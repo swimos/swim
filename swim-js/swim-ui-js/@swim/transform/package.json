@@ -1,0 +1,21 @@
+{
+  "name": "@swim/transform",
+  "version": "3.9.0",
+  "description": "CSS transformation object model and parsers",
+  "homepage": "https://github.com/swimit/swim-ui-js",
+  "author": "Chris Sachs <chris@swim.ai>",
+  "copyright": "2015-2019 SWIM.AI inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimit/swim-ui-js.git",
+  "main": "dist/main/swim-transform.js",
+  "module": "lib/main/index.js",
+  "types": "lib/main/index.d.ts",
+  "dependencies": {
+    "@swim/util": "3.9.0",
+    "@swim/codec": "3.9.0",
+    "@swim/structure": "3.9.0",
+    "@swim/math": "3.9.0",
+    "@swim/angle": "3.9.0",
+    "@swim/length": "3.9.0"
+  }
+}

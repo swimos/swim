@@ -1,0 +1,32 @@
+{
+  "extends": "../../../tsconfig-main",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/main",
+    "paths": {
+      "@swim/util": ["../swim-core-js/@swim/util/main"],
+      "@swim/codec": ["../swim-core-js/@swim/codec/main"],
+      "@swim/structure": ["../swim-core-js/@swim/structure/main"],
+      "@swim/math": ["../swim-core-js/@swim/math/main"],
+      "@swim/time": ["../swim-core-js/@swim/time/main"],
+      "@swim/angle": ["@swim/angle/main"],
+      "@swim/length": ["@swim/length/main"],
+      "@swim/color": ["@swim/color/main"],
+      "@swim/font": ["@swim/font/main"],
+      "@swim/transform": ["@swim/transform/main"],
+      "@swim/interpolate": ["@swim/interpolate/main"],
+      "@swim/scale": ["@swim/scale/main"],
+      "@swim/transition": ["@swim/transition/main"]
+    }
+  },
+  "references": [
+    {"path": "../../angle/main"},
+    {"path": "../../length/main"},
+    {"path": "../../color/main"},
+    {"path": "../../font/main"},
+    {"path": "../../transform/main"},
+    {"path": "../../interpolate/main"},
+    {"path": "../../scale/main"},
+    {"path": "../../transition/main"}
+  ]
+}

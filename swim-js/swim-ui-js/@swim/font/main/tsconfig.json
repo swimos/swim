@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig-main",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/main",
+    "paths": {
+      "@swim/util": ["../swim-core-js/@swim/util/main"],
+      "@swim/codec": ["../swim-core-js/@swim/codec/main"],
+      "@swim/structure": ["../swim-core-js/@swim/structure/main"],
+      "@swim/length": ["@swim/length/main"],
+    }
+  },
+  "references": [
+    {"path": "../../length/main"},
+  ]
+}

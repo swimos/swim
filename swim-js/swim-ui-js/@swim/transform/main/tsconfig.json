@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig-main",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/main",
+    "paths": {
+      "@swim/util": ["../swim-core-js/@swim/util/main"],
+      "@swim/codec": ["../swim-core-js/@swim/codec/main"],
+      "@swim/structure": ["../swim-core-js/@swim/structure/main"],
+      "@swim/math": ["../swim-core-js/@swim/math/main"],
+      "@swim/angle": ["@swim/angle/main"],
+      "@swim/length": ["@swim/length/main"]
+    }
+  },
+  "references": [
+    {"path": "../../angle/main"},
+    {"path": "../../length/main"}
+  ]
+}
