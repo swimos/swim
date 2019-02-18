@@ -1,0 +1,8 @@
+# Ignore mac hidden file ...
+.DS_Store
+*.DS_Store
+
+# Ignore all folder that name match list
+dist
+doc
+lib
