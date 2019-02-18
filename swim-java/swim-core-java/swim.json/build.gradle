@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'JavaScript Object Notation (JSON) codec'
+ext.moduleName = 'swim.json'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+}

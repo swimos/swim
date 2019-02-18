@@ -1,0 +1,8 @@
+apply from: '../project.gradle'
+
+description = 'Incremental parsers, writers, decoders, and encoders'
+ext.moduleName = 'swim.codec'
+
+dependencies {
+  api project(':swim-util')
+}

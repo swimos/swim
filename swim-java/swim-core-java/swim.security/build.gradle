@@ -1,0 +1,13 @@
+apply from: '../project.gradle'
+
+description = 'Cryptographic security model'
+ext.moduleName = 'swim.security'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-recon')
+  api project(':swim-json')
+  api project(':swim-collections')
+}

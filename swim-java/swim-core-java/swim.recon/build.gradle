@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Record Notation (Recon) codec'
+ext.moduleName = 'swim.recon'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+}

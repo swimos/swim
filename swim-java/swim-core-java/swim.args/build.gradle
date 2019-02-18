@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Command-line argument parser'
+ext.moduleName = 'swim.args'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-collections')
+}

@@ -1,0 +1,11 @@
+apply from: '../project.gradle'
+
+description = 'Flow-controlled MQTT I/O library'
+ext.moduleName = 'swim.io.mqtt'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-mqtt')
+  api project(':swim-io')
+}

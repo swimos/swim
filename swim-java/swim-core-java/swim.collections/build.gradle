@@ -1,0 +1,9 @@
+apply from: '../project.gradle'
+
+description = 'Immutable, structure sharing collections'
+ext.moduleName = 'swim.collections'
+
+dependencies {
+  api project(':swim-util')
+  api project(':swim-codec')
+}

@@ -1,0 +1,14 @@
+apply from: '../project.gradle'
+
+description = 'Format-detecting parsers and decoders'
+ext.moduleName = 'swim.decipher'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-recon')
+  api project(':swim-json')
+  api project(':swim-xml')
+  api project(':swim-protobuf')
+}

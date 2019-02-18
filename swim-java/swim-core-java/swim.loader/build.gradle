@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Dynamic runtime loader'
+ext.moduleName = 'swim.loader'
+
+dependencies {
+  api project(':swim-api')
+  api project(':swim-linker')
+  api project(':swim-recon')
+}

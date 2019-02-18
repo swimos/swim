@@ -1,0 +1,9 @@
+apply from: '../project.gradle'
+
+description = 'DEFLATE compression codec'
+ext.moduleName = 'swim.deflate'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+}

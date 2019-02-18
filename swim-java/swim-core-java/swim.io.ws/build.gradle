@@ -1,0 +1,14 @@
+apply from: '../project.gradle'
+
+description = 'Flow-controlled WebSocket I/O library'
+ext.moduleName = 'swim.io.ws'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-http')
+  api project(':swim-ws')
+  api project(':swim-io')
+  api project(':swim-io-http')
+}

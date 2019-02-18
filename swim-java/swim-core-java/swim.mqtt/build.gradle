@@ -1,0 +1,11 @@
+apply from: '../project.gradle'
+
+description = 'MQTT wire protocol model, decoders, and encoders'
+ext.moduleName = 'swim.mqtt'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-collections')
+}

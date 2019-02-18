@@ -1,0 +1,14 @@
+apply from: '../project.gradle'
+
+description = 'WebSocket wire protocol model, decoders, and encoders'
+ext.moduleName = 'swim.ws'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-collections')
+  api project(':swim-uri')
+  api project(':swim-deflate')
+  api project(':swim-http')
+}

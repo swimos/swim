@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'eXtensible Markup Language (XML) codec'
+ext.moduleName = 'swim.xml'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+}

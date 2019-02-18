@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Stateful streaming component model'
+ext.moduleName = 'swim.streamlet'
+
+dependencies {
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-concurrent')
+}

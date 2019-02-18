@@ -1,0 +1,11 @@
+apply from: '../project.gradle'
+
+description = 'Dynamic structured data model'
+ext.moduleName = 'swim.dataflow'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-structure')
+  api project(':swim-collections')
+  api project(':swim-streamlet')
+}

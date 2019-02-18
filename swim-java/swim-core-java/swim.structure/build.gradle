@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Uniform structured data model'
+ext.moduleName = 'swim.structure'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-collections')
+}

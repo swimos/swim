@@ -1,0 +1,12 @@
+apply from: '../project.gradle'
+
+description = 'Web Agent Remote Protocol'
+ext.moduleName = 'swim.warp'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  implementation project(':swim-recon')
+  api project(':swim-uri')
+}

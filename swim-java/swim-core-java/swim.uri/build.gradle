@@ -1,0 +1,11 @@
+apply from: '../project.gradle'
+
+description = 'Uniform resource identifiers'
+ext.moduleName = 'swim.uri'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-collections')
+}

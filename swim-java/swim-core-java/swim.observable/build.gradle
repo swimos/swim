@@ -1,0 +1,11 @@
+apply from: '../project.gradle'
+
+description = 'Observable collection interfaces'
+ext.moduleName = 'swim.observable'
+
+dependencies {
+  api project(':swim-util')
+  api project(':swim-collections')
+  api project(':swim-spatial')
+  api project(':swim-concurrent')
+}

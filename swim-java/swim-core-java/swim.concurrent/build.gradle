@@ -1,0 +1,4 @@
+apply from: '../project.gradle'
+
+description = 'Lightweight timers, tasks, and continuations'
+ext.moduleName = 'swim.concurrent'

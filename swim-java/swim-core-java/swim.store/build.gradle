@@ -1,0 +1,14 @@
+apply from: '../project.gradle'
+
+description = 'Storage runtime interface'
+ext.moduleName = 'swim.store'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-math')
+  api project(':swim-spatial')
+  api project(':swim-concurrent')
+  api project(':swim-api')
+}

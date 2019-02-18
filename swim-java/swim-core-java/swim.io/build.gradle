@@ -1,0 +1,11 @@
+apply from: '../project.gradle'
+
+description = 'Flow-controlled input/output library'
+ext.moduleName = 'swim.io'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-concurrent')
+}

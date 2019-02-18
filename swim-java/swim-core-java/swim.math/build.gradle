@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Mathematical and geometric structures'
+ext.moduleName = 'swim.math'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+}

@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Runtime configuration interfaces'
+ext.moduleName = 'swim.linker'
+
+dependencies {
+  api project(':swim-remote')
+  api project(':swim-runtime')
+  api project(':swim-security')
+}

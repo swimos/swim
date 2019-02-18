@@ -1,0 +1,93 @@
+// Build with `gradle -Pno-modules` to force compatibility with legacy JVMs.
+ext.jvmVersion = System.getProperty('java.version').split('\\.')[0] as Integer
+ext.useModules = ext.jvmVersion >= 9 && !project.hasProperty('no-modules')
+
+gradle.projectsEvaluated {
+  apply plugin: 'java'
+
+  def javaProjects = subprojects.findAll { subproject -> subproject.plugins.hasPlugin(JavaPlugin) }
+
+  javadoc {
+    title 'Swim Core'
+    options.overview = "${projectDir}/overview.html"
+    if (useModules) {
+      options.group('System',
+        'swim.args',
+        'swim.codec',
+        'swim.collections',
+        'swim.concurrent',
+        'swim.dataflow',
+        'swim.math',
+        'swim.observable',
+        'swim.security',
+        'swim.spatial',
+        'swim.streamlet',
+        'swim.structure',
+        'swim.uri',
+        'swim.util')
+      options.group('Data',
+        'swim.decipher',
+        'swim.deflate',
+        'swim.json',
+        'swim.protobuf',
+        'swim.recon',
+        'swim.xml')
+      options.group('Network',
+        'swim.http',
+        'swim.io',
+        'swim.io.http',
+        'swim.io.mqtt',
+        'swim.io.warp',
+        'swim.io.ws',
+        'swim.mqtt',
+        'swim.warp',
+        'swim.ws')
+      options.group('Storage',
+        'swim.store',
+        'swim.store.mem')
+      options.group('Runtime',
+        'swim.api',
+        'swim.client',
+        'swim.loader',
+        'swim.linker',
+        'swim.remote',
+        'swim.runtime',
+        'swim.server')
+      options.group('Tools',
+        'swim.cli')
+    }
+
+    source javaProjects.collect { project -> project.sourceSets.main.allJava }
+    doFirst {
+      if (useModules) {
+        def modules = javaProjects.collect { project -> project.ext.moduleName }
+        options.addStringOption('-module', modules.join(','))
+        options.addStringOption('-module-source-path', "${projectDir}/*/src/main/java")
+        options.addStringOption('-module-path', classpath.asPath)
+        classpath = files()
+        options.addBooleanOption('html5', true)
+        if (jvmVersion == 11) {
+          options.links += ['https://docs.oracle.com/en/java/javase/11/docs/api/']
+        } else {
+          options.links += ["https://docs.oracle.com/javase/" + jvmVersion + "/docs/api/"]
+        }
+        options.addBooleanOption('Xdoclint:all,-missing', true)
+      } else {
+        exclude '*module-info*'
+        exclude '**/package-info*'
+      }
+    }
+
+    options.charSet = 'UTF-8'
+    options.encoding = 'UTF-8'
+  }
+
+  task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+  }
+
+  artifacts {
+    archives javadocJar
+  }
+}

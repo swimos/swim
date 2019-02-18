@@ -1,0 +1,11 @@
+apply from: '../project.gradle'
+
+description = 'Spatial collections and geospatial projections'
+ext.moduleName = 'swim.spatial'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-math')
+}

@@ -1,0 +1,12 @@
+apply from: '../project.gradle'
+
+description = 'Flow-controlled HTTP I/O library'
+ext.moduleName = 'swim.io.http'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  implementation project(':swim-collections')
+  api project(':swim-http')
+  api project(':swim-io')
+}

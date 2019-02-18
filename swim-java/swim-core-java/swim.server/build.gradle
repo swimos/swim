@@ -1,0 +1,24 @@
+apply from: '../project.gradle'
+
+description = 'Web Agent server runtime'
+ext.moduleName = 'swim.server'
+
+dependencies {
+  api project(':swim-runtime')
+  api project(':swim-remote')
+  api project(':swim-security')
+  api project(':swim-store')
+  api project(':swim-store-mem')
+  api project(':swim-linker')
+}
+
+test {
+  if (useModules) {
+    doFirst {
+      jvmArgs += [
+        '--add-opens', 'swim.server/swim.server=swim.runtime',
+        '--add-opens', 'swim.server/swim.server=testng',
+      ]
+    }
+  }
+}

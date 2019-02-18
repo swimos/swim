@@ -1,0 +1,4 @@
+apply from: '../project.gradle'
+
+description = 'Utility library'
+ext.moduleName = 'swim.util'

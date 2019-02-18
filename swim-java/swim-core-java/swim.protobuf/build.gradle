@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Protocol Buffers (protobuf) codec'
+ext.moduleName = 'swim.protobuf'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+}

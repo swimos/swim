@@ -1,0 +1,18 @@
+apply from: '../project.gradle'
+
+description = 'Web Agent runtime interface'
+ext.moduleName = 'swim.runtime'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-math')
+  api project(':swim-spatial')
+  api project(':swim-http')
+  api project(':swim-mqtt')
+  api project(':swim-warp')
+  api project(':swim-concurrent')
+  api project(':swim-api')
+  api project(':swim-store')
+}

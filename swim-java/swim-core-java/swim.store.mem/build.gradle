@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'In-memory storage runtime'
+ext.moduleName = 'swim.store.mem'
+
+dependencies {
+  api project(':swim-collections')
+  api project(':swim-spatial')
+  api project(':swim-store')
+}
