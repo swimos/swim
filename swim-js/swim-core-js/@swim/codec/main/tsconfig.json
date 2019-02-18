@@ -1,0 +1,13 @@
+{
+  "extends": "../../../tsconfig-main",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/main",
+    "paths": {
+      "@swim/util": ["@swim/util/main"]
+    }
+  },
+  "references": [
+    {"path": "../../util/main"}
+  ]
+}

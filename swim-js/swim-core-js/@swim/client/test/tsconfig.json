@@ -1,0 +1,34 @@
+{
+  "extends": "../../../tsconfig-test",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "lib": ["DOM", "ES5", "ES2015.Promise", "ScriptHost"],
+    "outDir": "../lib/test",
+    "paths": {
+      "@swim/util": ["@swim/util/main"],
+      "@swim/codec": ["@swim/codec/main"],
+      "@swim/collections": ["@swim/collections/main"],
+      "@swim/unit": ["@swim/unit/main"],
+      "@swim/structure": ["@swim/structure/main"],
+      "@swim/streamlet": ["@swim/streamlet/main"],
+      "@swim/dataflow": ["@swim/dataflow/main"],
+      "@swim/recon": ["@swim/recon/main"],
+      "@swim/uri": ["@swim/uri/main"],
+      "@swim/warp": ["@swim/warp/main"],
+      "@swim/client": ["@swim/client/main"]
+    }
+  },
+  "references": [
+    {"path": "../../util/main"},
+    {"path": "../../codec/main"},
+    {"path": "../../collections/main"},
+    {"path": "../../unit/main"},
+    {"path": "../../structure/main"},
+    {"path": "../../streamlet/main"},
+    {"path": "../../dataflow/main"},
+    {"path": "../../recon/main"},
+    {"path": "../../uri/main"},
+    {"path": "../../warp/main"},
+    {"path": "../../client/main"}
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig-main",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "lib": ["DOM", "ES5", "ES2015.Promise", "ScriptHost"],
+    "outDir": "../lib/main",
+    "paths": {
+      "@swim/util": ["@swim/util/main"],
+      "@swim/codec": ["@swim/codec/main"]
+    }
+  },
+  "references": [
+    {"path": "../../util/main"},
+    {"path": "../../codec/main"}
+  ]
+}

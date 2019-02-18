@@ -1,0 +1,21 @@
+{
+  "extends": "../../../tsconfig-test",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/test",
+    "paths": {
+      "@swim/util": ["@swim/util/main"],
+      "@swim/codec": ["@swim/codec/main"],
+      "@swim/unit": ["@swim/unit/main"],
+      "@swim/collections": ["@swim/collections/main"],
+      "@swim/streamlet": ["@swim/streamlet/main"]
+    }
+  },
+  "references": [
+    {"path": "../../util/main"},
+    {"path": "../../codec/main"},
+    {"path": "../../unit/main"},
+    {"path": "../../collections/main"},
+    {"path": "../../streamlet/main"}
+  ]
+}

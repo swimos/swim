@@ -1,0 +1,126 @@
+// Copyright 2015-2019 SWIM.AI inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import {AnyOutputSettings, OutputSettings} from "./OutputSettings";
+import {Output} from "./Output";
+
+/** @hidden */
+export abstract class ByteOutput<T> extends Output<T> {
+  /** @hidden */
+  _array: Uint8Array | null;
+  /** @hidden */
+  _size: number;
+  /** @hidden */
+  _settings: OutputSettings;
+
+  constructor(array: Uint8Array | null, size: number, settings: OutputSettings) {
+    super();
+    this._array = array;
+    this._size = size;
+    this._settings = settings;
+  }
+
+  isCont(): boolean {
+    return true;
+  }
+
+  isFull(): boolean {
+    return false;
+  }
+
+  isDone(): boolean {
+    return false;
+  }
+
+  isError(): boolean {
+    return false;
+  }
+
+  isPart(): boolean;
+  isPart(isPart: boolean): Output<T>;
+  isPart(isPart?: boolean): boolean | Output<T> {
+    if (isPart === void 0) {
+      return false;
+    } else {
+      return this;
+    }
+  }
+
+  write(b: number | string): Output<T> {
+    if (typeof b === "number") {
+      const n = this._size;
+      const oldArray = this._array;
+      let newArray;
+      if (oldArray === null || n + 1 > oldArray.length) {
+        newArray = new Uint8Array(ByteOutput.expand(n + 1));
+        if (oldArray !== null) {
+          newArray.set(oldArray, 0);
+        }
+        this._array = newArray;
+      } else {
+        newArray = oldArray;
+      }
+      newArray[n] = b;
+      this._size = n + 1;
+      return this;
+    } else {
+      throw new TypeError("" + b);
+    }
+  }
+
+  writeln(string?: string): Output<T> {
+    throw new TypeError("" + string);
+  }
+
+  toUint8Array(): Uint8Array {
+    const n = this._size;
+    const oldArray = this._array;
+    if (oldArray !== null && n === oldArray.length) {
+      return oldArray;
+    } else {
+      const newArray = new Uint8Array(n);
+      if (oldArray !== null) {
+        newArray.set(oldArray.slice(0, n), 0);
+      }
+      this._array = newArray;
+      return newArray;
+    }
+  }
+
+  cloneArray(): Uint8Array | null {
+    const oldArray = this._array;
+    if (oldArray !== null) {
+      return oldArray.slice(0, this._size);
+    } else {
+      return null;
+    }
+  }
+
+  settings(): OutputSettings;
+  settings(settings: AnyOutputSettings): Output<T>;
+  settings(settings?: AnyOutputSettings): OutputSettings | Output<T> {
+    if (settings === void 0) {
+      return this._settings;
+    } else {
+      this._settings = OutputSettings.fromAny(settings);
+      return this;
+    }
+  }
+
+  static expand(n: number): number {
+    n = Math.max(32, n) - 1;
+    n |= n >> 1; n |= n >> 2; n |= n >> 4; n |= n >> 8; n |= n >> 16;
+    return n + 1;
+  }
+}

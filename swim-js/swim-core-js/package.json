@@ -1,0 +1,34 @@
+{
+  "name": "@swim/core",
+  "version": "3.9.0",
+  "description": "Swim Core TypeScript Implementation",
+  "homepage": "https://github.com/swimit/swim-core-js",
+  "author": "Chris Sachs <chris@swim.ai>",
+  "copyright": "2015-2019 SWIM.AI inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimit/swim-core-js.git",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "11",
+    "@types/ws": "6",
+    "rollup": "1.2",
+    "rollup-plugin-node-resolve": "4",
+    "rollup-plugin-sourcemaps": "0",
+    "terser": "3",
+    "tslib": "1",
+    "tslint": "5",
+    "typedoc": "0.14",
+    "typescript": "3.3",
+    "ws": "6"
+  },
+  "scripts": {
+    "postinstall": "cd ./@swim/build && npm run compile && npm run bundle",
+    "build": "./bin/build.js",
+    "compile": "./bin/build.js compile",
+    "test": "./bin/build.js compile --test",
+    "doc": "./bin/build.js doc",
+    "watch": "./bin/build.js watch",
+    "clean": "./bin/build.js clean && cd ./@swim/build && npm run compile && npm run bundle",
+    "help": "./bin/build.js help"
+  }
+}

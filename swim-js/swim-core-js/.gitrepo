@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:swimit/swim-core-js.git
+	branch = master
+	commit = fdf3fad169617d2350d0f54faeb8d777c675edc1
+	parent = da484f08d466e9e604c01ee084dac47996d32416
+	method = merge
+	cmdver = 0.4.0
