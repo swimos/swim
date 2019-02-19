@@ -31,11 +31,11 @@ if (project.hasProperty('nexusUsername') && project.hasProperty('nexusPassword')
           name "${name}"
           packaging 'jar'
           description "${description}"
-          url 'https://github.com/swimit/swim-core-java'
+          url 'https://github.com/swimos/swim'
 
           scm {
-            connection 'scm:git:git@github.com:swimit/swim-core-java.git'
-            url 'git@github.com:swimit/swim-core-java.git'
+            connection 'scm:git:git@github.com:swimos/swim-core-java.git'
+            url 'git@github.com:swimos/swim.git'
           }
 
           licenses {
