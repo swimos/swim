@@ -4,7 +4,7 @@
 ; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
 ;
 [subrepo]
-	remote = git@github.com:swimit/swim-web-js.git
+	remote = git@github.com:swimos/swim-web-js.git
 	branch = master
 	commit = 32bdf9ade17ffd039a993bafe97be8938b1c9adc
 	parent = a0f3e311ffa5f28511cbc813a723aadaf98b2bd8
