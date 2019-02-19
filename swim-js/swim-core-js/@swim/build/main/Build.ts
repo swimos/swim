@@ -26,6 +26,7 @@ export interface BuildConfig {
   devel?: boolean;
   tests?: string;
   compilerOptions?: ts.CompilerOptions;
+  gaID?: string;
 }
 
 export class Build {
@@ -34,6 +35,7 @@ export class Build {
   readonly projects: {[id: string]: Project};
   readonly projectList: Project[];
   readonly compilerOptions: ts.CompilerOptions;
+  readonly gaID: string | undefined;
 
   constructor(config: BuildConfig) {
     this.baseDir = process.cwd();
@@ -41,6 +43,7 @@ export class Build {
     this.projects = {};
     this.projectList = [];
     this.compilerOptions = config.compilerOptions || {};
+    this.gaID = config.gaID;
 
     for (let i = 0; i < config.projects.length; i += 1) {
       const projectConfig = config.projects[i];

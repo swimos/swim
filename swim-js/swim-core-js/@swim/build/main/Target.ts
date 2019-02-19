@@ -703,6 +703,7 @@ export class Target {
       readme: fs.existsSync(readmePath) ? readmePath : "none",
       mode: "modules",
       tsconfig: configPath,
+      gaID: this.project.build.gaID,
       excludeNotExported: true,
       excludePrivate: true,
       hideGenerator: true,
