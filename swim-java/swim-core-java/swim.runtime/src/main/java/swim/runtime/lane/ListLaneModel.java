@@ -371,7 +371,7 @@ final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>
       return result.getKey();
     } else if (phase == 2) {
       final Form<Object> valueForm = (Form<Object>) view.valueForm;
-      if (this.valueForm != valueForm && valueForm != null) {
+      if (valueForm != null) {
         this.valueForm = valueForm;
         this.oldObject = valueForm.cast(this.oldValue);
         if (this.oldObject == null) {

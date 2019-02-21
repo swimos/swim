@@ -107,7 +107,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
         return null;
       }
     }
-    return this.root.getEntry(index);
+    return size() <= index ? null : this.root.getEntry(index);
   }
 
   @Override
