@@ -44,4 +44,6 @@ export {ArrayInterpolator} from "./ArrayInterpolator";
 
 export {InterpolatorInterpolator} from "./InterpolatorInterpolator";
 
+export {InterpolatorMap} from "./InterpolatorMap";
+
 export {InterpolatorForm} from "./InterpolatorForm";

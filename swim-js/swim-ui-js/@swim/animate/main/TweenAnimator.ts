@@ -312,13 +312,13 @@ export abstract class TweenAnimator<T> extends Animator implements Inoutlet<T, T
   }
 
   interpolate(u: number): T {
-    return this._interpolator!.interpolate(u);
+    return this._interpolator ? this._interpolator.interpolate(u) : this._state!;
   }
 
   tween(u: number): void {
     u = this._ease(u);
     const oldValue = this._value!;
-    const newValue = u !== 1 ? this.interpolate(u) : this._state!;
+    const newValue = this.interpolate(u);
     this._value = newValue;
     this.update(newValue, oldValue);
     if (u === 1) {

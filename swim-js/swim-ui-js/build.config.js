@@ -195,6 +195,7 @@ const ui = [
   {
     id: "ui",
     name: "@swim/ui",
+    umbrella: true,
     targets: [
       {
         id: "main",

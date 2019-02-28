@@ -31,6 +31,7 @@ import {ColorInterpolator} from "./ColorInterpolator";
 import {StructureInterpolator} from "./StructureInterpolator";
 import {ArrayInterpolator} from "./ArrayInterpolator";
 import {InterpolatorInterpolator} from "./InterpolatorInterpolator";
+import {InterpolatorMap} from "./InterpolatorMap";
 import {InterpolatorForm} from "./InterpolatorForm";
 
 export type InterpolatorType = "step" | "number" | "shape" | "time" | "angle"
@@ -46,6 +47,10 @@ export abstract class Interpolator<T extends U, U = T> implements Equals {
   abstract range(): T[];
   abstract range(ys: ReadonlyArray<U>): Interpolator<T>;
   abstract range(y0: U, y1?: U): Interpolator<T>;
+
+  map<U>(f: (value: T) => U): Interpolator<U> {
+    return new Interpolator.Map(this, f);
+  }
 
   abstract equals(that: unknown): boolean;
 
@@ -79,6 +84,10 @@ export abstract class Interpolator<T extends U, U = T> implements Equals {
 
   static array<T>(a0?: ReadonlyArray<T>, a1?: ReadonlyArray<T>): ArrayInterpolator<T> {
     return new Interpolator.Array(a0, a1);
+  }
+
+  static map<S, T>(a: S, b: S, f: (value: S) => T): Interpolator<T> {
+    return new Interpolator.Map(Interpolator.from(a, b), f);
   }
 
   static interpolator<T extends U, U = T>(i0?: Interpolator<T, U>, i1?: Interpolator<T, U>): InterpolatorInterpolator<T, U> {
@@ -173,6 +182,8 @@ export abstract class Interpolator<T extends U, U = T> implements Equals {
   static Array: typeof ArrayInterpolator; // defined by ArrayInterpolator
   /** @hidden */
   static Interpolator: typeof InterpolatorInterpolator; // defined by InterpolatorInterpolator
+  /** @hidden */
+  static Map: typeof InterpolatorMap; // defined by InterpolatorMap
   /** @hidden */
   static Form: typeof InterpolatorForm; // defined by InterpolatorForm
 }
