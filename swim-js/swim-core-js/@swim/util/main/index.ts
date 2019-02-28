@@ -43,10 +43,10 @@ export {CursorArray} from "./CursorArray";
 
 export {Builder} from "./Builder";
 export {PairBuilder} from "./PairBuilder";
-export {ReducedMap} from "./ReducedMap";
 
 export {Map} from "./Map";
 export {OrderedMap} from "./OrderedMap";
+export {ReducedMap} from "./ReducedMap";
 
 export {AssertException} from "./AssertException";
 export {Assert, assert} from "./Assert";

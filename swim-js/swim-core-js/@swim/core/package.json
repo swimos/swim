@@ -21,8 +21,11 @@
     "@swim/streamlet": "3.9.0",
     "@swim/dataflow": "3.9.0",
     "@swim/recon": "3.9.0",
+    "@swim/math": "3.9.0",
+    "@swim/time": "3.9.0",
     "@swim/uri": "3.9.0",
     "@swim/warp": "3.9.0",
+    "@swim/client": "3.9.0",
     "ws": "6"
   }
 }

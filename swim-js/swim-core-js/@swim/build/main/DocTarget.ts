@@ -71,7 +71,7 @@ export class DocTarget extends ConverterComponent {
         targetReflection.name = target.project.name;
         targetReflection.kind = typedoc.ReflectionKind.Module;
 
-        const readmePath = path.join(target.project.baseDir, "overview.md");
+        const readmePath = path.join(target.project.baseDir, target.project.build.readme || "README.md");
         if (fs.existsSync(readmePath)) {
           const readme = fs.readFileSync(readmePath);
           targetReflection.comment = new Comment("", readme.toString());
@@ -79,7 +79,12 @@ export class DocTarget extends ConverterComponent {
       }
     }
 
+    const rootInfo = targetReflections[this.target.uid]!;
+    const rootTarget = rootInfo.target;
+    const rootReflection = rootInfo.reflection as ContainerReflection;
+
     for (const fileName in this.fileTargetMap) {
+      // lift file reflections into library reflection
       const fileInfo = this.fileTargetMap[fileName]!;
       const targetInfo = targetReflections[fileInfo.target.uid]!;
       const fileReflection = fileInfo.reflection as DeclarationReflection;
@@ -100,7 +105,29 @@ export class DocTarget extends ConverterComponent {
       CommentPlugin.removeReflection(context.project, fileReflection);
     }
 
-    const rootReflection = targetReflections[this.target.uid]!.reflection!;
-    CommentPlugin.removeReflection(context.project, rootReflection);
+    if (rootTarget.project.umbrella) {
+      CommentPlugin.removeReflection(context.project, rootReflection);
+    } else {
+      // lift root library reflections into project reflection
+      const childReflections = reflections.filter((reflection) => reflection.parent === rootReflection);
+      for (let i = 0; i < childReflections.length; i += 1) {
+        const childReflection = childReflections[i] as DeclarationReflection;
+        childReflection.parent = context.project;
+        if (!context.project.children) {
+          context.project.children = [];
+        }
+        context.project.children!.push(childReflection);
+      }
+      if (rootReflection.children) {
+        rootReflection.children.length = 0;
+      }
+      context.project.comment = rootReflection.comment;
+      CommentPlugin.removeReflection(context.project, rootReflection);
+
+      for (const targetName in targetReflections) {
+        const targetInfo = targetReflections[targetName]!;
+        CommentPlugin.removeReflection(context.project, targetInfo.reflection!);
+      }
+    }
   }
 }

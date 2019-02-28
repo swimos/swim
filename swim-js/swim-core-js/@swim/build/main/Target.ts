@@ -695,12 +695,11 @@ export class Target {
     console.log(output.bind());
 
     const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
-    const readmePath = path.join(this.project.baseDir, "overview.md");
     const outDir = path.join(this.project.baseDir, "doc", "/");
 
     const doc = new typedoc.Application({
       name: this.project.name,
-      readme: fs.existsSync(readmePath) ? readmePath : "none",
+      readme: "none",
       mode: "modules",
       tsconfig: configPath,
       gaID: this.project.build.gaID,

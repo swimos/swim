@@ -29,6 +29,7 @@ export interface ProjectConfig {
   tests?: string;
   cleanDirs?: string[];
   compilerOptions?: ts.CompilerOptions;
+  umbrella?: boolean;
 }
 
 export class Project {
@@ -51,6 +52,8 @@ export class Project {
 
   readonly compilerOptions: ts.CompilerOptions;
   bundleConfig: any;
+
+  readonly umbrella: boolean;
 
   constructor(build: Build, config: ProjectConfig) {
     this.build = build;
@@ -77,6 +80,8 @@ export class Project {
 
     this.compilerOptions = config.compilerOptions || this.build.compilerOptions;
     this.bundleConfig = {};
+
+    this.umbrella = config.umbrella || false;
   }
 
   initTargets(config: ProjectConfig): void {
