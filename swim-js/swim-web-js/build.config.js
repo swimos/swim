@@ -20,6 +20,7 @@ const web = [
   {
     id: "web",
     name: "@swim/web",
+    umbrella: true,
     targets: [
       {
         id: "main",
