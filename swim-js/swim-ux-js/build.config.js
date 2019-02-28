@@ -48,6 +48,7 @@ const ux = [
   {
     id: "ux",
     name: "@swim/ux",
+    umbrella: true,
     targets: [
       {
         id: "main",
