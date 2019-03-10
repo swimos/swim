@@ -7,4 +7,5 @@ dependencies {
   api project(':swim-remote')
   api project(':swim-runtime')
   api project(':swim-security')
+  api project(':swim-store')
 }

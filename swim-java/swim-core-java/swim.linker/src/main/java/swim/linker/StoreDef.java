@@ -24,7 +24,6 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public final class StoreDef implements Debug {
-
   final String path;
   final Value settings;
 
@@ -130,5 +129,4 @@ final class StoreForm extends Form<StoreDef> {
     }
     return null;
   }
-
 }

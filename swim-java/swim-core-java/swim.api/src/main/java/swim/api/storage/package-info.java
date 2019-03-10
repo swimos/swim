@@ -15,14 +15,4 @@
 /**
  * Storage runtime interface.
  */
-module swim.store {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.structure;
-  requires transitive swim.math;
-  requires transitive swim.spatial;
-  requires transitive swim.concurrent;
-  requires transitive swim.api;
-
-  exports swim.store;
-}
+package swim.api.storage;

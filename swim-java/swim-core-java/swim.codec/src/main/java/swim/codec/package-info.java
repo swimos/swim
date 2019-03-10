@@ -31,17 +31,18 @@
  *
  * <h2>Decoders and Encoders</h2>
  *
- * <p>A {@link Decoder} incrementally decodes a sequence of input buffers to
- * produce a decoded result.  An {@link Encoder} incrementally encodes a value
- * into a sequence of byte buffers.</p>
+ * <p>A {@link Decoder} incrementally decodes a sequence of {@link InputBuffer
+ * input buffers} to produce a decoded result.  An {@link Encoder}
+ * incrementally encodes a value into a sequence of {@link OutputBuffer output
+ * buffers}.</p>
  *
- * <h2>Binary encodings</h2>
+ * <h2>Binary codecs</h2>
  *
  * <p>The {@link Binary} factory has methods to create {@link Input} readers
  * that read bytes out of byte buffers, and methods to create {@link Output}
  * writers that write bytes into byte buffers.</p>
  *
- * <h2>Text encodings</h2>
+ * <h2>Text codecs</h2>
  *
  * <p>The {@link Unicode} factory has methods to create {@link Input} readers
  * that read Unicode code points out of strings, and methods to create {@link
@@ -52,7 +53,7 @@
  * methods to create {@link Output} writers that encode Unicode code points
  * into UTF-8 encoded byte buffers.</p>
  *
- * <h2>Binary-Text transcoding</h2>
+ * <h2>Binary-Text codecs</h2>
  *
  * <p>The {@link Base10} factory has methods to create {@link Parser}s that
  * incrementally parse decimal formatted integers, and methods to create {@link

@@ -14,9 +14,7 @@
 
 package swim.runtime;
 
-import swim.store.StoreBinding;
-
-public interface CellBinding extends StoreBinding {
+public interface CellBinding {
   void openUplink(LinkBinding link);
 
   void httpUplink(HttpBinding http);

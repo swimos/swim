@@ -15,24 +15,17 @@
 package swim.server;
 
 import swim.api.policy.Policy;
-import swim.math.Z2Form;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeProxy;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.Storage;
-import swim.store.ValueDataBinding;
-import swim.structure.Record;
-import swim.structure.Value;
+import swim.store.StoreBinding;
 
 public final class ServerNode extends NodeProxy {
-  final Storage storage;
+  final StoreBinding store;
   final Policy policy;
 
-  ServerNode(NodeBinding nodeBinding, Storage storage, Policy policy) {
+  ServerNode(NodeBinding nodeBinding, StoreBinding store, Policy policy) {
     super(nodeBinding);
-    this.storage = storage;
+    this.store = store;
     this.policy = policy;
   }
 
@@ -41,27 +34,8 @@ public final class ServerNode extends NodeProxy {
     return this.policy;
   }
 
-  protected Value treeName(Value name) {
-    return Record.create(2).slot("node", nodeUri().toString()).slot("name", name).commit();
-  }
-
   @Override
-  public ListDataBinding openListData(Value name) {
-    return storage.openListData(nodeUri(), name);
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return storage.openMapData(nodeUri(), name);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return storage.openSpatialData(nodeUri(), name, shapeForm);
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return storage.openValueData(nodeUri(), name);
+  public StoreBinding store() {
+    return this.store;
   }
 }

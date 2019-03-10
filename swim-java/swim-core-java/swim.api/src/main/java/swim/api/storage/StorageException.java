@@ -12,17 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Storage runtime interface.
- */
-module swim.store {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.structure;
-  requires transitive swim.math;
-  requires transitive swim.spatial;
-  requires transitive swim.concurrent;
-  requires transitive swim.api;
+package swim.api.storage;
 
-  exports swim.store;
+public class StorageException extends RuntimeException {
+  private static final long serialVersionUID = 1L;
+
+  public StorageException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public StorageException(String message) {
+    super(message);
+  }
+
+  public StorageException(Throwable cause) {
+    super(cause);
+  }
+
+  public StorageException() {
+    super();
+  }
 }

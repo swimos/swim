@@ -49,7 +49,7 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
   }
 
   protected void openStore() {
-    this.data = this.laneContext.data().listData(laneUri().toString())
+    this.data = this.laneContext.store().listData(laneUri().toString())
         .isResident(isResident())
         .isTransient(isTransient());
   }

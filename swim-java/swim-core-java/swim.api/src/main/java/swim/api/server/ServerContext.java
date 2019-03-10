@@ -16,12 +16,17 @@ package swim.api.server;
 
 import swim.api.plane.Plane;
 import swim.api.router.Router;
+import swim.api.storage.Storage;
 import swim.util.Log;
 
 public interface ServerContext extends Log {
   Router router();
 
   void setRouter(Router router);
+
+  Storage storage();
+
+  void setStorage(Storage storage);
 
   Plane getPlane(String name);
 

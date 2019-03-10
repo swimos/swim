@@ -15,22 +15,17 @@
 package swim.runtime.router;
 
 import swim.api.auth.Identity;
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
-import swim.math.Z2Form;
 import swim.runtime.HttpBinding;
 import swim.runtime.LaneBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
 import swim.runtime.PushRequest;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
+import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -93,53 +88,13 @@ public class HostTableNode implements NodeContext {
   }
 
   @Override
-  public DataFactory data() {
-    return this.host.data();
+  public StoreBinding store() {
+    return this.host.store();
   }
 
   @Override
   public LaneBinding injectLane(Uri laneUri, LaneBinding lane) {
     return this.host.hostContext().injectLane(nodeUri, laneUri, lane);
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return this.host.openListData(name);
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return this.host.injectListData(dataBinding);
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return this.host.openMapData(name);
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return this.host.injectMapData(dataBinding);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return this.host.openSpatialData(name, shapeForm);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return this.host.injectSpatialData(dataBinding);
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return this.host.openValueData(name);
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return this.host.injectValueData(dataBinding);
   }
 
   @Override

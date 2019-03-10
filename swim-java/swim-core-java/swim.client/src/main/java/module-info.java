@@ -18,6 +18,7 @@
 module swim.client {
   requires transitive swim.runtime;
   requires transitive swim.remote;
+  requires transitive swim.store.mem;
 
   exports swim.client;
 

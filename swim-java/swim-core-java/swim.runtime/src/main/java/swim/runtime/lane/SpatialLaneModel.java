@@ -55,7 +55,7 @@ public class SpatialLaneModel<S> extends LaneModel<SpatialLaneView<?, S, ?>, Spa
   }
 
   protected void openStore() {
-    this.data = this.laneContext.data().spatialData(laneUri().toString(), shapeForm)
+    this.data = this.laneContext.store().spatialData(laneUri().toString(), shapeForm)
         .isResident(isResident())
         .isTransient(isTransient());
   }

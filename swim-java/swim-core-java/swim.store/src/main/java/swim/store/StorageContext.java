@@ -12,17 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Storage runtime interface.
- */
-module swim.store {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.structure;
-  requires transitive swim.math;
-  requires transitive swim.spatial;
-  requires transitive swim.concurrent;
-  requires transitive swim.api;
+package swim.store;
 
-  exports swim.store;
+import swim.api.storage.Storage;
+
+public interface StorageContext extends Storage {
+  StoreBinding createStore();
 }

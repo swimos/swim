@@ -16,22 +16,16 @@ package swim.runtime.scope;
 
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.collections.HashTrieSet;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
-import swim.math.Z2Form;
 import swim.runtime.CellContext;
 import swim.runtime.HttpBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.PushRequest;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
-import swim.structure.Value;
+import swim.store.StoreBinding;
 
 public abstract class Scope implements CellContext {
   protected final CellContext cellContext;
@@ -69,48 +63,8 @@ public abstract class Scope implements CellContext {
   }
 
   @Override
-  public DataFactory data() {
-    return this.cellContext.data();
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return this.cellContext.openListData(name);
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return this.cellContext.injectListData(dataBinding);
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return this.cellContext.openMapData(name);
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return this.cellContext.injectMapData(dataBinding);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return this.cellContext.openSpatialData(name, shapeForm);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return this.cellContext.injectSpatialData(dataBinding);
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return this.cellContext.openValueData(name);
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return this.cellContext.injectValueData(dataBinding);
+  public StoreBinding store() {
+    return this.cellContext.store();
   }
 
   @Override

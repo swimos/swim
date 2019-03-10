@@ -26,7 +26,6 @@ import swim.api.auth.Authenticated;
 import swim.api.auth.Authenticator;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.plane.Plane;
 import swim.api.plane.PlaneContext;
@@ -49,9 +48,7 @@ import swim.linker.HttpServiceDef;
 import swim.linker.HttpsServiceDef;
 import swim.linker.PlaneDef;
 import swim.linker.ServiceDef;
-import swim.linker.StoreDef;
 import swim.linker.WarpServiceDef;
-import swim.math.Z2Form;
 import swim.recon.Recon;
 import swim.remote.RemoteHostClient;
 import swim.runtime.AbstractTierBinding;
@@ -71,21 +68,17 @@ import swim.runtime.agent.AgentModel;
 import swim.runtime.router.HostTable;
 import swim.runtime.router.MeshTable;
 import swim.runtime.router.PartTable;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.Storage;
-import swim.store.StorageLoader;
-import swim.store.ValueDataBinding;
-import swim.store.mem.MemStorage;
+import swim.store.StoreBinding;
+import swim.structure.Record;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriMapper;
-import swim.uri.UriPath;
 import swim.uri.UriPattern;
 
 public class ServerPlane extends AbstractTierBinding implements RootContext, PlaneContext, AuthenticatorContext {
   protected final Theater stage;
+
+  protected final StoreBinding store;
 
   protected final HttpEndpoint endpoint;
 
@@ -95,10 +88,6 @@ public class ServerPlane extends AbstractTierBinding implements RootContext, Pla
 
   protected WarpSettings warpSettings;
 
-  protected StoreDef storeDef;
-
-  protected Storage storage;
-
   volatile PlanePolicy policy;
 
   volatile FingerTrieSeq<Authenticator> authenticators;
@@ -107,8 +96,9 @@ public class ServerPlane extends AbstractTierBinding implements RootContext, Pla
 
   volatile UriMapper<AgentType<?>> agentRoutes;
 
-  public ServerPlane(Theater stage, HttpEndpoint endpoint, RootBinding root) {
+  public ServerPlane(Theater stage, StoreBinding store, HttpEndpoint endpoint, RootBinding root) {
     this.stage = stage;
+    this.store = store;
     this.endpoint = endpoint;
     this.root = root;
     this.authenticators = FingerTrieSeq.empty();
@@ -142,8 +132,8 @@ public class ServerPlane extends AbstractTierBinding implements RootContext, Pla
   }
 
   @Override
-  public DataFactory data() {
-    throw new UnsupportedOperationException();
+  public StoreBinding store() {
+    return this.store;
   }
 
   public HttpEndpoint endpoint() {
@@ -168,22 +158,6 @@ public class ServerPlane extends AbstractTierBinding implements RootContext, Pla
 
   public void setWarpSettings(WarpSettings warpSettings) {
     this.warpSettings = warpSettings;
-  }
-
-  public StoreDef getStoreDef() {
-    return storeDef;
-  }
-
-  public void  setStoreDef(StoreDef storeDef) {
-    this.storeDef = storeDef;
-  }
-
-  public Storage getStorage() {
-    return storage;
-  }
-
-  public void setStorage(Storage storage) {
-    this.storage = storage;
   }
 
   public void materialize(Class<? extends Plane> planeClass) {
@@ -396,12 +370,9 @@ public class ServerPlane extends AbstractTierBinding implements RootContext, Pla
   @Override
   public PartBinding injectPart(Uri meshUri, Value partKey, PartBinding part) {
     if (!meshUri.isDefined()) {
-      Storage storage = StorageLoader.loadStorage();
-      if (storage == null) {
-        storage = new MemStorage();
-      }
-      storage.init(Recon.toString(partKey), this.storeDef.path(), this);
-      part = new ServerPart(part, storage);
+      final Value partStoreName = Record.create(1).slot("part", partKey);
+      final StoreBinding partStore = this.store.storeContext().openStore(partStoreName);
+      part = new ServerPart(part, partStore);
     }
     return part;
   }
@@ -449,11 +420,11 @@ public class ServerPlane extends AbstractTierBinding implements RootContext, Pla
     final AgentType<?> agentType = getAgentRoute(nodeUri);
     final PlanePolicy planePolicy = this.policy;
     final Policy nodePolicy = planePolicy != null ? planePolicy.agentTypePolicy(agentType) : null;
-    UriPath nodePath = nodeUri.path();
-    if (nodePath.isAbsolute()) {
-      nodePath = nodePath.tail();
-    }
-    return new ServerNode(node, part.directory(), nodePolicy);
+
+    final Value nodeStoreName = Record.create(2).slot("part", partKey).slot("node", nodeUri.toString());
+    final StoreBinding nodeStore = this.store.storeContext().openStore(nodeStoreName);
+
+    return new ServerNode(node, nodeStore, nodePolicy);
   }
 
   @Override
@@ -480,46 +451,6 @@ public class ServerPlane extends AbstractTierBinding implements RootContext, Pla
       return PolicyDirective.<Identity>allow(new Authenticated(
         credentials.requestUri(), credentials.fromUri(), Value.absent()));
     }
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return storage.openListData(name);
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return dataBinding;
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return storage.openMapData(name);
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return dataBinding;
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return storage.openSpatialData(name, shapeForm);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return dataBinding;
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return storage.openValueData(name);
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return dataBinding;
   }
 
   @Override
@@ -628,7 +559,7 @@ public class ServerPlane extends AbstractTierBinding implements RootContext, Pla
   @Override
   public void willUnload() {
     this.root.unload();
-    this.storage.close();
+    this.store.close();
   }
 
   @Override
@@ -649,7 +580,7 @@ public class ServerPlane extends AbstractTierBinding implements RootContext, Pla
     if (this.plane != null) {
       this.plane.didClose();
     }
-    this.storage.close();
+    this.store.close();
     this.stage.stop();
   }
 

@@ -18,12 +18,10 @@ import java.net.InetSocketAddress;
 import java.security.Principal;
 import java.security.cert.Certificate;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.auth.Identity;
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
@@ -39,7 +37,6 @@ import swim.http.HttpResponse;
 import swim.io.Socket;
 import swim.io.warp.WarpSocket;
 import swim.io.warp.WarpSocketContext;
-import swim.math.Z2Form;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
@@ -49,11 +46,7 @@ import swim.runtime.NodeBinding;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
 import swim.runtime.uplink.HttpErrorUplinkModem;
-import swim.store.DataBinding;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
+import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriAuthority;
@@ -185,8 +178,8 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   @Override
-  public DataFactory data() {
-    return this.hostContext.data();
+  public StoreBinding store() {
+    return this.hostContext.store();
   }
 
   @Override
@@ -880,56 +873,6 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     disconnectUplinks();
     this.hostContext.didDisconnect();
     reconnect();
-  }
-
-  @Override
-  public Iterator<DataBinding> dataBindings() {
-    return Collections.emptyIterator();
-  }
-
-  @Override
-  public void closeData(Value name) {
-    // nop
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return this.hostContext.openListData(name);
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return this.hostContext.injectListData(dataBinding);
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return this.hostContext.openMapData(name);
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return this.hostContext.injectMapData(dataBinding);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return this.hostContext.openSpatialData(name, shapeForm);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return this.hostContext.injectSpatialData(dataBinding);
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return this.hostContext.openValueData(name);
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return this.hostContext.injectValueData(dataBinding);
   }
 
   @Override

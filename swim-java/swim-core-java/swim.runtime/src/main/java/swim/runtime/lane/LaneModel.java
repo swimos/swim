@@ -14,12 +14,9 @@
 
 package swim.runtime.lane;
 
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.agent.AgentContext;
 import swim.api.auth.Identity;
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.lane.Lane;
 import swim.api.policy.Policy;
@@ -32,7 +29,6 @@ import swim.http.HttpBody;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
-import swim.math.Z2Form;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.HttpBinding;
 import swim.runtime.LaneBinding;
@@ -42,11 +38,7 @@ import swim.runtime.LinkContext;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
 import swim.runtime.uplink.UplinkModem;
-import swim.store.DataBinding;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
+import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.warp.CommandMessage;
@@ -148,8 +140,8 @@ public abstract class LaneModel<View extends LaneView, U extends UplinkModem> ex
   }
 
   @Override
-  public DataFactory data() {
-    return this.laneContext.data();
+  public StoreBinding store() {
+    return this.laneContext.store();
   }
 
   @Override
@@ -429,56 +421,6 @@ public abstract class LaneModel<View extends LaneView, U extends UplinkModem> ex
 
   public void didRespond(HttpLaneUplink uplink, HttpResponse<?> response) {
     new LaneRelayDidRespondHttp<View>(this, uplink, response).run();
-  }
-
-  @Override
-  public Iterator<DataBinding> dataBindings() {
-    return Collections.emptyIterator();
-  }
-
-  @Override
-  public void closeData(Value name) {
-    // nop
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return this.laneContext.openListData(name);
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return this.laneContext.injectListData(dataBinding);
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return this.laneContext.openMapData(name);
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return this.laneContext.injectMapData(dataBinding);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return this.laneContext.openSpatialData(name, shapeForm);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return this.laneContext.injectSpatialData(dataBinding);
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return this.laneContext.openValueData(name);
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return this.laneContext.injectValueData(dataBinding);
   }
 
   @Override

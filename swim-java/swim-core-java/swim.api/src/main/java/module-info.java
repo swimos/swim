@@ -46,6 +46,7 @@ module swim.api {
   exports swim.api.ref;
   exports swim.api.router;
   exports swim.api.server;
+  exports swim.api.storage;
   exports swim.api.uplink;
   exports swim.api.uplink.function;
 }

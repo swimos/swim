@@ -21,4 +21,6 @@ module swim.store.mem {
   requires transitive swim.store;
 
   exports swim.store.mem;
+
+  //provides swim.api.storage.Storage with swim.store.mem.MemStorage;
 }

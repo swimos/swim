@@ -16,22 +16,23 @@ package swim.server;
 
 import swim.runtime.PartBinding;
 import swim.runtime.PartProxy;
-import swim.store.Storage;
+import swim.store.StoreBinding;
 
 public final class ServerPart extends PartProxy {
-  final Storage storage;
+  final StoreBinding store;
 
-  ServerPart(PartBinding partBinding, Storage storage) {
+  ServerPart(PartBinding partBinding, StoreBinding store) {
     super(partBinding);
-    this.storage = storage;
+    this.store = store;
   }
 
-  public Storage directory() {
-    return this.storage;
+  @Override
+  public StoreBinding store() {
+    return this.store;
   }
 
   @Override
   public void willClose() {
-    this.storage.close();
+    this.store.close();
   }
 }

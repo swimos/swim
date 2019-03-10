@@ -20,7 +20,6 @@ import swim.api.agent.Agent;
 import swim.api.agent.AgentContext;
 import swim.api.agent.AgentFactory;
 import swim.api.agent.AgentType;
-import swim.api.data.DataFactory;
 import swim.api.data.ListData;
 import swim.api.data.MapData;
 import swim.api.data.SpatialData;
@@ -60,10 +59,7 @@ import swim.runtime.lane.SpatialLaneView;
 import swim.runtime.lane.SupplyLaneView;
 import swim.runtime.lane.ValueLaneView;
 import swim.spatial.GeoProjection;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
+import swim.store.StoreBinding;
 import swim.structure.Text;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -156,8 +152,8 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   @Override
-  public DataFactory data() {
-    return this;
+  public StoreBinding store() {
+    return this.node.store();
   }
 
   @Override
@@ -308,92 +304,52 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
 
   @Override
   public ListData<Value> listData(Value name) {
-    return this.node.listData(name);
+    return store().listData(name);
   }
 
   @Override
   public ListData<Value> listData(String name) {
-    return this.node.listData(name);
+    return store().listData(name);
   }
 
   @Override
   public MapData<Value, Value> mapData(Value name) {
-    return this.node.mapData(name);
+    return store().mapData(name);
   }
 
   @Override
   public MapData<Value, Value> mapData(String name) {
-    return this.node.mapData(name);
+    return store().mapData(name);
   }
 
   @Override
   public <S> SpatialData<Value, S, Value> spatialData(Value name, Z2Form<S> shapeForm) {
-    return this.node.spatialData(name, shapeForm);
+    return store().spatialData(name, shapeForm);
   }
 
   @Override
   public <S> SpatialData<Value, S, Value> spatialData(String name, Z2Form<S> shapeForm) {
-    return this.node.spatialData(name, shapeForm);
+    return store().spatialData(name, shapeForm);
   }
 
   @Override
   public SpatialData<Value, R2Shape, Value> geospatialData(Value name) {
-    return this.node.geospatialData(name);
+    return store().geospatialData(name);
   }
 
   @Override
   public SpatialData<Value, R2Shape, Value> geospatialData(String name) {
-    return this.node.geospatialData(name);
+    return store().geospatialData(name);
   }
 
   @Override
   public ValueData<Value> valueData(Value name) {
-    return this.node.valueData(name);
+    return store().valueData(name);
   }
 
   @Override
   public ValueData<Value> valueData(String name) {
-    return this.node.valueData(name);
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return this.node.openListData(name);
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return this.node.injectListData(dataBinding);
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return this.node.openMapData(name);
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return this.node.injectMapData(dataBinding);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return this.node.openSpatialData(name, shapeForm);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return this.node.injectSpatialData(dataBinding);
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return this.node.openValueData(name);
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return this.node.injectValueData(dataBinding);
+    return store().valueData(name);
   }
 
   @Override

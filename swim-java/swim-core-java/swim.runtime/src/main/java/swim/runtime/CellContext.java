@@ -14,16 +14,15 @@
 
 package swim.runtime;
 
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
-import swim.store.StoreContext;
+import swim.store.StoreBinding;
 import swim.uri.Uri;
 import swim.util.Log;
 
-public interface CellContext extends StoreContext, Log {
+public interface CellContext extends Log {
   Uri meshUri();
 
   Policy policy();
@@ -32,7 +31,7 @@ public interface CellContext extends StoreContext, Log {
 
   Stage stage();
 
-  DataFactory data();
+  StoreBinding store();
 
   LinkBinding bindDownlink(Downlink downlink);
 

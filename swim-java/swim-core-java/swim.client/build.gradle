@@ -6,4 +6,5 @@ ext.moduleName = 'swim.client'
 dependencies {
   api project(':swim-runtime')
   api project(':swim-remote')
+  api project(':swim-store-mem')
 }

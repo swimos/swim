@@ -14,22 +14,15 @@
 
 package swim.runtime;
 
-import java.util.Iterator;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
-import swim.math.Z2Form;
-import swim.store.DataBinding;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
+import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -92,8 +85,8 @@ public class PartProxy implements PartBinding, PartContext {
   }
 
   @Override
-  public DataFactory data() {
-    return this.partContext.data();
+  public StoreBinding store() {
+    return this.partContext.store();
   }
 
   @Override
@@ -179,56 +172,6 @@ public class PartProxy implements PartBinding, PartContext {
   @Override
   public PolicyDirective<Identity> authenticate(Credentials credentials) {
     return this.partContext.authenticate(credentials);
-  }
-
-  @Override
-  public Iterator<DataBinding> dataBindings() {
-    return this.partBinding.dataBindings();
-  }
-
-  @Override
-  public void closeData(Value name) {
-    this.partBinding.closeData(name);
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return this.partContext.openListData(name);
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return this.partContext.injectListData(dataBinding);
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return this.partContext.openMapData(name);
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return this.partContext.injectMapData(dataBinding);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return this.partContext.openSpatialData(name, shapeForm);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return this.partContext.injectSpatialData(dataBinding);
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return this.partContext.openValueData(name);
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return this.partContext.injectValueData(dataBinding);
   }
 
   @Override

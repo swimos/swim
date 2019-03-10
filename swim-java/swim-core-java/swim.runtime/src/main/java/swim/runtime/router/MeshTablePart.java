@@ -16,13 +16,11 @@ package swim.runtime.router;
 
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
-import swim.math.Z2Form;
 import swim.runtime.HostBinding;
 import swim.runtime.HttpBinding;
 import swim.runtime.LaneBinding;
@@ -31,10 +29,7 @@ import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
 import swim.runtime.PartContext;
 import swim.runtime.PushRequest;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
+import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -77,8 +72,8 @@ public class MeshTablePart implements PartContext {
   }
 
   @Override
-  public DataFactory data() {
-    return this.mesh.data();
+  public StoreBinding store() {
+    return this.mesh.store();
   }
 
   @Override
@@ -119,46 +114,6 @@ public class MeshTablePart implements PartContext {
   @Override
   public void hostDidDisconnect(Uri hostUri) {
     // nop
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return this.mesh.openListData(name);
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return this.mesh.injectListData(dataBinding);
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return this.mesh.openMapData(name);
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return this.mesh.injectMapData(dataBinding);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return this.mesh.openSpatialData(name, shapeForm);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return this.mesh.injectSpatialData(dataBinding);
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return this.mesh.openValueData(name);
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return this.mesh.injectValueData(dataBinding);
   }
 
   @Override

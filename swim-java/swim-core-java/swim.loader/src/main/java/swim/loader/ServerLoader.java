@@ -26,9 +26,11 @@ import swim.api.plane.PlaneException;
 import swim.api.router.Router;
 import swim.api.server.Server;
 import swim.api.server.ServerContext;
+import swim.api.storage.Storage;
 import swim.codec.Utf8;
 import swim.linker.ServerDef;
 import swim.linker.ServerLinker;
+import swim.linker.StorageLinker;
 import swim.recon.Recon;
 import swim.structure.Value;
 
@@ -57,11 +59,19 @@ public final class ServerLoader {
 
   public static Server load(Module module) throws IOException {
     final ServerContext context = loadServerContext();
+
     final Router router = RouterLoader.loadRouter();
     context.setRouter(router);
+
+    final Storage storage = StorageLoader.loadStorage();
+    context.setStorage(storage);
+
     final Server server = loadServer(context);
     if (context instanceof ServerLinker) {
       final ServerDef serverDef = loadServerDef(module);
+      if (storage instanceof StorageLinker) {
+        ((StorageLinker) storage).materialize(serverDef.storeDef());
+      }
       ((ServerLinker) context).materialize(serverDef);
     }
     return server;

@@ -16,12 +16,17 @@ package swim.api.client;
 
 import swim.api.ref.SwimRef;
 import swim.api.router.Router;
+import swim.api.storage.Storage;
 import swim.util.Log;
 
 public interface ClientContext extends Log, SwimRef {
   Router router();
 
   void setRouter(Router router);
+
+  Storage storage();
+
+  void setStorage(Storage storage);
 
   void start();
 

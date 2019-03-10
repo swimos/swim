@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.plane.Plane;
 import swim.api.plane.PlaneException;
 import swim.api.router.Router;
+import swim.api.storage.Storage;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Theater;
 import swim.io.ServiceRef;
@@ -37,8 +38,8 @@ import swim.runtime.PartBinding;
 import swim.runtime.RootBinding;
 import swim.runtime.RouterContext;
 import swim.runtime.router.TableRouter;
-import swim.store.Storage;
-import swim.store.StorageLoader;
+import swim.store.StorageContext;
+import swim.store.StoreBinding;
 import swim.store.mem.MemStorage;
 import swim.uri.Uri;
 
@@ -46,10 +47,12 @@ public class ServerRuntime implements ServerLinker {
   volatile HashTrieMap<String, ServerPlane> planes;
   ServerShutdownHook shutdownHook;
   RouterContext router;
+  StorageContext storage;
 
   public ServerRuntime() {
     this.planes = HashTrieMap.empty();
     this.router = new TableRouter(); // TODO: remove; always require setRouter?
+    this.storage = new MemStorage(); // TODO: remove; always require setStorage?
   }
 
   @Override
@@ -63,6 +66,20 @@ public class ServerRuntime implements ServerLinker {
       this.router = (RouterContext) router;
     } else {
       throw new IllegalArgumentException(router.toString());
+    }
+  }
+
+  @Override
+  public StorageContext storage() {
+    return this.storage;
+  }
+
+  @Override
+  public void setStorage(Storage storage) {
+    if (storage instanceof StorageContext) {
+      this.storage = (StorageContext) storage;
+    } else {
+      throw new IllegalArgumentException(storage.toString());
     }
   }
 
@@ -118,20 +135,14 @@ public class ServerRuntime implements ServerLinker {
 
   public ServerPlane materializePlane(String name, Class<? extends Plane> planeClass, PlaneDef planeDef, StoreDef storeDef) {
     final Theater stage = new Theater();
+    final StoreBinding store = this.storage.createStore();
     final RootBinding root = this.router.createRoot();
-    final ServerPlane planeContext = new ServerPlane(stage, new HttpEndpoint(stage), root);
+    final ServerPlane planeContext = new ServerPlane(stage, store, new HttpEndpoint(stage), root);
 
     root.setRootContext(planeContext);
     planeContext.setWarpSettings(planeDef != null
         ? planeDef.warpSettings()
         : WarpSettings.standard().tlsSettings(TlsSettings.standard()));
-    Storage storage = StorageLoader.loadStorage();
-    if (storage == null) {
-      storage = new MemStorage();
-    }
-    storage.init(planeContext, storeDef.settings());
-    planeContext.setStoreDef(storeDef);
-    planeContext.setStorage(storage);
     materializeImplicitMesh(planeContext);
     planeContext.materialize(planeClass, planeDef);
     addPlane(name, planeContext);

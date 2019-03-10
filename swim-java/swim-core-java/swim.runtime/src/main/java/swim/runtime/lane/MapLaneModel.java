@@ -50,7 +50,7 @@ public class MapLaneModel extends LaneModel<MapLaneView<?, ?>, MapLaneUplink> {
   }
 
   protected void openStore() {
-    this.data = this.laneContext.data().mapData(laneUri().toString())
+    this.data = this.laneContext.store().mapData(laneUri().toString())
         .isResident(isResident())
         .isTransient(isTransient());
   }

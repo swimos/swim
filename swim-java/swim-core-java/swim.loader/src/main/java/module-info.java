@@ -27,4 +27,5 @@ module swim.loader {
   uses swim.api.router.Router;
   uses swim.api.server.Server;
   uses swim.api.server.ServerContext;
+  uses swim.api.storage.Storage;
 }

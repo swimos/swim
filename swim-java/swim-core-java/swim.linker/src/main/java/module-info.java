@@ -20,6 +20,7 @@ module swim.linker {
   requires transitive swim.util;
   requires transitive swim.io.warp;
   requires transitive swim.security;
+  requires transitive swim.store;
 
   exports swim.linker;
 }

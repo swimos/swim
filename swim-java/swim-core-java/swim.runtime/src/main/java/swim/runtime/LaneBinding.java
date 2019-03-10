@@ -15,11 +15,11 @@
 package swim.runtime;
 
 import swim.api.agent.AgentContext;
-import swim.api.data.DataFactory;
 import swim.api.lane.Lane;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Log;
@@ -48,7 +48,7 @@ public interface LaneBinding extends TierBinding, CellBinding, Log {
 
   Stage stage();
 
-  DataFactory data();
+  StoreBinding store();
 
   Lane getLaneView(AgentContext agentContext);
 

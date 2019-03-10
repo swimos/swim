@@ -15,10 +15,17 @@
 package swim.store;
 
 import java.util.Iterator;
+import swim.api.data.DataFactory;
 import swim.structure.Value;
 
-public interface StoreBinding {
+public interface StoreBinding extends DataFactory {
+  StoreContext storeContext();
+
+  void setStoreContext(StoreContext storeContext);
+
   Iterator<DataBinding> dataBindings();
 
   void closeData(Value name);
+
+  void close();
 }

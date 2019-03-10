@@ -17,18 +17,17 @@ package swim.client;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
 import swim.api.client.ClientContext;
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.api.router.Router;
+import swim.api.storage.Storage;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.concurrent.Theater;
 import swim.io.TlsSettings;
 import swim.io.http.HttpEndpoint;
 import swim.io.http.HttpSettings;
-import swim.math.Z2Form;
 import swim.remote.RemoteHostClient;
 import swim.runtime.AbstractSwimRef;
 import swim.runtime.HostBinding;
@@ -45,10 +44,10 @@ import swim.runtime.RouterContext;
 import swim.runtime.router.MeshTable;
 import swim.runtime.router.PartTable;
 import swim.runtime.router.RootTable;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
+import swim.runtime.router.TableRouter;
+import swim.store.StorageContext;
+import swim.store.StoreBinding;
+import swim.store.mem.MemStorage;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -57,12 +56,16 @@ public class ClientRuntime extends AbstractSwimRef implements ClientContext, Roo
   protected final HttpEndpoint endpoint;
   protected final RootBinding root;
   RouterContext router;
+  StorageContext storage;
+  StoreBinding store;
 
   public ClientRuntime(Theater stage, HttpSettings settings) {
     this.stage = stage;
     this.endpoint = new HttpEndpoint(stage, settings);
     this.root = new RootTable();
     this.root.setRootContext(this);
+    this.router = new TableRouter(); // TODO: remove; always require setRouter?
+    this.storage = new MemStorage(); // TODO: remove; always require setStorage?
   }
 
   public ClientRuntime(Theater stage) {
@@ -84,6 +87,21 @@ public class ClientRuntime extends AbstractSwimRef implements ClientContext, Roo
       this.router = (RouterContext) router;
     } else {
       throw new IllegalArgumentException(router.toString());
+    }
+  }
+
+  @Override
+  public final StorageContext storage() {
+    return this.storage;
+  }
+
+  @Override
+  public void setStorage(Storage storage) {
+    if (storage instanceof StorageContext) {
+      this.storage = (StorageContext) storage;
+      this.store = this.storage.createStore();
+    } else {
+      throw new IllegalArgumentException(storage.toString());
     }
   }
 
@@ -120,13 +138,13 @@ public class ClientRuntime extends AbstractSwimRef implements ClientContext, Roo
     return this.stage;
   }
 
-  public final HttpEndpoint endpoint() {
-    return this.endpoint;
+  @Override
+  public final StoreBinding store() {
+    return this.store;
   }
 
-  @Override
-  public DataFactory data() {
-    return null; // TODO
+  public final HttpEndpoint endpoint() {
+    return this.endpoint;
   }
 
   @Override
@@ -177,46 +195,6 @@ public class ClientRuntime extends AbstractSwimRef implements ClientContext, Roo
   @Override
   public PolicyDirective<Identity> authenticate(Credentials credentials) {
     return null; // TODO
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return dataBinding;
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return dataBinding;
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return dataBinding;
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return dataBinding;
   }
 
   @Override

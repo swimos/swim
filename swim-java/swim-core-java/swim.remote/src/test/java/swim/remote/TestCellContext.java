@@ -14,34 +14,28 @@
 
 package swim.remote;
 
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
-import swim.math.Z2Form;
 import swim.runtime.CellContext;
 import swim.runtime.HttpBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.PushRequest;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
-import swim.structure.Value;
+import swim.store.StoreBinding;
 import swim.uri.Uri;
 
 public class TestCellContext implements CellContext {
   private final Policy policy;
   private final Schedule schedule;
   private final Stage stage;
-  private final DataFactory data;
+  private final StoreBinding store;
 
-  public TestCellContext(Policy policy, Schedule schedule, Stage stage, DataFactory data) {
+  public TestCellContext(Policy policy, Schedule schedule, Stage stage, StoreBinding store) {
     this.policy = policy;
     this.schedule = schedule;
     this.stage = stage;
-    this.data = data;
+    this.store = store;
   }
 
   public TestCellContext(Stage stage) {
@@ -73,48 +67,8 @@ public class TestCellContext implements CellContext {
   }
 
   @Override
-  public DataFactory data() {
-    return data;
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return null;
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return dataBinding;
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return null;
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return dataBinding;
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return null;
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return dataBinding;
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return null;
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return dataBinding;
+  public StoreBinding store() {
+    return store;
   }
 
   @Override

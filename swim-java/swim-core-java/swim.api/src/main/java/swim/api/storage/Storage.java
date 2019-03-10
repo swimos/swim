@@ -12,17 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Storage runtime interface.
- */
-module swim.store {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.structure;
-  requires transitive swim.math;
-  requires transitive swim.spatial;
-  requires transitive swim.concurrent;
-  requires transitive swim.api;
+package swim.api.storage;
 
-  exports swim.store;
+/**
+ * Opaque handle to a Swim storage implementation.
+ */
+public interface Storage {
+  /**
+   * Returns the relative priority of this {@code Storage} implementation.
+   * Storage implementations with greater priority inject into storage stacks
+   * before implementations with lower priority.
+   */
+  double storagePriority();
+
+  /**
+   * Returns a {@code Storage} implementation with the combined capabilities
+   * of this {@code Storage} implementation and the given {@code storage}
+   * implementation.
+   */
+  Storage injectStorage(Storage storage);
 }

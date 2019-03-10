@@ -17,11 +17,6 @@ package swim.runtime.agent;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.api.data.DataFactory;
-import swim.api.data.ListData;
-import swim.api.data.MapData;
-import swim.api.data.SpatialData;
-import swim.api.data.ValueData;
 import swim.api.downlink.Downlink;
 import swim.api.lane.CommandLane;
 import swim.api.lane.DemandLane;
@@ -74,30 +69,22 @@ import swim.runtime.lane.ValueLaneView;
 import swim.runtime.uplink.ErrorUplinkModem;
 import swim.runtime.uplink.HttpErrorUplinkModem;
 import swim.spatial.GeoProjection;
-import swim.store.DataBinding;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
+import swim.store.StoreBinding;
 import swim.structure.Record;
-import swim.structure.Text;
 import swim.structure.Value;
 import swim.uri.Uri;
 
-public class AgentNode extends AbstractTierBinding implements NodeBinding, CellContext, LaneFactory, DataFactory, Schedule, Stage, Task {
+public class AgentNode extends AbstractTierBinding implements NodeBinding, CellContext, LaneFactory, Schedule, Stage, Task {
   protected NodeContext nodeContext;
 
   protected TaskContext taskContext;
 
   volatile HashTrieMap<Uri, LaneBinding> lanes;
 
-  volatile HashTrieMap<Value, DataBinding> data;
-
   final ConcurrentLinkedQueue<Runnable> mailbox;
 
   public AgentNode() {
     this.lanes = HashTrieMap.empty();
-    this.data = HashTrieMap.empty();
     this.mailbox = new ConcurrentLinkedQueue<Runnable>();
   }
 
@@ -321,136 +308,6 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   }
 
   @Override
-  public ListData<Value> listData(Value name) {
-    ListDataBinding dataBinding = openListData(name);
-    dataBinding = injectListData(dataBinding);
-    return dataBinding;
-  }
-
-  @Override
-  public ListData<Value> listData(String name) {
-    return listData(Text.from(name));
-  }
-
-  @Override
-  public MapData<Value, Value> mapData(Value name) {
-    MapDataBinding dataBinding = openMapData(name);
-    dataBinding = injectMapData(dataBinding);
-    return dataBinding;
-  }
-
-  @Override
-  public MapData<Value, Value> mapData(String name) {
-    return mapData(Text.from(name));
-  }
-
-  @Override
-  public <S> SpatialData<Value, S, Value> spatialData(Value name, Z2Form<S> shapeForm) {
-    SpatialDataBinding<S> dataBinding = openSpatialData(name, shapeForm);
-    dataBinding = injectSpatialData(dataBinding);
-    return dataBinding;
-  }
-
-  @Override
-  public <S> SpatialData<Value, S, Value> spatialData(String name, Z2Form<S> shapeForm) {
-    return spatialData(Text.from(name), shapeForm);
-  }
-
-  @Override
-  public SpatialData<Value, R2Shape, Value> geospatialData(Value name) {
-    return spatialData(name, GeoProjection.wgs84Form());
-  }
-
-  @Override
-  public SpatialData<Value, R2Shape, Value> geospatialData(String name) {
-    return geospatialData(Text.from(name));
-  }
-
-  @Override
-  public ValueData<Value> valueData(Value name) {
-    ValueDataBinding dataBinding = openValueData(name);
-    dataBinding = injectValueData(dataBinding);
-    return dataBinding;
-  }
-
-  @Override
-  public ValueData<Value> valueData(String name) {
-    return valueData(Text.from(name));
-  }
-
-  @Override
-  public Iterator<DataBinding> dataBindings() {
-    return this.data.valueIterator();
-  }
-
-  protected void openData(DataBinding dataBinding) {
-    HashTrieMap<Value, DataBinding> oldData;
-    HashTrieMap<Value, DataBinding> newData;
-    do {
-      oldData = this.data;
-      newData = oldData.updated(dataBinding.name(), dataBinding);
-    } while (!DATA.compareAndSet(this, oldData, newData));
-  }
-
-  @Override
-  public void closeData(Value name) {
-    HashTrieMap<Value, DataBinding> oldData;
-    HashTrieMap<Value, DataBinding> newData;
-    do {
-      oldData = this.data;
-      newData = oldData.removed(name);
-    } while (!DATA.compareAndSet(this, oldData, newData));
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return this.nodeContext.openListData(name);
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    dataBinding = this.nodeContext.injectListData(dataBinding);
-    openData(dataBinding);
-    return dataBinding;
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return this.nodeContext.openMapData(name);
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    dataBinding = this.nodeContext.injectMapData(dataBinding);
-    openData(dataBinding);
-    return dataBinding;
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return this.nodeContext.openSpatialData(name, shapeForm);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    dataBinding = this.nodeContext.injectSpatialData(dataBinding);
-    openData(dataBinding);
-    return dataBinding;
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return this.nodeContext.openValueData(name);
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    dataBinding = this.nodeContext.injectValueData(dataBinding);
-    openData(dataBinding);
-    return dataBinding;
-  }
-
-  @Override
   public void openUplink(LinkBinding link) {
     final Uri laneUri = normalizeLaneUri(link.laneUri());
     final LaneBinding laneBinding = getLane(laneUri);
@@ -614,8 +471,8 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   }
 
   @Override
-  public DataFactory data() {
-    return this;
+  public StoreBinding store() {
+    return this.nodeContext.store();
   }
 
   @Override
@@ -688,9 +545,5 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<AgentNode, HashTrieMap<Uri, LaneBinding>> LANES =
       AtomicReferenceFieldUpdater.newUpdater(AgentNode.class, (Class<HashTrieMap<Uri, LaneBinding>>) (Class<?>) HashTrieMap.class, "lanes");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<AgentNode, HashTrieMap<Value, DataBinding>> DATA =
-      AtomicReferenceFieldUpdater.newUpdater(AgentNode.class, (Class<HashTrieMap<Value, DataBinding>>) (Class<?>) HashTrieMap.class, "data");
 
 }

@@ -14,22 +14,15 @@
 
 package swim.runtime;
 
-import java.util.Iterator;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
-import swim.api.data.DataFactory;
 import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
-import swim.math.Z2Form;
-import swim.store.DataBinding;
-import swim.store.ListDataBinding;
-import swim.store.MapDataBinding;
-import swim.store.SpatialDataBinding;
-import swim.store.ValueDataBinding;
+import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -92,8 +85,8 @@ public class MeshProxy implements MeshBinding, MeshContext {
   }
 
   @Override
-  public DataFactory data() {
-    return this.meshContext.data();
+  public StoreBinding store() {
+    return this.meshContext.store();
   }
 
   @Override
@@ -184,56 +177,6 @@ public class MeshProxy implements MeshBinding, MeshContext {
   @Override
   public PolicyDirective<Identity> authenticate(Credentials credentials) {
     return this.meshContext.authenticate(credentials);
-  }
-
-  @Override
-  public Iterator<DataBinding> dataBindings() {
-    return this.meshBinding.dataBindings();
-  }
-
-  @Override
-  public void closeData(Value name) {
-    this.meshBinding.closeData(name);
-  }
-
-  @Override
-  public ListDataBinding openListData(Value name) {
-    return this.meshContext.openListData(name);
-  }
-
-  @Override
-  public ListDataBinding injectListData(ListDataBinding dataBinding) {
-    return this.meshContext.injectListData(dataBinding);
-  }
-
-  @Override
-  public MapDataBinding openMapData(Value name) {
-    return this.meshContext.openMapData(name);
-  }
-
-  @Override
-  public MapDataBinding injectMapData(MapDataBinding dataBinding) {
-    return this.meshContext.injectMapData(dataBinding);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    return this.meshContext.openSpatialData(name, shapeForm);
-  }
-
-  @Override
-  public <S> SpatialDataBinding<S> injectSpatialData(SpatialDataBinding<S> dataBinding) {
-    return this.meshContext.injectSpatialData(dataBinding);
-  }
-
-  @Override
-  public ValueDataBinding openValueData(Value name) {
-    return this.meshContext.openValueData(name);
-  }
-
-  @Override
-  public ValueDataBinding injectValueData(ValueDataBinding dataBinding) {
-    return this.meshContext.injectValueData(dataBinding);
   }
 
   @Override

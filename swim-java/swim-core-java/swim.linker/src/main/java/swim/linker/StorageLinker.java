@@ -12,23 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.store;
+package swim.linker;
 
-import java.util.Iterator;
-import java.util.ServiceLoader;
+import swim.store.StorageContext;
 
-public final class StorageLoader {
-  private StorageLoader() {
-    // nop
-  }
-
-  public static Storage loadStorage() {
-    final ServiceLoader<Storage> storageLoader = ServiceLoader.load(Storage.class);
-    final Iterator<Storage> storages = storageLoader.iterator();
-    Storage storage = null;
-    if (storages.hasNext()) {
-      storage = storages.next();
-    }
-    return storage;
-  }
+public interface StorageLinker extends StorageContext {
+  StorageLinker materialize(StoreDef storeDef);
 }
