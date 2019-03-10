@@ -41,7 +41,7 @@ component libraries:
   [npm](https://www.npmjs.com/package/@swim/structure),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_structure.html)) –
   generic structured data model, with support for selectors, expressions,
-  and ambda functions.  Used as a common abstract syntax tree for Recon,
+  and lambda functions.  Used as a common abstract syntax tree for Recon,
   JSON, XML, and other data languages.
 - **`@swim/streamlet`**
   ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/streamlet),
