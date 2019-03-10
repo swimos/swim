@@ -68,11 +68,12 @@ export class ElementView extends NodeView {
     return this;
   }
 
-  setAttribute(name: string, value: unknown): void {
+  setAttribute(name: string, value: unknown): this {
     this.willSetAttribute(name, value);
     this._node.setAttribute(name, AttributeString(value));
     this.onSetAttribute(name, value);
     this.didSetAttribute(name, value);
+    return this;
   }
 
   protected willSetAttribute(name: string, value: unknown): void {
@@ -95,11 +96,12 @@ export class ElementView extends NodeView {
     });
   }
 
-  setStyle(name: string, value: unknown, priority?: string): void {
+  setStyle(name: string, value: unknown, priority?: string): this {
     this.willSetStyle(name, value, priority);
     this._node.style.setProperty(name, StyleString(value), priority);
     this.onSetStyle(name, value, priority);
     this.didSetStyle(name, value, priority);
+    return this;
   }
 
   protected willSetStyle(name: string, value: unknown, priority: string | undefined): void {
