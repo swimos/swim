@@ -300,7 +300,7 @@ public class JsonWebSignature implements Debug {
 
   public static JsonWebSignature from(Value unprotectedHeader, Data signingInput, Data protectedHeaderData,
                                        Data payloadData, Data signatureData) {
-    final Value protectedHeader = Json.modelParser().parseObject(Utf8.decodedInput(protectedHeaderData.toInputBuffer())).bind();
+    final Value protectedHeader = Json.structureParser().parseObject(Utf8.decodedInput(protectedHeaderData.toInputBuffer())).bind();
     return new JsonWebSignature(unprotectedHeader, protectedHeader, signingInput, payloadData, signatureData);
   }
 
@@ -551,7 +551,7 @@ public class JsonWebSignature implements Debug {
   }
 
   static Data derDecodeECDSASignature(Data derData, int n) {
-    final Value sequence = Der.modelDecoder().decodeValue(derData.toInputBuffer()).bind();
+    final Value sequence = Der.structureDecoder().decodeValue(derData.toInputBuffer()).bind();
     final byte[] r = ((Num) sequence.getItem(0)).integerValue().toByteArray();
     final byte[] s = ((Num) sequence.getItem(1)).integerValue().toByteArray();
     final byte[] signatureBytes = new byte[n << 1];
@@ -578,8 +578,8 @@ public class JsonWebSignature implements Debug {
     final Num s = Num.from(new BigInteger(1, magnitude));
 
     final Value sequence = Record.of(r, s);
-    final byte[] derBytes = new byte[Der.modelEncoder().sizeOf(sequence)];
-    Der.modelEncoder().encode(sequence, Binary.outputBuffer(derBytes));
+    final byte[] derBytes = new byte[Der.structureEncoder().sizeOf(sequence)];
+    Der.structureEncoder().encode(sequence, Binary.outputBuffer(derBytes));
     return Data.wrap(derBytes);
   }
 }

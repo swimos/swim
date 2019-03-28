@@ -15,4 +15,4 @@
 /**
  * TODO
  */
-package swim.api.store;
+package swim.api.data;

@@ -22,19 +22,19 @@ import swim.structure.Item;
 import swim.structure.Value;
 import swim.xml.Xml;
 
-public class DecipherModelParser extends DecipherParser<Item, Value> {
+public class DecipherStructureParser extends DecipherParser<Item, Value> {
   @Override
   public Parser<Value> parseXml(Input input) {
-    return Xml.modelParser().parseDocument(input);
+    return Xml.structureParser().parseDocument(input);
   }
 
   @Override
   public Parser<Value> parseJson(Input input) {
-    return Json.modelParser().parseObject(input);
+    return Json.structureParser().parseObject(input);
   }
 
   @Override
   public Parser<Value> parseRecon(Input input) {
-    return Recon.modelParser().parseBlock(input);
+    return Recon.structureParser().parseBlock(input);
   }
 }

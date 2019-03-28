@@ -171,21 +171,23 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
         if (this.oldObject == null) {
           this.oldObject = valueForm.unit();
         }
+        newObject = valueForm.cast(newValue);
       }
       if (preemptive) {
-        this.newObject = ((ValueDownlinkView<Object>) view).downlinkWillSet(this.oldObject);
+        this.newObject = ((ValueDownlinkView<Object>) view).downlinkWillSet(this.newObject);
       }
       final Map.Entry<Boolean, Object> result = ((ValueDownlinkView<Object>) view).dispatchWillSet(this.oldObject, preemptive);
       this.newObject = result.getValue();
-      if (this.oldObject != this.newObject) {
-        this.oldObject = this.newObject;
+      if (this.oldObject != result.getValue()) {
+        this.oldObject = this.newObject; //FIXME: Is this right?
+        this.newObject = result.getValue();
         this.newValue = valueForm.mold(this.newObject).toValue();
       }
       return result.getKey();
     } else if (phase == 2) {
       view.downlinkDidSetValue(this.newValue, this.oldValue);
       final Form<Object> valueForm = (Form<Object>) view.valueForm();
-      if (this.valueForm != valueForm && valueForm != null) {
+      if (valueForm != null) {
         this.valueForm = valueForm;
         this.oldObject = valueForm.cast(this.oldValue);
         if (this.oldObject == null) {

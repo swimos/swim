@@ -30,8 +30,8 @@ import static org.testng.Assert.assertThrows;
 
 public class ReconParserSpec {
   public static void assertParses(String recon, Value expected) {
-    Assertions.assertParses(Recon.modelParser().blockParser(), recon, expected);
-    Assertions.assertParses(Recon.modelParser().blockParser(), " " + recon + " ", expected);
+    Assertions.assertParses(Recon.structureParser().blockParser(), recon, expected);
+    Assertions.assertParses(Recon.structureParser().blockParser(), " " + recon + " ", expected);
   }
 
   public static void assertParseFails(final String recon) {

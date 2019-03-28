@@ -85,45 +85,45 @@ public final class Recon {
         || c >= 0x10000 && c <= 0xeffff;
   }
 
-  private static ReconParser<Item, Value> modelParser;
-  private static ReconWriter<Item, Value> modelWriter;
+  private static ReconParser<Item, Value> structureParser;
+  private static ReconWriter<Item, Value> structureWriter;
 
-  public static ReconParser<Item, Value> modelParser() {
-    if (modelParser == null) {
-      modelParser = new ReconModelParser();
+  public static ReconParser<Item, Value> structureParser() {
+    if (structureParser == null) {
+      structureParser = new ReconStructureParser();
     }
-    return modelParser;
+    return structureParser;
   }
 
-  public static ReconWriter<Item, Value> modelWriter() {
-    if (modelWriter == null) {
-      modelWriter = new ReconModelWriter();
+  public static ReconWriter<Item, Value> structureWriter() {
+    if (structureWriter == null) {
+      structureWriter = new ReconStructureWriter();
     }
-    return modelWriter;
+    return structureWriter;
   }
 
   public static Value parse(String recon) {
-    return modelParser().parseBlockString(recon);
+    return structureParser().parseBlockString(recon);
   }
 
   public static Parser<Value> parser() {
-    return modelParser().blockParser();
+    return structureParser().blockParser();
   }
 
   public static int sizeOf(Item item) {
-    return modelWriter().sizeOfItem(item);
+    return structureWriter().sizeOfItem(item);
   }
 
   public static int sizeOfBlock(Item item) {
-    return modelWriter().sizeOfBlockItem(item);
+    return structureWriter().sizeOfBlockItem(item);
   }
 
   public static Writer<?, ?> write(Item item, Output<?> output) {
-    return modelWriter().writeItem(item, output);
+    return structureWriter().writeItem(item, output);
   }
 
   public static Writer<?, ?> writeBlock(Item item, Output<?> output) {
-    return modelWriter().writeBlockItem(item, output);
+    return structureWriter().writeBlockItem(item, output);
   }
 
   public static String toString(Item item) {
@@ -151,7 +151,7 @@ public final class Recon {
   }
 
   public static <T> Parser<T> formParser(Form<T> form) {
-    return new ReconFormParser<T>(modelParser(), form);
+    return new ReconFormParser<T>(structureParser(), form);
   }
 
   public static <T> Decoder<T> formDecoder(Form<T> form) {
@@ -159,7 +159,7 @@ public final class Recon {
   }
 
   public static <T> Writer<T, T> formWriter(Form<T> form) {
-    return new ReconFormWriter<T>(modelWriter(), form);
+    return new ReconFormWriter<T>(structureWriter(), form);
   }
 
   public static <T> Encoder<T, T> formEncoder(Form<T> form) {

@@ -26,7 +26,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 import swim.util.Builder;
 
-public class JsonModelParser extends JsonParser<Item, Value> {
+public class JsonStructureParser extends JsonParser<Item, Value> {
   @Override
   public Item item(Value value) {
     return value;

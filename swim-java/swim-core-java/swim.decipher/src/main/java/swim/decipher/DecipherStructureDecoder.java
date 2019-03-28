@@ -28,45 +28,45 @@ import swim.structure.Text;
 import swim.structure.Value;
 import swim.xml.Xml;
 
-public class DecipherModelDecoder extends DecipherDecoder<Item, Value> {
+public class DecipherStructureDecoder extends DecipherDecoder<Item, Value> {
   @Override
   public Parser<Value> xmlParser() {
-    return Xml.modelParser().documentParser();
+    return Xml.structureParser().documentParser();
   }
 
   @Override
   public Parser<Value> parseXml(Input input) {
-    return Xml.modelParser().parseDocument(input);
+    return Xml.structureParser().parseDocument(input);
   }
 
   @Override
   public Parser<Value> jsonParser() {
-    return Json.modelParser().objectParser();
+    return Json.structureParser().objectParser();
   }
 
   @Override
   public Parser<Value> parseJson(Input input) {
-    return Json.modelParser().parseObject(input);
+    return Json.structureParser().parseObject(input);
   }
 
   @Override
   public Parser<Value> reconParser() {
-    return Recon.modelParser().blockParser();
+    return Recon.structureParser().blockParser();
   }
 
   @Override
   public Parser<Value> parseRecon(Input input) {
-    return Recon.modelParser().parseBlock(input);
+    return Recon.structureParser().parseBlock(input);
   }
 
   @Override
   public Decoder<Value> protobufDecoder() {
-    return Protobuf.modelDecoder().payloadDecoder();
+    return Protobuf.structureDecoder().payloadDecoder();
   }
 
   @Override
   public Decoder<Value> decodeProtobuf(InputBuffer input) {
-    return Protobuf.modelDecoder().decodePayload(input);
+    return Protobuf.structureDecoder().decodePayload(input);
   }
 
   @SuppressWarnings("unchecked")

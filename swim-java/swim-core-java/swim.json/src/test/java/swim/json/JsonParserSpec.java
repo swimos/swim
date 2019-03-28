@@ -29,8 +29,8 @@ import static org.testng.Assert.assertThrows;
 
 public class JsonParserSpec {
   public static void assertParses(String json, Value expected) {
-    Assertions.assertParses(Json.modelParser().valueParser(), json, expected);
-    Assertions.assertParses(Json.modelParser().valueParser(), " " + json + " ", expected);
+    Assertions.assertParses(Json.structureParser().valueParser(), json, expected);
+    Assertions.assertParses(Json.structureParser().valueParser(), " " + json + " ", expected);
   }
 
   public static void assertParseFails(final String json) {

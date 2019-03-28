@@ -28,7 +28,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 import swim.util.Builder;
 
-public class ReconModelParser extends ReconParser<Item, Value> {
+public class ReconStructureParser extends ReconParser<Item, Value> {
   @Override
   public boolean isDistinct(Value value) {
     return value.isDistinct();

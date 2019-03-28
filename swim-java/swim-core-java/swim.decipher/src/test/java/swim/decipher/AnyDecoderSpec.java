@@ -26,11 +26,11 @@ import swim.structure.Value;
 
 public class AnyDecoderSpec {
   public static void assertDecodes(Data data, Value value) {
-    Assertions.assertDecodes(Decipher.modelDecoder().anyDecoder(), data, value);
+    Assertions.assertDecodes(Decipher.structureDecoder().anyDecoder(), data, value);
   }
 
   public static void assertDecodes(String text, Value value) {
-    Assertions.assertDecodes(Decipher.modelDecoder().anyDecoder(), Data.fromUtf8(text), value);
+    Assertions.assertDecodes(Decipher.structureDecoder().anyDecoder(), Data.fromUtf8(text), value);
   }
 
   @Test

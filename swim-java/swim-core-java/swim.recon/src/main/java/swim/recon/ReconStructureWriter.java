@@ -51,7 +51,7 @@ import swim.structure.selector.KeysSelector;
 import swim.structure.selector.LiteralSelector;
 import swim.structure.selector.ValuesSelector;
 
-public class ReconModelWriter extends ReconWriter<Item, Value> {
+public class ReconStructureWriter extends ReconWriter<Item, Value> {
   @Override
   public boolean isField(Item item) {
     return item instanceof Field;

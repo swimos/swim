@@ -31,7 +31,7 @@ import swim.structure.Slot;
 import swim.structure.Text;
 import swim.structure.Value;
 
-public class JsonModelWriter extends JsonWriter<Item, Value> {
+public class JsonStructureWriter extends JsonWriter<Item, Value> {
   @Override
   public Iterator<Item> items(Item item) {
     return item.iterator();

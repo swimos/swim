@@ -24,7 +24,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 import swim.util.Builder;
 
-public class XmlModelParser extends XmlParser<Item, Value> {
+public class XmlStructureParser extends XmlParser<Item, Value> {
   @Override
   public Item item(Value value) {
     return value;

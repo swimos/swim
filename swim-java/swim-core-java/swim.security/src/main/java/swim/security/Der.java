@@ -28,25 +28,25 @@ final class Der {
     // stub
   }
 
-  private static DerDecoder<Value> modelDecoder;
-  private static DerEncoder<Value> modelEncoder;
+  private static DerDecoder<Value> structureDecoder;
+  private static DerEncoder<Value> structureEncoder;
 
-  public static DerDecoder<Value> modelDecoder() {
-    if (modelDecoder == null) {
-      modelDecoder = new DerModelDecoder();
+  public static DerDecoder<Value> structureDecoder() {
+    if (structureDecoder == null) {
+      structureDecoder = new DerStructureDecoder();
     }
-    return modelDecoder;
+    return structureDecoder;
   }
 
-  public static DerEncoder<Value> modelEncoder() {
-    if (modelEncoder == null) {
-      modelEncoder = new DerModelEncoder();
+  public static DerEncoder<Value> structureEncoder() {
+    if (structureEncoder == null) {
+      structureEncoder = new DerStructureEncoder();
     }
-    return modelEncoder;
+    return structureEncoder;
   }
 }
 
-class DerModelDecoder extends DerDecoder<Value> {
+class DerStructureDecoder extends DerDecoder<Value> {
   @Override
   public Value integer(byte[] data) {
     return Num.from(new BigInteger(data));
@@ -59,7 +59,7 @@ class DerModelDecoder extends DerDecoder<Value> {
   }
 }
 
-class DerModelEncoder extends DerEncoder<Value> {
+class DerStructureEncoder extends DerEncoder<Value> {
   @Override
   public boolean isSequence(Value value) {
     if (value instanceof Record) {

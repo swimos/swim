@@ -25,20 +25,20 @@ public final class Protobuf {
     // stub
   }
 
-  private static ProtobufDecoder<Item, Value> modelDecoder;
-  //private static ProtobufEncoder<Item, Value> modelEncoder;
+  private static ProtobufDecoder<Item, Value> structureDecoder;
+  //private static ProtobufEncoder<Item, Value> structureEncoder;
 
-  public static ProtobufDecoder<Item, Value> modelDecoder() {
-    if (modelDecoder == null) {
-      modelDecoder = new ProtobufModelDecoder();
+  public static ProtobufDecoder<Item, Value> structureDecoder() {
+    if (structureDecoder == null) {
+      structureDecoder = new ProtobufStructureDecoder();
     }
-    return modelDecoder;
+    return structureDecoder;
   }
 
-  //public static ProtobufEncoder<Item, Value> modelEncoder() {
-  //  if (modelEncoder == null) {
-  //    modelEncoder = new ProtobufModelEncoder();
+  //public static ProtobufEncoder<Item, Value> structureEncoder() {
+  //  if (structureEncoder == null) {
+  //    structureEncoder = new ProtobufStructureEncoder();
   //  }
-  //  return modelEncoder;
+  //  return structureEncoder;
   //}
 }

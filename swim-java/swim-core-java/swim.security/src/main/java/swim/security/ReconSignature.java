@@ -63,8 +63,8 @@ public class ReconSignature {
 
   protected Data signingInput() {
     final Output<Data> output = Data.output();
-    Recon.modelWriter().writeValue(this.payload, output);
-    Recon.modelWriter().writeAttr(Text.from("protected"), this.protectedHeader, output);
+    Recon.structureWriter().writeValue(this.payload, output);
+    Recon.structureWriter().writeAttr(Text.from("protected"), this.protectedHeader, output);
     return output.bind();
   }
 
@@ -124,8 +124,8 @@ public class ReconSignature {
                                        Value payload, Value protectedHeader,
                                        Value unprotectedHeader) {
     final Output<Data> output = Data.output();
-    Recon.modelWriter().writeValue(payload, output);
-    Recon.modelWriter().writeAttr(Text.from("protected"), protectedHeader, output);
+    Recon.structureWriter().writeValue(payload, output);
+    Recon.structureWriter().writeAttr(Text.from("protected"), protectedHeader, output);
     final Data signingInput = output.bind();
 
     try {

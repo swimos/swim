@@ -25,8 +25,8 @@ import static org.testng.Assert.assertThrows;
 
 public class XmlParserSpec {
   public static void assertParses(String xml, Value expected) {
-    Assertions.assertParses(Xml.modelParser().documentParser(), xml, expected);
-    Assertions.assertParses(Xml.modelParser().documentParser(), " " + xml + " ", expected);
+    Assertions.assertParses(Xml.structureParser().documentParser(), xml, expected);
+    Assertions.assertParses(Xml.structureParser().documentParser(), " " + xml + " ", expected);
   }
 
   public static void assertParseFails(final String xml) {

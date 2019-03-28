@@ -121,7 +121,7 @@ public final class ServerLoader {
         configInput = module.getResourceAsStream(configPath);
       }
       if (configInput != null) {
-        configValue = Utf8.read(Recon.modelParser().blockParser(), configInput);
+        configValue = Utf8.read(Recon.structureParser().blockParser(), configInput);
       } else {
         configValue = Value.absent();
       }

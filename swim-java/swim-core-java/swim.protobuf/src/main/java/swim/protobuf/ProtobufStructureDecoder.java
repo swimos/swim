@@ -24,7 +24,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 import swim.util.Builder;
 
-public class ProtobufModelDecoder extends ProtobufDecoder<Item, Value> {
+public class ProtobufStructureDecoder extends ProtobufDecoder<Item, Value> {
   @Override
   public Item item(Value value) {
     return value;

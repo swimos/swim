@@ -105,32 +105,32 @@ public final class Xml {
         || c >= 'a' && c <= 'z';
   }
 
-  private static XmlParser<Item, Value> modelParser;
-  //private static XmlWriter<Item, Value> modelWriter;
+  private static XmlParser<Item, Value> structureParser;
+  //private static XmlWriter<Item, Value> structureWriter;
 
-  public static XmlParser<Item, Value> modelParser() {
-    if (modelParser == null) {
-      modelParser = new XmlModelParser();
+  public static XmlParser<Item, Value> structureParser() {
+    if (structureParser == null) {
+      structureParser = new XmlStructureParser();
     }
-    return modelParser;
+    return structureParser;
   }
 
-  //public static XmlWriter<Item, Value> modelWriter() {
-  //  if (modelWriter == null) {
-  //    modelWriter = new XmlModelWriter();
+  //public static XmlWriter<Item, Value> structureWriter() {
+  //  if (structureWriter == null) {
+  //    structureWriter = new XmlStructureWriter();
   //  }
-  //  return modelWriter;
+  //  return structureWriter;
   //}
 
   public static Value parse(String xml) {
-    return modelParser().parseDocumentString(xml);
+    return structureParser().parseDocumentString(xml);
   }
 
   public static Value parseFragment(String xml) {
-    return modelParser().parseFragmentString(xml);
+    return structureParser().parseFragmentString(xml);
   }
 
   public static Parser<Value> parser() {
-    return modelParser().documentParser();
+    return structureParser().documentParser();
   }
 }

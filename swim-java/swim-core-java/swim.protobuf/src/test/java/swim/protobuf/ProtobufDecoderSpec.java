@@ -23,7 +23,7 @@ import swim.structure.Value;
 
 public class ProtobufDecoderSpec {
   public static void assertDecodes(Data data, Value value) {
-    Assertions.assertDecodes(Protobuf.modelDecoder().payloadDecoder(), data, value);
+    Assertions.assertDecodes(Protobuf.structureDecoder().payloadDecoder(), data, value);
   }
 
   @Test

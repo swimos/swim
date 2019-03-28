@@ -131,15 +131,15 @@ public abstract class HttpMessage<T> extends HttpPart {
       return (Decoder<Object>) (Decoder<?>) Utf8.stringParser();
     } else if (mediaType.isApplication()) {
       if ("json".equalsIgnoreCase(mediaType.subtype)) {
-        return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Json.modelParser().valueParser());
+        return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Json.structureParser().valueParser());
       } else if ("recon".equalsIgnoreCase(mediaType.subtype)
               || "x-recon".equalsIgnoreCase(mediaType.subtype)) {
-        return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Recon.modelParser().blockParser());
+        return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Recon.structureParser().blockParser());
       } else if ("xml".equalsIgnoreCase(mediaType.subtype)) {
-        return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Xml.modelParser().documentParser());
+        return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Xml.structureParser().documentParser());
       }
     }
-    return (Decoder<Object>) (Decoder<?>) Decipher.modelDecoder().anyDecoder();
+    return (Decoder<Object>) (Decoder<?>) Decipher.structureDecoder().anyDecoder();
   }
 
   public Decoder<Object> contentDecoder() {

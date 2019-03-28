@@ -39,32 +39,32 @@ public final class Decipher {
     return isSpace(c) || isNewline(c);
   }
 
-  private static DecipherDecoder<Item, Value> modelDecoder;
-  private static DecipherParser<Item, Value> modelParser;
+  private static DecipherDecoder<Item, Value> structureDecoder;
+  private static DecipherParser<Item, Value> structureParser;
 
-  public static DecipherDecoder<Item, Value> modelDecoder() {
-    if (modelDecoder == null) {
-      modelDecoder = new DecipherModelDecoder();
+  public static DecipherDecoder<Item, Value> structureDecoder() {
+    if (structureDecoder == null) {
+      structureDecoder = new DecipherStructureDecoder();
     }
-    return modelDecoder;
+    return structureDecoder;
   }
 
-  public static DecipherParser<Item, Value> modelParser() {
-    if (modelParser == null) {
-      modelParser = new DecipherModelParser();
+  public static DecipherParser<Item, Value> structureParser() {
+    if (structureParser == null) {
+      structureParser = new DecipherStructureParser();
     }
-    return modelParser;
+    return structureParser;
   }
 
   public static Value parse(String any) {
-    return modelParser().parseAnyString(any);
+    return structureParser().parseAnyString(any);
   }
 
   public static Parser<Value> parser() {
-    return modelParser().anyParser();
+    return structureParser().anyParser();
   }
 
   public static Decoder<Value> decoder() {
-    return modelDecoder().anyDecoder();
+    return structureDecoder().anyDecoder();
   }
 }

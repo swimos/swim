@@ -87,7 +87,7 @@ public class DerSpec {
 
   @SuppressWarnings("unchecked")
   public static void assertDecodes(Data data, Value value) {
-    assertDecodes(Der.modelDecoder().valueDecoder(), data, value);
+    assertDecodes(Der.structureDecoder().valueDecoder(), data, value);
   }
 
   public static void assertEncodes(Value value, Data data) {
@@ -95,7 +95,7 @@ public class DerSpec {
     for (int i = expected.capacity(), n = expected.capacity(); i <= n; i += 1) {
       final ByteBuffer actual = ByteBuffer.allocate(n);
       OutputBuffer<?> output = Binary.outputBuffer(actual).isPart(true);
-      Encoder<?, ?> encoder = Der.modelEncoder().encoder(value);
+      Encoder<?, ?> encoder = Der.structureEncoder().encoder(value);
       assertTrue(encoder.isCont());
       assertFalse(encoder.isError());
       assertFalse(encoder.isDone());

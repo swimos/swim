@@ -38,7 +38,7 @@ import static org.testng.Assert.fail;
 
 public class ReconWriterSpec {
   public static void assertWrites(Item item, byte... expected) {
-    final int size = Recon.modelWriter().sizeOfItem(item);
+    final int size = Recon.structureWriter().sizeOfItem(item);
     final int n = expected.length;
     if (size != n) {
       fail("expected " + n + " bytes, but found " + size + " bytes: " + Recon.toString(item));
@@ -64,7 +64,7 @@ public class ReconWriterSpec {
   }
 
   public static void assertWritesBlock(Item item, byte... expected) {
-    final int size = Recon.modelWriter().sizeOfBlockItem(item);
+    final int size = Recon.structureWriter().sizeOfBlockItem(item);
     final int n = expected.length;
     if (size != n) {
       fail("expected " + n + " bytes, but found " + size + " bytes: " + Recon.toBlockString(item));

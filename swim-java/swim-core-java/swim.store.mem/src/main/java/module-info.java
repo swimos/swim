@@ -22,5 +22,5 @@ module swim.store.mem {
 
   exports swim.store.mem;
 
-  //provides swim.api.storage.Storage with swim.store.mem.MemStorage;
+  provides swim.api.storage.Storage with swim.store.mem.MemStorage;
 }

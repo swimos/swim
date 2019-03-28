@@ -29,15 +29,15 @@ import static org.testng.Assert.assertThrows;
 
 public class AnyParserSpec {
   public static void assertParses(String any, Value expected) {
-    Assertions.assertParses(Decipher.modelParser().anyParser(), any, expected);
-    Assertions.assertParses(Decipher.modelParser().anyParser(), " " + any + " ", expected);
+    Assertions.assertParses(Decipher.structureParser().anyParser(), any, expected);
+    Assertions.assertParses(Decipher.structureParser().anyParser(), " " + any + " ", expected);
   }
 
   public static void assertParseFails(final String any) {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
       public void run() throws Throwable {
-        Decipher.modelParser().parseAnyString(any);
+        Decipher.structureParser().parseAnyString(any);
       }
     });
   }

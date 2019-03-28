@@ -85,33 +85,33 @@ public final class Json {
         || c >= 0x10000 && c <= 0xeffff;
   }
 
-  private static JsonParser<Item, Value> modelParser;
-  private static JsonWriter<Item, Value> modelWriter;
+  private static JsonParser<Item, Value> structureParser;
+  private static JsonWriter<Item, Value> structureWriter;
 
-  public static JsonParser<Item, Value> modelParser() {
-    if (modelParser == null) {
-      modelParser = new JsonModelParser();
+  public static JsonParser<Item, Value> structureParser() {
+    if (structureParser == null) {
+      structureParser = new JsonStructureParser();
     }
-    return modelParser;
+    return structureParser;
   }
 
-  public static JsonWriter<Item, Value> modelWriter() {
-    if (modelWriter == null) {
-      modelWriter = new JsonModelWriter();
+  public static JsonWriter<Item, Value> structureWriter() {
+    if (structureWriter == null) {
+      structureWriter = new JsonStructureWriter();
     }
-    return modelWriter;
+    return structureWriter;
   }
 
   public static Value parse(String json) {
-    return modelParser().parseValueString(json);
+    return structureParser().parseValueString(json);
   }
 
   public static Parser<Value> parser() {
-    return modelParser().valueParser();
+    return structureParser().valueParser();
   }
 
   public static Writer<?, ?> write(Item item, Output<?> output) {
-    return modelWriter().writeItem(item, output);
+    return structureWriter().writeItem(item, output);
   }
 
   public static String toString(Item item) {
@@ -127,7 +127,7 @@ public final class Json {
   }
 
   public static <T> Parser<T> formParser(Form<T> form) {
-    return new JsonFormParser<T>(modelParser(), form);
+    return new JsonFormParser<T>(structureParser(), form);
   }
 
   public static <T> Decoder<T> formDecoder(Form<T> form) {
@@ -135,7 +135,7 @@ public final class Json {
   }
 
   public static <T> Writer<T, T> formWriter(Form<T> form) {
-    return new JsonFormWriter<T>(modelWriter(), form);
+    return new JsonFormWriter<T>(structureWriter(), form);
   }
 
   public static <T> Encoder<T, T> formEncoder(Form<T> form) {
