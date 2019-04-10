@@ -10,9 +10,9 @@
 [Swim](https://developer.swim.ai) client applications that run in Node.js
 and/or web browsers.  `@swim/core` also serves as the foundation framework
 on which the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui) and
-[`@swim/ux`](https://www.npmjs.com/package/@swim/ux) streaming user interface
-toolkits are built.  `@swim/core` is written in TypeScript, but is designed to
-be used from either TypeScript or JavaScript.
+[`@swim/vis`](https://www.npmjs.com/package/@swim/vis) real-time user interface
+frameworks are built.  `@swim/core` is written in TypeScript, but is designed
+to be used from either TypeScript or JavaScript.
 
 ## Libraries
 

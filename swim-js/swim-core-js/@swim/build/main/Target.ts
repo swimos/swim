@@ -152,6 +152,10 @@ export class Target {
     return newRefs;
   }
 
+  protected injectCompilerOptions(compilerOptions: ts.CompilerOptions): void {
+    // stub
+  }
+
   compile(): Promise<unknown> {
     const output = Unicode.stringOutput(OutputSettings.styled());
     OutputStyle.greenBold(output);
@@ -166,6 +170,7 @@ export class Target {
     const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
     const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
     const projectReferences = this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
+    this.injectCompilerOptions(commandLine.options);
 
     this.program = ts.createProgram({
       rootNames: commandLine.fileNames,
@@ -214,6 +219,7 @@ export class Target {
     const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
     const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
     const projectReferences = this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
+    this.injectCompilerOptions(commandLine.options);
 
     const host = ts.createWatchCompilerHost(commandLine.fileNames, commandLine.options, ts.sys,
                                             this.createWatchProgram.bind(this) as any,

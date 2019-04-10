@@ -57,7 +57,7 @@ export interface MapDownlinkInit<K extends KU, V extends VU, KU = K, VU = V> ext
   valueForm?: Form<V, VU>;
 }
 
-export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Downlink implements OrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapDownlink<K, V>> {
+export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Downlink implements OrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapDownlink<K, V, KU, VU>> {
   /** @hidden */
   _observers: ReadonlyArray<MapDownlinkObserver<K, V, KU, VU>> | null;
   /** @hidden */
@@ -165,9 +165,9 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
     return this._model!.has(keyObject);
   }
 
-  get(): MapDownlink<K, V>;
+  get(): MapDownlink<K, V, KU, VU>;
   get(key: KU): V;
-  get(key?: KU): MapDownlink<K, V> | V {
+  get(key?: KU): MapDownlink<K, V, KU, VU> | V {
     if (key === void 0) {
       return this;
     } else {
@@ -934,32 +934,32 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
     // stub
   }
 
-  memoize(): MapOutlet<K, V, MapDownlink<K, V>> {
+  memoize(): MapOutlet<K, V, MapDownlink<K, V, KU, VU>> {
     return this;
   }
 
   filter(func: FilterFieldsFunction<K, V>): MapOutlet<K, V, Map<K, V>> {
-    const combinator = new FilterFieldsCombinator<K, V, MapDownlink<K, V>>(func);
+    const combinator = new FilterFieldsCombinator<K, V, MapDownlink<K, V, KU, VU>>(func);
     combinator.bindInput(this);
     return combinator;
   }
 
-  map<O2>(func: MapValueFunction<MapDownlink<K, V>, O2>): Outlet<O2>;
+  map<O2>(func: MapValueFunction<MapDownlink<K, V, KU, VU>, O2>): Outlet<O2>;
   map<V2>(func: MapFieldValuesFunction<K, V, V2>): MapOutlet<K, V2, Map<K, V2>>;
-  map<V2>(func: MapValueFunction<MapDownlink<K, V>, V2> | MapFieldValuesFunction<K, V, V2>): Outlet<V2> | MapOutlet<K, V2, Map<K, V2>> {
+  map<V2>(func: MapValueFunction<MapDownlink<K, V, KU, VU>, V2> | MapFieldValuesFunction<K, V, V2>): Outlet<V2> | MapOutlet<K, V2, Map<K, V2>> {
     if (func.length === 1) {
-      const combinator = new MapValueCombinator<MapDownlink<K, V>, V2>(func as MapValueFunction<MapDownlink<K, V>, V2>);
+      const combinator = new MapValueCombinator<MapDownlink<K, V, KU, VU>, V2>(func as MapValueFunction<MapDownlink<K, V, KU, VU>, V2>);
       combinator.bindInput(this);
       return combinator;
     } else {
-      const combinator = new MapFieldValuesCombinator<K, V, V2, MapDownlink<K, V>>(func as MapFieldValuesFunction<K, V, V2>);
+      const combinator = new MapFieldValuesCombinator<K, V, V2, MapDownlink<K, V, KU, VU>>(func as MapFieldValuesFunction<K, V, V2>);
       combinator.bindInput(this);
       return combinator;
     }
   }
 
   reduce<U>(identity: U, accumulator: (result: U, element: V) => U, combiner: (result: U, result2: U) => U): Outlet<U> {
-    const combinator = new ReduceFieldsCombinator<K, V, MapDownlink<K, V>, U>(identity, accumulator, combiner);
+    const combinator = new ReduceFieldsCombinator<K, V, MapDownlink<K, V, KU, VU>, U>(identity, accumulator, combiner);
     combinator.bindInput(this);
     return combinator;
   }
