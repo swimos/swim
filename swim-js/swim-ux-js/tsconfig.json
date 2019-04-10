@@ -7,6 +7,6 @@
     {"path": "./@swim/chart"},
     {"path": "./@swim/map"},
     {"path": "./@swim/mapbox"},
-    {"path": "./@swim/ux"}
+    {"path": "./@swim/vis"}
   ]
 }

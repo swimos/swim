@@ -1,8 +1,8 @@
-# Swim User Experience Components
+# Swim Real-Time Data Visualization Toolkit
 
 ## Building
 
-**Note:** You can only build `swim-ux-js` from within the top-level `swim`
+**Note:** You can only build `swim-vis-js` from within the top-level `swim`
 repository.
 
 ### Setup
@@ -10,7 +10,7 @@ repository.
 Install build dependencies:
 
 ```sh
-swim-ux-js $ npm install
+swim-vis-js $ npm install
 ```
 
 ### Build script
@@ -41,16 +41,16 @@ to the `dist` subdirectory of each project.  To compile all targets,
 of all projects, run:
 
 ```sh
-swim-ux-js $ bin/build.js compile
+swim-vis-js $ bin/build.js compile
 ```
 
 To compile a subset of projects and targets, include a `--projects` (`-p`)
 option, with a comma-separated list of `$project:($target)?` specifiers.
 For example, to build the `main` target of the `pie` project, and all
-targets of the `ux` project, run:
+targets of the `vis` project, run:
 
 ```sh
-swim-ux-js $ bin/build.js compile -p pie:main,ux
+swim-vis-js $ bin/build.js compile -p pie:main,vis
 ```
 
 ### Running tests
@@ -59,7 +59,7 @@ Use the `test` build script command to compile and run unit tests.
 For example, to compile and test the `chart` project, run:
 
 ```sh
-swim-ux-js $ bin/build.js test -p chart
+swim-vis-js $ bin/build.js test -p chart
 ```
 
 ### Continuous development builds
@@ -70,7 +70,7 @@ dependent source files change.  For example, to continuously recompile the
 in one of the project's transitive local dependencies–changes, run:
 
 ```sh
-swim-ux-js $ bin/build.js watch -p gauge:main
+swim-vis-js $ bin/build.js watch -p gauge:main
 ```
 
 Pass the `--devel` (`-d`) option to expedite recompilation by skipping the
@@ -80,5 +80,5 @@ and test the `chart` project, bypassing minification, and skipping generation
 of the main script, run:
 
 ```sh
-swim-ux-js $ bin/build.js watch -p chart:test -d -t
+swim-vis-js $ bin/build.js watch -p chart:test -d -t
 ```

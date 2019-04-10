@@ -652,10 +652,10 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const childView = childViews[i];
       if (childView instanceof PlotView && childView.xAxis() === topAxis) {
         const xDomain = childView.xDomain();
-        if (topDomain[0] === null || Objects.compare(topDomain[0], xDomain[0]) < 0) {
+        if (topDomain[0] === null || xDomain[0] !== null && Objects.compare(topDomain[0], xDomain[0]) > 0) {
           topDomain[0] = xDomain[0];
         }
-        if (topDomain[1] === null || Objects.compare(topDomain[1], xDomain[1] > 0)) {
+        if (topDomain[1] === null || xDomain[1] !== null && Objects.compare(topDomain[1], xDomain[1]) < 0) {
           topDomain[1] = xDomain[1];
         }
       }
@@ -671,10 +671,10 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const childView = childViews[i];
       if (childView instanceof PlotView && childView.yAxis() === rightAxis) {
         const yDomain = childView.yDomain();
-        if (rightDomain[0] === null || Objects.compare(rightDomain[0], yDomain[0]) < 0) {
+        if (rightDomain[0] === null || yDomain[0] !== null && Objects.compare(rightDomain[0], yDomain[0]) > 0) {
           rightDomain[0] = yDomain[0];
         }
-        if (rightDomain[1] === null || Objects.compare(rightDomain[1], yDomain[1] > 0)) {
+        if (rightDomain[1] === null || yDomain[1] !== null && Objects.compare(rightDomain[1], yDomain[1]) < 0) {
           rightDomain[1] = yDomain[1];
         }
       }
@@ -690,10 +690,10 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const childView = childViews[i];
       if (childView instanceof PlotView && childView.xAxis() === bottomAxis) {
         const xDomain = childView.xDomain();
-        if (bottomDomain[0] === null || Objects.compare(bottomDomain[0], xDomain[0]) < 0) {
+        if (bottomDomain[0] === null || xDomain[0] !== null && Objects.compare(bottomDomain[0], xDomain[0]) > 0) {
           bottomDomain[0] = xDomain[0];
         }
-        if (bottomDomain[1] === null || Objects.compare(bottomDomain[1], xDomain[1] > 0)) {
+        if (bottomDomain[1] === null || xDomain[1] !== null && Objects.compare(bottomDomain[1], xDomain[1]) < 0) {
           bottomDomain[1] = xDomain[1];
         }
       }
@@ -709,10 +709,10 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const childView = childViews[i];
       if (childView instanceof PlotView && childView.yAxis() === leftAxis) {
         const yDomain = childView.yDomain();
-        if (leftDomain[0] === null || Objects.compare(leftDomain[0], yDomain[0]) < 0) {
+        if (leftDomain[0] === null || yDomain[0] !== null && Objects.compare(leftDomain[0], yDomain[0]) > 0) {
           leftDomain[0] = yDomain[0];
         }
-        if (leftDomain[1] === null || Objects.compare(leftDomain[1], yDomain[1] > 0)) {
+        if (leftDomain[1] === null || yDomain[1] !== null && Objects.compare(leftDomain[1], yDomain[1]) < 0) {
           leftDomain[1] = yDomain[1];
         }
       }
@@ -1121,7 +1121,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
 
   autoscale(tween?: Tween<any>): void {
     if (tween === void 0) {
-      tween = this._rescaleTransition || undefined;
+      tween = this._rescaleTransition || void 0;
     }
     this.autoscaleTop(tween);
     this.autoscaleRight(tween);
@@ -1134,7 +1134,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const topAxis = this.topAxis();
       if (topAxis) {
         if (tween === void 0) {
-          tween = this._rescaleTransition || undefined;
+          tween = this._rescaleTransition || void 0;
         }
         const [xMin, xMax] = this.topDomainPadded();
         if (xMin !== null && xMax !== null) {
@@ -1149,7 +1149,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const rightAxis = this.rightAxis();
       if (rightAxis) {
         if (tween === void 0) {
-          tween = this._rescaleTransition || undefined;
+          tween = this._rescaleTransition || void 0;
         }
         const [yMin, yMax] = this.rightDomainPadded();
         if (yMin !== null && yMax !== null) {
@@ -1164,7 +1164,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const bottomAxis = this.bottomAxis();
       if (bottomAxis) {
         if (tween === void 0) {
-          tween = this._rescaleTransition || undefined;
+          tween = this._rescaleTransition || void 0;
         }
         const [xMin, xMax] = this.bottomDomainPadded();
         if (xMin !== null && xMax !== null) {
@@ -1179,7 +1179,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const leftAxis = this.leftAxis();
       if (leftAxis) {
         if (tween === void 0) {
-          tween = this._rescaleTransition || undefined;
+          tween = this._rescaleTransition || void 0;
         }
         const [yMin, yMax] = this.leftDomainPadded();
         if (yMin !== null && yMax !== null) {
