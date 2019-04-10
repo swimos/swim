@@ -82,6 +82,7 @@ export {TextViewController} from "./TextViewController";
 
 export {
   ViewElement,
+  ElementViewClass,
   ElementView,
 } from "./ElementView";
 export {ElementViewObserver} from "./ElementViewObserver";
@@ -108,7 +109,11 @@ export {
 export {CanvasViewObserver} from "./CanvasViewObserver";
 export {CanvasViewController} from "./CanvasViewController";
 
-export {HtmlAppView} from "./HtmlAppView";
+export {
+  HtmlAppViewSafeArea,
+  HtmlAppViewport,
+  HtmlAppView,
+} from "./HtmlAppView";
 export {HtmlAppViewObserver} from "./HtmlAppViewObserver";
 export {HtmlAppViewController} from "./HtmlAppViewController";
 

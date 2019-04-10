@@ -24,7 +24,7 @@ import {GraphicView} from "./GraphicView";
 import {LayerView} from "./LayerView";
 import {ViewNode, NodeView} from "./NodeView";
 import {TextView} from "./TextView";
-import {ElementView} from "./ElementView";
+import {ElementViewClass, ElementView} from "./ElementView";
 import {SvgView} from "./SvgView";
 import {HtmlView} from "./HtmlView";
 import {CanvasView} from "./CanvasView";
@@ -448,18 +448,29 @@ export abstract class View {
     }
   }
 
-  static fromTag(tag: "svg"): SvgView;
-  static fromTag(tag: "canvas"): CanvasView;
-  static fromTag<K extends keyof HTMLElementTagNameMap>(tag: K): HtmlView;
-  static fromTag(tag: string): ElementView;
-  static fromTag(tag: string): ElementView {
-    if (tag === "svg") {
-      return new View.Svg(document.createElementNS(View.Svg.NS, tag) as SVGElement);
-    } else if (tag === "canvas") {
-      return new View.Canvas(document.createElement(tag) as HTMLCanvasElement);
-    } else {
-      return View.fromNode(document.createElement(tag));
+  static create(tag: "svg"): SvgView;
+  static create(tag: "canvas"): CanvasView;
+  static create<K extends keyof HTMLElementTagNameMap>(tag: K): HtmlView;
+  static create(tag: string): ElementView;
+  static create<V extends ElementView>(tag: ElementViewClass<Element, V>): V;
+  static create<V extends ElementView>(tag: string | ElementViewClass<Element, V>): ElementView {
+    if (typeof tag === "string") {
+      if (tag === "svg") {
+        return new View.Svg(document.createElementNS(View.Svg.NS, tag) as SVGElement);
+      } else if (tag === "canvas") {
+        return new View.Canvas(document.createElement(tag) as HTMLCanvasElement);
+      } else {
+        return View.fromNode(document.createElement(tag));
+      }
+    } else if (typeof tag === "function") {
+      const ns = tag.NS;
+      if (ns === void 0) {
+        return new tag(document.createElement(tag.tag));
+      } else {
+        return new tag(document.createElementNS(ns, tag.tag));
+      }
     }
+    throw new TypeError("" + tag);
   }
 
   /** @hidden */

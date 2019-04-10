@@ -46,6 +46,7 @@ export type MemberAnimatorType = FromAny<any>
                                | typeof Color
                                | typeof Font
                                | typeof Transform;
+
 export interface MemberAnimatorClass {
   new<V extends AnimatedView, T, U = T>(view: V, value?: T | null, transition?: Transition<T> | null,
                                         inherit?: MemberAnimatorInherit): MemberAnimator<V, T, U>;

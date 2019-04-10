@@ -19,11 +19,27 @@ import {HtmlView} from "./HtmlView";
 import {HtmlAppViewController} from "./HtmlAppViewController";
 import {PopoverOptions, Popover} from "./Popover";
 
+export interface HtmlAppViewSafeArea {
+  insetTop: number;
+  insetRight: number;
+  insetBottom: number;
+  insetLeft: number;
+}
+
+export interface HtmlAppViewport {
+  width: number;
+  height: number;
+  orientation: OrientationType;
+  safeArea: HtmlAppViewSafeArea;
+}
+
 export class HtmlAppView extends HtmlView implements AppView {
   /** @hidden */
   _viewController: HtmlAppViewController | null;
   /** @hidden */
   readonly _popovers: Popover[];
+  /** @hidden */
+  _viewport: HtmlAppViewport | null;
   /** @hidden */
   _resizeTimer: number; // debounces resize events
   /** @hidden */
@@ -37,6 +53,7 @@ export class HtmlAppView extends HtmlView implements AppView {
     this.doScroll = this.doScroll.bind(this);
     this.onClick = this.onClick.bind(this);
     this._popovers = [];
+    this._viewport = null;
     this._resizeTimer = 0;
     this._scrollTimer = 0;
     if (typeof window !== "undefined") {
@@ -153,6 +170,58 @@ export class HtmlAppView extends HtmlView implements AppView {
     }
   }
 
+  get viewport(): HtmlAppViewport {
+    let viewport = this._viewport;
+    if (viewport === null) {
+      let insetTop = 0;
+      let insetRight = 0;
+      let insetBottom = 0;
+      let insetLeft = 0;
+      const div = document.createElement("div");
+      div.style.setProperty("position", "fixed");
+      div.style.setProperty("top", "0");
+      div.style.setProperty("right", "0");
+      div.style.setProperty("width", "100vw");
+      div.style.setProperty("height", "100vh");
+      div.style.setProperty("box-sizing", "border-box");
+      div.style.setProperty("padding-top", "env(safe-area-inset-top)");
+      div.style.setProperty("padding-right", "env(safe-area-inset-right)");
+      div.style.setProperty("padding-bottom", "env(safe-area-inset-bottom)");
+      div.style.setProperty("padding-left", "env(safe-area-inset-left)");
+      div.style.setProperty("overflow", "hidden");
+      div.style.setProperty("visibility", "hidden");
+      document.body.appendChild(div);
+      const style = window.getComputedStyle(div);
+      const width = parseFloat(style.getPropertyValue("width"));
+      const height = parseFloat(style.getPropertyValue("height"));
+      if (typeof CSS !== "undefined" && typeof CSS.supports === "function"
+          && CSS.supports("padding-top: env(safe-area-inset-top)")) {
+        insetTop = parseFloat(style.getPropertyValue("padding-top"));
+        insetRight = parseFloat(style.getPropertyValue("padding-right"));
+        insetBottom = parseFloat(style.getPropertyValue("padding-bottom"));
+        insetLeft = parseFloat(style.getPropertyValue("padding-left"));
+      }
+      document.body.removeChild(div);
+      let orientation: OrientationType | undefined =
+          (screen as any).msOrientation ||
+          (screen as any).mozOrientation ||
+          (screen.orientation || {}).type;
+      if (!orientation) {
+        switch (window.orientation) {
+          case 0: orientation = "portrait-primary"; break;
+          case 180: orientation = "portrait-secondary"; break;
+          case -90: orientation = "landscape-primary"; break;
+          case 90: orientation = "landscape-secondary"; break;
+          default: orientation = "landscape-primary";
+        }
+      }
+      const safeArea = {insetTop, insetRight, insetBottom, insetLeft};
+      viewport = {width, height, orientation, safeArea};
+      this._viewport = viewport;
+    }
+    return viewport;
+  }
+
   throttleResize(): void {
     if (!this._resizeTimer) {
       this._resizeTimer = setTimeout(this.doResize, 16) as any;
@@ -162,6 +231,7 @@ export class HtmlAppView extends HtmlView implements AppView {
   /** @hidden */
   doResize(): void {
     this._resizeTimer = 0;
+    this._viewport = null;
     this.cascadeResize();
   }
 

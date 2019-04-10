@@ -6,6 +6,7 @@
     "declarationMap": true,
     "experimentalDecorators": true,
     "importHelpers": true,
+    "incremental": true,
     "module": "es6",
     "moduleResolution": "node",
     "noEmitHelpers": true,

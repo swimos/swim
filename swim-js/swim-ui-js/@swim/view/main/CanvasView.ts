@@ -20,7 +20,7 @@ import {RenderView} from "./RenderView";
 import {RenderViewObserver} from "./RenderViewObserver";
 import {ViewNode, NodeView} from "./NodeView";
 import {TextView} from "./TextView";
-import {ElementView} from "./ElementView";
+import {ElementViewClass, ElementView} from "./ElementView";
 import {SvgView} from "./SvgView";
 import {HtmlView} from "./HtmlView";
 import {CanvasViewController} from "./CanvasViewController";
@@ -191,12 +191,16 @@ export class CanvasView extends HtmlView implements RenderView {
   append(child: Node): NodeView;
   append(child: NodeView): typeof child;
   append(child: RenderView): typeof child;
-  append(child: View | Node | string): View {
+  append<V extends ElementView>(child: ElementViewClass<Element, V>): V;
+  append<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>): View {
     if (typeof child === "string") {
-      child = HtmlView.fromTag(child);
+      child = HtmlView.create(child);
     }
     if (child instanceof Node) {
       child = View.fromNode(child);
+    }
+    if (typeof child === "function") {
+      child = View.create(child);
     }
     this.appendChildView(child);
     return child;
@@ -228,12 +232,16 @@ export class CanvasView extends HtmlView implements RenderView {
   prepend(child: Node): NodeView;
   prepend(child: NodeView): typeof child;
   prepend(child: RenderView): typeof child;
-  prepend(child: View | Node | string): View {
+  prepend<V extends ElementView>(child: ElementViewClass<Element, V>): V;
+  prepend<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>): View {
     if (typeof child === "string") {
-      child = HtmlView.fromTag(child);
+      child = HtmlView.create(child);
     }
     if (child instanceof Node) {
       child = View.fromNode(child);
+    }
+    if (typeof child === "function") {
+      child = View.create(child);
     }
     this.prependChildView(child);
     return child;
@@ -265,12 +273,17 @@ export class CanvasView extends HtmlView implements RenderView {
   insert(child: Node, target: View | Node | null): NodeView;
   insert(child: NodeView, target: View | Node | null): typeof child;
   insert(child: RenderView, target: View | Node | null): typeof child;
-  insert(child: View | Node | string, target: View | Node | null): View {
+  insert<V extends ElementView>(child: ElementViewClass<Element, V>, target: View | Node | null): V;
+  insert<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>,
+                                target: View | Node | null): View {
     if (typeof child === "string") {
-      child = HtmlView.fromTag(child);
+      child = HtmlView.create(child);
     }
     if (child instanceof Node) {
       child = View.fromNode(child);
+    }
+    if (typeof child === "function") {
+      child = View.create(child);
     }
     this.insertChild(child, target);
     return child;
@@ -949,5 +962,8 @@ export class CanvasView extends HtmlView implements RenderView {
     this.setBounds(new BoxR2(0, 0, width, height));
     this.setAnchor(new PointR2(width / 2, height / 2));
   }
+
+  /** @hidden */
+  static readonly tag: string = "canvas";
 }
 View.Canvas = CanvasView;

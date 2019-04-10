@@ -35,7 +35,7 @@ import {StyleAnimator} from "./style/StyleAnimator";
 import {View} from "./View";
 import {NodeView} from "./NodeView";
 import {TextView} from "./TextView";
-import {ElementView} from "./ElementView";
+import {ElementViewClass, ElementView} from "./ElementView";
 import {SvgViewController} from "./SvgViewController";
 import {CanvasView} from "./CanvasView";
 
@@ -71,12 +71,16 @@ export class SvgView extends ElementView {
   append(child: Text): TextView;
   append(child: Node): NodeView;
   append(child: NodeView): typeof child;
-  append(child: NodeView | Node | string): NodeView {
+  append<V extends ElementView>(child: ElementViewClass<Element, V>): V;
+  append<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>): NodeView {
     if (typeof child === "string") {
-      child = SvgView.fromTag(child);
+      child = SvgView.create(child);
     }
     if (child instanceof Node) {
       child = View.fromNode(child);
+    }
+    if (typeof child === "function") {
+      child = View.create(child);
     }
     this.appendChildView(child);
     return child;
@@ -88,12 +92,16 @@ export class SvgView extends ElementView {
   prepend(child: Text): TextView;
   prepend(child: Node): NodeView;
   prepend(child: NodeView): typeof child;
-  prepend(child: NodeView | Node | string): NodeView {
+  prepend<V extends ElementView>(child: ElementViewClass<Element, V>): V;
+  prepend<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>): NodeView {
     if (typeof child === "string") {
-      child = SvgView.fromTag(child);
+      child = SvgView.create(child);
     }
     if (child instanceof Node) {
       child = View.fromNode(child);
+    }
+    if (typeof child === "function") {
+      child = View.create(child);
     }
     this.prependChildView(child);
     return child;
@@ -105,12 +113,17 @@ export class SvgView extends ElementView {
   insert(child: Text, target: View | Node | null): TextView;
   insert(child: Node, target: View | Node | null): NodeView;
   insert(child: NodeView, target: View | Node | null): typeof child;
-  insert(child: NodeView | Node | string, target: View | Node | null): NodeView {
+  insert<V extends ElementView>(child: ElementViewClass<Element, V>, target: View | Node | null): V;
+  insert<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>,
+                                target: View | Node | null): NodeView {
     if (typeof child === "string") {
-      child = SvgView.fromTag(child);
+      child = SvgView.create(child);
     }
     if (child instanceof Node) {
       child = View.fromNode(child);
+    }
+    if (typeof child === "function") {
+      child = View.create(child);
     }
     this.insertChild(child, target);
     return child;
@@ -302,15 +315,24 @@ export class SvgView extends ElementView {
   @StyleAnimator("line-height", LineHeight)
   lineHeight: StyleAnimator<this, LineHeight, AnyLineHeight>;
 
-  static fromTag(tag: "canvas"): CanvasView;
-  static fromTag(tag: string): SvgView;
-  static fromTag(tag: string): ElementView {
-    if (tag === "canvas") {
-      return new View.Canvas(document.createElement(tag) as HTMLCanvasElement);
-    } else {
-      return new SvgView(document.createElementNS(SvgView.NS, tag) as SVGElement);
+  static create(tag: "canvas"): CanvasView;
+  static create(tag: string): SvgView;
+  static create<V extends SvgView>(tag: ElementViewClass<SVGElement, V>): V;
+  static create<V extends SvgView>(tag: string | ElementViewClass<SVGElement, V>): ElementView {
+    if (typeof tag === "string") {
+      if (tag === "canvas") {
+        return new View.Canvas(document.createElement(tag) as HTMLCanvasElement);
+      } else {
+        return new SvgView(document.createElementNS(SvgView.NS, tag) as SVGElement);
+      }
+    } else if (typeof tag === "function") {
+      return new tag(document.createElementNS(SvgView.NS, tag.tag) as SVGElement);
     }
+    throw new TypeError("" + tag);
   }
+
+  /** @hidden */
+  static readonly tag: string = "svg";
 
   /** @hidden */
   static readonly NS: string = "http://www.w3.org/2000/svg";

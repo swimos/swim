@@ -68,7 +68,7 @@ import {StyleAnimator} from "./style/StyleAnimator";
 import {View} from "./View";
 import {NodeView} from "./NodeView";
 import {TextView} from "./TextView";
-import {ElementView} from "./ElementView";
+import {ElementViewClass, ElementView} from "./ElementView";
 import {SvgView} from "./SvgView";
 import {HtmlViewController} from "./HtmlViewController";
 import {CanvasView} from "./CanvasView";
@@ -107,12 +107,16 @@ export class HtmlView extends ElementView {
   append(child: Text): TextView;
   append(child: Node): NodeView;
   append(child: NodeView): typeof child;
-  append(child: NodeView | Node | string): NodeView {
+  append<V extends ElementView>(child: ElementViewClass<Element, V>): V;
+  append<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>): NodeView {
     if (typeof child === "string") {
-      child = HtmlView.fromTag(child);
+      child = HtmlView.create(child);
     }
     if (child instanceof Node) {
       child = View.fromNode(child);
+    }
+    if (typeof child === "function") {
+      child = View.create(child);
     }
     this.appendChildView(child);
     return child;
@@ -126,12 +130,16 @@ export class HtmlView extends ElementView {
   prepend(child: Text): TextView;
   prepend(child: Node): NodeView;
   prepend(child: NodeView): typeof child;
-  prepend(child: NodeView | Node | string): NodeView {
+  prepend<V extends ElementView>(child: ElementViewClass<Element, V>): V;
+  prepend<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>): NodeView {
     if (typeof child === "string") {
-      child = HtmlView.fromTag(child);
+      child = HtmlView.create(child);
     }
     if (child instanceof Node) {
       child = View.fromNode(child);
+    }
+    if (typeof child === "function") {
+      child = View.create(child);
     }
     this.prependChildView(child);
     return child;
@@ -145,12 +153,17 @@ export class HtmlView extends ElementView {
   insert(child: Text, target: View | Node | null): TextView;
   insert(child: Node, target: View | Node | null): NodeView;
   insert(child: NodeView, target: View | Node | null): typeof child;
-  insert(child: NodeView | Node | string, target: View | Node | null): NodeView {
+  insert<V extends ElementView>(child: ElementViewClass<Element, V>, target: View | Node | null): V;
+  insert<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>,
+                                target: View | Node | null): NodeView {
     if (typeof child === "string") {
-      child = HtmlView.fromTag(child);
+      child = HtmlView.create(child);
     }
     if (child instanceof Node) {
       child = View.fromNode(child);
+    }
+    if (typeof child === "function") {
+      child = View.create(child);
     }
     this.insertChild(child, target);
     return child;
@@ -843,17 +856,26 @@ export class HtmlView extends ElementView {
   @StyleAnimator("z-index", [Number, String])
   zIndex: StyleAnimator<this, number | string>;
 
-  static fromTag(tag: "svg"): SvgView;
-  static fromTag(tag: "canvas"): CanvasView;
-  static fromTag(tag: string): HtmlView;
-  static fromTag(tag: string): ElementView {
-    if (tag === "svg") {
-      return new View.Svg(document.createElementNS(View.Svg.NS, tag) as SVGElement);
-    } else if (tag === "canvas") {
-      return new View.Canvas(document.createElement(tag) as HTMLCanvasElement);
-    } else {
-      return new HtmlView(document.createElement(tag) as HTMLElement);
+  static create(tag: "svg"): SvgView;
+  static create(tag: "canvas"): CanvasView;
+  static create(tag: string): HtmlView;
+  static create<V extends HtmlView>(tag: ElementViewClass<HTMLElement, V>): V;
+  static create<V extends HtmlView>(tag: string | ElementViewClass<HTMLElement, V>): ElementView {
+    if (typeof tag === "string") {
+      if (tag === "svg") {
+        return new View.Svg(document.createElementNS(View.Svg.NS, tag) as SVGElement);
+      } else if (tag === "canvas") {
+        return new View.Canvas(document.createElement(tag) as HTMLCanvasElement);
+      } else {
+        return new HtmlView(document.createElement(tag) as HTMLElement);
+      }
+    } else if (typeof tag === "function") {
+      return new tag(document.createElement(tag.tag));
     }
+    throw new TypeError("" + tag);
   }
+
+  /** @hidden */
+  static readonly tag: string = "div";
 }
 View.Html = HtmlView;

@@ -25,6 +25,13 @@ export interface ViewElement extends StyledElement {
   view?: ElementView;
 }
 
+export interface ElementViewClass<E extends Element, V extends ElementView> {
+  new(node: E): V;
+
+  tag: string;
+  NS?: string;
+}
+
 export class ElementView extends NodeView {
   /** @hidden */
   readonly _node: ViewElement;
