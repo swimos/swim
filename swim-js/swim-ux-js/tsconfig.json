@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {"path": "./@swim/navigation"},
+    {"path": "./@swim/ux"}
+  ]
+}

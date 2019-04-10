@@ -1,0 +1,303 @@
+SWIM SOFTWARE DEVELOPMENT KIT LICENSE AGREEMENT
+
+This SWIM software development kit (SDK) License Agreement (“License Agreement”)
+governs your use of the SWIM SDK, SWIM Core Runtime, SWIM Website and materials,
+training and code samples.
+
+1. DEFINITIONS
+
+1.1. “SWIM” means SWIM.AI, Inc. located at 1 Almaden Boulevard, Suite 200,
+San Jose, CA 95113.
+
+1.2. "SWIM SDK" means the SWIM SDK software downloaded from the swim developer
+website and used to produce edge applications including custom data bridge
+scripts, analytic logic scripts and API/GUI specification scripts.  This
+includes SWIM system files, SWIM APIs, SWIM API add-ons, and any documentation
+licensed to you under the terms of this License Agreement
+
+1.3. “SWIM Core Runtime” means the core SWIM runtime code used to execute SDK
+scripts and to enable edge data ingestion, analytics, processing, communication
+and other functions
+
+1.4. “SWIM Website, Materials and Training” means all information, documents,
+code samples, applications, videos, links and materials provided on the swim
+corporate website (ww.swim.ai) and developer website (www.swim.ai/developers)
+
+1.5. “SWIM Code Samples” means software, executable code, interactive
+applications examples and code samples made available to users by download,
+via GitHub or through the SWIM website, materials and training
+
+1.6. “SWIM API or GUI” means SWIM API or graphical use interface used in
+conjunction with the swim SDK or core runtime.
+
+1.7. “SWIM Application” means any application developed using the SWIM SDK,
+SWIM Core Runtime, SWIM website, materials, training or code samples.  These
+applications may include streaming data processing, data reduction, edge
+applications, machine learning, basic or advanced analytics, edge computing or
+other purposes
+
+1.8. "SWIM Platform" means the SWIM SDK, SWIM core runtime, SWIM website, SWIM
+API, SWIM GUI, SWIM Materials, Training, and SWIM code samples and related SWIM
+products and services for development of applications, analytics, interfaces
+and services
+
+2. YOUR ACCEPTANCE OF THIS LICENSE AGREEMENT
+
+2.1. You must accept this License Agreement before you can use the SWIM SDK,
+core runtime, website, materials, training, code samples, API or GUI. By
+clicking to accept this Agreement, or by accessing or using any portion of the
+SWIM SDK or SWIM platform, you hereby agree to the terms and conditions of this
+License Agreement.
+
+2.2. You may not use the SWIM SDK or SWIM platform and may not accept this
+License Agreement if you are a person barred from receiving the SWIM SDK or
+SWIM platform under the laws of the United States or other countries, including
+the country in which you are resident or from which you use the SWIM SDK or
+SWIM platform.
+
+2.3. If you are agreeing to be bound by this License Agreement on behalf of
+your employer or other entity, you represent and warrant that you have full
+legal authority to bind your employer or such entity to this License Agreement.
+If you do not have the requisite authority, you may not accept this License
+Agreement or use the SWIM SDK or SWIM platform on behalf of your employer or
+other entity.
+
+3. LICENSE TO SWIM SDK and SWIM platform
+
+3.1. Subject to the terms and conditions of this License Agreement, SWIM grants
+to you a limited, non-transferable, non-sublicensable, non-exclusive and
+worldwide license to install and use up to two (2) instances of the SWIM SDK
+and SWIM core runtime on a single MAC address solely to develop applications
+that will run on the SWIM Platform.
+
+3.2. YOU MAY NOT DISTRIBUTE OR USE THE SWIM SDK or SWIM platform OR ANY PART
+THEREOF FOR COMMERCIAL PURPOSES.  YOU MAY NOT USE the SWIM SDK or SWIM platform
+to develop or operate a service (SAAS, PAAS, IAAS) IN ORDER TO DISTRIBUTE ANY
+APPLICATIONS OR SERVICES CREATED USING the SWIM SDK or SWIM platform, YOU MUST
+ENTER INTO A COMMERCIAL LICENSE AGREEMENT WITH SWIM AND PAY ANY APPLICABLE FEES.
+
+3.3. You may not use the SWIM SDK or SWIM platform to develop applications for
+other platforms or to develop another SDK.
+
+3.4. You may not use the SWIM SDK or SWIM platform for any purpose not
+expressly permitted by the License Agreement. You may not copy (except for
+backup purposes), modify, adapt, redistribute, decompile, reverse engineer,
+disassemble, or create derivative works of the SWIM SDK or SWIM platform or
+any part of the SWIM SDK or SWIM platform.
+
+3.5. You agree that SWIM owns all legal right, title and interest in and to the
+SWIM SDK and SWIM Platform, including any Intellectual Property Rights embodied
+therein. "Intellectual Property Rights" means any and all rights under patent
+law, copyright law, trade secret law, trademark law, and any and all other
+proprietary rights.  SWIM reserves all rights not expressly granted to you.
+SWIM is free to use, implement and incorporate in the SWIM SDK and SWIM
+Platform any suggestions, ideas, recommendations or feedback you provide,
+without payment of additional consideration to you.
+
+3.6. You agree that SWIM may provide updates or upgrades to the SWIM SDK and
+SWIM Platform from time to time and such updates and upgrades will be governed
+by this License Agreement unless SWIM makes access to such updates or upgrades
+contingent upon you entering into a new agreement.
+
+3.7. You agree that SWIM may stop (permanently or temporarily) providing the
+SWIM SDK or platform (or any features within the SWIM SDK or platform) to you
+or to users generally at SWIM’s sole discretion, without prior notice to you.
+
+3.8. You agree that you will not remove, obscure, or alter any proprietary
+rights notices (including copyright and trademark notices) that may be affixed
+to or contained within the SWIM SDK or SWIM platform.  Subject to the
+foregoing, nothing in this License Agreement gives you a right to use any of
+SWIM’s trade names, trademarks, service marks, logos, domain names, or other
+distinctive brand features.
+
+4. YOUR USE OF THE SWIM SDK and SWIM PLATFORM
+
+4.1. SWIM agrees that it obtains no right, title or interest from you under
+this License Agreement in or to any software applications that you develop
+using the SWIM SDK, including any Intellectual Property Rights embodied in
+those applications.
+
+4.2. You agree to use the SWIM SDK and SWIM Platform and write applications
+only for purposes that are permitted by (a) this License Agreement and (b) any
+applicable law, regulation or generally accepted practices or guidelines in the
+relevant jurisdictions (including any laws regarding the export of data or
+software to and from the United States or other relevant countries).
+
+4.3. You agree that you will not engage in any activity with the SWIM SDK or
+SWIM Platform, including the development of an application, that interferes
+with, disrupts, damages, or accesses in an unauthorized manner the servers,
+networks, or other properties or services of any third party.
+
+4.4. You agree that you are solely responsible for (and that SWIM has no
+responsibility to you or to any third party for) any data, content, or
+resources that you create, transmit or display through SWIM Platform, and for
+the consequences of your actions (including any loss or damage which SWIM may
+suffer) by doing so.
+
+4.5. You agree that you are solely responsible for (and that SWIM has no
+responsibility to you or to any third party for) any breach of your obligations
+under the License Agreement, any applicable third party contract or Terms of
+Service, or any applicable law or regulation, and for the consequences
+(including any loss or damage which SWIM or any third party may suffer) of any
+such breach.
+
+5. YOUR DEVELOPER CREDENTIALS
+
+5.1. You agree that you are responsible for maintaining the confidentiality of
+any developer credentials that may be issued to you by SWIM or which you may
+choose yourself and that you will be solely responsible for all applications
+that are developed under your developer credentials.
+
+6. PRIVACY AND INFORMATION
+
+6.1. You agree that if you use the SWIM SDK or SWIM platform to develop
+applications for other users, you will protect the privacy and legal rights of
+those users, prominently display a privacy policy that describes to your users
+the information that is collected by you and your application and how such
+information is used and shared. You will maintain and process all user data in
+accordance with your privacy policy and all applicable laws and regulations in
+any countries in which your application is distributed or used.
+
+6.2. SWIM may collect certain usage statistics from the SWIM SDK and SWIM
+PLATFORM, including, but not limited to, a unique identifier, associated IP
+address, version number of the SWIM SDK and information on which tools and/or
+services in the SWIM SDK and SWIM platform are being used and how they are
+being used.  This information will be collected and used in accordance with
+the SWIM Privacy Policy available at  https://www.swim.ai/privacy-policy
+
+7. Third Party Applications
+
+7.1. If you use the SWIM SDK or SWIM Platform to run applications developed by
+a third party or that access data, content or resources provided by a third
+party, you agree that SWIM is not responsible for those applications, data,
+content, or resources. You understand that all data, content or resources which
+you may access through such third-party applications are the sole
+responsibility of the person from which they originated and that SWIM is not
+liable for any loss or damage that you may experience as a result of the use or
+access of any of those third-party applications, data, content, or resources.
+
+7.2. You should be aware the data, content, and resources presented to you
+through such a third-party application may be protected by intellectual
+property rights which are owned by the providers (or by other persons or
+companies on their behalf). You may not modify, rent, lease, loan, sell,
+distribute or create derivative works based on these data, content, or
+resources (either in whole or in part) unless you have been specifically
+given permission to do so by the relevant owners.
+
+7.3. You acknowledge that your use of such third-party applications, data,
+content, or resources may be subject to separate terms between you and the
+relevant third party. In that case, the License Agreement does not affect
+your legal relationship with these third parties.
+
+8. Using SWIM APIs
+
+8.1 SWIM Data and GUI APIs
+
+8.1.1. If you use any API to retrieve data from SWIM or send data to SWIM APIs,
+you acknowledge that the data may be protected by intellectual property rights
+which are owned by SWIM or those parties that provide the data (or by other
+persons or companies on their behalf). Your use of any such API may be subject
+to additional Terms of Service. You may not modify, rent, lease, loan, sell,
+distribute or create derivative works based on this data (either in whole or
+in part) unless allowed by the relevant Terms of Service.
+
+9. TERM AND TERMINATION
+
+9.1. This Agreement is effective until terminated by SWIM or you as described
+below.
+
+9.2. You may terminate this Agreement by notifying SWIM that you have stopped
+all use of the SWIM SDK and SWIM platform.
+
+9.3. SWIM may terminate this Agreement at any time if (a) you have breached any
+provision of this Agreement; (b) SWIM is legally required to do so; or (c) SWIM
+decides not to provide the SWIM SDK, SWIM platform or services related to the
+SWIM SDK and SWIM platform to users in the country in which you reside.
+
+9.4. Upon any termination of this Agreement you will immediately: (a) cease all
+use of the SWIM SDK and SWIM platform; and (b) destroy all copies of the SWIM
+SDK and SWIM platform and portions thereof in your possession or control.  The
+provisions of Sections 1, 5 through 9, 10, and 11 through 15 inclusive of this
+Agreement will survive any termination or expiration of this Agreement.
+
+10. NO WARRANTIES
+
+The SWIM SDK and SWIM platform is provided to you on an “AS IS” basis and
+without warranty of any kind.  SWIM DISCLAIMS ALL WARRANTIES, WHETHER
+STATUTORY, EXPRESS OR IMPLIED, RELATING TO THE SWIM SDK AND SWIM PLATFORM,
+INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. YOU AGREE THAT YOUR USE
+OF THE SWIM SDK AND SWIM PLATFORM IS AT YOUR OWN DISCRETION AND RISK AND YOU
+ARE SOLELY RESPONSIBLE FOR YOUR INSTALLATION AND USE OF THE SWIM SDK AND SWIM
+PLATFORM, ANY DAMAGE TO YOUR COMPUTER SYSTEM OR OTHER DEVICE AND ANY LOSS OF
+DATA THAT RESULTS FROM SUCH INSTALLATION AND USE.
+
+11. SWIM LIMITATION OF LIABILITY
+
+11.1. TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL SWIM BE LIABLE
+TO YOU OR ANY THIRD PARTIES FOR ANY LOSS OF USE, LOST PROFITS, INTERRUPTION OF
+BUSINESS, OR INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OF ANY KIND
+ARISING OUT OF YOUR USE OF THE SWIM SDK AND PLATFORM, REGARDLESS OF THE FORM OF
+ACTION, WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT PRODUCT
+LIABILITY OR OTHERWISE, EVEN IF SWIM HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+
+11.2. IN NO EVENT WILL SWIM’S AGGREGATE LIABILITY TO YOU UNDER THIS AGREEMENT
+EXCEED ONE HUNDRED DOLLARS (USD $100).
+
+11.3. You and SWIM agree that the foregoing warranty disclaimer and limitation
+of liability fairly allocate the risks in the Agreement between the parties,
+that such allocation is an essential element of the basis of the bargain
+between the parties, and that SWIM would not have entered this Agreement
+without these limitations.
+
+12. YOUR INDEMNIFICATION OF SWIM
+
+You agree to defend, indemnify and hold harmless SWIM, its affiliates and their
+respective directors, officers, employees, agents and representatives from and
+against any and all claims, actions, suits or proceedings, as well as any and
+all losses, liabilities, damages, costs and expenses (including reasonable
+attorneys' fees) arising out of or allegedly based (in whole or in part) on:
+(a) your use of the SWIM SDK or SWIM PLATFORM, (b) any violation by you of any
+applicable law or regulation, or (c) any non-compliance by you with the terms
+of this License Agreement (including, without limitation, your non-compliance
+with Section 11).
+
+13. Changes to the License Agreement
+
+13.1. SWIM may make changes to the License Agreement as it distributes new
+versions of the SDK or Platform. When these changes are made, SWIM will make a
+new version of the License Agreement available on the website where the SDK or
+Platform elements are made available.
+
+14. RESTRICTION ON EXPORT
+
+You acknowledge and agree that you will not import, export, or re-export,
+directly or indirectly, any commodity (including, without limitation, the SWIM
+SDK, SWIM Platform or related information) to any country in violation of the
+laws and regulations of any applicable jurisdiction. This restriction expressly
+includes, without limitation, the export regulations of the United States, and
+the import and export restrictions of the various European countries.
+
+15. GENERAL TERMS
+
+This License Agreement is the entire legal agreement between you and SWIM
+regarding your use of the SWIM SDK and SWIM platform, and may only be modified,
+or any rights under it waived, by a written document executed by both parties.
+Nothing in this License Agreement shall not be construed to create a
+partnership, joint venture, employment or agency relationship between you and
+SWIM.  In the event that any of the provisions of this License Agreement are
+held by to be unenforceable by a court or arbitrator, the remaining portions
+of this License Agreement will remain in full force and effect.  EXPORT
+RESTRICTIONS. THE SDK and CORE RUNTIME ARE SUBJECT TO UNITED STATES EXPORT
+LAWS AND REGULATIONS. YOU MUST COMPLY WITH ALL DOMESTIC AND INTERNATIONAL
+EXPORT LAWS AND REGULATIONS THAT APPLY TO THE SDK and runtime. THESE LAWS
+INCLUDE RESTRICTIONS ON DESTINATIONS, END USERS AND END USE. The rights granted
+in this License Agreement may not be assigned or transferred by you without the
+prior written approval of SWIM.  This License Agreement shall be governed by
+the laws of the State of California without regard to its conflict of laws
+provisions.  You and SWIM agree to submit to the exclusive jurisdiction of the
+courts located within the county of Santa Clara, California to resolve any
+legal matter arising from this License Agreement.  Notwithstanding this, you
+agree that SWIM shall still be allowed to apply for injunctive remedies (or an
+equivalent type of urgent legal relief) in any jurisdiction in the world.

@@ -25,6 +25,7 @@ const main = {
   plugins: [
     nodeResolve({customResolveOptions: {paths: ["../../swim-core-js",
                                                 "../../swim-ui-js",
+                                                "../../swim-ux-js",
                                                 "../../swim-vis-js",
                                                 "../../swim-web-js"]}}),
     sourcemaps(),

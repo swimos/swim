@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html style="height: 100vh;">
+  <head>
+    <title>Swim Navigation</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  </head>
+  <body style="position: fixed; width: 100vw; height: 100vh; margin: 0; overflow: hidden;">
+    <div id="app" style="position: relative; height: 100vh;">
+    </div>
+    <script src="../swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
+    <script>
+
+const app = new swim.HtmlAppView(document.getElementById("app"));
+
+const nav = app.append(swim.NavigationView);
+nav.navigationBar.height(4);
+
+    </script>
+  </body>
+</html>

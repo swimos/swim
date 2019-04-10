@@ -230,6 +230,7 @@ const core = [
     id: "core",
     name: "@swim/core",
     path: "swim-core-js/@swim/core",
+    umbrella: true,
     targets: [
       {
         id: "main",
@@ -455,10 +456,37 @@ const ui = [
     id: "ui",
     name: "@swim/ui",
     path: "swim-ui-js/@swim/ui",
+    umbrella: true,
     targets: [
       {
         id: "main",
         deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "gesture"],
+      },
+    ],
+  },
+];
+
+const ux = [
+  {
+    id: "navigation",
+    name: "@swim/navigation",
+    path: "swim-ux-js/@swim/navigation",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset"],
+      },
+    ],
+  },
+  {
+    id: "ux",
+    name: "@swim/ux",
+    path: "swim-ux-js/@swim/ux",
+    umbrella: true,
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "navigation"],
       },
     ],
   },
@@ -524,6 +552,7 @@ const vis = [
     id: "vis",
     name: "@swim/vis",
     path: "swim-vis-js/@swim/vis",
+    umbrella: true,
     targets: [
       {
         id: "main",
@@ -560,6 +589,7 @@ const web = [
     id: "web",
     name: "@swim/web",
     path: "swim-web-js/@swim/web",
+    umbrella: true,
     targets: [
       {
         id: "main",
@@ -573,10 +603,11 @@ const platform = [
   {
     id: "platform",
     name: "@swim/platform",
+    umbrella: true,
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri", "warp", "client", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "gesture", "gauge", "pie", "chart", "map", "mapbox", "site", "app"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri", "warp", "client", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "gesture", "navigation", "gauge", "pie", "chart", "map", "mapbox", "site", "app"],
       },
     ],
   },
@@ -584,5 +615,7 @@ const platform = [
 
 export default {
   version: "3.9.0",
-  projects: core.concat(ui).concat(vis).concat(web).concat(platform),
+  projects: core.concat(ui).concat(ux).concat(vis).concat(web).concat(platform),
+  umbrella: true,
+  gaID: "UA-79441805-2",
 };

@@ -37,6 +37,9 @@
     {"path": "./swim-ui-js/@swim/gesture"},
     {"path": "./swim-ui-js/@swim/ui"},
 
+    {"path": "./swim-ux-js/@swim/navigation"},
+    {"path": "./swim-ux-js/@swim/ux"},
+
     {"path": "./swim-vis-js/@swim/gauge"},
     {"path": "./swim-vis-js/@swim/pie"},
     {"path": "./swim-vis-js/@swim/chart"},
