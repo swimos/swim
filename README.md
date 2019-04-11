@@ -1,4 +1,6 @@
-# Swim
+# Swim &ensp; ![version](https://img.shields.io/github/tag/swimOS/swim.svg?label=version) [![javadoc](https://img.shields.io/badge/doc-JavaDoc-blue.svg)](http://docs.swim.ai/java/latest) [![typedoc](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest) [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community) [![license](https://img.shields.io/github/license/swimOS/swim.svg)](https://github.com/swimos/swim/blob/master/LICENSE)
+
+<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
 Swim implements a complete, self-contained, distributed application stack
 in an embeddable software library. To develop server-side Swim apps, add
@@ -6,7 +8,7 @@ the `swim-loader` library to your Java project. To write a JavaScript client
 application, install the `@swim/core` library from npm. To build a web
 application, npm install the `@swim/ui` and `@swim/ux` libraries.
 
-Visit [developer.swim.ai](http://developer.swim.ai) to learn more.
+Visit [swim.dev](https://swim.dev) to learn more.
 
 ## Concepts
 
