@@ -51,8 +51,8 @@ public class MapLaneModel extends LaneModel<MapLaneView<?, ?>, MapLaneUplink> {
 
   protected void openStore() {
     this.data = this.laneContext.store().mapData(laneUri().toString())
-        .isResident(isResident())
-        .isTransient(isTransient());
+        .isTransient(isTransient())
+        .isResident(isResident());
   }
 
   @Override
@@ -223,15 +223,19 @@ public class MapLaneModel extends LaneModel<MapLaneView<?, ?>, MapLaneUplink> {
   }
 
   public void drop(MapLaneView<?, ?> view, int lower) {
-    final MapLaneRelayDrop relay = new MapLaneRelayDrop(this, null, lower);
-    relay.stage = stage();
-    relay.run();
+    if (lower > 0) {
+      final MapLaneRelayDrop relay = new MapLaneRelayDrop(this, null, lower);
+      relay.stage = stage();
+      relay.run();
+    }
   }
 
   public void take(MapLaneView<?, ?> view, int upper) {
-    final MapLaneRelayTake relay = new MapLaneRelayTake(this, null, upper);
-    relay.stage = stage();
-    relay.run();
+    if (upper > 0) {
+      final MapLaneRelayTake relay = new MapLaneRelayTake(this, null, upper);
+      relay.stage = stage();
+      relay.run();
+    }
   }
 
   public void clear(MapLaneView<?, ?> view) {

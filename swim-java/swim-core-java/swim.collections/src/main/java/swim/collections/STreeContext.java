@@ -19,7 +19,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public abstract class STreeContext<T> {
   @SuppressWarnings("unchecked")
   protected Object identify(T value) {
-    return ThreadLocalRandom.current().nextLong();
+    final byte[] bytes = new byte[6];
+    ThreadLocalRandom.current().nextBytes(bytes);
+    return bytes;
   }
 
   @SuppressWarnings("unchecked")

@@ -62,8 +62,8 @@ public class JoinValueLaneModel extends LaneModel<JoinValueLaneView<?, ?>, JoinV
 
   protected void openStore() {
     this.data = this.laneContext.store().mapData(laneUri().toString())
-        .isResident(isResident())
-        .isTransient(isTransient());
+        .isTransient(isTransient())
+        .isResident(isResident());
     openDownlinks();
   }
 

@@ -58,11 +58,11 @@ public class JoinMapLaneModel extends LaneModel<JoinMapLaneView<?, ?, ?>, JoinMa
 
   protected void openStore() {
     this.data = this.laneContext.store().mapData(laneUri().toString())
-        .isResident(isResident())
-        .isTransient(isTransient());
+        .isTransient(isTransient())
+        .isResident(isResident());
     this.linkData = this.laneContext.store().mapData(Record.create(1).attr("join", laneUri().toString()))
-        .isResident(isResident())
-        .isTransient(isTransient());
+        .isTransient(isTransient())
+        .isResident(isResident());
   }
 
   protected void openDownlinks() {

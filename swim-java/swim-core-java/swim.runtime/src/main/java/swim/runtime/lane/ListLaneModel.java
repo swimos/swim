@@ -14,12 +14,15 @@
 
 package swim.runtime.lane;
 
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import swim.api.Link;
 import swim.api.data.ListData;
+import swim.collections.FingerTrieSeq;
 import swim.runtime.LaneContext;
 import swim.runtime.LinkBinding;
-import swim.structure.Attr;
+import swim.runtime.uplink.ListOperation;
 import swim.structure.Form;
 import swim.structure.Record;
 import swim.structure.Value;
@@ -50,8 +53,8 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
 
   protected void openStore() {
     this.data = this.laneContext.store().listData(laneUri().toString())
-        .isResident(isResident())
-        .isTransient(isTransient());
+        .isTransient(isTransient())
+        .isResident(isResident());
   }
 
   @Override
@@ -68,7 +71,7 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
       final int index = header.get("index").intValue(-1);
       if (index > -1) {
         final Object key;
-        if (header.get("key").isDefined()) {
+        if (header.get("key").isDistinct()) {
           key = header.get("key");
         } else {
           key = null;
@@ -82,7 +85,7 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
       final int toIindex = header.get("to").intValue(-1);
       if (fromIndex > -1 && toIindex > -1) {
         final Object key;
-        if (header.get("key").isDefined()) {
+        if (header.get("key").isDistinct()) {
           key = header.get("key");
         } else {
           key = null;
@@ -94,7 +97,7 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
       final int index = header.get("index").intValue(-1);
       if (index > -1) {
         final Object key;
-        if (header.get("key").isDefined()) {
+        if (header.get("key").isDistinct()) {
           key = header.get("key");
         } else {
           key = null;
@@ -112,6 +115,16 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
     } else if ("clear".equals(tag)) {
       new ListLaneRelayClear(this, null, message).run();
     }
+  }
+
+  protected void cueDownKey(Value key, ListOperation listOperation) {
+    FingerTrieSeq<ListLaneUplink> uplinks;
+    do {
+      uplinks = this.uplinks;
+      for (int i = 0, n = uplinks.size(); i < n; i += 1) {
+        uplinks.get(i).cueDownKey(key, listOperation);
+      }
+    } while (uplinks != this.uplinks);
   }
 
   public final boolean isResident() {
@@ -186,10 +199,6 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
     return this;
   }
 
-  public Value get(int index) {
-    return this.data.get(index);
-  }
-
   @SuppressWarnings("unchecked")
   public <V> boolean add(ListLaneView<V> view, int index, V newObject) {
     return add(view, index, newObject, null);
@@ -249,35 +258,49 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
   @SuppressWarnings("unchecked")
   public <V> V remove(ListLaneView<V> view, int index, Object key) {
     final Form<V> valueForm = view.valueForm;
-    final ListLaneRelayRemove relay = new ListLaneRelayRemove(this, null, index, key);
-    relay.valueForm = (Form<Object>) valueForm;
-    relay.stage = stage();
-    relay.run();
-    if (relay.valueForm != valueForm && valueForm != null) {
-      relay.oldObject = valueForm.cast(relay.oldValue);
-      if (relay.oldObject == null) {
-        relay.oldObject = valueForm.unit();
+    final Map.Entry<Object, Value> entry = this.data.getEntry(index, key);
+    if (entry != null) {
+      final Object actualKey = key == null ? entry.getKey() : key;
+      final ListLaneRelayRemove relay = new ListLaneRelayRemove(this, null, index, actualKey);
+      relay.valueForm = (Form<Object>) valueForm;
+      relay.stage = stage();
+      relay.run();
+      if (relay.valueForm != valueForm && valueForm != null) {
+        relay.oldObject = valueForm.cast(relay.oldValue);
+        if (relay.oldObject == null) {
+          relay.oldObject = valueForm.unit();
+        }
       }
+      return (V) relay.oldObject;
+    } else {
+      return null;
     }
-    return (V) relay.oldObject;
   }
 
   public void drop(ListLaneView<?> view, int lower) {
-    final ListLaneRelayDrop relay = new ListLaneRelayDrop(this, null, lower);
-    relay.stage = stage();
-    relay.run();
+    if (lower > 0) {
+      final ListLaneRelayDrop relay = new ListLaneRelayDrop(this, null, lower);
+      relay.stage = stage();
+      relay.run();
+    }
   }
 
   public void take(ListLaneView<?> view, int upper) {
-    final ListLaneRelayTake relay = new ListLaneRelayTake(this, null, upper);
-    relay.stage = stage();
-    relay.run();
+    if (upper > 0) {
+      final ListLaneRelayTake relay = new ListLaneRelayTake(this, null, upper);
+      relay.stage = stage();
+      relay.run();
+    }
   }
 
   public void clear(ListLaneView<?> view) {
     final ListLaneRelayClear relay = new ListLaneRelayClear(this, null);
     relay.stage = stage();
     relay.run();
+  }
+
+  public ListIterator<Map.Entry<Object, Value>> iterator() {
+    return this.data.entryIterator();
   }
 
   static final int RESIDENT = 1 << 0;
@@ -324,6 +347,11 @@ final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>
         entry = this.model.data.getEntry(this.index, this.key);
       }
       if (entry == null) {
+        if (this.key == null) {
+          final byte[] bytes = new byte[6];
+          ThreadLocalRandom.current().nextBytes(bytes);
+          this.key = Value.fromObject(bytes);
+        }
         this.model.data.add(this.index, this.newValue, this.key);
       } else {
         this.oldValue = entry.getValue();
@@ -399,7 +427,7 @@ final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>
   @Override
   void done() {
     final Record header = Record.create(2).slot("key", Value.fromObject(this.key)).slot("index", this.index);
-    this.model.sendDown(Attr.of("update", header).concat(this.newValue));
+    this.model.cueDownKey(header, ListOperation.UPDATE);
   }
 }
 
@@ -450,7 +478,7 @@ final class ListLaneRelayMove extends LaneRelay<ListLaneModel, ListLaneView<?>> 
       final Form<Object> valueForm = (Form<Object>) view.valueForm;
       if (this.valueForm != valueForm && valueForm != null) {
         this.valueForm = valueForm;
-        this.value = this.model.data.get(this.fromIndex, this.key); // TODO
+        this.value = this.model.data.get(this.fromIndex, this.key);
         this.object = valueForm.cast(this.value);
         if (this.object == null) {
           this.object = valueForm.unit();
@@ -479,7 +507,7 @@ final class ListLaneRelayMove extends LaneRelay<ListLaneModel, ListLaneView<?>> 
   void done() {
     final Record header = Record.create(3).slot("key", Value.fromObject(this.key))
                                           .slot("from", this.fromIndex).slot("to", this.toIndex);
-    model.sendDown(Record.create(1).attr("move", header));
+    this.model.cueDownKey(header, ListOperation.MOVE);
   }
 }
 
@@ -567,8 +595,8 @@ final class ListLaneRelayRemove extends LaneRelay<ListLaneModel, ListLaneView<?>
 
   @Override
   void done() {
-    this.model.sendDown(Record.create(1).attr("remove",
-        Record.create(2).slot("key", Value.fromObject(this.key)).slot("index", this.index)));
+    final Value header = Record.create(2).slot("key", Value.fromObject(this.key)).slot("index", this.index);
+    this.model.cueDownKey(header, ListOperation.REMOVE);
   }
 }
 

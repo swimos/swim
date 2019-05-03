@@ -18,24 +18,25 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.collections.HashTrieSet;
+import swim.collections.HashTrieMap;
 import swim.runtime.LinkBinding;
 import swim.structure.Record;
 import swim.structure.Value;
 
-public abstract class PartialUplinkModem extends UplinkModem {
+public abstract class SeqUplinkModem extends UplinkModem {
   final ConcurrentLinkedQueue<Value> downQueue;
 
-  volatile Iterator<Map.Entry<Value, Value>> syncQueue;
+  protected volatile Iterator<Map.Entry<Value, Value>> syncQueue;
 
-  volatile HashTrieSet<Value> keyQueue;
+  protected volatile HashTrieMap<Value, ListOperation> keyQueue;
 
   volatile Value lastKey;
+  volatile int lastSyncIndex;
 
-  public PartialUplinkModem(LinkBinding linkBinding) {
+  public SeqUplinkModem(LinkBinding linkBinding) {
     super(linkBinding);
     this.downQueue = new ConcurrentLinkedQueue<Value>();
-    this.keyQueue = HashTrieSet.empty();
+    this.keyQueue = HashTrieMap.empty();
   }
 
   @Override
@@ -52,20 +53,19 @@ public abstract class PartialUplinkModem extends UplinkModem {
     this.syncQueue = syncQueue;
   }
 
-  public void cueDownKey(Value key) {
-    HashTrieSet<Value> oldKeyQueue;
-    HashTrieSet<Value> newKeyQueue;
+  public void cueDownKey(Value key, ListOperation listOperation) {
+    HashTrieMap<Value, ListOperation> oldKeyQueue;
+    HashTrieMap<Value, ListOperation> newKeyQueue;
     do {
       oldKeyQueue = this.keyQueue;
-      newKeyQueue = oldKeyQueue.added(key);
+      newKeyQueue = oldKeyQueue.updated(key, listOperation);
     } while (oldKeyQueue != newKeyQueue && !KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue));
     if (oldKeyQueue != newKeyQueue) {
       cueDown();
     }
   }
 
-
-  protected abstract Value nextDownKey(Value key);
+  protected abstract Value nextDownKey(Value key, ListOperation listOperation);
 
   @Override
   protected Value nextDownQueue() {
@@ -73,9 +73,14 @@ public abstract class PartialUplinkModem extends UplinkModem {
     if (syncQueue != null) {
       if (syncQueue.hasNext()) {
         final Map.Entry<Value, Value> entry = syncQueue.next();
-        return Record.of().attr("update", Record.of().slot("key", entry.getKey())).concat(entry.getValue());
+        final Record header = Record.of().attr("update",
+              Record.of().slot("key", Record.fromObject(entry.getKey())).slot("index", lastSyncIndex))
+              .concat(entry.getValue());
+        lastSyncIndex += 1;
+        return header;
       } else {
         this.syncQueue = null;
+        lastSyncIndex = 0;
         return null;
       }
     }
@@ -84,12 +89,14 @@ public abstract class PartialUplinkModem extends UplinkModem {
 
   @Override
   protected Value nextDownCue() {
-    HashTrieSet<Value> oldKeyQueue;
-    HashTrieSet<Value> newKeyQueue;
+    HashTrieMap<Value, ListOperation> oldKeyQueue;
+    HashTrieMap<Value, ListOperation> newKeyQueue;
     Value key;
+    ListOperation listOperation;
     do {
       oldKeyQueue = this.keyQueue;
-      key = oldKeyQueue.next(this.lastKey);
+      key = oldKeyQueue.nextKey(this.lastKey);
+      listOperation = oldKeyQueue.get(key);
       newKeyQueue = oldKeyQueue.removed(key);
     } while (oldKeyQueue != newKeyQueue && !KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue));
     if (key != null) {
@@ -102,13 +109,13 @@ public abstract class PartialUplinkModem extends UplinkModem {
           newStatus = oldStatus | CUED_DOWN;
         } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
       }
-      return nextDownKey(key);
+      return nextDownKey(key, listOperation);
     } else {
       return null;
     }
   }
 
   @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<PartialUplinkModem, HashTrieSet<Value>> KEY_QUEUE =
-      AtomicReferenceFieldUpdater.newUpdater(PartialUplinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
+  static final AtomicReferenceFieldUpdater<SeqUplinkModem, HashTrieMap<Value, ListOperation>> KEY_QUEUE =
+      AtomicReferenceFieldUpdater.newUpdater(SeqUplinkModem.class, (Class<HashTrieMap<Value, ListOperation>>) (Class<?>) HashTrieMap.class, "keyQueue");
 }

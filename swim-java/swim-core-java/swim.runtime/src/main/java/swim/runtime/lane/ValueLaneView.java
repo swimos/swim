@@ -67,7 +67,7 @@ public class ValueLaneView<V> extends LaneView implements ValueLane<V> {
   }
 
   public ValueLaneView(AgentContext agentContext, Form<V> valueForm) {
-    this(agentContext, valueForm, RESIDENT, null);
+    this(agentContext, valueForm, 0, null);
   }
 
   @Override

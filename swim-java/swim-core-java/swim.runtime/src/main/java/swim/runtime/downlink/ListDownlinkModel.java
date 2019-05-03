@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import swim.collections.STreeList;
 import swim.structure.Attr;
 import swim.structure.Form;
@@ -26,7 +27,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 import swim.warp.EventMessage;
 
-public class ListDownlinkModel extends SupplyDownlinkModem<ListDownlinkView<?>> {
+public class ListDownlinkModel extends PartialDownlinkModem<ListDownlinkView<?>> {
   protected int flags;
   protected final STreeList<Value> state;
 
@@ -69,8 +70,8 @@ public class ListDownlinkModel extends SupplyDownlinkModem<ListDownlinkView<?>> 
       final int index = header.get("index").intValue(-1);
       if (index > -1) {
         final Object key;
-        if (header.get("key").isDefined()) {
-          key = header.get("key").longValue(-1L);
+        if (header.get("key").isDistinct()) {
+          key = header.get("key");
         } else {
           key = null;
         }
@@ -83,8 +84,8 @@ public class ListDownlinkModel extends SupplyDownlinkModem<ListDownlinkView<?>> 
       final int toIndex = header.get("to").intValue(-1);
       if (fromIndex > -1 && toIndex > -1) {
         final Object key;
-        if (header.get("key").isDefined()) {
-          key = header.get("key").longValue(-1L);
+        if (header.get("key").isDistinct()) {
+          key = header.get("key");
         } else {
           key = null;
         }
@@ -95,8 +96,8 @@ public class ListDownlinkModel extends SupplyDownlinkModem<ListDownlinkView<?>> 
       final int index = header.get("index").intValue(-1);
       if (index > -1) {
         final Object key;
-        if (header.get("key").isDefined()) {
-          key = header.get("key").longValue(-1L);
+        if (header.get("key").isDistinct()) {
+          key = header.get("key");
         } else {
           key = null;
         }
@@ -112,6 +113,19 @@ public class ListDownlinkModel extends SupplyDownlinkModem<ListDownlinkView<?>> 
       new ListDownlinkRelayTake(this, message, upper).run();
     } else if ("clear".equals(tag)) {
       new ListDownlinkRelayClear(this, message).run();
+    }
+  }
+
+  @Override
+  protected Value nextUpKey(Value key) {
+    final Value listKey = key.get("key");
+    final int index = key.get("index").intValue();
+    final Value value = this.state.get(index, listKey);
+    if (value != null) {
+      final Record header = Record.create(2).slot("key", listKey).slot("index", index);
+      return Attr.of("update", header).concat(value);
+    } else {
+      return null;
     }
   }
 
@@ -255,18 +269,24 @@ public class ListDownlinkModel extends SupplyDownlinkModem<ListDownlinkView<?>> 
   @SuppressWarnings("unchecked")
   public <V> V remove(ListDownlinkView<V> view, int index, Object key) {
     final Form<V> valueForm = view.valueForm;
-    final ListDownlinkRelayRemove relay = new ListDownlinkRelayRemove(this, index, key);
-    relay.valueForm = (Form<Object>) valueForm;
-    relay.stage = view.stage;
-    relay.run();
-    if (relay.isDone()) {
-      if (relay.valueForm != valueForm && valueForm != null) {
-        relay.oldObject = valueForm.cast(relay.oldValue);
-        if (relay.oldObject == null) {
-          relay.oldObject = valueForm.unit();
+    final Map.Entry<Object, Value> entry = getEntry(index, key);
+    if (entry != null) {
+      final Object actualKey = key == null ? entry.getKey() : key;
+      final ListDownlinkRelayRemove relay = new ListDownlinkRelayRemove(this, index, actualKey);
+      relay.valueForm = (Form<Object>) valueForm;
+      relay.stage = view.stage;
+      relay.run();
+      if (relay.isDone()) {
+        if (relay.valueForm != valueForm && valueForm != null) {
+          relay.oldObject = valueForm.cast(relay.oldValue);
+          if (relay.oldObject == null) {
+            relay.oldObject = valueForm.unit();
+          }
         }
+        return (V) relay.oldObject;
+      } else {
+        return null;
       }
-      return (V) relay.oldObject;
     } else {
       return null;
     }
@@ -326,18 +346,19 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
   void beginPhase(int phase) {
     if (phase == 2) {
       if (this.model.isStateful()) {
-        Map.Entry<Object, Value> entry;
+        final Map.Entry<Object, Value> entry;
         if (this.index < this.model.state.size()) {
           entry = this.model.state.getEntry(this.index, this.key);
         } else {
           entry = null;
         }
         if (entry == null) {
-          this.model.state.add(this.index, this.newValue, this.key);
-          if (key == null) {
-            entry = this.model.state.getEntry(this.index);
-            key = entry.getKey();
+          if (this.key == null) {
+            final byte[] bytes = new byte[6];
+            ThreadLocalRandom.current().nextBytes(bytes);
+            this.key = Value.fromObject(bytes);
           }
+          this.model.state.add(this.index, this.newValue, this.key);
         } else {
           this.oldValue = entry.getValue();
           this.key = entry.getKey();
@@ -372,19 +393,19 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
         this.oldObject = valueForm.unit();
       }
       if (preemptive) {
-        this.newObject = ((ListDownlinkView<Object>) view).downlinkWillUpdate(this.index, this.oldObject);
+        this.newObject = ((ListDownlinkView<Object>) view).downlinkWillUpdate(this.index, this.newObject);
       }
-      final Map.Entry<Boolean, Object> result = ((ListDownlinkView<Object>) view).dispatchWillUpdate(this.index, this.oldObject, preemptive);
-      this.newObject = result.getValue();
-      if (this.oldObject != this.newObject) {
-        this.oldObject = this.newObject;
+      final Map.Entry<Boolean, Object> result = ((ListDownlinkView<Object>) view).dispatchWillUpdate(this.index, this.newObject, preemptive);
+      if (this.newObject != result.getValue()) {
+        this.oldObject = this.newObject; //FIXME: Is this right?
+        this.newObject = result.getValue();
         this.newValue = valueForm.mold(this.newObject).toValue();
       }
       return result.getKey();
     } else if (phase == 2) {
       view.downlinkDidUpdateValue(this.index, this.newValue, this.oldValue);
       final Form<Object> valueForm = (Form<Object>) view.valueForm;
-      if (this.valueForm != valueForm && valueForm != null) {
+      if (valueForm != null) {
         this.valueForm = valueForm;
         this.oldObject = valueForm.cast(this.oldValue);
         if (this.oldObject == null) {
@@ -415,7 +436,7 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
       this.model.cueDown();
     } else {
       final Record header = Record.create(2).slot("key", Value.fromObject(this.key)).slot("index", this.index);
-      this.model.pushUp(Attr.of("update", header).concat(this.newValue));
+      this.model.cueUpKey(header);
     }
   }
 }

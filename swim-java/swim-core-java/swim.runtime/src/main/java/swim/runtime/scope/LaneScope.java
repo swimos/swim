@@ -23,6 +23,7 @@ import swim.api.ref.LaneRef;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
 import swim.runtime.downlink.EventDownlinkView;
+import swim.runtime.downlink.ListDownlinkView;
 import swim.runtime.downlink.MapDownlinkView;
 import swim.runtime.downlink.ValueDownlinkView;
 import swim.structure.Form;
@@ -72,7 +73,8 @@ public class LaneScope extends Scope implements LaneRef {
 
   @Override
   public ListDownlink<Value> downlinkList() {
-    return null; // TODO
+    return new ListDownlinkView<Value>(this, stage, this.meshUri, this.hostUri,
+        this.nodeUri, this.laneUri, 0.0f, 0.0f, Value.absent(), Form.forValue());
   }
 
   @Override

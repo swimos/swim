@@ -310,6 +310,7 @@ public abstract class LaneModel<View extends LaneView, U extends UplinkModem> ex
   @SuppressWarnings("unchecked")
   protected void cueDown() {
     FingerTrieSeq<U> uplinks;
+    FingerTrieSeq<Value> closedLinks = FingerTrieSeq.empty();
     do {
       uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) this.uplinks;
       for (int i = 0, n = uplinks.size(); i < n; i += 1) {
@@ -317,15 +318,20 @@ public abstract class LaneModel<View extends LaneView, U extends UplinkModem> ex
         if (u.isConnected()) {
           u.cueDown();
         } else {
-          closeUplink(u.linkKey());
+          closedLinks = closedLinks.appended(u.linkKey());
         }
       }
     } while (uplinks != this.uplinks);
+
+    for (Value linkKey: closedLinks) {
+      closeUplink(linkKey);
+    }
   }
 
   @SuppressWarnings("unchecked")
   protected void sendDown(Value body) {
     FingerTrieSeq<U> uplinks;
+    FingerTrieSeq<Value> closedLinks = FingerTrieSeq.empty();
     do {
       uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) this.uplinks;
       for (int i = 0, n = uplinks.size(); i < n; i += 1) {
@@ -333,10 +339,14 @@ public abstract class LaneModel<View extends LaneView, U extends UplinkModem> ex
         if (u.isConnected()) {
           u.sendDown(body);
         } else {
-          closeUplink(u.linkKey());
+          closedLinks = closedLinks.appended(u.linkKey());
         }
       }
     } while (uplinks != this.uplinks);
+
+    for (Value linkKey: closedLinks) {
+      closeUplink(linkKey);
+    }
   }
 
   @Override

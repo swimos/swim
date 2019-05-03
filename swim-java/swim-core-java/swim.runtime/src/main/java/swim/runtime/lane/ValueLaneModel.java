@@ -50,8 +50,8 @@ public class ValueLaneModel extends LaneModel<ValueLaneView<?>, ValueLaneUplink>
 
   protected void openStore() {
     this.data = this.laneContext.store().valueData(laneUri().toString())
-        .isResident(isResident())
-        .isTransient(isTransient());
+        .isTransient(isTransient())
+        .isResident(isResident());
     this.key = Text.from(this.laneContext.laneUri().toString());
   }
 

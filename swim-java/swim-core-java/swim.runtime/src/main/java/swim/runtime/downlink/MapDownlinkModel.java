@@ -245,14 +245,18 @@ public class MapDownlinkModel extends PartialDownlinkModem<MapDownlinkView<?, ?>
   }
 
   public void drop(MapDownlinkView<?, ?> view, int lower) {
-    pushUp(Record.create(1).attr("drop", lower)); // TODO: drop top key
+    if (lower > 0) {
+      pushUp(Record.create(1).attr("drop", lower)); // TODO: drop top key
+    }
     //final MapDownlinkRelayDrop relay = new MapDownlinkRelayDrop(this, lower);
     //relay.stage = view.stage;
     //relay.run();
   }
 
   public void take(MapDownlinkView<?, ?> view, int upper) {
-    pushUp(Record.create(1).attr("take", upper)); // TODO: take to key
+    if (upper > 0) {
+      pushUp(Record.create(1).attr("take", upper)); // TODO: take to key
+    }
     //final MapDownlinkRelayTake relay = new MapDownlinkRelayTake(this, upper);
     //relay.stage = view.stage;
     //relay.run();
