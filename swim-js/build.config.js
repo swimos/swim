@@ -409,13 +409,28 @@ const ui = [
     ],
   },
   {
+    id: "constraint",
+    name: "@swim/constraint",
+    path: "swim-ui-js/@swim/constraint",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "constraint"],
+      },
+    ],
+  },
+  {
     id: "view",
     name: "@swim/view",
     path: "swim-ui-js/@swim/view",
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint"],
       },
     ],
   },
@@ -426,7 +441,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view"],
       },
     ],
   },
@@ -437,7 +452,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view"],
       },
     ],
   },
@@ -448,7 +463,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view"],
       },
     ],
   },
@@ -460,7 +475,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "gesture"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture"],
       },
     ],
   },
@@ -474,7 +489,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset"],
       },
     ],
   },
@@ -486,7 +501,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "navigation"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "navigation"],
       },
     ],
   },
@@ -500,7 +515,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset"],
       },
     ],
   },
@@ -511,7 +526,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset"],
       },
     ],
   },
@@ -522,7 +537,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "gesture"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture"],
       },
     ],
   },
@@ -533,7 +548,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset"],
       },
     ],
   },
@@ -544,7 +559,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "map"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "map"],
       },
     ],
   },
@@ -556,7 +571,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "gesture", "gauge", "pie", "chart", "map", "mapbox"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture", "gauge", "pie", "chart", "map", "mapbox"],
       },
     ],
   },
@@ -570,7 +585,7 @@ const web = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset"],
       },
     ],
   },
@@ -581,7 +596,7 @@ const web = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset"],
       },
     ],
   },
@@ -593,7 +608,7 @@ const web = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "site", "app"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "site", "app"],
       },
     ],
   },
@@ -607,7 +622,7 @@ const platform = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri", "warp", "client", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "gesture", "navigation", "gauge", "pie", "chart", "map", "mapbox", "site", "app"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri", "warp", "client", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture", "navigation", "gauge", "pie", "chart", "map", "mapbox", "site", "app"],
       },
     ],
   },

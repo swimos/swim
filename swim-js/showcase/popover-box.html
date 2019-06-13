@@ -20,6 +20,7 @@
         }
 
         .box-2 {
+            position: relative;
             border-right: 1px solid #f0f;
             border-left: 1px solid #f0f;
         }
@@ -48,16 +49,16 @@
     <script src="../swim-vis-js/@swim/vis/dist/main/swim-vis.js"></script>
     <script type="text/javascript">
 
-const box2 = document.querySelector(".box-2");
-const app = new swim.HtmlAppView(box2);
+const box2 = new swim.HtmlAppView(document.querySelector(".box-2"));
+const box3 = new swim.HtmlAppView(document.querySelector(".box-3"));
 
-const source = app.append("div")
-    .position("relative")
-    .left(swim.Length.pct(50, box2))
-    .top(swim.Length.pct(50, box2))
+const source = box2.append("div")
+    .position("absolute")
+    .left(swim.Length.pct(50, box2.node))
+    .top(swim.Length.pct(50, box2.node))
     .width(30)
     .height(30)
-    .borderRadius(50)
+    .borderRadius("50%")
     .backgroundColor("#989898");
 
 const popover = new swim.PopoverView()
@@ -67,24 +68,24 @@ const popover = new swim.PopoverView()
     .borderRadius(5)
     .backgroundColor("#4a4a4a");
 popover.setSource(source);
-popover.hidePopover();
-app.showPopover(popover);
+popover.hidePopover(false);
+box3.showPopover(popover);
 
 
-app.on('click', function() {
-    popover.togglePopover({duration: 500});
+box2.on('click', function() {
+  popover.togglePopover({duration: 500});
 });
 
-app.on('mousemove', function(event) {
-    source.left(event.clientX - 15)
-        .top(event.clientY - 15);
+window.addEventListener('mousemove', function (event) {
+  source.left(event.clientX - box2.node.offsetLeft - 15)
+      .top(event.clientY - box2.node.offsetTop - 15);
 
-     // set mouse event??
-    // popover.setSource(event);
+   // set mouse event??
+  // popover.setSource(event);
 
-    //  Custom Coord with BoxR2?
-    // const customCoord = {}
-    // popover.setSource(customCoord);
+  //  Custom Coord with BoxR2?
+  // const customCoord = {}
+  // popover.setSource(customCoord);
 })
 
 

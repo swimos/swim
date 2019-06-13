@@ -27,13 +27,13 @@ const source = app.append("div")
     });
 
 const popover = new swim.PopoverView()
-    .placement(["top", "bottom", "right", "left"])
-    .width(240)
-    .height(360)
+    .placement(["top", "bottom", "right", "left", "below"])
+    .minWidth(240)
+    .minHeight(360)
     .borderRadius(5)
     .backgroundColor("#4a4a4a");
 popover.setSource(source);
-popover.hidePopover();
+popover.hidePopover(false);
 app.showPopover(popover);
 
 //setInterval(function () {

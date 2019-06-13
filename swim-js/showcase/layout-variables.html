@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Layout Variables</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"/>
+  </head>
+  <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <div id="app" style="width: 100%; height: 100%;">
+    </div>
+    <script src="../swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script>
+
+const app = new swim.HtmlAppView(document.getElementById("app"));
+
+const divider = app.variable("divider");
+app.constraint(divider, "eq", app.widthAnchor.divide(4)).enabled(true);
+
+const sidebar = app.append("div")
+    .position("absolute")
+    .top(0)
+    .bottom(0)
+    .left(0)
+    .borderRightWidth(1)
+    .borderRightStyle("solid")
+    .borderRightColor("#0000cc");
+sidebar.widthAnchor.enabled(true);
+sidebar.constraint(sidebar.widthAnchor, "eq", divider).enabled(true);
+
+const circle = app.append("div")
+    .position("absolute")
+    .borderRadius("50%")
+    .backgroundColor("#989898");
+circle.widthAnchor.enabled(true);
+circle.heightAnchor.enabled(true);
+circle.centerXAnchor.enabled(true);
+circle.centerYAnchor.enabled(true);
+circle.constraint(circle.widthAnchor, "eq", circle.heightAnchor).enabled(true);
+circle.constraint(circle.heightAnchor, "eq", app.heightAnchor.divide(3)).enabled(true);
+circle.constraint(circle.centerXAnchor, "eq", app.widthAnchor.plus(divider).divide(2)).enabled(true);
+circle.constraint(circle.centerYAnchor, "eq", app.heightAnchor.divide(2).minus(10)).enabled(true);
+
+    </script>
+  </body>
+</html>
