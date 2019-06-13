@@ -31,6 +31,7 @@ import swim.api.lane.SpatialLane;
 import swim.api.lane.SupplyLane;
 import swim.api.lane.ValueLane;
 import swim.api.policy.Policy;
+import swim.api.ws.WsLane;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Call;
 import swim.concurrent.Cont;
@@ -83,9 +84,12 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
 
   final ConcurrentLinkedQueue<Runnable> mailbox;
 
+  final long createdTime;
+
   public AgentNode() {
     this.lanes = HashTrieMap.empty();
     this.mailbox = new ConcurrentLinkedQueue<Runnable>();
+    this.createdTime = System.currentTimeMillis();
   }
 
   @Override
@@ -151,6 +155,11 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   @Override
   public Value agentKey() {
     return Value.absent();
+  }
+
+  @Override
+  public long createdTime() {
+    return this.createdTime;
   }
 
   protected static Uri normalizeLaneUri(Uri laneUri) {
@@ -305,6 +314,11 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   @Override
   public <V> ValueLane<V> valueLane() {
     return new ValueLaneView<V>(null, null);
+  }
+
+  @Override
+  public <I, O> WsLane<I, O> wsLane() {
+    throw new UnsupportedOperationException(); // TODO
   }
 
   @Override

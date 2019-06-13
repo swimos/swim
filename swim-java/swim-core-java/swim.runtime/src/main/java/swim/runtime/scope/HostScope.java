@@ -22,6 +22,7 @@ import swim.api.http.HttpDownlink;
 import swim.api.ref.HostRef;
 import swim.api.ref.LaneRef;
 import swim.api.ref.NodeRef;
+import swim.api.ws.WsDownlink;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
 import swim.runtime.downlink.EventDownlinkView;
@@ -95,7 +96,12 @@ public class HostScope extends Scope implements HostRef {
   }
 
   @Override
-  public <T> HttpDownlink<T> downlinkHttp() {
+  public <V> HttpDownlink<V> downlinkHttp() {
+    return null; // TODO
+  }
+
+  @Override
+  public <I, O> WsDownlink<I, O> downlinkWs() {
     return null; // TODO
   }
 

@@ -38,6 +38,11 @@ public class ValueLaneModel extends LaneModel<ValueLaneView<?>, ValueLaneUplink>
   }
 
   @Override
+  public String laneType() {
+    return "value";
+  }
+
+  @Override
   protected ValueLaneUplink createUplink(LinkBinding link) {
     return new ValueLaneUplink(this, link);
   }

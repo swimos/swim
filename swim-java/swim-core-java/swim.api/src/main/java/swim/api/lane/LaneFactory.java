@@ -14,6 +14,7 @@
 
 package swim.api.lane;
 
+import swim.api.ws.WsLane;
 import swim.math.R2Shape;
 import swim.math.Z2Form;
 
@@ -39,4 +40,6 @@ public interface LaneFactory {
   <V> SupplyLane<V> supplyLane();
 
   <V> ValueLane<V> valueLane();
+
+  <I, O> WsLane<I, O> wsLane();
 }

@@ -25,6 +25,7 @@ import swim.api.ref.LaneRef;
 import swim.api.ref.NodeRef;
 import swim.api.ref.SwimRef;
 import swim.api.router.Router;
+import swim.api.ws.WsDownlink;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Log;
@@ -186,8 +187,13 @@ public abstract class AbstractClient implements Client, Log, SwimRef {
   }
 
   @Override
-  public <T> HttpDownlink<T> downlinkHttp() {
+  public <V> HttpDownlink<V> downlinkHttp() {
     return this.context.downlinkHttp();
+  }
+
+  @Override
+  public <I, O> WsDownlink<I, O> downlinkWs() {
+    return this.context.downlinkWs();
   }
 
   @Override

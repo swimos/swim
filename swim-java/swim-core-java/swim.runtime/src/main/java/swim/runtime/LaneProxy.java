@@ -91,6 +91,11 @@ public class LaneProxy implements LaneBinding, LaneContext {
   }
 
   @Override
+  public String laneType() {
+    return this.laneBinding.laneType();
+  }
+
+  @Override
   public Value agentKey() {
     return this.laneContext.agentKey();
   }

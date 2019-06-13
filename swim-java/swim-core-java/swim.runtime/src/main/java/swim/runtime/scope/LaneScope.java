@@ -20,6 +20,7 @@ import swim.api.downlink.MapDownlink;
 import swim.api.downlink.ValueDownlink;
 import swim.api.http.HttpDownlink;
 import swim.api.ref.LaneRef;
+import swim.api.ws.WsDownlink;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
 import swim.runtime.downlink.EventDownlinkView;
@@ -90,7 +91,12 @@ public class LaneScope extends Scope implements LaneRef {
   }
 
   @Override
-  public <T> HttpDownlink<T> downlinkHttp() {
+  public <V> HttpDownlink<V> downlinkHttp() {
+    return null; // TODO
+  }
+
+  @Override
+  public <I, O> WsDownlink<I, O> downlinkWs() {
     return null; // TODO
   }
 

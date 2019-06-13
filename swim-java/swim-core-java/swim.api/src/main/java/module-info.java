@@ -25,6 +25,7 @@ module swim.api {
   requires transitive swim.streamlet;
   requires transitive swim.dataflow;
   requires transitive swim.http;
+  requires transitive swim.ws;
   requires transitive swim.mqtt;
   requires transitive swim.warp;
   requires transitive swim.concurrent;
@@ -49,4 +50,6 @@ module swim.api {
   exports swim.api.storage;
   exports swim.api.uplink;
   exports swim.api.uplink.function;
+  exports swim.api.ws;
+  exports swim.api.ws.function;
 }

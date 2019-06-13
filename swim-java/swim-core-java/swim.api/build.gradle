@@ -13,6 +13,7 @@ dependencies {
   api project(':swim-dataflow')
   api project(':swim-observable')
   api project(':swim-http')
+  api project(':swim-ws')
   api project(':swim-mqtt')
   api project(':swim-warp')
   api project(':swim-concurrent')

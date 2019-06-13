@@ -42,6 +42,8 @@ public interface LaneBinding extends TierBinding, CellBinding, Log {
 
   Uri laneUri();
 
+  String laneType();
+
   Value agentKey();
 
   Schedule schedule();

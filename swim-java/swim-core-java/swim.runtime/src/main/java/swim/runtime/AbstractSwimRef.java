@@ -24,6 +24,7 @@ import swim.api.ref.HostRef;
 import swim.api.ref.LaneRef;
 import swim.api.ref.NodeRef;
 import swim.api.ref.SwimRef;
+import swim.api.ws.WsDownlink;
 import swim.runtime.downlink.EventDownlinkView;
 import swim.runtime.downlink.ListDownlinkView;
 import swim.runtime.downlink.MapDownlinkView;
@@ -138,7 +139,12 @@ public abstract class AbstractSwimRef implements SwimRef, CellContext {
   }
 
   @Override
-  public <T> HttpDownlink<T> downlinkHttp() {
+  public <V> HttpDownlink<V> downlinkHttp() {
+    return null; // TODO
+  }
+
+  @Override
+  public <I, O> WsDownlink<I, O> downlinkWs() {
     return null; // TODO
   }
 

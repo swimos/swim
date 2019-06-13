@@ -37,6 +37,7 @@ import swim.api.lane.SpatialLane;
 import swim.api.lane.SupplyLane;
 import swim.api.lane.ValueLane;
 import swim.api.policy.Policy;
+import swim.api.ws.WsLane;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
@@ -300,6 +301,11 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   @Override
   public <V> ValueLane<V> valueLane() {
     return new ValueLaneView<V>(this, null);
+  }
+
+  @Override
+  public <I, O> WsLane<I, O> wsLane() {
+    throw new UnsupportedOperationException(); // TODO
   }
 
   @Override

@@ -15,6 +15,7 @@
 package swim.api.downlink;
 
 import swim.api.http.HttpDownlink;
+import swim.api.ws.WsDownlink;
 import swim.structure.Value;
 
 public interface DownlinkFactory {
@@ -26,5 +27,7 @@ public interface DownlinkFactory {
 
   ValueDownlink<Value> downlinkValue();
 
-  <T> HttpDownlink<T> downlinkHttp();
+  <V> HttpDownlink<V> downlinkHttp();
+
+  <I, O> WsDownlink<I, O> downlinkWs();
 }

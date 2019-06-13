@@ -12,27 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.runtime;
-
-import swim.api.auth.Identity;
-import swim.structure.Value;
-import swim.uri.Uri;
-
-public interface NodeContext extends TierContext, CellContext {
-  @Override
-  Uri meshUri();
-
-  Value partKey();
-
-  Uri hostUri();
-
-  Uri nodeUri();
-
-  Value agentKey();
-
-  long createdTime();
-
-  Identity identity();
-
-  LaneBinding injectLane(Uri laneUri, LaneBinding lane);
-}
+/**
+ * WebSocket lanes and downlinks.
+ */
+package swim.api.ws;

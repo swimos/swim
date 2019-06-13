@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.api.http;
+package swim.api.ws;
 
 import java.net.InetSocketAddress;
 import java.security.Principal;
@@ -20,17 +20,10 @@ import java.security.cert.Certificate;
 import java.util.Collection;
 import swim.api.Link;
 import swim.api.auth.Identity;
-import swim.api.function.DidDisconnect;
-import swim.api.function.DidFail;
-import swim.api.http.function.DecodeResponseHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRequestHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
 import swim.uri.Uri;
+import swim.ws.WsRequest;
 
-public interface HttpDownlink<V> extends Link {
+public interface WsUplink extends Link {
   @Override
   Uri hostUri();
 
@@ -39,6 +32,10 @@ public interface HttpDownlink<V> extends Link {
 
   @Override
   Uri laneUri();
+
+  Uri requestUri();
+
+  WsRequest request();
 
   @Override
   boolean isConnected();
@@ -80,31 +77,13 @@ public interface HttpDownlink<V> extends Link {
   Collection<Certificate> remoteCertificates();
 
   @Override
-  HttpDownlink<V> observe(Object observer);
-
-  @Override
-  HttpDownlink<V> unobserve(Object observer);
-
-  HttpDownlink<V> doRequest(DoRequestHttp<?> doRequest);
-
-  HttpDownlink<V> willRequest(WillRequestHttp<?> willRequest);
-
-  HttpDownlink<V> didRequest(DidRequestHttp<?> didRequest);
-
-  HttpDownlink<V> decodeResponse(DecodeResponseHttp<V> decodeResponse);
-
-  HttpDownlink<V> willRespond(WillRespondHttp<V> willRespond);
-
-  HttpDownlink<V> didRespond(DidRespondHttp<V> didRespond);
-
-  HttpDownlink<V> didDisconnect(DidDisconnect didDisconnect);
-
-  HttpDownlink<V> didFail(DidFail didFail);
-
-  HttpDownlink<V> open();
-
-  @Override
   void close();
+
+  @Override
+  WsUplink observe(Object observer);
+
+  @Override
+  WsUplink unobserve(Object observer);
 
   @Override
   void trace(Object message);

@@ -18,6 +18,11 @@ import swim.runtime.LinkBinding;
 
 public class SupplyLaneModel extends LaneModel<SupplyLaneView<?>, SupplyLaneUplink> {
   @Override
+  public String laneType() {
+    return "supply";
+  }
+
+  @Override
   protected SupplyLaneUplink createUplink(LinkBinding link) {
     return new SupplyLaneUplink(this, link);
   }

@@ -46,6 +46,11 @@ public class JoinMapLaneModel extends LaneModel<JoinMapLaneView<?, ?, ?>, JoinMa
   }
 
   @Override
+  public String laneType() {
+    return "map";
+  }
+
+  @Override
   protected JoinMapLaneUplink createUplink(LinkBinding link) {
     return new JoinMapLaneUplink(this, link);
   }

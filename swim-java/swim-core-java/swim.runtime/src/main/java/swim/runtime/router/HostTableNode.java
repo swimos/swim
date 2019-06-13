@@ -68,6 +68,11 @@ public class HostTableNode implements NodeContext {
   }
 
   @Override
+  public long createdTime() {
+    return this.node.createdTime();
+  }
+
+  @Override
   public final Identity identity() {
     return null; // TODO
   }

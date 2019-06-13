@@ -12,27 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.runtime;
+package swim.api.ws.function;
 
-import swim.api.auth.Identity;
-import swim.structure.Value;
-import swim.uri.Uri;
+import swim.concurrent.Preemptive;
+import swim.ws.WsRequest;
+import swim.ws.WsResponse;
 
-public interface NodeContext extends TierContext, CellContext {
-  @Override
-  Uri meshUri();
-
-  Value partKey();
-
-  Uri hostUri();
-
-  Uri nodeUri();
-
-  Value agentKey();
-
-  long createdTime();
-
-  Identity identity();
-
-  LaneBinding injectLane(Uri laneUri, LaneBinding lane);
+@FunctionalInterface
+public interface DoUpgradeWs extends Preemptive {
+  WsResponse doUpgrade(WsRequest request);
 }

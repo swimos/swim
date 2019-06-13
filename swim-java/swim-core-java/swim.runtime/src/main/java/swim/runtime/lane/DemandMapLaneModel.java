@@ -24,6 +24,11 @@ import swim.structure.Value;
 
 public class DemandMapLaneModel extends LaneModel<DemandMapLaneView<?, ?>, DemandMapLaneUplink> {
   @Override
+  public String laneType() {
+    return "map";
+  }
+
+  @Override
   protected DemandMapLaneUplink createUplink(LinkBinding link) {
     return new DemandMapLaneUplink(this, link);
   }

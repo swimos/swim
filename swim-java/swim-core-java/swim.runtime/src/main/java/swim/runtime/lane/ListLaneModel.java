@@ -41,6 +41,11 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
   }
 
   @Override
+  public String laneType() {
+    return "list";
+  }
+
+  @Override
   protected ListLaneUplink createUplink(LinkBinding link) {
     return new ListLaneUplink(this, link);
   }
@@ -141,12 +146,12 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
       this.flags &= ~RESIDENT;
     }
     final Object views = this.views;
-    if (views instanceof ValueLaneView<?>) {
-      ((ValueLaneView<?>) views).didSetResident(isResident);
+    if (views instanceof ListLaneView<?>) {
+      ((ListLaneView<?>) views).didSetResident(isResident);
     } else if (views instanceof LaneView[]) {
       final LaneView[] viewArray = (LaneView[]) views;
       for (int i = 0, n = viewArray.length; i < n; i += 1) {
-        ((ValueLaneView<?>) viewArray[i]).didSetResident(isResident);
+        ((ListLaneView<?>) viewArray[i]).didSetResident(isResident);
       }
     }
     return this;
@@ -166,12 +171,12 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
       this.flags &= ~TRANSIENT;
     }
     final Object views = this.views;
-    if (views instanceof ValueLaneView<?>) {
-      ((ValueLaneView<?>) views).didSetTransient(isTransient);
+    if (views instanceof ListLaneView<?>) {
+      ((ListLaneView<?>) views).didSetTransient(isTransient);
     } else if (views instanceof LaneView[]) {
       final LaneView[] viewArray = (LaneView[]) views;
       for (int i = 0, n = viewArray.length; i < n; i += 1) {
-        ((ValueLaneView<?>) viewArray[i]).didSetTransient(isTransient);
+        ((ListLaneView<?>) viewArray[i]).didSetTransient(isTransient);
       }
     }
     return this;

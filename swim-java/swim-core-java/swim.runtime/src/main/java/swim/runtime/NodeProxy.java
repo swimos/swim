@@ -88,6 +88,11 @@ public class NodeProxy implements NodeBinding, NodeContext {
   }
 
   @Override
+  public long createdTime() {
+    return this.nodeBinding.createdTime();
+  }
+
+  @Override
   public Identity identity() {
     return this.nodeContext.identity();
   }

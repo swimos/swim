@@ -39,6 +39,11 @@ public class MapLaneModel extends LaneModel<MapLaneView<?, ?>, MapLaneUplink> {
   }
 
   @Override
+  public String laneType() {
+    return "map";
+  }
+
+  @Override
   protected MapLaneUplink createUplink(LinkBinding link) {
     return new MapLaneUplink(this, link);
   }
@@ -135,12 +140,12 @@ public class MapLaneModel extends LaneModel<MapLaneView<?, ?>, MapLaneUplink> {
       this.flags &= ~TRANSIENT;
     }
     final Object views = this.views;
-    if (views instanceof ValueLaneView<?>) {
-      ((ValueLaneView<?>) views).didSetTransient(isTransient);
+    if (views instanceof MapLaneView<?, ?>) {
+      ((MapLaneView<?, ?>) views).didSetTransient(isTransient);
     } else if (views instanceof LaneView[]) {
       final LaneView[] viewArray = (LaneView[]) views;
       for (int i = 0, n = viewArray.length; i < n; i += 1) {
-        ((ValueLaneView<?>) viewArray[i]).didSetTransient(isTransient);
+        ((MapLaneView<?, ?>) viewArray[i]).didSetTransient(isTransient);
       }
     }
     return this;

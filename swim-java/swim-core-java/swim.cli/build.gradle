@@ -14,6 +14,22 @@ dependencies {
 
 def javaHome = System.getenv('JAVA_HOME')
 
+task nativeImage(type: Exec) {
+  dependsOn 'jar'
+
+  workingDir project.projectDir
+
+  commandLine "${javaHome}/bin/native-image",
+              '-cp', sourceSets.main.runtimeClasspath.asPath,
+              "-H:Path=${buildDir}/graal",
+              "-H:Name=${project.name}",
+              '--no-server',
+              '--no-fallback',
+              '--initialize-at-build-time',
+              '--enable-all-security-services',
+              "${mainClassName}"
+}
+
 task link(type: Exec) {
   dependsOn 'clean'
   dependsOn 'jar'

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.api.http;
+package swim.api.ws;
 
 import java.net.InetSocketAddress;
 import java.security.Principal;
@@ -22,15 +22,18 @@ import swim.api.Link;
 import swim.api.auth.Identity;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
-import swim.api.http.function.DecodeResponseHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRequestHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
+import swim.api.ws.function.DidReadFrameWs;
+import swim.api.ws.function.DidUpgradeWs;
+import swim.api.ws.function.DidWriteFrameWs;
+import swim.api.ws.function.DoUpgradeWs;
+import swim.api.ws.function.WillReadFrameWs;
+import swim.api.ws.function.WillUpgradeWs;
+import swim.api.ws.function.WillWriteFrameWs;
 import swim.uri.Uri;
+import swim.ws.WsControl;
+import swim.ws.WsData;
 
-public interface HttpDownlink<V> extends Link {
+public interface WsDownlink<I, O> extends Link {
   @Override
   Uri hostUri();
 
@@ -80,28 +83,34 @@ public interface HttpDownlink<V> extends Link {
   Collection<Certificate> remoteCertificates();
 
   @Override
-  HttpDownlink<V> observe(Object observer);
+  WsDownlink<I, O> observe(Object observer);
 
   @Override
-  HttpDownlink<V> unobserve(Object observer);
+  WsDownlink<I, O> unobserve(Object observer);
 
-  HttpDownlink<V> doRequest(DoRequestHttp<?> doRequest);
+  WsLane<I, O> willUpgrade(WillUpgradeWs willUpgrade);
 
-  HttpDownlink<V> willRequest(WillRequestHttp<?> willRequest);
+  WsLane<I, O> doUpgrade(DoUpgradeWs doUpgrade);
 
-  HttpDownlink<V> didRequest(DidRequestHttp<?> didRequest);
+  WsLane<I, O> didUpgrade(DidUpgradeWs didUpgrade);
 
-  HttpDownlink<V> decodeResponse(DecodeResponseHttp<V> decodeResponse);
+  WsLane<I, O> willReadFrame(WillReadFrameWs<I> willReadFrame);
 
-  HttpDownlink<V> willRespond(WillRespondHttp<V> willRespond);
+  WsLane<I, O> didReadFrame(DidReadFrameWs<I> didReadFrame);
 
-  HttpDownlink<V> didRespond(DidRespondHttp<V> didRespond);
+  WsLane<I, O> willWriteFrame(WillWriteFrameWs<O> willWriteFrame);
 
-  HttpDownlink<V> didDisconnect(DidDisconnect didDisconnect);
+  WsLane<I, O> didWriteFrame(DidWriteFrameWs<O> didWriteFrame);
 
-  HttpDownlink<V> didFail(DidFail didFail);
+  WsDownlink<I, O> didDisconnect(DidDisconnect didDisconnect);
 
-  HttpDownlink<V> open();
+  WsDownlink<I, O> didFail(DidFail didFail);
+
+  WsDownlink<I, O> open();
+
+  <O2 extends O> void write(WsData<O2> frame);
+
+  <O2 extends O> void write(WsControl<?, O2> frame);
 
   @Override
   void close();

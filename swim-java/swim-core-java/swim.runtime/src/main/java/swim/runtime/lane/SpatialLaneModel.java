@@ -29,7 +29,6 @@ import swim.structure.Value;
 import swim.warp.CommandMessage;
 
 public class SpatialLaneModel<S> extends LaneModel<SpatialLaneView<?, S, ?>, SpatialLaneUplink<S>> {
-
   protected int flags;
   protected SpatialData<Value, S, Value> data;
   protected final Z2Form<S> shapeForm;
@@ -41,6 +40,11 @@ public class SpatialLaneModel<S> extends LaneModel<SpatialLaneView<?, S, ?>, Spa
 
   public SpatialLaneModel(Z2Form<S> shapeForm) {
     this(shapeForm, 0);
+  }
+
+  @Override
+  public String laneType() {
+    return "spatial";
   }
 
   @Override

@@ -35,6 +35,8 @@ public interface NodeBinding extends TierBinding, CellBinding {
 
   Value agentKey();
 
+  long createdTime();
+
   HashTrieMap<Uri, LaneBinding> getLanes();
 
   LaneBinding getLane(Uri laneUri);

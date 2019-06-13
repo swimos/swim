@@ -47,6 +47,8 @@ import swim.api.ref.HostRef;
 import swim.api.ref.LaneRef;
 import swim.api.ref.NodeRef;
 import swim.api.ref.SwimRef;
+import swim.api.ws.WsDownlink;
+import swim.api.ws.WsLane;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
@@ -479,6 +481,11 @@ public class AbstractAgent implements Agent, LaneFactory, DataFactory, SwimRef, 
   }
 
   @Override
+  public final <I, O> WsLane<I, O> wsLane() {
+    return this.context.wsLane();
+  }
+
+  @Override
   public final ListData<Value> listData(Value name) {
     return this.context.listData(name);
   }
@@ -551,6 +558,11 @@ public class AbstractAgent implements Agent, LaneFactory, DataFactory, SwimRef, 
   @Override
   public final <V> HttpDownlink<V> downlinkHttp() {
     return this.context.downlinkHttp();
+  }
+
+  @Override
+  public final <I, O> WsDownlink<I, O> downlinkWs() {
+    return this.context.downlinkWs();
   }
 
   @Override
