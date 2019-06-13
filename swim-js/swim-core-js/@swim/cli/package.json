@@ -34,7 +34,7 @@
     "@swim/client": "3.9.0"
   },
   "dependencies": {
-    "ws": "6"
+    "ws": "7"
   },
   "bin": {
     "swim-cli": "./dist/main/swim-cli.js"

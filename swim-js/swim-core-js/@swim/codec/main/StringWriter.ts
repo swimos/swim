@@ -17,7 +17,7 @@ import {WriterException} from "./WriterException";
 import {Writer} from "./Writer";
 
 /** @hidden */
-export class StringWriter extends Writer<unknown, unknown> {
+export class StringWriter<I> extends Writer<I, unknown> {
   private readonly _value: unknown;
   private readonly _input: string;
   private readonly _index: number;
@@ -29,15 +29,15 @@ export class StringWriter extends Writer<unknown, unknown> {
     this._index = index;
   }
 
-  feed(input: unknown): Writer<unknown, unknown> {
+  feed(input: unknown): Writer<I, unknown> {
     return new StringWriter(input, "" + input);
   }
 
-  pull(output: Output): Writer<unknown, unknown> {
+  pull(output: Output): Writer<I, unknown> {
     return StringWriter.write(output, this._value, this._input, this._index);
   }
 
-  static write(output: Output, value: unknown, input: string, index: number = 0): Writer<unknown, unknown> {
+  static write<I>(output: Output, value: unknown, input: string, index: number = 0): Writer<I, unknown> {
     const length = input.length;
     while (index < length && output.isCont()) {
       let c = input.codePointAt(index);

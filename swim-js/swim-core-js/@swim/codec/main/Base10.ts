@@ -111,7 +111,7 @@ export class Base10 {
    * of the `input` value.
    */
   static integerWriter(input: number): Writer<unknown, number>;
-  static integerWriter(input?: number): Writer<unknown, number> {
+  static integerWriter(input?: number): Writer<unknown, unknown> {
     if (input === void 0) {
       return new Base10.IntegerWriter(void 0, 0);
     } else {
