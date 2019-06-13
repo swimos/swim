@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:swimos/swim-vis-js.git
 	branch = master
-	commit = c0bc293757d39b021a4f6c7bac5fe47772ea72d6
-	parent = c73eb64f41019aa2d68d9d6d3ed16df5076d6369
+	commit = e9bad9523e88ad61fa1bfa2396c718d05a9c3eb8
+	parent = d4e9a758e8e3217faa411da1626267db367245aa
 	method = merge
 	cmdver = 0.4.0

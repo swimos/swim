@@ -36,7 +36,7 @@ export const MapProjection = {
     return MapProjection._identity;
   },
 
-  is<I>(object: unknown): object is MapProjection {
+  is(object: unknown): object is MapProjection {
     if (typeof object === "object" && object) {
       const projection = object as MapProjection;
       return typeof projection.project === "function"

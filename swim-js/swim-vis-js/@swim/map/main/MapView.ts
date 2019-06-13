@@ -30,7 +30,7 @@ export interface MapView extends RenderView {
 
 /** @hidden */
 export const MapView = {
-  is<I>(object: unknown): object is MapView {
+  is(object: unknown): object is MapView {
     if (typeof object === "object" && object) {
       const view = object as MapView;
       return view instanceof View

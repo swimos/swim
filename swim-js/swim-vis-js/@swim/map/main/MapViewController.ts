@@ -52,6 +52,10 @@ export interface MapViewController<V extends MapView = MapView> extends RenderVi
 
   viewDidResize(view: V): void;
 
+  viewWillLayout(view: V): void;
+
+  viewDidLayout(view: V): void;
+
   viewWillScroll(view: V): void;
 
   viewDidScroll(view: V): void;
