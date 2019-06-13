@@ -62,7 +62,7 @@ export const Shape = {
   },
 
   /** @hidden */
-  is<I>(object: unknown): object is Shape {
+  is(object: unknown): object is Shape {
     if (typeof object === "object" && object) {
       const shape = object as Shape;
       return typeof shape.contains === "function"

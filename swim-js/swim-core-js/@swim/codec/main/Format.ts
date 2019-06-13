@@ -83,7 +83,7 @@ export class Format {
         }
         output = output.write(object);
       }
-    } else if (typeof object === "object" && typeof (object as any).display === "function") {
+    } else if (object && typeof (object as any).display === "function") {
       if (!(output instanceof Output)) {
         output = Unicode.stringOutput(output);
       }
@@ -159,7 +159,7 @@ export class Format {
         output = Unicode.stringOutput(output);
       }
       Format.debugString(object, output);
-    } else if (typeof object === "object" && typeof (object as any).debug === "function") {
+    } else if (typeof (object as any).debug === "function") {
       if (!(output instanceof Output)) {
         output = Unicode.stringOutput(output);
       }

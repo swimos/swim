@@ -41,7 +41,7 @@ export class ListDownlinkSpec extends Spec {
           exam.equal(envelope.node(), Uri.parse("todo"));
           exam.equal(envelope.lane(), Uri.parse("list"));
           const header = Record.of(Slot.of("key", Data.fromBase64("Az+0")), Slot.of("index", 0));
-          exam.equal(envelope.body(), Attr.of("insert", header).concat("test"));
+          exam.equal(envelope.body(), Attr.of("update", header).concat("test"));
           resolve();
         }
       };
@@ -70,7 +70,7 @@ export class ListDownlinkSpec extends Spec {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
           const header = Record.of(Slot.of("key", Data.fromBase64("Az+0")), Slot.of("index", 0));
           server.send(EventMessage.of(envelope.node(), envelope.lane(),
-                      Attr.of("insert", header).concat("test")));
+                      Attr.of("update", header).concat("test")));
           server.send(SyncedResponse.of(envelope.node(), envelope.lane()));
         }
       };
@@ -79,18 +79,19 @@ export class ListDownlinkSpec extends Spec {
         .nodeUri("todo")
         .laneUri("list")
         .keepLinked(false)
-        .willInsert(function (index: number, newValue: Value, downlink: ListDownlink<Value, AnyValue>): void {
-          exam.comment("willInsert");
+        .willUpdate(function (index: number, newValue: Value, downlink: ListDownlink<Value, AnyValue>): void {
+          exam.comment("willUpdate");
           exam.equal(index, 0);
           exam.equal(newValue, Text.from("test"));
           exam.equal(downlink.length, 0);
           exam.equal(downlink.get(0), Value.absent());
           exam.equal(downlink.getEntry(0), void 0);
         })
-        .didInsert(function (index: number, newValue: Value, downlink: ListDownlink<Value, AnyValue>): void {
-          exam.comment("didInsert");
+        .didUpdate(function (index: number, newValue: Value, oldValue: Value, downlink: ListDownlink<Value, AnyValue>): void {
+          exam.comment("didUpdate");
           exam.equal(index, 0);
           exam.equal(newValue, Text.from("test"));
+          exam.equal(oldValue, Value.absent());
           exam.equal(downlink.length, 1);
           exam.equal(downlink.get(0), Text.from("test"));
           exam.equal((downlink.getEntry(0)!)[0], Data.fromBase64("Az+0"));

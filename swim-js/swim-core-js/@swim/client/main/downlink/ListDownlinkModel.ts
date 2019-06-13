@@ -79,12 +79,12 @@ export class ListDownlinkModel extends DownlinkModel {
     if (index < 0 || index > this._state.length) {
       throw new RangeError("" + index);
     }
-    newValue = this.listWillInsert(index, newValue);
+    newValue = this.listWillUpdate(index, newValue);
     this._state.insert(index, newValue, key);
     const newEntry = this._state.getEntry(index)!;
-    this.listDidInsert(index, newValue);
+    this.listDidUpdate(index, newValue, Value.absent());
     const header = Record.create(2).slot("key", newEntry[0]).slot("index", index);
-    this.command(Attr.of("insert", header).concat(newValue));
+    this.command(Attr.of("update", header).concat(newValue));
     return this;
   }
 
@@ -110,12 +110,12 @@ export class ListDownlinkModel extends DownlinkModel {
   push(...newValues: Value[]): number {
     for (let i = 0; i < newValues.length; i += 1) {
       const index = this._state.length + i;
-      const newValue = this.listWillInsert(index, newValues[i]);
+      const newValue = this.listWillUpdate(index, newValues[i]);
       this._state.insert(index, newValue);
       const newEntry = this._state.getEntry(index)!;
-      this.listDidInsert(index, newValue);
+      this.listDidUpdate(index, newValue, Value.absent());
       const header = Record.create(2).slot("key", newEntry[0]).slot("index", index);
-      this.command(Attr.of("insert", header).concat(newValue));
+      this.command(Attr.of("update", header).concat(newValue));
     }
     return this._state.length;
   }
@@ -137,12 +137,12 @@ export class ListDownlinkModel extends DownlinkModel {
 
   unshift(...newValues: Value[]): number {
     for (let i = newValues.length - 1; i >= 0; i -= 1) {
-      const newValue = this.listWillInsert(0, newValues[i]);
+      const newValue = this.listWillUpdate(0, newValues[i]);
       this._state.insert(0, newValue);
       const newEntry = this._state.getEntry(0)!;
-      this.listDidInsert(0, newValue);
+      this.listDidUpdate(0, newValue, Value.absent());
       const header = Record.create(2).slot("key", newEntry[0]).slot("index", 0);
-      this.command(Attr.of("insert", header).concat(newValue));
+      this.command(Attr.of("update", header).concat(newValue));
     }
     return this._state.length;
   }
@@ -205,12 +205,12 @@ export class ListDownlinkModel extends DownlinkModel {
     }
     for (let i = 0; i < newValues.length; i += 1) {
       const index = start + i;
-      const newValue = this.listWillInsert(index, newValues[i]);
+      const newValue = this.listWillUpdate(index, newValues[i]);
       this._state.insert(index, newValue);
       const newEntry = this._state.getEntry(index)!;
-      this.listDidInsert(index, newValue);
+      this.listDidUpdate(index, newValue, Value.absent());
       const header = Record.create(2).slot("key", newEntry[0]).slot("index", index);
-      this.command(Attr.of("insert", header).concat(newValue));
+      this.command(Attr.of("update", header).concat(newValue));
     }
     return deleted;
   }
@@ -265,14 +265,6 @@ export class ListDownlinkModel extends DownlinkModel {
       } else {
         this.onInsertEvent(header.get("index").numberValue(0), event.body(), header.get("key"));
       }
-    } else if (tag === "insert") {
-      const header = event.head().toValue();
-      const index = this._state.lookup(header.get("key"), header.get("index").numberValue());
-      if (index < 0) {
-        this.onInsertEvent(header.get("index").numberValue(0), event.body(), header.get("key"));
-      } else {
-        this.onUpdateEvent(index, event.body(), header.get("key"));
-      }
     } else if (tag === "move") {
       const header = event.head().toValue();
       const index = this._state.lookup(header.get("key"), header.get("from").numberValue());
@@ -296,17 +288,17 @@ export class ListDownlinkModel extends DownlinkModel {
     }
   }
 
+  protected onInsertEvent(index: number, newValue: Value, key: Value): void {
+    newValue = this.listWillUpdate(index, newValue);
+    this._state.insert(index, newValue, key);
+    this.listDidUpdate(index, newValue, Value.absent());
+  }
+
   protected onUpdateEvent(index: number, newValue: Value, key: Value): void {
     newValue = this.listWillUpdate(index, newValue);
     const oldValue = this._state.get(index) || Value.absent();
     this._state.set(index, newValue);
     this.listDidUpdate(index, newValue, oldValue);
-  }
-
-  protected onInsertEvent(index: number, newValue: Value, key: Value): void {
-    newValue = this.listWillInsert(index, newValue);
-    this._state.insert(index, newValue, key);
-    this.listDidInsert(index, newValue);
   }
 
   protected onMoveEvent(fromIndex: number, toIndex: number, key: Value): void {
@@ -342,19 +334,6 @@ export class ListDownlinkModel extends DownlinkModel {
     this.listWillClear();
     this._state.clear();
     this.listDidClear();
-  }
-
-  protected listWillInsert(index: number, newValue: Value): Value {
-    for (let i = 0; i < this._views.length; i += 1) {
-      newValue = this._views[i].listWillInsert(index, newValue);
-    }
-    return newValue;
-  }
-
-  protected listDidInsert(index: number, newValue: Value): void {
-    for (let i = 0; i < this._views.length; i += 1) {
-      this._views[i].listDidInsert(index, newValue);
-    }
   }
 
   protected listWillUpdate(index: number, newValue: Value): Value {

@@ -21,8 +21,6 @@ import {DownlinkOwner} from "./DownlinkOwner";
 import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
 import {ListDownlinkModel} from "./ListDownlinkModel";
 
-export type ListDownlinkWillInsert<V extends VU, VU = V> = (index: number, newValue: V, downlink: ListDownlink<V, VU>) => V | void;
-export type ListDownlinkDidInsert<V extends VU, VU = V> = (index: number, newValue: V, downlink: ListDownlink<V, VU>) => void;
 export type ListDownlinkWillUpdate<V extends VU, VU = V> = (index: number, newValue: V, downlink: ListDownlink<V, VU>) => V | void;
 export type ListDownlinkDidUpdate<V extends VU, VU = V> = (index: number, newValue: V, oldValue: V, downlink: ListDownlink<V, VU>) => void;
 export type ListDownlinkWillMove<V extends VU, VU = V> = (fromIndex: number, toIndex: number, value: V, downlink: ListDownlink<V, VU>) => void;
@@ -37,8 +35,6 @@ export type ListDownlinkWillClear<V extends VU, VU = V> = (downlink: ListDownlin
 export type ListDownlinkDidClear<V extends VU, VU = V> = (downlink: ListDownlink<V, VU>) => void;
 
 export interface ListDownlinkObserver<V extends VU, VU = V> extends DownlinkObserver {
-  willInsert?: ListDownlinkWillInsert<V, VU>;
-  didInsert?: ListDownlinkDidInsert<V, VU>;
   willUpdate?: ListDownlinkWillUpdate<V, VU>;
   didUpdate?: ListDownlinkDidUpdate<V, VU>;
   willMove?: ListDownlinkWillMove<V, VU>;
@@ -75,8 +71,6 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
     super(context, owner, init, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
     if (init) {
       const observer = this._observers![this._observers!.length - 1];
-      observer.willInsert = init.willInsert || observer.willInsert;
-      observer.didInsert = init.didInsert || observer.didInsert;
       observer.willUpdate = init.willUpdate || observer.willUpdate;
       observer.didUpdate = init.didUpdate || observer.didUpdate;
       observer.willMove = init.willMove || observer.willMove;
@@ -259,14 +253,6 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
     return super.observe(observer);
   }
 
-  willInsert(willInsert: ListDownlinkWillInsert<V, VU>): this {
-    return this.observe({willInsert});
-  }
-
-  didInsert(didInsert: ListDownlinkDidInsert<V, VU>): this {
-    return this.observe({didInsert});
-  }
-
   willUpdate(willUpdate: ListDownlinkWillUpdate<V, VU>): this {
     return this.observe({willUpdate});
   }
@@ -313,40 +299,6 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
 
   didClear(didClear: ListDownlinkDidClear<V, VU>): this {
     return this.observe({didClear});
-  }
-
-  /** @hidden */
-  listWillInsert(index: number, newValue: Value): Value {
-    const observers = this._observers;
-    const n = observers ? observers.length : 0;
-    let newObject: V | undefined;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
-      if (observer.willInsert) {
-        if (newObject === void 0) {
-          newObject = newValue.coerce(this._valueForm);
-        }
-        const newResult = observer.willInsert(index, newObject, this);
-        if (newResult !== void 0) {
-          newObject = newResult;
-          newValue = this._valueForm.mold(newObject);
-        }
-      }
-    }
-    return newValue;
-  }
-
-  /** @hidden */
-  listDidInsert(index: number, newValue: Value): void {
-    const observers = this._observers;
-    const n = observers ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
-      if (observer.didInsert) {
-        const newObject = newValue.coerce(this._valueForm);
-        observer.didInsert(index, newObject, this);
-      }
-    }
   }
 
   /** @hidden */
@@ -537,7 +489,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   protected didAliasModel(): void {
     this.onLinkedResponse();
     this._model!._state.forEach(function (value: Value, index: number) {
-      this.listDidInsert(index, value);
+      this.listDidUpdate(index, value, Value.absent());
     }, this);
     this.onSyncedResponse();
   }
