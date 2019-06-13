@@ -18,6 +18,8 @@ export * from "./attribute";
 
 export * from "./style";
 
+export * from "./layout";
+
 export {
   ViewEvent,
   ViewMouseEvent,
@@ -44,6 +46,8 @@ export {AnimatedViewController} from "./AnimatedViewController";
 export {RenderView} from "./RenderView";
 export {RenderViewObserver} from "./RenderViewObserver";
 export {RenderViewController} from "./RenderViewController";
+
+export {LayoutView} from "./LayoutView";
 
 export {
   FillViewInit,

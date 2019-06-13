@@ -50,6 +50,10 @@ export interface AnimatedViewController<V extends AnimatedView = AnimatedView> e
 
   viewDidResize(view: V): void;
 
+  viewWillLayout(view: V): void;
+
+  viewDidLayout(view: V): void;
+
   viewWillScroll(view: V): void;
 
   viewDidScroll(view: V): void;

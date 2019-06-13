@@ -12,47 +12,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyTransform, Transform} from "@swim/transform";
 import {Tween, Transition} from "@swim/transition";
-import {AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorConstructor, AttributeAnimator} from "./AttributeAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class TransformAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Transform, AnyTransform> {
-  constructor(target: V, name: string, value?: Transform | null, transition?: Transition<Transform> | null) {
-    super(target, name, value, transition);
-    let animator = this;
-    function accessor(): Transform | null | undefined;
-    function accessor(value: AnyTransform | null, tween?: Tween<Transform>): V;
-    function accessor(value?: AnyTransform | null, tween?: Tween<Transform>): Transform | null | undefined | V {
+export interface TransformAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Transform, AnyTransform> {
+}
+
+/** @hidden */
+export const TransformAttributeAnimator = (function (_super: typeof AttributeAnimator): AttributeAnimatorConstructor {
+  const TransformAttributeAnimator: AttributeAnimatorConstructor = function <V extends ElementView>(
+      this: TransformAttributeAnimator<V>, view: V, name: string, value?: Transform | null,
+      transition?: Transition<Transform> | null): TransformAttributeAnimator<V> {
+    let _this: TransformAttributeAnimator<V> = function (value?: AnyTransform | null, tween?: Tween<Transform>): Transform | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           value = Transform.fromAny(value);
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as TransformAttributeAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, name, value, transition) || _this;
+    return _this;
+  } as unknown as AttributeAnimatorConstructor;
+  __extends(TransformAttributeAnimator, _super);
 
-  get value(): Transform | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const attributeValue = this.attributeValue;
-      if (attributeValue) {
-        try {
-          value = Transform.parse(attributeValue);
-        } catch (swallow) {
-          // nop
+  Object.defineProperty(TransformAttributeAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: TransformAttributeAnimator<V>): Transform | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const attributeValue = this.attributeValue;
+        if (attributeValue) {
+          try {
+            value = Transform.parse(attributeValue);
+          } catch (swallow) {
+            // nop
+          }
         }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return TransformAttributeAnimator;
+}(AttributeAnimator));
 AttributeAnimator.Transform = TransformAttributeAnimator;

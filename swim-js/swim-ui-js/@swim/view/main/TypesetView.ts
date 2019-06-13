@@ -41,7 +41,7 @@ export interface TypesetView extends RenderView {
 
 /** @hidden */
 export const TypesetView = {
-  is<I>(object: unknown): object is TypesetView {
+  is(object: unknown): object is TypesetView {
     if (typeof object === "object" && object) {
       const view = object as TypesetView;
       return view instanceof View

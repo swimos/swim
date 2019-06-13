@@ -12,32 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyColor, Color} from "@swim/color";
 import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimator} from "./MemberAnimator";
+import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
-export class ColorMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, Color, AnyColor> {
-  constructor(view: V, value?: Color | null, transition?: Transition<Color> | null, inherit?: MemberAnimatorInherit) {
-    super(view, value, transition, inherit);
-    let animator = this;
-    function accessor(): Color | undefined;
-    function accessor(value: AnyColor | null, tween?: Tween<Color>): V;
-    function accessor(value?: AnyColor | null, tween?: Tween<Color>): Color | null | undefined | V {
+export interface ColorMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, Color, AnyColor> {
+}
+
+/** @hidden */
+export const ColorMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
+  const ColorMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
+      this: ColorMemberAnimator<V>, view: V, value?: Color | null,
+      transition?: Transition<Color> | null, inherit?: MemberAnimatorInherit): ColorMemberAnimator<V> {
+    let _this: ColorMemberAnimator<V> = function (value?: AnyColor | null, tween?: Tween<Color>): Color | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           value = Color.fromAny(value);
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
-}
+    } as ColorMemberAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, value, transition, inherit) || _this;
+    return _this;
+  } as unknown as MemberAnimatorConstructor;
+  __extends(ColorMemberAnimator, _super);
+
+  return ColorMemberAnimator;
+}(MemberAnimator));
 MemberAnimator.Color = ColorMemberAnimator;

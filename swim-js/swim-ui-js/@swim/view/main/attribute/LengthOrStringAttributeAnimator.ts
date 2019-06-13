@@ -12,55 +12,65 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyLength, Length} from "@swim/length";
 import {Tween, Transition} from "@swim/transition";
-import {AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorConstructor, AttributeAnimator} from "./AttributeAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class LengthOrStringAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Length | string, AnyLength | string> {
-  constructor(target: V, name: string, value?: Length | string | null, transition?: Transition<Length | string> | null) {
-    super(target, name, value, transition);
-    let animator = this;
-    function accessor(): Length | string | null | undefined;
-    function accessor(value: AnyLength | string | null, tween?: Tween<Length | string>): V;
-    function accessor(value?: AnyLength | string | null, tween?: Tween<Length | string>): Length | string | null | undefined | V {
+export interface LengthOrStringAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Length | string, AnyLength | string> {
+}
+
+/** @hidden */
+export const LengthOrStringAttributeAnimator = (function (_super: typeof AttributeAnimator): AttributeAnimatorConstructor {
+  const LengthOrStringAttributeAnimator: AttributeAnimatorConstructor = function <V extends ElementView>(
+      this: LengthOrStringAttributeAnimator<V>, view: V, name: string, value?: Length | string | null,
+      transition?: Transition<Length | string> | null): LengthOrStringAttributeAnimator<V> {
+    let _this: LengthOrStringAttributeAnimator<V> = function (value?: AnyLength | string | null, tween?: Tween<Length | string>): Length | string | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           if (typeof value === "string") {
             try {
-              value = Length.parse(value, target._node);
+              value = Length.parse(value, _this._view._node);
             } catch (swallow) {
               // string value
             }
           } else {
-            value = Length.fromAny(value, target._node);
+            value = Length.fromAny(value, _this._view._node);
           }
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as LengthOrStringAttributeAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, name, value, transition) || _this;
+    return _this;
+  } as unknown as AttributeAnimatorConstructor;
+  __extends(LengthOrStringAttributeAnimator, _super);
 
-  get value(): Length | string | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const attributeValue = this.attributeValue;
-      if (attributeValue) {
-        try {
-          value = Length.parse(attributeValue);
-        } catch (swallow) {
-          value = attributeValue;
+  Object.defineProperty(LengthOrStringAttributeAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: LengthOrStringAttributeAnimator<V>): Length | string | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const attributeValue = this.attributeValue;
+        if (attributeValue) {
+          try {
+            value = Length.parse(attributeValue, this._view._node);
+          } catch (swallow) {
+            value = attributeValue;
+          }
         }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return LengthOrStringAttributeAnimator;
+}(AttributeAnimator));
 AttributeAnimator.LengthOrString = LengthOrStringAttributeAnimator;

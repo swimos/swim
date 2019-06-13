@@ -28,7 +28,7 @@ export interface FillView extends RenderView {
 
 /** @hidden */
 export const FillView = {
-  is<I>(object: unknown): object is FillView {
+  is(object: unknown): object is FillView {
     if (typeof object === "object" && object) {
       const view = object as FillView;
       return view instanceof View

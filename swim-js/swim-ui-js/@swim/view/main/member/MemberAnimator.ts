@@ -47,10 +47,12 @@ export type MemberAnimatorType = FromAny<any>
                                | typeof Font
                                | typeof Transform;
 
-export interface MemberAnimatorClass {
+export interface MemberAnimatorConstructor {
   new<V extends AnimatedView, T, U = T>(view: V, value?: T | null, transition?: Transition<T> | null,
                                         inherit?: MemberAnimatorInherit): MemberAnimator<V, T, U>;
+}
 
+export interface MemberAnimatorClass extends MemberAnimatorConstructor {
   (type: MemberAnimatorType, inherit?: string): PropertyDecorator;
 
   // Forward type declarations
@@ -103,7 +105,7 @@ export const MemberAnimator = (function (_super: typeof TweenAnimator): MemberAn
   const MemberAnimator: MemberAnimatorClass = function <V extends AnimatedView, T, U>(
       this: MemberAnimator<V, T, U> | undefined, view: V | MemberAnimatorType | unknown,
       value?: T | null | string, transition?: Transition<T> | null,
-      inherit?: MemberAnimatorInherit): MemberAnimator<V, T, U> | PropertyDecorator | void {
+      inherit?: MemberAnimatorInherit): MemberAnimator<V, T, U> | PropertyDecorator {
     if (this instanceof MemberAnimator) { // constructor
       if (transition === void 0) {
         transition = null;

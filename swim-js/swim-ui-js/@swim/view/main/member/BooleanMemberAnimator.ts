@@ -12,31 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimator} from "./MemberAnimator";
+import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
-export class BooleanMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, boolean, boolean | string> {
-  constructor(view: V, value?: boolean | null, transition?: Transition<boolean> | null, inherit?: MemberAnimatorInherit) {
-    super(view, value, transition, inherit);
-    let animator = this;
-    function accessor(): boolean | undefined;
-    function accessor(value: boolean | string | null, tween?: Tween<boolean>): V;
-    function accessor(value?: boolean | string | null, tween?: Tween<boolean>): boolean | null | undefined | V {
+export interface BooleanMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, boolean, boolean | string> {
+}
+
+/** @hidden */
+export const BooleanMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
+  const BooleanMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
+      this: BooleanMemberAnimator<V>, view: V, value?: boolean | null,
+      transition?: Transition<boolean> | null, inherit?: MemberAnimatorInherit): BooleanMemberAnimator<V> {
+    let _this: BooleanMemberAnimator<V> = function (value?: boolean | string | null, tween?: Tween<boolean>): boolean | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (typeof value === "string") {
           value = value ? true : false;
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
-}
+    } as BooleanMemberAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, value, transition, inherit) || _this;
+    return _this;
+  } as unknown as MemberAnimatorConstructor;
+  __extends(BooleanMemberAnimator, _super);
+
+  return BooleanMemberAnimator;
+}(MemberAnimator));
 MemberAnimator.Boolean = BooleanMemberAnimator;

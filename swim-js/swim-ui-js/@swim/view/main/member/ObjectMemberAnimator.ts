@@ -12,28 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimator} from "./MemberAnimator";
+import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
-export class ObjectMemberAnimator<V extends AnimatedView, T> extends MemberAnimator<V, T, T> {
-  constructor(view: V, value?: T | null, transition?: Transition<T> | null, inherit?: MemberAnimatorInherit) {
-    super(view, value, transition, inherit);
-    let animator = this;
-    function accessor(): T | undefined;
-    function accessor(value: T | null, tween?: Tween<T>): V;
-    function accessor(value?: T | null, tween?: Tween<T>): T | null | undefined | V {
-      if (value === void 0) {
-        return animator.value;
-      } else {
-        animator.setState(value, tween);
-        return animator._view;
-      }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+export interface ObjectMemberAnimator<V extends AnimatedView, T> extends MemberAnimator<V, T, T> {
 }
+
+/** @hidden */
+export const ObjectMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
+  const ObjectMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView, T>(
+      this: ObjectMemberAnimator<V, T>, view: V, value?: T | null,
+      transition?: Transition<T> | null, inherit?: MemberAnimatorInherit): ObjectMemberAnimator<V, T> {
+    let _this: ObjectMemberAnimator<V, T> = function (value?: T | null, tween?: Tween<T>): T | null | undefined | V {
+      if (value === void 0) {
+        return _this.value;
+      } else {
+        _this.setState(value, tween);
+        return _this._view;
+      }
+    } as ObjectMemberAnimator<V, T>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, value, transition, inherit) || _this;
+    return _this;
+  } as unknown as MemberAnimatorConstructor;
+  __extends(ObjectMemberAnimator, _super);
+
+  return ObjectMemberAnimator;
+}(MemberAnimator));
 MemberAnimator.Object = ObjectMemberAnimator;

@@ -12,43 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {Tween, Transition} from "@swim/transition";
-import {StyleAnimator} from "./StyleAnimator";
+import {StyleAnimatorConstructor, StyleAnimator} from "./StyleAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class NumberStyleAnimator<V extends ElementView> extends StyleAnimator<V, number, number | string> {
-  constructor(view: V, names: string | ReadonlyArray<string>, value?: number | null,
-              transition?: Transition<number> | null, priority?: string) {
-    super(view, names, value, transition, priority);
-    let animator = this;
-    function accessor(): number | null | undefined;
-    function accessor(value: number | string | null, tween?: Tween<number>, priority?: string | null): V;
-    function accessor(value?: number | string | null, tween?: Tween<number>, priority?: string | null): number | null | undefined | V {
+export interface NumberStyleAnimator<V extends ElementView> extends StyleAnimator<V, number, number | string> {
+}
+
+/** @hidden */
+export const NumberStyleAnimator = (function (_super: typeof StyleAnimator): StyleAnimatorConstructor {
+  const NumberStyleAnimator: StyleAnimatorConstructor = function <V extends ElementView>(
+      this: NumberStyleAnimator<V>, view: V, names: string | ReadonlyArray<string>, value?: number | null,
+      transition?: Transition<number> | null, priority?: string): NumberStyleAnimator<V> {
+    let _this: NumberStyleAnimator<V> = function (value?: number | string | null, tween?: Tween<number>, priority?: string | null): number | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (typeof value === "string") {
           value = +value;
         }
-        animator.setState(value, tween, priority);
-        return animator._view;
+        _this.setState(value, tween, priority);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as NumberStyleAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, names, value, transition, priority) || _this;
+    return _this;
+  } as unknown as StyleAnimatorConstructor;
+  __extends(NumberStyleAnimator, _super);
 
-  get value(): number | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const propertyValue = this.propertyValue;
-      if (propertyValue) {
-        value = +propertyValue;
+  Object.defineProperty(NumberStyleAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: NumberStyleAnimator<V>): number | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const propertyValue = this.propertyValue;
+        if (propertyValue) {
+          value = +propertyValue;
+        }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return NumberStyleAnimator;
+}(StyleAnimator));
 StyleAnimator.Number = NumberStyleAnimator;

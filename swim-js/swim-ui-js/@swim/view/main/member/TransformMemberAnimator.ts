@@ -12,32 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyTransform, Transform} from "@swim/transform";
 import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimator} from "./MemberAnimator";
+import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
-export class TransformMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, Transform, AnyTransform> {
-  constructor(view: V, value?: Transform | null, transition?: Transition<Transform> | null, inherit?: MemberAnimatorInherit) {
-    super(view, value, transition, inherit);
-    let animator = this;
-    function accessor(): Transform | undefined;
-    function accessor(value: AnyTransform | null, tween?: Tween<Transform>): V;
-    function accessor(value?: AnyTransform | null, tween?: Tween<Transform>): Transform | null | undefined | V {
+export interface TransformMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, Transform, AnyTransform> {
+}
+
+/** @hidden */
+export const TransformMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
+  const TransformMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
+      this: TransformMemberAnimator<V>, view: V, value?: Transform | null,
+      transition?: Transition<Transform> | null, inherit?: MemberAnimatorInherit): TransformMemberAnimator<V> {
+    let _this: TransformMemberAnimator<V> = function (value?: AnyTransform | null, tween?: Tween<Transform>): Transform | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           value = Transform.fromAny(value);
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
-}
+    } as TransformMemberAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, value, transition, inherit) || _this;
+    return _this;
+  } as unknown as MemberAnimatorConstructor;
+  __extends(TransformMemberAnimator, _super);
+
+  return TransformMemberAnimator;
+}(MemberAnimator));
 MemberAnimator.Transform = TransformMemberAnimator;

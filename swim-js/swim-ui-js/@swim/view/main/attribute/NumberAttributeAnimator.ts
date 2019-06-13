@@ -12,42 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {Tween, Transition} from "@swim/transition";
-import {AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorConstructor, AttributeAnimator} from "./AttributeAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class NumberAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, number, number | string> {
-  constructor(target: V, name: string, value?: number | null, transition?: Transition<number> | null) {
-    super(target, name, value, transition);
-    let animator = this;
-    function accessor(): number | null | undefined;
-    function accessor(value: number | string | null, tween?: Tween<number>): V;
-    function accessor(value?: number | string | null, tween?: Tween<number>): number | null | undefined | V {
+export interface NumberAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, number, number | string> {
+}
+
+/** @hidden */
+export const NumberAttributeAnimator = (function (_super: typeof AttributeAnimator): AttributeAnimatorConstructor {
+  const NumberAttributeAnimator: AttributeAnimatorConstructor = function <V extends ElementView>(
+      this: NumberAttributeAnimator<V>, view: V, name: string, value?: number | null,
+      transition?: Transition<number> | null): NumberAttributeAnimator<V> {
+    let _this: NumberAttributeAnimator<V> = function (value?: number | string | null, tween?: Tween<number>): number | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (typeof value === "string") {
           value = +value;
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as NumberAttributeAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, name, value, transition) || _this;
+    return _this;
+  } as unknown as AttributeAnimatorConstructor;
+  __extends(NumberAttributeAnimator, _super);
 
-  get value(): number | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const attributeValue = this.attributeValue;
-      if (attributeValue) {
-        value = +attributeValue;
+  Object.defineProperty(NumberAttributeAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: NumberAttributeAnimator<V>): number | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const attributeValue = this.attributeValue;
+        if (attributeValue) {
+          value = +attributeValue;
+        }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return NumberAttributeAnimator;
+}(AttributeAnimator));
 AttributeAnimator.Number = NumberAttributeAnimator;

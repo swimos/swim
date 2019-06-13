@@ -34,7 +34,7 @@ export interface AppView extends View {
 
 /** @hidden */
 export const AppView = {
-  is<I>(object: unknown): object is AppView {
+  is(object: unknown): object is AppView {
     if (typeof object === "object" && object) {
       const view = object as AppView;
       return view instanceof View

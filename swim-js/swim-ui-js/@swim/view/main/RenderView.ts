@@ -66,7 +66,7 @@ export interface RenderView extends AnimatedView {
 
 /** @hidden */
 export const RenderView = {
-  is<I>(object: unknown): object is RenderView {
+  is(object: unknown): object is RenderView {
     if (typeof object === "object" && object) {
       const view = object as RenderView;
       return view instanceof View.Graphic || view instanceof View

@@ -12,42 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {Tween, Transition} from "@swim/transition";
-import {AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorConstructor, AttributeAnimator} from "./AttributeAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class BooleanAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, boolean, boolean | string> {
-  constructor(target: V, name: string, value?: boolean | null, transition?: Transition<boolean> | null) {
-    super(target, name, value, transition);
-    let animator = this;
-    function accessor(): boolean | null | undefined;
-    function accessor(value: boolean | string | null, tween?: Tween<boolean>): V;
-    function accessor(value?: boolean | string | null, tween?: Tween<boolean>): boolean | null | undefined | V {
+export interface BooleanAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, boolean, boolean | string> {
+}
+
+/** @hidden */
+export const BooleanAttributeAnimator = (function (_super: typeof AttributeAnimator): AttributeAnimatorConstructor {
+  const BooleanAttributeAnimator: AttributeAnimatorConstructor = function <V extends ElementView>(
+      this: BooleanAttributeAnimator<V>, view: V, name: string, value?: boolean | null,
+      transition?: Transition<boolean> | null): BooleanAttributeAnimator<V> {
+    let _this: BooleanAttributeAnimator<V> = function (value?: boolean | string | null, tween?: Tween<boolean>): boolean | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (typeof value === "string") {
           value = value ? true : false;
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as BooleanAttributeAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, name, value, transition) || _this;
+    return _this;
+  } as unknown as AttributeAnimatorConstructor;
+  __extends(BooleanAttributeAnimator, _super);
 
-  get value(): boolean | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const attributeValue = this.attributeValue;
-      if (attributeValue) {
-        value = !!attributeValue;
+  Object.defineProperty(BooleanAttributeAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: BooleanAttributeAnimator<V>): boolean | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const attributeValue = this.attributeValue;
+        if (attributeValue) {
+          value = !!attributeValue;
+        }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return BooleanAttributeAnimator;
+}(AttributeAnimator));
 AttributeAnimator.Boolean = BooleanAttributeAnimator;

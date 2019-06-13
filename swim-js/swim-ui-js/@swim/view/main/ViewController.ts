@@ -76,7 +76,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     return view ? view.parentView : null;
   }
 
-  get parentViewController(): ViewObserver | null {
+  get parentViewController(): ViewController | null {
     const parentView = this.parentView;
     return parentView ? parentView.viewController : null;
   }
@@ -94,8 +94,8 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     return view ? view.childViews : [];
   }
 
-  get childViewControllers(): ReadonlyArray<ViewObserver | null> {
-    return this.childViews.map(function (view: View): ViewObserver | null {
+  get childViewControllers(): ReadonlyArray<ViewController | null> {
+    return this.childViews.map(function (view: View): ViewController | null {
       return view.viewController;
     });
   }
@@ -105,7 +105,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     return view ? view.getChildView(key) : null;
   }
 
-  getChildViewController(key: string): ViewObserver | null {
+  getChildViewController(key: string): ViewController | null {
     const childView = this.getChildView(key);
     return childView ? childView.viewController : null;
   }
@@ -119,7 +119,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     }
   }
 
-  setChildViewController(key: string, newChildViewController: ViewObserver | null): ViewObserver | null {
+  setChildViewController(key: string, newChildViewController: ViewController | null): ViewController | null {
     const newChildView = newChildViewController ? newChildViewController.view : null;
     if (newChildView !== void 0) {
       const oldChildView = this.setChildView(key, newChildView);
@@ -138,7 +138,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     }
   }
 
-  appendChildViewController(childViewController: ViewObserver): void {
+  appendChildViewController(childViewController: ViewController): void {
     const childView = childViewController.view;
     if (childView) {
       this.appendChildView(childView);
@@ -156,7 +156,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     }
   }
 
-  prependChildViewController(childViewController: ViewObserver): void {
+  prependChildViewController(childViewController: ViewController): void {
     const childView = childViewController.view;
     if (childView) {
       this.prependChildView(childView);
@@ -174,7 +174,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     }
   }
 
-  insertChildViewController(childViewController: ViewObserver, targetViewController: ViewObserver | View | null): void {
+  insertChildViewController(childViewController: ViewController, targetViewController: ViewController | View | null): void {
     const childView = childViewController.view;
     let targetView: View | null | undefined;
     if (targetViewController && !(targetViewController instanceof View)) {
@@ -206,7 +206,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     }
   }
 
-  removeChildViewController(childViewController: ViewObserver): void {
+  removeChildViewController(childViewController: ViewController): void {
     const childView = childViewController.view;
     if (childView) {
       this.removeChildView(childView);
@@ -267,6 +267,14 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   viewDidResize(view: V): void {
+    // hook
+  }
+
+  viewWillLayout(view: V): void {
+    // hook
+  }
+
+  viewDidLayout(view: V): void {
     // hook
   }
 

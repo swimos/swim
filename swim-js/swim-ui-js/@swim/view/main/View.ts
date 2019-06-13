@@ -14,12 +14,15 @@
 
 import {BoxR2} from "@swim/math";
 import {Transform} from "@swim/transform";
-import {MemberAnimatorInherit, MemberAnimatorClass, MemberAnimator} from "./member/MemberAnimator";
+import {ConstraintStrength} from "@swim/constraint";
+import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./member/MemberAnimator";
+import {LayoutAnchorConstructor, LayoutAnchor} from "./layout/LayoutAnchor";
 import {ViewObserver} from "./ViewObserver";
 import {ViewController} from "./ViewController";
 import {AppView} from "./AppView";
 import {AnimatedView} from "./AnimatedView";
 import {RenderView} from "./RenderView";
+import {LayoutView} from "./LayoutView";
 import {GraphicView} from "./GraphicView";
 import {LayerView} from "./LayerView";
 import {ViewNode, NodeView} from "./NodeView";
@@ -325,6 +328,37 @@ export abstract class View {
     });
   }
 
+  cascadeLayout(): void {
+    this.willLayout();
+    this.onLayout();
+    const childViews = this.childViews;
+    for (let i = 0, n = childViews.length; i < n; i += 1) {
+      const childView = childViews[i];
+      childView.cascadeLayout();
+    }
+    this.didLayout();
+  }
+
+  protected willLayout(): void {
+    this.willObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewWillLayout) {
+        viewObserver.viewWillLayout(this);
+      }
+    });
+  }
+
+  protected onLayout(): void {
+    // stub
+  }
+
+  protected didLayout(): void {
+    this.didObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewDidLayout) {
+        viewObserver.viewDidLayout(this);
+      }
+    });
+  }
+
   cascadeScroll(): void {
     this.willScroll();
     this.onScroll();
@@ -452,8 +486,8 @@ export abstract class View {
   static create(tag: "canvas"): CanvasView;
   static create<K extends keyof HTMLElementTagNameMap>(tag: K): HtmlView;
   static create(tag: string): ElementView;
-  static create<V extends ElementView>(tag: ElementViewClass<Element, V>): V;
-  static create<V extends ElementView>(tag: string | ElementViewClass<Element, V>): ElementView {
+  static create<V extends ElementView>(tag: ElementViewClass<Element, V>, key?: string): V;
+  static create<V extends ElementView>(tag: string | ElementViewClass<Element, V>, key?: string): ElementView {
     if (typeof tag === "string") {
       if (tag === "svg") {
         return new View.Svg(document.createElementNS(View.Svg.NS, tag) as SVGElement);
@@ -464,17 +498,22 @@ export abstract class View {
       }
     } else if (typeof tag === "function") {
       const ns = tag.NS;
+      let view: V;
       if (ns === void 0) {
-        return new tag(document.createElement(tag.tag));
+        view = new tag(document.createElement(tag.tag));
       } else {
-        return new tag(document.createElementNS(ns, tag.tag));
+        view = new tag(document.createElementNS(ns, tag.tag));
       }
+      if (key !== void 0) {
+        view = view.key(key);
+      }
+      return view;
     }
     throw new TypeError("" + tag);
   }
 
   /** @hidden */
-  static decorateMemberAnimator<V extends AnimatedView, T, U>(MemberAnimator: MemberAnimatorClass,
+  static decorateMemberAnimator<V extends AnimatedView, T, U>(MemberAnimator: MemberAnimatorConstructor,
                                                               inherit: MemberAnimatorInherit | undefined,
                                                               target: unknown, key: string): void {
     if (inherit === "inherit") {
@@ -483,12 +522,36 @@ export abstract class View {
     Object.defineProperty(target, key, {
       get: function (this: V): MemberAnimator<V, T, U> {
         const animator = new MemberAnimator<V, T, U>(this, void 0, void 0, inherit);
+        Object.defineProperty(animator, "name", {
+          value: key,
+          enumerable: true,
+          configurable: true,
+        });
         Object.defineProperty(this, key, {
           value: animator,
           configurable: true,
           enumerable: true,
         });
         return animator;
+      },
+      configurable: true,
+      enumerable: true,
+    });
+  }
+
+  /** @hidden */
+  static decorateLayoutAnchor<V extends LayoutView>(LayoutAnchor: LayoutAnchorConstructor,
+                                                    value: number, strength: ConstraintStrength,
+                                                    target: unknown, key: string): void {
+    Object.defineProperty(target, key, {
+      get: function (this: V): LayoutAnchor<V> {
+        const anchor = new LayoutAnchor<V>(this, key, value, strength);
+        Object.defineProperty(this, key, {
+          value: anchor,
+          configurable: true,
+          enumerable: true,
+        });
+        return anchor;
       },
       configurable: true,
       enumerable: true,
@@ -502,6 +565,8 @@ export abstract class View {
   static Animated: typeof AnimatedView; // defined by AnimatedView
   /** @hidden */
   static Render: typeof RenderView; // defined by RenderView
+  /** @hidden */
+  static Layout: typeof LayoutView; // defined by LayoutView
   /** @hidden */
   static Graphic: typeof GraphicView; // defined by GraphicView
   /** @hidden */

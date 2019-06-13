@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig-test",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/test",
+    "paths": {
+      "@swim/util": ["../swim-core-js/@swim/util/main"],
+      "@swim/codec": ["../swim-core-js/@swim/codec/main"],
+      "@swim/unit": ["../swim-core-js/@swim/unit/main"],
+      "@swim/constraint": ["@swim/constraint/main"]
+    }
+  },
+  "references": [
+    {"path": "../../constraint/main"}
+  ]
+}

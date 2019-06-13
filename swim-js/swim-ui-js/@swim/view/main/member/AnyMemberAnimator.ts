@@ -12,40 +12,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {FromAny} from "@swim/util";
 import {Tween, Transition} from "@swim/transition";
 import {MemberAnimatorInherit, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
-export class AnyMemberAnimator<V extends AnimatedView, T, U = T> extends MemberAnimator<V, T, T | U> {
+export interface AnyMemberAnimatorClass {
+  new<V extends AnimatedView, T, U = T>(type: FromAny<T, U>, view: V, value?: T | null, transition?: Transition<T> | null,
+                                        inherit?: MemberAnimatorInherit): AnyMemberAnimator<V, T, U>;
+}
+
+/** @hidden */
+export interface AnyMemberAnimator<V extends AnimatedView, T, U = T> extends MemberAnimator<V, T, U> {
   /** @hidden */
   readonly _type: FromAny<T, U>;
 
-  constructor(type: FromAny<T, U>, view: V, value?: T | null, transition?: Transition<T> | null, inherit?: MemberAnimatorInherit) {
-    super(view, value, transition, inherit);
-    this._type = type;
-    let animator = this;
-    function accessor(): T | undefined;
-    function accessor(value: T | U | null, tween?: Tween<T>): V;
-    function accessor(value?: T | U | null, tween?: Tween<T>): T | null | undefined | V {
+  readonly type: FromAny<T, U>;
+}
+
+/** @hidden */
+export const AnyMemberAnimator = (function (_super: typeof MemberAnimator): AnyMemberAnimatorClass {
+  const AnyMemberAnimator: AnyMemberAnimatorClass = function <V extends AnimatedView, T, U>(
+      this: AnyMemberAnimator<V, T, U>, type: FromAny<T, U>, view: V, value?: T | null,
+      transition?: Transition<T> | null, inherit?: MemberAnimatorInherit): AnyMemberAnimator<V, T, U> {
+    let _this: AnyMemberAnimator<V, T, U> = function (value?: T | U | null, tween?: Tween<T>): T | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
-          value = animator.type.fromAny(value);
+          value = _this._type.fromAny(value);
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as AnyMemberAnimator<V, T, U>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, value, transition, inherit) || _this;
+    (_this as any)._type = type;
+    return _this;
+  } as unknown as AnyMemberAnimatorClass;
+  __extends(AnyMemberAnimator, _super);
 
-  get type(): FromAny<T, U> {
-    return this._type;
-  }
-}
+  Object.defineProperty(AnyMemberAnimator.prototype, "type", {
+    get: function <V extends AnimatedView, T, U>(this: AnyMemberAnimator<V, T, U>): FromAny<T, U> {
+      return this._type;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return AnyMemberAnimator;
+}(MemberAnimator));
 MemberAnimator.Any = AnyMemberAnimator;

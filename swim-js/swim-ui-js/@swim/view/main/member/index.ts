@@ -15,11 +15,15 @@
 export {
   MemberAnimatorInherit,
   MemberAnimatorType,
+  MemberAnimatorConstructor,
   MemberAnimatorClass,
   MemberAnimator,
 } from "./MemberAnimator";
 
-export {AnyMemberAnimator} from "./AnyMemberAnimator";
+export {
+  AnyMemberAnimatorClass,
+  AnyMemberAnimator,
+} from "./AnyMemberAnimator";
 
 export {ObjectMemberAnimator} from "./ObjectMemberAnimator";
 

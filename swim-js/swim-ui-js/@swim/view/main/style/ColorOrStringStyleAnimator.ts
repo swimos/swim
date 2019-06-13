@@ -12,22 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyColor, Color} from "@swim/color";
 import {Tween, Transition} from "@swim/transition";
-import {StyleAnimator} from "./StyleAnimator";
+import {StyleAnimatorConstructor, StyleAnimator} from "./StyleAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class ColorOrStringStyleAnimator<V extends ElementView> extends StyleAnimator<V, Color | string, AnyColor | string> {
-  constructor(view: V, names: string | ReadonlyArray<string>, value?: Color | string | null,
-              transition?: Transition<Color | string> | null, priority?: string) {
-    super(view, names, value, transition, priority);
-    let animator = this;
-    function accessor(): Color | string | null | undefined;
-    function accessor(value: AnyColor | string | null, tween?: Tween<Color | string>, priority?: string | null): V;
-    function accessor(value?: AnyColor | string | null, tween?: Tween<Color | string>, priority?: string | null): Color | string | null | undefined | V {
+export interface ColorOrStringStyleAnimator<V extends ElementView> extends StyleAnimator<V, Color | string, AnyColor | string> {
+}
+
+/** @hidden */
+export const ColorOrStringStyleAnimator = (function (_super: typeof StyleAnimator): StyleAnimatorConstructor {
+  const ColorOrStringStyleAnimator: StyleAnimatorConstructor = function <V extends ElementView>(
+      this: ColorOrStringStyleAnimator<V>, view: V, names: string | ReadonlyArray<string>, value?: Color | string | null,
+      transition?: Transition<Color | string> | null, priority?: string): ColorOrStringStyleAnimator<V> {
+    let _this: ColorOrStringStyleAnimator<V> = function (value?: AnyColor | string | null, tween?: Tween<Color | string>, priority?: string | null): Color | string | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           if (typeof value === "string") {
@@ -40,28 +42,35 @@ export class ColorOrStringStyleAnimator<V extends ElementView> extends StyleAnim
             value = Color.fromAny(value);
           }
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween, priority);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as ColorOrStringStyleAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, names, value, transition, priority) || _this;
+    return _this;
+  } as unknown as StyleAnimatorConstructor;
+  __extends(ColorOrStringStyleAnimator, _super);
 
-  get value(): Color | string | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const propertyValue = this.propertyValue;
-      if (propertyValue) {
-        try {
-          value = Color.parse(propertyValue);
-        } catch (swallow) {
-          value = propertyValue;
+  Object.defineProperty(ColorOrStringStyleAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: ColorOrStringStyleAnimator<V>): Color | string | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const propertyValue = this.propertyValue;
+        if (propertyValue) {
+          try {
+            value = Color.parse(propertyValue);
+          } catch (swallow) {
+            value = propertyValue;
+          }
         }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return ColorOrStringStyleAnimator;
+}(StyleAnimator));
 StyleAnimator.ColorOrString = ColorOrStringStyleAnimator;

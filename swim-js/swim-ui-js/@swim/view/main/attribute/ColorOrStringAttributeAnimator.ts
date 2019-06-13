@@ -12,21 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyColor, Color} from "@swim/color";
 import {Tween, Transition} from "@swim/transition";
-import {AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorConstructor, AttributeAnimator} from "./AttributeAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class ColorOrStringAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Color | string, AnyColor | string> {
-  constructor(target: V, name: string, value?: Color | string | null, transition?: Transition<Color | string> | null) {
-    super(target, name, value, transition);
-    let animator = this;
-    function accessor(): Color | string | null | undefined;
-    function accessor(value: AnyColor | string | null, tween?: Tween<Color | string>): V;
-    function accessor(value?: AnyColor | string | null, tween?: Tween<Color | string>): Color | string | null | undefined | V {
+export interface ColorOrStringAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Color | string, AnyColor | string> {
+}
+
+/** @hidden */
+export const ColorOrStringAttributeAnimator = (function (_super: typeof AttributeAnimator): AttributeAnimatorConstructor {
+  const ColorOrStringAttributeAnimator: AttributeAnimatorConstructor = function <V extends ElementView>(
+      this: ColorOrStringAttributeAnimator<V>, view: V, name: string, value?: Color | string | null,
+      transition?: Transition<Color | string> | null): ColorOrStringAttributeAnimator<V> {
+    let _this: ColorOrStringAttributeAnimator<V> = function (value?: AnyColor | string | null, tween?: Tween<Color | string>): Color | string | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           if (typeof value === "string") {
@@ -39,28 +42,35 @@ export class ColorOrStringAttributeAnimator<V extends ElementView> extends Attri
             value = Color.fromAny(value);
           }
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as ColorOrStringAttributeAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, name, value, transition) || _this;
+    return _this;
+  } as unknown as AttributeAnimatorConstructor;
+  __extends(ColorOrStringAttributeAnimator, _super);
 
-  get value(): Color | string | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const attributeValue = this.attributeValue;
-      if (attributeValue) {
-        try {
-          value = Color.parse(attributeValue);
-        } catch (swallow) {
-          value = attributeValue;
+  Object.defineProperty(ColorOrStringAttributeAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: ColorOrStringAttributeAnimator<V>): Color | string | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const attributeValue = this.attributeValue;
+        if (attributeValue) {
+          try {
+            value = Color.parse(attributeValue);
+          } catch (swallow) {
+            value = attributeValue;
+          }
         }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return ColorOrStringAttributeAnimator;
+}(AttributeAnimator));
 AttributeAnimator.ColorOrString = ColorOrStringAttributeAnimator;

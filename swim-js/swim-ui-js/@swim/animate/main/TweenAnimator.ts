@@ -193,15 +193,9 @@ export abstract class TweenAnimator<T> extends Animator implements Inoutlet<T, T
       if (transition._interpolator !== null) {
         this._interpolator = transition._interpolator;
       }
-      if (transition._onStart !== null) {
-        this._onStart = transition._onStart;
-      }
-      if (transition._onEnd !== null) {
-        this._onEnd = transition._onEnd;
-      }
-      if (transition._onInterrupt !== null) {
-        this._onInterrupt = transition._onInterrupt;
-      }
+      this._onStart = transition._onStart;
+      this._onEnd = transition._onEnd;
+      this._onInterrupt = transition._onInterrupt;
       return this;
     }
   }
@@ -221,6 +215,10 @@ export abstract class TweenAnimator<T> extends Animator implements Inoutlet<T, T
       this.transition(tween); // may update transition interrupt callback
     } else if (!tween) {
       this._duration = 0;
+      this._onStart = null;
+      this._onEnd = null;
+      this._onInterrupt = null;
+      this.cancel();
     }
     this._interrupt = interrupt; // stash current transition interrupt callback
 
@@ -253,9 +251,10 @@ export abstract class TweenAnimator<T> extends Animator implements Inoutlet<T, T
           interruptCallback(this._value!); // invoke last transition interrupt callback
         }
       }
-      this._tweenState = TweenState.Diverged;
+      this._tweenState = TweenState.Quiesced;
       this._value = state;
       if (this._value === void 0) {
+        this._interpolator = null;
         this.delete();
       }
     }

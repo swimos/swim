@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {ConstrainVariable, Constraint, ConstraintSolver} from "@swim/constraint";
+import {LayoutManager} from "./layout/LayoutManager";
+import {LayoutSolver} from "./layout/LayoutSolver";
+import {LayoutAnchor} from "./layout/LayoutAnchor";
 import {View} from "./View";
 import {AppView} from "./AppView";
 import {AppViewObserver} from "./AppViewObserver";
@@ -33,13 +37,17 @@ export interface HtmlAppViewport {
   safeArea: HtmlAppViewSafeArea;
 }
 
-export class HtmlAppView extends HtmlView implements AppView {
+export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
   /** @hidden */
   _viewController: HtmlAppViewController | null;
   /** @hidden */
   readonly _popovers: Popover[];
   /** @hidden */
-  _viewport: HtmlAppViewport | null;
+  _viewport: HtmlAppViewport | undefined;
+  /** @hidden */
+  _solver: LayoutSolver | undefined;
+  /** @hidden */
+  _layoutTimer: number; // debounces layout events
   /** @hidden */
   _resizeTimer: number; // debounces resize events
   /** @hidden */
@@ -47,13 +55,14 @@ export class HtmlAppView extends HtmlView implements AppView {
 
   constructor(node: HTMLElement, key: string | null = null) {
     super(node, key);
+    this.doLayout = this.doLayout.bind(this);
     this.throttleResize = this.throttleResize.bind(this);
     this.doResize = this.doResize.bind(this);
     this.throttleScroll = this.throttleScroll.bind(this);
     this.doScroll = this.doScroll.bind(this);
     this.onClick = this.onClick.bind(this);
     this._popovers = [];
-    this._viewport = null;
+    this._layoutTimer = 0;
     this._resizeTimer = 0;
     this._scrollTimer = 0;
     if (typeof window !== "undefined") {
@@ -172,7 +181,7 @@ export class HtmlAppView extends HtmlView implements AppView {
 
   get viewport(): HtmlAppViewport {
     let viewport = this._viewport;
-    if (viewport === null) {
+    if (viewport === void 0) {
       let insetTop = 0;
       let insetRight = 0;
       let insetBottom = 0;
@@ -222,23 +231,119 @@ export class HtmlAppView extends HtmlView implements AppView {
     return viewport;
   }
 
+  /** @hidden */
+  get solver(): ConstraintSolver | null {
+    return this._solver || null;
+  }
+
+  /** @hidden */
+  activateVariable(variable: ConstrainVariable): void {
+    if (this._solver === void 0) {
+      this._solver = new LayoutSolver(this);
+    }
+    this._solver.addVariable(variable);
+  }
+
+  /** @hidden */
+  deactivateVariable(variable: ConstrainVariable): void {
+    if (this._solver !== void 0) {
+      this._solver.removeVariable(variable);
+    }
+  }
+
+  /** @hidden */
+  setVariableState(variable: ConstrainVariable, state: number): void {
+    if (this._solver !== void 0) {
+      this._solver.setVariableState(variable, state);
+    }
+  }
+
+  /** @hidden */
+  activateConstraint(constraint: Constraint): void {
+    if (this._solver === void 0) {
+      this._solver = new LayoutSolver(this);
+    }
+    this._solver.addConstraint(constraint);
+  }
+
+  /** @hidden */
+  deactivateConstraint(constraint: Constraint): void {
+    if (this._solver !== void 0) {
+      this._solver.removeConstraint(constraint);
+    }
+  }
+
+  /** @hidden */
+  updateLayoutStates(): void {
+    super.updateLayoutStates();
+    const viewport = this.viewport;
+    const safeAreaInsetTop = this.hasOwnProperty("safeAreaInsetTop") ? this.safeAreaInsetTop : void 0;
+    const safeAreaInsetRight = this.hasOwnProperty("safeAreaInsetRight") ? this.safeAreaInsetRight : void 0;
+    const safeAreaInsetBottom = this.hasOwnProperty("safeAreaInsetBottom") ? this.safeAreaInsetBottom : void 0;
+    const safeAreaInsetLeft = this.hasOwnProperty("safeAreaInsetLeft") ? this.safeAreaInsetLeft : void 0;
+    if (safeAreaInsetTop && !safeAreaInsetTop.enabled()) {
+      safeAreaInsetTop.setState(viewport.safeArea.insetTop);
+    }
+    if (safeAreaInsetRight && !safeAreaInsetRight.enabled()) {
+      safeAreaInsetRight.setState(viewport.safeArea.insetRight);
+    }
+    if (safeAreaInsetBottom && !safeAreaInsetBottom.enabled()) {
+      safeAreaInsetBottom.setState(viewport.safeArea.insetBottom);
+    }
+    if (safeAreaInsetLeft && !safeAreaInsetLeft.enabled()) {
+      safeAreaInsetLeft.setState(viewport.safeArea.insetLeft);
+    }
+  }
+
+  @LayoutAnchor("strong")
+  safeAreaInsetTop: LayoutAnchor<this>;
+
+  @LayoutAnchor("strong")
+  safeAreaInsetRight: LayoutAnchor<this>;
+
+  @LayoutAnchor("strong")
+  safeAreaInsetBottom: LayoutAnchor<this>;
+
+  @LayoutAnchor("strong")
+  safeAreaInsetLeft: LayoutAnchor<this>;
+
+  /** @hidden */
+  throttleLayout(): void {
+    if (!this._layoutTimer) {
+      this._layoutTimer = setTimeout(this.doResize, 0) as any;
+    }
+  }
+
+  /** @hidden */
+  doLayout(): void {
+    if (this._layoutTimer) {
+      clearTimeout(this._layoutTimer);
+      this._layoutTimer = 0;
+    }
+    if (this._solver !== void 0) {
+      this._solver.updateVariables();
+      this.cascadeLayout();
+    }
+  }
+
   throttleResize(): void {
     if (!this._resizeTimer) {
-      this._resizeTimer = setTimeout(this.doResize, 16) as any;
+      this._resizeTimer = setTimeout(this.doResize, 0) as any;
     }
   }
 
   /** @hidden */
   doResize(): void {
     this._resizeTimer = 0;
-    this._viewport = null;
+    this._viewport = void 0;
     this.cascadeResize();
+    this.doLayout();
   }
 
   /** @hidden */
   throttleScroll(): void {
     if (!this._scrollTimer) {
-      this._scrollTimer = setTimeout(this.doScroll, 16) as any;
+      this._scrollTimer = setTimeout(this.doScroll, 0) as any;
     }
   }
 
@@ -249,6 +354,10 @@ export class HtmlAppView extends HtmlView implements AppView {
   }
 
   protected onUnmount(): void {
+    if (this._layoutTimer) {
+      clearTimeout(this._layoutTimer);
+      this._layoutTimer = 0;
+    }
     if (this._resizeTimer) {
       clearTimeout(this._resizeTimer);
       this._resizeTimer = 0;

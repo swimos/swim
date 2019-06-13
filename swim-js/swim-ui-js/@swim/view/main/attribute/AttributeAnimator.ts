@@ -40,10 +40,12 @@ export type AttributeAnimatorType = typeof String
                                   | [typeof Length, typeof String]
                                   | [typeof Color, typeof String];
 
-export interface AttributeAnimatorClass {
+export interface AttributeAnimatorConstructor {
   new<V extends ElementView, T, U = T>(view: V, name: string, value?: T | null,
                                        transition?: Transition<T> | null): AttributeAnimator<V, T, U>;
+}
 
+export interface AttributeAnimatorClass extends AttributeAnimatorConstructor {
   (name: string, type: AttributeAnimatorType): PropertyDecorator;
 
   // Forward type declarations

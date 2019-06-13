@@ -12,32 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyFont, Font} from "@swim/font";
 import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimator} from "./MemberAnimator";
+import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
-export class FontMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, Font, AnyFont> {
-  constructor(view: V, value?: Font | null, transition?: Transition<Font> | null, inherit?: MemberAnimatorInherit) {
-    super(view, value, transition, inherit);
-    let animator = this;
-    function accessor(): Font | undefined;
-    function accessor(value: AnyFont | null, tween?: Tween<Font>): V;
-    function accessor(value?: AnyFont | null, tween?: Tween<Font>): Font | null | undefined | V {
+export interface FontMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, Font, AnyFont> {
+}
+
+/** @hidden */
+export const FontMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
+  const FontMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
+      this: FontMemberAnimator<V>, view: V, value?: Font | null,
+      transition?: Transition<Font> | null, inherit?: MemberAnimatorInherit): FontMemberAnimator<V> {
+    let _this: FontMemberAnimator<V> = function (value?: AnyFont | null, tween?: Tween<Font>): Font | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           value = Font.fromAny(value);
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
-}
+    } as FontMemberAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, value, transition, inherit) || _this;
+    return _this;
+  } as unknown as MemberAnimatorConstructor;
+  __extends(FontMemberAnimator, _super);
+
+  return FontMemberAnimator;
+}(MemberAnimator));
 MemberAnimator.Font = FontMemberAnimator;

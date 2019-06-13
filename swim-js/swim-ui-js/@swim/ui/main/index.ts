@@ -24,6 +24,7 @@ export * from "@swim/animate";
 export * from "@swim/dom";
 export * from "@swim/style";
 export * from "@swim/render";
+export * from "@swim/constraint";
 export * from "@swim/view";
 export * from "@swim/shape";
 export * from "@swim/typeset";

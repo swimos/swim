@@ -17,7 +17,7 @@ import {View} from "./View";
 
 export type PopoverState = "hidden" | "showing" | "shown" | "hiding";
 
-export type PopoverPlacement = "over" | "top" | "bottom" | "right" | "left";
+export type PopoverPlacement = "none" | "above" | "below" | "over" | "top" | "bottom" | "right" | "left";
 
 export interface PopoverOptions {
   modal?: boolean;
@@ -36,7 +36,7 @@ export interface Popover {
 
 /** @hidden */
 export const Popover = {
-  is<I>(object: unknown): object is Popover {
+  is(object: unknown): object is Popover {
     if (typeof object === "object" && object) {
       const popover = object as Popover;
       return popover.popoverState !== void 0

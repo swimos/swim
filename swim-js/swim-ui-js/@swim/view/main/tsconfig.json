@@ -22,7 +22,8 @@
       "@swim/animate": ["@swim/animate/main"],
       "@swim/dom": ["@swim/dom/main"],
       "@swim/style": ["@swim/style/main"],
-      "@swim/render": ["@swim/render/main"]
+      "@swim/render": ["@swim/render/main"],
+      "@swim/constraint": ["@swim/constraint/main"]
     }
   },
   "references": [
@@ -37,6 +38,7 @@
     {"path": "../../animate/main"},
     {"path": "../../dom/main"},
     {"path": "../../style/main"},
-    {"path": "../../render/main"}
+    {"path": "../../render/main"},
+    {"path": "../../constraint/main"}
   ]
 }

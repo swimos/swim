@@ -12,46 +12,56 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {Tween, Transition} from "@swim/transition";
-import {AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimatorConstructor, AttributeAnimator} from "./AttributeAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class NumberOrStringAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, number | string, number | string> {
-  constructor(target: V, name: string, value?: number | string | null, transition?: Transition<number | string> | null) {
-    super(target, name, value, transition);
-    let animator = this;
-    function accessor(): number | string | null | undefined;
-    function accessor(value: number | string | null, tween?: Tween<number>): V;
-    function accessor(value?: number | string | null, tween?: Tween<number>): number | string | null | undefined | V {
+export interface NumberOrStringAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, number | string, number | string> {
+}
+
+/** @hidden */
+export const NumberOrStringAttributeAnimator = (function (_super: typeof AttributeAnimator): AttributeAnimatorConstructor {
+  const NumberOrStringAttributeAnimator: AttributeAnimatorConstructor = function <V extends ElementView>(
+      this: NumberOrStringAttributeAnimator<V>, view: V, name: string, value?: number | string | null,
+      transition?: Transition<number | string> | null): NumberOrStringAttributeAnimator<V> {
+    let _this: NumberOrStringAttributeAnimator<V> = function (value?: number | string | null, tween?: Tween<number | string>): number | string | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (typeof value === "string" && isFinite(+value)) {
           value = +value;
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as NumberOrStringAttributeAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, name, value, transition) || _this;
+    return _this;
+  } as unknown as AttributeAnimatorConstructor;
+  __extends(NumberOrStringAttributeAnimator, _super);
 
-  get value(): number | string | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const attributeValue = this.attributeValue;
-      if (attributeValue) {
-        if (isFinite(+attributeValue)) {
-          value = +attributeValue;
-        } else {
-          value = attributeValue;
+  Object.defineProperty(NumberOrStringAttributeAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: NumberOrStringAttributeAnimator<V>): number | string | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const attributeValue = this.attributeValue;
+        if (attributeValue) {
+          if (isFinite(+attributeValue)) {
+            value = +attributeValue;
+          } else {
+            value = attributeValue;
+          }
         }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return NumberOrStringAttributeAnimator;
+}(AttributeAnimator));
 AttributeAnimator.NumberOrString = NumberOrStringAttributeAnimator;

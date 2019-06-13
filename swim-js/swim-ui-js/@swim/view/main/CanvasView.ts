@@ -191,8 +191,8 @@ export class CanvasView extends HtmlView implements RenderView {
   append(child: Node): NodeView;
   append(child: NodeView): typeof child;
   append(child: RenderView): typeof child;
-  append<V extends ElementView>(child: ElementViewClass<Element, V>): V;
-  append<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>): View {
+  append<V extends ElementView>(child: ElementViewClass<Element, V>, key?: string): V;
+  append<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>, key?: string): View {
     if (typeof child === "string") {
       child = HtmlView.create(child);
     }
@@ -200,7 +200,7 @@ export class CanvasView extends HtmlView implements RenderView {
       child = View.fromNode(child);
     }
     if (typeof child === "function") {
-      child = View.create(child);
+      child = View.create(child, key);
     }
     this.appendChildView(child);
     return child;
@@ -232,8 +232,8 @@ export class CanvasView extends HtmlView implements RenderView {
   prepend(child: Node): NodeView;
   prepend(child: NodeView): typeof child;
   prepend(child: RenderView): typeof child;
-  prepend<V extends ElementView>(child: ElementViewClass<Element, V>): V;
-  prepend<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>): View {
+  prepend<V extends ElementView>(child: ElementViewClass<Element, V>, key?: string): V;
+  prepend<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>, key?: string): View {
     if (typeof child === "string") {
       child = HtmlView.create(child);
     }
@@ -241,7 +241,7 @@ export class CanvasView extends HtmlView implements RenderView {
       child = View.fromNode(child);
     }
     if (typeof child === "function") {
-      child = View.create(child);
+      child = View.create(child, key);
     }
     this.prependChildView(child);
     return child;
@@ -273,9 +273,10 @@ export class CanvasView extends HtmlView implements RenderView {
   insert(child: Node, target: View | Node | null): NodeView;
   insert(child: NodeView, target: View | Node | null): typeof child;
   insert(child: RenderView, target: View | Node | null): typeof child;
-  insert<V extends ElementView>(child: ElementViewClass<Element, V>, target: View | Node | null): V;
+  insert<V extends ElementView>(child: ElementViewClass<Element, V>,
+                                target: View | Node | null, key?: string): V;
   insert<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>,
-                                target: View | Node | null): View {
+                                target: View | Node | null, key?: string): View {
     if (typeof child === "string") {
       child = HtmlView.create(child);
     }
@@ -283,7 +284,7 @@ export class CanvasView extends HtmlView implements RenderView {
       child = View.fromNode(child);
     }
     if (typeof child === "function") {
-      child = View.create(child);
+      child = View.create(child, key);
     }
     this.insertChild(child, target);
     return child;
@@ -448,6 +449,42 @@ export class CanvasView extends HtmlView implements RenderView {
   protected didResize(): void {
     this.cascadeRender();
     super.didResize();
+  }
+
+  cascadeLayout(): void {
+    this.willLayout();
+    this.onLayout();
+    const childNodes = this._node.childNodes;
+    for (let i = 0, n = childNodes.length; i < n; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView) {
+        childView.cascadeLayout();
+      }
+    }
+    const renderViews = this._renderViews;
+    for (let i = 0, n = renderViews.length; i < n; i += 1) {
+      const renderView = renderViews[i];
+      renderView.cascadeLayout();
+    }
+    this.didLayout();
+  }
+
+  cascadeScroll(): void {
+    this.willScroll();
+    this.onScroll();
+    const childNodes = this._node.childNodes;
+    for (let i = 0, n = childNodes.length; i < n; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView) {
+        childView.cascadeScroll();
+      }
+    }
+    const renderViews = this._renderViews;
+    for (let i = 0, n = renderViews.length; i < n; i += 1) {
+      const renderView = renderViews[i];
+      renderView.cascadeScroll();
+    }
+    this.didScroll();
   }
 
   protected onAnimationFrame(timestamp: number): void {

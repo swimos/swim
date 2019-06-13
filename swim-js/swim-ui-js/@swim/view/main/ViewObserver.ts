@@ -15,10 +15,6 @@
 import {View} from "./View";
 
 export interface ViewObserver<V extends View = View> {
-  readonly view?: V | null;
-
-  setView?(view: V | null): void;
-
   viewWillSetKey?(key: string | null, view: V): void;
 
   viewDidSetKey?(key: string | null, view: V): void;
@@ -46,6 +42,10 @@ export interface ViewObserver<V extends View = View> {
   viewWillResize?(view: V): void;
 
   viewDidResize?(view: V): void;
+
+  viewWillLayout?(view: V): void;
+
+  viewDidLayout?(view: V): void;
 
   viewWillScroll?(view: V): void;
 

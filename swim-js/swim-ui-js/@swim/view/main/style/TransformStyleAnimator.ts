@@ -12,48 +12,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyTransform, Transform} from "@swim/transform";
 import {Tween, Transition} from "@swim/transition";
-import {StyleAnimator} from "./StyleAnimator";
+import {StyleAnimatorConstructor, StyleAnimator} from "./StyleAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class TransformStyleAnimator<V extends ElementView> extends StyleAnimator<V, Transform, AnyTransform> {
-  constructor(view: V, names: string | ReadonlyArray<string>, value?: Transform | null,
-              transition?: Transition<Transform> | null, priority?: string) {
-    super(view, names, value, transition, priority);
-    let animator = this;
-    function accessor(): Transform | null | undefined;
-    function accessor(value: AnyTransform | null, tween?: Tween<Transform>, priority?: string | null): V;
-    function accessor(value?: AnyTransform | null, tween?: Tween<Transform>, priority?: string | null): Transform | null | undefined | V {
+export interface TransformStyleAnimator<V extends ElementView> extends StyleAnimator<V, Transform, AnyTransform> {
+}
+
+/** @hidden */
+export const TransformStyleAnimator = (function (_super: typeof StyleAnimator): StyleAnimatorConstructor {
+  const TransformStyleAnimator: StyleAnimatorConstructor = function <V extends ElementView>(
+      this: TransformStyleAnimator<V>, view: V, names: string | ReadonlyArray<string>, value?: Transform | null,
+      transition?: Transition<Transform> | null, priority?: string): TransformStyleAnimator<V> {
+    let _this: TransformStyleAnimator<V> = function (value?: AnyTransform | null, tween?: Tween<Transform>, priority?: string | null): Transform | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           value = Transform.fromAny(value);
         }
-        animator.setState(value, tween, priority);
-        return animator._view;
+        _this.setState(value, tween, priority);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as TransformStyleAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, names, value, transition, priority) || _this;
+    return _this;
+  } as unknown as StyleAnimatorConstructor;
+  __extends(TransformStyleAnimator, _super);
 
-  get value(): Transform | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const propertyValue = this.propertyValue;
-      if (propertyValue) {
-        try {
-          value = Transform.parse(propertyValue);
-        } catch (swallow) {
-          // nop
+  Object.defineProperty(TransformStyleAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: TransformStyleAnimator<V>): Transform | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const propertyValue = this.propertyValue;
+        if (propertyValue) {
+          try {
+            value = Transform.parse(propertyValue);
+          } catch (swallow) {
+            // nop
+          }
         }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return TransformStyleAnimator;
+}(StyleAnimator));
 StyleAnimator.Transform = TransformStyleAnimator;

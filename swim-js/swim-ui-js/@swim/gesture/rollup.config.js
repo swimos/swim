@@ -30,6 +30,7 @@ const main = {
       "@swim/dom": "swim",
       "@swim/style": "swim",
       "@swim/render": "swim",
+      "@swim/constraint": "swim",
       "@swim/view": "swim",
     },
     sourcemap: true,
@@ -56,6 +57,7 @@ const main = {
     "@swim/dom",
     "@swim/style",
     "@swim/render",
+    "@swim/constraint",
     "@swim/view",
   ],
   plugins: [

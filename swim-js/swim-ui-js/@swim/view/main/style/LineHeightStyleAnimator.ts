@@ -12,48 +12,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyLineHeight, LineHeight} from "@swim/font";
 import {Tween, Transition} from "@swim/transition";
-import {StyleAnimator} from "./StyleAnimator";
+import {StyleAnimatorConstructor, StyleAnimator} from "./StyleAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class LineHeightStyleAnimator<V extends ElementView> extends StyleAnimator<V, LineHeight, AnyLineHeight> {
-  constructor(view: V, names: string | ReadonlyArray<string>, value?: LineHeight | null,
-              transition?: Transition<LineHeight> | null, priority?: string) {
-    super(view, names, value, transition, priority);
-    let animator = this;
-    function accessor(): LineHeight | null | undefined;
-    function accessor(value: AnyLineHeight | null, tween?: Tween<LineHeight>, priority?: string | null): V;
-    function accessor(value?: AnyLineHeight | null, tween?: Tween<LineHeight>, priority?: string | null): LineHeight | null | undefined | V {
+export interface LineHeightStyleAnimator<V extends ElementView> extends StyleAnimator<V, LineHeight, AnyLineHeight> {
+}
+
+/** @hidden */
+export const LineHeightStyleAnimator = (function (_super: typeof StyleAnimator): StyleAnimatorConstructor {
+  const LineHeightStyleAnimator: StyleAnimatorConstructor = function <V extends ElementView>(
+      this: LineHeightStyleAnimator<V>, view: V, names: string | ReadonlyArray<string>, value?: LineHeight | null,
+      transition?: Transition<LineHeight> | null, priority?: string): LineHeightStyleAnimator<V> {
+    let _this: LineHeightStyleAnimator<V> = function (value?: AnyLineHeight | null, tween?: Tween<LineHeight>, priority?: string | null): LineHeight | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           value = LineHeight.fromAny(value);
         }
-        animator.setState(value as LineHeight | null, tween, priority);
-        return animator._view;
+        _this.setState(value as LineHeight | null, tween, priority);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as LineHeightStyleAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, names, value, transition, priority) || _this;
+    return _this;
+  } as unknown as StyleAnimatorConstructor;
+  __extends(LineHeightStyleAnimator, _super);
 
-  get value(): LineHeight | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const propertyValue = this.propertyValue;
-      if (propertyValue) {
-        try {
-          value = LineHeight.fromAny(propertyValue);
-        } catch (swallow) {
-          // nop
+  Object.defineProperty(LineHeightStyleAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: LineHeightStyleAnimator<V>): LineHeight | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const propertyValue = this.propertyValue;
+        if (propertyValue) {
+          try {
+            value = LineHeight.fromAny(propertyValue);
+          } catch (swallow) {
+            // nop
+          }
         }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return LineHeightStyleAnimator;
+}(StyleAnimator));
 StyleAnimator.LineHeight = LineHeightStyleAnimator;

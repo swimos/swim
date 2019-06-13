@@ -12,48 +12,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {FontFamily, Font} from "@swim/font";
 import {Tween, Transition} from "@swim/transition";
-import {StyleAnimator} from "./StyleAnimator";
+import {StyleAnimatorConstructor, StyleAnimator} from "./StyleAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class FontFamilyStyleAnimator<V extends ElementView> extends StyleAnimator<V, FontFamily | FontFamily[], FontFamily | ReadonlyArray<FontFamily>> {
-  constructor(view: V, names: string | ReadonlyArray<string>, value?: FontFamily | FontFamily[] | null,
-              transition?: Transition<FontFamily | FontFamily[]> | null, priority?: string) {
-    super(view, names, value, transition, priority);
-    let animator = this;
-    function accessor(): FontFamily | FontFamily[] | null | undefined;
-    function accessor(value: FontFamily | ReadonlyArray<FontFamily> | null, tween?: Tween<FontFamily | FontFamily[]>, priority?: string | null): V;
-    function accessor(value?: FontFamily | ReadonlyArray<FontFamily> | null, tween?: Tween<FontFamily | FontFamily[]>, priority?: string | null): FontFamily | FontFamily[] | null | undefined | V {
+export interface FontFamilyStyleAnimator<V extends ElementView> extends StyleAnimator<V, FontFamily | FontFamily[], FontFamily | ReadonlyArray<FontFamily>> {
+}
+
+/** @hidden */
+export const FontFamilyStyleAnimator = (function (_super: typeof StyleAnimator): StyleAnimatorConstructor {
+  const FontFamilyStyleAnimator: StyleAnimatorConstructor = function <V extends ElementView>(
+      this: FontFamilyStyleAnimator<V>, view: V, names: string | ReadonlyArray<string>, value?: FontFamily | FontFamily[] | null,
+      transition?: Transition<FontFamily | FontFamily[]> | null, priority?: string): FontFamilyStyleAnimator<V> {
+    let _this: FontFamilyStyleAnimator<V> = function (value?: FontFamily | ReadonlyArray<FontFamily> | null, tween?: Tween<FontFamily | FontFamily[]>, priority?: string | null): FontFamily | FontFamily[] | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           value = Font.family(value).family();
         }
-        animator.setState(value as FontFamily | FontFamily[], tween, priority);
-        return animator._view;
+        _this.setState(value as FontFamily | FontFamily[], tween, priority);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as FontFamilyStyleAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, names, value, transition, priority) || _this;
+    return _this;
+  } as unknown as StyleAnimatorConstructor;
+  __extends(FontFamilyStyleAnimator, _super);
 
-  get value(): FontFamily | FontFamily[] | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const propertyValue = this.propertyValue;
-      if (propertyValue) {
-        try {
-          value = Font.parse(propertyValue).family();
-        } catch (swallow) {
-          // nop
+  Object.defineProperty(FontFamilyStyleAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: FontFamilyStyleAnimator<V>): FontFamily | FontFamily[] | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const propertyValue = this.propertyValue;
+        if (propertyValue) {
+          try {
+            value = Font.parse(propertyValue).family();
+          } catch (swallow) {
+            // nop
+          }
         }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return FontFamilyStyleAnimator;
+}(StyleAnimator));
 StyleAnimator.FontFamily = FontFamilyStyleAnimator;

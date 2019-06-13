@@ -113,9 +113,6 @@ export class GraphicView extends View implements RenderView {
     if (index < 0) {
       this.willAddViewObserver(viewObserver);
       viewObservers.push(viewObserver);
-      if (viewObserver.setView) {
-        viewObserver.setView(this);
-      }
       this.onAddViewObserver(viewObserver);
       this.didAddViewObserver(viewObserver);
     }
@@ -126,9 +123,6 @@ export class GraphicView extends View implements RenderView {
     const index = viewObservers.indexOf(viewObserver);
     if (index >= 0) {
       this.willRemoveViewObserver(viewObserver);
-      if (viewObserver.setView) {
-        viewObserver.setView(null);
-      }
       viewObservers.splice(index, 1);
       this.onRemoveViewObserver(viewObserver);
       this.didRemoveViewObserver(viewObserver);
@@ -367,6 +361,28 @@ export class GraphicView extends View implements RenderView {
       childView.cascadeResize();
     }
     this.didResize();
+  }
+
+  cascadeLayout(): void {
+    this.willLayout();
+    this.onLayout();
+    const childViews = this._childViews;
+    for (let i = 0, n = childViews.length; i < n; i += 1) {
+      const childView = childViews[i];
+      childView.cascadeLayout();
+    }
+    this.didLayout();
+  }
+
+  cascadeScroll(): void {
+    this.willScroll();
+    this.onScroll();
+    const childViews = this._childViews;
+    for (let i = 0, n = childViews.length; i < n; i += 1) {
+      const childView = childViews[i];
+      childView.cascadeScroll();
+    }
+    this.didScroll();
   }
 
   animate(): void {

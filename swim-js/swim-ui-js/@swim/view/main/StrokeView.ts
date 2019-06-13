@@ -33,7 +33,7 @@ export interface StrokeView extends RenderView {
 
 /** @hidden */
 export const StrokeView = {
-  is<I>(object: unknown): object is StrokeView {
+  is(object: unknown): object is StrokeView {
     if (typeof object === "object" && object) {
       const view = object as StrokeView;
       return view instanceof View

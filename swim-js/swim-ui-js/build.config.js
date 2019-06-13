@@ -153,12 +153,25 @@ const ui = [
     ],
   },
   {
+    id: "constraint",
+    name: "@swim/constraint",
+    targets: [
+      {
+        id: "main",
+      },
+      {
+        id: "test",
+        deps: ["constraint"],
+      },
+    ],
+  },
+  {
     id: "view",
     name: "@swim/view",
     targets: [
       {
         id: "main",
-        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render"],
+        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint"],
       },
     ],
   },
@@ -168,7 +181,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view"],
+        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view"],
       },
     ],
   },
@@ -178,7 +191,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view"],
+        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view"],
       },
     ],
   },
@@ -188,7 +201,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view"],
+        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view"],
       },
     ],
   },
@@ -199,7 +212,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "view", "shape", "typeset", "gesture"],
+        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture"],
       },
     ],
   },

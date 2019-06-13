@@ -12,32 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyLength, Length} from "@swim/length";
 import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimator} from "./MemberAnimator";
+import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
-export class LengthMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, Length, AnyLength> {
-  constructor(view: V, value?: Length | null, transition?: Transition<Length> | null, inherit?: MemberAnimatorInherit) {
-    super(view, value, transition, inherit);
-    let animator = this;
-    function accessor(): Length | undefined;
-    function accessor(value: AnyLength | null, tween?: Tween<Length>): V;
-    function accessor(value?: AnyLength | null, tween?: Tween<Length>): Length | null | undefined | V {
+export interface LengthMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, Length, AnyLength> {
+}
+
+/** @hidden */
+export const LengthMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
+  const LengthMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
+      this: LengthMemberAnimator<V>, view: V, value?: Length | null,
+      transition?: Transition<Length> | null, inherit?: MemberAnimatorInherit): LengthMemberAnimator<V> {
+    let _this: LengthMemberAnimator<V> = function (value?: AnyLength | null, tween?: Tween<Length>): Length | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           value = Length.fromAny(value);
         }
-        animator.setState(value, tween);
-        return animator._view;
+        _this.setState(value, tween);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
-}
+    } as LengthMemberAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, value, transition, inherit) || _this;
+    return _this;
+  } as unknown as MemberAnimatorConstructor;
+  __extends(LengthMemberAnimator, _super);
+
+  return LengthMemberAnimator;
+}(MemberAnimator));
 MemberAnimator.Length = LengthMemberAnimator;

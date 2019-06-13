@@ -14,6 +14,7 @@
 
 export {
   StyleAnimatorType,
+  StyleAnimatorConstructor,
   StyleAnimatorClass,
   StyleAnimator,
 } from "./StyleAnimator";

@@ -63,9 +63,21 @@ import {
   WhiteSpace,
   Width,
 } from "@swim/style";
+import {
+  Constrain,
+  ConstrainVariable,
+  ConstrainBinding,
+  ConstraintRelation,
+  AnyConstraintStrength,
+  ConstraintStrength,
+  Constraint,
+} from "@swim/constraint";
 import {AttributeAnimator} from "./attribute/AttributeAnimator";
 import {StyleAnimator} from "./style/StyleAnimator";
+import {LayoutManager} from "./layout/LayoutManager";
+import {LayoutAnchor} from "./layout/LayoutAnchor";
 import {View} from "./View";
+import {LayoutView} from "./LayoutView";
 import {NodeView} from "./NodeView";
 import {TextView} from "./TextView";
 import {ElementViewClass, ElementView} from "./ElementView";
@@ -77,11 +89,15 @@ export interface ViewHtml extends HTMLElement {
   view?: HtmlView;
 }
 
-export class HtmlView extends ElementView {
+export class HtmlView extends ElementView implements LayoutView {
   /** @hidden */
   readonly _node: ViewHtml;
   /** @hidden */
   _viewController: HtmlViewController | null;
+  /** @hidden */
+  _variables: ConstrainVariable[] | undefined;
+  /** @hidden */
+  _constraints: Constraint[] | undefined;
 
   constructor(node: HTMLElement, key: string | null = null) {
     super(node, key);
@@ -107,8 +123,8 @@ export class HtmlView extends ElementView {
   append(child: Text): TextView;
   append(child: Node): NodeView;
   append(child: NodeView): typeof child;
-  append<V extends ElementView>(child: ElementViewClass<Element, V>): V;
-  append<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>): NodeView {
+  append<V extends ElementView>(child: ElementViewClass<Element, V>, key?: string): V;
+  append<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>, key?: string): NodeView {
     if (typeof child === "string") {
       child = HtmlView.create(child);
     }
@@ -116,7 +132,7 @@ export class HtmlView extends ElementView {
       child = View.fromNode(child);
     }
     if (typeof child === "function") {
-      child = View.create(child);
+      child = View.create(child, key);
     }
     this.appendChildView(child);
     return child;
@@ -130,8 +146,8 @@ export class HtmlView extends ElementView {
   prepend(child: Text): TextView;
   prepend(child: Node): NodeView;
   prepend(child: NodeView): typeof child;
-  prepend<V extends ElementView>(child: ElementViewClass<Element, V>): V;
-  prepend<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>): NodeView {
+  prepend<V extends ElementView>(child: ElementViewClass<Element, V>, key?: string): V;
+  prepend<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>, key?: string): NodeView {
     if (typeof child === "string") {
       child = HtmlView.create(child);
     }
@@ -139,7 +155,7 @@ export class HtmlView extends ElementView {
       child = View.fromNode(child);
     }
     if (typeof child === "function") {
-      child = View.create(child);
+      child = View.create(child, key);
     }
     this.prependChildView(child);
     return child;
@@ -153,9 +169,10 @@ export class HtmlView extends ElementView {
   insert(child: Text, target: View | Node | null): TextView;
   insert(child: Node, target: View | Node | null): NodeView;
   insert(child: NodeView, target: View | Node | null): typeof child;
-  insert<V extends ElementView>(child: ElementViewClass<Element, V>, target: View | Node | null): V;
+  insert<V extends ElementView>(child: ElementViewClass<Element, V>,
+                                target: View | Node | null, key?: string): V;
   insert<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>,
-                                target: View | Node | null): NodeView {
+                                target: View | Node | null, key?: string): NodeView {
     if (typeof child === "string") {
       child = HtmlView.create(child);
     }
@@ -163,7 +180,7 @@ export class HtmlView extends ElementView {
       child = View.fromNode(child);
     }
     if (typeof child === "function") {
-      child = View.create(child);
+      child = View.create(child, key);
     }
     this.insertChild(child, target);
     return child;
@@ -172,6 +189,284 @@ export class HtmlView extends ElementView {
   get parentTransform(): Transform {
     const transform = this.transform();
     return transform || Transform.identity();
+  }
+
+  variable(name: string, value?: number, strength?: AnyConstraintStrength): ConstrainVariable {
+    if (value === void 0) {
+      value = 0;
+    }
+    if (strength === void 0) {
+      strength = ConstraintStrength.Strong;
+    } else {
+      strength = ConstraintStrength.fromAny(strength);
+    }
+    return new ConstrainBinding(this, name, value, strength);
+  }
+
+  constraint(lhs: Constrain | number, relation: ConstraintRelation,
+             rhs?: Constrain | number, strength?: AnyConstraintStrength): Constraint {
+    if (typeof lhs === "number") {
+      lhs = Constrain.constant(lhs);
+    }
+    if (typeof rhs === "number") {
+      rhs = Constrain.constant(rhs);
+    }
+    const constrain = rhs ? lhs.minus(rhs) : lhs;
+    if (strength === void 0) {
+      strength = ConstraintStrength.Required;
+    } else {
+      strength = ConstraintStrength.fromAny(strength);
+    }
+    return new Constraint(this, constrain, relation, strength);
+  }
+
+  get variables(): ReadonlyArray<ConstrainVariable> {
+    if (this._variables === void 0) {
+      this._variables = [];
+    }
+    return this._variables;
+  }
+
+  hasVariable(variable: ConstrainVariable): boolean {
+    return this._variables !== void 0 && this._variables.indexOf(variable) >= 0;
+  }
+
+  addVariable(variable: ConstrainVariable): void {
+    if (this._variables === void 0) {
+      this._variables = [];
+    }
+    if (this._variables.indexOf(variable) < 0) {
+      this._variables.push(variable);
+      this.activateVariable(variable);
+    }
+  }
+
+  /** @hidden */
+  activateVariable(variable: ConstrainVariable): void {
+    const appView = this.appView;
+    if (LayoutManager.is(appView)) {
+      appView.activateVariable(variable);
+    }
+  }
+
+  removeVariable(variable: ConstrainVariable): void {
+    if (this._variables !== void 0) {
+      const index = this._variables.indexOf(variable);
+      if (index >= 0) {
+        this._variables.splice(index, 1);
+        this.deactivateVariable(variable);
+      }
+    }
+  }
+
+  /** @hidden */
+  deactivateVariable(variable: ConstrainVariable): void {
+    const appView = this.appView;
+    if (LayoutManager.is(appView)) {
+      appView.deactivateVariable(variable);
+    }
+  }
+
+  setVariableState(variable: ConstrainVariable, state: number): void {
+    const appView = this.appView;
+    if (LayoutManager.is(appView)) {
+      appView.setVariableState(variable, state);
+    }
+  }
+
+  get constraints(): ReadonlyArray<Constraint> {
+    if (this._constraints === void 0) {
+      this._constraints = [];
+    }
+    return this._constraints;
+  }
+
+  hasConstraint(constraint: Constraint): boolean {
+    return this._constraints !== void 0 && this._constraints.indexOf(constraint) >= 0;
+  }
+
+  addConstraint(constraint: Constraint): void {
+    if (this._constraints === void 0) {
+      this._constraints = [];
+    }
+    if (this._constraints.indexOf(constraint) < 0) {
+      this._constraints.push(constraint);
+      this.activateConstraint(constraint);
+    }
+  }
+
+  /** @hidden */
+  activateConstraint(constraint: Constraint): void {
+    const appView = this.appView;
+    if (LayoutManager.is(appView)) {
+      appView.activateConstraint(constraint);
+    }
+  }
+
+  removeConstraint(constraint: Constraint): void {
+    if (this._constraints !== void 0) {
+      const index = this._constraints.indexOf(constraint);
+      if (index >= 0) {
+        this._constraints.splice(index, 1);
+        this.deactivateConstraint(constraint);
+      }
+    }
+  }
+
+  /** @hidden */
+  deactivateConstraint(constraint: Constraint): void {
+    const appView = this.appView;
+    if (LayoutManager.is(appView)) {
+      appView.deactivateConstraint(constraint);
+    }
+  }
+
+  /** @hidden */
+  activateLayout(): void {
+    const variables = this._variables;
+    const constraints = this._constraints;
+    let appView: View | null;
+    if ((variables !== void 0 || constraints !== void 0)
+        && (appView = this.appView, LayoutManager.is(appView))) {
+      for (let i = 0, n = variables !== void 0 ? variables.length : 0; i < n; i += 1) {
+        const variable = variables![i];
+        if (variable instanceof LayoutAnchor) {
+          appView.activateVariable(variable);
+        }
+      }
+      for (let i = 0, n = constraints !== void 0 ? constraints.length : 0; i < n; i += 1) {
+        appView.activateConstraint(constraints![i]);
+      }
+    }
+  }
+
+  /** @hidden */
+  deactivateLayout(): void {
+    const variables = this._variables;
+    const constraints = this._constraints;
+    let appView: View | null;
+    if ((variables !== void 0 || constraints !== void 0)
+        && (appView = this.appView, LayoutManager.is(appView))) {
+      for (let i = 0, n = constraints !== void 0 ? constraints.length : 0; i < n; i += 1) {
+        appView.deactivateConstraint(constraints![i]);
+      }
+      for (let i = 0, n = variables !== void 0 ? variables.length : 0; i < n; i += 1) {
+        appView.deactivateVariable(variables![i]);
+      }
+    }
+  }
+
+  /** @hidden */
+  updateLayoutStates(): void {
+    const offsetParent = this._node.offsetParent;
+    if (offsetParent) {
+      const offsetBounds = offsetParent.getBoundingClientRect();
+      const bounds = this._node.getBoundingClientRect();
+
+      const topAnchor = this.hasOwnProperty("topAnchor") ? this.topAnchor : void 0;
+      const rightAnchor = this.hasOwnProperty("rightAnchor") ? this.rightAnchor : void 0;
+      const bottomAnchor = this.hasOwnProperty("bottomAnchor") ? this.bottomAnchor : void 0;
+      const leftAnchor = this.hasOwnProperty("leftAnchor") ? this.leftAnchor : void 0;
+      const widthAnchor = this.hasOwnProperty("widthAnchor") ? this.widthAnchor : void 0;
+      const heightAnchor = this.hasOwnProperty("heightAnchor") ? this.heightAnchor : void 0;
+      const centerXAnchor = this.hasOwnProperty("centerXAnchor") ? this.centerXAnchor : void 0;
+      const centerYAnchor = this.hasOwnProperty("centerYAnchor") ? this.centerYAnchor : void 0;
+      if (topAnchor && !topAnchor.enabled()) {
+        topAnchor.setState(bounds.top - offsetBounds.top);
+      }
+      if (rightAnchor && !rightAnchor.enabled()) {
+        rightAnchor.setState(offsetBounds.right + bounds.right);
+      }
+      if (bottomAnchor && !bottomAnchor.enabled()) {
+        bottomAnchor.setState(offsetBounds.bottom + bounds.bottom);
+      }
+      if (leftAnchor && !leftAnchor.enabled()) {
+        leftAnchor.setState(bounds.left - offsetBounds.left);
+      }
+      if (widthAnchor && !widthAnchor.enabled()) {
+        widthAnchor.setState(bounds.width);
+      }
+      if (heightAnchor && !heightAnchor.enabled()) {
+        heightAnchor.setState(bounds.height);
+      }
+      if (centerXAnchor && !centerXAnchor.enabled()) {
+        centerXAnchor.setState(bounds.left + 0.5 * bounds.width - offsetBounds.left);
+      }
+      if (centerYAnchor && !centerYAnchor.enabled()) {
+        centerYAnchor.setState(bounds.top + 0.5 * bounds.height - offsetBounds.top);
+      }
+    }
+  }
+
+  /** @hidden */
+  updateLayoutValues(): void {
+    const offsetParent = this._node.offsetParent;
+    if (offsetParent) {
+      const topAnchor = this.hasOwnProperty("topAnchor") ? this.topAnchor : void 0;
+      const rightAnchor = this.hasOwnProperty("rightAnchor") ? this.rightAnchor : void 0;
+      const bottomAnchor = this.hasOwnProperty("bottomAnchor") ? this.bottomAnchor : void 0;
+      const leftAnchor = this.hasOwnProperty("leftAnchor") ? this.leftAnchor : void 0;
+      const widthAnchor = this.hasOwnProperty("widthAnchor") ? this.widthAnchor : void 0;
+      const heightAnchor = this.hasOwnProperty("heightAnchor") ? this.heightAnchor : void 0;
+      const centerXAnchor = this.hasOwnProperty("centerXAnchor") ? this.centerXAnchor : void 0;
+      const centerYAnchor = this.hasOwnProperty("centerYAnchor") ? this.centerYAnchor : void 0;
+      if (topAnchor && topAnchor.enabled()) {
+        this.top.setState(Length.px(topAnchor.value));
+      }
+      if (rightAnchor && rightAnchor.enabled()) {
+        this.right.setState(Length.px(rightAnchor.value));
+      }
+      if (bottomAnchor && bottomAnchor.enabled()) {
+        this.bottom.setState(Length.px(bottomAnchor.value));
+      }
+      if (leftAnchor && leftAnchor.enabled()) {
+        this.left.setState(Length.px(leftAnchor.value));
+      }
+      if (widthAnchor && widthAnchor.enabled()) {
+        this.width.setState(Length.px(widthAnchor.value));
+      }
+      if (heightAnchor && heightAnchor.enabled()) {
+        this.height.setState(Length.px(heightAnchor.value));
+      }
+      if (centerXAnchor && centerXAnchor.enabled()) {
+        if (leftAnchor && leftAnchor.enabled()) {
+          this.width.setState(Length.px(2 * (centerXAnchor.value - leftAnchor.value)));
+        } else if (rightAnchor && rightAnchor.enabled()) {
+          this.width.setState(Length.px(2 * (rightAnchor.value - centerXAnchor.value)));
+        } else if (widthAnchor && widthAnchor.enabled()) {
+          this.left.setState(Length.px(centerXAnchor.value - 0.5 * widthAnchor.value));
+        }
+      }
+      if (centerYAnchor && centerYAnchor.enabled()) {
+        if (topAnchor && topAnchor.enabled()) {
+          this.height.setState(Length.px(2 * (centerYAnchor.value - topAnchor.value)));
+        } else if (bottomAnchor && bottomAnchor.enabled()) {
+          this.height.setState(Length.px(2 * (bottomAnchor.value - centerYAnchor.value)));
+        } else if (heightAnchor && heightAnchor.enabled()) {
+          this.top.setState(Length.px(centerYAnchor.value - 0.5 * heightAnchor.value));
+        }
+      }
+    }
+  }
+
+  protected didMount(): void {
+    super.didMount();
+    this.activateLayout();
+  }
+
+  protected willUnmount(): void {
+    this.deactivateLayout();
+    super.willUnmount();
+  }
+
+  protected didResize(): void {
+    super.didResize();
+    this.updateLayoutStates();
+  }
+
+  protected willLayout(): void {
+    this.updateLayoutValues();
+    super.willLayout();
   }
 
   on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, event: HTMLElementEventMap[K]) => unknown, options?: AddEventListenerOptions | boolean): this;
@@ -187,6 +482,30 @@ export class HtmlView extends ElementView {
     this._node.removeEventListener(type, listener, options);
     return this;
   }
+
+  @LayoutAnchor("strong")
+  topAnchor: LayoutAnchor<this>;
+
+  @LayoutAnchor("strong")
+  rightAnchor: LayoutAnchor<this>;
+
+  @LayoutAnchor("strong")
+  bottomAnchor: LayoutAnchor<this>;
+
+  @LayoutAnchor("strong")
+  leftAnchor: LayoutAnchor<this>;
+
+  @LayoutAnchor("strong")
+  widthAnchor: LayoutAnchor<this>;
+
+  @LayoutAnchor("strong")
+  heightAnchor: LayoutAnchor<this>;
+
+  @LayoutAnchor("strong")
+  centerXAnchor: LayoutAnchor<this>;
+
+  @LayoutAnchor("strong")
+  centerYAnchor: LayoutAnchor<this>;
 
   @AttributeAnimator("autocomplete", String)
   autocomplete: AttributeAnimator<this, string>;
@@ -224,7 +543,7 @@ export class HtmlView extends ElementView {
   @StyleAnimator("appearance", String)
   appearance: StyleAnimator<this, Appearance>;
 
-  @StyleAnimator("backdrop-filter", String)
+  @StyleAnimator(["backdrop-filter", "-webkit-backdrop-filter"], String)
   backdropFilter: StyleAnimator<this, string>;
 
   @StyleAnimator("background-color", Color)

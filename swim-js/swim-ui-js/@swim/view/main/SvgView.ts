@@ -71,8 +71,8 @@ export class SvgView extends ElementView {
   append(child: Text): TextView;
   append(child: Node): NodeView;
   append(child: NodeView): typeof child;
-  append<V extends ElementView>(child: ElementViewClass<Element, V>): V;
-  append<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>): NodeView {
+  append<V extends ElementView>(child: ElementViewClass<Element, V>, key?: string): V;
+  append<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>, key?: string): NodeView {
     if (typeof child === "string") {
       child = SvgView.create(child);
     }
@@ -80,7 +80,7 @@ export class SvgView extends ElementView {
       child = View.fromNode(child);
     }
     if (typeof child === "function") {
-      child = View.create(child);
+      child = View.create(child, key);
     }
     this.appendChildView(child);
     return child;
@@ -92,8 +92,8 @@ export class SvgView extends ElementView {
   prepend(child: Text): TextView;
   prepend(child: Node): NodeView;
   prepend(child: NodeView): typeof child;
-  prepend<V extends ElementView>(child: ElementViewClass<Element, V>): V;
-  prepend<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>): NodeView {
+  prepend<V extends ElementView>(child: ElementViewClass<Element, V>, key?: string): V;
+  prepend<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>, key?: string): NodeView {
     if (typeof child === "string") {
       child = SvgView.create(child);
     }
@@ -101,7 +101,7 @@ export class SvgView extends ElementView {
       child = View.fromNode(child);
     }
     if (typeof child === "function") {
-      child = View.create(child);
+      child = View.create(child, key);
     }
     this.prependChildView(child);
     return child;
@@ -113,9 +113,10 @@ export class SvgView extends ElementView {
   insert(child: Text, target: View | Node | null): TextView;
   insert(child: Node, target: View | Node | null): NodeView;
   insert(child: NodeView, target: View | Node | null): typeof child;
-  insert<V extends ElementView>(child: ElementViewClass<Element, V>, target: View | Node | null): V;
+  insert<V extends ElementView>(child: ElementViewClass<Element, V>,
+                                target: View | Node | null, key?: string): V;
   insert<V extends ElementView>(child: string | Node | NodeView | ElementViewClass<Element, V>,
-                                target: View | Node | null): NodeView {
+                                target: View | Node | null, key?: string): NodeView {
     if (typeof child === "string") {
       child = SvgView.create(child);
     }
@@ -123,7 +124,7 @@ export class SvgView extends ElementView {
       child = View.fromNode(child);
     }
     if (typeof child === "function") {
-      child = View.create(child);
+      child = View.create(child, key);
     }
     this.insertChild(child, target);
     return child;
@@ -192,6 +193,9 @@ export class SvgView extends ElementView {
 
   @AttributeAnimator("mode", String)
   mode: AttributeAnimator<this, string>;
+
+  @AttributeAnimator("opacity", Number)
+  opacity: AttributeAnimator<this, number>;
 
   @AttributeAnimator("points", String)
   points: AttributeAnimator<this, string>;

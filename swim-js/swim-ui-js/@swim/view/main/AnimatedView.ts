@@ -24,7 +24,7 @@ export interface AnimatedView extends Animated, View {
 
 /** @hidden */
 export const AnimatedView = {
-  is<I>(object: unknown): object is AnimatedView {
+  is(object: unknown): object is AnimatedView {
     if (typeof object === "object" && object) {
       const view = object as AnimatedView;
       return view instanceof View.Graphic || view instanceof View

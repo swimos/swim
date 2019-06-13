@@ -12,28 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimator} from "./MemberAnimator";
+import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
-export class StringMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, string, string> {
-  constructor(view: V, value?: string | null, transition?: Transition<string> | null, inherit?: MemberAnimatorInherit) {
-    super(view, value, transition, inherit);
-    let animator = this;
-    function accessor(): string | undefined;
-    function accessor(value: string | null, tween?: Tween<string>): V;
-    function accessor(value?: string | null, tween?: Tween<string>): string | null | undefined | V {
-      if (value === void 0) {
-        return animator.value;
-      } else {
-        animator.setState(value, tween);
-        return animator._view;
-      }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+export interface StringMemberAnimator<V extends AnimatedView> extends MemberAnimator<V, string, string> {
 }
+
+/** @hidden */
+export const StringMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
+  const StringMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
+      this: StringMemberAnimator<V>, view: V, value?: string | null,
+      transition?: Transition<string> | null, inherit?: MemberAnimatorInherit): StringMemberAnimator<V> {
+    let _this: StringMemberAnimator<V> = function (value?: string | null, tween?: Tween<string>): string | null | undefined | V {
+      if (value === void 0) {
+        return _this.value;
+      } else {
+        _this.setState(value, tween);
+        return _this._view;
+      }
+    } as StringMemberAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, value, transition, inherit) || _this;
+    return _this;
+  } as unknown as MemberAnimatorConstructor;
+  __extends(StringMemberAnimator, _super);
+
+  return StringMemberAnimator;
+}(MemberAnimator));
 MemberAnimator.String = StringMemberAnimator;

@@ -12,56 +12,65 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {__extends} from "tslib";
 import {AnyLength, Length} from "@swim/length";
 import {Tween, Transition} from "@swim/transition";
-import {StyleAnimator} from "./StyleAnimator";
+import {StyleAnimatorConstructor, StyleAnimator} from "./StyleAnimator";
 import {ElementView} from "../ElementView";
 
 /** @hidden */
-export class LengthOrStringStyleAnimator<V extends ElementView> extends StyleAnimator<V, Length | string, AnyLength | string> {
-  constructor(view: V, names: string | ReadonlyArray<string>, value?: Length | string | null,
-              transition?: Transition<Length | string> | null, priority?: string) {
-    super(view, names, value, transition, priority);
-    let animator = this;
-    function accessor(): Length | string | null | undefined;
-    function accessor(value: AnyLength | string, tween?: Tween<Length | string>, priority?: string | null): V;
-    function accessor(value?: AnyLength | string, tween?: Tween<Length | string>, priority?: string | null): Length | string | null | undefined | V {
+export interface LengthOrStringStyleAnimator<V extends ElementView> extends StyleAnimator<V, Length | string, AnyLength | string> {
+}
+
+/** @hidden */
+export const LengthOrStringStyleAnimator = (function (_super: typeof StyleAnimator): StyleAnimatorConstructor {
+  const LengthOrStringStyleAnimator: StyleAnimatorConstructor = function <V extends ElementView>(
+      this: LengthOrStringStyleAnimator<V>, view: V, names: string | ReadonlyArray<string>, value?: Length | string | null,
+      transition?: Transition<Length | string> | null, priority?: string): LengthOrStringStyleAnimator<V> {
+    let _this: LengthOrStringStyleAnimator<V> = function (value?: AnyLength | string | null, tween?: Tween<Length | string>, priority?: string | null): Length | string | null | undefined | V {
       if (value === void 0) {
-        return animator.value;
+        return _this.value;
       } else {
         if (value !== null) {
           if (typeof value === "string") {
             try {
-              value = Length.parse(value, view._node);
+              value = Length.parse(value, _this._view._node);
             } catch (swallow) {
               // string value
             }
           } else {
-            value = Length.fromAny(value, view._node);
+            value = Length.fromAny(value, _this._view._node);
           }
         }
-        animator.setState(value, tween, priority);
-        return animator._view;
+        _this.setState(value, tween, priority);
+        return _this._view;
       }
-    }
-    (accessor as any).__proto__ = animator;
-    animator = accessor as any;
-    return animator;
-  }
+    } as LengthOrStringStyleAnimator<V>;
+    (_this as any).__proto__ = this;
+    _this = _super.call(_this, view, names, value, transition, priority) || _this;
+    return _this;
+  } as unknown as StyleAnimatorConstructor;
+  __extends(LengthOrStringStyleAnimator, _super);
 
-  get value(): Length | string | null | undefined {
-    let value = this._value;
-    if (value === void 0) {
-      const propertyValue = this.propertyValue;
-      if (propertyValue) {
-        try {
-          value = Length.parse(propertyValue);
-        } catch (swallow) {
-          value = propertyValue;
+  Object.defineProperty(LengthOrStringStyleAnimator.prototype, "value", {
+    get: function <V extends ElementView>(this: LengthOrStringStyleAnimator<V>): Length | string | null | undefined {
+      let value = this._value;
+      if (value === void 0) {
+        const propertyValue = this.propertyValue;
+        if (propertyValue) {
+          try {
+            value = Length.parse(propertyValue, this._view._node);
+          } catch (swallow) {
+            value = propertyValue;
+          }
         }
       }
-    }
-    return value;
-  }
-}
+      return value;
+    },
+    enumerable: true,
+    configurable: true,
+  });
+
+  return LengthOrStringStyleAnimator;
+}(StyleAnimator));
 StyleAnimator.LengthOrString = LengthOrStringStyleAnimator;

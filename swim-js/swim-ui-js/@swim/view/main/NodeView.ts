@@ -103,9 +103,6 @@ export class NodeView extends View implements AnimatedView {
     if (index < 0) {
       this.willAddViewObserver(viewObserver);
       viewObservers.push(viewObserver);
-      if (viewObserver.setView) {
-        viewObserver.setView(this);
-      }
       this.onAddViewObserver(viewObserver);
       this.didAddViewObserver(viewObserver);
     }
@@ -116,9 +113,6 @@ export class NodeView extends View implements AnimatedView {
     const index = viewObservers.indexOf(viewObserver);
     if (index >= 0) {
       this.willRemoveViewObserver(viewObserver);
-      if (viewObserver.setView) {
-        viewObserver.setView(null);
-      }
       viewObservers.splice(index, 1);
       this.onRemoveViewObserver(viewObserver);
       this.didRemoveViewObserver(viewObserver);
@@ -547,6 +541,32 @@ export class NodeView extends View implements AnimatedView {
       }
     }
     this.didResize();
+  }
+
+  cascadeLayout(): void {
+    this.willLayout();
+    this.onLayout();
+    const childNodes = this._node.childNodes;
+    for (let i = 0, n = childNodes.length; i < n; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView) {
+        childView.cascadeLayout();
+      }
+    }
+    this.didLayout();
+  }
+
+  cascadeScroll(): void {
+    this.willScroll();
+    this.onScroll();
+    const childNodes = this._node.childNodes;
+    for (let i = 0, n = childNodes.length; i < n; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView) {
+        childView.cascadeScroll();
+      }
+    }
+    this.didScroll();
   }
 
   animate(force: boolean = false): void {

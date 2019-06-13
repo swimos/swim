@@ -30,6 +30,7 @@
     "@swim/dom": "3.9.0",
     "@swim/style": "3.9.0",
     "@swim/render": "3.9.0",
+    "@swim/constraint": "3.9.0",
     "@swim/view": "3.9.0"
   }
 }

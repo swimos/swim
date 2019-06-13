@@ -46,11 +46,13 @@ export type StyleAnimatorType = typeof String
                               | [typeof Length, typeof String]
                               | [typeof Color, typeof String];
 
-export interface StyleAnimatorClass {
+export interface StyleAnimatorConstructor {
   new<V extends ElementView, T, U = T>(view: V, names: string | ReadonlyArray<string>,
                                        value?: T | null, transition?: Transition<T> | null,
                                        priority?: string): StyleAnimator<V, T, U>;
+}
 
+export interface StyleAnimatorClass extends StyleAnimatorConstructor {
   (names: string | ReadonlyArray<string>, type: StyleAnimatorType): PropertyDecorator;
 
   // Forward type declarations

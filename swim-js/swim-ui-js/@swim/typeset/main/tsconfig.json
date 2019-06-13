@@ -23,6 +23,7 @@
       "@swim/dom": ["@swim/dom/main"],
       "@swim/style": ["@swim/style/main"],
       "@swim/render": ["@swim/render/main"],
+      "@swim/constraint": ["@swim/constraint/main"],
       "@swim/view": ["@swim/view/main"]
     }
   },
@@ -39,6 +40,7 @@
     {"path": "../../dom/main"},
     {"path": "../../style/main"},
     {"path": "../../render/main"},
+    {"path": "../../constraint/main"},
     {"path": "../../view/main"}
   ]
 }

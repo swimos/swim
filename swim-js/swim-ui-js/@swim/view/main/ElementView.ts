@@ -14,8 +14,8 @@
 
 import {BoxR2} from "@swim/math";
 import {AttributeString, StyleString, StyledElement} from "@swim/style";
-import {AttributeAnimatorClass, AttributeAnimator} from "./attribute/AttributeAnimator";
-import {StyleAnimatorClass, StyleAnimator} from "./style/StyleAnimator";
+import {AttributeAnimatorConstructor, AttributeAnimator} from "./attribute/AttributeAnimator";
+import {StyleAnimatorConstructor, StyleAnimator} from "./style/StyleAnimator";
 import {View} from "./View";
 import {NodeView} from "./NodeView";
 import {ElementViewObserver} from "./ElementViewObserver";
@@ -54,30 +54,17 @@ export class ElementView extends NodeView {
     return this._viewController;
   }
 
-  elemId(value: string): this {
-    this._node.setAttribute('id', AttributeString(value));
-    return this;
-  }
-
-  className(value?: string): this | DOMTokenList {
-    if(value === undefined) { return this._node.classList; }
-    this._node.setAttribute('class', AttributeString(value));
-    return this;
-  }
-
-  addClass(value: string): this {
-    this._node.classList.add(AttributeString(value));
-    return this;
-  }
-
-  removeClass(value: string): this {
-    this._node.classList.remove(AttributeString(value));
-    return this;
+  getAttribute(name: string): string | null {
+    return this._node.getAttribute(name);
   }
 
   setAttribute(name: string, value: unknown): this {
     this.willSetAttribute(name, value);
-    this._node.setAttribute(name, AttributeString(value));
+    if (value !== null) {
+      this._node.setAttribute(name, AttributeString(value));
+    } else {
+      this._node.removeAttribute(name);
+    }
     this.onSetAttribute(name, value);
     this.didSetAttribute(name, value);
     return this;
@@ -131,6 +118,64 @@ export class ElementView extends NodeView {
     });
   }
 
+  id(): string | null;
+  id(value: string | null): this;
+  id(value?: string | null): string | null | this {
+    if (value === void 0) {
+      return this.getAttribute("id");
+    } else {
+      this.setAttribute("id", value);
+      return this;
+    }
+  }
+
+  className(): string | null;
+  className(value: string | null): this;
+  className(value?: string | null): string | null | this {
+    if (value === void 0) {
+      return this.getAttribute("class");
+    } else {
+      this.setAttribute("class", value);
+      return this;
+    }
+  }
+
+  get classList(): DOMTokenList {
+    return this._node.classList;
+  }
+
+  hasClass(className: string): boolean {
+    return this._node.classList.contains(className);
+  }
+
+  addClass(...classNames: string[]): this {
+    const classList = this._node.classList;
+    for (let i = 0, n = classNames.length; i < n; i += 1) {
+      classList.add(classNames[i]);
+    }
+    return this;
+  }
+
+  removeClass(...classNames: string[]): this {
+    const classList = this._node.classList;
+    for (let i = 0, n = classNames.length; i < n; i += 1) {
+      classList.remove(classNames[i]);
+    }
+    return this;
+  }
+
+  toggleClass(className: string, state?: boolean): this {
+    const classList = this._node.classList;
+    if (state === void 0) {
+      classList.toggle(className);
+    } else if (state === true) {
+      classList.add(className);
+    } else if (state === false) {
+      classList.remove(className);
+    }
+    return this;
+  }
+
   get clientBounds(): BoxR2 {
     const bounds = this._node.getBoundingClientRect();
     return new BoxR2(bounds.left, bounds.top, bounds.right, bounds.bottom);
@@ -159,11 +204,16 @@ export class ElementView extends NodeView {
   }
 
   /** @hidden */
-  static decorateAttributeAnimator<V extends ElementView, T, U>(AttributeAnimator: AttributeAnimatorClass,
+  static decorateAttributeAnimator<V extends ElementView, T, U>(AttributeAnimator: AttributeAnimatorConstructor,
                                                                 name: string, target: unknown, key: string): void {
     Object.defineProperty(target, key, {
       get: function (this: V): AttributeAnimator<V, T, U> {
         const animator = new AttributeAnimator<V, T, U>(this, name);
+        Object.defineProperty(animator, "name", {
+          value: key,
+          enumerable: true,
+          configurable: true,
+        });
         Object.defineProperty(this, key, {
           value: animator,
           configurable: true,
@@ -177,12 +227,17 @@ export class ElementView extends NodeView {
   }
 
   /** @hidden */
-  static decorateStyleAnimator<V extends ElementView, T, U>(StyleAnimator: StyleAnimatorClass,
+  static decorateStyleAnimator<V extends ElementView, T, U>(StyleAnimator: StyleAnimatorConstructor,
                                                             names: string | ReadonlyArray<string>,
                                                             target: unknown, key: string): void {
     Object.defineProperty(target, key, {
       get: function (this: V): StyleAnimator<V, T, U> {
         const animator = new StyleAnimator<V, T, U>(this, names);
+        Object.defineProperty(animator, "name", {
+          value: key,
+          enumerable: true,
+          configurable: true,
+        });
         Object.defineProperty(this, key, {
           value: animator,
           configurable: true,
