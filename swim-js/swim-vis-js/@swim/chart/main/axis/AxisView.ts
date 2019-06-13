@@ -295,7 +295,7 @@ export abstract class AxisView<D> extends GraphicView {
       if (this._tickGenerator) {
         tickLabel = this._tickGenerator.format(tickValue);
       } else {
-        tickLabel = tickValue.toString();
+        tickLabel = "" + tickValue;
       }
     }
     if (typeof tickLabel === "string") {
