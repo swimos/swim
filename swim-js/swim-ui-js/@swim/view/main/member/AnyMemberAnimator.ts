@@ -44,7 +44,7 @@ export const AnyMemberAnimator = (function (_super: typeof MemberAnimator): AnyM
         if (value !== null) {
           value = _this._type.fromAny(value);
         }
-        _this.setState(value, tween);
+        _this.setState(value as T, tween);
         return _this._view;
       }
     } as AnyMemberAnimator<V, T, U>;
