@@ -1,0 +1,21 @@
+apply from: '../project.gradle'
+
+description = 'Agent programming interface'
+ext.moduleName = 'swim.api'
+
+dependencies {
+  api group: 'ai.swim', name: 'swim-util', version: version
+  api group: 'ai.swim', name: 'swim-codec', version: version
+  api group: 'ai.swim', name: 'swim-structure', version: version
+  api group: 'ai.swim', name: 'swim-math', version: version
+  api group: 'ai.swim', name: 'swim-spatial', version: version
+  api group: 'ai.swim', name: 'swim-streamlet', version: version
+  api group: 'ai.swim', name: 'swim-dataflow', version: version
+  api group: 'ai.swim', name: 'swim-observable', version: version
+  api group: 'ai.swim', name: 'swim-http', version: version
+  api group: 'ai.swim', name: 'swim-ws', version: version
+  api group: 'ai.swim', name: 'swim-mqtt', version: version
+  api group: 'ai.swim', name: 'swim-warp', version: version
+  api group: 'ai.swim', name: 'swim-concurrent', version: version
+  api group: 'ai.swim', name: 'swim-io', version: version
+}

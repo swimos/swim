@@ -1,0 +1,27 @@
+apply from: '../project.gradle'
+
+description = 'Swim server loader'
+ext.moduleName = 'swim.server'
+
+dependencies {
+  api project(':swim-kernel')
+  api project(':swim-store-mem')
+  api project(':swim-router')
+  api project(':swim-remote')
+  api project(':swim-service')
+  api project(':swim-service-warp')
+  api project(':swim-auth')
+  api project(':swim-fabric')
+  api project(':swim-java')
+}
+
+test {
+  if (useModules) {
+    doFirst {
+      jvmArgs += [
+        '--add-opens', 'swim.server/swim.server=swim.java',
+        '--add-opens', 'swim.server/swim.server=testng',
+      ]
+    }
+  }
+}

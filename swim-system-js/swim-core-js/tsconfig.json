@@ -1,0 +1,19 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {"path": "./@swim/util"},
+    {"path": "./@swim/codec"},
+    {"path": "./@swim/args"},
+    {"path": "./@swim/unit"},
+    {"path": "./@swim/collections"},
+    {"path": "./@swim/structure"},
+    {"path": "./@swim/streamlet"},
+    {"path": "./@swim/dataflow"},
+    {"path": "./@swim/recon"},
+    {"path": "./@swim/math"},
+    {"path": "./@swim/time"},
+    {"path": "./@swim/uri"},
+    {"path": "./@swim/core"}
+  ]
+}

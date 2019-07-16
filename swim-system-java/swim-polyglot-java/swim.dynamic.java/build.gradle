@@ -1,0 +1,21 @@
+apply from: '../project.gradle'
+
+description = 'java.base dynamic language bindings'
+ext.moduleName = 'swim.dynamic.java'
+
+dependencies {
+  api project(':swim-dynamic')
+
+  testCompile project(":swim-vm-js")
+}
+
+test {
+  if (useModules) {
+    doFirst {
+      jvmArgs += [
+        '--add-reads', 'swim.dynamic.java=org.graalvm.sdk',
+        '--add-reads', 'swim.dynamic.java=swim.vm',
+      ]
+    }
+  }
+}

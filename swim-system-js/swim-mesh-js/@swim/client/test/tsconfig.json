@@ -1,0 +1,25 @@
+{
+  "extends": "../../../tsconfig-test",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "lib": ["DOM", "ES5", "ES2015.Promise", "ScriptHost"],
+    "outDir": "../lib/test",
+    "paths": {
+      "@swim/util": ["../swim-core-js/@swim/util/main"],
+      "@swim/codec": ["../swim-core-js/@swim/codec/main"],
+      "@swim/collections": ["../swim-core-js/@swim/collections/main"],
+      "@swim/unit": ["../swim-core-js/@swim/unit/main"],
+      "@swim/structure": ["../swim-core-js/@swim/structure/main"],
+      "@swim/streamlet": ["../swim-core-js/@swim/streamlet/main"],
+      "@swim/dataflow": ["../swim-core-js/@swim/dataflow/main"],
+      "@swim/recon": ["../swim-core-js/@swim/recon/main"],
+      "@swim/uri": ["../swim-core-js/@swim/uri/main"],
+      "@swim/warp": ["@swim/warp/main"],
+      "@swim/client": ["@swim/client/main"]
+    }
+  },
+  "references": [
+    {"path": "../../warp/main"},
+    {"path": "../../client/main"}
+  ]
+}

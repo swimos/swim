@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+  remote = git@github.com:swimos/swim-mesh-java.git
+  branch = master
+  commit = 97a64516982a7b076aa4fd7065a4cb00cd8593ca
+  parent = a01e588adc75427f9d35fb985aa1fa494a027c3c
+  method = merge
+  cmdver = 0.4.0

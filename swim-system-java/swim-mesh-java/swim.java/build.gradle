@@ -1,0 +1,8 @@
+apply from: '../project.gradle'
+
+description = 'Java kernel runtime'
+ext.moduleName = 'swim.java'
+
+dependencies {
+  api project(':swim-kernel')
+}

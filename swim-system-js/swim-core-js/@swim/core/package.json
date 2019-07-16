@@ -1,0 +1,25 @@
+{
+  "name": "@swim/core",
+  "version": "3.9.0",
+  "description": "Swim Core TypeScript Implementation",
+  "homepage": "https://github.com/swimos/swim",
+  "author": "Chris Sachs <chris@swim.ai>",
+  "copyright": "2015-2019 SWIM.AI inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "dist/main/swim-core.js",
+  "module": "lib/main/index.js",
+  "types": "lib/main/index.d.ts",
+  "dependencies": {
+    "@swim/util": "3.9.0",
+    "@swim/codec": "3.9.0",
+    "@swim/collections": "3.9.0",
+    "@swim/structure": "3.9.0",
+    "@swim/streamlet": "3.9.0",
+    "@swim/dataflow": "3.9.0",
+    "@swim/recon": "3.9.0",
+    "@swim/math": "3.9.0",
+    "@swim/time": "3.9.0",
+    "@swim/uri": "3.9.0"
+  }
+}

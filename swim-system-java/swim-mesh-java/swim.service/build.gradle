@@ -1,0 +1,8 @@
+apply from: '../project.gradle'
+
+description = 'Swim network service runtime'
+ext.moduleName = 'swim.service'
+
+dependencies {
+  api project(':swim-kernel')
+}

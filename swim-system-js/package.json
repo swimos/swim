@@ -1,0 +1,34 @@
+{
+  "name": "@swim/system",
+  "version": "3.9.0",
+  "description": "Swim TypeScript System",
+  "homepage": "https://github.com/swimos/swim",
+  "author": "Chris Sachs <chris@swim.ai>",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "private": true,
+  "devDependencies": {
+    "@types/mapbox-gl": "0.51",
+    "@types/node": "12",
+    "@types/ws": "6",
+    "rollup": "1.16",
+    "rollup-plugin-node-resolve": "5",
+    "rollup-plugin-sourcemaps": "0",
+    "terser": "4",
+    "tslib": "1",
+    "tslint": "5",
+    "typedoc": "0.14",
+    "typescript": "3.5",
+    "ws": "7"
+  },
+  "scripts": {
+    "postinstall": "cd ./swim-core-js/@swim/build && npm run compile && npm run bundle",
+    "build": "./bin/build.js",
+    "compile": "./bin/build.js compile",
+    "test": "./bin/build.js compile --test",
+    "doc": "./bin/build.js doc",
+    "watch": "./bin/build.js watch",
+    "clean": "./bin/build.js clean && cd ./swim-core-js/@swim/build && npm run compile && npm run bundle",
+    "help": "./bin/build.js help"
+  }
+}

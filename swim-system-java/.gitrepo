@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+  remote = git@github.com:swimos/swim-system-java.git
+  branch = master
+  commit = 8035b118f4e6cadc52f078d91d7ae7cb821d55ae
+  parent = a01e588adc75427f9d35fb985aa1fa494a027c3c
+  method = merge
+  cmdver = 0.4.0

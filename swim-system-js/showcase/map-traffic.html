@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Traffic Map</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover"/>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.css" rel="stylesheet"/>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.js"></script>
+  </head>
+  <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <div id="app" style="display: flex; position: relative; width: 100%; height: 100%;">
+    </div>
+    <script src="../swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script src="../swim-vis-js/@swim/vis/dist/main/swim-vis.js"></script>
+    <script>
+
+const RED = swim.Color.parse("#a50f21");
+const YELLOW = swim.Color.parse("#fccf20");
+const GREEN = swim.Color.parse("#54e218");
+const INTERSECTION_COLOR = swim.Color.parse("#00a6ed");
+const RIPPLE_COLOR = swim.Color.parse("#efefef").alpha(0.25);
+
+const app = new swim.HtmlAppView(document.getElementById("app"));
+
+mapboxgl.accessToken = "pk.eyJ1Ijoic3dpbWl0IiwiYSI6ImNqY2c3NXZkYzFoa2QycXQ1eXl1Mnd6M3EifQ.qpRE7xC08AyZfxJ56LoN7w";
+const map = new mapboxgl.Map({
+  container: app.node,
+  style: "mapbox://styles/swimit/cjmcivx8t8yul2sp7neiwgy8g",
+  center: {lng: -122.157139, lat: 37.450809},
+  pitch: 70,
+  zoom: 18,
+  bearing: -160,
+});
+
+const mapView = new swim.MapboxView(map);
+mapView.overlayCanvas();
+
+const host = swim.hostRef("warp://traffic.swim.services")
+
+const intersectionsLink = host.downlinkMap()
+    .nodeUri("/city/PaloAlto_CA_US")
+    .laneUri("intersections")
+    .didUpdate(function (key, value) {
+      key = key.stringValue();
+      const lng = value.get("lng").numberValue();
+      const lat = value.get("lat").numberValue();
+
+      let intersection = mapView.getChildView(key);
+      if (!intersection) {
+        const intersectionId = value.get("id").stringValue();
+        intersection = new swim.MapCircleView()
+            .center([lng, lat])
+            .radius(5)
+            .fill(INTERSECTION_COLOR);
+        mapView.setChildView(key, intersection);
+        linkIntersection(intersectionId, host.nodeRef(key), intersection);
+      }
+    })
+    .open();
+
+function linkIntersection(intersectionId, node, intersection) {
+  let approaches = {};
+  let phases = {};
+  let detectors = {};
+  let intersectionPopover = null;
+  intersection.on("click", function (event) {
+    event.stopPropagation();
+    if (!intersectionPopover) {
+      intersectionPopover = new swim.PopoverView()
+          .width(240)
+          .height(360)
+          .borderRadius(5)
+          .backgroundColor(swim.Color.parse("#071013").alpha(0.9))
+          .backdropFilter("blur(2px)");
+      intersectionPopover.setSource(intersection);
+      intersectionPopover.hidePopover();
+    }
+    app.togglePopover(intersectionPopover, {multi: event.altKey});
+  });
+
+  const schematicLink = node.downlinkValue()
+      .laneUri("intersection/schematic")
+      .didSet(function (value) {
+        value.forEach(function (item) {
+          if (item.tag() === "approach") {
+            const approachId = item.get("id").stringValue();
+            const approachKey = intersectionId + "-" + approachId;
+            let approach = approaches[approachId];
+            if (!approach) {
+              const coords = item.get("coords").toAny();
+              approach = swim.MapPolygonView.fromAny({
+                    coords: coords,
+                    fill: swim.Color.transparent(),
+                    stroke: swim.Color.transparent(),
+                    strokeWidth: 3,
+                  })
+                  .on("mouseenter", function (event) {
+                    updateApproach(approach);
+                  })
+                  .on("mouseleave", function (event) {
+                    updateApproach(approach);
+                  });
+              approaches[approachId] = approach;
+              const phaseId = item.get("phase").stringValue();
+              if (phaseId) {
+                const phaseApproaches = phases[phaseId] || [];
+                phaseApproaches.push(approach);
+                phases[phaseId] = phaseApproaches;
+              }
+              const detectorId = item.get("detector").toAny();
+              if (detectorId) {
+                const detectorApproaches = detectors[detectorId] || [];
+                detectorApproaches.push(approach);
+                detectors[detectorId] = detectorApproaches;
+              }
+              mapView.setChildView(approachKey, approach);
+            }
+          }
+        })
+      })
+      .open();
+
+  const phaseLink = node.downlinkMap()
+      .laneUri("phase/state")
+      .didUpdate(function (key, value) {
+        const phaseId = key.stringValue();
+        const phase = value.numberValue();
+        const phaseApproaches = phases[phaseId] || [];
+        for (let i = 0; i < phaseApproaches.length; i += 1) {
+          const approach = phaseApproaches[i];
+          approach.phase = phase;
+          updateApproach(approach);
+        }
+      })
+      .open();
+
+  const detectorLink = node.downlinkMap()
+      .laneUri("detector/state")
+      .didUpdate(function (key, value) {
+        const detectorId = key.stringValue();
+        const occupied = value.numberValue() !== 0;
+        const detectorApproaches = detectors[detectorId] || [];
+        for (let i = 0; i < detectorApproaches.length; i += 1) {
+          const approach = detectorApproaches[i];
+          approach.occupied = occupied;
+          updateApproach(approach);
+        }
+        if (occupied && !document.hidden) {
+          rippleIntersection();
+        }
+      })
+      .open();
+
+  function updateApproach(approach) {
+    let phaseColor;
+    if (approach.phase === 1) { // red
+      phaseColor = RED;
+    } else if (approach.phase === 2) { // yellow
+      phaseColor = YELLOW;
+    } else if (approach.phase === 3) { // green
+      phaseColor = GREEN;
+    } else {
+      phaseColor = swim.Color.transparent();
+    }
+    if (approach.occupied === false) {
+      phaseColor = phaseColor.alpha(0.25);
+    }
+    approach.fill(phaseColor, swim.Transition.duration(500));
+    if (approach.hover) {
+      approach.stroke("#ffffff", {duration: 200});
+    } else {
+      approach.stroke(swim.Color.transparent(), {duration: 200});
+    }
+  }
+
+  function rippleIntersection() {
+    const ripple = new swim.MapCircleView()
+        .center(intersection.center.value)
+        .radius(0)
+        .fill(null)
+        .stroke(RIPPLE_COLOR)
+        .strokeWidth(1);
+    mapView.append(ripple);
+    const radius = Math.min(mapView.bounds.width, mapView.bounds.height) / 8;
+    const tween = swim.Transition.duration(2000);
+    ripple.stroke(RIPPLE_COLOR.alpha(0), tween)
+          .radius(radius, tween.onEnd(function () { ripple.remove(); }));
+  }
+}
+
+    </script>
+  </body>
+</html>

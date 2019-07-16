@@ -1,1 +1,0 @@
-# Swim Platform Java Implementation

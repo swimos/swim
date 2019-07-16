@@ -1,0 +1,23 @@
+apply from: '../project.gradle'
+
+description = 'swim.structure dynamic language bindings'
+ext.moduleName = 'swim.dynamic.structure'
+
+dependencies {
+  api group: 'ai.swim', name: 'swim-structure', version: version
+  api project(':swim-dynamic')
+  api project(':swim-dynamic-java')
+
+  testCompile project(":swim-vm-js")
+}
+
+test {
+  if (useModules) {
+    doFirst {
+      jvmArgs += [
+        '--add-reads', 'swim.dynamic.structure=org.graalvm.sdk',
+        '--add-reads', 'swim.dynamic.structure=swim.vm',
+      ]
+    }
+  }
+}

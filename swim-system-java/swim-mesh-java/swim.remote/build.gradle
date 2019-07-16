@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Web Agent remote router'
+ext.moduleName = 'swim.remote'
+
+dependencies {
+  api group: 'ai.swim', name: 'swim-io-warp', version: version
+  api project(':swim-runtime')
+  api project(':swim-kernel')
+}

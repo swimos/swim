@@ -1,0 +1,54 @@
+apply from: '../project.gradle'
+apply plugin: 'application'
+
+description = 'Swim Command Line Interface'
+ext.moduleName = 'swim.cli'
+mainClassName = 'swim.cli.Main'
+
+dependencies {
+  api group: 'ai.swim', name: 'swim-args', version: version
+  api group: 'ai.swim', name: 'swim-recon', version: version
+  api group: 'ai.swim', name: 'swim-json', version: version
+  api project(':swim-client')
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+afterEvaluate {
+  def javaHome = System.getenv('JAVA_HOME')
+
+  task nativeImage(type: Exec) {
+    dependsOn 'jar'
+
+    workingDir project.projectDir
+
+    commandLine "${javaHome}/bin/native-image",
+                '-cp', sourceSets.main.runtimeClasspath.asPath,
+                "-H:Path=${buildDir}/graal",
+                "-H:Name=${project.name}",
+                '--no-server',
+                '--no-fallback',
+                '--initialize-at-build-time',
+                '--enable-all-security-services',
+                "${mainClassName}"
+  }
+
+  task link(type: Exec) {
+    dependsOn 'clean'
+    dependsOn 'jar'
+
+    workingDir project.projectDir
+
+    commandLine "${javaHome}/bin/jlink",
+                '--module-path', sourceSets.main.runtimeClasspath.asPath,
+                '--add-modules', moduleName,
+                '--launcher', "${project.name}=${moduleName}/${mainClassName}",
+                '--output', "${buildDir}/distribution/${project.name}",
+                '--vm', 'server',
+                '--compress', '2',
+                '--strip-debug',
+                '--no-header-files',
+                '--no-man-pages'
+  }
+}

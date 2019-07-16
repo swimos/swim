@@ -1,0 +1,76 @@
+// Build with `gradle -Pno-modules` to force compatibility with legacy JVMs.
+def javaVersion = System.getProperty('java.version').split('\\.')
+ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : javaVersion[1] as Integer
+ext.useModules = jvmVersion >= 9 && !hasProperty('no-modules')
+ext.graalVersion = project.property('graal.version')
+
+gradle.projectsEvaluated {
+  apply plugin: 'java'
+
+  def javaProjects = subprojects.findAll { subproject -> subproject.plugins.hasPlugin(JavaPlugin) }
+
+  if (useModules) {
+    javaProjects.each { project ->
+      compileJava.dependsOn project.tasks.compileModuleInfoJava
+    }
+  }
+
+  javadoc {
+    title 'Swim Mesh'
+    options.overview = "${projectDir}/overview.html"
+    if (useModules) {
+      options.group('Storage',
+        'swim.store',
+        'swim.store.mem')
+      options.group('Runtime',
+        'swim.agent',
+        'swim.api',
+        'swim.auth',
+        'swim.client',
+        'swim.fabric',
+        'swim.java',
+        'swim.kernel',
+        'swim.remote',
+        'swim.router',
+        'swim.runtime',
+        'swim.server',
+        'swim.service',
+        'swim.service.warp')
+      options.group('Tools',
+        'swim.cli')
+    }
+
+    source javaProjects.collect { project -> project.sourceSets.main.allJava }
+    doFirst {
+      if (useModules) {
+        def modules = javaProjects.collect { project -> project.moduleName }
+        options.addStringOption('-module', modules.join(','))
+        options.addStringOption('-module-source-path', "${projectDir}/*/src/main/java")
+        options.addStringOption('-module-path', classpath.asPath)
+        classpath = files()
+      } else {
+        exclude '*module-info*'
+      }
+      options.addBooleanOption('Xdoclint:all,-missing', true)
+      options.charSet = 'UTF-8'
+      options.encoding = 'UTF-8'
+      if (jvmVersion >= 9) {
+        options.addBooleanOption('html5', true)
+      }
+      if (jvmVersion >= 11) {
+        options.links += ["https://docs.oracle.com/en/java/javase/" + jvmVersion + "/docs/api/"]
+      } else {
+        options.links += ["https://docs.oracle.com/javase/" + jvmVersion + "/docs/api/"]
+      }
+    }
+  }
+
+  task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc
+  }
+
+  artifacts {
+    archives javadocJar
+  }
+}

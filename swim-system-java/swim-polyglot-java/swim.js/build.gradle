@@ -1,0 +1,30 @@
+apply from: '../project.gradle'
+
+description = 'JavaScript kernel runtime'
+ext.moduleName = 'swim.js'
+
+dependencies {
+  implementation group: 'ai.swim', name: 'swim-json', version: version
+  api group: 'ai.swim', name: 'swim-kernel', version: version
+  implementation project(':swim-dynamic-java')
+  implementation project(':swim-dynamic-structure')
+  implementation project(':swim-dynamic-observable')
+  implementation project(':swim-dynamic-api')
+  api project(':swim-vm-js')
+
+  testCompile group: 'ai.swim', name: 'swim-server', version: version
+}
+
+test {
+  if (useModules) {
+    doFirst {
+      jvmArgs += [
+        '--add-reads', 'swim.js=swim.fabric',
+        '--add-reads', 'swim.js=swim.server',
+        '--add-reads', 'swim.js=swim.service.warp',
+      ]
+    }
+  }
+
+  systemProperty "project.dir", projectDir
+}

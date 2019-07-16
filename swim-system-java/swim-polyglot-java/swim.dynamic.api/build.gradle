@@ -1,0 +1,24 @@
+apply from: '../project.gradle'
+
+description = 'swim.api dynamic language bindings'
+ext.moduleName = 'swim.dynamic.api'
+
+dependencies {
+  api group: 'ai.swim', name: 'swim-api', version: version
+  api project(':swim-dynamic')
+  api project(':swim-dynamic-java')
+  api project(':swim-dynamic-observable')
+
+  testCompile project(":swim-vm-js")
+}
+
+test {
+  if (useModules) {
+    doFirst {
+      jvmArgs += [
+        '--add-reads', 'swim.dynamic.api=org.graalvm.sdk',
+        '--add-reads', 'swim.dynamic.api=swim.vm',
+      ]
+    }
+  }
+}

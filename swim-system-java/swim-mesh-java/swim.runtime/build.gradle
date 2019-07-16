@@ -1,0 +1,18 @@
+apply from: '../project.gradle'
+
+description = 'Swim runtime interfaces'
+ext.moduleName = 'swim.runtime'
+
+dependencies {
+  implementation group: 'ai.swim', name: 'swim-util', version: version
+  api group: 'ai.swim', name: 'swim-codec', version: version
+  api group: 'ai.swim', name: 'swim-structure', version: version
+  api group: 'ai.swim', name: 'swim-math', version: version
+  api group: 'ai.swim', name: 'swim-spatial', version: version
+  api group: 'ai.swim', name: 'swim-http', version: version
+  api group: 'ai.swim', name: 'swim-mqtt', version: version
+  api group: 'ai.swim', name: 'swim-warp', version: version
+  api group: 'ai.swim', name: 'swim-concurrent', version: version
+  api project(':swim-api')
+  api project(':swim-store')
+}

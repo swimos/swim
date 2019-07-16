@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Web Agent client runtime'
+ext.moduleName = 'swim.client'
+
+dependencies {
+  api project(':swim-runtime')
+  api project(':swim-router')
+  api project(':swim-remote')
+}

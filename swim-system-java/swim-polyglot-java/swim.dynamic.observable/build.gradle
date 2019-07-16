@@ -1,0 +1,23 @@
+apply from: '../project.gradle'
+
+description = 'swim.observable dynamic language bindings'
+ext.moduleName = 'swim.dynamic.observable'
+
+dependencies {
+  api group: 'ai.swim', name: 'swim-observable', version: version
+  api project(':swim-dynamic')
+  api project(':swim-dynamic-java')
+
+  testCompile project(":swim-vm-js")
+}
+
+test {
+  if (useModules) {
+    doFirst {
+      jvmArgs += [
+        '--add-reads', 'swim.dynamic.observable=org.graalvm.sdk',
+        '--add-reads', 'swim.dynamic.observable=swim.vm',
+      ]
+    }
+  }
+}

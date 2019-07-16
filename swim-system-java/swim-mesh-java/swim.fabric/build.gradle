@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Swim fabric runtime'
+ext.moduleName = 'swim.fabric'
+
+dependencies {
+  api project(':swim-runtime')
+  api project(':swim-agent')
+  api project(':swim-kernel')
+}

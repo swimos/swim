@@ -1,0 +1,49 @@
+rootProject.name = 'swim-mesh'
+
+include 'swim.api'
+project(':swim.api').name = 'swim-api'
+
+include 'swim.store'
+project(':swim.store').name = 'swim-store'
+
+include 'swim.runtime'
+project(':swim.runtime').name = 'swim-runtime'
+
+include 'swim.kernel'
+project(':swim.kernel').name = 'swim-kernel'
+
+include 'swim.auth'
+project(':swim.auth').name = 'swim-auth'
+
+include 'swim.agent'
+project(':swim.agent').name = 'swim-agent'
+
+include 'swim.fabric'
+project(':swim.fabric').name = 'swim-fabric'
+
+include 'swim.service'
+project(':swim.service').name = 'swim-service'
+
+include 'swim.store.mem'
+project(':swim.store.mem').name = 'swim-store-mem'
+
+include 'swim.router'
+project(':swim.router').name = 'swim-router'
+
+include 'swim.remote'
+project(':swim.remote').name = 'swim-remote'
+
+include 'swim.service.warp'
+project(':swim.service.warp').name = 'swim-service-warp'
+
+include 'swim.java'
+project(':swim.java').name = 'swim-java'
+
+include 'swim.server'
+project(':swim.server').name = 'swim-server'
+
+include 'swim.client'
+project(':swim.client').name = 'swim-client'
+
+include 'swim.cli'
+project(':swim.cli').name = 'swim-cli'

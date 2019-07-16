@@ -1,0 +1,217 @@
+apply plugin: 'java-library'
+apply plugin: 'checkstyle'
+apply plugin: 'signing'
+apply plugin: 'maven'
+
+group = 'ai.swim'
+version = project.property('swim.version')
+ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
+ext.compilerArgs = ['-Xlint:all']
+
+repositories {
+  mavenCentral()
+  maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+}
+
+afterEvaluate {
+  dependencies {
+    testCompile 'org.testng:testng:6.14.3'
+  }
+
+  configurations {
+    apiElements {
+      sourceCompatibility = JavaVersion.VERSION_1_8
+      targetCompatibility = JavaVersion.VERSION_1_8
+    }
+  }
+
+  if (useModules) {
+    task compileModuleInfoJava(type: JavaCompile) {
+      dependsOn 'compileJava'
+      doFirst {
+        options.compilerArgs = [
+          '--module-path', compileJava.classpath.asPath,
+        ]
+      }
+      options.compilerArgs += compilerArgs
+      options.encoding = 'UTF-8'
+      classpath = files()
+      source = sourceSets.main.allJava
+      sourceCompatibility = JavaVersion.VERSION_1_9
+      targetCompatibility = JavaVersion.VERSION_1_9
+      destinationDir = compileJava.destinationDir
+      include '*module-info*'
+    }
+    classes.dependsOn compileModuleInfoJava
+    def dependents = configurations.api.dependencies + configurations.implementation.dependencies
+    def dependentProjects = dependents.findAll { it instanceof ProjectDependency }
+    dependentProjects.each { dependency ->
+      compileModuleInfoJava.dependsOn ":${dependency.name}:compileModuleInfoJava"
+    }
+  }
+
+  compileJava {
+    options.compilerArgs += compilerArgs
+    options.encoding = 'UTF-8'
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    exclude '*module-info*'
+  }
+
+  compileTestJava {
+    options.compilerArgs += compilerArgs
+    options.encoding = 'UTF-8'
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    exclude '*module-info*'
+  }
+
+  test {
+    inputs.property('moduleName', moduleName)
+    if (useModules) {
+      doFirst {
+        jvmArgs = [
+          '--module-path', classpath.asPath,
+          '--add-modules', 'ALL-MODULE-PATH',
+          '--add-reads', "$moduleName=testng",
+          '--patch-module', "$moduleName=" + (
+            files(sourceSets.test.java.outputDir) + files(sourceSets.test.resources.srcDirs)
+          ).asPath
+        ]
+        classpath = files()
+      }
+    }
+
+    useTestNG() {
+      // Run `gradle -Pslow test` to include slow tests.
+      if (!project.hasProperty('slow')) {
+        excludeGroups 'slow'
+      }
+    }
+
+    scanForTestClasses = false
+    include '**/*Spec.class'
+
+    maxHeapSize = '1024m'
+
+    testLogging {
+      events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+      exceptionFormat 'full'
+      displayGranularity = 4
+    }
+
+    outputs.upToDateWhen { false }
+  }
+
+  checkstyle {
+    configFile = new File(rootDir, 'checkstyle.xml')
+    toolVersion "8.22"
+    checkstyleMain {
+      source = sourceSets.main.allJava
+      exclude '*module-info*'
+    }
+    checkstyleTest {
+      source = sourceSets.test.allJava
+      exclude '*module-info*'
+    }
+  }
+
+  javadoc {
+    if (useModules) {
+      options.addStringOption('-module-path', classpath.asPath)
+    } else {
+      exclude '*module-info*'
+    }
+    options.addBooleanOption('Xdoclint:all,-missing', true)
+    options.charSet = 'UTF-8'
+    options.encoding = 'UTF-8'
+    if (jvmVersion >= 9) {
+      options.addBooleanOption('html5', true)
+    }
+    if (jvmVersion >= 11) {
+      options.links += ["https://docs.oracle.com/en/java/javase/" + jvmVersion + "/docs/api/"]
+    } else {
+      options.links += ["https://docs.oracle.com/javase/" + jvmVersion + "/docs/api/"]
+    }
+  }
+
+  jar {
+    inputs.property('moduleName', moduleName)
+    manifest {
+      attributes(
+        'Implementation-Title': moduleName,
+        'Implementation-Version': version)
+    }
+  }
+
+  task sourcesJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+  }
+
+  task javadocJar(type: Jar) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+  }
+
+  artifacts {
+    archives javadocJar, sourcesJar
+  }
+
+  task jshell(type: Exec) {
+    dependsOn 'classes'
+    executable 'jshell'
+    args '--class-path', sourceSets.main.compileClasspath.asPath
+    standardInput = System.in
+  }
+}
+
+if (project.hasProperty('nexusUsername') && project.hasProperty('nexusPassword')) {
+  signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask('uploadArchives') }
+    sign configurations.archives
+  }
+
+  uploadArchives {
+    repositories {
+      mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+          authentication(userName: nexusUsername, password: nexusPassword)
+        }
+
+        snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+          authentication(userName: nexusUsername, password: nexusPassword)
+        }
+
+        pom.project {
+          name "${name}"
+          packaging 'jar'
+          description "${description}"
+          url 'https://github.com/swimos/swim'
+
+          scm {
+            connection 'scm:git:git@github.com:swimos/swim.git'
+            url 'git@github.com:swimos/swim.git'
+          }
+
+          licenses {
+            license {
+              name 'The Apache Software License, Version 2.0'
+              url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+            }
+          }
+
+          developers {
+            developer {
+              id 'c9r'
+              name 'Chris Sachs'
+              email 'chris@swim.ai'
+            }
+          }
+        }
+      }
+    }
+  }
+}

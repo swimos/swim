@@ -1,0 +1,23 @@
+apply from: '../project.gradle'
+
+description = 'Swim JavaScript language integration'
+ext.moduleName = 'swim.vm.js'
+
+dependencies {
+  implementation group: 'ai.swim', name: 'swim-json', version: version
+  api group: 'ai.swim', name: 'swim-uri', version: version
+  api project(':swim-vm')
+  implementation group: 'org.graalvm.js', name: 'js', version: graalVersion
+
+  testCompile project(":swim-dynamic-structure")
+}
+
+test {
+  if (useModules) {
+    doFirst {
+      jvmArgs += [
+        '--add-reads', 'swim.vm.js=swim.dynamic.structure',
+      ]
+    }
+  }
+}

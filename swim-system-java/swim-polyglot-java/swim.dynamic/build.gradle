@@ -1,0 +1,8 @@
+apply from: '../project.gradle'
+
+description = 'Language binding interfaces'
+ext.moduleName = 'swim.dynamic'
+
+dependencies {
+  implementation group: 'ai.swim', name: 'swim-collections', version: version
+}

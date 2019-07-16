@@ -1,9 +1,0 @@
-apply from: '../project.gradle'
-
-description = 'Web Agent remote runtime'
-ext.moduleName = 'swim.remote'
-
-dependencies {
-  api project(':swim-io-warp')
-  api project(':swim-runtime')
-}
