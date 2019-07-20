@@ -36,13 +36,11 @@
       "@swim/typeset": ["swim-ui-js/@swim/typeset/main"],
       "@swim/gesture": ["swim-ui-js/@swim/gesture/main"],
 
-      "@swim/navigation": ["swim-ux-js/@swim/navigation/main"],
-
-      "@swim/gauge": ["swim-vis-js/@swim/gauge/main"],
-      "@swim/pie": ["swim-vis-js/@swim/pie/main"],
-      "@swim/chart": ["swim-vis-js/@swim/chart/main"],
-      "@swim/map": ["swim-vis-js/@swim/map/main"],
-      "@swim/mapbox": ["swim-vis-js/@swim/mapbox/main"],
+      "@swim/gauge": ["swim-ux-js/@swim/gauge/main"],
+      "@swim/pie": ["swim-ux-js/@swim/pie/main"],
+      "@swim/chart": ["swim-ux-js/@swim/chart/main"],
+      "@swim/map": ["swim-ux-js/@swim/map/main"],
+      "@swim/mapbox": ["swim-ux-js/@swim/mapbox/main"],
 
       "@swim/site": ["swim-web-js/@swim/site/main"],
       "@swim/app": ["swim-web-js/@swim/app/main"]
@@ -81,13 +79,11 @@
     {"path": "../../swim-ui-js/@swim/typeset/main"},
     {"path": "../../swim-ui-js/@swim/gesture/main"},
 
-    {"path": "../../swim-ux-js/@swim/navigation/main"},
-
-    {"path": "../../swim-vis-js/@swim/gauge/main"},
-    {"path": "../../swim-vis-js/@swim/pie/main"},
-    {"path": "../../swim-vis-js/@swim/chart/main"},
-    {"path": "../../swim-vis-js/@swim/map/main"},
-    {"path": "../../swim-vis-js/@swim/mapbox/main"},
+    {"path": "../../swim-ux-js/@swim/gauge/main"},
+    {"path": "../../swim-ux-js/@swim/pie/main"},
+    {"path": "../../swim-ux-js/@swim/chart/main"},
+    {"path": "../../swim-ux-js/@swim/map/main"},
+    {"path": "../../swim-ux-js/@swim/mapbox/main"},
 
     {"path": "../../swim-web-js/@swim/site/main"},
     {"path": "../../swim-web-js/@swim/app/main"}

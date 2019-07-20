@@ -40,15 +40,12 @@
     {"path": "./swim-ui-js/@swim/gesture"},
     {"path": "./swim-ui-js/@swim/ui"},
 
-    {"path": "./swim-ux-js/@swim/navigation"},
+    {"path": "./swim-ux-js/@swim/gauge"},
+    {"path": "./swim-ux-js/@swim/pie"},
+    {"path": "./swim-ux-js/@swim/chart"},
+    {"path": "./swim-ux-js/@swim/map"},
+    {"path": "./swim-ux-js/@swim/mapbox"},
     {"path": "./swim-ux-js/@swim/ux"},
-
-    {"path": "./swim-vis-js/@swim/gauge"},
-    {"path": "./swim-vis-js/@swim/pie"},
-    {"path": "./swim-vis-js/@swim/chart"},
-    {"path": "./swim-vis-js/@swim/map"},
-    {"path": "./swim-vis-js/@swim/mapbox"},
-    {"path": "./swim-vis-js/@swim/vis"},
 
     {"path": "./swim-web-js/@swim/site"},
     {"path": "./swim-web-js/@swim/app"},

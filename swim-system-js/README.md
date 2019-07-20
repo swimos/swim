@@ -43,11 +43,11 @@ swim-system-js $ bin/build.js test -p ui
 
 Use the `watch` build script command to automatically rebuild projects when
 dependent source files change.  For example, to continuously recompile the
-`main` target of the `vis` project when any source file in the project–or in
+`main` target of the `ux` project when any source file in the project–or in
 one of the project's transitive local dependencies–changes, run:
 
 ```sh
-swim-system-js $ bin/build.js watch -p vis:main
+swim-system-js $ bin/build.js watch -p ux:main
 ```
 
 Pass the `--devel` (`-d`) option to expedite recompilation by skipping the

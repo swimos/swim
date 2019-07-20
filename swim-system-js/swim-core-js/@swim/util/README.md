@@ -81,7 +81,7 @@ export interface ToAny<T> {
 
 `FromAny` is implicitly implemented by classes that have a static `fromAny`
 method that converts a loosely typed JavaScript value into a strongly typed
-TypeScript value.  `FromAny` is implemented by many `@swim/ui` and `@swim/vis`
+TypeScript value.  `FromAny` is implemented by many `@swim/ui` and `@swim/ux`
 classes, and is used to abstract over the conversion of loosely typed values to
 strongly typed values.  For example, `@swim/view`'s `MemberAnimator` classes
 leverage `FromAny` to generically convert loosely typed animator arguments to

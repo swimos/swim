@@ -498,35 +498,9 @@ const ui = [
 
 const ux = [
   {
-    id: "navigation",
-    name: "@swim/navigation",
-    path: "swim-ux-js/@swim/navigation",
-    targets: [
-      {
-        id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset"],
-      },
-    ],
-  },
-  {
-    id: "ux",
-    name: "@swim/ux",
-    path: "swim-ux-js/@swim/ux",
-    umbrella: true,
-    targets: [
-      {
-        id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "navigation"],
-      },
-    ],
-  },
-];
-
-const vis = [
-  {
     id: "gauge",
     name: "@swim/gauge",
-    path: "swim-vis-js/@swim/gauge",
+    path: "swim-ux-js/@swim/gauge",
     targets: [
       {
         id: "main",
@@ -537,7 +511,7 @@ const vis = [
   {
     id: "pie",
     name: "@swim/pie",
-    path: "swim-vis-js/@swim/pie",
+    path: "swim-ux-js/@swim/pie",
     targets: [
       {
         id: "main",
@@ -548,7 +522,7 @@ const vis = [
   {
     id: "chart",
     name: "@swim/chart",
-    path: "swim-vis-js/@swim/chart",
+    path: "swim-ux-js/@swim/chart",
     targets: [
       {
         id: "main",
@@ -559,7 +533,7 @@ const vis = [
   {
     id: "map",
     name: "@swim/map",
-    path: "swim-vis-js/@swim/map",
+    path: "swim-ux-js/@swim/map",
     targets: [
       {
         id: "main",
@@ -570,7 +544,7 @@ const vis = [
   {
     id: "mapbox",
     name: "@swim/mapbox",
-    path: "swim-vis-js/@swim/mapbox",
+    path: "swim-ux-js/@swim/mapbox",
     targets: [
       {
         id: "main",
@@ -579,9 +553,9 @@ const vis = [
     ],
   },
   {
-    id: "vis",
-    name: "@swim/vis",
-    path: "swim-vis-js/@swim/vis",
+    id: "ux",
+    name: "@swim/ux",
+    path: "swim-ux-js/@swim/ux",
     umbrella: true,
     targets: [
       {
@@ -637,7 +611,7 @@ const system = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri", "warp", "client", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture", "navigation", "gauge", "pie", "chart", "map", "mapbox", "site", "app"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri", "warp", "client", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture", "gauge", "pie", "chart", "map", "mapbox", "site", "app"],
       },
     ],
   },
@@ -645,7 +619,7 @@ const system = [
 
 export default {
   version: "3.9.0",
-  projects: core.concat(mesh).concat(ui).concat(ux).concat(vis).concat(web).concat(system),
+  projects: core.concat(mesh).concat(ui).concat(ux).concat(web).concat(system),
   umbrella: true,
   gaID: "UA-79441805-2",
 };

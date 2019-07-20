@@ -7,7 +7,7 @@
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
 `@swim/core` is the foundation framework on which the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui)
-and [`@swim/vis`](https://www.npmjs.com/package/@swim/vis) real-time user interface
+and [`@swim/ux`](https://www.npmjs.com/package/@swim/ux) real-time user interface
 frameworks are built.  `@swim/core` is written in TypeScript, but is designed
 to be used from either TypeScript or JavaScript.
 

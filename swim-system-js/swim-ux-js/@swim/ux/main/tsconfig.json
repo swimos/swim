@@ -11,7 +11,6 @@
       "@swim/streamlet": ["../swim-core-js/@swim/streamlet/main"],
       "@swim/math": ["../swim-core-js/@swim/math/main"],
       "@swim/time": ["../swim-core-js/@swim/time/main"],
-      "@swim/uri": ["../swim-core-js/@swim/uri/main"],
       "@swim/angle": ["../swim-ui-js/@swim/angle/main"],
       "@swim/length": ["../swim-ui-js/@swim/length/main"],
       "@swim/color": ["../swim-ui-js/@swim/color/main"],
@@ -28,10 +27,19 @@
       "@swim/view": ["../swim-ui-js/@swim/view/main"],
       "@swim/shape": ["../swim-ui-js/@swim/shape/main"],
       "@swim/typeset": ["../swim-ui-js/@swim/typeset/main"],
-      "@swim/navigation": ["@swim/navigation/main"]
+      "@swim/gesture": ["../swim-ui-js/@swim/gesture/main"],
+      "@swim/gauge": ["@swim/gauge/main"],
+      "@swim/pie": ["@swim/pie/main"],
+      "@swim/chart": ["@swim/chart/main"],
+      "@swim/map": ["@swim/map/main"],
+      "@swim/mapbox": ["@swim/mapbox/main"]
     }
   },
   "references": [
-    {"navigation": "../../navigation/main"}
+    {"path": "../../gauge/main"},
+    {"path": "../../pie/main"},
+    {"path": "../../chart/main"},
+    {"path": "../../map/main"},
+    {"path": "../../mapbox/main"}
   ]
 }

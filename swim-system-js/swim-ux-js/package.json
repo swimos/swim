@@ -1,7 +1,7 @@
 {
   "name": "@swim/ux",
   "version": "3.9.0",
-  "description": "Swim User Experience Toolkit",
+  "description": "Swim Real-Time User eXperience Toolkit",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
   "copyright": "2015-2019 SWIM.AI inc.",
@@ -40,9 +40,11 @@
     "@swim/view": "3.9.0",
     "@swim/shape": "3.9.0",
     "@swim/typeset": "3.9.0",
+    "@swim/gesture": "3.9.0",
 
+    "@types/mapbox-gl": "0.51",
     "@types/node": "12",
-    "rollup": "1.16",
+    "rollup": "1.17",
     "rollup-plugin-node-resolve": "5",
     "rollup-plugin-sourcemaps": "0",
     "terser": "4",

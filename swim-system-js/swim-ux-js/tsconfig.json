@@ -2,7 +2,11 @@
   "files": [],
   "include": [],
   "references": [
-    {"path": "./@swim/navigation"},
+    {"path": "./@swim/gauge"},
+    {"path": "./@swim/pie"},
+    {"path": "./@swim/chart"},
+    {"path": "./@swim/map"},
+    {"path": "./@swim/mapbox"},
     {"path": "./@swim/ux"}
   ]
 }

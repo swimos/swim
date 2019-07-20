@@ -44,8 +44,6 @@ export * from "@swim/shape";
 export * from "@swim/typeset";
 export * from "@swim/gesture";
 
-export * from "@swim/navigation";
-
 export * from "@swim/gauge";
 export * from "@swim/pie";
 export * from "@swim/chart";

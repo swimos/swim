@@ -1,3 +1,3 @@
 # @swim/ux
 
-Swim User Experience Toolkit.
+Swim Real-Time User eXperience Toolkit.

@@ -1,4 +1,4 @@
-# Swim User Interface Toolkit
+# Swim Real-Time User Interface Toolkit
 
 ## Building
 

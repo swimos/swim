@@ -12,4 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "@swim/navigation";
+export * from "@swim/gauge";
+export * from "@swim/pie";
+export * from "@swim/chart";
+export * from "@swim/map";
+export * from "@swim/mapbox";

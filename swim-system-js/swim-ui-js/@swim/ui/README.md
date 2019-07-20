@@ -1,3 +1,3 @@
 # @swim/ui
 
-Swim User Interface Toolkit.
+Swim Real-Time User Interface Toolkit.
