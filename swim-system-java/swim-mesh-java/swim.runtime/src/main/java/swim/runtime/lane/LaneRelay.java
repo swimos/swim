@@ -71,6 +71,26 @@ abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends LaneView
     // stub
   }
 
+  void pass() {
+    do {
+      if (this.phase < this.phaseCount) {
+        endPhase(this.phase);
+        this.phase += 1;
+        this.preemptive = true;
+        if (this.phase < this.phaseCount) {
+          beginPhase(this.phase);
+        } else {
+          endPhase(this.phase);
+          this.phase += 1;
+          done();
+          return;
+        }
+      } else {
+        return;
+      }
+    } while (true);
+  }
+
   void pass(View view) {
     do {
       if (this.viewIndex < this.viewCount) {
@@ -157,7 +177,9 @@ abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends LaneView
   @Override
   public void run() {
     try {
-      if (this.viewCount == 1) {
+      if (this.viewCount == 0) {
+        pass();
+      } else if (this.viewCount == 1) {
         pass((View) views);
       } else if (this.viewCount > 1) {
         pass((LaneView[]) views);

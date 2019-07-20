@@ -15,7 +15,7 @@
 package swim.auth;
 
 import swim.api.auth.Authenticator;
-import swim.kernel.AuthenticatorDef;
+import swim.api.auth.AuthenticatorDef;
 import swim.kernel.KernelProxy;
 import swim.structure.Item;
 import swim.structure.Value;

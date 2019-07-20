@@ -112,7 +112,11 @@ public class WarpServicePort implements Service, HttpService, HttpInterface {
   @Override
   public void didStart() {
     final WarpServiceDef serviceDef = this.serviceDef;
-    bindHttp(serviceDef.address, serviceDef.port, this, serviceDef.warpSettings.httpSettings());
+    if ("warps".equals(serviceDef.scheme.name())) {
+      bindHttps(serviceDef.address, serviceDef.port, this, serviceDef.warpSettings.httpSettings());
+    } else {
+      bindHttp(serviceDef.address, serviceDef.port, this, serviceDef.warpSettings.httpSettings());
+    }
   }
 
   @Override

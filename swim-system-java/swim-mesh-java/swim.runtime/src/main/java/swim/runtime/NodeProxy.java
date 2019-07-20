@@ -15,6 +15,7 @@
 package swim.runtime;
 
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Identity;
 import swim.api.downlink.Downlink;
@@ -135,8 +136,23 @@ public class NodeProxy implements NodeBinding, NodeContext {
   }
 
   @Override
+  public LaneBinding openLane(Uri laneUri) {
+    return this.nodeBinding.openLane(laneUri);
+  }
+
+  @Override
   public LaneBinding openLane(Uri laneUri, LaneBinding lane) {
     return this.nodeBinding.openLane(laneUri, lane);
+  }
+
+  @Override
+  public LaneBinding createLane(LaneDef laneDef) {
+    return this.nodeContext.createLane(laneDef);
+  }
+
+  @Override
+  public LaneBinding createLane(Uri laneUri) {
+    return this.nodeContext.createLane(laneUri);
   }
 
   @Override
@@ -145,8 +161,23 @@ public class NodeProxy implements NodeBinding, NodeContext {
   }
 
   @Override
+  public void openLanes(NodeBinding node) {
+    this.nodeContext.openLanes(node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(AgentDef agentDef) {
+    return this.nodeContext.createAgentFactory(agentDef);
+  }
+
+  @Override
   public <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass) {
     return this.nodeContext.createAgentFactory(agentClass);
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.nodeContext.openAgents(node);
   }
 
   @Override

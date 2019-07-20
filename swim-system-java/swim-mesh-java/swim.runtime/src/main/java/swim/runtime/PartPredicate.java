@@ -248,8 +248,7 @@ final class NodePartPredicate extends PartPredicate {
 
   @Override
   public String toString() {
-    return "PartPredicate" + '.' + "node" + '(' + nodePattern.toUri() + ')';
-//    previously return "PartPredicate" + '.' + "node" + '(' + nodePattern.getPattern().toUri() + ')';
+    return "PartPredicate" + '.' + "node" + '(' + nodePattern + ')';
   }
 
   public static NodePartPredicate fromValue(Value value) {
@@ -269,8 +268,8 @@ final class HashPartPredicate extends PartPredicate {
 
   @Override
   public boolean test(Uri nodeUri, int nodeHash) {
-    final long dlh = (long) (nodeHash - lowerBound) & 0xFFFFFFFFL;
-    return 0L <= dlh && dlh < ((long) (upperBound - lowerBound) & 0xFFFFFFFFL);
+    final long dlh = (long) (nodeHash - lowerBound) & 0xffffffffL;
+    return 0L <= dlh && dlh < ((long) (upperBound - lowerBound) & 0xffffffffL);
   }
 
   @Override

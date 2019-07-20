@@ -137,10 +137,6 @@ include 'swim.auth'
 project(':swim.auth').projectDir = file('swim-mesh-java/swim.auth')
 project(':swim.auth').name = 'swim-auth'
 
-include 'swim.agent'
-project(':swim.agent').projectDir = file('swim-mesh-java/swim.agent')
-project(':swim.agent').name = 'swim-agent'
-
 include 'swim.fabric'
 project(':swim.fabric').projectDir = file('swim-mesh-java/swim.fabric')
 project(':swim.fabric').name = 'swim-fabric'
@@ -152,10 +148,6 @@ project(':swim.service').name = 'swim-service'
 include 'swim.store.mem'
 project(':swim.store.mem').projectDir = file('swim-mesh-java/swim.store.mem')
 project(':swim.store.mem').name = 'swim-store-mem'
-
-include 'swim.router'
-project(':swim.router').projectDir = file('swim-mesh-java/swim.router')
-project(':swim.router').name = 'swim-router'
 
 include 'swim.remote'
 project(':swim.remote').projectDir = file('swim-mesh-java/swim.remote')

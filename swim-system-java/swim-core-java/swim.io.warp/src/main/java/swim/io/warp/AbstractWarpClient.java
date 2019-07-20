@@ -17,7 +17,6 @@ package swim.io.warp;
 import swim.codec.Decoder;
 import swim.io.http.HttpClientContext;
 import swim.io.ws.AbstractWsClient;
-import swim.io.ws.WebSocket;
 import swim.io.ws.WebSocketContext;
 import swim.io.ws.WsSettings;
 import swim.io.ws.WsUpgradeRequester;
@@ -70,7 +69,8 @@ public abstract class AbstractWarpClient extends AbstractWsClient implements Web
   }
 
   protected WsUpgradeRequester upgrade(WarpSocket warpSocket, WsRequest wsRequest) {
-    final WebSocket<Envelope, Envelope> webSocket = new WarpWebSocket(warpSocket, this.warpSettings);
+    final WarpWebSocket webSocket = new WarpWebSocket(warpSocket, this.warpSettings);
+    warpSocket.setWarpSocketContext(webSocket); // eagerly set
     return new WsUpgradeRequester(webSocket, wsRequest, this.wsSettings);
   }
 }

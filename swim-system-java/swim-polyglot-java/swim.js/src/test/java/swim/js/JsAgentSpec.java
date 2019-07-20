@@ -21,6 +21,7 @@ import swim.api.downlink.EventDownlink;
 import swim.api.downlink.function.OnEvent;
 import swim.fabric.Fabric;
 import swim.fabric.FabricDef;
+import swim.fabric.FabricNodeDef;
 import swim.kernel.Kernel;
 import swim.server.ServerLoader;
 import swim.service.warp.WarpServiceDef;
@@ -35,9 +36,8 @@ public class JsAgentSpec {
     final Kernel kernel = ServerLoader.loadServerStack().injectKernel(jsKernel);
 
     final FabricDef fabricDef = FabricDef.fromName("test")
-        .agentRouteDef(JsAgentRouteDef.fromModulePath("./src/test/js/TestCommandAgent")
-                                      .routeName("command")
-                                      .pattern("/command/:name"));
+        .nodeDef(FabricNodeDef.fromNodePattern("/command/:name")
+                              .agentDef(JsAgentDef.fromModulePath("./src/test/js/TestCommandAgent")));
     final Fabric fabric = (Fabric) kernel.openSpace(fabricDef);
 
     final CountDownLatch linkOnEvent = new CountDownLatch(1);

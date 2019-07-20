@@ -15,33 +15,32 @@
 package swim.fabric;
 
 import java.util.Collection;
+import swim.api.auth.AuthenticatorDef;
+import swim.api.plane.PlaneDef;
+import swim.api.space.SpaceDef;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
+import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
-import swim.kernel.AgentRouteDef;
-import swim.kernel.AuthenticatorDef;
-import swim.kernel.HostDef;
-import swim.kernel.LaneDef;
-import swim.kernel.LogDef;
-import swim.kernel.MeshDef;
-import swim.kernel.NodeDef;
-import swim.kernel.PartDef;
-import swim.kernel.PlaneDef;
-import swim.kernel.PolicyDef;
-import swim.kernel.RootDef;
-import swim.kernel.SpaceDef;
-import swim.kernel.StageDef;
-import swim.kernel.StoreDef;
+import swim.concurrent.StageDef;
+import swim.runtime.EdgeDef;
+import swim.runtime.HostDef;
+import swim.runtime.LaneDef;
+import swim.runtime.LogDef;
+import swim.runtime.MeshDef;
+import swim.runtime.NodeDef;
+import swim.runtime.PartDef;
+import swim.runtime.PolicyDef;
+import swim.store.StoreDef;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriMapper;
 import swim.util.Murmur3;
 
-public class FabricDef implements SpaceDef, RootDef, Debug {
+public class FabricDef implements SpaceDef, EdgeDef, Debug {
   final String spaceName;
-  final HashTrieMap<String, PlaneDef> planeDefs;
-  final HashTrieMap<String, AgentRouteDef> agentRouteDefs;
+  final FingerTrieSeq<PlaneDef> planeDefs;
   final HashTrieMap<String, AuthenticatorDef> authenticatorDefs;
   final HashTrieMap<Uri, MeshDef> meshDefs;
   final HashTrieMap<Value, PartDef> partDefs;
@@ -53,8 +52,7 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   final StageDef stageDef;
   final StoreDef storeDef;
 
-  public FabricDef(String spaceName, HashTrieMap<String, PlaneDef> planeDefs,
-                   HashTrieMap<String, AgentRouteDef> agentRouteDefs,
+  public FabricDef(String spaceName, FingerTrieSeq<PlaneDef> planeDefs,
                    HashTrieMap<String, AuthenticatorDef> authenticatorDefs,
                    HashTrieMap<Uri, MeshDef> meshDefs, HashTrieMap<Value, PartDef> partDefs,
                    UriMapper<HostDef> hostDefs, UriMapper<NodeDef> nodeDefs,
@@ -62,7 +60,6 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
                    StageDef stageDef, StoreDef storeDef) {
     this.spaceName = spaceName;
     this.planeDefs = planeDefs;
-    this.agentRouteDefs = agentRouteDefs;
     this.authenticatorDefs = authenticatorDefs;
     this.meshDefs = meshDefs;
     this.partDefs = partDefs;
@@ -81,40 +78,31 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef spaceName(String spaceName) {
-    return copy(spaceName, this.planeDefs, this.agentRouteDefs, this.authenticatorDefs,
-                this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
+    return copy(spaceName, this.planeDefs, this.authenticatorDefs, this.meshDefs,
+                this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
                 this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
   public final Collection<? extends PlaneDef> planeDefs() {
-    return this.planeDefs.values();
+    return this.planeDefs;
   }
 
   @Override
   public final PlaneDef getPlaneDef(String planeName) {
-    return this.planeDefs.get(planeName);
+    for (PlaneDef planeDef : this.planeDefs) {
+      if (planeName.equals(planeDef.planeName())) {
+        return planeDef;
+      }
+    }
+    return null;
   }
 
   public FabricDef planeDef(PlaneDef planeDef) {
-    return copy(this.spaceName, this.planeDefs.updated(planeDef.planeName(), planeDef),
-                this.agentRouteDefs, this.authenticatorDefs, this.meshDefs,
-                this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
-  }
-
-  public final Collection<? extends AgentRouteDef> agentRouteDefs() {
-    return this.agentRouteDefs.values();
-  }
-
-  public final AgentRouteDef getAgentRouteDef(String routeName) {
-    return this.agentRouteDefs.get(routeName);
-  }
-
-  public FabricDef agentRouteDef(AgentRouteDef agentRouteDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs.updated(agentRouteDef.routeName(), agentRouteDef),
-                this.authenticatorDefs, this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+    return copy(this.spaceName, this.planeDefs.appended(planeDef),
+                this.authenticatorDefs, this.meshDefs, this.partDefs, this.hostDefs,
+                this.nodeDefs, this.laneDefs, this.logDef, this.policyDef,
+                this.stageDef, this.storeDef);
   }
 
   public final Collection<? extends AuthenticatorDef> authenticatorDefs() {
@@ -126,7 +114,7 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef authenticatorDef(AuthenticatorDef authenticatorDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs,
+    return copy(this.spaceName, this.planeDefs,
                 this.authenticatorDefs.updated(authenticatorDef.authenticatorName(), authenticatorDef),
                 this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
                 this.logDef, this.policyDef, this.stageDef, this.storeDef);
@@ -143,9 +131,10 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef meshDef(MeshDef meshDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs, this.authenticatorDefs,
-                this.meshDefs.updated(meshDef.meshUri(), meshDef), this.partDefs, this.hostDefs,
-                this.nodeDefs, this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
+    return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
+                this.meshDefs.updated(meshDef.meshUri(), meshDef),
+                this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
+                this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -159,9 +148,10 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef partDef(PartDef partDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs, this.authenticatorDefs,
-                this.meshDefs, this.partDefs.updated(partDef.partKey(), partDef), this.hostDefs,
-                this.nodeDefs, this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
+    return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
+                this.meshDefs, this.partDefs.updated(partDef.partKey(), partDef),
+                this.hostDefs, this.nodeDefs, this.laneDefs,
+                this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -175,9 +165,10 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef hostDef(HostDef hostDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs, this.authenticatorDefs,
-                this.meshDefs, this.partDefs, this.hostDefs.updated(hostDef.hostPattern(), hostDef),
-                this.nodeDefs, this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
+    return copy(this.spaceName, this.planeDefs, this.authenticatorDefs, this.meshDefs,
+                this.partDefs, this.hostDefs.updated(hostDef.hostPattern(), hostDef),
+                this.nodeDefs, this.laneDefs, this.logDef, this.policyDef,
+                this.stageDef, this.storeDef);
   }
 
   @Override
@@ -191,7 +182,7 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef nodeDef(NodeDef nodeDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs, this.authenticatorDefs,
+    return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
                 this.meshDefs, this.partDefs, this.hostDefs,
                 this.nodeDefs.updated(nodeDef.nodePattern(), nodeDef), this.laneDefs,
                 this.logDef, this.policyDef, this.stageDef, this.storeDef);
@@ -208,7 +199,7 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef laneDef(LaneDef laneDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs, this.authenticatorDefs,
+    return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
                 this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs,
                 this.laneDefs.updated(laneDef.lanePattern(), laneDef),
                 this.logDef, this.policyDef, this.stageDef, this.storeDef);
@@ -220,7 +211,7 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef logDef(LogDef logDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs, this.authenticatorDefs,
+    return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
                 this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
                 logDef, this.policyDef, this.stageDef, this.storeDef);
   }
@@ -231,7 +222,7 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef policyDef(PolicyDef policyDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs, this.authenticatorDefs,
+    return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
                 this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
                 this.logDef, policyDef, this.stageDef, this.storeDef);
   }
@@ -242,7 +233,7 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef stageDef(StageDef stageDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs, this.authenticatorDefs,
+    return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
                 this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
                 this.logDef, this.policyDef, stageDef, this.storeDef);
   }
@@ -253,20 +244,19 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   }
 
   public FabricDef storeDef(StoreDef storeDef) {
-    return copy(this.spaceName, this.planeDefs, this.agentRouteDefs, this.authenticatorDefs,
+    return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
                 this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
                 this.logDef, this.policyDef, this.stageDef, storeDef);
   }
 
-  protected FabricDef copy(String spaceName, HashTrieMap<String, PlaneDef> planeDefs,
-                           HashTrieMap<String, AgentRouteDef> agentRouteDefs,
+  protected FabricDef copy(String spaceName, FingerTrieSeq<PlaneDef> planeDefs,
                            HashTrieMap<String, AuthenticatorDef> authenticatorDefs,
                            HashTrieMap<Uri, MeshDef> meshDefs, HashTrieMap<Value, PartDef> partDefs,
                            UriMapper<HostDef> hostDefs, UriMapper<NodeDef> nodeDefs,
                            UriMapper<LaneDef> laneDefs, LogDef logDef, PolicyDef policyDef,
                            StageDef stageDef, StoreDef storeDef) {
-    return new FabricDef(spaceName, planeDefs, agentRouteDefs, authenticatorDefs,
-                         meshDefs, partDefs, hostDefs, nodeDefs, laneDefs,
+    return new FabricDef(spaceName, planeDefs, authenticatorDefs, meshDefs,
+                         partDefs, hostDefs, nodeDefs, laneDefs,
                          logDef, policyDef, stageDef, storeDef);
   }
 
@@ -278,7 +268,6 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
       final FabricDef that = (FabricDef) other;
       return (this.spaceName == null ? that.spaceName == null : this.spaceName.equals(that.spaceName))
           && this.planeDefs.equals(that.planeDefs)
-          && this.agentRouteDefs.equals(that.agentRouteDefs)
           && this.authenticatorDefs.equals(that.authenticatorDefs)
           && this.meshDefs.equals(that.meshDefs)
           && this.partDefs.equals(that.partDefs)
@@ -299,23 +288,19 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
       hashSeed = Murmur3.seed(FabricDef.class);
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
-        Murmur3.hash(this.spaceName)), this.planeDefs.hashCode()), this.agentRouteDefs.hashCode()),
-        this.authenticatorDefs.hashCode()), this.meshDefs.hashCode()), this.partDefs.hashCode()),
-        this.hostDefs.hashCode()), this.nodeDefs.hashCode()), this.laneDefs.hashCode()),
-        Murmur3.hash(this.logDef)), Murmur3.hash(this.policyDef)), Murmur3.hash(this.stageDef)),
-        Murmur3.hash(this.storeDef)));
+        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+        Murmur3.hash(this.spaceName)), this.planeDefs.hashCode()), this.authenticatorDefs.hashCode()),
+        this.meshDefs.hashCode()), this.partDefs.hashCode()), this.hostDefs.hashCode()),
+        this.nodeDefs.hashCode()), this.laneDefs.hashCode()), Murmur3.hash(this.logDef)),
+        Murmur3.hash(this.policyDef)), Murmur3.hash(this.stageDef)), Murmur3.hash(this.storeDef)));
   }
 
   @Override
   public void debug(Output<?> output) {
     output = output.write("FabricDef").write('.').write("fromName").write('(')
         .debug(this.spaceName).write(')');
-    for (PlaneDef planeDef : this.planeDefs.values()) {
+    for (PlaneDef planeDef : this.planeDefs) {
       output = output.write('.').write("planeDef").write('(').debug(planeDef).write(')');
-    }
-    for (AgentRouteDef agentRouteDef : this.agentRouteDefs.values()) {
-      output = output.write('.').write("agentRouteDef").write('(').debug(agentRouteDef).write(')');
     }
     for (AuthenticatorDef authenticatorDef : this.authenticatorDefs.values()) {
       output = output.write('.').write("authenticatorDef").write('(').debug(authenticatorDef).write(')');
@@ -357,16 +342,14 @@ public class FabricDef implements SpaceDef, RootDef, Debug {
   private static int hashSeed;
 
   public static FabricDef fromName(String spaceName) {
-    return new FabricDef(spaceName, HashTrieMap.empty(), HashTrieMap.empty(),
-                         HashTrieMap.empty(), HashTrieMap.empty(), HashTrieMap.empty(),
-                         UriMapper.empty(), UriMapper.empty(), UriMapper.empty(),
-                         null, null, null, null);
+    return new FabricDef(spaceName, FingerTrieSeq.empty(), HashTrieMap.empty(),
+                         HashTrieMap.empty(), HashTrieMap.empty(), UriMapper.empty(),
+                         UriMapper.empty(), UriMapper.empty(), null, null, null, null);
   }
 
   public static FabricDef fromPlaneDef(PlaneDef planeDef) {
-    return new FabricDef(planeDef.planeName(), HashTrieMap.of(planeDef.planeName(), planeDef),
-                         HashTrieMap.empty(), HashTrieMap.empty(), HashTrieMap.empty(),
-                         HashTrieMap.empty(), UriMapper.empty(), UriMapper.empty(),
-                         UriMapper.empty(), null, null, null, null);
+    return new FabricDef(planeDef.planeName(), FingerTrieSeq.of(planeDef), HashTrieMap.empty(),
+                         HashTrieMap.empty(), HashTrieMap.empty(), UriMapper.empty(),
+                         UriMapper.empty(), UriMapper.empty(), null, null, null, null);
   }
 }

@@ -65,9 +65,9 @@ public class GuestAgentRoute extends BridgeGuest implements AgentRoute<Agent> {
   }
 
   @Override
-  public Value createProps(Uri nodeUri) {
-    if (this.bridge.guestCanInvokeMember(this.guest, "createProps")) {
-      final Object props = this.bridge.guestInvokeMember(this.guest, "createProps", nodeUri);
+  public Value props(Uri nodeUri) {
+    if (this.bridge.guestCanInvokeMember(this.guest, "props")) {
+      final Object props = this.bridge.guestInvokeMember(this.guest, "props", nodeUri);
       if (props instanceof Value) {
         return (Value) props;
       }

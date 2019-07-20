@@ -17,12 +17,16 @@ package swim.kernel;
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.concurrent.Clock;
+import swim.concurrent.ClockDef;
 import swim.concurrent.MainStage;
 import swim.concurrent.Schedule;
+import swim.concurrent.ScheduleDef;
 import swim.concurrent.SideStage;
 import swim.concurrent.Stage;
 import swim.concurrent.StageClock;
+import swim.concurrent.StageDef;
 import swim.concurrent.Theater;
+import swim.concurrent.TheaterDef;
 import swim.io.IpService;
 import swim.io.IpServiceRef;
 import swim.io.IpSettings;
@@ -31,8 +35,30 @@ import swim.io.IpSocketRef;
 import swim.io.IpStation;
 import swim.io.Station;
 import swim.io.TransportSettings;
+import swim.math.R2Shape;
+import swim.runtime.EdgeBinding;
+import swim.runtime.HostBinding;
+import swim.runtime.HostDef;
+import swim.runtime.LaneBinding;
+import swim.runtime.LaneDef;
+import swim.runtime.MeshBinding;
+import swim.runtime.MeshDef;
+import swim.runtime.PartBinding;
+import swim.runtime.PartDef;
+import swim.runtime.lane.CommandLaneModel;
+import swim.runtime.lane.ListLaneModel;
+import swim.runtime.lane.MapLaneModel;
+import swim.runtime.lane.SpatialLaneModel;
+import swim.runtime.lane.SupplyLaneModel;
+import swim.runtime.lane.ValueLaneModel;
+import swim.runtime.router.EdgeTable;
+import swim.runtime.router.HostTable;
+import swim.runtime.router.MeshTable;
+import swim.runtime.router.PartTable;
+import swim.spatial.GeoProjection;
 import swim.structure.Item;
 import swim.structure.Value;
+import swim.uri.Uri;
 
 public class BootKernel extends KernelProxy implements IpStation {
   final double kernelPriority;
@@ -166,33 +192,8 @@ public class BootKernel extends KernelProxy implements IpStation {
 
   @Override
   public ScheduleDef defineSchedule(Item scheduleConfig) {
-    final ScheduleDef scheduleDef = defineClock(scheduleConfig);
+    final ScheduleDef scheduleDef = ScheduleDef.form().cast(scheduleConfig);
     return scheduleDef != null ? scheduleDef : super.defineSchedule(scheduleConfig);
-  }
-
-  public ClockDef defineClock(Item clockConfig) {
-    final Value value = clockConfig.toValue();
-    final Value header = value.getAttr("clock");
-    if (header.isDefined()) {
-      final String clockProvider = header.get("provider").stringValue(null);
-      if (clockProvider == null || Clock.class.getName().equals(clockProvider)) {
-        int tickMillis = Clock.TICK_MILLIS;
-        int tickCount = Clock.TICK_COUNT;
-        for (int i = 0, n = value.length(); i < n; i += 1) {
-          final Item item = value.getItem(i);
-          if (item.keyEquals("tickMillis")) {
-            tickMillis = item.toValue().intValue(tickMillis);
-            continue;
-          }
-          if (item.keyEquals("tickCount")) {
-            tickCount = item.toValue().intValue(tickCount);
-            continue;
-          }
-        }
-        return new ClockDef(tickMillis, tickCount);
-      }
-    }
-    return null;
   }
 
   @Override
@@ -206,44 +207,16 @@ public class BootKernel extends KernelProxy implements IpStation {
 
   public Clock createClock(ClockDef clockDef, Stage stage) {
     if (stage != null) {
-      return new StageClock(stage, clockDef.tickMillis, clockDef.tickCount);
+      return new StageClock(stage, clockDef);
     } else {
-      return new Clock(clockDef.tickMillis, clockDef.tickCount);
+      return new Clock(clockDef);
     }
   }
 
   @Override
   public StageDef defineStage(Item stageConfig) {
-    final StageDef stageDef = defineTheater(stageConfig);
+    final StageDef stageDef = StageDef.form().cast(stageConfig);
     return stageDef != null ? stageDef : super.defineStage(stageConfig);
-  }
-
-  public TheaterDef defineTheater(Item theaterConfig) {
-    final Value value = theaterConfig.toValue();
-    final Value header = value.getAttr("theater");
-    if (header.isDefined()) {
-      final String clockProvider = header.get("provider").stringValue(null);
-      if (clockProvider == null || Theater.class.getName().equals(clockProvider)) {
-        final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
-        final String name = theaterConfig.key().stringValue(null);
-        int parallelism = Runtime.getRuntime().availableProcessors();
-        ScheduleDef scheduleDef = null;
-        for (int i = 0, n = value.length(); i < n; i += 1) {
-          final Item item = value.getItem(i);
-          if (item.keyEquals("parallelism")) {
-            parallelism = item.toValue().intValue(parallelism);
-            continue;
-          }
-          final ScheduleDef newScheduleDef = kernel.defineSchedule(item);
-          if (newScheduleDef != null) {
-            scheduleDef = newScheduleDef;
-            continue;
-          }
-        }
-        return new TheaterDef(name, parallelism, scheduleDef);
-      }
-    }
-    return null;
   }
 
   @Override
@@ -256,18 +229,19 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   public Theater createTheater(TheaterDef theaterDef) {
-    final String name = theaterDef.name;
-    final int parallelism = theaterDef.parallelism;
-    final ScheduleDef scheduleDef = theaterDef.scheduleDef;
-    final Theater theater = new Theater(name, parallelism);
-    if (scheduleDef != null) {
-      final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
-      final Schedule schedule = kernel.createSchedule(scheduleDef, stage);
-      if (schedule != null) {
-        theater.setSchedule(stage);
+    return new Theater(theaterDef);
+  }
+
+  @Override
+  public Stage openStoreStage(String storeName) {
+    Stage stage = super.openStoreStage(storeName);
+    if (stage == null) {
+      stage = stage();
+      if (stage instanceof MainStage) {
+        stage = new SideStage(stage); // isolate stage lifecycle
       }
     }
-    return theater;
+    return stage;
   }
 
   @Override
@@ -300,15 +274,12 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   @Override
-  public Stage openStoreStage(String storeName) {
-    Stage stage = super.openStoreStage(storeName);
-    if (stage == null) {
-      stage = stage();
-      if (stage instanceof MainStage) {
-        stage = new SideStage(stage); // isolate stage lifecycle
-      }
+  public EdgeBinding createEdge(String edgeName) {
+    EdgeBinding edge = super.createEdge(edgeName);
+    if (edge == null) {
+      edge = new EdgeTable();
     }
-    return stage;
+    return edge;
   }
 
   @Override
@@ -321,6 +292,106 @@ public class BootKernel extends KernelProxy implements IpStation {
       }
     }
     return stage;
+  }
+
+  @Override
+  public MeshBinding createMesh(String edgeName, MeshDef meshDef) {
+    MeshBinding mesh = super.createMesh(edgeName, meshDef);
+    if (mesh == null) {
+      mesh = new MeshTable();
+    }
+    return mesh;
+  }
+
+  @Override
+  public MeshBinding createMesh(String edgeName, Uri meshUri) {
+    MeshBinding mesh = super.createMesh(edgeName, meshUri);
+    if (mesh == null) {
+      mesh = new MeshTable();
+    }
+    return mesh;
+  }
+
+  @Override
+  public PartBinding createPart(String edgeName, Uri meshUri, PartDef partDef) {
+    PartBinding part = super.createPart(edgeName, meshUri, partDef);
+    if (part == null) {
+      part = new PartTable(partDef.predicate());
+    }
+    return part;
+  }
+
+  @Override
+  public PartBinding createPart(String edgeName, Uri meshUri, Value partKey) {
+    PartBinding part = super.createPart(edgeName, meshUri, partKey);
+    if (part == null) {
+      part = new PartTable();
+    }
+    return part;
+  }
+
+  @Override
+  public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, HostDef hostDef) {
+    HostBinding host = super.createHost(edgeName, meshUri, partKey, hostDef);
+    if (host == null) {
+      host = new HostTable();
+    }
+    return host;
+  }
+
+  @Override
+  public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
+    HostBinding host = super.createHost(edgeName, meshUri, partKey, hostUri);
+    if (host == null) {
+      host = new HostTable();
+    }
+    return host;
+  }
+
+  @Override
+  public LaneBinding createLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    LaneBinding lane = super.createLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+    if (lane == null) {
+      final String laneType = laneDef.laneType();
+      if ("command".equals(laneType)) {
+        lane = createCommandLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+      } else if ("list".equals(laneType)) {
+        lane = createListLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+      } else if ("map".equals(laneType)) {
+        lane = createMapLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+      } else if ("geospatial".equals(laneType)) {
+        lane = createGeospatialLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+      } else if ("supply".equals(laneType)) {
+        lane = createSupplyLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+      } else if ("value".equals(laneType)) {
+        lane = createValueLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+      }
+    }
+    return lane;
+  }
+
+  public LaneBinding createCommandLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return new CommandLaneModel();
+  }
+
+  public LaneBinding createListLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return new ListLaneModel();
+  }
+
+  public LaneBinding createMapLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return new MapLaneModel();
+  }
+
+  public LaneBinding createGeospatialLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return new SpatialLaneModel<R2Shape>(GeoProjection.wgs84Form());
+  }
+
+  public LaneBinding createSupplyLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return new SupplyLaneModel();
+  }
+
+  public LaneBinding createValueLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return new ValueLaneModel();
   }
 
   @Override

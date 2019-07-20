@@ -42,6 +42,7 @@ public class RemoteHostClient extends RemoteHost {
   final IpInterface endpoint;
   final WarpSettings warpSettings;
 
+  HttpClient client;
   TimerRef reconnectTimer;
   double reconnectTimeout;
 
@@ -58,27 +59,28 @@ public class RemoteHostClient extends RemoteHost {
   @Override
   public void setHostContext(HostContext hostContext) {
     super.setHostContext(hostContext);
-    connect();
   }
 
   public void connect() {
     final String scheme = this.baseUri.schemeName();
-    final boolean isSecure = "swims".equals(scheme);
+    final boolean isSecure = "warps".equals(scheme) || "swims".equals(scheme);
 
     final UriAuthority remoteAuthority = this.baseUri.authority();
     final String remoteAddress = remoteAuthority.host().address();
     final int remotePort = remoteAuthority.port().number();
-
-    final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, UriPath.slash(), this.baseUri.query());
     final int requestPort = remotePort > 0 ? remotePort : isSecure ? 443 : 80;
-    final WsRequest wsRequest = WsRequest.from(requestUri, PROTOCOL_LIST);
 
-    final WarpWebSocket warpWebSocket = new WarpWebSocket(this, this.warpSettings);
-    final HttpClient client = new RemoteHostClientBinding(this, warpWebSocket, wsRequest, this.warpSettings);
+    if (this.client == null) {
+      final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, UriPath.slash(), this.baseUri.query());
+      final WsRequest wsRequest = WsRequest.from(requestUri, PROTOCOL_LIST);
+      final WarpWebSocket webSocket = new WarpWebSocket(this, this.warpSettings);
+      this.client = new RemoteHostClientBinding(this, webSocket, wsRequest, this.warpSettings);
+      setWarpSocketContext(webSocket); // eagerly set
+    }
     if (isSecure) {
-      connectHttps(new InetSocketAddress(remoteAddress, requestPort), client, this.warpSettings.httpSettings());
+      connectHttps(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
     } else {
-      connectHttp(new InetSocketAddress(remoteAddress, requestPort), client, this.warpSettings.httpSettings());
+      connectHttp(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
     }
   }
 
@@ -122,6 +124,12 @@ public class RemoteHostClient extends RemoteHost {
     super.didConnect();
   }
 
+  @Override
+  protected void willOpen() {
+    connect();
+    super.willOpen();
+  }
+
   static final double MAX_RECONNECT_TIMEOUT = 15000.0;
 
   static final FingerTrieSeq<String> PROTOCOL_LIST = FingerTrieSeq.of("warp0", "swim-0.0");
@@ -129,15 +137,15 @@ public class RemoteHostClient extends RemoteHost {
 
 final class RemoteHostClientBinding extends AbstractWarpClient {
   final RemoteHostClient client;
-  final WarpWebSocket warpWebSocket;
+  final WarpWebSocket webSocket;
   final WsRequest wsRequest;
   final WarpSettings warpSettings;
 
-  RemoteHostClientBinding(RemoteHostClient client, WarpWebSocket warpWebSocket,
+  RemoteHostClientBinding(RemoteHostClient client, WarpWebSocket webSocket,
                           WsRequest wsRequest, WarpSettings warpSettings) {
     super(warpSettings);
     this.client = client;
-    this.warpWebSocket = warpWebSocket;
+    this.webSocket = webSocket;
     this.wsRequest = wsRequest;
     this.warpSettings = warpSettings;
   }
@@ -145,18 +153,18 @@ final class RemoteHostClientBinding extends AbstractWarpClient {
   @Override
   public void setHttpClientContext(HttpClientContext context) {
     super.setHttpClientContext(context);
-    this.warpWebSocket.setWebSocketContext(this);
+    this.webSocket.setWebSocketContext(this);
   }
 
   @Override
   public void didConnect() {
     super.didConnect();
-    doRequest(upgrade(this.warpWebSocket, this.wsRequest));
+    doRequest(upgrade(this.webSocket, this.wsRequest));
   }
 
   @Override
   public void didDisconnect() {
-    warpWebSocket.close();
+    webSocket.close();
     this.client.didDisconnect();
   }
 }

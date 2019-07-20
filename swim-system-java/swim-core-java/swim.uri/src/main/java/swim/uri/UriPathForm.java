@@ -29,7 +29,7 @@ public class UriPathForm extends Form<UriPath> {
 
   @Override
   public UriPath unit() {
-    return unit;
+    return this.unit;
   }
 
   @Override

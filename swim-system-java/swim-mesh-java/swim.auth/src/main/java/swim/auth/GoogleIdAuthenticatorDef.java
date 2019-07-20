@@ -14,6 +14,7 @@
 
 package swim.auth;
 
+import swim.api.auth.AuthenticatorDef;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
@@ -21,7 +22,6 @@ import swim.codec.ParserException;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieSet;
 import swim.io.http.HttpSettings;
-import swim.kernel.AuthenticatorDef;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Kind;

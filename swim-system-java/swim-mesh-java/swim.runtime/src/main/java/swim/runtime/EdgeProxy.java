@@ -15,6 +15,7 @@
 package swim.runtime;
 
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
@@ -167,8 +168,28 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   }
 
   @Override
+  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return this.edgeContext.createLane(meshUri, partKey, hostUri, nodeUri, laneDef);
+  }
+
+  @Override
+  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+    return this.edgeContext.createLane(meshUri, partKey, hostUri, nodeUri, laneUri);
+  }
+
+  @Override
   public LaneBinding injectLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
     return this.edgeContext.injectLane(meshUri, partKey, hostUri, nodeUri, laneUri, lane);
+  }
+
+  @Override
+  public void openLanes(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
+    this.edgeContext.openLanes(meshUri, partKey, hostUri, nodeUri, node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+    return this.edgeContext.createAgentFactory(meshUri, partKey, hostUri, nodeUri, agentDef);
   }
 
   @Override

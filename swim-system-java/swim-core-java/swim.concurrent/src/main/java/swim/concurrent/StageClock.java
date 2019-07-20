@@ -27,7 +27,7 @@ public class StageClock extends Clock {
   /**
    * Constructs a new {@code StageClock} with a timer resolution of {@code
    * tickMillis} milliseconds, and a clock period of {@code tickCount} ticks
-   * per revolution, that executes timer functions on the {@code stage}.
+   * per revolution, that executes timer functions on the given {@code stage}.
    */
   public StageClock(Stage stage, int tickMillis, int tickCount) {
     super(tickMillis, tickCount);
@@ -35,9 +35,19 @@ public class StageClock extends Clock {
   }
 
   /**
+   * Constructs a new {@code StageClock}, with the timer resolution and clock
+   * period specified by the given {@code clockDef}, that executes timer
+   * functions on the given {@code stage}.
+   */
+  public StageClock(Stage stage, ClockDef clockDef) {
+    this(stage, clockDef.tickMillis, clockDef.tickCount);
+  }
+
+  /**
    * Constructs a new {@code StageClock} with a timer resolution of {@link
    * #TICK_MILLIS} milliseconds, and a clock period of {@link #TICK_COUNT}
-   * ticks per revolution, that executes timer functions on the {@code stage}.
+   * ticks per revolution, that executes timer functions on the given
+   * {@code stage}.
    */
   public StageClock(Stage stage) {
     this(stage, TICK_MILLIS, TICK_COUNT);

@@ -19,6 +19,7 @@ import swim.codec.Display;
 import swim.codec.Format;
 import swim.codec.Output;
 import swim.util.HashGenCacheMap;
+import swim.util.Murmur3;
 
 public class UriFragment implements Comparable<UriFragment>, Debug, Display {
   protected final String identifier;
@@ -54,7 +55,7 @@ public class UriFragment implements Comparable<UriFragment>, Debug, Display {
 
   @Override
   public int hashCode() {
-    return this.identifier == null ? 0 : this.identifier.hashCode();
+    return this.identifier == null ? 0 : Murmur3.seed(this.identifier);
   }
 
   @Override

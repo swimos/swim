@@ -15,6 +15,7 @@
 package swim.runtime;
 
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
@@ -182,8 +183,28 @@ public class MeshProxy implements MeshBinding, MeshContext {
   }
 
   @Override
+  public LaneBinding createLane(Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return this.meshContext.createLane(partKey, hostUri, nodeUri, laneDef);
+  }
+
+  @Override
+  public LaneBinding createLane(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+    return this.meshContext.createLane(partKey, hostUri, nodeUri, laneUri);
+  }
+
+  @Override
   public LaneBinding injectLane(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
     return this.meshContext.injectLane(partKey, hostUri, nodeUri, laneUri, lane);
+  }
+
+  @Override
+  public void openLanes(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
+    this.meshContext.openLanes(partKey, hostUri, nodeUri, node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+    return this.meshContext.createAgentFactory(partKey, hostUri, nodeUri, agentDef);
   }
 
   @Override

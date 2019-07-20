@@ -15,15 +15,17 @@
 package swim.fabric;
 
 import java.util.Collection;
+import swim.api.agent.AgentDef;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
-import swim.kernel.LaneDef;
-import swim.kernel.LogDef;
-import swim.kernel.NodeDef;
-import swim.kernel.PolicyDef;
-import swim.kernel.StageDef;
-import swim.kernel.StoreDef;
+import swim.collections.FingerTrieSeq;
+import swim.concurrent.StageDef;
+import swim.runtime.LaneDef;
+import swim.runtime.LogDef;
+import swim.runtime.NodeDef;
+import swim.runtime.PolicyDef;
+import swim.store.StoreDef;
 import swim.uri.Uri;
 import swim.uri.UriMapper;
 import swim.uri.UriPattern;
@@ -31,15 +33,18 @@ import swim.util.Murmur3;
 
 public class FabricNodeDef implements NodeDef, Debug {
   final UriPattern nodePattern;
+  final FingerTrieSeq<AgentDef> agentDefs;
   final UriMapper<LaneDef> laneDefs;
   final LogDef logDef;
   final PolicyDef policyDef;
   final StageDef stageDef;
   final StoreDef storeDef;
 
-  public FabricNodeDef(UriPattern nodePattern, UriMapper<LaneDef> laneDefs,
-                       LogDef logDef, PolicyDef policyDef, StageDef stageDef, StoreDef storeDef) {
+  public FabricNodeDef(UriPattern nodePattern, FingerTrieSeq<AgentDef> agentDefs,
+                       UriMapper<LaneDef> laneDefs, LogDef logDef, PolicyDef policyDef,
+                       StageDef stageDef, StoreDef storeDef) {
     this.nodePattern = nodePattern;
+    this.agentDefs = agentDefs;
     this.laneDefs = laneDefs;
     this.logDef = logDef;
     this.policyDef = policyDef;
@@ -58,7 +63,28 @@ public class FabricNodeDef implements NodeDef, Debug {
   }
 
   public FabricNodeDef nodePattern(UriPattern nodePattern) {
-    return copy(nodePattern, this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
+    return copy(nodePattern, this.agentDefs, this.laneDefs,
+                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+  }
+
+  @Override
+  public final Collection<? extends AgentDef> agentDefs() {
+    return this.agentDefs;
+  }
+
+  @Override
+  public final AgentDef getAgentDef(String agentName) {
+    for (AgentDef agentDef : this.agentDefs) {
+      if (agentName.equals(agentDef.agentName())) {
+        return agentDef;
+      }
+    }
+    return null;
+  }
+
+  public FabricNodeDef agentDef(AgentDef agentDef) {
+    return copy(this.nodePattern, this.agentDefs.appended(agentDef), this.laneDefs,
+                this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -72,7 +98,7 @@ public class FabricNodeDef implements NodeDef, Debug {
   }
 
   public FabricNodeDef laneDef(LaneDef laneDef) {
-    return copy(this.nodePattern, this.laneDefs.updated(laneDef.lanePattern(), laneDef),
+    return copy(this.nodePattern, this.agentDefs, this.laneDefs.updated(laneDef.lanePattern(), laneDef),
                 this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
@@ -82,7 +108,8 @@ public class FabricNodeDef implements NodeDef, Debug {
   }
 
   public FabricNodeDef logDef(LogDef logDef) {
-    return copy(this.nodePattern, this.laneDefs, logDef, this.policyDef, this.stageDef, this.storeDef);
+    return copy(this.nodePattern, this.agentDefs, this.laneDefs,
+                logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -91,7 +118,8 @@ public class FabricNodeDef implements NodeDef, Debug {
   }
 
   public FabricNodeDef policyDef(PolicyDef policyDef) {
-    return copy(this.nodePattern, this.laneDefs, this.logDef, policyDef, this.stageDef, this.storeDef);
+    return copy(this.nodePattern, this.agentDefs, this.laneDefs,
+                this.logDef, policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -100,7 +128,8 @@ public class FabricNodeDef implements NodeDef, Debug {
   }
 
   public FabricNodeDef stageDef(StageDef stageDef) {
-    return copy(this.nodePattern, this.laneDefs, this.logDef, this.policyDef, stageDef, this.storeDef);
+    return copy(this.nodePattern, this.agentDefs, this.laneDefs,
+                this.logDef, this.policyDef, stageDef, this.storeDef);
   }
 
   @Override
@@ -109,12 +138,14 @@ public class FabricNodeDef implements NodeDef, Debug {
   }
 
   public FabricNodeDef storeDef(StoreDef storeDef) {
-    return copy(this.nodePattern, this.laneDefs, this.logDef, this.policyDef, this.stageDef, storeDef);
+    return copy(this.nodePattern, this.agentDefs, this.laneDefs,
+                this.logDef, this.policyDef, this.stageDef, storeDef);
   }
 
-  protected FabricNodeDef copy(UriPattern nodePattern, UriMapper<LaneDef> laneDefs,
-                               LogDef logDef, PolicyDef policyDef, StageDef stageDef, StoreDef storeDef) {
-    return new FabricNodeDef(nodePattern, laneDefs,
+  protected FabricNodeDef copy(UriPattern nodePattern, FingerTrieSeq<AgentDef> agentDefs,
+                               UriMapper<LaneDef> laneDefs, LogDef logDef, PolicyDef policyDef,
+                               StageDef stageDef, StoreDef storeDef) {
+    return new FabricNodeDef(nodePattern, agentDefs, laneDefs,
                              logDef, policyDef, stageDef, storeDef);
   }
 
@@ -125,6 +156,7 @@ public class FabricNodeDef implements NodeDef, Debug {
     } else if (other instanceof FabricNodeDef) {
       final FabricNodeDef that = (FabricNodeDef) other;
       return this.nodePattern.equals(that.nodePattern)
+          && this.agentDefs.equals(that.agentDefs)
           && this.laneDefs.equals(that.laneDefs)
           && (this.logDef == null ? that.logDef == null : this.logDef.equals(that.logDef))
           && (this.policyDef == null ? that.policyDef == null : this.policyDef.equals(that.policyDef))
@@ -139,9 +171,9 @@ public class FabricNodeDef implements NodeDef, Debug {
     if (hashSeed == 0) {
       hashSeed = Murmur3.seed(FabricNodeDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(hashSeed, this.nodePattern.hashCode()), this.laneDefs.hashCode()),
-        Murmur3.hash(this.logDef)), Murmur3.hash(this.policyDef)),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        Murmur3.mix(hashSeed, this.nodePattern.hashCode()), this.agentDefs.hashCode()),
+        this.laneDefs.hashCode()), Murmur3.hash(this.logDef)), Murmur3.hash(this.policyDef)),
         Murmur3.hash(this.stageDef)), Murmur3.hash(this.storeDef)));
   }
 
@@ -152,6 +184,9 @@ public class FabricNodeDef implements NodeDef, Debug {
       output = output.write("fromNodeUri").write('(').debug(this.nodePattern.toUri()).write(')');
     } else {
       output = output.write("fromNodePattern").write('(').debug(this.nodePattern).write(')');
+    }
+    for (AgentDef agentDef : this.agentDefs()) {
+      output = output.write('.').write("agentDef").write('(').debug(agentDef).write(')');
     }
     for (LaneDef laneDef : this.laneDefs.values()) {
       output = output.write('.').write("laneDef").write('(').debug(laneDef).write(')');
@@ -178,10 +213,20 @@ public class FabricNodeDef implements NodeDef, Debug {
   private static int hashSeed;
 
   public static FabricNodeDef fromNodeUri(Uri nodeUri) {
-    return new FabricNodeDef(UriPattern.from(nodeUri), UriMapper.empty(), null, null, null, null);
+    return new FabricNodeDef(UriPattern.from(nodeUri), FingerTrieSeq.empty(),
+                             UriMapper.empty(), null, null, null, null);
+  }
+
+  public static FabricNodeDef fromNodeUri(String nodeUri) {
+    return fromNodeUri(Uri.parse(nodeUri));
   }
 
   public static FabricNodeDef fromNodePattern(UriPattern nodePattern) {
-    return new FabricNodeDef(nodePattern, UriMapper.empty(), null, null, null, null);
+    return new FabricNodeDef(nodePattern, FingerTrieSeq.empty(),
+                             UriMapper.empty(), null, null, null, null);
+  }
+
+  public static FabricNodeDef fromNodePattern(String nodePattern) {
+    return fromNodePattern(UriPattern.parse(nodePattern));
   }
 }

@@ -15,8 +15,8 @@
 package swim.store.mem;
 
 import swim.kernel.KernelProxy;
-import swim.kernel.StoreDef;
 import swim.store.StoreBinding;
+import swim.store.StoreDef;
 import swim.structure.Value;
 
 public class MemStoreKernel extends KernelProxy {

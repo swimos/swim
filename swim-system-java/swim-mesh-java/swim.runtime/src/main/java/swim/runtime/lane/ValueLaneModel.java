@@ -31,7 +31,7 @@ public class ValueLaneModel extends LaneModel<ValueLaneView<?>, ValueLaneUplink>
   }
 
   public ValueLaneModel() {
-    this(RESIDENT);
+    this(0);
   }
 
   @Override

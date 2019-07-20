@@ -18,13 +18,13 @@ import java.util.Collection;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
-import swim.kernel.HostDef;
-import swim.kernel.LaneDef;
-import swim.kernel.LogDef;
-import swim.kernel.NodeDef;
-import swim.kernel.PolicyDef;
-import swim.kernel.StageDef;
-import swim.kernel.StoreDef;
+import swim.concurrent.StageDef;
+import swim.runtime.HostDef;
+import swim.runtime.LaneDef;
+import swim.runtime.LogDef;
+import swim.runtime.NodeDef;
+import swim.runtime.PolicyDef;
+import swim.store.StoreDef;
 import swim.uri.Uri;
 import swim.uri.UriMapper;
 import swim.uri.UriPattern;
@@ -248,8 +248,16 @@ public class FabricHostDef implements HostDef, Debug {
                              UriMapper.empty(), null, null, null, null);
   }
 
+  public static FabricHostDef fromHostUri(String hostUri) {
+    return fromHostUri(Uri.parse(hostUri));
+  }
+
   public static FabricHostDef fromHostPattern(UriPattern hostPattern) {
     return new FabricHostDef(hostPattern, false, false, UriMapper.empty(),
                              UriMapper.empty(), null, null, null, null);
+  }
+
+  public static FabricHostDef fromHostPattern(String hostPattern) {
+    return fromHostPattern(UriPattern.parse(hostPattern));
   }
 }

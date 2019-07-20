@@ -15,6 +15,7 @@
 package swim.http;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Paths;
@@ -190,7 +191,31 @@ public final class HttpBody<T> extends HttpEntity<T> implements Debug {
   }
 
   public static <T> HttpBody<T> fromFile(String path) throws IOException {
-    return fromFile(path, MediaType.forFile(path));
+    return fromFile(path, MediaType.forPath(path));
+  }
+
+  public static <T> HttpBody<T> fromResource(ClassLoader classLoader, String resource, MediaType mediaType) throws IOException {
+    HttpBody<T> body = null;
+    InputStream input = null;
+    try {
+      input = classLoader.getResourceAsStream(resource);
+      if (input != null) {
+        final ByteBuffer data = Binary.read(Binary.outputParser(Binary.byteBufferOutput()), input);
+        body = new HttpBody<T>(null, Binary.byteBufferWriter(data), data.remaining(), mediaType);
+      }
+    } finally {
+      try {
+        if (input != null) {
+          input.close();
+        }
+      } catch (IOException swallow) {
+      }
+    }
+    return body;
+  }
+
+  public static <T> HttpBody<T> fromResource(ClassLoader classLoader, String resource) throws IOException {
+    return fromResource(classLoader, resource, MediaType.forPath(resource));
   }
 
   public static <T> Decoder<HttpMessage<T>> httpDecoder(HttpMessage<?> message, Decoder<T> content, long length) {

@@ -145,7 +145,7 @@ public class ListLaneSpec {
       listLink.add(0, "a");
       listLink.add(1, "b");
       listLink.add(2, "c");
-      linkDidReceive.await(1, TimeUnit.SECONDS);
+      linkDidReceive.await(2, TimeUnit.SECONDS);
       linkDidUpdate.await(1, TimeUnit.SECONDS);
       assertEquals(linkDidReceive.getCount(), 0);
       assertEquals(linkDidUpdate.getCount(), 0);

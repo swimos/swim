@@ -1,9 +1,0 @@
-apply from: '../project.gradle'
-
-description = 'Web Agent router'
-ext.moduleName = 'swim.router'
-
-dependencies {
-  api project(':swim-runtime')
-  api project(':swim-kernel')
-}

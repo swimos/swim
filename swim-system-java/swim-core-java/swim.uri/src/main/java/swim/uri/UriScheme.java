@@ -18,6 +18,7 @@ import swim.codec.Debug;
 import swim.codec.Display;
 import swim.codec.Output;
 import swim.util.HashGenCacheMap;
+import swim.util.Murmur3;
 
 public class UriScheme implements Comparable<UriScheme>, Debug, Display {
   protected final String name;
@@ -51,7 +52,7 @@ public class UriScheme implements Comparable<UriScheme>, Debug, Display {
 
   @Override
   public final int hashCode() {
-    return this.name.hashCode();
+    return Murmur3.seed(this.name);
   }
 
   @Override

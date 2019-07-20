@@ -15,6 +15,7 @@
 package swim.runtime;
 
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
@@ -40,7 +41,15 @@ public interface HostContext extends TierContext, CellContext {
 
   NodeBinding injectNode(Uri nodeUri, NodeBinding node);
 
+  LaneBinding createLane(Uri nodeUri, LaneDef laneDef);
+
+  LaneBinding createLane(Uri nodeUri, Uri laneUri);
+
   LaneBinding injectLane(Uri nodeUri, Uri laneUri, LaneBinding lane);
+
+  void openLanes(Uri nodeUri, NodeBinding node);
+
+  AgentFactory<?> createAgentFactory(Uri nodeUri, AgentDef agentDef);
 
   <A extends Agent> AgentFactory<A> createAgentFactory(Uri nodeUri, Class<? extends A> agentClass);
 

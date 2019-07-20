@@ -17,11 +17,11 @@ package swim.fabric;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
-import swim.kernel.LaneDef;
-import swim.kernel.LogDef;
-import swim.kernel.PolicyDef;
-import swim.kernel.StageDef;
-import swim.kernel.StoreDef;
+import swim.concurrent.StageDef;
+import swim.runtime.LaneDef;
+import swim.runtime.LogDef;
+import swim.runtime.PolicyDef;
+import swim.store.StoreDef;
 import swim.uri.Uri;
 import swim.uri.UriPattern;
 import swim.util.Murmur3;
@@ -171,7 +171,15 @@ public class FabricLaneDef implements LaneDef, Debug {
     return new FabricLaneDef(UriPattern.from(laneUri), null, null, null, null, null);
   }
 
+  public static FabricLaneDef fromLaneUri(String laneUri) {
+    return fromLaneUri(Uri.parse(laneUri));
+  }
+
   public static FabricLaneDef fromLanePattern(UriPattern lanePattern) {
     return new FabricLaneDef(lanePattern, null, null, null, null, null);
+  }
+
+  public static FabricLaneDef fromLanePattern(String lanePattern) {
+    return fromLanePattern(UriPattern.parse(lanePattern));
   }
 }

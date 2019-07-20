@@ -24,6 +24,7 @@ import swim.codec.Output;
 import swim.structure.Form;
 import swim.structure.Kind;
 import swim.util.HashGenCacheSet;
+import swim.util.Murmur3;
 
 public abstract class UriPath implements Collection<String>, Comparable<UriPath>, Debug, Display {
   UriPath() {
@@ -445,7 +446,7 @@ public abstract class UriPath implements Collection<String>, Comparable<UriPath>
 
   @Override
   public final int hashCode() {
-    return toString().hashCode();
+    return Murmur3.seed(toString());
   }
 
   @Override

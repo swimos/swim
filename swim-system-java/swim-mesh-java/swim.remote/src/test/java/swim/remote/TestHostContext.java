@@ -15,6 +15,7 @@
 package swim.remote;
 
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
@@ -27,6 +28,7 @@ import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
 import swim.runtime.HttpBinding;
 import swim.runtime.LaneBinding;
+import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
@@ -97,8 +99,27 @@ public class TestHostContext extends TestCellContext implements HostContext {
   }
 
   @Override
+  public LaneBinding createLane(Uri nodeUri, LaneDef laneDef) {
+    return null;
+  }
+
+  @Override
+  public LaneBinding createLane(Uri nodeUri, Uri laneUri) {
+    return null;
+  }
+
+  @Override
   public LaneBinding injectLane(Uri nodeUri, Uri laneUri, LaneBinding lane) {
     return lane;
+  }
+
+  @Override
+  public void openLanes(Uri nodeUri, NodeBinding node) {
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(Uri nodeUri, AgentDef agentDef) {
+    return null;
   }
 
   @Override

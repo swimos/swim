@@ -14,10 +14,10 @@
 
 package swim.service.warp;
 
+import swim.api.service.ServiceDef;
 import swim.api.service.ServiceFactory;
 import swim.kernel.KernelContext;
 import swim.kernel.KernelProxy;
-import swim.kernel.ServiceDef;
 import swim.structure.Item;
 import swim.structure.Value;
 

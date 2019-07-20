@@ -260,7 +260,7 @@ public final class MediaType extends HttpPart implements Debug {
     return Http.standardParser().parseMediaTypeString(string);
   }
 
-  public static MediaType forFile(String path) {
+  public static MediaType forPath(String path) {
     if (path.endsWith(".js")) {
       return applicationJavascript();
     } else if (path.endsWith(".json")) {

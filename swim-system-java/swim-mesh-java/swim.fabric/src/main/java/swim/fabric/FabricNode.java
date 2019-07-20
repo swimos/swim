@@ -15,24 +15,25 @@
 package swim.fabric;
 
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Identity;
 import swim.api.policy.Policy;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Stage;
-import swim.kernel.LaneDef;
-import swim.kernel.LogDef;
-import swim.kernel.NodeDef;
-import swim.kernel.PolicyDef;
-import swim.kernel.StageDef;
-import swim.kernel.StoreDef;
+import swim.concurrent.StageDef;
 import swim.runtime.CellBinding;
 import swim.runtime.CellContext;
 import swim.runtime.HostBinding;
 import swim.runtime.LaneBinding;
+import swim.runtime.LaneDef;
+import swim.runtime.LogDef;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
+import swim.runtime.NodeDef;
+import swim.runtime.PolicyDef;
 import swim.store.StoreBinding;
+import swim.store.StoreDef;
 import swim.structure.Record;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -259,6 +260,11 @@ public class FabricNode extends FabricTier implements NodeBinding, NodeContext {
   }
 
   @Override
+  public LaneBinding openLane(Uri laneUri) {
+    return this.nodeBinding.openLane(laneUri);
+  }
+
+  @Override
   public LaneBinding openLane(Uri laneUri, LaneBinding lane) {
     return this.nodeBinding.openLane(laneUri, lane);
   }
@@ -274,9 +280,34 @@ public class FabricNode extends FabricTier implements NodeBinding, NodeContext {
   }
 
   @Override
+  public LaneBinding createLane(LaneDef laneDef) {
+    return this.nodeContext.createLane(laneDef);
+  }
+
+  @Override
+  public LaneBinding createLane(Uri laneUri) {
+    return this.nodeContext.createLane(laneUri);
+  }
+
+  @Override
   public LaneBinding injectLane(Uri laneUri, LaneBinding lane) {
     final LaneDef laneDef = getLaneDef(laneUri);
     return new FabricLane(this.nodeContext.injectLane(laneUri, lane), laneDef);
+  }
+
+  @Override
+  public void openLanes(NodeBinding node) {
+    this.nodeContext.openLanes(node);
+    final NodeDef nodeDef = this.nodeDef;
+    if (nodeDef != null) {
+      for (LaneDef laneDef : nodeDef.laneDefs()) {
+        final Uri laneUri = laneDef.laneUri();
+        final LaneBinding lane = createLane(laneDef);
+        if (laneDef != null) {
+          node.openLane(laneUri, lane);
+        }
+      }
+    }
   }
 
   public Log openLaneLog(Uri laneUri) {
@@ -300,8 +331,18 @@ public class FabricNode extends FabricTier implements NodeBinding, NodeContext {
   }
 
   @Override
+  public AgentFactory<?> createAgentFactory(AgentDef agentDef) {
+    return this.nodeContext.createAgentFactory(agentDef);
+  }
+
+  @Override
   public <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass) {
     return this.nodeContext.createAgentFactory(agentClass);
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.nodeContext.openAgents(node);
   }
 
   @Override

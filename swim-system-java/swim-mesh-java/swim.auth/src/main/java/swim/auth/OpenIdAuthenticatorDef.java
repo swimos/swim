@@ -14,11 +14,11 @@
 
 package swim.auth;
 
+import swim.api.auth.AuthenticatorDef;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
 import swim.collections.FingerTrieSeq;
-import swim.kernel.AuthenticatorDef;
 import swim.security.PublicKeyDef;
 import swim.structure.Form;
 import swim.structure.Item;

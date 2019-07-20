@@ -14,16 +14,16 @@
 
 package swim.js;
 
+import swim.api.plane.PlaneDef;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
-import swim.kernel.PlaneDef;
 import swim.uri.UriPath;
 import swim.util.Murmur3;
 
 public class JsPlaneDef implements PlaneDef, Debug {
-  protected final String planeName;
-  protected final UriPath modulePath;
+  final String planeName;
+  final UriPath modulePath;
 
   public JsPlaneDef(String planeName, UriPath modulePath) {
     this.planeName = planeName;
@@ -65,13 +65,16 @@ public class JsPlaneDef implements PlaneDef, Debug {
 
   @Override
   public int hashCode() {
+    if (hashSeed == 0) {
+      hashSeed = Murmur3.seed(JsPlaneDef.class);
+    }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
         Murmur3.hash(this.planeName)), Murmur3.hash(this.modulePath)));
   }
 
   @Override
   public void debug(Output<?> output) {
-    output = output.write("new").write(' ').write("JsPlaneDef").write('(')
+    output = output.write("JsPlaneDef").write('.').write("from").write('(')
         .debug(this.planeName).write(", ").debug(this.modulePath).write(')');
   }
 

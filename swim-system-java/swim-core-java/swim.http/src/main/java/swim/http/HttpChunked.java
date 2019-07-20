@@ -156,7 +156,7 @@ public final class HttpChunked<T> extends HttpEntity<T> implements Debug {
   }
 
   public static <T> HttpChunked<T> fromFile(String path) throws IOException {
-    return fromFile(path, MediaType.forFile(path));
+    return fromFile(path, MediaType.forPath(path));
   }
 
   public static <T> Decoder<HttpMessage<T>> httpDecoder(HttpMessage<?> message, Decoder<T> content) {

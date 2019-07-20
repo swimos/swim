@@ -49,7 +49,7 @@ public abstract class AbstractAgentRoute<A extends Agent> implements AgentRoute<
   public abstract A createAgent(AgentContext context);
 
   @Override
-  public Value createProps(Uri nodeUri) {
+  public Value props(Uri nodeUri) {
     final Record props = Record.create();
     final UriPattern pattern = pattern();
     if (pattern != null) {

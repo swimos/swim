@@ -18,6 +18,7 @@ import swim.codec.Debug;
 import swim.codec.Display;
 import swim.codec.Format;
 import swim.codec.Output;
+import swim.util.Murmur3;
 
 public class UriAuthority implements Comparable<UriAuthority>, Debug, Display {
   protected final UriUser user;
@@ -172,7 +173,7 @@ public class UriAuthority implements Comparable<UriAuthority>, Debug, Display {
 
   @Override
   public final int hashCode() {
-    return toString().hashCode();
+    return Murmur3.seed(toString());
   }
 
   @Override

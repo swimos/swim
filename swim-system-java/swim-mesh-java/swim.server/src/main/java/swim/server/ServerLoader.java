@@ -15,7 +15,9 @@
 package swim.server;
 
 import java.io.IOException;
+import swim.api.service.ServiceDef;
 import swim.api.service.ServiceFactory;
+import swim.api.space.SpaceDef;
 import swim.auth.AuthenticatorKernel;
 import swim.fabric.FabricKernel;
 import swim.java.JavaKernel;
@@ -23,10 +25,7 @@ import swim.kernel.BootKernel;
 import swim.kernel.Kernel;
 import swim.kernel.KernelException;
 import swim.kernel.KernelLoader;
-import swim.kernel.ServiceDef;
-import swim.kernel.SpaceDef;
 import swim.remote.RemoteKernel;
-import swim.router.RouterKernel;
 import swim.service.ServiceKernel;
 import swim.service.warp.WarpServiceKernel;
 import swim.store.mem.MemStoreKernel;
@@ -82,9 +81,6 @@ public final class ServerLoader {
     }
     if (kernel.unwrapKernel(MemStoreKernel.class) == null) {
       kernel = kernel.injectKernel(new MemStoreKernel());
-    }
-    if (kernel.unwrapKernel(RouterKernel.class) == null) {
-      kernel = kernel.injectKernel(new RouterKernel());
     }
     if (kernel.unwrapKernel(RemoteKernel.class) == null) {
       kernel = kernel.injectKernel(new RemoteKernel());

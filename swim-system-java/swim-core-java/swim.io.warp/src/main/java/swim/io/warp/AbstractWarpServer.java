@@ -16,10 +16,8 @@ package swim.io.warp;
 
 import swim.io.http.HttpServerContext;
 import swim.io.ws.AbstractWsServer;
-import swim.io.ws.WebSocket;
 import swim.io.ws.WsSettings;
 import swim.io.ws.WsUpgradeResponder;
-import swim.warp.Envelope;
 import swim.ws.WsResponse;
 
 public abstract class AbstractWarpServer extends AbstractWsServer {
@@ -49,7 +47,8 @@ public abstract class AbstractWarpServer extends AbstractWsServer {
   }
 
   protected WsUpgradeResponder upgrade(WarpSocket warpSocket, WsResponse wsResponse) {
-    final WebSocket<Envelope, Envelope> webSocket = new WarpWebSocket(warpSocket, this.warpSettings);
+    final WarpWebSocket webSocket = new WarpWebSocket(warpSocket, this.warpSettings);
+    warpSocket.setWarpSocketContext(webSocket); // eagerly set
     return new WsUpgradeResponder(webSocket, wsResponse, this.wsSettings);
   }
 }

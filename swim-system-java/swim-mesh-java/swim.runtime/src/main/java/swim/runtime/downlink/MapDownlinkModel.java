@@ -490,7 +490,9 @@ final class MapDownlinkRelayRemove extends DownlinkRelay<MapDownlinkModel, MapDo
       final Form<Object> valueForm = (Form<Object>) view.valueForm;
       if (this.valueForm != valueForm && valueForm != null) {
         this.valueForm = valueForm;
-        this.oldObject = valueForm.cast(this.oldValue);
+        if (this.oldValue != null) {
+          this.oldObject = valueForm.cast(this.oldValue);
+        }
         if (this.oldObject == null) {
           this.oldObject = valueForm.unit();
         }

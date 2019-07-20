@@ -6,7 +6,6 @@ ext.moduleName = 'swim.server'
 dependencies {
   api project(':swim-kernel')
   api project(':swim-store-mem')
-  api project(':swim-router')
   api project(':swim-remote')
   api project(':swim-service')
   api project(':swim-service-warp')

@@ -15,6 +15,7 @@
 package swim.fabric;
 
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
@@ -22,21 +23,22 @@ import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Stage;
-import swim.kernel.HostDef;
-import swim.kernel.LaneDef;
-import swim.kernel.LogDef;
-import swim.kernel.NodeDef;
-import swim.kernel.PolicyDef;
-import swim.kernel.StageDef;
-import swim.kernel.StoreDef;
+import swim.concurrent.StageDef;
 import swim.runtime.CellBinding;
 import swim.runtime.CellContext;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
+import swim.runtime.HostDef;
 import swim.runtime.LaneBinding;
+import swim.runtime.LaneDef;
+import swim.runtime.LogDef;
 import swim.runtime.NodeBinding;
+import swim.runtime.NodeDef;
 import swim.runtime.PartBinding;
+import swim.runtime.PolicyDef;
+import swim.runtime.agent.AgentModel;
 import swim.store.StoreBinding;
+import swim.store.StoreDef;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Log;
@@ -317,7 +319,16 @@ public class FabricHost extends FabricTier implements HostBinding, HostContext {
 
   @Override
   public NodeBinding createNode(Uri nodeUri) {
-    return this.hostContext.createNode(nodeUri);
+    NodeBinding node = this.hostContext.createNode(nodeUri);
+    if (node == null && !meshUri().isDefined()) {
+      final HostDef hostDef = this.hostDef;
+      final NodeDef nodeDef = hostDef != null ? hostDef.getNodeDef(nodeUri) : null;
+      if (nodeDef != null) {
+        final Value props = nodeDef.props(nodeUri);
+        node = new AgentModel(props);
+      }
+    }
+    return node;
   }
 
   @Override
@@ -357,8 +368,23 @@ public class FabricHost extends FabricTier implements HostBinding, HostContext {
   }
 
   @Override
+  public LaneBinding createLane(Uri nodeUri, LaneDef laneDef) {
+    return this.hostContext.createLane(nodeUri, laneDef);
+  }
+
+  @Override
+  public LaneBinding createLane(Uri nodeUri, Uri laneUri) {
+    return this.hostContext.createLane(nodeUri, laneUri);
+  }
+
+  @Override
   public LaneBinding injectLane(Uri nodeUri, Uri laneUri, LaneBinding lane) {
     return this.hostContext.injectLane(nodeUri, laneUri, lane);
+  }
+
+  @Override
+  public void openLanes(Uri nodeUri, NodeBinding node) {
+    this.hostContext.openLanes(nodeUri, node);
   }
 
   public Log openLaneLog(Uri nodeUri, Uri laneUri) {
@@ -382,6 +408,11 @@ public class FabricHost extends FabricTier implements HostBinding, HostContext {
   }
 
   @Override
+  public AgentFactory<?> createAgentFactory(Uri nodeUri, AgentDef agentDef) {
+    return this.hostContext.createAgentFactory(nodeUri, agentDef);
+  }
+
+  @Override
   public <A extends Agent> AgentFactory<A> createAgentFactory(Uri nodeUri, Class<? extends A> agentClass) {
     return this.hostContext.createAgentFactory(nodeUri, agentClass);
   }
@@ -389,6 +420,23 @@ public class FabricHost extends FabricTier implements HostBinding, HostContext {
   @Override
   public void openAgents(Uri nodeUri, NodeBinding node) {
     this.hostContext.openAgents(nodeUri, node);
+    if (!meshUri().isDefined()) {
+      final HostDef hostDef = this.hostDef;
+      final NodeDef nodeDef = hostDef != null ? hostDef.getNodeDef(nodeUri) : null;
+      if (nodeDef != null && node instanceof AgentModel) {
+        final AgentModel agentModel = (AgentModel) node;
+        for (AgentDef agentDef : nodeDef.agentDefs()) {
+          final AgentFactory<?> agentFactory = createAgentFactory(nodeUri, agentDef);
+          if (agentDef != null) {
+            Value props = agentDef.props();
+            if (!props.isDefined()) {
+              props = agentModel.props();
+            }
+            agentModel.addAgentView(agentModel.createAgent(agentFactory, props));
+          }
+        }
+      }
+    }
   }
 
   @Override

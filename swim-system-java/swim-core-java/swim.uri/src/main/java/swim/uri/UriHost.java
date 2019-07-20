@@ -22,6 +22,7 @@ import swim.codec.Debug;
 import swim.codec.Display;
 import swim.codec.Output;
 import swim.util.HashGenCacheMap;
+import swim.util.Murmur3;
 
 public abstract class UriHost implements Comparable<UriHost>, Debug, Display {
   protected UriHost() {
@@ -67,7 +68,7 @@ public abstract class UriHost implements Comparable<UriHost>, Debug, Display {
 
   @Override
   public final int hashCode() {
-    return toString().hashCode();
+    return Murmur3.seed(toString());
   }
 
   @Override

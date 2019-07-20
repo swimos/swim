@@ -23,6 +23,7 @@ import swim.codec.Format;
 import swim.codec.Output;
 import swim.structure.Form;
 import swim.structure.Kind;
+import swim.util.Murmur3;
 
 public class Uri implements Comparable<Uri>, Debug, Display {
   protected final UriScheme scheme;
@@ -469,7 +470,7 @@ public class Uri implements Comparable<Uri>, Debug, Display {
 
   @Override
   public final int hashCode() {
-    return toString().hashCode();
+    return Murmur3.seed(toString());
   }
 
   @Override

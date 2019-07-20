@@ -16,5 +16,7 @@
  * Lightweight timers, tasks, and continuations.
  */
 module swim.concurrent {
+  requires transitive swim.structure;
+
   exports swim.concurrent;
 }

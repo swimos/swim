@@ -423,7 +423,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       newUplinks = oldUplinks.updated(remoteNodeUri, nodeUplinks);
     } while (!UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
 
-    if (this.warpSocketContext.isConnected()) {
+    if (isConnected()) {
       uplink.didConnect();
     }
   }
@@ -1041,16 +1041,18 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void disconnectUplinks() {
-    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
-    while (nodeUplinksIterator.hasNext()) {
-      final HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>> nodeUplinks = nodeUplinksIterator.next();
-      final Iterator<HashTrieSet<RemoteHostUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
-      while (laneUplinksIterator.hasNext()) {
-        final HashTrieSet<RemoteHostUplink> laneUplinks = laneUplinksIterator.next();
-        final Iterator<RemoteHostUplink> uplinksIterator = laneUplinks.iterator();
-        while (uplinksIterator.hasNext()) {
-          final RemoteHostUplink uplink = uplinksIterator.next();
-          uplink.didDisconnect();
+    if (isConnected()) {
+      final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
+      while (nodeUplinksIterator.hasNext()) {
+        final HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>> nodeUplinks = nodeUplinksIterator.next();
+        final Iterator<HashTrieSet<RemoteHostUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
+        while (laneUplinksIterator.hasNext()) {
+          final HashTrieSet<RemoteHostUplink> laneUplinks = laneUplinksIterator.next();
+          final Iterator<RemoteHostUplink> uplinksIterator = laneUplinks.iterator();
+          while (uplinksIterator.hasNext()) {
+            final RemoteHostUplink uplink = uplinksIterator.next();
+            uplink.didDisconnect();
+          }
         }
       }
     }

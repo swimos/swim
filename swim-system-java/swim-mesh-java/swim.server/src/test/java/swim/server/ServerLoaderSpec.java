@@ -21,7 +21,6 @@ import swim.java.JavaKernel;
 import swim.kernel.BootKernel;
 import swim.kernel.Kernel;
 import swim.remote.RemoteKernel;
-import swim.router.RouterKernel;
 import swim.service.ServiceKernel;
 import swim.service.warp.WarpServiceKernel;
 import swim.store.mem.MemStoreKernel;
@@ -33,7 +32,6 @@ public class ServerLoaderSpec {
     final Kernel kernel = ServerLoader.loadServerStack();
     assertNotNull(kernel.unwrapKernel(BootKernel.class));
     assertNotNull(kernel.unwrapKernel(MemStoreKernel.class));
-    assertNotNull(kernel.unwrapKernel(RouterKernel.class));
     assertNotNull(kernel.unwrapKernel(RemoteKernel.class));
     assertNotNull(kernel.unwrapKernel(ServiceKernel.class));
     assertNotNull(kernel.unwrapKernel(WarpServiceKernel.class));

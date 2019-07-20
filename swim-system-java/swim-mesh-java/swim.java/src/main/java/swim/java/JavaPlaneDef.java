@@ -14,15 +14,15 @@
 
 package swim.java;
 
+import swim.api.plane.PlaneDef;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
-import swim.kernel.PlaneDef;
 import swim.util.Murmur3;
 
 public class JavaPlaneDef implements PlaneDef, Debug {
-  protected final String planeName;
-  protected final String className;
+  final String planeName;
+  final String className;
 
   public JavaPlaneDef(String planeName, String className) {
     this.planeName = planeName;
@@ -64,13 +64,16 @@ public class JavaPlaneDef implements PlaneDef, Debug {
 
   @Override
   public int hashCode() {
+    if (hashSeed == 0) {
+      hashSeed = Murmur3.seed(JavaPlaneDef.class);
+    }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
         Murmur3.hash(this.planeName)), Murmur3.hash(this.className)));
   }
 
   @Override
   public void debug(Output<?> output) {
-    output = output.write("new").write(' ').write("JavaPlaneDef").write('(')
+    output = output.write("JavaPlaneDef").write('.').write("from").write('(')
         .debug(this.planeName).write(", ").debug(this.className).write(')');
   }
 
@@ -80,4 +83,12 @@ public class JavaPlaneDef implements PlaneDef, Debug {
   }
 
   private static int hashSeed;
+
+  public static JavaPlaneDef from(String planeName, String className) {
+    return new JavaPlaneDef(planeName, className);
+  }
+
+  public static JavaPlaneDef fromClassName(String className) {
+    return new JavaPlaneDef(className, className);
+  }
 }

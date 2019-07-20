@@ -17,7 +17,6 @@
  */
 module swim.client {
   requires transitive swim.runtime;
-  requires transitive swim.router;
   requires transitive swim.remote;
 
   exports swim.client;

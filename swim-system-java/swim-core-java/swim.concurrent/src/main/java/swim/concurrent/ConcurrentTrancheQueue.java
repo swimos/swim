@@ -34,6 +34,14 @@ public class ConcurrentTrancheQueue<T> {
     this.highest = tranches - 1;
   }
 
+  public int size() {
+    int size = 0;
+    for (int tranche = this.highest; tranche >= 0; tranche -= 1) {
+      size += this.queues[tranche].size();
+    }
+    return size;
+  }
+
   public void add(T value, float prio) {
     final int tranche = Math.max(0, Math.min((int) ((1.0f + prio) * this.scale), this.highest));
     this.queues[tranche].add(value);

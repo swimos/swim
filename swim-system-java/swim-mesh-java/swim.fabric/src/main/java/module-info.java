@@ -17,7 +17,6 @@
  */
 module swim.fabric {
   requires transitive swim.runtime;
-  requires transitive swim.agent;
   requires transitive swim.kernel;
 
   exports swim.fabric;

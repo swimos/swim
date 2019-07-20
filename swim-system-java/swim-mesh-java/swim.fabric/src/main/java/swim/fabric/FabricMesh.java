@@ -15,6 +15,7 @@
 package swim.fabric;
 
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
@@ -22,25 +23,26 @@ import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Stage;
-import swim.kernel.HostDef;
-import swim.kernel.LaneDef;
-import swim.kernel.LogDef;
-import swim.kernel.MeshDef;
-import swim.kernel.NodeDef;
-import swim.kernel.PartDef;
-import swim.kernel.PolicyDef;
-import swim.kernel.StageDef;
-import swim.kernel.StoreDef;
+import swim.concurrent.StageDef;
 import swim.runtime.CellBinding;
 import swim.runtime.CellContext;
 import swim.runtime.EdgeBinding;
 import swim.runtime.HostBinding;
+import swim.runtime.HostDef;
 import swim.runtime.LaneBinding;
+import swim.runtime.LaneDef;
+import swim.runtime.LogDef;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshContext;
+import swim.runtime.MeshDef;
 import swim.runtime.NodeBinding;
+import swim.runtime.NodeDef;
 import swim.runtime.PartBinding;
+import swim.runtime.PartDef;
+import swim.runtime.PolicyDef;
+import swim.runtime.agent.AgentModel;
 import swim.store.StoreBinding;
+import swim.store.StoreDef;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Log;
@@ -367,7 +369,16 @@ public class FabricMesh extends FabricTier implements MeshBinding, MeshContext {
 
   @Override
   public NodeBinding createNode(Value partKey, Uri hostUri, Uri nodeUri) {
-    return this.meshContext.createNode(partKey, hostUri, nodeUri);
+    NodeBinding node = this.meshContext.createNode(partKey, hostUri, nodeUri);
+    if (node == null && !meshUri().isDefined()) {
+      final MeshDef meshDef = this.meshDef;
+      final NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(nodeUri) : null;
+      if (nodeDef != null) {
+        final Value props = nodeDef.props(nodeUri);
+        node = new AgentModel(props);
+      }
+    }
+    return node;
   }
 
   @Override
@@ -406,8 +417,23 @@ public class FabricMesh extends FabricTier implements MeshBinding, MeshContext {
   }
 
   @Override
+  public LaneBinding createLane(Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return this.meshContext.createLane(partKey, hostUri, nodeUri, laneDef);
+  }
+
+  @Override
+  public LaneBinding createLane(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+    return this.meshContext.createLane(partKey, hostUri, nodeUri, laneUri);
+  }
+
+  @Override
   public LaneBinding injectLane(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
     return this.meshContext.injectLane(partKey, hostUri, nodeUri, laneUri, lane);
+  }
+
+  @Override
+  public void openLanes(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
+    this.meshContext.openLanes(partKey, hostUri, nodeUri, node);
   }
 
   public Log openLaneLog(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
@@ -431,6 +457,11 @@ public class FabricMesh extends FabricTier implements MeshBinding, MeshContext {
   }
 
   @Override
+  public AgentFactory<?> createAgentFactory(Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+    return this.meshContext.createAgentFactory(partKey, hostUri, nodeUri, agentDef);
+  }
+
+  @Override
   public <A extends Agent> AgentFactory<A> createAgentFactory(Value partKey, Uri hostUri, Uri nodeUri,
                                                               Class<? extends A> agentClass) {
     return this.meshContext.createAgentFactory(partKey, hostUri, nodeUri, agentClass);
@@ -439,6 +470,23 @@ public class FabricMesh extends FabricTier implements MeshBinding, MeshContext {
   @Override
   public void openAgents(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
     this.meshContext.openAgents(partKey, hostUri, nodeUri, node);
+    if (!meshUri().isDefined()) {
+      final MeshDef meshDef = this.meshDef;
+      final NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(nodeUri) : null;
+      if (nodeDef != null && node instanceof AgentModel) {
+        final AgentModel agentModel = (AgentModel) node;
+        for (AgentDef agentDef : nodeDef.agentDefs()) {
+          final AgentFactory<?> agentFactory = createAgentFactory(partKey, hostUri, nodeUri, agentDef);
+          if (agentDef != null) {
+            Value props = agentDef.props();
+            if (!props.isDefined()) {
+              props = agentModel.props();
+            }
+            agentModel.addAgentView(agentModel.createAgent(agentFactory, props));
+          }
+        }
+      }
+    }
   }
 
   @Override

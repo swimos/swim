@@ -33,7 +33,7 @@ public class UriPatternForm extends Form<UriPattern> {
 
   @Override
   public UriPattern unit() {
-    return unit;
+    return this.unit;
   }
 
   @Override

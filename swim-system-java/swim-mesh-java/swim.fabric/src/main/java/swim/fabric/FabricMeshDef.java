@@ -19,15 +19,15 @@ import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
 import swim.collections.HashTrieMap;
-import swim.kernel.HostDef;
-import swim.kernel.LaneDef;
-import swim.kernel.LogDef;
-import swim.kernel.MeshDef;
-import swim.kernel.NodeDef;
-import swim.kernel.PartDef;
-import swim.kernel.PolicyDef;
-import swim.kernel.StageDef;
-import swim.kernel.StoreDef;
+import swim.concurrent.StageDef;
+import swim.runtime.HostDef;
+import swim.runtime.LaneDef;
+import swim.runtime.LogDef;
+import swim.runtime.MeshDef;
+import swim.runtime.NodeDef;
+import swim.runtime.PartDef;
+import swim.runtime.PolicyDef;
+import swim.store.StoreDef;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriMapper;
@@ -253,5 +253,9 @@ public class FabricMeshDef implements MeshDef, Debug {
     return new FabricMeshDef(meshUri, HashTrieMap.empty(), UriMapper.empty(),
                              UriMapper.empty(), UriMapper.empty(),
                              null, null, null, null);
+  }
+
+  public static FabricMeshDef fromMeshUri(String meshUri) {
+    return fromMeshUri(Uri.parse(meshUri));
   }
 }

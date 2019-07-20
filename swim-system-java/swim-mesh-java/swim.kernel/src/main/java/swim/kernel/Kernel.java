@@ -14,11 +14,17 @@
 
 package swim.kernel;
 
+import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
+import swim.api.agent.AgentFactory;
 import swim.api.plane.Plane;
+import swim.api.plane.PlaneDef;
 import swim.api.plane.PlaneFactory;
 import swim.api.service.Service;
+import swim.api.service.ServiceDef;
 import swim.api.service.ServiceFactory;
 import swim.api.space.Space;
+import swim.api.space.SpaceDef;
 import swim.structure.Item;
 
 public interface Kernel {
@@ -73,6 +79,12 @@ public interface Kernel {
   PlaneFactory<?> createPlaneFactory(PlaneDef planeDef, ClassLoader classLoader);
 
   <P extends Plane> PlaneFactory<P> createPlaneFactory(Class<? extends P> planeClass);
+
+  AgentDef defineAgent(Item agentConfig);
+
+  AgentFactory<?> createAgentFactory(AgentDef agentDef, ClassLoader classLoader);
+
+  <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass);
 
   boolean isStarted();
 

@@ -14,11 +14,11 @@
 
 package swim.service.warp;
 
+import swim.api.service.ServiceDef;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
 import swim.io.warp.WarpSettings;
-import swim.kernel.ServiceDef;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Kind;

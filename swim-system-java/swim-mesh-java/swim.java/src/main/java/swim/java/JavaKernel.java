@@ -15,20 +15,19 @@
 package swim.java;
 
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentException;
 import swim.api.agent.AgentFactory;
 import swim.api.agent.AgentRoute;
 import swim.api.plane.Plane;
+import swim.api.plane.PlaneDef;
 import swim.api.plane.PlaneException;
 import swim.api.plane.PlaneFactory;
-import swim.kernel.AgentRouteDef;
 import swim.kernel.KernelContext;
 import swim.kernel.KernelProxy;
-import swim.kernel.PlaneDef;
 import swim.structure.Item;
 import swim.structure.Value;
 import swim.uri.Uri;
-import swim.uri.UriPattern;
 
 public class JavaKernel extends KernelProxy {
   final double kernelPriority;
@@ -104,49 +103,47 @@ public class JavaKernel extends KernelProxy {
   }
 
   @Override
-  public AgentRouteDef defineAgentRoute(Item agentRouteConfig) {
-    final AgentRouteDef agentRouteDef = defineJavaAgentRoute(agentRouteConfig);
-    return agentRouteDef != null ? agentRouteDef : super.defineAgentRoute(agentRouteConfig);
+  public AgentDef defineAgent(Item agentConfig) {
+    final AgentDef agentDef = defineJavaAgent(agentConfig);
+    return agentDef != null ? agentDef : super.defineAgent(agentConfig);
   }
 
-  public JavaAgentRouteDef defineJavaAgentRoute(Item agentRouteConfig) {
-    final Value value = agentRouteConfig.toValue();
-    final Value header = value.getAttr("route");
+  public JavaAgentDef defineJavaAgent(Item agentConfig) {
+    final Value value = agentConfig.toValue();
+    final Value header = value.getAttr("agent");
     if (header.isDefined()) {
-      final String agentProvider = header.get("provider").stringValue(null);
-      final String agentClassName = value.get("class").stringValue(null);
-      if (agentProvider != null && JavaKernel.class.getName().equals(agentProvider)
-          || agentProvider == null && agentClassName != null) {
-        final String routeName = agentRouteConfig.key().stringValue(agentClassName);
-        final UriPattern pattern = value.get("pattern").cast(UriPattern.form());
-        return new JavaAgentRouteDef(routeName, agentClassName, pattern);
+      final String agentClassName = header.get("class").stringValue(null);
+      if (agentClassName != null) {
+        final String agentName = agentConfig.key().stringValue(agentClassName);
+        final Value props = value.get("props");
+        return new JavaAgentDef(agentName, agentClassName, props);
       }
     }
     return null;
   }
 
   @Override
-  public AgentRoute<?> createAgentRoute(AgentRouteDef agentRouteDef, ClassLoader classLoader) {
-    if (agentRouteDef instanceof JavaAgentRouteDef) {
-      return createJavaAgentRoute((JavaAgentRouteDef) agentRouteDef, classLoader);
+  public AgentFactory<?> createAgentFactory(AgentDef agentDef, ClassLoader classLoader) {
+    if (agentDef instanceof JavaAgentDef) {
+      return createJavaAgentFactory((JavaAgentDef) agentDef, classLoader);
     } else {
-      return super.createAgentRoute(agentRouteDef, classLoader);
+      return super.createAgentFactory(agentDef, classLoader);
     }
-  }
-
-  public JavaAgentFactory<?> createJavaAgentRoute(JavaAgentRouteDef agentRouteDef, ClassLoader classLoader) {
-    final String agentClassName = agentRouteDef.className;
-    final Class<? extends Agent> agentClass = loadAgentClass(agentClassName, classLoader);
-    return new JavaAgentFactory<Agent>(agentRouteDef, agentClass);
   }
 
   @Override
-  public <A extends Agent> AgentRoute<A> createAgentRoute(String edgeName, Class<? extends A> agentClass) {
-    AgentRoute<A> agentRoute = super.createAgentRoute(edgeName, agentClass);
-    if (agentRoute == null) {
-      agentRoute = new JavaAgentFactory<A>(agentClass);
+  public AgentFactory<?> createAgentFactory(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+    if (agentDef instanceof JavaAgentDef) {
+      return createJavaAgentFactory((JavaAgentDef) agentDef, null);
+    } else {
+      return super.createAgentFactory(edgeName, meshUri, partKey, hostUri, nodeUri, agentDef);
     }
-    return agentRoute;
+  }
+
+  public JavaAgentFactory<?> createJavaAgentFactory(JavaAgentDef agentDef, ClassLoader classLoader) {
+    final String agentClassName = agentDef.className;
+    final Class<? extends Agent> agentClass = loadAgentClass(agentClassName, classLoader);
+    return new JavaAgentFactory<Agent>(agentDef, agentClass);
   }
 
   @SuppressWarnings("unchecked")
@@ -162,6 +159,15 @@ public class JavaKernel extends KernelProxy {
   }
 
   @Override
+  public <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass) {
+    AgentFactory<A> agentFactory = super.createAgentFactory(agentClass);
+    if (agentFactory == null) {
+      agentFactory = new JavaAgentFactory<A>(agentClass);
+    }
+    return agentFactory;
+  }
+
+  @Override
   public <A extends Agent> AgentFactory<A> createAgentFactory(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri,
                                                               Class<? extends A> agentClass) {
     AgentFactory<A> agentFactory = super.createAgentFactory(edgeName, meshUri, partKey, hostUri, nodeUri, agentClass);
@@ -169,6 +175,15 @@ public class JavaKernel extends KernelProxy {
       agentFactory = new JavaAgentFactory<A>(agentClass);
     }
     return agentFactory;
+  }
+
+  @Override
+  public <A extends Agent> AgentRoute<A> createAgentRoute(String edgeName, Class<? extends A> agentClass) {
+    AgentRoute<A> agentRoute = super.createAgentRoute(edgeName, agentClass);
+    if (agentRoute == null) {
+      agentRoute = new JavaAgentFactory<A>(agentClass);
+    }
+    return agentRoute;
   }
 
   private static final double KERNEL_PRIORITY = 1.5;

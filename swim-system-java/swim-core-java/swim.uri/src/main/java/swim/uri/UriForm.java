@@ -29,7 +29,7 @@ public class UriForm extends Form<Uri> {
 
   @Override
   public Uri unit() {
-    return unit;
+    return this.unit;
   }
 
   @Override

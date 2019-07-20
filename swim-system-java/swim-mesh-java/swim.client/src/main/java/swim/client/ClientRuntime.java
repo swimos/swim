@@ -15,6 +15,7 @@
 package swim.client;
 
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
@@ -30,20 +31,21 @@ import swim.io.TlsSettings;
 import swim.io.http.HttpEndpoint;
 import swim.io.http.HttpSettings;
 import swim.remote.RemoteHostClient;
-import swim.router.EdgeTable;
-import swim.router.MeshTable;
-import swim.router.PartTable;
 import swim.runtime.AbstractSwimRef;
 import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
 import swim.runtime.HostBinding;
 import swim.runtime.HttpBinding;
 import swim.runtime.LaneBinding;
+import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
 import swim.runtime.MeshBinding;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
 import swim.runtime.PushRequest;
+import swim.runtime.router.EdgeTable;
+import swim.runtime.router.MeshTable;
+import swim.runtime.router.PartTable;
 import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -171,8 +173,28 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
   }
 
   @Override
+  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return null;
+  }
+
+  @Override
+  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+    return null;
+  }
+
+  @Override
   public LaneBinding injectLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
     return lane;
+  }
+
+  @Override
+  public void openLanes(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
+    // nop
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+    return null;
   }
 
   @Override

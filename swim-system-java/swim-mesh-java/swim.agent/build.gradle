@@ -1,8 +1,0 @@
-apply from: '../project.gradle'
-
-description = 'Web Agent runtime'
-ext.moduleName = 'swim.agent'
-
-dependencies {
-  api project(':swim-runtime')
-}

@@ -15,28 +15,28 @@
 package swim.fabric;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.api.agent.AgentRoute;
+import swim.api.agent.AgentDef;
 import swim.api.auth.Authenticator;
+import swim.api.auth.AuthenticatorDef;
+import swim.api.plane.PlaneDef;
 import swim.api.plane.PlaneException;
 import swim.api.plane.PlaneFactory;
 import swim.api.space.Space;
+import swim.api.space.SpaceDef;
+import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
-import swim.kernel.AgentRouteDef;
-import swim.kernel.AuthenticatorDef;
-import swim.kernel.HostDef;
+import swim.concurrent.StageDef;
 import swim.kernel.KernelContext;
 import swim.kernel.KernelProxy;
-import swim.kernel.LaneDef;
-import swim.kernel.LogDef;
-import swim.kernel.MeshDef;
-import swim.kernel.NodeDef;
-import swim.kernel.PartDef;
-import swim.kernel.PlaneDef;
-import swim.kernel.PolicyDef;
-import swim.kernel.SpaceDef;
-import swim.kernel.StageDef;
-import swim.kernel.StoreDef;
+import swim.runtime.HostDef;
+import swim.runtime.LaneDef;
+import swim.runtime.LogDef;
+import swim.runtime.MeshDef;
+import swim.runtime.NodeDef;
+import swim.runtime.PartDef;
 import swim.runtime.PartPredicate;
+import swim.runtime.PolicyDef;
+import swim.store.StoreDef;
 import swim.structure.Item;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -75,8 +75,7 @@ public class FabricKernel extends KernelProxy {
       if (fabricProvider == null || FabricKernel.class.getName().equals(fabricProvider)) {
         final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
         final String spaceName = spaceConfig.key().stringValue(null);
-        HashTrieMap<String, PlaneDef> planeDefs = HashTrieMap.empty();
-        HashTrieMap<String, AgentRouteDef> agentRouteDefs = HashTrieMap.empty();
+        FingerTrieSeq<PlaneDef> planeDefs = FingerTrieSeq.empty();
         HashTrieMap<String, AuthenticatorDef> authenticatorDefs = HashTrieMap.empty();
         HashTrieMap<Uri, MeshDef> meshDefs = HashTrieMap.empty();
         HashTrieMap<Value, PartDef> partDefs = HashTrieMap.empty();
@@ -91,12 +90,7 @@ public class FabricKernel extends KernelProxy {
           final Item item = value.getItem(i);
           final PlaneDef planeDef = kernel.definePlane(item);
           if (planeDef != null) {
-            planeDefs = planeDefs.updated(planeDef.planeName(), planeDef);
-            continue;
-          }
-          final AgentRouteDef agentRouteDef = kernel.defineAgentRoute(item);
-          if (agentRouteDef != null) {
-            agentRouteDefs = agentRouteDefs.updated(agentRouteDef.routeName(), agentRouteDef);
+            planeDefs = planeDefs.appended(planeDef);
             continue;
           }
           final AuthenticatorDef authenticatorDef = kernel.defineAuthenticator(item);
@@ -150,8 +144,8 @@ public class FabricKernel extends KernelProxy {
             continue;
           }
         }
-        return new FabricDef(spaceName, planeDefs, agentRouteDefs, authenticatorDefs,
-                             meshDefs, partDefs, hostDefs, nodeDefs, laneDefs,
+        return new FabricDef(spaceName, planeDefs, authenticatorDefs, meshDefs,
+                             partDefs, hostDefs, nodeDefs, laneDefs,
                              logDef, policyDef, stageDef, storeDef);
       }
     }
@@ -196,7 +190,6 @@ public class FabricKernel extends KernelProxy {
     final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
     final Fabric fabric = new Fabric(spaceName, spaceDef, kernel);
     createAuthenticators(fabric, spaceDef);
-    createAgentRoutes(fabric, spaceDef);
     createPlanes(fabric, spaceDef);
     return fabric;
   }
@@ -217,26 +210,6 @@ public class FabricKernel extends KernelProxy {
     }
     if (authenticator != null) {
       fabric.addAuthenticator(authenticatorDef.authenticatorName(), authenticator);
-    }
-  }
-
-  protected void createAgentRoutes(Fabric fabric, FabricDef spaceDef) {
-    for (AgentRouteDef agentRouteDef : spaceDef.agentRouteDefs()) {
-      if (fabric.getAgentRoute(agentRouteDef.routeName()) == null) {
-        createAgentRoute(fabric, agentRouteDef);
-      }
-    }
-  }
-
-  protected void createAgentRoute(Fabric fabric, AgentRouteDef agentRouteDef) {
-    final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
-    final AgentRoute<?> agentRoute = kernel.createAgentRoute(agentRouteDef, null);
-    final String routeName = agentRouteDef.routeName();
-    final UriPattern pattern = agentRouteDef.pattern();
-    if (routeName != null && pattern != null) {
-      fabric.addAgentRoute(routeName, pattern, agentRoute);
-    } else {
-      throw new PlaneException("No URI pattern for route: " + routeName);
     }
   }
 
@@ -457,11 +430,11 @@ public class FabricKernel extends KernelProxy {
             hostPattern = item.toValue().cast(UriPattern.form(), hostPattern);
             continue;
           }
-          if (item.keyEquals("isPrimary")) {
+          if (item.keyEquals("primary") || item.keyEquals("isPrimary")) {
             isPrimary = item.toValue().booleanValue(isPrimary);
             continue;
           }
-          if (item.keyEquals("isReplica")) {
+          if (item.keyEquals("replica") || item.keyEquals("isReplica")) {
             isReplica = item.toValue().booleanValue(isReplica);
             continue;
           }
@@ -517,6 +490,7 @@ public class FabricKernel extends KernelProxy {
       if (fabricProvider == null || FabricKernel.class.getName().equals(fabricProvider)) {
         final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
         UriPattern nodePattern = null;
+        FingerTrieSeq<AgentDef> agentDefs = FingerTrieSeq.empty();
         UriMapper<LaneDef> laneDefs = UriMapper.empty();
         LogDef logDef = null;
         PolicyDef policyDef = null;
@@ -526,6 +500,11 @@ public class FabricKernel extends KernelProxy {
           final Item item = value.getItem(i);
           if (item.keyEquals("uri") || item.keyEquals("pattern")) {
             nodePattern = item.toValue().cast(UriPattern.form(), nodePattern);
+            continue;
+          }
+          final AgentDef agentDef = kernel.defineAgent(item);
+          if (agentDef != null) {
+            agentDefs = agentDefs.appended(agentDef);
             continue;
           }
           final LaneDef laneDef = kernel.defineLane(item);
@@ -555,7 +534,8 @@ public class FabricKernel extends KernelProxy {
           }
         }
         if (nodePattern != null) {
-          return new FabricNodeDef(nodePattern, laneDefs, logDef, policyDef, stageDef, storeDef);
+          return new FabricNodeDef(nodePattern, agentDefs, laneDefs,
+                                   logDef, policyDef, stageDef, storeDef);
         }
       }
     }
@@ -575,8 +555,8 @@ public class FabricKernel extends KernelProxy {
       final String fabricProvider = header.get("provider").stringValue(null);
       if (fabricProvider == null || FabricKernel.class.getName().equals(fabricProvider)) {
         final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+        final String laneType = header.get("type").stringValue(null);
         UriPattern lanePattern = null;
-        String laneType = null;
         LogDef logDef = null;
         PolicyDef policyDef = null;
         StageDef stageDef = null;
@@ -585,10 +565,6 @@ public class FabricKernel extends KernelProxy {
           final Item item = value.getItem(i);
           if (item.keyEquals("uri") || item.keyEquals("pattern")) {
             lanePattern = item.toValue().cast(UriPattern.form(), lanePattern);
-            continue;
-          }
-          if (item.keyEquals("type")) {
-            laneType = item.toValue().stringValue(laneType);
             continue;
           }
           final LogDef newLogDef = kernel.defineLog(item);

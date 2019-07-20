@@ -109,6 +109,14 @@ public class Clock implements Schedule {
   }
 
   /**
+   * Constructs a new {@code Clock} with the timer resolution and clock period
+   * specified by the given {@code clockDef}.
+   */
+  public Clock(ClockDef clockDef) {
+    this(clockDef.tickMillis, clockDef.tickCount);
+  }
+
+  /**
    * Constructs a new {@code Clock} with a timer resolution of {@link
    * #TICK_MILLIS} milliseconds, and a clock period of {@link #TICK_COUNT}
    * ticks per revolution.

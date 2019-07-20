@@ -20,6 +20,7 @@ import swim.io.warp.WarpSettings;
 import swim.io.ws.WsSettings;
 import swim.kernel.KernelProxy;
 import swim.runtime.HostBinding;
+import swim.runtime.HostDef;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -58,6 +59,16 @@ public class RemoteKernel extends KernelProxy {
   @Override
   public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
     if (hostUri.host().isDefined() && !"swim".equals(partKey.stringValue(null))) {
+      final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
+      return new RemoteHostClient(hostUri, endpoint, warpSettings());
+    }
+    return super.createHost(edgeName, meshUri, partKey, hostUri);
+  }
+
+  @Override
+  public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, HostDef hostDef) {
+    final Uri hostUri = hostDef.hostUri();
+    if (hostUri != null && hostUri.host().isDefined() && !"swim".equals(partKey.stringValue(null))) {
       final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
       return new RemoteHostClient(hostUri, endpoint, warpSettings());
     }

@@ -45,6 +45,16 @@ public class Theater implements MainStage, Thread.UncaughtExceptionHandler {
    */
   volatile int status;
 
+  public Theater(TheaterDef theaterDef) {
+    this.name = theaterDef.name != null ? theaterDef.name : "SwimStage" + THEATER_COUNT.getAndIncrement() + ".";
+    this.pool = new ForkJoinPool(theaterDef.parallelism, new TheaterWorkerFactory(this), this, true);
+    if (theaterDef.scheduleDef instanceof ClockDef) {
+      this.schedule = new StageClock(this, (ClockDef) theaterDef.scheduleDef);
+    } else {
+      this.schedule = new StageClock(this);
+    }
+  }
+
   public Theater(String name, int parallelism, Schedule schedule) {
     this.name = name != null ? name : "SwimStage" + THEATER_COUNT.getAndIncrement() + ".";
     this.pool = new ForkJoinPool(parallelism, new TheaterWorkerFactory(this), this, true);

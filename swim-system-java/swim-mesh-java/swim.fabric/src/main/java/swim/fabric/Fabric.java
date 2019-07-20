@@ -15,9 +15,9 @@
 package swim.fabric;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.agent.AgentModel;
 import swim.api.SwimContext;
 import swim.api.agent.Agent;
+import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.agent.AgentRoute;
 import swim.api.agent.AgentRouteContext;
@@ -37,29 +37,30 @@ import swim.collections.HashTrieMap;
 import swim.concurrent.MainStage;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
-import swim.kernel.HostDef;
+import swim.concurrent.StageDef;
 import swim.kernel.KernelContext;
-import swim.kernel.LaneDef;
-import swim.kernel.LogDef;
-import swim.kernel.MeshDef;
-import swim.kernel.NodeDef;
-import swim.kernel.PartDef;
-import swim.kernel.PolicyDef;
-import swim.kernel.StageDef;
-import swim.kernel.StoreDef;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
 import swim.runtime.HostBinding;
+import swim.runtime.HostDef;
 import swim.runtime.HttpBinding;
 import swim.runtime.LaneBinding;
+import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
+import swim.runtime.LogDef;
 import swim.runtime.MeshBinding;
+import swim.runtime.MeshDef;
 import swim.runtime.NodeBinding;
+import swim.runtime.NodeDef;
 import swim.runtime.PartBinding;
+import swim.runtime.PartDef;
+import swim.runtime.PolicyDef;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
+import swim.runtime.agent.AgentModel;
 import swim.store.StoreBinding;
+import swim.store.StoreDef;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriMapper;
@@ -309,6 +310,11 @@ public class Fabric extends AbstractTierBinding implements EdgeContext, PlaneCon
   }
 
   @Override
+  public AgentFactory<?> createAgentFactory(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+    return this.kernel.createAgentFactory(this.spaceName, meshUri, partKey, hostUri, nodeUri, agentDef);
+  }
+
+  @Override
   public <A extends Agent> AgentFactory<A> createAgentFactory(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri,
                                                               Class<? extends A> agentClass) {
     return this.kernel.createAgentFactory(this.spaceName, meshUri, partKey, hostUri, nodeUri, agentClass);
@@ -318,6 +324,20 @@ public class Fabric extends AbstractTierBinding implements EdgeContext, PlaneCon
   public void openAgents(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
     this.kernel.openAgents(this.spaceName, meshUri, partKey, hostUri, nodeUri, node);
     if (!meshUri.isDefined()) {
+      final NodeDef nodeDef = this.fabricDef.getNodeDef(nodeUri);
+      if (nodeDef != null && node instanceof AgentModel) {
+        final AgentModel agentModel = (AgentModel) node;
+        for (AgentDef agentDef : nodeDef.agentDefs()) {
+          final AgentFactory<?> agentFactory = createAgentFactory(meshUri, partKey, hostUri, nodeUri, agentDef);
+          if (agentDef != null) {
+            Value props = agentDef.props();
+            if (!props.isDefined()) {
+              props = agentModel.props();
+            }
+            agentModel.addAgentView(agentModel.createAgent(agentFactory, props));
+          }
+        }
+      }
       final AgentFactory<?> agentFactory = this.agentFactories.get(nodeUri);
       if (agentFactory != null && node instanceof AgentModel) {
         final AgentModel agentModel = (AgentModel) node;
@@ -496,8 +516,9 @@ public class Fabric extends AbstractTierBinding implements EdgeContext, PlaneCon
     final Uri meshUri = mesh.meshUri();
     final Value partKey = part.partKey();
     final Uri hostUri = hostDef.hostUri();
+    HostBinding host = null;
     if (hostUri != null) {
-      HostBinding host = this.kernel.createHost(this.spaceName, meshUri, partKey, hostDef);
+      host = this.kernel.createHost(this.spaceName, meshUri, partKey, hostDef);
       if (host != null) {
         host = part.openHost(hostUri, host);
         if (host != null) {
@@ -514,9 +535,8 @@ public class Fabric extends AbstractTierBinding implements EdgeContext, PlaneCon
           }
         }
       }
-      return host;
     }
-    return null;
+    return host;
   }
 
   protected NodeBinding createNode(EdgeBinding edge, MeshBinding mesh, PartBinding part,
@@ -525,8 +545,9 @@ public class Fabric extends AbstractTierBinding implements EdgeContext, PlaneCon
     final Value partKey = part.partKey();
     final Uri hostUri = host.hostUri();
     final Uri nodeUri = nodeDef.nodeUri();
+    NodeBinding node = null;
     if (nodeUri != null) {
-      NodeBinding node = this.kernel.createNode(this.spaceName, meshUri, partKey, hostUri, nodeDef);
+      node = this.kernel.createNode(this.spaceName, meshUri, partKey, hostUri, nodeDef);
       if (node != null) {
         node = host.openNode(nodeUri, node);
         if (node != null) {
@@ -535,14 +556,25 @@ public class Fabric extends AbstractTierBinding implements EdgeContext, PlaneCon
           }
         }
       }
-      return node;
     }
-    return null;
+    return node;
   }
 
   protected LaneBinding createLane(EdgeBinding edge, MeshBinding mesh, PartBinding part,
-                                   HostBinding host, NodeBinding node, LaneDef lane) {
-    return null; // TODO
+                                   HostBinding host, NodeBinding node, LaneDef laneDef) {
+    final Uri meshUri = mesh.meshUri();
+    final Value partKey = part.partKey();
+    final Uri hostUri = host.hostUri();
+    final Uri nodeUri = node.nodeUri();
+    final Uri laneUri = laneDef.laneUri();
+    LaneBinding lane = null;
+    if (laneUri != null) {
+      lane = this.kernel.createLane(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneDef);
+      if (lane != null) {
+        lane = node.openLane(laneUri, lane);
+      }
+    }
+    return lane;
   }
 
   protected EdgeBinding injectEdge(EdgeBinding edge) {
@@ -678,14 +710,25 @@ public class Fabric extends AbstractTierBinding implements EdgeContext, PlaneCon
 
   @Override
   public NodeBinding createNode(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
+    NodeBinding node = null;
     if (!meshUri.isDefined()) {
       final AgentFactory<?> agentFactory = this.agentFactories.get(nodeUri);
       if (agentFactory != null) {
-        final Value props = agentFactory.createProps(nodeUri);
-        return new AgentModel(props);
+        final Value props = agentFactory.props(nodeUri);
+        node = new AgentModel(props);
       }
     }
-    return this.kernel.createNode(this.spaceName, meshUri, partKey, hostUri, nodeUri);
+    if (node == null) {
+      node = this.kernel.createNode(this.spaceName, meshUri, partKey, hostUri, nodeUri);
+    }
+    if (node == null && !meshUri.isDefined()) {
+      final NodeDef nodeDef = this.fabricDef.getNodeDef(nodeUri);
+      if (nodeDef != null) {
+        final Value props = nodeDef.props(nodeUri);
+        node = new AgentModel(props);
+      }
+    }
+    return node;
   }
 
   @Override
@@ -718,8 +761,23 @@ public class Fabric extends AbstractTierBinding implements EdgeContext, PlaneCon
   }
 
   @Override
+  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return this.kernel.createLane(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneDef);
+  }
+
+  @Override
+  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+    return this.kernel.createLane(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneUri);
+  }
+
+  @Override
   public LaneBinding injectLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
     return this.kernel.injectLane(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneUri, lane);
+  }
+
+  @Override
+  public void openLanes(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
+    this.kernel.openLanes(this.spaceName, meshUri, partKey, hostUri, nodeUri, node);
   }
 
   public Log openLaneLog(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {

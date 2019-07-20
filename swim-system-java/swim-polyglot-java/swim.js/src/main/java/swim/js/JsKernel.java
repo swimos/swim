@@ -17,19 +17,19 @@ package swim.js;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import org.graalvm.polyglot.Engine;
-import swim.api.agent.AgentRoute;
+import swim.api.agent.AgentDef;
+import swim.api.agent.AgentFactory;
+import swim.api.plane.PlaneDef;
 import swim.api.plane.PlaneFactory;
 import swim.dynamic.api.SwimApi;
 import swim.dynamic.java.JavaBase;
 import swim.dynamic.observable.SwimObservable;
 import swim.dynamic.structure.SwimStructure;
-import swim.kernel.AgentRouteDef;
 import swim.kernel.KernelProxy;
-import swim.kernel.PlaneDef;
 import swim.structure.Item;
 import swim.structure.Value;
+import swim.uri.Uri;
 import swim.uri.UriPath;
-import swim.uri.UriPattern;
 import swim.vm.js.JsCachedModuleResolver;
 import swim.vm.js.JsHostRuntime;
 import swim.vm.js.JsModuleResolver;
@@ -207,38 +207,45 @@ public class JsKernel extends KernelProxy {
   }
 
   @Override
-  public AgentRouteDef defineAgentRoute(Item agentRouteConfig) {
-    final AgentRouteDef agentRouteDef = defineJsAgentRoute(agentRouteConfig);
-    return agentRouteDef != null ? agentRouteDef : super.defineAgentRoute(agentRouteConfig);
+  public AgentDef defineAgent(Item agentConfig) {
+    final AgentDef agentDef = defineJsAgent(agentConfig);
+    return agentDef != null ? agentDef : super.defineAgent(agentConfig);
   }
 
-  public JsAgentRouteDef defineJsAgentRoute(Item agentRouteConfig) {
-    final Value value = agentRouteConfig.toValue();
-    final Value header = value.getAttr("route");
+  public JsAgentDef defineJsAgent(Item agentConfig) {
+    final Value value = agentConfig.toValue();
+    final Value header = value.getAttr("agent");
     if (header.isDefined()) {
-      final String agentProvider = header.get("provider").stringValue(null);
-      final UriPath agentModulePath = value.get("jsMain").cast(UriPath.pathForm());
-      if (agentProvider != null && JsKernel.class.getName().equals(agentProvider)
-          || agentProvider == null && agentModulePath != null) {
-        final String routeName = agentRouteConfig.key().stringValue(agentModulePath.toString());
-        final UriPattern pattern = value.get("pattern").cast(UriPattern.form());
-        return new JsAgentRouteDef(routeName, agentModulePath, pattern);
+      final UriPath agentModulePath = header.get("js").cast(UriPath.pathForm());
+      if (agentModulePath != null) {
+        final String agentName = agentConfig.key().stringValue(agentModulePath.toString());
+        final Value props = value.get("props");
+        return new JsAgentDef(agentName, agentModulePath, props);
       }
     }
     return null;
   }
 
   @Override
-  public AgentRoute<?> createAgentRoute(AgentRouteDef agentRouteDef, ClassLoader classLoader) {
-    if (agentRouteDef instanceof JsAgentRouteDef) {
-      return createJsAgentRoute((JsAgentRouteDef) agentRouteDef);
+  public AgentFactory<?> createAgentFactory(AgentDef agentDef, ClassLoader classLoader) {
+    if (agentDef instanceof JsAgentDef) {
+      return createJsAgentFactory((JsAgentDef) agentDef);
     } else {
-      return super.createAgentRoute(agentRouteDef, classLoader);
+      return super.createAgentFactory(agentDef, classLoader);
     }
   }
 
-  public JsAgentFactory createJsAgentRoute(JsAgentRouteDef agentRouteDef) {
-    return new JsAgentFactory(this, rootPath(), agentRouteDef);
+  @Override
+  public AgentFactory<?> createAgentFactory(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+    if (agentDef instanceof JsAgentDef) {
+      return createJsAgentFactory((JsAgentDef) agentDef);
+    } else {
+      return super.createAgentFactory(edgeName, meshUri, partKey, hostUri, nodeUri, agentDef);
+    }
+  }
+
+  public JsAgentFactory createJsAgentFactory(JsAgentDef agentDef) {
+    return new JsAgentFactory(this, rootPath(), agentDef);
   }
 
   private static final double KERNEL_PRIORITY = 1.75;
