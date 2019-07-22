@@ -6,7 +6,7 @@
 [subrepo]
   remote = git@github.com:swimos/swim-ux-js.git
   branch = master
-	commit = 8db0808a5d2559165eaee7c0140a63c1841c4795
-	parent = 5a4bea5f3b7a141c0924548aa5406f8407f6e17f
+	commit = 0f0b098d5b1229e5a78f270492a93bf0d980598c
+	parent = ec6e923161d0030fe9e7cdf89c88c50b6d514153
 	method = merge
 	cmdver = 0.4.0

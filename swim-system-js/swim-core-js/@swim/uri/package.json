@@ -1,6 +1,6 @@
 {
   "name": "@swim/uri",
-  "version": "3.9.0",
+  "version": "3.10.0",
   "description": "Uniform resource identifiers",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
@@ -16,8 +16,8 @@
     "uri"
   ],
   "dependencies": {
-    "@swim/util": "3.9.0",
-    "@swim/codec": "3.9.0",
-    "@swim/structure": "3.9.0"
+    "@swim/util": "3.10.0",
+    "@swim/codec": "3.10.0",
+    "@swim/structure": "3.10.0"
   }
 }

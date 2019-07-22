@@ -1,6 +1,6 @@
 {
   "name": "@swim/args",
-  "version": "3.9.0",
+  "version": "3.10.0",
   "description": "Command-line argument parser",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
@@ -11,7 +11,7 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.9.0",
-    "@swim/codec": "3.9.0"
+    "@swim/util": "3.10.0",
+    "@swim/codec": "3.10.0"
   }
 }

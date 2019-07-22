@@ -54,8 +54,8 @@ function runGet(this: Cmd, args: {[name: string]: string | null | undefined}): v
 }
 
 function runReflect(this: Cmd, args: {[name: string]: string | null | undefined}): void {
-  const rootUri = args.root;
-  if (rootUri) {
+  const edgeUri = args.edge;
+  if (edgeUri) {
     const meshUri = args.mesh;
     const hostUri = args.host;
     const nodeUri = args.node;
@@ -71,12 +71,12 @@ function runReflect(this: Cmd, args: {[name: string]: string | null | undefined}
       }
       if (laneUri) {
         metaNodeUri = metaNodeUri.appendedPath("lane", laneUri);
-        link(rootUri, metaNodeUri, "linkStats", args.format).open();
+        link(edgeUri, metaNodeUri, "linkStats", args.format).open();
       } else {
         if (args.link !== void 0) {
-          link(rootUri, metaNodeUri, "linkStats", args.format).open();
+          link(edgeUri, metaNodeUri, "linkStats", args.format).open();
         } else {
-          link(rootUri, metaNodeUri, "routerStats", args.format).open();
+          link(edgeUri, metaNodeUri, "routerStats", args.format).open();
         }
       }
     } else if (hostUri !== void 0) {
@@ -93,17 +93,17 @@ function runReflect(this: Cmd, args: {[name: string]: string | null | undefined}
         }
       }
       if (args.process !== void 0) {
-        link(rootUri, metaNodeUri, "processStats", args.format).open();
+        link(edgeUri, metaNodeUri, "processStats", args.format).open();
       } else if (args.system !== void 0) {
-        link(rootUri, metaNodeUri, "systemStats", args.format).open();
+        link(edgeUri, metaNodeUri, "systemStats", args.format).open();
       } else if (args.data !== void 0) {
-        link(rootUri, metaNodeUri, "dataStats", args.format).open();
+        link(edgeUri, metaNodeUri, "dataStats", args.format).open();
       } else if (args.router !== void 0) {
-        link(rootUri, metaNodeUri, "routerStats", args.format).open();
+        link(edgeUri, metaNodeUri, "routerStats", args.format).open();
       } else if (args.link !== void 0) {
-        link(rootUri, metaNodeUri, "linkStats", args.format).open();
+        link(edgeUri, metaNodeUri, "linkStats", args.format).open();
       } else {
-        link(rootUri, metaNodeUri, "hostStats", args.format).open();
+        link(edgeUri, metaNodeUri, "hostStats", args.format).open();
       }
     } else if (meshUri !== void 0) {
       let metaNodeUri = Uri.parse("swim:meta:mesh");
@@ -111,29 +111,29 @@ function runReflect(this: Cmd, args: {[name: string]: string | null | undefined}
         metaNodeUri = metaNodeUri.appendedPath(meshUri);
       }
       if (args.process !== void 0) {
-        link(rootUri, metaNodeUri, "processStats", args.format).open();
+        link(edgeUri, metaNodeUri, "processStats", args.format).open();
       } else if (args.system !== void 0) {
-        link(rootUri, metaNodeUri, "systemStats", args.format).open();
+        link(edgeUri, metaNodeUri, "systemStats", args.format).open();
       } else if (args.data !== void 0) {
-        link(rootUri, metaNodeUri, "dataStats", args.format).open();
+        link(edgeUri, metaNodeUri, "dataStats", args.format).open();
       } else if (args.router !== void 0) {
-        link(rootUri, metaNodeUri, "routerStats", args.format).open();
+        link(edgeUri, metaNodeUri, "routerStats", args.format).open();
       } else if (args.link !== void 0) {
-        link(rootUri, metaNodeUri, "linkStats", args.format).open();
+        link(edgeUri, metaNodeUri, "linkStats", args.format).open();
       } else {
-        link(rootUri, metaNodeUri, "meshStats", args.format).open();
+        link(edgeUri, metaNodeUri, "meshStats", args.format).open();
       }
     } else {
       if (args.process !== void 0) {
-        link(rootUri, "swim:meta:root", "processStats", args.format).open();
+        link(edgeUri, "swim:meta:edge", "processStats", args.format).open();
       } else if (args.system !== void 0) {
-        link(rootUri, "swim:meta:root", "systemStats", args.format).open();
+        link(edgeUri, "swim:meta:edge", "systemStats", args.format).open();
       } else if (args.data !== void 0) {
-        link(rootUri, "swim:meta:root", "dataStats", args.format).open();
+        link(edgeUri, "swim:meta:edge", "dataStats", args.format).open();
       } else if (args.link !== void 0) {
-        link(rootUri, "swim:meta:root", "linkStats", args.format).open();
+        link(edgeUri, "swim:meta:edge", "linkStats", args.format).open();
       } else {
-        link(rootUri, "swim:meta:root", "routerStats", args.format).open();
+        link(edgeUri, "swim:meta:edge", "routerStats", args.format).open();
       }
     }
   }
@@ -182,13 +182,13 @@ const reflectLogCmd = Cmd.of("log")
 
 const reflectCmd = Cmd.of("reflect")
     .desc("stream introspection metadata")
-    .opt(Opt.of("root").flag("r").arg("rootUri").desc("endpoint to introspect"))
+    .opt(Opt.of("edge").flag("e").arg("edgeUri").desc("endpoint to introspect"))
     .opt(Opt.of("mesh").flag("m").arg(Arg.of("meshUri").optional(true)).desc("introspect default or specified mesh"))
     .opt(Opt.of("part").flag("p").arg(Arg.of("partKey").optional(true)).desc("introspect default or specified partition"))
     .opt(Opt.of("host").flag("h").arg(Arg.of("hostUri").optional(true)).desc("introspect default or specified host"))
     .opt(Opt.of("node").flag("n").arg("nodeUri").desc("introspect specified node"))
     .opt(Opt.of("lane").flag("l").arg("laneUri").desc("introspect specified lane"))
-    .opt(Opt.of("link").flag("l").desc("introspect link behavior"))
+    .opt(Opt.of("link").flag("k").desc("introspect link behavior"))
     .opt(Opt.of("router").flag("r").desc("introspect router behavior"))
     .opt(Opt.of("data").desc("introspect data behavior"))
     .opt(Opt.of("system").desc("introspect system behavior"))
