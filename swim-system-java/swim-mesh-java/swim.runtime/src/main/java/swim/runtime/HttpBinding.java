@@ -14,75 +14,22 @@
 
 package swim.runtime;
 
-import java.net.InetSocketAddress;
-import java.security.Principal;
-import java.security.cert.Certificate;
-import java.util.Collection;
-import swim.api.auth.Identity;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.uri.Uri;
 
-public interface HttpBinding {
-  HttpContext httpContext();
+public interface HttpBinding extends LinkBinding {
+  @Override
+  HttpBinding linkWrapper();
 
-  void setHttpContext(HttpContext httpContext);
-
-  Uri meshUri();
-
-  Uri hostUri();
-
-  Uri nodeUri();
-
-  Uri laneUri();
+  @Override
+  HttpContext linkContext();
 
   Uri requestUri();
 
   HttpRequest<?> request();
 
-  boolean isConnectedDown();
-
-  boolean isRemoteDown();
-
-  boolean isSecureDown();
-
-  String securityProtocolDown();
-
-  String cipherSuiteDown();
-
-  InetSocketAddress localAddressDown();
-
-  Identity localIdentityDown();
-
-  Principal localPrincipalDown();
-
-  Collection<Certificate> localCertificatesDown();
-
-  InetSocketAddress remoteAddressDown();
-
-  Identity remoteIdentityDown();
-
-  Principal remotePrincipalDown();
-
-  Collection<Certificate> remoteCertificatesDown();
-
   HttpRequest<?> doRequest();
 
   void writeResponse(HttpResponse<?> response);
-
-  void closeDown();
-
-  void didDisconnect();
-
-  void didFail(Throwable error);
-
-  void traceDown(Object message);
-
-  void debugDown(Object message);
-
-  void infoDown(Object message);
-
-  void warnDown(Object message);
-
-  void errorDown(Object message);
 }

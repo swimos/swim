@@ -66,7 +66,7 @@ public abstract class HttpSocketBehaviors {
     };
     final AbstractHttpResponder<String> responder = new AbstractHttpResponder<String>() {
       @Override
-      public void didRequest(HttpRequest<String> request) {
+      public void doRespond(HttpRequest<String> request) {
         assertEquals(request.entity().get(), "clientToServer");
         serverRequest.countDown();
         writeResponse(HttpResponse.from(HttpStatus.OK).body("serverToClient"));
@@ -145,7 +145,7 @@ public abstract class HttpSocketBehaviors {
       public HttpResponder<?> doRequest(HttpRequest<?> request) {
         return new AbstractHttpResponder<String>() {
           @Override
-          public void didRequest(HttpRequest<String> request) {
+          public void doRespond(HttpRequest<String> request) {
             assertEquals(request.entity().get(), "clientToServer");
             serverRequest.countDown();
             writeResponse(HttpResponse.from(HttpStatus.OK).body("serverToClient"));
@@ -217,7 +217,7 @@ public abstract class HttpSocketBehaviors {
     };
     final AbstractHttpResponder<String> responder = new AbstractHttpResponder<String>() {
       @Override
-      public void didRequest(HttpRequest<String> request) {
+      public void doRespond(HttpRequest<String> request) {
         assertEquals(request.entity().get(), "clientToServer");
         serverRequest.countDown();
         writeResponse(HttpResponse.from(HttpStatus.OK)

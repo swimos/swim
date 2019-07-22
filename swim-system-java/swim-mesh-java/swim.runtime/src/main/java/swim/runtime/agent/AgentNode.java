@@ -17,16 +17,17 @@ package swim.runtime.agent;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import swim.api.Downlink;
+import swim.api.Lane;
 import swim.api.agent.Agent;
 import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
-import swim.api.downlink.Downlink;
+import swim.api.http.HttpLane;
 import swim.api.lane.CommandLane;
 import swim.api.lane.DemandLane;
 import swim.api.lane.DemandMapLane;
 import swim.api.lane.JoinMapLane;
 import swim.api.lane.JoinValueLane;
-import swim.api.lane.Lane;
 import swim.api.lane.LaneFactory;
 import swim.api.lane.ListLane;
 import swim.api.lane.MapLane;
@@ -52,30 +53,29 @@ import swim.math.Z2Form;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.CellContext;
 import swim.runtime.HostBinding;
-import swim.runtime.HttpBinding;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneContext;
+import swim.runtime.LaneView;
 import swim.runtime.LinkBinding;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
+import swim.runtime.UplinkError;
+import swim.runtime.WarpBinding;
+import swim.runtime.http.RestLaneView;
 import swim.runtime.lane.CommandLaneView;
 import swim.runtime.lane.DemandLaneView;
 import swim.runtime.lane.DemandMapLaneView;
 import swim.runtime.lane.JoinMapLaneView;
 import swim.runtime.lane.JoinValueLaneView;
-import swim.runtime.lane.LaneView;
 import swim.runtime.lane.ListLaneView;
 import swim.runtime.lane.MapLaneView;
 import swim.runtime.lane.SpatialLaneView;
 import swim.runtime.lane.SupplyLaneView;
 import swim.runtime.lane.ValueLaneView;
-import swim.runtime.uplink.ErrorUplinkModem;
-import swim.runtime.uplink.HttpErrorUplinkModem;
 import swim.spatial.GeoProjection;
 import swim.store.StoreBinding;
-import swim.structure.Record;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -346,6 +346,11 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   }
 
   @Override
+  public <V> HttpLane<V> httpLane() {
+    return new RestLaneView<V>(null, null);
+  }
+
+  @Override
   public <L, K, V> JoinMapLane<L, K, V> joinMapLane() {
     return new JoinMapLaneView<L, K, V>(null, null, null, null);
   }
@@ -396,10 +401,8 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
     final LaneBinding laneBinding = getLane(laneUri);
     if (laneBinding != null) {
       laneBinding.openUplink(link);
-    } else {
-      final ErrorUplinkModem linkContext = new ErrorUplinkModem(link, Record.of().attr("laneNotFound"));
-      link.setLinkContext(linkContext);
-      linkContext.cueDown();
+    } else if (link instanceof WarpBinding) {
+      UplinkError.rejectLaneNotFound(link);
     }
   }
 
@@ -416,22 +419,6 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   @Override
   public void closeDownlink(LinkBinding link) {
     // nop
-  }
-
-  @Override
-  public void httpUplink(HttpBinding http) {
-    final LaneBinding laneBinding = getLane(http.laneUri());
-    if (laneBinding != null) {
-      laneBinding.httpUplink(http);
-    } else {
-      final HttpErrorUplinkModem httpContext = new HttpErrorUplinkModem(http);
-      http.setHttpContext(httpContext);
-    }
-  }
-
-  @Override
-  public void httpDownlink(HttpBinding http) {
-    // TODO
   }
 
   @Override

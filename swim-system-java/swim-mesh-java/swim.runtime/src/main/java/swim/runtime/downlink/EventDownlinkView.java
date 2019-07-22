@@ -14,33 +14,34 @@
 
 package swim.runtime.downlink;
 
+import swim.api.DownlinkException;
 import swim.api.Link;
 import swim.api.SwimContext;
-import swim.api.downlink.DownlinkException;
 import swim.api.downlink.EventDownlink;
-import swim.api.downlink.function.DidLink;
-import swim.api.downlink.function.DidReceive;
-import swim.api.downlink.function.DidSync;
-import swim.api.downlink.function.DidUnlink;
-import swim.api.downlink.function.OnEvent;
-import swim.api.downlink.function.WillLink;
-import swim.api.downlink.function.WillReceive;
-import swim.api.downlink.function.WillSync;
-import swim.api.downlink.function.WillUnlink;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
-import swim.api.function.WillCommand;
+import swim.api.warp.function.DidLink;
+import swim.api.warp.function.DidReceive;
+import swim.api.warp.function.DidSync;
+import swim.api.warp.function.DidUnlink;
+import swim.api.warp.function.OnEvent;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillLink;
+import swim.api.warp.function.WillReceive;
+import swim.api.warp.function.WillSync;
+import swim.api.warp.function.WillUnlink;
 import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.warp.WarpDownlinkView;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
 
-public class EventDownlinkView<V> extends DownlinkView implements EventDownlink<V> {
+public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownlink<V> {
   protected final Form<V> valueForm;
   protected EventDownlinkModel model;
 
@@ -254,7 +255,7 @@ public class EventDownlinkView<V> extends DownlinkView implements EventDownlink<
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchOnEvent(V value, boolean preemptive) {
+  public boolean dispatchOnEvent(V value, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);

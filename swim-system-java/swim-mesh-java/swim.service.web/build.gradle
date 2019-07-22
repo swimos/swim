@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Web service runtime'
+ext.moduleName = 'swim.service.web'
+
+dependencies {
+  api group: 'ai.swim', name: 'swim-web', version: version
+  api project(':swim-service')
+  api project(':swim-remote')
+}

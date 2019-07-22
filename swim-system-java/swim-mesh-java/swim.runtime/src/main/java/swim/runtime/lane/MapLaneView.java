@@ -20,26 +20,20 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import swim.api.Lane;
 import swim.api.Link;
 import swim.api.SwimContext;
 import swim.api.agent.AgentContext;
 import swim.api.data.MapData;
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
-import swim.api.http.function.DecodeRequestHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRespondHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
-import swim.api.lane.Lane;
 import swim.api.lane.MapLane;
-import swim.api.lane.function.DidEnter;
-import swim.api.lane.function.DidLeave;
-import swim.api.lane.function.DidUplink;
-import swim.api.lane.function.WillEnter;
-import swim.api.lane.function.WillLeave;
-import swim.api.lane.function.WillUplink;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidEnter;
+import swim.api.warp.function.DidLeave;
+import swim.api.warp.function.DidUplink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillEnter;
+import swim.api.warp.function.WillLeave;
+import swim.api.warp.function.WillUplink;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Conts;
 import swim.observable.function.DidClear;
@@ -52,6 +46,7 @@ import swim.observable.function.WillDrop;
 import swim.observable.function.WillRemoveKey;
 import swim.observable.function.WillTake;
 import swim.observable.function.WillUpdateKey;
+import swim.runtime.warp.WarpLaneView;
 import swim.streamlet.Inlet;
 import swim.streamlet.KeyEffect;
 import swim.streamlet.KeyOutlet;
@@ -63,7 +58,7 @@ import swim.util.Cursor;
 import swim.util.OrderedMap;
 import swim.util.OrderedMapCursor;
 
-public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
+public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
   protected final AgentContext agentContext;
   protected Form<K> keyForm;
   protected Form<V> valueForm;
@@ -215,33 +210,6 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
   }
 
   @Override
-  public final boolean isSigned() {
-    return (this.flags & SIGNED) != 0;
-  }
-
-  @Override
-  public MapLaneView<K, V> isSigned(boolean isSigned) {
-    didSetSigned(isSigned);
-
-    // note: marked final given access of concurrently accessed volatile objects
-    final MapLaneModel laneBinding = this.laneBinding;
-
-    if (laneBinding != null) {
-      laneBinding.isSigned(isSigned);
-    }
-
-    return this;
-  }
-
-  void didSetSigned(boolean isSigned) {
-    if (isSigned) {
-      this.flags |= SIGNED;
-    } else {
-      this.flags &= ~SIGNED;
-    }
-  }
-
-  @Override
   protected void willLoad() {
     this.dataView = this.laneBinding.data.keyForm(this.keyForm).valueForm(this.valueForm);
     super.willLoad();
@@ -252,16 +220,16 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
     this.laneBinding.closeLaneView(this);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public MapLaneView<K, V> observe(Object observer) {
-    return (MapLaneView<K, V>) super.observe(observer);
+    super.observe(observer);
+    return this;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public MapLaneView<K, V> unobserve(Object observer) {
-    return (MapLaneView<K, V>) super.unobserve(observer);
+    super.unobserve(observer);
+    return this;
   }
 
   @Override
@@ -354,38 +322,8 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
     return observe(didLeave);
   }
 
-  @Override
-  public MapLaneView<K, V> decodeRequest(DecodeRequestHttp<Object> decodeRequest) {
-    return observe(decodeRequest);
-  }
-
-  @Override
-  public MapLaneView<K, V> willRequest(WillRequestHttp<?> willRequest) {
-    return observe(willRequest);
-  }
-
-  @Override
-  public MapLaneView<K, V> didRequest(DidRequestHttp<Object> didRequest) {
-    return observe(didRequest);
-  }
-
-  @Override
-  public MapLaneView<K, V> doRespond(DoRespondHttp<Object> doRespond) {
-    return observe(doRespond);
-  }
-
-  @Override
-  public MapLaneView<K, V> willRespond(WillRespondHttp<?> willRespond) {
-    return observe(willRespond);
-  }
-
-  @Override
-  public MapLaneView<K, V> didRespond(DidRespondHttp<?> didRespond) {
-    return observe(didRespond);
-  }
-
   @SuppressWarnings("unchecked")
-  protected Entry<Boolean, V> dispatchWillUpdate(Link link, K key, V newValue, boolean preemptive) {
+  public Entry<Boolean, V> dispatchWillUpdate(Link link, K key, V newValue, boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {
@@ -434,7 +372,7 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchDidUpdate(Link link, K key, V newValue, V oldValue, boolean preemptive) {
+  public boolean dispatchDidUpdate(Link link, K key, V newValue, V oldValue, boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {
@@ -483,7 +421,7 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchWillRemove(Link link, K key, boolean preemptive) {
+  public boolean dispatchWillRemove(Link link, K key, boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {
@@ -532,7 +470,7 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchDidRemove(Link link, K key, V oldValue, boolean preemptive) {
+  public boolean dispatchDidRemove(Link link, K key, V oldValue, boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {
@@ -580,7 +518,7 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
     }
   }
 
-  protected boolean dispatchWillDrop(Link link, int lower, boolean preemptive) {
+  public boolean dispatchWillDrop(Link link, int lower, boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {
@@ -628,7 +566,7 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
     }
   }
 
-  protected boolean dispatchDidDrop(Link link, int lower, boolean preemptive) {
+  public boolean dispatchDidDrop(Link link, int lower, boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {
@@ -676,7 +614,7 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
     }
   }
 
-  protected boolean dispatchWillTake(Link link, int upper, boolean preemptive) {
+  public boolean dispatchWillTake(Link link, int upper, boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {
@@ -724,7 +662,7 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
     }
   }
 
-  protected boolean dispatchDidTake(Link link, int upper, boolean preemptive) {
+  public boolean dispatchDidTake(Link link, int upper, boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {
@@ -772,7 +710,7 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
     }
   }
 
-  protected boolean dispatchWillClear(Link link, boolean preemptive) {
+  public boolean dispatchWillClear(Link link, boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {
@@ -820,7 +758,7 @@ public class MapLaneView<K, V> extends LaneView implements MapLane<K, V> {
     }
   }
 
-  protected boolean dispatchDidClear(Link link, boolean preemptive) {
+  public boolean dispatchDidClear(Link link, boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {

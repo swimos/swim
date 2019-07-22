@@ -48,6 +48,7 @@ gradle.projectsEvaluated {
         'swim.io.ws',
         'swim.mqtt',
         'swim.warp',
+        'swim.web',
         'swim.ws')
     }
 

@@ -15,7 +15,7 @@
 package swim.remote;
 
 import java.util.concurrent.CountDownLatch;
-import org.testng.TestException;
+import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
 import swim.concurrent.Theater;
 import swim.http.HttpRequest;
@@ -34,12 +34,12 @@ import static org.testng.AssertJUnit.assertEquals;
 
 public class RemoteHostSpec {
   @Test
-  public void testRemoteHostConnection() {
+  public void testRemoteHostConnection() throws InterruptedException {
     final Theater stage = new Theater();
     final HttpEndpoint endpoint = new HttpEndpoint(stage);
     final CountDownLatch clientUpgrade = new CountDownLatch(1);
     final CountDownLatch serverUpgrade = new CountDownLatch(1);
-    final Uri hostUri = Uri.parse("swim://127.0.0.1:53556/");
+    final Uri hostUri = Uri.parse("warp://127.0.0.1:53556/");
 
     final RemoteHostClient clientHost = new RemoteHostClient(hostUri, endpoint) {
       @Override
@@ -80,27 +80,30 @@ public class RemoteHostSpec {
       endpoint.start();
       endpoint.bindHttp("127.0.0.1", 53556, service);
       clientHost.setHostContext(new TestHostContext(hostUri, endpoint.stage()));
-      clientUpgrade.await();
-      serverUpgrade.await();
-    } catch (InterruptedException cause) {
-      throw new TestException(cause);
+      clientHost.connect();
+      clientUpgrade.await(1, TimeUnit.SECONDS);
+      serverUpgrade.await(1, TimeUnit.SECONDS);
+      assertEquals(clientUpgrade.getCount(), 0);
+      assertEquals(serverUpgrade.getCount(), 0);
     } finally {
+      clientHost.close();
+      serverHost.close();
       endpoint.stop();
       stage.stop();
     }
   }
 
   @Test
-  public void testRemoteHostCommands() {
+  public void testRemoteHostCommands() throws InterruptedException {
     final Theater stage = new Theater();
     final HttpEndpoint endpoint = new HttpEndpoint(stage);
     final CountDownLatch clientPush = new CountDownLatch(1);
     final CountDownLatch serverPush = new CountDownLatch(1);
     final CountDownLatch clientPull = new CountDownLatch(1);
     final CountDownLatch serverPull = new CountDownLatch(1);
-    final CommandMessage clientToServerCommand = new CommandMessage("swim://127.0.0.1:53556/a", "x");
-    final CommandMessage serverToClientCommand = new CommandMessage("swim://127.0.0.1:53556/b", "y");
-    final Uri hostUri = Uri.parse("swim://127.0.0.1:53556/");
+    final CommandMessage clientToServerCommand = new CommandMessage("warp://127.0.0.1:53556/a", "x");
+    final CommandMessage serverToClientCommand = new CommandMessage("warp://127.0.0.1:53556/b", "y");
+    final Uri hostUri = Uri.parse("warp://127.0.0.1:53556/");
 
     final RemoteHostClient clientHost = new RemoteHostClient(hostUri, endpoint) {
       @Override
@@ -155,13 +158,18 @@ public class RemoteHostSpec {
           clientPull.countDown();
         }
       });
-      clientPush.await();
-      serverPush.await();
-      clientPull.await();
-      serverPull.await();
-    } catch (InterruptedException cause) {
-      throw new TestException(cause);
+      clientHost.connect();
+      clientPush.await(1, TimeUnit.SECONDS);
+      serverPush.await(1, TimeUnit.SECONDS);
+      clientPull.await(1, TimeUnit.SECONDS);
+      serverPull.await(1, TimeUnit.SECONDS);
+      assertEquals(clientPush.getCount(), 0);
+      assertEquals(serverPush.getCount(), 0);
+      assertEquals(clientPull.getCount(), 0);
+      assertEquals(serverPull.getCount(), 0);
     } finally {
+      clientHost.close();
+      serverHost.close();
       endpoint.stop();
       stage.stop();
     }

@@ -22,26 +22,26 @@ import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
 import swim.api.agent.AgentRoute;
 import swim.api.downlink.ValueDownlink;
-import swim.api.downlink.function.DidLink;
-import swim.api.downlink.function.DidReceive;
-import swim.api.downlink.function.DidSync;
-import swim.api.downlink.function.DidUnlink;
-import swim.api.downlink.function.WillLink;
-import swim.api.downlink.function.WillReceive;
-import swim.api.downlink.function.WillSync;
-import swim.api.downlink.function.WillUnlink;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.lane.ValueLane;
 import swim.api.plane.AbstractPlane;
+import swim.api.warp.function.DidLink;
+import swim.api.warp.function.DidReceive;
+import swim.api.warp.function.DidSync;
+import swim.api.warp.function.DidUnlink;
+import swim.api.warp.function.WillLink;
+import swim.api.warp.function.WillReceive;
+import swim.api.warp.function.WillSync;
+import swim.api.warp.function.WillUnlink;
 import swim.codec.Format;
 import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
 import swim.recon.Recon;
-import swim.service.warp.WarpServiceDef;
+import swim.service.web.WebServiceDef;
 import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -145,7 +145,7 @@ public class ValueLaneSpec {
     }
 
     try {
-      kernel.openService(WarpServiceDef.standard().port(53556).spaceName("test"));
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
       final ValueDownlink<String> valueLink = plane.downlinkValue()
           .valueClass(String.class)
@@ -228,7 +228,7 @@ public class ValueLaneSpec {
     }
 
     try {
-      kernel.openService(WarpServiceDef.standard().port(53556).spaceName("test"));
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
       final ValueDownlink<String> halfOpenValueLink = plane.downlinkValue()
           .valueClass(String.class)

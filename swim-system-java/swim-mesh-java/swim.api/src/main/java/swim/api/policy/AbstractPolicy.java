@@ -14,12 +14,12 @@
 
 package swim.api.policy;
 
+import swim.api.Downlink;
+import swim.api.Lane;
+import swim.api.Uplink;
 import swim.api.agent.Agent;
 import swim.api.agent.AgentRoute;
 import swim.api.auth.Identity;
-import swim.api.downlink.Downlink;
-import swim.api.lane.Lane;
-import swim.api.uplink.Uplink;
 import swim.http.HttpMessage;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;

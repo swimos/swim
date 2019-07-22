@@ -21,6 +21,7 @@ import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
 import swim.dynamic.api.lane.function.GuestOnCueKey;
 import swim.dynamic.api.lane.function.GuestOnSyncMap;
+import swim.dynamic.api.warp.HostWarpLane;
 
 public final class HostDemandMapLane {
   private HostDemandMapLane() {
@@ -32,7 +33,7 @@ public final class HostDemandMapLane {
   static {
     final JavaHostObjectType<DemandMapLane<Object, Object>> type = new JavaHostObjectType<>(DemandMapLane.class);
     TYPE = type;
-    type.inheritType(HostLane.TYPE);
+    type.inheritType(HostWarpLane.TYPE);
     type.addMember(new HostDemandMapLaneObserve());
     type.addMember(new HostDemandMapLaneUnobserve());
     type.addMember(new HostDemandMapLaneOnCue());

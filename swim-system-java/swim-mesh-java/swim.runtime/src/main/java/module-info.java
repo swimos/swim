@@ -31,9 +31,8 @@ module swim.runtime {
   exports swim.runtime;
   exports swim.runtime.agent;
   exports swim.runtime.downlink;
+  exports swim.runtime.http;
   exports swim.runtime.lane;
-  exports swim.runtime.link;
   exports swim.runtime.router;
   exports swim.runtime.scope;
-  exports swim.runtime.uplink;
 }

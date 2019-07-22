@@ -14,10 +14,10 @@
 
 package swim.runtime;
 
+import swim.api.Downlink;
+import swim.api.Lane;
 import swim.api.agent.AgentContext;
 import swim.api.auth.Identity;
-import swim.api.downlink.Downlink;
-import swim.api.lane.Lane;
 import swim.api.policy.Policy;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Schedule;
@@ -146,8 +146,8 @@ public class LaneProxy implements LaneBinding, LaneContext {
   }
 
   @Override
-  public FingerTrieSeq<LinkContext> getUplinks() {
-    return this.laneBinding.getUplinks();
+  public FingerTrieSeq<LinkContext> uplinks() {
+    return this.laneBinding.uplinks();
   }
 
   @Override
@@ -181,11 +181,6 @@ public class LaneProxy implements LaneBinding, LaneContext {
   }
 
   @Override
-  public void httpDownlink(HttpBinding http) {
-    this.laneContext.httpDownlink(http);
-  }
-
-  @Override
   public void pushDown(PushRequest pushRequest) {
     this.laneContext.pushDown(pushRequest);
   }
@@ -193,11 +188,6 @@ public class LaneProxy implements LaneBinding, LaneContext {
   @Override
   public void openUplink(LinkBinding link) {
     this.laneBinding.openUplink(link);
-  }
-
-  @Override
-  public void httpUplink(HttpBinding http) {
-    this.laneBinding.httpUplink(http);
   }
 
   @Override

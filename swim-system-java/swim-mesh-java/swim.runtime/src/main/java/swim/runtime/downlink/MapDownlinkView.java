@@ -20,23 +20,23 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import swim.api.DownlinkException;
 import swim.api.Link;
 import swim.api.SwimContext;
-import swim.api.downlink.DownlinkException;
 import swim.api.downlink.MapDownlink;
-import swim.api.downlink.function.DidLink;
-import swim.api.downlink.function.DidReceive;
-import swim.api.downlink.function.DidSync;
-import swim.api.downlink.function.DidUnlink;
-import swim.api.downlink.function.WillLink;
-import swim.api.downlink.function.WillReceive;
-import swim.api.downlink.function.WillSync;
-import swim.api.downlink.function.WillUnlink;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
-import swim.api.function.WillCommand;
+import swim.api.warp.function.DidLink;
+import swim.api.warp.function.DidReceive;
+import swim.api.warp.function.DidSync;
+import swim.api.warp.function.DidUnlink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillLink;
+import swim.api.warp.function.WillReceive;
+import swim.api.warp.function.WillSync;
+import swim.api.warp.function.WillUnlink;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Conts;
 import swim.concurrent.Stage;
@@ -52,6 +52,7 @@ import swim.observable.function.WillTake;
 import swim.observable.function.WillUpdateKey;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.warp.WarpDownlinkView;
 import swim.streamlet.Inlet;
 import swim.streamlet.KeyEffect;
 import swim.streamlet.KeyOutlet;
@@ -72,7 +73,7 @@ import swim.util.Cursor;
 import swim.util.OrderedMap;
 import swim.util.OrderedMapCursor;
 
-public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K, V> {
+public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownlink<K, V> {
   protected final Form<K> keyForm;
   protected final Form<V> valueForm;
   protected MapDownlinkModel model;
@@ -439,7 +440,7 @@ public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K
   }
 
   @SuppressWarnings("unchecked")
-  protected Entry<Boolean, V> dispatchWillUpdate(K key, V newValue, boolean preemptive) {
+  public Entry<Boolean, V> dispatchWillUpdate(K key, V newValue, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -485,7 +486,7 @@ public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchDidUpdate(K key, V newValue, V oldValue, boolean preemptive) {
+  public boolean dispatchDidUpdate(K key, V newValue, V oldValue, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -531,7 +532,7 @@ public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchWillRemove(K key, boolean preemptive) {
+  public boolean dispatchWillRemove(K key, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -577,7 +578,7 @@ public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchDidRemove(K key, V oldValue, boolean preemptive) {
+  public boolean dispatchDidRemove(K key, V oldValue, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -622,7 +623,7 @@ public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K
     }
   }
 
-  protected boolean dispatchWillDrop(int lower, boolean preemptive) {
+  public boolean dispatchWillDrop(int lower, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -667,7 +668,7 @@ public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K
     }
   }
 
-  protected boolean dispatchDidDrop(int lower, boolean preemptive) {
+  public boolean dispatchDidDrop(int lower, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -712,7 +713,7 @@ public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K
     }
   }
 
-  protected boolean dispatchWillTake(int upper, boolean preemptive) {
+  public boolean dispatchWillTake(int upper, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -757,7 +758,7 @@ public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K
     }
   }
 
-  protected boolean dispatchDidTake(int upper, boolean preemptive) {
+  public boolean dispatchDidTake(int upper, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -802,7 +803,7 @@ public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K
     }
   }
 
-  protected boolean dispatchWillClear(boolean preemptive) {
+  public boolean dispatchWillClear(boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -847,7 +848,7 @@ public class MapDownlinkView<K, V> extends DownlinkView implements MapDownlink<K
     }
   }
 
-  protected boolean dispatchDidClear(boolean preemptive) {
+  public boolean dispatchDidClear(boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);

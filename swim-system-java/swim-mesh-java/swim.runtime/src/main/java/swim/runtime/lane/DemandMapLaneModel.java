@@ -16,20 +16,22 @@ package swim.runtime.lane;
 
 import java.util.Iterator;
 import java.util.Map;
-import swim.api.uplink.Uplink;
+import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
-import swim.runtime.LinkBinding;
+import swim.runtime.LaneView;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.WarpLaneModel;
 import swim.structure.Record;
 import swim.structure.Value;
 
-public class DemandMapLaneModel extends LaneModel<DemandMapLaneView<?, ?>, DemandMapLaneUplink> {
+public class DemandMapLaneModel extends WarpLaneModel<DemandMapLaneView<?, ?>, DemandMapLaneUplink> {
   @Override
   public String laneType() {
     return "map";
   }
 
   @Override
-  protected DemandMapLaneUplink createUplink(LinkBinding link) {
+  protected DemandMapLaneUplink createWarpUplink(WarpBinding link) {
     return new DemandMapLaneUplink(this, link);
   }
 
@@ -52,7 +54,7 @@ public class DemandMapLaneModel extends LaneModel<DemandMapLaneView<?, ?>, Deman
     sendDown(Record.create(1).attr("remove", Record.create(1).slot("key", key)));
   }
 
-  Value nextDownCue(Value key, Uplink uplink) {
+  Value nextDownCue(Value key, WarpUplink uplink) {
     final Object views = this.views;
     if (views instanceof DemandMapLaneView<?, ?>) {
       return ((DemandMapLaneView<?, ?>) views).nextDownCue(key, uplink);
@@ -68,7 +70,7 @@ public class DemandMapLaneModel extends LaneModel<DemandMapLaneView<?, ?>, Deman
     return null;
   }
 
-  Iterator<Map.Entry<Value, Value>> syncKeys(Uplink uplink) {
+  Iterator<Map.Entry<Value, Value>> syncKeys(WarpUplink uplink) {
     final Object views = this.views;
     if (views instanceof DemandMapLaneView<?, ?>) {
       return ((DemandMapLaneView<?, ?>) views).syncKeys(uplink);

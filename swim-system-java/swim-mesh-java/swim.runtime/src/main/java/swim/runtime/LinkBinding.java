@@ -21,7 +21,6 @@ import java.util.Collection;
 import swim.api.auth.Identity;
 import swim.structure.Value;
 import swim.uri.Uri;
-import swim.warp.Envelope;
 
 public interface LinkBinding {
   LinkBinding linkWrapper();
@@ -44,15 +43,7 @@ public interface LinkBinding {
 
   Uri laneUri();
 
-  float prio();
-
-  float rate();
-
-  Value body();
-
-  boolean keepLinked();
-
-  boolean keepSynced();
+  Value linkKey();
 
   boolean isConnectedDown();
 
@@ -79,14 +70,6 @@ public interface LinkBinding {
   Principal remotePrincipalDown();
 
   Collection<Certificate> remoteCertificatesDown();
-
-  void feedDown();
-
-  void pushDown(Envelope envelope);
-
-  void skipDown();
-
-  void pullUp();
 
   void reopen();
 

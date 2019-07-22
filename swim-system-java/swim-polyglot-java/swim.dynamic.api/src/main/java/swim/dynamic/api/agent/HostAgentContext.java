@@ -14,8 +14,8 @@
 
 package swim.dynamic.api.agent;
 
+import swim.api.Lane;
 import swim.api.agent.AgentContext;
-import swim.api.lane.Lane;
 import swim.dynamic.Bridge;
 import swim.dynamic.HostMethod;
 import swim.dynamic.HostObjectType;

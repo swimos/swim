@@ -19,6 +19,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.HostMethod;
 import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
+import swim.dynamic.api.warp.HostWarpLane;
 
 public final class HostSupplyLane {
   private HostSupplyLane() {
@@ -30,7 +31,7 @@ public final class HostSupplyLane {
   static {
     final JavaHostObjectType<SupplyLane<Object>> type = new JavaHostObjectType<>(SupplyLane.class);
     TYPE = type;
-    type.inheritType(HostLane.TYPE);
+    type.inheritType(HostWarpLane.TYPE);
     type.addMember(new HostSupplyLaneObserve());
     type.addMember(new HostSupplyLaneUnobserve());
     type.addMember(new HostSupplyLanePush());

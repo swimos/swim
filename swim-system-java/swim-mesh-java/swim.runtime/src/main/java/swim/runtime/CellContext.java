@@ -14,7 +14,7 @@
 
 package swim.runtime;
 
-import swim.api.downlink.Downlink;
+import swim.api.Downlink;
 import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
@@ -38,8 +38,6 @@ public interface CellContext extends Log {
   void openDownlink(LinkBinding link);
 
   void closeDownlink(LinkBinding link);
-
-  void httpDownlink(HttpBinding http);
 
   void pushDown(PushRequest pushRequest);
 }

@@ -297,6 +297,7 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
     final HttpServerResponder<?> responderContext = REQUESTING.getAndSet(this, null);
     responderContext.didRequest(request);
     this.server.didRequest(request);
+    responderContext.doRespond(request);
   }
 
   void doWriteResponse(HttpResponse<?> response) {

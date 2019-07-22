@@ -83,7 +83,7 @@ public final class KernelLoader {
         }
       } catch (ReflectiveOperationException cause) {
         if (!header.get("optional").booleanValue(false)) {
-          throw new KernelException("failed to load required kernel class: " + kernelClassName);
+          throw new KernelException("failed to load required kernel class: " + kernelClassName, cause);
         }
       }
     }

@@ -15,7 +15,6 @@
 package swim.api;
 
 import swim.api.agent.AgentContext;
-import swim.api.lane.Lane;
 import swim.api.plane.PlaneContext;
 import swim.api.service.ServiceContext;
 

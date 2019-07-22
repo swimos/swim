@@ -14,6 +14,7 @@
 
 package swim.api.lane;
 
+import swim.api.http.HttpLane;
 import swim.api.ws.WsLane;
 import swim.math.R2Shape;
 import swim.math.Z2Form;
@@ -24,6 +25,8 @@ public interface LaneFactory {
   <V> DemandLane<V> demandLane();
 
   <K, V> DemandMapLane<K, V> demandMapLane();
+
+  <V> HttpLane<V> httpLane();
 
   <L, K, V> JoinMapLane<L, K, V> joinMapLane();
 

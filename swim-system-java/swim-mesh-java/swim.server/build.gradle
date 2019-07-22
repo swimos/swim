@@ -8,7 +8,7 @@ dependencies {
   api project(':swim-store-mem')
   api project(':swim-remote')
   api project(':swim-service')
-  api project(':swim-service-warp')
+  api project(':swim-service-web')
   api project(':swim-auth')
   api project(':swim-fabric')
   api project(':swim-java')

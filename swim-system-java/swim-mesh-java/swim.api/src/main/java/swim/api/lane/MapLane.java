@@ -15,20 +15,15 @@
 package swim.api.lane;
 
 import java.util.Map;
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
-import swim.api.http.function.DecodeRequestHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRespondHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
-import swim.api.lane.function.DidEnter;
-import swim.api.lane.function.DidLeave;
-import swim.api.lane.function.DidUplink;
-import swim.api.lane.function.WillEnter;
-import swim.api.lane.function.WillLeave;
-import swim.api.lane.function.WillUplink;
+import swim.api.warp.WarpLane;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidEnter;
+import swim.api.warp.function.DidLeave;
+import swim.api.warp.function.DidUplink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillEnter;
+import swim.api.warp.function.WillLeave;
+import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableOrderedMap;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
@@ -46,7 +41,7 @@ import swim.structure.Form;
 import swim.util.Cursor;
 import swim.util.OrderedMap;
 
-public interface MapLane<K, V> extends Lane, ObservableOrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapLane<K, V>> {
+public interface MapLane<K, V> extends WarpLane, ObservableOrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapLane<K, V>> {
   Form<K> keyForm();
 
   <K2> MapLane<K2, V> keyForm(Form<K2> keyForm);
@@ -66,9 +61,6 @@ public interface MapLane<K, V> extends Lane, ObservableOrderedMap<K, V>, MapInle
   boolean isTransient();
 
   MapLane<K, V> isTransient(boolean isTransient);
-
-  @Override
-  MapLane<K, V> isSigned(boolean isSigned);
 
   @Override
   MapLane<K, V> observe(Object observer);
@@ -129,24 +121,6 @@ public interface MapLane<K, V> extends Lane, ObservableOrderedMap<K, V>, MapInle
 
   @Override
   MapLane<K, V> didLeave(DidLeave didLeave);
-
-  @Override
-  MapLane<K, V> decodeRequest(DecodeRequestHttp<Object> decodeRequest);
-
-  @Override
-  MapLane<K, V> willRequest(WillRequestHttp<?> willRequest);
-
-  @Override
-  MapLane<K, V> didRequest(DidRequestHttp<Object> didRequest);
-
-  @Override
-  MapLane<K, V> doRespond(DoRespondHttp<Object> doRespond);
-
-  @Override
-  MapLane<K, V> willRespond(WillRespondHttp<?> willRespond);
-
-  @Override
-  MapLane<K, V> didRespond(DidRespondHttp<?> didRespond);
 
   OrderedMap<K, V> snapshot();
 

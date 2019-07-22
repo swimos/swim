@@ -76,7 +76,7 @@ public class AgentModel extends AgentNode {
   }
 
   @SuppressWarnings("unchecked")
-  public <S extends Agent> S getTrait(Class<S> agentClass) {
+  public <S extends Agent> S getAgent(Class<S> agentClass) {
     Agent agent;
     if (views instanceof AgentView) {
       agent = ((AgentView) views).agent;
@@ -132,7 +132,7 @@ public class AgentModel extends AgentNode {
   }
 
   @SuppressWarnings("unchecked")
-  public <S extends Agent> S addTrait(Value props, AgentFactory<S> agentFactory) {
+  public <S extends Agent> S addAgent(Value props, AgentFactory<S> agentFactory) {
     Object oldViews;
     Object newViews;
     AgentView oldView;

@@ -14,32 +14,27 @@
 
 package swim.runtime.lane;
 
+import swim.api.Lane;
 import swim.api.Link;
 import swim.api.SwimContext;
 import swim.api.agent.AgentContext;
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
-import swim.api.http.function.DecodeRequestHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRespondHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
 import swim.api.lane.DemandLane;
-import swim.api.lane.Lane;
-import swim.api.lane.function.DidEnter;
-import swim.api.lane.function.DidLeave;
-import swim.api.lane.function.DidUplink;
 import swim.api.lane.function.OnCue;
-import swim.api.lane.function.WillEnter;
-import swim.api.lane.function.WillLeave;
-import swim.api.lane.function.WillUplink;
-import swim.api.uplink.Uplink;
+import swim.api.warp.WarpUplink;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidEnter;
+import swim.api.warp.function.DidLeave;
+import swim.api.warp.function.DidUplink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillEnter;
+import swim.api.warp.function.WillLeave;
+import swim.api.warp.function.WillUplink;
 import swim.concurrent.Conts;
+import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 import swim.structure.Value;
 
-public class DemandLaneView<V> extends LaneView implements DemandLane<V> {
+public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
 
@@ -101,30 +96,20 @@ public class DemandLaneView<V> extends LaneView implements DemandLane<V> {
   }
 
   @Override
-  public final boolean isSigned() {
-    return false; // TODO
-  }
-
-  @Override
-  public DemandLaneView<V> isSigned(boolean isSigned) {
-    return this; // TODO
-  }
-
-  @Override
   public void close() {
     this.laneBinding.closeLaneView(this);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public DemandLaneView<V> observe(Object observer) {
-    return (DemandLaneView<V>) super.observe(observer);
+    super.observe(observer);
+    return this;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public DemandLaneView<V> unobserve(Object observer) {
-    return (DemandLaneView<V>) super.unobserve(observer);
+    super.unobserve(observer);
+    return this;
   }
 
   @Override
@@ -172,38 +157,8 @@ public class DemandLaneView<V> extends LaneView implements DemandLane<V> {
     return observe(didLeave);
   }
 
-  @Override
-  public DemandLaneView<V> decodeRequest(DecodeRequestHttp<Object> decodeRequest) {
-    return observe(decodeRequest);
-  }
-
-  @Override
-  public DemandLaneView<V> willRequest(WillRequestHttp<?> willRequest) {
-    return observe(willRequest);
-  }
-
-  @Override
-  public DemandLaneView<V> didRequest(DidRequestHttp<Object> didRequest) {
-    return observe(didRequest);
-  }
-
-  @Override
-  public DemandLaneView<V> doRespond(DoRespondHttp<Object> doRespond) {
-    return observe(doRespond);
-  }
-
-  @Override
-  public DemandLaneView<V> willRespond(WillRespondHttp<?> willRespond) {
-    return observe(willRespond);
-  }
-
-  @Override
-  public DemandLaneView<V> didRespond(DidRespondHttp<?> didRespond) {
-    return observe(didRespond);
-  }
-
   @SuppressWarnings("unchecked")
-  protected V dispatchOnCue(Uplink uplink) {
+  public V dispatchOnCue(WarpUplink uplink) {
     final Lane lane = SwimContext.getLane();
     final Link link = SwimContext.getLink();
     SwimContext.setLane(this);
@@ -248,7 +203,7 @@ public class DemandLaneView<V> extends LaneView implements DemandLane<V> {
     }
   }
 
-  Value nextDownCue(Uplink uplink) {
+  Value nextDownCue(WarpUplink uplink) {
     final V object = dispatchOnCue(uplink);
     if (object != null) {
       return this.valueForm.mold(object).toValue();

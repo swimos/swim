@@ -15,13 +15,13 @@
 package swim.runtime.lane;
 
 import swim.concurrent.Stage;
-import swim.runtime.LinkBinding;
-import swim.runtime.uplink.SupplyUplinkModem;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.SupplyUplinkModem;
 
 public class SupplyLaneUplink extends SupplyUplinkModem {
   final SupplyLaneModel laneBinding;
 
-  public SupplyLaneUplink(SupplyLaneModel laneBinding, LinkBinding linkBinding) {
+  public SupplyLaneUplink(SupplyLaneModel laneBinding, WarpBinding linkBinding) {
     super(linkBinding);
     this.laneBinding = laneBinding;
   }

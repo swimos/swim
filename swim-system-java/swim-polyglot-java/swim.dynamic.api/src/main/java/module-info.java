@@ -27,4 +27,6 @@ module swim.dynamic.api {
   exports swim.dynamic.api.lane;
   exports swim.dynamic.api.lane.function;
   exports swim.dynamic.api.plane;
+  exports swim.dynamic.api.warp;
+  exports swim.dynamic.api.warp.function;
 }

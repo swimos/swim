@@ -14,9 +14,9 @@
 
 package swim.fabric;
 
+import swim.api.Lane;
 import swim.api.agent.AgentContext;
 import swim.api.auth.Identity;
-import swim.api.lane.Lane;
 import swim.api.policy.Policy;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Stage;
@@ -147,8 +147,8 @@ public class FabricLane extends FabricTier implements LaneBinding, LaneContext {
   }
 
   @Override
-  public FingerTrieSeq<LinkContext> getUplinks() {
-    return this.laneBinding.getUplinks();
+  public FingerTrieSeq<LinkContext> uplinks() {
+    return this.laneBinding.uplinks();
   }
 
   @Override

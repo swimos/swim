@@ -14,6 +14,7 @@
 
 package swim.api.space;
 
+import java.util.Collection;
 import swim.api.plane.Plane;
 import swim.api.plane.PlaneFactory;
 import swim.api.policy.PlanePolicy;
@@ -36,4 +37,6 @@ public interface Space extends SwimRef, Log {
   Plane getPlane(String planeName);
 
   <P extends Plane> P getPlane(Class<? extends P> planeClass);
+
+  Collection<? extends Plane> planes();
 }

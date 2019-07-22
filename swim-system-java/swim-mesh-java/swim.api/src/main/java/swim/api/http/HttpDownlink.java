@@ -14,12 +14,9 @@
 
 package swim.api.http;
 
-import java.net.InetSocketAddress;
-import java.security.Principal;
-import java.security.cert.Certificate;
-import java.util.Collection;
-import swim.api.Link;
-import swim.api.auth.Identity;
+import swim.api.Downlink;
+import swim.api.function.DidClose;
+import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
 import swim.api.http.function.DecodeResponseHttp;
@@ -30,54 +27,8 @@ import swim.api.http.function.WillRequestHttp;
 import swim.api.http.function.WillRespondHttp;
 import swim.uri.Uri;
 
-public interface HttpDownlink<V> extends Link {
-  @Override
-  Uri hostUri();
-
-  @Override
-  Uri nodeUri();
-
-  @Override
-  Uri laneUri();
-
-  @Override
-  boolean isConnected();
-
-  @Override
-  boolean isRemote();
-
-  @Override
-  boolean isSecure();
-
-  @Override
-  String securityProtocol();
-
-  @Override
-  String cipherSuite();
-
-  @Override
-  InetSocketAddress localAddress();
-
-  @Override
-  Identity localIdentity();
-
-  @Override
-  Principal localPrincipal();
-
-  @Override
-  Collection<Certificate> localCertificates();
-
-  @Override
-  InetSocketAddress remoteAddress();
-
-  @Override
-  Identity remoteIdentity();
-
-  @Override
-  Principal remotePrincipal();
-
-  @Override
-  Collection<Certificate> remoteCertificates();
+public interface HttpDownlink<V> extends Downlink, HttpLink {
+  HttpDownlink<V> requestUri(Uri requestUri);
 
   @Override
   HttpDownlink<V> observe(Object observer);
@@ -97,27 +48,18 @@ public interface HttpDownlink<V> extends Link {
 
   HttpDownlink<V> didRespond(DidRespondHttp<V> didRespond);
 
+  @Override
+  HttpDownlink<V> didConnect(DidConnect didConnect);
+
+  @Override
   HttpDownlink<V> didDisconnect(DidDisconnect didDisconnect);
 
+  @Override
+  HttpDownlink<V> didClose(DidClose didClose);
+
+  @Override
   HttpDownlink<V> didFail(DidFail didFail);
 
+  @Override
   HttpDownlink<V> open();
-
-  @Override
-  void close();
-
-  @Override
-  void trace(Object message);
-
-  @Override
-  void debug(Object message);
-
-  @Override
-  void info(Object message);
-
-  @Override
-  void warn(Object message);
-
-  @Override
-  void error(Object message);
 }

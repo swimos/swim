@@ -45,6 +45,7 @@ import swim.runtime.MeshBinding;
 import swim.runtime.MeshDef;
 import swim.runtime.PartBinding;
 import swim.runtime.PartDef;
+import swim.runtime.http.RestLaneModel;
 import swim.runtime.lane.CommandLaneModel;
 import swim.runtime.lane.ListLaneModel;
 import swim.runtime.lane.MapLaneModel;
@@ -365,6 +366,8 @@ public class BootKernel extends KernelProxy implements IpStation {
         lane = createSupplyLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
       } else if ("value".equals(laneType)) {
         lane = createValueLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+      } else if ("http".equals(laneType)) {
+        lane = createHttpLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
       }
     }
     return lane;
@@ -392,6 +395,10 @@ public class BootKernel extends KernelProxy implements IpStation {
 
   public LaneBinding createValueLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
     return new ValueLaneModel();
+  }
+
+  public LaneBinding createHttpLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+    return new RestLaneModel();
   }
 
   @Override

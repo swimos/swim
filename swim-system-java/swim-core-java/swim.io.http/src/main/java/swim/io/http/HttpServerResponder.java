@@ -160,6 +160,11 @@ public class HttpServerResponder<T> implements HttpResponderContext {
     this.responder.didRequest((HttpRequest<T>) request);
   }
 
+  @SuppressWarnings("unchecked")
+  void doRespond(HttpRequest<?> request) {
+    this.responder.doRespond((HttpRequest<T>) request);
+  }
+
   void doRespond() {
     do {
       final int oldStatus = STATUS.get(this);

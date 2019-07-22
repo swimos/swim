@@ -19,7 +19,8 @@ import swim.dynamic.Bridge;
 import swim.dynamic.HostMethod;
 import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
-import swim.dynamic.api.lane.function.GuestOnCommand;
+import swim.dynamic.api.warp.HostWarpLane;
+import swim.dynamic.api.warp.function.GuestOnCommand;
 
 public final class HostCommandLane {
   private HostCommandLane() {
@@ -31,7 +32,7 @@ public final class HostCommandLane {
   static {
     final JavaHostObjectType<CommandLane<Object>> type = new JavaHostObjectType<>(CommandLane.class);
     TYPE = type;
-    type.inheritType(HostLane.TYPE);
+    type.inheritType(HostWarpLane.TYPE);
     type.addMember(new HostCommandLaneObserve());
     type.addMember(new HostCommandLaneUnobserve());
     type.addMember(new HostCommandLaneOnCommand());

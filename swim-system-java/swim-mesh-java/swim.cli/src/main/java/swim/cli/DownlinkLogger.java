@@ -14,20 +14,20 @@
 
 package swim.cli;
 
-import swim.api.downlink.Downlink;
-import swim.api.downlink.function.DidSync;
-import swim.api.downlink.function.DidUnlink;
-import swim.api.downlink.function.OnEvent;
 import swim.api.function.DidClose;
+import swim.api.warp.WarpDownlink;
+import swim.api.warp.function.DidSync;
+import swim.api.warp.function.DidUnlink;
+import swim.api.warp.function.OnEvent;
 import swim.json.Json;
 import swim.recon.Recon;
 import swim.structure.Value;
 
 public class DownlinkLogger implements OnEvent<Value>, DidSync, DidUnlink, DidClose {
-  final Downlink downlink;
+  final WarpDownlink downlink;
   final String format;
 
-  public DownlinkLogger(Downlink downlink, String format) {
+  public DownlinkLogger(WarpDownlink downlink, String format) {
     this.downlink = downlink.observe(this);
     this.format = format;
   }

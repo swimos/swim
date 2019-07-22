@@ -15,18 +15,20 @@
 package swim.runtime.lane;
 
 import swim.api.Link;
-import swim.runtime.LinkBinding;
+import swim.runtime.LaneRelay;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.WarpLaneModel;
 import swim.structure.Form;
 import swim.warp.CommandMessage;
 
-public class CommandLaneModel extends LaneModel<CommandLaneView<?>, CommandLaneUplink> {
+public class CommandLaneModel extends WarpLaneModel<CommandLaneView<?>, CommandLaneUplink> {
   @Override
   public String laneType() {
     return "command";
   }
 
   @Override
-  protected CommandLaneUplink createUplink(LinkBinding link) {
+  protected CommandLaneUplink createWarpUplink(WarpBinding link) {
     return new CommandLaneUplink(this, link);
   }
 
@@ -55,7 +57,7 @@ final class CommandLaneRelayCommand extends LaneRelay<CommandLaneModel, CommandL
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(CommandLaneView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(CommandLaneView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -85,7 +87,7 @@ final class CommandLaneRelayCommand extends LaneRelay<CommandLaneModel, CommandL
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.sendDown(this.message.body());
   }
 }

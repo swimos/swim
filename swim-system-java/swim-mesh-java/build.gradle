@@ -33,7 +33,7 @@ gradle.projectsEvaluated {
         'swim.runtime',
         'swim.server',
         'swim.service',
-        'swim.service.warp')
+        'swim.service.web')
       options.group('Tools',
         'swim.cli')
     }

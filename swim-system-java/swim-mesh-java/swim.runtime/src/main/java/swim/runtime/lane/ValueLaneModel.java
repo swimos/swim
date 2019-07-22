@@ -17,12 +17,16 @@ package swim.runtime.lane;
 import java.util.Map;
 import swim.api.Link;
 import swim.api.data.ValueData;
-import swim.runtime.LinkBinding;
+import swim.concurrent.Stage;
+import swim.runtime.LaneRelay;
+import swim.runtime.LaneView;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.WarpLaneModel;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.warp.CommandMessage;
 
-public class ValueLaneModel extends LaneModel<ValueLaneView<?>, ValueLaneUplink> {
+public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUplink> {
   protected int flags;
   protected ValueData<Value> data;
 
@@ -40,7 +44,7 @@ public class ValueLaneModel extends LaneModel<ValueLaneView<?>, ValueLaneUplink>
   }
 
   @Override
-  protected ValueLaneUplink createUplink(LinkBinding link) {
+  protected ValueLaneUplink createWarpUplink(WarpBinding link) {
     return new ValueLaneUplink(this, link);
   }
 
@@ -51,7 +55,7 @@ public class ValueLaneModel extends LaneModel<ValueLaneView<?>, ValueLaneUplink>
 
   @Override
   public void onCommand(CommandMessage message) {
-    new ValueLaneRelaySet(this, null, message, message.body()).run();
+    new ValueLaneRelaySet(this, message, message.body()).run();
   }
 
   public final boolean isResident() {
@@ -108,28 +112,6 @@ public class ValueLaneModel extends LaneModel<ValueLaneView<?>, ValueLaneUplink>
     return this;
   }
 
-  public final boolean isSigned() {
-    return (this.flags & SIGNED) != 0;
-  }
-
-  public ValueLaneModel isSigned(boolean isSigned) {
-    if (isSigned) {
-      this.flags |= SIGNED;
-    } else {
-      this.flags &= ~SIGNED;
-    }
-    final Object views = this.views;
-    if (views instanceof ValueLaneView<?>) {
-      ((ValueLaneView<?>) views).didSetSigned(isSigned);
-    } else if (views instanceof LaneView[]) {
-      final LaneView[] viewArray = (LaneView[]) views;
-      for (int i = 0, n = viewArray.length; i < n; i += 1) {
-        ((ValueLaneView<?>) viewArray[i]).didSetSigned(isSigned);
-      }
-    }
-    return this;
-  }
-
   public Value get() {
     return this.data.get();
   }
@@ -138,12 +120,10 @@ public class ValueLaneModel extends LaneModel<ValueLaneView<?>, ValueLaneUplink>
   public <V> V set(ValueLaneView<V> view, V newObject) {
     final Form<V> valueForm = view.valueForm;
     final Value newValue = valueForm.mold(newObject).toValue();
-    final ValueLaneRelaySet relay = new ValueLaneRelaySet(this, null, newValue);
-
+    final ValueLaneRelaySet relay = new ValueLaneRelaySet(this, stage(), newValue);
     relay.valueForm = (Form<Object>) valueForm;
     relay.oldObject = newObject;
     relay.newObject = newObject;
-    relay.stage = stage();
     relay.run();
 
     if (relay.valueForm != valueForm && valueForm != null) {
@@ -182,22 +162,29 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
   Value newValue;
   Object newObject;
 
-  ValueLaneRelaySet(ValueLaneModel model, Link link, CommandMessage message, Value newValue) {
+  ValueLaneRelaySet(ValueLaneModel model, CommandMessage message, Value newValue) {
     super(model, 4);
-    this.link = link;
+    this.link = null;
     this.message = message;
     this.newValue = newValue;
   }
 
   ValueLaneRelaySet(ValueLaneModel model, Link link, Value newValue) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.link = link;
     this.message = null;
     this.newValue = newValue;
   }
 
+  ValueLaneRelaySet(ValueLaneModel model, Stage stage, Value newValue) {
+    super(model, 1, 3, stage);
+    this.link = null;
+    this.message = null;
+    this.newValue = newValue;
+  }
+
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       this.oldValue = this.model.data.set(this.newValue);
       if (this.valueForm != null) {
@@ -211,7 +198,7 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(ValueLaneView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ValueLaneView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -263,7 +250,7 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.cueDown();
   }
 }

@@ -14,6 +14,8 @@
 
 package swim.runtime.agent;
 
+import swim.api.Downlink;
+import swim.api.Lane;
 import swim.api.Link;
 import swim.api.SwimContext;
 import swim.api.agent.Agent;
@@ -23,13 +25,12 @@ import swim.api.data.ListData;
 import swim.api.data.MapData;
 import swim.api.data.SpatialData;
 import swim.api.data.ValueData;
-import swim.api.downlink.Downlink;
+import swim.api.http.HttpLane;
 import swim.api.lane.CommandLane;
 import swim.api.lane.DemandLane;
 import swim.api.lane.DemandMapLane;
 import swim.api.lane.JoinMapLane;
 import swim.api.lane.JoinValueLane;
-import swim.api.lane.Lane;
 import swim.api.lane.ListLane;
 import swim.api.lane.MapLane;
 import swim.api.lane.SpatialLane;
@@ -43,16 +44,16 @@ import swim.concurrent.Stage;
 import swim.math.R2Shape;
 import swim.math.Z2Form;
 import swim.runtime.AbstractTierBinding;
-import swim.runtime.HttpBinding;
+import swim.runtime.LaneView;
 import swim.runtime.LinkBinding;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
+import swim.runtime.http.RestLaneView;
 import swim.runtime.lane.CommandLaneView;
 import swim.runtime.lane.DemandLaneView;
 import swim.runtime.lane.DemandMapLaneView;
 import swim.runtime.lane.JoinMapLaneView;
 import swim.runtime.lane.JoinValueLaneView;
-import swim.runtime.lane.LaneView;
 import swim.runtime.lane.ListLaneView;
 import swim.runtime.lane.MapLaneView;
 import swim.runtime.lane.SpatialLaneView;
@@ -161,79 +162,6 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
     return SwimContext.getLink();
   }
 
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass) {
-    return this.node.createAgentFactory(agentClass);
-  }
-
-  @Override
-  public FingerTrieSeq<Agent> traits() {
-    final Object views = this.node.views;
-    final Builder<Agent, FingerTrieSeq<Agent>> traits = FingerTrieSeq.builder();
-    if (views instanceof AgentView) {
-      traits.add(((AgentView) views).agent);
-    } else if (views instanceof AgentView[]) {
-      final AgentView[] viewArray = (AgentView[]) views;
-      for (int i = 0, n = viewArray.length; i < n; i += 1) {
-        traits.add(viewArray[i].agent);
-      }
-    }
-    return traits.bind();
-  }
-
-  @Override
-  public Agent getTrait(Value props) {
-    final AgentView view = this.node.getAgentView(props);
-    if (view != null) {
-      return view.agent;
-    } else {
-      return null;
-    }
-  }
-
-  @Override
-  public Agent getTrait(String name) {
-    return getTrait(Text.from(name));
-  }
-
-  @Override
-  public <A extends Agent> A getTrait(Class<? extends A> agentClass) {
-    return this.node.getTrait(agentClass);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <A extends Agent> A addTrait(Value props, AgentFactory<A> agentFactory) {
-    return this.node.addTrait(props, agentFactory);
-  }
-
-  @Override
-  public <A extends Agent> A addTrait(String name, AgentFactory<A> agentFactory) {
-    return addTrait(Text.from(name), agentFactory);
-  }
-
-  @Override
-  public <A extends Agent> A addTrait(Value props, Class<? extends A> agentClass) {
-    return addTrait(props, createAgentFactory(agentClass));
-  }
-
-  @Override
-  public <A extends Agent> A addTrait(String name, Class<? extends A> agentClass) {
-    return addTrait(Text.from(name), agentClass);
-  }
-
-  @Override
-  public void removeTrait(Value props) {
-    final AgentView view = this.node.getAgentView(props);
-    if (view != null) {
-      this.node.removeAgentView(view);
-    }
-  }
-
-  @Override
-  public void removeTrait(String name) {
-    removeTrait(Text.from(name));
-  }
-
   @Override
   public Lane getLane(Uri laneUri) {
     return this.node.getLane(laneUri).getLaneView(this);
@@ -243,6 +171,79 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   public Lane openLane(Uri laneUri, Lane lane) {
     this.node.openLaneView(laneUri, (LaneView) lane);
     return lane;
+  }
+
+  public <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass) {
+    return this.node.createAgentFactory(agentClass);
+  }
+
+  @Override
+  public FingerTrieSeq<Agent> agents() {
+    final Object views = this.node.views;
+    final Builder<Agent, FingerTrieSeq<Agent>> agents = FingerTrieSeq.builder();
+    if (views instanceof AgentView) {
+      agents.add(((AgentView) views).agent);
+    } else if (views instanceof AgentView[]) {
+      final AgentView[] viewArray = (AgentView[]) views;
+      for (int i = 0, n = viewArray.length; i < n; i += 1) {
+        agents.add(viewArray[i].agent);
+      }
+    }
+    return agents.bind();
+  }
+
+  @Override
+  public Agent getAgent(Value props) {
+    final AgentView view = this.node.getAgentView(props);
+    if (view != null) {
+      return view.agent;
+    } else {
+      return null;
+    }
+  }
+
+  @Override
+  public Agent getAgent(String name) {
+    return getAgent(Text.from(name));
+  }
+
+  @Override
+  public <A extends Agent> A getAgent(Class<? extends A> agentClass) {
+    return this.node.getAgent(agentClass);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <A extends Agent> A addAgent(Value props, AgentFactory<A> agentFactory) {
+    return this.node.addAgent(props, agentFactory);
+  }
+
+  @Override
+  public <A extends Agent> A addAgent(String name, AgentFactory<A> agentFactory) {
+    return addAgent(Text.from(name), agentFactory);
+  }
+
+  @Override
+  public <A extends Agent> A addAgent(Value props, Class<? extends A> agentClass) {
+    return addAgent(props, createAgentFactory(agentClass));
+  }
+
+  @Override
+  public <A extends Agent> A addAgent(String name, Class<? extends A> agentClass) {
+    return addAgent(Text.from(name), agentClass);
+  }
+
+  @Override
+  public void removeAgent(Value props) {
+    final AgentView view = this.node.getAgentView(props);
+    if (view != null) {
+      this.node.removeAgentView(view);
+    }
+  }
+
+  @Override
+  public void removeAgent(String name) {
+    removeAgent(Text.from(name));
   }
 
   @Override
@@ -258,6 +259,11 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   @Override
   public <K, V> DemandMapLane<K, V> demandMapLane() {
     return new DemandMapLaneView<K, V>(this, null, null);
+  }
+
+  @Override
+  public <V> HttpLane<V> httpLane() {
+    return new RestLaneView<V>(this, null);
   }
 
   @Override
@@ -368,11 +374,6 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   @Override
   public void closeDownlink(LinkBinding link) {
     this.node.closeDownlink(link);
-  }
-
-  @Override
-  public void httpDownlink(HttpBinding http) {
-    this.node.httpDownlink(http);
   }
 
   @Override

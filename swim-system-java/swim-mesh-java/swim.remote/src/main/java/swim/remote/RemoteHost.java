@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import swim.api.Downlink;
 import swim.api.auth.Identity;
-import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.collections.FingerTrieSeq;
@@ -40,13 +40,13 @@ import swim.io.warp.WarpSocketContext;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
-import swim.runtime.HttpBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
-import swim.runtime.uplink.HttpErrorUplinkModem;
+import swim.runtime.UplinkError;
+import swim.runtime.WarpBinding;
 import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -91,9 +91,9 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   volatile Identity remoteIdentity;
 
-  volatile HashTrieMap<Uri, HashTrieMap<Uri, RemoteHostDownlink>> downlinks;
+  volatile HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> downlinks;
 
-  volatile HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> uplinks;
+  volatile HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> uplinks;
 
   final HashGenCacheMap<Uri, Uri> resolveCache;
 
@@ -350,12 +350,12 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     } while (oldFlags != newFlags && !FLAGS.compareAndSet(this, oldFlags, newFlags));
   }
 
-  RemoteHostDownlink createDownlink(Uri remoteNodeUri, Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
-    return new RemoteHostDownlink(this, remoteNodeUri, nodeUri, laneUri, prio, rate, body);
+  RemoteWarpDownlink createWarpDownlink(Uri remoteNodeUri, Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
+    return new RemoteWarpDownlink(this, remoteNodeUri, nodeUri, laneUri, prio, rate, body);
   }
 
-  RemoteHostUplink createUplink(LinkBinding link, Uri remoteNodeUri) {
-    return new RemoteHostUplink(this, link, remoteNodeUri);
+  RemoteWarpUplink createWarpUplink(WarpBinding link, Uri remoteNodeUri) {
+    return new RemoteWarpUplink(this, link, remoteNodeUri);
   }
 
   PushRequest createPushRequest(Envelope envelope, float prio) {
@@ -401,20 +401,28 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void openUplink(LinkBinding link) {
+    if (link instanceof WarpBinding) {
+      openWarpUplink((WarpBinding) link);
+    } else {
+      UplinkError.rejectUnsupported(link);
+    }
+  }
+
+  protected void openWarpUplink(WarpBinding link) {
     final Uri laneUri = link.laneUri();
     final Uri remoteNodeUri = resolve(link.nodeUri());
-    final RemoteHostUplink uplink = createUplink(link, remoteNodeUri);
+    final RemoteWarpUplink uplink = createWarpUplink(link, remoteNodeUri);
     link.setLinkContext(uplink);
 
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> oldUplinks;
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> newUplinks;
+    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks;
+    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks;
     do {
       oldUplinks = this.uplinks;
-      HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>> nodeUplinks = oldUplinks.get(remoteNodeUri);
+      HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = oldUplinks.get(remoteNodeUri);
       if (nodeUplinks == null) {
         nodeUplinks = HashTrieMap.empty();
       }
-      HashTrieSet<RemoteHostUplink> laneUplinks = nodeUplinks.get(laneUri);
+      HashTrieSet<RemoteWarpUplink> laneUplinks = nodeUplinks.get(laneUri);
       if (laneUplinks == null) {
         laneUplinks = HashTrieSet.empty();
       }
@@ -428,16 +436,16 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     }
   }
 
-  void closeUplink(RemoteHostUplink uplink) {
+  void closeUplink(RemoteWarpUplink uplink) {
     final Uri laneUri = uplink.laneUri();
     final Uri remoteNodeUri = uplink.remoteNodeUri;
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> oldUplinks;
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> newUplinks;
+    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks;
+    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks;
     do {
       oldUplinks = this.uplinks;
-      HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>> nodeUplinks = oldUplinks.get(remoteNodeUri);
+      HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = oldUplinks.get(remoteNodeUri);
       if (nodeUplinks != null) {
-        HashTrieSet<RemoteHostUplink> laneUplinks = nodeUplinks.get(laneUri);
+        HashTrieSet<RemoteWarpUplink> laneUplinks = nodeUplinks.get(laneUri);
         if (laneUplinks != null) {
           laneUplinks = laneUplinks.removed(uplink);
           if (laneUplinks.isEmpty()) {
@@ -464,12 +472,6 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     if (oldUplinks != newUplinks) {
       uplink.didCloseUp();
     }
-  }
-
-  @Override
-  public void httpUplink(HttpBinding http) {
-    final HttpErrorUplinkModem httpContext = new HttpErrorUplinkModem(http);
-    http.setHttpContext(httpContext);
   }
 
   @Override
@@ -579,12 +581,12 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     final Uri nodeUri = resolve(message.nodeUri());
     final Uri laneUri = message.laneUri();
 
-    final HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>> nodeUplinks = this.uplinks.get(nodeUri);
+    final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = this.uplinks.get(nodeUri);
     if (nodeUplinks != null) {
-      final HashTrieSet<RemoteHostUplink> laneUplinks = nodeUplinks.get(laneUri);
+      final HashTrieSet<RemoteWarpUplink> laneUplinks = nodeUplinks.get(laneUri);
       if (laneUplinks != null) {
         final EventMessage resolvedMessage = message.nodeUri(nodeUri);
-        final Iterator<RemoteHostUplink> uplinksIterator = laneUplinks.iterator();
+        final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
         while (uplinksIterator.hasNext()) {
           uplinksIterator.next().queueDown(resolvedMessage);
         }
@@ -613,9 +615,9 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     final Uri laneUri = message.laneUri();
     final CommandMessage resolvedMessage = message.nodeUri(nodeUri);
 
-    final HashTrieMap<Uri, RemoteHostDownlink> nodeDownlinks = this.downlinks.get(nodeUri);
+    final HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = this.downlinks.get(nodeUri);
     if (nodeDownlinks != null) {
-      final RemoteHostDownlink laneDownlink = nodeDownlinks.get(laneUri);
+      final RemoteWarpDownlink laneDownlink = nodeDownlinks.get(laneUri);
       if (laneDownlink != null) {
         laneDownlink.queueUp(resolvedMessage);
         return;
@@ -633,17 +635,17 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     final float prio = envelope.prio();
     final float rate = envelope.rate();
     final Value body = envelope.body();
-    HashTrieMap<Uri, HashTrieMap<Uri, RemoteHostDownlink>> oldDownlinks;
-    HashTrieMap<Uri, HashTrieMap<Uri, RemoteHostDownlink>> newDownlinks;
-    RemoteHostDownlink downlink = null;
+    HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> oldDownlinks;
+    HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> newDownlinks;
+    RemoteWarpDownlink downlink = null;
 
     do {
       oldDownlinks = this.downlinks;
-      HashTrieMap<Uri, RemoteHostDownlink> nodeDownlinks = oldDownlinks.get(nodeUri);
+      HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = oldDownlinks.get(nodeUri);
       if (nodeDownlinks == null) {
         nodeDownlinks = HashTrieMap.empty();
       }
-      final RemoteHostDownlink laneDownlink = nodeDownlinks.get(laneUri);
+      final RemoteWarpDownlink laneDownlink = nodeDownlinks.get(laneUri);
       if (laneDownlink != null) {
         if (downlink != null) {
           // Lost creation race.
@@ -654,7 +656,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         break;
       } else {
         if (downlink == null) {
-          downlink = createDownlink(remoteNodeUri, nodeUri, laneUri, prio, rate, body);
+          downlink = createWarpDownlink(remoteNodeUri, nodeUri, laneUri, prio, rate, body);
           this.hostContext.openDownlink(downlink);
         }
         // TODO: don't register error links
@@ -673,12 +675,12 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   protected void routeUplink(LaneAddressed envelope) {
     final Uri nodeUri = resolve(envelope.nodeUri());
     final Uri laneUri = envelope.laneUri();
-    final HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>> nodeUplinks = this.uplinks.get(nodeUri);
+    final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = this.uplinks.get(nodeUri);
     if (nodeUplinks != null) {
-      final HashTrieSet<RemoteHostUplink> laneUplinks = nodeUplinks.get(laneUri);
+      final HashTrieSet<RemoteWarpUplink> laneUplinks = nodeUplinks.get(laneUri);
       if (laneUplinks != null) {
         final LaneAddressed resolvedEnvelope = envelope.nodeUri(nodeUri);
-        final Iterator<RemoteHostUplink> uplinksIterator = laneUplinks.iterator();
+        final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
         while (uplinksIterator.hasNext()) {
           uplinksIterator.next().queueDown(resolvedEnvelope);
         }
@@ -739,13 +741,13 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   protected void onUnlinkRequest(UnlinkRequest request) {
     final Uri nodeUri = resolve(request.nodeUri());
     final Uri laneUri = request.laneUri();
-    HashTrieMap<Uri, HashTrieMap<Uri, RemoteHostDownlink>> oldDownlinks;
-    HashTrieMap<Uri, HashTrieMap<Uri, RemoteHostDownlink>> newDownlinks;
-    RemoteHostDownlink downlink;
+    HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> oldDownlinks;
+    HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> newDownlinks;
+    RemoteWarpDownlink downlink;
 
     do {
       oldDownlinks = this.downlinks;
-      HashTrieMap<Uri, RemoteHostDownlink> nodeDownlinks = oldDownlinks.get(nodeUri);
+      HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = oldDownlinks.get(nodeUri);
       if (nodeDownlinks != null) {
         downlink = nodeDownlinks.get(laneUri);
         if (downlink != null) {
@@ -775,13 +777,13 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   protected void onUnlinkedResponse(UnlinkedResponse response) {
     final Uri nodeUri = resolve(response.nodeUri());
     final Uri laneUri = response.laneUri();
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> oldUplinks;
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> newUplinks;
-    HashTrieSet<RemoteHostUplink> laneUplinks;
+    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks;
+    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks;
+    HashTrieSet<RemoteWarpUplink> laneUplinks;
 
     do {
       oldUplinks = this.uplinks;
-      HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>> nodeUplinks = oldUplinks.get(nodeUri);
+      HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = oldUplinks.get(nodeUri);
       if (nodeUplinks != null) {
         laneUplinks = nodeUplinks.get(laneUri);
         if (laneUplinks != null) {
@@ -804,7 +806,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
     if (laneUplinks != null) {
       final UnlinkedResponse resolvedResponse = response.nodeUri(nodeUri);
-      final Iterator<RemoteHostUplink> uplinksIterator = laneUplinks.iterator();
+      final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
       while (uplinksIterator.hasNext()) {
         uplinksIterator.next().queueDown(resolvedResponse);
       }
@@ -902,11 +904,6 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   @Override
-  public void httpDownlink(HttpBinding http) {
-    this.hostContext.httpDownlink(http);
-  }
-
-  @Override
   public void pushDown(PushRequest pushRequest) {
     this.hostContext.pushDown(pushRequest);
   }
@@ -985,39 +982,39 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void closeDownlinks() {
-    HashTrieMap<Uri, HashTrieMap<Uri, RemoteHostDownlink>> oldDownlinks;
-    final HashTrieMap<Uri, HashTrieMap<Uri, RemoteHostDownlink>> newDownlinks = HashTrieMap.empty();
+    HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> oldDownlinks;
+    final HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> newDownlinks = HashTrieMap.empty();
     do {
       oldDownlinks = this.downlinks;
     } while (oldDownlinks != newDownlinks && !DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks));
 
-    final Iterator<HashTrieMap<Uri, RemoteHostDownlink>> nodeDownlinksIterator = oldDownlinks.valueIterator();
+    final Iterator<HashTrieMap<Uri, RemoteWarpDownlink>> nodeDownlinksIterator = oldDownlinks.valueIterator();
     while (nodeDownlinksIterator.hasNext()) {
-      final HashTrieMap<Uri, RemoteHostDownlink> nodeDownlinks = nodeDownlinksIterator.next();
-      final Iterator<RemoteHostDownlink> laneDownlinks = nodeDownlinks.valueIterator();
+      final HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = nodeDownlinksIterator.next();
+      final Iterator<RemoteWarpDownlink> laneDownlinks = nodeDownlinks.valueIterator();
       while (laneDownlinks.hasNext()) {
-        final RemoteHostDownlink downlink = laneDownlinks.next();
+        final RemoteWarpDownlink downlink = laneDownlinks.next();
         downlink.closeDown();
       }
     }
   }
 
   protected void closeUplinks() {
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> oldUplinks;
-    final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> newUplinks = HashTrieMap.empty();
+    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks;
+    final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks = HashTrieMap.empty();
     do {
       oldUplinks = this.uplinks;
     } while (oldUplinks != newUplinks && !UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
 
-    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
+    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
     while (nodeUplinksIterator.hasNext()) {
-      final HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>> nodeUplinks = nodeUplinksIterator.next();
-      final Iterator<HashTrieSet<RemoteHostUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
+      final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = nodeUplinksIterator.next();
+      final Iterator<HashTrieSet<RemoteWarpUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
       while (laneUplinksIterator.hasNext()) {
-        final HashTrieSet<RemoteHostUplink> laneUplinks = laneUplinksIterator.next();
-        final Iterator<RemoteHostUplink> uplinksIterator = laneUplinks.iterator();
+        final HashTrieSet<RemoteWarpUplink> laneUplinks = laneUplinksIterator.next();
+        final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
         while (uplinksIterator.hasNext()) {
-          final RemoteHostUplink uplink = uplinksIterator.next();
+          final RemoteWarpUplink uplink = uplinksIterator.next();
           uplink.closeUp();
         }
       }
@@ -1025,15 +1022,15 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void connectUplinks() {
-    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
+    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
     while (nodeUplinksIterator.hasNext()) {
-      final HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>> nodeUplinks = nodeUplinksIterator.next();
-      final Iterator<HashTrieSet<RemoteHostUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
+      final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = nodeUplinksIterator.next();
+      final Iterator<HashTrieSet<RemoteWarpUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
       while (laneUplinksIterator.hasNext()) {
-        final HashTrieSet<RemoteHostUplink> laneUplinks = laneUplinksIterator.next();
-        final Iterator<RemoteHostUplink> uplinksIterator = laneUplinks.iterator();
+        final HashTrieSet<RemoteWarpUplink> laneUplinks = laneUplinksIterator.next();
+        final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
         while (uplinksIterator.hasNext()) {
-          final RemoteHostUplink uplink = uplinksIterator.next();
+          final RemoteWarpUplink uplink = uplinksIterator.next();
           uplink.didConnect();
         }
       }
@@ -1042,15 +1039,15 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   protected void disconnectUplinks() {
     if (isConnected()) {
-      final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
+      final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
       while (nodeUplinksIterator.hasNext()) {
-        final HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>> nodeUplinks = nodeUplinksIterator.next();
-        final Iterator<HashTrieSet<RemoteHostUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
+        final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = nodeUplinksIterator.next();
+        final Iterator<HashTrieSet<RemoteWarpUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
         while (laneUplinksIterator.hasNext()) {
-          final HashTrieSet<RemoteHostUplink> laneUplinks = laneUplinksIterator.next();
-          final Iterator<RemoteHostUplink> uplinksIterator = laneUplinks.iterator();
+          final HashTrieSet<RemoteWarpUplink> laneUplinks = laneUplinksIterator.next();
+          final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
           while (uplinksIterator.hasNext()) {
-            final RemoteHostUplink uplink = uplinksIterator.next();
+            final RemoteWarpUplink uplink = uplinksIterator.next();
             uplink.didDisconnect();
           }
         }
@@ -1097,12 +1094,12 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, Identity.class, "remoteIdentity");
 
   @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<RemoteHost, HashTrieMap<Uri, HashTrieMap<Uri, RemoteHostDownlink>>> DOWNLINKS =
-      AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, (Class<HashTrieMap<Uri, HashTrieMap<Uri, RemoteHostDownlink>>>) (Class<?>) HashTrieMap.class, "downlinks");
+  static final AtomicReferenceFieldUpdater<RemoteHost, HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>>> DOWNLINKS =
+      AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, (Class<HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>>>) (Class<?>) HashTrieMap.class, "downlinks");
 
   @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<RemoteHost, HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>>> UPLINKS =
-      AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, (Class<HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteHostUplink>>>>) (Class<?>) HashTrieMap.class, "uplinks");
+  static final AtomicReferenceFieldUpdater<RemoteHost, HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>>> UPLINKS =
+      AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, (Class<HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>>>) (Class<?>) HashTrieMap.class, "uplinks");
 
   static {
     int uriResolutionCacheSize;

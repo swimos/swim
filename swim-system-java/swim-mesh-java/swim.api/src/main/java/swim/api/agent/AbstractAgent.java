@@ -18,6 +18,7 @@ import java.net.InetSocketAddress;
 import java.security.Principal;
 import java.security.cert.Certificate;
 import java.util.Collection;
+import swim.api.Lane;
 import swim.api.Link;
 import swim.api.SwimContext;
 import swim.api.auth.Identity;
@@ -30,12 +31,12 @@ import swim.api.downlink.ListDownlink;
 import swim.api.downlink.MapDownlink;
 import swim.api.downlink.ValueDownlink;
 import swim.api.http.HttpDownlink;
+import swim.api.http.HttpLane;
 import swim.api.lane.CommandLane;
 import swim.api.lane.DemandLane;
 import swim.api.lane.DemandMapLane;
 import swim.api.lane.JoinMapLane;
 import swim.api.lane.JoinValueLane;
-import swim.api.lane.Lane;
 import swim.api.lane.LaneFactory;
 import swim.api.lane.ListLane;
 import swim.api.lane.MapLane;
@@ -228,44 +229,52 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
     return this.context.link();
   }
 
-  public FingerTrieSeq<Agent> traits() {
-    return this.context.traits();
+  public final Lane getLane(Uri laneUri) {
+    return this.context.getLane(laneUri);
   }
 
-  public Agent getTrait(Value props) {
-    return this.context.getTrait(props);
+  public final Lane openLane(Uri laneUri, Lane lane) {
+    return this.context.openLane(laneUri, lane);
   }
 
-  public Agent getTrait(String name) {
-    return this.context.getTrait(name);
+  public FingerTrieSeq<Agent> agents() {
+    return this.context.agents();
   }
 
-  public <A extends Agent> A getTrait(Class<A> agentClass) {
-    return this.context.getTrait(agentClass);
+  public Agent getAgent(Value props) {
+    return this.context.getAgent(props);
   }
 
-  public <A extends Agent> A addTrait(Value props, AgentFactory<A> agentFactory) {
-    return this.context.addTrait(props, agentFactory);
+  public Agent getAgent(String name) {
+    return this.context.getAgent(name);
   }
 
-  public <A extends Agent> A addTrait(String name, AgentFactory<A> agentFactory) {
-    return this.context.addTrait(name, agentFactory);
+  public <A extends Agent> A getAgent(Class<A> agentClass) {
+    return this.context.getAgent(agentClass);
   }
 
-  public <A extends Agent> A addTrait(Value props, Class<A> agentClass) {
-    return this.context.addTrait(props, agentClass);
+  public <A extends Agent> A addAgent(Value props, AgentFactory<A> agentFactory) {
+    return this.context.addAgent(props, agentFactory);
   }
 
-  public <A extends Agent> A addTrait(String name, Class<A> agentClass) {
-    return this.context.addTrait(name, agentClass);
+  public <A extends Agent> A addAgent(String name, AgentFactory<A> agentFactory) {
+    return this.context.addAgent(name, agentFactory);
   }
 
-  public void removeTrait(Value props) {
-    this.context.removeTrait(props);
+  public <A extends Agent> A addAgent(Value props, Class<A> agentClass) {
+    return this.context.addAgent(props, agentClass);
   }
 
-  public void removeTrait(String name) {
-    this.context.removeTrait(name);
+  public <A extends Agent> A addAgent(String name, Class<A> agentClass) {
+    return this.context.addAgent(name, agentClass);
+  }
+
+  public void removeAgent(Value props) {
+    this.context.removeAgent(props);
+  }
+
+  public void removeAgent(String name) {
+    this.context.removeAgent(name);
   }
 
   /**
@@ -431,6 +440,11 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
   @Override
   public final <K, V> DemandMapLane<K, V> demandMapLane() {
     return this.context.demandMapLane();
+  }
+
+  @Override
+  public final <V> HttpLane<V> httpLane() {
+    return this.context.httpLane();
   }
 
   @Override

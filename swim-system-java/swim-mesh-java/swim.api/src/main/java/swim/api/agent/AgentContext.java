@@ -14,8 +14,8 @@
 
 package swim.api.agent;
 
+import swim.api.Lane;
 import swim.api.Link;
-import swim.api.lane.Lane;
 import swim.api.lane.LaneFactory;
 import swim.api.ref.SwimRef;
 import swim.api.store.Store;
@@ -84,26 +84,6 @@ public interface AgentContext extends SwimRef, LaneFactory, Store, Log {
    */
   Link link();
 
-  FingerTrieSeq<Agent> traits();
-
-  Agent getTrait(Value props);
-
-  Agent getTrait(String name);
-
-  <A extends Agent> A getTrait(Class<? extends A> agentClass);
-
-  <A extends Agent> A addTrait(Value props, AgentFactory<A> agentFactory);
-
-  <A extends Agent> A addTrait(String name, AgentFactory<A> agentFactory);
-
-  <A extends Agent> A addTrait(Value props, Class<? extends A> agentClass);
-
-  <A extends Agent> A addTrait(String name, Class<? extends A> agentClass);
-
-  void removeTrait(Value props);
-
-  void removeTrait(String name);
-
   /**
    * Returns the {@code Lane} belonging to the {@code Agent} managed by this
    * {@code AgentContext} that is addressable by {@code laneUri}, or {@code
@@ -115,4 +95,24 @@ public interface AgentContext extends SwimRef, LaneFactory, Store, Log {
    * Registers {@code lane} with {@code laneUri} and returns {@code lane}.
    */
   Lane openLane(Uri laneUri, Lane lane);
+
+  FingerTrieSeq<Agent> agents();
+
+  Agent getAgent(Value props);
+
+  Agent getAgent(String name);
+
+  <A extends Agent> A getAgent(Class<? extends A> agentClass);
+
+  <A extends Agent> A addAgent(Value props, AgentFactory<A> agentFactory);
+
+  <A extends Agent> A addAgent(String name, AgentFactory<A> agentFactory);
+
+  <A extends Agent> A addAgent(Value props, Class<? extends A> agentClass);
+
+  <A extends Agent> A addAgent(String name, Class<? extends A> agentClass);
+
+  void removeAgent(Value props);
+
+  void removeAgent(String name);
 }

@@ -14,89 +14,15 @@
 
 package swim.api.http;
 
-import java.net.InetSocketAddress;
-import java.security.Principal;
-import java.security.cert.Certificate;
-import java.util.Collection;
-import swim.api.Link;
-import swim.api.auth.Identity;
+import swim.api.Uplink;
 import swim.http.HttpRequest;
-import swim.uri.Uri;
 
-public interface HttpUplink extends Link {
-  @Override
-  Uri hostUri();
-
-  @Override
-  Uri nodeUri();
-
-  @Override
-  Uri laneUri();
-
-  Uri requestUri();
-
+public interface HttpUplink extends Uplink, HttpLink {
   HttpRequest<?> request();
-
-  @Override
-  boolean isConnected();
-
-  @Override
-  boolean isRemote();
-
-  @Override
-  boolean isSecure();
-
-  @Override
-  String securityProtocol();
-
-  @Override
-  String cipherSuite();
-
-  @Override
-  InetSocketAddress localAddress();
-
-  @Override
-  Identity localIdentity();
-
-  @Override
-  Principal localPrincipal();
-
-  @Override
-  Collection<Certificate> localCertificates();
-
-  @Override
-  InetSocketAddress remoteAddress();
-
-  @Override
-  Identity remoteIdentity();
-
-  @Override
-  Principal remotePrincipal();
-
-  @Override
-  Collection<Certificate> remoteCertificates();
-
-  @Override
-  void close();
 
   @Override
   HttpUplink observe(Object observer);
 
   @Override
   HttpUplink unobserve(Object observer);
-
-  @Override
-  void trace(Object message);
-
-  @Override
-  void debug(Object message);
-
-  @Override
-  void info(Object message);
-
-  @Override
-  void warn(Object message);
-
-  @Override
-  void error(Object message);
 }

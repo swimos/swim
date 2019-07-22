@@ -19,6 +19,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.HostMethod;
 import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
+import swim.dynamic.api.warp.HostWarpLane;
 import swim.dynamic.observable.HostObservableSpatialMap;
 
 public final class HostSpatialLane {
@@ -31,7 +32,7 @@ public final class HostSpatialLane {
   static {
     final JavaHostObjectType<SpatialLane<Object, Object, Object>> type = new JavaHostObjectType<>(SpatialLane.class);
     TYPE = type;
-    type.inheritType(HostLane.TYPE);
+    type.inheritType(HostWarpLane.TYPE);
     type.inheritType(HostObservableSpatialMap.TYPE);
     type.addMember(new HostSpatialLaneIsResident());
     type.addMember(new HostSpatialLaneIsTransient());

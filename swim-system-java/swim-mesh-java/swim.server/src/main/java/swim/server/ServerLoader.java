@@ -27,7 +27,7 @@ import swim.kernel.KernelException;
 import swim.kernel.KernelLoader;
 import swim.remote.RemoteKernel;
 import swim.service.ServiceKernel;
-import swim.service.warp.WarpServiceKernel;
+import swim.service.web.WebServiceKernel;
 import swim.store.mem.MemStoreKernel;
 import swim.structure.Item;
 import swim.structure.Value;
@@ -38,7 +38,7 @@ public final class ServerLoader {
   }
 
   public static Kernel loadServer() {
-    return loadServer(ServerLoader.class.getClassLoader());
+    return loadServer(KernelLoader.class.getClassLoader());
   }
 
   public static Kernel loadServer(ClassLoader classLoader) {
@@ -60,7 +60,7 @@ public final class ServerLoader {
   }
 
   public static Kernel loadServerStack() {
-    return loadServerStack(ServerLoader.class.getClassLoader());
+    return loadServerStack(KernelLoader.class.getClassLoader());
   }
 
   public static Kernel loadServerStack(ClassLoader classLoader) {
@@ -88,8 +88,8 @@ public final class ServerLoader {
     if (kernel.unwrapKernel(ServiceKernel.class) == null) {
       kernel = kernel.injectKernel(new ServiceKernel());
     }
-    if (kernel.unwrapKernel(WarpServiceKernel.class) == null) {
-      kernel = kernel.injectKernel(new WarpServiceKernel());
+    if (kernel.unwrapKernel(WebServiceKernel.class) == null) {
+      kernel = kernel.injectKernel(new WebServiceKernel());
     }
     if (kernel.unwrapKernel(AuthenticatorKernel.class) == null) {
       kernel = kernel.injectKernel(new AuthenticatorKernel());

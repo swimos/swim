@@ -19,7 +19,9 @@ import swim.structure.Num;
 import swim.structure.Value;
 
 public final class LinkKeys {
-  private LinkKeys() { }
+  private LinkKeys() {
+    // static
+  }
 
   static final AtomicLong LINK_COUNT = new AtomicLong(0);
 

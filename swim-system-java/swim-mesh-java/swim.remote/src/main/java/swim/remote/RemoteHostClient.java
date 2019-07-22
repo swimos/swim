@@ -153,7 +153,6 @@ final class RemoteHostClientBinding extends AbstractWarpClient {
   @Override
   public void setHttpClientContext(HttpClientContext context) {
     super.setHttpClientContext(context);
-    this.webSocket.setWebSocketContext(this);
   }
 
   @Override

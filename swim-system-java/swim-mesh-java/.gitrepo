@@ -6,7 +6,7 @@
 [subrepo]
   remote = git@github.com:swimos/swim-mesh-java.git
   branch = master
-	commit = fa3f4e10a7fba3008bd1450bc89c5802af01fb03
-	parent = a5b5aa0a3a7a56e33b862bc4543e3dc485b59b9e
+	commit = f9ad626bed3cb1c32567d96e910688b68c12d330
+	parent = fa8bc99cdff1f6b616c4375027e4e11565b55973
 	method = merge
 	cmdver = 0.4.0

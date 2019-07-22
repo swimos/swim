@@ -14,12 +14,12 @@
 
 package swim.runtime;
 
+import swim.api.Downlink;
 import swim.api.agent.Agent;
 import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
-import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.collections.FingerTrieSeq;
@@ -239,11 +239,6 @@ public class MeshProxy implements MeshBinding, MeshContext {
   }
 
   @Override
-  public void httpDownlink(HttpBinding http) {
-    this.meshContext.httpDownlink(http);
-  }
-
-  @Override
   public void pushDown(PushRequest pushRequest) {
     this.meshContext.pushDown(pushRequest);
   }
@@ -251,11 +246,6 @@ public class MeshProxy implements MeshBinding, MeshContext {
   @Override
   public void openUplink(LinkBinding link) {
     this.meshBinding.openUplink(link);
-  }
-
-  @Override
-  public void httpUplink(HttpBinding http) {
-    this.meshBinding.httpUplink(http);
   }
 
   @Override

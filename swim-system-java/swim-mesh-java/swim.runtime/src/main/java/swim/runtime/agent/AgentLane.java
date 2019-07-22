@@ -14,12 +14,11 @@
 
 package swim.runtime.agent;
 
+import swim.api.Downlink;
 import swim.api.auth.Identity;
-import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
-import swim.runtime.HttpBinding;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneContext;
 import swim.runtime.LinkBinding;
@@ -125,11 +124,6 @@ public class AgentLane implements LaneContext {
   @Override
   public void closeDownlink(LinkBinding link) {
     // nop
-  }
-
-  @Override
-  public void httpDownlink(HttpBinding http) {
-    this.node.httpDownlink(http);
   }
 
   @Override

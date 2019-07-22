@@ -22,12 +22,12 @@ import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
 import swim.api.agent.AgentRoute;
 import swim.api.downlink.ListDownlink;
-import swim.api.downlink.function.DidReceive;
-import swim.api.downlink.function.WillReceive;
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
 import swim.api.lane.ListLane;
 import swim.api.plane.AbstractPlane;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidReceive;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillReceive;
 import swim.codec.Format;
 import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
@@ -38,7 +38,7 @@ import swim.observable.function.WillMoveIndex;
 import swim.observable.function.WillRemoveIndex;
 import swim.observable.function.WillUpdateIndex;
 import swim.recon.Recon;
-import swim.service.warp.WarpServiceDef;
+import swim.service.web.WebServiceDef;
 import swim.structure.Value;
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -133,7 +133,7 @@ public class ListLaneSpec {
     }
 
     try {
-      kernel.openService(WarpServiceDef.standard().port(53556).spaceName("test"));
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
       final ListDownlink<String> listLink = plane.downlinkList()
           .valueClass(String.class)
@@ -145,7 +145,7 @@ public class ListLaneSpec {
       listLink.add(0, "a");
       listLink.add(1, "b");
       listLink.add(2, "c");
-      linkDidReceive.await(2, TimeUnit.SECONDS);
+      linkDidReceive.await(1, TimeUnit.SECONDS);
       linkDidUpdate.await(1, TimeUnit.SECONDS);
       assertEquals(linkDidReceive.getCount(), 0);
       assertEquals(linkDidUpdate.getCount(), 0);
@@ -211,7 +211,7 @@ public class ListLaneSpec {
     }
 
     try {
-      kernel.openService(WarpServiceDef.standard().port(53556).spaceName("test"));
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
       final ListDownlink<String> listLink = plane.downlinkList()
           .valueClass(String.class)
@@ -293,7 +293,7 @@ public class ListLaneSpec {
     }
 
     try {
-      kernel.openService(WarpServiceDef.standard().port(53556).spaceName("test"));
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
       final ListDownlink<String> listLink = plane.downlinkList()
           .valueClass(String.class)
@@ -368,7 +368,7 @@ public class ListLaneSpec {
     }
 
     try {
-      kernel.openService(WarpServiceDef.standard().port(53556).spaceName("test"));
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
       final ListDownlink<String> listLink = plane.downlinkList()
           .valueClass(String.class)

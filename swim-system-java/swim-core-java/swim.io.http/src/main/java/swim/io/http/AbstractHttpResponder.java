@@ -57,12 +57,7 @@ public abstract class AbstractHttpResponder<T> implements HttpResponder<T>, IpCo
   }
 
   @Override
-  public void willBecome(IpSocket socket) {
-    // stub
-  }
-
-  @Override
-  public void didBecome(IpSocket socket) {
+  public void doRespond(HttpRequest<T> request) {
     // stub
   }
 
@@ -73,6 +68,16 @@ public abstract class AbstractHttpResponder<T> implements HttpResponder<T>, IpCo
 
   @Override
   public void didRespond(HttpResponse<?> response) {
+    // stub
+  }
+
+  @Override
+  public void willBecome(IpSocket socket) {
+    // stub
+  }
+
+  @Override
+  public void didBecome(IpSocket socket) {
     // stub
   }
 

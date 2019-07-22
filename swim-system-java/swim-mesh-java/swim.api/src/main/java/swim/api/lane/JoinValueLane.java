@@ -17,22 +17,17 @@ package swim.api.lane;
 import java.util.Iterator;
 import java.util.Map;
 import swim.api.downlink.ValueDownlink;
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
-import swim.api.http.function.DecodeRequestHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRespondHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
 import swim.api.lane.function.DidDownlinkValue;
-import swim.api.lane.function.DidEnter;
-import swim.api.lane.function.DidLeave;
-import swim.api.lane.function.DidUplink;
 import swim.api.lane.function.WillDownlinkValue;
-import swim.api.lane.function.WillEnter;
-import swim.api.lane.function.WillLeave;
-import swim.api.lane.function.WillUplink;
+import swim.api.warp.WarpLane;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidEnter;
+import swim.api.warp.function.DidLeave;
+import swim.api.warp.function.DidUplink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillEnter;
+import swim.api.warp.function.WillLeave;
+import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableMap;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidRemoveKey;
@@ -42,7 +37,7 @@ import swim.observable.function.WillRemoveKey;
 import swim.observable.function.WillUpdateKey;
 import swim.structure.Form;
 
-public interface JoinValueLane<K, V> extends Lane, Iterable<Map.Entry<K, V>>, ObservableMap<K, V> {
+public interface JoinValueLane<K, V> extends WarpLane, Iterable<Map.Entry<K, V>>, ObservableMap<K, V> {
   Form<K> keyForm();
 
   <K2> JoinValueLane<K2, V> keyForm(Form<K2> keyForm);
@@ -62,9 +57,6 @@ public interface JoinValueLane<K, V> extends Lane, Iterable<Map.Entry<K, V>>, Ob
   boolean isTransient();
 
   JoinValueLane<K, V> isTransient(boolean isTransient);
-
-  @Override
-  JoinValueLane<K, V> isSigned(boolean isSigned);
 
   @Override
   JoinValueLane<K, V> observe(Object observer);
@@ -117,24 +109,6 @@ public interface JoinValueLane<K, V> extends Lane, Iterable<Map.Entry<K, V>>, Ob
 
   @Override
   JoinValueLane<K, V> didLeave(DidLeave didLeave);
-
-  @Override
-  JoinValueLane<K, V> decodeRequest(DecodeRequestHttp<Object> decodeRequest);
-
-  @Override
-  JoinValueLane<K, V> willRequest(WillRequestHttp<?> willRequest);
-
-  @Override
-  JoinValueLane<K, V> didRequest(DidRequestHttp<Object> didRequest);
-
-  @Override
-  JoinValueLane<K, V> doRespond(DoRespondHttp<Object> doRespond);
-
-  @Override
-  JoinValueLane<K, V> willRespond(WillRespondHttp<?> willRespond);
-
-  @Override
-  JoinValueLane<K, V> didRespond(DidRespondHttp<?> didRespond);
 
   ValueDownlink<V> downlink(K key);
 

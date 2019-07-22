@@ -19,6 +19,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.HostMethod;
 import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
+import swim.dynamic.api.warp.HostWarpLane;
 import swim.dynamic.observable.HostObservableList;
 
 public final class HostListLane {
@@ -31,7 +32,7 @@ public final class HostListLane {
   static {
     final JavaHostObjectType<ListLane<Object>> type = new JavaHostObjectType<>(ListLane.class);
     TYPE = type;
-    type.inheritType(HostLane.TYPE);
+    type.inheritType(HostWarpLane.TYPE);
     // FIXME: type.inheritType(HostKeyedList.TYPE);
     type.inheritType(HostObservableList.TYPE);
     type.addMember(new HostListLaneIsResident());

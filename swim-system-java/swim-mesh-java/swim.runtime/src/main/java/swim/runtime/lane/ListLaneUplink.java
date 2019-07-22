@@ -17,16 +17,16 @@ package swim.runtime.lane;
 import java.util.Iterator;
 import java.util.Map;
 import swim.concurrent.Stage;
-import swim.runtime.LinkBinding;
-import swim.runtime.link.ListLinkDelta;
-import swim.runtime.uplink.ListUplinkModem;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.ListLinkDelta;
+import swim.runtime.warp.ListUplinkModem;
 import swim.structure.Value;
 import swim.warp.SyncRequest;
 
 public class ListLaneUplink extends ListUplinkModem {
   final ListLaneModel laneBinding;
 
-  public ListLaneUplink(ListLaneModel laneBinding, LinkBinding linkBinding) {
+  public ListLaneUplink(ListLaneModel laneBinding, WarpBinding linkBinding) {
     super(linkBinding);
     this.laneBinding = laneBinding;
   }

@@ -16,13 +16,12 @@ package swim.runtime.scope;
 
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.api.downlink.Downlink;
+import swim.api.Downlink;
 import swim.api.policy.Policy;
 import swim.collections.HashTrieSet;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
-import swim.runtime.HttpBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.PushRequest;
 import swim.store.StoreBinding;
@@ -100,11 +99,6 @@ public abstract class Scope implements CellContext {
       oldLinks = this.links;
       newLinks = oldLinks.removed(link);
     } while (oldLinks != newLinks && !LINKS.compareAndSet(this, oldLinks, newLinks));
-  }
-
-  @Override
-  public void httpDownlink(HttpBinding http) {
-    // TODO
   }
 
   @Override

@@ -16,34 +16,29 @@ package swim.runtime.lane;
 
 import java.util.Iterator;
 import java.util.Map;
+import swim.api.Lane;
 import swim.api.Link;
 import swim.api.SwimContext;
 import swim.api.agent.AgentContext;
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
-import swim.api.http.function.DecodeRequestHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRespondHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
 import swim.api.lane.DemandMapLane;
-import swim.api.lane.Lane;
-import swim.api.lane.function.DidEnter;
-import swim.api.lane.function.DidLeave;
-import swim.api.lane.function.DidUplink;
 import swim.api.lane.function.OnCueKey;
 import swim.api.lane.function.OnSyncMap;
-import swim.api.lane.function.WillEnter;
-import swim.api.lane.function.WillLeave;
-import swim.api.lane.function.WillUplink;
-import swim.api.uplink.Uplink;
+import swim.api.warp.WarpUplink;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidEnter;
+import swim.api.warp.function.DidLeave;
+import swim.api.warp.function.DidUplink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillEnter;
+import swim.api.warp.function.WillLeave;
+import swim.api.warp.function.WillUplink;
 import swim.concurrent.Conts;
+import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 import swim.structure.Slot;
 import swim.structure.Value;
 
-public class DemandMapLaneView<K, V> extends LaneView implements DemandMapLane<K, V> {
+public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLane<K, V> {
   protected final AgentContext agentContext;
   protected Form<K> keyForm;
   protected Form<V> valueForm;
@@ -126,30 +121,20 @@ public class DemandMapLaneView<K, V> extends LaneView implements DemandMapLane<K
   }
 
   @Override
-  public final boolean isSigned() {
-    return false; // TODO
-  }
-
-  @Override
-  public DemandMapLaneView<K, V> isSigned(boolean isSigned) {
-    return this; // TODO
-  }
-
-  @Override
   public void close() {
     this.laneBinding.closeLaneView(this);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public DemandMapLaneView<K, V> observe(Object observer) {
-    return (DemandMapLaneView<K, V>) super.observe(observer);
+    super.observe(observer);
+    return this;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public DemandMapLaneView<K, V> unobserve(Object observer) {
-    return (DemandMapLaneView<K, V>) super.unobserve(observer);
+    super.unobserve(observer);
+    return this;
   }
 
   @Override
@@ -202,38 +187,8 @@ public class DemandMapLaneView<K, V> extends LaneView implements DemandMapLane<K
     return observe(didLeave);
   }
 
-  @Override
-  public DemandMapLaneView<K, V> decodeRequest(DecodeRequestHttp<Object> decodeRequest) {
-    return observe(decodeRequest);
-  }
-
-  @Override
-  public DemandMapLaneView<K, V> willRequest(WillRequestHttp<?> willRequest) {
-    return observe(willRequest);
-  }
-
-  @Override
-  public DemandMapLaneView<K, V> didRequest(DidRequestHttp<Object> didRequest) {
-    return observe(didRequest);
-  }
-
-  @Override
-  public DemandMapLaneView<K, V> doRespond(DoRespondHttp<Object> doRespond) {
-    return observe(doRespond);
-  }
-
-  @Override
-  public DemandMapLaneView<K, V> willRespond(WillRespondHttp<?> willRespond) {
-    return observe(willRespond);
-  }
-
-  @Override
-  public DemandMapLaneView<K, V> didRespond(DidRespondHttp<?> didRespond) {
-    return observe(didRespond);
-  }
-
   @SuppressWarnings("unchecked")
-  protected V dispatchOnCue(K key, Uplink uplink) {
+  public V dispatchOnCue(K key, WarpUplink uplink) {
     final Lane lane = SwimContext.getLane();
     final Link link = SwimContext.getLink();
     SwimContext.setLane(this);
@@ -279,7 +234,7 @@ public class DemandMapLaneView<K, V> extends LaneView implements DemandMapLane<K
   }
 
   @SuppressWarnings("unchecked")
-  protected Iterator<Map.Entry<K, V>> dispatchOnSync(Uplink uplink) {
+  public Iterator<Map.Entry<K, V>> dispatchOnSync(WarpUplink uplink) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     SwimContext.setLane(this);
@@ -324,7 +279,7 @@ public class DemandMapLaneView<K, V> extends LaneView implements DemandMapLane<K
     }
   }
 
-  Value nextDownCue(Value key, Uplink uplink) {
+  Value nextDownCue(Value key, WarpUplink uplink) {
     final K keyObject = this.keyForm.cast(key);
     final V object = dispatchOnCue(keyObject, uplink);
     if (object != null) {
@@ -335,7 +290,7 @@ public class DemandMapLaneView<K, V> extends LaneView implements DemandMapLane<K
   }
 
   @SuppressWarnings("unchecked")
-  Iterator<Map.Entry<Value, Value>> syncKeys(Uplink uplink) {
+  Iterator<Map.Entry<Value, Value>> syncKeys(WarpUplink uplink) {
     final Iterator<Map.Entry<K, V>> iterator = dispatchOnSync(uplink);
     if (iterator != null) {
       if (this.keyForm == Form.forValue() && this.valueForm == Form.forValue()) {

@@ -16,6 +16,10 @@ package swim.runtime.downlink;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import swim.concurrent.Stage;
+import swim.runtime.DownlinkRelay;
+import swim.runtime.DownlinkView;
+import swim.runtime.warp.DemandDownlinkModem;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -79,11 +83,10 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
   public <V> V set(ValueDownlinkView<V> view, V newObject) {
     final Form<V> valueForm = view.valueForm;
     final Value newValue = valueForm.mold(newObject).toValue();
-    final ValueDownlinkRelaySet relay = new ValueDownlinkRelaySet(this, newValue);
+    final ValueDownlinkRelaySet relay = new ValueDownlinkRelaySet(this, view.stage(), newValue);
     relay.valueForm = (Form<Object>) valueForm;
     relay.oldObject = newObject;
     relay.newObject = newObject;
-    relay.stage = view.stage;
     relay.run();
     if (relay.isDone()) {
       if (relay.valueForm != valueForm && valueForm != null) {
@@ -136,15 +139,22 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
     this.newValue = newValue;
   }
 
+  ValueDownlinkRelaySet(ValueDownlinkModel model, Stage stage, Value newValue) {
+    super(model, 1, 3, stage);
+    this.message = null;
+    this.oldValue = newValue;
+    this.newValue = newValue;
+  }
+
   ValueDownlinkRelaySet(ValueDownlinkModel model, Value newValue) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.message = null;
     this.oldValue = newValue;
     this.newValue = newValue;
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 1) {
       this.newValue = this.model.willSet(this.newValue);
     } else if (phase == 2) {
@@ -159,7 +169,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(ValueDownlinkView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ValueDownlinkView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -216,7 +226,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {

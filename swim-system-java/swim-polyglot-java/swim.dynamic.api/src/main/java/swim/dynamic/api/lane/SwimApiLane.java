@@ -27,7 +27,6 @@ public final class SwimApiLane {
   static {
     final JavaHostPackage hostPkg = new JavaHostPackage("swim.api.lane");
     PACKAGE = hostPkg;
-    hostPkg.addHostType(HostLane.TYPE);
     hostPkg.addHostType(HostCommandLane.TYPE);
     hostPkg.addHostType(HostDemandLane.TYPE);
     hostPkg.addHostType(HostDemandMapLane.TYPE);

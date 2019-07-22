@@ -21,7 +21,7 @@ test {
       jvmArgs += [
         '--add-reads', 'swim.js=swim.fabric',
         '--add-reads', 'swim.js=swim.server',
-        '--add-reads', 'swim.js=swim.service.warp',
+        '--add-reads', 'swim.js=swim.service.web',
       ]
     }
   }

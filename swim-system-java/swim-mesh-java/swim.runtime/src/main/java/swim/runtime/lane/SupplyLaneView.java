@@ -15,24 +15,19 @@
 package swim.runtime.lane;
 
 import swim.api.agent.AgentContext;
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
-import swim.api.http.function.DecodeRequestHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRespondHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
 import swim.api.lane.SupplyLane;
-import swim.api.lane.function.DidEnter;
-import swim.api.lane.function.DidLeave;
-import swim.api.lane.function.DidUplink;
-import swim.api.lane.function.WillEnter;
-import swim.api.lane.function.WillLeave;
-import swim.api.lane.function.WillUplink;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidEnter;
+import swim.api.warp.function.DidLeave;
+import swim.api.warp.function.DidUplink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillEnter;
+import swim.api.warp.function.WillLeave;
+import swim.api.warp.function.WillUplink;
+import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 
-public class SupplyLaneView<V> extends LaneView implements SupplyLane<V> {
+public class SupplyLaneView<V> extends WarpLaneView implements SupplyLane<V> {
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
 
@@ -87,30 +82,20 @@ public class SupplyLaneView<V> extends LaneView implements SupplyLane<V> {
   }
 
   @Override
-  public final boolean isSigned() {
-    return false; // TODO
-  }
-
-  @Override
-  public SupplyLaneView<V> isSigned(boolean isSigned) {
-    return this; // TODO
-  }
-
-  @Override
   public void close() {
     this.laneBinding.closeLaneView(this);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public SupplyLaneView<V> observe(Object observer) {
-    return (SupplyLaneView<V>) super.observe(observer);
+    super.observe(observer);
+    return this;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public SupplyLaneView<V> unobserve(Object observer) {
-    return (SupplyLaneView<V>) super.unobserve(observer);
+    super.unobserve(observer);
+    return this;
   }
 
   @Override
@@ -151,36 +136,6 @@ public class SupplyLaneView<V> extends LaneView implements SupplyLane<V> {
   @Override
   public SupplyLaneView<V> didLeave(DidLeave didLeave) {
     return observe(didLeave);
-  }
-
-  @Override
-  public SupplyLaneView<V> decodeRequest(DecodeRequestHttp<Object> decodeRequest) {
-    return observe(decodeRequest);
-  }
-
-  @Override
-  public SupplyLaneView<V> willRequest(WillRequestHttp<?> willRequest) {
-    return observe(willRequest);
-  }
-
-  @Override
-  public SupplyLaneView<V> didRequest(DidRequestHttp<Object> didRequest) {
-    return observe(didRequest);
-  }
-
-  @Override
-  public SupplyLaneView<V> doRespond(DoRespondHttp<Object> doRespond) {
-    return observe(doRespond);
-  }
-
-  @Override
-  public SupplyLaneView<V> willRespond(WillRespondHttp<?> willRespond) {
-    return observe(willRespond);
-  }
-
-  @Override
-  public SupplyLaneView<V> didRespond(DidRespondHttp<?> didRespond) {
-    return observe(didRespond);
   }
 
   @Override

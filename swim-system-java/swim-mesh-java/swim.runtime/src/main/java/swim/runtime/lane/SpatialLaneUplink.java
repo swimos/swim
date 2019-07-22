@@ -17,8 +17,8 @@ package swim.runtime.lane;
 import java.util.Iterator;
 import java.util.Map;
 import swim.concurrent.Stage;
-import swim.runtime.LinkBinding;
-import swim.runtime.uplink.PartialUplinkModem;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.PartialUplinkModem;
 import swim.structure.Attr;
 import swim.structure.Record;
 import swim.structure.Value;
@@ -27,7 +27,7 @@ import swim.warp.SyncRequest;
 public class SpatialLaneUplink<S> extends PartialUplinkModem {
   final SpatialLaneModel<S> laneBinding;
 
-  public SpatialLaneUplink(SpatialLaneModel<S> laneBinding, LinkBinding linkBinding) {
+  public SpatialLaneUplink(SpatialLaneModel<S> laneBinding, WarpBinding linkBinding) {
     super(linkBinding);
     this.laneBinding = laneBinding;
   }

@@ -14,10 +14,6 @@
 
 package swim.api.service;
 
-import swim.uri.UriScheme;
-
 public interface ServiceDef {
   String serviceName();
-
-  UriScheme scheme();
 }

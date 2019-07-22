@@ -14,25 +14,20 @@
 
 package swim.api.lane;
 
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
-import swim.api.http.function.DecodeRequestHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRespondHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
-import swim.api.lane.function.DidEnter;
-import swim.api.lane.function.DidLeave;
-import swim.api.lane.function.DidUplink;
 import swim.api.lane.function.OnCueKey;
 import swim.api.lane.function.OnSyncMap;
-import swim.api.lane.function.WillEnter;
-import swim.api.lane.function.WillLeave;
-import swim.api.lane.function.WillUplink;
+import swim.api.warp.WarpLane;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidEnter;
+import swim.api.warp.function.DidLeave;
+import swim.api.warp.function.DidUplink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillEnter;
+import swim.api.warp.function.WillLeave;
+import swim.api.warp.function.WillUplink;
 import swim.structure.Form;
 
-public interface DemandMapLane<K, V> extends Lane {
+public interface DemandMapLane<K, V> extends WarpLane {
   Form<K> keyForm();
 
   <K2> DemandMapLane<K2, V> keyForm(Form<K2> keyForm);
@@ -44,9 +39,6 @@ public interface DemandMapLane<K, V> extends Lane {
   <V2> DemandMapLane<K, V2> valueForm(Form<V2> valueForm);
 
   <V2> DemandMapLane<K, V2> valueClass(Class<V2> valueClass);
-
-  @Override
-  DemandMapLane<K, V> isSigned(boolean isSigned);
 
   @Override
   DemandMapLane<K, V> observe(Object observer);
@@ -81,24 +73,6 @@ public interface DemandMapLane<K, V> extends Lane {
 
   @Override
   DemandMapLane<K, V> didLeave(DidLeave didLeave);
-
-  @Override
-  DemandMapLane<K, V> decodeRequest(DecodeRequestHttp<Object> decodeRequest);
-
-  @Override
-  DemandMapLane<K, V> willRequest(WillRequestHttp<?> willRequest);
-
-  @Override
-  DemandMapLane<K, V> didRequest(DidRequestHttp<Object> didRequest);
-
-  @Override
-  DemandMapLane<K, V> doRespond(DoRespondHttp<Object> doRespond);
-
-  @Override
-  DemandMapLane<K, V> willRespond(WillRespondHttp<?> willRespond);
-
-  @Override
-  DemandMapLane<K, V> didRespond(DidRespondHttp<?> didRespond);
 
   void cue(K key);
 

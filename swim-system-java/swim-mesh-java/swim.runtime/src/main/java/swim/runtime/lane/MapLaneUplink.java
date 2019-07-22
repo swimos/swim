@@ -15,8 +15,8 @@
 package swim.runtime.lane;
 
 import swim.concurrent.Stage;
-import swim.runtime.LinkBinding;
-import swim.runtime.uplink.PartialUplinkModem;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.PartialUplinkModem;
 import swim.structure.Attr;
 import swim.structure.Record;
 import swim.structure.Value;
@@ -25,7 +25,7 @@ import swim.warp.SyncRequest;
 public class MapLaneUplink extends PartialUplinkModem {
   final MapLaneModel laneBinding;
 
-  public MapLaneUplink(MapLaneModel laneBinding, LinkBinding linkBinding) {
+  public MapLaneUplink(MapLaneModel laneBinding, WarpBinding linkBinding) {
     super(linkBinding);
     this.laneBinding = laneBinding;
   }

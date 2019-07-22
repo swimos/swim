@@ -6,7 +6,7 @@
 [subrepo]
   remote = git@github.com:swimos/swim-polyglot-java.git
   branch = master
-	commit = a8d5a77ad5126bca7874375d2605a52c5e451913
-	parent = cbeca65dc521b367111d543d7e58e6422a56d829
+	commit = 84183a142fff864f4c18e803d866a41944fa609c
+	parent = 5dcd12b3237d00daae556efa74d639f056ae4452
 	method = merge
 	cmdver = 0.4.0

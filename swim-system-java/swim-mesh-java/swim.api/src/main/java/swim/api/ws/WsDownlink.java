@@ -14,12 +14,9 @@
 
 package swim.api.ws;
 
-import java.net.InetSocketAddress;
-import java.security.Principal;
-import java.security.cert.Certificate;
-import java.util.Collection;
-import swim.api.Link;
-import swim.api.auth.Identity;
+import swim.api.Downlink;
+import swim.api.function.DidClose;
+import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
 import swim.api.ws.function.DidReadFrameWs;
@@ -33,54 +30,8 @@ import swim.uri.Uri;
 import swim.ws.WsControl;
 import swim.ws.WsData;
 
-public interface WsDownlink<I, O> extends Link {
-  @Override
-  Uri hostUri();
-
-  @Override
-  Uri nodeUri();
-
-  @Override
-  Uri laneUri();
-
-  @Override
-  boolean isConnected();
-
-  @Override
-  boolean isRemote();
-
-  @Override
-  boolean isSecure();
-
-  @Override
-  String securityProtocol();
-
-  @Override
-  String cipherSuite();
-
-  @Override
-  InetSocketAddress localAddress();
-
-  @Override
-  Identity localIdentity();
-
-  @Override
-  Principal localPrincipal();
-
-  @Override
-  Collection<Certificate> localCertificates();
-
-  @Override
-  InetSocketAddress remoteAddress();
-
-  @Override
-  Identity remoteIdentity();
-
-  @Override
-  Principal remotePrincipal();
-
-  @Override
-  Collection<Certificate> remoteCertificates();
+public interface WsDownlink<I, O> extends Downlink, WsLink {
+  WsDownlink<I, O> requestUri(Uri requestUri);
 
   @Override
   WsDownlink<I, O> observe(Object observer);
@@ -88,45 +39,36 @@ public interface WsDownlink<I, O> extends Link {
   @Override
   WsDownlink<I, O> unobserve(Object observer);
 
-  WsLane<I, O> willUpgrade(WillUpgradeWs willUpgrade);
+  WsDownlink<I, O> willUpgrade(WillUpgradeWs willUpgrade);
 
-  WsLane<I, O> doUpgrade(DoUpgradeWs doUpgrade);
+  WsDownlink<I, O> doUpgrade(DoUpgradeWs doUpgrade);
 
-  WsLane<I, O> didUpgrade(DidUpgradeWs didUpgrade);
+  WsDownlink<I, O> didUpgrade(DidUpgradeWs didUpgrade);
 
-  WsLane<I, O> willReadFrame(WillReadFrameWs<I> willReadFrame);
+  WsDownlink<I, O> willReadFrame(WillReadFrameWs<I> willReadFrame);
 
-  WsLane<I, O> didReadFrame(DidReadFrameWs<I> didReadFrame);
+  WsDownlink<I, O> didReadFrame(DidReadFrameWs<I> didReadFrame);
 
-  WsLane<I, O> willWriteFrame(WillWriteFrameWs<O> willWriteFrame);
+  WsDownlink<I, O> willWriteFrame(WillWriteFrameWs<O> willWriteFrame);
 
-  WsLane<I, O> didWriteFrame(DidWriteFrameWs<O> didWriteFrame);
+  WsDownlink<I, O> didWriteFrame(DidWriteFrameWs<O> didWriteFrame);
 
+  @Override
+  WsDownlink<I, O> didConnect(DidConnect didConnect);
+
+  @Override
   WsDownlink<I, O> didDisconnect(DidDisconnect didDisconnect);
 
+  @Override
+  WsDownlink<I, O> didClose(DidClose didClose);
+
+  @Override
   WsDownlink<I, O> didFail(DidFail didFail);
 
+  @Override
   WsDownlink<I, O> open();
 
   <O2 extends O> void write(WsData<O2> frame);
 
   <O2 extends O> void write(WsControl<?, O2> frame);
-
-  @Override
-  void close();
-
-  @Override
-  void trace(Object message);
-
-  @Override
-  void debug(Object message);
-
-  @Override
-  void info(Object message);
-
-  @Override
-  void warn(Object message);
-
-  @Override
-  void error(Object message);
 }

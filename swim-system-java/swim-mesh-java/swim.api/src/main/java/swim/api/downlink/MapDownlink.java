@@ -15,19 +15,20 @@
 package swim.api.downlink;
 
 import java.util.Map;
-import swim.api.downlink.function.DidLink;
-import swim.api.downlink.function.DidReceive;
-import swim.api.downlink.function.DidSync;
-import swim.api.downlink.function.DidUnlink;
-import swim.api.downlink.function.WillLink;
-import swim.api.downlink.function.WillReceive;
-import swim.api.downlink.function.WillSync;
-import swim.api.downlink.function.WillUnlink;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
-import swim.api.function.WillCommand;
+import swim.api.warp.WarpDownlink;
+import swim.api.warp.function.DidLink;
+import swim.api.warp.function.DidReceive;
+import swim.api.warp.function.DidSync;
+import swim.api.warp.function.DidUnlink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillLink;
+import swim.api.warp.function.WillReceive;
+import swim.api.warp.function.WillSync;
+import swim.api.warp.function.WillUnlink;
 import swim.observable.ObservableOrderedMap;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
@@ -46,7 +47,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Cursor;
 
-public interface MapDownlink<K, V> extends Downlink, ObservableOrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapDownlink<K, V>> {
+public interface MapDownlink<K, V> extends WarpDownlink, ObservableOrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapDownlink<K, V>> {
   @Override
   MapDownlink<K, V> hostUri(Uri hostUri);
 

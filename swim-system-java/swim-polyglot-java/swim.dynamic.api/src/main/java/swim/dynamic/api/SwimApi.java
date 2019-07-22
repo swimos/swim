@@ -21,6 +21,7 @@ import swim.dynamic.JavaHostPackage;
 import swim.dynamic.api.agent.SwimApiAgent;
 import swim.dynamic.api.lane.SwimApiLane;
 import swim.dynamic.api.plane.SwimApiPlane;
+import swim.dynamic.api.warp.SwimApiWarp;
 
 public final class SwimApi {
   private SwimApi() {
@@ -34,6 +35,7 @@ public final class SwimApi {
   static {
     final JavaHostPackage hostPkg = new JavaHostPackage("swim.api");
     PACKAGE = hostPkg;
+    hostPkg.addHostType(HostLane.TYPE);
     hostPkg.addHostType(HostLink.TYPE);
 
     final JavaHostLibrary hostLib = new JavaHostLibrary("swim.api");
@@ -42,5 +44,6 @@ public final class SwimApi {
     hostLib.addHostPackage(SwimApiAgent.PACKAGE);
     hostLib.addHostPackage(SwimApiLane.PACKAGE);
     hostLib.addHostPackage(SwimApiPlane.PACKAGE);
+    hostLib.addHostPackage(SwimApiWarp.PACKAGE);
   }
 }

@@ -14,7 +14,9 @@
 
 package swim.fabric;
 
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import swim.api.Downlink;
 import swim.api.SwimContext;
 import swim.api.agent.Agent;
 import swim.api.agent.AgentDef;
@@ -25,7 +27,6 @@ import swim.api.auth.Authenticator;
 import swim.api.auth.AuthenticatorContext;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
-import swim.api.downlink.Downlink;
 import swim.api.plane.Plane;
 import swim.api.plane.PlaneContext;
 import swim.api.plane.PlaneFactory;
@@ -44,7 +45,6 @@ import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
 import swim.runtime.HostBinding;
 import swim.runtime.HostDef;
-import swim.runtime.HttpBinding;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
@@ -184,6 +184,11 @@ public class Fabric extends AbstractTierBinding implements EdgeContext, PlaneCon
       oldAuthenticators = this.authenticators;
       newAuthenticators = oldAuthenticators.updated(authenticatorName, authenticator);
     } while (!AUTHENTICATORS.compareAndSet(this, oldAuthenticators, newAuthenticators));
+  }
+
+  @Override
+  public Collection<? extends Plane> planes() {
+    return this.planes.values();
   }
 
   @Override
@@ -827,11 +832,6 @@ public class Fabric extends AbstractTierBinding implements EdgeContext, PlaneCon
   @Override
   public void closeDownlink(LinkBinding link) {
     // nop
-  }
-
-  @Override
-  public void httpDownlink(HttpBinding http) {
-    this.edge.httpDownlink(http);
   }
 
   @Override

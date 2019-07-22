@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Flow-controlled web server library'
+ext.moduleName = 'swim.web'
+
+dependencies {
+  api project(':swim-io-http')
+  api project(':swim-io-ws')
+  api project(':swim-io-warp')
+}

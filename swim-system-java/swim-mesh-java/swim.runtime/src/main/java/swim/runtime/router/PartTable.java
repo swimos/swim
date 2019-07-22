@@ -16,7 +16,7 @@ package swim.runtime.router;
 
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.api.downlink.Downlink;
+import swim.api.Downlink;
 import swim.api.policy.Policy;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Schedule;
@@ -32,10 +32,9 @@ import swim.runtime.PartContext;
 import swim.runtime.PartPredicate;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
-import swim.runtime.uplink.ErrorUplinkModem;
-import swim.runtime.uplink.HttpErrorUplinkModem;
+import swim.runtime.UplinkError;
+import swim.runtime.WarpBinding;
 import swim.store.StoreBinding;
-import swim.structure.Record;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -46,7 +45,7 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
 
   volatile HashTrieMap<Uri, HostBinding> hosts;
 
-  volatile HashTrieMap<Value, PartTableUplink> uplinks;
+  volatile HashTrieMap<Value, LinkBinding> uplinks;
 
   volatile HostBinding master;
 
@@ -253,7 +252,7 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
 
   @Override
   public void reopenUplinks() {
-    for (PartTableUplink uplink : this.uplinks.values()) {
+    for (LinkBinding uplink : this.uplinks.values()) {
       uplink.reopen();
     }
   }
@@ -284,53 +283,34 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
       hostBinding = openHost(hostUri);
     }
     if (hostBinding != null) {
-      hostBinding.openUplink(new PartTableUplink(this, link));
+      if (link instanceof WarpBinding) {
+        hostBinding.openUplink(new PartTableWarpUplink(this, (WarpBinding) link));
+      } else if (link instanceof HttpBinding) {
+        hostBinding.openUplink(new PartTableHttpUplink(this, (HttpBinding) link));
+      } else {
+        UplinkError.rejectUnsupported(link);
+      }
     } else {
-      final ErrorUplinkModem linkContext = new ErrorUplinkModem(link, Record.of().attr("badHost"));
-      link.setLinkContext(linkContext);
-      linkContext.cueDown();
+      UplinkError.rejectHostNotFound(link);
     }
   }
 
-  void didOpenUplink(PartTableUplink uplink) {
-    HashTrieMap<Value, PartTableUplink> oldUplinks;
-    HashTrieMap<Value, PartTableUplink> newUplinks;
+  void didOpenUplink(LinkBinding uplink) {
+    HashTrieMap<Value, LinkBinding> oldUplinks;
+    HashTrieMap<Value, LinkBinding> newUplinks;
     do {
       oldUplinks = this.uplinks;
       newUplinks = oldUplinks.updated(uplink.linkKey(), uplink);
     } while (oldUplinks != newUplinks && !UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
   }
 
-  void didCloseUplink(PartTableUplink uplink) {
-    HashTrieMap<Value, PartTableUplink> oldUplinks;
-    HashTrieMap<Value, PartTableUplink> newUplinks;
+  void didCloseUplink(LinkBinding uplink) {
+    HashTrieMap<Value, LinkBinding> oldUplinks;
+    HashTrieMap<Value, LinkBinding> newUplinks;
     do {
       oldUplinks = this.uplinks;
       newUplinks = oldUplinks.removed(uplink.linkKey());
     } while (oldUplinks != newUplinks && !UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
-  }
-
-  @Override
-  public void httpDownlink(HttpBinding http) {
-    // TODO
-  }
-
-  @Override
-  public void httpUplink(HttpBinding http) {
-    final Uri hostUri = http.hostUri();
-    HostBinding hostBinding = null;
-    if (!hostUri.isDefined() || hostUri.equals(http.meshUri())) {
-      hostBinding = this.master;
-    }
-    if (hostBinding == null) {
-      hostBinding = openHost(hostUri);
-    }
-    if (hostBinding != null) {
-      hostBinding.httpUplink(http);
-    } else {
-      final HttpErrorUplinkModem httpContext = new HttpErrorUplinkModem(http);
-      http.setHttpContext(httpContext);
-    }
   }
 
   @Override
@@ -449,6 +429,6 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
       AtomicReferenceFieldUpdater.newUpdater(PartTable.class, (Class<HashTrieMap<Uri, HostBinding>>) (Class<?>) HashTrieMap.class, "hosts");
 
   @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<PartTable, HashTrieMap<Value, PartTableUplink>> UPLINKS =
-      AtomicReferenceFieldUpdater.newUpdater(PartTable.class, (Class<HashTrieMap<Value, PartTableUplink>>) (Class<?>) HashTrieMap.class, "uplinks");
+  static final AtomicReferenceFieldUpdater<PartTable, HashTrieMap<Value, LinkBinding>> UPLINKS =
+      AtomicReferenceFieldUpdater.newUpdater(PartTable.class, (Class<HashTrieMap<Value, LinkBinding>>) (Class<?>) HashTrieMap.class, "uplinks");
 }

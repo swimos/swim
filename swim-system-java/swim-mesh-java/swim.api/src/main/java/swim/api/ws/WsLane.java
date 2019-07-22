@@ -14,6 +14,7 @@
 
 package swim.api.ws;
 
+import swim.api.Lane;
 import swim.api.ws.function.DidReadFrameWs;
 import swim.api.ws.function.DidUpgradeWs;
 import swim.api.ws.function.DidWriteFrameWs;
@@ -21,13 +22,10 @@ import swim.api.ws.function.DoUpgradeWs;
 import swim.api.ws.function.WillReadFrameWs;
 import swim.api.ws.function.WillUpgradeWs;
 import swim.api.ws.function.WillWriteFrameWs;
-import swim.observable.Observable;
 import swim.ws.WsControl;
 import swim.ws.WsData;
 
-public interface WsLane<I, O> extends Observable<Object> {
-  void close();
-
+public interface WsLane<I, O> extends Lane {
   @Override
   WsLane<I, O> observe(Object observer);
 

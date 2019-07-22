@@ -14,25 +14,26 @@
 
 package swim.api.downlink;
 
-import swim.api.downlink.function.DidLink;
-import swim.api.downlink.function.DidReceive;
-import swim.api.downlink.function.DidSync;
-import swim.api.downlink.function.DidUnlink;
-import swim.api.downlink.function.OnEvent;
-import swim.api.downlink.function.WillLink;
-import swim.api.downlink.function.WillReceive;
-import swim.api.downlink.function.WillSync;
-import swim.api.downlink.function.WillUnlink;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
-import swim.api.function.WillCommand;
+import swim.api.warp.WarpDownlink;
+import swim.api.warp.function.DidLink;
+import swim.api.warp.function.DidReceive;
+import swim.api.warp.function.DidSync;
+import swim.api.warp.function.DidUnlink;
+import swim.api.warp.function.OnEvent;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillLink;
+import swim.api.warp.function.WillReceive;
+import swim.api.warp.function.WillSync;
+import swim.api.warp.function.WillUnlink;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
 
-public interface EventDownlink<V> extends Downlink {
+public interface EventDownlink<V> extends WarpDownlink {
   @Override
   EventDownlink<V> hostUri(Uri hostUri);
 

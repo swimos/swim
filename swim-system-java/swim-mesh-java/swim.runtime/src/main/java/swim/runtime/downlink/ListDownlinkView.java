@@ -20,23 +20,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import swim.api.DownlinkException;
 import swim.api.Link;
 import swim.api.SwimContext;
-import swim.api.downlink.DownlinkException;
 import swim.api.downlink.ListDownlink;
-import swim.api.downlink.function.DidLink;
-import swim.api.downlink.function.DidReceive;
-import swim.api.downlink.function.DidSync;
-import swim.api.downlink.function.DidUnlink;
-import swim.api.downlink.function.WillLink;
-import swim.api.downlink.function.WillReceive;
-import swim.api.downlink.function.WillSync;
-import swim.api.downlink.function.WillUnlink;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
-import swim.api.function.WillCommand;
+import swim.api.warp.function.DidLink;
+import swim.api.warp.function.DidReceive;
+import swim.api.warp.function.DidSync;
+import swim.api.warp.function.DidUnlink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillLink;
+import swim.api.warp.function.WillReceive;
+import swim.api.warp.function.WillSync;
+import swim.api.warp.function.WillUnlink;
 import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.observable.function.DidClear;
@@ -53,6 +53,7 @@ import swim.observable.function.WillTake;
 import swim.observable.function.WillUpdateIndex;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.warp.WarpDownlinkView;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.structure.collections.ValueIterator;
@@ -60,7 +61,7 @@ import swim.structure.collections.ValueList;
 import swim.structure.collections.ValueListIterator;
 import swim.uri.Uri;
 
-public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V> {
+public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlink<V> {
   protected final Form<V> valueForm;
   protected ListDownlinkModel model;
 
@@ -357,7 +358,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
   }
 
   @SuppressWarnings("unchecked")
-  protected Map.Entry<Boolean, V> dispatchWillUpdate(int index, V newValue, boolean preemptive) {
+  public Map.Entry<Boolean, V> dispatchWillUpdate(int index, V newValue, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -403,7 +404,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchDidUpdate(int index, V newValue, V oldValue, boolean preemptive) {
+  public boolean dispatchDidUpdate(int index, V newValue, V oldValue, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -449,7 +450,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchWillMove(int fromIndex, int toIndex, V value, boolean preemptive) {
+  public boolean dispatchWillMove(int fromIndex, int toIndex, V value, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -495,7 +496,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchDidMove(int fromIndex, int toIndex, V value, boolean preemptive) {
+  public boolean dispatchDidMove(int fromIndex, int toIndex, V value, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -540,7 +541,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
     }
   }
 
-  protected boolean dispatchWillRemove(int index, boolean preemptive) {
+  public boolean dispatchWillRemove(int index, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -586,7 +587,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchDidRemove(int index, V oldValue, boolean preemptive) {
+  public boolean dispatchDidRemove(int index, V oldValue, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -631,7 +632,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
     }
   }
 
-  protected boolean dispatchWillDrop(int lower, boolean preemptive) {
+  public boolean dispatchWillDrop(int lower, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -676,7 +677,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
     }
   }
 
-  protected boolean dispatchDidDrop(int lower, boolean preemptive) {
+  public boolean dispatchDidDrop(int lower, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -721,7 +722,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
     }
   }
 
-  protected boolean dispatchWillTake(int upper, boolean preemptive) {
+  public boolean dispatchWillTake(int upper, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -766,7 +767,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
     }
   }
 
-  protected boolean dispatchDidTake(int upper, boolean preemptive) {
+  public boolean dispatchDidTake(int upper, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -811,7 +812,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
     }
   }
 
-  protected boolean dispatchWillClear(boolean preemptive) {
+  public boolean dispatchWillClear(boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -856,7 +857,7 @@ public class ListDownlinkView<V> extends DownlinkView implements ListDownlink<V>
     }
   }
 
-  protected boolean dispatchDidClear(boolean preemptive) {
+  public boolean dispatchDidClear(boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);

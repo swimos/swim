@@ -14,8 +14,8 @@
 
 package swim.cli;
 
-import swim.api.downlink.Downlink;
 import swim.api.ref.SwimRef;
+import swim.api.warp.WarpDownlink;
 import swim.args.Arg;
 import swim.args.Cmd;
 import swim.args.Opt;
@@ -87,7 +87,7 @@ public class CliClient {
         .opt(Opt.of("host").flag('h').arg(Arg.of("hostUri").optional(true)).desc("introspect default or specified host"))
         .opt(Opt.of("node").flag('n').arg("nodeUri").desc("introspect specified node"))
         .opt(Opt.of("lane").flag('l').arg("laneUri").desc("introspect specified lane"))
-        .opt(Opt.of("link").flag('l').desc("introspect link behavior"))
+        .opt(Opt.of("link").flag('k').desc("introspect link behavior"))
         .opt(Opt.of("router").flag('r').desc("introspect router behavior"))
         .opt(Opt.of("data").desc("introspect data behavior"))
         .opt(Opt.of("system").desc("introspect system behavior"))
@@ -112,19 +112,19 @@ public class CliClient {
   }
 
   public void runLinkCmd(Cmd cmd) {
-    final Downlink downlink = downlink(cmd).keepSynced(false);
+    final WarpDownlink downlink = downlink(cmd).keepSynced(false);
     final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
     downlinkLogger.open();
   }
 
   public void runSyncCmd(Cmd cmd) {
-    final Downlink downlink = downlink(cmd).keepSynced(true);
+    final WarpDownlink downlink = downlink(cmd).keepSynced(true);
     final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
     downlinkLogger.open();
   }
 
   public void runGetCmd(Cmd cmd) {
-    final Downlink downlink = downlink(cmd).keepSynced(true);
+    final WarpDownlink downlink = downlink(cmd).keepSynced(true);
     final DownlinkGetter downlinkGetter = downlinkGetter(downlink, cmd);
     downlinkGetter.open();
   }
@@ -147,7 +147,7 @@ public class CliClient {
         }
         if (laneUri != null) {
           metaNodeUri = metaNodeUri.appendedPath("lane", laneUri);
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("linkStats")
@@ -156,7 +156,7 @@ public class CliClient {
           downlinkLogger.open();
         } else {
           if (cmd.getOpt("link").isDefined()) {
-            final Downlink downlink = this.swim.downlink()
+            final WarpDownlink downlink = this.swim.downlink()
                 .hostUri(edgeUri)
                 .nodeUri(metaNodeUri)
                 .laneUri("linkStats")
@@ -164,7 +164,7 @@ public class CliClient {
             final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
             downlinkLogger.open();
           } else {
-            final Downlink downlink = this.swim.downlink()
+            final WarpDownlink downlink = this.swim.downlink()
                 .hostUri(edgeUri)
                 .nodeUri(metaNodeUri)
                 .laneUri("routerStats")
@@ -187,7 +187,7 @@ public class CliClient {
           }
         }
         if (cmd.getOpt("process").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("processStats")
@@ -195,7 +195,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("system").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("systemStats")
@@ -203,7 +203,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("data").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("dataStats")
@@ -211,7 +211,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("router").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("routerStats")
@@ -219,7 +219,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("link").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("linkStats")
@@ -227,7 +227,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("hostStats")
@@ -241,7 +241,7 @@ public class CliClient {
           metaNodeUri = metaNodeUri.appendedPath(meshUri);
         }
         if (cmd.getOpt("process").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("processStats")
@@ -249,7 +249,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("system").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("systemStats")
@@ -257,7 +257,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("data").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("dataStats")
@@ -265,7 +265,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("router").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("routerStats")
@@ -273,7 +273,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("link").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("linkStats")
@@ -281,7 +281,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri(metaNodeUri)
               .laneUri("meshStats")
@@ -291,7 +291,7 @@ public class CliClient {
         }
       } else {
         if (cmd.getOpt("process").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri("swim:meta:edge")
               .laneUri("processStats")
@@ -299,7 +299,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("system").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri("swim:meta:edge")
               .laneUri("systemStats")
@@ -307,7 +307,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("data").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri("swim:meta:edge")
               .laneUri("dataStats")
@@ -315,7 +315,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("link").isDefined()) {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri("swim:meta:edge")
               .laneUri("linkStats")
@@ -323,7 +323,7 @@ public class CliClient {
           final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else {
-          final Downlink downlink = this.swim.downlink()
+          final WarpDownlink downlink = this.swim.downlink()
               .hostUri(edgeUri)
               .nodeUri("swim:meta:edge")
               .laneUri("routerStats")
@@ -339,19 +339,19 @@ public class CliClient {
     // TODO
   }
 
-  protected Downlink downlink(Cmd cmd) {
+  protected WarpDownlink downlink(Cmd cmd) {
     return this.swim.downlink()
         .hostUri(cmd.getOpt("host").getValue())
         .nodeUri(cmd.getOpt("node").getValue())
         .laneUri(cmd.getOpt("lane").getValue());
   }
 
-  protected DownlinkLogger downlinkLogger(Downlink downlink, Cmd cmd) {
+  protected DownlinkLogger downlinkLogger(WarpDownlink downlink, Cmd cmd) {
     final String format = cmd.getOpt("format").getValue();
     return new DownlinkLogger(downlink, format);
   }
 
-  protected DownlinkGetter downlinkGetter(Downlink downlink, Cmd cmd) {
+  protected DownlinkGetter downlinkGetter(WarpDownlink downlink, Cmd cmd) {
     final String format = cmd.getOpt("format").getValue();
     return new DownlinkGetter(downlink, format);
   }

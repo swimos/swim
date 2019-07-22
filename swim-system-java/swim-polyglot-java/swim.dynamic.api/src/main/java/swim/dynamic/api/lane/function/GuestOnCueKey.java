@@ -15,7 +15,7 @@
 package swim.dynamic.api.lane.function;
 
 import swim.api.lane.function.OnCueKey;
-import swim.api.uplink.Uplink;
+import swim.api.warp.WarpUplink;
 import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
@@ -26,7 +26,7 @@ public class GuestOnCueKey<K, V> extends BridgeGuest implements OnCueKey<K, V> {
 
   @SuppressWarnings("unchecked")
   @Override
-  public V onCue(K key, Uplink uplink) {
+  public V onCue(K key, WarpUplink uplink) {
     return (V) this.bridge.guestExecute(this.guest, key, uplink);
   }
 }

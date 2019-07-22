@@ -14,6 +14,7 @@
 
 package swim.api.downlink;
 
+import swim.api.Downlink;
 import swim.api.ref.SwimRef;
 import swim.dataflow.AbstractRecordStreamlet;
 import swim.dataflow.Transmuter;

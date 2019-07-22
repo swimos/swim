@@ -63,19 +63,4 @@ public interface Link extends Observable<Object>, Log {
 
   @Override
   Link unobserve(Object observer);
-
-  @Override
-  void trace(Object message);
-
-  @Override
-  void debug(Object message);
-
-  @Override
-  void info(Object message);
-
-  @Override
-  void warn(Object message);
-
-  @Override
-  void error(Object message);
 }

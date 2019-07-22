@@ -20,13 +20,17 @@ import java.util.concurrent.ThreadLocalRandom;
 import swim.api.Link;
 import swim.api.data.ListData;
 import swim.collections.FingerTrieSeq;
-import swim.runtime.LinkBinding;
-import swim.runtime.link.ListLinkDelta;
+import swim.concurrent.Stage;
+import swim.runtime.LaneRelay;
+import swim.runtime.LaneView;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.ListLinkDelta;
+import swim.runtime.warp.WarpLaneModel;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.warp.CommandMessage;
 
-public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
+public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink> {
   protected int flags;
   protected ListData<Value> data;
 
@@ -44,7 +48,7 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
   }
 
   @Override
-  protected ListLaneUplink createUplink(LinkBinding link) {
+  protected ListLaneUplink createWarpUplink(WarpBinding link) {
     return new ListLaneUplink(this, link);
   }
 
@@ -68,7 +72,7 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
           key = null;
         }
         final Value value = payload.body();
-        new ListLaneRelayUpdate(this, null, message, index, value, key).run();
+        new ListLaneRelayUpdate(this, message, index, value, key).run();
       }
     } else if ("move".equals(tag)) {
       final Value header = payload.header("move");
@@ -81,7 +85,7 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
         } else {
           key = null;
         }
-        new ListLaneRelayMove(this, null, message, fromIndex, toIindex, key).run();
+        new ListLaneRelayMove(this, message, fromIndex, toIindex, key).run();
       }
     } else if ("remove".equals(tag)) {
       final Value header = payload.header("remove");
@@ -93,18 +97,18 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
         } else {
           key = null;
         }
-        new ListLaneRelayRemove(this, null, message, index, key).run();
+        new ListLaneRelayRemove(this, message, index, key).run();
       }
     } else if ("drop".equals(tag)) {
       final Value header = payload.header("drop");
       final int lower = header.intValue(0);
-      new ListLaneRelayDrop(this, null, message, lower).run();
+      new ListLaneRelayDrop(this, message, lower).run();
     } else if ("take".equals(tag)) {
       final Value header = payload.header("take");
       final int upper = header.intValue(0);
-      new ListLaneRelayTake(this, null, message, upper).run();
+      new ListLaneRelayTake(this, message, upper).run();
     } else if ("clear".equals(tag)) {
-      new ListLaneRelayClear(this, null, message).run();
+      new ListLaneRelayClear(this, message).run();
     }
   }
 
@@ -178,28 +182,6 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
     return this;
   }
 
-  public final boolean isSigned() {
-    return (this.flags & SIGNED) != 0;
-  }
-
-  public ListLaneModel isSigned(boolean isSigned) {
-    if (isSigned) {
-      this.flags |= SIGNED;
-    } else {
-      this.flags &= ~SIGNED;
-    }
-    final Object views = this.views;
-    if (views instanceof ListLaneView<?>) {
-      ((ListLaneView<?>) views).didSetSigned(isSigned);
-    } else if (views instanceof LaneView[]) {
-      final LaneView[] viewArray = (LaneView[]) views;
-      for (int i = 0, n = viewArray.length; i < n; i += 1) {
-        ((ListLaneView<?>) viewArray[i]).didSetSigned(isSigned);
-      }
-    }
-    return this;
-  }
-
   @SuppressWarnings("unchecked")
   public <V> boolean add(ListLaneView<V> view, int index, V newObject) {
     return add(view, index, newObject, null);
@@ -209,10 +191,9 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
   public <V> boolean add(ListLaneView<V> view, int index, V newObject, Object key) {
     final Form<V> valueForm = view.valueForm;
     final Value newValue = valueForm.mold(newObject).toValue();
-    final ListLaneRelayUpdate relay = new ListLaneRelayUpdate(this, null, index, newValue, key);
+    final ListLaneRelayUpdate relay = new ListLaneRelayUpdate(this, stage(), index, newValue, key);
     relay.valueForm = (Form<Object>) valueForm;
     relay.newObject = newObject;
-    relay.stage = stage();
     relay.run();
     return relay.newObject != null; // TODO
   }
@@ -226,11 +207,10 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
   public <V> V set(ListLaneView<V> view, int index, V newObject, Object key) {
     final Form<V> valueForm = view.valueForm;
     final Value newValue = valueForm.mold(newObject).toValue();
-    final ListLaneRelayUpdate relay = new ListLaneRelayUpdate(this, null, index, newValue, key);
+    final ListLaneRelayUpdate relay = new ListLaneRelayUpdate(this, stage(), index, newValue, key);
     relay.valueForm = (Form<Object>) valueForm;
     relay.oldObject = newObject;
     relay.newObject = newObject;
-    relay.stage = stage();
     relay.run();
     if (relay.valueForm != valueForm && valueForm != null) {
       relay.oldObject = valueForm.cast(relay.oldValue);
@@ -246,8 +226,7 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
   }
 
   public void move(int fromIndex, int toIndex, Object key) {
-    final ListLaneRelayMove relay = new ListLaneRelayMove(this, null, fromIndex, toIndex, key);
-    relay.stage = stage();
+    final ListLaneRelayMove relay = new ListLaneRelayMove(this, stage(), fromIndex, toIndex, key);
     relay.run();
   }
 
@@ -262,9 +241,8 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
     final Map.Entry<Object, Value> entry = this.data.getEntry(index, key);
     if (entry != null) {
       final Object actualKey = key == null ? entry.getKey() : key;
-      final ListLaneRelayRemove relay = new ListLaneRelayRemove(this, null, index, actualKey);
+      final ListLaneRelayRemove relay = new ListLaneRelayRemove(this, stage(), index, actualKey);
       relay.valueForm = (Form<Object>) valueForm;
-      relay.stage = stage();
       relay.run();
       if (relay.valueForm != valueForm && valueForm != null) {
         relay.oldObject = valueForm.cast(relay.oldValue);
@@ -280,23 +258,20 @@ public class ListLaneModel extends LaneModel<ListLaneView<?>, ListLaneUplink> {
 
   public void drop(ListLaneView<?> view, int lower) {
     if (lower > 0) {
-      final ListLaneRelayDrop relay = new ListLaneRelayDrop(this, null, lower);
-      relay.stage = stage();
+      final ListLaneRelayDrop relay = new ListLaneRelayDrop(this, stage(), lower);
       relay.run();
     }
   }
 
   public void take(ListLaneView<?> view, int upper) {
     if (upper > 0) {
-      final ListLaneRelayTake relay = new ListLaneRelayTake(this, null, upper);
-      relay.stage = stage();
+      final ListLaneRelayTake relay = new ListLaneRelayTake(this, stage(), upper);
       relay.run();
     }
   }
 
   public void clear(ListLaneView<?> view) {
-    final ListLaneRelayClear relay = new ListLaneRelayClear(this, null);
-    relay.stage = stage();
+    final ListLaneRelayClear relay = new ListLaneRelayClear(this, stage());
     relay.run();
   }
 
@@ -332,9 +307,9 @@ final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>
   Value newValue;
   Object newObject;
 
-  ListLaneRelayUpdate(ListLaneModel model, Link link, CommandMessage message, int index, Value newValue, Object key) {
+  ListLaneRelayUpdate(ListLaneModel model, CommandMessage message, int index, Value newValue, Object key) {
     super(model, 4);
-    this.link = link;
+    this.link = null;
     this.message = message;
     this.index = index;
     this.newValue = newValue;
@@ -342,7 +317,7 @@ final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>
   }
 
   ListLaneRelayUpdate(ListLaneModel model, Link link, int index, Value newValue, Object key) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.link = link;
     this.message = null;
     this.index = index;
@@ -350,8 +325,17 @@ final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>
     this.key = key;
   }
 
+  ListLaneRelayUpdate(ListLaneModel model, Stage stage, int index, Value newValue, Object key) {
+    super(model, 1, 3, stage);
+    this.link = null;
+    this.message = null;
+    this.index = index;
+    this.newValue = newValue;
+    this.key = key;
+  }
+
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       final Map.Entry<Object, Value> entry;
       if (model.data.isEmpty()) {
@@ -385,7 +369,7 @@ final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -438,7 +422,7 @@ final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.sendDown(ListLinkDelta.update(this.index, Value.fromObject(this.key), this.newValue));
   }
 }
@@ -453,9 +437,9 @@ final class ListLaneRelayMove extends LaneRelay<ListLaneModel, ListLaneView<?>> 
   Value value;
   Object object;
 
-  ListLaneRelayMove(ListLaneModel model, Link link, CommandMessage message, int fromIndex, int toIndex, Object key) {
+  ListLaneRelayMove(ListLaneModel model, CommandMessage message, int fromIndex, int toIndex, Object key) {
     super(model, 4);
-    this.link = link;
+    this.link = null;
     this.message = message;
     this.fromIndex = fromIndex;
     this.toIndex = toIndex;
@@ -463,7 +447,7 @@ final class ListLaneRelayMove extends LaneRelay<ListLaneModel, ListLaneView<?>> 
   }
 
   ListLaneRelayMove(ListLaneModel model, Link link, int fromIndex, int toIndex, Object key) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.link = link;
     this.message = null;
     this.fromIndex = fromIndex;
@@ -471,8 +455,17 @@ final class ListLaneRelayMove extends LaneRelay<ListLaneModel, ListLaneView<?>> 
     this.key = key;
   }
 
+  ListLaneRelayMove(ListLaneModel model, Stage stage, int fromIndex, int toIndex, Object key) {
+    super(model, 1, 3, stage);
+    this.link = null;
+    this.message = null;
+    this.fromIndex = fromIndex;
+    this.toIndex = toIndex;
+    this.key = key;
+  }
+
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       this.model.data.move(this.fromIndex, this.toIndex, this.key);
     }
@@ -480,7 +473,7 @@ final class ListLaneRelayMove extends LaneRelay<ListLaneModel, ListLaneView<?>> 
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -524,7 +517,7 @@ final class ListLaneRelayMove extends LaneRelay<ListLaneModel, ListLaneView<?>> 
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.sendDown(ListLinkDelta.move(this.fromIndex, this.toIndex, Value.fromObject(this.key)));
   }
 }
@@ -538,24 +531,32 @@ final class ListLaneRelayRemove extends LaneRelay<ListLaneModel, ListLaneView<?>
   Value oldValue;
   Object oldObject;
 
-  ListLaneRelayRemove(ListLaneModel model, Link link, CommandMessage message, int index, Object key) {
+  ListLaneRelayRemove(ListLaneModel model, CommandMessage message, int index, Object key) {
     super(model, 4);
-    this.link = link;
+    this.link = null;
     this.message = message;
     this.index = index;
     this.key = key;
   }
 
   ListLaneRelayRemove(ListLaneModel model, Link link, int index, Object key) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.link = link;
     this.message = null;
     this.index = index;
     this.key = key;
   }
 
+  ListLaneRelayRemove(ListLaneModel model, Stage stage, int index, Object key) {
+    super(model, 1, 3, stage);
+    this.link = null;
+    this.message = null;
+    this.index = index;
+    this.key = key;
+  }
+
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       this.oldValue = this.model.data.remove(this.index, this.key);
       if (this.valueForm != null) {
@@ -569,7 +570,7 @@ final class ListLaneRelayRemove extends LaneRelay<ListLaneModel, ListLaneView<?>
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -614,7 +615,7 @@ final class ListLaneRelayRemove extends LaneRelay<ListLaneModel, ListLaneView<?>
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.sendDown(ListLinkDelta.remove(this.index, Value.fromObject(this.key)));
   }
 }
@@ -624,29 +625,36 @@ final class ListLaneRelayDrop extends LaneRelay<ListLaneModel, ListLaneView<?>> 
   final CommandMessage message;
   final int lower;
 
-  ListLaneRelayDrop(ListLaneModel model, Link link, CommandMessage message, int lower) {
+  ListLaneRelayDrop(ListLaneModel model, CommandMessage message, int lower) {
     super(model, 4);
-    this.link = link;
+    this.link = null;
     this.message = message;
     this.lower = lower;
   }
 
   ListLaneRelayDrop(ListLaneModel model, Link link, int lower) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.link = link;
     this.message = null;
     this.lower = lower;
   }
 
+  ListLaneRelayDrop(ListLaneModel model, Stage stage, int lower) {
+    super(model, 1, 3, stage);
+    this.link = null;
+    this.message = null;
+    this.lower = lower;
+  }
+
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       this.model.data.drop(this.lower);
     }
   }
 
   @Override
-  boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -673,7 +681,7 @@ final class ListLaneRelayDrop extends LaneRelay<ListLaneModel, ListLaneView<?>> 
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.sendDown(ListLinkDelta.drop(this.lower));
   }
 }
@@ -683,29 +691,36 @@ final class ListLaneRelayTake extends LaneRelay<ListLaneModel, ListLaneView<?>> 
   final CommandMessage message;
   final int upper;
 
-  ListLaneRelayTake(ListLaneModel model, Link link, CommandMessage message, int upper) {
+  ListLaneRelayTake(ListLaneModel model, CommandMessage message, int upper) {
     super(model, 4);
-    this.link = link;
+    this.link = null;
     this.message = message;
     this.upper = upper;
   }
 
   ListLaneRelayTake(ListLaneModel model, Link link, int upper) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.link = link;
     this.message = null;
     this.upper = upper;
   }
 
+  ListLaneRelayTake(ListLaneModel model, Stage stage, int upper) {
+    super(model, 1, 3, stage);
+    this.link = null;
+    this.message = null;
+    this.upper = upper;
+  }
+
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       this.model.data.take(this.upper);
     }
   }
 
   @Override
-  boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -732,7 +747,7 @@ final class ListLaneRelayTake extends LaneRelay<ListLaneModel, ListLaneView<?>> 
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.sendDown(ListLinkDelta.take(this.upper));
   }
 }
@@ -741,27 +756,33 @@ final class ListLaneRelayClear extends LaneRelay<ListLaneModel, ListLaneView<?>>
   final Link link;
   final CommandMessage message;
 
-  ListLaneRelayClear(ListLaneModel model, Link link, CommandMessage message) {
+  ListLaneRelayClear(ListLaneModel model, CommandMessage message) {
     super(model, 4);
-    this.link = link;
+    this.link = null;
     this.message = message;
   }
 
   ListLaneRelayClear(ListLaneModel model, Link link) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.link = link;
     this.message = null;
   }
 
+  ListLaneRelayClear(ListLaneModel model, Stage stage) {
+    super(model, 1, 3, stage);
+    this.link = null;
+    this.message = null;
+  }
+
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       this.model.data.clear();
     }
   }
 
   @Override
-  boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListLaneView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -784,7 +805,7 @@ final class ListLaneRelayClear extends LaneRelay<ListLaneModel, ListLaneView<?>>
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.sendDown(ListLinkDelta.clear());
   }
 }

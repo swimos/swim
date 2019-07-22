@@ -14,18 +14,17 @@
 
 package swim.runtime.router;
 
+import swim.api.Downlink;
 import swim.api.agent.Agent;
 import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
-import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.HostBinding;
-import swim.runtime.HttpBinding;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
@@ -185,11 +184,6 @@ public class MeshTablePart implements PartContext {
   @Override
   public void closeDownlink(LinkBinding link) {
     // nop
-  }
-
-  @Override
-  public void httpDownlink(HttpBinding http) {
-    // TODO
   }
 
   @Override

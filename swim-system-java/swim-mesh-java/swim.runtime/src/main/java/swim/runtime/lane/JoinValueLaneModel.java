@@ -25,7 +25,11 @@ import swim.api.data.MapData;
 import swim.api.downlink.ValueDownlink;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
-import swim.runtime.LinkBinding;
+import swim.concurrent.Stage;
+import swim.runtime.LaneRelay;
+import swim.runtime.LaneView;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.WarpLaneModel;
 import swim.structure.Attr;
 import swim.structure.Form;
 import swim.structure.Item;
@@ -34,7 +38,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
-public class JoinValueLaneModel extends LaneModel<JoinValueLaneView<?, ?>, JoinValueLaneUplink> {
+public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, JoinValueLaneUplink> {
   protected int flags;
   protected MapData<Value, Value> data;
   protected volatile HashTrieMap<Value, JoinValueLaneDownlink<?>> downlinks;
@@ -54,7 +58,7 @@ public class JoinValueLaneModel extends LaneModel<JoinValueLaneView<?, ?>, JoinV
   }
 
   @Override
-  protected JoinValueLaneUplink createUplink(LinkBinding link) {
+  protected JoinValueLaneUplink createWarpUplink(WarpBinding link) {
     return new JoinValueLaneUplink(this, link);
   }
 
@@ -167,13 +171,13 @@ public class JoinValueLaneModel extends LaneModel<JoinValueLaneView<?, ?>, JoinV
       final Value key = header.get("key");
       final Item head = this.data.get(key).head();
       final Value newValue = payload.body();
-      new JoinValueLaneRelayUpdate(this, null, message, key, newValue).run();
+      new JoinValueLaneRelayUpdate(this, message, key, newValue).run();
     } else if ("remove".equals(tag)) {
       final Value header = payload.header("remove");
       final Value key = header.get("key");
-      new JoinValueLaneRelayRemove(this, null, message, key).run();
+      new JoinValueLaneRelayRemove(this, message, key).run();
     } else if ("clear".equals(tag)) {
-      new JoinValueLaneRelayClear(this, null, message).run();
+      new JoinValueLaneRelayClear(this, message).run();
     }
   }
 
@@ -237,28 +241,6 @@ public class JoinValueLaneModel extends LaneModel<JoinValueLaneView<?, ?>, JoinV
     return this;
   }
 
-  public final boolean isSigned() {
-    return (this.flags & SIGNED) != 0;
-  }
-
-  public JoinValueLaneModel isSigned(boolean isSigned) {
-    if (isSigned) {
-      this.flags |= SIGNED;
-    } else {
-      this.flags &= ~SIGNED;
-    }
-    final Object views = this.views;
-    if (views instanceof JoinValueLaneView<?, ?>) {
-      ((JoinValueLaneView<?, ?>) views).didSetSigned(isSigned);
-    } else if (views instanceof LaneView[]) {
-      final LaneView[] viewArray = (LaneView[]) views;
-      for (int i = 0, n = viewArray.length; i < n; i += 1) {
-        ((JoinValueLaneView<?, ?>) viewArray[i]).didSetSigned(isSigned);
-      }
-    }
-    return this;
-  }
-
   public Value get(Object key) {
     if (key != null) {
       Value value = this.data.get(key);
@@ -277,7 +259,6 @@ public class JoinValueLaneModel extends LaneModel<JoinValueLaneView<?, ?>, JoinV
 
   public void put(JoinValueLaneDownlink<?> downlink, Value key, Value newValue) {
     final JoinValueLaneRelayUpdate relay = new JoinValueLaneRelayUpdate(this, downlink, key, newValue);
-    //relay.stage = stage();
     relay.run();
   }
 
@@ -287,13 +268,12 @@ public class JoinValueLaneModel extends LaneModel<JoinValueLaneView<?, ?>, JoinV
     final Form<V> valueForm = view.valueForm;
     final Value key = keyForm.mold(keyObject).toValue();
     final Value newValue = valueForm.mold(newObject).toValue();
-    final JoinValueLaneRelayUpdate relay = new JoinValueLaneRelayUpdate(this, null, key, newValue);
+    final JoinValueLaneRelayUpdate relay = new JoinValueLaneRelayUpdate(this, stage(), key, newValue);
     relay.keyForm = (Form<Object>) keyForm;
     relay.valueForm = (Form<Object>) valueForm;
     relay.keyObject = keyObject;
     relay.oldObject = newObject;
     relay.newObject = newObject;
-    relay.stage = stage();
     relay.run();
     if (relay.valueForm != valueForm && valueForm != null) {
       relay.oldObject = valueForm.cast(relay.oldValue);
@@ -309,11 +289,10 @@ public class JoinValueLaneModel extends LaneModel<JoinValueLaneView<?, ?>, JoinV
     final Form<K> keyForm = view.keyForm;
     final Form<V> valueForm = view.valueForm;
     final Value key = keyForm.mold(keyObject).toValue();
-    final JoinValueLaneRelayRemove relay = new JoinValueLaneRelayRemove(this, null, key);
+    final JoinValueLaneRelayRemove relay = new JoinValueLaneRelayRemove(this, stage(), key);
     relay.keyForm = (Form<Object>) keyForm;
     relay.valueForm = (Form<Object>) valueForm;
     relay.keyObject = keyObject;
-    relay.stage = stage();
     relay.run();
     if (relay.valueForm == valueForm) {
       return (V) relay.oldObject;
@@ -323,8 +302,7 @@ public class JoinValueLaneModel extends LaneModel<JoinValueLaneView<?, ?>, JoinV
   }
 
   public void clear(JoinValueLaneView<?, ?> view) {
-    final JoinValueLaneRelayClear relay = new JoinValueLaneRelayClear(this, null);
-    relay.stage = stage();
+    final JoinValueLaneRelayClear relay = new JoinValueLaneRelayClear(this, stage());
     relay.run();
   }
 
@@ -446,24 +424,32 @@ final class JoinValueLaneRelayUpdate extends LaneRelay<JoinValueLaneModel, JoinV
   Value newValue;
   Object newObject;
 
-  JoinValueLaneRelayUpdate(JoinValueLaneModel model, Link link, CommandMessage message, Value key, Value newValue) {
+  JoinValueLaneRelayUpdate(JoinValueLaneModel model, CommandMessage message, Value key, Value newValue) {
     super(model, 4);
-    this.link = link;
+    this.link = null;
     this.message = message;
     this.key = key;
     this.newValue = newValue;
   }
 
   JoinValueLaneRelayUpdate(JoinValueLaneModel model, Link link, Value key, Value newValue) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.link = link;
     this.message = null;
     this.key = key;
     this.newValue = newValue;
   }
 
+  JoinValueLaneRelayUpdate(JoinValueLaneModel model, Stage stage, Value key, Value newValue) {
+    super(model, 1, 3, stage);
+    this.link = null;
+    this.message = null;
+    this.key = key;
+    this.newValue = newValue;
+  }
+
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       final Item head = this.model.data.get(this.key).head();
       Value dataValue = this.newValue;
@@ -491,7 +477,7 @@ final class JoinValueLaneRelayUpdate extends LaneRelay<JoinValueLaneModel, JoinV
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(JoinValueLaneView<?, ?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(JoinValueLaneView<?, ?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -560,7 +546,7 @@ final class JoinValueLaneRelayUpdate extends LaneRelay<JoinValueLaneModel, JoinV
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.cueDownKey(this.key);
   }
 }
@@ -575,22 +561,29 @@ final class JoinValueLaneRelayRemove extends LaneRelay<JoinValueLaneModel, JoinV
   Value oldValue;
   Object oldObject;
 
-  JoinValueLaneRelayRemove(JoinValueLaneModel model, Link link, CommandMessage message, Value key) {
+  JoinValueLaneRelayRemove(JoinValueLaneModel model, CommandMessage message, Value key) {
     super(model, 4);
-    this.link = link;
+    this.link = null;
     this.message = message;
     this.key = key;
   }
 
   JoinValueLaneRelayRemove(JoinValueLaneModel model, Link link, Value key) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.link = link;
     this.message = null;
     this.key = key;
   }
 
+  JoinValueLaneRelayRemove(JoinValueLaneModel model, Stage stage, Value key) {
+    super(model, 1, 3, stage);
+    this.link = null;
+    this.message = null;
+    this.key = key;
+  }
+
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       this.model.closeDownlinkKey(this.key);
       this.oldValue = this.model.data.remove(this.key);
@@ -605,7 +598,7 @@ final class JoinValueLaneRelayRemove extends LaneRelay<JoinValueLaneModel, JoinV
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(JoinValueLaneView<?, ?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(JoinValueLaneView<?, ?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -664,7 +657,7 @@ final class JoinValueLaneRelayRemove extends LaneRelay<JoinValueLaneModel, JoinV
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.oldValue.isDefined()) {
       this.model.sendDown(Record.create(1).attr("remove", Record.create(1).slot("key", this.key)));
     }
@@ -675,20 +668,26 @@ final class JoinValueLaneRelayClear extends LaneRelay<JoinValueLaneModel, JoinVa
   final Link link;
   final CommandMessage message;
 
-  JoinValueLaneRelayClear(JoinValueLaneModel model, Link link, CommandMessage message) {
+  JoinValueLaneRelayClear(JoinValueLaneModel model, CommandMessage message) {
     super(model, 4);
-    this.link = link;
+    this.link = null;
     this.message = message;
   }
 
   JoinValueLaneRelayClear(JoinValueLaneModel model, Link link) {
-    super(model, 1, 3);
+    super(model, 1, 3, null);
     this.link = link;
     this.message = null;
   }
 
+  JoinValueLaneRelayClear(JoinValueLaneModel model, Stage stage) {
+    super(model, 1, 3, stage);
+    this.link = null;
+    this.message = null;
+  }
+
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       this.model.closeDownlinks();
       this.model.data.clear();
@@ -696,7 +695,7 @@ final class JoinValueLaneRelayClear extends LaneRelay<JoinValueLaneModel, JoinVa
   }
 
   @Override
-  boolean runPhase(JoinValueLaneView<?, ?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(JoinValueLaneView<?, ?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.laneWillCommand(this.message);
@@ -723,7 +722,7 @@ final class JoinValueLaneRelayClear extends LaneRelay<JoinValueLaneModel, JoinVa
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.sendDown(Record.create(1).attr("clear"));
   }
 }
@@ -736,13 +735,13 @@ final class JoinValueLaneRelayDownlink extends LaneRelay<JoinValueLaneModel, Joi
 
   @SuppressWarnings("unchecked")
   JoinValueLaneRelayDownlink(JoinValueLaneModel model, Value key, JoinValueLaneDownlink<?> downlink) {
-    super(model, 0, 2);
+    super(model, 2);
     this.key = key;
     this.downlink = (JoinValueLaneDownlink<Object>) downlink;
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 1) {
       this.model.openDownlink(this.key, this.downlink);
     }
@@ -750,7 +749,7 @@ final class JoinValueLaneRelayDownlink extends LaneRelay<JoinValueLaneModel, Joi
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(JoinValueLaneView<?, ?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(JoinValueLaneView<?, ?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       final Form<Object> keyForm = (Form<Object>) view.keyForm;
       if (this.keyForm != keyForm && keyForm != null) {

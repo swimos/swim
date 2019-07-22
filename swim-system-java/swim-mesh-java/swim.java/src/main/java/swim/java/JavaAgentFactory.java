@@ -18,6 +18,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import swim.api.Lane;
 import swim.api.SwimContext;
 import swim.api.SwimLane;
 import swim.api.SwimResident;
@@ -26,17 +27,18 @@ import swim.api.agent.AbstractAgentRoute;
 import swim.api.agent.Agent;
 import swim.api.agent.AgentContext;
 import swim.api.agent.AgentException;
+import swim.api.http.HttpLane;
 import swim.api.lane.CommandLane;
 import swim.api.lane.DemandLane;
 import swim.api.lane.DemandMapLane;
 import swim.api.lane.JoinMapLane;
 import swim.api.lane.JoinValueLane;
-import swim.api.lane.Lane;
 import swim.api.lane.ListLane;
 import swim.api.lane.MapLane;
 import swim.api.lane.SpatialLane;
 import swim.api.lane.SupplyLane;
 import swim.api.lane.ValueLane;
+import swim.runtime.http.HttpLaneView;
 import swim.runtime.lane.CommandLaneView;
 import swim.runtime.lane.DemandLaneView;
 import swim.runtime.lane.DemandMapLaneView;
@@ -190,6 +192,8 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
       return reflectSupplyLaneType(agent, field, type, arguments);
     } else if (ValueLane.class.equals(type)) {
       return reflectValueLaneType(agent, field, type, arguments);
+    } else if (HttpLane.class.equals(type)) {
+      return reflectHttpLaneType(agent, field, type, arguments);
     }
     return reflectOtherLaneType(agent, field, type);
   }
@@ -520,6 +524,26 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
         if (swimTransient != null) {
           lane.isTransient(swimTransient.value());
         }
+        return lane;
+      }
+      return reflectOtherLaneType(agent, field, type);
+    } catch (IllegalAccessException cause) {
+      throw new AgentException(cause);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  static Lane reflectHttpLaneType(Agent agent, Field field, Class<?> type, Type[] arguments) {
+    try {
+      field.setAccessible(true);
+      Object object = field.get(agent);
+      if (object == null) {
+        object = agent.agentContext().httpLane();
+        field.set(agent, object);
+      }
+      if (object instanceof HttpLaneView<?>) {
+        final HttpLaneView<Object> lane = (HttpLaneView<Object>) object;
+        // TODO: infer request decoder
         return lane;
       }
       return reflectOtherLaneType(agent, field, type);

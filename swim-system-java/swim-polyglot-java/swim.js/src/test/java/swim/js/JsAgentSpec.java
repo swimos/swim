@@ -18,13 +18,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
 import swim.api.downlink.EventDownlink;
-import swim.api.downlink.function.OnEvent;
+import swim.api.warp.function.OnEvent;
 import swim.fabric.Fabric;
 import swim.fabric.FabricDef;
 import swim.fabric.FabricNodeDef;
 import swim.kernel.Kernel;
 import swim.server.ServerLoader;
-import swim.service.warp.WarpServiceDef;
+import swim.service.web.WebServiceDef;
 import swim.structure.Text;
 import swim.uri.UriPath;
 
@@ -50,7 +50,7 @@ public class JsAgentSpec {
     }
 
     try {
-      kernel.openService(WarpServiceDef.standard().port(53556).spaceName("test"));
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
       final EventDownlink<String> commandLink = fabric.downlink()
           .valueClass(String.class)

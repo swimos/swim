@@ -16,10 +16,10 @@ package swim.api.lane.function;
 
 import java.util.Iterator;
 import java.util.Map;
-import swim.api.uplink.Uplink;
+import swim.api.warp.WarpUplink;
 import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface OnSyncMap<K, V> extends Preemptive {
-  Iterator<Map.Entry<K, V>> onSync(Uplink uplink);
+  Iterator<Map.Entry<K, V>> onSync(WarpUplink uplink);
 }

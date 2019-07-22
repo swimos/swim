@@ -14,13 +14,12 @@
 
 package swim.fabric;
 
-import swim.api.downlink.Downlink;
+import swim.api.Downlink;
 import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.CellBinding;
 import swim.runtime.CellContext;
-import swim.runtime.HttpBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.PushRequest;
 import swim.store.StoreBinding;
@@ -93,11 +92,6 @@ public abstract class FabricCell implements CellBinding, CellContext {
   }
 
   @Override
-  public void httpDownlink(HttpBinding http) {
-    cellContext().httpDownlink(http);
-  }
-
-  @Override
   public void pushDown(PushRequest pushRequest) {
     cellContext().pushDown(pushRequest);
   }
@@ -105,11 +99,6 @@ public abstract class FabricCell implements CellBinding, CellContext {
   @Override
   public void openUplink(LinkBinding link) {
     cellBinding().openUplink(link);
-  }
-
-  @Override
-  public void httpUplink(HttpBinding http) {
-    cellBinding().httpUplink(http);
   }
 
   @Override

@@ -14,8 +14,8 @@
 
 package swim.api.policy;
 
+import swim.api.Downlink;
 import swim.api.agent.AgentRoute;
-import swim.api.downlink.Downlink;
 import swim.uri.Uri;
 
 public interface PlanePolicy extends Policy {

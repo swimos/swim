@@ -14,12 +14,12 @@
 
 package swim.runtime;
 
+import swim.api.Downlink;
 import swim.api.agent.Agent;
 import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
-import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.collections.HashTrieMap;
@@ -224,11 +224,6 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   }
 
   @Override
-  public void httpDownlink(HttpBinding http) {
-    this.edgeBinding.httpDownlink(http);
-  }
-
-  @Override
   public void pushDown(PushRequest pushRequest) {
     this.edgeBinding.pushDown(pushRequest);
   }
@@ -236,11 +231,6 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   @Override
   public void openUplink(LinkBinding link) {
     this.edgeBinding.openUplink(link);
-  }
-
-  @Override
-  public void httpUplink(HttpBinding http) {
-    this.edgeBinding.httpUplink(http);
   }
 
   @Override

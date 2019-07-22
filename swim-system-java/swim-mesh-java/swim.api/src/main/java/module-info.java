@@ -37,7 +37,6 @@ module swim.api {
   exports swim.api.client;
   exports swim.api.data;
   exports swim.api.downlink;
-  exports swim.api.downlink.function;
   exports swim.api.function;
   exports swim.api.http;
   exports swim.api.http.function;
@@ -49,8 +48,8 @@ module swim.api {
   exports swim.api.service;
   exports swim.api.space;
   exports swim.api.store;
-  exports swim.api.uplink;
-  exports swim.api.uplink.function;
+  exports swim.api.warp;
+  exports swim.api.warp.function;
   exports swim.api.ws;
   exports swim.api.ws.function;
 }

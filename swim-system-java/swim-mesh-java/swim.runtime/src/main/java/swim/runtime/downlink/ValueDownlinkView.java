@@ -17,29 +17,30 @@ package swim.runtime.downlink;
 import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map;
+import swim.api.DownlinkException;
 import swim.api.Link;
 import swim.api.SwimContext;
-import swim.api.downlink.DownlinkException;
 import swim.api.downlink.ValueDownlink;
-import swim.api.downlink.function.DidLink;
-import swim.api.downlink.function.DidReceive;
-import swim.api.downlink.function.DidSync;
-import swim.api.downlink.function.DidUnlink;
-import swim.api.downlink.function.WillLink;
-import swim.api.downlink.function.WillReceive;
-import swim.api.downlink.function.WillSync;
-import swim.api.downlink.function.WillUnlink;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
-import swim.api.function.WillCommand;
+import swim.api.warp.function.DidLink;
+import swim.api.warp.function.DidReceive;
+import swim.api.warp.function.DidSync;
+import swim.api.warp.function.DidUnlink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillLink;
+import swim.api.warp.function.WillReceive;
+import swim.api.warp.function.WillSync;
+import swim.api.warp.function.WillUnlink;
 import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.warp.WarpDownlinkView;
 import swim.streamlet.Inlet;
 import swim.streamlet.Outlet;
 import swim.structure.Form;
@@ -47,7 +48,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Cursor;
 
-public class ValueDownlinkView<V> extends DownlinkView implements ValueDownlink<V> {
+public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownlink<V> {
   protected final Form<V> valueForm;
   protected ValueDownlinkModel model;
 
@@ -301,7 +302,7 @@ public class ValueDownlinkView<V> extends DownlinkView implements ValueDownlink<
   }
 
   @SuppressWarnings("unchecked")
-  protected Map.Entry<Boolean, V> dispatchWillSet(V newValue, boolean preemptive) {
+  public Map.Entry<Boolean, V> dispatchWillSet(V newValue, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
@@ -347,7 +348,7 @@ public class ValueDownlinkView<V> extends DownlinkView implements ValueDownlink<
   }
 
   @SuppressWarnings("unchecked")
-  protected boolean dispatchDidSet(V newValue, V oldValue, boolean preemptive) {
+  public boolean dispatchDidSet(V newValue, V oldValue, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);

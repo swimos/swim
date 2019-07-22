@@ -117,6 +117,10 @@ include 'swim.io.warp'
 project(':swim.io.warp').projectDir = file('swim-core-java/swim.io.warp')
 project(':swim.io.warp').name = 'swim-io-warp'
 
+include 'swim.web'
+project(':swim.web').projectDir = file('swim-core-java/swim.web')
+project(':swim.web').name = 'swim-web'
+
 include 'swim.api'
 project(':swim.api').projectDir = file('swim-mesh-java/swim.api')
 project(':swim.api').name = 'swim-api'
@@ -153,9 +157,9 @@ include 'swim.remote'
 project(':swim.remote').projectDir = file('swim-mesh-java/swim.remote')
 project(':swim.remote').name = 'swim-remote'
 
-include 'swim.service.warp'
-project(':swim.service.warp').projectDir = file('swim-mesh-java/swim.service.warp')
-project(':swim.service.warp').name = 'swim-service-warp'
+include 'swim.service.web'
+project(':swim.service.web').projectDir = file('swim-mesh-java/swim.service.web')
+project(':swim.service.web').name = 'swim-service-web'
 
 include 'swim.java'
 project(':swim.java').projectDir = file('swim-mesh-java/swim.java')

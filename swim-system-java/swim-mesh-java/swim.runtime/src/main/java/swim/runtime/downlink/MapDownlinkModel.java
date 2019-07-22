@@ -18,6 +18,10 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import swim.collections.BTreeMap;
+import swim.concurrent.Stage;
+import swim.runtime.DownlinkRelay;
+import swim.runtime.DownlinkView;
+import swim.runtime.warp.PartialDownlinkModem;
 import swim.structure.Attr;
 import swim.structure.Form;
 import swim.structure.Record;
@@ -205,13 +209,12 @@ public class MapDownlinkModel extends PartialDownlinkModem<MapDownlinkView<?, ?>
     final Form<V> valueForm = view.valueForm;
     final Value key = keyForm.mold(keyObject).toValue();
     final Value newValue = valueForm.mold(newObject).toValue();
-    final MapDownlinkRelayUpdate relay = new MapDownlinkRelayUpdate(this, key, newValue);
+    final MapDownlinkRelayUpdate relay = new MapDownlinkRelayUpdate(this, view.stage(), key, newValue);
     relay.keyForm = (Form<Object>) keyForm;
     relay.valueForm = (Form<Object>) valueForm;
     relay.keyObject = keyObject;
     relay.oldObject = newObject;
     relay.newObject = newObject;
-    relay.stage = view.stage;
     relay.run();
     if (relay.isDone() && relay.valueForm == valueForm) {
       return (V) relay.oldObject;
@@ -225,11 +228,10 @@ public class MapDownlinkModel extends PartialDownlinkModem<MapDownlinkView<?, ?>
     final Form<K> keyForm = view.keyForm;
     final Form<V> valueForm = view.valueForm;
     final Value key = keyForm.mold(keyObject).toValue();
-    final MapDownlinkRelayRemove relay = new MapDownlinkRelayRemove(this, key);
+    final MapDownlinkRelayRemove relay = new MapDownlinkRelayRemove(this, view.stage(), key);
     relay.keyForm = (Form<Object>) keyForm;
     relay.valueForm = (Form<Object>) valueForm;
     relay.keyObject = keyObject;
-    relay.stage = view.stage;
     relay.run();
     if (relay.isDone()) {
       if (relay.valueForm != valueForm && valueForm != null) {
@@ -248,8 +250,7 @@ public class MapDownlinkModel extends PartialDownlinkModem<MapDownlinkView<?, ?>
     if (lower > 0) {
       pushUp(Record.create(1).attr("drop", lower)); // TODO: drop top key
     }
-    //final MapDownlinkRelayDrop relay = new MapDownlinkRelayDrop(this, lower);
-    //relay.stage = view.stage;
+    //final MapDownlinkRelayDrop relay = new MapDownlinkRelayDrop(this, view.stage(), lower);
     //relay.run();
   }
 
@@ -257,14 +258,12 @@ public class MapDownlinkModel extends PartialDownlinkModem<MapDownlinkView<?, ?>
     if (upper > 0) {
       pushUp(Record.create(1).attr("take", upper)); // TODO: take to key
     }
-    //final MapDownlinkRelayTake relay = new MapDownlinkRelayTake(this, upper);
-    //relay.stage = view.stage;
+    //final MapDownlinkRelayTake relay = new MapDownlinkRelayTake(this, view.stage(), upper);
     //relay.run();
   }
 
   public void clear(MapDownlinkView<?, ?> view) {
-    final MapDownlinkRelayClear relay = new MapDownlinkRelayClear(this);
-    relay.stage = view.stage;
+    final MapDownlinkRelayClear relay = new MapDownlinkRelayClear(this, view.stage());
     relay.run();
   }
 
@@ -325,16 +324,17 @@ final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDo
     this.newValue = newValue;
   }
 
-  MapDownlinkRelayUpdate(MapDownlinkModel model, Value key, Value newValue) {
-    super(model, 1, 3);
+  MapDownlinkRelayUpdate(MapDownlinkModel model, Stage stage, Value key, Value newValue) {
+    super(model, 1, 3, stage);
     this.message = null;
     this.key = key;
     this.newValue = newValue;
+    this.stage = stage;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       if (this.model.isStateful()) {
         this.oldValue = this.model.state.put(this.key, this.newValue);
@@ -347,7 +347,7 @@ final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDo
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(MapDownlinkView<?, ?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(MapDownlinkView<?, ?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -421,7 +421,7 @@ final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDo
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {
@@ -445,14 +445,14 @@ final class MapDownlinkRelayRemove extends DownlinkRelay<MapDownlinkModel, MapDo
     this.key = key;
   }
 
-  MapDownlinkRelayRemove(MapDownlinkModel model, Value key) {
-    super(model, 1, 3);
+  MapDownlinkRelayRemove(MapDownlinkModel model, Stage stage, Value key) {
+    super(model, 1, 3, stage);
     this.message = null;
     this.key = key;
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       if (this.model.isStateful()) {
         this.oldValue = this.model.state.remove(this.key);
@@ -471,7 +471,7 @@ final class MapDownlinkRelayRemove extends DownlinkRelay<MapDownlinkModel, MapDo
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(MapDownlinkView<?, ?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(MapDownlinkView<?, ?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -534,7 +534,7 @@ final class MapDownlinkRelayRemove extends DownlinkRelay<MapDownlinkModel, MapDo
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {
@@ -554,14 +554,14 @@ final class MapDownlinkRelayDrop extends DownlinkRelay<MapDownlinkModel, MapDown
     this.lower = lower;
   }
 
-  MapDownlinkRelayDrop(MapDownlinkModel model, int lower) {
-    super(model, 1, 3);
+  MapDownlinkRelayDrop(MapDownlinkModel model, Stage stage, int lower) {
+    super(model, 1, 3, stage);
     this.message = null;
     this.lower = lower;
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       if (this.model.isStateful()) {
         this.model.state.drop(this.lower);
@@ -570,7 +570,7 @@ final class MapDownlinkRelayDrop extends DownlinkRelay<MapDownlinkModel, MapDown
   }
 
   @Override
-  boolean runPhase(MapDownlinkView<?, ?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(MapDownlinkView<?, ?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -597,7 +597,7 @@ final class MapDownlinkRelayDrop extends DownlinkRelay<MapDownlinkModel, MapDown
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {
@@ -616,14 +616,14 @@ final class MapDownlinkRelayTake extends DownlinkRelay<MapDownlinkModel, MapDown
     this.upper = upper;
   }
 
-  MapDownlinkRelayTake(MapDownlinkModel model, int upper) {
-    super(model, 1, 3);
+  MapDownlinkRelayTake(MapDownlinkModel model, Stage stage, int upper) {
+    super(model, 1, 3, stage);
     this.message = null;
     this.upper = upper;
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       if (this.model.isStateful()) {
         this.model.state.take(this.upper);
@@ -632,7 +632,7 @@ final class MapDownlinkRelayTake extends DownlinkRelay<MapDownlinkModel, MapDown
   }
 
   @Override
-  boolean runPhase(MapDownlinkView<?, ?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(MapDownlinkView<?, ?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -659,7 +659,7 @@ final class MapDownlinkRelayTake extends DownlinkRelay<MapDownlinkModel, MapDown
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {
@@ -676,13 +676,13 @@ final class MapDownlinkRelayClear extends DownlinkRelay<MapDownlinkModel, MapDow
     this.message = message;
   }
 
-  MapDownlinkRelayClear(MapDownlinkModel model) {
-    super(model, 1, 3);
+  MapDownlinkRelayClear(MapDownlinkModel model, Stage stage) {
+    super(model, 1, 3, stage);
     this.message = null;
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       if (this.model.isStateful()) {
         this.model.state.clear();
@@ -691,7 +691,7 @@ final class MapDownlinkRelayClear extends DownlinkRelay<MapDownlinkModel, MapDow
   }
 
   @Override
-  boolean runPhase(MapDownlinkView<?, ?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(MapDownlinkView<?, ?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -718,7 +718,7 @@ final class MapDownlinkRelayClear extends DownlinkRelay<MapDownlinkModel, MapDow
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {

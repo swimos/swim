@@ -20,7 +20,7 @@ module swim.server {
   requires transitive swim.store.mem;
   requires transitive swim.remote;
   requires transitive swim.service;
-  requires transitive swim.service.warp;
+  requires transitive swim.service.web;
   requires transitive swim.auth;
   requires transitive swim.fabric;
   requires transitive swim.java;

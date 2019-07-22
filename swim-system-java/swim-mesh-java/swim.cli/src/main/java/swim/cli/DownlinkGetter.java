@@ -14,10 +14,10 @@
 
 package swim.cli;
 
-import swim.api.downlink.Downlink;
+import swim.api.warp.WarpDownlink;
 
 public class DownlinkGetter extends DownlinkLogger {
-  public DownlinkGetter(Downlink downlink, String format) {
+  public DownlinkGetter(WarpDownlink downlink, String format) {
     super(downlink, format);
   }
 

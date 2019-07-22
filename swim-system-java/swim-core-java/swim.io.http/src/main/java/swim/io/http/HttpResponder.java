@@ -30,6 +30,8 @@ public interface HttpResponder<T> {
 
   void didRequest(HttpRequest<T> request);
 
+  void doRespond(HttpRequest<T> request);
+
   void willRespond(HttpResponse<?> response);
 
   void didRespond(HttpResponse<?> response);

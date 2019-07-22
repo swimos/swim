@@ -21,6 +21,7 @@ import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
 import swim.dynamic.api.lane.function.GuestDidDownlinkValue;
 import swim.dynamic.api.lane.function.GuestWillDownlinkValue;
+import swim.dynamic.api.warp.HostWarpLane;
 import swim.dynamic.java.lang.HostIterable;
 import swim.dynamic.observable.HostObservableMap;
 
@@ -34,7 +35,7 @@ public final class HostJoinValueLane {
   static {
     final JavaHostObjectType<JoinValueLane<Object, Object>> type = new JavaHostObjectType<>(JoinValueLane.class);
     TYPE = type;
-    type.inheritType(HostLane.TYPE);
+    type.inheritType(HostWarpLane.TYPE);
     type.inheritType(HostIterable.TYPE);
     type.inheritType(HostObservableMap.TYPE);
     type.addMember(new HostJoinValueLaneIsResident());

@@ -14,20 +14,15 @@
 
 package swim.api.lane;
 
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
-import swim.api.http.function.DecodeRequestHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRespondHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
-import swim.api.lane.function.DidEnter;
-import swim.api.lane.function.DidLeave;
-import swim.api.lane.function.DidUplink;
-import swim.api.lane.function.WillEnter;
-import swim.api.lane.function.WillLeave;
-import swim.api.lane.function.WillUplink;
+import swim.api.warp.WarpLane;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidEnter;
+import swim.api.warp.function.DidLeave;
+import swim.api.warp.function.DidUplink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillEnter;
+import swim.api.warp.function.WillLeave;
+import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableValue;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
@@ -35,7 +30,7 @@ import swim.streamlet.Inlet;
 import swim.streamlet.Outlet;
 import swim.structure.Form;
 
-public interface ValueLane<V> extends Lane, ObservableValue<V>, Inlet<V>, Outlet<V> {
+public interface ValueLane<V> extends WarpLane, ObservableValue<V>, Inlet<V>, Outlet<V> {
   Form<V> valueForm();
 
   <V2> ValueLane<V2> valueForm(Form<V2> valueForm);
@@ -49,9 +44,6 @@ public interface ValueLane<V> extends Lane, ObservableValue<V>, Inlet<V>, Outlet
   boolean isTransient();
 
   ValueLane<V> isTransient(boolean isTransient);
-
-  @Override
-  ValueLane<V> isSigned(boolean isSigned);
 
   @Override
   ValueLane<V> observe(Object observer);
@@ -88,24 +80,6 @@ public interface ValueLane<V> extends Lane, ObservableValue<V>, Inlet<V>, Outlet
 
   @Override
   ValueLane<V> didLeave(DidLeave didLeave);
-
-  @Override
-  ValueLane<V> decodeRequest(DecodeRequestHttp<Object> decodeRequest);
-
-  @Override
-  ValueLane<V> willRequest(WillRequestHttp<?> willRequest);
-
-  @Override
-  ValueLane<V> didRequest(DidRequestHttp<Object> didRequest);
-
-  @Override
-  ValueLane<V> doRespond(DoRespondHttp<Object> doRespond);
-
-  @Override
-  ValueLane<V> willRespond(WillRespondHttp<?> willRespond);
-
-  @Override
-  ValueLane<V> didRespond(DidRespondHttp<?> didRespond);
 
   @Override
   V get();

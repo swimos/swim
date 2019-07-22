@@ -14,8 +14,8 @@
 
 package swim.runtime;
 
+import swim.api.Lane;
 import swim.api.agent.AgentContext;
-import swim.api.lane.Lane;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
@@ -60,7 +60,7 @@ public interface LaneBinding extends TierBinding, CellBinding, Log {
 
   void closeLaneView(Lane lane);
 
-  FingerTrieSeq<LinkContext> getUplinks();
+  FingerTrieSeq<LinkContext> uplinks();
 
   LinkBinding getUplink(Value linkKey);
 

@@ -20,7 +20,6 @@ import java.security.cert.Certificate;
 import java.util.Collection;
 import swim.api.auth.Identity;
 import swim.structure.Value;
-import swim.warp.Envelope;
 
 public interface LinkContext {
   LinkBinding linkWrapper();
@@ -54,14 +53,6 @@ public interface LinkContext {
   Principal remotePrincipalUp();
 
   Collection<Certificate> remoteCertificatesUp();
-
-  void pullDown();
-
-  void feedUp();
-
-  void pushUp(Envelope envelope);
-
-  void skipUp();
 
   void closeUp();
 

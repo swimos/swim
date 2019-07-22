@@ -14,12 +14,12 @@
 
 package swim.runtime;
 
+import swim.api.Downlink;
 import swim.api.agent.Agent;
 import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
-import swim.api.downlink.Downlink;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.collections.HashTrieMap;
@@ -234,11 +234,6 @@ public class PartProxy implements PartBinding, PartContext {
   }
 
   @Override
-  public void httpDownlink(HttpBinding http) {
-    this.partContext.httpDownlink(http);
-  }
-
-  @Override
   public void pushDown(PushRequest pushRequest) {
     this.partContext.pushDown(pushRequest);
   }
@@ -246,11 +241,6 @@ public class PartProxy implements PartBinding, PartContext {
   @Override
   public void openUplink(LinkBinding link) {
     this.partBinding.openUplink(link);
-  }
-
-  @Override
-  public void httpUplink(HttpBinding http) {
-    this.partBinding.httpUplink(http);
   }
 
   @Override

@@ -14,20 +14,15 @@
 
 package swim.api.lane;
 
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
-import swim.api.http.function.DecodeRequestHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRespondHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
-import swim.api.lane.function.DidEnter;
-import swim.api.lane.function.DidLeave;
-import swim.api.lane.function.DidUplink;
-import swim.api.lane.function.WillEnter;
-import swim.api.lane.function.WillLeave;
-import swim.api.lane.function.WillUplink;
+import swim.api.warp.WarpLane;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidEnter;
+import swim.api.warp.function.DidLeave;
+import swim.api.warp.function.DidUplink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillEnter;
+import swim.api.warp.function.WillLeave;
+import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableSpatialMap;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidMoveShape;
@@ -40,7 +35,7 @@ import swim.observable.function.WillUpdateShape;
 import swim.spatial.SpatialMap;
 import swim.structure.Form;
 
-public interface SpatialLane<K, S, V> extends Lane, ObservableSpatialMap<K, S, V> {
+public interface SpatialLane<K, S, V> extends WarpLane, ObservableSpatialMap<K, S, V> {
   Form<K> keyForm();
 
   <K2> SpatialLane<K2, S, V> keyForm(Form<K2> keyForm);
@@ -60,9 +55,6 @@ public interface SpatialLane<K, S, V> extends Lane, ObservableSpatialMap<K, S, V
   boolean isTransient();
 
   SpatialLane<K, S, V> isTransient(boolean isTransient);
-
-  @Override
-  SpatialLane<K, S, V> isSigned(boolean isSigned);
 
   @Override
   SpatialLane<K, S, V> observe(Object observer);
@@ -117,24 +109,6 @@ public interface SpatialLane<K, S, V> extends Lane, ObservableSpatialMap<K, S, V
 
   @Override
   SpatialLane<K, S, V> didLeave(DidLeave didLeave);
-
-  @Override
-  SpatialLane<K, S, V> decodeRequest(DecodeRequestHttp<Object> decodeRequest);
-
-  @Override
-  SpatialLane<K, S, V> willRequest(WillRequestHttp<?> willRequest);
-
-  @Override
-  SpatialLane<K, S, V> didRequest(DidRequestHttp<Object> didRequest);
-
-  @Override
-  SpatialLane<K, S, V> doRespond(DoRespondHttp<Object> doRespond);
-
-  @Override
-  SpatialLane<K, S, V> willRespond(WillRespondHttp<?> willRespond);
-
-  @Override
-  SpatialLane<K, S, V> didRespond(DidRespondHttp<?> didRespond);
 
   SpatialMap<K, S, V> snapshot();
 }

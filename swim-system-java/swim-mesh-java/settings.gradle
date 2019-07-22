@@ -27,8 +27,8 @@ project(':swim.store.mem').name = 'swim-store-mem'
 include 'swim.remote'
 project(':swim.remote').name = 'swim-remote'
 
-include 'swim.service.warp'
-project(':swim.service.warp').name = 'swim-service-warp'
+include 'swim.service.web'
+project(':swim.service.web').name = 'swim-service-web'
 
 include 'swim.java'
 project(':swim.java').name = 'swim-java'

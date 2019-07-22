@@ -16,14 +16,13 @@ package swim.runtime.router;
 
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.api.downlink.Downlink;
+import swim.api.Downlink;
 import swim.api.policy.Policy;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.EdgeBinding;
-import swim.runtime.HttpBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshContext;
@@ -31,11 +30,9 @@ import swim.runtime.PartBinding;
 import swim.runtime.PartContext;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
-import swim.runtime.uplink.ErrorUplinkModem;
-import swim.runtime.uplink.HttpErrorUplinkModem;
+import swim.runtime.UplinkError;
 import swim.store.StoreBinding;
 import swim.structure.Extant;
-import swim.structure.Record;
 import swim.structure.Text;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -347,25 +344,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     if (partBinding != null) {
       partBinding.openUplink(link);
     } else {
-      final ErrorUplinkModem linkContext = new ErrorUplinkModem(link, Record.of().attr("noPart"));
-      link.setLinkContext(linkContext);
-      linkContext.cueDown();
-    }
-  }
-
-  @Override
-  public void httpDownlink(HttpBinding http) {
-    // TODO
-  }
-
-  @Override
-  public void httpUplink(HttpBinding http) {
-    final PartBinding partBinding = openPart(http.nodeUri());
-    if (partBinding != null) {
-      partBinding.httpUplink(http);
-    } else {
-      final HttpErrorUplinkModem httpContext = new HttpErrorUplinkModem(http);
-      http.setHttpContext(httpContext);
+      UplinkError.rejectPartNotFound(link);
     }
   }
 

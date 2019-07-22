@@ -14,16 +14,17 @@
 
 package swim.runtime.lane;
 
-import swim.runtime.LinkBinding;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.WarpLaneModel;
 
-public class SupplyLaneModel extends LaneModel<SupplyLaneView<?>, SupplyLaneUplink> {
+public class SupplyLaneModel extends WarpLaneModel<SupplyLaneView<?>, SupplyLaneUplink> {
   @Override
   public String laneType() {
     return "supply";
   }
 
   @Override
-  protected SupplyLaneUplink createUplink(LinkBinding link) {
+  protected SupplyLaneUplink createWarpUplink(WarpBinding link) {
     return new SupplyLaneUplink(this, link);
   }
 

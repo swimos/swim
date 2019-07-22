@@ -14,6 +14,8 @@
 
 package swim.runtime.downlink;
 
+import swim.runtime.DownlinkRelay;
+import swim.runtime.warp.SupplyDownlinkModem;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -48,7 +50,7 @@ final class EventDownlinkRelayOnEvent extends DownlinkRelay<EventDownlinkModel, 
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(EventDownlinkView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(EventDownlinkView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -78,7 +80,7 @@ final class EventDownlinkRelayOnEvent extends DownlinkRelay<EventDownlinkModel, 
   }
 
   @Override
-  void done() {
+  protected void done() {
     this.model.cueDown();
   }
 }

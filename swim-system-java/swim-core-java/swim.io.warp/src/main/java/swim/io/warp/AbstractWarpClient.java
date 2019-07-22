@@ -51,7 +51,6 @@ public abstract class AbstractWarpClient extends AbstractWsClient implements Web
   @Override
   public <I2 extends Envelope> void read(Decoder<I2> content) {
     throw new WarpException("unupgraded websocket");
-
   }
 
   @Override

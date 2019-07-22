@@ -14,12 +14,11 @@
 
 package swim.remote;
 
-import swim.api.downlink.Downlink;
+import swim.api.Downlink;
 import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
-import swim.runtime.HttpBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.PushRequest;
 import swim.store.StoreBinding;
@@ -82,10 +81,6 @@ public class TestCellContext implements CellContext {
 
   @Override
   public void closeDownlink(LinkBinding link) {
-  }
-
-  @Override
-  public void httpDownlink(HttpBinding http) {
   }
 
   @Override

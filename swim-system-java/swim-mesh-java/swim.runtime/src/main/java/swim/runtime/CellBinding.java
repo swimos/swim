@@ -17,7 +17,5 @@ package swim.runtime;
 public interface CellBinding {
   void openUplink(LinkBinding link);
 
-  void httpUplink(HttpBinding http);
-
   void pushUp(PushRequest pushRequest);
 }

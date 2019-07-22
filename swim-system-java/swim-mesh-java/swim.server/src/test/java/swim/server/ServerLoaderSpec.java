@@ -22,7 +22,7 @@ import swim.kernel.BootKernel;
 import swim.kernel.Kernel;
 import swim.remote.RemoteKernel;
 import swim.service.ServiceKernel;
-import swim.service.warp.WarpServiceKernel;
+import swim.service.web.WebServiceKernel;
 import swim.store.mem.MemStoreKernel;
 import static org.testng.Assert.assertNotNull;
 
@@ -34,7 +34,7 @@ public class ServerLoaderSpec {
     assertNotNull(kernel.unwrapKernel(MemStoreKernel.class));
     assertNotNull(kernel.unwrapKernel(RemoteKernel.class));
     assertNotNull(kernel.unwrapKernel(ServiceKernel.class));
-    assertNotNull(kernel.unwrapKernel(WarpServiceKernel.class));
+    assertNotNull(kernel.unwrapKernel(WebServiceKernel.class));
     assertNotNull(kernel.unwrapKernel(AuthenticatorKernel.class));
     assertNotNull(kernel.unwrapKernel(FabricKernel.class));
     assertNotNull(kernel.unwrapKernel(JavaKernel.class));

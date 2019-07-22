@@ -16,16 +16,16 @@ package swim.client;
 
 import java.util.concurrent.CountDownLatch;
 import org.testng.annotations.Test;
-import swim.api.downlink.function.DidLink;
-import swim.api.downlink.function.DidSync;
-import swim.api.downlink.function.DidUnlink;
-import swim.api.downlink.function.OnEvent;
-import swim.api.downlink.function.WillLink;
-import swim.api.downlink.function.WillSync;
-import swim.api.downlink.function.WillUnlink;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
+import swim.api.warp.function.DidLink;
+import swim.api.warp.function.DidSync;
+import swim.api.warp.function.DidUnlink;
+import swim.api.warp.function.OnEvent;
+import swim.api.warp.function.WillLink;
+import swim.api.warp.function.WillSync;
+import swim.api.warp.function.WillUnlink;
 import swim.structure.Value;
 
 public class ClientRuntimeSpec {

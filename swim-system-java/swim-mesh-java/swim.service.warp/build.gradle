@@ -1,9 +1,0 @@
-apply from: '../project.gradle'
-
-description = 'WARP service runtime'
-ext.moduleName = 'swim.service.warp'
-
-dependencies {
-  api project(':swim-service')
-  api project(':swim-remote')
-}

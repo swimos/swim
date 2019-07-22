@@ -20,7 +20,11 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import swim.collections.STreeList;
-import swim.runtime.link.ListLinkDelta;
+import swim.concurrent.Stage;
+import swim.runtime.DownlinkRelay;
+import swim.runtime.DownlinkView;
+import swim.runtime.warp.ListDownlinkModem;
+import swim.runtime.warp.ListLinkDelta;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -203,10 +207,9 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
   public <V> boolean add(ListDownlinkView<V> view, int index, V newObject, Object key) {
     final Form<V> valueForm = view.valueForm;
     final Value newValue = valueForm.mold(newObject).toValue();
-    final ListDownlinkRelayUpdate relay = new ListDownlinkRelayUpdate(this, index, newValue, key);
+    final ListDownlinkRelayUpdate relay = new ListDownlinkRelayUpdate(this, view.stage(), index, newValue, key);
     relay.valueForm = (Form<Object>) valueForm;
     relay.newObject = newObject;
-    relay.stage = view.stage;
     relay.run();
     if (relay.isDone() && relay.valueForm == valueForm) {
       return relay.oldObject != null;
@@ -224,11 +227,10 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
   public <V> V set(ListDownlinkView<V> view, int index, V newObject, Object key) {
     final Form<V> valueForm = view.valueForm;
     final Value newValue = valueForm.mold(newObject).toValue();
-    final ListDownlinkRelayUpdate relay = new ListDownlinkRelayUpdate(this, index, newValue, key);
+    final ListDownlinkRelayUpdate relay = new ListDownlinkRelayUpdate(this, view.stage(), index, newValue, key);
     relay.valueForm = (Form<Object>) valueForm;
     relay.oldObject = newObject;
     relay.newObject = newObject;
-    relay.stage = view.stage;
     relay.run();
     if (relay.isDone() && relay.valueForm == valueForm) {
       return (V) relay.oldObject;
@@ -242,8 +244,7 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
   }
 
   public <V> void move(ListDownlinkView<V> view, int fromIndex, int toIndex, Object key) {
-    final ListDownlinkRelayMove relay = new ListDownlinkRelayMove(this, fromIndex, toIndex, key);
-    relay.stage = view.stage;
+    final ListDownlinkRelayMove relay = new ListDownlinkRelayMove(this, view.stage(), fromIndex, toIndex, key);
     relay.run();
   }
 
@@ -258,9 +259,8 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
     final Map.Entry<Object, Value> entry = getEntry(index, key);
     if (entry != null) {
       final Object actualKey = key == null ? entry.getKey() : key;
-      final ListDownlinkRelayRemove relay = new ListDownlinkRelayRemove(this, index, actualKey);
+      final ListDownlinkRelayRemove relay = new ListDownlinkRelayRemove(this, view.stage(), index, actualKey);
       relay.valueForm = (Form<Object>) valueForm;
-      relay.stage = view.stage;
       relay.run();
       if (relay.isDone()) {
         if (relay.valueForm != valueForm && valueForm != null) {
@@ -280,21 +280,18 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
 
   public void drop(ListDownlinkView<?> view, int lower) {
     pushUp(ListLinkDelta.drop(lower));
-    //final ListDownlinkRelayDrop relay = new ListDownlinkRelayDrop(this, lower);
-    //relay.stage = view.stage;
+    //final ListDownlinkRelayDrop relay = new ListDownlinkRelayDrop(this, view.stage(), lower);
     //relay.run();
   }
 
   public void take(ListDownlinkView<?> view, int upper) {
     pushUp(ListLinkDelta.take(upper));
-    //final ListDownlinkRelayTake relay = new ListDownlinkRelayTake(this, upper);
-    //relay.stage = view.stage;
+    //final ListDownlinkRelayTake relay = new ListDownlinkRelayTake(this, view.stage(), upper);
     //relay.run();
   }
 
   public void clear(ListDownlinkView<?> view) {
-    final ListDownlinkRelayClear relay = new ListDownlinkRelayClear(this);
-    relay.stage = view.stage;
+    final ListDownlinkRelayClear relay = new ListDownlinkRelayClear(this, view.stage());
     relay.run();
   }
 
@@ -319,8 +316,8 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
     this.newValue = newValue;
   }
 
-  ListDownlinkRelayUpdate(ListDownlinkModel model, int index, Value newValue, Object key) {
-    super(model, 1, 3);
+  ListDownlinkRelayUpdate(ListDownlinkModel model, Stage stage, int index, Value newValue, Object key) {
+    super(model, 1, 3, stage);
     this.message = null;
     this.index = index;
     this.key = key;
@@ -329,7 +326,7 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
 
   @SuppressWarnings("unchecked")
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       if (this.model.isStateful()) {
         final Map.Entry<Object, Value> entry;
@@ -359,7 +356,7 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -417,7 +414,7 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {
@@ -443,8 +440,8 @@ final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListD
     this.key = key;
   }
 
-  ListDownlinkRelayMove(ListDownlinkModel model, int fromIndex, int toIndex, Object key) {
-    super(model, 1, 3);
+  ListDownlinkRelayMove(ListDownlinkModel model, Stage stage, int fromIndex, int toIndex, Object key) {
+    super(model, 1, 3, stage);
     this.message = null;
     this.fromIndex = fromIndex;
     this.toIndex = toIndex;
@@ -452,7 +449,7 @@ final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListD
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       final Map.Entry<Object, Value> entry = this.model.state.getEntry(this.fromIndex);
       this.model.state.move(this.fromIndex, this.toIndex, this.key);
@@ -472,7 +469,7 @@ final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListD
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -519,7 +516,7 @@ final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListD
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {
@@ -543,15 +540,15 @@ final class ListDownlinkRelayRemove extends DownlinkRelay<ListDownlinkModel, Lis
     this.key = key;
   }
 
-  ListDownlinkRelayRemove(ListDownlinkModel model, int index, Object key) {
-    super(model, 1, 3);
+  ListDownlinkRelayRemove(ListDownlinkModel model, Stage stage, int index, Object key) {
+    super(model, 1, 3, stage);
     this.message = null;
     this.index = index;
     this.key = key;
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       this.model.state.remove(this.index, this.key);
       if (this.oldValue == null) {
@@ -568,7 +565,7 @@ final class ListDownlinkRelayRemove extends DownlinkRelay<ListDownlinkModel, Lis
 
   @SuppressWarnings("unchecked")
   @Override
-  boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -616,7 +613,7 @@ final class ListDownlinkRelayRemove extends DownlinkRelay<ListDownlinkModel, Lis
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {
@@ -635,14 +632,14 @@ final class ListDownlinkRelayDrop extends DownlinkRelay<ListDownlinkModel, ListD
     this.lower = lower;
   }
 
-  ListDownlinkRelayDrop(ListDownlinkModel model, int lower) {
-    super(model, 1, 3);
+  ListDownlinkRelayDrop(ListDownlinkModel model, Stage stage, int lower) {
+    super(model, 1, 3, stage);
     this.message = null;
     this.lower = lower;
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       if (this.model.isStateful()) {
         this.model.state.drop(this.lower);
@@ -651,7 +648,7 @@ final class ListDownlinkRelayDrop extends DownlinkRelay<ListDownlinkModel, ListD
   }
 
   @Override
-  boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -678,7 +675,7 @@ final class ListDownlinkRelayDrop extends DownlinkRelay<ListDownlinkModel, ListD
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {
@@ -697,14 +694,14 @@ final class ListDownlinkRelayTake extends DownlinkRelay<ListDownlinkModel, ListD
     this.upper = upper;
   }
 
-  ListDownlinkRelayTake(ListDownlinkModel model, int upper) {
-    super(model, 1, 3);
+  ListDownlinkRelayTake(ListDownlinkModel model, Stage stage, int upper) {
+    super(model, 1, 3, stage);
     this.message = null;
     this.upper = upper;
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       if (this.model.isStateful()) {
         this.model.state.take(this.upper);
@@ -713,7 +710,7 @@ final class ListDownlinkRelayTake extends DownlinkRelay<ListDownlinkModel, ListD
   }
 
   @Override
-  boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -740,7 +737,7 @@ final class ListDownlinkRelayTake extends DownlinkRelay<ListDownlinkModel, ListD
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {
@@ -753,17 +750,17 @@ final class ListDownlinkRelayClear extends DownlinkRelay<ListDownlinkModel, List
   final EventMessage message;
 
   ListDownlinkRelayClear(ListDownlinkModel model, EventMessage message) {
-    super(model, 0, 3);
+    super(model, 0, 3, null);
     this.message = message;
   }
 
-  ListDownlinkRelayClear(ListDownlinkModel model) {
-    super(model, 3, 4);
+  ListDownlinkRelayClear(ListDownlinkModel model, Stage stage) {
+    super(model, 3, 4, stage);
     this.message = null;
   }
 
   @Override
-  void beginPhase(int phase) {
+  protected void beginPhase(int phase) {
     if (phase == 2) {
       if (this.model.isStateful()) {
         this.model.state.clear();
@@ -772,7 +769,7 @@ final class ListDownlinkRelayClear extends DownlinkRelay<ListDownlinkModel, List
   }
 
   @Override
-  boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
+  protected boolean runPhase(ListDownlinkView<?> view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
         view.downlinkWillReceive(this.message);
@@ -799,7 +796,7 @@ final class ListDownlinkRelayClear extends DownlinkRelay<ListDownlinkModel, List
   }
 
   @Override
-  void done() {
+  protected void done() {
     if (this.message != null) {
       this.model.cueDown();
     } else {

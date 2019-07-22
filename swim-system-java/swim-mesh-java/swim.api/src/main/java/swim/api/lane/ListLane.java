@@ -15,20 +15,15 @@
 package swim.api.lane;
 
 import java.util.List;
-import swim.api.function.DidCommand;
-import swim.api.function.WillCommand;
-import swim.api.http.function.DecodeRequestHttp;
-import swim.api.http.function.DidRequestHttp;
-import swim.api.http.function.DidRespondHttp;
-import swim.api.http.function.DoRespondHttp;
-import swim.api.http.function.WillRequestHttp;
-import swim.api.http.function.WillRespondHttp;
-import swim.api.lane.function.DidEnter;
-import swim.api.lane.function.DidLeave;
-import swim.api.lane.function.DidUplink;
-import swim.api.lane.function.WillEnter;
-import swim.api.lane.function.WillLeave;
-import swim.api.lane.function.WillUplink;
+import swim.api.warp.WarpLane;
+import swim.api.warp.function.DidCommand;
+import swim.api.warp.function.DidEnter;
+import swim.api.warp.function.DidLeave;
+import swim.api.warp.function.DidUplink;
+import swim.api.warp.function.WillCommand;
+import swim.api.warp.function.WillEnter;
+import swim.api.warp.function.WillLeave;
+import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableList;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
@@ -45,7 +40,7 @@ import swim.observable.function.WillUpdateIndex;
 import swim.structure.Form;
 import swim.util.KeyedList;
 
-public interface ListLane<V> extends Lane, KeyedList<V>, ObservableList<V> {
+public interface ListLane<V> extends WarpLane, KeyedList<V>, ObservableList<V> {
   Form<V> valueForm();
 
   <V2> ListLane<V2> valueForm(Form<V2> valueForm);
@@ -59,9 +54,6 @@ public interface ListLane<V> extends Lane, KeyedList<V>, ObservableList<V> {
   boolean isTransient();
 
   ListLane<V> isTransient(boolean isTransient);
-
-  @Override
-  ListLane<V> isSigned(boolean isSigned);
 
   @Override
   ListLane<V> observe(Object observer);
@@ -128,24 +120,6 @@ public interface ListLane<V> extends Lane, KeyedList<V>, ObservableList<V> {
 
   @Override
   ListLane<V> didLeave(DidLeave didLeave);
-
-  @Override
-  ListLane<V> decodeRequest(DecodeRequestHttp<Object> decodeRequest);
-
-  @Override
-  ListLane<V> willRequest(WillRequestHttp<?> willRequest);
-
-  @Override
-  ListLane<V> didRequest(DidRequestHttp<Object> didRequest);
-
-  @Override
-  ListLane<V> doRespond(DoRespondHttp<Object> doRespond);
-
-  @Override
-  ListLane<V> willRespond(WillRespondHttp<?> willRespond);
-
-  @Override
-  ListLane<V> didRespond(DidRespondHttp<?> didRespond);
 
   @Override
   void drop(int lower);

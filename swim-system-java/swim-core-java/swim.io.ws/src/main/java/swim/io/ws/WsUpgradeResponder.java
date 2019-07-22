@@ -63,7 +63,7 @@ public class WsUpgradeResponder extends AbstractHttpResponder<Object> {
   }
 
   @Override
-  public void didRequest(HttpRequest<Object> httpRequest) {
+  public void doRespond(HttpRequest<Object> httpRequest) {
     writeResponse(this.wsResponse.httpResponse());
   }
 

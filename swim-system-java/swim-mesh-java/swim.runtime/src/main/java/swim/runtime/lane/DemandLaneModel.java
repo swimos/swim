@@ -14,18 +14,20 @@
 
 package swim.runtime.lane;
 
-import swim.api.uplink.Uplink;
-import swim.runtime.LinkBinding;
+import swim.api.warp.WarpUplink;
+import swim.runtime.LaneView;
+import swim.runtime.WarpBinding;
+import swim.runtime.warp.WarpLaneModel;
 import swim.structure.Value;
 
-public class DemandLaneModel extends LaneModel<DemandLaneView<?>, DemandLaneUplink> {
+public class DemandLaneModel extends WarpLaneModel<DemandLaneView<?>, DemandLaneUplink> {
   @Override
   public String laneType() {
     return "demand";
   }
 
   @Override
-  protected DemandLaneUplink createUplink(LinkBinding link) {
+  protected DemandLaneUplink createWarpUplink(WarpBinding link) {
     return new DemandLaneUplink(this, link);
   }
 
@@ -34,7 +36,7 @@ public class DemandLaneModel extends LaneModel<DemandLaneView<?>, DemandLaneUpli
     view.setLaneBinding(this);
   }
 
-  Value nextDownCue(Uplink uplink) {
+  Value nextDownCue(WarpUplink uplink) {
     final Object views = this.views;
     if (views instanceof DemandLaneView<?>) {
       return ((DemandLaneView<?>) views).nextDownCue(uplink);

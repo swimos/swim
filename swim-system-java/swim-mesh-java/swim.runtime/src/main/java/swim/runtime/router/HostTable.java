@@ -17,7 +17,7 @@ package swim.runtime.router;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.api.downlink.Downlink;
+import swim.api.Downlink;
 import swim.api.policy.Policy;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Schedule;
@@ -25,17 +25,14 @@ import swim.concurrent.Stage;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
-import swim.runtime.HttpBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
 import swim.runtime.PartBinding;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
-import swim.runtime.uplink.ErrorUplinkModem;
-import swim.runtime.uplink.HttpErrorUplinkModem;
+import swim.runtime.UplinkError;
 import swim.store.StoreBinding;
-import swim.structure.Record;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -330,11 +327,6 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   }
 
   @Override
-  public void httpDownlink(HttpBinding http) {
-    this.hostContext.httpDownlink(http);
-  }
-
-  @Override
   public void pushDown(PushRequest pushRequest) {
     this.hostContext.pushDown(pushRequest);
   }
@@ -345,20 +337,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     if (nodeBinding != null) {
       nodeBinding.openUplink(link);
     } else {
-      final ErrorUplinkModem linkContext = new ErrorUplinkModem(link, Record.of().attr("nodeNotFound"));
-      link.setLinkContext(linkContext);
-      linkContext.cueDown();
-    }
-  }
-
-  @Override
-  public void httpUplink(HttpBinding http) {
-    final NodeBinding nodeBinding = openNode(http.nodeUri());
-    if (nodeBinding != null) {
-      nodeBinding.httpUplink(http);
-    } else {
-      final HttpErrorUplinkModem httpContext = new HttpErrorUplinkModem(http);
-      http.setHttpContext(httpContext);
+      UplinkError.rejectNodeNotFound(link);
     }
   }
 
