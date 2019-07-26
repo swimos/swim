@@ -14,6 +14,8 @@
 
 package swim.server;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
@@ -25,24 +27,56 @@ import swim.api.downlink.ListDownlink;
 import swim.api.lane.ListLane;
 import swim.api.plane.AbstractPlane;
 import swim.api.warp.function.DidCommand;
-import swim.api.warp.function.DidReceive;
 import swim.api.warp.function.WillCommand;
-import swim.api.warp.function.WillReceive;
 import swim.codec.Format;
 import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
+import swim.observable.function.DidClear;
+import swim.observable.function.DidDrop;
 import swim.observable.function.DidMoveIndex;
 import swim.observable.function.DidRemoveIndex;
+import swim.observable.function.DidTake;
 import swim.observable.function.DidUpdateIndex;
+import swim.observable.function.WillClear;
+import swim.observable.function.WillDrop;
 import swim.observable.function.WillMoveIndex;
 import swim.observable.function.WillRemoveIndex;
+import swim.observable.function.WillTake;
 import swim.observable.function.WillUpdateIndex;
 import swim.recon.Recon;
 import swim.service.web.WebServiceDef;
 import swim.structure.Value;
-import static org.testng.AssertJUnit.assertEquals;
-
+import static org.testng.Assert.assertEquals;
+    
 public class ListLaneSpec {
+
+  private static final int DEF_LATCH_COUNT = 100;
+  private static CountDownLatch laneWillUpdate = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidUpdate  = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidUpdateLower  = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidUpdateUpper  = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static CountDownLatch laneWillMove = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidMove = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static CountDownLatch laneWillRemove = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidRemove = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static CountDownLatch laneWillDrop = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidDrop = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static CountDownLatch laneWillTake = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidTake = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static CountDownLatch laneWillClear = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidClear = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static CountDownLatch laneWillCommand = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidCommand = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static List<String> listLaneCopy = new ArrayList<String>();
+  private static List<String> commandList = new ArrayList<String>();
+
   static class TestListLaneAgent extends AbstractAgent {
     @SwimLane("list")
     ListLane<String> testList = listLane()
@@ -51,39 +85,97 @@ public class ListLaneSpec {
 
     class TestListLaneController implements WillUpdateIndex<String>, DidUpdateIndex<String>,
         WillMoveIndex<String>, DidMoveIndex<String>, WillRemoveIndex, DidRemoveIndex<String>,
+        WillDrop, DidDrop, WillTake, DidTake, WillClear, DidClear,
         WillCommand, DidCommand {
       @Override
       public String willUpdate(int index, String newValue) {
         System.out.println("lane willUpdate index " + index + "; newValue: " + Format.debug(newValue));
+        laneWillUpdate.countDown();
         return newValue;
       }
       @Override
       public void didUpdate(int index, String newValue, String oldValue) {
         System.out.println("lane didUpdate index " + index + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+        listLaneCopy = testList.snapshot();
+        laneDidUpdate.countDown();
+        final char letter = newValue.length() > 0 ? newValue.charAt(0) : '\0';
+        if (Character.isLowerCase(letter)) {
+          laneDidUpdateLower.countDown();
+        } else if (Character.isUpperCase(letter)) {
+          laneDidUpdateUpper.countDown();
+        }
       }
       @Override
       public void willMove(int fromIndex, int toIndex, String value) {
         System.out.println("lane willMove fromIndex: " + fromIndex + "; toIndex: " + toIndex + "; value: " + Format.debug(value));
+        laneWillMove.countDown();
       }
       @Override
       public void didMove(int fromIndex, int toIndex, String value) {
         System.out.println("lane didMove fromIndex: " + fromIndex + "; toIndex: " + toIndex + "; value: " + Format.debug(value));
+        listLaneCopy = testList.snapshot();
+        laneDidMove.countDown();
       }
       @Override
       public void willRemove(int index) {
         System.out.println("lane willRemove index: " + index);
+        laneWillRemove.countDown();
       }
       @Override
       public void didRemove(int index, String oldValue) {
         System.out.println("lane didRemove index: " + index + "; oldValue: " + Format.debug(oldValue));
+        listLaneCopy = testList.snapshot();
+        laneDidRemove.countDown();
       }
       @Override
       public void willCommand(Value body) {
         System.out.println("lane willCommand body " + Recon.toString(body));
+        laneWillCommand.countDown();
       }
       @Override
       public void didCommand(Value body) {
         System.out.println("lane didCommand body " + Recon.toString(body));
+        commandList.add(body.stringValue());
+        laneDidCommand.countDown();
+      }
+
+      @Override
+      public void didDrop(int lower) {
+        System.out.println("lane didDrop lower : " + lower);
+        listLaneCopy = testList.snapshot();
+        laneDidDrop.countDown();
+      }
+
+      @Override
+      public void didTake(int upper) {
+        System.out.println("lane didTake upper: " + upper);
+        listLaneCopy = testList.snapshot();
+        laneDidTake.countDown();
+      }
+
+      @Override
+      public void willDrop(int lower) {
+        System.out.println("lane willDrop lower: " + lower);
+        laneWillDrop.countDown();
+      }
+
+      @Override
+      public void willTake(int upper) {
+        System.out.println("lane willTake upper: " + upper);
+        laneWillTake.countDown();
+      }
+
+      @Override
+      public void didClear() {
+        System.out.println("lane didClear");
+        listLaneCopy = testList.snapshot();
+        laneDidClear.countDown();
+      }
+
+      @Override
+      public void willClear() {
+        System.out.println("lane willClear");
+        laneWillClear.countDown();
       }
     }
   }
@@ -99,60 +191,28 @@ public class ListLaneSpec {
     final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
                                       .openPlane("test", TestListPlane.class);
 
-    final CountDownLatch linkDidReceive = new CountDownLatch(3);
-    final CountDownLatch linkDidUpdate = new CountDownLatch(6);
-    class ListLinkController implements WillUpdateIndex<String>, DidUpdateIndex<String>,
-        WillCommand, DidCommand, WillReceive, DidReceive {
-      @Override
-      public String willUpdate(int index, String newValue) {
-        System.out.println("link willUpdate index: " + index);
-        return newValue;
-      }
-      @Override
-      public void didUpdate(int index, String newValue, String oldValue) {
-        System.out.println("link didUpdate index: " + index + "; newValue " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        linkDidUpdate.countDown();
-      }
-      @Override
-      public void willCommand(Value body) {
-        System.out.println("link willCommand body " + Recon.toString(body));
-      }
-      @Override
-      public void didCommand(Value body) {
-        System.out.println("link didCommand body " + Recon.toString(body));
-      }
-      @Override
-      public void willReceive(Value body) {
-        System.out.println("link willReceive body " + Recon.toString(body));
-      }
-      @Override
-      public void didReceive(Value body) {
-        System.out.println("link didReceive body " + Recon.toString(body));
-        linkDidReceive.countDown();
-      }
-    }
-
+    laneWillUpdate = new CountDownLatch(3);
+    laneDidUpdate = new CountDownLatch(3);
     try {
       kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
       final ListDownlink<String> listLink = plane.downlinkList()
           .valueClass(String.class)
           .hostUri("warp://localhost:53556")
-          .nodeUri("/list/todo")
+          .nodeUri("/list/insert")
           .laneUri("list")
-          .observe(new ListLinkController())
           .open();
+
       listLink.add(0, "a");
       listLink.add(1, "b");
       listLink.add(2, "c");
-      linkDidReceive.await(1, TimeUnit.SECONDS);
-      linkDidUpdate.await(1, TimeUnit.SECONDS);
-      assertEquals(linkDidReceive.getCount(), 0);
-      assertEquals(linkDidUpdate.getCount(), 0);
-      assertEquals(listLink.size(), 3);
-      assertEquals(listLink.get(0), "a");
-      assertEquals(listLink.get(1), "b");
-      assertEquals(listLink.get(2), "c");
+      laneDidUpdate.await(1, TimeUnit.SECONDS);
+      assertEquals(laneWillUpdate.getCount(), 0);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(listLaneCopy.size(), 3);
+      assertEquals(listLaneCopy.get(0), "a");
+      assertEquals(listLaneCopy.get(1), "b");
+      assertEquals(listLaneCopy.get(2), "c");
     } finally {
       kernel.stop();
     }
@@ -162,157 +222,80 @@ public class ListLaneSpec {
   public void testUpdate() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
-                                      .openPlane("test", TestListPlane.class);
-
-    final CountDownLatch linkDidReceiveLower = new CountDownLatch(3);
-    final CountDownLatch linkDidReceiveUpper = new CountDownLatch(3);
-    final CountDownLatch linkDidUpdateLower = new CountDownLatch(6);
-    final CountDownLatch linkDidUpdateUpper = new CountDownLatch(6);
-    class ListLinkController implements WillUpdateIndex<String>, DidUpdateIndex<String>,
-        WillCommand, DidCommand, WillReceive, DidReceive {
-      @Override
-      public String willUpdate(int index, String newValue) {
-        System.out.println("link willUpdate index: " + index);
-        return newValue;
-      }
-      @Override
-      public void didUpdate(int index, String newValue, String oldValue) {
-        System.out.println("link didUpdate index: " + index + "; newValue " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        final char letter = newValue.length() > 0 ? newValue.charAt(0) : '\0';
-        if (Character.isLowerCase(letter)) {
-          linkDidUpdateLower.countDown();
-        } else if (Character.isUpperCase(letter)) {
-          linkDidUpdateUpper.countDown();
-        }
-      }
-      @Override
-      public void willCommand(Value body) {
-        System.out.println("link willCommand body " + Recon.toString(body));
-      }
-      @Override
-      public void didCommand(Value body) {
-        System.out.println("link didCommand body " + Recon.toString(body));
-      }
-      @Override
-      public void willReceive(Value body) {
-        System.out.println("link willReceive body " + Recon.toString(body));
-      }
-      @Override
-      public void didReceive(Value body) {
-        System.out.println("link didReceive body " + Recon.toString(body));
-        final String value = body.target().stringValue("");
-        final char letter = value.length() > 0 ? value.charAt(0) : '\0';
-        if (Character.isLowerCase(letter)) {
-          linkDidReceiveLower.countDown();
-        } else if (Character.isUpperCase(letter)) {
-          linkDidReceiveUpper.countDown();
-        }
-      }
-    }
-
+        .openPlane("test", TestListPlane.class);
+    laneDidUpdateLower = new CountDownLatch(3);
+    laneDidUpdateUpper = new CountDownLatch(3);
     try {
       kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
       final ListDownlink<String> listLink = plane.downlinkList()
           .valueClass(String.class)
           .hostUri("warp://localhost:53556")
-          .nodeUri("/list/todo")
+          .nodeUri("/list/update")
           .laneUri("list")
-          .observe(new ListLinkController())
           .open();
       listLink.add(0, "a");
       listLink.add(1, "b");
       listLink.add(2, "c");
-      linkDidReceiveLower.await(1, TimeUnit.SECONDS);
-      linkDidUpdateLower.await(1, TimeUnit.SECONDS);
-      assertEquals(linkDidReceiveLower.getCount(), 0);
-      assertEquals(linkDidUpdateLower.getCount(), 0);
+      laneDidUpdateLower.await(1, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdateLower.getCount(), 0);
+      assertEquals(listLaneCopy.size(), 3);
+      assertEquals(listLaneCopy.get(0), "a");
+      assertEquals(listLaneCopy.get(1), "b");
+      assertEquals(listLaneCopy.get(2), "c");
+
       listLink.add(0, "A");
       listLink.add(1, "B");
       listLink.add(2, "C");
-      linkDidReceiveUpper.await(1, TimeUnit.SECONDS);
-      linkDidUpdateUpper.await(1, TimeUnit.SECONDS);
-      assertEquals(linkDidReceiveUpper.getCount(), 0);
-      assertEquals(linkDidUpdateUpper.getCount(), 0);
-      assertEquals(listLink.size(), 3);
-      assertEquals(listLink.get(0), "A");
-      assertEquals(listLink.get(1), "B");
-      assertEquals(listLink.get(2), "C");
+      laneDidUpdateUpper.await(1, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdateUpper.getCount(), 0);
+      assertEquals(listLaneCopy.size(), 3);
+      assertEquals(listLaneCopy.get(0), "A");
+      assertEquals(listLaneCopy.get(1), "B");
+      assertEquals(listLaneCopy.get(2), "C");
     } finally {
       kernel.stop();
     }
   }
 
+
   @Test
   public void testMove() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
-                                      .openPlane("test", TestListPlane.class);
+        .openPlane("test", TestListPlane.class);
 
-    final CountDownLatch linkDidReceive = new CountDownLatch(5);
-    final CountDownLatch linkDidUpdate = new CountDownLatch(6);
-    final CountDownLatch linkDidMove = new CountDownLatch(2);
-    class ListLinkController implements WillUpdateIndex<String>, DidUpdateIndex<String>,
-        WillMoveIndex<String>, DidMoveIndex<String>, WillCommand, DidCommand, WillReceive, DidReceive {
-      @Override
-      public String willUpdate(int index, String newValue) {
-        System.out.println("link willUpdate index: " + index);
-        return newValue;
-      }
-      @Override
-      public void didUpdate(int index, String newValue, String oldValue) {
-        System.out.println("link didUpdate index: " + index + "; newValue " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        linkDidUpdate.countDown();
-      }
-      @Override
-      public void willMove(int fromIndex, int toIndex, String value) {
-        System.out.println("link willMove fromIndex: " + fromIndex + "; toIndex: " + toIndex + "; value: " + Format.debug(value));
-      }
-      @Override
-      public void didMove(int fromIndex, int toIndex, String value) {
-        System.out.println("link didMove fromIndex: " + fromIndex + "; toIndex: " + toIndex + "; value: " + Format.debug(value));
-        linkDidMove.countDown();
-      }
-      @Override
-      public void willCommand(Value body) {
-        System.out.println("link willCommand body " + Recon.toString(body));
-      }
-      @Override
-      public void didCommand(Value body) {
-        System.out.println("link didCommand body " + Recon.toString(body));
-      }
-      @Override
-      public void willReceive(Value body) {
-        System.out.println("link willReceive body " + Recon.toString(body));
-      }
-      @Override
-      public void didReceive(Value body) {
-        System.out.println("link didReceive body " + Recon.toString(body));
-        linkDidReceive.countDown();
-      }
-    }
-
+    laneDidUpdate = new CountDownLatch(3);
+    laneDidMove = new CountDownLatch(2);
+    laneWillMove = new CountDownLatch(2);
     try {
       kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
       final ListDownlink<String> listLink = plane.downlinkList()
           .valueClass(String.class)
           .hostUri("warp://localhost:53556")
-          .nodeUri("/list/todo")
+          .nodeUri("/list/move")
           .laneUri("list")
-          .observe(new ListLinkController())
           .open();
       listLink.add(0, "a");
       listLink.add(1, "b");
       listLink.add(2, "c");
+      laneDidUpdate.await(1, TimeUnit.SECONDS);
+      assertEquals(listLaneCopy.size(), 3);
+      assertEquals(listLaneCopy.get(0), "a");
+      assertEquals(listLaneCopy.get(1), "b");
+      assertEquals(listLaneCopy.get(2), "c");
+
       listLink.move(1, 0);
       listLink.move(2, 1);
-      linkDidReceive.await(1, TimeUnit.SECONDS);
-      linkDidUpdate.await(1, TimeUnit.SECONDS);
-      assertEquals(listLink.size(), 3);
-      assertEquals(listLink.get(0), "b");
-      assertEquals(listLink.get(1), "c");
-      assertEquals(listLink.get(2), "a");
+      laneDidMove.await(1, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(laneWillMove.getCount(), 0);
+      assertEquals(laneDidMove.getCount(), 0);
+      assertEquals(listLaneCopy.size(), 3);
+      assertEquals(listLaneCopy.get(0), "b");
+      assertEquals(listLaneCopy.get(1), "c");
+      assertEquals(listLaneCopy.get(2), "a");
     } finally {
       kernel.stop();
     }
@@ -322,50 +305,11 @@ public class ListLaneSpec {
   public void testRemove() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
-                                      .openPlane("test", TestListPlane.class);
+        .openPlane("test", TestListPlane.class);
 
-    final CountDownLatch linkDidReceive = new CountDownLatch(4);
-    final CountDownLatch linkDidUpdate = new CountDownLatch(6);
-    final CountDownLatch linkDidRemove = new CountDownLatch(1);
-    class ListLinkController implements WillUpdateIndex<String>, DidUpdateIndex<String>,
-        WillRemoveIndex, DidRemoveIndex<String>, WillCommand, DidCommand, WillReceive, DidReceive {
-      @Override
-      public String willUpdate(int index, String newValue) {
-        System.out.println("link willUpdate index: " + index);
-        return newValue;
-      }
-      @Override
-      public void didUpdate(int index, String newValue, String oldValue) {
-        System.out.println("link didUpdate index: " + index + "; newValue " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        linkDidUpdate.countDown();
-      }
-      @Override
-      public void willRemove(int index) {
-        System.out.println("link willRemove index: " + index);
-      }
-      @Override
-      public void didRemove(int index, String oldValue) {
-        System.out.println("link didRemove index: " + index + "; oldValue: " + Format.debug(oldValue));
-        linkDidRemove.countDown();
-      }
-      @Override
-      public void willCommand(Value body) {
-        System.out.println("link willCommand body " + Recon.toString(body));
-      }
-      @Override
-      public void didCommand(Value body) {
-        System.out.println("link didCommand body " + Recon.toString(body));
-      }
-      @Override
-      public void willReceive(Value body) {
-        System.out.println("link willReceive body " + Recon.toString(body));
-      }
-      @Override
-      public void didReceive(Value body) {
-        System.out.println("link didReceive body " + Recon.toString(body));
-        linkDidReceive.countDown();
-      }
-    }
+    laneDidUpdate = new CountDownLatch(3);
+    laneDidRemove = new CountDownLatch(1);
+    laneWillRemove = new CountDownLatch(1);
 
     try {
       kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
@@ -373,25 +317,159 @@ public class ListLaneSpec {
       final ListDownlink<String> listLink = plane.downlinkList()
           .valueClass(String.class)
           .hostUri("warp://localhost:53556")
-          .nodeUri("/list/todo")
+          .nodeUri("/list/remove")
           .laneUri("list")
-          .observe(new ListLinkController())
           .open();
+
       listLink.add(0, "a");
       listLink.add(1, "b");
       listLink.add(2, "c");
+      laneDidUpdate.await(1, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(listLaneCopy.size(), 3);
+      assertEquals(listLaneCopy.get(0), "a");
+      assertEquals(listLaneCopy.get(1), "b");
+      assertEquals(listLaneCopy.get(2), "c");
+
       listLink.remove(1);
-      linkDidReceive.await(1, TimeUnit.SECONDS);
-      linkDidUpdate.await(1, TimeUnit.SECONDS);
-      linkDidRemove.await(1, TimeUnit.SECONDS);
-      assertEquals(linkDidReceive.getCount(), 0);
-      assertEquals(linkDidUpdate.getCount(), 0);
-      assertEquals(linkDidRemove.getCount(), 0);
-      assertEquals(listLink.size(), 2);
-      assertEquals(listLink.get(0), "a");
-      assertEquals(listLink.get(1), "c");
+      laneWillRemove.await(1, TimeUnit.SECONDS);
+      laneDidRemove.await(1, TimeUnit.SECONDS);
+      assertEquals(laneWillRemove.getCount(), 0);
+      assertEquals(laneDidRemove.getCount(), 0);
+      assertEquals(listLaneCopy.size(), 2);
+      assertEquals(listLaneCopy.get(0), "a");
+      assertEquals(listLaneCopy.get(1), "c");
     } finally {
       kernel.stop();
     }
   }
+
+  @Test
+  public void testDrop() throws InterruptedException {
+    final Kernel kernel = ServerLoader.loadServerStack();
+    final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+        .openPlane("test", TestListPlane.class);
+    final int total = 5;
+
+    laneDidUpdate = new CountDownLatch(total);
+    laneDidDrop = new CountDownLatch(1);
+    laneWillDrop = new CountDownLatch(1);
+
+    try {
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
+      kernel.start();
+      final ListDownlink<String> listLink = plane.downlinkList()
+          .valueClass(String.class)
+          .hostUri("warp://localhost:53556")
+          .nodeUri("/list/drop")
+          .laneUri("list")
+          .open();
+
+      for (int i = 0; i < total; i++) {
+        listLink.add(i, Integer.toString(i));
+      }
+      laneDidUpdate.await(1, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(listLaneCopy.size(), total);
+      for (int i = 0; i < total; i++) {
+        assertEquals(listLaneCopy.get(i), Integer.toString(i));
+      }
+
+      listLink.drop(2);
+      laneWillDrop.await(2, TimeUnit.SECONDS);
+      laneDidDrop.await(2, TimeUnit.SECONDS);
+      assertEquals(laneDidDrop.getCount(), 0);
+      assertEquals(listLaneCopy.size(), 3);
+      assertEquals(listLaneCopy.get(0), "2");
+      assertEquals(listLaneCopy.get(1), "3");
+      assertEquals(listLaneCopy.get(2), "4");
+    } finally {
+      kernel.stop();
+    }
+  }
+
+  @Test
+  public void testTake() throws InterruptedException {
+    final Kernel kernel = ServerLoader.loadServerStack();
+    final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+        .openPlane("test", TestListPlane.class);
+    final int total = 5;
+    laneDidUpdate = new CountDownLatch(total);
+    laneDidTake = new CountDownLatch(1);
+    laneWillTake = new CountDownLatch(1);
+
+    try {
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
+      kernel.start();
+      final ListDownlink<String> listLink = plane.downlinkList()
+          .valueClass(String.class)
+          .hostUri("warp://localhost:53556")
+          .nodeUri("/list/take")
+          .laneUri("list")
+          .open();
+
+      for (int i = 0; i < total; i++) {
+        listLink.add(i, Integer.toString(i));
+      }
+      laneDidUpdate.await(2, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(listLaneCopy.size(), 5);
+      for (int i = 0; i < total; i++) {
+        assertEquals(listLaneCopy.get(i), Integer.toString(i));
+      }
+
+      listLink.take(2);
+      laneWillTake.await(2, TimeUnit.SECONDS);
+      laneDidTake.await(2, TimeUnit.SECONDS);
+      assertEquals(laneDidTake.getCount(), 0);
+      assertEquals(listLaneCopy.size(), 2);
+      assertEquals(listLaneCopy.get(0), "0");
+      assertEquals(listLaneCopy.get(1), "1");
+    } finally {
+      kernel.stop();
+    }
+  }
+
+  @Test
+  public void testClear() throws InterruptedException {
+    final Kernel kernel = ServerLoader.loadServerStack();
+    final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+        .openPlane("test", TestListPlane.class);
+    final int total = 3;
+    laneDidUpdate = new CountDownLatch(total);
+    laneDidClear = new CountDownLatch(1);
+    laneWillClear = new CountDownLatch(1);
+
+    try {
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
+      kernel.start();
+      final ListDownlink<String> listLink = plane.downlinkList()
+          .valueClass(String.class)
+          .hostUri("warp://localhost:53556")
+          .nodeUri("/list/clear")
+          .laneUri("list")
+          .open();
+
+      for (int i = 0; i < total; i++) {
+        listLink.add(i, Integer.toString(i));
+      }
+
+      laneDidUpdate.await(2, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(listLaneCopy.size(), total);
+      for (int i = 0; i < total; i++) {
+        assertEquals(listLaneCopy.get(i), Integer.toString(i));
+      }
+
+      listLink.clear();
+      laneDidClear.await(1, TimeUnit.SECONDS);
+      assertEquals(laneWillClear.getCount(), 0);
+      assertEquals(laneDidClear.getCount(), 0);
+      assertEquals(listLaneCopy.size(), 0);
+    } finally {
+      kernel.stop();
+    }
+  }
+
 }
+

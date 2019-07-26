@@ -291,8 +291,9 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
   }
 
   public void clear(ListDownlinkView<?> view) {
-    final ListDownlinkRelayClear relay = new ListDownlinkRelayClear(this, view.stage());
-    relay.run();
+    pushUp(ListLinkDelta.clear());
+    //final ListDownlinkRelayClear relay = new ListDownlinkRelayClear(this, view.stage());
+    //relay.run();
   }
 
   protected static final int STATEFUL = 1 << 0;
@@ -576,9 +577,11 @@ final class ListDownlinkRelayRemove extends DownlinkRelay<ListDownlinkModel, Lis
       final Form<Object> valueForm = (Form<Object>) view.valueForm;
       this.valueForm = valueForm;
       final Map.Entry<Object, Value> entry = this.model.state.getEntry(this.index, this.key);
-      this.oldValue = entry.getValue();
-      this.key = entry.getKey();
-      this.oldObject = valueForm.cast(this.oldValue);
+      if (entry != null) {
+        this.oldValue = entry.getValue();
+        this.key = entry.getKey();
+        this.oldObject = valueForm.cast(this.oldValue);
+      }
       if (this.oldObject == null) {
         this.oldObject = valueForm.unit();
       }
