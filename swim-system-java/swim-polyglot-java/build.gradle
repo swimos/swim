@@ -37,6 +37,8 @@ gradle.projectsEvaluated {
         options.addStringOption('-module', modules.join(','))
         options.addStringOption('-module-source-path', "${projectDir}/*/src/main/java")
         options.addStringOption('-module-path', classpath.asPath)
+        def classpaths = javaProjects.collect { project -> project.sourceSets.main.compileClasspath.asPath }
+        options.addStringOption('-module-path', classpaths.join(':'))
         classpath = files()
       } else {
         exclude '*module-info*'
