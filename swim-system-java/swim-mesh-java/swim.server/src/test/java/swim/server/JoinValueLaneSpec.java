@@ -122,7 +122,7 @@ public class JoinValueLaneSpec {
                                            .openPlane("test", TestJoinValuePlane.class);
 
     final CountDownLatch joinDidReceive = new CountDownLatch(2);
-    final CountDownLatch joinDidUpdate = new CountDownLatch(2);
+    final CountDownLatch joinDidUpdate = new CountDownLatch(2 * 2); // 1 for the initial link and 1 for update for x, same for y
     class JoinValueLinkController implements WillUpdateKey<String, String>,
         DidUpdateKey<String, String>, WillReceive, DidReceive, WillLink, DidLink,
         WillSync, DidSync, WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {

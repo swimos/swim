@@ -22,19 +22,8 @@ import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
 import swim.api.agent.AgentRoute;
 import swim.api.downlink.MapDownlink;
-import swim.api.function.DidClose;
-import swim.api.function.DidConnect;
-import swim.api.function.DidDisconnect;
 import swim.api.lane.MapLane;
 import swim.api.plane.AbstractPlane;
-import swim.api.warp.function.DidLink;
-import swim.api.warp.function.DidReceive;
-import swim.api.warp.function.DidSync;
-import swim.api.warp.function.DidUnlink;
-import swim.api.warp.function.WillLink;
-import swim.api.warp.function.WillReceive;
-import swim.api.warp.function.WillSync;
-import swim.api.warp.function.WillUnlink;
 import swim.codec.Format;
 import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
@@ -48,13 +37,31 @@ import swim.observable.function.WillDrop;
 import swim.observable.function.WillRemoveKey;
 import swim.observable.function.WillTake;
 import swim.observable.function.WillUpdateKey;
-import swim.recon.Recon;
 import swim.service.web.WebServiceDef;
-import swim.structure.Value;
+import swim.util.OrderedMap;
 import static org.testng.Assert.assertEquals;
 
 public class MapLaneSpec {
-  static class TestMapLaneAgent extends AbstractAgent {
+
+  private static final int DEF_LATCH_COUNT = 100;
+  private static CountDownLatch laneWillUpdate = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidUpdate = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static CountDownLatch laneWillRemove = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidRemove = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static CountDownLatch laneWillDrop = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidDrop = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static CountDownLatch laneWillTake = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidTake = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static CountDownLatch laneWillClear = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidClear = new CountDownLatch(DEF_LATCH_COUNT);
+
+  private static OrderedMap<String, String> mapLaneCopy;
+
+  private static class TestMapLaneAgent extends AbstractAgent {
     @SwimLane("map")
     MapLane<String, String> testMap = this.<String, String>mapLane()
         .keyClass(String.class)
@@ -67,43 +74,67 @@ public class MapLaneSpec {
       @Override
       public String willUpdate(String key, String newValue) {
         System.out.println("lane willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
+        laneWillUpdate.countDown();
         return newValue;
       }
+
       @Override
       public void didUpdate(String key, String newValue, String oldValue) {
         System.out.println("lane didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+        mapLaneCopy = testMap.snapshot();
+        laneDidUpdate.countDown();
       }
+
       @Override
       public void willRemove(String key) {
         System.out.println("lane willRemove key: " + Format.debug(key));
+        laneWillRemove.countDown();
       }
+
       @Override
       public void didRemove(String key, String oldValue) {
         System.out.println("lane didRemove key: " + Format.debug(key) + "; oldValue: " + Format.debug(oldValue));
+        mapLaneCopy = testMap.snapshot();
+        laneDidRemove.countDown();
       }
+
       @Override
       public void willClear() {
         System.out.println("lane willClear");
+        laneWillClear.countDown();
       }
+
       @Override
       public void didClear() {
         System.out.println("lane didClear");
+        mapLaneCopy = testMap.snapshot();
+        laneDidClear.countDown();
       }
+
       @Override
       public void willDrop(int lower) {
         System.out.println("lane willDrop " + lower);
+        laneWillDrop.countDown();
       }
+
       @Override
       public void didDrop(int lower) {
         System.out.println("lane didDrop " + lower);
+        mapLaneCopy = testMap.snapshot();
+        laneDidDrop.countDown();
       }
+
       @Override
       public void willTake(int upper) {
         System.out.println("lane willTake " + upper);
+        laneWillTake.countDown();
       }
+
       @Override
       public void didTake(int upper) {
         System.out.println("lane didTake " + upper);
+        mapLaneCopy = testMap.snapshot();
+        laneDidTake.countDown();
       }
     }
   }
@@ -114,73 +145,13 @@ public class MapLaneSpec {
   }
 
   @Test
-  public void testUpdate() throws InterruptedException {
+  public void testPut() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
-                                     .openPlane("test", TestMapPlane.class);
+        .openPlane("test", TestMapPlane.class);
 
-    final CountDownLatch linkDidReceive = new CountDownLatch(2);
-    final CountDownLatch linkDidUpdate = new CountDownLatch(4);
-    class MapLinkController implements WillUpdateKey<String, String>,
-        DidUpdateKey<String, String>, WillReceive, DidReceive, WillLink, DidLink,
-        WillSync, DidSync, WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
-      @Override
-      public String willUpdate(String key, String newValue) {
-        System.out.println("link willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
-        return newValue;
-      }
-      @Override
-      public void didUpdate(String key, String newValue, String oldValue) {
-        System.out.println("link didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
-        linkDidUpdate.countDown();
-      }
-      @Override
-      public void willReceive(Value body) {
-        System.out.println("link willReceive body: " + Recon.toString(body));
-      }
-      @Override
-      public void didReceive(Value body) {
-        System.out.println("link didReceive body: " + Recon.toString(body));
-        linkDidReceive.countDown();
-      }
-      @Override
-      public void willLink() {
-        System.out.println("link willLink");
-      }
-      @Override
-      public void didLink() {
-        System.out.println("link didLink");
-      }
-      @Override
-      public void willSync() {
-        System.out.println("link willSync");
-      }
-      @Override
-      public void didSync() {
-        System.out.println("link didSync");
-      }
-      @Override
-      public void willUnlink() {
-        System.out.println("link willUnlink");
-      }
-      @Override
-      public void didUnlink() {
-        System.out.println("link didUnlink");
-      }
-      @Override
-      public void didConnect() {
-        System.out.println("link didConnect");
-      }
-      @Override
-      public void didDisconnect() {
-        System.out.println("link didDisconnect");
-      }
-      @Override
-      public void didClose() {
-        System.out.println("link didClose");
-      }
-    }
-
+    laneWillUpdate = new CountDownLatch(3);
+    laneDidUpdate = new CountDownLatch(3);
     try {
       kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
@@ -190,17 +161,181 @@ public class MapLaneSpec {
           .hostUri("warp://localhost:53556")
           .nodeUri("/map/words")
           .laneUri("map")
-          .observe(new MapLinkController())
           .open();
       mapLink.put("a", "indefinite article");
       mapLink.put("the", "definite article");
-      linkDidReceive.await(1, TimeUnit.SECONDS);
-      linkDidUpdate.await(1, TimeUnit.SECONDS);
-      assertEquals(linkDidReceive.getCount(), 0);
-      assertEquals(linkDidUpdate.getCount(), 0);
-      assertEquals(mapLink.size(), 2);
-      assertEquals(mapLink.get("a"), "indefinite article");
-      assertEquals(mapLink.get("the"), "definite article");
+      laneDidUpdate.await(1, TimeUnit.SECONDS);
+      assertEquals(laneWillUpdate.getCount(), 1);
+      assertEquals(laneDidUpdate.getCount(), 1);
+      assertEquals(mapLaneCopy.size(), 2);
+      assertEquals(mapLaneCopy.get("a"), "indefinite article");
+      assertEquals(mapLaneCopy.get("the"), "definite article");
+
+      mapLink.put("a", "article");
+      laneDidUpdate.await(1, TimeUnit.SECONDS);
+      assertEquals(laneWillUpdate.getCount(), 0);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(mapLaneCopy.size(), 2);
+      assertEquals(mapLaneCopy.get("a"), "article");
+      assertEquals(mapLaneCopy.get("the"), "definite article");
+    } finally {
+      kernel.stop();
+    }
+  }
+
+  @Test
+  void testRemove() throws InterruptedException {
+    final Kernel kernel = ServerLoader.loadServerStack();
+    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+        .openPlane("test", TestMapPlane.class);
+
+    laneDidUpdate = new CountDownLatch(2);
+    laneWillRemove = new CountDownLatch(1);
+    laneDidRemove = new CountDownLatch(1);
+    try {
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
+      kernel.start();
+      final MapDownlink<String, String> mapLink = plane.downlinkMap()
+          .keyClass(String.class)
+          .valueClass(String.class)
+          .hostUri("warp://localhost:53556")
+          .nodeUri("/map/words")
+          .laneUri("map")
+          .open();
+
+      mapLink.put("a", "indefinite article");
+      mapLink.put("the", "definite article");
+      laneDidUpdate.await(1, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(mapLaneCopy.size(), 2);
+
+      mapLink.remove("the");
+      laneDidRemove.await(1, TimeUnit.SECONDS);
+      assertEquals(laneDidRemove.getCount(), 0);
+      assertEquals(mapLaneCopy.size(), 1);
+      assertEquals(mapLaneCopy.get("a"), "indefinite article");
+    } finally {
+      kernel.stop();
+    }
+  }
+
+  @Test
+  void testClear() throws InterruptedException {
+    final Kernel kernel = ServerLoader.loadServerStack();
+    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+        .openPlane("test", TestMapPlane.class);
+
+    laneDidUpdate = new CountDownLatch(2);
+    laneWillClear = new CountDownLatch(1);
+    laneDidClear = new CountDownLatch(1);
+    try {
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
+      kernel.start();
+      final MapDownlink<String, String> mapLink = plane.downlinkMap()
+          .keyClass(String.class)
+          .valueClass(String.class)
+          .hostUri("warp://localhost:53556")
+          .nodeUri("/map/words")
+          .laneUri("map")
+          .open();
+
+      mapLink.put("a", "indefinite article");
+      mapLink.put("the", "definite article");
+      laneDidUpdate.await(1, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(mapLaneCopy.size(), 2);
+
+      mapLink.clear();
+      laneWillClear.await(1, TimeUnit.SECONDS);
+      laneDidClear.await(1, TimeUnit.SECONDS);
+      assertEquals(laneWillClear.getCount(), 0);
+      assertEquals(laneDidClear.getCount(), 0);
+      assertEquals(mapLaneCopy.size(), 0);
+    } finally {
+      kernel.stop();
+    }
+  }
+
+  @Test
+  void testDrop() throws InterruptedException {
+    final Kernel kernel = ServerLoader.loadServerStack();
+    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+        .openPlane("test", TestMapPlane.class);
+
+    laneDidUpdate = new CountDownLatch(5);
+    laneWillDrop = new CountDownLatch(1);
+    laneDidDrop = new CountDownLatch(1);
+    try {
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
+      kernel.start();
+      final MapDownlink<String, String> mapLink = plane.downlinkMap()
+          .keyClass(String.class)
+          .valueClass(String.class)
+          .hostUri("warp://localhost:53556")
+          .nodeUri("/map/words")
+          .laneUri("map")
+          .open();
+
+      mapLink.put("a", "alpha");
+      mapLink.put("b", "bravo");
+      mapLink.put("c", "charlie");
+      mapLink.put("d", "delta");
+      mapLink.put("e", "echo");
+      laneDidUpdate.await(2, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(mapLaneCopy.size(), 5);
+
+      mapLink.drop(2);
+      laneWillDrop.await(1, TimeUnit.SECONDS);
+      laneDidDrop.await(1, TimeUnit.SECONDS);
+      assertEquals(laneWillDrop.getCount(), 0);
+      assertEquals(laneDidDrop.getCount(), 0);
+      assertEquals(mapLaneCopy.size(), 3);
+      assertEquals(mapLaneCopy.get("c"), "charlie");
+      assertEquals(mapLaneCopy.get("d"), "delta");
+      assertEquals(mapLaneCopy.get("e"), "echo");
+    } finally {
+      kernel.stop();
+    }
+  }
+
+  @Test
+  void testTake() throws InterruptedException {
+    final Kernel kernel = ServerLoader.loadServerStack();
+    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+        .openPlane("test", TestMapPlane.class);
+
+    laneDidUpdate = new CountDownLatch(5);
+    laneWillTake = new CountDownLatch(1);
+    laneDidTake = new CountDownLatch(1);
+    try {
+      kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
+      kernel.start();
+      final MapDownlink<String, String> mapLink = plane.downlinkMap()
+          .keyClass(String.class)
+          .valueClass(String.class)
+          .hostUri("warp://localhost:53556")
+          .nodeUri("/map/words")
+          .laneUri("map")
+          .open();
+
+      mapLink.put("a", "alpha");
+      mapLink.put("b", "bravo");
+      mapLink.put("c", "charlie");
+      mapLink.put("d", "delta");
+      mapLink.put("e", "echo");
+      laneDidUpdate.await(1, TimeUnit.SECONDS);
+      assertEquals(laneDidUpdate.getCount(), 0);
+      assertEquals(mapLaneCopy.size(), 5);
+
+      mapLink.take(2);
+      laneWillTake.await(1, TimeUnit.SECONDS);
+      laneDidTake.await(1, TimeUnit.SECONDS);
+      assertEquals(laneWillTake.getCount(), 0);
+      assertEquals(laneDidTake.getCount(), 0);
+      assertEquals(mapLaneCopy.size(), 2);
+      assertEquals(mapLaneCopy.get("a"), "alpha");
+      assertEquals(mapLaneCopy.get("b"), "bravo");
     } finally {
       kernel.stop();
     }
