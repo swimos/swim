@@ -4,8 +4,8 @@
 
 Swim implements a complete, self-contained, distributed application stack
 in an embeddable software library. To develop server-side Swim apps, add
-the `swim-loader` library to your Java project. To write a JavaScript client
-application, install the `@swim/core` library from npm. To build a web
+the `swim-server` library to your Java project. To write a JavaScript client
+application, install the `@swim/mesh` library from npm. To build a web
 application, npm install the `@swim/ui` and `@swim/ux` libraries.
 
 Visit [swim.dev](https://swim.dev) to learn more.

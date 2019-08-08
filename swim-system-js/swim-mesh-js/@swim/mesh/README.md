@@ -17,12 +17,12 @@ The `@swim/mesh` umbrella package depends on, and re-exports, the following
 component libraries:
 
 - **`@swim/warp`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-mesh-js/%40swim/warp),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/%40swim/warp),
   [npm](https://www.npmjs.com/package/@swim/warp),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_warp.html)) –
   implementation of the WARP multiplexed streaming wire protocol.
 - **`@swim/client`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-mesh-js/%40swim/client),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/%40swim/client),
   [npm](https://www.npmjs.com/package/@swim/client),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_client.html)) –
   WARP multiplexed streaming API client.

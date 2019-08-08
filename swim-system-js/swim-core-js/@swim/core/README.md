@@ -17,56 +17,56 @@ The `@swim/core` umbrella package depends on, and re-exports, the following
 component libraries:
 
 - **`@swim/util`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/util),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/%40swim/util),
   [npm](https://www.npmjs.com/package/@swim/util),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_util.html)) –
   ordering, equality, and hashing; type conversions; iterators; builders; maps;
   caches; and assertions.
 - **`@swim/codec`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/codec),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/%40swim/codec),
   [npm](https://www.npmjs.com/package/@swim/codec),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_codec.html)) –
   incremental I/O; functional parsers and writers; display, debug, and
   diagnostic formatters; and Unicode and binary codecs.
 - **`@swim/collections`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/collections),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/%40swim/collections),
   [npm](https://www.npmjs.com/package/@swim/collections),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_collections.html)) –
   B-trees and S-trees (sequence trees).
 - **`@swim/structure`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/structure),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/%40swim/structure),
   [npm](https://www.npmjs.com/package/@swim/structure),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_structure.html)) –
   generic structured data model, with support for selectors, expressions,
   and lambda functions.  Used as a common abstract syntax tree for Recon,
   JSON, XML, and other data languages.
 - **`@swim/streamlet`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/streamlet),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/%40swim/streamlet),
   [npm](https://www.npmjs.com/package/@swim/streamlet),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_streamlet.html)) –
   stateful, streaming component model.
 - **`@swim/dataflow`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/dataflow),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/%40swim/dataflow),
   [npm](https://www.npmjs.com/package/@swim/dataflow),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_dataflow.html)) –
   compiler from `@swim/structure` expressions to live-updated data models.
 - **`@swim/recon`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/recon),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/%40swim/recon),
   [npm](https://www.npmjs.com/package/@swim/recon),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_recon.html)) –
   codec for parsing/writing Recon strings to/from `@swim/structure` data models.
 - **`@swim/math`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/math),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/%40swim/math),
   [npm](https://www.npmjs.com/package/@swim/math),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_math.html)) –
   mathematical and geometric structures and operators.
 - **`@swim/time`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/time),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/%40swim/time),
   [npm](https://www.npmjs.com/package/@swim/time),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_time.html)) –
   date-time, time zone, and time inteval data types, parsers, and formatters.
 - **`@swim/uri`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-js/swim-core-js/%40swim/uri),
+  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/%40swim/uri),
   [npm](https://www.npmjs.com/package/@swim/uri),
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_uri.html)) –
   codec for parsing/writing URI strings to/from structured URI data types.
