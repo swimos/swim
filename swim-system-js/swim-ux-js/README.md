@@ -1,9 +1,9 @@
-# Swim Real-Time User eXperience Toolkit
+# Swim Real-Time User Interface Widgets
 
 ## Building
 
-**Note:** You can only build `swim-ux-js` from within the top-level `swim`
-repository.
+**Note:** You can only build `swim-ux-js` from the parent `swim-system-js`
+directory.
 
 ### Setup
 
@@ -15,7 +15,7 @@ swim-ux-js $ npm install
 
 ### Build script
 
-Use the `bin/build.js` script to build the Swim user experience components.
+Use the `bin/build.js` script to build the Swim user interface widgets.
 The build script supports `compile`, `test`, `doc`, and `watch` commands,
 described below.  All build script commands take an optional `--projects`
 (`-p`) option to restrict the build to a comma-separated list of projects.

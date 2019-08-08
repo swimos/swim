@@ -2,8 +2,8 @@
 
 ## Building
 
-**Note:** You can only build `swim-ui-js` from within the top-level `swim`
-repository.
+**Note:** You can only build `swim-ui-js` from the parent `swim-system-js`
+directory.
 
 ### Setup
 

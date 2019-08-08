@@ -1,4 +1,38 @@
-# Swim TypeScript System
+# Swim System Framework
+
+[![package](https://img.shields.io/npm/v/@swim/system.svg)](https://www.npmjs.com/package/@swim/system)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest)
+[![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
+
+<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+
+The Swim system umbrella framework encompasses the [`@swim/core`](https://www.npmjs.com/package/@swim/core)
+foundation framework, the [`@swim/mesh`](https://www.npmjs.com/package/@swim/mesh)
+multiplexed streaming WARP framework, the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui)
+and [`@swim/ux`](https://www.npmjs.com/package/@swim/ux) real-time user
+interface toolkits, and the [`@swim/web`](https://www.npmjs.com/package/@swim/web)
+real-time web application framework.  Swim System enables massively real-time
+streaming applications that work with any WARP fabric.
+
+## Frameworks
+
+The Swim system framework consists of the following component frameworks:
+
+- [**`@swim/system`**](@swim/system) –
+  umbrella framework that depends on, and re-exports, the Swim system child frameworks.
+- [**`@swim/core`**](swim-core-js) –
+  lightweight, portable, dependency-free foundation framework.
+- [**`@swim/mesh`**](swim-mesh-js) –
+  multiplexed streaming WARP framework.
+- [**`@swim/ui`**](swim-ui-js) –
+  real-time user interface toolkit.
+- [**`@swim/ux`**](swim-ux-js) –
+  real-time user interface widgets.
+- [**`@swim/web`**](swim-web-js) –
+  real-time web application framework.
+
+Swim System has no external dependencies when run in a web browser,
+and depends only on a WebSocket implementation when run in Node.js.
 
 ## Building
 

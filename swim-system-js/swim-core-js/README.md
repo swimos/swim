@@ -1,4 +1,51 @@
-# Swim Core TypeScript Implementation
+# Swim Core Framework
+
+[![package](https://img.shields.io/npm/v/@swim/core.svg)](https://www.npmjs.com/package/@swim/core)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest)
+[![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
+
+<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+
+The Swim core framework provides a lightweight, portable, dependency-free,
+strongly typed baseline on which to build higher level libraries. Swim Core
+forms the foundation on which the [`@swim/mesh`](https://www.npmjs.com/package/@swim/mesh)
+multiplexed streaming WARP framework, and the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui)
+and [`@swim/ux`](https://www.npmjs.com/package/@swim/ux) real-time user
+interface toolkits, are built.  `@swim/core` is included as part of the
+[`@swim/system`](https://www.npmjs.com/package/@swim/system) framework.
+
+## Libraries
+
+The Swim core framework consists of the following component libraries:
+
+- [**`@swim/core`**](@swim/core) –
+  umbrella package that depends on, and re-exports, the Swim core libraries.
+- [**`@swim/util`**](@swim/util) –
+  ordering, equality, and hashing; type conversions; iterators; builders; maps;
+  caches; and assertions.
+- [**`@swim/codec`**](@swim/codec) –
+  incremental I/O; functional parsers and writers; display, debug, and
+  diagnostic formatters; and Unicode and binary codecs.
+- [**`@swim/collections`**](@swim/collections) –
+  B-trees and S-trees (sequence trees).
+- [**`@swim/structure`**](@swim/structure) –
+  generic structured data model, with support for selectors, expressions,
+  and lambda functions.  Used as a common abstract syntax tree for Recon,
+  JSON, XML, and other data languages.
+- [**`@swim/streamlet`**](@swim/streamlet) –
+  stateful, streaming component model.
+- [**`@swim/dataflow`**](@swim/dataflow) –
+  compiler from `@swim/structure` expressions to live-updated data models.
+- [**`@swim/recon`**](@swim/recon) –
+  codec for parsing/writing Recon strings to/from `@swim/structure` data models.
+- [**`@swim/math`**](@swim/math) –
+  mathematical and geometric structures and operators.
+- [**`@swim/time`**](@swim/time) –
+  date-time, time zone, and time inteval data types, parsers, and formatters.
+- [**`@swim/uri`**](@swim/uri) –
+  codec for parsing/writing URI strings to/from structured URI data types.
+
+Swim Core has no external dependencies.
 
 ## Building
 
@@ -12,7 +59,7 @@ swim-core-js $ npm install
 
 ### Build script
 
-Use the `bin/build.js` script to build the Swim TypeScript Core.  The build
+Use the `bin/build.js` script to build the Swim core framework.  The build
 script supports `compile`, `test`, `doc`, and `watch` commands, described
 below.  All build script commands take an optional `--projects` (`-p`) option
 to restrict the build to a comma-separated list of projects.

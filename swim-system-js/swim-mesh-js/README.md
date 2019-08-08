@@ -1,9 +1,37 @@
-# Swim Mesh TypeScript Implementation
+# Swim Mesh Framework
+
+[![package](https://img.shields.io/npm/v/@swim/mesh.svg)](https://www.npmjs.com/package/@swim/mesh)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest)
+[![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
+
+<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+
+The Swim mesh framework implements a multiplexed streaming WARP client that
+runs in both Node.js and web browsers.  Swim Mesh can be used in concert with
+the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui) and
+[`@swim/ux`](https://www.npmjs.com/package/@swim/ux) user interface
+toolkits to build massively real-time streaming applications.
+`@swim/mesh` is included as part of the
+[`@swim/system`](https://www.npmjs.com/package/@swim/system) framework.
+
+## Libraries
+
+The Swim mesh framework consists of the following component libraries:
+
+- [**`@swim/mesh`**](@swim/mesh) –
+  umbrella package that depends on, and re-exports, the Swim mesh libraries.
+- [**`@swim/warp`**](@swim/warp) –
+  implementation of the WARP multiplexed streaming wire protocol.
+- [**`@swim/client`**](@swim/client) –
+  WARP multiplexed streaming API client.
+
+Swim Mesh has no additional dependencies when run in a web browser,
+and depends only on a WebSocket implementation when run in Node.js.
 
 ## Building
 
-**Note:** You can only build `swim-mesh-js` from within the top-level `swim`
-repository.
+**Note:** You can only build `swim-mesh-js` from the parent `swim-system-js`
+directory.
 
 ### Setup
 
@@ -15,7 +43,7 @@ swim-mesh-js $ npm install
 
 ### Build script
 
-Use the `bin/build.js` script to build the Swim user interface toolkit.
+Use the `bin/build.js` script to build the Swim mesh framework.
 The build script supports `compile`, `test`, `doc`, and `watch` commands,
 described below.  All build script commands take an optional `--projects`
 (`-p`) option to restrict the build to a comma-separated list of projects.

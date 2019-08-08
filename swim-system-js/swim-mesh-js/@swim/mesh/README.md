@@ -6,10 +6,13 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/mesh` is a framework for building multiplexed streaming
-[Swim](https://developer.swim.ai) client applications that run in Node.js
-and/or web browsers.  `@swim/mesh` is written in TypeScript, but is designed
-to be used from either TypeScript or JavaScript.
+`@swim/mesh` implements a multiplexed streaming WARP client that runs in both
+Node.js and web browsers. `@swim/mesh` can be used in concert with the
+[`@swim/ui`](https://www.npmjs.com/package/@swim/ui) and
+[`@swim/ux`](https://www.npmjs.com/package/@swim/ux) user interface
+toolkits to build massively real-time streaming applications. `@swim/mesh`
+is written in TypeScript, but is designed to be used from either TypeScript
+or JavaScript.
 
 ## Libraries
 
@@ -27,8 +30,8 @@ component libraries:
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_client.html)) –
   WARP multiplexed streaming API client.
 
-`@swim/mesh` has no additional dependencies when run in a web browser.
-And depends only on a WebSocket implementation when run in Node.js.
+`@swim/mesh` has no additional dependencies when run in a web browser,
+and depends only on a WebSocket implementation when run in Node.js.
 
 ## Installation
 
