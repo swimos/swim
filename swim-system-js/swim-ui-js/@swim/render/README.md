@@ -1,3 +1,4 @@
 # @swim/render
 
-2D graphics rendering primitives.
+Renderable graphic types for SVG and Canvas compatible path drawing contexts,
+and Canvas compatible rendering contexts.

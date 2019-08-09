@@ -25,11 +25,11 @@ swimOS has implementations for the JVM, Node.js, and web browsers:
 
 swimOS has no additional dependencies beyond the base platforms on which it runs.
 
-### Java Frameworks
+### Java Implementation
 
 The swimOS Java implementation consists of the following frameworks and libraries.
 
-- [**`swim-core-java`**](swim-system-java/swim-core-java) –
+- [**`swim-core`**](swim-system-java/swim-core-java) –
   foundation framework, with lightweight concurrency, incremental I/O, and
   flow-controlled network engines.
   - [**`swim.util`**](swim-system-java/swim-core-java/swim.util) –
@@ -61,7 +61,7 @@ The swimOS Java implementation consists of the following frameworks and librarie
   - [**`swim.io.ws`**](swim-system-java/swim-core-java/swim.io.ws) –
   - [**`swim.io.warp`**](swim-system-java/swim-core-java/swim.io.warp) –
   - [**`swim.web`**](swim-system-java/swim-core-java/swim.web) –
-- [**`swim-mesh-java`**](swim-system-java/swim-mesh-java) –
+- [**`swim-mesh`**](swim-system-java/swim-mesh-java) –
   Web Agent API, and distributed microkernel implementation.
   - [**`swim.api`**](swim-system-java/swim-mesh-java/swim.api) –
   - [**`swim.store`**](swim-system-java/swim-mesh-java/swim.store) –
@@ -77,7 +77,7 @@ The swimOS Java implementation consists of the following frameworks and librarie
   - [**`swim.server`**](swim-system-java/swim-mesh-java/swim.server) –
   - [**`swim.client`**](swim-system-java/swim-mesh-java/swim.client) –
   - [**`swim.cli`**](swim-system-java/swim-mesh-java/swim.cli) –
-- [**`swim-polyglot-java`**](swim-system-java/swim-polyglot-java) –
+- [**`swim-polyglot`**](swim-system-java/swim-polyglot-java) –
   API bindings for guest languages, and [GraalVM](https://www.graalvm.org/)
   integration.
   - [**`swim.dynamic`**](swim-system-java/swim-polyglot-java/swim.dynamic) –
@@ -89,7 +89,7 @@ The swimOS Java implementation consists of the following frameworks and librarie
   - [**`swim.vm.js`**](swim-system-java/swim-polyglot-java/swim.vm.js) –
   - [**`swim.js`**](swim-system-java/swim-polyglot-java/swim.js) –
 
-### TypeScript Frameworks
+### TypeScript Implementation
 
 The swimOS TypeScript implementation consists of the following frameworks and libraries.
 
@@ -103,6 +103,10 @@ The swimOS TypeScript implementation consists of the following frameworks and li
   - [**`@swim/codec`**](swim-system-js/swim-core-js/@swim/codec) –
     incremental I/O; functional parsers and writers; display, debug, and
     diagnostic formatters; and Unicode and binary codecs.
+  - [**`@swim/args`**](swim-system-js/swim-core-js/@swim/args) –
+    composable command line argument parser.
+  - [**`@swim/unit`**](swim-system-js/swim-core-js/@swim/unit) –
+    specializable unit testing framework.
   - [**`@swim/collections`**](swim-system-js/swim-core-js/@swim/collections) –
     B-trees and S-trees (sequence trees).
   - [**`@swim/structure`**](swim-system-js/swim-core-js/@swim/structure) –
@@ -127,25 +131,56 @@ The swimOS TypeScript implementation consists of the following frameworks and li
     implementation of the WARP multiplexed streaming wire protocol.
   - [**`@swim/client`**](swim-system-js/swim-mesh-js/@swim/client) –
     WARP multiplexed streaming API client.
+  - [**`@swim/cli`**](swim-system-js/swim-mesh-js/@swim/cli) –
+    WARP command line client.
 - [**`@swim/ui`**](swim-system-js/swim-ui-js) –
   real-time user interface toolkit.
   - [**`@swim/angle`**](swim-system-js/swim-ui-js/@swim/angle) –
+    Dimensional angle types with unit-aware algebraic operators, conversions,
+    and parsers.
   - [**`@swim/length`**](swim-system-js/swim-ui-js/@swim/length) –
+    DOM-relative length types with unit-aware algebraic operators, conversions,
+    and parsers.
   - [**`@swim/color`**](swim-system-js/swim-ui-js/@swim/color) –
+    RGB and HSL color types with color-space-aware operators, conversions,
+    and parsers.
   - [**`@swim/font`**](swim-system-js/swim-ui-js/@swim/font) –
+    CSS font property types and parsers.
   - [**`@swim/transform`**](swim-system-js/swim-ui-js/@swim/transform) –
+    CSS and SVG compatible transform types with unit-aware algebraic operators
+    and parsers.
   - [**`@swim/interpolate`**](swim-system-js/swim-ui-js/@swim/interpolate) –
+    Interpolator types for blending between values, such as numbers, dates,
+    angles, lengths, colors, transforms, shapes, arrays, structures, and
+    other interpolators.
   - [**`@swim/scale`**](swim-system-js/swim-ui-js/@swim/scale) –
+    Scale types that map numeric and temporal input domains to interpolated
+    output ranges, with support for continuous domain clamping, domain solving,
+    range unscaling, and interpolation between scales.
   - [**`@swim/transition`**](swim-system-js/swim-ui-js/@swim/transition) –
+    Transition types that specify duration, ease, interpolator, and lifecycle
+    callback parameters for tween animations.
   - [**`@swim/animate`**](swim-system-js/swim-ui-js/@swim/animate) –
+    Property-managing animator types that efficiently tween values between
+    discrete state changes.
   - [**`@swim/dom`**](swim-system-js/swim-ui-js/@swim/dom) –
+    CustomEvent and ResizeObserver polyfills.
   - [**`@swim/style`**](swim-system-js/swim-ui-js/@swim/style) –
+    CSS style types and universal style value parser.
   - [**`@swim/render`**](swim-system-js/swim-ui-js/@swim/render) –
+    Renderable graphic types for SVG and Canvas compatible path drawing contexts,
+    and Canvas compatible rendering contexts.
   - [**`@swim/constraint`**](swim-system-js/swim-ui-js/@swim/constraint) –
+    Incremental solver for systems of linear layout constraints.
   - [**`@swim/view`**](swim-system-js/swim-ui-js/@swim/view) –
+    Unified HTML, SVG, and Canvas view hierarchy, with integrated controller
+    architecture, animated procedural styling, and constraint-based layouts.
   - [**`@swim/shape`**](swim-system-js/swim-ui-js/@swim/shape) –
+    Canvas shape views, with animated geometry and style properties.
   - [**`@swim/typeset`**](swim-system-js/swim-ui-js/@swim/typeset) –
+    Canvas typesetting views, with animated text, layout, font, and style properties.
   - [**`@swim/gesture`**](swim-system-js/swim-ui-js/@swim/gesture) –
+    Multitouch gesture recognizers, with kinematic surface modeling.
 - [**`@swim/ux`**](swim-system-js/swim-ux-js) –
   real-time user interface widgets.
   - [**`@swim/gauge`**](swim-system-js/swim-ux-js/@swim/gauge) –

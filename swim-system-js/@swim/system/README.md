@@ -57,6 +57,9 @@ bundles all `@swim/system` child frameworks, can be found in
 ### Browser
 
 Web applications can load `swim-system.js` directly from the Swim CDN.
+The `swim-system.js` bundle is self-contained; it supersedes `swim-core.js`,
+`swim-mesh.js`, `swim-ui.js`, `swim-ux.js`, and `swim-web.js`—those scripts
+need not be loaded when using `swim-system.js`.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>

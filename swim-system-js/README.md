@@ -34,7 +34,56 @@ The Swim system framework consists of the following component frameworks:
 Swim System has no external dependencies when run in a web browser,
 and depends only on a WebSocket implementation when run in Node.js.
 
-## Building
+## Installation
+
+### npm
+
+For an npm-managed project, `npm install @swim/system` to make it a dependency.
+TypeScript sources will be installed into `node_modules/@swim/system/main`.
+Transpiled JavaScript and TypeScript definition files install into
+`node_modules/@swim/system/lib/main`.  And a pre-built UMD script, which
+bundles all `@swim/system` child frameworks, can be found in
+`node_modules/@swim/system/dist/main/swim-system.js`.
+
+### Browser
+
+Web applications can load `swim-system.js` directly from the Swim CDN.
+The `swim-system.js` bundle is self-contained; it supersedes `swim-core.js`,
+`swim-mesh.js`, `swim-ui.js`, `swim-ux.js`, and `swim-web.js`—those scripts
+need not be loaded when using `swim-system.js`.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+```
+
+## Usage
+
+### ES6/TypeScript
+
+`@swim/system` can be imported as an ES6 module from TypeScript and other
+ES6-compatible environments.  All child frameworks are re-exported,
+in their entirety, from the top-level `@swim/system` namespace.
+
+```typescript
+import * as swim from "@swim/system";
+```
+
+### CommonJS/Node.js
+
+`@swim/system` can also be used as a CommonJS in Node.js applications.
+All child frameworks are re-exported, in their entirety, from the
+top-level `@swim/system` namespace.
+
+```javascript
+var swim = require("@swim/system");
+```
+
+### Browser
+
+When loaded by a web browser, the `swim-system.js` script adds all child
+framework exports to the global `swim` namespace.
+
+## Development
 
 ### Setup
 

@@ -1,3 +1,4 @@
 # @swim/color
 
-Color object model and parsers.
+RGB and HSL color types with color-space-aware operators, conversions,
+and parsers.

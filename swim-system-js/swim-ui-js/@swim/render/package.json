@@ -1,7 +1,7 @@
 {
   "name": "@swim/render",
   "version": "3.10.0",
-  "description": "2D graphics rendering primitives",
+  "description": "Renderable graphic types for SVG and Canvas compatible path drawing contexts, and Canvas compatible rendering contexts",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
   "copyright": "2015-2019 SWIM.AI inc.",

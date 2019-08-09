@@ -1,3 +1,4 @@
 # @swim/transition
 
-Animated transition model.
+Transition types that specify duration, ease, interpolator, and lifecycle
+callback parameters for tween animations.

@@ -9,29 +9,80 @@
 The Swim mesh framework implements a multiplexed streaming WARP client that
 runs in both Node.js and web browsers.  Swim Mesh can be used in concert with
 the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui) and
-[`@swim/ux`](https://www.npmjs.com/package/@swim/ux) user interface
-toolkits to build massively real-time streaming applications.
-`@swim/mesh` is included as part of the
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) framework.
+[`@swim/ux`](https://www.npmjs.com/package/@swim/ux) user interface toolkits to
+build massively real-time streaming applications. Swim Mesh is included as part
+of the [Swim System framework](https://www.npmjs.com/package/@swim/system).
 
 ## Libraries
 
 The Swim mesh framework consists of the following component libraries:
 
 - [**`@swim/mesh`**](@swim/mesh) –
-  umbrella package that depends on, and re-exports, the Swim mesh libraries.
+  umbrella package that depends on, and re-exports, all Swim Mesh libraries.
 - [**`@swim/warp`**](@swim/warp) –
   implementation of the WARP multiplexed streaming wire protocol.
 - [**`@swim/client`**](@swim/client) –
   WARP multiplexed streaming API client.
+- [**`@swim/cli`**](@swim/cli) –
+  WARP command line client.
 
-Swim Mesh has no additional dependencies when run in a web browser,
-and depends only on a WebSocket implementation when run in Node.js.
+Swim Mesh builds on the [Swim Core framework](https://www.npmjs.com/package/@swim/core);
+it has no additional dependencies when run in a web browser, and depends only
+on a WebSocket implementation when run in Node.js.
 
-## Building
+## Installation
 
-**Note:** You can only build `swim-mesh-js` from the parent `swim-system-js`
-directory.
+### npm
+
+For an npm-managed project, `npm install @swim/mesh` to make it a dependency.
+TypeScript sources will be installed into `node_modules/@swim/mesh/main`.
+Transpiled JavaScript and TypeScript definition files install into
+`node_modules/@swim/mesh/lib/main`.  And a pre-built UMD script, which
+bundles all `@swim/mesh` component libraries, can be found in
+`node_modules/@swim/mesh/dist/main/swim-mesh.js`.
+
+### Browser
+
+Web applications can load `swim-mesh.js`, along with its `swim-core.js`
+dependency, from the Swim CDN.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
+<script src="https://cdn.swim.ai/js/latest/swim-mesh.js"></script>
+```
+
+## Usage
+
+### ES6/TypeScript
+
+`@swim/mesh` can be imported as an ES6 module from TypeScript and other
+ES6-compatible environments.  All component libraries are re-exported,
+in their entirety, from the top-level `@swim/mesh` namespace.
+
+```typescript
+import * as swim from "@swim/mesh";
+```
+
+### CommonJS/Node.js
+
+`@swim/mesh` can also be used as a CommonJS in Node.js applications.
+All component libraries are re-exported, in their entirety, from the
+top-level `@swim/mesh` namespace.
+
+```javascript
+var swim = require("@swim/mesh");
+```
+
+### Browser
+
+When loaded by a web browser, the `swim-mesh.js` script adds all component
+library exports to the global `swim` namespace.
+
+## Development
+
+**Note:**
+`swim-mesh-js` can be built against the currently checked out `swim-core-js`
+sources by compiling it from the parent `swim-system-js` directory.
 
 ### Setup
 

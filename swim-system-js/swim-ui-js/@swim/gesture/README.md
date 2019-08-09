@@ -1,3 +1,3 @@
 # @swim/gesture
 
-Multitouch gesture recognizers.
+Multitouch gesture recognizers, with kinematic surface modeling.

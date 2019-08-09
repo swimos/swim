@@ -1,3 +1,4 @@
 # @swim/length
 
-Length object model and parsers.
+DOM-relative length types with unit-aware algebraic operators, conversions,
+and parsers.

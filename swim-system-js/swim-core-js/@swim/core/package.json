@@ -1,7 +1,7 @@
 {
   "name": "@swim/core",
   "version": "3.10.0",
-  "description": "Swim Core TypeScript Implementation",
+  "description": "Lightweight, portable, dependency-free, strongly typed foundation framework",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
   "copyright": "2015-2019 SWIM.AI inc.",

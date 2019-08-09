@@ -11,21 +11,25 @@ strongly typed baseline on which to build higher level libraries. Swim Core
 forms the foundation on which the [`@swim/mesh`](https://www.npmjs.com/package/@swim/mesh)
 multiplexed streaming WARP framework, and the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui)
 and [`@swim/ux`](https://www.npmjs.com/package/@swim/ux) real-time user
-interface toolkits, are built.  `@swim/core` is included as part of the
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) framework.
+interface toolkits, are built.  Swim Core is included as part of the
+[Swim System framework](https://www.npmjs.com/package/@swim/system).
 
 ## Libraries
 
 The Swim core framework consists of the following component libraries:
 
 - [**`@swim/core`**](@swim/core) –
-  umbrella package that depends on, and re-exports, the Swim core libraries.
+  umbrella package that depends on, and re-exports, all Swim Core libraries.
 - [**`@swim/util`**](@swim/util) –
   ordering, equality, and hashing; type conversions; iterators; builders; maps;
   caches; and assertions.
 - [**`@swim/codec`**](@swim/codec) –
   incremental I/O; functional parsers and writers; display, debug, and
   diagnostic formatters; and Unicode and binary codecs.
+- [**`@swim/args`**](@swim/args) –
+  composable command line argument parser.
+- [**`@swim/unit`**](@swim/unit) –
+  specializable unit testing framework.
 - [**`@swim/collections`**](@swim/collections) –
   B-trees and S-trees (sequence trees).
 - [**`@swim/structure`**](@swim/structure) –
@@ -47,7 +51,53 @@ The Swim core framework consists of the following component libraries:
 
 Swim Core has no external dependencies.
 
-## Building
+## Installation
+
+### npm
+
+For an npm-managed project, `npm install @swim/core` to make it a dependency.
+TypeScript sources will be installed into `node_modules/@swim/core/main`.
+Transpiled JavaScript and TypeScript definition files install into
+`node_modules/@swim/core/lib/main`.  And a pre-built UMD script, which
+bundles all `@swim/core` component libraries, can be found in
+`node_modules/@swim/core/dist/main/swim-core.js`.
+
+### Browser
+
+Web applications can load `swim-core.js` directly from the Swim CDN.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
+```
+
+## Usage
+
+### ES6/TypeScript
+
+`@swim/core` can be imported as an ES6 module from TypeScript and other
+ES6-compatible environments.  All component libraries are re-exported,
+in their entirety, from the top-level `@swim/core` namespace.
+
+```typescript
+import * as swim from "@swim/core";
+```
+
+### CommonJS/Node.js
+
+`@swim/core` can also be used as a CommonJS in Node.js applications.
+All component libraries are re-exported, in their entirety, from the
+top-level `@swim/core` namespace.
+
+```javascript
+var swim = require("@swim/core");
+```
+
+### Browser
+
+When loaded by a web browser, the `swim-core.js` script adds all component
+library exports to the global `swim` namespace.
+
+## Development
 
 ### Setup
 

@@ -1,9 +1,10 @@
 # Swim Real-Time User Interface Widgets
 
-## Building
+## Development
 
-**Note:** You can only build `swim-ux-js` from the parent `swim-system-js`
-directory.
+**Note:**
+`swim-ux-js` can be built against the currently checked out `swim-core-js` and
+`swim-ui-js` sources by compiling it from the parent `swim-system-js` directory.
 
 ### Setup
 

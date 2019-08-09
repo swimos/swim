@@ -1,3 +1,3 @@
 # @swim/typeset
 
-Text layout, rendering, and animation.
+Canvas typesetting views, with animated text, layout, font, and style properties.

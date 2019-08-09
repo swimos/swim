@@ -1,7 +1,7 @@
 {
   "name": "@swim/style",
   "version": "3.10.0",
-  "description": "CSS style value model and parsers",
+  "description": "CSS style types and universal style value parser",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
   "copyright": "2015-2019 SWIM.AI inc.",

@@ -1,3 +1,4 @@
 # @swim/animate
 
-Object property, DOM attribute, and CSS style animators.
+Property-managing animator types that efficiently tween values between
+discrete state changes.

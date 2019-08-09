@@ -1,3 +1,4 @@
 # @swim/angle
 
-Angle object model and parsers.
+Dimensional angle types with unit-aware algebraic operators, conversions,
+and parsers.

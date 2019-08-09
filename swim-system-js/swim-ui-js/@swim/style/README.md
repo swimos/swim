@@ -1,3 +1,3 @@
 # @swim/style
 
-CSS style value model and parsers.
+CSS style types and universal style value parser.

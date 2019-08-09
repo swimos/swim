@@ -30,7 +30,8 @@ component libraries:
   [typedoc](http://docs.swim.ai/js/latest/modules/_swim_client.html)) –
   WARP multiplexed streaming API client.
 
-`@swim/mesh` has no additional dependencies when run in a web browser,
+`@swim/mesh` builds on the [`@swim/core`](https://www.npmjs.com/package/@swim/core)
+framework; it has no additional dependencies when run in a web browser,
 and depends only on a WebSocket implementation when run in Node.js.
 
 ## Installation
@@ -46,9 +47,11 @@ bundles all `@swim/mesh` component libraries, can be found in
 
 ### Browser
 
-Web applications can load `swim-mesh.js` directly from the Swim CDN.
+Web applications can load `swim-mesh.js`, along with its `swim-core.js`
+dependency, from the Swim CDN.
 
 ```html
+<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 <script src="https://cdn.swim.ai/js/latest/swim-mesh.js"></script>
 ```
 

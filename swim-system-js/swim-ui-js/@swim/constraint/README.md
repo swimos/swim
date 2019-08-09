@@ -1,3 +1,3 @@
 # @swim/constraint
 
-Cassowary layout constraint solver.
+Incremental solver for systems of linear layout constraints.

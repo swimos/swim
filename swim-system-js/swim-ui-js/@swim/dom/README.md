@@ -1,3 +1,3 @@
 # @swim/dom
 
-Document Object Model polyfills.
+CustomEvent and ResizeObserver polyfills.

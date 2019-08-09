@@ -1,3 +1,3 @@
 # @swim/font
 
-Font descriptor model and parser.
+CSS font property types and parsers.
