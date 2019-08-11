@@ -33,7 +33,8 @@
       "@swim/chart": ["@swim/chart/main"],
       "@swim/map": ["@swim/map/main"],
       "@swim/mapbox": ["@swim/mapbox/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../gauge/main"},

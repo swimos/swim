@@ -2,6 +2,7 @@
   "extends": "../../../tsconfig-main",
   "compilerOptions": {
     "baseUrl": "../../..",
-    "outDir": "../lib/main"
+    "outDir": "../lib/main",
+    "tsBuildInfoFile": ".tsbuildinfo"
   }
 }

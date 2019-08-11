@@ -705,7 +705,7 @@ export class Target {
     const outDir = path.join(this.project.baseDir, "doc", "/");
 
     const doc = new typedoc.Application({
-      name: this.project.name,
+      name: this.project.title || this.project.name,
       readme: "none",
       mode: "modules",
       tsconfig: configPath,

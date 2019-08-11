@@ -30,7 +30,8 @@
       "@swim/typeset": ["../swim-ui-js/@swim/typeset/main"],
       "@swim/site": ["@swim/site/main"],
       "@swim/app": ["@swim/app/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../site/main"},

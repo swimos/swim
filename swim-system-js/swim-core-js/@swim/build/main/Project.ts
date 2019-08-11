@@ -24,6 +24,8 @@ export interface ProjectConfig {
   id: string;
   name: string;
   path?: string;
+  title?: string;
+  readme?: string;
   targets: TargetConfig[];
   devel?: boolean;
   tests?: string;
@@ -39,6 +41,8 @@ export class Project {
   readonly name: string;
   readonly path: string;
   readonly baseDir: string;
+  readonly title: string | undefined;
+  readonly readme: string | undefined;
 
   readonly packagePath: string;
   readonly package: any;
@@ -62,6 +66,8 @@ export class Project {
     this.name = config.name;
     this.path = config.path !== void 0 ? config.path : this.name;
     this.baseDir = path.resolve(this.build.baseDir, this.path);
+    this.title = config.title;
+    this.readme = config.readme;
 
     this.packagePath = path.join(this.baseDir, "package.json");
     try {

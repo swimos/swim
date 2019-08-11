@@ -9,6 +9,7 @@
       "@swim/structure": ["../swim-core-js/@swim/structure/main"],
       "@swim/recon": ["../swim-core-js/@swim/recon/main"],
       "@swim/uri": ["../swim-core-js/@swim/uri/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   }
 }

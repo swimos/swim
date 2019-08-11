@@ -21,23 +21,28 @@ child frameworks:
 
 - **`@swim/core`**
   ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js),
-  [npm](https://www.npmjs.com/package/@swim/core)) –
+  [npm](https://www.npmjs.com/package/@swim/core),
+  [typedoc](http://docs.swim.ai/js/latest/modules/_swim_core.html)) –
   lightweight, portable, dependency-free foundation framework.
 - **`@swim/mesh`**
   ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js),
-  [npm](https://www.npmjs.com/package/@swim/mesh)) –
+  [npm](https://www.npmjs.com/package/@swim/mesh),
+  [typedoc](http://docs.swim.ai/js/latest/modules/_swim_mesh.html)) –
   multiplexed streaming WARP framework.
 - **`@swim/ui`**
   ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js),
-  [npm](https://www.npmjs.com/package/@swim/ui)) –
+  [npm](https://www.npmjs.com/package/@swim/ui),
+  [typedoc](http://docs.swim.ai/js/latest/modules/_swim_ui.html)) –
   real-time user interface toolkit.
 - **`@swim/ux`**
   ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js),
-  [npm](https://www.npmjs.com/package/@swim/ux)) –
+  [npm](https://www.npmjs.com/package/@swim/ux),
+  [typedoc](http://docs.swim.ai/js/latest/modules/_swim_ux.html)) –
   real-time user interface widgets.
 - **`@swim/web`**
   ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js),
-  [npm](https://www.npmjs.com/package/@swim/web)) –
+  [npm](https://www.npmjs.com/package/@swim/web),
+  [typedoc](http://docs.swim.ai/js/latest/modules/_swim_web.html)) –
   real-time web application framework.
 
 Swim System has no external dependencies when run in a web browser,

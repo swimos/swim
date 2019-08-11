@@ -28,7 +28,8 @@
       "@swim/shape": ["../swim-ui-js/@swim/shape/main"],
       "@swim/typeset": ["../swim-ui-js/@swim/typeset/main"],
       "@swim/map": ["@swim/map/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../map/main"}

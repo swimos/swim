@@ -20,6 +20,7 @@ const web = [
   {
     id: "web",
     name: "@swim/web",
+    title: "Swim Web Application Framework",
     umbrella: true,
     targets: [
       {

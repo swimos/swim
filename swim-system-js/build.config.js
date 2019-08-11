@@ -189,6 +189,7 @@ const core = [
     id: "core",
     name: "@swim/core",
     path: "swim-core-js/@swim/core",
+    title: "Swim Core Framework",
     umbrella: true,
     targets: [
       {
@@ -245,11 +246,12 @@ const mesh = [
     id: "mesh",
     name: "@swim/mesh",
     path: "swim-mesh-js/@swim/mesh",
+    title: "Swim Mesh Framework",
     umbrella: true,
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri", "warp", "client"],
+        deps: ["warp", "client"],
       },
     ],
   },
@@ -486,11 +488,12 @@ const ui = [
     id: "ui",
     name: "@swim/ui",
     path: "swim-ui-js/@swim/ui",
+    title: "Swim UI Toolkit",
     umbrella: true,
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture"],
+        deps: ["angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture"],
       },
     ],
   },
@@ -556,11 +559,12 @@ const ux = [
     id: "ux",
     name: "@swim/ux",
     path: "swim-ux-js/@swim/ux",
+    title: "Swim UI Widgets",
     umbrella: true,
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture", "gauge", "pie", "chart", "map", "mapbox"],
+        deps: ["gauge", "pie", "chart", "map", "mapbox"],
       },
     ],
   },
@@ -593,11 +597,12 @@ const web = [
     id: "web",
     name: "@swim/web",
     path: "swim-web-js/@swim/web",
+    title: "Swim Web Application Framework",
     umbrella: true,
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "math", "time", "uri", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "site", "app"],
+        deps: ["site", "app"],
       },
     ],
   },
@@ -607,11 +612,12 @@ const system = [
   {
     id: "system",
     name: "@swim/system",
+    title: "swimOS",
     umbrella: true,
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri", "warp", "client", "angle", "length", "color", "font", "transform", "interpolate", "scale", "transition", "animate", "dom", "style", "render", "constraint", "view", "shape", "typeset", "gesture", "gauge", "pie", "chart", "map", "mapbox", "site", "app"],
+        deps: ["core", "mesh", "ui", "ux", "web"],
       },
     ],
   },
@@ -620,6 +626,5 @@ const system = [
 export default {
   version: "3.10.0",
   projects: core.concat(mesh).concat(ui).concat(ux).concat(web).concat(system),
-  umbrella: true,
   gaID: "UA-79441805-2",
 };

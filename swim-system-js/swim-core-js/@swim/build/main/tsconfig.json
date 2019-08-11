@@ -9,7 +9,8 @@
       "@swim/codec": ["@swim/codec/main"],
       "@swim/args": ["@swim/args/main"]
     },
-    "target": "ES6"
+    "target": "ES6",
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../util/main"},

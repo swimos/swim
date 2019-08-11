@@ -9,7 +9,8 @@
       "@swim/collections": ["@swim/collections/main"],
       "@swim/structure": ["@swim/structure/main"],
       "@swim/streamlet": ["@swim/streamlet/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../util/main"},

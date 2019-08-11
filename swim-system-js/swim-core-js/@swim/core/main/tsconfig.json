@@ -14,7 +14,8 @@
       "@swim/math": ["@swim/math/main"],
       "@swim/time": ["@swim/time/main"],
       "@swim/uri": ["@swim/uri/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../util/main"},

@@ -48,6 +48,7 @@ const ux = [
   {
     id: "ux",
     name: "@swim/ux",
+    title: "Swim UI Widgets",
     umbrella: true,
     targets: [
       {

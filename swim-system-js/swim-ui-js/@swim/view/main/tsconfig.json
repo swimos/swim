@@ -24,7 +24,8 @@
       "@swim/style": ["@swim/style/main"],
       "@swim/render": ["@swim/render/main"],
       "@swim/constraint": ["@swim/constraint/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../angle/main"},

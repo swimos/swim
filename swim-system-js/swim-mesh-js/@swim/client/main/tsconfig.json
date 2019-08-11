@@ -13,7 +13,8 @@
       "@swim/recon": ["../swim-core-js/@swim/recon/main"],
       "@swim/uri": ["../swim-core-js/@swim/uri/main"],
       "@swim/warp": ["@swim/warp/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../warp/main"}

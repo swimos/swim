@@ -102,7 +102,7 @@ export class WebAppView extends HtmlAppView {
       for (let i = 0; i < nodes.length; i += 1) {
         const node = nodes[i];
         if (node instanceof HTMLElement) {
-          const webapp = this.bootElement(node);
+          const webapp = WebAppView.bootElement(node);
           webapps.push(webapp);
         }
       }

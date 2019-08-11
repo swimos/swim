@@ -14,9 +14,11 @@
       "@swim/math": ["swim-core-js/@swim/math/main"],
       "@swim/time": ["swim-core-js/@swim/time/main"],
       "@swim/uri": ["swim-core-js/@swim/uri/main"],
+      "@swim/core": ["swim-core-js/@swim/core/main"],
 
       "@swim/warp": ["swim-mesh-js/@swim/warp/main"],
       "@swim/client": ["swim-mesh-js/@swim/client/main"],
+      "@swim/mesh": ["swim-mesh-js/@swim/mesh/main"],
 
       "@swim/angle": ["swim-ui-js/@swim/angle/main"],
       "@swim/length": ["swim-ui-js/@swim/length/main"],
@@ -35,15 +37,18 @@
       "@swim/shape": ["swim-ui-js/@swim/shape/main"],
       "@swim/typeset": ["swim-ui-js/@swim/typeset/main"],
       "@swim/gesture": ["swim-ui-js/@swim/gesture/main"],
+      "@swim/ui": ["swim-ui-js/@swim/ui/main"],
 
       "@swim/gauge": ["swim-ux-js/@swim/gauge/main"],
       "@swim/pie": ["swim-ux-js/@swim/pie/main"],
       "@swim/chart": ["swim-ux-js/@swim/chart/main"],
       "@swim/map": ["swim-ux-js/@swim/map/main"],
       "@swim/mapbox": ["swim-ux-js/@swim/mapbox/main"],
+      "@swim/ux": ["swim-ux-js/@swim/ux/main"],
 
       "@swim/site": ["swim-web-js/@swim/site/main"],
-      "@swim/app": ["swim-web-js/@swim/app/main"]
+      "@swim/app": ["swim-web-js/@swim/app/main"],
+      "@swim/web": ["swim-web-js/@swim/web/main"]
     },
     "tsBuildInfoFile": ".tsbuildinfo"
   },
@@ -58,9 +63,11 @@
     {"path": "../../swim-core-js/@swim/math/main"},
     {"path": "../../swim-core-js/@swim/time/main"},
     {"path": "../../swim-core-js/@swim/uri/main"},
+    {"path": "../../swim-core-js/@swim/core/main"},
 
     {"path": "../../swim-mesh-js/@swim/warp/main"},
     {"path": "../../swim-mesh-js/@swim/client/main"},
+    {"path": "../../swim-mesh-js/@swim/mesh/main"},
 
     {"path": "../../swim-ui-js/@swim/angle/main"},
     {"path": "../../swim-ui-js/@swim/length/main"},
@@ -79,14 +86,17 @@
     {"path": "../../swim-ui-js/@swim/shape/main"},
     {"path": "../../swim-ui-js/@swim/typeset/main"},
     {"path": "../../swim-ui-js/@swim/gesture/main"},
+    {"path": "../../swim-ui-js/@swim/ui/main"},
 
     {"path": "../../swim-ux-js/@swim/gauge/main"},
     {"path": "../../swim-ux-js/@swim/pie/main"},
     {"path": "../../swim-ux-js/@swim/chart/main"},
     {"path": "../../swim-ux-js/@swim/map/main"},
     {"path": "../../swim-ux-js/@swim/mapbox/main"},
+    {"path": "../../swim-ux-js/@swim/ux/main"},
 
     {"path": "../../swim-web-js/@swim/site/main"},
-    {"path": "../../swim-web-js/@swim/app/main"}
+    {"path": "../../swim-web-js/@swim/app/main"},
+    {"path": "../../swim-web-js/@swim/web/main"}
   ]
 }

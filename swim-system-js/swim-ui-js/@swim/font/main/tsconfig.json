@@ -8,7 +8,8 @@
       "@swim/codec": ["../swim-core-js/@swim/codec/main"],
       "@swim/structure": ["../swim-core-js/@swim/structure/main"],
       "@swim/length": ["@swim/length/main"],
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../length/main"},

@@ -5,7 +5,8 @@
     "outDir": "../lib/main",
     "paths": {
       "@swim/util": ["@swim/util/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../util/main"}

@@ -20,8 +20,6 @@ import {Converter} from "typedoc/dist/lib/converter/converter";
 import {Context} from "typedoc/dist/lib/converter/context";
 import {CommentPlugin} from "typedoc/dist/lib/converter/plugins/CommentPlugin";
 import {Comment} from "typedoc/dist/lib/models/comments";
-import {ContainerReflection} from "typedoc/dist/lib/models/reflections/container";
-import {DeclarationReflection} from "typedoc/dist/lib/models/reflections/declaration";
 
 import {Target} from "./Target";
 
@@ -67,11 +65,11 @@ export class DocTarget extends ConverterComponent {
         delete this.fileTargetMap[indexPath];
         targetReflections[target.uid] = targetInfo;
 
-        const targetReflection = targetInfo.reflection as ContainerReflection;
+        const targetReflection = targetInfo.reflection as typedoc.ContainerReflection;
         targetReflection.name = target.project.name;
         targetReflection.kind = typedoc.ReflectionKind.Module;
 
-        const readmePath = path.join(target.project.baseDir, target.project.build.readme || "README.md");
+        const readmePath = path.join(target.project.baseDir, target.project.readme || "README.md");
         if (fs.existsSync(readmePath)) {
           const readme = fs.readFileSync(readmePath);
           targetReflection.comment = new Comment("", readme.toString());
@@ -81,18 +79,24 @@ export class DocTarget extends ConverterComponent {
 
     const rootInfo = targetReflections[this.target.uid]!;
     const rootTarget = rootInfo.target;
-    const rootReflection = rootInfo.reflection as ContainerReflection;
+    const rootReflection = rootInfo.reflection as typedoc.ContainerReflection;
+
+    const rootReadmePath = path.join(this.target.project.baseDir, this.target.project.readme || "README.md");
+    if (fs.existsSync(rootReadmePath)) {
+      const readme = fs.readFileSync(rootReadmePath);
+      rootReflection.comment = new Comment("", readme.toString());
+    }
 
     for (const fileName in this.fileTargetMap) {
       // lift file reflections into library reflection
       const fileInfo = this.fileTargetMap[fileName]!;
       const targetInfo = targetReflections[fileInfo.target.uid]!;
-      const fileReflection = fileInfo.reflection as DeclarationReflection;
-      const targetReflection = targetInfo.reflection as ContainerReflection;
+      const fileReflection = fileInfo.reflection as typedoc.DeclarationReflection;
+      const targetReflection = targetInfo.reflection as typedoc.ContainerReflection;
 
       const childReflections = reflections.filter((reflection) => reflection.parent === fileReflection);
       for (let i = 0; i < childReflections.length; i += 1) {
-        const childReflection = childReflections[i] as DeclarationReflection;
+        const childReflection = childReflections[i] as typedoc.DeclarationReflection;
         childReflection.parent = targetReflection;
         if (!targetReflection.children) {
           targetReflection.children = [];
@@ -106,12 +110,37 @@ export class DocTarget extends ConverterComponent {
     }
 
     if (rootTarget.project.umbrella) {
+      for (let i = 0; i < targets.length; i += 1) {
+        const target = targets[i];
+        const targetReflection = targetReflections[target.uid]!.reflection as typedoc.ContainerReflection;
+        if (targetReflection !== rootReflection && target.project.umbrella) {
+          // add library reflections to parent framework reflection
+          const targetDeps = target.deps;
+          for (let j = 0; j < targetDeps.length; j += 1) {
+            const targetDep = targetDeps[j];
+            const depReflection = targetReflections[targetDep.uid]!.reflection as typedoc.DeclarationReflection;
+            const oldParentReflection = depReflection.parent as typedoc.ContainerReflection | undefined;
+            if (oldParentReflection && oldParentReflection.children) {
+              const index = oldParentReflection.children.indexOf(depReflection);
+              if (index >= 0) {
+                oldParentReflection.children.splice(index, 1);
+              }
+            }
+            depReflection.parent = context.project; // keep library urls flat
+            if (!targetReflection.children) {
+              targetReflection.children = [];
+            }
+            targetReflection.children!.push(depReflection);
+          }
+        }
+      }
+      context.project.comment = rootReflection.comment;
       CommentPlugin.removeReflection(context.project, rootReflection);
     } else {
       // lift root library reflections into project reflection
       const childReflections = reflections.filter((reflection) => reflection.parent === rootReflection);
       for (let i = 0; i < childReflections.length; i += 1) {
-        const childReflection = childReflections[i] as DeclarationReflection;
+        const childReflection = childReflections[i] as typedoc.DeclarationReflection;
         childReflection.parent = context.project;
         if (!context.project.children) {
           context.project.children = [];

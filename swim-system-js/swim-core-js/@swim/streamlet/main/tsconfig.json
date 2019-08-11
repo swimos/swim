@@ -6,7 +6,8 @@
     "paths": {
       "@swim/util": ["@swim/util/main"],
       "@swim/collections": ["@swim/collections/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../util/main"},

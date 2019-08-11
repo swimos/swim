@@ -13,7 +13,8 @@
       "@swim/length": ["@swim/length/main"],
       "@swim/color": ["@swim/color/main"],
       "@swim/transform": ["@swim/transform/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../angle/main"},

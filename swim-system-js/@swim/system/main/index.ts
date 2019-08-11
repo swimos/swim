@@ -12,43 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "@swim/util";
-export * from "@swim/codec";
-export * from "@swim/collections";
-export * from "@swim/structure";
-export * from "@swim/streamlet";
-export * from "@swim/dataflow";
-export * from "@swim/recon";
-export * from "@swim/math";
-export * from "@swim/time";
-export * from "@swim/uri";
-
-export * from "@swim/warp";
-export * from "@swim/client";
-
-export * from "@swim/angle";
-export * from "@swim/length";
-export * from "@swim/color";
-export * from "@swim/font";
-export * from "@swim/transform";
-export * from "@swim/interpolate";
-export * from "@swim/scale";
-export * from "@swim/transition";
-export * from "@swim/animate";
-export * from "@swim/dom";
-export * from "@swim/style";
-export * from "@swim/render";
-export * from "@swim/constraint";
-export * from "@swim/view";
-export * from "@swim/shape";
-export * from "@swim/typeset";
-export * from "@swim/gesture";
-
-export * from "@swim/gauge";
-export * from "@swim/pie";
-export * from "@swim/chart";
-export * from "@swim/map";
-export * from "@swim/mapbox";
-
-export * from "@swim/site";
-export * from "@swim/app";
+export * from "@swim/core";
+export * from "@swim/mesh";
+export * from "@swim/ui";
+export * from "@swim/ux";
+export * from "@swim/web";

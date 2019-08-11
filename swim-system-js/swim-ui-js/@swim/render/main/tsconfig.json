@@ -18,7 +18,8 @@
       "@swim/scale": ["@swim/scale/main"],
       "@swim/transition": ["@swim/transition/main"],
       "@swim/style": ["@swim/style/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../angle/main"},

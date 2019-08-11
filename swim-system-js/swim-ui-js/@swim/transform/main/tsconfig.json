@@ -10,7 +10,8 @@
       "@swim/math": ["../swim-core-js/@swim/math/main"],
       "@swim/angle": ["@swim/angle/main"],
       "@swim/length": ["@swim/length/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../angle/main"},
