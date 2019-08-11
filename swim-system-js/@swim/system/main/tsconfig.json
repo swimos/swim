@@ -44,7 +44,8 @@
 
       "@swim/site": ["swim-web-js/@swim/site/main"],
       "@swim/app": ["swim-web-js/@swim/app/main"]
-    }
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
   },
   "references": [
     {"path": "../../swim-core-js/@swim/util/main"},

@@ -11,7 +11,7 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "devDependencies": {
-    "@types/mapbox-gl": "0.51"
+    "@types/mapbox-gl": "0.54"
   },
   "dependencies": {
     "@swim/util": "3.10.0",

@@ -24,13 +24,13 @@
 
     "@types/node": "12",
     "@types/ws": "6",
-    "rollup": "1.17",
+    "rollup": "1.19",
     "rollup-plugin-node-resolve": "5",
     "rollup-plugin-sourcemaps": "0",
     "terser": "4",
     "tslib": "1",
     "tslint": "5",
-    "typedoc": "0.14",
+    "typedoc": "0.15",
     "typescript": "3.5",
     "ws": "7"
   },

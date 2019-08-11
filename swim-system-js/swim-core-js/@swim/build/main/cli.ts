@@ -20,12 +20,16 @@ import {Target} from "./Target";
 function runProjects(this: Cmd, args: {[name: string]: string | null | undefined}): void {
   Build.load(args.config!, args.devel === null).then((build: Build): void => {
     build.printProjects();
+  }, (reason: any): void => {
+    console.log(reason);
   });
 }
 
 function runTargets(this: Cmd, args: {[name: string]: string | null | undefined}): void {
   Build.load(args.config!, args.devel === null).then((build: Build): void => {
     build.printTargets(args.projects!);
+  }, (reason: any): void => {
+    console.log(reason);
   });
 }
 
@@ -40,6 +44,8 @@ function runCompile(this: Cmd, args: {[name: string]: string | null | undefined}
       }
       return target.compile();
     });
+  }, (reason: any): void => {
+    console.log(reason);
   });
 }
 
@@ -52,6 +58,8 @@ function runTest(this: Cmd, args: {[name: string]: string | null | undefined}): 
       }
       return;
     });
+  }, (reason: any): void => {
+    console.log(reason);
   });
 }
 
@@ -63,6 +71,8 @@ function runDoc(this: Cmd, args: {[name: string]: string | null | undefined}): v
       }
       return;
     });
+  }, (reason: any): void => {
+    console.log(reason);
   });
 }
 
@@ -77,6 +87,8 @@ function runWatch(this: Cmd, args: {[name: string]: string | null | undefined}):
       }
       target.watch();
     });
+  }, (reason: any): void => {
+    console.log(reason);
   });
 }
 
@@ -85,6 +97,8 @@ function runUpdate(this: Cmd, args: {[name: string]: string | null | undefined})
     build.forEachProject(args.projects!, (project: Project): void => {
       project.updatePackage();
     });
+  }, (reason: any): void => {
+    console.log(reason);
   });
 }
 
@@ -93,6 +107,8 @@ function runClean(this: Cmd, args: {[name: string]: string | null | undefined}):
     build.forEachProject(args.projects!, (project: Project): void => {
       project.clean();
     });
+  }, (reason: any): void => {
+    console.log(reason);
   });
 }
 

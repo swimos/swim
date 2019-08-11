@@ -471,9 +471,9 @@ export class Target {
         .then((bundle: rollup.RollupOutput): Promise<rollup.RollupOutput> | rollup.RollupOutput => {
           if (this.retest) {
             return new Promise((resolve, reject): void => {
-              this.test().then(() => {
+              this.test().then((): void => {
                 resolve(bundle);
-              });
+              }, reject);
             });
           } else {
             return bundle;
@@ -482,9 +482,9 @@ export class Target {
         .then((bundle: rollup.RollupOutput): Promise<rollup.RollupOutput> | rollup.RollupOutput => {
           if (this.redoc) {
             return new Promise((resolve, reject): void => {
-              this.doc().then(() => {
+              this.doc().then((): void => {
                 resolve(bundle);
-              });
+              }, reject);
             });
           } else {
             return bundle;
@@ -625,12 +625,12 @@ export class Target {
     const outputFile = bundleConfig ? bundleConfig.output!.file : void 0;
     const scriptPath = outputFile ? path.resolve(this.project.baseDir, outputFile) : void 0;
     if (scriptPath && fs.existsSync(scriptPath)) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, reject): void => {
         const args: string[] = [];
 
         const t0 = Date.now();
         const proc = fork(scriptPath, args);
-        return proc.on("exit", (code: number): void => {
+        proc.on("exit", (code: number): void => {
           const dt = Date.now() - t0;
           if (code === 0) {
             const output = Unicode.stringOutput(OutputSettings.styled());
@@ -646,6 +646,7 @@ export class Target {
             output.write("ms");
             console.log(output.bind());
             console.log();
+            resolve();
           } else {
             const output = Unicode.stringOutput(OutputSettings.styled());
             OutputStyle.redBold(output);
@@ -657,8 +658,8 @@ export class Target {
             OutputStyle.reset(output);
             console.log(output.bind());
             console.log();
+            reject(code);
           }
-          resolve(0);
         });
       });
     } else {
