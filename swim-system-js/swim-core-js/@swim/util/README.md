@@ -146,8 +146,8 @@ and contract enforcement.  The exported `assert` singleton provides a default
 For an npm-managed project, `npm install @swim/util` to make it a dependency.
 TypeScript sources will be installed into `node_modules/@swim/util/main`.
 Transpiled JavaScript and TypeScript definition files install into
-`node_modules/@swim/util/lib/main`.  And a pre-built UMD script can be found in
-`node_modules/@swim/util/dist/main/swim-util.js`.
+`node_modules/@swim/util/lib/main`.  And a pre-built UMD script can
+be found in `node_modules/@swim/util/dist/main/swim-util.js`.
 
 ### Browser
 

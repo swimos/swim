@@ -83,8 +83,8 @@ displaying the diagnostic as an annotated snippet of the relevant source input.
 For an npm-managed project, `npm install @swim/codec` to make it a dependency.
 TypeScript sources will be installed into `node_modules/@swim/codec/main`.
 Transpiled JavaScript and TypeScript definition files install into
-`node_modules/@swim/codec/lib/main`.  And a pre-built UMD script can be found in
-`node_modules/@swim/codec/dist/main/swim-codec.js`.
+`node_modules/@swim/codec/lib/main`.  And a pre-built UMD script can
+be found in `node_modules/@swim/codec/dist/main/swim-codec.js`.
 
 ### Browser
 

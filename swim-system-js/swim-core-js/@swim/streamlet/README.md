@@ -60,9 +60,9 @@ enabling log-time updates to its reduced state when any given input key changes.
 
 ### npm
 
-For an npm-managed project, `npm install @swim/streamlet` to make it a
-dependency. TypeScript sources will be installed into
-`node_modules/@swim/streamlet/main`. Transpiled JavaScript and TypeScript
+For an npm-managed project, `npm install @swim/streamlet` to
+make it a dependency.  TypeScript sources will be installed into
+`node_modules/@swim/streamlet/main`.  Transpiled JavaScript and TypeScript
 definition files install into `node_modules/@swim/streamlet/lib/main`.
 And a pre-built UMD script can be found in
 `node_modules/@swim/streamlet/dist/main/swim-streamlet.js`.

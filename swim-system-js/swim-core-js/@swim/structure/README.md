@@ -262,8 +262,8 @@ which, if defined, can be used to optimize polymorphic `cast` operations.
 ### npm
 
 For an npm-managed project, `npm install @swim/structure` to
-make it a dependency. TypeScript sources will be installed into
-`node_modules/@swim/structure/main`. Transpiled JavaScript and TypeScript
+make it a dependency.  TypeScript sources will be installed into
+`node_modules/@swim/structure/main`.  Transpiled JavaScript and TypeScript
 definition files install into `node_modules/@swim/structure/lib/main`.
 And a pre-built UMD script can be found in
 `node_modules/@swim/structure/dist/main/swim-structure.js`.

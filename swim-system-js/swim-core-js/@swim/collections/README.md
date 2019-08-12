@@ -38,8 +38,8 @@ reconcile concurrent, conflicting updates to the same logical list.
 
 ### npm
 
-For an npm-managed project, `npm install @swim/collections` to make it a
-dependency.  TypeScript sources will be installed into
+For an npm-managed project, `npm install @swim/collections` to
+make it a dependency.  TypeScript sources will be installed into
 `node_modules/@swim/collections/main`.  Transpiled JavaScript and TypeScript
 definition files install into `node_modules/@swim/collections/lib/main`.
 And a pre-built UMD script can be found in

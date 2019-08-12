@@ -324,20 +324,20 @@ Recon structures.  Use `Recon.parse` to parse a `@swim/structure` `Value` from
 a string:
 
 ```typescript
-swim.Recon.parse("[Welcome @a(href:'index.html')@em[home].]");
+Recon.parse("[Welcome @a(href:'index.html')@em[home].]");
 ```
 
 Use `Recon.toString` to serialize a structured `Value` to a Recon string:
 
 ```typescript
-swim.Recon.toString(swim.Record.of("a", swim.Slot.of("b", 2), "c"));
+Recon.toString(Record.of("a", Slot.of("b", 2), "c"));
 // "{a,b:2,c}"
 ```
 
 Use "Recon.toBlockString" to write a top-level block when serializing documents:
 
 ```typescript
-swim.Recon.toBlockString(swim.Record.of("a", swim.Slot.of("b", 2), "c"));
+Recon.toBlockString(Record.of("a", Slot.of("b", 2), "c"));
 // "a,b:2,c"
 ```
 
@@ -347,14 +347,14 @@ and serializing Recon more convenient.
 The `Value.parseRecon` static method is an alias for `Recon.parse`.
 
 ```typescript
-swim.Value.parseRecon("[Hello, @em[world]!]");
+Value.parseRecon("[Hello, @em[world]!]");
 ```
 
 The `Item.toRecon` and `Item.toReconBlock` instance methods delegate to
 `Recon.toString` and `Recon.toBlockString`, respectively.
 
 ```typescript
-swim.Record.of("Hello, ", swim.Record.of(swim.Attr.of("em"), "world"), "!").toRecon();
+Record.of("Hello, ", Record.of(Attr.of("em"), "world"), "!").toRecon();
 // "[Hello, @em[world]!]"
 ```
 
@@ -362,13 +362,13 @@ Invoke `Item.toAny` to convert parsed Recon structures to plain old JavaScript
 objects:
 
 ```typescript
-swim.Value.parseRecon("1, 2, 3").toAny();
+Value.parseRecon("1, 2, 3").toAny();
 // [1, 2, 3]
 
-swim.Value.parseRecon("a: 1, b: 2, c: 3").toAny();
+Value.parseRecon("a: 1, b: 2, c: 3").toAny();
 // {"a": 1, "b": 2, "c": 3}
 
-swim.Value.parseRecon("[Hello, @em[world]!]").toAny();
+Value.parseRecon("[Hello, @em[world]!]").toAny();
 // ["Hello, ",{"@em":null,"$1":"world"},"!"]
 ```
 
@@ -512,8 +512,8 @@ Primary ::= Literal | '(' BlockExpression (',' BlockExpression)* ')'
 For an npm-managed project, `npm install @swim/recon` to make it a dependency.
 TypeScript sources will be installed into `node_modules/@swim/recon/main`.
 Transpiled JavaScript and TypeScript definition files install into
-`node_modules/@swim/recon/lib/main`.  And a pre-built UMD script can be found in
-`node_modules/@swim/recon/dist/main/swim-recon.js`.
+`node_modules/@swim/recon/lib/main`.  And a pre-built UMD script can
+be found in `node_modules/@swim/recon/dist/main/swim-recon.js`.
 
 ### Browser
 

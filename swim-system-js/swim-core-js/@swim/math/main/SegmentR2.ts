@@ -201,7 +201,7 @@ export class SegmentR2 extends R2Shape implements HashCode, Debug {
 
   debug(output: Output): void {
     output.write("SegmentR2").write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this._x0).write(", ").debug(this._y0)
+        .debug(this._x0).write(", ").debug(this._y0).write(", ")
         .debug(this._x1).write(", ").debug(this._y1).write(41/*')'*/);
   }
 

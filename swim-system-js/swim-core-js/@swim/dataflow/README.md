@@ -34,8 +34,8 @@ of any of its transitively dependend expressions changes.
 
 ### npm
 
-For an npm-managed project, `npm install @swim/dataflow` to make it a
-dependency. TypeScript sources will be installed into
+For an npm-managed project, `npm install @swim/dataflow` to
+make it a dependency. TypeScript sources will be installed into
 `node_modules/@swim/dataflow/main`. Transpiled JavaScript and TypeScript
 definition files install into `node_modules/@swim/dataflow/lib/main`.
 And a pre-built UMD script can be found in
