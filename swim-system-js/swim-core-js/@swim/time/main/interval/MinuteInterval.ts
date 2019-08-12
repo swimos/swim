@@ -18,25 +18,33 @@ import {MILLIS_PER_MINUTE, UnitTimeInterval, TimeInterval} from "../TimeInterval
 /** @hidden */
 export class MinuteInterval extends UnitTimeInterval {
   offset(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.time(d.time() + k * MILLIS_PER_MINUTE);
+    d += k * MILLIS_PER_MINUTE;
+    return new DateTime(d, z);
   }
 
   next(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.time(Math.floor((d.time() + k * MILLIS_PER_MINUTE) / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE);
+    d = Math.floor((d + k * MILLIS_PER_MINUTE) / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE;
+    return new DateTime(d, z);
   }
 
   floor(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    return d.time(Math.floor(d.time() / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
+    d = Math.floor(d / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE;
+    return new DateTime(d, z);
   }
 
   ceil(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    return d.time(Math.floor(((Math.floor((d.time() - 1) / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE) + MILLIS_PER_MINUTE) / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
+    d = Math.floor(((Math.floor((d - 1) / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE) + MILLIS_PER_MINUTE) / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE;
+    return new DateTime(d, z);
   }
 
   every(k: number): TimeInterval {

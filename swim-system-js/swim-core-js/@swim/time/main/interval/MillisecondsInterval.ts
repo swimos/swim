@@ -28,28 +28,36 @@ export class MillisecondsInterval extends TimeInterval {
   }
 
   offset(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.time(d.time() + k * this.stride);
+    d += k * this.stride;
+    return new DateTime(d, z);
   }
 
   next(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
     const stride = this.stride;
-    return d.time(Math.floor((d.time() + k * stride) / stride) * stride);
+    d = Math.floor((d + k * stride) / stride) * stride;
+    return new DateTime(d, z);
   }
 
   floor(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
     const stride = this.stride;
-    return d.time(Math.floor(d.time() / stride) * stride);
+    d = Math.floor(d / stride) * stride;
+    return new DateTime(d, z);
   }
 
   ceil(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
     const stride = this.stride;
-    return d.time(Math.floor(((Math.floor((d.time() - 1) / stride) * stride) + stride) / stride) * stride);
+    d = Math.floor(((Math.floor((d - 1) / stride) * stride) + stride) / stride) * stride;
+    return new DateTime(d, z);
   }
 }
 TimeInterval.Milliseconds = MillisecondsInterval;

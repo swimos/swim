@@ -18,15 +18,19 @@ import {UnitTimeInterval, TimeInterval} from "../TimeInterval";
 /** @hidden */
 export class MillisecondInterval extends UnitTimeInterval {
   offset(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.time(d.time() + k);
+    d += k;
+    return new DateTime(d, z);
   }
 
   next(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.time(d.time() + k);
+    d += k;
+    return new DateTime(d, z);
   }
 
   floor(d: AnyDateTime): DateTime {

@@ -395,6 +395,14 @@ export class DateTime implements Comparable<AnyDateTime>, HashCode, Display {
     throw new TypeError("" + date);
   }
 
+  static zone(date: AnyDateTime): TimeZone {
+    if (date instanceof DateTime) {
+      return date._zone;
+    } else {
+      return TimeZone.utc();
+    }
+  }
+
   /** @hidden */
   static isInit(value: unknown): value is DateTimeInit {
     if (value && typeof value === "object") {

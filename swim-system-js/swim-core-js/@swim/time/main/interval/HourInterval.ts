@@ -18,44 +18,48 @@ import {MILLIS_PER_MINUTE, MILLIS_PER_HOUR, UnitTimeInterval, TimeInterval} from
 /** @hidden */
 export class HourInterval extends UnitTimeInterval {
   offset(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.time(d.time() + k * MILLIS_PER_HOUR);
+    d += k * MILLIS_PER_HOUR;
+    return new DateTime(d, z);
   }
 
   next(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    d = d.time(d.time() + k * MILLIS_PER_HOUR);
-    let dtz = d.zone().offset() * MILLIS_PER_MINUTE % MILLIS_PER_HOUR;
+    d += k * MILLIS_PER_HOUR;
+    let dtz = z.offset() * MILLIS_PER_MINUTE % MILLIS_PER_HOUR;
     if (dtz < 0) {
       dtz += MILLIS_PER_HOUR;
     }
-    return d.time(Math.floor((d.time() - dtz) / MILLIS_PER_HOUR) * MILLIS_PER_HOUR + dtz);
+    d = Math.floor((d - dtz) / MILLIS_PER_HOUR) * MILLIS_PER_HOUR + dtz;
+    return new DateTime(d, z);
   }
 
   floor(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    let dtz = d.zone().offset() * MILLIS_PER_MINUTE % MILLIS_PER_HOUR;
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
+    let dtz = z.offset() * MILLIS_PER_MINUTE % MILLIS_PER_HOUR;
     if (dtz < 0) {
       dtz += MILLIS_PER_HOUR;
     }
-    return d.time(Math.floor((d.time() - dtz) / MILLIS_PER_HOUR) * MILLIS_PER_HOUR + dtz);
+    d = Math.floor((d - dtz) / MILLIS_PER_HOUR) * MILLIS_PER_HOUR + dtz;
+    return new DateTime(d, z);
   }
 
   ceil(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    d = d.time(d.time() - 1);
-    let dtz = d.zone().offset() * MILLIS_PER_MINUTE % MILLIS_PER_HOUR;
+    const z = DateTime.zone(d);
+    d = DateTime.time(d);
+    d -= 1;
+    let dtz = z.offset() * MILLIS_PER_MINUTE % MILLIS_PER_HOUR;
     if (dtz < 0) {
       dtz += MILLIS_PER_HOUR;
     }
-    d = d.time((Math.floor((d.time() - dtz) / MILLIS_PER_HOUR) * MILLIS_PER_HOUR + dtz) + MILLIS_PER_HOUR);
-    dtz = d.zone().offset() * MILLIS_PER_MINUTE % MILLIS_PER_HOUR;
-    if (dtz < 0) {
-      dtz += MILLIS_PER_HOUR;
-    }
-    return d.time(Math.floor((d.time() - dtz) / MILLIS_PER_HOUR) * MILLIS_PER_HOUR + dtz);
+    d = (Math.floor((d - dtz) / MILLIS_PER_HOUR) * MILLIS_PER_HOUR + dtz) + MILLIS_PER_HOUR;
+    d = Math.floor((d - dtz) / MILLIS_PER_HOUR) * MILLIS_PER_HOUR + dtz;
+    return new DateTime(d, z);
   }
 
   every(k: number): TimeInterval {
