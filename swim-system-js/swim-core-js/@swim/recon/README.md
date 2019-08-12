@@ -15,12 +15,55 @@ framework.
 
 ## Language Overview
 
-### Primitives
+Recon combines the simplicity of JSON with the expressiveness of XML.  As shown
+in the example below, Recon looks a bit like a hybrid of the two.  Yet Recon is
+deceptively simple: the grammar for Recon is scarcely larger than the grammar
+for JSON.  And this underlying uniformity makes Recon more expressive, and more
+consistent to work with, than either XML or JSON.
 
-Record Notation has six primitive datatypes: _text_, _data_, _num_, _bool_
-_extant_, and _absent_.
+```recon
+@html {
+  @head {
+    @title "Greetings"
+  }
+  @body {
+    @h1 "Introduction"
+    @p [I have @a(href:"https://en.wikipedia.org/wiki/Markup_language")[markup syntax]
+        for when you need it.  But I'm not a text chauvinist.  I'm a structured object
+        notation first and foremost.  The numbers {1, 2, 3} are parsed as numbers,
+        not strings.  Any my attributes make it easy to define, embed, and
+        disambiguate microformats and domain specific languages.]
+    @p [Need a microformat for time?  You'll find it falls out naturally after
+        {{10 @minutes}} of using Recon.  Need to build a DSL for real-time GUI
+        widgets?  Recon helps you do so cleanly and concisely, like this:]
+    @pie {
+      title: "Events"
+      linkStats: @link(host: "warp://traffic.swim.services", node: "swim:meta:mesh", lane: "linkStats", type: value)
+      @slice {
+        value: $max(0.1, $rate($linkStats.downMessageCount))
+        label: @text($percent($value, $total))
+        legend: @text([Down ({$round($value)}/s)])
+        innerRadius: 10 + 7.5 * $value / $max($value) @pct
+        outerRadius: 20 + 7.5 * $value / $max($value) @pct
+      }
+      @slice {
+        value: $max(0.1, $rate($linkStats.upMessageCount))
+        label: @text($percent($value, $total))
+        legend: @text([Up ({$round($value)}/s)])
+        innerRadius: 10 + 7.5 * $value / $max($value) @pct
+        outerRadius: 20 + 7.5 * $value / $max($value) @pct
+      }
+    }
+  }
+}
+```
 
-#### Text Values
+The name Recon is shorthand for **Reco**rd **n**otation.  Record Notation has
+six primitive data types: _text_, _data_, _num_, _bool_ _extant_, and _absent_;
+and one aggregate data type: _record_.  Read on to learn about the underlying
+structure of the language.
+
+### Text Values
 
 Text values take one of two forms: a quoted _string_, or an unquoted
 _identifier_.
@@ -30,7 +73,7 @@ _identifier_.
 identifier
 ```
 
-#### Data Values
+### Data Values
 
 Binary data encodes as a leading '%' symbol, followed by a base64 literal.
 
@@ -38,7 +81,7 @@ Binary data encodes as a leading '%' symbol, followed by a base64 literal.
 %AA==
 ```
 
-#### Num Values
+### Num Values
 
 Numbers serialize as decimal literals.
 
@@ -48,7 +91,7 @@ Numbers serialize as decimal literals.
 6.02e23
 ```
 
-#### Bool Values
+### Bool Values
 
 Booleans are represented by the `true` and `false` identifiers.
 
@@ -57,7 +100,7 @@ true
 false
 ```
 
-#### Extant Values
+### Extant Values
 
 Extant symbolizes a thing that is defined, but which has no specific value.
 Extant is represented by an empty token where a value is expected.
@@ -67,12 +110,12 @@ foo: # value of foo slot is extant
 @bar # value of bar attr is extant
 ```
 
-#### Absent Values
+### Absent Values
 
 Absent represents something that does not exist.  Its only direct
 representation in Record Notation is an empty document.
 
-### Records
+### Record Values
 
 Record Notation has a single aggregate data type, called _record_.  Records
 play the combined role of array and associative array.  Think of a record as
