@@ -1,7 +1,7 @@
 {
   "name": "@swim/time",
   "version": "3.10.0",
-  "description": "Date and time object models and parsers",
+  "description": "Date-time, time zone, and time interval data types, with strptime/strftime-style parsers and formatters",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
   "copyright": "2015-2019 SWIM.AI inc.",

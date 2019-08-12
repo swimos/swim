@@ -390,7 +390,7 @@ export class DateTime implements Comparable<AnyDateTime>, HashCode, Display {
     } else if (typeof date === "string") {
       return DateTime.parse(date).time();
     } else if (date && typeof date === "object") {
-      DateTime.from(date).time();
+      return DateTime.from(date).time();
     }
     throw new TypeError("" + date);
   }
