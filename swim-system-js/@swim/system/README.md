@@ -14,9 +14,9 @@ interface toolkits, and the [`@swim/web`](https://www.npmjs.com/package/@swim/we
 real-time web application framework.  `@swim/system` is written in TypeScript,
 but is designed to be used from either TypeScript or JavaScript.
 
-## Frameworks
+## Child Frameworks
 
-The `@swim/system` umbrella package depends on, and re-exports, the following
+The `@swim/system` umbrella framework depends on, and re-exports, the following
 child frameworks:
 
 - **`@swim/core`**

@@ -6,7 +6,7 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-The Swim system umbrella framework encompasses the [`@swim/core`](https://www.npmjs.com/package/@swim/core)
+The Swim System umbrella framework encompasses the [`@swim/core`](https://www.npmjs.com/package/@swim/core)
 foundation framework, the [`@swim/mesh`](https://www.npmjs.com/package/@swim/mesh)
 multiplexed streaming WARP framework, the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui)
 and [`@swim/ux`](https://www.npmjs.com/package/@swim/ux) real-time user
@@ -14,9 +14,9 @@ interface toolkits, and the [`@swim/web`](https://www.npmjs.com/package/@swim/we
 real-time web application framework.  Swim System enables massively real-time
 streaming applications that work with any WARP fabric.
 
-## Frameworks
+## Child Frameworks
 
-The Swim system framework consists of the following component frameworks:
+The Swim system umbrella framework consists of the following child frameworks:
 
 - [**`@swim/system`**](@swim/system) –
   umbrella framework that depends on, and re-exports, the Swim system child frameworks.

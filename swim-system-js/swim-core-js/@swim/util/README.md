@@ -6,7 +6,7 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/util` is a lightweight foundation library for TypeScript applications,
+`@swim/util` is a lightweight utility library for TypeScript applications,
 providing interfaces and implementations for: ordering, equality, and hashing;
 type conversions; iterators; builders; maps; caches; and assertions.
 `@swim/util` is written in TypeScript, but can be used from either TypeScript
