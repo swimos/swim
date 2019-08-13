@@ -114,7 +114,8 @@ export abstract class UriPath implements Comparable<UriPath>, HashCode, Debug, D
     } while (true);
   }
 
-  isSubpathOf(b: UriPath): boolean {
+  isSubpathOf(b: AnyUriPath): boolean {
+    b = UriPath.fromAny(b);
     let a = this as UriPath;
     while (!a.isEmpty() && !b.isEmpty()) {
       if (a.head() !== b.head()) {

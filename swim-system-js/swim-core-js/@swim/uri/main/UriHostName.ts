@@ -36,7 +36,7 @@ export class UriHostName extends UriHost {
   }
 
   debug(output: Output): void {
-    output = output.write("UriHost").write(46/*'.'*/).write("name")
+    output = output.write("UriHost").write(46/*'.'*/).write("from")
         .write(40/*'('*/).debug(this._address).write(41/*')'*/);
   }
 

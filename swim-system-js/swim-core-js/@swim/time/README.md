@@ -235,4 +235,3 @@ var time = require("@swim/time");
 
 When loaded by a web browser, the `swim-core.js` script adds the
 `@swim/time` library exports to the global `swim` namespace.
-
