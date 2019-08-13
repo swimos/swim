@@ -19,15 +19,20 @@ streaming applications that work with any WARP fabric.
 The Swim system umbrella framework consists of the following child frameworks:
 
 - [**`@swim/system`**](@swim/system) –
-  umbrella framework that depends on, and re-exports, the Swim system child frameworks.
+  umbrella framework that depends on, and re-exports, the Swim system child
+  frameworks.
 - [**`@swim/core`**](swim-core-js) –
   lightweight, portable, dependency-free foundation framework.
 - [**`@swim/mesh`**](swim-mesh-js) –
-  multiplexed streaming WARP framework.
+  multiplexed streaming WARP framework that runs in both Node.js and web
+  browsers.
 - [**`@swim/ui`**](swim-ui-js) –
-  real-time user interface toolkit.
+  massively real-time user interface toolkit, with a unified view hierarchy
+  for HTML, SVG, and Canvas components, animated procedural styling, and
+  constraint-based layouts.
 - [**`@swim/ux`**](swim-ux-js) –
-  real-time user interface widgets.
+  seamlessly animated user interface widgets, including gauges, pie charts,
+  line, area, and bubble charts, and geospatial map overlays.
 - [**`@swim/web`**](swim-web-js) –
   real-time web application framework.
 

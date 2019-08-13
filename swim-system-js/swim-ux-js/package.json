@@ -1,7 +1,7 @@
 {
   "name": "@swim/ux",
   "version": "3.9.0",
-  "description": "Swim Real-Time User Interface Widgets",
+  "description": "Swim UX Toolkit",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
   "copyright": "2015-2019 SWIM.AI inc.",

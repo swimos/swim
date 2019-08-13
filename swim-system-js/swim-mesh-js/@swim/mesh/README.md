@@ -10,9 +10,9 @@
 Node.js and web browsers. `@swim/mesh` can be used in concert with the
 [`@swim/ui`](https://www.npmjs.com/package/@swim/ui) and
 [`@swim/ux`](https://www.npmjs.com/package/@swim/ux) user interface
-toolkits to build massively real-time streaming applications. `@swim/mesh`
-is written in TypeScript, but is designed to be used from either TypeScript
-or JavaScript.
+toolkits to build massively real-time streaming applications.  `@swim/mesh` is
+part of the broader [`@swim/system`](https://www.npmjs.com/package/@swim/system)
+framework.
 
 ## Libraries
 
@@ -55,6 +55,14 @@ dependency, from the Swim CDN.
 <script src="https://cdn.swim.ai/js/latest/swim-mesh.js"></script>
 ```
 
+Alternatively, the standalone `swim-system.js` script may be loaded
+from the Swim CDN, which bundles `@swim/mesh` along with all other
+[`@swim/system`](https://www.npmjs.com/package/@swim/system) frameworks.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+```
+
 ## Usage
 
 ### ES6/TypeScript
@@ -80,4 +88,9 @@ var swim = require("@swim/mesh");
 ### Browser
 
 When loaded by a web browser, the `swim-mesh.js` script adds all component
-library exports to the global `swim` namespace.
+library exports to the global `swim` namespace.  The `swim-mesh.js` script
+requires that `swim-core.js` has already been loaded.
+
+The `swim-system.js` script also adds all `@swim/mesh` component library
+exports to the global `swim` namespace, making it a drop-in replacement
+for `swim-mesh.js` when additional `@swim/system` frameworks are needed.

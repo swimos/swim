@@ -1,7 +1,7 @@
 # Swim Mesh Framework
 
 [![package](https://img.shields.io/npm/v/@swim/mesh.svg)](https://www.npmjs.com/package/@swim/mesh)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_mesh.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
@@ -10,8 +10,8 @@ The Swim mesh framework implements a multiplexed streaming WARP client that
 runs in both Node.js and web browsers.  Swim Mesh can be used in concert with
 the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui) and
 [`@swim/ux`](https://www.npmjs.com/package/@swim/ux) user interface toolkits to
-build massively real-time streaming applications. Swim Mesh is included as part
-of the [Swim System framework](https://www.npmjs.com/package/@swim/system).
+build massively real-time streaming applications. Swim Mesh is part of the
+broader [Swim System](https://www.npmjs.com/package/@swim/system) framework.
 
 ## Libraries
 
@@ -26,9 +26,9 @@ The Swim mesh framework consists of the following component libraries:
 - [**`@swim/cli`**](@swim/cli) –
   WARP command line client.
 
-Swim Mesh builds on the [Swim Core framework](https://www.npmjs.com/package/@swim/core);
-it has no additional dependencies when run in a web browser, and depends only
-on a WebSocket implementation when run in Node.js.
+Swim Mesh builds on the [Swim Core](https://www.npmjs.com/package/@swim/core)
+framework; it has no additional dependencies when run in a web browser, and
+depends only on a WebSocket implementation when run in Node.js.
 
 ## Installation
 
@@ -49,6 +49,14 @@ dependency, from the Swim CDN.
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 <script src="https://cdn.swim.ai/js/latest/swim-mesh.js"></script>
+```
+
+Alternatively, the standalone `swim-system.js` script may be loaded
+from the Swim CDN, which bundles `@swim/mesh` along with all other
+[`@swim/system`](https://www.npmjs.com/package/@swim/system) frameworks.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
 ```
 
 ## Usage
@@ -76,7 +84,12 @@ var swim = require("@swim/mesh");
 ### Browser
 
 When loaded by a web browser, the `swim-mesh.js` script adds all component
-library exports to the global `swim` namespace.
+library exports to the global `swim` namespace.  The `swim-mesh.js` script
+requires that `swim-core.js` has already been loaded.
+
+The `swim-system.js` script also adds all `@swim/mesh` component library
+exports to the global `swim` namespace, making it a drop-in replacement
+for `swim-mesh.js` when additional `@swim/system` frameworks are needed.
 
 ## Development
 

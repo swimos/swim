@@ -524,6 +524,14 @@ Web applications can load `swim-core.js`, which comes bundled with the
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
+Alternatively, the standalone `swim-system.js` script may be loaded
+from the Swim CDN, which bundles `@swim/recon` along with all other
+[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+```
+
 ## Usage
 
 ### ES6/TypeScript

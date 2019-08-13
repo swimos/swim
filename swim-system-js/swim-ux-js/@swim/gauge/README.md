@@ -1,3 +1,3 @@
 # @swim/gauge
 
-Animated gauge component.
+Multi-dial, fully animatable, canvas rendered gauge widget.

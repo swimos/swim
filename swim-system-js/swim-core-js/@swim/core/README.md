@@ -11,7 +11,8 @@ strongly typed baseline on which to build higher level libraries. `@swim/core`
 forms the foundation on which the [`@swim/mesh`](https://www.npmjs.com/package/@swim/mesh)
 multiplexed streaming WARP framework, and the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui)
 and [`@swim/ux`](https://www.npmjs.com/package/@swim/ux) real-time user
-interface toolkits, are built.
+interface toolkits, are built.  `@swim/core` is a part of the broader
+[`@swim/system`](https://www.npmjs.com/package/@swim/system) framework.
 
 ## Libraries
 
@@ -94,6 +95,14 @@ Web applications can load `swim-core.js` directly from the Swim CDN.
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
+Alternatively, the standalone `swim-system.js` script may be loaded
+from the Swim CDN, which bundles `@swim/core` along with all other
+[`@swim/system`](https://www.npmjs.com/package/@swim/system) frameworks.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+```
+
 ## Usage
 
 ### ES6/TypeScript
@@ -120,3 +129,7 @@ var swim = require("@swim/core");
 
 When loaded by a web browser, the `swim-core.js` script adds all component
 library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/core` component library
+exports to the global `swim` namespace, making it a drop-in replacement
+for `swim-core.js` when additional `@swim/system` frameworks are needed.

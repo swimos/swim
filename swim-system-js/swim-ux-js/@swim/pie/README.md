@@ -1,3 +1,3 @@
 # @swim/pie
 
-Animated pie chart component.
+Multi-slice, fully animatable, canvas rendered pie chart widget.

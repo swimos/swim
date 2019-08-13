@@ -1,7 +1,7 @@
 # Swim Core Framework
 
 [![package](https://img.shields.io/npm/v/@swim/core.svg)](https://www.npmjs.com/package/@swim/core)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_core.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
@@ -11,8 +11,8 @@ strongly typed baseline on which to build higher level libraries. Swim Core
 forms the foundation on which the [`@swim/mesh`](https://www.npmjs.com/package/@swim/mesh)
 multiplexed streaming WARP framework, and the [`@swim/ui`](https://www.npmjs.com/package/@swim/ui)
 and [`@swim/ux`](https://www.npmjs.com/package/@swim/ux) real-time user
-interface toolkits, are built.  Swim Core is included as part of the
-[Swim System framework](https://www.npmjs.com/package/@swim/system).
+interface toolkits, are built.  Swim Core is part of the broader
+[Swim System](https://www.npmjs.com/package/@swim/system) framework.
 
 ## Libraries
 
@@ -70,6 +70,14 @@ Web applications can load `swim-core.js` directly from the Swim CDN.
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
+Alternatively, the standalone `swim-system.js` script may be loaded
+from the Swim CDN, which bundles `@swim/core` along with all other
+[`@swim/system`](https://www.npmjs.com/package/@swim/system) frameworks.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+```
+
 ## Usage
 
 ### ES6/TypeScript
@@ -96,6 +104,10 @@ var swim = require("@swim/core");
 
 When loaded by a web browser, the `swim-core.js` script adds all component
 library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/core` component library
+exports to the global `swim` namespace, making it a drop-in replacement
+for `swim-core.js` when additional `@swim/system` frameworks are needed.
 
 ## Development
 

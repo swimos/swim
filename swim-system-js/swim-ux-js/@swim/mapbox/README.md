@@ -1,3 +1,3 @@
 # @swim/mapbox
 
-Animated Mapbox components.
+support for overlaying `@swim/map` views on Mapbox maps.

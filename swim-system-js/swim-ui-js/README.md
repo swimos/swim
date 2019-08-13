@@ -1,7 +1,7 @@
 # Swim UI Toolkit
 
 [![package](https://img.shields.io/npm/v/@swim/ui.svg)](https://www.npmjs.com/package/@swim/ui)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_ui.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
@@ -11,7 +11,7 @@ Procedural styling, and a unified view hierarchy, make it easy to consistently
 animate—and efficiently render—mixed HTML, SVG, and Canvas components, enabling
 uniform tweening of everything from HTML attributes, to CSS styles, SVG and
 Canvas drawings, and custom parameters.  Swim UI is a part of the
-[Swim System framework](https://www.npmjs.com/package/@swim/system).
+[Swim System](https://www.npmjs.com/package/@swim/system) framework.
 
 ## Libraries
 
@@ -20,7 +20,7 @@ The Swim UI toolkit consists of the following component libraries:
 - [**`@swim/ui`**](@swim/ui) –
   umbrella package that depends on, and re-exports, all Swim UI libraries.
 - [**`@swim/angle`**](@swim/angle) –
-  Dimensional angle types with unit-aware algebraic operators, conversions,
+  dimensional angle types with unit-aware algebraic operators, conversions,
   and parsers.
 - [**`@swim/length`**](@swim/length) –
   DOM-relative length types with unit-aware algebraic operators, conversions,
@@ -34,40 +34,40 @@ The Swim UI toolkit consists of the following component libraries:
   CSS and SVG compatible transform types with unit-aware algebraic operators
   and parsers.
 - [**`@swim/interpolate`**](@swim/interpolate) –
-  Interpolator types for blending between values, such as numbers, dates,
+  interpolator types for blending between values, such as numbers, dates,
   angles, lengths, colors, transforms, shapes, arrays, structures, and
   other interpolators.
 - [**`@swim/scale`**](@swim/scale) –
-  Scale types that map numeric and temporal input domains to interpolated
+  scale types that map numeric and temporal input domains to interpolated
   output ranges, with support for continuous domain clamping, domain solving,
   range unscaling, and interpolation between scales.
 - [**`@swim/transition`**](@swim/transition) –
-  Transition types that specify duration, ease, interpolator, and lifecycle
+  transition types that specify duration, ease, interpolator, and lifecycle
   callback parameters for tween animations.
 - [**`@swim/animate`**](@swim/animate) –
-  Property-managing animator types that efficiently tween values between
+  property-managing animator types that efficiently tween values between
   discrete state changes.
 - [**`@swim/dom`**](@swim/dom) –
   CustomEvent and ResizeObserver polyfills.
 - [**`@swim/style`**](@swim/style) –
   CSS style types and universal style value parser.
 - [**`@swim/render`**](@swim/render) –
-  Renderable graphic types for SVG and Canvas compatible path drawing contexts,
+  renderable graphic types for SVG and Canvas compatible path drawing contexts,
   and Canvas compatible rendering contexts.
 - [**`@swim/constraint`**](@swim/constraint) –
-  Incremental solver for systems of linear layout constraints.
+  incremental solver for systems of linear layout constraints.
 - [**`@swim/view`**](@swim/view) –
-  Unified HTML, SVG, and Canvas view hierarchy, with integrated controller
+  unified HTML, SVG, and Canvas view hierarchy, with integrated controller
   architecture, animated procedural styling, and constraint-based layouts.
 - [**`@swim/shape`**](@swim/shape) –
-  Canvas shape views, with animated geometry and style properties.
+  canvas shape views, with animated geometry and style properties.
 - [**`@swim/typeset`**](@swim/typeset) –
-  Canvas typesetting views, with animated text, layout, font, and style properties.
+  canvas typesetting views, with animated text, layout, font, and style properties.
 - [**`@swim/gesture`**](@swim/gesture) –
-  Multitouch gesture recognizers, with kinematic surface modeling.
+  multitouch gesture recognizers, with kinematic surface modeling.
 
-Swim UI builds on the [Swim Core framework](https://www.npmjs.com/package/@swim/core);
-it has no additional dependencies.
+Swim UI builds on the [Swim Core](https://www.npmjs.com/package/@swim/core)
+framework; it has no additional dependencies.
 
 ## Installation
 
@@ -88,6 +88,14 @@ dependency, from the Swim CDN.
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 <script src="https://cdn.swim.ai/js/latest/swim-ui.js"></script>
+```
+
+Alternatively, the standalone `swim-system.js` script may be loaded
+from the Swim CDN, which bundles `@swim/ui` along with all other
+[`@swim/system`](https://www.npmjs.com/package/@swim/system) frameworks.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
 ```
 
 ## Usage
@@ -115,7 +123,12 @@ var swim = require("@swim/ui");
 ### Browser
 
 When loaded by a web browser, the `swim-ui.js` script adds all component
-library exports to the global `swim` namespace.
+library exports to the global `swim` namespace.  The `swim-ui.js` script
+requires that `swim-core.js` has already been loaded.
+
+The `swim-system.js` script also adds all `@swim/ui` component library
+exports to the global `swim` namespace, making it a drop-in replacement
+for `swim-ui.js` when additional `@swim/system` frameworks are needed.
 
 ## Development
 

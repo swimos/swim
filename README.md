@@ -126,7 +126,8 @@ The swimOS TypeScript implementation consists of the following frameworks and li
   - [**`@swim/uri`**](swim-system-js/swim-core-js/@swim/uri) –
     codec for parsing/writing URI strings to/from structured URI data types.
 - [**`@swim/mesh`**](swim-system-js/swim-mesh-js) –
-  multiplexed streaming WARP framework.
+  multiplexed streaming WARP framework that runs in both Node.js and web
+  browsers.
   - [**`@swim/warp`**](swim-system-js/swim-mesh-js/@swim/warp) –
     implementation of the WARP multiplexed streaming wire protocol.
   - [**`@swim/client`**](swim-system-js/swim-mesh-js/@swim/client) –
@@ -134,9 +135,11 @@ The swimOS TypeScript implementation consists of the following frameworks and li
   - [**`@swim/cli`**](swim-system-js/swim-mesh-js/@swim/cli) –
     WARP command line client.
 - [**`@swim/ui`**](swim-system-js/swim-ui-js) –
-  real-time user interface toolkit.
+  massively real-time user interface toolkit, with a unified view hierarchy
+  for HTML, SVG, and Canvas components, animated procedural styling, and
+  constraint-based layouts.
   - [**`@swim/angle`**](swim-system-js/swim-ui-js/@swim/angle) –
-    Dimensional angle types with unit-aware algebraic operators, conversions,
+    dimensional angle types with unit-aware algebraic operators, conversions,
     and parsers.
   - [**`@swim/length`**](swim-system-js/swim-ui-js/@swim/length) –
     DOM-relative length types with unit-aware algebraic operators, conversions,
@@ -150,44 +153,53 @@ The swimOS TypeScript implementation consists of the following frameworks and li
     CSS and SVG compatible transform types with unit-aware algebraic operators
     and parsers.
   - [**`@swim/interpolate`**](swim-system-js/swim-ui-js/@swim/interpolate) –
-    Interpolator types for blending between values, such as numbers, dates,
+    interpolator types for blending between values, such as numbers, dates,
     angles, lengths, colors, transforms, shapes, arrays, structures, and
     other interpolators.
   - [**`@swim/scale`**](swim-system-js/swim-ui-js/@swim/scale) –
-    Scale types that map numeric and temporal input domains to interpolated
+    scale types that map numeric and temporal input domains to interpolated
     output ranges, with support for continuous domain clamping, domain solving,
     range unscaling, and interpolation between scales.
   - [**`@swim/transition`**](swim-system-js/swim-ui-js/@swim/transition) –
-    Transition types that specify duration, ease, interpolator, and lifecycle
+    transition types that specify duration, ease, interpolator, and lifecycle
     callback parameters for tween animations.
   - [**`@swim/animate`**](swim-system-js/swim-ui-js/@swim/animate) –
-    Property-managing animator types that efficiently tween values between
+    property-managing animator types that efficiently tween values between
     discrete state changes.
   - [**`@swim/dom`**](swim-system-js/swim-ui-js/@swim/dom) –
     CustomEvent and ResizeObserver polyfills.
   - [**`@swim/style`**](swim-system-js/swim-ui-js/@swim/style) –
     CSS style types and universal style value parser.
   - [**`@swim/render`**](swim-system-js/swim-ui-js/@swim/render) –
-    Renderable graphic types for SVG and Canvas compatible path drawing contexts,
+    renderable graphic types for SVG and Canvas compatible path drawing contexts,
     and Canvas compatible rendering contexts.
   - [**`@swim/constraint`**](swim-system-js/swim-ui-js/@swim/constraint) –
-    Incremental solver for systems of linear layout constraints.
+    incremental solver for systems of linear layout constraints.
   - [**`@swim/view`**](swim-system-js/swim-ui-js/@swim/view) –
-    Unified HTML, SVG, and Canvas view hierarchy, with integrated controller
+    unified HTML, SVG, and Canvas view hierarchy, with integrated controller
     architecture, animated procedural styling, and constraint-based layouts.
   - [**`@swim/shape`**](swim-system-js/swim-ui-js/@swim/shape) –
-    Canvas shape views, with animated geometry and style properties.
+    canvas shape views, with animated geometry and style properties.
   - [**`@swim/typeset`**](swim-system-js/swim-ui-js/@swim/typeset) –
-    Canvas typesetting views, with animated text, layout, font, and style properties.
+    canvas typesetting views, with animated text, layout, font, and style properties.
   - [**`@swim/gesture`**](swim-system-js/swim-ui-js/@swim/gesture) –
-    Multitouch gesture recognizers, with kinematic surface modeling.
+    multitouch gesture recognizers, with kinematic surface modeling.
 - [**`@swim/ux`**](swim-system-js/swim-ux-js) –
-  real-time user interface widgets.
+  seamlessly animated user interface widgets, including gauges, pie charts,
+  line, area, and bubble charts, and geospatial map overlays.
   - [**`@swim/gauge`**](swim-system-js/swim-ux-js/@swim/gauge) –
+    multi-dial, fully animatable, canvas rendered gauge widget.
   - [**`@swim/pie`**](swim-system-js/swim-ux-js/@swim/pie) –
+    multi-slice, fully animatable, canvas rendered pie chart widget.
   - [**`@swim/chart`**](swim-system-js/swim-ux-js/@swim/chart) –
+    multi-plot, fully animatable, canvas rendered chart widget, suppporting line,
+    area, and bubble graphs, with customizeable axes, and kinematic multitouch
+    scale gestures for panning and zooming with momentum.
   - [**`@swim/map`**](swim-system-js/swim-ux-js/@swim/map) –
+    canvas views for efficiently rendering geospatially located map overlays,
+    including fully animatable views for lines, circles, and polygons.
   - [**`@swim/mapbox`**](swim-system-js/swim-ux-js/@swim/mapbox) –
+    support for overlaying `@swim/map` views on Mapbox maps.
 - [**`@swim/web`**](swim-system-js/swim-web-js) –
   real-time web application framework.
   - [**`@swim/site`**](swim-system-js/swim-web-js/@swim/site) –
