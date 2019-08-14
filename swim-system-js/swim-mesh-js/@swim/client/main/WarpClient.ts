@@ -23,28 +23,28 @@ import {EventDownlinkInit, EventDownlink} from "./downlink/EventDownlink";
 import {ListDownlinkInit, ListDownlink} from "./downlink/ListDownlink";
 import {MapDownlinkInit, MapDownlink} from "./downlink/MapDownlink";
 import {ValueDownlinkInit, ValueDownlink} from "./downlink/ValueDownlink";
-import {SwimRef} from "./SwimRef";
+import {WarpRef} from "./WarpRef";
 import {
-  SwimDidConnect,
-  SwimDidAuthenticate,
-  SwimDidDeauthenticate,
-  SwimDidDisconnect,
-  SwimDidFail,
-  SwimObserver,
-} from "./SwimObserver";
+  WarpDidConnect,
+  WarpDidAuthenticate,
+  WarpDidDeauthenticate,
+  WarpDidDisconnect,
+  WarpDidFail,
+  WarpObserver,
+} from "./WarpObserver";
 import {RefContext} from "./ref/RefContext";
 import {BaseRef} from "./ref/BaseRef";
 import {HostRef} from "./ref/HostRef";
 import {NodeRef} from "./ref/NodeRef";
 import {LaneRef} from "./ref/LaneRef";
 
-export interface SwimClientOptions extends HostOptions {
+export interface WarpClientOptions extends HostOptions {
   keepOnline?: boolean;
 }
 
-export class SwimClient implements HostContext, RefContext, SwimRef {
+export class WarpClient implements HostContext, RefContext, WarpRef {
   /** @hidden */
-  readonly _options: SwimClientOptions;
+  readonly _options: WarpClientOptions;
   /** @hidden */
   _hosts: BTree<Uri, Host>;
   /** @hidden */
@@ -56,9 +56,12 @@ export class SwimClient implements HostContext, RefContext, SwimRef {
   /** @hidden */
   _online: boolean;
   /** @hidden */
-  _observers: ReadonlyArray<SwimObserver> | null;
+  _observers: ReadonlyArray<WarpObserver> | null;
 
-  constructor(options: SwimClientOptions = {}) {
+  constructor(options: WarpClientOptions = {}) {
+    if (options.keepOnline === void 0) {
+      options.keepOnline = true;
+    }
     this._options = options;
     this._hosts = new BTree();
     this._downlinks = new BTree();
@@ -347,10 +350,10 @@ export class SwimClient implements HostContext, RefContext, SwimRef {
     }, this);
   }
 
-  observe(observer: SwimObserver): this {
+  observe(observer: WarpObserver): this {
     const oldObservers = this._observers;
     const n = oldObservers ? oldObservers.length : 0;
-    const newObservers = new Array<SwimObserver>(n + 1);
+    const newObservers = new Array<WarpObserver>(n + 1);
     for (let i = 0; i < n; i += 1) {
       newObservers[i] = oldObservers![i];
     }
@@ -375,7 +378,7 @@ export class SwimClient implements HostContext, RefContext, SwimRef {
       }
       if (found) {
         if (n > 1) {
-          const newObservers = new Array<SwimObserver>(n - 1);
+          const newObservers = new Array<WarpObserver>(n - 1);
           for (let j = 0; j < i; j += 1) {
             newObservers[j] = oldObservers![j];
           }
@@ -392,23 +395,23 @@ export class SwimClient implements HostContext, RefContext, SwimRef {
     return this;
   }
 
-  didConnect(didConnect: SwimDidConnect): this {
+  didConnect(didConnect: WarpDidConnect): this {
     return this.observe({didConnect});
   }
 
-  didAuthenticate(didAuthenticate: SwimDidAuthenticate): this {
+  didAuthenticate(didAuthenticate: WarpDidAuthenticate): this {
     return this.observe({didAuthenticate});
   }
 
-  didDeauthenticate(didDeauthenticate: SwimDidDeauthenticate): this {
+  didDeauthenticate(didDeauthenticate: WarpDidDeauthenticate): this {
     return this.observe({didDeauthenticate});
   }
 
-  didDisconnect(didDisconnect: SwimDidDisconnect): this {
+  didDisconnect(didDisconnect: WarpDidDisconnect): this {
     return this.observe({didDisconnect});
   }
 
-  didFail(didFail: SwimDidFail): this {
+  didFail(didFail: WarpDidFail): this {
     return this.observe({didFail});
   }
 
@@ -502,3 +505,13 @@ export class SwimClient implements HostContext, RefContext, SwimRef {
     }
   }
 }
+
+/**
+ * @deprecated
+ */
+export type SwimClientOptions = WarpClientOptions;
+
+/**
+ * @deprecated
+ */
+export type SwimClient = WarpClient;

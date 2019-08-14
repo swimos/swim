@@ -1,5 +1,6 @@
 .gitignore
 .npmignore
+.tsbuildinfo
 dist/test
 doc/
 lib/test

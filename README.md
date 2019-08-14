@@ -138,9 +138,11 @@ The swimOS TypeScript implementation consists of the following frameworks and li
     links to streaming APIs, called lanes, of URI-addressed distributed objects,
     called nodes, that run stateful distributed processes, called Web Agents.
   - [**`@swim/client`**](swim-system-js/swim-mesh-js/@swim/client) –
-    WARP multiplexed streaming API client.
+    streaming API client for linking to lanes of stateful Web Agents using the
+    WARP protocol, enabling massively real-time applications that continuously
+    synchronize all shared states with ping latency.
   - [**`@swim/cli`**](swim-system-js/swim-mesh-js/@swim/cli) –
-    WARP command line client.
+    command line client for linking to Web Agent lanes over the WARP protocol.
 - [**`@swim/ui`**](swim-system-js/swim-ui-js) –
   massively real-time user interface toolkit, with a unified view hierarchy
   for HTML, SVG, and Canvas components, animated procedural styling, and

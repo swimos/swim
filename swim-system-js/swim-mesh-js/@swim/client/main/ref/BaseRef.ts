@@ -22,17 +22,17 @@ import {ListDownlinkInit, ListDownlink} from "../downlink/ListDownlink";
 import {MapDownlinkInit, MapDownlink} from "../downlink/MapDownlink";
 import {ValueDownlinkInit, ValueDownlink} from "../downlink/ValueDownlink";
 import {RefContext} from "./RefContext";
-import {SwimRef} from "../SwimRef";
+import {WarpRef} from "../WarpRef";
 import {
-  SwimDidConnect,
-  SwimDidAuthenticate,
-  SwimDidDeauthenticate,
-  SwimDidDisconnect,
-  SwimDidFail,
-  SwimObserver,
-} from "../SwimObserver";
+  WarpDidConnect,
+  WarpDidAuthenticate,
+  WarpDidDeauthenticate,
+  WarpDidDisconnect,
+  WarpDidFail,
+  WarpObserver,
+} from "../WarpObserver";
 
-export abstract class BaseRef implements DownlinkOwner, SwimRef {
+export abstract class BaseRef implements DownlinkOwner, WarpRef {
   /** @hidden */
   readonly _context: RefContext;
   /** @hidden */
@@ -42,7 +42,7 @@ export abstract class BaseRef implements DownlinkOwner, SwimRef {
   /** @hidden */
   _downlinkCount: number;
   /** @hidden */
-  _observers: ReadonlyArray<SwimObserver> | null;
+  _observers: ReadonlyArray<WarpObserver> | null;
 
   constructor(context: RefContext) {
     this._context = context;
@@ -116,10 +116,10 @@ export abstract class BaseRef implements DownlinkOwner, SwimRef {
     }
   }
 
-  observe(observer: SwimObserver): this {
+  observe(observer: WarpObserver): this {
     const oldObservers = this._observers;
     const n = oldObservers ? oldObservers.length : 0;
-    const newObservers = new Array<SwimObserver>(n + 1);
+    const newObservers = new Array<WarpObserver>(n + 1);
     for (let i = 0; i < n; i += 1) {
       newObservers[i] = oldObservers![i];
     }
@@ -144,7 +144,7 @@ export abstract class BaseRef implements DownlinkOwner, SwimRef {
       }
       if (found) {
         if (n > 1) {
-          const newObservers = new Array<SwimObserver>(n - 1);
+          const newObservers = new Array<WarpObserver>(n - 1);
           for (let j = 0; j < i; j += 1) {
             newObservers[j] = oldObservers![j];
           }
@@ -161,23 +161,23 @@ export abstract class BaseRef implements DownlinkOwner, SwimRef {
     return this;
   }
 
-  didConnect(didConnect: SwimDidConnect): this {
+  didConnect(didConnect: WarpDidConnect): this {
     return this.observe({didConnect});
   }
 
-  didAuthenticate(didAuthenticate: SwimDidAuthenticate): this {
+  didAuthenticate(didAuthenticate: WarpDidAuthenticate): this {
     return this.observe({didAuthenticate});
   }
 
-  didDeauthenticate(didDeauthenticate: SwimDidDeauthenticate): this {
+  didDeauthenticate(didDeauthenticate: WarpDidDeauthenticate): this {
     return this.observe({didDeauthenticate});
   }
 
-  didDisconnect(didDisconnect: SwimDidDisconnect): this {
+  didDisconnect(didDisconnect: WarpDidDisconnect): this {
     return this.observe({didDisconnect});
   }
 
-  didFail(didFail: SwimDidFail): this {
+  didFail(didFail: WarpDidFail): this {
     return this.observe({didFail});
   }
 

@@ -31,7 +31,7 @@
       "@swim/site": ["@swim/site/main"],
       "@swim/app": ["@swim/app/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../site/main"},

@@ -28,7 +28,7 @@
       "@swim/typeset": ["@swim/typeset/main"],
       "@swim/gesture": ["@swim/gesture/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../angle/main"},

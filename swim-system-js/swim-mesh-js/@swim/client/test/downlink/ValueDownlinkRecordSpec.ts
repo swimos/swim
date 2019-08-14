@@ -22,7 +22,7 @@ import {
   SyncRequest,
   SyncedResponse,
 } from "@swim/warp";
-import {ValueDownlinkRecord, SwimClient} from "@swim/client";
+import {ValueDownlinkRecord, WarpClient} from "@swim/client";
 import {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
@@ -33,7 +33,7 @@ export class ValueDownlinkRecordSpec extends Spec {
 
   @Test
   valueDownlinkRemoteSet(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));

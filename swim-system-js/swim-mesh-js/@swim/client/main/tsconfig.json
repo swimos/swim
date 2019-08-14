@@ -14,7 +14,7 @@
       "@swim/uri": ["../swim-core-js/@swim/uri/main"],
       "@swim/warp": ["@swim/warp/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../warp/main"}

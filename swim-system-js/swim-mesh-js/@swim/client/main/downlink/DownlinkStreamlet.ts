@@ -21,11 +21,11 @@ import {ValueDownlink} from "./ValueDownlink";
 import {DownlinkRecord} from "./DownlinkRecord";
 import {MapDownlinkRecord} from "./MapDownlinkRecord";
 import {DownlinkTransmuter} from "./DownlinkTransmuter";
-import {SwimRef} from "../SwimRef";
+import {WarpRef} from "../WarpRef";
 import {client} from "..";
 
 export class DownlinkStreamlet extends AbstractRecordStreamlet {
-  swim: SwimRef | undefined;
+  warp: WarpRef | undefined;
   downlink: Downlink | undefined;
   /** @hidden */
   downlinkRecord: DownlinkRecord | undefined;
@@ -44,9 +44,9 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
   /** @hidden */
   inputType: DownlinkType | undefined;
 
-  constructor(swim?: SwimRef, scope?: StreamletScope<Value> | null) {
+  constructor(warp?: WarpRef, scope?: StreamletScope<Value> | null) {
     super(scope);
-    this.swim = swim;
+    this.warp = warp;
   }
 
   @Inout
@@ -109,9 +109,9 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
       this.inputRate = rate;
       this.inputBody = body;
       this.inputType = type;
-      const swim = this.swim || client;
+      const warp = this.warp || client;
       if (type === "map") {
-        let downlink = swim.downlinkMap();
+        let downlink = warp.downlinkMap();
         if (hostUri !== void 0) {
           downlink = downlink.hostUri(hostUri);
         }
@@ -135,7 +135,7 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
         this.downlink = downlink;
         this.downlinkRecord = new MapDownlinkRecord(downlink);
       } else if (type === "value") {
-        let downlink = swim.downlinkValue();
+        let downlink = warp.downlinkValue();
         if (hostUri !== void 0) {
           downlink = downlink.hostUri(hostUri);
         }
@@ -163,14 +163,14 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
 
   private static _transmuter: DownlinkTransmuter | undefined;
 
-  static transmuter(swim?: SwimRef): Transmuter {
-    if (swim === void 0) {
+  static transmuter(warp?: WarpRef): Transmuter {
+    if (warp === void 0) {
       if (!DownlinkStreamlet._transmuter) {
         DownlinkStreamlet._transmuter = new DownlinkTransmuter();
       }
       return DownlinkStreamlet._transmuter;
     } else {
-      return new DownlinkTransmuter(swim);
+      return new DownlinkTransmuter(warp);
     }
   }
 }

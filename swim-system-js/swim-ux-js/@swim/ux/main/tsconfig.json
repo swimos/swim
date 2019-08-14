@@ -34,7 +34,7 @@
       "@swim/map": ["@swim/map/main"],
       "@swim/mapbox": ["@swim/mapbox/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../gauge/main"},

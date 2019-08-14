@@ -50,7 +50,7 @@
       "@swim/app": ["swim-web-js/@swim/app/main"],
       "@swim/web": ["swim-web-js/@swim/web/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../swim-core-js/@swim/util/main"},

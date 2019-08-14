@@ -19,7 +19,7 @@
       "@swim/transition": ["@swim/transition/main"],
       "@swim/style": ["@swim/style/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../angle/main"},

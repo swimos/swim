@@ -25,18 +25,18 @@ import {
   DeauthedResponse,
 } from "@swim/warp";
 import {Uri} from "@swim/uri";
-import {Host, SwimClient} from "@swim/client";
+import {Host, WarpClient} from "@swim/client";
 import {MockServer} from "./MockServer";
 import {ClientExam} from "./ClientExam";
 
-export class SwimClientSpec extends Spec {
+export class WarpClientSpec extends Spec {
   createExam(report: Report, name: string, options: TestOptions): ClientExam {
     return new ClientExam(report, this, name, options);
   }
 
   @Test
   clientDidConnect(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       client.didConnect(function (host: Host): void {
         exam.comment("didConnect");
         exam.equal(host.hostUri(), server.hostUri());
@@ -48,7 +48,7 @@ export class SwimClientSpec extends Spec {
 
   @Test
   clientDidDisconnect(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       client.didConnect(function (host: Host): void {
         exam.comment("didConnect");
         client.close();
@@ -64,7 +64,7 @@ export class SwimClientSpec extends Spec {
 
   @Test
   clientDidAuthenticate(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         exam.true(envelope instanceof AuthRequest);
         exam.equal(envelope.body(), Record.of(Slot.of("key", 1234)));
@@ -82,7 +82,7 @@ export class SwimClientSpec extends Spec {
 
   @Test
   clientDidDeauthenticate(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         exam.true(envelope instanceof AuthRequest);
         exam.equal(envelope.body(), Record.of(Slot.of("key", 1234)));
@@ -103,7 +103,7 @@ export class SwimClientSpec extends Spec {
 
   @Test
   clientDownlink(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         exam.true(envelope instanceof LinkRequest);
         exam.equal(envelope.node(), Uri.parse("house/kitchen"));
@@ -133,7 +133,7 @@ export class SwimClientSpec extends Spec {
 
   @Test
   clientCommand(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         exam.true(envelope instanceof CommandMessage);
         exam.equal(envelope.node(), Uri.parse("house/kitchen"));

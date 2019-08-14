@@ -24,7 +24,7 @@ import {
   SyncRequest,
   SyncedResponse,
 } from "@swim/warp";
-import {DownlinkStreamlet, SwimClient} from "@swim/client";
+import {DownlinkStreamlet, WarpClient} from "@swim/client";
 import {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
@@ -35,7 +35,7 @@ export class DownlinkStreamletSpec extends Spec {
 
   @Test
   bindValueDownlinkStreamlet(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -48,7 +48,7 @@ export class DownlinkStreamletSpec extends Spec {
       const laneUri = new ValueInput(Text.from("light"));
       const type = new ValueInput(Text.from("value"));
       const streamlet = new DownlinkStreamlet();
-      streamlet.swim = client;
+      streamlet.warp = client;
       streamlet.bindInput("hostUri", hostUri);
       streamlet.bindInput("nodeUri", nodeUri);
       streamlet.bindInput("laneUri", laneUri);
@@ -70,7 +70,7 @@ export class DownlinkStreamletSpec extends Spec {
 
   @Test
   bindMapDownlinkStreamlet(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -85,7 +85,7 @@ export class DownlinkStreamletSpec extends Spec {
       const laneUri = new ValueInput(Text.from("definitions"));
       const type = new ValueInput(Text.from("map"));
       const streamlet = new DownlinkStreamlet();
-      streamlet.swim = client;
+      streamlet.warp = client;
       streamlet.bindInput("hostUri", hostUri);
       streamlet.bindInput("nodeUri", nodeUri);
       streamlet.bindInput("laneUri", laneUri);
@@ -107,7 +107,7 @@ export class DownlinkStreamletSpec extends Spec {
 
   @Test
   compiledValueDownlinkStreamlet(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -116,7 +116,7 @@ export class DownlinkStreamletSpec extends Spec {
         }
       };
       const streamlet = new DownlinkStreamlet();
-      streamlet.swim = client;
+      streamlet.warp = client;
       const record = RecordScope.of(Slot.of("hostUri", server.hostUri().toString()),
                                     Slot.of("nodeUri", "house/kitchen"),
                                     Slot.of("laneUri", "light"),
@@ -139,7 +139,7 @@ export class DownlinkStreamletSpec extends Spec {
 
   @Test
   compileMapDownlinkStreamlet(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -150,7 +150,7 @@ export class DownlinkStreamletSpec extends Spec {
         }
       };
       const streamlet = new DownlinkStreamlet();
-      streamlet.swim = client;
+      streamlet.warp = client;
       const record = RecordScope.of(Slot.of("hostUri", server.hostUri().toString()),
                                     Slot.of("nodeUri", "dictionary/english"),
                                     Slot.of("laneUri", "definitions"),
@@ -173,7 +173,7 @@ export class DownlinkStreamletSpec extends Spec {
 
   @Test
   transmuteValueDownlinkStreamlet(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -205,7 +205,7 @@ export class DownlinkStreamletSpec extends Spec {
 
   @Test
   transmuteMapDownlinkStreamlet(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));

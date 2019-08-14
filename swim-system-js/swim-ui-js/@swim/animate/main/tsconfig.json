@@ -18,7 +18,7 @@
       "@swim/interpolate": ["@swim/interpolate/main"],
       "@swim/transition": ["@swim/transition/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../angle/main"},

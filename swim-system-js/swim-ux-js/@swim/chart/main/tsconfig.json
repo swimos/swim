@@ -29,6 +29,6 @@
       "@swim/typeset": ["../swim-ui-js/@swim/typeset/main"],
       "@swim/gesture": ["../swim-ui-js/@swim/gesture/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   }
 }

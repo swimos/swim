@@ -14,7 +14,7 @@
 
 import {Spec, Unit} from "@swim/unit";
 
-import {SwimClientSpec} from "./SwimClientSpec";
+import {WarpClientSpec} from "./WarpClientSpec";
 
 import {DownlinkSpec} from "./downlink";
 import {RefSpec} from "./ref";
@@ -32,8 +32,8 @@ class ClientSpec extends Spec {
   }
 
   @Unit
-  swimClientSpec(): Spec {
-    return new SwimClientSpec();
+  warpClientSpec(): Spec {
+    return new WarpClientSpec();
   }
 }
 
@@ -41,7 +41,7 @@ export * from "./downlink";
 export * from "./ref";
 
 export {
-  SwimClientSpec,
+  WarpClientSpec,
   ClientSpec,
 };
 

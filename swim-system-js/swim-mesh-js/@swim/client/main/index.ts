@@ -18,16 +18,16 @@ export * from "./downlink";
 
 export * from "./ref";
 
-export {SwimRef} from "./SwimRef";
-export {SwimObserver} from "./SwimObserver";
+export {WarpRef, SwimRef} from "./WarpRef";
+export {WarpObserver, SwimObserver} from "./WarpObserver";
 
 export {
-  SwimClientOptions,
-  SwimClient,
-} from "./SwimClient";
+  WarpClientOptions, SwimClientOptions,
+  WarpClient, SwimClient,
+} from "./WarpClient";
 
-import {SwimClient} from "./SwimClient";
-export const client = new SwimClient();
+import {WarpClient} from "./WarpClient";
+export const client = new WarpClient();
 export const isOnline = client.isOnline.bind(client);
 export const keepOnline = client.keepOnline.bind(client);
 export const downlink = client.downlink.bind(client);

@@ -3,6 +3,6 @@
   "compilerOptions": {
     "baseUrl": "../../..",
     "outDir": "../lib/main",
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   }
 }

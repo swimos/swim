@@ -8,6 +8,6 @@
       "@swim/codec": ["../swim-core-js/@swim/codec/main"],
       "@swim/structure": ["../swim-core-js/@swim/structure/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   }
 }

@@ -29,6 +29,6 @@
       "@swim/shape": ["../swim-ui-js/@swim/shape/main"],
       "@swim/typeset": ["../swim-ui-js/@swim/typeset/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   }
 }

@@ -21,7 +21,7 @@ import {
   LinkedResponse,
 } from "@swim/warp";
 import {Uri} from "@swim/uri";
-import {Downlink, SwimClient} from "@swim/client";
+import {Downlink, WarpClient} from "@swim/client";
 import {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
@@ -32,7 +32,7 @@ export class EventDownlinkSpec extends Spec {
 
   @Test
   eventDownlinkReconnect(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof LinkRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -60,7 +60,7 @@ export class EventDownlinkSpec extends Spec {
 
   @Test
   eventDownlinkOffline(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof LinkRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -93,7 +93,7 @@ export class EventDownlinkSpec extends Spec {
 
   @Test
   eventDownlinkCommand(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
           exam.equal(envelope.node(), Uri.parse("house/kitchen"));

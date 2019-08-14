@@ -24,7 +24,7 @@ import {
   SyncedResponse,
 } from "@swim/warp";
 import {Uri} from "@swim/uri";
-import {ListDownlink, SwimClient} from "@swim/client";
+import {ListDownlink, WarpClient} from "@swim/client";
 import {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
@@ -35,7 +35,7 @@ export class ListDownlinkSpec extends Spec {
 
   @Test
   listDownlinkInsert(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
           exam.equal(envelope.node(), Uri.parse("todo"));
@@ -64,7 +64,7 @@ export class ListDownlinkSpec extends Spec {
 
   @Test
   listDownlinkRemoteInsert(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -104,7 +104,7 @@ export class ListDownlinkSpec extends Spec {
 
   @Test
   listDownlinkUpdate(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
           exam.equal(envelope.node(), Uri.parse("todo"));
@@ -135,7 +135,7 @@ export class ListDownlinkSpec extends Spec {
 
   @Test
   listDownlinkRemoteUpdate(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -177,7 +177,7 @@ export class ListDownlinkSpec extends Spec {
 
   @Test
   listDownlinkRemove(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
           exam.equal(envelope.node(), Uri.parse("todo"));
@@ -207,7 +207,7 @@ export class ListDownlinkSpec extends Spec {
 
   @Test
   listDownlinkRemoteRemove(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -246,7 +246,7 @@ export class ListDownlinkSpec extends Spec {
 
   @Test
   listDownlinkMove(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
           exam.equal(envelope.node(), Uri.parse("todo"));
@@ -281,7 +281,7 @@ export class ListDownlinkSpec extends Spec {
 
   @Test
   listDownlinkRemoteMove(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
@@ -332,7 +332,7 @@ export class ListDownlinkSpec extends Spec {
 
   @Test
   listDownlinkClear(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
           exam.equal(envelope.node(), Uri.parse("todo"));
@@ -360,7 +360,7 @@ export class ListDownlinkSpec extends Spec {
 
   @Test
   listDownlinkRemoteClear(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));

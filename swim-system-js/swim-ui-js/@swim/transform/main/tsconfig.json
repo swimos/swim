@@ -11,7 +11,7 @@
       "@swim/angle": ["@swim/angle/main"],
       "@swim/length": ["@swim/length/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../angle/main"},

@@ -17,8 +17,16 @@ import {EventDownlinkInit, EventDownlink} from "./downlink/EventDownlink";
 import {ListDownlinkInit, ListDownlink} from "./downlink/ListDownlink";
 import {MapDownlinkInit, MapDownlink} from "./downlink/MapDownlink";
 import {ValueDownlinkInit, ValueDownlink} from "./downlink/ValueDownlink";
+import {
+  WarpDidConnect,
+  WarpDidAuthenticate,
+  WarpDidDeauthenticate,
+  WarpDidDisconnect,
+  WarpDidFail,
+  WarpObserver,
+} from "./WarpObserver";
 
-export interface SwimRef {
+export interface WarpRef {
   downlink(init?: EventDownlinkInit): EventDownlink;
 
   downlinkList(init?: ListDownlinkInit<Value, AnyValue>): ListDownlink<Value, AnyValue>;
@@ -29,4 +37,18 @@ export interface SwimRef {
 
   downlinkValue(init?: ValueDownlinkInit<Value, AnyValue>): ValueDownlink<Value, AnyValue>;
   downlinkValue<V extends VU, VU = V>(init?: ValueDownlinkInit<V, VU>): ValueDownlink<V, VU>;
+
+  observe(observer: WarpObserver): this;
+  unobserve(observer: unknown): this;
+
+  didConnect(didConnect: WarpDidConnect): this;
+  didAuthenticate(didAuthenticate: WarpDidAuthenticate): this;
+  didDeauthenticate(didDeauthenticate: WarpDidDeauthenticate): this;
+  didDisconnect(didDisconnect: WarpDidDisconnect): this;
+  didFail(didFail: WarpDidFail): this;
 }
+
+/**
+ * @deprecated
+ */
+export type SwimRef = WarpRef;

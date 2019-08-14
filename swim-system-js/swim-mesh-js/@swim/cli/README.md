@@ -6,7 +6,7 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-WARP command line client.<br><br><br><br>
+Command line client for linking to Web Agent lanes over the WARP protocol.<br><br><br><br>
 
 ## Installation
 

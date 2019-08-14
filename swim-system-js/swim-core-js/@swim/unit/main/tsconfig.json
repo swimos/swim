@@ -8,7 +8,7 @@
       "@swim/util": ["@swim/util/main"],
       "@swim/codec": ["@swim/codec/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../util/main"},

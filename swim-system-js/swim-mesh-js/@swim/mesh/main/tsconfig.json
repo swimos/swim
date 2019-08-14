@@ -17,7 +17,7 @@
       "@swim/warp": ["@swim/warp/main"],
       "@swim/client": ["@swim/client/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../warp/main"},

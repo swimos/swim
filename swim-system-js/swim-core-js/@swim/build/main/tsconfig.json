@@ -10,7 +10,7 @@
       "@swim/args": ["@swim/args/main"]
     },
     "target": "ES6",
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../util/main"},

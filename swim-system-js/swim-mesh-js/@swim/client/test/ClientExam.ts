@@ -14,7 +14,7 @@
 
 import {TestOptions, Spec, Report, ExamStatus, Exam} from "@swim/unit";
 import {AnyUri} from "@swim/uri";
-import {SwimClient} from "@swim/client";
+import {WarpClient} from "@swim/client";
 import {MockServer} from "./MockServer";
 
 export class ClientExam extends Exam {
@@ -23,10 +23,10 @@ export class ClientExam extends Exam {
     super(report, spec, name, options, status);
   }
 
-  mockServer<T>(callback: (server: MockServer, client: SwimClient,
+  mockServer<T>(callback: (server: MockServer, client: WarpClient,
                            resolve: (result?: T) => void,
                            reject: (reason?: unknown) => void) => void,
-                hostUri?: AnyUri, client?: SwimClient): Promise<T> {
+                hostUri?: AnyUri, client?: WarpClient): Promise<T> {
     const server = new MockServer(hostUri, client);
     return server.run(callback);
   }

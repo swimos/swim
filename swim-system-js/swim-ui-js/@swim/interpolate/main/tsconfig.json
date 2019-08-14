@@ -14,7 +14,7 @@
       "@swim/color": ["@swim/color/main"],
       "@swim/transform": ["@swim/transform/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../angle/main"},

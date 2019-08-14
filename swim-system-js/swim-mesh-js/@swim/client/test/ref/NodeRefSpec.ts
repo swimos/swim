@@ -25,7 +25,7 @@ import {
   DeauthedResponse,
 } from "@swim/warp";
 import {Uri} from "@swim/uri";
-import {Host, SwimClient} from "@swim/client";
+import {Host, WarpClient} from "@swim/client";
 import {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
@@ -36,7 +36,7 @@ export class NodeRefSpec extends Spec {
 
   @Test
   clientNodeRef(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       const node1 = client.nodeRef(server.hostUri(), "house/kitchen");
       exam.equal(node1.hostUri(), server.hostUri());
       exam.equal(node1.nodeUri(), Uri.parse("house/kitchen"));
@@ -49,7 +49,7 @@ export class NodeRefSpec extends Spec {
 
   @Test
   hostRefNodeRef(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       const hostRef = client.hostRef(server.hostUri());
       const nodeRef = hostRef.nodeRef("house/kitchen");
       exam.equal(nodeRef.hostUri(), server.hostUri());
@@ -60,7 +60,7 @@ export class NodeRefSpec extends Spec {
 
   @Test
   nodeRefDidConnect(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       const nodeRef = client.nodeRef(server.hostUri(), "/")
         .didConnect(function (host: Host): void {
           exam.comment("didConnect");
@@ -74,7 +74,7 @@ export class NodeRefSpec extends Spec {
 
   @Test
   nodeRefDidDisconnect(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       const nodeRef = client.nodeRef(server.hostUri(), "/")
         .didConnect(function (host: Host): void {
           exam.comment("didConnect");
@@ -92,7 +92,7 @@ export class NodeRefSpec extends Spec {
 
   @Test
   nodeRefDidAuthenticate(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof AuthRequest) {
           exam.equal(envelope.body(), Record.of(Slot.of("key", 1234)));
@@ -113,7 +113,7 @@ export class NodeRefSpec extends Spec {
 
   @Test
   nodeRefDidDeauthenticate(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof AuthRequest) {
           exam.equal(envelope.body(), Record.of(Slot.of("key", 1234)));
@@ -137,7 +137,7 @@ export class NodeRefSpec extends Spec {
 
   @Test
   nodeRefDownlink(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         exam.true(envelope instanceof LinkRequest);
         exam.equal(envelope.node(), Uri.parse("house/kitchen"));
@@ -163,7 +163,7 @@ export class NodeRefSpec extends Spec {
 
   @Test
   nodeRefCommand(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         exam.true(envelope instanceof CommandMessage);
         exam.equal(envelope.node(), Uri.parse("house/kitchen"));
@@ -178,7 +178,7 @@ export class NodeRefSpec extends Spec {
 
   @Test
   nodeRefClose(exam: ClientExam): Promise<void> {
-    return exam.mockServer((server: MockServer, client: SwimClient, resolve: () => void): void => {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof LinkRequest) {
           server.send(LinkedResponse.of(envelope.node(), envelope.lane()));

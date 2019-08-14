@@ -10,7 +10,7 @@
       "@swim/structure": ["@swim/structure/main"],
       "@swim/streamlet": ["@swim/streamlet/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../util/main"},

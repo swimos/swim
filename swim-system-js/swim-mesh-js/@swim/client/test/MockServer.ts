@@ -14,18 +14,18 @@
 
 import {AnyUri, Uri} from "@swim/uri";
 import {Envelope} from "@swim/warp";
-import {SwimClient} from "@swim/client";
+import {WarpClient} from "@swim/client";
 import * as http from "http";
 import * as ws from "ws";
 
 export class MockServer {
   readonly _hostUri: Uri;
-  client: SwimClient;
+  client: WarpClient;
   httpServer: http.Server | undefined;
   wsServer: ws.Server | undefined;
   socket: ws | undefined;
 
-  constructor(hostUri: AnyUri = "ws://localhost:5619", client: SwimClient = new SwimClient()) {
+  constructor(hostUri: AnyUri = "ws://localhost:5619", client: WarpClient = new WarpClient()) {
     hostUri = Uri.fromAny(hostUri);
     this._hostUri = hostUri;
     this.client = client;
@@ -59,7 +59,7 @@ export class MockServer {
     }
   }
 
-  run<T>(callback: (server: MockServer, client: SwimClient,
+  run<T>(callback: (server: MockServer, client: WarpClient,
                     resolve: (result?: T) => void,
                     reject: (reason?: unknown) => void) => void): Promise<T> {
     return new Promise((resolve: (result?: T) => void, reject: (reason?: unknown) => void): void => {

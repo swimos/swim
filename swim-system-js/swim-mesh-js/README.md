@@ -24,9 +24,11 @@ The Swim mesh framework consists of the following component libraries:
   links to streaming APIs, called lanes, of URI-addressed distributed objects,
   called nodes, that run stateful distributed processes, called Web Agents.
 - [**`@swim/client`**](@swim/client) –
-  WARP multiplexed streaming API client.
+  streaming API client for linking to lanes of stateful Web Agents using the
+  WARP protocol, enabling massively real-time applications that continuously
+  synchronize all shared states with ping latency.
 - [**`@swim/cli`**](@swim/cli) –
-  WARP command line client.
+  command line client for linking to Web Agent lanes over the WARP protocol.
 
 Swim Mesh builds on the [Swim Core](https://www.npmjs.com/package/@swim/core)
 framework; it has no additional dependencies when run in a web browser, and

@@ -14,7 +14,7 @@ interface toolkits, and the [`@swim/web`](https://www.npmjs.com/package/@swim/we
 real-time web application framework.  Swim System enables massively real-time
 streaming applications that work with any WARP fabric.
 
-## Child Frameworks
+## Child frameworks
 
 The Swim system umbrella framework consists of the following child frameworks:
 

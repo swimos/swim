@@ -15,20 +15,20 @@
 import {Record} from "@swim/structure";
 import {RecordModel, Transmuter} from "@swim/dataflow";
 import {DownlinkStreamlet} from "./DownlinkStreamlet";
-import {SwimRef} from "../SwimRef";
+import {WarpRef} from "../WarpRef";
 
 /** @hidden */
 export class DownlinkTransmuter extends Transmuter {
-  swim: SwimRef | undefined;
+  warp: WarpRef | undefined;
 
-  constructor(swim?: SwimRef) {
+  constructor(warp?: WarpRef) {
     super();
-    this.swim = swim;
+    this.warp = warp;
   }
 
   transmute(model: RecordModel): Record {
     if (model.tag() === "link") {
-      const streamlet = new DownlinkStreamlet(this.swim, model);
+      const streamlet = new DownlinkStreamlet(this.warp, model);
       streamlet.compile();
       return streamlet;
     }
