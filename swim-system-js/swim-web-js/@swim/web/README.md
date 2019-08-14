@@ -47,8 +47,8 @@ bundles all `@swim/web` component libraries, can be found in
 
 ### Browser
 
-Web applications can load `swim-web.js`, along with its `swim-core.js` and
-`swim-ui.js` dependencies, from the Swim CDN.
+Browser applications can load `swim-web.js`, along with its `swim-core.js`
+and `swim-ui.js` dependencies, from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>

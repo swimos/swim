@@ -10,7 +10,7 @@
 providing interfaces and implementations for: ordering, equality, and hashing;
 type conversions; iterators; builders; maps; caches; and assertions.
 `@swim/util` is written in TypeScript, but can be used from either TypeScript
-or JavaScript. `@swim/util` is included as part of the
+or JavaScript.  `@swim/util` is part of the
 [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
 
 ## Overview
@@ -151,7 +151,7 @@ be found in `node_modules/@swim/util/dist/main/swim-util.js`.
 
 ### Browser
 
-Web applications can load `swim-core.js`, which comes bundled with the
+Browser applications can load `swim-core.js`, which comes bundled with the
 `@swim/util` library, directly from the Swim CDN.
 
 ```html
@@ -179,7 +179,7 @@ import * as util from "@swim/util";
 
 ### CommonJS/Node.js
 
-`@swim/util` can also be used as a CommonJS in Node.js applications.
+`@swim/util` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var util = require("@swim/util");
@@ -187,5 +187,9 @@ var util = require("@swim/util");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds the `@swim/util`
-library exports to the global `swim` namespace.
+When loaded by a web browser, the `swim-core.js` script adds all
+`@swim/util` library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/util` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+`swim-core.js` when additional `@swim/system` libraries are needed.

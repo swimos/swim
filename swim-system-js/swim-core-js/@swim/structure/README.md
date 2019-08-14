@@ -7,12 +7,11 @@
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
 `@swim/structure` implements a generic structured data model that is compatible
-with JSON, XML, and many other data languages. `@swim/structure` has first
+with JSON, XML, and many other data languages.  `@swim/structure` has first
 class support for XPath/JSONPath-style selectors, as well as operator syntax
 trees, and lambda functions. `@swim/structure` is written in TypeScript, but
-can be used from either TypeScript or JavaScript. `@swim/structure` is included
-as part of the [`@swim/core`](https://www.npmjs.com/package/@swim/core)
-framework.
+can be used from either TypeScript or JavaScript.  `@swim/structure` is part
+of the [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
 
 ## Overview
 
@@ -270,7 +269,7 @@ And a pre-built UMD script can be found in
 
 ### Browser
 
-Web applications can load `swim-core.js`, which comes bundled with the
+Browser applications can load `swim-core.js`, which comes bundled with the
 `@swim/structure` library, directly from the Swim CDN.
 
 ```html
@@ -298,7 +297,7 @@ import * as structure from "@swim/structure";
 
 ### CommonJS/Node.js
 
-`@swim/structure` can also be used as a CommonJS in Node.js applications.
+`@swim/structure` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var structure = require("@swim/structure");
@@ -306,5 +305,9 @@ var structure = require("@swim/structure");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds the
+When loaded by a web browser, the `swim-core.js` script adds all
 `@swim/structure` library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/structure` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+`swim-core.js` when additional `@swim/system` libraries are needed.

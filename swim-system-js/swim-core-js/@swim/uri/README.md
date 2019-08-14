@@ -10,8 +10,7 @@
 Identifiers and URI subcomponents, including an efficient and safe codec for
 parsing and writing compliant URI strings.  Rich APIs for paths and queries
 simplify deconstruction and manipulation of parsed URI objects.  `@swim/uri` is
-included as part of the [`@swim/core`](https://www.npmjs.com/package/@swim/core)
-framework.
+part of the [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
 
 ## Overview
 
@@ -917,7 +916,7 @@ be found in `node_modules/@swim/uri/dist/main/swim-uri.js`.
 
 ### Browser
 
-Web applications can load `swim-core.js`, which comes bundled with the
+Browser applications can load `swim-core.js`, which comes bundled with the
 `@swim/uri` library, directly from the Swim CDN.
 
 ```html
@@ -945,7 +944,7 @@ import * as uri from "@swim/uri";
 
 ### CommonJS/Node.js
 
-`@swim/uri` can also be used as a CommonJS in Node.js applications.
+`@swim/uri` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var uri = require("@swim/uri");
@@ -953,5 +952,9 @@ var uri = require("@swim/uri");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds the
+When loaded by a web browser, the `swim-core.js` script adds all
 `@swim/time` library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/uri` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+`swim-core.js` when additional `@swim/system` libraries are needed.

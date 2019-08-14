@@ -35,7 +35,7 @@ import * as build from "@swim/build";
 
 ### CommonJS/Node.js
 
-`@swim/build` can also be used as a CommonJS in Node.js applications.
+`@swim/build` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var build = require("@swim/build");

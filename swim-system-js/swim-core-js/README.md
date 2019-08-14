@@ -21,8 +21,8 @@ The Swim core framework consists of the following component libraries:
 - [**`@swim/core`**](@swim/core) –
   umbrella package that depends on, and re-exports, all Swim Core libraries.
 - [**`@swim/util`**](@swim/util) –
-  ordering, equality, and hashing; type conversions; iterators; builders; maps;
-  caches; and assertions.
+  ordering, equality, and hashing; type conversions; iterators; builders;
+  maps; caches; and assertions.
 - [**`@swim/codec`**](@swim/codec) –
   incremental I/O; functional parsers and writers; display, debug, and
   diagnostic formatters; and Unicode and binary codecs.
@@ -31,23 +31,29 @@ The Swim core framework consists of the following component libraries:
 - [**`@swim/unit`**](@swim/unit) –
   specializable unit testing framework.
 - [**`@swim/collections`**](@swim/collections) –
-  B-trees and S-trees (sequence trees).
+  immutable, structure sharing collections, including B-trees and S-trees
+  (sequence trees).
 - [**`@swim/structure`**](@swim/structure) –
   generic structured data model, with support for selectors, expressions,
   and lambda functions.  Used as a common abstract syntax tree for Recon,
   JSON, XML, and other data languages.
 - [**`@swim/streamlet`**](@swim/streamlet) –
-  stateful, streaming component model.
+  stateful, streaming component model for application componets that
+  continuously consume input state from streaming inlets, and continuously
+  produce output state on streaming outlets.
 - [**`@swim/dataflow`**](@swim/dataflow) –
   compiler from `@swim/structure` expressions to live-updated data models.
 - [**`@swim/recon`**](@swim/recon) –
-  codec for parsing/writing Recon strings to/from `@swim/structure` data models.
+  bject notation with attributes, like if JSON and XML had a baby.
 - [**`@swim/math`**](@swim/math) –
   mathematical and geometric structures and operators.
 - [**`@swim/time`**](@swim/time) –
-  date-time, time zone, and time inteval data types, parsers, and formatters.
+  date-time, time zone, and time interval data types,
+  with `strptime`/`strftime`-style parsers and formatters.
 - [**`@swim/uri`**](@swim/uri) –
-  codec for parsing/writing URI strings to/from structured URI data types.
+  rich object model for working with Uniform Resource Identifiers and URI
+  subcomponents, including an efficient and safe codec for parsing and
+  writing compliant URI strings.
 
 Swim Core has no external dependencies.
 
@@ -64,7 +70,7 @@ bundles all `@swim/core` component libraries, can be found in
 
 ### Browser
 
-Web applications can load `swim-core.js` directly from the Swim CDN.
+Browser applications can load `swim-core.js` directly from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
@@ -92,9 +98,8 @@ import * as swim from "@swim/core";
 
 ### CommonJS/Node.js
 
-`@swim/core` can also be used as a CommonJS in Node.js applications.
-All component libraries are re-exported, in their entirety, from the
-top-level `@swim/core` namespace.
+`@swim/core` can also be used as a CommonJS module in Node.js applications.
+All component libraries are re-exported by the umbrella `@swim/core` module.
 
 ```javascript
 var swim = require("@swim/core");

@@ -10,7 +10,7 @@ Recon is object notation with attributes, like if JSON and XML had a baby.
 Attributes facilitate uniformly disambiguating polymorphic structures.  And
 first-class language extensions for selectors, expressions, and functions make
 Recon a highly expressive format for domain specific languages.  `@swim/recon`
-is included as part of the [`@swim/core`](https://www.npmjs.com/package/@swim/core)
+is part of the [`@swim/core`](https://www.npmjs.com/package/@swim/core)
 framework.
 
 ## Language Overview
@@ -517,7 +517,7 @@ be found in `node_modules/@swim/recon/dist/main/swim-recon.js`.
 
 ### Browser
 
-Web applications can load `swim-core.js`, which comes bundled with the
+Browser applications can load `swim-core.js`, which comes bundled with the
 `@swim/recon` library, directly from the Swim CDN.
 
 ```html
@@ -545,7 +545,7 @@ import * as recon from "@swim/recon";
 
 ### CommonJS/Node.js
 
-`@swim/recon` can also be used as a CommonJS in Node.js applications.
+`@swim/recon` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var recon = require("@swim/recon");
@@ -553,5 +553,9 @@ var recon = require("@swim/recon");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds the `@swim/recon`
-library exports to the global `swim` namespace.
+When loaded by a web browser, the `swim-core.js` script adds all
+`@swim/recon` library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/recon` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+`swim-core.js` when additional `@swim/system` libraries are needed.

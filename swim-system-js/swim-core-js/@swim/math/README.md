@@ -9,7 +9,7 @@
 `@swim/math` implements common mathematical and geometric structures and
 operators.  `@swim/math` implements vectors, points, lines, and shapes, with
 standard algebraic and computational geometry operators, including containment
-and intersection testing.  `@swim/math` is included as part of the
+and intersection testing.  `@swim/math` is part of the
 [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
 
 ## Overview
@@ -76,7 +76,7 @@ be found in `node_modules/@swim/math/dist/main/swim-math.js`.
 
 ### Browser
 
-Web applications can load `swim-core.js`, which comes bundled with the
+Browser applications can load `swim-core.js`, which comes bundled with the
 `@swim/math` library, directly from the Swim CDN.
 
 ```html
@@ -104,7 +104,7 @@ import * as math from "@swim/math";
 
 ### CommonJS/Node.js
 
-`@swim/math` can also be used as a CommonJS in Node.js applications.
+`@swim/math` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var math = require("@swim/math");
@@ -112,5 +112,9 @@ var math = require("@swim/math");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds the
+When loaded by a web browser, the `swim-core.js` script adds all
 `@swim/math` library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/math` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+`swim-core.js` when additional `@swim/system` libraries are needed.

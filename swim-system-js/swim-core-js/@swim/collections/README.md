@@ -8,9 +8,9 @@
 
 `@swim/collections` implements data structures for key-value maps and
 sequential lists, including B-tree and S-tree (implicitly indexed B-tree)
-implementations. `@swim/collections` is written in TypeScript, but can be used
-from either TypeScript or JavaScript. `@swim/collections` is included as part
-of the [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
+implementations.  `@swim/collections` is written in TypeScript, but can be
+used from either TypeScript or JavaScript.  `@swim/collections` is part of
+the [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
 
 ## Overview
 
@@ -47,7 +47,7 @@ And a pre-built UMD script can be found in
 
 ### Browser
 
-Web applications can load `swim-core.js`, which comes bundled with the
+Browser applications can load `swim-core.js`, which comes bundled with the
 `@swim/collections` library, directly from the Swim CDN.
 
 ```html
@@ -75,7 +75,8 @@ import * as collections from "@swim/collections";
 
 ### CommonJS/Node.js
 
-`@swim/collections` can also be used as a CommonJS in Node.js applications.
+`@swim/collections` can also be used as a CommonJS module in Node.js
+applications.
 
 ```javascript
 var collections = require("@swim/collections");
@@ -83,5 +84,9 @@ var collections = require("@swim/collections");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds the
+When loaded by a web browser, the `swim-core.js` script adds all
 `@swim/collections` library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/collections` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+`swim-core.js` when additional `@swim/system` libraries are needed.

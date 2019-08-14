@@ -82,7 +82,7 @@ bundles all `@swim/ui` component libraries, can be found in
 
 ### Browser
 
-Web applications can load `swim-ui.js`, along with its `swim-core.js`
+Browser applications can load `swim-ui.js`, along with its `swim-core.js`
 dependency, from the Swim CDN.
 
 ```html

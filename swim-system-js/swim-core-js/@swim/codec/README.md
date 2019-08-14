@@ -9,7 +9,7 @@
 `@swim/codec` is an incremental I/O library, providing: functional parsers and
 writers; display, debug, and diagnostic formatters; and Unicode and binary
 codecs.  `@swim/codec` is written in TypeScript, but can be used from either
-TypeScript or JavaScript. `@swim/codec` is included as part of the
+TypeScript or JavaScript.  `@swim/codec` is part of the
 [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
 
 ## Overview
@@ -88,7 +88,7 @@ be found in `node_modules/@swim/codec/dist/main/swim-codec.js`.
 
 ### Browser
 
-Web applications can load `swim-core.js`, which comes bundled with the
+Browser applications can load `swim-core.js`, which comes bundled with the
 `@swim/codec` library, directly from the Swim CDN.
 
 ```html
@@ -116,7 +116,7 @@ import * as codec from "@swim/codec";
 
 ### CommonJS/Node.js
 
-`@swim/codec` can also be used as a CommonJS in Node.js applications.
+`@swim/codec` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var codec = require("@swim/codec");
@@ -124,5 +124,9 @@ var codec = require("@swim/codec");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds the `@swim/codec`
-library exports to the global `swim` namespace.
+When loaded by a web browser, the `swim-core.js` script adds all
+`@swim/codec` library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/codec` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+`swim-core.js` when additional `@swim/system` libraries are needed.

@@ -47,7 +47,7 @@ bundles all `@swim/mesh` component libraries, can be found in
 
 ### Browser
 
-Web applications can load `swim-mesh.js`, along with its `swim-core.js`
+Browser applications can load `swim-mesh.js`, along with its `swim-core.js`
 dependency, from the Swim CDN.
 
 ```html
@@ -77,9 +77,8 @@ import * as swim from "@swim/mesh";
 
 ### CommonJS/Node.js
 
-`@swim/mesh` can also be used as a CommonJS in Node.js applications.
-All component libraries are re-exported, in their entirety, from the
-top-level `@swim/mesh` namespace.
+`@swim/mesh` can also be used as a CommonJS module in Node.js applications.
+All component libraries are re-exported by the umbrella `@swim/mesh` module.
 
 ```javascript
 var swim = require("@swim/mesh");

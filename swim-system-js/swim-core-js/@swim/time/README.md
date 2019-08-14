@@ -9,8 +9,8 @@
 `@swim/time` provides date-time, time zone, and time interval data types, with
 `strptime`/`strftime`-style parsers and formatters.  `@swim/time` facilitates
 parsing and formatting of date strings, time zone aware date manipulation, and
-sampling of date ranges at regular time intervals. `@swim/time` is included as
-part of the [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
+sampling of date ranges at regular time intervals.  `@swim/time` is part of the
+[`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
 
 ## Overview
 
@@ -205,7 +205,7 @@ be found in `node_modules/@swim/time/dist/main/swim-time.js`.
 
 ### Browser
 
-Web applications can load `swim-core.js`, which comes bundled with the
+Browser applications can load `swim-core.js`, which comes bundled with the
 `@swim/time` library, directly from the Swim CDN.
 
 ```html
@@ -233,7 +233,7 @@ import * as time from "@swim/time";
 
 ### CommonJS/Node.js
 
-`@swim/time` can also be used as a CommonJS in Node.js applications.
+`@swim/time` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var time = require("@swim/time");
@@ -241,5 +241,9 @@ var time = require("@swim/time");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds the
+When loaded by a web browser, the `swim-core.js` script adds all
 `@swim/time` library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/time` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+`swim-core.js` when additional `@swim/system` libraries are needed.

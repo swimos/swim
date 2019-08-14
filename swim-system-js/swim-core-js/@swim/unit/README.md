@@ -35,7 +35,7 @@ import * as unit from "@swim/unit";
 
 ### CommonJS/Node.js
 
-`@swim/unit` can also be used as a CommonJS in Node.js applications.
+`@swim/unit` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var unit = require("@swim/unit");

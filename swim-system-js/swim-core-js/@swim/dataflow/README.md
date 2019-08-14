@@ -12,7 +12,7 @@ operators, and functions, to continuously updated data structures driven by
 [`@swim/streamlet`](https://www.npmjs.com/package/@swim/streamlet) dataflow
 graphs.  `@swim/dataflow` turns dynamic data structures into living documents.
 `@swim/dataflow` is written in TypeScript, but can be used from either
-TypeScript or JavaScript. `@swim/dataflow` is included as part of the
+TypeScript or JavaScript.  `@swim/dataflow` is part of the
 [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
 
 ## Overview
@@ -43,7 +43,7 @@ And a pre-built UMD script can be found in
 
 ### Browser
 
-Web applications can load `swim-core.js`, which comes bundled with the
+Browser applications can load `swim-core.js`, which comes bundled with the
 `@swim/dataflow` library, directly from the Swim CDN.
 
 ```html
@@ -71,7 +71,7 @@ import * as dataflow from "@swim/dataflow";
 
 ### CommonJS/Node.js
 
-`@swim/dataflow` can also be used as a CommonJS in Node.js applications.
+`@swim/dataflow` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var dataflow = require("@swim/dataflow");
@@ -79,5 +79,9 @@ var dataflow = require("@swim/dataflow");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds the
+When loaded by a web browser, the `swim-core.js` script adds all
 `@swim/dataflow` library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/dataflow` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+`swim-core.js` when additional `@swim/system` libraries are needed.

@@ -108,28 +108,35 @@ The swimOS TypeScript implementation consists of the following frameworks and li
   - [**`@swim/unit`**](swim-system-js/swim-core-js/@swim/unit) –
     specializable unit testing framework.
   - [**`@swim/collections`**](swim-system-js/swim-core-js/@swim/collections) –
-    B-trees and S-trees (sequence trees).
+    immutable, structure sharing collections, including B-trees and S-trees
+    (sequence trees).
   - [**`@swim/structure`**](swim-system-js/swim-core-js/@swim/structure) –
     generic structured data model, with support for selectors, expressions,
     and lambda functions.  Used as a common abstract syntax tree for Recon,
     JSON, XML, and other data languages.
   - [**`@swim/streamlet`**](swim-system-js/swim-core-js/@swim/streamlet) –
-    stateful, streaming component model.
+    stateful, streaming component model for application componets that
+    continuously consume input state from streaming inlets, and continuously
+    produce output state on streaming outlets.
   - [**`@swim/dataflow`**](swim-system-js/swim-core-js/@swim/dataflow) –
     compiler from `@swim/structure` expressions to live-updated data models.
   - [**`@swim/recon`**](swim-system-js/swim-core-js/@swim/recon) –
-    codec for parsing/writing Recon strings to/from `@swim/structure` data models.
+    object notation with attributes, like if JSON and XML had a baby.
   - [**`@swim/math`**](swim-system-js/swim-core-js/@swim/math) –
     mathematical and geometric structures and operators.
   - [**`@swim/time`**](swim-system-js/swim-core-js/@swim/time) –
-    date-time, time zone, and time inteval data types, parsers, and formatters.
+    date-time, time zone, and time interval data types,
+    with `strptime`/`strftime`-style parsers and formatters.
   - [**`@swim/uri`**](swim-system-js/swim-core-js/@swim/uri) –
-    codec for parsing/writing URI strings to/from structured URI data types.
+    rich object model for working with Uniform Resource Identifiers and URI
+    subcomponents, including an efficient and safe codec for parsing and
+    writing compliant URI strings.
 - [**`@swim/mesh`**](swim-system-js/swim-mesh-js) –
-  multiplexed streaming WARP framework that runs in both Node.js and web
-  browsers.
+  multiplexed streaming WARP framework that runs in Node.js and web browsers.
   - [**`@swim/warp`**](swim-system-js/swim-mesh-js/@swim/warp) –
-    implementation of the WARP multiplexed streaming wire protocol.
+    WebSocket protocol for dynamically multiplexing large numbers of bidirectional
+    links to streaming APIs, called lanes, of URI-addressed distributed objects,
+    called nodes, that run stateful distributed processes, called Web Agents.
   - [**`@swim/client`**](swim-system-js/swim-mesh-js/@swim/client) –
     WARP multiplexed streaming API client.
   - [**`@swim/cli`**](swim-system-js/swim-mesh-js/@swim/cli) –

@@ -10,7 +10,7 @@
 are stateful application componets that continuously consume input state from
 streaming inlets, and continuously produce output state on streaming outlets.
 `@swim/streamlet` is written in TypeScript, but can be used from either
-TypeScript or JavaScript. `@swim/streamlet` is included as part of the
+TypeScript or JavaScript.  `@swim/streamlet` is part of the
 [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
 
 ## Overview
@@ -69,7 +69,7 @@ And a pre-built UMD script can be found in
 
 ### Browser
 
-Web applications can load `swim-core.js`, which comes bundled with the
+Browser applications can load `swim-core.js`, which comes bundled with the
 `@swim/streamlet` library, directly from the Swim CDN.
 
 ```html
@@ -97,7 +97,7 @@ import * as streamlet from "@swim/streamlet";
 
 ### CommonJS/Node.js
 
-`@swim/streamlet` can also be used as a CommonJS in Node.js applications.
+`@swim/streamlet` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var streamlet = require("@swim/streamlet");
@@ -105,5 +105,9 @@ var streamlet = require("@swim/streamlet");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds the
+When loaded by a web browser, the `swim-core.js` script adds all
 `@swim/streamlet` library exports to the global `swim` namespace.
+
+The `swim-system.js` script also adds all `@swim/streamlet` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+`swim-core.js` when additional `@swim/system` libraries are needed.

@@ -1,7 +1,7 @@
 {
   "name": "@swim/streamlet",
   "version": "3.10.0",
-  "description": "Stateful streaming component model",
+  "description": "Stateful, streaming component model for application componets that continuously consume input state from streaming inlets, and continuously produce output state on streaming outlets",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
   "copyright": "2015-2019 SWIM.AI inc.",

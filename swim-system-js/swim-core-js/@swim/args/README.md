@@ -35,7 +35,7 @@ import * as args from "@swim/args";
 
 ### CommonJS/Node.js
 
-`@swim/args` can also be used as a CommonJS in Node.js applications.
+`@swim/args` can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var args = require("@swim/args");

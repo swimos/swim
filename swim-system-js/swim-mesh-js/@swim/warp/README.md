@@ -1,3 +1,252 @@
 # @swim/warp
 
-Web Agent Remote Protocol.
+[![package](https://img.shields.io/npm/v/@swim/warp.svg)](https://www.npmjs.com/package/@swim/warp)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_warp.html)
+[![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
+
+<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+
+`@swim/warp` implements the WARP WebSocket protocol for dynamically
+multiplexing large numbers of bidirectional links to streaming APIs, called
+lanes, of URI-addressed distributed objects, called nodes, that run stateful
+distributed processes, called Web Agents.  `@swim/warp` is part of the
+[`@swim/mesh`](https://www.npmjs.com/package/@swim/mesh) framework.
+
+## Protocol overview
+
+The name WARP stands for *W*eb *A*gent *R*emote *P*rotocol.  The purpose
+of the WARP protocol is to enable bidirectional, continuously consistent,
+network real-time communication between stateful distributed processes,
+called Web Agents.
+
+The first and most important design goal for WARP is to be extensible, forward
+compatible, and easy to implement in any networked environment.  In particular,
+WARP has to work in all major web browsers, using existing networking
+technologies.  To facilitate human understanding of the protocol and its
+operation, the first version of WARP is text-based.  To avoid the explosion
+of grammars found in other human-readable protocols, like HTTP, and to aid
+extensibility, WARP protocol envelopes are defined as a set of structurally
+typed [`Recon`](https://www.npmjs.com/package/@swim/mesh) records.
+
+The second most important design goal for WARP is to support efficient
+multiplexing of extremely large numbers of links.  WARP scales to many millions
+of high rate links per WebSocket connection.  Imagine if every hyperlink on the
+Web was a real-time stream between web pages—that's the level of concurrency
+WARP aims to support.
+
+The third most important design goal for WARP is minimalism.  WARP supports
+forward-compatible, per-link subprotocols, enabling protocol stability without
+stagnation.  The core WARP protocol remains unchanged since its original
+implementation in 2015, despite significant evolution of swimOS, and its
+extensive use of WARP subprotocols.
+
+Future evolution of the WARP protocol must maintain the delicate balance
+between extreme multiplexability, broad implementability, extensibility,
+forward compatibility, and minimalism.
+
+### Envelopes
+
+The data structures exchanged over WARP connections are called _envelopes_.
+WARP defines 12 envelope types: event messages, command messages, link requests
+and responses, sync requests and responses, unlink requests and responses, auth
+requests and responses, and deauth requests and responses.
+
+Envelopes can be addressed in one of three ways: host addressed, lane addressed,
+or link addressed.  Host addressed envelopes simply get delivered to the other
+end of the network connection.
+
+Lane addressed envelopes route to a particular lane, of a particular node.
+Nodes and lanes are each addressed by URI.  Node URIs are scoped to a network
+host, like HTTP request URIs.  Lane URIs are scoped to an encapsulating node,
+like a member of an object.
+
+Link addressed envelopes route along the path of a currently open link.
+Links are currently addressed by the complete node and lane URIs of the remote
+endpoint.  Explicit link addressing greatly aids human readability of the wire
+protocol, and compression effectively mitigates the transport overhead.  Link
+addresses are intended to be coupled to stream identifiers in an underlying
+multiplexed transport protocol, such as QUIC, in a future evolution of the
+WARP protocol.
+
+WARP is a symmetric protocol: any envelope type can be sent in any direction.
+It's perfectly valid for a server to send a link request to a client;
+this capability is important for reverse tunneling of links to endpoints
+that can only open outbound connections.
+
+Request and response envelopes trigger link state transitions—request envelopes
+do not always or immediately pair with corresponding response envelopes.
+For example, a link request may be replied to with an unlinked response,
+if the link request is rejected.  And a sync request only receives a matching
+synced response once the state of the link quiesces.
+
+### Event messages
+
+An event message is a link addressed envelope that transmits a structured data
+payload to the receiving end of a link.
+
+An event message is distinguished by an `@event` attribute:
+
+```recon
+@event(node: "/house/kitchen", lane: "light") "off"
+```
+
+### Command messages
+
+A command message is a lane addressed envelope that transmit a structured data
+payload to a particular lane of a particular node.  Command messages may be
+fast-path routed via an open link to the recipient lane.
+
+A command message is distinguished by a `@command` attribute:
+
+```recon
+@command(node: "/house/kitchen", lane: "light") "on"
+```
+
+### Link requests and and responses
+
+A link request is a lane addressed envelope that initiates the opening of a new
+link to the recipient lane.  A linked response is a link addressed envelope
+that finalizes the opening of a new link.
+
+A link request is distinguished by a `@link` attribute:
+
+```recon
+@link(node: "/house/kitchen", lane: "light")
+```
+
+A linked response is distinguished by a `@linked` attribute:
+
+```recon
+@linked(node: "/house/kitchen", lane: "light")
+```
+
+### Sync requests and responses
+
+A sync request is a lane addressed envelope that both initiates the opening of
+a new link to the recipient lane, and requests synchronization with the current
+state of the remote lane.  A synced response is a link addressed envelope that
+indicates completion of initial link synchronization.
+
+A sync request is distinguished by a `@sync` attribute:
+
+```recon
+@sync(node: "/house", lane: "rooms")
+```
+
+A synced response is distinguished by a `@synced` attribute:
+
+```recon
+@synced(node: "/house lane: "rooms")
+```
+
+### Unlink requests and responses
+
+An unlink request is a link addressed envelope that initiates the closure of
+a link.  An unlinked response is a link addressed envelope that finalizes the
+closure of a link.
+
+An unlink request is distinguished by an `@unlink` attribute:
+
+```recon
+@unlink(node: "/house", lane: "power/meter")
+```
+
+An unlinked response is distinguished by an `@unlinked` attribute:
+
+```recon
+@unlinked(node: "/house", lane: "power/meter")
+```
+
+### Auth requests and responses
+
+An auth request is a host addressed envelope that authenticates the sender.
+An authed response is a host addressed envelope that acknowledges the
+credentials of the receipient.
+
+An auth request is distinguished by an `@auth` attribute:
+
+```recon
+@auth @googleId(<jwt>)
+```
+
+An authed response is distinguished by an `@authed` attribute:
+
+```recon
+@authed
+```
+
+### Deauth requests and responses
+
+A deauth request is a host addressed envelope that deauthenticates the sender.
+A deauthed response is a host addressed envelope that revokes the credentials
+of the recipient.
+
+A deauth request is distinguished by a `@deauth` attribute:
+
+```recon
+@deauth
+```
+
+A deauthed response is distinguished by a `@deauthed` attribute:
+
+```recon
+@deauthed
+```
+
+## Installation
+
+### npm
+
+For an npm-managed project, `npm install @swim/warp` to make it a dependency.
+TypeScript sources will be installed into `node_modules/@swim/warp/main`.
+Transpiled JavaScript and TypeScript definition files install into
+`node_modules/@swim/warp/lib/main`.  And a pre-built UMD script can
+be found in `node_modules/@swim/warp/dist/main/swim-warp.js`.
+
+### Browser
+
+Browser applications can load `swim-mesh.js`—which bundles the `@swim/warp`
+library—along with its `swim-core.js` dependency, directly from the Swim CDN.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
+<script src="https://cdn.swim.ai/js/latest/swim-mesh.js"></script>
+```
+
+Alternatively, the standalone `swim-system.js` script may be loaded
+from the Swim CDN, which bundles `@swim/warp` along with all other
+[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+
+```html
+<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+```
+
+## Usage
+
+### ES6/TypeScript
+
+`@swim/warp` can be imported as an ES6 module from TypeScript and other
+ES6-compatible environments.
+
+```typescript
+import * as warp from "@swim/warp";
+```
+
+### CommonJS/Node.js
+
+`@swim/warp` can also be used as a CommonJS module in Node.js applications.
+
+```javascript
+var warp = require("@swim/warp");
+```
+
+### Browser
+
+When loaded by a web browser, the `swim-core.js` script adds all
+`@swim/warp` library exports to the global `swim` namespace.  The
+`swim-mesh.js` script requires that `swim-core.js` has already been loaded.
+
+The `swim-system.js` script also adds all `@swim/warp` library exports
+to the global `swim` namespace, making it a drop-in replacement for
+'swim-core.js' and `swim-mesh.js` when additional `@swim/system`
+libraries are needed.

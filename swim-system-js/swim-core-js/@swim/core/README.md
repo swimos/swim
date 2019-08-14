@@ -89,7 +89,7 @@ bundles all `@swim/core` component libraries, can be found in
 
 ### Browser
 
-Web applications can load `swim-core.js` directly from the Swim CDN.
+Browser applications can load `swim-core.js` directly from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
@@ -117,9 +117,8 @@ import * as swim from "@swim/core";
 
 ### CommonJS/Node.js
 
-`@swim/core` can also be used as a CommonJS in Node.js applications.
-All component libraries are re-exported, in their entirety, from the
-top-level `@swim/core` namespace.
+`@swim/core` can also be used as a CommonJS module in Node.js applications.
+All component libraries are re-exported by the umbrella `@swim/core` module.
 
 ```javascript
 var swim = require("@swim/core");
