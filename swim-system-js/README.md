@@ -34,7 +34,7 @@ The Swim system umbrella framework consists of the following child frameworks:
   seamlessly animated user interface widgets, including gauges, pie charts,
   line, area, and bubble charts, and geospatial map overlays.
 - [**`@swim/web`**](swim-web-js) –
-  real-time web application framework.
+  thin web application framework built on the `@swim/ui` toolkit.
 
 Swim System has no external dependencies when run in a web browser,
 and depends only on a WebSocket implementation when run in Node.js.

@@ -201,9 +201,12 @@ The swimOS TypeScript implementation consists of the following frameworks and li
   - [**`@swim/mapbox`**](swim-system-js/swim-ux-js/@swim/mapbox) –
     support for overlaying `@swim/map` views on Mapbox maps.
 - [**`@swim/web`**](swim-system-js/swim-web-js) –
-  real-time web application framework.
+  thin web application framework built on the `@swim/ui` toolkit.
   - [**`@swim/site`**](swim-system-js/swim-web-js/@swim/site) –
+    minimalist components that implement common dynamic website behaviors.
   - [**`@swim/app`**](swim-system-js/swim-web-js/@swim/app) –
+    lightweight application loader that dynamically instantiates views and
+    controllers declared by `swim-` HTML attributes.
 
 ## Concepts
 

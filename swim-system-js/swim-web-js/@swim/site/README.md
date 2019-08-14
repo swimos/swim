@@ -1,3 +1,3 @@
 # @swim/site
 
-Common website components.
+Minimalist components that implement common dynamic website behaviors.

@@ -121,7 +121,7 @@ swim-core-js $ npm install
 
 ### Build script
 
-Use the `bin/build.js` script to build the Swim core framework.  The build
+Use the `bin/build.js` script to build the Swim Core framework.  The build
 script supports `compile`, `test`, `doc`, and `watch` commands, described
 below.  All build script commands take an optional `--projects` (`-p`) option
 to restrict the build to a comma-separated list of projects.

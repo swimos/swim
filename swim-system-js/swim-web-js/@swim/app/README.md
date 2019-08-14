@@ -1,3 +1,4 @@
 # @swim/app
 
-Web application components.
+Lightweight application loader that dynamically instantiates views and
+controllers declared by `swim-` HTML attributes.

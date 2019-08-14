@@ -114,10 +114,10 @@ swim-ux-js $ npm install
 
 ### Build script
 
-Use the `bin/build.js` script to build the Swim user interface widgets.
-The build script supports `compile`, `test`, `doc`, and `watch` commands,
-described below.  All build script commands take an optional `--projects`
-(`-p`) option to restrict the build to a comma-separated list of projects.
+Use the `bin/build.js` script to build the Swim UX toolkit.  The build script
+supports `compile`, `test`, `doc`, and `watch` commands, described below.
+All build script commands take an optional `--projects` (`-p`) option to
+restrict the build to a comma-separated list of projects.
 
 Each project supports multiple output targets; typical targets for a project
 include `main`, to build the main sources, and `test`, to build the test
