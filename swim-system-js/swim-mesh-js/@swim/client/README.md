@@ -91,8 +91,8 @@ a remote node.  `WarpClient.command` takes either three our four arguments.
 The three argument `command` overload takes a node URI, a lane URI, and a
 command payload.  The node URI must have an authority component that specifies
 the host to which the command should be sent.  The four argument `command`
-overload takes a host URI, a node URI, a lane URI, and a command payload; the
-node URI is interpreted relative to the host URI.
+overload takes a host URI, a node URI, a lane URI, and a command payload;
+the node URI is interpreted relative to the host URI.
 
 ```typescript
 swim.command("warp://example.com/house/kitchen", "light", "on");
@@ -261,52 +261,164 @@ swim.downlink()
 
 ### ValueDownlink
 
-A `ValueDownlink` synchronizes a structured value with a remote value lane.
-Value downlinks support registering `willSet` and `didSet` callbacks, in
-addition to the standard `Downlink` callbacks.
+A `ValueDownlink` synchronizes a shared real-time value with a remote value
+lane.  In addition to the standard `Downlink` callbacks, `ValueDownlink`
+supports registering `willSet` and `didSet` callbacks to observe all changes
+to downlinked state—whether remote or local.
+
+A `ValueDownlink` views its state as a `@swim/structure` `Value` by default.
+Use the `valueForm` method to create a typed projection of a `ValueDownlink`
+that automatically transforms its state using a `@swim/structure` `Form`.  For
+example, you can use `Form.foString()` to create a `ValueDownlink` that coerces
+its state to a string; and you can also use `Form.forAny()` to create a
+`ValueDownlink` that coerces its state to a plain old JavaScript value.
 
 ```typescript
-swim.downlinkValue()
+const value = swim.downlinkValue()
     .hostUri("warp://example.com")
     .nodeUri("/house/kitchen")
     .laneUri("light")
+    .valueForm(swim.Form.forAny())
     .didSet((value) => /* ... */)
     .open();
 ```
 
-### MapDownlink
-
-A `MapDownlink` implements the WARP map subprotocol to synchronize key-value
-state with a remote map lane.  Map downlinks support registering `willUpdate`,
-`didUpdate`, `willRemove`, and `didRemove` callbacks, in addition to the
-standard `Downlink` callbacks.
+Use the `ValueDownlink.get` method to get the current state value.  Use the
+`ValueDownlink.set` method to set the current state value.
 
 ```typescript
-swim.downlinkMap()
+value.get(); // get the current local state of the downlink
+value.set(newValue); // update the local and remote state of the downlink
+```
+
+For the most part, client code can treat a `ValueDownlink` like an ordinary
+mutable variable; the WARP client will ensure that the downlink is continuously
+made consistent with the remote lane.  Using `didSet` callbacks, applications
+can update UI views, and other dependent components, to keep them consistent
+with the shared state of the remote value lane in network real-time.
+
+```typescript
+swim.downlinkValue()
+    .didSet((value) => {
+      // update UI view with latest value
+      document.getElementById("value").innerText = value;
+    })
+```
+
+### MapDownlink
+
+A `MapDownlink` synchronizes a shared real-time key-value map with a remote map
+lane.  In addition to the standard `Downlink` callbacks, `MapDownlink` supports
+registering `willUpdate`, `didUpdate`, `willRemove`, and `didRemove` callbacks
+to observe all changes to downlinked map state—whether remote or local.
+
+A `MapDownlink` views its keys and values as `@swim/structure` `Value`s by
+default.  Use the `keyForm` and `valueForm` methods to create a typed
+projection of a `MapDownlink` that automatically transforms its keys and values
+using `@swim/structure` `Form`s.
+
+```typescript
+const map = swim.downlinkMap()
     .hostUri("warp://example.com")
     .nodeUri("/house")
     .laneUri("rooms")
+    .keyForm(swim.Form.forString())
+    .valueForm(swim.Form.forAny())
     .didUpdate((key, value) => /* ... */)
     .didRemove((key) => /* ... */)
     .open();
 ```
 
-### ListDownlink
-
-A `ListDownlink` implements the WARP list subprotocol to to synchronize
-sequential list state with a remote list lane.  List downlinks support
-registering `willUpdate`, `didUpdate`, `willMove`, `didMove`, `willRemove`,
-and `didRemove` callbacks, in addition to the standard `Downlink` callbacks.
+`MapDownlink` implements the standard JavaScript `Map` interface.  Use the
+`MapDownlink.get` method to get the value associated with a given key.  Use the
+`MapDownlink.set` method to update the value associated with a key.  And use
+the `MapDownlink.delete` method to remove a key and its associated value.
 
 ```typescript
-swim.downlinkList()
+map.get("kitchen"); // get the locally cached value associated with the key
+map.set("garage", newRoom); // locally and remotely insert a new entry
+```
+
+For the most part, client code can treat a `MapDownlink` like an
+ordinary JavaScript `Map`; the WARP client will ensure that the downlink is
+continuously made consistent with the remote lane.  Using `didUpdate` and
+`didRemove` callbacks, applications can update UI collection views, and other
+dependent components, to keep them consistent with the shared state of the
+remote map lane in network real-time.
+
+```typescript
+swim.downlinkMap()
+    .didUpdate((key, value) => {
+      if (hasChildElement(key)) {
+        // update existing UI view for key
+      } else {
+        // insert new UI view for key
+      }
+    })
+    .didRemove((key) => {
+      // remove UI view for key
+    })
+```
+
+### ListDownlink
+
+A `ListDownlink` synchronizes a shared real-time list with a remote list lane.
+In addition to the standard `Downlink` callbacks, `ListDownlink` supports
+registering `willUpdate`, `didUpdate`, `willMove`, `didMove`, `willRemove`,
+and `didRemove` callbacks to observe all changes to downlinked list
+state—whether remote or local.
+
+A `ListDownlink` views its items as `@swim/structure` `Value`s by default.
+Use the `valueForm` method to create a typed projection of a `ListDownlink`
+that automatically transforms its items using a `@swim/structure` `Form`.
+
+```typescript
+const list = swim.downlinkList()
     .hostUri("warp://example.com")
     .nodeUri("/house")
     .laneUri("todo")
+    .valueForm(swim.Form.forAny())
     .didUpdate((index, value) => /* ... */)
     .didMove((fromIndex, toIndex, value) => /* ... */)
     .didRemove((index) => /* ... */)
     .open();
+```
+
+`ListDownlink` behaves similarly to a JavaScript array.  Use the
+`ListDownlink.get` method to get the item at a given index.  Use the
+`ListDownlink.set` method to update the item at some index.  And use the
+`ListDownlink.splice` method to insert and remove items from the list.
+You can also `push`, `pop`, `shift`, and `unshift` items, and `move` an
+item from one index to another.
+
+```typescript
+list.get(0); // get the first item in the list
+list.set(0, "build"); // locally and remotely update an item
+list.push("paint"); // locally and remotely append an item
+```
+
+For the most part, client code can treat a `ListDownlink` like an ordinary
+JavaScript list; the WARP client will ensure that the downlink is continuously
+made consistent with the remote lane.  Using `didUpdate`, `didMove`, and
+`didRemove` callbacks, applications can update UI list views, and other
+dependent components, to keep them consistent with the shared state of the
+remote list lane in network real-time.
+
+```typescript
+swim.downlinkList()
+    .didUpdate((index, value) => {
+      if (hasChildElement(index)) {
+        // update existing UI view at index
+      } else {
+        // insert new UI view at index
+      }
+    })
+    .didMove((fromIndex, toIndex, value)) {
+      // move existing UI view from old index to new index
+    }
+    .didRemove((index) => {
+      // remove UI view at index
+    })
 ```
 
 ## Installation

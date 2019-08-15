@@ -63,6 +63,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   _state0: STree<Value, Value> | undefined;
 
+  /** @hidden */
   constructor(context: DownlinkContext, owner?: DownlinkOwner, init?: ListDownlinkInit<V, VU>,
               hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number, rate?: number,
               body?: Value, flags: number = DownlinkFlags.KeepLinkedSynced,
@@ -486,6 +487,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
     }
   }
 
+  /** @hidden */
   protected didAliasModel(): void {
     this.onLinkedResponse();
     this._model!._state.forEach(function (value: Value, index: number) {

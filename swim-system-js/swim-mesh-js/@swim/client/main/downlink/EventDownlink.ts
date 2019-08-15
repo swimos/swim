@@ -31,6 +31,7 @@ export class EventDownlink extends Downlink {
   /** @hidden */
   _model: EventDownlinkModel | null;
 
+  /** @hidden */
   constructor(context: DownlinkContext, owner?: DownlinkOwner, init?: EventDownlinkInit,
               hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number,
               rate?: number, body?: Value, flags: number = DownlinkFlags.KeepLinked,

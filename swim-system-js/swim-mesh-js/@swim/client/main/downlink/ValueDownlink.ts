@@ -51,6 +51,7 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
   /** @hidden */
   _version: number;
 
+  /** @hidden */
   constructor(context: DownlinkContext, owner?: DownlinkOwner, init?: ValueDownlinkInit<V, VU>,
               hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number, rate?: number,
               body?: Value, flags: number = DownlinkFlags.KeepLinkedSynced,
@@ -180,6 +181,7 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
     }
   }
 
+  /** @hidden */
   protected didAliasModel(): void {
     this.onLinkedResponse();
     this.valueDidSet(this._model!.get(), Value.absent());

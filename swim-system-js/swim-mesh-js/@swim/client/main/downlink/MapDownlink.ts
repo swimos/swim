@@ -79,6 +79,7 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   protected _version: number;
 
+  /** @hidden */
   constructor(context: DownlinkContext, owner?: DownlinkOwner, init?: MapDownlinkInit<K, V, KU, VU>,
               hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number, rate?: number,
               body?: Value, flags: number = DownlinkFlags.KeepLinkedSynced,
@@ -607,6 +608,7 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
     }
   }
 
+  /** @hidden */
   protected didAliasModel(): void {
     this.onLinkedResponse();
     this._model!._state.forEach(function (key: Value, value: Value): void {
