@@ -260,7 +260,7 @@ export class DialView extends GraphicView {
 
   protected renderTick(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
     const legend = this.legend();
-    if (RenderView.is(legend)) {
+    if (RenderView.is(legend) && !legend.hidden) {
       const width = bounds.width;
       const height = bounds.height;
       const size = Math.min(width, height);
