@@ -254,7 +254,8 @@ export abstract class AxisView<D> extends GraphicView {
         const newTick = this.createTickView(tickValue);
         if (newTick) {
           this.insertTick(newTick);
-          newTick.opacity(0);
+          newTick.opacity._value = 0;
+          newTick.opacity._state = 0;
           newTick.fadeIn(this._tickTransition || void 0);
         }
       }
