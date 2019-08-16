@@ -7,7 +7,7 @@
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
 `@swim/streamlet` provides a stateful, streaming component model.  Streamlets
-are stateful application componets that continuously consume input state from
+are stateful application components that continuously consume input state from
 streaming inlets, and continuously produce output state on streaming outlets.
 `@swim/streamlet` is written in TypeScript, but can be used from either
 TypeScript or JavaScript.  `@swim/streamlet` is part of the
