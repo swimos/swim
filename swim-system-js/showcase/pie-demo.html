@@ -186,7 +186,7 @@ function updatePie() {
 
   // Update pie chart properties.
   pie.baseAngle(swim.Angle.rad(-0.5 * Math.PI + (baseAngle.checked ? Math.PI * Math.random() : 0)), tween)
-     .padAngle(swim.Angle.deg(padAngle.checked ? 5 * Math.random() : count > 26 ? 0.5 : 2), tween)
+     .padAngle(swim.Angle.deg(padAngle.checked ? 5 * Math.random() : count >= 26 ? 0.5 : 2), tween)
      .cornerRadius(swim.Length.pct(cornerRadius.checked ? 10 * Math.random() : 0), tween)
      .tickRadius(swim.Length.pct(tickRadius.checked ? 25 + 20 * Math.random() : 30), tween)
      .tickLength(swim.Length.pct(tickLength.checked ? 40 + 10 * Math.random() : 50), tween)

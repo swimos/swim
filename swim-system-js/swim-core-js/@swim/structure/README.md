@@ -6,35 +6,36 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/structure` implements a generic structured data model that is compatible
-with JSON, XML, and many other data languages.  `@swim/structure` has first
+**@swim/structure** implements a generic structured data model that is compatible
+with JSON, XML, and many other data languages.  **@swim/structure** has first
 class support for XPath/JSONPath-style selectors, as well as operator syntax
-trees, and lambda functions. `@swim/structure` is written in TypeScript, but
-can be used from either TypeScript or JavaScript.  `@swim/structure` is part
-of the [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
+trees, and lambda functions.  **@swim/structure** is written in TypeScript, but
+can be used from either TypeScript or JavaScript.  **@swim/structure** is part
+of the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
+framework.
 
 ## Overview
 
-Think of `@swim/structure` as a generic abstract syntax tree that can represent
+Think of **@swim/structure** as a generic abstract syntax tree that can represent
 many structured data models, including parsed JSON, parsed XML, parsed Recon,
 parsed Protocol Buffers, and more.  In addition to structured data models,
-`@swim/structure` has generic syntax trees for selector languages, like XPath,
-JSONPath, and Recon selectors.  `@swim/structure` also provides generic syntax
+**@swim/structure** has generic syntax trees for selector languages, like XPath,
+JSONPath, and Recon selectors.  **@swim/structure** also provides generic syntax
 trees for algebraic, logical, bitwise, and function invocation operators, as
 well as syntax trees for lambda function definitions.  An `Interpreter` is
 provided for evaluating selectors, operators, and function invocations.
 
-Parsers from source languages to `@swim/structure` syntax trees are provided by
-other packages.  The `@swim/recon` library implements a parser and serializer
+Parsers from source languages to **@swim/structure** syntax trees are provided by
+other packages.  The **@swim/recon** library implements a parser and serializer
 for Recon, Recon selectors, and Recon expressions.
 
 ### Data Model
 
-The heart of `@swim/structure` is its uniform structured data model.  Swim
+The heart of **@swim/structure** is its uniform structured data model.  Swim
 uses an abstract data model to decouple itself from the irregularities and
 limitations of common data formats, such as JSON or XML.
 
-To illuminate the complexity and limitations that `@swim/structure` was
+To illuminate the complexity and limitations that **@swim/structure** was
 designed to solve, let's first consider the data models of JSON and XML.
 
 JSON's data model consists of four primitive types: `string`, `number`,
@@ -52,7 +53,7 @@ And because of its textual nature, XML leads to profuse use of ad hoc string
 microformats.  Rather than natively implemented a structured type system, XML
 layers on various nominally typed schema languages.
 
-`@swim/structure` implements a uniform tree data model that is a superset of
+**@swim/structure** implements a uniform tree data model that is a superset of
 both the JSON and XML data models.  The Swim structured data model has six
 primitive types: `data`, `text`, `num`, `bool`, `extant`, and `absent`; two
 field types: `attr`, and `slot`; and a single composite type: `record`.
@@ -69,7 +70,7 @@ unlike JSON object keys, `slot` keys are not restricted to string values.
 
 <img src="http://docs.swim.ai/assets/images/item-family.svg" alt="Item Family" align="right">
 
-At the center of `@swim/structure` is the `Item` class, which defines an
+At the center of **@swim/structure** is the `Item` class, which defines an
 algebraic data type for representing and manipulating structured data.  `Item`
 provides many methods for operating on structured values, most of which are
 closed over the `Item` type, meaning they always return other instances of
@@ -118,7 +119,7 @@ a mixture of `Field` and `Value` members acts like a partially keyed list.
 
 <img src="http://docs.swim.ai/assets/images/expression-family.svg" alt="Expression Family" align="right">
 
-Beyond representing static data structures, `@swim/structure` can also model
+Beyond representing static data structures, **@swim/structure** can also model
 dynamic data structures, expressed using `Selector`, `Operator`, and `Func`
 extensions to the structured `Value` type.  All dynamic values extend the
 abstract `Expression` class.  `Expression` trees treat code as just another
@@ -129,10 +130,10 @@ nested expressions interpreted in lexical order and scope.  The `substitute`
 method partially evaluates an `Item`, interpreting only the sub-expressions
 that contain no unresolveable selectors.
 
-The [`@swim/dataflow`](https://www.npmjs.com/package/@swim/dataflow) library
-implements a compiler from `@swim/structure` expressions to live-updated
-structures that automatically recompute themselves when any transitively
-dependent selector changes.
+The [**@swim/dataflow**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/dataflow)
+library implements a compiler from **@swim/structure** expressions to
+live-updated structures that automatically recompute themselves when
+any transitively dependent selector changes.
 
 #### Selectors
 
@@ -142,7 +143,7 @@ Each `Selector` represents a filter operation, followed by a subselection,
 defined by a chained `then` `Selector`.  A `Selector` expression thus consists
 of a sequence of filter steps, terminating with the identity selector.
 
-`@swim/structure` implements the following `Selector` expressions:
+**@swim/structure** implements the following `Selector` expressions:
 
 - **`IdentitySelector`** – selects the selection scope.
 - **`GetSelector`** – selects the `Value` associated with some key for each
@@ -169,7 +170,7 @@ of a sequence of filter steps, terminating with the identity selector.
 An `Operator` is an `Expression` that performs an arithmetic, logical, bitwise,
 or comparison operation on its operand expressions.  An `Operator` expression
 evaluates to `Absent` when its operands cannot be coerced to a suitable type.
-`@swim/structure` implements the following `Operator` expressions.
+**@swim/structure** implements the following `Operator` expressions.
 
 - **`ConditionalOperator`** – ternary operator that evaluates its `ifTerm`, and
   if truthy, evaluates its `thenTerm`, and if falsey, evaluates its `elseTerm`.
@@ -230,7 +231,7 @@ multiple parameters.  A `Func` is usually invoked with unevaluated arguments;
 a `Func` can choose to eagerly evaluate its arguments, or to operate like a
 macro on the syntax trees of its arguments.
 
-`@swim/structure` has the following builtin `Func` implementations:
+**@swim/structure** has the following builtin `Func` implementations:
 
 - **`LambdaFunc`** – an anonymouse function that, when invoked, evaluates its
   `template` expression with its `bindings` identifiers in scope and bound to
@@ -254,7 +255,7 @@ The `unit` method optionally returns a default value for the nominal JavaScript
 type.  The `tag` method optionally returns a discriminating `Attr` key string,
 which, if defined, can be used to optimize polymorphic `cast` operations.
 
-`@swim/structure` implements standard forms for builtin JavaScript types.
+**@swim/structure** implements standard forms for builtin JavaScript types.
 
 ## Installation
 
@@ -270,15 +271,16 @@ And a pre-built UMD script can be found in
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-`@swim/structure` library, directly from the Swim CDN.
+**@swim/structure** library, directly from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/structure` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+from the Swim CDN, which bundles **@swim/structure** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+libraries.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -288,7 +290,7 @@ from the Swim CDN, which bundles `@swim/structure` along with all other
 
 ### ES6/TypeScript
 
-`@swim/structure` can be imported as an ES6 module from TypeScript and other
+**@swim/structure** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -297,7 +299,7 @@ import * as structure from "@swim/structure";
 
 ### CommonJS/Node.js
 
-`@swim/structure` can also be used as a CommonJS module in Node.js applications.
+**@swim/structure** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var structure = require("@swim/structure");
@@ -306,8 +308,8 @@ var structure = require("@swim/structure");
 ### Browser
 
 When loaded by a web browser, the `swim-core.js` script adds all
-`@swim/structure` library exports to the global `swim` namespace.
+**@swim/structure** library exports to the global `swim` namespace.
 
-The `swim-system.js` script also adds all `@swim/structure` library exports
+The `swim-system.js` script also adds all **@swim/structure** library exports
 to the global `swim` namespace, making it a drop-in replacement for
-`swim-core.js` when additional `@swim/system` libraries are needed.
+`swim-core.js` when additional **@swim/system** libraries are needed.

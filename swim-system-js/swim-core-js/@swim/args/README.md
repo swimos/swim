@@ -6,7 +6,7 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-Command-line argument parser.<br><br><br><br>
+**@swim/args** implements a composable command-line argument parser.<br><br><br><br>
 
 ## Overview
 
@@ -26,7 +26,7 @@ be found in `node_modules/@swim/args/dist/main/swim-args.js`.
 
 ### ES6/TypeScript
 
-`@swim/args` can be imported as an ES6 module from TypeScript and other
+**@swim/args** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -35,7 +35,7 @@ import * as args from "@swim/args";
 
 ### CommonJS/Node.js
 
-`@swim/args` can also be used as a CommonJS module in Node.js applications.
+**@swim/args** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var args = require("@swim/args");

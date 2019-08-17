@@ -6,11 +6,12 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/time` provides date-time, time zone, and time interval data types, with
-`strptime`/`strftime`-style parsers and formatters.  `@swim/time` facilitates
-parsing and formatting of date strings, time zone aware date manipulation, and
-sampling of date ranges at regular time intervals.  `@swim/time` is part of the
-[`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
+**@swim/time** provides date-time, time zone, and time interval data types,
+with `strptime`/`strftime`-style parsers and formatters.  **@swim/time**
+facilitates parsing and formatting of date strings, time zone aware date
+manipulation, and sampling of date ranges at regular time intervals.
+**@swim/time** is part of the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
+framework.
 
 ## Overview
 
@@ -206,15 +207,16 @@ be found in `node_modules/@swim/time/dist/main/swim-time.js`.
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-`@swim/time` library, directly from the Swim CDN.
+**@swim/time** library, directly from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/time` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+from the Swim CDN, which bundles **@swim/time** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+libraries.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -224,7 +226,7 @@ from the Swim CDN, which bundles `@swim/time` along with all other
 
 ### ES6/TypeScript
 
-`@swim/time` can be imported as an ES6 module from TypeScript and other
+**@swim/time** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -233,7 +235,7 @@ import * as time from "@swim/time";
 
 ### CommonJS/Node.js
 
-`@swim/time` can also be used as a CommonJS module in Node.js applications.
+**@swim/time** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var time = require("@swim/time");
@@ -242,8 +244,8 @@ var time = require("@swim/time");
 ### Browser
 
 When loaded by a web browser, the `swim-core.js` script adds all
-`@swim/time` library exports to the global `swim` namespace.
+**@swim/time** library exports to the global `swim` namespace.
 
-The `swim-system.js` script also adds all `@swim/time` library exports
+The `swim-system.js` script also adds all **@swim/time** library exports
 to the global `swim` namespace, making it a drop-in replacement for
-`swim-core.js` when additional `@swim/system` libraries are needed.
+`swim-core.js` when additional **@swim/system** libraries are needed.

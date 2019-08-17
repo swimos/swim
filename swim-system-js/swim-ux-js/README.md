@@ -1,4 +1,4 @@
-# Swim UX Toolkit
+# Swim UX TypeScript Framework
 
 [![package](https://img.shields.io/npm/v/@swim/ux.svg)](https://www.npmjs.com/package/@swim/ux)
 [![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_ux.html)
@@ -6,35 +6,36 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-The Swim UX toolkit implements seamlessly animated user interface widgets,
+The **Swim UX** framework implements seamlessly animated user interface widgets,
 including gauges, pie charts, line, area, and bubble charts, and geospatial
 map overlays.  These fully encapsulated widgets can be embedded into any web
-application framework, or directly into any web page.  Swim UX is a part of the
-broader [Swim System](https://www.npmjs.com/package/@swim/system) framework.
+application framework, or directly into any web page.  **Swim UX** is a part of
+the broader [**Swim System**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+framework.
 
-## Libraries
+## Framework
 
-The Swim UX toolkit consists of the following component libraries:
+The **Swim UX** framework consists of the following component libraries:
 
-- [**`@swim/ux`**](@swim/ux) –
+- [**@swim/ux**](@swim/ux) –
   umbrella package that depends on, and re-exports, all Swim UX libraries.
-- [**`@swim/gauge`**](@swim/gauge) –
+- [**@swim/gauge**](@swim/gauge) –
   multi-dial, fully animated, Canvas rendered gauge widget.
-- [**`@swim/pie`**](@swim/pie) –
+- [**@swim/pie**](@swim/pie) –
   multi-slice, fully animatable, canvas rendered pie chart widget.
-- [**`@swim/chart`**](@swim/chart) –
+- [**@swim/chart**](@swim/chart) –
   multi-plot, fully animatable, canvas rendered chart widget, suppporting line,
   area, and bubble graphs, with customizeable axes, and kinematic multitouch
   scale gestures for panning and zooming with momentum.
-- [**`@swim/map`**](@swim/map) –
+- [**@swim/map**](@swim/map) –
   canvas views for efficiently rendering geospatially located map overlays,
   including fully animatable views for lines, circles, and polygons.
-- [**`@swim/mapbox`**](@swim/mapbox) –
-  support for overlaying `@swim/map` views on Mapbox maps.
+- [**@swim/mapbox**](@swim/mapbox) –
+  support for overlaying **@swim/map** views on Mapbox maps.
 
-Swim UX builds on the [Swim Core](https://www.npmjs.com/package/@swim/core) and
-[Swim UI](https://www.npmjs.com/package/@swim/core) frameworks; it has no
-additional required dependencies.
+**Swim UX** builds on the [**Swim Core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js)
+and [**Swim UI**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js)
+frameworks; it has no additional required dependencies.
 
 ## Installation
 
@@ -44,7 +45,7 @@ For an npm-managed project, `npm install @swim/ux` to make it a dependency.
 TypeScript sources will be installed into `node_modules/@swim/ux/main`.
 Transpiled JavaScript and TypeScript definition files install into
 `node_modules/@swim/ux/lib/main`.  And a pre-built UMD script, which
-bundles all `@swim/ux` component libraries, can be found in
+bundles all **@swim/ux** component libraries, can be found in
 `node_modules/@swim/ux/dist/main/swim-ux.js`.
 
 ### Browser
@@ -59,8 +60,9 @@ and `swim-ui.js` dependencies, from the Swim CDN.
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/ux` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) frameworks.
+from the Swim CDN, which bundles **@swim/ux** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+frameworks.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -70,9 +72,9 @@ from the Swim CDN, which bundles `@swim/ux` along with all other
 
 ### ES6/TypeScript
 
-`@swim/ux` can be imported as an ES6 module from TypeScript and other
-ES6-compatible environments.  All component libraries are re-exported,
-in their entirety, from the top-level `@swim/ux` namespace.
+**@swim/ux** can be imported as an ES6 module from TypeScript and other
+ES6-compatible environments.  All component libraries are re-exported by
+the umbrella `@swim/ux` module.
 
 ```typescript
 import * as swim from "@swim/ux";
@@ -80,9 +82,8 @@ import * as swim from "@swim/ux";
 
 ### CommonJS
 
-`@swim/ux` can also be used with CommonJS-compatible module systems.
-All component libraries are re-exported, in their entirety, from the
-top-level `@swim/ux` namespace.
+**@swim/ux** can also be used with CommonJS-compatible module systems.
+All component libraries are re-exported by the umbrella `@swim/ux` namespace.
 
 ```javascript
 var swim = require("@swim/ux");
@@ -94,9 +95,9 @@ When loaded by a web browser, the `swim-ux.js` script adds all component
 library exports to the global `swim` namespace.  The `swim-ux.js` script
 requires that `swim-core.js` and `swim-ui.js` have already been loaded.
 
-The `swim-system.js` script also adds all `@swim/ux` component library
+The `swim-system.js` script also adds all **@swim/ux** component library
 exports to the global `swim` namespace, making it a drop-in replacement
-for `swim-ux.js` when additional `@swim/system` frameworks are needed.
+for `swim-ux.js` when additional **@swim/system** frameworks are needed.
 
 ## Development
 
@@ -114,7 +115,7 @@ swim-ux-js $ npm install
 
 ### Build script
 
-Use the `bin/build.js` script to build the Swim UX toolkit.  The build script
+Use the `bin/build.js` script to build the Swim UX framework.  The build script
 supports `compile`, `test`, `doc`, and `watch` commands, described below.
 All build script commands take an optional `--projects` (`-p`) option to
 restrict the build to a comma-separated list of projects.

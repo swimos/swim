@@ -6,15 +6,16 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/uri` provides a rich object model for working with Uniform Resource
+**@swim/uri** provides a rich object model for working with Uniform Resource
 Identifiers and URI subcomponents, including an efficient and safe codec for
 parsing and writing compliant URI strings.  Rich APIs for paths and queries
-simplify deconstruction and manipulation of parsed URI objects.  `@swim/uri` is
-part of the [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
+simplify deconstruction and manipulation of parsed URI objects.  **@swim/uri**
+is part of the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
+framework.
 
 ## Overview
 
-`@swim/uri` models each URI component as an immutable class, with rich methods
+**@swim/uri** models each URI component as an immutable class, with rich methods
 for manipulating and destructuring the component.  The `Uri` class combines a
 `UriScheme`, `UriAuthority`, `UriPath`, `UriQuery`, and `UriFragment` into a
 complete model of a URI.  The `UriAuthority` class composes a `UriUser`,
@@ -30,7 +31,7 @@ The `Uri` class has an expressive API for transforming URI subcomponents.  And
 provides standards-compliant methods to resolve and unresolve URIs relative to
 base URIs.
 
-All `@swim/uri` classes are immutable, which facilitates caching and instance
+All **@swim/uri** classes are immutable, which facilitates caching and instance
 sharing.  All manipulation methods return a new URI component, instead of
 mutating the receiver.  URI classes are also typically used non-nullably,
 enabling fluent API use without pervasive `null` checks.  Undefined URI
@@ -38,7 +39,7 @@ components are modeled as particular instances of their respective component
 classes for which an `isDefined` method returns `false`, rather than as `null`
 or `undefined` JavaScript values.
 
-`@swim/uri` implements [`@swim/codec`](https://www.npmjs.com/package/@swim/codec)-based
+**@swim/uri** implements [**@swim/codec**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/codec)-based
 `Parser`s and `Writer`s for efficiently and safely decoding and encoding URI
 strings.  And aggressive internal caching and memoization minimizes runtime
 overhead, without compromising the API.
@@ -729,7 +730,7 @@ UriPath.parse("/x/b/c").isSubpathOf("/a/b");
 
 The `UriPathBuilder` class provides an efficient way to incrementally construct
 `UriPath` objects by appending path components.  `UriPathBuilder` implements
-the `@swim/util` `Builder` interface, enabling path components to be `push`ed
+the **@swim/util** `Builder` interface, enabling path components to be `push`ed
 onto the end of the path, like an array.  Appends to `UriPathBuilder` instances
 take constant time.
 
@@ -854,7 +855,7 @@ UriQuery.parse("b=1&c=2").prepended("alpha");
 
 The `UriQueryBuilder` class provides an efficient way to incrementally
 construct `UriQuery` objects by appending query parameters.  `UriQueryBuilder`
-implements the `@swim/util` `PairBuilder` interface, enabling query parameters
+implements the **@swim/util** `PairBuilder` interface, enabling query parameters
 to be `push`ed onto the end of the query, like an array.  Appends to
 `UriQueryBuilder` instances take constant time.
 
@@ -897,7 +898,7 @@ UriFragment.undefined().identifier()
 ### UriCache
 
 The `UriCache` class implements an efficient URI resolution cache, relative to
-a fixed base URI, backed by a [`@swim/util`](https://www.npmjs.com/package/@swim/util)
+a fixed base URI, backed by a [**@swim/util**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/util)
 `HashGenCacheMap`.  The `resolve` instance method resolves its URI argument
 relative to the cache's base URI, returning a cached instance of the resolved
 URI when possible.  The `unresolve` instance method returns the relative
@@ -917,15 +918,16 @@ be found in `node_modules/@swim/uri/dist/main/swim-uri.js`.
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-`@swim/uri` library, directly from the Swim CDN.
+**@swim/uri** library, directly from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/uri` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+from the Swim CDN, which bundles **@swim/uri** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+libraries.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -935,7 +937,7 @@ from the Swim CDN, which bundles `@swim/uri` along with all other
 
 ### ES6/TypeScript
 
-`@swim/uri` can be imported as an ES6 module from TypeScript and other
+**@swim/uri** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -944,7 +946,7 @@ import * as uri from "@swim/uri";
 
 ### CommonJS/Node.js
 
-`@swim/uri` can also be used as a CommonJS module in Node.js applications.
+**@swim/uri** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var uri = require("@swim/uri");
@@ -953,8 +955,8 @@ var uri = require("@swim/uri");
 ### Browser
 
 When loaded by a web browser, the `swim-core.js` script adds all
-`@swim/time` library exports to the global `swim` namespace.
+**@swim/time** library exports to the global `swim` namespace.
 
-The `swim-system.js` script also adds all `@swim/uri` library exports
+The `swim-system.js` script also adds all **@swim/uri** library exports
 to the global `swim` namespace, making it a drop-in replacement for
-`swim-core.js` when additional `@swim/system` libraries are needed.
+`swim-core.js` when additional **@swim/system** libraries are needed.

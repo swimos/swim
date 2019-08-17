@@ -6,16 +6,17 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/math` implements common mathematical and geometric structures and
-operators.  `@swim/math` implements vectors, points, lines, and shapes, with
+**@swim/math** implements common mathematical and geometric structures and
+operators.  **@swim/math** implements vectors, points, lines, and shapes, with
 standard algebraic and computational geometry operators, including containment
-and intersection testing.  `@swim/math` is part of the
-[`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
+and intersection testing.  **@swim/math** is part of the
+[**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
+framework.
 
 ## Overview
 
-`@swim/math` defines standard types for linear and affine algebraic structures
-and operators, as well as generic geometric shape interfaces.
+**@swim/math** defines standard types for linear and affine algebraic
+structures and operators, as well as generic geometric shape interfaces.
 
 ### Shapes
 
@@ -77,15 +78,16 @@ be found in `node_modules/@swim/math/dist/main/swim-math.js`.
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-`@swim/math` library, directly from the Swim CDN.
+**@swim/math** library, directly from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/math` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+from the Swim CDN, which bundles **@swim/math** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+libraries.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -95,7 +97,7 @@ from the Swim CDN, which bundles `@swim/math` along with all other
 
 ### ES6/TypeScript
 
-`@swim/math` can be imported as an ES6 module from TypeScript and other
+**@swim/math** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -104,7 +106,7 @@ import * as math from "@swim/math";
 
 ### CommonJS/Node.js
 
-`@swim/math` can also be used as a CommonJS module in Node.js applications.
+**@swim/math** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var math = require("@swim/math");
@@ -113,8 +115,8 @@ var math = require("@swim/math");
 ### Browser
 
 When loaded by a web browser, the `swim-core.js` script adds all
-`@swim/math` library exports to the global `swim` namespace.
+**@swim/math** library exports to the global `swim` namespace.
 
-The `swim-system.js` script also adds all `@swim/math` library exports
+The `swim-system.js` script also adds all **@swim/math** library exports
 to the global `swim` namespace, making it a drop-in replacement for
-`swim-core.js` when additional `@swim/system` libraries are needed.
+`swim-core.js` when additional **@swim/system** libraries are needed.

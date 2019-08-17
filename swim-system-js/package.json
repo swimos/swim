@@ -1,7 +1,7 @@
 {
   "name": "@swim/system",
   "version": "3.9.0",
-  "description": "Swim System Framework",
+  "description": "Swim System TypeScript Implementation",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
   "license": "Apache-2.0",

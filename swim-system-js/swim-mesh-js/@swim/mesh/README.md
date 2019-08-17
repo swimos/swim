@@ -6,31 +6,33 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/mesh` implements a multiplexed streaming WARP client that runs in both
-Node.js and web browsers. `@swim/mesh` can be used in concert with the
-[`@swim/ui`](https://www.npmjs.com/package/@swim/ui) and
-[`@swim/ux`](https://www.npmjs.com/package/@swim/ux) user interface
-toolkits to build massively real-time streaming applications.  `@swim/mesh` is
-part of the broader [`@swim/system`](https://www.npmjs.com/package/@swim/system)
-framework.
+**@swim/mesh** implements a multiplexed streaming WARP client that runs in both
+Node.js and web browsers. **@swim/mesh** can be used in concert with the
+[**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/ui)
+and [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ux)
+user interface toolkits to build massively real-time streaming applications.
+**@swim/mesh** is part of the broader
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system) framework.
 
-## Libraries
+## Framework
 
-The `@swim/mesh` umbrella package depends on, and re-exports, the following
+The **@swim/mesh** umbrella package depends on, and re-exports, the following
 component libraries:
 
-- **`@swim/warp`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/%40swim/warp),
-  [npm](https://www.npmjs.com/package/@swim/warp),
-  [typedoc](http://docs.swim.ai/js/latest/modules/_swim_warp.html)) –
-  implementation of the WARP multiplexed streaming wire protocol.
-- **`@swim/client`**
-  ([github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/%40swim/client),
-  [npm](https://www.npmjs.com/package/@swim/client),
-  [typedoc](http://docs.swim.ai/js/latest/modules/_swim_client.html)) –
-  WARP multiplexed streaming API client.
+- [**@swim/warp**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/warp)
+  ([npm](https://www.npmjs.com/package/@swim/warp),
+  [doc](http://docs.swim.ai/js/latest/modules/_swim_warp.html)) –
+  WebSocket protocol for dynamically multiplexing large numbers of bidirectional
+  links to streaming APIs, called lanes, of URI-addressed distributed objects,
+  called nodes, that run stateful distributed processes, called Web Agents.
+- [**@swim/client**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/client)
+  ([npm](https://www.npmjs.com/package/@swim/client),
+  [doc](http://docs.swim.ai/js/latest/modules/_swim_client.html)) –
+  streaming API client for linking to lanes of stateful Web Agents using the
+  WARP protocol, enabling massively real-time applications that continuously
+  synchronize all shared states with ping latency.
 
-`@swim/mesh` builds on the [`@swim/core`](https://www.npmjs.com/package/@swim/core)
+**@swim/mesh** builds on the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
 framework; it has no additional dependencies when run in a web browser,
 and depends only on a WebSocket implementation when run in Node.js.
 
@@ -42,7 +44,7 @@ For an npm-managed project, `npm install @swim/mesh` to make it a dependency.
 TypeScript sources will be installed into `node_modules/@swim/mesh/main`.
 Transpiled JavaScript and TypeScript definition files install into
 `node_modules/@swim/mesh/lib/main`.  And a pre-built UMD script, which
-bundles all `@swim/mesh` component libraries, can be found in
+bundles all **@swim/mesh** component libraries, can be found in
 `node_modules/@swim/mesh/dist/main/swim-mesh.js`.
 
 ### Browser
@@ -56,8 +58,9 @@ dependency, from the Swim CDN.
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/mesh` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) frameworks.
+from the Swim CDN, which bundles **@swim/mesh** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+frameworks.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -67,9 +70,9 @@ from the Swim CDN, which bundles `@swim/mesh` along with all other
 
 ### ES6/TypeScript
 
-`@swim/mesh` can be imported as an ES6 module from TypeScript and other
-ES6-compatible environments.  All component libraries are re-exported,
-in their entirety, from the top-level `@swim/mesh` namespace.
+**@swim/mesh** can be imported as an ES6 module from TypeScript and other
+ES6-compatible environments.  All component libraries are re-exported by
+the umbrella `@swim/mesh` module.
 
 ```typescript
 import * as swim from "@swim/mesh";
@@ -77,7 +80,7 @@ import * as swim from "@swim/mesh";
 
 ### CommonJS/Node.js
 
-`@swim/mesh` can also be used as a CommonJS module in Node.js applications.
+**@swim/mesh** can also be used as a CommonJS module in Node.js applications.
 All component libraries are re-exported by the umbrella `@swim/mesh` module.
 
 ```javascript
@@ -90,6 +93,6 @@ When loaded by a web browser, the `swim-mesh.js` script adds all component
 library exports to the global `swim` namespace.  The `swim-mesh.js` script
 requires that `swim-core.js` has already been loaded.
 
-The `swim-system.js` script also adds all `@swim/mesh` component library
+The `swim-system.js` script also adds all **@swim/mesh** component library
 exports to the global `swim` namespace, making it a drop-in replacement
-for `swim-mesh.js` when additional `@swim/system` frameworks are needed.
+for `swim-mesh.js` when additional **@swim/system** frameworks are needed.

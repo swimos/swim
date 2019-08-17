@@ -6,11 +6,12 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/warp` implements the WARP WebSocket protocol for dynamically
+**@swim/warp** implements the WARP WebSocket protocol for dynamically
 multiplexing large numbers of bidirectional links to streaming APIs, called
 lanes, of URI-addressed distributed objects, called nodes, that run stateful
-distributed processes, called Web Agents.  `@swim/warp` is part of the
-[`@swim/mesh`](https://www.npmjs.com/package/@swim/mesh) framework.
+distributed processes, called Web Agents.  **@swim/warp** is part of the
+[**@swim/mesh**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/mesh)
+framework.
 
 ## Protocol overview
 
@@ -26,7 +27,7 @@ technologies.  To facilitate human understanding of the protocol and its
 operation, the first version of WARP is text-based.  To avoid the explosion
 of grammars found in other human-readable protocols, like HTTP, and to aid
 extensibility, WARP protocol envelopes are defined as a set of structurally
-typed [`Recon`](https://www.npmjs.com/package/@swim/mesh) records.
+typed [`Recon`](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/recon) records.
 
 The second most important design goal for WARP is to support efficient
 multiplexing of extremely large numbers of links.  WARP scales to many millions
@@ -205,7 +206,7 @@ be found in `node_modules/@swim/warp/dist/main/swim-warp.js`.
 
 ### Browser
 
-Browser applications can load `swim-mesh.js`—which bundles the `@swim/warp`
+Browser applications can load `swim-mesh.js`—which bundles the **@swim/warp**
 library—along with its `swim-core.js` dependency, directly from the Swim CDN.
 
 ```html
@@ -214,8 +215,9 @@ library—along with its `swim-core.js` dependency, directly from the Swim CDN.
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/warp` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+from the Swim CDN, which bundles **@swim/warp** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+libraries.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -225,7 +227,7 @@ from the Swim CDN, which bundles `@swim/warp` along with all other
 
 ### ES6/TypeScript
 
-`@swim/warp` can be imported as an ES6 module from TypeScript and other
+**@swim/warp** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -234,7 +236,7 @@ import * as warp from "@swim/warp";
 
 ### CommonJS/Node.js
 
-`@swim/warp` can also be used as a CommonJS module in Node.js applications.
+**@swim/warp** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var warp = require("@swim/warp");
@@ -242,11 +244,11 @@ var warp = require("@swim/warp");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds all
-`@swim/warp` library exports to the global `swim` namespace.  The
+When loaded by a web browser, the `swim-mesh.js` script adds all
+**@swim/warp** library exports to the global `swim` namespace.  The
 `swim-mesh.js` script requires that `swim-core.js` has already been loaded.
 
-The `swim-system.js` script also adds all `@swim/warp` library exports
+The `swim-system.js` script also adds all **@swim/warp** library exports
 to the global `swim` namespace, making it a drop-in replacement for
-'swim-core.js' and `swim-mesh.js` when additional `@swim/system`
+'swim-core.js' and `swim-mesh.js` when additional **@swim/system**
 libraries are needed.

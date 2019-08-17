@@ -6,19 +6,19 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/dataflow` implements a compiler from
-[`@swim/structure`](https://www.npmjs.com/package/@swim/structure) selectors,
-operators, and functions, to continuously updated data structures driven by
-[`@swim/streamlet`](https://www.npmjs.com/package/@swim/streamlet) dataflow
-graphs.  `@swim/dataflow` turns dynamic data structures into living documents.
-`@swim/dataflow` is written in TypeScript, but can be used from either
-TypeScript or JavaScript.  `@swim/dataflow` is part of the
-[`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
+**@swim/dataflow** implements a compiler from
+[**@swim/structure**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/structure)
+selectors, operators, and functions, to continuously updated data structures
+driven by [**@swim/streamlet**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/streamlet)
+dataflow graphs.  **@swim/dataflow** turns dynamic data structures into living
+documents.  **@swim/dataflow** is written in TypeScript, but can be used from
+either TypeScript or JavaScript.  **@swim/dataflow** is part of the
+[**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core) framework.
 
 ## Overview
 
 A live updated data structure is represented as a `RecordScope`, which extends
-`Record` from `@swim/structure`.  An ordinary `Record` can be recursively
+`Record` from **@swim/structure**.  An ordinary `Record` can be recursively
 compiled into a `RecordScope` by invoking the `RecordScope.from` factory method.
 A compiled `RecordScope` has all of its nested expressions replaced by their
 evaluated state.  But unlike evaluating a `Record` with an `Interpreter`, if a
@@ -27,8 +27,8 @@ that member get flagged for recomputation, which occurs the next time
 `reconcileInput` gets invoked on the `RecordScope`.
 
 The `Dataflow.compile` method can also be used to compile an arbitrary
-`@swim/structure` expression into an `Outlet` that updates whenever the state
-of any of its transitively dependend expressions changes.
+**@swim/structure** expression into an `Outlet` that updates whenever
+the state of any of its transitively dependend expressions changes.
 
 ## Installation
 
@@ -44,15 +44,16 @@ And a pre-built UMD script can be found in
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-`@swim/dataflow` library, directly from the Swim CDN.
+**@swim/dataflow** library, directly from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/dataflow` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+from the Swim CDN, which bundles **@swim/dataflow** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+libraries.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -62,7 +63,7 @@ from the Swim CDN, which bundles `@swim/dataflow` along with all other
 
 ### ES6/TypeScript
 
-`@swim/dataflow` can be imported as an ES6 module from TypeScript and other
+**@swim/dataflow** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -71,7 +72,7 @@ import * as dataflow from "@swim/dataflow";
 
 ### CommonJS/Node.js
 
-`@swim/dataflow` can also be used as a CommonJS module in Node.js applications.
+**@swim/dataflow** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var dataflow = require("@swim/dataflow");
@@ -80,8 +81,8 @@ var dataflow = require("@swim/dataflow");
 ### Browser
 
 When loaded by a web browser, the `swim-core.js` script adds all
-`@swim/dataflow` library exports to the global `swim` namespace.
+**@swim/dataflow** library exports to the global `swim` namespace.
 
-The `swim-system.js` script also adds all `@swim/dataflow` library exports
+The `swim-system.js` script also adds all **@swim/dataflow** library exports
 to the global `swim` namespace, making it a drop-in replacement for
-`swim-core.js` when additional `@swim/system` libraries are needed.
+`swim-core.js` when additional **@swim/system** libraries are needed.

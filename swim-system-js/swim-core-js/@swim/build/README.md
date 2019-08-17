@@ -26,7 +26,7 @@ be found in `node_modules/@swim/build/dist/main/swim-build.js`.
 
 ### ES6/TypeScript
 
-`@swim/build` can be imported as an ES6 module from TypeScript and other
+**@swim/build** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -35,7 +35,7 @@ import * as build from "@swim/build";
 
 ### CommonJS/Node.js
 
-`@swim/build` can also be used as a CommonJS module in Node.js applications.
+**@swim/build** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var build = require("@swim/build");

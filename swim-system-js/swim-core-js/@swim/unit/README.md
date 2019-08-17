@@ -6,7 +6,7 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-Unit testing framework.<br><br><br><br>
+**@swim/unit** implements a specializable unit testing framework.<br><br><br><br>
 
 ## Overview
 
@@ -26,7 +26,7 @@ be found in `node_modules/@swim/unit/dist/main/swim-unit.js`.
 
 ### ES6/TypeScript
 
-`@swim/unit` can be imported as an ES6 module from TypeScript and other
+**@swim/unit** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -35,7 +35,7 @@ import * as unit from "@swim/unit";
 
 ### CommonJS/Node.js
 
-`@swim/unit` can also be used as a CommonJS module in Node.js applications.
+**@swim/unit** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var unit = require("@swim/unit");

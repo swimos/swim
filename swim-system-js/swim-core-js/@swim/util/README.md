@@ -6,18 +6,19 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/util` is a lightweight utility library for TypeScript applications,
+**@swim/util** is a lightweight utility library for TypeScript applications,
 providing interfaces and implementations for: ordering, equality, and hashing;
 type conversions; iterators; builders; maps; caches; and assertions.
-`@swim/util` is written in TypeScript, but can be used from either TypeScript
-or JavaScript.  `@swim/util` is part of the
-[`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
+**@swim/util** is written in TypeScript, but can be used from either TypeScript
+or JavaScript.  **@swim/util** is part of the
+[**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
+framework.
 
 ## Overview
 
 ### Ordering, equality, and hashing
 
-`@swim/util` exports `Comparable`, `Equals`, and `HashCode` interfaces that can
+**@swim/util** exports `Comparable`, `Equals`, and `HashCode` interfaces that can
 be implemented by ordered, equatable, and hashable classes, respectively.
 
 ```typescript
@@ -66,7 +67,7 @@ The exported `Murmur3` object implements the 32-bit
 
 ### Type conversions
 
-`@swim/util` provides two generic interfaces for converting between loosely
+**@swim/util** provides two generic interfaces for converting between loosely
 JavaScript values, and strongly typed TypeScript values, called `FromAny` and
 `ToAny`.
 
@@ -81,11 +82,11 @@ export interface ToAny<T> {
 
 `FromAny` is implicitly implemented by classes that have a static `fromAny`
 method that converts a loosely typed JavaScript value into a strongly typed
-TypeScript value.  `FromAny` is implemented by many `@swim/ui` and `@swim/ux`
-classes, and is used to abstract over the conversion of loosely typed values to
-strongly typed values.  For example, `@swim/view`'s `MemberAnimator` classes
-leverage `FromAny` to generically convert loosely typed animator arguments to
-strongly typed, tweenable values.
+TypeScript value.  `FromAny` is implemented by many **@swim/ui** and
+**@swim/ux** classes, and is used to abstract over the conversion of loosely
+typed values to strongly typed values.  For example, **@swim/view**'s
+`MemberAnimator` classes leverage `FromAny` to generically convert loosely
+typed animator arguments to strongly typed, tweenable values.
 
 `ToAny` is implemented by classes that have a `tonAny` method that returns a
 loosely typed JavaScript value.  `ToAny` is used to abstract over the
@@ -93,7 +94,7 @@ conversion of strongly typed values to loosely typed values.
 
 ### Iterator interfaces
 
-`@swim/util` exports an ES6-compatible `Iterator` interface, as well as a
+**@swim/util** exports an ES6-compatible `Iterator` interface, as well as a
 `Cursor` base class for positioned iterators.
 
 ```typescript
@@ -121,7 +122,7 @@ export interface PairBuilder<K, V, O> {
 
 ### Map interfaces
 
-`@swim/util` defines three key-value map interfaces: an ES6-compatible `Map`
+**@swim/util** defines three key-value map interfaces: an ES6-compatible `Map`
 interface, as well as an `OrderedMap` interface, and a `ReducedMap` interface.
 An `OrderedMap` has its entries sorted by key order.  A `ReducedMap` is an
 `OrderedMap` that memoizes partial combinations of sub-elements to support
@@ -152,15 +153,16 @@ be found in `node_modules/@swim/util/dist/main/swim-util.js`.
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-`@swim/util` library, directly from the Swim CDN.
+**@swim/util**` library, directly from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/util` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+from the Swim CDN, which bundles **@swim/util** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+libraries.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -170,7 +172,7 @@ from the Swim CDN, which bundles `@swim/util` along with all other
 
 ### ES6/TypeScript
 
-`@swim/util` can be imported as an ES6 module from TypeScript and other
+**@swim/util** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -179,7 +181,7 @@ import * as util from "@swim/util";
 
 ### CommonJS/Node.js
 
-`@swim/util` can also be used as a CommonJS module in Node.js applications.
+**@swim/util** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var util = require("@swim/util");
@@ -188,8 +190,8 @@ var util = require("@swim/util");
 ### Browser
 
 When loaded by a web browser, the `swim-core.js` script adds all
-`@swim/util` library exports to the global `swim` namespace.
+**@swim/util** library exports to the global `swim` namespace.
 
-The `swim-system.js` script also adds all `@swim/util` library exports
+The `swim-system.js` script also adds all **@swim/util** library exports
 to the global `swim` namespace, making it a drop-in replacement for
-`swim-core.js` when additional `@swim/system` libraries are needed.
+`swim-core.js` when additional **@swim/system** libraries are needed.

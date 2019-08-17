@@ -9,9 +9,8 @@
 Recon is object notation with attributes, like if JSON and XML had a baby.
 Attributes facilitate uniformly disambiguating polymorphic structures.  And
 first-class language extensions for selectors, expressions, and functions make
-Recon a highly expressive format for domain specific languages.  `@swim/recon`
-is part of the [`@swim/core`](https://www.npmjs.com/package/@swim/core)
-framework.
+Recon a highly expressive format for domain specific languages.  **@swim/recon**
+is part of the [https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core) framework.
 
 ## Language Overview
 
@@ -315,12 +314,12 @@ TODO.
 
 ## API Overview
 
-`@swim/recon` uses [`@swim/structure`](https://www.npmjs.com/package/@swim/structure)
+**@swim/recon** uses [**@swim/structure**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/structure)
 as its default abstract syntax tree.  Refer to the documentation for
-`@swim/structure` to learn how to manipulate parsed Recon structures.
+**@swim/structure** to learn how to manipulate parsed Recon structures.
 
 The `Recon` factory class provides static methods for parsing and serializing
-Recon structures.  Use `Recon.parse` to parse a `@swim/structure` `Value` from
+Recon structures.  Use `Recon.parse` to parse a **@swim/structure** `Value` from
 a string:
 
 ```typescript
@@ -341,8 +340,8 @@ Recon.toBlockString(Record.of("a", Slot.of("b", 2), "c"));
 // "a,b:2,c"
 ```
 
-`@swim/recon` also adds extension methods to `@swim/structure` to make parsing
-and serializing Recon more convenient.
+**@swim/recon** also adds extension methods to **@swim/structure** to make
+parsing and serializing Recon more convenient.
 
 The `Value.parseRecon` static method is an alias for `Recon.parse`.
 
@@ -373,14 +372,14 @@ Value.parseRecon("[Hello, @em[world]!]").toAny();
 ```
 
 `Recon` also provides methods to get composable
-[`@swim/codec`](https://www.npmjs.com/package/@swim/codec) `Parser`s and
-`Writer`s for low-level parsing and serialization needs, such as incremental
-parsing out of arbitrary `Input` streams.
+[**@swim/codec**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/codec)
+`Parser`s and `Writer`s for low-level parsing and serialization needs, such as
+incremental parsing out of arbitrary `Input` streams.
 
 The exported `ReconParser` and `ReconWriter` classes can be extended to
 directly generate and serialize alternative syntax trees, or to extend the
 Recon language itself by overriding parse methods.  `ReconStructureParser` and
-`ReconStructureWriter` provide the standard `@swim/structure`-based
+`ReconStructureWriter` provide the standard **@swim/structure**-based
 `ReconParser` and `ReconWriter` implementations, with full support for Recon
 selectors, expressions, and functions.
 
@@ -518,15 +517,16 @@ be found in `node_modules/@swim/recon/dist/main/swim-recon.js`.
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-`@swim/recon` library, directly from the Swim CDN.
+**@swim/recon** library, directly from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/recon` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+from the Swim CDN, which bundles **@swim/recon** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+libraries.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -536,7 +536,7 @@ from the Swim CDN, which bundles `@swim/recon` along with all other
 
 ### ES6/TypeScript
 
-`@swim/recon` can be imported as an ES6 module from TypeScript and other
+**@swim/recon** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -545,7 +545,7 @@ import * as recon from "@swim/recon";
 
 ### CommonJS/Node.js
 
-`@swim/recon` can also be used as a CommonJS module in Node.js applications.
+**@swim/recon** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var recon = require("@swim/recon");
@@ -554,8 +554,8 @@ var recon = require("@swim/recon");
 ### Browser
 
 When loaded by a web browser, the `swim-core.js` script adds all
-`@swim/recon` library exports to the global `swim` namespace.
+**@swim/recon** library exports to the global `swim` namespace.
 
-The `swim-system.js` script also adds all `@swim/recon` library exports
+The `swim-system.js` script also adds all **@swim/recon** library exports
 to the global `swim` namespace, making it a drop-in replacement for
-`swim-core.js` when additional `@swim/system` libraries are needed.
+`swim-core.js` when additional **@swim/system** libraries are needed.

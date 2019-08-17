@@ -6,12 +6,13 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/client` is a streaming API client for linking to lanes of stateful Web
+**@swim/client** is a streaming API client for linking to lanes of stateful Web
 Agents using the WARP protocol, enabling massively real-time applications that
 continuously synchronize all shared states with ping latency. WARP is like
 pub-sub without the broker, enabling every state of a Web API to be streamed,
-without interference from billions of queues.  `@swim/client` is part of the
-[`@swim/mesh`](https://www.npmjs.com/package/@swim/mesh) framework.
+without interference from billions of queues.  **@swim/client** is part of the
+[**@swim/mesh**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/mesh)
+framework.
 
 ## Overview
 
@@ -19,7 +20,7 @@ without interference from billions of queues.  `@swim/client` is part of the
 
 A `WarpRef` is a handle through which WARP downlinks can be opened.
 `WarpClient` implements the `WarpRef` interface, as does the exported
-`@swim/client` module object, and by extension, the global `swim` namespace
+**@swim/client** module object, and by extension, the global `swim` namespace
 object used web browsers and other non-module contexts.
 
 `WarpRef` instances have four methods that open different kinds of downlinks.
@@ -266,12 +267,12 @@ lane.  In addition to the standard `Downlink` callbacks, `ValueDownlink`
 supports registering `willSet` and `didSet` callbacks to observe all changes
 to downlinked state—whether remote or local.
 
-A `ValueDownlink` views its state as a `@swim/structure` `Value` by default.
+A `ValueDownlink` views its state as a **@swim/structure** `Value` by default.
 Use the `valueForm` method to create a typed projection of a `ValueDownlink`
-that automatically transforms its state using a `@swim/structure` `Form`.  For
-example, you can use `Form.foString()` to create a `ValueDownlink` that coerces
-its state to a string; and you can also use `Form.forAny()` to create a
-`ValueDownlink` that coerces its state to a plain old JavaScript value.
+that automatically transforms its state using a **@swim/structure** `Form`.
+For example, you can use `Form.foString()` to create a `ValueDownlink` that
+coerces its state to a string; and you can also use `Form.forAny()` to create
+a `ValueDownlink` that coerces its state to a plain old JavaScript value.
 
 ```typescript
 const value = swim.downlinkValue()
@@ -312,10 +313,10 @@ lane.  In addition to the standard `Downlink` callbacks, `MapDownlink` supports
 registering `willUpdate`, `didUpdate`, `willRemove`, and `didRemove` callbacks
 to observe all changes to downlinked map state—whether remote or local.
 
-A `MapDownlink` views its keys and values as `@swim/structure` `Value`s by
+A `MapDownlink` views its keys and values as **@swim/structure** `Value`s by
 default.  Use the `keyForm` and `valueForm` methods to create a typed
 projection of a `MapDownlink` that automatically transforms its keys and values
-using `@swim/structure` `Form`s.
+using **@swim/structure** `Form`s.
 
 ```typescript
 const map = swim.downlinkMap()
@@ -368,9 +369,9 @@ registering `willUpdate`, `didUpdate`, `willMove`, `didMove`, `willRemove`,
 and `didRemove` callbacks to observe all changes to downlinked list
 state—whether remote or local.
 
-A `ListDownlink` views its items as `@swim/structure` `Value`s by default.
+A `ListDownlink` views its items as **@swim/structure** `Value`s by default.
 Use the `valueForm` method to create a typed projection of a `ListDownlink`
-that automatically transforms its items using a `@swim/structure` `Form`.
+that automatically transforms its items using a **@swim/structure** `Form`.
 
 ```typescript
 const list = swim.downlinkList()
@@ -433,7 +434,7 @@ be found in `node_modules/@swim/client/dist/main/swim-client.js`.
 
 ### Browser
 
-Browser applications can load `swim-mesh.js`—which bundles the `@swim/client`
+Browser applications can load `swim-mesh.js`—which bundles the **@swim/client**
 library—along with its `swim-core.js` dependency, directly from the Swim CDN.
 
 ```html
@@ -442,8 +443,9 @@ library—along with its `swim-core.js` dependency, directly from the Swim CDN.
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/client` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+from the Swim CDN, which bundles **@swim/client** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+libraries.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -453,7 +455,7 @@ from the Swim CDN, which bundles `@swim/client` along with all other
 
 ### ES6/TypeScript
 
-`@swim/client` can be imported as an ES6 module from TypeScript and other
+**@swim/client** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -462,7 +464,7 @@ import * as client from "@swim/client";
 
 ### CommonJS/Node.js
 
-`@swim/client` can also be used as a CommonJS module in Node.js applications.
+**@swim/client** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
 var client = require("@swim/client");
@@ -470,11 +472,11 @@ var client = require("@swim/client");
 
 ### Browser
 
-When loaded by a web browser, the `swim-core.js` script adds all
-`@swim/client` library exports to the global `swim` namespace.  The
+When loaded by a web browser, the `swim-mesh.js` script adds all
+**@swim/client** library exports to the global `swim` namespace.  The
 `swim-mesh.js` script requires that `swim-core.js` has already been loaded.
 
-The `swim-system.js` script also adds all `@swim/client` library exports
+The `swim-system.js` script also adds all **@swim/client** library exports
 to the global `swim` namespace, making it a drop-in replacement for
-'swim-core.js' and `swim-mesh.js` when additional `@swim/system`
+'swim-core.js' and `swim-mesh.js` when additional **@swim/system**
 libraries are needed.

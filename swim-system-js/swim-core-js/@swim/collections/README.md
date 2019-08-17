@@ -6,22 +6,23 @@
 
 <a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
 
-`@swim/collections` implements data structures for key-value maps and
+**@swim/collections** implements data structures for key-value maps and
 sequential lists, including B-tree and S-tree (implicitly indexed B-tree)
-implementations.  `@swim/collections` is written in TypeScript, but can be
-used from either TypeScript or JavaScript.  `@swim/collections` is part of
-the [`@swim/core`](https://www.npmjs.com/package/@swim/core) framework.
+implementations.  **@swim/collections** is written in TypeScript, but can be
+used from either TypeScript or JavaScript.  **@swim/collections** is part of
+the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
+framework.
 
 ## Overview
 
 ### B-trees
 
-The `BTree` class implements the `OrderedMap` interface from `@swim/util`,
-and compares keys using `Objects.compare`, also from `@swim/util`.  `BTree`
+The `BTree` class implements the `OrderedMap` interface from **@swim/util**,
+and compares keys using `Objects.compare`, also from **@swim/util**.  `BTree`
 is internally immutable, enabling lightweight snapshotting via `BTree.clone`,
 and non-destructive mutation via `BTree.updated`, and `BTree.removed`.
 
-`BTree` also implements the `ReducedMap` interface from `@swim/util`,
+`BTree` also implements the `ReducedMap` interface from **@swim/util**,
 providing storage of sub-tree reductions in b-tree nodes to support log
 time recomputation of whole tree reductions after incremental updates.
 
@@ -48,15 +49,16 @@ And a pre-built UMD script can be found in
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-`@swim/collections` library, directly from the Swim CDN.
+**@swim/collections** library, directly from the Swim CDN.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles `@swim/collections` along with all other
-[`@swim/system`](https://www.npmjs.com/package/@swim/system) libraries.
+from the Swim CDN, which bundles **@swim/collections** together with all other
+[**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
+libraries.
 
 ```html
 <script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
@@ -66,7 +68,7 @@ from the Swim CDN, which bundles `@swim/collections` along with all other
 
 ### ES6/TypeScript
 
-`@swim/collections` can be imported as an ES6 module from TypeScript and other
+**@swim/collections** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
@@ -75,7 +77,7 @@ import * as collections from "@swim/collections";
 
 ### CommonJS/Node.js
 
-`@swim/collections` can also be used as a CommonJS module in Node.js
+**@swim/collections** can also be used as a CommonJS module in Node.js
 applications.
 
 ```javascript
@@ -85,8 +87,8 @@ var collections = require("@swim/collections");
 ### Browser
 
 When loaded by a web browser, the `swim-core.js` script adds all
-`@swim/collections` library exports to the global `swim` namespace.
+**@swim/collections** library exports to the global `swim` namespace.
 
-The `swim-system.js` script also adds all `@swim/collections` library exports
+The `swim-system.js` script also adds all **@swim/collections** library exports
 to the global `swim` namespace, making it a drop-in replacement for
-`swim-core.js` when additional `@swim/system` libraries are needed.
+`swim-core.js` when additional **@swim/system** libraries are needed.
