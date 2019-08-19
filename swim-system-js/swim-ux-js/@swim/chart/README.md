@@ -9,7 +9,11 @@
 **@swim/chart** provides multi-plot, fully animatable, canvas rendered chart
 widgets, suppporting line, area, and bubble graphs, with customizeable axes,
 and kinematic multitouch scale gestures for panning and zooming with momentum.
-**@swim/chart** is part of the
+Check out the [bubble chart](https://www.swimos.org/demo/chart/bubble.html),
+[area chart](https://www.swimos.org/demo/chart/area.html),
+[line chart](https://www.swimos.org/demo/chart/line.html), and
+[chart axes](https://www.swimos.org/demo/chart/bubble.html) demos to see
+multi-touch charts in action.  **@swim/chart** is part of the
 [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ux) framework.
 
 ## Installation

@@ -7,7 +7,9 @@
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/mapbox** adds support for overlaying **@swim/map** views on Mapbox maps.
-**@swim/mapbox** is part of the
+Check out the [traffic map](https://www.swimos.org/demo/map/traffic.html) and
+[transit map](https://www.swimos.org/demo/map/transit.html) demos to see
+massively real-time maps in action.  **@swim/mapbox** is part of the
 [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ux) framework.
 
 ## Installation

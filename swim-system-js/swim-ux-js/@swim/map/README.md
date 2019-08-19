@@ -8,7 +8,9 @@
 
 **@swim/map** provides canvas views for efficiently rendering geospatially
 located map overlays, including fully animatable views for lines, circles,
-and polygons.  **@swim/map** is part of the
+and polygons.  Check out the [traffic map](https://www.swimos.org/demo/map/traffic.html)
+and [transit map](https://www.swimos.org/demo/map/transit.html) demos to see
+massively real-time maps in action.  **@swim/map** is part of the
 [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ux) framework.
 
 ## Installation
