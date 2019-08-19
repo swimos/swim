@@ -37,7 +37,7 @@ component libraries:
   [doc](https://docs.swimos.org/js/latest/modules/_swim_map.html)) –
   canvas views for efficiently rendering geospatially located map overlays,
   including fully animatable views for lines, circles, and polygons.
-- [**@swim/mapbox**][github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/mapbox)
+- [**@swim/mapbox**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/mapbox)
   ([npm](https://www.npmjs.com/package/@swim/mapbox),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_mapbox.html)) –
   support for overlaying **@swim/map** views on Mapbox maps.
