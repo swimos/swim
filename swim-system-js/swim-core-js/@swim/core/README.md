@@ -87,19 +87,27 @@ bundles all **@swim/core** component libraries, can be found in
 
 ### Browser
 
-Browser applications can load `swim-core.js` directly from the Swim CDN.
+Browser applications can load `swim-core.js` directly from the swimOS CDN.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles **@swim/core** together with all other
+from the swimOS CDN, which bundles **@swim/core** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 frameworks.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-system.min.js"></script>
 ```
 
 ## Usage

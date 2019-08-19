@@ -220,26 +220,26 @@ overlays.  **Swim UX** consists of the following component libraries:
   [doc](https://docs.swimos.org/js/latest/modules/_swim_ux.html)) –
   seamlessly animated user interface widgets, including gauges, pie charts,
   line, area, and bubble charts, and geospatial map overlays.
-- [**@swim/gauge**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/gauge)
+- [**@swim/gauge**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/gauge)
   ([npm](https://www.npmjs.com/package/@swim/gauge),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_gauge.html)) –
   multi-dial, fully animatable, canvas rendered gauge widget.
-- [**@swim/pie**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/pie)
+- [**@swim/pie**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/pie)
   ([npm](https://www.npmjs.com/package/@swim/pie),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_pie.html)) –
   multi-slice, fully animatable, canvas rendered pie chart widget.
-- [**@swim/chart**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/chart)
+- [**@swim/chart**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/chart)
   ([npm](https://www.npmjs.com/package/@swim/chart),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_chart.html)) –
   multi-plot, fully animatable, canvas rendered chart widget, suppporting line,
   area, and bubble graphs, with customizeable axes, and kinematic multitouch
   scale gestures for panning and zooming with momentum.
-- [**@swim/map**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/map)
+- [**@swim/map**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/map)
   ([npm](https://www.npmjs.com/package/@swim/map),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_map.html)) –
   canvas views for efficiently rendering geospatially located map overlays,
   including fully animatable views for lines, circles, and polygons.
-- [**@swim/mapbox**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/mapbox)
+- [**@swim/mapbox**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/mapbox)
   ([npm](https://www.npmjs.com/package/@swim/mapbox),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_mapbox.html)) –
   support for overlaying **@swim/map** views on Mapbox maps.
@@ -254,11 +254,11 @@ libraries:
   ([npm](https://www.npmjs.com/package/@swim/web),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_web.html)) –
   thin web application framework built on the **@swim/ui** toolkit.
-- [**@swim/site**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/site)
+- [**@swim/site**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/site)
   ([npm](https://www.npmjs.com/package/@swim/site),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_site.html)) –
   minimalist components that implement common dynamic website behaviors.
-- [**@swim/app**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/app)
+- [**@swim/app**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/app)
   ([npm](https://www.npmjs.com/package/@swim/app),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_app.html)) –
   lightweight application loader that dynamically instantiates views and
@@ -277,13 +277,17 @@ bundles all **@swim/system** child frameworks, can be found in
 
 ### Browser
 
-Browser applications can load `swim-system.js` directly from the Swim CDN.
+Browser applications can load `swim-system.js` directly from the swimOS CDN.
 The `swim-system.js` bundle is self-contained; it supersedes `swim-core.js`,
 `swim-mesh.js`, `swim-ui.js`, `swim-ux.js`, and `swim-web.js`—those scripts
 need not be loaded when using `swim-system.js`.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-system.min.js"></script>
 ```
 
 ## Usage

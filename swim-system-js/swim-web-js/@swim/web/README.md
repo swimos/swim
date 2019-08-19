@@ -19,11 +19,11 @@ HTML elements.  **@swim/web** is a part of the broader
 The **@swim/web** umbrella package depends on, and re-exports, the following
 component libraries:
 
-- [**@swim/site**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/site)
+- [**@swim/site**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/site)
   ([npm](https://www.npmjs.com/package/@swim/site),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_site.html)) –
   inimalist components that implement common dynamic website behaviors.
-- [**@swim/app**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/app)
+- [**@swim/app**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/app)
   ([npm](https://www.npmjs.com/package/@swim/app),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_app.html)) –
   lightweight application loader that dynamically instantiates views and
@@ -47,21 +47,31 @@ bundles all **@swim/web** component libraries, can be found in
 ### Browser
 
 Browser applications can load `swim-web.js`, along with its `swim-core.js`
-and `swim-ui.js` dependencies, from the Swim CDN.
+and `swim-ui.js` dependencies, from the swimOS CDN.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-web.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ui.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-web.min.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles **@swim/web** together with all other
+from the swimOS CDN, which bundles **@swim/web** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 frameworks.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-system.min.js"></script>
 ```
 
 ## Usage

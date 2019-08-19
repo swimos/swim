@@ -447,6 +447,7 @@ export class Target {
           return build.generate(bundleConfig.output!);
         })
         .then((bundle: rollup.RollupOutput): rollup.RollupOutput => {
+          bundle.output[0].fileName = bundleConfig.output!.file!;
           bundle = this.minify(bundle, bundleConfig.output!);
 
           this.writeBundle(bundle, bundleConfig.output!);
@@ -498,8 +499,10 @@ export class Target {
 
   minify(bundle: rollup.RollupOutput, options: rollup.OutputOptions): rollup.RollupOutput {
     if (!this.project.devel) {
-      const chunk = bundle.output[0] as rollup.OutputChunk;
-      const scriptPath = path.basename(options.file!);
+      const inputChunk = bundle.output[0] as rollup.OutputChunk;
+      const outputDir = path.dirname(inputChunk.fileName);
+      const scriptName = path.basename(inputChunk.fileName, ".js") + ".min.js";
+      const scriptPath = path.resolve(outputDir, scriptName);
       const terserOptions: any = {
         output: {},
       };
@@ -507,17 +510,29 @@ export class Target {
         terserOptions.output.preamble = this.preamble;
       }
       if (options.sourcemap) {
-        const sourceMappingPath = scriptPath + ".map";
+        const sourceMappingURL = scriptName + ".map";
         terserOptions.sourceMap = {
-          content: chunk.map,
+          content: inputChunk.map,
           filename: scriptPath,
-          url: sourceMappingPath,
+          url: sourceMappingURL,
         };
       }
-      const output = terser.minify(chunk.code, terserOptions);
+      const output = terser.minify(inputChunk.code, terserOptions);
       if (!output.error) {
-        chunk.code = output.code;
-        chunk.map = output.map;
+        const outputChunk: rollup.OutputChunk = {
+          fileName: scriptPath,
+          code: output.code,
+          map: output.map,
+          name: inputChunk.name,
+          facadeModuleId: inputChunk.facadeModuleId,
+          modules: inputChunk.modules,
+          imports: inputChunk.imports,
+          dynamicImports: inputChunk.dynamicImports,
+          exports: inputChunk.exports,
+          isEntry: inputChunk.isEntry,
+          isDynamicEntry: inputChunk.isDynamicEntry,
+        };
+        bundle.output.push(outputChunk);
       } else {
         this.onMinifyError(output.error);
       }
@@ -587,19 +602,22 @@ export class Target {
   }
 
   protected writeBundle(bundle: rollup.RollupOutput, options: rollup.OutputOptions): void {
-    const chunk = bundle.output[0] as rollup.OutputChunk;
-    const scriptPath = options.file!;
-    const sourceMappingPath = scriptPath + ".map";
+    for (let i = 0; i < bundle.output.length; i += 1) {
+      const chunk = bundle.output[i] as rollup.OutputChunk;
+      const scriptPath = chunk.fileName!;
+      const sourceMappingPath = scriptPath + ".map";
 
-    Target.mkdir(path.dirname(scriptPath));
-    let code = chunk.code;
-    if (options.sourcemap && this.project.devel) {
-      code += "//# sourceMappingURL=" + path.basename(sourceMappingPath);
-    }
-    fs.writeFileSync(scriptPath, code, "utf8");
+      Target.mkdir(path.dirname(scriptPath));
+      let code = chunk.code;
+      if (options.sourcemap && i === 0) {
+        const sourceMappingURL = path.basename(sourceMappingPath);
+        code += "//# sourceMappingURL=" + sourceMappingURL;
+      }
+      fs.writeFileSync(scriptPath, code, "utf8");
 
-    if (options.sourcemap) {
-      fs.writeFileSync(sourceMappingPath, chunk.map, "utf8");
+      if (options.sourcemap) {
+        fs.writeFileSync(sourceMappingPath, chunk.map, "utf8");
+      }
     }
   }
 

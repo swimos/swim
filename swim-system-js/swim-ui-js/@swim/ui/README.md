@@ -117,20 +117,29 @@ bundles all **@swim/ui** component libraries, can be found in
 ### Browser
 
 Browser applications can load `swim-ui.js`, along with its `swim-core.js`
-dependency, from the Swim CDN.
+dependency, from the swimOS CDN.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ui.min.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles **@swim/ui** together with all other
+from the swimOS CDN, which bundles **@swim/ui** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 frameworks.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-system.min.js"></script>
 ```
 
 ## Usage

@@ -18,32 +18,32 @@ framework.
 The **@swim/ux** umbrella package depends on, and re-exports, the following
 component libraries:
 
-- [**@swim/gauge**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/gauge)
+- [**@swim/gauge**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/gauge)
   ([npm](https://www.npmjs.com/package/@swim/gauge),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_gauge.html)) –
   multi-dial, fully animatable, canvas rendered gauge widget.
-- [**@swim/pie**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/pie)
+- [**@swim/pie**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/pie)
   ([npm](https://www.npmjs.com/package/@swim/pie),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_pie.html)) –
   multi-slice, fully animatable, canvas rendered pie chart widget.
-- [**@swim/chart**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/chart)
+- [**@swim/chart**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/chart)
   ([npm](https://www.npmjs.com/package/@swim/chart),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_chart.html)) –
   multi-plot, fully animatable, canvas rendered chart widget, suppporting line,
   area, and bubble graphs, with customizeable axes, and kinematic multitouch
   scale gestures for panning and zooming with momentum.
-- [**@swim/map**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/map)
+- [**@swim/map**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/map)
   ([npm](https://www.npmjs.com/package/@swim/map),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_map.html)) –
   canvas views for efficiently rendering geospatially located map overlays,
   including fully animatable views for lines, circles, and polygons.
-- [**@swim/mapbox**][github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/mapbox)
+- [**@swim/mapbox**][github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/mapbox)
   ([npm](https://www.npmjs.com/package/@swim/mapbox),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_mapbox.html)) –
   support for overlaying **@swim/map** views on Mapbox maps.
 
 **@swim/ux** builds on the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
-and [**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/ui)
+and [**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ui)
 frameworks; it has no additional required dependencies.
 
 ## Installation
@@ -60,21 +60,31 @@ bundles all **@swim/ux** component libraries, can be found in
 ### Browser
 
 Browser applications can load `swim-ux.js`, along with its `swim-core.js`
-and `swim-ui.js` dependencies, from the Swim CDN.
+and `swim-ui.js` dependencies, from the swimOS CDN.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ux.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ui.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ux.min.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles **@swim/ux** together with all other
+from the swimOS CDN, which bundles **@swim/ux** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 frameworks.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-system.min.js"></script>
 ```
 
 ## Usage

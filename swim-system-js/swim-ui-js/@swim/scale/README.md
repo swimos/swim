@@ -25,20 +25,29 @@ be found in `node_modules/@swim/scale/dist/main/swim-scale.js`.
 ### Browser
 
 Browser applications can load `swim-ui.js`—which bundles the **@swim/scale**
-library—along with its `swim-core.js` dependency, directly from the Swim CDN.
+library—along with its `swim-core.js` dependency, directly from the swimOS CDN.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ui.min.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles **@swim/scale** together with all other
+from the swimOS CDN, which bundles **@swim/scale** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 libraries.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-system.min.js"></script>
 ```
 
 ## Usage

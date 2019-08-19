@@ -24,21 +24,31 @@ be found in `node_modules/@swim/mapbox/dist/main/swim-mapbox.js`.
 
 Browser applications can load `swim-ux.js`—which bundles the **@swim/mapbox**
 library—along with its `swim-core.js` and `swim-ui.js` dependencies, directly
-from the Swim CDN.
+from the swimOS CDN.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ux.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ui.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ux.min.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the Swim CDN, which bundles **@swim/mapbox** together with all other
+from the swimOS CDN, which bundles **@swim/mapbox** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 libraries.
 
 ```html
+<!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
+
+<!-- Production -->
+<script src="https://cdn.swimos.org/js/latest/swim-system.min.js"></script>
 ```
 
 ## Usage
