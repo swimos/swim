@@ -1,10 +1,10 @@
 # @swim/collections
 
 [![package](https://img.shields.io/npm/v/@swim/collections.svg)](https://www.npmjs.com/package/@swim/collections)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_collections.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_collections.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/collections** implements data structures for key-value maps and
 sequential lists, including B-tree and S-tree (implicitly indexed B-tree)
@@ -52,7 +52,7 @@ Browser applications can load `swim-core.js`, which comes bundled with the
 **@swim/collections** library, directly from the Swim CDN.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
@@ -61,7 +61,7 @@ from the Swim CDN, which bundles **@swim/collections** together with all other
 libraries.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
 ```
 
 ## Usage

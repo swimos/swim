@@ -1,6 +1,6 @@
-# swimOS &ensp; ![version](https://img.shields.io/github/tag/swimOS/swim.svg?label=version) [![javadoc](https://img.shields.io/badge/doc-JavaDoc-blue.svg)](http://docs.swim.ai/java/latest) [![typedoc](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest) [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community) [![license](https://img.shields.io/github/license/swimOS/swim.svg)](https://github.com/swimos/swim/blob/master/LICENSE) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](code-of-conduct.md)
+# swimOS &ensp; ![version](https://img.shields.io/github/tag/swimOS/swim.svg?label=version) [![javadoc](https://img.shields.io/badge/doc-JavaDoc-blue.svg)](https://docs.swimos.org/java/latest) [![typedoc](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest) [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community) [![license](https://img.shields.io/github/license/swimOS/swim.svg)](https://github.com/swimos/swim/blob/master/LICENSE) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](code-of-conduct.md)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **swimOS** is a complete, self-contained distributed software platform for
 building stateful, massively real-time streaming applications.  **swimOS**
@@ -11,8 +11,8 @@ without a separate app server.
 
 ## Getting Started
 
-Check out the [**swimOS** cookbook](https://swim.dev/tutorials) to learn how
-to build massively real-time streaming applications.  Use the
+Check out the [**swimOS** cookbook](https://www.swimos.org/tutorials) to learn
+how to build massively real-time streaming applications.  Use the
 [**Swim API**](https://mvnrepository.com/artifact/ai.swim/swim-api) to write
 Web Agents that run on the **Swim Kernel**.  Use the
 [**Swim Server**](https://mvnrepository.com/artifact/ai.swim/swim-server)
@@ -23,7 +23,7 @@ To write WARP client applications that run in Node.js and web browsers,
 install the [**@swim/mesh**](swim-system-js/swim-mesh-js) library from npm.
 To build a real-time Web UI, npm install the [**@swim/ui**](swim-system-js/swim-ui-js)
 and [**@swim/ux**](swim-system-js/swim-ux-js) libraries.
-Visit [**swim.dev**](https://swim.dev) to learn more.
+Visit [**swimOS.org**](https://www.swimos.org) to learn more.
 
 ## Architecture
 
@@ -44,7 +44,7 @@ The **Swim Kernel** holistically distributes and executes all aspects of
 stateful Web Agent applications, providing builtin distributed persistence,
 messaging, scheduling, and multiplexed streaming APIs.
 
-<img src="http://docs.swim.ai/assets/images/middleware-stack-vs-distributed-os.svg" alt="Middleware Stack vs. Distributed OS">
+<img src="https://docs.swimos.org/readme/middleware-stack-vs-distributed-os.svg" alt="Middleware Stack vs. Distributed OS">
 
 Vertical integration greatly simplifies application development and operations,
 while radically improving performance.  CPUs are 1,000,000x+ faster than

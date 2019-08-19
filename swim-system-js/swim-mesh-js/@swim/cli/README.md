@@ -1,10 +1,10 @@
 # @swim/cli
 
 [![package](https://img.shields.io/npm/v/@swim/cli.svg)](https://www.npmjs.com/package/@swim/cli)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_cli.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_cli.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 Command line client for linking to Web Agent lanes over the WARP protocol.<br><br><br><br>
 

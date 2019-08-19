@@ -3,7 +3,7 @@
   "version": "3.9.0",
   "description": "Swim UI TypeScript Framework",
   "homepage": "https://github.com/swimos/swim",
-  "author": "Chris Sachs <chris@swim.ai>",
+  "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2019 SWIM.AI inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",

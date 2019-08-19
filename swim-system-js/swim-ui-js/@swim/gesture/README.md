@@ -1,10 +1,10 @@
 # @swim/gesture
 
 [![package](https://img.shields.io/npm/v/@swim/gesture.svg)](https://www.npmjs.com/package/@swim/gesture)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_gesture.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_gesture.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/gesture** implements multitouch gesture recognizers, with kinematic
 surface modeling.  **@swim/gesture** is part of the
@@ -27,8 +27,8 @@ Browser applications can load `swim-ui.js`—which bundles the **@swim/gesture**
 library—along with its `swim-core.js` dependency, directly from the Swim CDN.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
-<script src="https://cdn.swim.ai/js/latest/swim-ui.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
@@ -37,7 +37,7 @@ from the Swim CDN, which bundles **@swim/gesture** together with all other
 libraries.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
 ```
 
 ## Usage

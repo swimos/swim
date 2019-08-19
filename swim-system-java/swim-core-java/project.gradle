@@ -206,7 +206,7 @@ if (project.hasProperty('nexusUsername') && project.hasProperty('nexusPassword')
             developer {
               id 'c9r'
               name 'Chris Sachs'
-              email 'chris@swim.ai'
+              email 'chris@swimos.org'
             }
           }
         }

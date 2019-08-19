@@ -1,10 +1,10 @@
 # @swim/recon
 
 [![package](https://img.shields.io/npm/v/@swim/recon.svg)](https://www.npmjs.com/package/@swim/recon)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_recon.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_recon.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 Recon is object notation with attributes, like if JSON and XML had a baby.
 Attributes facilitate uniformly disambiguating polymorphic structures.  And
@@ -520,7 +520,7 @@ Browser applications can load `swim-core.js`, which comes bundled with the
 **@swim/recon** library, directly from the Swim CDN.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
@@ -529,7 +529,7 @@ from the Swim CDN, which bundles **@swim/recon** together with all other
 libraries.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
 ```
 
 ## Usage

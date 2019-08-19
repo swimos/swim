@@ -3,7 +3,7 @@
   "version": "3.10.0",
   "description": "Seamlessly animated user interface widgets, including gauges, pie charts, line, area, and bubble charts, and geospatial map overlays",
   "homepage": "https://github.com/swimos/swim",
-  "author": "Chris Sachs <chris@swim.ai>",
+  "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2019 SWIM.AI inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",

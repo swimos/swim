@@ -1,10 +1,10 @@
 # @swim/structure
 
 [![package](https://img.shields.io/npm/v/@swim/structure.svg)](https://www.npmjs.com/package/@swim/structure)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_structure.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_structure.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/structure** implements a generic structured data model that is compatible
 with JSON, XML, and many other data languages.  **@swim/structure** has first
@@ -68,7 +68,7 @@ unlike JSON object keys, `slot` keys are not restricted to string values.
 
 ### Structures
 
-<img src="http://docs.swim.ai/assets/images/item-family.svg" alt="Item Family" align="right">
+<img src="https://docs.swimos.org/readme/item-family.svg" alt="Item Family" align="right">
 
 At the center of **@swim/structure** is the `Item` class, which defines an
 algebraic data type for representing and manipulating structured data.  `Item`
@@ -117,7 +117,7 @@ a mixture of `Field` and `Value` members acts like a partially keyed list.
 
 ### Expressions
 
-<img src="http://docs.swim.ai/assets/images/expression-family.svg" alt="Expression Family" align="right">
+<img src="https://docs.swimos.org/readme/expression-family.svg" alt="Expression Family" align="right">
 
 Beyond representing static data structures, **@swim/structure** can also model
 dynamic data structures, expressed using `Selector`, `Operator`, and `Func`
@@ -274,7 +274,7 @@ Browser applications can load `swim-core.js`, which comes bundled with the
 **@swim/structure** library, directly from the Swim CDN.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
@@ -283,7 +283,7 @@ from the Swim CDN, which bundles **@swim/structure** together with all other
 libraries.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
 ```
 
 ## Usage

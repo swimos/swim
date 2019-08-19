@@ -1,10 +1,10 @@
 # @swim/ux
 
 [![package](https://img.shields.io/npm/v/@swim/ux.svg)](https://www.npmjs.com/package/@swim/ux)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_ux.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_ux.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/ux** implements seamlessly animated user interface widgets, including
 gauges, pie charts, line, area, and bubble charts, and geospatial map overlays.
@@ -20,26 +20,26 @@ component libraries:
 
 - [**@swim/gauge**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/gauge)
   ([npm](https://www.npmjs.com/package/@swim/gauge),
-  [doc](http://docs.swim.ai/js/latest/modules/_swim_gauge.html)) –
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_gauge.html)) –
   multi-dial, fully animatable, canvas rendered gauge widget.
 - [**@swim/pie**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/pie)
   ([npm](https://www.npmjs.com/package/@swim/pie),
-  [doc](http://docs.swim.ai/js/latest/modules/_swim_pie.html)) –
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_pie.html)) –
   multi-slice, fully animatable, canvas rendered pie chart widget.
 - [**@swim/chart**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/chart)
   ([npm](https://www.npmjs.com/package/@swim/chart),
-  [doc](http://docs.swim.ai/js/latest/modules/_swim_chart.html)) –
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_chart.html)) –
   multi-plot, fully animatable, canvas rendered chart widget, suppporting line,
   area, and bubble graphs, with customizeable axes, and kinematic multitouch
   scale gestures for panning and zooming with momentum.
 - [**@swim/map**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/map)
   ([npm](https://www.npmjs.com/package/@swim/map),
-  [doc](http://docs.swim.ai/js/latest/modules/_swim_map.html)) –
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_map.html)) –
   canvas views for efficiently rendering geospatially located map overlays,
   including fully animatable views for lines, circles, and polygons.
 - [**@swim/mapbox**][github](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/mapbox)
   ([npm](https://www.npmjs.com/package/@swim/mapbox),
-  [doc](http://docs.swim.ai/js/latest/modules/_swim_mapbox.html)) –
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_mapbox.html)) –
   support for overlaying **@swim/map** views on Mapbox maps.
 
 **@swim/ux** builds on the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
@@ -63,9 +63,9 @@ Browser applications can load `swim-ux.js`, along with its `swim-core.js`
 and `swim-ui.js` dependencies, from the Swim CDN.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
-<script src="https://cdn.swim.ai/js/latest/swim-ui.js"></script>
-<script src="https://cdn.swim.ai/js/latest/swim-ux.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ux.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
@@ -74,7 +74,7 @@ from the Swim CDN, which bundles **@swim/ux** together with all other
 frameworks.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
 ```
 
 ## Usage

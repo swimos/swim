@@ -1,10 +1,10 @@
 # @swim/streamlet
 
 [![package](https://img.shields.io/npm/v/@swim/structure.svg)](https://www.npmjs.com/package/@swim/streamlet)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_streamlet.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_streamlet.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/streamlet** provides a stateful, streaming component model.  Streamlets
 are stateful application components that continuously consume input state from
@@ -74,7 +74,7 @@ Browser applications can load `swim-core.js`, which comes bundled with the
 **@swim/streamlet** library, directly from the Swim CDN.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
@@ -83,7 +83,7 @@ from the Swim CDN, which bundles **@swim/streamlet** together with all other
 libraries.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
 ```
 
 ## Usage

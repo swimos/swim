@@ -1,10 +1,10 @@
 # @swim/mesh
 
 [![package](https://img.shields.io/npm/v/@swim/mesh.svg)](https://www.npmjs.com/package/@swim/mesh)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_mesh.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_mesh.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/mesh** implements a multiplexed streaming WARP client that runs in both
 Node.js and web browsers. **@swim/mesh** can be used in concert with the
@@ -21,13 +21,13 @@ component libraries:
 
 - [**@swim/warp**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/warp)
   ([npm](https://www.npmjs.com/package/@swim/warp),
-  [doc](http://docs.swim.ai/js/latest/modules/_swim_warp.html)) –
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_warp.html)) –
   WebSocket protocol for dynamically multiplexing large numbers of bidirectional
   links to streaming APIs, called lanes, of URI-addressed distributed objects,
   called nodes, that run stateful distributed processes, called Web Agents.
 - [**@swim/client**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/client)
   ([npm](https://www.npmjs.com/package/@swim/client),
-  [doc](http://docs.swim.ai/js/latest/modules/_swim_client.html)) –
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_client.html)) –
   streaming API client for linking to lanes of stateful Web Agents using the
   WARP protocol, enabling massively real-time applications that continuously
   synchronize all shared states with ping latency.
@@ -53,8 +53,8 @@ Browser applications can load `swim-mesh.js`, along with its `swim-core.js`
 dependency, from the Swim CDN.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
-<script src="https://cdn.swim.ai/js/latest/swim-mesh.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-mesh.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
@@ -63,7 +63,7 @@ from the Swim CDN, which bundles **@swim/mesh** together with all other
 frameworks.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
 ```
 
 ## Usage

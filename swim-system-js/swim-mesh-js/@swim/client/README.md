@@ -1,10 +1,10 @@
 # @swim/client
 
 [![package](https://img.shields.io/npm/v/@swim/client.svg)](https://www.npmjs.com/package/@swim/client)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_client.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_client.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/client** is a streaming API client for linking to lanes of stateful Web
 Agents using the WARP protocol, enabling massively real-time applications that
@@ -438,8 +438,8 @@ Browser applications can load `swim-mesh.js`—which bundles the **@swim/client*
 library—along with its `swim-core.js` dependency, directly from the Swim CDN.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
-<script src="https://cdn.swim.ai/js/latest/swim-mesh.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-mesh.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
@@ -448,7 +448,7 @@ from the Swim CDN, which bundles **@swim/client** together with all other
 libraries.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
 ```
 
 ## Usage

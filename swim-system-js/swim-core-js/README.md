@@ -1,10 +1,10 @@
 # Swim Core TypeScript Framework
 
 [![package](https://img.shields.io/npm/v/@swim/core.svg)](https://www.npmjs.com/package/@swim/core)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_core.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_core.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 The **Swim Core** framework provides a lightweight, portable, dependency-free,
 and strongly typed baseline on which to build higher level libraries.
@@ -75,7 +75,7 @@ bundles all **@swim/core** component libraries, can be found in
 Browser applications can load `swim-core.js` directly from the Swim CDN.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
@@ -84,7 +84,7 @@ from the Swim CDN, which bundles **@swim/core** together with all other
 frameworks.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
 ```
 
 ## Usage

@@ -1,10 +1,10 @@
 # @swim/web
 
 [![package](https://img.shields.io/npm/v/@swim/web.svg)](https://www.npmjs.com/package/@swim/web)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](http://docs.swim.ai/js/latest/modules/_swim_web.html)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_web.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
-<a href="https://developer.swim.ai"><img src="https://cdn.swim.ai/images/marlin-blue.svg" align="left"></a>
+<a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/web** implements a thin web application framework built on the
 **@swim/ui** toolkit.  **@swim/web** makes it easy to embed
@@ -21,11 +21,11 @@ component libraries:
 
 - [**@swim/site**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/site)
   ([npm](https://www.npmjs.com/package/@swim/site),
-  [doc](http://docs.swim.ai/js/latest/modules/_swim_site.html)) –
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_site.html)) –
   inimalist components that implement common dynamic website behaviors.
 - [**@swim/app**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/app)
   ([npm](https://www.npmjs.com/package/@swim/app),
-  [doc](http://docs.swim.ai/js/latest/modules/_swim_app.html)) –
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_app.html)) –
   lightweight application loader that dynamically instantiates views and
   controllers declared by `swim-` HTML attributes.
 
@@ -50,9 +50,9 @@ Browser applications can load `swim-web.js`, along with its `swim-core.js`
 and `swim-ui.js` dependencies, from the Swim CDN.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-core.js"></script>
-<script src="https://cdn.swim.ai/js/latest/swim-ui.js"></script>
-<script src="https://cdn.swim.ai/js/latest/swim-web.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-web.js"></script>
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
@@ -61,7 +61,7 @@ from the Swim CDN, which bundles **@swim/web** together with all other
 frameworks.
 
 ```html
-<script src="https://cdn.swim.ai/js/latest/swim-system.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-system.js"></script>
 ```
 
 ## Usage
