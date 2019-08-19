@@ -6,15 +6,15 @@
 
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
-The **Swim System** umbrella framework provides a standalone set of frameworks
-for building massively real-time streaming WARP clients and web user interface
-applications.  **Swim System** encompasses the [**Swim Core**](swim-core-js)
+The **Swim System** TypeScript implementation provides a standalone set of
+frameworks for building massively real-time streaming WARP clients and web user
+interface applications.  **Swim System** encompasses the [**Swim Core**](swim-core-js)
 foundation framework, the [**Swim Mesh**](swim-mesh-js) multiplexed streaming
 WARP framework, the [**Swim UI**](swim-ui-js) and [**Swim UX**](swim-ux-js)
 real-time user interface toolkits, and the [**Swim Web**](swim-web-js)
 real-time web application framework.
 
-## **Umbrella Framework**
+## Umbrella Framework
 
 The **Swim System** umbrella framework has no external dependencies when run
 in a web browser, and depends only on a WebSocket implementation when run in
@@ -24,7 +24,7 @@ Node.js.  **Swim System** provides the following top-level libraries:
   umbrella package that depends on, and re-exports, all **Swim System**
   child frameworks and libraries.
 
-### [**Swim Core Framework**](swim-core-js)
+### [**Swim Core** Framework](swim-core-js)
 
 The **Swim Core** framework provides a lightweight, portable, dependency-free,
 and strongly typed baseline on which to build higher level libraries.
@@ -67,7 +67,7 @@ and strongly typed baseline on which to build higher level libraries.
   subcomponents, including an efficient and safe codec for parsing and
   writing compliant URI strings.
 
-### [**Swim Mesh Framework**](swim-mesh-js)
+### [**Swim Mesh** Framework](swim-mesh-js)
 
 The **Swim Mesh** framework implements a multiplexed streaming WARP client that
 runs in both Node.js and web browsers.  **Swim Mesh** consists of the following
@@ -86,7 +86,7 @@ component libraries:
 - [**@swim/cli**](swim-mesh-js/@swim/cli) –
   command line client for linking to Web Agent lanes over the WARP protocol.
 
-### [**Swim UI Framework**](swim-ui-js)
+### [**Swim UI** Framework](swim-ui-js)
 
 The **Swim UI** framework implements a massively real-time user interface
 toolkit, with a unified view hierarchy for HTML, SVG, and Canvas components,
@@ -142,7 +142,7 @@ consists of the following component libraries:
 - [**@swim/gesture**](swim-ui-js/@swim/gesture) –
   multitouch gesture recognizers, with kinematic surface modeling.
 
-### [**Swim UX Framework**](swim-ux-js)
+### [**Swim UX** Framework](swim-ux-js)
 
 The **Swim UX** framework implements seamlessly animated user interface widgets,
 including gauges, pie charts, line, area, and bubble charts, and geospatial map
@@ -164,7 +164,7 @@ overlays.  **Swim UX** consists of the following component libraries:
 - [**@swim/mapbox**](swim-ux-js/@swim/mapbox) –
   support for overlaying **@swim/map** views on Mapbox maps.
 
-### [**Swim Web Framework**](swim-web-js)
+### [**Swim Web** Framework](swim-web-js)
 
 The **Swim Web** framework implements a thin web application framework built
 on the **Swim UI** toolkit.  **Swim Web** consists of the following component
