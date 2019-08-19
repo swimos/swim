@@ -97,7 +97,8 @@ requires that `swim-core.js` and `swim-ui.js` have already been loaded.
 
 The `swim-system.js` script also adds all **@swim/ux** component library
 exports to the global `swim` namespace, making it a drop-in replacement
-for `swim-ux.js` when additional **@swim/system** frameworks are needed.
+for `swim-core.js`, `swim-ui.js`, and `swim-ux.js` when additional
+**@swim/system** frameworks are needed.
 
 ## Development
 
