@@ -29,7 +29,7 @@ export interface ArcInit {
   innerRadius?: AnyLength;
   outerRadius?: AnyLength;
   startAngle?: AnyAngle;
-  deltaAngle?: AnyAngle;
+  sweepAngle?: AnyAngle;
   padAngle?: AnyAngle;
   padRadius?: AnyLength | null;
   cornerRadius?: AnyLength;
@@ -51,12 +51,12 @@ export class Arc implements Graphic, Equals, Debug {
   /** @hidden */
   readonly _cornerRadius: Length;
 
-  constructor(innerRadius: Length, outerRadius: Length, startAngle: Angle, deltaAngle: Angle,
+  constructor(innerRadius: Length, outerRadius: Length, startAngle: Angle, sweepAngle: Angle,
               padAngle: Angle, padRadius: Length | null, cornerRadius: Length) {
     this._innerRadius = innerRadius;
     this._outerRadius = outerRadius;
     this._startAngle = startAngle;
-    this._deltaAngle = deltaAngle;
+    this._deltaAngle = sweepAngle;
     this._padAngle = padAngle;
     this._padRadius = padRadius;
     this._cornerRadius = cornerRadius;
@@ -110,17 +110,17 @@ export class Arc implements Graphic, Equals, Debug {
     }
   }
 
-  deltaAngle(): Angle;
-  deltaAngle(deltaAngle: AnyAngle): Arc;
-  deltaAngle(deltaAngle?: AnyAngle): Angle | Arc {
-    if (deltaAngle === void 0) {
+  sweepAngle(): Angle;
+  sweepAngle(sweepAngle: AnyAngle): Arc;
+  sweepAngle(sweepAngle?: AnyAngle): Angle | Arc {
+    if (sweepAngle === void 0) {
       return this._deltaAngle;
     } else {
-      deltaAngle = Angle.fromAny(deltaAngle);
-      if (this._deltaAngle.equals(deltaAngle)) {
+      sweepAngle = Angle.fromAny(sweepAngle);
+      if (this._deltaAngle.equals(sweepAngle)) {
         return this;
       } else {
-        return this.copy(this._innerRadius, this._outerRadius, this._startAngle, deltaAngle,
+        return this.copy(this._innerRadius, this._outerRadius, this._startAngle, sweepAngle,
                          this._padAngle, this._padRadius, this._cornerRadius);
       }
     }
@@ -346,9 +346,9 @@ export class Arc implements Graphic, Equals, Debug {
     }
   }
 
-  protected copy(innerRadius: Length, outerRadius: Length, startAngle: Angle, deltaAngle: Angle,
+  protected copy(innerRadius: Length, outerRadius: Length, startAngle: Angle, sweepAngle: Angle,
                  padAngle: Angle, padRadius: Length | null, cornerRadius: Length): Arc {
-    return new Arc(innerRadius, outerRadius, startAngle, deltaAngle, padAngle, padRadius, cornerRadius);
+    return new Arc(innerRadius, outerRadius, startAngle, sweepAngle, padAngle, padRadius, cornerRadius);
   }
 
   toAny(): ArcInit {
@@ -356,7 +356,7 @@ export class Arc implements Graphic, Equals, Debug {
       innerRadius: this._innerRadius,
       outerRadius: this._outerRadius,
       startAngle: this._startAngle,
-      deltaAngle: this._deltaAngle,
+      sweepAngle: this._deltaAngle,
       padAngle: this._padAngle,
       padRadius: this._padRadius,
       cornerRadius: this._cornerRadius,
@@ -390,7 +390,7 @@ export class Arc implements Graphic, Equals, Debug {
       output = output.write(46/*'.'*/).write("startAngle").write(40/*'('*/).debug(this._startAngle).write(41/*')'*/);
     }
     if (this._deltaAngle.isDefined()) {
-      output = output.write(46/*'.'*/).write("deltaAngle").write(40/*'('*/).debug(this._deltaAngle).write(41/*')'*/);
+      output = output.write(46/*'.'*/).write("sweepAngle").write(40/*'('*/).debug(this._deltaAngle).write(41/*')'*/);
     }
     if (this._padAngle.isDefined()) {
       output = output.write(46/*'.'*/).write("padAngle").write(40/*'('*/).debug(this._padAngle).write(41/*')'*/);
@@ -410,18 +410,18 @@ export class Arc implements Graphic, Equals, Debug {
   static from(innerRadius: AnyLength = Length.zero(),
               outerRadius: AnyLength = Length.zero(),
               startAngle: AnyAngle = Angle.zero(),
-              deltaAngle: AnyAngle = Angle.zero(),
+              sweepAngle: AnyAngle = Angle.zero(),
               padAngle: AnyAngle = Angle.zero(),
               padRadius: AnyLength | null = null,
               cornerRadius: AnyLength = Length.zero()): Arc {
     innerRadius = Length.fromAny(innerRadius);
     outerRadius = Length.fromAny(outerRadius);
     startAngle = Angle.fromAny(startAngle);
-    deltaAngle = Angle.fromAny(deltaAngle);
+    sweepAngle = Angle.fromAny(sweepAngle);
     padAngle = Angle.fromAny(padAngle);
     padRadius = padRadius !== null ? Length.fromAny(padRadius) : null;
     cornerRadius = Length.fromAny(cornerRadius);
-    return new Arc(innerRadius, outerRadius, startAngle, deltaAngle,
+    return new Arc(innerRadius, outerRadius, startAngle, sweepAngle,
                    padAngle, padRadius, cornerRadius);
   }
 
@@ -430,7 +430,7 @@ export class Arc implements Graphic, Equals, Debug {
       return arc;
     } else if (typeof arc === "object" && arc) {
       return Arc.from(arc.innerRadius, arc.outerRadius, arc.startAngle,
-                      arc.deltaAngle, arc.padAngle, arc.padRadius,
+                      arc.sweepAngle, arc.padAngle, arc.padRadius,
                       arc.cornerRadius);
     }
     throw new TypeError("" + arc);

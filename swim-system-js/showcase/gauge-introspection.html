@@ -19,7 +19,7 @@ const canvas = app.append("canvas");
 
 const gauge = new swim.GaugeView()
     .startAngle(swim.Angle.rad(3 * Math.PI / 4))
-    .deltaAngle(swim.Angle.rad(3 * Math.PI / 2))
+    .sweepAngle(swim.Angle.rad(3 * Math.PI / 2))
     .dialColor("#cccccc")
     .meterColor("#989898")
     .title(new swim.TextRunView("Performance").font("20px sans-serif"))

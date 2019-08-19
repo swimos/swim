@@ -41,7 +41,7 @@ export interface DialViewInit extends ViewInit {
   innerRadius?: AnyLength;
   outerRadius?: AnyLength;
   startAngle?: AnyAngle;
-  deltaAngle?: AnyAngle;
+  sweepAngle?: AnyAngle;
   cornerRadius?: AnyLength;
   dialColor?: AnyColor;
   meterColor?: AnyColor;
@@ -82,17 +82,17 @@ export class DialView extends GraphicView {
   @MemberAnimator(Number)
   total: MemberAnimator<this, number>;
 
-  @MemberAnimator(Length)
+  @MemberAnimator(Length, "inherit")
   innerRadius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length)
+  @MemberAnimator(Length, "inherit")
   outerRadius: MemberAnimator<this, Length, AnyLength>;
 
   @MemberAnimator(Angle, "inherit")
   startAngle: MemberAnimator<this, Angle, AnyAngle>;
 
   @MemberAnimator(Angle, "inherit")
-  deltaAngle: MemberAnimator<this, Angle, AnyAngle>;
+  sweepAngle: MemberAnimator<this, Angle, AnyAngle>;
 
   @MemberAnimator(Length, "inherit")
   cornerRadius: MemberAnimator<this, Length, AnyLength>;
@@ -175,7 +175,7 @@ export class DialView extends GraphicView {
     this.innerRadius.onFrame(t);
     this.outerRadius.onFrame(t);
     this.startAngle.onFrame(t);
-    this.deltaAngle.onFrame(t);
+    this.sweepAngle.onFrame(t);
     this.cornerRadius.onFrame(t);
     this.dialColor.onFrame(t);
     this.meterColor.onFrame(t);
@@ -205,10 +205,10 @@ export class DialView extends GraphicView {
     const r0 = this.innerRadius.value!.pxValue(size);
     const r1 = this.outerRadius.value!.pxValue(size);
     const a0 = this.startAngle.value!.radValue();
-    const da = this.deltaAngle.value!.radValue();
+    const da = this.sweepAngle.value!.radValue();
     const rc = this.cornerRadius.value!.pxValue(r1 - r0);
     const dial = new Arc(Length.px(r0), Length.px(r1), Angle.rad(a0), Angle.rad(da), Angle.zero(), null, Length.px(rc));
-    const meter = dial.deltaAngle(da * this.value.value! / (this.total.value! || 1));
+    const meter = dial.sweepAngle(da * this.value.value! / (this.total.value! || 1));
 
     context.beginPath();
     const dialColor = this.dialColor.value!;
@@ -268,7 +268,7 @@ export class DialView extends GraphicView {
       const cy = anchor.y;
 
       const a0 = this.startAngle.value!.radValue();
-      const da = this.deltaAngle.value!.radValue() * this.value.value! / (this.total.value! || 1);
+      const da = this.sweepAngle.value!.radValue() * this.value.value! / (this.total.value! || 1);
       const a = a0 + da * this.tickAlign.value!;
       const r1 = this.outerRadius.value!.pxValue(size);
       const r2 = this.tickRadius.value!.pxValue(size);
@@ -349,7 +349,7 @@ export class DialView extends GraphicView {
     const r0 = this.innerRadius.value!.pxValue(size);
     const r1 = this.outerRadius.value!.pxValue(size);
     const a0 = this.startAngle.value!.radValue();
-    const da = this.deltaAngle.value!.radValue();
+    const da = this.sweepAngle.value!.radValue();
     const rc = this.cornerRadius.value!.pxValue(r1 - r0);
     const dial = new Arc(Length.px(r0), Length.px(r1), Angle.rad(a0), Angle.rad(da), Angle.zero(), null, Length.px(rc));
 
@@ -384,8 +384,8 @@ export class DialView extends GraphicView {
       if (dial.startAngle !== void 0) {
         view.startAngle(dial.startAngle);
       }
-      if (dial.deltaAngle !== void 0) {
-        view.deltaAngle(dial.deltaAngle);
+      if (dial.sweepAngle !== void 0) {
+        view.sweepAngle(dial.sweepAngle);
       }
       if (dial.cornerRadius !== void 0) {
         view.cornerRadius(dial.cornerRadius);

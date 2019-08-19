@@ -40,14 +40,14 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
   _viewController: GraphicViewController<ArcView> | null;
 
   constructor(innerRadius: Length = Length.zero(), outerRadius: Length = Length.zero(),
-              startAngle: Angle = Angle.zero(), deltaAngle: Angle = Angle.zero(),
+              startAngle: Angle = Angle.zero(), sweepAngle: Angle = Angle.zero(),
               padAngle: Angle = Angle.zero(), padRadius: Length | null = null,
               cornerRadius: Length = Length.zero()) {
     super();
     this.innerRadius.setState(innerRadius);
     this.outerRadius.setState(outerRadius);
     this.startAngle.setState(startAngle);
-    this.deltaAngle.setState(deltaAngle);
+    this.sweepAngle.setState(sweepAngle);
     this.padAngle.setState(padAngle);
     this.padRadius.setState(padRadius);
     this.cornerRadius.setState(cornerRadius);
@@ -67,7 +67,7 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
   startAngle: MemberAnimator<this, Angle, AnyAngle>;
 
   @MemberAnimator(Angle)
-  deltaAngle: MemberAnimator<this, Angle, AnyAngle>;
+  sweepAngle: MemberAnimator<this, Angle, AnyAngle>;
 
   @MemberAnimator(Angle)
   padAngle: MemberAnimator<this, Angle, AnyAngle>;
@@ -89,13 +89,13 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
 
   get value(): Arc {
     return new Arc(this.innerRadius.value!, this.outerRadius.value!, this.startAngle.value!,
-                   this.deltaAngle.value!, this.padAngle.value!, this.padRadius.value!,
+                   this.sweepAngle.value!, this.padAngle.value!, this.padRadius.value!,
                    this.cornerRadius.value!);
   }
 
   get state(): Arc {
     return new Arc(this.innerRadius.state!, this.outerRadius.state!, this.startAngle.state!,
-                   this.deltaAngle.state!, this.padAngle.state!, this.padRadius.state!,
+                   this.sweepAngle.state!, this.padAngle.state!, this.padRadius.state!,
                    this.cornerRadius.state!);
   }
 
@@ -115,8 +115,8 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
     if (arc.startAngle !== void 0) {
       this.startAngle(arc.startAngle, tween);
     }
-    if (arc.deltaAngle !== void 0) {
-      this.deltaAngle(arc.deltaAngle, tween);
+    if (arc.sweepAngle !== void 0) {
+      this.sweepAngle(arc.sweepAngle, tween);
     }
     if (arc.padAngle !== void 0) {
       this.padAngle(arc.padAngle, tween);
@@ -142,7 +142,7 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
     this.innerRadius.onFrame(t);
     this.outerRadius.onFrame(t);
     this.startAngle.onFrame(t);
-    this.deltaAngle.onFrame(t);
+    this.sweepAngle.onFrame(t);
     this.padAngle.onFrame(t);
     this.padRadius.onFrame(t);
     this.cornerRadius.onFrame(t);
@@ -205,7 +205,7 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
   static from(innerRadius: AnyLength = Length.zero(),
               outerRadius: AnyLength = Length.zero(),
               startAngle: AnyAngle = Angle.zero(),
-              deltaAngle: AnyAngle = Angle.zero(),
+              sweepAngle: AnyAngle = Angle.zero(),
               padAngle: AnyAngle = Angle.zero(),
               padRadius: AnyLength | null = null,
               cornerRadius: AnyLength = Length.zero(),
@@ -215,11 +215,11 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
     innerRadius = Length.fromAny(innerRadius);
     outerRadius = Length.fromAny(outerRadius);
     startAngle = Angle.fromAny(startAngle);
-    deltaAngle = Angle.fromAny(deltaAngle);
+    sweepAngle = Angle.fromAny(sweepAngle);
     padAngle = Angle.fromAny(padAngle);
     padRadius = padRadius !== null ? Length.fromAny(padRadius) : null;
     cornerRadius = Length.fromAny(cornerRadius);
-    const view = new ArcView(innerRadius, outerRadius, startAngle, deltaAngle,
+    const view = new ArcView(innerRadius, outerRadius, startAngle, sweepAngle,
                              padAngle, padRadius, cornerRadius);
     if (fill !== void 0) {
       view.fill(fill);
@@ -238,7 +238,7 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
       return arc;
     } else if (arc instanceof Arc) {
       return new ArcView(arc.innerRadius(), arc.outerRadius(), arc.startAngle(),
-                         arc.deltaAngle(), arc.padAngle(), arc.padRadius(),
+                         arc.sweepAngle(), arc.padAngle(), arc.padRadius(),
                          arc.cornerRadius());
     } else if (typeof arc === "object" && arc) {
       const view = new ArcView();

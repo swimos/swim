@@ -34,7 +34,7 @@ export interface GaugeViewInit extends ViewInit {
   innerRadius?: AnyLength;
   outerRadius?: AnyLength;
   startAngle?: AnyAngle;
-  deltaAngle?: AnyAngle;
+  sweepAngle?: AnyAngle;
   cornerRadius?: AnyLength;
   dialSpacing?: AnyLength;
   dialColor?: AnyColor;
@@ -62,7 +62,7 @@ export class GaugeView extends GraphicView {
     this.innerRadius.setState(Length.pct(30));
     this.outerRadius.setState(Length.pct(40));
     this.startAngle.setState(Angle.rad(-Math.PI / 2));
-    this.deltaAngle.setState(Angle.rad(2 * Math.PI));
+    this.sweepAngle.setState(Angle.rad(2 * Math.PI));
     this.cornerRadius.setState(Length.pct(50));
     this.dialSpacing.setState(Length.px(1));
     this.dialColor.setState(Color.transparent());
@@ -93,7 +93,7 @@ export class GaugeView extends GraphicView {
   startAngle: MemberAnimator<this, Angle, AnyAngle>;
 
   @MemberAnimator(Angle)
-  deltaAngle: MemberAnimator<this, Angle, AnyAngle>;
+  sweepAngle: MemberAnimator<this, Angle, AnyAngle>;
 
   @MemberAnimator(Length)
   cornerRadius: MemberAnimator<this, Length, AnyLength>;
@@ -158,7 +158,7 @@ export class GaugeView extends GraphicView {
     this.innerRadius.onFrame(t);
     this.outerRadius.onFrame(t);
     this.startAngle.onFrame(t);
-    this.deltaAngle.onFrame(t);
+    this.sweepAngle.onFrame(t);
     this.cornerRadius.onFrame(t);
     this.dialSpacing.onFrame(t);
     this.dialColor.onFrame(t);
@@ -190,7 +190,7 @@ export class GaugeView extends GraphicView {
     const innerRadius = this.innerRadius.value;
     const outerRadius = this.outerRadius.value;
     const startAngle = this.startAngle.value;
-    const deltaAngle = this.deltaAngle.value;
+    const sweepAngle = this.sweepAngle.value;
     const dialSpacing = this.dialSpacing.value;
 
     let r0: number | undefined;
@@ -228,8 +228,8 @@ export class GaugeView extends GraphicView {
         if (startAngle) {
           childView.startAngle(startAngle);
         }
-        if (deltaAngle) {
-          childView.deltaAngle(deltaAngle);
+        if (sweepAngle) {
+          childView.sweepAngle(sweepAngle);
         }
       }
     }
@@ -261,8 +261,8 @@ export class GaugeView extends GraphicView {
       if (gauge.startAngle !== void 0) {
         view.startAngle(gauge.startAngle);
       }
-      if (gauge.deltaAngle !== void 0) {
-        view.deltaAngle(gauge.deltaAngle);
+      if (gauge.sweepAngle !== void 0) {
+        view.sweepAngle(gauge.sweepAngle);
       }
       if (gauge.cornerRadius !== void 0) {
         view.cornerRadius(gauge.cornerRadius);

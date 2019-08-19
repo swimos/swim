@@ -7,7 +7,9 @@
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/pie** implements a multi-slice, fully animatable, canvas rendered pie
-chart widget.  **@swim/pie** is part of the
+chart widget.  **@swim/pie** views have numerous easy to animate properties.
+Check out the [interactive **@swim/pie** demo](https://www.swimos.org/demo/pie)
+to see it in action.  **@swim/pie** is part of the
 [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ux) framework.
 
 ## Installation

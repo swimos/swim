@@ -7,7 +7,9 @@
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/gauge** implements a multi-dial, fully animatable, canvas rendered
-gauge widget.  **@swim/gauge** is part of the
+gauge widget.  **@swim/gauge** views have numerous easy to animate properties.
+Check out the [interactive **@swim/gauge** demo](https://www.swimos.org/demo/gauge)
+to see it in action.  **@swim/gauge** is part of the
 [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ux) framework.
 
 ## Installation
