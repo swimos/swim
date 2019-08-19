@@ -1,6 +1,6 @@
 {
   "name": "@swim/unit",
-  "version": "3.10.0",
+  "version": "3.10.1",
   "description": "Specializable unit testing framework",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,7 +11,7 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.10.0",
-    "@swim/codec": "3.10.0"
+    "@swim/util": "3.10.1",
+    "@swim/codec": "3.10.1"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@swim/constraint",
-  "version": "3.10.0",
+  "version": "3.10.1",
   "description": "Incremental solver for systems of linear layout constraints",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,8 +11,8 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.10.0",
-    "@swim/codec": "3.10.0",
-    "@swim/collections": "3.10.0"
+    "@swim/util": "3.10.1",
+    "@swim/codec": "3.10.1",
+    "@swim/collections": "3.10.1"
   }
 }

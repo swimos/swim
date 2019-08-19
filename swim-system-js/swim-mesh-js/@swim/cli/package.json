@@ -1,6 +1,6 @@
 {
   "name": "@swim/cli",
-  "version": "3.10.0",
+  "version": "3.10.1",
   "description": "Command line client for linking to Web Agent lanes over the WARP protocol",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",

@@ -1,6 +1,6 @@
 {
   "name": "@swim/collections",
-  "version": "3.10.0",
+  "version": "3.10.1",
   "description": "Immutable, structure sharing collections, including B-trees and S-trees (sequence trees)",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -16,7 +16,7 @@
     "trie"
   ],
   "dependencies": {
-    "@swim/util": "3.10.0",
-    "@swim/codec": "3.10.0"
+    "@swim/util": "3.10.1",
+    "@swim/codec": "3.10.1"
   }
 }

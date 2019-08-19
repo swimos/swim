@@ -1,6 +1,6 @@
 {
   "name": "@swim/mesh",
-  "version": "3.10.0",
+  "version": "3.10.1",
   "description": "Multiplexed streaming WARP framework that runs in Node.js and web browsers",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -14,18 +14,18 @@
     "@types/ws": "6"
   },
   "dependencies": {
-    "@swim/util": "3.10.0",
-    "@swim/codec": "3.10.0",
-    "@swim/collections": "3.10.0",
-    "@swim/structure": "3.10.0",
-    "@swim/streamlet": "3.10.0",
-    "@swim/dataflow": "3.10.0",
-    "@swim/recon": "3.10.0",
-    "@swim/math": "3.10.0",
-    "@swim/time": "3.10.0",
-    "@swim/uri": "3.10.0",
-    "@swim/warp": "3.10.0",
-    "@swim/client": "3.10.0",
+    "@swim/util": "3.10.1",
+    "@swim/codec": "3.10.1",
+    "@swim/collections": "3.10.1",
+    "@swim/structure": "3.10.1",
+    "@swim/streamlet": "3.10.1",
+    "@swim/dataflow": "3.10.1",
+    "@swim/recon": "3.10.1",
+    "@swim/math": "3.10.1",
+    "@swim/time": "3.10.1",
+    "@swim/uri": "3.10.1",
+    "@swim/warp": "3.10.1",
+    "@swim/client": "3.10.1",
     "ws": "7"
   }
 }

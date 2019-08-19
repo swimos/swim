@@ -624,7 +624,7 @@ const system = [
 ];
 
 export default {
-  version: "3.10.0",
+  version: "3.10.1",
   projects: core.concat(mesh).concat(ui).concat(ux).concat(web).concat(system),
   gaID: "UA-79441805-2",
 };

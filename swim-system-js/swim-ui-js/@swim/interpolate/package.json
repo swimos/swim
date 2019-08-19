@@ -1,6 +1,6 @@
 {
   "name": "@swim/interpolate",
-  "version": "3.10.0",
+  "version": "3.10.1",
   "description": "Interpolator types for blending between values, including numbers, dates, angles, lengths, colors, transforms, shapes, arrays, structures, and other interpolators",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,14 +11,14 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.10.0",
-    "@swim/codec": "3.10.0",
-    "@swim/structure": "3.10.0",
-    "@swim/math": "3.10.0",
-    "@swim/time": "3.10.0",
-    "@swim/angle": "3.10.0",
-    "@swim/length": "3.10.0",
-    "@swim/color": "3.10.0",
-    "@swim/transform": "3.10.0"
+    "@swim/util": "3.10.1",
+    "@swim/codec": "3.10.1",
+    "@swim/structure": "3.10.1",
+    "@swim/math": "3.10.1",
+    "@swim/time": "3.10.1",
+    "@swim/angle": "3.10.1",
+    "@swim/length": "3.10.1",
+    "@swim/color": "3.10.1",
+    "@swim/transform": "3.10.1"
   }
 }

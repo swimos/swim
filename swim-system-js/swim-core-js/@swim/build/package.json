@@ -1,6 +1,6 @@
 {
   "name": "@swim/build",
-  "version": "3.10.0",
+  "version": "3.10.1",
   "description": "Swim build tool",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -22,9 +22,9 @@
     "typescript": "3.5"
   },
   "dependencies": {
-    "@swim/util": "3.10.0",
-    "@swim/codec": "3.10.0",
-    "@swim/args": "3.10.0"
+    "@swim/util": "3.10.1",
+    "@swim/codec": "3.10.1",
+    "@swim/args": "3.10.1"
   },
   "scripts": {
     "compile": "tsc -b",
