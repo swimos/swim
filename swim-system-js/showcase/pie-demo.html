@@ -2,95 +2,135 @@
 <html>
   <head>
     <title>@swim/pie demo</title>
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"/>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <style>
+body {
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100vw;
+  margin: 0;
+  font-family: sans-serif;
+}
+#controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+  flex-shrink: 0;
+  margin: 5% 0;
+}
+#app {
+  display: flex;
+  flex-grow: 1;
+  flex-shrink: 0;
+  height: 50vh;
+  margin: 0 5%;
+}
+@media (min-width: 800px) {
+  body {
+    flex-direction: row;
+    align-items: center;
+    height: 100vh;
+  }
+  #controls {
+    flex-grow: 1;
+  }
+  #app {
+    flex-grow: 4;
+    height: 67vh;
+  }
+}
+    </style>
   </head>
-  <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0; font-family: sans-serif;">
-    <div style="display: flex; flex-direction: column; justify-content: center; width: 20%;">
-      <p style="margin-bottom: 0;">Pie Chart:</p>
+  <body>
+    <div id="controls">
       <div>
-        <select id="sliceCount" onchange="updatePie()">
-          <option value="2">2</option>
-          <option value="3" selected>3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-          <option value="8">8</option>
-          <option value="9">9</option>
-          <option value="10">10</option>
-          <option value="26">26</option>
-          <option value="52">52</option>
-        </select>
-        <label for="sliceCount">Slices</label>
-      </div>
-      <div>
-        <input id="showTitle" type="checkbox" onchange="updatePie()">
-        <label for="showTitle">Show Title</label>
-      </div>
-      <div>
-        <input id="showLabels" type="checkbox" onchange="updatePie()" checked>
-        <label for="showLabels">Show Labels</label>
-      </div>
-      <div>
-        <input id="showLegend" type="checkbox" onchange="updatePie()" checked>
-        <label for="showLegend">Show Legend</label>
-      </div>
-      <p style="margin-bottom: 0;">Animation:</p>
-      <div>
-        <input id="innerRadius" type="checkbox" onchange="updatePie()">
-        <label for="innerRadius">Inner Radius</label>
-      </div>
-      <div>
-        <input id="outerRadius" type="checkbox" onchange="updatePie()" checked>
-        <label for="outerRadius">Outer Radius</label>
-      </div>
-      <div>
-        <input id="baseAngle" type="checkbox" onchange="updatePie()">
-        <label for="baseAngle">Base Angle</label>
-      </div>
-      <div>
-        <input id="padAngle" type="checkbox" onchange="updatePie()">
-        <label for="padAngle">Pad Angle</label>
-      </div>
-      <div>
-        <input id="cornerRadius" type="checkbox" onchange="updatePie()">
-        <label for="cornerRadius">Corner Radius</label>
-      </div>
-      <div>
-        <input id="labelRadius" type="checkbox" onchange="updatePie()">
-        <label for="labelRadius">Label Radius</label>
-      </div>
-      <div>
-        <input id="tickAlign" type="checkbox" onchange="updatePie()">
-        <label for="tickAlign">Tick Align</label>
-      </div>
-      <div>
-        <input id="tickRadius" type="checkbox" onchange="updatePie()">
-        <label for="tickRadius">Tick Radius</label>
-      </div>
-      <div>
-        <input id="tickLength" type="checkbox" onchange="updatePie()">
-        <label for="tickLength">Tick Length</label>
-      </div>
-      <div>
-        <input id="tickWidth" type="checkbox" onchange="updatePie()">
-        <label for="tickWidth">Tick Width</label>
-      </div>
-      <div>
-        <input id="tickPadding" type="checkbox" onchange="updatePie()">
-        <label for="tickPadding">Tick Padding</label>
-      </div>
-      <div>
-        <select id="updateRate" onchange="updatePie()">
-          <option value="250">250 ms</option>
-          <option value="500">500 ms</option>
-          <option value="1000" selected>1 s</option>
-          <option value="2000">2 s</option>
-        </select>
-        <label for="updateRate">Rate</label>
+        <p style="margin-bottom: 0;">Pie Chart:</p>
+        <div>
+          <select id="sliceCount" onchange="updatePie()">
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="26">26</option>
+            <option value="52">52</option>
+          </select>
+          <label for="sliceCount">Slices</label>
+        </div>
+        <div>
+          <input id="showTitle" type="checkbox" onchange="updatePie()">
+          <label for="showTitle">Show Title</label>
+        </div>
+        <div>
+          <input id="showLabels" type="checkbox" onchange="updatePie()" checked>
+          <label for="showLabels">Show Labels</label>
+        </div>
+        <div>
+          <input id="showLegend" type="checkbox" onchange="updatePie()" checked>
+          <label for="showLegend">Show Legend</label>
+        </div>
+        <p style="margin-bottom: 0;">Animation:</p>
+        <div>
+          <input id="innerRadius" type="checkbox" onchange="updatePie()">
+          <label for="innerRadius">Inner Radius</label>
+        </div>
+        <div>
+          <input id="outerRadius" type="checkbox" onchange="updatePie()" checked>
+          <label for="outerRadius">Outer Radius</label>
+        </div>
+        <div>
+          <input id="baseAngle" type="checkbox" onchange="updatePie()">
+          <label for="baseAngle">Base Angle</label>
+        </div>
+        <div>
+          <input id="padAngle" type="checkbox" onchange="updatePie()">
+          <label for="padAngle">Pad Angle</label>
+        </div>
+        <div>
+          <input id="cornerRadius" type="checkbox" onchange="updatePie()">
+          <label for="cornerRadius">Corner Radius</label>
+        </div>
+        <div>
+          <input id="labelRadius" type="checkbox" onchange="updatePie()">
+          <label for="labelRadius">Label Radius</label>
+        </div>
+        <div>
+          <input id="tickAlign" type="checkbox" onchange="updatePie()">
+          <label for="tickAlign">Tick Align</label>
+        </div>
+        <div>
+          <input id="tickRadius" type="checkbox" onchange="updatePie()">
+          <label for="tickRadius">Tick Radius</label>
+        </div>
+        <div>
+          <input id="tickLength" type="checkbox" onchange="updatePie()">
+          <label for="tickLength">Tick Length</label>
+        </div>
+        <div>
+          <input id="tickWidth" type="checkbox" onchange="updatePie()">
+          <label for="tickWidth">Tick Width</label>
+        </div>
+        <div>
+          <input id="tickPadding" type="checkbox" onchange="updatePie()">
+          <label for="tickPadding">Tick Padding</label>
+        </div>
+        <div>
+          <select id="updateRate" onchange="updatePie()">
+            <option value="250">250 ms</option>
+            <option value="500">500 ms</option>
+            <option value="1000" selected>1 s</option>
+            <option value="2000">2 s</option>
+          </select>
+          <label for="updateRate">Rate</label>
+        </div>
       </div>
     </div>
-    <div id="app" style="display: flex; width: 67%; height: 67%;">
+    <div id="app">
     </div>
     <script src="../swim-core-js/@swim/core/dist/main/swim-core.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
