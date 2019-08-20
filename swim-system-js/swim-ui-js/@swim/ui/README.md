@@ -73,7 +73,7 @@ component libraries:
   ([npm](https://www.npmjs.com/package/@swim/style),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_style.html)) –
   CSS style types and universal style value parser.
-- [**@swim/render**]](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/render)
+- [**@swim/render**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/render)
   ([npm](https://www.npmjs.com/package/@swim/render),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_render.html)) –
   renderable graphic types for SVG and Canvas compatible path drawing contexts,
