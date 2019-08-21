@@ -193,6 +193,7 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
     final Value newValue = valueForm.mold(newObject).toValue();
     final ListLaneRelayUpdate relay = new ListLaneRelayUpdate(this, stage(), index, newValue, key);
     relay.valueForm = (Form<Object>) valueForm;
+    relay.oldObject = newObject;
     relay.newObject = newObject;
     relay.run();
     return relay.newObject != null; // TODO

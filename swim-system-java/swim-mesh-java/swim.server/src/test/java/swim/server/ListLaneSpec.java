@@ -47,7 +47,8 @@ import swim.recon.Recon;
 import swim.service.web.WebServiceDef;
 import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
-    
+import static org.testng.Assert.assertNotNull;
+
 public class ListLaneSpec {
 
   private static final int DEF_LATCH_COUNT = 100;
@@ -75,6 +76,7 @@ public class ListLaneSpec {
   private static CountDownLatch laneDidCommand = new CountDownLatch(DEF_LATCH_COUNT);
 
   private static List<String> listLaneCopy = new ArrayList<String>();
+  private static List<String> listLane1Copy = new ArrayList<String>();
   private static List<String> commandList = new ArrayList<String>();
 
   static class TestListLaneAgent extends AbstractAgent {
@@ -82,6 +84,25 @@ public class ListLaneSpec {
     ListLane<String> testList = listLane()
         .valueClass(String.class)
         .observe(new TestListLaneController());
+
+    @SwimLane("list1")
+    ListLane<String> testList1 = listLane().valueClass(String.class)
+        .didUpdate((index, newValue, oldValue) -> {
+          assertNotNull(newValue);
+          listLane1Copy = this.testList1.snapshot();
+        })
+        .didMove((index, newValue, oldValue) -> {
+          assertNotNull(newValue);
+          assertNotNull(oldValue);
+          listLane1Copy = this.testList1.snapshot();
+        })
+        .didRemove((index, oldValue) -> {
+          assertNotNull(oldValue);
+          listLane1Copy = this.testList1.snapshot();
+        })
+        .didDrop((lower) -> listLane1Copy = this.testList1.snapshot())
+        .didTake((upper) -> listLane1Copy = this.testList1.snapshot())
+        .didClear(() -> listLane1Copy = this.testList1.snapshot());
 
     class TestListLaneController implements WillUpdateIndex<String>, DidUpdateIndex<String>,
         WillMoveIndex<String>, DidMoveIndex<String>, WillRemoveIndex, DidRemoveIndex<String>,
@@ -97,7 +118,9 @@ public class ListLaneSpec {
       public void didUpdate(int index, String newValue, String oldValue) {
         System.out.println("lane didUpdate index " + index + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
         listLaneCopy = testList.snapshot();
+        testList1.add(index, newValue);
         laneDidUpdate.countDown();
+
         final char letter = newValue.length() > 0 ? newValue.charAt(0) : '\0';
         if (Character.isLowerCase(letter)) {
           laneDidUpdateLower.countDown();
@@ -114,6 +137,7 @@ public class ListLaneSpec {
       public void didMove(int fromIndex, int toIndex, String value) {
         System.out.println("lane didMove fromIndex: " + fromIndex + "; toIndex: " + toIndex + "; value: " + Format.debug(value));
         listLaneCopy = testList.snapshot();
+        testList1.move(fromIndex, toIndex);
         laneDidMove.countDown();
       }
       @Override
@@ -125,6 +149,7 @@ public class ListLaneSpec {
       public void didRemove(int index, String oldValue) {
         System.out.println("lane didRemove index: " + index + "; oldValue: " + Format.debug(oldValue));
         listLaneCopy = testList.snapshot();
+        testList1.remove(index);
         laneDidRemove.countDown();
       }
       @Override
@@ -140,23 +165,17 @@ public class ListLaneSpec {
       }
 
       @Override
-      public void didDrop(int lower) {
-        System.out.println("lane didDrop lower : " + lower);
-        listLaneCopy = testList.snapshot();
-        laneDidDrop.countDown();
-      }
-
-      @Override
-      public void didTake(int upper) {
-        System.out.println("lane didTake upper: " + upper);
-        listLaneCopy = testList.snapshot();
-        laneDidTake.countDown();
-      }
-
-      @Override
       public void willDrop(int lower) {
         System.out.println("lane willDrop lower: " + lower);
         laneWillDrop.countDown();
+      }
+
+      @Override
+      public void didDrop(int lower) {
+        System.out.println("lane didDrop lower : " + lower);
+        listLaneCopy = testList.snapshot();
+        testList1.drop(lower);
+        laneDidDrop.countDown();
       }
 
       @Override
@@ -166,10 +185,11 @@ public class ListLaneSpec {
       }
 
       @Override
-      public void didClear() {
-        System.out.println("lane didClear");
+      public void didTake(int upper) {
+        System.out.println("lane didTake upper: " + upper);
         listLaneCopy = testList.snapshot();
-        laneDidClear.countDown();
+        testList1.take(upper);
+        laneDidTake.countDown();
       }
 
       @Override
@@ -177,6 +197,15 @@ public class ListLaneSpec {
         System.out.println("lane willClear");
         laneWillClear.countDown();
       }
+
+      @Override
+      public void didClear() {
+        System.out.println("lane didClear");
+        listLaneCopy = testList.snapshot();
+        testList1.clear();
+        laneDidClear.countDown();
+      }
+
     }
   }
 
@@ -189,7 +218,7 @@ public class ListLaneSpec {
   public void testInsert() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
-                                      .openPlane("test", TestListPlane.class);
+        .openPlane("test", TestListPlane.class);
 
     laneWillUpdate = new CountDownLatch(3);
     laneDidUpdate = new CountDownLatch(3);
@@ -213,6 +242,11 @@ public class ListLaneSpec {
       assertEquals(listLaneCopy.get(0), "a");
       assertEquals(listLaneCopy.get(1), "b");
       assertEquals(listLaneCopy.get(2), "c");
+
+      assertEquals(listLane1Copy.size(), 3);
+      assertEquals(listLane1Copy.get(0), "a");
+      assertEquals(listLane1Copy.get(1), "b");
+      assertEquals(listLane1Copy.get(2), "c");
     } finally {
       kernel.stop();
     }
@@ -244,6 +278,12 @@ public class ListLaneSpec {
       assertEquals(listLaneCopy.get(1), "b");
       assertEquals(listLaneCopy.get(2), "c");
 
+      assertEquals(listLane1Copy.size(), 3);
+      assertEquals(listLane1Copy.get(0), "a");
+      assertEquals(listLane1Copy.get(1), "b");
+      assertEquals(listLane1Copy.get(2), "c");
+
+
       listLink.add(0, "A");
       listLink.add(1, "B");
       listLink.add(2, "C");
@@ -253,6 +293,11 @@ public class ListLaneSpec {
       assertEquals(listLaneCopy.get(0), "A");
       assertEquals(listLaneCopy.get(1), "B");
       assertEquals(listLaneCopy.get(2), "C");
+
+      assertEquals(listLane1Copy.size(), 3);
+      assertEquals(listLane1Copy.get(0), "A");
+      assertEquals(listLane1Copy.get(1), "B");
+      assertEquals(listLane1Copy.get(2), "C");
     } finally {
       kernel.stop();
     }
@@ -286,6 +331,11 @@ public class ListLaneSpec {
       assertEquals(listLaneCopy.get(1), "b");
       assertEquals(listLaneCopy.get(2), "c");
 
+      assertEquals(listLane1Copy.size(), 3);
+      assertEquals(listLane1Copy.get(0), "a");
+      assertEquals(listLane1Copy.get(1), "b");
+      assertEquals(listLane1Copy.get(2), "c");
+
       listLink.move(1, 0);
       listLink.move(2, 1);
       laneDidMove.await(1, TimeUnit.SECONDS);
@@ -296,6 +346,11 @@ public class ListLaneSpec {
       assertEquals(listLaneCopy.get(0), "b");
       assertEquals(listLaneCopy.get(1), "c");
       assertEquals(listLaneCopy.get(2), "a");
+
+      assertEquals(listLane1Copy.size(), 3);
+      assertEquals(listLane1Copy.get(0), "b");
+      assertEquals(listLane1Copy.get(1), "c");
+      assertEquals(listLane1Copy.get(2), "a");
     } finally {
       kernel.stop();
     }
@@ -331,6 +386,11 @@ public class ListLaneSpec {
       assertEquals(listLaneCopy.get(1), "b");
       assertEquals(listLaneCopy.get(2), "c");
 
+      assertEquals(listLane1Copy.size(), 3);
+      assertEquals(listLane1Copy.get(0), "a");
+      assertEquals(listLane1Copy.get(1), "b");
+      assertEquals(listLane1Copy.get(2), "c");
+
       listLink.remove(1);
       laneWillRemove.await(1, TimeUnit.SECONDS);
       laneDidRemove.await(1, TimeUnit.SECONDS);
@@ -339,6 +399,10 @@ public class ListLaneSpec {
       assertEquals(listLaneCopy.size(), 2);
       assertEquals(listLaneCopy.get(0), "a");
       assertEquals(listLaneCopy.get(1), "c");
+
+      assertEquals(listLane1Copy.size(), 2);
+      assertEquals(listLane1Copy.get(0), "a");
+      assertEquals(listLane1Copy.get(1), "c");
     } finally {
       kernel.stop();
     }
@@ -371,8 +435,10 @@ public class ListLaneSpec {
       laneDidUpdate.await(1, TimeUnit.SECONDS);
       assertEquals(laneDidUpdate.getCount(), 0);
       assertEquals(listLaneCopy.size(), total);
+      assertEquals(listLane1Copy.size(), total);
       for (int i = 0; i < total; i++) {
         assertEquals(listLaneCopy.get(i), Integer.toString(i));
+        assertEquals(listLane1Copy.get(i), Integer.toString(i));
       }
 
       listLink.drop(2);
@@ -383,6 +449,11 @@ public class ListLaneSpec {
       assertEquals(listLaneCopy.get(0), "2");
       assertEquals(listLaneCopy.get(1), "3");
       assertEquals(listLaneCopy.get(2), "4");
+
+      assertEquals(listLane1Copy.size(), 3);
+      assertEquals(listLane1Copy.get(0), "2");
+      assertEquals(listLane1Copy.get(1), "3");
+      assertEquals(listLane1Copy.get(2), "4");
     } finally {
       kernel.stop();
     }
@@ -414,8 +485,10 @@ public class ListLaneSpec {
       laneDidUpdate.await(2, TimeUnit.SECONDS);
       assertEquals(laneDidUpdate.getCount(), 0);
       assertEquals(listLaneCopy.size(), 5);
+      assertEquals(listLane1Copy.size(), 5);
       for (int i = 0; i < total; i++) {
         assertEquals(listLaneCopy.get(i), Integer.toString(i));
+        assertEquals(listLane1Copy.get(i), Integer.toString(i));
       }
 
       listLink.take(2);
@@ -425,6 +498,10 @@ public class ListLaneSpec {
       assertEquals(listLaneCopy.size(), 2);
       assertEquals(listLaneCopy.get(0), "0");
       assertEquals(listLaneCopy.get(1), "1");
+
+      assertEquals(listLane1Copy.size(), 2);
+      assertEquals(listLane1Copy.get(0), "0");
+      assertEquals(listLane1Copy.get(1), "1");
     } finally {
       kernel.stop();
     }
@@ -457,8 +534,10 @@ public class ListLaneSpec {
       laneDidUpdate.await(2, TimeUnit.SECONDS);
       assertEquals(laneDidUpdate.getCount(), 0);
       assertEquals(listLaneCopy.size(), total);
+      assertEquals(listLane1Copy.size(), total);
       for (int i = 0; i < total; i++) {
         assertEquals(listLaneCopy.get(i), Integer.toString(i));
+        assertEquals(listLane1Copy.get(i), Integer.toString(i));
       }
 
       listLink.clear();
@@ -466,10 +545,10 @@ public class ListLaneSpec {
       assertEquals(laneWillClear.getCount(), 0);
       assertEquals(laneDidClear.getCount(), 0);
       assertEquals(listLaneCopy.size(), 0);
+      assertEquals(listLane1Copy.size(), 0);
     } finally {
       kernel.stop();
     }
   }
 
 }
-

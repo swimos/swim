@@ -40,6 +40,7 @@ import swim.observable.function.WillUpdateKey;
 import swim.service.web.WebServiceDef;
 import swim.util.OrderedMap;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class MapLaneSpec {
 
@@ -60,6 +61,7 @@ public class MapLaneSpec {
   private static CountDownLatch laneDidClear = new CountDownLatch(DEF_LATCH_COUNT);
 
   private static OrderedMap<String, String> mapLaneCopy;
+  private static OrderedMap<String, String> mapLane1Copy;
 
   private static class TestMapLaneAgent extends AbstractAgent {
     @SwimLane("map")
@@ -67,6 +69,20 @@ public class MapLaneSpec {
         .keyClass(String.class)
         .valueClass(String.class)
         .observe(new TestMapLaneController());
+
+    @SwimLane("map1")
+    MapLane<String, String> testMap1 = this.<String, String>mapLane().keyClass(String.class).valueClass(String.class)
+        .didUpdate((key, newValue, oldValue) -> {
+          assertNotNull(newValue);
+          mapLane1Copy = this.testMap1.snapshot();
+        })
+        .didRemove((key, oldValue) -> {
+          assertNotNull(oldValue);
+          mapLane1Copy = this.testMap1.snapshot();
+        })
+        .didDrop((lower) -> mapLane1Copy = this.testMap1.snapshot())
+        .didTake((upper) -> mapLane1Copy = this.testMap1.snapshot())
+        .didClear(() -> mapLane1Copy = this.testMap1.snapshot());
 
     class TestMapLaneController implements WillUpdateKey<String, String>,
         DidUpdateKey<String, String>, WillRemoveKey<String>, DidRemoveKey<String, String>,
@@ -82,6 +98,7 @@ public class MapLaneSpec {
       public void didUpdate(String key, String newValue, String oldValue) {
         System.out.println("lane didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
         mapLaneCopy = testMap.snapshot();
+        testMap1.put(key, newValue);
         laneDidUpdate.countDown();
       }
 
@@ -95,6 +112,7 @@ public class MapLaneSpec {
       public void didRemove(String key, String oldValue) {
         System.out.println("lane didRemove key: " + Format.debug(key) + "; oldValue: " + Format.debug(oldValue));
         mapLaneCopy = testMap.snapshot();
+        testMap1.remove(key);
         laneDidRemove.countDown();
       }
 
@@ -108,6 +126,7 @@ public class MapLaneSpec {
       public void didClear() {
         System.out.println("lane didClear");
         mapLaneCopy = testMap.snapshot();
+        testMap1.clear();
         laneDidClear.countDown();
       }
 
@@ -121,6 +140,7 @@ public class MapLaneSpec {
       public void didDrop(int lower) {
         System.out.println("lane didDrop " + lower);
         mapLaneCopy = testMap.snapshot();
+        testMap1.drop(lower);
         laneDidDrop.countDown();
       }
 
@@ -134,6 +154,7 @@ public class MapLaneSpec {
       public void didTake(int upper) {
         System.out.println("lane didTake " + upper);
         mapLaneCopy = testMap.snapshot();
+        testMap1.take(upper);
         laneDidTake.countDown();
       }
     }
@@ -171,6 +192,10 @@ public class MapLaneSpec {
       assertEquals(mapLaneCopy.get("a"), "indefinite article");
       assertEquals(mapLaneCopy.get("the"), "definite article");
 
+      assertEquals(mapLane1Copy.size(), 2);
+      assertEquals(mapLane1Copy.get("a"), "indefinite article");
+      assertEquals(mapLane1Copy.get("the"), "definite article");
+
       mapLink.put("a", "article");
       laneDidUpdate.await(1, TimeUnit.SECONDS);
       assertEquals(laneWillUpdate.getCount(), 0);
@@ -178,6 +203,10 @@ public class MapLaneSpec {
       assertEquals(mapLaneCopy.size(), 2);
       assertEquals(mapLaneCopy.get("a"), "article");
       assertEquals(mapLaneCopy.get("the"), "definite article");
+
+      assertEquals(mapLane1Copy.size(), 2);
+      assertEquals(mapLane1Copy.get("a"), "article");
+      assertEquals(mapLane1Copy.get("the"), "definite article");
     } finally {
       kernel.stop();
     }
@@ -208,12 +237,16 @@ public class MapLaneSpec {
       laneDidUpdate.await(1, TimeUnit.SECONDS);
       assertEquals(laneDidUpdate.getCount(), 0);
       assertEquals(mapLaneCopy.size(), 2);
+      assertEquals(mapLane1Copy.size(), 2);
 
       mapLink.remove("the");
       laneDidRemove.await(1, TimeUnit.SECONDS);
       assertEquals(laneDidRemove.getCount(), 0);
       assertEquals(mapLaneCopy.size(), 1);
       assertEquals(mapLaneCopy.get("a"), "indefinite article");
+
+      assertEquals(mapLane1Copy.size(), 1);
+      assertEquals(mapLane1Copy.get("a"), "indefinite article");
     } finally {
       kernel.stop();
     }
@@ -244,6 +277,7 @@ public class MapLaneSpec {
       laneDidUpdate.await(1, TimeUnit.SECONDS);
       assertEquals(laneDidUpdate.getCount(), 0);
       assertEquals(mapLaneCopy.size(), 2);
+      assertEquals(mapLane1Copy.size(), 2);
 
       mapLink.clear();
       laneWillClear.await(1, TimeUnit.SECONDS);
@@ -251,6 +285,7 @@ public class MapLaneSpec {
       assertEquals(laneWillClear.getCount(), 0);
       assertEquals(laneDidClear.getCount(), 0);
       assertEquals(mapLaneCopy.size(), 0);
+      assertEquals(mapLane1Copy.size(), 0);
     } finally {
       kernel.stop();
     }
@@ -284,6 +319,7 @@ public class MapLaneSpec {
       laneDidUpdate.await(2, TimeUnit.SECONDS);
       assertEquals(laneDidUpdate.getCount(), 0);
       assertEquals(mapLaneCopy.size(), 5);
+      assertEquals(mapLane1Copy.size(), 5);
 
       mapLink.drop(2);
       laneWillDrop.await(1, TimeUnit.SECONDS);
@@ -294,6 +330,11 @@ public class MapLaneSpec {
       assertEquals(mapLaneCopy.get("c"), "charlie");
       assertEquals(mapLaneCopy.get("d"), "delta");
       assertEquals(mapLaneCopy.get("e"), "echo");
+
+      assertEquals(mapLane1Copy.size(), 3);
+      assertEquals(mapLane1Copy.get("c"), "charlie");
+      assertEquals(mapLane1Copy.get("d"), "delta");
+      assertEquals(mapLane1Copy.get("e"), "echo");
     } finally {
       kernel.stop();
     }
@@ -327,6 +368,7 @@ public class MapLaneSpec {
       laneDidUpdate.await(1, TimeUnit.SECONDS);
       assertEquals(laneDidUpdate.getCount(), 0);
       assertEquals(mapLaneCopy.size(), 5);
+      assertEquals(mapLane1Copy.size(), 5);
 
       mapLink.take(2);
       laneWillTake.await(1, TimeUnit.SECONDS);
@@ -336,6 +378,10 @@ public class MapLaneSpec {
       assertEquals(mapLaneCopy.size(), 2);
       assertEquals(mapLaneCopy.get("a"), "alpha");
       assertEquals(mapLaneCopy.get("b"), "bravo");
+
+      assertEquals(mapLane1Copy.size(), 2);
+      assertEquals(mapLane1Copy.get("a"), "alpha");
+      assertEquals(mapLane1Copy.get("b"), "bravo");
     } finally {
       kernel.stop();
     }
