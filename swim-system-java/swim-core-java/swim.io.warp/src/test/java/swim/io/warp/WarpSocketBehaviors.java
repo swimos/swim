@@ -353,6 +353,6 @@ public abstract class WarpSocketBehaviors {
   public void benchmarkCommands() {
     final Value value = Record.create(1).attr("test");
     final CommandMessage envelope = new CommandMessage("node", "lane", value);
-    benchmark(4, 2000L, envelope);
+    benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, envelope);
   }
 }

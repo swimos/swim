@@ -55,6 +55,9 @@ class TlsSocket implements Transport, IpSocketContext {
 
   TlsSocket(InetSocketAddress localAddress, InetSocketAddress remoteAddress, SocketChannel channel,
             SSLEngine sslEngine, IpSettings ipSettings, boolean isClient) {
+    if (sslEngine == null) {
+      throw new NullPointerException();
+    }
     this.localAddress = localAddress;
     this.remoteAddress = remoteAddress;
     this.channel = channel;
@@ -326,7 +329,16 @@ class TlsSocket implements Transport, IpSocketContext {
               this.context.flowControl(FlowModifier.ENABLE_READ_WRITE);
               break read;
             case NEED_TASK:
-              this.sslEngine.getDelegatedTask().run();
+              do {
+                // Spin until task is actually available.
+                final Runnable task = this.sslEngine.getDelegatedTask();
+                if (task != null) {
+                  task.run();
+                  break;
+                } else if (this.sslEngine.getHandshakeStatus() != SSLEngineResult.HandshakeStatus.NEED_TASK) {
+                  break;
+                }
+              } while (true);
               continue read;
             case FINISHED:
               handshakeAcknowledged();
@@ -385,85 +397,90 @@ class TlsSocket implements Transport, IpSocketContext {
         throw error;
       }
     }
-    final SSLEngineResult.Status sslStatus = result.getStatus();
-    switch (sslStatus) {
-      case OK:
-        SSLEngineResult.HandshakeStatus handshakeStatus = result.getHandshakeStatus();
-        switch (handshakeStatus) {
-          case NEED_UNWRAP:
-            this.context.flowControl(FlowModifier.ENABLE_READ);
-            break;
-          case NEED_WRAP:
-            this.context.flowControl(FlowModifier.ENABLE_WRITE);
-            break;
-          case FINISHED:
-            handshakeFinished();
-            break;
-          case NEED_TASK:
-            this.sslEngine.getDelegatedTask().run();
-            handshakeStatus = this.sslEngine.getHandshakeStatus();
-            switch (handshakeStatus) {
-              case FINISHED:
-                handshakeFinished();
-                break;
-              default:
-                throw new AssertionError(handshakeStatus); // unreachable
-            }
-            break;
-          case NOT_HANDSHAKING:
-            break;
-          default:
-            throw new AssertionError(handshakeStatus); // unreachable
-        }
-        break;
-      case CLOSED:
-        close();
-        break;
-      case BUFFER_UNDERFLOW:
-        close();
-        break;
-      case BUFFER_OVERFLOW:
-        close();
-        break;
-      default:
-        throw new AssertionError(sslStatus); // unreachable
-    }
+    write: do {
+      final SSLEngineResult.Status sslStatus = result.getStatus();
+      switch (sslStatus) {
+        case OK:
+          SSLEngineResult.HandshakeStatus handshakeStatus = result.getHandshakeStatus();
+          switch (handshakeStatus) {
+            case NEED_UNWRAP:
+              this.context.flowControl(FlowModifier.ENABLE_READ);
+              break;
+            case NEED_WRAP:
+              this.context.flowControl(FlowModifier.ENABLE_WRITE);
+              break;
+            case FINISHED:
+              handshakeFinished();
+              break;
+            case NEED_TASK:
+              do {
+                // Spin until task is actually available.
+                final Runnable task = this.sslEngine.getDelegatedTask();
+                if (task != null) {
+                  task.run();
+                  break;
+                } else if (this.sslEngine.getHandshakeStatus() != SSLEngineResult.HandshakeStatus.NEED_TASK) {
+                  break;
+                }
+              } while (true);
+              continue write;
+            case NOT_HANDSHAKING:
+              break;
+            default:
+              throw new AssertionError(handshakeStatus); // unreachable
+          }
+          break;
+        case CLOSED:
+          close();
+          break;
+        case BUFFER_UNDERFLOW:
+          close();
+          break;
+        case BUFFER_OVERFLOW:
+          close();
+          break;
+        default:
+          throw new AssertionError(sslStatus); // unreachable
+      }
+      break;
+    } while (true);
   }
 
   @Override
   public void didWrite() {
-    final int status = this.status;
-    if ((status & HANDSHAKING) != 0) {
-      SSLEngineResult.HandshakeStatus handshakeStatus = this.sslEngine.getHandshakeStatus();
-      switch (handshakeStatus) {
-        case NEED_UNWRAP:
-          this.context.flowControl(FlowModifier.DISABLE_WRITE_ENABLE_READ);
-          break;
-        case NEED_WRAP:
-          this.context.flowControl(FlowModifier.ENABLE_READ_WRITE);
-          break;
-        case NEED_TASK:
-          final Runnable task = this.sslEngine.getDelegatedTask();
-          if (task != null) {
-            task.run();
-            handshakeStatus = this.sslEngine.getHandshakeStatus();
-            switch (handshakeStatus) {
-              case FINISHED:
-                handshakeAcknowledged();
+    write: do {
+      final int status = this.status;
+      if ((status & HANDSHAKING) != 0) {
+        SSLEngineResult.HandshakeStatus handshakeStatus = this.sslEngine.getHandshakeStatus();
+        switch (handshakeStatus) {
+          case NEED_UNWRAP:
+            this.context.flowControl(FlowModifier.DISABLE_WRITE_ENABLE_READ);
+            break;
+          case NEED_WRAP:
+            this.context.flowControl(FlowModifier.ENABLE_READ_WRITE);
+            break;
+          case NEED_TASK:
+            do {
+              // Spin until task is actually available.
+              final Runnable task = this.sslEngine.getDelegatedTask();
+              if (task != null) {
+                task.run();
                 break;
-              default:
-                throw new AssertionError(handshakeStatus); // unreachable
-            }
-          }
-          break;
-        default:
-          throw new AssertionError(handshakeStatus); // unreachable
+              } else if (this.sslEngine.getHandshakeStatus() != SSLEngineResult.HandshakeStatus.NEED_TASK) {
+                break;
+              }
+            } while (true);
+            continue write;
+          default:
+            throw new AssertionError(handshakeStatus); // unreachable
+        }
+      } else if ((status & HANDSHAKED) != 0) {
+        handshakeAcknowledged();
+      } else {
+        this.socket.didWrite();
       }
-    } else if ((status & HANDSHAKED) != 0) {
-      handshakeAcknowledged();
-    } else {
-      this.socket.didWrite();
-    }
+      break;
+    } while (true);
   }
 
   void handshakeFinished() {
@@ -503,7 +520,7 @@ class TlsSocket implements Transport, IpSocketContext {
       if ((status & CLOSING) == 0) {
         final int newStatus = oldStatus & CLOSING;
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          this.context.flowControl(FlowControl.READ_WRITE);
+          this.context.flowControl(FlowModifier.ENABLE_READ_WRITE);
           break;
         }
       } else {
