@@ -401,7 +401,7 @@ class TlsSocket implements Transport, IpSocketContext {
       final SSLEngineResult.Status sslStatus = result.getStatus();
       switch (sslStatus) {
         case OK:
-          SSLEngineResult.HandshakeStatus handshakeStatus = result.getHandshakeStatus();
+          final SSLEngineResult.HandshakeStatus handshakeStatus = result.getHandshakeStatus();
           switch (handshakeStatus) {
             case NEED_UNWRAP:
               this.context.flowControl(FlowModifier.ENABLE_READ);
@@ -451,7 +451,7 @@ class TlsSocket implements Transport, IpSocketContext {
     write: do {
       final int status = this.status;
       if ((status & HANDSHAKING) != 0) {
-        SSLEngineResult.HandshakeStatus handshakeStatus = this.sslEngine.getHandshakeStatus();
+        final SSLEngineResult.HandshakeStatus handshakeStatus = this.sslEngine.getHandshakeStatus();
         switch (handshakeStatus) {
           case NEED_UNWRAP:
             this.context.flowControl(FlowModifier.DISABLE_WRITE_ENABLE_READ);

@@ -92,9 +92,7 @@ public class TheaterDef implements StageDef, Debug {
     if (this.name != null) {
       output = output.write('.').write("name").write('(').debug(name).write(')');
     }
-    if (this.parallelism != Runtime.getRuntime().availableProcessors()) {
-      output = output.write('.').write("parallelism").write('(').debug(parallelism).write(')');
-    }
+    output = output.write('.').write("parallelism").write('(').debug(parallelism).write(')');
     if (this.scheduleDef != null) {
       output = output.write('.').write("scheduleDef").write('(').debug(scheduleDef).write(')');
     }
@@ -180,7 +178,7 @@ final class TheaterForm extends Form<TheaterDef> {
     final Value header = value.getAttr(tag());
     if (header.isDefined()) {
       final String name = item.key().stringValue(null);
-      int parallelism = Runtime.getRuntime().availableProcessors();
+      int parallelism = 2 * Runtime.getRuntime().availableProcessors();
       ScheduleDef scheduleDef = null;
       for (int i = 0, n = value.length(); i < n; i += 1) {
         final Item member = value.getItem(i);

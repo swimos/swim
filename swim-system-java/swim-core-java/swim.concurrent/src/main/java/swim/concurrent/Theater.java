@@ -66,11 +66,11 @@ public class Theater implements MainStage, Thread.UncaughtExceptionHandler {
   }
 
   public Theater(String name, Schedule schedule) {
-    this(name, Runtime.getRuntime().availableProcessors(), schedule);
+    this(name, 2 * Runtime.getRuntime().availableProcessors(), schedule);
   }
 
   public Theater(String name) {
-    this(name, Runtime.getRuntime().availableProcessors(), null);
+    this(name, 2 * Runtime.getRuntime().availableProcessors(), null);
   }
 
   public Theater(int parallelism, Schedule schedule) {
@@ -82,11 +82,11 @@ public class Theater implements MainStage, Thread.UncaughtExceptionHandler {
   }
 
   public Theater(Schedule schedule) {
-    this(null, Runtime.getRuntime().availableProcessors(), schedule);
+    this(null, 2 * Runtime.getRuntime().availableProcessors(), schedule);
   }
 
   public Theater() {
-    this(null, Runtime.getRuntime().availableProcessors(), null);
+    this(null, 2 * Runtime.getRuntime().availableProcessors(), null);
   }
 
   public final String name() {
