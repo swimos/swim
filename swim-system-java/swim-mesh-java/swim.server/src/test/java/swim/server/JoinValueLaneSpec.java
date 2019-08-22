@@ -210,8 +210,8 @@ public class JoinValueLaneSpec {
           .observe(new JoinValueLinkController())
           .open();
 
-      joinDidReceive.await(1, TimeUnit.SECONDS);
-      joinDidUpdate.await(1, TimeUnit.SECONDS);
+      joinDidReceive.await(2, TimeUnit.SECONDS);
+      joinDidUpdate.await(2, TimeUnit.SECONDS);
       assertEquals(joinDidReceive.getCount(), 0);
       assertEquals(joinDidUpdate.getCount(), 0);
       assertEquals(join.size(), 2);

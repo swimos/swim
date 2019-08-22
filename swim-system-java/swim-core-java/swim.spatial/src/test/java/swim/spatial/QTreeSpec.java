@@ -20,7 +20,7 @@ import swim.math.Z2Shape;
 import static org.testng.Assert.fail;
 
 public class QTreeSpec {
-  @Test
+  @Test(groups = {"benchmark"})
   public void benchmarkInserts() {
     final long duration = 5 * 1000L;
     final Random random = new Random();
@@ -51,7 +51,7 @@ public class QTreeSpec {
     System.out.println("Inserted " + i + " points in " + dt + " milliseconds (" + insertRate + " inserts/second)");
   }
 
-  @Test
+  @Test(groups = {"benchmark"})
   public void benchmarkUpdates() {
     final int n = 500000;
     final QTree<Integer, Z2Shape, Integer> tree = QTree.empty(Z2Shape.shapeForm());
@@ -90,7 +90,7 @@ public class QTreeSpec {
     System.out.println("Updated " + n + " points in " + dt + " milliseconds (" + updateRate + " updates/second)");
   }
 
-  @Test
+  @Test(groups = {"benchmark"})
   public void benchmarkSearches() {
     final int n = 500000;
     final QTree<Integer, Z2Shape, Integer> tree = QTree.empty(Z2Shape.shapeForm());

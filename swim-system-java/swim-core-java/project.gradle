@@ -86,6 +86,10 @@ afterEvaluate {
       if (!project.hasProperty('slow')) {
         excludeGroups 'slow'
       }
+      // Run `gradle -Pbenchmark test` to include benchmark tests.
+      if (!project.hasProperty('benchmark')) {
+        excludeGroups 'benchmark'
+      }
     }
 
     scanForTestClasses = false

@@ -455,7 +455,7 @@ public abstract class WebSocketBehaviors {
     }
   }
 
-  @Test
+  @Test(groups = {"benchmark"})
   public void benchmarkSmallFrames() {
     final StringBuilder payload = new StringBuilder();
     for (int i = 0; i < 32; i += 1) {
@@ -464,7 +464,7 @@ public abstract class WebSocketBehaviors {
     benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, payload.toString());
   }
 
-  @Test
+  @Test(groups = {"benchmark"})
   public void benchmarkLargeFrames() {
     final StringBuilder payload = new StringBuilder();
     for (int i = 0; i < 256; i += 1) {

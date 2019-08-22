@@ -28,6 +28,7 @@ public class MockClockSpec {
     final CountDownLatch fire = new CountDownLatch(1);
     try {
       clock.start();
+      clock.halfTick();
       clock.setTimer(0L, new AbstractTimer() {
         @Override
         public void runTimer() {
@@ -35,6 +36,7 @@ public class MockClockSpec {
           fire.countDown();
         }
       });
+      clock.halfTick();
       clock.tick(1);
       clock.await(fire);
     } finally {
@@ -48,6 +50,7 @@ public class MockClockSpec {
     final CountDownLatch fire = new CountDownLatch(2);
     try {
       clock.start();
+      clock.halfTick();
       clock.setTimer(0L, new AbstractTimer() {
         @Override
         public void runTimer() {
@@ -64,6 +67,7 @@ public class MockClockSpec {
           fire.countDown();
         }
       });
+      clock.halfTick();
       clock.tick(1);
       clock.await(fire);
     } finally {
@@ -752,6 +756,7 @@ public class MockClockSpec {
     };
     try {
       clock.start();
+      clock.halfTick();
       clock.setTimer(0L, new AbstractTimer() {
         @Override
         public void runTimer() {
@@ -780,7 +785,7 @@ public class MockClockSpec {
           fire.countDown();
         }
       });
-
+      clock.halfTick();
       clock.tick(1);
       clock.await(fire);
       clock.await(failure);
