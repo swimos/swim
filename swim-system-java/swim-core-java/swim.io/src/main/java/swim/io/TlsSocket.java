@@ -450,29 +450,32 @@ class TlsSocket implements Transport, IpSocketContext {
   public void didWrite() {
     final int status = this.status;
     if ((status & HANDSHAKING) != 0) {
-      final SSLEngineResult.HandshakeStatus handshakeStatus = this.sslEngine.getHandshakeStatus();
-      switch (handshakeStatus) {
-        case NEED_UNWRAP:
-          this.context.flowControl(FlowModifier.DISABLE_WRITE_ENABLE_READ);
-          break;
-        case NEED_WRAP:
-          this.context.flowControl(FlowModifier.ENABLE_READ_WRITE);
-          break;
-        case NEED_TASK:
-          do {
-            // Spin until task is actually available.
-            final Runnable task = this.sslEngine.getDelegatedTask();
-            if (task != null) {
-              task.run();
-              break;
-            } else if (this.sslEngine.getHandshakeStatus() != SSLEngineResult.HandshakeStatus.NEED_TASK) {
-              break;
-            }
-          } while (true);
-          break;
-        default:
-          throw new AssertionError(handshakeStatus); // unreachable
-      }
+      write: do {
+        final SSLEngineResult.HandshakeStatus handshakeStatus = this.sslEngine.getHandshakeStatus();
+        switch (handshakeStatus) {
+          case NEED_UNWRAP:
+            this.context.flowControl(FlowModifier.DISABLE_WRITE_ENABLE_READ);
+            break;
+          case NEED_WRAP:
+            this.context.flowControl(FlowModifier.ENABLE_READ_WRITE);
+            break;
+          case NEED_TASK:
+            do {
+              // Spin until task is actually available.
+              final Runnable task = this.sslEngine.getDelegatedTask();
+              if (task != null) {
+                task.run();
+                break;
+              } else if (this.sslEngine.getHandshakeStatus() != SSLEngineResult.HandshakeStatus.NEED_TASK) {
+                break;
+              }
+            } while (true);
+            continue write;
+          default:
+            throw new AssertionError(handshakeStatus); // unreachable
+        }
+        break;
+      } while (true);
     } else if ((status & HANDSHAKED) != 0) {
       handshakeAcknowledged();
     } else {
