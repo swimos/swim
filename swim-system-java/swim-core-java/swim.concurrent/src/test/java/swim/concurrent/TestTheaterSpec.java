@@ -459,7 +459,7 @@ public class TestTheaterSpec {
       task2.cue();
       theater.await(taskWillCue2);
       task2.cancel();
-      theater.await(taskDidCancel);
+      theater.await(taskDidCancel, 2000);
 
       theater.task(new AbstractTask() {
         @Override
