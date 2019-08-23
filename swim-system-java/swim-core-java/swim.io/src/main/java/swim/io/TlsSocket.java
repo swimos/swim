@@ -432,6 +432,7 @@ class TlsSocket implements Transport, IpSocketContext {
               this.context.flowControl(FlowModifier.ENABLE_READ_WRITE);
               break;
             case FINISHED:
+              this.context.flowControl(FlowModifier.DISABLE_WRITE);
               handshakeFinished();
               break;
             case NEED_TASK:
@@ -584,7 +585,7 @@ class TlsSocket implements Transport, IpSocketContext {
     do {
       final int oldStatus = this.status;
       if ((oldStatus & (CONNECTING | CONNECTED | HANDSHAKING)) != (CONNECTED | HANDSHAKING)) {
-        final int newStatus = oldStatus & ~CONNECTING | CONNECTED | HANDSHAKING;
+        final int newStatus = oldStatus & ~CONNECTING | (CONNECTED | HANDSHAKING);
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
           if ((oldStatus & CONNECTED) != (newStatus & CONNECTED)) {
             this.socket.didConnect();
