@@ -368,7 +368,6 @@ public class TestTheaterSpec {
     final CountDownLatch didStart = new CountDownLatch(1);
     final CountDownLatch didStop = new CountDownLatch(1);
     final CountDownLatch taskWillCue = new CountDownLatch(1);
-    final CountDownLatch taskWillCue2 = new CountDownLatch(2);
     final CountDownLatch taskDidCancel = new CountDownLatch(1);
     final CountDownLatch taskWillRun = new CountDownLatch(1);
     final CountDownLatch taskDidRun = new CountDownLatch(1);
@@ -393,7 +392,6 @@ public class TestTheaterSpec {
       @Override
       protected void taskWillCue(TaskFunction task) {
         taskWillCue.countDown();
-        taskWillCue2.countDown();
       }
       @Override
       protected void taskDidCancel(TaskFunction task) {
@@ -450,6 +448,16 @@ public class TestTheaterSpec {
       theater.await(taskWillRun);
       theater.await(taskDidRun);
 
+      final CyclicBarrier barrier = new CyclicBarrier(2);
+      final TaskRef blocker = theater.task(new AbstractTask() {
+        @Override
+        public void runTask() {
+          // Block thread to prevent test task from running.
+          theater.await(barrier);
+        }
+      });
+      blocker.cue();
+
       final TaskRef task2 = theater.task(new AbstractTask() {
         @Override
         public void runTask() {
@@ -457,9 +465,9 @@ public class TestTheaterSpec {
         }
       });
       task2.cue();
-      theater.await(taskWillCue2);
       task2.cancel();
-      theater.await(taskDidCancel, 2000);
+      theater.await(taskDidCancel);
+      theater.await(barrier);
 
       theater.task(new AbstractTask() {
         @Override
