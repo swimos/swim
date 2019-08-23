@@ -617,7 +617,7 @@ class TlsSocket implements Transport, IpSocketContext {
   public void didClose() {
     do {
       final int oldStatus = this.status;
-      if ((oldStatus & (CONNECTING | CONNECTED)) != 0) {
+      if ((oldStatus & (CONNECTING | CONNECTED | HANDSHAKING | HANDSHAKED | OPEN | CLOSING_INBOUND | CLOSING_OUTBOUND)) != 0) {
         final int newStatus = oldStatus & ~(CONNECTING | CONNECTED | HANDSHAKING | HANDSHAKED | OPEN | CLOSING_INBOUND | CLOSING_OUTBOUND);
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.socket.didDisconnect();
