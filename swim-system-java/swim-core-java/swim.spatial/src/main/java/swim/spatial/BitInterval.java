@@ -14,6 +14,8 @@
 
 package swim.spatial;
 
+import java.util.Comparator;
+
 /**
  * Significant bit interval encoding. Represents power-of-2 sized integer
  * intervals as a (64 - k) bit prefix with a k bit suffix.
@@ -142,5 +144,46 @@ public final class BitInterval {
 
   public static boolean intersects(long xq, long yq, long xa, long ya) {
     return intersects(xq, xa) && intersects(yq, ya);
+  }
+
+  public static <T> void sort(T[] array, Comparator<? super T> comparator) {
+    sort(null, array, 0, array.length, 0, comparator);
+  }
+
+  private static <T> void sort(T[] src, T[] dest, int low, int high, int offset, Comparator<? super T> comparator) {
+    final int length = high - low;
+    if (length < 7) { // insertion sort
+      for (int i = low; i < high; i += 1) {
+        for (int j = i; j > low && comparator.compare(dest[j - 1], dest[j]) > 0; j -= 1) {
+          final T tmp = dest[j];
+          dest[j] = dest[j - 1];
+          dest[j - 1] = tmp;
+        }
+      }
+    } else { // merge sort
+      final int destLow  = low;
+      final int destHigh = high;
+      low += offset;
+      high += offset;
+      final int mid = (low + high) >>> 1;
+      if (src == null) {
+        src = dest.clone();
+      }
+      sort(dest, src, low, mid, -offset, comparator);
+      sort(dest, src, mid, high, -offset, comparator);
+      if (comparator.compare(src[mid - 1], src[mid]) <= 0) {
+        System.arraycopy(src, low, dest, destLow, length);
+      } else {
+        for (int i = destLow, p = low, q = mid; i < destHigh; i += 1) {
+          if (q >= high || p < mid && comparator.compare(src[p], src[q]) <= 0) {
+            dest[i] = src[p];
+            p += 1;
+          } else {
+            dest[i] = src[q];
+            q += 1;
+          }
+        }
+      }
+    }
   }
 }

@@ -14,7 +14,6 @@
 
 package swim.spatial;
 
-import java.util.Arrays;
 import swim.util.Cursor;
 
 final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
@@ -238,7 +237,7 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
       newSlots[i] = cursor.next();
       i += 1;
     }
-    Arrays.sort(newSlots, tree);
+    BitInterval.sort(newSlots, tree);
     return QTreeLeaf.create(newSlots);
   }
 
@@ -249,7 +248,7 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
     final QTreeEntry<K, S, V>[] newSlots = (QTreeEntry<K, S, V>[]) new QTreeEntry<?, ?, ?>[oldSlots.length + midSlots.length];
     System.arraycopy(oldSlots, 0, newSlots, 0, oldSlots.length);
     System.arraycopy(midSlots, 0, newSlots, oldSlots.length, midSlots.length);
-    Arrays.sort(newSlots, tree);
+    BitInterval.sort(newSlots, tree);
     return QTreeLeaf.create(newSlots);
   }
 
@@ -631,7 +630,7 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
         System.arraycopy(slots00, 0, newSlots00, 0, slotCount00);
         slots00 = newSlots00;
       }
-      Arrays.sort(slots00, tree);
+      BitInterval.sort(slots00, tree);
       pages[pageRefOffset] = new QTreeLeaf<K, S, V>(slots00, x00, y00);
       pageRefOffset += 1;
     }
@@ -641,7 +640,7 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
         System.arraycopy(slots01, 0, newSlots01, 0, slotCount01);
         slots01 = newSlots01;
       }
-      Arrays.sort(slots01, tree);
+      BitInterval.sort(slots01, tree);
       pages[pageRefOffset] = new QTreeLeaf<K, S, V>(slots01, x01, y01);
       pageRefOffset += 1;
     }
@@ -651,7 +650,7 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
         System.arraycopy(slots10, 0, newSlots10, 0, slotCount10);
         slots10 = newSlots10;
       }
-      Arrays.sort(slots10, tree);
+      BitInterval.sort(slots10, tree);
       pages[pageRefOffset] = new QTreeLeaf<K, S, V>(slots10, x10, y10);
       pageRefOffset += 1;
     }
@@ -661,11 +660,11 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
         System.arraycopy(slots11, 0, newSlots11, 0, slotCount11);
         slots11 = newSlots11;
       }
-      Arrays.sort(slots11, tree);
+      BitInterval.sort(slots11, tree);
       pages[pageRefOffset] = new QTreeLeaf<K, S, V>(slots11, x11, y11);
       pageRefOffset += 1;
     }
-    Arrays.sort(pages, PAGE_ORDERING);
+    BitInterval.sort(pages, PAGE_ORDERING);
 
     if (slotCountXY == 0) {
       slotsXY = (QTreeEntry<K, S, V>[]) EMPTY_SLOTS;
@@ -674,7 +673,7 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
       System.arraycopy(slotsXY, 0, newSlotsXY, 0, slotCountXY);
       slotsXY = newSlotsXY;
     }
-    Arrays.sort(slotsXY, tree);
+    BitInterval.sort(slotsXY, tree);
 
     return QTreeNode.create(pages, slotsXY, this.slots.length);
   }
