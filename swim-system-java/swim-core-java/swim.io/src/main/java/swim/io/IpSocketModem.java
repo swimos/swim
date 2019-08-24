@@ -280,10 +280,10 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
       if (this.writing != null) {
         this.context.flowControl(FlowModifier.ENABLE_READ_WRITE);
       } else {
-        this.context.flowControl(FlowModifier.ENABLE_READ);
+        this.context.flowControl(FlowModifier.DISABLE_WRITE_ENABLE_READ);
       }
     } else if (this.writing != null) {
-      this.context.flowControl(FlowModifier.ENABLE_WRITE);
+      this.context.flowControl(FlowModifier.DISABLE_READ_ENABLE_WRITE);
     }
     this.modem.didConnect();
   }
@@ -315,6 +315,7 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
 
   @Override
   public void didDisconnect() {
+    this.context.flowControl(FlowModifier.DISABLE_READ_WRITE);
     Decoder<? extends I> reader = this.reading;
     do {
       if (reader != null) {
