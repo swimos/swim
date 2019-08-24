@@ -327,8 +327,9 @@ public abstract class WarpSocketBehaviors {
           };
         }
       });
+      final IpSocketRef[] clients = new IpSocketRef[connections];
       for (int connection = 0; connection < connections; connection += 1) {
-        connect(endpoint, new AbstractWarpSocket() {
+        clients[connection] = connect(endpoint, new AbstractWarpSocket() {
           @Override
           public void didRead(WsControl<?, ?> frame) {
             if (frame instanceof WsClose<?, ?>) {
@@ -339,6 +340,9 @@ public abstract class WarpSocketBehaviors {
       }
       clientDone.await();
       serverDone.await();
+      for (int connection = 0; connection < connections; connection += 1) {
+        clients[connection].close();
+      }
       final int rate = (int) (1000L * count.get() / duration);
       System.out.println("Wrote " + count.get() + " envelopes over " + connections + " connections in " + duration + " milliseconds (" + rate + " per second)");
     } catch (InterruptedException cause) {

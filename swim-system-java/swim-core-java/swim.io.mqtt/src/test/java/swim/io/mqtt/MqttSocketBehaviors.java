@@ -202,13 +202,13 @@ public abstract class MqttSocketBehaviors {
             @Override
             public void didDisconnect() {
               serverDone.countDown();
-              close();
             }
           };
         }
       });
+      final IpSocketRef[] clients = new IpSocketRef[connections];
       for (int connection = 0; connection < connections; connection += 1) {
-        connect(endpoint, new AbstractMqttSocket<String, String>() {
+        clients[connection] = connect(endpoint, new AbstractMqttSocket<String, String>() {
           @Override
           public void didConnect() {
             read(Utf8.stringParser());
@@ -225,6 +225,9 @@ public abstract class MqttSocketBehaviors {
       }
       clientDone.await();
       serverDone.await();
+      for (int connection = 0; connection < connections; connection += 1) {
+        clients[connection].close();
+      }
       final int rate = (int) (1000L * count.get() / duration);
       System.out.println("Wrote " + count.get() + " messages over " + connections + " connections in " + duration + " milliseconds (" + rate + " per second)");
     } catch (InterruptedException cause) {
