@@ -317,6 +317,7 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
   public void didDisconnect() {
     this.context.flowControl(FlowModifier.DISABLE_READ_WRITE);
     Decoder<? extends I> reader = this.reading;
+    this.reading = null;
     do {
       if (reader != null) {
         try {
@@ -333,6 +334,7 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
       reader = this.readerQueue.poll();
     } while (reader != null);
     Encoder<?, ? extends O> writer = this.writing;
+    this.writing = null;
     do {
       if (writer != null) {
         try {
