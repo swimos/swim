@@ -4,8 +4,8 @@ description = 'Swim JavaScript language integration'
 ext.moduleName = 'swim.vm.js'
 
 dependencies {
-  implementation group: 'ai.swim', name: 'swim-json', version: version
-  api group: 'ai.swim', name: 'swim-uri', version: version
+  implementation group: 'org.swimos', name: 'swim-json', version: version
+  api group: 'org.swimos', name: 'swim-uri', version: version
   api project(':swim-vm')
   implementation group: 'org.graalvm.js', name: 'js', version: graalVersion
 

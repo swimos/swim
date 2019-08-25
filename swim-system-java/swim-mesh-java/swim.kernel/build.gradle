@@ -4,8 +4,8 @@ description = 'Swim kernel runtime'
 ext.moduleName = 'swim.kernel'
 
 dependencies {
-  implementation group: 'ai.swim', name: 'swim-recon', version: version
-  api group: 'ai.swim', name: 'swim-io', version: version
+  implementation group: 'org.swimos', name: 'swim-recon', version: version
+  api group: 'org.swimos', name: 'swim-io', version: version
   api project(':swim-api')
   api project(':swim-runtime')
 }

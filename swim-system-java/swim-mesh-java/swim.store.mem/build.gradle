@@ -4,8 +4,8 @@ description = 'In-memory storage runtime'
 ext.moduleName = 'swim.store.mem'
 
 dependencies {
-  api group: 'ai.swim', name: 'swim-collections', version: version
-  api group: 'ai.swim', name: 'swim-spatial', version: version
+  api group: 'org.swimos', name: 'swim-collections', version: version
+  api group: 'org.swimos', name: 'swim-spatial', version: version
   api project(':swim-store')
   api project(':swim-kernel')
 }

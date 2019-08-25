@@ -4,7 +4,7 @@ description = 'swim.observable dynamic language bindings'
 ext.moduleName = 'swim.dynamic.observable'
 
 dependencies {
-  api group: 'ai.swim', name: 'swim-observable', version: version
+  api group: 'org.swimos', name: 'swim-observable', version: version
   api project(':swim-dynamic')
   api project(':swim-dynamic-java')
 

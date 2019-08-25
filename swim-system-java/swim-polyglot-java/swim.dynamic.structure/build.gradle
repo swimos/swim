@@ -4,7 +4,7 @@ description = 'swim.structure dynamic language bindings'
 ext.moduleName = 'swim.dynamic.structure'
 
 dependencies {
-  api group: 'ai.swim', name: 'swim-structure', version: version
+  api group: 'org.swimos', name: 'swim-structure', version: version
   api project(':swim-dynamic')
   api project(':swim-dynamic-java')
 

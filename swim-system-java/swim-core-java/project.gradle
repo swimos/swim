@@ -3,7 +3,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'signing'
 apply plugin: 'maven'
 
-group = 'ai.swim'
+group = 'org.swimos'
 version = project.property('swim.version')
 ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 ext.compilerArgs = ['-Xlint:all']
