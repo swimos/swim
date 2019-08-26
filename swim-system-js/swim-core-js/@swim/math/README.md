@@ -10,8 +10,7 @@
 operators.  **@swim/math** implements vectors, points, lines, and shapes, with
 standard algebraic and computational geometry operators, including containment
 and intersection testing.  **@swim/math** is part of the
-[**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
-framework.
+[**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core) framework.
 
 ## Overview
 

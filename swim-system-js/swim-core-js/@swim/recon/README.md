@@ -10,7 +10,7 @@ Recon is object notation with attributes, like if JSON and XML had a baby.
 Attributes facilitate uniformly disambiguating polymorphic structures.  And
 first-class language extensions for selectors, expressions, and functions make
 Recon a highly expressive format for domain specific languages.  **@swim/recon**
-is part of the [https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core) framework.
+is part of the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core) framework.
 
 ## Language Overview
 
