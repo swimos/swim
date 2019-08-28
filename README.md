@@ -91,6 +91,7 @@ of the following component libraries:
 - [**swim.ws**](swim-system-java/swim-core-java/swim.ws) –
 - [**swim.warp**](swim-system-java/swim-core-java/swim.warp) –
 - [**swim.concurrent**](swim-system-java/swim-core-java/swim.concurrent) –
+- [**swim.db**](swim-system-java/swim-core-java/swim.db) –
 - [**swim.io**](swim-system-java/swim-core-java/swim.io) –
 - [**swim.io.mqtt**](swim-system-java/swim-core-java/swim.io.mqtt) –
 - [**swim.io.http**](swim-system-java/swim-core-java/swim.io.http) –
@@ -112,6 +113,7 @@ component libraries:
 - [**swim.fabric**](swim-system-java/swim-mesh-java/swim.fabric) –
 - [**swim.service**](swim-system-java/swim-mesh-java/swim.service) –
 - [**swim.store.mem**](swim-system-java/swim-mesh-java/swim.store.mem) –
+- [**swim.store.db**](swim-system-java/swim-mesh-java/swim.store.db) –
 - [**swim.remote**](swim-system-java/swim-mesh-java/swim.remote) –
 - [**swim.service.web**](swim-system-java/swim-mesh-java/swim.service.web) –
 - [**swim.java**](swim-system-java/swim-mesh-java/swim.java) –
