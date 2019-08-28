@@ -1,0 +1,9 @@
+apply from: '../project.gradle'
+
+description = 'Swim actor runtime'
+ext.moduleName = 'swim.actor'
+
+dependencies {
+  api project(':swim-runtime')
+  api project(':swim-kernel')
+}

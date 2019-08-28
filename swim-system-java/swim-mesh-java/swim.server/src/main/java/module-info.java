@@ -18,11 +18,12 @@
 module swim.server {
   requires transitive swim.kernel;
   requires transitive swim.store.mem;
+  requires transitive swim.store.db;
   requires transitive swim.remote;
   requires transitive swim.service;
   requires transitive swim.service.web;
   requires transitive swim.auth;
-  requires transitive swim.fabric;
+  requires transitive swim.actor;
   requires transitive swim.java;
 
   exports swim.server;

@@ -17,40 +17,6 @@ gradle.projectsEvaluated {
   javadoc {
     title 'Swim Core'
     options.overview = "${projectDir}/overview.html"
-    if (useModules) {
-      options.group('System',
-        'swim.args',
-        'swim.codec',
-        'swim.collections',
-        'swim.concurrent',
-        'swim.dataflow',
-        'swim.math',
-        'swim.observable',
-        'swim.security',
-        'swim.spatial',
-        'swim.streamlet',
-        'swim.structure',
-        'swim.uri',
-        'swim.util')
-      options.group('Data',
-        'swim.decipher',
-        'swim.deflate',
-        'swim.json',
-        'swim.protobuf',
-        'swim.recon',
-        'swim.xml')
-      options.group('Network',
-        'swim.http',
-        'swim.io',
-        'swim.io.http',
-        'swim.io.mqtt',
-        'swim.io.warp',
-        'swim.io.ws',
-        'swim.mqtt',
-        'swim.warp',
-        'swim.web',
-        'swim.ws')
-    }
 
     source javaProjects.collect { project -> project.sourceSets.main.allJava }
     doFirst {

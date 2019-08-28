@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Database storage runtime'
+ext.moduleName = 'swim.store.db'
+
+dependencies {
+  api group: 'org.swimos', name: 'swim-db', version: version
+  api project(':swim-store')
+  api project(':swim-kernel')
+}

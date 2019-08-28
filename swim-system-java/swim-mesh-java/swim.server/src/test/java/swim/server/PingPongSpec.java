@@ -17,6 +17,7 @@ package swim.server;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
+import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
 import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
@@ -26,7 +27,6 @@ import swim.api.lane.CommandLane;
 import swim.api.plane.AbstractPlane;
 import swim.api.warp.function.OnCommand;
 import swim.api.warp.function.OnEvent;
-import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
 import swim.recon.Recon;
 import swim.service.web.WebServiceDef;
@@ -75,7 +75,7 @@ public class PingPongSpec {
   @Test
   public void testCommandPingPong() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestPingPongPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestPingPongPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
                                           .openPlane("test", TestPingPongPlane.class);
 
     final CountDownLatch onPong = new CountDownLatch(1);

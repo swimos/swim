@@ -17,6 +17,7 @@ package swim.server;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
+import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
 import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
@@ -36,7 +37,6 @@ import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.codec.Format;
-import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
 import swim.service.web.WebServiceDef;
 import swim.structure.Text;
@@ -63,7 +63,7 @@ public class CommandLaneSpec {
   @Test
   public void testLinkToCommandLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestCommandPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestCommandPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
                                          .openPlane("test", TestCommandPlane.class);
 
     final CountDownLatch linkOnEvent = new CountDownLatch(1);

@@ -18,25 +18,6 @@ gradle.projectsEvaluated {
   javadoc {
     title 'Swim Mesh'
     options.overview = "${projectDir}/overview.html"
-    if (useModules) {
-      options.group('Storage',
-        'swim.store',
-        'swim.store.mem')
-      options.group('Runtime',
-        'swim.api',
-        'swim.auth',
-        'swim.client',
-        'swim.fabric',
-        'swim.java',
-        'swim.kernel',
-        'swim.remote',
-        'swim.runtime',
-        'swim.server',
-        'swim.service',
-        'swim.service.web')
-      options.group('Tools',
-        'swim.cli')
-    }
 
     source javaProjects.collect { project -> project.sourceSets.main.allJava }
     doFirst {

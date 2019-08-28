@@ -1,0 +1,16 @@
+apply from: '../project.gradle'
+
+description = 'Structured data store'
+ext.moduleName = 'swim.db'
+
+dependencies {
+  api project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-collections')
+  api project(':swim-structure')
+  api project(':swim-recon')
+  api project(':swim-math')
+  api project(':swim-spatial')
+  api project(':swim-uri')
+  api project(':swim-concurrent')
+}

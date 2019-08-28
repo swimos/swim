@@ -15,7 +15,7 @@
 package swim.js;
 
 import org.testng.annotations.Test;
-import swim.fabric.FabricDef;
+import swim.actor.ActorSpaceDef;
 import swim.kernel.Kernel;
 import swim.server.ServerLoader;
 import swim.uri.UriPath;
@@ -27,8 +27,8 @@ public class JsPlaneSpec {
     jsKernel.setRootPath(UriPath.parse(System.getProperty("project.dir")));
     final Kernel kernel = ServerLoader.loadServerStack().injectKernel(jsKernel);
 
-    final FabricDef fabricDef = FabricDef.fromPlaneDef(JsPlaneDef.from("plane", "./src/test/js/TestPlane"));
-    final JsPlane plane = (JsPlane) kernel.openSpace(fabricDef).getPlane("plane");
+    final ActorSpaceDef spaceDef = ActorSpaceDef.fromPlaneDef(JsPlaneDef.from("plane", "./src/test/js/TestPlane"));
+    final JsPlane plane = (JsPlane) kernel.openSpace(spaceDef).getPlane("plane");
 
     try {
       kernel.start();

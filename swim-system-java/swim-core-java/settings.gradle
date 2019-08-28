@@ -74,6 +74,9 @@ project(':swim.warp').name = 'swim-warp'
 include 'swim.concurrent'
 project(':swim.concurrent').name = 'swim-concurrent'
 
+include 'swim.db'
+project(':swim.db').name = 'swim-db'
+
 include 'swim.io'
 project(':swim.io').name = 'swim-io'
 

@@ -18,17 +18,6 @@ gradle.projectsEvaluated {
   javadoc {
     title 'Swim Polyglot'
     options.overview = "${projectDir}/overview.html"
-    if (useModules) {
-      options.group('Polyglot',
-        'swim.dynamic',
-        'swim.dynamic.api',
-        'swim.dynamic.java',
-        'swim.dynamic.observable',
-        'swim.dynamic.structure',
-        'swim.js',
-        'swim.vm',
-        'swim.vm.js')
-    }
 
     source javaProjects.collect { project -> project.sourceSets.main.allJava }
     doFirst {

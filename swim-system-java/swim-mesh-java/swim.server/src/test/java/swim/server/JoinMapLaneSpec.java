@@ -17,6 +17,7 @@ package swim.server;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
+import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
 import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
@@ -39,7 +40,6 @@ import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.codec.Format;
-import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
 import swim.observable.function.DidRemoveKey;
 import swim.observable.function.DidUpdateKey;
@@ -132,7 +132,7 @@ public class JoinMapLaneSpec {
   @Test
   public void testLinkToJoinMapLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestJoinMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestJoinMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
                                          .openPlane("test", TestJoinMapPlane.class);
 
     final CountDownLatch joinDidReceive = new CountDownLatch(4);

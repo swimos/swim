@@ -15,7 +15,7 @@
 package swim.js;
 
 import org.testng.annotations.Test;
-import swim.fabric.FabricDef;
+import swim.actor.ActorSpaceDef;
 import swim.kernel.Kernel;
 import swim.server.ServerLoader;
 import swim.uri.UriPath;
@@ -40,8 +40,8 @@ public class JsKernelSpec {
         + "}\n"
         + "module.exports = TestPlane\n");
 
-    final FabricDef fabricDef = FabricDef.fromPlaneDef(JsPlaneDef.fromModulePath("main"));
-    final JsPlane plane = (JsPlane) kernel.openSpace(fabricDef).getPlane("main");
+    final ActorSpaceDef spaceDef = ActorSpaceDef.fromPlaneDef(JsPlaneDef.fromModulePath("main"));
+    final JsPlane plane = (JsPlane) kernel.openSpace(spaceDef).getPlane("main");
     assertNotNull(plane);
   }
 
@@ -63,8 +63,8 @@ public class JsKernelSpec {
         + "}\n"
         + "module.exports = TestPlane\n");
 
-    final FabricDef fabricDef = FabricDef.fromPlaneDef(JsPlaneDef.fromModulePath("main"));
-    final JsPlane plane = (JsPlane) kernel.openSpace(fabricDef).getPlane("main");
+    final ActorSpaceDef spaceDef = ActorSpaceDef.fromPlaneDef(JsPlaneDef.fromModulePath("main"));
+    final JsPlane plane = (JsPlane) kernel.openSpace(spaceDef).getPlane("main");
     assertNotNull(plane);
   }
 }
