@@ -57,6 +57,7 @@ import {
   TextAlign,
   TextDecorationStyle,
   TextTransform,
+  TouchAction,
   UserSelect,
   VerticalAlign,
   Visibility,
@@ -1153,6 +1154,9 @@ export class HtmlView extends ElementView implements LayoutView {
 
   @StyleAnimator("top", [Length, String])
   top: StyleAnimator<this, Length | "auto", AnyLength | "auto">;
+
+  @StyleAnimator("touch-action", String)
+  touchAction: StyleAnimator<this, TouchAction>;
 
   @StyleAnimator("transform", Transform)
   transform: StyleAnimator<this, Transform, AnyTransform>;

@@ -29,7 +29,14 @@ import {
 } from "@swim/font";
 import {AnyTransform, Transform} from "@swim/transform";
 import {Tween} from "@swim/transition";
-import {AlignmentBaseline, CssCursor, FillRule, Paint, TextAnchor} from "@swim/style";
+import {
+  AlignmentBaseline,
+  CssCursor,
+  FillRule,
+  Paint,
+  TextAnchor,
+  TouchAction,
+} from "@swim/style";
 import {AttributeAnimator} from "./attribute/AttributeAnimator";
 import {StyleAnimator} from "./style/StyleAnimator";
 import {View} from "./View";
@@ -223,6 +230,9 @@ export class SvgView extends ElementView {
 
   @AttributeAnimator("text-anchor", String)
   textAnchor: AttributeAnimator<this, TextAnchor>;
+
+  @StyleAnimator("touch-action", String)
+  touchAction: StyleAnimator<this, TouchAction>;
 
   @AttributeAnimator("transform", Transform)
   transform: AttributeAnimator<this, Transform, AnyTransform>;

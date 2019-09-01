@@ -683,6 +683,7 @@ export class MultitouchPointer extends Multitouch {
     super();
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
+    this.onPointerCancel = this.onPointerCancel.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onWheel = this.onWheel.bind(this);
     this._wheel = true;
@@ -731,6 +732,7 @@ export class MultitouchPointer extends Multitouch {
     const target = this.target();
     if (target) {
       target.on("pointermove", this.onPointerMove);
+      target.on("pointercancel", this.onPointerCancel);
       target.on("pointerup", this.onPointerUp);
     }
   }
@@ -739,6 +741,7 @@ export class MultitouchPointer extends Multitouch {
     const target = this.target();
     if (target) {
       target.off("pointermove", this.onPointerMove);
+      target.off("pointercancel", this.onPointerCancel);
       target.off("pointerup", this.onPointerUp);
     }
   }
@@ -748,6 +751,14 @@ export class MultitouchPointer extends Multitouch {
     const target = this.target();
     if (target && target.node.setPointerCapture) {
       target.node.setPointerCapture(+track.identifier);
+    }
+  }
+
+  protected trackDidCancel(track: MultitouchTrack, surface: View, event: Event): void {
+    super.trackDidCancel(track, surface, event);
+    const target = this.target();
+    if (target && target.node.releasePointerCapture) {
+      target.node.releasePointerCapture(+track.identifier);
     }
   }
 
@@ -765,6 +776,10 @@ export class MultitouchPointer extends Multitouch {
 
   protected onPointerMove(event: PointerEvent): void {
     this.trackMove("" + event.pointerId, event.clientX, event.clientY, event);
+  }
+
+  protected onPointerCancel(event: PointerEvent): void {
+    this.trackCancel("" + event.pointerId, event.clientX, event.clientY, event);
   }
 
   protected onPointerUp(event: PointerEvent): void {
