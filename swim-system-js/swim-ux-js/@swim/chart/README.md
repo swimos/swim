@@ -7,7 +7,7 @@
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/chart** provides multi-plot, fully animatable, canvas rendered chart
-widgets, suppporting line, area, and bubble graphs, with customizeable axes,
+widgets, supporting line, area, and bubble graphs, with customizeable axes,
 and kinematic multitouch scale gestures for panning and zooming with momentum.
 Check out the [bubble chart](https://www.swimos.org/demo/chart/bubble.html),
 [area chart](https://www.swimos.org/demo/chart/area.html),
