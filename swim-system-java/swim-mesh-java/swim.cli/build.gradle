@@ -3,6 +3,7 @@ apply plugin: 'application'
 
 description = 'Swim Command Line Interface'
 mainClassName = 'swim.cli.Main'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.cli'
 ext.moduleName = 'swim.cli'
 
 dependencies {

@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Storage runtime interface'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.store'
 ext.moduleName = 'swim.store'
 
 dependencies {

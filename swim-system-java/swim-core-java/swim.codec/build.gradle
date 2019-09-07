@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
-description = 'Incremental parsers, writers, decoders, and encoders'
+description = 'Incremental I/O; functional parsers and writers; display, debug, and diagnostic formatters; and Unicode and binary codecs'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.codec'
 ext.moduleName = 'swim.codec'
 
 dependencies {

@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
-description = 'Protocol Buffers (protobuf) codec'
+description = 'Protocol Buffers (protobuf) codec that incrementally parses and writes swim-structure values'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.protobuf'
 ext.moduleName = 'swim.protobuf'
 
 dependencies {

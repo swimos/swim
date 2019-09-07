@@ -1,3 +1,3 @@
-# swim.dynamic.java
+# swim-dynamic-java
 
 java.base dynamic language bindings.

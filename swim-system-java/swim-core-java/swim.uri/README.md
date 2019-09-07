@@ -1,3 +1,3 @@
-# swim.uri
+# swim-uri
 
 Uniform resource identifiers.

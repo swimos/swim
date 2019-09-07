@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'DEFLATE compression codec'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.deflate'
 ext.moduleName = 'swim.deflate'
 
 dependencies {

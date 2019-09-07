@@ -1,3 +1,3 @@
-# swim.deflate
+# swim-deflate
 
 DEFLATE compression codec.

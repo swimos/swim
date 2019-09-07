@@ -5,6 +5,7 @@ apply plugin: 'maven'
 
 group = 'org.swimos'
 version = project.property('swim.version')
+ext.homepage = 'https://github.com/swimos/swim'
 ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 ext.compilerArgs = ['-Xlint:all']
 
@@ -169,7 +170,7 @@ afterEvaluate {
   }
 }
 
-if (project.hasProperty('nexusUsername') && project.hasProperty('nexusPassword')) {
+if (project.hasProperty('swimOSUsername') && project.hasProperty('swimOSPassword')) {
   signing {
     required { isReleaseVersion && gradle.taskGraph.hasTask('uploadArchives') }
     sign configurations.archives
@@ -181,18 +182,18 @@ if (project.hasProperty('nexusUsername') && project.hasProperty('nexusPassword')
         beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
         repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
-          authentication(userName: nexusUsername, password: nexusPassword)
+          authentication(userName: swimOSUsername, password: swimOSPassword)
         }
 
         snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
-          authentication(userName: nexusUsername, password: nexusPassword)
+          authentication(userName: swimOSUsername, password: swimOSPassword)
         }
 
         pom.project {
-          name "${name}"
+          name "${project.name}"
           packaging 'jar'
-          description "${description}"
-          url 'https://github.com/swimos/swim'
+          description "${project.description}"
+          url "${project.ext.homepage}"
 
           scm {
             connection 'scm:git:git@github.com:swimos/swim.git'

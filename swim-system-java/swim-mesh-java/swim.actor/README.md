@@ -1,3 +1,3 @@
-# swim.actor
+# swim-actor
 
 Swim actor runtime.

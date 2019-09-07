@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Cryptographic security model'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.security'
 ext.moduleName = 'swim.security'
 
 dependencies {

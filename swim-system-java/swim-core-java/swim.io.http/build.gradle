@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Flow-controlled HTTP I/O library'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.io.http'
 ext.moduleName = 'swim.io.http'
 
 dependencies {

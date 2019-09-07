@@ -25,7 +25,7 @@ The **Swim System** umbrella framework has no external dependencies when run
 in a web browser, and depends only on a WebSocket implementation when run in
 Node.js.  **Swim System** provides the following top-level libraries:
 
-- [**@swim/system**](https://github.com/swimos/swim/tree/js-readmes/swim-system-js/@swim/system)
+- [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
   ([npm](https://www.npmjs.com/package/@swim/system),
   [doc](https://docs.swimos.org/js/latest)) –
   umbrella package that depends on, and re-exports, all **Swim System**

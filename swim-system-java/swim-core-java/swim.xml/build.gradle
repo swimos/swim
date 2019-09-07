@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
-description = 'eXtensible Markup Language (XML) codec'
+description = 'eXtensible Markup Language (XML) codec that incrementally parses and writes swim-structure values'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.xml'
 ext.moduleName = 'swim.xml'
 
 dependencies {

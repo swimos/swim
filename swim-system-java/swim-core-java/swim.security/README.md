@@ -1,3 +1,3 @@
-# swim.security
+# swim-security
 
 Cryptographic security model.

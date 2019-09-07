@@ -1,3 +1,3 @@
-# swim.service
+# swim-service
 
 Swim network service runtime.

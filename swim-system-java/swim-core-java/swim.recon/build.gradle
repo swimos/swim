@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
-description = 'Record Notation (Recon) codec'
+description = 'Object notation with attributes, like if JSON and XML had a baby'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.recon'
 ext.moduleName = 'swim.recon'
 
 dependencies {

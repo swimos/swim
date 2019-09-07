@@ -1,3 +1,3 @@
-# swim.store
+# swim-store
 
 Storage runtime interface.

@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Flow-controlled web server library'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.web'
 ext.moduleName = 'swim.web'
 
 dependencies {

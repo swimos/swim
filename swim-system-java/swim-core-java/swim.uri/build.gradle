@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Uniform resource identifiers'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.uri'
 ext.moduleName = 'swim.uri'
 
 dependencies {

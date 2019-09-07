@@ -1,6 +1,6 @@
 # Swim System Java Implementation
 
-[![package](https://img.shields.io/github/tag/swimOS/swim.svg?label=maven)](https://mvnrepository.com/artifact/ai.swim)
+[![package](https://img.shields.io/github/tag/swimOS/swim.svg?label=maven)](https://mvnrepository.com/artifact/org.swimos)
 [![documentation](https://img.shields.io/badge/doc-JavaDoc-blue.svg)](https://docs.swimos.org/java/latest)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
@@ -27,36 +27,58 @@ framework, with a lightweight concurrency engine, incremental I/O engine,
 and flow-controlled network protocol implementations.  **Swim Core** consists
 of the following component libraries:
 
-- [**swim.util**](swim-core-java/swim.util) –
-- [**swim.codec**](swim-core-java/swim.codec) –
-- [**swim.collections**](swim-core-java/swim.collections) –
-- [**swim.args**](swim-core-java/swim.args) –
-- [**swim.structure**](swim-core-java/swim.structure) –
-- [**swim.recon**](swim-core-java/swim.recon) –
-- [**swim.json**](swim-core-java/swim.json) –
-- [**swim.xml**](swim-core-java/swim.xml) –
-- [**swim.protobuf**](swim-core-java/swim.protobuf) –
-- [**swim.decipher**](swim-core-java/swim.decipher) –
-- [**swim.math**](swim-core-java/swim.math) –
-- [**swim.security**](swim-core-java/swim.security) –
-- [**swim.spatial**](swim-core-java/swim.spatial) –
-- [**swim.streamlet**](swim-core-java/swim.streamlet) –
-- [**swim.dataflow**](swim-core-java/swim.dataflow) –
-- [**swim.observable**](swim-core-java/swim.observable) –
-- [**swim.uri**](swim-core-java/swim.uri) –
-- [**swim.deflate**](swim-core-java/swim.deflate) –
-- [**swim.mqtt**](swim-core-java/swim.mqtt) –
-- [**swim.http**](swim-core-java/swim.http) –
-- [**swim.ws**](swim-core-java/swim.ws) –
-- [**swim.warp**](swim-core-java/swim.warp) –
-- [**swim.concurrent**](swim-core-java/swim.concurrent) –
-- [**swim.db**](swim-core-java/swim.db) –
-- [**swim.io**](swim-core-java/swim.io) –
-- [**swim.io.mqtt**](swim-core-java/swim.io.mqtt) –
-- [**swim.io.http**](swim-core-java/swim.io.http) –
-- [**swim.io.ws**](swim-core-java/swim.io.ws) –
-- [**swim.io.warp**](swim-core-java/swim.io.warp) –
-- [**swim.web**](swim-core-java/swim.web) –
+- [**swim-util**](swim-core-java/swim.util) –
+  extended collection, iterator, and builder interfaces, lightweight cache
+  sets and maps, and other foundational utilities.
+- [**swim-codec**](swim-core-java/swim.codec) –
+  incremental I/O; functional parsers and writers; display, debug, and
+  diagnostic formatters; and Unicode and binary codecs.
+- [**swim-collections**](swim-core-java/swim.collections) –
+  immutable, structure sharing collections, including hash array mapped tries,
+  finger tries, B-trees, and S-trees (sequence trees).
+- [**swim-args**](swim-core-java/swim.args) –
+  composable command line argument parser.
+- [**swim-structure**](swim-core-java/swim.structure) –
+  generic structured data model, with support for selectors, expressions,
+  and lambda functions.  Used as a common abstract syntax tree for Recon,
+  JSON, XML, and other data languages.
+- [**swim-recon**](swim-core-java/swim.recon) –
+  object notation with attributes, like if JSON and XML had a baby.
+- [**swim-json**](swim-core-java/swim.json) –
+  JavaScript Object Notation (JSON) codec that incrementally parses and writes
+  **swim-structure** values.
+- [**swim-xml**](swim-core-java/swim.xml) –
+  eXtensible Markup Language (XML) codec that incrementally parses and writes
+  **swim-structure** values.
+- [**swim-protobuf**](swim-core-java/swim.protobuf) –
+  Protocol Buffers (protobuf) codec that incrementally parses and writes
+  **swim-structure** values.
+- [**swim-decipher**](swim-core-java/swim.decipher) –
+  universal decoder that detects and incrementally parses Recon, JSON, XML,
+  Protobuf, raw text, and binary data formats as **swim-structure** values.
+- [**swim-math**](swim-core-java/swim.math) –
+  mathematical and geometric structures, including rings, fields, vector
+  modules and spaces, affine spaces, tensor spaces, probability distributions,
+  and associated operators.
+- [**swim-security**](swim-core-java/swim.security) –
+- [**swim-spatial**](swim-core-java/swim.spatial) –
+- [**swim-streamlet**](swim-core-java/swim.streamlet) –
+- [**swim-dataflow**](swim-core-java/swim.dataflow) –
+- [**swim-observable**](swim-core-java/swim.observable) –
+- [**swim-uri**](swim-core-java/swim.uri) –
+- [**swim-deflate**](swim-core-java/swim.deflate) –
+- [**swim-mqtt**](swim-core-java/swim.mqtt) –
+- [**swim-http**](swim-core-java/swim.http) –
+- [**swim-ws**](swim-core-java/swim.ws) –
+- [**swim-warp**](swim-core-java/swim.warp) –
+- [**swim-concurrent**](swim-core-java/swim.concurrent) –
+- [**swim-db**](swim-core-java/swim.db) –
+- [**swim-io**](swim-core-java/swim.io) –
+- [**swim-io-mqtt**](swim-core-java/swim.io.mqtt) –
+- [**swim-io-http**](swim-core-java/swim.io.http) –
+- [**swim-io-ws**](swim-core-java/swim.io.ws) –
+- [**swim-io-warp**](swim-core-java/swim.io.warp) –
+- [**swim-web**](swim-core-java/swim.web) –
 
 ### [**Swim Mesh** Framework](swim-mesh-java)
 
@@ -64,21 +86,21 @@ The **Swim Mesh** framework provides the Web Agent API, and implements
 a distributed WARP microkernel.  **Swim Mesh** consists of the following
 component libraries:
 
-- [**swim.api**](swim-mesh-java/swim.api) –
-- [**swim.store**](swim-mesh-java/swim.store) –
-- [**swim.runtime**](swim-mesh-java/swim.runtime) –
-- [**swim.kernel**](swim-mesh-java/swim.kernel) –
-- [**swim.auth**](swim-mesh-java/swim.auth) –
-- [**swim.actor**](swim-mesh-java/swim.actor) –
-- [**swim.service**](swim-mesh-java/swim.service) –
-- [**swim.store.mem**](swim-mesh-java/swim.store.mem) –
-- [**swim.store.db**](swim-mesh-java/swim.store.db) –
-- [**swim.remote**](swim-mesh-java/swim.remote) –
-- [**swim.service.web**](swim-mesh-java/swim.service.web) –
-- [**swim.java**](swim-mesh-java/swim.java) –
-- [**swim.server**](swim-mesh-java/swim.server) –
-- [**swim.client**](swim-mesh-java/swim.client) –
-- [**swim.cli**](swim-mesh-java/swim.cli) –
+- [**swim-api**](swim-mesh-java/swim.api) –
+- [**swim-store**](swim-mesh-java/swim.store) –
+- [**swim-runtime**](swim-mesh-java/swim.runtime) –
+- [**swim-kernel**](swim-mesh-java/swim.kernel) –
+- [**swim-auth**](swim-mesh-java/swim.auth) –
+- [**swim-actor**](swim-mesh-java/swim.actor) –
+- [**swim-service**](swim-mesh-java/swim.service) –
+- [**swim-store-mem**](swim-mesh-java/swim.store.mem) –
+- [**swim-store-db**](swim-mesh-java/swim.store.db) –
+- [**swim-remote**](swim-mesh-java/swim.remote) –
+- [**swim-service-web**](swim-mesh-java/swim.service.web) –
+- [**swim-java**](swim-mesh-java/swim.java) –
+- [**swim-server**](swim-mesh-java/swim.server) –
+- [**swim-client**](swim-mesh-java/swim.client) –
+- [**swim-cli**](swim-mesh-java/swim.cli) –
 
 ### [**Swim Polyglot** Framework](swim-polyglot-java)
 
@@ -87,33 +109,33 @@ The **Swim Polyglot** framework provides multi-language API bindings and
 into **swimOS** applications.  **Swim Polyglot** consists of the following
 component libraries:
 
-- [**swim.dynamic**](swim-polyglot-java/swim.dynamic) –
-- [**swim.dynamic.java**](swim-polyglot-java/swim.dynamic.java) –
-- [**swim.dynamic.structure**](swim-polyglot-java/swim.dynamic.structure) –
-- [**swim.dynamic.observable**](swim-polyglot-java/swim.dynamic.observable) –
-- [**swim.dynamic.api**](swim-polyglot-java/swim.dynamic.api) –
-- [**swim.vm**](swim-polyglot-java/swim.vm) –
-- [**swim.vm.js**](swim-polyglot-java/swim.vm.js) –
-- [**swim.js**](swim-polyglot-java/swim.js) –
+- [**swim-dynamic**](swim-polyglot-java/swim.dynamic) –
+- [**swim-dynamic-java**](swim-polyglot-java/swim.dynamic.java) –
+- [**swim-dynamic-structure**](swim-polyglot-java/swim.dynamic.structure) –
+- [**swim-dynamic-observable**](swim-polyglot-java/swim.dynamic.observable) –
+- [**swim-dynamic-api**](swim-polyglot-java/swim.dynamic.api) –
+- [**swim-vm**](swim-polyglot-java/swim.vm) –
+- [**swim-vm-js**](swim-polyglot-java/swim.vm.js) –
+- [**swim-js**](swim-polyglot-java/swim.js) –
 
 ## Usage
 
 To embed the **Swim Kernel** directly into your application, add the
-**swim-server** library to your project's dependencies:
+**swim-server** library to your project's dependencies.
 
 ### Gradle
 
 ```groovy
-compile group: 'ai.swim', name: 'swim-server', version: '3.10.0'
+compile group: 'org.swimos', name: 'swim-server', version: '3.10.0'
 ```
 
 ### Maven
 
 ```xml
 <dependency>
-    <groupId>ai.swim</groupId>
-    <artifactId>swim-server</artifactId>
-    <version>3.10.0</version>
+  <groupId>org.swimos</groupId>
+  <artifactId>swim-server</artifactId>
+  <version>3.10.0</version>
 </dependency>
 ```
 

@@ -1,3 +1,3 @@
-# swim.service.web
+# swim-service-web
 
 Web service runtime.

@@ -1,3 +1,3 @@
-# swim.auth
+# swim-auth
 
 Swim authenticator runtime.

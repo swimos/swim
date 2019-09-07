@@ -1,3 +1,3 @@
-# swim.warp
+# swim-warp
 
 Web Agent Remote Protocol.

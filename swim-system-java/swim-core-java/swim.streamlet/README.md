@@ -1,3 +1,3 @@
-# swim.streamlet
+# swim-streamlet
 
 Stateful streaming component model.

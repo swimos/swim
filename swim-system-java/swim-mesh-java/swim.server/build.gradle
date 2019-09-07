@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Swim server loader'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.server'
 ext.moduleName = 'swim.server'
 
 dependencies {

@@ -1,3 +1,3 @@
-# swim.server
+# swim-server
 
 Swim server loader.

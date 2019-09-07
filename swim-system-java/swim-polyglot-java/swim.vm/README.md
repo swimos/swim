@@ -1,3 +1,3 @@
-# swim.vm
+# swim-vm
 
 Swim polyglot virtual machine integration.

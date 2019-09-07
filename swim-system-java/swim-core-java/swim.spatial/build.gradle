@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Spatial collections and geospatial projections'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.spatial'
 ext.moduleName = 'swim.spatial'
 
 dependencies {

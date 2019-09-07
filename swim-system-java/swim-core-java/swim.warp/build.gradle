@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Web Agent Remote Protocol'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.warp'
 ext.moduleName = 'swim.warp'
 
 dependencies {

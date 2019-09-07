@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
-description = 'Uniform structured data model'
+description = 'Generic structured data model, with support for selectors, expressions, and lambda functions'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.structure'
 ext.moduleName = 'swim.structure'
 
 dependencies {

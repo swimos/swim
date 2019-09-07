@@ -1,3 +1,3 @@
-# swim.java
+# swim-java
 
 Java kernel runtime.

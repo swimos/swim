@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Stateful streaming component model'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.streamlet'
 ext.moduleName = 'swim.streamlet'
 
 dependencies {

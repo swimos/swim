@@ -1,3 +1,3 @@
-# swim.dataflow
+# swim-dataflow
 
 Dynamic structured data model.

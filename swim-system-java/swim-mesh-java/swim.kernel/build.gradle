@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Swim kernel runtime'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.kernel'
 ext.moduleName = 'swim.kernel'
 
 dependencies {

@@ -1,3 +1,3 @@
-# swim.observable
+# swim-observable
 
 Observable collection interfaces.

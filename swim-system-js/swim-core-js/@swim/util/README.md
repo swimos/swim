@@ -11,8 +11,7 @@ providing interfaces and implementations for: ordering, equality, and hashing;
 type conversions; iterators; builders; maps; caches; and assertions.
 **@swim/util** is written in TypeScript, but can be used from either TypeScript
 or JavaScript.  **@swim/util** is part of the
-[**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
-framework.
+[**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core) framework.
 
 ## Overview
 
@@ -153,7 +152,7 @@ be found in `node_modules/@swim/util/dist/main/swim-util.js`.
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-**@swim/util**` library, directly from the swimOS CDN.
+**@swim/util** library, directly from the swimOS CDN.
 
 ```html
 <!-- Development -->

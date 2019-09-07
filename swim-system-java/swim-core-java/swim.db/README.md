@@ -1,3 +1,3 @@
-# swim.db
+# swim-db
 
 Structured data store.
