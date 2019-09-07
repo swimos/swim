@@ -2,7 +2,7 @@
   "name": "@swim/system",
   "version": "3.9.0",
   "description": "Swim System TypeScript Implementation",
-  "homepage": "https://github.com/swimos/swim",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js",
   "author": "Chris Sachs <chris@swimos.org>",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",

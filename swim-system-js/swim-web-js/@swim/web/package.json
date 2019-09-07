@@ -2,7 +2,7 @@
   "name": "@swim/web",
   "version": "3.10.1",
   "description": "Thin web application framework built on the @swim/ui toolkit",
-  "homepage": "https://github.com/swimos/swim",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/web",
   "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2019 SWIM.AI inc.",
   "license": "Apache-2.0",
