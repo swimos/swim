@@ -6,7 +6,7 @@
 [subrepo]
   remote = git@github.com:swimos/swim-system-js.git
   branch = master
-	commit = b9dd815e15a36b422897c1cbe25d3c7da27c77e8
-	parent = 1b166fbec31dfa0c2ab72de7b576bc45ef00953a
+	commit = b0ba30997bd265481637f9a0a23e0f0460def497
+	parent = 3adfe1dd757d38b52f1fe0a12e41423f19f07732
 	method = merge
 	cmdver = 0.4.0
