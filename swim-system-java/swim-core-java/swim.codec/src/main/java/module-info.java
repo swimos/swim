@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * Incremental parsers, writers, decoders, and encoders.
+ * Incremental I/O; functional parsers and writers; display, debug, and
+ * diagnostic formatters; and Unicode and binary codecs.
  */
 module swim.codec {
   requires transitive swim.util;

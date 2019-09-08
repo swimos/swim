@@ -13,7 +13,9 @@
 // limitations under the License.
 
 /**
- * Spatial collections and geospatial projections.
+ * Geospatial projections and spatial collections, including sparse prefix
+ * Q-trees optimized for continuous n-body geofencing and real-time spatial
+ * clustering and reduction.
  */
 module swim.spatial {
   requires swim.util;

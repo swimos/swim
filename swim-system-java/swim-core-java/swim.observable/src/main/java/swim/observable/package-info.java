@@ -13,6 +13,6 @@
 // limitations under the License.
 
 /**
- * Observable collection interfaces.
+ * Collection interfaces that notify registered observers of precise state changes.
  */
 package swim.observable;

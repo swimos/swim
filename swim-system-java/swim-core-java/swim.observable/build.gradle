@@ -1,6 +1,6 @@
 apply from: '../project.gradle'
 
-description = 'Observable collection interfaces'
+description = 'Collection interfaces that notify registered observers of precise state changes'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.observable'
 ext.moduleName = 'swim.observable'
 

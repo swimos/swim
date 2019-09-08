@@ -1,6 +1,6 @@
 apply from: '../project.gradle'
 
-description = 'Spatial collections and geospatial projections'
+description = 'Geospatial projections and spatial collections, including sparse prefix Q-trees optimized for continuous n-body geofencing and real-time spatial clustering and reduction'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.spatial'
 ext.moduleName = 'swim.spatial'
 

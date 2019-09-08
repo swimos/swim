@@ -13,6 +13,8 @@
 // limitations under the License.
 
 /**
- * Stateful streaming component model.
+ * Stateful, streaming component model for application componets that
+ * continuously consume input state from streaming inlets, and continuously
+ * produce output state on streaming outlets.
  */
 package swim.streamlet;

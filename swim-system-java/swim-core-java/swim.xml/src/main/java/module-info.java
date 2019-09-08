@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * eXtensible Markup Language (XML) codec.
+ * eXtensible Markup Language (XML) codec that incrementally parses and writes
+ * <strong>swim-structure</strong> values.
  */
 module swim.xml {
   requires swim.util;

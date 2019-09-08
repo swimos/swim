@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * Format-detecting parsers and decoders.
+ * Universal decoder that detects and incrementally parses Recon, JSON, XML,
+ * Protobuf, raw text, and binary data formats as <strong>swim-structure</strong> values.
  */
 module swim.decipher {
   requires swim.util;

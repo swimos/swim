@@ -13,6 +13,7 @@
 // limitations under the License.
 
 /**
- * Uniform structured data model.
+ * Generic structured data model, with support for selectors, expressions,
+ * and lambda functions.
  */
 package swim.structure;

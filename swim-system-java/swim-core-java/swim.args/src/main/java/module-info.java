@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * Command-line argument parser.
+ * Composable command line argument parser.
  */
 module swim.args {
   requires swim.util;

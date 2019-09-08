@@ -49,12 +49,26 @@ The **Swim Core** framework consists of the following component libraries:
   modules and spaces, affine spaces, tensor spaces, probability distributions,
   and associated operators.
 - [**swim-security**](swim.security) –
+  signing and encryption of **swim-structure** values using the JSON Web Key
+  (JWK), JSON Web Signature (JWS), JSON Web Token (JWT), and OpenID standards.
 - [**swim-spatial**](swim.spatial) –
+  geospatial projections and spatial collections, including sparse prefix
+  Q-trees optimized for continuous n-body geofencing and real-time spatial
+  clustering and reduction.
 - [**swim-streamlet**](swim.streamlet) –
+  stateful, streaming component model for application componets that
+  continuously consume input state from streaming inlets, and continuously
+  produce output state on streaming outlets.
 - [**swim-dataflow**](swim.dataflow) –
+  compiler from **swim-structure** expressions to live-updated data models.
 - [**swim-observable**](swim.observable) –
+  collection interfaces that notify registered observers of precise state changes.
 - [**swim-uri**](swim.uri) –
+  rich object model for working with Uniform Resource Identifiers,
+  URI subcomponents, and URI patterns, including an efficient and
+  safe codec for parsing and writing compliant URI strings.
 - [**swim-deflate**](swim.deflate) –
+  DEFLATE codec that incrementally compresses and decompresses streams.
 - [**swim-mqtt**](swim.mqtt) –
 - [**swim-http**](swim.http) –
 - [**swim-ws**](swim.ws) –

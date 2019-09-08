@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * Protocol Buffers (protobuf) codec.
+ * Protocol Buffers (protobuf) codec that incrementally parses and writes
+ * <strong>swim-structure</strong> values.
  */
 module swim.protobuf {
   requires swim.util;

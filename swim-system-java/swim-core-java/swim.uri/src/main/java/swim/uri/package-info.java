@@ -13,6 +13,8 @@
 // limitations under the License.
 
 /**
- * Uniform resource identifiers.
+ * Rich object model for working with Uniform Resource Identifiers, URI
+ * subcomponents, and URI patterns, including an efficient and safe codec
+ * for parsing and writing compliant URI strings.
  */
 package swim.uri;

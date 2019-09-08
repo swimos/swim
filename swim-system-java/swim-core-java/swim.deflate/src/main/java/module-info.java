@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * DEFLATE compression codec.
+ * DEFLATE codec that incrementally compresses and decompresses streams.
  */
 module swim.deflate {
   requires swim.util;
