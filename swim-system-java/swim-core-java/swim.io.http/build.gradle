@@ -1,6 +1,6 @@
 apply from: '../project.gradle'
 
-description = 'Flow-controlled HTTP I/O library'
+description = 'HTTP client and server socket modems for pipelining and concurrently transporting explicitly flow-controlled HTTP streams over a network without blocking or intermediate buffering'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.io.http'
 ext.moduleName = 'swim.io.http'
 

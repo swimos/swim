@@ -82,17 +82,49 @@ of the following component libraries:
 - [**swim-deflate**](swim-core-java/swim.deflate) –
   DEFLATE codec that incrementally compresses and decompresses streams.
 - [**swim-mqtt**](swim-core-java/swim.mqtt) –
+  MQTT packet model and wire protocol codec that incrementally decodes
+  and encodes MQTT streams without intermediate buffering.
 - [**swim-http**](swim-core-java/swim.http) –
+  HTTP message model and wire protocol codec that incrementally decodes
+  and encodes HTTP streams without intermediate buffering.
 - [**swim-ws**](swim-core-java/swim.ws) –
+  WebSocket frame model and wire protocol codec that incrementally decodes
+  and encodes fragmented WebSocket streams without intermediate buffering.
 - [**swim-warp**](swim-core-java/swim.warp) –
+  WebSocket protocol for dynamically multiplexing large numbers of
+  bidirectional links to streaming API endpoints, called lanes, of
+  URI-addressed distributed objects, called nodes, that run stateful
+  distributed processes, called Web Agents.
 - [**swim-concurrent**](swim-core-java/swim.concurrent) –
+  timer, task, and continuation passing style interfaces, with lightweight
+  scheduler and execution stage implementations.
 - [**swim-db**](swim-core-java/swim.db) –
+  lock-free document store—optimized for high rate atomic state changes—that
+  concurrently commits and compacts on-disk log-structured storage files
+  without blocking parallel in-memory updates to associative B-tree maps,
+  spatial Q-tree maps, sequential S-tree lists, and singleton U-tree values.
 - [**swim-io**](swim-core-java/swim.io) –
+  explicitly flow-controlled, non-blocking, parallel I/O engine, with
+  **swim-codec**-modulated socket modems, and TCP and TLS transports.
 - [**swim-io-mqtt**](swim-core-java/swim.io.mqtt) –
+  MQTT socket modem for concurrently transporting explicitly flow-controlled
+  MQTT streams over a network without blocking or intermediate buffering.
 - [**swim-io-http**](swim-core-java/swim.io.http) –
+  HTTP client and server socket modems for pipelining and concurrently
+  transporting explicitly flow-controlled HTTP streams over a network
+  without blocking or intermediate buffering.
 - [**swim-io-ws**](swim-core-java/swim.io.ws) –
+  WebSocket modem for concurrently transporting explicitly flow-controlled
+  WebSocket streams over a network without blocking or intermediate buffering,
+  and **swim-io-http** requesters and responders for upgrading HTTP client
+  and server modems to WebSocket modems.
 - [**swim-io-warp**](swim-core-java/swim.io.warp) –
+  WARP socket modem for multiplexing and concurrently transporting prioritized,
+  explicitly flow-controlled WARP treams over a network, without blocking or
+  intermediate buffering
 - [**swim-web**](swim-core-java/swim.web) –
+  high-level web server API and routing DSL, with HTTP, WebSocket, and WARP
+  routing directives.
 
 ### [**Swim Mesh** Framework](swim-mesh-java)
 

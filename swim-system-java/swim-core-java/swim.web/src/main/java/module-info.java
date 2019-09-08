@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * Flow-controlled web server library.
+ * High-level web server API and routing DSL, with HTTP, WebSocket, and WARP
+ * routing directives.
  */
 module swim.web {
   requires transitive swim.io.http;

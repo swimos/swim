@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * HTTP wire protocol model, decoders, and encoders.
+ * HTTP message model and wire protocol codec that incrementally decodes
+ * and encodes HTTP streams without intermediate buffering.
  */
 module swim.http {
   requires swim.util;

@@ -1,6 +1,6 @@
 apply from: '../project.gradle'
 
-description = 'Structured data store'
+description = 'Lock-free document store—optimized for high rate atomic state changes—that concurrently commits and compacts on-disk log-structured storage files without blocking parallel in-memory updates to associative B-tree maps, spatial Q-tree maps, sequential S-tree lists, and singleton U-tree values'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.db'
 ext.moduleName = 'swim.db'
 

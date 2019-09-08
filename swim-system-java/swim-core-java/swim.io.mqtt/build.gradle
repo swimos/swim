@@ -1,6 +1,6 @@
 apply from: '../project.gradle'
 
-description = 'Flow-controlled MQTT I/O library'
+description = 'MQTT socket modem for concurrently transporting explicitly flow-controlled MQTT streams over a network without blocking or intermediate buffering'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.io.mqtt'
 ext.moduleName = 'swim.io.mqtt'
 

@@ -1,6 +1,6 @@
 apply from: '../project.gradle'
 
-description = 'Flow-controlled input/output library'
+description = 'Explicitly flow-controlled, non-blocking, parallel I/O engine, with swim-codec-modulated socket modems, and TCP and TLS transports'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.io'
 ext.moduleName = 'swim.io'
 

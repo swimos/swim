@@ -22,9 +22,10 @@ component libraries:
 - [**@swim/warp**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/warp)
   ([npm](https://www.npmjs.com/package/@swim/warp),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_warp.html)) –
-  WebSocket protocol for dynamically multiplexing large numbers of bidirectional
-  links to streaming APIs, called lanes, of URI-addressed distributed objects,
-  called nodes, that run stateful distributed processes, called Web Agents.
+  WebSocket protocol for dynamically multiplexing large numbers of
+  bidirectional links to streaming API endpoints, called lanes, of
+  URI-addressed distributed objects, called nodes, that run stateful
+  distributed processes, called Web Agents.
 - [**@swim/client**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/client)
   ([npm](https://www.npmjs.com/package/@swim/client),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_client.html)) –

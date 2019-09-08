@@ -13,7 +13,10 @@
 // limitations under the License.
 
 /**
- * Structured data store.
+ * Lock-free document store—optimized for high rate atomic state changes—that
+ * concurrently commits and compacts on-disk log-structured storage files
+ * without blocking parallel in-memory updates to associative B-tree maps, 
+ * spatial Q-tree maps, sequential S-tree lists, and singleton U-tree values.
  */
 module swim.db {
   requires transitive swim.util;

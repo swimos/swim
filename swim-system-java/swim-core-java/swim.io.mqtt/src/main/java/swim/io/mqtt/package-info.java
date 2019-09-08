@@ -13,6 +13,7 @@
 // limitations under the License.
 
 /**
- * Flow-controlled MQTT I/O library.
+ * MQTT socket modem for concurrently transporting explicitly flow-controlled
+ * MQTT streams over a network without blocking or intermediate buffering.
  */
 package swim.io.mqtt;

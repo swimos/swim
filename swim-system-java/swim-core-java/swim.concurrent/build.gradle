@@ -1,6 +1,6 @@
 apply from: '../project.gradle'
 
-description = 'Lightweight timers, tasks, and continuations'
+description = 'Timer, task, and continuation passing style interfaces, with lightweight scheduler and execution stage implementations'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.concurrent'
 ext.moduleName = 'swim.concurrent'
 

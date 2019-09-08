@@ -1,6 +1,6 @@
 apply from: '../project.gradle'
 
-description = 'Flow-controlled Web Agent I/O library'
+description = 'WARP socket modem for multiplexing and concurrently transporting prioritized, explicitly flow-controlled WARP treams over a network, without blocking or intermediate buffering'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.io.warp'
 ext.moduleName = 'swim.io.warp'
 
