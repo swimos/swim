@@ -22,6 +22,8 @@ import swim.kernel.KernelProxy;
 import swim.structure.Item;
 import swim.structure.Value;
 import swim.uri.UriPath;
+import swim.web.WebRoute;
+import swim.web.route.RejectRoute;
 
 public class WebServiceKernel extends KernelProxy {
   final double kernelPriority;
@@ -80,15 +82,20 @@ public class WebServiceKernel extends KernelProxy {
   @Override
   public ServiceFactory<?> createServiceFactory(ServiceDef serviceDef, ClassLoader classLoader) {
     if (serviceDef instanceof WebServiceDef) {
-      return createWarpServiceFactory((WebServiceDef) serviceDef);
+      return createWebServiceFactory((WebServiceDef) serviceDef);
     } else {
       return super.createServiceFactory(serviceDef, classLoader);
     }
   }
 
-  public WebServiceFactory createWarpServiceFactory(WebServiceDef serviceDef) {
+  public WebServiceFactory createWebServiceFactory(WebServiceDef serviceDef) {
+    final WebRoute router = createWebRouter(serviceDef);
     final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
-    return new WebServiceFactory(kernel, serviceDef);
+    return new WebServiceFactory(kernel, serviceDef, router);
+  }
+
+  protected WebRoute createWebRouter(WebServiceDef serviceDef) {
+    return new RejectRoute(); // TODO: parse from config
   }
 
   private static final double KERNEL_PRIORITY = 0.75;

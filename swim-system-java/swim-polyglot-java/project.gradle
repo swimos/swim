@@ -1,7 +1,7 @@
 apply plugin: 'java-library'
 apply plugin: 'checkstyle'
 apply plugin: 'signing'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 group = 'org.swimos'
 version = project.property('swim.version')
@@ -165,54 +165,57 @@ afterEvaluate {
     args '--class-path', sourceSets.main.compileClasspath.asPath
     standardInput = System.in
   }
-}
 
-if (project.hasProperty('swimOSUsername') && project.hasProperty('swimOSPassword')) {
-  signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask('uploadArchives') }
-    sign configurations.archives
-  }
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        from components.java
+        artifact sourcesJar
+        artifact javadocJar
 
-  uploadArchives {
-    repositories {
-      mavenDeployer {
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
-          authentication(userName: swimOSUsername, password: swimOSPassword)
-        }
-
-        snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
-          authentication(userName: swimOSUsername, password: swimOSPassword)
-        }
-
-        pom.project {
-          name "${project.name}"
-          packaging 'jar'
-          description "${project.description}"
-          url "${project.ext.homepage}"
-
-          scm {
-            connection 'scm:git:git@github.com:swimos/swim.git'
-            url 'git@github.com:swimos/swim.git'
-          }
-
+        pom {
+          name = "${project.name}"
+          description = "${project.description}"
+          url = "${project.homepage}"
           licenses {
             license {
-              name 'The Apache Software License, Version 2.0'
-              url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+              name = 'The Apache Software License, Version 2.0'
+              url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
             }
           }
-
           developers {
             developer {
-              id 'c9r'
-              name 'Chris Sachs'
-              email 'chris@swimos.org'
+              id = 'c9r'
+              name = 'Chris Sachs'
+              email = 'chris@swimos.org'
             }
+          }
+          scm {
+            url = 'https://github.com/swimos/swim'
+            connection = 'scm:git:https://github.com/swimos/swim.git'
+            developerConnection = 'scm:git:git@github.com:swimos/swim.git'
           }
         }
       }
     }
+
+    repositories {
+      maven {
+        def releasesRepositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+        def snapshotsRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+        url = isReleaseVersion ? releasesRepositoryUrl : snapshotsRepositoryUrl
+        if (project.hasProperty('swimOSUsername') && project.hasProperty('swimOSPassword')) {
+          credentials {
+            username swimOSUsername
+            password swimOSPassword
+          }
+        }
+      }
+    }
+  }
+
+  signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask('publish') }
+    sign publishing.publications.mavenJava
   }
 }

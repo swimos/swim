@@ -7,6 +7,7 @@ ext.moduleName = 'swim.kernel'
 dependencies {
   implementation group: 'org.swimos', name: 'swim-recon', version: version
   api group: 'org.swimos', name: 'swim-io', version: version
+  api group: 'org.swimos', name: 'swim-web', version: version
   api project(':swim-api')
   api project(':swim-runtime')
 }

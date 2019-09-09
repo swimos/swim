@@ -61,6 +61,8 @@ import swim.structure.Item;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Log;
+import swim.web.WebRequest;
+import swim.web.WebResponse;
 
 public abstract class KernelProxy implements KernelBinding, KernelContext {
   protected KernelBinding kernelBinding;
@@ -360,6 +362,12 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   public Stage openServiceStage(String serviceName) {
     final KernelContext kernelContext = this.kernelContext;
     return kernelContext != null ? kernelContext.openServiceStage(serviceName) : null;
+  }
+
+  @Override
+  public WebResponse routeRequest(WebRequest request) {
+    final KernelContext kernelContext = this.kernelContext;
+    return kernelContext != null ? kernelContext.routeRequest(request) : request.reject();
   }
 
   @Override

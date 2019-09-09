@@ -58,6 +58,7 @@ project(':swim-kernel') {
     dependencies {
       implementation project(':swim-recon')
       api project(':swim-io')
+      api project(':swim-web')
     }
   }
 }

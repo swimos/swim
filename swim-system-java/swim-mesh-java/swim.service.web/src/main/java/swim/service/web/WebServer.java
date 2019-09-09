@@ -53,7 +53,7 @@ public class WebServer extends AbstractWarpServer {
   final WebServiceDef serviceDef;
   WebRoute router;
 
-  public WebServer(KernelContext kernel, WebServiceDef serviceDef) {
+  public WebServer(KernelContext kernel, WebServiceDef serviceDef, WebRoute router) {
     this.kernel = kernel;
     this.serviceDef = serviceDef;
 
@@ -64,7 +64,6 @@ public class WebServer extends AbstractWarpServer {
     }
     final UriPath resourceRoot = serviceDef.resourceRoot();
 
-    WebRoute router = new RejectRoute();
     if (documentRoot != null) {
       router = router.orElse(new DirectoryRoute(documentRoot, "index.html"));
     }
@@ -98,8 +97,8 @@ public class WebServer extends AbstractWarpServer {
       }
     }
 
-    // Check for WARP upgrade.
-    // TODO: WarpSpaceRoute
+    // Route WARP upgrades.
+    // TODO: Refactor into WarpSpaceRoute.
     final WsRequest wsRequest = WsRequest.from(httpRequest);
     if (wsRequest != null) {
       final WsResponse wsResponse = wsRequest.accept(this.wsSettings);
@@ -108,8 +107,8 @@ public class WebServer extends AbstractWarpServer {
       }
     }
 
-    // Try routing HTTP lane.
-    // TODO: HttpLaneRoute
+    // Routing HTTP lanes.
+    // TODO: Refactor into HttpLaneRoute.
     try {
       final Uri laneUri = Uri.parse(requestUri.query().get("lane"));
       final Uri nodeUri = Uri.from(requestUri.path());
@@ -122,9 +121,13 @@ public class WebServer extends AbstractWarpServer {
       // nop
     }
 
-    // Route request.
     final WebRequest webRequest = new WebServerRequest(httpRequest);
-    final WebResponse webResponse = this.router.routeRequest(webRequest);
+    // Route kernel module requests.
+    WebResponse webResponse = this.kernel.routeRequest(webRequest);
+    if (webResponse.isRejected()) {
+      // Route application requests.
+      webResponse = this.router.routeRequest(webRequest);
+    }
     return webResponse.httpResponder();
   }
 

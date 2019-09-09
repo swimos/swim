@@ -18,6 +18,7 @@
 module swim.kernel {
   requires swim.recon;
   requires transitive swim.io;
+  requires transitive swim.web;
   requires transitive swim.api;
   requires transitive swim.runtime;
 
