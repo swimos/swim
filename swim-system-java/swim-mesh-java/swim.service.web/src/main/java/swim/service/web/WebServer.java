@@ -43,7 +43,6 @@ import swim.web.WebResponse;
 import swim.web.WebRoute;
 import swim.web.WebServerRequest;
 import swim.web.route.DirectoryRoute;
-import swim.web.route.RejectRoute;
 import swim.web.route.ResourceDirectoryRoute;
 import swim.ws.WsRequest;
 import swim.ws.WsResponse;
