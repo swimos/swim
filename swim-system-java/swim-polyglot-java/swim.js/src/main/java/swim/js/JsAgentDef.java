@@ -18,28 +18,20 @@ import swim.api.agent.AgentDef;
 import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
+import swim.structure.Text;
 import swim.structure.Value;
 import swim.uri.UriPath;
 import swim.util.Murmur3;
 
 public class JsAgentDef implements AgentDef, Debug {
-  final String agentName;
   final UriPath modulePath;
+  final Value id;
   final Value props;
 
-  public JsAgentDef(String agentName, UriPath modulePath, Value props) {
-    this.agentName = agentName;
+  public JsAgentDef(UriPath modulePath, Value id, Value props) {
     this.modulePath = modulePath;
+    this.id = id;
     this.props = props;
-  }
-
-  @Override
-  public final String agentName() {
-    return this.agentName;
-  }
-
-  public JsAgentDef agentName(String agentName) {
-    return copy(agentName, this.modulePath, this.props);
   }
 
   public final UriPath modulePath() {
@@ -47,7 +39,16 @@ public class JsAgentDef implements AgentDef, Debug {
   }
 
   public JsAgentDef modulePath(UriPath modulePath) {
-    return copy(this.agentName, modulePath, this.props);
+    return copy(modulePath, this.id, this.props);
+  }
+
+  @Override
+  public final Value id() {
+    return this.id;
+  }
+
+  public JsAgentDef id(Value id) {
+    return copy(this.modulePath, id, this.props);
   }
 
   @Override
@@ -56,11 +57,11 @@ public class JsAgentDef implements AgentDef, Debug {
   }
 
   public JsAgentDef props(Value props) {
-    return copy(this.agentName, this.modulePath, props);
+    return copy(this.modulePath, this.id, props);
   }
 
-  protected JsAgentDef copy(String agentName, UriPath modulePath, Value props) {
-    return new JsAgentDef(agentName, modulePath, props);
+  protected JsAgentDef copy(UriPath modulePath, Value id, Value props) {
+    return new JsAgentDef(modulePath, id, props);
   }
 
   @Override
@@ -69,9 +70,8 @@ public class JsAgentDef implements AgentDef, Debug {
       return true;
     } else if (other instanceof JsAgentDef) {
       final JsAgentDef that = (JsAgentDef) other;
-      return (this.agentName == null ? that.agentName == null : this.agentName.equals(that.agentName))
-          && (this.modulePath == null ? that.modulePath == null : this.modulePath.equals(that.modulePath))
-          && this.props.equals(that.props);
+      return (this.modulePath == null ? that.modulePath == null : this.modulePath.equals(that.modulePath))
+          && this.id.equals(that.id) && this.props.equals(that.props);
     }
     return false;
   }
@@ -82,13 +82,16 @@ public class JsAgentDef implements AgentDef, Debug {
       hashSeed = Murmur3.seed(JsAgentDef.class);
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
-        Murmur3.hash(this.agentName)), Murmur3.hash(this.modulePath)), this.props.hashCode()));
+        Murmur3.hash(this.modulePath)), this.id.hashCode()), this.props.hashCode()));
   }
 
   @Override
   public void debug(Output<?> output) {
-    output = output.write("JsAgentDef").write('.').write("from").write('(')
-        .debug(this.agentName).write(", ").debug(this.modulePath).write(')');
+    output = output.write("JsAgentDef").write('.').write("fromModulePath").write('(')
+        .debug(this.modulePath).write(')');
+    if (this.id.isDefined()) {
+      output = output.write('.').write("id").write('(').debug(this.id).write(')');
+    }
     if (this.props.isDefined()) {
       output = output.write('.').write("props").write('(').debug(this.props).write(')');
     }
@@ -101,19 +104,11 @@ public class JsAgentDef implements AgentDef, Debug {
 
   private static int hashSeed;
 
-  public static JsAgentDef from(String agentName, UriPath modulePath) {
-    return new JsAgentDef(agentName, modulePath, Value.absent());
-  }
-
-  public static JsAgentDef from(String agentName, String modulePath) {
-    return new JsAgentDef(agentName, UriPath.parse(modulePath), Value.absent());
-  }
-
   public static JsAgentDef fromModulePath(UriPath modulePath) {
-    return new JsAgentDef(modulePath.toString(), modulePath, Value.absent());
+    return new JsAgentDef(modulePath, Text.from(modulePath.toString()), Value.absent());
   }
 
   public static JsAgentDef fromModulePath(String modulePath) {
-    return new JsAgentDef(modulePath, UriPath.parse(modulePath), Value.absent());
+    return new JsAgentDef(UriPath.parse(modulePath), Text.from(modulePath), Value.absent());
   }
 }

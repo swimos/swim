@@ -335,18 +335,24 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
         for (AgentDef agentDef : nodeDef.agentDefs()) {
           final AgentFactory<?> agentFactory = createAgentFactory(meshUri, partKey, hostUri, nodeUri, agentDef);
           if (agentDef != null) {
+            final Value id = agentDef.id();
             Value props = agentDef.props();
             if (!props.isDefined()) {
               props = agentModel.props();
             }
-            agentModel.addAgentView(agentModel.createAgent(agentFactory, props));
+            agentModel.addAgentView(agentModel.createAgent(agentFactory, id, props));
           }
         }
       }
       final AgentFactory<?> agentFactory = this.agentFactories.get(nodeUri);
       if (agentFactory != null && node instanceof AgentModel) {
         final AgentModel agentModel = (AgentModel) node;
-        agentModel.addAgentView(agentModel.createAgent(agentFactory, agentModel.props()));
+        final Value id = agentFactory.id(nodeUri);
+        Value props = agentFactory.props(nodeUri);
+        if (!props.isDefined()) {
+          props = agentModel.props();
+        }
+        agentModel.addAgentView(agentModel.createAgent(agentFactory, id, props));
       }
     }
   }

@@ -27,5 +27,7 @@ public interface AgentFactory<A extends Agent> {
    */
   A createAgent(AgentContext context);
 
+  Value id(Uri nodeUri);
+
   Value props(Uri nodeUri);
 }

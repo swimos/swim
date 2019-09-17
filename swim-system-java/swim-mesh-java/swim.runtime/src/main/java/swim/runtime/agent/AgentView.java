@@ -69,12 +69,15 @@ import swim.util.Builder;
 public class AgentView extends AbstractTierBinding implements TierContext, AgentContext {
   protected final AgentModel node;
 
+  protected final Value id;
+
   protected final Value props;
 
   protected Agent agent;
 
-  public AgentView(AgentModel node, Value props) {
+  public AgentView(AgentModel node, Value id, Value props) {
     this.node = node;
+    this.id = id.commit();
     this.props = props.commit();
   }
 
@@ -193,8 +196,8 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   @Override
-  public Agent getAgent(Value props) {
-    final AgentView view = this.node.getAgentView(props);
+  public Agent getAgent(Value id) {
+    final AgentView view = this.node.getAgentView(id);
     if (view != null) {
       return view.agent;
     } else {
@@ -214,8 +217,13 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
 
   @SuppressWarnings("unchecked")
   @Override
-  public <A extends Agent> A addAgent(Value props, AgentFactory<A> agentFactory) {
-    return this.node.addAgent(props, agentFactory);
+  public <A extends Agent> A addAgent(Value id, Value props, AgentFactory<A> agentFactory) {
+    return this.node.addAgent(id, props, agentFactory);
+  }
+
+  @Override
+  public <A extends Agent> A addAgent(Value id, AgentFactory<A> agentFactory) {
+    return addAgent(id, Value.absent(), agentFactory);
   }
 
   @Override
@@ -224,8 +232,13 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   @Override
-  public <A extends Agent> A addAgent(Value props, Class<? extends A> agentClass) {
-    return addAgent(props, createAgentFactory(agentClass));
+  public <A extends Agent> A addAgent(Value id, Value props, Class<? extends A> agentClass) {
+    return addAgent(id, props, createAgentFactory(agentClass));
+  }
+
+  @Override
+  public <A extends Agent> A addAgent(Value id, Class<? extends A> agentClass) {
+    return addAgent(id, Value.absent(), createAgentFactory(agentClass));
   }
 
   @Override
@@ -234,8 +247,8 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   @Override
-  public void removeAgent(Value props) {
-    final AgentView view = this.node.getAgentView(props);
+  public void removeAgent(Value id) {
+    final AgentView view = this.node.getAgentView(id);
     if (view != null) {
       this.node.removeAgentView(view);
     }

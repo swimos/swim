@@ -42,8 +42,8 @@ public class AgentModel extends AgentNode {
     return this.props;
   }
 
-  public AgentView createAgent(AgentFactory<?> agentFactory, Value props) {
-    final AgentView view = new AgentView(this, props);
+  public AgentView createAgent(AgentFactory<?> agentFactory, Value id, Value props) {
+    final AgentView view = new AgentView(this, id, props);
     final Agent agent;
     try {
       SwimContext.setAgentContext(view);
@@ -55,19 +55,19 @@ public class AgentModel extends AgentNode {
     return view;
   }
 
-  public AgentView getAgentView(Value props) {
+  public AgentView getAgentView(Value id) {
     final Object views = this.views;
     AgentView view;
     if (views instanceof AgentView) {
       view = (AgentView) views;
-      if (props.equals(view.props)) {
+      if (id.equals(view.id)) {
         return view;
       }
     } else if (views instanceof AgentView[]) {
       final AgentView[] viewArray = (AgentView[]) views;
       for (int i = 0, n = viewArray.length; i < n; i += 1) {
         view = viewArray[i];
-        if (props.equals(view.props)) {
+        if (id.equals(view.id)) {
           return view;
         }
       }
@@ -96,7 +96,6 @@ public class AgentModel extends AgentNode {
   }
 
   public AgentView addAgentView(AgentView view) {
-    final Value props = view.props();
     Object oldViews;
     Object newViews;
     AgentView oldView;
@@ -104,7 +103,7 @@ public class AgentModel extends AgentNode {
       oldViews = this.views;
       if (oldViews instanceof AgentView) {
         oldView = (AgentView) oldViews;
-        if (props.equals(oldView.props())) {
+        if (view.id.equals(oldView.id)) {
           return oldView;
         } else {
           newViews = new AgentView[]{oldView, view};
@@ -115,7 +114,7 @@ public class AgentModel extends AgentNode {
         final AgentView[] newViewArray = new AgentView[n + 1];
         for (int i = 0; i < n; i += 1) {
           oldView = oldViewArray[i];
-          if (props.equals(oldView.props())) {
+          if (view.id.equals(oldView.id)) {
             return oldView;
           }
           newViewArray[i] = oldViewArray[i];
@@ -132,7 +131,7 @@ public class AgentModel extends AgentNode {
   }
 
   @SuppressWarnings("unchecked")
-  public <S extends Agent> S addAgent(Value props, AgentFactory<S> agentFactory) {
+  public <S extends Agent> S addAgent(Value id, Value props, AgentFactory<S> agentFactory) {
     Object oldViews;
     Object newViews;
     AgentView oldView;
@@ -141,11 +140,11 @@ public class AgentModel extends AgentNode {
       oldViews = this.views;
       if (oldViews instanceof AgentView) {
         oldView = (AgentView) oldViews;
-        if (props.equals(oldView.props())) {
+        if (id.equals(oldView.id)) {
           return (S) oldView.agent;
         } else {
           if (view == null) {
-            view = createAgent(agentFactory, props);
+            view = createAgent(agentFactory, id, props);
           }
           newViews = new AgentView[]{oldView, view};
         }
@@ -155,19 +154,19 @@ public class AgentModel extends AgentNode {
         final AgentView[] newViewArray = new AgentView[n + 1];
         for (int i = 0; i < n; i += 1) {
           oldView = oldViewArray[i];
-          if (props.equals(oldView.props())) {
+          if (id.equals(oldView.id)) {
             return (S) oldView.agent;
           }
           newViewArray[i] = oldViewArray[i];
         }
         if (view == null) {
-          view = createAgent(agentFactory, props);
+          view = createAgent(agentFactory, id, props);
         }
         newViewArray[n] = view;
         newViews = newViewArray;
       } else {
         if (view == null) {
-          view = createAgent(agentFactory, props);
+          view = createAgent(agentFactory, id, props);
         }
         newViews = view;
       }

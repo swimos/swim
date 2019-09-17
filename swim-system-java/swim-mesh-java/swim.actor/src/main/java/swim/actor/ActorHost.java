@@ -428,11 +428,12 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
         for (AgentDef agentDef : nodeDef.agentDefs()) {
           final AgentFactory<?> agentFactory = createAgentFactory(nodeUri, agentDef);
           if (agentDef != null) {
+            final Value id = agentDef.id();
             Value props = agentDef.props();
             if (!props.isDefined()) {
               props = agentModel.props();
             }
-            agentModel.addAgentView(agentModel.createAgent(agentFactory, props));
+            agentModel.addAgentView(agentModel.createAgent(agentFactory, id, props));
           }
         }
       }

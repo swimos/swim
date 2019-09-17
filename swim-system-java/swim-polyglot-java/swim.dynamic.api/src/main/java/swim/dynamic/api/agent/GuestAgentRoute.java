@@ -20,6 +20,7 @@ import swim.api.agent.AgentRoute;
 import swim.api.agent.AgentRouteContext;
 import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
+import swim.structure.Text;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriPattern;
@@ -62,6 +63,17 @@ public class GuestAgentRoute extends BridgeGuest implements AgentRoute<Agent> {
       }
     }
     return null;
+  }
+
+  @Override
+  public Value id(Uri nodeUri) {
+    if (this.bridge.guestCanInvokeMember(this.guest, "id")) {
+      final Object id = this.bridge.guestInvokeMember(this.guest, "id", nodeUri);
+      if (id instanceof Value) {
+        return (Value) id;
+      }
+    }
+    return Text.from(this.context.routeName());
   }
 
   @Override

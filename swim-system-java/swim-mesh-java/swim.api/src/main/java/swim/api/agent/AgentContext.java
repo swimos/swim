@@ -98,21 +98,25 @@ public interface AgentContext extends SwimRef, LaneFactory, Store, Log {
 
   FingerTrieSeq<Agent> agents();
 
-  Agent getAgent(Value props);
+  Agent getAgent(Value id);
 
   Agent getAgent(String name);
 
   <A extends Agent> A getAgent(Class<? extends A> agentClass);
 
-  <A extends Agent> A addAgent(Value props, AgentFactory<A> agentFactory);
+  <A extends Agent> A addAgent(Value id, Value props, AgentFactory<A> agentFactory);
+
+  <A extends Agent> A addAgent(Value id, AgentFactory<A> agentFactory);
 
   <A extends Agent> A addAgent(String name, AgentFactory<A> agentFactory);
 
-  <A extends Agent> A addAgent(Value props, Class<? extends A> agentClass);
+  <A extends Agent> A addAgent(Value id, Value props, Class<? extends A> agentClass);
+
+  <A extends Agent> A addAgent(Value id, Class<? extends A> agentClass);
 
   <A extends Agent> A addAgent(String name, Class<? extends A> agentClass);
 
-  void removeAgent(Value props);
+  void removeAgent(Value id);
 
   void removeAgent(String name);
 }

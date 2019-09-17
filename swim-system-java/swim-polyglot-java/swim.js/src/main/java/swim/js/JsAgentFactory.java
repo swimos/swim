@@ -15,9 +15,10 @@
 package swim.js;
 
 import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Value;
 import swim.api.agent.AbstractAgentRoute;
 import swim.api.agent.AgentContext;
+import swim.structure.Value;
+import swim.uri.Uri;
 import swim.uri.UriPath;
 import swim.vm.js.JsBridge;
 import swim.vm.js.JsModule;
@@ -71,10 +72,10 @@ public class JsAgentFactory extends AbstractAgentRoute<JsAgent> {
     return moduleSystem.requireModule(basePath(), this.agentDef.modulePath());
   }
 
-  protected Value createGuestAgent(AgentContext agentContext, JsBridge jsBridge, JsModule agentModule) {
+  protected org.graalvm.polyglot.Value createGuestAgent(AgentContext agentContext, JsBridge jsBridge, JsModule agentModule) {
     final Object guestAgentContext = jsBridge.hostToGuest(agentContext);
-    final Value agentExports = agentModule.moduleExports();
-    final Value guestAgent;
+    final org.graalvm.polyglot.Value agentExports = agentModule.moduleExports();
+    final org.graalvm.polyglot.Value guestAgent;
     if (agentExports.canInstantiate()) {
       guestAgent = agentExports.newInstance(guestAgentContext);
     } else {
@@ -92,7 +93,12 @@ public class JsAgentFactory extends AbstractAgentRoute<JsAgent> {
     final JsBridge jsBridge = createAgentJsBridge(agentContext, jsContext);
     final JsModuleSystem moduleSystem = createAgentModuleSystem(agentContext, jsContext, jsBridge);
     final JsModule module = requireAgentModule(agentContext, moduleSystem);
-    final Value guest = createGuestAgent(agentContext, jsBridge, module);
+    final org.graalvm.polyglot.Value guest = createGuestAgent(agentContext, jsBridge, module);
     return new JsAgent(agentContext, jsBridge, module, guest);
+  }
+
+  @Override
+  public Value id(Uri nodeUri) {
+    return this.agentDef.id();
   }
 }

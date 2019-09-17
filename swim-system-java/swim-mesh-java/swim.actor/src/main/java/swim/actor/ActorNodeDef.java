@@ -26,6 +26,7 @@ import swim.runtime.LogDef;
 import swim.runtime.NodeDef;
 import swim.runtime.PolicyDef;
 import swim.store.StoreDef;
+import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriMapper;
 import swim.uri.UriPattern;
@@ -73,9 +74,9 @@ public class ActorNodeDef implements NodeDef, Debug {
   }
 
   @Override
-  public final AgentDef getAgentDef(String agentName) {
+  public final AgentDef getAgentDef(Value agentId) {
     for (AgentDef agentDef : this.agentDefs) {
-      if (agentName.equals(agentDef.agentName())) {
+      if (agentId.equals(agentDef.id())) {
         return agentDef;
       }
     }

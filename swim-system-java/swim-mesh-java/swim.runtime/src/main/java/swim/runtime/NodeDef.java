@@ -41,7 +41,7 @@ public interface NodeDef extends CellDef {
 
   Collection<? extends AgentDef> agentDefs();
 
-  AgentDef getAgentDef(String agentName);
+  AgentDef getAgentDef(Value agentId);
 
   Collection<? extends LaneDef> laneDefs();
 
