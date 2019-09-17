@@ -11,7 +11,18 @@ ext.compilerArgs = ['-Xlint:all']
 
 repositories {
   mavenCentral()
-  maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+  maven {
+    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+  }
+  if (project.hasProperty('githubUsername') && project.hasProperty('githubPassword')) {
+    maven {
+      url 'https://maven.pkg.github.com/swimos'
+      credentials {
+        username githubUsername
+        password githubPassword
+      }
+    }
+  }
 }
 
 afterEvaluate {
@@ -200,17 +211,28 @@ afterEvaluate {
     }
 
     repositories {
-      maven {
-        def releasesRepositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
-        def snapshotsRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
-        url = isReleaseVersion ? releasesRepositoryUrl : snapshotsRepositoryUrl
-        if (project.hasProperty('swimOSUsername') && project.hasProperty('swimOSPassword')) {
+      if (project.hasProperty('swimOSUsername') && project.hasProperty('swimOSPassword')) {
+        maven {
+          def releasesRepositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+          def snapshotsRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+          name = 'Sonatype'
+          url = isReleaseVersion ? releasesRepositoryUrl : snapshotsRepositoryUrl
           credentials {
             username swimOSUsername
             password swimOSPassword
           }
         }
       }
+      //if (project.hasProperty('githubUsername') && project.hasProperty('githubPassword')) {
+      //  maven {
+      //    name = 'GitHub'
+      //    url = 'https://maven.pkg.github.com/swimos/swim'
+      //    credentials {
+      //      username githubUsername
+      //      password githubPassword
+      //    }
+      //  }
+      //}
     }
   }
 
