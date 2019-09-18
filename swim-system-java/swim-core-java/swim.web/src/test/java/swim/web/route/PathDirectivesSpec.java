@@ -11,20 +11,19 @@ import swim.uri.UriPath;
 import swim.web.WebRequest;
 import swim.web.WebRoute;
 import swim.web.WebServerRequest;
-
 import static org.testng.Assert.assertEquals;
 import static swim.web.WebRoute.pathPrefix;
 
 public class PathDirectivesSpec {
 
-  private static HttpResponse ok() {
+  private static HttpResponse<?> ok() {
     return HttpResponse.from(HttpStatus.OK);
   }
 
   @Test
   public void testPathRoute() {
     final WebRoute route = pathPrefix(UriPath.parse("/foo"),
-      request -> request.respond(ok()));
+        request -> request.respond(ok()));
     final WebRequest exactMatch = new WebServerRequest(HttpRequest.from(HttpMethod.GET, Uri.parse("/foo"), HttpVersion.HTTP_1_0));
     final WebRequest prefixMatch = new WebServerRequest(HttpRequest.from(HttpMethod.GET, Uri.parse("/foo/1"), HttpVersion.HTTP_1_0));
     assertEquals(route.routeRequest(exactMatch).isAccepted(), true);
@@ -34,7 +33,7 @@ public class PathDirectivesSpec {
   @Test
   public void testPrefixRoute() {
     final WebRoute route = pathPrefix(UriPath.parse("/foo"),
-      request -> request.respond(ok()));
+        request -> request.respond(ok()));
     final WebRequest exactMatch = new WebServerRequest(HttpRequest.from(HttpMethod.GET, Uri.parse("/foo"), HttpVersion.HTTP_1_0));
     final WebRequest truePrefixMatch = new WebServerRequest(HttpRequest.from(HttpMethod.GET, Uri.parse("/foot"), HttpVersion.HTTP_1_0));
     final WebRequest prefixMatch = new WebServerRequest(HttpRequest.from(HttpMethod.GET, Uri.parse("/foo/cat"), HttpVersion.HTTP_1_0));

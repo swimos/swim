@@ -31,8 +31,8 @@ public final class PathDirective implements WebRoute {
 
   @Override
   public WebResponse routeRequest(WebRequest request) {
-    UriPath path = this.path;
-    UriPath routePath = request.routePath();
+    final UriPath path = this.path;
+    final UriPath routePath = request.routePath();
     if (!path.equals(routePath)) {
       return request.reject();
     }

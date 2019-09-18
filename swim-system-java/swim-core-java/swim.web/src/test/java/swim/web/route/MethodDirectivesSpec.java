@@ -11,9 +11,13 @@ import swim.uri.UriPath;
 import swim.web.WebRequest;
 import swim.web.WebRoute;
 import swim.web.WebServerRequest;
-
 import static org.testng.Assert.assertEquals;
-import static swim.web.WebRoute.*;
+import static swim.web.WebRoute.delete;
+import static swim.web.WebRoute.get;
+import static swim.web.WebRoute.head;
+import static swim.web.WebRoute.path;
+import static swim.web.WebRoute.post;
+import static swim.web.WebRoute.put;
 
 public class MethodDirectivesSpec {
 
@@ -21,7 +25,7 @@ public class MethodDirectivesSpec {
     return new WebServerRequest(HttpRequest.from(method, uri, HttpVersion.HTTP_1_0));
   }
 
-  private static HttpResponse ok() {
+  private static HttpResponse<?> ok() {
     return HttpResponse.from(HttpStatus.OK);
   }
 
@@ -47,12 +51,12 @@ public class MethodDirectivesSpec {
   @Test
   public void testMethodDirectives() {
     final WebRoute directive = get(() -> path(UriPath.parse("/GET"), request -> request.respond(ok())))
-      .orElse(head(() -> path(UriPath.parse("/HEAD"), request -> request.respond(ok()))))
-      .orElse(post(() -> path(UriPath.parse("/POST"), request -> request.respond(ok()))))
-      .orElse(put(() -> path(UriPath.parse("/PUT"), request -> request.respond(ok()))))
-      .orElse(delete(() -> path(UriPath.parse("/DELETE"), request -> request.respond(ok()))));
+        .orElse(head(() -> path(UriPath.parse("/HEAD"), request -> request.respond(ok()))))
+        .orElse(post(() -> path(UriPath.parse("/POST"), request -> request.respond(ok()))))
+        .orElse(put(() -> path(UriPath.parse("/PUT"), request -> request.respond(ok()))))
+        .orElse(delete(() -> path(UriPath.parse("/DELETE"), request -> request.respond(ok()))));
     for (HttpMethod m : new HttpMethod[]{HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE}) {
-      final WebRequest req = methodRequest(m, Uri.parse("/"+m.name()));
+      final WebRequest req = methodRequest(m, Uri.parse("/" + m.name()));
       assertEquals(directive.routeRequest(req).isAccepted(), true);
     }
     assertEquals(directive.routeRequest(methodRequest(HttpMethod.HEAD, Uri.parse("/POST"))).isAccepted(), false);

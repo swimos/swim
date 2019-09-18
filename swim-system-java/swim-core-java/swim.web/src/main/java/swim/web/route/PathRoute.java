@@ -30,8 +30,8 @@ public final class PathRoute implements WebRoute {
 
   @Override
   public WebResponse routeRequest(WebRequest request) {
-    UriPath pathRoute = this.pathRoute;
-    UriPath routePath = request.routePath();
+    final UriPath pathRoute = this.pathRoute;
+    final UriPath routePath = request.routePath();
     if (!pathRoute.equals(routePath)) {
       return request.reject();
     }

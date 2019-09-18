@@ -14,13 +14,12 @@ import swim.uri.UriHost;
 import swim.web.WebRequest;
 import swim.web.WebRoute;
 import swim.web.WebServerRequest;
-
 import static org.testng.Assert.assertEquals;
 import static swim.web.WebRoute.extractHost;
 
 public class ExtractDirectivesSpec {
 
-  private static HttpResponse ok() {
+  private static HttpResponse<?> ok() {
     return HttpResponse.from(HttpStatus.OK);
   }
 
