@@ -38,7 +38,7 @@ import swim.uri.UriPath;
 import swim.uri.UriScheme;
 import swim.ws.WsRequest;
 
-public class RemoteHostClient extends RemoteHost {
+public class RemoteWarpHostClient extends RemoteWarpHost {
   final IpInterface endpoint;
   final WarpSettings warpSettings;
 
@@ -46,13 +46,13 @@ public class RemoteHostClient extends RemoteHost {
   TimerRef reconnectTimer;
   double reconnectTimeout;
 
-  public RemoteHostClient(Uri baseUri, IpInterface endpoint, WarpSettings warpSettings) {
+  public RemoteWarpHostClient(Uri baseUri, IpInterface endpoint, WarpSettings warpSettings) {
     super(Uri.empty(), baseUri);
     this.endpoint = endpoint;
     this.warpSettings = warpSettings;
   }
 
-  public RemoteHostClient(Uri baseUri, IpInterface endpoint) {
+  public RemoteWarpHostClient(Uri baseUri, IpInterface endpoint) {
     this(baseUri, endpoint, WarpSettings.standard());
   }
 
@@ -74,7 +74,7 @@ public class RemoteHostClient extends RemoteHost {
       final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, UriPath.slash(), this.baseUri.query());
       final WsRequest wsRequest = WsRequest.from(requestUri, PROTOCOL_LIST);
       final WarpWebSocket webSocket = new WarpWebSocket(this, this.warpSettings);
-      this.client = new RemoteHostClientBinding(this, webSocket, wsRequest, this.warpSettings);
+      this.client = new RemoteWarpHostClientBinding(this, webSocket, wsRequest, this.warpSettings);
       setWarpSocketContext(webSocket); // eagerly set
     }
     if (isSecure) {
@@ -111,7 +111,7 @@ public class RemoteHostClient extends RemoteHost {
       this.reconnectTimeout = Math.min(1.8 * this.reconnectTimeout, MAX_RECONNECT_TIMEOUT);
     }
     this.reconnectTimer = this.hostContext.schedule().setTimer((long) this.reconnectTimeout,
-        new RemoteHostClientReconnectTimer(this));
+        new RemoteWarpHostClientReconnectTimer(this));
   }
 
   @Override
@@ -135,14 +135,14 @@ public class RemoteHostClient extends RemoteHost {
   static final FingerTrieSeq<String> PROTOCOL_LIST = FingerTrieSeq.of("warp0", "swim-0.0");
 }
 
-final class RemoteHostClientBinding extends AbstractWarpClient {
-  final RemoteHostClient client;
+final class RemoteWarpHostClientBinding extends AbstractWarpClient {
+  final RemoteWarpHostClient client;
   final WarpWebSocket webSocket;
   final WsRequest wsRequest;
   final WarpSettings warpSettings;
 
-  RemoteHostClientBinding(RemoteHostClient client, WarpWebSocket webSocket,
-                          WsRequest wsRequest, WarpSettings warpSettings) {
+  RemoteWarpHostClientBinding(RemoteWarpHostClient client, WarpWebSocket webSocket,
+                              WsRequest wsRequest, WarpSettings warpSettings) {
     super(warpSettings);
     this.client = client;
     this.webSocket = webSocket;
@@ -168,10 +168,10 @@ final class RemoteHostClientBinding extends AbstractWarpClient {
   }
 }
 
-final class RemoteHostClientReconnectTimer implements TimerFunction {
-  final RemoteHostClient client;
+final class RemoteWarpHostClientReconnectTimer implements TimerFunction {
+  final RemoteWarpHostClient client;
 
-  RemoteHostClientReconnectTimer(RemoteHostClient client) {
+  RemoteWarpHostClientReconnectTimer(RemoteWarpHostClient client) {
     this.client = client;
   }
 

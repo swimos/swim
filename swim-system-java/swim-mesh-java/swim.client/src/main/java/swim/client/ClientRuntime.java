@@ -30,7 +30,8 @@ import swim.concurrent.Theater;
 import swim.io.TlsSettings;
 import swim.io.http.HttpEndpoint;
 import swim.io.http.HttpSettings;
-import swim.remote.RemoteHostClient;
+import swim.remote.RemoteHttpHostClient;
+import swim.remote.RemoteWarpHostClient;
 import swim.runtime.AbstractSwimRef;
 import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
@@ -153,7 +154,12 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
 
   @Override
   public HostBinding createHost(Uri meshUri, Value partKey, Uri hostUri) {
-    return new RemoteHostClient(hostUri, this.endpoint);
+    if (hostUri != null && hostUri.host().isDefined()
+        && ("http".equals(hostUri.scheme().name()) || "https".equals(hostUri.scheme().name()))) {
+      return new RemoteHttpHostClient(hostUri, this.endpoint);
+    } else {
+      return new RemoteWarpHostClient(hostUri, this.endpoint);
+    }
   }
 
   @Override

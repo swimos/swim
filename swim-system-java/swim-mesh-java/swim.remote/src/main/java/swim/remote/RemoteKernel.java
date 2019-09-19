@@ -60,7 +60,11 @@ public class RemoteKernel extends KernelProxy {
   public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
     if (hostUri.host().isDefined() && !"swim".equals(partKey.stringValue(null))) {
       final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
-      return new RemoteHostClient(hostUri, endpoint, warpSettings());
+      return new RemoteWarpHostClient(hostUri, endpoint, warpSettings());
+    } else if (hostUri != null && hostUri.host().isDefined()
+        && "http".equals(hostUri.scheme().name()) && "https".equals(hostUri.scheme().name())) {
+      final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
+      return new RemoteHttpHostClient(hostUri, endpoint, httpSettings());
     }
     return super.createHost(edgeName, meshUri, partKey, hostUri);
   }
@@ -70,7 +74,11 @@ public class RemoteKernel extends KernelProxy {
     final Uri hostUri = hostDef.hostUri();
     if (hostUri != null && hostUri.host().isDefined() && !"swim".equals(partKey.stringValue(null))) {
       final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
-      return new RemoteHostClient(hostUri, endpoint, warpSettings());
+      return new RemoteWarpHostClient(hostUri, endpoint, warpSettings());
+    } else if (hostUri != null && hostUri.host().isDefined()
+        && "http".equals(hostUri.scheme().name()) && "https".equals(hostUri.scheme().name())) {
+      final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
+      return new RemoteHttpHostClient(hostUri, endpoint, httpSettings());
     }
     return super.createHost(edgeName, meshUri, partKey, hostUri);
   }

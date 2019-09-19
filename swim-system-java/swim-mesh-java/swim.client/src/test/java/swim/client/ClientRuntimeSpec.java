@@ -19,6 +19,10 @@ import org.testng.annotations.Test;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
+import swim.api.http.function.DidRequestHttp;
+import swim.api.http.function.DidRespondHttp;
+import swim.api.http.function.WillRequestHttp;
+import swim.api.http.function.WillRespondHttp;
 import swim.api.warp.function.DidLink;
 import swim.api.warp.function.DidSync;
 import swim.api.warp.function.DidUnlink;
@@ -26,11 +30,14 @@ import swim.api.warp.function.OnEvent;
 import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
+import swim.http.HttpRequest;
+import swim.http.HttpResponse;
 import swim.structure.Value;
+import swim.uri.Uri;
 
 public class ClientRuntimeSpec {
   @Test
-  public void testLink() throws InterruptedException {
+  public void testWarpLink() throws InterruptedException {
     final ClientRuntime client = new ClientRuntime();
     final CountDownLatch didSync = new CountDownLatch(1);
     class IntersectionsController implements OnEvent<Value>, WillLink, DidLink,
@@ -87,6 +94,46 @@ public class ClientRuntimeSpec {
           .observe(new IntersectionsController())
           .open();
       didSync.await();
+    } finally {
+      client.stop();
+    }
+  }
+
+  @Test
+  public void testHttpLink() throws InterruptedException {
+    final ClientRuntime client = new ClientRuntime();
+    final CountDownLatch didRespond = new CountDownLatch(1);
+    class VehiclesController implements WillRequestHttp<String>, DidRequestHttp<String>, WillRespondHttp<String>, DidRespondHttp<String> {
+
+      @Override
+      public void didRequest(HttpRequest<String> request) {
+        System.out.println("didRequest: " + request);
+      }
+
+      @Override
+      public void willRequest(HttpRequest<String> request) {
+        System.out.println("willRequest: " + request);
+      }
+
+      @Override
+      public void didRespond(HttpResponse<String> response) {
+        System.out.println("didRespond: " + response);
+        didRespond.countDown();
+      }
+
+      @Override
+      public void willRespond(HttpResponse<String> response) {
+        System.out.println("willRespond: " + response);
+      }
+    }
+    try {
+      client.start();
+      final Uri reqUri = Uri.parse("http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=tahoe&t=0");
+      client.downlinkHttp()
+          .requestUri(reqUri)
+          .observe(new VehiclesController())
+          .open();
+      didRespond.await();
     } finally {
       client.stop();
     }

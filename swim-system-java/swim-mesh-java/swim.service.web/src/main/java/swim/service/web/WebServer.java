@@ -27,7 +27,7 @@ import swim.io.http.HttpResponder;
 import swim.io.http.StaticHttpResponder;
 import swim.io.warp.AbstractWarpServer;
 import swim.kernel.KernelContext;
-import swim.remote.RemoteHost;
+import swim.remote.RemoteWarpHost;
 import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
 import swim.runtime.MeshBinding;
@@ -129,11 +129,11 @@ public class WebServer extends AbstractWarpServer {
   }
 
   protected HttpResponder<?> warpWebSocketResponder(WsRequest wsRequest, WsResponse wsResponse) {
-    final RemoteHost host = openHost(wsRequest.httpRequest().uri());
+    final RemoteWarpHost host = openHost(wsRequest.httpRequest().uri());
     return upgrade(host, wsResponse);
   }
 
-  protected RemoteHost openHost(Uri requestUri) {
+  protected RemoteWarpHost openHost(Uri requestUri) {
     final Uri baseUri = Uri.from(UriScheme.from("warp"),
         UriAuthority.from(UriHost.inetAddress(context.localAddress().getAddress()),
                           UriPort.from(context.localAddress().getPort())),
@@ -149,7 +149,7 @@ public class WebServer extends AbstractWarpServer {
       final EdgeBinding edge = ((EdgeContext) space).edgeWrapper();
       final MeshBinding mesh = edge.openMesh(remoteUri);
       final PartBinding gateway = mesh.openGateway();
-      final RemoteHost host = new RemoteHost(requestUri, baseUri);
+      final RemoteWarpHost host = new RemoteWarpHost(requestUri, baseUri);
       gateway.openHost(remoteUri, host);
       return host;
     } else {

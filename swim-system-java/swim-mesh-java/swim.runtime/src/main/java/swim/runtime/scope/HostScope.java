@@ -28,6 +28,7 @@ import swim.runtime.CellContext;
 import swim.runtime.downlink.EventDownlinkView;
 import swim.runtime.downlink.MapDownlinkView;
 import swim.runtime.downlink.ValueDownlinkView;
+import swim.runtime.http.RestDownlinkView;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -97,7 +98,8 @@ public class HostScope extends Scope implements HostRef {
 
   @Override
   public <V> HttpDownlink<V> downlinkHttp() {
-    return null; // TODO
+    return new RestDownlinkView<V>(this, stage(), meshUri(), Uri.empty(),
+        Uri.empty(), Uri.empty(), null); // TODO
   }
 
   @Override

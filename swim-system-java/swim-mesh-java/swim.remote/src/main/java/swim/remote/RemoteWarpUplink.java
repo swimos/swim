@@ -31,7 +31,7 @@ import swim.uri.Uri;
 import swim.warp.Envelope;
 
 class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
-  final RemoteHost host;
+  final RemoteWarpHost host;
 
   final WarpBinding link;
 
@@ -45,7 +45,7 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
 
   volatile int status;
 
-  RemoteWarpUplink(RemoteHost host, WarpBinding link, Uri remoteNodeUri, Value linkKey) {
+  RemoteWarpUplink(RemoteWarpHost host, WarpBinding link, Uri remoteNodeUri, Value linkKey) {
     this.host = host;
     this.link = link;
     this.remoteNodeUri = remoteNodeUri;
@@ -53,7 +53,7 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
     this.downQueue = new ConcurrentLinkedQueue<Envelope>();
   }
 
-  RemoteWarpUplink(RemoteHost host, WarpBinding link, Uri remoteNodeUri) {
+  RemoteWarpUplink(RemoteWarpHost host, WarpBinding link, Uri remoteNodeUri) {
     this(host, link, remoteNodeUri, LinkKeys.generateLinkKey());
   }
 
