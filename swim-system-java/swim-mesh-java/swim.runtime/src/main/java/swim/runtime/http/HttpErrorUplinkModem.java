@@ -125,32 +125,32 @@ public class HttpErrorUplinkModem implements HttpContext {
   }
 
   @Override
-  public Decoder<Object> decodeRequest(HttpRequest<?> request) {
+  public Decoder<Object> decodeRequestUp(HttpRequest<?> request) {
     return request.contentDecoder();
   }
 
   @Override
-  public void willRequest(HttpRequest<?> request) {
+  public void willRequestUp(HttpRequest<?> request) {
     // nop
   }
 
   @Override
-  public void didRequest(HttpRequest<Object> request) {
+  public void didRequestUp(HttpRequest<Object> request) {
     // nop
   }
 
   @Override
-  public void doRespond(HttpRequest<Object> request) {
+  public void doRespondUp(HttpRequest<Object> request) {
     this.linkBinding.writeResponse(HttpResponse.from(HttpStatus.NOT_FOUND));
   }
 
   @Override
-  public void willRespond(HttpResponse<?> response) {
+  public void willRespondUp(HttpResponse<?> response) {
     // nop
   }
 
   @Override
-  public void didRespond(HttpResponse<?> response) {
+  public void didRespondUp(HttpResponse<?> response) {
     // nop
   }
 

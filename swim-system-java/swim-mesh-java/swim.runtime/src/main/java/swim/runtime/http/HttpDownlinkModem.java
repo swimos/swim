@@ -14,6 +14,7 @@
 
 package swim.runtime.http;
 
+import swim.codec.Decoder;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.runtime.CellContext;
@@ -26,14 +27,14 @@ import swim.uri.Uri;
 
 public abstract class HttpDownlinkModem<View extends DownlinkView> extends DownlinkModel<View> implements HttpBinding {
 
-  protected final Uri requestUri;
+  protected final HttpRequest<?> request;
 
   protected HttpContext linkContext;
   protected CellContext cellContext;
 
-  public HttpDownlinkModem(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri, Uri requestUri) {
-    super(meshUri, hostUri, nodeUri, laneUri);
-    this.requestUri = requestUri;
+  public HttpDownlinkModem(Uri hostUri, HttpRequest<?> request) {
+    super(Uri.empty(), hostUri, Uri.empty(), Uri.empty());
+    this.request = request;
   }
 
   @Override
@@ -63,7 +64,7 @@ public abstract class HttpDownlinkModem<View extends DownlinkView> extends Downl
 
   @Override
   public Uri requestUri() {
-    return this.requestUri;
+    return this.request.uri();
   }
 
   @Override
@@ -90,15 +91,21 @@ public abstract class HttpDownlinkModem<View extends DownlinkView> extends Downl
     }
   }
 
-  protected void onRequest(HttpRequest<?> request) {
-    // stub
-  }
+  @Override
+  public abstract Decoder<Object> decodeResponseDown(HttpResponse<?> request);
 
-  protected void didRequest(HttpRequest<?> request) {
-    // stub
-  }
+  @Override
+  public abstract void willRequestDown(HttpRequest<?> request);
 
-  protected void onResponse(HttpResponse<?> response) {
-    // stub
-  }
+  @Override
+  public abstract void didRequestDown(HttpRequest<Object> request);
+
+  @Override
+  public abstract void doRespondDown(HttpRequest<Object> request);
+
+  @Override
+  public abstract void willRespondDown(HttpResponse<?> response);
+
+  @Override
+  public abstract void didRespondDown(HttpResponse<?> response);
 }

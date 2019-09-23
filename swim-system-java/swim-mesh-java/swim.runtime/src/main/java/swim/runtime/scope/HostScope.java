@@ -98,8 +98,7 @@ public class HostScope extends Scope implements HostRef {
 
   @Override
   public <V> HttpDownlink<V> downlinkHttp() {
-    return new RestDownlinkView<V>(this, stage(), meshUri(), Uri.empty(),
-        Uri.empty(), Uri.empty(), null); // TODO
+    return new RestDownlinkView<V>(this, stage(), Uri.empty()); // TODO
   }
 
   @Override

@@ -244,23 +244,23 @@ public class HttpProxy implements HttpBinding, HttpContext {
   }
 
   @Override
-  public Decoder<Object> decodeRequest(HttpRequest<?> request) {
-    return this.linkContext.decodeRequest(request);
+  public Decoder<Object> decodeRequestUp(HttpRequest<?> request) {
+    return this.linkContext.decodeRequestUp(request);
   }
 
   @Override
-  public void willRequest(HttpRequest<?> request) {
-    this.linkContext.willRequest(request);
+  public void willRequestUp(HttpRequest<?> request) {
+    this.linkContext.willRequestUp(request);
   }
 
   @Override
-  public void didRequest(HttpRequest<Object> request) {
-    this.linkContext.didRequest(request);
+  public void didRequestUp(HttpRequest<Object> request) {
+    this.linkContext.didRequestUp(request);
   }
 
   @Override
-  public void doRespond(HttpRequest<Object> request) {
-    this.linkContext.doRespond(request);
+  public void doRespondUp(HttpRequest<Object> request) {
+    this.linkContext.doRespondUp(request);
   }
 
   @Override
@@ -269,13 +269,43 @@ public class HttpProxy implements HttpBinding, HttpContext {
   }
 
   @Override
-  public void willRespond(HttpResponse<?> response) {
-    this.linkContext.willRespond(response);
+  public Decoder<Object> decodeResponseDown(HttpResponse<?> response) {
+    return this.linkBinding.decodeResponseDown(response);
   }
 
   @Override
-  public void didRespond(HttpResponse<?> response) {
-    this.linkContext.didRespond(response);
+  public void willRequestDown(HttpRequest<?> request) {
+    this.linkBinding.willRequestDown(request);
+  }
+
+  @Override
+  public void didRequestDown(HttpRequest<Object> request) {
+    this.linkBinding.didRequestDown(request);
+  }
+
+  @Override
+  public void doRespondDown(HttpRequest<Object> request) {
+    this.linkBinding.doRespondDown(request);
+  }
+
+  @Override
+  public void willRespondDown(HttpResponse<?> response) {
+    this.linkBinding.willRespondDown(response);
+  }
+
+  @Override
+  public void didRespondDown(HttpResponse<?> response) {
+    this.linkBinding.didRespondDown(response);
+  }
+
+  @Override
+  public void willRespondUp(HttpResponse<?> response) {
+    this.linkContext.willRespondUp(response);
+  }
+
+  @Override
+  public void didRespondUp(HttpResponse<?> response) {
+    this.linkContext.didRespondUp(response);
   }
 
   @Override

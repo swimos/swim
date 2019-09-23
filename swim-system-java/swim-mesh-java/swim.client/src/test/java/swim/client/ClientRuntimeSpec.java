@@ -30,6 +30,7 @@ import swim.api.warp.function.OnEvent;
 import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
+import swim.codec.Format;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.structure.Value;
@@ -99,31 +100,37 @@ public class ClientRuntimeSpec {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testHttpLink() throws InterruptedException {
     final ClientRuntime client = new ClientRuntime();
     final CountDownLatch didRespond = new CountDownLatch(1);
-    class VehiclesController implements WillRequestHttp<String>, DidRequestHttp<String>, WillRespondHttp<String>, DidRespondHttp<String> {
+    class VehiclesController implements DidConnect, WillRequestHttp<Value>, DidRequestHttp<Value>, WillRespondHttp<Value>, DidRespondHttp<Value> {
 
       @Override
-      public void didRequest(HttpRequest<String> request) {
-        System.out.println("didRequest: " + request);
+      public void didRequest(HttpRequest<Value> request) {
+        System.out.println("VehiclesController.didRequest: " + Format.debug(request.toHttp()));
       }
 
       @Override
-      public void willRequest(HttpRequest<String> request) {
-        System.out.println("willRequest: " + request);
+      public void willRequest(HttpRequest<Value> request) {
+        System.out.println("VehiclesController.willRequest: " + Format.debug(request.toHttp()));
       }
 
       @Override
-      public void didRespond(HttpResponse<String> response) {
-        System.out.println("didRespond: " + response);
+      public void didRespond(HttpResponse<Value> response) {
+        System.out.println("VehiclesController.didRespond: " + response.toString());
         didRespond.countDown();
       }
 
       @Override
-      public void willRespond(HttpResponse<String> response) {
-        System.out.println("willRespond: " + response);
+      public void willRespond(HttpResponse<Value> response) {
+        System.out.println("VehiclesController.willRespond: " + response);
+      }
+
+      @Override
+      public void didConnect() {
+        System.out.println("VehiclesController.didConnect");
       }
     }
     try {

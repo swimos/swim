@@ -21,10 +21,8 @@ public class RestDownlinkView<V> extends HttpDownlinkView<V> {
 
   protected RestDownlinkModel<V> model;
 
-  public RestDownlinkView(CellContext cellContext, Stage stage, Uri meshUri,
-                          Uri hostUri, Uri nodeUri, Uri laneUri,
-                          Uri requestUri) {
-    super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, requestUri, null);
+  public RestDownlinkView(CellContext cellContext, Stage stage, Uri requestUri) {
+    super(cellContext, stage, requestUri, null);
   }
 
   @Override
@@ -32,13 +30,6 @@ public class RestDownlinkView<V> extends HttpDownlinkView<V> {
     return this.model;
   }
 
-  @Override
-  public RestDownlinkView<V> requestUri(Uri requestUri) {
-    this.requestUri = requestUri;
-    //TODO- extract host URI here- is this right?
-    this.hostUri = requestUri.base();
-    return this;
-  }
 
   @Override
   public HttpDownlink<V> doRequest(DoRequestHttp<?> doRequest) {
@@ -102,7 +93,7 @@ public class RestDownlinkView<V> extends HttpDownlinkView<V> {
 
   @Override
   public RestDownlinkModel<V> createDownlinkModel() {
-    return new RestDownlinkModel<>(this.meshUri, this.hostUri, this.nodeUri, this.laneUri, requestUri);
+    return new RestDownlinkModel<>(this.hostUri, this.request);
   }
 
   @SuppressWarnings("unchecked")

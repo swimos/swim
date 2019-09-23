@@ -91,24 +91,24 @@ public abstract class HttpUplinkModem extends AbstractUplinkContext implements H
   }
 
   @Override
-  public abstract Decoder<Object> decodeRequest(HttpRequest<?> request);
+  public abstract Decoder<Object> decodeRequestUp(HttpRequest<?> request);
 
   @Override
-  public abstract void willRequest(HttpRequest<?> request);
+  public abstract void willRequestUp(HttpRequest<?> request);
 
   @Override
-  public abstract void didRequest(HttpRequest<Object> request);
+  public abstract void didRequestUp(HttpRequest<Object> request);
 
   @Override
-  public abstract void doRespond(HttpRequest<Object> request);
+  public abstract void doRespondUp(HttpRequest<Object> request);
 
   @Override
-  public abstract void willRespond(HttpResponse<?> response);
+  public abstract void willRespondUp(HttpResponse<?> response);
 
   public void writeResponse(HttpResponse<?> response) {
     this.linkBinding.writeResponse(response);
   }
 
   @Override
-  public abstract void didRespond(HttpResponse<?> response);
+  public abstract void didRespondUp(HttpResponse<?> response);
 }

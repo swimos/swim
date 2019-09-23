@@ -14,92 +14,187 @@
 
 package swim.runtime.http;
 
+import swim.codec.Decoder;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
-import swim.http.header.Host;
 import swim.runtime.DownlinkRelay;
 import swim.uri.Uri;
 
 public abstract class HttpDownlinkModel<View extends HttpDownlinkView<?>> extends HttpDownlinkModem<View> {
 
-  public HttpDownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri, Uri requestUri) {
-    super(meshUri, hostUri, nodeUri, laneUri, requestUri);
+  public HttpDownlinkModel(Uri hostUri, HttpRequest<?> request) {
+    super(hostUri, request);
   }
 
   @Override
   public HttpRequest<?> request() {
-    // TODO figure out the headers
-    return HttpRequest.get(this.requestUri, Host.from(this.requestUri.authority()));
+    return this.request;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public HttpRequest<?> doRequest() {
-    final HttpDownlinkRelayRequest<?> relay = new HttpDownlinkRelayRequest<>(this, request());
-    relay.run();
-    if (relay.isDone()) {
-      return relay.httpRequest;
-    } else {
-      return null;
+    final Object views = this.views;
+    HttpDownlinkView<?> view;
+    HttpRequest<?> request = null;
+    if (views instanceof HttpDownlinkView) {
+      view = (HttpDownlinkView<?>) views;
+      request = view.dispatchDoRequest();
+    } else if (views instanceof HttpDownlinkView[]) {
+      final HttpDownlinkView<?>[] viewArray = (HttpDownlinkView<?>[]) views;
+      for (int i = 0, n = viewArray.length; i < n; i += 1) {
+        view = viewArray[i];
+        request = view.dispatchDoRequest();
+        if (request != null) {
+          break;
+        }
+      }
     }
+    return request == null ? request() : request;
   }
 
-  @SuppressWarnings({"unchecked"})
+  @Override
+  public Decoder<Object> decodeResponseDown(HttpResponse<?> response) {
+    final Object views = this.views;
+    HttpDownlinkView<?> view;
+    Decoder<Object> decoder = null;
+    if (views instanceof HttpDownlinkView) {
+      view = (HttpDownlinkView<?>) views;
+      decoder = view.dispatchDecodeResponse(response);
+    } else if (views instanceof HttpDownlinkView[]) {
+      final HttpDownlinkView<?>[] viewArray = (HttpDownlinkView<?>[]) views;
+      for (int i = 0, n = viewArray.length; i < n; i += 1) {
+        view = viewArray[i];
+        decoder = view.dispatchDecodeResponse(response);
+        if (decoder != null) {
+          break;
+        }
+      }
+    }
+    if (decoder == null) {
+      decoder = decodeRespondDefault(response);
+    }
+    return decoder;
+  }
+
   @Override
   public void writeResponse(HttpResponse<?> response) {
-    new HttpDownlinkRelayResponse<>(this, response).run();
+    // stub
   }
+
+  @Override
+  public void willRequestDown(HttpRequest<?> request) {
+    new HttpDownlinkRelayWillRequest<>(this, request).run();
+  }
+
+  @Override
+  public void didRequestDown(HttpRequest<Object> request) {
+    new HttpDownlinkRelayDidRequest<>(this, request).run();
+  }
+
+  @Override
+  public void doRespondDown(HttpRequest<Object> request) {
+    //stub
+  }
+
+  @Override
+  public void willRespondDown(HttpResponse<?> response) {
+    new HttpDownlinkRelayWillRespond<>(this, response).run();
+  }
+
+  @Override
+  public void didRespondDown(HttpResponse<?> response) {
+    new HttpDownlinkRelayDidRespond<>(this, response).run();
+  }
+
+  protected Decoder<Object> decodeRespondDefault(HttpResponse<?> response) {
+    return response.contentDecoder();
+  }
+
 }
 
-final class HttpDownlinkRelayRequest<View extends HttpDownlinkView<?>> extends DownlinkRelay<HttpDownlinkModel<View>, View> {
+final class HttpDownlinkRelayWillRequest<View extends HttpDownlinkView<?>> extends DownlinkRelay<HttpDownlinkModel<View>, View> {
 
-  final HttpRequest<?> httpRequest;
+  final HttpRequest<?> request;
 
-  HttpDownlinkRelayRequest(HttpDownlinkModel<View> model, HttpRequest<?> httpRequest) {
-    super(model, 2);
-    this.httpRequest = httpRequest;
+  HttpDownlinkRelayWillRequest(HttpDownlinkModel<View> model, HttpRequest<?> request) {
+    super(model);
+    this.request = request;
   }
 
   @Override
   protected boolean runPhase(View view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
-        view.downlinkWillRequest(this.httpRequest);
+        view.downlinkWillRequest(this.request);
       }
-      return view.dispatchWillRequest(this.httpRequest, preemptive);
-    } else if (phase == 1) {
-      if (preemptive) {
-        view.downlinkDidRequest(this.httpRequest);
-      }
-      return view.dispatchDidRequest(this.httpRequest, preemptive);
+      return view.dispatchWillRequest(this.request, preemptive);
     } else {
       throw new AssertionError(); // unreachable
     }
   }
-
 }
 
-final class HttpDownlinkRelayResponse<View extends HttpDownlinkView<?>> extends DownlinkRelay<HttpDownlinkModel<View>, View> {
+final class HttpDownlinkRelayDidRequest<View extends HttpDownlinkView<?>> extends DownlinkRelay<HttpDownlinkModel<View>, View> {
 
-  final HttpResponse<?> httpResponse;
+  final HttpRequest<?> request;
 
-  HttpDownlinkRelayResponse(HttpDownlinkModel<View> model, HttpResponse<?> httpResponse) {
-    super(model, 2);
-    this.httpResponse = httpResponse;
+  HttpDownlinkRelayDidRequest(HttpDownlinkModel<View> model, HttpRequest<?> request) {
+    super(model);
+    this.request = request;
   }
 
   @Override
   protected boolean runPhase(View view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
-        view.downlinkWillRespond(this.httpResponse);
+        view.downlinkDidRequest(this.request);
       }
-      return view.dispatchWillRespond(this.httpResponse, preemptive);
-    } else if (phase == 1) {
+      return view.dispatchDidRequest(this.request, preemptive);
+    } else {
+      throw new AssertionError(); // unreachable
+    }
+  }
+}
+
+final class HttpDownlinkRelayWillRespond<View extends HttpDownlinkView<?>> extends DownlinkRelay<HttpDownlinkModel<View>, View> {
+
+  final HttpResponse<?> response;
+
+  HttpDownlinkRelayWillRespond(HttpDownlinkModel<View> model, HttpResponse<?> response) {
+    super(model);
+    this.response = response;
+  }
+
+  @Override
+  protected boolean runPhase(View view, int phase, boolean preemptive) {
+    if (phase == 0) {
       if (preemptive) {
-        view.downlinkDidRespond(this.httpResponse);
+        view.downlinkWillRespond(this.response);
       }
-      return view.dispatchDidRespond(this.httpResponse, preemptive);
+      return view.dispatchWillRespond(this.response, preemptive);
+    } else {
+      throw new AssertionError(); // unreachable
+    }
+  }
+}
+
+final class HttpDownlinkRelayDidRespond<View extends HttpDownlinkView<?>> extends DownlinkRelay<HttpDownlinkModel<View>, View> {
+
+  final HttpResponse<?> response;
+
+  HttpDownlinkRelayDidRespond(HttpDownlinkModel<View> model, HttpResponse<?> response) {
+    super(model);
+    this.response = response;
+  }
+
+  @Override
+  protected boolean runPhase(View view, int phase, boolean preemptive) {
+    if (phase == 0) {
+      if (preemptive) {
+        view.downlinkDidRespond(this.response);
+      }
+      return view.dispatchDidRespond(this.response, preemptive);
     } else {
       throw new AssertionError(); // unreachable
     }

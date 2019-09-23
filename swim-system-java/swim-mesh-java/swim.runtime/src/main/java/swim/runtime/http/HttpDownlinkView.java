@@ -27,33 +27,27 @@ import swim.api.http.function.DidRespondHttp;
 import swim.api.http.function.DoRequestHttp;
 import swim.api.http.function.WillRequestHttp;
 import swim.api.http.function.WillRespondHttp;
+import swim.codec.Decoder;
 import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
+import swim.http.header.Host;
 import swim.runtime.CellContext;
 import swim.runtime.DownlinkView;
 import swim.uri.Uri;
 
 public abstract class HttpDownlinkView<V> extends DownlinkView implements HttpDownlink<V> {
 
-  protected final Uri meshUri;
   protected Uri hostUri;
-  protected final Uri nodeUri;
-  protected final Uri laneUri;
-  protected Uri requestUri;
+  protected HttpRequest<V> request;
 
   protected volatile int flags;
 
-  public HttpDownlinkView(CellContext cellContext, Stage stage,
-                          Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
-                          Uri requestUri, Object observers) {
+  public HttpDownlinkView(CellContext cellContext, Stage stage, Uri requestUri, Object observers) {
     super(cellContext, stage, observers);
-    this.meshUri = meshUri;
-    this.hostUri = hostUri;
-    this.nodeUri = nodeUri;
-    this.laneUri = laneUri;
-    this.requestUri = requestUri;
+    this.request = HttpRequest.get(requestUri, Host.from(requestUri.authority()));
+    this.hostUri = Uri.empty().scheme(requestUri.scheme()).authority(requestUri.authority());
   }
 
   @Override
@@ -66,20 +60,36 @@ public abstract class HttpDownlinkView<V> extends DownlinkView implements HttpDo
 
   @Override
   public final Uri nodeUri() {
-    return this.nodeUri;
+    return Uri.empty();
   }
 
   @Override
   public final Uri laneUri() {
-    return this.laneUri;
+    return Uri.empty();
   }
 
   @Override
-  public abstract HttpDownlinkView<V> requestUri(Uri requestUri);
+  public HttpDownlinkView<V> requestUri(Uri requestUri) {
+    this.request = HttpRequest.get(requestUri, Host.from(requestUri.authority()));
+    this.hostUri = Uri.empty().scheme(requestUri.scheme()).authority(requestUri.authority());
+    return this;
+  }
 
   @Override
   public Uri requestUri() {
-    return this.requestUri;
+    return this.request.uri();
+  }
+
+
+  @Override
+  public HttpDownlink<V> request(HttpRequest<V> request) {
+    this.request = request;
+    return this;
+  }
+
+  @Override
+  public HttpRequest<V> request() {
+    return this.request;
   }
 
   @Override
@@ -161,6 +171,49 @@ public abstract class HttpDownlinkView<V> extends DownlinkView implements HttpDo
     return this;
   }
 
+  @SuppressWarnings("unchecked")
+  public HttpRequest<?> dispatchDoRequest() {
+    final Link oldLink = SwimContext.getLink();
+    try {
+      SwimContext.setLink(this);
+      final Object observers = this.observers;
+      if (observers instanceof DoRequestHttp<?>) {
+        try {
+          final HttpRequest<?> request = ((DoRequestHttp<?>) observers).doRequest();
+          if (request != null) {
+            return request;
+          }
+        } catch (Throwable error) {
+          if (Conts.isNonFatal(error)) {
+            downlinkDidFail(error);
+          }
+          throw error;
+        }
+      } else if (observers instanceof Object[]) {
+        final Object[] array = (Object[]) observers;
+        for (int i = 0, n = array.length; i < n; i += 1) {
+          final Object observer = array[i];
+          if (observer instanceof DoRequestHttp) {
+
+            try {
+              final HttpRequest<?> request = ((DoRequestHttp<?>) observer).doRequest();
+              if (request != null) {
+                return request;
+              }
+            } catch (Throwable error) {
+              if (Conts.isNonFatal(error)) {
+                downlinkDidFail(error);
+              }
+              throw error;
+            }
+          }
+        }
+      }
+      return null;
+    } finally {
+      SwimContext.setLink(oldLink);
+    }
+  }
 
   @SuppressWarnings("unchecked")
   public <R> boolean dispatchWillRequest(HttpRequest<R> httpRequest, boolean preemptive) {
@@ -301,6 +354,43 @@ public abstract class HttpDownlinkView<V> extends DownlinkView implements HttpDo
   }
 
   @SuppressWarnings("unchecked")
+  public Decoder<Object> dispatchDecodeResponse(HttpResponse<?> response) {
+    final Link oldLink = SwimContext.getLink();
+    try {
+      SwimContext.setLink(this);
+      final Object observers = this.observers;
+      if (observers instanceof DecodeResponseHttp<?>) {
+        try {
+          final Decoder<Object> decoder = ((DecodeResponseHttp<Object>) observers).decodeResponse((HttpResponse<Object>) response);
+          if (decoder != null) {
+            return decoder;
+          }
+        } catch (Throwable error) {
+          throw error;
+        }
+      } else if (observers instanceof Object[]) {
+        final Object[] array = (Object[]) observers;
+        for (int i = 0, n = array.length; i < n; i += 1) {
+          final Object observer = array[i];
+          if (observer instanceof DecodeResponseHttp<?>) {
+            try {
+              final Decoder<Object> decoder = ((DecodeResponseHttp<Object>) observer).decodeResponse((HttpResponse<Object>) response);
+              if (decoder != null) {
+                return decoder;
+              }
+            } catch (Throwable error) {
+              throw error;
+            }
+          }
+        }
+      }
+      return null;
+    } finally {
+      SwimContext.setLink(oldLink);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
   public <R> boolean dispatchDidRespond(HttpResponse<R> httpResponse, boolean preemptive) {
     final Link oldLink = SwimContext.getLink();
     try {
@@ -361,4 +451,5 @@ public abstract class HttpDownlinkView<V> extends DownlinkView implements HttpDo
   public void downlinkDidRespond(HttpResponse<?> httpResponse) {
     // stub
   }
+
 }

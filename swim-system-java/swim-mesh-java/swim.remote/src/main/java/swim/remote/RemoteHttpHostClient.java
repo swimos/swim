@@ -17,6 +17,7 @@ package swim.remote;
 import java.net.InetSocketAddress;
 import swim.api.Downlink;
 import swim.api.policy.Policy;
+import swim.codec.Decoder;
 import swim.concurrent.AbstractTimer;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
@@ -37,7 +38,6 @@ import swim.runtime.LinkBinding;
 import swim.runtime.PushRequest;
 import swim.runtime.UplinkError;
 import swim.store.StoreBinding;
-import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriAuthority;
 
@@ -158,7 +158,7 @@ public class RemoteHttpHostClient extends RemoteHost {
 
   public void connect(HttpBinding link) {
     final String scheme = link.requestUri().schemeName();
-    final boolean isSecure = "warps".equals(scheme) || "swims".equals(scheme);
+    final boolean isSecure = "https".equals(scheme);
 
     final UriAuthority remoteAuthority = link.requestUri().authority();
     final String remoteAddress = remoteAuthority.host().address();
@@ -187,7 +187,6 @@ public class RemoteHttpHostClient extends RemoteHost {
     return this.endpoint.connectTls(remoteAddress, socket, httpSettings.ipSettings());
   }
 
-
 }
 
 final class RemoteHttpHostClientBinding extends AbstractHttpClient {
@@ -202,12 +201,17 @@ final class RemoteHttpHostClientBinding extends AbstractHttpClient {
 
   @Override
   public void willConnect() {
+    System.out.println("RemoteHttpHostClientBinding willConnect");
     super.willConnect();
   }
 
   @Override
   public void didConnect() {
+    System.out.println("RemoteHttpHostClientBinding didConnect");
+    final RemoteHttpUplink remoteHttpUplink = new RemoteHttpUplink(remoteHttpHostClient, link);
+    this.link.setLinkContext(remoteHttpUplink);
     super.didConnect();
+    this.link.didConnect();
     doRequest(new RemoteHttpRequester(this.remoteHttpHostClient, link));
   }
 }
@@ -229,7 +233,7 @@ final class RemoteHttpPoller extends AbstractTimer implements TimerFunction {
   }
 }
 
-final class RemoteHttpRequester extends AbstractHttpRequester<Value> {
+final class RemoteHttpRequester extends AbstractHttpRequester<Object> {
 
   private final RemoteHttpHostClient remoteHttpHostClient;
   private final HttpBinding link;
@@ -241,11 +245,35 @@ final class RemoteHttpRequester extends AbstractHttpRequester<Value> {
 
   @Override
   public void doRequest() {
-    writeRequest(link.request());
+    final HttpRequest<?> request = this.link.doRequest();
+    writeRequest(request);
   }
 
   @Override
-  public void didRespond(HttpResponse<Value> response) {
-    this.link.writeResponse(response);
+  public void willRequest(HttpRequest<?> request) {
+    this.link.linkContext().willRequestUp(request);
   }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public void didRequest(HttpRequest<?> request) {
+    this.link.linkContext().didRequestUp((HttpRequest<Object>) request);
+  }
+
+
+  @Override
+  public void willRespond(HttpResponse<?> response) {
+    this.link.linkContext().willRespondUp(response);
+  }
+
+  @Override
+  public Decoder<Object> contentDecoder(HttpResponse<?> response) {
+    return this.link.decodeResponseDown(response);
+  }
+
+  @Override
+  public void didRespond(HttpResponse<Object> response) {
+    this.link.linkContext().didRespondUp(response);
+  }
+
 }

@@ -203,22 +203,22 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
   @SuppressWarnings("unchecked")
   @Override
   public Decoder<Object> contentDecoder(HttpRequest<?> request) {
-    return this.linkContext.decodeRequest(request);
+    return this.linkContext.decodeRequestUp(request);
   }
 
   @Override
   public void willRequest(HttpRequest<?> request) {
-    this.linkContext.willRequest(request);
+    this.linkContext.willRequestUp(request);
   }
 
   @Override
   public void didRequest(HttpRequest<Object> request) {
-    this.linkContext.didRequest(request);
+    this.linkContext.didRequestUp(request);
   }
 
   @Override
   public void doRespond(HttpRequest<Object> request) {
-    this.linkContext.doRespond(request);
+    this.linkContext.doRespondUp(request);
   }
 
   @Override
@@ -227,13 +227,43 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
   }
 
   @Override
+  public Decoder<Object> decodeResponseDown(HttpResponse<?> response) {
+    return response.contentDecoder();
+  }
+
+  @Override
+  public void willRequestDown(HttpRequest<?> request) {
+    // noop
+  }
+
+  @Override
+  public void didRequestDown(HttpRequest<Object> request) {
+    // noop
+  }
+
+  @Override
+  public void doRespondDown(HttpRequest<Object> request) {
+    // noop
+  }
+
+  @Override
+  public void willRespondDown(HttpResponse<?> response) {
+    // noop
+  }
+
+  @Override
+  public void didRespondDown(HttpResponse<?> response) {
+    // noop
+  }
+
+  @Override
   public void willRespond(HttpResponse<?> response) {
-    this.linkContext.willRespond(response);
+    this.linkContext.willRespondUp(response);
   }
 
   @Override
   public void didRespond(HttpResponse<?> response) {
-    this.linkContext.didRespond(response);
+    this.linkContext.didRespondUp(response);
   }
 
   @Override
