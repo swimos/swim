@@ -201,13 +201,11 @@ final class RemoteHttpHostClientBinding extends AbstractHttpClient {
 
   @Override
   public void willConnect() {
-    System.out.println("RemoteHttpHostClientBinding willConnect");
     super.willConnect();
   }
 
   @Override
   public void didConnect() {
-    System.out.println("RemoteHttpHostClientBinding didConnect");
     final RemoteHttpUplink remoteHttpUplink = new RemoteHttpUplink(remoteHttpHostClient, link);
     this.link.setLinkContext(remoteHttpUplink);
     super.didConnect();

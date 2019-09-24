@@ -83,7 +83,12 @@ public abstract class HttpDownlinkView<V> extends DownlinkView implements HttpDo
 
   @Override
   public HttpDownlink<V> request(HttpRequest<V> request) {
-    this.request = request;
+    if (request.getHeader(Host.class) == null) {
+      this.request = request.appendedHeader(Host.from(request.uri().authority()));
+    } else {
+      this.request = request;
+    }
+    this.hostUri = Uri.empty().scheme(request.uri().scheme()).authority(request.uri().authority());
     return this;
   }
 
