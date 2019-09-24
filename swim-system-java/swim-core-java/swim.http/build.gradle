@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
-description = 'HTTP wire protocol model, decoders, and encoders'
+description = 'HTTP message model and wire protocol codec that incrementally decodes and encodes HTTP streams without intermediate buffering'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.http'
 ext.moduleName = 'swim.http'
 
 dependencies {

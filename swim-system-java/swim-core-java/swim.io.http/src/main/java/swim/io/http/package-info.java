@@ -13,6 +13,8 @@
 // limitations under the License.
 
 /**
- * Flow-controlled HTTP I/O library.
+ * HTTP client and server socket modems for pipelining and concurrently
+ * transporting explicitly flow-controlled HTTP streams over a network
+ * without blocking or intermediate buffering.
  */
 package swim.io.http;

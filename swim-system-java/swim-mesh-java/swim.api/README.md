@@ -1,3 +1,3 @@
-# swim.api
+# swim-api
 
 Agent programming interface.

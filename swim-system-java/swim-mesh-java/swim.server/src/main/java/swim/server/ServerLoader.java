@@ -15,11 +15,11 @@
 package swim.server;
 
 import java.io.IOException;
+import swim.actor.ActorKernel;
 import swim.api.service.ServiceDef;
 import swim.api.service.ServiceFactory;
 import swim.api.space.SpaceDef;
 import swim.auth.AuthenticatorKernel;
-import swim.fabric.FabricKernel;
 import swim.java.JavaKernel;
 import swim.kernel.BootKernel;
 import swim.kernel.Kernel;
@@ -28,6 +28,7 @@ import swim.kernel.KernelLoader;
 import swim.remote.RemoteKernel;
 import swim.service.ServiceKernel;
 import swim.service.web.WebServiceKernel;
+import swim.store.db.DbStoreKernel;
 import swim.store.mem.MemStoreKernel;
 import swim.structure.Item;
 import swim.structure.Value;
@@ -82,6 +83,9 @@ public final class ServerLoader {
     if (kernel.unwrapKernel(MemStoreKernel.class) == null) {
       kernel = kernel.injectKernel(new MemStoreKernel());
     }
+    if (kernel.unwrapKernel(DbStoreKernel.class) == null) {
+      kernel = kernel.injectKernel(new DbStoreKernel());
+    }
     if (kernel.unwrapKernel(RemoteKernel.class) == null) {
       kernel = kernel.injectKernel(new RemoteKernel());
     }
@@ -94,8 +98,8 @@ public final class ServerLoader {
     if (kernel.unwrapKernel(AuthenticatorKernel.class) == null) {
       kernel = kernel.injectKernel(new AuthenticatorKernel());
     }
-    if (kernel.unwrapKernel(FabricKernel.class) == null) {
-      kernel = kernel.injectKernel(new FabricKernel());
+    if (kernel.unwrapKernel(ActorKernel.class) == null) {
+      kernel = kernel.injectKernel(new ActorKernel());
     }
     if (kernel.unwrapKernel(JavaKernel.class) == null) {
       kernel = kernel.injectKernel(new JavaKernel());

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 /**
- * Dynamic structured data model.
+ * Compiler from <strong>swim-structure</strong> expressions to live-updated
+ * data models.
  */
 package swim.dataflow;

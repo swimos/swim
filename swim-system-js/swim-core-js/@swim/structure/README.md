@@ -11,8 +11,7 @@ with JSON, XML, and many other data languages.  **@swim/structure** has first
 class support for XPath/JSONPath-style selectors, as well as operator syntax
 trees, and lambda functions.  **@swim/structure** is written in TypeScript, but
 can be used from either TypeScript or JavaScript.  **@swim/structure** is part
-of the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
-framework.
+of the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core) framework.
 
 ## Overview
 

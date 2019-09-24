@@ -15,12 +15,12 @@
 package swim.server;
 
 import org.testng.annotations.Test;
+import swim.actor.ActorSpaceDef;
 import swim.api.SwimAgent;
 import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
 import swim.api.agent.AgentRoute;
 import swim.api.plane.AbstractPlane;
-import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
 import swim.uri.Uri;
 import static org.testng.Assert.assertEquals;
@@ -41,7 +41,7 @@ public class ServerKernelSpec {
   public void testAgentRouteReflection() {
     final Kernel kernel = ServerLoader.loadServerStack();
 
-    final TestPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
                                   .openPlane("test", TestPlane.class);
     assertNotNull(plane);
 

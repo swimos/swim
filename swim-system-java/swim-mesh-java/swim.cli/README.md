@@ -1,3 +1,3 @@
-# swim.cli
+# swim-cli
 
 Swim Command Line Interface.

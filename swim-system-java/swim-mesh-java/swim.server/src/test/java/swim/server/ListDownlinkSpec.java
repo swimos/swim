@@ -17,6 +17,7 @@ package swim.server;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
+import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
 import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
@@ -27,7 +28,6 @@ import swim.api.plane.AbstractPlane;
 import swim.api.warp.function.DidReceive;
 import swim.api.warp.function.WillReceive;
 import swim.codec.Format;
-import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
@@ -61,7 +61,7 @@ public class ListDownlinkSpec {
   @Test
   public void testInsert() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestListPlane.class);
 
     final CountDownLatch linkDidReceive = new CountDownLatch(3);
@@ -140,7 +140,7 @@ public class ListDownlinkSpec {
   @Test
   public void testUpdate() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestListPlane.class);
 
     final CountDownLatch linkDidReceiveLower = new CountDownLatch(3);
@@ -240,7 +240,7 @@ public class ListDownlinkSpec {
   @Test
   public void testMove() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestListPlane.class);
 
     final CountDownLatch linkDidUpdate = new CountDownLatch(6);
@@ -332,7 +332,7 @@ public class ListDownlinkSpec {
   @Test
   public void testRemove() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestListPlane.class);
 
     final CountDownLatch linkDidUpdate = new CountDownLatch(6);
@@ -419,7 +419,7 @@ public class ListDownlinkSpec {
   @Test
   public void testDrop() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestListPlane.class);
     final int total = 5;
     final CountDownLatch didUpdate = new CountDownLatch(2 * total);
@@ -514,7 +514,7 @@ public class ListDownlinkSpec {
   @Test
   public void testTake() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestListPlane.class);
     final int total = 5;
     final CountDownLatch didUpdate = new CountDownLatch(2 * total);
@@ -606,7 +606,7 @@ public class ListDownlinkSpec {
   @Test
   public void testClear() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestListPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestListPlane.class);
     final int total = 3;
     final CountDownLatch didUpdate = new CountDownLatch(2 * total);

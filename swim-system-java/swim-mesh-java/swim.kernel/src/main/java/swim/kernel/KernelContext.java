@@ -61,6 +61,8 @@ import swim.structure.Item;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Log;
+import swim.web.WebRequest;
+import swim.web.WebResponse;
 
 public interface KernelContext extends Kernel, IpInterface, Log {
   KernelBinding kernelWrapper();
@@ -153,6 +155,8 @@ public interface KernelContext extends Kernel, IpInterface, Log {
   Policy openServicePolicy(String serviceName);
 
   Stage openServiceStage(String serviceName);
+
+  WebResponse routeRequest(WebRequest request);
 
   @Override
   Space getSpace(String spaceName);

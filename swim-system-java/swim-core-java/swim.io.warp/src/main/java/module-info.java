@@ -13,7 +13,9 @@
 // limitations under the License.
 
 /**
- * Flow-controlled Web Agent I/O library.
+ * WARP socket modem for multiplexing and concurrently transporting
+ * prioritized explicitly flow-controlled WARP treams over a network,
+ * without blocking or intermediate buffering.
  */
 module swim.io.warp {
   requires swim.util;

@@ -2,7 +2,7 @@
   "name": "@swim/app",
   "version": "3.10.1",
   "description": "Lightweight application loader that dynamically instantiates views and controllers declared by HTML attributes",
-  "homepage": "https://github.com/swimos/swim",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/app",
   "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2019 SWIM.AI inc.",
   "license": "Apache-2.0",

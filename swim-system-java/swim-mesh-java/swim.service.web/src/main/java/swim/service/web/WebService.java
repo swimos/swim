@@ -29,17 +29,21 @@ import swim.io.http.HttpServiceContext;
 import swim.io.http.HttpSettings;
 import swim.io.warp.WarpSettings;
 import swim.kernel.KernelContext;
+import swim.web.WebRoute;
 
 public class WebService implements Service, HttpService, HttpInterface {
   final KernelContext kernel;
   final ServiceContext serviceContext;
   final WebServiceDef serviceDef;
+  WebRoute router;
   HttpServiceContext httpServiceContext;
 
-  public WebService(KernelContext kernel, ServiceContext serviceContext, WebServiceDef serviceDef) {
+  public WebService(KernelContext kernel, ServiceContext serviceContext,
+                    WebServiceDef serviceDef, WebRoute router) {
     this.kernel = kernel;
     this.serviceContext = serviceContext;
     this.serviceDef = serviceDef;
+    this.router = router;
   }
 
   public final KernelContext kernel() {
@@ -63,6 +67,15 @@ public class WebService implements Service, HttpService, HttpInterface {
 
   public final WebServiceDef serviceDef() {
     return this.serviceDef;
+  }
+
+  public final WebRoute router() {
+    return this.router;
+  }
+
+  public WebService router(WebRoute router) {
+    this.router = router;
+    return this;
   }
 
   @Override
@@ -101,7 +114,7 @@ public class WebService implements Service, HttpService, HttpInterface {
 
   @Override
   public HttpServer createServer() {
-    return new WebServer(this.kernel, this.serviceDef);
+    return new WebServer(this.kernel, this.serviceDef, this.router);
   }
 
   @Override

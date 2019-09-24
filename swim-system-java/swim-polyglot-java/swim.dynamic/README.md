@@ -1,3 +1,3 @@
-# swim.dynamic
+# swim-dynamic
 
 Language binding interfaces.

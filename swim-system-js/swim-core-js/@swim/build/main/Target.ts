@@ -49,6 +49,7 @@ export class Target {
 
   readonly compilerOptions: ts.CompilerOptions;
   readonly lintConfig: tslint.Configuration.IConfigurationFile;
+  readonly emittedSourceFiles: ts.SourceFile[];
   program: ts.Program | undefined;
 
   selected: boolean;
@@ -74,6 +75,7 @@ export class Target {
 
     this.compilerOptions = config.compilerOptions || this.project.compilerOptions;
     this.lintConfig = tslint.Configuration.findConfiguration(null, this.baseDir).results!;
+    this.emittedSourceFiles = [];
 
     this.selected = false;
     this.watching = false;
@@ -82,6 +84,11 @@ export class Target {
     this.redoc = false;
 
     this.compileStart = 0;
+    this.createWatchProgram = this.createWatchProgram.bind(this);
+    this.onCompileUpdate = this.onCompileUpdate.bind(this);
+    this.onCompileResult = this.onCompileResult.bind(this);
+    this.onCompileError = this.onCompileError.bind(this);
+
     this.bundleTimer = 0;
     this.bundle = this.bundle.bind(this);
     this.onBundleWarning = this.onBundleWarning.bind(this);
@@ -156,52 +163,81 @@ export class Target {
     // stub
   }
 
+  protected canCompile(): boolean {
+    let targets = [] as Target[];
+    for (let i = 0; i < this.deps.length; i += 1) {
+      targets = this.deps[i].transitiveDeps(targets);
+    }
+    for (let i = 0; i < targets.length; i += 1) {
+      const target = targets[i];
+      if (target.failed) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   compile(): Promise<unknown> {
-    const output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.greenBold(output);
-    output.write("compiling");
-    OutputStyle.reset(output);
-    output.write(" ");
-    OutputStyle.yellow(output);
-    output.write(this.uid);
-    OutputStyle.reset(output);
-    console.log(output.bind());
+    if (this.canCompile()) {
+      const output = Unicode.stringOutput(OutputSettings.styled());
+      OutputStyle.greenBold(output);
+      output.write("compiling");
+      OutputStyle.reset(output);
+      output.write(" ");
+      OutputStyle.yellow(output);
+      output.write(this.uid);
+      OutputStyle.reset(output);
+      console.log(output.bind());
 
-    const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
-    const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
-    const projectReferences = this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
-    this.injectCompilerOptions(commandLine.options);
+      const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
+      const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
+      const projectReferences = this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
+      this.injectCompilerOptions(commandLine.options);
 
-    this.program = ts.createProgram({
-      rootNames: commandLine.fileNames,
-      options: commandLine.options,
-      projectReferences: projectReferences,
-      configFileParsingDiagnostics: commandLine.errors,
-    });
-    this.compileStart = Date.now();
+      const incrementalProgram = ts.createIncrementalProgram<ts.EmitAndSemanticDiagnosticsBuilderProgram>({
+        rootNames: commandLine.fileNames,
+        options: commandLine.options,
+        projectReferences: projectReferences,
+        configFileParsingDiagnostics: commandLine.errors,
+      });
+      this.program = incrementalProgram.getProgram();
+      this.compileStart = Date.now();
 
-    const emitResult = this.program.emit();
-    const diagnostics = ts.getPreEmitDiagnostics(this.program).concat(emitResult.diagnostics);
-    for (let i = 0; i < diagnostics.length; i += 1) {
-      const diagnostic = diagnostics[i];
-      if (diagnostic.category !== ts.DiagnosticCategory.Message) {
-        this.onCompileError(diagnostics[i]);
+      let nextDiagnostic: ts.AffectedFileResult<ReadonlyArray<ts.Diagnostic>>;
+      while (nextDiagnostic = incrementalProgram.getSemanticDiagnosticsOfNextAffectedFile()) {
+        const diagnostics = nextDiagnostic.result;
+        for (let i = 0; i < diagnostics.length; i += 1) {
+          const diagnostic = diagnostics[i];
+          if (diagnostic.category !== ts.DiagnosticCategory.Message) {
+            this.onCompileError(diagnostics[i]);
+          }
+        }
       }
-    }
 
-    if (!this.failed) {
-      this.lint();
-    }
-
-    if (!this.failed) {
-      this.onCompileSuccess();
-      if (this.selected) {
-        return this.bundle();
+      if (!this.failed) {
+        let nextEmit: ts.AffectedFileResult<ts.EmitResult>;
+        while (nextEmit = incrementalProgram.emitNextAffectedFile()) {
+          if ((nextEmit.affected as ts.SourceFile).kind === ts.SyntaxKind.SourceFile) {
+            const sourceFile = nextEmit.affected as ts.SourceFile;
+            this.onEmitSourceFile(sourceFile);
+          }
+        }
       }
-    } else {
-      this.onCompileFailure();
+
+      if (!this.failed) {
+        this.lint();
+      }
+      this.emittedSourceFiles.length = 0;
+      if (!this.failed) {
+        this.onCompileSuccess();
+        if (this.selected) {
+          return this.bundle();
+        }
+      } else {
+        this.onCompileFailure();
+      }
+      this.program = void 0;
     }
-    this.program = void 0;
     return Promise.resolve(void 0);
   }
 
@@ -221,59 +257,90 @@ export class Target {
     const projectReferences = this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
     this.injectCompilerOptions(commandLine.options);
 
-    const host = ts.createWatchCompilerHost(commandLine.fileNames, commandLine.options, ts.sys,
-                                            this.createWatchProgram.bind(this) as any,
-                                            this.onCompileError.bind(this),
-                                            this.onCompileResult.bind(this),
-                                            projectReferences);
+    const rootNames = projectReferences.map(ref => ref.path);
+    rootNames.push(this.baseDir);
+    const solutionBuilderHost = ts.createSolutionBuilderWithWatchHost(ts.sys, this.createWatchProgram, this.onCompileError,
+                                                                      this.onCompileUpdate, this.onCompileResult);
+    const solutionBuilder = ts.createSolutionBuilderWithWatch(solutionBuilderHost, rootNames, {incremental: true, watch: true});
 
     this.watching = true;
-    ts.createWatchProgram(host);
+    solutionBuilder.build();
   }
 
-  private createWatchProgram(...args: unknown[]): ts.EmitAndSemanticDiagnosticsBuilderProgram {
-    const watchProgram = ts.createEmitAndSemanticDiagnosticsBuilderProgram.apply(ts, arguments);
+  private createWatchProgram(rootNames: ReadonlyArray<string>,
+                             options: ts.CompilerOptions,
+                             host?: ts.CompilerHost,
+                             oldProgram?: ts.EmitAndSemanticDiagnosticsBuilderProgram,
+                             configFileParsingDiagnostics?: ReadonlyArray<ts.Diagnostic>,
+                             projectReferences?: ReadonlyArray<ts.ProjectReference>): ts.EmitAndSemanticDiagnosticsBuilderProgram {
+    projectReferences = this.injectProjectReferences(projectReferences, options);
+    const watchProgram = ts.createEmitAndSemanticDiagnosticsBuilderProgram(rootNames, options, host, oldProgram,
+                                                                           configFileParsingDiagnostics, projectReferences);
     this.program = watchProgram.getProgram();
+    const emit = this.program.emit;
+    this.program.emit = function (this: Target, targetSourceFile?: ts.SourceFile, writeFile?: ts.WriteFileCallback, cancellationToken?: ts.CancellationToken, emitOnlyDtsFiles?: boolean, customTransformers?: ts.CustomTransformers): ts.EmitResult {
+      this.onEmitSourceFile(targetSourceFile!);
+      return emit.call(this.program, targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers);
+    }.bind(this);
     return watchProgram;
   }
 
-  protected onCompileResult(status: ts.Diagnostic) {
-    if (status.code === 6031) {
-      // watching
-      this.failed = false;
-      this.compileStart = Date.now();
-    } else if (status.code === 6032) {
-      // change detected
-      this.failed = false;
-      this.compileStart = Date.now();
-      const output = Unicode.stringOutput(OutputSettings.styled());
-      OutputStyle.greenBold(output);
-      output.write("recompiling");
-      OutputStyle.reset(output);
-      output.write(" ");
-      OutputStyle.yellow(output);
-      output.write(this.uid);
-      OutputStyle.reset(output);
-      console.log(output.bind());
-    } else if (status.code === 6194) {
-      // complete
-      if (!this.failed) {
-        this.lint();
-      }
-      if (!this.failed) {
-        this.onCompileSuccess();
-        if (this.selected) {
-          this.throttleBundle();
-        }
-      } else {
-        this.onCompileFailure();
-      }
-    } else {
-      this.onCompileError(status);
+  protected onEmitSourceFile(sourceFile: ts.SourceFile): void {
+    if (this.program && !this.program.isSourceFileFromExternalLibrary(sourceFile)
+        && !this.program.isSourceFileDefaultLibrary(sourceFile)
+        && sourceFile.fileName.indexOf(".d.ts") < 0
+        && this.emittedSourceFiles.indexOf(sourceFile) < 0) {
+      this.emittedSourceFiles.push(sourceFile);
     }
   }
 
+  protected onCompileResult(status: ts.Diagnostic) {
+    if (this.canCompile()) {
+      if (status.code === 6031) {
+        // watching
+        this.failed = false;
+        this.compileStart = Date.now();
+      } else if (status.code === 6032) {
+        // change detected
+        this.failed = false;
+        this.compileStart = Date.now();
+        const output = Unicode.stringOutput(OutputSettings.styled());
+        OutputStyle.greenBold(output);
+        output.write("recompiling");
+        OutputStyle.reset(output);
+        output.write(" ");
+        OutputStyle.yellow(output);
+        output.write(this.uid);
+        OutputStyle.reset(output);
+        console.log(output.bind());
+      } else if (status.code === 6194) {
+        // complete
+        if (!this.failed) {
+          this.lint();
+        }
+        this.emittedSourceFiles.length = 0;
+        if (!this.failed) {
+          this.onCompileSuccess();
+          if (this.selected) {
+            this.throttleBundle();
+          }
+        } else {
+          this.onCompileFailure();
+        }
+      } else {
+        this.onCompileError(status);
+      }
+    }
+  }
+
+  protected onCompileUpdate(status: ts.Diagnostic) {
+    // stub
+  }
+
   protected onCompileError(error: ts.Diagnostic): void {
+    if (error.code === 6377) {
+      return; // Suppress .tsbuildinfo file overwrite error.
+    }
     let message = error.messageText;
     if (typeof message !== "string") {
       message = message.messageText;
@@ -350,13 +417,9 @@ export class Target {
   }
 
   protected lint(): void {
-    const options = {
-      fix: false,
-    };
-    const linter = new tslint.Linter(options, this.program);
-    const fileNames = this.program!.getRootFileNames();
-    for (let i = 0; i < fileNames.length; i += 1) {
-      const sourceFile = this.program!.getSourceFile(fileNames[i])!;
+    const linter = new tslint.Linter({fix: false}, this.program);
+    for (let i = 0; i < this.emittedSourceFiles.length; i += 1) {
+      const sourceFile = this.emittedSourceFiles[i];
       linter.lint(sourceFile.fileName, sourceFile.text, this.lintConfig);
     }
     this.onLintResult(linter.getResult());

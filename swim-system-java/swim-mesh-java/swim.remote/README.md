@@ -1,3 +1,3 @@
-# swim.remote
+# swim-remote
 
 Web Agent remote router.

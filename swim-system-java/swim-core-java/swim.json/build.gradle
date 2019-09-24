@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
-description = 'JavaScript Object Notation (JSON) codec'
+description = 'JavaScript Object Notation (JSON) codec that incrementally parses and writes swim-structure values'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.json'
 ext.moduleName = 'swim.json'
 
 dependencies {

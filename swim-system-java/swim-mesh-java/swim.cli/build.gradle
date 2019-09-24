@@ -2,18 +2,18 @@ apply from: '../project.gradle'
 apply plugin: 'application'
 
 description = 'Swim Command Line Interface'
-ext.moduleName = 'swim.cli'
 mainClassName = 'swim.cli.Main'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.cli'
+ext.moduleName = 'swim.cli'
 
 dependencies {
   api group: 'org.swimos', name: 'swim-args', version: version
   api group: 'org.swimos', name: 'swim-recon', version: version
   api group: 'org.swimos', name: 'swim-json', version: version
   api project(':swim-client')
-}
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+  implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.62'
+}
 
 afterEvaluate {
   def javaHome = System.getenv('JAVA_HOME')
@@ -21,21 +21,26 @@ afterEvaluate {
   task nativeImage(type: Exec) {
     dependsOn 'jar'
 
-    workingDir project.projectDir
+    def outDir = "${buildDir}/native"
+    doFirst {
+      mkdir outDir
+    }
 
+    workingDir project.projectDir
     commandLine "${javaHome}/bin/native-image",
                 '-cp', sourceSets.main.runtimeClasspath.asPath,
-                "-H:Path=${buildDir}/graal",
+                "-H:Path=${outDir}",
                 "-H:Name=${project.name}",
                 '--no-server',
                 '--no-fallback',
                 '--initialize-at-build-time',
                 '--enable-all-security-services',
+                '--initialize-at-run-time=org.bouncycastle.crypto.prng.SP800SecureRandom,org.bouncycastle.jcajce.provider.drbg.DRBG$Default,org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV',
+                '-J-Djava.security.properties=java.security.overrides',
                 "${mainClassName}"
   }
 
-  task link(type: Exec) {
-    dependsOn 'clean'
+  task jlink(type: Exec) {
     dependsOn 'jar'
 
     workingDir project.projectDir

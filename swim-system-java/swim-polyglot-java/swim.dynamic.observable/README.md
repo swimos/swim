@@ -1,3 +1,3 @@
-# swim.dynamic.observable
+# swim-dynamic-observable
 
 swim.observable dynamic language bindings.

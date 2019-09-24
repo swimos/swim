@@ -1,3 +1,3 @@
-# swim.js
+# swim-js
 
 JavaScript kernel runtime.

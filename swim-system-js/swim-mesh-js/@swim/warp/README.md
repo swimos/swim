@@ -7,11 +7,10 @@
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/warp** implements the WARP WebSocket protocol for dynamically
-multiplexing large numbers of bidirectional links to streaming APIs, called
-lanes, of URI-addressed distributed objects, called nodes, that run stateful
-distributed processes, called Web Agents.  **@swim/warp** is part of the
-[**@swim/mesh**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/mesh)
-framework.
+multiplexing large numbers of bidirectional links to streaming API endpoints,
+called lanes, of URI-addressed distributed objects, called nodes, that run
+stateful distributed processes, called Web Agents.  **@swim/warp** is part of
+the [**@swim/mesh**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/mesh) framework.
 
 ## Protocol overview
 
@@ -27,7 +26,7 @@ technologies.  To facilitate human understanding of the protocol and its
 operation, the first version of WARP is text-based.  To avoid the explosion
 of grammars found in other human-readable protocols, like HTTP, and to aid
 extensibility, WARP protocol envelopes are defined as a set of structurally
-typed [`Recon`](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/recon) records.
+typed [**Recon**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/recon) records.
 
 The second most important design goal for WARP is to support efficient
 multiplexing of extremely large numbers of links.  WARP scales to many millions

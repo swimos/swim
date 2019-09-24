@@ -50,6 +50,8 @@ import swim.runtime.lane.SpatialLaneView;
 import swim.runtime.lane.SupplyLaneView;
 import swim.runtime.lane.ValueLaneView;
 import swim.structure.Form;
+import swim.structure.Text;
+import swim.structure.Value;
 import swim.uri.Uri;
 
 public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
@@ -85,6 +87,16 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
     final A agent = constructAgent(agentContext);
     reflectLaneFields(this.agentClass, agentContext, agent);
     return agent;
+  }
+
+  @Override
+  public Value id(Uri nodeUri) {
+    final JavaAgentDef agentDef = this.agentDef;
+    if (agentDef != null) {
+      return this.agentDef.id();
+    } else {
+      return Text.from(this.agentClass.getName());
+    }
   }
 
   protected A constructAgent(AgentContext agentContext) {

@@ -17,6 +17,7 @@ package swim.server;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
+import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
 import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
@@ -29,7 +30,6 @@ import swim.api.http.function.WillRequestHttp;
 import swim.api.http.function.WillRespondHttp;
 import swim.api.plane.AbstractPlane;
 import swim.codec.Format;
-import swim.fabric.FabricDef;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
@@ -82,7 +82,7 @@ public class HttpLaneSpec {
   @Test
   public void testLinkToValueLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestHttpPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestHttpPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
                                        .openPlane("test", TestHttpPlane.class);
 
     final CountDownLatch clientRequest = new CountDownLatch(1);

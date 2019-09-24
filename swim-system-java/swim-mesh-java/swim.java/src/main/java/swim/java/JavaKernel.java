@@ -26,6 +26,7 @@ import swim.api.plane.PlaneFactory;
 import swim.kernel.KernelContext;
 import swim.kernel.KernelProxy;
 import swim.structure.Item;
+import swim.structure.Text;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -114,9 +115,12 @@ public class JavaKernel extends KernelProxy {
     if (header.isDefined()) {
       final String agentClassName = header.get("class").stringValue(null);
       if (agentClassName != null) {
-        final String agentName = agentConfig.key().stringValue(agentClassName);
-        final Value props = value.get("props");
-        return new JavaAgentDef(agentName, agentClassName, props);
+        Value id = agentConfig.key();
+        if (!id.isDefined()) {
+          id = Text.from(agentClassName);
+        }
+        final Value props = value.removed("agent");
+        return new JavaAgentDef(agentClassName, id, props);
       }
     }
     return null;

@@ -13,7 +13,9 @@
 // limitations under the License.
 
 /**
- * Mathematical and geometric structures.
+ * Mathematical and geometric structures, including rings, fields, vector
+ * modules and spaces, affine spaces, tensor spaces, probability distributions,
+ * and associated operators.
  */
 module swim.math {
   requires swim.util;

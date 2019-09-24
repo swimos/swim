@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Swim authenticator runtime'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.auth'
 ext.moduleName = 'swim.auth'
 
 dependencies {

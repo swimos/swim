@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
-description = 'Flow-controlled WebSocket I/O library'
+description = 'WebSocket modem for concurrently transporting explicitly flow-controlled WebSocket streams over a network without blocking or intermediate buffering, and swim-io-http requesters and responders for upgrading HTTP client and server modems to WebSocket modems'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.io.ws'
 ext.moduleName = 'swim.io.ws'
 
 dependencies {

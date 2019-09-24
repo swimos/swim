@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * Immutable, structure sharing collections.
+ * Immutable, structure sharing collections, including hash array mapped tries,
+ * finger tries, B-trees, and S-trees (sequence trees).
  */
 module swim.collections {
   requires transitive swim.util;

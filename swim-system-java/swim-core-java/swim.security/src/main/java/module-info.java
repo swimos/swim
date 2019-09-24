@@ -13,7 +13,9 @@
 // limitations under the License.
 
 /**
- * Cryptographic security model.
+ * Signing and encryption of <strong>swim-structure</strong> values using the
+ * JSON Web Key (JWK), JSON Web Signature (JWS), JSON Web Token (JWT), and
+ * OpenID standards.
  */
 module swim.security {
   requires swim.util;

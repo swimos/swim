@@ -7,11 +7,10 @@
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **@swim/collections** implements data structures for key-value maps and
-sequential lists, including B-tree and S-tree (implicitly indexed B-tree)
-implementations.  **@swim/collections** is written in TypeScript, but can be
-used from either TypeScript or JavaScript.  **@swim/collections** is part of
-the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
-framework.
+sequential lists, including B-trees and S-trees (implicitly indexed B-tree).
+**@swim/collections** is written in TypeScript, but can be used from either
+TypeScript or JavaScript.  **@swim/collections** is part of the
+[**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core) framework.
 
 ## Overview
 

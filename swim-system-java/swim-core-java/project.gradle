@@ -1,15 +1,28 @@
 apply plugin: 'java-library'
 apply plugin: 'checkstyle'
 apply plugin: 'signing'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 group = 'org.swimos'
 version = project.property('swim.version')
+ext.homepage = 'https://github.com/swimos/swim'
 ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
 ext.compilerArgs = ['-Xlint:all']
 
 repositories {
   mavenCentral()
+  maven {
+    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+  }
+  if (project.hasProperty('githubUsername') && project.hasProperty('githubPassword')) {
+    maven {
+      url 'https://maven.pkg.github.com/swimos'
+      credentials {
+        username githubUsername
+        password githubPassword
+      }
+    }
+  }
 }
 
 afterEvaluate {
@@ -167,54 +180,68 @@ afterEvaluate {
     args '--class-path', sourceSets.main.compileClasspath.asPath
     standardInput = System.in
   }
-}
 
-if (project.hasProperty('nexusUsername') && project.hasProperty('nexusPassword')) {
-  signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask('uploadArchives') }
-    sign configurations.archives
-  }
+  publishing {
+    publications {
+      mavenJava(MavenPublication) {
+        from components.java
+        artifact sourcesJar
+        artifact javadocJar
 
-  uploadArchives {
-    repositories {
-      mavenDeployer {
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
-          authentication(userName: nexusUsername, password: nexusPassword)
-        }
-
-        snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
-          authentication(userName: nexusUsername, password: nexusPassword)
-        }
-
-        pom.project {
-          name "${name}"
-          packaging 'jar'
-          description "${description}"
-          url 'https://github.com/swimos/swim'
-
-          scm {
-            connection 'scm:git:git@github.com:swimos/swim.git'
-            url 'git@github.com:swimos/swim.git'
-          }
-
+        pom {
+          name = "${project.name}"
+          description = "${project.description}"
+          url = "${project.homepage}"
           licenses {
             license {
-              name 'The Apache Software License, Version 2.0'
-              url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+              name = 'The Apache Software License, Version 2.0'
+              url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
             }
           }
-
           developers {
             developer {
-              id 'c9r'
-              name 'Chris Sachs'
-              email 'chris@swimos.org'
+              id = 'c9r'
+              name = 'Chris Sachs'
+              email = 'chris@swimos.org'
             }
+          }
+          scm {
+            url = 'https://github.com/swimos/swim'
+            connection = 'scm:git:https://github.com/swimos/swim.git'
+            developerConnection = 'scm:git:git@github.com:swimos/swim.git'
           }
         }
       }
     }
+
+    repositories {
+      if (project.hasProperty('swimOSUsername') && project.hasProperty('swimOSPassword')) {
+        maven {
+          def releasesRepositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+          def snapshotsRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+          name = 'Sonatype'
+          url = isReleaseVersion ? releasesRepositoryUrl : snapshotsRepositoryUrl
+          credentials {
+            username swimOSUsername
+            password swimOSPassword
+          }
+        }
+      }
+      //if (project.hasProperty('githubUsername') && project.hasProperty('githubPassword')) {
+      //  maven {
+      //    name = 'GitHub'
+      //    url = 'https://maven.pkg.github.com/swimos/swim'
+      //    credentials {
+      //      username githubUsername
+      //      password githubPassword
+      //    }
+      //  }
+      //}
+    }
+  }
+
+  signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask('publish') }
+    sign publishing.publications.mavenJava
   }
 }

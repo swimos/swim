@@ -1,3 +1,3 @@
-# swim.store.mem
+# swim-store-mem
 
 In-memory storage runtime.

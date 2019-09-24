@@ -17,6 +17,7 @@ package swim.server;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
+import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
 import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
@@ -25,7 +26,6 @@ import swim.api.downlink.MapDownlink;
 import swim.api.lane.MapLane;
 import swim.api.plane.AbstractPlane;
 import swim.codec.Format;
-import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
@@ -168,7 +168,7 @@ public class MapLaneSpec {
   @Test
   public void testPut() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     laneWillUpdate = new CountDownLatch(3);
@@ -215,7 +215,7 @@ public class MapLaneSpec {
   @Test
   void testRemove() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     laneDidUpdate = new CountDownLatch(2);
@@ -255,7 +255,7 @@ public class MapLaneSpec {
   @Test
   void testClear() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     laneDidUpdate = new CountDownLatch(2);
@@ -294,7 +294,7 @@ public class MapLaneSpec {
   @Test
   void testDrop() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     laneDidUpdate = new CountDownLatch(5);
@@ -343,7 +343,7 @@ public class MapLaneSpec {
   @Test
   void testTake() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     laneDidUpdate = new CountDownLatch(5);

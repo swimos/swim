@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
+import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
 import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
@@ -33,7 +34,6 @@ import swim.api.warp.function.DidSync;
 import swim.api.warp.function.WillReceive;
 import swim.codec.Format;
 import swim.collections.HashTrieMap;
-import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
@@ -71,7 +71,7 @@ public class MapDownlinkSpec {
   @Test
   public void testPut() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     final CountDownLatch linkWillReceive = new CountDownLatch(2);
@@ -162,7 +162,7 @@ public class MapDownlinkSpec {
   @Test
   void testRemove() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     final CountDownLatch didReceive = new CountDownLatch(2);
@@ -257,7 +257,7 @@ public class MapDownlinkSpec {
   @Test
   void testClear() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     final CountDownLatch didReceive = new CountDownLatch(2);
@@ -346,7 +346,7 @@ public class MapDownlinkSpec {
   @Test
   void testDrop() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     final CountDownLatch didReceive = new CountDownLatch(5);
@@ -448,7 +448,7 @@ public class MapDownlinkSpec {
   @Test
   void testTake() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     final CountDownLatch didReceive = new CountDownLatch(5);
@@ -547,7 +547,7 @@ public class MapDownlinkSpec {
   @Test
   public void testLinkMap() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestMapPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestMapPlane.class);
 
     final CountDownLatch didReceive = new CountDownLatch(4);

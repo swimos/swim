@@ -1,0 +1,10 @@
+apply from: '../project.gradle'
+
+description = 'Swim actor runtime'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.actor'
+ext.moduleName = 'swim.actor'
+
+dependencies {
+  api project(':swim-runtime')
+  api project(':swim-kernel')
+}

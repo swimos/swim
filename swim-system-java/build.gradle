@@ -58,6 +58,7 @@ project(':swim-kernel') {
     dependencies {
       implementation project(':swim-recon')
       api project(':swim-io')
+      api project(':swim-web')
     }
   }
 }
@@ -181,53 +182,53 @@ gradle.projectsEvaluated {
     title 'Swim System'
     options.overview = "${projectDir}/overview.html"
     if (useModules) {
-      options.group('System',
+      options.group('Core',
         'swim.args',
         'swim.codec',
         'swim.collections',
         'swim.concurrent',
         'swim.dataflow',
-        'swim.math',
-        'swim.observable',
-        'swim.security',
-        'swim.spatial',
-        'swim.streamlet',
-        'swim.structure',
-        'swim.uri',
-        'swim.util')
-      options.group('Data',
+        'swim.db',
         'swim.decipher',
         'swim.deflate',
-        'swim.json',
-        'swim.protobuf',
-        'swim.recon',
-        'swim.xml')
-      options.group('Network',
         'swim.http',
         'swim.io',
         'swim.io.http',
         'swim.io.mqtt',
         'swim.io.warp',
         'swim.io.ws',
+        'swim.json',
+        'swim.math',
         'swim.mqtt',
+        'swim.observable',
+        'swim.protobuf',
+        'swim.recon',
+        'swim.security',
+        'swim.spatial',
+        'swim.streamlet',
+        'swim.structure',
+        'swim.uri',
+        'swim.util',
         'swim.warp',
         'swim.web',
-        'swim.ws')
-      options.group('Storage',
-        'swim.store',
-        'swim.store.mem')
-      options.group('Runtime',
+        'swim.ws',
+        'swim.xml')
+      options.group('Mesh',
         'swim.api',
         'swim.auth',
+        'swim.cli',
         'swim.client',
-        'swim.fabric',
+        'swim.actor',
         'swim.java',
         'swim.kernel',
         'swim.remote',
         'swim.runtime',
         'swim.server',
         'swim.service',
-        'swim.service.web')
+        'swim.service.web',
+        'swim.store',
+        'swim.store.db',
+        'swim.store.mem')
       options.group('Polyglot',
         'swim.dynamic',
         'swim.dynamic.api',
@@ -237,8 +238,6 @@ gradle.projectsEvaluated {
         'swim.js',
         'swim.vm',
         'swim.vm.js')
-      options.group('Tools',
-        'swim.cli')
     }
 
     // Google Analytics Tracking Code

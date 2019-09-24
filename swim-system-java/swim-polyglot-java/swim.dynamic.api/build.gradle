@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'swim.api dynamic language bindings'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-polyglot-java/swim.dynamic.api'
 ext.moduleName = 'swim.dynamic.api'
 
 dependencies {

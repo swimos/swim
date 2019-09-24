@@ -2,7 +2,7 @@
   "name": "@swim/ux",
   "version": "3.10.1",
   "description": "Seamlessly animated user interface widgets, including gauges, pie charts, line, area, and bubble charts, and geospatial map overlays",
-  "homepage": "https://github.com/swimos/swim",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ux",
   "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2019 SWIM.AI inc.",
   "license": "Apache-2.0",

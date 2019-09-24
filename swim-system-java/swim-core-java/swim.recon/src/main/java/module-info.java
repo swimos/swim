@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * Record Notation (Recon) codec.
+ * Object notation with attributes, like if JSON and XML had a baby.
  */
 module swim.recon {
   requires swim.util;

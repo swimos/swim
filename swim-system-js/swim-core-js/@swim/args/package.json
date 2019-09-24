@@ -2,7 +2,7 @@
   "name": "@swim/args",
   "version": "3.10.1",
   "description": "Composable command line argument parser",
-  "homepage": "https://github.com/swimos/swim",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/args",
   "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2019 SWIM.AI inc.",
   "license": "Apache-2.0",

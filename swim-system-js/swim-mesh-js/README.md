@@ -21,9 +21,10 @@ The **Swim Mesh** framework consists of the following component libraries:
 - [**@swim/mesh**](@swim/mesh) –
   umbrella package that depends on, and re-exports, all Swim Mesh libraries.
 - [**@swim/warp**](@swim/warp) –
-  WebSocket protocol for dynamically multiplexing large numbers of bidirectional
-  links to streaming APIs, called lanes, of URI-addressed distributed objects,
-  called nodes, that run stateful distributed processes, called Web Agents.
+  WebSocket protocol for dynamically multiplexing large numbers of
+  bidirectional links to streaming API endpoints, called lanes, of
+  URI-addressed distributed objects, called nodes, that run stateful
+  distributed processes, called Web Agents.
 - [**@swim/client**](@swim/client) –
   streaming API client for linking to lanes of stateful Web Agents using the
   WARP protocol, enabling massively real-time applications that continuously

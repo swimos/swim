@@ -1,3 +1,3 @@
-# swim.kernel
+# swim-kernel
 
 Swim kernel runtime.

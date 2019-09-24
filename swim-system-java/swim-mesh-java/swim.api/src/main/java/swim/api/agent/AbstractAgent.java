@@ -241,8 +241,8 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
     return this.context.agents();
   }
 
-  public Agent getAgent(Value props) {
-    return this.context.getAgent(props);
+  public Agent getAgent(Value id) {
+    return this.context.getAgent(id);
   }
 
   public Agent getAgent(String name) {
@@ -253,24 +253,32 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
     return this.context.getAgent(agentClass);
   }
 
-  public <A extends Agent> A addAgent(Value props, AgentFactory<A> agentFactory) {
-    return this.context.addAgent(props, agentFactory);
+  public <A extends Agent> A addAgent(Value id, Value props, AgentFactory<A> agentFactory) {
+    return this.context.addAgent(id, props, agentFactory);
+  }
+
+  public <A extends Agent> A addAgent(Value id, AgentFactory<A> agentFactory) {
+    return this.context.addAgent(id, agentFactory);
   }
 
   public <A extends Agent> A addAgent(String name, AgentFactory<A> agentFactory) {
     return this.context.addAgent(name, agentFactory);
   }
 
-  public <A extends Agent> A addAgent(Value props, Class<A> agentClass) {
-    return this.context.addAgent(props, agentClass);
+  public <A extends Agent> A addAgent(Value id, Value props, Class<A> agentClass) {
+    return this.context.addAgent(id, props, agentClass);
+  }
+
+  public <A extends Agent> A addAgent(Value id, Class<A> agentClass) {
+    return this.context.addAgent(id, agentClass);
   }
 
   public <A extends Agent> A addAgent(String name, Class<A> agentClass) {
     return this.context.addAgent(name, agentClass);
   }
 
-  public void removeAgent(Value props) {
-    this.context.removeAgent(props);
+  public void removeAgent(Value id) {
+    this.context.removeAgent(id);
   }
 
   public void removeAgent(String name) {

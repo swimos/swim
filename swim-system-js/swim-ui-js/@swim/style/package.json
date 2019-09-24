@@ -2,7 +2,7 @@
   "name": "@swim/style",
   "version": "3.10.1",
   "description": "CSS style types and universal style value parser",
-  "homepage": "https://github.com/swimos/swim",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/style",
   "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2019 SWIM.AI inc.",
   "license": "Apache-2.0",

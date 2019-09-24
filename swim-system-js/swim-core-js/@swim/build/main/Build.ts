@@ -86,7 +86,63 @@ export class Build {
     });
   }
 
-  transitiveDeps(specifiers: string[] | string | undefined): Target[] {
+  targets(specifiers: string[] | string | undefined): Target[] {
+    if (specifiers === void 0) {
+      specifiers = Object.keys(this.projects);
+    } else if (typeof specifiers === "string") {
+      specifiers = specifiers.split(",");
+    }
+    let targets: Target[] = [];
+    for (let i = 0; i < specifiers.length; i += 1) {
+      const specifier = specifiers[i];
+      const [projectId, targetId] = specifier.split(":");
+      if (projectId) { // <project>(:<target>)?
+        const project = this.projects[projectId];
+        if (project) {
+          if (targetId) { // <project>:<target>
+            const target = project.targets[targetId];
+            if (target) {
+              target.selected = true;
+              if (targets.indexOf(target) < 0) {
+                targets.push(target);
+              }
+            }
+          } else { // <project>(:?)
+            for (let j = 0; j < project.targetList.length; j += 1) {
+              const target = project.targetList[j];
+              target.selected = true;
+              if (targets.indexOf(target) < 0) {
+                targets.push(target);
+              }
+            }
+          }
+        } else {
+          const output = Unicode.stringOutput(OutputSettings.styled());
+          OutputStyle.redBold(output);
+          output.write("unknown project");
+          OutputStyle.reset(output);
+          output.write(" ");
+          OutputStyle.yellow(output);
+          output.write(projectId);
+          OutputStyle.reset(output);
+          console.log(output.bind());
+        }
+      } else if (targetId) { // :<target>
+        for (let j = 0; j < this.projectList.length; j += 1) {
+          const target = this.projectList[j].targets[targetId];
+          if (target) {
+            target.selected = true;
+            if (targets.indexOf(target) < 0) {
+              targets.push(target);
+            }
+          }
+        }
+      }
+    }
+    return targets;
+  }
+
+  transitiveTargets(specifiers: string[] | string | undefined): Target[] {
     if (specifiers === void 0) {
       specifiers = Object.keys(this.projects);
     } else if (typeof specifiers === "string") {
@@ -140,15 +196,34 @@ export class Build {
                 callback: (target: Target) => Promise<unknown> | void,
                 i: number = 0): Promise<unknown> {
     if (!Array.isArray(targets)) {
-      targets = this.transitiveDeps(targets);
+      targets = this.targets(targets);
     }
     if (i < targets.length) {
       const target = targets[i];
       const result = callback(target);
       if (result) {
-        return result.then(this.forEachTarget.bind(this, targets, callback, i + 1));
+        return result.then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
       } else {
-        return Promise.resolve(void 0).then(this.forEachTarget.bind(this, targets, callback, i + 1));
+        return Promise.resolve(void 0).then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
+      }
+    } else {
+      return Promise.resolve(void 0);
+    }
+  }
+
+  forEachTransitiveTarget(targets: Target[] | string | undefined,
+                          callback: (target: Target) => Promise<unknown> | void,
+                          i: number = 0): Promise<unknown> {
+    if (!Array.isArray(targets)) {
+      targets = this.transitiveTargets(targets);
+    }
+    if (i < targets.length) {
+      const target = targets[i];
+      const result = callback(target);
+      if (result) {
+        return result.then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
+      } else {
+        return Promise.resolve(void 0).then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
       }
     } else {
       return Promise.resolve(void 0);
@@ -208,7 +283,7 @@ export class Build {
 
   printTargets(targets: Target[] | string | undefined): void {
     if (!Array.isArray(targets)) {
-      targets = this.transitiveDeps(targets);
+      targets = this.transitiveTargets(targets);
     }
     const output = Unicode.stringOutput(OutputSettings.styled());
     OutputStyle.greenBold(output);

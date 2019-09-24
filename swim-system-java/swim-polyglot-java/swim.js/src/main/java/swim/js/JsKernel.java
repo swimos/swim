@@ -27,6 +27,7 @@ import swim.dynamic.observable.SwimObservable;
 import swim.dynamic.structure.SwimStructure;
 import swim.kernel.KernelProxy;
 import swim.structure.Item;
+import swim.structure.Text;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriPath;
@@ -218,9 +219,12 @@ public class JsKernel extends KernelProxy {
     if (header.isDefined()) {
       final UriPath agentModulePath = header.get("js").cast(UriPath.pathForm());
       if (agentModulePath != null) {
-        final String agentName = agentConfig.key().stringValue(agentModulePath.toString());
-        final Value props = value.get("props");
-        return new JsAgentDef(agentName, agentModulePath, props);
+        Value id = agentConfig.key();
+        if (!id.isDefined()) {
+          id = Text.from(agentModulePath.toString());
+        }
+        final Value props = value.removed("agent");
+        return new JsAgentDef(agentModulePath, id, props);
       }
     }
     return null;

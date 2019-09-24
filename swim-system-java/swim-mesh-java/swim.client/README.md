@@ -1,3 +1,3 @@
-# swim.client
+# swim-client
 
 Web Agent client runtime.

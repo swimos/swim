@@ -15,14 +15,15 @@
 package swim.server;
 
 import org.testng.annotations.Test;
+import swim.actor.ActorKernel;
 import swim.auth.AuthenticatorKernel;
-import swim.fabric.FabricKernel;
 import swim.java.JavaKernel;
 import swim.kernel.BootKernel;
 import swim.kernel.Kernel;
 import swim.remote.RemoteKernel;
 import swim.service.ServiceKernel;
 import swim.service.web.WebServiceKernel;
+import swim.store.db.DbStoreKernel;
 import swim.store.mem.MemStoreKernel;
 import static org.testng.Assert.assertNotNull;
 
@@ -32,11 +33,12 @@ public class ServerLoaderSpec {
     final Kernel kernel = ServerLoader.loadServerStack();
     assertNotNull(kernel.unwrapKernel(BootKernel.class));
     assertNotNull(kernel.unwrapKernel(MemStoreKernel.class));
+    assertNotNull(kernel.unwrapKernel(DbStoreKernel.class));
     assertNotNull(kernel.unwrapKernel(RemoteKernel.class));
     assertNotNull(kernel.unwrapKernel(ServiceKernel.class));
     assertNotNull(kernel.unwrapKernel(WebServiceKernel.class));
     assertNotNull(kernel.unwrapKernel(AuthenticatorKernel.class));
-    assertNotNull(kernel.unwrapKernel(FabricKernel.class));
+    assertNotNull(kernel.unwrapKernel(ActorKernel.class));
     assertNotNull(kernel.unwrapKernel(JavaKernel.class));
   }
 

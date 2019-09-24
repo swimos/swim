@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * Utility library.
+ * Extended collection, iterator, and builder interfaces, lightweight cache
+ * sets and maps, and other foundational utilities.
  */
 module swim.util {
   exports swim.util;

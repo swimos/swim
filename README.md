@@ -68,35 +68,104 @@ framework, with a lightweight concurrency engine, incremental I/O engine,
 and flow-controlled network protocol implementations.  **Swim Core** consists
 of the following component libraries:
 
-- [**swim.util**](swim-system-java/swim-core-java/swim.util) –
-- [**swim.codec**](swim-system-java/swim-core-java/swim.codec) –
-- [**swim.collections**](swim-system-java/swim-core-java/swim.collections) –
-- [**swim.args**](swim-system-java/swim-core-java/swim.args) –
-- [**swim.structure**](swim-system-java/swim-core-java/swim.structure) –
-- [**swim.recon**](swim-system-java/swim-core-java/swim.recon) –
-- [**swim.json**](swim-system-java/swim-core-java/swim.json) –
-- [**swim.xml**](swim-system-java/swim-core-java/swim.xml) –
-- [**swim.protobuf**](swim-system-java/swim-core-java/swim.protobuf) –
-- [**swim.decipher**](swim-system-java/swim-core-java/swim.decipher) –
-- [**swim.math**](swim-system-java/swim-core-java/swim.math) –
-- [**swim.security**](swim-system-java/swim-core-java/swim.security) –
-- [**swim.spatial**](swim-system-java/swim-core-java/swim.spatial) –
-- [**swim.streamlet**](swim-system-java/swim-core-java/swim.streamlet) –
-- [**swim.dataflow**](swim-system-java/swim-core-java/swim.dataflow) –
-- [**swim.observable**](swim-system-java/swim-core-java/swim.observable) –
-- [**swim.uri**](swim-system-java/swim-core-java/swim.uri) –
-- [**swim.deflate**](swim-system-java/swim-core-java/swim.deflate) –
-- [**swim.mqtt**](swim-system-java/swim-core-java/swim.mqtt) –
-- [**swim.http**](swim-system-java/swim-core-java/swim.http) –
-- [**swim.ws**](swim-system-java/swim-core-java/swim.ws) –
-- [**swim.warp**](swim-system-java/swim-core-java/swim.warp) –
-- [**swim.concurrent**](swim-system-java/swim-core-java/swim.concurrent) –
-- [**swim.io**](swim-system-java/swim-core-java/swim.io) –
-- [**swim.io.mqtt**](swim-system-java/swim-core-java/swim.io.mqtt) –
-- [**swim.io.http**](swim-system-java/swim-core-java/swim.io.http) –
-- [**swim.io.ws**](swim-system-java/swim-core-java/swim.io.ws) –
-- [**swim.io.warp**](swim-system-java/swim-core-java/swim.io.warp) –
-- [**swim.web**](swim-system-java/swim-core-java/swim.web) –
+- [**swim-util**](swim-system-java/swim-core-java/swim.util) –
+  extended collection, iterator, and builder interfaces, lightweight cache
+  sets and maps, and other foundational utilities.
+- [**swim-codec**](swim-system-java/swim-core-java/swim.codec) –
+  incremental I/O; functional parsers and writers; display, debug, and
+  diagnostic formatters; and Unicode and binary codecs.
+- [**swim-collections**](swim-system-java/swim-core-java/swim.collections) –
+  immutable, structure sharing collections, including hash array mapped tries,
+  finger tries, B-trees, and S-trees (sequence trees).
+- [**swim-args**](swim-system-java/swim-core-java/swim.args) –
+  composable command line argument parser.
+- [**swim-structure**](swim-system-java/swim-core-java/swim.structure) –
+  generic structured data model, with support for selectors, expressions,
+  and lambda functions.  Used as a common abstract syntax tree for Recon,
+  JSON, XML, and other data languages.
+- [**swim-recon**](swim-system-java/swim-core-java/swim.recon) –
+  object notation with attributes, like if JSON and XML had a baby.
+- [**swim-json**](swim-system-java/swim-core-java/swim.json) –
+  JavaScript Object Notation (JSON) codec that incrementally parses and writes
+  **swim-structure** values.
+- [**swim-xml**](swim-system-java/swim-core-java/swim.xml) –
+  eXtensible Markup Language (XML) codec that incrementally parses and writes
+  **swim-structure** values.
+- [**swim-protobuf**](swim-system-java/swim-core-java/swim.protobuf) –
+  Protocol Buffers (protobuf) codec that incrementally parses and writes
+  **swim-structure** values.
+- [**swim-decipher**](swim-system-java/swim-core-java/swim.decipher) –
+  universal decoder that detects and incrementally parses Recon, JSON, XML,
+  Protobuf, raw text, and binary data formats as **swim-structure** values.
+- [**swim-math**](swim-system-java/swim-core-java/swim.math) –
+  mathematical and geometric structures, including rings, fields, vector
+  modules and spaces, affine spaces, tensor spaces, probability distributions,
+  and associated operators.
+- [**swim-security**](swim-system-java/swim-core-java/swim.security) –
+  signing and encryption of **swim-structure** values using the JSON Web Key
+  (JWK), JSON Web Signature (JWS), JSON Web Token (JWT), and OpenID standards.
+- [**swim-spatial**](swim-system-java/swim-core-java/swim.spatial) –
+  geospatial projections and spatial collections, including sparse prefix
+  Q-trees optimized for continuous n-body geofencing and real-time spatial
+  clustering and reduction.
+- [**swim-streamlet**](swim-system-java/swim-core-java/swim.streamlet) –
+  stateful, streaming component model for application componets that
+  continuously consume input state from streaming inlets, and continuously
+  produce output state on streaming outlets.
+- [**swim-dataflow**](swim-system-java/swim-core-java/swim.dataflow) –
+  compiler from **swim-structure** expressions to live-updated data models.
+- [**swim-observable**](swim-system-java/swim-core-java/swim.observable) –
+  collection interfaces that notify registered observers of precise state changes.
+- [**swim-uri**](swim-system-java/swim-core-java/swim.uri) –
+  rich object model for working with Uniform Resource Identifiers,
+  URI subcomponents, and URI patterns, including an efficient and
+  safe codec for parsing and writing compliant URI strings.
+- [**swim-deflate**](swim-system-java/swim-core-java/swim.deflate) –
+  DEFLATE codec that incrementally compresses and decompresses streams.
+- [**swim-mqtt**](swim-system-java/swim-core-java/swim.mqtt) –
+  MQTT packet model and wire protocol codec that incrementally decodes
+  and encodes MQTT streams without intermediate buffering.
+- [**swim-http**](swim-system-java/swim-core-java/swim.http) –
+  HTTP message model and wire protocol codec that incrementally decodes
+  and encodes HTTP streams without intermediate buffering.
+- [**swim-ws**](swim-system-java/swim-core-java/swim.ws) –
+  WebSocket frame model and wire protocol codec that incrementally decodes
+  and encodes fragmented WebSocket streams without intermediate buffering.
+- [**swim-warp**](swim-system-java/swim-core-java/swim.warp) –
+  WebSocket protocol for dynamically multiplexing large numbers of
+  bidirectional links to streaming API endpoints, called lanes, of
+  URI-addressed distributed objects, called nodes, that run stateful
+  distributed processes, called Web Agents.
+- [**swim-concurrent**](swim-system-java/swim-core-java/swim.concurrent) –
+  timer, task, and continuation passing style interfaces, with lightweight
+  scheduler and execution stage implementations.
+- [**swim-db**](swim-system-java/swim-core-java/swim.db) –
+  lock-free document store—optimized for high rate atomic state changes—that
+  concurrently commits and compacts on-disk log-structured storage files
+  without blocking parallel in-memory updates to associative B-tree maps,
+  spatial Q-tree maps, sequential S-tree lists, and singleton U-tree values.
+- [**swim-io**](swim-system-java/swim-core-java/swim.io) –
+  explicitly flow-controlled, non-blocking, parallel I/O engine, with
+  **swim-codec**-modulated socket modems, and TCP and TLS transports.
+- [**swim-io-mqtt**](swim-system-java/swim-core-java/swim.io.mqtt) –
+  MQTT socket modem for concurrently transporting explicitly flow-controlled
+  MQTT streams over a network without blocking or intermediate buffering.
+- [**swim-io-http**](swim-system-java/swim-core-java/swim.io.http) –
+  HTTP client and server socket modems for pipelining and concurrently
+  transporting explicitly flow-controlled HTTP streams over a network
+  without blocking or intermediate buffering.
+- [**swim-io-ws**](swim-system-java/swim-core-java/swim.io.ws) –
+  WebSocket modem for concurrently transporting explicitly flow-controlled
+  WebSocket streams over a network without blocking or intermediate buffering,
+  and **swim-io-http** requesters and responders for upgrading HTTP client
+  and server modems to WebSocket modems.
+- [**swim-io-warp**](swim-system-java/swim-core-java/swim.io.warp) –
+  WARP socket modem for multiplexing and concurrently transporting prioritized,
+  explicitly flow-controlled WARP treams over a network, without blocking or
+  intermediate buffering
+- [**swim-web**](swim-system-java/swim-core-java/swim.web) –
+  high-level web server API and routing DSL, with HTTP, WebSocket, and WARP
+  routing directives.
 
 ### [**Swim Mesh** Java Framework](swim-system-java/swim-mesh-java)
 
@@ -104,20 +173,21 @@ The **Swim Mesh** Java framework provides the Web Agent API, and implements
 a distributed WARP microkernel.  **Swim Mesh** consists of the following
 component libraries:
 
-- [**swim.api**](swim-system-java/swim-mesh-java/swim.api) –
-- [**swim.store**](swim-system-java/swim-mesh-java/swim.store) –
-- [**swim.runtime**](swim-system-java/swim-mesh-java/swim.runtime) –
-- [**swim.kernel**](swim-system-java/swim-mesh-java/swim.kernel) –
-- [**swim.auth**](swim-system-java/swim-mesh-java/swim.auth) –
-- [**swim.fabric**](swim-system-java/swim-mesh-java/swim.fabric) –
-- [**swim.service**](swim-system-java/swim-mesh-java/swim.service) –
-- [**swim.store.mem**](swim-system-java/swim-mesh-java/swim.store.mem) –
-- [**swim.remote**](swim-system-java/swim-mesh-java/swim.remote) –
-- [**swim.service.web**](swim-system-java/swim-mesh-java/swim.service.web) –
-- [**swim.java**](swim-system-java/swim-mesh-java/swim.java) –
-- [**swim.server**](swim-system-java/swim-mesh-java/swim.server) –
-- [**swim.client**](swim-system-java/swim-mesh-java/swim.client) –
-- [**swim.cli**](swim-system-java/swim-mesh-java/swim.cli) –
+- [**swim-api**](swim-system-java/swim-mesh-java/swim.api) –
+- [**swim-store**](swim-system-java/swim-mesh-java/swim.store) –
+- [**swim-runtime**](swim-system-java/swim-mesh-java/swim.runtime) –
+- [**swim-kernel**](swim-system-java/swim-mesh-java/swim.kernel) –
+- [**swim-auth**](swim-system-java/swim-mesh-java/swim.auth) –
+- [**swim-actor**](swim-system-java/swim-mesh-java/swim.actor) –
+- [**swim-service**](swim-system-java/swim-mesh-java/swim.service) –
+- [**swim-store-mem**](swim-system-java/swim-mesh-java/swim.store.mem) –
+- [**swim-store-db**](swim-system-java/swim-mesh-java/swim.store.db) –
+- [**swim-remote**](swim-system-java/swim-mesh-java/swim.remote) –
+- [**swim-service-web**](swim-system-java/swim-mesh-java/swim.service.web) –
+- [**swim-java**](swim-system-java/swim-mesh-java/swim.java) –
+- [**swim-server**](swim-system-java/swim-mesh-java/swim.server) –
+- [**swim-client**](swim-system-java/swim-mesh-java/swim.client) –
+- [**swim-cli**](swim-system-java/swim-mesh-java/swim.cli) –
 
 ### [**Swim Polyglot** Java Framework](swim-system-java/swim-polyglot-java)
 
@@ -126,14 +196,14 @@ The **Swim Polyglot** Java framework provides multi-language API bindings and
 into **swimOS** applications.  **Swim Polyglot** consists of the following
 component libraries:
 
-- [**swim.dynamic**](swim-system-java/swim-polyglot-java/swim.dynamic) –
-- [**swim.dynamic.java**](swim-system-java/swim-polyglot-java/swim.dynamic.java) –
-- [**swim.dynamic.structure**](swim-system-java/swim-polyglot-java/swim.dynamic.structure) –
-- [**swim.dynamic.observable**](swim-system-java/swim-polyglot-java/swim.dynamic.observable) –
-- [**swim.dynamic.api**](swim-system-java/swim-polyglot-java/swim.dynamic.api) –
-- [**swim.vm**](swim-system-java/swim-polyglot-java/swim.vm) –
-- [**swim.vm.js**](swim-system-java/swim-polyglot-java/swim.vm.js) –
-- [**swim.js**](swim-system-java/swim-polyglot-java/swim.js) –
+- [**swim-dynamic**](swim-system-java/swim-polyglot-java/swim.dynamic) –
+- [**swim-dynamic-java**](swim-system-java/swim-polyglot-java/swim.dynamic.java) –
+- [**swim-dynamic-structure**](swim-system-java/swim-polyglot-java/swim.dynamic.structure) –
+- [**swim-dynamic-observable**](swim-system-java/swim-polyglot-java/swim.dynamic.observable) –
+- [**swim-dynamic-api**](swim-system-java/swim-polyglot-java/swim.dynamic.api) –
+- [**swim-vm**](swim-system-java/swim-polyglot-java/swim.vm) –
+- [**swim-vm-js**](swim-system-java/swim-polyglot-java/swim.vm.js) –
+- [**swim-js**](swim-system-java/swim-polyglot-java/swim.js) –
 
 ## [**Swim System** TypeScript Implementation](swim-system-js)
 
@@ -203,9 +273,10 @@ the following component libraries:
 - [**@swim/mesh**](swim-system-js/swim-mesh-js/@swim/mesh) –
   umbrella package that depends on, and re-exports, all **Swim Mesh** libraries.
 - [**@swim/warp**](swim-system-js/swim-mesh-js/@swim/warp) –
-  WebSocket protocol for dynamically multiplexing large numbers of bidirectional
-  links to streaming APIs, called lanes, of URI-addressed distributed objects,
-  called nodes, that run stateful distributed processes, called Web Agents.
+  WebSocket protocol for dynamically multiplexing large numbers of
+  bidirectional links to streaming API endpoints, called lanes, of
+  URI-addressed distributed objects, called nodes, that run stateful
+  distributed processes, called Web Agents.
 - [**@swim/client**](swim-system-js/swim-mesh-js/@swim/client) –
   streaming API client for linking to lanes of stateful Web Agents using the
   WARP protocol, enabling massively real-time applications that continuously

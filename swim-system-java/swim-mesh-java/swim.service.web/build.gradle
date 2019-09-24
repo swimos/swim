@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Web service runtime'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.service.web'
 ext.moduleName = 'swim.service.web'
 
 dependencies {

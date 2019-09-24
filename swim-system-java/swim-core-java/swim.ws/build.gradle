@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
-description = 'WebSocket wire protocol model, decoders, and encoders'
+description = 'WebSocket frame model and wire protocol codec that incrementally decodes and encodes fragmented WebSocket streams without intermediate buffering'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.ws'
 ext.moduleName = 'swim.ws'
 
 dependencies {

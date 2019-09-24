@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
-description = 'Mathematical and geometric structures'
+description = 'Mathematical and geometric structures, including rings, fields, vector modules and spaces, affine spaces, tensor spaces, probability distributions, and associated operators'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.math'
 ext.moduleName = 'swim.math'
 
 dependencies {

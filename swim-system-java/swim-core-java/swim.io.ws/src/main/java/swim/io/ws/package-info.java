@@ -13,6 +13,9 @@
 // limitations under the License.
 
 /**
- * Flow-controlled WebSocket I/O library.
+ * WebSocket modem for concurrently transporting explicitly flow-controlled
+ * WebSocket streams over a network without blocking or intermediate buffering,
+ * and <strong>swim-io-http</strong> requesters and responders for upgrading
+ * HTTP client and server modems to WebSocket modems.
  */
 package swim.io.ws;

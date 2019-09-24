@@ -17,14 +17,17 @@ package swim.service.web;
 import swim.api.service.ServiceContext;
 import swim.api.service.ServiceFactory;
 import swim.kernel.KernelContext;
+import swim.web.WebRoute;
 
 public class WebServiceFactory implements ServiceFactory<WebService> {
   final KernelContext kernel;
   final WebServiceDef serviceDef;
+  final WebRoute router;
 
-  WebServiceFactory(KernelContext kernel, WebServiceDef serviceDef) {
+  WebServiceFactory(KernelContext kernel, WebServiceDef serviceDef, WebRoute router) {
     this.kernel = kernel;
     this.serviceDef = serviceDef;
+    this.router = router;
   }
 
   public final KernelContext kernel() {
@@ -35,8 +38,12 @@ public class WebServiceFactory implements ServiceFactory<WebService> {
     return this.serviceDef;
   }
 
+  public final WebRoute router() {
+    return this.router;
+  }
+
   @Override
   public WebService createService(ServiceContext context) {
-    return new WebService(this.kernel, context, this.serviceDef);
+    return new WebService(this.kernel, context, this.serviceDef, this.router);
   }
 }

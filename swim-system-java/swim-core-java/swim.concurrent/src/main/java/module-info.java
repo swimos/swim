@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * Lightweight timers, tasks, and continuations.
+ * Timer, task, and continuation passing style interfaces, with lightweight
+ * scheduler and execution stage implementations.
  */
 module swim.concurrent {
   requires transitive swim.structure;

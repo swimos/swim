@@ -883,7 +883,14 @@ export class CanvasView extends HtmlView implements RenderView {
             targetViewTouches.push(nextTouch);
           }
         }
-        startEvent.targetViewTouches = document.createTouchList(...targetViewTouches);
+        if (typeof (document as any).createTouchList) {
+          startEvent.targetViewTouches = (document as any).createTouchList(...targetViewTouches);
+        } else {
+          (targetViewTouches as unknown as TouchList).item = function (index: number): Touch {
+            return targetViewTouches[index];
+          };
+          startEvent.targetViewTouches = targetViewTouches as unknown as TouchList;
+        }
         targetView.bubbleEvent(startEvent);
         dispatched.push(targetView);
       }

@@ -13,6 +13,8 @@
 // limitations under the License.
 
 /**
- * Flow-controlled input/output library.
+ * Explicitly flow-controlled, non-blocking, parallel I/O engine, with
+ * <strong>swim-codec</strong>-modulated socket modems, and TCP and TLS
+ * transports.
  */
 package swim.io;

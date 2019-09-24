@@ -13,6 +13,6 @@
 // limitations under the License.
 
 /**
- * Command-line argument parser.
+ * Composable command line argument parser.
  */
 package swim.args;

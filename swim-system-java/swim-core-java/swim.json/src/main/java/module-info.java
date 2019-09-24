@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * JavaScript Object Notation (JSON) codec.
+ * JavaScript Object Notation (JSON) codec that incrementally parses and writes
+ * <strong>swim-structure</strong> values.
  */
 module swim.json {
   requires swim.util;

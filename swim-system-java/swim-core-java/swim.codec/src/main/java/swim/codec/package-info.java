@@ -13,7 +13,8 @@
 // limitations under the License.
 
 /**
- * Incremental decoders, encoders, parsers, and writers.  {@code swim.codec}
+ * Incremental I/O; functional parsers and writers; display, debug, and
+ * diagnostic formatters; and Unicode and binary codecs.  {@code swim.codec}
  * enables efficient, interruptible transcoding of network protocols and data
  * formats, without blocking or intermediate buffering.
  *

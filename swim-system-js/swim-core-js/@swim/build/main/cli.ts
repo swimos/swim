@@ -35,7 +35,7 @@ function runTargets(this: Cmd, args: {[name: string]: string | null | undefined}
 
 function runCompile(this: Cmd, args: {[name: string]: string | null | undefined}): void {
   Build.load(args.config!, args.devel === null).then((build: Build): void => {
-    build.forEachTarget(args.projects!, (target: Target): Promise<unknown> => {
+    build.forEachTransitiveTarget(args.projects!, (target: Target): Promise<unknown> => {
       if (target.id === "test" && args.test === null) {
         target.retest = true;
       }
@@ -51,7 +51,7 @@ function runCompile(this: Cmd, args: {[name: string]: string | null | undefined}
 
 function runTest(this: Cmd, args: {[name: string]: string | null | undefined}): void {
   Build.load(args.config!, args.devel === null).then((build: Build): void => {
-    build.forEachTarget(args.projects!, (target: Target): Promise<unknown> | void => {
+    build.forEachTransitiveTarget(args.projects!, (target: Target): Promise<unknown> | void => {
       if (target.id === "test") {
         target.retest = true;
         return target.compile();
@@ -65,7 +65,7 @@ function runTest(this: Cmd, args: {[name: string]: string | null | undefined}): 
 
 function runDoc(this: Cmd, args: {[name: string]: string | null | undefined}): void {
   Build.load(args.config!, args.devel === null).then((build: Build): void => {
-    build.forEachTarget(args.projects!, (target: Target): Promise<unknown> | void => {
+    build.forEachTransitiveTarget(args.projects!, (target: Target): Promise<unknown> | void => {
       if (target.selected && target.id === "main") {
         return target.doc();
       }
@@ -78,7 +78,7 @@ function runDoc(this: Cmd, args: {[name: string]: string | null | undefined}): v
 
 function runWatch(this: Cmd, args: {[name: string]: string | null | undefined}): void {
   Build.load(args.config!, args.devel === null).then((build: Build): void => {
-    build.forEachTarget(args.projects!, (target: Target): void => {
+    build.forEachTransitiveTarget(args.projects!, (target: Target): void => {
       if (target.id === "test" && args.test === null) {
         target.retest = true;
       }

@@ -1,6 +1,7 @@
 apply from: '../project.gradle'
 
 description = 'Swim polyglot virtual machine integration'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-polyglot-java/swim.vm'
 ext.moduleName = 'swim.vm'
 
 dependencies {

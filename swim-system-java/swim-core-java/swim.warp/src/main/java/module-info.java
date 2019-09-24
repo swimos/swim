@@ -13,7 +13,10 @@
 // limitations under the License.
 
 /**
- * Web Agent Remote Protocol.
+ * WebSocket protocol for dynamically multiplexing large numbers of
+ * bidirectional links to streaming API endpoints, called lanes, of
+ * URI-addressed distributed objects, called nodes, that run stateful
+ * distributed processes, called Web Agents.
  */
 module swim.warp {
   requires swim.util;

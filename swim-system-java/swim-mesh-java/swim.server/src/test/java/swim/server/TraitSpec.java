@@ -17,6 +17,7 @@ package swim.server;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
+import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
 import swim.api.SwimRoute;
 import swim.api.agent.AbstractAgent;
@@ -36,7 +37,6 @@ import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.codec.Format;
-import swim.fabric.FabricDef;
 import swim.kernel.Kernel;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
@@ -115,7 +115,7 @@ public class TraitSpec {
   @Test
   public void testExtensionLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestGraphPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestGraphPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
                                        .openPlane("test", TestGraphPlane.class);
 
     final String testValue = "Hello, world!";
@@ -209,7 +209,7 @@ public class TraitSpec {
   @Test
   public void testOverloadedLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
-    final TestGraphPlane plane = kernel.openSpace(FabricDef.fromName("test"))
+    final TestGraphPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
                                        .openPlane("test", TestGraphPlane.class);
 
     final String testValue = "Hello, world";

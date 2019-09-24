@@ -17,11 +17,11 @@ package swim.js;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
+import swim.actor.ActorNodeDef;
+import swim.actor.ActorSpace;
+import swim.actor.ActorSpaceDef;
 import swim.api.downlink.EventDownlink;
 import swim.api.warp.function.OnEvent;
-import swim.fabric.Fabric;
-import swim.fabric.FabricDef;
-import swim.fabric.FabricNodeDef;
 import swim.kernel.Kernel;
 import swim.server.ServerLoader;
 import swim.service.web.WebServiceDef;
@@ -35,10 +35,10 @@ public class JsAgentSpec {
     jsKernel.setRootPath(UriPath.parse(System.getProperty("project.dir")));
     final Kernel kernel = ServerLoader.loadServerStack().injectKernel(jsKernel);
 
-    final FabricDef fabricDef = FabricDef.fromName("test")
-        .nodeDef(FabricNodeDef.fromNodePattern("/command/:name")
-                              .agentDef(JsAgentDef.fromModulePath("./src/test/js/TestCommandAgent")));
-    final Fabric fabric = (Fabric) kernel.openSpace(fabricDef);
+    final ActorSpaceDef spaceDef = ActorSpaceDef.fromName("test")
+        .nodeDef(ActorNodeDef.fromNodePattern("/command/:name")
+                             .agentDef(JsAgentDef.fromModulePath("./src/test/js/TestCommandAgent")));
+    final ActorSpace space = (ActorSpace) kernel.openSpace(spaceDef);
 
     final CountDownLatch linkOnEvent = new CountDownLatch(1);
     class CommandLinkController implements OnEvent<String> {
@@ -52,7 +52,7 @@ public class JsAgentSpec {
     try {
       kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
-      final EventDownlink<String> commandLink = fabric.downlink()
+      final EventDownlink<String> commandLink = space.downlink()
           .valueClass(String.class)
           .hostUri("warp://localhost:53556")
           .nodeUri("/command/hello")

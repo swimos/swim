@@ -17,7 +17,7 @@ package swim.api.agent;
 import swim.structure.Value;
 
 public interface AgentDef {
-  String agentName();
+  Value id();
 
   Value props();
 }
