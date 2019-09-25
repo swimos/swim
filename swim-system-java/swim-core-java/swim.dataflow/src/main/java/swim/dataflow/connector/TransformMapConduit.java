@@ -15,6 +15,7 @@
 package swim.dataflow.connector;
 
 import java.util.function.BiFunction;
+import swim.util.Deferred;
 
 /**
  * {@link MapConduit} that transforms the map values with a function that depends on both the key and input value.

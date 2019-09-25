@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
 import swim.dataflow.graph.Iterables;
+import swim.util.Deferred;
 
 /**
  * Immutable view of the current state of a {@link MapJunction}.

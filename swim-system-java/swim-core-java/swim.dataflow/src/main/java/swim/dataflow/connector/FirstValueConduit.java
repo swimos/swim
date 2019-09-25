@@ -16,6 +16,7 @@ package swim.dataflow.connector;
 
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialValuePersister;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * A conduit that only emits the first value it receives.

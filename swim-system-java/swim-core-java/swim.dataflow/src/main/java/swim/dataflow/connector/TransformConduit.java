@@ -15,6 +15,7 @@
 package swim.dataflow.connector;
 
 import java.util.function.Function;
+import swim.util.Deferred;
 
 /**
  * {@link Conduit} that transforms the values of its input.

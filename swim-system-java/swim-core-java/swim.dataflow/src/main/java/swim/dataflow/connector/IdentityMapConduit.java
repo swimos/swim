@@ -1,5 +1,7 @@
 package swim.dataflow.connector;
 
+import swim.util.Deferred;
+
 /**
  * Trivial {@link MapConduit} that passes its values on unchanged.
  *

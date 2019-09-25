@@ -14,6 +14,8 @@
 
 package swim.dataflow.connector;
 
+import swim.util.Deferred;
+
 /**
  * Trivial {@link Conduit} that passes its values on unchanged.
  *

@@ -24,11 +24,11 @@ import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
 import swim.dataflow.connector.ConnectorTestUtil;
 import swim.dataflow.connector.ConnectorTestUtil.MapAction;
-import swim.dataflow.connector.Deferred;
 import swim.dataflow.connector.MapReceptacle;
 import swim.dataflow.connector.MapView;
 import swim.dataflow.graph.Pair;
 import swim.dataflow.graph.timestamps.TimestampAssigner;
+import swim.util.Deferred;
 
 public class KeyedWindowConduitSpec {
 

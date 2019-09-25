@@ -22,6 +22,7 @@ import swim.collections.HashTrieMap;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider;
 import swim.dataflow.graph.persistence.ValuePersister;
 import swim.structure.Form;
+import swim.util.Deferred;
 
 public class ModalKeyFetchConduitSpec {
 

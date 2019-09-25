@@ -16,6 +16,7 @@ package swim.dataflow.connector;
 
 import swim.collections.FingerTrieSeq;
 import swim.dataflow.graph.Require;
+import swim.util.Deferred;
 
 /**
  * Abstract implementation of {@link Junction} that provides methods to pass values on to any number

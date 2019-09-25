@@ -14,6 +14,8 @@
 
 package swim.dataflow.connector;
 
+import swim.util.Deferred;
+
 /**
  * Interface for handlers that can consume the outputs of a {@link Junction}.
  *

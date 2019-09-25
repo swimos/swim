@@ -20,6 +20,7 @@ import swim.collections.HashTrieSet;
 import swim.dataflow.graph.persistence.MapPersister;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialMapPersister;
 import swim.structure.Form;
+import swim.util.Deferred;
 
 /**
  * Conduit that consumes collections and emits them as key/value pairs from a {@link MapJunction}.

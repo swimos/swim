@@ -16,6 +16,7 @@ package swim.dataflow.connector;
 
 import java.util.function.Function;
 import swim.collections.HashTrieMap;
+import swim.util.Deferred;
 
 /**
  * Collects values from a {@link Receptacle} and accumulates them into a map which it then outputs.

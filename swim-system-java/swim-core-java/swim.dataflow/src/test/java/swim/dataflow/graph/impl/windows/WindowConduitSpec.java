@@ -18,9 +18,9 @@ import java.util.ArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import swim.dataflow.connector.ConnectorTestUtil.FakeSchedule;
-import swim.dataflow.connector.Deferred;
 import swim.dataflow.graph.Pair;
 import swim.dataflow.graph.timestamps.TimestampAssigner;
+import swim.util.Deferred;
 
 public class WindowConduitSpec {
 

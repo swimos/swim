@@ -16,6 +16,7 @@ package swim.dataflow.connector;
 
 import java.util.Map;
 import swim.collections.HashTrieMap;
+import swim.util.Deferred;
 
 /**
  * Consumes the keys and values of a map and outputs them a single object.

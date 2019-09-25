@@ -18,7 +18,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Supplier;
 import swim.collections.HashTrieMap;
-import swim.dataflow.connector.Deferred;
 import swim.dataflow.connector.MapReceptacle;
 import swim.dataflow.connector.MapView;
 import swim.dataflow.graph.MapSink;
@@ -26,6 +25,7 @@ import swim.dataflow.graph.SwimStreamContext;
 import swim.streamlet.AbstractMapOutlet;
 import swim.streamlet.KeyEffect;
 import swim.streamlet.MapInlet;
+import swim.util.Deferred;
 
 /**
  * Sink based on an external map inlet.

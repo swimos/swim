@@ -14,6 +14,8 @@
 
 package swim.dataflow.connector;
 
+import swim.util.Deferred;
+
 /**
  * Abstract {@link MapJunction} with two inputs, one of which is a map, the other of which is a simple value.
  *

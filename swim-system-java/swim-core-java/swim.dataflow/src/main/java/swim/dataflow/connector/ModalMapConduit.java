@@ -15,6 +15,7 @@
 package swim.dataflow.connector;
 
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Base class for map conduits that have an auxiliary control stream to modify their behaviour.

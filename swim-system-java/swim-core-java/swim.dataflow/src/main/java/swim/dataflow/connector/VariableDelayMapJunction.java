@@ -24,6 +24,7 @@ import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialListPer
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialSetPersisiter;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialValuePersister;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Junction that buffers the values it receives and emits the values a variable number of samples previous to the

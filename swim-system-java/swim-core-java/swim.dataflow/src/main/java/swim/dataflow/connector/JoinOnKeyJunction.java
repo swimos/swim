@@ -22,6 +22,7 @@ import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
 import swim.dataflow.graph.Iterables;
 import swim.dataflow.graph.JoinKind;
+import swim.util.Deferred;
 
 /**
  * {@link Junction} that combines together two map inputs (with a common key type) to produce a joined output map

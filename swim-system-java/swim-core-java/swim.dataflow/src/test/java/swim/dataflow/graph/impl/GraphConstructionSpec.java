@@ -18,12 +18,12 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import swim.dataflow.connector.AbstractJunction;
 import swim.dataflow.connector.ConnectorTestUtil;
-import swim.dataflow.connector.Deferred;
 import swim.dataflow.connector.Receptacle;
 import swim.dataflow.graph.Sink;
 import swim.dataflow.graph.SwimStreamContext;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider;
 import swim.structure.Form;
+import swim.util.Deferred;
 
 public class GraphConstructionSpec {
 

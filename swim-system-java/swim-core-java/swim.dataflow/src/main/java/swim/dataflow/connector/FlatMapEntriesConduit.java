@@ -19,6 +19,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import swim.collections.HashTrieMap;
 import swim.dataflow.graph.Pair;
+import swim.util.Deferred;
 
 /**
  * {@link Conduit} that transforms the entries of a map using a function that produces a sequence of key values pairs

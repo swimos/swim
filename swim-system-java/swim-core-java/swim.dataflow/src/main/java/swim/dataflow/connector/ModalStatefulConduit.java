@@ -17,6 +17,7 @@ package swim.dataflow.connector;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Conduit that maintains an external state where the function that updates the state can be modified by an auxiliary

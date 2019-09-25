@@ -28,7 +28,6 @@ import swim.api.lane.ValueLane;
 import swim.api.warp.function.OnEvent;
 import swim.dataflow.connector.AbstractJunction;
 import swim.dataflow.connector.AbstractMapJunction;
-import swim.dataflow.connector.Deferred;
 import swim.dataflow.connector.Junction;
 import swim.dataflow.connector.MapJunction;
 import swim.dataflow.connector.MapReceptacle;
@@ -43,6 +42,7 @@ import swim.observable.function.DidRemoveKey;
 import swim.observable.function.DidSet;
 import swim.observable.function.DidUpdateKey;
 import swim.structure.Form;
+import swim.util.Deferred;
 
 /**
  * Extension to {@link AbstractAgent} that provides a declarative method for describing the relationship

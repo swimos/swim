@@ -20,8 +20,8 @@ import swim.concurrent.Schedule;
 import swim.concurrent.TimerFunction;
 import swim.dataflow.connector.AbstractJunction;
 import swim.dataflow.connector.Conduit;
-import swim.dataflow.connector.Deferred;
 import swim.dataflow.graph.timestamps.TimestampAssigner;
+import swim.util.Deferred;
 
 public class WindowConduit<T, W, U> extends AbstractJunction<U> implements Conduit<T, U> {
 

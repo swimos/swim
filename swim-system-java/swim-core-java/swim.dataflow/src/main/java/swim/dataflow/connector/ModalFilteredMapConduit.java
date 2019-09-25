@@ -22,6 +22,7 @@ import java.util.function.Function;
 import swim.collections.HashTrieMap;
 import swim.dataflow.graph.Pair;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Filtered map conduit where the behaviour of the filtering is controlled by an auxiliary control input.

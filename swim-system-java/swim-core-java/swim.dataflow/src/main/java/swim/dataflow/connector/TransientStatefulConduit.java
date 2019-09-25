@@ -15,6 +15,7 @@
 package swim.dataflow.connector;
 
 import java.util.function.BiFunction;
+import swim.util.Deferred;
 
 /**
  * {@link Conduit} that maintains an internal state.

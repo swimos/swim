@@ -17,7 +17,6 @@ package swim.dataflow.graph.impl.partitions;
 import java.util.HashSet;
 import java.util.Set;
 import swim.dataflow.connector.AbstractMapJunction;
-import swim.dataflow.connector.Deferred;
 import swim.dataflow.connector.MapView;
 import swim.dataflow.connector.ValueToMapConduit;
 import swim.dataflow.graph.persistence.MapPersister;
@@ -25,6 +24,7 @@ import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialMapPers
 import swim.dataflow.graph.windows.PartitionAssigner;
 import swim.dataflow.graph.windows.PartitionState;
 import swim.structure.Form;
+import swim.util.Deferred;
 
 public class PartitionConduit<T, P, S extends PartitionState<P, S>>
     extends AbstractMapJunction<P, T> implements ValueToMapConduit<T, P, T> {

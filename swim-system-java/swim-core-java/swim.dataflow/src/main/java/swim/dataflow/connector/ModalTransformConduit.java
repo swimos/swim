@@ -16,6 +16,7 @@ package swim.dataflow.connector;
 
 import java.util.function.Function;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Conduit that transforms its inputs using a function that can be modified by an auxiliary control input.

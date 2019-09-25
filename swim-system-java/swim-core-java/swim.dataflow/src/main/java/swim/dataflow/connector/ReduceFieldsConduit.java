@@ -17,6 +17,7 @@ package swim.dataflow.connector;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import swim.collections.BTreeMap;
+import swim.util.Deferred;
 
 /**
  * Reduces the entries of a map to a sequence of values for each update/removal.

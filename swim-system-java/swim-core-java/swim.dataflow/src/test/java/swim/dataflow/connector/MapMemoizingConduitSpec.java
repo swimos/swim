@@ -20,6 +20,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import swim.collections.HashTrieMap;
 import swim.dataflow.connector.ConnectorTestUtil.Update;
+import swim.util.Deferred;
 
 public class MapMemoizingConduitSpec {
 

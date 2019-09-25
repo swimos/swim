@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider;
 import swim.dataflow.graph.persistence.ValuePersister;
 import swim.structure.form.DurationForm;
+import swim.util.Deferred;
 
 public class VariableFlatMapConduitSpec {
 

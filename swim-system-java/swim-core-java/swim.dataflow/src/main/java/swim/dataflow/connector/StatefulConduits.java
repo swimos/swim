@@ -19,6 +19,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import swim.dataflow.graph.persistence.MapPersister;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Utility methods to create common stateful conduits.

@@ -14,6 +14,8 @@
 
 package swim.dataflow.connector;
 
+import swim.util.Deferred;
+
 /**
  * Abstract {@link Junction} that consumers data from two input sources.
  *

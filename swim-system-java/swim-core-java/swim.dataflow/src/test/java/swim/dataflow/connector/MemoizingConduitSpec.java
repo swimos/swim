@@ -16,6 +16,7 @@ package swim.dataflow.connector;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import swim.util.Deferred;
 
 public class MemoizingConduitSpec {
 

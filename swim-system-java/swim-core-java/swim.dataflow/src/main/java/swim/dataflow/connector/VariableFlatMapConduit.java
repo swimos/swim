@@ -22,6 +22,7 @@ import swim.concurrent.Schedule;
 import swim.dataflow.graph.Require;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * {@link Conduit} that, for each values of its input, emits a sequence of output values on a period that can be

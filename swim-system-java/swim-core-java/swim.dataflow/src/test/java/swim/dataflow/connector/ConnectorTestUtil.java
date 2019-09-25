@@ -24,6 +24,7 @@ import swim.concurrent.TimerFunction;
 import swim.concurrent.TimerRef;
 import swim.dataflow.graph.Either;
 import swim.dataflow.graph.Unit;
+import swim.util.Deferred;
 
 public final class ConnectorTestUtil {
 

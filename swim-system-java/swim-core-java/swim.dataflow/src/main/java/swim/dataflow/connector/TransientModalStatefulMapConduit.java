@@ -17,6 +17,7 @@ package swim.dataflow.connector;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import swim.collections.HashTrieMap;
+import swim.util.Deferred;
 
 /**
  * Map conduit that maintains an internal state where the function that updates the state can be modified by an

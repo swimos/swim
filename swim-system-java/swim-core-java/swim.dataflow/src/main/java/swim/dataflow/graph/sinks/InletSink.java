@@ -15,12 +15,12 @@
 package swim.dataflow.graph.sinks;
 
 import java.util.function.Supplier;
-import swim.dataflow.connector.Deferred;
 import swim.dataflow.connector.Receptacle;
 import swim.dataflow.graph.Sink;
 import swim.dataflow.graph.SwimStreamContext;
 import swim.streamlet.AbstractOutlet;
 import swim.streamlet.Inlet;
+import swim.util.Deferred;
 
 /**
  * Sink based on an external inlet.

@@ -14,6 +14,8 @@
 
 package swim.dataflow.connector;
 
+import swim.util.Deferred;
+
 /**
  * {@link Conduit} that memoizes the values that pass through it.
  *

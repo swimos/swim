@@ -16,6 +16,7 @@ package swim.dataflow.connector;
 
 import java.util.Set;
 import swim.collections.HashTrieSet;
+import swim.util.Deferred;
 
 /**
  * Conduit that collects the keys from a {@link MapJunction} and outputs the current key set as a single value.

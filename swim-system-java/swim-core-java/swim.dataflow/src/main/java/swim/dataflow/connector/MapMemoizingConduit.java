@@ -15,6 +15,7 @@
 package swim.dataflow.connector;
 
 import swim.collections.HashTrieMap;
+import swim.util.Deferred;
 
 /**
  * Conduit that memoizes the state of a {@link MapJunction}.

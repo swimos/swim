@@ -15,6 +15,7 @@
 package swim.dataflow.connector;
 
 import java.util.function.Predicate;
+import swim.util.Deferred;
 
 /**
  * {@link Conduit} that only passes some of its input values to the output.

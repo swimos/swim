@@ -19,6 +19,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import swim.collections.HashTrieSet;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Filtered {@link MapConduit} that filters solely by key using a predicate that is modified by an auxiliary control

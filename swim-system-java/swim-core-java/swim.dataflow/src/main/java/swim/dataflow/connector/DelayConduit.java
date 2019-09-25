@@ -17,6 +17,7 @@ package swim.dataflow.connector;
 import swim.dataflow.graph.Require;
 import swim.dataflow.graph.persistence.ListPersister;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialListPersister;
+import swim.util.Deferred;
 
 /**
  * Conduit that buffers the values it receives and emits the values a fixed number of samples previous to the

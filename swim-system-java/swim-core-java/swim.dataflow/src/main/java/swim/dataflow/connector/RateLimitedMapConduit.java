@@ -18,11 +18,12 @@ import java.time.Duration;
 import java.util.Map;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
+import swim.concurrent.Recurring;
 import swim.concurrent.Schedule;
 import swim.dataflow.graph.Require;
-import swim.dataflow.graph.impl.Recurring;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialValuePersister;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Map conduit that emits its outputs on a timer rather than on receipt of input. The changes that occur between two

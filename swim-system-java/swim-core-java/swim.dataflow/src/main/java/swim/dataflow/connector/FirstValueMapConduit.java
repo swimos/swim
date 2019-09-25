@@ -17,6 +17,7 @@ package swim.dataflow.connector;
 import swim.dataflow.graph.persistence.MapPersister;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialMapPersister;
 import swim.structure.Form;
+import swim.util.Deferred;
 
 /**
  * A conduit that only emits the first value it receives for each key.

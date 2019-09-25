@@ -25,6 +25,7 @@ import swim.dataflow.graph.persistence.TrivialPersistenceProvider;
 import swim.dataflow.graph.persistence.ValuePersister;
 import swim.structure.Form;
 import swim.structure.form.DurationForm;
+import swim.util.Deferred;
 
 
 public class ModalFlatMapConduitSpec {

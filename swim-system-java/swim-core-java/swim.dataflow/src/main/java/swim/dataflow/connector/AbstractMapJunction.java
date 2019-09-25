@@ -17,6 +17,7 @@ package swim.dataflow.connector;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.dataflow.graph.Require;
+import swim.util.Deferred;
 
 /**
  * Abstract implementation of {@link MapJunction} which provides methods to pass on changes to the values for each

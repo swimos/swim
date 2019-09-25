@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.dataflow.graph.impl;
+package swim.concurrent;
 
 import java.util.concurrent.atomic.AtomicReference;
-import swim.concurrent.Schedule;
-import swim.concurrent.TimerFunction;
-import swim.concurrent.TimerRef;
 
 /**
  * A recurring time event (it will reschedule itself on successful completion).
@@ -114,10 +111,8 @@ public abstract class Recurring implements TimerFunction {
         stop();
         throw ex;
       } finally {
-        if (state.get() == State.RUNNING) {
-          if (ref != null) {
-            ref.reschedule(periodMillis);
-          }
+        if (state.get() == State.RUNNING && ref != null) {
+          ref.reschedule(periodMillis);
         }
       }
     }

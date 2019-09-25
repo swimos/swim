@@ -16,6 +16,7 @@ package swim.dataflow.connector;
 
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialValuePersister;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * {@link Conduit} that selects values from a {@link MapJunction} according to a variable key.

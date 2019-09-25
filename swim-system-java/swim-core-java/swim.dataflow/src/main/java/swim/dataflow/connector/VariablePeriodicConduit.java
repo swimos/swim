@@ -15,12 +15,13 @@
 package swim.dataflow.connector;
 
 import java.time.Duration;
+import swim.concurrent.Recurring;
 import swim.concurrent.Schedule;
 import swim.dataflow.graph.Require;
 import swim.dataflow.graph.StreamInterpretation;
-import swim.dataflow.graph.impl.Recurring;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialValuePersister;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Conduit that emits its outputs on a timer rather than on receipt of input. The period of the timer can be

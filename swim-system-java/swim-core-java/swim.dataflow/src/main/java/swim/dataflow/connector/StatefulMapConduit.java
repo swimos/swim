@@ -16,6 +16,7 @@ package swim.dataflow.connector;
 
 import java.util.function.BiFunction;
 import swim.dataflow.graph.persistence.MapPersister;
+import swim.util.Deferred;
 
 /**
  * {@link MapConduit} that maintains an internal state for each key.

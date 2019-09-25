@@ -17,6 +17,7 @@ package swim.dataflow.connector;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Filtered conduit where the behaviour of the filtering is controlled by an auxiliary input.

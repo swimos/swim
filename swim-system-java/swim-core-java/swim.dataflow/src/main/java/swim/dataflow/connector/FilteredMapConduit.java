@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.function.BiPredicate;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
+import swim.util.Deferred;
 
 /**
  * {@link MapConduit} that filters out some key/value pairs from it's input.

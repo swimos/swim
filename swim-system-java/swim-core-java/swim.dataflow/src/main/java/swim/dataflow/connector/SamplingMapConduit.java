@@ -16,11 +16,12 @@ package swim.dataflow.connector;
 
 import java.time.Duration;
 import java.util.Map;
+import swim.concurrent.Recurring;
 import swim.concurrent.Schedule;
 import swim.dataflow.graph.Require;
-import swim.dataflow.graph.impl.Recurring;
 import swim.dataflow.graph.persistence.TrivialPersistenceProvider;
 import swim.dataflow.graph.persistence.ValuePersister;
+import swim.util.Deferred;
 
 /**
  * Map conduit that emits its outputs on a timer rather than on receipt of input. When the output triggers the entire
