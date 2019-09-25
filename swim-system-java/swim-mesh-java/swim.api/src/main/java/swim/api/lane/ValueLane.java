@@ -26,11 +26,9 @@ import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableValue;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
-import swim.streamlet.Inlet;
-import swim.streamlet.Outlet;
 import swim.structure.Form;
 
-public interface ValueLane<V> extends WarpLane, ObservableValue<V>, Inlet<V>, Outlet<V> {
+public interface ValueLane<V> extends WarpLane, ObservableValue<V> {
   Form<V> valueForm();
 
   <V2> ValueLane<V2> valueForm(Form<V2> valueForm);

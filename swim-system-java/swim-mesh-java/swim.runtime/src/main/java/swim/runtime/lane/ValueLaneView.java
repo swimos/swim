@@ -15,7 +15,6 @@
 package swim.runtime.lane;
 
 import java.util.AbstractMap;
-import java.util.Iterator;
 import java.util.Map;
 import swim.api.Lane;
 import swim.api.Link;
@@ -34,10 +33,7 @@ import swim.concurrent.Conts;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
 import swim.runtime.warp.WarpLaneView;
-import swim.streamlet.Inlet;
-import swim.streamlet.Outlet;
 import swim.structure.Form;
-import swim.util.Cursor;
 
 public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   protected final AgentContext agentContext;
@@ -46,8 +42,6 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   protected int flags;
   protected ValueLaneModel laneBinding;
 
-  protected Outlet<? extends V> input;
-  protected Inlet<? super V>[] outputs; // TODO: unify with observers
   protected int version;
 
   ValueLaneView(AgentContext agentContext, Form<V> valueForm, int flags, Object observers) {
@@ -56,8 +50,6 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
     this.valueForm = valueForm;
     this.flags = flags;
 
-    this.input = null;
-    this.outputs = null;
     this.version = -1;
   }
 
@@ -333,8 +325,6 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   }
 
   public void laneDidSet(V newValue, V oldValue) {
-    invalidate();
-    reconcile(0); // TODO: debounce and track version
   }
 
   @Override
@@ -351,178 +341,6 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
     return this.laneBinding.set(this, newValue);
   }
 
-  @Override
-  public Outlet<? extends V> input() {
-    return this.input;
-  }
-
-  @Override
-  public void bindInput(Outlet<? extends V> input) {
-    if (this.input != null) {
-      this.input.unbindOutput(this);
-    }
-    this.input = input;
-    if (this.input != null) {
-      this.input.bindOutput(this);
-    }
-  }
-
-  @Override
-  public void unbindInput() {
-    if (this.input != null) {
-      this.input.unbindOutput(this);
-    }
-    this.input = null;
-  }
-
-  @Override
-  public void disconnectInputs() {
-    final Outlet<? extends V> input = this.input;
-    if (input != null) {
-      input.unbindOutput(this);
-      this.input = null;
-      input.disconnectInputs();
-    }
-  }
-
-  @Override
-  public Iterator<Inlet<? super V>> outputIterator() {
-    return this.outputs != null ? Cursor.array(this.outputs) : Cursor.empty();
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public void bindOutput(Inlet<? super V> output) {
-    final Inlet<? super V>[] oldOutputs = this.outputs;
-    final int n = oldOutputs != null ? oldOutputs.length : 0;
-    final Inlet<? super V>[] newOutputs = (Inlet<? super V>[]) new Inlet<?>[n + 1];
-    if (n > 0) {
-      System.arraycopy(oldOutputs, 0, newOutputs, 0, n);
-    }
-    newOutputs[n] = output;
-    this.outputs = newOutputs;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public void unbindOutput(Inlet<? super V> output) {
-    final Inlet<? super V>[] oldOutputs = this.outputs;
-    final int n = oldOutputs != null ? oldOutputs.length : 0;
-    for (int i = 0; i < n; i += 1) {
-      if (oldOutputs[i] == output) {
-        if (n > 1) {
-          final Inlet<? super V>[] newOutputs = (Inlet<? super V>[]) new Inlet<?>[n - 1];
-          System.arraycopy(oldOutputs, 0, newOutputs, 0, i);
-          System.arraycopy(oldOutputs, i + 1, newOutputs, i, (n - 1) - i);
-          this.outputs = newOutputs;
-        } else {
-          this.outputs = null;
-        }
-        break;
-      }
-    }
-  }
-
-  @Override
-  public void unbindOutputs() {
-    final Inlet<? super V>[] outputs = this.outputs;
-    if (outputs != null) {
-      this.outputs = null;
-      for (int i = 0, n = outputs.length; i < n; i += 1) {
-        final Inlet<? super V> output = outputs[i];
-        output.unbindInput();
-      }
-    }
-  }
-
-  @Override
-  public void disconnectOutputs() {
-    final Inlet<? super V>[] outputs = this.outputs;
-    if (outputs != null) {
-      this.outputs = null;
-      for (int i = 0, n = outputs.length; i < n; i += 1) {
-        final Inlet<? super V> output = outputs[i];
-        output.unbindInput();
-        output.disconnectOutputs();
-      }
-    }
-  }
-
-  @Override
-  public void invalidateOutput() {
-    invalidate();
-  }
-
-  @Override
-  public void invalidateInput() {
-    invalidate();
-  }
-
-  public void invalidate() {
-    if (this.version >= 0) {
-      willInvalidate();
-      this.version = -1;
-      onInvalidate();
-      final int n = this.outputs != null ? this.outputs.length : 0;
-      for (int i = 0; i < n; i += 1) {
-        this.outputs[i].invalidateOutput();
-      }
-      didInvalidate();
-    }
-  }
-
-  @Override
-  public void reconcileOutput(int version) {
-    reconcile(version);
-  }
-
-  @Override
-  public void reconcileInput(int version) {
-    reconcile(version);
-  }
-
-  public void reconcile(int version) {
-    if (this.version < 0) {
-      willReconcile(version);
-      this.version = version;
-      if (this.input != null) {
-        this.input.reconcileInput(version);
-      }
-      onReconcile(version);
-      final int n = this.outputs != null ? this.outputs.length : 0;
-      for (int i = 0; i < n; i += 1) {
-        this.outputs[i].reconcileOutput(version);
-      }
-      didReconcile(version);
-    }
-  }
-
-  protected void willInvalidate() {
-    // stub
-  }
-
-  protected void onInvalidate() {
-    // stub
-  }
-
-  protected void didInvalidate() {
-    // stub
-  }
-
-  protected void willReconcile(int version) {
-    // stub
-  }
-
-  protected void onReconcile(int version) {
-    if (this.input != null) {
-      final V value = this.input.get();
-      set(value);
-    }
-  }
-
-  protected void didReconcile(int version) {
-    // stub
-  }
 
   static final int RESIDENT = 1 << 0;
   static final int TRANSIENT = 1 << 1;

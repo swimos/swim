@@ -22,7 +22,6 @@ module swim.dataflow {
   requires transitive swim.collections;
   requires transitive swim.streamlet;
 
-  exports swim.dataflow;
   exports swim.dataflow.graph;
   exports swim.dataflow.graph.windows;
   exports swim.dataflow.graph.windows.eviction;
@@ -31,7 +30,6 @@ module swim.dataflow {
   exports swim.dataflow.graph.timestamps;
   exports swim.dataflow.graph.statistics;
   exports swim.dataflow.graph.statistics.model;
-  exports swim.dataflow.graph.sinks;
   exports swim.dataflow.graph.impl;
   exports swim.dataflow.graph.impl.partitions;
   exports swim.dataflow.graph.impl.windows;

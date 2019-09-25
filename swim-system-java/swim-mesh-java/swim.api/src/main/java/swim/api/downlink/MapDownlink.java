@@ -14,7 +14,6 @@
 
 package swim.api.downlink;
 
-import java.util.Map;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
@@ -40,14 +39,12 @@ import swim.observable.function.WillDrop;
 import swim.observable.function.WillRemoveKey;
 import swim.observable.function.WillTake;
 import swim.observable.function.WillUpdateKey;
-import swim.streamlet.MapInlet;
-import swim.streamlet.MapOutlet;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Cursor;
 
-public interface MapDownlink<K, V> extends WarpDownlink, ObservableOrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapDownlink<K, V>> {
+public interface MapDownlink<K, V> extends WarpDownlink, ObservableOrderedMap<K, V> {
   @Override
   MapDownlink<K, V> hostUri(Uri hostUri);
 

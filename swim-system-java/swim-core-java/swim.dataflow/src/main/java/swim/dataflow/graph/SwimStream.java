@@ -32,14 +32,13 @@ import swim.dataflow.graph.windows.TemporalWindowAssigner;
 import swim.dataflow.graph.windows.WindowSpec;
 import swim.dataflow.graph.windows.WindowState;
 import swim.dataflow.graph.windows.triggers.Trigger;
-import swim.streamlet.Inlet;
-import swim.streamlet.Outlet;
 import swim.structure.Form;
 
 /**
  * An abstract stream of values. In combination with {@link MapSwimStream} this is used to construct a directed
  * graph of combinators which pump data from sources to sinks. The graph can then be instantiated against a set of
- * source {@link Outlet}s and sink {@link Inlet}s to create an executable data-flow that can run inside a Swim
+ * source {@link Junction}s and sink {@link swim.dataflow.connector.Receptacle}s to create an executable data-flow
+ * that can run inside a Swim
  * agent.
  *
  * @param <T> The type of the values.

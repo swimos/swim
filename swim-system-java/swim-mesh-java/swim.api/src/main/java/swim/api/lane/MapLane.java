@@ -14,7 +14,6 @@
 
 package swim.api.lane;
 
-import java.util.Map;
 import swim.api.warp.WarpLane;
 import swim.api.warp.function.DidCommand;
 import swim.api.warp.function.DidEnter;
@@ -35,13 +34,11 @@ import swim.observable.function.WillDrop;
 import swim.observable.function.WillRemoveKey;
 import swim.observable.function.WillTake;
 import swim.observable.function.WillUpdateKey;
-import swim.streamlet.MapInlet;
-import swim.streamlet.MapOutlet;
 import swim.structure.Form;
 import swim.util.Cursor;
 import swim.util.OrderedMap;
 
-public interface MapLane<K, V> extends WarpLane, ObservableOrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapLane<K, V>> {
+public interface MapLane<K, V> extends WarpLane, ObservableOrderedMap<K, V> {
   Form<K> keyForm();
 
   <K2> MapLane<K2, V> keyForm(Form<K2> keyForm);

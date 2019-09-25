@@ -31,13 +31,11 @@ import swim.api.warp.function.WillUnlink;
 import swim.observable.ObservableValue;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
-import swim.streamlet.Inlet;
-import swim.streamlet.Outlet;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
 
-public interface ValueDownlink<V> extends WarpDownlink, ObservableValue<V>, Inlet<V>, Outlet<V> {
+public interface ValueDownlink<V> extends WarpDownlink, ObservableValue<V> {
   @Override
   ValueDownlink<V> hostUri(Uri hostUri);
 

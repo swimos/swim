@@ -22,7 +22,4 @@ module swim.streamlet {
   requires transitive swim.collections;
   requires transitive swim.concurrent;
 
-  exports swim.streamlet;
-  exports swim.streamlet.combinator;
-  exports swim.streamlet.function;
 }
