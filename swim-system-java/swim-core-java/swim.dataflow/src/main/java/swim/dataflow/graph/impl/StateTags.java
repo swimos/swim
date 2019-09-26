@@ -14,9 +14,9 @@
 
 package swim.dataflow.graph.impl;
 
-import swim.dataflow.graph.Require;
 import swim.structure.Record;
 import swim.structure.Value;
+import swim.util.Require;
 
 /**
  * Utilities to create identifying tags for states stored by stream elements.

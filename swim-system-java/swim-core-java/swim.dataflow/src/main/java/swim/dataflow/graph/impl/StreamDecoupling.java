@@ -15,18 +15,18 @@
 package swim.dataflow.graph.impl;
 
 import java.time.Duration;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.MapJunction;
-import swim.dataflow.connector.MapJunction2;
-import swim.dataflow.connector.PeriodicConduit;
-import swim.dataflow.connector.RateLimitedMapConduit;
-import swim.dataflow.connector.SamplingMapConduit;
-import swim.dataflow.connector.VariablePeriodicConduit;
-import swim.dataflow.graph.StreamInterpretation;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.ValuePersister;
 import swim.dataflow.graph.sampling.Sampling;
+import swim.streamlet.Junction;
+import swim.streamlet.MapJunction;
+import swim.streamlet.MapJunction2;
+import swim.streamlet.PeriodicConduit;
+import swim.streamlet.RateLimitedMapConduit;
+import swim.streamlet.SamplingMapConduit;
+import swim.streamlet.StreamInterpretation;
+import swim.streamlet.VariablePeriodicConduit;
+import swim.streamlet.persistence.ValuePersister;
 
 /**
  * Static methods to temporally decouple a stream (the rate at which the stream emits data becomes different from

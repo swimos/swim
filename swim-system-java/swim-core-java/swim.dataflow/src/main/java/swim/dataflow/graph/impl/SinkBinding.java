@@ -14,12 +14,12 @@
 
 package swim.dataflow.graph.impl;
 
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.Receptacle;
 import swim.dataflow.graph.Sink;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.Unit;
+import swim.streamlet.Junction;
+import swim.streamlet.Receptacle;
+import swim.util.Unit;
 
 /**
  * Binding of a stream to a sink.

@@ -20,12 +20,12 @@ import swim.dataflow.graph.impl.windows.MapWindowAccumulators;
 import swim.dataflow.graph.impl.windows.PersisterAccumulators;
 import swim.dataflow.graph.impl.windows.WindowAccumulators;
 import swim.dataflow.graph.persistence.BTreeMapForm;
-import swim.dataflow.graph.persistence.FingerTrieSeqForm;
-import swim.dataflow.graph.persistence.MapPersister;
-import swim.dataflow.graph.persistence.PersistenceProvider;
 import swim.dataflow.graph.timestamps.WithTimestamp;
+import swim.streamlet.persistence.MapPersister;
+import swim.streamlet.persistence.PersistenceProvider;
 import swim.structure.Form;
 import swim.structure.Value;
+import swim.structure.form.FingerTrieSeqForm;
 
 /**
  * Factories for {@link WindowAccumulators}s to hold the current state of a windowed conduit.

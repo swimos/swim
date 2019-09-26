@@ -17,12 +17,12 @@ package swim.dataflow.graph.impl;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.ModalFilteredConduit;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.ValuePersister;
+import swim.streamlet.Junction;
+import swim.streamlet.ModalFilteredConduit;
+import swim.streamlet.persistence.ValuePersister;
 
 /**
  * Stream where the values are filtered according to a variable predicate.

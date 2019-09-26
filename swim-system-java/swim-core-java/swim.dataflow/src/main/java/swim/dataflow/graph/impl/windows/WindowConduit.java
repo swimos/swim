@@ -18,9 +18,9 @@ import java.util.function.LongSupplier;
 import java.util.function.ToLongFunction;
 import swim.concurrent.Schedule;
 import swim.concurrent.TimerFunction;
-import swim.dataflow.connector.AbstractJunction;
-import swim.dataflow.connector.Conduit;
 import swim.dataflow.graph.timestamps.TimestampAssigner;
+import swim.streamlet.AbstractJunction;
+import swim.streamlet.Conduit;
 import swim.util.Deferred;
 
 public class WindowConduit<T, W, U> extends AbstractJunction<U> implements Conduit<T, U> {

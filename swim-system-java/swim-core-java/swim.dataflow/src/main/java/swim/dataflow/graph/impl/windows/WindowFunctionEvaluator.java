@@ -15,9 +15,9 @@
 package swim.dataflow.graph.impl.windows;
 
 import swim.collections.FingerTrieSeq;
-import swim.dataflow.graph.Iterables;
 import swim.dataflow.graph.timestamps.WithTimestamp;
 import swim.dataflow.graph.windows.WindowFunction;
+import swim.util.Iterables;
 
 /**
  * Evaluate an arbitrary function over the contents of a window pane stored as a sequence of values.

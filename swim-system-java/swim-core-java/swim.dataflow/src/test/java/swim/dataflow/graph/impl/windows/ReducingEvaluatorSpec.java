@@ -17,7 +17,7 @@ package swim.dataflow.graph.impl.windows;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import swim.collections.BTreeMap;
-import swim.dataflow.graph.Unit;
+import swim.util.Unit;
 
 public class ReducingEvaluatorSpec {
 

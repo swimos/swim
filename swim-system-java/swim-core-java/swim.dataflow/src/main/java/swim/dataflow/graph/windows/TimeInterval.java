@@ -14,13 +14,13 @@
 
 package swim.dataflow.graph.windows;
 
-import swim.dataflow.graph.Require;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Kind;
 import swim.structure.Record;
 import swim.structure.Value;
 import swim.util.Murmur3;
+import swim.util.Require;
 
 /**
  * Window representing a fixed time interval.

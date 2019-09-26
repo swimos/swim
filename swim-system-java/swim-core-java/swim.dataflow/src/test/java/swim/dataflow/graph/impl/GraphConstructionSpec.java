@@ -16,12 +16,11 @@ package swim.dataflow.graph.impl;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import swim.dataflow.connector.AbstractJunction;
-import swim.dataflow.connector.ConnectorTestUtil;
-import swim.dataflow.connector.Receptacle;
 import swim.dataflow.graph.Sink;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.TrivialPersistenceProvider;
+import swim.streamlet.AbstractJunction;
+import swim.streamlet.Receptacle;
+import swim.streamlet.persistence.TrivialPersistenceProvider;
 import swim.structure.Form;
 import swim.util.Deferred;
 
@@ -51,7 +50,7 @@ public class GraphConstructionSpec {
 
   @Test
   public void executeSimpleGraph() {
-    final ConnectorTestUtil.FakeSchedule schedule = new ConnectorTestUtil.FakeSchedule();
+    final ConnectorTest.FakeSchedule schedule = new ConnectorTest.FakeSchedule();
     final ContextImpl context = new ContextImpl(schedule, new TrivialPersistenceProvider());
     final TestInput<Integer> input = new TestInput<>();
     final TestSink<Integer> output = new TestSink<>();

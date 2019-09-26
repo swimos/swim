@@ -16,7 +16,7 @@ package swim.dataflow.graph.impl.windows;
 
 import java.util.function.Consumer;
 import org.testng.Assert;
-import swim.dataflow.graph.Pair;
+import swim.util.Pair;
 
 /**
  * Implementation of {@link PaneManager} that executes an {@link Expectation} when updated.

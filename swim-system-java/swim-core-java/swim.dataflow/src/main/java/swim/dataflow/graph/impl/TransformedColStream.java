@@ -17,12 +17,12 @@ package swim.dataflow.graph.impl;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.TransformConduit;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.CollectionSwimStream;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
+import swim.streamlet.Junction;
+import swim.streamlet.TransformConduit;
 import swim.structure.Form;
 
 /**

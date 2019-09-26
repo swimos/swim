@@ -16,15 +16,15 @@ package swim.dataflow.graph.impl;
 
 import java.util.function.BinaryOperator;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.Conduit;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.StatefulConduits;
 import swim.dataflow.graph.BindingContext;
-import swim.dataflow.graph.StreamInterpretation;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.ValuePersister;
 import swim.dataflow.graph.sampling.Sampling;
+import swim.streamlet.Conduit;
+import swim.streamlet.Junction;
+import swim.streamlet.StatefulConduits;
+import swim.streamlet.StreamInterpretation;
+import swim.streamlet.persistence.ValuePersister;
 
 /**
  * Reduces the values of the stream over time.

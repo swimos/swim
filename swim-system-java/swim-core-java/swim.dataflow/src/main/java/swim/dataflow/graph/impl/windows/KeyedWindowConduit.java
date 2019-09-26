@@ -20,12 +20,12 @@ import java.util.function.ToLongFunction;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Schedule;
 import swim.concurrent.TimerFunction;
-import swim.dataflow.connector.AbstractMapJunction;
-import swim.dataflow.connector.MapConduit;
-import swim.dataflow.connector.MapView;
-import swim.dataflow.graph.persistence.SetPersister;
-import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialSetPersisiter;
 import swim.dataflow.graph.timestamps.TimestampAssigner;
+import swim.streamlet.AbstractMapJunction;
+import swim.streamlet.MapConduit;
+import swim.streamlet.MapView;
+import swim.streamlet.persistence.SetPersister;
+import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialSetPersisiter;
 import swim.util.Deferred;
 
 public class KeyedWindowConduit<K, V, W, U> extends AbstractMapJunction<K, U> implements MapConduit<K, K, V, U> {

@@ -14,7 +14,7 @@
 
 package swim.dataflow.graph;
 
-import swim.dataflow.connector.Receptacle;
+import swim.streamlet.Receptacle;
 
 public interface Sink<T> {
 

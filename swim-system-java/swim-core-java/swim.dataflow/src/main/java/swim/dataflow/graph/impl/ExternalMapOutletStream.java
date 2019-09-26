@@ -16,10 +16,10 @@ package swim.dataflow.graph.impl;
 
 import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.MapJunction;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
 import swim.dataflow.graph.SwimStreamContext;
+import swim.streamlet.MapJunction;
 import swim.structure.Form;
 
 /**

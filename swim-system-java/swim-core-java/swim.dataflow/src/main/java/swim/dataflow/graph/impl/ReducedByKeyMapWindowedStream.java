@@ -17,10 +17,8 @@ package swim.dataflow.graph.impl;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 import swim.collections.BTreeMap;
-import swim.dataflow.connector.MapJunction;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
-import swim.dataflow.graph.StreamInterpretation;
 import swim.dataflow.graph.SwimStreamContext;
 import swim.dataflow.graph.impl.windows.DefaultPaneManager;
 import swim.dataflow.graph.impl.windows.KeyedWindowConduit;
@@ -32,8 +30,6 @@ import swim.dataflow.graph.impl.windows.ReducePaneUpdater;
 import swim.dataflow.graph.impl.windows.ReducingEvaluator;
 import swim.dataflow.graph.impl.windows.ThresholdEvictor;
 import swim.dataflow.graph.impl.windows.WindowAccumulators;
-import swim.dataflow.graph.persistence.PersistenceProvider;
-import swim.dataflow.graph.persistence.SetPersister;
 import swim.dataflow.graph.sampling.Sampling;
 import swim.dataflow.graph.timestamps.TimestampAssigner;
 import swim.dataflow.graph.windows.KeyedWindowBinOp;
@@ -42,6 +38,10 @@ import swim.dataflow.graph.windows.WindowBinOp;
 import swim.dataflow.graph.windows.WindowFoldFunction;
 import swim.dataflow.graph.windows.WindowState;
 import swim.dataflow.graph.windows.eviction.ThresholdEviction;
+import swim.streamlet.MapJunction;
+import swim.streamlet.StreamInterpretation;
+import swim.streamlet.persistence.PersistenceProvider;
+import swim.streamlet.persistence.SetPersister;
 
 /**
  * Map stream of the reductions of the values over a window for each key of a mapped stream.

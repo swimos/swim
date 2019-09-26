@@ -27,13 +27,13 @@ import swim.dataflow.graph.CollectionSwimStream;
 import swim.dataflow.graph.MapSink;
 import swim.dataflow.graph.MapSwimStream;
 import swim.dataflow.graph.MapWindowedSwimStream;
-import swim.dataflow.graph.Pair;
 import swim.dataflow.graph.SinkHandle;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.sampling.Sampling;
 import swim.dataflow.graph.windows.TemporalWindowAssigner;
 import swim.dataflow.graph.windows.WindowState;
 import swim.structure.Form;
+import swim.util.Pair;
 
 /**
  * Provides standard implementations of combinator builder methods.

@@ -26,15 +26,14 @@ import java.util.function.ToLongFunction;
 import swim.collections.FingerTrieSeq;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.CollectionSwimStream;
-import swim.dataflow.graph.Either;
+import swim.dataflow.graph.EitherForm;
 import swim.dataflow.graph.MapSwimStream;
 import swim.dataflow.graph.MapWindowedSwimStream;
-import swim.dataflow.graph.Pair;
 import swim.dataflow.graph.Sink;
 import swim.dataflow.graph.SinkHandle;
 import swim.dataflow.graph.SwimStream;
-import swim.dataflow.graph.Unit;
 import swim.dataflow.graph.WindowedSwimStream;
+import swim.dataflow.graph.persistence.PairForm;
 import swim.dataflow.graph.sampling.DelaySpecifier;
 import swim.dataflow.graph.sampling.Sampling;
 import swim.dataflow.graph.windows.CombinedState;
@@ -46,6 +45,9 @@ import swim.dataflow.graph.windows.WindowState;
 import swim.dataflow.graph.windows.triggers.Trigger;
 import swim.structure.Form;
 import swim.util.Builder;
+import swim.util.Either;
+import swim.util.Pair;
+import swim.util.Unit;
 
 /**
  * Provides standard implementations of combinator builder methods.
@@ -233,14 +235,14 @@ public abstract class AbstractSwimStream<T> implements SwimStream<T> {
       final Function<T, K> firstToKey,
       final Function<T2, K> secondToKey,
       final BiFunction<T, T2, U> combine) {
-    final Form<Either<T, T2>> eitherForm = Either.form(form, other.form());
+    final Form<Either<T, T2>> eitherForm = new EitherForm<>(form, other.form());
     final SwimStream<Either<T, T2>> combined = map(Either::left, eitherForm)
             .union(other.map(Either::right, eitherForm));
     final WindowedSwimStream<Either<T, T2>, W> windowed = combined.window(assigner, windowForm, sampling)
             .withTrigger(trigger);
     final WindowJoinFunction<T, T2, K, U, W> joinFunction = new WindowJoinFunction<>(firstToKey, secondToKey, combine);
 
-    final Form<List<Pair<K, U>>> listForm = Form.forCollection(List.class, Pair.form(kform, vform));
+    final Form<List<Pair<K, U>>> listForm = Form.forCollection(List.class, new PairForm<>(kform, vform));
     return windowed.mapWindow(joinFunction, listForm)
             .mapToCollection(c -> c, listForm)
             .toMapStream(Pair::getFirst, Pair::getSecond, kform, vform);

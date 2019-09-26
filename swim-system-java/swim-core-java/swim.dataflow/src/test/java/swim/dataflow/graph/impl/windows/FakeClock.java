@@ -17,8 +17,8 @@ package swim.dataflow.graph.impl.windows;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.function.ToLongFunction;
-import swim.dataflow.graph.Pair;
 import swim.dataflow.graph.timestamps.TimestampAssigner;
+import swim.util.Pair;
 
 /**
  * A fake clock that can be incremented at will.

@@ -17,11 +17,11 @@ package swim.dataflow.graph;
 import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
 import swim.concurrent.Schedule;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.MapJunction;
-import swim.dataflow.connector.MapReceptacle;
-import swim.dataflow.connector.Receptacle;
-import swim.dataflow.graph.persistence.PersistenceProvider;
+import swim.streamlet.Junction;
+import swim.streamlet.MapJunction;
+import swim.streamlet.MapReceptacle;
+import swim.streamlet.Receptacle;
+import swim.streamlet.persistence.PersistenceProvider;
 import swim.structure.Form;
 
 /**

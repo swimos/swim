@@ -23,16 +23,17 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import swim.collections.HashTrieSet;
-import swim.dataflow.connector.ConnectorTestUtil;
-import swim.dataflow.connector.ConnectorTestUtil.MapAction;
-import swim.dataflow.graph.persistence.MapPersister;
-import swim.dataflow.graph.persistence.TrivialPersistenceProvider;
+import swim.dataflow.graph.impl.ConnectorTest;
 import swim.dataflow.graph.windows.PartitionAssigner;
+import swim.streamlet.ConnectorUtilities;
+import swim.streamlet.ConnectorUtilities.MapAction;
+import swim.streamlet.persistence.MapPersister;
+import swim.streamlet.persistence.TrivialPersistenceProvider;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Value;
 
-public class PartitionConduitSpec {
+public class PartitionConduitSpec extends ConnectorTest {
 
   @DataProvider(name = "withState")
   public Object[][] withOrWithoutState() {
@@ -62,11 +63,11 @@ public class PartitionConduitSpec {
 
   private void emitsSinglePartitionCorrectly(final PartitionConduit<Integer, Integer, PartitionSet<Integer>> conduit) {
     final ArrayList<MapAction<Integer, Integer>> results =
-        ConnectorTestUtil.pushData(conduit, 7);
+        ConnectorUtilities.pushData(conduit, 7);
 
     Assert.assertEquals(results.size(), 1);
 
-    ConnectorTestUtil.expectUpdate(results.get(0), (k, v, m) -> {
+    expectUpdate(results.get(0), (k, v, m) -> {
       Assert.assertEquals(k.intValue(), 2);
       Assert.assertEquals(v.intValue(), 7);
       Assert.assertEquals(m.size(), 1);
@@ -101,7 +102,7 @@ public class PartitionConduitSpec {
 
   private void emitsTwoPartitionsCorrectly(final PartitionConduit<Integer, Integer, PartitionSet<Integer>> conduit) {
     final ArrayList<MapAction<Integer, Integer>> results =
-        ConnectorTestUtil.pushData(conduit, 7);
+        ConnectorUtilities.pushData(conduit, 7);
 
     Assert.assertEquals(results.size(), 3);
 
@@ -111,7 +112,7 @@ public class PartitionConduitSpec {
     expectedParts.add(2);
 
     for (final MapAction<Integer, Integer> action : results) {
-      ConnectorTestUtil.expectUpdate(action, (k, v, m) -> {
+      expectUpdate(action, (k, v, m) -> {
         Assert.assertTrue(expectedParts.contains(k));
         expectedParts.remove(k);
         Assert.assertEquals(v.intValue(), 7);
@@ -150,15 +151,15 @@ public class PartitionConduitSpec {
   }
 
   private void updateExistingPartition(final PartitionConduit<Integer, Integer, PartitionSet<Integer>> conduit) {
-    final ArrayList<MapAction<Integer, Integer>> results1 = ConnectorTestUtil.pushData(conduit, 8);
+    final ArrayList<MapAction<Integer, Integer>> results1 = ConnectorUtilities.pushData(conduit, 8);
 
     Assert.assertEquals(results1.size(), 2);
 
-    final ArrayList<MapAction<Integer, Integer>> results2 = ConnectorTestUtil.pushData(conduit, 4);
+    final ArrayList<MapAction<Integer, Integer>> results2 = ConnectorUtilities.pushData(conduit, 4);
 
     Assert.assertEquals(results2.size(), 1);
 
-    ConnectorTestUtil.expectUpdate(results2.get(0), (k, v, m) -> {
+    expectUpdate(results2.get(0), (k, v, m) -> {
       Assert.assertEquals(k.intValue(), 2);
       Assert.assertEquals(v.intValue(), 4);
       Assert.assertEquals(m.size(), 2);
@@ -198,28 +199,28 @@ public class PartitionConduitSpec {
   }
 
   private void removeExpiredPartitions(final PartitionConduit<Record, String, PartitionSet<String>> conduit) {
-    final ArrayList<MapAction<String, Record>> results = ConnectorTestUtil.pushData(conduit,
+    final ArrayList<MapAction<String, Record>> results = ConnectorUtilities.pushData(conduit,
         new Record("name", false, 2),
         new Record("name", false, 8),
         new Record("name", true, -1));
 
     Assert.assertEquals(results.size(), 3);
 
-    ConnectorTestUtil.expectUpdate(results.get(0), (k, v, m) -> {
+    expectUpdate(results.get(0), (k, v, m) -> {
       Assert.assertEquals(k, "name");
       Assert.assertEquals(v.data, 2);
       Assert.assertEquals(m.size(), 1);
       Assert.assertEquals(m.get("name").get().data, 2);
     });
 
-    ConnectorTestUtil.expectUpdate(results.get(1), (k, v, m) -> {
+    expectUpdate(results.get(1), (k, v, m) -> {
       Assert.assertEquals(k, "name");
       Assert.assertEquals(v.data, 8);
       Assert.assertEquals(m.size(), 1);
       Assert.assertEquals(m.get("name").get().data, 8);
     });
 
-    ConnectorTestUtil.expectRemoval(results.get(2), (k, m) -> {
+    expectRemoval(results.get(2), (k, m) -> {
       Assert.assertEquals(k, "name");
       Assert.assertEquals(m.size(), 0);
     });

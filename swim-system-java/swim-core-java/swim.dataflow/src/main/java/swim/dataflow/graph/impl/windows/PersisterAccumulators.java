@@ -16,7 +16,7 @@ package swim.dataflow.graph.impl.windows;
 
 import java.util.Optional;
 import java.util.Set;
-import swim.dataflow.graph.persistence.MapPersister;
+import swim.streamlet.persistence.MapPersister;
 
 /**
  * {@link WindowAccumulators} backed by a {@link MapPersister} state store.

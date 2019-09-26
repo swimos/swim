@@ -16,13 +16,13 @@ package swim.dataflow.graph.impl;
 
 import java.util.function.BiFunction;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.MapConduit;
-import swim.dataflow.connector.MapJunction;
-import swim.dataflow.connector.MapMemoizingConduit;
-import swim.dataflow.connector.TransformMapConduit;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
 import swim.dataflow.graph.SwimStreamContext;
+import swim.streamlet.MapConduit;
+import swim.streamlet.MapJunction;
+import swim.streamlet.MapMemoizingConduit;
+import swim.streamlet.TransformMapConduit;
 import swim.structure.Form;
 
 /**

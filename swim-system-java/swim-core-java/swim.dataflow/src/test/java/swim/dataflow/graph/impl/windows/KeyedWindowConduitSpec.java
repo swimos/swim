@@ -22,19 +22,20 @@ import org.testng.annotations.Test;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
-import swim.dataflow.connector.ConnectorTestUtil;
-import swim.dataflow.connector.ConnectorTestUtil.MapAction;
-import swim.dataflow.connector.MapReceptacle;
-import swim.dataflow.connector.MapView;
-import swim.dataflow.graph.Pair;
+import swim.dataflow.graph.impl.ConnectorTest;
 import swim.dataflow.graph.timestamps.TimestampAssigner;
+import swim.streamlet.ConnectorUtilities;
+import swim.streamlet.ConnectorUtilities.MapAction;
+import swim.streamlet.MapReceptacle;
+import swim.streamlet.MapView;
 import swim.util.Deferred;
+import swim.util.Pair;
 
-public class KeyedWindowConduitSpec {
+public class KeyedWindowConduitSpec extends ConnectorTest {
 
   @Test
   public void handleUpdatesAndRemovals() {
-    final ConnectorTestUtil.FakeSchedule schedule = new ConnectorTestUtil.FakeSchedule();
+    final ConnectorTest.FakeSchedule schedule = new ConnectorTest.FakeSchedule();
     final FakePaneManagers managers = new FakePaneManagers();
 
     final KeyedWindowConduit<String, Pair<Long, Integer>, Integer, Integer> conduit = new KeyedWindowConduit<>(
@@ -61,14 +62,14 @@ public class KeyedWindowConduitSpec {
     Assert.assertEquals(outputs.size(), 3);
 
     //Check we get the expected updates and removals.
-    ConnectorTestUtil.expectUpdate(outputs.get(0), (k, v, m) -> {
+    expectUpdate(outputs.get(0), (k, v, m) -> {
       Assert.assertEquals(k, "a");
       Assert.assertEquals(v.intValue(), 16);
       Assert.assertEquals(m.size(), 1);
       Assert.assertEquals(m.get("a").get().intValue(), 16);
     });
 
-    ConnectorTestUtil.expectUpdate(outputs.get(1), (k, v, m) -> {
+    expectUpdate(outputs.get(1), (k, v, m) -> {
       Assert.assertEquals(k, "b");
       Assert.assertEquals(v.intValue(), 18);
       Assert.assertEquals(m.size(), 2);
@@ -76,7 +77,7 @@ public class KeyedWindowConduitSpec {
       Assert.assertEquals(m.get("b").get().intValue(), 18);
     });
 
-    ConnectorTestUtil.expectRemoval(outputs.get(2), (k, m) -> {
+    expectRemoval(outputs.get(2), (k, m) -> {
       Assert.assertEquals(k, "a");
       Assert.assertEquals(m.size(), 1);
       Assert.assertEquals(m.get("b").get().intValue(), 18);
@@ -91,7 +92,7 @@ public class KeyedWindowConduitSpec {
 
   @Test
   public void replacePaneManagerOnRemoval() {
-    final ConnectorTestUtil.FakeSchedule schedule = new ConnectorTestUtil.FakeSchedule();
+    final ConnectorTest.FakeSchedule schedule = new ConnectorTest.FakeSchedule();
     final FakePaneManagers managers = new FakePaneManagers();
 
     final KeyedWindowConduit<String, Pair<Long, Integer>, Integer, Integer> conduit = new KeyedWindowConduit<>(
@@ -125,26 +126,26 @@ public class KeyedWindowConduitSpec {
     Assert.assertEquals(outputs.size(), 4);
 
     //Check we get the expected updates and removals.
-    ConnectorTestUtil.expectUpdate(outputs.get(0), (k, v, m) -> {
+    expectUpdate(outputs.get(0), (k, v, m) -> {
       Assert.assertEquals(k, "a");
       Assert.assertEquals(v.intValue(), 16);
       Assert.assertEquals(m.size(), 1);
       Assert.assertEquals(m.get("a").get().intValue(), 16);
     });
 
-    ConnectorTestUtil.expectRemoval(outputs.get(1), (k, m) -> {
+    expectRemoval(outputs.get(1), (k, m) -> {
       Assert.assertEquals(k, "a");
       Assert.assertEquals(m.size(), 0);
     });
 
-    ConnectorTestUtil.expectUpdate(outputs.get(2), (k, v, m) -> {
+    expectUpdate(outputs.get(2), (k, v, m) -> {
       Assert.assertEquals(k, "a");
       Assert.assertEquals(v.intValue(), 18);
       Assert.assertEquals(m.size(), 1);
       Assert.assertEquals(m.get("a").get().intValue(), 18);
     });
 
-    ConnectorTestUtil.expectRemoval(outputs.get(3), (k, m) -> {
+    expectRemoval(outputs.get(3), (k, m) -> {
       Assert.assertEquals(k, "a");
       Assert.assertEquals(m.size(), 0);
     });
@@ -158,7 +159,7 @@ public class KeyedWindowConduitSpec {
 
   @Test
   public void triggerByDataTimestampsForOneKey() {
-    final ConnectorTestUtil.FakeSchedule schedule = new ConnectorTestUtil.FakeSchedule();
+    final ConnectorTest.FakeSchedule schedule = new ConnectorTest.FakeSchedule();
     final FakePaneManagers managers = new FakePaneManagers();
 
     final KeyedWindowConduit<String, Pair<Long, Integer>, Integer, Integer> conduit = new KeyedWindowConduit<>(
@@ -201,7 +202,7 @@ public class KeyedWindowConduitSpec {
 
   @Test
   public void triggerByDataTimestampsBetweenKeys() {
-    final ConnectorTestUtil.FakeSchedule schedule = new ConnectorTestUtil.FakeSchedule();
+    final ConnectorTest.FakeSchedule schedule = new ConnectorTest.FakeSchedule();
     final FakePaneManagers managers = new FakePaneManagers();
 
     final KeyedWindowConduit<String, Pair<Long, Integer>, Integer, Integer> conduit = new KeyedWindowConduit<>(
@@ -245,7 +246,7 @@ public class KeyedWindowConduitSpec {
 
   @Test
   public void scheduleCallbacksUsingClockTimestamps() {
-    final ConnectorTestUtil.FakeSchedule schedule = new ConnectorTestUtil.FakeSchedule();
+    final ConnectorTest.FakeSchedule schedule = new ConnectorTest.FakeSchedule();
     final FakePaneManagers managers = new FakePaneManagers();
     final FakeClock clock = new FakeClock();
 
@@ -293,12 +294,12 @@ public class KeyedWindowConduitSpec {
     conduit.subscribe(new MapReceptacle<String, Integer>() {
       @Override
       public void notifyChange(final String key, final Deferred<Integer> value, final Deferred<MapView<String, Integer>> map) {
-        outputs.add(ConnectorTestUtil.update(key, value.get(), map.get()));
+        outputs.add(ConnectorUtilities.update(key, value.get(), map.get()));
       }
 
       @Override
       public void notifyRemoval(final String key, final Deferred<MapView<String, Integer>> map) {
-        outputs.add(ConnectorTestUtil.remove(key, map.get()));
+        outputs.add(ConnectorUtilities.remove(key, map.get()));
       }
     });
     return outputs;

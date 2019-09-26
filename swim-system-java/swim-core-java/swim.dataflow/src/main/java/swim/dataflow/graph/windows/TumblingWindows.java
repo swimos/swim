@@ -22,7 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import swim.collections.FingerTrieSeq;
-import swim.dataflow.graph.Iterables;
+import swim.util.Iterables;
 
 /**
  * Assigns tumbling, mutually exclusive windows of a fixed length. A given value will belong to exactly one window.

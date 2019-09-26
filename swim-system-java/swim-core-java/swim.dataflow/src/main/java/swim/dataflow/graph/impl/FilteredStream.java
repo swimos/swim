@@ -16,11 +16,11 @@ package swim.dataflow.graph.impl;
 
 import java.util.function.Predicate;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.FilteredConduit;
-import swim.dataflow.connector.Junction;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
+import swim.streamlet.FilteredConduit;
+import swim.streamlet.Junction;
 
 /**
  * A filtered view of a stream.

@@ -15,15 +15,15 @@
 package swim.dataflow.graph.impl;
 
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.VariableDelayJunction;
 import swim.dataflow.graph.BindingContext;
-import swim.dataflow.graph.Require;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.ListPersister;
-import swim.dataflow.graph.persistence.ValuePersister;
+import swim.streamlet.Junction;
+import swim.streamlet.VariableDelayJunction;
+import swim.streamlet.persistence.ListPersister;
+import swim.streamlet.persistence.ValuePersister;
 import swim.structure.Form;
+import swim.util.Require;
 
 /**
  * Stream that, interpreting its input as a sequence of discrete samples, will return the value received a variable

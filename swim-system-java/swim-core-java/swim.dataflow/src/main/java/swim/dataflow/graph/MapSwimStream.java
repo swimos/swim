@@ -22,18 +22,20 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.MapJunction;
 import swim.dataflow.graph.sampling.Sampling;
 import swim.dataflow.graph.windows.KeyedWindowSpec;
 import swim.dataflow.graph.windows.TemporalWindowAssigner;
 import swim.dataflow.graph.windows.WindowSpec;
 import swim.dataflow.graph.windows.WindowState;
+import swim.streamlet.MapJunction;
+import swim.streamlet.MapReceptacle;
 import swim.structure.Form;
+import swim.util.Pair;
 
 /**
  * An abstract stream of mappings from keys to values. In combination with {@link SwimStream} this is used to construct
  * a directed graph of combinators which pump data from sources to sinks. The graph can then be instantiated against a
- * set of source {@link swim.dataflow.connector.MapJunction}s and sink {@link swim.dataflow.connector.MapReceptacle}s to
+ * set of source {@link MapJunction}s and sink {@link MapReceptacle}s to
  * create an executable data-flow that can run inside a Swim agent.
  *
  * @param <K> The type of the keys.

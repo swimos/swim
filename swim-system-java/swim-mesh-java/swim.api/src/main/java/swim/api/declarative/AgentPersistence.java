@@ -20,15 +20,16 @@ import swim.api.data.ListData;
 import swim.api.data.MapData;
 import swim.api.data.ValueData;
 import swim.api.store.Store;
-import swim.dataflow.connector.MapView;
-import swim.dataflow.graph.Unit;
-import swim.dataflow.graph.persistence.ListPersister;
-import swim.dataflow.graph.persistence.MapPersister;
-import swim.dataflow.graph.persistence.PersistenceProvider;
-import swim.dataflow.graph.persistence.SetPersister;
-import swim.dataflow.graph.persistence.ValuePersister;
+import swim.dataflow.graph.persistence.UnitForm;
+import swim.streamlet.MapView;
+import swim.streamlet.persistence.ListPersister;
+import swim.streamlet.persistence.MapPersister;
+import swim.streamlet.persistence.PersistenceProvider;
+import swim.streamlet.persistence.SetPersister;
+import swim.streamlet.persistence.ValuePersister;
 import swim.structure.Form;
 import swim.structure.Value;
+import swim.util.Unit;
 
 /**
  * Persistence provider which stores state using a {@link Store}.
@@ -48,7 +49,7 @@ public class AgentPersistence implements PersistenceProvider {
 
   @Override
   public <T> SetPersister<T> forSet(final Value key, final Form<T> form) {
-    return new SetDataPersister<>(factory.mapData(key).keyForm(form).valueForm(Unit.FORM));
+    return new SetDataPersister<>(factory.mapData(key).keyForm(form).valueForm(UnitForm.INSTANCE));
   }
 
   @Override

@@ -20,21 +20,21 @@ import java.util.function.ToLongFunction;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieSet;
 import swim.concurrent.Schedule;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.MapJunction;
-import swim.dataflow.connector.MapReceptacle;
-import swim.dataflow.connector.Receptacle;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSink;
 import swim.dataflow.graph.MapSwimStream;
-import swim.dataflow.graph.Require;
 import swim.dataflow.graph.Sink;
 import swim.dataflow.graph.SinkHandle;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.Unit;
-import swim.dataflow.graph.persistence.PersistenceProvider;
+import swim.streamlet.Junction;
+import swim.streamlet.MapJunction;
+import swim.streamlet.MapReceptacle;
+import swim.streamlet.Receptacle;
+import swim.streamlet.persistence.PersistenceProvider;
 import swim.structure.Form;
+import swim.util.Require;
+import swim.util.Unit;
 
 /**
  * Standard implementation of {@link SwimStreamContext}.

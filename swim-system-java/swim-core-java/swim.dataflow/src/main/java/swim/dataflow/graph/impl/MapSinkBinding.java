@@ -14,11 +14,11 @@
 
 package swim.dataflow.graph.impl;
 
-import swim.dataflow.connector.MapJunction;
-import swim.dataflow.connector.MapReceptacle;
 import swim.dataflow.graph.MapSink;
 import swim.dataflow.graph.MapSwimStream;
 import swim.dataflow.graph.SwimStreamContext;
+import swim.streamlet.MapJunction;
+import swim.streamlet.MapReceptacle;
 
 /**
  * A binding from a map stream to a sink.

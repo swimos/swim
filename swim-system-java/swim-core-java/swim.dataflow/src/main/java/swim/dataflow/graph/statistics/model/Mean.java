@@ -14,11 +14,11 @@
 
 package swim.dataflow.graph.statistics.model;
 
-import swim.dataflow.graph.Require;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Record;
 import swim.structure.Value;
+import swim.util.Require;
 
 /**
  * Type to reduce the mean of a stream of values.

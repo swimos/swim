@@ -15,8 +15,8 @@
 package swim.dataflow.graph.impl.windows;
 
 import swim.collections.BTreeMap;
-import swim.dataflow.graph.Iterables;
 import swim.dataflow.graph.windows.eviction.EvictionThresholdFunction;
+import swim.util.Iterables;
 
 /**
  * Evicts values from a window, where the state is stored in a map by eviction criterion, usig a threshold function.

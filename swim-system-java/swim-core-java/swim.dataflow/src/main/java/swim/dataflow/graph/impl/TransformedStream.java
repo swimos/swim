@@ -18,13 +18,13 @@ package swim.dataflow.graph.impl;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.MemoizingConduit;
-import swim.dataflow.connector.TransformConduit;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
 import swim.dataflow.graph.sampling.Sampling;
+import swim.streamlet.Junction;
+import swim.streamlet.MemoizingConduit;
+import swim.streamlet.TransformConduit;
 import swim.structure.Form;
 
 /**

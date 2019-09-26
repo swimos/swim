@@ -19,13 +19,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
-import swim.dataflow.graph.Pair;
-import swim.dataflow.graph.Unit;
 import swim.dataflow.graph.timestamps.TimestampContext;
 import swim.dataflow.graph.windows.SingletonWindowStore;
 import swim.dataflow.graph.windows.TemporalWindowAssigner;
 import swim.dataflow.graph.windows.triggers.Trigger;
 import swim.dataflow.graph.windows.triggers.TriggerAction;
+import swim.util.Pair;
+import swim.util.Unit;
 
 final class WindowTestingMocks {
 

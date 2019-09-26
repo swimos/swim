@@ -15,16 +15,16 @@
 package swim.dataflow.graph.impl;
 
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.MapJunction;
-import swim.dataflow.connector.ModalKeyFetchConduit;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
-import swim.dataflow.graph.StreamInterpretation;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.ValuePersister;
 import swim.dataflow.graph.sampling.Sampling;
+import swim.streamlet.Junction;
+import swim.streamlet.MapJunction;
+import swim.streamlet.ModalKeyFetchConduit;
+import swim.streamlet.StreamInterpretation;
+import swim.streamlet.persistence.ValuePersister;
 
 /**
  * A stream of values for a specified key in a map stream. The selected key can be modified by a control stream.

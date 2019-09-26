@@ -18,13 +18,13 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.FlatMapEntriesConduit;
-import swim.dataflow.connector.MapJunction;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
-import swim.dataflow.graph.Pair;
 import swim.dataflow.graph.SwimStreamContext;
+import swim.streamlet.FlatMapEntriesConduit;
+import swim.streamlet.MapJunction;
 import swim.structure.Form;
+import swim.util.Pair;
 
 /**
  * Flat-map operation across the key-value pairs of a map stream. A combine operation is supplied to merge

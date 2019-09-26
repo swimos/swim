@@ -1,5 +1,7 @@
 package swim.dataflow.graph;
 
+import swim.util.Unit;
+
 /**
  * Context passed through {@link SwimStream} and {@link MapSwimStream} instances.
  */

@@ -18,18 +18,18 @@ import java.time.Duration;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 import swim.concurrent.Schedule;
-import swim.dataflow.connector.AbstractJunction;
-import swim.dataflow.connector.FlatMapConduit;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.VariableFlatMapConduit;
 import swim.dataflow.graph.BindingContext;
-import swim.dataflow.graph.Iterables;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.ValuePersister;
 import swim.dataflow.graph.sampling.DelaySpecifier;
+import swim.streamlet.AbstractJunction;
+import swim.streamlet.FlatMapConduit;
+import swim.streamlet.Junction;
+import swim.streamlet.VariableFlatMapConduit;
+import swim.streamlet.persistence.ValuePersister;
 import swim.structure.Form;
 import swim.structure.form.DurationForm;
+import swim.util.Iterables;
 
 /**
  * Stream with a flat-map operation applied across its values. The sequences of values produced for each change is

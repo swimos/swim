@@ -18,8 +18,6 @@ import java.util.Optional;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import swim.collections.HashTrieMap;
-import swim.dataflow.graph.Pair;
-import swim.dataflow.graph.Unit;
 import swim.dataflow.graph.impl.windows.WindowTestingMocks.ActionWithCallback;
 import swim.dataflow.graph.impl.windows.WindowTestingMocks.OnInit;
 import swim.dataflow.graph.impl.windows.WindowTestingMocks.OutputCollector;
@@ -30,6 +28,8 @@ import swim.dataflow.graph.windows.SingletonWindowStore;
 import swim.dataflow.graph.windows.TemporalWindowAssigner;
 import swim.dataflow.graph.windows.triggers.Trigger;
 import swim.dataflow.graph.windows.triggers.TriggerAction;
+import swim.util.Pair;
+import swim.util.Unit;
 
 public class DefaultPaneManagerSpec {
 

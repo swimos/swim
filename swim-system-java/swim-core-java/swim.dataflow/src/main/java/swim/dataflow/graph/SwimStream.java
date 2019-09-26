@@ -21,7 +21,6 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.Junction;
 import swim.dataflow.graph.sampling.DelaySpecifier;
 import swim.dataflow.graph.sampling.Sampling;
 import swim.dataflow.graph.windows.CombinedState;
@@ -32,12 +31,17 @@ import swim.dataflow.graph.windows.TemporalWindowAssigner;
 import swim.dataflow.graph.windows.WindowSpec;
 import swim.dataflow.graph.windows.WindowState;
 import swim.dataflow.graph.windows.triggers.Trigger;
+import swim.streamlet.Junction;
+import swim.streamlet.Receptacle;
 import swim.structure.Form;
+import swim.util.Either;
+import swim.util.Pair;
+import swim.util.Unit;
 
 /**
  * An abstract stream of values. In combination with {@link MapSwimStream} this is used to construct a directed
  * graph of combinators which pump data from sources to sinks. The graph can then be instantiated against a set of
- * source {@link Junction}s and sink {@link swim.dataflow.connector.Receptacle}s to create an executable data-flow
+ * source {@link Junction}s and sink {@link Receptacle}s to create an executable data-flow
  * that can run inside a Swim
  * agent.
  *

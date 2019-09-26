@@ -16,13 +16,13 @@ package swim.dataflow.graph.impl.partitions;
 
 import java.util.HashSet;
 import java.util.Set;
-import swim.dataflow.connector.AbstractMapJunction;
-import swim.dataflow.connector.MapView;
-import swim.dataflow.connector.ValueToMapConduit;
-import swim.dataflow.graph.persistence.MapPersister;
-import swim.dataflow.graph.persistence.TrivialPersistenceProvider.TrivialMapPersister;
 import swim.dataflow.graph.windows.PartitionAssigner;
 import swim.dataflow.graph.windows.PartitionState;
+import swim.streamlet.AbstractMapJunction;
+import swim.streamlet.MapView;
+import swim.streamlet.ValueToMapConduit;
+import swim.streamlet.persistence.MapPersister;
+import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialMapPersister;
 import swim.structure.Form;
 import swim.util.Deferred;
 

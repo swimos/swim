@@ -16,11 +16,11 @@ package swim.dataflow.graph.impl;
 
 import java.util.function.BiPredicate;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.FilteredMapConduit;
-import swim.dataflow.connector.MapJunction;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
 import swim.dataflow.graph.SwimStreamContext;
+import swim.streamlet.FilteredMapConduit;
+import swim.streamlet.MapJunction;
 
 /**
  * A filtered view on a map stream.

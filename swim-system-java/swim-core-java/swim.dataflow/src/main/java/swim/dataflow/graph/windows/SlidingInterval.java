@@ -14,12 +14,12 @@
 
 package swim.dataflow.graph.windows;
 
-import swim.dataflow.graph.Require;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Record;
 import swim.structure.Value;
 import swim.util.Murmur3;
+import swim.util.Require;
 
 /**
  * A fixed length window that slides with the data that is added to it, having no fixed beginning and end.

@@ -15,12 +15,12 @@
 package swim.dataflow.graph.impl;
 
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.FirstValueMapConduit;
-import swim.dataflow.connector.MapJunction;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.MapPersister;
+import swim.streamlet.FirstValueMapConduit;
+import swim.streamlet.MapJunction;
+import swim.streamlet.persistence.MapPersister;
 
 /**
  * A stream that will only ever contain the first value received from its source for each key.

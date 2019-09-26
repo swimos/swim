@@ -17,18 +17,18 @@ package swim.dataflow.graph.impl;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.MapJunction;
-import swim.dataflow.connector.MapJunction2;
-import swim.dataflow.connector.StatefulConduits;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
-import swim.dataflow.graph.StreamInterpretation;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.MapPersister;
-import swim.dataflow.graph.persistence.ValuePersister;
 import swim.dataflow.graph.sampling.Sampling;
+import swim.streamlet.Junction;
+import swim.streamlet.MapJunction;
+import swim.streamlet.MapJunction2;
+import swim.streamlet.StatefulConduits;
+import swim.streamlet.StreamInterpretation;
+import swim.streamlet.persistence.MapPersister;
+import swim.streamlet.persistence.ValuePersister;
 import swim.structure.Form;
 
 /**

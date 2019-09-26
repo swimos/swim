@@ -16,9 +16,7 @@ package swim.dataflow.graph.impl;
 
 import java.util.function.ToLongFunction;
 import swim.collections.FingerTrieSeq;
-import swim.dataflow.connector.Junction;
 import swim.dataflow.graph.BindingContext;
-import swim.dataflow.graph.StreamInterpretation;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
 import swim.dataflow.graph.impl.windows.DefaultPaneManager;
@@ -34,6 +32,8 @@ import swim.dataflow.graph.timestamps.WithTimestamp;
 import swim.dataflow.graph.windows.WindowFunction;
 import swim.dataflow.graph.windows.WindowSpec;
 import swim.dataflow.graph.windows.WindowState;
+import swim.streamlet.Junction;
+import swim.streamlet.StreamInterpretation;
 import swim.structure.Form;
 
 /**

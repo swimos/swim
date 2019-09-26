@@ -17,12 +17,12 @@ package swim.dataflow.graph.impl;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.JoinOnKeyJunction;
-import swim.dataflow.connector.MapJunction;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
 import swim.dataflow.graph.SwimStreamContext;
 import swim.dataflow.graph.sampling.Sampling;
+import swim.streamlet.JoinOnKeyJunction;
+import swim.streamlet.MapJunction;
 import swim.structure.Form;
 
 /**

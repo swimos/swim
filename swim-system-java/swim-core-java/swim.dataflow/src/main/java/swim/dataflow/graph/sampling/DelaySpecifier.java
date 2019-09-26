@@ -16,8 +16,8 @@ package swim.dataflow.graph.sampling;
 
 import java.time.Duration;
 import java.util.function.Function;
-import swim.dataflow.graph.Require;
 import swim.dataflow.graph.SwimStream;
+import swim.util.Require;
 
 public interface DelaySpecifier extends Sampling {
 

@@ -14,8 +14,8 @@
 
 package swim.dataflow.graph.impl.windows;
 
-import swim.dataflow.graph.Pair;
 import swim.util.Deferred;
+import swim.util.Pair;
 
 /**
  * Specification for a call to {@link WindowConduit#notifyChange(Deferred)}.

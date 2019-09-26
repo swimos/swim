@@ -16,16 +16,16 @@ package swim.dataflow.graph.impl;
 
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.DelayMapConduit;
-import swim.dataflow.connector.MapJunction;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
-import swim.dataflow.graph.Require;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.ListPersister;
-import swim.dataflow.graph.persistence.PersistenceProvider;
-import swim.dataflow.graph.persistence.SetPersister;
+import swim.streamlet.DelayMapConduit;
+import swim.streamlet.MapJunction;
+import swim.streamlet.persistence.ListPersister;
+import swim.streamlet.persistence.PersistenceProvider;
+import swim.streamlet.persistence.SetPersister;
 import swim.structure.Form;
+import swim.util.Require;
 
 /**
  * Stream that, interpreting its input as a sequence of discrete samples, will return the value received a fixed

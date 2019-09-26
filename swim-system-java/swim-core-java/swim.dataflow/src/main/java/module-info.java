@@ -34,5 +34,4 @@ module swim.dataflow {
   exports swim.dataflow.graph.impl.partitions;
   exports swim.dataflow.graph.impl.windows;
   exports swim.dataflow.graph.persistence;
-  exports swim.dataflow.connector;
 }

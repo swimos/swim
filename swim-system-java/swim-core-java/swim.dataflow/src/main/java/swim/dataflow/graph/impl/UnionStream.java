@@ -16,11 +16,11 @@ package swim.dataflow.graph.impl;
 
 import java.util.function.ToLongFunction;
 import swim.collections.FingerTrieSeq;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.UnionJunction;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
+import swim.streamlet.Junction;
+import swim.streamlet.UnionJunction;
 import swim.structure.Form;
 
 /**

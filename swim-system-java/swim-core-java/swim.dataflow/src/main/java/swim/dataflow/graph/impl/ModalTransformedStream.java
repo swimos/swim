@@ -16,13 +16,13 @@ package swim.dataflow.graph.impl;
 
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.ModalTransformConduit;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.ValuePersister;
 import swim.dataflow.graph.sampling.DelaySpecifier;
+import swim.streamlet.Junction;
+import swim.streamlet.ModalTransformConduit;
+import swim.streamlet.persistence.ValuePersister;
 import swim.structure.Form;
 
 /**

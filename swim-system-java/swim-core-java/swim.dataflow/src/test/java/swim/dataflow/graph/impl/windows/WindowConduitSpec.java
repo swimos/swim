@@ -17,10 +17,10 @@ package swim.dataflow.graph.impl.windows;
 import java.util.ArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import swim.dataflow.connector.ConnectorTestUtil.FakeSchedule;
-import swim.dataflow.graph.Pair;
+import swim.dataflow.graph.impl.ConnectorTest;
 import swim.dataflow.graph.timestamps.TimestampAssigner;
 import swim.util.Deferred;
+import swim.util.Pair;
 
 public class WindowConduitSpec {
 
@@ -28,7 +28,7 @@ public class WindowConduitSpec {
   public void timestampsFromData() {
 
     final FakePaneManager manager = new FakePaneManager(man -> { });
-    final FakeSchedule schedule = new FakeSchedule();
+    final ConnectorTest.FakeSchedule schedule = new ConnectorTest.FakeSchedule();
     final WindowConduit<Pair<Long, Integer>, Integer, Integer> conduit = new WindowConduit<>(
         schedule, manager, TimestampAssigner.fromData(Pair::getFirst));
 
@@ -88,7 +88,7 @@ public class WindowConduitSpec {
   public void timestampsFromClock() {
 
     final FakePaneManager manager = new FakePaneManager(man -> { });
-    final FakeSchedule schedule = new FakeSchedule();
+    final ConnectorTest.FakeSchedule schedule = new ConnectorTest.FakeSchedule();
     final FakeClock clock = new FakeClock();
     final WindowConduit<Pair<Long, Integer>, Integer, Integer> conduit = new WindowConduit<>(
         schedule, manager, clock);

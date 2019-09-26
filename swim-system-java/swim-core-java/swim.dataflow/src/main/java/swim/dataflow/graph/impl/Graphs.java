@@ -16,7 +16,7 @@ package swim.dataflow.graph.impl;
 
 import swim.concurrent.Schedule;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.PersistenceProvider;
+import swim.streamlet.persistence.PersistenceProvider;
 
 /**
  * Factory for {@link SwimStreamContext}s.

@@ -17,14 +17,14 @@ package swim.dataflow.graph.impl;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
-import swim.dataflow.connector.Junction;
-import swim.dataflow.connector.MapJunction;
-import swim.dataflow.connector.ModalFilteredMapConduit;
 import swim.dataflow.graph.BindingContext;
 import swim.dataflow.graph.MapSwimStream;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
-import swim.dataflow.graph.persistence.ValuePersister;
+import swim.streamlet.Junction;
+import swim.streamlet.MapJunction;
+import swim.streamlet.ModalFilteredMapConduit;
+import swim.streamlet.persistence.ValuePersister;
 
 /**
  * Map stream where the entries are filtered according to a variable predicate.

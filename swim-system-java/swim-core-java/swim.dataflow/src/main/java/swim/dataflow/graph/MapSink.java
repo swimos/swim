@@ -14,7 +14,7 @@
 
 package swim.dataflow.graph;
 
-import swim.dataflow.connector.MapReceptacle;
+import swim.streamlet.MapReceptacle;
 
 public interface MapSink<K, V> {
 

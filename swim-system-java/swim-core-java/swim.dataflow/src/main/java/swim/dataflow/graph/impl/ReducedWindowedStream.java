@@ -16,9 +16,7 @@ package swim.dataflow.graph.impl;
 
 import java.util.function.ToLongFunction;
 import swim.collections.BTreeMap;
-import swim.dataflow.connector.Junction;
 import swim.dataflow.graph.BindingContext;
-import swim.dataflow.graph.StreamInterpretation;
 import swim.dataflow.graph.SwimStream;
 import swim.dataflow.graph.SwimStreamContext;
 import swim.dataflow.graph.impl.windows.DefaultPaneManager;
@@ -31,7 +29,6 @@ import swim.dataflow.graph.impl.windows.ReducingEvaluator;
 import swim.dataflow.graph.impl.windows.ThresholdEvictor;
 import swim.dataflow.graph.impl.windows.WindowAccumulators;
 import swim.dataflow.graph.impl.windows.WindowConduit;
-import swim.dataflow.graph.persistence.PersistenceProvider;
 import swim.dataflow.graph.sampling.Sampling;
 import swim.dataflow.graph.timestamps.TimestampAssigner;
 import swim.dataflow.graph.windows.WindowBinOp;
@@ -39,6 +36,9 @@ import swim.dataflow.graph.windows.WindowFoldFunction;
 import swim.dataflow.graph.windows.WindowSpec;
 import swim.dataflow.graph.windows.WindowState;
 import swim.dataflow.graph.windows.eviction.ThresholdEviction;
+import swim.streamlet.Junction;
+import swim.streamlet.StreamInterpretation;
+import swim.streamlet.persistence.PersistenceProvider;
 
 /**
  * Stream of the reductions of another stream over a window.
