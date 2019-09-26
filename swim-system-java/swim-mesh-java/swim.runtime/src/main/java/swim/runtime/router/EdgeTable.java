@@ -15,31 +15,53 @@
 package swim.runtime.router;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.Downlink;
+import swim.api.lane.DemandMapLane;
+import swim.api.lane.SupplyLane;
+import swim.api.lane.function.OnCueKey;
+import swim.api.lane.function.OnSyncMap;
 import swim.api.policy.Policy;
+import swim.api.warp.WarpUplink;
 import swim.collections.HashTrieMap;
+import swim.concurrent.Conts;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.DownlinkView;
+import swim.runtime.EdgeAddress;
 import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
+import swim.runtime.HostBinding;
+import swim.runtime.LaneBinding;
 import swim.runtime.LinkBinding;
+import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshContext;
+import swim.runtime.NodeBinding;
+import swim.runtime.PartBinding;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
+import swim.runtime.agent.AgentNode;
+import swim.runtime.reflect.LogEntry;
+import swim.runtime.reflect.MeshInfo;
 import swim.store.StoreBinding;
 import swim.uri.Uri;
 
 public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   protected EdgeContext edgeContext;
-
   volatile HashTrieMap<Uri, MeshBinding> meshes;
-
   volatile MeshBinding network;
+
+  DemandMapLane<Uri, MeshInfo> metaMeshes;
+  SupplyLane<LogEntry> metaTraceLog;
+  SupplyLane<LogEntry> metaDebugLog;
+  SupplyLane<LogEntry> metaInfoLog;
+  SupplyLane<LogEntry> metaWarnLog;
+  SupplyLane<LogEntry> metaErrorLog;
+  SupplyLane<LogEntry> metaFailLog;
 
   public EdgeTable() {
     this.meshes = HashTrieMap.empty();
@@ -75,8 +97,18 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
     }
   }
 
-  protected MeshContext createMeshContext(MeshBinding mesh, Uri meshUri) {
-    return new EdgeTableMesh(this, mesh, meshUri);
+  protected MeshContext createMeshContext(MeshAddress meshAddress, MeshBinding mesh) {
+    return new EdgeTableMesh(this, mesh, meshAddress);
+  }
+
+  @Override
+  public final EdgeAddress cellAddress() {
+    return this.edgeContext.cellAddress();
+  }
+
+  @Override
+  public final String edgeName() {
+    return this.edgeContext.edgeName();
   }
 
   @Override
@@ -102,6 +134,51 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @Override
   public StoreBinding store() {
     return this.edgeContext.store();
+  }
+
+  @Override
+  public void openMetaEdge(EdgeBinding edge, NodeBinding metaEdge) {
+    openMetaLanes(edge, (AgentNode) metaEdge);
+    this.edgeContext.openMetaEdge(edge, metaEdge);
+  }
+
+  protected void openMetaLanes(EdgeBinding edge, AgentNode metaEdge) {
+    openReflectLanes(edge, metaEdge);
+    openLogLanes(edge, metaEdge);
+  }
+
+  protected void openReflectLanes(EdgeBinding edge, AgentNode metaEdge) {
+    this.metaMeshes = metaEdge.demandMapLane()
+        .keyForm(Uri.form())
+        .valueForm(MeshInfo.form())
+        .observe(new EdgeTableMeshesController(edge));
+    metaEdge.openLane(MESHES_URI, this.metaMeshes);
+  }
+
+  protected void openLogLanes(EdgeBinding edge, AgentNode metaEdge) {
+    this.metaTraceLog = metaEdge.supplyLane()
+        .valueForm(LogEntry.form());
+    metaEdge.openLane(LogEntry.TRACE_LOG_URI, this.metaTraceLog);
+
+    this.metaDebugLog = metaEdge.supplyLane()
+        .valueForm(LogEntry.form());
+    metaEdge.openLane(LogEntry.DEBUG_LOG_URI, this.metaDebugLog);
+
+    this.metaInfoLog = metaEdge.supplyLane()
+        .valueForm(LogEntry.form());
+    metaEdge.openLane(LogEntry.INFO_LOG_URI, this.metaInfoLog);
+
+    this.metaWarnLog = metaEdge.supplyLane()
+        .valueForm(LogEntry.form());
+    metaEdge.openLane(LogEntry.WARN_LOG_URI, this.metaWarnLog);
+
+    this.metaErrorLog = metaEdge.supplyLane()
+        .valueForm(LogEntry.form());
+    metaEdge.openLane(LogEntry.ERROR_LOG_URI, this.metaErrorLog);
+
+    this.metaFailLog = metaEdge.supplyLane()
+        .valueForm(LogEntry.form());
+    metaEdge.openLane(LogEntry.FAIL_LOG_URI, this.metaFailLog);
   }
 
   @Override
@@ -141,10 +218,11 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
         newMeshes = oldMeshes;
         break;
       } else if (meshBinding == null) {
-        meshBinding = this.edgeContext.createMesh(meshUri);
+        final MeshAddress meshAddress = cellAddress().meshUri(meshUri);
+        meshBinding = this.edgeContext.createMesh(meshAddress);
         if (meshBinding != null) {
-          meshBinding = this.edgeContext.injectMesh(meshUri, meshBinding);
-          final MeshContext meshContext = createMeshContext(meshBinding, meshUri);
+          meshBinding = this.edgeContext.injectMesh(meshAddress, meshBinding);
+          final MeshContext meshContext = createMeshContext(meshAddress, meshBinding);
           meshBinding.setMeshContext(meshContext);
           meshBinding = meshBinding.meshWrapper();
           newMeshes = oldMeshes.updated(meshUri, meshBinding);
@@ -158,6 +236,10 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
     } while (oldMeshes != newMeshes && !MESHES.compareAndSet(this, oldMeshes, newMeshes));
     if (oldMeshes != newMeshes) {
       activate(meshBinding);
+      final DemandMapLane<Uri, MeshInfo> metaMeshes = this.metaMeshes;
+      if (metaMeshes != null) {
+        metaMeshes.cue(meshUri);
+      }
     }
     return meshBinding;
   }
@@ -175,8 +257,9 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
         break;
       } else {
         if (meshBinding == null) {
-          meshBinding = this.edgeContext.injectMesh(meshUri, mesh);
-          final MeshContext meshContext = createMeshContext(meshBinding, meshUri);
+          final MeshAddress meshAddress = cellAddress().meshUri(meshUri);
+          meshBinding = this.edgeContext.injectMesh(meshAddress, mesh);
+          final MeshContext meshContext = createMeshContext(meshAddress, meshBinding);
           meshBinding.setMeshContext(meshContext);
           meshBinding = meshBinding.meshWrapper();
         }
@@ -185,6 +268,10 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
     } while (oldMeshes != newMeshes && !MESHES.compareAndSet(this, oldMeshes, newMeshes));
     if (meshBinding != null) {
       activate(meshBinding);
+      final DemandMapLane<Uri, MeshInfo> metaMeshes = this.metaMeshes;
+      if (metaMeshes != null) {
+        metaMeshes.cue(meshUri);
+      }
     }
     return meshBinding;
   }
@@ -210,7 +297,46 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
         this.network = null;
       }
       meshBinding.didClose();
+      final DemandMapLane<Uri, MeshInfo> metaMeshes = this.metaMeshes;
+      if (metaMeshes != null) {
+        metaMeshes.remove(meshUri);
+      }
     }
+  }
+
+  @Override
+  public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
+    this.edgeContext.openMetaMesh(mesh, metaMesh);
+  }
+
+  @Override
+  public void openMetaPart(PartBinding part, NodeBinding metaPart) {
+    this.edgeContext.openMetaPart(part, metaPart);
+  }
+
+  @Override
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    this.edgeContext.openMetaHost(host, metaHost);
+  }
+
+  @Override
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.edgeContext.openMetaNode(node, metaNode);
+  }
+
+  @Override
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.edgeContext.openMetaLane(lane, metaLane);
+  }
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.edgeContext.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.edgeContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override
@@ -257,27 +383,56 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
 
   @Override
   public void trace(Object message) {
+    final SupplyLane<LogEntry> metaTraceLog = this.metaTraceLog;
+    if (metaTraceLog != null) {
+      metaTraceLog.push(LogEntry.trace(message));
+    }
     this.edgeContext.trace(message);
   }
 
   @Override
   public void debug(Object message) {
+    final SupplyLane<LogEntry> metaDebugLog = this.metaDebugLog;
+    if (metaDebugLog != null) {
+      metaDebugLog.push(LogEntry.debug(message));
+    }
     this.edgeContext.debug(message);
   }
 
   @Override
   public void info(Object message) {
+    final SupplyLane<LogEntry> metaInfoLog = this.metaInfoLog;
+    if (metaInfoLog != null) {
+      metaInfoLog.push(LogEntry.info(message));
+    }
     this.edgeContext.info(message);
   }
 
   @Override
   public void warn(Object message) {
+    final SupplyLane<LogEntry> metaWarnLog = this.metaWarnLog;
+    if (metaWarnLog != null) {
+      metaWarnLog.push(LogEntry.warn(message));
+    }
     this.edgeContext.warn(message);
   }
 
   @Override
   public void error(Object message) {
+    final SupplyLane<LogEntry> metaErrorLog = this.metaErrorLog;
+    if (metaErrorLog != null) {
+      metaErrorLog.push(LogEntry.error(message));
+    }
     this.edgeContext.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    final SupplyLane<LogEntry> metaFailLog = this.metaFailLog;
+    if (metaFailLog != null) {
+      metaFailLog.push(LogEntry.fail(message));
+    }
+    this.edgeContext.fail(message);
   }
 
   @Override
@@ -341,10 +496,38 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
 
   @Override
   public void didFail(Throwable error) {
-    error.printStackTrace();
+    if (Conts.isNonFatal(error)) {
+      fail(error);
+    } else {
+      error.printStackTrace();
+    }
   }
 
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<EdgeTable, HashTrieMap<Uri, MeshBinding>> MESHES =
       AtomicReferenceFieldUpdater.newUpdater(EdgeTable.class, (Class<HashTrieMap<Uri, MeshBinding>>) (Class<?>) HashTrieMap.class, "meshes");
+
+  static final Uri MESHES_URI = Uri.parse("meshes");
+}
+
+final class EdgeTableMeshesController implements OnCueKey<Uri, MeshInfo>, OnSyncMap<Uri, MeshInfo> {
+  final EdgeBinding edge;
+
+  EdgeTableMeshesController(EdgeBinding edge) {
+    this.edge = edge;
+  }
+
+  @Override
+  public MeshInfo onCue(Uri meshUri, WarpUplink uplink) {
+    final MeshBinding meshBinding = this.edge.getMesh(meshUri);
+    if (meshBinding == null) {
+      return null;
+    }
+    return MeshInfo.from(meshBinding);
+  }
+
+  @Override
+  public Iterator<Map.Entry<Uri, MeshInfo>> onSync(WarpUplink uplink) {
+    return MeshInfo.iterator(this.edge.meshes().iterator());
+  }
 }

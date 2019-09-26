@@ -12,6 +12,9 @@ project(':swim.runtime').name = 'swim-runtime'
 include 'swim.kernel'
 project(':swim.kernel').name = 'swim-kernel'
 
+include 'swim.meta'
+project(':swim.meta').name = 'swim-meta'
+
 include 'swim.auth'
 project(':swim.auth').name = 'swim-auth'
 

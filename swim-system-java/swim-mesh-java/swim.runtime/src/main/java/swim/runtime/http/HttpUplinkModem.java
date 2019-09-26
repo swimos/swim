@@ -21,7 +21,9 @@ import swim.http.HttpResponse;
 import swim.runtime.AbstractUplinkContext;
 import swim.runtime.HttpBinding;
 import swim.runtime.HttpContext;
+import swim.runtime.LinkBinding;
 import swim.runtime.LinkKeys;
+import swim.runtime.NodeBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -111,4 +113,9 @@ public abstract class HttpUplinkModem extends AbstractUplinkContext implements H
 
   @Override
   public abstract void didRespond(HttpResponse<?> response);
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    laneBinding().openMetaUplink(uplink, metaUplink);
+  }
 }

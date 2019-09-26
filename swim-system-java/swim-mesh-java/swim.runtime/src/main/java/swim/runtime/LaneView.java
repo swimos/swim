@@ -56,6 +56,21 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   }
 
   @Override
+  public LaneAddress cellAddress() {
+    return laneContext().cellAddress();
+  }
+
+  @Override
+  public final String edgeName() {
+    return laneContext().edgeName();
+  }
+
+  @Override
+  public final Uri meshUri() {
+    return laneContext().meshUri();
+  }
+
+  @Override
   public final Uri hostUri() {
     return laneBinding().hostUri();
   }
@@ -154,11 +169,6 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   }
 
   @Override
-  public Uri meshUri() {
-    return laneContext().meshUri();
-  }
-
-  @Override
   public Policy policy() {
     return laneContext().policy();
   }
@@ -199,6 +209,11 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   }
 
   @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    laneBinding().openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
   public void trace(Object message) {
     laneBinding().trace(message);
   }
@@ -221,6 +236,11 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   @Override
   public void error(Object message) {
     laneBinding().error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    laneBinding().fail(message);
   }
 
   static final AtomicReferenceFieldUpdater<LaneView, Object> OBSERVERS =

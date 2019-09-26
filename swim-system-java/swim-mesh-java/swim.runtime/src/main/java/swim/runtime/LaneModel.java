@@ -14,25 +14,35 @@
 
 package swim.runtime;
 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.Downlink;
 import swim.api.Lane;
 import swim.api.agent.AgentContext;
+import swim.api.lane.DemandMapLane;
+import swim.api.lane.function.OnCueKey;
+import swim.api.lane.function.OnSyncMap;
 import swim.api.policy.Policy;
+import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
+import swim.concurrent.Conts;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.runtime.agent.AgentNode;
+import swim.runtime.reflect.UplinkInfo;
 import swim.store.StoreBinding;
+import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
 public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkContext> extends AbstractTierBinding implements LaneBinding {
   protected LaneContext laneContext;
-
   protected volatile Object views; // View | LaneView[]
-
   protected volatile FingerTrieSeq<U> uplinks;
+
+  DemandMapLane<Value, UplinkInfo> metaUplinks;
 
   public LaneModel() {
     this.uplinks = FingerTrieSeq.empty();
@@ -74,6 +84,16 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   }
 
   protected abstract U createUplink(LinkBinding link);
+
+  @Override
+  public LaneAddress cellAddress() {
+    return this.laneContext.cellAddress();
+  }
+
+  @Override
+  public String edgeName() {
+    return this.laneContext.edgeName();
+  }
 
   @Override
   public final Uri meshUri() {
@@ -228,12 +248,12 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
 
   @SuppressWarnings("unchecked")
   @Override
-  public LinkBinding getUplink(Value linkKey) {
+  public LinkContext getUplink(Value linkKey) {
     final FingerTrieSeq<U> uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) this.uplinks;
     for (int i = 0, n = uplinks.size(); i < n; i += 1) {
       final U uplink = uplinks.get(i);
       if (linkKey.equals(uplink.linkKey())) {
-        return uplink.linkBinding();
+        return uplink;
       }
     }
     return null;
@@ -253,6 +273,10 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
       } while (!UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
       didUplink(uplink);
       // TODO: onEnter
+      final DemandMapLane<Value, UplinkInfo> metaUplinks = this.metaUplinks;
+      if (metaUplinks != null) {
+        metaUplinks.cue(link.linkKey());
+      }
     } else {
       UplinkError.rejectUnsupported(link);
     }
@@ -279,8 +303,40 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
     } while (!UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
     if (linkContext != null) {
       linkContext.linkBinding().didCloseUp();
+      final DemandMapLane<Value, UplinkInfo> metaUplinks = this.metaUplinks;
+      if (metaUplinks != null) {
+        metaUplinks.remove(linkKey);
+      }
       // TODO: onLeave
     }
+  }
+
+  @Override
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    openMetaLanes(lane, (AgentNode) metaLane);
+    this.laneContext.openMetaLane(lane, metaLane);
+  }
+
+  protected void openMetaLanes(LaneBinding lane, AgentNode metaLane) {
+    openReflectLanes(lane, metaLane);
+  }
+
+  protected void openReflectLanes(LaneBinding lane, AgentNode metaLane) {
+    this.metaUplinks = metaLane.demandMapLane()
+        .keyForm(Form.forValue())
+        .valueForm(UplinkInfo.uplinkForm())
+        .observe(new LaneModelUplinksController(lane));
+    metaLane.openLane(UPLINKS_URI, this.metaUplinks);
+  }
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.laneContext.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.laneContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override
@@ -292,11 +348,11 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   protected abstract void didOpenLaneView(View view);
 
   protected void didCloseLaneView(View view) {
-    // stub
+    // hook
   }
 
   protected void didUplink(U uplink) {
-    // stub
+    // hook
   }
 
   @Override
@@ -342,6 +398,11 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @Override
   public void error(Object message) {
     this.laneContext.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    this.laneContext.fail(message);
   }
 
   @Override
@@ -440,7 +501,11 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
 
   @Override
   public void didFail(Throwable error) {
-    error.printStackTrace();
+    if (Conts.isNonFatal(error)) {
+      fail(error);
+    } else {
+      error.printStackTrace();
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -450,4 +515,28 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @SuppressWarnings("unchecked")
   protected static final AtomicReferenceFieldUpdater<LaneModel<?, ?>, FingerTrieSeq<? extends LinkContext>> UPLINKS =
       AtomicReferenceFieldUpdater.newUpdater((Class<LaneModel<?, ?>>) (Class<?>) LaneModel.class, (Class<FingerTrieSeq<? extends LinkContext>>) (Class<?>) FingerTrieSeq.class, "uplinks");
+
+  static final Uri UPLINKS_URI = Uri.parse("uplinks");
+}
+
+final class LaneModelUplinksController implements OnCueKey<Value, UplinkInfo>, OnSyncMap<Value, UplinkInfo> {
+  final LaneBinding lane;
+
+  LaneModelUplinksController(LaneBinding lane) {
+    this.lane = lane;
+  }
+
+  @Override
+  public UplinkInfo onCue(Value linkKey, WarpUplink uplink) {
+    final LinkContext linkContext = this.lane.getUplink(linkKey);
+    if (linkContext == null) {
+      return null;
+    }
+    return UplinkInfo.from(linkContext);
+  }
+
+  @Override
+  public Iterator<Map.Entry<Value, UplinkInfo>> onSync(WarpUplink uplink) {
+    return UplinkInfo.iterator(this.lane.uplinks().iterator());
+  }
 }

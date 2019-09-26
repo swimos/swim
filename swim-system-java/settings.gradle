@@ -141,6 +141,10 @@ include 'swim.kernel'
 project(':swim.kernel').projectDir = file('swim-mesh-java/swim.kernel')
 project(':swim.kernel').name = 'swim-kernel'
 
+include 'swim.meta'
+project(':swim.meta').projectDir = file('swim-mesh-java/swim.meta')
+project(':swim.meta').name = 'swim-meta'
+
 include 'swim.auth'
 project(':swim.auth').projectDir = file('swim-mesh-java/swim.auth')
 project(':swim.auth').name = 'swim-auth'

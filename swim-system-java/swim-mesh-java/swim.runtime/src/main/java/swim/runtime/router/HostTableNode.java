@@ -23,9 +23,11 @@ import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.HostBinding;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
 import swim.runtime.PushRequest;
@@ -35,15 +37,13 @@ import swim.uri.Uri;
 
 public class HostTableNode implements NodeContext {
   protected final HostTable host;
-
   protected final NodeBinding node;
+  protected final NodeAddress nodeAddress;
 
-  protected final Uri nodeUri;
-
-  public HostTableNode(HostTable host, NodeBinding node, Uri nodeUri) {
+  public HostTableNode(HostTable host, NodeBinding node, NodeAddress nodeAddress) {
     this.host = host;
     this.node = node;
-    this.nodeUri = nodeUri;
+    this.nodeAddress = nodeAddress;
   }
 
   @Override
@@ -67,23 +67,33 @@ public class HostTableNode implements NodeContext {
   }
 
   @Override
+  public final NodeAddress cellAddress() {
+    return this.nodeAddress;
+  }
+
+  @Override
+  public final String edgeName() {
+    return this.nodeAddress.edgeName();
+  }
+
+  @Override
   public final Uri meshUri() {
-    return this.host.meshUri();
+    return this.nodeAddress.meshUri();
   }
 
   @Override
   public final Value partKey() {
-    return this.host.partKey();
+    return this.nodeAddress.partKey();
   }
 
   @Override
   public final Uri hostUri() {
-    return this.host.hostUri();
+    return this.nodeAddress.hostUri();
   }
 
   @Override
   public final Uri nodeUri() {
-    return this.nodeUri;
+    return this.nodeAddress.nodeUri();
   }
 
   @Override
@@ -117,38 +127,58 @@ public class HostTableNode implements NodeContext {
   }
 
   @Override
-  public LaneBinding createLane(LaneDef laneDef) {
-    return this.host.hostContext().createLane(this.nodeUri, laneDef);
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.host.openMetaNode(node, metaNode);
   }
 
   @Override
-  public LaneBinding createLane(Uri laneUri) {
-    return this.host.hostContext().createLane(this.nodeUri, laneUri);
+  public LaneBinding createLane(LaneAddress laneAddress) {
+    return this.host.hostContext().createLane(laneAddress);
   }
 
   @Override
-  public LaneBinding injectLane(Uri laneUri, LaneBinding lane) {
-    return this.host.hostContext().injectLane(this.nodeUri, laneUri, lane);
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return this.host.hostContext().injectLane(laneAddress, lane);
+  }
+
+  @Override
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.host.openMetaLane(lane, metaLane);
+  }
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.host.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.host.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return this.host.hostContext().createLane(node, laneDef);
   }
 
   @Override
   public void openLanes(NodeBinding node) {
-    this.host.hostContext().openLanes(this.nodeUri, node);
+    this.host.hostContext().openLanes(node);
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(AgentDef agentDef) {
-    return this.host.hostContext().createAgentFactory(this.nodeUri, agentDef);
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return this.host.hostContext().createAgentFactory(node, agentDef);
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass) {
-    return this.host.hostContext().createAgentFactory(this.nodeUri, agentClass);
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return this.host.hostContext().createAgentFactory(node, agentClass);
   }
 
   @Override
   public void openAgents(NodeBinding node) {
-    this.host.hostContext().openAgents(this.nodeUri, node);
+    this.host.hostContext().openAgents(node);
   }
 
   @Override
@@ -196,8 +226,13 @@ public class HostTableNode implements NodeContext {
   }
 
   @Override
+  public void fail(Object message) {
+    this.host.fail(message);
+  }
+
+  @Override
   public void close() {
-    this.host.closeNode(this.nodeUri);
+    this.host.closeNode(this.nodeAddress.nodeUri());
   }
 
   @Override

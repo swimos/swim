@@ -27,6 +27,7 @@ import swim.io.IpSettings;
 import swim.io.IpSocket;
 import swim.io.IpSocketRef;
 import swim.kernel.KernelContext;
+import swim.runtime.AuthenticatorAddress;
 import swim.util.Log;
 
 public class ActorAuthenticator implements AuthenticatorContext {
@@ -94,26 +95,6 @@ public class ActorAuthenticator implements AuthenticatorContext {
     return this.kernel.connectTls(remoteAddress, socket, ipSettings);
   }
 
-  protected Log openLog() {
-    return this.kernel.openAuthenticatorLog(this.authenticatorName);
-  }
-
-  protected void closeLog() {
-    this.log = null;
-  }
-
-  protected Stage openStage() {
-    return this.kernel.openAuthenticatorStage(this.authenticatorName);
-  }
-
-  protected void closeStage() {
-    final Stage stage = this.stage;
-    if (stage instanceof MainStage) {
-      ((MainStage) stage).stop();
-    }
-    this.stage = null;
-  }
-
   public void start() {
     int oldStatus;
     int newStatus;
@@ -141,8 +122,9 @@ public class ActorAuthenticator implements AuthenticatorContext {
   }
 
   protected void willStart() {
-    this.log = openLog();
-    this.stage = openStage();
+    final AuthenticatorAddress authenticatorAddress = new AuthenticatorAddress(this.authenticatorName);
+    this.log = this.kernel.createLog(authenticatorAddress);
+    this.stage = this.kernel.createStage(authenticatorAddress);
     this.authenticator.willStart();
   }
 
@@ -156,8 +138,12 @@ public class ActorAuthenticator implements AuthenticatorContext {
 
   protected void didStop() {
     this.authenticator.didStop();
-    closeStage();
-    closeLog();
+    final Stage stage = this.stage;
+    if (stage instanceof MainStage) {
+      ((MainStage) stage).stop();
+    }
+    this.stage = null;
+    this.log = null;
   }
 
   @Override
@@ -207,6 +193,16 @@ public class ActorAuthenticator implements AuthenticatorContext {
       log.error(message);
     } else {
       this.kernel.error(message);
+    }
+  }
+
+  @Override
+  public void fail(Object message) {
+    final Log log = this.log;
+    if (log != null) {
+      log.fail(message);
+    } else {
+      this.kernel.fail(message);
     }
   }
 

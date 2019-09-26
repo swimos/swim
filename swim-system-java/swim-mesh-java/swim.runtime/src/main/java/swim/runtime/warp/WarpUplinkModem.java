@@ -29,7 +29,9 @@ import swim.api.warp.function.OnUnlinkRequest;
 import swim.api.warp.function.OnUnlinkedResponse;
 import swim.concurrent.Conts;
 import swim.runtime.AbstractUplinkContext;
+import swim.runtime.LinkBinding;
 import swim.runtime.LinkKeys;
+import swim.runtime.NodeBinding;
 import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
 import swim.structure.Value;
@@ -47,7 +49,6 @@ import swim.warp.UnlinkedResponse;
 public abstract class WarpUplinkModem extends AbstractUplinkContext implements WarpContext, WarpUplink {
   protected final WarpBinding linkBinding;
   protected final Value linkKey;
-
   protected volatile int status;
 
   protected WarpUplinkModem(WarpBinding linkBinding, Value linkKey) {
@@ -640,11 +641,11 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
     if ((oldStatus & UNLINKING) != (newStatus & UNLINKING)) {
       final UnlinkedResponse response = unlinkedResponse();
       pullDownUnlinked(response);
-      this.linkBinding.pushDown(response);
+      pushDown(response);
     } else if ((oldStatus & LINKING) != (newStatus & LINKING)) {
       final LinkedResponse response = linkedResponse();
       pullDownLinked(response);
-      this.linkBinding.pushDown(response);
+      pushDown(response);
       if ((newStatus & SYNCING) != 0) {
         this.linkBinding.feedDown();
       } else {
@@ -672,7 +673,7 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
       }
       if (message != null) {
         pullDownEvent(message);
-        this.linkBinding.pushDown(message);
+        pushDown(message);
         do {
           oldStatus = this.status;
           if ((oldStatus & (SYNCING | CUED_DOWN)) == 0 && downQueueIsEmpty()) {
@@ -687,7 +688,7 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
       } else if ((oldStatus & SYNCING) != 0) {
         final SyncedResponse response = syncedResponse();
         pullDownSynced(response);
-        this.linkBinding.pushDown(response);
+        pushDown(response);
         do {
           oldStatus = this.status;
           if ((oldStatus & CUED_DOWN) == 0 && downQueueIsEmpty()) {
@@ -735,6 +736,10 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   protected void pullDownUnlinked(UnlinkedResponse response) {
     didUnlink(response);
     dispatchOnUnlinked(response);
+  }
+
+  protected void pushDown(Envelope envelope) {
+    this.linkBinding.pushDown(envelope);
   }
 
   public void cueUp() {
@@ -993,6 +998,11 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
 
   protected UnlinkedResponse unlinkedResponse() {
     return new UnlinkedResponse(nodeUri(), laneUri());
+  }
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    laneBinding().openMetaUplink(uplink, metaUplink);
   }
 
   static final int LINKED = 1 << 0;

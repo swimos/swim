@@ -24,7 +24,9 @@ import swim.api.auth.Identity;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.runtime.CellContext;
+import swim.runtime.LinkBinding;
 import swim.runtime.LinkContext;
+import swim.runtime.NodeBinding;
 import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
 import swim.structure.Value;
@@ -320,6 +322,11 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   }
 
   @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.host.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
   public void reopen() {
     this.linkContext.closeUp();
     int oldStatus;
@@ -393,6 +400,11 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   @Override
   public void errorDown(Object message) {
     this.host.error(message);
+  }
+
+  @Override
+  public void failDown(Object message) {
+    this.host.fail(message);
   }
 
   static final int FEEDING_DOWN = 1 << 0;

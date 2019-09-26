@@ -46,6 +46,8 @@ import swim.math.Z2Form;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.LaneView;
 import swim.runtime.LinkBinding;
+import swim.runtime.NodeAddress;
+import swim.runtime.NodeBinding;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
 import swim.runtime.http.RestLaneView;
@@ -68,11 +70,8 @@ import swim.util.Builder;
 
 public class AgentView extends AbstractTierBinding implements TierContext, AgentContext {
   protected final AgentModel node;
-
   protected final Value id;
-
   protected final Value props;
-
   protected Agent agent;
 
   public AgentView(AgentModel node, Value id, Value props) {
@@ -103,6 +102,16 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
     } else {
       return null;
     }
+  }
+
+  @Override
+  public NodeAddress cellAddress() {
+    return this.node.cellAddress();
+  }
+
+  @Override
+  public final String edgeName() {
+    return this.node.edgeName();
   }
 
   @Override
@@ -177,7 +186,7 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   public <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass) {
-    return this.node.createAgentFactory(agentClass);
+    return this.node.createAgentFactory(this.node, agentClass);
   }
 
   @Override
@@ -395,6 +404,11 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.node.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
   public void trace(Object message) {
     this.node.trace(message);
   }
@@ -417,6 +431,11 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   @Override
   public void error(Object message) {
     this.node.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    this.node.fail(message);
   }
 
   @Override

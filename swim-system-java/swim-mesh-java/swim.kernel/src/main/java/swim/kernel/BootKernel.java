@@ -36,15 +36,22 @@ import swim.io.IpStation;
 import swim.io.Station;
 import swim.io.TransportSettings;
 import swim.math.R2Shape;
+import swim.runtime.CellAddress;
+import swim.runtime.EdgeAddress;
 import swim.runtime.EdgeBinding;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostDef;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
+import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshDef;
+import swim.runtime.NodeBinding;
+import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PartDef;
+import swim.runtime.StoreAddress;
 import swim.runtime.http.RestLaneModel;
 import swim.runtime.lane.CommandLaneModel;
 import swim.runtime.lane.ListLaneModel;
@@ -59,7 +66,6 @@ import swim.runtime.router.PartTable;
 import swim.spatial.GeoProjection;
 import swim.structure.Item;
 import swim.structure.Value;
-import swim.uri.Uri;
 
 public class BootKernel extends KernelProxy implements IpStation {
   final double kernelPriority;
@@ -234,9 +240,10 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   @Override
-  public Stage openStoreStage(String storeName) {
-    Stage stage = super.openStoreStage(storeName);
-    if (stage == null) {
+  public Stage createStage(CellAddress cellAddress) {
+    Stage stage = super.createStage(cellAddress);
+    if (stage == null && (cellAddress instanceof EdgeAddress || cellAddress instanceof StoreAddress)) {
+      // Provide default boot stage to edge and store cells.
       stage = stage();
       if (stage instanceof MainStage) {
         stage = new SideStage(stage); // isolate stage lifecycle
@@ -275,8 +282,8 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   @Override
-  public EdgeBinding createEdge(String edgeName) {
-    EdgeBinding edge = super.createEdge(edgeName);
+  public EdgeBinding createEdge(EdgeAddress edgeAddress) {
+    EdgeBinding edge = super.createEdge(edgeAddress);
     if (edge == null) {
       edge = new EdgeTable();
     }
@@ -284,20 +291,8 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   @Override
-  public Stage openEdgeStage(String edgeName) {
-    Stage stage = super.openEdgeStage(edgeName);
-    if (stage == null) {
-      stage = stage();
-      if (stage instanceof MainStage) {
-        stage = new SideStage(stage); // isolate stage lifecycle
-      }
-    }
-    return stage;
-  }
-
-  @Override
-  public MeshBinding createMesh(String edgeName, MeshDef meshDef) {
-    MeshBinding mesh = super.createMesh(edgeName, meshDef);
+  public MeshBinding createMesh(EdgeBinding edge, MeshDef meshDef) {
+    MeshBinding mesh = super.createMesh(edge, meshDef);
     if (mesh == null) {
       mesh = new MeshTable();
     }
@@ -305,8 +300,8 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   @Override
-  public MeshBinding createMesh(String edgeName, Uri meshUri) {
-    MeshBinding mesh = super.createMesh(edgeName, meshUri);
+  public MeshBinding createMesh(MeshAddress meshAddress) {
+    MeshBinding mesh = super.createMesh(meshAddress);
     if (mesh == null) {
       mesh = new MeshTable();
     }
@@ -314,8 +309,8 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   @Override
-  public PartBinding createPart(String edgeName, Uri meshUri, PartDef partDef) {
-    PartBinding part = super.createPart(edgeName, meshUri, partDef);
+  public PartBinding createPart(MeshBinding mesh, PartDef partDef) {
+    PartBinding part = super.createPart(mesh, partDef);
     if (part == null) {
       part = new PartTable(partDef.predicate());
     }
@@ -323,8 +318,8 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   @Override
-  public PartBinding createPart(String edgeName, Uri meshUri, Value partKey) {
-    PartBinding part = super.createPart(edgeName, meshUri, partKey);
+  public PartBinding createPart(PartAddress partAddress) {
+    PartBinding part = super.createPart(partAddress);
     if (part == null) {
       part = new PartTable();
     }
@@ -332,8 +327,8 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   @Override
-  public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, HostDef hostDef) {
-    HostBinding host = super.createHost(edgeName, meshUri, partKey, hostDef);
+  public HostBinding createHost(PartBinding part, HostDef hostDef) {
+    HostBinding host = super.createHost(part, hostDef);
     if (host == null) {
       host = new HostTable();
     }
@@ -341,8 +336,8 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   @Override
-  public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
-    HostBinding host = super.createHost(edgeName, meshUri, partKey, hostUri);
+  public HostBinding createHost(HostAddress hostAddress) {
+    HostBinding host = super.createHost(hostAddress);
     if (host == null) {
       host = new HostTable();
     }
@@ -350,54 +345,54 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   @Override
-  public LaneBinding createLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
-    LaneBinding lane = super.createLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    LaneBinding lane = super.createLane(node, laneDef);
     if (lane == null) {
       final String laneType = laneDef.laneType();
       if ("command".equals(laneType)) {
-        lane = createCommandLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+        lane = createCommandLane(node, laneDef);
       } else if ("list".equals(laneType)) {
-        lane = createListLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+        lane = createListLane(node, laneDef);
       } else if ("map".equals(laneType)) {
-        lane = createMapLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+        lane = createMapLane(node, laneDef);
       } else if ("geospatial".equals(laneType)) {
-        lane = createGeospatialLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+        lane = createGeospatialLane(node, laneDef);
       } else if ("supply".equals(laneType)) {
-        lane = createSupplyLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+        lane = createSupplyLane(node, laneDef);
       } else if ("value".equals(laneType)) {
-        lane = createValueLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+        lane = createValueLane(node, laneDef);
       } else if ("http".equals(laneType)) {
-        lane = createHttpLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef);
+        lane = createHttpLane(node, laneDef);
       }
     }
     return lane;
   }
 
-  public LaneBinding createCommandLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+  public LaneBinding createCommandLane(NodeBinding node, LaneDef laneDef) {
     return new CommandLaneModel();
   }
 
-  public LaneBinding createListLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+  public LaneBinding createListLane(NodeBinding node, LaneDef laneDef) {
     return new ListLaneModel();
   }
 
-  public LaneBinding createMapLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+  public LaneBinding createMapLane(NodeBinding node, LaneDef laneDef) {
     return new MapLaneModel();
   }
 
-  public LaneBinding createGeospatialLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+  public LaneBinding createGeospatialLane(NodeBinding node, LaneDef laneDef) {
     return new SpatialLaneModel<R2Shape>(GeoProjection.wgs84Form());
   }
 
-  public LaneBinding createSupplyLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+  public LaneBinding createSupplyLane(NodeBinding node, LaneDef laneDef) {
     return new SupplyLaneModel();
   }
 
-  public LaneBinding createValueLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+  public LaneBinding createValueLane(NodeBinding node, LaneDef laneDef) {
     return new ValueLaneModel();
   }
 
-  public LaneBinding createHttpLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+  public LaneBinding createHttpLane(NodeBinding node, LaneDef laneDef) {
     return new RestLaneModel();
   }
 
@@ -443,6 +438,68 @@ public class BootKernel extends KernelProxy implements IpStation {
           }
         }
       }
+    }
+  }
+
+  @Override
+  public void trace(Object message) {
+    final KernelContext kernelContext = this.kernelContext;
+    if (kernelContext != null) {
+      kernelContext.trace(message);
+    } else if (message != null) {
+      System.out.println(message);
+    }
+  }
+
+  @Override
+  public void debug(Object message) {
+    final KernelContext kernelContext = this.kernelContext;
+    if (kernelContext != null) {
+      kernelContext.debug(message);
+    } else if (message != null) {
+      System.out.println(message);
+    }
+  }
+
+  @Override
+  public void info(Object message) {
+    final KernelContext kernelContext = this.kernelContext;
+    if (kernelContext != null) {
+      kernelContext.info(message);
+    } else if (message != null) {
+      System.out.println(message);
+    }
+  }
+
+  @Override
+  public void warn(Object message) {
+    final KernelContext kernelContext = this.kernelContext;
+    if (kernelContext != null) {
+      kernelContext.warn(message);
+    } else if (message != null) {
+      System.out.println(message);
+    }
+  }
+
+  @Override
+  public void error(Object message) {
+    final KernelContext kernelContext = this.kernelContext;
+    if (kernelContext != null) {
+      kernelContext.error(message);
+    } else if (message != null) {
+      System.err.println(message);
+    }
+  }
+
+  @Override
+  public void fail(Object message) {
+    final KernelContext kernelContext = this.kernelContext;
+    if (kernelContext != null) {
+      kernelContext.fail(message);
+    } else if (message instanceof Throwable) {
+      ((Throwable) message).printStackTrace();
+    } else if (message != null) {
+      System.err.println(message);
     }
   }
 

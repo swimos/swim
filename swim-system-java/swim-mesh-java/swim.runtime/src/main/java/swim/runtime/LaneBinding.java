@@ -36,6 +36,8 @@ public interface LaneBinding extends TierBinding, CellBinding, Log {
 
   <T> T unwrapLane(Class<T> laneClass);
 
+  LaneAddress cellAddress();
+
   Uri meshUri();
 
   Value partKey();
@@ -60,11 +62,17 @@ public interface LaneBinding extends TierBinding, CellBinding, Log {
 
   void closeLaneView(Lane lane);
 
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
+
   FingerTrieSeq<LinkContext> uplinks();
 
-  LinkBinding getUplink(Value linkKey);
+  LinkContext getUplink(Value linkKey);
 
   void closeUplink(Value linkKey);
 
   void pushUpCommand(CommandMessage message);
+
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
+
+  void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink);
 }

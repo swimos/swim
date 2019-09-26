@@ -26,6 +26,12 @@ public interface LaneContext extends TierContext, CellContext {
   <T> T unwrapLane(Class<T> laneClass);
 
   @Override
+  LaneAddress cellAddress();
+
+  @Override
+  String edgeName();
+
+  @Override
   Uri meshUri();
 
   Value partKey();
@@ -37,4 +43,8 @@ public interface LaneContext extends TierContext, CellContext {
   Uri laneUri();
 
   Identity identity();
+
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
+
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 }

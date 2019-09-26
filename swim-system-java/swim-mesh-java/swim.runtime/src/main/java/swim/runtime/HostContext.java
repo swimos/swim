@@ -31,29 +31,43 @@ public interface HostContext extends TierContext, CellContext {
   <T> T unwrapHost(Class<T> hostClass);
 
   @Override
+  HostAddress cellAddress();
+
+  @Override
+  String edgeName();
+
+  @Override
   Uri meshUri();
 
   Value partKey();
 
   Uri hostUri();
 
-  NodeBinding createNode(Uri nodeUri);
+  void openMetaHost(HostBinding host, NodeBinding metaHost);
 
-  NodeBinding injectNode(Uri nodeUri, NodeBinding node);
+  NodeBinding createNode(NodeAddress nodeAddress);
 
-  LaneBinding createLane(Uri nodeUri, LaneDef laneDef);
+  NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node);
 
-  LaneBinding createLane(Uri nodeUri, Uri laneUri);
+  void openMetaNode(NodeBinding node, NodeBinding metaNode);
 
-  LaneBinding injectLane(Uri nodeUri, Uri laneUri, LaneBinding lane);
+  LaneBinding createLane(LaneAddress laneAddress);
 
-  void openLanes(Uri nodeUri, NodeBinding node);
+  LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane);
 
-  AgentFactory<?> createAgentFactory(Uri nodeUri, AgentDef agentDef);
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
 
-  <A extends Agent> AgentFactory<A> createAgentFactory(Uri nodeUri, Class<? extends A> agentClass);
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 
-  void openAgents(Uri nodeUri, NodeBinding node);
+  LaneBinding createLane(NodeBinding node, LaneDef laneDef);
+
+  void openLanes(NodeBinding node);
+
+  AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef);
+
+  <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass);
+
+  void openAgents(NodeBinding node);
 
   PolicyDirective<Identity> authenticate(Credentials credentials);
 

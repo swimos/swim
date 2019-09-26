@@ -24,19 +24,26 @@ import swim.api.policy.PolicyDirective;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Stage;
 import swim.concurrent.StageDef;
+import swim.runtime.CellAddress;
 import swim.runtime.CellBinding;
 import swim.runtime.CellContext;
 import swim.runtime.EdgeBinding;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostDef;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
+import swim.runtime.LinkBinding;
 import swim.runtime.LogDef;
+import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshContext;
 import swim.runtime.MeshDef;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeDef;
+import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PartDef;
 import swim.runtime.PolicyDef;
@@ -111,6 +118,11 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   }
 
   @Override
+  public final MeshAddress cellAddress() {
+    return this.meshContext.cellAddress();
+  }
+
+  @Override
   public PartBinding gateway() {
     return this.meshBinding.gateway();
   }
@@ -165,6 +177,11 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
     return edge != null ? edge.createLog(logDef) : null;
   }
 
+  public Log createLog(CellAddress cellAddress) {
+    final ActorSpace edge = actorEdge();
+    return edge != null ? edge.createLog(cellAddress) : null;
+  }
+
   public Log injectLog(Log log) {
     final ActorSpace edge = actorEdge();
     return edge != null ? edge.injectLog(log) : log;
@@ -176,7 +193,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
     if (this.meshDef != null && this.meshDef.logDef() != null) {
       log = createLog(this.meshDef.logDef());
     } else {
-      log = openMeshLog();
+      log = createLog(cellAddress());
     }
     if (log != null) {
       log = injectLog(log);
@@ -187,6 +204,11 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   public Policy createPolicy(PolicyDef policyDef) {
     final ActorSpace edge = actorEdge();
     return edge != null ? edge.createPolicy(policyDef) : null;
+  }
+
+  public Policy createPolicy(CellAddress cellAddress) {
+    final ActorSpace edge = actorEdge();
+    return edge != null ? edge.createPolicy(cellAddress) : null;
   }
 
   public Policy injectPolicy(Policy policy) {
@@ -200,7 +222,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
     if (this.meshDef != null && this.meshDef.policyDef() != null) {
       policy = createPolicy(this.meshDef.policyDef());
     } else {
-      policy = openMeshPolicy();
+      policy = createPolicy(cellAddress());
     }
     if (policy != null) {
       policy = injectPolicy(policy);
@@ -211,6 +233,11 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   public Stage createStage(StageDef stageDef) {
     final ActorSpace edge = actorEdge();
     return edge != null ? edge.createStage(stageDef) : null;
+  }
+
+  public Stage createStage(CellAddress cellAddress) {
+    final ActorSpace edge = actorEdge();
+    return edge != null ? edge.createStage(cellAddress) : null;
   }
 
   public Stage injectStage(Stage stage) {
@@ -224,7 +251,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
     if (this.meshDef != null && this.meshDef.stageDef() != null) {
       stage = createStage(this.meshDef.stageDef());
     } else {
-      stage = openMeshStage();
+      stage = createStage(cellAddress());
     }
     if (stage != null) {
       stage = injectStage(stage);
@@ -235,6 +262,11 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   public StoreBinding createStore(StoreDef storeDef) {
     final ActorSpace edge = actorEdge();
     return edge != null ? edge.createStore(storeDef) : null;
+  }
+
+  public StoreBinding createStore(CellAddress cellAddress) {
+    final ActorSpace edge = actorEdge();
+    return edge != null ? edge.createStore(cellAddress) : null;
   }
 
   public StoreBinding injectStore(StoreBinding store) {
@@ -248,7 +280,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
     if (this.meshDef != null && this.meshDef.storeDef() != null) {
       store = createStore(this.meshDef.storeDef());
     } else {
-      store = openMeshStore();
+      store = createStore(cellAddress());
     }
     if (store != null) {
       store = injectStore(store);
@@ -256,125 +288,89 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
     return store;
   }
 
-  protected Log openMeshLog() {
+  @Override
+  public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
     final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openMeshLog(meshUri()) : null;
+    if (edge != null) {
+      edge.openMetaMesh(mesh, metaMesh);
+    }
   }
 
-  protected Policy openMeshPolicy() {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openMeshPolicy(meshUri()) : null;
-  }
-
-  protected Stage openMeshStage() {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openMeshStage(meshUri()) : null;
-  }
-
-  protected StoreBinding openMeshStore() {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openMeshStore(meshUri()) : null;
-  }
-
-  public PartDef getPartDef(Value partKey) {
+  public PartDef getPartDef(PartAddress partAddress) {
     final MeshDef meshDef = this.meshDef;
-    PartDef partDef = meshDef != null ? meshDef.getPartDef(partKey) : null;
+    PartDef partDef = meshDef != null ? meshDef.getPartDef(partAddress.partKey()) : null;
     if (partDef == null) {
       final ActorSpace edge = actorEdge();
-      partDef = edge != null ? edge.getPartDef(meshUri(), partKey) : null;
+      partDef = edge != null ? edge.getPartDef(partAddress) : null;
     }
     return partDef;
   }
 
   @Override
-  public PartBinding createPart(Value partKey) {
-    return this.meshContext.createPart(partKey);
+  public PartBinding createPart(PartAddress partAddress) {
+    return this.meshContext.createPart(partAddress);
   }
 
   @Override
-  public PartBinding injectPart(Value partKey, PartBinding part) {
-    final PartDef partDef = getPartDef(partKey);
-    return new ActorPart(this.meshContext.injectPart(partKey, part), partDef);
+  public PartBinding injectPart(PartAddress partAddress, PartBinding part) {
+    final PartDef partDef = getPartDef(partAddress);
+    return new ActorPart(this.meshContext.injectPart(partAddress, part), partDef);
   }
 
-  public Log openPartLog(Value partKey) {
+  @Override
+  public void openMetaPart(PartBinding part, NodeBinding metaPart) {
     final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openPartLog(meshUri(), partKey) : null;
+    if (edge != null) {
+      edge.openMetaPart(part, metaPart);
+    }
   }
 
-  public Policy openPartPolicy(Value partKey) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openPartPolicy(meshUri(), partKey) : null;
-  }
-
-  public Stage openPartStage(Value partKey) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openPartStage(meshUri(), partKey) : null;
-  }
-
-  public StoreBinding openPartStore(Value partKey) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openPartStore(meshUri(), partKey) : null;
-  }
-
-  public HostDef getHostDef(Value partKey, Uri hostUri) {
+  public HostDef getHostDef(HostAddress hostAddress) {
     final MeshDef meshDef = this.meshDef;
-    HostDef hostDef = meshDef != null ? meshDef.getHostDef(hostUri) : null;
+    HostDef hostDef = meshDef != null ? meshDef.getHostDef(hostAddress.hostUri()) : null;
     if (hostDef == null) {
       final ActorSpace edge = actorEdge();
-      hostDef = edge != null ? edge.getHostDef(meshUri(), partKey, hostUri) : null;
+      hostDef = edge != null ? edge.getHostDef(hostAddress) : null;
     }
     return hostDef;
   }
 
   @Override
-  public HostBinding createHost(Value partKey, Uri hostUri) {
-    return this.meshContext.createHost(partKey, hostUri);
+  public HostBinding createHost(HostAddress hostAddress) {
+    return this.meshContext.createHost(hostAddress);
   }
 
   @Override
-  public HostBinding injectHost(Value partKey, Uri hostUri, HostBinding host) {
-    return this.meshContext.injectHost(partKey, hostUri, host);
+  public HostBinding injectHost(HostAddress hostAddress, HostBinding host) {
+    return this.meshContext.injectHost(hostAddress, host);
   }
 
-  public Log openHostLog(Value partKey, Uri hostUri) {
+  @Override
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
     final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openHostLog(meshUri(), partKey, hostUri) : null;
+    if (edge != null) {
+      edge.openMetaHost(host, metaHost);
+    }
   }
 
-  public Policy openHostPolicy(Value partKey, Uri hostUri) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openHostPolicy(meshUri(), partKey, hostUri) : null;
-  }
-
-  public Stage openHostStage(Value partKey, Uri hostUri) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openHostStage(meshUri(), partKey, hostUri) : null;
-  }
-
-  public StoreBinding openHostStore(Value partKey, Uri hostUri) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openHostStore(meshUri(), partKey, hostUri) : null;
-  }
-
-  public NodeDef getNodeDef(Value partKey, Uri hostUri, Uri nodeUri) {
+  public NodeDef getNodeDef(NodeAddress nodeAddress) {
     final MeshDef meshDef = this.meshDef;
-    NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(nodeUri) : null;
+    NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(nodeAddress.nodeUri()) : null;
     if (nodeDef == null) {
       final ActorSpace edge = actorEdge();
-      nodeDef = edge != null ? edge.getNodeDef(meshUri(), partKey, hostUri, nodeUri) : null;
+      nodeDef = edge != null ? edge.getNodeDef(nodeAddress) : null;
     }
     return nodeDef;
   }
 
   @Override
-  public NodeBinding createNode(Value partKey, Uri hostUri, Uri nodeUri) {
-    NodeBinding node = this.meshContext.createNode(partKey, hostUri, nodeUri);
+  public NodeBinding createNode(NodeAddress nodeAddress) {
+    NodeBinding node = this.meshContext.createNode(nodeAddress);
     if (node == null && !meshUri().isDefined()) {
       final MeshDef meshDef = this.meshDef;
-      final NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(nodeUri) : null;
+      final NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(nodeAddress.nodeUri()) : null;
       if (nodeDef != null) {
-        final Value props = nodeDef.props(nodeUri);
+        final Value props = nodeDef.props(nodeAddress.nodeUri());
         node = new AgentModel(props);
       }
     }
@@ -382,101 +378,92 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   }
 
   @Override
-  public NodeBinding injectNode(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    return this.meshContext.injectNode(partKey, hostUri, nodeUri, node);
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
+    return this.meshContext.injectNode(nodeAddress, node);
   }
 
-  public Log openNodeLog(Value partKey, Uri hostUri, Uri nodeUri) {
+  @Override
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
     final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openNodeLog(meshUri(), partKey, hostUri, nodeUri) : null;
+    if (edge != null) {
+      edge.openMetaNode(node, metaNode);
+    }
   }
 
-  public Policy openNodePolicy(Value partKey, Uri hostUri, Uri nodeUri) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openNodePolicy(meshUri(), partKey, hostUri, nodeUri) : null;
-  }
-
-  public Stage openNodeStage(Value partKey, Uri hostUri, Uri nodeUri) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openNodeStage(meshUri(), partKey, hostUri, nodeUri) : null;
-  }
-
-  public StoreBinding openNodeStore(Value partKey, Uri hostUri, Uri nodeUri) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openNodeStore(meshUri(), partKey, hostUri, nodeUri) : null;
-  }
-
-  public LaneDef getLaneDef(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+  public LaneDef getLaneDef(LaneAddress laneAddress) {
     final MeshDef meshDef = this.meshDef;
-    LaneDef laneDef = meshDef != null ? meshDef.getLaneDef(laneUri) : null;
+    LaneDef laneDef = meshDef != null ? meshDef.getLaneDef(laneAddress.laneUri()) : null;
     if (laneDef == null) {
       final ActorSpace edge = actorEdge();
-      laneDef = edge != null ? edge.getLaneDef(meshUri(), partKey, hostUri, nodeUri, laneUri) : null;
+      laneDef = edge != null ? edge.getLaneDef(laneAddress) : null;
     }
     return laneDef;
   }
 
   @Override
-  public LaneBinding createLane(Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
-    return this.meshContext.createLane(partKey, hostUri, nodeUri, laneDef);
+  public LaneBinding createLane(LaneAddress laneAddress) {
+    return this.meshContext.createLane(laneAddress);
   }
 
   @Override
-  public LaneBinding createLane(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return this.meshContext.createLane(partKey, hostUri, nodeUri, laneUri);
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return this.meshContext.injectLane(laneAddress, lane);
   }
 
   @Override
-  public LaneBinding injectLane(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
-    return this.meshContext.injectLane(partKey, hostUri, nodeUri, laneUri, lane);
-  }
-
-  @Override
-  public void openLanes(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.meshContext.openLanes(partKey, hostUri, nodeUri, node);
-  }
-
-  public Log openLaneLog(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
     final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openLaneLog(meshUri(), partKey, hostUri, nodeUri, laneUri) : null;
-  }
-
-  public Policy openLanePolicy(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openLanePolicy(meshUri(), partKey, hostUri, nodeUri, laneUri) : null;
-  }
-
-  public Stage openLaneStage(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openLaneStage(meshUri(), partKey, hostUri, nodeUri, laneUri) : null;
-  }
-
-  public StoreBinding openLaneStore(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    final ActorSpace edge = actorEdge();
-    return edge != null ? edge.openLaneStore(meshUri(), partKey, hostUri, nodeUri, laneUri) : null;
+    if (edge != null) {
+      edge.openMetaLane(lane, metaLane);
+    }
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
-    return this.meshContext.createAgentFactory(partKey, hostUri, nodeUri, agentDef);
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    final ActorSpace edge = actorEdge();
+    if (edge != null) {
+      edge.openMetaUplink(uplink, metaUplink);
+    }
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Value partKey, Uri hostUri, Uri nodeUri,
-                                                              Class<? extends A> agentClass) {
-    return this.meshContext.createAgentFactory(partKey, hostUri, nodeUri, agentClass);
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    final ActorSpace edge = actorEdge();
+    if (edge != null) {
+      edge.openMetaDownlink(downlink, metaDownlink);
+    }
   }
 
   @Override
-  public void openAgents(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.meshContext.openAgents(partKey, hostUri, nodeUri, node);
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return this.meshContext.createLane(node, laneDef);
+  }
+
+  @Override
+  public void openLanes(NodeBinding node) {
+    this.meshContext.openLanes(node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return this.meshContext.createAgentFactory(node, agentDef);
+  }
+
+  @Override
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return this.meshContext.createAgentFactory(node, agentClass);
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.meshContext.openAgents(node);
     if (!meshUri().isDefined()) {
       final MeshDef meshDef = this.meshDef;
-      final NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(nodeUri) : null;
+      final NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(node.nodeUri()) : null;
       if (nodeDef != null && node instanceof AgentModel) {
         final AgentModel agentModel = (AgentModel) node;
         for (AgentDef agentDef : nodeDef.agentDefs()) {
-          final AgentFactory<?> agentFactory = createAgentFactory(partKey, hostUri, nodeUri, agentDef);
+          final AgentFactory<?> agentFactory = createAgentFactory(node, agentDef);
           if (agentDef != null) {
             final Value id = agentDef.id();
             Value props = agentDef.props();

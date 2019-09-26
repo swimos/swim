@@ -32,21 +32,26 @@ import swim.io.http.HttpEndpoint;
 import swim.io.http.HttpSettings;
 import swim.remote.RemoteHostClient;
 import swim.runtime.AbstractSwimRef;
+import swim.runtime.EdgeAddress;
 import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
+import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
+import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PushRequest;
 import swim.runtime.router.EdgeTable;
 import swim.runtime.router.MeshTable;
 import swim.runtime.router.PartTable;
 import swim.store.StoreBinding;
-import swim.structure.Value;
 import swim.uri.Uri;
 
 public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContext {
@@ -103,6 +108,16 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
   }
 
   @Override
+  public EdgeAddress cellAddress() {
+    return new EdgeAddress(edgeName());
+  }
+
+  @Override
+  public String edgeName() {
+    return "";
+  }
+
+  @Override
   public Uri meshUri() {
     return Uri.empty();
   }
@@ -132,78 +147,117 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
   }
 
   @Override
-  public MeshBinding createMesh(Uri meshUri) {
-    return new MeshTable();
-  }
-
-  @Override
-  public MeshBinding injectMesh(Uri meshUri, MeshBinding mesh) {
-    return mesh;
-  }
-
-  @Override
-  public PartBinding createPart(Uri meshUri, Value partKey) {
-    return new PartTable();
-  }
-
-  @Override
-  public PartBinding injectPart(Uri meshUri, Value partKey, PartBinding part) {
-    return part;
-  }
-
-  @Override
-  public HostBinding createHost(Uri meshUri, Value partKey, Uri hostUri) {
-    return new RemoteHostClient(hostUri, this.endpoint);
-  }
-
-  @Override
-  public HostBinding injectHost(Uri meshUri, Value partKey, Uri hostUri, HostBinding host) {
-    return host;
-  }
-
-  @Override
-  public NodeBinding createNode(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
-    return null;
-  }
-
-  @Override
-  public NodeBinding injectNode(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    return node;
-  }
-
-  @Override
-  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
-    return null;
-  }
-
-  @Override
-  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return null;
-  }
-
-  @Override
-  public LaneBinding injectLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
-    return lane;
-  }
-
-  @Override
-  public void openLanes(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
+  public void openMetaEdge(EdgeBinding edge, NodeBinding metaEdge) {
     // nop
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+  public MeshBinding createMesh(MeshAddress meshAddress) {
+    return new MeshTable();
+  }
+
+  @Override
+  public MeshBinding injectMesh(MeshAddress meshAddress, MeshBinding mesh) {
+    return mesh;
+  }
+
+  @Override
+  public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
+    // nop
+  }
+
+  @Override
+  public PartBinding createPart(PartAddress partAddress) {
+    return new PartTable();
+  }
+
+  @Override
+  public PartBinding injectPart(PartAddress partAddress, PartBinding part) {
+    return part;
+  }
+
+  @Override
+  public void openMetaPart(PartBinding part, NodeBinding metaPart) {
+    // nop
+  }
+
+  @Override
+  public HostBinding createHost(HostAddress hostAddress) {
+    return new RemoteHostClient(hostAddress.hostUri(), this.endpoint);
+  }
+
+  @Override
+  public HostBinding injectHost(HostAddress hostAddress, HostBinding host) {
+    return host;
+  }
+
+  @Override
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    // nop
+  }
+
+  @Override
+  public NodeBinding createNode(NodeAddress nodeAddress) {
     return null;
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri,
-                                                              Class<? extends A> agentClass) {
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
+    return node;
+  }
+
+  @Override
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    // nop
+  }
+
+  @Override
+  public LaneBinding createLane(LaneAddress lane) {
     return null;
   }
 
   @Override
-  public void openAgents(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return lane;
+  }
+
+  @Override
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    // nop
+  }
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    // nop
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    // nop
+  }
+
+  @Override
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return null;
+  }
+
+  @Override
+  public void openLanes(NodeBinding node) {
+    // nop
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return null;
+  }
+
+  @Override
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return null;
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
     // nop
   }
 
@@ -254,6 +308,11 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
 
   @Override
   public void error(Object message) {
+    // TODO
+  }
+
+  @Override
+  public void fail(Object message) {
     // TODO
   }
 

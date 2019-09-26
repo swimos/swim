@@ -71,6 +71,8 @@ public interface LinkBinding {
 
   Collection<Certificate> remoteCertificatesDown();
 
+  void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink);
+
   void reopen();
 
   void openDown();
@@ -94,4 +96,6 @@ public interface LinkBinding {
   void warnDown(Object message);
 
   void errorDown(Object message);
+
+  void failDown(Object message);
 }

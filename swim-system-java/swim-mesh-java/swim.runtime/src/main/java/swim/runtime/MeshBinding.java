@@ -29,7 +29,11 @@ public interface MeshBinding extends TierBinding, CellBinding, CellContext {
 
   <T> T unwrapMesh(Class<T> meshClass);
 
+  MeshAddress cellAddress();
+
   Uri meshUri();
+
+  void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh);
 
   PartBinding gateway();
 
@@ -50,4 +54,14 @@ public interface MeshBinding extends TierBinding, CellBinding, CellContext {
   PartBinding openGateway();
 
   PartBinding addPart(Value partKey, PartBinding part);
+
+  void openMetaPart(PartBinding part, NodeBinding metaPart);
+
+  void openMetaHost(HostBinding host, NodeBinding metaHost);
+
+  void openMetaNode(NodeBinding node, NodeBinding metaNode);
+
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
+
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 }

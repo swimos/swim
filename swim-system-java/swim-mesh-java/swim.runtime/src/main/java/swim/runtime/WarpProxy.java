@@ -302,6 +302,16 @@ public class WarpProxy implements WarpBinding, WarpContext {
   }
 
   @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.linkContext.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.linkBinding.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
   public void closeUp() {
     this.linkContext.closeUp();
   }
@@ -367,6 +377,11 @@ public class WarpProxy implements WarpBinding, WarpContext {
   }
 
   @Override
+  public void failDown(Object message) {
+    this.linkBinding.failDown(message);
+  }
+
+  @Override
   public void traceUp(Object message) {
     this.linkContext.traceUp(message);
   }
@@ -389,5 +404,10 @@ public class WarpProxy implements WarpBinding, WarpContext {
   @Override
   public void errorUp(Object message) {
     this.linkContext.errorUp(message);
+  }
+
+  @Override
+  public void failUp(Object message) {
+    this.linkContext.failUp(message);
   }
 }

@@ -29,11 +29,15 @@ public interface PartBinding extends TierBinding, CellBinding, CellContext {
 
   <T> T unwrapPart(Class<T> partClass);
 
+  PartAddress cellAddress();
+
   Uri meshUri();
 
   Value partKey();
 
   PartPredicate predicate();
+
+  void openMetaPart(PartBinding part, NodeBinding metaPart);
 
   HostBinding master();
 
@@ -48,4 +52,12 @@ public interface PartBinding extends TierBinding, CellBinding, CellContext {
   HostBinding openHost(Uri hostUri, HostBinding host);
 
   void reopenUplinks();
+
+  void openMetaHost(HostBinding host, NodeBinding metaHost);
+
+  void openMetaNode(NodeBinding node, NodeBinding metaNode);
+
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
+
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 }

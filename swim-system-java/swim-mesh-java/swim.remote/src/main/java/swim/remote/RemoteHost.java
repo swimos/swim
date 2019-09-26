@@ -38,8 +38,10 @@ import swim.io.IpSocket;
 import swim.io.warp.WarpSocket;
 import swim.io.warp.WarpSocketContext;
 import swim.runtime.AbstractTierBinding;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
+import swim.runtime.LaneBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
@@ -47,6 +49,7 @@ import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.WarpBinding;
+import swim.runtime.agent.AgentNode;
 import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -156,6 +159,16 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   @Override
   public long idleTimeout() {
     return -1; // default timeout
+  }
+
+  @Override
+  public HostAddress cellAddress() {
+    return this.hostContext.cellAddress();
+  }
+
+  @Override
+  public String edgeName() {
+    return this.hostContext.edgeName();
   }
 
   @Override
@@ -889,6 +902,36 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   @Override
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    openMetaLanes(host, (AgentNode) metaHost);
+    this.hostContext.openMetaHost(host, metaHost);
+  }
+
+  protected void openMetaLanes(HostBinding host, AgentNode metaHost) {
+    // TODO
+  }
+
+  @Override
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.hostContext.openMetaNode(node, metaNode);
+  }
+
+  @Override
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.hostContext.openMetaLane(lane, metaLane);
+  }
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.hostContext.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.hostContext.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
   public LinkBinding bindDownlink(Downlink downlink) {
     return this.hostContext.bindDownlink(downlink);
   }
@@ -1078,6 +1121,11 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   @Override
   public void error(Object message) {
     this.hostContext.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    this.hostContext.fail(message);
   }
 
   static final int PRIMARY = 1 << 0;

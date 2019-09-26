@@ -43,6 +43,7 @@ public class HostScope extends Scope implements HostRef {
     this.hostUri = hostUri;
   }
 
+  @Override
   public final Uri meshUri() {
     return this.meshUri;
   }

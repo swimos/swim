@@ -18,7 +18,9 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.runtime.CellContext;
 import swim.runtime.DownlinkModel;
 import swim.runtime.DownlinkView;
+import swim.runtime.LinkBinding;
 import swim.runtime.LinkContext;
+import swim.runtime.NodeBinding;
 import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
 import swim.structure.Value;
@@ -37,10 +39,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
   protected final float prio;
   protected final float rate;
   protected final Value body;
-
   protected WarpContext linkContext;
   protected CellContext cellContext;
-
   protected volatile int status;
 
   public WarpDownlinkModem(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
@@ -278,16 +278,16 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
     if ((oldStatus & UNLINK) != 0) {
       final UnlinkRequest request = unlinkRequest();
       pullUpUnlink(request);
-      this.linkContext.pushUp(request);
+      pushUp(request);
     } else if ((oldStatus & SYNC) != 0) {
       final SyncRequest request = syncRequest();
       pullUpSync(request);
-      this.linkContext.pushUp(request);
+      pushUp(request);
       feedUp();
     } else if ((oldStatus & LINK) != 0) {
       final LinkRequest request = linkRequest();
       pullUpLink(request);
-      this.linkContext.pushUp(request);
+      pushUp(request);
       feedUp();
     } else {
       CommandMessage message = nextUpQueueCommand();
@@ -296,7 +296,7 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
       }
       if (message != null) {
         pullUpCommand(message);
-        this.linkContext.pushUp(message);
+        pushUp(message);
         feedUp();
       } else {
         this.linkContext.skipUp();
@@ -318,6 +318,10 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   protected void pullUpUnlink(UnlinkRequest request) {
     willUnlink(request);
+  }
+
+  protected void pushUp(Envelope envelope) {
+    this.linkContext.pushUp(envelope);
   }
 
   public void link() {
@@ -517,6 +521,11 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
   public void didFail(Throwable error) {
     error.printStackTrace();
     super.didFail(error);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.cellContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   static final int OPENED = 1 << 0;

@@ -506,6 +506,14 @@ public abstract class DownlinkView implements Downlink {
     }
   }
 
+  @Override
+  public void fail(Object message) {
+    final DownlinkModel<?> model = downlinkModel();
+    if (model != null) {
+      model.fail(message);
+    }
+  }
+
   static final AtomicReferenceFieldUpdater<DownlinkView, Object> OBSERVERS =
       AtomicReferenceFieldUpdater.newUpdater(DownlinkView.class, Object.class, "observers");
 }

@@ -18,6 +18,7 @@ import swim.api.Downlink;
 import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.runtime.CellAddress;
 import swim.runtime.CellBinding;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
@@ -33,6 +34,14 @@ public abstract class ActorCell implements CellBinding, CellContext {
   public abstract CellBinding cellBinding();
 
   public abstract CellContext cellContext();
+
+  @Override
+  public abstract CellAddress cellAddress();
+
+  @Override
+  public String edgeName() {
+    return cellContext().edgeName();
+  }
 
   @Override
   public Uri meshUri() {
@@ -153,6 +162,16 @@ public abstract class ActorCell implements CellBinding, CellContext {
       log.error(message);
     } else {
       cellContext().error(message);
+    }
+  }
+
+  @Override
+  public void fail(Object message) {
+    final Log log = this.log;
+    if (log != null) {
+      log.fail(message);
+    } else {
+      cellContext().fail(message);
     }
   }
 }

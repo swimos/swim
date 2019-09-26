@@ -31,32 +31,47 @@ public interface PartContext extends TierContext, CellContext {
   <T> T unwrapPart(Class<T> partClass);
 
   @Override
+  PartAddress cellAddress();
+
+  @Override
+  String edgeName();
+
+  @Override
   Uri meshUri();
 
   Value partKey();
 
-  HostBinding createHost(Uri hostUri);
+  void openMetaPart(PartBinding part, NodeBinding metaPart);
 
-  HostBinding injectHost(Uri hostUri, HostBinding host);
+  HostBinding createHost(HostAddress hostAddress);
 
-  NodeBinding createNode(Uri hostUri, Uri nodeUri);
+  HostBinding injectHost(HostAddress hostAddress, HostBinding host);
 
-  NodeBinding injectNode(Uri hostUri, Uri nodeUri, NodeBinding node);
+  void openMetaHost(HostBinding host, NodeBinding metaHost);
 
-  LaneBinding createLane(Uri hostUri, Uri nodeUri, LaneDef laneDef);
+  NodeBinding createNode(NodeAddress nodeAddress);
 
-  LaneBinding createLane(Uri hostUri, Uri nodeUri, Uri laneUri);
+  NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node);
 
-  LaneBinding injectLane(Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane);
+  void openMetaNode(NodeBinding node, NodeBinding metaNode);
 
-  void openLanes(Uri hostUri, Uri nodeUri, NodeBinding node);
+  LaneBinding createLane(LaneAddress laneAddress);
 
-  AgentFactory<?> createAgentFactory(Uri hostUri, Uri nodeUri, AgentDef agentDef);
+  LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane);
 
-  <A extends Agent> AgentFactory<A> createAgentFactory(Uri hostUri, Uri nodeUri,
-                                                       Class<? extends A> agentClass);
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
 
-  void openAgents(Uri hostUri, Uri nodeUri, NodeBinding node);
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
+
+  LaneBinding createLane(NodeBinding node, LaneDef laneDef);
+
+  void openLanes(NodeBinding node);
+
+  AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef);
+
+  <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass);
+
+  void openAgents(NodeBinding node);
 
   PolicyDirective<Identity> authenticate(Credentials credentials);
 

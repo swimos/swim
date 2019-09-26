@@ -28,6 +28,7 @@ import swim.collections.HashTrieMap;
 import swim.concurrent.StageDef;
 import swim.kernel.KernelContext;
 import swim.kernel.KernelProxy;
+import swim.runtime.EdgeAddress;
 import swim.runtime.HostDef;
 import swim.runtime.LaneDef;
 import swim.runtime.LogDef;
@@ -188,7 +189,8 @@ public class ActorKernel extends KernelProxy {
 
   protected ActorSpace createActorSpace(String spaceName, ActorSpaceDef spaceDef) {
     final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
-    final ActorSpace space = new ActorSpace(spaceName, spaceDef, kernel);
+    final EdgeAddress edgeAddress = new EdgeAddress(spaceName);
+    final ActorSpace space = new ActorSpace(edgeAddress, spaceDef, kernel);
     createAuthenticators(space, spaceDef);
     createPlanes(space, spaceDef);
     return space;

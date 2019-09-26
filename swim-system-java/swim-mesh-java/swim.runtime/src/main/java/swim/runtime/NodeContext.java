@@ -29,6 +29,12 @@ public interface NodeContext extends TierContext, CellContext {
   <T> T unwrapNode(Class<T> nodeClass);
 
   @Override
+  NodeAddress cellAddress();
+
+  @Override
+  String edgeName();
+
+  @Override
   Uri meshUri();
 
   Value partKey();
@@ -41,17 +47,23 @@ public interface NodeContext extends TierContext, CellContext {
 
   Identity identity();
 
-  LaneBinding createLane(LaneDef laneDef);
+  void openMetaNode(NodeBinding node, NodeBinding metaNode);
 
-  LaneBinding createLane(Uri laneUri);
+  LaneBinding createLane(LaneAddress laneAddress);
 
-  LaneBinding injectLane(Uri laneUri, LaneBinding lane);
+  LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane);
+
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
+
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
+
+  LaneBinding createLane(NodeBinding node, LaneDef laneDef);
 
   void openLanes(NodeBinding node);
 
-  AgentFactory<?> createAgentFactory(AgentDef agentDef);
+  AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef);
 
-  <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass);
+  <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass);
 
   void openAgents(NodeBinding node);
 }

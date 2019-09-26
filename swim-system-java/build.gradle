@@ -4,166 +4,36 @@ ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : j
 ext.useModules = jvmVersion >= 9 && !hasProperty('no-modules')
 ext.graalVersion = project.property('graal.version')
 
-project(':swim-api') {
-  afterEvaluate {
-    dependencies {
-      api project(':swim-util')
-      api project(':swim-codec')
-      api project(':swim-structure')
-      api project(':swim-math')
-      api project(':swim-spatial')
-      api project(':swim-streamlet')
-      api project(':swim-dataflow')
-      api project(':swim-observable')
-      api project(':swim-http')
-      api project(':swim-ws')
-      api project(':swim-mqtt')
-      api project(':swim-warp')
-      api project(':swim-concurrent')
-      api project(':swim-io')
+def redepend(subproject) {
+  subproject.configurations.api.dependencies.toArray().each { dependency ->
+    if (dependency instanceof ExternalModuleDependency && dependency.group == "org.swimos") {
+      subproject.configurations.api.dependencies.remove(dependency)
+      subproject.dependencies {
+        api project(':' + dependency.name)
+      }
+    }
+  }
+  subproject.configurations.implementation.dependencies.toArray().each { dependency ->
+    if (dependency instanceof ExternalModuleDependency && dependency.group == "org.swimos") {
+      subproject.configurations.implementation.dependencies.remove(dependency)
+      subproject.dependencies {
+        implementation project(':' + dependency.name)
+      }
+    }
+  }
+  subproject.configurations.testCompile.dependencies.toArray().each { dependency ->
+    if (dependency instanceof ExternalModuleDependency && dependency.group == "org.swimos") {
+      subproject.configurations.testCompile.dependencies.remove(dependency)
+      subproject.dependencies {
+        testCompile project(':' + dependency.name)
+      }
     }
   }
 }
 
-project(':swim-store') {
+subprojects {
   afterEvaluate {
-    dependencies {
-      implementation project(':swim-util')
-      api project(':swim-codec')
-      api project(':swim-structure')
-      api project(':swim-math')
-      api project(':swim-spatial')
-    }
-  }
-}
-
-project(':swim-runtime') {
-  afterEvaluate {
-    dependencies {
-      implementation project(':swim-util')
-      api project(':swim-codec')
-      api project(':swim-structure')
-      api project(':swim-math')
-      api project(':swim-spatial')
-      api project(':swim-http')
-      api project(':swim-mqtt')
-      api project(':swim-warp')
-      api project(':swim-concurrent')
-    }
-  }
-}
-
-project(':swim-kernel') {
-  afterEvaluate {
-    dependencies {
-      implementation project(':swim-recon')
-      api project(':swim-io')
-      api project(':swim-web')
-    }
-  }
-}
-
-project(':swim-auth') {
-  afterEvaluate {
-    dependencies {
-      api project(':swim-security')
-      api project(':swim-io-http')
-    }
-  }
-}
-
-project(':swim-store-mem') {
-  afterEvaluate {
-    dependencies {
-      api project(':swim-collections')
-      api project(':swim-spatial')
-    }
-  }
-}
-
-project(':swim-remote') {
-  afterEvaluate {
-    dependencies {
-      api project(':swim-io-warp')
-      api project(':swim-runtime')
-    }
-  }
-}
-
-project(':swim-service-web') {
-  afterEvaluate {
-    dependencies {
-      api project(':swim-web')
-    }
-  }
-}
-
-project(':swim-cli') {
-  afterEvaluate {
-    dependencies {
-      api project(':swim-args')
-      api project(':swim-recon')
-      api project(':swim-json')
-    }
-  }
-}
-
-project(':swim-dynamic') {
-  afterEvaluate {
-    dependencies {
-      implementation project(':swim-collections')
-    }
-  }
-}
-
-project(':swim-dynamic-structure') {
-  afterEvaluate {
-    dependencies {
-      api project(':swim-structure')
-    }
-  }
-}
-
-project(':swim-dynamic-observable') {
-  afterEvaluate {
-    dependencies {
-      api project(':swim-observable')
-    }
-  }
-}
-
-project(':swim-dynamic-api') {
-  afterEvaluate {
-    dependencies {
-      api project(':swim-api')
-    }
-  }
-}
-
-project(':swim-vm') {
-  afterEvaluate {
-    dependencies {
-      implementation project(':swim-collections')
-    }
-  }
-}
-
-project(':swim-vm-js') {
-  afterEvaluate {
-    dependencies {
-      implementation project(':swim-json')
-      api project(':swim-uri')
-    }
-  }
-}
-
-project(':swim-js') {
-  afterEvaluate {
-    dependencies {
-      implementation project(':swim-json')
-      api project(':swim-kernel')
-      testCompile project(':swim-server')
-    }
+    redepend(project) // override maven dependencies with project dependencies
   }
 }
 

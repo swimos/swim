@@ -24,11 +24,14 @@ import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
 import swim.runtime.PushRequest;
@@ -38,15 +41,13 @@ import swim.uri.Uri;
 
 public class PartTableHost implements HostContext {
   protected final PartTable part;
-
   protected final HostBinding host;
+  protected final HostAddress hostAddress;
 
-  protected final Uri hostUri;
-
-  public PartTableHost(PartTable part, HostBinding host, Uri hostUri) {
+  public PartTableHost(PartTable part, HostBinding host, HostAddress hostAddress) {
     this.part = part;
     this.host = host;
-    this.hostUri = hostUri;
+    this.hostAddress = hostAddress;
   }
 
   @Override
@@ -70,18 +71,28 @@ public class PartTableHost implements HostContext {
   }
 
   @Override
+  public final HostAddress cellAddress() {
+    return this.hostAddress;
+  }
+
+  @Override
+  public final String edgeName() {
+    return this.hostAddress.edgeName();
+  }
+
+  @Override
   public final Uri meshUri() {
-    return this.part.meshUri();
+    return this.hostAddress.meshUri();
   }
 
   @Override
   public final Value partKey() {
-    return this.part.partKey();
+    return this.hostAddress.partKey();
   }
 
   @Override
   public final Uri hostUri() {
-    return this.hostUri;
+    return this.hostAddress.hostUri();
   }
 
   @Override
@@ -105,48 +116,73 @@ public class PartTableHost implements HostContext {
   }
 
   @Override
-  public NodeBinding createNode(Uri nodeUri) {
-    return this.part.partContext().createNode(this.hostUri, nodeUri);
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    this.part.openMetaHost(host, metaHost);
   }
 
   @Override
-  public NodeBinding injectNode(Uri nodeUri, NodeBinding node) {
-    return this.part.partContext().injectNode(this.hostUri, nodeUri, node);
+  public NodeBinding createNode(NodeAddress nodeAddress) {
+    return this.part.partContext().createNode(nodeAddress);
   }
 
   @Override
-  public LaneBinding createLane(Uri nodeUri, LaneDef laneDef) {
-    return this.part.partContext().createLane(this.hostUri, nodeUri, laneDef);
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
+    return this.part.partContext().injectNode(nodeAddress, node);
   }
 
   @Override
-  public LaneBinding createLane(Uri nodeUri, Uri laneUri) {
-    return this.part.partContext().createLane(this.hostUri, nodeUri, laneUri);
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.part.openMetaNode(node, metaNode);
   }
 
   @Override
-  public LaneBinding injectLane(Uri nodeUri, Uri laneUri, LaneBinding lane) {
-    return this.part.partContext().injectLane(this.hostUri, nodeUri, laneUri, lane);
+  public LaneBinding createLane(LaneAddress laneAddress) {
+    return this.part.partContext().createLane(laneAddress);
   }
 
   @Override
-  public void openLanes(Uri nodeUri, NodeBinding node) {
-    this.part.partContext().openLanes(this.hostUri, nodeUri, node);
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return this.part.partContext().injectLane(laneAddress, lane);
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Uri nodeUri, AgentDef agentDef) {
-    return this.part.partContext().createAgentFactory(this.hostUri, nodeUri, agentDef);
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.part.openMetaLane(lane, metaLane);
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Uri nodeUri, Class<? extends A> agentClass) {
-    return this.part.partContext().createAgentFactory(this.hostUri, nodeUri, agentClass);
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.part.openMetaUplink(uplink, metaUplink);
   }
 
   @Override
-  public void openAgents(Uri nodeUri, NodeBinding node) {
-    this.part.partContext().openAgents(this.hostUri, nodeUri, node);
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.part.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return this.part.partContext().createLane(node, laneDef);
+  }
+
+  @Override
+  public void openLanes(NodeBinding node) {
+    this.part.partContext().openLanes(node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return this.part.partContext().createAgentFactory(node, agentDef);
+  }
+
+  @Override
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return this.part.partContext().createAgentFactory(node, agentClass);
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.part.partContext().openAgents(node);
   }
 
   @Override
@@ -200,8 +236,13 @@ public class PartTableHost implements HostContext {
   }
 
   @Override
+  public void fail(Object message) {
+    this.part.fail(message);
+  }
+
+  @Override
   public void close() {
-    this.part.closeHost(this.hostUri);
+    this.part.closeHost(this.hostAddress.hostUri());
   }
 
   @Override
@@ -236,12 +277,12 @@ public class PartTableHost implements HostContext {
 
   @Override
   public void didConnect() {
-    this.part.hostDidConnect(this.hostUri);
+    this.part.hostDidConnect(this.hostAddress.hostUri());
   }
 
   @Override
   public void didDisconnect() {
-    this.part.hostDidDisconnect(this.hostUri);
+    this.part.hostDidDisconnect(this.hostAddress.hostUri());
   }
 
   @Override

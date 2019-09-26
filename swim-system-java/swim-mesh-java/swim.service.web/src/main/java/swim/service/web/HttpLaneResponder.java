@@ -28,7 +28,9 @@ import swim.io.http.HttpResponderContext;
 import swim.runtime.CellContext;
 import swim.runtime.HttpBinding;
 import swim.runtime.HttpContext;
+import swim.runtime.LinkBinding;
 import swim.runtime.LinkContext;
+import swim.runtime.NodeBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -237,6 +239,11 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
   }
 
   @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.linkContext.openMetaUplink(downlink, metaDownlink); // always an uplink
+  }
+
+  @Override
   public void willBecome(IpSocket socket) {
     // nop
   }
@@ -309,6 +316,11 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
 
   @Override
   public void errorDown(Object message) {
+    // nop
+  }
+
+  @Override
+  public void failDown(Object message) {
     // nop
   }
 }

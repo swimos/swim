@@ -76,6 +76,16 @@ public class LaneProxy implements LaneBinding, LaneContext {
   }
 
   @Override
+  public LaneAddress cellAddress() {
+    return this.laneContext.cellAddress();
+  }
+
+  @Override
+  public String edgeName() {
+    return this.laneContext.edgeName();
+  }
+
+  @Override
   public Uri meshUri() {
     return this.laneContext.meshUri();
   }
@@ -151,13 +161,28 @@ public class LaneProxy implements LaneBinding, LaneContext {
   }
 
   @Override
-  public LinkBinding getUplink(Value linkKey) {
+  public LinkContext getUplink(Value linkKey) {
     return this.laneBinding.getUplink(linkKey);
   }
 
   @Override
   public void closeUplink(Value linkKey) {
     this.laneBinding.closeUplink(linkKey);
+  }
+
+  @Override
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.laneContext.openMetaLane(lane, metaLane);
+  }
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.laneContext.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.laneContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override
@@ -218,6 +243,11 @@ public class LaneProxy implements LaneBinding, LaneContext {
   @Override
   public void error(Object message) {
     this.laneContext.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    this.laneContext.fail(message);
   }
 
   @Override

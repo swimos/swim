@@ -47,6 +47,7 @@ public class LaneScope extends Scope implements LaneRef {
     this.laneUri = laneUri;
   }
 
+  @Override
   public final Uri meshUri() {
     return this.meshUri;
   }
