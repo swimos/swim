@@ -23,7 +23,7 @@ import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
-import swim.streamlet.ModalKeyFilterConduit;
+import swim.streamlet.ModalKeyFilterStreamlet;
 
 /**
  * Map stream where the entries are filtered according to a variable predicate on the keys only.
@@ -95,16 +95,16 @@ public class ModalFilteredKeysMapStream<K, V, M> extends AbstractMapStream<K, V>
   public MapJunction<K, V> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K, V> source = context.createFor(in);
     final Junction<M> modes = context.createFor(control);
-    final ModalKeyFilterConduit<K, V, M> conduit;
+    final ModalKeyFilterStreamlet<K, V, M> streamlet;
     if (isTransient) {
-      conduit = new ModalKeyFilterConduit<>(init, switcher);
+      streamlet = new ModalKeyFilterStreamlet<>(init, switcher);
     } else {
       final ValuePersister<M> modePersister = context.getPersistenceProvider().forValue(
           StateTags.modeTag(id()), control.form(), init);
-      conduit = new ModalKeyFilterConduit<>(modePersister, switcher);
+      streamlet = new ModalKeyFilterStreamlet<>(modePersister, switcher);
     }
-    source.subscribe(conduit.first());
-    modes.subscribe(conduit.second());
-    return conduit;
+    source.subscribe(streamlet.first());
+    modes.subscribe(streamlet.second());
+    return streamlet;
   }
 }

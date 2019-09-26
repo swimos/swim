@@ -21,7 +21,7 @@ import java.util.function.ToLongFunction;
 import swim.streaming.MapJunction;
 import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStreamContext;
-import swim.streamlet.FlatMapEntriesConduit;
+import swim.streamlet.FlatMapEntriesStreamlet;
 import swim.structure.Form;
 import swim.util.Pair;
 
@@ -90,8 +90,8 @@ class FlatMappedMapStream<K1, K2, V1, V2> extends AbstractMapStream<K2, V2> {
   @Override
   public MapJunction<K2, V2> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K1, V1> source = context.createFor(in);
-    final FlatMapEntriesConduit<K1, K2, V1, V2> conduit = new FlatMapEntriesConduit<>(f, onRemove);
-    source.subscribe(conduit);
-    return conduit;
+    final FlatMapEntriesStreamlet<K1, K2, V1, V2> streamlet = new FlatMapEntriesStreamlet<>(f, onRemove);
+    source.subscribe(streamlet);
+    return streamlet;
   }
 }

@@ -22,7 +22,7 @@ import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ListPersister;
 import swim.streaming.persistence.PersistenceProvider;
 import swim.streaming.persistence.SetPersister;
-import swim.streamlet.DelayMapConduit;
+import swim.streamlet.DelayMapStreamlet;
 import swim.structure.Form;
 import swim.util.Require;
 
@@ -85,9 +85,9 @@ class DelayedMapStream<K, V> extends AbstractMapStream<K, V> {
   @Override
   public MapJunction<K, V> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K, V> source = context.createFor(in);
-    final DelayMapConduit<K, V> conduit;
+    final DelayMapStreamlet<K, V> streamlet;
     if (isTransient) {
-      conduit = new DelayMapConduit<>(steps);
+      streamlet = new DelayMapStreamlet<>(steps);
     } else {
       final PersistenceProvider perProvider = context.getPersistenceProvider();
       final Form<K> kForm = keyForm();
@@ -95,9 +95,9 @@ class DelayedMapStream<K, V> extends AbstractMapStream<K, V> {
       final Function<K, ListPersister<V>> bufferPeristers = k -> perProvider.forList(
           StateTags.keyedStateTag(id(), kForm.mold(k).toValue()), vForm);
       final SetPersister<K> keysPersister = perProvider.forSet(StateTags.stateTag(id()), kForm);
-      conduit = new DelayMapConduit<>(bufferPeristers, keysPersister, steps);
+      streamlet = new DelayMapStreamlet<>(bufferPeristers, keysPersister, steps);
     }
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 }

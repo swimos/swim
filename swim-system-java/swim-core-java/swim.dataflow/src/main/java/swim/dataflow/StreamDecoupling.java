@@ -22,11 +22,11 @@ import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
 import swim.streaming.sampling.Sampling;
 import swim.streamlet.MapJunction2;
-import swim.streamlet.PeriodicConduit;
-import swim.streamlet.RateLimitedMapConduit;
-import swim.streamlet.SamplingMapConduit;
+import swim.streamlet.PeriodicStreamlet;
+import swim.streamlet.RateLimitedMapStreamlet;
+import swim.streamlet.SamplingMapStreamlet;
 import swim.streamlet.StreamInterpretation;
-import swim.streamlet.VariablePeriodicConduit;
+import swim.streamlet.VariablePeriodicStreamlet;
 
 /**
  * Static methods to temporally decouple a stream (the rate at which the stream emits data becomes different from
@@ -89,19 +89,19 @@ final class StreamDecoupling {
                                                  final boolean isTransient,
                                                  final StreamInterpretation interpretation) {
     final Junction<Duration> control = context.createFor(durs);
-    final VariablePeriodicConduit<T> conduit;
+    final VariablePeriodicStreamlet<T> streamlet;
     if (isTransient) {
-      conduit = new VariablePeriodicConduit<>(
+      streamlet = new VariablePeriodicStreamlet<>(
           context.getSchedule(), dur0, interpretation);
     } else {
       final ValuePersister<Duration> persister = context.getPersistenceProvider().forValue(
           StateTags.periodTag(id), durs.form(), dur0);
-      conduit = new VariablePeriodicConduit<>(
+      streamlet = new VariablePeriodicStreamlet<>(
           context.getSchedule(), persister, interpretation);
     }
-    control.subscribe(conduit.second());
-    in.subscribe(conduit.first());
-    return conduit;
+    control.subscribe(streamlet.second());
+    in.subscribe(streamlet.first());
+    return streamlet;
   }
 
   private static <K, V> MapJunction<K, V> dynamicSamplingMap(final String id,
@@ -111,51 +111,51 @@ final class StreamDecoupling {
                                                              final SwimStream<Duration> durs,
                                                              final boolean isTransient,
                                                              final StreamInterpretation interpretation) {
-    final MapJunction2<K, K, V, V, Duration> conduit;
+    final MapJunction2<K, K, V, V, Duration> streamlet;
     if (isTransient) {
       if (interpretation == StreamInterpretation.DISCRETE) {
-        conduit = new RateLimitedMapConduit<>(context.getSchedule(), dur0);
+        streamlet = new RateLimitedMapStreamlet<>(context.getSchedule(), dur0);
       } else {
-        conduit = new SamplingMapConduit<>(context.getSchedule(), dur0);
+        streamlet = new SamplingMapStreamlet<>(context.getSchedule(), dur0);
       }
     } else {
       final ValuePersister<Duration> persister = context.getPersistenceProvider().forValue(
           StateTags.periodTag(id), durs.form(), dur0);
       if (interpretation == StreamInterpretation.DISCRETE) {
-        conduit = new RateLimitedMapConduit<>(context.getSchedule(), persister);
+        streamlet = new RateLimitedMapStreamlet<>(context.getSchedule(), persister);
       } else {
-        conduit = new SamplingMapConduit<>(context.getSchedule(), persister);
+        streamlet = new SamplingMapStreamlet<>(context.getSchedule(), persister);
       }
     }
 
-    in.subscribe(conduit.first());
+    in.subscribe(streamlet.first());
 
     final Junction<Duration> periods = context.createFor(durs);
-    periods.subscribe(conduit.second());
-    return conduit;
+    periods.subscribe(streamlet.second());
+    return streamlet;
   }
 
   private static <T> Junction<T> constantSampling(final SwimStreamContext.InitContext context,
                                                   final Junction<T> in,
                                                   final Duration dur,
                                                   final StreamInterpretation interpretation) {
-    final PeriodicConduit<T> conduit = new PeriodicConduit<>(
+    final PeriodicStreamlet<T> streamlet = new PeriodicStreamlet<>(
         context.getSchedule(), dur, interpretation);
-    in.subscribe(conduit);
-    return conduit;
+    in.subscribe(streamlet);
+    return streamlet;
   }
 
   private static <K, V> MapJunction2<K, K, V, V, Duration> constantSamplingMap(final SwimStreamContext.InitContext context,
                                                                                final MapJunction<K, V> in, final Duration dur,
                                                                                final StreamInterpretation interpretation) {
-    final MapJunction2<K, K, V, V, Duration> conduit;
+    final MapJunction2<K, K, V, V, Duration> streamlet;
     if (interpretation == StreamInterpretation.DISCRETE) {
-      conduit = new RateLimitedMapConduit<>(context.getSchedule(), dur);
+      streamlet = new RateLimitedMapStreamlet<>(context.getSchedule(), dur);
     } else {
-      conduit = new SamplingMapConduit<>(context.getSchedule(), dur);
+      streamlet = new SamplingMapStreamlet<>(context.getSchedule(), dur);
     }
-    in.subscribe(conduit.first());
-    return conduit;
+    in.subscribe(streamlet.first());
+    return streamlet;
   }
 
 }

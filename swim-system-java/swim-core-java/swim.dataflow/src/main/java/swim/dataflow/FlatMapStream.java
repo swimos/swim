@@ -24,8 +24,8 @@ import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
 import swim.streaming.sampling.DelaySpecifier;
 import swim.streamlet.AbstractJunction;
-import swim.streamlet.FlatMapConduit;
-import swim.streamlet.VariableFlatMapConduit;
+import swim.streamlet.FlatMapStreamlet;
+import swim.streamlet.VariableFlatMapStreamlet;
 import swim.structure.Form;
 import swim.structure.form.DurationForm;
 import swim.util.Iterables;
@@ -107,13 +107,13 @@ class FlatMapStream<S, T> extends AbstractSwimStream<T> {
                                              final SwimStream<Duration> delays,
                                              final boolean isTransient) {
     final Junction<Duration> delayJunction = context.createFor(delays);
-    final VariableFlatMapConduit<S, T> junction;
+    final VariableFlatMapStreamlet<S, T> junction;
     if (isTransient) {
-      junction = new VariableFlatMapConduit<>(f, schedule, init);
+      junction = new VariableFlatMapStreamlet<>(f, schedule, init);
     } else {
       final ValuePersister<Duration> persister = context.getPersistenceProvider().forValue(
           StateTags.stateTag(id()), new DurationForm(init));
-      junction = new VariableFlatMapConduit<>(f, schedule, persister);
+      junction = new VariableFlatMapStreamlet<>(f, schedule, persister);
     }
     delayJunction.subscribe(junction.second());
     source.subscribe(junction.first());
@@ -121,9 +121,9 @@ class FlatMapStream<S, T> extends AbstractSwimStream<T> {
   }
 
   private AbstractJunction<T> simpleFlatMap(final Junction<S> source, final Schedule schedule, final Duration dur) {
-    final FlatMapConduit<S, T> conduit = new FlatMapConduit<>(f, schedule, dur);
-    source.subscribe(conduit);
-    return conduit;
+    final FlatMapStreamlet<S, T> streamlet = new FlatMapStreamlet<>(f, schedule, dur);
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
 }

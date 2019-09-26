@@ -19,7 +19,7 @@ import swim.streaming.MapJunction;
 import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.MapPersister;
-import swim.streamlet.FirstValueMapConduit;
+import swim.streamlet.FirstValueMapStreamlet;
 
 /**
  * A stream that will only ever contain the first value received from its source for each key.
@@ -73,15 +73,15 @@ class FirstMapStream<K, V> extends AbstractMapStream<K, V> {
   @Override
   public MapJunction<K, V> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K, V> source = context.createFor(in);
-    final FirstValueMapConduit<K, V> conduit;
+    final FirstValueMapStreamlet<K, V> streamlet;
     if (isTransient) {
-      conduit = new FirstValueMapConduit<>(resetOnRemoval, valueForm());
+      streamlet = new FirstValueMapStreamlet<>(resetOnRemoval, valueForm());
     } else {
       final MapPersister<K, V> persister = context.getPersistenceProvider()
           .forMap(StateTags.stateTag(id()), keyForm(), valueForm());
-      conduit = new FirstValueMapConduit<>(resetOnRemoval, persister);
+      streamlet = new FirstValueMapStreamlet<>(resetOnRemoval, persister);
     }
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 }

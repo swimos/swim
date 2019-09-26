@@ -18,7 +18,7 @@ import swim.util.Deferred;
 import swim.util.Pair;
 
 /**
- * Specification for a call to {@link WindowConduit#notifyChange(Deferred)}.
+ * Specification for a call to {@link WindowStreamlet#notifyChange(Deferred)}.
  */
 final class Expectation {
 

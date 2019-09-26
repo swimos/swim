@@ -22,8 +22,8 @@ import swim.streaming.Junction;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.sampling.Sampling;
-import swim.streamlet.MemoizingConduit;
-import swim.streamlet.TransformConduit;
+import swim.streamlet.MemoizingStreamlet;
+import swim.streamlet.TransformStreamlet;
 import swim.structure.Form;
 
 /**
@@ -108,14 +108,14 @@ public class TransformedStream<S, T> extends AbstractSwimStream<T> {
   @Override
   public Junction<T> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<S> source = context.createFor(in);
-    final TransformConduit<S, T> conduit = new TransformConduit<>(f);
-    source.subscribe(conduit);
+    final TransformStreamlet<S, T> streamlet = new TransformStreamlet<>(f);
+    source.subscribe(streamlet);
     if (memoizeValue) {
-      final MemoizingConduit<T> memoizer = new MemoizingConduit<>();
-      conduit.subscribe(memoizer);
+      final MemoizingStreamlet<T> memoizer = new MemoizingStreamlet<>();
+      streamlet.subscribe(memoizer);
       return memoizer;
     } else {
-      return conduit;
+      return streamlet;
     }
   }
 }

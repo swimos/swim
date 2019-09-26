@@ -21,8 +21,8 @@ import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.MapPersister;
 import swim.streaming.sampling.Sampling;
-import swim.streamlet.MapConduit;
-import swim.streamlet.StatefulConduits;
+import swim.streamlet.MapStreamlet;
+import swim.streamlet.StatefulStreamlets;
 
 /**
  * Accumulates the values associated with each key over time.
@@ -84,15 +84,15 @@ final class ReducedMapStream<K, V> extends AbstractMapStream<K, V> {
   @Override
   public MapJunction<K, V> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K, V> source = context.createFor(in);
-    final MapConduit<K, K, V, V> conduit;
+    final MapStreamlet<K, K, V, V> streamlet;
     if (isTransient) {
-      conduit = StatefulConduits.reduceMap(operator);
+      streamlet = StatefulStreamlets.reduceMap(operator);
     } else {
       final MapPersister<K, V> statePersister = context.getPersistenceProvider()
           .forMap(StateTags.stateTag(id()), keyForm(), valueForm(), null);
-      conduit = StatefulConduits.reduceMap(statePersister, operator);
+      streamlet = StatefulStreamlets.reduceMap(statePersister, operator);
     }
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 }

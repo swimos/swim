@@ -15,7 +15,7 @@
 package swim.dataflow;
 
 import java.util.function.ToLongFunction;
-import swim.dataflow.partitions.PartitionConduit;
+import swim.dataflow.partitions.PartitionStreamlet;
 import swim.streaming.Junction;
 import swim.streaming.MapJunction;
 import swim.streaming.MapSwimStream;
@@ -90,16 +90,16 @@ class PartitionedStream<T, P, S extends PartitionState<P, S>> extends AbstractMa
   public MapJunction<P, T> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<T> source = StreamDecoupling.sampleStream(id(), context, context.createFor(in),
         sampling, StreamInterpretation.DISCRETE);
-    final PartitionConduit<T, P, S> conduit;
+    final PartitionStreamlet<T, P, S> streamlet;
     if (isTransient) {
-      conduit = new PartitionConduit<>(assigner, valueForm());
+      streamlet = new PartitionStreamlet<>(assigner, valueForm());
     } else {
       final MapPersister<P, T> persister = context.getPersistenceProvider().forMap(
           StateTags.stateTag(id()), keyForm(), valueForm());
-      conduit = new PartitionConduit<>(assigner, persister);
+      streamlet = new PartitionStreamlet<>(assigner, persister);
     }
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
   @Override

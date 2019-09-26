@@ -26,7 +26,7 @@ import swim.streaming.persistence.MapPersister;
 import swim.streaming.persistence.ValuePersister;
 import swim.streaming.sampling.Sampling;
 import swim.streamlet.MapJunction2;
-import swim.streamlet.StatefulConduits;
+import swim.streamlet.StatefulStreamlets;
 import swim.streamlet.StreamInterpretation;
 import swim.structure.Form;
 
@@ -121,20 +121,20 @@ class ModalFoldedMapStream<K, V, U, M> extends AbstractMapStream<K, U> {
     final MapJunction<K, V> source = StreamDecoupling.sampleMapStream(id(), context, context.createFor(in),
         sampling, StreamInterpretation.DISCRETE);
     final Junction<M> control = context.createFor(controlStream);
-    final MapJunction2<K, K, V, U, M> conduit;
+    final MapJunction2<K, K, V, U, M> streamlet;
     if (isTransient) {
-      conduit = StatefulConduits.modalFoldMap(init, seed, modalFoldFunction);
+      streamlet = StatefulStreamlets.modalFoldMap(init, seed, modalFoldFunction);
     } else {
       final ValuePersister<M> modePersister = context.getPersistenceProvider().forValue(StateTags.modeTag(id()),
           controlStream.form(), init);
       final MapPersister<K, U> statePersister = context.getPersistenceProvider().forMap(
           StateTags.stateTag(id()),
           keyForm(), valueForm(), seed);
-      conduit = StatefulConduits.modalFoldMap(modePersister, statePersister, modalFoldFunction);
+      streamlet = StatefulStreamlets.modalFoldMap(modePersister, statePersister, modalFoldFunction);
     }
-    source.subscribe(conduit.first());
-    control.subscribe(conduit.second());
-    return conduit;
+    source.subscribe(streamlet.first());
+    control.subscribe(streamlet.second());
+    return streamlet;
   }
 
 }

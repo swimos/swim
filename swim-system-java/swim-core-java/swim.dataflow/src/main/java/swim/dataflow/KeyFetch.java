@@ -21,7 +21,7 @@ import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.sampling.Sampling;
-import swim.streamlet.IdentityConduit;
+import swim.streamlet.IdentityStreamlet;
 import swim.streamlet.StreamInterpretation;
 import swim.structure.Form;
 
@@ -82,7 +82,7 @@ class KeyFetch<K, V> extends AbstractSwimStream<V> {
   @Override
   public Junction<V> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K, V> source = context.createFor(keyedStream);
-    final IdentityConduit<V> identity = new IdentityConduit<>();
+    final IdentityStreamlet<V> identity = new IdentityStreamlet<>();
     source.subscribe(key, identity);
     return StreamDecoupling.sampleStream(id(), context, identity, sampling, StreamInterpretation.DISCRETE);
   }

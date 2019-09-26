@@ -22,7 +22,7 @@ import swim.collections.FingerTrieSeq;
 import swim.dataflow.windows.DefaultPaneManager;
 import swim.dataflow.windows.FoldPaneUpdater;
 import swim.dataflow.windows.FoldingEvaluator;
-import swim.dataflow.windows.KeyedWindowConduit;
+import swim.dataflow.windows.KeyedWindowStreamlet;
 import swim.dataflow.windows.MapPaneUpdater;
 import swim.dataflow.windows.NoOpEvictor;
 import swim.dataflow.windows.PaneEvaluator;
@@ -132,19 +132,19 @@ class FoldedMapWindowedStream<K, T, U, W, S extends WindowState<W, S>> extends A
     final TimestampAssigner<T> timestamps =
         ts == null ? TimestampAssigner.fromClock() : TimestampAssigner.fromData(ts);
 
-    final KeyedWindowConduit<K, T, W, U> conduit;
+    final KeyedWindowStreamlet<K, T, W, U> streamlet;
     if (spec.isTransient()) {
-      conduit = new KeyedWindowConduit<>(
+      streamlet = new KeyedWindowStreamlet<>(
           context.getSchedule(), paneManagers, timestamps);
     } else {
       final SetPersister<K> keysPersister = context.getPersistenceProvider().forSet(
           StateTags.stateTag(id()), keyForm());
-      conduit = new KeyedWindowConduit<>(
+      streamlet = new KeyedWindowStreamlet<>(
           context.getSchedule(), keysPersister, paneManagers, timestamps);
     }
 
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
   //When we have eviction it is necessary to maintain all of the data in the window.

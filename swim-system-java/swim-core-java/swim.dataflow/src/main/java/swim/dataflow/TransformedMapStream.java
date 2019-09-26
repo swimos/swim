@@ -22,7 +22,7 @@ import java.util.function.ToLongFunction;
 import swim.streaming.MapJunction;
 import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStreamContext;
-import swim.streamlet.FlatMapEntriesConduit;
+import swim.streamlet.FlatMapEntriesStreamlet;
 import swim.structure.Form;
 import swim.util.Pair;
 
@@ -91,8 +91,8 @@ class TransformedMapStream<K1, K2, V1, V2> extends AbstractMapStream<K2, V2> {
   public MapJunction<K2, V2> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K1, V1> source = context.createFor(in);
     final BiFunction<K1, V1, Iterable<Pair<K2, V2>>> itFun = (k1, v1) -> Collections.singletonList(f.apply(k1, v1));
-    final FlatMapEntriesConduit<K1, K2, V1, V2> conduit = new FlatMapEntriesConduit<>(itFun, onRemove);
-    source.subscribe(conduit);
-    return conduit;
+    final FlatMapEntriesStreamlet<K1, K2, V1, V2> streamlet = new FlatMapEntriesStreamlet<>(itFun, onRemove);
+    source.subscribe(streamlet);
+    return streamlet;
   }
 }

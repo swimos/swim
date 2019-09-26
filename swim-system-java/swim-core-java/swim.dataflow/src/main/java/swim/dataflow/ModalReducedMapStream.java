@@ -26,7 +26,7 @@ import swim.streaming.persistence.MapPersister;
 import swim.streaming.persistence.ValuePersister;
 import swim.streaming.sampling.Sampling;
 import swim.streamlet.MapJunction2;
-import swim.streamlet.StatefulConduits;
+import swim.streamlet.StatefulStreamlets;
 import swim.streamlet.StreamInterpretation;
 
 /**
@@ -109,20 +109,20 @@ class ModalReducedMapStream<K, V, M> extends AbstractMapStream<K, V> {
     final MapJunction<K, V> source = StreamDecoupling.sampleMapStream(id(), context, context.createFor(in),
         sampling, StreamInterpretation.DISCRETE);
     final Junction<M> modes = context.createFor(controlStream);
-    final MapJunction2<K, K, V, V, M> conduit;
+    final MapJunction2<K, K, V, V, M> streamlet;
     if (isTransient) {
-      conduit = StatefulConduits.modalReduceMap(init, modalOperator);
+      streamlet = StatefulStreamlets.modalReduceMap(init, modalOperator);
     } else {
       final ValuePersister<M> modePersister = context.getPersistenceProvider().forValue(StateTags.modeTag(id()),
           controlStream.form(), init);
       final MapPersister<K, V> statePersister = context.getPersistenceProvider().forMap(
           StateTags.stateTag(id()),
           keyForm(), valueForm(), null);
-      conduit = StatefulConduits.modalReduceMap(modePersister, statePersister, modalOperator);
+      streamlet = StatefulStreamlets.modalReduceMap(modePersister, statePersister, modalOperator);
     }
-    source.subscribe(conduit.first());
-    modes.subscribe(conduit.second());
-    return conduit;
+    source.subscribe(streamlet.first());
+    modes.subscribe(streamlet.second());
+    return streamlet;
   }
 
 }

@@ -21,7 +21,7 @@ import swim.streaming.Junction;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
-import swim.streamlet.ModalFilteredConduit;
+import swim.streamlet.ModalFilteredStreamlet;
 
 /**
  * Stream where the values are filtered according to a variable predicate.
@@ -83,13 +83,13 @@ class ModalFilteredStream<T, M> extends AbstractSwimStream<T> {
   public Junction<T> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<T> source = context.createFor(in);
     final Junction<M> modes = context.createFor(control);
-    final ModalFilteredConduit<T, M> junction;
+    final ModalFilteredStreamlet<T, M> junction;
     if (isTransient) {
-      junction = new ModalFilteredConduit<>(init, switcher);
+      junction = new ModalFilteredStreamlet<>(init, switcher);
     } else {
       final ValuePersister<M> modePersister = context.getPersistenceProvider().forValue(
           StateTags.modeTag(id()), control.form(), init);
-      junction = new ModalFilteredConduit<>(modePersister, switcher);
+      junction = new ModalFilteredStreamlet<>(modePersister, switcher);
     }
     source.subscribe(junction.first());
     modes.subscribe(junction.second());

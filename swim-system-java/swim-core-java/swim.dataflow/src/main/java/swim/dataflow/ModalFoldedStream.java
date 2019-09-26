@@ -23,7 +23,7 @@ import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
 import swim.streaming.sampling.Sampling;
 import swim.streamlet.Junction2;
-import swim.streamlet.StatefulConduits;
+import swim.streamlet.StatefulStreamlets;
 import swim.streamlet.StreamInterpretation;
 import swim.structure.Form;
 
@@ -120,13 +120,13 @@ class ModalFoldedStream<T, U, M> extends AbstractSwimStream<U> {
     final Junction<M> control = context.createFor(controlStream);
     final Junction2<T, M, U> junction;
     if (isTransient) {
-      junction = StatefulConduits.modalFold(initialMode, seed, modalFoldFunction);
+      junction = StatefulStreamlets.modalFold(initialMode, seed, modalFoldFunction);
     } else {
       final ValuePersister<M> modePersister = context.getPersistenceProvider().forValue(
           StateTags.modeTag(id()), controlStream.form(), initialMode);
       final ValuePersister<U> statePersister = context.getPersistenceProvider().forValue(
           StateTags.stateTag(id()), form(), seed);
-      junction = StatefulConduits.modalFold(modePersister, statePersister, modalFoldFunction);
+      junction = StatefulStreamlets.modalFold(modePersister, statePersister, modalFoldFunction);
     }
     source.subscribe(junction.first());
     control.subscribe(junction.second());

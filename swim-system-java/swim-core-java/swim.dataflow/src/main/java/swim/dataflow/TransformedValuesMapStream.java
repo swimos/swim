@@ -19,9 +19,9 @@ import java.util.function.ToLongFunction;
 import swim.streaming.MapJunction;
 import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStreamContext;
-import swim.streamlet.MapConduit;
-import swim.streamlet.MapMemoizingConduit;
-import swim.streamlet.TransformMapConduit;
+import swim.streamlet.MapMemoizingStreamlet;
+import swim.streamlet.MapStreamlet;
+import swim.streamlet.TransformMapStreamlet;
 import swim.structure.Form;
 
 /**
@@ -79,14 +79,14 @@ class TransformedValuesMapStream<K, V1, V2> extends AbstractMapStream<K, V2> {
   @Override
   public MapJunction<K, V2> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K, V1> source = context.createFor(in);
-    final TransformMapConduit<K, V1, V2> conduit = new TransformMapConduit<>(f);
-    source.subscribe(conduit);
+    final TransformMapStreamlet<K, V1, V2> streamlet = new TransformMapStreamlet<>(f);
+    source.subscribe(streamlet);
     if (memoizeValues) {
-      final MapConduit<K, K, V2, V2> memoizer = new MapMemoizingConduit<>();
-      conduit.subscribe(memoizer);
+      final MapStreamlet<K, K, V2, V2> memoizer = new MapMemoizingStreamlet<>();
+      streamlet.subscribe(memoizer);
       return memoizer;
     } else {
-      return conduit;
+      return streamlet;
     }
   }
 }

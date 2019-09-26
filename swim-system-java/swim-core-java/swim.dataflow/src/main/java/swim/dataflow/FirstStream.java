@@ -19,7 +19,7 @@ import swim.streaming.Junction;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
-import swim.streamlet.FirstValueConduit;
+import swim.streamlet.FirstValueStreamlet;
 
 /**
  * A stream that will only ever contain the first value received from its source.
@@ -66,15 +66,15 @@ final class FirstStream<T> extends AbstractSwimStream<T> {
   public Junction<T> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<T> source = context.createFor(in);
 
-    final FirstValueConduit<T> conduit;
+    final FirstValueStreamlet<T> streamlet;
     if (isTransient) {
-      conduit = new FirstValueConduit<>();
+      streamlet = new FirstValueStreamlet<>();
     } else {
       final ValuePersister<T> persister = context.getPersistenceProvider().forValue(
           StateTags.stateTag(id()), form().unit(null));
-      conduit = new FirstValueConduit<>(persister);
+      streamlet = new FirstValueStreamlet<>(persister);
     }
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 }

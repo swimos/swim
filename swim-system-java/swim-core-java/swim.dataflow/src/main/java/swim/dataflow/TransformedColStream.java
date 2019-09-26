@@ -21,7 +21,7 @@ import swim.streaming.CollectionSwimStream;
 import swim.streaming.Junction;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
-import swim.streamlet.TransformConduit;
+import swim.streamlet.TransformStreamlet;
 import swim.structure.Form;
 
 /**
@@ -77,8 +77,8 @@ class TransformedColStream<T, U, C extends Collection<U>> extends AbstractCollec
   @Override
   public Junction<C> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<T> source = context.createFor(in);
-    final TransformConduit<T, C> conduit = new TransformConduit<>(f);
-    source.subscribe(conduit);
-    return conduit;
+    final TransformStreamlet<T, C> streamlet = new TransformStreamlet<>(f);
+    source.subscribe(streamlet);
+    return streamlet;
   }
 }

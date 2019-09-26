@@ -21,12 +21,12 @@ import swim.streaming.MapView;
 import swim.util.Deferred;
 
 /**
- * Conduit that collects the keys from a {@link MapJunction} and outputs the current key set as a single value.
+ * Streamlet that collects the keys from a {@link MapJunction} and outputs the current key set as a single value.
  *
  * @param <K> The type of the keys.
  * @param <V> The value type of the map.
  */
-public class MapKeysCollector<K, V> extends AbstractJunction<Set<K>> implements MapToValueConduit<K, V, Set<K>> {
+public class MapKeysCollector<K, V> extends AbstractJunction<Set<K>> implements MapToValueStreamlet<K, V, Set<K>> {
 
   private HashTrieSet<K> keys = HashTrieSet.empty();
 

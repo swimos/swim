@@ -46,31 +46,31 @@ public class VariableDelayJunctionSpec {
 
   @Test
   public void emitsNothingOnIntialInput() {
-    final VariableDelayJunction<Integer> conduit = new VariableDelayJunction<>(1);
-    final ArrayList<Integer> results = ConnectorUtilities.pushData(conduit, Either.left(7));
+    final VariableDelayJunction<Integer> streamlet = new VariableDelayJunction<>(1);
+    final ArrayList<Integer> results = ConnectorUtilities.pushData(streamlet, Either.left(7));
     Assert.assertTrue(results.isEmpty());
   }
 
   @Test
   public void emitsPreviousValues() {
-    final VariableDelayJunction<Integer> conduit = new VariableDelayJunction<>(1);
-    final ArrayList<Integer> results1 = ConnectorUtilities.pushData(conduit, Either.left(7));
+    final VariableDelayJunction<Integer> streamlet = new VariableDelayJunction<>(1);
+    final ArrayList<Integer> results1 = ConnectorUtilities.pushData(streamlet, Either.left(7));
     Assert.assertTrue(results1.isEmpty());
-    final ArrayList<Integer> results2 = ConnectorUtilities.pushData(conduit, Either.left(5));
+    final ArrayList<Integer> results2 = ConnectorUtilities.pushData(streamlet, Either.left(5));
     Assert.assertEquals(results2.size(), 1);
     Assert.assertEquals(results2.get(0).intValue(), 7);
-    final ArrayList<Integer> results3 = ConnectorUtilities.pushData(conduit, Either.left(2));
+    final ArrayList<Integer> results3 = ConnectorUtilities.pushData(streamlet, Either.left(2));
     Assert.assertEquals(results3.size(), 1);
     Assert.assertEquals(results3.get(0).intValue(), 5);
   }
 
   @Test
   public void emitsWithLongerDelay() {
-    final VariableDelayJunction<Integer> conduit = new VariableDelayJunction<>(3);
+    final VariableDelayJunction<Integer> streamlet = new VariableDelayJunction<>(3);
     final ArrayList<Integer> results1 = ConnectorUtilities.pushData(
-        conduit, Either.left(6), Either.left(5), Either.left(98));
+        streamlet, Either.left(6), Either.left(5), Either.left(98));
     Assert.assertTrue(results1.isEmpty());
-    final ArrayList<Integer> results2 = ConnectorUtilities.pushData(conduit, Either.left(76));
+    final ArrayList<Integer> results2 = ConnectorUtilities.pushData(streamlet, Either.left(76));
     Assert.assertEquals(results2.size(), 1);
     Assert.assertEquals(results2.get(0).intValue(), 6);
   }
@@ -78,9 +78,9 @@ public class VariableDelayJunctionSpec {
   @Test
   public void storesBufferInState() {
     final ListPersister<Integer> state = new TrivialListPersister<>();
-    final VariableDelayJunction<Integer> conduit = new VariableDelayJunction<>(state,
+    final VariableDelayJunction<Integer> streamlet = new VariableDelayJunction<>(state,
         new TrivialValuePersister<>(2));
-    ConnectorUtilities.pushData(conduit, Either.left(1), Either.left(2), Either.left(3), Either.left(4));
+    ConnectorUtilities.pushData(streamlet, Either.left(1), Either.left(2), Either.left(3), Either.left(4));
     Assert.assertEquals(state.size(), 3);
     Assert.assertEquals(state.get(0).intValue(), 2);
     Assert.assertEquals(state.get(1).intValue(), 3);
@@ -93,27 +93,27 @@ public class VariableDelayJunctionSpec {
     state.append(1);
     state.append(2);
     state.append(3);
-    final VariableDelayJunction<Integer> conduit = new VariableDelayJunction<>(state,
+    final VariableDelayJunction<Integer> streamlet = new VariableDelayJunction<>(state,
         new TrivialValuePersister<>(2));
-    final ArrayList<Integer> results = ConnectorUtilities.pushData(conduit, Either.left(4));
+    final ArrayList<Integer> results = ConnectorUtilities.pushData(streamlet, Either.left(4));
     Assert.assertEquals(results.size(), 1);
     Assert.assertEquals(results.get(0).intValue(), 2);
   }
 
   @Test
   public void handleReductionInBufferSize() {
-    final VariableDelayJunction<Integer> conduit = new VariableDelayJunction<>(3);
+    final VariableDelayJunction<Integer> streamlet = new VariableDelayJunction<>(3);
     final ArrayList<Integer> results1 = ConnectorUtilities.pushData(
-        conduit, Either.left(1), Either.left(2), Either.left(3), Either.left(4));
+        streamlet, Either.left(1), Either.left(2), Either.left(3), Either.left(4));
 
     Assert.assertEquals(results1.size(), 1);
     Assert.assertEquals(results1.get(0).intValue(), 1);
 
-    final ArrayList<Integer> results2 = ConnectorUtilities.pushData(conduit, Either.right(1));
+    final ArrayList<Integer> results2 = ConnectorUtilities.pushData(streamlet, Either.right(1));
 
     Assert.assertTrue(results2.isEmpty());
 
-    final ArrayList<Integer> results3 = ConnectorUtilities.pushData(conduit, Either.left(5));
+    final ArrayList<Integer> results3 = ConnectorUtilities.pushData(streamlet, Either.left(5));
 
     Assert.assertEquals(results3.size(), 1);
     Assert.assertEquals(results3.get(0).intValue(), 4);
@@ -121,21 +121,21 @@ public class VariableDelayJunctionSpec {
 
   @Test
   public void handleIncreaseInBufferSize() {
-    final VariableDelayJunction<Integer> conduit = new VariableDelayJunction<>(2);
+    final VariableDelayJunction<Integer> streamlet = new VariableDelayJunction<>(2);
     final ArrayList<Integer> results1 = ConnectorUtilities.pushData(
-        conduit, Either.left(1), Either.left(2));
+        streamlet, Either.left(1), Either.left(2));
 
     Assert.assertTrue(results1.isEmpty());
 
-    final ArrayList<Integer> results2 = ConnectorUtilities.pushData(conduit, Either.right(3));
+    final ArrayList<Integer> results2 = ConnectorUtilities.pushData(streamlet, Either.right(3));
 
     Assert.assertTrue(results2.isEmpty());
 
-    final ArrayList<Integer> results3 = ConnectorUtilities.pushData(conduit, Either.left(3));
+    final ArrayList<Integer> results3 = ConnectorUtilities.pushData(streamlet, Either.left(3));
 
     Assert.assertTrue(results3.isEmpty());
 
-    final ArrayList<Integer> results4 = ConnectorUtilities.pushData(conduit, Either.left(4));
+    final ArrayList<Integer> results4 = ConnectorUtilities.pushData(streamlet, Either.left(4));
 
     Assert.assertEquals(results4.size(), 1);
     Assert.assertEquals(results4.get(0).intValue(), 1);
@@ -155,18 +155,18 @@ public class VariableDelayJunctionSpec {
   @Test
   public void ignoresInvalidDelays() {
     final TrivialValuePersister<Integer> delayState = new TrivialValuePersister<>(2);
-    final VariableDelayJunction<Integer> conduit = new VariableDelayJunction<>(
+    final VariableDelayJunction<Integer> streamlet = new VariableDelayJunction<>(
         new TrivialListPersister<>(), delayState);
     final ArrayList<Integer> results1 = ConnectorUtilities.pushData(
-        conduit, Either.left(1), Either.left(2));
+        streamlet, Either.left(1), Either.left(2));
 
     Assert.assertTrue(results1.isEmpty());
 
-    final ArrayList<Integer> results2 = ConnectorUtilities.pushData(conduit, Either.right(-1));
+    final ArrayList<Integer> results2 = ConnectorUtilities.pushData(streamlet, Either.right(-1));
 
     Assert.assertTrue(results2.isEmpty());
 
-    final ArrayList<Integer> results3 = ConnectorUtilities.pushData(conduit, Either.left(3));
+    final ArrayList<Integer> results3 = ConnectorUtilities.pushData(streamlet, Either.left(3));
 
     Assert.assertEquals(results3.size(), 1);
     Assert.assertEquals(results3.get(0).intValue(), 1);

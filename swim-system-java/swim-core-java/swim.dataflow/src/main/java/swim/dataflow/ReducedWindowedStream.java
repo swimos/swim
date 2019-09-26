@@ -25,7 +25,7 @@ import swim.dataflow.windows.ReducePaneUpdater;
 import swim.dataflow.windows.ReducingEvaluator;
 import swim.dataflow.windows.ThresholdEvictor;
 import swim.dataflow.windows.WindowAccumulators;
-import swim.dataflow.windows.WindowConduit;
+import swim.dataflow.windows.WindowStreamlet;
 import swim.streaming.Junction;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
@@ -108,12 +108,12 @@ class ReducedWindowedStream<T, W, S extends WindowState<W, S>> extends AbstractS
         ts == null ? TimestampAssigner.fromClock() : TimestampAssigner.fromData(ts);
 
 
-    final WindowConduit<T, W, T> conduit = new WindowConduit<>(context.getSchedule(), paneManager, timestamps);
+    final WindowStreamlet<T, W, T> streamlet = new WindowStreamlet<>(context.getSchedule(), paneManager, timestamps);
 
     final Junction<T> source = StreamDecoupling.sampleStream(id(), context, context.createFor(in), sampling, StreamInterpretation.DISCRETE);
 
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
   //When we have eviction it is necessary to maintain all of the data in the window.

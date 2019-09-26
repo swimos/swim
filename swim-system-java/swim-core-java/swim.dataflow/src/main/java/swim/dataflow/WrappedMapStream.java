@@ -24,7 +24,7 @@ import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.MapPersister;
 import swim.streamlet.StatefulMapCollector;
 import swim.streamlet.TransientMapCollector;
-import swim.streamlet.ValueToMapConduit;
+import swim.streamlet.ValueToMapStreamlet;
 import swim.structure.Form;
 
 /**
@@ -85,7 +85,7 @@ class WrappedMapStream<K, V> extends AbstractMapStream<K, V> {
   @Override
   public MapJunction<K, V> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<V> source = context.createFor(inner);
-    final ValueToMapConduit<V, K, V> collector;
+    final ValueToMapStreamlet<V, K, V> collector;
     if (isTransient) {
       collector = new TransientMapCollector<>(keys, x -> x);
     } else {

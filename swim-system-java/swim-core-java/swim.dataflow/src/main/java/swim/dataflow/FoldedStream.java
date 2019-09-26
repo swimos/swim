@@ -21,9 +21,9 @@ import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
 import swim.streaming.sampling.Sampling;
-import swim.streamlet.Conduit;
-import swim.streamlet.StatefulConduits;
+import swim.streamlet.StatefulStreamlets;
 import swim.streamlet.StreamInterpretation;
+import swim.streamlet.Streamlet;
 import swim.structure.Form;
 
 /**
@@ -98,16 +98,16 @@ class FoldedStream<T, U> extends AbstractSwimStream<U> {
   public Junction<U> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<T> source = StreamDecoupling.sampleStream(id(), context, context.createFor(in),
         sampling, StreamInterpretation.DISCRETE);
-    final Conduit<T, U> foldConduit;
+    final Streamlet<T, U> foldStreamlet;
     if (isTransient) {
-      foldConduit = StatefulConduits.fold(seed, foldFunction);
+      foldStreamlet = StatefulStreamlets.fold(seed, foldFunction);
     } else {
       final ValuePersister<U> persister = context.getPersistenceProvider().forValue(
           StateTags.stateTag(id()), form(), seed);
-      foldConduit = StatefulConduits.foldPersistent(persister, foldFunction);
+      foldStreamlet = StatefulStreamlets.foldPersistent(persister, foldFunction);
     }
-    source.subscribe(foldConduit);
-    return foldConduit;
+    source.subscribe(foldStreamlet);
+    return foldStreamlet;
   }
 
 }

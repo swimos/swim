@@ -22,7 +22,7 @@ import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
 import swim.streaming.sampling.DelaySpecifier;
-import swim.streamlet.ModalFlatMapConduit;
+import swim.streamlet.ModalFlatMapStreamlet;
 import swim.structure.Form;
 import swim.structure.form.DurationForm;
 import swim.util.Iterables;
@@ -128,15 +128,15 @@ public class ModalFlatMapStream<S, T, M> extends AbstractSwimStream<T> {
   public Junction<T> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<S> source = context.createFor(in);
     final Junction<M> modes = context.createFor(controlStream);
-    final ModalFlatMapConduit<S, T, M> junction;
+    final ModalFlatMapStreamlet<S, T, M> junction;
     if (isTransient) {
-      junction = delay.matchDelay(dur -> new ModalFlatMapConduit<>(
+      junction = delay.matchDelay(dur -> new ModalFlatMapStreamlet<>(
               initial, f, context.getSchedule(), dur.getInterval()),
           dyn -> dynamicDelay(context, dyn.getInitial(), dyn.getIntervalStream(), dyn.isTransient()));
     } else {
       final ValuePersister<M> modePersister = context.getPersistenceProvider().forValue(
           StateTags.modeTag(id()), controlStream.form(), initial);
-      junction = delay.matchDelay(dur -> new ModalFlatMapConduit<>(
+      junction = delay.matchDelay(dur -> new ModalFlatMapStreamlet<>(
               modePersister, f, context.getSchedule(), dur.getInterval()),
           dyn -> dynamicDelay(context, dyn.getInitial(), dyn.getIntervalStream(), modePersister, dyn.isTransient()));
     }
@@ -145,43 +145,43 @@ public class ModalFlatMapStream<S, T, M> extends AbstractSwimStream<T> {
     return junction;
   }
 
-  private ModalFlatMapConduit<S, T, M> dynamicDelay(final SwimStreamContext.InitContext context,
-                                                    final Duration initDur,
-                                                    final SwimStream<Duration> durStr,
-                                                    final boolean delayIsTransient) {
+  private ModalFlatMapStreamlet<S, T, M> dynamicDelay(final SwimStreamContext.InitContext context,
+                                                      final Duration initDur,
+                                                      final SwimStream<Duration> durStr,
+                                                      final boolean delayIsTransient) {
 
-    final ModalFlatMapConduit<S, T, M> conduit;
+    final ModalFlatMapStreamlet<S, T, M> streamlet;
     if (delayIsTransient) {
-      conduit = new ModalFlatMapConduit<>(
+      streamlet = new ModalFlatMapStreamlet<>(
           initial, f, context.getSchedule(), initDur);
     } else {
       final ValuePersister<Duration> periodPersister = context.getPersistenceProvider().forValue(
           StateTags.stateTag(id()), new DurationForm(initDur));
-      conduit = new ModalFlatMapConduit<>(
+      streamlet = new ModalFlatMapStreamlet<>(
           initial, f, context.getSchedule(), periodPersister);
     }
     final Junction<Duration> durations = context.createFor(durStr);
-    durations.subscribe(conduit.second());
-    return conduit;
+    durations.subscribe(streamlet.second());
+    return streamlet;
   }
 
-  private ModalFlatMapConduit<S, T, M> dynamicDelay(final SwimStreamContext.InitContext context,
-                                                    final Duration initDur,
-                                                    final SwimStream<Duration> durStr,
-                                                    final ValuePersister<M> modePersister,
-                                                    final boolean delayIsTransient) {
-    final ModalFlatMapConduit<S, T, M> conduit;
+  private ModalFlatMapStreamlet<S, T, M> dynamicDelay(final SwimStreamContext.InitContext context,
+                                                      final Duration initDur,
+                                                      final SwimStream<Duration> durStr,
+                                                      final ValuePersister<M> modePersister,
+                                                      final boolean delayIsTransient) {
+    final ModalFlatMapStreamlet<S, T, M> streamlet;
     if (delayIsTransient) {
-      conduit = new ModalFlatMapConduit<>(
+      streamlet = new ModalFlatMapStreamlet<>(
           modePersister, f, context.getSchedule(), initDur);
     } else {
       final ValuePersister<Duration> periodPersister = context.getPersistenceProvider().forValue(
           StateTags.stateTag(id()), new DurationForm(initDur));
-      conduit = new ModalFlatMapConduit<>(
+      streamlet = new ModalFlatMapStreamlet<>(
           modePersister, f, context.getSchedule(), periodPersister);
     }
     final Junction<Duration> durations = context.createFor(durStr);
-    durations.subscribe(conduit.second());
-    return conduit;
+    durations.subscribe(streamlet.second());
+    return streamlet;
   }
 }

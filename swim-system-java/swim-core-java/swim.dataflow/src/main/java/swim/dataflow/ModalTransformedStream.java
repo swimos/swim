@@ -21,7 +21,7 @@ import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
 import swim.streaming.sampling.DelaySpecifier;
-import swim.streamlet.ModalTransformConduit;
+import swim.streamlet.ModalTransformStreamlet;
 import swim.structure.Form;
 
 /**
@@ -122,13 +122,13 @@ class ModalTransformedStream<S, T, M> extends AbstractSwimStream<T> {
   public Junction<T> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<S> source = context.createFor(in);
     final Junction<M> control = context.createFor(controlStream);
-    final ModalTransformConduit<S, T, M> junction;
+    final ModalTransformStreamlet<S, T, M> junction;
     if (isTransient) {
-      junction = new ModalTransformConduit<>(initialMode, f);
+      junction = new ModalTransformStreamlet<>(initialMode, f);
     } else {
       final ValuePersister<M> persister = context.getPersistenceProvider().forValue(
           StateTags.modeTag(id()), controlStream.form(), initialMode);
-      junction = new ModalTransformConduit<>(persister, f);
+      junction = new ModalTransformStreamlet<>(persister, f);
     }
     source.subscribe(junction.first());
     control.subscribe(junction.second());

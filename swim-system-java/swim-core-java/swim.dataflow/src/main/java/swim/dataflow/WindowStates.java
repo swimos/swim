@@ -28,7 +28,7 @@ import swim.structure.Value;
 import swim.structure.form.FingerTrieSeqForm;
 
 /**
- * Factories for {@link WindowAccumulators}s to hold the current state of a windowed conduit.
+ * Factories for {@link WindowAccumulators}s to hold the current state of a windowed streamlet.
  */
 final class WindowStates {
 

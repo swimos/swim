@@ -23,7 +23,7 @@ import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.MapPersister;
-import swim.streamlet.CollectionToMapConduit;
+import swim.streamlet.CollectionToMapStreamlet;
 import swim.structure.Form;
 
 /**
@@ -97,15 +97,15 @@ class CollectionToMapStream<T, C extends Collection<T>, K, V> extends AbstractMa
   @Override
   public MapJunction<K, V> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<C> source = context.createFor(in);
-    final CollectionToMapConduit<T, Collection<T>, K, V> conduit;
+    final CollectionToMapStreamlet<T, Collection<T>, K, V> streamlet;
     if (isTransient) {
-      conduit = new CollectionToMapConduit<>(toKey, toValue, valueForm());
+      streamlet = new CollectionToMapStreamlet<>(toKey, toValue, valueForm());
     } else {
       final MapPersister<K, V> persister = context.getPersistenceProvider().forMap(
           StateTags.stateTag(id()), keyForm(), valueForm());
-      conduit = new CollectionToMapConduit<>(toKey, toValue, persister);
+      streamlet = new CollectionToMapStreamlet<>(toKey, toValue, persister);
     }
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 }

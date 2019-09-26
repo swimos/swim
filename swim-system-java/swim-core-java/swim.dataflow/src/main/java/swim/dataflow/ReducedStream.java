@@ -21,9 +21,9 @@ import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
 import swim.streaming.sampling.Sampling;
-import swim.streamlet.Conduit;
-import swim.streamlet.StatefulConduits;
+import swim.streamlet.StatefulStreamlets;
 import swim.streamlet.StreamInterpretation;
+import swim.streamlet.Streamlet;
 
 /**
  * Reduces the values of the stream over time.
@@ -77,16 +77,16 @@ class ReducedStream<T> extends AbstractSwimStream<T> {
   public Junction<T> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<T> source = StreamDecoupling.sampleStream(id(), context,
         context.createFor(in), sampling, StreamInterpretation.DISCRETE);
-    final Conduit<T, T> conduit;
+    final Streamlet<T, T> streamlet;
     if (isTransient) {
-      conduit = StatefulConduits.reduce(operator);
+      streamlet = StatefulStreamlets.reduce(operator);
     } else {
       final ValuePersister<T> statePersister = context.getPersistenceProvider().forValue(
           StateTags.stateTag(id()), form(), null);
-      conduit = StatefulConduits.reduce(statePersister, operator);
+      streamlet = StatefulStreamlets.reduce(statePersister, operator);
     }
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
 }

@@ -19,7 +19,7 @@ import swim.streaming.Junction;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ListPersister;
-import swim.streamlet.DelayConduit;
+import swim.streamlet.DelayStreamlet;
 import swim.util.Require;
 
 /**
@@ -81,15 +81,15 @@ public class DelayedStream<T> extends AbstractSwimStream<T> {
   public Junction<T> instantiate(final SwimStreamContext.InitContext context) {
 
     final Junction<T> source = context.createFor(in);
-    final DelayConduit<T> conduit;
+    final DelayStreamlet<T> streamlet;
 
     if (isTransient) {
-      conduit = new DelayConduit<>(steps);
+      streamlet = new DelayStreamlet<>(steps);
     } else {
       final ListPersister<T> persister = context.getPersistenceProvider().forList(StateTags.stateTag(id()), form());
-      conduit = new DelayConduit<>(persister, steps);
+      streamlet = new DelayStreamlet<>(persister, steps);
     }
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 }

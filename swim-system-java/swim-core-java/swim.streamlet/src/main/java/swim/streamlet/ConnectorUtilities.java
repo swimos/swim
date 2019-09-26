@@ -24,7 +24,7 @@ import swim.util.Either;
 import swim.util.Unit;
 
 /**
- * Utility methods, primarily for tesing or debugging {@link Conduit}s.
+ * Utility methods, primarily for tesing or debugging {@link Streamlet}s.
  */
 public final class ConnectorUtilities {
 
@@ -32,12 +32,12 @@ public final class ConnectorUtilities {
   }
 
   @SafeVarargs
-  public static <In, Out> ArrayList<Out> pushData(final Conduit<In, Out> conduit, final In... values) {
+  public static <In, Out> ArrayList<Out> pushData(final Streamlet<In, Out> streamlet, final In... values) {
     final ArrayList<Out> output = new ArrayList<>(values.length);
     final Receptacle<Out> receptacle = x -> output.add(x.get());
-    conduit.subscribe(receptacle);
+    streamlet.subscribe(receptacle);
     for (final In val : values) {
-      conduit.notifyChange(Deferred.value(val));
+      streamlet.notifyChange(Deferred.value(val));
     }
     return output;
   }
@@ -150,18 +150,18 @@ public final class ConnectorUtilities {
   }
 
   @SafeVarargs
-  public static <K, V, Out> ArrayList<Out> pushData(final MapToValueConduit<K, V, Out> conduit, final MapAction<K, V>... actions) {
+  public static <K, V, Out> ArrayList<Out> pushData(final MapToValueStreamlet<K, V, Out> streamlet, final MapAction<K, V>... actions) {
     final ArrayList<Out> output = new ArrayList<>(actions.length);
     final Receptacle<Out> receptacle = x -> output.add(x.get());
-    conduit.subscribe(receptacle);
+    streamlet.subscribe(receptacle);
     for (final MapAction<K, V> action : actions) {
-      action.push(conduit);
+      action.push(streamlet);
     }
     return output;
   }
 
   @SafeVarargs
-  public static <In, KOut, VOut> ArrayList<MapAction<KOut, VOut>> pushData(final ValueToMapConduit<In, KOut, VOut> conduit, final In... values) {
+  public static <In, KOut, VOut> ArrayList<MapAction<KOut, VOut>> pushData(final ValueToMapStreamlet<In, KOut, VOut> streamlet, final In... values) {
     final ArrayList<MapAction<KOut, VOut>> output = new ArrayList<>(values.length);
     final MapReceptacle<KOut, VOut> receptacle = new MapReceptacle<KOut, VOut>() {
       @Override
@@ -174,15 +174,15 @@ public final class ConnectorUtilities {
         output.add(new Remove<>(key, map.get()));
       }
     };
-    conduit.subscribe(receptacle);
+    streamlet.subscribe(receptacle);
     for (final In value : values) {
-      conduit.notifyChange(Deferred.value(value));
+      streamlet.notifyChange(Deferred.value(value));
     }
     return output;
   }
 
   @SafeVarargs
-  public static <KIn, VIn, KOut, VOut> ArrayList<MapAction<KOut, VOut>> pushData(final MapConduit<KIn, KOut, VIn, VOut> conduit, final MapAction<KIn, VIn>... actions) {
+  public static <KIn, VIn, KOut, VOut> ArrayList<MapAction<KOut, VOut>> pushData(final MapStreamlet<KIn, KOut, VIn, VOut> streamlet, final MapAction<KIn, VIn>... actions) {
     final ArrayList<MapAction<KOut, VOut>> output = new ArrayList<>(actions.length);
     final MapReceptacle<KOut, VOut> receptacle = new MapReceptacle<KOut, VOut>() {
       @Override
@@ -195,16 +195,16 @@ public final class ConnectorUtilities {
         output.add(new Remove<>(key, map.get()));
       }
     };
-    conduit.subscribe(receptacle);
+    streamlet.subscribe(receptacle);
     for (final MapAction<KIn, VIn> action : actions) {
-      action.push(conduit);
+      action.push(streamlet);
     }
     return output;
   }
 
   @SafeVarargs
   public static <KIn, VIn, KOut, VOut, T> ArrayList<MapAction<KOut, VOut>> pushData(
-      final MapJunction2<KIn, KOut, VIn, VOut, T> conduit,
+      final MapJunction2<KIn, KOut, VIn, VOut, T> streamlet,
       final Either<MapAction<KIn, VIn>, T>... events) {
 
     final ArrayList<MapAction<KOut, VOut>> output = new ArrayList<>(events.length);
@@ -219,15 +219,15 @@ public final class ConnectorUtilities {
         output.add(new Remove<>(key, map.get()));
       }
     };
-    conduit.subscribe(receptacle);
+    streamlet.subscribe(receptacle);
     for (final Either<MapAction<KIn, VIn>, T> event : events) {
       event.match(
           action -> {
-            action.push(conduit.first());
+            action.push(streamlet.first());
             return Unit.INSTANCE;
           },
           val -> {
-            conduit.second().notifyChange(Deferred.value(val));
+            streamlet.second().notifyChange(Deferred.value(val));
             return Unit.INSTANCE;
           });
     }
@@ -236,7 +236,7 @@ public final class ConnectorUtilities {
 
   @SafeVarargs
   public static <KIn, VIn1, VIn2, KOut, VOut> ArrayList<MapAction<KOut, VOut>> pushData(
-      final MapJoinJunction<KIn, VIn1, VIn2, KOut, VOut> conduit,
+      final MapJoinJunction<KIn, VIn1, VIn2, KOut, VOut> streamlet,
       final Either<MapAction<KIn, VIn1>, MapAction<KIn, VIn2>>... events) {
 
     final ArrayList<MapAction<KOut, VOut>> output = new ArrayList<>(events.length);
@@ -251,15 +251,15 @@ public final class ConnectorUtilities {
         output.add(new Remove<>(key, map.get()));
       }
     };
-    conduit.subscribe(receptacle);
+    streamlet.subscribe(receptacle);
     for (final Either<MapAction<KIn, VIn1>, MapAction<KIn, VIn2>> event : events) {
       event.match(
           action -> {
-            action.push(conduit.first());
+            action.push(streamlet.first());
             return Unit.INSTANCE;
           },
           action -> {
-            action.push(conduit.second());
+            action.push(streamlet.second());
             return Unit.INSTANCE;
           });
     }
@@ -267,19 +267,19 @@ public final class ConnectorUtilities {
   }
 
   @SafeVarargs
-  public static <In1, In2, Out> ArrayList<Out> pushData(final Junction2<In1, In2, Out> conduit,
+  public static <In1, In2, Out> ArrayList<Out> pushData(final Junction2<In1, In2, Out> streamlet,
                                                         final Either<In1, In2>... values) {
     final ArrayList<Out> output = new ArrayList<>(values.length);
     final Receptacle<Out> receptacle = x -> output.add(x.get());
-    conduit.subscribe(receptacle);
+    streamlet.subscribe(receptacle);
     for (final Either<In1, In2> val : values) {
       val.match(
           in -> {
-            conduit.first().notifyChange(Deferred.value(in));
+            streamlet.first().notifyChange(Deferred.value(in));
             return Unit.INSTANCE;
           },
           in -> {
-            conduit.second().notifyChange(Deferred.value(in));
+            streamlet.second().notifyChange(Deferred.value(in));
             return Unit.INSTANCE;
           });
 

@@ -25,7 +25,7 @@ import swim.util.Deferred;
  * @param <K> The type of the keys.
  * @param <V> The type of the values.
  */
-public class MapExtractor<K, V> extends AbstractJunction<Map<K, V>> implements MapToValueConduit<K, V, Map<K, V>> {
+public class MapExtractor<K, V> extends AbstractJunction<Map<K, V>> implements MapToValueStreamlet<K, V, Map<K, V>> {
 
   private HashTrieMap<K, V> acc = HashTrieMap.empty();
 

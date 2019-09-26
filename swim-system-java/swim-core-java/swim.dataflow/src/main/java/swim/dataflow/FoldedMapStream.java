@@ -21,8 +21,8 @@ import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.MapPersister;
 import swim.streaming.sampling.Sampling;
-import swim.streamlet.MapConduit;
-import swim.streamlet.StatefulConduits;
+import swim.streamlet.MapStreamlet;
+import swim.streamlet.StatefulStreamlets;
 import swim.streamlet.StreamInterpretation;
 import swim.structure.Form;
 
@@ -100,16 +100,16 @@ class FoldedMapStream<K, V, U> extends AbstractMapStream<K, U> {
   public MapJunction<K, U> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K, V> source = StreamDecoupling.sampleMapStream(id(), context, context.createFor(in),
         sampling, StreamInterpretation.DISCRETE);
-    final MapConduit<K, K, V, U> conduit;
+    final MapStreamlet<K, K, V, U> streamlet;
     if (isTransient) {
-      conduit = StatefulConduits.foldMap(seed, foldFunction);
+      streamlet = StatefulStreamlets.foldMap(seed, foldFunction);
     } else {
       final MapPersister<K, U> persister = context.getPersistenceProvider()
           .forMap(StateTags.stateTag(id()), keyForm(), valueForm(), seed);
-      conduit = StatefulConduits.foldMapPersistent(persister, foldFunction);
+      streamlet = StatefulStreamlets.foldMapPersistent(persister, foldFunction);
     }
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
 }

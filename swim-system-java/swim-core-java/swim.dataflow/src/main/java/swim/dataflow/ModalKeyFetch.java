@@ -22,7 +22,7 @@ import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.persistence.ValuePersister;
 import swim.streaming.sampling.Sampling;
-import swim.streamlet.ModalKeyFetchConduit;
+import swim.streamlet.ModalKeyFetchStreamlet;
 import swim.streamlet.StreamInterpretation;
 
 /**
@@ -79,13 +79,13 @@ public class ModalKeyFetch<K, V> extends AbstractSwimStream<V> {
   public Junction<V> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K, V> source = context.createFor(keyedStream);
     final Junction<K> control = context.createFor(keys);
-    final ModalKeyFetchConduit<K, V> selector;
+    final ModalKeyFetchStreamlet<K, V> selector;
     if (isTransient) {
-      selector = new ModalKeyFetchConduit<>();
+      selector = new ModalKeyFetchStreamlet<>();
     } else {
       final ValuePersister<K> keyPersister = context.getPersistenceProvider().forValue(
           StateTags.modeTag(id()), keys.form());
-      selector = new ModalKeyFetchConduit<>(keyPersister);
+      selector = new ModalKeyFetchStreamlet<>(keyPersister);
     }
     control.subscribe(selector.keySelector());
     source.subscribe(selector.mapInput());

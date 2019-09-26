@@ -21,8 +21,8 @@ import swim.dataflow.windows.NoOpEvictor;
 import swim.dataflow.windows.PaneEvictor;
 import swim.dataflow.windows.SequencePaneUpdater;
 import swim.dataflow.windows.WindowAccumulators;
-import swim.dataflow.windows.WindowConduit;
 import swim.dataflow.windows.WindowFunctionEvaluator;
+import swim.dataflow.windows.WindowStreamlet;
 import swim.streaming.Junction;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
@@ -119,13 +119,13 @@ class TransformedWindowedStream<T, W, S extends WindowState<W, S>, U> extends Ab
         ts == null ? TimestampAssigner.fromClock() : TimestampAssigner.fromData(ts);
 
 
-    final WindowConduit<T, W, U> conduit = new WindowConduit<>(
+    final WindowStreamlet<T, W, U> streamlet = new WindowStreamlet<>(
         context.getSchedule(), paneManager, timestamps);
 
     final Junction<T> source = StreamDecoupling.sampleStream(id(), context, context.createFor(in), sampling, StreamInterpretation.DISCRETE);
 
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
 }

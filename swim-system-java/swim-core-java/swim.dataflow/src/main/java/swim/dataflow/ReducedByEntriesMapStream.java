@@ -23,7 +23,7 @@ import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
 import swim.streaming.sampling.Sampling;
-import swim.streamlet.ReduceFieldsConduit;
+import swim.streamlet.ReduceFieldsStreamlet;
 import swim.streamlet.StreamInterpretation;
 import swim.structure.Form;
 
@@ -99,9 +99,9 @@ class ReducedByEntriesMapStream<K, V, U> extends AbstractSwimStream<U> {
   public Junction<U> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K, V> source = StreamDecoupling.sampleMapStream(id(), context,
         context.createFor(in), sampling, StreamInterpretation.DISCRETE);
-    final ReduceFieldsConduit<K, V, U> conduit = new ReduceFieldsConduit<>(seed, operation, combiner);
-    source.subscribe(conduit);
-    return conduit;
+    final ReduceFieldsStreamlet<K, V, U> streamlet = new ReduceFieldsStreamlet<>(seed, operation, combiner);
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
 }

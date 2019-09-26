@@ -30,7 +30,7 @@ import swim.dataflow.windows.SequencePaneUpdater;
 import swim.dataflow.windows.SequenceThresholdEvictor;
 import swim.dataflow.windows.ThresholdEvictor;
 import swim.dataflow.windows.WindowAccumulators;
-import swim.dataflow.windows.WindowConduit;
+import swim.dataflow.windows.WindowStreamlet;
 import swim.streaming.Junction;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext.InitContext;
@@ -152,14 +152,14 @@ public class FoldedWindowedStream<T, W, S extends WindowState<W, S>, U> extends 
     final TimestampAssigner<T> timestamps =
         ts == null ? TimestampAssigner.fromClock() : TimestampAssigner.fromData(ts);
 
-    final WindowConduit<T, W, U> conduit = new WindowConduit<>(
+    final WindowStreamlet<T, W, U> streamlet = new WindowStreamlet<>(
         context.getSchedule(), paneManager, timestamps);
 
     final Junction<T> source = StreamDecoupling.sampleStream(id(), context, context.createFor(in),
         sampling, StreamInterpretation.DISCRETE);
 
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
   //When we have eviction it is necessary to maintain all of the data in the window.

@@ -18,7 +18,7 @@ import java.util.function.Function;
 import java.util.function.ToLongFunction;
 import swim.collections.FingerTrieSeq;
 import swim.dataflow.windows.DefaultPaneManager;
-import swim.dataflow.windows.KeyedWindowConduit;
+import swim.dataflow.windows.KeyedWindowStreamlet;
 import swim.dataflow.windows.NoOpEvictor;
 import swim.dataflow.windows.PaneEvictor;
 import swim.dataflow.windows.PaneManager;
@@ -134,19 +134,19 @@ class TransformedMapWindowedStream<K, T, U, W, S extends WindowState<W, S>> exte
     final TimestampAssigner<T> timestamps =
         ts == null ? TimestampAssigner.fromClock() : TimestampAssigner.fromData(ts);
 
-    final KeyedWindowConduit<K, T, W, U> conduit;
+    final KeyedWindowStreamlet<K, T, W, U> streamlet;
     if (spec.isTransient()) {
-      conduit = new KeyedWindowConduit<>(
+      streamlet = new KeyedWindowStreamlet<>(
           context.getSchedule(), managerFactory, timestamps);
     } else {
       final SetPersister<K> keysPersister = context.getPersistenceProvider().forSet(
           StateTags.stateTag(id()), keyForm());
-      conduit = new KeyedWindowConduit<>(
+      streamlet = new KeyedWindowStreamlet<>(
           context.getSchedule(), keysPersister, managerFactory, timestamps);
     }
 
-    source.subscribe(conduit);
-    return conduit;
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
   @Override

@@ -19,7 +19,7 @@ import java.util.function.ToLongFunction;
 import swim.streaming.Junction;
 import swim.streaming.SwimStream;
 import swim.streaming.SwimStreamContext;
-import swim.streamlet.FilteredConduit;
+import swim.streamlet.FilteredStreamlet;
 
 /**
  * A filtered view of a stream.
@@ -67,9 +67,9 @@ class FilteredStream<T> extends AbstractSwimStream<T> {
   @Override
   public Junction<T> instantiate(final SwimStreamContext.InitContext context) {
     final Junction<T> source = context.createFor(in);
-    final FilteredConduit<T> conduit = new FilteredConduit<>(predicate);
-    source.subscribe(conduit);
-    return conduit;
+    final FilteredStreamlet<T> streamlet = new FilteredStreamlet<>(predicate);
+    source.subscribe(streamlet);
+    return streamlet;
   }
 
 }

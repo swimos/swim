@@ -19,7 +19,7 @@ import java.util.function.ToLongFunction;
 import swim.streaming.MapJunction;
 import swim.streaming.MapSwimStream;
 import swim.streaming.SwimStreamContext;
-import swim.streamlet.FilteredMapConduit;
+import swim.streamlet.FilteredMapStreamlet;
 
 /**
  * A filtered view on a map stream.
@@ -63,8 +63,8 @@ class FilteredMapStream<K, V> extends AbstractMapStream<K, V> {
   @Override
   public MapJunction<K, V> instantiate(final SwimStreamContext.InitContext context) {
     final MapJunction<K, V> source = context.createFor(in);
-    final FilteredMapConduit<K, V> conduit = new FilteredMapConduit<>(predicate);
-    source.subscribe(conduit);
-    return conduit;
+    final FilteredMapStreamlet<K, V> streamlet = new FilteredMapStreamlet<>(predicate);
+    source.subscribe(streamlet);
+    return streamlet;
   }
 }

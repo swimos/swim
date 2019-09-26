@@ -27,7 +27,7 @@ import swim.util.Deferred;
  * @param <K> The type of the output keys.
  * @param <V> The type of the output values.
  */
-public class MapCollector<T, K, V> extends AbstractMapJunction<K, V> implements ValueToMapConduit<T, K, V> {
+public class MapCollector<T, K, V> extends AbstractMapJunction<K, V> implements ValueToMapStreamlet<T, K, V> {
 
   private final Function<T, K> toKey;
   private final Function<T, V> toValue;
