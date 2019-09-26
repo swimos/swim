@@ -14,8 +14,12 @@
 
 package swim.streamlet;
 
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialValuePersister;
-import swim.streamlet.persistence.ValuePersister;
+import swim.streaming.MapJunction;
+import swim.streaming.MapReceptacle;
+import swim.streaming.MapView;
+import swim.streaming.Receptacle;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialValuePersister;
+import swim.streaming.persistence.ValuePersister;
 import swim.util.Deferred;
 
 /**

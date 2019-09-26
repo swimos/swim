@@ -17,8 +17,9 @@ package swim.streamlet;
 import java.util.Collection;
 import java.util.function.Function;
 import swim.collections.HashTrieSet;
-import swim.streamlet.persistence.MapPersister;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialMapPersister;
+import swim.streaming.MapJunction;
+import swim.streaming.persistence.MapPersister;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialMapPersister;
 import swim.structure.Form;
 import swim.util.Deferred;
 

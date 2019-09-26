@@ -94,3 +94,6 @@ project(':swim.io.warp').name = 'swim-io-warp'
 
 include 'swim.web'
 project(':swim.web').name = 'swim-web'
+
+include 'swim.streaming'
+project(':swim.streaming').name = "swim-streaming"

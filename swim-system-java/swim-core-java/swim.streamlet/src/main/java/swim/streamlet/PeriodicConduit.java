@@ -17,6 +17,7 @@ package swim.streamlet;
 import java.time.Duration;
 import swim.concurrent.Recurring;
 import swim.concurrent.Schedule;
+import swim.streaming.Receptacle;
 import swim.util.Deferred;
 import swim.util.Require;
 

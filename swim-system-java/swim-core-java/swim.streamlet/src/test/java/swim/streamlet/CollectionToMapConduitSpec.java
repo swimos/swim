@@ -23,9 +23,9 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import swim.collections.HashTrieSet;
+import swim.streaming.persistence.MapPersister;
+import swim.streaming.persistence.TrivialPersistenceProvider;
 import swim.streamlet.ConnectorUtilities.MapAction;
-import swim.streamlet.persistence.MapPersister;
-import swim.streamlet.persistence.TrivialPersistenceProvider;
 import swim.structure.Form;
 import swim.util.Pair;
 

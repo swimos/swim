@@ -17,10 +17,11 @@ package swim.streamlet;
 import java.util.Map;
 import java.util.function.Function;
 import swim.collections.HashTrieMap;
-import swim.streamlet.persistence.ListPersister;
-import swim.streamlet.persistence.SetPersister;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialListPersister;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialSetPersisiter;
+import swim.streaming.MapView;
+import swim.streaming.persistence.ListPersister;
+import swim.streaming.persistence.SetPersister;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialListPersister;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialSetPersisiter;
 import swim.util.Deferred;
 import swim.util.Require;
 

@@ -16,6 +16,9 @@ package swim.streamlet;
 
 import java.util.ArrayList;
 import swim.collections.HashTrieMap;
+import swim.streaming.MapReceptacle;
+import swim.streaming.MapView;
+import swim.streaming.Receptacle;
 import swim.util.Deferred;
 import swim.util.Either;
 import swim.util.Unit;

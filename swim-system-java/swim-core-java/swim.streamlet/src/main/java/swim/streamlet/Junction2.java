@@ -14,6 +14,9 @@
 
 package swim.streamlet;
 
+import swim.streaming.Junction;
+import swim.streaming.Receptacle;
+
 /**
  * A {@link Junction} that has two input channels.
  *

@@ -14,6 +14,8 @@
 
 package swim.streamlet;
 
+import swim.streaming.Junction;
+
 /**
  * Interface for junctions that have an additional output.
  *

@@ -14,6 +14,8 @@
 
 package swim.streamlet;
 
+import swim.streaming.Junction;
+import swim.streaming.Receptacle;
 import swim.util.Deferred;
 
 /**

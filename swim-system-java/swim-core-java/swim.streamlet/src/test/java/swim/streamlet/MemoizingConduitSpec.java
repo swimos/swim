@@ -16,6 +16,7 @@ package swim.streamlet;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import swim.streaming.Receptacle;
 import swim.util.Deferred;
 
 public class MemoizingConduitSpec {

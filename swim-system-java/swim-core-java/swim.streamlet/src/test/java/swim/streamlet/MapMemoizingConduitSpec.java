@@ -19,6 +19,8 @@ import java.util.Map;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import swim.collections.HashTrieMap;
+import swim.streaming.MapReceptacle;
+import swim.streaming.MapView;
 import swim.streamlet.ConnectorUtilities.Update;
 import swim.util.Deferred;
 

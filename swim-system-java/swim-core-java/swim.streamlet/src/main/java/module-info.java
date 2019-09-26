@@ -21,7 +21,7 @@ module swim.streamlet {
   requires transitive swim.util;
   requires transitive swim.collections;
   requires transitive swim.concurrent;
+  requires transitive swim.streaming;
 
   exports swim.streamlet;
-  exports swim.streamlet.persistence;
 }

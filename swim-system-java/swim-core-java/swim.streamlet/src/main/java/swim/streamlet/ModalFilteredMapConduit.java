@@ -20,7 +20,8 @@ import java.util.Map;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import swim.collections.HashTrieMap;
-import swim.streamlet.persistence.ValuePersister;
+import swim.streaming.MapView;
+import swim.streaming.persistence.ValuePersister;
 import swim.util.Deferred;
 import swim.util.Pair;
 

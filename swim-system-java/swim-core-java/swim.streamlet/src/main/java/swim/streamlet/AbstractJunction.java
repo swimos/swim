@@ -15,6 +15,8 @@
 package swim.streamlet;
 
 import swim.collections.FingerTrieSeq;
+import swim.streaming.Junction;
+import swim.streaming.Receptacle;
 import swim.util.Deferred;
 import swim.util.Require;
 

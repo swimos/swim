@@ -17,9 +17,9 @@ package swim.streamlet;
 import java.util.ArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import swim.streaming.persistence.TrivialPersistenceProvider;
+import swim.streaming.persistence.ValuePersister;
 import swim.streamlet.ConnectorTest.Parity;
-import swim.streamlet.persistence.TrivialPersistenceProvider;
-import swim.streamlet.persistence.ValuePersister;
 import swim.structure.Form;
 import swim.util.Either;
 

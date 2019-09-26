@@ -8,4 +8,5 @@ dependencies {
   api project(':swim-util')
   api project(':swim-collections')
   api project(':swim-concurrent')
+  api project(':swim-streaming')
 }

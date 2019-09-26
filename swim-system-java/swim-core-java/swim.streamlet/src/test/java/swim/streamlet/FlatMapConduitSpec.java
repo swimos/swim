@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import swim.streaming.Receptacle;
 import swim.util.Deferred;
 
 public class FlatMapConduitSpec extends ConnectorTest {

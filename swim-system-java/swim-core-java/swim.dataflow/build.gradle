@@ -9,4 +9,5 @@ dependencies {
   api project(':swim-structure')
   api project(':swim-collections')
   api project(':swim-streamlet')
+  api project(':swim-streaming')
 }

@@ -16,6 +16,10 @@ package swim.streamlet;
 
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
+import swim.streaming.MapJunction;
+import swim.streaming.MapReceptacle;
+import swim.streaming.MapView;
+import swim.streaming.Receptacle;
 import swim.util.Deferred;
 import swim.util.Require;
 

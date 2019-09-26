@@ -14,6 +14,10 @@
 
 package swim.streamlet;
 
+import swim.streaming.MapJunction;
+import swim.streaming.MapReceptacle;
+import swim.streaming.Receptacle;
+
 /**
  * A {@link MapJunction} with two inputs, one consuming map data and the other simple values.
  *

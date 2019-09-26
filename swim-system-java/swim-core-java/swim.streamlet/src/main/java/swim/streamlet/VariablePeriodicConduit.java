@@ -17,8 +17,8 @@ package swim.streamlet;
 import java.time.Duration;
 import swim.concurrent.Recurring;
 import swim.concurrent.Schedule;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialValuePersister;
-import swim.streamlet.persistence.ValuePersister;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialValuePersister;
+import swim.streaming.persistence.ValuePersister;
 import swim.util.Deferred;
 import swim.util.Require;
 

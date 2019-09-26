@@ -14,7 +14,8 @@
 
 package swim.streamlet;
 
-import swim.streamlet.persistence.ValuePersister;
+import swim.streaming.MapView;
+import swim.streaming.persistence.ValuePersister;
 import swim.util.Deferred;
 
 /**

@@ -21,9 +21,11 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import swim.collections.HashTrieMap;
+import swim.streaming.MapReceptacle;
+import swim.streaming.MapView;
+import swim.streaming.persistence.TrivialPersistenceProvider;
+import swim.streaming.persistence.ValuePersister;
 import swim.streamlet.ConnectorUtilities.MapAction;
-import swim.streamlet.persistence.TrivialPersistenceProvider;
-import swim.streamlet.persistence.ValuePersister;
 import swim.structure.form.DurationForm;
 import swim.util.Deferred;
 

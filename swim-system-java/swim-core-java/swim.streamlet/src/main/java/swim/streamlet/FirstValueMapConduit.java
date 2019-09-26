@@ -14,8 +14,9 @@
 
 package swim.streamlet;
 
-import swim.streamlet.persistence.MapPersister;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialMapPersister;
+import swim.streaming.MapView;
+import swim.streaming.persistence.MapPersister;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialMapPersister;
 import swim.structure.Form;
 import swim.util.Deferred;
 

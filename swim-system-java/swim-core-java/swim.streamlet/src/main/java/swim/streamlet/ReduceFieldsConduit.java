@@ -17,6 +17,7 @@ package swim.streamlet;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import swim.collections.BTreeMap;
+import swim.streaming.MapView;
 import swim.util.Deferred;
 
 /**

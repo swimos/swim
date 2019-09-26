@@ -17,9 +17,9 @@ package swim.streamlet;
 import java.util.ArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import swim.streamlet.persistence.ListPersister;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialListPersister;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialValuePersister;
+import swim.streaming.persistence.ListPersister;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialListPersister;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialValuePersister;
 import swim.util.Either;
 
 public class VariableDelayJunctionSpec {

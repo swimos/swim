@@ -14,8 +14,8 @@
 
 package swim.streamlet;
 
-import swim.streamlet.persistence.ListPersister;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialListPersister;
+import swim.streaming.persistence.ListPersister;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialListPersister;
 import swim.util.Deferred;
 import swim.util.Require;
 

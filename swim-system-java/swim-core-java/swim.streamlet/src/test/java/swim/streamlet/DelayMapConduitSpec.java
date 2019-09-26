@@ -20,11 +20,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
+import swim.streaming.persistence.ListPersister;
+import swim.streaming.persistence.SetPersister;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialListPersister;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialSetPersisiter;
 import swim.streamlet.ConnectorUtilities.MapAction;
-import swim.streamlet.persistence.ListPersister;
-import swim.streamlet.persistence.SetPersister;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialListPersister;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialSetPersisiter;
 import static swim.streamlet.ConnectorUtilities.remove;
 import static swim.streamlet.ConnectorUtilities.update;
 

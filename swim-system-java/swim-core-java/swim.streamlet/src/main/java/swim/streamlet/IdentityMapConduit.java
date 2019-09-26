@@ -1,5 +1,6 @@
 package swim.streamlet;
 
+import swim.streaming.MapView;
 import swim.util.Deferred;
 
 /**

@@ -17,6 +17,7 @@ package swim.streamlet;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import swim.collections.HashTrieMap;
+import swim.streaming.MapView;
 import swim.util.Deferred;
 
 /**

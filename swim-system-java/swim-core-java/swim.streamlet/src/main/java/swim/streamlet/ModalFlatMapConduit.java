@@ -19,8 +19,9 @@ import java.util.function.Function;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.AbstractTimer;
 import swim.concurrent.Schedule;
-import swim.streamlet.persistence.TrivialPersistenceProvider.TrivialValuePersister;
-import swim.streamlet.persistence.ValuePersister;
+import swim.streaming.Receptacle;
+import swim.streaming.persistence.TrivialPersistenceProvider.TrivialValuePersister;
+import swim.streaming.persistence.ValuePersister;
 import swim.util.Deferred;
 import swim.util.Require;
 

@@ -14,6 +14,9 @@
 
 package swim.streamlet;
 
+import swim.streaming.Junction;
+import swim.streaming.Receptacle;
+
 /**
  * A simple pipe that accepts values on a single input and produces them on a single output.
  *

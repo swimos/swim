@@ -12,6 +12,7 @@ project(':swim-api') {
       api project(':swim-structure')
       api project(':swim-math')
       api project(':swim-spatial')
+      api project(':swim-streaming')
       api project(':swim-streamlet')
       api project(':swim-dataflow')
       api project(':swim-observable')
@@ -205,6 +206,7 @@ gradle.projectsEvaluated {
         'swim.recon',
         'swim.security',
         'swim.spatial',
+        'swim.streaming',
         'swim.streamlet',
         'swim.structure',
         'swim.uri',

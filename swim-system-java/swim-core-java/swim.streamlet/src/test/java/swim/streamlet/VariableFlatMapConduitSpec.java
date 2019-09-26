@@ -20,8 +20,9 @@ import java.util.Arrays;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import swim.streamlet.persistence.TrivialPersistenceProvider;
-import swim.streamlet.persistence.ValuePersister;
+import swim.streaming.Receptacle;
+import swim.streaming.persistence.TrivialPersistenceProvider;
+import swim.streaming.persistence.ValuePersister;
 import swim.structure.form.DurationForm;
 import swim.util.Deferred;
 

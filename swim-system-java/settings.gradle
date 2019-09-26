@@ -65,6 +65,10 @@ include 'swim.dataflow'
 project(':swim.dataflow').projectDir = file('swim-core-java/swim.dataflow')
 project(':swim.dataflow').name = 'swim-dataflow'
 
+include 'swim.streaming'
+project(':swim.streaming').projectDir = file('swim-core-java/swim.streaming')
+project(':swim.streaming').name = 'swim-streaming'
+
 include 'swim.observable'
 project(':swim.observable').projectDir = file('swim-core-java/swim.observable')
 project(':swim.observable').name = 'swim-observable'

@@ -15,7 +15,8 @@
 package swim.streamlet;
 
 import java.util.function.BiFunction;
-import swim.streamlet.persistence.MapPersister;
+import swim.streaming.MapView;
+import swim.streaming.persistence.MapPersister;
 import swim.util.Deferred;
 
 /**

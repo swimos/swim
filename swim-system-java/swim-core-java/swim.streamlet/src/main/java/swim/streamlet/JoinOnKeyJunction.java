@@ -20,6 +20,10 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
+import swim.streaming.Junction;
+import swim.streaming.MapReceptacle;
+import swim.streaming.MapView;
+import swim.streaming.SetView;
 import swim.util.Deferred;
 import swim.util.Iterables;
 

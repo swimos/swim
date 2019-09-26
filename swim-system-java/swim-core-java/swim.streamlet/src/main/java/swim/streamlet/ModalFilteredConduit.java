@@ -16,7 +16,7 @@ package swim.streamlet;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
-import swim.streamlet.persistence.ValuePersister;
+import swim.streaming.persistence.ValuePersister;
 import swim.util.Deferred;
 
 /**

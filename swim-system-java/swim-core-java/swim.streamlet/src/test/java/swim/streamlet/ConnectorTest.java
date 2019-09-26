@@ -21,6 +21,8 @@ import swim.concurrent.Schedule;
 import swim.concurrent.TimerContext;
 import swim.concurrent.TimerFunction;
 import swim.concurrent.TimerRef;
+import swim.streaming.MapReceptacle;
+import swim.streaming.MapView;
 import swim.util.Deferred;
 
 public abstract class ConnectorTest {

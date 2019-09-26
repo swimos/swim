@@ -15,7 +15,8 @@
 package swim.streamlet;
 
 import java.util.function.Function;
-import swim.streamlet.persistence.MapPersister;
+import swim.streaming.Receptacle;
+import swim.streaming.persistence.MapPersister;
 import swim.util.Deferred;
 
 /**

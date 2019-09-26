@@ -14,6 +14,9 @@
 
 package swim.streamlet;
 
+import swim.streaming.MapJunction;
+import swim.streaming.Receptacle;
+
 /**
  * Conduit that consumes the values and outputs the values of a map.
  *

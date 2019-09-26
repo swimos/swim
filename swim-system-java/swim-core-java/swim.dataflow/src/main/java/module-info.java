@@ -20,18 +20,12 @@ module swim.dataflow {
   requires swim.util;
   requires transitive swim.structure;
   requires transitive swim.collections;
+  requires transitive swim.concurrent;
   requires transitive swim.streamlet;
+  requires transitive swim.streaming;
 
-  exports swim.dataflow.graph;
-  exports swim.dataflow.graph.windows;
-  exports swim.dataflow.graph.windows.eviction;
-  exports swim.dataflow.graph.windows.triggers;
-  exports swim.dataflow.graph.sampling;
-  exports swim.dataflow.graph.timestamps;
-  exports swim.dataflow.graph.statistics;
-  exports swim.dataflow.graph.statistics.model;
-  exports swim.dataflow.graph.impl;
-  exports swim.dataflow.graph.impl.partitions;
-  exports swim.dataflow.graph.impl.windows;
-  exports swim.dataflow.graph.persistence;
+  exports swim.dataflow;
+  exports swim.dataflow.partitions;
+  exports swim.dataflow.persistence;
+  exports swim.dataflow.windows;
 }

@@ -14,6 +14,9 @@
 
 package swim.streamlet;
 
+import swim.streaming.Junction;
+import swim.streaming.Receptacle;
+
 /**
  * Interface for junctions that aggregate any number of inputs into a single output.
  *

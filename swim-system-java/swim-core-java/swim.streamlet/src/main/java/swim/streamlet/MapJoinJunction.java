@@ -14,6 +14,9 @@
 
 package swim.streamlet;
 
+import swim.streaming.MapJunction;
+import swim.streaming.MapReceptacle;
+
 /**
  * {@link MapJunction} that consumes two map inputs with the same key type and generates another map output.
  *

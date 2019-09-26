@@ -1,0 +1,12 @@
+apply from: '../project.gradle'
+
+description = 'Model for stateful streams attached to Swim lanes.'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.streaming'
+ext.moduleName = 'swim.streaming'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-structure')
+  api project(':swim-collections')
+  api project(':swim-concurrent')
+}

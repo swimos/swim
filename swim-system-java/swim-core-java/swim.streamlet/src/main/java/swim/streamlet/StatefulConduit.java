@@ -15,7 +15,7 @@
 package swim.streamlet;
 
 import java.util.function.BiFunction;
-import swim.streamlet.persistence.ValuePersister;
+import swim.streaming.persistence.ValuePersister;
 import swim.util.Deferred;
 
 /**

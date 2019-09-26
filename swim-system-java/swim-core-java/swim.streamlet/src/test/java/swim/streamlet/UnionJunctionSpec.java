@@ -17,6 +17,7 @@ package swim.streamlet;
 import java.util.ArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import swim.streaming.Receptacle;
 import swim.util.Deferred;
 
 public class UnionJunctionSpec {

@@ -15,6 +15,8 @@
 package swim.streamlet;
 
 import swim.collections.HashTrieMap;
+import swim.streaming.MapJunction;
+import swim.streaming.MapView;
 import swim.util.Deferred;
 
 /**
