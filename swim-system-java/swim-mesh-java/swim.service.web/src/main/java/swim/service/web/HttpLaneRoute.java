@@ -1,17 +1,12 @@
 package swim.service.web;
 
-import swim.runtime.EdgeContext;
-import swim.uri.Uri;
+import swim.runtime.CellBinding;
 
 public class HttpLaneRoute { // TODO
 
-  final EdgeContext edgeContext;
-  final Uri nodeUri;
-  final Uri laneUri;
+  final CellBinding cellBinding;
 
-  public HttpLaneRoute(EdgeContext edgeContext, Uri nodeUri, Uri laneUri) {
-    this.edgeContext = edgeContext;
-    this.nodeUri = nodeUri;
-    this.laneUri = laneUri;
+  public HttpLaneRoute(CellBinding cellBinding) {
+    this.cellBinding = cellBinding;
   }
 }

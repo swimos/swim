@@ -16,9 +16,12 @@ package swim.web;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
+import swim.collections.HashTrieMap;
 import swim.http.HttpMethod;
+import swim.http.HttpResponse;
 import swim.uri.UriHost;
 import swim.uri.UriPath;
+import swim.uri.UriPattern;
 import swim.web.route.AlternativeRoute;
 import swim.web.route.ExtractHostDirective;
 import swim.web.route.ExtractPathDirective;
@@ -28,18 +31,39 @@ import swim.web.route.PathDirective;
 import swim.web.route.PathPrefixDirective;
 import swim.web.route.PathPrefixRoute;
 import swim.web.route.PathRoute;
+import swim.web.route.RespondRoute;
 
 @FunctionalInterface
 public interface WebRoute {
 
   WebResponse routeRequest(WebRequest request);
 
-  static WebRoute pathPrefix(UriPath pathPrefix, WebRoute route) {
-    return new PathPrefixRoute(pathPrefix, route);
+  static WebRoute respond(HttpResponse<?> response) {
+    return new RespondRoute(response);
   }
 
-  static WebRoute pathPrefix(UriPath pathPrefix, Supplier<WebRoute> then) {
-    return new PathPrefixDirective(pathPrefix, then);
+  static WebRoute pathPrefix(UriPath prefix, WebRoute route) {
+    return new PathPrefixRoute(prefix, route);
+  }
+
+  static WebRoute pathPrefix(String prefix, WebRoute route) {
+    return pathPrefix(UriPath.parse(prefix), route);
+  }
+
+  static WebRoute pathPrefix(UriPath prefix, Supplier<WebRoute> then) {
+    return new PathPrefixDirective(prefix, then);
+  }
+
+  static WebRoute pathPrefix(String prefix, Supplier<WebRoute> then) {
+    return pathPrefix(UriPath.parse(prefix), then);
+  }
+
+  static WebRoute pathPrefix(UriPattern prefix, Function<HashTrieMap<String, String>, WebRoute> props) {
+    return null;
+  }
+
+  static WebRoute pathPrefix(String prefix, Function<HashTrieMap<String, String>, WebRoute> props) {
+    return pathPrefix(UriPattern.parse(prefix), props);
   }
 
   static WebRoute path(UriPath path, WebRoute route) {

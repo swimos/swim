@@ -15,26 +15,24 @@
 package swim.web.route;
 
 import java.util.function.Function;
-import swim.http.HttpHeader;
-import swim.uri.UriHost;
+import swim.collections.HashTrieMap;
+import swim.uri.UriPattern;
 import swim.web.WebRequest;
 import swim.web.WebResponse;
 import swim.web.WebRoute;
 
-public final class ExtractHostRoute implements WebRoute {
+public class ExhumePathPrefixDirective implements WebRoute { // TODO: after UriPattern.unapplyPrefix
 
-  final Function<UriHost, WebResponse> eval;
+  final UriPattern pattern;
+  final Function<HashTrieMap<String, String>, WebResponse> eval;
 
-  public ExtractHostRoute(Function<UriHost, WebResponse> eval) {
+  public ExhumePathPrefixDirective(UriPattern pattern, Function<HashTrieMap<String, String>, WebResponse> eval) {
+    this.pattern = pattern;
     this.eval = eval;
   }
 
   @Override
   public WebResponse routeRequest(WebRequest request) {
-    final HttpHeader header = request.getHttpHeader("host");
-    if (header == null || header.value() == null) {
-      return request.reject();
-    }
-    return this.eval.apply(UriHost.parse(header.value()));
+    return null;
   }
 }

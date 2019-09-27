@@ -16,6 +16,7 @@ package swim.web.route;
 
 import java.util.function.Function;
 import swim.http.HttpHeader;
+import swim.http.header.Host;
 import swim.uri.UriHost;
 import swim.web.WebRequest;
 import swim.web.WebResponse;
@@ -31,7 +32,7 @@ public final class ExtractHostDirective implements WebRoute {
 
   @Override
   public WebResponse routeRequest(WebRequest request) {
-    final HttpHeader header = request.getHttpHeader("Host");
+    final HttpHeader header = request.getHttpHeader(Host.class);
     if (header == null || header.value() == null) {
       return request.reject();
     }

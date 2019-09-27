@@ -1,3 +1,17 @@
+// Copyright 2015-2019 SWIM.AI inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package swim.web.route;
 
 import org.testng.annotations.Test;
@@ -18,6 +32,7 @@ import static swim.web.WebRoute.head;
 import static swim.web.WebRoute.path;
 import static swim.web.WebRoute.post;
 import static swim.web.WebRoute.put;
+import static swim.web.WebRoute.respond;
 
 public class MethodDirectivesSpec {
 
@@ -31,11 +46,11 @@ public class MethodDirectivesSpec {
 
   @Test
   public void testMethodRoutes() {
-    final WebRoute getRoute = get(request -> request.respond(HttpResponse.from(HttpStatus.OK)));
-    final WebRoute headRoute = head(request -> request.respond(HttpResponse.from(HttpStatus.OK)));
-    final WebRoute postRoute = post(request -> request.respond(HttpResponse.from(HttpStatus.OK)));
-    final WebRoute putRoute = put(request -> request.respond(HttpResponse.from(HttpStatus.OK)));
-    final WebRoute deleteRoute = delete(request -> request.respond(HttpResponse.from(HttpStatus.OK)));
+    final WebRoute getRoute = get(respond(ok()));
+    final WebRoute headRoute = head(respond(ok()));
+    final WebRoute postRoute = post(respond(ok()));
+    final WebRoute putRoute = put(respond(ok()));
+    final WebRoute deleteRoute = delete(respond(ok()));
     assertEquals(getRoute.routeRequest(methodRequest(HttpMethod.GET, Uri.parse("/foo"))).isAccepted(), true);
     assertEquals(getRoute.routeRequest(methodRequest(HttpMethod.HEAD, Uri.parse("/foo"))).isAccepted(), false);
     assertEquals(headRoute.routeRequest(methodRequest(HttpMethod.HEAD, Uri.parse("/foo"))).isAccepted(), true);
@@ -50,11 +65,11 @@ public class MethodDirectivesSpec {
 
   @Test
   public void testMethodDirectives() {
-    final WebRoute directive = get(() -> path(UriPath.parse("/GET"), request -> request.respond(ok())))
-        .orElse(head(() -> path(UriPath.parse("/HEAD"), request -> request.respond(ok()))))
-        .orElse(post(() -> path(UriPath.parse("/POST"), request -> request.respond(ok()))))
-        .orElse(put(() -> path(UriPath.parse("/PUT"), request -> request.respond(ok()))))
-        .orElse(delete(() -> path(UriPath.parse("/DELETE"), request -> request.respond(ok()))));
+    final WebRoute directive = get(() -> path(UriPath.parse("/GET"), respond(ok())))
+        .orElse(head(() -> path(UriPath.parse("/HEAD"), respond(ok()))))
+        .orElse(post(() -> path(UriPath.parse("/POST"), respond(ok()))))
+        .orElse(put(() -> path(UriPath.parse("/PUT"), respond(ok()))))
+        .orElse(delete(() -> path(UriPath.parse("/DELETE"), respond(ok()))));
     for (HttpMethod m : new HttpMethod[]{HttpMethod.GET, HttpMethod.HEAD, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE}) {
       final WebRequest req = methodRequest(m, Uri.parse("/" + m.name()));
       assertEquals(directive.routeRequest(req).isAccepted(), true);
