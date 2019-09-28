@@ -251,7 +251,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     FingerTrieSeq<PartBinding> oldParts;
     FingerTrieSeq<PartBinding> newParts;
     PartBinding partBinding = null;
-    Value partKey = Value.absent();
+    Value partKey = Value.extant();
     do {
       oldParts = this.parts;
       PartBinding part = null;
@@ -278,7 +278,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
         if (isMetaNode(nodeUri)) {
           partKey = Text.from("swim");
         } else {
-          partKey = Value.absent();
+          partKey = Value.extant();
         }
         final PartAddress partAddress = cellAddress().partKey(partKey);
         partBinding = this.meshContext.createPart(partAddress);
@@ -313,7 +313,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   @Override
   public PartBinding openGateway() {
-    final Value partKey = Value.absent();
+    final Value partKey = Value.extant();
     FingerTrieSeq<PartBinding> oldParts;
     FingerTrieSeq<PartBinding> newParts;
     PartBinding partBinding = null;
