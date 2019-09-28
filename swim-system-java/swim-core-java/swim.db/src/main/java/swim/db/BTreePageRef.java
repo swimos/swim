@@ -262,7 +262,11 @@ public final class BTreePageRef extends PageRef {
 
   @Override
   public BTreePageRef evacuated(int post, long version) {
-    return page().evacuated(post, version).pageRef();
+    if (this.post != 0 && this.post < post) {
+      return page().evacuated(post, version).pageRef();
+    } else {
+      return this;
+    }
   }
 
   @Override

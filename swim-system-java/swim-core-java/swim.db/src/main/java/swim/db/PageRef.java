@@ -89,7 +89,7 @@ public abstract class PageRef {
   public abstract Cursor<? extends Object> cursor();
 
   public String toDebugString() {
-    return Recon.toString(toValue());
+    return "stem: " + stem() + ", pageRef: " + Recon.toString(toValue());
   }
 
   static final class LoadPage implements Cont<Page> {

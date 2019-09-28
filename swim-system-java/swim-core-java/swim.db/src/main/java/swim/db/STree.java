@@ -277,9 +277,9 @@ public final class STree extends Tree {
   }
 
   @Override
-  public STree evacuated(int zone, long version) {
+  public STree evacuated(int post, long version) {
     final STreePageRef oldRootRef = this.rootRef;
-    final STreePageRef newRootRef = oldRootRef.evacuated(zone, version);
+    final STreePageRef newRootRef = oldRootRef.evacuated(post, version);
     if (oldRootRef != newRootRef) {
       return new STree(this.treeContext, newRootRef, this.seed, this.isResident, this.isTransient);
     } else {

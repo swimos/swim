@@ -226,9 +226,9 @@ public final class QTree extends Tree {
   }
 
   @Override
-  public QTree evacuated(int zone, long version) {
+  public QTree evacuated(int post, long version) {
     final QTreePageRef oldRootRef = this.rootRef;
-    final QTreePageRef newRootRef = oldRootRef.evacuated(zone, version);
+    final QTreePageRef newRootRef = oldRootRef.evacuated(post, version);
     if (oldRootRef != newRootRef) {
       return new QTree(this.treeContext, newRootRef, this.seed, this.isResident, this.isTransient);
     } else {

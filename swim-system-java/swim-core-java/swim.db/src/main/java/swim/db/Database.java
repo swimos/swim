@@ -342,11 +342,11 @@ public class Database {
     do {
       final long newVersion = this.version;
       final int newPost = this.post;
-      final BTree oldSeeds = this.seedTrunk.tree;
-      final BTree newSeeds = oldSeeds.removed(name, newVersion, newPost);
-      if (oldSeeds != newSeeds) {
-        if (this.seedTrunk.updateTree(oldSeeds, newSeeds, newVersion)) {
-          final Value seedValue = oldSeeds.get(name);
+      final BTree oldSeedTree = this.seedTrunk.tree;
+      final BTree newSeedTree = oldSeedTree.removed(name, newVersion, newPost);
+      if (oldSeedTree != newSeedTree) {
+        if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, newSeedTree)) {
+          final Value seedValue = oldSeedTree.get(name);
           final Value sizeValue = seedValue.get("root").head().toValue().get("area");
           final long treeSize = sizeValue.longValue(0L);
           TREE_SIZE.addAndGet(this, -treeSize);
@@ -511,7 +511,7 @@ public class Database {
           if (Trunk.TREE.compareAndSet(trunk, oldTree, newTree)) {
             do {
               final BTree oldSeedTree = this.seedTrunk.tree;
-              final BTree newSeedTree = oldSeedTree.updated(trunk.name, newTree.seed().toValue(), version, 0);
+              final BTree newSeedTree = oldSeedTree.updated(trunk.name, newTree.seed().toValue(), version, this.post);
               if (Trunk.TREE.compareAndSet(this.seedTrunk, oldSeedTree, newSeedTree)) {
                 break;
               }
@@ -543,9 +543,9 @@ public class Database {
     BTree metaTree;
     do {
       final BTree oldMetaTree = this.metaTrunk.tree;
-      metaTree = oldMetaTree.updated(Text.from("seed"), seedTree.rootRef().toValue(), version, 0)
-                            .updated(Text.from("stem"), Num.from(this.stem), version, 0)
-                            .updated(Text.from("time"), Num.from(time), version, 0)
+      metaTree = oldMetaTree.updated(Text.from("seed"), seedTree.rootRef().toValue(), version, this.post)
+                            .updated(Text.from("stem"), Num.from(this.stem), version, this.post)
+                            .updated(Text.from("time"), Num.from(time), version, this.post)
                             .committed(zone, step, version, time);
       if (Trunk.TREE.compareAndSet(this.metaTrunk, oldMetaTree, metaTree)) {
         step += metaTree.diffSize(version);

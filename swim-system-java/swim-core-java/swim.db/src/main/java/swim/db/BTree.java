@@ -325,9 +325,9 @@ public final class BTree extends Tree {
   }
 
   @Override
-  public BTree evacuated(int zone, long version) {
+  public BTree evacuated(int post, long version) {
     final BTreePageRef oldRootRef = this.rootRef;
-    final BTreePageRef newRootRef = oldRootRef.evacuated(zone, version);
+    final BTreePageRef newRootRef = oldRootRef.evacuated(post, version);
     if (oldRootRef != newRootRef) {
       return new BTree(this.treeContext, newRootRef, this.seed, this.isResident, this.isTransient);
     } else {
