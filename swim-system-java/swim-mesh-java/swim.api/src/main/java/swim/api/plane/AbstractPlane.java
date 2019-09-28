@@ -228,6 +228,11 @@ public class AbstractPlane implements Plane, SwimRef, Log {
     this.context.error(message);
   }
 
+  @Override
+  public void fail(Object message) {
+    this.context.fail(message);
+  }
+
   public void close() {
     this.context.close();
   }

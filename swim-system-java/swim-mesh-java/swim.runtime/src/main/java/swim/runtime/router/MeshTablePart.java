@@ -24,12 +24,16 @@ import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
 import swim.runtime.MeshBinding;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
+import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PartContext;
 import swim.runtime.PushRequest;
@@ -39,15 +43,13 @@ import swim.uri.Uri;
 
 public class MeshTablePart implements PartContext {
   protected final MeshTable mesh;
-
   protected final PartBinding part;
+  protected final PartAddress partAddress;
 
-  protected final Value partKey;
-
-  public MeshTablePart(MeshTable mesh, PartBinding part, Value partKey) {
+  public MeshTablePart(MeshTable mesh, PartBinding part, PartAddress partAddress) {
     this.mesh = mesh;
     this.part = part;
-    this.partKey = partKey.commit();
+    this.partAddress = partAddress;
   }
 
   @Override
@@ -71,13 +73,23 @@ public class MeshTablePart implements PartContext {
   }
 
   @Override
+  public final PartAddress cellAddress() {
+    return this.partAddress;
+  }
+
+  @Override
+  public final String edgeName() {
+    return this.partAddress.edgeName();
+  }
+
+  @Override
   public final Uri meshUri() {
-    return this.mesh.meshUri();
+    return this.partAddress.meshUri();
   }
 
   @Override
   public final Value partKey() {
-    return this.partKey;
+    return this.partAddress.partKey();
   }
 
   @Override
@@ -101,59 +113,88 @@ public class MeshTablePart implements PartContext {
   }
 
   @Override
-  public HostBinding createHost(Uri hostUri) {
-    return this.mesh.meshContext().createHost(this.partKey, hostUri);
+  public void openMetaPart(PartBinding part, NodeBinding metaPart) {
+    this.mesh.openMetaPart(part, metaPart);
   }
 
   @Override
-  public HostBinding injectHost(Uri hostUri, HostBinding host) {
-    return this.mesh.meshContext().injectHost(this.partKey, hostUri, host);
+  public HostBinding createHost(HostAddress hostAddress) {
+    return this.mesh.meshContext().createHost(hostAddress);
   }
 
   @Override
-  public NodeBinding createNode(Uri hostUri, Uri nodeUri) {
-    return this.mesh.meshContext().createNode(this.partKey, hostUri, nodeUri);
+  public HostBinding injectHost(HostAddress hostAddress, HostBinding host) {
+    return this.mesh.meshContext().injectHost(hostAddress, host);
   }
 
   @Override
-  public NodeBinding injectNode(Uri hostUri, Uri nodeUri, NodeBinding node) {
-    return this.mesh.meshContext().injectNode(this.partKey, hostUri, nodeUri, node);
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    this.mesh.openMetaHost(host, metaHost);
   }
 
   @Override
-  public LaneBinding createLane(Uri hostUri, Uri nodeUri, LaneDef laneDef) {
-    return this.mesh.meshContext().createLane(this.partKey, hostUri, nodeUri, laneDef);
+  public NodeBinding createNode(NodeAddress nodeAddress) {
+    return this.mesh.meshContext().createNode(nodeAddress);
   }
 
   @Override
-  public LaneBinding createLane(Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return this.mesh.meshContext().createLane(this.partKey, hostUri, nodeUri, laneUri);
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
+    return this.mesh.meshContext().injectNode(nodeAddress, node);
   }
 
   @Override
-  public LaneBinding injectLane(Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
-    return this.mesh.meshContext().injectLane(this.partKey, hostUri, nodeUri, laneUri, lane);
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.mesh.openMetaNode(node, metaNode);
   }
 
   @Override
-  public void openLanes(Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.mesh.meshContext().openLanes(this.partKey, hostUri, nodeUri, node);
+  public LaneBinding createLane(LaneAddress laneAddress) {
+    return this.mesh.meshContext().createLane(laneAddress);
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Uri hostUri, Uri nodeUri, AgentDef agentDef) {
-    return this.mesh.meshContext().createAgentFactory(this.partKey, hostUri, nodeUri, agentDef);
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return this.mesh.meshContext().injectLane(laneAddress, lane);
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Uri hostUri, Uri nodeUri,
-                                                              Class<? extends A> agentClass) {
-    return this.mesh.meshContext().createAgentFactory(this.partKey, hostUri, nodeUri, agentClass);
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.mesh.openMetaLane(lane, metaLane);
   }
 
   @Override
-  public void openAgents(Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.mesh.meshContext().openAgents(this.partKey, hostUri, nodeUri, node);
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.mesh.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.mesh.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return this.mesh.meshContext().createLane(node, laneDef);
+  }
+
+  @Override
+  public void openLanes(NodeBinding node) {
+    this.mesh.meshContext().openLanes(node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return this.mesh.meshContext().createAgentFactory(node, agentDef);
+  }
+
+  @Override
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return this.mesh.meshContext().createAgentFactory(node, agentClass);
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.mesh.meshContext().openAgents(node);
   }
 
   @Override
@@ -217,8 +258,13 @@ public class MeshTablePart implements PartContext {
   }
 
   @Override
+  public void fail(Object message) {
+    this.mesh.fail(message);
+  }
+
+  @Override
   public void close() {
-    this.mesh.closePart(this.partKey);
+    this.mesh.closePart(this.partAddress.partKey());
   }
 
   @Override

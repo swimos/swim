@@ -42,4 +42,9 @@ public interface Log {
    * Logs an error-level message.
    */
   void error(Object message);
+
+  /**
+   * Logs an fail-level message.
+   */
+  void fail(Object message);
 }

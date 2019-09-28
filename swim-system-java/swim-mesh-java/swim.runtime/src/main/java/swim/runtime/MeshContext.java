@@ -20,7 +20,6 @@ import swim.api.agent.AgentFactory;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
 import swim.api.policy.PolicyDirective;
-import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface MeshContext extends TierContext, CellContext {
@@ -31,34 +30,51 @@ public interface MeshContext extends TierContext, CellContext {
   <T> T unwrapMesh(Class<T> meshClass);
 
   @Override
+  MeshAddress cellAddress();
+
+  @Override
+  String edgeName();
+
+  @Override
   Uri meshUri();
 
-  PartBinding createPart(Value partKey);
+  void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh);
 
-  PartBinding injectPart(Value partKey, PartBinding part);
+  PartBinding createPart(PartAddress partAddress);
 
-  HostBinding createHost(Value partKey, Uri hostUri);
+  PartBinding injectPart(PartAddress partAddress, PartBinding part);
 
-  HostBinding injectHost(Value partKey, Uri hostUri, HostBinding host);
+  void openMetaPart(PartBinding part, NodeBinding metaPart);
 
-  NodeBinding createNode(Value partKey, Uri hostUri, Uri nodeUri);
+  HostBinding createHost(HostAddress hostAddress);
 
-  NodeBinding injectNode(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node);
+  HostBinding injectHost(HostAddress hostAddress, HostBinding host);
 
-  LaneBinding createLane(Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef);
+  void openMetaHost(HostBinding host, NodeBinding metaHost);
 
-  LaneBinding createLane(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri);
+  NodeBinding createNode(NodeAddress nodeAddress);
 
-  LaneBinding injectLane(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane);
+  NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node);
 
-  void openLanes(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node);
+  void openMetaNode(NodeBinding node, NodeBinding metaNode);
 
-  AgentFactory<?> createAgentFactory(Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef);
+  LaneBinding createLane(LaneAddress laneAddress);
 
-  <A extends Agent> AgentFactory<A> createAgentFactory(Value partKey, Uri hostUri, Uri nodeUri,
-                                                       Class<? extends A> agentClass);
+  LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane);
 
-  void openAgents(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node);
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
+
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
+
+  LaneBinding createLane(NodeBinding node, LaneDef laneDef);
+
+  void openLanes(NodeBinding node);
+
+  AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef);
+
+  <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass);
+
+  void openAgents(NodeBinding node);
 
   PolicyDirective<Identity> authenticate(Credentials credentials);
 }

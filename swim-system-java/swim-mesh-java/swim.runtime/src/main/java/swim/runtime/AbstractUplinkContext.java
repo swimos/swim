@@ -316,6 +316,11 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
   }
 
   @Override
+  public void failUp(Object message) {
+    laneBinding().fail(message);
+  }
+
+  @Override
   public void trace(Object message) {
     linkBinding().traceDown(message);
   }
@@ -338,6 +343,11 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
   @Override
   public void error(Object message) {
     linkBinding().errorDown(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    linkBinding().failDown(message);
   }
 
   static final AtomicReferenceFieldUpdater<AbstractUplinkContext, Object> OBSERVERS =

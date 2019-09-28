@@ -25,11 +25,8 @@ import swim.structure.Value;
 
 public abstract class PartialUplinkModem extends WarpUplinkModem {
   final ConcurrentLinkedQueue<Value> downQueue;
-
   volatile Iterator<Map.Entry<Value, Value>> syncQueue;
-
   volatile HashTrieSet<Value> keyQueue;
-
   volatile Value lastKey;
 
   public PartialUplinkModem(WarpBinding linkBinding) {

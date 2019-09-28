@@ -41,18 +41,25 @@ import swim.concurrent.Stage;
 import swim.concurrent.StageDef;
 import swim.kernel.KernelContext;
 import swim.runtime.AbstractTierBinding;
+import swim.runtime.CellAddress;
+import swim.runtime.EdgeAddress;
 import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostDef;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
 import swim.runtime.LogDef;
+import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshDef;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeDef;
+import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PartDef;
 import swim.runtime.PolicyDef;
@@ -68,7 +75,7 @@ import swim.uri.UriPattern;
 import swim.util.Log;
 
 public class ActorSpace extends AbstractTierBinding implements EdgeContext, PlaneContext, Space {
-  final String spaceName;
+  final EdgeAddress edgeAddress;
   final ActorSpaceDef spaceDef;
   final KernelContext kernel;
   final EdgeBinding edge;
@@ -83,13 +90,12 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   volatile UriMapper<AgentFactory<?>> agentFactories;
   volatile HashTrieMap<String, Authenticator> authenticators;
 
-  public ActorSpace(String spaceName, ActorSpaceDef spaceDef, KernelContext kernel) {
-    this.spaceName = spaceName;
+  public ActorSpace(EdgeAddress edgeAddress, ActorSpaceDef spaceDef, KernelContext kernel) {
+    this.edgeAddress = edgeAddress;
     this.spaceDef = spaceDef;
     this.kernel = kernel;
 
     EdgeBinding edge = createEdge();
-    edge = injectEdge(edge);
     edge.setEdgeContext(this);
     edge = edge.edgeWrapper();
     this.edge = edge;
@@ -99,11 +105,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     this.agentFactories = UriMapper.empty();
     this.authenticators = HashTrieMap.empty();
 
-    openEdge(this.edge);
-  }
-
-  public final String spaceName() {
-    return this.spaceName;
+    seedEdge(this.edge);
   }
 
   public final ActorSpaceDef spaceDef() {
@@ -128,6 +130,16 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     } else {
       return null;
     }
+  }
+
+  @Override
+  public final EdgeAddress cellAddress() {
+    return this.edgeAddress;
+  }
+
+  @Override
+  public final String edgeName() {
+    return this.edgeAddress.edgeName();
   }
 
   @Override
@@ -261,7 +273,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public <A extends Agent> AgentRoute<A> createAgentRoute(Class<? extends A> agentClass) {
-    return this.kernel.createAgentRoute(this.spaceName, agentClass);
+    return this.kernel.createAgentRoute(this.edge, agentClass);
   }
 
   @Override
@@ -315,25 +327,25 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
-    return this.kernel.createAgentFactory(this.spaceName, meshUri, partKey, hostUri, nodeUri, agentDef);
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return this.kernel.createAgentFactory(node, agentDef);
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri,
-                                                              Class<? extends A> agentClass) {
-    return this.kernel.createAgentFactory(this.spaceName, meshUri, partKey, hostUri, nodeUri, agentClass);
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return this.kernel.createAgentFactory(node, agentClass);
   }
 
   @Override
-  public void openAgents(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.kernel.openAgents(this.spaceName, meshUri, partKey, hostUri, nodeUri, node);
-    if (!meshUri.isDefined()) {
+  public void openAgents(NodeBinding node) {
+    this.kernel.openAgents(node);
+    if (!node.meshUri().isDefined()) {
+      final Uri nodeUri = node.nodeUri();
       final NodeDef nodeDef = this.spaceDef.getNodeDef(nodeUri);
       if (nodeDef != null && node instanceof AgentModel) {
         final AgentModel agentModel = (AgentModel) node;
         for (AgentDef agentDef : nodeDef.agentDefs()) {
-          final AgentFactory<?> agentFactory = createAgentFactory(meshUri, partKey, hostUri, nodeUri, agentDef);
+          final AgentFactory<?> agentFactory = createAgentFactory(node, agentDef);
           if (agentDef != null) {
             final Value id = agentDef.id();
             Value props = agentDef.props();
@@ -361,6 +373,10 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     return this.kernel.createLog(logDef);
   }
 
+  public Log createLog(CellAddress cellAddress) {
+    return this.kernel.createLog(cellAddress);
+  }
+
   public Log injectLog(Log log) {
     return this.kernel.injectLog(log);
   }
@@ -370,7 +386,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     if (this.spaceDef.logDef != null) {
       log = createLog(this.spaceDef.logDef);
     } else {
-      log = openEdgeLog();
+      log = createLog(cellAddress());
     }
     if (log != null) {
       log = injectLog(log);
@@ -386,6 +402,10 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     return this.kernel.createPolicy(policyDef);
   }
 
+  public Policy createPolicy(CellAddress cellAddress) {
+    return this.kernel.createPolicy(cellAddress);
+  }
+
   public Policy injectPolicy(Policy policy) {
     return this.kernel.injectPolicy(policy);
   }
@@ -395,7 +415,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     if (this.spaceDef.policyDef != null) {
       policy = createPolicy(this.spaceDef.policyDef);
     } else {
-      policy = openEdgePolicy();
+      policy = createPolicy(cellAddress());
     }
     if (policy != null) {
       policy = injectPolicy(policy);
@@ -411,6 +431,10 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     return this.kernel.createStage(stageDef);
   }
 
+  public Stage createStage(CellAddress cellAddress) {
+    return this.kernel.createStage(cellAddress);
+  }
+
   public Stage injectStage(Stage stage) {
     return this.kernel.injectStage(stage);
   }
@@ -420,7 +444,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     if (this.spaceDef.stageDef != null) {
       stage = createStage(this.spaceDef.stageDef);
     } else {
-      stage = openEdgeStage();
+      stage = createStage(cellAddress());
     }
     if (stage != null) {
       stage = injectStage(stage);
@@ -440,6 +464,10 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     return this.kernel.createStore(storeDef, null);
   }
 
+  public StoreBinding createStore(CellAddress cellAddress) {
+    return this.kernel.createStore(cellAddress);
+  }
+
   public StoreBinding injectStore(StoreBinding store) {
     return this.kernel.injectStore(store);
   }
@@ -449,7 +477,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     if (this.spaceDef.storeDef != null) {
       store = createStore(this.spaceDef.storeDef);
     } else {
-      store = openEdgeStore();
+      store = createStore(cellAddress());
     }
     if (store != null) {
       store = injectStore(store);
@@ -466,16 +494,17 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   }
 
   protected EdgeBinding createEdge() {
-    EdgeBinding edge = this.kernel.createEdge(this.spaceName);
+    final EdgeAddress edgeAddress = cellAddress();
+    EdgeBinding edge = this.kernel.createEdge(edgeAddress);
     if (edge != null) {
-      edge = this.kernel.injectEdge(this.spaceName, edge);
+      edge = injectEdge(edgeAddress, edge);
     }
     return edge;
   }
 
-  protected void openEdge(EdgeBinding edge) {
+  protected void seedEdge(EdgeBinding edge) {
     for (MeshDef meshDef : this.spaceDef.meshDefs()) {
-      createMesh(edge, meshDef);
+      seedMesh(edge, meshDef);
     }
     if (edge.network() == null) {
       final MeshBinding network = edge.openMesh(Uri.empty());
@@ -488,9 +517,9 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     }
   }
 
-  protected MeshBinding createMesh(EdgeBinding edge, MeshDef meshDef) {
+  protected MeshBinding seedMesh(EdgeBinding edge, MeshDef meshDef) {
     final Uri meshUri = meshDef.meshUri();
-    MeshBinding mesh = this.kernel.createMesh(this.spaceName, meshDef);
+    MeshBinding mesh = this.kernel.createMesh(edge, meshDef);
     if (mesh != null) {
       mesh = edge.openMesh(meshUri, mesh);
       if (mesh != null) {
@@ -498,17 +527,16 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
           edge.setNetwork(mesh);
         }
         for (PartDef partDef : meshDef.partDefs()) {
-          createPart(edge, mesh, partDef);
+          seedPart(mesh, partDef);
         }
       }
     }
     return mesh;
   }
 
-  protected PartBinding createPart(EdgeBinding edge, MeshBinding mesh, PartDef partDef) {
-    final Uri meshUri = mesh.meshUri();
+  protected PartBinding seedPart(MeshBinding mesh, PartDef partDef) {
     final Value partKey = partDef.partKey();
-    PartBinding part = this.kernel.createPart(this.spaceName, meshUri, partDef);
+    PartBinding part = this.kernel.createPart(mesh, partDef);
     if (part != null) {
       part = mesh.addPart(partKey, part);
       if (part != null) {
@@ -516,20 +544,18 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
           mesh.setGateway(part);
         }
         for (HostDef hostDef : partDef.hostDefs()) {
-          createHost(edge, mesh, part, hostDef);
+          seedHost(part, hostDef);
         }
       }
     }
     return part;
   }
 
-  protected HostBinding createHost(EdgeBinding edge, MeshBinding mesh, PartBinding part, HostDef hostDef) {
-    final Uri meshUri = mesh.meshUri();
-    final Value partKey = part.partKey();
+  protected HostBinding seedHost(PartBinding part, HostDef hostDef) {
     final Uri hostUri = hostDef.hostUri();
     HostBinding host = null;
     if (hostUri != null) {
-      host = this.kernel.createHost(this.spaceName, meshUri, partKey, hostDef);
+      host = this.kernel.createHost(part, hostDef);
       if (host != null) {
         host = part.openHost(hostUri, host);
         if (host != null) {
@@ -542,7 +568,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
             host.didBecomeSlave();
           }
           for (NodeDef nodeDef : hostDef.nodeDefs()) {
-            createNode(edge, mesh, part, host, nodeDef);
+            seedNode(host, nodeDef);
           }
         }
       }
@@ -550,20 +576,16 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     return host;
   }
 
-  protected NodeBinding createNode(EdgeBinding edge, MeshBinding mesh, PartBinding part,
-                                   HostBinding host, NodeDef nodeDef) {
-    final Uri meshUri = mesh.meshUri();
-    final Value partKey = part.partKey();
-    final Uri hostUri = host.hostUri();
+  protected NodeBinding seedNode(HostBinding host, NodeDef nodeDef) {
     final Uri nodeUri = nodeDef.nodeUri();
     NodeBinding node = null;
     if (nodeUri != null) {
-      node = this.kernel.createNode(this.spaceName, meshUri, partKey, hostUri, nodeDef);
+      node = this.kernel.createNode(host, nodeDef);
       if (node != null) {
         node = host.openNode(nodeUri, node);
         if (node != null) {
           for (LaneDef laneDef : nodeDef.laneDefs()) {
-            createLane(edge, mesh, part, host, node, laneDef);
+            seedLane(node, laneDef);
           }
         }
       }
@@ -571,16 +593,11 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     return node;
   }
 
-  protected LaneBinding createLane(EdgeBinding edge, MeshBinding mesh, PartBinding part,
-                                   HostBinding host, NodeBinding node, LaneDef laneDef) {
-    final Uri meshUri = mesh.meshUri();
-    final Value partKey = part.partKey();
-    final Uri hostUri = host.hostUri();
-    final Uri nodeUri = node.nodeUri();
+  protected LaneBinding seedLane(NodeBinding node, LaneDef laneDef) {
     final Uri laneUri = laneDef.laneUri();
     LaneBinding lane = null;
     if (laneUri != null) {
-      lane = this.kernel.createLane(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneDef);
+      lane = this.kernel.createLane(node, laneDef);
       if (lane != null) {
         lane = node.openLane(laneUri, lane);
       }
@@ -588,139 +605,97 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     return lane;
   }
 
-  protected EdgeBinding injectEdge(EdgeBinding edge) {
-    return this.kernel.injectEdge(this.spaceName, edge);
+  protected EdgeBinding injectEdge(EdgeAddress edgeAddress, EdgeBinding edge) {
+    return this.kernel.injectEdge(edgeAddress, edge);
   }
 
-  protected Log openEdgeLog() {
-    return this.kernel.openEdgeLog(this.spaceName);
+  @Override
+  public void openMetaEdge(EdgeBinding edge, NodeBinding metaEdge) {
+    this.kernel.openMetaEdge(edge, metaEdge);
   }
 
-  protected Policy openEdgePolicy() {
-    return this.kernel.openEdgePolicy(this.spaceName);
-  }
-
-  protected Stage openEdgeStage() {
-    return this.kernel.openEdgeStage(this.spaceName);
-  }
-
-  protected StoreBinding openEdgeStore() {
-    return this.kernel.openEdgeStore(this.spaceName);
-  }
-
-  public MeshDef getMeshDef(Uri meshUri) {
-    MeshDef meshDef = this.spaceDef.getMeshDef(meshUri);
+  public MeshDef getMeshDef(MeshAddress meshAddress) {
+    MeshDef meshDef = this.spaceDef.getMeshDef(meshAddress.meshUri());
     if (meshDef == null) {
-      meshDef = this.kernel.getMeshDef(this.spaceName, meshUri);
+      meshDef = this.kernel.getMeshDef(meshAddress);
     }
     return meshDef;
   }
 
   @Override
-  public MeshBinding createMesh(Uri meshUri) {
-    return this.kernel.createMesh(this.spaceName, meshUri);
+  public MeshBinding createMesh(MeshAddress meshAddress) {
+    return this.kernel.createMesh(meshAddress);
   }
 
   @Override
-  public MeshBinding injectMesh(Uri meshUri, MeshBinding mesh) {
-    final MeshDef meshDef = getMeshDef(meshUri);
-    return new ActorMesh(this.kernel.injectMesh(this.spaceName, meshUri, mesh), meshDef);
+  public MeshBinding injectMesh(MeshAddress meshAddress, MeshBinding mesh) {
+    final MeshDef meshDef = getMeshDef(meshAddress);
+    return new ActorMesh(this.kernel.injectMesh(meshAddress, mesh), meshDef);
   }
 
-  public Log openMeshLog(Uri meshUri) {
-    return this.kernel.openMeshLog(this.spaceName, meshUri);
+  @Override
+  public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
+    this.kernel.openMetaMesh(mesh, metaMesh);
   }
 
-  public Policy openMeshPolicy(Uri meshUri) {
-    return this.kernel.openMeshPolicy(this.spaceName, meshUri);
-  }
-
-  public Stage openMeshStage(Uri meshUri) {
-    return this.kernel.openMeshStage(this.spaceName, meshUri);
-  }
-
-  public StoreBinding openMeshStore(Uri meshUri) {
-    return this.kernel.openMeshStore(this.spaceName, meshUri);
-  }
-
-  public PartDef getPartDef(Uri meshUri, Value partKey) {
-    PartDef partDef = this.spaceDef.getPartDef(partKey);
+  public PartDef getPartDef(PartAddress partAddress) {
+    PartDef partDef = this.spaceDef.getPartDef(partAddress.partKey());
     if (partDef == null) {
-      partDef = this.kernel.getPartDef(this.spaceName, meshUri, partKey);
+      partDef = this.kernel.getPartDef(partAddress);
     }
     return partDef;
   }
 
   @Override
-  public PartBinding createPart(Uri meshUri, Value partKey) {
-    return this.kernel.createPart(this.spaceName, meshUri, partKey);
+  public PartBinding createPart(PartAddress partAddress) {
+    return this.kernel.createPart(partAddress);
   }
 
   @Override
-  public PartBinding injectPart(Uri meshUri, Value partKey, PartBinding part) {
-    return this.kernel.injectPart(this.spaceName, meshUri, partKey, part);
+  public PartBinding injectPart(PartAddress partAddress, PartBinding part) {
+    return this.kernel.injectPart(partAddress, part);
   }
 
-  public Log openPartLog(Uri meshUri, Value partKey) {
-    return this.kernel.openPartLog(this.spaceName, meshUri, partKey);
+  @Override
+  public void openMetaPart(PartBinding part, NodeBinding metaPart) {
+    this.kernel.openMetaPart(part, metaPart);
   }
 
-  public Policy openPartPolicy(Uri meshUri, Value partKey) {
-    return this.kernel.openPartPolicy(this.spaceName, meshUri, partKey);
-  }
-
-  public Stage openPartStage(Uri meshUri, Value partKey) {
-    return this.kernel.openPartStage(this.spaceName, meshUri, partKey);
-  }
-
-  public StoreBinding openPartStore(Uri meshUri, Value partKey) {
-    return this.kernel.openPartStore(this.spaceName, meshUri, partKey);
-  }
-
-  public HostDef getHostDef(Uri meshUri, Value partKey, Uri hostUri) {
-    HostDef hostDef = this.spaceDef.getHostDef(hostUri);
+  public HostDef getHostDef(HostAddress hostAddress) {
+    HostDef hostDef = this.spaceDef.getHostDef(hostAddress.hostUri());
     if (hostDef == null) {
-      hostDef = this.kernel.getHostDef(this.spaceName, meshUri, partKey, hostUri);
+      hostDef = this.kernel.getHostDef(hostAddress);
     }
     return hostDef;
   }
 
   @Override
-  public HostBinding createHost(Uri meshUri, Value partKey, Uri hostUri) {
-    return this.kernel.createHost(this.spaceName, meshUri, partKey, hostUri);
+  public HostBinding createHost(HostAddress hostAddress) {
+    return this.kernel.createHost(hostAddress);
   }
 
   @Override
-  public HostBinding injectHost(Uri meshUri, Value partKey, Uri hostUri, HostBinding host) {
-    return this.kernel.injectHost(this.spaceName, meshUri, partKey, hostUri, host);
+  public HostBinding injectHost(HostAddress hostAddress, HostBinding host) {
+    return this.kernel.injectHost(hostAddress, host);
   }
 
-  public Log openHostLog(Uri meshUri, Value partKey, Uri hostUri) {
-    return this.kernel.openHostLog(this.spaceName, meshUri, partKey, hostUri);
+  @Override
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    this.kernel.openMetaHost(host, metaHost);
   }
 
-  public Policy openHostPolicy(Uri meshUri, Value partKey, Uri hostUri) {
-    return this.kernel.openHostPolicy(this.spaceName, meshUri, partKey, hostUri);
-  }
-
-  public Stage openHostStage(Uri meshUri, Value partKey, Uri hostUri) {
-    return this.kernel.openHostStage(this.spaceName, meshUri, partKey, hostUri);
-  }
-
-  public StoreBinding openHostStore(Uri meshUri, Value partKey, Uri hostUri) {
-    return this.kernel.openHostStore(this.spaceName, meshUri, partKey, hostUri);
-  }
-
-  public NodeDef getNodeDef(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
-    NodeDef nodeDef = this.spaceDef.getNodeDef(nodeUri);
+  public NodeDef getNodeDef(NodeAddress nodeAddress) {
+    NodeDef nodeDef = this.spaceDef.getNodeDef(nodeAddress.nodeUri());
     if (nodeDef == null) {
-      nodeDef = this.kernel.getNodeDef(this.spaceName, meshUri, partKey, hostUri, nodeUri);
+      nodeDef = this.kernel.getNodeDef(nodeAddress);
     }
     return nodeDef;
   }
 
   @Override
-  public NodeBinding createNode(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
+  public NodeBinding createNode(NodeAddress nodeAddress) {
+    final Uri meshUri = nodeAddress.meshUri();
+    final Uri nodeUri = nodeAddress.nodeUri();
     NodeBinding node = null;
     if (!meshUri.isDefined()) {
       final AgentFactory<?> agentFactory = this.agentFactories.get(nodeUri);
@@ -730,7 +705,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
       }
     }
     if (node == null) {
-      node = this.kernel.createNode(this.spaceName, meshUri, partKey, hostUri, nodeUri);
+      node = this.kernel.createNode(nodeAddress);
     }
     if (node == null && !meshUri.isDefined()) {
       final NodeDef nodeDef = this.spaceDef.getNodeDef(nodeUri);
@@ -743,68 +718,56 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   }
 
   @Override
-  public NodeBinding injectNode(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    return this.kernel.injectNode(this.spaceName, meshUri, partKey, hostUri, nodeUri, node);
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
+    return this.kernel.injectNode(nodeAddress, node);
   }
 
-  public Log openNodeLog(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
-    return this.kernel.openNodeLog(this.spaceName, meshUri, partKey, hostUri, nodeUri);
+  @Override
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.kernel.openMetaNode(node, metaNode);
   }
 
-  public Policy openNodePolicy(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
-    return this.kernel.openNodePolicy(this.spaceName, meshUri, partKey, hostUri, nodeUri);
-  }
-
-  public Stage openNodeStage(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
-    return this.kernel.openNodeStage(this.spaceName, meshUri, partKey, hostUri, nodeUri);
-  }
-
-  public StoreBinding openNodeStore(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
-    return this.kernel.openNodeStore(this.spaceName, meshUri, partKey, hostUri, nodeUri);
-  }
-
-  public LaneDef getLaneDef(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    LaneDef laneDef = this.spaceDef.getLaneDef(laneUri);
+  public LaneDef getLaneDef(LaneAddress laneAddress) {
+    LaneDef laneDef = this.spaceDef.getLaneDef(laneAddress.laneUri());
     if (laneDef == null) {
-      laneDef = this.kernel.getLaneDef(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneUri);
+      laneDef = this.kernel.getLaneDef(laneAddress);
     }
     return laneDef;
   }
 
   @Override
-  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
-    return this.kernel.createLane(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneDef);
+  public LaneBinding createLane(LaneAddress laneAddress) {
+    return this.kernel.createLane(laneAddress);
   }
 
   @Override
-  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return this.kernel.createLane(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneUri);
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return this.kernel.injectLane(laneAddress, lane);
   }
 
   @Override
-  public LaneBinding injectLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
-    return this.kernel.injectLane(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneUri, lane);
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.kernel.openMetaLane(lane, metaLane);
   }
 
   @Override
-  public void openLanes(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.kernel.openLanes(this.spaceName, meshUri, partKey, hostUri, nodeUri, node);
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.kernel.openMetaUplink(uplink, metaUplink);
   }
 
-  public Log openLaneLog(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return this.kernel.openLaneLog(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneUri);
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.kernel.openMetaDownlink(downlink, metaDownlink);
   }
 
-  public Policy openLanePolicy(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return this.kernel.openLanePolicy(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneUri);
+  @Override
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return this.kernel.createLane(node, laneDef);
   }
 
-  public Stage openLaneStage(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return this.kernel.openLaneStage(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneUri);
-  }
-
-  public StoreBinding openLaneStore(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return this.kernel.openLaneStore(this.spaceName, meshUri, partKey, hostUri, nodeUri, laneUri);
+  @Override
+  public void openLanes(NodeBinding node) {
+    this.kernel.openLanes(node);
   }
 
   @Override
@@ -892,6 +855,16 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
       log.error(message);
     } else {
       this.kernel.error(message);
+    }
+  }
+
+  @Override
+  public void fail(Object message) {
+    final Log log = this.log;
+    if (log != null) {
+      log.fail(message);
+    } else {
+      this.kernel.fail(message);
     }
   }
 

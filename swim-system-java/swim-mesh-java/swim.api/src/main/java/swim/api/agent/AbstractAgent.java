@@ -721,6 +721,16 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
   }
 
   @Override
+  public void fail(Object message) {
+    final Link link = link();
+    if (link != null) {
+      link.fail(message);
+    } else {
+      this.context.fail(message);
+    }
+  }
+
+  @Override
   public final TimerRef timer(TimerFunction timer) {
     return schedule().timer(timer);
   }

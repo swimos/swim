@@ -22,7 +22,9 @@ import swim.runtime.DownlinkModel;
 import swim.runtime.DownlinkView;
 import swim.runtime.HttpBinding;
 import swim.runtime.HttpContext;
+import swim.runtime.LinkBinding;
 import swim.runtime.LinkContext;
+import swim.runtime.NodeBinding;
 import swim.uri.Uri;
 
 public abstract class HttpDownlinkModem<View extends DownlinkView> extends DownlinkModel<View> implements HttpBinding {
@@ -89,6 +91,11 @@ public abstract class HttpDownlinkModem<View extends DownlinkView> extends Downl
     if (linkContext != null) {
       this.linkContext.didCloseDown();
     }
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.cellContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override

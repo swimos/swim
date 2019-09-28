@@ -26,6 +26,8 @@ import swim.http.HttpResponse;
 import swim.http.HttpStatus;
 import swim.runtime.HttpBinding;
 import swim.runtime.HttpContext;
+import swim.runtime.LinkBinding;
+import swim.runtime.NodeBinding;
 import swim.structure.Value;
 
 public class HttpErrorUplinkModem implements HttpContext {
@@ -154,6 +156,11 @@ public class HttpErrorUplinkModem implements HttpContext {
     // nop
   }
 
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    // nop
+  }
+
   public void close() {
     this.linkBinding.closeDown();
   }
@@ -195,6 +202,11 @@ public class HttpErrorUplinkModem implements HttpContext {
 
   @Override
   public void errorUp(Object message) {
+    // nop
+  }
+
+  @Override
+  public void failUp(Object message) {
     // nop
   }
 }

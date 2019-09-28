@@ -46,6 +46,7 @@ public class NodeScope extends Scope implements NodeRef {
     this.nodeUri = nodeUri;
   }
 
+  @Override
   public final Uri meshUri() {
     return this.meshUri;
   }

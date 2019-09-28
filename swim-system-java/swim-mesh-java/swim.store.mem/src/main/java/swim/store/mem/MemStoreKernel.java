@@ -15,6 +15,8 @@
 package swim.store.mem;
 
 import swim.kernel.KernelProxy;
+import swim.runtime.CellAddress;
+import swim.runtime.EdgeAddress;
 import swim.store.StoreBinding;
 import swim.store.StoreDef;
 import swim.structure.Value;
@@ -45,9 +47,10 @@ public class MemStoreKernel extends KernelProxy {
   }
 
   @Override
-  public StoreBinding openEdgeStore(String edgeName) {
-    StoreBinding store = super.openEdgeStore(edgeName);
-    if (store == null) {
+  public StoreBinding createStore(CellAddress cellAddress) {
+    StoreBinding store = super.createStore(cellAddress);
+    if (store == null && cellAddress instanceof EdgeAddress) {
+      // Provide default mem store to edge cells.
       store = new MemStore();
     }
     return store;

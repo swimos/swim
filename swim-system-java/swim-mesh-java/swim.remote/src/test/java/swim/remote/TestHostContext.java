@@ -24,11 +24,14 @@ import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
 import swim.runtime.PushRequest;
@@ -73,6 +76,11 @@ public class TestHostContext extends TestCellContext implements HostContext {
   }
 
   @Override
+  public HostAddress cellAddress() {
+    return new HostAddress(edgeName(), meshUri(), partKey(), hostUri());
+  }
+
+  @Override
   public Uri meshUri() {
     return Uri.empty();
   }
@@ -88,46 +96,62 @@ public class TestHostContext extends TestCellContext implements HostContext {
   }
 
   @Override
-  public NodeBinding createNode(Uri nodeUri) {
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+  }
+
+  @Override
+  public NodeBinding createNode(NodeAddress nodeAddress) {
     return null;
   }
 
   @Override
-  public NodeBinding injectNode(Uri nodeUri, NodeBinding node) {
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
     return node;
   }
 
   @Override
-  public LaneBinding createLane(Uri nodeUri, LaneDef laneDef) {
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+  }
+
+  @Override
+  public LaneBinding createLane(LaneAddress laneAddress) {
     return null;
   }
 
   @Override
-  public LaneBinding createLane(Uri nodeUri, Uri laneUri) {
-    return null;
-  }
-
-  @Override
-  public LaneBinding injectLane(Uri nodeUri, Uri laneUri, LaneBinding lane) {
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
     return lane;
   }
 
   @Override
-  public void openLanes(Uri nodeUri, NodeBinding node) {
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Uri nodeUri, AgentDef agentDef) {
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+  }
+
+  @Override
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
     return null;
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Uri nodeUri, Class<? extends A> agentClass) {
+  public void openLanes(NodeBinding node) {
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
     return null;
   }
 
   @Override
-  public void openAgents(Uri nodeUri, NodeBinding node) {
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return null;
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
   }
 
   @Override

@@ -42,24 +42,30 @@ import swim.io.IpSettings;
 import swim.io.IpSocket;
 import swim.io.IpSocketRef;
 import swim.io.Station;
+import swim.runtime.CellAddress;
+import swim.runtime.EdgeAddress;
 import swim.runtime.EdgeBinding;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostDef;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
+import swim.runtime.LinkBinding;
 import swim.runtime.LogDef;
+import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshDef;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeDef;
+import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PartDef;
 import swim.runtime.PolicyDef;
 import swim.store.StoreBinding;
 import swim.store.StoreDef;
 import swim.structure.Item;
-import swim.structure.Value;
-import swim.uri.Uri;
 import swim.util.Log;
 import swim.web.WebRequest;
 import swim.web.WebResponse;
@@ -167,6 +173,12 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
+  public Log createLog(CellAddress cellAddress) {
+    final KernelContext kernelContext = this.kernelContext;
+    return kernelContext != null ? kernelContext.createLog(cellAddress) : null;
+  }
+
+  @Override
   public Log injectLog(Log log) {
     final KernelContext kernelContext = this.kernelContext;
     return kernelContext != null ? kernelContext.injectLog(log) : log;
@@ -182,6 +194,12 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   public Policy createPolicy(PolicyDef policyDef) {
     final KernelContext kernelContext = this.kernelContext;
     return kernelContext != null ? kernelContext.createPolicy(policyDef) : null;
+  }
+
+  @Override
+  public Policy createPolicy(CellAddress cellAddress) {
+    final KernelContext kernelContext = this.kernelContext;
+    return kernelContext != null ? kernelContext.createPolicy(cellAddress) : null;
   }
 
   @Override
@@ -221,6 +239,12 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
+  public Stage createStage(CellAddress cellAddress) {
+    final KernelContext kernelContext = this.kernelContext;
+    return kernelContext != null ? kernelContext.createStage(cellAddress) : null;
+  }
+
+  @Override
   public Stage injectStage(Stage stage) {
     final KernelContext kernelContext = this.kernelContext;
     return kernelContext != null ? kernelContext.injectStage(stage) : stage;
@@ -239,21 +263,15 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
+  public StoreBinding createStore(CellAddress cellAddress) {
+    final KernelContext kernelContext = this.kernelContext;
+    return kernelContext != null ? kernelContext.createStore(cellAddress) : null;
+  }
+
+  @Override
   public StoreBinding injectStore(StoreBinding store) {
     final KernelContext kernelContext = this.kernelContext;
     return kernelContext != null ? kernelContext.injectStore(store) : store;
-  }
-
-  @Override
-  public Log openStoreLog(String storeName) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openStoreLog(storeName) : null;
-  }
-
-  @Override
-  public Stage openStoreStage(String storeName) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openStoreStage(storeName) : null;
   }
 
   @Override
@@ -272,18 +290,6 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   public Authenticator injectAuthenticator(Authenticator authenticator) {
     final KernelContext kernelContext = this.kernelContext;
     return kernelContext != null ? kernelContext.injectAuthenticator(authenticator) : authenticator;
-  }
-
-  @Override
-  public Log openAuthenticatorLog(String authenticatorName) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openAuthenticatorLog(authenticatorName) : null;
-  }
-
-  @Override
-  public Stage openAuthenticatorStage(String authenticatorName) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openAuthenticatorStage(authenticatorName) : null;
   }
 
   @Override
@@ -347,24 +353,6 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
-  public Log openServiceLog(String serviceName) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openServiceLog(serviceName) : null;
-  }
-
-  @Override
-  public Policy openServicePolicy(String policyName) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openServicePolicy(policyName) : null;
-  }
-
-  @Override
-  public Stage openServiceStage(String serviceName) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openServiceStage(serviceName) : null;
-  }
-
-  @Override
   public WebResponse routeRequest(WebRequest request) {
     final KernelContext kernelContext = this.kernelContext;
     return kernelContext != null ? kernelContext.routeRequest(request) : request.reject();
@@ -425,9 +413,9 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createAgentFactory(edgeName, meshUri, partKey, hostUri, nodeUri, agentDef) : null;
+    return kernelContext != null ? kernelContext.createAgentFactory(node, agentDef) : null;
   }
 
   @Override
@@ -437,60 +425,51 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri,
-                                                              Class<? extends A> agentClass) {
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createAgentFactory(edgeName, meshUri, partKey, hostUri, nodeUri, agentClass) : null;
+    return kernelContext != null ? kernelContext.createAgentFactory(node, agentClass) : null;
   }
 
   @Override
-  public <A extends Agent> AgentRoute<A> createAgentRoute(String edgeName, Class<? extends A> agentClass) {
+  public <A extends Agent> AgentRoute<A> createAgentRoute(EdgeBinding edge, Class<? extends A> agentClass) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createAgentRoute(edgeName, agentClass) : null;
+    return kernelContext != null ? kernelContext.createAgentRoute(edge, agentClass) : null;
   }
 
   @Override
-  public void openAgents(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
+  public void openAgents(NodeBinding node) {
     final KernelContext kernelContext = this.kernelContext;
     if (kernelContext != null) {
-      kernelContext.openAgents(edgeName, meshUri, partKey, hostUri, nodeUri, node);
+      kernelContext.openAgents(node);
     }
   }
 
   @Override
-  public EdgeBinding createEdge(String edgeName) {
+  public void openLanes(NodeBinding node) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createEdge(edgeName) : null;
+    if (kernelContext != null) {
+      kernelContext.openLanes(node);
+    }
   }
 
   @Override
-  public EdgeBinding injectEdge(String edgeName, EdgeBinding edge) {
+  public EdgeBinding createEdge(EdgeAddress edgeAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.injectEdge(edgeName, edge) : edge;
+    return kernelContext != null ? kernelContext.createEdge(edgeAddress) : null;
   }
 
   @Override
-  public Log openEdgeLog(String edgeName) {
+  public EdgeBinding injectEdge(EdgeAddress edgeAddress, EdgeBinding edge) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openEdgeLog(edgeName) : null;
+    return kernelContext != null ? kernelContext.injectEdge(edgeAddress, edge) : edge;
   }
 
   @Override
-  public Policy openEdgePolicy(String edgeName) {
+  public void openMetaEdge(EdgeBinding edge, NodeBinding metaEdge) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openEdgePolicy(edgeName) : null;
-  }
-
-  @Override
-  public Stage openEdgeStage(String edgeName) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openEdgeStage(edgeName) : null;
-  }
-
-  @Override
-  public StoreBinding openEdgeStore(String edgeName) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openEdgeStore(edgeName) : null;
+    if (kernelContext != null) {
+      kernelContext.openMetaEdge(edge, metaEdge);
+    }
   }
 
   @Override
@@ -500,51 +479,35 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
-  public MeshDef getMeshDef(String edgeName, Uri meshUri) {
+  public MeshDef getMeshDef(MeshAddress meshAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.getMeshDef(edgeName, meshUri) : null;
+    return kernelContext != null ? kernelContext.getMeshDef(meshAddress) : null;
   }
 
   @Override
-  public MeshBinding createMesh(String edgeName, MeshDef meshDef) {
+  public MeshBinding createMesh(EdgeBinding edge, MeshDef meshDef) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createMesh(edgeName, meshDef) : null;
+    return kernelContext != null ? kernelContext.createMesh(edge, meshDef) : null;
   }
 
   @Override
-  public MeshBinding createMesh(String edgeName, Uri meshUri) {
+  public MeshBinding createMesh(MeshAddress meshAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createMesh(edgeName, meshUri) : null;
+    return kernelContext != null ? kernelContext.createMesh(meshAddress) : null;
   }
 
   @Override
-  public MeshBinding injectMesh(String edgeName, Uri meshUri, MeshBinding mesh) {
+  public MeshBinding injectMesh(MeshAddress meshAddress, MeshBinding mesh) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.injectMesh(edgeName, meshUri, mesh) : mesh;
+    return kernelContext != null ? kernelContext.injectMesh(meshAddress, mesh) : mesh;
   }
 
   @Override
-  public Log openMeshLog(String edgeName, Uri meshUri) {
+  public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openMeshLog(edgeName, meshUri) : null;
-  }
-
-  @Override
-  public Policy openMeshPolicy(String edgeName, Uri meshUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openMeshPolicy(edgeName, meshUri) : null;
-  }
-
-  @Override
-  public Stage openMeshStage(String edgeName, Uri meshUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openMeshStage(edgeName, meshUri) : null;
-  }
-
-  @Override
-  public StoreBinding openMeshStore(String edgeName, Uri meshUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openMeshStore(edgeName, meshUri) : null;
+    if (kernelContext != null) {
+      kernelContext.openMetaMesh(mesh, metaMesh);
+    }
   }
 
   @Override
@@ -554,51 +517,35 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
-  public PartDef getPartDef(String edgeName, Uri meshUri, Value partKey) {
+  public PartDef getPartDef(PartAddress partAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.getPartDef(edgeName, meshUri, partKey) : null;
+    return kernelContext != null ? kernelContext.getPartDef(partAddress) : null;
   }
 
   @Override
-  public PartBinding createPart(String edgeName, Uri meshUri, PartDef partDef) {
+  public PartBinding createPart(MeshBinding mesh, PartDef partDef) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createPart(edgeName, meshUri, partDef) : null;
+    return kernelContext != null ? kernelContext.createPart(mesh, partDef) : null;
   }
 
   @Override
-  public PartBinding createPart(String edgeName, Uri meshUri, Value partKey) {
+  public PartBinding createPart(PartAddress partAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createPart(edgeName, meshUri, partKey) : null;
+    return kernelContext != null ? kernelContext.createPart(partAddress) : null;
   }
 
   @Override
-  public PartBinding injectPart(String edgeName, Uri meshUri, Value partKey, PartBinding part) {
+  public PartBinding injectPart(PartAddress partAddress, PartBinding part) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.injectPart(edgeName, meshUri, partKey, part) : part;
+    return kernelContext != null ? kernelContext.injectPart(partAddress, part) : part;
   }
 
   @Override
-  public Log openPartLog(String edgeName, Uri meshUri, Value partKey) {
+  public void openMetaPart(PartBinding part, NodeBinding metaPart) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openPartLog(edgeName, meshUri, partKey) : null;
-  }
-
-  @Override
-  public Policy openPartPolicy(String edgeName, Uri meshUri, Value partKey) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openPartPolicy(edgeName, meshUri, partKey) : null;
-  }
-
-  @Override
-  public Stage openPartStage(String edgeName, Uri meshUri, Value partKey) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openPartStage(edgeName, meshUri, partKey) : null;
-  }
-
-  @Override
-  public StoreBinding openPartStore(String edgeName, Uri meshUri, Value partKey) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openPartStore(edgeName, meshUri, partKey) : null;
+    if (kernelContext != null) {
+      kernelContext.openMetaPart(part, metaPart);
+    }
   }
 
   @Override
@@ -608,51 +555,35 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
-  public HostDef getHostDef(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
+  public HostDef getHostDef(HostAddress hostAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.getHostDef(edgeName, meshUri, partKey, hostUri) : null;
+    return kernelContext != null ? kernelContext.getHostDef(hostAddress) : null;
   }
 
   @Override
-  public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, HostDef hostDef) {
+  public HostBinding createHost(PartBinding part, HostDef hostDef) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createHost(edgeName, meshUri, partKey, hostDef) : null;
+    return kernelContext != null ? kernelContext.createHost(part, hostDef) : null;
   }
 
   @Override
-  public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
+  public HostBinding createHost(HostAddress hostAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createHost(edgeName, meshUri, partKey, hostUri) : null;
+    return kernelContext != null ? kernelContext.createHost(hostAddress) : null;
   }
 
   @Override
-  public HostBinding injectHost(String edgeName, Uri meshUri, Value partKey, Uri hostUri, HostBinding host) {
+  public HostBinding injectHost(HostAddress hostAddress, HostBinding host) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.injectHost(edgeName, meshUri, partKey, hostUri, host) : host;
+    return kernelContext != null ? kernelContext.injectHost(hostAddress, host) : host;
   }
 
   @Override
-  public Log openHostLog(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openHostLog(edgeName, meshUri, partKey, hostUri) : null;
-  }
-
-  @Override
-  public Policy openHostPolicy(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openHostPolicy(edgeName, meshUri, partKey, hostUri) : null;
-  }
-
-  @Override
-  public Stage openHostStage(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openHostStage(edgeName, meshUri, partKey, hostUri) : null;
-  }
-
-  @Override
-  public StoreBinding openHostStore(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openHostStore(edgeName, meshUri, partKey, hostUri) : null;
+    if (kernelContext != null) {
+      kernelContext.openMetaHost(host, metaHost);
+    }
   }
 
   @Override
@@ -662,51 +593,35 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
-  public NodeDef getNodeDef(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
+  public NodeDef getNodeDef(NodeAddress nodeAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.getNodeDef(edgeName, meshUri, partKey, hostUri, nodeUri) : null;
+    return kernelContext != null ? kernelContext.getNodeDef(nodeAddress) : null;
   }
 
   @Override
-  public NodeBinding createNode(String edgeName, Uri meshUri, Value partKey, Uri hostUri, NodeDef nodeDef) {
+  public NodeBinding createNode(HostBinding host, NodeDef nodeDef) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createNode(edgeName, meshUri, partKey, hostUri, nodeDef) : null;
+    return kernelContext != null ? kernelContext.createNode(host, nodeDef) : null;
   }
 
   @Override
-  public NodeBinding createNode(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
+  public NodeBinding createNode(NodeAddress nodeAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createNode(edgeName, meshUri, partKey, hostUri, nodeUri) : null;
+    return kernelContext != null ? kernelContext.createNode(nodeAddress) : null;
   }
 
   @Override
-  public NodeBinding injectNode(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.injectNode(edgeName, meshUri, partKey, hostUri, nodeUri, node) : node;
+    return kernelContext != null ? kernelContext.injectNode(nodeAddress, node) : node;
   }
 
   @Override
-  public Log openNodeLog(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openNodeLog(edgeName, meshUri, partKey, hostUri, nodeUri) : null;
-  }
-
-  @Override
-  public Policy openNodePolicy(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openNodePolicy(edgeName, meshUri, partKey, hostUri, nodeUri) : null;
-  }
-
-  @Override
-  public Stage openNodeStage(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openNodeStage(edgeName, meshUri, partKey, hostUri, nodeUri) : null;
-  }
-
-  @Override
-  public StoreBinding openNodeStore(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openNodeStore(edgeName, meshUri, partKey, hostUri, nodeUri) : null;
+    if (kernelContext != null) {
+      kernelContext.openMetaNode(node, metaNode);
+    }
   }
 
   @Override
@@ -716,59 +631,51 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   }
 
   @Override
-  public LaneDef getLaneDef(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+  public LaneDef getLaneDef(LaneAddress laneAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.getLaneDef(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri) : null;
+    return kernelContext != null ? kernelContext.getLaneDef(laneAddress) : null;
   }
 
   @Override
-  public LaneBinding createLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneDef) : null;
+    return kernelContext != null ? kernelContext.createLane(node, laneDef) : null;
   }
 
   @Override
-  public LaneBinding createLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+  public LaneBinding createLane(LaneAddress laneAddress) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.createLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri) : null;
+    return kernelContext != null ? kernelContext.createLane(laneAddress) : null;
   }
 
   @Override
-  public LaneBinding injectLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.injectLane(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri, lane) : lane;
+    return kernelContext != null ? kernelContext.injectLane(laneAddress, lane) : lane;
   }
 
   @Override
-  public void openLanes(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
     final KernelContext kernelContext = this.kernelContext;
     if (kernelContext != null) {
-      kernelContext.openLanes(edgeName, meshUri, partKey, hostUri, nodeUri, node);
+      kernelContext.openMetaLane(lane, metaLane);
     }
   }
 
   @Override
-  public Log openLaneLog(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openLaneLog(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri) : null;
+    if (kernelContext != null) {
+      kernelContext.openMetaUplink(uplink, metaUplink);
+    }
   }
 
   @Override
-  public Policy openLanePolicy(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
     final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openLanePolicy(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri) : null;
-  }
-
-  @Override
-  public Stage openLaneStage(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openLaneStage(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri) : null;
-  }
-
-  @Override
-  public StoreBinding openLaneStore(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    final KernelContext kernelContext = this.kernelContext;
-    return kernelContext != null ? kernelContext.openLaneStore(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri) : null;
+    if (kernelContext != null) {
+      kernelContext.openMetaDownlink(downlink, metaDownlink);
+    }
   }
 
   @Override
@@ -808,6 +715,14 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
     final KernelContext kernelContext = this.kernelContext;
     if (kernelContext != null) {
       kernelContext.error(message);
+    }
+  }
+
+  @Override
+  public void fail(Object message) {
+    final KernelContext kernelContext = this.kernelContext;
+    if (kernelContext != null) {
+      kernelContext.fail(message);
     }
   }
 

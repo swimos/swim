@@ -54,6 +54,8 @@ public interface LinkContext {
 
   Collection<Certificate> remoteCertificatesUp();
 
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
+
   void closeUp();
 
   void didOpenDown();
@@ -69,4 +71,6 @@ public interface LinkContext {
   void warnUp(Object message);
 
   void errorUp(Object message);
+
+  void failUp(Object message);
 }

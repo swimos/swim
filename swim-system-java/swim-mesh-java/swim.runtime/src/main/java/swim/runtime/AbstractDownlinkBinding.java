@@ -243,6 +243,11 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
   }
 
   @Override
+  public void failDown(Object message) {
+    // nop
+  }
+
+  @Override
   public void trace(Object message) {
     linkContext().traceUp(message);
   }
@@ -265,5 +270,10 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
   @Override
   public void error(Object message) {
     linkContext().errorUp(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    linkContext().failUp(message);
   }
 }

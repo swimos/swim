@@ -26,10 +26,10 @@ import swim.dynamic.java.JavaBase;
 import swim.dynamic.observable.SwimObservable;
 import swim.dynamic.structure.SwimStructure;
 import swim.kernel.KernelProxy;
+import swim.runtime.NodeBinding;
 import swim.structure.Item;
 import swim.structure.Text;
 import swim.structure.Value;
-import swim.uri.Uri;
 import swim.uri.UriPath;
 import swim.vm.js.JsCachedModuleResolver;
 import swim.vm.js.JsHostRuntime;
@@ -240,11 +240,11 @@ public class JsKernel extends KernelProxy {
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
     if (agentDef instanceof JsAgentDef) {
       return createJsAgentFactory((JsAgentDef) agentDef);
     } else {
-      return super.createAgentFactory(edgeName, meshUri, partKey, hostUri, nodeUri, agentDef);
+      return super.createAgentFactory(node, agentDef);
     }
   }
 

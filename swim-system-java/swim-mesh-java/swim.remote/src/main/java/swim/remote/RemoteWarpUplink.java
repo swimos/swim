@@ -23,7 +23,9 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.api.auth.Identity;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
+import swim.runtime.LinkBinding;
 import swim.runtime.LinkKeys;
+import swim.runtime.NodeBinding;
 import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
 import swim.structure.Value;
@@ -31,18 +33,13 @@ import swim.uri.Uri;
 import swim.warp.Envelope;
 
 class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
+
   final RemoteWarpHost host;
-
   final WarpBinding link;
-
   final Uri remoteNodeUri;
-
   final Value linkKey;
-
   final ConcurrentLinkedQueue<Envelope> downQueue;
-
   PullContext<? super Envelope> pullContext;
-
   volatile int status;
 
   RemoteWarpUplink(RemoteWarpHost host, WarpBinding link, Uri remoteNodeUri, Value linkKey) {
@@ -254,6 +251,11 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   }
 
   @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.host.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
   public void closeUp() {
     this.host.closeUplink(this);
   }
@@ -304,6 +306,11 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   @Override
   public void errorUp(Object message) {
     this.host.error(message);
+  }
+
+  @Override
+  public void failUp(Object message) {
+    this.host.fail(message);
   }
 
   static final int FEEDING_DOWN = 1 << 0;

@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.api.auth.Identity;
 import swim.collections.FingerTrieSeq;
+import swim.runtime.LinkBinding;
+import swim.runtime.NodeBinding;
 import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
 import swim.structure.Value;
@@ -29,9 +31,7 @@ import swim.warp.UnlinkedResponse;
 
 public class WarpErrorUplinkModem implements WarpContext {
   protected final WarpBinding linkBinding;
-
   protected final Value body;
-
   volatile int status;
 
   public WarpErrorUplinkModem(WarpBinding linkBinding, Value body) {
@@ -172,6 +172,11 @@ public class WarpErrorUplinkModem implements WarpContext {
   }
 
   @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    // nop
+  }
+
+  @Override
   public void closeUp() {
     // nop
   }
@@ -212,6 +217,11 @@ public class WarpErrorUplinkModem implements WarpContext {
 
   @Override
   public void errorUp(Object message) {
+    // nop
+  }
+
+  @Override
+  public void failUp(Object message) {
     // nop
   }
 

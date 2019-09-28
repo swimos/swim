@@ -11,6 +11,7 @@ import swim.http.HttpResponse;
 import swim.runtime.HttpBinding;
 import swim.runtime.HttpContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.NodeBinding;
 import swim.structure.Value;
 
 public class RemoteHttpUplink implements HttpContext {
@@ -119,6 +120,11 @@ public class RemoteHttpUplink implements HttpContext {
   }
 
   @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.host.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
   public void closeUp() {
     // noop
   }
@@ -156,6 +162,11 @@ public class RemoteHttpUplink implements HttpContext {
   @Override
   public void errorUp(Object message) {
     this.host.error(message);
+  }
+
+  @Override
+  public void failUp(Object message) {
+    this.host.fail(message);
   }
 
   @Override

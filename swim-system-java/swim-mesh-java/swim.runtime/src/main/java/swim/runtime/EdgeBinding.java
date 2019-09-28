@@ -26,6 +26,12 @@ public interface EdgeBinding extends TierBinding, CellBinding, CellContext {
 
   <T> T unwrapEdge(Class<T> edgeClass);
 
+  EdgeAddress cellAddress();
+
+  String edgeName();
+
+  void openMetaEdge(EdgeBinding edge, NodeBinding metaEdge);
+
   MeshBinding network();
 
   void setNetwork(MeshBinding network);
@@ -37,4 +43,16 @@ public interface EdgeBinding extends TierBinding, CellBinding, CellContext {
   MeshBinding openMesh(Uri meshUri);
 
   MeshBinding openMesh(Uri meshUri, MeshBinding mesh);
+
+  void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh);
+
+  void openMetaPart(PartBinding part, NodeBinding metaPart);
+
+  void openMetaHost(HostBinding host, NodeBinding metaHost);
+
+  void openMetaNode(NodeBinding node, NodeBinding metaNode);
+
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
+
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 }

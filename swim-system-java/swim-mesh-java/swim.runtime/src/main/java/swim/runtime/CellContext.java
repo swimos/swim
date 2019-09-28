@@ -23,6 +23,10 @@ import swim.uri.Uri;
 import swim.util.Log;
 
 public interface CellContext extends Log {
+  CellAddress cellAddress();
+
+  String edgeName();
+
   Uri meshUri();
 
   Policy policy();
@@ -40,4 +44,6 @@ public interface CellContext extends Log {
   void closeDownlink(LinkBinding link);
 
   void pushDown(PushRequest pushRequest);
+
+  void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink);
 }

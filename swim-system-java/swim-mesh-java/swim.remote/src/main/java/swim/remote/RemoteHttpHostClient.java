@@ -143,6 +143,12 @@ public class RemoteHttpHostClient extends RemoteHost {
     this.hostContext().error(message);
   }
 
+  @Override
+  public void fail(Object message) {
+    //TODO
+    this.hostContext().fail(message);
+  }
+
   public void openUplink(LinkBinding link) {
     if (link instanceof HttpBinding) {
       openHttpUplink((HttpBinding) link);

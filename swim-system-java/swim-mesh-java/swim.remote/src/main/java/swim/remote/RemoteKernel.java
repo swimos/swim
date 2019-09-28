@@ -19,8 +19,10 @@ import swim.io.http.HttpSettings;
 import swim.io.warp.WarpSettings;
 import swim.io.ws.WsSettings;
 import swim.kernel.KernelProxy;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostDef;
+import swim.runtime.PartBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -57,30 +59,31 @@ public class RemoteKernel extends KernelProxy {
   }
 
   @Override
-  public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
-    if (hostUri.host().isDefined() && !"swim".equals(partKey.stringValue(null))) {
+  public HostBinding createHost(HostAddress hostAddress) {
+    final Uri hostUri = hostAddress.hostUri();
+    if (hostUri.host().isDefined() && !"swim".equals(hostAddress.partKey().stringValue(null))) {
       final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
       return new RemoteWarpHostClient(hostUri, endpoint, warpSettings());
     } else if (hostUri != null && hostUri.host().isDefined()
-        && "http".equals(hostUri.scheme().name()) && "https".equals(hostUri.scheme().name())) {
+        && ("http".equals(hostUri.scheme().name()) || "https".equals(hostUri.scheme().name()))) {
       final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
       return new RemoteHttpHostClient(hostUri, endpoint, httpSettings());
     }
-    return super.createHost(edgeName, meshUri, partKey, hostUri);
+    return super.createHost(hostAddress);
   }
 
   @Override
-  public HostBinding createHost(String edgeName, Uri meshUri, Value partKey, HostDef hostDef) {
+  public HostBinding createHost(PartBinding part, HostDef hostDef) {
     final Uri hostUri = hostDef.hostUri();
-    if (hostUri != null && hostUri.host().isDefined() && !"swim".equals(partKey.stringValue(null))) {
+    if (hostUri != null && hostUri.host().isDefined() && !"swim".equals(part.partKey().stringValue(null))) {
       final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
       return new RemoteWarpHostClient(hostUri, endpoint, warpSettings());
     } else if (hostUri != null && hostUri.host().isDefined()
-        && "http".equals(hostUri.scheme().name()) && "https".equals(hostUri.scheme().name())) {
+        && ("http".equals(hostUri.scheme().name()) || "https".equals(hostUri.scheme().name()))) {
       final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
       return new RemoteHttpHostClient(hostUri, endpoint, httpSettings());
     }
-    return super.createHost(edgeName, meshUri, partKey, hostUri);
+    return super.createHost(part, hostDef);
   }
 
   private static final double KERNEL_PRIORITY = 0.25;

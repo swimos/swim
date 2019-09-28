@@ -25,10 +25,11 @@ import swim.api.plane.PlaneException;
 import swim.api.plane.PlaneFactory;
 import swim.kernel.KernelContext;
 import swim.kernel.KernelProxy;
+import swim.runtime.EdgeBinding;
+import swim.runtime.NodeBinding;
 import swim.structure.Item;
 import swim.structure.Text;
 import swim.structure.Value;
-import swim.uri.Uri;
 
 public class JavaKernel extends KernelProxy {
   final double kernelPriority;
@@ -136,11 +137,11 @@ public class JavaKernel extends KernelProxy {
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
     if (agentDef instanceof JavaAgentDef) {
       return createJavaAgentFactory((JavaAgentDef) agentDef, null);
     } else {
-      return super.createAgentFactory(edgeName, meshUri, partKey, hostUri, nodeUri, agentDef);
+      return super.createAgentFactory(node, agentDef);
     }
   }
 
@@ -172,9 +173,8 @@ public class JavaKernel extends KernelProxy {
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri,
-                                                              Class<? extends A> agentClass) {
-    AgentFactory<A> agentFactory = super.createAgentFactory(edgeName, meshUri, partKey, hostUri, nodeUri, agentClass);
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    AgentFactory<A> agentFactory = super.createAgentFactory(node, agentClass);
     if (agentFactory == null) {
       agentFactory = new JavaAgentFactory<A>(agentClass);
     }
@@ -182,8 +182,8 @@ public class JavaKernel extends KernelProxy {
   }
 
   @Override
-  public <A extends Agent> AgentRoute<A> createAgentRoute(String edgeName, Class<? extends A> agentClass) {
-    AgentRoute<A> agentRoute = super.createAgentRoute(edgeName, agentClass);
+  public <A extends Agent> AgentRoute<A> createAgentRoute(EdgeBinding edge, Class<? extends A> agentClass) {
+    AgentRoute<A> agentRoute = super.createAgentRoute(edge, agentClass);
     if (agentRoute == null) {
       agentRoute = new JavaAgentFactory<A>(agentClass);
     }

@@ -78,6 +78,16 @@ public class PartProxy implements PartBinding, PartContext {
   }
 
   @Override
+  public PartAddress cellAddress() {
+    return this.partContext.cellAddress();
+  }
+
+  @Override
+  public String edgeName() {
+    return this.partContext.edgeName();
+  }
+
+  @Override
   public Uri meshUri() {
     return this.partContext.meshUri();
   }
@@ -110,6 +120,11 @@ public class PartProxy implements PartBinding, PartContext {
   @Override
   public PartPredicate predicate() {
     return this.partBinding.predicate();
+  }
+
+  @Override
+  public void openMetaPart(PartBinding part, NodeBinding metaPart) {
+    this.partContext.openMetaPart(part, metaPart);
   }
 
   @Override
@@ -158,59 +173,83 @@ public class PartProxy implements PartBinding, PartContext {
   }
 
   @Override
-  public HostBinding createHost(Uri hostUri) {
-    return this.partContext.createHost(hostUri);
+  public HostBinding createHost(HostAddress hostAddress) {
+    return this.partContext.createHost(hostAddress);
   }
 
   @Override
-  public HostBinding injectHost(Uri hostUri, HostBinding host) {
-    return this.partContext.injectHost(hostUri, host);
+  public HostBinding injectHost(HostAddress hostAddress, HostBinding host) {
+    return this.partContext.injectHost(hostAddress, host);
   }
 
   @Override
-  public NodeBinding createNode(Uri hostUri, Uri nodeUri) {
-    return this.partContext.createNode(hostUri, nodeUri);
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    this.partContext.openMetaHost(host, metaHost);
   }
 
   @Override
-  public NodeBinding injectNode(Uri hostUri, Uri nodeUri, NodeBinding node) {
-    return this.partContext.injectNode(hostUri, nodeUri, node);
+  public NodeBinding createNode(NodeAddress nodeAddress) {
+    return this.partContext.createNode(nodeAddress);
   }
 
   @Override
-  public LaneBinding createLane(Uri hostUri, Uri nodeUri, LaneDef laneDef) {
-    return this.partContext.createLane(hostUri, nodeUri, laneDef);
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
+    return this.partContext.injectNode(nodeAddress, node);
   }
 
   @Override
-  public LaneBinding createLane(Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return this.partContext.createLane(hostUri, nodeUri, laneUri);
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.partContext.openMetaNode(node, metaNode);
   }
 
   @Override
-  public LaneBinding injectLane(Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
-    return this.partContext.injectLane(hostUri, nodeUri, laneUri, lane);
+  public LaneBinding createLane(LaneAddress laneAddress) {
+    return this.partContext.createLane(laneAddress);
   }
 
   @Override
-  public void openLanes(Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.partContext.openLanes(hostUri, nodeUri, node);
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return this.partContext.injectLane(laneAddress, lane);
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Uri hostUri, Uri nodeUri, AgentDef agentDef) {
-    return this.partContext.createAgentFactory(hostUri, nodeUri, agentDef);
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.partContext.openMetaLane(lane, metaLane);
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Uri hostUri, Uri nodeUri,
-                                                              Class<? extends A> agentClass) {
-    return this.partContext.createAgentFactory(hostUri, nodeUri, agentClass);
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.partContext.openMetaUplink(uplink, metaUplink);
   }
 
   @Override
-  public void openAgents(Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.partContext.openAgents(hostUri, nodeUri, node);
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.partContext.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return this.partContext.createLane(node, laneDef);
+  }
+
+  @Override
+  public void openLanes(NodeBinding node) {
+    this.partContext.openLanes(node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return this.partContext.createAgentFactory(node, agentDef);
+  }
+
+  @Override
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return this.partContext.createAgentFactory(node, agentClass);
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.partContext.openAgents(node);
   }
 
   @Override
@@ -271,6 +310,11 @@ public class PartProxy implements PartBinding, PartContext {
   @Override
   public void error(Object message) {
     this.partContext.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    this.partContext.fail(message);
   }
 
   @Override

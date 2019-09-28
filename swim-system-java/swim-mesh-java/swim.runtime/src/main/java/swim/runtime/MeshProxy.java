@@ -78,6 +78,16 @@ public class MeshProxy implements MeshBinding, MeshContext {
   }
 
   @Override
+  public MeshAddress cellAddress() {
+    return this.meshContext.cellAddress();
+  }
+
+  @Override
+  public String edgeName() {
+    return this.meshContext.edgeName();
+  }
+
+  @Override
   public Uri meshUri() {
     return this.meshContext.meshUri();
   }
@@ -100,6 +110,11 @@ public class MeshProxy implements MeshBinding, MeshContext {
   @Override
   public StoreBinding store() {
     return this.meshContext.store();
+  }
+
+  @Override
+  public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
+    this.meshContext.openMetaMesh(mesh, metaMesh);
   }
 
   @Override
@@ -153,69 +168,98 @@ public class MeshProxy implements MeshBinding, MeshContext {
   }
 
   @Override
-  public PartBinding createPart(Value partKey) {
-    return this.meshContext.createPart(partKey);
+  public PartBinding createPart(PartAddress partAddress) {
+    return this.meshContext.createPart(partAddress);
   }
 
   @Override
-  public PartBinding injectPart(Value partKey, PartBinding part) {
-    return this.meshContext.injectPart(partKey, part);
+  public PartBinding injectPart(PartAddress partAddress, PartBinding part) {
+    return this.meshContext.injectPart(partAddress, part);
   }
 
   @Override
-  public HostBinding createHost(Value partKey, Uri hostUri) {
-    return this.meshContext.createHost(partKey, hostUri);
+  public void openMetaPart(PartBinding part, NodeBinding metaPart) {
+    this.meshContext.openMetaPart(part, metaPart);
   }
 
   @Override
-  public HostBinding injectHost(Value partKey, Uri hostUri, HostBinding host) {
-    return this.meshContext.injectHost(partKey, hostUri, host);
+  public HostBinding createHost(HostAddress hostAddress) {
+    return this.meshContext.createHost(hostAddress);
   }
 
   @Override
-  public NodeBinding createNode(Value partKey, Uri hostUri, Uri nodeUri) {
-    return this.meshContext.createNode(partKey, hostUri, nodeUri);
+  public HostBinding injectHost(HostAddress hostAddress, HostBinding host) {
+    return this.meshContext.injectHost(hostAddress, host);
   }
 
   @Override
-  public NodeBinding injectNode(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    return this.meshContext.injectNode(partKey, hostUri, nodeUri, node);
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    this.meshContext.openMetaHost(host, metaHost);
   }
 
   @Override
-  public LaneBinding createLane(Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
-    return this.meshContext.createLane(partKey, hostUri, nodeUri, laneDef);
+  public NodeBinding createNode(NodeAddress nodeAddress) {
+    return this.meshContext.createNode(nodeAddress);
   }
 
   @Override
-  public LaneBinding createLane(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return this.meshContext.createLane(partKey, hostUri, nodeUri, laneUri);
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
+    return this.meshContext.injectNode(nodeAddress, node);
   }
 
   @Override
-  public LaneBinding injectLane(Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
-    return this.meshContext.injectLane(partKey, hostUri, nodeUri, laneUri, lane);
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.meshContext.openMetaNode(node, metaNode);
   }
 
   @Override
-  public void openLanes(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.meshContext.openLanes(partKey, hostUri, nodeUri, node);
+  public LaneBinding createLane(LaneAddress laneAddress) {
+    return this.meshContext.createLane(laneAddress);
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
-    return this.meshContext.createAgentFactory(partKey, hostUri, nodeUri, agentDef);
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return this.meshContext.injectLane(laneAddress, lane);
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Value partKey, Uri hostUri, Uri nodeUri,
-                                                              Class<? extends A> agentClass) {
-    return this.meshContext.createAgentFactory(partKey, hostUri, nodeUri, agentClass);
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.meshContext.openMetaLane(lane, metaLane);
   }
 
   @Override
-  public void openAgents(Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.meshContext.openAgents(partKey, hostUri, nodeUri, node);
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.meshContext.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.meshContext.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return this.meshContext.createLane(node, laneDef);
+  }
+
+  @Override
+  public void openLanes(NodeBinding node) {
+    this.meshContext.openLanes(node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return this.meshContext.createAgentFactory(node, agentDef);
+  }
+
+  @Override
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return this.meshContext.createAgentFactory(node, agentClass);
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.meshContext.openAgents(node);
   }
 
   @Override
@@ -276,6 +320,11 @@ public class MeshProxy implements MeshBinding, MeshContext {
   @Override
   public void error(Object message) {
     this.meshContext.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    this.meshContext.fail(message);
   }
 
   @Override

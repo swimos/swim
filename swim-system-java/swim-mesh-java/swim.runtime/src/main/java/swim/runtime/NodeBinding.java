@@ -32,6 +32,8 @@ public interface NodeBinding extends TierBinding, CellBinding {
 
   <T> T unwrapNode(Class<T> nodeClass);
 
+  NodeAddress cellAddress();
+
   Uri meshUri();
 
   Value partKey();
@@ -42,11 +44,11 @@ public interface NodeBinding extends TierBinding, CellBinding {
 
   long createdTime();
 
-  void openLanes(NodeBinding node);
+  void openMetaNode(NodeBinding node, NodeBinding metaNode);
 
-  AgentFactory<?> createAgentFactory(AgentDef agentDef);
+  AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef);
 
-  <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass);
+  <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass);
 
   void openAgents(NodeBinding node);
 
@@ -57,4 +59,10 @@ public interface NodeBinding extends TierBinding, CellBinding {
   LaneBinding openLane(Uri laneUri);
 
   LaneBinding openLane(Uri laneUri, LaneBinding lane);
+
+  void openLanes(NodeBinding node);
+
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
+
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 }

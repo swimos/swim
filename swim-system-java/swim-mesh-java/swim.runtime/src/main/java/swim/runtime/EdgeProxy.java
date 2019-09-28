@@ -26,7 +26,6 @@ import swim.collections.HashTrieMap;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.store.StoreBinding;
-import swim.structure.Value;
 import swim.uri.Uri;
 
 public class EdgeProxy implements EdgeBinding, EdgeContext {
@@ -73,6 +72,16 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   }
 
   @Override
+  public EdgeAddress cellAddress() {
+    return this.edgeContext.cellAddress();
+  }
+
+  @Override
+  public String edgeName() {
+    return this.edgeContext.edgeName();
+  }
+
+  @Override
   public Uri meshUri() {
     return this.edgeContext.meshUri();
   }
@@ -95,6 +104,11 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   @Override
   public StoreBinding store() {
     return this.edgeContext.store();
+  }
+
+  @Override
+  public void openMetaEdge(EdgeBinding edge, NodeBinding metaEdge) {
+    this.edgeContext.openMetaEdge(edge, metaEdge);
   }
 
   @Override
@@ -128,79 +142,113 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   }
 
   @Override
-  public MeshBinding createMesh(Uri meshUri) {
-    return this.edgeContext.createMesh(meshUri);
+  public MeshBinding createMesh(MeshAddress meshAddress) {
+    return this.edgeContext.createMesh(meshAddress);
   }
 
   @Override
-  public MeshBinding injectMesh(Uri meshUri, MeshBinding mesh) {
-    return this.edgeContext.injectMesh(meshUri, mesh);
+  public MeshBinding injectMesh(MeshAddress meshAddress, MeshBinding mesh) {
+    return this.edgeContext.injectMesh(meshAddress, mesh);
   }
 
   @Override
-  public PartBinding createPart(Uri meshUri, Value partKey) {
-    return this.edgeContext.createPart(meshUri, partKey);
+  public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
+    this.edgeContext.openMetaMesh(mesh, metaMesh);
   }
 
   @Override
-  public PartBinding injectPart(Uri meshUri, Value partKey, PartBinding part) {
-    return this.edgeContext.injectPart(meshUri, partKey, part);
+  public PartBinding createPart(PartAddress partAddress) {
+    return this.edgeContext.createPart(partAddress);
   }
 
   @Override
-  public HostBinding createHost(Uri meshUri, Value partKey, Uri hostUri) {
-    return this.edgeContext.createHost(meshUri, partKey, hostUri);
+  public PartBinding injectPart(PartAddress partAddress, PartBinding part) {
+    return this.edgeContext.injectPart(partAddress, part);
   }
 
   @Override
-  public HostBinding injectHost(Uri meshUri, Value partKey, Uri hostUri, HostBinding host) {
-    return this.edgeContext.injectHost(meshUri, partKey, hostUri, host);
+  public void openMetaPart(PartBinding part, NodeBinding metaPart) {
+    this.edgeContext.openMetaPart(part, metaPart);
   }
 
   @Override
-  public NodeBinding createNode(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
-    return this.edgeContext.createNode(meshUri, partKey, hostUri, nodeUri);
+  public HostBinding createHost(HostAddress hostAddress) {
+    return this.edgeContext.createHost(hostAddress);
   }
 
   @Override
-  public NodeBinding injectNode(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    return this.edgeContext.injectNode(meshUri, partKey, hostUri, nodeUri, node);
+  public HostBinding injectHost(HostAddress hostAddress, HostBinding host) {
+    return this.edgeContext.injectHost(hostAddress, host);
   }
 
   @Override
-  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef) {
-    return this.edgeContext.createLane(meshUri, partKey, hostUri, nodeUri, laneDef);
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    this.edgeContext.openMetaHost(host, metaHost);
   }
 
   @Override
-  public LaneBinding createLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return this.edgeContext.createLane(meshUri, partKey, hostUri, nodeUri, laneUri);
+  public NodeBinding createNode(NodeAddress nodeAddress) {
+    return this.edgeContext.createNode(nodeAddress);
   }
 
   @Override
-  public LaneBinding injectLane(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane) {
-    return this.edgeContext.injectLane(meshUri, partKey, hostUri, nodeUri, laneUri, lane);
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
+    return this.edgeContext.injectNode(nodeAddress, node);
   }
 
   @Override
-  public void openLanes(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.edgeContext.openLanes(meshUri, partKey, hostUri, nodeUri, node);
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.edgeContext.openMetaNode(node, metaNode);
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef) {
-    return this.edgeContext.createAgentFactory(meshUri, partKey, hostUri, nodeUri, agentDef);
+  public LaneBinding createLane(LaneAddress laneAddress) {
+    return this.edgeContext.createLane(laneAddress);
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri,
-                                                              Class<? extends A> agentClass) {
-    return this.edgeContext.createAgentFactory(meshUri, partKey, hostUri, nodeUri, agentClass);
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return this.edgeContext.injectLane(laneAddress, lane);
   }
 
   @Override
-  public void openAgents(Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node) {
-    this.edgeContext.openAgents(meshUri, partKey, hostUri, nodeUri, node);
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.edgeContext.openMetaLane(lane, metaLane);
+  }
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.edgeContext.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.edgeContext.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return this.edgeContext.createLane(node, laneDef);
+  }
+
+  @Override
+  public void openLanes(NodeBinding node) {
+    this.edgeContext.openLanes(node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return this.edgeContext.createAgentFactory(node, agentDef);
+  }
+
+  @Override
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return this.edgeContext.createAgentFactory(node, agentClass);
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.edgeContext.openAgents(node);
   }
 
   @Override
@@ -261,6 +309,11 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   @Override
   public void error(Object message) {
     this.edgeContext.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    this.edgeContext.fail(message);
   }
 
   @Override

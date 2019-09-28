@@ -22,6 +22,7 @@ import swim.db.StoreContext;
 import swim.db.StoreSettings;
 import swim.kernel.KernelContext;
 import swim.kernel.KernelProxy;
+import swim.runtime.StoreAddress;
 import swim.store.StoreBinding;
 import swim.store.StoreDef;
 import swim.structure.Item;
@@ -80,9 +81,10 @@ public class DbStoreKernel extends KernelProxy {
     final String storePath = storeDef.path;
     final StoreSettings storeSettings = storeDef.settings;
     final StoreContext storeContext = new StoreContext(storeSettings);
+    final StoreAddress storeAddress = new StoreAddress(storeName);
 
     final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
-    final Stage stage = kernel.openStoreStage(storeName);
+    final Stage stage = kernel.createStage(storeAddress);
     try {
       final FileStore fileStore = new FileStore(storeContext, storePath, stage).open();
       fileStore.openDatabase();

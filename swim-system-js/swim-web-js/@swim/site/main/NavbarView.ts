@@ -35,7 +35,7 @@ export class NavbarView extends HtmlView {
   }
 
   get menuView(): HtmlView | null {
-    return this.getChildView("menu") as HtmlView;
+    return (this.getChildView("menu") as HtmlView | null) || this;
   }
 
   get visibleClass(): string {

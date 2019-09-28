@@ -15,33 +15,52 @@
 package swim.runtime.router;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.Downlink;
+import swim.api.lane.DemandMapLane;
+import swim.api.lane.SupplyLane;
+import swim.api.lane.function.OnCueKey;
+import swim.api.lane.function.OnSyncMap;
 import swim.api.policy.Policy;
+import swim.api.warp.WarpUplink;
 import swim.collections.HashTrieMap;
+import swim.concurrent.Conts;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.AbstractTierBinding;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
+import swim.runtime.LaneBinding;
 import swim.runtime.LinkBinding;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
 import swim.runtime.PartBinding;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
+import swim.runtime.agent.AgentNode;
+import swim.runtime.reflect.LogEntry;
+import swim.runtime.reflect.NodeInfo;
 import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
 
 public class HostTable extends AbstractTierBinding implements HostBinding {
   protected HostContext hostContext;
-
   volatile HashTrieMap<Uri, NodeBinding> nodes;
-
   volatile int flags;
+
+  DemandMapLane<Uri, NodeInfo> metaNodes;
+  SupplyLane<LogEntry> metaTraceLog;
+  SupplyLane<LogEntry> metaDebugLog;
+  SupplyLane<LogEntry> metaInfoLog;
+  SupplyLane<LogEntry> metaWarnLog;
+  SupplyLane<LogEntry> metaErrorLog;
+  SupplyLane<LogEntry> metaFailLog;
 
   public HostTable() {
     this.nodes = HashTrieMap.empty();
@@ -82,8 +101,18 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     }
   }
 
-  protected NodeContext createNodeContext(NodeBinding node, Uri nodeUri) {
-    return new HostTableNode(this, node, nodeUri);
+  protected NodeContext createNodeContext(NodeAddress nodeAddress, NodeBinding node) {
+    return new HostTableNode(this, node, nodeAddress);
+  }
+
+  @Override
+  public final HostAddress cellAddress() {
+    return this.hostContext.cellAddress();
+  }
+
+  @Override
+  public final String edgeName() {
+    return this.hostContext.edgeName();
   }
 
   @Override
@@ -200,6 +229,51 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   }
 
   @Override
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    openMetaLanes(host, (AgentNode) metaHost);
+    this.hostContext.openMetaHost(host, metaHost);
+  }
+
+  protected void openMetaLanes(HostBinding host, AgentNode metaHost) {
+    openReflectLanes(host, metaHost);
+    openLogLanes(host, metaHost);
+  }
+
+  protected void openReflectLanes(HostBinding host, AgentNode metaHost) {
+    this.metaNodes = metaHost.demandMapLane()
+        .keyForm(Uri.form())
+        .valueForm(NodeInfo.form())
+        .observe(new HostTableNodesController(host));
+    metaHost.openLane(NODES_URI, this.metaNodes);
+  }
+
+  protected void openLogLanes(HostBinding host, AgentNode metaHost) {
+    this.metaTraceLog = metaHost.supplyLane()
+        .valueForm(LogEntry.form());
+    metaHost.openLane(LogEntry.TRACE_LOG_URI, this.metaTraceLog);
+
+    this.metaDebugLog = metaHost.supplyLane()
+        .valueForm(LogEntry.form());
+    metaHost.openLane(LogEntry.DEBUG_LOG_URI, this.metaDebugLog);
+
+    this.metaInfoLog = metaHost.supplyLane()
+        .valueForm(LogEntry.form());
+    metaHost.openLane(LogEntry.INFO_LOG_URI, this.metaInfoLog);
+
+    this.metaWarnLog = metaHost.supplyLane()
+        .valueForm(LogEntry.form());
+    metaHost.openLane(LogEntry.WARN_LOG_URI, this.metaWarnLog);
+
+    this.metaErrorLog = metaHost.supplyLane()
+        .valueForm(LogEntry.form());
+    metaHost.openLane(LogEntry.ERROR_LOG_URI, this.metaErrorLog);
+
+    this.metaFailLog = metaHost.supplyLane()
+        .valueForm(LogEntry.form());
+    metaHost.openLane(LogEntry.FAIL_LOG_URI, this.metaFailLog);
+  }
+
+  @Override
   public HashTrieMap<Uri, NodeBinding> nodes() {
     return this.nodes;
   }
@@ -226,10 +300,11 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
         newNodes = oldNodes;
         break;
       } else if (nodeBinding == null) {
-        nodeBinding = this.hostContext.createNode(nodeUri);
+        final NodeAddress nodeAddress = cellAddress().nodeUri(nodeUri);
+        nodeBinding = this.hostContext.createNode(nodeAddress);
         if (nodeBinding != null) {
-          nodeBinding = this.hostContext.injectNode(nodeUri, nodeBinding);
-          final NodeContext nodeContext = createNodeContext(nodeBinding, nodeUri);
+          nodeBinding = this.hostContext.injectNode(nodeAddress, nodeBinding);
+          final NodeContext nodeContext = createNodeContext(nodeAddress, nodeBinding);
           nodeBinding.setNodeContext(nodeContext);
           nodeBinding = nodeBinding.nodeWrapper();
           nodeBinding.openLanes(nodeBinding);
@@ -245,6 +320,10 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
     if (oldNodes != newNodes) {
       activate(nodeBinding);
+      final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
+      if (metaNodes != null) {
+        metaNodes.cue(nodeUri);
+      }
     }
     return nodeBinding;
   }
@@ -262,8 +341,9 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
         break;
       } else {
         if (nodeBinding == null) {
-          nodeBinding = this.hostContext.injectNode(nodeUri, node);
-          final NodeContext nodeContext = createNodeContext(nodeBinding, nodeUri);
+          final NodeAddress nodeAddress = cellAddress().nodeUri(nodeUri);
+          nodeBinding = this.hostContext.injectNode(nodeAddress, node);
+          final NodeContext nodeContext = createNodeContext(nodeAddress, nodeBinding);
           nodeBinding.setNodeContext(nodeContext);
           nodeBinding = nodeBinding.nodeWrapper();
           nodeBinding.openLanes(nodeBinding);
@@ -274,6 +354,10 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
     if (nodeBinding != null) {
       activate(nodeBinding);
+      final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
+      if (metaNodes != null) {
+        metaNodes.cue(nodeUri);
+      }
     }
     return nodeBinding;
   }
@@ -296,6 +380,10 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
     if (nodeBinding != null) {
       nodeBinding.didClose();
+      final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
+      if (metaNodes != null) {
+        metaNodes.remove(nodeUri);
+      }
     }
   }
 
@@ -308,7 +396,31 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     for (NodeBinding nodeBinding : oldNodes.values()) {
       nodeBinding.close();
       nodeBinding.didClose();
+      final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
+      if (metaNodes != null) {
+        metaNodes.remove(nodeBinding.nodeUri());
+      }
     }
+  }
+
+  @Override
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.hostContext.openMetaNode(node, metaNode);
+  }
+
+  @Override
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.hostContext.openMetaLane(lane, metaLane);
+  }
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.hostContext.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.hostContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override
@@ -353,27 +465,56 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   @Override
   public void trace(Object message) {
+    final SupplyLane<LogEntry> metaTraceLog = this.metaTraceLog;
+    if (metaTraceLog != null) {
+      metaTraceLog.push(LogEntry.trace(message));
+    }
     this.hostContext.trace(message);
   }
 
   @Override
   public void debug(Object message) {
+    final SupplyLane<LogEntry> metaDebugLog = this.metaDebugLog;
+    if (metaDebugLog != null) {
+      metaDebugLog.push(LogEntry.debug(message));
+    }
     this.hostContext.debug(message);
   }
 
   @Override
   public void info(Object message) {
+    final SupplyLane<LogEntry> metaInfoLog = this.metaInfoLog;
+    if (metaInfoLog != null) {
+      metaInfoLog.push(LogEntry.info(message));
+    }
     this.hostContext.info(message);
   }
 
   @Override
   public void warn(Object message) {
+    final SupplyLane<LogEntry> metaWarnLog = this.metaWarnLog;
+    if (metaWarnLog != null) {
+      metaWarnLog.push(LogEntry.warn(message));
+    }
     this.hostContext.warn(message);
   }
 
   @Override
   public void error(Object message) {
+    final SupplyLane<LogEntry> metaErrorLog = this.metaErrorLog;
+    if (metaErrorLog != null) {
+      metaErrorLog.push(LogEntry.error(message));
+    }
     this.hostContext.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    final SupplyLane<LogEntry> metaFailLog = this.metaFailLog;
+    if (metaFailLog != null) {
+      metaFailLog.push(LogEntry.fail(message));
+    }
+    this.hostContext.fail(message);
   }
 
   @Override
@@ -437,7 +578,11 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   @Override
   public void didFail(Throwable error) {
-    error.printStackTrace();
+    if (Conts.isNonFatal(error)) {
+      fail(error);
+    } else {
+      error.printStackTrace();
+    }
   }
 
   static final int PRIMARY = 1 << 0;
@@ -451,4 +596,28 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   static final AtomicIntegerFieldUpdater<HostTable> FLAGS =
       AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "flags");
+
+  static final Uri NODES_URI = Uri.parse("nodes");
+}
+
+final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncMap<Uri, NodeInfo> {
+  final HostBinding host;
+
+  HostTableNodesController(HostBinding host) {
+    this.host = host;
+  }
+
+  @Override
+  public NodeInfo onCue(Uri nodeUri, WarpUplink uplink) {
+    final NodeBinding nodeBinding = this.host.getNode(nodeUri);
+    if (nodeBinding == null) {
+      return null;
+    }
+    return NodeInfo.from(nodeBinding);
+  }
+
+  @Override
+  public Iterator<Map.Entry<Uri, NodeInfo>> onSync(WarpUplink uplink) {
+    return NodeInfo.iterator(this.host.nodes().iterator());
+  }
 }

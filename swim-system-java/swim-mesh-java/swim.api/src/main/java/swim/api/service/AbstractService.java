@@ -100,6 +100,11 @@ public class AbstractService implements Service, IpInterface, Log {
     this.context.error(message);
   }
 
+  @Override
+  public void fail(Object message) {
+    this.context.fail(message);
+  }
+
   public void close() {
     this.context.close();
   }

@@ -23,9 +23,7 @@ import swim.uri.Uri;
 
 public abstract class PartialDownlinkModem<View extends WarpDownlinkView> extends WarpDownlinkModel<View> {
   final ConcurrentLinkedQueue<Value> upQueue;
-
   volatile HashTrieSet<Value> keyQueue;
-
   volatile Value lastKey;
 
   public PartialDownlinkModem(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,

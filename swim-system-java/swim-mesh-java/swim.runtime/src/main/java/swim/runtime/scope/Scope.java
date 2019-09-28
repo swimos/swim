@@ -21,16 +21,16 @@ import swim.api.policy.Policy;
 import swim.collections.HashTrieSet;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.runtime.CellAddress;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.NodeBinding;
 import swim.runtime.PushRequest;
 import swim.store.StoreBinding;
 
 public abstract class Scope implements CellContext {
   protected final CellContext cellContext;
-
   protected final Stage stage;
-
   volatile HashTrieSet<LinkBinding> links;
 
   public Scope(CellContext cellContext, Stage stage) {
@@ -43,8 +43,18 @@ public abstract class Scope implements CellContext {
     this(cellContext, cellContext.stage());
   }
 
-  public final CellContext getCellContext() {
+  public final CellContext cellContext() {
     return this.cellContext;
+  }
+
+  @Override
+  public CellAddress cellAddress() {
+    return this.cellContext.cellAddress();
+  }
+
+  @Override
+  public String edgeName() {
+    return this.cellContext.edgeName();
   }
 
   @Override
@@ -107,6 +117,11 @@ public abstract class Scope implements CellContext {
   }
 
   @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.cellContext.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
   public void trace(Object message) {
     this.cellContext.trace(message);
   }
@@ -129,6 +144,11 @@ public abstract class Scope implements CellContext {
   @Override
   public void error(Object message) {
     this.cellContext.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    this.cellContext.fail(message);
   }
 
   public void close() {

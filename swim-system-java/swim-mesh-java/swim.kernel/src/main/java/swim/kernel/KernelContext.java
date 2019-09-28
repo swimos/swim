@@ -42,24 +42,30 @@ import swim.io.IpSettings;
 import swim.io.IpSocket;
 import swim.io.IpSocketRef;
 import swim.io.Station;
+import swim.runtime.CellAddress;
+import swim.runtime.EdgeAddress;
 import swim.runtime.EdgeBinding;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostDef;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
+import swim.runtime.LinkBinding;
 import swim.runtime.LogDef;
+import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshDef;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeDef;
+import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PartDef;
 import swim.runtime.PolicyDef;
 import swim.store.StoreBinding;
 import swim.store.StoreDef;
 import swim.structure.Item;
-import swim.structure.Value;
-import swim.uri.Uri;
 import swim.util.Log;
 import swim.web.WebRequest;
 import swim.web.WebResponse;
@@ -81,11 +87,15 @@ public interface KernelContext extends Kernel, IpInterface, Log {
 
   Log createLog(LogDef logDef);
 
+  Log createLog(CellAddress cellAddress);
+
   Log injectLog(Log log);
 
   PolicyDef definePolicy(Item policyConfig);
 
   Policy createPolicy(PolicyDef policyDef);
+
+  Policy createPolicy(CellAddress cellAddress);
 
   Policy injectPolicy(Policy policy);
 
@@ -99,27 +109,23 @@ public interface KernelContext extends Kernel, IpInterface, Log {
 
   Stage createStage(StageDef stageDef);
 
+  Stage createStage(CellAddress cellAddress);
+
   Stage injectStage(Stage stage);
 
   StoreDef defineStore(Item storeConfig);
 
   StoreBinding createStore(StoreDef storeDef, ClassLoader classLoader);
 
+  StoreBinding createStore(CellAddress cellAddress);
+
   StoreBinding injectStore(StoreBinding store);
-
-  Log openStoreLog(String storeName);
-
-  Stage openStoreStage(String storeName);
 
   AuthenticatorDef defineAuthenticator(Item authenticatorConfig);
 
   Authenticator createAuthenticator(AuthenticatorDef authenticatorDef, ClassLoader classLoader);
 
   Authenticator injectAuthenticator(Authenticator authenticator);
-
-  Log openAuthenticatorLog(String authenticatorName);
-
-  Stage openAuthenticatorStage(String authenticatorName);
 
   @Override
   IpSettings ipSettings();
@@ -150,12 +156,6 @@ public interface KernelContext extends Kernel, IpInterface, Log {
 
   Service injectService(Service service);
 
-  Log openServiceLog(String serviceName);
-
-  Policy openServicePolicy(String serviceName);
-
-  Stage openServiceStage(String serviceName);
-
   WebResponse routeRequest(WebRequest request);
 
   @Override
@@ -184,118 +184,85 @@ public interface KernelContext extends Kernel, IpInterface, Log {
   @Override
   AgentFactory<?> createAgentFactory(AgentDef agentDef, ClassLoader classLoader);
 
-  AgentFactory<?> createAgentFactory(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, AgentDef agentDef);
+  AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef);
 
   <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass);
 
-  <A extends Agent> AgentFactory<A> createAgentFactory(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri,
-                                                       Class<? extends A> agentClass);
+  <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass);
 
-  <A extends Agent> AgentRoute<A> createAgentRoute(String edgeName, Class<? extends A> agentClass);
+  <A extends Agent> AgentRoute<A> createAgentRoute(EdgeBinding edge, Class<? extends A> agentClass);
 
-  void openAgents(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node);
+  void openAgents(NodeBinding node);
 
-  EdgeBinding createEdge(String edgeName);
+  void openLanes(NodeBinding node);
 
-  EdgeBinding injectEdge(String edgeName, EdgeBinding edge);
+  EdgeBinding createEdge(EdgeAddress edgeAddress);
 
-  Log openEdgeLog(String edgeName);
+  EdgeBinding injectEdge(EdgeAddress edgeAddress, EdgeBinding edge);
 
-  Policy openEdgePolicy(String edgeName);
-
-  Stage openEdgeStage(String edgeName);
-
-  StoreBinding openEdgeStore(String edgeName);
+  void openMetaEdge(EdgeBinding edge, NodeBinding metaEdge);
 
   MeshDef defineMesh(Item meshConfig);
 
-  MeshDef getMeshDef(String edgeName, Uri meshUri);
+  MeshDef getMeshDef(MeshAddress meshAddress);
 
-  MeshBinding createMesh(String edgeName, MeshDef meshDef);
+  MeshBinding createMesh(EdgeBinding edge, MeshDef meshDef);
 
-  MeshBinding createMesh(String edgeName, Uri meshUri);
+  MeshBinding createMesh(MeshAddress meshAddress);
 
-  MeshBinding injectMesh(String edgeName, Uri meshUri, MeshBinding mesh);
+  MeshBinding injectMesh(MeshAddress meshAddress, MeshBinding mesh);
 
-  Log openMeshLog(String edgeName, Uri meshUri);
-
-  Policy openMeshPolicy(String edgeName, Uri meshUri);
-
-  Stage openMeshStage(String edgeName, Uri meshUri);
-
-  StoreBinding openMeshStore(String edgeName, Uri meshUri);
+  void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh);
 
   PartDef definePart(Item partConfig);
 
-  PartDef getPartDef(String edgeName, Uri meshUri, Value partKey);
+  PartDef getPartDef(PartAddress partAddress);
 
-  PartBinding createPart(String edgeName, Uri meshUri, PartDef partDef);
+  PartBinding createPart(MeshBinding mesh, PartDef partDef);
 
-  PartBinding createPart(String edgeName, Uri meshUri, Value partKey);
+  PartBinding createPart(PartAddress partAddress);
 
-  PartBinding injectPart(String edgeName, Uri meshUri, Value partKey, PartBinding part);
+  PartBinding injectPart(PartAddress partAddress, PartBinding part);
 
-  Log openPartLog(String edgeName, Uri meshUri, Value partKey);
-
-  Policy openPartPolicy(String edgeName, Uri meshUri, Value partKey);
-
-  Stage openPartStage(String edgeName, Uri meshUri, Value partKey);
-
-  StoreBinding openPartStore(String edgeName, Uri meshUri, Value partKey);
+  void openMetaPart(PartBinding part, NodeBinding metaPart);
 
   HostDef defineHost(Item hostConfig);
 
-  HostDef getHostDef(String edgeName, Uri meshUri, Value partKey, Uri hostUri);
+  HostDef getHostDef(HostAddress hostAddress);
 
-  HostBinding createHost(String edgeName, Uri meshUri, Value partKey, HostDef hostDef);
+  HostBinding createHost(PartBinding part, HostDef hostDef);
 
-  HostBinding createHost(String edgeName, Uri meshUri, Value partKey, Uri hostUri);
+  HostBinding createHost(HostAddress hostAddress);
 
-  HostBinding injectHost(String edgeName, Uri meshUri, Value partKey, Uri hostUri, HostBinding host);
+  HostBinding injectHost(HostAddress hostAddress, HostBinding host);
 
-  Log openHostLog(String edgeName, Uri meshUri, Value partKey, Uri hostUri);
-
-  Policy openHostPolicy(String edgeName, Uri meshUri, Value partKey, Uri hostUri);
-
-  Stage openHostStage(String edgeName, Uri meshUri, Value partKey, Uri hostUri);
-
-  StoreBinding openHostStore(String edgeName, Uri meshUri, Value partKey, Uri hostUri);
+  void openMetaHost(HostBinding host, NodeBinding metaHost);
 
   NodeDef defineNode(Item nodeConfig);
 
-  NodeDef getNodeDef(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri);
+  NodeDef getNodeDef(NodeAddress nodeAddress);
 
-  NodeBinding createNode(String edgeName, Uri meshUri, Value partKey, Uri hostUri, NodeDef nodeDef);
+  NodeBinding createNode(HostBinding host, NodeDef nodeDef);
 
-  NodeBinding createNode(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri);
+  NodeBinding createNode(NodeAddress nodeAddress);
 
-  NodeBinding injectNode(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node);
+  NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node);
 
-  Log openNodeLog(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri);
-
-  Policy openNodePolicy(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri);
-
-  Stage openNodeStage(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri);
-
-  StoreBinding openNodeStore(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri);
+  void openMetaNode(NodeBinding node, NodeBinding metaNode);
 
   LaneDef defineLane(Item laneConfig);
 
-  LaneDef getLaneDef(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri);
+  LaneDef getLaneDef(LaneAddress laneAddress);
 
-  LaneBinding createLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, LaneDef laneDef);
+  LaneBinding createLane(NodeBinding node, LaneDef laneDef);
 
-  LaneBinding createLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri);
+  LaneBinding createLane(LaneAddress laneAddress);
 
-  LaneBinding injectLane(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri, LaneBinding lane);
+  LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane);
 
-  void openLanes(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, NodeBinding node);
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
 
-  Log openLaneLog(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri);
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 
-  Policy openLanePolicy(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri);
-
-  Stage openLaneStage(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri);
-
-  StoreBinding openLaneStore(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri);
+  void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink);
 }

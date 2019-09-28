@@ -101,6 +101,11 @@ public abstract class AbstractAuthenticator implements Authenticator, IpInterfac
   }
 
   @Override
+  public void fail(Object message) {
+    this.context.fail(message);
+  }
+
+  @Override
   public void willStart() {
     // hook
   }

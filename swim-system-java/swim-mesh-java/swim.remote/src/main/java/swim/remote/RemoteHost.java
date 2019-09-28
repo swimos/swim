@@ -16,12 +16,16 @@ package swim.remote;
 
 import swim.collections.HashTrieMap;
 import swim.runtime.AbstractTierBinding;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
+import swim.runtime.LaneBinding;
+import swim.runtime.LinkBinding;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
 import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
+import swim.runtime.agent.AgentNode;
 import swim.structure.Value;
 import swim.uri.Uri;
 
@@ -83,6 +87,16 @@ public abstract class RemoteHost extends AbstractTierBinding implements HostBind
   public boolean isSecure() {
     // TODO
     return false;
+  }
+
+  @Override
+  public HostAddress cellAddress() {
+    return this.hostContext.cellAddress();
+  }
+
+  @Override
+  public String edgeName() {
+    return this.hostContext.edgeName();
   }
 
   @Override
@@ -162,6 +176,36 @@ public abstract class RemoteHost extends AbstractTierBinding implements HostBind
   @Override
   public TierContext tierContext() {
     return this.hostContext;
+  }
+
+  @Override
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    openMetaLanes(host, (AgentNode) metaHost);
+    this.hostContext.openMetaHost(host, metaHost);
+  }
+
+  protected void openMetaLanes(HostBinding host, AgentNode metaHost) {
+    // TODO
+  }
+
+  @Override
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.hostContext.openMetaNode(node, metaNode);
+  }
+
+  @Override
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.hostContext.openMetaLane(lane, metaLane);
+  }
+
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.hostContext.openMetaUplink(uplink, metaUplink);
+  }
+
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.hostContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override

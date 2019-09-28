@@ -21,8 +21,10 @@ import swim.api.policy.Policy;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Stage;
 import swim.concurrent.StageDef;
+import swim.runtime.CellAddress;
 import swim.runtime.CellBinding;
 import swim.runtime.CellContext;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneContext;
 import swim.runtime.LaneDef;
@@ -102,6 +104,11 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   }
 
   @Override
+  public final LaneAddress cellAddress() {
+    return this.laneContext.cellAddress();
+  }
+
+  @Override
   public Value partKey() {
     return this.laneContext.partKey();
   }
@@ -152,7 +159,7 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   }
 
   @Override
-  public LinkBinding getUplink(Value linkKey) {
+  public LinkContext getUplink(Value linkKey) {
     return this.laneBinding.getUplink(linkKey);
   }
 
@@ -171,6 +178,11 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
     return node != null ? node.createLog(logDef) : null;
   }
 
+  public Log createLog(CellAddress cellAddress) {
+    final ActorNode node = actorNode();
+    return node != null ? node.createLog(cellAddress) : null;
+  }
+
   public Log injectLog(Log log) {
     final ActorNode node = actorNode();
     return node != null ? node.injectLog(log) : log;
@@ -182,7 +194,7 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
     if (this.laneDef != null && this.laneDef.logDef() != null) {
       log = createLog(this.laneDef.logDef());
     } else {
-      log = openLaneLog();
+      log = createLog(cellAddress());
     }
     if (log != null) {
       log = injectLog(log);
@@ -193,6 +205,11 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   public Policy createPolicy(PolicyDef policyDef) {
     final ActorNode node = actorNode();
     return node != null ? node.createPolicy(policyDef) : null;
+  }
+
+  public Policy createPolicy(CellAddress cellAddress) {
+    final ActorNode node = actorNode();
+    return node != null ? node.createPolicy(cellAddress) : null;
   }
 
   public Policy injectPolicy(Policy policy) {
@@ -206,7 +223,7 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
     if (this.laneDef != null && this.laneDef.policyDef() != null) {
       policy = createPolicy(this.laneDef.policyDef());
     } else {
-      policy = openLanePolicy();
+      policy = createPolicy(cellAddress());
     }
     if (policy != null) {
       policy = injectPolicy(policy);
@@ -217,6 +234,11 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   public Stage createStage(StageDef stageDef) {
     final ActorNode node = actorNode();
     return node != null ? node.createStage(stageDef) : null;
+  }
+
+  public Stage createStage(CellAddress cellAddress) {
+    final ActorNode node = actorNode();
+    return node != null ? node.createStage(cellAddress) : null;
   }
 
   public Stage injectStage(Stage stage) {
@@ -230,7 +252,7 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
     if (this.laneDef != null && this.laneDef.stageDef() != null) {
       stage = createStage(this.laneDef.stageDef());
     } else {
-      stage = openLaneStage();
+      stage = createStage(cellAddress());
     }
     if (stage != null) {
       stage = injectStage(stage);
@@ -241,6 +263,11 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   public StoreBinding createStore(StoreDef storeDef) {
     final ActorNode node = actorNode();
     return node != null ? node.createStore(storeDef) : null;
+  }
+
+  public StoreBinding createStore(CellAddress cellAddress) {
+    final ActorNode node = actorNode();
+    return node != null ? node.createStore(cellAddress) : null;
   }
 
   public StoreBinding injectStore(StoreBinding store) {
@@ -254,7 +281,7 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
     if (this.laneDef != null && this.laneDef.storeDef() != null) {
       store = createStore(this.laneDef.storeDef());
     } else {
-      store = openLaneStore();
+      store = createStore(cellAddress());
     }
     if (store != null) {
       store = injectStore(store);
@@ -262,24 +289,28 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
     return store;
   }
 
-  protected Log openLaneLog() {
+  @Override
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
     final ActorNode node = actorNode();
-    return node != null ? node.openLaneLog(laneUri()) : null;
+    if (node != null) {
+      node.openMetaLane(lane, metaLane);
+    }
   }
 
-  protected Policy openLanePolicy() {
+  @Override
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
     final ActorNode node = actorNode();
-    return node != null ? node.openLanePolicy(laneUri()) : null;
+    if (node != null) {
+      node.openMetaUplink(uplink, metaUplink);
+    }
   }
 
-  protected Stage openLaneStage() {
+  @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
     final ActorNode node = actorNode();
-    return node != null ? node.openLaneStage(laneUri()) : null;
-  }
-
-  protected StoreBinding openLaneStore() {
-    final ActorNode node = actorNode();
-    return node != null ? node.openLaneStore(laneUri()) : null;
+    if (node != null) {
+      node.openMetaDownlink(downlink, metaDownlink);
+    }
   }
 
   @Override

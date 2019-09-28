@@ -53,7 +53,6 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
   protected final float prio;
   protected final float rate;
   protected final Value body;
-
   protected volatile int flags;
 
   public WarpDownlinkView(CellContext cellContext, Stage stage, Uri meshUri,

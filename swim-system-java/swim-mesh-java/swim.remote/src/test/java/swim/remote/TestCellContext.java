@@ -18,8 +18,10 @@ import swim.api.Downlink;
 import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.runtime.CellAddress;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.NodeBinding;
 import swim.runtime.PushRequest;
 import swim.store.StoreBinding;
 import swim.uri.Uri;
@@ -43,6 +45,16 @@ public class TestCellContext implements CellContext {
 
   public TestCellContext() {
     this(null, null, null, null);
+  }
+
+  @Override
+  public CellAddress cellAddress() {
+    return null;
+  }
+
+  @Override
+  public String edgeName() {
+    return "";
   }
 
   @Override
@@ -88,6 +100,10 @@ public class TestCellContext implements CellContext {
   }
 
   @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+  }
+
+  @Override
   public void trace(Object message) {
   }
 
@@ -105,5 +121,9 @@ public class TestCellContext implements CellContext {
 
   @Override
   public void error(Object message) {
+  }
+
+  @Override
+  public void fail(Object message) {
   }
 }

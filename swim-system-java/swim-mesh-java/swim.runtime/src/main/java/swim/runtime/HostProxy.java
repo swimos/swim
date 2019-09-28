@@ -78,6 +78,16 @@ public class HostProxy implements HostBinding, HostContext {
   }
 
   @Override
+  public HostAddress cellAddress() {
+    return this.hostContext.cellAddress();
+  }
+
+  @Override
+  public String edgeName() {
+    return this.hostContext.edgeName();
+  }
+
+  @Override
   public Uri meshUri() {
     return this.hostContext.meshUri();
   }
@@ -168,6 +178,11 @@ public class HostProxy implements HostBinding, HostContext {
   }
 
   @Override
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    this.hostContext.openMetaHost(host, metaHost);
+  }
+
+  @Override
   public HashTrieMap<Uri, NodeBinding> nodes() {
     return this.hostBinding.nodes();
   }
@@ -188,48 +203,68 @@ public class HostProxy implements HostBinding, HostContext {
   }
 
   @Override
-  public NodeBinding createNode(Uri nodeUri) {
-    return this.hostContext.createNode(nodeUri);
+  public NodeBinding createNode(NodeAddress nodeAddress) {
+    return this.hostContext.createNode(nodeAddress);
   }
 
   @Override
-  public NodeBinding injectNode(Uri nodeUri, NodeBinding node) {
-    return this.hostContext.injectNode(nodeUri, node);
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
+    return this.hostContext.injectNode(nodeAddress, node);
   }
 
   @Override
-  public LaneBinding createLane(Uri nodeUri, LaneDef laneDef) {
-    return this.hostContext.createLane(nodeUri, laneDef);
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    this.hostContext.openMetaNode(node, metaNode);
   }
 
   @Override
-  public LaneBinding createLane(Uri nodeUri, Uri laneUri) {
-    return this.hostContext.createLane(nodeUri, laneUri);
+  public LaneBinding createLane(LaneAddress laneAddress) {
+    return this.hostContext.createLane(laneAddress);
   }
 
   @Override
-  public LaneBinding injectLane(Uri nodeUri, Uri laneUri, LaneBinding lane) {
-    return this.hostContext.injectLane(nodeUri, laneUri, lane);
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return this.hostContext.injectLane(laneAddress, lane);
   }
 
   @Override
-  public void openLanes(Uri nodeUri, NodeBinding node) {
-    this.hostContext.openLanes(nodeUri, node);
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    this.hostContext.openMetaLane(lane, metaLane);
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Uri nodeUri, AgentDef agentDef) {
-    return this.hostContext.createAgentFactory(nodeUri, agentDef);
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    this.hostContext.openMetaUplink(uplink, metaUplink);
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Uri nodeUri, Class<? extends A> agentClass) {
-    return this.hostContext.createAgentFactory(nodeUri, agentClass);
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.hostContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override
-  public void openAgents(Uri nodeUri, NodeBinding node) {
-    this.hostContext.openAgents(nodeUri, node);
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return this.hostContext.createLane(node, laneDef);
+  }
+
+  @Override
+  public void openLanes(NodeBinding node) {
+    this.hostContext.openLanes(node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return this.hostContext.createAgentFactory(node, agentDef);
+  }
+
+  @Override
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return this.hostContext.createAgentFactory(node, agentClass);
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.hostContext.openAgents(node);
   }
 
   @Override
@@ -290,6 +325,11 @@ public class HostProxy implements HostBinding, HostContext {
   @Override
   public void error(Object message) {
     this.hostContext.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    this.hostContext.fail(message);
   }
 
   @Override

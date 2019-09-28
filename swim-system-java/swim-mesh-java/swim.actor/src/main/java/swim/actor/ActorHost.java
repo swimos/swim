@@ -24,14 +24,19 @@ import swim.api.policy.PolicyDirective;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Stage;
 import swim.concurrent.StageDef;
+import swim.runtime.CellAddress;
 import swim.runtime.CellBinding;
 import swim.runtime.CellContext;
+import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
 import swim.runtime.HostDef;
+import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
+import swim.runtime.LinkBinding;
 import swim.runtime.LogDef;
+import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeDef;
 import swim.runtime.PartBinding;
@@ -104,6 +109,11 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
   @Override
   public final CellContext cellContext() {
     return this.hostContext;
+  }
+
+  @Override
+  public final HostAddress cellAddress() {
+    return this.hostContext.cellAddress();
   }
 
   @Override
@@ -196,6 +206,11 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
     return part != null ? part.createLog(logDef) : null;
   }
 
+  public Log createLog(CellAddress cellAddress) {
+    final ActorPart part = actorPart();
+    return part != null ? part.createLog(cellAddress) : null;
+  }
+
   public Log injectLog(Log log) {
     final ActorPart part = actorPart();
     return part != null ? part.injectLog(log) : log;
@@ -207,7 +222,7 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
     if (this.hostDef != null && this.hostDef.logDef() != null) {
       log = createLog(this.hostDef.logDef());
     } else {
-      log = openHostLog();
+      log = createLog(cellAddress());
     }
     if (log != null) {
       log = injectLog(log);
@@ -218,6 +233,11 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
   public Policy createPolicy(PolicyDef policyDef) {
     final ActorPart part = actorPart();
     return part != null ? part.createPolicy(policyDef) : null;
+  }
+
+  public Policy createPolicy(CellAddress cellAddress) {
+    final ActorPart part = actorPart();
+    return part != null ? part.createPolicy(cellAddress) : null;
   }
 
   public Policy injectPolicy(Policy policy) {
@@ -231,7 +251,7 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
     if (this.hostDef != null && this.hostDef.policyDef() != null) {
       policy = createPolicy(this.hostDef.policyDef());
     } else {
-      policy = openHostPolicy();
+      policy = createPolicy(cellAddress());
     }
     if (policy != null) {
       policy = injectPolicy(policy);
@@ -242,6 +262,11 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
   public Stage createStage(StageDef stageDef) {
     final ActorPart part = actorPart();
     return part != null ? part.createStage(stageDef) : null;
+  }
+
+  public Stage createStage(CellAddress cellAddress) {
+    final ActorPart part = actorPart();
+    return part != null ? part.createStage(cellAddress) : null;
   }
 
   public Stage injectStage(Stage stage) {
@@ -255,7 +280,7 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
     if (this.hostDef != null && this.hostDef.stageDef() != null) {
       stage = createStage(this.hostDef.stageDef());
     } else {
-      stage = openHostStage();
+      stage = createStage(cellAddress());
     }
     if (stage != null) {
       stage = injectStage(stage);
@@ -266,6 +291,11 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
   public StoreBinding createStore(StoreDef storeDef) {
     final ActorPart part = actorPart();
     return part != null ? part.createStore(storeDef) : null;
+  }
+
+  public StoreBinding createStore(CellAddress cellAddress) {
+    final ActorPart part = actorPart();
+    return part != null ? part.createStore(cellAddress) : null;
   }
 
   public StoreBinding injectStore(StoreBinding store) {
@@ -279,7 +309,7 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
     if (this.hostDef != null && this.hostDef.storeDef() != null) {
       store = createStore(this.hostDef.storeDef());
     } else {
-      store = openHostStore();
+      store = createStore(cellAddress());
     }
     if (store != null) {
       store = injectStore(store);
@@ -287,44 +317,32 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
     return store;
   }
 
-  protected Log openHostLog() {
+  @Override
+  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
     final ActorPart part = actorPart();
-    return part != null ? part.openHostLog(hostUri()) : null;
+    if (part != null) {
+      part.openMetaHost(host, metaHost);
+    }
   }
 
-  protected Policy openHostPolicy() {
-    final ActorPart part = actorPart();
-    return part != null ? part.openHostPolicy(hostUri()) : null;
-  }
-
-  protected Stage openHostStage() {
-    final ActorPart part = actorPart();
-    return part != null ? part.openHostStage(hostUri()) : null;
-  }
-
-  protected StoreBinding openHostStore() {
-    final ActorPart part = actorPart();
-    return part != null ? part.openHostStore(hostUri()) : null;
-  }
-
-  public NodeDef getNodeDef(Uri nodeUri) {
+  public NodeDef getNodeDef(NodeAddress nodeAddress) {
     final HostDef hostDef = this.hostDef;
-    NodeDef nodeDef = hostDef != null ? hostDef.getNodeDef(nodeUri) : null;
+    NodeDef nodeDef = hostDef != null ? hostDef.getNodeDef(nodeAddress.nodeUri()) : null;
     if (nodeDef == null) {
       final ActorPart part = actorPart();
-      nodeDef = part != null ? part.getNodeDef(hostUri(), nodeUri) : null;
+      nodeDef = part != null ? part.getNodeDef(nodeAddress) : null;
     }
     return nodeDef;
   }
 
   @Override
-  public NodeBinding createNode(Uri nodeUri) {
-    NodeBinding node = this.hostContext.createNode(nodeUri);
+  public NodeBinding createNode(NodeAddress nodeAddress) {
+    NodeBinding node = this.hostContext.createNode(nodeAddress);
     if (node == null && !meshUri().isDefined()) {
       final HostDef hostDef = this.hostDef;
-      final NodeDef nodeDef = hostDef != null ? hostDef.getNodeDef(nodeUri) : null;
+      final NodeDef nodeDef = hostDef != null ? hostDef.getNodeDef(nodeAddress.nodeUri()) : null;
       if (nodeDef != null) {
-        final Value props = nodeDef.props(nodeUri);
+        final Value props = nodeDef.props(nodeAddress.nodeUri());
         node = new AgentModel(props);
       }
     }
@@ -332,101 +350,93 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
   }
 
   @Override
-  public NodeBinding injectNode(Uri nodeUri, NodeBinding node) {
-    final NodeDef nodeDef = getNodeDef(nodeUri);
-    return new ActorNode(this.hostContext.injectNode(nodeUri, node), nodeDef);
+  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
+    final NodeDef nodeDef = getNodeDef(nodeAddress);
+    return new ActorNode(this.hostContext.injectNode(nodeAddress, node), nodeDef);
   }
 
-  public Log openNodeLog(Uri nodeUri) {
+  @Override
+  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
     final ActorPart part = actorPart();
-    return part != null ? part.openNodeLog(hostUri(), nodeUri) : null;
+    if (part != null) {
+      part.openMetaNode(node, metaNode);
+    }
   }
 
-  public Policy openNodePolicy(Uri nodeUri) {
-    final ActorPart part = actorPart();
-    return part != null ? part.openNodePolicy(hostUri(), nodeUri) : null;
-  }
-
-  public Stage openNodeStage(Uri nodeUri) {
-    final ActorPart part = actorPart();
-    return part != null ? part.openNodeStage(hostUri(), nodeUri) : null;
-  }
-
-  public StoreBinding openNodeStore(Uri nodeUri) {
-    final ActorPart part = actorPart();
-    return part != null ? part.openNodeStore(hostUri(), nodeUri) : null;
-  }
-
-  public LaneDef getLaneDef(Uri nodeUri, Uri laneUri) {
+  public LaneDef getLaneDef(LaneAddress laneAddress) {
     final HostDef hostDef = this.hostDef;
-    LaneDef laneDef = hostDef != null ? hostDef.getLaneDef(laneUri) : null;
+    LaneDef laneDef = hostDef != null ? hostDef.getLaneDef(laneAddress.laneUri()) : null;
     if (laneDef == null) {
       final ActorPart part = actorPart();
-      laneDef = part != null ? part.getLaneDef(hostUri(), nodeUri, laneUri) : null;
+      laneDef = part != null ? part.getLaneDef(laneAddress) : null;
     }
     return laneDef;
   }
 
   @Override
-  public LaneBinding createLane(Uri nodeUri, LaneDef laneDef) {
-    return this.hostContext.createLane(nodeUri, laneDef);
+  public LaneBinding createLane(LaneAddress laneAddress) {
+    return this.hostContext.createLane(laneAddress);
   }
 
   @Override
-  public LaneBinding createLane(Uri nodeUri, Uri laneUri) {
-    return this.hostContext.createLane(nodeUri, laneUri);
+  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
+    return this.hostContext.injectLane(laneAddress, lane);
   }
 
   @Override
-  public LaneBinding injectLane(Uri nodeUri, Uri laneUri, LaneBinding lane) {
-    return this.hostContext.injectLane(nodeUri, laneUri, lane);
-  }
-
-  @Override
-  public void openLanes(Uri nodeUri, NodeBinding node) {
-    this.hostContext.openLanes(nodeUri, node);
-  }
-
-  public Log openLaneLog(Uri nodeUri, Uri laneUri) {
+  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
     final ActorPart part = actorPart();
-    return part != null ? part.openLaneLog(hostUri(), nodeUri, laneUri) : null;
-  }
-
-  public Policy openLanePolicy(Uri nodeUri, Uri laneUri) {
-    final ActorPart part = actorPart();
-    return part != null ? part.openLanePolicy(hostUri(), nodeUri, laneUri) : null;
-  }
-
-  public Stage openLaneStage(Uri nodeUri, Uri laneUri) {
-    final ActorPart part = actorPart();
-    return part != null ? part.openLaneStage(hostUri(), nodeUri, laneUri) : null;
-  }
-
-  public StoreBinding openLaneStore(Uri nodeUri, Uri laneUri) {
-    final ActorPart part = actorPart();
-    return part != null ? part.openLaneStore(hostUri(), nodeUri, laneUri) : null;
+    if (part != null) {
+      part.openMetaLane(lane, metaLane);
+    }
   }
 
   @Override
-  public AgentFactory<?> createAgentFactory(Uri nodeUri, AgentDef agentDef) {
-    return this.hostContext.createAgentFactory(nodeUri, agentDef);
+  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    final ActorPart part = actorPart();
+    if (part != null) {
+      part.openMetaUplink(uplink, metaUplink);
+    }
   }
 
   @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Uri nodeUri, Class<? extends A> agentClass) {
-    return this.hostContext.createAgentFactory(nodeUri, agentClass);
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    final ActorPart part = actorPart();
+    if (part != null) {
+      part.openMetaDownlink(downlink, metaDownlink);
+    }
   }
 
   @Override
-  public void openAgents(Uri nodeUri, NodeBinding node) {
-    this.hostContext.openAgents(nodeUri, node);
+  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
+    return this.hostContext.createLane(node, laneDef);
+  }
+
+  @Override
+  public void openLanes(NodeBinding node) {
+    this.hostContext.openLanes(node);
+  }
+
+  @Override
+  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
+    return this.hostContext.createAgentFactory(node, agentDef);
+  }
+
+  @Override
+  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
+    return this.hostContext.createAgentFactory(node, agentClass);
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.hostContext.openAgents(node);
     if (!meshUri().isDefined()) {
       final HostDef hostDef = this.hostDef;
-      final NodeDef nodeDef = hostDef != null ? hostDef.getNodeDef(nodeUri) : null;
+      final NodeDef nodeDef = hostDef != null ? hostDef.getNodeDef(node.nodeUri()) : null;
       if (nodeDef != null && node instanceof AgentModel) {
         final AgentModel agentModel = (AgentModel) node;
         for (AgentDef agentDef : nodeDef.agentDefs()) {
-          final AgentFactory<?> agentFactory = createAgentFactory(nodeUri, agentDef);
+          final AgentFactory<?> agentFactory = createAgentFactory(node, agentDef);
           if (agentDef != null) {
             final Value id = agentDef.id();
             Value props = agentDef.props();

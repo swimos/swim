@@ -18,16 +18,25 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.SwimContext;
 import swim.api.agent.Agent;
 import swim.api.agent.AgentFactory;
+import swim.api.lane.SupplyLane;
 import swim.concurrent.Conts;
 import swim.runtime.LaneBinding;
+import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
 import swim.runtime.PushRequest;
+import swim.runtime.reflect.LogEntry;
 import swim.structure.Value;
 
 public class AgentModel extends AgentNode {
   protected final Value props;
-
   volatile Object views; // AgentView | AgentView[]
+
+  SupplyLane<LogEntry> metaTraceLog;
+  SupplyLane<LogEntry> metaDebugLog;
+  SupplyLane<LogEntry> metaInfoLog;
+  SupplyLane<LogEntry> metaWarnLog;
+  SupplyLane<LogEntry> metaErrorLog;
+  SupplyLane<LogEntry> metaFailLog;
 
   public AgentModel(Value props) {
     this.props = props.commit();
@@ -40,6 +49,38 @@ public class AgentModel extends AgentNode {
 
   public Value props() {
     return this.props;
+  }
+
+  @Override
+  protected void openMetaLanes(NodeBinding node, AgentNode metaNode) {
+    super.openMetaLanes(node, metaNode);
+    openLogLanes(node, metaNode);
+  }
+
+  protected void openLogLanes(NodeBinding node, AgentNode metaNode) {
+    this.metaTraceLog = metaNode.supplyLane()
+        .valueForm(LogEntry.form());
+    metaNode.openLane(LogEntry.TRACE_LOG_URI, this.metaTraceLog);
+
+    this.metaDebugLog = metaNode.supplyLane()
+        .valueForm(LogEntry.form());
+    metaNode.openLane(LogEntry.DEBUG_LOG_URI, this.metaDebugLog);
+
+    this.metaInfoLog = metaNode.supplyLane()
+        .valueForm(LogEntry.form());
+    metaNode.openLane(LogEntry.INFO_LOG_URI, this.metaInfoLog);
+
+    this.metaWarnLog = metaNode.supplyLane()
+        .valueForm(LogEntry.form());
+    metaNode.openLane(LogEntry.WARN_LOG_URI, this.metaWarnLog);
+
+    this.metaErrorLog = metaNode.supplyLane()
+        .valueForm(LogEntry.form());
+    metaNode.openLane(LogEntry.ERROR_LOG_URI, this.metaErrorLog);
+
+    this.metaFailLog = metaNode.supplyLane()
+        .valueForm(LogEntry.form());
+    metaNode.openLane(LogEntry.FAIL_LOG_URI, this.metaFailLog);
   }
 
   public AgentView createAgent(AgentFactory<?> agentFactory, Value id, Value props) {
@@ -228,6 +269,60 @@ public class AgentModel extends AgentNode {
   @Override
   public void pushUp(PushRequest pushRequest) {
     execute(new AgentModelPushUp(this, pushRequest));
+  }
+
+  @Override
+  public void trace(Object message) {
+    final SupplyLane<LogEntry> metaTraceLog = this.metaTraceLog;
+    if (metaTraceLog != null) {
+      metaTraceLog.push(LogEntry.trace(message));
+    }
+    super.trace(message);
+  }
+
+  @Override
+  public void debug(Object message) {
+    final SupplyLane<LogEntry> metaDebugLog = this.metaDebugLog;
+    if (metaDebugLog != null) {
+      metaDebugLog.push(LogEntry.debug(message));
+    }
+    super.debug(message);
+  }
+
+  @Override
+  public void info(Object message) {
+    final SupplyLane<LogEntry> metaInfoLog = this.metaInfoLog;
+    if (metaInfoLog != null) {
+      metaInfoLog.push(LogEntry.info(message));
+    }
+    super.info(message);
+  }
+
+  @Override
+  public void warn(Object message) {
+    final SupplyLane<LogEntry> metaWarnLog = this.metaWarnLog;
+    if (metaWarnLog != null) {
+      metaWarnLog.push(LogEntry.warn(message));
+    }
+    super.warn(message);
+  }
+
+  @Override
+  public void error(Object message) {
+    final SupplyLane<LogEntry> metaErrorLog = this.metaErrorLog;
+    if (metaErrorLog != null) {
+      metaErrorLog.push(LogEntry.error(message));
+    }
+    super.error(message);
+  }
+
+  @Override
+  public void fail(Object message) {
+    final SupplyLane<LogEntry> metaFailLog = this.metaFailLog;
+    if (metaFailLog != null) {
+      metaFailLog.push(LogEntry.fail(message));
+    }
+    super.fail(message);
   }
 
   protected void didAddAgentView(AgentView view) {

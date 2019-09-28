@@ -29,6 +29,8 @@ public interface HostBinding extends TierBinding, CellBinding {
 
   <T> T unwrapHost(Class<T> hostClass);
 
+  HostAddress cellAddress();
+
   Uri meshUri();
 
   Value partKey();
@@ -57,6 +59,8 @@ public interface HostBinding extends TierBinding, CellBinding {
 
   void didBecomeSlave();
 
+  void openMetaHost(HostBinding host, NodeBinding metaHost);
+
   HashTrieMap<Uri, NodeBinding> nodes();
 
   NodeBinding getNode(Uri nodeUri);
@@ -64,4 +68,10 @@ public interface HostBinding extends TierBinding, CellBinding {
   NodeBinding openNode(Uri nodeUri);
 
   NodeBinding openNode(Uri nodeUri, NodeBinding node);
+
+  void openMetaNode(NodeBinding node, NodeBinding metaNode);
+
+  void openMetaLane(LaneBinding lane, NodeBinding metaLane);
+
+  void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 }

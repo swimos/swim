@@ -28,6 +28,7 @@ import swim.io.IpSettings;
 import swim.io.IpSocket;
 import swim.io.IpSocketRef;
 import swim.kernel.KernelContext;
+import swim.runtime.ServiceAddress;
 import swim.util.Log;
 
 public class ServicePort implements ServiceContext {
@@ -96,34 +97,6 @@ public class ServicePort implements ServiceContext {
     return this.kernel.connectTls(remoteAddress, socket, ipSettings);
   }
 
-  protected Log openLog() {
-    return this.kernel.openServiceLog(this.serviceName);
-  }
-
-  protected void closeLog() {
-    this.log = null;
-  }
-
-  protected Policy openPolicy() {
-    return this.kernel.openServicePolicy(this.serviceName);
-  }
-
-  protected void closePolicy() {
-    this.policy = null;
-  }
-
-  protected Stage openStage() {
-    return this.kernel.openServiceStage(this.serviceName);
-  }
-
-  protected void closeStage() {
-    final Stage stage = this.stage;
-    if (stage instanceof MainStage) {
-      ((MainStage) stage).stop();
-    }
-    this.stage = null;
-  }
-
   public void start() {
     int oldStatus;
     int newStatus;
@@ -156,9 +129,10 @@ public class ServicePort implements ServiceContext {
   }
 
   protected void willStart() {
-    this.log = openLog();
-    this.policy = openPolicy();
-    this.stage = openStage();
+    final ServiceAddress serviceAddress = new ServiceAddress(this.serviceName);
+    this.log = this.kernel.createLog(serviceAddress);
+    this.policy = this.kernel.createPolicy(serviceAddress);
+    this.stage = this.kernel.createStage(serviceAddress);
     this.service.willStart();
   }
 
@@ -172,9 +146,13 @@ public class ServicePort implements ServiceContext {
 
   protected void didStop() {
     this.service.didStop();
-    closeStage();
-    closePolicy();
-    closeLog();
+    final Stage stage = this.stage;
+    if (stage instanceof MainStage) {
+      ((MainStage) stage).stop();
+    }
+    this.stage = null;
+    this.policy = null;
+    this.log = null;
   }
 
   @Override
@@ -224,6 +202,16 @@ public class ServicePort implements ServiceContext {
       log.error(message);
     } else {
       this.kernel.error(message);
+    }
+  }
+
+  @Override
+  public void fail(Object message) {
+    final Log log = this.log;
+    if (log != null) {
+      log.fail(message);
+    } else {
+      this.kernel.fail(message);
     }
   }
 
