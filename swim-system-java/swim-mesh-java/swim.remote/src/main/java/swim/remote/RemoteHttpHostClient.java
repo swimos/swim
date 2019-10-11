@@ -15,14 +15,17 @@
 package swim.remote;
 
 import java.net.InetSocketAddress;
+import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.Downlink;
 import swim.api.policy.Policy;
 import swim.codec.Decoder;
+import swim.collections.HashTrieMap;
+import swim.collections.HashTrieSet;
 import swim.concurrent.AbstractTimer;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.concurrent.TimerFunction;
-import swim.concurrent.TimerRef;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.io.IpInterface;
@@ -48,16 +51,20 @@ public class RemoteHttpHostClient extends RemoteHost {
   final HttpSettings httpSettings;
   final Uri baseUri;
 
-  private HttpClient client;
-  private TimerRef remoteHttpPoller;
+  private AbstractHttpClient client;
+
+  volatile HashTrieMap<HttpRequest<?>, HashTrieSet<RemoteHttpUplink>> uplinks;
+  volatile HashTrieMap<HttpRequest<?>, RemoteHttpPoller> timerRefs;
 
   static final long POLL_INTERVAL = 10 * 1000;
-
+  private boolean connected;
 
   public RemoteHttpHostClient(Uri baseUri, IpInterface endpoint, HttpSettings httpSettings) {
     this.baseUri = baseUri;
     this.endpoint = endpoint;
     this.httpSettings = httpSettings;
+    this.uplinks = HashTrieMap.empty();
+    this.timerRefs = HashTrieMap.empty();
   }
 
   public RemoteHttpHostClient(Uri baseUri, IpInterface endpoint) {
@@ -66,6 +73,7 @@ public class RemoteHttpHostClient extends RemoteHost {
 
   @Override
   protected void willOpen() {
+    connect();
     super.willOpen();
   }
 
@@ -149,6 +157,11 @@ public class RemoteHttpHostClient extends RemoteHost {
     this.hostContext().fail(message);
   }
 
+  @Override
+  public boolean isConnected() {
+    return connected;
+  }
+
   public void openUplink(LinkBinding link) {
     if (link instanceof HttpBinding) {
       openHttpUplink((HttpBinding) link);
@@ -158,21 +171,57 @@ public class RemoteHttpHostClient extends RemoteHost {
   }
 
   private void openHttpUplink(HttpBinding link) {
-    this.remoteHttpPoller = hostContext().schedule().setTimer(POLL_INTERVAL,
-        new RemoteHttpPoller(this, link));
+    final RemoteHttpUplink uplink = new RemoteHttpUplink(this, link);
+    link.setLinkContext(uplink);
+
+    HashTrieMap<HttpRequest<?>, HashTrieSet<RemoteHttpUplink>> oldUplinks;
+    HashTrieMap<HttpRequest<?>, HashTrieSet<RemoteHttpUplink>> newUplinks;
+    do {
+      oldUplinks = this.uplinks;
+      HashTrieSet<RemoteHttpUplink> httpUplinks = oldUplinks.get(link.request());
+      if (httpUplinks == null) {
+        httpUplinks = HashTrieSet.empty();
+      }
+      httpUplinks = httpUplinks.added(uplink);
+      newUplinks = oldUplinks.updated(link.request(), httpUplinks);
+    } while (!UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
+
+    if (isConnected()) {
+      uplink.didConnect();
+    }
+    schedulePoller(link.request());
   }
 
-  public void connect(HttpBinding link) {
-    final String scheme = link.requestUri().schemeName();
+  private void schedulePoller(HttpRequest<?> request) {
+    // use uplinks to compute poll interval
+    RemoteHttpPoller timerRef = timerRefs.get(request);
+    if (timerRef == null) {
+      HashTrieMap<HttpRequest<?>, RemoteHttpPoller> oldTimerRefs;
+      HashTrieMap<HttpRequest<?>, RemoteHttpPoller> newTimerRefs;
+      do {
+        oldTimerRefs = this.timerRefs;
+        timerRef = oldTimerRefs.get(request);
+        if (timerRef != null) {
+          break;
+        }
+        timerRef = new RemoteHttpPoller(this, request);
+        newTimerRefs = oldTimerRefs.updated(request, timerRef);
+      } while (!TIMER_REFS.compareAndSet(this, oldTimerRefs, newTimerRefs));
+    }
+    hostContext().schedule().setTimer(POLL_INTERVAL, timerRef);
+  }
+
+  public void connect() {
+    final String scheme = this.baseUri.schemeName();
     final boolean isSecure = "https".equals(scheme);
 
-    final UriAuthority remoteAuthority = link.requestUri().authority();
+    final UriAuthority remoteAuthority = this.baseUri.authority();
     final String remoteAddress = remoteAuthority.host().address();
     final int remotePort = remoteAuthority.port().number();
     final int requestPort = remotePort > 0 ? remotePort : isSecure ? 443 : 80;
 
     if (this.client == null) {
-      this.client = new RemoteHttpHostClientBinding(this, link);
+      this.client = new RemoteHttpHostClientBinding(this);
     }
     if (isSecure) {
       connectHttps(new InetSocketAddress(remoteAddress, requestPort), this.client, this.httpSettings);
@@ -193,16 +242,102 @@ public class RemoteHttpHostClient extends RemoteHost {
     return this.endpoint.connectTls(remoteAddress, socket, httpSettings.ipSettings());
   }
 
+  protected void didConnect() {
+    connected = true;
+    final Iterator<HttpRequest<?>> requestHttpUplinksIterator = uplinks.keyIterator();
+    while (requestHttpUplinksIterator.hasNext()) {
+      final HashTrieSet<RemoteHttpUplink> httpUplinks = uplinks.get(requestHttpUplinksIterator.next());
+      final Iterator<RemoteHttpUplink> uplinksIterator = httpUplinks.iterator();
+      while (uplinksIterator.hasNext()) {
+        uplinksIterator.next().link.didConnect();
+      }
+    }
+  }
+
+  protected void nextRequest(HttpRequest<?> request) {
+    final RemoteHttpRequester requester = new RemoteHttpRequester(this, request);
+    this.client.doRequest(requester);
+    schedulePoller(request);
+  }
+
+  protected HttpRequest<?> doRequest(HttpRequest<?> request) {
+    final HashTrieSet<RemoteHttpUplink> httpUplinks = uplinks.get(request);
+    if (httpUplinks != null && !httpUplinks.isEmpty()) {
+      return httpUplinks.head().link.request();
+    } else {
+      return null;
+    }
+  }
+
+  protected void willRequest(HttpRequest<?> request) {
+    final HashTrieSet<RemoteHttpUplink> httpUplinks = uplinks.get(request);
+    if (httpUplinks != null && !httpUplinks.isEmpty()) {
+      final Iterator<RemoteHttpUplink> uplinksIterator = httpUplinks.iterator();
+      while (uplinksIterator.hasNext()) {
+        uplinksIterator.next().link.linkContext().willRequestUp(request);
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  protected void didRequest(HttpRequest<?> request) {
+    final HashTrieSet<RemoteHttpUplink> httpUplinks = uplinks.get(request);
+    if (httpUplinks != null && !httpUplinks.isEmpty()) {
+      final Iterator<RemoteHttpUplink> uplinksIterator = httpUplinks.iterator();
+      while (uplinksIterator.hasNext()) {
+        uplinksIterator.next().link.linkContext().didRequestUp((HttpRequest<Object>) request);
+      }
+    }
+  }
+
+  protected void willRespond(HttpRequest<?> request, HttpResponse<?> response) {
+    final HashTrieSet<RemoteHttpUplink> httpUplinks = uplinks.get(request);
+    if (httpUplinks != null && !httpUplinks.isEmpty()) {
+      final Iterator<RemoteHttpUplink> uplinksIterator = httpUplinks.iterator();
+      while (uplinksIterator.hasNext()) {
+        uplinksIterator.next().link.linkContext().willRespondUp(response);
+      }
+    }
+  }
+
+  protected Decoder<Object> contentDecoder(HttpRequest<?> request, HttpResponse<?> response) {
+    final HashTrieSet<RemoteHttpUplink> httpUplinks = uplinks.get(request);
+    if (httpUplinks != null && !httpUplinks.isEmpty()) {
+      final Iterator<RemoteHttpUplink> uplinksIterator = httpUplinks.iterator();
+      while (uplinksIterator.hasNext()) {
+        //TODO- Returning the first decoder here
+        return uplinksIterator.next().link.decodeResponseDown(response);
+      }
+    }
+    return response.contentDecoder();
+  }
+
+  protected void didRespond(HttpRequest<?> request, HttpResponse<?> response) {
+    final HashTrieSet<RemoteHttpUplink> httpUplinks = uplinks.get(request);
+    if (httpUplinks != null && !httpUplinks.isEmpty()) {
+      final Iterator<RemoteHttpUplink> uplinksIterator = httpUplinks.iterator();
+      while (uplinksIterator.hasNext()) {
+        uplinksIterator.next().link.linkContext().didRespondUp(response);
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<RemoteHttpHostClient, HashTrieMap<HttpRequest<?>, HashTrieSet<RemoteHttpUplink>>> UPLINKS =
+      AtomicReferenceFieldUpdater.newUpdater(RemoteHttpHostClient.class, (Class<HashTrieMap<HttpRequest<?>, HashTrieSet<RemoteHttpUplink>>>) (Class<?>) HashTrieMap.class, "uplinks");
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<RemoteHttpHostClient, HashTrieMap<HttpRequest<?>, RemoteHttpPoller>> TIMER_REFS =
+      AtomicReferenceFieldUpdater.newUpdater(RemoteHttpHostClient.class, (Class<HashTrieMap<HttpRequest<?>, RemoteHttpPoller>>) (Class<?>) HashTrieMap.class, "timerRefs");
+
 }
 
 final class RemoteHttpHostClientBinding extends AbstractHttpClient {
 
   private final RemoteHttpHostClient remoteHttpHostClient;
-  private final HttpBinding link;
 
-  RemoteHttpHostClientBinding(RemoteHttpHostClient remoteHttpHostClient, HttpBinding link) {
+  RemoteHttpHostClientBinding(RemoteHttpHostClient remoteHttpHostClient) {
     this.remoteHttpHostClient = remoteHttpHostClient;
-    this.link = link;
   }
 
   @Override
@@ -212,72 +347,68 @@ final class RemoteHttpHostClientBinding extends AbstractHttpClient {
 
   @Override
   public void didConnect() {
-    final RemoteHttpUplink remoteHttpUplink = new RemoteHttpUplink(remoteHttpHostClient, link);
-    this.link.setLinkContext(remoteHttpUplink);
+    this.remoteHttpHostClient.didConnect();
     super.didConnect();
-    this.link.didConnect();
-    doRequest(new RemoteHttpRequester(this.remoteHttpHostClient, link));
   }
 }
 
 final class RemoteHttpPoller extends AbstractTimer implements TimerFunction {
 
   private final RemoteHttpHostClient remoteHttpHostClient;
-  private final HttpBinding link;
+  private final HttpRequest<?> request;
 
-  RemoteHttpPoller(RemoteHttpHostClient remoteHttpHostClient, HttpBinding link) {
+  RemoteHttpPoller(RemoteHttpHostClient remoteHttpHostClient, HttpRequest<?> request) {
     this.remoteHttpHostClient = remoteHttpHostClient;
-    this.link = link;
+    this.request = request;
   }
 
   @Override
   public void runTimer() {
-    this.remoteHttpHostClient.connect(link);
-    this.reschedule(RemoteHttpHostClient.POLL_INTERVAL);
+    remoteHttpHostClient.nextRequest(request);
   }
 }
 
 final class RemoteHttpRequester extends AbstractHttpRequester<Object> {
 
   private final RemoteHttpHostClient remoteHttpHostClient;
-  private final HttpBinding link;
+  private final HttpRequest<?> request;
 
-  RemoteHttpRequester(RemoteHttpHostClient remoteHttpHostClient, HttpBinding link) {
+  RemoteHttpRequester(RemoteHttpHostClient remoteHttpHostClient, HttpRequest<?> request) {
     this.remoteHttpHostClient = remoteHttpHostClient;
-    this.link = link;
+    this.request = request;
   }
 
   @Override
   public void doRequest() {
-    final HttpRequest<?> request = this.link.doRequest();
-    writeRequest(request);
+    final HttpRequest<?> request = this.remoteHttpHostClient.doRequest(this.request);
+    if (request != null) {
+      writeRequest(request);
+    }
   }
 
   @Override
   public void willRequest(HttpRequest<?> request) {
-    this.link.linkContext().willRequestUp(request);
+    this.remoteHttpHostClient.willRequest(request);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public void didRequest(HttpRequest<?> request) {
-    this.link.linkContext().didRequestUp((HttpRequest<Object>) request);
+    this.remoteHttpHostClient.didRequest(request);
   }
-
 
   @Override
   public void willRespond(HttpResponse<?> response) {
-    this.link.linkContext().willRespondUp(response);
+    this.remoteHttpHostClient.willRespond(request, response);
   }
 
   @Override
   public Decoder<Object> contentDecoder(HttpResponse<?> response) {
-    return this.link.decodeResponseDown(response);
+    return this.remoteHttpHostClient.contentDecoder(request, response);
   }
 
   @Override
   public void didRespond(HttpResponse<Object> response) {
-    this.link.linkContext().didRespondUp(response);
+    this.remoteHttpHostClient.didRespond(request, response);
   }
 
 }

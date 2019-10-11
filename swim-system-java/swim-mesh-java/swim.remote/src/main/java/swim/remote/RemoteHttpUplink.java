@@ -11,18 +11,24 @@ import swim.http.HttpResponse;
 import swim.runtime.HttpBinding;
 import swim.runtime.HttpContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.LinkKeys;
 import swim.runtime.NodeBinding;
 import swim.structure.Value;
 
 public class RemoteHttpUplink implements HttpContext {
 
   final RemoteHttpHostClient host;
-
   final HttpBinding link;
+  final Value linkKey;
 
-  public RemoteHttpUplink(RemoteHttpHostClient host, HttpBinding link) {
+  public RemoteHttpUplink(RemoteHttpHostClient host, HttpBinding link, Value linkKey) {
     this.host = host;
     this.link = link;
+    this.linkKey = linkKey.commit();
+  }
+
+  public RemoteHttpUplink(RemoteHttpHostClient host, HttpBinding link) {
+    this(host, link, LinkKeys.generateLinkKey());
   }
 
   @Override
@@ -46,7 +52,7 @@ public class RemoteHttpUplink implements HttpContext {
 
   @Override
   public Value linkKey() {
-    return this.linkKey();
+    return this.linkKey;
   }
 
   @Override
@@ -132,6 +138,10 @@ public class RemoteHttpUplink implements HttpContext {
   @Override
   public void didOpenDown() {
     // noop
+  }
+
+  public void didConnect() {
+    this.link.didConnect();
   }
 
   @Override

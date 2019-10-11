@@ -221,10 +221,10 @@ public class ClientRuntimeSpec {
           .observe(new CallbackController())
           .open();
       didRespond.await();
-      assertEquals(didConnect.getCount(), 0);
       assertEquals(willRequest.getCount(), 0);
       assertEquals(didRequest.getCount(), 0);
       assertEquals(willRespond.getCount(), 0);
+      assertEquals(didConnect.getCount(), 0);
     } finally {
       client.stop();
     }
