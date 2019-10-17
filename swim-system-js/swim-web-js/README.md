@@ -20,10 +20,10 @@ The **Swim Web** framework consists of the following component libraries:
 
 - [**@swim/web**](@swim/web) –
   umbrella package that depends on, and re-exports, all Swim Web libraries.
-- [**@swim/site**](@swim/site) –
+- [**@swim/website**](@swim/website) –
   minimalist components that implement common dynamic website behaviors.
-- [**@swim/app**](@swim/app) –
-  lightweight application loader that dynamically instantiates views and
+- [**@swim/webapp**](@swim/webapp) –
+  lightweight web application loader that dynamically instantiates views and
   controllers declared by `swim-` HTML attributes.
 
 **Swim Web** builds on the [**Swim Core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js)
@@ -149,39 +149,39 @@ swim-web-js $ bin/build.js compile
 
 To compile a subset of projects and targets, include a `--projects` (`-p`)
 option, with a comma-separated list of `$project:($target)?` specifiers.
-For example, to build the `main` target of the `app` project, and all
+For example, to build the `main` target of the `webapp` project, and all
 targets of the `web` project, run:
 
 ```sh
-swim-web-js $ bin/build.js compile -p app:main,web
+swim-web-js $ bin/build.js compile -p webapp:main,web
 ```
 
 ### Running tests
 
 Use the `test` build script command to compile and run unit tests.
-For example, to compile and test the `site` project, run:
+For example, to compile and test the `website` project, run:
 
 ```sh
-swim-web-js $ bin/build.js test -p site
+swim-web-js $ bin/build.js test -p website
 ```
 
 ### Continuous development builds
 
 Use the `watch` build script command to automatically rebuild projects when
 dependent source files change.  For example, to continuously recompile the
-`main` target of the `app` project when any source file in the project–or
+`main` target of the `webapp` project when any source file in the project–or
 in one of the project's transitive local dependencies–changes, run:
 
 ```sh
-swim-web-js $ bin/build.js watch -p app:main
+swim-web-js $ bin/build.js watch -p webapp:main
 ```
 
 Pass the `--devel` (`-d`) option to expedite recompilation by skipping the
 minification step.  Add the `--test` (`-t`) option to automatically run unit
 tests after each successful compilation.  For example, to continuosly compile
-and test the `site` project, bypassing minification, and skipping generation
+and test the `website` project, bypassing minification, and skipping generation
 of the main script, run:
 
 ```sh
-swim-web-js $ bin/build.js watch -p site:test -d -t
+swim-web-js $ bin/build.js watch -p website:test -d -t
 ```

@@ -28,13 +28,13 @@
       "@swim/view": ["../swim-ui-js/@swim/view/main"],
       "@swim/shape": ["../swim-ui-js/@swim/shape/main"],
       "@swim/typeset": ["../swim-ui-js/@swim/typeset/main"],
-      "@swim/site": ["@swim/site/main"],
-      "@swim/app": ["@swim/app/main"]
+      "@swim/website": ["@swim/website/main"],
+      "@swim/webapp": ["@swim/webapp/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
-    {"path": "../../site/main"},
-    {"path": "../../app/main"}
+    {"path": "../../website/main"},
+    {"path": "../../webapp/main"}
   ]
 }

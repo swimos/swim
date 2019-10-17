@@ -1,13 +1,13 @@
 {
-  "name": "@swim/site",
+  "name": "@swim/website",
   "version": "3.10.1",
   "description": "Minimalist components that implement common dynamic website behaviors",
-  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/site",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/website",
   "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2019 SWIM.AI inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-site.js",
+  "main": "dist/main/swim-website.js",
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {

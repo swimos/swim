@@ -19,14 +19,14 @@ HTML elements.  **@swim/web** is a part of the broader
 The **@swim/web** umbrella package depends on, and re-exports, the following
 component libraries:
 
-- [**@swim/site**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/site)
-  ([npm](https://www.npmjs.com/package/@swim/site),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_site.html)) –
+- [**@swim/website**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/website)
+  ([npm](https://www.npmjs.com/package/@swim/website),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_website.html)) –
   inimalist components that implement common dynamic website behaviors.
-- [**@swim/app**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/app)
-  ([npm](https://www.npmjs.com/package/@swim/app),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_app.html)) –
-  lightweight application loader that dynamically instantiates views and
+- [**@swim/webapp**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/webapp)
+  ([npm](https://www.npmjs.com/package/@swim/webapp),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_webapp.html)) –
+  lightweight web application loader that dynamically instantiates views and
   controllers declared by `swim-` HTML attributes.
 
 **@swim/web** builds on the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)

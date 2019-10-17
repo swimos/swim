@@ -320,5 +320,120 @@ export class Format {
     }
     return Format._lineSeparator;
   }
+
+  /** @hidden */
+  static readonly Prefixes: ReadonlyArray<string> = ["y", "z", "a", "f", "p", "n", "µ", "m", "", "k", "M", "G", "T", "P", "E"," Z", "Y"];
+
+  /**
+   * Returns a string representation of `value` scaled by its SI magnitude,
+   * keeping at most `precision` digits past the decimal place, appended with
+   * the appropriate SI prefix.
+   */
+  static prefix(value: number, precision: number = 1): string {
+    if (isFinite(value)) {
+      const exponential = Math.abs(value).toExponential();
+      const exponentIndex = exponential.indexOf("e");
+      const exponent = exponentIndex >= 0 ? +exponential.slice(exponentIndex + 1) : NaN;
+      const power = Math.min(Math.max(-8, Math.floor(exponent / 3)), 8) * 3;
+      const scaled = Math.pow(10, -power) * value;
+      let s = Format.trimTrailingZeros(Math.abs(scaled).toFixed(precision));
+      if (scaled < 0 && +s !== 0) {
+        s = "-" + s;
+      }
+      s += Format.Prefixes[8 + power / 3];
+      return s;
+    } else {
+      return "" + value;
+    }
+  }
+
+  /** @hidden */
+  static trimTrailingZeros(s: string): string {
+    let i0 = -1;
+    let i1: number | undefined;
+    for (let i = 1, n = s.length; i < n; i += 1) {
+      const c = s.charCodeAt(i);
+      if (c === 46/*'.'*/) {
+        i0 = i; // candidate start of trailing zeros
+        i1 = i; // candidate end of trailing zeros
+      } else if (c === 48/*'0'*/) {
+        if (i0 === 0) { // if after decimal
+          i0 = i; // new candidate start of trailing zeros
+        }
+        i1 = i; // new candidate end of trailing zeros
+      } else if (c >= 49/*'1'*/ && c <= 57/*'9'*/) {
+        if (i0 > 0) { // if non-zero digit after decimal
+          i0 = 0; // no candidate start of trailing zeros
+        }
+      } else if (i0 > 0) { // if non-numeric character after decimal
+        break; // accept current range of trailing zeros
+      }
+    }
+    if (i0 > 0) {
+      s = s.slice(0, i0) + s.slice(i1! + 1); // cut out trailing zeros
+    }
+    return s;
+  }
+
+  /**
+   * Returns a string representation of the duration represented by the given
+   * number of milliseconds.
+   */
+  static duration(millis: number, separator: string = " "): string {
+    if (isFinite(millis)) {
+      const SECOND = 1000;
+      const MINUTE = 60 * SECOND;
+      const HOUR = 60 * MINUTE;
+      const DAY = 24 * HOUR;
+      const WEEK = 7 * DAY;
+      let weeks: number | undefined;
+      if (millis > WEEK) {
+        weeks = Math.floor(millis / WEEK);
+        millis %= WEEK;
+      }
+      let days: number | undefined;
+      if (millis > DAY) {
+        days = Math.floor(millis / DAY);
+        millis %= DAY;
+      }
+      let hours: number | undefined;
+      if (millis > HOUR) {
+        hours = Math.floor(millis / HOUR);
+        millis %= HOUR;
+      }
+      let minutes: number | undefined;
+      if (millis > MINUTE) {
+        minutes = Math.floor(millis / MINUTE);
+        millis %= MINUTE;
+      }
+      let seconds: number | undefined;
+      if (millis > SECOND) {
+        seconds = Math.floor(millis / SECOND);
+        millis %= SECOND;
+      }
+      let s = "";
+      if (weeks !== void 0) {
+        s += weeks + "w";
+      }
+      if (days !== void 0) {
+        s += (s ? separator : "") + days + "d";
+      }
+      if (hours !== void 0) {
+        s += (s ? separator : "") + hours + "h";
+      }
+      if (minutes !== void 0) {
+        s += (s ? separator : "") + minutes + "m";
+      }
+      if (seconds !== void 0 || !millis) {
+        s += (s ? separator : "") + (seconds || 0) + "s";
+      }
+      if (millis && !s) {
+        s += millis + "ms";
+      }
+      return s;
+    } else {
+      return "" + millis;
+    }
+  }
 }
 Tag.Format = Format;

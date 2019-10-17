@@ -254,14 +254,14 @@ libraries:
   ([npm](https://www.npmjs.com/package/@swim/web),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_web.html)) –
   thin web application framework built on the **@swim/ui** toolkit.
-- [**@swim/site**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/site)
-  ([npm](https://www.npmjs.com/package/@swim/site),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_site.html)) –
+- [**@swim/website**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/website)
+  ([npm](https://www.npmjs.com/package/@swim/website),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_website.html)) –
   minimalist components that implement common dynamic website behaviors.
-- [**@swim/app**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/app)
-  ([npm](https://www.npmjs.com/package/@swim/app),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_app.html)) –
-  lightweight application loader that dynamically instantiates views and
+- [**@swim/webapp**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/webapp)
+  ([npm](https://www.npmjs.com/package/@swim/webapp),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_webapp.html)) –
+  lightweight web application loader that dynamically instantiates views and
   controllers declared by `swim-` HTML attributes.
 
 ## Installation

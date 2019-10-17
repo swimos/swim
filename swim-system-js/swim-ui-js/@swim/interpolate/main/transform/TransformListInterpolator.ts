@@ -70,3 +70,4 @@ export class TransformListInterpolator extends TransformInterpolator<TransformLi
     return false;
   }
 }
+TransformInterpolator.List = TransformListInterpolator;

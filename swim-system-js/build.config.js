@@ -572,9 +572,9 @@ const ux = [
 
 const web = [
   {
-    id: "site",
-    name: "@swim/site",
-    path: "swim-web-js/@swim/site",
+    id: "website",
+    name: "@swim/website",
+    path: "swim-web-js/@swim/website",
     targets: [
       {
         id: "main",
@@ -583,9 +583,9 @@ const web = [
     ],
   },
   {
-    id: "app",
-    name: "@swim/app",
-    path: "swim-web-js/@swim/app",
+    id: "webapp",
+    name: "@swim/webapp",
+    path: "swim-web-js/@swim/webapp",
     targets: [
       {
         id: "main",
@@ -602,7 +602,7 @@ const web = [
     targets: [
       {
         id: "main",
-        deps: ["site", "app"],
+        deps: ["website", "webapp"],
       },
     ],
   },

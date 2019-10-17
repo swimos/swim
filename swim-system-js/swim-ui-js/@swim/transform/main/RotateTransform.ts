@@ -115,6 +115,10 @@ export class RotateTransform extends Transform {
     return "rotate(" + this._a + ")";
   }
 
+  toAttributeString(): string {
+    return "rotate(" + this._a.degValue() + ")";
+  }
+
   private static _hashSeed?: number;
 
   static fromAny(value: RotateTransform | string): RotateTransform {

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "@swim/site";
-export * from "@swim/app";
+export * from "@swim/website";
+export * from "@swim/webapp";
 
-import {WebAppView} from "@swim/app";
+import {WebAppView} from "@swim/webapp";
 if (typeof document !== "undefined") {
   document.addEventListener("DOMContentLoaded", function (event: Event): void {
     WebAppView.boot();

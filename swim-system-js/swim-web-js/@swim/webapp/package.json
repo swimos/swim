@@ -1,13 +1,13 @@
 {
-  "name": "@swim/app",
+  "name": "@swim/webapp",
   "version": "3.10.1",
-  "description": "Lightweight application loader that dynamically instantiates views and controllers declared by HTML attributes",
-  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/app",
+  "description": "Lightweight web application loader that dynamically instantiates views and controllers declared by HTML attributes",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/webapp",
   "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2019 SWIM.AI inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
-  "main": "dist/main/swim-app.js",
+  "main": "dist/main/swim-webapp.js",
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
