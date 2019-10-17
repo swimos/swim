@@ -157,6 +157,8 @@ public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View exte
   @SuppressWarnings("unchecked")
   @Override
   public void run() {
+    final Stage stage = this.stage;
+    final long t0 = System.nanoTime();
     try {
       if (this.viewCount == 1) {
         pass((View) views);
@@ -169,6 +171,10 @@ public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View exte
       } else {
         throw error;
       }
+    }
+    final long dt = System.nanoTime() - t0;
+    if (stage == null) {
+      this.model.accumulateExecTime(dt);
     }
   }
 }

@@ -231,6 +231,11 @@ public class NodeProxy implements NodeBinding, NodeContext {
   }
 
   @Override
+  public void reportDown(Metric metric) {
+    this.nodeContext.reportDown(metric);
+  }
+
+  @Override
   public void openUplink(LinkBinding link) {
     this.nodeBinding.openUplink(link);
   }
@@ -317,7 +322,7 @@ public class NodeProxy implements NodeBinding, NodeContext {
 
   @Override
   public void close() {
-    this.nodeBinding.close();
+    this.nodeContext.close();
   }
 
   @Override

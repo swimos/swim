@@ -109,6 +109,16 @@ public class HttpProxy implements HttpBinding, HttpContext {
   }
 
   @Override
+  public LinkAddress cellAddressDown() {
+    return this.linkBinding.cellAddressDown();
+  }
+
+  @Override
+  public LinkAddress cellAddressUp() {
+    return this.linkContext.cellAddressUp();
+  }
+
+  @Override
   public boolean isConnectedDown() {
     return this.linkBinding.isConnectedDown();
   }

@@ -31,6 +31,7 @@ import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
 import swim.runtime.MeshBinding;
+import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartAddress;
@@ -230,6 +231,11 @@ public class MeshTablePart implements PartContext {
   @Override
   public void pushDown(PushRequest pushRequest) {
     this.mesh.pushDown(pushRequest);
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    this.mesh.reportDown(metric);
   }
 
   @Override

@@ -21,7 +21,7 @@ import swim.codec.Output;
 import swim.util.HashGenCacheMap;
 import swim.util.Murmur3;
 
-public class UriFragment implements Comparable<UriFragment>, Debug, Display {
+public class UriFragment extends UriPart implements Comparable<UriFragment>, Debug, Display {
   protected final String identifier;
   String string;
 

@@ -20,7 +20,7 @@ import swim.codec.Format;
 import swim.codec.Output;
 import swim.util.Murmur3;
 
-public class UriAuthority implements Comparable<UriAuthority>, Debug, Display {
+public class UriAuthority extends UriPart implements Comparable<UriAuthority>, Debug, Display {
   protected final UriUser user;
   protected final UriHost host;
   protected final UriPort port;

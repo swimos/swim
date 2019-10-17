@@ -14,9 +14,6 @@
 
 package swim.runtime.reflect;
 
-import java.util.AbstractMap;
-import java.util.Iterator;
-import java.util.Map;
 import swim.runtime.LaneBinding;
 import swim.structure.Form;
 import swim.structure.Item;
@@ -48,10 +45,6 @@ public class LaneInfo {
 
   public static LaneInfo from(LaneBinding laneBinding) {
     return new LaneInfo(laneBinding.laneUri(), laneBinding.laneType());
-  }
-
-  public static Iterator<Map.Entry<Uri, LaneInfo>> iterator(Iterator<Map.Entry<Uri, LaneBinding>> laneBindings) {
-    return new LaneBindingInfoIterator(laneBindings);
   }
 
   private static Form<LaneInfo> form;
@@ -92,32 +85,5 @@ final class LaneInfoForm extends Form<LaneInfo> {
       return new LaneInfo(laneUri, laneType);
     }
     return null;
-  }
-}
-
-final class LaneBindingInfoIterator implements Iterator<Map.Entry<Uri, LaneInfo>> {
-  final Iterator<Map.Entry<Uri, LaneBinding>> laneBindings;
-
-  LaneBindingInfoIterator(Iterator<Map.Entry<Uri, LaneBinding>> laneBindings) {
-    this.laneBindings = laneBindings;
-  }
-
-  @Override
-  public boolean hasNext() {
-    return laneBindings.hasNext();
-  }
-
-  @Override
-  public Map.Entry<Uri, LaneInfo> next() {
-    final Map.Entry<Uri, LaneBinding> entry = this.laneBindings.next();
-    final Uri laneUri = entry.getKey();
-    final LaneBinding laneBinding = entry.getValue();
-    final LaneInfo laneInfo = LaneInfo.from(laneBinding);
-    return new AbstractMap.SimpleImmutableEntry<Uri, LaneInfo>(laneUri, laneInfo);
-  }
-
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
   }
 }

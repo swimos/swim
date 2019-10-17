@@ -45,6 +45,8 @@ public interface LinkBinding {
 
   Value linkKey();
 
+  LinkAddress cellAddressDown();
+
   boolean isConnectedDown();
 
   boolean isRemoteDown();

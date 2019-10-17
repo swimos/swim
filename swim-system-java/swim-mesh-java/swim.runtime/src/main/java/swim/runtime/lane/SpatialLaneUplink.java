@@ -14,21 +14,21 @@
 
 package swim.runtime.lane;
 
-import java.util.Iterator;
-import java.util.Map;
 import swim.concurrent.Stage;
+import swim.runtime.UplinkAddress;
 import swim.runtime.WarpBinding;
-import swim.runtime.warp.PartialUplinkModem;
+import swim.runtime.warp.MapUplinkModem;
 import swim.structure.Attr;
 import swim.structure.Record;
 import swim.structure.Value;
 import swim.warp.SyncRequest;
 
-public class SpatialLaneUplink<S> extends PartialUplinkModem {
+public class SpatialLaneUplink<S> extends MapUplinkModem {
   final SpatialLaneModel<S> laneBinding;
 
-  public SpatialLaneUplink(SpatialLaneModel<S> laneBinding, WarpBinding linkBinding) {
-    super(linkBinding);
+  public SpatialLaneUplink(SpatialLaneModel<S> laneBinding, WarpBinding linkBinding,
+                           UplinkAddress uplinkAddress) {
+    super(linkBinding, uplinkAddress);
     this.laneBinding = laneBinding;
   }
 
@@ -52,10 +52,9 @@ public class SpatialLaneUplink<S> extends PartialUplinkModem {
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected void willSync(SyncRequest request) {
-    syncDown((Iterator<Map.Entry<Value, Value>>) (Iterator<?>) this.laneBinding.iterator());
+    syncDown(this.laneBinding.keyIterator());
     super.willSync(request);
   }
 }

@@ -26,6 +26,7 @@ import swim.http.HttpResponse;
 import swim.http.HttpStatus;
 import swim.runtime.HttpBinding;
 import swim.runtime.HttpContext;
+import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
 import swim.runtime.NodeBinding;
 import swim.structure.Value;
@@ -59,6 +60,11 @@ public class HttpErrorUplinkModem implements HttpContext {
   @Override
   public Value linkKey() {
     return Value.absent(); // never opened
+  }
+
+  @Override
+  public LinkAddress cellAddressUp() {
+    return null;
   }
 
   @Override

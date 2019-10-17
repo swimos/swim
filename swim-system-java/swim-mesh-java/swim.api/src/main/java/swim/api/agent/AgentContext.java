@@ -104,19 +104,19 @@ public interface AgentContext extends SwimRef, LaneFactory, Store, Log {
 
   <A extends Agent> A getAgent(Class<? extends A> agentClass);
 
-  <A extends Agent> A addAgent(Value id, Value props, AgentFactory<A> agentFactory);
+  <A extends Agent> A openAgent(Value id, Value props, AgentFactory<A> agentFactory);
 
-  <A extends Agent> A addAgent(Value id, AgentFactory<A> agentFactory);
+  <A extends Agent> A openAgent(Value id, AgentFactory<A> agentFactory);
 
-  <A extends Agent> A addAgent(String name, AgentFactory<A> agentFactory);
+  <A extends Agent> A openAgent(String name, AgentFactory<A> agentFactory);
 
-  <A extends Agent> A addAgent(Value id, Value props, Class<? extends A> agentClass);
+  <A extends Agent> A openAgent(Value id, Value props, Class<? extends A> agentClass);
 
-  <A extends Agent> A addAgent(Value id, Class<? extends A> agentClass);
+  <A extends Agent> A openAgent(Value id, Class<? extends A> agentClass);
 
-  <A extends Agent> A addAgent(String name, Class<? extends A> agentClass);
+  <A extends Agent> A openAgent(String name, Class<? extends A> agentClass);
 
-  void removeAgent(Value id);
+  void closeAgent(Value id);
 
-  void removeAgent(String name);
+  void closeAgent(String name);
 }

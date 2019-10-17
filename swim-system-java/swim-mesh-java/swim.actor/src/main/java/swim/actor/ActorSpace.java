@@ -56,6 +56,7 @@ import swim.runtime.LogDef;
 import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshDef;
+import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeDef;
@@ -806,6 +807,11 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   @Override
   public void pushDown(PushRequest pushRequest) {
     this.edge.pushDown(pushRequest);
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    this.kernel.reportDown(metric);
   }
 
   @Override

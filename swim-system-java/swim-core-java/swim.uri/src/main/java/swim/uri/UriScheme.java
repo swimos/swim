@@ -20,7 +20,7 @@ import swim.codec.Output;
 import swim.util.HashGenCacheMap;
 import swim.util.Murmur3;
 
-public class UriScheme implements Comparable<UriScheme>, Debug, Display {
+public class UriScheme extends UriPart implements Comparable<UriScheme>, Debug, Display {
   protected final String name;
 
   protected UriScheme(String name) {

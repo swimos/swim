@@ -15,14 +15,13 @@
 package swim.runtime.lane;
 
 import java.util.Iterator;
-import java.util.Map;
 import swim.api.Lane;
 import swim.api.Link;
 import swim.api.SwimContext;
 import swim.api.agent.AgentContext;
 import swim.api.lane.DemandMapLane;
 import swim.api.lane.function.OnCueKey;
-import swim.api.lane.function.OnSyncMap;
+import swim.api.lane.function.OnSyncKeys;
 import swim.api.warp.WarpUplink;
 import swim.api.warp.function.DidCommand;
 import swim.api.warp.function.DidEnter;
@@ -35,7 +34,6 @@ import swim.api.warp.function.WillUplink;
 import swim.concurrent.Conts;
 import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
-import swim.structure.Slot;
 import swim.structure.Value;
 
 public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLane<K, V> {
@@ -116,7 +114,7 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   }
 
   protected Object typesafeObservers(Object observers) {
-    // TODO: filter out OnCueKey, OnSyncMap
+    // TODO: filter out OnCueKey, OnSyncKeys
     return observers;
   }
 
@@ -143,7 +141,7 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   }
 
   @Override
-  public DemandMapLaneView<K, V> onSync(OnSyncMap<K, V> onSync) {
+  public DemandMapLaneView<K, V> onSync(OnSyncKeys<K> onSync) {
     return observe(onSync);
   }
 
@@ -234,16 +232,16 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   }
 
   @SuppressWarnings("unchecked")
-  public Iterator<Map.Entry<K, V>> dispatchOnSync(WarpUplink uplink) {
+  public Iterator<K> dispatchOnSync(WarpUplink uplink) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     SwimContext.setLane(this);
     SwimContext.setLink(uplink);
     try {
       final Object observers = this.observers;
-      if (observers instanceof OnSyncMap<?, ?>) {
+      if (observers instanceof OnSyncKeys<?>) {
         try {
-          final Iterator<Map.Entry<K, V>> iterator = ((OnSyncMap<K, V>) observers).onSync(uplink);
+          final Iterator<K> iterator = ((OnSyncKeys<K>) observers).onSync(uplink);
           if (iterator != null) {
             return iterator;
           }
@@ -257,9 +255,9 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
         final Object[] array = (Object[]) observers;
         for (int i = 0, n = array.length; i < n; i += 1) {
           final Object observer = array[i];
-          if (observer instanceof OnSyncMap<?, ?>) {
+          if (observer instanceof OnSyncKeys<?>) {
             try {
-              final Iterator<Map.Entry<K, V>> iterator = ((OnSyncMap<K, V>) observer).onSync(uplink);
+              final Iterator<K> iterator = ((OnSyncKeys<K>) observer).onSync(uplink);
               if (iterator != null) {
                 return iterator;
               }
@@ -290,13 +288,13 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   }
 
   @SuppressWarnings("unchecked")
-  Iterator<Map.Entry<Value, Value>> syncKeys(WarpUplink uplink) {
-    final Iterator<Map.Entry<K, V>> iterator = dispatchOnSync(uplink);
-    if (iterator != null) {
+  Iterator<Value> syncKeys(WarpUplink uplink) {
+    final Iterator<K> keyIterator = dispatchOnSync(uplink);
+    if (keyIterator != null) {
       if (this.keyForm == Form.forValue() && this.valueForm == Form.forValue()) {
-        return (Iterator<Map.Entry<Value, Value>>) (Iterator<?>) iterator;
+        return (Iterator<Value>) (Iterator<?>) keyIterator;
       } else {
-        return new DemandMapLaneIterator<K, V>(iterator, this.keyForm, this.valueForm);
+        return new DemandMapLaneKeyIterator<K>(keyIterator, this.keyForm);
       }
     }
     return null;
@@ -313,15 +311,13 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   }
 }
 
-final class DemandMapLaneIterator<K, V> implements Iterator<Map.Entry<Value, Value>> {
-  final Iterator<Map.Entry<K, V>> inner;
+final class DemandMapLaneKeyIterator<K> implements Iterator<Value> {
+  final Iterator<K> inner;
   final Form<K> keyForm;
-  final Form<V> valueForm;
 
-  DemandMapLaneIterator(Iterator<Map.Entry<K, V>> inner, Form<K> keyForm, Form<V> valueForm) {
+  DemandMapLaneKeyIterator(Iterator<K> inner, Form<K> keyForm) {
     this.inner = inner;
     this.keyForm = keyForm;
-    this.valueForm = valueForm;
   }
 
   @Override
@@ -330,11 +326,8 @@ final class DemandMapLaneIterator<K, V> implements Iterator<Map.Entry<Value, Val
   }
 
   @Override
-  public Map.Entry<Value, Value> next() {
-    final Map.Entry<K, V> entry = this.inner.next();
-    final Value key = this.keyForm.mold(entry.getKey()).toValue();
-    final Value value = this.valueForm.mold(entry.getValue()).toValue();
-    return Slot.of(key, value);
+  public Value next() {
+    return this.keyForm.mold(this.inner.next()).toValue();
   }
 
   @Override

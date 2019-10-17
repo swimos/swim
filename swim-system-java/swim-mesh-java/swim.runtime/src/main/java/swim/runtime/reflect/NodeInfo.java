@@ -14,9 +14,6 @@
 
 package swim.runtime.reflect;
 
-import java.util.AbstractMap;
-import java.util.Iterator;
-import java.util.Map;
 import swim.runtime.NodeBinding;
 import swim.structure.Form;
 import swim.structure.Item;
@@ -28,10 +25,12 @@ import swim.uri.Uri;
 public class NodeInfo {
   protected final Uri nodeUri;
   protected final long created;
+  protected final long childCount;
 
-  public NodeInfo(Uri nodeUri, long created) {
+  public NodeInfo(Uri nodeUri, long created, long childCount) {
     this.nodeUri = nodeUri;
     this.created = created;
+    this.childCount = childCount;
   }
 
   public final Uri nodeUri() {
@@ -42,16 +41,20 @@ public class NodeInfo {
     return this.created;
   }
 
+  public final long childCount() {
+    return this.childCount;
+  }
+
   public Value toValue() {
     return form().mold(this).toValue();
   }
 
-  public static NodeInfo from(NodeBinding nodeBinding) {
-    return new NodeInfo(nodeBinding.nodeUri(), nodeBinding.createdTime());
+  public static NodeInfo from(NodeBinding nodeBinding, long childCount) {
+    return new NodeInfo(nodeBinding.nodeUri(), nodeBinding.createdTime(), childCount);
   }
 
-  public static Iterator<Map.Entry<Uri, NodeInfo>> iterator(Iterator<Map.Entry<Uri, NodeBinding>> nodeBindings) {
-    return new NodeBindingInfoIterator(nodeBindings);
+  public static NodeInfo from(NodeBinding nodeBinding) {
+    return from(nodeBinding, 0L);
   }
 
   private static Form<NodeInfo> form;
@@ -74,9 +77,12 @@ final class NodeInfoForm extends Form<NodeInfo> {
   @Override
   public Item mold(NodeInfo info) {
     if (info != null) {
-      final Record record = Record.create(2);
+      final Record record = Record.create(3);
       record.slot("nodeUri", info.nodeUri.toString());
       record.slot("created", info.created);
+      if (info.childCount != 0L) {
+        record.slot("childCount", info.childCount);
+      }
       return record;
     } else {
       return Item.extant();
@@ -89,35 +95,9 @@ final class NodeInfoForm extends Form<NodeInfo> {
     final Uri nodeUri = Uri.form().cast(value.get("nodeUri"));
     if (nodeUri != null) {
       final long created = value.get("created").longValue(0L);
-      return new NodeInfo(nodeUri, created);
+      final long childCount = value.get("childCount").longValue(0L);
+      return new NodeInfo(nodeUri, created, childCount);
     }
     return null;
-  }
-}
-
-final class NodeBindingInfoIterator implements Iterator<Map.Entry<Uri, NodeInfo>> {
-  final Iterator<Map.Entry<Uri, NodeBinding>> nodeBindings;
-
-  NodeBindingInfoIterator(Iterator<Map.Entry<Uri, NodeBinding>> nodeBindings) {
-    this.nodeBindings = nodeBindings;
-  }
-
-  @Override
-  public boolean hasNext() {
-    return nodeBindings.hasNext();
-  }
-
-  @Override
-  public Map.Entry<Uri, NodeInfo> next() {
-    final Map.Entry<Uri, NodeBinding> entry = this.nodeBindings.next();
-    final Uri nodeUri = entry.getKey();
-    final NodeBinding nodeBinding = entry.getValue();
-    final NodeInfo nodeInfo = NodeInfo.from(nodeBinding);
-    return new AbstractMap.SimpleImmutableEntry<Uri, NodeInfo>(nodeUri, nodeInfo);
-  }
-
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
   }
 }

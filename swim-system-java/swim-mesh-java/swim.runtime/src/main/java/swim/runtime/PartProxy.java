@@ -278,6 +278,11 @@ public class PartProxy implements PartBinding, PartContext {
   }
 
   @Override
+  public void reportDown(Metric metric) {
+    this.partContext.reportDown(metric);
+  }
+
+  @Override
   public void openUplink(LinkBinding link) {
     this.partBinding.openUplink(link);
   }
@@ -364,7 +369,7 @@ public class PartProxy implements PartBinding, PartContext {
 
   @Override
   public void close() {
-    this.partBinding.close();
+    this.partContext.close();
   }
 
   @Override

@@ -21,6 +21,7 @@ import swim.concurrent.Stage;
 import swim.runtime.CellAddress;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
 import swim.runtime.PushRequest;
 import swim.store.StoreBinding;
@@ -97,6 +98,10 @@ public class TestCellContext implements CellContext {
 
   @Override
   public void pushDown(PushRequest pushRequest) {
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
   }
 
   @Override

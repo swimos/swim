@@ -22,14 +22,11 @@ import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
 import swim.runtime.HostBinding;
 import swim.runtime.LaneBinding;
-import swim.runtime.LinkBinding;
 import swim.runtime.LinkContext;
 import swim.runtime.MeshBinding;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
-import swim.runtime.NodeContext;
 import swim.runtime.PartBinding;
-import swim.runtime.agent.AgentNode;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriPath;
@@ -71,6 +68,10 @@ public class MetaKernel extends KernelProxy {
   protected NodeBinding createMeta(EdgeBinding edge, UriPath nodePath) {
     if (!nodePath.isEmpty()) {
       if ("meta:edge".equals(nodePath.head())) {
+        nodePath = nodePath.tail(); // drop meta:edge
+        if (!nodePath.isEmpty()) {
+          nodePath = nodePath.tail(); // drop /
+        }
         return createMetaEdge(edge, nodePath);
       } else if ("meta:mesh".equals(nodePath.head())) {
         nodePath = nodePath.tail(); // drop meta:mesh
@@ -354,117 +355,5 @@ public class MetaKernel extends KernelProxy {
       return new MetaKernel(kernelPriority);
     }
     return null;
-  }
-}
-
-final class MetaEdgeAgent extends AgentNode {
-  final EdgeBinding edge;
-
-  MetaEdgeAgent(EdgeBinding edge) {
-    this.edge = edge;
-  }
-
-  @Override
-  public void setNodeContext(NodeContext nodeContext) {
-    super.setNodeContext(nodeContext);
-    this.edge.openMetaEdge(this.edge, this);
-  }
-}
-
-final class MetaMeshAgent extends AgentNode {
-  final MeshBinding mesh;
-
-  MetaMeshAgent(MeshBinding mesh) {
-    this.mesh = mesh;
-  }
-
-  @Override
-  public void setNodeContext(NodeContext nodeContext) {
-    super.setNodeContext(nodeContext);
-    this.mesh.openMetaMesh(this.mesh, this);
-  }
-}
-
-final class MetaPartAgent extends AgentNode {
-  final PartBinding part;
-
-  MetaPartAgent(PartBinding part) {
-    this.part = part;
-  }
-
-  @Override
-  public void setNodeContext(NodeContext nodeContext) {
-    super.setNodeContext(nodeContext);
-    this.part.openMetaPart(this.part, this);
-  }
-}
-
-final class MetaHostAgent extends AgentNode {
-  final HostBinding host;
-
-  MetaHostAgent(HostBinding host) {
-    this.host = host;
-  }
-
-  @Override
-  public void setNodeContext(NodeContext nodeContext) {
-    super.setNodeContext(nodeContext);
-    this.host.openMetaHost(this.host, this);
-  }
-}
-
-final class MetaNodeAgent extends AgentNode {
-  final NodeBinding node;
-
-  MetaNodeAgent(NodeBinding node) {
-    this.node = node;
-  }
-
-  @Override
-  public void setNodeContext(NodeContext nodeContext) {
-    super.setNodeContext(nodeContext);
-    this.node.openMetaNode(this.node, this);
-  }
-}
-
-final class MetaLaneAgent extends AgentNode {
-  final LaneBinding lane;
-
-  MetaLaneAgent(LaneBinding lane) {
-    this.lane = lane;
-  }
-
-  @Override
-  public void setNodeContext(NodeContext nodeContext) {
-    super.setNodeContext(nodeContext);
-    this.lane.openMetaLane(this.lane, this);
-  }
-}
-
-final class MetaUplinkAgent extends AgentNode {
-  final LinkContext uplink;
-
-  MetaUplinkAgent(LinkContext uplink) {
-    this.uplink = uplink;
-  }
-
-  @Override
-  public void setNodeContext(NodeContext nodeContext) {
-    super.setNodeContext(nodeContext);
-    this.uplink.openMetaUplink(this.uplink.linkWrapper(), this);
-  }
-}
-
-final class MetaDownlinkAgent extends AgentNode {
-  final LinkBinding downlink;
-
-  MetaDownlinkAgent(LinkBinding downlink) {
-    this.downlink = downlink;
-  }
-
-  @Override
-  public void setNodeContext(NodeContext nodeContext) {
-    super.setNodeContext(nodeContext);
-    this.downlink.openMetaDownlink(this.downlink, this);
   }
 }

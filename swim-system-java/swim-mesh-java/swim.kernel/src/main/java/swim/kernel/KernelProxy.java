@@ -56,6 +56,7 @@ import swim.runtime.LogDef;
 import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshDef;
+import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeDef;
@@ -675,6 +676,14 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
     final KernelContext kernelContext = this.kernelContext;
     if (kernelContext != null) {
       kernelContext.openMetaDownlink(downlink, metaDownlink);
+    }
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    final KernelContext kernelContext = this.kernelContext;
+    if (kernelContext != null) {
+      kernelContext.reportDown(metric);
     }
   }
 

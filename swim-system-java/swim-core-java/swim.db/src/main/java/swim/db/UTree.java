@@ -139,9 +139,9 @@ public final class UTree extends Tree {
   }
 
   @Override
-  public UTree evacuated(int zone, long version) {
+  public UTree evacuated(int post, long version) {
     final UTreePageRef oldRootRef = this.rootRef;
-    final UTreePageRef newRootRef = oldRootRef.evacuated(zone, version);
+    final UTreePageRef newRootRef = oldRootRef.evacuated(post, version);
     if (oldRootRef != newRootRef) {
       return new UTree(this.treeContext, newRootRef, this.seed, this.isResident, this.isTransient);
     } else {

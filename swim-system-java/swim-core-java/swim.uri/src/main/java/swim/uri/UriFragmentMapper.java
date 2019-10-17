@@ -15,6 +15,13 @@
 package swim.uri;
 
 abstract class UriFragmentMapper<T> extends UriQueryMapper<T> {
+  abstract UriMapper<T> getSuffix(UriFragment fragment);
+
+  @Override
+  UriMapper<T> getSuffix(UriQuery query, UriFragment fragment) {
+    return getSuffix(fragment);
+  }
+
   abstract T get(UriFragment fragment);
 
   @Override

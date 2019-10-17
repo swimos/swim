@@ -29,7 +29,7 @@ public class CommandLaneModel extends WarpLaneModel<CommandLaneView<?>, CommandL
 
   @Override
   protected CommandLaneUplink createWarpUplink(WarpBinding link) {
-    return new CommandLaneUplink(this, link);
+    return new CommandLaneUplink(this, link, createUplinkAddress(link));
   }
 
   @Override

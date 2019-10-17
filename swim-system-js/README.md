@@ -173,10 +173,10 @@ libraries:
 
 - [**@swim/web**](swim-web-js/@swim/web) –
   umbrella package that depends on, and re-exports, all **Swim Web** libraries.
-- [**@swim/site**](swim-web-js/@swim/site) –
+- [**@swim/website**](swim-web-js/@swim/website) –
   minimalist components that implement common dynamic website behaviors.
-- [**@swim/app**](swim-web-js/@swim/app) –
-  lightweight application loader that dynamically instantiates views and
+- [**@swim/webapp**](swim-web-js/@swim/webapp) –
+  lightweight web application loader that dynamically instantiates views and
   controllers declared by `swim-` HTML attributes.
 
 ## Installation

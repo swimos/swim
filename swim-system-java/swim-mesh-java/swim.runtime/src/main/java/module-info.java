@@ -33,6 +33,7 @@ module swim.runtime {
   exports swim.runtime.downlink;
   exports swim.runtime.http;
   exports swim.runtime.lane;
+  exports swim.runtime.profile;
   exports swim.runtime.reflect;
   exports swim.runtime.router;
   exports swim.runtime.scope;

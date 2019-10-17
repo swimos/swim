@@ -8,8 +8,10 @@ import swim.api.auth.Identity;
 import swim.codec.Decoder;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
+import swim.runtime.DownlinkAddress;
 import swim.runtime.HttpBinding;
 import swim.runtime.HttpContext;
+import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
 import swim.runtime.LinkKeys;
 import swim.runtime.NodeBinding;
@@ -53,6 +55,11 @@ public class RemoteHttpUplink implements HttpContext {
   @Override
   public Value linkKey() {
     return this.linkKey;
+  }
+
+  @Override
+  public LinkAddress cellAddressUp() {
+    return new DownlinkAddress(this.host.cellAddress(), linkKey());
   }
 
   @Override

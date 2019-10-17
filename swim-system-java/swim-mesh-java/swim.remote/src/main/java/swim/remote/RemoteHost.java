@@ -14,7 +14,6 @@
 
 package swim.remote;
 
-import swim.collections.HashTrieMap;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
@@ -28,6 +27,7 @@ import swim.runtime.TierContext;
 import swim.runtime.agent.AgentNode;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.uri.UriMapper;
 
 public abstract class RemoteHost extends AbstractTierBinding implements HostBinding {
 
@@ -149,8 +149,8 @@ public abstract class RemoteHost extends AbstractTierBinding implements HostBind
   }
 
   @Override
-  public HashTrieMap<Uri, NodeBinding> nodes() {
-    return HashTrieMap.empty();
+  public UriMapper<NodeBinding> nodes() {
+    return UriMapper.<NodeBinding>empty();
   }
 
   @Override

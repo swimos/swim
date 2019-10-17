@@ -42,7 +42,7 @@ public final class DirectoryRoute implements WebRoute {
       path = path.tail();
     }
     path = this.directory.appended(path).removeDotSegments();
-    if (path.isSubpathOf(this.directory)) {
+    if (path.isRelativeTo(this.directory)) {
       try {
         final HttpBody<Object> body = HttpBody.fromFile(path.toString());
         final HttpResponse<Object> response = HttpResponse.from(HttpStatus.OK).content(body);

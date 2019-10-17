@@ -514,11 +514,17 @@ export class HtmlView extends ElementView implements LayoutView {
   @AttributeAnimator("checked", Boolean)
   checked: AttributeAnimator<this, boolean, boolean | string>;
 
+  @AttributeAnimator("colspan", Number)
+  colspan: AttributeAnimator<this, number, number | string>;
+
   @AttributeAnimator("disabled", Boolean)
   disabled: AttributeAnimator<this, boolean, boolean | string>;
 
   @AttributeAnimator("placeholder", String)
   placeholder: AttributeAnimator<this, string>;
+
+  @AttributeAnimator("rowspan", Number)
+  rowspan: AttributeAnimator<this, number, number | string>;
 
   @AttributeAnimator("selected", Boolean)
   selected: AttributeAnimator<this, boolean, boolean | string>;

@@ -1,7 +1,7 @@
 const web = [
   {
-    id: "site",
-    name: "@swim/site",
+    id: "website",
+    name: "@swim/website",
     targets: [
       {
         id: "main",
@@ -9,8 +9,8 @@ const web = [
     ],
   },
   {
-    id: "app",
-    name: "@swim/app",
+    id: "webapp",
+    name: "@swim/webapp",
     targets: [
       {
         id: "main",
@@ -25,7 +25,7 @@ const web = [
     targets: [
       {
         id: "main",
-        deps: ["site", "app"],
+        deps: ["website", "webapp"],
       },
     ],
   },

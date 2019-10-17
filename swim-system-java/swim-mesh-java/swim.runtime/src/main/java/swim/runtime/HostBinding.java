@@ -14,9 +14,9 @@
 
 package swim.runtime;
 
-import swim.collections.HashTrieMap;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.uri.UriMapper;
 
 public interface HostBinding extends TierBinding, CellBinding {
   PartBinding part();
@@ -61,7 +61,7 @@ public interface HostBinding extends TierBinding, CellBinding {
 
   void openMetaHost(HostBinding host, NodeBinding metaHost);
 
-  HashTrieMap<Uri, NodeBinding> nodes();
+  UriMapper<NodeBinding> nodes();
 
   NodeBinding getNode(Uri nodeUri);
 

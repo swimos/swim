@@ -46,6 +46,7 @@ import swim.math.Z2Form;
 import swim.runtime.AbstractTierBinding;
 import swim.runtime.LaneView;
 import swim.runtime.LinkBinding;
+import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.PushRequest;
@@ -226,37 +227,37 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
 
   @SuppressWarnings("unchecked")
   @Override
-  public <A extends Agent> A addAgent(Value id, Value props, AgentFactory<A> agentFactory) {
-    return this.node.addAgent(id, props, agentFactory);
+  public <A extends Agent> A openAgent(Value id, Value props, AgentFactory<A> agentFactory) {
+    return this.node.openAgent(id, props, agentFactory);
   }
 
   @Override
-  public <A extends Agent> A addAgent(Value id, AgentFactory<A> agentFactory) {
-    return addAgent(id, Value.absent(), agentFactory);
+  public <A extends Agent> A openAgent(Value id, AgentFactory<A> agentFactory) {
+    return openAgent(id, Value.absent(), agentFactory);
   }
 
   @Override
-  public <A extends Agent> A addAgent(String name, AgentFactory<A> agentFactory) {
-    return addAgent(Text.from(name), agentFactory);
+  public <A extends Agent> A openAgent(String name, AgentFactory<A> agentFactory) {
+    return openAgent(Text.from(name), agentFactory);
   }
 
   @Override
-  public <A extends Agent> A addAgent(Value id, Value props, Class<? extends A> agentClass) {
-    return addAgent(id, props, createAgentFactory(agentClass));
+  public <A extends Agent> A openAgent(Value id, Value props, Class<? extends A> agentClass) {
+    return openAgent(id, props, createAgentFactory(agentClass));
   }
 
   @Override
-  public <A extends Agent> A addAgent(Value id, Class<? extends A> agentClass) {
-    return addAgent(id, Value.absent(), createAgentFactory(agentClass));
+  public <A extends Agent> A openAgent(Value id, Class<? extends A> agentClass) {
+    return openAgent(id, Value.absent(), createAgentFactory(agentClass));
   }
 
   @Override
-  public <A extends Agent> A addAgent(String name, Class<? extends A> agentClass) {
-    return addAgent(Text.from(name), agentClass);
+  public <A extends Agent> A openAgent(String name, Class<? extends A> agentClass) {
+    return openAgent(Text.from(name), agentClass);
   }
 
   @Override
-  public void removeAgent(Value id) {
+  public void closeAgent(Value id) {
     final AgentView view = this.node.getAgentView(id);
     if (view != null) {
       this.node.removeAgentView(view);
@@ -264,8 +265,8 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   @Override
-  public void removeAgent(String name) {
-    removeAgent(Text.from(name));
+  public void closeAgent(String name) {
+    closeAgent(Text.from(name));
   }
 
   @Override
@@ -401,6 +402,11 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   @Override
   public void pushDown(PushRequest pushRequest) {
     this.node.pushDown(pushRequest);
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    this.node.reportDown(metric);
   }
 
   @Override

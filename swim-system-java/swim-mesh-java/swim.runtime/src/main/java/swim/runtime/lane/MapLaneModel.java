@@ -48,7 +48,7 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
 
   @Override
   protected MapLaneUplink createWarpUplink(WarpBinding link) {
-    return new MapLaneUplink(this, link);
+    return new MapLaneUplink(this, link, createUplinkAddress(link));
   }
 
   @Override
@@ -210,6 +210,14 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
 
   public Iterator<Map.Entry<Value, Value>> iterator() {
     return this.data.iterator();
+  }
+
+  public Iterator<Value> keyIterator() {
+    return this.data.keyIterator();
+  }
+
+  public Iterator<Value> valueIterator() {
+    return this.data.valueIterator();
   }
 
   protected void openStore() {

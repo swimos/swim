@@ -61,7 +61,7 @@ public final class Conts {
     return !(throwable instanceof InterruptedException
           || throwable instanceof LinkageError
           || throwable instanceof ThreadDeath
-          || throwable instanceof VirtualMachineError);
+          || throwable instanceof VirtualMachineError && !(throwable instanceof StackOverflowError));
   }
 }
 

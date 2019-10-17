@@ -21,13 +21,13 @@ import swim.collections.HashTrieSet;
 import swim.structure.Value;
 import swim.uri.Uri;
 
-public abstract class PartialDownlinkModem<View extends WarpDownlinkView> extends WarpDownlinkModel<View> {
+public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends WarpDownlinkModel<View> {
   final ConcurrentLinkedQueue<Value> upQueue;
   volatile HashTrieSet<Value> keyQueue;
   volatile Value lastKey;
 
-  public PartialDownlinkModem(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
-                              float prio, float rate, Value body) {
+  public MapDownlinkModem(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
+                          float prio, float rate, Value body) {
     super(meshUri, hostUri, nodeUri, laneUri, prio, rate, body);
     this.upQueue = new ConcurrentLinkedQueue<Value>();
     this.keyQueue = HashTrieSet.empty();
@@ -44,30 +44,29 @@ public abstract class PartialDownlinkModem<View extends WarpDownlinkView> extend
   }
 
   public void cueUpKey(Value key) {
-    HashTrieSet<Value> oldKeyQueue;
-    HashTrieSet<Value> newKeyQueue;
     do {
-      oldKeyQueue = this.keyQueue;
-      if (!oldKeyQueue.contains(key)) {
-        newKeyQueue = oldKeyQueue.added(key);
+      final HashTrieSet<Value> oldKeyQueue = this.keyQueue;
+      final HashTrieSet<Value> newKeyQueue = oldKeyQueue.added(key);
+      if (oldKeyQueue != newKeyQueue) {
+        if (KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
+          cueUp();
+          break;
+        }
       } else {
-        newKeyQueue = oldKeyQueue;
         break;
       }
-    } while (!KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue));
-    if (oldKeyQueue != newKeyQueue) {
-      cueUp();
-    }
+    } while (true);
   }
 
   protected void cueUpKeys(Collection<? extends Value> keys) {
     if (!keys.isEmpty()) {
-      HashTrieSet<Value> oldKeyQueue;
-      HashTrieSet<Value> newKeyQueue;
       do {
-        oldKeyQueue = this.keyQueue;
-        newKeyQueue = oldKeyQueue.added(keys);
-      } while (!KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue));
+        final HashTrieSet<Value> oldKeyQueue = this.keyQueue;
+        final HashTrieSet<Value> newKeyQueue = oldKeyQueue.added(keys);
+        if (KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
+          break;
+        }
+      } while (true);
       cueUp();
     }
   }
@@ -106,6 +105,6 @@ public abstract class PartialDownlinkModem<View extends WarpDownlinkView> extend
   }
 
   @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<PartialDownlinkModem<?>, HashTrieSet<Value>> KEY_QUEUE =
-      AtomicReferenceFieldUpdater.newUpdater((Class<PartialDownlinkModem<?>>) (Class<?>) PartialDownlinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
+  static final AtomicReferenceFieldUpdater<MapDownlinkModem<?>, HashTrieSet<Value>> KEY_QUEUE =
+      AtomicReferenceFieldUpdater.newUpdater((Class<MapDownlinkModem<?>>) (Class<?>) MapDownlinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
 }

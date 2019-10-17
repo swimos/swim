@@ -38,6 +38,7 @@ import swim.io.http.HttpClientModem;
 import swim.io.http.HttpSettings;
 import swim.runtime.HttpBinding;
 import swim.runtime.LinkBinding;
+import swim.runtime.Metric;
 import swim.runtime.PushRequest;
 import swim.runtime.UplinkError;
 import swim.store.StoreBinding;
@@ -119,6 +120,11 @@ public class RemoteHttpHostClient extends RemoteHost {
   @Override
   public void pushDown(PushRequest pushRequest) {
 
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    this.hostContext().reportDown(metric);
   }
 
   @Override

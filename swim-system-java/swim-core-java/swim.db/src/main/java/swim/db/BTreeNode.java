@@ -805,7 +805,7 @@ public final class BTreeNode extends BTreePage {
           if (i < n) {
             System.arraycopy(oldChildRefs, i, newChildRefs, i, n - i);
           }
-          return create(this.pageRef.context, this.pageRef.stem, version, 0, 0L,
+          return create(this.pageRef.context, this.pageRef.stem, version,
                         this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotKeys);
         }
       }

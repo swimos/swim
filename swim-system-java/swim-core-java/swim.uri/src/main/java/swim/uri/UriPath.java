@@ -26,7 +26,7 @@ import swim.structure.Kind;
 import swim.util.HashGenCacheSet;
 import swim.util.Murmur3;
 
-public abstract class UriPath implements Collection<String>, Comparable<UriPath>, Debug, Display {
+public abstract class UriPath extends UriPart implements Collection<String>, Comparable<UriPath>, Debug, Display {
   UriPath() {
     // sealed
   }
@@ -109,11 +109,11 @@ public abstract class UriPath implements Collection<String>, Comparable<UriPath>
     } while (true);
   }
 
-  public boolean isSubpathOf(UriPath b) {
-    return UriPath.isSubpathOf(this, b);
+  public boolean isRelativeTo(UriPath b) {
+    return UriPath.isRelativeTo(this, b);
   }
 
-  private static boolean isSubpathOf(UriPath a, UriPath b) {
+  private static boolean isRelativeTo(UriPath a, UriPath b) {
     while (!a.isEmpty() && !b.isEmpty()) {
       if (!a.head().equals(b.head())) {
         return false;
@@ -122,6 +122,21 @@ public abstract class UriPath implements Collection<String>, Comparable<UriPath>
       b = b.tail();
     }
     return b.isEmpty();
+  }
+
+  public boolean isChildOf(UriPath b) {
+    return UriPath.isChildOf(this, b);
+  }
+
+  private static boolean isChildOf(UriPath a, UriPath b) {
+    while (!a.isEmpty() && !b.isEmpty()) {
+      if (!a.head().equals(b.head())) {
+        return false;
+      }
+      a = a.tail();
+      b = b.tail();
+    }
+    return b.isEmpty() && !a.isEmpty() && a.tail().isEmpty();
   }
 
   @Override
@@ -493,10 +508,6 @@ public abstract class UriPath implements Collection<String>, Comparable<UriPath>
     return slash;
   }
 
-  public static UriPath segment(String segment) {
-    return UriPath.segment(segment, UriPath.empty());
-  }
-
   static UriPath slash(UriPath tail) {
     if (tail == empty) {
       return UriPath.slash();
@@ -505,12 +516,31 @@ public abstract class UriPath implements Collection<String>, Comparable<UriPath>
     }
   }
 
+  public static UriPath segment(String segment) {
+    return UriPath.segment(segment, UriPath.empty());
+  }
+
   static UriPath segment(String segment, UriPath tail) {
     if (segment == null) {
       throw new NullPointerException("segment");
     }
     segment = UriPath.cacheSegment(segment);
     return new UriPathSegment(segment, tail);
+  }
+
+  public static UriPath component(String component) {
+    return UriPath.component(component, UriPath.empty());
+  }
+
+  static UriPath component(String component, UriPath tail) {
+    if (component == null) {
+      throw new NullPointerException();
+    }
+    if (component.equals("/")) {
+      return slash();
+    } else {
+      return segment(component);
+    }
   }
 
   public static UriPath from(String... components) {

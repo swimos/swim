@@ -14,9 +14,6 @@
 
 package swim.runtime.reflect;
 
-import java.util.AbstractMap;
-import java.util.Iterator;
-import java.util.Map;
 import swim.runtime.HostBinding;
 import swim.structure.Form;
 import swim.structure.Item;
@@ -34,9 +31,11 @@ public class HostInfo {
   protected final boolean replica;
   protected final boolean master;
   protected final boolean slave;
+  protected final long nodeCount;
 
   public HostInfo(Uri hostUri, boolean connected, boolean remote, boolean secure,
-                  boolean primary, boolean replica, boolean master, boolean slave) {
+                  boolean primary, boolean replica, boolean master, boolean slave,
+                  long nodeCount) {
     this.hostUri = hostUri;
     this.connected = connected;
     this.remote = remote;
@@ -45,6 +44,7 @@ public class HostInfo {
     this.replica = replica;
     this.master = master;
     this.slave = slave;
+    this.nodeCount = nodeCount;
   }
 
   public final Uri hostUri() {
@@ -79,6 +79,10 @@ public class HostInfo {
     return this.slave;
   }
 
+  public final long nodeCount() {
+    return this.nodeCount;
+  }
+
   public Value toValue() {
     return form().mold(this).toValue();
   }
@@ -86,11 +90,7 @@ public class HostInfo {
   public static HostInfo from(HostBinding hostBinding) {
     return new HostInfo(hostBinding.hostUri(), hostBinding.isConnected(), hostBinding.isRemote(),
                         hostBinding.isSecure(), hostBinding.isPrimary(), hostBinding.isReplica(),
-                        hostBinding.isMaster(), hostBinding.isSlave());
-  }
-
-  public static Iterator<Map.Entry<Uri, HostInfo>> iterator(Iterator<Map.Entry<Uri, HostBinding>> hostBindings) {
-    return new HostBindingInfoIterator(hostBindings);
+                        hostBinding.isMaster(), hostBinding.isSlave(), (long) hostBinding.nodes().size());
   }
 
   private static Form<HostInfo> form;
@@ -113,7 +113,7 @@ final class HostInfoForm extends Form<HostInfo> {
   @Override
   public Item mold(HostInfo info) {
     if (info != null) {
-      final Record record = Record.create(8);
+      final Record record = Record.create(9);
       record.slot("hostUri", info.hostUri.toString());
       record.slot("connected", info.connected);
       if (info.remote) {
@@ -134,6 +134,9 @@ final class HostInfoForm extends Form<HostInfo> {
       if (info.slave) {
         record.slot("slave", info.slave);
       }
+      if (info.nodeCount != 0L) {
+        record.slot("nodeCount", info.nodeCount);
+      }
       return record;
     } else {
       return Item.extant();
@@ -152,35 +155,9 @@ final class HostInfoForm extends Form<HostInfo> {
       final boolean replica = value.get("replica").booleanValue(false);
       final boolean master = value.get("master").booleanValue(false);
       final boolean slave = value.get("slave").booleanValue(false);
-      return new HostInfo(hostUri, connected, remote, secure, primary, replica, master, slave);
+      final long nodeCount = value.get("nodeCount").longValue(0L);
+      return new HostInfo(hostUri, connected, remote, secure, primary, replica, master, slave, nodeCount);
     }
     return null;
-  }
-}
-
-final class HostBindingInfoIterator implements Iterator<Map.Entry<Uri, HostInfo>> {
-  final Iterator<Map.Entry<Uri, HostBinding>> hostBindings;
-
-  HostBindingInfoIterator(Iterator<Map.Entry<Uri, HostBinding>> hostBindings) {
-    this.hostBindings = hostBindings;
-  }
-
-  @Override
-  public boolean hasNext() {
-    return hostBindings.hasNext();
-  }
-
-  @Override
-  public Map.Entry<Uri, HostInfo> next() {
-    final Map.Entry<Uri, HostBinding> entry = this.hostBindings.next();
-    final Uri hostUri = entry.getKey();
-    final HostBinding hostBinding = entry.getValue();
-    final HostInfo hostInfo = HostInfo.from(hostBinding);
-    return new AbstractMap.SimpleImmutableEntry<Uri, HostInfo>(hostUri, hostInfo);
-  }
-
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
   }
 }

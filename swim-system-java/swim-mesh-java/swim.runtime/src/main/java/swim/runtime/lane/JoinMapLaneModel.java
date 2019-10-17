@@ -27,6 +27,7 @@ import swim.runtime.LaneRelay;
 import swim.runtime.LaneView;
 import swim.runtime.WarpBinding;
 import swim.runtime.warp.WarpLaneModel;
+import swim.structure.Attr;
 import swim.structure.Form;
 import swim.structure.Record;
 import swim.structure.Value;
@@ -55,7 +56,7 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
 
   @Override
   protected JoinMapLaneUplink createWarpUplink(WarpBinding link) {
-    return new JoinMapLaneUplink(this, link);
+    return new JoinMapLaneUplink(this, link, createUplinkAddress(link));
   }
 
   protected void openDownlinks() {
@@ -83,9 +84,9 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
         || header.get("prio").floatValue(0.0f) != downlink.prio()
         || header.get("rate").floatValue(0.0f) != downlink.rate()
         || !header.get("body").equals(downlink.body())) {
-      header = Record.of()
-        .slot("node", downlink.nodeUri().toString())
-        .slot("lane", downlink.laneUri().toString());
+      header = Record.create(2)
+          .slot("node", downlink.nodeUri().toString())
+          .slot("lane", downlink.laneUri().toString());
       if (downlink.prio() != 0.0f) {
         header.slot("prio", downlink.prio());
       }
@@ -98,7 +99,7 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
       if ("downlink".equals(value.tag())) {
         value = value.updatedAttr("downlink", header);
       } else {
-        value = Record.of().attr("downlink", header).concat(value);
+        value = Attr.of("downlink", header).concat(value);
       }
       this.linkData.put(key, value);
     }
@@ -315,6 +316,14 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
 
   public Iterator<Map.Entry<Value, Value>> iterator() {
     return this.data.iterator();
+  }
+
+  public Iterator<Value> keyIterator() {
+    return this.data.keyIterator();
+  }
+
+  public Iterator<Value> valueIterator() {
+    return this.data.valueIterator();
   }
 
   protected void openStore() {

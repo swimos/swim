@@ -75,4 +75,6 @@ public interface LaneBinding extends TierBinding, CellBinding, Log {
   void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 
   void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink);
+
+  void reportDown(Metric metric);
 }

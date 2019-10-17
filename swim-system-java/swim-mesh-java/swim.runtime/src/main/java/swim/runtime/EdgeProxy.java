@@ -277,6 +277,11 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   }
 
   @Override
+  public void reportDown(Metric metric) {
+    this.edgeContext.reportDown(metric);
+  }
+
+  @Override
   public void openUplink(LinkBinding link) {
     this.edgeBinding.openUplink(link);
   }
@@ -363,7 +368,7 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
 
   @Override
   public void close() {
-    this.edgeBinding.close();
+    this.edgeContext.close();
   }
 
   @Override

@@ -27,6 +27,7 @@ import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
+import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
@@ -198,6 +199,11 @@ public class HostTableNode implements NodeContext {
   @Override
   public void pushDown(PushRequest pushRequest) {
     this.host.pushDown(pushRequest);
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    this.host.reportDown(metric);
   }
 
   @Override

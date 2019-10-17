@@ -132,6 +132,16 @@ export class SkewTransform extends Transform {
     }
   }
 
+  toAttributeString(): string {
+    if (this._x.isDefined() && !this._y.isDefined()) {
+      return "skewX(" + this._x.degValue() + ")";
+    } else if (!this._x.isDefined() && this._y.isDefined()) {
+      return "skewY(" + this._y.degValue() + ")";
+    } else {
+      return "skew(" + this._x.degValue() + "," + this._y.degValue() + ")";
+    }
+  }
+
   private static _hashSeed?: number;
 
   static fromAny(value: SkewTransform | string): SkewTransform {

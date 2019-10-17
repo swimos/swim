@@ -67,7 +67,7 @@ public class TraitSpec {
 
     @Override
     public void willOpen() {
-      context.addAgent(Text.from("test"), TestGraphAgentTrait.class);
+      context.openAgent(Text.from("test"), TestGraphAgentTrait.class);
     }
   }
 

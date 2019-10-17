@@ -14,15 +14,11 @@
 
 package swim.runtime.reflect;
 
-import java.util.AbstractMap;
-import java.util.Iterator;
-import java.util.Map;
 import swim.runtime.LinkContext;
 import swim.runtime.WarpContext;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Kind;
-import swim.structure.Value;
 
 public abstract class UplinkInfo extends LinkInfo {
   public static UplinkInfo from(LinkContext linkContext) {
@@ -31,10 +27,6 @@ public abstract class UplinkInfo extends LinkInfo {
     } else {
       return null;
     }
-  }
-
-  public static Iterator<Map.Entry<Value, UplinkInfo>> iterator(Iterator<LinkContext> linkContexts) {
-    return new LinkContextUplinkInfoIterator(linkContexts);
   }
 
   private static Form<UplinkInfo> uplinkForm;
@@ -66,30 +58,5 @@ final class UplinkInfoForm extends Form<UplinkInfo> {
       return warpUplinkInfo;
     }
     return null;
-  }
-}
-
-final class LinkContextUplinkInfoIterator implements Iterator<Map.Entry<Value, UplinkInfo>> {
-  final Iterator<LinkContext> linkContexts;
-
-  LinkContextUplinkInfoIterator(Iterator<LinkContext> linkContexts) {
-    this.linkContexts = linkContexts;
-  }
-
-  @Override
-  public boolean hasNext() {
-    return linkContexts.hasNext();
-  }
-
-  @Override
-  public Map.Entry<Value, UplinkInfo> next() {
-    final LinkContext linkContext = this.linkContexts.next();
-    final UplinkInfo uplinkInfo = UplinkInfo.from(linkContext);
-    return new AbstractMap.SimpleImmutableEntry<Value, UplinkInfo>(linkContext.linkKey(), uplinkInfo);
-  }
-
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
   }
 }

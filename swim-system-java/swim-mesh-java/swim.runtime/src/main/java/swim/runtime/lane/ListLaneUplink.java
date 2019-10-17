@@ -17,6 +17,7 @@ package swim.runtime.lane;
 import java.util.Iterator;
 import java.util.Map;
 import swim.concurrent.Stage;
+import swim.runtime.UplinkAddress;
 import swim.runtime.WarpBinding;
 import swim.runtime.warp.ListLinkDelta;
 import swim.runtime.warp.ListUplinkModem;
@@ -26,8 +27,9 @@ import swim.warp.SyncRequest;
 public class ListLaneUplink extends ListUplinkModem {
   final ListLaneModel laneBinding;
 
-  public ListLaneUplink(ListLaneModel laneBinding, WarpBinding linkBinding) {
-    super(linkBinding);
+  public ListLaneUplink(ListLaneModel laneBinding, WarpBinding linkBinding,
+                        UplinkAddress uplinkAddress) {
+    super(linkBinding, uplinkAddress);
     this.laneBinding = laneBinding;
   }
 

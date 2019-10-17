@@ -67,7 +67,7 @@ public class JsNodeModuleResolver implements JsModuleResolver {
         break;
       }
       directoryPath = directoryPath.parent();
-    } while (directoryPath.isDefined() && directoryPath.isSubpathOf(this.rootPath));
+    } while (directoryPath.isDefined() && directoryPath.isRelativeTo(this.rootPath));
     return moduleId;
   }
 
@@ -130,7 +130,7 @@ public class JsNodeModuleResolver implements JsModuleResolver {
     final String main = packageValue.get("main").stringValue(null);
     if (main != null) {
       final UriPath scriptPath = packagePath.resolve(UriPath.parse(main));
-      if (scriptPath.isSubpathOf(this.rootPath)) {
+      if (scriptPath.isRelativeTo(this.rootPath)) {
         final File scriptFile = new File(scriptPath.toString());
         if (scriptFile.exists()) {
           return scriptPath;

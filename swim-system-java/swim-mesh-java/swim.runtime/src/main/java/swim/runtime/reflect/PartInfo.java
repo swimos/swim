@@ -14,9 +14,6 @@
 
 package swim.runtime.reflect;
 
-import java.util.AbstractMap;
-import java.util.Iterator;
-import java.util.Map;
 import swim.runtime.HostBinding;
 import swim.runtime.PartBinding;
 import swim.runtime.PartPredicate;
@@ -31,11 +28,13 @@ public class PartInfo {
   protected final Value partKey;
   protected final PartPredicate predicate;
   protected final Uri masterHostUri;
+  protected final int hostCount;
 
-  public PartInfo(Value partKey, PartPredicate predicate, Uri masterHostUri) {
+  public PartInfo(Value partKey, PartPredicate predicate, Uri masterHostUri, int hostCount) {
     this.partKey = partKey;
     this.predicate = predicate;
     this.masterHostUri = masterHostUri;
+    this.hostCount = hostCount;
   }
 
   public final Value partKey() {
@@ -50,17 +49,19 @@ public class PartInfo {
     return this.masterHostUri;
   }
 
+  protected final int hostCount() {
+    return this.hostCount;
+  }
+
   public Value toValue() {
     return form().mold(this).toValue();
   }
 
   public static PartInfo from(PartBinding partBinding) {
     final HostBinding master = partBinding.master();
-    return new PartInfo(partBinding.partKey(), partBinding.predicate(), master != null ? master.hostUri() : Uri.empty());
-  }
-
-  public static Iterator<Map.Entry<Value, PartInfo>> iterator(Iterator<PartBinding> partBindings) {
-    return new PartBindingInfoIterator(partBindings);
+    return new PartInfo(partBinding.partKey(), partBinding.predicate(),
+                        master != null ? master.hostUri() : Uri.empty(),
+                        partBinding.hosts().size());
   }
 
   private static Form<PartInfo> form;
@@ -83,10 +84,15 @@ final class PartInfoForm extends Form<PartInfo> {
   @Override
   public Item mold(PartInfo info) {
     if (info != null) {
-      final Record record = Record.create(3);
+      final Record record = Record.create(4);
       record.slot("partKey", info.partKey);
       record.slot("predicate", info.predicate.toValue());
-      record.slot("masterHostUri", info.masterHostUri.toString());
+      if (info.masterHostUri.isDefined()) {
+        record.slot("masterHostUri", info.masterHostUri.toString());
+      }
+      if (info.hostCount != 0) {
+        record.slot("hostCount", info.hostCount);
+      }
       return record;
     } else {
       return Item.extant();
@@ -100,33 +106,9 @@ final class PartInfoForm extends Form<PartInfo> {
     if (partKey.isDefined()) {
       final PartPredicate predicate = PartPredicate.form().cast(value.get("predicate"));
       final Uri masterHostUri = Uri.form().cast(value.get("masterHostUri"));
-      return new PartInfo(partKey, predicate, masterHostUri);
+      final int hostCount = value.get("hostCount").intValue(0);
+      return new PartInfo(partKey, predicate, masterHostUri, hostCount);
     }
     return null;
-  }
-}
-
-final class PartBindingInfoIterator implements Iterator<Map.Entry<Value, PartInfo>> {
-  final Iterator<PartBinding> partBindings;
-
-  PartBindingInfoIterator(Iterator<PartBinding> partBindings) {
-    this.partBindings = partBindings;
-  }
-
-  @Override
-  public boolean hasNext() {
-    return partBindings.hasNext();
-  }
-
-  @Override
-  public Map.Entry<Value, PartInfo> next() {
-    final PartBinding partBinding = this.partBindings.next();
-    final PartInfo partInfo = PartInfo.from(partBinding);
-    return new AbstractMap.SimpleImmutableEntry<Value, PartInfo>(partBinding.partKey(), partInfo);
-  }
-
-  @Override
-  public void remove() {
-    throw new UnsupportedOperationException();
   }
 }

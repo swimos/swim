@@ -119,7 +119,7 @@ public abstract class ActorTier extends ActorCell implements TierBinding, TierCo
 
   @Override
   public void close() {
-    ((TierBinding) cellBinding()).close();
+    ((TierContext) cellContext()).close();
   }
 
   @Override

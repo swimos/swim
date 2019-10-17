@@ -45,7 +45,7 @@ public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUpl
 
   @Override
   protected ValueLaneUplink createWarpUplink(WarpBinding link) {
-    return new ValueLaneUplink(this, link);
+    return new ValueLaneUplink(this, link, createUplinkAddress(link));
   }
 
   @Override

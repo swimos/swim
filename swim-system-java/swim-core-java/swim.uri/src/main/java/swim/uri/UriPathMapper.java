@@ -17,6 +17,13 @@ package swim.uri;
 import swim.collections.HashTrieMap;
 
 abstract class UriPathMapper<T> extends UriAuthorityMapper<T> {
+  abstract UriMapper<T> getSuffix(UriPath path, UriQuery query, UriFragment fragment);
+
+  @Override
+  UriMapper<T> getSuffix(UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
+    return getSuffix(path, query, fragment);
+  }
+
   abstract T get(UriPath path, UriQuery query, UriFragment fragment);
 
   @Override

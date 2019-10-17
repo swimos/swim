@@ -121,6 +121,7 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
 
   @Override
   protected void didAddDownlink(ListDownlinkView<?> view) {
+    super.didAddDownlink(view);
     if (this.views instanceof DownlinkView) {
       isStateful(((ListDownlinkView<?>) view).isStateful());
     }

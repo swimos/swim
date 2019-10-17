@@ -35,7 +35,7 @@
     "@swim/view": "3.10.1",
     "@swim/shape": "3.10.1",
     "@swim/typeset": "3.10.1",
-    "@swim/site": "3.10.1",
-    "@swim/app": "3.10.1"
+    "@swim/website": "3.10.1",
+    "@swim/webapp": "3.10.1"
   }
 }

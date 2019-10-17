@@ -1,28 +1,28 @@
-# @swim/site
+# @swim/website
 
-[![package](https://img.shields.io/npm/v/@swim/site.svg)](https://www.npmjs.com/package/@swim/site)
-[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_site.html)
+[![package](https://img.shields.io/npm/v/@swim/website.svg)](https://www.npmjs.com/package/@swim/website)
+[![documentation](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest/modules/_swim_website.html)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
-**@swim/site** provides minimalist components that implement common dynamic
-website behaviors.  **@swim/site** is part of the
+**@swim/website** provides minimalist components that implement common dynamic
+website behaviors.  **@swim/website** is part of the
 [**@swim/web**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-web-js/@swim/web) framework.
 
 ## Installation
 
 ### npm
 
-For an npm-managed project, `npm install @swim/site` to make it a dependency.
-TypeScript sources will be installed into `node_modules/@swim/site/main`.
+For an npm-managed project, `npm install @swim/website` to make it a dependency.
+TypeScript sources will be installed into `node_modules/@swim/website/main`.
 Transpiled JavaScript and TypeScript definition files install into
-`node_modules/@swim/site/lib/main`.  And a pre-built UMD script can
-be found in `node_modules/@swim/site/dist/main/swim-site.js`.
+`node_modules/@swim/website/lib/main`.  And a pre-built UMD script can
+be found in `node_modules/@swim/website/dist/main/swim-website.js`.
 
 ### Browser
 
-Browser applications can load `swim-web.js`—which bundles the **@swim/site**
+Browser applications can load `swim-web.js`—which bundles the **@swim/website**
 library—along with its `swim-core.js` and `swim-ui.js` dependencies, directly
 from the swimOS CDN.
 
@@ -39,7 +39,7 @@ from the swimOS CDN.
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the swimOS CDN, which bundles **@swim/site** together with all other
+from the swimOS CDN, which bundles **@swim/website** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 libraries.
 
@@ -55,29 +55,29 @@ libraries.
 
 ### ES6/TypeScript
 
-**@swim/site** can be imported as an ES6 module from TypeScript and other
+**@swim/website** can be imported as an ES6 module from TypeScript and other
 ES6-compatible environments.
 
 ```typescript
-import * as site from "@swim/site";
+import * as website from "@swim/website";
 ```
 
 ### CommonJS/Node.js
 
-**@swim/site** can also be used as a CommonJS module in Node.js applications.
+**@swim/website** can also be used as a CommonJS module in Node.js applications.
 
 ```javascript
-var site = require("@swim/site");
+var website = require("@swim/website");
 ```
 
 ### Browser
 
 When loaded by a web browser, the `swim-web.js` script adds all
-**@swim/site** library exports to the global `swim` namespace.
+**@swim/website** library exports to the global `swim` namespace.
 The `swim-web.js` script requires that `swim-core.js` and `swim-ui.js`
 have already been loaded.
 
-The `swim-system.js` script also adds all **@swim/site** library exports
+The `swim-system.js` script also adds all **@swim/website** library exports
 to the global `swim` namespace, making it a drop-in replacement for
 'swim-core.js', `swim-ui.js`, and `swim-web.js` when additional
 **@swim/system** libraries are needed.

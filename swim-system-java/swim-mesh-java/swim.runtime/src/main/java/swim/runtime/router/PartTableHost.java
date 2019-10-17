@@ -31,6 +31,7 @@ import swim.runtime.LaneAddress;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
+import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
@@ -208,6 +209,11 @@ public class PartTableHost implements HostContext {
   @Override
   public void pushDown(PushRequest pushRequest) {
     this.part.pushDown(pushRequest);
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    this.part.reportDown(metric);
   }
 
   @Override

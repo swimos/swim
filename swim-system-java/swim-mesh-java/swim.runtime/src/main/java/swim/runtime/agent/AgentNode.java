@@ -15,7 +15,6 @@
 package swim.runtime.agent;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.Downlink;
@@ -36,10 +35,7 @@ import swim.api.lane.MapLane;
 import swim.api.lane.SpatialLane;
 import swim.api.lane.SupplyLane;
 import swim.api.lane.ValueLane;
-import swim.api.lane.function.OnCueKey;
-import swim.api.lane.function.OnSyncMap;
 import swim.api.policy.Policy;
-import swim.api.warp.WarpUplink;
 import swim.api.ws.WsLane;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Call;
@@ -63,6 +59,7 @@ import swim.runtime.LaneBinding;
 import swim.runtime.LaneContext;
 import swim.runtime.LaneView;
 import swim.runtime.LinkBinding;
+import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
@@ -81,7 +78,6 @@ import swim.runtime.lane.MapLaneView;
 import swim.runtime.lane.SpatialLaneView;
 import swim.runtime.lane.SupplyLaneView;
 import swim.runtime.lane.ValueLaneView;
-import swim.runtime.reflect.LaneInfo;
 import swim.spatial.GeoProjection;
 import swim.store.StoreBinding;
 import swim.structure.Value;
@@ -93,8 +89,6 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   volatile HashTrieMap<Uri, LaneBinding> lanes;
   final ConcurrentLinkedQueue<Runnable> mailbox;
   final long createdTime;
-
-  DemandMapLane<Uri, LaneInfo> metaLanes;
 
   public AgentNode() {
     this.lanes = HashTrieMap.empty();
@@ -182,31 +176,18 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
     return this.nodeContext.nodeUri();
   }
 
-  public final Identity identity() {
-    return this.nodeContext.identity();
-  }
-
   @Override
   public long createdTime() {
     return this.createdTime;
   }
 
+  public final Identity identity() {
+    return this.nodeContext.identity();
+  }
+
   @Override
   public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
-    openMetaLanes(node, (AgentNode) metaNode);
     this.nodeContext.openMetaNode(node, metaNode);
-  }
-
-  protected void openMetaLanes(NodeBinding node, AgentNode metaNode) {
-    openReflectLanes(node, metaNode);
-  }
-
-  protected void openReflectLanes(NodeBinding node, AgentNode metaNode) {
-    this.metaLanes = metaNode.demandMapLane()
-        .keyForm(Uri.form())
-        .valueForm(LaneInfo.form())
-        .observe(new AgentNodeLanesController(node));
-    metaNode.openLane(LANES_URI, this.metaLanes);
   }
 
   @Override
@@ -272,10 +253,7 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
     laneBinding.openLaneView(laneView);
     if (oldLanes != newLanes) {
       activate(laneBinding);
-      final DemandMapLane<Uri, LaneInfo> metaLanes = this.metaLanes;
-      if (metaLanes != null) {
-        metaLanes.cue(laneUri);
-      }
+      didOpenLane(laneBinding);
     }
     return laneBinding;
   }
@@ -320,10 +298,7 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
     } while (oldLanes != newLanes && !LANES.compareAndSet(this, oldLanes, newLanes));
     if (laneBinding != null) {
       activate(laneBinding);
-      final DemandMapLane<Uri, LaneInfo> metaLanes = this.metaLanes;
-      if (metaLanes != null) {
-        metaLanes.cue(laneUri);
-      }
+      didOpenLane(laneBinding);
     }
     return laneBinding;
   }
@@ -353,10 +328,7 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
     } while (oldLanes != newLanes && !LANES.compareAndSet(this, oldLanes, newLanes));
     if (laneBinding != null) {
       activate(laneBinding);
-      final DemandMapLane<Uri, LaneInfo> metaLanes = this.metaLanes;
-      if (metaLanes != null) {
-        metaLanes.cue(laneUri);
-      }
+      didOpenLane(laneBinding);
     }
     return laneBinding;
   }
@@ -380,11 +352,16 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
     } while (oldLanes != newLanes && !LANES.compareAndSet(this, oldLanes, newLanes));
     if (laneBinding != null) {
       laneBinding.didClose();
-      final DemandMapLane<Uri, LaneInfo> metaLanes = this.metaLanes;
-      if (metaLanes != null) {
-        metaLanes.remove(laneUri);
-      }
+      didCloseLane(laneBinding);
     }
+  }
+
+  protected void didOpenLane(LaneBinding lane) {
+    // hook
+  }
+
+  protected void didCloseLane(LaneBinding lane) {
+    // hook
   }
 
   @Override
@@ -480,12 +457,15 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
 
   @Override
   public LinkBinding bindDownlink(Downlink downlink) {
-    return this.nodeContext.bindDownlink(downlink);
+    final LinkBinding link = this.nodeContext.bindDownlink(downlink);
+    link.setCellContext(this);
+    return link;
   }
 
   @Override
   public void openDownlink(LinkBinding link) {
     this.nodeContext.openDownlink(link);
+    link.setCellContext(this);
   }
 
   @Override
@@ -506,6 +486,11 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   @Override
   public void pushDown(PushRequest pushRequest) {
     this.nodeContext.pushDown(pushRequest);
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    this.nodeContext.reportDown(metric);
   }
 
   @Override
@@ -693,31 +678,9 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
     // nop
   }
 
+  static final Uri LANES_URI = Uri.parse("lanes");
+
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<AgentNode, HashTrieMap<Uri, LaneBinding>> LANES =
       AtomicReferenceFieldUpdater.newUpdater(AgentNode.class, (Class<HashTrieMap<Uri, LaneBinding>>) (Class<?>) HashTrieMap.class, "lanes");
-
-  static final Uri LANES_URI = Uri.parse("lanes");
-}
-
-final class AgentNodeLanesController implements OnCueKey<Uri, LaneInfo>, OnSyncMap<Uri, LaneInfo> {
-  final NodeBinding node;
-
-  AgentNodeLanesController(NodeBinding node) {
-    this.node = node;
-  }
-
-  @Override
-  public LaneInfo onCue(Uri laneUri, WarpUplink uplink) {
-    final LaneBinding laneBinding = this.node.getLane(laneUri);
-    if (laneBinding == null) {
-      return null;
-    }
-    return LaneInfo.from(laneBinding);
-  }
-
-  @Override
-  public Iterator<Map.Entry<Uri, LaneInfo>> onSync(WarpUplink uplink) {
-    return LaneInfo.iterator(this.node.lanes().iterator());
-  }
 }

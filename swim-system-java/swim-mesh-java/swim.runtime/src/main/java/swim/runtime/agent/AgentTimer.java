@@ -85,6 +85,7 @@ public class AgentTimer implements Timer, TimerContext, TimerRef, Runnable {
 
   @Override
   public void run() {
+    final long t0 = System.nanoTime();
     try {
       this.timer.runTimer();
     } catch (Throwable error) {
@@ -93,6 +94,11 @@ public class AgentTimer implements Timer, TimerContext, TimerRef, Runnable {
       } else {
         throw error;
       }
+    }
+    final long dt = System.nanoTime() - t0;
+    if (this.node instanceof AgentModel) {
+      AgentModel.TIMER_EVENT_DELTA.incrementAndGet((AgentModel) this.node);
+      ((AgentModel) this.node).accumulateExecTime(dt);
     }
   }
 }

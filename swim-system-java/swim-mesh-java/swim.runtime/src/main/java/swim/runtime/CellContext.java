@@ -43,7 +43,9 @@ public interface CellContext extends Log {
 
   void closeDownlink(LinkBinding link);
 
+  void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink);
+
   void pushDown(PushRequest pushRequest);
 
-  void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink);
+  void reportDown(Metric metric);
 }

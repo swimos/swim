@@ -102,6 +102,10 @@ public final class LaneAddress extends CellAddress implements Debug {
     return new LaneAddress(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri);
   }
 
+  public UplinkAddress linkKey(Value linkKey) {
+    return new UplinkAddress(this.edgeName, this.meshUri, this.partKey, this.hostUri, this.nodeUri, this.laneUri, linkKey);
+  }
+
   @Override
   public boolean equals(Object other) {
     if (this == other) {

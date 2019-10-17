@@ -53,6 +53,17 @@ final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
   }
 
   @Override
+  UriMapper<T> getSuffix(UriScheme scheme, UriAuthority authority, UriPath path,
+                         UriQuery query, UriFragment fragment) {
+    final UriAuthorityMapper<T> mapping = this.table.get(scheme.name());
+    if (mapping != null) {
+      return mapping.getSuffix(authority, path, query, fragment);
+    } else {
+      return UriMapper.empty();
+    }
+  }
+
+  @Override
   T get(UriScheme scheme, UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
     final UriAuthorityMapper<T> mapping = this.table.get(scheme.name());
     if (mapping != null) {
