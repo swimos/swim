@@ -253,36 +253,36 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
     return this.context.getAgent(agentClass);
   }
 
-  public <A extends Agent> A addAgent(Value id, Value props, AgentFactory<A> agentFactory) {
-    return this.context.addAgent(id, props, agentFactory);
+  public <A extends Agent> A openAgent(Value id, Value props, AgentFactory<A> agentFactory) {
+    return this.context.openAgent(id, props, agentFactory);
   }
 
-  public <A extends Agent> A addAgent(Value id, AgentFactory<A> agentFactory) {
-    return this.context.addAgent(id, agentFactory);
+  public <A extends Agent> A openAgent(Value id, AgentFactory<A> agentFactory) {
+    return this.context.openAgent(id, agentFactory);
   }
 
-  public <A extends Agent> A addAgent(String name, AgentFactory<A> agentFactory) {
-    return this.context.addAgent(name, agentFactory);
+  public <A extends Agent> A openAgent(String name, AgentFactory<A> agentFactory) {
+    return this.context.openAgent(name, agentFactory);
   }
 
-  public <A extends Agent> A addAgent(Value id, Value props, Class<A> agentClass) {
-    return this.context.addAgent(id, props, agentClass);
+  public <A extends Agent> A openAgent(Value id, Value props, Class<A> agentClass) {
+    return this.context.openAgent(id, props, agentClass);
   }
 
-  public <A extends Agent> A addAgent(Value id, Class<A> agentClass) {
-    return this.context.addAgent(id, agentClass);
+  public <A extends Agent> A openAgent(Value id, Class<A> agentClass) {
+    return this.context.openAgent(id, agentClass);
   }
 
-  public <A extends Agent> A addAgent(String name, Class<A> agentClass) {
-    return this.context.addAgent(name, agentClass);
+  public <A extends Agent> A openAgent(String name, Class<A> agentClass) {
+    return this.context.openAgent(name, agentClass);
   }
 
-  public void removeAgent(Value id) {
-    this.context.removeAgent(id);
+  public void closeAgent(Value id) {
+    this.context.closeAgent(id);
   }
 
-  public void removeAgent(String name) {
-    this.context.removeAgent(name);
+  public void closeAgent(String name) {
+    this.context.closeAgent(name);
   }
 
   /**

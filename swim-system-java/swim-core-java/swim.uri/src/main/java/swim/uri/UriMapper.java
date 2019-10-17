@@ -27,7 +27,7 @@ import swim.codec.Output;
 
 public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<Uri, T>, Debug {
   UriMapper() {
-    // stub
+    // sealed
   }
 
   @Override
@@ -43,6 +43,12 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
 
   @Override
   public abstract boolean containsValue(Object value);
+
+  public abstract UriMapper<T> getSuffix(Uri uri);
+
+  public UriMapper<T> getSuffix(String uri) {
+    return getSuffix(Uri.parse(uri));
+  }
 
   public abstract T get(Uri uri);
 
@@ -129,6 +135,14 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
 
   public abstract Iterator<T> valueIterator();
 
+  public long childCount() {
+    return 0L;
+  }
+
+  public Iterator<UriPart> childIterator() {
+    return Collections.emptyIterator();
+  }
+
   @Override
   public void debug(Output<?> output) {
     output = output.write("UriMapper").write('.').write("empty").write('(').write(')');
@@ -155,7 +169,8 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
   }
 
   public static <T> UriMapper<T> from(Uri pattern, T value) {
-    return UriSchemeMapper.compile(pattern, pattern.scheme(), pattern.authority(), pattern.path(), pattern.query(), pattern.fragment(), value);
+    return UriSchemeMapper.compile(pattern, pattern.scheme(), pattern.authority(),
+                                   pattern.path(), pattern.query(), pattern.fragment(), value);
   }
 
   public static <T> UriMapper<T> from(UriPattern pattern, T value) {
@@ -233,57 +248,5 @@ final class UriMapperValues<T> extends AbstractCollection<T> {
   @Override
   public Iterator<T> iterator() {
     return this.mapper.valueIterator();
-  }
-}
-
-final class UriEmptyMapping<T> extends UriTerminalMapper<T> {
-  @Override
-  public boolean isEmpty() {
-    return true;
-  }
-
-  @Override
-  public int size() {
-    return 0;
-  }
-
-  @Override
-  public boolean containsValue(Object value) {
-    return false;
-  }
-
-  @Override
-  public T get() {
-    return null;
-  }
-
-  @Override
-  public Set<Entry<Uri, T>> entrySet() {
-    return Collections.emptySet();
-  }
-
-  @Override
-  public Set<Uri> keySet() {
-    return Collections.emptySet();
-  }
-
-  @Override
-  public Collection<T> values() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public Iterator<Entry<Uri, T>> iterator() {
-    return Collections.emptyIterator();
-  }
-
-  @Override
-  public Iterator<Uri> keyIterator() {
-    return Collections.emptyIterator();
-  }
-
-  @Override
-  public Iterator<T> valueIterator() {
-    return Collections.emptyIterator();
   }
 }

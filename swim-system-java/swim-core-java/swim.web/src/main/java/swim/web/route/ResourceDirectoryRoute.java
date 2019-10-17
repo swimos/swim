@@ -44,7 +44,7 @@ public final class ResourceDirectoryRoute implements WebRoute {
       path = path.tail();
     }
     path = this.directory.appended(path).removeDotSegments();
-    if (path.isSubpathOf(this.directory)) {
+    if (path.isRelativeTo(this.directory)) {
       try {
         final HttpBody<Object> body = HttpBody.fromResource(this.classLoader, path.toString());
         if (body != null) {

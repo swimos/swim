@@ -61,6 +61,11 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
   public abstract Value linkKey();
 
   @Override
+  public UplinkAddress cellAddressUp() {
+    return laneBinding().cellAddress().linkKey(linkKey());
+  }
+
+  @Override
   public boolean isConnectedUp() {
     return true;
   }
@@ -268,7 +273,7 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
 
   @Override
   public void closeUp() {
-    laneBinding().closeUplink(linkKey());
+    didClose();
   }
 
   @Override
@@ -283,7 +288,11 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
 
   @Override
   public void didCloseDown() {
-    // stub
+    didClose();
+  }
+
+  protected void didClose() {
+    laneBinding().closeUplink(linkKey());
   }
 
   protected void didFail(Throwable error) {

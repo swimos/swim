@@ -20,7 +20,7 @@ import swim.dynamic.HostMethod;
 import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
 import swim.dynamic.api.lane.function.GuestOnCueKey;
-import swim.dynamic.api.lane.function.GuestOnSyncMap;
+import swim.dynamic.api.lane.function.GuestOnSyncKeys;
 import swim.dynamic.api.warp.HostWarpLane;
 
 public final class HostDemandMapLane {
@@ -93,7 +93,7 @@ final class HostDemandMapLaneOnSync implements HostMethod<DemandMapLane<Object, 
 
   @Override
   public Object invoke(Bridge bridge, DemandMapLane<Object, Object> lane, Object... arguments) {
-    return lane.onSync(new GuestOnSyncMap<Object, Object>(bridge, arguments[0]));
+    return lane.onSync(new GuestOnSyncKeys<Object>(bridge, arguments[0]));
   }
 }
 

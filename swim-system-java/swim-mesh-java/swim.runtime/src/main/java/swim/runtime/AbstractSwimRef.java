@@ -135,7 +135,7 @@ public abstract class AbstractSwimRef implements SwimRef, CellContext {
   @Override
   public ValueDownlink<Value> downlinkValue() {
     return new ValueDownlinkView<>(this, stage(), meshUri(), Uri.empty(),
-      Uri.empty(), Uri.empty(), 0.0f, 0.0f, Value.absent(), Form.forValue());
+        Uri.empty(), Uri.empty(), 0.0f, 0.0f, Value.absent(), Form.forValue());
   }
 
   @Override

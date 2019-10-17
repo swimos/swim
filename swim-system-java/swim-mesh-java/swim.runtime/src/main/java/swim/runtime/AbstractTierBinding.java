@@ -454,10 +454,12 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
 
   @Override
   public void didClose() {
+    // stub
   }
 
   @Override
   public void didFail(Throwable error) {
+    error.printStackTrace();
   }
 
   protected static final int STATE_MASK = 0xf;

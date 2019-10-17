@@ -211,6 +211,11 @@ public class LaneProxy implements LaneBinding, LaneContext {
   }
 
   @Override
+  public void reportDown(Metric metric) {
+    this.laneContext.reportDown(metric);
+  }
+
+  @Override
   public void openUplink(LinkBinding link) {
     this.laneBinding.openUplink(link);
   }
@@ -297,7 +302,7 @@ public class LaneProxy implements LaneBinding, LaneContext {
 
   @Override
   public void close() {
-    this.laneBinding.close();
+    this.laneContext.close();
   }
 
   @Override

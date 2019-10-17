@@ -392,6 +392,16 @@ public class Uri implements Comparable<Uri>, Debug, Display {
     }
   }
 
+  public boolean isRelativeTo(Uri absolute) {
+    return this.scheme.equals(absolute.scheme) && this.authority.equals(absolute.authority)
+        && this.path.isRelativeTo(absolute.path);
+  }
+
+  public boolean isChildOf(Uri absolute) {
+    return this.scheme.equals(absolute.scheme) && this.authority.equals(absolute.authority)
+        && this.path.isChildOf(absolute.path);
+  }
+
   public Uri resolve(Uri relative) {
     if (relative.scheme.isDefined()) {
       return copy(relative.scheme,
@@ -579,6 +589,22 @@ public class Uri implements Comparable<Uri>, Debug, Display {
 
   public static Uri from(UriPath path) {
     return from(null, null, path, null, null);
+  }
+
+  public static Uri from(UriPart part) {
+    if (part instanceof UriScheme) {
+      return from((UriScheme) part, null, null, null, null);
+    } else if (part instanceof UriAuthority) {
+      return from(null, (UriAuthority) part, null, null, null);
+    } else if (part instanceof UriPath) {
+      return from(null, null, (UriPath) part, null, null);
+    } else if (part instanceof UriQuery) {
+      return from(null, null, null, (UriQuery) part, null);
+    } else if (part instanceof UriFragment) {
+      return from(null, null, null, null, (UriFragment) part);
+    } else {
+      throw new ClassCastException(part.toString());
+    }
   }
 
   public static UriParser standardParser() {

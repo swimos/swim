@@ -70,6 +70,7 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
 
   @Override
   protected void didAddDownlink(ValueDownlinkView<?> view) {
+    super.didAddDownlink(view);
     if (this.views instanceof DownlinkView) {
       isStateful(((ValueDownlinkView<?>) view).isStateful());
     }

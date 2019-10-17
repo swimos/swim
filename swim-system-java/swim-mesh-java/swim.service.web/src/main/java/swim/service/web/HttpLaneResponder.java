@@ -25,9 +25,12 @@ import swim.http.HttpResponse;
 import swim.io.IpSocket;
 import swim.io.http.HttpResponder;
 import swim.io.http.HttpResponderContext;
+import swim.runtime.CellAddress;
 import swim.runtime.CellContext;
+import swim.runtime.DownlinkAddress;
 import swim.runtime.HttpBinding;
 import swim.runtime.HttpContext;
+import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
 import swim.runtime.LinkContext;
 import swim.runtime.NodeBinding;
@@ -120,6 +123,13 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
   @Override
   public Value linkKey() {
     return this.linkContext.linkKey();
+  }
+
+  @Override
+  public LinkAddress cellAddressDown() {
+    final CellContext cellContext = cellContext();
+    final CellAddress cellAddress = cellContext != null ? cellContext.cellAddress() : null;
+    return new DownlinkAddress(cellAddress, linkKey());
   }
 
   @Override

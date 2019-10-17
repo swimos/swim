@@ -59,7 +59,7 @@ public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, J
 
   @Override
   protected JoinValueLaneUplink createWarpUplink(WarpBinding link) {
-    return new JoinValueLaneUplink(this, link);
+    return new JoinValueLaneUplink(this, link, createUplinkAddress(link));
   }
 
   protected void openDownlinks() {
@@ -87,7 +87,7 @@ public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, J
         || header.get("prio").floatValue(0.0f) != downlink.prio()
         || header.get("rate").floatValue(0.0f) != downlink.rate()
         || !header.get("body").equals(downlink.body())) {
-      header = Record.of()
+      header = Record.create(2)
           .slot("node", downlink.nodeUri().toString())
           .slot("lane", downlink.laneUri().toString());
       if (downlink.prio() != 0.0f) {
@@ -102,7 +102,7 @@ public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, J
       if ("downlink".equals(value.tag())) {
         value = value.updatedAttr("downlink", header);
       } else {
-        value = Record.of().attr("downlink", header).concat(value);
+        value = Attr.of("downlink", header).concat(value);
       }
       this.data.put(key, value);
     }

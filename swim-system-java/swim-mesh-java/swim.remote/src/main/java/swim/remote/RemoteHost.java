@@ -43,6 +43,7 @@ import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
 import swim.runtime.LaneBinding;
 import swim.runtime.LinkBinding;
+import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
 import swim.runtime.PushRequest;
@@ -55,6 +56,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 import swim.uri.UriAuthority;
 import swim.uri.UriHost;
+import swim.uri.UriMapper;
 import swim.uri.UriPath;
 import swim.uri.UriPort;
 import swim.uri.UriScheme;
@@ -81,23 +83,15 @@ import swim.ws.WsPong;
 
 public class RemoteHost extends AbstractTierBinding implements HostBinding, WarpSocket {
   protected HostContext hostContext;
-
   protected WarpSocketContext warpSocketContext;
-
   final Uri requestUri;
-
   final Uri baseUri;
-
   Uri remoteUri;
 
   volatile int flags;
-
   volatile Identity remoteIdentity;
-
   volatile HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> downlinks;
-
   volatile HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> uplinks;
-
   final HashGenCacheMap<Uri, Uri> resolveCache;
 
   public RemoteHost(Uri requestUri, Uri baseUri) {
@@ -393,8 +387,8 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   @Override
-  public HashTrieMap<Uri, NodeBinding> nodes() {
-    return HashTrieMap.empty();
+  public UriMapper<NodeBinding> nodes() {
+    return UriMapper.empty();
   }
 
   @Override
@@ -902,6 +896,37 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   @Override
+  protected void willClose() {
+    super.willClose();
+    try {
+      closeDownlinks();
+    } finally {
+      try {
+        closeUplinks();
+      } finally {
+        try {
+          final HostContext hostContext = this.hostContext;
+          if (hostContext != null) {
+            hostContext.close();
+          }
+        } finally {
+          final WarpSocketContext warpSocketContext = this.warpSocketContext;
+          if (warpSocketContext != null) {
+            warpSocketContext.close();
+          }
+        }
+      }
+    }
+  }
+
+  @Override
+  public void didFail(Throwable error) {
+    error.printStackTrace();
+    this.warpSocketContext.write(WsClose.from(1002, error.getMessage()));
+    this.hostContext.close();
+  }
+
+  @Override
   public void openMetaHost(HostBinding host, NodeBinding metaHost) {
     openMetaLanes(host, (AgentNode) metaHost);
     this.hostContext.openMetaHost(host, metaHost);
@@ -951,73 +976,9 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     this.hostContext.pushDown(pushRequest);
   }
 
-  protected void willOpen() {
-    // nop
-  }
-
-  protected void didOpen() {
-    // nop
-  }
-
-  protected void willLoad() {
-    // nop
-  }
-
-  protected void didLoad() {
-    // nop
-  }
-
-  protected void willStart() {
-    // nop
-  }
-
-  protected void didStart() {
-    // nop
-  }
-
-  protected void willStop() {
-    // nop
-  }
-
-  protected void didStop() {
-    // nop
-  }
-
-  protected void willUnload() {
-    // nop
-  }
-
-  protected void didUnload() {
-    // nop
-  }
-
-  protected void willClose() {
-    try {
-      closeDownlinks();
-    } finally {
-      try {
-        closeUplinks();
-      } finally {
-        try {
-          final HostContext hostContext = this.hostContext;
-          if (hostContext != null) {
-            hostContext.close();
-          }
-        } finally {
-          final WarpSocketContext warpSocketContext = this.warpSocketContext;
-          if (warpSocketContext != null) {
-            warpSocketContext.close();
-          }
-        }
-      }
-    }
-  }
-
   @Override
-  public void didFail(Throwable error) {
-    error.printStackTrace();
-    this.warpSocketContext.write(WsClose.from(1002, error.getMessage()));
-    this.hostContext.close();
+  public void reportDown(Metric metric) {
+    this.hostContext.reportDown(metric);
   }
 
   protected void reconnect() {

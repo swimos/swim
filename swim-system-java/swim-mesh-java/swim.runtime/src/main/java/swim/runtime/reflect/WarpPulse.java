@@ -12,23 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.dynamic.api.lane.function;
+package swim.runtime.reflect;
 
-import java.util.Iterator;
-import java.util.Map;
-import swim.api.lane.function.OnSyncMap;
-import swim.api.warp.WarpUplink;
-import swim.dynamic.Bridge;
-import swim.dynamic.BridgeGuest;
+import swim.structure.Value;
 
-public class GuestOnSyncMap<K, V> extends BridgeGuest implements OnSyncMap<K, V> {
-  public GuestOnSyncMap(Bridge bridge, Object guest) {
-    super(bridge, guest);
-  }
+public interface WarpPulse {
+  boolean isDefined();
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public Iterator<Map.Entry<K, V>> onSync(WarpUplink uplink) {
-    return (Iterator<Map.Entry<K, V>>) this.bridge.guestExecute(this.guest, uplink);
-  }
+  int eventRate();
+
+  long eventCount();
+
+  int commandRate();
+
+  long commandCount();
+
+  Value toValue();
 }

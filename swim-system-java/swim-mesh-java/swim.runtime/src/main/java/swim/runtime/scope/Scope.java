@@ -24,6 +24,7 @@ import swim.concurrent.Stage;
 import swim.runtime.CellAddress;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
 import swim.runtime.PushRequest;
 import swim.store.StoreBinding;
@@ -112,13 +113,18 @@ public abstract class Scope implements CellContext {
   }
 
   @Override
+  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    this.cellContext.openMetaDownlink(downlink, metaDownlink);
+  }
+
+  @Override
   public void pushDown(PushRequest pushRequest) {
     this.cellContext.pushDown(pushRequest);
   }
 
   @Override
-  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
-    this.cellContext.openMetaDownlink(downlink, metaDownlink);
+  public void reportDown(Metric metric) {
+    this.cellContext.reportDown(metric);
   }
 
   @Override

@@ -59,6 +59,19 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
   }
 
   @Override
+  UriMapper<T> getSuffix(UriPath path, UriQuery query, UriFragment fragment) {
+    if (!path.isEmpty()) {
+      UriPathMapper<T> mapping = this.table.get(path.head());
+      if (mapping == null) {
+        mapping = this.wildcard;
+      }
+      return mapping.getSuffix(path.tail(), query, fragment);
+    } else {
+      return this;
+    }
+  }
+
+  @Override
   T get(UriPath path, UriQuery query, UriFragment fragment) {
     if (!path.isEmpty()) {
       UriPathMapper<T> mapping = this.table.get(path.head());
@@ -206,6 +219,16 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
   }
 
   @Override
+  public long childCount() {
+    return (long) this.table.size();
+  }
+
+  @Override
+  public Iterator<UriPart> childIterator() {
+    return new UriPathMappingChildIterator(this.table.keyIterator());
+  }
+
+  @Override
   public boolean equals(Object other) {
     if (this == other) {
       return true;
@@ -292,5 +315,28 @@ final class UriPathMappingValueIterator<T> extends FlatteningIterator<UriPathMap
   @Override
   protected Iterator<T> childIterator(UriPathMapper<T> parent) {
     return parent.valueIterator();
+  }
+}
+
+final class UriPathMappingChildIterator implements Iterator<UriPart> {
+  final Iterator<String> componentIterator;
+
+  UriPathMappingChildIterator(Iterator<String> componentIterator) {
+    this.componentIterator = componentIterator;
+  }
+
+  @Override
+  public boolean hasNext() {
+    return this.componentIterator.hasNext();
+  }
+
+  @Override
+  public UriPart next() {
+    return UriPath.component(this.componentIterator.next());
+  }
+
+  @Override
+  public void remove() {
+    throw new UnsupportedOperationException();
   }
 }

@@ -21,7 +21,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Murmur3;
 
-public final class UplinkAddress extends CellAddress implements Debug {
+public final class UplinkAddress extends LinkAddress implements Debug {
   final String edgeName;
   final Uri meshUri;
   final Value partKey;
@@ -99,6 +99,14 @@ public final class UplinkAddress extends CellAddress implements Debug {
 
   public UplinkAddress laneUri(String laneUri) {
     return laneUri(Uri.parse(laneUri));
+  }
+
+  public Value linkKey() {
+    return this.linkKey;
+  }
+
+  public UplinkAddress linkKey(Value linkKey) {
+    return copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, this.nodeUri, this.laneUri, linkKey);
   }
 
   UplinkAddress copy(String edgeName, Uri meshUri, Value partKey, Uri hostUri,

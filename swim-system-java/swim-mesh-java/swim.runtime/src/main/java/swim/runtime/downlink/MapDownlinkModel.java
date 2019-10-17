@@ -21,7 +21,7 @@ import swim.collections.BTreeMap;
 import swim.concurrent.Stage;
 import swim.runtime.DownlinkRelay;
 import swim.runtime.DownlinkView;
-import swim.runtime.warp.PartialDownlinkModem;
+import swim.runtime.warp.MapDownlinkModem;
 import swim.structure.Attr;
 import swim.structure.Form;
 import swim.structure.Record;
@@ -32,7 +32,7 @@ import swim.util.OrderedMap;
 import swim.util.OrderedMapCursor;
 import swim.warp.EventMessage;
 
-public class MapDownlinkModel extends PartialDownlinkModem<MapDownlinkView<?, ?>> {
+public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
   protected int flags;
   protected final BTreeMap<Value, Value, Value> state;
 
@@ -104,6 +104,7 @@ public class MapDownlinkModel extends PartialDownlinkModem<MapDownlinkView<?, ?>
 
   @Override
   protected void didAddDownlink(MapDownlinkView<?, ?> view) {
+    super.didAddDownlink(view);
     if (this.views instanceof DownlinkView) {
       isStateful(((MapDownlinkView<?, ?>) view).isStateful());
     }

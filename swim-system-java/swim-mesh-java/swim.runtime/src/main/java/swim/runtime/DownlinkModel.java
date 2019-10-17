@@ -100,6 +100,23 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
     }
   }
 
+  @SuppressWarnings("unchecked")
+  protected void removeDownlinks() {
+    final Object views = VIEWS.getAndSet(this, null);
+    View view;
+    if (views instanceof DownlinkView) {
+      view = (View) views;
+      didRemoveDownlink(view);
+    } else if (views instanceof DownlinkView[]) {
+      final DownlinkView[] viewArray = (DownlinkView[]) views;
+      final int n = viewArray.length;
+      for (int i = 0; i < n; i += 1) {
+        view = (View) viewArray[i];
+        didRemoveDownlink(view);
+      }
+    }
+  }
+
   protected void didAddDownlink(View view) {
     // stub
   }
@@ -153,6 +170,10 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
   @Override
   public void didFail(Throwable error) {
     new DownlinkRelayDidFail<View>(this, error).run();
+  }
+
+  public void accumulateExecTime(long execDelta) {
+    // hook
   }
 
   @SuppressWarnings("unchecked")

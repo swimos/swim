@@ -45,7 +45,12 @@ final class UriConstantMapping<T> extends UriTerminalMapper<T> {
   }
 
   @Override
-  public T get() {
+  UriMapper<T> getSuffix() {
+    return this;
+  }
+
+  @Override
+  T get() {
     return this.value;
   }
 

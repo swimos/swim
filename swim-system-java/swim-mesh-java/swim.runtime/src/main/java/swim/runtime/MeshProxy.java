@@ -288,6 +288,11 @@ public class MeshProxy implements MeshBinding, MeshContext {
   }
 
   @Override
+  public void reportDown(Metric metric) {
+    this.meshContext.reportDown(metric);
+  }
+
+  @Override
   public void openUplink(LinkBinding link) {
     this.meshBinding.openUplink(link);
   }
@@ -374,7 +379,7 @@ public class MeshProxy implements MeshBinding, MeshContext {
 
   @Override
   public void close() {
-    this.meshBinding.close();
+    this.meshContext.close();
   }
 
   @Override

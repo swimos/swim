@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.api.auth.Identity;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
+import swim.runtime.DownlinkAddress;
+import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
 import swim.runtime.LinkKeys;
 import swim.runtime.NodeBinding;
@@ -82,6 +84,11 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
 
   public final Value linkKey() {
     return this.linkKey;
+  }
+
+  @Override
+  public LinkAddress cellAddressUp() {
+    return new DownlinkAddress(this.host.cellAddress(), linkKey());
   }
 
   public final float prio() {

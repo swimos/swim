@@ -28,6 +28,8 @@ public interface LinkContext {
 
   Value linkKey();
 
+  LinkAddress cellAddressUp();
+
   boolean isConnectedUp();
 
   boolean isRemoteUp();

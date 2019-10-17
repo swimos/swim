@@ -15,17 +15,18 @@
 package swim.runtime.router;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.Downlink;
+import swim.api.lane.DemandLane;
 import swim.api.lane.DemandMapLane;
 import swim.api.lane.SupplyLane;
+import swim.api.lane.function.OnCue;
 import swim.api.lane.function.OnCueKey;
-import swim.api.lane.function.OnSyncMap;
+import swim.api.lane.function.OnSyncKeys;
 import swim.api.policy.Policy;
 import swim.api.warp.WarpUplink;
-import swim.collections.HashTrieMap;
 import swim.concurrent.Conts;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
@@ -35,6 +36,7 @@ import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
 import swim.runtime.LaneBinding;
 import swim.runtime.LinkBinding;
+import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
@@ -43,18 +45,69 @@ import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.agent.AgentNode;
+import swim.runtime.profile.HostProfile;
+import swim.runtime.profile.NodeProfile;
+import swim.runtime.profile.WarpDownlinkProfile;
+import swim.runtime.reflect.AgentPulse;
+import swim.runtime.reflect.HostPulse;
 import swim.runtime.reflect.LogEntry;
 import swim.runtime.reflect.NodeInfo;
+import swim.runtime.reflect.WarpDownlinkPulse;
+import swim.runtime.reflect.WarpUplinkPulse;
 import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.uri.UriFragment;
+import swim.uri.UriMapper;
+import swim.uri.UriPart;
+import swim.uri.UriPath;
+import swim.uri.UriPathBuilder;
 
 public class HostTable extends AbstractTierBinding implements HostBinding {
   protected HostContext hostContext;
-  volatile HashTrieMap<Uri, NodeBinding> nodes;
+  volatile UriMapper<NodeBinding> nodes;
   volatile int flags;
 
+  volatile int nodeOpenDelta;
+  volatile long nodeOpenCount;
+  volatile int nodeCloseDelta;
+  volatile long nodeCloseCount;
+  volatile int agentOpenDelta;
+  volatile long agentOpenCount;
+  volatile int agentCloseDelta;
+  volatile long agentCloseCount;
+  volatile long agentExecDelta;
+  volatile long agentExecRate;
+  volatile long agentExecTime;
+  volatile int timerEventDelta;
+  volatile int timerEventRate;
+  volatile long timerEventCount;
+  volatile int downlinkOpenDelta;
+  volatile long downlinkOpenCount;
+  volatile int downlinkCloseDelta;
+  volatile long downlinkCloseCount;
+  volatile int downlinkEventDelta;
+  volatile int downlinkEventRate;
+  volatile long downlinkEventCount;
+  volatile int downlinkCommandDelta;
+  volatile int downlinkCommandRate;
+  volatile long downlinkCommandCount;
+  volatile int uplinkOpenDelta;
+  volatile long uplinkOpenCount;
+  volatile int uplinkCloseDelta;
+  volatile long uplinkCloseCount;
+  volatile int uplinkEventDelta;
+  volatile int uplinkEventRate;
+  volatile long uplinkEventCount;
+  volatile int uplinkCommandDelta;
+  volatile int uplinkCommandRate;
+  volatile long uplinkCommandCount;
+  volatile long lastReportTime;
+  HostPulse pulse;
+
+  AgentNode metaNode;
   DemandMapLane<Uri, NodeInfo> metaNodes;
+  DemandLane<HostPulse> metaPulse;
   SupplyLane<LogEntry> metaTraceLog;
   SupplyLane<LogEntry> metaDebugLog;
   SupplyLane<LogEntry> metaInfoLog;
@@ -63,7 +116,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   SupplyLane<LogEntry> metaFailLog;
 
   public HostTable() {
-    this.nodes = HashTrieMap.empty();
+    this.nodes = UriMapper.empty();
   }
 
   @Override
@@ -230,7 +283,10 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   @Override
   public void openMetaHost(HostBinding host, NodeBinding metaHost) {
-    openMetaLanes(host, (AgentNode) metaHost);
+    if (metaHost instanceof AgentNode) {
+      this.metaNode = (AgentNode) metaHost;
+      openMetaLanes(host, (AgentNode) metaHost);
+    }
     this.hostContext.openMetaHost(host, metaHost);
   }
 
@@ -245,6 +301,11 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
         .valueForm(NodeInfo.form())
         .observe(new HostTableNodesController(host));
     metaHost.openLane(NODES_URI, this.metaNodes);
+
+    this.metaPulse = metaNode.demandLane()
+        .valueForm(HostPulse.form())
+        .observe(new HostTablePulseController(this));
+    metaNode.openLane(HostPulse.PULSE_URI, this.metaPulse);
   }
 
   protected void openLogLanes(HostBinding host, AgentNode metaHost) {
@@ -274,7 +335,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   }
 
   @Override
-  public HashTrieMap<Uri, NodeBinding> nodes() {
+  public UriMapper<NodeBinding> nodes() {
     return this.nodes;
   }
 
@@ -285,8 +346,8 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   @Override
   public NodeBinding openNode(Uri nodeUri) {
-    HashTrieMap<Uri, NodeBinding> oldNodes;
-    HashTrieMap<Uri, NodeBinding> newNodes;
+    UriMapper<NodeBinding> oldNodes;
+    UriMapper<NodeBinding> newNodes;
     NodeBinding nodeBinding = null;
     do {
       oldNodes = this.nodes;
@@ -320,18 +381,15 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
     if (oldNodes != newNodes) {
       activate(nodeBinding);
-      final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
-      if (metaNodes != null) {
-        metaNodes.cue(nodeUri);
-      }
+      didOpenNode(nodeBinding);
     }
     return nodeBinding;
   }
 
   @Override
   public NodeBinding openNode(Uri nodeUri, NodeBinding node) {
-    HashTrieMap<Uri, NodeBinding> oldNodes;
-    HashTrieMap<Uri, NodeBinding> newNodes;
+    UriMapper<NodeBinding> oldNodes;
+    UriMapper<NodeBinding> newNodes;
     NodeBinding nodeBinding = null;
     do {
       oldNodes = this.nodes;
@@ -354,17 +412,14 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
     if (nodeBinding != null) {
       activate(nodeBinding);
-      final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
-      if (metaNodes != null) {
-        metaNodes.cue(nodeUri);
-      }
+      didOpenNode(nodeBinding);
     }
     return nodeBinding;
   }
 
   public void closeNode(Uri nodeUri) {
-    HashTrieMap<Uri, NodeBinding> oldNodes;
-    HashTrieMap<Uri, NodeBinding> newNodes;
+    UriMapper<NodeBinding> oldNodes;
+    UriMapper<NodeBinding> newNodes;
     NodeBinding nodeBinding = null;
     do {
       oldNodes = this.nodes;
@@ -380,25 +435,70 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
     if (nodeBinding != null) {
       nodeBinding.didClose();
-      final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
-      if (metaNodes != null) {
-        metaNodes.remove(nodeUri);
-      }
+      didCloseNode(nodeBinding);
     }
   }
 
   public void closeNodes() {
-    HashTrieMap<Uri, NodeBinding> oldNodes;
-    final HashTrieMap<Uri, NodeBinding> newNodes = HashTrieMap.empty();
+    UriMapper<NodeBinding> oldNodes;
+    final UriMapper<NodeBinding> newNodes = UriMapper.empty();
     do {
       oldNodes = this.nodes;
     } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
-    for (NodeBinding nodeBinding : oldNodes.values()) {
-      nodeBinding.close();
-      nodeBinding.didClose();
+    if (!oldNodes.isEmpty()) {
       final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
-      if (metaNodes != null) {
-        metaNodes.remove(nodeBinding.nodeUri());
+      for (NodeBinding nodeBinding : oldNodes.values()) {
+        nodeBinding.close();
+        nodeBinding.didClose();
+        if (metaNodes != null) {
+          metaNodes.cue(nodeBinding.nodeUri());
+        }
+      }
+      flushMetrics();
+    }
+  }
+
+  protected void didOpenNode(NodeBinding node) {
+    final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
+    if (metaNodes != null) {
+      final Uri nodeUri = node.nodeUri();
+      metaNodes.cue(nodeUri);
+      cueAncestorNodes(nodeUri);
+    }
+    NODE_OPEN_DELTA.incrementAndGet(this);
+    flushMetrics();
+  }
+
+  protected void didCloseNode(NodeBinding node) {
+    final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
+    if (metaNodes != null) {
+      final Uri nodeUri = node.nodeUri();
+      metaNodes.remove(nodeUri);
+      cueAncestorNodes(nodeUri);
+    }
+    NODE_CLOSE_DELTA.incrementAndGet(this);
+    flushMetrics();
+  }
+
+  protected void cueAncestorNodes(Uri nodeUri) {
+    final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
+    if (metaNodes != null) {
+      UriPath nodePath = nodeUri.path();
+      final UriPathBuilder ancestorPathBuilder = UriPath.builder();
+      while (!nodePath.isEmpty()) {
+        if (nodePath.isAbsolute()) {
+          ancestorPathBuilder.addSlash();
+          nodePath = nodePath.tail();
+        } else {
+          ancestorPathBuilder.addSegment(nodePath.head());
+          nodePath = nodePath.tail();
+          if (nodePath.isAbsolute()) {
+            final Uri ancestorUri = nodeUri.path(ancestorPathBuilder.bind());
+            metaNodes.cue(ancestorUri);
+            ancestorPathBuilder.addSlash();
+            nodePath = nodePath.tail();
+          }
+        }
       }
     }
   }
@@ -425,12 +525,15 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   @Override
   public LinkBinding bindDownlink(Downlink downlink) {
-    return this.hostContext.bindDownlink(downlink);
+    final LinkBinding link = this.hostContext.bindDownlink(downlink);
+    link.setCellContext(this);
+    return link;
   }
 
   @Override
   public void openDownlink(LinkBinding link) {
     this.hostContext.openDownlink(link);
+    link.setCellContext(this);
   }
 
   @Override
@@ -573,7 +676,20 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   @Override
   public void didClose() {
-    // nop
+    super.didClose();
+    final AgentNode metaNode = this.metaNode;
+    if (metaNode != null) {
+      metaNode.close();
+      this.metaNode = null;
+      this.metaNodes = null;
+      this.metaTraceLog = null;
+      this.metaDebugLog = null;
+      this.metaInfoLog = null;
+      this.metaWarnLog = null;
+      this.metaErrorLog = null;
+      this.metaFailLog = null;
+    } 
+    flushMetrics();
   }
 
   @Override
@@ -585,22 +701,248 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     }
   }
 
+  @Override
+  public void reportDown(Metric metric) {
+    if (metric instanceof NodeProfile) {
+      accumulateNodeProfile((NodeProfile) metric);
+    } else if (metric instanceof WarpDownlinkProfile) {
+      accumulateWarpDownlinkProfile((WarpDownlinkProfile) metric);
+    } else {
+      this.hostContext.reportDown(metric);
+    }
+  }
+
+  protected void accumulateNodeProfile(NodeProfile profile) {
+    AGENT_OPEN_DELTA.addAndGet(this, profile.agentOpenDelta());
+    AGENT_CLOSE_DELTA.addAndGet(this, profile.agentCloseDelta());
+    AGENT_EXEC_DELTA.addAndGet(this, profile.agentExecDelta());
+    AGENT_EXEC_RATE.addAndGet(this, profile.agentExecRate());
+    TIMER_EVENT_DELTA.addAndGet(this, profile.timerEventDelta());
+    TIMER_EVENT_RATE.addAndGet(this, profile.timerEventRate());
+    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.downlinkOpenDelta());
+    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.downlinkCloseDelta());
+    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.downlinkEventDelta());
+    DOWNLINK_EVENT_RATE.addAndGet(this, profile.downlinkEventRate());
+    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.downlinkCommandDelta());
+    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.downlinkCommandRate());
+    UPLINK_OPEN_DELTA.addAndGet(this, profile.uplinkOpenDelta());
+    UPLINK_CLOSE_DELTA.addAndGet(this, profile.uplinkCloseDelta());
+    UPLINK_EVENT_DELTA.addAndGet(this, profile.uplinkEventDelta());
+    UPLINK_EVENT_RATE.addAndGet(this, profile.uplinkEventRate());
+    UPLINK_COMMAND_DELTA.addAndGet(this, profile.uplinkCommandDelta());
+    UPLINK_COMMAND_RATE.addAndGet(this, profile.uplinkCommandRate());
+    didUpdateMetrics();
+  }
+
+  protected void accumulateWarpDownlinkProfile(WarpDownlinkProfile profile) {
+    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.openDelta());
+    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.closeDelta());
+    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
+    DOWNLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
+    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
+    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
+    didUpdateMetrics();
+  }
+
+  protected void didUpdateMetrics() {
+    do {
+      final long newReportTime = System.currentTimeMillis();
+      final long oldReportTime = this.lastReportTime;
+      final long dt = newReportTime - oldReportTime;
+      if (dt >= Metric.REPORT_INTERVAL) {
+        if (LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
+          try {
+            reportMetrics(dt);
+          } catch (Throwable error) {
+            if (Conts.isNonFatal(error)) {
+              didFail(error);
+            } else {
+              throw error;
+            }
+          }
+          break;
+        }
+      } else {
+        break;
+      }
+    } while (true);
+  }
+
+  protected void flushMetrics() {
+    final long newReportTime = System.currentTimeMillis();
+    final long oldReportTime = LAST_REPORT_TIME.getAndSet(this, newReportTime);
+    final long dt = newReportTime - oldReportTime;
+    try {
+      reportMetrics(dt);
+    } catch (Throwable error) {
+      if (Conts.isNonFatal(error)) {
+        didFail(error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  protected void reportMetrics(long dt) {
+    final HostProfile profile = collectProfile(dt);
+    this.hostContext.reportDown(profile);
+  }
+
+  protected HostProfile collectProfile(long dt) {
+    final int nodeOpenDelta = NODE_OPEN_DELTA.getAndSet(this, 0);
+    final long nodeOpenCount = NODE_OPEN_COUNT.addAndGet(this, (long) nodeOpenDelta);
+    final int nodeCloseDelta = NODE_CLOSE_DELTA.getAndSet(this, 0);
+    final long nodeCloseCount = NODE_CLOSE_COUNT.addAndGet(this, (long) nodeCloseDelta);
+
+    final int agentOpenDelta = AGENT_OPEN_DELTA.getAndSet(this, 0);
+    final long agentOpenCount = AGENT_OPEN_COUNT.addAndGet(this, (long) agentOpenDelta);
+    final int agentCloseDelta = AGENT_CLOSE_DELTA.getAndSet(this, 0);
+    final long agentCloseCount = AGENT_CLOSE_COUNT.addAndGet(this, (long) agentCloseDelta);
+    final long agentExecDelta = AGENT_EXEC_DELTA.getAndSet(this, 0L);
+    final long agentExecRate = AGENT_EXEC_RATE.getAndSet(this, 0L);
+    final long agentExecTime = AGENT_EXEC_TIME.addAndGet(this, agentExecDelta);
+
+    final int timerEventDelta = TIMER_EVENT_DELTA.getAndSet(this, 0);
+    final int timerEventRate = TIMER_EVENT_RATE.getAndSet(this, 0);
+    final long timerEventCount = TIMER_EVENT_COUNT.addAndGet(this, (long) timerEventDelta);
+
+    final int downlinkOpenDelta = DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long downlinkOpenCount = DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
+    final int downlinkCloseDelta = DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long downlinkCloseCount = DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
+    final int downlinkEventDelta = DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int downlinkEventRate = DOWNLINK_EVENT_RATE.getAndSet(this, 0);
+    final long downlinkEventCount = DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
+    final int downlinkCommandDelta = DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int downlinkCommandRate = DOWNLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long downlinkCommandCount = DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
+
+    final int uplinkOpenDelta = UPLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long uplinkOpenCount = UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
+    final int uplinkCloseDelta = UPLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long uplinkCloseCount = UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
+    final int uplinkEventDelta = UPLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int uplinkEventRate = UPLINK_EVENT_RATE.getAndSet(this, 0);
+    final long uplinkEventCount = UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
+    final int uplinkCommandDelta = UPLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int uplinkCommandRate = UPLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long uplinkCommandCount = UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
+
+    final long nodeCount = nodeOpenCount - nodeCloseCount;
+    final long agentCount = agentOpenCount - agentCloseCount;
+    final AgentPulse agentPulse = new AgentPulse(agentCount, agentExecRate, agentExecTime, timerEventRate, timerEventCount);
+    final long downlinkCount = downlinkOpenCount - downlinkCloseCount;
+    final WarpDownlinkPulse downlinkPulse = new WarpDownlinkPulse(downlinkCount, downlinkEventRate, downlinkEventCount,
+                                                                  downlinkCommandRate, downlinkCommandCount);
+    final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
+    final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
+                                                            uplinkCommandRate, uplinkCommandCount);
+    this.pulse = new HostPulse(nodeCount, agentPulse, downlinkPulse, uplinkPulse);
+    final DemandLane<HostPulse> metaPulse = this.metaPulse;
+    if (metaPulse != null) {
+      metaPulse.cue();
+    }
+
+    return new HostProfile(cellAddress(),
+                           nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
+                           agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
+                           agentExecDelta, agentExecRate, agentExecTime,
+                           timerEventDelta, timerEventRate, timerEventCount,
+                           downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+                           downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+                           downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+                           uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+                           uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+                           uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+  }
+
   static final int PRIMARY = 1 << 0;
   static final int REPLICA = 1 << 1;
   static final int MASTER = 1 << 2;
   static final int SLAVE = 1 << 3;
 
+  static final Uri NODES_URI = Uri.parse("nodes");
+
   @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<HostTable, HashTrieMap<Uri, NodeBinding>> NODES =
-      AtomicReferenceFieldUpdater.newUpdater(HostTable.class, (Class<HashTrieMap<Uri, NodeBinding>>) (Class<?>) HashTrieMap.class, "nodes");
+  static final AtomicReferenceFieldUpdater<HostTable, UriMapper<NodeBinding>> NODES =
+      AtomicReferenceFieldUpdater.newUpdater(HostTable.class, (Class<UriMapper<NodeBinding>>) (Class<?>) UriMapper.class, "nodes");
 
   static final AtomicIntegerFieldUpdater<HostTable> FLAGS =
       AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "flags");
 
-  static final Uri NODES_URI = Uri.parse("nodes");
+  static final AtomicIntegerFieldUpdater<HostTable> NODE_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "nodeOpenDelta");
+  static final AtomicLongFieldUpdater<HostTable> NODE_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "nodeOpenCount");
+  static final AtomicIntegerFieldUpdater<HostTable> NODE_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "nodeCloseDelta");
+  static final AtomicLongFieldUpdater<HostTable> NODE_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "nodeCloseCount");
+  static final AtomicIntegerFieldUpdater<HostTable> AGENT_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "agentOpenDelta");
+  static final AtomicLongFieldUpdater<HostTable> AGENT_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentOpenCount");
+  static final AtomicIntegerFieldUpdater<HostTable> AGENT_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "agentCloseDelta");
+  static final AtomicLongFieldUpdater<HostTable> AGENT_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentCloseCount");
+  static final AtomicLongFieldUpdater<HostTable> AGENT_EXEC_DELTA =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentExecDelta");
+  static final AtomicLongFieldUpdater<HostTable> AGENT_EXEC_RATE =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentExecRate");
+  static final AtomicLongFieldUpdater<HostTable> AGENT_EXEC_TIME =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentExecTime");
+  static final AtomicIntegerFieldUpdater<HostTable> TIMER_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "timerEventDelta");
+  static final AtomicIntegerFieldUpdater<HostTable> TIMER_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "timerEventRate");
+  static final AtomicLongFieldUpdater<HostTable> TIMER_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "timerEventCount");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkOpenDelta");
+  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkOpenCount");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkCloseDelta");
+  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkCloseCount");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkEventDelta");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkEventRate");
+  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkEventCount");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkCommandRate");
+  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkCommandCount");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkOpenDelta");
+  static final AtomicLongFieldUpdater<HostTable> UPLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkOpenCount");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkCloseDelta");
+  static final AtomicLongFieldUpdater<HostTable> UPLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkCloseCount");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkEventDelta");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkEventRate");
+  static final AtomicLongFieldUpdater<HostTable> UPLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkEventCount");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkCommandRate");
+  static final AtomicLongFieldUpdater<HostTable> UPLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkCommandCount");
+  static final AtomicLongFieldUpdater<HostTable> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "lastReportTime");
 }
 
-final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncMap<Uri, NodeInfo> {
+final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncKeys<Uri> {
   final HostBinding host;
 
   HostTableNodesController(HostBinding host) {
@@ -609,15 +951,76 @@ final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncM
 
   @Override
   public NodeInfo onCue(Uri nodeUri, WarpUplink uplink) {
-    final NodeBinding nodeBinding = this.host.getNode(nodeUri);
-    if (nodeBinding == null) {
-      return null;
+    final NodeBinding nodeBinding;
+    final UriFragment laneFragment = uplink.laneUri().fragment();
+    if (laneFragment.isDefined()) {
+      final Uri parentUri = Uri.parse(laneFragment.identifier());
+      if (nodeUri.isChildOf(parentUri)) {
+        nodeBinding = this.host.getNode(nodeUri);
+        final Uri directoryUri = nodeUri.appendedSlash();
+        final UriMapper<NodeBinding> directory = this.host.nodes().getSuffix(directoryUri);
+        if (nodeBinding != null) {
+          return NodeInfo.from(nodeBinding, directory.childCount());
+        } else if (!directory.isEmpty()) {
+          return new NodeInfo(nodeUri, 0L, directory.childCount()); // synthetic directory node
+        }
+      }
+    } else {
+      nodeBinding = this.host.getNode(nodeUri);
+      if (nodeBinding != null) {
+        return NodeInfo.from(nodeBinding);
+      }
     }
-    return NodeInfo.from(nodeBinding);
+    return null;
   }
 
   @Override
-  public Iterator<Map.Entry<Uri, NodeInfo>> onSync(WarpUplink uplink) {
-    return NodeInfo.iterator(this.host.nodes().iterator());
+  public Iterator<Uri> onSync(WarpUplink uplink) {
+    final UriFragment laneFragment = uplink.laneUri().fragment();
+    if (laneFragment.isDefined()) {
+      final Uri parentUri = Uri.parse(laneFragment.identifier());
+      final UriMapper<NodeBinding> parentSuffix = this.host.nodes().getSuffix(parentUri);
+      return new HostTableNodesChildIterator(parentUri, parentSuffix.childIterator());
+    }
+    return this.host.nodes().keyIterator();
+  }
+}
+
+final class HostTableNodesChildIterator implements Iterator<Uri> {
+  final Uri parentUri;
+  final Iterator<UriPart> childSegments;
+
+  HostTableNodesChildIterator(Uri parentUri, Iterator<UriPart> childSegments) {
+    this.parentUri = parentUri;
+    this.childSegments = childSegments;
+  }
+
+  @Override
+  public boolean hasNext() {
+    return this.childSegments.hasNext();
+  }
+
+  @Override
+  public Uri next() {
+    final UriPart childSegment = this.childSegments.next();
+    return this.parentUri.appendedPath((UriPath) childSegment);
+  }
+
+  @Override
+  public void remove() {
+    throw new UnsupportedOperationException();
+  }
+}
+
+final class HostTablePulseController implements OnCue<HostPulse> {
+  final HostTable host;
+
+  HostTablePulseController(HostTable host) {
+    this.host = host;
+  }
+
+  @Override
+  public HostPulse onCue(WarpUplink uplink) {
+    return this.host.pulse;
   }
 }

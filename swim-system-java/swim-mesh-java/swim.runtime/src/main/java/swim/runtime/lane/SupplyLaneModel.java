@@ -25,7 +25,7 @@ public class SupplyLaneModel extends WarpLaneModel<SupplyLaneView<?>, SupplyLane
 
   @Override
   protected SupplyLaneUplink createWarpUplink(WarpBinding link) {
-    return new SupplyLaneUplink(this, link);
+    return new SupplyLaneUplink(this, link, createUplinkAddress(link));
   }
 
   @Override

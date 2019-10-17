@@ -15,13 +15,16 @@
 package swim.runtime.router;
 
 import java.util.Iterator;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.Downlink;
+import swim.api.lane.DemandLane;
 import swim.api.lane.DemandMapLane;
 import swim.api.lane.SupplyLane;
+import swim.api.lane.function.OnCue;
 import swim.api.lane.function.OnCueKey;
-import swim.api.lane.function.OnSyncMap;
+import swim.api.lane.function.OnSyncKeys;
 import swim.api.policy.Policy;
 import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
@@ -36,6 +39,7 @@ import swim.runtime.LinkBinding;
 import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshContext;
+import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
@@ -44,8 +48,15 @@ import swim.runtime.PushRequest;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.agent.AgentNode;
+import swim.runtime.profile.MeshProfile;
+import swim.runtime.profile.PartProfile;
+import swim.runtime.profile.WarpDownlinkProfile;
+import swim.runtime.reflect.AgentPulse;
 import swim.runtime.reflect.LogEntry;
+import swim.runtime.reflect.MeshPulse;
 import swim.runtime.reflect.PartInfo;
+import swim.runtime.reflect.WarpDownlinkPulse;
+import swim.runtime.reflect.WarpUplinkPulse;
 import swim.store.StoreBinding;
 import swim.structure.Extant;
 import swim.structure.Form;
@@ -59,7 +70,54 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   volatile PartBinding gateway;
   volatile PartBinding ourself;
 
+  volatile int partOpenDelta;
+  volatile long partOpenCount;
+  volatile int partCloseDelta;
+  volatile long partCloseCount;
+  volatile int hostOpenDelta;
+  volatile long hostOpenCount;
+  volatile int hostCloseDelta;
+  volatile long hostCloseCount;
+  volatile int nodeOpenDelta;
+  volatile long nodeOpenCount;
+  volatile int nodeCloseDelta;
+  volatile long nodeCloseCount;
+  volatile int agentOpenDelta;
+  volatile long agentOpenCount;
+  volatile int agentCloseDelta;
+  volatile long agentCloseCount;
+  volatile long agentExecDelta;
+  volatile long agentExecRate;
+  volatile long agentExecTime;
+  volatile int timerEventDelta;
+  volatile int timerEventRate;
+  volatile long timerEventCount;
+  volatile int downlinkOpenDelta;
+  volatile long downlinkOpenCount;
+  volatile int downlinkCloseDelta;
+  volatile long downlinkCloseCount;
+  volatile int downlinkEventDelta;
+  volatile int downlinkEventRate;
+  volatile long downlinkEventCount;
+  volatile int downlinkCommandDelta;
+  volatile int downlinkCommandRate;
+  volatile long downlinkCommandCount;
+  volatile int uplinkOpenDelta;
+  volatile long uplinkOpenCount;
+  volatile int uplinkCloseDelta;
+  volatile long uplinkCloseCount;
+  volatile int uplinkEventDelta;
+  volatile int uplinkEventRate;
+  volatile long uplinkEventCount;
+  volatile int uplinkCommandDelta;
+  volatile int uplinkCommandRate;
+  volatile long uplinkCommandCount;
+  volatile long lastReportTime;
+  MeshPulse pulse;
+
+  AgentNode metaNode;
   DemandMapLane<Value, PartInfo> metaParts;
+  DemandLane<MeshPulse> metaPulse;
   SupplyLane<LogEntry> metaTraceLog;
   SupplyLane<LogEntry> metaDebugLog;
   SupplyLane<LogEntry> metaInfoLog;
@@ -147,7 +205,10 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   @Override
   public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
-    openMetaLanes(mesh, (AgentNode) metaMesh);
+    if (metaMesh instanceof AgentNode) {
+      this.metaNode = (AgentNode) metaMesh;
+      openMetaLanes(mesh, (AgentNode) metaMesh);
+    }
     this.meshContext.openMetaMesh(mesh, metaMesh);
   }
 
@@ -162,6 +223,11 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
         .valueForm(PartInfo.form())
         .observe(new MeshTablePartsController(mesh));
     metaMesh.openLane(PARTS_URI, this.metaParts);
+
+    this.metaPulse = metaNode.demandLane()
+        .valueForm(MeshPulse.form())
+        .observe(new MeshTablePulseController(this));
+    metaNode.openLane(MeshPulse.PULSE_URI, this.metaPulse);
   }
 
   protected void openLogLanes(MeshBinding mesh, AgentNode metaMesh) {
@@ -303,10 +369,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
         this.ourself = partBinding;
       }
       activate(partBinding);
-      final DemandMapLane<Value, PartInfo> metaParts = this.metaParts;
-      if (metaParts != null) {
-        metaParts.cue(partKey);
-      }
+      didOpenPart(partBinding);
     }
     return partBinding;
   }
@@ -348,10 +411,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     if (oldParts != newParts) {
       this.gateway = partBinding;
       activate(partBinding);
-      final DemandMapLane<Value, PartInfo> metaParts = this.metaParts;
-      if (metaParts != null) {
-        metaParts.cue(partKey);
-      }
+      didOpenPart(partBinding);
     }
     return partBinding;
   }
@@ -380,10 +440,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     } while (oldParts != newParts && !PARTS.compareAndSet(this, oldParts, newParts));
     if (partBinding != null) {
       activate(partBinding);
-      final DemandMapLane<Value, PartInfo> metaParts = this.metaParts;
-      if (metaParts != null) {
-        metaParts.cue(partKey);
-      }
+      didOpenPart(partBinding);
     }
     return partBinding;
   }
@@ -412,11 +469,29 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
         this.ourself = null;
       }
       partBinding.didClose();
-      final DemandMapLane<Value, PartInfo> metaParts = this.metaParts;
-      if (metaParts != null) {
-        metaParts.remove(partKey);
+      didClosePart(partBinding);
+      if (newParts.isEmpty()) {
+        close();
       }
     }
+  }
+
+  protected void didOpenPart(PartBinding part) {
+    final DemandMapLane<Value, PartInfo> metaParts = this.metaParts;
+    if (metaParts != null) {
+      metaParts.cue(part.partKey());
+    }
+    PART_OPEN_DELTA.incrementAndGet(this);
+    flushMetrics();
+  }
+
+  protected void didClosePart(PartBinding part) {
+    final DemandMapLane<Value, PartInfo> metaParts = this.metaParts;
+    if (metaParts != null) {
+      metaParts.remove(part.partKey());
+    }
+    PART_CLOSE_DELTA.incrementAndGet(this);
+    flushMetrics();
   }
 
   @Override
@@ -451,12 +526,15 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   @Override
   public LinkBinding bindDownlink(Downlink downlink) {
-    return this.meshContext.bindDownlink(downlink);
+    final LinkBinding link = this.meshContext.bindDownlink(downlink);
+    link.setCellContext(this);
+    return link;
   }
 
   @Override
   public void openDownlink(LinkBinding link) {
     this.meshContext.openDownlink(link);
+    link.setCellContext(this);
   }
 
   @Override
@@ -598,7 +676,20 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   @Override
   public void didClose() {
-    // nop
+    super.didClose();
+    final AgentNode metaNode = this.metaNode;
+    if (metaNode != null) {
+      metaNode.close();
+      this.metaNode = null;
+      this.metaParts = null;
+      this.metaTraceLog = null;
+      this.metaDebugLog = null;
+      this.metaInfoLog = null;
+      this.metaWarnLog = null;
+      this.metaErrorLog = null;
+      this.metaFailLog = null;
+    } 
+    flushMetrics();
   }
 
   @Override
@@ -610,14 +701,274 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     }
   }
 
+  @Override
+  public void reportDown(Metric metric) {
+    if (metric instanceof PartProfile) {
+      accumulatePartProfile((PartProfile) metric);
+    } else if (metric instanceof WarpDownlinkProfile) {
+      accumulateWarpDownlinkProfile((WarpDownlinkProfile) metric);
+    } else {
+      this.meshContext.reportDown(metric);
+    }
+  }
+
+  protected void accumulatePartProfile(PartProfile profile) {
+    HOST_OPEN_DELTA.addAndGet(this, profile.hostOpenDelta());
+    HOST_CLOSE_DELTA.addAndGet(this, profile.hostCloseDelta());
+    NODE_OPEN_DELTA.addAndGet(this, profile.nodeOpenDelta());
+    NODE_CLOSE_DELTA.addAndGet(this, profile.nodeCloseDelta());
+    AGENT_OPEN_DELTA.addAndGet(this, profile.agentOpenDelta());
+    AGENT_CLOSE_DELTA.addAndGet(this, profile.agentCloseDelta());
+    AGENT_EXEC_DELTA.addAndGet(this, profile.agentExecDelta());
+    AGENT_EXEC_RATE.addAndGet(this, profile.agentExecRate());
+    TIMER_EVENT_DELTA.addAndGet(this, profile.timerEventDelta());
+    TIMER_EVENT_RATE.addAndGet(this, profile.timerEventRate());
+    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.downlinkOpenDelta());
+    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.downlinkCloseDelta());
+    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.downlinkEventDelta());
+    DOWNLINK_EVENT_RATE.addAndGet(this, profile.downlinkEventRate());
+    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.downlinkCommandDelta());
+    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.downlinkCommandRate());
+    UPLINK_OPEN_DELTA.addAndGet(this, profile.uplinkOpenDelta());
+    UPLINK_CLOSE_DELTA.addAndGet(this, profile.uplinkCloseDelta());
+    UPLINK_EVENT_DELTA.addAndGet(this, profile.uplinkEventDelta());
+    UPLINK_EVENT_RATE.addAndGet(this, profile.uplinkEventRate());
+    UPLINK_COMMAND_DELTA.addAndGet(this, profile.uplinkCommandDelta());
+    UPLINK_COMMAND_RATE.addAndGet(this, profile.uplinkCommandRate());
+    didUpdateMetrics();
+  }
+
+  protected void accumulateWarpDownlinkProfile(WarpDownlinkProfile profile) {
+    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.openDelta());
+    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.closeDelta());
+    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
+    DOWNLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
+    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
+    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
+    didUpdateMetrics();
+  }
+
+  protected void didUpdateMetrics() {
+    do {
+      final long newReportTime = System.currentTimeMillis();
+      final long oldReportTime = this.lastReportTime;
+      final long dt = newReportTime - oldReportTime;
+      if (dt >= Metric.REPORT_INTERVAL) {
+        if (LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
+          try {
+            reportMetrics(dt);
+          } catch (Throwable error) {
+            if (Conts.isNonFatal(error)) {
+              didFail(error);
+            } else {
+              throw error;
+            }
+          }
+          break;
+        }
+      } else {
+        break;
+      }
+    } while (true);
+  }
+
+  protected void flushMetrics() {
+    final long newReportTime = System.currentTimeMillis();
+    final long oldReportTime = LAST_REPORT_TIME.getAndSet(this, newReportTime);
+    final long dt = newReportTime - oldReportTime;
+    try {
+      reportMetrics(dt);
+    } catch (Throwable error) {
+      if (Conts.isNonFatal(error)) {
+        didFail(error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  protected void reportMetrics(long dt) {
+    final MeshProfile profile = collectProfile(dt);
+    this.meshContext.reportDown(profile);
+  }
+
+  protected MeshProfile collectProfile(long dt) {
+    final int partOpenDelta = PART_OPEN_DELTA.getAndSet(this, 0);
+    final long partOpenCount = PART_OPEN_COUNT.addAndGet(this, (long) partOpenDelta);
+    final int partCloseDelta = PART_CLOSE_DELTA.getAndSet(this, 0);
+    final long partCloseCount = PART_CLOSE_COUNT.addAndGet(this, (long) partCloseDelta);
+
+    final int hostOpenDelta = HOST_OPEN_DELTA.getAndSet(this, 0);
+    final long hostOpenCount = HOST_OPEN_COUNT.addAndGet(this, (long) hostOpenDelta);
+    final int hostCloseDelta = HOST_CLOSE_DELTA.getAndSet(this, 0);
+    final long hostCloseCount = HOST_CLOSE_COUNT.addAndGet(this, (long) hostCloseDelta);
+
+    final int nodeOpenDelta = NODE_OPEN_DELTA.getAndSet(this, 0);
+    final long nodeOpenCount = NODE_OPEN_COUNT.addAndGet(this, (long) nodeOpenDelta);
+    final int nodeCloseDelta = NODE_CLOSE_DELTA.getAndSet(this, 0);
+    final long nodeCloseCount = NODE_CLOSE_COUNT.addAndGet(this, (long) nodeCloseDelta);
+
+    final int agentOpenDelta = AGENT_OPEN_DELTA.getAndSet(this, 0);
+    final long agentOpenCount = AGENT_OPEN_COUNT.addAndGet(this, (long) agentOpenDelta);
+    final int agentCloseDelta = AGENT_CLOSE_DELTA.getAndSet(this, 0);
+    final long agentCloseCount = AGENT_CLOSE_COUNT.addAndGet(this, (long) agentCloseDelta);
+    final long agentExecDelta = AGENT_EXEC_DELTA.getAndSet(this, 0L);
+    final long agentExecRate = AGENT_EXEC_RATE.getAndSet(this, 0L);
+    final long agentExecTime = AGENT_EXEC_TIME.addAndGet(this, agentExecDelta);
+
+    final int timerEventDelta = TIMER_EVENT_DELTA.getAndSet(this, 0);
+    final int timerEventRate = TIMER_EVENT_RATE.getAndSet(this, 0);
+    final long timerEventCount = TIMER_EVENT_COUNT.addAndGet(this, (long) timerEventDelta);
+
+    final int downlinkOpenDelta = DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long downlinkOpenCount = DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
+    final int downlinkCloseDelta = DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long downlinkCloseCount = DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
+    final int downlinkEventDelta = DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int downlinkEventRate = DOWNLINK_EVENT_RATE.getAndSet(this, 0);
+    final long downlinkEventCount = DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
+    final int downlinkCommandDelta = DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int downlinkCommandRate = DOWNLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long downlinkCommandCount = DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
+
+    final int uplinkOpenDelta = UPLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long uplinkOpenCount = UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
+    final int uplinkCloseDelta = UPLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long uplinkCloseCount = UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
+    final int uplinkEventDelta = UPLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int uplinkEventRate = UPLINK_EVENT_RATE.getAndSet(this, 0);
+    final long uplinkEventCount = UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
+    final int uplinkCommandDelta = UPLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int uplinkCommandRate = UPLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long uplinkCommandCount = UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
+
+    final int partCount = (int) (partOpenCount - partCloseCount);
+    final int hostCount = (int) (hostOpenCount - hostCloseCount);
+    final long nodeCount = nodeOpenCount - nodeCloseCount;
+    final long agentCount = agentOpenCount - agentCloseCount;
+    final AgentPulse agentPulse = new AgentPulse(agentCount, agentExecRate, agentExecTime, timerEventRate, timerEventCount);
+    final long downlinkCount = downlinkOpenCount - downlinkCloseCount;
+    final WarpDownlinkPulse downlinkPulse = new WarpDownlinkPulse(downlinkCount, downlinkEventRate, downlinkEventCount,
+                                                                  downlinkCommandRate, downlinkCommandCount);
+    final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
+    final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
+                                                            uplinkCommandRate, uplinkCommandCount);
+    this.pulse = new MeshPulse(partCount, hostCount, nodeCount, agentPulse, downlinkPulse, uplinkPulse);
+    final DemandLane<MeshPulse> metaPulse = this.metaPulse;
+    if (metaPulse != null) {
+      metaPulse.cue();
+    }
+
+    return new MeshProfile(cellAddress(),
+                           partOpenDelta, partOpenCount, partCloseDelta, partCloseCount,
+                           hostOpenDelta, hostOpenCount, hostCloseDelta, hostCloseCount,
+                           nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
+                           agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
+                           agentExecDelta, agentExecRate, agentExecTime,
+                           timerEventDelta, timerEventRate, timerEventCount,
+                           downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+                           downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+                           downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+                           uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+                           uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+                           uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+  }
+
+  static final Uri PARTS_URI = Uri.parse("parts");
+
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<MeshTable, FingerTrieSeq<PartBinding>> PARTS =
       AtomicReferenceFieldUpdater.newUpdater(MeshTable.class, (Class<FingerTrieSeq<PartBinding>>) (Class<?>) FingerTrieSeq.class, "parts");
 
-  static final Uri PARTS_URI = Uri.parse("parts");
+  static final AtomicIntegerFieldUpdater<MeshTable> PART_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "partOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> PART_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "partOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> PART_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "partCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> PART_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "partCloseCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> HOST_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "hostOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> HOST_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "hostOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> HOST_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "hostCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> HOST_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "hostCloseCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> NODE_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "nodeOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> NODE_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "nodeOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> NODE_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "nodeCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> NODE_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "nodeCloseCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> AGENT_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "agentOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> AGENT_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> AGENT_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "agentCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> AGENT_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentCloseCount");
+  static final AtomicLongFieldUpdater<MeshTable> AGENT_EXEC_DELTA =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentExecDelta");
+  static final AtomicLongFieldUpdater<MeshTable> AGENT_EXEC_RATE =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentExecRate");
+  static final AtomicLongFieldUpdater<MeshTable> AGENT_EXEC_TIME =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentExecTime");
+  static final AtomicIntegerFieldUpdater<MeshTable> TIMER_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "timerEventDelta");
+  static final AtomicIntegerFieldUpdater<MeshTable> TIMER_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "timerEventRate");
+  static final AtomicLongFieldUpdater<MeshTable> TIMER_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "timerEventCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkCloseCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkEventDelta");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkEventRate");
+  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkEventCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkCommandRate");
+  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkCommandCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> UPLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> UPLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkCloseCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkEventDelta");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkEventRate");
+  static final AtomicLongFieldUpdater<MeshTable> UPLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkEventCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandRate");
+  static final AtomicLongFieldUpdater<MeshTable> UPLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandCount");
+  static final AtomicLongFieldUpdater<MeshTable> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "lastReportTime");
 }
 
-final class MeshTablePartsController implements OnCueKey<Value, PartInfo>, OnSyncMap<Value, PartInfo> {
+final class MeshTablePartsController implements OnCueKey<Value, PartInfo>, OnSyncKeys<Value> {
   final MeshBinding mesh;
 
   MeshTablePartsController(MeshBinding mesh) {
@@ -627,14 +978,50 @@ final class MeshTablePartsController implements OnCueKey<Value, PartInfo>, OnSyn
   @Override
   public PartInfo onCue(Value partKey, WarpUplink uplink) {
     final PartBinding partBinding = this.mesh.getPart(partKey);
-    if (partBinding == null) {
-      return null;
+    if (partBinding != null) {
+      return PartInfo.from(partBinding);
     }
-    return PartInfo.from(partBinding);
+    return null;
   }
 
   @Override
-  public Iterator<Map.Entry<Value, PartInfo>> onSync(WarpUplink uplink) {
-    return PartInfo.iterator(this.mesh.parts().iterator());
+  public Iterator<Value> onSync(WarpUplink uplink) {
+    return new MeshTablePartsKeyIterator(this.mesh.parts().iterator());
+  }
+}
+
+final class MeshTablePartsKeyIterator implements Iterator<Value> {
+  final Iterator<PartBinding> parts;
+
+  MeshTablePartsKeyIterator(Iterator<PartBinding> parts) {
+    this.parts = parts;
+  }
+
+  @Override
+  public boolean hasNext() {
+    return this.parts.hasNext();
+  }
+
+  @Override
+  public Value next() {
+    return this.parts.next().partKey();
+  }
+
+  @Override
+  public void remove() {
+    throw new UnsupportedOperationException();
+  }
+}
+
+final class MeshTablePulseController implements OnCue<MeshPulse> {
+  final MeshTable mesh;
+
+  MeshTablePulseController(MeshTable mesh) {
+    this.mesh = mesh;
+  }
+
+  @Override
+  public MeshPulse onCue(WarpUplink uplink) {
+    return this.mesh.pulse;
   }
 }

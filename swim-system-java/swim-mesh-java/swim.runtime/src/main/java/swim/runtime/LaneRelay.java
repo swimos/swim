@@ -84,10 +84,10 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
           endPhase(this.phase);
           this.phase += 1;
           done();
-          return;
+          break;
         }
       } else {
-        return;
+        break;
       }
     } while (true);
   }
@@ -101,7 +101,7 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
             if (this.stage == null) {
               this.stage = this.model.stage();
               this.stage.execute(this);
-              return;
+              break;
             } else {
               continue;
             }
@@ -124,10 +124,10 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
           endPhase(this.phase);
           this.phase += 1;
           done();
-          return;
+          break;
         }
       } else {
-        return;
+        break;
       }
     } while (true);
   }
@@ -143,7 +143,7 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
             if (this.stage == null) {
               this.stage = this.model.stage();
               this.stage.execute(this);
-              return;
+              break;
             } else {
               continue;
             }
@@ -166,10 +166,10 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
           endPhase(this.phase);
           this.phase += 1;
           done();
-          return;
+          break;
         }
       } else {
-        return;
+        break;
       }
     } while (true);
   }
@@ -177,6 +177,8 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
   @SuppressWarnings("unchecked")
   @Override
   public void run() {
+    final Stage stage = this.stage;
+    final long t0 = System.nanoTime();
     try {
       if (this.viewCount == 0) {
         pass();
@@ -191,6 +193,10 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
       } else {
         throw error;
       }
+    }
+    final long dt = System.nanoTime() - t0;
+    if (stage == null) {
+      this.model.accumulateExecTime(dt);
     }
   }
 }

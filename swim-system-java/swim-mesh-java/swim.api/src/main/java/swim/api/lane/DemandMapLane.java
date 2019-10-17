@@ -15,7 +15,7 @@
 package swim.api.lane;
 
 import swim.api.lane.function.OnCueKey;
-import swim.api.lane.function.OnSyncMap;
+import swim.api.lane.function.OnSyncKeys;
 import swim.api.warp.WarpLane;
 import swim.api.warp.function.DidCommand;
 import swim.api.warp.function.DidEnter;
@@ -48,7 +48,7 @@ public interface DemandMapLane<K, V> extends WarpLane {
 
   DemandMapLane<K, V> onCue(OnCueKey<K, V> onCue);
 
-  DemandMapLane<K, V> onSync(OnSyncMap<K, V> onSync);
+  DemandMapLane<K, V> onSync(OnSyncKeys<K> onSync);
 
   @Override
   DemandMapLane<K, V> willCommand(WillCommand willCommand);

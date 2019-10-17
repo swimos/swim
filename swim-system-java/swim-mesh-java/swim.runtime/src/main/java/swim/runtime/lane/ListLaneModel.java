@@ -49,7 +49,7 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
 
   @Override
   protected ListLaneUplink createWarpUplink(WarpBinding link) {
-    return new ListLaneUplink(this, link);
+    return new ListLaneUplink(this, link, createUplinkAddress(link));
   }
 
   @Override

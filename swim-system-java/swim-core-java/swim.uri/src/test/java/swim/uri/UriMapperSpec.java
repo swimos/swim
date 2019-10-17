@@ -14,8 +14,10 @@
 
 package swim.uri;
 
+import java.util.Iterator;
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -227,5 +229,57 @@ public class UriMapperSpec {
     assertNull(mapper.get("/a/b"));
     assertEquals(mapper.get("/a/c"), "C");
     assertNull(mapper.get("/x/y"));
+  }
+
+  @Test
+  public void suffixMappings() {
+    final UriMapper<String> mapper = UriMapper.<String>empty()
+        .updated("/a/1", "1")
+        .updated("/b/2", "2")
+        .updated("/b/3", "3")
+        .updated("/c/4", "4");
+
+    final UriMapper<String> slash = mapper.getSuffix("/");
+    assertEquals(slash.size(), 4);
+    assertEquals(slash.get("a/1"), "1");
+    assertEquals(slash.get("b/2"), "2");
+    assertEquals(slash.get("b/3"), "3");
+    assertEquals(slash.get("c/4"), "4");
+
+    final UriMapper<String> slashA = mapper.getSuffix("/a");
+    assertEquals(slashA.size(), 1);
+    assertEquals(slashA.get("/1"), "1");
+
+    final UriMapper<String> slashASlash1 = mapper.getSuffix("/a/1");
+    assertEquals(slashASlash1.size(), 1);
+    assertEquals(slashASlash1.get(Uri.empty()), "1");
+
+    final UriMapper<String> slashB = mapper.getSuffix("/b");
+    assertEquals(slashB.size(), 2);
+    assertEquals(slashB.get("/2"), "2");
+    assertEquals(slashB.get("/3"), "3");
+
+    final UriMapper<String> slashC = mapper.getSuffix("/c");
+    assertEquals(slashC.size(), 1);
+    assertEquals(slashC.get("/4"), "4");
+
+    final UriMapper<String> slashCSlash1 = mapper.getSuffix("/c/1");
+    assertEquals(slashCSlash1.size(), 0);
+  }
+
+  @Test
+  public void childIterators() {
+    final UriMapper<String> mapper = UriMapper.<String>empty()
+        .updated("/a/1", "1")
+        .updated("/b/2", "2")
+        .updated("/b/3", "3")
+        .updated("/c/4", "4");
+
+    final Iterator<UriPart> childIterator = mapper.getSuffix("/b/").childIterator();
+    assertTrue(childIterator.hasNext());
+    assertEquals(childIterator.next(), UriPath.segment("2"));
+    assertTrue(childIterator.hasNext());
+    assertEquals(childIterator.next(), UriPath.segment("3"));
+    assertFalse(childIterator.hasNext());
   }
 }

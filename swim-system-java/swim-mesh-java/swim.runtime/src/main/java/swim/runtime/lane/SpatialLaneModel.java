@@ -52,7 +52,7 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
 
   @Override
   protected SpatialLaneUplink<S> createWarpUplink(WarpBinding link) {
-    return new SpatialLaneUplink<S>(this, link);
+    return new SpatialLaneUplink<S>(this, link, createUplinkAddress(link));
   }
 
   @Override
@@ -238,6 +238,14 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
 
   public Iterator<SpatialMap.Entry<Value, S, Value>> iterator() {
     return this.data.iterator();
+  }
+
+  public Iterator<Value> keyIterator() {
+    return this.data.keyIterator();
+  }
+
+  public Iterator<Value> valueIterator() {
+    return this.data.valueIterator();
   }
 
   protected void openStore() {

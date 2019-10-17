@@ -23,7 +23,7 @@ import swim.codec.Display;
 import swim.codec.Output;
 import swim.util.HashGenCacheSet;
 
-public abstract class UriQuery implements Iterable<Map.Entry<String, String>>,
+public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<String, String>>,
     Map<String, String>, Comparable<UriQuery>, Debug, Display {
 
   protected UriQuery() {

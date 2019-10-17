@@ -15,6 +15,7 @@
 package swim.runtime.lane;
 
 import swim.concurrent.Stage;
+import swim.runtime.UplinkAddress;
 import swim.runtime.WarpBinding;
 import swim.runtime.warp.DemandUplinkModem;
 import swim.structure.Value;
@@ -23,8 +24,9 @@ import swim.warp.SyncRequest;
 public class ValueLaneUplink extends DemandUplinkModem {
   final ValueLaneModel laneBinding;
 
-  public ValueLaneUplink(ValueLaneModel laneBinding, WarpBinding linkBinding) {
-    super(linkBinding);
+  public ValueLaneUplink(ValueLaneModel laneBinding, WarpBinding linkBinding,
+                         UplinkAddress uplinkAddress) {
+    super(linkBinding, uplinkAddress);
     this.laneBinding = laneBinding;
   }
 

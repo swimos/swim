@@ -43,6 +43,7 @@ import swim.runtime.LaneDef;
 import swim.runtime.LinkBinding;
 import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
+import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartAddress;
@@ -284,6 +285,11 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
   @Override
   public void pushDown(PushRequest pushRequest) {
     this.edge.pushDown(pushRequest);
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    this.edge.reportDown(metric);
   }
 
   @Override

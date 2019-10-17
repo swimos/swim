@@ -209,6 +209,11 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   }
 
   @Override
+  public void reportDown(Metric metric) {
+    laneContext().reportDown(metric);
+  }
+
+  @Override
   public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
     laneBinding().openMetaDownlink(downlink, metaDownlink);
   }

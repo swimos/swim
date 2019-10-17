@@ -15,18 +15,20 @@
 package swim.runtime.lane;
 
 import swim.concurrent.Stage;
+import swim.runtime.UplinkAddress;
 import swim.runtime.WarpBinding;
-import swim.runtime.warp.PartialUplinkModem;
+import swim.runtime.warp.MapUplinkModem;
 import swim.structure.Attr;
 import swim.structure.Record;
 import swim.structure.Value;
 import swim.warp.SyncRequest;
 
-public class MapLaneUplink extends PartialUplinkModem {
+public class MapLaneUplink extends MapUplinkModem {
   final MapLaneModel laneBinding;
 
-  public MapLaneUplink(MapLaneModel laneBinding, WarpBinding linkBinding) {
-    super(linkBinding);
+  public MapLaneUplink(MapLaneModel laneBinding, WarpBinding linkBinding,
+                       UplinkAddress uplinkAddress) {
+    super(linkBinding, uplinkAddress);
     this.laneBinding = laneBinding;
   }
 
@@ -52,7 +54,7 @@ public class MapLaneUplink extends PartialUplinkModem {
 
   @Override
   protected void willSync(SyncRequest request) {
-    syncDown(this.laneBinding.iterator());
+    syncDown(this.laneBinding.keyIterator());
     super.willSync(request);
   }
 }

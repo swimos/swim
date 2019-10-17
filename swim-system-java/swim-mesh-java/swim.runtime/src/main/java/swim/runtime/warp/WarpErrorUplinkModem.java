@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.api.auth.Identity;
 import swim.collections.FingerTrieSeq;
+import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
 import swim.runtime.NodeBinding;
 import swim.runtime.WarpBinding;
@@ -61,6 +62,11 @@ public class WarpErrorUplinkModem implements WarpContext {
   @Override
   public Value linkKey() {
     return Value.absent(); // never opened
+  }
+
+  @Override
+  public LinkAddress cellAddressUp() {
+    return null;
   }
 
   @Override

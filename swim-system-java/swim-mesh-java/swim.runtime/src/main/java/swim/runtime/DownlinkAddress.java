@@ -20,7 +20,7 @@ import swim.codec.Output;
 import swim.structure.Value;
 import swim.util.Murmur3;
 
-public final class DownlinkAddress extends CellAddress implements Debug {
+public final class DownlinkAddress extends LinkAddress implements Debug {
   final CellAddress cellAddress;
   final Value linkKey;
 

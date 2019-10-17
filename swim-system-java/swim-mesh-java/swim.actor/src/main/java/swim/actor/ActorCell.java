@@ -22,6 +22,7 @@ import swim.runtime.CellAddress;
 import swim.runtime.CellBinding;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.Metric;
 import swim.runtime.PushRequest;
 import swim.store.StoreBinding;
 import swim.uri.Uri;
@@ -103,6 +104,11 @@ public abstract class ActorCell implements CellBinding, CellContext {
   @Override
   public void pushDown(PushRequest pushRequest) {
     cellContext().pushDown(pushRequest);
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    cellContext().reportDown(metric);
   }
 
   @Override

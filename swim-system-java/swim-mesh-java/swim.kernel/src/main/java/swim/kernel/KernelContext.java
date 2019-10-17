@@ -56,6 +56,7 @@ import swim.runtime.LogDef;
 import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshDef;
+import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeDef;
@@ -265,4 +266,6 @@ public interface KernelContext extends Kernel, IpInterface, Log {
   void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 
   void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink);
+
+  void reportDown(Metric metric);
 }

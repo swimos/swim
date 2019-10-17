@@ -82,6 +82,13 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
   }
 
   @Override
+  public DownlinkAddress cellAddressDown() {
+    final CellContext cellContext = cellContext();
+    final CellAddress cellAddress = cellContext != null ? cellContext.cellAddress() : null;
+    return new DownlinkAddress(cellAddress, linkKey());
+  }
+
+  @Override
   public boolean isConnectedDown() {
     return true;
   }

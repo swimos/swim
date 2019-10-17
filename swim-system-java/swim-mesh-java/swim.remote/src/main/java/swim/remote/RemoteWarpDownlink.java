@@ -24,6 +24,7 @@ import swim.api.auth.Identity;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.runtime.CellContext;
+import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
 import swim.runtime.LinkContext;
 import swim.runtime.NodeBinding;
@@ -37,25 +38,16 @@ import swim.warp.SyncRequest;
 
 class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   final RemoteHost host;
-
   final Uri remoteNodeUri;
-
   final Uri nodeUri;
-
   final Uri laneUri;
-
   final float prio;
-
   final float rate;
-
   final Value body;
 
   final ConcurrentLinkedQueue<Envelope> upQueue;
-
   WarpContext linkContext;
-
   PullContext<? super Envelope> pullContext;
-
   volatile int status;
 
   RemoteWarpDownlink(RemoteHost host, Uri remoteNodeUri, Uri nodeUri,
@@ -128,6 +120,16 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   }
 
   @Override
+  public Value linkKey() {
+    return this.linkContext.linkKey();
+  }
+
+  @Override
+  public LinkAddress cellAddressDown() {
+    return this.host.cellAddress().nodeUri(this.nodeUri).laneUri(this.laneUri).linkKey(linkKey());
+  }
+
+  @Override
   public final float prio() {
     return this.prio;
   }
@@ -140,11 +142,6 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   @Override
   public final Value body() {
     return this.body;
-  }
-
-  @Override
-  public Value linkKey() {
-    return this.linkContext.linkKey();
   }
 
   @Override

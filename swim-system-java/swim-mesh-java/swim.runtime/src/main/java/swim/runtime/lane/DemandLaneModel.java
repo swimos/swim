@@ -28,7 +28,7 @@ public class DemandLaneModel extends WarpLaneModel<DemandLaneView<?>, DemandLane
 
   @Override
   protected DemandLaneUplink createWarpUplink(WarpBinding link) {
-    return new DemandLaneUplink(this, link);
+    return new DemandLaneUplink(this, link, createUplinkAddress(link));
   }
 
   @Override

@@ -14,12 +14,13 @@
 
 package swim.runtime.warp;
 
+import swim.runtime.UplinkAddress;
 import swim.runtime.WarpBinding;
 import swim.structure.Value;
 
 public abstract class DemandUplinkModem extends WarpUplinkModem {
-  public DemandUplinkModem(WarpBinding linkBinding) {
-    super(linkBinding);
+  public DemandUplinkModem(WarpBinding linkBinding, UplinkAddress uplinkAddress) {
+    super(linkBinding, uplinkAddress);
   }
 
   @Override
