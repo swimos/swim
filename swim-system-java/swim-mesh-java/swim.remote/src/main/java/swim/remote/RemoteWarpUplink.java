@@ -282,7 +282,7 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
 
   @Override
   public void didCloseDown() {
-    // nop
+    this.host.closeUplink(this);
   }
 
   public void didCloseUp() {
