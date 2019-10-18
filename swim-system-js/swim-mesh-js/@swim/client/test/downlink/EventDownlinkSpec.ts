@@ -76,6 +76,7 @@ export class EventDownlinkSpec extends Spec {
           if (linkCount === 1) {
             exam.comment("online");
             client.isOnline(false);
+            server.close();
           } else if (linkCount === 2) {
             downlink.keepLinked(false);
             exam.comment("back online");
@@ -88,7 +89,7 @@ export class EventDownlinkSpec extends Spec {
           client.isOnline(true);
         })
         .open();
-    });
+    }, void 0, new WarpClient({keepOnline: false}));
   }
 
   @Test

@@ -34,6 +34,7 @@ import {HostDownlink} from "./HostDownlink";
 import {HostContext} from "./HostContext";
 import {HostOptions, Host} from "./Host";
 
+const UNLINK_DELAY = 0;
 const MAX_RECONNECT_TIMEOUT = 30000;
 const IDLE_TIMEOUT = 1000;
 const SEND_BUFFER_SIZE = 1024;
@@ -79,9 +80,6 @@ export abstract class RemoteHost extends Host {
     this._reconnectTimer = 0;
     this._reconnectTimeout = 0;
     this._idleTimer = 0;
-
-    this.open = this.open.bind(this);
-    this.checkIdle = this.checkIdle.bind(this);
   }
 
   hostUri(): Uri {
@@ -90,6 +88,11 @@ export abstract class RemoteHost extends Host {
 
   credentials(): Value {
     return this._options.credentials || Value.absent();
+  }
+
+  unlinkDelay(): number {
+    const unlinkDelay = this._options.unlinkDelay;
+    return typeof unlinkDelay === "number" ? unlinkDelay : UNLINK_DELAY;
   }
 
   maxReconnectTimeout(): number {
@@ -245,11 +248,11 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onCommandMessage(message: CommandMessage): void {
-    // TODO: client services
+    // TODO: client agents
   }
 
   protected onLinkRequest(request: LinkRequest): void {
-    // TODO: client services
+    // TODO: client agents
   }
 
   protected onLinkedResponse(response: LinkedResponse): void {
@@ -266,7 +269,7 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onSyncRequest(request: SyncRequest): void {
-    // TODO: client services
+    // TODO: client agents
   }
 
   protected onSyncedResponse(response: SyncedResponse): void {
@@ -283,7 +286,7 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onUnlinkRequest(request: UnlinkRequest): void {
-    // TODO: client services
+    // TODO: client agents
   }
 
   protected onUnlinkedResponse(response: UnlinkedResponse): void {
@@ -300,7 +303,7 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onAuthRequest(request: AuthRequest): void {
-    // TODO: client services
+    // TODO: client agents
   }
 
   protected onAuthedResponse(response: AuthedResponse): void {
@@ -310,7 +313,7 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onDeauthRequest(request: DeauthRequest): void {
-    // TODO: client services
+    // TODO: client agents
   }
 
   protected onDeauthedResponse(response: DeauthedResponse): void {
@@ -360,7 +363,7 @@ export abstract class RemoteHost extends Host {
       } else {
         this._reconnectTimeout = Math.min(Math.floor(1.8 * this._reconnectTimeout), this.maxReconnectTimeout());
       }
-      this._reconnectTimer = setTimeout(this.open, this._reconnectTimeout) as any;
+      this._reconnectTimer = setTimeout(this.open.bind(this), this._reconnectTimeout) as any;
     }
   }
 
@@ -373,7 +376,7 @@ export abstract class RemoteHost extends Host {
 
   protected watchIdle(): void {
     if (!this._idleTimer && this.isConnected() && this.isIdle()) {
-      this._idleTimer = setTimeout(this.checkIdle, this.idleTimeout()) as any;
+      this._idleTimer = setTimeout(this.checkIdle.bind(this), this.idleTimeout()) as any;
     }
   }
 

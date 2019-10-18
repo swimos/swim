@@ -517,7 +517,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
       }
       model.addDownlink(this);
       this._model = model as ListDownlinkModel;
-      this.didAliasModel();
+      setTimeout(this.didAliasModel.bind(this));
     } else {
       model = new ListDownlinkModel(this._context, hostUri, nodeUri, laneUri, this._prio,
                                     this._rate, this._body, this._state0);

@@ -209,7 +209,7 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
       }
       model.addDownlink(this);
       this._model = model as ValueDownlinkModel;
-      this.didAliasModel();
+      setTimeout(this.didAliasModel.bind(this));
     } else {
       model = new ValueDownlinkModel(this._context, hostUri, nodeUri, laneUri, this._prio,
                                      this._rate, this._body, this._state0);

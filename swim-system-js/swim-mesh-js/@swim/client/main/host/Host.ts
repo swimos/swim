@@ -19,6 +19,7 @@ import {HostDownlink} from "./HostDownlink";
 
 export interface HostOptions {
   credentials?: Value;
+  unlinkDelay?: number;
   maxReconnectTimeout?: number;
   idleTimeout?: number;
   sendBufferSize?: number;
@@ -27,6 +28,8 @@ export interface HostOptions {
 /** @hidden */
 export abstract class Host {
   abstract hostUri(): Uri;
+
+  abstract unlinkDelay(): number;
 
   abstract isConnected(): boolean;
 

@@ -83,13 +83,11 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
     } else {
       if (this._online !== online) {
         this._online = online;
-        this._hosts.forEach(function (hostUri, host) {
-          if (online) {
+        if (online) {
+          this._hosts.forEach(function (hostUri, host) {
             host.open();
-          } else {
-            host.close();
-          }
-        }, this);
+          }, this);
+        }
       }
       return this;
     }

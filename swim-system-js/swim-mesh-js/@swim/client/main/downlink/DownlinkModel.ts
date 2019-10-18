@@ -115,6 +115,10 @@ export abstract class DownlinkModel implements HostDownlink {
     return false;
   }
 
+  unlinkDelay(): number {
+    return this._host ? this._host.unlinkDelay() : 0;
+  }
+
   isConnected(): boolean {
     return !!(this._host && this._host.isConnected());
   }
@@ -147,7 +151,12 @@ export abstract class DownlinkModel implements HostDownlink {
       }
     }
     if (this._views.length === 0) {
-      this.unlink();
+      const unlinkDelay = this.unlinkDelay();
+      if (unlinkDelay < 0) {
+        this.unlink();
+      } else {
+        setTimeout(this.doUnlink.bind(this), unlinkDelay);
+      }
     }
   }
 
@@ -200,11 +209,17 @@ export abstract class DownlinkModel implements HostDownlink {
 
   onUnlinkedResponse(response: UnlinkedResponse, host: Host): void {
     this._status &= ~UNLINKING;
-    for (let i = 0; i < this._views.length; i += 1) {
-      this._views[i].onUnlinkedResponse(response);
-    }
-    if (this._status === 0) {
+    if (this._views.length === 0 || this._status !== 0) {
+      for (let i = 0; i < this._views.length; i += 1) {
+        this._views[i].onUnlinkedResponse(response);
+      }
       this.close();
+    } else { // concurrently relinked
+      if (this.keepSynced()) {
+        this.sync();
+      } else {
+        this.link();
+      }
     }
   }
 
@@ -212,16 +227,11 @@ export abstract class DownlinkModel implements HostDownlink {
     for (let i = 0; i < this._views.length; i += 1) {
       this._views[i].hostDidConnect();
     }
-    const nodeUri = this._host!.unresolve(this._nodeUri);
-    let request;
     if (this.keepSynced()) {
-      request = SyncRequest.of(nodeUri, this._laneUri, this._prio, this._rate, this._body);
-      this.onSyncRequest(request);
+      this.sync();
     } else {
-      request = LinkRequest.of(nodeUri, this._laneUri, this._prio, this._rate, this._body);
-      this.onLinkRequest(request);
+      this.link();
     }
-    this._host!.push(request);
   }
 
   hostDidDisconnect(host: Host): void {
@@ -249,9 +259,29 @@ export abstract class DownlinkModel implements HostDownlink {
     this._host!.command(this._nodeUri, this._laneUri, body);
   }
 
+  sync(): void {
+    const nodeUri = this._host!.unresolve(this._nodeUri);
+    const request = SyncRequest.of(nodeUri, this._laneUri, this._prio, this._rate, this._body);
+    this.onSyncRequest(request);
+    this._host!.push(request);
+  }
+
+  link(): void {
+    const nodeUri = this._host!.unresolve(this._nodeUri);
+    const request = LinkRequest.of(nodeUri, this._laneUri, this._prio, this._rate, this._body);
+    this.onLinkRequest(request);
+    this._host!.push(request);
+  }
+
   unlink(): void {
     this._status = UNLINKING;
     this._context.unlinkDownlink(this);
+  }
+
+  protected doUnlink(): void {
+    if (this._views.length === 0) {
+      this.unlink();
+    }
   }
 
   close(): void {

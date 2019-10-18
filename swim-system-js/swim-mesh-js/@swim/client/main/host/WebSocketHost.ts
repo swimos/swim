@@ -35,10 +35,6 @@ export class WebSocketHost extends RemoteHost {
 
   constructor(context: HostContext, hostUri: Uri, options: WebSocketHostOptions = {}) {
     super(context, hostUri, options);
-    this.onWebSocketOpen = this.onWebSocketOpen.bind(this);
-    this.onWebSocketMessage = this.onWebSocketMessage.bind(this);
-    this.onWebSocketClose = this.onWebSocketClose.bind(this);
-    this.onWebSocketError = this.onWebSocketError.bind(this);
   }
 
   get WebSocket(): WebSocketConstructor | undefined {
@@ -71,10 +67,10 @@ export class WebSocketHost extends RemoteHost {
       } else {
         this._socket = new WebSocket(hostUri.toString());
       }
-      this._socket.onopen = this.onWebSocketOpen;
-      this._socket.onmessage = this.onWebSocketMessage;
-      this._socket.onclose = this.onWebSocketClose;
-      this._socket.onerror = this.onWebSocketError;
+      this._socket.onopen = this.onWebSocketOpen.bind(this);
+      this._socket.onmessage = this.onWebSocketMessage.bind(this);
+      this._socket.onclose = this.onWebSocketClose.bind(this);
+      this._socket.onerror = this.onWebSocketError.bind(this);
     }
   }
 
@@ -157,9 +153,13 @@ export class WebSocketHost extends RemoteHost {
   }
 
   protected onWebSocketError(): void {
-    this.onError();
     if (this._socket) {
       this._socket.close();
+      if (!this._context.isOnline()) {
+        this.onWebSocketClose(); // force close event
+      } else {
+        this.onError();
+      }
     }
   }
 }

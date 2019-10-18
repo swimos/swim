@@ -638,7 +638,7 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
       }
       model.addDownlink(this);
       this._model = model as MapDownlinkModel;
-      this.didAliasModel();
+      setTimeout(this.didAliasModel.bind(this));
     } else {
       model = new MapDownlinkModel(this._context, hostUri, nodeUri, laneUri, this._prio,
                                    this._rate, this._body, this._state0);

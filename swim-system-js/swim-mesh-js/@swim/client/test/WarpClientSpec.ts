@@ -20,12 +20,14 @@ import {
   CommandMessage,
   LinkRequest,
   LinkedResponse,
+  UnlinkRequest,
+  UnlinkedResponse,
   AuthRequest,
   AuthedResponse,
   DeauthedResponse,
 } from "@swim/warp";
 import {Uri} from "@swim/uri";
-import {Host, WarpClient} from "@swim/client";
+import {Host, Downlink, WarpClient} from "@swim/client";
 import {MockServer} from "./MockServer";
 import {ClientExam} from "./ClientExam";
 
@@ -129,6 +131,57 @@ export class WarpClientSpec extends Spec {
         })
         .open();
     });
+  }
+
+  @Test
+  clientConcurrentlyRelink(exam: ClientExam): Promise<void> {
+    return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
+      server.onEnvelope = function (envelope: Envelope): void {
+        if (envelope instanceof LinkRequest) {
+          exam.equal(envelope.node(), Uri.parse("house/kitchen"));
+          exam.equal(envelope.lane(), Uri.parse("light"));
+          server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
+          server.send(EventMessage.of(envelope.node(), envelope.lane(), "on"));
+        } else if (envelope instanceof UnlinkRequest) {
+          exam.equal(envelope.node(), Uri.parse("house/kitchen"));
+          exam.equal(envelope.lane(), Uri.parse("light"));
+          server.send(UnlinkedResponse.of(envelope.node(), envelope.lane()));
+        }
+      };
+      client.downlink()
+        .hostUri(server.hostUri())
+        .nodeUri("house/kitchen")
+        .laneUri("light")
+        .willLink(function (): void {
+          exam.comment("A willLink");
+        })
+        .didLink(function (): void {
+          exam.comment("A didLink");
+        })
+        .onEvent(function (body: Value, downlink: Downlink): void {
+          exam.comment("A onEvent");
+          exam.equal(body, Text.from("on"));
+          downlink.close();
+          client.downlink()
+            .hostUri(server.hostUri())
+            .nodeUri("house/kitchen")
+            .laneUri("light")
+            .keepLinked(false)
+            .willLink(function (): void {
+              exam.comment("B willLink");
+            })
+            .didLink(function (): void {
+              exam.comment("B didLink");
+            })
+            .onEvent(function (body: Value): void {
+              exam.comment("B onEvent");
+              exam.equal(body, Text.from("on"));
+              resolve();
+            })
+            .open();
+        })
+        .open();
+    }, void 0, new WarpClient({unlinkDelay: -1}));
   }
 
   @Test
