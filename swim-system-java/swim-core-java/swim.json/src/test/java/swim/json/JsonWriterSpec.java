@@ -15,6 +15,8 @@
 package swim.json;
 
 import java.nio.charset.Charset;
+import java.util.AbstractMap;
+import java.util.Map;
 import org.testng.TestException;
 import org.testng.annotations.Test;
 import swim.codec.Binary;
@@ -24,6 +26,7 @@ import swim.codec.Writer;
 import swim.structure.Attr;
 import swim.structure.Bool;
 import swim.structure.Data;
+import swim.structure.Field;
 import swim.structure.Item;
 import swim.structure.Num;
 import swim.structure.Record;
@@ -175,5 +178,21 @@ public class JsonWriterSpec {
   public void writeNestedRecords() {
     assertWrites(Record.of(1, Record.of(Attr.of("b", 2), 3), Slot.of("d", 4)),
                  "{\"$0\":1,\"$1\":{\"@b\":2,\"$1\":3},\"d\":4}");
+  }
+  
+  @Test
+  public void writeAttributes() {
+    assertWrites(Attr.of("foo", 1), "\"@foo\":1");
+    assertWrites(Attr.of("bar", 2), "\"@bar\":2");
+    assertWrites(Attr.of("baz", 3), "\"@baz\":3");
+  }
+  
+  @Test
+  public void writeFields() {
+    Map.Entry<Integer, String> entry = new AbstractMap.SimpleEntry<>(42, "foo");
+    assertWrites(Field.of(entry), "{\"$key\":42,\"$value\":\"foo\"}");
+    
+    entry = new AbstractMap.SimpleEntry<>(13, "bar");
+    assertWrites(Field.of(entry), "{\"$key\":13,\"$value\":\"bar\"}");
   }
 }
