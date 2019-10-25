@@ -105,8 +105,6 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     this.agentRoutes = HashTrieMap.empty();
     this.agentFactories = UriMapper.empty();
     this.authenticators = HashTrieMap.empty();
-
-    seedEdge(this.edge);
   }
 
   public final ActorSpaceDef spaceDef() {
@@ -516,6 +514,24 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
       final HostBinding localHost = gateway.openHost(Uri.empty());
       gateway.setMaster(localHost);
     }
+    final MeshBinding mesh = edge.network();
+    if (mesh != null) {
+      for (PartDef partDef : this.spaceDef.partDefs()) {
+        seedPart(mesh, partDef);
+      }
+      for (NodeDef nodeDef : this.spaceDef.nodeDefs()) {
+        final Uri nodeUri = nodeDef.nodeUri();
+        if (nodeUri != null) {
+          final PartBinding part = mesh.openPart(nodeUri);
+          if (part != null) {
+            final HostBinding host = part.master();
+            if (host != null) {
+              seedNode(host, nodeDef);
+            }
+          }
+        }
+      }
+    }
   }
 
   protected MeshBinding seedMesh(EdgeBinding edge, MeshDef meshDef) {
@@ -529,6 +545,18 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
         }
         for (PartDef partDef : meshDef.partDefs()) {
           seedPart(mesh, partDef);
+        }
+        for (NodeDef nodeDef : meshDef.nodeDefs()) {
+          final Uri nodeUri = nodeDef.nodeUri();
+          if (nodeUri != null) {
+            final PartBinding part = mesh.openPart(nodeUri);
+            if (part != null) {
+              final HostBinding host = part.master();
+              if (host != null) {
+                seedNode(host, nodeDef);
+              }
+            }
+          }
         }
       }
     }
@@ -546,6 +574,15 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
         }
         for (HostDef hostDef : partDef.hostDefs()) {
           seedHost(part, hostDef);
+        }
+        for (NodeDef nodeDef : partDef.nodeDefs()) {
+          final Uri nodeUri = nodeDef.nodeUri();
+          if (nodeUri != null) {
+            final HostBinding host = part.master();
+            if (host != null) {
+              seedNode(host, nodeDef);
+            }
+          }
         }
       }
     }
@@ -582,6 +619,10 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     NodeBinding node = null;
     if (nodeUri != null) {
       node = this.kernel.createNode(host, nodeDef);
+      if (node == null) {
+        final Value props = nodeDef.props(nodeUri);
+        node = new AgentModel(props);
+      }
       if (node != null) {
         node = host.openNode(nodeUri, node);
         if (node != null) {
@@ -876,6 +917,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public void open() {
+    seedEdge(this.edge);
     this.edge.open();
   }
 

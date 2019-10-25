@@ -161,6 +161,11 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   @Override
+  public Stage asyncStage() {
+    return this.node.asyncStage();
+  }
+
+  @Override
   public StoreBinding store() {
     return this.node.store();
   }

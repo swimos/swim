@@ -606,6 +606,10 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
     return this;
   }
 
+  public Stage asyncStage() {
+    return this.nodeContext.stage();
+  }
+
   @Override
   public StoreBinding store() {
     return this.nodeContext.store();

@@ -68,9 +68,16 @@ public interface AgentContext extends SwimRef, LaneFactory, Store, Log {
   Schedule schedule();
 
   /**
-   * The {@link Stage} that this {@code AgentContext} is bound to.
+   * The single-threaded execution {@link Stage} on which this {@code
+   * AgentContext} runs its application logic.
    */
   Stage stage();
+
+  /**
+   * The multi-threaded execution {@link Stage} on which this {@code
+   * AgentContext} can run asynchronous operations.
+   */
+  Stage asyncStage();
 
   /**
    * Returns the currently executing lane, or null if not currently executing

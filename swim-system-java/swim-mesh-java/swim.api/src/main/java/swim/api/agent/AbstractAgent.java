@@ -207,10 +207,19 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
   }
 
   /**
-   * The {@link Stage} that this {@code Agent} is bound to.
+   * The single-threaded execution {@link Stage} on which this {@code
+   * AgentContext} runs its application logic.
    */
   public final Stage stage() {
     return this.context.stage();
+  }
+
+  /**
+   * The multi-threaded execution {@link Stage} on which this {@code
+   * AgentContext} can run asynchronous operations.
+   */
+  public final Stage asyncStage() {
+    return this.context.asyncStage();
   }
 
   /**
