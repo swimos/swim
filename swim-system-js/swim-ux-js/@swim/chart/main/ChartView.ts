@@ -141,6 +141,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     super();
     this.onScaleStart = this.onScaleStart.bind(this);
     this.onScaleChange = this.onScaleChange.bind(this);
+    this.onScaleCancel = this.onScaleCancel.bind(this);
     this.onScaleEnd = this.onScaleEnd.bind(this);
 
     this._fitTopDomain = true;
@@ -846,12 +847,14 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     }
     this.on("scalestart", this.onScaleStart);
     this.on("scalechange", this.onScaleChange);
+    this.on("scalecancel", this.onScaleCancel);
     this.on("scaleend", this.onScaleEnd);
   }
 
   protected onUnmount(): void {
     this.off("scalestart", this.onScaleStart);
     this.off("scalechange", this.onScaleChange);
+    this.off("scalecancel", this.onScaleCancel);
     this.off("scaleend", this.onScaleEnd);
     if (this._multitouch) {
       if (this._topGesture) {
@@ -1382,6 +1385,10 @@ export class ChartView<X = any, Y = any> extends GraphicView {
         leftAxis.domain(event.scale.domain() as Y[]);
       }
     }
+  }
+
+  protected onScaleCancel(event: ScaleGestureEvent<unknown>): void {
+    this.onScaleEnd(event);
   }
 
   protected onScaleEnd(event: ScaleGestureEvent<unknown>): void {

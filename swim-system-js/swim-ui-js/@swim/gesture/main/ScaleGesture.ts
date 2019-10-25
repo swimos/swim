@@ -24,6 +24,7 @@ export interface ScaleGestureEventInit<D> extends CustomEventInit {
   multitouch: Multitouch;
   ruler: View;
   scale: ContinuousScale<D, number>;
+  originalEvent?: Event | null;
 }
 
 export class ScaleGestureEvent<D> extends CustomEvent {
@@ -31,6 +32,7 @@ export class ScaleGestureEvent<D> extends CustomEvent {
   multitouch: Multitouch;
   ruler: View;
   scale: ContinuousScale<D, number>;
+  readonly originalEvent: Event | null;
 
   constructor(type: string, init: ScaleGestureEventInit<D>) {
     super(type, init);
@@ -38,6 +40,7 @@ export class ScaleGestureEvent<D> extends CustomEvent {
     this.multitouch = init.multitouch;
     this.ruler = init.ruler;
     this.scale = init.scale;
+    this.originalEvent = init.originalEvent || null;
   }
 }
 
@@ -78,6 +81,7 @@ export abstract class ScaleGesture<D> {
 
     this.onMultitouchStart = this.onMultitouchStart.bind(this);
     this.onMultitouchChange = this.onMultitouchChange.bind(this);
+    this.onMultitouchCancel = this.onMultitouchCancel.bind(this);
     this.onMultitouchEnd = this.onMultitouchEnd.bind(this);
   }
 
@@ -269,6 +273,7 @@ export abstract class ScaleGesture<D> {
     if (surface) {
       surface.on("multitouchstart", this.onMultitouchStart);
       surface.on("multitouchchange", this.onMultitouchChange);
+      surface.on("multitouchcancel", this.onMultitouchCancel);
       surface.on("multitouchend", this.onMultitouchEnd);
     }
   }
@@ -278,6 +283,7 @@ export abstract class ScaleGesture<D> {
     if (surface) {
       surface.off("multitouchstart", this.onMultitouchStart);
       surface.off("multitouchchange", this.onMultitouchChange);
+      surface.off("multitouchcancel", this.onMultitouchCancel);
       surface.off("multitouchend", this.onMultitouchEnd);
     }
   }
@@ -362,22 +368,26 @@ export abstract class ScaleGesture<D> {
   }
 
   protected onMultitouchStart(event: MultitouchEvent): void {
-    this.scaleStart();
+    this.scaleStart(event);
   }
 
   protected onMultitouchChange(event: MultitouchEvent): void {
     this.updatePoints(event.points);
     const changed = this.rescale();
     if (changed) {
-      this.scaleChange();
+      this.scaleChange(event);
     }
   }
 
-  protected onMultitouchEnd(event: MultitouchEvent): void {
-    this.scaleEnd();
+  protected onMultitouchCancel(event: MultitouchEvent): void {
+    this.scaleCancel(event);
   }
 
-  protected scaleStart(): void {
+  protected onMultitouchEnd(event: MultitouchEvent): void {
+    this.scaleEnd(event);
+  }
+
+  protected scaleStart(originalEvent: Event | null): void {
     const event = new ScaleGestureEvent("scalestart", {
       bubbles: true,
       cancelable: true,
@@ -386,11 +396,12 @@ export abstract class ScaleGesture<D> {
       multitouch: this._multitouch!,
       ruler: this._ruler!,
       scale: this._scale!,
+      originalEvent: originalEvent,
     });
     this._ruler!.dispatchEvent(event);
   }
 
-  protected scaleChange(): void {
+  protected scaleChange(originalEvent: Event | null): void {
     const event = new ScaleGestureEvent("scalechange", {
       bubbles: true,
       cancelable: true,
@@ -399,11 +410,27 @@ export abstract class ScaleGesture<D> {
       multitouch: this._multitouch!,
       ruler: this._ruler!,
       scale: this._scale!,
+      originalEvent: originalEvent,
     });
     this._ruler!.dispatchEvent(event);
   }
 
-  protected scaleEnd(): void {
+  protected scaleCancel(originalEvent: Event | null): void {
+    const event = new ScaleGestureEvent("scalecancel", {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      gesture: this,
+      multitouch: this._multitouch!,
+      ruler: this._ruler!,
+      scale: this._scale!,
+      originalEvent: originalEvent,
+    });
+    this._ruler!.dispatchEvent(event);
+    this._points.length = 0;
+  }
+
+  protected scaleEnd(originalEvent: Event | null): void {
     const event = new ScaleGestureEvent("scaleend", {
       bubbles: true,
       cancelable: true,
@@ -412,6 +439,7 @@ export abstract class ScaleGesture<D> {
       multitouch: this._multitouch!,
       ruler: this._ruler!,
       scale: this._scale!,
+      originalEvent: originalEvent,
     });
     this._ruler!.dispatchEvent(event);
     this._points.length = 0;

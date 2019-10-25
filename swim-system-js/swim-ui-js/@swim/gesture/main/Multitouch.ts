@@ -21,14 +21,17 @@ const SIN_PI_4 = Math.sin(Math.PI / 4);
 export interface MultitouchEventInit extends EventInit {
   composed?: boolean;
   points: MultitouchPoint[];
+  originalEvent?: Event | null;
 }
 
 export class MultitouchEvent extends CustomEvent {
   readonly points: ReadonlyArray<MultitouchPoint>;
+  readonly originalEvent: Event | null;
 
   constructor(type: string, init: MultitouchEventInit) {
     super(type, init);
     this.points = init.points;
+    this.originalEvent = init.originalEvent || null;
   }
 }
 
@@ -344,7 +347,7 @@ export abstract class Multitouch {
     return points;
   }
 
-  interrupt(): void {
+  interrupt(originalEvent: Event | null): void {
     if (this._ghostFrame) {
       cancelAnimationFrame(this._ghostFrame);
       this._ghostFrame = 0;
@@ -353,14 +356,14 @@ export abstract class Multitouch {
       this._ghosts = {};
       this._ghostCount = 0;
       if (this._trackCount) {
-        this.multitouchChange();
+        this.multitouchChange(originalEvent);
       } else {
-        this.multitouchEnd();
+        this.multitouchEnd(originalEvent);
       }
     }
   }
 
-  zoom(cx: number, cy: number, dz: number): void {
+  zoom(cx: number, cy: number, dz: number, originalEvent: Event | null): void {
     if (!dz) {
       return;
     }
@@ -408,8 +411,8 @@ export abstract class Multitouch {
         zoom1.dy = -zy;
       }
     } else {
-      this.interrupt();
-      this.multitouchStart();
+      this.interrupt(originalEvent);
+      this.multitouchStart(originalEvent);
 
       if (dz < 0) {
         zoom0 = new MultitouchGhost(this, "zoom0", t, cx - dx, cy - dy, -vx, -vy, ax, ay);
@@ -425,7 +428,7 @@ export abstract class Multitouch {
       this._ghostCount += 1;
     }
 
-    this.multitouchChange();
+    this.multitouchChange(originalEvent);
     if (this._ghostFrame) {
       cancelAnimationFrame(this._ghostFrame);
     }
@@ -522,20 +525,26 @@ export abstract class Multitouch {
       this._tracks[identifier].update();
     }
     this.updateVelocity(t, this.points());
-    this.multitouchChange();
+    this.multitouchChange(null);
 
     for (const identifier in this._ghosts) {
       const ghost = this._ghosts[identifier];
       if (!ghost.ax && !ghost.ay) {
-        delete this._ghosts[identifier];
         this._ghostCount -= 1;
       }
     }
 
     if (!this._trackCount && !this._ghostCount) {
-      this.multitouchEnd();
+      this.multitouchEnd(null);
     } else if (this._ghostCount && !this._ghostFrame) {
       this._ghostFrame = requestAnimationFrame(this.onGhostFrame);
+    }
+
+    for (const identifier in this._ghosts) {
+      const ghost = this._ghosts[identifier];
+      if (!ghost.ax && !ghost.ay) {
+        delete this._ghosts[identifier];
+      }
     }
   }
 
@@ -544,38 +553,52 @@ export abstract class Multitouch {
     this.interpolate(Date.now());
   }
 
-  protected multitouchStart(): void {
+  protected multitouchStart(originalEvent: Event | null): void {
     const event = new MultitouchEvent("multitouchstart", {
       bubbles: true,
       cancelable: true,
       composed: true,
       points: this.points(),
+      originalEvent: originalEvent,
     });
     this._surface!.dispatchEvent(event);
   }
 
-  protected multitouchChange(): void {
+  protected multitouchChange(originalEvent: Event | null): void {
     const event = new MultitouchEvent("multitouchchange", {
       bubbles: true,
       cancelable: true,
       composed: true,
       points: this.points(),
+      originalEvent: originalEvent,
     });
     this._surface!.dispatchEvent(event);
   }
 
-  protected multitouchEnd(): void {
+  protected multitouchCancel(originalEvent: Event | null): void {
+    const event = new MultitouchEvent("multitouchcancel", {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      points: this.points(),
+      originalEvent: originalEvent,
+    });
+    this._surface!.dispatchEvent(event);
+  }
+
+  protected multitouchEnd(originalEvent: Event | null): void {
     const event = new MultitouchEvent("multitouchend", {
       bubbles: true,
       cancelable: true,
       composed: true,
       points: this.points(),
+      originalEvent: originalEvent,
     });
     this._surface!.dispatchEvent(event);
   }
 
   protected trackStart(identifier: string, clientX: number, clientY: number, event: Event): void {
-    this.interrupt();
+    this.interrupt(event);
 
     const track = new MultitouchTrack(this, identifier);
     this._tracks[identifier] = track;
@@ -602,9 +625,7 @@ export abstract class Multitouch {
   protected trackCancel(identifier: string, clientX: number, clientY: number, event: Event): void {
     const track = this._tracks[identifier];
     if (track) {
-      delete this._tracks[identifier];
       this._trackCount -= 1;
-
       track.update();
       this.trackDidCancel(track, this._surface!, event);
       if (this._trackCount === 0) {
@@ -613,15 +634,14 @@ export abstract class Multitouch {
           this.endTracking(target);
         }
       }
+      delete this._tracks[identifier];
     }
   }
 
   protected trackEnd(identifier: string, clientX: number, clientY: number, event: Event): void {
     const track = this._tracks[identifier];
     if (track) {
-      delete this._tracks[identifier];
       this._trackCount -= 1;
-
       track.update();
       this.trackDidEnd(track, this._surface!, event);
       if (this._trackCount === 0) {
@@ -630,12 +650,13 @@ export abstract class Multitouch {
           this.endTracking(target);
         }
       }
+      delete this._tracks[identifier];
     }
   }
 
   protected trackDidStart(track: MultitouchTrack, surface: View, event: Event): void {
     if (this._trackCount === 1) {
-      this.multitouchStart();
+      this.multitouchStart(event);
     }
   }
 
@@ -646,14 +667,14 @@ export abstract class Multitouch {
 
   protected trackDidCancel(track: MultitouchTrack, surface: View, event: Event): void {
     if (!this._trackCount && !this._ghostCount) {
-      this.multitouchEnd();
+      this.multitouchCancel(event);
     }
   }
 
   protected trackDidEnd(track: MultitouchTrack, surface: View, event: Event): void {
     this.coast(track);
     if (!this._trackCount && !this._ghostCount) {
-      this.multitouchEnd();
+      this.multitouchEnd(event);
     }
   }
 
@@ -746,32 +767,12 @@ export class MultitouchPointer extends Multitouch {
     }
   }
 
-  protected trackDidStart(track: MultitouchTrack, surface: View, event: Event): void {
-    super.trackDidStart(track, surface, event);
-    const target = this.target();
-    if (target && target.node.setPointerCapture) {
-      target.node.setPointerCapture(+track.identifier);
-    }
-  }
-
-  protected trackDidCancel(track: MultitouchTrack, surface: View, event: Event): void {
-    super.trackDidCancel(track, surface, event);
-    const target = this.target();
-    if (target && target.node.releasePointerCapture) {
-      target.node.releasePointerCapture(+track.identifier);
-    }
-  }
-
-  protected trackDidEnd(track: MultitouchTrack, surface: View, event: Event): void {
-    super.trackDidEnd(track, surface, event);
-    const target = this.target();
-    if (target && target.node.releasePointerCapture) {
-      target.node.releasePointerCapture(+track.identifier);
-    }
-  }
-
   protected onPointerDown(event: PointerEvent): void {
     this.trackStart("" + event.pointerId, event.clientX, event.clientY, event);
+    const target = this.target();
+    if (target && target.node.setPointerCapture) {
+      target.node.setPointerCapture(event.pointerId);
+    }
   }
 
   protected onPointerMove(event: PointerEvent): void {
@@ -780,15 +781,23 @@ export class MultitouchPointer extends Multitouch {
 
   protected onPointerCancel(event: PointerEvent): void {
     this.trackCancel("" + event.pointerId, event.clientX, event.clientY, event);
+    const target = this.target();
+    if (target && target.node.releasePointerCapture) {
+      target.node.releasePointerCapture(event.pointerId);
+    }
   }
 
   protected onPointerUp(event: PointerEvent): void {
     this.trackEnd("" + event.pointerId, event.clientX, event.clientY, event);
+    const target = this.target();
+    if (target && target.node.releasePointerCapture) {
+      target.node.releasePointerCapture(event.pointerId);
+    }
   }
 
   protected onWheel(event: WheelEvent): void {
     event.preventDefault();
-    this.zoom(event.clientX, event.clientY, event.deltaY);
+    this.zoom(event.clientX, event.clientY, event.deltaY, event);
   }
 }
 
@@ -804,7 +813,7 @@ export class MultitouchTouch extends Multitouch {
   attach(surface: View): void {
     const target = this.target();
     if (target) {
-      target.on("touchstart", this.onTouchStart);
+      target.on("touchstart", this.onTouchStart, {passive: true});
     }
   }
 
@@ -818,7 +827,7 @@ export class MultitouchTouch extends Multitouch {
   protected startTracking(surface: View): void {
     const target = this.target();
     if (target) {
-      target.on("touchmove", this.onTouchMove);
+      target.on("touchmove", this.onTouchMove, {passive: true});
       target.on("touchcancel", this.onTouchCancel);
       target.on("touchend", this.onTouchEnd);
     }
@@ -940,6 +949,6 @@ export class MultitouchMouse extends Multitouch {
 
   protected onWheel(event: WheelEvent): void {
     event.preventDefault();
-    this.zoom(event.clientX, event.clientY, event.deltaY);
+    this.zoom(event.clientX, event.clientY, event.deltaY, event);
   }
 }
