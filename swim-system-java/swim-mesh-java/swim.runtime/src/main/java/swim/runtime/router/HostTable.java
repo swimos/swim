@@ -15,6 +15,7 @@
 package swim.runtime.router;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -62,6 +63,7 @@ import swim.uri.UriMapper;
 import swim.uri.UriPart;
 import swim.uri.UriPath;
 import swim.uri.UriPathBuilder;
+import swim.uri.UriQuery;
 
 public class HostTable extends AbstractTierBinding implements HostBinding {
   protected HostContext hostContext;
@@ -952,8 +954,16 @@ final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncK
   @Override
   public NodeInfo onCue(Uri nodeUri, WarpUplink uplink) {
     final NodeBinding nodeBinding;
+    final String laneQuery = uplink.laneUri().query().get("q");
     final UriFragment laneFragment = uplink.laneUri().fragment();
-    if (laneFragment.isDefined()) {
+    if (laneQuery != null) {
+      if (nodeUri.toString().contains(laneQuery)) {
+        nodeBinding = this.host.getNode(nodeUri);
+        if (nodeBinding != null) {
+          return NodeInfo.from(nodeBinding);
+        }
+      }
+    } else if (laneFragment.isDefined()) {
       final Uri parentUri = Uri.parse(laneFragment.identifier());
       if (nodeUri.isChildOf(parentUri)) {
         nodeBinding = this.host.getNode(nodeUri);
@@ -976,13 +986,58 @@ final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncK
 
   @Override
   public Iterator<Uri> onSync(WarpUplink uplink) {
+    final String laneQuery = uplink.laneUri().query().get("q");
     final UriFragment laneFragment = uplink.laneUri().fragment();
-    if (laneFragment.isDefined()) {
+    if (laneQuery != null) {
+      return new HostTableNodesQueryIterator(laneQuery, this.host.nodes().iterator());
+    } else if (laneFragment.isDefined()) {
       final Uri parentUri = Uri.parse(laneFragment.identifier());
       final UriMapper<NodeBinding> parentSuffix = this.host.nodes().getSuffix(parentUri);
       return new HostTableNodesChildIterator(parentUri, parentSuffix.childIterator());
     }
     return this.host.nodes().keyIterator();
+  }
+}
+
+final class HostTableNodesQueryIterator implements Iterator<Uri> {
+  final String query;
+  final Iterator<Map.Entry<Uri, NodeBinding>> nodes;
+  Uri nextNodeUri;
+
+  HostTableNodesQueryIterator(String query, Iterator<Map.Entry<Uri, NodeBinding>> nodes) {
+    this.query = query;
+    this.nodes = nodes;
+  }
+
+  Uri nextNodeUri() {
+    if (this.nextNodeUri == null) {
+      while (this.nodes.hasNext()) {
+        final Map.Entry<Uri, NodeBinding> entry = this.nodes.next();
+        final Uri nodeUri = entry.getKey();
+        if (nodeUri.toString().contains(this.query)) {
+          this.nextNodeUri = nodeUri;
+          break;
+        }
+      }
+    }
+    return this.nextNodeUri;
+  }
+
+  @Override
+  public boolean hasNext() {
+    return nextNodeUri() != null;
+  }
+
+  @Override
+  public Uri next() {
+    final Uri nextNodeUri = nextNodeUri();
+    this.nextNodeUri = null;
+    return nextNodeUri;
+  }
+
+  @Override
+  public void remove() {
+    throw new UnsupportedOperationException();
   }
 }
 

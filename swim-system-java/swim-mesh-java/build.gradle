@@ -2,7 +2,6 @@
 def javaVersion = System.getProperty('java.version').split('\\.')
 ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : javaVersion[1] as Integer
 ext.useModules = jvmVersion >= 9 && !hasProperty('no-modules')
-ext.graalVersion = project.property('graal.version')
 
 gradle.projectsEvaluated {
   apply plugin: 'java'
@@ -26,8 +25,6 @@ gradle.projectsEvaluated {
         options.addStringOption('-module', modules.join(','))
         options.addStringOption('-module-source-path', "${projectDir}/*/src/main/java")
         options.addStringOption('-module-path', classpath.asPath)
-        def classpaths = javaProjects.collect { project -> project.sourceSets.main.compileClasspath.asPath }
-        options.addStringOption('-module-path', classpaths.join(':'))
         classpath = files()
       } else {
         exclude '*module-info*'
