@@ -102,14 +102,14 @@ export class AreaGraphView<X, Y> extends GraphView<X, Y> implements FillView {
     while (cursor.hasNext()) {
       const p = cursor.next().value!;
       context.lineTo(p.xCoord, p.yCoord);
-      if (p.isGradientStop()) {
+      if (gradient && p.isGradientStop()) {
         let color = p.color.value || fill;
         const opacity = p.opacity.value;
         if (typeof opacity === "number") {
           color = color.alpha(opacity);
         }
         const offset = (p.xCoord - x0) / (dx || 1);
-        gradient!.addColorStop(offset, color.toString());
+        gradient.addColorStop(offset, color.toString());
       }
     }
     while (cursor.hasPrevious()) {

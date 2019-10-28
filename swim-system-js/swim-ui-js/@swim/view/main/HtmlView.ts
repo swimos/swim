@@ -401,51 +401,48 @@ export class HtmlView extends ElementView implements LayoutView {
 
   /** @hidden */
   updateLayoutValues(): void {
-    const offsetParent = this._node.offsetParent;
-    if (offsetParent) {
-      const topAnchor = this.hasOwnProperty("topAnchor") ? this.topAnchor : void 0;
-      const rightAnchor = this.hasOwnProperty("rightAnchor") ? this.rightAnchor : void 0;
-      const bottomAnchor = this.hasOwnProperty("bottomAnchor") ? this.bottomAnchor : void 0;
-      const leftAnchor = this.hasOwnProperty("leftAnchor") ? this.leftAnchor : void 0;
-      const widthAnchor = this.hasOwnProperty("widthAnchor") ? this.widthAnchor : void 0;
-      const heightAnchor = this.hasOwnProperty("heightAnchor") ? this.heightAnchor : void 0;
-      const centerXAnchor = this.hasOwnProperty("centerXAnchor") ? this.centerXAnchor : void 0;
-      const centerYAnchor = this.hasOwnProperty("centerYAnchor") ? this.centerYAnchor : void 0;
-      if (topAnchor && topAnchor.enabled()) {
-        this.top.setState(Length.px(topAnchor.value));
-      }
-      if (rightAnchor && rightAnchor.enabled()) {
-        this.right.setState(Length.px(rightAnchor.value));
-      }
-      if (bottomAnchor && bottomAnchor.enabled()) {
-        this.bottom.setState(Length.px(bottomAnchor.value));
-      }
+    const topAnchor = this.hasOwnProperty("topAnchor") ? this.topAnchor : void 0;
+    const rightAnchor = this.hasOwnProperty("rightAnchor") ? this.rightAnchor : void 0;
+    const bottomAnchor = this.hasOwnProperty("bottomAnchor") ? this.bottomAnchor : void 0;
+    const leftAnchor = this.hasOwnProperty("leftAnchor") ? this.leftAnchor : void 0;
+    const widthAnchor = this.hasOwnProperty("widthAnchor") ? this.widthAnchor : void 0;
+    const heightAnchor = this.hasOwnProperty("heightAnchor") ? this.heightAnchor : void 0;
+    const centerXAnchor = this.hasOwnProperty("centerXAnchor") ? this.centerXAnchor : void 0;
+    const centerYAnchor = this.hasOwnProperty("centerYAnchor") ? this.centerYAnchor : void 0;
+    if (topAnchor && topAnchor.enabled()) {
+      this.top.setState(Length.px(topAnchor.value));
+    }
+    if (rightAnchor && rightAnchor.enabled()) {
+      this.right.setState(Length.px(rightAnchor.value));
+    }
+    if (bottomAnchor && bottomAnchor.enabled()) {
+      this.bottom.setState(Length.px(bottomAnchor.value));
+    }
+    if (leftAnchor && leftAnchor.enabled()) {
+      this.left.setState(Length.px(leftAnchor.value));
+    }
+    if (widthAnchor && widthAnchor.enabled()) {
+      this.width.setState(Length.px(widthAnchor.value));
+    }
+    if (heightAnchor && heightAnchor.enabled()) {
+      this.height.setState(Length.px(heightAnchor.value));
+    }
+    if (centerXAnchor && centerXAnchor.enabled()) {
       if (leftAnchor && leftAnchor.enabled()) {
-        this.left.setState(Length.px(leftAnchor.value));
+        this.width.setState(Length.px(2 * (centerXAnchor.value - leftAnchor.value)));
+      } else if (rightAnchor && rightAnchor.enabled()) {
+        this.width.setState(Length.px(2 * (rightAnchor.value - centerXAnchor.value)));
+      } else if (widthAnchor && widthAnchor.enabled()) {
+        this.left.setState(Length.px(centerXAnchor.value - 0.5 * widthAnchor.value));
       }
-      if (widthAnchor && widthAnchor.enabled()) {
-        this.width.setState(Length.px(widthAnchor.value));
-      }
-      if (heightAnchor && heightAnchor.enabled()) {
-        this.height.setState(Length.px(heightAnchor.value));
-      }
-      if (centerXAnchor && centerXAnchor.enabled()) {
-        if (leftAnchor && leftAnchor.enabled()) {
-          this.width.setState(Length.px(2 * (centerXAnchor.value - leftAnchor.value)));
-        } else if (rightAnchor && rightAnchor.enabled()) {
-          this.width.setState(Length.px(2 * (rightAnchor.value - centerXAnchor.value)));
-        } else if (widthAnchor && widthAnchor.enabled()) {
-          this.left.setState(Length.px(centerXAnchor.value - 0.5 * widthAnchor.value));
-        }
-      }
-      if (centerYAnchor && centerYAnchor.enabled()) {
-        if (topAnchor && topAnchor.enabled()) {
-          this.height.setState(Length.px(2 * (centerYAnchor.value - topAnchor.value)));
-        } else if (bottomAnchor && bottomAnchor.enabled()) {
-          this.height.setState(Length.px(2 * (bottomAnchor.value - centerYAnchor.value)));
-        } else if (heightAnchor && heightAnchor.enabled()) {
-          this.top.setState(Length.px(centerYAnchor.value - 0.5 * heightAnchor.value));
-        }
+    }
+    if (centerYAnchor && centerYAnchor.enabled()) {
+      if (topAnchor && topAnchor.enabled()) {
+        this.height.setState(Length.px(2 * (centerYAnchor.value - topAnchor.value)));
+      } else if (bottomAnchor && bottomAnchor.enabled()) {
+        this.height.setState(Length.px(2 * (bottomAnchor.value - centerYAnchor.value)));
+      } else if (heightAnchor && heightAnchor.enabled()) {
+        this.top.setState(Length.px(centerYAnchor.value - 0.5 * heightAnchor.value));
       }
     }
   }

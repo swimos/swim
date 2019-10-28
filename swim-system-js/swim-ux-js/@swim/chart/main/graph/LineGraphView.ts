@@ -119,7 +119,7 @@ export class LineGraphView<X, Y> extends GraphView<X, Y> implements StrokeView {
       } else {
         context.lineTo(xCoord, yCoord);
       }
-      if (p.isGradientStop()) {
+      if (gradient && p.isGradientStop()) {
         let color = p.color.value || stroke;
         const opacity = p.opacity.value;
         if (typeof opacity === "number") {

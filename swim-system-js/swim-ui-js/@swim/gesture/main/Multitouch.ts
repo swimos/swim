@@ -734,7 +734,7 @@ export class MultitouchPointer extends Multitouch {
   attach(surface: View): void {
     const target = this.target();
     if (target) {
-      target.on("pointerdown", this.onPointerDown);
+      target.on("pointerdown", this.onPointerDown, {passive: true});
       if (this._wheel) {
         target.on("wheel", this.onWheel);
       }
