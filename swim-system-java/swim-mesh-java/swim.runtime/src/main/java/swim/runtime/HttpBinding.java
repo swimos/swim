@@ -14,6 +14,7 @@
 
 package swim.runtime;
 
+import swim.codec.Decoder;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.uri.Uri;
@@ -32,4 +33,18 @@ public interface HttpBinding extends LinkBinding {
   HttpRequest<?> doRequest();
 
   void writeResponse(HttpResponse<?> response);
+
+  Decoder<Object> decodeResponseDown(HttpResponse<?> response);
+
+  void willRequestDown(HttpRequest<?> request);
+
+  void didRequestDown(HttpRequest<Object> request);
+
+  void doRespondDown(HttpRequest<Object> request);
+
+  void willRespondDown(HttpResponse<?> response);
+
+  void didRespondDown(HttpResponse<?> response);
+
+
 }

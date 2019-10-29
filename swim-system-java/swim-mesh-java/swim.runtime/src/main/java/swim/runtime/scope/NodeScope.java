@@ -27,6 +27,7 @@ import swim.runtime.CellContext;
 import swim.runtime.downlink.EventDownlinkView;
 import swim.runtime.downlink.MapDownlinkView;
 import swim.runtime.downlink.ValueDownlinkView;
+import swim.runtime.http.RestDownlinkView;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -95,7 +96,7 @@ public class NodeScope extends Scope implements NodeRef {
 
   @Override
   public <V> HttpDownlink<V> downlinkHttp() {
-    return null; // TODO
+    return new RestDownlinkView<V>(this, stage(), Uri.empty()); // TODO
   }
 
   @Override

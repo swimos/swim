@@ -37,7 +37,7 @@ import swim.warp.LinkRequest;
 import swim.warp.SyncRequest;
 
 class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
-  final RemoteHost host;
+  final RemoteWarpHost host;
   final Uri remoteNodeUri;
   final Uri nodeUri;
   final Uri laneUri;
@@ -50,7 +50,7 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   PullContext<? super Envelope> pullContext;
   volatile int status;
 
-  RemoteWarpDownlink(RemoteHost host, Uri remoteNodeUri, Uri nodeUri,
+  RemoteWarpDownlink(RemoteWarpHost host, Uri remoteNodeUri, Uri nodeUri,
                      Uri laneUri, float prio, float rate, Value body) {
     this.host = host;
     this.remoteNodeUri = remoteNodeUri;

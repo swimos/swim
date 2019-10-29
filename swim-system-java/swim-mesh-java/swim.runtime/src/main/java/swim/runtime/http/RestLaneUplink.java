@@ -39,32 +39,32 @@ public class RestLaneUplink extends HttpUplinkModem {
   }
 
   @Override
-  public Decoder<Object> decodeRequest(HttpRequest<?> request) {
+  public Decoder<Object> decodeRequestUp(HttpRequest<?> request) {
     return this.laneBinding.decodeRequest(this, request);
   }
 
   @Override
-  public void willRequest(HttpRequest<?> request) {
+  public void willRequestUp(HttpRequest<?> request) {
     this.laneBinding.willRequest(this, request);
   }
 
   @Override
-  public void didRequest(HttpRequest<Object> request) {
+  public void didRequestUp(HttpRequest<Object> request) {
     this.laneBinding.didRequest(this, request);
   }
 
   @Override
-  public void doRespond(HttpRequest<Object> request) {
+  public void doRespondUp(HttpRequest<Object> request) {
     this.laneBinding.doRespond(this, request);
   }
 
   @Override
-  public void willRespond(HttpResponse<?> response) {
+  public void willRespondUp(HttpResponse<?> response) {
     this.laneBinding.willRespond(this, response);
   }
 
   @Override
-  public void didRespond(HttpResponse<?> response) {
+  public void didRespondUp(HttpResponse<?> response) {
     this.laneBinding.didRespond(this, response);
   }
 }

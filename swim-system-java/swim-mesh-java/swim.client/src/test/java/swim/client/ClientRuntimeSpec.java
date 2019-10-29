@@ -19,6 +19,10 @@ import org.testng.annotations.Test;
 import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
+import swim.api.http.function.DidRequestHttp;
+import swim.api.http.function.DidRespondHttp;
+import swim.api.http.function.WillRequestHttp;
+import swim.api.http.function.WillRespondHttp;
 import swim.api.warp.function.DidLink;
 import swim.api.warp.function.DidSync;
 import swim.api.warp.function.DidUnlink;
@@ -26,11 +30,18 @@ import swim.api.warp.function.OnEvent;
 import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
+import swim.codec.Format;
+import swim.http.HttpRequest;
+import swim.http.HttpResponse;
+import swim.http.HttpStatus;
 import swim.structure.Value;
+import swim.uri.Uri;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class ClientRuntimeSpec {
   @Test
-  public void testLink() throws InterruptedException {
+  public void testWarpLink() throws InterruptedException {
     final ClientRuntime client = new ClientRuntime();
     final CountDownLatch didSync = new CountDownLatch(1);
     class IntersectionsController implements OnEvent<Value>, WillLink, DidLink,
@@ -87,6 +98,133 @@ public class ClientRuntimeSpec {
           .observe(new IntersectionsController())
           .open();
       didSync.await();
+    } finally {
+      client.stop();
+    }
+  }
+
+  @Test
+  public void testHttpLinkGet() throws InterruptedException {
+    final ClientRuntime client = new ClientRuntime();
+
+    final CountDownLatch willRespond = new CountDownLatch(1);
+    final CountDownLatch didRespond = new CountDownLatch(1);
+
+    class GetController implements WillRespondHttp<String>, DidRespondHttp<String> {
+
+      @Override
+      public void willRespond(HttpResponse<String> response) {
+        assertEquals(HttpStatus.OK, response.status());
+        willRespond.countDown();
+      }
+
+      @Override
+      public void didRespond(HttpResponse<String> response) {
+        assertTrue(response.entity().get().length() > 0);
+        didRespond.countDown();
+      }
+
+    }
+    try {
+      client.start();
+      final Uri reqUri = Uri.parse("http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=tahoe&t=0");
+      client.downlinkHttp()
+          .requestUri(reqUri)
+          .observe(new GetController())
+          .open();
+      didRespond.await();
+      assertEquals(willRespond.getCount(), 0);
+    } finally {
+      client.stop();
+    }
+  }
+
+  @Test
+  public void testHttpLinkDelete() throws InterruptedException {
+    final ClientRuntime client = new ClientRuntime();
+
+    final CountDownLatch willRespond = new CountDownLatch(1);
+    final CountDownLatch didRespond = new CountDownLatch(1);
+
+    class DeleteController implements WillRespondHttp<String>, DidRespondHttp<String> {
+
+      @Override
+      public void willRespond(HttpResponse<String> response) {
+        assertEquals(HttpStatus.OK, response.status());
+        willRespond.countDown();
+      }
+
+      @Override
+      public void didRespond(HttpResponse<String> response) {
+        assertTrue(response.entity().isDefined());
+        didRespond.countDown();
+      }
+    }
+    try {
+      client.start();
+      client.downlinkHttp()
+          .request(HttpRequest.delete(Uri.parse("http://jsonplaceholder.typicode.com/posts/1")))
+          .observe(new DeleteController())
+          .open();
+      didRespond.await();
+      assertEquals(willRespond.getCount(), 0);
+    } finally {
+      client.stop();
+    }
+  }
+
+  @Test
+  public void testHttpLinkCallback() throws InterruptedException {
+    final ClientRuntime client = new ClientRuntime();
+    final CountDownLatch didConnect = new CountDownLatch(1);
+    final CountDownLatch didRequest = new CountDownLatch(1);
+    final CountDownLatch willRequest = new CountDownLatch(1);
+    final CountDownLatch didRespond = new CountDownLatch(1);
+    final CountDownLatch willRespond = new CountDownLatch(1);
+
+    class CallbackController implements DidConnect, WillRequestHttp<String>, DidRequestHttp<String>, WillRespondHttp<String>, DidRespondHttp<String> {
+      @Override
+      public void willRequest(HttpRequest<String> request) {
+        System.out.println("CallbackController.willRequest: " + Format.debug(request.toHttp()));
+        willRequest.countDown();
+      }
+
+      @Override
+      public void didRequest(HttpRequest<String> request) {
+        System.out.println("CallbackController.didRequest: " + Format.debug(request.toHttp()));
+        didRequest.countDown();
+      }
+
+      @Override
+      public void willRespond(HttpResponse<String> response) {
+        System.out.println("CallbackController.willRespond: " + response);
+        willRespond.countDown();
+      }
+
+      @Override
+      public void didRespond(HttpResponse<String> response) {
+        System.out.println("CallbackController.didRespond: " + response.toString());
+        didRespond.countDown();
+      }
+
+      @Override
+      public void didConnect() {
+        System.out.println("CallbackController.didConnect");
+        didConnect.countDown();
+      }
+    }
+    try {
+      client.start();
+      final Uri reqUri = Uri.parse("http://webservices.nextbus.com/service/publicXMLFeed?command=vehicleLocations&a=tahoe&t=0");
+      client.downlinkHttp()
+          .requestUri(reqUri)
+          .observe(new CallbackController())
+          .open();
+      didRespond.await();
+      assertEquals(willRequest.getCount(), 0);
+      assertEquals(didRequest.getCount(), 0);
+      assertEquals(willRespond.getCount(), 0);
+      assertEquals(didConnect.getCount(), 0);
     } finally {
       client.stop();
     }

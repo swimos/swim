@@ -29,6 +29,7 @@ import swim.runtime.downlink.EventDownlinkView;
 import swim.runtime.downlink.ListDownlinkView;
 import swim.runtime.downlink.MapDownlinkView;
 import swim.runtime.downlink.ValueDownlinkView;
+import swim.runtime.http.RestDownlinkView;
 import swim.runtime.scope.HostScope;
 import swim.runtime.scope.LaneScope;
 import swim.runtime.scope.NodeScope;
@@ -140,7 +141,7 @@ public abstract class AbstractSwimRef implements SwimRef, CellContext {
 
   @Override
   public <V> HttpDownlink<V> downlinkHttp() {
-    return null; // TODO
+    return new RestDownlinkView<V>(this, stage(), Uri.empty()); // TODO
   }
 
   @Override

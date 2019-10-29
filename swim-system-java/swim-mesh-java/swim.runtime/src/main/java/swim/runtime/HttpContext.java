@@ -22,15 +22,15 @@ public interface HttpContext extends LinkContext {
   @Override
   HttpBinding linkWrapper();
 
-  Decoder<Object> decodeRequest(HttpRequest<?> request);
+  Decoder<Object> decodeRequestUp(HttpRequest<?> request);
 
-  void willRequest(HttpRequest<?> request);
+  void willRequestUp(HttpRequest<?> request);
 
-  void didRequest(HttpRequest<Object> request);
+  void didRequestUp(HttpRequest<Object> request);
 
-  void doRespond(HttpRequest<Object> request);
+  void doRespondUp(HttpRequest<Object> request);
 
-  void willRespond(HttpResponse<?> response);
+  void willRespondUp(HttpResponse<?> response);
 
-  void didRespond(HttpResponse<?> response);
+  void didRespondUp(HttpResponse<?> response);
 }

@@ -41,7 +41,7 @@ public class RemoteHostSpec {
     final CountDownLatch serverUpgrade = new CountDownLatch(1);
     final Uri hostUri = Uri.parse("warp://127.0.0.1:53556/");
 
-    final RemoteHostClient clientHost = new RemoteHostClient(hostUri, endpoint) {
+    final RemoteWarpHostClient clientHost = new RemoteWarpHostClient(hostUri, endpoint) {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
@@ -52,7 +52,7 @@ public class RemoteHostSpec {
         // nop
       }
     };
-    final RemoteHost serverHost = new RemoteHost(hostUri) {
+    final RemoteWarpHost serverHost = new RemoteWarpHost(hostUri) {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
@@ -105,7 +105,7 @@ public class RemoteHostSpec {
     final CommandMessage serverToClientCommand = new CommandMessage("warp://127.0.0.1:53556/b", "y");
     final Uri hostUri = Uri.parse("warp://127.0.0.1:53556/");
 
-    final RemoteHostClient clientHost = new RemoteHostClient(hostUri, endpoint) {
+    final RemoteWarpHostClient clientHost = new RemoteWarpHostClient(hostUri, endpoint) {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
@@ -117,7 +117,7 @@ public class RemoteHostSpec {
         // nop
       }
     };
-    final RemoteHost serverHost = new RemoteHost(hostUri) {
+    final RemoteWarpHost serverHost = new RemoteWarpHost(hostUri) {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
