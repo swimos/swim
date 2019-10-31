@@ -23,7 +23,7 @@ import swim.structure.Value;
  */
 public final class Xml {
   private Xml() {
-    // stub
+    // static
   }
 
   static boolean isSpace(int c) {

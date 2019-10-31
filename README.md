@@ -91,6 +91,9 @@ of the following component libraries:
 - [**swim-xml**](swim-system-java/swim-core-java/swim.xml) –
   eXtensible Markup Language (XML) codec that incrementally parses and writes
   **swim-structure** values.
+- [**swim-csv**](swim-system-java/swim-core-java/swim.csv) –
+  Comma-Separated Values (CSV) codec that incrementally parses and writes
+  **swim-structure** values.
 - [**swim-protobuf**](swim-system-java/swim-core-java/swim.protobuf) –
   Protocol Buffers (protobuf) codec that incrementally parses and writes
   **swim-structure** values.

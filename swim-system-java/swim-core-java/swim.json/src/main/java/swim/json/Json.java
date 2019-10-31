@@ -31,7 +31,7 @@ import swim.structure.Value;
  */
 public final class Json {
   private Json() {
-    // stub
+    // static
   }
 
   static boolean isSpace(int c) {

@@ -31,7 +31,7 @@ import swim.structure.Value;
  */
 public final class Recon {
   private Recon() {
-    // stub
+    // static
   }
 
   static boolean isSpace(int c) {

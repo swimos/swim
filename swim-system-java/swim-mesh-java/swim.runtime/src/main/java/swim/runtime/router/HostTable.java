@@ -63,7 +63,6 @@ import swim.uri.UriMapper;
 import swim.uri.UriPart;
 import swim.uri.UriPath;
 import swim.uri.UriPathBuilder;
-import swim.uri.UriQuery;
 
 public class HostTable extends AbstractTierBinding implements HostBinding {
   protected HostContext hostContext;

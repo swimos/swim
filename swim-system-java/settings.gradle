@@ -37,6 +37,10 @@ include 'swim.xml'
 project(':swim.xml').projectDir = file('swim-core-java/swim.xml')
 project(':swim.xml').name = 'swim-xml'
 
+include 'swim.csv'
+project(':swim.csv').projectDir = file('swim-core-java/swim.csv')
+project(':swim.csv').name = 'swim-csv'
+
 include 'swim.protobuf'
 project(':swim.protobuf').projectDir = file('swim-core-java/swim.protobuf')
 project(':swim.protobuf').name = 'swim-protobuf'

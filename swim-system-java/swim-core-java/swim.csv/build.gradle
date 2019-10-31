@@ -1,0 +1,11 @@
+apply from: '../project.gradle'
+
+description = 'Comma-Separated Values (CSV) codec that incrementally parses and writes swim-structure values'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.csv'
+ext.moduleName = 'swim.csv'
+
+dependencies {
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+}

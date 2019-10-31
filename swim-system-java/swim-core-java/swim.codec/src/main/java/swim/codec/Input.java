@@ -414,7 +414,7 @@ final class InputEmpty extends Input {
 
   @Override
   public int head() {
-    throw new IllegalStateException();
+    throw new InputException();
   }
 
   @Override
@@ -520,7 +520,7 @@ final class InputDone extends Input {
 
   @Override
   public int head() {
-    throw new IllegalStateException();
+    throw new InputException();
   }
 
   @Override
@@ -616,7 +616,7 @@ final class InputError extends Input {
 
   @Override
   public int head() {
-    throw new IllegalStateException();
+    throw new InputException();
   }
 
   @Override

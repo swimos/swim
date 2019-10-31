@@ -22,7 +22,7 @@ import swim.structure.Value;
  */
 public final class Protobuf {
   private Protobuf() {
-    // stub
+    // static
   }
 
   private static ProtobufDecoder<Item, Value> structureDecoder;

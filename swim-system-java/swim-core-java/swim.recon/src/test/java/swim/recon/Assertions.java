@@ -23,7 +23,7 @@ import static org.testng.Assert.fail;
 
 public final class Assertions {
   private Assertions() {
-    // stub
+    // static
   }
 
   static <O> void assertParsed(O actual, O expected, String a, String b, int part) {

@@ -24,7 +24,7 @@ import swim.structure.Value;
  */
 public final class Decipher {
   private Decipher() {
-    // stub
+    // static
   }
 
   static boolean isSpace(int c) {

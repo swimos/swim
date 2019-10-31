@@ -57,6 +57,7 @@ gradle.projectsEvaluated {
         'swim.codec',
         'swim.collections',
         'swim.concurrent',
+        'swim.csv',
         'swim.dataflow',
         'swim.db',
         'swim.decipher',

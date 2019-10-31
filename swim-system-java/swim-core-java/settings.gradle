@@ -29,6 +29,9 @@ project(':swim.json').name = 'swim-json'
 include 'swim.xml'
 project(':swim.xml').name = 'swim-xml'
 
+include 'swim.csv'
+project(':swim.csv').name = 'swim-csv'
+
 include 'swim.protobuf'
 project(':swim.protobuf').name = 'swim-protobuf'
 

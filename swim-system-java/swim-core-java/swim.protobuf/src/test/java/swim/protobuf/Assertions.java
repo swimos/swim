@@ -25,7 +25,7 @@ import static org.testng.Assert.assertTrue;
 
 public final class Assertions {
   private Assertions() {
-    // stub
+    // static
   }
 
   public static <T> void assertDecodes(Decoder<T> decodee, InputBuffer input, T expected) {
