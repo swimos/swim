@@ -19,9 +19,9 @@ import swim.codec.Parser;
 import swim.codec.Unicode;
 import swim.codec.Utf8;
 import swim.codec.Writer;
-import swim.collections.FingerTrieSeq;
 import swim.structure.Data;
 import swim.structure.Item;
+import swim.structure.Num;
 import swim.structure.Text;
 import swim.structure.Value;
 
@@ -66,72 +66,68 @@ public final class Csv {
     }
   }
 
-  public static Parser<Item> numberCellParser(Value key) {
-    return new NumberCellParser(key);
+  public static CsvStructureHeader header() {
+    return CsvStructureHeader.empty();
   }
 
-  public static Parser<Item> numberCellParser(String key) {
-    return new NumberCellParser(Text.from(key));
+  public static CsvStructureCol<Text> textCol(Value key) {
+    return new TextCol(key, key.stringValue(""), false);
   }
 
-  public static Parser<Item> numberCellParser() {
-    return new NumberCellParser(Value.absent());
+  public static CsvStructureCol<Text> textCol(String key) {
+    return new TextCol(Text.from(key), key, false);
   }
 
-  public static Parser<Item> optionaNumberCellParser(Value key) {
-    return new OptionalNumberCellParser(key);
+  public static CsvStructureCol<Text> textCol() {
+    return new TextCol(Value.absent(), "", false);
   }
 
-  public static Parser<Item> optionalNumberCellParser(String key) {
-    return new OptionalNumberCellParser(Text.from(key));
+  public static CsvStructureCol<Num> numberCol(Value key) {
+    return new NumberCol(key, key.stringValue(""), false);
   }
 
-  public static Parser<Item> textCellParser(Value key) {
-    return new TextCellParser(key);
+  public static CsvStructureCol<Num> numberCol(String key) {
+    return new NumberCol(Text.from(key), key, false);
   }
 
-  public static Parser<Item> textCellParser(String key) {
-    return new TextCellParser(Text.from(key));
+  public static CsvStructureCol<Num> numberCol() {
+    return new NumberCol(Value.absent(), "", false);
   }
 
-  public static Parser<Item> textCellParser() {
-    return new TextCellParser(Value.absent());
+  public static CsvStructureCol<Item> itemCol(Value key, Parser<? extends Item> itemParser) {
+    return new ItemCol(key, key.stringValue(""), false, itemParser);
   }
 
-  public static Parser<Item> optionalTextCellParser(Value key) {
-    return new OptionalTextCellParser(key);
+  public static CsvStructureCol<Item> itemCol(String key, Parser<? extends Item> itemParser) {
+    return new ItemCol(Text.from(key), key, false, itemParser);
   }
 
-  public static Parser<Item> optionalTextCellParser(String key) {
-    return new OptionalTextCellParser(Text.from(key));
-  }
-
-  public static Parser<Item> itemCellParser(Value key, Parser<Item> itemParser) {
-    return new ItemCellParser(key, itemParser);
-  }
-
-  public static Parser<Item> itemCellParser(String key, Parser<Item> itemParser) {
-    return new ItemCellParser(Text.from(key), itemParser);
-  }
-
-  public static Parser<Item> itemCellParser(Parser<Item> itemParser) {
-    return new ItemCellParser(Value.absent(), itemParser);
+  public static CsvStructureCol<Item> itemCol(Parser<? extends Item> itemParser) {
+    return new ItemCol(Value.absent(), "", false, itemParser);
   }
 
   public static Value parse(String csv) {
     return structureParser().parseTableString(csv);
   }
 
-  public static Value parse(String csv, int delimiter) {
+  public static Value parse(int delimiter, String csv) {
     return structureParser(delimiter).parseTableString(csv);
   }
 
-  public static Value parse(String csv, FingerTrieSeq<Parser<Item>> cellParsers) {
-    return structureParser().parseTableString(csv, cellParsers);
+  public static Value parse(String csv, CsvHeader<Item> header) {
+    return structureParser().parseBodyString(csv, header);
   }
 
-  public static Value parse(String csv, FingerTrieSeq<Parser<Item>> cellParsers, int delimiter) {
-    return structureParser(delimiter).parseTableString(csv, cellParsers);
+  public static Value parse(int delimiter, String csv, CsvHeader<Item> header) {
+    return structureParser(delimiter).parseBodyString(csv, header);
+  }
+
+  public static Item parseRow(String csv, CsvHeader<Item> header) {
+    return structureParser().parseRowString(csv, header);
+  }
+
+  public static Item parseRow(int delimiter, String csv, CsvHeader<Item> header) {
+    return structureParser(delimiter).parseRowString(csv, header);
   }
 
   public static Parser<Value> parser() {
@@ -142,19 +138,43 @@ public final class Csv {
     return structureParser(delimiter).tableParser();
   }
 
-  public static Parser<Value> parser(FingerTrieSeq<Parser<Item>> cellParsers) {
-    return structureParser().tableParser(cellParsers);
+  public static Parser<Value> parser(CsvHeader<Item> header) {
+    return structureParser().bodyParser(header);
   }
 
-  public static Parser<Value> parser(FingerTrieSeq<Parser<Item>> cellParsers, int delimiter) {
-    return structureParser(delimiter).tableParser(cellParsers);
+  public static Parser<Value> parser(int delimiter, CsvHeader<Item> header) {
+    return structureParser(delimiter).bodyParser(header);
+  }
+
+  public static Parser<CsvHeader<Item>> headerParser() {
+    return structureParser().headerParser();
+  }
+
+  public static Parser<CsvHeader<Item>> headerParser(int delimiter) {
+    return structureParser(delimiter).headerParser();
+  }
+
+  public static Parser<Value> bodyParser(CsvHeader<Item> header) {
+    return structureParser().bodyParser(header);
+  }
+
+  public static Parser<Value> bodyParser(int delimiter, CsvHeader<Item> header) {
+    return structureParser(delimiter).bodyParser(header);
+  }
+
+  public static Parser<Item> rowParser(CsvHeader<Item> header) {
+    return structureParser().rowParser(header);
+  }
+
+  public static Parser<Item> rowParser(int delimiter, CsvHeader<Item> header) {
+    return structureParser(delimiter).rowParser(header);
   }
 
   public static Writer<?, ?> write(Value table, Output<?> output) {
     return structureWriter().writeTable(table, output);
   }
 
-  public static Writer<?, ?> write(Value table, Output<?> output, int delimiter) {
+  public static Writer<?, ?> write(int delimiter, Value table, Output<?> output) {
     return structureWriter(delimiter).writeTable(table, output);
   }
 
@@ -164,9 +184,9 @@ public final class Csv {
     return output.bind();
   }
 
-  public static String toString(Value table, int delimiter) {
+  public static String toString(int delimiter, Value table) {
     final Output<String> output = Unicode.stringOutput();
-    write(table, output, delimiter);
+    write(delimiter, table, output);
     return output.bind();
   }
 
@@ -176,9 +196,9 @@ public final class Csv {
     return output.bind();
   }
 
-  public static Data toData(Value table, int delimiter) {
+  public static Data toData(int delimiter, Value table) {
     final Output<Data> output = Utf8.encodedOutput(Data.output());
-    write(table, output, delimiter);
+    write(delimiter, table, output);
     return output.bind();
   }
 }

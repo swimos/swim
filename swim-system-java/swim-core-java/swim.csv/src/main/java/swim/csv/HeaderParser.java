@@ -18,39 +18,34 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parser;
 import swim.codec.Unicode;
-import swim.collections.FingerTrieSeq;
-import swim.util.Builder;
 
-final class HeaderParser<T, R, C> extends Parser<FingerTrieSeq<Parser<C>>> {
+final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
   final CsvParser<T, R, C> csv;
-  final Builder<Parser<C>, FingerTrieSeq<Parser<C>>> builder;
+  final CsvHeader<C> header;
   final Parser<String> nameParser;
-  final int index;
   final int head;
   final int step;
 
-  HeaderParser(CsvParser<T, R, C> csv, Builder<Parser<C>, FingerTrieSeq<Parser<C>>> builder,
-               Parser<String> nameParser, int index, int head, int step) {
+  HeaderParser(CsvParser<T, R, C> csv, CsvHeader<C> header,
+               Parser<String> nameParser, int head, int step) {
     this.csv = csv;
-    this.builder = builder;
+    this.header = header;
     this.nameParser = nameParser;
-    this.index = index;
     this.head = head;
     this.step = step;
   }
 
   HeaderParser(CsvParser<T, R, C> csv) {
-    this(csv, null, null, 0, -1, 1);
+    this(csv, null, null, -1, 1);
   }
 
   @Override
-  public Parser<FingerTrieSeq<Parser<C>>> feed(Input input) {
-    return parse(input, this.csv, this.builder, this.nameParser, this.index, this.head, this.step);
+  public Parser<CsvHeader<C>> feed(Input input) {
+    return parse(input, this.csv, this.header, this.nameParser, this.head, this.step);
   }
 
-  static <T, R, C> Parser<FingerTrieSeq<Parser<C>>> parse(Input input, CsvParser<T, R, C> csv,
-                                                          Builder<Parser<C>, FingerTrieSeq<Parser<C>>> builder,
-                                                          Parser<String> nameParser, int index, int head, int step) {
+  static <T, R, C> Parser<CsvHeader<C>> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header,
+                                              Parser<String> nameParser, int head, int step) {
     int c = 0;
     do {
       if (step == 1) {
@@ -65,16 +60,15 @@ final class HeaderParser<T, R, C> extends Parser<FingerTrieSeq<Parser<C>>> {
         final Input cellInput = new CsvInput(csv, input);
         if (nameParser == null) {
           nameParser = Unicode.parseString(cellInput);
-          index += 1;
         }
         while (nameParser.isCont() && !cellInput.isEmpty()) {
           nameParser = nameParser.feed(cellInput);
         }
         if (nameParser.isDone()) {
-          if (builder == null) {
-            builder = FingerTrieSeq.builder();
+          if (header == null) {
+            header = csv.header();
           }
-          builder.add(csv.cellParser(nameParser.bind(), index));
+          header = header.col(nameParser.bind());
           nameParser = null;
           step = 4;
         } else if (nameParser.isError()) {
@@ -85,7 +79,6 @@ final class HeaderParser<T, R, C> extends Parser<FingerTrieSeq<Parser<C>>> {
         final Input cellInput = new CsvQuotedInput('"', input, head);
         if (nameParser == null) {
           nameParser = Unicode.parseString(cellInput);
-          index += 1;
         }
         while (nameParser.isCont() && !cellInput.isEmpty()) {
           nameParser = nameParser.feed(cellInput);
@@ -96,10 +89,10 @@ final class HeaderParser<T, R, C> extends Parser<FingerTrieSeq<Parser<C>>> {
         if (head == -4) {
           return error(Diagnostic.expected('"', input));
         } else if (nameParser.isDone()) {
-          if (builder == null) {
-            builder = FingerTrieSeq.builder();
+          if (header == null) {
+            header = csv.header();
           }
-          builder.add(csv.cellParser(nameParser.bind(), index));
+          header = header.col(nameParser.bind());
           nameParser = null;
           head = -1;
           step = 4;
@@ -111,10 +104,10 @@ final class HeaderParser<T, R, C> extends Parser<FingerTrieSeq<Parser<C>>> {
         if (input.isCont()) {
           c = input.head();
           if (c == '\r' || c == '\n') {
-            if (builder == null) {
-              builder = FingerTrieSeq.builder();
+            if (header == null) {
+              header = csv.header();
             }
-            return done(builder.bind());
+            return done(header);
           } else if (csv.isDelimiter(c)) {
             input = input.step();
             step = 1;
@@ -131,10 +124,10 @@ final class HeaderParser<T, R, C> extends Parser<FingerTrieSeq<Parser<C>>> {
     if (input.isError()) {
       return error(input.trap());
     }
-    return new HeaderParser<T, R, C>(csv, builder, nameParser, index, head, step);
+    return new HeaderParser<T, R, C>(csv, header, nameParser, head, step);
   }
 
-  static <T, R, C> Parser<FingerTrieSeq<Parser<C>>> parse(Input input, CsvParser<T, R, C> csv) {
-    return parse(input, csv, null, null, 0, -1, 1);
+  static <T, R, C> Parser<CsvHeader<C>> parse(Input input, CsvParser<T, R, C> csv) {
+    return parse(input, csv, null, null, -1, 1);
   }
 }

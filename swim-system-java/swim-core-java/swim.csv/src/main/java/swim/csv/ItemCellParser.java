@@ -17,39 +17,39 @@ package swim.csv;
 import swim.codec.Input;
 import swim.codec.Parser;
 import swim.structure.Item;
-import swim.structure.Slot;
-import swim.structure.Value;
+import swim.util.Builder;
 
 final class ItemCellParser extends Parser<Item> {
-  final Value key;
-  final Parser<Item> itemParser;
+  final ItemCol col;
+  final Builder<Item, ?> rowBuilder;
+  final Parser<? extends Item> itemParser;
 
-  ItemCellParser(Value key, Parser<Item> itemParser) {
-    this.key = key;
+  ItemCellParser(ItemCol col, Builder<Item, ?> rowBuilder,
+                 Parser<? extends Item> itemParser) {
+    this.col = col;
+    this.rowBuilder = rowBuilder;
     this.itemParser = itemParser;
   }
 
   @Override
   public Parser<Item> feed(Input input) {
-    return parse(input, this.key, this.itemParser);
+    return parse(input, this.col, this.rowBuilder, this.itemParser);
   }
 
-  static Parser<Item> parse(Input input, Value key, Parser<Item> itemParser) {
+  static Parser<Item> parse(Input input, ItemCol col, Builder<Item, ?> rowBuilder,
+                            Parser<? extends Item> itemParser) {
     while (itemParser.isCont() && !input.isEmpty()) {
       itemParser = itemParser.feed(input);
     }
     if (itemParser.isDone()) {
       final Item item = itemParser.bind();
-      if (key.isDefined() && item instanceof Value) {
-        return done(Slot.of(key, (Value) item));
-      } else {
-        return done(item);
-      }
+      col.addCell(item, rowBuilder);
+      return done(item);
     } else if (itemParser.isError()) {
       return itemParser.asError();
     } else if (input.isError()) {
       return error(input.trap());
     }
-    return new ItemCellParser(key, itemParser);
+    return new ItemCellParser(col, rowBuilder, itemParser);
   }
 }

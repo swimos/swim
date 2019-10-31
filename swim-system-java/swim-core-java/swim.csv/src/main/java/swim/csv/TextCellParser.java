@@ -18,29 +18,30 @@ import swim.codec.Input;
 import swim.codec.Output;
 import swim.codec.Parser;
 import swim.structure.Item;
-import swim.structure.Slot;
 import swim.structure.Text;
-import swim.structure.Value;
+import swim.util.Builder;
 
-final class TextCellParser extends Parser<Item> {
-  final Value key;
+final class TextCellParser extends Parser<Text> {
+  final TextCol col;
+  final Builder<Item, ?> rowBuilder;
   final Output<Text> output;
 
-  TextCellParser(Value key, Output<Text> output) {
-    this.key = key;
+  TextCellParser(TextCol col, Builder<Item, ?> rowBuilder, Output<Text> output) {
+    this.col = col;
+    this.rowBuilder = rowBuilder;
     this.output = output;
   }
 
-  TextCellParser(Value key) {
-    this(key, null);
+  TextCellParser(TextCol col, Builder<Item, ?> rowBuilder) {
+    this(col, rowBuilder, null);
   }
 
   @Override
-  public Parser<Item> feed(Input input) {
-    return parse(input, this.key, this.output);
+  public Parser<Text> feed(Input input) {
+    return parse(input, this.col, this.rowBuilder, this.output);
   }
 
-  static Parser<Item> parse(Input input, Value key, Output<Text> output) {
+  static Parser<Text> parse(Input input, TextCol col, Builder<Item, ?> rowBuilder, Output<Text> output) {
     if (input.isCont()) {
       if (output == null) {
         output = Text.output();
@@ -51,19 +52,16 @@ final class TextCellParser extends Parser<Item> {
       }
     }
     if (!input.isEmpty()) {
-      final Text value = output != null ? output.bind() : Text.empty();
-      if (key.isDefined()) {
-        return done(Slot.of(key, value));
-      } else {
-        return done(value);
-      }
+      final Text text = output != null ? output.bind() : Text.empty();
+      col.addCell(text, rowBuilder);
+      return done(text);
     } else if (input.isError()) {
       return error(input.trap());
     }
-    return new TextCellParser(key, output);
+    return new TextCellParser(col, rowBuilder, output);
   }
 
-  static Parser<Item> parse(Input input, Value key) {
-    return parse(input, key, null);
+  static Parser<Text> parse(Input input, TextCol col, Builder<Item, ?> rowBuilder) {
+    return parse(input, col, rowBuilder, null);
   }
 }

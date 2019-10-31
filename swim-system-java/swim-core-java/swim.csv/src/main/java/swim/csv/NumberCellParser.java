@@ -21,34 +21,37 @@ import swim.codec.Input;
 import swim.codec.Parser;
 import swim.structure.Item;
 import swim.structure.Num;
-import swim.structure.Slot;
-import swim.structure.Value;
+import swim.util.Builder;
 
-final class NumberCellParser extends Parser<Item> {
-  final Value key;
+final class NumberCellParser extends Parser<Num> {
+  final NumberCol col;
+  final Builder<Item, ?> rowBuilder;
   final int sign;
   final long value;
   final int mode;
   final int step;
 
-  NumberCellParser(Value key, int sign, long value, int mode, int step) {
-    this.key = key;
+  NumberCellParser(NumberCol col, Builder<Item, ?> rowBuilder,
+                   int sign, long value, int mode, int step) {
+    this.col = col;
+    this.rowBuilder = rowBuilder;
     this.sign = sign;
     this.value = value;
     this.mode = mode;
     this.step = step;
   }
 
-  NumberCellParser(Value key) {
-    this(key, 1, 0L, 2, 1);
+  NumberCellParser(NumberCol col, Builder<Item, ?> rowBuilder) {
+    this(col, rowBuilder, 1, 0L, 2, 1);
   }
 
   @Override
-  public Parser<Item> feed(Input input) {
-    return parse(input, this.key, this.sign, this.value, this.mode, this.step);
+  public Parser<Num> feed(Input input) {
+    return parse(input, this.col, this.rowBuilder, this.sign, this.value, this.mode, this.step);
   }
 
-  static Parser<Item> parse(Input input, Value key, int sign, long value, int mode, int step) {
+  static Parser<Num> parse(Input input, NumberCol col, Builder<Item, ?> rowBuilder,
+                          int sign, long value, int mode, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
@@ -59,7 +62,8 @@ final class NumberCellParser extends Parser<Item> {
         }
         step = 2;
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("number", input));
+        col.addCell(null, rowBuilder);
+        return done();
       }
     }
     if (step == 2) {
@@ -88,7 +92,7 @@ final class NumberCellParser extends Parser<Item> {
             value = newValue;
             input = input.step();
           } else {
-            return BigIntegerCellParser.parse(input, key, sign, BigInteger.valueOf(value));
+            return BigIntegerCellParser.parse(input, col, rowBuilder, sign, BigInteger.valueOf(value));
           }
         } else {
           break;
@@ -97,72 +101,70 @@ final class NumberCellParser extends Parser<Item> {
       if (input.isCont()) {
         step = 4;
       } else if (input.isDone()) {
-        if (key.isDefined()) {
-          return done(Slot.of(key, Num.from(value)));
-        } else {
-          return done(Num.from(value));
-        }
+        final Num num = Num.from(value);
+        col.addCell(num, rowBuilder);
+        return done(num);
       }
     }
     if (step == 4) {
       if (input.isCont()) {
         c = input.head();
         if (mode > 0 && c == '.' || mode > 1 && (c == 'E' || c == 'e')) {
-          return DecimalCellParser.parse(input, key, sign, value, mode);
+          return DecimalCellParser.parse(input, col, rowBuilder, sign, value, mode);
         } else if (c == 'x' && sign > 0 && value == 0L) {
           input = input.step();
-          return HexadecimalCellParser.parse(input, key);
+          return HexadecimalCellParser.parse(input, col, rowBuilder);
         } else {
-          if (key.isDefined()) {
-            return done(Slot.of(key, Num.from(value)));
-          } else {
-            return done(Num.from(value));
-          }
+          final Num num = Num.from(value);
+          col.addCell(num, rowBuilder);
+          return done(num);
         }
       } else if (input.isDone()) {
-        if (key.isDefined()) {
-          return done(Slot.of(key, Num.from(value)));
-        } else {
-          return done(Num.from(value));
-        }
+        final Num num = Num.from(value);
+        col.addCell(num, rowBuilder);
+        return done(num);
       }
     }
     if (input.isError()) {
       return error(input.trap());
     }
-    return new NumberCellParser(key, sign, value, mode, step);
+    return new NumberCellParser(col, rowBuilder, sign, value, mode, step);
   }
 
-  static Parser<Item> parse(Input input, Value key) {
-    return parse(input, key, 1, 0L, 2, 1);
+  static Parser<Num> parse(Input input, NumberCol col, Builder<Item, ?> rowBuilder) {
+    return parse(input, col, rowBuilder, 1, 0L, 2, 1);
   }
 
-  static Parser<Item> parseDecimal(Input input, Value key) {
-    return parse(input, key, 1, 0L, 1, 1);
+  static Parser<Num> parseDecimal(Input input, NumberCol col, Builder<Item, ?> rowBuilder) {
+    return parse(input, col, rowBuilder, 1, 0L, 1, 1);
   }
 
-  static Parser<Item> parseInteger(Input input, Value key) {
-    return parse(input, key, 1, 0L, 0, 1);
+  static Parser<Num> parseInteger(Input input, NumberCol col, Builder<Item, ?> rowBuilder) {
+    return parse(input, col, rowBuilder, 1, 0L, 0, 1);
   }
 }
 
-final class BigIntegerCellParser extends Parser<Item> {
-  final Value key;
+final class BigIntegerCellParser extends Parser<Num> {
+  final NumberCol col;
+  final Builder<Item, ?> rowBuilder;
   final int sign;
   final BigInteger value;
 
-  BigIntegerCellParser(Value key, int sign, BigInteger value) {
-    this.key = key;
+  BigIntegerCellParser(NumberCol col, Builder<Item, ?> rowBuilder,
+                       int sign, BigInteger value) {
+    this.col = col;
+    this.rowBuilder = rowBuilder;
     this.sign = sign;
     this.value = value;
   }
 
   @Override
-  public Parser<Item> feed(Input input) {
-    return parse(input, this.key, this.sign, this.value);
+  public Parser<Num> feed(Input input) {
+    return parse(input, this.col, this.rowBuilder, this.sign, this.value);
   }
 
-  static Parser<Item> parse(Input input, Value key, int sign, BigInteger value) {
+  static Parser<Num> parse(Input input, NumberCol col, Builder<Item, ?> rowBuilder,
+                           int sign, BigInteger value) {
     while (input.isCont()) {
       final int c = input.head();
       if (c >= '0' && c <= '9') {
@@ -173,35 +175,37 @@ final class BigIntegerCellParser extends Parser<Item> {
       }
     }
     if (!input.isEmpty()) {
-      if (key.isDefined()) {
-        return done(Slot.of(key, Num.from(value)));
-      } else {
-        return done(Num.from(value));
-      }
+      final Num num = Num.from(value);
+      col.addCell(num, rowBuilder);
+      return done(num);
     }
-    return new BigIntegerCellParser(key, sign, value);
+    return new BigIntegerCellParser(col, rowBuilder, sign, value);
   }
 }
 
-final class DecimalCellParser extends Parser<Item> {
-  final Value key;
+final class DecimalCellParser extends Parser<Num> {
+  final NumberCol col;
+  final Builder<Item, ?> rowBuilder;
   final StringBuilder builder;
   final int mode;
   final int step;
 
-  DecimalCellParser(Value key, StringBuilder builder, int mode, int step) {
-    this.key = key;
+  DecimalCellParser(NumberCol col, Builder<Item, ?> rowBuilder,
+                    StringBuilder builder, int mode, int step) {
+    this.col = col;
+    this.rowBuilder = rowBuilder;
     this.builder = builder;
     this.mode = mode;
     this.step = step;
   }
 
   @Override
-  public Parser<Item> feed(Input input) {
-    return parse(input, this.key, this.builder, this.mode, this.step);
+  public Parser<Num> feed(Input input) {
+    return parse(input, this.col, this.rowBuilder, this.builder, this.mode, this.step);
   }
 
-  static Parser<Item> parse(Input input, Value key, StringBuilder builder, int mode, int step) {
+  static Parser<Num> parse(Input input, NumberCol col, Builder<Item, ?> rowBuilder,
+                           StringBuilder builder, int mode, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
@@ -249,18 +253,14 @@ final class DecimalCellParser extends Parser<Item> {
         if (mode > 1) {
           step = 4;
         } else {
-          if (key.isDefined()) {
-            return done(Slot.of(key, Num.from(builder.toString())));
-          } else {
-            return done(Num.from(builder.toString()));
-          }
+          final Num num = Num.from(builder.toString());
+          col.addCell(num, rowBuilder);
+          return done(num);
         }
       } else if (input.isDone()) {
-        if (key.isDefined()) {
-          return done(Slot.of(key, Num.from(builder.toString())));
-        } else {
-          return done(Num.from(builder.toString()));
-        }
+        final Num num = Num.from(builder.toString());
+        col.addCell(num, rowBuilder);
+        return done(num);
       }
     }
     if (step == 4) {
@@ -270,11 +270,9 @@ final class DecimalCellParser extends Parser<Item> {
         builder.appendCodePoint(c);
         step = 5;
       } else {
-        if (key.isDefined()) {
-          return done(Slot.of(key, Num.from(builder.toString())));
-        } else {
-          return done(Num.from(builder.toString()));
-        }
+        final Num num = Num.from(builder.toString());
+        col.addCell(num, rowBuilder);
+        return done(num);
       }
     }
     if (step == 5) {
@@ -314,47 +312,50 @@ final class DecimalCellParser extends Parser<Item> {
         }
       }
       if (!input.isEmpty()) {
-        if (key.isDefined()) {
-          return done(Slot.of(key, Num.from(builder.toString())));
-        } else {
-          return done(Num.from(builder.toString()));
-        }
+        final Num num = Num.from(builder.toString());
+        col.addCell(num, rowBuilder);
+        return done(num);
       }
     }
     if (input.isError()) {
       return error(input.trap());
     }
-    return new DecimalCellParser(key, builder, mode, step);
+    return new DecimalCellParser(col, rowBuilder, builder, mode, step);
   }
 
-  static Parser<Item> parse(Input input, Value key, int sign, long value, int mode) {
+  static Parser<Num> parse(Input input, NumberCol col, Builder<Item, ?> rowBuilder,
+                           int sign, long value, int mode) {
     final StringBuilder builder = new StringBuilder();
     if (sign < 0 && value == 0L) {
       builder.append('-').append('0');
     } else {
       builder.append(value);
     }
-    return parse(input, key, builder, mode, 1);
+    return parse(input, col, rowBuilder, builder, mode, 1);
   }
 }
 
-final class HexadecimalCellParser extends Parser<Item> {
-  final Value key;
+final class HexadecimalCellParser extends Parser<Num> {
+  final NumberCol col;
+  final Builder<Item, ?> rowBuilder;
   final long value;
   final int size;
 
-  HexadecimalCellParser(Value key, long value, int size) {
-    this.key = key;
+  HexadecimalCellParser(NumberCol col, Builder<Item, ?> rowBuilder,
+                        long value, int size) {
+    this.col = col;
+    this.rowBuilder = rowBuilder;
     this.value = value;
     this.size = size;
   }
 
   @Override
-  public Parser<Item> feed(Input input) {
-    return parse(input, this.key, this.value, this.size);
+  public Parser<Num> feed(Input input) {
+    return parse(input, this.col, this.rowBuilder, this.value, this.size);
   }
 
-  static Parser<Item> parse(Input input, Value key, long value, int size) {
+  static Parser<Num> parse(Input input, NumberCol col, Builder<Item, ?> rowBuilder,
+                           long value, int size) {
     int c = 0;
     while (input.isCont()) {
       c = input.head();
@@ -369,17 +370,13 @@ final class HexadecimalCellParser extends Parser<Item> {
     if (!input.isEmpty()) {
       if (size > 0) {
         if (size <= 8) {
-          if (key.isDefined()) {
-            return done(Slot.of(key, Num.uint32((int) value)));
-          } else {
-            return done(Num.uint32((int) value));
-          }
+          final Num num = Num.uint32((int) value);
+          col.addCell(num, rowBuilder);
+          return done(num);
         } else {
-          if (key.isDefined()) {
-            return done(Slot.of(key, Num.uint64(value)));
-          } else {
-            return done(Num.uint64(value));
-          }
+          final Num num = Num.uint64(value);
+          col.addCell(num, rowBuilder);
+          return done(num);
         }
       } else {
         return error(Diagnostic.expected("hex digit", input));
@@ -388,10 +385,10 @@ final class HexadecimalCellParser extends Parser<Item> {
     if (input.isError()) {
       return error(input.trap());
     }
-    return new HexadecimalCellParser(key, value, size);
+    return new HexadecimalCellParser(col, rowBuilder, value, size);
   }
 
-  static Parser<Item> parse(Input input, Value key) {
-    return parse(input, key, 0L, 0);
+  static Parser<Num> parse(Input input, NumberCol col, Builder<Item, ?> rowBuilder) {
+    return parse(input, col, rowBuilder, 0L, 0);
   }
 }

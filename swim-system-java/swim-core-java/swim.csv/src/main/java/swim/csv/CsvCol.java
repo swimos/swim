@@ -15,30 +15,23 @@
 package swim.csv;
 
 import swim.codec.Input;
+import swim.codec.Output;
 import swim.codec.Parser;
-import swim.structure.Item;
-import swim.structure.Value;
+import swim.codec.Writer;
+import swim.util.Builder;
 
-final class OptionalNumberCellParser extends Parser<Item> {
-  final Value key;
+public abstract class CsvCol<C, V> {
+  public abstract String name();
 
-  OptionalNumberCellParser(Value key) {
-    this.key = key;
-  }
+  public abstract CsvCol<C, V> name(String name);
 
-  @Override
-  public Parser<Item> feed(Input input) {
-    return parse(input, this.key);
-  }
+  public abstract boolean optional();
 
-  static Parser<Item> parse(Input input, Value key) {
-    if (input.isCont()) {
-      return NumberCellParser.parse(input, key);
-    } else if (input.isDone()) {
-      return done();
-    } else if (input.isError()) {
-      return error(input.trap());
-    }
-    return new OptionalNumberCellParser(key);
-  }
+  public abstract CsvCol<C, V> optional(boolean optional);
+
+  public abstract void addCell(V value, Builder<C, ?> rowBuilder);
+
+  public abstract Parser<V> parseCell(Input input, Builder<C, ?> rowBuilder);
+
+  public abstract Writer<?, ?> writeCell(C cell, Output<?> output);
 }

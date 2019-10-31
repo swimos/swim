@@ -14,10 +14,8 @@
 
 package swim.csv;
 
-import swim.codec.Parser;
 import swim.structure.Item;
 import swim.structure.Record;
-import swim.structure.Text;
 import swim.structure.Value;
 import swim.util.Builder;
 
@@ -33,6 +31,11 @@ public class CsvStructureParser extends CsvParser<Value, Item, Item> {
     return c == delimiter;
   }
 
+  @Override
+  public CsvHeader<Item> header() {
+    return CsvStructureHeader.empty();
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public Builder<Item, Value> tableBuilder() {
@@ -43,10 +46,5 @@ public class CsvStructureParser extends CsvParser<Value, Item, Item> {
   @Override
   public Builder<Item, Item> rowBuilder() {
     return (Builder<Item, Item>) (Builder<?, ?>) Record.create();
-  }
-
-  @Override
-  public Parser<Item> cellParser(String name, int index) {
-    return new TextCellParser(Text.from(name));
   }
 }

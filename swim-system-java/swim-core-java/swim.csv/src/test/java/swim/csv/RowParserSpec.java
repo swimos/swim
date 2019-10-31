@@ -15,12 +15,7 @@
 package swim.csv;
 
 import org.testng.annotations.Test;
-import swim.codec.Diagnostic;
-import swim.codec.Input;
-import swim.codec.Parser;
 import swim.codec.ParserException;
-import swim.codec.Unicode;
-import swim.collections.FingerTrieSeq;
 import swim.structure.Item;
 import swim.structure.Record;
 import swim.structure.Slot;
@@ -28,126 +23,126 @@ import swim.structure.Value;
 import static org.testng.Assert.ThrowingRunnable;
 import static org.testng.Assert.assertThrows;
 
-@SuppressWarnings("unchecked")
 public class RowParserSpec {
   @Test
   public void parseEmptyRow() {
-    assertParses("", Record.empty());
+    assertParses("", Record.empty(), Csv.header());
   }
 
   @Test
   public void parseOneUnquotedCell() {
-    assertParses("", Record.of(""), Csv.textCellParser());
-    assertParses("test", Record.of("test"), Csv.textCellParser());
+    assertParses("", Record.of(""), Csv.header().textCol());
+    assertParses("test", Record.of("test"), Csv.header().textCol());
   }
 
   @Test
   public void parseManyUnquotedCells() {
-    assertParses(",", Record.of("", ""), Csv.textCellParser(), Csv.textCellParser());
-    assertParses("foo,bar", Record.of("foo", "bar"), Csv.textCellParser(), Csv.textCellParser());
-    assertParses("a,b,c", Record.of("a", "b", "c"), Csv.textCellParser(), Csv.textCellParser(), Csv.textCellParser());
+    assertParses(",", Record.of("", ""), Csv.header().textCol().textCol());
+    assertParses("foo,bar", Record.of("foo", "bar"), Csv.header().textCol().textCol());
+    assertParses("a,b,c", Record.of("a", "b", "c"), Csv.header().textCol().textCol().textCol());
   }
 
   @Test
   public void parseOneQuotedCell() {
-    assertParses("\"\"", Record.of(""), Csv.textCellParser());
-    assertParses("\"test\"", Record.of("test"), Csv.textCellParser());
+    assertParses("\"\"", Record.of(""), Csv.header().textCol());
+    assertParses("\"test\"", Record.of("test"), Csv.header().textCol());
   }
 
   @Test
   public void parsManyQuotedCells() {
-    assertParses("\"\",\"\"", Record.of("", ""), Csv.textCellParser(), Csv.textCellParser());
-    assertParses("\"foo\",\"bar\"", Record.of("foo", "bar"), Csv.textCellParser(), Csv.textCellParser());
-    assertParses("\"a\",\"b\",\"c\"", Record.of("a", "b", "c"), Csv.textCellParser(), Csv.textCellParser(), Csv.textCellParser());
+    assertParses("\"\",\"\"", Record.of("", ""), Csv.header().textCol().textCol());
+    assertParses("\"foo\",\"bar\"", Record.of("foo", "bar"), Csv.header().textCol().textCol());
+    assertParses("\"a\",\"b\",\"c\"", Record.of("a", "b", "c"), Csv.header().textCol().textCol().textCol());
   }
 
   @Test
   public void parseQuotedCellWithEscapes() {
-    assertParses("\"Hello, \"\"world\"\"!\"", Record.of("Hello, \"world\"!"), Csv.textCellParser());
+    assertParses("\"Hello, \"\"world\"\"!\"", Record.of("Hello, \"world\"!"), Csv.header().textCol());
   }
 
   @Test
   public void parsRowsWithDifferentDelimiters() {
-    assertParses('^', "^", Record.of("", ""), Csv.textCellParser(), Csv.textCellParser());
-    assertParses('^', "foo^bar", Record.of("foo", "bar"), Csv.textCellParser(), Csv.textCellParser());
-    assertParses('^', "a^b^c", Record.of("a", "b", "c"), Csv.textCellParser(), Csv.textCellParser(), Csv.textCellParser());
+    assertParses('^', "^", Record.of("", ""), Csv.header().textCol().textCol());
+    assertParses('^', "foo^bar", Record.of("foo", "bar"), Csv.header().textCol().textCol());
+    assertParses('^', "a^b^c", Record.of("a", "b", "c"), Csv.header().textCol().textCol().textCol());
   }
 
   @Test
   public void parsRowsWithNestedCsvCells() {
     assertParses("1,2^3,4", Record.of(Slot.of("a", 1), Slot.of("b", Record.of(Slot.of("c", 2), Slot.of("d", 3))), Slot.of("e", 4)),
-                 Csv.numberCellParser("a"),
-                 Csv.itemCellParser("b", Csv.structureParser('^').rowParser(FingerTrieSeq.of(Csv.numberCellParser("c"), Csv.numberCellParser("d")))),
-                 Csv.numberCellParser("e"));
+                 Csv.header().numberCol("a")
+                             .itemCol("b", Csv.rowParser('^', Csv.header().numberCol("c").numberCol("d")))
+                             .numberCol("e"));
   }
 
   @Test
   public void parsRowsWithOptionalCells() {
     assertParses(",,,", Record.empty(),
-                 Csv.optionalTextCellParser("a"), Csv.optionalTextCellParser("b"),
-                 Csv.optionalNumberCellParser("c"), Csv.optionalNumberCellParser("d"));
+                 Csv.header().textCol("a").optional(true)
+                             .textCol("b").optional(true)
+                             .numberCol("c").optional(true)
+                             .numberCol("d").optional(true));
     assertParses("1,,3,", Record.of(Slot.of("a", "1"), Slot.of("c", 3)),
-                 Csv.optionalTextCellParser("a"), Csv.optionalTextCellParser("b"),
-                 Csv.optionalNumberCellParser("c"), Csv.optionalNumberCellParser("d"));
+                 Csv.header().textCol("a").optional(true)
+                             .textCol("b").optional(true)
+                             .numberCol("c").optional(true)
+                             .numberCol("d").optional(true));
     assertParses(",2,,4", Record.of(Slot.of("b", "2"), Slot.of("d", 4)),
-                 Csv.optionalTextCellParser("a"), Csv.optionalTextCellParser("b"),
-                 Csv.optionalNumberCellParser("c"), Csv.optionalNumberCellParser("d"));
+                 Csv.header().textCol("a").optional(true)
+                             .textCol("b").optional(true)
+                             .numberCol("c").optional(true)
+                             .numberCol("d").optional(true));
     assertParses("1,2,3,4", Record.of(Slot.of("a", "1"), Slot.of("b", "2"), Slot.of("c", 3), Slot.of("d", 4)),
-                 Csv.optionalTextCellParser("a"), Csv.optionalTextCellParser("b"),
-                 Csv.optionalNumberCellParser("c"), Csv.optionalNumberCellParser("d"));
+                 Csv.header().textCol("a").optional(true)
+                             .textCol("b").optional(true)
+                             .numberCol("c").optional(true)
+                             .numberCol("d").optional(true));
   }
 
   @Test
   public void parseUnclosedQuotedCellsFails() {
-    assertParseFails("\"test", Csv.textCellParser());
-    assertParseFails("foo,\"bar", Csv.textCellParser(), Csv.textCellParser());
+    assertParseFails("\"test", Csv.header().textCol());
+    assertParseFails("foo,\"bar", Csv.header().textCol().textCol());
   }
 
   @Test
   public void parseQuoteInUnquotedCellsFails() {
-    assertParseFails("test\"", Csv.textCellParser());
+    assertParseFails("test\"", Csv.header().textCol());
   }
 
   @Test
   public void parseTooFewCellsFails() {
-    assertParseFails("foo", Csv.textCellParser(), Csv.textCellParser());
-    assertParseFails("a,b", Csv.textCellParser(), Csv.textCellParser(), Csv.textCellParser());
-    assertParseFails("\"foo\"", Csv.textCellParser(), Csv.textCellParser());
-    assertParseFails("\"a\",\"b\"", Csv.textCellParser(), Csv.textCellParser(), Csv.textCellParser());
+    assertParseFails("foo", Csv.header().textCol().textCol());
+    assertParseFails("a,b", Csv.header().textCol().textCol().textCol());
+    assertParseFails("\"foo\"", Csv.header().textCol().textCol());
+    assertParseFails("\"a\",\"b\"", Csv.header().textCol().textCol().textCol());
   }
 
   @Test
   public void parseTooManyCellsFails() {
-    assertParseFails("foo,bar", Csv.textCellParser());
-    assertParseFails("a,b,c", Csv.textCellParser(), Csv.textCellParser());
-    assertParseFails("\"foo\",\"bar\"", Csv.textCellParser());
-    assertParseFails("\"a\",\"b\",\"c\"", Csv.textCellParser(), Csv.textCellParser());
+    assertParseFails("foo,bar", Csv.header().textCol());
+    assertParseFails("a,b,c", Csv.header().textCol().textCol());
+    assertParseFails("\"foo\",\"bar\"", Csv.header().textCol());
+    assertParseFails("\"a\",\"b\",\"c\"", Csv.header().textCol().textCol());
   }
 
-  public static void assertParses(String csv, Value expected, Parser<Item>... cellParsers) {
-    assertParses(',', csv, expected, cellParsers);
+  public static void assertParses(String csv, Value expected, CsvHeader<Item> header) {
+    assertParses(',', csv, expected, header);
   }
 
-  public static void assertParses(int delimiter, String csv, Value expected, Parser<Item>... cellParsers) {
-    Assertions.assertParses(Csv.structureParser(delimiter).rowParser(FingerTrieSeq.of(cellParsers)), csv, expected);
+  public static void assertParses(int delimiter, String csv, Value expected, CsvHeader<Item> header) {
+    Assertions.assertParses(Csv.rowParser(delimiter, header), csv, expected);
   }
 
-  public static void assertParseFails(String csv, Parser<Item>... cellParsers) {
-    assertParseFails(',', csv, cellParsers);
+  public static void assertParseFails(String csv, CsvHeader<Item> header) {
+    assertParseFails(',', csv, header);
   }
 
-  public static void assertParseFails(final int delimiter, final String csv, Parser<Item>... cellParsers) {
+  public static void assertParseFails(final int delimiter, final String csv, CsvHeader<Item> header) {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
       public void run() throws Throwable {
-        final Input input = Unicode.stringInput(csv);
-        Parser<Item> parser = Csv.structureParser(delimiter).parseRow(input, FingerTrieSeq.of(cellParsers));
-        if (input.isCont() && !parser.isError()) {
-          parser = Parser.error(Diagnostic.unexpected(input));
-        } else if (input.isError()) {
-          parser = Parser.error(input.trap());
-        }
-        parser.bind();
+        Csv.parseRow(delimiter, csv, header);
       }
     });
   }

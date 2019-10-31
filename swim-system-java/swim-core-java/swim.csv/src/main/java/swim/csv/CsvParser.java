@@ -18,48 +18,47 @@ import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parser;
 import swim.codec.Unicode;
-import swim.collections.FingerTrieSeq;
 import swim.util.Builder;
 
 public abstract class CsvParser<T, R, C> {
   public abstract boolean isDelimiter(int c);
 
+  public abstract CsvHeader<C> header();
+
   public abstract Builder<R, T> tableBuilder();
 
   public abstract Builder<C, R> rowBuilder();
-
-  public abstract Parser<C> cellParser(String name, int index);
 
   public Parser<T> parseTable(Input input) {
     return TableParser.parse(input, this);
   }
 
-  public Parser<T> parseTable(Input input, FingerTrieSeq<Parser<C>> cellParsers) {
-    return TableParser.parse(input, this, cellParsers);
-  }
-
-  public Parser<FingerTrieSeq<Parser<C>>> parseHeader(Input input) {
+  public Parser<CsvHeader<C>> parseHeader(Input input) {
     return HeaderParser.parse(input, this);
   }
 
-  public Parser<R> parseRow(Input input, FingerTrieSeq<Parser<C>> cellParsers) {
-    return RowParser.parse(input, this, cellParsers);
+  public Parser<T> parseBody(Input input, CsvHeader<C> header) {
+    return BodyParser.parse(input, this, header);
+  }
+
+  public Parser<R> parseRow(Input input, CsvHeader<C> header) {
+    return RowParser.parse(input, this, header);
   }
 
   public Parser<T> tableParser() {
     return new TableParser<T, R, C>(this);
   }
 
-  public Parser<T> tableParser(FingerTrieSeq<Parser<C>> cellParsers) {
-    return new TableParser<T, R, C>(this, cellParsers);
-  }
-
-  public Parser<FingerTrieSeq<Parser<C>>> headerParser() {
+  public Parser<CsvHeader<C>> headerParser() {
     return new HeaderParser<T, R, C>(this);
   }
 
-  public Parser<R> rowParser(FingerTrieSeq<Parser<C>> cellParsers) {
-    return new RowParser<T, R, C>(this, cellParsers);
+  public Parser<T> bodyParser(CsvHeader<C> header) {
+    return new BodyParser<T, R, C>(this, header);
+  }
+
+  public Parser<R> rowParser(CsvHeader<C> header) {
+    return new RowParser<T, R, C>(this, header);
   }
 
   public T parseTableString(String string) {
@@ -73,9 +72,20 @@ public abstract class CsvParser<T, R, C> {
     return parser.bind();
   }
 
-  public T parseTableString(String string, FingerTrieSeq<Parser<C>> cellParsers) {
+  public T parseBodyString(String string, CsvHeader<C> header) {
     final Input input = Unicode.stringInput(string);
-    Parser<T> parser = parseTable(input, cellParsers);
+    Parser<T> parser = parseBody(input, header);
+    if (input.isCont() && !parser.isError()) {
+      parser = Parser.error(Diagnostic.unexpected(input));
+    } else if (input.isError()) {
+      parser = Parser.error(input.trap());
+    }
+    return parser.bind();
+  }
+
+  public R parseRowString(String string, CsvHeader<C> header) {
+    final Input input = Unicode.stringInput(string);
+    Parser<R> parser = parseRow(input, header);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
