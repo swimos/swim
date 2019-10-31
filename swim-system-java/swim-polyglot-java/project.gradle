@@ -2,6 +2,7 @@ apply plugin: 'java-library'
 apply plugin: 'checkstyle'
 apply plugin: 'signing'
 apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 group = 'org.swimos'
 version = project.property('swim.version')
@@ -233,6 +234,23 @@ afterEvaluate {
       //    }
       //  }
       //}
+    }
+  }
+
+  if (project.hasProperty('bintrayUsername') && project.hasProperty('bintrayPassword')) {
+    bintray {
+      user = bintrayUsername
+      key = bintrayPassword
+      publications = ['mavenJava']
+      pkg {
+        name = "${project.name}"
+        desc = "${project.description}"
+        websiteUrl = "${project.homepage}"
+        vcsUrl = 'https://github.com/swimos/swim.git'
+        licenses = ['Apache-2.0']
+        userOrg = 'swimos'
+        repo = 'maven'
+      }
     }
   }
 

@@ -1,3 +1,7 @@
+plugins {
+  id 'com.jfrog.bintray' version '1.8.4'
+}
+
 // Build with `gradle -Pno-modules` to force compatibility with legacy JVMs.
 def javaVersion = System.getProperty('java.version').split('\\.')
 ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : javaVersion[1] as Integer
