@@ -19,6 +19,10 @@ public abstract class CsvHeader<C> {
 
   public abstract CsvCol<C, ?> get(int index);
 
+  public abstract CsvHeader<C> col(int index, CsvCol<C, ?> col);
+
+  public abstract CsvHeader<C> col(int index, String name);
+
   public abstract CsvHeader<C> col(CsvCol<C, ?> col);
 
   public abstract CsvHeader<C> col(String name);

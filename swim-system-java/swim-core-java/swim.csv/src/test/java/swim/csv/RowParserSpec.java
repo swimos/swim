@@ -100,22 +100,11 @@ public class RowParserSpec {
   }
 
   @Test
-  public void parseUnclosedQuotedCellsFails() {
-    assertParseFails("\"test", Csv.header().textCol());
-    assertParseFails("foo,\"bar", Csv.header().textCol().textCol());
-  }
-
-  @Test
-  public void parseQuoteInUnquotedCellsFails() {
-    assertParseFails("test\"", Csv.header().textCol());
-  }
-
-  @Test
-  public void parseTooFewCellsFails() {
-    assertParseFails("foo", Csv.header().textCol().textCol());
-    assertParseFails("a,b", Csv.header().textCol().textCol().textCol());
-    assertParseFails("\"foo\"", Csv.header().textCol().textCol());
-    assertParseFails("\"a\",\"b\"", Csv.header().textCol().textCol().textCol());
+  public void parseTooFewCells() {
+    assertParses("foo", Record.of("foo"), Csv.header().textCol().textCol());
+    assertParses("a,b", Record.of("a", "b"), Csv.header().textCol().textCol().textCol());
+    assertParses("\"foo\"", Record.of("foo"), Csv.header().textCol().textCol());
+    assertParses("\"a\",\"b\"", Record.of("a", "b"), Csv.header().textCol().textCol().textCol());
   }
 
   @Test
@@ -126,23 +115,34 @@ public class RowParserSpec {
     assertParseFails("\"a\",\"b\",\"c\"", Csv.header().textCol().textCol());
   }
 
-  public static void assertParses(String csv, Value expected, CsvHeader<Item> header) {
-    assertParses(',', csv, expected, header);
+  @Test
+  public void parseUnclosedQuotedCellsFails() {
+    assertParseFails("\"test", Csv.header().textCol());
+    assertParseFails("foo,\"bar", Csv.header().textCol().textCol());
   }
 
-  public static void assertParses(int delimiter, String csv, Value expected, CsvHeader<Item> header) {
-    Assertions.assertParses(Csv.rowParser(delimiter, header), csv, expected);
+  @Test
+  public void parseQuoteInUnquotedCellsFails() {
+    assertParseFails("test\"", Csv.header().textCol());
   }
 
-  public static void assertParseFails(String csv, CsvHeader<Item> header) {
-    assertParseFails(',', csv, header);
+  public static void assertParses(String csvString, Value expected, CsvHeader<Item> header) {
+    assertParses(',', csvString, expected, header);
   }
 
-  public static void assertParseFails(final int delimiter, final String csv, CsvHeader<Item> header) {
+  public static void assertParses(int delimiter, String csvString, Value expected, CsvHeader<Item> header) {
+    Assertions.assertParses(Csv.rowParser(delimiter, header), csvString, expected);
+  }
+
+  public static void assertParseFails(String csvString, CsvHeader<Item> header) {
+    assertParseFails(',', csvString, header);
+  }
+
+  public static void assertParseFails(final int delimiter, final String csvString, CsvHeader<Item> header) {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
       public void run() throws Throwable {
-        Csv.parseRow(delimiter, csv, header);
+        Csv.parseRow(delimiter, csvString, header);
       }
     });
   }

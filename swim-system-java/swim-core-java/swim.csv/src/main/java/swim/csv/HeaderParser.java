@@ -23,29 +23,31 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
   final CsvParser<T, R, C> csv;
   final CsvHeader<C> header;
   final Parser<String> nameParser;
+  final int index;
   final int head;
   final int step;
 
   HeaderParser(CsvParser<T, R, C> csv, CsvHeader<C> header,
-               Parser<String> nameParser, int head, int step) {
+               Parser<String> nameParser, int index, int head, int step) {
     this.csv = csv;
     this.header = header;
     this.nameParser = nameParser;
+    this.index = index;
     this.head = head;
     this.step = step;
   }
 
   HeaderParser(CsvParser<T, R, C> csv) {
-    this(csv, null, null, -1, 1);
+    this(csv, null, null, 0, -1, 1);
   }
 
   @Override
   public Parser<CsvHeader<C>> feed(Input input) {
-    return parse(input, this.csv, this.header, this.nameParser, this.head, this.step);
+    return parse(input, this.csv, this.header, this.nameParser, this.index, this.head, this.step);
   }
 
   static <T, R, C> Parser<CsvHeader<C>> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header,
-                                              Parser<String> nameParser, int head, int step) {
+                                              Parser<String> nameParser, int index, int head, int step) {
     int c = 0;
     do {
       if (step == 1) {
@@ -68,8 +70,9 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
           if (header == null) {
             header = csv.header();
           }
-          header = header.col(nameParser.bind());
+          header = header.col(index, nameParser.bind());
           nameParser = null;
+          index += 1;
           step = 4;
         } else if (nameParser.isError()) {
           return nameParser.asError();
@@ -92,8 +95,9 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
           if (header == null) {
             header = csv.header();
           }
-          header = header.col(nameParser.bind());
+          header = header.col(index, nameParser.bind());
           nameParser = null;
+          index += 1;
           head = -1;
           step = 4;
         } else if (nameParser.isError()) {
@@ -124,10 +128,10 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
     if (input.isError()) {
       return error(input.trap());
     }
-    return new HeaderParser<T, R, C>(csv, header, nameParser, head, step);
+    return new HeaderParser<T, R, C>(csv, header, nameParser, index, head, step);
   }
 
   static <T, R, C> Parser<CsvHeader<C>> parse(Input input, CsvParser<T, R, C> csv) {
-    return parse(input, csv, null, null, -1, 1);
+    return parse(input, csv, null, null, 0, -1, 1);
   }
 }

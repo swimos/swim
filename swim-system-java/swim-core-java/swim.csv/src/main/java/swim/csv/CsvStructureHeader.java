@@ -79,6 +79,30 @@ public final class CsvStructureHeader extends CsvHeader<Item> {
   }
 
   @Override
+  public CsvStructureHeader col(int index, CsvCol<Item, ?> col) {
+    final FingerTrieSeq<CsvCol<Item, ?>> cols = this.cols;
+    if (index < 0) {
+      return new CsvStructureHeader(cols.prepended(col));
+    } else if (index >= cols.size()) {
+      return new CsvStructureHeader(cols.appended(col));
+    } else {
+      return new CsvStructureHeader(cols.updated(index, col));
+    }
+  }
+
+  @Override
+  public CsvStructureHeader col(int index, String name) {
+    final FingerTrieSeq<CsvCol<Item, ?>> cols = this.cols;
+    if (index < 0) {
+      return new CsvStructureHeader(cols.prepended(new TextCol(Text.from(name), name, false)));
+    } else if (index >= cols.size()) {
+      return new CsvStructureHeader(cols.appended(new TextCol(Text.from(name), name, false)));
+    } else {
+      return new CsvStructureHeader(cols.updated(index, cols.get(index).name(name)));
+    }
+  }
+
+  @Override
   public CsvStructureHeader col(CsvCol<Item, ?> col) {
     return new CsvStructureHeader(this.cols.appended(col));
   }

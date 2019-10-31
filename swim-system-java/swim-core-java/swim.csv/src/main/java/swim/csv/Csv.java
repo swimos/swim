@@ -14,6 +14,7 @@
 
 package swim.csv;
 
+import java.nio.ByteBuffer;
 import swim.codec.Output;
 import swim.codec.Parser;
 import swim.codec.Unicode;
@@ -38,7 +39,7 @@ public final class Csv {
 
   public static CsvParser<Value, Item, Item> structureParser() {
     if (structureParser == null) {
-      structureParser = new CsvStructureParser(',');
+      structureParser = new CsvStructureParser(CsvStructureHeader.empty(), ',');
     }
     return structureParser;
   }
@@ -48,6 +49,22 @@ public final class Csv {
       return structureParser();
     } else {
       return new CsvStructureParser(delimiter);
+    }
+  }
+
+  public static CsvParser<Value, Item, Item> structureParser(CsvHeader<Item> header) {
+    if (header == CsvStructureHeader.empty()) {
+      return structureParser();
+    } else {
+      return new CsvStructureParser(header, ',');
+    }
+  }
+
+  public static CsvParser<Value, Item, Item> structureParser(CsvHeader<Item> header, int delimiter) {
+    if (header == CsvStructureHeader.empty() && delimiter == ',') {
+      return structureParser();
+    } else {
+      return new CsvStructureParser(header, delimiter);
     }
   }
 
@@ -106,44 +123,84 @@ public final class Csv {
     return new ItemCol(Value.absent(), "", false, itemParser);
   }
 
-  public static Value parse(String csv) {
-    return structureParser().parseTableString(csv);
+  public static Value parseTable(String csvString) {
+    return structureParser().parseTableString(csvString);
   }
 
-  public static Value parse(int delimiter, String csv) {
-    return structureParser(delimiter).parseTableString(csv);
+  public static Value parseTable(int delimiter, String csvString) {
+    return structureParser(delimiter).parseTableString(csvString);
   }
 
-  public static Value parse(String csv, CsvHeader<Item> header) {
-    return structureParser().parseBodyString(csv, header);
+  public static Value parseTable(byte[] csvData) {
+    return structureParser().parseTableData(csvData);
   }
 
-  public static Value parse(int delimiter, String csv, CsvHeader<Item> header) {
-    return structureParser(delimiter).parseBodyString(csv, header);
+  public static Value parseTable(int delimiter, byte[] csvData) {
+    return structureParser(delimiter).parseTableData(csvData);
   }
 
-  public static Item parseRow(String csv, CsvHeader<Item> header) {
-    return structureParser().parseRowString(csv, header);
+  public static Value parseTable(ByteBuffer csvBuffer) {
+    return structureParser().parseTableBuffer(csvBuffer);
   }
 
-  public static Item parseRow(int delimiter, String csv, CsvHeader<Item> header) {
-    return structureParser(delimiter).parseRowString(csv, header);
+  public static Value parseTable(int delimiter, ByteBuffer csvBuffer) {
+    return structureParser(delimiter).parseTableBuffer(csvBuffer);
   }
 
-  public static Parser<Value> parser() {
+  public static Value parseBody(String csvString, CsvHeader<Item> header) {
+    return structureParser().parseBodyString(csvString, header);
+  }
+
+  public static Value parseBody(int delimiter, String csvString, CsvHeader<Item> header) {
+    return structureParser(delimiter).parseBodyString(csvString, header);
+  }
+
+  public static Value parseBody(byte[] csvData, CsvHeader<Item> header) {
+    return structureParser().parseBodyData(csvData, header);
+  }
+
+  public static Value parseBody(int delimiter, byte[] csvData, CsvHeader<Item> header) {
+    return structureParser(delimiter).parseBodyData(csvData, header);
+  }
+
+  public static Value parseBody(ByteBuffer csvBuffer, CsvHeader<Item> header) {
+    return structureParser().parseBodyBuffer(csvBuffer, header);
+  }
+
+  public static Value parseBody(int delimiter, ByteBuffer csvBuffer, CsvHeader<Item> header) {
+    return structureParser(delimiter).parseBodyBuffer(csvBuffer, header);
+  }
+
+  public static Item parseRow(String csvString, CsvHeader<Item> header) {
+    return structureParser().parseRowString(csvString, header);
+  }
+
+  public static Item parseRow(int delimiter, String csvString, CsvHeader<Item> header) {
+    return structureParser(delimiter).parseRowString(csvString, header);
+  }
+
+  public static Item parseRow(byte[] csvData, CsvHeader<Item> header) {
+    return structureParser().parseRowData(csvData, header);
+  }
+
+  public static Item parseRow(int delimiter, byte[] csvData, CsvHeader<Item> header) {
+    return structureParser(delimiter).parseRowData(csvData, header);
+  }
+
+  public static Item parseRow(ByteBuffer csvBuffer, CsvHeader<Item> header) {
+    return structureParser().parseRowBuffer(csvBuffer, header);
+  }
+
+  public static Item parseRow(int delimiter, ByteBuffer csvBuffer, CsvHeader<Item> header) {
+    return structureParser(delimiter).parseRowBuffer(csvBuffer, header);
+  }
+
+  public static Parser<Value> tableParser() {
     return structureParser().tableParser();
   }
 
-  public static Parser<Value> parser(int delimiter) {
+  public static Parser<Value> tableParser(int delimiter) {
     return structureParser(delimiter).tableParser();
-  }
-
-  public static Parser<Value> parser(CsvHeader<Item> header) {
-    return structureParser().bodyParser(header);
-  }
-
-  public static Parser<Value> parser(int delimiter, CsvHeader<Item> header) {
-    return structureParser(delimiter).bodyParser(header);
   }
 
   public static Parser<CsvHeader<Item>> headerParser() {
@@ -170,35 +227,35 @@ public final class Csv {
     return structureParser(delimiter).rowParser(header);
   }
 
-  public static Writer<?, ?> write(Value table, Output<?> output) {
+  public static Writer<?, ?> writeTable(Value table, Output<?> output) {
     return structureWriter().writeTable(table, output);
   }
 
-  public static Writer<?, ?> write(int delimiter, Value table, Output<?> output) {
+  public static Writer<?, ?> writeTable(int delimiter, Value table, Output<?> output) {
     return structureWriter(delimiter).writeTable(table, output);
   }
 
   public static String toString(Value table) {
     final Output<String> output = Unicode.stringOutput();
-    write(table, output);
+    writeTable(table, output);
     return output.bind();
   }
 
   public static String toString(int delimiter, Value table) {
     final Output<String> output = Unicode.stringOutput();
-    write(delimiter, table, output);
+    writeTable(delimiter, table, output);
     return output.bind();
   }
 
   public static Data toData(Value table) {
     final Output<Data> output = Utf8.encodedOutput(Data.output());
-    write(table, output);
+    writeTable(table, output);
     return output.bind();
   }
 
   public static Data toData(int delimiter, Value table) {
     final Output<Data> output = Utf8.encodedOutput(Data.output());
-    write(delimiter, table, output);
+    writeTable(delimiter, table, output);
     return output.bind();
   }
 }

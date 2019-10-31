@@ -52,6 +52,7 @@ final class RowParser<T, R, C> extends Parser<R> {
   static <T, R, C> Parser<R> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header,
                                    Parser<?> valueParser, Builder<C, R> rowBuilder,
                                    int index, int head, int step) {
+    int c = 0;
     do {
       if (step == 1) {
         if (index >= header.size()) {
@@ -108,17 +109,25 @@ final class RowParser<T, R, C> extends Parser<R> {
         }
       }
       if (step == 4) {
-        if (index >= header.size()) {
+        if (input.isDone() || index >= header.size()) {
           if (rowBuilder == null) {
             rowBuilder = csv.rowBuilder();
           }
           return done(rowBuilder.bind());
-        } else if (input.isCont() && csv.isDelimiter(input.head())) {
-          input = input.step();
-          step = 1;
-          continue;
-        } else if (!input.isEmpty()) {
-          return error(Diagnostic.expected("delimiter", input));
+        } else if (input.isCont()) {
+          c = input.head();
+          if (c == '\r' || c == '\n') {
+            if (rowBuilder == null) {
+              rowBuilder = csv.rowBuilder();
+            }
+            return done(rowBuilder.bind());
+          } else if (csv.isDelimiter(c)) {
+            input = input.step();
+            step = 1;
+            continue;
+          } else {
+            return error(Diagnostic.expected("delimiter", input));
+          }
         }
       }
       break;

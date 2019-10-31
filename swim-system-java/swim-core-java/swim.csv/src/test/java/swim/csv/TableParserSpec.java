@@ -16,6 +16,7 @@ package swim.csv;
 
 import org.testng.annotations.Test;
 import swim.codec.ParserException;
+import swim.structure.Item;
 import swim.structure.Record;
 import swim.structure.Slot;
 import swim.structure.Value;
@@ -58,23 +59,39 @@ public class TableParserSpec {
                  Record.of(Record.of(Slot.of("title", "Moby Dick"), Slot.of("author", "Herman Melville"))));
   }
 
-  public static void assertParses(String csv, Value expected) {
-    assertParses(',', csv, expected);
+  @Test
+  public void parseTableWithPredefinedHeader() {
+    assertParses(Csv.header().numberCol("x").numberCol("y"), ',',
+                 "X,Y\n2,3\n5,7\n",
+                 Record.of(Record.of(Slot.of("x", 2), Slot.of("y", 3)),
+                           Record.of(Slot.of("x", 5), Slot.of("y", 7))));
   }
 
-  public static void assertParses(int delimiter, String csv, Value expected) {
-    Assertions.assertParses(Csv.parser(delimiter), csv, expected);
+  @Test
+  public void parseTableWithExtendedPredefinedHeader() {
+    assertParses(Csv.header().textCol("x").textCol("y"), ',',
+                 "x,y,z\n2,3,5\n7,9,11\n",
+                 Record.of(Record.of(Slot.of("x", "2"), Slot.of("y", "3"), Slot.of("z", "5")),
+                           Record.of(Slot.of("x", "7"), Slot.of("y", "9"), Slot.of("z", "11"))));
   }
 
-  public static void assertParseFails(final String csv) {
-    assertParseFails(',', csv);
+  public static void assertParses(String csvString, Value expected) {
+    assertParses(CsvStructureHeader.empty(), ',', csvString, expected);
   }
 
-  public static void assertParseFails(final int delimiter, final String csv) {
+  public static void assertParses(CsvHeader<Item> header, int delimiter, String csvString, Value expected) {
+    Assertions.assertParses(Csv.structureParser(header, delimiter).tableParser(), csvString, expected);
+  }
+
+  public static void assertParseFails(final String csvString) {
+    assertParseFails(CsvStructureHeader.empty(), ',', csvString);
+  }
+
+  public static void assertParseFails(final CsvHeader<Item> header, final int delimiter, final String csvString) {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
       public void run() throws Throwable {
-        Csv.parse(delimiter, csv);
+        Csv.structureParser(header, delimiter).parseTableString(csvString);
       }
     });
   }

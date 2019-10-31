@@ -25,7 +25,7 @@ import static org.testng.Assert.assertThrows;
 
 public class BodyParserSpec {
   @Test
-  public void parseBodyWithPredefinedRows() {
+  public void parseBodyWithPredefinedHeader() {
     assertParses("2,3\n5,7\n",
                  Record.of(Record.of(Slot.of("x", "2"), Slot.of("y", "3")),
                            Record.of(Slot.of("x", "5"), Slot.of("y", "7"))),
@@ -42,23 +42,23 @@ public class BodyParserSpec {
                              .numberCol("e"));
   }
 
-  public static void assertParses(String csv, Value expected, CsvHeader<Item> header) {
-    assertParses(',', csv, expected, header);
+  public static void assertParses(String csvString, Value expected, CsvHeader<Item> header) {
+    assertParses(',', csvString, expected, header);
   }
 
-  public static void assertParses(int delimiter, String csv, Value expected, CsvHeader<Item> header) {
-    Assertions.assertParses(Csv.bodyParser(delimiter, header), csv, expected);
+  public static void assertParses(int delimiter, String csvString, Value expected, CsvHeader<Item> header) {
+    Assertions.assertParses(Csv.bodyParser(delimiter, header), csvString, expected);
   }
 
-  public static void assertParseFails(final String csv, CsvHeader<Item> header) {
-    assertParseFails(',', csv, header);
+  public static void assertParseFails(final String csvString, CsvHeader<Item> header) {
+    assertParseFails(',', csvString, header);
   }
 
-  public static void assertParseFails(final int delimiter, final String csv, CsvHeader<Item> header) {
+  public static void assertParseFails(final int delimiter, final String csvString, CsvHeader<Item> header) {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
       public void run() throws Throwable {
-        Csv.parse(delimiter, csv, header);
+        Csv.parseBody(delimiter, csvString, header);
       }
     });
   }
