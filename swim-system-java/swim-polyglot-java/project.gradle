@@ -250,6 +250,7 @@ afterEvaluate {
         licenses = ['Apache-2.0']
         userOrg = 'swimos'
         repo = 'maven'
+        override = !isReleaseVersion
       }
     }
   }
