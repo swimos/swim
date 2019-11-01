@@ -39,7 +39,7 @@ public final class Csv {
 
   public static CsvParser<Value, Item, Item> structureParser() {
     if (structureParser == null) {
-      structureParser = new CsvStructureParser(CsvStructureHeader.empty(), ',');
+      structureParser = new CsvStructureParser(',');
     }
     return structureParser;
   }
@@ -49,22 +49,6 @@ public final class Csv {
       return structureParser();
     } else {
       return new CsvStructureParser(delimiter);
-    }
-  }
-
-  public static CsvParser<Value, Item, Item> structureParser(CsvHeader<Item> header) {
-    if (header == CsvStructureHeader.empty()) {
-      return structureParser();
-    } else {
-      return new CsvStructureParser(header, ',');
-    }
-  }
-
-  public static CsvParser<Value, Item, Item> structureParser(CsvHeader<Item> header, int delimiter) {
-    if (header == CsvStructureHeader.empty() && delimiter == ',') {
-      return structureParser();
-    } else {
-      return new CsvStructureParser(header, delimiter);
     }
   }
 
@@ -124,51 +108,51 @@ public final class Csv {
   }
 
   public static Value parseTable(String csvString) {
-    return structureParser().parseTableString(csvString);
+    return structureParser().parseTableString(csvString, header());
   }
 
   public static Value parseTable(String csvString, int delimiter) {
-    return structureParser(delimiter).parseTableString(csvString);
+    return structureParser(delimiter).parseTableString(csvString, header());
   }
 
   public static Value parseTable(String csvString, CsvHeader<Item> header) {
-    return structureParser(header).parseTableString(csvString);
+    return structureParser().parseTableString(csvString, header);
   }
 
   public static Value parseTable(String csvString, CsvHeader<Item> header, int delimiter) {
-    return structureParser(header, delimiter).parseTableString(csvString);
+    return structureParser(delimiter).parseTableString(csvString, header);
   }
 
   public static Value parseTable(byte[] csvData) {
-    return structureParser().parseTableData(csvData);
+    return structureParser().parseTableData(csvData, header());
   }
 
   public static Value parseTable(byte[] csvData, int delimiter) {
-    return structureParser(delimiter).parseTableData(csvData);
+    return structureParser(delimiter).parseTableData(csvData, header());
   }
 
   public static Value parseTable(byte[] csvData, CsvHeader<Item> header) {
-    return structureParser(header).parseTableData(csvData);
+    return structureParser().parseTableData(csvData, header);
   }
 
   public static Value parseTable(byte[] csvData, CsvHeader<Item> header, int delimiter) {
-    return structureParser(header, delimiter).parseTableData(csvData);
+    return structureParser(delimiter).parseTableData(csvData, header);
   }
 
   public static Value parseTable(ByteBuffer csvBuffer) {
-    return structureParser().parseTableBuffer(csvBuffer);
+    return structureParser().parseTableBuffer(csvBuffer, header());
   }
 
   public static Value parseTable(ByteBuffer csvBuffer, int delimiter) {
-    return structureParser(delimiter).parseTableBuffer(csvBuffer);
+    return structureParser(delimiter).parseTableBuffer(csvBuffer, header());
   }
 
   public static Value parseTable(ByteBuffer csvBuffer, CsvHeader<Item> header) {
-    return structureParser(header).parseTableBuffer(csvBuffer);
+    return structureParser().parseTableBuffer(csvBuffer, header);
   }
 
   public static Value parseTable(ByteBuffer csvBuffer, CsvHeader<Item> header, int delimiter) {
-    return structureParser(header, delimiter).parseTableBuffer(csvBuffer);
+    return structureParser(delimiter).parseTableBuffer(csvBuffer, header);
   }
 
   public static Value parseBody(String csvString, CsvHeader<Item> header) {
@@ -220,19 +204,35 @@ public final class Csv {
   }
 
   public static Parser<Value> tableParser() {
-    return structureParser().tableParser();
+    return structureParser().tableParser(header());
   }
 
   public static Parser<Value> tableParser(int delimiter) {
-    return structureParser(delimiter).tableParser();
+    return structureParser(delimiter).tableParser(header());
+  }
+
+  public static Parser<Value> tableParser(CsvHeader<Item> header) {
+    return structureParser().tableParser(header);
+  }
+
+  public static Parser<Value> tableParser(CsvHeader<Item> header, int delimiter) {
+    return structureParser(delimiter).tableParser(header);
   }
 
   public static Parser<CsvHeader<Item>> headerParser() {
-    return structureParser().headerParser();
+    return structureParser().headerParser(header());
   }
 
   public static Parser<CsvHeader<Item>> headerParser(int delimiter) {
-    return structureParser(delimiter).headerParser();
+    return structureParser(delimiter).headerParser(header());
+  }
+
+  public static Parser<CsvHeader<Item>> headerParser(CsvHeader<Item> header) {
+    return structureParser().headerParser(header);
+  }
+
+  public static Parser<CsvHeader<Item>> headerParser(CsvHeader<Item> header, int delimiter) {
+    return structureParser(delimiter).headerParser(header);
   }
 
   public static Parser<Value> bodyParser(CsvHeader<Item> header) {

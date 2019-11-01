@@ -20,34 +20,19 @@ import swim.structure.Value;
 import swim.util.Builder;
 
 public class CsvStructureParser extends CsvParser<Value, Item, Item> {
-  final CsvHeader<Item> header;
   final int delimiter;
 
-  public CsvStructureParser(CsvHeader<Item> header, int delimiter) {
-    this.header = header;
+  public CsvStructureParser(int delimiter) {
     this.delimiter = delimiter;
   }
 
-  public CsvStructureParser(CsvHeader<Item> header) {
-    this(header, ',');
-  }
-
-  public CsvStructureParser(int delimiter) {
-    this(CsvStructureHeader.empty(), delimiter);
-  }
-
   public CsvStructureParser() {
-    this(CsvStructureHeader.empty(), ',');
+    this(',');
   }
 
   @Override
   public boolean isDelimiter(int c) {
     return c == delimiter;
-  }
-
-  @Override
-  public CsvHeader<Item> header() {
-    return this.header;
   }
 
   @SuppressWarnings("unchecked")

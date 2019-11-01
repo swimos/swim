@@ -37,8 +37,8 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
     this.step = step;
   }
 
-  HeaderParser(CsvParser<T, R, C> csv) {
-    this(csv, null, null, 0, -1, 1);
+  HeaderParser(CsvParser<T, R, C> csv, CsvHeader<C> header) {
+    this(csv, header, null, 0, -1, 1);
   }
 
   @Override
@@ -67,9 +67,6 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
           nameParser = nameParser.feed(cellInput);
         }
         if (nameParser.isDone()) {
-          if (header == null) {
-            header = csv.header();
-          }
           header = header.col(index, nameParser.bind());
           nameParser = null;
           index += 1;
@@ -92,9 +89,6 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
         if (head == -4) {
           return error(Diagnostic.expected('"', input));
         } else if (nameParser.isDone()) {
-          if (header == null) {
-            header = csv.header();
-          }
           header = header.col(index, nameParser.bind());
           nameParser = null;
           index += 1;
@@ -108,9 +102,6 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
         if (input.isCont()) {
           c = input.head();
           if (c == '\r' || c == '\n') {
-            if (header == null) {
-              header = csv.header();
-            }
             return done(header);
           } else if (csv.isDelimiter(c)) {
             input = input.step();
@@ -131,7 +122,7 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
     return new HeaderParser<T, R, C>(csv, header, nameParser, index, head, step);
   }
 
-  static <T, R, C> Parser<CsvHeader<C>> parse(Input input, CsvParser<T, R, C> csv) {
-    return parse(input, csv, null, null, 0, -1, 1);
+  static <T, R, C> Parser<CsvHeader<C>> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header) {
+    return parse(input, csv, header, null, 0, -1, 1);
   }
 }

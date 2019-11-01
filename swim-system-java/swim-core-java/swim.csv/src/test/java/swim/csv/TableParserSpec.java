@@ -80,7 +80,7 @@ public class TableParserSpec {
   }
 
   public static void assertParses(String csvString, Value expected, CsvHeader<Item> header, int delimiter) {
-    Assertions.assertParses(Csv.structureParser(header, delimiter).tableParser(), csvString, expected);
+    Assertions.assertParses(Csv.tableParser(header, delimiter), csvString, expected);
   }
 
   public static void assertParseFails(final String csvString) {
@@ -91,7 +91,7 @@ public class TableParserSpec {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
       public void run() throws Throwable {
-        Csv.structureParser(header, delimiter).parseTableString(csvString);
+        Csv.parseTable(csvString, header, delimiter);
       }
     });
   }

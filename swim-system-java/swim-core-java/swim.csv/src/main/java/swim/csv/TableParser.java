@@ -20,30 +20,33 @@ import swim.codec.Parser;
 
 final class TableParser<T, R, C> extends Parser<T> {
   final CsvParser<T, R, C> csv;
+  final CsvHeader<C> header;
   final Parser<CsvHeader<C>> headerParser;
   final int step;
 
-  TableParser(CsvParser<T, R, C> csv, Parser<CsvHeader<C>> headerParser, int step) {
+  TableParser(CsvParser<T, R, C> csv, CsvHeader<C> header,
+              Parser<CsvHeader<C>> headerParser, int step) {
     this.csv = csv;
+    this.header = header;
     this.headerParser = headerParser;
     this.step = step;
   }
 
-  TableParser(CsvParser<T, R, C> csv) {
-    this(csv, null, 1);
+  TableParser(CsvParser<T, R, C> csv, CsvHeader<C> header) {
+    this(csv, header, null, 1);
   }
 
   @Override
   public Parser<T> feed(Input input) {
-    return parse(input, this.csv, this.headerParser, this.step);
+    return parse(input, this.csv, this.header, this.headerParser, this.step);
   }
 
-  static <T, R, C> Parser<T> parse(Input input, CsvParser<T, R, C> csv,
+  static <T, R, C> Parser<T> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header,
                                    Parser<CsvHeader<C>> headerParser, int step) {
     int c = 0;
     if (step == 1) {
       if (headerParser == null) {
-        headerParser = csv.parseHeader(input);
+        headerParser = csv.parseHeader(input, header);
       }
       while (headerParser.isCont() && !input.isEmpty()) {
         headerParser = headerParser.feed(input);
@@ -81,10 +84,10 @@ final class TableParser<T, R, C> extends Parser<T> {
     if (input.isError()) {
       return error(input.trap());
     }
-    return new TableParser<T, R, C>(csv, headerParser, step);
+    return new TableParser<T, R, C>(csv, header, headerParser, step);
   }
 
-  static <T, R, C> Parser<T> parse(Input input, CsvParser<T, R, C> csv) {
-    return parse(input, csv, null, 1);
+  static <T, R, C> Parser<T> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header) {
+    return parse(input, csv, header, null, 1);
   }
 }
