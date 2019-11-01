@@ -12,36 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.protobuf;
+package swim.avro.decoder;
 
+import swim.avro.schema.AvroDoubleType;
 import swim.codec.Decoder;
 import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
-final class Fixed32Decoder<V> extends Decoder<V> {
-  final ProtobufDecoder<?, V> protobuf;
-  final int value;
+final class DoubleDecoder<T> extends Decoder<T> {
+  final AvroDoubleType<T> type;
+  final long value;
   final int shift;
 
-  Fixed32Decoder(ProtobufDecoder<?, V> protobuf, int value, int shift) {
-    this.protobuf = protobuf;
+  DoubleDecoder(AvroDoubleType<T> type, long value, int shift) {
+    this.type = type;
     this.value = value;
     this.shift = shift;
   }
 
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.value, this.shift);
+  DoubleDecoder(AvroDoubleType<T> type) {
+    this(type, 0L, 0);
   }
 
-  static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf,
-                               int value, int shift) {
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type, this.value, this.shift);
+  }
+
+  static <T> Decoder<T> decode(InputBuffer input, AvroDoubleType<T> type,
+                               long value, int shift) {
     while (input.isCont()) {
-      value |= input.head() << shift;
+      value |= (long) input.head() << shift;
       input = input.step();
       shift += 8;
-      if (shift == 32) {
-        return done(protobuf.fixed(value));
+      if (shift == 64) {
+        return done(type.cast(Double.longBitsToDouble(value)));
       }
     }
     if (input.isDone()) {
@@ -49,10 +54,10 @@ final class Fixed32Decoder<V> extends Decoder<V> {
     } else if (input.isError()) {
       return error(input.trap());
     }
-    return new Fixed32Decoder<V>(protobuf, value, shift);
+    return new DoubleDecoder<T>(type, value, shift);
   }
 
-  static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf) {
-    return decode(input, protobuf, 0, 0);
+  static <T> Decoder<T> decode(InputBuffer input, AvroDoubleType<T> type) {
+    return decode(input, type, 0L, 0);
   }
 }

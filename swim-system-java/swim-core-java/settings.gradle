@@ -32,6 +32,9 @@ project(':swim.xml').name = 'swim-xml'
 include 'swim.csv'
 project(':swim.csv').name = 'swim-csv'
 
+include 'swim.avro'
+project(':swim.avro').name = 'swim-avro'
+
 include 'swim.protobuf'
 project(':swim.protobuf').name = 'swim-protobuf'
 

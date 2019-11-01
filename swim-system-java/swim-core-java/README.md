@@ -41,6 +41,8 @@ The **Swim Core** framework consists of the following component libraries:
 - [**swim-csv**](swim.csv) –
   Comma-Separated Values (CSV) codec that incrementally parses and writes
   **swim-structure** values.
+- [**swim-avro**](swim.avro) –
+  Apache Avro codec that incrementally parses and writes **swim-structure** values.
 - [**swim-protobuf**](swim.protobuf) –
   Protocol Buffers (protobuf) codec that incrementally parses and writes
   **swim-structure** values.

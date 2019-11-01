@@ -41,6 +41,10 @@ include 'swim.csv'
 project(':swim.csv').projectDir = file('swim-core-java/swim.csv')
 project(':swim.csv').name = 'swim-csv'
 
+include 'swim.avro'
+project(':swim.avro').projectDir = file('swim-core-java/swim.avro')
+project(':swim.avro').name = 'swim-avro'
+
 include 'swim.protobuf'
 project(':swim.protobuf').projectDir = file('swim-core-java/swim.protobuf')
 project(':swim.protobuf').name = 'swim-protobuf'

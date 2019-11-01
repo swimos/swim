@@ -94,6 +94,8 @@ of the following component libraries:
 - [**swim-csv**](swim-system-java/swim-core-java/swim.csv) –
   Comma-Separated Values (CSV) codec that incrementally parses and writes
   **swim-structure** values.
+- [**swim-avro**](swim-system-java/swim-core-java/swim.avro) –
+  Apache Avro codec that incrementally parses and writes **swim-structure** values.
 - [**swim-protobuf**](swim-system-java/swim-core-java/swim.protobuf) –
   Protocol Buffers (protobuf) codec that incrementally parses and writes
   **swim-structure** values.

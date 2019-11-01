@@ -39,9 +39,8 @@ final class Fixed64Decoder<V> extends Decoder<V> {
     while (input.isCont()) {
       value |= (long) input.head() << shift;
       input = input.step();
-      if (shift != 0) {
-        shift -= 8;
-      } else {
+      shift += 8;
+      if (shift == 64) {
         return done(protobuf.fixed(value));
       }
     }
@@ -54,6 +53,6 @@ final class Fixed64Decoder<V> extends Decoder<V> {
   }
 
   static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf) {
-    return decode(input, protobuf, 0L, 56);
+    return decode(input, protobuf, 0L, 0);
   }
 }

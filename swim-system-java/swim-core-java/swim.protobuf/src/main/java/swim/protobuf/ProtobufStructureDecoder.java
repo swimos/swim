@@ -37,13 +37,13 @@ public class ProtobufStructureDecoder extends ProtobufDecoder<Item, Value> {
 
   @Override
   public Item field(long key, Value value) {
-    return Slot.of((int) key == key ? Num.from((int) key) : Num.from(key), value);
+    return Slot.of((long) (int) key == key ? Num.from((int) key) : Num.from(key), value);
   }
 
   @Override
   public Value uint(long value) {
     if ((int) value == value) {
-      return Num.from((int) value);
+      return Num.from((long) (int) value);
     } else {
       return Num.from(value);
     }
@@ -52,7 +52,7 @@ public class ProtobufStructureDecoder extends ProtobufDecoder<Item, Value> {
   @Override
   public Value sint(long value) {
     if ((int) value == value) {
-      return Num.from((int) value);
+      return Num.from((long) (int) value);
     } else {
       return Num.from(value);
     }

@@ -123,6 +123,14 @@ public final class Unicode {
     return StringParser.parse(input);
   }
 
+  public static <O> Parser<O> outputParser(Output<O> output) {
+    return new ByteParser<O>(output);
+  }
+
+  public static <O> Parser<O> parseOutput(Output<O> output, Input input) {
+    return ByteParser.parse(input, output);
+  }
+
   @SuppressWarnings("unchecked")
   public static <I> Writer<I, Object> stringWriter() {
     return (Writer<I, Object>) new StringWriter();

@@ -58,6 +58,7 @@ gradle.projectsEvaluated {
     if (useModules) {
       options.group('Core',
         'swim.args',
+        'swim.avro',
         'swim.codec',
         'swim.collections',
         'swim.concurrent',

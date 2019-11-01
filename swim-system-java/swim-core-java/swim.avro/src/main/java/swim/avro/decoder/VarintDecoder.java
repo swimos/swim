@@ -12,32 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.protobuf;
+package swim.avro.decoder;
 
+import swim.avro.schema.AvroVarintType;
 import swim.codec.Decoder;
 import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
-final class VarintDecoder<V> extends Decoder<V> {
-  final ProtobufDecoder<?, V> protobuf;
-  final boolean signed;
+final class VarintDecoder<T> extends Decoder<T> {
+  final AvroVarintType<T> type;
   final long value;
   final int shift;
 
-  VarintDecoder(ProtobufDecoder<?, V> protobuf, boolean signed, long value, int shift) {
-    this.protobuf = protobuf;
-    this.signed = signed;
+  VarintDecoder(AvroVarintType<T> type, long value, int shift) {
+    this.type = type;
     this.value = value;
     this.shift = shift;
   }
 
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.signed, this.value, this.shift);
+  VarintDecoder(AvroVarintType<T> type) {
+    this(type, 0L, 0);
   }
 
-  static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf,
-                               boolean signed, long value, int shift) {
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type, this.value, this.shift);
+  }
+
+  static <T> Decoder<T> decode(InputBuffer input, AvroVarintType<T> type,
+                               long value, int shift) {
     while (input.isCont()) {
       final int b = input.head();
       if (shift < 64) {
@@ -47,12 +50,8 @@ final class VarintDecoder<V> extends Decoder<V> {
         return error(new DecoderException("varint overflow"));
       }
       if ((b & 0x80) == 0) {
-        if (signed) {
-          value = (value >>> 1) ^ (value << 63 >> 63);
-          return done(protobuf.sint(value));
-        } else {
-          return done(protobuf.uint(value));
-        }
+        value = (value >>> 1) ^ (value << 63 >> 63);
+        return done(type.cast(value));
       }
       shift += 7;
     }
@@ -61,14 +60,10 @@ final class VarintDecoder<V> extends Decoder<V> {
     } else if (input.isError()) {
       return error(input.trap());
     }
-    return new VarintDecoder<V>(protobuf, signed, value, shift);
+    return new VarintDecoder<T>(type, value, shift);
   }
 
-  static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf) {
-    return decode(input, protobuf, false, 0L, 0);
-  }
-
-  static <V> Decoder<V> decodeSigned(InputBuffer input, ProtobufDecoder<?, V> protobuf) {
-    return decode(input, protobuf, true, 0L, 0);
+  static <T> Decoder<T> decode(InputBuffer input, AvroVarintType<T> type) {
+    return decode(input, type, 0L, 0);
   }
 }

@@ -12,36 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.protobuf;
+package swim.avro.decoder;
 
+import swim.avro.schema.AvroFloatType;
 import swim.codec.Decoder;
 import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
-final class Fixed32Decoder<V> extends Decoder<V> {
-  final ProtobufDecoder<?, V> protobuf;
+final class FloatDecoder<T> extends Decoder<T> {
+  final AvroFloatType<T> type;
   final int value;
   final int shift;
 
-  Fixed32Decoder(ProtobufDecoder<?, V> protobuf, int value, int shift) {
-    this.protobuf = protobuf;
+  FloatDecoder(AvroFloatType<T> type, int value, int shift) {
+    this.type = type;
     this.value = value;
     this.shift = shift;
   }
 
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.value, this.shift);
+  FloatDecoder(AvroFloatType<T> type) {
+    this(type, 0, 0);
   }
 
-  static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf,
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type, this.value, this.shift);
+  }
+
+  static <T> Decoder<T> decode(InputBuffer input, AvroFloatType<T> type,
                                int value, int shift) {
     while (input.isCont()) {
       value |= input.head() << shift;
       input = input.step();
       shift += 8;
       if (shift == 32) {
-        return done(protobuf.fixed(value));
+        return done(type.cast(Float.intBitsToFloat(value)));
       }
     }
     if (input.isDone()) {
@@ -49,10 +54,10 @@ final class Fixed32Decoder<V> extends Decoder<V> {
     } else if (input.isError()) {
       return error(input.trap());
     }
-    return new Fixed32Decoder<V>(protobuf, value, shift);
+    return new FloatDecoder<T>(type, value, shift);
   }
 
-  static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf) {
-    return decode(input, protobuf, 0, 0);
+  static <T> Decoder<T> decode(InputBuffer input, AvroFloatType<T> type) {
+    return decode(input, type, 0, 0);
   }
 }
