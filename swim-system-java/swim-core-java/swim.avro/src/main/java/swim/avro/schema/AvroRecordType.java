@@ -31,5 +31,7 @@ public abstract class AvroRecordType<F, T> extends AvroNamedType<T> {
 
   public abstract AvroRecordType<F, T> field(AvroFieldType<?, ? extends F> field);
 
+  public abstract AvroRecordType<F, T> field(String name, AvroType<? extends F> valueType);
+
   public abstract Builder<F, T> recordBuilder();
 }

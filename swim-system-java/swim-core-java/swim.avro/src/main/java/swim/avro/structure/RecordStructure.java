@@ -17,27 +17,28 @@ package swim.avro.structure;
 import swim.avro.AvroName;
 import swim.avro.schema.AvroFieldType;
 import swim.avro.schema.AvroRecordType;
+import swim.avro.schema.AvroType;
 import swim.collections.FingerTrieSeq;
 import swim.structure.Item;
 import swim.structure.Record;
 import swim.structure.Value;
 import swim.util.Builder;
 
-final class RecordStructureType extends AvroRecordType<Item, Value> {
+final class RecordStructure extends AvroRecordType<Item, Value> {
   final AvroName fullName;
   final String doc;
   final FingerTrieSeq<AvroName> aliases;
   final FingerTrieSeq<AvroFieldType<?, ? extends Item>> fields;
 
-  RecordStructureType(AvroName fullName, String doc, FingerTrieSeq<AvroName> aliases,
-                      FingerTrieSeq<AvroFieldType<?, ? extends Item>> fields) {
+  RecordStructure(AvroName fullName, String doc, FingerTrieSeq<AvroName> aliases,
+                  FingerTrieSeq<AvroFieldType<?, ? extends Item>> fields) {
     this.fullName = fullName;
     this.doc = doc;
     this.aliases = aliases;
     this.fields = fields;
   }
 
-  RecordStructureType(AvroName fullName) {
+  RecordStructure(AvroName fullName) {
     this(fullName, null, FingerTrieSeq.empty(), FingerTrieSeq.empty());
   }
 
@@ -53,7 +54,7 @@ final class RecordStructureType extends AvroRecordType<Item, Value> {
 
   @Override
   public AvroRecordType<Item, Value> doc(String doc) {
-    return new RecordStructureType(this.fullName, doc, this.aliases, this.fields);
+    return new RecordStructure(this.fullName, doc, this.aliases, this.fields);
   }
 
   @Override
@@ -68,7 +69,7 @@ final class RecordStructureType extends AvroRecordType<Item, Value> {
 
   @Override
   public AvroRecordType<Item, Value> alias(AvroName alias) {
-    return new RecordStructureType(this.fullName, this.doc, this.aliases.appended(alias), this.fields);
+    return new RecordStructure(this.fullName, this.doc, this.aliases.appended(alias), this.fields);
   }
 
   @Override
@@ -83,7 +84,12 @@ final class RecordStructureType extends AvroRecordType<Item, Value> {
 
   @Override
   public AvroRecordType<Item, Value> field(AvroFieldType<?, ? extends Item> field) {
-    return new RecordStructureType(this.fullName, this.doc, this.aliases, this.fields.appended(field));
+    return new RecordStructure(this.fullName, this.doc, this.aliases, this.fields.appended(field));
+  }
+
+  @Override
+  public AvroRecordType<Item, Value> field(String name, AvroType<? extends Item> valueType) {
+    return field(new FieldStructure(name, valueType));
   }
 
   @Override

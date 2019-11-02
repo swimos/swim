@@ -20,25 +20,25 @@ import swim.collections.FingerTrieSeq;
 import swim.structure.Text;
 import swim.structure.Value;
 
-final class EnumStructureType extends AvroEnumType<Value> {
+final class EnumStructure extends AvroEnumType<Value> {
   final AvroName fullName;
   final String doc;
   final FingerTrieSeq<AvroName> aliases;
   final FingerTrieSeq<Text> symbols;
 
-  EnumStructureType(AvroName fullName, String doc, FingerTrieSeq<AvroName> aliases,
-                    FingerTrieSeq<Text> symbols) {
+  EnumStructure(AvroName fullName, String doc, FingerTrieSeq<AvroName> aliases,
+                FingerTrieSeq<Text> symbols) {
     this.fullName = fullName;
     this.doc = doc;
     this.aliases = aliases;
     this.symbols = symbols;
   }
 
-  EnumStructureType(AvroName fullName, FingerTrieSeq<Text> symbols) {
+  EnumStructure(AvroName fullName, FingerTrieSeq<Text> symbols) {
     this(fullName, null, FingerTrieSeq.empty(), symbols);
   }
 
-  EnumStructureType(AvroName fullName) {
+  EnumStructure(AvroName fullName) {
     this(fullName, null, FingerTrieSeq.empty(), FingerTrieSeq.empty());
   }
 
@@ -54,7 +54,7 @@ final class EnumStructureType extends AvroEnumType<Value> {
 
   @Override
   public AvroEnumType<Value> doc(String doc) {
-    return new EnumStructureType(this.fullName, doc, this.aliases, this.symbols);
+    return new EnumStructure(this.fullName, doc, this.aliases, this.symbols);
   }
 
   @Override
@@ -69,7 +69,7 @@ final class EnumStructureType extends AvroEnumType<Value> {
 
   @Override
   public AvroEnumType<Value> alias(AvroName alias) {
-    return new EnumStructureType(this.fullName, this.doc, this.aliases.appended(alias), this.symbols);
+    return new EnumStructure(this.fullName, this.doc, this.aliases.appended(alias), this.symbols);
   }
 
   @Override
@@ -84,7 +84,7 @@ final class EnumStructureType extends AvroEnumType<Value> {
 
   @Override
   public AvroEnumType<Value> symbol(String symbol) {
-    return new EnumStructureType(this.fullName, this.doc, this.aliases, this.symbols.appended(Text.from(symbol).commit()));
+    return new EnumStructure(this.fullName, this.doc, this.aliases, this.symbols.appended(Text.from(symbol).commit()));
   }
 
   @Override

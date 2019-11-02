@@ -14,13 +14,27 @@
 
 package swim.avro.structure;
 
-import swim.avro.schema.AvroLongType;
-import swim.structure.Num;
+import swim.avro.schema.AvroArrayType;
+import swim.avro.schema.AvroType;
+import swim.structure.Record;
 import swim.structure.Value;
+import swim.util.Builder;
 
-final class LongStructureType extends AvroLongType<Value> {
+final class ArrayStructure extends AvroArrayType<Value, Value> {
+  final AvroType<Value> itemType;
+
+  ArrayStructure(AvroType<Value> itemType) {
+    this.itemType = itemType;
+  }
+
   @Override
-  public Value cast(long value) {
-    return Num.from(value);
+  public AvroType<Value> itemType() {
+    return this.itemType;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public Builder<Value, Value> arrayBuilder() {
+    return (Builder<Value, Value>) (Builder<?, ?>) Record.builder();
   }
 }

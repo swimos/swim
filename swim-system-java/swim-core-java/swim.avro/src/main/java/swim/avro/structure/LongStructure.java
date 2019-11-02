@@ -14,13 +14,13 @@
 
 package swim.avro.structure;
 
-import swim.avro.schema.AvroBooleanType;
-import swim.structure.Bool;
+import swim.avro.schema.AvroLongType;
+import swim.structure.Num;
 import swim.structure.Value;
 
-final class BooleanStructureType extends AvroBooleanType<Value> {
+final class LongStructure extends AvroLongType<Value> {
   @Override
-  public Value cast(boolean value) {
-    return Bool.from(value);
+  public Value cast(long value) {
+    return Num.from(value);
   }
 }

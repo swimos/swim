@@ -42,73 +42,73 @@ public final class AvroStructure {
     // static
   }
 
-  private static NullStructureType nullType;
-  private static BooleanStructureType booleanType;
-  private static IntStructureType intType;
-  private static LongStructureType longType;
-  private static FloatStructureType floatType;
-  private static DoubleStructureType doubleType;
-  private static DataStructureType dataType;
-  private static StringStructureType stringType;
+  private static NullStructure nullType;
+  private static BooleanStructure booleanType;
+  private static IntStructure intType;
+  private static LongStructure longType;
+  private static FloatStructure floatType;
+  private static DoubleStructure doubleType;
+  private static DataStructure dataType;
+  private static StringStructure stringType;
 
   public static AvroNullType<Value> nullType() {
     if (nullType == null) {
-      nullType = new NullStructureType();
+      nullType = new NullStructure();
     }
     return nullType;
   }
 
   public static AvroBooleanType<Value> booleanType() {
     if (booleanType == null) {
-      booleanType = new BooleanStructureType();
+      booleanType = new BooleanStructure();
     }
     return booleanType;
   }
 
   public static AvroIntType<Value> intType() {
     if (intType == null) {
-      intType = new IntStructureType();
+      intType = new IntStructure();
     }
     return intType;
   }
 
   public static AvroLongType<Value> longType() {
     if (longType == null) {
-      longType = new LongStructureType();
+      longType = new LongStructure();
     }
     return longType;
   }
 
   public static AvroFloatType<Value> floatType() {
     if (floatType == null) {
-      floatType = new FloatStructureType();
+      floatType = new FloatStructure();
     }
     return floatType;
   }
 
   public static AvroDoubleType<Value> doubleType() {
     if (doubleType == null) {
-      doubleType = new DoubleStructureType();
+      doubleType = new DoubleStructure();
     }
     return doubleType;
   }
 
   public static AvroDataType<Value> dataType() {
     if (dataType == null) {
-      dataType = new DataStructureType();
+      dataType = new DataStructure();
     }
     return dataType;
   }
 
   public static AvroStringType<Value> stringType() {
     if (stringType == null) {
-      stringType = new StringStructureType();
+      stringType = new StringStructure();
     }
     return stringType;
   }
 
   public static AvroRecordType<Item, Value> recordType(AvroName fullName) {
-    return new RecordStructureType(fullName);
+    return new RecordStructure(fullName);
   }
 
   public static AvroRecordType<Item, Value> recordType(String fullName) {
@@ -116,7 +116,7 @@ public final class AvroStructure {
   }
 
   public static AvroEnumType<Value> enumType(AvroName fullName) {
-    return new EnumStructureType(fullName);
+    return new EnumStructure(fullName);
   }
 
   public static AvroEnumType<Value> enumType(String fullName) {
@@ -128,7 +128,7 @@ public final class AvroStructure {
     for (int i = 0, n = symbols.length; i < n; i += 1) {
       builder.add(Text.from(symbols[i]));
     }
-    return new EnumStructureType(fullName, builder.bind());
+    return new EnumStructure(fullName, builder.bind());
   }
 
   public static AvroEnumType<Value> enumType(String fullName, String... symbols) {
@@ -136,26 +136,26 @@ public final class AvroStructure {
   }
 
   public static AvroArrayType<Value, Value> arrayType(AvroType<Value> itemType) {
-    return new ArrayStructureType(itemType);
+    return new ArrayStructure(itemType);
   }
 
   public static AvroMapType<Value, Value, Value> mapType(AvroType<Value> valueType) {
-    return new MapStructureType(valueType);
+    return new MapStructure(valueType);
   }
 
   public static AvroUnionType<Value> unionType() {
-    return UnionStructureType.empty();
+    return UnionStructure.empty();
   }
 
   public static AvroFixedType<Value> fixedType(AvroName fullName, int size) {
-    return new FixedStructureType(fullName, size);
+    return new FixedStructure(fullName, size);
   }
 
   public static AvroFixedType<Value> fixedType(String fullName, int size) {
     return fixedType(AvroName.parse(fullName), size);
   }
 
-  public static AvroFieldType<Value, Item> field(String name, AvroType<Value> valueType) {
-    return new FieldStructureType(name, valueType);
+  public static AvroFieldType<Item, Item> field(String name, AvroType<? extends Item> valueType) {
+    return new FieldStructure(name, valueType);
   }
 }

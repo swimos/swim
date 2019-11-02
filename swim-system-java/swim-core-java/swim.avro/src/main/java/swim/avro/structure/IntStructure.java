@@ -14,27 +14,13 @@
 
 package swim.avro.structure;
 
-import swim.avro.schema.AvroArrayType;
-import swim.avro.schema.AvroType;
-import swim.structure.Record;
+import swim.avro.schema.AvroIntType;
+import swim.structure.Num;
 import swim.structure.Value;
-import swim.util.Builder;
 
-final class ArrayStructureType extends AvroArrayType<Value, Value> {
-  final AvroType<Value> itemType;
-
-  ArrayStructureType(AvroType<Value> itemType) {
-    this.itemType = itemType;
-  }
-
+final class IntStructure extends AvroIntType<Value> {
   @Override
-  public AvroType<Value> itemType() {
-    return this.itemType;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public Builder<Value, Value> arrayBuilder() {
-    return (Builder<Value, Value>) (Builder<?, ?>) Record.builder();
+  public Value cast(long value) {
+    return Num.from((int) value);
   }
 }

@@ -18,7 +18,7 @@ import swim.avro.schema.AvroDoubleType;
 import swim.structure.Num;
 import swim.structure.Value;
 
-final class DoubleStructureType extends AvroDoubleType<Value> {
+final class DoubleStructure extends AvroDoubleType<Value> {
   @Override
   public Value cast(double value) {
     return Num.from(value);

@@ -14,13 +14,12 @@
 
 package swim.avro.structure;
 
-import swim.avro.schema.AvroIntType;
-import swim.structure.Num;
+import swim.avro.schema.AvroNullType;
 import swim.structure.Value;
 
-final class IntStructureType extends AvroIntType<Value> {
+final class NullStructure extends AvroNullType<Value> {
   @Override
-  public Value cast(long value) {
-    return Num.from((int) value);
+  public Value cast() {
+    return Value.extant();
   }
 }

@@ -23,16 +23,16 @@ import swim.structure.Slot;
 import swim.structure.Text;
 import swim.structure.Value;
 
-final class FieldStructureType extends AvroFieldType<Value, Item> {
+final class FieldStructure extends AvroFieldType<Item, Item> {
   final Text name;
   final String doc;
-  final AvroType<Value> valueType;
-  final Value defaultValue;
+  final AvroType<? extends Item> valueType;
+  final Item defaultValue;
   final AvroOrder order;
   final FingerTrieSeq<String> aliases;
 
-  FieldStructureType(Text name, String doc, AvroType<Value> valueType,
-                     Value defaultValue, AvroOrder order, FingerTrieSeq<String> aliases) {
+  FieldStructure(Text name, String doc, AvroType<? extends Item> valueType,
+                 Item defaultValue, AvroOrder order, FingerTrieSeq<String> aliases) {
     this.name = name.commit();
     this.doc = doc;
     this.valueType = valueType;
@@ -41,8 +41,8 @@ final class FieldStructureType extends AvroFieldType<Value, Item> {
     this.aliases = aliases;
   }
 
-  FieldStructureType(String name, AvroType<Value> valueType) {
-    this(Text.from(name), null, valueType, Value.absent(), AvroOrder.ASCENDING, FingerTrieSeq.empty());
+  FieldStructure(String name, AvroType<? extends Item> valueType) {
+    this(Text.from(name), null, valueType, Item.absent(), AvroOrder.ASCENDING, FingerTrieSeq.empty());
   }
 
   @Override
@@ -56,18 +56,18 @@ final class FieldStructureType extends AvroFieldType<Value, Item> {
   }
 
   @Override
-  public AvroFieldType<Value, Item> doc(String doc) {
-    return new FieldStructureType(this.name, doc, this.valueType, this.defaultValue,
-                                  this.order, this.aliases);
+  public AvroFieldType<Item, Item> doc(String doc) {
+    return new FieldStructure(this.name, doc, this.valueType, this.defaultValue,
+                              this.order, this.aliases);
   }
 
   @Override
-  public AvroType<Value> valueType() {
+  public AvroType<? extends Item> valueType() {
     return this.valueType;
   }
 
   @Override
-  public Value defaultValue() {
+  public Item defaultValue() {
     return this.defaultValue;
   }
 
@@ -87,13 +87,17 @@ final class FieldStructureType extends AvroFieldType<Value, Item> {
   }
 
   @Override
-  public AvroFieldType<Value, Item> alias(String alias) {
-    return new FieldStructureType(this.name, this.doc, this.valueType, this.defaultValue,
-                                  this.order, this.aliases.appended(alias));
+  public AvroFieldType<Item, Item> alias(String alias) {
+    return new FieldStructure(this.name, this.doc, this.valueType, this.defaultValue,
+                              this.order, this.aliases.appended(alias));
   }
 
   @Override
-  public Item cast(Value value) {
-    return Slot.of(this.name, value);
+  public Item cast(Item value) {
+    if (value instanceof Value) {
+      return Slot.of(this.name, (Value) value);
+    } else {
+      return value;
+    }
   }
 }

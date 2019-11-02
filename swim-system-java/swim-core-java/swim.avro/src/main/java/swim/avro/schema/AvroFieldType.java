@@ -14,14 +14,14 @@
 
 package swim.avro.schema;
 
-public abstract class AvroFieldType<V, T> {
+public abstract class AvroFieldType<V, F> {
   public abstract String name();
 
   public abstract String doc();
 
-  public abstract AvroFieldType<V, T> doc(String doc);
+  public abstract AvroFieldType<V, F> doc(String doc);
 
-  public abstract AvroType<V> valueType();
+  public abstract AvroType<? extends V> valueType();
 
   public abstract V defaultValue();
 
@@ -31,7 +31,7 @@ public abstract class AvroFieldType<V, T> {
 
   public abstract String getAlias(int index);
 
-  public abstract AvroFieldType<V, T> alias(String alias);
+  public abstract AvroFieldType<V, F> alias(String alias);
 
-  public abstract T cast(V value);
+  public abstract F cast(V value);
 }

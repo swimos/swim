@@ -14,13 +14,18 @@
 
 package swim.avro.structure;
 
-import swim.avro.schema.AvroFloatType;
-import swim.structure.Num;
+import swim.avro.schema.AvroDataType;
+import swim.codec.Binary;
+import swim.codec.Decoder;
+import swim.codec.InputBuffer;
+import swim.codec.Output;
+import swim.structure.Data;
 import swim.structure.Value;
 
-final class FloatStructureType extends AvroFloatType<Value> {
+final class DataStructure extends AvroDataType<Value> {
+  @SuppressWarnings("unchecked")
   @Override
-  public Value cast(float value) {
-    return Num.from(value);
+  public Decoder<Value> decodeData(InputBuffer input) {
+    return Binary.parseOutput((Output<Value>) (Output<?>) Data.output(), input);
   }
 }

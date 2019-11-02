@@ -26,10 +26,10 @@ import swim.structure.Text;
 import swim.structure.Value;
 import swim.util.PairBuilder;
 
-final class MapStructureType extends AvroMapType<Value, Value, Value> {
+final class MapStructure extends AvroMapType<Value, Value, Value> {
   final AvroType<Value> valueType;
 
-  MapStructureType(AvroType<Value> valueType) {
+  MapStructure(AvroType<Value> valueType) {
     this.valueType = valueType;
   }
 

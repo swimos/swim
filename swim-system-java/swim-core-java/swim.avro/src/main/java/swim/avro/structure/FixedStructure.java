@@ -24,18 +24,18 @@ import swim.collections.FingerTrieSeq;
 import swim.structure.Data;
 import swim.structure.Value;
 
-final class FixedStructureType extends AvroFixedType<Value> {
+final class FixedStructure extends AvroFixedType<Value> {
   final AvroName fullName;
   final FingerTrieSeq<AvroName> aliases;
   final int size;
 
-  FixedStructureType(AvroName fullName, FingerTrieSeq<AvroName> aliases, int size) {
+  FixedStructure(AvroName fullName, FingerTrieSeq<AvroName> aliases, int size) {
     this.fullName = fullName;
     this.aliases = aliases;
     this.size = size;
   }
 
-  FixedStructureType(AvroName fullName, int size) {
+  FixedStructure(AvroName fullName, int size) {
     this(fullName, FingerTrieSeq.empty(), size);
   }
 
@@ -56,7 +56,7 @@ final class FixedStructureType extends AvroFixedType<Value> {
 
   @Override
   public AvroFixedType<Value> alias(AvroName alias) {
-    return new FixedStructureType(this.fullName, this.aliases.appended(alias), this.size);
+    return new FixedStructure(this.fullName, this.aliases.appended(alias), this.size);
   }
 
   @Override

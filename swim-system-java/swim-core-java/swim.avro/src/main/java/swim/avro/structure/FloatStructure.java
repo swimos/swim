@@ -14,18 +14,13 @@
 
 package swim.avro.structure;
 
-import swim.avro.schema.AvroStringType;
-import swim.codec.Input;
-import swim.codec.Output;
-import swim.codec.Parser;
-import swim.codec.Unicode;
-import swim.structure.Text;
+import swim.avro.schema.AvroFloatType;
+import swim.structure.Num;
 import swim.structure.Value;
 
-final class StringStructureType extends AvroStringType<Value> {
-  @SuppressWarnings("unchecked")
+final class FloatStructure extends AvroFloatType<Value> {
   @Override
-  public Parser<Value> parseString(Input input) {
-    return Unicode.parseOutput((Output<Value>) (Output<?>) Text.output(), input);
+  public Value cast(float value) {
+    return Num.from(value);
   }
 }

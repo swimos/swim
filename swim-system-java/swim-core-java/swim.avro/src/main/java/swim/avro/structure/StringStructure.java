@@ -14,18 +14,18 @@
 
 package swim.avro.structure;
 
-import swim.avro.schema.AvroDataType;
-import swim.codec.Binary;
-import swim.codec.Decoder;
-import swim.codec.InputBuffer;
+import swim.avro.schema.AvroStringType;
+import swim.codec.Input;
 import swim.codec.Output;
-import swim.structure.Data;
+import swim.codec.Parser;
+import swim.codec.Unicode;
+import swim.structure.Text;
 import swim.structure.Value;
 
-final class DataStructureType extends AvroDataType<Value> {
+final class StringStructure extends AvroStringType<Value> {
   @SuppressWarnings("unchecked")
   @Override
-  public Decoder<Value> decodeData(InputBuffer input) {
-    return Binary.parseOutput((Output<Value>) (Output<?>) Data.output(), input);
+  public Parser<Value> parseString(Input input) {
+    return Unicode.parseOutput((Output<Value>) (Output<?>) Text.output(), input);
   }
 }
