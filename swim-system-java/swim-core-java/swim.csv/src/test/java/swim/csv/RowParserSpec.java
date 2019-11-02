@@ -68,11 +68,19 @@ public class RowParserSpec {
   }
 
   @Test
-  public void parsRowsWithNestedCsvCells() {
+  public void parsRowsWithNestedRows() {
     assertParses("1,2^3,4", Record.of(Slot.of("a", 1), Slot.of("b", Record.of(Slot.of("c", 2), Slot.of("d", 3))), Slot.of("e", 4)),
                  Csv.header().numberCol("a")
                              .itemCol("b", Csv.rowParser(Csv.header().numberCol("c").numberCol("d"), '^'))
                              .numberCol("e"));
+  }
+
+  @Test
+  public void parsRowsWithNestedRowsWithTooFewCells() {
+    assertParses("1,2^3,4", Record.of(Slot.of("a", 1), Slot.of("b", Record.of(Slot.of("c", 2), Slot.of("d", 3))), Slot.of("f", 4)),
+                 Csv.header().numberCol("a")
+                             .itemCol("b", Csv.rowParser(Csv.header().numberCol("c").numberCol("d").numberCol("e"), '^'))
+                             .numberCol("f"));
   }
 
   @Test

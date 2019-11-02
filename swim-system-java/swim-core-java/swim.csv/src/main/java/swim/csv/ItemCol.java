@@ -19,6 +19,7 @@ import swim.codec.Output;
 import swim.codec.Parser;
 import swim.codec.Writer;
 import swim.structure.Item;
+import swim.structure.Record;
 import swim.structure.Slot;
 import swim.structure.Value;
 import swim.util.Builder;
@@ -68,7 +69,8 @@ final class ItemCol extends CsvStructureCol<Item> {
 
   @Override
   public void addCell(Item value, Builder<Item, ?> rowBuilder) {
-    if (!this.optional || value != null || value.isDefined()) {
+    if (!this.optional || (value instanceof Record) && !((Record) value).isEmpty()
+        || value != null && !(value instanceof Record) && value.isDefined()) {
       if (value == null) {
         value = Item.extant();
       }
