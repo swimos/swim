@@ -12,26 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.avro.schema;
+package swim.avro;
 
-public abstract class AvroFieldType<R, V> {
-  public abstract String name();
+public class AvroException extends RuntimeException {
+  private static final long serialVersionUID = 1L;
 
-  public abstract String doc();
+  public AvroException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-  public abstract AvroFieldType<R, V> doc(String doc);
+  public AvroException(String message) {
+    super(message);
+  }
 
-  public abstract AvroType<? extends V> valueType();
+  public AvroException(Throwable cause) {
+    super(cause);
+  }
 
-  public abstract V defaultValue();
-
-  public abstract AvroOrder order();
-
-  public abstract int aliasCount();
-
-  public abstract String getAlias(int index);
-
-  public abstract AvroFieldType<R, V> alias(String alias);
-
-  public abstract R updated(R record, V value);
+  public AvroException() {
+    super();
+  }
 }

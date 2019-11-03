@@ -12,26 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.avro.schema;
+package swim.avro;
 
-public abstract class AvroFieldType<R, V> {
-  public abstract String name();
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-  public abstract String doc();
-
-  public abstract AvroFieldType<R, V> doc(String doc);
-
-  public abstract AvroType<? extends V> valueType();
-
-  public abstract V defaultValue();
-
-  public abstract AvroOrder order();
-
-  public abstract int aliasCount();
-
-  public abstract String getAlias(int index);
-
-  public abstract AvroFieldType<R, V> alias(String alias);
-
-  public abstract R updated(R record, V value);
+@Documented
+@Target({ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AvroMember {
+  String value() default "";
 }

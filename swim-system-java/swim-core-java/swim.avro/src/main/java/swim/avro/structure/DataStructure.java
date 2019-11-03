@@ -18,7 +18,6 @@ import swim.avro.schema.AvroDataType;
 import swim.codec.Binary;
 import swim.codec.Decoder;
 import swim.codec.InputBuffer;
-import swim.codec.Output;
 import swim.structure.Data;
 import swim.structure.Value;
 
@@ -26,6 +25,6 @@ final class DataStructure extends AvroDataType<Value> {
   @SuppressWarnings("unchecked")
   @Override
   public Decoder<Value> decodeData(InputBuffer input) {
-    return Binary.parseOutput((Output<Value>) (Output<?>) Data.output(), input);
+    return (Decoder<Value>) (Decoder<?>) Binary.parseOutput(Data.output(), input);
   }
 }

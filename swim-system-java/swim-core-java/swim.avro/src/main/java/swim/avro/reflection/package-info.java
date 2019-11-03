@@ -12,26 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.avro.schema;
-
-public abstract class AvroFieldType<R, V> {
-  public abstract String name();
-
-  public abstract String doc();
-
-  public abstract AvroFieldType<R, V> doc(String doc);
-
-  public abstract AvroType<? extends V> valueType();
-
-  public abstract V defaultValue();
-
-  public abstract AvroOrder order();
-
-  public abstract int aliasCount();
-
-  public abstract String getAlias(int index);
-
-  public abstract AvroFieldType<R, V> alias(String alias);
-
-  public abstract R updated(R record, V value);
-}
+/**
+ * Reflectively typed Apache Avro schema.
+ */
+package swim.avro.reflection;

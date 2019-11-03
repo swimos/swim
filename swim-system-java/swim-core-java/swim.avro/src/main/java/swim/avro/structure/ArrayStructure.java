@@ -16,25 +16,25 @@ package swim.avro.structure;
 
 import swim.avro.schema.AvroArrayType;
 import swim.avro.schema.AvroType;
+import swim.structure.Item;
 import swim.structure.Record;
-import swim.structure.Value;
 import swim.util.Builder;
 
-final class ArrayStructure extends AvroArrayType<Value, Value> {
-  final AvroType<Value> itemType;
+final class ArrayStructure<I extends Item> extends AvroArrayType<I, Record> {
+  final AvroType<I> itemType;
 
-  ArrayStructure(AvroType<Value> itemType) {
+  ArrayStructure(AvroType<I> itemType) {
     this.itemType = itemType;
   }
 
   @Override
-  public AvroType<Value> itemType() {
+  public AvroType<I> itemType() {
     return this.itemType;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public Builder<Value, Value> arrayBuilder() {
-    return (Builder<Value, Value>) (Builder<?, ?>) Record.builder();
+  public Builder<I, Record> arrayBuilder() {
+    return (Builder<I, Record>) (Builder<?, Record>) Record.create();
   }
 }

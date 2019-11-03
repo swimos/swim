@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.avro.structure;
+package swim.avro.reflection;
 
+import java.lang.reflect.Field;
+import swim.avro.AvroException;
 import swim.avro.schema.AvroFieldType;
 import swim.avro.schema.AvroOrder;
 import swim.avro.schema.AvroType;
 import swim.collections.FingerTrieSeq;
-import swim.structure.Record;
-import swim.structure.Text;
-import swim.structure.Value;
 
-final class FieldStructure extends AvroFieldType<Record, Value> {
-  final Text name;
+final class FieldReflection<R, V> extends AvroFieldType<R, V> {
+  final Field field;
   final String doc;
-  final AvroType<? extends Value> valueType;
-  final Value defaultValue;
+  final AvroType<? extends V> valueType;
+  final V defaultValue;
   final AvroOrder order;
   final FingerTrieSeq<String> aliases;
 
-  FieldStructure(Text name, String doc, AvroType<? extends Value> valueType,
-                 Value defaultValue, AvroOrder order, FingerTrieSeq<String> aliases) {
-    this.name = name.commit();
+  FieldReflection(Field field, String doc, AvroType<? extends V> valueType,
+                  V defaultValue, AvroOrder order, FingerTrieSeq<String> aliases) {
+    this.field = field;
     this.doc = doc;
     this.valueType = valueType;
     this.defaultValue = defaultValue;
@@ -40,13 +39,13 @@ final class FieldStructure extends AvroFieldType<Record, Value> {
     this.aliases = aliases;
   }
 
-  FieldStructure(String name, AvroType<? extends Value> valueType) {
-    this(Text.from(name), null, valueType, Value.absent(), AvroOrder.ASCENDING, FingerTrieSeq.empty());
+  FieldReflection(Field field, AvroType<? extends V> valueType) {
+    this(field, null, valueType, null, AvroOrder.ASCENDING, FingerTrieSeq.empty());
   }
 
   @Override
   public String name() {
-    return this.name.stringValue();
+    return this.field.getName();
   }
 
   @Override
@@ -55,18 +54,18 @@ final class FieldStructure extends AvroFieldType<Record, Value> {
   }
 
   @Override
-  public AvroFieldType<Record, Value> doc(String doc) {
-    return new FieldStructure(this.name, doc, this.valueType, this.defaultValue,
-                              this.order, this.aliases);
+  public AvroFieldType<R, V> doc(String doc) {
+    return new FieldReflection<R, V>(this.field, doc, this.valueType, this.defaultValue,
+                                     this.order, this.aliases);
   }
 
   @Override
-  public AvroType<? extends Value> valueType() {
+  public AvroType<? extends V> valueType() {
     return this.valueType;
   }
 
   @Override
-  public Value defaultValue() {
+  public V defaultValue() {
     return this.defaultValue;
   }
 
@@ -86,13 +85,18 @@ final class FieldStructure extends AvroFieldType<Record, Value> {
   }
 
   @Override
-  public AvroFieldType<Record, Value> alias(String alias) {
-    return new FieldStructure(this.name, this.doc, this.valueType, this.defaultValue,
-                              this.order, this.aliases.appended(alias));
+  public AvroFieldType<R, V> alias(String alias) {
+    return new FieldReflection<R, V>(this.field, this.doc, this.valueType, this.defaultValue,
+                                     this.order, this.aliases.appended(alias));
   }
 
   @Override
-  public Record updated(Record record, Value value) {
-    return record.slot(this.name, value);
+  public R updated(R record, V value) {
+    try {
+      field.set(record, value);
+      return record;
+    } catch (IllegalAccessException cause) {
+      throw new AvroException(cause);
+    }
   }
 }

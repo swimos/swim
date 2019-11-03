@@ -17,53 +17,34 @@ package swim.avro.structure;
 import swim.avro.schema.AvroMapType;
 import swim.avro.schema.AvroType;
 import swim.codec.Input;
-import swim.codec.Output;
 import swim.codec.Parser;
 import swim.codec.Unicode;
 import swim.structure.Record;
-import swim.structure.Slot;
 import swim.structure.Text;
 import swim.structure.Value;
 import swim.util.PairBuilder;
 
-final class MapStructure extends AvroMapType<Value, Value, Value> {
-  final AvroType<Value> valueType;
+final class MapStructure<V extends Value> extends AvroMapType<Value, V, Record> {
+  final AvroType<V> valueType;
 
-  MapStructure(AvroType<Value> valueType) {
+  MapStructure(AvroType<V> valueType) {
     this.valueType = valueType;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public Parser<Value> parseKey(Input input) {
-    return Unicode.parseOutput((Output<Value>) (Output<?>) Text.output(), input);
+    return (Parser<Value>) (Parser<?>) Unicode.parseOutput(Text.output(), input);
   }
 
   @Override
-  public AvroType<Value> valueType() {
+  public AvroType<V> valueType() {
     return this.valueType;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public PairBuilder<Value, Value, Value> mapBuilder() {
-    return new MapStructureBuilder();
-  }
-}
-
-final class MapStructureBuilder implements PairBuilder<Value, Value, Value> {
-  final Record record;
-
-  MapStructureBuilder() {
-    this.record = Record.create();
-  }
-
-  @Override
-  public boolean add(Value key, Value value) {
-    return this.record.add(Slot.of(key, value));
-  }
-
-  @Override
-  public Value bind() {
-    return this.record.branch();
+  public PairBuilder<Value, V, Record> mapBuilder() {
+    return (PairBuilder<Value, V, Record>) (PairBuilder<Value, ?, Record>) Record.create();
   }
 }

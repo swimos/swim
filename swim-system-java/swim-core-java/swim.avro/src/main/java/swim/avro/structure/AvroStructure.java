@@ -33,6 +33,7 @@ import swim.avro.schema.AvroType;
 import swim.avro.schema.AvroUnionType;
 import swim.collections.FingerTrieSeq;
 import swim.structure.Item;
+import swim.structure.Record;
 import swim.structure.Text;
 import swim.structure.Value;
 import swim.util.Builder;
@@ -107,11 +108,11 @@ public final class AvroStructure {
     return stringType;
   }
 
-  public static AvroRecordType<Item, Value> recordType(AvroName fullName) {
+  public static AvroRecordType<Record, Record> recordType(AvroName fullName) {
     return new RecordStructure(fullName);
   }
 
-  public static AvroRecordType<Item, Value> recordType(String fullName) {
+  public static AvroRecordType<Record, Record> recordType(String fullName) {
     return recordType(AvroName.parse(fullName));
   }
 
@@ -135,12 +136,12 @@ public final class AvroStructure {
     return enumType(AvroName.parse(fullName), symbols);
   }
 
-  public static AvroArrayType<Value, Value> arrayType(AvroType<Value> itemType) {
-    return new ArrayStructure(itemType);
+  public static <I extends Item> AvroArrayType<I, Record> arrayType(AvroType<I> itemType) {
+    return new ArrayStructure<I>(itemType);
   }
 
-  public static AvroMapType<Value, Value, Value> mapType(AvroType<Value> valueType) {
-    return new MapStructure(valueType);
+  public static <V extends Value> AvroMapType<Value, V, Record> mapType(AvroType<V> valueType) {
+    return new MapStructure<V>(valueType);
   }
 
   public static AvroUnionType<Value> unionType() {
@@ -155,7 +156,7 @@ public final class AvroStructure {
     return fixedType(AvroName.parse(fullName), size);
   }
 
-  public static AvroFieldType<Item, Item> field(String name, AvroType<? extends Item> valueType) {
+  public static AvroFieldType<Record, Value> field(String name, AvroType<? extends Value> valueType) {
     return new FieldStructure(name, valueType);
   }
 }

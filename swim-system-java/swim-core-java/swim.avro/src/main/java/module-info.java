@@ -25,4 +25,6 @@ module swim.avro {
   exports swim.avro;
   exports swim.avro.schema;
   exports swim.avro.decoder;
+  exports swim.avro.reflection;
+  exports swim.avro.structure;
 }

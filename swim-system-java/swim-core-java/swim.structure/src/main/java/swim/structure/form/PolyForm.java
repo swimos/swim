@@ -497,14 +497,13 @@ public class PolyForm extends Form<Object> implements Cloneable {
   public <T> ClassForm<T> reflectField(ClassForm<T> classForm, Field field) {
     final int modifiers = field.getModifiers();
     if ((modifiers & (Modifier.STATIC | Modifier.TRANSIENT)) == 0) {
-      if ((modifiers & (Modifier.FINAL | Modifier.PRIVATE | Modifier.PROTECTED)) != 0
-          || modifiers == 0) {
+      if ((modifiers & (Modifier.FINAL | Modifier.PRIVATE | Modifier.PROTECTED)) != 0 || modifiers == 0) {
         field.setAccessible(true);
       }
 
-      // Close over the type generic type of the field.
+      // Close over the generic type of the field.
       final Type fieldType = field.getGenericType();
-      addType(field.getGenericType());
+      addType(fieldType);
 
       String name;
       final FieldForm<T> fieldForm;

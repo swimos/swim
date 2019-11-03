@@ -67,7 +67,7 @@ public class AvroDecoder {
 
   public <T> Decoder<T> decodeComplex(AvroComplexType<T> type, InputBuffer input) {
     if (type instanceof AvroRecordType<?, ?>) {
-      return decodeRecord((AvroRecordType<?, T>) type, input);
+      return decodeRecord((AvroRecordType<T, ?>) type, input);
     } else if (type instanceof AvroEnumType<?>) {
       return decodeEnum((AvroEnumType<T>) type, input);
     } else if (type instanceof AvroArrayType<?, ?>) {
@@ -111,7 +111,7 @@ public class AvroDecoder {
     return StringDecoder.decode(input, type);
   }
 
-  public <F, T> Decoder<T> decodeRecord(AvroRecordType<F, T> type, InputBuffer input) {
+  public <T, R> Decoder<T> decodeRecord(AvroRecordType<T, R> type, InputBuffer input) {
     return RecordDecoder.decode(input, this, type);
   }
 
@@ -167,7 +167,7 @@ public class AvroDecoder {
 
   public <T> Decoder<T> complexDecoder(AvroComplexType<T> type) {
     if (type instanceof AvroRecordType<?, ?>) {
-      return recordDecoder((AvroRecordType<?, T>) type);
+      return recordDecoder((AvroRecordType<T, ?>) type);
     } else if (type instanceof AvroEnumType<?>) {
       return enumDecoder((AvroEnumType<T>) type);
     } else if (type instanceof AvroArrayType<?, ?>) {
@@ -211,8 +211,8 @@ public class AvroDecoder {
     return new StringDecoder<T>(type);
   }
 
-  public <F, T> Decoder<T> recordDecoder(AvroRecordType<F, T> type) {
-    return new RecordDecoder<F, T>(this, type);
+  public <T, R> Decoder<T> recordDecoder(AvroRecordType<T, R> type) {
+    return new RecordDecoder<T, R>(this, type);
   }
 
   public <T> Decoder<T> enumDecoder(AvroEnumType<T> type) {

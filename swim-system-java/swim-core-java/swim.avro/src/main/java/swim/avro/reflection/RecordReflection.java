@@ -12,30 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.avro.structure;
+package swim.avro.reflection;
 
+import java.lang.reflect.Constructor;
+import swim.avro.AvroException;
 import swim.avro.AvroName;
 import swim.avro.schema.AvroFieldType;
 import swim.avro.schema.AvroRecordType;
 import swim.collections.FingerTrieSeq;
-import swim.structure.Record;
 
-final class RecordStructure extends AvroRecordType<Record, Record> {
+final class RecordReflection<T> extends AvroRecordType<T, T> {
   final AvroName fullName;
+  final Constructor<T> constructor;
   final String doc;
   final FingerTrieSeq<AvroName> aliases;
-  final FingerTrieSeq<AvroFieldType<Record, ?>> fields;
+  final FingerTrieSeq<AvroFieldType<T, ?>> fields;
 
-  RecordStructure(AvroName fullName, String doc, FingerTrieSeq<AvroName> aliases,
-                  FingerTrieSeq<AvroFieldType<Record, ?>> fields) {
+  RecordReflection(AvroName fullName, Constructor<T> constructor, String doc,
+                   FingerTrieSeq<AvroName> aliases, FingerTrieSeq<AvroFieldType<T, ?>> fields) {
     this.fullName = fullName;
+    this.constructor = constructor;
     this.doc = doc;
     this.aliases = aliases;
     this.fields = fields;
   }
 
-  RecordStructure(AvroName fullName) {
-    this(fullName, null, FingerTrieSeq.empty(), FingerTrieSeq.empty());
+  RecordReflection(AvroName fullName, Constructor<T> constructor) {
+    this(fullName, constructor, null, FingerTrieSeq.empty(), FingerTrieSeq.empty());
   }
 
   @Override
@@ -49,8 +52,9 @@ final class RecordStructure extends AvroRecordType<Record, Record> {
   }
 
   @Override
-  public AvroRecordType<Record, Record> doc(String doc) {
-    return new RecordStructure(this.fullName, doc, this.aliases, this.fields);
+  public AvroRecordType<T, T> doc(String doc) {
+    return new RecordReflection<T>(this.fullName, this.constructor, doc,
+                                   this.aliases, this.fields);
   }
 
   @Override
@@ -64,8 +68,9 @@ final class RecordStructure extends AvroRecordType<Record, Record> {
   }
 
   @Override
-  public AvroRecordType<Record, Record> alias(AvroName alias) {
-    return new RecordStructure(this.fullName, this.doc, this.aliases.appended(alias), this.fields);
+  public AvroRecordType<T, T> alias(AvroName alias) {
+    return new RecordReflection<T>(this.fullName, this.constructor, this.doc,
+                                   this.aliases.appended(alias), this.fields);
   }
 
   @Override
@@ -74,22 +79,27 @@ final class RecordStructure extends AvroRecordType<Record, Record> {
   }
 
   @Override
-  public AvroFieldType<Record, ?> getField(int index) {
+  public AvroFieldType<T, ?> getField(int index) {
     return this.fields.get(index);
   }
 
   @Override
-  public AvroRecordType<Record, Record> field(AvroFieldType<Record, ?> field) {
-    return new RecordStructure(this.fullName, this.doc, this.aliases, this.fields.appended(field));
+  public AvroRecordType<T, T> field(AvroFieldType<T, ?> field) {
+    return new RecordReflection<T>(this.fullName, this.constructor, this.doc,
+                                   this.aliases, this.fields.appended(field));
   }
 
   @Override
-  public Record create() {
-    return Record.create();
+  public T create() {
+    try {
+      return this.constructor.newInstance();
+    } catch (ReflectiveOperationException cause) {
+      throw new AvroException(cause);
+    }
   }
 
   @Override
-  public Record cast(Record record) {
+  public T cast(T record) {
     return record;
   }
 }

@@ -25,8 +25,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.codec.Output;
 import swim.util.Builder;
+import swim.util.PairBuilder;
 
-public abstract class Record extends Value implements List<Item>, Builder<Item, Record> {
+public abstract class Record extends Value implements List<Item>, Builder<Item, Record>, PairBuilder<Value, Value, Record> {
   volatile int flags;
 
   protected Record() {
@@ -981,6 +982,11 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   public void add(int index, boolean item) {
     add(index, Bool.from(item));
+  }
+
+  @Override
+  public boolean add(Value key, Value value) {
+    return add(new Slot(key, value));
   }
 
   @Override

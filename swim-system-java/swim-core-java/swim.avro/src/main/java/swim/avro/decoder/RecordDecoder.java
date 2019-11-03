@@ -19,57 +19,56 @@ import swim.avro.schema.AvroRecordType;
 import swim.codec.Decoder;
 import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
-import swim.util.Builder;
 
-final class RecordDecoder<F, T> extends Decoder<T> {
+final class RecordDecoder<T, R> extends Decoder<T> {
   final AvroDecoder avro;
-  final AvroRecordType<F, T> type;
-  final Builder<F, T> builder;
+  final AvroRecordType<T, R> type;
+  final R record;
   final Decoder<?> valueDecoder;
   final int fieldIndex;
 
-  RecordDecoder(AvroDecoder avro, AvroRecordType<F, T> type, Builder<F, T> builder,
+  RecordDecoder(AvroDecoder avro, AvroRecordType<T, R> type, R record,
                 Decoder<?> valueDecoder, int fieldIndex) {
     this.avro = avro;
     this.type = type;
-    this.builder = builder;
+    this.record = record;
     this.valueDecoder = valueDecoder;
     this.fieldIndex = fieldIndex;
   }
 
-  RecordDecoder(AvroDecoder avro, AvroRecordType<F, T> type) {
+  RecordDecoder(AvroDecoder avro, AvroRecordType<T, R> type) {
     this(avro, type, null, null, 0);
   }
 
   @Override
   public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.avro, this.type, this.builder, this.valueDecoder, this.fieldIndex);
+    return decode(input, this.avro, this.type, this.record, this.valueDecoder, this.fieldIndex);
   }
 
   @SuppressWarnings("unchecked")
-  static <F, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroRecordType<F, T> type,
-                                  Builder<F, T> builder, Decoder<?> valueDecoder, int fieldIndex) {
+  static <T, R> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroRecordType<T, R> type,
+                                  R record, Decoder<?> valueDecoder, int fieldIndex) {
     do {
       if (valueDecoder == null) {
         if (fieldIndex < type.fieldCount()) {
-          final AvroFieldType<?, ? extends F> fieldType = type.getField(fieldIndex);
+          final AvroFieldType<R, ?> fieldType = type.getField(fieldIndex);
           valueDecoder = avro.decodeType(fieldType.valueType(), input);
         } else {
-          if (builder == null) {
-            builder = type.recordBuilder();
+          if (record == null) {
+            record = type.create();
           }
-          return done(builder.bind());
+          return done(type.cast(record));
         }
       }
       while (valueDecoder.isCont() && !input.isEmpty()) {
         valueDecoder = valueDecoder.feed(input);
       }
       if (valueDecoder.isDone()) {
-        if (builder == null) {
-          builder = type.recordBuilder();
+        if (record == null) {
+          record = type.create();
         }
-        final AvroFieldType<Object, ? extends F> fieldType = (AvroFieldType<Object, ? extends F>) type.getField(fieldIndex);
-        builder.add(fieldType.cast(valueDecoder.bind()));
+        final AvroFieldType<R, Object> fieldType = (AvroFieldType<R, Object>) type.getField(fieldIndex);
+        record = fieldType.updated(record, valueDecoder.bind());
         valueDecoder = null;
         fieldIndex += 1;
         continue;
@@ -83,10 +82,10 @@ final class RecordDecoder<F, T> extends Decoder<T> {
     } else if (input.isError()) {
       return error(input.trap());
     }
-    return new RecordDecoder<F, T>(avro, type, builder, valueDecoder, fieldIndex);
+    return new RecordDecoder<T, R>(avro, type, record, valueDecoder, fieldIndex);
   }
 
-  static <F, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroRecordType<F, T> type) {
+  static <T, R> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroRecordType<T, R> type) {
     return decode(input, avro, type, null, null, 0);
   }
 }

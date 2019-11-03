@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.avro.structure;
+package swim.avro.reflection;
 
 import swim.avro.AvroName;
 import swim.avro.schema.AvroFixedType;
@@ -20,21 +20,19 @@ import swim.codec.Binary;
 import swim.codec.Decoder;
 import swim.codec.InputBuffer;
 import swim.collections.FingerTrieSeq;
-import swim.structure.Data;
-import swim.structure.Value;
 
-final class FixedStructure extends AvroFixedType<Value> {
+final class FixedReflection extends AvroFixedType<byte[]> {
   final AvroName fullName;
   final FingerTrieSeq<AvroName> aliases;
   final int size;
 
-  FixedStructure(AvroName fullName, FingerTrieSeq<AvroName> aliases, int size) {
+  FixedReflection(AvroName fullName, FingerTrieSeq<AvroName> aliases, int size) {
     this.fullName = fullName;
     this.aliases = aliases;
     this.size = size;
   }
 
-  FixedStructure(AvroName fullName, int size) {
+  FixedReflection(AvroName fullName, int size) {
     this(fullName, FingerTrieSeq.empty(), size);
   }
 
@@ -54,8 +52,8 @@ final class FixedStructure extends AvroFixedType<Value> {
   }
 
   @Override
-  public AvroFixedType<Value> alias(AvroName alias) {
-    return new FixedStructure(this.fullName, this.aliases.appended(alias), this.size);
+  public AvroFixedType<byte[]> alias(AvroName alias) {
+    return new FixedReflection(this.fullName, this.aliases.appended(alias), this.size);
   }
 
   @Override
@@ -63,8 +61,7 @@ final class FixedStructure extends AvroFixedType<Value> {
     return this.size;
   }
 
-  @SuppressWarnings("unchecked")
-  public Decoder<Value> decodeFixed(InputBuffer input) {
-    return (Decoder<Value>) (Decoder<?>) Binary.parseOutput(Data.output(this.size), input);
+  public Decoder<byte[]> decodeFixed(InputBuffer input) {
+    return Binary.parseOutput(Binary.byteArrayOutput(this.size), input);
   }
 }

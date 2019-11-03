@@ -15,23 +15,22 @@
 package swim.avro.schema;
 
 import swim.avro.AvroName;
-import swim.util.Builder;
 
-public abstract class AvroRecordType<F, T> extends AvroNamedType<T> {
+public abstract class AvroRecordType<T, R> extends AvroNamedType<T> {
   public abstract String doc();
 
-  public abstract AvroRecordType<F, T> doc(String doc);
+  public abstract AvroRecordType<T, R> doc(String doc);
 
   public abstract int fieldCount();
 
   @Override
-  public abstract AvroRecordType<F, T> alias(AvroName alias);
+  public abstract AvroRecordType<T, R> alias(AvroName alias);
 
-  public abstract AvroFieldType<?, ? extends F> getField(int index);
+  public abstract AvroFieldType<R, ?> getField(int index);
 
-  public abstract AvroRecordType<F, T> field(AvroFieldType<?, ? extends F> field);
+  public abstract AvroRecordType<T, R> field(AvroFieldType<R, ?> field);
 
-  public abstract AvroRecordType<F, T> field(String name, AvroType<? extends F> valueType);
+  public abstract R create();
 
-  public abstract Builder<F, T> recordBuilder();
+  public abstract T cast(R record);
 }
