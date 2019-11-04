@@ -155,6 +155,7 @@ export class Project {
   }
 
   clean(): void {
+    this.cleanTargets();
     for (let i = 0; i < this.cleanDirs.length; i += 1) {
       const cleanDir = path.resolve(this.baseDir, this.cleanDirs[i]);
       const output = Unicode.stringOutput(OutputSettings.styled());
@@ -165,6 +166,13 @@ export class Project {
       output.write(cleanDir);
       console.log(output.bind());
       Project.rmdir(cleanDir);
+    }
+  }
+
+  cleanTargets(): void {
+    for (let i = 0; i < this.targetList.length; i += 1) {
+      const target = this.targetList[i];
+      target.clean();
     }
   }
 

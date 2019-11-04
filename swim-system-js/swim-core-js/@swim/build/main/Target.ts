@@ -111,20 +111,21 @@ export class Target {
     if (typeof bundleConfig.input === "string") {
       bundleConfig.input = path.resolve(this.project.baseDir, bundleConfig.input);
     }
-    if (bundleConfig.output && typeof bundleConfig.output.file === "string") {
-      bundleConfig.output.file = path.resolve(this.project.baseDir, bundleConfig.output.file);
+    const bundleOutput = bundleConfig.output as rollup.OutputOptions;
+    if (bundleOutput && typeof bundleOutput.file === "string") {
+      bundleOutput.file = path.resolve(this.project.baseDir, bundleOutput.file);
       if (this.preamble === void 0) {
-        if (typeof bundleConfig.output.banner === "string") {
-          this.preamble = bundleConfig.output.banner;
+        if (typeof bundleOutput.banner === "string") {
+          this.preamble = bundleOutput.banner;
         } else {
-          this.preamble = "// " + path.basename(bundleConfig.output.file, ".js") + "-" + this.project.package.version;
+          this.preamble = "// " + path.basename(bundleOutput.file, ".js") + "-" + this.project.package.version;
           if (this.project.package.copyright) {
             this.preamble += "; copyright " + this.project.package.copyright;
           }
         }
       }
-      if (!bundleConfig.output.banner && this.project.devel) {
-        bundleConfig.output.banner = this.preamble;
+      if (!bundleOutput.banner && this.project.devel) {
+        bundleOutput.banner = this.preamble;
       }
     }
   }
@@ -507,13 +508,14 @@ export class Target {
           if (this.watching) {
             bundleConfig.cache = build.cache;
           }
-          return build.generate(bundleConfig.output!);
+          return build.generate(bundleConfig.output as rollup.OutputOptions);
         })
         .then((bundle: rollup.RollupOutput): rollup.RollupOutput => {
-          bundle.output[0].fileName = bundleConfig.output!.file!;
-          bundle = this.minify(bundle, bundleConfig.output!);
+          const bundleOutput = bundleConfig.output as rollup.OutputOptions;
+          bundle.output[0].fileName = bundleOutput.file!;
+          bundle = this.minify(bundle, bundleOutput);
 
-          this.writeBundle(bundle, bundleConfig.output!);
+          this.writeBundle(bundle, bundleOutput);
 
           const dt = Date.now() - t0;
           const output = Unicode.stringOutput(OutputSettings.styled());
@@ -583,6 +585,7 @@ export class Target {
       const output = terser.minify(inputChunk.code, terserOptions);
       if (!output.error) {
         const outputChunk: rollup.OutputChunk = {
+          type: "chunk",
           fileName: scriptPath,
           code: output.code,
           map: output.map,
@@ -703,7 +706,8 @@ export class Target {
     console.log(output.bind());
 
     const bundleConfig = this.project.bundleConfig[this.id] as rollup.RollupOptions | undefined;
-    const outputFile = bundleConfig ? bundleConfig.output!.file : void 0;
+    const bundleOutput = bundleConfig ? bundleConfig.output as rollup.OutputOptions : void 0;
+    const outputFile = bundleOutput ? bundleOutput.file : void 0;
     const scriptPath = outputFile ? path.resolve(this.project.baseDir, outputFile) : void 0;
     if (scriptPath && fs.existsSync(scriptPath)) {
       return new Promise((resolve, reject): void => {
@@ -847,6 +851,26 @@ export class Target {
       console.log(output.bind());
       console.log();
       return Promise.reject();
+    }
+  }
+
+  clean(): void {
+    try {
+      const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
+      const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
+      const tsBuildInfoFile = commandLine.options.tsBuildInfoFile;
+      if (tsBuildInfoFile && fs.existsSync(tsBuildInfoFile)) {
+        const output = Unicode.stringOutput(OutputSettings.styled());
+        OutputStyle.greenBold(output);
+        output.write("deleting");
+        OutputStyle.reset(output);
+        output.write(" ");
+        output.write(tsBuildInfoFile);
+        console.log(output.bind());
+        fs.unlinkSync(tsBuildInfoFile);
+      }
+    } catch (error) {
+      console.error(error); // swallow
     }
   }
 }
