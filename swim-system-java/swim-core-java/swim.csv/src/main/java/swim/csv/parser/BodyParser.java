@@ -12,21 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.parser;
 
 import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parser;
+import swim.csv.schema.CsvHeader;
 import swim.util.Builder;
 
 final class BodyParser<T, R, C> extends Parser<T> {
-  final CsvParser<T, R, C> csv;
-  final CsvHeader<C> header;
+  final CsvParser csv;
+  final CsvHeader<T, R, C> header;
   final Builder<R, T> tableBuilder;
   final Parser<R> rowParser;
   final int step;
 
-  BodyParser(CsvParser<T, R, C> csv, CsvHeader<C> header,
+  BodyParser(CsvParser csv, CsvHeader<T, R, C> header,
              Builder<R, T> tableBuilder, Parser<R> rowParser, int step) {
     this.csv = csv;
     this.header = header;
@@ -35,7 +36,7 @@ final class BodyParser<T, R, C> extends Parser<T> {
     this.step = step;
   }
 
-  BodyParser(CsvParser<T, R, C> csv, CsvHeader<C> header) {
+  BodyParser(CsvParser csv, CsvHeader<T, R, C> header) {
     this(csv, header, null, null, 1);
   }
 
@@ -44,7 +45,7 @@ final class BodyParser<T, R, C> extends Parser<T> {
     return parse(input, this.csv, this.header, this.tableBuilder, this.rowParser, this.step);
   }
 
-  static <T, R, C> Parser<T> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header,
+  static <T, R, C> Parser<T> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header,
                                    Builder<R, T> tableBuilder, Parser<R> rowParser, int step) {
     int c = 0;
     do {
@@ -53,21 +54,21 @@ final class BodyParser<T, R, C> extends Parser<T> {
           step = 2;
         } else if (input.isDone()) {
           if (tableBuilder == null) {
-            tableBuilder = csv.tableBuilder();
+            tableBuilder = header.tableBuilder();
           }
           return done(tableBuilder.bind());
         }
       }
       if (step == 2) {
         if (rowParser == null) {
-          rowParser = csv.parseRow(input, header);
+          rowParser = csv.parseRow(header, input);
         }
         while (rowParser.isCont() && !input.isEmpty()) {
           rowParser = rowParser.feed(input);
         }
         if (rowParser.isDone()) {
           if (tableBuilder == null) {
-            tableBuilder = csv.tableBuilder();
+            tableBuilder = header.tableBuilder();
           }
           tableBuilder.add(rowParser.bind());
           rowParser = null;
@@ -112,7 +113,7 @@ final class BodyParser<T, R, C> extends Parser<T> {
     return new BodyParser<T, R, C>(csv, header, tableBuilder, rowParser, step);
   }
 
-  static <T, R, C> Parser<T> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header) {
+  static <T, R, C> Parser<T> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header) {
     return parse(input, csv, header, null, null, 1);
   }
 }

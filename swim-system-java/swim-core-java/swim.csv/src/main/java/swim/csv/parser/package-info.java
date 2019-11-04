@@ -12,22 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
-
-import swim.codec.Output;
-import swim.codec.Writer;
-import swim.structure.Item;
-import swim.structure.Value;
-
-public class CsvStructureWriter extends CsvWriter<Value, Item, Item> {
-  final int delimiter;
-
-  public CsvStructureWriter(int delimiter) {
-    this.delimiter = delimiter;
-  }
-
-  @Override
-  public Writer<?, ?> writeTable(Value table, Output<?> output) {
-    throw new UnsupportedOperationException(); // TODO
-  }
-}
+/**
+ * CSV parser.
+ */
+package swim.csv.parser;

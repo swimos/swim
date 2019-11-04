@@ -12,18 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
-
-public abstract class CsvHeader<C> {
-  public abstract int size();
-
-  public abstract CsvCol<C, ?> get(int index);
-
-  public abstract CsvHeader<C> col(int index, CsvCol<C, ?> col);
-
-  public abstract CsvHeader<C> col(int index, String name);
-
-  public abstract CsvHeader<C> col(CsvCol<C, ?> col);
-
-  public abstract CsvHeader<C> col(String name);
-}
+/**
+ * Abstract CSV schema.
+ */
+package swim.csv.schema;

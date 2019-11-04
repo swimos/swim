@@ -12,8 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.schema;
 
-public class TableWriterSpec {
+import swim.codec.Input;
+import swim.codec.Parser;
+import swim.util.Builder;
 
+public interface CsvCol<C> {
+  String name();
+
+  CsvCol<C> name(String name);
+
+  boolean optional();
+
+  CsvCol<C> optional(boolean optional);
+
+  Parser<C> parseCell(Input input);
+
+  void addCell(C cell, Builder<C, ?> rowBuilder);
 }

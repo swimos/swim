@@ -12,24 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.structure;
 
 import swim.codec.Input;
-import swim.codec.Output;
 import swim.codec.Parser;
-import swim.codec.Writer;
+import swim.codec.Unicode;
 import swim.structure.Item;
-import swim.structure.Num;
 import swim.structure.Slot;
+import swim.structure.Text;
 import swim.structure.Value;
 import swim.util.Builder;
 
-final class NumberCol extends CsvStructureCol<Num> {
+final class StringStructure implements CsvStructureCol {
   final Value key;
   final String name;
   final boolean optional;
 
-  NumberCol(Value key, String name, boolean optional) {
+  StringStructure(Value key, String name, boolean optional) {
     this.key = key;
     this.name = name;
     this.optional = optional;
@@ -41,8 +40,8 @@ final class NumberCol extends CsvStructureCol<Num> {
   }
 
   @Override
-  public NumberCol key(Value key) {
-    return new NumberCol(key, this.name, this.optional);
+  public CsvStructureCol key(Value key) {
+    return new StringStructure(key, this.name, this.optional);
   }
 
   @Override
@@ -51,8 +50,8 @@ final class NumberCol extends CsvStructureCol<Num> {
   }
 
   @Override
-  public NumberCol name(String name) {
-    return new NumberCol(this.key, name, this.optional);
+  public CsvStructureCol name(String name) {
+    return new StringStructure(this.key, name, this.optional);
   }
 
   @Override
@@ -61,31 +60,32 @@ final class NumberCol extends CsvStructureCol<Num> {
   }
 
   @Override
-  public NumberCol optional(boolean optional) {
-    return new NumberCol(this.key, this.name, optional);
+  public CsvStructureCol optional(boolean optional) {
+    return new StringStructure(this.key, this.name, optional);
   }
 
   @Override
-  public void addCell(Num value, Builder<Item, ?> rowBuilder) {
-    if (!this.optional || value != null) {
-      if (value == null) {
-        value = Num.from(0);
+  public Item defaultCell() {
+    return Text.from("");
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public Parser<Item> parseCell(Input input) {
+    return (Parser<Item>) (Parser<?>) Unicode.parseOutput(Text.output(), input);
+  }
+
+  @Override
+  public void addCell(Item cell, Builder<Item, ?> rowBuilder) {
+    if (!this.optional || cell instanceof Text && ((Text) cell).size() != 0) {
+      if (cell == null) {
+        cell = defaultCell();
       }
-      if (this.key.isDefined()) {
-        rowBuilder.add(Slot.of(this.key, value));
+      if (this.key.isDefined() && cell instanceof Value) {
+        rowBuilder.add(Slot.of(this.key, (Value) cell));
       } else {
-        rowBuilder.add(value);
+        rowBuilder.add(cell);
       }
     }
-  }
-
-  @Override
-  public Parser<Num> parseCell(Input input, Builder<Item, ?> rowBuilder) {
-    return NumberCellParser.parse(input, this, rowBuilder);
-  }
-
-  @Override
-  public Writer<?, ?> writeCell(Item cell, Output<?> output) {
-    throw new UnsupportedOperationException(); // TODO
   }
 }

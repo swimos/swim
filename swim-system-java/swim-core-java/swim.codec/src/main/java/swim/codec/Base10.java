@@ -83,6 +83,30 @@ public final class Base10 {
     return size;
   }
 
+  public static Parser<Number> parseNumber(Input input) {
+    return NumberParser.parseNumber(input);
+  }
+
+  public static Parser<Number> parseDecimal(Input input) {
+    return NumberParser.parseDecimal(input);
+  }
+
+  public static Parser<Number> parseInteger(Input input) {
+    return NumberParser.parseInteger(input);
+  }
+
+  public static Parser<Number> numberParser() {
+    return NumberParser.numberParser();
+  }
+
+  public static Parser<Number> decimalParser() {
+    return NumberParser.decimalParser();
+  }
+
+  public static Parser<Number> integerParser() {
+    return NumberParser.integerParser();
+  }
+
   /**
    * Returns a {@code Writer} that, when fed an input {@code Integer} value,
    * returns a continuation that writes the base-10 (decimal) encoding of the

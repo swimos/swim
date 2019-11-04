@@ -12,27 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.parser;
 
 import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parser;
+import swim.csv.schema.CsvHeader;
 
 final class TableParser<T, R, C> extends Parser<T> {
-  final CsvParser<T, R, C> csv;
-  final CsvHeader<C> header;
-  final Parser<CsvHeader<C>> headerParser;
+  final CsvParser csv;
+  final CsvHeader<T, R, C> header;
+  final Parser<CsvHeader<T, R, C>> headerParser;
   final int step;
 
-  TableParser(CsvParser<T, R, C> csv, CsvHeader<C> header,
-              Parser<CsvHeader<C>> headerParser, int step) {
+  TableParser(CsvParser csv, CsvHeader<T, R, C> header,
+              Parser<CsvHeader<T, R, C>> headerParser, int step) {
     this.csv = csv;
     this.header = header;
     this.headerParser = headerParser;
     this.step = step;
   }
 
-  TableParser(CsvParser<T, R, C> csv, CsvHeader<C> header) {
+  TableParser(CsvParser csv, CsvHeader<T, R, C> header) {
     this(csv, header, null, 1);
   }
 
@@ -41,12 +42,12 @@ final class TableParser<T, R, C> extends Parser<T> {
     return parse(input, this.csv, this.header, this.headerParser, this.step);
   }
 
-  static <T, R, C> Parser<T> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header,
-                                   Parser<CsvHeader<C>> headerParser, int step) {
+  static <T, R, C> Parser<T> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header,
+                                   Parser<CsvHeader<T, R, C>> headerParser, int step) {
     int c = 0;
     if (step == 1) {
       if (headerParser == null) {
-        headerParser = csv.parseHeader(input, header);
+        headerParser = csv.parseHeader(header, input);
       }
       while (headerParser.isCont() && !input.isEmpty()) {
         headerParser = headerParser.feed(input);
@@ -65,7 +66,7 @@ final class TableParser<T, R, C> extends Parser<T> {
           step = 3;
         } else if (c == '\n') {
           input = input.step();
-          return csv.parseBody(input, headerParser.bind());
+          return csv.parseBody(headerParser.bind(), input);
         } else {
           return error(Diagnostic.expected("carriage return or line feed", input));
         }
@@ -76,9 +77,9 @@ final class TableParser<T, R, C> extends Parser<T> {
     if (step == 3) {
       if (input.isCont() && input.head() == '\n') {
         input = input.step();
-        return csv.parseBody(input, headerParser.bind());
+        return csv.parseBody(headerParser.bind(), input);
       } else if (!input.isEmpty()) {
-        return csv.parseBody(input, headerParser.bind());
+        return csv.parseBody(headerParser.bind(), input);
       }
     }
     if (input.isError()) {
@@ -87,7 +88,7 @@ final class TableParser<T, R, C> extends Parser<T> {
     return new TableParser<T, R, C>(csv, header, headerParser, step);
   }
 
-  static <T, R, C> Parser<T> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header) {
+  static <T, R, C> Parser<T> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header) {
     return parse(input, csv, header, null, 1);
   }
 }

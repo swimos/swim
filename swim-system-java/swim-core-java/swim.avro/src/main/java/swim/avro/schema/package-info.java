@@ -13,6 +13,6 @@
 // limitations under the License.
 
 /**
- * Apache Avro schema.
+ * Abstract Apache Avro schema.
  */
 package swim.avro.schema;

@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.structure;
 
+import swim.csv.schema.CsvCol;
+import swim.csv.schema.CsvHeader;
 import swim.structure.Item;
+import swim.structure.Record;
 import swim.structure.Value;
 
-public abstract class CsvStructureCol<V> extends CsvCol<Item, V> {
-  public abstract Value key();
-
-  public abstract CsvStructureCol<V> key(Value key);
+public abstract class CsvStructureHeader extends CsvHeader<Record, Value, Item> {
+  @Override
+  public abstract CsvStructureHeader col(int index, CsvCol<? extends Item> col);
 
   @Override
-  public abstract CsvStructureCol<V> name(String name);
+  public abstract CsvStructureHeader col(CsvCol<? extends Item> col);
 
-  @Override
-  public abstract CsvStructureCol<V> optional(boolean optional);
+  public abstract CsvStructureHeader cols(CsvStructureCol... cols);
 }

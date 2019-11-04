@@ -12,22 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.parser;
 
 import swim.codec.Diagnostic;
 import swim.codec.Input;
 import swim.codec.Parser;
 import swim.codec.Unicode;
+import swim.csv.schema.CsvHeader;
 
-final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
-  final CsvParser<T, R, C> csv;
-  final CsvHeader<C> header;
+final class HeaderParser<T, R, C> extends Parser<CsvHeader<T, R, C>> {
+  final CsvParser csv;
+  final CsvHeader<T, R, C> header;
   final Parser<String> nameParser;
   final int index;
   final int head;
   final int step;
 
-  HeaderParser(CsvParser<T, R, C> csv, CsvHeader<C> header,
+  HeaderParser(CsvParser csv, CsvHeader<T, R, C> header,
                Parser<String> nameParser, int index, int head, int step) {
     this.csv = csv;
     this.header = header;
@@ -37,17 +38,17 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
     this.step = step;
   }
 
-  HeaderParser(CsvParser<T, R, C> csv, CsvHeader<C> header) {
+  HeaderParser(CsvParser csv, CsvHeader<T, R, C> header) {
     this(csv, header, null, 0, -1, 1);
   }
 
   @Override
-  public Parser<CsvHeader<C>> feed(Input input) {
+  public Parser<CsvHeader<T, R, C>> feed(Input input) {
     return parse(input, this.csv, this.header, this.nameParser, this.index, this.head, this.step);
   }
 
-  static <T, R, C> Parser<CsvHeader<C>> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header,
-                                              Parser<String> nameParser, int index, int head, int step) {
+  static <T, R, C> Parser<CsvHeader<T, R, C>> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header,
+                                                    Parser<String> nameParser, int index, int head, int step) {
     int c = 0;
     do {
       if (step == 1) {
@@ -122,7 +123,7 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<C>> {
     return new HeaderParser<T, R, C>(csv, header, nameParser, index, head, step);
   }
 
-  static <T, R, C> Parser<CsvHeader<C>> parse(Input input, CsvParser<T, R, C> csv, CsvHeader<C> header) {
+  static <T, R, C> Parser<CsvHeader<T, R, C>> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header) {
     return parse(input, csv, header, null, 0, -1, 1);
   }
 }

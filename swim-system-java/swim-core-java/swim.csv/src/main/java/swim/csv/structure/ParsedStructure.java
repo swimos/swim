@@ -12,25 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.structure;
 
 import swim.codec.Input;
-import swim.codec.Output;
 import swim.codec.Parser;
-import swim.codec.Writer;
 import swim.structure.Item;
 import swim.structure.Record;
 import swim.structure.Slot;
 import swim.structure.Value;
 import swim.util.Builder;
 
-final class ItemCol extends CsvStructureCol<Item> {
+final class ParsedStructure implements CsvStructureCol {
   final Value key;
   final String name;
   final boolean optional;
   final Parser<? extends Item> itemParser;
 
-  ItemCol(Value key, String name, boolean optional, Parser<? extends Item> itemParser) {
+  ParsedStructure(Value key, String name, boolean optional, Parser<? extends Item> itemParser) {
     this.key = key;
     this.name = name;
     this.optional = optional;
@@ -43,8 +41,8 @@ final class ItemCol extends CsvStructureCol<Item> {
   }
 
   @Override
-  public ItemCol key(Value key) {
-    return new ItemCol(key, this.name, this.optional, this.itemParser);
+  public CsvStructureCol key(Value key) {
+    return new ParsedStructure(key, this.name, this.optional, this.itemParser);
   }
 
   @Override
@@ -53,8 +51,8 @@ final class ItemCol extends CsvStructureCol<Item> {
   }
 
   @Override
-  public ItemCol name(String name) {
-    return new ItemCol(this.key, name, this.optional, this.itemParser);
+  public CsvStructureCol name(String name) {
+    return new ParsedStructure(this.key, name, this.optional, this.itemParser);
   }
 
   @Override
@@ -63,32 +61,33 @@ final class ItemCol extends CsvStructureCol<Item> {
   }
 
   @Override
-  public ItemCol optional(boolean optional) {
-    return new ItemCol(this.key, this.name, optional, this.itemParser);
+  public CsvStructureCol optional(boolean optional) {
+    return new ParsedStructure(this.key, this.name, optional, this.itemParser);
   }
 
   @Override
-  public void addCell(Item value, Builder<Item, ?> rowBuilder) {
-    if (!this.optional || (value instanceof Record) && !((Record) value).isEmpty()
-        || value != null && !(value instanceof Record) && value.isDefined()) {
-      if (value == null) {
-        value = Item.extant();
+  public Item defaultCell() {
+    return Item.extant();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public Parser<Item> parseCell(Input input) {
+    return (Parser<Item>) this.itemParser.feed(input);
+  }
+
+  @Override
+  public void addCell(Item cell, Builder<Item, ?> rowBuilder) {
+    if (!this.optional || (cell instanceof Record) && !((Record) cell).isEmpty()
+        || cell != null && !(cell instanceof Record) && cell.isDefined()) {
+      if (cell == null) {
+        cell = defaultCell();
       }
-      if (this.key.isDefined() && value instanceof Value) {
-        rowBuilder.add(Slot.of(this.key, (Value) value));
+      if (this.key.isDefined() && cell instanceof Value) {
+        rowBuilder.add(Slot.of(this.key, (Value) cell));
       } else {
-        rowBuilder.add(value);
+        rowBuilder.add(cell);
       }
     }
-  }
-
-  @Override
-  public Parser<Item> parseCell(Input input, Builder<Item, ?> rowBuilder) {
-    return ItemCellParser.parse(input, this, rowBuilder, this.itemParser);
-  }
-
-  @Override
-  public Writer<?, ?> writeCell(Item cell, Output<?> output) {
-    throw new UnsupportedOperationException(); // TODO
   }
 }

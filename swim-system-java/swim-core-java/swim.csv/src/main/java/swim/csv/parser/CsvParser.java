@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.parser;
 
 import java.nio.ByteBuffer;
 import swim.codec.Binary;
@@ -21,50 +21,63 @@ import swim.codec.Input;
 import swim.codec.Parser;
 import swim.codec.Unicode;
 import swim.codec.Utf8;
-import swim.util.Builder;
+import swim.csv.schema.CsvCol;
+import swim.csv.schema.CsvHeader;
 
-public abstract class CsvParser<T, R, C> {
-  public abstract boolean isDelimiter(int c);
+public class CsvParser {
+  protected final int delimiter;
 
-  public abstract Builder<R, T> tableBuilder();
+  public CsvParser(int delimiter) {
+    this.delimiter = delimiter;
+  }
 
-  public abstract Builder<C, R> rowBuilder();
+  public final int delimiter() {
+    return this.delimiter;
+  }
 
-  public Parser<T> parseTable(Input input, CsvHeader<C> header) {
+  public boolean isDelimiter(int c) {
+    return c == delimiter;
+  }
+
+  public <T, R, C> Parser<T> parseTable(CsvHeader<T, R, C> header, Input input) {
     return TableParser.parse(input, this, header);
   }
 
-  public Parser<CsvHeader<C>> parseHeader(Input input, CsvHeader<C> header) {
+  public <T, R, C> Parser<CsvHeader<T, R, C>> parseHeader(CsvHeader<T, R, C> header, Input input) {
     return HeaderParser.parse(input, this, header);
   }
 
-  public Parser<T> parseBody(Input input, CsvHeader<C> header) {
+  public <T, R, C> Parser<T> parseBody(CsvHeader<T, R, C> header, Input input) {
     return BodyParser.parse(input, this, header);
   }
 
-  public Parser<R> parseRow(Input input, CsvHeader<C> header) {
+  public <T, R, C> Parser<R> parseRow(CsvHeader<T, R, C> header, Input input) {
     return RowParser.parse(input, this, header);
   }
 
-  public Parser<T> tableParser(CsvHeader<C> header) {
+  public <C> Parser<C> parseCell(CsvCol<C> col, Input input) {
+    return col.parseCell(input);
+  }
+
+  public <T, R, C> Parser<T> tableParser(CsvHeader<T, R, C> header) {
     return new TableParser<T, R, C>(this, header);
   }
 
-  public Parser<CsvHeader<C>> headerParser(CsvHeader<C> header) {
+  public <T, R, C> Parser<CsvHeader<T, R, C>> headerParser(CsvHeader<T, R, C> header) {
     return new HeaderParser<T, R, C>(this, header);
   }
 
-  public Parser<T> bodyParser(CsvHeader<C> header) {
+  public <T, R, C> Parser<T> bodyParser(CsvHeader<T, R, C> header) {
     return new BodyParser<T, R, C>(this, header);
   }
 
-  public Parser<R> rowParser(CsvHeader<C> header) {
+  public <T, R, C> Parser<R> rowParser(CsvHeader<T, R, C> header) {
     return new RowParser<T, R, C>(this, header);
   }
 
-  public T parseTableString(String string, CsvHeader<C> header) {
+  public <T, R, C> T parseTableString(CsvHeader<T, R, C> header, String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<T> parser = parseTable(input, header);
+    Parser<T> parser = parseTable(header, input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -73,9 +86,9 @@ public abstract class CsvParser<T, R, C> {
     return parser.bind();
   }
 
-  public T parseTableData(byte[] data, CsvHeader<C> header) {
+  public <T, R, C> T parseTableData(CsvHeader<T, R, C> header, byte[] data) {
     final Input input = Utf8.decodedInput(Binary.inputBuffer(data));
-    Parser<T> parser = parseTable(input, header);
+    Parser<T> parser = parseTable(header, input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -84,9 +97,9 @@ public abstract class CsvParser<T, R, C> {
     return parser.bind();
   }
 
-  public T parseTableBuffer(ByteBuffer buffer, CsvHeader<C> header) {
+  public <T, R, C> T parseTableBuffer(CsvHeader<T, R, C> header, ByteBuffer buffer) {
     final Input input = Utf8.decodedInput(Binary.inputBuffer(buffer));
-    Parser<T> parser = parseTable(input, header);
+    Parser<T> parser = parseTable(header, input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -95,9 +108,9 @@ public abstract class CsvParser<T, R, C> {
     return parser.bind();
   }
 
-  public T parseBodyString(String string, CsvHeader<C> header) {
+  public <T, R, C> T parseBodyString(CsvHeader<T, R, C> header, String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<T> parser = parseBody(input, header);
+    Parser<T> parser = parseBody(header, input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -106,9 +119,9 @@ public abstract class CsvParser<T, R, C> {
     return parser.bind();
   }
 
-  public T parseBodyData(byte[] data, CsvHeader<C> header) {
+  public <T, R, C> T parseBodyData(CsvHeader<T, R, C> header, byte[] data) {
     final Input input = Utf8.decodedInput(Binary.inputBuffer(data));
-    Parser<T> parser = parseBody(input, header);
+    Parser<T> parser = parseBody(header, input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -117,9 +130,9 @@ public abstract class CsvParser<T, R, C> {
     return parser.bind();
   }
 
-  public T parseBodyBuffer(ByteBuffer buffer, CsvHeader<C> header) {
+  public <T, R, C> T parseBodyBuffer(CsvHeader<T, R, C> header, ByteBuffer buffer) {
     final Input input = Utf8.decodedInput(Binary.inputBuffer(buffer));
-    Parser<T> parser = parseBody(input, header);
+    Parser<T> parser = parseBody(header, input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -128,9 +141,9 @@ public abstract class CsvParser<T, R, C> {
     return parser.bind();
   }
 
-  public R parseRowString(String string, CsvHeader<C> header) {
+  public <T, R, C> R parseRowString(CsvHeader<T, R, C> header, String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<R> parser = parseRow(input, header);
+    Parser<R> parser = parseRow(header, input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -139,9 +152,9 @@ public abstract class CsvParser<T, R, C> {
     return parser.bind();
   }
 
-  public R parseRowData(byte[] data, CsvHeader<C> header) {
+  public <T, R, C> R parseRowData(CsvHeader<T, R, C> header, byte[] data) {
     final Input input = Utf8.decodedInput(Binary.inputBuffer(data));
-    Parser<R> parser = parseRow(input, header);
+    Parser<R> parser = parseRow(header, input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -150,9 +163,9 @@ public abstract class CsvParser<T, R, C> {
     return parser.bind();
   }
 
-  public R parseRowBuffer(ByteBuffer buffer, CsvHeader<C> header) {
+  public <T, R, C> R parseRowBuffer(CsvHeader<T, R, C> header, ByteBuffer buffer) {
     final Input input = Utf8.decodedInput(Binary.inputBuffer(buffer));
-    Parser<R> parser = parseRow(input, header);
+    Parser<R> parser = parseRow(header, input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {

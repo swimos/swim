@@ -12,11 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.schema;
 
-import swim.codec.Output;
-import swim.codec.Writer;
+import swim.util.Builder;
 
-public abstract class CsvWriter<T, R, C> {
-  public abstract Writer<?, ?> writeTable(T table, Output<?> output);
+public abstract class CsvHeader<T, R, C> {
+  public abstract int colCount();
+
+  public abstract CsvCol<? extends C> getCol(int index);
+
+  public abstract CsvHeader<T, R, C> col(int index, CsvCol<? extends C> col);
+
+  public abstract CsvHeader<T, R, C> col(int index, String name);
+
+  public abstract CsvHeader<T, R, C> col(CsvCol<? extends C> col);
+
+  public abstract CsvHeader<T, R, C> col(String name);
+
+  public abstract Builder<C, R> rowBuilder();
+
+  public abstract Builder<R, T> tableBuilder();
 }

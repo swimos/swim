@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.parser;
 
 import org.testng.annotations.Test;
 import swim.codec.ParserException;
+import swim.csv.Assertions;
+import swim.csv.Csv;
+import swim.csv.schema.CsvHeader;
+import swim.csv.structure.CsvStructure;
 import swim.structure.Item;
 import swim.structure.Record;
 import swim.structure.Slot;
@@ -64,7 +68,8 @@ public class TableParserSpec {
     assertParses("X,Y\n2,3\n5,7\n",
                  Record.of(Record.of(Slot.of("x", 2), Slot.of("y", 3)),
                            Record.of(Slot.of("x", 5), Slot.of("y", 7))),
-                 Csv.header().numberCol("x").numberCol("y"), ',');
+                 CsvStructure.header(CsvStructure.numberCol("x"),
+                                     CsvStructure.numberCol("y")));
   }
 
   @Test
@@ -72,26 +77,35 @@ public class TableParserSpec {
     assertParses("x,y,z\n2,3,5\n7,9,11\n",
                  Record.of(Record.of(Slot.of("x", "2"), Slot.of("y", "3"), Slot.of("z", "5")),
                            Record.of(Slot.of("x", "7"), Slot.of("y", "9"), Slot.of("z", "11"))),
-                 Csv.header().textCol("x").textCol("y"), ',');
+                 CsvStructure.header(CsvStructure.stringCol("x"),
+                                     CsvStructure.stringCol("y")));
   }
 
-  public static void assertParses(String csvString, Value expected) {
-    assertParses(csvString, expected, CsvStructureHeader.empty(), ',');
+  public static void assertParses(String csvString, Record expected) {
+    assertParses(',', csvString, expected, CsvStructure.header());
   }
 
-  public static void assertParses(String csvString, Value expected, CsvHeader<Item> header, int delimiter) {
-    Assertions.assertParses(Csv.tableParser(header, delimiter), csvString, expected);
+  public static void assertParses(String csvString, Record expected, CsvHeader<Record, Value, Item> header) {
+    assertParses(',', csvString, expected, header);
+  }
+
+  public static void assertParses(int delimiter, String csvString, Record expected, CsvHeader<Record, Value, Item> header) {
+    Assertions.assertParses(Csv.tableParser(delimiter, header), csvString, expected);
   }
 
   public static void assertParseFails(final String csvString) {
-    assertParseFails(csvString, CsvStructureHeader.empty(), ',');
+    assertParseFails(',', csvString, CsvStructure.header());
   }
 
-  public static void assertParseFails(final String csvString, final CsvHeader<Item> header, final int delimiter) {
+  public static void assertParseFails(final String csvString, final CsvHeader<Record, Value, Item> header) {
+    assertParseFails(',', csvString, header);
+  }
+
+  public static void assertParseFails(final int delimiter, final String csvString, final CsvHeader<Record, Value, Item> header) {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
       public void run() throws Throwable {
-        Csv.parseTable(csvString, header, delimiter);
+        Csv.parseTable(delimiter, csvString, header);
       }
     });
   }

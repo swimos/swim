@@ -12,38 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.structure;
 
+import swim.csv.schema.CsvCol;
 import swim.structure.Item;
-import swim.structure.Record;
 import swim.structure.Value;
 import swim.util.Builder;
 
-public class CsvStructureParser extends CsvParser<Value, Item, Item> {
-  final int delimiter;
+public interface CsvStructureCol extends CsvCol<Item> {
+  Value key();
 
-  public CsvStructureParser(int delimiter) {
-    this.delimiter = delimiter;
-  }
-
-  public CsvStructureParser() {
-    this(',');
-  }
+  CsvStructureCol key(Value key);
 
   @Override
-  public boolean isDelimiter(int c) {
-    return c == delimiter;
-  }
+  CsvStructureCol name(String name);
 
-  @SuppressWarnings("unchecked")
   @Override
-  public Builder<Item, Value> tableBuilder() {
-    return (Builder<Item, Value>) (Builder<?, ?>) Record.create();
-  }
+  CsvStructureCol optional(boolean optional);
 
-  @SuppressWarnings("unchecked")
+  Item defaultCell();
+
   @Override
-  public Builder<Item, Item> rowBuilder() {
-    return (Builder<Item, Item>) (Builder<?, ?>) Record.create();
-  }
+  void addCell(Item cell, Builder<Item, ?> rowBuilder);
 }

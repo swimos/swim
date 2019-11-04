@@ -12,72 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
+package swim.csv.parser;
 
 import swim.codec.Input;
 import swim.codec.InputException;
 import swim.codec.InputSettings;
 import swim.codec.Mark;
 
-final class CsvQuotedInput extends Input {
-  final int quote;
+final class CsvInput extends Input {
+  final CsvParser csv;
   Input input;
-  int head;
 
-  CsvQuotedInput(int quote, Input input, int head) {
-    this.quote = quote;
+  CsvInput(CsvParser csv, Input input) {
+    this.csv = csv;
     this.input = input;
-    this.head = head;
   }
 
-  CsvQuotedInput(int quote, Input input) {
-    this(quote, input, -1);
-  }
-
-  int next() {
-    if (this.head == -1 && this.input.isCont()) {
-      this.head = this.input.head();
-      this.input = this.input.step();
-      if (this.head == this.quote) {
-        this.head = -2;
-      }
-    } else if (this.head == -1 && this.input.isDone()) {
-      this.head = -4;
-    }
-    if (this.head == -2 && this.input.isCont()) {
-      this.head = this.input.head();
-      if (this.head == this.quote) {
-        this.input = this.input.step();
-      } else {
-        this.head = -3;
-      }
-    } else if (this.head == -2 && this.input.isDone()) {
-      this.head = -3;
-    }
-    return this.head;
+  boolean isDelimiter(int c) {
+    return c == '\r' || c == '\n' || c == '"' || this.csv.isDelimiter(c);
   }
 
   @Override
   public boolean isCont() {
-    return next() >= 0;
+    return this.input.isCont() && !isDelimiter(this.input.head());
   }
 
   @Override
   public boolean isEmpty() {
-    final int head = next();
-    return head == -1 && this.input.isEmpty() || head == -2;
+    return this.input.isEmpty();
   }
 
   @Override
   public boolean isDone() {
-    final int head = next();
-    return head == -1 && this.input.isDone() || head == -3 || head == -4;
+    return this.input.isDone() || this.input.isCont() && isDelimiter(this.input.head());
   }
 
   @Override
   public boolean isError() {
-    final int head = next();
-    return head == -1 && this.input.isError();
+    return this.input.isError();
   }
 
   @Override
@@ -87,13 +59,13 @@ final class CsvQuotedInput extends Input {
 
   @Override
   public Input isPart(boolean isPart) {
-    return new CsvQuotedInput(this.quote, this.input.isPart(isPart), this.head);
+    return new CsvInput(this.csv, this.input.isPart(isPart));
   }
 
   @Override
   public int head() {
-    final int head = next();
-    if (head >= 0) {
+    final int head = this.input.head();
+    if (!isDelimiter(head)) {
       return head;
     } else {
       throw new InputException();
@@ -102,9 +74,9 @@ final class CsvQuotedInput extends Input {
 
   @Override
   public Input step() {
-    final int head = next();
-    if (head >= 0) {
-      this.head = -1;
+    final int head = this.input.head();
+    if (!isDelimiter(head)) {
+      this.input = this.input.step();
       return this;
     } else {
       final Throwable error = new InputException("invalid step");
@@ -114,7 +86,12 @@ final class CsvQuotedInput extends Input {
 
   @Override
   public Input seek(Mark mark) {
-    throw new UnsupportedOperationException();
+    return new CsvInput(this.csv, this.input.seek(mark));
+  }
+
+  @Override
+  public Input fork(Object condition) {
+    return new CsvInput(this.csv, this.input.fork(condition));
   }
 
   @Override
@@ -129,7 +106,7 @@ final class CsvQuotedInput extends Input {
 
   @Override
   public Input id(Object id) {
-    return new CsvQuotedInput(this.quote, this.input.id(id), this.head);
+    return new CsvInput(this.csv, this.input.id(id));
   }
 
   @Override
@@ -139,7 +116,7 @@ final class CsvQuotedInput extends Input {
 
   @Override
   public Input mark(Mark mark) {
-    return new CsvQuotedInput(this.quote, this.input.mark(mark), this.head);
+    return new CsvInput(this.csv, this.input.mark(mark));
   }
 
   @Override
@@ -164,11 +141,11 @@ final class CsvQuotedInput extends Input {
 
   @Override
   public Input settings(InputSettings settings) {
-    return new CsvQuotedInput(this.quote, this.input.settings(settings), this.head);
+    return new CsvInput(this.csv, this.input.settings(settings));
   }
 
   @Override
   public Input clone() {
-    return new CsvQuotedInput(this.quote, this.input.clone(), this.head);
+    return new CsvInput(this.csv, this.input.clone());
   }
 }

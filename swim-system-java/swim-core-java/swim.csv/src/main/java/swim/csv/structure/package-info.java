@@ -12,26 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.csv;
-
-import swim.codec.Input;
-import swim.codec.Output;
-import swim.codec.Parser;
-import swim.codec.Writer;
-import swim.util.Builder;
-
-public abstract class CsvCol<C, V> {
-  public abstract String name();
-
-  public abstract CsvCol<C, V> name(String name);
-
-  public abstract boolean optional();
-
-  public abstract CsvCol<C, V> optional(boolean optional);
-
-  public abstract void addCell(V value, Builder<C, ?> rowBuilder);
-
-  public abstract Parser<V> parseCell(Input input, Builder<C, ?> rowBuilder);
-
-  public abstract Writer<?, ?> writeCell(C cell, Output<?> output);
-}
+/**
+ * Structurally typed CSV schema.
+ */
+package swim.csv.structure;

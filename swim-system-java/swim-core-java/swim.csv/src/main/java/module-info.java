@@ -22,4 +22,7 @@ module swim.csv {
   requires transitive swim.structure;
 
   exports swim.csv;
+  exports swim.csv.schema;
+  exports swim.csv.parser;
+  exports swim.csv.structure;
 }
