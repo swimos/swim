@@ -40,6 +40,11 @@ final class HeaderStructure extends CsvStructureHeader {
   }
 
   @Override
+  public CsvCol<? extends Item> overflowCol() {
+    return new StringStructure(Value.absent(), "", false);
+  }
+
+  @Override
   public CsvStructureHeader col(int index, CsvCol<? extends Item> col) {
     final FingerTrieSeq<CsvCol<? extends Item>> cols = this.cols;
     if (index < 0) {

@@ -40,6 +40,11 @@ final class ArrayStructure extends CsvStructureHeader {
   }
 
   @Override
+  public CsvCol<? extends Item> overflowCol() {
+    return this.col;
+  }
+
+  @Override
   public CsvStructureHeader col(int index, CsvCol<? extends Item> col) {
     throw new UnsupportedOperationException();
   }

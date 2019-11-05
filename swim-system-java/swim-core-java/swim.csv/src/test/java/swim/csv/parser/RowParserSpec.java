@@ -30,7 +30,7 @@ import static org.testng.Assert.assertThrows;
 public class RowParserSpec {
   @Test
   public void parseEmptyRow() {
-    assertParses("", Record.empty(), CsvStructure.header());
+    assertParses("", Record.of(""), CsvStructure.header());
   }
 
   @Test
@@ -157,7 +157,7 @@ public class RowParserSpec {
   }
 
   @Test
-  public void parseTooFewCells() {
+  public void parseUnderflowRows() {
     assertParses("foo", Record.of("foo"),
                  CsvStructure.header(CsvStructure.stringCol(),
                                      CsvStructure.stringCol()));
@@ -175,17 +175,17 @@ public class RowParserSpec {
   }
 
   @Test
-  public void parseTooManyCellsFails() {
-    assertParseFails("foo,bar",
-                     CsvStructure.header(CsvStructure.stringCol()));
-    assertParseFails("a,b,c",
-                     CsvStructure.header(CsvStructure.stringCol(),
-                                         CsvStructure.stringCol()));
-    assertParseFails("\"foo\",\"bar\"",
-                     CsvStructure.header(CsvStructure.stringCol()));
-    assertParseFails("\"a\",\"b\",\"c\"",
-                     CsvStructure.header(CsvStructure.stringCol(),
-                                         CsvStructure.stringCol()));
+  public void parseOverflowRows() {
+    assertParses("foo,bar", Record.of("foo", "bar"),
+                 CsvStructure.header(CsvStructure.stringCol()));
+    assertParses("1,2,3", Record.of(1, 2, "3"),
+                 CsvStructure.header(CsvStructure.numberCol(),
+                                     CsvStructure.numberCol()));
+    assertParses("\"foo\",\"bar\"", Record.of("foo", "bar"),
+                 CsvStructure.header(CsvStructure.stringCol()));
+    assertParses("\"a\",\"b\",\"c\"", Record.of("a", "b", "c"),
+                 CsvStructure.header(CsvStructure.stringCol(),
+                                     CsvStructure.stringCol()));
   }
 
   @Test

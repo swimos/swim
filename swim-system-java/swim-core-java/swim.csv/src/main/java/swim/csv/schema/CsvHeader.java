@@ -21,6 +21,8 @@ public abstract class CsvHeader<T, R, C> {
 
   public abstract CsvCol<? extends C> getCol(int index);
 
+  public abstract CsvCol<? extends C> overflowCol();
+
   public abstract CsvHeader<T, R, C> col(int index, CsvCol<? extends C> col);
 
   public abstract CsvHeader<T, R, C> col(int index, String name);

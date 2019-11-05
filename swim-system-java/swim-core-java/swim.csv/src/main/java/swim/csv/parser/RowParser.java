@@ -58,26 +58,45 @@ final class RowParser<T, R, C> extends Parser<R> {
     int c = 0;
     do {
       if (step == 1) {
-        if (index >= header.colCount()) {
-          step = 4;
-        } else if (input.isCont() && input.head() == '"') {
-          input = input.step();
-          step = 3;
-        } else if (!input.isEmpty()) {
+        if (input.isCont()) {
+          c = input.head();
+          if (c == '\r' || c == '\n') {
+            if (rowBuilder == null) {
+              rowBuilder = header.rowBuilder();
+            }
+            return done(rowBuilder.bind());
+          } else if (c == '"') {
+            input = input.step();
+            step = 3;
+          } else {
+            step = 2;
+          }
+        } else if (input.isDone()) {
           step = 2;
         }
       }
       if (step == 2) {
         final Input cellInput = new CsvInput(csv, input);
+        CsvCol<C> col = null;
         if (cellParser == null) {
-          final CsvCol<? extends C> col = header.getCol(index);
+          if (index < header.colCount()) {
+            col = (CsvCol<C>) header.getCol(index);
+          } else {
+            col = (CsvCol<C>) header.overflowCol();
+          }
           cellParser = csv.parseCell(col, cellInput);
         }
         while (cellParser.isCont() && !cellInput.isEmpty()) {
           cellParser = cellParser.feed(cellInput);
         }
         if (cellParser.isDone()) {
-          final CsvCol<C> col = (CsvCol<C>) header.getCol(index);
+          if (col == null) {
+            if (index < header.colCount()) {
+              col = (CsvCol<C>) header.getCol(index);
+            } else {
+              col = (CsvCol<C>) header.overflowCol();
+            }
+          }
           if (rowBuilder == null) {
             rowBuilder = header.rowBuilder();
           }
@@ -91,8 +110,14 @@ final class RowParser<T, R, C> extends Parser<R> {
       }
       if (step == 3) {
         final Input cellInput = new CsvQuotedInput('"', input, head);
+        CsvCol<C> col = null;
         if (cellParser == null) {
-          cellParser = csv.parseCell(header.getCol(index), cellInput);
+          if (index < header.colCount()) {
+            col = (CsvCol<C>) header.getCol(index);
+          } else {
+            col = (CsvCol<C>) header.overflowCol();
+          }
+          cellParser = csv.parseCell(col, cellInput);
         }
         while (cellParser.isCont() && !cellInput.isEmpty()) {
           cellParser = cellParser.feed(cellInput);
@@ -103,7 +128,13 @@ final class RowParser<T, R, C> extends Parser<R> {
         if (head == -4) {
           return error(Diagnostic.expected('"', input));
         } else if (cellParser.isDone()) {
-          final CsvCol<C> col = (CsvCol<C>) header.getCol(index);
+          if (col == null) {
+            if (index < header.colCount()) {
+              col = (CsvCol<C>) header.getCol(index);
+            } else {
+              col = (CsvCol<C>) header.overflowCol();
+            }
+          }
           if (rowBuilder == null) {
             rowBuilder = header.rowBuilder();
           }
@@ -117,12 +148,7 @@ final class RowParser<T, R, C> extends Parser<R> {
         }
       }
       if (step == 4) {
-        if (input.isDone() || index >= header.colCount()) {
-          if (rowBuilder == null) {
-            rowBuilder = header.rowBuilder();
-          }
-          return done(rowBuilder.bind());
-        } else if (input.isCont()) {
+        if (input.isCont()) {
           c = input.head();
           if (c == '\r' || c == '\n') {
             if (rowBuilder == null) {
@@ -136,6 +162,11 @@ final class RowParser<T, R, C> extends Parser<R> {
           } else {
             return error(Diagnostic.expected("delimiter", input));
           }
+        } else if (input.isDone()) {
+          if (rowBuilder == null) {
+            rowBuilder = header.rowBuilder();
+          }
+          return done(rowBuilder.bind());
         }
       }
       break;
