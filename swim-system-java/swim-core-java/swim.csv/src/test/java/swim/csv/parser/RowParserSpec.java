@@ -84,6 +84,16 @@ public class RowParserSpec {
   }
 
   @Test
+  public void parseQuotedCellWithLineBreaks() {
+    assertParses("\"Hello,\rworld!\"", Record.of("Hello,\rworld!"),
+                 CsvStructure.header(CsvStructure.stringCol()));
+    assertParses("\"Hello,\nworld!\"", Record.of("Hello,\nworld!"),
+                 CsvStructure.header(CsvStructure.stringCol()));
+    assertParses("\"Hello,\r\nworld!\"", Record.of("Hello,\r\nworld!"),
+                 CsvStructure.header(CsvStructure.stringCol()));
+  }
+
+  @Test
   public void parsRowsWithDifferentDelimiters() {
     assertParses('^', "^", Record.of("", ""),
                  CsvStructure.header(CsvStructure.stringCol(),
