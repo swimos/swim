@@ -70,6 +70,11 @@ final class UriPathEmpty extends UriPath {
   }
 
   @Override
+  public UriPath body() {
+    return this;
+  }
+
+  @Override
   public UriPath appended(Collection<? extends String> components) {
     return UriPath.from(components);
   }

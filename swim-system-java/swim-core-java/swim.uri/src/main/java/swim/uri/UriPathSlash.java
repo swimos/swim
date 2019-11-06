@@ -91,6 +91,21 @@ final class UriPathSlash extends UriPath {
   }
 
   @Override
+  public UriPath body() {
+    final UriPath tail = this.tail;
+    if (tail.isEmpty()) {
+      return UriPath.empty();
+    } else {
+      final UriPath next = tail.tail();
+      if (next.isEmpty()) {
+        return UriPath.slash();
+      } else {
+        return new UriPathSlash(tail.body());
+      }
+    }
+  }
+
+  @Override
   public UriPath prependedSegment(String segment) {
     return UriPath.segment(segment, this);
   }

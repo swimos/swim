@@ -91,6 +91,8 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     return builder.bind();
   }
 
+  public abstract UriPath body();
+
   public UriPath foot() {
     return UriPath.foot(this);
   }

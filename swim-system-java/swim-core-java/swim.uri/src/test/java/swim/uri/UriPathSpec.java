@@ -55,4 +55,18 @@ public class UriPathSpec {
     assertEquals(UriPath.parse("/foo/bar").base(), UriPath.parse("/foo/"));
     assertEquals(UriPath.parse("/foo/bar/").base(), UriPath.parse("/foo/bar/"));
   }
+
+  @Test
+  public void testBodyPath() {
+    assertEquals(UriPath.parse("").body(), UriPath.parse(""));
+    assertEquals(UriPath.parse("foo").body(), UriPath.parse(""));
+    assertEquals(UriPath.parse("foo/").body(), UriPath.parse("foo"));
+    assertEquals(UriPath.parse("foo/bar").body(), UriPath.parse("foo/"));
+    assertEquals(UriPath.parse("foo/bar/").body(), UriPath.parse("foo/bar"));
+    assertEquals(UriPath.parse("/").body(), UriPath.parse(""));
+    assertEquals(UriPath.parse("/foo").body(), UriPath.parse("/"));
+    assertEquals(UriPath.parse("/foo/").body(), UriPath.parse("/foo"));
+    assertEquals(UriPath.parse("/foo/bar").body(), UriPath.parse("/foo/"));
+    assertEquals(UriPath.parse("/foo/bar/").body(), UriPath.parse("/foo/bar"));
+  }
 }

@@ -100,6 +100,16 @@ final class UriPathSegment extends UriPath {
   }
 
   @Override
+  public UriPath body() {
+    final UriPath tail = this.tail;
+    if (tail.isEmpty()) {
+      return UriPath.empty();
+    } else {
+      return new UriPathSegment(this.head, tail.body());
+    }
+  }
+
+  @Override
   public UriPath prependedSegment(String segment) {
     return UriPath.segment(segment, UriPath.slash(this));
   }

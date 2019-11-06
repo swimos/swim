@@ -244,12 +244,20 @@ public class Uri implements Comparable<Uri>, Debug, Display {
     return this.path.base();
   }
 
+  public final UriPath bodyPath() {
+    return this.path.body();
+  }
+
   public final Uri parent() {
     return Uri.from(this.scheme, this.authority, this.path.parent());
   }
 
   public final Uri base() {
     return Uri.from(this.scheme, this.authority, this.path.base());
+  }
+
+  public final Uri body() {
+    return Uri.from(this.scheme, this.authority, this.path.body());
   }
 
   public Uri appendedPath(String component) {
