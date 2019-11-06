@@ -466,10 +466,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
           final AgentFactory<?> agentFactory = createAgentFactory(node, agentDef);
           if (agentDef != null) {
             final Value id = agentDef.id();
-            Value props = agentDef.props();
-            if (!props.isDefined()) {
-              props = agentModel.props();
-            }
+            final Value props = agentModel.props().concat(agentDef.props());
             agentModel.addAgentView(agentModel.createAgent(agentFactory, id, props));
           }
         }
