@@ -90,7 +90,7 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
     while (routes.hasNext()) {
       final Map.Entry<String, UriPathMapper<T>> route = routes.next();
       final String segment = route.getKey();
-      UriPathMapper<T> mapping = this.table.get(segment);
+      UriPathMapper<T> mapping = table.get(segment);
       if (mapping != null) {
         mapping = mapping.merged(route.getValue());
       } else {

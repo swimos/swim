@@ -605,7 +605,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K
         final int leafHash = Murmur3.hash(leaf);
         if (keyHash == leafHash && key.equals(leaf)) {
           final V v = getValue(branch);
-          if (value == null ? v == null : value.equals(v)) {
+          if (value == v) {
             return this;
           } else {
             return remap(treeMap, leafMap).setLeaf(branch, key, value);
