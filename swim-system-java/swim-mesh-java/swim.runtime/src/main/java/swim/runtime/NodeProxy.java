@@ -20,6 +20,7 @@ import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Identity;
 import swim.api.policy.Policy;
+import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
@@ -193,6 +194,16 @@ public class NodeProxy implements NodeBinding, NodeContext {
   @Override
   public void openLanes(NodeBinding node) {
     this.nodeContext.openLanes(node);
+  }
+
+  @Override
+  public FingerTrieSeq<Value> agentIds() {
+    return this.nodeBinding.agentIds();
+  }
+
+  @Override
+  public FingerTrieSeq<Agent> agents() {
+    return this.nodeBinding.agents();
   }
 
   @Override

@@ -14,6 +14,7 @@
 
 package swim.runtime.reflect;
 
+import swim.collections.FingerTrieSeq;
 import swim.runtime.NodeBinding;
 import swim.structure.Form;
 import swim.structure.Item;
@@ -25,11 +26,13 @@ import swim.uri.Uri;
 public class NodeInfo {
   protected final Uri nodeUri;
   protected final long created;
+  protected final FingerTrieSeq<Value> agentIds;
   protected final long childCount;
 
-  public NodeInfo(Uri nodeUri, long created, long childCount) {
+  public NodeInfo(Uri nodeUri, long created, FingerTrieSeq<Value> agentIds, long childCount) {
     this.nodeUri = nodeUri;
     this.created = created;
+    this.agentIds = agentIds;
     this.childCount = childCount;
   }
 
@@ -41,6 +44,10 @@ public class NodeInfo {
     return this.created;
   }
 
+  public final FingerTrieSeq<Value> agentIds() {
+    return this.agentIds;
+  }
+
   public final long childCount() {
     return this.childCount;
   }
@@ -50,7 +57,8 @@ public class NodeInfo {
   }
 
   public static NodeInfo from(NodeBinding nodeBinding, long childCount) {
-    return new NodeInfo(nodeBinding.nodeUri(), nodeBinding.createdTime(), childCount);
+    return new NodeInfo(nodeBinding.nodeUri(), nodeBinding.createdTime(),
+                        nodeBinding.agentIds(), childCount);
   }
 
   public static NodeInfo from(NodeBinding nodeBinding) {
@@ -77,11 +85,19 @@ final class NodeInfoForm extends Form<NodeInfo> {
   @Override
   public Item mold(NodeInfo info) {
     if (info != null) {
-      final Record record = Record.create(3);
+      final Record record = Record.create(4);
       record.slot("nodeUri", info.nodeUri.toString());
       record.slot("created", info.created);
       if (info.childCount != 0L) {
         record.slot("childCount", info.childCount);
+      }
+      final int agentCount = info.agentIds.size();
+      if (agentCount != 0) {
+        final Record agents = Record.create(agentCount);
+        for (int i = 0; i < agentCount; i += 1) {
+          agents.add(info.agentIds.get(i));
+        }
+        record.slot("agents", agents);
       }
       return record;
     } else {
@@ -95,8 +111,13 @@ final class NodeInfoForm extends Form<NodeInfo> {
     final Uri nodeUri = Uri.form().cast(value.get("nodeUri"));
     if (nodeUri != null) {
       final long created = value.get("created").longValue(0L);
+      FingerTrieSeq<Value> agentIds = FingerTrieSeq.empty();
+      final Value agents = value.get("agents");
+      for (int i = 0, n = agents.length(); i < n; i += 1) {
+        agentIds = agentIds.appended(agents.getItem(i).toValue());
+      }
       final long childCount = value.get("childCount").longValue(0L);
-      return new NodeInfo(nodeUri, created, childCount);
+      return new NodeInfo(nodeUri, created, agentIds, childCount);
     }
     return null;
   }

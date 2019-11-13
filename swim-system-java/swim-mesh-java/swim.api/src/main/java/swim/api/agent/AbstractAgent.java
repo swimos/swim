@@ -175,6 +175,10 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
     return this.context.nodeUri();
   }
 
+  public final Value agentId() {
+    return this.context.agentId();
+  }
+
   /**
    * A {@link swim.structure.Record} that maps every dynamic property in
    * {@link #nodeUri()}, as defined by {@link AgentRoute#pattern()}, to its

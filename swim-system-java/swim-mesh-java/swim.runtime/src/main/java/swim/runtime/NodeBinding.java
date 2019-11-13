@@ -17,6 +17,7 @@ package swim.runtime;
 import swim.api.agent.Agent;
 import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
+import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -45,6 +46,10 @@ public interface NodeBinding extends TierBinding, CellBinding {
   long createdTime();
 
   void openMetaNode(NodeBinding node, NodeBinding metaNode);
+
+  FingerTrieSeq<Value> agentIds();
+
+  FingerTrieSeq<Agent> agents();
 
   AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef);
 

@@ -67,7 +67,6 @@ import swim.store.StoreBinding;
 import swim.structure.Text;
 import swim.structure.Value;
 import swim.uri.Uri;
-import swim.util.Builder;
 
 public class AgentView extends AbstractTierBinding implements TierContext, AgentContext {
   protected final AgentModel node;
@@ -131,6 +130,11 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   @Override
+  public final Value agentId() {
+    return this.id;
+  }
+
+  @Override
   public final Value props() {
     return this.props;
   }
@@ -191,23 +195,9 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
     return lane;
   }
 
-  public <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass) {
-    return this.node.createAgentFactory(this.node, agentClass);
-  }
-
   @Override
   public FingerTrieSeq<Agent> agents() {
-    final Object views = this.node.views;
-    final Builder<Agent, FingerTrieSeq<Agent>> agents = FingerTrieSeq.builder();
-    if (views instanceof AgentView) {
-      agents.add(((AgentView) views).agent);
-    } else if (views instanceof AgentView[]) {
-      final AgentView[] viewArray = (AgentView[]) views;
-      for (int i = 0, n = viewArray.length; i < n; i += 1) {
-        agents.add(viewArray[i].agent);
-      }
-    }
-    return agents.bind();
+    return this.node.agents();
   }
 
   @Override
@@ -228,6 +218,10 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   @Override
   public <A extends Agent> A getAgent(Class<? extends A> agentClass) {
     return this.node.getAgent(agentClass);
+  }
+
+  public <A extends Agent> AgentFactory<A> createAgentFactory(Class<? extends A> agentClass) {
+    return this.node.createAgentFactory(this.node, agentClass);
   }
 
   @SuppressWarnings("unchecked")

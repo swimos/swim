@@ -181,8 +181,6 @@ public abstract class AbstractSwimRef implements SwimRef, CellContext {
       nodeUri = Uri.from(nodeUri.path(), nodeUri.query(), nodeUri.fragment());
     } else {
       hostUri = Uri.empty();
-      nodeUri = Uri.from(nodeUri.scheme(), UriAuthority.undefined(),
-                         nodeUri.path(), nodeUri.query(), nodeUri.fragment());
     }
     final Identity identity = null;
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);

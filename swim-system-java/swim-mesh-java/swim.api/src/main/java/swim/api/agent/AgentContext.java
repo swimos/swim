@@ -44,6 +44,8 @@ public interface AgentContext extends SwimRef, LaneFactory, Store, Log {
    */
   Uri nodeUri();
 
+  Value agentId();
+
   /**
    * A {@link swim.structure.Record} that maps every dynamic property in
    * {@link #nodeUri()}, as defined by {@link AgentRoute#pattern()}, to its

@@ -28,6 +28,7 @@ import swim.api.lane.function.OnCueKey;
 import swim.api.lane.function.OnSyncKeys;
 import swim.api.policy.Policy;
 import swim.api.warp.WarpUplink;
+import swim.collections.FingerTrieSeq;
 import swim.concurrent.Conts;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
@@ -971,7 +972,7 @@ final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncK
         if (nodeBinding != null) {
           return NodeInfo.from(nodeBinding, directory.childCount());
         } else if (!directory.isEmpty()) {
-          return new NodeInfo(nodeUri, 0L, directory.childCount()); // synthetic directory node
+          return new NodeInfo(nodeUri, 0L, FingerTrieSeq.empty(), directory.childCount()); // synthetic directory node
         }
       }
     } else {

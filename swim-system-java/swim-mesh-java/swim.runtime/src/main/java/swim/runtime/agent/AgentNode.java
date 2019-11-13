@@ -37,6 +37,7 @@ import swim.api.lane.SupplyLane;
 import swim.api.lane.ValueLane;
 import swim.api.policy.Policy;
 import swim.api.ws.WsLane;
+import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Call;
 import swim.concurrent.Cont;
@@ -193,6 +194,16 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   @Override
   public void openLanes(NodeBinding node) {
     this.nodeContext.openLanes(node);
+  }
+
+  @Override
+  public FingerTrieSeq<Value> agentIds() {
+    return FingerTrieSeq.empty();
+  }
+
+  @Override
+  public FingerTrieSeq<Agent> agents() {
+    return FingerTrieSeq.empty();
   }
 
   @Override

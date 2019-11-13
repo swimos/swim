@@ -122,8 +122,6 @@ public abstract class WarpLaneModel<View extends WarpLaneView, U extends WarpUpl
       } finally {
         pushRequest.didDeliver();
       }
-      COMMAND_DELTA.incrementAndGet(this);
-      didUpdateMetrics();
     } else {
       pushRequest.didDecline();
     }

@@ -19,6 +19,7 @@ import swim.api.agent.AgentDef;
 import swim.api.agent.AgentFactory;
 import swim.api.auth.Identity;
 import swim.api.policy.Policy;
+import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Stage;
 import swim.concurrent.StageDef;
@@ -352,6 +353,21 @@ public class ActorNode extends ActorTier implements NodeBinding, NodeContext {
   }
 
   @Override
+  public FingerTrieSeq<Value> agentIds() {
+    return this.nodeBinding.agentIds();
+  }
+
+  @Override
+  public FingerTrieSeq<Agent> agents() {
+    return this.nodeBinding.agents();
+  }
+
+  @Override
+  public void openAgents(NodeBinding node) {
+    this.nodeContext.openAgents(node);
+  }
+
+  @Override
   public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
     return this.nodeContext.createAgentFactory(node, agentDef);
   }
@@ -359,11 +375,6 @@ public class ActorNode extends ActorTier implements NodeBinding, NodeContext {
   @Override
   public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
     return this.nodeContext.createAgentFactory(node, agentClass);
-  }
-
-  @Override
-  public void openAgents(NodeBinding node) {
-    this.nodeContext.openAgents(node);
   }
 
   @Override

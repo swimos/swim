@@ -28,6 +28,7 @@ import swim.api.lane.function.OnCue;
 import swim.api.lane.function.OnCueKey;
 import swim.api.lane.function.OnSyncKeys;
 import swim.api.warp.WarpUplink;
+import swim.collections.FingerTrieSeq;
 import swim.concurrent.Conts;
 import swim.runtime.LaneBinding;
 import swim.runtime.LaneModel;
@@ -46,6 +47,7 @@ import swim.runtime.reflect.WarpDownlinkPulse;
 import swim.runtime.reflect.WarpUplinkPulse;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.util.Builder;
 
 public class AgentModel extends AgentNode {
   protected final Value props;
@@ -159,22 +161,39 @@ public class AgentModel extends AgentNode {
     metaNode.openLane(LogEntry.FAIL_LOG_URI, this.metaFailLog);
   }
 
-  public AgentView createAgent(AgentFactory<?> agentFactory, Value id, Value props) {
-    final AgentView view = new AgentView(this, id, props);
-    final Agent agent;
-    try {
-      SwimContext.setAgentContext(view);
-      agent = agentFactory.createAgent(view);
-    } finally {
-      SwimContext.clear();
+  @Override
+  public FingerTrieSeq<Value> agentIds() {
+    final Builder<Value, FingerTrieSeq<Value>> builder = FingerTrieSeq.builder();
+    final Object views = this.views;
+    if (views instanceof AgentView) {
+      builder.add(((AgentView) views).id);
+    } else if (views instanceof AgentView[]) {
+      final AgentView[] viewArray = (AgentView[]) views;
+      for (int i = 0, n = viewArray.length; i < n; i += 1) {
+        builder.add(viewArray[i].id);
+      }
     }
-    view.setAgent(agent);
-    return view;
+    return builder.bind();
+  }
+
+  @Override
+  public FingerTrieSeq<Agent> agents() {
+    final Builder<Agent, FingerTrieSeq<Agent>> builder = FingerTrieSeq.builder();
+    final Object views = this.views;
+    if (views instanceof AgentView) {
+      builder.add(((AgentView) views).agent);
+    } else if (views instanceof AgentView[]) {
+      final AgentView[] viewArray = (AgentView[]) views;
+      for (int i = 0, n = viewArray.length; i < n; i += 1) {
+        builder.add(viewArray[i].agent);
+      }
+    }
+    return builder.bind();
   }
 
   public AgentView getAgentView(Value id) {
-    final Object views = this.views;
     AgentView view;
+    final Object views = this.views;
     if (views instanceof AgentView) {
       view = (AgentView) views;
       if (id.equals(view.id)) {
@@ -195,6 +214,7 @@ public class AgentModel extends AgentNode {
   @SuppressWarnings("unchecked")
   public <S extends Agent> S getAgent(Class<S> agentClass) {
     Agent agent;
+    final Object views = this.views;
     if (views instanceof AgentView) {
       agent = ((AgentView) views).agent;
       if (agentClass.isInstance(agent)) {
@@ -244,6 +264,19 @@ public class AgentModel extends AgentNode {
     } while (!VIEWS.compareAndSet(this, oldViews, newViews));
     activate(view);
     didOpenAgent(view);
+    return view;
+  }
+
+  public AgentView createAgent(AgentFactory<?> agentFactory, Value id, Value props) {
+    final AgentView view = new AgentView(this, id, props);
+    final Agent agent;
+    try {
+      SwimContext.setAgentContext(view);
+      agent = agentFactory.createAgent(view);
+    } finally {
+      SwimContext.clear();
+    }
+    view.setAgent(agent);
     return view;
   }
 
