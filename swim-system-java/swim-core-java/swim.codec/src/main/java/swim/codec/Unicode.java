@@ -131,6 +131,14 @@ public final class Unicode {
     return ByteParser.parse(input, output);
   }
 
+  public static <O> Parser<O> nullParser() {
+    return new NullParser<O>();
+  }
+
+  public static <O> Parser<O> parseNull(Input input) {
+    return NullParser.parse(input);
+  }
+
   @SuppressWarnings("unchecked")
   public static <I> Writer<I, Object> stringWriter() {
     return (Writer<I, Object>) new StringWriter();

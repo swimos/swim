@@ -182,6 +182,14 @@ public final class Binary {
     return ByteParser.parse(input, output);
   }
 
+  public static <O> Parser<O> nullParser() {
+    return new NullParser<O>();
+  }
+
+  public static <O> Parser<O> parseNull(Input input) {
+    return NullParser.parse(input);
+  }
+
   @SuppressWarnings("unchecked")
   public static Writer<byte[], ?> byteArrayWriter() {
     return (Writer<byte[], ?>) (Writer<?, ?>) new ByteWriter();

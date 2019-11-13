@@ -15,6 +15,7 @@
 package swim.csv.structure;
 
 import swim.codec.Parser;
+import swim.codec.Unicode;
 import swim.collections.FingerTrieSeq;
 import swim.csv.schema.CsvCol;
 import swim.structure.Item;
@@ -64,6 +65,18 @@ public final class CsvStructure {
 
   public static CsvStructureCol numberCol() {
     return new NumberStructure(Value.absent(), "", false);
+  }
+
+  public static CsvStructureCol nullCol(Value key) {
+    return new ParsedStructure(key, key.stringValue(""), true, Unicode.nullParser());
+  }
+
+  public static CsvStructureCol nullCol(String key) {
+    return new ParsedStructure(Text.from(key), key, true, Unicode.nullParser());
+  }
+
+  public static CsvStructureCol nullCol() {
+    return new ParsedStructure(Value.absent(), "", true, Unicode.nullParser());
   }
 
   public static CsvStructureCol parsedCol(Value key, Parser<? extends Item> itemParser) {

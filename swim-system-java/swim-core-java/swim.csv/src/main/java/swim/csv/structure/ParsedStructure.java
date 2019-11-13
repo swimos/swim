@@ -78,8 +78,8 @@ final class ParsedStructure implements CsvStructureCol {
 
   @Override
   public void addCell(Item cell, Builder<Item, ?> rowBuilder) {
-    if (!this.optional || (cell instanceof Record) && !((Record) cell).isEmpty()
-        || cell != null && !(cell instanceof Record) && cell.isDefined()) {
+    if (!this.optional || (cell instanceof Record && !((Record) cell).isEmpty())
+        || (cell != null && !(cell instanceof Record) && cell.isDefined())) {
       if (cell == null) {
         cell = defaultCell();
       }

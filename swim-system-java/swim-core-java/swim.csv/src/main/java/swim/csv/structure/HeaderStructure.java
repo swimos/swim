@@ -41,7 +41,7 @@ final class HeaderStructure extends CsvStructureHeader {
 
   @Override
   public CsvCol<? extends Item> overflowCol() {
-    return new StringStructure(Value.absent(), "", false);
+    return CsvStructure.nullCol();
   }
 
   @Override
