@@ -13,22 +13,42 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {RenderingContext} from "@swim/render";
 import {AnimatedViewObserver} from "./AnimatedViewObserver";
+import {RenderViewContext} from "./RenderViewContext";
 import {RenderView} from "./RenderView";
 
 export interface RenderViewObserver<V extends RenderView = RenderView> extends AnimatedViewObserver<V> {
-  viewWillRender?(context: RenderingContext, view: V): void;
+  viewWillUpdate?(viewContext: RenderViewContext, view: V): void;
 
-  viewDidRender?(context: RenderingContext, view: V): void;
+  viewDidUpdate?(viewContext: RenderViewContext, view: V): void;
+
+  viewWillCompute?(viewContext: RenderViewContext, view: V): void;
+
+  viewDidCompute?(viewContext: RenderViewContext, view: V): void;
+
+  viewWillAnimate?(viewContext: RenderViewContext, view: V): void;
+
+  viewDidAnimate?(viewContext: RenderViewContext, view: V): void;
+
+  viewWillLayout?(viewContext: RenderViewContext, view: V): void;
+
+  viewDidLayout?(viewContext: RenderViewContext, view: V): void;
+
+  viewWillScroll?(viewContext: RenderViewContext, view: V): void;
+
+  viewDidScroll?(viewContext: RenderViewContext, view: V): void;
+
+  viewWillRender?(viewContext: RenderViewContext, view: V): void;
+
+  viewDidRender?(viewContext: RenderViewContext, view: V): void;
+
+  viewWillUpdateChildViews?(viewContext: RenderViewContext, view: V): void;
+
+  viewDidUpdateChildViews?(viewContext: RenderViewContext, view: V): void;
 
   viewWillSetHidden?(hidden: boolean, view: V): void;
 
   viewDidSetHidden?(hidden: boolean, view: V): void;
-
-  viewWillCull?(view: V): void;
-
-  viewDidCull?(view: V): void;
 
   viewWillSetCulled?(culled: boolean, view: V): void;
 

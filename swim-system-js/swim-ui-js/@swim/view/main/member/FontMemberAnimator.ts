@@ -14,8 +14,8 @@
 
 import {__extends} from "tslib";
 import {AnyFont, Font} from "@swim/font";
-import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
+import {Transition, Tween} from "@swim/transition";
+import {MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
@@ -23,10 +23,10 @@ export interface FontMemberAnimator<V extends AnimatedView> extends MemberAnimat
 }
 
 /** @hidden */
-export const FontMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
-  const FontMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
-      this: FontMemberAnimator<V>, view: V, value?: Font | null,
-      transition?: Transition<Font> | null, inherit?: MemberAnimatorInherit): FontMemberAnimator<V> {
+export const FontMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor<Font, AnyFont> {
+  const FontMemberAnimator: MemberAnimatorConstructor<Font, AnyFont> = function <V extends AnimatedView>(
+      this: FontMemberAnimator<V>, view: V, value?: AnyFont,
+      transition?: Transition<Font> | null, inherit?: string | null): FontMemberAnimator<V> {
     let _this: FontMemberAnimator<V> = function (value?: AnyFont | null, tween?: Tween<Font>): Font | null | undefined | V {
       if (value === void 0) {
         return _this.value;
@@ -39,9 +39,12 @@ export const FontMemberAnimator = (function (_super: typeof MemberAnimator): Mem
       }
     } as FontMemberAnimator<V>;
     (_this as any).__proto__ = this;
+    if (value !== null && value !== void 0) {
+      value = Font.fromAny(value);
+    }
     _this = _super.call(_this, view, value, transition, inherit) || _this;
     return _this;
-  } as unknown as MemberAnimatorConstructor;
+  } as unknown as MemberAnimatorConstructor<Font, AnyFont>;
   __extends(FontMemberAnimator, _super);
 
   return FontMemberAnimator;

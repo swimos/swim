@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
+import {Transition, Tween} from "@swim/transition";
+import {MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
@@ -22,10 +22,10 @@ export interface NumberMemberAnimator<V extends AnimatedView> extends MemberAnim
 }
 
 /** @hidden */
-export const NumberMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
-  const NumberMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
-      this: NumberMemberAnimator<V>, view: V, value?: number | null,
-      transition?: Transition<number> | null, inherit?: MemberAnimatorInherit): NumberMemberAnimator<V> {
+export const NumberMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor<number, number | string> {
+  const NumberMemberAnimator: MemberAnimatorConstructor<number, number | string> = function <V extends AnimatedView>(
+      this: NumberMemberAnimator<V>, view: V, value?: number | string,
+      transition?: Transition<number> | null, inherit?: string | null): NumberMemberAnimator<V> {
     let _this: NumberMemberAnimator<V> = function (value?: number | string | null, tween?: Tween<number>): number | null | undefined | V {
       if (value === void 0) {
         return _this.value;
@@ -38,9 +38,12 @@ export const NumberMemberAnimator = (function (_super: typeof MemberAnimator): M
       }
     } as NumberMemberAnimator<V>;
     (_this as any).__proto__ = this;
+    if (typeof value === "string") {
+      value = +value;
+    }
     _this = _super.call(_this, view, value, transition, inherit) || _this;
     return _this;
-  } as unknown as MemberAnimatorConstructor;
+  } as unknown as MemberAnimatorConstructor<number, number | string>;
   __extends(NumberMemberAnimator, _super);
 
   return NumberMemberAnimator;

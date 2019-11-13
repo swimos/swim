@@ -85,9 +85,9 @@ export interface StyleAnimator<V extends ElementView, T, U = T> extends TweenFra
   (value: U | null, tween?: Tween<T>, priority?: string | null): V;
 
   /** @hidden */
-  readonly _view: V;
+  _view: V;
   /** @hidden */
-  readonly _names: string | ReadonlyArray<string>;
+  _names: string | ReadonlyArray<string>;
   /** @hidden */
   _priority: string | undefined;
 
@@ -253,13 +253,12 @@ export const StyleAnimator = (function (_super: typeof TweenFrameAnimator): Styl
   };
 
   StyleAnimator.prototype.delete = function <V extends ElementView, T, U>(this: StyleAnimator<V, T, U>): void {
-    const style = this._view._node.style;
     const names = this._names;
     if (typeof names === "string") {
-      style.removeProperty(names);
+      this._view.setStyle(names, null);
     } else {
       for (let i = 0, n = names.length; i < n; i += 1) {
-        style.removeProperty(names[i]);
+        this._view.setStyle(names[i], null);
       }
     }
   };

@@ -14,8 +14,8 @@
 
 import {__extends} from "tslib";
 import {AnyTransform, Transform} from "@swim/transform";
-import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
+import {Transition, Tween} from "@swim/transition";
+import {MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
@@ -23,10 +23,10 @@ export interface TransformMemberAnimator<V extends AnimatedView> extends MemberA
 }
 
 /** @hidden */
-export const TransformMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
-  const TransformMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
-      this: TransformMemberAnimator<V>, view: V, value?: Transform | null,
-      transition?: Transition<Transform> | null, inherit?: MemberAnimatorInherit): TransformMemberAnimator<V> {
+export const TransformMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor<Transform, AnyTransform> {
+  const TransformMemberAnimator: MemberAnimatorConstructor<Transform, AnyTransform> = function <V extends AnimatedView>(
+      this: TransformMemberAnimator<V>, view: V, value?: AnyTransform,
+      transition?: Transition<Transform> | null, inherit?: string | null): TransformMemberAnimator<V> {
     let _this: TransformMemberAnimator<V> = function (value?: AnyTransform | null, tween?: Tween<Transform>): Transform | null | undefined | V {
       if (value === void 0) {
         return _this.value;
@@ -39,9 +39,12 @@ export const TransformMemberAnimator = (function (_super: typeof MemberAnimator)
       }
     } as TransformMemberAnimator<V>;
     (_this as any).__proto__ = this;
+    if (value !== null && value !== void 0) {
+      value = Transform.fromAny(value);
+    }
     _this = _super.call(_this, view, value, transition, inherit) || _this;
     return _this;
-  } as unknown as MemberAnimatorConstructor;
+  } as unknown as MemberAnimatorConstructor<Transform, AnyTransform>;
   __extends(TransformMemberAnimator, _super);
 
   return TransformMemberAnimator;

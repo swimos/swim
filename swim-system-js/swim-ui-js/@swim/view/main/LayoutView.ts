@@ -25,7 +25,8 @@ export const LayoutView = {
       const view = object as LayoutView;
       return view instanceof View
           && typeof view.addConstraint === "function"
-          && typeof view.removeConstraint === "function";
+          && typeof view.removeConstraint === "function"
+          && typeof view.updateVariables === "function";
     }
     return false;
   },

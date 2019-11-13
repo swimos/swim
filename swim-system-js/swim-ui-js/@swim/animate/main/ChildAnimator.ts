@@ -12,30 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Animated} from "./Animated";
+import {AnimatorContext} from "./AnimatorContext";
 import {Animator} from "./Animator";
 
 export abstract class ChildAnimator extends Animator {
-  abstract get parent(): Animated | null;
+  abstract get parent(): AnimatorContext | null;
 
-  get dirty(): boolean {
-    const parent = this.parent;
-    return parent ? parent.dirty : false;
-  }
-
-  setDirty(dirty: boolean): void {
-    if (dirty) {
-      const parent = this.parent;
-      if (parent) {
-        parent.setDirty(dirty);
-      }
-    }
-  }
-
-  animate(): void {
+  animate(animator: Animator = this): void {
     const parent = this.parent;
     if (parent) {
-      parent.animate();
+      parent.animate(animator);
     }
   }
 }

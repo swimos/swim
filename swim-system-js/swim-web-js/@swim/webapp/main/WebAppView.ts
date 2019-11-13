@@ -131,7 +131,7 @@ export class WebAppView extends HtmlAppView {
       webapp.key(key);
     }
     WebAppView.bindController(webapp);
-    webapp.cascadeMount();
+    webapp.requireUpdate(0, true);
     webapp.materializeTree();
     return webapp;
   }

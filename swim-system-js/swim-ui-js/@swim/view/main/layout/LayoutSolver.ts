@@ -30,22 +30,18 @@ export class LayoutSolver extends ConstraintSolver {
   }
 
   protected didAddConstraint(constraint: Constraint): void {
-    this._manager.throttleLayout();
+    this._manager.didAddConstraint(constraint);
   }
 
   protected didRemoveConstraint(constraint: Constraint): void {
-    this._manager.throttleLayout();
+    this._manager.didRemoveConstraint(constraint);
   }
 
   protected didAddVariable(variable: ConstrainVariable): void {
-    this._manager.throttleLayout();
+    this._manager.didAddVariable(variable);
   }
 
   protected didRemoveVariable(variable: ConstrainVariable): void {
-    this._manager.throttleLayout();
-  }
-
-  protected didSetVariableState(variable: ConstrainVariable, state: number): void {
-    this._manager.throttleLayout();
+    this._manager.didRemoveVariable(variable);
   }
 }

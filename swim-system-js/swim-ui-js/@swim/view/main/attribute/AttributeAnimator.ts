@@ -74,9 +74,9 @@ export interface AttributeAnimator<V extends ElementView, T, U = T> extends Twee
   (value: U | null, tween?: Tween<T>): V;
 
   /** @hidden */
-  readonly _view: V;
+  _view: V;
   /** @hidden */
-  readonly _name: string;
+  _name: string;
 
   readonly view: V;
 
@@ -180,16 +180,16 @@ export const AttributeAnimator = (function (_super: typeof TweenFrameAnimator): 
 
   AttributeAnimator.prototype.willUpdate = function <V extends ElementView, T, U>(this: AttributeAnimator<V, T, U>,
                                                                                   newValue: T, oldValue: T): void {
-    // stub
+    // hook
   };
 
   AttributeAnimator.prototype.didUpdate = function <V extends ElementView, T, U>(this: AttributeAnimator<V, T, U>,
                                                                                  newValue: T, oldValue: T): void {
-    // stub
+    // hook
   };
 
   AttributeAnimator.prototype.delete = function <V extends ElementView, T, U>(this: AttributeAnimator<V, T, U>): void {
-    this._view._node.removeAttribute(this._name);
+    this._view.setAttribute(this._name, null);
   };
 
   return AttributeAnimator;

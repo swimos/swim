@@ -17,12 +17,25 @@ import {ConstrainBinding, AnyConstraintStrength, ConstraintStrength} from "@swim
 import {LayoutScope} from "./LayoutScope";
 import {View} from "../View";
 
+export type LayoutAnchorGetState<S extends LayoutScope> = (this: S, oldState: number) => number;
+
+export type LayoutAnchorSetValue<S extends LayoutScope> = (this: S, newValue: number) => void;
+
+export interface LayoutAnchorDescriptor<S extends LayoutScope> {
+  get?: LayoutAnchorGetState<S>;
+  set?: LayoutAnchorSetValue<S>;
+  value?: number;
+  strength?: AnyConstraintStrength;
+  enabled?: boolean;
+}
+
 export interface LayoutAnchorConstructor {
-  new<S extends LayoutScope>(scope: S, name: string, value: number, strength: ConstraintStrength): LayoutAnchor<S>;
+  new<S extends LayoutScope>(scope: S, name: string, value: number,
+                             strength: ConstraintStrength, enabled?: boolean): LayoutAnchor<S>;
 }
 
 export interface LayoutAnchorClass extends LayoutAnchorConstructor {
-  (strength: AnyConstraintStrength): PropertyDecorator;
+  <S extends LayoutScope>(descriptor: LayoutAnchorDescriptor<S>): PropertyDecorator;
 }
 
 export interface LayoutAnchor<S extends LayoutScope> extends ConstrainBinding {
@@ -30,21 +43,28 @@ export interface LayoutAnchor<S extends LayoutScope> extends ConstrainBinding {
   (state: number): S;
 
   /** @hidden */
-  readonly _scope: S;
-
-  readonly scope: S;
-
+  _scope: S;
   /** @hidden */
   _enabled: boolean;
 
+  readonly scope: S;
+
   enabled(): boolean;
   enabled(enabled: boolean): this;
+
+  updateState(): void;
+
+  /** @hidden */
+  getState?: LayoutAnchorGetState<S>;
+
+  /** @hidden */
+  setValue?: LayoutAnchorSetValue<S>;
 }
 
 export const LayoutAnchor = (function (_super: typeof ConstrainBinding): LayoutAnchorClass {
   const LayoutAnchor: LayoutAnchorClass = function <S extends LayoutScope>(
-      this: LayoutAnchor<S> | undefined, scope: S | AnyConstraintStrength,
-      name?: string, value?: number, strength?: ConstraintStrength): LayoutAnchor<S> | PropertyDecorator {
+      this: LayoutAnchor<S> | undefined, scope: S | LayoutAnchorDescriptor<S>,
+      name?: string, value?: number, strength?: ConstraintStrength, enabled?: boolean): LayoutAnchor<S> | PropertyDecorator {
     if (this instanceof LayoutAnchor) { // constructor
       let _this: LayoutAnchor<S> = function (state?: number): number | S {
         if (state === void 0) {
@@ -55,12 +75,15 @@ export const LayoutAnchor = (function (_super: typeof ConstrainBinding): LayoutA
         }
       } as LayoutAnchor<S>;
       (_this as any).__proto__ = this;
+      if (enabled === void 0) {
+        enabled = false;
+      }
       _this = _super.call(_this, scope as S, name!, value!, strength!) || _this;
-      _this._enabled = false;
+      _this._enabled = enabled;
       return _this;
     } else { // decorator
-      strength = ConstraintStrength.fromAny(scope as AnyConstraintStrength);
-      return View.decorateLayoutAnchor.bind(void 0, LayoutAnchor, 0, strength);
+      const descriptor = scope as LayoutAnchorDescriptor<S>;
+      return View.decorateLayoutAnchor.bind(void 0, LayoutAnchor, descriptor);
     }
   } as LayoutAnchorClass;
   __extends(LayoutAnchor, _super);
@@ -71,6 +94,30 @@ export const LayoutAnchor = (function (_super: typeof ConstrainBinding): LayoutA
     } else {
       this._enabled = enabled;
       return this;
+    }
+  };
+
+  LayoutAnchor.prototype.updateValue = function <S extends LayoutScope>(this: LayoutAnchor<S>, newValue: number): void {
+    const oldValue = this._value;
+    if (oldValue !== newValue) {
+      this._value = newValue;
+      if (this._enabled) {
+        const setValue = this.setValue;
+        if (setValue) {
+          setValue.call(this._scope, newValue);
+        }
+      }
+    }
+  };
+
+  LayoutAnchor.prototype.updateState = function <S extends LayoutScope>(this: LayoutAnchor<S>): void {
+    if (!this._enabled) {
+      const getState = this.getState;
+      if (getState) {
+        const oldState = this._state;
+        const newState = getState.call(this._scope, oldState);
+        this.setState(newState);
+      }
     }
   };
 

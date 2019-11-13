@@ -75,8 +75,10 @@ import {
 } from "@swim/constraint";
 import {AttributeAnimator} from "./attribute/AttributeAnimator";
 import {StyleAnimator} from "./style/StyleAnimator";
+import {LayoutScope} from "./layout/LayoutScope";
 import {LayoutManager} from "./layout/LayoutManager";
 import {LayoutAnchor} from "./layout/LayoutAnchor";
+import {ViewContext} from "./ViewContext";
 import {View} from "./View";
 import {LayoutView} from "./LayoutView";
 import {NodeView} from "./NodeView";
@@ -247,6 +249,7 @@ export class HtmlView extends ElementView implements LayoutView {
     const appView = this.appView;
     if (LayoutManager.is(appView)) {
       appView.activateVariable(variable);
+      this.requireUpdate(View.NeedsLayout);
     }
   }
 
@@ -254,8 +257,8 @@ export class HtmlView extends ElementView implements LayoutView {
     if (this._variables !== void 0) {
       const index = this._variables.indexOf(variable);
       if (index >= 0) {
-        this._variables.splice(index, 1);
         this.deactivateVariable(variable);
+        this._variables.splice(index, 1);
       }
     }
   }
@@ -265,13 +268,14 @@ export class HtmlView extends ElementView implements LayoutView {
     const appView = this.appView;
     if (LayoutManager.is(appView)) {
       appView.deactivateVariable(variable);
+      this.requireUpdate(View.NeedsLayout);
     }
   }
 
-  setVariableState(variable: ConstrainVariable, state: number): void {
+  setVariable(variable: ConstrainVariable, state: number): void {
     const appView = this.appView;
     if (LayoutManager.is(appView)) {
-      appView.setVariableState(variable, state);
+      appView.setVariable(variable, state);
     }
   }
 
@@ -301,6 +305,7 @@ export class HtmlView extends ElementView implements LayoutView {
     const appView = this.appView;
     if (LayoutManager.is(appView)) {
       appView.activateConstraint(constraint);
+      this.requireUpdate(View.NeedsLayout);
     }
   }
 
@@ -319,6 +324,7 @@ export class HtmlView extends ElementView implements LayoutView {
     const appView = this.appView;
     if (LayoutManager.is(appView)) {
       appView.deactivateConstraint(constraint);
+      this.requireUpdate(View.NeedsLayout);
     }
   }
 
@@ -333,10 +339,12 @@ export class HtmlView extends ElementView implements LayoutView {
         const variable = variables![i];
         if (variable instanceof LayoutAnchor) {
           appView.activateVariable(variable);
+          this.requireUpdate(View.NeedsLayout);
         }
       }
       for (let i = 0, n = constraints !== void 0 ? constraints.length : 0; i < n; i += 1) {
         appView.activateConstraint(constraints![i]);
+        this.requireUpdate(View.NeedsLayout);
       }
     }
   }
@@ -350,99 +358,11 @@ export class HtmlView extends ElementView implements LayoutView {
         && (appView = this.appView, LayoutManager.is(appView))) {
       for (let i = 0, n = constraints !== void 0 ? constraints.length : 0; i < n; i += 1) {
         appView.deactivateConstraint(constraints![i]);
+        this.requireUpdate(View.NeedsLayout);
       }
       for (let i = 0, n = variables !== void 0 ? variables.length : 0; i < n; i += 1) {
         appView.deactivateVariable(variables![i]);
-      }
-    }
-  }
-
-  /** @hidden */
-  updateLayoutStates(): void {
-    const offsetParent = this._node.offsetParent;
-    if (offsetParent) {
-      const offsetBounds = offsetParent.getBoundingClientRect();
-      const bounds = this._node.getBoundingClientRect();
-
-      const topAnchor = this.hasOwnProperty("topAnchor") ? this.topAnchor : void 0;
-      const rightAnchor = this.hasOwnProperty("rightAnchor") ? this.rightAnchor : void 0;
-      const bottomAnchor = this.hasOwnProperty("bottomAnchor") ? this.bottomAnchor : void 0;
-      const leftAnchor = this.hasOwnProperty("leftAnchor") ? this.leftAnchor : void 0;
-      const widthAnchor = this.hasOwnProperty("widthAnchor") ? this.widthAnchor : void 0;
-      const heightAnchor = this.hasOwnProperty("heightAnchor") ? this.heightAnchor : void 0;
-      const centerXAnchor = this.hasOwnProperty("centerXAnchor") ? this.centerXAnchor : void 0;
-      const centerYAnchor = this.hasOwnProperty("centerYAnchor") ? this.centerYAnchor : void 0;
-      if (topAnchor && !topAnchor.enabled()) {
-        topAnchor.setState(bounds.top - offsetBounds.top);
-      }
-      if (rightAnchor && !rightAnchor.enabled()) {
-        rightAnchor.setState(offsetBounds.right + bounds.right);
-      }
-      if (bottomAnchor && !bottomAnchor.enabled()) {
-        bottomAnchor.setState(offsetBounds.bottom + bounds.bottom);
-      }
-      if (leftAnchor && !leftAnchor.enabled()) {
-        leftAnchor.setState(bounds.left - offsetBounds.left);
-      }
-      if (widthAnchor && !widthAnchor.enabled()) {
-        widthAnchor.setState(bounds.width);
-      }
-      if (heightAnchor && !heightAnchor.enabled()) {
-        heightAnchor.setState(bounds.height);
-      }
-      if (centerXAnchor && !centerXAnchor.enabled()) {
-        centerXAnchor.setState(bounds.left + 0.5 * bounds.width - offsetBounds.left);
-      }
-      if (centerYAnchor && !centerYAnchor.enabled()) {
-        centerYAnchor.setState(bounds.top + 0.5 * bounds.height - offsetBounds.top);
-      }
-    }
-  }
-
-  /** @hidden */
-  updateLayoutValues(): void {
-    const topAnchor = this.hasOwnProperty("topAnchor") ? this.topAnchor : void 0;
-    const rightAnchor = this.hasOwnProperty("rightAnchor") ? this.rightAnchor : void 0;
-    const bottomAnchor = this.hasOwnProperty("bottomAnchor") ? this.bottomAnchor : void 0;
-    const leftAnchor = this.hasOwnProperty("leftAnchor") ? this.leftAnchor : void 0;
-    const widthAnchor = this.hasOwnProperty("widthAnchor") ? this.widthAnchor : void 0;
-    const heightAnchor = this.hasOwnProperty("heightAnchor") ? this.heightAnchor : void 0;
-    const centerXAnchor = this.hasOwnProperty("centerXAnchor") ? this.centerXAnchor : void 0;
-    const centerYAnchor = this.hasOwnProperty("centerYAnchor") ? this.centerYAnchor : void 0;
-    if (topAnchor && topAnchor.enabled()) {
-      this.top.setState(Length.px(topAnchor.value));
-    }
-    if (rightAnchor && rightAnchor.enabled()) {
-      this.right.setState(Length.px(rightAnchor.value));
-    }
-    if (bottomAnchor && bottomAnchor.enabled()) {
-      this.bottom.setState(Length.px(bottomAnchor.value));
-    }
-    if (leftAnchor && leftAnchor.enabled()) {
-      this.left.setState(Length.px(leftAnchor.value));
-    }
-    if (widthAnchor && widthAnchor.enabled()) {
-      this.width.setState(Length.px(widthAnchor.value));
-    }
-    if (heightAnchor && heightAnchor.enabled()) {
-      this.height.setState(Length.px(heightAnchor.value));
-    }
-    if (centerXAnchor && centerXAnchor.enabled()) {
-      if (leftAnchor && leftAnchor.enabled()) {
-        this.width.setState(Length.px(2 * (centerXAnchor.value - leftAnchor.value)));
-      } else if (rightAnchor && rightAnchor.enabled()) {
-        this.width.setState(Length.px(2 * (rightAnchor.value - centerXAnchor.value)));
-      } else if (widthAnchor && widthAnchor.enabled()) {
-        this.left.setState(Length.px(centerXAnchor.value - 0.5 * widthAnchor.value));
-      }
-    }
-    if (centerYAnchor && centerYAnchor.enabled()) {
-      if (topAnchor && topAnchor.enabled()) {
-        this.height.setState(Length.px(2 * (centerYAnchor.value - topAnchor.value)));
-      } else if (bottomAnchor && bottomAnchor.enabled()) {
-        this.height.setState(Length.px(2 * (bottomAnchor.value - centerYAnchor.value)));
-      } else if (heightAnchor && heightAnchor.enabled()) {
-        this.top.setState(Length.px(centerYAnchor.value - 0.5 * heightAnchor.value));
+        this.requireUpdate(View.NeedsLayout);
       }
     }
   }
@@ -457,14 +377,45 @@ export class HtmlView extends ElementView implements LayoutView {
     super.willUnmount();
   }
 
-  protected didResize(): void {
-    super.didResize();
+  protected didLayout(viewContext: ViewContext): void {
     this.updateLayoutStates();
+    this.updateVariables();
+    super.didLayout(viewContext);
   }
 
-  protected willLayout(): void {
-    this.updateLayoutValues();
-    super.willLayout();
+  protected updateLayoutStates(): void {
+    if (this.hasOwnProperty("topAnchor")) {
+      this.topAnchor.updateState();
+    }
+    if (this.hasOwnProperty("rightAnchor")) {
+      this.rightAnchor.updateState();
+    }
+    if (this.hasOwnProperty("bottomAnchor")) {
+      this.bottomAnchor.updateState();
+    }
+    if (this.hasOwnProperty("leftAnchor")) {
+      this.leftAnchor.updateState();
+    }
+    if (this.hasOwnProperty("widthAnchor")) {
+      this.widthAnchor.updateState();
+    }
+    if (this.hasOwnProperty("heightAnchor")) {
+      this.heightAnchor.updateState();
+    }
+    if (this.hasOwnProperty("centerXAnchor")) {
+      this.centerXAnchor.updateState();
+    }
+    if (this.hasOwnProperty("centerYAnchor")) {
+      this.centerYAnchor.updateState();
+    }
+  }
+
+  /** @hidden */
+  updateVariables(): void {
+    const appView = this.appView;
+    if (LayoutScope.is(appView)) {
+      appView.updateVariables();
+    }
   }
 
   on<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, event: HTMLElementEventMap[K]) => unknown, options?: AddEventListenerOptions | boolean): this;
@@ -481,28 +432,174 @@ export class HtmlView extends ElementView implements LayoutView {
     return this;
   }
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlView>({
+    get(oldState: number): number {
+      const offsetParent = this._node.offsetParent!;
+      const offsetBounds = offsetParent.getBoundingClientRect();
+      const bounds = this._node.getBoundingClientRect();
+      const newState = bounds.top - offsetBounds.top;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    set(newValue: number): void {
+      this.top.setState(Length.px(newValue));
+      this.requireUpdate(View.NeedsLayout);
+    },
+    strength: "strong",
+  })
   topAnchor: LayoutAnchor<this>;
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlView>({
+    get(oldState: number): number {
+      const offsetParent = this._node.offsetParent!;
+      const offsetBounds = offsetParent.getBoundingClientRect();
+      const bounds = this._node.getBoundingClientRect();
+      const newState = offsetBounds.right + bounds.right;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    set(newValue: number): void {
+      this.right.setState(Length.px(newValue));
+      this.requireUpdate(View.NeedsLayout);
+    },
+    strength: "strong",
+  })
   rightAnchor: LayoutAnchor<this>;
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlView>({
+    get(oldState: number): number {
+      const offsetParent = this._node.offsetParent!;
+      const offsetBounds = offsetParent.getBoundingClientRect();
+      const bounds = this._node.getBoundingClientRect();
+      const newState = offsetBounds.bottom + bounds.bottom;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    set(newValue: number): void {
+      this.bottom.setState(Length.px(newValue));
+      this.requireUpdate(View.NeedsLayout);
+    },
+    strength: "strong",
+  })
   bottomAnchor: LayoutAnchor<this>;
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlView>({
+    get(oldState: number): number {
+      const offsetParent = this._node.offsetParent!;
+      const offsetBounds = offsetParent.getBoundingClientRect();
+      const bounds = this._node.getBoundingClientRect();
+      const newState = bounds.left - offsetBounds.left;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    set(newValue: number): void {
+      this.left.setState(Length.px(newValue));
+      this.requireUpdate(View.NeedsLayout);
+    },
+    strength: "strong",
+  })
   leftAnchor: LayoutAnchor<this>;
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlView>({
+    get(oldState: number): number {
+      const bounds = this._node.getBoundingClientRect();
+      const newState = bounds.width;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    set(newValue: number): void {
+      this.width.setState(Length.px(newValue));
+      this.requireUpdate(View.NeedsLayout);
+    },
+    strength: "strong",
+  })
   widthAnchor: LayoutAnchor<this>;
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlView>({
+    get(oldState: number): number {
+      const bounds = this._node.getBoundingClientRect();
+      const newState = bounds.height;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    set(newValue: number): void {
+      this.height.setState(Length.px(newValue));
+      this.requireUpdate(View.NeedsLayout);
+    },
+    strength: "strong",
+  })
   heightAnchor: LayoutAnchor<this>;
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlView>({
+    get(oldState: number): number {
+      const offsetParent = this._node.offsetParent!;
+      const offsetBounds = offsetParent.getBoundingClientRect();
+      const bounds = this._node.getBoundingClientRect();
+      const newState = bounds.left + 0.5 * bounds.width - offsetBounds.left;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    set(newValue: number): void {
+      const rightAnchor = this.hasOwnProperty("rightAnchor") ? this.rightAnchor : void 0;
+      const leftAnchor = this.hasOwnProperty("leftAnchor") ? this.leftAnchor : void 0;
+      const widthAnchor = this.hasOwnProperty("widthAnchor") ? this.widthAnchor : void 0;
+      if (leftAnchor && leftAnchor.enabled()) {
+        this.width.setState(Length.px(2 * (newValue - leftAnchor.value)));
+        this.requireUpdate(View.NeedsLayout);
+      } else if (rightAnchor && rightAnchor.enabled()) {
+        this.width.setState(Length.px(2 * (rightAnchor.value - newValue)));
+        this.requireUpdate(View.NeedsLayout);
+      } else if (widthAnchor && widthAnchor.enabled()) {
+        this.left.setState(Length.px(newValue - 0.5 * widthAnchor.value));
+        this.requireUpdate(View.NeedsLayout);
+      }
+    },
+    strength: "strong",
+  })
   centerXAnchor: LayoutAnchor<this>;
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlView>({
+    get(oldState: number): number {
+      const offsetParent = this._node.offsetParent!;
+      const offsetBounds = offsetParent.getBoundingClientRect();
+      const bounds = this._node.getBoundingClientRect();
+      const newState = bounds.top + 0.5 * bounds.height - offsetBounds.top;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    set(newValue: number): void {
+      const topAnchor = this.hasOwnProperty("topAnchor") ? this.topAnchor : void 0;
+      const bottomAnchor = this.hasOwnProperty("bottomAnchor") ? this.bottomAnchor : void 0;
+      const heightAnchor = this.hasOwnProperty("heightAnchor") ? this.heightAnchor : void 0;
+      if (topAnchor && topAnchor.enabled()) {
+        this.height.setState(Length.px(2 * (newValue - topAnchor.value)));
+        this.requireUpdate(View.NeedsLayout);
+      } else if (bottomAnchor && bottomAnchor.enabled()) {
+        this.height.setState(Length.px(2 * (bottomAnchor.value - newValue)));
+        this.requireUpdate(View.NeedsLayout);
+      } else if (heightAnchor && heightAnchor.enabled()) {
+        this.top.setState(Length.px(newValue - 0.5 * heightAnchor.value));
+        this.requireUpdate(View.NeedsLayout);
+      }
+    },
+    strength: "strong",
+  })
   centerYAnchor: LayoutAnchor<this>;
 
   @AttributeAnimator("autocomplete", String)

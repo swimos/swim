@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {RenderViewObserver} from "@swim/view";
-import {MapViewContext} from "./MapViewContext";
-import {MapView} from "./MapView";
+export interface ViewportSafeArea {
+  readonly insetTop: number;
+  readonly insetRight: number;
+  readonly insetBottom: number;
+  readonly insetLeft: number;
+}
 
-export interface MapViewObserver<V extends MapView = MapView> extends RenderViewObserver<V> {
-  viewWillProject?(viewContext: MapViewContext, view: V): void;
-
-  viewDidProject?(viewContext: MapViewContext, view: V): void;
+export interface Viewport {
+  readonly width: number;
+  readonly height: number;
+  readonly safeArea: ViewportSafeArea;
+  readonly orientation: OrientationType;
 }

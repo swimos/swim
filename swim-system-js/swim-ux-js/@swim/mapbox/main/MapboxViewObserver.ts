@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {RenderViewObserver} from "@swim/view";
-import {MapViewContext} from "./MapViewContext";
-import {MapView} from "./MapView";
+import {MapGraphicViewObserver} from "@swim/map";
+import {MapboxProjection} from "./MapboxProjection";
+import {MapboxView} from "./MapboxView";
 
-export interface MapViewObserver<V extends MapView = MapView> extends RenderViewObserver<V> {
-  viewWillProject?(viewContext: MapViewContext, view: V): void;
+export interface MapboxViewObserver<V extends MapboxView = MapboxView> extends MapGraphicViewObserver<V> {
+  viewWillSetProjection?(projection: MapboxProjection, view: V): void;
 
-  viewDidProject?(viewContext: MapViewContext, view: V): void;
+  viewDidSetProjection?(projection: MapboxProjection, view: V): void;
+
+  viewWillSetZoom?(zoom: number, view: V): void;
+
+  viewDidSetZoom?(newZoom: number, oldZoom: number, view: V): void;
 }

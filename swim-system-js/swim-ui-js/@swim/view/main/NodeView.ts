@@ -14,6 +14,8 @@
 
 import {BoxR2} from "@swim/math";
 import {Transform} from "@swim/transform";
+import {Animator} from "@swim/animate";
+import {ViewContext} from "./ViewContext";
 import {View} from "./View";
 import {ViewObserver} from "./ViewObserver";
 import {AnimatedView} from "./AnimatedView";
@@ -35,20 +37,16 @@ export class NodeView extends View implements AnimatedView {
   /** @hidden */
   readonly _viewObservers: ViewObserver[];
   /** @hidden */
-  _dirty: boolean;
-  /** @hidden */
-  _animationFrame: number;
+  _updateFlags: number;
 
   constructor(node: Node, key: string | null = null) {
     super();
-    this.onAnimationFrame = this.onAnimationFrame.bind(this);
     this._node = node;
     this._node.view = this;
     this._key = key;
     this._viewController = null;
     this._viewObservers = [];
-    this._dirty = false;
-    this._animationFrame = 0;
+    this._updateFlags = 0;
     this.initNode(this._node);
   }
 
@@ -119,6 +117,22 @@ export class NodeView extends View implements AnimatedView {
     }
   }
 
+  isMounted(): boolean {
+    let node = this._node;
+    do {
+      const parentNode = node.parentNode;
+      if (parentNode) {
+        if (parentNode.nodeType === Node.DOCUMENT_NODE) {
+          return true;
+        }
+        node = parentNode;
+        continue;
+      }
+      break;
+    } while (true);
+    return false;
+  }
+
   get parentView(): View | null {
     const parentNode = this._node.parentNode as ViewNode | null;
     if (parentNode) {
@@ -130,6 +144,7 @@ export class NodeView extends View implements AnimatedView {
     return null;
   }
 
+  /** @hidden */
   setParentView(parentView: View | null): void {
     this.willSetParentView(parentView);
     this.onSetParentView(parentView);
@@ -360,7 +375,7 @@ export class NodeView extends View implements AnimatedView {
   }
 
   protected onInsertChildNode(childNode: Node, targetNode: Node | null): void {
-    // hook
+    this.requireUpdate(View.NeedsLayout);
   }
 
   protected didInsertChildNode(childNode: Node, targetNode: Node | null): void {
@@ -466,7 +481,7 @@ export class NodeView extends View implements AnimatedView {
   }
 
   protected onRemoveChildNode(childNode: Node): void {
-    // hook
+    this.requireUpdate(View.NeedsLayout);
   }
 
   protected didRemoveChildNode(childNode: Node): void {
@@ -488,145 +503,121 @@ export class NodeView extends View implements AnimatedView {
     }
   }
 
-  isMounted(): boolean {
-    let node = this._node;
-    do {
-      const parentNode = node.parentNode;
-      if (parentNode) {
-        if (parentNode.nodeType === Node.DOCUMENT_NODE) {
-          return true;
-        }
-        node = parentNode;
-        continue;
-      }
-      break;
-    } while (true);
-    return false;
+  cascadeMount(): void {
+    this.doMountChildViews();
+    this.doMount();
   }
 
-  cascadeMount(): void {
-    this.willMount();
-    this.onMount();
+  /** @hidden */
+  doMountChildViews(): void {
     const childNodes = this._node.childNodes;
-    for (let i = 0, n = childNodes.length; i < n; i += 1) {
+    for (let i = 0; i < childNodes.length; i += 1) {
       const childView = (childNodes[i] as ViewNode).view;
       if (childView) {
         childView.cascadeMount();
       }
     }
-    this.didMount();
   }
 
   cascadeUnmount(): void {
-    this.willUnmount();
-    this.onUnmount();
+    this._updateFlags = 0;
+    this.doUnmountChildViews();
+    this.doUnmount();
+  }
+
+  /** @hidden */
+  doUnmountChildViews(): void {
     const childNodes = this._node.childNodes;
-    for (let i = 0, n = childNodes.length; i < n; i += 1) {
+    for (let i = 0; i < childNodes.length; i += 1) {
       const childView = (childNodes[i] as ViewNode).view;
       if (childView) {
         childView.cascadeUnmount();
       }
     }
-    this.didUnmount();
   }
 
-  cascadeResize(): void {
-    this.willResize();
-    this.onResize();
-    const childNodes = this._node.childNodes;
-    for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
-      if (childView) {
-        childView.cascadeResize();
-      }
+  /** @hidden */
+  get updateFlags(): number {
+    return this._updateFlags;
+  }
+
+  /** @hidden */
+  setUpdateFlags(updateFlags: number): void {
+    this._updateFlags = updateFlags;
+  }
+
+  cascadeUpdate(updateFlags: number, viewContext: ViewContext): void {
+    updateFlags = updateFlags | this.updateFlags;
+    updateFlags = this.needsUpdate(updateFlags, viewContext);
+    this.doUpdate(updateFlags, viewContext);
+  }
+
+  /** @hidden */
+  doUpdate(updateFlags: number, viewContext: ViewContext): void {
+    this.willUpdate(viewContext);
+    if (((updateFlags | this._updateFlags) & View.NeedsCompute) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsCompute;
+      this.doCompute(viewContext);
     }
-    this.didResize();
-  }
-
-  cascadeLayout(): void {
-    this.willLayout();
-    this.onLayout();
-    const childNodes = this._node.childNodes;
-    for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
-      if (childView) {
-        childView.cascadeLayout();
-      }
+    if (((updateFlags | this._updateFlags) & View.NeedsAnimate) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsAnimate;
+      this.doAnimate(viewContext);
     }
-    this.didLayout();
-  }
-
-  cascadeScroll(): void {
-    this.willScroll();
-    this.onScroll();
-    const childNodes = this._node.childNodes;
-    for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
-      if (childView) {
-        childView.cascadeScroll();
-      }
+    if (((updateFlags | this._updateFlags) & View.NeedsLayout) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsLayout;
+      this.doLayout(viewContext);
     }
-    this.didScroll();
-  }
-
-  animate(force: boolean = false): void {
-    if (force) {
-      if (this._animationFrame) {
-        cancelAnimationFrame(this._animationFrame);
-      }
-      this.onAnimationFrame(performance.now());
-    } else if (!this._animationFrame) {
-      this._animationFrame = requestAnimationFrame(this.onAnimationFrame);
+    if (((updateFlags | this._updateFlags) & View.NeedsScroll) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsScroll;
+      this.doScroll(viewContext);
     }
+    this.onUpdate(viewContext);
+    this.doUpdateChildViews(updateFlags, viewContext);
+    this.didUpdate(viewContext);
   }
 
-  protected onAnimationFrame(timestamp: number): void {
-    this._animationFrame = 0;
-    this.cascadeAnimate(timestamp);
+  /** @hidden */
+  doAnimate(viewContext: ViewContext): void {
+    this.willAnimate(viewContext);
+    this.onAnimate(viewContext);
+    this.didAnimate(viewContext);
   }
 
-  cascadeAnimate(frame: number): void {
-    this.willAnimate(frame);
-    this.onAnimate(frame);
-    this.didAnimate(frame);
-  }
-
-  protected willAnimate(frame: number): void {
+  protected willAnimate(viewContext: ViewContext): void {
     this.willObserve(function (viewObserver: AnimatedViewObserver): void {
       if (viewObserver.viewWillAnimate) {
-        viewObserver.viewWillAnimate(frame, this);
+        viewObserver.viewWillAnimate(viewContext, this);
       }
     });
   }
 
-  protected onAnimate(frame: number): void {
+  protected onAnimate(viewContext: ViewContext): void {
     // hook
   }
 
-  protected didAnimate(frame: number): void {
+  protected didAnimate(viewContext: ViewContext): void {
     this.didObserve(function (viewObserver: AnimatedViewObserver): void {
       if (viewObserver.viewDidAnimate) {
-        viewObserver.viewDidAnimate(frame, this);
+        viewObserver.viewDidAnimate(viewContext, this);
       }
     });
-    this.setDirty(false);
   }
 
-  get dirty(): boolean {
-    return this._dirty;
-  }
-
-  setDirty(dirty: boolean): void {
-    if (dirty !== this._dirty) {
-      this._dirty = dirty;
-      this.didSetDirty(dirty);
+  /** @hidden */
+  doUpdateChildViews(updateFlags: number, viewContext: ViewContext): void {
+    this.willUpdateChildViews(viewContext);
+    const childNodes = this._node.childNodes;
+    for (let i = 0; i < childNodes.length; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView) {
+        childView.cascadeUpdate(updateFlags, viewContext);
+      }
     }
+    this.didUpdateChildViews(viewContext);
   }
 
-  protected didSetDirty(dirty: boolean): void {
-    if (dirty) {
-      this.animate();
-    }
+  animate(animator: Animator): void {
+    this.requireUpdate(View.NeedsAnimate);
   }
 
   get parentTransform(): Transform {

@@ -18,6 +18,7 @@ import {AnyLength, Length} from "@swim/length";
 import {Color} from "@swim/color";
 import {Ease, Tween, AnyTransition, Transition} from "@swim/transition";
 import {MemberAnimator} from "./member/MemberAnimator";
+import {ViewContext} from "./ViewContext";
 import {View} from "./View";
 import {RenderView} from "./RenderView";
 import {RenderViewObserver} from "./RenderViewObserver";
@@ -109,7 +110,7 @@ export class PopoverView extends HtmlView implements Popover, HtmlViewObserver, 
   }
 
   protected onSetSource(source: View | null): void {
-    // hook
+    this.requireUpdate(View.NeedsLayout);
   }
 
   protected didSetSource(source: View | null): void {
@@ -258,11 +259,13 @@ export class PopoverView extends HtmlView implements Popover, HtmlViewObserver, 
     if (placement === void 0) {
       return this._placement;
     } else {
-      this._placement.length = 0;
-      for (let i = 0, n = placement.length; i < n; i += 1) {
-        this._placement.push(placement[i]);
+      if (!Objects.equalArray(this._placement, placement)) {
+        this._placement.length = 0;
+        for (let i = 0, n = placement.length; i < n; i += 1) {
+          this._placement.push(placement[i]);
+        }
+        this.place();
       }
-      this.setDirty(true);
       return this;
     }
   }
@@ -275,7 +278,7 @@ export class PopoverView extends HtmlView implements Popover, HtmlViewObserver, 
     } else {
       if (!Objects.equal(this._placementBounds, placementBounds)) {
         this._placementBounds = placementBounds;
-        this.setDirty(true);
+        this.place();
       }
       return this;
     }
@@ -292,34 +295,34 @@ export class PopoverView extends HtmlView implements Popover, HtmlViewObserver, 
     }
   }
 
-  protected onMount(): void {
+  needsUpdate(updateFlags: number, viewContext: ViewContext): number {
+    if ((updateFlags & (View.NeedsAnimate | View.NeedsScroll)) !== 0) {
+      updateFlags = updateFlags | View.NeedsLayout;
+    }
+    return updateFlags;
+  }
+
+  protected didMount(): void {
     if (this._source) {
       this._source.addViewObserver(this);
     }
+    super.didMount();
   }
 
-  protected onUnmount(): void {
+  protected willUnmount(): void {
+    super.willUnmount();
     if (this._source) {
       this._source.removeViewObserver(this);
     }
   }
 
-  protected onResize(): void {
-    this.place();
-  }
-
-  protected onLayout(): void {
-    this.place();
-  }
-
-  protected onScroll(): void {
-    this.place();
-  }
-
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: ViewContext): void {
+    const t = viewContext.updateTime;
     this.arrowWidth.onFrame(t);
     this.arrowHeight.onFrame(t);
+  }
 
+  protected onLayout(viewContext: ViewContext): void {
     this.place();
   }
 
@@ -327,8 +330,7 @@ export class PopoverView extends HtmlView implements Popover, HtmlViewObserver, 
     const source = this._source;
     const oldSourceBounds = this._sourceBounds;
     const newSourceBounds = source ? source.popoverBounds : null;
-    if (newSourceBounds && this._placement.length
-        && (this._dirty || !newSourceBounds.equals(oldSourceBounds))) {
+    if (newSourceBounds && this._placement.length && !newSourceBounds.equals(oldSourceBounds)) {
       const placement = this.placePopover(source!, newSourceBounds);
       const arrow = this.getChildView("arrow");
       if (arrow instanceof HtmlView) {
@@ -672,11 +674,11 @@ export class PopoverView extends HtmlView implements Popover, HtmlViewObserver, 
     this.place();
   }
 
-  viewDidResize(view: View): void {
+  viewDidLayout(viewContext: ViewContext, view: View): void {
     this.place();
   }
 
-  viewDidScroll(view: View): void {
+  viewDidScroll(viewContext: ViewContext, view: View): void {
     this.place();
   }
 

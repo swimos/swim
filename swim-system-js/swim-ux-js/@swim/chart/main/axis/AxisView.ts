@@ -22,7 +22,7 @@ import {ContinuousScale, LinearScale, TimeScale} from "@swim/scale";
 import {Tween, AnyTransition, Transition} from "@swim/transition";
 import {StyleValue} from "@swim/style";
 import {RenderingContext} from "@swim/render";
-import {MemberAnimator, ViewInit, View, RenderView, GraphicView} from "@swim/view";
+import {MemberAnimator, ViewInit, View, RenderViewContext, GraphicView} from "@swim/view";
 import {AnyTickView, TickView} from "../tick/TickView";
 import {TickGenerator} from "../tick/TickGenerator";
 import {AxisViewController} from "./AxisViewController";
@@ -93,37 +93,37 @@ export abstract class AxisView<D> extends GraphicView {
   @MemberAnimator(Object)
   scale: MemberAnimator<this, ContinuousScale<D, number>>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   domainColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   domainWidth: MemberAnimator<this, number>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   domainSerif: MemberAnimator<this, number>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   tickMarkColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   tickMarkWidth: MemberAnimator<this, number>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   tickMarkLength: MemberAnimator<this, number>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   tickLabelPadding: MemberAnimator<this, number>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   gridLineColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   gridLineWidth: MemberAnimator<this, number>;
 
-  @MemberAnimator(Font, "inherit")
+  @MemberAnimator(Font, {inherit: true})
   font: MemberAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
   getTick(value: D): TickView<D> | undefined {
@@ -207,7 +207,30 @@ export abstract class AxisView<D> extends GraphicView {
     }
   }
 
-  protected onAnimate(t: number): void {
+  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+    if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
+      updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout | View.NeedsRender;
+    }
+    return updateFlags;
+  }
+
+  protected willUpdate(viewContext: RenderViewContext): void {
+    super.willUpdate(viewContext);
+    const context = viewContext.renderingContext;
+    context.save();
+  }
+
+  protected didUpdate(viewContext: RenderViewContext): void {
+    const context = viewContext.renderingContext;
+    const bounds = this._bounds;
+    const anchor = this._anchor;
+    this.renderDomain(context, bounds, anchor);
+    context.restore();
+    super.didUpdate(viewContext);
+  }
+
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.scale.onFrame(t);
 
     this.domainColor.onFrame(t);
@@ -225,7 +248,9 @@ export abstract class AxisView<D> extends GraphicView {
 
     this.font.onFrame(t);
     this.textColor.onFrame(t);
+  }
 
+  protected onLayout(viewContext: RenderViewContext): void {
     if (this._tickGenerator) {
       this.generateTicks(this._tickGenerator);
       this.layoutTicks(this._bounds, this._anchor);
@@ -314,14 +339,6 @@ export abstract class AxisView<D> extends GraphicView {
     }
   }
 
-  protected didRender(context: RenderingContext): void {
-    context.save();
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    this.renderDomain(context, bounds, anchor);
-    context.restore();
-  }
-
   protected abstract renderDomain(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void;
 
   protected layoutTicks(bounds: BoxR2, anchor: PointR2): void {
@@ -336,7 +353,8 @@ export abstract class AxisView<D> extends GraphicView {
 
   protected abstract layoutTick(tick: TickView<D>, bounds: BoxR2, anchor: PointR2): void;
 
-  protected onInsertChildView(childView: View): void {
+  protected onInsertChildView(childView: View, targetView: View | null): void {
+    super.onInsertChildView(childView, targetView);
     if (childView instanceof TickView) {
       this._ticks.set(childView.value, childView);
     }
@@ -348,19 +366,11 @@ export abstract class AxisView<D> extends GraphicView {
     }
   }
 
-  protected setChildViewBounds(childView: RenderView, bounds: BoxR2): void {
+  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
     if (childView instanceof TickView) {
-      this.layoutTick(childView, bounds, this._anchor);
+      this.layoutTick(childView, this._bounds, this._anchor);
     } else {
-      super.setChildViewBounds(childView, bounds);
-    }
-  }
-
-  protected setChildViewAnchor(childView: RenderView, anchor: PointR2): void {
-    if (childView instanceof TickView) {
-      this.layoutTick(childView, this._bounds, anchor);
-    } else {
-      super.setChildViewAnchor(childView, anchor);
+      super.layoutChildView(childView, viewContext);
     }
   }
 

@@ -223,7 +223,7 @@ export abstract class GraphView<X, Y> extends PlotView<X, Y> {
         rebound = true;
       }
       if (rebound) {
-        this.animate();
+        this.requireUpdate(View.NeedsLayout);
       }
     }
     this._gradientStops = gradientStops;

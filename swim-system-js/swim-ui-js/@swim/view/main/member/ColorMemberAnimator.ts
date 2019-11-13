@@ -14,8 +14,8 @@
 
 import {__extends} from "tslib";
 import {AnyColor, Color} from "@swim/color";
-import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
+import {Transition, Tween} from "@swim/transition";
+import {MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
@@ -23,10 +23,10 @@ export interface ColorMemberAnimator<V extends AnimatedView> extends MemberAnima
 }
 
 /** @hidden */
-export const ColorMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
-  const ColorMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
-      this: ColorMemberAnimator<V>, view: V, value?: Color | null,
-      transition?: Transition<Color> | null, inherit?: MemberAnimatorInherit): ColorMemberAnimator<V> {
+export const ColorMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor<Color, AnyColor> {
+  const ColorMemberAnimator: MemberAnimatorConstructor<Color, AnyColor> = function <V extends AnimatedView>(
+      this: ColorMemberAnimator<V>, view: V, value?: AnyColor | null,
+      transition?: Transition<Color> | null, inherit?: string | null): ColorMemberAnimator<V> {
     let _this: ColorMemberAnimator<V> = function (value?: AnyColor | null, tween?: Tween<Color>): Color | null | undefined | V {
       if (value === void 0) {
         return _this.value;
@@ -39,9 +39,12 @@ export const ColorMemberAnimator = (function (_super: typeof MemberAnimator): Me
       }
     } as ColorMemberAnimator<V>;
     (_this as any).__proto__ = this;
+    if (value !== null && value !== void 0) {
+      value = Color.fromAny(value);
+    }
     _this = _super.call(_this, view, value, transition, inherit) || _this;
     return _this;
-  } as unknown as MemberAnimatorConstructor;
+  } as unknown as MemberAnimatorConstructor<Color, AnyColor>;
   __extends(ColorMemberAnimator, _super);
 
   return ColorMemberAnimator;

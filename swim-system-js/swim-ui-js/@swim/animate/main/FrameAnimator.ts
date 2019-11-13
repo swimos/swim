@@ -19,14 +19,11 @@ export abstract class FrameAnimator extends Animator {
   protected _animationFrame: number;
   /** @hidden */
   _disabled: boolean;
-  /** @hidden */
-  _dirty: boolean;
 
   constructor() {
     super();
     this._animationFrame = 0;
     this._disabled = false;
-    this._dirty = false;
   }
 
   get enabled(): boolean {
@@ -51,25 +48,7 @@ export abstract class FrameAnimator extends Animator {
     }
   }
 
-  get dirty(): boolean {
-    return this._dirty;
-  }
-
-  setDirty(dirty: boolean): void {
-    if (dirty && !this._dirty) {
-      this._dirty = true;
-      this.didSetDirty(true);
-    } else if (!dirty && this._dirty) {
-      this._dirty = false;
-      this.didSetDirty(false);
-    }
-  }
-
-  protected didSetDirty(dirty: boolean): void {
-    // stub
-  }
-
-  animate(): void {
+  animate(animator: Animator = this): void {
     if (!this._animationFrame && !this._disabled) {
       if (!this.hasOwnProperty("onAnimationFrame")) {
         this.onAnimationFrame = this.onAnimationFrame.bind(this);

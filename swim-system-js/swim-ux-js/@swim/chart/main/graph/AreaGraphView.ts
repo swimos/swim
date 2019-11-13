@@ -16,7 +16,13 @@ import {PointR2, BoxR2} from "@swim/math";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont} from "@swim/font";
 import {RenderingContext} from "@swim/render";
-import {MemberAnimator, ViewInit, RenderView, FillViewInit, FillView} from "@swim/view";
+import {MemberAnimator,
+  ViewInit,
+  RenderViewContext,
+  RenderView,
+  FillViewInit,
+  FillView,
+} from "@swim/view";
 import {AxisView} from "../axis/AxisView";
 import {AnyDatumView} from "../data/DatumView";
 import {AnyPlotView, PlotView} from "../plot/PlotView";
@@ -55,9 +61,10 @@ export class AreaGraphView<X, Y> extends GraphView<X, Y> implements FillView {
   @MemberAnimator(Color)
   fill: MemberAnimator<this, Color, AnyColor>;
 
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.fill.onFrame(t);
-    super.onAnimate(t);
+    super.onAnimate(viewContext);
   }
 
   protected renderPlot(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {

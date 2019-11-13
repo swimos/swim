@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {RenderViewObserver} from "@swim/view";
-import {MapViewContext} from "./MapViewContext";
-import {MapView} from "./MapView";
+import {Viewport} from "./Viewport";
+import {ViewIdiom} from "./ViewIdiom";
 
-export interface MapViewObserver<V extends MapView = MapView> extends RenderViewObserver<V> {
-  viewWillProject?(viewContext: MapViewContext, view: V): void;
+export interface ViewContext {
+  readonly updateTime: number;
 
-  viewDidProject?(viewContext: MapViewContext, view: V): void;
+  readonly viewport: Viewport;
+
+  readonly viewIdiom: ViewIdiom;
 }

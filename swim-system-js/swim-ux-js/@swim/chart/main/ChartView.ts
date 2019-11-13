@@ -18,7 +18,7 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween, AnyTransition, Transition} from "@swim/transition";
-import {MemberAnimator, ViewInit, View, RenderView, GraphicView} from "@swim/view";
+import {MemberAnimator, ViewInit, View, RenderViewContext, RenderView, GraphicView} from "@swim/view";
 import {Multitouch, ScaleGestureEvent, ScaleGesture} from "@swim/gesture";
 import {AnyAxisView, AxisView} from "./axis/AxisView";
 import {AnyPlotView, PlotView} from "./plot/PlotView";
@@ -236,10 +236,10 @@ export class ChartView<X = any, Y = any> extends GraphicView {
   @MemberAnimator(Number)
   gridLineWidth: MemberAnimator<this, number>;
 
-  @MemberAnimator(Font, "inherit")
+  @MemberAnimator(Font, {inherit: true})
   font: MemberAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
   surface(): RenderView | null;
@@ -492,7 +492,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       return this._fitTopDomain;
     } else {
       if (!this._fitTopDomain && fitTopDomain) {
-        this.setDirty(true);
+        this.requireUpdate(View.NeedsLayout);
       }
       this._fitTopDomain = fitTopDomain;
       return this;
@@ -506,7 +506,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       return this._fitRightDomain;
     } else {
       if (!this._fitRightDomain && fitRightDomain) {
-        this.setDirty(true);
+        this.requireUpdate(View.NeedsLayout);
       }
       this._fitRightDomain = fitRightDomain;
       return this;
@@ -520,7 +520,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       return this._fitBottomDomain;
     } else {
       if (!this._fitBottomDomain && fitBottomDomain) {
-        this.setDirty(true);
+        this.requireUpdate(View.NeedsLayout);
       }
       this._fitBottomDomain = fitBottomDomain;
       return this;
@@ -534,7 +534,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       return this._fitLeftDomain;
     } else {
       if (!this._fitLeftDomain && fitLeftDomain) {
-        this.setDirty(true);
+        this.requireUpdate(View.NeedsLayout);
       }
       this._fitLeftDomain = fitLeftDomain;
       return this;
@@ -601,7 +601,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     } else {
       this._topDomainPadding[0] = topDomainPadding[0];
       this._topDomainPadding[1] = topDomainPadding[1];
-      this.setDirty(true);
+      this.requireUpdate(View.NeedsLayout);
       return this;
     }
   }
@@ -614,7 +614,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     } else {
       this._rightDomainPadding[0] = rightDomainPadding[0];
       this._rightDomainPadding[1] = rightDomainPadding[1];
-      this.setDirty(true);
+      this.requireUpdate(View.NeedsLayout);
       return this;
     }
   }
@@ -627,7 +627,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     } else {
       this._bottomDomainPadding[0] = bottomDomainPadding[0];
       this._bottomDomainPadding[1] = bottomDomainPadding[1];
-      this.setDirty(true);
+      this.requireUpdate(View.NeedsLayout);
       return this;
     }
   }
@@ -640,7 +640,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     } else {
       this._leftDomainPadding[0] = leftDomainPadding[0];
       this._leftDomainPadding[1] = leftDomainPadding[1];
-      this.setDirty(true);
+      this.requireUpdate(View.NeedsLayout);
       return this;
     }
   }
@@ -873,13 +873,21 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     }
   }
 
-  protected willAnimate(t: number): void {
-    super.willAnimate(t);
+  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+    if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
+      updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout | View.NeedsRender;
+    }
+    return updateFlags;
+  }
+
+  protected didUpdate(viewContext: RenderViewContext): void {
+    super.didUpdate(viewContext);
     this.autoscale();
     this.rebound();
   }
 
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.topGutter.onFrame(t);
     this.rightGutter.onFrame(t);
     this.bottomGutter.onFrame(t);
@@ -900,7 +908,9 @@ export class ChartView<X = any, Y = any> extends GraphicView {
 
     this.font.onFrame(t);
     this.textColor.onFrame(t);
+  }
 
+  protected onLayout(viewContext: RenderViewContext): void {
     if (this._topGesture) {
       this._topGesture.scale(this.topAxis()!.scale.value!);
     }
@@ -912,6 +922,28 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     }
     if (this._leftGesture) {
       this._leftGesture.scale(this.leftAxis()!.scale.value!);
+    }
+    this.layoutChildViews(viewContext);
+  }
+
+  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
+    const childKey = childView.key();
+    if (childKey === "surface" && RenderView.is(childView)) {
+      this.layoutSurface(childView, this._bounds);
+    } else if (childView instanceof AxisView) {
+      if (childKey === "topAxis") {
+        this.layoutTopAxis(childView, this._bounds);
+      } else if (childKey === "rightAxis") {
+        this.layoutRightAxis(childView, this._bounds);
+      } else if (childKey === "bottomAxis") {
+        this.layoutBottomAxis(childView, this._bounds);
+      } else if (childKey === "leftAxis") {
+        this.layoutLeftAxis(childView, this._bounds);
+      }
+    } else if (childView instanceof PlotView) {
+      this.layoutPlot(childView, this._bounds);
+    } else {
+      super.layoutChildView(childView, viewContext);
     }
   }
 
@@ -1053,7 +1085,8 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     // stub
   }
 
-  protected onInsertChildView(childView: View): void {
+  protected onInsertChildView(childView: View, targetView: View | null): void {
+    super.onInsertChildView(childView, targetView);
     const childKey = childView.key();
     if (childKey === "surface" && RenderView.is(childView)) {
       this.layoutSurface(childView, this._bounds);
@@ -1082,44 +1115,6 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     if (childView instanceof PlotView) {
       this.onRemovePlot(childView);
     }
-  }
-
-  protected setChildViewBounds(childView: RenderView, bounds: BoxR2): void {
-    const childKey = childView.key();
-    if (childKey === "surface" && RenderView.is(childView)) {
-      this.layoutSurface(childView, bounds);
-      return;
-    } else if (childView instanceof AxisView) {
-      if (childKey === "topAxis") {
-        this.layoutTopAxis(childView, bounds);
-        return;
-      } else if (childKey === "rightAxis") {
-        this.layoutRightAxis(childView, bounds);
-        return;
-      } else if (childKey === "bottomAxis") {
-        this.layoutBottomAxis(childView, bounds);
-        return;
-      } else if (childKey === "leftAxis") {
-        this.layoutLeftAxis(childView, bounds);
-        return;
-      }
-    } else if (childView instanceof PlotView) {
-      this.layoutPlot(childView, bounds);
-      return;
-    }
-    super.setChildViewBounds(childView, bounds);
-  }
-
-  protected setChildViewAnchor(childView: RenderView, anchor: PointR2): void {
-    const childKey = childView.key();
-    if (childKey === "surface" && RenderView.is(childView)) {
-      return;
-    } else if (childView instanceof AxisView) {
-      return;
-    } else if (childView instanceof PlotView) {
-      return;
-    }
-    super.setChildViewAnchor(childView, anchor);
   }
 
   autoscale(tween?: Tween<any>): void {
@@ -1340,24 +1335,28 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const topAxis = this.topAxis();
       if (topAxis) {
         topAxis.domain(event.scale.domain() as X[]);
+        this.requireUpdate(View.NeedsLayout);
       }
       this._trackTopDomain = false;
     } else if (event.gesture === this._rightGesture) {
       const rightAxis = this.rightAxis();
       if (rightAxis) {
         rightAxis.domain(event.scale.domain() as Y[]);
+        this.requireUpdate(View.NeedsLayout);
       }
       this._trackRightDomain = false;
     } else if (event.gesture === this._bottomGesture) {
       const bottomAxis = this.bottomAxis();
       if (bottomAxis) {
         bottomAxis.domain(event.scale.domain() as X[]);
+        this.requireUpdate(View.NeedsLayout);
       }
       this._trackBottomDomain = false;
     } else if (event.gesture === this._leftGesture) {
       const leftAxis = this.leftAxis();
       if (leftAxis) {
         leftAxis.domain(event.scale.domain() as Y[]);
+        this.requireUpdate(View.NeedsLayout);
       }
       this._trackLeftDomain = false;
     }
@@ -1368,21 +1367,25 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const topAxis = this.topAxis();
       if (topAxis) {
         topAxis.domain(event.scale.domain() as X[]);
+        this.requireUpdate(View.NeedsLayout);
       }
     } else if (event.gesture === this._rightGesture) {
       const rightAxis = this.rightAxis();
       if (rightAxis) {
         rightAxis.domain(event.scale.domain() as Y[]);
+        this.requireUpdate(View.NeedsLayout);
       }
     } else if (event.gesture === this._bottomGesture) {
       const bottomAxis = this.bottomAxis();
       if (bottomAxis) {
         bottomAxis.domain(event.scale.domain() as X[]);
+        this.requireUpdate(View.NeedsLayout);
       }
     } else if (event.gesture === this._leftGesture) {
       const leftAxis = this.leftAxis();
       if (leftAxis) {
         leftAxis.domain(event.scale.domain() as Y[]);
+        this.requireUpdate(View.NeedsLayout);
       }
     }
   }
@@ -1396,24 +1399,28 @@ export class ChartView<X = any, Y = any> extends GraphicView {
       const topAxis = this.topAxis();
       if (topAxis) {
         topAxis.domain(event.scale.domain() as X[]);
+        this.requireUpdate(View.NeedsLayout);
       }
       this.retrackTop();
     } else if (event.gesture === this._rightGesture) {
       const rightAxis = this.rightAxis();
       if (rightAxis) {
         rightAxis.domain(event.scale.domain() as Y[]);
+        this.requireUpdate(View.NeedsLayout);
       }
       this.retrackRight();
     } else if (event.gesture === this._bottomGesture) {
       const bottomAxis = this.bottomAxis();
       if (bottomAxis) {
         bottomAxis.domain(event.scale.domain() as X[]);
+        this.requireUpdate(View.NeedsLayout);
       }
       this.retrackBottom();
     } else if (event.gesture === this._leftGesture) {
       const leftAxis = this.leftAxis();
       if (leftAxis) {
         leftAxis.domain(event.scale.domain() as Y[]);
+        this.requireUpdate(View.NeedsLayout);
       }
       this.retrackLeft();
     }

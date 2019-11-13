@@ -21,6 +21,13 @@ export * from "./style";
 export * from "./layout";
 
 export {
+  ViewScopeDescriptor,
+  ViewScopeConstructor,
+  ViewScopeClass,
+  ViewScope,
+} from "./ViewScope";
+
+export {
   ViewEvent,
   ViewMouseEvent,
   ViewTouch,
@@ -28,6 +35,14 @@ export {
   ViewEventHandler,
 } from "./ViewEvent";
 
+export {
+  ViewportSafeArea,
+  Viewport,
+} from "./Viewport";
+
+export {ViewIdiom} from "./ViewIdiom";
+
+export {ViewContext} from "./ViewContext";
 export {
   ViewInit,
   View,
@@ -39,10 +54,12 @@ export {AppView} from "./AppView";
 export {AppViewObserver} from "./AppViewObserver";
 export {AppViewController} from "./AppViewController";
 
+export {AnimatedViewContext} from "./AnimatedViewContext";
 export {AnimatedView} from "./AnimatedView";
 export {AnimatedViewObserver} from "./AnimatedViewObserver";
 export {AnimatedViewController} from "./AnimatedViewController";
 
+export {RenderViewContext} from "./RenderViewContext";
 export {RenderView} from "./RenderView";
 export {RenderViewObserver} from "./RenderViewObserver";
 export {RenderViewController} from "./RenderViewController";
@@ -66,6 +83,7 @@ export {GraphicView} from "./GraphicView";
 export {GraphicViewObserver} from "./GraphicViewObserver";
 export {GraphicViewController} from "./GraphicViewController";
 
+export {LayerViewContext} from "./LayerViewContext";
 export {LayerView} from "./LayerView";
 export {LayerViewObserver} from "./LayerViewObserver";
 export {LayerViewController} from "./LayerViewController";
@@ -113,11 +131,7 @@ export {
 export {CanvasViewObserver} from "./CanvasViewObserver";
 export {CanvasViewController} from "./CanvasViewController";
 
-export {
-  HtmlAppViewSafeArea,
-  HtmlAppViewport,
-  HtmlAppView,
-} from "./HtmlAppView";
+export {HtmlAppView} from "./HtmlAppView";
 export {HtmlAppViewObserver} from "./HtmlAppViewObserver";
 export {HtmlAppViewController} from "./HtmlAppViewController";
 

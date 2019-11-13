@@ -16,6 +16,9 @@ import {ConstrainVariable, Constraint, ConstraintSolver} from "@swim/constraint"
 import {LayoutManager} from "./layout/LayoutManager";
 import {LayoutSolver} from "./layout/LayoutSolver";
 import {LayoutAnchor} from "./layout/LayoutAnchor";
+import {Viewport} from "./Viewport";
+import {ViewIdiom} from "./ViewIdiom";
+import {ViewContext} from "./ViewContext";
 import {View} from "./View";
 import {AppView} from "./AppView";
 import {AppViewObserver} from "./AppViewObserver";
@@ -24,31 +27,21 @@ import {HtmlView} from "./HtmlView";
 import {HtmlAppViewController} from "./HtmlAppViewController";
 import {PopoverOptions, Popover} from "./Popover";
 
-export interface HtmlAppViewSafeArea {
-  insetTop: number;
-  insetRight: number;
-  insetBottom: number;
-  insetLeft: number;
-}
-
-export interface HtmlAppViewport {
-  width: number;
-  height: number;
-  orientation: OrientationType;
-  safeArea: HtmlAppViewSafeArea;
-}
-
 export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
   /** @hidden */
   _viewController: HtmlAppViewController | null;
   /** @hidden */
   readonly _popovers: Popover[];
   /** @hidden */
-  _viewport: HtmlAppViewport | null;
+  _viewport: Viewport | null;
+  /** @hidden */
+  _viewIdiom: ViewIdiom | null;
   /** @hidden */
   _solver: LayoutSolver | null;
   /** @hidden */
-  _flags: number;
+  _updateTime: number;
+  /** @hidden */
+  _updateFrame: number;
   /** @hidden */
   _updateTimer: number;
   /** @hidden */
@@ -58,7 +51,7 @@ export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
 
   constructor(node: HTMLElement, key: string | null = null) {
     super(node, key);
-    this.doUpdate = this.doUpdate.bind(this);
+    this.performUpdate = this.performUpdate.bind(this);
     this.throttleResize = this.throttleResize.bind(this);
     this.throttleScroll = this.throttleScroll.bind(this);
     this.debounceReorientation = this.debounceReorientation.bind(this);
@@ -66,13 +59,19 @@ export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
     this.onClick = this.onClick.bind(this);
     this._popovers = [];
     this._viewport = null;
+    this._viewIdiom = null;
     this._solver = null;
-    this._flags = HtmlAppView.NeedsResize | HtmlAppView.NeedsScroll | HtmlAppView.NeedsLayout;
+    this._updateTime = 0;
+    this._updateFrame = 0;
     this._updateTimer = 0;
     this._updateDelay = 16;
     this._reorientationTimer = 0;
+    this.initApp();
+  }
+
+  protected initApp(): void {
     if (this.isRootView() && this.isMounted()) {
-      setTimeout(this.cascadeRootMount.bind(this));
+      this.onRootMount();
     }
   }
 
@@ -134,6 +133,7 @@ export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
   protected insertPopoverView(popoverView: View): void {
     // subclasses can override to change popover container
     this.appendChildView(popoverView);
+    popoverView.cascadeUpdate(View.NeedsLayout, this.appViewContext());
   }
 
   protected willShowPopover(popover: Popover, options: PopoverOptions): void {
@@ -200,64 +200,6 @@ export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
     }
   }
 
-  get viewport(): HtmlAppViewport {
-    let viewport = this._viewport;
-    if (viewport === null) {
-      let insetTop = 0;
-      let insetRight = 0;
-      let insetBottom = 0;
-      let insetLeft = 0;
-      const documentWidth = document.documentElement.style.width;
-      const documentHeight = document.documentElement.style.height;
-      document.documentElement.style.width = "100%";
-      document.documentElement.style.height = "100%";
-      const div = document.createElement("div");
-      div.style.setProperty("position", "fixed");
-      div.style.setProperty("top", "0");
-      div.style.setProperty("right", "0");
-      div.style.setProperty("width", window.innerWidth === document.documentElement.offsetWidth ? "100%" : "100vw");
-      div.style.setProperty("height", window.innerHeight === document.documentElement.offsetHeight ? "100%" : "100vh");
-      div.style.setProperty("box-sizing", "border-box");
-      div.style.setProperty("padding-top", "env(safe-area-inset-top)");
-      div.style.setProperty("padding-right", "env(safe-area-inset-right)");
-      div.style.setProperty("padding-bottom", "env(safe-area-inset-bottom)");
-      div.style.setProperty("padding-left", "env(safe-area-inset-left)");
-      div.style.setProperty("overflow", "hidden");
-      div.style.setProperty("visibility", "hidden");
-      document.body.appendChild(div);
-      const style = window.getComputedStyle(div);
-      const width = parseFloat(style.getPropertyValue("width"));
-      const height = parseFloat(style.getPropertyValue("height"));
-      if (typeof CSS !== "undefined" && typeof CSS.supports === "function"
-          && CSS.supports("padding-top: env(safe-area-inset-top)")) {
-        insetTop = parseFloat(style.getPropertyValue("padding-top"));
-        insetRight = parseFloat(style.getPropertyValue("padding-right"));
-        insetBottom = parseFloat(style.getPropertyValue("padding-bottom"));
-        insetLeft = parseFloat(style.getPropertyValue("padding-left"));
-      }
-      document.body.removeChild(div);
-      document.documentElement.style.width = documentWidth;
-      document.documentElement.style.height = documentHeight;
-      let orientation: OrientationType | undefined =
-          (screen as any).msOrientation ||
-          (screen as any).mozOrientation ||
-          (screen.orientation || {}).type;
-      if (!orientation) {
-        switch (window.orientation) {
-          case 0: orientation = "portrait-primary"; break;
-          case 180: orientation = "portrait-secondary"; break;
-          case -90: orientation = "landscape-primary"; break;
-          case 90: orientation = "landscape-secondary"; break;
-          default: orientation = "landscape-primary";
-        }
-      }
-      const safeArea = {insetTop, insetRight, insetBottom, insetLeft};
-      viewport = {width, height, orientation, safeArea};
-      this._viewport = viewport;
-    }
-    return viewport;
-  }
-
   /** @hidden */
   get solver(): ConstraintSolver | null {
     return this._solver || null;
@@ -279,9 +221,9 @@ export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
   }
 
   /** @hidden */
-  setVariableState(variable: ConstrainVariable, state: number): void {
+  setVariable(variable: ConstrainVariable, state: number): void {
     if (this._solver !== null) {
-      this._solver.setVariableState(variable, state);
+      this._solver.setVariable(variable, state);
     }
   }
 
@@ -300,111 +242,279 @@ export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
     }
   }
 
-  /** @hidden */
-  updateLayoutStates(): void {
-    super.updateLayoutStates();
-    const viewport = this.viewport;
-    const safeAreaInsetTop = this.hasOwnProperty("safeAreaInsetTop") ? this.safeAreaInsetTop : void 0;
-    const safeAreaInsetRight = this.hasOwnProperty("safeAreaInsetRight") ? this.safeAreaInsetRight : void 0;
-    const safeAreaInsetBottom = this.hasOwnProperty("safeAreaInsetBottom") ? this.safeAreaInsetBottom : void 0;
-    const safeAreaInsetLeft = this.hasOwnProperty("safeAreaInsetLeft") ? this.safeAreaInsetLeft : void 0;
-    if (safeAreaInsetTop && !safeAreaInsetTop.enabled()) {
-      safeAreaInsetTop.setState(viewport.safeArea.insetTop);
-    }
-    if (safeAreaInsetRight && !safeAreaInsetRight.enabled()) {
-      safeAreaInsetRight.setState(viewport.safeArea.insetRight);
-    }
-    if (safeAreaInsetBottom && !safeAreaInsetBottom.enabled()) {
-      safeAreaInsetBottom.setState(viewport.safeArea.insetBottom);
-    }
-    if (safeAreaInsetLeft && !safeAreaInsetLeft.enabled()) {
-      safeAreaInsetLeft.setState(viewport.safeArea.insetLeft);
-    }
-  }
-
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlAppView>({
+    get(oldState: number): number {
+      const newState = this.viewport.safeArea.insetTop;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    strength: "strong",
+  })
   safeAreaInsetTop: LayoutAnchor<this>;
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlAppView>({
+    get(oldState: number): number {
+      const newState = this.viewport.safeArea.insetRight;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    strength: "strong",
+  })
   safeAreaInsetRight: LayoutAnchor<this>;
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlAppView>({
+    get(oldState: number): number {
+      const newState = this.viewport.safeArea.insetBottom;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    strength: "strong",
+  })
   safeAreaInsetBottom: LayoutAnchor<this>;
 
-  @LayoutAnchor("strong")
+  @LayoutAnchor<HtmlAppView>({
+    get(oldState: number): number {
+      const newState = this.viewport.safeArea.insetLeft;
+      if (oldState !== newState) {
+        this.requireUpdate(View.NeedsLayout);
+      }
+      return newState;
+    },
+    strength: "strong",
+  })
   safeAreaInsetLeft: LayoutAnchor<this>;
 
+  get viewport(): Viewport {
+    let viewport = this._viewport;
+    if (viewport === null) {
+      viewport = this.appViewport();
+      this._viewport = viewport;
+    }
+    return viewport;
+  }
+
   /** @hidden */
-  throttleUpdate(): void {
-    if (!this._updateTimer) {
-      this._updateTimer = setTimeout(this.doUpdate, this._updateDelay) as any;
+  protected appViewport(): Viewport {
+    let insetTop = 0;
+    let insetRight = 0;
+    let insetBottom = 0;
+    let insetLeft = 0;
+    const documentWidth = document.documentElement.style.width;
+    const documentHeight = document.documentElement.style.height;
+    document.documentElement.style.width = "100%";
+    document.documentElement.style.height = "100%";
+    const div = document.createElement("div");
+    div.style.setProperty("position", "fixed");
+    div.style.setProperty("top", "0");
+    div.style.setProperty("right", "0");
+    div.style.setProperty("width", window.innerWidth === document.documentElement.offsetWidth ? "100%" : "100vw");
+    div.style.setProperty("height", window.innerHeight === document.documentElement.offsetHeight ? "100%" : "100vh");
+    div.style.setProperty("box-sizing", "border-box");
+    div.style.setProperty("padding-top", "env(safe-area-inset-top)");
+    div.style.setProperty("padding-right", "env(safe-area-inset-right)");
+    div.style.setProperty("padding-bottom", "env(safe-area-inset-bottom)");
+    div.style.setProperty("padding-left", "env(safe-area-inset-left)");
+    div.style.setProperty("overflow", "hidden");
+    div.style.setProperty("visibility", "hidden");
+    document.body.appendChild(div);
+    const style = window.getComputedStyle(div);
+    const width = parseFloat(style.getPropertyValue("width"));
+    const height = parseFloat(style.getPropertyValue("height"));
+    if (typeof CSS !== "undefined" && typeof CSS.supports === "function"
+        && CSS.supports("padding-top: env(safe-area-inset-top)")) {
+      insetTop = parseFloat(style.getPropertyValue("padding-top"));
+      insetRight = parseFloat(style.getPropertyValue("padding-right"));
+      insetBottom = parseFloat(style.getPropertyValue("padding-bottom"));
+      insetLeft = parseFloat(style.getPropertyValue("padding-left"));
+    }
+    document.body.removeChild(div);
+    document.documentElement.style.width = documentWidth;
+    document.documentElement.style.height = documentHeight;
+    const safeArea = {insetTop, insetRight, insetBottom, insetLeft};
+    let orientation: OrientationType | undefined =
+        (screen as any).msOrientation ||
+        (screen as any).mozOrientation ||
+        (screen.orientation || {}).type;
+    if (!orientation) {
+      switch (window.orientation) {
+        case 0: orientation = "portrait-primary"; break;
+        case 180: orientation = "portrait-secondary"; break;
+        case -90: orientation = "landscape-primary"; break;
+        case 90: orientation = "landscape-secondary"; break;
+        default: orientation = "landscape-primary";
+      }
+    }
+    return {width, height, safeArea, orientation};
+  }
+
+  get viewIdiom(): ViewIdiom {
+    let viewIdiom = this._viewIdiom;
+    if (viewIdiom === null) {
+      viewIdiom = this.appViewIdiom();
+      this._viewIdiom = viewIdiom;
+    }
+    return viewIdiom;
+  }
+
+  protected appViewIdiom(): ViewIdiom {
+    return "unspecified";
+  }
+
+  appViewContext(): ViewContext {
+    return {
+      updateTime: performance.now(),
+      viewport: this.viewport,
+      viewIdiom: this.viewIdiom,
+    };
+  }
+
+  get updateTime(): number {
+    return this._updateTime;
+  }
+
+  requestUpdate(updateFlags: number, immediate: boolean): void {
+    if (immediate) {
+      this.performUpdate();
+    } else if (!this._updateFrame && !this._updateTimer) {
+      if (this._updateDelay === 16) {
+        this._updateFrame = requestAnimationFrame(this.performUpdate);
+      } else {
+        this._updateTimer = setTimeout(this.performUpdate, this._updateDelay) as any;
+      }
     }
   }
 
   /** @hidden */
-  doUpdate(): void {
+  performUpdate(): void {
+    if (this._updateFrame) {
+      cancelAnimationFrame(this._updateFrame);
+      this._updateFrame = 0;
+    }
     if (this._updateTimer) {
       clearTimeout(this._updateTimer);
       this._updateTimer = 0;
     }
-    const t0 = performance.now();
-    if ((this._flags & HtmlAppView.NeedsResize) !== 0) {
-      this.doResize();
-    }
-    if ((this._flags & HtmlAppView.NeedsScroll) !== 0) {
-      this.doScroll();
-    }
-    if ((this._flags & HtmlAppView.NeedsLayout) !== 0) {
-      this.doLayout();
-    }
+    const viewContext = this.appViewContext();
+    this.cascadeUpdate(this._updateFlags, viewContext);
+  }
+
+  cascadeUpdate(updateFlags: number, viewContext: ViewContext): void {
+    const t0 = viewContext.updateTime;
+    this._updateTime = t0;
+    updateFlags = updateFlags | this.updateFlags;
+    updateFlags = this.needsUpdate(updateFlags, viewContext);
+    this.doUpdate(updateFlags, viewContext);
     const t1 = performance.now();
     this._updateDelay = Math.min(t1 - t0 > this._updateDelay ? 2 * this._updateDelay : 16, 166);
   }
 
   /** @hidden */
-  throttleResize(): void {
-    if ((this._flags & HtmlAppView.NeedsResize) === 0) {
-      this._flags |= HtmlAppView.NeedsResize | HtmlAppView.NeedsLayout;
-      this.throttleUpdate();
+  doUpdate(updateFlags: number, viewContext: ViewContext): void {
+    this.willUpdate(viewContext);
+    if (((updateFlags | this._updateFlags) & View.NeedsCompute) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsCompute;
+      this.doCompute(viewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsAnimate) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsAnimate;
+      this.doAnimate(viewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsLayout) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsLayout;
+      this.doLayout(viewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsScroll) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsScroll;
+      this.doScroll(viewContext);
+    }
+    this.onUpdate(viewContext);
+    this.doUpdateChildViews(updateFlags, viewContext);
+    this.didUpdate(viewContext);
+  }
+
+  protected updateLayoutStates(): void {
+    super.updateLayoutStates();
+    if (this.hasOwnProperty("safeAreaInsetTop")) {
+      this.safeAreaInsetTop.updateState();
+    }
+    if (this.hasOwnProperty("safeAreaInsetRight")) {
+      this.safeAreaInsetRight.updateState();
+    }
+    if (this.hasOwnProperty("safeAreaInsetBottom")) {
+      this.safeAreaInsetBottom.updateState();
+    }
+    if (this.hasOwnProperty("safeAreaInsetLeft")) {
+      this.safeAreaInsetLeft.updateState();
     }
   }
 
   /** @hidden */
-  doResize(): void {
-    this._flags &= ~HtmlAppView.NeedsResize;
-    this._viewport = null;
-    this.cascadeResize();
-  }
-
-  /** @hidden */
-  throttleScroll(): void {
-    if ((this._flags & HtmlAppView.NeedsScroll) === 0) {
-      this._flags |= HtmlAppView.NeedsScroll;
-      this.throttleUpdate();
+  updateVariables(): void {
+    if (this._solver !== null) {
+      this._solver.updateVariables();
     }
   }
 
   /** @hidden */
-  doScroll(): void {
-    this._flags &= ~HtmlAppView.NeedsScroll;
-    this.cascadeScroll();
+  protected onRootMount(): void {
+    if (this.isRootView() && this.isMounted()) {
+      this.cascadeMount();
+    }
+  }
+
+  protected onMount(): void {
+    super.onMount();
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", this.throttleResize);
+      window.addEventListener("scroll", this.throttleScroll, {passive: true});
+      window.addEventListener("orientationchange", this.debounceReorientation);
+      this.on('click', this.onClick);
+    }
+  }
+
+  protected onUnmount(): void {
+    if (this._updateFrame) {
+      cancelAnimationFrame(this._updateFrame);
+      this._updateFrame = 0;
+    }
+    if (this._updateTimer) {
+      clearTimeout(this._updateTimer);
+      this._updateTimer = 0;
+    }
+    if (this._reorientationTimer) {
+      clearTimeout(this._reorientationTimer);
+      this._reorientationTimer = 0;
+    }
+    if (typeof window !== "undefined") {
+      window.removeEventListener("resize", this.throttleResize);
+      window.removeEventListener("scroll", this.throttleScroll);
+      window.removeEventListener("orientationchange", this.debounceReorientation);
+      this.off('click', this.onClick);
+    }
+    super.onUnmount();
   }
 
   /** @hidden */
   throttleLayout(): void {
-    if ((this._flags & HtmlAppView.NeedsLayout) === 0) {
-      this._flags |= HtmlAppView.NeedsLayout;
-      this.throttleUpdate();
-    }
+    this.requireUpdate(View.NeedsLayout);
   }
 
   /** @hidden */
-  doLayout(): void {
-    this._flags &= ~HtmlAppView.NeedsLayout;
-    if (this._solver !== null) {
-      this._solver.updateVariables();
-      this.cascadeLayout();
-    }
+  throttleResize(): void {
+    this._viewport = null;
+    this._viewIdiom = null;
+    this.requireUpdate(View.NeedsLayout);
+  }
+
+  /** @hidden */
+  throttleScroll(): void {
+    this.requireUpdate(View.NeedsScroll);
   }
 
   /** @hidden */
@@ -425,39 +535,24 @@ export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
     this.throttleResize();
   }
 
-  cascadeRootMount(): void {
-    if (this.isRootView() && this.isMounted()) {
-      this.cascadeMount();
-    }
+  /** @hidden */
+  didAddConstraint(constraint: Constraint): void {
+    this.requireUpdate(View.NeedsLayout);
   }
 
-  protected onMount(): void {
-    super.onMount();
-    if (typeof window !== "undefined") {
-      window.addEventListener("resize", this.throttleResize);
-      window.addEventListener("scroll", this.throttleScroll, {passive: true});
-      window.addEventListener("orientationchange", this.debounceReorientation);
-      this.on('click', this.onClick);
-    }
-    this.doUpdate();
+  /** @hidden */
+  didRemoveConstraint(constraint: Constraint): void {
+    this.requireUpdate(View.NeedsLayout);
   }
 
-  protected onUnmount(): void {
-    if (this._updateTimer) {
-      clearTimeout(this._updateTimer);
-      this._updateTimer = 0;
-    }
-    if (this._reorientationTimer) {
-      clearTimeout(this._reorientationTimer);
-      this._reorientationTimer = 0;
-    }
-    if (typeof window !== "undefined") {
-      window.removeEventListener("resize", this.throttleResize);
-      window.removeEventListener("scroll", this.throttleScroll);
-      window.removeEventListener("orientationchange", this.debounceReorientation);
-      this.off('click', this.onClick);
-    }
-    super.onUnmount();
+  /** @hidden */
+  didAddVariable(variable: ConstrainVariable): void {
+    this.requireUpdate(View.NeedsLayout);
+  }
+
+  /** @hidden */
+  didRemoveVariable(variable: ConstrainVariable): void {
+    this.requireUpdate(View.NeedsLayout);
   }
 
   protected onClick(event: Event): void {
@@ -467,11 +562,4 @@ export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
   onFallthroughClick(event: Event): void {
     this.hidePopovers();
   }
-
-  /** @hidden */
-  static readonly NeedsResize: number = 1 << 0;
-  /** @hidden */
-  static readonly NeedsScroll: number = 1 << 1;
-  /** @hidden */
-  static readonly NeedsLayout: number = 1 << 2;
 }

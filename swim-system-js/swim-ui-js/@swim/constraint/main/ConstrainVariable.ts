@@ -46,7 +46,7 @@ export abstract class ConstrainVariable extends ConstrainTerm implements Constra
 
   abstract get value(): number;
 
-  abstract setValue(value: number): void;
+  abstract updateValue(value: number): void;
 
   abstract get state(): number;
 

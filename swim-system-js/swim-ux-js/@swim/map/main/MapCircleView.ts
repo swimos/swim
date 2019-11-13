@@ -26,6 +26,8 @@ import {
   StrokeView,
 } from "@swim/view";
 import {AnyLngLat, LngLat} from "./LngLat";
+import {MapViewContext} from "./MapViewContext";
+import {MapView} from "./MapView";
 import {MapGraphicView} from "./MapGraphicView";
 import {MapGraphicViewController} from "./MapGraphicViewController";
 
@@ -60,13 +62,13 @@ export class MapCircleView extends MapGraphicView implements FillView, StrokeVie
   @MemberAnimator(Length)
   radius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   fill: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   stroke: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   strokeWidth: MemberAnimator<this, Length, AnyLength>;
 
   hitRadius(): number;
@@ -80,7 +82,8 @@ export class MapCircleView extends MapGraphicView implements FillView, StrokeVie
     }
   }
 
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: MapViewContext): void {
+    const t = viewContext.updateTime;
     const oldCenter = this.center.value!;
     this.center.onFrame(t);
     const newCenter = this.center.value!;
@@ -89,12 +92,36 @@ export class MapCircleView extends MapGraphicView implements FillView, StrokeVie
     this.stroke.onFrame(t);
     this.strokeWidth.onFrame(t);
 
-    if (this._dirtyProjection || oldCenter !== newCenter) {
-      this.projectGeometry();
+    if (oldCenter !== newCenter) {
+      this.requireUpdate(MapView.NeedsProject);
     }
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected onProject(viewContext: MapViewContext): void {
+    const projection = viewContext.projection;
+    const bounds = this._bounds;
+    const anchor = projection.project(this.center.value!);
+    const size = Math.min(bounds.width, bounds.height);
+    const radius = this.radius.value!.pxValue(size);
+    const hitRadius = Math.max(this._hitRadius, radius);
+    this._hitBounds = new BoxR2(anchor.x - hitRadius, anchor.y - hitRadius,
+                                anchor.x + hitRadius, anchor.y + hitRadius);
+    this.setAnchor(anchor);
+  }
+
+  protected onLayout(viewContext: MapViewContext): void {
+    const bounds = this._bounds;
+    const anchor = this._anchor;
+    const size = Math.min(bounds.width, bounds.height);
+    const radius = this.radius.value!.pxValue(size);
+    const invalid = !isFinite(anchor.x) || !isFinite(anchor.y) || !isFinite(radius);
+    const culled = invalid || !bounds.intersectsCircle(new CircleR2(anchor.x, anchor.y, radius));
+    this.setCulled(culled);
+    this.layoutChildViews(viewContext);
+  }
+
+  protected onRender(viewContext: MapViewContext): void {
+    const context = viewContext.renderingContext;
     context.save();
     const bounds = this._bounds;
     const anchor = this._anchor;
@@ -126,16 +153,6 @@ export class MapCircleView extends MapGraphicView implements FillView, StrokeVie
     }
   }
 
-  protected onCull(): void {
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    const size = Math.min(bounds.width, bounds.height);
-    const radius = this.radius.value!.pxValue(size);
-    const invalid = !isFinite(anchor.x) || !isFinite(anchor.y) || !isFinite(radius);
-    const culled = invalid || !bounds.intersectsCircle(new CircleR2(anchor.x, anchor.y, radius));
-    this.setCulled(culled);
-  }
-
   get popoverBounds(): BoxR2 {
     const inversePageTransform = this.pageTransform.inverse();
     const hitBounds = this._hitBounds;
@@ -147,17 +164,6 @@ export class MapCircleView extends MapGraphicView implements FillView, StrokeVie
       const pageY = Math.round(pageAnchor.y);
       return new BoxR2(pageX, pageY, pageX, pageY);
     }
-  }
-
-  protected projectGeometry(): void {
-    const bounds = this._bounds;
-    const anchor = this.project(this.center.value!);
-    const size = Math.min(bounds.width, bounds.height);
-    const radius = this.radius.value!.pxValue(size);
-    const hitRadius = Math.max(this._hitRadius, radius);
-    this._hitBounds = new BoxR2(anchor.x - hitRadius, anchor.y - hitRadius,
-                                anchor.x + hitRadius, anchor.y + hitRadius);
-    this.setAnchor(anchor);
   }
 
   hitTest(x: number, y: number, context: RenderingContext): RenderView | null {

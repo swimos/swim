@@ -20,6 +20,7 @@ import {
   MemberAnimator,
   ViewInit,
   View,
+  RenderViewContext,
   TypesetView,
   GraphicView,
   GraphicViewController,
@@ -123,10 +124,10 @@ export class PieView extends GraphicView {
   @MemberAnimator(Color)
   tickColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Font, "inherit")
+  @MemberAnimator(Font, {inherit: true})
   font: MemberAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
   title(): View | null;
@@ -148,7 +149,18 @@ export class PieView extends GraphicView {
     this.appendChildView(slice);
   }
 
-  protected onAnimate(t: number): void {
+  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+    if ((updateFlags & View.NeedsAnimate) !== 0) {
+      updateFlags = updateFlags | View.NeedsLayout;
+    }
+    if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
+      updateFlags = updateFlags | View.NeedsRender;
+    }
+    return updateFlags;
+  }
+
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.limit.onFrame(t);
     this.baseAngle.onFrame(t);
     this.innerRadius.onFrame(t);
@@ -166,11 +178,20 @@ export class PieView extends GraphicView {
     this.tickColor.onFrame(t);
     this.font.onFrame(t);
     this.textColor.onFrame(t);
+
+    const childViews = this._childViews;
+    for (let i = 0; i < childViews.length; i += 1) {
+      const childView = childViews[i];
+      if (childView instanceof SliceView) {
+        childView.onAnimate(viewContext);
+        childView.setUpdateFlags(childView.updateFlags & ~View.NeedsAnimate);
+      }
+    }
   }
 
-  protected didAnimate(t: number): void {
+  protected onLayout(viewContext: RenderViewContext): void {
+    super.onLayout(viewContext);
     this.layoutPie();
-    super.didAnimate(t);
   }
 
   protected layoutPie(): void {

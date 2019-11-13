@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {Animated} from "./Animated";
-
+export {AnimatorContext} from "./AnimatorContext";
 export {Animator} from "./Animator";
 export {FrameAnimator} from "./FrameAnimator";
 export {ChildAnimator} from "./ChildAnimator";

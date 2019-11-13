@@ -12,30 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View, RenderView} from "@swim/view";
+import {RenderView} from "@swim/view";
 import {MapProjection} from "./MapProjection";
+import {MapViewContext} from "./MapViewContext";
 import {MapViewController} from "./MapViewController";
 
 export interface MapView extends RenderView {
   readonly viewController: MapViewController | null;
 
-  readonly projection: MapProjection;
-
-  setProjection(projection: MapProjection): void;
+  readonly projection: MapProjection | null;
 
   readonly zoom: number;
 
-  setZoom(zoom: number): void;
+  needsUpdate(updateFlags: number, viewContext: MapViewContext): number;
+
+  /** @hidden */
+  doProject(viewContext: MapViewContext): void;
 }
 
 /** @hidden */
 export const MapView = {
+  NeedsProject: 1 << 8,
+
   is(object: unknown): object is MapView {
     if (typeof object === "object" && object) {
       const view = object as MapView;
-      return view instanceof View
-          && typeof view.setProjection === "function"
-          && typeof view.setZoom === "function";
+      return RenderView.is(view)
+          && typeof view.doProject === "function";
     }
     return false;
   },

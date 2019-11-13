@@ -92,7 +92,11 @@ export class ElementView extends NodeView {
 
   setStyle(name: string, value: unknown, priority?: string): this {
     this.willSetStyle(name, value, priority);
-    this._node.style.setProperty(name, StyleString(value), priority);
+    if (value !== null) {
+      this._node.style.setProperty(name, StyleString(value), priority);
+    } else {
+      this._node.style.removeProperty(name);
+    }
     this.onSetStyle(name, value, priority);
     this.didSetStyle(name, value, priority);
     return this;

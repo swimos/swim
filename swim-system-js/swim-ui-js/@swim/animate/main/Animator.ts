@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Animated} from "./Animated";
+import {AnimatorContext} from "./AnimatorContext";
 
-export abstract class Animator implements Animated {
-  abstract get dirty(): boolean;
-
-  abstract setDirty(dirty: boolean): void;
-
-  abstract animate(): void;
+export abstract class Animator implements AnimatorContext {
+  abstract animate(animator?: Animator): void;
 
   abstract onFrame(t: number): void;
 }

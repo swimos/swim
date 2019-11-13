@@ -18,7 +18,7 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {ContinuousScale} from "@swim/scale";
 import {RenderingContext} from "@swim/render";
-import {MemberAnimator, ViewInit, GraphicView} from "@swim/view";
+import {MemberAnimator, ViewInit, View, RenderViewContext, GraphicView} from "@swim/view";
 import {AxisView} from "../axis/AxisView";
 import {AnyDatumView, DatumView} from "../data/DatumView";
 import {PlotViewController} from "./PlotViewController";
@@ -115,22 +115,29 @@ export abstract class PlotView<X, Y> extends GraphicView {
     return this._yRange;
   }
 
-  @MemberAnimator(Font, "inherit")
+  @MemberAnimator(Font, {inherit: true})
   font: MemberAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
-  protected onAnimate(t: number): void {
+  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+    if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
+      updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout | View.NeedsRender;
+    }
+    return updateFlags;
+  }
+
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.font.onFrame(t);
     this.textColor.onFrame(t);
   }
 
-  protected didAnimate(t: number): void {
+  protected onLayout(viewContext: RenderViewContext): void {
     if (this._xAxis && this._yAxis) {
       this.layoutData(this._xAxis.scale.value!, this._yAxis.scale.value!, this._bounds, this._anchor);
     }
-    super.didAnimate(t);
   }
 
   protected layoutData(xScale: ContinuousScale<X, number>, yScale: ContinuousScale<Y, number>,
@@ -153,6 +160,7 @@ export abstract class PlotView<X, Y> extends GraphicView {
         const ax1 = xScale.scale(x1);
         const ay1 = yScale.scale(y1);
         const datumAnchor = new PointR2(anchor.x + ax1, anchor.y + ay1);
+        datum1.setBounds(bounds);
         datum1.setAnchor(datumAnchor);
 
         if (datum0) {
@@ -228,26 +236,29 @@ export abstract class PlotView<X, Y> extends GraphicView {
         rebound = true;
       }
       if (rebound) {
-        this.animate();
+        this.requireUpdate(View.NeedsLayout);
       }
     }
   }
 
-  protected willRender(context: RenderingContext): void {
-    super.willRender(context);
+  protected willUpdate(viewContext: RenderViewContext): void {
+    super.willUpdate(viewContext);
+    const context = viewContext.renderingContext;
     context.save();
     this.clipPlot(context, this._bounds);
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected onRender(viewContext: RenderViewContext): void {
+    const context = viewContext.renderingContext;
     const bounds = this._bounds;
     const anchor = this._anchor;
     this.renderPlot(context, bounds, anchor);
   }
 
-  protected didRender(context: RenderingContext): void {
+  protected didUpdate(viewContext: RenderViewContext): void {
+    const context = viewContext.renderingContext;
     context.restore();
-    super.didRender(context);
+    super.didUpdate(viewContext);
   }
 
   protected clipPlot(context: RenderingContext, bounds: BoxR2): void {

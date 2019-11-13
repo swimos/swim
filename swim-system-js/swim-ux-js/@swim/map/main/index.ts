@@ -21,6 +21,7 @@ export {LngLatInterpolator} from "./LngLatInterpolator";
 
 export {MapProjection} from "./MapProjection";
 
+export {MapViewContext} from "./MapViewContext";
 export {MapView} from "./MapView";
 export {MapViewObserver} from "./MapViewObserver";
 export {MapViewController} from "./MapViewController";
@@ -29,6 +30,7 @@ export {MapGraphicView} from "./MapGraphicView";
 export {MapGraphicViewObserver} from "./MapGraphicViewObserver";
 export {MapGraphicViewController} from "./MapGraphicViewController";
 
+export {MapLayerViewContext} from "./MapLayerViewContext";
 export {MapLayerView} from "./MapLayerView";
 export {MapLayerViewObserver} from "./MapLayerViewObserver";
 export {MapLayerViewController} from "./MapLayerViewController";

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {ViewContext} from "./ViewContext";
 import {View} from "./View";
 import {ViewController} from "./ViewController";
 import {AppView} from "./AppView";
@@ -39,6 +40,14 @@ export interface AppViewController<V extends AppView = AppView> extends ViewCont
 
   viewDidRemoveChildView(childView: View, view: V): void;
 
+  viewWillShowPopover(popover: Popover, options: PopoverOptions, view: V): void;
+
+  viewDidShowPopover(popover: Popover, options: PopoverOptions, view: V): void;
+
+  viewWillHidePopover(popover: Popover, view: V): void;
+
+  viewDidHidePopover(popover: Popover, view: V): void;
+
   viewWillMount(view: V): void;
 
   viewDidMount(view: V): void;
@@ -47,23 +56,27 @@ export interface AppViewController<V extends AppView = AppView> extends ViewCont
 
   viewDidUnmount(view: V): void;
 
-  viewWillResize(view: V): void;
+  viewWillUpdate(viewContext: ViewContext, view: V): void;
 
-  viewDidResize(view: V): void;
+  viewDidUpdate(viewContext: ViewContext, view: V): void;
 
-  viewWillLayout(view: V): void;
+  viewWillCompute(viewContext: ViewContext, view: V): void;
 
-  viewDidLayout(view: V): void;
+  viewDidCompute(viewContext: ViewContext, view: V): void;
 
-  viewWillScroll(view: V): void;
+  viewWillAnimate(viewContext: ViewContext, view: V): void;
 
-  viewDidScroll(view: V): void;
+  viewDidAnimate(viewContext: ViewContext, view: V): void;
 
-  viewWillShowPopover(popover: Popover, options: PopoverOptions, view: V): void;
+  viewWillLayout(viewContext: ViewContext, view: V): void;
 
-  viewDidShowPopover(popover: Popover, options: PopoverOptions, view: V): void;
+  viewDidLayout(viewContext: ViewContext, view: V): void;
 
-  viewWillHidePopover(popover: Popover, view: V): void;
+  viewWillScroll(viewContext: ViewContext, view: V): void;
 
-  viewDidHidePopover(popover: Popover, view: V): void;
+  viewDidScroll(viewContext: ViewContext, view: V): void;
+
+  viewWillUpdateChildViews(viewContext: ViewContext, view: V): void;
+
+  viewDidUpdateChildViews(viewContext: ViewContext, view: V): void;
 }

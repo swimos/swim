@@ -22,6 +22,7 @@ import {
   MemberAnimator,
   ViewInit,
   View,
+  RenderViewContext,
   RenderView,
   GraphicView,
   GraphicViewController,
@@ -111,28 +112,28 @@ export abstract class TickView<D> extends GraphicView {
   @MemberAnimator(Number)
   opacity: MemberAnimator<this, number>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   tickMarkColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   tickMarkWidth: MemberAnimator<this, number>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   tickMarkLength: MemberAnimator<this, number>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   tickLabelPadding: MemberAnimator<this, number>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   gridLineColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   gridLineWidth: MemberAnimator<this, number>;
 
-  @MemberAnimator(Font, "inherit")
+  @MemberAnimator(Font, {inherit: true})
   font: MemberAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
   tickLabel(): View | null;
@@ -174,7 +175,15 @@ export abstract class TickView<D> extends GraphicView {
     }
   }
 
-  protected onAnimate(t: number): void {
+  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+    if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
+      updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout | View.NeedsRender;
+    }
+    return updateFlags;
+  }
+
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.opacity.onFrame(t);
 
     this.tickMarkColor.onFrame(t);
@@ -188,47 +197,44 @@ export abstract class TickView<D> extends GraphicView {
 
     this.font.onFrame(t);
     this.textColor.onFrame(t);
+  }
 
+  protected onLayout(viewContext: RenderViewContext): void {
     const tickLabel = this.tickLabel();
     if (RenderView.is(tickLabel)) {
       this.layoutTickLabel(tickLabel, this._bounds, this._anchor);
     }
   }
 
-  protected willRender(context: RenderingContext): void {
-    super.willRender(context);
+  protected willUpdate(viewContext: RenderViewContext): void {
+    super.willUpdate(viewContext);
+    const context = viewContext.renderingContext;
     context.save();
-    context.globalAlpha = this.opacity.value!;
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected onRender(viewContext: RenderViewContext): void {
+    const context = viewContext.renderingContext;
+    context.globalAlpha = this.opacity.value!;
     const bounds = this._bounds;
     const anchor = this._anchor;
     this.renderTick(context, bounds, anchor);
   }
 
-  protected didRender(context: RenderingContext): void {
+  protected didUpdate(viewContext: RenderViewContext): void {
+    const context = viewContext.renderingContext;
     context.restore();
-    super.didRender(context);
+    super.didUpdate(viewContext);
   }
 
   protected abstract layoutTickLabel(tickLabel: RenderView, bounds: BoxR2, anchor: PointR2): void;
 
   protected abstract renderTick(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void;
 
-  protected setChildViewBounds(childView: RenderView, bounds: BoxR2): void {
-    if (childView.key() === "tickLabel") {
-      this.layoutTickLabel(childView, bounds, this._anchor);
+  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
+    if (childView.key() === "tickLabel" && RenderView.is(childView)) {
+      this.layoutTickLabel(childView, this._bounds, this._anchor);
     } else {
-      super.setChildViewBounds(childView, bounds);
-    }
-  }
-
-  protected setChildViewAnchor(childView: RenderView, anchor: PointR2): void {
-    if (childView.key() === "tickLabel") {
-      this.layoutTickLabel(childView, this._bounds, anchor);
-    } else {
-      super.setChildViewAnchor(childView, anchor);
+      super.layoutChildView(childView, viewContext);
     }
   }
 
@@ -331,7 +337,7 @@ export abstract class TickView<D> extends GraphicView {
     if (opacity === 0 && view._state === TickState.Leaving) {
       view._state = TickState.Excluded;
       view._coord0 = NaN;
-      view.remove();
+      setTimeout(view.remove.bind(view));
     } else if (opacity === 1 && view._state === TickState.Entering) {
       view._state = TickState.Included;
       view._coord0 = NaN;

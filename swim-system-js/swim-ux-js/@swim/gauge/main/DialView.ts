@@ -22,6 +22,7 @@ import {
   MemberAnimator,
   ViewInit,
   View,
+  RenderViewContext,
   RenderView,
   FillView,
   TypesetView,
@@ -82,52 +83,52 @@ export class DialView extends GraphicView {
   @MemberAnimator(Number)
   total: MemberAnimator<this, number>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   innerRadius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   outerRadius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Angle, "inherit")
+  @MemberAnimator(Angle, {inherit: true})
   startAngle: MemberAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Angle, "inherit")
+  @MemberAnimator(Angle, {inherit: true})
   sweepAngle: MemberAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   cornerRadius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   dialColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   meterColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   labelPadding: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   tickAlign: MemberAnimator<this, number>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   tickRadius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   tickLength: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   tickWidth: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   tickPadding: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   tickColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Font, "inherit")
+  @MemberAnimator(Font, {inherit: true})
   font: MemberAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
   label(): View | null;
@@ -169,7 +170,8 @@ export class DialView extends GraphicView {
     }
   }
 
-  protected onAnimate(t: number): void {
+  onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.value.onFrame(t);
     this.total.onFrame(t);
     this.innerRadius.onFrame(t);
@@ -190,7 +192,15 @@ export class DialView extends GraphicView {
     this.textColor.onFrame(t);
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
+    if (RenderView.is(childView)) {
+      childView.setBounds(this._bounds);
+      // Don't set anchor.
+    }
+  }
+
+  protected onRender(viewContext: RenderViewContext): void {
+    const context = viewContext.renderingContext;
     context.save();
     const bounds = this._bounds;
     const anchor = this._anchor;

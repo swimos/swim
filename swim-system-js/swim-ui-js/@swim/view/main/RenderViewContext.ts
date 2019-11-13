@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface Animated {
-  readonly dirty: boolean;
+import {RenderingContext} from "@swim/render";
+import {AnimatedViewContext} from "./AnimatedViewContext";
 
-  setDirty(dirty: boolean): void;
+export interface RenderViewContext extends AnimatedViewContext {
+  readonly renderingContext: RenderingContext;
 
-  animate(): void;
+  readonly pixelRatio: number;
 }

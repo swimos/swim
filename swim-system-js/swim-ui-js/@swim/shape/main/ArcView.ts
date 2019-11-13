@@ -20,6 +20,7 @@ import {RenderingContext} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
+  RenderViewContext,
   RenderView,
   FillViewInit,
   FillView,
@@ -78,13 +79,13 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
   @MemberAnimator(Length)
   cornerRadius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   fill: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   stroke: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   strokeWidth: MemberAnimator<this, Length, AnyLength>;
 
   get value(): Arc {
@@ -138,7 +139,8 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
     }
   }
 
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.innerRadius.onFrame(t);
     this.outerRadius.onFrame(t);
     this.startAngle.onFrame(t);
@@ -151,7 +153,8 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
     this.strokeWidth.onFrame(t);
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected onRender(viewContext: RenderViewContext): void {
+    const context = viewContext.renderingContext;
     context.save();
     const bounds = this._bounds;
     const arc = this.value;

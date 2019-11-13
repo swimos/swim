@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
+import {Transition, Tween} from "@swim/transition";
+import {MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
@@ -22,10 +22,10 @@ export interface StringMemberAnimator<V extends AnimatedView> extends MemberAnim
 }
 
 /** @hidden */
-export const StringMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
-  const StringMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
+export const StringMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor<string> {
+  const StringMemberAnimator: MemberAnimatorConstructor<string> = function <V extends AnimatedView>(
       this: StringMemberAnimator<V>, view: V, value?: string | null,
-      transition?: Transition<string> | null, inherit?: MemberAnimatorInherit): StringMemberAnimator<V> {
+      transition?: Transition<string> | null, inherit?: string | null): StringMemberAnimator<V> {
     let _this: StringMemberAnimator<V> = function (value?: string | null, tween?: Tween<string>): string | null | undefined | V {
       if (value === void 0) {
         return _this.value;
@@ -37,7 +37,7 @@ export const StringMemberAnimator = (function (_super: typeof MemberAnimator): M
     (_this as any).__proto__ = this;
     _this = _super.call(_this, view, value, transition, inherit) || _this;
     return _this;
-  } as unknown as MemberAnimatorConstructor;
+  } as unknown as MemberAnimatorConstructor<string>;
   __extends(StringMemberAnimator, _super);
 
   return StringMemberAnimator;

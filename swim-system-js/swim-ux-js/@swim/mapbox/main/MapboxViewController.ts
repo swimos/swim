@@ -13,13 +13,13 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {View} from "./View";
-import {AnimatedViewController} from "./AnimatedViewController";
-import {RenderViewContext} from "./RenderViewContext";
-import {RenderView} from "./RenderView";
-import {RenderViewObserver} from "./RenderViewObserver";
+import {View} from "@swim/view";
+import {MapViewContext, MapGraphicViewController} from "@swim/map";
+import {MapboxProjection} from "./MapboxProjection";
+import {MapboxView} from "./MapboxView";
+import {MapboxViewObserver} from "./MapboxViewObserver";
 
-export interface RenderViewController<V extends RenderView = RenderView> extends AnimatedViewController<V>, RenderViewObserver<V> {
+export interface MapboxViewController<V extends MapboxView = MapboxView> extends MapGraphicViewController<V>, MapboxViewObserver<V> {
   readonly view: V | null;
 
   setView(view: V | null): void;
@@ -48,33 +48,37 @@ export interface RenderViewController<V extends RenderView = RenderView> extends
 
   viewDidUnmount(view: V): void;
 
-  viewWillUpdate(viewContext: RenderViewContext, view: V): void;
+  viewWillUpdate(viewContext: MapViewContext, view: V): void;
 
-  viewDidUpdate(viewContext: RenderViewContext, view: V): void;
+  viewDidUpdate(viewContext: MapViewContext, view: V): void;
 
-  viewWillCompute(viewContext: RenderViewContext, view: V): void;
+  viewWillCompute(viewContext: MapViewContext, view: V): void;
 
-  viewDidCompute(viewContext: RenderViewContext, view: V): void;
+  viewDidCompute(viewContext: MapViewContext, view: V): void;
 
-  viewWillAnimate(viewContext: RenderViewContext, view: V): void;
+  viewWillAnimate(viewContext: MapViewContext, view: V): void;
 
-  viewDidAnimate(viewContext: RenderViewContext, view: V): void;
+  viewDidAnimate(viewContext: MapViewContext, view: V): void;
 
-  viewWillLayout(viewContext: RenderViewContext, view: V): void;
+  viewWillProject(viewContext: MapViewContext, view: V): void;
 
-  viewDidLayout(viewContext: RenderViewContext, view: V): void;
+  viewDidProject(viewContext: MapViewContext, view: V): void;
 
-  viewWillScroll(viewContext: RenderViewContext, view: V): void;
+  viewWillLayout(viewContext: MapViewContext, view: V): void;
 
-  viewDidScroll(viewContext: RenderViewContext, view: V): void;
+  viewDidLayout(viewContext: MapViewContext, view: V): void;
 
-  viewWillRender(viewContext: RenderViewContext, view: V): void;
+  viewWillScroll(viewContext: MapViewContext, view: V): void;
 
-  viewDidRender(viewContext: RenderViewContext, view: V): void;
+  viewDidScroll(viewContext: MapViewContext, view: V): void;
 
-  viewWillUpdateChildViews(viewContext: RenderViewContext, view: V): void;
+  viewWillRender(viewContext: MapViewContext, view: V): void;
 
-  viewDidUpdateChildViews(viewContext: RenderViewContext, view: V): void;
+  viewDidRender(viewContext: MapViewContext, view: V): void;
+
+  viewWillUpdateChildViews(viewContext: MapViewContext, view: V): void;
+
+  viewDidUpdateChildViews(viewContext: MapViewContext, view: V): void;
 
   viewWillSetHidden(hidden: boolean, view: V): boolean | void;
 
@@ -91,4 +95,12 @@ export interface RenderViewController<V extends RenderView = RenderView> extends
   viewWillSetAnchor(anchor: PointR2, view: V): PointR2 | void;
 
   viewDidSetAnchor(newAnchor: PointR2, oldAnchor: PointR2, view: V): void;
+
+  viewWillSetProjection(projection: MapboxProjection, view: V): void;
+
+  viewDidSetProjection(projection: MapboxProjection, view: V): void;
+
+  viewWillSetZoom(zoom: number, view: V): void;
+
+  viewDidSetZoom(newZoom: number, oldZoom: number, view: V): void;
 }

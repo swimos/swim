@@ -13,14 +13,14 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Objects, FromAny} from "@swim/util";
-import {Angle} from "@swim/angle";
-import {Length} from "@swim/length";
-import {Color} from "@swim/color";
-import {Font} from "@swim/font";
-import {Transform} from "@swim/transform";
-import {Tween, Transition} from "@swim/transition";
-import {TweenAnimator} from "@swim/animate";
+import {FromAny} from "@swim/util";
+import {AnyAngle, Angle} from "@swim/angle";
+import {AnyLength, Length} from "@swim/length";
+import {AnyColor, Color} from "@swim/color";
+import {AnyFont, Font} from "@swim/font";
+import {AnyTransform, Transform} from "@swim/transform";
+import {AnyTransition, Transition, Tween} from "@swim/transition";
+import {Animator, TweenAnimator} from "@swim/animate";
 import {AnyMemberAnimator} from "./AnyMemberAnimator";
 import {ObjectMemberAnimator} from "./ObjectMemberAnimator";
 import {StringMemberAnimator} from "./StringMemberAnimator";
@@ -34,26 +34,46 @@ import {TransformMemberAnimator} from "./TransformMemberAnimator";
 import {View} from "../View";
 import {AnimatedView} from "../AnimatedView";
 
-export type MemberAnimatorInherit = "inherit" | string | null;
+export type MemberAnimatorTypeConstructor = FromAny<any>
+                                          | typeof Object
+                                          | typeof String
+                                          | typeof Boolean
+                                          | typeof Number
+                                          | typeof Angle
+                                          | typeof Length
+                                          | typeof Color
+                                          | typeof Font
+                                          | typeof Transform;
 
-export type MemberAnimatorType = FromAny<any>
-                               | typeof Object
-                               | typeof String
-                               | typeof Boolean
-                               | typeof Number
-                               | typeof Angle
-                               | typeof Length
-                               | typeof Color
-                               | typeof Font
-                               | typeof Transform;
+export type MemberAnimatorDescriptorType<C extends MemberAnimatorTypeConstructor> =
+  C extends typeof Transform ? MemberAnimatorDescriptor<Transform, AnyTransform> :
+  C extends typeof Font ? MemberAnimatorDescriptor<Font, AnyFont> :
+  C extends typeof Color ? MemberAnimatorDescriptor<Color, AnyColor> :
+  C extends typeof Length ? MemberAnimatorDescriptor<Length, AnyLength> :
+  C extends typeof Angle ? MemberAnimatorDescriptor<Angle, AnyAngle> :
+  C extends typeof Number ? MemberAnimatorDescriptor<number, number | string> :
+  C extends typeof Boolean ? MemberAnimatorDescriptor<boolean, boolean | string> :
+  C extends typeof String ? MemberAnimatorDescriptor<string> :
+  C extends typeof Object ? MemberAnimatorDescriptor<Object> :
+  C extends FromAny<any> ? MemberAnimatorDescriptor<any> :
+  MemberAnimatorDescriptor<any>;
 
-export interface MemberAnimatorConstructor {
-  new<V extends AnimatedView, T, U = T>(view: V, value?: T | null, transition?: Transition<T> | null,
-                                        inherit?: MemberAnimatorInherit): MemberAnimator<V, T, U>;
+export interface MemberAnimatorDescriptor<T, U = T> {
+  value?: T | U | null;
+  transition?: AnyTransition<T> | null;
+  inherit?: string | boolean | null;
 }
 
-export interface MemberAnimatorClass extends MemberAnimatorConstructor {
-  (type: MemberAnimatorType, inherit?: string): PropertyDecorator;
+export interface MemberAnimatorConstructor<T, U = T> {
+  new<V extends AnimatedView>(view: V, value?: T | U | null, transition?: Transition<T> | null,
+                              inherit?: string | null): MemberAnimator<V, T, U>;
+}
+
+export interface MemberAnimatorClass {
+  new<V extends AnimatedView, T, U = T>(view: V, value?: T | null, transition?: Transition<T> | null,
+                                        inherit?: string | null): MemberAnimator<V, T, U>;
+
+  <C extends MemberAnimatorTypeConstructor>(constructor: C, descriptor?: MemberAnimatorDescriptorType<C>): PropertyDecorator;
 
   // Forward type declarations
   /** @hidden */
@@ -83,16 +103,15 @@ export interface MemberAnimator<V extends AnimatedView, T, U = T> extends TweenA
   (value: U | null, tween?: Tween<T>): V;
 
   /** @hidden */
-  readonly _view: V;
+  _view: V;
+  /** @hidden */
+  _inherit: string | null;
 
   readonly view: V;
 
-  /** @hidden */
-  readonly _inherit: MemberAnimatorInherit;
+  readonly inherit: string | null;
 
-  readonly inherit: MemberAnimatorInherit;
-
-  animate(): void;
+  animate(animator?: Animator): void;
 
   cancel(): void;
 
@@ -103,42 +122,45 @@ export interface MemberAnimator<V extends AnimatedView, T, U = T> extends TweenA
 
 export const MemberAnimator = (function (_super: typeof TweenAnimator): MemberAnimatorClass {
   const MemberAnimator: MemberAnimatorClass = function <V extends AnimatedView, T, U>(
-      this: MemberAnimator<V, T, U> | undefined, view: V | MemberAnimatorType | unknown,
-      value?: T | null | string, transition?: Transition<T> | null,
-      inherit?: MemberAnimatorInherit): MemberAnimator<V, T, U> | PropertyDecorator {
+      this: MemberAnimator<V, T, U> | undefined, view: V | MemberAnimatorTypeConstructor,
+      value?: T | null | MemberAnimatorDescriptor<T, U>, transition?: Transition<T> | null,
+      inherit?: string | null): MemberAnimator<V, T, U> | PropertyDecorator {
     if (this instanceof MemberAnimator) { // constructor
       if (transition === void 0) {
         transition = null;
       }
+      if (inherit === void 0) {
+        inherit = null;
+      }
       const _this = _super.call(this, value, transition) || this;
       _this._view = view;
-      _this._inherit = inherit !== void 0 ? inherit : null;
+      _this._inherit = inherit;
       return _this;
     } else { // decorator
-      const type = view as MemberAnimatorType;
-      inherit = value as MemberAnimatorInherit | undefined;
-      if (type === Object) {
-        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Object, inherit);
-      } else if (type === String) {
-        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.String, inherit);
-      } else if (type === Boolean) {
-        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Boolean, inherit);
-      } else if (type === Number) {
-        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Number, inherit);
-      } else if (type === Angle) {
-        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Angle, inherit);
-      } else if (type === Length) {
-        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Length, inherit);
-      } else if (type === Color) {
-        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Color, inherit);
-      } else if (type === Font) {
-        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Font, inherit);
-      } else if (type === Transform) {
-        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Transform, inherit);
-      } else if (FromAny.is(type)) {
-        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Any.bind(void 0, type), inherit);
+      const constructor = view as MemberAnimatorTypeConstructor;
+      const descriptor = value as MemberAnimatorDescriptor<T, U> | undefined;
+      if (constructor === Object) {
+        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Object, descriptor);
+      } else if (constructor === String) {
+        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.String, descriptor);
+      } else if (constructor === Boolean) {
+        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Boolean, descriptor);
+      } else if (constructor === Number) {
+        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Number, descriptor);
+      } else if (constructor === Angle) {
+        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Angle, descriptor);
+      } else if (constructor === Length) {
+        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Length, descriptor);
+      } else if (constructor === Color) {
+        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Color, descriptor);
+      } else if (constructor === Font) {
+        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Font, descriptor);
+      } else if (constructor === Transform) {
+        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Transform, descriptor);
+      } else if (FromAny.is(constructor)) {
+        return View.decorateMemberAnimator.bind(void 0, MemberAnimator.Any.bind(void 0, constructor), descriptor);
       }
-      throw new TypeError("" + type);
+      throw new TypeError("" + constructor);
     }
   } as MemberAnimatorClass;
   __extends(MemberAnimator, _super);
@@ -152,16 +174,8 @@ export const MemberAnimator = (function (_super: typeof TweenAnimator): MemberAn
   });
 
   Object.defineProperty(MemberAnimator.prototype, "inherit", {
-    get: function <V extends AnimatedView, T, U>(this: MemberAnimator<V, T, U>): MemberAnimatorInherit {
+    get: function <V extends AnimatedView, T, U>(this: MemberAnimator<V, T, U>): string | null {
       return this._inherit;
-    },
-    enumerable: true,
-    configurable: true,
-  });
-
-  Object.defineProperty(MemberAnimator.prototype, "dirty", {
-    get: function <V extends AnimatedView, T, U>(this: MemberAnimator<V, T, U>): boolean {
-      return this._view.dirty;
     },
     enumerable: true,
     configurable: true,
@@ -213,16 +227,10 @@ export const MemberAnimator = (function (_super: typeof TweenAnimator): MemberAn
     configurable: true,
   });
 
-  MemberAnimator.prototype.setDirty = function <V extends AnimatedView, T, U>(this: MemberAnimator<V, T, U>,
-                                                                              dirty: boolean): void {
-    if (dirty) {
-      this._view.setDirty(dirty);
-    }
-  };
-
-  MemberAnimator.prototype.animate = function <V extends AnimatedView, T, U>(this: MemberAnimator<V, T, U>): void {
-    if (!this._disabled) {
-      this._view.animate();
+  MemberAnimator.prototype.animate = function <V extends AnimatedView, T, U>(this: MemberAnimator<V, T, U>,
+                                                                             animator: Animator = this): void {
+    if (!this._disabled || animator !== this) {
+      this._view.animate(animator);
     }
   };
 
@@ -232,9 +240,7 @@ export const MemberAnimator = (function (_super: typeof TweenAnimator): MemberAn
 
   MemberAnimator.prototype.update = function <V extends AnimatedView, T, U>(this: MemberAnimator<V, T, U>,
                                                                             newValue: T, oldValue: T): void {
-    if (!Objects.equal(oldValue, newValue)) {
-      this.setDirty(true);
-    }
+    // hook
   };
 
   MemberAnimator.prototype.delete = function <V extends AnimatedView, T, U>(this: MemberAnimator<V, T, U>): void {

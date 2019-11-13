@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {RenderingContext} from "@swim/render";
 import {ViewController} from "./ViewController";
+import {RenderViewContext} from "./RenderViewContext";
 import {RenderViewController} from "./RenderViewController";
 import {GraphicView} from "./GraphicView";
 import {GraphicViewObserver} from "./GraphicViewObserver";
@@ -26,26 +26,19 @@ export class GraphicViewController<V extends GraphicView = GraphicView> extends 
     return view ? view.canvasView : null;
   }
 
-  animate(): void {
-    const view = this._view;
-    if (view) {
-      view.animate();
-    }
-  }
-
-  viewWillAnimate(frame: number, view: V): void {
+  viewWillAnimate(viewContext: RenderViewContext, view: V): void {
     // hook
   }
 
-  viewDidAnimate(frame: number, view: V): void {
+  viewDidAnimate(viewContext: RenderViewContext, view: V): void {
     // hook
   }
 
-  viewWillRender(context: RenderingContext, view: V): void {
+  viewWillRender(viewContext: RenderViewContext, view: V): void {
     // hook
   }
 
-  viewDidRender(context: RenderingContext, view: V): void {
+  viewDidRender(viewContext: RenderViewContext, view: V): void {
     // hook
   }
 
@@ -59,14 +52,6 @@ export class GraphicViewController<V extends GraphicView = GraphicView> extends 
   }
 
   viewDidSetHidden(hidden: boolean, view: V): void {
-    // hook
-  }
-
-  viewWillCull(view: V): void {
-    // hook
-  }
-
-  viewDidCull(view: V): void {
     // hook
   }
 
@@ -107,17 +92,5 @@ export class GraphicViewController<V extends GraphicView = GraphicView> extends 
 
   viewDidSetAnchor(newAnchor: PointR2, oldAnchor: PointR2, view: V): void {
     // hook
-  }
-
-  get dirty(): boolean {
-    const view = this._view;
-    return view ? view.dirty : false;
-  }
-
-  setDirty(dirty: boolean): void {
-    const view = this._view;
-    if (view) {
-      view.setDirty(dirty);
-    }
   }
 }

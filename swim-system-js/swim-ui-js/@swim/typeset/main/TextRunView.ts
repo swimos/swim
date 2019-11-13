@@ -15,10 +15,10 @@
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
-import {RenderingContext} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
+  RenderViewContext,
   TypesetViewInit,
   TypesetView,
   GraphicView,
@@ -48,16 +48,16 @@ export class TextRunView extends GraphicView implements TypesetView {
   @MemberAnimator(String)
   text: MemberAnimator<this, string>;
 
-  @MemberAnimator(Font, "inherit")
+  @MemberAnimator(Font, {inherit: true})
   font: MemberAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(String, "inherit")
+  @MemberAnimator(String, {inherit: true})
   textAlign: MemberAnimator<this, CanvasTextAlign>;
 
-  @MemberAnimator(String, "inherit")
+  @MemberAnimator(String, {inherit: true})
   textBaseline: MemberAnimator<this, CanvasTextBaseline>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
   get value(): TextRun {
@@ -98,7 +98,8 @@ export class TextRunView extends GraphicView implements TypesetView {
     }
   }
 
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.text.onFrame(t);
     this.font.onFrame(t);
     this.textAlign.onFrame(t);
@@ -106,7 +107,8 @@ export class TextRunView extends GraphicView implements TypesetView {
     this.textColor.onFrame(t);
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected onRender(viewContext: RenderViewContext): void {
+    const context = viewContext.renderingContext;
     context.save();
     const anchor = this._anchor;
     const font = this.font.value;

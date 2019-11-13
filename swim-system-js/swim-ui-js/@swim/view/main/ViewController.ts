@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Viewport} from "./Viewport";
+import {ViewIdiom} from "./ViewIdiom";
+import {ViewContext} from "./ViewContext";
 import {View} from "./View";
 import {ViewObserver} from "./ViewObserver";
 import {AppView} from "./AppView";
@@ -59,6 +62,21 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
 
   viewDidSetKey(key: string | null, view: V): void {
     // hook
+  }
+
+  isMounted(): boolean {
+    const view = this._view;
+    return view ? view.isMounted() : false;
+  }
+
+  get viewport(): Viewport | null {
+    const view = this._view;
+    return view ? view.viewport : null;
+  }
+
+  get viewIdiom(): ViewIdiom {
+    const view = this._view;
+    return view ? view.viewIdiom : "unspecified";
   }
 
   get appView(): AppView | null {
@@ -174,7 +192,8 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     }
   }
 
-  insertChildViewController(childViewController: ViewController, targetViewController: ViewController | View | null): void {
+  insertChildViewController(childViewController: ViewController,
+                            targetViewController: ViewController | View | null): void {
     const childView = childViewController.view;
     let targetView: View | null | undefined;
     if (targetViewController && !(targetViewController instanceof View)) {
@@ -241,11 +260,6 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
-  isMounted(): boolean {
-    const view = this._view;
-    return view ? view.isMounted() : false;
-  }
-
   viewWillMount(view: V): void {
     // hook
   }
@@ -262,27 +276,43 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
-  viewWillResize(view: V): void {
+  viewWillUpdate(viewContext: ViewContext, view: V): void {
     // hook
   }
 
-  viewDidResize(view: V): void {
+  viewDidUpdate(viewContext: ViewContext, view: V): void {
     // hook
   }
 
-  viewWillLayout(view: V): void {
+  viewWillCompute(viewContext: ViewContext, view: V): void {
     // hook
   }
 
-  viewDidLayout(view: V): void {
+  viewDidCompute(viewContext: ViewContext, view: V): void {
     // hook
   }
 
-  viewWillScroll(view: V): void {
+  viewWillLayout(viewContext: ViewContext, view: V): void {
     // hook
   }
 
-  viewDidScroll(view: V): void {
+  viewDidLayout(viewContext: ViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillScroll(viewContext: ViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidScroll(viewContext: ViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillUpdateChildViews(viewContext: ViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidUpdateChildViews(viewContext: ViewContext, view: V): void {
     // hook
   }
 }

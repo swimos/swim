@@ -18,6 +18,8 @@ import {AnyColor, Color} from "@swim/color";
 import {RenderingContext} from "@swim/render";
 import {MemberAnimator, ViewInit, RenderView, StrokeViewInit, StrokeView} from "@swim/view";
 import {AnyLngLat, LngLat} from "./LngLat";
+import {MapView} from "./MapView";
+import {MapViewContext} from "./MapViewContext";
 import {MapGraphicView} from "./MapGraphicView";
 import {MapGraphicViewController} from "./MapGraphicViewController";
 
@@ -58,10 +60,10 @@ export class MapLineView extends MapGraphicView implements StrokeView {
   @MemberAnimator(LngLat)
   end: MemberAnimator<this, LngLat, AnyLngLat>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   stroke: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   strokeWidth: MemberAnimator<this, Length, AnyLength>;
 
   hitWidth(): number;
@@ -75,7 +77,8 @@ export class MapLineView extends MapGraphicView implements StrokeView {
     }
   }
 
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: MapViewContext): void {
+    const t = viewContext.updateTime;
     const oldStart = this.start.value!;
     this.start.onFrame(t);
     const newStart = this.start.value!;
@@ -85,12 +88,36 @@ export class MapLineView extends MapGraphicView implements StrokeView {
     this.stroke.onFrame(t);
     this.strokeWidth.onFrame(t);
 
-    if (this._dirtyProjection || oldStart !== newStart || oldEnd !== newEnd) {
-      this.projectGeometry();
+    if (oldStart !== newStart || oldEnd !== newEnd) {
+      this.requireUpdate(MapView.NeedsProject);
     }
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected onProject(viewContext: MapViewContext): void {
+    const projection = viewContext.projection;
+    const start = projection.project(this.start.value!);
+    const end = projection.project(this.end.value!);
+    const anchor = new PointR2((start.x + end.x) / 2, (start.y + end.y) / 2);
+    this._startPoint = start;
+    this._endPoint = end;
+    this._hitBounds = new BoxR2(Math.min(start.x, end.x), Math.min(start.y, end.y),
+                                Math.max(start.x, end.x), Math.max(start.y, end.y));
+    this.setAnchor(anchor);
+  }
+
+  protected onLayout(viewContext: MapViewContext): void {
+    const bounds = this._bounds;
+    const start = this._startPoint;
+    const end = this._endPoint;
+    const invalid = !isFinite(start.x) || isFinite(start.y)
+                 || !isFinite(end.x) || !isFinite(end.y);
+    const culled = invalid || !bounds.intersectsSegment(new SegmentR2(start.x, start.y, end.x, end.y));
+    this.setCulled(culled);
+    this.layoutChildViews(viewContext);
+  }
+
+  protected onRender(viewContext: MapViewContext): void {
+    const context = viewContext.renderingContext;
     context.save();
     const bounds = this._bounds;
     const anchor = this._anchor;
@@ -114,27 +141,6 @@ export class MapLineView extends MapGraphicView implements StrokeView {
         context.stroke();
       }
     }
-  }
-
-  protected onCull(): void {
-    const bounds = this._bounds;
-    const start = this._startPoint;
-    const end = this._endPoint;
-    const invalid = !isFinite(start.x) || isFinite(start.y)
-                 || !isFinite(end.x) || !isFinite(end.y);
-    const culled = invalid || !bounds.intersectsSegment(new SegmentR2(start.x, start.y, end.x, end.y));
-    this.setCulled(culled);
-  }
-
-  protected projectGeometry(): void {
-    const start = this.project(this.start.value!);
-    const end = this.project(this.end.value!);
-    const anchor = new PointR2((start.x + end.x) / 2, (start.y + end.y) / 2);
-    this._startPoint = start;
-    this._endPoint = end;
-    this._hitBounds = new BoxR2(Math.min(start.x, end.x), Math.min(start.y, end.y),
-                                Math.max(start.x, end.x), Math.max(start.y, end.y));
-    this.setAnchor(anchor);
   }
 
   hitTest(x: number, y: number, context: RenderingContext): RenderView | null {

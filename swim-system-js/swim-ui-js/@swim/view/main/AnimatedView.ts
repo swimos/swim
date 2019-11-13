@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Animated} from "@swim/animate";
+import {AnimatorContext} from "@swim/animate";
 import {View} from "./View";
+import {AnimatedViewContext} from "./AnimatedViewContext";
 import {AnimatedViewController} from "./AnimatedViewController";
 
-export interface AnimatedView extends Animated, View {
+export interface AnimatedView extends AnimatorContext, View {
   readonly viewController: AnimatedViewController | null;
 
-  cascadeAnimate(frame: number): void;
+  needsUpdate(updateFlags: number, viewContext: AnimatedViewContext): number;
 }
 
 /** @hidden */
@@ -28,7 +29,7 @@ export const AnimatedView = {
     if (typeof object === "object" && object) {
       const view = object as AnimatedView;
       return view instanceof View.Graphic || view instanceof View
-          && typeof view.cascadeAnimate === "function";
+          && typeof view.animate === "function";
     }
     return false;
   },

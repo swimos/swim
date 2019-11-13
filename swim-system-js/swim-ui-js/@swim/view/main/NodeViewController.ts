@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {ViewContext} from "./ViewContext";
 import {ViewController} from "./ViewController";
 import {ViewNode, NodeView} from "./NodeView";
 import {NodeViewObserver} from "./NodeViewObserver";
@@ -74,11 +75,11 @@ export class NodeViewController<V extends NodeView = NodeView> extends ViewContr
     // hook
   }
 
-  viewWillAnimate(frame: number, view: V): void {
+  viewWillAnimate(viewContext: ViewContext, view: V): void {
     // hook
   }
 
-  viewDidAnimate(frame: number, view: V): void {
+  viewDidAnimate(viewContext: ViewContext, view: V): void {
     // hook
   }
 }

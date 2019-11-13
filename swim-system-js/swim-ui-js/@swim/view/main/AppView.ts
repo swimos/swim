@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Viewport} from "./Viewport";
+import {ViewContext} from "./ViewContext";
 import {View} from "./View";
 import {AppViewController} from "./AppViewController";
 import {PopoverOptions, Popover} from "./Popover";
@@ -20,6 +22,8 @@ export interface AppView extends View {
   readonly viewController: AppViewController | null;
 
   readonly appView: this;
+
+  readonly viewport: Viewport;
 
   readonly popovers: ReadonlyArray<Popover>;
 
@@ -30,6 +34,8 @@ export interface AppView extends View {
   hidePopover(popover: Popover): void;
 
   hidePopovers(): void;
+
+  appViewContext(): ViewContext;
 }
 
 /** @hidden */

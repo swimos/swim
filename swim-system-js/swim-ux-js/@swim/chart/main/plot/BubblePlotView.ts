@@ -20,6 +20,7 @@ import {RenderingContext} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
+  RenderViewContext,
   FillViewInit,
   FillView,
   StrokeViewInit,
@@ -101,12 +102,13 @@ export class BubblePlotView<X, Y> extends PlotView<X, Y> implements FillView, St
     }
   }
 
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.radius.onFrame(t);
     this.fill.onFrame(t);
     this.stroke.onFrame(t);
     this.strokeWidth.onFrame(t);
-    super.onAnimate(t);
+    super.onAnimate(viewContext);
   }
 
   protected renderPlot(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {

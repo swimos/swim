@@ -56,8 +56,6 @@ export abstract class TweenAnimator<T> extends Animator implements Inoutlet<T, T
   /** @hidden */
   _disabled: boolean;
   /** @hidden */
-  _dirty: boolean;
-  /** @hidden */
   protected _input: Outlet<T> | null;
   /** @hidden */
   protected _outputs: ReadonlyArray<Inlet<T>> | null;
@@ -87,7 +85,6 @@ export abstract class TweenAnimator<T> extends Animator implements Inoutlet<T, T
     this._startTime = 0;
     this._tweenState = TweenState.Quiesced;
     this._disabled = false;
-    this._dirty = false;
     this._input = null;
     this._outputs = null;
     this._version = -1;
@@ -113,24 +110,6 @@ export abstract class TweenAnimator<T> extends Animator implements Inoutlet<T, T
     } else {
       this.cancel();
     }
-  }
-
-  get dirty(): boolean {
-    return this._dirty;
-  }
-
-  setDirty(dirty: boolean): void {
-    if (dirty && !this._dirty) {
-      this._dirty = true;
-      this.didSetDirty(true);
-    } else if (!dirty && this._dirty) {
-      this._dirty = false;
-      this.didSetDirty(false);
-    }
-  }
-
-  protected didSetDirty(dirty: boolean): void {
-    // stub
   }
 
   abstract cancel(): void;

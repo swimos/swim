@@ -15,8 +15,11 @@
 import {PointR2, BoxR2} from "@swim/math";
 import {Transform} from "@swim/transform";
 import {RenderingContext} from "@swim/render";
-import {RenderView} from "@swim/view";
+import {View, RenderView} from "@swim/view";
+import {MapViewContext} from "./MapViewContext";
+import {MapView} from "./MapView";
 import {MapGraphicView} from "./MapGraphicView";
+import {MapLayerViewContext} from "./MapLayerViewContext";
 import {MapLayerViewController} from "./MapLayerViewController";
 
 export class MapLayerView extends MapGraphicView {
@@ -38,46 +41,83 @@ export class MapLayerView extends MapGraphicView {
     return this._viewController;
   }
 
-  cascadeRender(context: RenderingContext): void {
-    const layerContext = this.getContext();
-    this.willRender(context, layerContext);
-    if (this._dirty) {
-      this.onRender(context, layerContext);
-      const childViews = this.childViews;
-      for (let i = 0, n = childViews.length; i < n; i += 1) {
-        const childView = childViews[i];
-        if (RenderView.is(childView)) {
-          childView.cascadeRender(layerContext);
-        }
-      }
+  get renderingContext(): RenderingContext | null {
+    return this._canvas.getContext("2d");
+  }
+
+  get layeringContext(): RenderingContext | null {
+    const parentView = this.parentView;
+    return RenderView.is(parentView) ? parentView.renderingContext : null;
+  }
+
+  /** @hidden */
+  doUpdate(updateFlags: number, viewContext: MapViewContext): void {
+    const layerViewContext = this.layerViewContext(viewContext);
+    this.willUpdate(layerViewContext);
+    if (((updateFlags | this._updateFlags) & View.NeedsCompute) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsCompute;
+      this.doCompute(layerViewContext);
     }
-    this.didRender(context, layerContext);
+    if (((updateFlags | this._updateFlags) & View.NeedsAnimate) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsAnimate;
+      this.doAnimate(layerViewContext);
+    }
+    if (((updateFlags | this._updateFlags) & MapView.NeedsProject) !== 0) {
+      this._updateFlags = this._updateFlags & ~MapView.NeedsProject;
+      this.doProject(layerViewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsLayout) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsLayout;
+      this.doLayout(layerViewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsScroll) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsScroll;
+      this.doScroll(layerViewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsRender) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsRender;
+      this.doRender(layerViewContext);
+    }
+    this.onUpdate(layerViewContext);
+    this.doUpdateChildViews(updateFlags, layerViewContext);
+    this.didUpdate(layerViewContext);
   }
 
-  protected willRender(context: RenderingContext, layerContext?: RenderingContext): void {
-    super.willRender(context);
+  protected onRender(viewContext: MapLayerViewContext): void {
+    if (this.parentView) {
+      const bounds = this._bounds;
+      viewContext.layeringContext.clearRect(0, 0, bounds.width, bounds.height);
+    }
+    super.onRender(viewContext);
   }
 
-  protected onRender(context: RenderingContext, layerContext?: RenderingContext): void {
-    const bounds = this._bounds;
-    layerContext!.clearRect(0, 0, bounds.width, bounds.height);
-    super.onRender(context);
+  protected didUpdateChildViews(viewContext: MapLayerViewContext): void {
+    super.didUpdateChildViews(viewContext);
+    this.copyLayerImage(viewContext);
   }
 
-  protected didRender(context: RenderingContext, layerContext?: RenderingContext): void {
-    this.copyLayerImage(context, layerContext!);
-    super.didRender(context);
-  }
-
-  protected copyLayerImage(context: RenderingContext, layerContext: RenderingContext): void {
+  protected copyLayerImage(viewContext: MapLayerViewContext): void {
     const bounds = this._bounds;
     const pixelRatio = this.pixelRatio;
-    const imageData = layerContext.getImageData(0, 0, bounds.width * pixelRatio, bounds.height * pixelRatio);
-    context.putImageData(imageData, bounds.x * pixelRatio, bounds.y * pixelRatio);
+    const imageData = viewContext.layeringContext.getImageData(0, 0, bounds.width * pixelRatio, bounds.height * pixelRatio);
+    viewContext.renderingContext.putImageData(imageData, bounds.x * pixelRatio, bounds.y * pixelRatio);
   }
 
-  protected onCull(): void {
-    // nop
+  childViewContext(childView: View, viewContext: MapLayerViewContext): MapLayerViewContext {
+    return viewContext;
+  }
+
+  layerViewContext(viewContext: MapViewContext): MapLayerViewContext {
+    return {
+      updateTime: viewContext.updateTime,
+      viewport: viewContext.viewport,
+      viewIdiom: viewContext.viewIdiom,
+      renderingContext: this.renderingContext!,
+      layeringContext: viewContext.renderingContext,
+      pixelRatio: this.pixelRatio,
+      projection: viewContext.projection,
+      zoom: viewContext.zoom,
+    };
   }
 
   get parentTransform(): Transform {
@@ -99,33 +139,33 @@ export class MapLayerView extends MapGraphicView {
   protected onSetBounds(newBounds: BoxR2, oldBounds: BoxR2): void {
     if (!newBounds.equals(oldBounds)) {
       this.resizeCanvas(this._canvas, newBounds);
-      this.setDirty(true);
+      this.requireUpdate(View.NeedsLayout);
     }
   }
 
-  protected setChildViewBounds(childView: RenderView, bounds: BoxR2): void {
-    if (bounds.x !== 0 || bounds.y !== 0) {
-      // transform bounds into layer coordinates
-      const width = bounds.width;
-      const height = bounds.height;
-      bounds = new BoxR2(0, 0, width, height);
+  protected layoutChildView(childView: View): void {
+    if (RenderView.is(childView)) {
+      let bounds = this._bounds;
+      let anchor = this._anchor;
+      const x = bounds.x;
+      const y = bounds.y;
+      if (bounds.x !== 0 || bounds.y !== 0) {
+        // transform bounds into layer coordinates
+        const width = bounds.width;
+        const height = bounds.height;
+        bounds = new BoxR2(0, 0, width, height);
+      }
+      if (x !== 0 || y !== 0) {
+        // transform anchor into layer coordinates
+        anchor = new PointR2(anchor.x - x, anchor.y - y);
+      }
+      childView.setBounds(bounds);
+      childView.setAnchor(anchor);
     }
-    childView.setBounds(bounds);
-  }
-
-  protected setChildViewAnchor(childView: RenderView, anchor: PointR2): void {
-    const bounds = this._bounds;
-    const x = bounds.x;
-    const y = bounds.y;
-    if (x !== 0 || y !== 0) {
-      // transform anchor into layer coordinates
-      anchor = new PointR2(anchor.x - x, anchor.y - y);
-    }
-    childView.setAnchor(anchor);
   }
 
   hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    const layerContext = this.getContext();
+    const layerContext = this.renderingContext!;
     const bounds = this._bounds;
     x -= bounds.x;
     y -= bounds.y;
@@ -144,10 +184,6 @@ export class MapLayerView extends MapGraphicView {
     return hit;
   }
 
-  getContext(): RenderingContext {
-    return this._canvas.getContext("2d")!;
-  }
-
   protected createCanvas(): HTMLCanvasElement {
     return document.createElement("canvas");
   }
@@ -160,7 +196,7 @@ export class MapLayerView extends MapGraphicView {
     node.height = height * pixelRatio;
     node.style.width = width + "px";
     node.style.height = height + "px";
-    const context = this.getContext();
+    const context = this.renderingContext!;
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
   }
 }

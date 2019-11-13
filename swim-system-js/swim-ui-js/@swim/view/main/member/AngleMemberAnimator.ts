@@ -14,8 +14,8 @@
 
 import {__extends} from "tslib";
 import {AnyAngle, Angle} from "@swim/angle";
-import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
+import {Transition, Tween} from "@swim/transition";
+import {MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
@@ -23,10 +23,10 @@ export interface AngleMemberAnimator<V extends AnimatedView> extends MemberAnima
 }
 
 /** @hidden */
-export const AngleMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
-  const AngleMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
-      this: AngleMemberAnimator<V>, view: V, value?: Angle | null,
-      transition?: Transition<Angle> | null, inherit?: MemberAnimatorInherit): AngleMemberAnimator<V> {
+export const AngleMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor<Angle, AnyAngle> {
+  const AngleMemberAnimator: MemberAnimatorConstructor<Angle, AnyAngle> = function <V extends AnimatedView>(
+      this: AngleMemberAnimator<V>, view: V, value?: AnyAngle | null,
+      transition?: Transition<Angle> | null, inherit?: string | null): AngleMemberAnimator<V> {
     let _this: AngleMemberAnimator<V> = function (value?: AnyAngle | null, tween?: Tween<Angle>): Angle | null | undefined | V {
       if (value === void 0) {
         return _this.value;
@@ -39,9 +39,12 @@ export const AngleMemberAnimator = (function (_super: typeof MemberAnimator): Me
       }
     } as AngleMemberAnimator<V>;
     (_this as any).__proto__ = this;
+    if (value !== null && value !== void 0) {
+      value = Angle.fromAny(value);
+    }
     _this = _super.call(_this, view, value, transition, inherit) || _this;
     return _this;
-  } as unknown as MemberAnimatorConstructor;
+  } as unknown as MemberAnimatorConstructor<Angle, AnyAngle>;
   __extends(AngleMemberAnimator, _super);
 
   return AngleMemberAnimator;

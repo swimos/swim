@@ -13,9 +13,8 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {RenderingContext} from "@swim/render";
 import {View, RenderViewController} from "@swim/view";
-import {MapProjection} from "./MapProjection";
+import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
 import {MapViewObserver} from "./MapViewObserver";
 
@@ -48,29 +47,37 @@ export interface MapViewController<V extends MapView = MapView> extends RenderVi
 
   viewDidUnmount(view: V): void;
 
-  viewWillResize(view: V): void;
+  viewWillUpdate(viewContext: MapViewContext, view: V): void;
 
-  viewDidResize(view: V): void;
+  viewDidUpdate(viewContext: MapViewContext, view: V): void;
 
-  viewWillLayout(view: V): void;
+  viewWillCompute(viewContext: MapViewContext, view: V): void;
 
-  viewDidLayout(view: V): void;
+  viewDidCompute(viewContext: MapViewContext, view: V): void;
 
-  viewWillScroll(view: V): void;
+  viewWillAnimate(viewContext: MapViewContext, view: V): void;
 
-  viewDidScroll(view: V): void;
+  viewDidAnimate(viewContext: MapViewContext, view: V): void;
 
-  viewWillAnimate(frame: number, view: V): void;
+  viewWillProject(viewContext: MapViewContext, view: V): void;
 
-  viewDidAnimate(frame: number, view: V): void;
+  viewDidProject(viewContext: MapViewContext, view: V): void;
 
-  viewWillRender(context: RenderingContext, view: V): void;
+  viewWillLayout(viewContext: MapViewContext, view: V): void;
 
-  viewDidRender(context: RenderingContext, view: V): void;
+  viewDidLayout(viewContext: MapViewContext, view: V): void;
 
-  viewWillCull(view: V): void;
+  viewWillScroll(viewContext: MapViewContext, view: V): void;
 
-  viewDidCull(view: V): void;
+  viewDidScroll(viewContext: MapViewContext, view: V): void;
+
+  viewWillRender(viewContext: MapViewContext, view: V): void;
+
+  viewDidRender(viewContext: MapViewContext, view: V): void;
+
+  viewWillUpdateChildViews(viewContext: MapViewContext, view: V): void;
+
+  viewDidUpdateChildViews(viewContext: MapViewContext, view: V): void;
 
   viewWillSetHidden(hidden: boolean, view: V): boolean | void;
 
@@ -87,12 +94,4 @@ export interface MapViewController<V extends MapView = MapView> extends RenderVi
   viewWillSetAnchor(anchor: PointR2, view: V): PointR2 | void;
 
   viewDidSetAnchor(newAnchor: PointR2, oldAnchor: PointR2, view: V): void;
-
-  viewWillSetProjection(projection: MapProjection, view: V): MapProjection | void;
-
-  viewDidSetProjection(projection: MapProjection, view: V): void;
-
-  viewWillSetZoom(zoom: number, view: V): void;
-
-  viewDidSetZoom(newZoom: number, oldZoom: number, view: V): void;
 }

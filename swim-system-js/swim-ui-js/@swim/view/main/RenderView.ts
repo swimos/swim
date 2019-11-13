@@ -17,6 +17,7 @@ import {RenderingContext} from "@swim/render";
 import {ViewEvent} from "./ViewEvent";
 import {View} from "./View";
 import {AnimatedView} from "./AnimatedView";
+import {RenderViewContext} from "./RenderViewContext";
 import {RenderViewController} from "./RenderViewController";
 import {CanvasView} from "./CanvasView";
 
@@ -25,13 +26,15 @@ export interface RenderView extends AnimatedView {
 
   readonly canvasView: CanvasView | null;
 
-  cascadeRender(context: RenderingContext): void;
+  readonly renderingContext: RenderingContext | null;
+
+  readonly pixelRatio: number;
+
+  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number;
 
   readonly hidden: boolean;
 
   setHidden(hidden: boolean): void;
-
-  cascadeCull(): void;
 
   readonly culled: boolean;
 
@@ -44,8 +47,6 @@ export interface RenderView extends AnimatedView {
   readonly anchor: PointR2;
 
   setAnchor(anchor: PointR2): void;
-
-  readonly pixelRatio: number;
 
   readonly hitBounds: BoxR2 | null;
 
@@ -69,10 +70,8 @@ export const RenderView = {
   is(object: unknown): object is RenderView {
     if (typeof object === "object" && object) {
       const view = object as RenderView;
-      return view instanceof View.Graphic || view instanceof View
-          && typeof view.cascadeAnimate === "function"
-          && typeof view.cascadeRender === "function"
-          && typeof view.cascadeCull === "function";
+      return AnimatedView.is(view)
+          && typeof view.hitTest === "function";
     }
     return false;
   },

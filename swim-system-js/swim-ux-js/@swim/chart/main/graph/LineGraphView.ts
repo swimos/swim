@@ -17,7 +17,14 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont} from "@swim/font";
 import {RenderingContext} from "@swim/render";
-import {MemberAnimator, ViewInit, RenderView, StrokeViewInit, StrokeView} from "@swim/view";
+import {
+  MemberAnimator,
+  ViewInit,
+  RenderViewContext,
+  RenderView,
+  StrokeViewInit,
+  StrokeView,
+} from "@swim/view";
 import {AxisView} from "../axis/AxisView";
 import {AnyDatumView, DatumView} from "../data/DatumView";
 import {AnyPlotView, PlotView} from "../plot/PlotView";
@@ -76,10 +83,11 @@ export class LineGraphView<X, Y> extends GraphView<X, Y> implements StrokeView {
     }
   }
 
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.stroke.onFrame(t);
     this.strokeWidth.onFrame(t);
-    super.onAnimate(t);
+    super.onAnimate(viewContext);
   }
 
   protected renderPlot(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {

@@ -50,7 +50,7 @@ export class ConstrainBinding extends ConstrainVariable {
     return this._value;
   }
 
-  setValue(value: number): void {
+  updateValue(value: number): void {
     this._value = value;
   }
 
@@ -68,7 +68,7 @@ export class ConstrainBinding extends ConstrainVariable {
       if (!isFinite(oldState)) {
         this._scope.addVariable(this);
       } else {
-        this._scope.setVariableState(this, newState);
+        this._scope.setVariable(this, newState);
       }
     }
   }

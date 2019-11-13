@@ -30,7 +30,7 @@ export interface ConstraintScope {
 
   removeVariable(variable: ConstrainVariable): void;
 
-  setVariableState(variable: ConstrainVariable, state: number): void;
+  setVariable(variable: ConstrainVariable, state: number): void;
 
   hasConstraint(constraint: Constraint): boolean;
 

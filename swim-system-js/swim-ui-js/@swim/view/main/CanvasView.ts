@@ -15,7 +15,9 @@
 import {PointR2, BoxR2} from "@swim/math";
 import {RenderingContext} from "@swim/render";
 import {ViewEvent, ViewMouseEvent, ViewTouch, ViewTouchEvent} from "./ViewEvent";
+import {ViewContext} from "./ViewContext";
 import {View} from "./View";
+import {RenderViewContext} from "./RenderViewContext";
 import {RenderView} from "./RenderView";
 import {RenderViewObserver} from "./RenderViewObserver";
 import {ViewNode, NodeView} from "./NodeView";
@@ -76,7 +78,6 @@ export class CanvasView extends HtmlView implements RenderView {
     this._renderViews = [];
     this._bounds = BoxR2.empty();
     this._anchor = PointR2.origin();
-    this._dirty = true;
     this._clientX = 0;
     this._clientY = 0;
     this._screenX = 0;
@@ -99,6 +100,14 @@ export class CanvasView extends HtmlView implements RenderView {
 
   get canvasView(): CanvasView | null {
     return this;
+  }
+
+  get renderingContext(): RenderingContext | null {
+    return this._node.getContext("2d");
+  }
+
+  get pixelRatio(): number {
+    return window.devicePixelRatio || 1;
   }
 
   get childViews(): ReadonlyArray<View> {
@@ -173,7 +182,6 @@ export class CanvasView extends HtmlView implements RenderView {
       newChildView.setParentView(this);
       this.onInsertChildView(newChildView, targetView);
       this.didInsertChildView(newChildView, targetView);
-      this.animate();
     }
     return oldChildView;
   }
@@ -220,7 +228,6 @@ export class CanvasView extends HtmlView implements RenderView {
     renderView.setParentView(this);
     this.onInsertChildView(renderView, null);
     this.didInsertChildView(renderView, null);
-    this.animate();
   }
 
   prepend(child: "svg"): SvgView;
@@ -261,7 +268,6 @@ export class CanvasView extends HtmlView implements RenderView {
     renderView.setParentView(this);
     this.onInsertChildView(renderView, null);
     this.didInsertChildView(renderView, null);
-    this.animate();
   }
 
   insert(child: "svg", target: View | Node | null): SvgView;
@@ -316,7 +322,6 @@ export class CanvasView extends HtmlView implements RenderView {
     renderView.setParentView(this);
     this.onInsertChildView(renderView, targetView);
     this.didInsertChildView(renderView, targetView);
-    this.animate();
   }
 
   protected onInsertChildView(childView: View, targetView: View | null): void {
@@ -348,7 +353,6 @@ export class CanvasView extends HtmlView implements RenderView {
     }
     this.onRemoveChildView(renderView);
     this.didRemoveChildView(renderView);
-    this.animate();
   }
 
   removeAll(): void {
@@ -363,178 +367,102 @@ export class CanvasView extends HtmlView implements RenderView {
         renderViews.pop();
         this.onRemoveChildView(childView);
         this.didRemoveChildView(childView);
-        this.animate();
         continue;
       }
       break;
     } while (true);
   }
 
-  cascadeMount(): void {
-    this.willMount();
-    this.onMount();
-    const childNodes = this._node.childNodes;
-    for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
-      if (childView) {
-        childView.cascadeMount();
+  requireUpdate(updateFlags: number, immediate: boolean = false): void {
+    this.requestUpdate(updateFlags, immediate);
+  }
+
+  requestUpdate(updateFlags: number, immediate: boolean): void {
+    const oldUpdateFlags = this.updateFlags;
+    const newUpdateFlags = oldUpdateFlags | updateFlags;
+    const deltaUpdateFlags = newUpdateFlags & ~oldUpdateFlags;
+    if (deltaUpdateFlags !== 0) {
+      this.setUpdateFlags(newUpdateFlags);
+      const parentView = this.parentView;
+      if (parentView) {
+        parentView.requestUpdate(updateFlags, immediate);
       }
     }
-    const renderViews = this._renderViews;
-    for (let i = 0, n = renderViews.length; i < n; i += 1) {
-      const renderView = renderViews[i];
-      renderView.cascadeMount();
-    }
-    this.didMount();
   }
 
-  protected onMount(): void {
-    super.onMount();
-    this.resizeCanvas(this._node);
-    this.animate();
-    this.addEventListeners(this._node);
+  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+    if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
+      updateFlags = updateFlags | View.NeedsRender;
+    }
+    return updateFlags;
   }
 
-  cascadeUnmount(): void {
-    this.willUnmount();
-    this.onUnmount();
-    const childNodes = this._node.childNodes;
-    for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
-      if (childView) {
-        childView.cascadeUnmount();
-      }
+  /** @hidden */
+  doUpdate(updateFlags: number, viewContext: ViewContext): void {
+    const canvasViewContext = this.canvasViewContext(viewContext);
+    this.willUpdate(canvasViewContext);
+    if (((updateFlags | this._updateFlags) & View.NeedsCompute) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsCompute;
+      this.doCompute(canvasViewContext);
     }
-    const renderViews = this._renderViews;
-    for (let i = 0, n = renderViews.length; i < n; i += 1) {
-      const renderView = renderViews[i];
-      renderView.cascadeUnmount();
+    if (((updateFlags | this._updateFlags) & View.NeedsAnimate) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsAnimate;
+      this.doAnimate(canvasViewContext);
     }
-    this.didUnmount();
+    if (((updateFlags | this._updateFlags) & View.NeedsLayout) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsLayout;
+      this.doLayout(canvasViewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsScroll) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsScroll;
+      this.doScroll(canvasViewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsRender) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsRender;
+      this.doRender(canvasViewContext);
+    }
+    this.onUpdate(canvasViewContext);
+    this.doUpdateChildViews(updateFlags, canvasViewContext);
+    this.didUpdate(canvasViewContext);
   }
 
-  protected onUnmount(): void {
-    this.removeEventListeners(this._node);
-    if (this._animationFrame) {
-      cancelAnimationFrame(this._animationFrame);
-      this._animationFrame = 0;
+  /** @hidden */
+  doLayout(viewContext: RenderViewContext): void {
+    if (this.parentView) {
+      this.resizeCanvas(this._node);
+      this.willLayout(viewContext);
+      this.onLayout(viewContext);
+      this.didLayout(viewContext);
     }
-    super.onUnmount();
   }
 
-  cascadeResize(): void {
-    this.willResize();
-    this.onResize();
-    const childNodes = this._node.childNodes;
-    for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
-      if (childView) {
-        childView.cascadeResize();
-      }
+  /** @hidden */
+  doRender(viewContext: RenderViewContext): void {
+    if (this.parentView) {
+      this.willRender(viewContext);
+      this.onRender(viewContext);
+      this.didRender(viewContext);
     }
-    const renderViews = this._renderViews;
-    for (let i = 0, n = renderViews.length; i < n; i += 1) {
-      const renderView = renderViews[i];
-      renderView.cascadeResize();
-    }
-    this.didResize();
   }
 
-  protected onResize(): void {
-    super.onResize();
-    this.resizeCanvas(this._node);
-    this.setDirty(true);
-  }
-
-  protected didResize(): void {
-    this.cascadeRender();
-    super.didResize();
-  }
-
-  cascadeLayout(): void {
-    this.willLayout();
-    this.onLayout();
-    const childNodes = this._node.childNodes;
-    for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
-      if (childView) {
-        childView.cascadeLayout();
-      }
-    }
-    const renderViews = this._renderViews;
-    for (let i = 0, n = renderViews.length; i < n; i += 1) {
-      const renderView = renderViews[i];
-      renderView.cascadeLayout();
-    }
-    this.didLayout();
-  }
-
-  cascadeScroll(): void {
-    this.willScroll();
-    this.onScroll();
-    const childNodes = this._node.childNodes;
-    for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
-      if (childView) {
-        childView.cascadeScroll();
-      }
-    }
-    const renderViews = this._renderViews;
-    for (let i = 0, n = renderViews.length; i < n; i += 1) {
-      const renderView = renderViews[i];
-      renderView.cascadeScroll();
-    }
-    this.didScroll();
-  }
-
-  protected onAnimationFrame(timestamp: number): void {
-    this._animationFrame = 0;
-    this.cascadeAnimate(timestamp);
-    this.cascadeCull();
-    this.cascadeRender();
-
-    this.detectMouseHover();
-  }
-
-  cascadeAnimate(frame: number): void {
-    this.willAnimate(frame);
-    this.onAnimate(frame);
-    const renderViews = this._renderViews;
-    for (let i = 0, n = renderViews.length; i < n; i += 1) {
-      const renderView = renderViews[i];
-      renderView.cascadeAnimate(frame);
-    }
-    this.didAnimate(frame);
-  }
-
-  cascadeRender(context: RenderingContext = this.getContext()): void {
-    this.willRender(context);
-    this.onRender(context);
-    const renderViews = this._renderViews;
-    for (let i = 0, n = renderViews.length; i < n; i += 1) {
-      const renderView = renderViews[i];
-      renderView.cascadeRender(context);
-    }
-    this.didRender(context);
-  }
-
-  protected willRender(context: RenderingContext): void {
+  protected willRender(viewContext: RenderViewContext): void {
     this.willObserve(function (viewObserver: RenderViewObserver): void {
       if (viewObserver.viewWillRender) {
-        viewObserver.viewWillRender(context, this);
+        viewObserver.viewWillRender(viewContext, this);
       }
     });
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected onRender(viewContext: RenderViewContext): void {
+    const renderingContext = viewContext.renderingContext;
     const bounds = this._bounds;
-    context.clearRect(0, 0, bounds.width, bounds.height);
+    renderingContext.clearRect(0, 0, bounds.width, bounds.height);
   }
 
-  protected didRender(context: RenderingContext): void {
+  protected didRender(viewContext: RenderViewContext): void {
     this.didObserve(function (viewObserver: RenderViewObserver): void {
       if (viewObserver.viewDidRender) {
-        viewObserver.viewDidRender(context, this);
+        viewObserver.viewDidRender(viewContext, this);
       }
     });
   }
@@ -545,39 +473,6 @@ export class CanvasView extends HtmlView implements RenderView {
 
   setHidden(hidden: boolean): void {
     // nop
-  }
-
-  cascadeCull(): void {
-    this.willCull();
-    this.onCull();
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (RenderView.is(childView)) {
-        childView.cascadeCull();
-      }
-    }
-    this.didCull();
-  }
-
-  protected willCull(): void {
-    this.willObserve(function (viewObserver: RenderViewObserver): void {
-      if (viewObserver.viewWillCull) {
-        viewObserver.viewWillCull(this);
-      }
-    });
-  }
-
-  protected onCull(): void {
-    // hook
-  }
-
-  protected didCull(): void {
-    this.didObserve(function (viewObserver: RenderViewObserver): void {
-      if (viewObserver.viewDidCull) {
-        viewObserver.viewDidCull(this);
-      }
-    });
   }
 
   get culled(): boolean {
@@ -692,15 +587,114 @@ export class CanvasView extends HtmlView implements RenderView {
     childView.setAnchor(anchor);
   }
 
-  get pixelRatio(): number {
-    return window.devicePixelRatio || 1;
+  protected onMount(): void {
+    this.addEventListeners(this._node);
+  }
+
+  protected onUnmount(): void {
+    this.removeEventListeners(this._node);
+    super.onUnmount();
+  }
+
+  /** @hidden */
+  doMountChildViews(): void {
+    const childNodes = this._node.childNodes;
+    for (let i = 0; i < childNodes.length; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView) {
+        childView.cascadeMount();
+      }
+    }
+    const renderViews = this._renderViews;
+    for (let i = 0; i < renderViews.length; i += 1) {
+      const renderView = renderViews[i];
+      renderView.cascadeMount();
+    }
+  }
+
+  /** @hidden */
+  doUnmountChildViews(): void {
+    const childNodes = this._node.childNodes;
+    for (let i = 0; i < childNodes.length; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView) {
+        childView.cascadeUnmount();
+      }
+    }
+    const renderViews = this._renderViews;
+    for (let i = 0; i < renderViews.length; i += 1) {
+      const renderView = renderViews[i];
+      renderView.cascadeUnmount();
+    }
+  }
+
+  protected didUpdate(viewContext: RenderViewContext): void {
+    super.didUpdate(viewContext);
+    this.detectMouseHover();
+  }
+
+  protected onLayout(viewContext: RenderViewContext): void {
+    super.onLayout(viewContext);
+    this.layoutChildViews(viewContext);
+  }
+
+  protected layoutChildViews(viewContext: RenderViewContext): void {
+    const renderViews = this._renderViews;
+    for (let i = 0; i < renderViews.length; i += 1) {
+      const renderView = renderViews[i];
+      this.layoutChildView(renderView, viewContext);
+    }
+  }
+
+  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
+    if (RenderView.is(childView)) {
+      childView.setBounds(this._bounds);
+      childView.setAnchor(this._anchor);
+    }
+  }
+
+  /** @hidden */
+  doUpdateChildViews(updateFlags: number, viewContext: RenderViewContext): void {
+    this.willUpdateChildViews(viewContext);
+    const childNodes = this._node.childNodes;
+    for (let i = 0; i < childNodes.length; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView) {
+        const childViewContext = this.childViewContext(childView, viewContext);
+        childView.cascadeUpdate(updateFlags, childViewContext);
+      }
+    }
+    const renderViews = this._renderViews;
+    for (let i = 0; i < renderViews.length; i += 1) {
+      const renderView = renderViews[i];
+      const renderViewContext = this.childViewContext(renderView, viewContext);
+      renderView.cascadeUpdate(updateFlags, renderViewContext);
+    }
+    this.didUpdateChildViews(viewContext);
+  }
+
+  childViewContext(childView: View, viewContext: RenderViewContext): RenderViewContext {
+    return viewContext;
+  }
+
+  canvasViewContext(viewContext: ViewContext): RenderViewContext {
+    return {
+      updateTime: viewContext.updateTime,
+      viewport: viewContext.viewport,
+      viewIdiom: viewContext.viewIdiom,
+      renderingContext: this.renderingContext!,
+      pixelRatio: this.pixelRatio,
+    };
   }
 
   get hitBounds(): BoxR2 | null {
     return null;
   }
 
-  hitTest(x: number, y: number, context: RenderingContext = this.getContext()): RenderView | null {
+  hitTest(x: number, y: number, context?: RenderingContext): RenderView | null {
+    if (context === void 0) {
+      context = this.renderingContext!;
+    }
     let hit: RenderView | null = null;
     const renderViews = this._renderViews;
     for (let i = renderViews.length - 1; i >= 0; i -= 1) {
@@ -736,10 +730,10 @@ export class CanvasView extends HtmlView implements RenderView {
     node.addEventListener("mousedown", this.onMouseDown);
     window.addEventListener("mousemove", this.onMouseMove);
     node.addEventListener("mouseup", this.onMouseUp);
-    node.addEventListener("wheel", this.onWheel);
+    node.addEventListener("wheel", this.onWheel, {passive: true});
 
-    node.addEventListener("touchstart", this.onTouchStart);
-    node.addEventListener("touchmove", this.onTouchMove);
+    node.addEventListener("touchstart", this.onTouchStart, {passive: true});
+    node.addEventListener("touchmove", this.onTouchMove, {passive: true});
     node.addEventListener("touchcancel", this.onTouchCancel);
     node.addEventListener("touchend", this.onTouchEnd);
   }
@@ -971,10 +965,6 @@ export class CanvasView extends HtmlView implements RenderView {
     }
   }
 
-  getContext(): RenderingContext {
-    return this._node.getContext("2d")!;
-  }
-
   protected resizeCanvas(node: ViewCanvas): void {
     let width: number;
     let height: number;
@@ -1001,7 +991,7 @@ export class CanvasView extends HtmlView implements RenderView {
       height = Math.floor(node.height);
       pixelRatio = 1;
     }
-    const context = this.getContext();
+    const context = this.renderingContext!;
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     this.setBounds(new BoxR2(0, 0, width, height));
     this.setAnchor(new PointR2(width / 2, height / 2));

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {RenderingContext} from "@swim/render";
+import {RenderViewContext} from "./RenderViewContext";
 import {RenderViewController} from "./RenderViewController";
 import {HtmlViewController} from "./HtmlViewController";
 import {ViewCanvas, CanvasView} from "./CanvasView";
@@ -25,26 +25,11 @@ export class CanvasViewController<V extends CanvasView = CanvasView> extends Htm
     return view ? view.node : null;
   }
 
-  animate(): void {
-    const view = this._view;
-    if (view) {
-      view.animate();
-    }
-  }
-
-  viewWillAnimate(frame: number, view: V): void {
+  viewWillRender(context: RenderViewContext, view: V): void {
     // hook
   }
 
-  viewDidAnimate(frame: number, view: V): void {
-    // hook
-  }
-
-  viewWillRender(context: RenderingContext, view: V): void {
-    // hook
-  }
-
-  viewDidRender(context: RenderingContext, view: V): void {
+  viewDidRender(context: RenderViewContext, view: V): void {
     // hook
   }
 
@@ -106,17 +91,5 @@ export class CanvasViewController<V extends CanvasView = CanvasView> extends Htm
 
   viewDidSetAnchor(newAnchor: PointR2, oldAnchor: PointR2, view: V): void {
     // hook
-  }
-
-  get dirty(): boolean {
-    const view = this._view;
-    return view ? view.dirty : false;
-  }
-
-  setDirty(dirty: boolean): void {
-    const view = this._view;
-    if (view) {
-      view.setDirty(dirty);
-    }
   }
 }

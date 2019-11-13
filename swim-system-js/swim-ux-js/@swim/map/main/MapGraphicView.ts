@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyPointR2, PointR2, BoxR2} from "@swim/math";
-import {View, RenderView, GraphicView} from "@swim/view";
-import {AnyLngLat, LngLat} from "./LngLat";
+import {BoxR2} from "@swim/math";
+import {View, RenderViewContext, RenderView, GraphicView} from "@swim/view";
 import {MapProjection} from "./MapProjection";
+import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
 import {MapViewObserver} from "./MapViewObserver";
 import {MapGraphicViewController} from "./MapGraphicViewController";
@@ -23,169 +23,115 @@ import {MapGraphicViewController} from "./MapGraphicViewController";
 export class MapGraphicView extends GraphicView implements MapView {
   /** @hidden */
   _viewController: MapGraphicViewController | null;
-  /** @hidden */
-  _projection: MapProjection;
-  /** @hidden */
-  _zoom: number;
   /** @Hidden */
   _hitBounds: BoxR2 | null;
-  /** @hidden */
-  _dirtyProjection: boolean;
 
   constructor(key: string | null = null) {
     super(key);
-    this._projection = MapProjection.identity();
     this._hitBounds = null;
-    this._dirtyProjection = true;
   }
 
   get viewController(): MapGraphicViewController | null {
     return this._viewController;
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
-    if (RenderView.is(childView)) {
-      this.setChildViewBounds(childView, this._bounds);
-      if (MapView.is(childView)) {
-        this.setChildViewProjection(childView, this._projection);
-        this.setChildViewZoom(childView, this._zoom);
-      }
-      if (this._culled) {
-        childView.setCulled(true);
-      }
-    }
-  }
-
-  project(lnglat: AnyLngLat): PointR2;
-  project(lng: number, lat: number): PointR2;
-  project(lng: AnyLngLat | number, lat?: number): PointR2 {
-    return this.projection.project.apply(this.projection, arguments);
-  }
-
-  unproject(point: AnyPointR2): LngLat;
-  unproject(x: number, y: number): LngLat;
-  unproject(x: AnyPointR2 | number, y?: number): LngLat {
-    return this.projection.unproject.apply(this.projection, arguments);
-  }
-
-  get projection(): MapProjection {
-    return this._projection;
-  }
-
-  setProjection(projection: MapProjection): void {
-    const newProjection = this.willSetProjection(projection);
-    if (newProjection !== void 0) {
-      projection = newProjection;
-    }
-    this._projection = projection;
-    this._dirtyProjection = true;
-    this.onSetProjection(projection);
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (MapView.is(childView)) {
-        this.setChildViewProjection(childView, projection);
-      }
-    }
-    this.didSetProjection(projection);
-  }
-
-  protected willSetProjection(projection: MapProjection): MapProjection | void {
-    const viewController = this._viewController;
-    if (viewController) {
-      const newProjection = viewController.viewWillSetProjection(projection, this);
-      if (newProjection !== void 0) {
-        projection = newProjection;
-      }
-    }
-    const viewObservers = this._viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i] as MapViewObserver;
-      if (viewObserver.viewWillSetProjection) {
-        viewObserver.viewWillSetProjection(projection, this);
-      }
-    }
-  }
-
-  protected onSetProjection(projection: MapProjection): void {
-    // hook
-  }
-
-  protected didSetProjection(projection: MapProjection): void {
-    this.didObserve(function (viewObserver: MapViewObserver): void {
-      if (viewObserver.viewDidSetProjection) {
-        viewObserver.viewDidSetProjection(projection, this);
-      }
-    });
-  }
-
-  protected setChildViewProjection(childView: MapView, projection: MapProjection): void {
-    childView.setProjection(projection);
+  get projection(): MapProjection | null {
+    const parentView = this.parentView;
+    return MapView.is(parentView) ? parentView.projection : null;
   }
 
   get zoom(): number {
-    return this._zoom;
+    const parentView = this.parentView;
+    return MapView.is(parentView) ? parentView.zoom : 0;
   }
 
-  setZoom(zoom: number): void {
-    this.willSetZoom(zoom);
-    const oldZoom = this._zoom;
-    this._zoom = zoom;
-    this.onSetZoom(zoom, oldZoom);
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (MapView.is(childView)) {
-        this.setChildViewZoom(childView, zoom);
-      }
+  needsUpdate(updateFlags: number, viewContext: MapViewContext): number {
+    if ((updateFlags & MapView.NeedsProject) !== 0) {
+      updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout;
     }
-    this.didSetZoom(zoom, oldZoom);
+    if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
+      updateFlags = updateFlags | View.NeedsRender;
+    }
+    return updateFlags;
   }
 
-  protected willSetZoom(zoom: number): void {
-    this.didObserve(function (viewObserver: MapViewObserver): void {
-      if (viewObserver.viewWillSetZoom) {
-        viewObserver.viewWillSetZoom(zoom, this);
+  /** @hidden */
+  doUpdate(updateFlags: number, viewContext: MapViewContext): void {
+    this.willUpdate(viewContext);
+    if (((updateFlags | this._updateFlags) & View.NeedsCompute) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsCompute;
+      this.doCompute(viewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsAnimate) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsAnimate;
+      this.doAnimate(viewContext);
+    }
+    if (((updateFlags | this._updateFlags) & MapView.NeedsProject) !== 0) {
+      this._updateFlags = this._updateFlags & ~MapView.NeedsProject;
+      this.doProject(viewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsLayout) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsLayout;
+      this.doLayout(viewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsScroll) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsScroll;
+      this.doScroll(viewContext);
+    }
+    if (((updateFlags | this._updateFlags) & View.NeedsRender) !== 0) {
+      this._updateFlags = this._updateFlags & ~View.NeedsRender;
+      this.doRender(viewContext);
+    }
+    this.onUpdate(viewContext);
+    this.doUpdateChildViews(updateFlags, viewContext);
+    this.didUpdate(viewContext);
+  }
+
+  /** @hidden */
+  doProject(viewContext: MapViewContext): void {
+    if (this.parentView) {
+      this.willProject(viewContext);
+      this.onProject(viewContext);
+      this.didProject(viewContext);
+    }
+  }
+
+  protected willProject(viewContext: MapViewContext): void {
+    this.willObserve(function (viewObserver: MapViewObserver): void {
+      if (viewObserver.viewWillProject) {
+        viewObserver.viewWillProject(viewContext, this);
       }
     });
   }
 
-  protected onSetZoom(newZoom: number, oldZoom: number): void {
-    if (newZoom !== oldZoom) {
-      this.setDirty(true);
-    }
+  protected onProject(viewContext: MapViewContext): void {
+    // hook
   }
 
-  protected didSetZoom(newZoom: number, oldZoom: number): void {
+  protected didProject(viewContext: MapViewContext): void {
     this.didObserve(function (viewObserver: MapViewObserver): void {
-      if (viewObserver.viewDidSetZoom) {
-        viewObserver.viewDidSetZoom(newZoom, oldZoom, this);
+      if (viewObserver.viewDidProject) {
+        viewObserver.viewDidProject(viewContext, this);
       }
     });
   }
 
-  protected setChildViewZoom(childView: MapView, zoom: number): void {
-    childView.setZoom(zoom);
-  }
-
-  protected onAnimate(t: number): void {
-    this.projectGeometry();
-  }
-
-  protected didAnimate(t: number): void {
-    super.didAnimate(t);
-    this._dirtyProjection = false;
-  }
-
-  protected onCull(): void {
-    const hitBounds = this._hitBounds;
-    if (hitBounds !== null) {
-      const culled = !this._bounds.intersects(hitBounds);
-      this.setCulled(culled);
+  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
+    if (RenderView.is(childView)) {
+      childView.setBounds(this._bounds);
+      // Don't set anchor.
     }
   }
 
-  protected projectGeometry(): void {
+  childViewContext(childView: View, viewContext: MapViewContext): MapViewContext {
+    return viewContext;
+  }
+
+  get hitBounds(): BoxR2 | null {
+    return this._hitBounds;
+  }
+
+  protected computeHitBounds(): void {
     let hitBounds: BoxR2 | null = null;
     const childViews = this._childViews;
     for (let i = 0, n = childViews.length; i < n; i += 1) {
@@ -200,7 +146,11 @@ export class MapGraphicView extends GraphicView implements MapView {
     this._hitBounds = hitBounds;
   }
 
-  get hitBounds(): BoxR2 | null {
-    return this._hitBounds;
+  protected cullHitBounds(): void {
+    const hitBounds = this._hitBounds;
+    if (hitBounds !== null) {
+      const culled = !this._bounds.intersects(hitBounds);
+      this.setCulled(culled);
+    }
   }
 }

@@ -304,7 +304,7 @@ export class ConstraintSolver implements ConstraintScope {
     this.didAddVariable(variable);
     const state = variable.state;
     if (isFinite(state)) {
-      this.setVariableState(variable, state);
+      this.setVariable(variable, state);
     }
   }
 
@@ -334,16 +334,17 @@ export class ConstraintSolver implements ConstraintScope {
     // hook
   }
 
-  setVariableState(variable: ConstrainVariable, state: number): void {
+  setVariable(variable: ConstrainVariable, newState: number): void {
     const binding = this._variables.get(variable);
     if (binding === void 0) {
       throw new Error("unknown variable");
     }
 
-    this.willSetVariableState(variable, state);
+    this.willSetVariable(variable, newState);
 
-    const delta = state - binding.state;
-    binding.state = state;
+    const oldState = binding.state;
+    binding.state = newState;
+    const delta = newState - oldState;
 
     // Check first if the positive error variable is basic.
     const marker = binding.tag.marker;
@@ -377,14 +378,14 @@ export class ConstraintSolver implements ConstraintScope {
     }
     this.dualOptimize();
 
-    this.didSetVariableState(variable, state);
+    this.didSetVariable(variable, newState, oldState);
   }
 
-  protected willSetVariableState(variable: ConstrainVariable, state: number): void {
+  protected willSetVariable(variable: ConstrainVariable, state: number): void {
     // hook
   }
 
-  protected didSetVariableState(variable: ConstrainVariable, state: number): void {
+  protected didSetVariable(variable: ConstrainVariable, newState: number, oldState: number): void {
     // hook
   }
 
@@ -392,9 +393,24 @@ export class ConstraintSolver implements ConstraintScope {
     for (let i = 0, n = this._rows.size; i < n; i += 1) {
       const [symbol, row] = this._rows.getEntry(i)!;
       if (symbol instanceof ConstrainVariable) {
-        symbol.setValue(row._constant);
+        this.updateVariable(symbol, row._constant);
       }
     }
+  }
+
+  updateVariable(variable: ConstrainVariable, newValue: number): void {
+    this.willUpdateVariable(variable, newValue);
+    const oldValue = variable.value;
+    variable.updateValue(newValue);
+    this.didUpdateVariable(variable, newValue, oldValue);
+  }
+
+  protected willUpdateVariable(variable: ConstrainVariable, newValue: number): void {
+    // hook
+  }
+
+  protected didUpdateVariable(variable: ConstrainVariable, newValue: number, oldValue: number): void {
+    // hook
   }
 
   // Returns a new row for the given constraint.

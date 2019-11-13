@@ -18,4 +18,18 @@ export interface LayoutScope extends ConstraintScope {
   readonly variables: ReadonlyArray<ConstrainVariable>;
 
   readonly constraints: ReadonlyArray<Constraint>;
+
+  /** @hidden */
+  updateVariables(): void;
 }
+
+/** @hidden */
+export const LayoutScope = {
+  is(object: unknown): object is LayoutScope {
+    if (typeof object === "object" && object) {
+      const view = object as LayoutScope;
+      return typeof view.updateVariables === "function";
+    }
+    return false;
+  },
+};

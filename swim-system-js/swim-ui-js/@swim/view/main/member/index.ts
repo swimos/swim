@@ -13,8 +13,9 @@
 // limitations under the License.
 
 export {
-  MemberAnimatorInherit,
-  MemberAnimatorType,
+  MemberAnimatorTypeConstructor,
+  MemberAnimatorDescriptorType,
+  MemberAnimatorDescriptor,
   MemberAnimatorConstructor,
   MemberAnimatorClass,
   MemberAnimator,
@@ -25,7 +26,10 @@ export {
   AnyMemberAnimator,
 } from "./AnyMemberAnimator";
 
-export {ObjectMemberAnimator} from "./ObjectMemberAnimator";
+export {
+  ObjectMemberAnimatorClass,
+  ObjectMemberAnimator,
+} from "./ObjectMemberAnimator";
 
 export {StringMemberAnimator} from "./StringMemberAnimator";
 

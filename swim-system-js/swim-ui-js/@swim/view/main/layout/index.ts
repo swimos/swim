@@ -19,6 +19,9 @@ export {LayoutManager} from "./LayoutManager";
 export {LayoutSolver} from "./LayoutSolver";
 
 export {
+  LayoutAnchorGetState,
+  LayoutAnchorSetValue,
+  LayoutAnchorDescriptor,
   LayoutAnchorConstructor,
   LayoutAnchorClass,
   LayoutAnchor,

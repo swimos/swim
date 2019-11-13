@@ -22,6 +22,7 @@ import {
   MemberAnimator,
   ViewInit,
   View,
+  RenderViewContext,
   RenderView,
   FillView,
   TypesetView,
@@ -87,52 +88,52 @@ export class SliceView extends GraphicView {
     }
   }
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   innerRadius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   outerRadius: MemberAnimator<this, Length, AnyLength>;
 
   @MemberAnimator(Angle)
   phaseAngle: MemberAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Angle, "inherit")
+  @MemberAnimator(Angle, {inherit: true})
   padAngle: MemberAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   padRadius: MemberAnimator<this, Length | null, AnyLength | null>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   cornerRadius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   labelRadius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   sliceColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Number, "inherit")
+  @MemberAnimator(Number, {inherit: true})
   tickAlign: MemberAnimator<this, number>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   tickRadius: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   tickLength: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   tickWidth: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   tickPadding: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   tickColor: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Font, "inherit")
+  @MemberAnimator(Font, {inherit: true})
   font: MemberAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
   label(): View | null;
@@ -163,7 +164,8 @@ export class SliceView extends GraphicView {
     }
   }
 
-  protected onAnimate(t: number): void {
+  onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.value.onFrame(t);
     this.innerRadius.onFrame(t);
     this.outerRadius.onFrame(t);
@@ -183,7 +185,15 @@ export class SliceView extends GraphicView {
     this.textColor.onFrame(t);
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected layoutChildView(childView: View): void {
+    if (RenderView.is(childView)) {
+      childView.setBounds(this._bounds);
+      // Don't set anchor.
+    }
+  }
+
+  protected onRender(viewContext: RenderViewContext): void {
+    const context = viewContext.renderingContext;
     context.save();
     const bounds = this._bounds;
     const anchor = this._anchor;

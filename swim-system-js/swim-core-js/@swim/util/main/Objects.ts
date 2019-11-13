@@ -94,7 +94,7 @@ export class Objects {
    * returns `0` if `x` and `y` are equivalent; and returns `NaN` if `x` is not
    * comparable to `y`.
    */
-  static compareArray(x: Array<unknown>, y: Array<unknown>): 0 | 1 | -1 {
+  static compareArray(x: ReadonlyArray<any>, y: ReadonlyArray<any>): 0 | 1 | -1 {
     const p = x.length as number;
     const q = y.length as number;
     let order = 0 as 0 | 1 | -1;
@@ -163,7 +163,7 @@ export class Objects {
    * Compares two arrays of structural values for equality.  Returns `true` if
    * `x` and `y` are structurally equal, otherwise returns `false`.
    */
-  static equalArray(x: Array<unknown>, y: Array<unknown>): boolean {
+  static equalArray(x: ReadonlyArray<any>, y: ReadonlyArray<any>): boolean {
     const n = x.length;
     if (n !== y.length) {
       return false;
@@ -217,7 +217,7 @@ export class Objects {
   /**
    * Returns a hash code for an array of structural values.
    */
-  static hashArray(x: Array<unknown>): number {
+  static hashArray(x: ReadonlyArray<any>): number {
     let h = 0;
     const n = x.length;
     for (let i = 0; i < n; i += 1) {

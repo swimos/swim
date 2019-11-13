@@ -14,9 +14,14 @@
 
 import {BoxR2} from "@swim/math";
 import {Transform} from "@swim/transform";
+import {Transition} from "@swim/transition";
 import {ConstraintStrength} from "@swim/constraint";
-import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./member/MemberAnimator";
-import {LayoutAnchorConstructor, LayoutAnchor} from "./layout/LayoutAnchor";
+import {MemberAnimatorDescriptor, MemberAnimatorConstructor, MemberAnimator} from "./member/MemberAnimator";
+import {LayoutAnchorDescriptor, LayoutAnchorConstructor, LayoutAnchor} from "./layout/LayoutAnchor";
+import {ViewScopeDescriptor, ViewScopeConstructor, ViewScope} from "./ViewScope";
+import {Viewport} from "./Viewport";
+import {ViewIdiom} from "./ViewIdiom";
+import {ViewContext} from "./ViewContext";
 import {ViewObserver} from "./ViewObserver";
 import {ViewController} from "./ViewController";
 import {AppView} from "./AppView";
@@ -49,7 +54,7 @@ export abstract class View {
   }
 
   protected onSetKey(key: string | null): void {
-    // stub
+    // hook
   }
 
   protected didSetKey(key: string | null): void {
@@ -128,6 +133,21 @@ export abstract class View {
     }
   }
 
+  isMounted(): boolean {
+    const parentView = this.parentView;
+    return parentView ? parentView.isMounted() : false;
+  }
+
+  get viewport(): Viewport | null {
+    const parentView = this.parentView;
+    return parentView ? parentView.viewport : null;
+  }
+
+  get viewIdiom(): ViewIdiom {
+    const parentView = this.parentView;
+    return parentView ? parentView.viewIdiom : "unspecified";
+  }
+
   get appView(): AppView | null {
     const parentView = this.parentView;
     return parentView ? parentView.appView : null;
@@ -135,6 +155,7 @@ export abstract class View {
 
   abstract get parentView(): View | null;
 
+  /** @hidden */
   abstract setParentView(parentView: View | null): void;
 
   protected willSetParentView(parentView: View | null): void {
@@ -193,7 +214,7 @@ export abstract class View {
   }
 
   protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
-    // stub
+    this.requireUpdate(View.NeedsLayout);
   }
 
   protected didInsertChildView(childView: View, targetView: View | null | undefined): void {
@@ -219,7 +240,7 @@ export abstract class View {
   }
 
   protected onRemoveChildView(childView: View): void {
-    // stub
+    this.requireUpdate(View.NeedsLayout);
   }
 
   protected didRemoveChildView(childView: View): void {
@@ -230,19 +251,12 @@ export abstract class View {
     });
   }
 
-  isMounted(): boolean {
-    const parentView = this.parentView;
-    return parentView ? parentView.isMounted() : false;
-  }
+  abstract cascadeMount(): void;
 
-  cascadeMount(): void {
+  /** @hidden */
+  doMount(): void {
     this.willMount();
     this.onMount();
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      childView.cascadeMount();
-    }
     this.didMount();
   }
 
@@ -255,7 +269,7 @@ export abstract class View {
   }
 
   protected onMount(): void {
-    // stub
+    // hook
   }
 
   protected didMount(): void {
@@ -266,15 +280,13 @@ export abstract class View {
     });
   }
 
-  cascadeUnmount(): void {
-    this.willMount();
+  abstract cascadeUnmount(): void;
+
+  /** @hidden */
+  doUnmount(): void {
+    this.willUnmount();
     this.onUnmount();
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      childView.cascadeUnmount();
-    }
-    this.didMount();
+    this.didUnmount();
   }
 
   protected willUnmount(): void {
@@ -286,7 +298,7 @@ export abstract class View {
   }
 
   protected onUnmount(): void {
-    // stub
+    // hook
   }
 
   protected didUnmount(): void {
@@ -297,97 +309,181 @@ export abstract class View {
     });
   }
 
-  cascadeResize(): void {
-    this.willResize();
-    this.onResize();
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      childView.cascadeResize();
-    }
-    this.didResize();
+  get updateTime(): number {
+    const parentView = this.parentView;
+    return parentView ? parentView.updateTime : performance.now();
   }
 
-  protected willResize(): void {
+  /** @hidden */
+  abstract get updateFlags(): number;
+
+  /** @hidden */
+  abstract setUpdateFlags(updateFlags: number): void;
+
+  requireUpdate(updateFlags: number, immediate: boolean = false): void {
+    const oldUpdateFlags = this.updateFlags;
+    const newUpdateFlags = oldUpdateFlags | updateFlags;
+    const deltaUpdateFlags = newUpdateFlags & ~oldUpdateFlags;
+    if (deltaUpdateFlags !== 0) {
+      this.setUpdateFlags(newUpdateFlags);
+      this.requestUpdate(deltaUpdateFlags, immediate);
+    }
+  }
+
+  requestUpdate(updateFlags: number, immediate: boolean): void {
+    const parentView = this.parentView;
+    if (parentView) {
+      parentView.requestUpdate(updateFlags, immediate);
+    }
+  }
+
+  needsUpdate(updateFlags: number, viewContext: ViewContext): number {
+    return updateFlags;
+  }
+
+  abstract cascadeUpdate(updateFlags: number, viewContext: ViewContext): void;
+
+  /** @hidden */
+  abstract doUpdate(updateFlags: number, viewContext: ViewContext): void;
+
+  protected willUpdate(viewContext: ViewContext): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewWillResize) {
-        viewObserver.viewWillResize(this);
+      if (viewObserver.viewWillUpdate) {
+        viewObserver.viewWillUpdate(viewContext, this);
       }
     });
   }
 
-  protected onResize(): void {
-    // stub
+  protected onUpdate(viewContext: ViewContext): void {
+    // hook
   }
 
-  protected didResize(): void {
+  protected didUpdate(viewContext: ViewContext): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewDidResize) {
-        viewObserver.viewDidResize(this);
+      if (viewObserver.viewDidUpdate) {
+        viewObserver.viewDidUpdate(viewContext, this);
       }
     });
   }
 
-  cascadeLayout(): void {
-    this.willLayout();
-    this.onLayout();
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      childView.cascadeLayout();
-    }
-    this.didLayout();
+  /** @hidden */
+  doCompute(viewContext: ViewContext): void {
+    this.willCompute(viewContext);
+    this.onCompute(viewContext);
+    this.didCompute(viewContext);
   }
 
-  protected willLayout(): void {
+  protected willCompute(viewContext: ViewContext): void {
+    this.willObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewWillCompute) {
+        viewObserver.viewWillCompute(viewContext, this);
+      }
+    });
+  }
+
+  protected onCompute(viewContext: ViewContext): void {
+    // hook
+  }
+
+  protected didCompute(viewContext: ViewContext): void {
+    this.didObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewDidCompute) {
+        viewObserver.viewDidCompute(viewContext, this);
+      }
+    });
+  }
+
+  /** @hidden */
+  doLayout(viewContext: ViewContext): void {
+    this.willLayout(viewContext);
+    this.onLayout(viewContext);
+    this.didLayout(viewContext);
+  }
+
+  protected willLayout(viewContext: ViewContext): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillLayout) {
-        viewObserver.viewWillLayout(this);
+        viewObserver.viewWillLayout(viewContext, this);
       }
     });
   }
 
-  protected onLayout(): void {
-    // stub
+  protected onLayout(viewContext: ViewContext): void {
+    // hook
   }
 
-  protected didLayout(): void {
+  protected didLayout(viewContext: ViewContext): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewDidLayout) {
-        viewObserver.viewDidLayout(this);
+        viewObserver.viewDidLayout(viewContext, this);
       }
     });
   }
 
-  cascadeScroll(): void {
-    this.willScroll();
-    this.onScroll();
-    const childViews = this.childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      childView.cascadeScroll();
-    }
-    this.didScroll();
+  /** @hidden */
+  doScroll(viewContext: ViewContext): void {
+    this.willScroll(viewContext);
+    this.onScroll(viewContext);
+    this.didScroll(viewContext);
   }
 
-  protected willScroll(): void {
+  protected willScroll(viewContext: ViewContext): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillScroll) {
-        viewObserver.viewWillScroll(this);
+        viewObserver.viewWillScroll(viewContext, this);
       }
     });
   }
 
-  protected onScroll(): void {
-    // stub
+  protected onScroll(viewContext: ViewContext): void {
+    // hook
   }
 
-  protected didScroll(): void {
+  protected didScroll(viewContext: ViewContext): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewDidScroll) {
-        viewObserver.viewDidScroll(this);
+        viewObserver.viewDidScroll(viewContext, this);
       }
     });
+  }
+
+  /** @hidden */
+  doUpdateChildViews(updateFlags: number, viewContext: ViewContext): void {
+    this.willUpdateChildViews(viewContext);
+    const childViews = this.childViews;
+    for (let i = 0; i < childViews.length; i += 1) {
+      const childView = childViews[i];
+      const childViewContext = this.childViewContext(childView, viewContext);
+      childView.cascadeUpdate(updateFlags, childViewContext);
+    }
+    this.didUpdateChildViews(viewContext);
+  }
+
+  /** @hidden */
+  protected willUpdateChildViews(viewContext: ViewContext): void {
+    this.willObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewWillUpdateChildViews) {
+        viewObserver.viewWillUpdateChildViews(viewContext, this);
+      }
+    });
+  }
+
+  /** @hidden */
+  protected didUpdateChildViews(viewContext: ViewContext): void {
+    this.didObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewDidUpdateChildViews) {
+        viewObserver.viewDidUpdateChildViews(viewContext, this);
+      }
+    });
+  }
+
+  childViewContext(childView: View, viewContext: ViewContext): ViewContext {
+    return viewContext;
+  }
+
+  /** @hidden */
+  didSetViewScope<V extends View, T>(scope: ViewScope<V, T>, newState: T | null, oldState: T | null): void {
+    this.requireUpdate(View.NeedsCompute);
   }
 
   /**
@@ -513,15 +609,26 @@ export abstract class View {
   }
 
   /** @hidden */
-  static decorateMemberAnimator<V extends AnimatedView, T, U>(MemberAnimator: MemberAnimatorConstructor,
-                                                              inherit: MemberAnimatorInherit | undefined,
+  static decorateMemberAnimator<V extends AnimatedView, T, U>(MemberAnimator: MemberAnimatorConstructor<T, U>,
+                                                              descriptor: MemberAnimatorDescriptor<T, U> | undefined,
                                                               target: unknown, key: string): void {
-    if (inherit === "inherit") {
-      inherit = key;
+    let value: T | U | null | undefined;
+    let transition: Transition<T> | null | undefined;
+    let inherit: string | null | undefined;
+    if (descriptor) {
+      value = descriptor.value;
+      if (descriptor.transition !== void 0 && descriptor.transition !== null) {
+        transition = Transition.fromAny(descriptor.transition);
+      }
+      if (typeof descriptor.inherit === "string") {
+        inherit = descriptor.inherit;
+      } else if (descriptor.inherit === true) {
+        inherit = key;
+      }
     }
     Object.defineProperty(target, key, {
       get: function (this: V): MemberAnimator<V, T, U> {
-        const animator = new MemberAnimator<V, T, U>(this, void 0, void 0, inherit);
+        const animator = new MemberAnimator<V>(this, value, transition, inherit);
         Object.defineProperty(animator, "name", {
           value: key,
           enumerable: true,
@@ -541,11 +648,28 @@ export abstract class View {
 
   /** @hidden */
   static decorateLayoutAnchor<V extends LayoutView>(LayoutAnchor: LayoutAnchorConstructor,
-                                                    value: number, strength: ConstraintStrength,
+                                                    descriptor: LayoutAnchorDescriptor<V> | undefined,
                                                     target: unknown, key: string): void {
+    let value: number;
+    let strength: ConstraintStrength;
+    if (descriptor && descriptor.value !== void 0) {
+      value = descriptor.value;
+    } else {
+      value = NaN;
+    }
+    if (descriptor && descriptor.strength !== void 0 && descriptor.strength !== null) {
+      strength = ConstraintStrength.fromAny(descriptor.strength);
+    } else {
+      strength = ConstraintStrength.Strong;
+    }
+    const enabled = descriptor ? !!descriptor.enabled : false;
+    const getState = descriptor ? descriptor.get : void 0;
+    const setValue = descriptor ? descriptor.set : void 0;
     Object.defineProperty(target, key, {
       get: function (this: V): LayoutAnchor<V> {
-        const anchor = new LayoutAnchor<V>(this, key, value, strength);
+        const anchor = new LayoutAnchor<V>(this, key, value, strength, enabled);
+        anchor.getState = getState;
+        anchor.setValue = setValue;
         Object.defineProperty(this, key, {
           value: anchor,
           configurable: true,
@@ -557,6 +681,41 @@ export abstract class View {
       enumerable: true,
     });
   }
+
+  /** @hidden */
+  static decorateViewScope<V extends View, T>(ViewScope: ViewScopeConstructor,
+                                              descriptor: ViewScopeDescriptor<T> | undefined,
+                                              target: unknown, key: string): void {
+    let state: T | null | undefined;
+    let inherit: string | null | undefined;
+    if (descriptor) {
+      state = descriptor.state;
+      if (typeof descriptor.inherit === "string") {
+        inherit = descriptor.inherit;
+      } else if (descriptor.inherit === true) {
+        inherit = key;
+      }
+    }
+    Object.defineProperty(target, key, {
+      get: function (this: V): ViewScope<V, T> {
+        const scope = new ViewScope<V, T>(this, key, state, inherit);
+        Object.defineProperty(this, key, {
+          value: scope,
+          configurable: true,
+          enumerable: true,
+        });
+        return scope;
+      },
+      configurable: true,
+      enumerable: true,
+    });
+  }
+
+  static readonly NeedsCompute: number = 1 << 0;
+  static readonly NeedsAnimate: number = 1 << 1;
+  static readonly NeedsLayout: number = 1 << 2;
+  static readonly NeedsScroll: number = 1 << 3;
+  static readonly NeedsRender: number = 1 << 4;
 
   // Forward type declarations
   /** @hidden */

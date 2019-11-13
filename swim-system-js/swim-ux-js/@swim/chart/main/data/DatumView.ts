@@ -17,7 +17,15 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {RenderingContext} from "@swim/render";
-import {MemberAnimator, View, RenderView, TypesetView, GraphicView, GraphicViewController} from "@swim/view";
+import {
+  MemberAnimator,
+  View,
+  RenderViewContext,
+  RenderView,
+  TypesetView,
+  GraphicView,
+  GraphicViewController,
+} from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 import {DatumCategory, DatumLabelPlacement, AnyDatum} from "./Datum";
 
@@ -82,10 +90,10 @@ export class DatumView<X, Y> extends GraphicView {
   @MemberAnimator(Length)
   labelPadding: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Font, "inherit")
+  @MemberAnimator(Font, {inherit: true})
   font: MemberAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
   hitRadius(): number;
@@ -139,7 +147,15 @@ export class DatumView<X, Y> extends GraphicView {
     return !!this.color.value || typeof this.opacity.value === "number";
   }
 
-  protected onAnimate(t: number): void {
+  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+    if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
+      updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout | View.NeedsRender;
+    }
+    return updateFlags;
+  }
+
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.x.onFrame(t);
     this.y.onFrame(t);
     this.y2.onFrame(t);
@@ -152,7 +168,9 @@ export class DatumView<X, Y> extends GraphicView {
 
     this.font.onFrame(t);
     this.textColor.onFrame(t);
+  }
 
+  protected onLayout(viewContext: RenderViewContext): void {
     const label = this.label();
     if (RenderView.is(label)) {
       this.layoutLabel(label, this._bounds, this._anchor);

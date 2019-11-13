@@ -21,6 +21,7 @@ import {
   MemberAnimator,
   AnyMemberAnimator,
   ViewInit,
+  View,
   RenderView,
   FillViewInit,
   FillView,
@@ -28,6 +29,8 @@ import {
   StrokeView,
 } from "@swim/view";
 import {AnyLngLat, LngLat} from "./LngLat";
+import {MapView} from "./MapView";
+import {MapViewContext} from "./MapViewContext";
 import {MapGraphicView} from "./MapGraphicView";
 import {MapGraphicViewController} from "./MapGraphicViewController";
 
@@ -69,7 +72,7 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
       const coord = LngLat.fromAny(coords[i]);
       this._coords.push(new AnyMemberAnimator(LngLat, this, coord as LngLat));
       this._points.push(PointR2.origin());
-      this.setDirty(true);
+      this.requireUpdate(View.NeedsAnimate | MapView.NeedsProject);
     }
     this._coords.length = coords.length;
   }
@@ -82,14 +85,14 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
     coord = LngLat.fromAny(coord);
     this._coords.push(new AnyMemberAnimator(LngLat, this, coord as LngLat));
     this._points.push(PointR2.origin());
-    this.setDirty(true);
+    this.requireUpdate(View.NeedsAnimate | MapView.NeedsProject);
   }
 
   insertCoord(index: number, coord: AnyLngLat): void {
     coord = LngLat.fromAny(coord);
     this._coords.splice(index, 0, new AnyMemberAnimator(LngLat, this, coord as LngLat));
     this._points.splice(index, 0, PointR2.origin());
-    this.setDirty(true);
+    this.requireUpdate(View.NeedsAnimate | MapView.NeedsProject);
   }
 
   removeCoord(index: number): void {
@@ -97,16 +100,17 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
     this._points.splice(index, 1);
   }
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   fill: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   stroke: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   strokeWidth: MemberAnimator<this, Length, AnyLength>;
 
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: MapViewContext): void {
+    const t = viewContext.updateTime;
     let moved = false;
     const coords = this._coords;
     for (let i = 0, n = coords.length; i < n; i += 1) {
@@ -122,12 +126,66 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
     this.stroke.onFrame(t);
     this.strokeWidth.onFrame(t);
 
-    if (this._dirtyProjection || moved) {
-      this.projectGeometry();
+    if (moved) {
+      this.requireUpdate(MapView.NeedsProject);
     }
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected onProject(viewContext: MapViewContext): void {
+    const projection = viewContext.projection;
+    const coords = this._coords;
+    const points = this._points;
+    const n = coords.length;
+    let cx = 0;
+    let cy = 0;
+    let hitBounds: BoxR2 | null = null;
+    if (n > 0) {
+      let invalid = false;
+      let xMin = Infinity;
+      let yMin = Infinity;
+      let xMax = -Infinity;
+      let yMax = -Infinity;
+      for (let i = 0; i < n; i += 1) {
+        const coord = coords[i].value!;
+        const point = projection.project(coord);
+        points[i] = point;
+        cx += point.x;
+        cy += point.y;
+        invalid = invalid || !isFinite(point.x) || !isFinite(point.y);
+        xMin = Math.min(xMin, point.x);
+        yMin = Math.min(yMin, point.y);
+        xMax = Math.max(point.x, xMax);
+        yMax = Math.max(point.y, yMax);
+      }
+      cx /= n;
+      cy /= n;
+      if (!invalid) {
+        hitBounds = new BoxR2(xMin, yMin, xMax, yMax);
+      }
+    }
+    this._hitBounds = hitBounds;
+    this.setAnchor(new PointR2(cx, cy));
+  }
+
+  protected onLayout(viewContext: MapViewContext): void {
+    const hitBounds = this._hitBounds;
+    if (hitBounds !== null) {
+      const bounds = this._bounds;
+      // check if 3x3 viewport fully contains hitBounds
+      const contained = bounds.xMin - bounds.width <= hitBounds.xMin
+                     && hitBounds.xMax <= bounds.xMax + bounds.width
+                     && bounds.yMin - bounds.height <= hitBounds.yMin
+                     && hitBounds.yMax <= bounds.yMax + bounds.height;
+      const culled = !contained || !bounds.intersects(hitBounds);
+      this.setCulled(culled);
+    } else {
+      this.setCulled(true);
+    }
+    this.layoutChildViews(viewContext);
+  }
+
+  protected onRender(viewContext: MapViewContext): void {
+    const context = viewContext.renderingContext;
     context.save();
     const bounds = this._bounds;
     const anchor = this._anchor;
@@ -165,57 +223,6 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
         }
       }
     }
-  }
-
-  protected onCull(): void {
-    const hitBounds = this._hitBounds;
-    if (hitBounds !== null) {
-      const bounds = this._bounds;
-      // check if 3x3 viewport fully contains hitBounds
-      const contained = bounds.xMin - bounds.width <= hitBounds.xMin
-                     && hitBounds.xMax <= bounds.xMax + bounds.width
-                     && bounds.yMin - bounds.height <= hitBounds.yMin
-                     && hitBounds.yMax <= bounds.yMax + bounds.height;
-      const culled = !contained || !bounds.intersects(hitBounds);
-      this.setCulled(culled);
-    } else {
-      this.setCulled(true);
-    }
-  }
-
-  protected projectGeometry(): void {
-    const coords = this._coords;
-    const points = this._points;
-    const n = coords.length;
-    let cx = 0;
-    let cy = 0;
-    let hitBounds: BoxR2 | null = null;
-    if (n > 0) {
-      let invalid = false;
-      let xMin = Infinity;
-      let yMin = Infinity;
-      let xMax = -Infinity;
-      let yMax = -Infinity;
-      for (let i = 0; i < n; i += 1) {
-        const coord = coords[i].value!;
-        const point = this.project(coord);
-        points[i] = point;
-        cx += point.x;
-        cy += point.y;
-        invalid = invalid || !isFinite(point.x) || !isFinite(point.y);
-        xMin = Math.min(xMin, point.x);
-        yMin = Math.min(yMin, point.y);
-        xMax = Math.max(point.x, xMax);
-        yMax = Math.max(point.y, yMax);
-      }
-      cx /= n;
-      cy /= n;
-      if (!invalid) {
-        hitBounds = new BoxR2(xMin, yMin, xMax, yMax);
-      }
-    }
-    this._hitBounds = hitBounds;
-    this.setAnchor(new PointR2(cx, cy));
   }
 
   hitTest(x: number, y: number, context: RenderingContext): RenderView | null {

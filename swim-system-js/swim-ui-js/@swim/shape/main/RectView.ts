@@ -19,6 +19,7 @@ import {RenderingContext} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
+  RenderViewContext,
   RenderView,
   FillViewInit,
   FillView,
@@ -67,13 +68,13 @@ export class RectView extends GraphicView implements FillView, StrokeView {
   @MemberAnimator(Length)
   height: MemberAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   fill: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color, "inherit")
+  @MemberAnimator(Color, {inherit: true})
   stroke: MemberAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, "inherit")
+  @MemberAnimator(Length, {inherit: true})
   strokeWidth: MemberAnimator<this, Length, AnyLength>;
 
   get value(): Rect {
@@ -114,7 +115,8 @@ export class RectView extends GraphicView implements FillView, StrokeView {
     }
   }
 
-  protected onAnimate(t: number): void {
+  protected onAnimate(viewContext: RenderViewContext): void {
+    const t = viewContext.updateTime;
     this.x.onFrame(t);
     this.y.onFrame(t);
     this.width.onFrame(t);
@@ -124,7 +126,8 @@ export class RectView extends GraphicView implements FillView, StrokeView {
     this.strokeWidth.onFrame(t);
   }
 
-  protected onRender(context: RenderingContext): void {
+  protected onRender(viewContext: RenderViewContext): void {
+    const context = viewContext.renderingContext;
     context.save();
     context.beginPath();
     context.rect(this.x.value!.pxValue(), this.y.value!.pxValue(),

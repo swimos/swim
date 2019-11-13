@@ -12,37 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Objects} from "@swim/util";
 import {Transition} from "@swim/transition";
-import {Animated} from "./Animated";
+import {AnimatorContext} from "./AnimatorContext";
+import {Animator} from "./Animator";
 import {TweenAnimator} from "./TweenAnimator";
 
 export class TweenChildAnimator<T> extends TweenAnimator<T> {
-  parent: Animated | null;
+  parent: AnimatorContext | null;
 
-  constructor(parent: Animated | null, value?: T, transition: Transition<T> | null = null) {
+  constructor(parent: AnimatorContext | null, value?: T, transition: Transition<T> | null = null) {
     super(value, transition);
     this.parent = parent;
   }
 
-  get dirty(): boolean {
-    const parent = this.parent;
-    return parent ? parent.dirty : false;
-  }
-
-  setDirty(dirty: boolean): void {
-    if (dirty) {
-      const parent = this.parent;
-      if (parent) {
-        parent.setDirty(dirty);
-      }
-    }
-  }
-
-  animate(): void {
+  animate(animator: Animator = this): void {
     const parent = this.parent;
     if (parent && !this._disabled) {
-      parent.animate();
+      parent.animate(animator);
     }
   }
 
@@ -51,9 +37,7 @@ export class TweenChildAnimator<T> extends TweenAnimator<T> {
   }
 
   update(newValue: T, oldValue: T): void {
-    if (!Objects.equal(oldValue, newValue)) {
-      this.setDirty(true);
-    }
+    // hook
   }
 
   delete(): void {

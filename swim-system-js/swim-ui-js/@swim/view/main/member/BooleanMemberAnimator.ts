@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
+import {Transition, Tween} from "@swim/transition";
+import {MemberAnimatorConstructor, MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
@@ -22,10 +22,10 @@ export interface BooleanMemberAnimator<V extends AnimatedView> extends MemberAni
 }
 
 /** @hidden */
-export const BooleanMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor {
-  const BooleanMemberAnimator: MemberAnimatorConstructor = function <V extends AnimatedView>(
-      this: BooleanMemberAnimator<V>, view: V, value?: boolean | null,
-      transition?: Transition<boolean> | null, inherit?: MemberAnimatorInherit): BooleanMemberAnimator<V> {
+export const BooleanMemberAnimator = (function (_super: typeof MemberAnimator): MemberAnimatorConstructor<boolean, boolean | string> {
+  const BooleanMemberAnimator: MemberAnimatorConstructor<boolean, boolean | string> = function <V extends AnimatedView>(
+      this: BooleanMemberAnimator<V>, view: V, value?: boolean | string | null,
+      transition?: Transition<boolean> | null, inherit?: string | null): BooleanMemberAnimator<V> {
     let _this: BooleanMemberAnimator<V> = function (value?: boolean | string | null, tween?: Tween<boolean>): boolean | null | undefined | V {
       if (value === void 0) {
         return _this.value;
@@ -38,9 +38,12 @@ export const BooleanMemberAnimator = (function (_super: typeof MemberAnimator): 
       }
     } as BooleanMemberAnimator<V>;
     (_this as any).__proto__ = this;
+    if (typeof value === "string") {
+      value = value ? true : false;
+    }
     _this = _super.call(_this, view, value, transition, inherit) || _this;
     return _this;
-  } as unknown as MemberAnimatorConstructor;
+  } as unknown as MemberAnimatorConstructor<boolean, boolean | string>;
   __extends(BooleanMemberAnimator, _super);
 
   return BooleanMemberAnimator;

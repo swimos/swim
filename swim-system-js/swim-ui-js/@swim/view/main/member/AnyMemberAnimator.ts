@@ -14,14 +14,14 @@
 
 import {__extends} from "tslib";
 import {FromAny} from "@swim/util";
-import {Tween, Transition} from "@swim/transition";
-import {MemberAnimatorInherit, MemberAnimator} from "./MemberAnimator";
+import {Transition, Tween} from "@swim/transition";
+import {MemberAnimator} from "./MemberAnimator";
 import {AnimatedView} from "../AnimatedView";
 
 /** @hidden */
 export interface AnyMemberAnimatorClass {
-  new<V extends AnimatedView, T, U = T>(type: FromAny<T, U>, view: V, value?: T | null, transition?: Transition<T> | null,
-                                        inherit?: MemberAnimatorInherit): AnyMemberAnimator<V, T, U>;
+  new<V extends AnimatedView, T, U = T>(type: FromAny<T, U>, view: V, value?: T | U | null, transition?: Transition<T> | null,
+                                        inherit?: string | null): AnyMemberAnimator<V, T, U>;
 }
 
 /** @hidden */
@@ -35,8 +35,8 @@ export interface AnyMemberAnimator<V extends AnimatedView, T, U = T> extends Mem
 /** @hidden */
 export const AnyMemberAnimator = (function (_super: typeof MemberAnimator): AnyMemberAnimatorClass {
   const AnyMemberAnimator: AnyMemberAnimatorClass = function <V extends AnimatedView, T, U>(
-      this: AnyMemberAnimator<V, T, U>, type: FromAny<T, U>, view: V, value?: T | null,
-      transition?: Transition<T> | null, inherit?: MemberAnimatorInherit): AnyMemberAnimator<V, T, U> {
+      this: AnyMemberAnimator<V, T, U>, type: FromAny<T, U>, view: V, value?: T | U | null,
+      transition?: Transition<T> | null, inherit?: string | null): AnyMemberAnimator<V, T, U> {
     let _this: AnyMemberAnimator<V, T, U> = function (value?: T | U | null, tween?: Tween<T>): T | null | undefined | V {
       if (value === void 0) {
         return _this.value;
@@ -49,6 +49,9 @@ export const AnyMemberAnimator = (function (_super: typeof MemberAnimator): AnyM
       }
     } as AnyMemberAnimator<V, T, U>;
     (_this as any).__proto__ = this;
+    if (value !== null && value !== void 0) {
+      value = type.fromAny(value);
+    }
     _this = _super.call(_this, view, value, transition, inherit) || _this;
     (_this as any)._type = type;
     return _this;

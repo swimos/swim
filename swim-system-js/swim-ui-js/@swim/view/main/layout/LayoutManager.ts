@@ -23,7 +23,7 @@ export interface LayoutManager {
   deactivateVariable(variable: ConstrainVariable): void;
 
   /** @hidden */
-  setVariableState(variable: ConstrainVariable, state: number): void;
+  setVariable(variable: ConstrainVariable, state: number): void;
 
   /** @hidden */
   activateConstraint(constraint: Constraint): void;
@@ -32,7 +32,16 @@ export interface LayoutManager {
   deactivateConstraint(constraint: Constraint): void;
 
   /** @hidden */
-  throttleLayout(): void;
+  didAddConstraint(constraint: Constraint): void;
+
+  /** @hidden */
+  didRemoveConstraint(constraint: Constraint): void;
+
+  /** @hidden */
+  didAddVariable(variable: ConstrainVariable): void;
+
+  /** @hidden */
+  didRemoveVariable(variable: ConstrainVariable): void;
 }
 
 /** @hidden */
@@ -40,7 +49,7 @@ export const LayoutManager = {
   is(object: unknown): object is LayoutManager {
     if (typeof object === "object" && object) {
       const view = object as LayoutManager;
-      return typeof view.throttleLayout === "function";
+      return typeof view.setVariable === "function";
     }
     return false;
   },
