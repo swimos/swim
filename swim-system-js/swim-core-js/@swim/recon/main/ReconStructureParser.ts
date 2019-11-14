@@ -14,7 +14,39 @@
 
 import {Builder} from "@swim/util";
 import {Output} from "@swim/codec";
-import {Item, Attr, Slot, Value, Record, Data, Text, Num, Bool, Selector} from "@swim/structure";
+import {
+  Item,
+  Attr,
+  Slot,
+  Value,
+  Record,
+  Data,
+  Text,
+  Num,
+  Bool,
+  Selector,
+  AndOperator,
+  BitwiseAndOperator,
+  BitwiseNotOperator,
+  BitwiseOrOperator,
+  BitwiseXorOperator,
+  DivideOperator,
+  EqOperator,
+  GeOperator,
+  GtOperator,
+  InvokeOperator,
+  LeOperator,
+  LtOperator,
+  MinusOperator,
+  ModuloOperator,
+  NeOperator,
+  NegativeOperator,
+  NotOperator,
+  OrOperator,
+  PlusOperator,
+  PositiveOperator,
+  TimesOperator,
+} from "@swim/structure";
 import {ReconParser} from "./ReconParser";
 
 export class ReconStructureParser extends ReconParser<Item, Value> {
@@ -105,87 +137,91 @@ export class ReconStructureParser extends ReconParser<Item, Value> {
   }
 
   or(lhs: Value, rhs: Value): Value {
-    return lhs.or(rhs);
+    return new OrOperator(lhs, rhs);
   }
 
   and(lhs: Value, rhs: Value): Value {
-    return lhs.and(rhs);
+    return new AndOperator(lhs, rhs);
   }
 
   bitwiseOr(lhs: Value, rhs: Value): Value {
-    return lhs.bitwiseOr(rhs);
+    return new BitwiseOrOperator(lhs, rhs);
   }
 
   bitwiseXor(lhs: Value, rhs: Value): Value {
-    return lhs.bitwiseXor(rhs);
+    return new BitwiseXorOperator(lhs, rhs);
   }
 
   bitwiseAnd(lhs: Value, rhs: Value): Value {
-    return lhs.bitwiseAnd(rhs);
+    return new BitwiseAndOperator(lhs, rhs);
   }
 
   lt(lhs: Value, rhs: Value): Value {
-    return lhs.lt(rhs);
+    return new LtOperator(lhs, rhs);
   }
 
   le(lhs: Value, rhs: Value): Value {
-    return lhs.le(rhs);
+    return new LeOperator(lhs, rhs);
   }
 
   eq(lhs: Value, rhs: Value): Value {
-    return lhs.eq(rhs);
+    return new EqOperator(lhs, rhs);
   }
 
   ne(lhs: Value, rhs: Value): Value {
-    return lhs.ne(rhs);
+    return new NeOperator(lhs, rhs);
   }
 
   ge(lhs: Value, rhs: Value): Value {
-    return lhs.ge(rhs);
+    return new GeOperator(lhs, rhs);
   }
 
   gt(lhs: Value, rhs: Value): Value {
-    return lhs.gt(rhs);
+    return new GtOperator(lhs, rhs);
   }
 
   plus(lhs: Value, rhs: Value): Value {
-    return lhs.plus(rhs);
+    return new PlusOperator(lhs, rhs);
   }
 
   minus(lhs: Value, rhs: Value): Value {
-    return lhs.minus(rhs);
+    return new MinusOperator(lhs, rhs);
   }
 
   times(lhs: Value, rhs: Value): Value {
-    return lhs.times(rhs);
+    return new TimesOperator(lhs, rhs);
   }
 
   divide(lhs: Value, rhs: Value): Value {
-    return lhs.divide(rhs);
+    return new DivideOperator(lhs, rhs);
   }
 
   modulo(lhs: Value, rhs: Value): Value {
-    return lhs.modulo(rhs);
+    return new ModuloOperator(lhs, rhs);
   }
 
   not(rhs: Value): Value {
-    return rhs.not();
+    return new NotOperator(rhs);
   }
 
   bitwiseNot(rhs: Value): Value {
-    return rhs.bitwiseNot();
+    return new BitwiseNotOperator(rhs);
   }
 
   negative(rhs: Value): Value {
-    return rhs.negative();
+    if (rhs instanceof Num) {
+      return rhs.negative();
+    } else {
+      return new NegativeOperator(rhs);
+    }
   }
 
   positive(rhs: Value): Value {
-    return rhs.positive();
+    return new PositiveOperator(rhs);
   }
 
   invoke(func: Value, args: Value): Value {
-    return func.invoke(args).toValue();
+    return new InvokeOperator(func, args);
   }
 
   lambda(bindings: Value, template: Value): Value {
