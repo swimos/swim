@@ -26,6 +26,27 @@ import swim.structure.Selector;
 import swim.structure.Slot;
 import swim.structure.Text;
 import swim.structure.Value;
+import swim.structure.operator.AndOperator;
+import swim.structure.operator.BitwiseAndOperator;
+import swim.structure.operator.BitwiseNotOperator;
+import swim.structure.operator.BitwiseOrOperator;
+import swim.structure.operator.BitwiseXorOperator;
+import swim.structure.operator.DivideOperator;
+import swim.structure.operator.EqOperator;
+import swim.structure.operator.GeOperator;
+import swim.structure.operator.GtOperator;
+import swim.structure.operator.InvokeOperator;
+import swim.structure.operator.LeOperator;
+import swim.structure.operator.LtOperator;
+import swim.structure.operator.MinusOperator;
+import swim.structure.operator.ModuloOperator;
+import swim.structure.operator.NeOperator;
+import swim.structure.operator.NegativeOperator;
+import swim.structure.operator.NotOperator;
+import swim.structure.operator.OrOperator;
+import swim.structure.operator.PlusOperator;
+import swim.structure.operator.PositiveOperator;
+import swim.structure.operator.TimesOperator;
 import swim.util.Builder;
 
 public class ReconStructureParser extends ReconParser<Item, Value> {
@@ -175,107 +196,111 @@ public class ReconStructureParser extends ReconParser<Item, Value> {
 
   @Override
   public Value or(Value lhs, Value rhs) {
-    return lhs.or(rhs);
+    return new OrOperator(lhs, rhs);
   }
 
   @Override
   public Value and(Value lhs, Value rhs) {
-    return lhs.and(rhs);
+    return new AndOperator(lhs, rhs);
   }
 
   @Override
   public Value bitwiseOr(Value lhs, Value rhs) {
-    return lhs.bitwiseOr(rhs);
+    return new BitwiseOrOperator(lhs, rhs);
   }
 
   @Override
   public Value bitwiseXor(Value lhs, Value rhs) {
-    return lhs.bitwiseXor(rhs);
+    return new BitwiseXorOperator(lhs, rhs);
   }
 
   @Override
   public Value bitwiseAnd(Value lhs, Value rhs) {
-    return lhs.bitwiseAnd(rhs);
+    return new BitwiseAndOperator(lhs, rhs);
   }
 
   @Override
   public Value lt(Value lhs, Value rhs) {
-    return lhs.lt(rhs);
+    return new LtOperator(lhs, rhs);
   }
 
   @Override
   public Value le(Value lhs, Value rhs) {
-    return lhs.le(rhs);
+    return new LeOperator(lhs, rhs);
   }
 
   @Override
   public Value eq(Value lhs, Value rhs) {
-    return lhs.eq(rhs);
+    return new EqOperator(lhs, rhs);
   }
 
   @Override
   public Value ne(Value lhs, Value rhs) {
-    return lhs.ne(rhs);
+    return new NeOperator(lhs, rhs);
   }
 
   @Override
   public Value ge(Value lhs, Value rhs) {
-    return lhs.ge(rhs);
+    return new GeOperator(lhs, rhs);
   }
 
   @Override
   public Value gt(Value lhs, Value rhs) {
-    return lhs.gt(rhs);
+    return new GtOperator(lhs, rhs);
   }
 
   @Override
   public Value plus(Value lhs, Value rhs) {
-    return lhs.plus(rhs);
+    return new PlusOperator(lhs, rhs);
   }
 
   @Override
   public Value minus(Value lhs, Value rhs) {
-    return lhs.minus(rhs);
+    return new MinusOperator(lhs, rhs);
   }
 
   @Override
   public Value times(Value lhs, Value rhs) {
-    return lhs.times(rhs);
+    return new TimesOperator(lhs, rhs);
   }
 
   @Override
   public Value divide(Value lhs, Value rhs) {
-    return lhs.divide(rhs);
+    return new DivideOperator(lhs, rhs);
   }
 
   @Override
   public Value modulo(Value lhs, Value rhs) {
-    return lhs.modulo(rhs);
+    return new ModuloOperator(lhs, rhs);
   }
 
   @Override
   public Value not(Value rhs) {
-    return rhs.not();
+    return new NotOperator(rhs);
   }
 
   @Override
   public Value bitwiseNot(Value rhs) {
-    return rhs.bitwiseNot();
+    return new BitwiseNotOperator(rhs);
   }
 
   @Override
   public Value negative(Value rhs) {
-    return rhs.negative();
+    if (rhs instanceof Num) {
+      return rhs.negative();
+    } else {
+      return new NegativeOperator(rhs);
+    }
   }
 
   @Override
   public Value positive(Value rhs) {
-    return rhs.positive();
+    return new PositiveOperator(rhs);
   }
 
   @Override
   public Value invoke(Value func, Value args) {
-    return func.invoke(args).toValue();
+    return new InvokeOperator(func, args);
   }
 
   @Override

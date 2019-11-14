@@ -19,6 +19,8 @@ import swim.structure.Item;
 import swim.structure.Kind;
 import swim.structure.Record;
 import swim.structure.Value;
+import swim.structure.operator.AndOperator;
+import swim.structure.operator.OrOperator;
 import swim.uri.Uri;
 import swim.uri.UriPattern;
 import swim.util.Murmur3;
@@ -32,6 +34,10 @@ public abstract class PartPredicate {
 
   public boolean test(Uri nodeUri) {
     return test(nodeUri, nodeUri.hashCode());
+  }
+
+  public PartPredicate or(PartPredicate that) {
+    return new OrPartPredicate(this, that);
   }
 
   public PartPredicate and(PartPredicate that) {
@@ -59,6 +65,10 @@ public abstract class PartPredicate {
     return any;
   }
 
+  public static PartPredicate or(PartPredicate... predicates) {
+    return new OrPartPredicate(predicates);
+  }
+
   public static PartPredicate and(PartPredicate... predicates) {
     return new AndPartPredicate(predicates);
   }
@@ -81,9 +91,20 @@ public abstract class PartPredicate {
       return NodePartPredicate.fromValue(value);
     } else if ("hash".equals(tag)) {
       return HashPartPredicate.fromValue(value);
-    } else {
-      return null;
+    } else if (value instanceof OrOperator) {
+      final PartPredicate lhs = fromValue(((OrOperator) value).operand1().toValue());
+      final PartPredicate rhs = fromValue(((OrOperator) value).operand2().toValue());
+      if (lhs != null && rhs != null) {
+        return new OrPartPredicate(lhs, rhs);
+      }
+    } else if (value instanceof AndOperator) {
+      final PartPredicate lhs = fromValue(((AndOperator) value).operand1().toValue());
+      final PartPredicate rhs = fromValue(((AndOperator) value).operand2().toValue());
+      if (lhs != null && rhs != null) {
+        return new AndPartPredicate(lhs, rhs);
+      }
     }
+    return null;
   }
 }
 
@@ -131,6 +152,99 @@ final class AnyPartPredicate extends PartPredicate {
   }
 }
 
+final class OrPartPredicate extends PartPredicate {
+  final PartPredicate[] predicates;
+
+  OrPartPredicate(PartPredicate[] predicates) {
+    this.predicates = predicates;
+  }
+
+  OrPartPredicate(PartPredicate f, PartPredicate g) {
+    this(new PartPredicate[] {f, g});
+  }
+
+  @Override
+  public boolean test(Uri nodeUri, int nodeHash) {
+    final PartPredicate[] predicates = this.predicates;
+    for (int i = 0, n = predicates.length; i < n; i += 1) {
+      if (predicates[i].test(nodeUri, nodeHash)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public PartPredicate or(PartPredicate that) {
+    final PartPredicate[] predicates = this.predicates;
+    final int n = predicates.length;
+    final PartPredicate[] newPredicates = new PartPredicate[n + 1];
+    System.arraycopy(predicates, 0, newPredicates, 0, n);
+    newPredicates[n] = that;
+    return new OrPartPredicate(newPredicates);
+  }
+
+  @Override
+  public Value toValue() {
+    final PartPredicate[] predicates = this.predicates;
+    final int n = predicates.length;
+    if (n > 0) {
+      Value value = predicates[0].toValue();
+      for (int i = 1; i < n; i += 1) {
+        value = new OrOperator(value, predicates[i].toValue());
+      }
+      return value;
+    } else {
+      return Value.absent();
+    }
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof OrPartPredicate) {
+      final OrPartPredicate that = (OrPartPredicate) other;
+      final int n = this.predicates.length;
+      if (n == that.predicates.length) {
+        for (int i = 0; i < n; i += 1) {
+          if (!this.predicates[i].equals(that.predicates[i])) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    if (hashSeed == 0) {
+      hashSeed = Murmur3.seed(OrPartPredicate.class);
+    }
+    int code = hashSeed;
+    for (int i = 0, n = this.predicates.length; i < n; i += 1) {
+      code = Murmur3.mix(code, this.predicates[i].hashCode());
+    }
+    return Murmur3.mash(code);
+  }
+
+  @Override
+  public String toString() {
+    final StringBuilder s = new StringBuilder("PartPredicate").append('.').append("or").append('(');
+    for (int i = 0, n = this.predicates.length; i < n; i += 1) {
+      if (i > 0) {
+        s.append(", ");
+      }
+      s.append(this.predicates[i]);
+    }
+    return s.append(')').toString();
+  }
+
+  private static int hashSeed;
+}
+
 final class AndPartPredicate extends PartPredicate {
   final PartPredicate[] predicates;
 
@@ -144,6 +258,7 @@ final class AndPartPredicate extends PartPredicate {
 
   @Override
   public boolean test(Uri nodeUri, int nodeHash) {
+    final PartPredicate[] predicates = this.predicates;
     for (int i = 0, n = predicates.length; i < n; i += 1) {
       if (!predicates[i].test(nodeUri, nodeHash)) {
         return false;
@@ -154,6 +269,7 @@ final class AndPartPredicate extends PartPredicate {
 
   @Override
   public PartPredicate and(PartPredicate that) {
+    final PartPredicate[] predicates = this.predicates;
     final int n = predicates.length;
     final PartPredicate[] newPredicates = new PartPredicate[n + 1];
     System.arraycopy(predicates, 0, newPredicates, 0, n);
@@ -163,12 +279,17 @@ final class AndPartPredicate extends PartPredicate {
 
   @Override
   public Value toValue() {
+    final PartPredicate[] predicates = this.predicates;
     final int n = predicates.length;
-    final Record record = Record.create(n);
-    for (int i = 0; i < n; i += 1) {
-      record.add(predicates[i].toValue());
+    if (n > 0) {
+      Value value = predicates[0].toValue();
+      for (int i = 1; i < n; i += 1) {
+        value = new AndOperator(value, predicates[i].toValue());
+      }
+      return value;
+    } else {
+      return Value.absent();
     }
-    return record;
   }
 
   @Override
@@ -177,10 +298,10 @@ final class AndPartPredicate extends PartPredicate {
       return true;
     } else if (other instanceof AndPartPredicate) {
       final AndPartPredicate that = (AndPartPredicate) other;
-      final int n = predicates.length;
+      final int n = this.predicates.length;
       if (n == that.predicates.length) {
         for (int i = 0; i < n; i += 1) {
-          if (!predicates[i].equals(that.predicates[i])) {
+          if (!this.predicates[i].equals(that.predicates[i])) {
             return false;
           }
         }
@@ -192,9 +313,12 @@ final class AndPartPredicate extends PartPredicate {
 
   @Override
   public int hashCode() {
-    int code = 0xFA5FC906;
-    for (int i = 0, n = predicates.length; i < n; i += 1) {
-      code = Murmur3.mix(code, predicates[i].hashCode());
+    if (hashSeed == 0) {
+      hashSeed = Murmur3.seed(AndPartPredicate.class);
+    }
+    int code = hashSeed;
+    for (int i = 0, n = this.predicates.length; i < n; i += 1) {
+      code = Murmur3.mix(code, this.predicates[i].hashCode());
     }
     return Murmur3.mash(code);
   }
@@ -202,14 +326,16 @@ final class AndPartPredicate extends PartPredicate {
   @Override
   public String toString() {
     final StringBuilder s = new StringBuilder("PartPredicate").append('.').append("and").append('(');
-    for (int i = 0, n = predicates.length; i < n; i += 1) {
+    for (int i = 0, n = this.predicates.length; i < n; i += 1) {
       if (i > 0) {
         s.append(", ");
       }
-      s.append(predicates[i]);
+      s.append(this.predicates[i]);
     }
     return s.append(')').toString();
   }
+
+  private static int hashSeed;
 }
 
 final class NodePartPredicate extends PartPredicate {
@@ -221,12 +347,12 @@ final class NodePartPredicate extends PartPredicate {
 
   @Override
   public boolean test(Uri nodeUri, int nodeHash) {
-    return nodePattern.matches(nodeUri);
+    return this.nodePattern.matches(nodeUri);
   }
 
   @Override
   public Value toValue() {
-    return Record.create(1).attr("node", nodePattern.toString());
+    return Record.create(1).attr("node", this.nodePattern.toString());
   }
 
   @Override
@@ -235,7 +361,7 @@ final class NodePartPredicate extends PartPredicate {
       return true;
     } else if (other instanceof NodePartPredicate) {
       final NodePartPredicate that = (NodePartPredicate) other;
-      return nodePattern.equals(that.nodePattern);
+      return this.nodePattern.equals(that.nodePattern);
     } else {
       return false;
     }
@@ -243,13 +369,18 @@ final class NodePartPredicate extends PartPredicate {
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(0x6C13D8A9, nodePattern.hashCode()));
+    if (hashSeed == 0) {
+      hashSeed = Murmur3.seed(NodePartPredicate.class);
+    }
+    return Murmur3.mash(Murmur3.mix(hashSeed, this.nodePattern.hashCode()));
   }
 
   @Override
   public String toString() {
-    return "PartPredicate" + '.' + "node" + '(' + nodePattern + ')';
+    return "PartPredicate" + '.' + "node" + '(' + this.nodePattern + ')';
   }
+
+  private static int hashSeed;
 
   public static NodePartPredicate fromValue(Value value) {
     final UriPattern nodePattern = UriPattern.parse(value.getAttr("node").stringValue());
@@ -268,13 +399,13 @@ final class HashPartPredicate extends PartPredicate {
 
   @Override
   public boolean test(Uri nodeUri, int nodeHash) {
-    final long dlh = (long) (nodeHash - lowerBound) & 0xffffffffL;
-    return 0L <= dlh && dlh < ((long) (upperBound - lowerBound) & 0xffffffffL);
+    final long dlh = (long) (nodeHash - this.lowerBound) & 0xffffffffL;
+    return 0L <= dlh && dlh < ((long) (this.upperBound - this.lowerBound) & 0xffffffffL);
   }
 
   @Override
   public Value toValue() {
-    return Record.create(1).attr("hash", Record.create(2).item(lowerBound).item(upperBound));
+    return Record.create(1).attr("hash", Record.create(2).item(this.lowerBound).item(this.upperBound));
   }
 
   @Override
@@ -283,26 +414,26 @@ final class HashPartPredicate extends PartPredicate {
       return true;
     } else if (other instanceof HashPartPredicate) {
       final HashPartPredicate that = (HashPartPredicate) other;
-      return lowerBound == that.lowerBound && upperBound == that.upperBound;
+      return this.lowerBound == that.lowerBound && this.upperBound == that.upperBound;
     } else {
       return false;
     }
   }
-
-  private static int hashSeed;
 
   @Override
   public int hashCode() {
     if (hashSeed == 0) {
       hashSeed = Murmur3.seed(HashPartPredicate.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, lowerBound), upperBound));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, this.lowerBound), this.upperBound));
   }
 
   @Override
   public String toString() {
-    return "PartPredicate" + '.' + "hash" + '(' + lowerBound + ", " + upperBound + ')';
+    return "PartPredicate" + '.' + "hash" + '(' + this.lowerBound + ", " + this.upperBound + ')';
   }
+
+  private static int hashSeed;
 
   public static HashPartPredicate fromValue(Value value) {
     final Value header = value.getAttr("hash");
