@@ -82,7 +82,7 @@ public abstract class UriHost implements Comparable<UriHost>, Debug, Display {
 
   private static UriHost undefined;
 
-  private static HashGenCacheMap<String, UriHost> cache;
+  private static ThreadLocal<HashGenCacheMap<String, UriHost>> cache = new ThreadLocal<>();
 
   public static UriHost undefined() {
     if (undefined == null) {
@@ -148,6 +148,7 @@ public abstract class UriHost implements Comparable<UriHost>, Debug, Display {
   }
 
   static HashGenCacheMap<String, UriHost> cache() {
+    HashGenCacheMap<String, UriHost> cache = UriHost.cache.get();
     if (cache == null) {
       int cacheSize;
       try {
@@ -156,6 +157,7 @@ public abstract class UriHost implements Comparable<UriHost>, Debug, Display {
         cacheSize = 16;
       }
       cache = new HashGenCacheMap<String, UriHost>(cacheSize);
+      UriHost.cache.set(cache);
     }
     return cache;
   }

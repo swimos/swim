@@ -287,7 +287,7 @@ final class NumF32 extends Num {
 
   private static NumF32 nan;
 
-  private static HashGenCacheSet<NumF32> cache;
+  private static ThreadLocal<HashGenCacheSet<NumF32>> cache = new ThreadLocal<>();
 
   static NumF32 positiveZero() {
     if (positiveZero == null) {
@@ -343,6 +343,7 @@ final class NumF32 extends Num {
   }
 
   static HashGenCacheSet<NumF32> cache() {
+    HashGenCacheSet<NumF32> cache = NumF32.cache.get();
     if (cache == null) {
       int cacheSize;
       try {
@@ -351,6 +352,7 @@ final class NumF32 extends Num {
         cacheSize = 16;
       }
       cache = new HashGenCacheSet<NumF32>(cacheSize);
+      NumF32.cache.set(cache);
     }
     return cache;
   }

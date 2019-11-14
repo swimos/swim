@@ -87,7 +87,7 @@ public class UriFragment extends UriPart implements Comparable<UriFragment>, Deb
 
   private static UriFragment undefined;
 
-  private static HashGenCacheMap<String, UriFragment> cache;
+  private static ThreadLocal<HashGenCacheMap<String, UriFragment>> cache = new ThreadLocal<>();
 
   public static UriFragment undefined() {
     if (undefined == null) {
@@ -115,6 +115,7 @@ public class UriFragment extends UriPart implements Comparable<UriFragment>, Deb
   }
 
   static HashGenCacheMap<String, UriFragment> cache() {
+    HashGenCacheMap<String, UriFragment> cache = UriFragment.cache.get();
     if (cache == null) {
       int cacheSize;
       try {
@@ -123,6 +124,7 @@ public class UriFragment extends UriPart implements Comparable<UriFragment>, Deb
         cacheSize = 32;
       }
       cache = new HashGenCacheMap<String, UriFragment>(cacheSize);
+      UriFragment.cache.set(cache);
     }
     return cache;
   }

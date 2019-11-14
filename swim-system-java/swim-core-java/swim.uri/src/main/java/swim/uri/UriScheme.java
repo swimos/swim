@@ -77,7 +77,7 @@ public class UriScheme extends UriPart implements Comparable<UriScheme>, Debug, 
 
   private static UriScheme undefined;
 
-  private static HashGenCacheMap<String, UriScheme> cache;
+  private static ThreadLocal<HashGenCacheMap<String, UriScheme>> cache = new ThreadLocal<>();
 
   public static UriScheme undefined() {
     if (undefined == null) {
@@ -104,6 +104,7 @@ public class UriScheme extends UriPart implements Comparable<UriScheme>, Debug, 
   }
 
   static HashGenCacheMap<String, UriScheme> cache() {
+    HashGenCacheMap<String, UriScheme> cache = UriScheme.cache.get();
     if (cache == null) {
       int cacheSize;
       try {
@@ -112,6 +113,7 @@ public class UriScheme extends UriPart implements Comparable<UriScheme>, Debug, 
         cacheSize = 4;
       }
       cache = new HashGenCacheMap<String, UriScheme>(cacheSize);
+      UriScheme.cache.set(cache);
     }
     return cache;
   }

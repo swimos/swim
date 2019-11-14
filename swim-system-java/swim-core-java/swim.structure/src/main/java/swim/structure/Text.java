@@ -293,7 +293,7 @@ public class Text extends Value {
     Format.debug(this.value, output);
   }
 
-  private static HashGenCacheMap<String, Text> cache;
+  private static ThreadLocal<HashGenCacheMap<String, Text>> cache = new ThreadLocal<>();
 
   private static Text empty;
 
@@ -339,6 +339,7 @@ public class Text extends Value {
   }
 
   static HashGenCacheMap<String, Text> cache() {
+    HashGenCacheMap<String, Text> cache = Text.cache.get();
     if (cache == null) {
       int cacheSize;
       try {
@@ -347,6 +348,7 @@ public class Text extends Value {
         cacheSize = 128;
       }
       cache = new HashGenCacheMap<String, Text>(cacheSize);
+      Text.cache.set(cache);
     }
     return cache;
   }

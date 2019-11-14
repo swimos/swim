@@ -296,7 +296,7 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
 
   private static UriQuery undefined;
 
-  private static HashGenCacheSet<String> keyCache;
+  private static ThreadLocal<HashGenCacheSet<String>> keyCache = new ThreadLocal<>();
 
   public static UriQueryBuilder builder() {
     return new UriQueryBuilder();
@@ -367,6 +367,7 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
   }
 
   static HashGenCacheSet<String> keyCache() {
+    HashGenCacheSet<String> keyCache = UriQuery.keyCache.get();
     if (keyCache == null) {
       int keyCacheSize;
       try {
@@ -375,6 +376,7 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
         keyCacheSize = 64;
       }
       keyCache = new HashGenCacheSet<String>(keyCacheSize);
+      UriQuery.keyCache.set(keyCache);
     }
     return keyCache;
   }

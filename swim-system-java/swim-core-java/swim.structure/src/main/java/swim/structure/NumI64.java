@@ -331,7 +331,7 @@ final class NumI64 extends Num {
 
   private static NumI64 negativeOne;
 
-  private static HashGenCacheSet<NumI64> cache;
+  private static ThreadLocal<HashGenCacheSet<NumI64>> cache = new ThreadLocal<>();
 
   static NumI64 zero() {
     if (zero == null) {
@@ -371,6 +371,7 @@ final class NumI64 extends Num {
   }
 
   static HashGenCacheSet<NumI64> cache() {
+    HashGenCacheSet<NumI64> cache = NumI64.cache.get();
     if (cache == null) {
       int cacheSize;
       try {
@@ -379,6 +380,7 @@ final class NumI64 extends Num {
         cacheSize = 16;
       }
       cache = new HashGenCacheSet<NumI64>(cacheSize);
+      NumI64.cache.set(cache);
     }
     return cache;
   }

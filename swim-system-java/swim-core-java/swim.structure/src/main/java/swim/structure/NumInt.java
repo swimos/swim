@@ -317,7 +317,7 @@ final class NumInt extends Num {
 
   private static NumInt negativeOne;
 
-  private static HashGenCacheSet<NumInt> cache;
+  private static ThreadLocal<HashGenCacheSet<NumInt>> cache = new ThreadLocal<>();
 
   static NumInt zero() {
     if (zero == null) {
@@ -354,6 +354,7 @@ final class NumInt extends Num {
   }
 
   static HashGenCacheSet<NumInt> cache() {
+    HashGenCacheSet<NumInt> cache = NumInt.cache.get();
     if (cache == null) {
       int cacheSize;
       try {
@@ -362,6 +363,7 @@ final class NumInt extends Num {
         cacheSize = 16;
       }
       cache = new HashGenCacheSet<NumInt>(cacheSize);
+      NumInt.cache.set(cache);
     }
     return cache;
   }

@@ -90,7 +90,7 @@ public final class AvroName implements Comparable<AvroName>, Debug, Display {
     return this.string;
   }
 
-  private static HashGenCacheSet<String> nameCache;
+  private static ThreadLocal<HashGenCacheSet<String>> nameCache = new ThreadLocal<>();
 
   public static AvroName from(AvroNamespace namespace, String name) {
     if (namespace == null) {
@@ -117,6 +117,7 @@ public final class AvroName implements Comparable<AvroName>, Debug, Display {
   }
 
   static HashGenCacheSet<String> nameCache() {
+    HashGenCacheSet<String> nameCache = AvroName.nameCache.get();
     if (nameCache == null) {
       int nameCacheSize;
       try {
@@ -125,6 +126,7 @@ public final class AvroName implements Comparable<AvroName>, Debug, Display {
         nameCacheSize = 16;
       }
       nameCache = new HashGenCacheSet<String>(nameCacheSize);
+      AvroName.nameCache.set(nameCache);
     }
     return nameCache;
   }

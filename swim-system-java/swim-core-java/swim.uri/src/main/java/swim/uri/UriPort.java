@@ -85,7 +85,7 @@ public class UriPort implements Comparable<UriPort>, Debug, Display {
 
   private static UriPort undefined;
 
-  private static HashGenCacheSet<UriPort> cache;
+  private static ThreadLocal<HashGenCacheSet<UriPort>> cache = new ThreadLocal<>();
 
   public static UriPort undefined() {
     if (undefined == null) {
@@ -109,6 +109,7 @@ public class UriPort implements Comparable<UriPort>, Debug, Display {
   }
 
   static HashGenCacheSet<UriPort> cache() {
+    HashGenCacheSet<UriPort> cache = UriPort.cache.get();
     if (cache == null) {
       int cacheSize;
       try {
@@ -117,6 +118,7 @@ public class UriPort implements Comparable<UriPort>, Debug, Display {
         cacheSize = 16;
       }
       cache = new HashGenCacheSet<UriPort>(cacheSize);
+      UriPort.cache.set(cache);
     }
     return cache;
   }

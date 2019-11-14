@@ -490,7 +490,7 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
 
   private static UriPath slash;
 
-  private static HashGenCacheSet<String> segmentCache;
+  private static ThreadLocal<HashGenCacheSet<String>> segmentCache = new ThreadLocal<>();
 
   public static UriPathBuilder builder() {
     return new UriPathBuilder();
@@ -574,6 +574,7 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
   }
 
   static HashGenCacheSet<String> segmentCache() {
+    HashGenCacheSet<String> segmentCache = UriPath.segmentCache.get();
     if (segmentCache == null) {
       int segmentCacheSize;
       try {
@@ -582,6 +583,7 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
         segmentCacheSize = 64;
       }
       segmentCache = new HashGenCacheSet<String>(segmentCacheSize);
+      UriPath.segmentCache.set(segmentCache);
     }
     return segmentCache;
   }

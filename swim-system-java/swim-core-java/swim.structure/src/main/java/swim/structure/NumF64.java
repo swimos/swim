@@ -287,7 +287,7 @@ final class NumF64 extends Num {
 
   private static NumF64 nan;
 
-  private static HashGenCacheSet<NumF64> cache;
+  private static ThreadLocal<HashGenCacheSet<NumF64>> cache = new ThreadLocal<>();
 
   static NumF64 positiveZero() {
     if (positiveZero == null) {
@@ -343,6 +343,7 @@ final class NumF64 extends Num {
   }
 
   static HashGenCacheSet<NumF64> cache() {
+    HashGenCacheSet<NumF64> cache = NumF64.cache.get();
     if (cache == null) {
       int cacheSize;
       try {
@@ -351,6 +352,7 @@ final class NumF64 extends Num {
         cacheSize = 16;
       }
       cache = new HashGenCacheSet<NumF64>(cacheSize);
+      NumF64.cache.set(cache);
     }
     return cache;
   }

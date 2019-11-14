@@ -331,7 +331,7 @@ final class NumI32 extends Num {
 
   private static NumI32 negativeOne;
 
-  private static HashGenCacheSet<NumI32> cache;
+  private static ThreadLocal<HashGenCacheSet<NumI32>> cache = new ThreadLocal<>();
 
   static NumI32 zero() {
     if (zero == null) {
@@ -371,6 +371,7 @@ final class NumI32 extends Num {
   }
 
   static HashGenCacheSet<NumI32> cache() {
+    HashGenCacheSet<NumI32> cache = NumI32.cache.get();
     if (cache == null) {
       int cacheSize;
       try {
@@ -379,6 +380,7 @@ final class NumI32 extends Num {
         cacheSize = 16;
       }
       cache = new HashGenCacheSet<NumI32>(cacheSize);
+      NumI32.cache.set(cache);
     }
     return cache;
   }
