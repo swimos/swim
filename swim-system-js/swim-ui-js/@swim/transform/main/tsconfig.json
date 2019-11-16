@@ -14,6 +14,10 @@
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
+    {"path": "../../../../swim-core-js/@swim/util/main"},
+    {"path": "../../../../swim-core-js/@swim/codec/main"},
+    {"path": "../../../../swim-core-js/@swim/structure/main"},
+    {"path": "../../../../swim-core-js/@swim/math/main"},
     {"path": "../../angle/main"},
     {"path": "../../length/main"}
   ]

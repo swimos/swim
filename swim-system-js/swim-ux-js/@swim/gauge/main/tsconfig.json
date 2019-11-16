@@ -29,5 +29,30 @@
       "@swim/typeset": ["../swim-ui-js/@swim/typeset/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
-  }
+  },
+  "references": [
+    {"path": "../../../../swim-core-js/@swim/util/main"},
+    {"path": "../../../../swim-core-js/@swim/codec/main"},
+    {"path": "../../../../swim-core-js/@swim/collections/main"},
+    {"path": "../../../../swim-core-js/@swim/structure/main"},
+    {"path": "../../../../swim-core-js/@swim/streamlet/main"},
+    {"path": "../../../../swim-core-js/@swim/math/main"},
+    {"path": "../../../../swim-core-js/@swim/time/main"},
+    {"path": "../../../../swim-ui-js/@swim/angle/main"},
+    {"path": "../../../../swim-ui-js/@swim/length/main"},
+    {"path": "../../../../swim-ui-js/@swim/color/main"},
+    {"path": "../../../../swim-ui-js/@swim/font/main"},
+    {"path": "../../../../swim-ui-js/@swim/transform/main"},
+    {"path": "../../../../swim-ui-js/@swim/interpolate/main"},
+    {"path": "../../../../swim-ui-js/@swim/scale/main"},
+    {"path": "../../../../swim-ui-js/@swim/transition/main"},
+    {"path": "../../../../swim-ui-js/@swim/animate/main"},
+    {"path": "../../../../swim-ui-js/@swim/dom/main"},
+    {"path": "../../../../swim-ui-js/@swim/style/main"},
+    {"path": "../../../../swim-ui-js/@swim/render/main"},
+    {"path": "../../../../swim-ui-js/@swim/constraint/main"},
+    {"path": "../../../../swim-ui-js/@swim/view/main"},
+    {"path": "../../../../swim-ui-js/@swim/shape/main"},
+    {"path": "../../../../swim-ui-js/@swim/typeset/main"}
+  ]
 }

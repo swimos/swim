@@ -82,20 +82,11 @@ export class MapboxView extends MapGraphicView {
   }
 
   protected willSetProjection(projection: MapboxProjection): MapboxProjection | void {
-    const viewController = this._viewController;
-    if (viewController) {
-      const newProjection = viewController.viewWillSetProjection(projection, this);
-      if (newProjection !== void 0) {
-        projection = newProjection;
-      }
-    }
-    const viewObservers = this._viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i] as MapboxViewObserver;
+    this.willObserve(function (viewObserver: MapboxViewObserver): void {
       if (viewObserver.viewWillSetProjection) {
         viewObserver.viewWillSetProjection(projection, this);
       }
-    }
+    });
   }
 
   protected onSetProjection(projection: MapboxProjection): void {

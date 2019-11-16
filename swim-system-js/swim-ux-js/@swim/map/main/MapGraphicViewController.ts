@@ -13,11 +13,22 @@
 // limitations under the License.
 
 import {GraphicViewController} from "@swim/view";
+import {MapProjection} from "./MapProjection";
 import {MapViewContext} from "./MapViewContext";
 import {MapGraphicView} from "./MapGraphicView";
 import {MapGraphicViewObserver} from "./MapGraphicViewObserver";
 
 export class MapGraphicViewController<V extends MapGraphicView = MapGraphicView> extends GraphicViewController<V> implements MapGraphicViewObserver<V> {
+  get projection(): MapProjection | null {
+    const view = this._view;
+    return view ? view.projection : null;
+  }
+
+  get zoom(): number {
+    const view = this._view;
+    return view ? view.zoom : 0;
+  }
+
   viewWillProject(viewContext: MapViewContext, view: V): void {
     // hook
   }

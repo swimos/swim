@@ -400,6 +400,8 @@ export class CanvasView extends HtmlView implements RenderView {
   /** @hidden */
   doUpdate(updateFlags: number, viewContext: ViewContext): void {
     const canvasViewContext = this.canvasViewContext(viewContext);
+    // Clear any unknown update flags.
+    this._updateFlags = this._updateFlags & (View.NeedsCompute | View.NeedsAnimate | View.NeedsLayout | View.NeedsScroll | View.NeedsRender);
     this.willUpdate(canvasViewContext);
     if (((updateFlags | this._updateFlags) & View.NeedsCompute) !== 0) {
       this._updateFlags = this._updateFlags & ~View.NeedsCompute;
