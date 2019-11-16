@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.UnresolvedAddressException;
 import java.util.Collection;
 import javax.net.ssl.SSLEngine;
 
@@ -38,8 +39,8 @@ public interface IpStation extends IpInterface {
       station().transport(context, FlowControl.ACCEPT);
       context.didBind();
       return context;
-    } catch (IOException error) {
-      throw new StationException(error);
+    } catch (IOException | UnresolvedAddressException error) {
+      throw new StationException(localAddress.toString(), error);
     }
   }
 
@@ -57,8 +58,8 @@ public interface IpStation extends IpInterface {
       station.transport(context, FlowControl.ACCEPT);
       context.didBind();
       return context;
-    } catch (IOException error) {
-      throw new StationException(error);
+    } catch (IOException | UnresolvedAddressException error) {
+      throw new StationException(localAddress.toString(), error);
     }
   }
 
@@ -82,8 +83,8 @@ public interface IpStation extends IpInterface {
         station.transport(context, FlowControl.CONNECT);
       }
       return context;
-    } catch (IOException error) {
-      throw new StationException(error);
+    } catch (IOException | UnresolvedAddressException error) {
+      throw new StationException(remoteAddress.toString(), error);
     }
   }
 
@@ -125,8 +126,8 @@ public interface IpStation extends IpInterface {
         station.transport(context, FlowControl.CONNECT);
       }
       return context;
-    } catch (IOException error) {
-      throw new StationException(error);
+    } catch (IOException | UnresolvedAddressException error) {
+      throw new StationException(remoteAddress.toString(), error);
     }
   }
 }

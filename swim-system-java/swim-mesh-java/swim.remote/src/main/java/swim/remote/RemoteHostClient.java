@@ -62,25 +62,34 @@ public class RemoteHostClient extends RemoteHost {
   }
 
   public void connect() {
-    final String scheme = this.baseUri.schemeName();
-    final boolean isSecure = "warps".equals(scheme) || "swims".equals(scheme);
+    try {
+      final String scheme = this.baseUri.schemeName();
+      final boolean isSecure = "warps".equals(scheme) || "swims".equals(scheme);
 
-    final UriAuthority remoteAuthority = this.baseUri.authority();
-    final String remoteAddress = remoteAuthority.host().address();
-    final int remotePort = remoteAuthority.port().number();
-    final int requestPort = remotePort > 0 ? remotePort : isSecure ? 443 : 80;
+      final UriAuthority remoteAuthority = this.baseUri.authority();
+      final String remoteAddress = remoteAuthority.host().address();
+      final int remotePort = remoteAuthority.port().number();
+      final int requestPort = remotePort > 0 ? remotePort : isSecure ? 443 : 80;
 
-    if (this.client == null) {
-      final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, UriPath.slash(), this.baseUri.query());
-      final WsRequest wsRequest = WsRequest.from(requestUri, PROTOCOL_LIST);
-      final WarpWebSocket webSocket = new WarpWebSocket(this, this.warpSettings);
-      this.client = new RemoteHostClientBinding(this, webSocket, wsRequest, this.warpSettings);
-      setWarpSocketContext(webSocket); // eagerly set
-    }
-    if (isSecure) {
-      connectHttps(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
-    } else {
-      connectHttp(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
+      if (this.client == null) {
+        final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, UriPath.slash(), this.baseUri.query());
+        final WsRequest wsRequest = WsRequest.from(requestUri, PROTOCOL_LIST);
+        final WarpWebSocket webSocket = new WarpWebSocket(this, this.warpSettings);
+        this.client = new RemoteHostClientBinding(this, webSocket, wsRequest, this.warpSettings);
+        setWarpSocketContext(webSocket); // eagerly set
+      }
+      if (isSecure) {
+        connectHttps(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
+      } else {
+        connectHttp(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
+      }
+    } catch (Throwable error) {
+      if (Conts.isNonFatal(error)) {
+        error.printStackTrace();
+        reconnect();
+      } else {
+        throw error;
+      }
     }
   }
 

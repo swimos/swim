@@ -335,8 +335,8 @@ public class ActorKernel extends KernelProxy {
       final String fabricProvider = header.get("provider").stringValue(null);
       if (fabricProvider == null || ActorKernel.class.getName().equals(fabricProvider)) {
         final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
-        Value partKey = null;
-        PartPredicate predicate = null;
+        Value partKey = Value.extant();
+        PartPredicate predicate = PartPredicate.any();
         boolean isGateway = false;
         UriMapper<HostDef> hostDefs = UriMapper.empty();
         UriMapper<NodeDef> nodeDefs = UriMapper.empty();
@@ -395,10 +395,8 @@ public class ActorKernel extends KernelProxy {
             continue;
           }
         }
-        if (partKey != null && predicate != null) {
-          return new ActorPartDef(partKey, predicate, isGateway, hostDefs, nodeDefs,
-                                 laneDefs, logDef, policyDef, stageDef, storeDef);
-        }
+        return new ActorPartDef(partKey, predicate, isGateway, hostDefs, nodeDefs,
+                               laneDefs, logDef, policyDef, stageDef, storeDef);
       }
     }
     return null;

@@ -14,6 +14,7 @@
 
 package swim.runtime;
 
+import swim.structure.Extant;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Kind;
@@ -103,6 +104,8 @@ public abstract class PartPredicate {
       if (lhs != null && rhs != null) {
         return new AndPartPredicate(lhs, rhs);
       }
+    } else if (value instanceof Extant) {
+      return PartPredicate.any();
     }
     return null;
   }
