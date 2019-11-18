@@ -105,8 +105,13 @@ public class NodeScope extends Scope implements NodeRef {
 
   @Override
   public void command(Uri laneUri, float prio, Value body) {
+    Uri meshUri = this.meshUri;
+    final Uri hostUri = this.hostUri;
+    if (!meshUri.isDefined()) {
+      meshUri = hostUri;
+    }
     final CommandMessage message = new CommandMessage(this.nodeUri, laneUri, body);
-    pushDown(new ScopePushRequest(this.meshUri, this.hostUri, null, message, prio));
+    pushDown(new ScopePushRequest(meshUri, hostUri, null, message, prio));
   }
 
   @Override

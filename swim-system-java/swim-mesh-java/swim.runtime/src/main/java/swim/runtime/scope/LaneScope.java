@@ -103,8 +103,13 @@ public class LaneScope extends Scope implements LaneRef {
 
   @Override
   public void command(float prio, Value body) {
+    Uri meshUri = this.meshUri;
+    final Uri hostUri = this.hostUri;
+    if (!meshUri.isDefined()) {
+      meshUri = hostUri;
+    }
     final CommandMessage message = new CommandMessage(this.nodeUri, this.laneUri, body);
-    pushDown(new ScopePushRequest(this.meshUri, this.hostUri, null, message, prio));
+    pushDown(new ScopePushRequest(meshUri, hostUri, null, message, prio));
   }
 
   @Override

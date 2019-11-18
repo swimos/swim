@@ -150,12 +150,16 @@ public abstract class AbstractSwimRef implements SwimRef, CellContext {
 
   @Override
   public void command(Uri hostUri, Uri nodeUri, Uri laneUri, float prio, Value body) {
+    Uri meshUri = meshUri();
+    if (!meshUri.isDefined()) {
+      meshUri = hostUri;
+    }
     if (nodeUri.authority().isDefined()) {
       nodeUri = Uri.from(nodeUri.path(), nodeUri.query(), nodeUri.fragment());
     }
     final Identity identity = null;
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
-    pushDown(new ScopePushRequest(meshUri(), hostUri, identity, message, prio));
+    pushDown(new ScopePushRequest(meshUri, hostUri, identity, message, prio));
   }
 
   @Override
@@ -175,6 +179,7 @@ public abstract class AbstractSwimRef implements SwimRef, CellContext {
 
   @Override
   public void command(Uri nodeUri, Uri laneUri, float prio, Value body) {
+    Uri meshUri = meshUri();
     final Uri hostUri;
     if (nodeUri.authority().isDefined()) {
       hostUri = Uri.from(nodeUri.scheme(), nodeUri.authority());
@@ -182,9 +187,12 @@ public abstract class AbstractSwimRef implements SwimRef, CellContext {
     } else {
       hostUri = Uri.empty();
     }
+    if (!meshUri.isDefined()) {
+      meshUri = hostUri;
+    }
     final Identity identity = null;
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
-    pushDown(new ScopePushRequest(meshUri(), hostUri, identity, message, prio));
+    pushDown(new ScopePushRequest(meshUri, hostUri, identity, message, prio));
   }
 
   @Override

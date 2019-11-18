@@ -108,8 +108,13 @@ public class HostScope extends Scope implements HostRef {
 
   @Override
   public void command(Uri nodeUri, Uri laneUri, float prio, Value body) {
+    Uri meshUri = this.meshUri;
+    final Uri hostUri = this.hostUri;
+    if (!meshUri.isDefined()) {
+      meshUri = hostUri;
+    }
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
-    pushDown(new ScopePushRequest(this.meshUri, this.hostUri, null, message, prio));
+    pushDown(new ScopePushRequest(meshUri, hostUri, null, message, prio));
   }
 
   @Override
