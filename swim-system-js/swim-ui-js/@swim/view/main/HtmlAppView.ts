@@ -401,17 +401,32 @@ export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
       this._updateTimer = 0;
     }
     const viewContext = this.appViewContext();
-    this.cascadeUpdate(this._updateFlags, viewContext);
+    const t0 = viewContext.updateTime;
+    const sinceUpdate = t0 - this._updateTime;
+    if (this._updateDelay > 16 && sinceUpdate < this._updateDelay) { // too soon
+      this._updateTimer = setTimeout(this.performUpdate, this._updateDelay - sinceUpdate) as any;
+    } else {
+      this._updateTime = t0;
+      let updateFlags = this.updateFlags;
+      updateFlags = this.needsUpdate(updateFlags, viewContext);
+      this.doUpdate(updateFlags, viewContext);
+      const t1 = performance.now();
+      this._updateDelay = Math.min(t1 - t0 > this._updateDelay ? 2 * this._updateDelay : 16, 166);
+      if (this._updateDelay !== 16) {
+        if (this._updateFrame) {
+          cancelAnimationFrame(this._updateFrame);
+          this._updateFrame = 0;
+          this._updateTimer = setTimeout(this.performUpdate, this._updateDelay) as any;
+        } else if (this._updateTimer) {
+          clearTimeout(this._updateTimer);
+          this._updateTimer = setTimeout(this.performUpdate, this._updateDelay) as any;
+        }
+      }
+    }
   }
 
   cascadeUpdate(updateFlags: number, viewContext: ViewContext): void {
-    const t0 = viewContext.updateTime;
-    this._updateTime = t0;
-    updateFlags = updateFlags | this.updateFlags;
-    updateFlags = this.needsUpdate(updateFlags, viewContext);
-    this.doUpdate(updateFlags, viewContext);
-    const t1 = performance.now();
-    this._updateDelay = Math.min(t1 - t0 > this._updateDelay ? 2 * this._updateDelay : 16, 166);
+    // ignore ancestor updates
   }
 
   /** @hidden */
