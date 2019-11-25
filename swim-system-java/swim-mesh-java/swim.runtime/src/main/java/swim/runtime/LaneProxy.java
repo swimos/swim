@@ -186,8 +186,8 @@ public class LaneProxy implements LaneBinding, LaneContext {
   }
 
   @Override
-  public void pushUpCommand(CommandMessage message) {
-    this.laneBinding.pushUpCommand(message);
+  public void pushUpCommand(Push<CommandMessage> push) {
+    this.laneBinding.pushUpCommand(push);
   }
 
   @Override
@@ -206,8 +206,8 @@ public class LaneProxy implements LaneBinding, LaneContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.laneContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.laneContext.pushDown(push);
   }
 
   @Override
@@ -221,8 +221,8 @@ public class LaneProxy implements LaneBinding, LaneContext {
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    this.laneBinding.pushUp(pushRequest);
+  public void pushUp(Push<?> push) {
+    this.laneBinding.pushUp(push);
   }
 
   @Override

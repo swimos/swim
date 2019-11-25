@@ -288,8 +288,8 @@ public class HostProxy implements HostBinding, HostContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.hostContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.hostContext.pushDown(push);
   }
 
   @Override
@@ -303,8 +303,8 @@ public class HostProxy implements HostBinding, HostContext {
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    this.hostBinding.pushUp(pushRequest);
+  public void pushUp(Push<?> push) {
+    this.hostBinding.pushUp(push);
   }
 
   @Override

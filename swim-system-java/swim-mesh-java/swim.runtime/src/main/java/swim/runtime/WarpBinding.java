@@ -15,7 +15,6 @@
 package swim.runtime;
 
 import swim.structure.Value;
-import swim.warp.Envelope;
 
 public interface WarpBinding extends LinkBinding {
   @Override
@@ -36,7 +35,7 @@ public interface WarpBinding extends LinkBinding {
 
   void feedDown();
 
-  void pushDown(Envelope envelope);
+  void pushDown(Push<?> push);
 
   void skipDown();
 

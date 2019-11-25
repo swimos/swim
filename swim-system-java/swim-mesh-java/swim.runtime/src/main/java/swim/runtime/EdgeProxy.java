@@ -272,8 +272,8 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.edgeBinding.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.edgeBinding.pushDown(push);
   }
 
   @Override
@@ -287,8 +287,8 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    this.edgeBinding.pushUp(pushRequest);
+  public void pushUp(Push<?> push) {
+    this.edgeBinding.pushUp(push);
   }
 
   @Override

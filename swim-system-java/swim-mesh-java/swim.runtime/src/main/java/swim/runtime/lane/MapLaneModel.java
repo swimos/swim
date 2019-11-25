@@ -16,12 +16,16 @@ package swim.runtime.lane;
 
 import java.util.Iterator;
 import java.util.Map;
+import swim.api.LaneException;
 import swim.api.Link;
 import swim.api.data.MapData;
 import swim.collections.FingerTrieSeq;
+import swim.concurrent.Cont;
+import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.runtime.LaneRelay;
 import swim.runtime.LaneView;
+import swim.runtime.Push;
 import swim.runtime.WarpBinding;
 import swim.runtime.warp.WarpLaneModel;
 import swim.structure.Form;
@@ -57,28 +61,31 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
   }
 
   @Override
-  public void onCommand(CommandMessage message) {
+  public void onCommand(Push<CommandMessage> push) {
+    final CommandMessage message = push.message();
     final Value payload = message.body();
     final String tag = payload.tag();
     if ("update".equals(tag)) {
       final Value header = payload.header("update");
       final Value key = header.get("key");
       final Value value = payload.body();
-      new MapLaneRelayUpdate(this, message, key, value).run();
+      new MapLaneRelayUpdate(this, message, push.cont(), key, value).run();
     } else if ("remove".equals(tag)) {
       final Value header = payload.header("remove");
       final Value key = header.get("key");
-      new MapLaneRelayRemove(this, message, key).run();
+      new MapLaneRelayRemove(this, message, push.cont(), key).run();
     } else if ("drop".equals(tag)) {
       final Value header = payload.header("drop");
       final int lower = header.intValue(0);
-      new MapLaneRelayDrop(this, message, lower).run();
+      new MapLaneRelayDrop(this, message, push.cont(), lower).run();
     } else if ("take".equals(tag)) {
       final Value header = payload.header("take");
       final int upper = header.intValue(0);
-      new MapLaneRelayTake(this, message, upper).run();
+      new MapLaneRelayTake(this, message, push.cont(), upper).run();
     } else if ("clear".equals(tag)) {
-      new MapLaneRelayClear(this, message).run();
+      new MapLaneRelayClear(this, message, push.cont()).run();
+    } else {
+      push.trap(new LaneException("unknown subcommand: " + payload));
     }
   }
 
@@ -240,6 +247,7 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
 final class MapLaneRelayUpdate extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
   Form<Object> keyForm;
   Form<Object> valueForm;
   final Value key;
@@ -249,10 +257,11 @@ final class MapLaneRelayUpdate extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
   Value newValue;
   Object newObject;
 
-  MapLaneRelayUpdate(MapLaneModel model, CommandMessage message, Value key, Value newValue) {
+  MapLaneRelayUpdate(MapLaneModel model, CommandMessage message, Cont<CommandMessage> cont, Value key, Value newValue) {
     super(model, 4);
     this.link = null;
     this.message = message;
+    this.cont = cont;
     this.key = key;
     this.newValue = newValue;
   }
@@ -261,6 +270,7 @@ final class MapLaneRelayUpdate extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
     super(model, 1, 3, null);
     this.link = link;
     this.message = null;
+    this.cont = null;
     this.key = key;
     this.newValue = newValue;
   }
@@ -269,6 +279,7 @@ final class MapLaneRelayUpdate extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
     super(model, 1, 3, stage);
     this.link = null;
     this.message = null;
+    this.cont = null;
     this.key = key;
     this.newValue = newValue;
   }
@@ -359,12 +370,24 @@ final class MapLaneRelayUpdate extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
   @Override
   protected void done() {
     this.model.cueDownKey(this.key);
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class MapLaneRelayRemove extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
   Form<Object> keyForm;
   Form<Object> valueForm;
   final Value key;
@@ -372,10 +395,11 @@ final class MapLaneRelayRemove extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
   Value oldValue;
   Object oldObject;
 
-  MapLaneRelayRemove(MapLaneModel model, CommandMessage message, Value key) {
+  MapLaneRelayRemove(MapLaneModel model, CommandMessage message, Cont<CommandMessage> cont, Value key) {
     super(model, 4);
     this.link = null;
     this.message = message;
+    this.cont = cont;
     this.key = key;
   }
 
@@ -383,6 +407,7 @@ final class MapLaneRelayRemove extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
     super(model, 1, 3, null);
     this.link = link;
     this.message = null;
+    this.cont = null;
     this.key = key;
   }
 
@@ -390,6 +415,7 @@ final class MapLaneRelayRemove extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
     super(model, 1, 3, stage);
     this.link = null;
     this.message = null;
+    this.cont = null;
     this.key = key;
   }
 
@@ -473,18 +499,31 @@ final class MapLaneRelayRemove extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
     if (this.oldValue.isDefined()) {
       this.model.sendDown(Record.create(1).attr("remove", Record.create(1).slot("key", this.key)));
     }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class MapLaneRelayDrop extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
   final int lower;
 
-  MapLaneRelayDrop(MapLaneModel model, CommandMessage message, int lower) {
+  MapLaneRelayDrop(MapLaneModel model, CommandMessage message, Cont<CommandMessage> cont, int lower) {
     super(model, 4);
     this.link = null;
     this.message = message;
+    this.cont = cont;
     this.lower = lower;
   }
 
@@ -492,6 +531,7 @@ final class MapLaneRelayDrop extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> 
     super(model, 1, 3, null);
     this.link = link;
     this.message = null;
+    this.cont = null;
     this.lower = lower;
   }
 
@@ -499,6 +539,7 @@ final class MapLaneRelayDrop extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> 
     super(model, 1, 3, stage);
     this.link = null;
     this.message = null;
+    this.cont = null;
     this.lower = lower;
   }
 
@@ -539,18 +580,31 @@ final class MapLaneRelayDrop extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> 
   @Override
   protected void done() {
     this.model.sendDown(Record.create(1).attr("drop", this.lower));
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class MapLaneRelayTake extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
   final int upper;
 
-  MapLaneRelayTake(MapLaneModel model, CommandMessage message, int upper) {
+  MapLaneRelayTake(MapLaneModel model, CommandMessage message, Cont<CommandMessage> cont, int upper) {
     super(model, 4);
     this.link = null;
     this.message = message;
+    this.cont = cont;
     this.upper = upper;
   }
 
@@ -558,6 +612,7 @@ final class MapLaneRelayTake extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> 
     super(model, 1, 3, null);
     this.link = link;
     this.message = null;
+    this.cont = null;
     this.upper = upper;
   }
 
@@ -565,6 +620,7 @@ final class MapLaneRelayTake extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> 
     super(model, 1, 3, stage);
     this.link = null;
     this.message = null;
+    this.cont = null;
     this.upper = upper;
   }
 
@@ -605,29 +661,44 @@ final class MapLaneRelayTake extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> 
   @Override
   protected void done() {
     this.model.sendDown(Record.create(1).attr("take", this.upper));
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class MapLaneRelayClear extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
 
-  MapLaneRelayClear(MapLaneModel model, CommandMessage message) {
+  MapLaneRelayClear(MapLaneModel model, CommandMessage message, Cont<CommandMessage> cont) {
     super(model, 4);
     this.link = null;
     this.message = message;
+    this.cont = cont;
   }
 
   MapLaneRelayClear(MapLaneModel model, Link link) {
     super(model, 1, 3, null);
     this.link = link;
     this.message = null;
+    this.cont = null;
   }
 
   MapLaneRelayClear(MapLaneModel model, Stage stage) {
     super(model, 1, 3, stage);
     this.link = null;
     this.message = null;
+    this.cont = null;
   }
 
   @Override
@@ -667,5 +738,16 @@ final class MapLaneRelayClear extends LaneRelay<MapLaneModel, MapLaneView<?, ?>>
   @Override
   protected void done() {
     this.model.sendDown(Record.create(1).attr("clear"));
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }

@@ -20,6 +20,7 @@ import java.security.cert.Certificate;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import swim.api.LinkException;
 import swim.api.auth.Identity;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
@@ -28,6 +29,7 @@ import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
 import swim.runtime.LinkContext;
 import swim.runtime.NodeBinding;
+import swim.runtime.Push;
 import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
 import swim.structure.Value;
@@ -243,17 +245,22 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   }
 
   @Override
-  public void pushDown(Envelope envelope) {
-    int oldStatus;
-    int newStatus;
-    do {
-      oldStatus = this.status;
-      newStatus = oldStatus & ~PULLING_DOWN;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if (oldStatus != newStatus) {
-      final Envelope remoteEnvelope = envelope.nodeUri(this.remoteNodeUri);
-      this.pullContext.push(remoteEnvelope);
-      this.pullContext = null;
+  public void pushDown(Push<?> push) {
+    final Object message = push.message();
+    if (message instanceof Envelope) {
+      int oldStatus;
+      int newStatus;
+      do {
+        oldStatus = this.status;
+        newStatus = oldStatus & ~PULLING_DOWN;
+      } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
+      if (oldStatus != newStatus) {
+        final Envelope remoteEnvelope = ((Envelope) message).nodeUri(this.remoteNodeUri);
+        this.pullContext.push(remoteEnvelope);
+        this.pullContext = null;
+      }
+    } else {
+      push.trap(new LinkException("unsupported message: " + message));
     }
   }
 
@@ -297,7 +304,8 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
       newStatus = oldStatus & ~FEEDING_UP;
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if (envelope != null) {
-      this.linkContext.pushUp(envelope);
+      this.linkContext.pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), this.nodeUri, this.laneUri,
+                                                 this.prio, this.host.remoteIdentity(), envelope, null));
     }
     feedUpQueue();
   }

@@ -16,6 +16,7 @@ package swim.server;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import org.testng.TestException;
 import org.testng.annotations.Test;
 import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
@@ -37,9 +38,11 @@ import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.codec.Format;
+import swim.concurrent.Cont;
 import swim.kernel.Kernel;
 import swim.service.web.WebServiceDef;
 import swim.structure.Text;
+import swim.warp.CommandMessage;
 import static org.testng.Assert.assertEquals;
 
 public class CommandLaneSpec {
@@ -66,7 +69,8 @@ public class CommandLaneSpec {
     final TestCommandPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
                                          .openPlane("test", TestCommandPlane.class);
 
-    final CountDownLatch linkOnEvent = new CountDownLatch(1);
+    final CountDownLatch commandDidSend = new CountDownLatch(2);
+    final CountDownLatch linkOnEvent = new CountDownLatch(2);
     class CommandLinkController implements OnEvent<String>,
         WillLink, DidLink, WillSync, DidSync, WillUnlink, DidUnlink,
         DidConnect, DidDisconnect, DidClose {
@@ -123,8 +127,29 @@ public class CommandLaneSpec {
           .laneUri("command")
           .observe(new CommandLinkController())
           .open();
-      commandLink.command(Text.from("Hello, world!"));
+      commandLink.command(Text.from("Hello, link!"), new Cont<CommandMessage>() {
+        @Override
+        public void bind(CommandMessage message) {
+          commandDidSend.countDown();
+        }
+        @Override
+        public void trap(Throwable error) {
+          throw new TestException(error);
+        }
+      });
+      plane.command("warp://localhost:53556", "/command/hello", "command", Text.from("Hello, plane!"), new Cont<CommandMessage>() {
+        @Override
+        public void bind(CommandMessage message) {
+          commandDidSend.countDown();
+        }
+        @Override
+        public void trap(Throwable error) {
+          throw new TestException(error);
+        }
+      });
+      commandDidSend.await(1, TimeUnit.SECONDS);
       linkOnEvent.await(1, TimeUnit.SECONDS);
+      assertEquals(commandDidSend.getCount(), 0);
       assertEquals(linkOnEvent.getCount(), 0);
     } finally {
       kernel.stop();

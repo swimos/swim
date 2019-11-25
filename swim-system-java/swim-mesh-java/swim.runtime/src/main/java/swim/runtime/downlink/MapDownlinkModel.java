@@ -17,10 +17,14 @@ package swim.runtime.downlink;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import swim.api.DownlinkException;
 import swim.collections.BTreeMap;
+import swim.concurrent.Cont;
+import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.runtime.DownlinkRelay;
 import swim.runtime.DownlinkView;
+import swim.runtime.Push;
 import swim.runtime.warp.MapDownlinkModem;
 import swim.structure.Attr;
 import swim.structure.Form;
@@ -66,7 +70,8 @@ public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
   }
 
   @Override
-  protected void pushDownEvent(EventMessage message) {
+  protected void pushDownEvent(Push<EventMessage> push) {
+    final EventMessage message = push.message();
     onEvent(message);
     final Value payload = message.body();
     final String tag = payload.tag();
@@ -74,21 +79,23 @@ public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
       final Value header = payload.header("update");
       final Value key = header.get("key");
       final Value value = payload.body();
-      new MapDownlinkRelayUpdate(this, message, key, value).run();
+      new MapDownlinkRelayUpdate(this, message, push.cont(), key, value).run();
     } else if ("remove".equals(tag)) {
       final Value header = payload.header("remove");
       final Value key = header.get("key");
-      new MapDownlinkRelayRemove(this, message, key).run();
+      new MapDownlinkRelayRemove(this, message, push.cont(), key).run();
     } else if ("drop".equals(tag)) {
       final Value header = payload.header("drop");
       final int lower = header.intValue(0);
-      new MapDownlinkRelayDrop(this, message, lower).run();
+      new MapDownlinkRelayDrop(this, message, push.cont(), lower).run();
     } else if ("take".equals(tag)) {
       final Value header = payload.header("take");
       final int upper = header.intValue(0);
-      new MapDownlinkRelayTake(this, message, upper).run();
+      new MapDownlinkRelayTake(this, message, push.cont(), upper).run();
     } else if ("clear".equals(tag)) {
-      new MapDownlinkRelayClear(this, message).run();
+      new MapDownlinkRelayClear(this, message, push.cont()).run();
+    } else {
+      push.trap(new DownlinkException("unknown subcommand: " + payload));
     }
   }
 
@@ -309,6 +316,7 @@ public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
 
 final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDownlinkView<?, ?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
   Form<Object> keyForm;
   Form<Object> valueForm;
   final Value key;
@@ -318,9 +326,10 @@ final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDo
   Object oldObject;
   Object newObject;
 
-  MapDownlinkRelayUpdate(MapDownlinkModel model, EventMessage message, Value key, Value newValue) {
+  MapDownlinkRelayUpdate(MapDownlinkModel model, EventMessage message, Cont<EventMessage> cont, Value key, Value newValue) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
     this.key = key;
     this.newValue = newValue;
   }
@@ -328,6 +337,7 @@ final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDo
   MapDownlinkRelayUpdate(MapDownlinkModel model, Stage stage, Value key, Value newValue) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
     this.key = key;
     this.newValue = newValue;
     this.stage = stage;
@@ -428,11 +438,23 @@ final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDo
     } else {
       this.model.cueUpKey(this.key);
     }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class MapDownlinkRelayRemove extends DownlinkRelay<MapDownlinkModel, MapDownlinkView<?, ?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
   Form<Object> keyForm;
   Form<Object> valueForm;
   final Value key;
@@ -440,15 +462,17 @@ final class MapDownlinkRelayRemove extends DownlinkRelay<MapDownlinkModel, MapDo
   Value oldValue;
   Object oldObject;
 
-  MapDownlinkRelayRemove(MapDownlinkModel model, EventMessage message, Value key) {
+  MapDownlinkRelayRemove(MapDownlinkModel model, EventMessage message, Cont<EventMessage> cont, Value key) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
     this.key = key;
   }
 
   MapDownlinkRelayRemove(MapDownlinkModel model, Stage stage, Value key) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
     this.key = key;
   }
 
@@ -542,22 +566,36 @@ final class MapDownlinkRelayRemove extends DownlinkRelay<MapDownlinkModel, MapDo
       final Record header = Record.create(1).slot("key", this.key);
       this.model.pushUp(Record.create(1).attr("remove", header));
     }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class MapDownlinkRelayDrop extends DownlinkRelay<MapDownlinkModel, MapDownlinkView<?, ?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
   final int lower;
 
-  MapDownlinkRelayDrop(MapDownlinkModel model, EventMessage message, int lower) {
+  MapDownlinkRelayDrop(MapDownlinkModel model, EventMessage message, Cont<EventMessage> cont, int lower) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
     this.lower = lower;
   }
 
   MapDownlinkRelayDrop(MapDownlinkModel model, Stage stage, int lower) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
     this.lower = lower;
   }
 
@@ -604,22 +642,36 @@ final class MapDownlinkRelayDrop extends DownlinkRelay<MapDownlinkModel, MapDown
     } else {
       this.model.pushUp(Record.create(1).attr("drop", this.lower));
     }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class MapDownlinkRelayTake extends DownlinkRelay<MapDownlinkModel, MapDownlinkView<?, ?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
   final int upper;
 
-  MapDownlinkRelayTake(MapDownlinkModel model, EventMessage message, int upper) {
+  MapDownlinkRelayTake(MapDownlinkModel model, EventMessage message, Cont<EventMessage> cont, int upper) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
     this.upper = upper;
   }
 
   MapDownlinkRelayTake(MapDownlinkModel model, Stage stage, int upper) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
     this.upper = upper;
   }
 
@@ -666,20 +718,34 @@ final class MapDownlinkRelayTake extends DownlinkRelay<MapDownlinkModel, MapDown
     } else {
       this.model.pushUp(Record.create(1).attr("take", this.upper));
     }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class MapDownlinkRelayClear extends DownlinkRelay<MapDownlinkModel, MapDownlinkView<?, ?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
 
-  MapDownlinkRelayClear(MapDownlinkModel model, EventMessage message) {
+  MapDownlinkRelayClear(MapDownlinkModel model, EventMessage message, Cont<EventMessage> cont) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
   }
 
   MapDownlinkRelayClear(MapDownlinkModel model, Stage stage) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
   }
 
   @Override
@@ -724,6 +790,17 @@ final class MapDownlinkRelayClear extends DownlinkRelay<MapDownlinkModel, MapDow
       this.model.cueDown();
     } else {
       this.model.pushUp(Record.create(1).attr("clear"));
+    }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
     }
   }
 }

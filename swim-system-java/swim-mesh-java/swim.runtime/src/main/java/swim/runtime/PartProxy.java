@@ -273,8 +273,8 @@ public class PartProxy implements PartBinding, PartContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.partContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.partContext.pushDown(push);
   }
 
   @Override
@@ -288,8 +288,8 @@ public class PartProxy implements PartBinding, PartContext {
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    this.partBinding.pushUp(pushRequest);
+  public void pushUp(Push<?> push) {
+    this.partBinding.pushUp(push);
   }
 
   @Override

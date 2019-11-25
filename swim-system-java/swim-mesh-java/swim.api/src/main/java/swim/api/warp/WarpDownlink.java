@@ -28,8 +28,10 @@ import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
+import swim.concurrent.Cont;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.warp.CommandMessage;
 
 public interface WarpDownlink extends Downlink, WarpLink {
   WarpDownlink hostUri(Uri hostUri);
@@ -102,6 +104,10 @@ public interface WarpDownlink extends Downlink, WarpLink {
 
   @Override
   WarpDownlink open();
+
+  void command(float prio, Value body, Cont<CommandMessage> cont);
+
+  void command(Value body, Cont<CommandMessage> cont);
 
   void command(float prio, Value body);
 

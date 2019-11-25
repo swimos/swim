@@ -49,7 +49,7 @@ import swim.runtime.LinkBinding;
 import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.runtime.TierContext;
 import swim.runtime.http.RestLaneView;
 import swim.runtime.lane.CommandLaneView;
@@ -399,8 +399,8 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.node.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.node.pushDown(push);
   }
 
   @Override

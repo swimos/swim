@@ -44,8 +44,9 @@ import swim.runtime.NodeBinding;
 import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PartContext;
+import swim.runtime.PartException;
 import swim.runtime.PartPredicate;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.WarpBinding;
@@ -503,24 +504,24 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.partContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.partContext.pushDown(push);
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    final Uri hostUri = pushRequest.hostUri();
+  public void pushUp(Push<?> push) {
+    final Uri hostUri = push.hostUri();
     HostBinding hostBinding = null;
-    if (!hostUri.isDefined() || hostUri.equals(pushRequest.meshUri())) {
+    if (!hostUri.isDefined() || hostUri.equals(push.meshUri())) {
       hostBinding = this.master;
     }
     if (hostBinding == null) {
       hostBinding = openHost(hostUri);
     }
     if (hostBinding != null) {
-      hostBinding.pushUp(pushRequest);
+      hostBinding.pushUp(push);
     } else {
-      pushRequest.didDecline();
+      push.trap(new PartException("unknown host: " + hostUri));
     }
   }
 

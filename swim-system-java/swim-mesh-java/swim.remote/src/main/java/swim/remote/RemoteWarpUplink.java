@@ -20,6 +20,7 @@ import java.security.cert.Certificate;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import swim.api.LinkException;
 import swim.api.auth.Identity;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
@@ -28,6 +29,7 @@ import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
 import swim.runtime.LinkKeys;
 import swim.runtime.NodeBinding;
+import swim.runtime.Push;
 import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
 import swim.structure.Value;
@@ -183,7 +185,8 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
       newStatus = oldStatus & ~FEEDING_DOWN;
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if (envelope != null) {
-      this.link.pushDown(envelope);
+      this.link.pushDown(new Push<Envelope>(Uri.empty(), Uri.empty(), this.link.nodeUri(), this.link.laneUri(),
+                                            this.link.prio(), this.host.remoteIdentity(), envelope, null));
     }
     feedDownQueue();
   }
@@ -228,17 +231,23 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   }
 
   @Override
-  public void pushUp(Envelope envelope) {
-    int oldStatus;
-    int newStatus;
-    do {
-      oldStatus = this.status;
-      newStatus = oldStatus & ~PULLING_UP;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if (oldStatus != newStatus && this.pullContext != null) {
-      final Envelope remoteEnvelope = envelope.nodeUri(this.remoteNodeUri);
-      this.pullContext.push(remoteEnvelope);
-      this.pullContext = null;
+  public void pushUp(Push<?> push) {
+    final Object message = push.message();
+    if (message instanceof Envelope) {
+      int oldStatus;
+      int newStatus;
+      do {
+        oldStatus = this.status;
+        newStatus = oldStatus & ~PULLING_UP;
+      } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
+      if (oldStatus != newStatus && this.pullContext != null) {
+        final Envelope remoteEnvelope = ((Envelope) message).nodeUri(this.remoteNodeUri);
+        this.pullContext.push(remoteEnvelope);
+        this.pullContext = null;
+        push.bind();
+      }
+    } else {
+      push.trap(new LinkException("unsupported message: " + message));
     }
   }
 

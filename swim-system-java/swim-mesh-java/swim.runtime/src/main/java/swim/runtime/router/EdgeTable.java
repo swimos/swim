@@ -36,6 +36,7 @@ import swim.runtime.DownlinkView;
 import swim.runtime.EdgeAddress;
 import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
+import swim.runtime.EdgeException;
 import swim.runtime.HostBinding;
 import swim.runtime.LaneBinding;
 import swim.runtime.LinkBinding;
@@ -45,7 +46,7 @@ import swim.runtime.MeshContext;
 import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.agent.AgentNode;
@@ -451,17 +452,18 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    pushUp(pushRequest);
+  public void pushDown(Push<?> push) {
+    pushUp(push);
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    final MeshBinding meshBinding = openMesh(pushRequest.meshUri());
+  public void pushUp(Push<?> push) {
+    final Uri meshUri = push.meshUri();
+    final MeshBinding meshBinding = openMesh(meshUri);
     if (meshBinding != null) {
-      meshBinding.pushUp(pushRequest);
+      meshBinding.pushUp(push);
     } else {
-      pushRequest.didDecline();
+      push.trap(new EdgeException("unknown mesh: " + meshUri));
     }
   }
 

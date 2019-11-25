@@ -26,7 +26,7 @@ import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
 import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.store.StoreBinding;
 
 public abstract class Scope implements CellContext {
@@ -118,8 +118,8 @@ public abstract class Scope implements CellContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.cellContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.cellContext.pushDown(push);
   }
 
   @Override

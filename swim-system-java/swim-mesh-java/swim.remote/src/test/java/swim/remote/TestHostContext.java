@@ -34,7 +34,7 @@ import swim.runtime.LinkBinding;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -173,7 +173,7 @@ public class TestHostContext extends TestCellContext implements HostContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
+  public void pushDown(Push<?> push) {
   }
 
   @Override

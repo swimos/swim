@@ -16,22 +16,23 @@ package swim.runtime.warp;
 
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+import swim.api.LaneException;
 import swim.api.auth.Identity;
 import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
+import swim.concurrent.Cont;
 import swim.concurrent.Conts;
 import swim.runtime.LaneModel;
 import swim.runtime.LaneRelay;
 import swim.runtime.LinkBinding;
 import swim.runtime.Metric;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.runtime.WarpBinding;
 import swim.runtime.profile.WarpDownlinkProfile;
 import swim.runtime.profile.WarpLaneProfile;
 import swim.runtime.profile.WarpUplinkProfile;
 import swim.structure.Value;
 import swim.warp.CommandMessage;
-import swim.warp.Envelope;
 
 public abstract class WarpLaneModel<View extends WarpLaneView, U extends WarpUplinkModem> extends LaneModel<View, U> {
   volatile long execDelta;
@@ -113,29 +114,26 @@ public abstract class WarpLaneModel<View extends WarpLaneView, U extends WarpUpl
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    final Envelope envelope = pushRequest.envelope();
-    if (envelope instanceof CommandMessage) {
-      try {
-        onCommand((CommandMessage) envelope);
-      } finally {
-        pushRequest.didDeliver();
-      }
+  public void pushUp(Push<?> push) {
+    final Object message = push.message();
+    if (message instanceof CommandMessage) {
+      onCommand((Push<CommandMessage>) push);
     } else {
-      pushRequest.didDecline();
+      push.trap(new LaneException("unsupported message: " + message));
     }
   }
 
   @Override
-  public void pushUpCommand(CommandMessage message) {
-    onCommand(message);
+  public void pushUpCommand(Push<CommandMessage> push) {
+    onCommand(push);
     COMMAND_DELTA.incrementAndGet(this);
     didUpdateMetrics();
   }
 
-  protected void onCommand(CommandMessage message) {
-    new WarpLaneRelayOnCommand<View>(this, message).run();
+  protected void onCommand(Push<CommandMessage> push) {
+    new WarpLaneRelayOnCommand<View>(this, push.message(), push.cont()).run();
   }
 
   @Override
@@ -369,10 +367,12 @@ public abstract class WarpLaneModel<View extends WarpLaneView, U extends WarpUpl
 
 final class WarpLaneRelayOnCommand<View extends WarpLaneView> extends LaneRelay<WarpLaneModel<View, ?>, View> {
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
 
-  WarpLaneRelayOnCommand(WarpLaneModel<View, ?> model, CommandMessage message) {
+  WarpLaneRelayOnCommand(WarpLaneModel<View, ?> model, CommandMessage message, Cont<CommandMessage> cont) {
     super(model, 2);
     this.message = message;
+    this.cont = cont;
   }
 
   @Override
@@ -389,6 +389,21 @@ final class WarpLaneRelayOnCommand<View extends WarpLaneView> extends LaneRelay<
       return view.dispatchDidCommand(this.message.body(), preemptive);
     } else {
       throw new AssertionError(); // unreachable
+    }
+  }
+
+  @Override
+  protected void done() {
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
     }
   }
 }

@@ -14,8 +14,10 @@
 
 package swim.runtime.warp;
 
+import swim.runtime.Push;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.warp.CommandMessage;
 
 public abstract class DemandDownlinkModem<View extends WarpDownlinkView> extends WarpDownlinkModel<View> {
   public DemandDownlinkModem(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
@@ -24,5 +26,5 @@ public abstract class DemandDownlinkModem<View extends WarpDownlinkView> extends
   }
 
   @Override
-  protected abstract Value nextUpCue();
+  protected abstract Push<CommandMessage> nextUpCue();
 }

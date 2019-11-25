@@ -15,8 +15,10 @@
 package swim.api.ref;
 
 import swim.api.downlink.DownlinkFactory;
+import swim.concurrent.Cont;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.warp.CommandMessage;
 
 public interface NodeRef extends DownlinkFactory {
   Uri hostUri();
@@ -26,6 +28,14 @@ public interface NodeRef extends DownlinkFactory {
   LaneRef laneRef(Uri laneUri);
 
   LaneRef laneRef(String laneUri);
+
+  void command(Uri laneUri, float prio, Value body, Cont<CommandMessage> cont);
+
+  void command(String laneUri, float prio, Value body, Cont<CommandMessage> cont);
+
+  void command(Uri laneUri, Value body, Cont<CommandMessage> cont);
+
+  void command(String laneUri, Value body, Cont<CommandMessage> cont);
 
   void command(Uri laneUri, float prio, Value body);
 

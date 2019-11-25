@@ -15,16 +15,19 @@
 package swim.runtime.warp;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import swim.concurrent.Cont;
+import swim.runtime.Push;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.warp.CommandMessage;
 
 public abstract class SupplyDownlinkModem<View extends WarpDownlinkView> extends WarpDownlinkModel<View> {
-  final ConcurrentLinkedQueue<Value> upQueue;
+  final ConcurrentLinkedQueue<Push<CommandMessage>> upQueue;
 
   public SupplyDownlinkModem(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                              float prio, float rate, Value body) {
     super(meshUri, hostUri, nodeUri, laneUri, prio, rate, body);
-    this.upQueue = new ConcurrentLinkedQueue<Value>();
+    this.upQueue = new ConcurrentLinkedQueue<Push<CommandMessage>>();
   }
 
   @Override
@@ -33,12 +36,18 @@ public abstract class SupplyDownlinkModem<View extends WarpDownlinkView> extends
   }
 
   @Override
-  protected void queueUp(Value body) {
-    this.upQueue.add(body);
+  protected void queueUp(Value body, Cont<CommandMessage> cont) {
+    final Uri hostUri = hostUri();
+    final Uri nodeUri = nodeUri();
+    final Uri laneUri = laneUri();
+    final float prio = prio();
+    final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
+    this.upQueue.add(new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
+                                              prio, null, message, cont));
   }
 
   @Override
-  protected Value nextUpQueue() {
+  protected Push<CommandMessage> nextUpQueue() {
     return this.upQueue.poll();
   }
 }

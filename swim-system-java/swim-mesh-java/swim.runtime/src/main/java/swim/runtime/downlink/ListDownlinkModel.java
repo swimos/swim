@@ -19,10 +19,14 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import swim.api.DownlinkException;
 import swim.collections.STreeList;
+import swim.concurrent.Cont;
+import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.runtime.DownlinkRelay;
 import swim.runtime.DownlinkView;
+import swim.runtime.Push;
 import swim.runtime.warp.ListDownlinkModem;
 import swim.runtime.warp.ListLinkDelta;
 import swim.structure.Form;
@@ -64,7 +68,8 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
   }
 
   @Override
-  protected void pushDownEvent(EventMessage message) {
+  protected void pushDownEvent(Push<EventMessage> push) {
+    final EventMessage message = push.message();
     onEvent(message);
     final Value payload = message.body();
     final String tag = payload.tag();
@@ -79,7 +84,7 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
           key = null;
         }
         final Value value = payload.body();
-        new ListDownlinkRelayUpdate(this, message, index, value, key).run();
+        new ListDownlinkRelayUpdate(this, message, push.cont(), index, value, key).run();
       }
     } else if ("move".equals(tag)) {
       final Value header = payload.header("move");
@@ -92,7 +97,7 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
         } else {
           key = null;
         }
-        new ListDownlinkRelayMove(this, message, fromIndex, toIndex, key).run();
+        new ListDownlinkRelayMove(this, message, push.cont(), fromIndex, toIndex, key).run();
       }
     } else if ("remove".equals(tag)) {
       final Value header = payload.header("remove");
@@ -104,18 +109,20 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
         } else {
           key = null;
         }
-        new ListDownlinkRelayRemove(this, message, index, key).run();
+        new ListDownlinkRelayRemove(this, message, push.cont(), index, key).run();
       }
     } else if ("drop".equals(tag)) {
       final Value header = payload.header("drop");
       final int lower = header.intValue(0);
-      new ListDownlinkRelayDrop(this, message, lower).run();
+      new ListDownlinkRelayDrop(this, message, push.cont(), lower).run();
     } else if ("take".equals(tag)) {
       final Value header = payload.header("take");
       final int upper = header.intValue(0);
-      new ListDownlinkRelayTake(this, message, upper).run();
+      new ListDownlinkRelayTake(this, message, push.cont(), upper).run();
     } else if ("clear".equals(tag)) {
-      new ListDownlinkRelayClear(this, message).run();
+      new ListDownlinkRelayClear(this, message, push.cont()).run();
+    } else {
+      push.trap(new DownlinkException("unknown subcommand: " + payload));
     }
   }
 
@@ -302,6 +309,7 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
 
 final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
   Object key;
   final int index;
   Form<Object> valueForm;
@@ -310,9 +318,10 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
   Object oldObject;
   Object newObject;
 
-  ListDownlinkRelayUpdate(ListDownlinkModel model, EventMessage message, int index, Value newValue, Object key) {
+  ListDownlinkRelayUpdate(ListDownlinkModel model, EventMessage message, Cont<EventMessage> cont, int index, Value newValue, Object key) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
     this.index = index;
     this.key = key;
     this.newValue = newValue;
@@ -321,6 +330,7 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
   ListDownlinkRelayUpdate(ListDownlinkModel model, Stage stage, int index, Value newValue, Object key) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
     this.index = index;
     this.key = key;
     this.newValue = newValue;
@@ -422,11 +432,23 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
     } else {
       this.model.pushUp(ListLinkDelta.update(this.index, Value.fromObject(this.key), this.newValue));
     }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
   final int fromIndex;
   final int toIndex;
   Object key;
@@ -434,9 +456,10 @@ final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListD
   Value value;
   Object object;
 
-  ListDownlinkRelayMove(ListDownlinkModel model, EventMessage message, int fromIndex, int toIndex, Object key) {
+  ListDownlinkRelayMove(ListDownlinkModel model, EventMessage message, Cont<EventMessage> cont, int fromIndex, int toIndex, Object key) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
     this.fromIndex = fromIndex;
     this.toIndex = toIndex;
     this.key = key;
@@ -445,6 +468,7 @@ final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListD
   ListDownlinkRelayMove(ListDownlinkModel model, Stage stage, int fromIndex, int toIndex, Object key) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
     this.fromIndex = fromIndex;
     this.toIndex = toIndex;
     this.key = key;
@@ -524,20 +548,33 @@ final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListD
     } else {
       this.model.pushUp(ListLinkDelta.move(this.fromIndex, this.toIndex, Value.fromObject(this.key)));
     }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class ListDownlinkRelayRemove extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
   final int index;
   Object key;
   Form<Object> valueForm;
   Value oldValue;
   Object oldObject;
 
-  ListDownlinkRelayRemove(ListDownlinkModel model, EventMessage message, int index, Object key) {
+  ListDownlinkRelayRemove(ListDownlinkModel model, EventMessage message, Cont<EventMessage> cont, int index, Object key) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
     this.index = index;
     this.key = key;
   }
@@ -545,6 +582,7 @@ final class ListDownlinkRelayRemove extends DownlinkRelay<ListDownlinkModel, Lis
   ListDownlinkRelayRemove(ListDownlinkModel model, Stage stage, int index, Object key) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
     this.index = index;
     this.key = key;
   }
@@ -623,22 +661,36 @@ final class ListDownlinkRelayRemove extends DownlinkRelay<ListDownlinkModel, Lis
     } else {
       this.model.pushUp(ListLinkDelta.remove(this.index, Value.fromObject(this.key)));
     }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class ListDownlinkRelayDrop extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
   final int lower;
 
-  ListDownlinkRelayDrop(ListDownlinkModel model, EventMessage message, int lower) {
+  ListDownlinkRelayDrop(ListDownlinkModel model, EventMessage message, Cont<EventMessage> cont, int lower) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
     this.lower = lower;
   }
 
   ListDownlinkRelayDrop(ListDownlinkModel model, Stage stage, int lower) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
     this.lower = lower;
   }
 
@@ -685,22 +737,36 @@ final class ListDownlinkRelayDrop extends DownlinkRelay<ListDownlinkModel, ListD
     } else {
       this.model.pushUp(ListLinkDelta.drop(this.lower));
     }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class ListDownlinkRelayTake extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
   final int upper;
 
-  ListDownlinkRelayTake(ListDownlinkModel model, EventMessage message, int upper) {
+  ListDownlinkRelayTake(ListDownlinkModel model, EventMessage message, Cont<EventMessage> cont, int upper) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
     this.upper = upper;
   }
 
   ListDownlinkRelayTake(ListDownlinkModel model, Stage stage, int upper) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
     this.upper = upper;
   }
 
@@ -747,20 +813,34 @@ final class ListDownlinkRelayTake extends DownlinkRelay<ListDownlinkModel, ListD
     } else {
       this.model.pushUp(ListLinkDelta.drop(this.upper));
     }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class ListDownlinkRelayClear extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
 
-  ListDownlinkRelayClear(ListDownlinkModel model, EventMessage message) {
+  ListDownlinkRelayClear(ListDownlinkModel model, EventMessage message, Cont<EventMessage> cont) {
     super(model, 0, 3, null);
     this.message = message;
+    this.cont = cont;
   }
 
   ListDownlinkRelayClear(ListDownlinkModel model, Stage stage) {
     super(model, 3, 4, stage);
     this.message = null;
+    this.cont = null;
   }
 
   @Override
@@ -805,6 +885,17 @@ final class ListDownlinkRelayClear extends DownlinkRelay<ListDownlinkModel, List
       this.model.cueDown();
     } else {
       this.model.pushUp(ListLinkDelta.clear());
+    }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
     }
   }
 }

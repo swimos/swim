@@ -348,10 +348,10 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   }
 
   @Override
-  public abstract void pushUp(PushRequest pushRequest);
+  public abstract void pushUp(Push<?> push);
 
   @Override
-  public abstract void pushUpCommand(CommandMessage message);
+  public abstract void pushUpCommand(Push<CommandMessage> push);
 
   protected abstract void didOpenLaneView(View view);
 
@@ -386,8 +386,8 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.laneContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.laneContext.pushDown(push);
   }
 
   @Override

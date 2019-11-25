@@ -23,7 +23,7 @@ import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
 import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.store.StoreBinding;
 import swim.uri.Uri;
 
@@ -97,7 +97,7 @@ public class TestCellContext implements CellContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
+  public void pushDown(Push<?> push) {
   }
 
   @Override

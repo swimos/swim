@@ -37,7 +37,7 @@ import swim.runtime.NodeBinding;
 import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PartContext;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -229,8 +229,8 @@ public class MeshTablePart implements PartContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.mesh.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.mesh.pushDown(push);
   }
 
   @Override

@@ -36,6 +36,7 @@ import swim.runtime.AbstractTierBinding;
 import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
+import swim.runtime.HostException;
 import swim.runtime.LaneBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.Metric;
@@ -43,7 +44,7 @@ import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
 import swim.runtime.PartBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.agent.AgentNode;
@@ -544,8 +545,8 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.hostContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.hostContext.pushDown(push);
   }
 
   @Override
@@ -559,12 +560,13 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    final NodeBinding nodeBinding = openNode(pushRequest.envelope().nodeUri());
+  public void pushUp(Push<?> push) {
+    final Uri nodeUri = push.nodeUri();
+    final NodeBinding nodeBinding = openNode(nodeUri);
     if (nodeBinding != null) {
-      nodeBinding.pushUp(pushRequest);
+      nodeBinding.pushUp(push);
     } else {
-      pushRequest.didDecline();
+      push.trap(new HostException("unknown node: " + nodeUri));
     }
   }
 

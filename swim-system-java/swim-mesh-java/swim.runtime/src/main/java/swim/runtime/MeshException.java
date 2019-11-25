@@ -14,24 +14,22 @@
 
 package swim.runtime;
 
-import swim.api.auth.Identity;
-import swim.uri.Uri;
-import swim.warp.Envelope;
+public class MeshException extends RuntimeException {
+  private static final long serialVersionUID = 1L;
 
-public interface PushRequest {
-  Uri meshUri();
+  public MeshException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-  Uri hostUri();
+  public MeshException(String message) {
+    super(message);
+  }
 
-  Uri nodeUri();
+  public MeshException(Throwable cause) {
+    super(cause);
+  }
 
-  float prio();
-
-  Identity identity();
-
-  Envelope envelope();
-
-  void didDeliver();
-
-  void didDecline();
+  public MeshException() {
+    super();
+  }
 }

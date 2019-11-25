@@ -24,7 +24,7 @@ import swim.runtime.LaneModel;
 import swim.runtime.LaneRelay;
 import swim.runtime.LaneView;
 import swim.runtime.LinkBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.warp.CommandMessage;
 
 public abstract class HttpLaneModel<View extends HttpLaneView<?>, U extends HttpUplinkModem> extends LaneModel<View, U> {
@@ -44,13 +44,13 @@ public abstract class HttpLaneModel<View extends HttpLaneView<?>, U extends Http
   protected abstract U createHttpUplink(HttpBinding link);
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    pushRequest.didDecline();
+  public void pushUp(Push<?> push) {
+    push.trap(new UnsupportedOperationException());
   }
 
   @Override
-  public void pushUpCommand(CommandMessage message) {
-    throw new UnsupportedOperationException();
+  public void pushUpCommand(Push<CommandMessage> push) {
+    push.trap(new UnsupportedOperationException());
   }
 
   @Override

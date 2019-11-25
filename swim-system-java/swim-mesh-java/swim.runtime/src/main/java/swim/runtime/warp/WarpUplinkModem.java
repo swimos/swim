@@ -33,6 +33,7 @@ import swim.runtime.AbstractUplinkContext;
 import swim.runtime.LinkBinding;
 import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
+import swim.runtime.Push;
 import swim.runtime.UplinkAddress;
 import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
@@ -773,7 +774,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   }
 
   protected void pushDown(Envelope envelope) {
-    this.linkBinding.pushDown(envelope);
+    this.linkBinding.pushDown(new Push<Envelope>(Uri.empty(), hostUri(), nodeUri(), laneUri(),
+                                                 prio(), null, envelope, null));
   }
 
   public void cueUp() {
@@ -815,34 +817,37 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
     } while (true);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public void pushUp(Envelope envelope) {
-    if (envelope instanceof CommandMessage) {
-      pushUpCommand((CommandMessage) envelope);
-    } else if (envelope instanceof LinkRequest) {
-      pushUpLink((LinkRequest) envelope);
-    } else if (envelope instanceof SyncRequest) {
-      pushUpSync((SyncRequest) envelope);
-    } else if (envelope instanceof UnlinkRequest) {
-      pushUpUnlink((UnlinkRequest) envelope);
-    } else {
-      pushUpEnvelope(envelope);
+  public void pushUp(Push<?> push) {
+    final Object message = push.message();
+    if (message instanceof CommandMessage) {
+      pushUpCommand((Push<CommandMessage>) push);
+    } else if (message instanceof LinkRequest) {
+      pushUpLink((Push<LinkRequest>) push);
+    } else if (message instanceof SyncRequest) {
+      pushUpSync((Push<SyncRequest>) push);
+    } else if (message instanceof UnlinkRequest) {
+      pushUpUnlink((Push<UnlinkRequest>) push);
+    } else if (message instanceof Envelope) {
+      pushUpUnknown(push);
     }
   }
 
-  protected void pushUpCommand(CommandMessage message) {
+  protected void pushUpCommand(Push<CommandMessage> push) {
+    final CommandMessage message = push.message();
     onCommand(message);
-    laneBinding().pushUpCommand(message);
+    laneBinding().pushUpCommand(push);
     if (!dispatchOnCommand(message, true)) {
-      stage().execute(new WarpUplinkModemOnCommand(this, message));
+      stage().execute(new WarpUplinkModemOnCommand(this, push));
     } else {
       cueUp();
     }
   }
 
-  protected void runOnCommand(CommandMessage message) {
+  protected void runOnCommand(Push<CommandMessage> push) {
     try {
-      dispatchOnCommand(message, false);
+      dispatchOnCommand(push.message(), false);
     } catch (Throwable error) {
       if (Conts.isNonFatal(error)) {
         didFail(error);
@@ -854,18 +859,20 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
     }
   }
 
-  protected void pushUpLink(LinkRequest request) {
+  protected void pushUpLink(Push<LinkRequest> push) {
+    final LinkRequest request = push.message();
     willLink(request);
     if (!dispatchOnLink(request, true)) {
-      stage().execute(new WarpUplinkModemOnLink(this, request));
+      stage().execute(new WarpUplinkModemOnLink(this, push));
     } else {
+      push.bind();
       cueUp();
     }
   }
 
-  protected void runOnLink(LinkRequest request) {
+  protected void runOnLink(Push<LinkRequest> push) {
     try {
-      dispatchOnLink(request, false);
+      dispatchOnLink(push.message(), false);
     } catch (Throwable error) {
       if (Conts.isNonFatal(error)) {
         didFail(error);
@@ -873,22 +880,25 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
         throw error;
       }
     } finally {
+      push.bind();
       cueUp();
     }
   }
 
-  protected void pushUpSync(SyncRequest request) {
+  protected void pushUpSync(Push<SyncRequest> push) {
+    final SyncRequest request = push.message();
     willSync(request);
     if (!dispatchOnSync(request, true)) {
-      stage().execute(new WarpUplinkModemOnSync(this, request));
+      stage().execute(new WarpUplinkModemOnSync(this, push));
     } else {
+      push.bind();
       cueUp();
     }
   }
 
-  protected void runOnSync(SyncRequest request) {
+  protected void runOnSync(Push<SyncRequest> push) {
     try {
-      dispatchOnSync(request, false);
+      dispatchOnSync(push.message(), false);
     } catch (Throwable error) {
       if (Conts.isNonFatal(error)) {
         didFail(error);
@@ -896,30 +906,37 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
         throw error;
       }
     } finally {
+      push.bind();
       cueUp();
     }
   }
 
-  protected void pushUpUnlink(UnlinkRequest request) {
+  protected void pushUpUnlink(Push<UnlinkRequest> push) {
+    final UnlinkRequest request = push.message();
     willUnlink(request);
     if (!dispatchOnUnlink(request, true)) {
-      stage().execute(new WarpUplinkModemOnUnlink(this, request));
+      stage().execute(new WarpUplinkModemOnUnlink(this, push));
+    } else {
+      push.bind();
     }
   }
 
-  protected void runOnUnlink(UnlinkRequest request) {
+  protected void runOnUnlink(Push<UnlinkRequest> push) {
     try {
-      dispatchOnUnlink(request, false);
+      dispatchOnUnlink(push.message(), false);
     } catch (Throwable error) {
       if (Conts.isNonFatal(error)) {
         didFail(error);
       } else {
         throw error;
       }
+    } finally {
+      push.bind();
     }
   }
 
-  protected void pushUpEnvelope(Envelope envelope) {
+  protected void pushUpUnknown(Push<?> push) {
+    push.bind();
     cueUp();
   }
 
@@ -1163,60 +1180,60 @@ final class WarpUplinkModemPullDown implements Runnable {
 
 final class WarpUplinkModemOnCommand implements Runnable {
   final WarpUplinkModem uplink;
-  final CommandMessage message;
+  final Push<CommandMessage> push;
 
-  WarpUplinkModemOnCommand(WarpUplinkModem uplink, CommandMessage message) {
+  WarpUplinkModemOnCommand(WarpUplinkModem uplink, Push<CommandMessage> push) {
     this.uplink = uplink;
-    this.message = message;
+    this.push = push;
   }
 
   @Override
   public void run() {
-    uplink.runOnCommand(message);
+    this.uplink.runOnCommand(push);
   }
 }
 
 final class WarpUplinkModemOnLink implements Runnable {
   final WarpUplinkModem uplink;
-  final LinkRequest request;
+  final Push<LinkRequest> push;
 
-  WarpUplinkModemOnLink(WarpUplinkModem uplink, LinkRequest request) {
+  WarpUplinkModemOnLink(WarpUplinkModem uplink, Push<LinkRequest> push) {
     this.uplink = uplink;
-    this.request = request;
+    this.push = push;
   }
 
   @Override
   public void run() {
-    uplink.runOnLink(request);
+    this.uplink.runOnLink(push);
   }
 }
 
 final class WarpUplinkModemOnSync implements Runnable {
   final WarpUplinkModem uplink;
-  final SyncRequest request;
+  final Push<SyncRequest> push;
 
-  WarpUplinkModemOnSync(WarpUplinkModem uplink, SyncRequest request) {
+  WarpUplinkModemOnSync(WarpUplinkModem uplink, Push<SyncRequest> push) {
     this.uplink = uplink;
-    this.request = request;
+    this.push = push;
   }
 
   @Override
   public void run() {
-    uplink.runOnSync(request);
+    this.uplink.runOnSync(push);
   }
 }
 
 final class WarpUplinkModemOnUnlink implements Runnable {
   final WarpUplinkModem uplink;
-  final UnlinkRequest request;
+  final Push<UnlinkRequest> push;
 
-  WarpUplinkModemOnUnlink(WarpUplinkModem uplink, UnlinkRequest request) {
+  WarpUplinkModemOnUnlink(WarpUplinkModem uplink, Push<UnlinkRequest> push) {
     this.uplink = uplink;
-    this.request = request;
+    this.push = push;
   }
 
   @Override
   public void run() {
-    uplink.runOnUnlink(request);
+    this.uplink.runOnUnlink(push);
   }
 }

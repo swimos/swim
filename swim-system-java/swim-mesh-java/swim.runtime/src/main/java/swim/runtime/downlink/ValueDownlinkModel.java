@@ -16,13 +16,17 @@ package swim.runtime.downlink;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import swim.concurrent.Cont;
+import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.runtime.DownlinkRelay;
 import swim.runtime.DownlinkView;
+import swim.runtime.Push;
 import swim.runtime.warp.DemandDownlinkModem;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.warp.CommandMessage;
 import swim.warp.EventMessage;
 
 public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>> {
@@ -59,13 +63,22 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
   }
 
   @Override
-  protected void pushDownEvent(EventMessage message) {
-    new ValueDownlinkRelaySet(this, message, message.body()).run();
+  protected void pushDownEvent(Push<EventMessage> push) {
+    final EventMessage message = push.message();
+    final Value value = message.body();
+    new ValueDownlinkRelaySet(this, message, push.cont(), value).run();
   }
 
   @Override
-  protected Value nextUpCue() {
-    return this.state;
+  protected Push<CommandMessage> nextUpCue() {
+    final Uri hostUri = hostUri();
+    final Uri nodeUri = nodeUri();
+    final Uri laneUri = laneUri();
+    final float prio = prio();
+    final Value body = this.state;
+    final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
+    return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
+                                    prio, null, message, null);
   }
 
   @Override
@@ -127,15 +140,17 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
 
 final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, ValueDownlinkView<?>> {
   final EventMessage message;
+  final Cont<EventMessage> cont;
   Form<Object> valueForm;
   Value oldValue;
   Value newValue;
   Object oldObject;
   Object newObject;
 
-  ValueDownlinkRelaySet(ValueDownlinkModel model, EventMessage message, Value newValue) {
+  ValueDownlinkRelaySet(ValueDownlinkModel model, EventMessage message, Cont<EventMessage> cont, Value newValue) {
     super(model, 4);
     this.message = message;
+    this.cont = cont;
     this.oldValue = newValue;
     this.newValue = newValue;
   }
@@ -143,6 +158,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
   ValueDownlinkRelaySet(ValueDownlinkModel model, Stage stage, Value newValue) {
     super(model, 1, 3, stage);
     this.message = null;
+    this.cont = null;
     this.oldValue = newValue;
     this.newValue = newValue;
   }
@@ -150,6 +166,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
   ValueDownlinkRelaySet(ValueDownlinkModel model, Value newValue) {
     super(model, 1, 3, null);
     this.message = null;
+    this.cont = null;
     this.oldValue = newValue;
     this.newValue = newValue;
   }
@@ -232,6 +249,17 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
       this.model.cueDown();
     } else {
       this.model.cueUp();
+    }
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
     }
   }
 }

@@ -33,6 +33,7 @@ import swim.runtime.LinkContext;
 import swim.runtime.LogDef;
 import swim.runtime.NodeBinding;
 import swim.runtime.PolicyDef;
+import swim.runtime.Push;
 import swim.store.StoreBinding;
 import swim.store.StoreDef;
 import swim.structure.Value;
@@ -169,8 +170,8 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   }
 
   @Override
-  public void pushUpCommand(CommandMessage message) {
-    this.laneBinding.pushUpCommand(message);
+  public void pushUpCommand(Push<CommandMessage> push) {
+    this.laneBinding.pushUpCommand(push);
   }
 
   public Log createLog(LogDef logDef) {

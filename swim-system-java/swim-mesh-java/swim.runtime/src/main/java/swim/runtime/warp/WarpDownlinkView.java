@@ -30,6 +30,7 @@ import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
+import swim.concurrent.Cont;
 import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
@@ -646,6 +647,16 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
 
   @Override
   public abstract WarpDownlinkView open();
+
+  @Override
+  public void command(float prio, Value body, Cont<CommandMessage> cont) {
+    downlinkModel().command(prio, body, cont);
+  }
+
+  @Override
+  public void command(Value body, Cont<CommandMessage> cont) {
+    downlinkModel().command(body, cont);
+  }
 
   @Override
   public void command(float prio, Value body) {

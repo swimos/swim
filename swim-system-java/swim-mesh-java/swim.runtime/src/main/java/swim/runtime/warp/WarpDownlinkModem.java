@@ -16,6 +16,7 @@ package swim.runtime.warp;
 
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
+import swim.concurrent.Cont;
 import swim.concurrent.Conts;
 import swim.runtime.CellContext;
 import swim.runtime.DownlinkModel;
@@ -24,6 +25,7 @@ import swim.runtime.LinkBinding;
 import swim.runtime.LinkContext;
 import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
+import swim.runtime.Push;
 import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
 import swim.runtime.profile.WarpDownlinkProfile;
@@ -152,52 +154,61 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
     } while (true);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public void pushDown(Envelope envelope) {
-    if (envelope instanceof EventMessage) {
-      pushDownEvent((EventMessage) envelope);
-    } else if (envelope instanceof LinkedResponse) {
-      pushDownLinked((LinkedResponse) envelope);
-    } else if (envelope instanceof SyncedResponse) {
-      pushDownSynced((SyncedResponse) envelope);
-    } else if (envelope instanceof UnlinkedResponse) {
-      pushDownUnlinked((UnlinkedResponse) envelope);
+  public void pushDown(Push<?> push) {
+    final Object message = push.message();
+    if (message instanceof EventMessage) {
+      pushDownEvent((Push<EventMessage>) push);
+    } else if (message instanceof LinkedResponse) {
+      pushDownLinked((Push<LinkedResponse>) push);
+    } else if (message instanceof SyncedResponse) {
+      pushDownSynced((Push<SyncedResponse>) push);
+    } else if (message instanceof UnlinkedResponse) {
+      pushDownUnlinked((Push<UnlinkedResponse>) push);
     } else {
-      pushDownEnvelope(envelope);
+      pushDownUnknown(push);
     }
   }
 
-  protected void pushDownEvent(EventMessage message) {
+  protected void pushDownEvent(Push<EventMessage> push) {
     try {
-      onEvent(message);
+      onEvent(push.message());
     } finally {
+      push.bind();
       cueDown();
     }
   }
 
-  protected void pushDownLinked(LinkedResponse response) {
+  protected void pushDownLinked(Push<LinkedResponse> push) {
     try {
-      didLink(response);
+      didLink(push.message());
     } finally {
+      push.bind();
       cueDown();
     }
   }
 
-  protected void pushDownSynced(SyncedResponse response) {
+  protected void pushDownSynced(Push<SyncedResponse> push) {
     try {
-      didSync(response);
+      didSync(push.message());
     } finally {
+      push.bind();
       cueDown();
     }
   }
 
-  protected void pushDownUnlinked(UnlinkedResponse response) {
-    didUnlink(response);
-    // Don't cueDown
+  protected void pushDownUnlinked(Push<UnlinkedResponse> push) {
+    try {
+      didUnlink(push.message());
+    } finally {
+      push.bind();
+      // Don't cueDown
+    }
   }
 
-  protected void pushDownEnvelope(Envelope envelope) {
-    // nop
+  protected void pushDownUnknown(Push<?> push) {
+    push.bind();
   }
 
   @Override
@@ -209,38 +220,20 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
     return true;
   }
 
-  protected void queueUp(Value body) {
+  protected void queueUp(Value body, Cont<CommandMessage> cont) {
     throw new UnsupportedOperationException();
   }
 
-  protected Value nextUpQueue() {
+  protected Push<CommandMessage> nextUpQueue() {
     return null;
   }
 
-  protected CommandMessage nextUpQueueCommand() {
-    final Value body = nextUpQueue();
-    if (body != null) {
-      return new CommandMessage(this.nodeUri, this.laneUri, body);
-    } else {
-      return null;
-    }
-  }
-
-  protected Value nextUpCue() {
+  protected Push<CommandMessage> nextUpCue() {
     return null;
-  }
-
-  protected CommandMessage nextUpCueCommand() {
-    final Value body = nextUpCue();
-    if (body != null) {
-      return new CommandMessage(this.nodeUri, this.laneUri, body);
-    } else {
-      return null;
-    }
   }
 
   public void pushUp(Value body) {
-    queueUp(body);
+    queueUp(body, null);
     do {
       final int oldStatus = this.status;
       final int newStatus = oldStatus | FEEDING_UP;
@@ -325,13 +318,13 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
       } else {
         newStatus = oldStatus & ~(CUED_UP | FEEDING_UP);
         if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          CommandMessage message = nextUpQueueCommand();
-          if (message == null && (oldStatus & CUED_UP) != 0) {
-            message = nextUpCueCommand();
+          Push<CommandMessage> push = nextUpQueue();
+          if (push == null && (oldStatus & CUED_UP) != 0) {
+            push = nextUpCue();
           }
-          if (message != null) {
-            pullUpCommand(message);
-            pushUp(message);
+          if (push != null) {
+            pullUpCommand(push.message());
+            this.linkContext.pushUp(push);
             feedUp();
           } else {
             this.linkContext.skipUp();
@@ -359,7 +352,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
   }
 
   protected void pushUp(Envelope envelope) {
-    this.linkContext.pushUp(envelope);
+    this.linkContext.pushUp(new Push<Envelope>(Uri.empty(), hostUri(), nodeUri(), laneUri(),
+                                               prio(), null, envelope, null));
   }
 
   public void link() {
@@ -421,12 +415,20 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
     } while (true);
   }
 
+  public void command(float prio, Value body, Cont<CommandMessage> cont) {
+    queueUp(body, cont);
+  }
+
+  public void command(Value body, Cont<CommandMessage> cont) {
+    queueUp(body, cont);
+  }
+
   public void command(float prio, Value body) {
-    queueUp(body);
+    queueUp(body, null);
   }
 
   public void command(Value body) {
-    queueUp(body);
+    queueUp(body, null);
   }
 
   protected LinkRequest linkRequest() {

@@ -64,7 +64,7 @@ import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PartDef;
 import swim.runtime.PolicyDef;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.runtime.TierContext;
 import swim.runtime.agent.AgentModel;
 import swim.store.StoreBinding;
@@ -840,8 +840,8 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.edge.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.edge.pushDown(push);
   }
 
   @Override

@@ -121,11 +121,11 @@ public class WebServer extends AbstractWarpServer {
     }
 
     final WebRequest webRequest = new WebServerRequest(httpRequest);
-    // Route kernel module requests.
-    WebResponse webResponse = this.kernel.routeRequest(webRequest);
+    // Route application requests.
+    WebResponse webResponse = this.router.routeRequest(webRequest);
     if (webResponse.isRejected()) {
-      // Route application requests.
-      webResponse = this.router.routeRequest(webRequest);
+      // Route kernel module requests.
+      webResponse = this.kernel.routeRequest(webRequest);
     }
     return webResponse.httpResponder();
   }

@@ -28,6 +28,8 @@ import swim.api.policy.PolicyDirective;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
+import swim.concurrent.Cont;
+import swim.concurrent.Conts;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.concurrent.Schedule;
@@ -41,12 +43,13 @@ import swim.runtime.AbstractTierBinding;
 import swim.runtime.HostAddress;
 import swim.runtime.HostBinding;
 import swim.runtime.HostContext;
+import swim.runtime.HostException;
 import swim.runtime.LaneBinding;
 import swim.runtime.LinkBinding;
 import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.WarpBinding;
@@ -365,12 +368,14 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     return new RemoteWarpUplink(this, link, remoteNodeUri);
   }
 
-  PushRequest createPushRequest(Envelope envelope, float prio) {
-    return new RemoteHostPushDown(this, envelope, prio);
+  <E extends Envelope> Push<E> createPush(float prio, E envelope) {
+    final Uri nodeUri = envelope.nodeUri();
+    final Uri laneUri = envelope instanceof LaneAddressed ? ((LaneAddressed) envelope).laneUri() : Uri.empty();
+    return new Push<E>(Uri.empty(), Uri.empty(), nodeUri, laneUri, prio, null, envelope, null);
   }
 
-  PullRequest<Envelope> createPullEnvelope(Envelope envelope, float prio, PushRequest delegate) {
-    return new RemoteHostPushUp(this, envelope, prio, delegate);
+  <E extends Envelope> PullRequest<E> createPull(float prio, E envelope, Cont<E> cont) {
+    return new RemoteHostPull<E>(this, prio, envelope, cont);
   }
 
   protected Uri resolve(Uri relativeUri) {
@@ -481,14 +486,19 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    final Envelope envelope = pushRequest.envelope();
-    final float prio = pushRequest.prio();
-    final Uri remoteNodeUri = resolve(envelope.nodeUri());
-    final Envelope remoteEnvelope = envelope.nodeUri(remoteNodeUri);
-    final PullRequest<Envelope> pullEnvelope = createPullEnvelope(remoteEnvelope, prio, pushRequest);
-    this.warpSocketContext.feed(pullEnvelope);
+  public void pushUp(Push<?> push) {
+    final Object message = push.message();
+    if (message instanceof Envelope) {
+      final Envelope envelope = (Envelope) message;
+      final Uri remoteNodeUri = resolve(envelope.nodeUri());
+      final Envelope remoteEnvelope = envelope.nodeUri(remoteNodeUri);
+      final PullRequest<Envelope> pull = createPull(push.prio(), remoteEnvelope, (Cont<Envelope>) push.cont());
+      this.warpSocketContext.feed(pull);
+    } else {
+      push.trap(new HostException("unsupported message: " + message));
+    }
   }
 
   @Override
@@ -631,8 +641,8 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       }
     }
 
-    final PushRequest pushRequest = createPushRequest(resolvedMessage, 0.0f);
-    this.hostContext.pushDown(pushRequest);
+    final Push<Envelope> push = createPush(0.0f, resolvedMessage);
+    this.hostContext.pushDown(push);
   }
 
   protected void routeDownlink(LinkAddressed envelope) {
@@ -972,8 +982,8 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.hostContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.hostContext.pushDown(push);
   }
 
   @Override
@@ -1121,40 +1131,17 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 }
 
-final class RemoteHostPushDown implements PushRequest {
+final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
   final RemoteHost host;
-  final Envelope envelope;
   final float prio;
+  final E envelope;
+  final Cont<E> cont;
 
-  RemoteHostPushDown(RemoteHost host, Envelope envelope, float prio) {
+  RemoteHostPull(RemoteHost host, float prio, E envelope, Cont<E> cont) {
     this.host = host;
-    this.envelope = envelope;
     this.prio = prio;
-  }
-
-  @Override
-  public Uri meshUri() {
-    return Uri.empty();
-  }
-
-  @Override
-  public Uri hostUri() {
-    return Uri.empty();
-  }
-
-  @Override
-  public Uri nodeUri() {
-    return this.envelope.nodeUri();
-  }
-
-  @Override
-  public Identity identity() {
-    return this.host.remoteIdentity();
-  }
-
-  @Override
-  public Envelope envelope() {
-    return this.envelope;
+    this.envelope = envelope;
+    this.cont = cont;
   }
 
   @Override
@@ -1163,37 +1150,18 @@ final class RemoteHostPushDown implements PushRequest {
   }
 
   @Override
-  public void didDeliver() {
-    // nop
-  }
-
-  @Override
-  public void didDecline() {
-    // nop
-  }
-}
-
-final class RemoteHostPushUp implements PullRequest<Envelope> {
-  final RemoteHost host;
-  final Envelope envelope;
-  final float prio;
-  final PushRequest delegate;
-
-  RemoteHostPushUp(RemoteHost host, Envelope envelope, float prio, PushRequest delegate) {
-    this.host = host;
-    this.envelope = envelope;
-    this.prio = prio;
-    this.delegate = delegate;
-  }
-
-  @Override
-  public float prio() {
-    return this.prio;
-  }
-
-  @Override
-  public void pull(PullContext<? super Envelope> context) {
+  public void pull(PullContext<? super E> context) {
     context.push(this.envelope);
-    this.delegate.didDeliver();
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.envelope);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }

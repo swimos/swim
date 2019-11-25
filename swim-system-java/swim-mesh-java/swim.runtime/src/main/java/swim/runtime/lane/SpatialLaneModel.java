@@ -16,13 +16,17 @@ package swim.runtime.lane;
 
 import java.util.Iterator;
 import java.util.Map;
+import swim.api.LaneException;
 import swim.api.Link;
 import swim.api.data.SpatialData;
 import swim.collections.FingerTrieSeq;
+import swim.concurrent.Cont;
+import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.math.Z2Form;
 import swim.runtime.LaneRelay;
 import swim.runtime.LaneView;
+import swim.runtime.Push;
 import swim.runtime.WarpBinding;
 import swim.runtime.warp.WarpLaneModel;
 import swim.spatial.SpatialMap;
@@ -56,7 +60,8 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
   }
 
   @Override
-  public void onCommand(CommandMessage message) {
+  public void onCommand(Push<CommandMessage> push) {
+    final CommandMessage message = push.message();
     final Value payload = message.body();
     final String tag = payload.tag();
     if ("update".equals(tag)) {
@@ -65,7 +70,7 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
       final Value shape = header.get("shape");
       final S shapeObject = shapeForm.cast(shape);
       final Value value = payload.body();
-      new SpatialLaneRelayUpdate<S>(this, message, key, shapeObject, value).run();
+      new SpatialLaneRelayUpdate<S>(this, message, push.cont(), key, shapeObject, value).run();
     } else if ("move".equals(tag)) {
       final Value header = payload.header("move");
       final Value key = header.get("key");
@@ -74,15 +79,17 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
       final S oldShapeObject = shapeForm.cast(oldShape);
       final S newShapeObject = shapeForm.cast(newShape);
       final Value value = payload.body();
-      new SpatialLaneRelayMove<S>(this, message, key, oldShapeObject, newShapeObject, value).run();
+      new SpatialLaneRelayMove<S>(this, message, push.cont(), key, oldShapeObject, newShapeObject, value).run();
     } else if ("remove".equals(tag)) {
       final Value header = payload.header("remove");
       final Value key = header.get("key");
       final Value shape = header.get("shape");
       final S shapeObject = shapeForm.cast(shape);
-      new SpatialLaneRelayRemove<S>(this, message, key, shapeObject).run();
+      new SpatialLaneRelayRemove<S>(this, message, push.cont(), key, shapeObject).run();
     } else if ("clear".equals(tag)) {
-      new SpatialLaneRelayClear<S>(this, message).run();
+      new SpatialLaneRelayClear<S>(this, message, push.cont()).run();
+    } else {
+      push.trap(new LaneException("unknown subcommand: " + payload));
     }
   }
 
@@ -268,6 +275,7 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
 final class SpatialLaneRelayUpdate<S> extends LaneRelay<SpatialLaneModel<S>, SpatialLaneView<?, S, ?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
   Form<Object> keyForm;
   Z2Form<Object> shapeForm;
   Form<Object> valueForm;
@@ -279,10 +287,11 @@ final class SpatialLaneRelayUpdate<S> extends LaneRelay<SpatialLaneModel<S>, Spa
   Value newValue;
   Object newObject;
 
-  SpatialLaneRelayUpdate(SpatialLaneModel<S> model, CommandMessage message, Value key, S shapeObject, Value newValue) {
+  SpatialLaneRelayUpdate(SpatialLaneModel<S> model, CommandMessage message, Cont<CommandMessage> cont, Value key, S shapeObject, Value newValue) {
     super(model, 4);
     this.link = null;
     this.message = message;
+    this.cont = cont;
     this.key = key;
     this.shapeObject = shapeObject;
     this.newValue = newValue;
@@ -292,6 +301,7 @@ final class SpatialLaneRelayUpdate<S> extends LaneRelay<SpatialLaneModel<S>, Spa
     super(model, 1, 3, null);
     this.link = link;
     this.message = null;
+    this.cont = null;
     this.key = key;
     this.shapeObject = shapeObject;
     this.newValue = newValue;
@@ -301,6 +311,7 @@ final class SpatialLaneRelayUpdate<S> extends LaneRelay<SpatialLaneModel<S>, Spa
     super(model, 1, 3, stage);
     this.link = null;
     this.message = null;
+    this.cont = null;
     this.key = key;
     this.shapeObject = shapeObject;
     this.newValue = newValue;
@@ -397,12 +408,24 @@ final class SpatialLaneRelayUpdate<S> extends LaneRelay<SpatialLaneModel<S>, Spa
   @Override
   protected void done() {
     this.model.cueDownKey(this.key);
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, SpatialLaneView<?, S, ?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
   Form<Object> keyForm;
   Z2Form<Object> shapeForm;
   Form<Object> valueForm;
@@ -415,11 +438,12 @@ final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, Spati
   Value newValue;
   Object newObject;
 
-  SpatialLaneRelayMove(SpatialLaneModel<S> model, CommandMessage message, Value key,
-                       S oldShapeObject, S newShapeObject, Value newValue) {
+  SpatialLaneRelayMove(SpatialLaneModel<S> model, CommandMessage message, Cont<CommandMessage> cont,
+                       Value key, S oldShapeObject, S newShapeObject, Value newValue) {
     super(model, 4);
     this.link = null;
     this.message = message;
+    this.cont = cont;
     this.key = key;
     this.oldShapeObject = oldShapeObject;
     this.newShapeObject = newShapeObject;
@@ -431,6 +455,7 @@ final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, Spati
     super(model, 1, 3, null);
     this.link = link;
     this.message = null;
+    this.cont = null;
     this.key = key;
     this.oldShapeObject = oldShapeObject;
     this.newShapeObject = newShapeObject;
@@ -443,6 +468,7 @@ final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, Spati
     super(model, 1, 3, stage);
     this.link = null;
     this.message = null;
+    this.cont = null;
     this.key = key;
     this.oldShapeObject = oldShapeObject;
     this.newShapeObject = newShapeObject;
@@ -543,12 +569,24 @@ final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, Spati
     final Record header = Record.create(3).slot("key", key).slot("from", shapeForm.mold(this.oldShapeObject).toValue())
         .slot("to", shapeForm.mold(this.newShapeObject).toValue());
     this.model.sendDown(Record.create(1).attr("move", header));
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, SpatialLaneView<?, S, ?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
   Form<Object> keyForm;
   Z2Form<Object> shapeForm;
   Form<Object> valueForm;
@@ -558,10 +596,11 @@ final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, Spa
   Value oldValue;
   Object oldObject;
 
-  SpatialLaneRelayRemove(SpatialLaneModel<S> model, CommandMessage message, Value key, S shapeObject) {
+  SpatialLaneRelayRemove(SpatialLaneModel<S> model, CommandMessage message, Cont<CommandMessage> cont, Value key, S shapeObject) {
     super(model, 4);
     this.link = null;
     this.message = message;
+    this.cont = cont;
     this.key = key;
     this.shapeObject = shapeObject;
   }
@@ -570,6 +609,7 @@ final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, Spa
     super(model, 1, 3, null);
     this.link = link;
     this.message = null;
+    this.cont = null;
     this.key = key;
     this.shapeObject = shapeObject;
   }
@@ -578,6 +618,7 @@ final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, Spa
     super(model, 1, 3, stage);
     this.link = null;
     this.message = null;
+    this.cont = null;
     this.key = key;
     this.shapeObject = shapeObject;
   }
@@ -661,29 +702,44 @@ final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, Spa
   protected void done() {
     final Record header = Record.create(2).slot("key", key).slot("shape", shapeForm.mold(this.shapeObject).toValue());
     this.model.sendDown(Record.create(1).attr("move", header));
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }
 
 final class SpatialLaneRelayClear<S> extends LaneRelay<SpatialLaneModel<S>, SpatialLaneView<?, S, ?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
 
-  SpatialLaneRelayClear(SpatialLaneModel<S> model, CommandMessage message) {
+  SpatialLaneRelayClear(SpatialLaneModel<S> model, CommandMessage message, Cont<CommandMessage> cont) {
     super(model, 4);
     this.link = null;
     this.message = message;
+    this.cont = cont;
   }
 
   SpatialLaneRelayClear(SpatialLaneModel<S> model, Link link) {
     super(model, 1, 3, null);
     this.link = link;
     this.message = null;
+    this.cont = null;
   }
 
   SpatialLaneRelayClear(SpatialLaneModel<S> model, Stage stage) {
     super(model, 1, 3, stage);
     this.link = null;
     this.message = null;
+    this.cont = null;
   }
 
   @Override
@@ -724,5 +780,16 @@ final class SpatialLaneRelayClear<S> extends LaneRelay<SpatialLaneModel<S>, Spat
   @Override
   protected void done() {
     this.model.sendDown(Record.create(1).attr("clear"));
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }

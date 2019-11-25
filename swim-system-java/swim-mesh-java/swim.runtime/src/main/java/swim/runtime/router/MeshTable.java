@@ -39,12 +39,13 @@ import swim.runtime.LinkBinding;
 import swim.runtime.MeshAddress;
 import swim.runtime.MeshBinding;
 import swim.runtime.MeshContext;
+import swim.runtime.MeshException;
 import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
 import swim.runtime.PartContext;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.agent.AgentNode;
@@ -552,17 +553,18 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.meshContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.meshContext.pushDown(push);
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    final PartBinding partBinding = openPart(pushRequest.nodeUri());
+  public void pushUp(Push<?> push) {
+    final Uri nodeUri = push.nodeUri();
+    final PartBinding partBinding = openPart(nodeUri);
     if (partBinding != null) {
-      partBinding.pushUp(pushRequest);
+      partBinding.pushUp(push);
     } else {
-      pushRequest.didDecline();
+      push.trap(new MeshException("unknown part for node: " + nodeUri));
     }
   }
 

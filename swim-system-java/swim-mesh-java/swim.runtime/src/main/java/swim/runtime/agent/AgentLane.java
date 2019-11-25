@@ -26,7 +26,7 @@ import swim.runtime.LaneContext;
 import swim.runtime.LinkBinding;
 import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.runtime.reflect.LogEntry;
 import swim.store.StoreBinding;
 import swim.structure.Value;
@@ -192,8 +192,8 @@ public class AgentLane implements LaneContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.node.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.node.pushDown(push);
   }
 
   @Override

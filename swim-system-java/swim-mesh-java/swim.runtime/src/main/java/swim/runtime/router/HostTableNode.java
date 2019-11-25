@@ -31,7 +31,7 @@ import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -197,8 +197,8 @@ public class HostTableNode implements NodeContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.host.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.host.pushDown(push);
   }
 
   @Override

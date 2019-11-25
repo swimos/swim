@@ -16,6 +16,7 @@ package swim.runtime.warp;
 
 import swim.runtime.DownlinkRelay;
 import swim.runtime.DownlinkView;
+import swim.runtime.Push;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.warp.CommandMessage;
@@ -66,27 +67,27 @@ public abstract class WarpDownlinkModel<View extends WarpDownlinkView> extends W
   }
 
   @Override
-  protected void pushDownEvent(EventMessage message) {
-    onEvent(message);
-    new WarpDownlinkRelayOnEvent<View>(this, message).run();
+  protected void pushDownEvent(Push<EventMessage> push) {
+    onEvent(push.message());
+    new WarpDownlinkRelayOnEvent<View>(this, push).run();
   }
 
   @Override
-  protected void pushDownLinked(LinkedResponse response) {
-    didLink(response);
-    new WarpDownlinkRelayDidLink<View>(this, response).run();
+  protected void pushDownLinked(Push<LinkedResponse> push) {
+    didLink(push.message());
+    new WarpDownlinkRelayDidLink<View>(this, push).run();
   }
 
   @Override
-  protected void pushDownSynced(SyncedResponse response) {
-    didSync(response);
-    new WarpDownlinkRelayDidSync<View>(this, response).run();
+  protected void pushDownSynced(Push<SyncedResponse> push) {
+    didSync(push.message());
+    new WarpDownlinkRelayDidSync<View>(this, push).run();
   }
 
   @Override
-  protected void pushDownUnlinked(UnlinkedResponse response) {
-    didUnlink(response);
-    new WarpDownlinkRelayDidUnlink<View>(this, response).run();
+  protected void pushDownUnlinked(Push<UnlinkedResponse> push) {
+    didUnlink(push.message());
+    new WarpDownlinkRelayDidUnlink<View>(this, push).run();
   }
 
   @Override
@@ -115,25 +116,27 @@ public abstract class WarpDownlinkModel<View extends WarpDownlinkView> extends W
 }
 
 final class WarpDownlinkRelayOnEvent<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
-  final EventMessage message;
+  final Push<EventMessage> push;
 
-  WarpDownlinkRelayOnEvent(WarpDownlinkModel<View> model, EventMessage message) {
+  WarpDownlinkRelayOnEvent(WarpDownlinkModel<View> model, Push<EventMessage> push) {
     super(model, 2);
-    this.message = message;
+    this.push = push;
   }
 
   @Override
   protected boolean runPhase(View view, int phase, boolean preemptive) {
     if (phase == 0) {
+      final EventMessage message = this.push.message();
       if (preemptive) {
-        view.downlinkWillReceive(this.message);
+        view.downlinkWillReceive(message);
       }
-      return view.dispatchWillReceive(this.message.body(), preemptive);
+      return view.dispatchWillReceive(message.body(), preemptive);
     } else if (phase == 1) {
+      final EventMessage message = this.push.message();
       if (preemptive) {
-        view.downlinkDidReceive(this.message);
+        view.downlinkDidReceive(message);
       }
-      return view.dispatchDidReceive(this.message.body(), preemptive);
+      return view.dispatchDidReceive(message.body(), preemptive);
     } else {
       throw new AssertionError(); // unreachable
     }
@@ -141,6 +144,7 @@ final class WarpDownlinkRelayOnEvent<View extends WarpDownlinkView> extends Down
 
   @Override
   protected void done() {
+    this.push.bind();
     this.model.cueDown();
   }
 }
@@ -188,18 +192,18 @@ final class WarpDownlinkRelayWillLink<View extends WarpDownlinkView> extends Dow
 }
 
 final class WarpDownlinkRelayDidLink<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
-  final LinkedResponse response;
+  final Push<LinkedResponse> push;
 
-  WarpDownlinkRelayDidLink(WarpDownlinkModel<View> model, LinkedResponse response) {
+  WarpDownlinkRelayDidLink(WarpDownlinkModel<View> model, Push<LinkedResponse> push) {
     super(model);
-    this.response = response;
+    this.push = push;
   }
 
   @Override
   protected boolean runPhase(View view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
-        view.downlinkDidLink(this.response);
+        view.downlinkDidLink(this.push.message());
       }
       return view.dispatchDidLink(preemptive);
     } else {
@@ -209,6 +213,7 @@ final class WarpDownlinkRelayDidLink<View extends WarpDownlinkView> extends Down
 
   @Override
   protected void done() {
+    this.push.bind();
     this.model.cueDown();
   }
 }
@@ -235,18 +240,18 @@ final class WarpDownlinkRelayWillSync<View extends WarpDownlinkView> extends Dow
 }
 
 final class WarpDownlinkRelayDidSync<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
-  final SyncedResponse response;
+  final Push<SyncedResponse> push;
 
-  WarpDownlinkRelayDidSync(WarpDownlinkModel<View> model, SyncedResponse response) {
+  WarpDownlinkRelayDidSync(WarpDownlinkModel<View> model, Push<SyncedResponse> push) {
     super(model);
-    this.response = response;
+    this.push = push;
   }
 
   @Override
   protected boolean runPhase(View view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
-        view.downlinkDidSync(this.response);
+        view.downlinkDidSync(this.push.message());
       }
       return view.dispatchDidSync(preemptive);
     } else {
@@ -256,6 +261,7 @@ final class WarpDownlinkRelayDidSync<View extends WarpDownlinkView> extends Down
 
   @Override
   protected void done() {
+    this.push.bind();
     this.model.cueDown();
   }
 }
@@ -282,18 +288,18 @@ final class WarpDownlinkRelayWillUnlink<View extends WarpDownlinkView> extends D
 }
 
 final class WarpDownlinkRelayDidUnlink<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
-  final UnlinkedResponse response;
+  final Push<UnlinkedResponse> push;
 
-  WarpDownlinkRelayDidUnlink(WarpDownlinkModel<View> model, UnlinkedResponse response) {
+  WarpDownlinkRelayDidUnlink(WarpDownlinkModel<View> model, Push<UnlinkedResponse> push) {
     super(model);
-    this.response = response;
+    this.push = push;
   }
 
   @Override
   protected boolean runPhase(View view, int phase, boolean preemptive) {
     if (phase == 0) {
       if (preemptive) {
-        view.downlinkDidUnlink(this.response);
+        view.downlinkDidUnlink(this.push.message());
       }
       return view.dispatchDidUnlink(preemptive);
     } else {
@@ -303,6 +309,7 @@ final class WarpDownlinkRelayDidUnlink<View extends WarpDownlinkView> extends Do
 
   @Override
   protected void done() {
+    this.push.bind();
     // Don't cueDown model after unlinked.
   }
 }

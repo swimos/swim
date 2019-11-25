@@ -204,8 +204,8 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    laneContext().pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    laneContext().pushDown(push);
   }
 
   @Override

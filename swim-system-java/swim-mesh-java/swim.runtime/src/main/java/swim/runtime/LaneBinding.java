@@ -70,7 +70,7 @@ public interface LaneBinding extends TierBinding, CellBinding, Log {
 
   void closeUplink(Value linkKey);
 
-  void pushUpCommand(CommandMessage message);
+  void pushUpCommand(Push<CommandMessage> push);
 
   void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
 

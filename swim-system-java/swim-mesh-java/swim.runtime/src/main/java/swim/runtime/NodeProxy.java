@@ -237,8 +237,8 @@ public class NodeProxy implements NodeBinding, NodeContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.nodeContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.nodeContext.pushDown(push);
   }
 
   @Override
@@ -252,8 +252,8 @@ public class NodeProxy implements NodeBinding, NodeContext {
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    this.nodeBinding.pushUp(pushRequest);
+  public void pushUp(Push<?> push) {
+    this.nodeBinding.pushUp(push);
   }
 
   @Override

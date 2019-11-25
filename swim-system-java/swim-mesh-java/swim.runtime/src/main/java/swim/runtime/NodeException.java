@@ -14,8 +14,22 @@
 
 package swim.runtime;
 
-public interface CellBinding {
-  void openUplink(LinkBinding link);
+public class NodeException extends RuntimeException {
+  private static final long serialVersionUID = 1L;
 
-  void pushUp(Push<?> push);
+  public NodeException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public NodeException(String message) {
+    super(message);
+  }
+
+  public NodeException(Throwable cause) {
+    super(cause);
+  }
+
+  public NodeException() {
+    super();
+  }
 }

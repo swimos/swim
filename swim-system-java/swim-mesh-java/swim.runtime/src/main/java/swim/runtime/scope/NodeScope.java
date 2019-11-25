@@ -22,8 +22,10 @@ import swim.api.http.HttpDownlink;
 import swim.api.ref.LaneRef;
 import swim.api.ref.NodeRef;
 import swim.api.ws.WsDownlink;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
+import swim.runtime.Push;
 import swim.runtime.downlink.EventDownlinkView;
 import swim.runtime.downlink.MapDownlinkView;
 import swim.runtime.downlink.ValueDownlinkView;
@@ -104,28 +106,49 @@ public class NodeScope extends Scope implements NodeRef {
   }
 
   @Override
-  public void command(Uri laneUri, float prio, Value body) {
+  public void command(Uri laneUri, float prio, Value body, Cont<CommandMessage> cont) {
     Uri meshUri = this.meshUri;
     final Uri hostUri = this.hostUri;
     if (!meshUri.isDefined()) {
       meshUri = hostUri;
     }
-    final CommandMessage message = new CommandMessage(this.nodeUri, laneUri, body);
-    pushDown(new ScopePushRequest(meshUri, hostUri, null, message, prio));
+    final Uri nodeUri = this.nodeUri;
+    final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
+    pushDown(new Push<CommandMessage>(meshUri, hostUri, nodeUri, laneUri, prio, null, message, cont));
+  }
+
+  @Override
+  public void command(String laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    command(Uri.parse(laneUri), prio, body, cont);
+  }
+
+  @Override
+  public void command(Uri laneUri, Value body, Cont<CommandMessage> cont) {
+    command(laneUri, 0.0f, body, cont);
+  }
+
+  @Override
+  public void command(String laneUri, Value body, Cont<CommandMessage> cont) {
+    command(Uri.parse(laneUri), body, cont);
+  }
+
+  @Override
+  public void command(Uri laneUri, float prio, Value body) {
+    command(laneUri, prio, body, null);
   }
 
   @Override
   public void command(String laneUri, float prio, Value body) {
-    command(Uri.parse(laneUri), prio, body);
+    command(Uri.parse(laneUri), prio, body, null);
   }
 
   @Override
   public void command(Uri laneUri, Value body) {
-    command(laneUri, 0.0f, body);
+    command(laneUri, 0.0f, body, null);
   }
 
   @Override
   public void command(String laneUri, Value body) {
-    command(Uri.parse(laneUri), body);
+    command(Uri.parse(laneUri), body, null);
   }
 }

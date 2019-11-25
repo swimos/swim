@@ -21,8 +21,10 @@ import swim.api.downlink.ValueDownlink;
 import swim.api.http.HttpDownlink;
 import swim.api.ref.LaneRef;
 import swim.api.ws.WsDownlink;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
+import swim.runtime.Push;
 import swim.runtime.downlink.EventDownlinkView;
 import swim.runtime.downlink.ListDownlinkView;
 import swim.runtime.downlink.MapDownlinkView;
@@ -102,18 +104,30 @@ public class LaneScope extends Scope implements LaneRef {
   }
 
   @Override
-  public void command(float prio, Value body) {
+  public void command(float prio, Value body, Cont<CommandMessage> cont) {
     Uri meshUri = this.meshUri;
     final Uri hostUri = this.hostUri;
     if (!meshUri.isDefined()) {
       meshUri = hostUri;
     }
-    final CommandMessage message = new CommandMessage(this.nodeUri, this.laneUri, body);
-    pushDown(new ScopePushRequest(meshUri, hostUri, null, message, prio));
+    final Uri nodeUri = this.nodeUri;
+    final Uri laneUri = this.laneUri;
+    final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
+    pushDown(new Push<CommandMessage>(meshUri, hostUri, nodeUri, laneUri, prio, null, message, cont));
+  }
+
+  @Override
+  public void command(Value body, Cont<CommandMessage> cont) {
+    command(0.0f, body, cont);
+  }
+
+  @Override
+  public void command(float prio, Value body) {
+    command(prio, body, null);
   }
 
   @Override
   public void command(Value body) {
-    command(0.0f, body);
+    command(0.0f, body, null);
   }
 }

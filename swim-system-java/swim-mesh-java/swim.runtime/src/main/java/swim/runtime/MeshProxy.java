@@ -283,8 +283,8 @@ public class MeshProxy implements MeshBinding, MeshContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.meshContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.meshContext.pushDown(push);
   }
 
   @Override
@@ -298,8 +298,8 @@ public class MeshProxy implements MeshBinding, MeshContext {
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    this.meshBinding.pushUp(pushRequest);
+  public void pushUp(Push<?> push) {
+    this.meshBinding.pushUp(push);
   }
 
   @Override

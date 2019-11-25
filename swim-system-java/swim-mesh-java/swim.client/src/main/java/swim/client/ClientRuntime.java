@@ -48,7 +48,7 @@ import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.runtime.router.EdgeTable;
 import swim.runtime.router.MeshTable;
 import swim.runtime.router.PartTable;
@@ -283,8 +283,8 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.edge.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.edge.pushDown(push);
   }
 
   @Override

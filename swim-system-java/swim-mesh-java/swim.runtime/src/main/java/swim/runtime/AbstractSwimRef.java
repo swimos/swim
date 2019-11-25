@@ -25,6 +25,7 @@ import swim.api.ref.LaneRef;
 import swim.api.ref.NodeRef;
 import swim.api.ref.SwimRef;
 import swim.api.ws.WsDownlink;
+import swim.concurrent.Cont;
 import swim.runtime.downlink.EventDownlinkView;
 import swim.runtime.downlink.ListDownlinkView;
 import swim.runtime.downlink.MapDownlinkView;
@@ -32,7 +33,6 @@ import swim.runtime.downlink.ValueDownlinkView;
 import swim.runtime.scope.HostScope;
 import swim.runtime.scope.LaneScope;
 import swim.runtime.scope.NodeScope;
-import swim.runtime.scope.ScopePushRequest;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -149,7 +149,7 @@ public abstract class AbstractSwimRef implements SwimRef, CellContext {
   }
 
   @Override
-  public void command(Uri hostUri, Uri nodeUri, Uri laneUri, float prio, Value body) {
+  public void command(Uri hostUri, Uri nodeUri, Uri laneUri, float prio, Value body, Cont<CommandMessage> cont) {
     Uri meshUri = meshUri();
     if (!meshUri.isDefined()) {
       meshUri = hostUri;
@@ -159,26 +159,26 @@ public abstract class AbstractSwimRef implements SwimRef, CellContext {
     }
     final Identity identity = null;
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
-    pushDown(new ScopePushRequest(meshUri, hostUri, identity, message, prio));
+    pushDown(new Push<CommandMessage>(meshUri, hostUri, nodeUri, laneUri, prio, identity, message, cont));
   }
 
   @Override
-  public void command(String hostUri, String nodeUri, String laneUri, float prio, Value body) {
-    command(Uri.parse(hostUri), Uri.parse(nodeUri), Uri.parse(laneUri), prio, body);
+  public void command(String hostUri, String nodeUri, String laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    command(Uri.parse(hostUri), Uri.parse(nodeUri), Uri.parse(laneUri), prio, body, cont);
   }
 
   @Override
-  public void command(Uri hostUri, Uri nodeUri, Uri laneUri, Value body) {
-    command(hostUri, nodeUri, laneUri, 0.0f, body);
+  public void command(Uri hostUri, Uri nodeUri, Uri laneUri, Value body, Cont<CommandMessage> cont) {
+    command(hostUri, nodeUri, laneUri, 0.0f, body, cont);
   }
 
   @Override
-  public void command(String hostUri, String nodeUri, String laneUri, Value body) {
-    command(Uri.parse(hostUri), Uri.parse(nodeUri), Uri.parse(laneUri), body);
+  public void command(String hostUri, String nodeUri, String laneUri, Value body, Cont<CommandMessage> cont) {
+    command(Uri.parse(hostUri), Uri.parse(nodeUri), Uri.parse(laneUri), body, cont);
   }
 
   @Override
-  public void command(Uri nodeUri, Uri laneUri, float prio, Value body) {
+  public void command(Uri nodeUri, Uri laneUri, float prio, Value body, Cont<CommandMessage> cont) {
     Uri meshUri = meshUri();
     final Uri hostUri;
     if (nodeUri.authority().isDefined()) {
@@ -192,22 +192,62 @@ public abstract class AbstractSwimRef implements SwimRef, CellContext {
     }
     final Identity identity = null;
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
-    pushDown(new ScopePushRequest(meshUri, hostUri, identity, message, prio));
+    pushDown(new Push<CommandMessage>(meshUri, hostUri, nodeUri, laneUri, prio, identity, message, cont));
+  }
+
+  @Override
+  public void command(String nodeUri, String laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    command(Uri.parse(nodeUri), Uri.parse(laneUri), prio, body, cont);
+  }
+
+  @Override
+  public void command(Uri nodeUri, Uri laneUri, Value body, Cont<CommandMessage> cont) {
+    command(nodeUri, laneUri, 0.0f, body, cont);
+  }
+
+  @Override
+  public void command(String nodeUri, String laneUri, Value body, Cont<CommandMessage> cont) {
+    command(Uri.parse(nodeUri), Uri.parse(laneUri), body, cont);
+  }
+
+  @Override
+  public void command(Uri hostUri, Uri nodeUri, Uri laneUri, float prio, Value body) {
+    command(hostUri, nodeUri, laneUri, prio, body, null);
+  }
+
+  @Override
+  public void command(String hostUri, String nodeUri, String laneUri, float prio, Value body) {
+    command(Uri.parse(hostUri), Uri.parse(nodeUri), Uri.parse(laneUri), prio, body, null);
+  }
+
+  @Override
+  public void command(Uri hostUri, Uri nodeUri, Uri laneUri, Value body) {
+    command(hostUri, nodeUri, laneUri, 0.0f, body, null);
+  }
+
+  @Override
+  public void command(String hostUri, String nodeUri, String laneUri, Value body) {
+    command(Uri.parse(hostUri), Uri.parse(nodeUri), Uri.parse(laneUri), body, null);
+  }
+
+  @Override
+  public void command(Uri nodeUri, Uri laneUri, float prio, Value body) {
+    command(nodeUri, laneUri, prio, body, null);
   }
 
   @Override
   public void command(String nodeUri, String laneUri, float prio, Value body) {
-    command(Uri.parse(nodeUri), Uri.parse(laneUri), prio, body);
+    command(Uri.parse(nodeUri), Uri.parse(laneUri), prio, body, null);
   }
 
   @Override
   public void command(Uri nodeUri, Uri laneUri, Value body) {
-    command(nodeUri, laneUri, 0.0f, body);
+    command(nodeUri, laneUri, 0.0f, body, null);
   }
 
   @Override
   public void command(String nodeUri, String laneUri, Value body) {
-    command(Uri.parse(nodeUri), Uri.parse(laneUri), body);
+    command(Uri.parse(nodeUri), Uri.parse(laneUri), body, null);
   }
 
   @Override

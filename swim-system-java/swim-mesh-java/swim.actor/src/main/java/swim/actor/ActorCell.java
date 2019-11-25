@@ -23,7 +23,7 @@ import swim.runtime.CellBinding;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
 import swim.runtime.Metric;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.store.StoreBinding;
 import swim.uri.Uri;
 import swim.util.Log;
@@ -102,8 +102,8 @@ public abstract class ActorCell implements CellBinding, CellContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    cellContext().pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    cellContext().pushDown(push);
   }
 
   @Override
@@ -117,8 +117,8 @@ public abstract class ActorCell implements CellBinding, CellContext {
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    cellBinding().pushUp(pushRequest);
+  public void pushUp(Push<?> push) {
+    cellBinding().pushUp(push);
   }
 
   @Override

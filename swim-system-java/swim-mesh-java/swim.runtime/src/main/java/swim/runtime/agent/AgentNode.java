@@ -64,7 +64,8 @@ import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
-import swim.runtime.PushRequest;
+import swim.runtime.NodeException;
+import swim.runtime.Push;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.WarpBinding;
@@ -485,18 +486,19 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    final LaneBinding laneBinding = getLane(pushRequest.envelope().laneUri());
+  public void pushUp(Push<?> push) {
+    final Uri laneUri = push.laneUri();
+    final LaneBinding laneBinding = getLane(laneUri);
     if (laneBinding != null) {
-      laneBinding.pushUp(pushRequest);
+      laneBinding.pushUp(push);
     } else {
-      pushRequest.didDecline();
+      push.trap(new NodeException("unknown lane: " + laneUri));
     }
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.nodeContext.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.nodeContext.pushDown(push);
   }
 
   @Override

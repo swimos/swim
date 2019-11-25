@@ -17,9 +17,12 @@ package swim.runtime.lane;
 import java.util.Map;
 import swim.api.Link;
 import swim.api.data.ValueData;
+import swim.concurrent.Cont;
+import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.runtime.LaneRelay;
 import swim.runtime.LaneView;
+import swim.runtime.Push;
 import swim.runtime.WarpBinding;
 import swim.runtime.warp.WarpLaneModel;
 import swim.structure.Form;
@@ -54,8 +57,10 @@ public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUpl
   }
 
   @Override
-  public void onCommand(CommandMessage message) {
-    new ValueLaneRelaySet(this, message, message.body()).run();
+  public void onCommand(Push<CommandMessage> push) {
+    final CommandMessage message = push.message();
+    final Value value = message.body();
+    new ValueLaneRelaySet(this, message, push.cont(), value).run();
   }
 
   public final boolean isResident() {
@@ -156,16 +161,18 @@ public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUpl
 final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
   Form<Object> valueForm;
   Value oldValue;
   Object oldObject;
   Value newValue;
   Object newObject;
 
-  ValueLaneRelaySet(ValueLaneModel model, CommandMessage message, Value newValue) {
+  ValueLaneRelaySet(ValueLaneModel model, CommandMessage message, Cont<CommandMessage> cont, Value newValue) {
     super(model, 4);
     this.link = null;
     this.message = message;
+    this.cont = cont;
     this.newValue = newValue;
   }
 
@@ -173,6 +180,7 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
     super(model, 1, 3, null);
     this.link = link;
     this.message = null;
+    this.cont = null;
     this.newValue = newValue;
   }
 
@@ -180,6 +188,7 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
     super(model, 1, 3, stage);
     this.link = null;
     this.message = null;
+    this.cont = null;
     this.newValue = newValue;
   }
 
@@ -252,5 +261,16 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
   @Override
   protected void done() {
     this.model.cueDown();
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }

@@ -18,18 +18,21 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.collections.HashTrieSet;
+import swim.concurrent.Cont;
+import swim.runtime.Push;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.warp.CommandMessage;
 
 public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends WarpDownlinkModel<View> {
-  final ConcurrentLinkedQueue<Value> upQueue;
+  final ConcurrentLinkedQueue<Push<CommandMessage>> upQueue;
   volatile HashTrieSet<Value> keyQueue;
   volatile Value lastKey;
 
   public MapDownlinkModem(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                           float prio, float rate, Value body) {
     super(meshUri, hostUri, nodeUri, laneUri, prio, rate, body);
-    this.upQueue = new ConcurrentLinkedQueue<Value>();
+    this.upQueue = new ConcurrentLinkedQueue<Push<CommandMessage>>();
     this.keyQueue = HashTrieSet.empty();
   }
 
@@ -39,8 +42,14 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
   }
 
   @Override
-  protected void queueUp(Value body) {
-    this.upQueue.add(body);
+  protected void queueUp(Value body, Cont<CommandMessage> cont) {
+    final Uri hostUri = hostUri();
+    final Uri nodeUri = nodeUri();
+    final Uri laneUri = laneUri();
+    final float prio = prio();
+    final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
+    this.upQueue.add(new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
+                                              prio, null, message, cont));
   }
 
   public void cueUpKey(Value key) {
@@ -74,12 +83,12 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
   protected abstract Value nextUpKey(Value key);
 
   @Override
-  protected Value nextUpQueue() {
+  protected Push<CommandMessage> nextUpQueue() {
     return this.upQueue.poll();
   }
 
   @Override
-  protected Value nextUpCue() {
+  protected Push<CommandMessage> nextUpCue() {
     HashTrieSet<Value> oldKeyQueue;
     HashTrieSet<Value> newKeyQueue;
     Value key;
@@ -90,7 +99,14 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
     } while (oldKeyQueue != newKeyQueue && !KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue));
     if (key != null) {
       this.lastKey = key;
-      return nextUpKey(key);
+      final Uri hostUri = hostUri();
+      final Uri nodeUri = nodeUri();
+      final Uri laneUri = laneUri();
+      final float prio = prio();
+      final Value body = nextUpKey(key);
+      final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
+      return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
+                                      prio, null, message, null);
     } else {
       return null;
     }

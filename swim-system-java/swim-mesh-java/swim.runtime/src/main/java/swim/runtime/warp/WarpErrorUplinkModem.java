@@ -24,10 +24,11 @@ import swim.collections.FingerTrieSeq;
 import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
 import swim.runtime.NodeBinding;
+import swim.runtime.Push;
 import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
 import swim.structure.Value;
-import swim.warp.Envelope;
+import swim.uri.Uri;
 import swim.warp.UnlinkedResponse;
 
 public class WarpErrorUplinkModem implements WarpContext {
@@ -156,7 +157,8 @@ public class WarpErrorUplinkModem implements WarpContext {
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldStatus != newStatus) {
       final UnlinkedResponse response = getUnlinkedResponse();
-      this.linkBinding.pushDown(response);
+      this.linkBinding.pushDown(new Push<UnlinkedResponse>(Uri.empty(), this.linkBinding.hostUri(), this.linkBinding.nodeUri(),
+                                                           this.linkBinding.laneUri(), this.linkBinding.prio(), null, response, null));
     } else {
       this.linkBinding.skipDown();
     }
@@ -168,7 +170,7 @@ public class WarpErrorUplinkModem implements WarpContext {
   }
 
   @Override
-  public void pushUp(Envelope envelope) {
+  public void pushUp(Push<?> push) {
     // nop
   }
 

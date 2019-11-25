@@ -15,7 +15,10 @@
 package swim.runtime.lane;
 
 import swim.api.Link;
+import swim.concurrent.Cont;
+import swim.concurrent.Conts;
 import swim.runtime.LaneRelay;
+import swim.runtime.Push;
 import swim.runtime.WarpBinding;
 import swim.runtime.warp.WarpLaneModel;
 import swim.structure.Form;
@@ -38,21 +41,24 @@ public class CommandLaneModel extends WarpLaneModel<CommandLaneView<?>, CommandL
   }
 
   @Override
-  public void onCommand(CommandMessage message) {
-    new CommandLaneRelayCommand(this, null, message).run();
+  public void onCommand(Push<CommandMessage> push) {
+    final CommandMessage message = push.message();
+    new CommandLaneRelayCommand(this, null, message, push.cont()).run();
   }
 }
 
 final class CommandLaneRelayCommand extends LaneRelay<CommandLaneModel, CommandLaneView<?>> {
   final Link link;
   final CommandMessage message;
+  final Cont<CommandMessage> cont;
   Form<?> valueForm;
   Object object;
 
-  CommandLaneRelayCommand(CommandLaneModel model, Link link, CommandMessage message) {
+  CommandLaneRelayCommand(CommandLaneModel model, Link link, CommandMessage message, Cont<CommandMessage> cont) {
     super(model, 3);
     this.link = link;
     this.message = message;
+    this.cont = cont;
   }
 
   @SuppressWarnings("unchecked")
@@ -89,5 +95,16 @@ final class CommandLaneRelayCommand extends LaneRelay<CommandLaneModel, CommandL
   @Override
   protected void done() {
     this.model.sendDown(this.message.body());
+    if (this.cont != null) {
+      try {
+        this.cont.bind(this.message);
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.cont.trap(error);
+        } else {
+          throw error;
+        }
+      }
+    }
   }
 }

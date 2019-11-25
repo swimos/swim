@@ -25,9 +25,10 @@ import swim.io.http.HttpEndpoint;
 import swim.io.http.HttpResponder;
 import swim.io.http.HttpServer;
 import swim.io.warp.AbstractWarpServer;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.uri.Uri;
 import swim.warp.CommandMessage;
+import swim.warp.Envelope;
 import swim.ws.WsRequest;
 import swim.ws.WsResponse;
 import static org.testng.AssertJUnit.assertEquals;
@@ -109,7 +110,8 @@ public class RemoteHostSpec {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
-        pushUp(new TestPushRequest(clientToServerCommand));
+        pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), clientToServerCommand.nodeUri(),
+                                  clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
         clientPush.countDown();
       }
       @Override
@@ -121,14 +123,15 @@ public class RemoteHostSpec {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
-        pushUp(new TestPushRequest(serverToClientCommand));
+        pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), serverToClientCommand.nodeUri(),
+                                  serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
         serverPush.countDown();
       }
     };
     serverHost.setHostContext(new TestHostContext(hostUri, endpoint.stage()) {
       @Override
-      public void pushDown(PushRequest pushRequest) {
-        assertEquals(pushRequest.envelope().body(), clientToServerCommand.body());
+      public void pushDown(Push<?> push) {
+        assertEquals(((Envelope) push.message()).body(), clientToServerCommand.body());
         serverPull.countDown();
       }
     });
@@ -153,8 +156,8 @@ public class RemoteHostSpec {
       endpoint.bindHttp("127.0.0.1", 53556, service);
       clientHost.setHostContext(new TestHostContext(hostUri, endpoint.stage()) {
         @Override
-        public void pushDown(PushRequest pushRequest) {
-          assertEquals(pushRequest.envelope().body(), serverToClientCommand.body());
+        public void pushDown(Push<?> push) {
+          assertEquals(((Envelope) push.message()).body(), serverToClientCommand.body());
           clientPull.countDown();
         }
       });

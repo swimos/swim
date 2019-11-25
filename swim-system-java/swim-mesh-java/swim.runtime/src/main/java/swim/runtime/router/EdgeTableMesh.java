@@ -39,7 +39,7 @@ import swim.runtime.NodeAddress;
 import swim.runtime.NodeBinding;
 import swim.runtime.PartAddress;
 import swim.runtime.PartBinding;
-import swim.runtime.PushRequest;
+import swim.runtime.Push;
 import swim.store.StoreBinding;
 import swim.uri.Uri;
 
@@ -230,8 +230,8 @@ public class EdgeTableMesh implements MeshContext {
   }
 
   @Override
-  public void pushDown(PushRequest pushRequest) {
-    this.edge.pushDown(pushRequest);
+  public void pushDown(Push<?> push) {
+    this.edge.pushDown(push);
   }
 
   @Override

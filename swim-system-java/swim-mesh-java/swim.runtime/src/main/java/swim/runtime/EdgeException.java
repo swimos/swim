@@ -14,8 +14,22 @@
 
 package swim.runtime;
 
-public interface CellBinding {
-  void openUplink(LinkBinding link);
+public class EdgeException extends RuntimeException {
+  private static final long serialVersionUID = 1L;
 
-  void pushUp(Push<?> push);
+  public EdgeException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public EdgeException(String message) {
+    super(message);
+  }
+
+  public EdgeException(Throwable cause) {
+    super(cause);
+  }
+
+  public EdgeException() {
+    super();
+  }
 }

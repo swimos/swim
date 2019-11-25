@@ -51,6 +51,7 @@ import swim.api.store.Store;
 import swim.api.ws.WsDownlink;
 import swim.api.ws.WsLane;
 import swim.collections.FingerTrieSeq;
+import swim.concurrent.Cont;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.concurrent.TimerFunction;
@@ -60,6 +61,7 @@ import swim.math.Z2Form;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Log;
+import swim.warp.CommandMessage;
 
 /**
  * Abstract base class for <em>all</em> {@link Agent Agents}.  This class
@@ -641,6 +643,46 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
   @Override
   public final LaneRef laneRef(String nodeUri, String laneUri) {
     return this.context.laneRef(nodeUri, laneUri);
+  }
+
+  @Override
+  public final void command(Uri hostUri, Uri nodeUri, Uri laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    this.context.command(hostUri, nodeUri, laneUri, prio, body, cont);
+  }
+
+  @Override
+  public final void command(String hostUri, String nodeUri, String laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    this.context.command(hostUri, nodeUri, laneUri, prio, body, cont);
+  }
+
+  @Override
+  public final void command(Uri hostUri, Uri nodeUri, Uri laneUri, Value body, Cont<CommandMessage> cont) {
+    this.context.command(hostUri, nodeUri, laneUri, body, cont);
+  }
+
+  @Override
+  public final void command(String hostUri, String nodeUri, String laneUri, Value body, Cont<CommandMessage> cont) {
+    this.context.command(hostUri, nodeUri, laneUri, body, cont);
+  }
+
+  @Override
+  public final void command(Uri nodeUri, Uri laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    this.context.command(nodeUri, laneUri, prio, body, cont);
+  }
+
+  @Override
+  public final void command(String nodeUri, String laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    this.context.command(nodeUri, laneUri, prio, body, cont);
+  }
+
+  @Override
+  public final void command(Uri nodeUri, Uri laneUri, Value body, Cont<CommandMessage> cont) {
+    this.context.command(nodeUri, laneUri, body, cont);
+  }
+
+  @Override
+  public final void command(String nodeUri, String laneUri, Value body, Cont<CommandMessage> cont) {
+    this.context.command(nodeUri, laneUri, body, cont);
   }
 
   @Override

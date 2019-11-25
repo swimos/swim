@@ -35,7 +35,8 @@ import swim.runtime.LaneModel;
 import swim.runtime.Metric;
 import swim.runtime.NodeBinding;
 import swim.runtime.NodeContext;
-import swim.runtime.PushRequest;
+import swim.runtime.NodeException;
+import swim.runtime.Push;
 import swim.runtime.profile.NodeProfile;
 import swim.runtime.profile.WarpDownlinkProfile;
 import swim.runtime.profile.WarpLaneProfile;
@@ -392,8 +393,8 @@ public class AgentModel extends AgentNode {
   }
 
   @Override
-  public void pushUp(PushRequest pushRequest) {
-    execute(new AgentModelPushUp(this, pushRequest));
+  public void pushUp(Push<?> push) {
+    execute(new AgentModelPushUp(this, push));
   }
 
   @Override
@@ -844,26 +845,27 @@ final class AgentModelPulseController implements OnCue<NodePulse> {
 
 final class AgentModelPushUp implements Runnable {
   final AgentNode node;
-  final PushRequest pushRequest;
+  final Push<?> push;
 
-  AgentModelPushUp(AgentNode node, PushRequest pushRequest) {
+  AgentModelPushUp(AgentNode node, Push<?> push) {
     this.node = node;
-    this.pushRequest = pushRequest;
+    this.push = push;
   }
 
   @Override
   public void run() {
     try {
-      final LaneBinding laneBinding = this.node.getLane(this.pushRequest.envelope().laneUri());
+      final Uri laneUri = this.push.laneUri();
+      final LaneBinding laneBinding = this.node.getLane(laneUri);
       if (laneBinding != null) {
         final long t0 = System.nanoTime();
-        laneBinding.pushUp(this.pushRequest);
+        laneBinding.pushUp(this.push);
         final long dt = System.nanoTime() - t0;
         if (laneBinding instanceof LaneModel<?, ?>) {
           ((LaneModel<?, ?>) laneBinding).accumulateExecTime(dt);
         }
       } else {
-        this.pushRequest.didDecline();
+        this.push.trap(new NodeException("unknown lane: " + laneUri));
       }
     } catch (Throwable error) {
       if (Conts.isNonFatal(error)) {

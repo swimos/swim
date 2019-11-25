@@ -15,8 +15,10 @@
 package swim.runtime.warp;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+import swim.runtime.Push;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.warp.CommandMessage;
 
 public abstract class ListDownlinkModem<View extends WarpDownlinkView> extends WarpDownlinkModel<View> {
   final ConcurrentLinkedQueue<ListLinkDelta> upQueue;
@@ -54,8 +56,19 @@ public abstract class ListDownlinkModem<View extends WarpDownlinkView> extends W
 
 
   @Override
-  protected Value nextUpQueue() {
+  protected Push<CommandMessage> nextUpQueue() {
     final ListLinkDelta delta = this.upQueue.poll();
-    return delta != null ? delta.toValue() : null;
+    if (delta != null) {
+      final Uri hostUri = hostUri();
+      final Uri nodeUri = nodeUri();
+      final Uri laneUri = laneUri();
+      final float prio = prio();
+      final Value body = delta.toValue();
+      final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
+      return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
+                                      prio, null, message, null);
+    } else {
+      return null;
+    }
   }
 }

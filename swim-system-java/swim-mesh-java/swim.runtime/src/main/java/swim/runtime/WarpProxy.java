@@ -21,7 +21,6 @@ import java.util.Collection;
 import swim.api.auth.Identity;
 import swim.structure.Value;
 import swim.uri.Uri;
-import swim.warp.Envelope;
 
 public class WarpProxy implements WarpBinding, WarpContext {
   protected final WarpBinding linkBinding;
@@ -272,8 +271,8 @@ public class WarpProxy implements WarpBinding, WarpContext {
   }
 
   @Override
-  public void pushDown(Envelope envelope) {
-    this.linkBinding.pushDown(envelope);
+  public void pushDown(Push<?> push) {
+    this.linkBinding.pushDown(push);
   }
 
   @Override
@@ -302,8 +301,8 @@ public class WarpProxy implements WarpBinding, WarpContext {
   }
 
   @Override
-  public void pushUp(Envelope envelope) {
-    this.linkContext.pushUp(envelope);
+  public void pushUp(Push<?> push) {
+    this.linkContext.pushUp(push);
   }
 
   @Override
