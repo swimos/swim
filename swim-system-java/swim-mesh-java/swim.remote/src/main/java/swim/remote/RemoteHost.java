@@ -931,8 +931,11 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void didFail(Throwable error) {
-    error.printStackTrace();
-    this.warpSocketContext.write(WsClose.from(1002, error.getMessage()));
+    final WarpSocketContext warpSocketContext = this.warpSocketContext;
+    if (warpSocketContext != null) {
+      this.warpSocketContext = null;
+      warpSocketContext.close();
+    }
     this.hostContext.close();
   }
 

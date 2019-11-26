@@ -30,6 +30,7 @@ import swim.io.http.HttpClientModem;
 import swim.io.http.HttpSettings;
 import swim.io.warp.AbstractWarpClient;
 import swim.io.warp.WarpSettings;
+import swim.io.warp.WarpSocketContext;
 import swim.io.warp.WarpWebSocket;
 import swim.runtime.HostContext;
 import swim.uri.Uri;
@@ -137,6 +138,16 @@ public class RemoteHostClient extends RemoteHost {
   protected void willOpen() {
     connect();
     super.willOpen();
+  }
+
+  @Override
+  public void didFail(Throwable error) {
+    final WarpSocketContext warpSocketContext = this.warpSocketContext;
+    if (warpSocketContext != null) {
+      this.warpSocketContext = null;
+      warpSocketContext.close();
+    }
+    reconnect();
   }
 
   static final double MAX_RECONNECT_TIMEOUT = 15000.0;
