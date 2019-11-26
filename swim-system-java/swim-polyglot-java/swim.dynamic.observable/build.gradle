@@ -9,7 +9,7 @@ dependencies {
   api project(':swim-dynamic')
   api project(':swim-dynamic-java')
 
-  testCompile project(":swim-vm-js")
+  testImplementation project(":swim-vm-js")
 }
 
 test {

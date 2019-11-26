@@ -28,7 +28,7 @@ repositories {
 
 afterEvaluate {
   dependencies {
-    testCompile 'org.testng:testng:6.14.3'
+    testImplementation 'org.testng:testng:6.14.3'
   }
 
   configurations {
@@ -157,7 +157,7 @@ afterEvaluate {
     manifest {
       attributes(
         'Implementation-Title': moduleName,
-        'Implementation-Version': version)
+        'Implementation-Version': archiveVersion)
     }
   }
 

@@ -197,7 +197,7 @@ final class ByteBufferOutput extends OutputBuffer<ByteBuffer> {
   @Override
   public ByteBuffer bind() {
     final ByteBuffer dup = this.buffer.duplicate();
-    dup.flip();
+    ((Buffer) dup).flip();
     return dup;
   }
 

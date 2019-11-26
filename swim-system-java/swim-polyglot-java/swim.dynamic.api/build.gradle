@@ -10,7 +10,7 @@ dependencies {
   api project(':swim-dynamic-java')
   api project(':swim-dynamic-observable')
 
-  testCompile project(":swim-vm-js")
+  testImplementation project(":swim-vm-js")
 }
 
 test {

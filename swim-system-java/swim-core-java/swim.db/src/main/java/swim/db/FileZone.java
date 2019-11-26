@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -218,7 +219,7 @@ public class FileZone extends Zone {
           final Germ germ = chunk.germ();
           buffer = germ.toByteBuffer();
           write(channel, buffer, 0L);
-          buffer.flip();
+          ((Buffer) buffer).flip();
           write(channel, buffer, Germ.BLOCK_SIZE);
           if (commit.isForced()) {
             channel.force(true);
@@ -303,7 +304,7 @@ abstract class FileZoneReader implements Runnable {
         position += k;
       } while (k >= 0 && buffer.hasRemaining());
       if (!buffer.hasRemaining()) {
-        buffer.flip();
+        ((Buffer) buffer).flip();
         bind(buffer);
       } else {
         throw new StoreException("incomplete read from " + zone.file.getPath()

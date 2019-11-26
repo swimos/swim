@@ -25,11 +25,11 @@ def redepend(subproject) {
       }
     }
   }
-  subproject.configurations.testCompile.dependencies.toArray().each { dependency ->
+  subproject.configurations.testImplementation.dependencies.toArray().each { dependency ->
     if (dependency instanceof ExternalModuleDependency && dependency.group == "org.swimos") {
-      subproject.configurations.testCompile.dependencies.remove(dependency)
+      subproject.configurations.testImplementation.dependencies.remove(dependency)
       subproject.dependencies {
-        testCompile project(':' + dependency.name)
+        testImplementation project(':' + dependency.name)
       }
     }
   }

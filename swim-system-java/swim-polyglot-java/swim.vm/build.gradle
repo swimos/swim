@@ -9,5 +9,5 @@ dependencies {
   api project(':swim-dynamic')
   api group: 'org.graalvm.sdk', name: 'graal-sdk', version: graalVersion
 
-  testCompile group: 'org.graalvm.js', name: 'js', version: graalVersion
+  testImplementation group: 'org.graalvm.js', name: 'js', version: graalVersion
 }

@@ -13,7 +13,7 @@ dependencies {
   implementation project(':swim-dynamic-api')
   api project(':swim-vm-js')
 
-  testCompile group: 'org.swimos', name: 'swim-server', version: version
+  testImplementation group: 'org.swimos', name: 'swim-server', version: version
 }
 
 test {

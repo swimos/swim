@@ -10,7 +10,7 @@ dependencies {
   api project(':swim-vm')
   implementation group: 'org.graalvm.js', name: 'js', version: graalVersion
 
-  testCompile project(":swim-dynamic-structure")
+  testImplementation project(":swim-dynamic-structure")
 }
 
 test {

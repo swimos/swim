@@ -7,7 +7,7 @@ ext.moduleName = 'swim.dynamic.java'
 dependencies {
   api project(':swim-dynamic')
 
-  testCompile project(":swim-vm-js")
+  testImplementation project(":swim-vm-js")
 }
 
 test {
