@@ -255,8 +255,10 @@ afterEvaluate {
     }
   }
 
-  signing {
-    required { isReleaseVersion && gradle.taskGraph.hasTask('publish') }
-    sign publishing.publications.mavenJava
+  if (isReleaseVersion) {
+    signing {
+      required { gradle.taskGraph.hasTask('publish') }
+      sign publishing.publications.mavenJava
+    }
   }
 }
