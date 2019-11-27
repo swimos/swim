@@ -63,11 +63,13 @@ public class ListDownlinkSpec {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestListPlane.class);
-
+  
+    final CountDownLatch didSyncListLinkLatch = new CountDownLatch(1);
+    final CountDownLatch didSyncReadOnlyListLinkLatch = new CountDownLatch(1);
     final CountDownLatch linkDidReceive = new CountDownLatch(3);
     final CountDownLatch linkWillUpdate = new CountDownLatch(6);
     final CountDownLatch linkDidUpdate = new CountDownLatch(3);
-    final CountDownLatch readOnlyLinkDidUpdate = new CountDownLatch(6);
+    final CountDownLatch readOnlyLinkDidUpdate = new CountDownLatch(3);
     class ListLinkController implements WillUpdateIndex<String>, DidUpdateIndex<String>, WillReceive, DidReceive {
       @Override
       public String willUpdate(int index, String newValue) {
@@ -107,6 +109,7 @@ public class ListDownlinkSpec {
           .nodeUri("/list/todo")
           .laneUri("list")
           .observe(new ListLinkController())
+          .didSync(didSyncListLinkLatch::countDown)
           .open();
       final ListDownlink<String> readOnlyListLink = plane.downlinkList()
           .valueClass(String.class)
@@ -114,12 +117,17 @@ public class ListDownlinkSpec {
           .nodeUri("/list/todo")
           .laneUri("list")
           .observe(new ReadOnlyListLinkController())
+          .didSync(didSyncReadOnlyListLinkLatch::countDown)
           .open();
+      
+      didSyncListLinkLatch.await();
+      didSyncReadOnlyListLinkLatch.await();
+      
       listLink.add(0, "a");
       listLink.add(1, "b");
       listLink.add(2, "c");
-      linkDidReceive.await(1, TimeUnit.SECONDS);
-      linkDidUpdate.await(1, TimeUnit.SECONDS);
+      linkDidReceive.await();
+      linkDidUpdate.await();
       assertEquals(linkDidReceive.getCount(), 0);
       assertEquals(linkWillUpdate.getCount(), 0);
       assertEquals(linkDidUpdate.getCount(), 0);
@@ -127,7 +135,7 @@ public class ListDownlinkSpec {
       assertEquals(listLink.get(0), "a");
       assertEquals(listLink.get(1), "b");
       assertEquals(listLink.get(2), "c");
-      readOnlyLinkDidUpdate.await(1, TimeUnit.SECONDS);
+      readOnlyLinkDidUpdate.await();
       assertEquals(readOnlyListLink.size(), 3);
       assertEquals(readOnlyListLink.get(0), "a");
       assertEquals(readOnlyListLink.get(1), "b");
@@ -609,6 +617,10 @@ public class ListDownlinkSpec {
     final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
         .openPlane("test", TestListPlane.class);
     final int total = 3;
+  
+  
+    final CountDownLatch didSyncListLinkLatch = new CountDownLatch(1);
+    final CountDownLatch didSyncReadOnlyListLinkLatch = new CountDownLatch(1);
     final CountDownLatch didUpdate = new CountDownLatch(2 * total);
     final CountDownLatch willClear = new CountDownLatch(2);
     final CountDownLatch didClear = new CountDownLatch(2);
@@ -660,6 +672,7 @@ public class ListDownlinkSpec {
           .nodeUri("/list/todo")
           .laneUri("list")
           .observe(new ListLinkController())
+          .didSync(didSyncListLinkLatch::countDown)
           .open();
       final ListDownlink<String> readOnlyListLink = plane.downlinkList()
           .valueClass(String.class)
@@ -667,26 +680,31 @@ public class ListDownlinkSpec {
           .nodeUri("/list/todo")
           .laneUri("list")
           .observe(new ReadOnlyListLinkController())
+          .didSync(didSyncReadOnlyListLinkLatch::countDown)
           .open();
       listLink.observe(new ListLinkController()).open();
       for (int i = 0; i < total; i++) {
         listLink.add(i, Integer.toString(i));
       }
-
-      didUpdate.await(2, TimeUnit.SECONDS);
+  
+  
+      didSyncListLinkLatch.await();
+      didSyncReadOnlyListLinkLatch.await();
+      
+      didUpdate.await();
       assertEquals(didUpdate.getCount(), 0);
       assertEquals(listLink.size(), total);
-      readOnlyDidUpdate.await(2, TimeUnit.SECONDS);
+      readOnlyDidUpdate.await();
       assertEquals(didUpdate.getCount(), 0);
       assertEquals(readOnlyListLink.size(), total);
 
       listLink.clear();
-      didClear.await(2, TimeUnit.SECONDS);
+      didClear.await();
       assertEquals(willClear.getCount(), 0);
       assertEquals(didClear.getCount(), 0);
       assertEquals(listLink.size(), 0);
 
-      readOnlyDidClear.await(2, TimeUnit.SECONDS);
+      readOnlyDidClear.await();
       assertEquals(readOnlyListLink.size(), 0);
     } finally {
       kernel.stop();
