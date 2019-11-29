@@ -42,7 +42,7 @@ final class Base64Parser<O> extends Parser<O> {
 
   static <O> Parser<O> parse(Input input, Output<O> output, Base64 base64, int p, int q, int r, int step) {
     int c = 0;
-    while (!input.isEmpty()) {
+    while (!input.isError() && !input.isEmpty()) {
       if (step == 1) {
         if (input.isCont()) {
           c = input.head();
