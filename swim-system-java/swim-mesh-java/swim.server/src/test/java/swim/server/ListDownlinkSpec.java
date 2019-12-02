@@ -683,13 +683,13 @@ public class ListDownlinkSpec {
           .didSync(didSyncReadOnlyListLinkLatch::countDown)
           .open();
       listLink.observe(new ListLinkController()).open();
-      for (int i = 0; i < total; i++) {
-        listLink.add(i, Integer.toString(i));
-      }
-  
   
       didSyncListLinkLatch.await();
       didSyncReadOnlyListLinkLatch.await();
+      
+      for (int i = 0; i < total; i++) {
+        listLink.add(i, Integer.toString(i));
+      }
       
       didUpdate.await();
       assertEquals(didUpdate.getCount(), 0);
