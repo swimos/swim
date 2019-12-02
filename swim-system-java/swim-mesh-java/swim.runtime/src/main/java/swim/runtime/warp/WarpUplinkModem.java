@@ -702,7 +702,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
             oldStatus = this.status;
             if ((oldStatus & (SYNCING | CUED_DOWN)) == 0 && downQueueIsEmpty()) {
               newStatus = oldStatus & ~FEEDING_DOWN;
-              if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
+              boolean statusHasChanged = STATUS.compareAndSet(this, oldStatus, newStatus);
+              if (downQueueIsEmpty() && (oldStatus == newStatus || statusHasChanged)){
                 break;
               }
             } else {
