@@ -46,6 +46,8 @@ public abstract class ListUplinkModem extends WarpUplinkModem {
           this.linkBinding.feedDown();
           break;
         }
+      } else {
+        break;
       }
     } while (true);
   }
