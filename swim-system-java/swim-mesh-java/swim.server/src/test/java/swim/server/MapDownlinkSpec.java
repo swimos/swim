@@ -195,15 +195,11 @@ public class MapDownlinkSpec {
       public void didReceive(Value body) {
         System.out.println("MapLinkController- didReceive");
         
-        if(didReceivePut.getCount() > 0)
-        {
+        if (didReceivePut.getCount() > 0) {
           didReceivePut.countDown();
-        }
-        else
-        {
+        } else {
           didReceiveRemove.countDown();
         }
-        
       }
 
       @Override
@@ -223,12 +219,9 @@ public class MapDownlinkSpec {
       @Override
       public void didReceive(Value body) {
         System.out.println("ReadOnlyMapLinkController- link didReceive body: " + Recon.toString(body));
-        if(readOnlyLinkDidReceivePut.getCount() > 0)
-        {
+        if (readOnlyLinkDidReceivePut.getCount() > 0) {
           readOnlyLinkDidReceivePut.countDown();
-        }
-        else
-        {
+        } else {
           readOnlyLinkDidReceiveRemove.countDown();
         }
       }

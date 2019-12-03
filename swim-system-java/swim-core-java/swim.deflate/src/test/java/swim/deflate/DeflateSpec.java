@@ -14,14 +14,14 @@
 
 package swim.deflate;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import org.testng.TestException;
 import org.testng.annotations.Test;
 import swim.codec.Binary;
 import swim.codec.Encoder;
 import swim.codec.OutputBuffer;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 import static swim.deflate.DeflateUtil.readResource;

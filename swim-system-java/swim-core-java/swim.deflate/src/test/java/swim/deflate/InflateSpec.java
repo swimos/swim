@@ -14,12 +14,12 @@
 
 package swim.deflate;
 
+import java.nio.charset.Charset;
 import org.testng.TestException;
 import org.testng.annotations.Test;
 import swim.codec.Binary;
 import swim.codec.Decoder;
 import swim.codec.Output;
-import java.nio.charset.Charset;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;

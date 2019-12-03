@@ -14,12 +14,16 @@
 
 package swim.deflate;
 
-import org.testng.TestException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import org.testng.TestException;
 
-class DeflateUtil {
+final class DeflateUtil {
+
+  private DeflateUtil() {
+
+  }
 
   /**
    * Reads a given resources by its name removing carriage returns as requested
@@ -31,7 +35,7 @@ class DeflateUtil {
   static byte[] readResource(String resource, boolean removeCr) {
     try (InputStream input = DeflateSpec.class.getResourceAsStream(resource)) {
       final byte[] buffer = new byte[4096];
-      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      final ByteArrayOutputStream output = new ByteArrayOutputStream();
       int count;
 
       while (true) {
@@ -60,7 +64,7 @@ class DeflateUtil {
       return output.toByteArray();
     }
 
-    String str = new String(output.toByteArray());
+    final String str = new String(output.toByteArray());
     return str.replace("\r", "").getBytes();
   }
 
