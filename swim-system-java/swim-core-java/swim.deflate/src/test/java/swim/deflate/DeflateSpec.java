@@ -14,32 +14,32 @@
 
 package swim.deflate;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import org.testng.TestException;
 import org.testng.annotations.Test;
 import swim.codec.Binary;
 import swim.codec.Encoder;
 import swim.codec.OutputBuffer;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
+import static swim.deflate.DeflateUtil.readResource;
 
 public class DeflateSpec {
+
   @Test
   public void deflateFixed() {
     assertDeflates("Hello",
-                   byteArray(0xf2, 0x48, 0xcd, 0xc9, 0xc9, 0x07, 0x00, 0x00, 0x00, 0xff, 0xff),
-                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
+        byteArray(0xf2, 0x48, 0xcd, 0xc9, 0xc9, 0x07, 0x00, 0x00, 0x00, 0xff, 0xff),
+        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
   }
 
   @Test
   public void deflateLencode() {
     assertDeflates("HelloHelloHello",
-                   byteArray(0xf2, 0x48, 0xcd, 0xc9, 0xc9, 0xf7, 0x80, 0x13, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff),
-                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
+        byteArray(0xf2, 0x48, 0xcd, 0xc9, 0xc9, 0xf7, 0x80, 0x13, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff),
+        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
   }
 
   @Test
@@ -47,16 +47,16 @@ public class DeflateSpec {
     //writeDeflatedFile(readResource("/lorem.txt"),
     //                  "lorem.txt.deflate",
     //                  Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
-    assertDeflates(readResource("/lorem.txt"),
-                   readResource("/lorem.txt.deflate"),
-                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
+    assertDeflates(readResource("/lorem.txt", true),
+        readResource("/lorem.txt.deflate", false),
+        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
   }
 
   @Test
   public void deflateLoremIncrementally() {
-    assertDeflates(readResource("/lorem.txt"),
-                   readResource("/lorem.txt.deflate"),
-                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH, 128);
+    assertDeflates(readResource("/lorem.txt", true),
+        readResource("/lorem.txt.deflate", false),
+        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH, 128);
   }
 
   @Test
@@ -64,16 +64,16 @@ public class DeflateSpec {
     //writeDeflatedFile(readResource("/image.tiff"),
     //                  "image.tiff.deflate",
     //                  Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
-    assertDeflates(readResource("/image.tiff"),
-                   readResource("/image.tiff.deflate"),
-                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
+    assertDeflates(readResource("/image.tiff", false),
+        readResource("/image.tiff.deflate", false),
+        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
   }
 
   @Test
   public void deflateImageIncrementally() {
-    assertDeflates(readResource("/image.tiff"),
-                   readResource("/image.tiff.deflate"),
-                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH, 1024);
+    assertDeflates(readResource("/image.tiff", false),
+        readResource("/image.tiff.deflate", false),
+        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH, 1024);
   }
 
   @Test
@@ -81,21 +81,24 @@ public class DeflateSpec {
     //writeDeflatedFile(readResource("/image.tiff"),
     //                  "image.tiff.gz",
     //                  Deflate.Z_WRAP_GZIP, Deflate.MAX_WBITS, Z_FINISH);
-    assertDeflates(readResource("/image.tiff"),
-                   readResource("/image.tiff.gz"),
-                   Deflate.Z_WRAP_GZIP, Deflate.MAX_WBITS, Deflate.Z_FINISH);
+    assertDeflates(readResource("/image.tiff", false),
+        readResource("/image.tiff.gz", false),
+        Deflate.Z_WRAP_GZIP, Deflate.MAX_WBITS, Deflate.Z_FINISH);
   }
 
   static void assertDeflates(byte[] inflated, byte[] deflated, int wrap, int windowBits, int flush, int bufferSize) {
     final byte[] actual = new byte[deflated.length];
-    Encoder<?, byte[]> deflater = new Deflate<byte[]>(Binary.byteArrayWriter(inflated), wrap, Deflate.Z_DEFAULT_COMPRESSION, windowBits).flush(flush);
+    Encoder<?, byte[]> deflater = new Deflate<>(Binary.byteArrayWriter(inflated), wrap, Deflate.Z_DEFAULT_COMPRESSION, windowBits).flush(flush);
     for (int i = 0; i < actual.length; i += bufferSize) {
       deflater = deflater.pull(Binary.outputBuffer(actual, i, Math.min(bufferSize, actual.length - i)).isPart(actual.length - i > bufferSize));
+
       if (deflater.isError()) {
         throw new TestException(deflater.trap());
       }
     }
+
     assertTrue(deflater.isDone());
+
     for (int i = 0, n = deflated.length; i < n; i += 1) {
       if ((actual[i] & 0xff) != (deflated[i] & 0xff)) {
         fail("expected 0x" + Integer.toHexString(deflated[i] & 0xff)
@@ -126,24 +129,6 @@ public class DeflateSpec {
     return array;
   }
 
-  static byte[] readResource(String resource) {
-    try (InputStream input = DeflateSpec.class.getResourceAsStream(resource)) {
-      final ByteArrayOutputStream output = new ByteArrayOutputStream();
-      final byte[] buffer = new byte[4096];
-      int count;
-      while (true) {
-        count = input.read(buffer);
-        if (count <= 0) {
-          break;
-        }
-        output.write(buffer, 0, count);
-      }
-      return output.toByteArray();
-    } catch (IOException cause) {
-      throw new TestException(cause);
-    }
-  }
-
   static void writeDeflatedFile(byte[] inflated, String path, int wrap, int windowBits, int flush) {
     final byte[] deflated = new byte[inflated.length];
     final OutputBuffer<?> deflatedBuffer = Binary.outputBuffer(deflated);
@@ -159,4 +144,5 @@ public class DeflateSpec {
       throw new TestException(cause);
     }
   }
+
 }

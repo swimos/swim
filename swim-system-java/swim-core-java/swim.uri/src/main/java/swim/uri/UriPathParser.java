@@ -66,7 +66,7 @@ final class UriPathParser extends Parser<UriPath> {
             break;
           }
         }
-        if (input.isCont() && c == '/') {
+        if (input.isCont() && (c == '/' || c == '\\')) {
           input = input.step();
           if (builder == null) {
             builder = uri.pathBuilder();
