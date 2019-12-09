@@ -126,10 +126,12 @@ afterEvaluate {
     checkstyleMain {
       source = sourceSets.main.allJava
       exclude '*module-info*'
+      outputs.upToDateWhen { false }
     }
     checkstyleTest {
       source = sourceSets.test.allJava
       exclude '*module-info*'
+      outputs.upToDateWhen { false }
     }
   }
 
