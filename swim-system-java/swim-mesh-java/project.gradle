@@ -131,33 +131,6 @@ afterEvaluate {
     }
   }
   
-//  task isLinuxOrMacOs() {
-//    group 'git hooks'
-//    def osName = System.getProperty('os.name').toLowerCase(Locale.ROOT)
-//    return osName.contains('linux') || osName.contains('mac os') || osName.contains('macos')
-//  }
-//
-//  task copyGitHook(type: Copy) {
-//    description 'Copies the git hook .pre-commit to the .git folder.'
-//    group 'git hooks'
-//    from new File(rootProject.rootDir, 'swim-system-java', 'swim-mesh-java', '.pre-commit')
-//    into { new File(rootProject.rootDir, '.git/hooks') }
-////    onlyIf { isLinuxOrMacOs() }
-//  }
-//
-//  task installGitHook(type: Exec) {
-//    description 'Installs the pre-commit git hooks from team-props/git-hooks.'
-//    group 'git hooks'
-//    workingDir rootDir
-//    commandLine 'chmod'
-//    args '-R', '+x', '.git/hooks/'
-//    dependsOn copyGitHook
-////    onlyIf { isLinuxOrMacOs() }
-//    doLast {
-//      logger.info('Git hook installed successfully.')
-//    }
-//  }
-
   javadoc {
     if (useModules) {
       options.addStringOption('-module-path', classpath.asPath)
