@@ -130,7 +130,7 @@ afterEvaluate {
       outputs.upToDateWhen { false }
     }
   }
-  
+
   javadoc {
     if (useModules) {
       options.addStringOption('-module-path', classpath.asPath)
