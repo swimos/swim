@@ -175,5 +175,5 @@ task installCommitHook(type: Copy) {
 
 task removeCommitHook(type: Delete) {
   group 'hooks'
-  delete '../.git/hooks', 'pre-commit'
+  delete file(rootProject.rootDir.parent + '/.git/hooks/pre-commit')
 }

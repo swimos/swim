@@ -1,7 +1,5 @@
 #!/bin/sh
-git stash -q --keep-index
 cd swim-system-java
-./gradlew task checkstyleMain -PfailOnWarning=true --daemon
+./gradlew checkstyleMain checkstyleTest -PfailOnWarning=true --daemon --warn
 RESULT=$?
-git stash pop -q
 exit $RESULT
