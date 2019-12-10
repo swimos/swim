@@ -164,3 +164,16 @@ gradle.projectsEvaluated {
     archives javadocJar
   }
 }
+
+task installCommitHook(type: Copy) {
+  group 'hooks'
+  
+  from new File(rootProject.rootDir, 'pre-commit')
+  into { new File(rootProject.rootDir.parent, '/.git/hooks') }
+  fileMode 0777
+}
+
+task removeCommitHook(type: Delete) {
+  group 'hooks'
+  delete '../.git/hooks', 'pre-commit'
+}
