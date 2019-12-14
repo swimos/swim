@@ -38,6 +38,7 @@ import swim.structure.form.ByteForm;
 import swim.structure.form.CharacterForm;
 import swim.structure.form.CollectionForm;
 import swim.structure.form.DoubleForm;
+import swim.structure.form.EnumForm;
 import swim.structure.form.FloatForm;
 import swim.structure.form.IntegerForm;
 import swim.structure.form.ItemForm;
@@ -414,6 +415,8 @@ public abstract class Form<T> {
     if (type.isArray()) {
       final Class<?> componentType = type.getComponentType();
       return forArray(componentType, forClass(componentType));
+    } else if (type.isEnum()) {
+      return forEnumInternal(type.asSubclass(Enum.class));
     } else {
       Form<T> form = forBuiltin(type);
       if (form != null) {
@@ -436,5 +439,20 @@ public abstract class Form<T> {
    */
   public static <T> Form<T> forClass(Class<?> type) {
     return forClass(type, null);
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private static <T> Form<T> forEnumInternal(final Class<? extends Enum> type) {
+    return (Form<T>) forEnum(type);
+  }
+
+  /**
+   * Returns a {@link Form} for an enumerated type.
+   * @param type Class for the enumerated type.
+   * @param <E> The type of the enumeration.
+   * @return The form for the enumeration.
+   */
+  public static <E extends Enum<E>> Form<E> forEnum(final Class<E> type) {
+    return new EnumForm<>(type);
   }
 }
