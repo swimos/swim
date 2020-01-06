@@ -24,26 +24,26 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
 
   @Override
   public boolean isClosed() {
-    final int phase = (this.status & PHASE_MASK) >>> PHASE_SHIFT;
-    return phase == CLOSED_PHASE;
+    final int state = (this.status & STATE_MASK);
+    return state == CLOSED_STATE;
   }
 
   @Override
   public boolean isOpened() {
-    final int phase = (this.status & PHASE_MASK) >>> PHASE_SHIFT;
-    return phase >= OPENED_PHASE;
+    final int state = (this.status & STATE_MASK);
+    return state >= OPENED_STATE;
   }
 
   @Override
   public boolean isLoaded() {
-    final int phase = (this.status & PHASE_MASK) >>> PHASE_SHIFT;
-    return phase >= LOADED_PHASE;
+    final int state = (this.status & STATE_MASK);
+    return state >= LOADED_STATE;
   }
 
   @Override
   public boolean isStarted() {
-    final int phase = (this.status & PHASE_MASK) >>> PHASE_SHIFT;
-    return phase == STARTED_PHASE;
+    final int state = (this.status & STATE_MASK);
+    return state == STARTED_STATE;
   }
 
   protected void activate(TierBinding childTier) {
