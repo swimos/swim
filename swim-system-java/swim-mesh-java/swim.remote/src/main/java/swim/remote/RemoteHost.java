@@ -1055,18 +1055,16 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void disconnectUplinks() {
-    if (isConnected()) {
-      final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
-      while (nodeUplinksIterator.hasNext()) {
-        final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = nodeUplinksIterator.next();
-        final Iterator<HashTrieSet<RemoteWarpUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
-        while (laneUplinksIterator.hasNext()) {
-          final HashTrieSet<RemoteWarpUplink> laneUplinks = laneUplinksIterator.next();
-          final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
-          while (uplinksIterator.hasNext()) {
-            final RemoteWarpUplink uplink = uplinksIterator.next();
-            uplink.didDisconnect();
-          }
+    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
+    while (nodeUplinksIterator.hasNext()) {
+      final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = nodeUplinksIterator.next();
+      final Iterator<HashTrieSet<RemoteWarpUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
+      while (laneUplinksIterator.hasNext()) {
+        final HashTrieSet<RemoteWarpUplink> laneUplinks = laneUplinksIterator.next();
+        final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
+        while (uplinksIterator.hasNext()) {
+          final RemoteWarpUplink uplink = uplinksIterator.next();
+          uplink.didDisconnect();
         }
       }
     }
