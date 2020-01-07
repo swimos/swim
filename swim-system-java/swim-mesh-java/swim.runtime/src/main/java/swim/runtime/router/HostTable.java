@@ -385,7 +385,9 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
       } else {
         newNodes = oldNodes.updated(nodeUri, nodeBinding);
       }
-    } while (nodeBinding == null || (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes)));
+    } while (nodeBinding == null
+        || (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes)));
+
     if (oldNodes != newNodes) {
       activate(nodeBinding);
       didOpenNode(nodeBinding);
