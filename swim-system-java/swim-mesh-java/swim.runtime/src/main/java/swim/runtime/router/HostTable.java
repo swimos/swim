@@ -360,8 +360,12 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
           // Lost creation race.
           nodeBinding.close();
         }
-        nodeBinding = node;
         newNodes = oldNodes;
+        if (node.isStarted()) {
+          nodeBinding = node;
+        } else {
+          nodeBinding = null;
+        }
         break;
       } else if (nodeBinding == null) {
         final NodeAddress nodeAddress = cellAddress().nodeUri(nodeUri);
@@ -381,7 +385,9 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
       } else {
         newNodes = oldNodes.updated(nodeUri, nodeBinding);
       }
-    } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
+    } while (nodeBinding == null
+        || (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes)));
+
     if (oldNodes != newNodes) {
       activate(nodeBinding);
       didOpenNode(nodeBinding);
