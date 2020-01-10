@@ -123,6 +123,11 @@ afterEvaluate {
   checkstyle {
     configFile = new File(rootDir, 'checkstyle.xml')
     toolVersion "8.22"
+  
+    if(project.hasProperty("failOnWarning")){
+      maxWarnings = 0
+    }
+    
     checkstyleMain {
       source = sourceSets.main.allJava
       exclude '*module-info*'

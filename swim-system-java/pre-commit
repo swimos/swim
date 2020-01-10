@@ -1,0 +1,5 @@
+#!/bin/sh
+cd swim-system-java
+./gradlew checkstyleMain checkstyleTest -PfailOnWarning=true --daemon --warn
+RESULT=$?
+exit $RESULT

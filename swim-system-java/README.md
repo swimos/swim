@@ -218,3 +218,9 @@ swim-system-java $ ./gradlew test
 ```sh
 swim-system-java $ ./gradlew :javadoc
 ```
+
+### Setting up a checkstyle commit hook
+
+```sh
+swim-system-java $ ./gradlew installCommitHook
+```
