@@ -23,9 +23,6 @@ import swim.dynamic.api.warp.HostWarpLane;
 import swim.dynamic.observable.HostObservableValue;
 
 public final class HostValueLane {
-  private HostValueLane() {
-    // static
-  }
 
   public static final HostObjectType<ValueLane<Object>> TYPE;
 
@@ -39,9 +36,15 @@ public final class HostValueLane {
     type.addMember(new HostValueLaneObserve());
     type.addMember(new HostValueLaneUnobserve());
   }
+
+  private HostValueLane() {
+    // static
+  }
+
 }
 
 final class HostValueLaneIsResident implements HostMethod<ValueLane<Object>> {
+
   @Override
   public String key() {
     return "isResident";
@@ -56,9 +59,11 @@ final class HostValueLaneIsResident implements HostMethod<ValueLane<Object>> {
       return lane.isResident((boolean) isResident);
     }
   }
+
 }
 
 final class HostValueLaneIsTransient implements HostMethod<ValueLane<Object>> {
+
   @Override
   public String key() {
     return "isTransient";
@@ -73,9 +78,11 @@ final class HostValueLaneIsTransient implements HostMethod<ValueLane<Object>> {
       return lane.isTransient((boolean) isTransient);
     }
   }
+
 }
 
 final class HostValueLaneObserve implements HostMethod<ValueLane<Object>> {
+
   @Override
   public String key() {
     return "observe";
@@ -88,9 +95,11 @@ final class HostValueLaneObserve implements HostMethod<ValueLane<Object>> {
     lane.observe(observer);
     return this;
   }
+
 }
 
 final class HostValueLaneUnobserve implements HostMethod<ValueLane<Object>> {
+
   @Override
   public String key() {
     return "unobserve";
@@ -103,4 +112,5 @@ final class HostValueLaneUnobserve implements HostMethod<ValueLane<Object>> {
     lane.unobserve(observer);
     return this;
   }
+
 }

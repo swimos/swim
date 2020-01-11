@@ -22,9 +22,6 @@ import swim.dynamic.JavaHostObjectType;
 import swim.dynamic.java.lang.HostObject;
 
 public final class HostPlane {
-  private HostPlane() {
-    // static
-  }
 
   public static final HostObjectType<Plane> TYPE;
 
@@ -34,9 +31,15 @@ public final class HostPlane {
     type.inheritType(HostObject.TYPE);
     type.addMember(new HostPlanePlaneContext());
   }
+
+  private HostPlane() {
+    // static
+  }
+
 }
 
 final class HostPlanePlaneContext implements HostMethod<Plane> {
+
   @Override
   public String key() {
     return "planeContext";
@@ -46,4 +49,5 @@ final class HostPlanePlaneContext implements HostMethod<Plane> {
   public Object invoke(Bridge bridge, Plane plane, Object... arguments) {
     return plane.planeContext();
   }
+
 }

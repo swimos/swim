@@ -18,6 +18,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class AnyParser<I, V> extends Parser<V> {
+
   final DecipherParser<I, V> decipher;
   final Parser<V> xmlParser;
   final Parser<V> jsonParser;
@@ -33,11 +34,6 @@ final class AnyParser<I, V> extends Parser<V> {
 
   AnyParser(DecipherParser<I, V> decipher) {
     this(decipher, null, null, null);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.decipher, this.xmlParser, this.jsonParser, this.reconParser);
   }
 
   static <I, V> Parser<V> parse(Input input, DecipherParser<I, V> decipher, Parser<V> xmlParser,
@@ -95,4 +91,10 @@ final class AnyParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parse(Input input, DecipherParser<I, V> decipher) {
     return parse(input, decipher, null, null, null);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.decipher, this.xmlParser, this.jsonParser, this.reconParser);
+  }
+
 }

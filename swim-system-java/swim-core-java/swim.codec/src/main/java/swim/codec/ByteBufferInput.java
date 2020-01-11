@@ -18,6 +18,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 final class ByteBufferInput extends InputBuffer {
+
   ByteBuffer buffer;
   Object id;
   long offset;
@@ -243,6 +244,7 @@ final class ByteBufferInput extends InputBuffer {
   @Override
   public InputBuffer clone() {
     return new ByteBufferInput(this.buffer.duplicate(), this.id, this.offset,
-                               this.settings, this.isPart);
+        this.settings, this.isPart);
   }
+
 }

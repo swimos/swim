@@ -22,6 +22,7 @@ import swim.codec.Parser;
 import swim.codec.Utf8;
 
 final class UriFragmentParser extends Parser<UriFragment> {
+
   final UriParser uri;
   final Output<String> output;
   final int c1;
@@ -36,11 +37,6 @@ final class UriFragmentParser extends Parser<UriFragment> {
 
   UriFragmentParser(UriParser uri) {
     this(uri, null, 0, 1);
-  }
-
-  @Override
-  public Parser<UriFragment> feed(Input input) {
-    return parse(input, this.uri, this.output, this.c1, this.step);
   }
 
   static Parser<UriFragment> parse(Input input, UriParser uri,
@@ -108,4 +104,10 @@ final class UriFragmentParser extends Parser<UriFragment> {
   static Parser<UriFragment> parse(Input input, UriParser uri) {
     return parse(input, uri, null, 0, 1);
   }
+
+  @Override
+  public Parser<UriFragment> feed(Input input) {
+    return parse(input, this.uri, this.output, this.c1, this.step);
+  }
+
 }

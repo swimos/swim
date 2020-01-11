@@ -15,10 +15,28 @@
 package swim.codec;
 
 final class ByteParser<O> extends Parser<O> {
+
   final Output<O> output;
 
   ByteParser(Output<O> output) {
     this.output = output;
+  }
+
+  static <O> Parser<O> parse(Input input, Output<O> output) {
+    while (input.isCont() && output.isCont()) {
+      output = output.write(input.head());
+      input = input.step();
+    }
+    if (input.isDone()) {
+      return done(output.bind());
+    } else if (input.isError()) {
+      return error(input.trap());
+    } else if (output.isDone()) {
+      return error(new ParserException("incomplete"));
+    } else if (output.isError()) {
+      return error(output.trap());
+    }
+    return new ByteParser<O>(output);
   }
 
   @Override
@@ -40,20 +58,4 @@ final class ByteParser<O> extends Parser<O> {
     return this;
   }
 
-  static <O> Parser<O> parse(Input input, Output<O> output) {
-    while (input.isCont() && output.isCont()) {
-      output = output.write(input.head());
-      input = input.step();
-    }
-    if (input.isDone()) {
-      return done(output.bind());
-    } else if (input.isError()) {
-      return error(input.trap());
-    } else if (output.isDone()) {
-      return error(new ParserException("incomplete"));
-    } else if (output.isError()) {
-      return error(output.trap());
-    }
-    return new ByteParser<O>(output);
-  }
 }

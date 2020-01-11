@@ -25,10 +25,44 @@ import swim.http.HttpWriter;
 import swim.util.Murmur3;
 
 public final class SecWebSocketVersion extends HttpHeader {
+
+  private static int hashSeed;
+  private static SecWebSocketVersion version13;
   final FingerTrieSeq<Integer> versions;
 
   SecWebSocketVersion(FingerTrieSeq<Integer> versions) {
     this.versions = versions;
+  }
+
+  public static SecWebSocketVersion version13() {
+    if (version13 == null) {
+      version13 = new SecWebSocketVersion(FingerTrieSeq.of(13));
+    }
+    return version13;
+  }
+
+  public static SecWebSocketVersion from(FingerTrieSeq<Integer> versions) {
+    if (versions.size() == 1) {
+      final int version = versions.head();
+      if (version == 13) {
+        return version13();
+      }
+    }
+    return new SecWebSocketVersion(versions);
+  }
+
+  public static SecWebSocketVersion from(Integer... versions) {
+    if (versions.length == 1) {
+      final int version = versions[0];
+      if (version == 13) {
+        return version13();
+      }
+    }
+    return new SecWebSocketVersion(FingerTrieSeq.of(versions));
+  }
+
+  public static Parser<SecWebSocketVersion> parseHttpValue(Input input, HttpParser http) {
+    return SecWebSocketVersionParser.parse(input);
   }
 
   @Override
@@ -91,38 +125,4 @@ public final class SecWebSocketVersion extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  private static SecWebSocketVersion version13;
-
-  public static SecWebSocketVersion version13() {
-    if (version13 == null) {
-      version13 = new SecWebSocketVersion(FingerTrieSeq.of(13));
-    }
-    return version13;
-  }
-
-  public static SecWebSocketVersion from(FingerTrieSeq<Integer> versions) {
-    if (versions.size() == 1) {
-      final int version = versions.head();
-      if (version == 13) {
-        return version13();
-      }
-    }
-    return new SecWebSocketVersion(versions);
-  }
-
-  public static SecWebSocketVersion from(Integer... versions) {
-    if (versions.length == 1) {
-      final int version = versions[0];
-      if (version == 13) {
-        return version13();
-      }
-    }
-    return new SecWebSocketVersion(FingerTrieSeq.of(versions));
-  }
-
-  public static Parser<SecWebSocketVersion> parseHttpValue(Input input, HttpParser http) {
-    return SecWebSocketVersionParser.parse(input);
-  }
 }

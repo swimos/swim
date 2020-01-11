@@ -19,6 +19,7 @@ import swim.structure.Data;
 import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttDisconnectSpec {
+
   public static void assertDecodes(Data data, MqttDisconnect packet) {
     MqttAssertions.assertDecodesPacket(data, packet);
   }
@@ -32,4 +33,5 @@ public class MqttDisconnectSpec {
   public void encodeDisconnectPackets() {
     assertEncodes(MqttDisconnect.packet(), Data.fromBase16("E000"));
   }
+
 }

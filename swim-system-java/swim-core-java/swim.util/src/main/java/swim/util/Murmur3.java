@@ -21,6 +21,7 @@ import java.nio.ByteOrder;
  * algorithm, version 3.
  */
 public final class Murmur3 {
+
   private Murmur3() {
   }
 
@@ -155,11 +156,12 @@ public final class Murmur3 {
       throw new AssertionError();
     }
   }
+
   static int mixByteArrayBE(int code, byte[] array, int offset, int size) {
     final int limit = offset + size;
     while (offset + 3 < limit) {
-      final int word = (array[offset    ] & 0xff) << 24 | (array[offset + 1] & 0xff) << 16
-                     | (array[offset + 2] & 0xff) <<  8 |  array[offset + 3] & 0xff;
+      final int word = (array[offset] & 0xff) << 24 | (array[offset + 1] & 0xff) << 16
+          | (array[offset + 2] & 0xff) << 8 | array[offset + 3] & 0xff;
       code = mix(code, word);
       offset += 4;
     }
@@ -179,11 +181,12 @@ public final class Murmur3 {
     }
     return code ^ size;
   }
+
   static int mixByteArrayLE(int code, byte[] array, int offset, int size) {
     final int limit = offset + size;
     while (offset + 3 < limit) {
-      final int word =  array[offset    ] & 0xff        | (array[offset + 1] & 0xff) <<  8
-                     | (array[offset + 2] & 0xff) << 16 | (array[offset + 3] & 0xff) << 24;
+      final int word = array[offset] & 0xff | (array[offset + 1] & 0xff) << 8
+          | (array[offset + 2] & 0xff) << 16 | (array[offset + 3] & 0xff) << 24;
       code = mix(code, word);
       offset += 4;
     }
@@ -225,6 +228,7 @@ public final class Murmur3 {
       throw new AssertionError();
     }
   }
+
   @SuppressWarnings("checkstyle:LeftCurly")
   static int mixStringBE(int code, String string) {
     int word = 0;
@@ -237,51 +241,103 @@ public final class Murmur3 {
       if (c >= 0 && c <= 0x7f) { // U+0000..U+007F
         k -= 8;
         word |= c << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         utf8Length += 1;
       } else if (c >= 0x80 && c <= 0x7ff) { // U+0080..U+07FF
         k -= 8;
         word |= (0xc0 | (c >>> 6)) << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         k -= 8;
         word |= (0x80 | (c & 0x3f)) << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         utf8Length += 2;
       } else if (c >= 0x0800 && c <= 0xffff) { // (U+0800..U+D7FF, U+E000..U+FFFF, and surrogates
         k -= 8;
-        word |= (0xe0 | (c  >>> 12)) << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        word |= (0xe0 | (c >>> 12)) << k;
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         k -= 8;
-        word |= (0x80 | ((c >>>  6) & 0x3f)) << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        word |= (0x80 | ((c >>> 6) & 0x3f)) << k;
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         k -= 8;
         word |= (0x80 | (c & 0x3f)) << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         utf8Length += 3;
       } else if (c >= 0x10000 && c <= 0x10ffff) { // U+10000..U+10FFFF
         k -= 8;
-        word |= (0xf0 | (c  >>> 18)) << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        word |= (0xf0 | (c >>> 18)) << k;
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         k -= 8;
         word |= (0x80 | ((c >>> 12) & 0x3f)) << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         k -= 8;
-        word |= (0x80 | ((c >>>  6) & 0x3f)) << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        word |= (0x80 | ((c >>> 6) & 0x3f)) << k;
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         k -= 8;
         word |= (0x80 | (c & 0x3f)) << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         utf8Length += 4;
       } else { // surrogate or invalid code point
         k -= 8;
         word |= 0xef << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         k -= 8;
         word |= 0xbf << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         k -= 8;
         word |= 0xbd << k;
-        if (k == 0) { code = mix(code, word); word = 0; k = 32; }
+        if (k == 0) {
+          code = mix(code, word);
+          word = 0;
+          k = 32;
+        }
         utf8Length += 3;
       }
       i = string.offsetByCodePoints(i, 1);
@@ -294,6 +350,7 @@ public final class Murmur3 {
     }
     return code ^ utf8Length;
   }
+
   @SuppressWarnings("checkstyle:LeftCurly")
   static int mixStringLE(int code, String string) {
     int word = 0;
@@ -306,51 +363,103 @@ public final class Murmur3 {
       if (c >= 0 && c <= 0x7f) { // U+0000..U+007F
         word |= c << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         utf8Length += 1;
       } else if (c >= 0x80 && c <= 0x7ff) { // U+0080..U+07FF
         word |= (0xc0 | (c >>> 6)) << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         word |= (0x80 | (c & 0x3f)) << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         utf8Length += 2;
       } else if (c >= 0x0800 && c <= 0xffff) { // (U+0800..U+D7FF, U+E000..U+FFFF, and surrogates
-        word |= (0xe0 | (c  >>> 12)) << k;
+        word |= (0xe0 | (c >>> 12)) << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
-        word |= (0x80 | ((c >>>  6) & 0x3f)) << k;
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
+        word |= (0x80 | ((c >>> 6) & 0x3f)) << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         word |= (0x80 | (c & 0x3f)) << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         utf8Length += 3;
       } else if (c >= 0x10000 && c <= 0x10ffff) { // U+10000..U+10FFFF
-        word |= (0xf0 | (c  >>> 18)) << k;
+        word |= (0xf0 | (c >>> 18)) << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         word |= (0x80 | ((c >>> 12) & 0x3f)) << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
-        word |= (0x80 | ((c >>>  6) & 0x3f)) << k;
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
+        word |= (0x80 | ((c >>> 6) & 0x3f)) << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         word |= (0x80 | (c & 0x3f)) << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         utf8Length += 4;
       } else { // surrogate or invalid code point
         word |= 0xef << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         word |= 0xbf << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         word |= 0xbd << k;
         k += 8;
-        if (k == 32) { code = mix(code, word); word = 0; k = 0; }
+        if (k == 32) {
+          code = mix(code, word);
+          word = 0;
+          k = 0;
+        }
         utf8Length += 3;
       }
       i = string.offsetByCodePoints(i, 1);
@@ -389,4 +498,5 @@ public final class Murmur3 {
     code ^= code >>> 16;
     return code;
   }
+
 }

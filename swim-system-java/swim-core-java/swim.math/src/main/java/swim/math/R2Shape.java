@@ -17,6 +17,17 @@ package swim.math;
 import swim.structure.Kind;
 
 public abstract class R2Shape implements Shape {
+
+  private static R2Form<R2Shape> shapeForm;
+
+  @Kind
+  public static R2Form<R2Shape> shapeForm() {
+    if (shapeForm == null) {
+      shapeForm = new R2ShapeForm();
+    }
+    return shapeForm;
+  }
+
   public abstract double xMin();
 
   public abstract double yMin();
@@ -49,13 +60,4 @@ public abstract class R2Shape implements Shape {
 
   public abstract Z2Shape transform(R2ToZ2Function f);
 
-  private static R2Form<R2Shape> shapeForm;
-
-  @Kind
-  public static R2Form<R2Shape> shapeForm() {
-    if (shapeForm == null) {
-      shapeForm = new R2ShapeForm();
-    }
-    return shapeForm;
-  }
 }

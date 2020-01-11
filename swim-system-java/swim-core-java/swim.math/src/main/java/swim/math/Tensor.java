@@ -24,6 +24,8 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class Tensor implements Debug {
+
+  private static int hashSeed;
   public final TensorDims dims;
   public final Object array;
   public final int offset;
@@ -58,20 +60,6 @@ public class Tensor implements Debug {
     this.offset = 0;
   }
 
-  public final TensorDims dimensions() {
-    return this.dims;
-  }
-
-  public final Precision precision() {
-    if (this.array instanceof double[]) {
-      return Precision.f64();
-    } else if (this.array instanceof float[]) {
-      return Precision.f32();
-    } else {
-      throw new AssertionError();
-    }
-  }
-
   protected static int getOffset(TensorDims dim, int[] coords, int offset) {
     int i = 0;
     do {
@@ -84,32 +72,6 @@ public class Tensor implements Debug {
       i += 1;
     } while (dim != null);
     return offset;
-  }
-
-  public final double getDouble(int... coords) {
-    final Object us = this.array;
-    if (us instanceof double[]) {
-      return ((double[]) us)[getOffset(dims, coords, 0)];
-    } else if (us instanceof float[]) {
-      return (double) ((float[]) us)[getOffset(dims, coords, 0)];
-    } else {
-      throw new AssertionError();
-    }
-  }
-
-  public final float getFloat(int... coords) {
-    final Object us = this.array;
-    if (us instanceof float[]) {
-      return ((float[]) us)[getOffset(dims, coords, 0)];
-    } else if (us instanceof double[]) {
-      return (float) ((double[]) us)[getOffset(dims, coords, 0)];
-    } else {
-      throw new AssertionError();
-    }
-  }
-
-  public final Tensor plus(Tensor that) {
-    return add(this, that);
   }
 
   public static Tensor add(Tensor u, Tensor v) {
@@ -421,10 +383,6 @@ public class Tensor implements Debug {
     }
   }
 
-  public final Tensor opposite() {
-    return opposite(this);
-  }
-
   public static Tensor opposite(Tensor u) {
     return opposite(u, u.dims, u.precision());
   }
@@ -575,10 +533,6 @@ public class Tensor implements Debug {
         wi += wd.stride;
       }
     }
-  }
-
-  public final Tensor minus(Tensor that) {
-    return subtract(this, that);
   }
 
   public static Tensor subtract(Tensor u, Tensor v) {
@@ -890,10 +844,6 @@ public class Tensor implements Debug {
     }
   }
 
-  public final Tensor times(double scalar) {
-    return multiply(scalar, this);
-  }
-
   public static Tensor multiply(double a, Tensor u) {
     return multiply(a, u, u.dims, u.precision());
   }
@@ -1044,10 +994,6 @@ public class Tensor implements Debug {
         wi += wd.stride;
       }
     }
-  }
-
-  public final Tensor times(Tensor that) {
-    return multiply(this, that);
   }
 
   public static Tensor multiply(Tensor u, Tensor v) {
@@ -1357,10 +1303,6 @@ public class Tensor implements Debug {
         wi += wd.stride;
       }
     }
-  }
-
-  public final Tensor timesMatrix(Tensor that) {
-    return multiplyMatrix(this, that);
   }
 
   public static Tensor multiplyMatrix(Tensor u, Tensor v) {
@@ -2065,43 +2007,6 @@ public class Tensor implements Debug {
     }
   }
 
-  public final double[] getDoubleArray() {
-    if (array instanceof double[]) {
-      return (double[]) this.array;
-    } else {
-      return null;
-    }
-  }
-
-  public final float[] getFloatArray() {
-    if (array instanceof float[]) {
-      return (float[]) this.array;
-    } else {
-      return null;
-    }
-  }
-
-  public final int getArrayOffset() {
-    return this.offset;
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof Tensor) {
-      final Tensor that = (Tensor) other;
-      final Object us = this.array;
-      final Object vs = that.array;
-      if (us instanceof double[] && vs instanceof double[]) {
-        return equals(dims, (double[]) us, this.offset, that.dims, (double[]) vs, that.offset);
-      } else if (us instanceof float[] && vs instanceof float[]) {
-        return equals(dims, (float[]) us, this.offset, that.dims, (float[]) vs, that.offset);
-      }
-    }
-    return false;
-  }
-
   static boolean equals(TensorDims ud, double[] us, int ui,
                         TensorDims vd, double[] vs, int vi) {
     if (ud.size != vd.size) {
@@ -2166,23 +2071,6 @@ public class Tensor implements Debug {
     return true;
   }
 
-  @Override
-  public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Tensor.class);
-    }
-    int code = hashSeed;
-    final Object us = this.array;
-    if (us instanceof double[]) {
-      code = hash(code, this.dims, (double[]) us, this.offset);
-    } else if (us instanceof float[]) {
-      code = hash(code, this.dims, (float[]) us, this.offset);
-    } else {
-      throw new AssertionError();
-    }
-    return Murmur3.mash(code);
-  }
-
   static int hash(int code, TensorDims ud, double[] us, int ui) {
     final int limit = ui + ud.size * ud.stride;
     if (ud.next != null) {
@@ -2215,21 +2103,6 @@ public class Tensor implements Debug {
     return code;
   }
 
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("Tensor").write('.').write("of").write('(')
-        .debug(this.dims).write(", ").debug(this.offset);
-    final Object us = this.array;
-    if (us instanceof double[]) {
-      debug(output, (double[]) us);
-    } else if (us instanceof float[]) {
-      debug(output, (float[]) us);
-    } else {
-      throw new AssertionError();
-    }
-    output = output.write(')');
-  }
-
   static void debug(Output<?> output, double[] us) {
     for (int i = 0, n = us.length; i < n; i += 1) {
       output = output.write(", ").debug(us[i]);
@@ -2241,13 +2114,6 @@ public class Tensor implements Debug {
       output = output.write(", ").debug(us[i]);
     }
   }
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
-  }
-
-  private static int hashSeed;
 
   public static Tensor zero(TensorDims dims) {
     return new Tensor(dims, new float[dims.size * dims.stride]);
@@ -2502,4 +2368,139 @@ public class Tensor implements Debug {
       }
     }
   }
+
+  public final TensorDims dimensions() {
+    return this.dims;
+  }
+
+  public final Precision precision() {
+    if (this.array instanceof double[]) {
+      return Precision.f64();
+    } else if (this.array instanceof float[]) {
+      return Precision.f32();
+    } else {
+      throw new AssertionError();
+    }
+  }
+
+  public final double getDouble(int... coords) {
+    final Object us = this.array;
+    if (us instanceof double[]) {
+      return ((double[]) us)[getOffset(dims, coords, 0)];
+    } else if (us instanceof float[]) {
+      return (double) ((float[]) us)[getOffset(dims, coords, 0)];
+    } else {
+      throw new AssertionError();
+    }
+  }
+
+  public final float getFloat(int... coords) {
+    final Object us = this.array;
+    if (us instanceof float[]) {
+      return ((float[]) us)[getOffset(dims, coords, 0)];
+    } else if (us instanceof double[]) {
+      return (float) ((double[]) us)[getOffset(dims, coords, 0)];
+    } else {
+      throw new AssertionError();
+    }
+  }
+
+  public final Tensor plus(Tensor that) {
+    return add(this, that);
+  }
+
+  public final Tensor opposite() {
+    return opposite(this);
+  }
+
+  public final Tensor minus(Tensor that) {
+    return subtract(this, that);
+  }
+
+  public final Tensor times(double scalar) {
+    return multiply(scalar, this);
+  }
+
+  public final Tensor times(Tensor that) {
+    return multiply(this, that);
+  }
+
+  public final Tensor timesMatrix(Tensor that) {
+    return multiplyMatrix(this, that);
+  }
+
+  public final double[] getDoubleArray() {
+    if (array instanceof double[]) {
+      return (double[]) this.array;
+    } else {
+      return null;
+    }
+  }
+
+  public final float[] getFloatArray() {
+    if (array instanceof float[]) {
+      return (float[]) this.array;
+    } else {
+      return null;
+    }
+  }
+
+  public final int getArrayOffset() {
+    return this.offset;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof Tensor) {
+      final Tensor that = (Tensor) other;
+      final Object us = this.array;
+      final Object vs = that.array;
+      if (us instanceof double[] && vs instanceof double[]) {
+        return equals(dims, (double[]) us, this.offset, that.dims, (double[]) vs, that.offset);
+      } else if (us instanceof float[] && vs instanceof float[]) {
+        return equals(dims, (float[]) us, this.offset, that.dims, (float[]) vs, that.offset);
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    if (hashSeed == 0) {
+      hashSeed = Murmur3.seed(Tensor.class);
+    }
+    int code = hashSeed;
+    final Object us = this.array;
+    if (us instanceof double[]) {
+      code = hash(code, this.dims, (double[]) us, this.offset);
+    } else if (us instanceof float[]) {
+      code = hash(code, this.dims, (float[]) us, this.offset);
+    } else {
+      throw new AssertionError();
+    }
+    return Murmur3.mash(code);
+  }
+
+  @Override
+  public void debug(Output<?> output) {
+    output = output.write("Tensor").write('.').write("of").write('(')
+        .debug(this.dims).write(", ").debug(this.offset);
+    final Object us = this.array;
+    if (us instanceof double[]) {
+      debug(output, (double[]) us);
+    } else if (us instanceof float[]) {
+      debug(output, (float[]) us);
+    } else {
+      throw new AssertionError();
+    }
+    output = output.write(')');
+  }
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
+  }
+
 }

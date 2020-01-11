@@ -20,6 +20,7 @@ import swim.collections.HashTrieMap;
 import swim.uri.UriPath;
 
 public class JsModuleSystem {
+
   final Context jsContext;
   final JsModuleLoader moduleLoader;
   HashTrieMap<UriPath, JsModule> modules;
@@ -32,6 +33,14 @@ public class JsModuleSystem {
 
   public JsModuleSystem(Context jsContext) {
     this(jsContext, new JsGuestModuleLoader());
+  }
+
+  public static boolean isRelativeModulePath(UriPath modulePath) {
+    if (modulePath.isDefined() && modulePath.isRelative()) {
+      final String head = modulePath.head();
+      return ".".equals(head) || "..".equals(head);
+    }
+    return false;
   }
 
   public final Context jsContext() {
@@ -56,7 +65,7 @@ public class JsModuleSystem {
       return requireModule(moduleId);
     } else {
       throw new JsModuleException("failed to resolve module " + Format.debug(modulePath.toString())
-                                + " relative to " + Format.debug(basePath.toString()));
+          + " relative to " + Format.debug(basePath.toString()));
     }
   }
 
@@ -87,11 +96,4 @@ public class JsModuleSystem {
     this.moduleLoader.evalModule(module);
   }
 
-  public static boolean isRelativeModulePath(UriPath modulePath) {
-    if (modulePath.isDefined() && modulePath.isRelative()) {
-      final String head = modulePath.head();
-      return ".".equals(head) || "..".equals(head);
-    }
-    return false;
-  }
 }

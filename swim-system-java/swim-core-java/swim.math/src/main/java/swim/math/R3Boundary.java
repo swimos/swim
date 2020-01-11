@@ -15,6 +15,7 @@
 package swim.math;
 
 public interface R3Boundary<T> extends Boundary<T> {
+
   double getXMin(T object);
 
   double getYMin(T object);
@@ -26,4 +27,5 @@ public interface R3Boundary<T> extends Boundary<T> {
   double getYMax(T object);
 
   double getZMax(T object);
+
 }

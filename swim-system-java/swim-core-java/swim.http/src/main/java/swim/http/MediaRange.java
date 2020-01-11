@@ -22,6 +22,8 @@ import swim.collections.HashTrieMap;
 import swim.util.Murmur3;
 
 public final class MediaRange extends HttpPart implements Debug {
+
+  private static int hashSeed;
   final String type;
   final String subtype;
   final float weight;
@@ -44,6 +46,26 @@ public final class MediaRange extends HttpPart implements Debug {
 
   MediaRange(String type, String subtype) {
     this(type, subtype, 1f, HashTrieMap.<String, String>empty());
+  }
+
+  public static MediaRange from(String type, String subtype, float weight, HashTrieMap<String, String> params) {
+    return new MediaRange(type, subtype, weight, params);
+  }
+
+  public static MediaRange from(String type, String subtype, float weight) {
+    return new MediaRange(type, subtype, weight);
+  }
+
+  public static MediaRange from(String type, String subtype, HashTrieMap<String, String> params) {
+    return new MediaRange(type, subtype, params);
+  }
+
+  public static MediaRange from(String type, String subtype) {
+    return new MediaRange(type, subtype);
+  }
+
+  public static MediaRange parse(String string) {
+    return Http.standardParser().parseMediaRangeString(string);
   }
 
   public boolean isApplication() {
@@ -149,25 +171,4 @@ public final class MediaRange extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static MediaRange from(String type, String subtype, float weight, HashTrieMap<String, String> params) {
-    return new MediaRange(type, subtype, weight, params);
-  }
-
-  public static MediaRange from(String type, String subtype, float weight) {
-    return new MediaRange(type, subtype, weight);
-  }
-
-  public static MediaRange from(String type, String subtype, HashTrieMap<String, String> params) {
-    return new MediaRange(type, subtype, params);
-  }
-
-  public static MediaRange from(String type, String subtype) {
-    return new MediaRange(type, subtype);
-  }
-
-  public static MediaRange parse(String string) {
-    return Http.standardParser().parseMediaRangeString(string);
-  }
 }

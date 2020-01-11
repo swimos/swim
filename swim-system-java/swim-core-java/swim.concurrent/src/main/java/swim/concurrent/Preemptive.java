@@ -18,6 +18,7 @@ package swim.concurrent;
  * Function interface that callers can optionally invoke concurrently.
  */
 public interface Preemptive {
+
   /**
    * Returns {@code true} if callers can safely invoke this function object
    * concurrently.  Returns {@code false} if this function object is not
@@ -26,4 +27,5 @@ public interface Preemptive {
   default boolean isPreemptive() {
     return false;
   }
+
 }

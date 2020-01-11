@@ -18,6 +18,7 @@ package swim.codec;
  * Thrown when reading invalid {@link Input}.
  */
 public class InputException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public InputException(String message, Throwable cause) {
@@ -35,4 +36,5 @@ public class InputException extends RuntimeException {
   public InputException() {
     super();
   }
+
 }

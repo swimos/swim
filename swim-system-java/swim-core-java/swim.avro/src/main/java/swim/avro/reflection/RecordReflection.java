@@ -22,6 +22,7 @@ import swim.avro.schema.AvroRecordType;
 import swim.collections.FingerTrieSeq;
 
 final class RecordReflection<T> extends AvroRecordType<T, T> {
+
   final AvroName fullName;
   final Constructor<T> constructor;
   final String doc;
@@ -54,7 +55,7 @@ final class RecordReflection<T> extends AvroRecordType<T, T> {
   @Override
   public AvroRecordType<T, T> doc(String doc) {
     return new RecordReflection<T>(this.fullName, this.constructor, doc,
-                                   this.aliases, this.fields);
+        this.aliases, this.fields);
   }
 
   @Override
@@ -70,7 +71,7 @@ final class RecordReflection<T> extends AvroRecordType<T, T> {
   @Override
   public AvroRecordType<T, T> alias(AvroName alias) {
     return new RecordReflection<T>(this.fullName, this.constructor, this.doc,
-                                   this.aliases.appended(alias), this.fields);
+        this.aliases.appended(alias), this.fields);
   }
 
   @Override
@@ -86,7 +87,7 @@ final class RecordReflection<T> extends AvroRecordType<T, T> {
   @Override
   public AvroRecordType<T, T> field(AvroFieldType<T, ?> field) {
     return new RecordReflection<T>(this.fullName, this.constructor, this.doc,
-                                   this.aliases, this.fields.appended(field));
+        this.aliases, this.fields.appended(field));
   }
 
   @Override
@@ -102,4 +103,5 @@ final class RecordReflection<T> extends AvroRecordType<T, T> {
   public T cast(T record) {
     return record;
   }
+
 }

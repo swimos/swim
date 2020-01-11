@@ -18,6 +18,7 @@ package swim.codec;
  * Dynamically generated {@link Encoder} continuation.
  */
 public abstract class DynamicEncoder<I, O> extends Encoder<I, O> {
+
   /**
    * Current encoder continuation.
    */
@@ -98,4 +99,5 @@ public abstract class DynamicEncoder<I, O> extends Encoder<I, O> {
    * encoding a {@code value}.
    */
   protected abstract void didEncode(O value);
+
 }

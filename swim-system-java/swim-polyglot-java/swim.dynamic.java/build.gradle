@@ -5,18 +5,18 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.dynamic.java'
 
 dependencies {
-  api project(':swim-dynamic')
+    api project(':swim-dynamic')
 
-  testImplementation project(":swim-vm-js")
+    testImplementation project(":swim-vm-js")
 }
 
 test {
-  if (useModules) {
-    doFirst {
-      jvmArgs += [
-        '--add-reads', 'swim.dynamic.java=org.graalvm.sdk',
-        '--add-reads', 'swim.dynamic.java=swim.vm',
-      ]
+    if (useModules) {
+        doFirst {
+            jvmArgs += [
+                    '--add-reads', 'swim.dynamic.java=org.graalvm.sdk',
+                    '--add-reads', 'swim.dynamic.java=swim.vm',
+            ]
+        }
     }
-  }
 }

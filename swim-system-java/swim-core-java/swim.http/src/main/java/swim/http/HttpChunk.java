@@ -25,12 +25,40 @@ import swim.codec.Utf8;
 import swim.util.Murmur3;
 
 public final class HttpChunk implements Debug {
+
+  private static int hashSeed;
+  private static HttpChunk last;
   final HttpChunkHeader header;
   final Encoder<?, ?> content;
 
   public HttpChunk(HttpChunkHeader header, Encoder<?, ?> content) {
     this.header = header;
     this.content = content;
+  }
+
+  public static HttpChunk last() {
+    if (last == null) {
+      last = new HttpChunk(HttpChunkHeader.sentinel(), Encoder.done());
+    }
+    return last;
+  }
+
+  public static HttpChunk from(int length, Encoder<?, ?> content) {
+    final HttpChunkHeader header = HttpChunkHeader.from(length);
+    return new HttpChunk(header, content);
+  }
+
+  public static HttpChunk from(ByteBuffer data) {
+    final HttpChunkHeader header = HttpChunkHeader.from(data.remaining());
+    return new HttpChunk(header, Binary.byteBufferWriter(data));
+  }
+
+  public static HttpChunk from(String text) {
+    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(text.length()));
+    output = output.write(text);
+    final ByteBuffer data = output.bind();
+    final HttpChunkHeader header = HttpChunkHeader.from(data.remaining());
+    return new HttpChunk(header, Binary.byteBufferWriter(data));
   }
 
   public boolean isEmpty() {
@@ -104,32 +132,4 @@ public final class HttpChunk implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static HttpChunk last;
-
-  public static HttpChunk last() {
-    if (last == null) {
-      last = new HttpChunk(HttpChunkHeader.sentinel(), Encoder.done());
-    }
-    return last;
-  }
-
-  public static HttpChunk from(int length, Encoder<?, ?> content) {
-    final HttpChunkHeader header = HttpChunkHeader.from(length);
-    return new HttpChunk(header, content);
-  }
-
-  public static HttpChunk from(ByteBuffer data) {
-    final HttpChunkHeader header = HttpChunkHeader.from(data.remaining());
-    return new HttpChunk(header, Binary.byteBufferWriter(data));
-  }
-
-  public static HttpChunk from(String text) {
-    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(text.length()));
-    output = output.write(text);
-    final ByteBuffer data = output.bind();
-    final HttpChunkHeader header = HttpChunkHeader.from(data.remaining());
-    return new HttpChunk(header, Binary.byteBufferWriter(data));
-  }
 }

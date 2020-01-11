@@ -15,6 +15,7 @@
 package swim.warp;
 
 public class WarpException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public WarpException(String message, Throwable cause) {
@@ -32,4 +33,5 @@ public class WarpException extends RuntimeException {
   public WarpException() {
     super();
   }
+
 }

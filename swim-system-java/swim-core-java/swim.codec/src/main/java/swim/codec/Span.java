@@ -22,12 +22,29 @@ import swim.util.Murmur3;
  * and end {@link Mark marks}.
  */
 public final class Span extends Tag {
+
+  private static int hashSeed;
   final Mark start;
   final Mark end;
 
   Span(Mark start, Mark end) {
     this.start = start;
     this.end = end;
+  }
+
+  /**
+   * Returns a new {@code Span} representing the closed interval between the
+   * given {@code start} and {@code end} marks.
+   */
+  public static Span from(Mark start, Mark end) {
+    start = Objects.requireNonNull(start);
+    end = Objects.requireNonNull(end);
+    if (start.offset > end.offset) {
+      final Mark tmp = start;
+      start = end;
+      end = tmp;
+    }
+    return new Span(start, end);
   }
 
   @Override
@@ -126,20 +143,4 @@ public final class Span extends Tag {
     return Format.display(this);
   }
 
-  private static int hashSeed;
-
-  /**
-   * Returns a new {@code Span} representing the closed interval between the
-   * given {@code start} and {@code end} marks.
-   */
-  public static Span from(Mark start, Mark end) {
-    start = Objects.requireNonNull(start);
-    end = Objects.requireNonNull(end);
-    if (start.offset > end.offset) {
-      final Mark tmp = start;
-      start = end;
-      end = tmp;
-    }
-    return new Span(start, end);
-  }
 }

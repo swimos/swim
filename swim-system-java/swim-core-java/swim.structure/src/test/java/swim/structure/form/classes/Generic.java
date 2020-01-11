@@ -19,14 +19,18 @@ import swim.util.Murmur3;
 
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class Generic<T> {
+
   @Header
   public T value;
+
   public Generic(T value) {
     this.value = value;
   }
+
   public Generic() {
     // Form.cast constructor
   }
+
   @Override
   public boolean equals(Object other) {
     if (other instanceof Generic<?>) {
@@ -35,12 +39,15 @@ public class Generic<T> {
     }
     return false;
   }
+
   @Override
   public int hashCode() {
     return Murmur3.hash(value);
   }
+
   @Override
   public String toString() {
     return "Generic(" + this.value + ")";
   }
+
 }

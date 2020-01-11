@@ -20,6 +20,7 @@ import swim.codec.Output;
 import swim.codec.Parser;
 
 final class NameParser extends Parser<String> {
+
   final XmlParser<?, ?> xml;
   final Output<String> output;
   final int step;
@@ -28,11 +29,6 @@ final class NameParser extends Parser<String> {
     this.xml = xml;
     this.output = output;
     this.step = step;
-  }
-
-  @Override
-  public Parser<String> feed(Input input) {
-    return parse(input, this.xml, this.output, this.step);
   }
 
   static Parser<String> parse(Input input, XmlParser<?, ?> xml, Output<String> output, int step) {
@@ -81,4 +77,10 @@ final class NameParser extends Parser<String> {
   static Parser<String> parse(Input input, XmlParser<?, ?> xml) {
     return parse(input, xml, null, 1);
   }
+
+  @Override
+  public Parser<String> feed(Input input) {
+    return parse(input, this.xml, this.output, this.step);
+  }
+
 }

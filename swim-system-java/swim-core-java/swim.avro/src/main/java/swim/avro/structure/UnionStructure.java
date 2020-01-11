@@ -20,10 +20,15 @@ import swim.collections.FingerTrieSeq;
 import swim.structure.Value;
 
 final class UnionStructure extends AvroUnionType<Value> {
+
   final FingerTrieSeq<AvroType<? extends Value>> variants;
 
   UnionStructure(FingerTrieSeq<AvroType<? extends Value>> variants) {
     this.variants = variants;
+  }
+
+  static UnionStructure empty() {
+    return new UnionStructure(FingerTrieSeq.empty());
   }
 
   @Override
@@ -41,7 +46,4 @@ final class UnionStructure extends AvroUnionType<Value> {
     return new UnionStructure(this.variants.appended(variant));
   }
 
-  static UnionStructure empty() {
-    return new UnionStructure(FingerTrieSeq.empty());
-  }
 }

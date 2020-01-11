@@ -19,5 +19,7 @@ import swim.warp.LinkedResponse;
 
 @FunctionalInterface
 public interface OnLinkedResponse extends Preemptive {
+
   void onLinked(LinkedResponse response);
+
 }

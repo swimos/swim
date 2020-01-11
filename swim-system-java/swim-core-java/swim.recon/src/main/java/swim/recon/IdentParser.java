@@ -20,6 +20,7 @@ import swim.codec.Output;
 import swim.codec.Parser;
 
 final class IdentParser<I, V> extends Parser<V> {
+
   final ReconParser<I, V> recon;
   final Output<V> output;
   final int step;
@@ -28,11 +29,6 @@ final class IdentParser<I, V> extends Parser<V> {
     this.recon = recon;
     this.output = output;
     this.step = step;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.output, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output, int step) {
@@ -81,4 +77,10 @@ final class IdentParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
     return parse(input, recon, null, 1);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.output, this.step);
+  }
+
 }

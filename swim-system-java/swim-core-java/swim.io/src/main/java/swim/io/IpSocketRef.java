@@ -18,8 +18,10 @@ package swim.io;
  * External handle to a network {@link IpSocket}.
  */
 public interface IpSocketRef extends IpContext {
+
   /**
    * Closes the underlying network socket.
    */
   void close();
+
 }

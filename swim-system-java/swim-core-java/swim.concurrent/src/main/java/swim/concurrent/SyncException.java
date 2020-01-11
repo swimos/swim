@@ -18,6 +18,7 @@ package swim.concurrent;
  * Thrown when awaiting a {@link Sync} continuation times out.
  */
 public class SyncException extends ContException {
+
   private static final long serialVersionUID = 1L;
 
   public SyncException(String message, Throwable cause) {
@@ -35,4 +36,5 @@ public class SyncException extends ContException {
   public SyncException() {
     super();
   }
+
 }

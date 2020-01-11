@@ -17,6 +17,7 @@ package swim.store;
 import swim.structure.Value;
 
 public interface DataBinding {
+
   DataContext dataContext();
 
   StoreBinding storeBinding();
@@ -38,4 +39,5 @@ public interface DataBinding {
   DataBinding isTransient(boolean isTransient);
 
   void close();
+
 }

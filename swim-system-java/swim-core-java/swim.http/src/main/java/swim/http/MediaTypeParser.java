@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.collections.HashTrieMap;
 
 final class MediaTypeParser extends Parser<MediaType> {
+
   final HttpParser http;
   final StringBuilder type;
   final StringBuilder subtype;
@@ -37,11 +38,6 @@ final class MediaTypeParser extends Parser<MediaType> {
 
   MediaTypeParser(HttpParser http) {
     this(http, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<MediaType> feed(Input input) {
-    return parse(input, this.http, this.type, this.subtype, this.params, this.step);
   }
 
   static Parser<MediaType> parse(Input input, HttpParser http, StringBuilder type, StringBuilder subtype,
@@ -133,4 +129,10 @@ final class MediaTypeParser extends Parser<MediaType> {
   static Parser<MediaType> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, null, 1);
   }
+
+  @Override
+  public Parser<MediaType> feed(Input input) {
+    return parse(input, this.http, this.type, this.subtype, this.params, this.step);
+  }
+
 }

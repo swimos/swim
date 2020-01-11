@@ -22,6 +22,10 @@ import swim.codec.OutputBuffer;
 import swim.util.Murmur3;
 
 public final class MqttConnAck extends MqttPacket<Object> implements Debug {
+
+  static final int SESSION_PRESENT_FLAG = 0x01;
+  private static int hashSeed;
+  private static MqttConnAck accepted;
   final int packetFlags;
   final int connectFlags;
   final int connectCode;
@@ -30,6 +34,29 @@ public final class MqttConnAck extends MqttPacket<Object> implements Debug {
     this.packetFlags = packetFlags;
     this.connectFlags = connectFlags;
     this.connectCode = connectCode;
+  }
+
+  public static MqttConnAck accepted() {
+    if (accepted == null) {
+      accepted = new MqttConnAck(0, 0, 0);
+    }
+    return accepted;
+  }
+
+  public static MqttConnAck from(int packetFlags, int connectFlags, int connectCode) {
+    if (packetFlags == 0 && connectFlags == 0 && connectCode == 0) {
+      return accepted();
+    } else {
+      return new MqttConnAck(packetFlags, connectFlags, connectCode);
+    }
+  }
+
+  public static MqttConnAck from(MqttConnStatus connectStatus) {
+    if (connectStatus.code == 0) {
+      return accepted();
+    } else {
+      return new MqttConnAck(0, 0, connectStatus.code);
+    }
   }
 
   @Override
@@ -130,32 +157,4 @@ public final class MqttConnAck extends MqttPacket<Object> implements Debug {
     return Format.debug(this);
   }
 
-  static final int SESSION_PRESENT_FLAG = 0x01;
-
-  private static int hashSeed;
-
-  private static MqttConnAck accepted;
-
-  public static MqttConnAck accepted() {
-    if (accepted == null) {
-      accepted = new MqttConnAck(0, 0, 0);
-    }
-    return accepted;
-  }
-
-  public static MqttConnAck from(int packetFlags, int connectFlags, int connectCode) {
-    if (packetFlags == 0 && connectFlags == 0 && connectCode == 0) {
-      return accepted();
-    } else {
-      return new MqttConnAck(packetFlags, connectFlags, connectCode);
-    }
-  }
-
-  public static MqttConnAck from(MqttConnStatus connectStatus) {
-    if (connectStatus.code == 0) {
-      return accepted();
-    } else {
-      return new MqttConnAck(0, 0, connectStatus.code);
-    }
-  }
 }

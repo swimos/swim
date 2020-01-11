@@ -21,6 +21,7 @@ import java.util.Collection;
  * result of type {@code O}.
  */
 public interface Builder<I, O> {
+
   /**
    * Adds a single input value to this builder, returning {@code true} if the
    * state of the builder changed.
@@ -37,4 +38,5 @@ public interface Builder<I, O> {
    * Returns the output result of this builder.
    */
   O bind();
+
 }

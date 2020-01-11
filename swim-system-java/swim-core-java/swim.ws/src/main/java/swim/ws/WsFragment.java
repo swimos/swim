@@ -22,12 +22,17 @@ import swim.codec.Output;
 import swim.codec.OutputBuffer;
 
 public final class WsFragment<T> extends WsFrame<T> implements Debug {
+
   final WsOpcode opcode;
   final Decoder<T> content;
 
   WsFragment(WsOpcode opcode, Decoder<T> content) {
     this.opcode = opcode;
     this.content = content;
+  }
+
+  public static <T> WsFragment<T> from(WsOpcode opcode, Decoder<T> content) {
+    return new WsFragment<T>(opcode, content);
   }
 
   @Override
@@ -75,7 +80,4 @@ public final class WsFragment<T> extends WsFrame<T> implements Debug {
     return Format.debug(this);
   }
 
-  public static <T> WsFragment<T> from(WsOpcode opcode, Decoder<T> content) {
-    return new WsFragment<T>(opcode, content);
-  }
 }

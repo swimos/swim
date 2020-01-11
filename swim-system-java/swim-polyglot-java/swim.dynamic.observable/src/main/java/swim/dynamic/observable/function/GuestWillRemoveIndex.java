@@ -19,6 +19,7 @@ import swim.dynamic.BridgeGuest;
 import swim.observable.function.WillRemoveIndex;
 
 public class GuestWillRemoveIndex extends BridgeGuest implements WillRemoveIndex {
+
   public GuestWillRemoveIndex(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -27,4 +28,5 @@ public class GuestWillRemoveIndex extends BridgeGuest implements WillRemoveIndex
   public void willRemove(int index) {
     this.bridge.guestExecuteVoid(this.guest, index);
   }
+
 }

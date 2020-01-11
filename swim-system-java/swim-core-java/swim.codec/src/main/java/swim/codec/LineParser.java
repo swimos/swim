@@ -15,6 +15,7 @@
 package swim.codec;
 
 final class LineParser extends Parser<String> {
+
   final StringBuilder output;
 
   LineParser(StringBuilder output) {
@@ -23,11 +24,6 @@ final class LineParser extends Parser<String> {
 
   LineParser() {
     this(null);
-  }
-
-  @Override
-  public Parser<String> feed(Input input) {
-    return parse(input, this.output);
   }
 
   static Parser<String> parse(Input input, StringBuilder output) {
@@ -52,4 +48,10 @@ final class LineParser extends Parser<String> {
     }
     return new LineParser(output);
   }
+
+  @Override
+  public Parser<String> feed(Input input) {
+    return parse(input, this.output);
+  }
+
 }

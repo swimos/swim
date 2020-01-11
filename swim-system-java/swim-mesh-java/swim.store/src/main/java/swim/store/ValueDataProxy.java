@@ -19,6 +19,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class ValueDataProxy implements ValueDataBinding, ValueDataContext {
+
   protected final ValueDataBinding dataBinding;
   protected ValueDataContext dataContext;
 
@@ -137,4 +138,5 @@ public class ValueDataProxy implements ValueDataBinding, ValueDataContext {
   public void didSet(Value newValue, Value oldValue) {
     this.dataContext.didSet(newValue, oldValue);
   }
+
 }

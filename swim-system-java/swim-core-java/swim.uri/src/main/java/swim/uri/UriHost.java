@@ -25,64 +25,13 @@ import swim.util.HashGenCacheMap;
 import swim.util.Murmur3;
 
 public abstract class UriHost implements Comparable<UriHost>, Debug, Display {
+
+  private static UriHost undefined;
+  private static ThreadLocal<HashGenCacheMap<String, UriHost>> cache = new ThreadLocal<>();
+
   protected UriHost() {
     // stub
   }
-
-  public boolean isDefined() {
-    return true;
-  }
-
-  public abstract String address();
-
-  public String name() {
-    return null;
-  }
-
-  public String ipv4() {
-    return null;
-  }
-
-  public String ipv6() {
-    return null;
-  }
-
-  public InetAddress inetAddress() throws UnknownHostException {
-    return InetAddress.getByName(address());
-  }
-
-  @Override
-  public final int compareTo(UriHost that) {
-    return toString().compareTo(that.toString());
-  }
-
-  @Override
-  public final boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof UriHost) {
-      return toString().equals(((UriHost) other).toString());
-    }
-    return false;
-  }
-
-  @Override
-  public final int hashCode() {
-    return Murmur3.seed(toString());
-  }
-
-  @Override
-  public abstract void debug(Output<?> output);
-
-  @Override
-  public abstract void display(Output<?> output);
-
-  @Override
-  public abstract String toString();
-
-  private static UriHost undefined;
-
-  private static ThreadLocal<HashGenCacheMap<String, UriHost>> cache = new ThreadLocal<>();
 
   public static UriHost undefined() {
     if (undefined == null) {
@@ -161,4 +110,56 @@ public abstract class UriHost implements Comparable<UriHost>, Debug, Display {
     }
     return cache;
   }
+
+  public boolean isDefined() {
+    return true;
+  }
+
+  public abstract String address();
+
+  public String name() {
+    return null;
+  }
+
+  public String ipv4() {
+    return null;
+  }
+
+  public String ipv6() {
+    return null;
+  }
+
+  public InetAddress inetAddress() throws UnknownHostException {
+    return InetAddress.getByName(address());
+  }
+
+  @Override
+  public final int compareTo(UriHost that) {
+    return toString().compareTo(that.toString());
+  }
+
+  @Override
+  public final boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof UriHost) {
+      return toString().equals(((UriHost) other).toString());
+    }
+    return false;
+  }
+
+  @Override
+  public final int hashCode() {
+    return Murmur3.seed(toString());
+  }
+
+  @Override
+  public abstract void debug(Output<?> output);
+
+  @Override
+  public abstract void display(Output<?> output);
+
+  @Override
+  public abstract String toString();
+
 }

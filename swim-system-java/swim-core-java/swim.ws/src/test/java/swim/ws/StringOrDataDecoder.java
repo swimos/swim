@@ -21,14 +21,17 @@ import swim.codec.Utf8;
 import swim.structure.Data;
 
 final class StringOrDataDecoder extends Decoder<Object> {
+
   @SuppressWarnings("unchecked")
   @Override
   public Decoder<Object> fork(Object condition) {
     if (condition instanceof WsOpcode) {
       final WsOpcode opcode = (WsOpcode) condition;
       switch (opcode) {
-        case TEXT: return (Decoder<Object>) (Decoder<?>) Utf8.stringParser();
-        case BINARY: return (Decoder<Object>) (Decoder<?>) Binary.outputParser(Data.output());
+        case TEXT:
+          return (Decoder<Object>) (Decoder<?>) Utf8.stringParser();
+        case BINARY:
+          return (Decoder<Object>) (Decoder<?>) Binary.outputParser(Data.output());
         default:
       }
     }
@@ -39,4 +42,5 @@ final class StringOrDataDecoder extends Decoder<Object> {
   public Decoder<Object> feed(InputBuffer input) {
     return Decoder.done();
   }
+
 }

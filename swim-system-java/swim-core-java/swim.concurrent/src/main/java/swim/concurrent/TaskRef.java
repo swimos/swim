@@ -22,6 +22,7 @@ package swim.concurrent;
  * @see Stage
  */
 public interface TaskRef {
+
   /**
    * Returns {@code true} if the task is currently scheduled for execution.
    */
@@ -45,4 +46,5 @@ public interface TaskRef {
    * if the task was not scheduled to execute.
    */
   boolean cancel();
+
 }

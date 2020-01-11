@@ -19,6 +19,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class CommentParser extends Parser<String> {
+
   final StringBuilder comment;
   final int level;
   final int step;
@@ -27,11 +28,6 @@ final class CommentParser extends Parser<String> {
     this.comment = comment;
     this.level = level;
     this.step = step;
-  }
-
-  @Override
-  public Parser<String> feed(Input input) {
-    return parse(input, this.comment, this.level, this.step);
   }
 
   static Parser<String> parse(Input input, StringBuilder comment, int level, int step) {
@@ -106,4 +102,10 @@ final class CommentParser extends Parser<String> {
   static Parser<String> parse(Input input) {
     return parse(input, null, 0, 1);
   }
+
+  @Override
+  public Parser<String> feed(Input input) {
+    return parse(input, this.comment, this.level, this.step);
+  }
+
 }

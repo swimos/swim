@@ -15,9 +15,11 @@
 package swim.kernel;
 
 public interface KernelBinding extends Kernel {
+
   KernelBinding kernelWrapper();
 
   KernelContext kernelContext();
 
   void setKernelContext(KernelContext context);
+
 }

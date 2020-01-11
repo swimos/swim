@@ -23,6 +23,7 @@ import swim.uri.UriHost;
 import swim.uri.UriPort;
 
 final class HostWriter extends Writer<Object, Object> {
+
   final UriHost host;
   final UriPort port;
   final Writer<?, ?> part;
@@ -37,11 +38,6 @@ final class HostWriter extends Writer<Object, Object> {
 
   HostWriter(UriHost host, UriPort port) {
     this(host, port, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.host, this.port, this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, UriHost host, UriPort port,
@@ -90,4 +86,10 @@ final class HostWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, UriHost host, UriPort port) {
     return write(output, host, port, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.host, this.port, this.part, this.step);
+  }
+
 }

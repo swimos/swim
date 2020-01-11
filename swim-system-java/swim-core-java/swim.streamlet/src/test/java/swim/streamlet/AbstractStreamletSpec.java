@@ -18,16 +18,20 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class AbstractStreamletSpec {
+
   @Test
   public void inspectGenericStreamlets() {
     class TestStreamlet extends AbstractStreamlet<Object, Object> {
+
       @In
       Inlet<Object> foo;
       @Inout
       Inoutlet<Object, Object> bar;
       @Out
       Outlet<Object> baz;
+
     }
+
     final TestStreamlet streamlet = new TestStreamlet();
     assertEquals(streamlet.inlet("foo"), streamlet.foo);
     assertEquals(streamlet.inlet("bar"), streamlet.bar);
@@ -40,15 +44,21 @@ public class AbstractStreamletSpec {
   @Test
   public void inspectInheritedStreamlets() {
     class ParentStreamlet extends AbstractStreamlet<Object, Object> {
+
       @In
       Inlet<Object> foo;
       @Out
       Outlet<Object> baz;
+
     }
+
     class ChildStreamlet extends ParentStreamlet {
+
       @Inout
       Inoutlet<Object, Object> bar;
+
     }
+
     final ChildStreamlet streamlet = new ChildStreamlet();
     assertEquals(streamlet.inlet("foo"), streamlet.foo);
     assertEquals(streamlet.inlet("bar"), streamlet.bar);
@@ -61,12 +71,14 @@ public class AbstractStreamletSpec {
   @Test
   public void evaluateGenericStreamlets() {
     class TestStreamlet extends AbstractStreamlet<Integer, Integer> {
+
       @In
       Inlet<Integer> foo = inlet();
       @In
       Inlet<Integer> bar = inlet();
       @Out
       Outlet<Integer> baz = outlet();
+
       @Override
       public Integer getOutput(Outlet<? super Integer> outlet) {
         if (outlet == baz) {
@@ -74,7 +86,9 @@ public class AbstractStreamletSpec {
         }
         return null;
       }
+
     }
+
     final ValueInput<Integer> foo = new ValueInput<>(0);
     final ValueInput<Integer> bar = new ValueInput<>(0);
     final ValueOutput<Integer> output = new ValueOutput<>();
@@ -93,4 +107,5 @@ public class AbstractStreamletSpec {
     output.reconcileOutput(1); // reconcile backward
     assertEquals((int) output.get(), 12);
   }
+
 }

@@ -19,6 +19,7 @@ import swim.runtime.PartBinding;
 import swim.runtime.agent.AgentNode;
 
 public final class MetaPartAgent extends AgentNode {
+
   protected final PartBinding part;
 
   public MetaPartAgent(PartBinding part) {
@@ -30,4 +31,5 @@ public final class MetaPartAgent extends AgentNode {
     super.setNodeContext(nodeContext);
     this.part.openMetaPart(this.part, this);
   }
+
 }

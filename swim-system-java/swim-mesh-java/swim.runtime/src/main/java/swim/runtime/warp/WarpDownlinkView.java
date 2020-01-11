@@ -47,6 +47,9 @@ import swim.warp.UnlinkRequest;
 import swim.warp.UnlinkedResponse;
 
 public abstract class WarpDownlinkView extends DownlinkView implements WarpDownlink {
+
+  protected static final int KEEP_LINKED = 1 << 0;
+  protected static final int KEEP_SYNCED = 1 << 1;
   protected final Uri meshUri;
   protected final Uri hostUri;
   protected final Uri nodeUri;
@@ -668,6 +671,4 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
     downlinkModel().command(body);
   }
 
-  protected static final int KEEP_LINKED = 1 << 0;
-  protected static final int KEEP_SYNCED = 1 << 1;
 }

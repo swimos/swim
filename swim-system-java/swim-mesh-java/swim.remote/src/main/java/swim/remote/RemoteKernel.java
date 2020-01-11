@@ -27,6 +27,8 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class RemoteKernel extends KernelProxy {
+
+  private static final double KERNEL_PRIORITY = 0.25;
   final double kernelPriority;
   WarpSettings warpSettings;
 
@@ -36,6 +38,16 @@ public class RemoteKernel extends KernelProxy {
 
   public RemoteKernel() {
     this(KERNEL_PRIORITY);
+  }
+
+  public static RemoteKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || RemoteKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      return new RemoteKernel(kernelPriority);
+    }
+    return null;
   }
 
   @Override
@@ -77,15 +89,4 @@ public class RemoteKernel extends KernelProxy {
     return super.createHost(part, hostDef);
   }
 
-  private static final double KERNEL_PRIORITY = 0.25;
-
-  public static RemoteKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || RemoteKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new RemoteKernel(kernelPriority);
-    }
-    return null;
-  }
 }

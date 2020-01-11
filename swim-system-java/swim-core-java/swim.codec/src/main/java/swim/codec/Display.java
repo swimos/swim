@@ -21,12 +21,14 @@ package swim.codec;
  * {@link OutputSettings#isStyled()} returns {@code true}.
  */
 public interface Display {
+
   /**
    * Writes a human readable, display-formatted string representation of this
    * object to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full display string has been written.
+   *                         state before the full display string has been written.
    */
   void display(Output<?> output);
+
 }

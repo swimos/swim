@@ -29,6 +29,7 @@ import swim.store.StoreBinding;
 import swim.uri.Uri;
 
 public class EdgeProxy implements EdgeBinding, EdgeContext {
+
   protected final EdgeBinding edgeBinding;
   protected EdgeContext edgeContext;
 
@@ -435,4 +436,5 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   public void didFail(Throwable error) {
     this.edgeBinding.didFail(error);
   }
+
 }

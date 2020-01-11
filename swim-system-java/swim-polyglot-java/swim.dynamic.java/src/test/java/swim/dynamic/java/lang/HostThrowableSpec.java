@@ -23,6 +23,7 @@ import swim.vm.VmBridge;
 import static org.testng.Assert.assertEquals;
 
 public class HostThrowableSpec {
+
   @Test
   public void testThrowables() {
     try (Context context = Context.create()) {
@@ -41,4 +42,5 @@ public class HostThrowableSpec {
       assertEquals(bridge.guestToHost(context.eval("js", "testThrowable.getCause()")), testCause);
     }
   }
+
 }

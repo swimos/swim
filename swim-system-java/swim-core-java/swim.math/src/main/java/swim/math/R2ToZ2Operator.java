@@ -15,5 +15,7 @@
 package swim.math;
 
 public interface R2ToZ2Operator extends R2ToZ2Function {
+
   Z2ToR2Operator inverse();
+
 }

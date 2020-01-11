@@ -26,6 +26,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public class StoreProxy implements StoreBinding, StoreContext {
+
   protected final StoreBinding storeBinding;
   protected StoreContext storeContext;
 
@@ -170,4 +171,5 @@ public class StoreProxy implements StoreBinding, StoreContext {
   public ValueData<Value> valueData(String name) {
     return valueData(Text.from(name));
   }
+
 }

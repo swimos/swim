@@ -21,6 +21,9 @@ import swim.structure.Operator;
 import swim.util.Murmur3;
 
 public final class NotOperator extends UnaryOperator {
+
+  private static int hashSeed;
+
   public NotOperator(Item operand) {
     super(operand);
   }
@@ -91,5 +94,4 @@ public final class NotOperator extends UnaryOperator {
     output.debug(this.operand).write('.').write("not").write('(').write(')');
   }
 
-  private static int hashSeed;
 }

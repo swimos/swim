@@ -22,12 +22,22 @@ import swim.uri.Uri;
 import swim.util.Murmur3;
 
 public final class MeshAddress extends CellAddress implements Debug {
+
+  private static int hashSeed;
   final String edgeName;
   final Uri meshUri;
 
   public MeshAddress(String edgeName, Uri meshUri) {
     this.edgeName = edgeName;
     this.meshUri = meshUri;
+  }
+
+  public static MeshAddress from(String edgeName, Uri meshUri) {
+    return new MeshAddress(edgeName, meshUri);
+  }
+
+  public static MeshAddress from(String edgeName, String meshUri) {
+    return new MeshAddress(edgeName, Uri.parse(meshUri));
   }
 
   public String edgeName() {
@@ -85,13 +95,4 @@ public final class MeshAddress extends CellAddress implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static MeshAddress from(String edgeName, Uri meshUri) {
-    return new MeshAddress(edgeName, meshUri);
-  }
-
-  public static MeshAddress from(String edgeName, String meshUri) {
-    return new MeshAddress(edgeName, Uri.parse(meshUri));
-  }
 }

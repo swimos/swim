@@ -15,6 +15,7 @@
 package swim.collections;
 
 public final class HashedValue<T> {
+
   private final T value;
   private final int hashCode;
 
@@ -41,4 +42,5 @@ public final class HashedValue<T> {
   public String toString() {
     return value.toString();
   }
+
 }

@@ -43,6 +43,7 @@ import swim.util.Murmur3;
 import static org.testng.Assert.assertEquals;
 
 public class ClassFormSpec {
+
   public void assertMolds(Object object, Item item, PolyForm scope) {
     final Form<Object> form = Form.forClass(object.getClass(), scope);
     assertEquals(form.mold(object), (Object) item);
@@ -76,37 +77,37 @@ public class ClassFormSpec {
   @Test
   public void moldsClassWithStringFields() {
     assertMolds(new Person("Humpty", "Dumpty"),
-                Record.of(Attr.of("Person"), Slot.of("first", "Humpty"), Slot.of("last", "Dumpty")));
+        Record.of(Attr.of("Person"), Slot.of("first", "Humpty"), Slot.of("last", "Dumpty")));
   }
 
   @Test
   public void castsClassWithStringFields() {
     assertCasts(Record.of(Attr.of("Person"), Slot.of("first", "Humpty"), Slot.of("last", "Dumpty")),
-                new Person("Humpty", "Dumpty"));
+        new Person("Humpty", "Dumpty"));
   }
 
   @Test
   public void moldsAnnotatedClassWithAnnotatedStringFields() {
     assertMolds(new AnnotatedPerson("Humpty", "Dumpty"),
-                Record.of(Attr.of("person"), Slot.of("firstName", "Humpty"), Slot.of("lastName", "Dumpty")));
+        Record.of(Attr.of("person"), Slot.of("firstName", "Humpty"), Slot.of("lastName", "Dumpty")));
   }
 
   @Test
   public void castsAnnotatedClassWithAnnotatedStringFields() {
     assertCasts(Record.of(Attr.of("person"), Slot.of("firstName", "Humpty"), Slot.of("lastName", "Dumpty")),
-                new AnnotatedPerson("Humpty", "Dumpty"));
+        new AnnotatedPerson("Humpty", "Dumpty"));
   }
 
   @Test
   public void moldsClassWithPrivateFields() {
     assertMolds(new PrivatePerson("Humpty", "Dumpty"),
-                Record.of(Attr.of("PrivatePerson"), Slot.of("first", "Humpty"), Slot.of("last", "Dumpty")));
+        Record.of(Attr.of("PrivatePerson"), Slot.of("first", "Humpty"), Slot.of("last", "Dumpty")));
   }
 
   @Test
   public void castsClassWithPrivateFields() {
     assertCasts(Record.of(Attr.of("PrivatePerson"), Slot.of("first", "Humpty"), Slot.of("last", "Dumpty")),
-                new PrivatePerson("Humpty", "Dumpty"));
+        new PrivatePerson("Humpty", "Dumpty"));
   }
 
   @Test
@@ -124,25 +125,25 @@ public class ClassFormSpec {
   @Test
   public void moldsClassWithPrimitiveHeaderFields() {
     assertMolds(new Point(2.5, 3.5),
-                Record.of(Attr.of("Point", Record.of(Slot.of("x", 2.5), Slot.of("y", 3.5)))));
+        Record.of(Attr.of("Point", Record.of(Slot.of("x", 2.5), Slot.of("y", 3.5)))));
   }
 
   @Test
   public void castsClassWithPrimitiveHeaderFields() {
     assertCasts(Record.of(Attr.of("Point", Record.of(Slot.of("x", 2.5), Slot.of("y", 3.5)))),
-                new Point(2.5, 3.5));
+        new Point(2.5, 3.5));
   }
 
   @Test
   public void moldsClassWithPrimitiveFields() {
     assertMolds(new Point2D(2.5, 3.5),
-                Record.of(Attr.of("Point2D"), Slot.of("x", 2.5), Slot.of("y", 3.5)));
+        Record.of(Attr.of("Point2D"), Slot.of("x", 2.5), Slot.of("y", 3.5)));
   }
 
   @Test
   public void castsClassWithPrimitiveFields() {
     assertCasts(Record.of(Attr.of("Point2D"), Slot.of("x", 2.5), Slot.of("y", 3.5)),
-                new Point2D(2.5, 3.5));
+        new Point2D(2.5, 3.5));
   }
 
   @Test
@@ -150,135 +151,135 @@ public class ClassFormSpec {
     assertMolds(
         new Line2D(new Point2D(2.0, 3.0), new Point2D(5.0, 7.0)),
         Record.of(Attr.of("Line2D"),
-                  Slot.of("p0", Record.of(Attr.of("Point2D"), Slot.of("x", 2.0), Slot.of("y", 3.0))),
-                  Slot.of("p1", Record.of(Attr.of("Point2D"), Slot.of("x", 5.0), Slot.of("y", 7.0)))));
+            Slot.of("p0", Record.of(Attr.of("Point2D"), Slot.of("x", 2.0), Slot.of("y", 3.0))),
+            Slot.of("p1", Record.of(Attr.of("Point2D"), Slot.of("x", 5.0), Slot.of("y", 7.0)))));
   }
 
   @Test
   public void castsClassWithObjectFields() {
     assertCasts(
         Record.of(Attr.of("Line2D"),
-                  Slot.of("p0", Record.of(Attr.of("Point2D"), Slot.of("x", 2.0), Slot.of("y", 3.0))),
-                  Slot.of("p1", Record.of(Attr.of("Point2D"), Slot.of("x", 5.0), Slot.of("y", 7.0)))),
+            Slot.of("p0", Record.of(Attr.of("Point2D"), Slot.of("x", 2.0), Slot.of("y", 3.0))),
+            Slot.of("p1", Record.of(Attr.of("Point2D"), Slot.of("x", 5.0), Slot.of("y", 7.0)))),
         new Line2D(new Point2D(2.0, 3.0), new Point2D(5.0, 7.0)));
   }
 
   @Test
   public void moldsClassWithGenericFields() {
     assertMolds(new Generic<String>("string"),
-                Record.of(Attr.of("Generic", Record.of(Slot.of("value", "string")))));
+        Record.of(Attr.of("Generic", Record.of(Slot.of("value", "string")))));
     assertMolds(new Generic<Integer>(2),
-                Record.of(Attr.of("Generic", Record.of(Slot.of("value", 2)))));
+        Record.of(Attr.of("Generic", Record.of(Slot.of("value", 2)))));
   }
 
   @Test
   public void castsClassWithGenericFields() {
     assertCasts(Record.of(Attr.of("Generic", Record.of(Slot.of("value", "string")))),
-                new Generic<String>("string"));
+        new Generic<String>("string"));
     assertCasts(Record.of(Attr.of("Generic", Record.of(Slot.of("value", 2)))),
-                new Generic<Integer>(2));
+        new Generic<Integer>(2));
   }
 
   @Test
   public void moldsClassWithFinalFields() {
     assertMolds(new Constant<String>("string"),
-                Record.of(Attr.of("Constant", Record.of(Slot.of("value", "string")))));
+        Record.of(Attr.of("Constant", Record.of(Slot.of("value", "string")))));
     assertMolds(new Constant<Integer>(2),
-                Record.of(Attr.of("Constant", Record.of(Slot.of("value", 2)))));
+        Record.of(Attr.of("Constant", Record.of(Slot.of("value", 2)))));
   }
 
   @Test
   public void castsClassWithFinalFields() {
     assertCasts(Record.of(Attr.of("Constant", Record.of(Slot.of("value", "string")))),
-                new Constant<String>("string"));
+        new Constant<String>("string"));
     assertCasts(Record.of(Attr.of("Constant", Record.of(Slot.of("value", 2)))),
-                new Constant<Integer>(2));
+        new Constant<Integer>(2));
   }
 
   @Test
   public void moldsClassWithObjectArrayFields() {
     final Point2D[] array = {new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0)};
     assertMolds(new PointArray(array),
-                Record.of(Attr.of("PointArray"),
-                          Slot.of("array", Record.of(Record.of(Attr.of("Point2D"),
-                                                               Slot.of("x", 1.0), Slot.of("y", -1.0)),
-                                                     Record.of(Attr.of("Point2D"),
-                                                               Slot.of("x", -1.0), Slot.of("y", 1.0))))));
+        Record.of(Attr.of("PointArray"),
+            Slot.of("array", Record.of(Record.of(Attr.of("Point2D"),
+                Slot.of("x", 1.0), Slot.of("y", -1.0)),
+                Record.of(Attr.of("Point2D"),
+                    Slot.of("x", -1.0), Slot.of("y", 1.0))))));
   }
 
   @Test
   public void castsClassWithObjectArrayFields() {
     final Point2D[] array = {new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0)};
     assertCasts(Record.of(Attr.of("PointArray"),
-                          Slot.of("array", Record.of(Record.of(Attr.of("Point2D"),
-                                                               Slot.of("x", 1.0), Slot.of("y", -1.0)),
-                                                     Record.of(Attr.of("Point2D"),
-                                                               Slot.of("x", -1.0), Slot.of("y", 1.0))))),
-                new PointArray(array));
+        Slot.of("array", Record.of(Record.of(Attr.of("Point2D"),
+            Slot.of("x", 1.0), Slot.of("y", -1.0)),
+            Record.of(Attr.of("Point2D"),
+                Slot.of("x", -1.0), Slot.of("y", 1.0))))),
+        new PointArray(array));
   }
 
   @Test
   public void moldsClassWithGenericArrayFields() {
     assertMolds(new GenericArray<Point2D>(new Point2D[] {new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0)}),
-                Record.of(Attr.of("GenericArray"),
-                          Slot.of("array", Record.of(Record.of(Attr.of("Point2D"),
-                                                               Slot.of("x", 1.0), Slot.of("y", -1.0)),
-                                                     Record.of(Attr.of("Point2D"),
-                                                               Slot.of("x", -1.0), Slot.of("y", 1.0))))),
-                new PolyForm().addClass(Point2D.class));
+        Record.of(Attr.of("GenericArray"),
+            Slot.of("array", Record.of(Record.of(Attr.of("Point2D"),
+                Slot.of("x", 1.0), Slot.of("y", -1.0)),
+                Record.of(Attr.of("Point2D"),
+                    Slot.of("x", -1.0), Slot.of("y", 1.0))))),
+        new PolyForm().addClass(Point2D.class));
   }
 
   @Test
   public void castsClassWithGenericArrayFields() {
     assertCasts(Record.of(Attr.of("GenericArray"),
-                          Slot.of("array", Record.of(Record.of(Attr.of("Point2D"),
-                                                               Slot.of("x", 1.0), Slot.of("y", -1.0)),
-                                                     Record.of(Attr.of("Point2D"),
-                                                               Slot.of("x", -1.0), Slot.of("y", 1.0))))),
-                new GenericArray<Point2D>(new Point2D[] {new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0)}),
-                new PolyForm().addClass(Point2D.class));
+        Slot.of("array", Record.of(Record.of(Attr.of("Point2D"),
+            Slot.of("x", 1.0), Slot.of("y", -1.0)),
+            Record.of(Attr.of("Point2D"),
+                Slot.of("x", -1.0), Slot.of("y", 1.0))))),
+        new GenericArray<Point2D>(new Point2D[] {new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0)}),
+        new PolyForm().addClass(Point2D.class));
   }
 
   @Test
   public void moldsClassWithObjectCollectionFields() {
     assertMolds(new PointList(Arrays.asList(new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0))),
-                Record.of(Attr.of("PointList"),
-                          Slot.of("list", Record.of(Record.of(Attr.of("Point2D"),
-                                                              Slot.of("x", 1.0), Slot.of("y", -1.0)),
-                                                    Record.of(Attr.of("Point2D"),
-                                                              Slot.of("x", -1.0), Slot.of("y", 1.0))))));
+        Record.of(Attr.of("PointList"),
+            Slot.of("list", Record.of(Record.of(Attr.of("Point2D"),
+                Slot.of("x", 1.0), Slot.of("y", -1.0)),
+                Record.of(Attr.of("Point2D"),
+                    Slot.of("x", -1.0), Slot.of("y", 1.0))))));
   }
 
   @Test
   public void castsClassWithObjectCollectionFields() {
     assertCasts(Record.of(Attr.of("PointList"),
-                          Slot.of("list", Record.of(Record.of(Attr.of("Point2D"),
-                                                              Slot.of("x", 1.0), Slot.of("y", -1.0)),
-                                                    Record.of(Attr.of("Point2D"),
-                                                              Slot.of("x", -1.0), Slot.of("y", 1.0))))),
-                new PointList(Arrays.asList(new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0))));
+        Slot.of("list", Record.of(Record.of(Attr.of("Point2D"),
+            Slot.of("x", 1.0), Slot.of("y", -1.0)),
+            Record.of(Attr.of("Point2D"),
+                Slot.of("x", -1.0), Slot.of("y", 1.0))))),
+        new PointList(Arrays.asList(new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0))));
   }
 
   @Test
   public void moldsClassWithGenericCollectionFields() {
     assertMolds(new GenericList<Point2D>(Arrays.asList(new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0))),
-                Record.of(Attr.of("GenericList"),
-                          Slot.of("list", Record.of(Record.of(Attr.of("Point2D"),
-                                                              Slot.of("x", 1.0), Slot.of("y", -1.0)),
-                                                    Record.of(Attr.of("Point2D"),
-                                                              Slot.of("x", -1.0), Slot.of("y", 1.0))))),
-                new PolyForm().addClass(Point2D.class));
+        Record.of(Attr.of("GenericList"),
+            Slot.of("list", Record.of(Record.of(Attr.of("Point2D"),
+                Slot.of("x", 1.0), Slot.of("y", -1.0)),
+                Record.of(Attr.of("Point2D"),
+                    Slot.of("x", -1.0), Slot.of("y", 1.0))))),
+        new PolyForm().addClass(Point2D.class));
   }
 
   @Test
   public void castsClassWithGenericCollectionFields() {
     assertCasts(Record.of(Attr.of("GenericList"),
-                          Slot.of("list", Record.of(Record.of(Attr.of("Point2D"),
-                                                              Slot.of("x", 1.0), Slot.of("y", -1.0)),
-                                                    Record.of(Attr.of("Point2D"),
-                                                              Slot.of("x", -1.0), Slot.of("y", 1.0))))),
-                new GenericList<Point2D>(Arrays.asList(new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0))),
-                new PolyForm().addClass(Point2D.class));
+        Slot.of("list", Record.of(Record.of(Attr.of("Point2D"),
+            Slot.of("x", 1.0), Slot.of("y", -1.0)),
+            Record.of(Attr.of("Point2D"),
+                Slot.of("x", -1.0), Slot.of("y", 1.0))))),
+        new GenericList<Point2D>(Arrays.asList(new Point2D(1.0, -1.0), new Point2D(-1.0, 1.0))),
+        new PolyForm().addClass(Point2D.class));
   }
 
   @Test
@@ -287,13 +288,13 @@ public class ClassFormSpec {
     map.put("p", new Point2D(1.0, 0.0));
     map.put("q", new Point2D(0.0, 1.0));
     assertMolds(new PointMap(map),
-                Record.of(Attr.of("PointMap"),
-                          Slot.of("map", Record.of(Slot.of("p", Record.of(Attr.of("Point2D"),
-                                                                          Slot.of("x", 1.0),
-                                                                          Slot.of("y", 0.0))),
-                                                   Slot.of("q", Record.of(Attr.of("Point2D"),
-                                                                          Slot.of("x", 0.0),
-                                                                          Slot.of("y", 1.0)))))));
+        Record.of(Attr.of("PointMap"),
+            Slot.of("map", Record.of(Slot.of("p", Record.of(Attr.of("Point2D"),
+                Slot.of("x", 1.0),
+                Slot.of("y", 0.0))),
+                Slot.of("q", Record.of(Attr.of("Point2D"),
+                    Slot.of("x", 0.0),
+                    Slot.of("y", 1.0)))))));
   }
 
   @Test
@@ -302,13 +303,13 @@ public class ClassFormSpec {
     map.put("p", new Point2D(1.0, 0.0));
     map.put("q", new Point2D(0.0, 1.0));
     assertCasts(Record.of(Attr.of("PointMap"),
-                          Slot.of("map", Record.of(Slot.of("p", Record.of(Attr.of("Point2D"),
-                                                                          Slot.of("x", 1.0),
-                                                                          Slot.of("y", 0.0))),
-                                                   Slot.of("q", Record.of(Attr.of("Point2D"),
-                                                                          Slot.of("x", 0.0),
-                                                                          Slot.of("y", 1.0)))))),
-                new PointMap(map));
+        Slot.of("map", Record.of(Slot.of("p", Record.of(Attr.of("Point2D"),
+            Slot.of("x", 1.0),
+            Slot.of("y", 0.0))),
+            Slot.of("q", Record.of(Attr.of("Point2D"),
+                Slot.of("x", 0.0),
+                Slot.of("y", 1.0)))))),
+        new PointMap(map));
   }
 
   @Test
@@ -317,14 +318,14 @@ public class ClassFormSpec {
     map.put("p", new Point2D(1.0, 0.0));
     map.put("q", new Point2D(0.0, 1.0));
     assertMolds(new GenericMap<String, Point2D>(map),
-                Record.of(Attr.of("GenericMap"),
-                          Slot.of("map", Record.of(Slot.of("p", Record.of(Attr.of("Point2D"),
-                                                                          Slot.of("x", 1.0),
-                                                                          Slot.of("y", 0.0))),
-                                                   Slot.of("q", Record.of(Attr.of("Point2D"),
-                                                                          Slot.of("x", 0.0),
-                                                                          Slot.of("y", 1.0)))))),
-                new PolyForm().addClass(Point2D.class));
+        Record.of(Attr.of("GenericMap"),
+            Slot.of("map", Record.of(Slot.of("p", Record.of(Attr.of("Point2D"),
+                Slot.of("x", 1.0),
+                Slot.of("y", 0.0))),
+                Slot.of("q", Record.of(Attr.of("Point2D"),
+                    Slot.of("x", 0.0),
+                    Slot.of("y", 1.0)))))),
+        new PolyForm().addClass(Point2D.class));
   }
 
   @Test
@@ -333,28 +334,77 @@ public class ClassFormSpec {
     map.put("p", new Point2D(1.0, 0.0));
     map.put("q", new Point2D(0.0, 1.0));
     assertCasts(Record.of(Attr.of("GenericMap"),
-                          Slot.of("map", Record.of(Slot.of("p", Record.of(Attr.of("Point2D"),
-                                                                          Slot.of("x", 1.0),
-                                                                          Slot.of("y", 0.0))),
-                                                   Slot.of("q", Record.of(Attr.of("Point2D"),
-                                                                          Slot.of("x", 0.0),
-                                                                          Slot.of("y", 1.0)))))),
-                new GenericMap<String, Point2D>(map),
-                new PolyForm().addClass(Point2D.class));
+        Slot.of("map", Record.of(Slot.of("p", Record.of(Attr.of("Point2D"),
+            Slot.of("x", 1.0),
+            Slot.of("y", 0.0))),
+            Slot.of("q", Record.of(Attr.of("Point2D"),
+                Slot.of("x", 0.0),
+                Slot.of("y", 1.0)))))),
+        new GenericMap<String, Point2D>(map),
+        new PolyForm().addClass(Point2D.class));
+  }
+
+  @Test
+  public void moldsClassWithRecursiveFields() {
+    assertMolds(new HeadTail<String>("a", new HeadTail<String>("b", null)),
+        Record.of(Attr.of("HeadTail"),
+            Slot.of("head", "a"),
+            Slot.of("tail", Record.of(Attr.of("HeadTail"),
+                Slot.of("head", "b"),
+                Slot.of("tail")))));
+  }
+
+  @Test
+  public void castsClassWithRecursiveFields() {
+    assertCasts(Record.of(Attr.of("HeadTail"),
+        Slot.of("head", "a"),
+        Slot.of("tail", Record.of(Attr.of("HeadTail"),
+            Slot.of("head", "b"),
+            Slot.of("tail")))),
+        new HeadTail<String>("a", new HeadTail<String>("b", null)));
+  }
+
+  @Test
+  public void moldsClassArray() {
+    final PrivatePerson[] arr = {new PrivatePerson("Humpty", "Dumpty"), new PrivatePerson("Satona", "Wall")};
+    assertMolds(arr, Record.of(
+        Record.of(Attr.of("PrivatePerson"),
+            Slot.of("first", "Humpty"),
+            Slot.of("last", "Dumpty")),
+        Record.of(Attr.of("PrivatePerson"),
+            Slot.of("first", "Satona"),
+            Slot.of("last", "Wall"))));
+  }
+
+  @Test
+  public void castsClassArray() {
+    final PrivatePerson[] arr = {new PrivatePerson("Humpty", "Dumpty"), new PrivatePerson("Satona", "Wall")};
+    assertCasts(Record.of(
+        Record.of(Attr.of("PrivatePerson"),
+            Slot.of("first", "Humpty"),
+            Slot.of("last", "Dumpty")),
+        Record.of(Attr.of("PrivatePerson"),
+            Slot.of("first", "Satona"),
+            Slot.of("last", "Wall"))),
+        arr);
   }
 
   public static class HeadTail<T> {
+
     public final T head;
     public final HeadTail<T> tail;
+
     public HeadTail(T head, HeadTail<T> tail) {
       this.head = head;
       this.tail = tail;
     }
+
     HeadTail() {
       // Form.cast constructor
       this.head = null;
       this.tail = null;
     }
+
     @Override
     public boolean equals(Object other) {
       if (other instanceof HeadTail<?>) {
@@ -364,58 +414,17 @@ public class ClassFormSpec {
       }
       return false;
     }
+
     @Override
     public int hashCode() {
       return Murmur3.mash(Murmur3.mix(Murmur3.hash(this.head), Murmur3.hash(this.tail)));
     }
+
     @Override
     public String toString() {
       return "HeadTail(" + this.head + ", " + this.tail + ")";
     }
+
   }
 
-  @Test
-  public void moldsClassWithRecursiveFields() {
-    assertMolds(new HeadTail<String>("a", new HeadTail<String>("b", null)),
-                Record.of(Attr.of("HeadTail"),
-                          Slot.of("head", "a"),
-                          Slot.of("tail", Record.of(Attr.of("HeadTail"),
-                                                    Slot.of("head", "b"),
-                                                    Slot.of("tail")))));
-  }
-
-  @Test
-  public void castsClassWithRecursiveFields() {
-    assertCasts(Record.of(Attr.of("HeadTail"),
-                          Slot.of("head", "a"),
-                          Slot.of("tail", Record.of(Attr.of("HeadTail"),
-                                                    Slot.of("head", "b"),
-                                                    Slot.of("tail")))),
-                new HeadTail<String>("a", new HeadTail<String>("b", null)));
-  }
-
-  @Test
-  public void moldsClassArray() {
-    final PrivatePerson[] arr = {new PrivatePerson("Humpty", "Dumpty"), new PrivatePerson("Satona", "Wall")};
-    assertMolds(arr, Record.of(
-                        Record.of(Attr.of("PrivatePerson"),
-                                  Slot.of("first", "Humpty"),
-                                  Slot.of("last", "Dumpty")),
-                        Record.of(Attr.of("PrivatePerson"),
-                                  Slot.of("first", "Satona"),
-                                  Slot.of("last", "Wall"))));
-  }
-
-  @Test
-  public void castsClassArray() {
-    final PrivatePerson[] arr = {new PrivatePerson("Humpty", "Dumpty"), new PrivatePerson("Satona", "Wall")};
-    assertCasts(Record.of(
-                    Record.of(Attr.of("PrivatePerson"),
-                              Slot.of("first", "Humpty"),
-                              Slot.of("last", "Dumpty")),
-                    Record.of(Attr.of("PrivatePerson"),
-                              Slot.of("first", "Satona"),
-                              Slot.of("last", "Wall"))),
-                arr);
-  }
 }

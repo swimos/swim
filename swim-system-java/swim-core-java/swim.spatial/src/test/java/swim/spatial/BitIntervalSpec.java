@@ -20,6 +20,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class BitIntervalSpec {
+
   @Test
   public void testCompare() {
     assertEquals(BitInterval.compare(0L, 0L), 0);
@@ -41,15 +42,15 @@ public class BitIntervalSpec {
   @Test
   public void testCompare2() {
     assertEquals(BitInterval.compare(0x0000000000000000L, 0x8000000000000000L,
-                                     0xC000000000000000L, 0xC000000000000000L), 0);
+        0xC000000000000000L, 0xC000000000000000L), 0);
     assertEquals(BitInterval.compare(0xF800000000000000L, 0xFFFC000000000000L,
-                                     0x800000000000000CL, 0xFFF0000000000001L), 0);
+        0x800000000000000CL, 0xFFF0000000000001L), 0);
     assertEquals(BitInterval.compare(0xE000000000000002L, 0xC000000000000003L,
-                                     0xF800000000000000L, 0xF000000000000001L), -1L);
+        0xF800000000000000L, 0xF000000000000001L), -1L);
     assertEquals(BitInterval.compare(0xE000000000000002L, 0xC000000000000003L,
-                                     0xF000000000000000L, 0xFC00000000000000L), 1L);
+        0xF000000000000000L, 0xFC00000000000000L), 1L);
     assertEquals(BitInterval.compare(0xF800000000000000L, 0xF000000000000001L,
-                                     0xF000000000000000L, 0xFC00000000000000L), 0);
+        0xF000000000000000L, 0xFC00000000000000L), 0);
   }
 
   @Test
@@ -100,4 +101,5 @@ public class BitIntervalSpec {
     assertFalse(BitInterval.contains(0L, 1L));
     assertFalse(BitInterval.contains(1L, 0L));
   }
+
 }

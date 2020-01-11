@@ -20,6 +20,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class QValueParser extends Parser<Float> {
+
   final int significand;
   final int exponent;
   final int step;
@@ -28,11 +29,6 @@ final class QValueParser extends Parser<Float> {
     this.significand = significand;
     this.exponent = exponent;
     this.step = step;
-  }
-
-  @Override
-  public Parser<Float> feed(Input input) {
-    return parse(input, this.significand, this.exponent, this.step);
   }
 
   static Parser<Float> parse(Input input, int significand, int exponent, int step) {
@@ -161,4 +157,10 @@ final class QValueParser extends Parser<Float> {
   public static Parser<Float> parseRest(Input input) {
     return parse(input, 0, 0, 3);
   }
+
+  @Override
+  public Parser<Float> feed(Input input) {
+    return parse(input, this.significand, this.exponent, this.step);
+  }
+
 }

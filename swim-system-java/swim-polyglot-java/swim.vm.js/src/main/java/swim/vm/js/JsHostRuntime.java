@@ -21,6 +21,7 @@ import swim.dynamic.JavaHostRuntime;
 import swim.uri.UriPath;
 
 public class JsHostRuntime extends JavaHostRuntime implements JsRuntime {
+
   JsModuleResolver moduleResolver;
   HashTrieMap<UriPath, HostLibrary> hostModules;
 
@@ -60,4 +61,5 @@ public class JsHostRuntime extends JavaHostRuntime implements JsRuntime {
   public void addHostModule(String moduleId, HostLibrary hostLibrary) {
     addHostModule(UriPath.parse(moduleId), hostLibrary);
   }
+
 }

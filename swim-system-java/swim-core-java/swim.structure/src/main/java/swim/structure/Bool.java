@@ -17,10 +17,17 @@ package swim.structure;
 import swim.codec.Output;
 
 public final class Bool extends Value {
+
+  private static final Bool TRUE = new Bool(true);
+  private static final Bool FALSE = new Bool(false);
   final boolean value;
 
   private Bool(boolean value) {
     this.value = value;
+  }
+
+  public static Bool from(boolean value) {
+    return value ? TRUE : FALSE;
   }
 
   @Override
@@ -119,11 +126,4 @@ public final class Bool extends Value {
     output = output.write(this.value ? "true" : "false");
   }
 
-  private static final Bool TRUE = new Bool(true);
-
-  private static final Bool FALSE = new Bool(false);
-
-  public static Bool from(boolean value) {
-    return value ? TRUE : FALSE;
-  }
 }

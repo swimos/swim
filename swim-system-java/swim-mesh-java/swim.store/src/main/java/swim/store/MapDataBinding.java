@@ -18,6 +18,7 @@ import swim.api.data.MapData;
 import swim.structure.Value;
 
 public interface MapDataBinding extends MapData<Value, Value>, DataBinding {
+
   @Override
   MapDataContext dataContext();
 
@@ -28,4 +29,5 @@ public interface MapDataBinding extends MapData<Value, Value>, DataBinding {
 
   @Override
   MapDataBinding isTransient(boolean isTransient);
+
 }

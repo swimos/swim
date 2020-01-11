@@ -20,6 +20,7 @@ import swim.codec.Output;
 import swim.codec.Parser;
 
 final class PIParser<I> extends Parser<I> {
+
   final XmlParser<I, ?> xml;
   final Parser<String> targetParser;
   final Output<I> output;
@@ -30,11 +31,6 @@ final class PIParser<I> extends Parser<I> {
     this.targetParser = targetParser;
     this.output = output;
     this.step = step;
-  }
-
-  @Override
-  public Parser<I> feed(Input input) {
-    return parse(input, this.xml, this.targetParser, this.output, this.step);
   }
 
   static <I> Parser<I> parse(Input input, XmlParser<I, ?> xml, Parser<String> targetParser,
@@ -156,4 +152,10 @@ final class PIParser<I> extends Parser<I> {
   static <I> Parser<I> parseTargetRest(Input input, XmlParser<I, ?> xml, String target) {
     return parse(input, xml, done(target), null, 4);
   }
+
+  @Override
+  public Parser<I> feed(Input input) {
+    return parse(input, this.xml, this.targetParser, this.output, this.step);
+  }
+
 }

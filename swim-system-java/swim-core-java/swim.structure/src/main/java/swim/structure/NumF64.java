@@ -21,10 +21,85 @@ import swim.codec.Output;
 import swim.util.HashGenCacheSet;
 
 final class NumF64 extends Num {
+
+  private static NumF64 positiveZero;
+  private static NumF64 negativeZero;
+  private static NumF64 positiveOne;
+  private static NumF64 negativeOne;
+  private static NumF64 nan;
+  private static ThreadLocal<HashGenCacheSet<NumF64>> cache = new ThreadLocal<>();
   final double value;
 
   NumF64(double value) {
     this.value = value;
+  }
+
+  static NumF64 positiveZero() {
+    if (positiveZero == null) {
+      positiveZero = new NumF64(0.0);
+    }
+    return positiveZero;
+  }
+
+  static NumF64 negativeZero() {
+    if (negativeZero == null) {
+      negativeZero = new NumF64(-0.0);
+    }
+    return negativeZero;
+  }
+
+  static NumF64 positiveOne() {
+    if (positiveOne == null) {
+      positiveOne = new NumF64(1.0);
+    }
+    return positiveOne;
+  }
+
+  static NumF64 negativeOne() {
+    if (negativeOne == null) {
+      negativeOne = new NumF64(-1.0);
+    }
+    return negativeOne;
+  }
+
+  static NumF64 nan() {
+    if (nan == null) {
+      nan = new NumF64(Double.NaN);
+    }
+    return nan;
+  }
+
+  public static NumF64 from(double value) {
+    if (value == 0.0) {
+      if (Math.copySign(1.0f, value) == 1.0f) {
+        return positiveZero();
+      } else {
+        return negativeZero();
+      }
+    } else if (value == 1.0) {
+      return positiveOne();
+    } else if (value == -1.0) {
+      return negativeOne();
+    } else if (Double.isNaN(value)) {
+      return nan();
+    } else {
+      return cache().put(new NumF64(value));
+    }
+  }
+
+  static HashGenCacheSet<NumF64> cache() {
+    HashGenCacheSet<NumF64> cache = NumF64.cache.get();
+    if (cache == null) {
+      int cacheSize;
+      try {
+        cacheSize = Integer.parseInt(System.getProperty("swim.structure.num.f64.cache.size"));
+      } catch (NumberFormatException e) {
+        cacheSize = 16;
+      }
+      cache = new HashGenCacheSet<NumF64>(cacheSize);
+      NumF64.cache.set(cache);
+    }
+    return cache;
   }
 
   @Override
@@ -277,83 +352,4 @@ final class NumF64 extends Num {
     Format.debugDouble(this.value, output);
   }
 
-  private static NumF64 positiveZero;
-
-  private static NumF64 negativeZero;
-
-  private static NumF64 positiveOne;
-
-  private static NumF64 negativeOne;
-
-  private static NumF64 nan;
-
-  private static ThreadLocal<HashGenCacheSet<NumF64>> cache = new ThreadLocal<>();
-
-  static NumF64 positiveZero() {
-    if (positiveZero == null) {
-      positiveZero = new NumF64(0.0);
-    }
-    return positiveZero;
-  }
-
-  static NumF64 negativeZero() {
-    if (negativeZero == null) {
-      negativeZero = new NumF64(-0.0);
-    }
-    return negativeZero;
-  }
-
-  static NumF64 positiveOne() {
-    if (positiveOne == null) {
-      positiveOne = new NumF64(1.0);
-    }
-    return positiveOne;
-  }
-
-  static NumF64 negativeOne() {
-    if (negativeOne == null) {
-      negativeOne = new NumF64(-1.0);
-    }
-    return negativeOne;
-  }
-
-  static NumF64 nan() {
-    if (nan == null) {
-      nan = new NumF64(Double.NaN);
-    }
-    return nan;
-  }
-
-  public static NumF64 from(double value) {
-    if (value == 0.0) {
-      if (Math.copySign(1.0f, value) == 1.0f) {
-        return positiveZero();
-      } else {
-        return negativeZero();
-      }
-    } else if (value == 1.0) {
-      return positiveOne();
-    } else if (value == -1.0) {
-      return negativeOne();
-    } else if (Double.isNaN(value)) {
-      return nan();
-    } else {
-      return cache().put(new NumF64(value));
-    }
-  }
-
-  static HashGenCacheSet<NumF64> cache() {
-    HashGenCacheSet<NumF64> cache = NumF64.cache.get();
-    if (cache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.structure.num.f64.cache.size"));
-      } catch (NumberFormatException e) {
-        cacheSize = 16;
-      }
-      cache = new HashGenCacheSet<NumF64>(cacheSize);
-      NumF64.cache.set(cache);
-    }
-    return cache;
-  }
 }

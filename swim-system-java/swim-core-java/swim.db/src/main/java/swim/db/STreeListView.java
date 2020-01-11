@@ -26,6 +26,7 @@ import swim.structure.collections.ValueList;
 import swim.util.Cursor;
 
 public class STreeListView implements List<Value> {
+
   protected final STree tree;
 
   public STreeListView(STree tree) {
@@ -229,4 +230,5 @@ public class STreeListView implements List<Value> {
     }
     return new STreeSubListView(this, fromIndex, toIndex);
   }
+
 }

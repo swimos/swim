@@ -19,6 +19,7 @@ import swim.collections.HashTrieMap;
 import swim.uri.UriPath;
 
 public class JsStaticModuleResolver implements JsModuleResolver {
+
   HashTrieMap<UriPath, Source> moduleSources;
 
   public JsStaticModuleResolver() {
@@ -61,4 +62,5 @@ public class JsStaticModuleResolver implements JsModuleResolver {
   public void defineModuleSource(String moduleId, String source) {
     defineModuleSource(UriPath.parse(moduleId), source);
   }
+
 }

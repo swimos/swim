@@ -20,6 +20,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class FixedDecoder<T> extends Decoder<T> {
+
   final AvroFixedType<T> type;
   final long size;
   final Decoder<T> decoder;
@@ -32,11 +33,6 @@ final class FixedDecoder<T> extends Decoder<T> {
 
   FixedDecoder(AvroFixedType<T> type) {
     this(type, type.size(), null);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.size, this.decoder);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroFixedType<T> type,
@@ -80,4 +76,10 @@ final class FixedDecoder<T> extends Decoder<T> {
   static <T> Decoder<T> decode(InputBuffer input, AvroFixedType<T> type) {
     return decode(input, type, type.size(), null);
   }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type, this.size, this.decoder);
+  }
+
 }

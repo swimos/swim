@@ -23,6 +23,7 @@ import swim.uri.UriPath;
 import swim.vm.VmProxyArray;
 
 public class JsRequireFunction implements ProxyExecutable, ProxyObject {
+
   final JsGuestModule module;
   HashTrieMap<String, Value> members;
 
@@ -81,4 +82,5 @@ public class JsRequireFunction implements ProxyExecutable, ProxyObject {
     }
     return new VmProxyArray(memberKeys);
   }
+
 }

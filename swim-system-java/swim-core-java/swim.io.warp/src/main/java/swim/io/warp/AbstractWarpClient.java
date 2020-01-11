@@ -27,6 +27,7 @@ import swim.ws.WsData;
 import swim.ws.WsRequest;
 
 public abstract class AbstractWarpClient extends AbstractWsClient implements WebSocketContext<Envelope, Envelope> {
+
   protected WarpSettings warpSettings;
 
   public AbstractWarpClient(WarpSettings warpSettings) {
@@ -72,4 +73,5 @@ public abstract class AbstractWarpClient extends AbstractWsClient implements Web
     warpSocket.setWarpSocketContext(webSocket); // eagerly set
     return new WsUpgradeRequester(webSocket, wsRequest, this.wsSettings);
   }
+
 }

@@ -19,6 +19,7 @@ import swim.dynamic.BridgeGuest;
 import swim.observable.function.DidUpdateShape;
 
 public class GuestDidUpdateShape<K, S, V> extends BridgeGuest implements DidUpdateShape<K, S, V> {
+
   public GuestDidUpdateShape(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -27,4 +28,5 @@ public class GuestDidUpdateShape<K, S, V> extends BridgeGuest implements DidUpda
   public void didUpdate(K key, S shape, V newValue, V oldValue) {
     this.bridge.guestExecuteVoid(this.guest, key, shape, newValue, oldValue);
   }
+
 }

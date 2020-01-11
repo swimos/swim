@@ -24,6 +24,7 @@ import swim.http.HttpParser;
 import swim.util.Builder;
 
 final class AcceptEncodingParser extends Parser<AcceptEncoding> {
+
   final HttpParser http;
   final Parser<ContentCoding> coding;
   final Builder<ContentCoding, FingerTrieSeq<ContentCoding>> codings;
@@ -39,11 +40,6 @@ final class AcceptEncodingParser extends Parser<AcceptEncoding> {
 
   AcceptEncodingParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<AcceptEncoding> feed(Input input) {
-    return parse(input, this.http, this.coding, this.codings, this.step);
   }
 
   static Parser<AcceptEncoding> parse(Input input, HttpParser http, Parser<ContentCoding> coding,
@@ -124,4 +120,10 @@ final class AcceptEncodingParser extends Parser<AcceptEncoding> {
   static Parser<AcceptEncoding> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<AcceptEncoding> feed(Input input) {
+    return parse(input, this.http, this.coding, this.codings, this.step);
+  }
+
 }

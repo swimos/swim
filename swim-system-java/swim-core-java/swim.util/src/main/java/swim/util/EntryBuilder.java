@@ -22,6 +22,7 @@ import java.util.Map;
  * {@code O}.
  */
 public interface EntryBuilder<K, V, O> extends PairBuilder<K, V, O>, Builder<Map.Entry<K, V>, O> {
+
   /**
    * Adds an input pair to this builder, returning {@code true} if the state
    * of the builder changed.
@@ -54,4 +55,5 @@ public interface EntryBuilder<K, V, O> extends PairBuilder<K, V, O>, Builder<Map
    */
   @Override
   O bind();
+
 }

@@ -24,6 +24,7 @@ import swim.util.CombinerFunction;
 import swim.util.Cursor;
 
 public final class QTree extends Tree {
+
   final TreeContext treeContext;
   final QTreePageRef rootRef;
   final Seed seed;
@@ -155,7 +156,7 @@ public final class QTree extends Tree {
         .balanced(newVersion).evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new QTree(this.treeContext, newRoot.pageRef(), this.seed,
-                       this.isResident, this.isTransient);
+          this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -171,7 +172,7 @@ public final class QTree extends Tree {
         .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new QTree(this.treeContext, newRoot.pageRef(), this.seed,
-                       this.isResident, this.isTransient);
+          this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -183,7 +184,7 @@ public final class QTree extends Tree {
         .balanced(newVersion).evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new QTree(this.treeContext, newRoot.pageRef(), this.seed,
-                       this.isResident, this.isTransient);
+          this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -193,7 +194,7 @@ public final class QTree extends Tree {
     if (!this.rootRef.isEmpty()) {
       final QTreePage newRoot = QTreePage.empty(this.treeContext, this.seed.stem, newVersion);
       return new QTree(this.treeContext, newRoot.pageRef(), this.seed,
-                       this.isResident, this.isTransient);
+          this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -318,4 +319,5 @@ public final class QTree extends Tree {
   public Cursor<Slot> deltaCursor(long sinceVersion) {
     return this.rootRef.deltaCursor(sinceVersion);
   }
+
 }

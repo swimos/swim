@@ -28,6 +28,7 @@ import static org.testng.Assert.ThrowingRunnable;
 import static org.testng.Assert.assertThrows;
 
 public class JsonParserSpec {
+
   public static void assertParses(String json, Value expected) {
     Assertions.assertParses(Json.structureParser().valueParser(), json, expected);
     Assertions.assertParses(Json.structureParser().valueParser(), " " + json + " ", expected);
@@ -316,9 +317,9 @@ public class JsonParserSpec {
   @Test
   public void parseNonEmptyObjects() {
     assertParses("{\"object\":{},\"array\":[],\"string\":\"\",\"number\":0,\"true\":true,\"false\":false,\"null\":null}",
-                 Record.of(Slot.of("object", Record.empty()), Slot.of("array", Record.empty()),
-                           Slot.of("string", ""), Slot.of("number", 0), Slot.of("true", Bool.from(true)),
-                           Slot.of("false", Bool.from(false)), Slot.of("null")));
+        Record.of(Slot.of("object", Record.empty()), Slot.of("array", Record.empty()),
+            Slot.of("string", ""), Slot.of("number", 0), Slot.of("true", Bool.from(true)),
+            Slot.of("false", Bool.from(false)), Slot.of("null")));
   }
 
   @Test
@@ -335,8 +336,8 @@ public class JsonParserSpec {
   @Test
   public void parseNonEmptyArrays() {
     assertParses("[{},[],\"\",0,true,false,null]",
-                 Record.of(Record.empty(), Record.empty(), "", 0, Bool.from(true),
-                           Bool.from(false), Value.extant()));
+        Record.of(Record.empty(), Record.empty(), "", 0, Bool.from(true),
+            Bool.from(false), Value.extant()));
   }
 
   @Test
@@ -433,4 +434,5 @@ public class JsonParserSpec {
     assertParseFails("{}{}");
     assertParseFails("1 2");
   }
+
 }

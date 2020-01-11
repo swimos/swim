@@ -23,6 +23,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class FingerTrieSeqSpec {
+
   @Test
   public void testEmpty() {
     assertTrue(FingerTrieSeq.empty().isEmpty());
@@ -54,6 +55,7 @@ public class FingerTrieSeqSpec {
       testCompose(n);
     }
   }
+
   private void testCompose(int n) {
     System.out.println("Composing FingerTrieSeq with " + n + " elements ...");
     final Builder<Integer, FingerTrieSeq<Integer>> builder = FingerTrieSeq.builder();
@@ -76,6 +78,7 @@ public class FingerTrieSeqSpec {
     testDrop((1 << 10) + 1);
     testDrop((1 << 15) + 1);
   }
+
   private void testDrop(int n) {
     final Builder<Integer, FingerTrieSeq<Integer>> builder = FingerTrieSeq.builder();
     for (int i = 0; i <= n; i += 1) {
@@ -97,6 +100,7 @@ public class FingerTrieSeqSpec {
     testTake((1 << 10) + 1);
     testTake((1 << 15) + 1);
   }
+
   private void testTake(int n) {
     final Builder<Integer, FingerTrieSeq<Integer>> builder = FingerTrieSeq.builder();
     for (int i = 0; i <= n; i += 1) {
@@ -121,6 +125,7 @@ public class FingerTrieSeqSpec {
       }
     }
   }
+
   private void testAppendAndDrop(int appendCount, int dropCount) {
     FingerTrieSeq<Integer> xs = FingerTrieSeq.empty();
     for (int i = 0; i < appendCount; i += 1) {
@@ -145,6 +150,7 @@ public class FingerTrieSeqSpec {
       }
     }
   }
+
   private void testPrependAndDrop(int prependCount, int dropCount) {
     FingerTrieSeq<Integer> xs = FingerTrieSeq.empty();
     for (int i = 0; i < prependCount; i += 1) {
@@ -157,7 +163,7 @@ public class FingerTrieSeqSpec {
       xs = xs.prepended(i);
     }
     for (int i = 0; i < prependCount; i += 1) {
-      assertEquals(xs.get(i).intValue(), prependCount +  dropCount - i - 1);
+      assertEquals(xs.get(i).intValue(), prependCount + dropCount - i - 1);
     }
   }
 
@@ -166,6 +172,7 @@ public class FingerTrieSeqSpec {
     testListIteratorSize((1 << 10) + 1);
     testListIteratorSize((1 << 15) + 1);
   }
+
   private void testListIteratorSize(int n) {
     final Builder<Integer, FingerTrieSeq<Integer>> builder = FingerTrieSeq.builder();
     for (int i = 0; i <= n; i += 1) {
@@ -187,6 +194,7 @@ public class FingerTrieSeqSpec {
     testReverseListIteratorSize((1 << 10) + 1);
     testReverseListIteratorSize((1 << 15) + 1);
   }
+
   private void testReverseListIteratorSize(int n) {
     final Builder<Integer, FingerTrieSeq<Integer>> builder = FingerTrieSeq.builder();
     for (int i = 0; i <= n; i += 1) {
@@ -203,4 +211,5 @@ public class FingerTrieSeqSpec {
       assertFalse(iter.hasPrevious());
     }
   }
+
 }

@@ -20,8 +20,17 @@ import java.util.Comparator;
 import swim.util.Cursor;
 
 public abstract class QTreePage<K, S, V> {
+
+  static final QTreePage<?, ?, ?>[] EMPTY_PAGES = new QTreePage<?, ?, ?>[0];
+  static final QTreeEntry<?, ?, ?>[] EMPTY_SLOTS = new QTreeEntry<?, ?, ?>[0];
+  static final Comparator<QTreePage<?, ?, ?>> PAGE_ORDERING = new QTreePageOrdering();
+
   QTreePage() {
     // stub
+  }
+
+  public static <K, S, V> QTreePage<K, S, V> empty() {
+    return QTreeLeaf.empty();
   }
 
   public abstract boolean isEmpty();
@@ -136,20 +145,13 @@ public abstract class QTreePage<K, S, V> {
     return cursor(-1L, -1L);
   }
 
-  static final QTreePage<?, ?, ?>[] EMPTY_PAGES = new QTreePage<?, ?, ?>[0];
-
-  static final QTreeEntry<?, ?, ?>[] EMPTY_SLOTS = new QTreeEntry<?, ?, ?>[0];
-
-  static final Comparator<QTreePage<?, ?, ?>> PAGE_ORDERING = new QTreePageOrdering();
-
-  public static <K, S, V> QTreePage<K, S, V> empty() {
-    return QTreeLeaf.empty();
-  }
 }
 
 final class QTreePageOrdering implements Comparator<QTreePage<?, ?, ?>> {
+
   @Override
   public int compare(QTreePage<?, ?, ?> a, QTreePage<?, ?, ?> b) {
     return BitInterval.compare(a.x(), a.y(), b.x(), b.y());
   }
+
 }

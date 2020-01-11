@@ -20,6 +20,7 @@ import java.util.Collection;
  * A dynamic object type descriptor for a host type.
  */
 public interface HostObjectType<T> extends HostType<T> {
+
   HostMember<? super T> getOwnMember(Bridge bridge, T self, String key);
 
   Collection<HostMember<? super T>> ownMembers(Bridge bridge, T self);
@@ -27,4 +28,5 @@ public interface HostObjectType<T> extends HostType<T> {
   HostMember<? super T> getMember(Bridge bridge, T self, String key);
 
   Collection<HostMember<? super T>> members(Bridge bridge, T self);
+
 }

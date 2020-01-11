@@ -23,11 +23,12 @@ import swim.codec.InputBuffer;
  * Factory for constructing Avro decoders and encoders.
  */
 public final class Avro {
+
+  private static AvroDecoder decoder;
+
   private Avro() {
     // static
   }
-
-  private static AvroDecoder decoder;
 
   public static AvroDecoder decoder() {
     if (decoder == null) {
@@ -56,4 +57,5 @@ public final class Avro {
         || '0' <= c && c <= '9'
         || c == '_';
   }
+
 }

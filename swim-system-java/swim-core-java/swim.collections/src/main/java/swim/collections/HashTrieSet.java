@@ -25,6 +25,12 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public final class HashTrieSet<T> implements Set<T>, Debug {
+
+  static final int VOID = 0;
+  static final int LEAF = 1;
+  static final int TREE = 2;
+  static final int KNOT = 3;
+  private static HashTrieSet<Object> empty;
   final int treeMap;
   final int leafMap;
   final Object[] slots;
@@ -33,6 +39,77 @@ public final class HashTrieSet<T> implements Set<T>, Debug {
     this.treeMap = treeMap;
     this.leafMap = leafMap;
     this.slots = slots;
+  }
+
+  static boolean contains(HashTrieSet<?> tree, Object elem, int elemHash, int shift) {
+    while (true) {
+      final int branch = tree.choose(elemHash, shift);
+      switch (tree.follow(branch)) {
+        case VOID:
+          return false;
+        case LEAF:
+          return elem.equals(tree.getLeaf(branch));
+        case TREE:
+          tree = tree.getTree(branch);
+          shift += 5;
+          break;
+        case KNOT:
+          return tree.getKnot(branch).contains(elem);
+        default:
+          throw new AssertionError();
+      }
+    }
+  }
+
+  static <T> T head(HashTrieSet<T> tree) {
+    loop:
+    while (true) {
+      int treeMap = tree.treeMap;
+      int leafMap = tree.leafMap;
+      while ((treeMap | leafMap) != 0) {
+        switch (leafMap & 1 | (treeMap & 1) << 1) {
+          case VOID:
+            break;
+          case LEAF:
+            return tree.leafAt(0);
+          case TREE:
+            tree = tree.treeAt(0);
+            continue loop;
+          case KNOT:
+            return tree.knotAt(0).head();
+          default:
+            throw new AssertionError();
+        }
+        treeMap >>>= 1;
+        leafMap >>>= 1;
+      }
+      return null;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> HashTrieSet<T> empty() {
+    if (empty == null) {
+      empty = new HashTrieSet<Object>(0, 0, new Object[0]);
+    }
+    return (HashTrieSet<T>) empty;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> HashTrieSet<T> of(T... elems) {
+    HashTrieSet<T> trie = empty();
+    for (T elem : elems) {
+      trie = trie.added(elem);
+    }
+    return trie;
+  }
+
+  public static <T> HashTrieSet<T> from(Iterable<? extends T> elems) {
+    HashTrieSet<T> trie = empty();
+    for (T elem : elems) {
+      trie = trie.added(elem);
+    }
+    return trie;
   }
 
   @Override
@@ -257,51 +334,6 @@ public final class HashTrieSet<T> implements Set<T>, Debug {
     }
   }
 
-  static boolean contains(HashTrieSet<?> tree, Object elem, int elemHash, int shift) {
-    while (true) {
-      final int branch = tree.choose(elemHash, shift);
-      switch (tree.follow(branch)) {
-        case VOID:
-          return false;
-        case LEAF:
-          return elem.equals(tree.getLeaf(branch));
-        case TREE:
-          tree = tree.getTree(branch);
-          shift += 5;
-          break;
-        case KNOT:
-          return tree.getKnot(branch).contains(elem);
-        default:
-          throw new AssertionError();
-      }
-    }
-  }
-
-  static <T> T head(HashTrieSet<T> tree) {
-    loop: while (true) {
-      int treeMap = tree.treeMap;
-      int leafMap = tree.leafMap;
-      while ((treeMap | leafMap) != 0) {
-        switch (leafMap & 1 | (treeMap & 1) << 1) {
-          case VOID:
-            break;
-          case LEAF:
-            return tree.leafAt(0);
-          case TREE:
-            tree = tree.treeAt(0);
-            continue loop;
-          case KNOT:
-            return tree.knotAt(0).head();
-          default:
-            throw new AssertionError();
-        }
-        treeMap >>>= 1;
-        leafMap >>>= 1;
-      }
-      return null;
-    }
-  }
-
   T next(Object elem, int elemHash, int shift) {
     final int block;
     if (elem == null) {
@@ -358,10 +390,10 @@ public final class HashTrieSet<T> implements Set<T>, Debug {
           return this;
         } else if (elemHash != leafHash) {
           return remap(treeMap | branch, leafMap ^ branch)
-            .setTree(branch, merge(leaf, leafHash, elem, elemHash, shift + 5));
+              .setTree(branch, merge(leaf, leafHash, elem, elemHash, shift + 5));
         } else {
           return remap(treeMap | branch, leafMap)
-            .setKnot(branch, new ArraySet<T>(leaf, elem));
+              .setKnot(branch, new ArraySet<T>(leaf, elem));
         }
       case TREE:
         final HashTrieSet<T> oldTree = getTree(branch);
@@ -533,43 +565,13 @@ public final class HashTrieSet<T> implements Set<T>, Debug {
     return Format.debug(this);
   }
 
-  static final int VOID = 0;
-  static final int LEAF = 1;
-  static final int TREE = 2;
-  static final int KNOT = 3;
-
-  private static HashTrieSet<Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <T> HashTrieSet<T> empty() {
-    if (empty == null) {
-      empty = new HashTrieSet<Object>(0, 0, new Object[0]);
-    }
-    return (HashTrieSet<T>) empty;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> HashTrieSet<T> of(T... elems) {
-    HashTrieSet<T> trie = empty();
-    for (T elem : elems) {
-      trie = trie.added(elem);
-    }
-    return trie;
-  }
-
-  public static <T> HashTrieSet<T> from(Iterable<? extends T> elems) {
-    HashTrieSet<T> trie = empty();
-    for (T elem : elems) {
-      trie = trie.added(elem);
-    }
-    return trie;
-  }
 }
 
 final class HashTrieSetIterator<T> implements Iterator<T> {
+
   final Object[] nodes;
-  int depth;
   final int[] stack;
+  int depth;
   int stackPointer;
 
   HashTrieSetIterator(HashTrieSet<T> tree) {
@@ -752,4 +754,5 @@ final class HashTrieSetIterator<T> implements Iterator<T> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

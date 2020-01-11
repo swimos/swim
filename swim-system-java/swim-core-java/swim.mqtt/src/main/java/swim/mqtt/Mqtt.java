@@ -15,12 +15,13 @@
 package swim.mqtt;
 
 public final class Mqtt {
-  private Mqtt() {
-    // stub
-  }
 
   private static MqttDecoder standardDecoder;
   private static MqttEncoder standardEncoder;
+
+  private Mqtt() {
+    // stub
+  }
 
   public static MqttDecoder standardDecoder() {
     if (standardDecoder == null) {
@@ -35,4 +36,5 @@ public final class Mqtt {
     }
     return standardEncoder;
   }
+
 }

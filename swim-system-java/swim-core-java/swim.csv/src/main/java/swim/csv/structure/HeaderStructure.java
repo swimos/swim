@@ -23,10 +23,15 @@ import swim.structure.Value;
 import swim.util.Builder;
 
 final class HeaderStructure extends CsvStructureHeader {
+
   final FingerTrieSeq<CsvCol<? extends Item>> cols;
 
   HeaderStructure(FingerTrieSeq<CsvCol<? extends Item>> cols) {
     this.cols = cols;
+  }
+
+  public static HeaderStructure empty() {
+    return new HeaderStructure(FingerTrieSeq.empty());
   }
 
   @Override
@@ -95,7 +100,4 @@ final class HeaderStructure extends CsvStructureHeader {
     return (Builder<Value, Record>) (Builder<?, ?>) Record.create();
   }
 
-  public static HeaderStructure empty() {
-    return new HeaderStructure(FingerTrieSeq.empty());
-  }
 }

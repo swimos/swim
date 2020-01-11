@@ -19,6 +19,7 @@ import java.util.List;
 import swim.collections.HashTrieMap;
 
 public abstract class AbstractHostObjectType<T> extends AbstractHostType<T> implements HostObjectType<T> {
+
   @Override
   public abstract HostMember<? super T> getOwnMember(Bridge bridge, T self, String key);
 
@@ -60,4 +61,5 @@ public abstract class AbstractHostObjectType<T> extends AbstractHostType<T> impl
     }
     return members.values();
   }
+
 }

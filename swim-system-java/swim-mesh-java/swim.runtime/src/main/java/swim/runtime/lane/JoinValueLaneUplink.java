@@ -24,6 +24,7 @@ import swim.structure.Value;
 import swim.warp.SyncRequest;
 
 public class JoinValueLaneUplink extends MapUplinkModem {
+
   final JoinValueLaneModel laneBinding;
 
   public JoinValueLaneUplink(JoinValueLaneModel laneBinding, WarpBinding linkBinding,
@@ -57,4 +58,5 @@ public class JoinValueLaneUplink extends MapUplinkModem {
     syncDown(this.laneBinding.keyIterator());
     super.willSync(request);
   }
+
 }

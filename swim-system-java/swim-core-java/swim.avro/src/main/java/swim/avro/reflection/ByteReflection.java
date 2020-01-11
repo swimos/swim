@@ -17,8 +17,10 @@ package swim.avro.reflection;
 import swim.avro.schema.AvroVarintType;
 
 final class ByteReflection extends AvroVarintType<Byte> {
+
   @Override
   public Byte cast(long value) {
     return Byte.valueOf((byte) value);
   }
+
 }

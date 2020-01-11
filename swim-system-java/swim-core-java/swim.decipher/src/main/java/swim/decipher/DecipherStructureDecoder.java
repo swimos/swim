@@ -29,6 +29,7 @@ import swim.structure.Value;
 import swim.xml.Xml;
 
 public class DecipherStructureDecoder extends DecipherDecoder<Item, Value> {
+
   @Override
   public Parser<Value> xmlParser() {
     return Xml.structureParser().documentParser();
@@ -80,4 +81,5 @@ public class DecipherStructureDecoder extends DecipherDecoder<Item, Value> {
   public Output<Value> dataOutput() {
     return (Output<Value>) (Output<?>) Data.output();
   }
+
 }

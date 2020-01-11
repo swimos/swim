@@ -22,6 +22,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 public final class Assertions {
+
   private Assertions() {
     // static
   }
@@ -73,4 +74,5 @@ public final class Assertions {
       }
     }
   }
+
 }

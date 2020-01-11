@@ -20,6 +20,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
 public class GuestAgent extends BridgeGuest implements Agent {
+
   protected final AgentContext agentContext;
 
   public GuestAgent(Bridge bridge, Object guest, AgentContext agentContext) {
@@ -122,4 +123,5 @@ public class GuestAgent extends BridgeGuest implements Agent {
       this.bridge.guestInvokeMember(this.guest, "didFail", error);
     }
   }
+
 }

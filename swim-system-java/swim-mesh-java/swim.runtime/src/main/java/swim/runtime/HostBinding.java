@@ -19,6 +19,7 @@ import swim.uri.Uri;
 import swim.uri.UriMapper;
 
 public interface HostBinding extends TierBinding, CellBinding {
+
   PartBinding part();
 
   HostBinding hostWrapper();
@@ -74,4 +75,5 @@ public interface HostBinding extends TierBinding, CellBinding {
   void openMetaLane(LaneBinding lane, NodeBinding metaLane);
 
   void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
+
 }

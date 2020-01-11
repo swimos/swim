@@ -23,6 +23,7 @@ import org.testng.annotations.Test;
 import swim.structure.Form;
 
 public class DatabaseSpec {
+
   final File testOutputDir = new File("build/test-output");
 
   @Test
@@ -32,6 +33,7 @@ public class DatabaseSpec {
       public boolean pageShouldSplit(Database database, Page page) {
         return page.arity() > 3;
       }
+
       @Override
       public boolean pageShouldMerge(Database database, Page page) {
         return page.arity() < 2;
@@ -106,4 +108,5 @@ public class DatabaseSpec {
     channel.close();
     testFile.delete();
   }
+
 }

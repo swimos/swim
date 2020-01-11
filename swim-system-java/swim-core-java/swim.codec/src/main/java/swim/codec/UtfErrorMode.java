@@ -20,57 +20,14 @@ import swim.util.Murmur3;
  * Unicode transformation format error handling mode.
  */
 public abstract class UtfErrorMode implements Debug {
-  UtfErrorMode() {
-  }
-
-  /**
-   * Returns {@code true} if a Unicode decoding should abort with an error when
-   * an invalid code unit sequence is encountered.
-   */
-  public boolean isFatal() {
-    return false;
-  }
-
-  /**
-   * Returns {@code true} if a Unicode decoding should substitute invalid code
-   * unit sequences with a replacement character.
-   */
-  public boolean isReplacement() {
-    return false;
-  }
-
-  /**
-   * Returns the Unicode code point of the replacement character to substitute
-   * for invalid code unit sequences.  Defaults to {@code U+FFFD}.
-   */
-  public int replacementChar() {
-    return 0xfffd;
-  }
-
-  /**
-   * Returns {@code true} if Unicode decoding should abort with an error when
-   * a {@code NUL} byte is encountered.
-   */
-  public abstract boolean isNonZero();
-
-  /**
-   * Returns a {@code UtfErrorMode} that, if {@code isNonZero} is {@code true},
-   * aborts when Unicode decoding encounters a {@code NUL} byte.
-   */
-  public abstract UtfErrorMode isNonZero(boolean isNonZero);
-
-  @Override
-  public abstract void debug(Output<?> output);
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
-  }
 
   private static UtfErrorMode fatal;
   private static UtfErrorMode fatalNonZero;
   private static UtfErrorMode replacement;
   private static UtfErrorMode replacementNonZero;
+
+  UtfErrorMode() {
+  }
 
   /**
    * Returns a {@code UtfErrorMode} that aborts Unicode decoding with an error
@@ -141,9 +98,56 @@ public abstract class UtfErrorMode implements Debug {
       return new UtfReplacementErrorMode(replacementChar, true);
     }
   }
+
+  /**
+   * Returns {@code true} if a Unicode decoding should abort with an error when
+   * an invalid code unit sequence is encountered.
+   */
+  public boolean isFatal() {
+    return false;
+  }
+
+  /**
+   * Returns {@code true} if a Unicode decoding should substitute invalid code
+   * unit sequences with a replacement character.
+   */
+  public boolean isReplacement() {
+    return false;
+  }
+
+  /**
+   * Returns the Unicode code point of the replacement character to substitute
+   * for invalid code unit sequences.  Defaults to {@code U+FFFD}.
+   */
+  public int replacementChar() {
+    return 0xfffd;
+  }
+
+  /**
+   * Returns {@code true} if Unicode decoding should abort with an error when
+   * a {@code NUL} byte is encountered.
+   */
+  public abstract boolean isNonZero();
+
+  /**
+   * Returns a {@code UtfErrorMode} that, if {@code isNonZero} is {@code true},
+   * aborts when Unicode decoding encounters a {@code NUL} byte.
+   */
+  public abstract UtfErrorMode isNonZero(boolean isNonZero);
+
+  @Override
+  public abstract void debug(Output<?> output);
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
+  }
+
 }
 
 final class UtfFatalErrorMode extends UtfErrorMode {
+
+  private static int hashSeed;
   private final boolean isNonZero;
 
   UtfFatalErrorMode(boolean isNonZero) {
@@ -195,10 +199,11 @@ final class UtfFatalErrorMode extends UtfErrorMode {
         .write('(').write(')');
   }
 
-  private static int hashSeed;
 }
 
 final class UtfReplacementErrorMode extends UtfErrorMode {
+
+  private static int hashSeed;
   private final int replacementChar;
   private final boolean isNonZero;
 
@@ -267,5 +272,4 @@ final class UtfReplacementErrorMode extends UtfErrorMode {
     output = output.write(')');
   }
 
-  private static int hashSeed;
 }

@@ -21,6 +21,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public class UriPathForm extends Form<UriPath> {
+
   final UriPath unit;
 
   UriPathForm(UriPath unit) {
@@ -64,4 +65,5 @@ public class UriPathForm extends Form<UriPath> {
     }
     return null;
   }
+
 }

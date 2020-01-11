@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 final class NumberParser extends Parser<Number> {
+
   final int sign;
   final long value;
   final int mode;
@@ -28,11 +29,6 @@ final class NumberParser extends Parser<Number> {
     this.value = value;
     this.mode = mode;
     this.step = step;
-  }
-
-  @Override
-  public Parser<Number> feed(Input input) {
-    return parse(input, this.sign, this.value, this.mode, this.step);
   }
 
   static Parser<Number> parse(Input input, int sign, long value, int mode, int step) {
@@ -161,20 +157,22 @@ final class NumberParser extends Parser<Number> {
       }
     }
   }
+
+  @Override
+  public Parser<Number> feed(Input input) {
+    return parse(input, this.sign, this.value, this.mode, this.step);
+  }
+
 }
 
 final class BigIntegerParser extends Parser<Number> {
+
   final int sign;
   final BigInteger value;
 
   BigIntegerParser(int sign, BigInteger value) {
     this.sign = sign;
     this.value = value;
-  }
-
-  @Override
-  public Parser<Number> feed(Input input) {
-    return parse(input, this.sign, this.value);
   }
 
   static Parser<Number> parse(Input input, int sign, BigInteger value) {
@@ -192,9 +190,16 @@ final class BigIntegerParser extends Parser<Number> {
     }
     return new BigIntegerParser(sign, value);
   }
+
+  @Override
+  public Parser<Number> feed(Input input) {
+    return parse(input, this.sign, this.value);
+  }
+
 }
 
 final class DecimalParser extends Parser<Number> {
+
   final StringBuilder builder;
   final int mode;
   final int step;
@@ -203,11 +208,6 @@ final class DecimalParser extends Parser<Number> {
     this.builder = builder;
     this.mode = mode;
     this.step = step;
-  }
-
-  @Override
-  public Parser<Number> feed(Input input) {
-    return parse(input, this.builder, this.mode, this.step);
   }
 
   static Parser<Number> parse(Input input, StringBuilder builder, int mode, int step) {
@@ -330,20 +330,22 @@ final class DecimalParser extends Parser<Number> {
     }
     return parse(input, builder, mode, 1);
   }
+
+  @Override
+  public Parser<Number> feed(Input input) {
+    return parse(input, this.builder, this.mode, this.step);
+  }
+
 }
 
 final class HexadecimalParser extends Parser<Number> {
+
   final long value;
   final int size;
 
   HexadecimalParser(long value, int size) {
     this.value = value;
     this.size = size;
-  }
-
-  @Override
-  public Parser<Number> feed(Input input) {
-    return parse(input, this.value, this.size);
   }
 
   static Parser<Number> parse(Input input, long value, int size) {
@@ -378,4 +380,10 @@ final class HexadecimalParser extends Parser<Number> {
   static Parser<Number> parse(Input input) {
     return parse(input, 0L, 0);
   }
+
+  @Override
+  public Parser<Number> feed(Input input) {
+    return parse(input, this.value, this.size);
+  }
+
 }

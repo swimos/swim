@@ -17,8 +17,10 @@ package swim.avro.reflection;
 import swim.avro.schema.AvroVarintType;
 
 final class ShortReflection extends AvroVarintType<Short> {
+
   @Override
   public Short cast(long value) {
     return Short.valueOf((short) value);
   }
+
 }

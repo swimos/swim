@@ -19,8 +19,18 @@ import swim.codec.Format;
 import swim.codec.Output;
 
 public class Z3 implements F3<VectorZ3, Long>, Debug {
+
+  private static Z3 module;
+
   protected Z3() {
     // stub
+  }
+
+  public static Z3 module() {
+    if (module == null) {
+      module = new Z3();
+    }
+    return module;
   }
 
   @Override
@@ -88,12 +98,4 @@ public class Z3 implements F3<VectorZ3, Long>, Debug {
     return Format.debug(this);
   }
 
-  private static Z3 module;
-
-  public static Z3 module() {
-    if (module == null) {
-      module = new Z3();
-    }
-    return module;
-  }
 }

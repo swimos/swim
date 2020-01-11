@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface DidSet<V> extends Preemptive {
+
   void didSet(V newValue, V oldValue);
+
 }

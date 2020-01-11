@@ -23,8 +23,37 @@ import swim.structure.Kind;
 import swim.util.Murmur3;
 
 public abstract class UriPattern implements Debug, Display {
+
+  private static int hashSeed;
+  private static UriPattern empty;
+  private static Form<UriPattern> form;
+
   UriPattern() {
     // stub
+  }
+
+  public static UriPattern empty() {
+    if (empty == null) {
+      empty = new UriConstantPattern(Uri.empty());
+    }
+    return empty;
+  }
+
+  public static UriPattern from(Uri pattern) {
+    return UriSchemePattern.compile(pattern, pattern.scheme(), pattern.authority(),
+        pattern.path(), pattern.query(), pattern.fragment());
+  }
+
+  public static UriPattern parse(String pattern) {
+    return from(Uri.parse(pattern));
+  }
+
+  @Kind
+  public static Form<UriPattern> form() {
+    if (form == null) {
+      form = new UriPatternForm(UriPattern.empty());
+    }
+    return form;
   }
 
   public abstract boolean isUri();
@@ -119,33 +148,4 @@ public abstract class UriPattern implements Debug, Display {
     return toUri().toString();
   }
 
-  private static int hashSeed;
-
-  private static UriPattern empty;
-
-  public static UriPattern empty() {
-    if (empty == null) {
-      empty = new UriConstantPattern(Uri.empty());
-    }
-    return empty;
-  }
-
-  public static UriPattern from(Uri pattern) {
-    return UriSchemePattern.compile(pattern, pattern.scheme(), pattern.authority(),
-                                    pattern.path(), pattern.query(), pattern.fragment());
-  }
-
-  public static UriPattern parse(String pattern) {
-    return from(Uri.parse(pattern));
-  }
-
-  private static Form<UriPattern> form;
-
-  @Kind
-  public static Form<UriPattern> form() {
-    if (form == null) {
-      form = new UriPatternForm(UriPattern.empty());
-    }
-    return form;
-  }
 }

@@ -19,5 +19,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface DidDownlinkValue<K> extends Preemptive {
+
   void didDownlink(K key, ValueDownlink<?> downlink);
+
 }

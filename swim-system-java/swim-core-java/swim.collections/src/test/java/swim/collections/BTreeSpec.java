@@ -19,6 +19,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 public class BTreeSpec {
+
   @Test
   public void testUpdatedAndGet() {
     BTree<Integer, Integer> tree = BTree.empty();
@@ -64,4 +65,5 @@ public class BTreeSpec {
       }
     }
   }
+
 }

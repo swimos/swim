@@ -27,8 +27,322 @@ import swim.util.HashGenCacheSet;
 import swim.util.Murmur3;
 
 public abstract class UriPath extends UriPart implements Collection<String>, Comparable<UriPath>, Debug, Display {
+
+  private static UriPath empty;
+  private static UriPath slash;
+  private static ThreadLocal<HashGenCacheSet<String>> segmentCache = new ThreadLocal<>();
+  private static Form<UriPath> pathForm;
+
   UriPath() {
     // sealed
+  }
+
+  private static int size(UriPath path) {
+    int n = 0;
+    while (!path.isEmpty()) {
+      n += 1;
+      path = path.tail();
+    }
+    return n;
+  }
+
+  private static String name(UriPath path) {
+    if (path.isEmpty()) {
+      return "";
+    }
+    do {
+      final UriPath tail = path.tail();
+      if (tail.isEmpty()) {
+        return path.isRelative() ? path.head() : "";
+      } else {
+        path = tail;
+      }
+    } while (true);
+  }
+
+  private static UriPath foot(UriPath path) {
+    if (path.isEmpty()) {
+      return path;
+    }
+    do {
+      final UriPath tail = path.tail();
+      if (tail.isEmpty()) {
+        return path;
+      } else {
+        path = tail;
+      }
+    } while (true);
+  }
+
+  private static boolean isRelativeTo(UriPath a, UriPath b) {
+    while (!a.isEmpty() && !b.isEmpty()) {
+      if (!a.head().equals(b.head())) {
+        return false;
+      }
+      a = a.tail();
+      b = b.tail();
+    }
+    return b.isEmpty();
+  }
+
+  private static boolean isChildOf(UriPath a, UriPath b) {
+    while (!a.isEmpty() && !b.isEmpty()) {
+      if (!a.head().equals(b.head())) {
+        return false;
+      }
+      a = a.tail();
+      b = b.tail();
+    }
+    return b.isEmpty() && !a.isEmpty() && a.tail().isEmpty();
+  }
+
+  private static boolean contains(UriPath path, String component) {
+    while (!path.isEmpty()) {
+      if (component.equals(path.head())) {
+        return true;
+      }
+      path = path.tail();
+    }
+    return false;
+  }
+
+  private static boolean containsAll(UriPath path, HashSet<?> missing) {
+    while (!path.isEmpty() && !missing.isEmpty()) {
+      missing.remove(path.head());
+      path = path.tail();
+    }
+    return missing.isEmpty();
+  }
+
+  private static UriPath removeDotSegments(UriPath path, UriPathBuilder builder) {
+    while (!path.isEmpty()) {
+      final String head = path.head();
+      if (head.equals(".") || head.equals("..")) {
+        path = path.tail();
+        if (!path.isEmpty()) {
+          path = path.tail();
+        }
+      } else if (path.isAbsolute()) {
+        final UriPath rest = path.tail();
+        if (!rest.isEmpty()) {
+          final String next = rest.head();
+          if (next.equals(".")) {
+            path = rest.tail();
+            if (path.isEmpty()) {
+              path = UriPath.slash();
+            }
+          } else if (next.equals("..")) {
+            path = rest.tail();
+            if (path.isEmpty()) {
+              path = UriPath.slash();
+            }
+            if (!builder.isEmpty() && !builder.pop().isAbsolute()) {
+              if (!builder.isEmpty()) {
+                builder.pop();
+              }
+            }
+          } else {
+            builder.add(head);
+            builder.add(next);
+            path = rest.tail();
+          }
+        } else {
+          builder.add(path.head());
+          path = path.tail();
+        }
+      } else {
+        builder.add(path.head());
+        path = path.tail();
+      }
+    }
+    return builder.bind();
+  }
+
+  static UriPath merge(UriPath prev, UriPath that) {
+    final UriPathBuilder builder = new UriPathBuilder();
+    do {
+      final UriPath next = prev.tail();
+      if (!next.isEmpty()) {
+        if (prev.isAbsolute()) {
+          builder.addSlash();
+        } else {
+          builder.addSegment(prev.head());
+        }
+        prev = next;
+      } else {
+        if (prev.isAbsolute()) {
+          builder.addSlash();
+        }
+        break;
+      }
+    } while (true);
+    builder.addPath(that);
+    return builder.bind();
+  }
+
+  private static UriPath unmerge(UriPath base, UriPath relative, UriPath root) {
+    do {
+      if (base.isEmpty()) {
+        if (!relative.isEmpty() && !relative.tail().isEmpty()) {
+          return relative.tail();
+        } else {
+          return relative;
+        }
+      } else if (base.isRelative()) {
+        return relative;
+      } else if (relative.isRelative()) {
+        return UriPath.slash(relative);
+      } else {
+        UriPath a = base.tail();
+        UriPath b = relative.tail();
+        if (!a.isEmpty() && b.isEmpty()) {
+          return UriPath.slash();
+        } else if (a.isEmpty() || b.isEmpty() || !a.head().equals(b.head())) {
+          return b;
+        } else {
+          a = a.tail();
+          b = b.tail();
+          if (!a.isEmpty() && b.isEmpty()) {
+            return root;
+          } else {
+            base = a;
+            relative = b;
+          }
+        }
+      }
+    } while (true);
+  }
+
+  private static void toArray(UriPath path, Object[] array) {
+    int i = 0;
+    while (!path.isEmpty()) {
+      array[i] = path.head();
+      path = path.tail();
+      i += 1;
+    }
+  }
+
+  static void display(UriPath path, Output<?> output) {
+    while (!path.isEmpty()) {
+      if (path.isAbsolute()) {
+        output = output.write('/');
+      } else {
+        Uri.writePathSegment(path.head(), output);
+      }
+      path = path.tail();
+    }
+  }
+
+  public static UriPathBuilder builder() {
+    return new UriPathBuilder();
+  }
+
+  public static UriPath empty() {
+    if (empty == null) {
+      empty = new UriPathEmpty();
+    }
+    return empty;
+  }
+
+  public static UriPath slash() {
+    if (slash == null) {
+      slash = new UriPathSlash(UriPath.empty());
+    }
+    return slash;
+  }
+
+  static UriPath slash(UriPath tail) {
+    if (tail == empty) {
+      return UriPath.slash();
+    } else {
+      return new UriPathSlash(tail);
+    }
+  }
+
+  public static UriPath segment(String segment) {
+    return UriPath.segment(segment, UriPath.empty());
+  }
+
+  static UriPath segment(String segment, UriPath tail) {
+    if (segment == null) {
+      throw new NullPointerException("segment");
+    }
+    segment = UriPath.cacheSegment(segment);
+    return new UriPathSegment(segment, tail);
+  }
+
+  public static UriPath component(String component) {
+    return UriPath.component(component, UriPath.empty());
+  }
+
+  static UriPath component(String component, UriPath tail) {
+    if (component == null) {
+      throw new NullPointerException();
+    }
+    if (component.equals("/")) {
+      return slash();
+    } else {
+      return segment(component);
+    }
+  }
+
+  public static UriPath from(String... components) {
+    if (components == null) {
+      throw new NullPointerException();
+    }
+    final UriPathBuilder builder = new UriPathBuilder();
+    for (int i = 0, n = components.length; i < n; i += 1) {
+      builder.add(components[i]);
+    }
+    return builder.bind();
+  }
+
+  public static UriPath from(Collection<? extends String> components) {
+    if (components == null) {
+      throw new NullPointerException();
+    }
+    if (components instanceof UriPath) {
+      return (UriPath) components;
+    } else {
+      final UriPathBuilder builder = new UriPathBuilder();
+      builder.addAll(components);
+      return builder.bind();
+    }
+  }
+
+  public static UriPath parse(String string) {
+    return Uri.standardParser().parsePathString(string);
+  }
+
+  static HashGenCacheSet<String> segmentCache() {
+    HashGenCacheSet<String> segmentCache = UriPath.segmentCache.get();
+    if (segmentCache == null) {
+      int segmentCacheSize;
+      try {
+        segmentCacheSize = Integer.parseInt(System.getProperty("swim.uri.segment.cache.size"));
+      } catch (NumberFormatException e) {
+        segmentCacheSize = 64;
+      }
+      segmentCache = new HashGenCacheSet<String>(segmentCacheSize);
+      UriPath.segmentCache.set(segmentCache);
+    }
+    return segmentCache;
+  }
+
+  static String cacheSegment(String segment) {
+    if (segment.length() <= 32) {
+      return segmentCache().put(segment);
+    } else {
+      return segment;
+    }
+  }
+
+  @Kind
+  public static Form<UriPath> pathForm() {
+    if (pathForm == null) {
+      pathForm = new UriPathForm(UriPath.empty());
+    }
+    return pathForm;
   }
 
   public abstract boolean isDefined();
@@ -43,15 +357,6 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
   @Override
   public int size() {
     return UriPath.size(this);
-  }
-
-  private static int size(UriPath path) {
-    int n = 0;
-    while (!path.isEmpty()) {
-      n += 1;
-      path = path.tail();
-    }
-    return n;
   }
 
   public abstract String head();
@@ -70,20 +375,6 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     return UriPath.name(this);
   }
 
-  private static String name(UriPath path) {
-    if (path.isEmpty()) {
-      return "";
-    }
-    do {
-      final UriPath tail = path.tail();
-      if (tail.isEmpty()) {
-        return path.isRelative() ? path.head() : "";
-      } else {
-        path = tail;
-      }
-    } while (true);
-  }
-
   public UriPath name(String name) {
     final UriPathBuilder builder = new UriPathBuilder();
     builder.addPath(base());
@@ -97,48 +388,12 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     return UriPath.foot(this);
   }
 
-  private static UriPath foot(UriPath path) {
-    if (path.isEmpty()) {
-      return path;
-    }
-    do {
-      final UriPath tail = path.tail();
-      if (tail.isEmpty()) {
-        return path;
-      } else {
-        path = tail;
-      }
-    } while (true);
-  }
-
   public boolean isRelativeTo(UriPath b) {
     return UriPath.isRelativeTo(this, b);
   }
 
-  private static boolean isRelativeTo(UriPath a, UriPath b) {
-    while (!a.isEmpty() && !b.isEmpty()) {
-      if (!a.head().equals(b.head())) {
-        return false;
-      }
-      a = a.tail();
-      b = b.tail();
-    }
-    return b.isEmpty();
-  }
-
   public boolean isChildOf(UriPath b) {
     return UriPath.isChildOf(this, b);
-  }
-
-  private static boolean isChildOf(UriPath a, UriPath b) {
-    while (!a.isEmpty() && !b.isEmpty()) {
-      if (!a.head().equals(b.head())) {
-        return false;
-      }
-      a = a.tail();
-      b = b.tail();
-    }
-    return b.isEmpty() && !a.isEmpty() && a.tail().isEmpty();
   }
 
   @Override
@@ -149,30 +404,12 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     return false;
   }
 
-  private static boolean contains(UriPath path, String component) {
-    while (!path.isEmpty()) {
-      if (component.equals(path.head())) {
-        return true;
-      }
-      path = path.tail();
-    }
-    return false;
-  }
-
   @Override
   public boolean containsAll(Collection<?> components) {
     if (components == null) {
       throw new NullPointerException();
     }
     return UriPath.containsAll(this, new HashSet<Object>(components));
-  }
-
-  private static boolean containsAll(UriPath path, HashSet<?> missing) {
-    while (!path.isEmpty() && !missing.isEmpty()) {
-      missing.remove(path.head());
-      path = path.tail();
-    }
-    return missing.isEmpty();
   }
 
   @Override
@@ -297,50 +534,6 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     return UriPath.removeDotSegments(this, new UriPathBuilder());
   }
 
-  private static UriPath removeDotSegments(UriPath path, UriPathBuilder builder) {
-    while (!path.isEmpty()) {
-      final String head = path.head();
-      if (head.equals(".") || head.equals("..")) {
-        path = path.tail();
-        if (!path.isEmpty()) {
-          path = path.tail();
-        }
-      } else if (path.isAbsolute()) {
-        final UriPath rest = path.tail();
-        if (!rest.isEmpty()) {
-          final String next = rest.head();
-          if (next.equals(".")) {
-            path = rest.tail();
-            if (path.isEmpty()) {
-              path = UriPath.slash();
-            }
-          } else if (next.equals("..")) {
-            path = rest.tail();
-            if (path.isEmpty()) {
-              path = UriPath.slash();
-            }
-            if (!builder.isEmpty() && !builder.pop().isAbsolute()) {
-              if (!builder.isEmpty()) {
-                builder.pop();
-              }
-            }
-          } else {
-            builder.add(head);
-            builder.add(next);
-            path = rest.tail();
-          }
-        } else {
-          builder.add(path.head());
-          path = path.tail();
-        }
-      } else {
-        builder.add(path.head());
-        path = path.tail();
-      }
-    }
-    return builder.bind();
-  }
-
   public UriPath merge(UriPath that) {
     if (that == null) {
       throw new NullPointerException();
@@ -352,63 +545,8 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
     }
   }
 
-  static UriPath merge(UriPath prev, UriPath that) {
-    final UriPathBuilder builder = new UriPathBuilder();
-    do {
-      final UriPath next = prev.tail();
-      if (!next.isEmpty()) {
-        if (prev.isAbsolute()) {
-          builder.addSlash();
-        } else {
-          builder.addSegment(prev.head());
-        }
-        prev = next;
-      } else {
-        if (prev.isAbsolute()) {
-          builder.addSlash();
-        }
-        break;
-      }
-    } while (true);
-    builder.addPath(that);
-    return builder.bind();
-  }
-
   public UriPath unmerge(UriPath that) {
     return UriPath.unmerge(this, that, that);
-  }
-
-  private static UriPath unmerge(UriPath base, UriPath relative, UriPath root) {
-    do {
-      if (base.isEmpty()) {
-        if (!relative.isEmpty() && !relative.tail().isEmpty()) {
-          return relative.tail();
-        } else {
-          return relative;
-        }
-      } else if (base.isRelative()) {
-        return relative;
-      } else if (relative.isRelative()) {
-        return UriPath.slash(relative);
-      } else {
-        UriPath a = base.tail();
-        UriPath b = relative.tail();
-        if (!a.isEmpty() && b.isEmpty()) {
-          return UriPath.slash();
-        } else if (a.isEmpty() || b.isEmpty() || !a.head().equals(b.head())) {
-          return b;
-        } else {
-          a = a.tail();
-          b = b.tail();
-          if (!a.isEmpty() && b.isEmpty()) {
-            return root;
-          } else {
-            base = a;
-            relative = b;
-          }
-        }
-      }
-    } while (true);
   }
 
   @Override
@@ -430,15 +568,6 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
       array[n] = null;
     }
     return array;
-  }
-
-  private static void toArray(UriPath path, Object[] array) {
-    int i = 0;
-    while (!path.isEmpty()) {
-      array[i] = path.head();
-      path = path.tail();
-      i += 1;
-    }
   }
 
   @Override
@@ -472,137 +601,7 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
   @Override
   public abstract void display(Output<?> output);
 
-  static void display(UriPath path, Output<?> output) {
-    while (!path.isEmpty()) {
-      if (path.isAbsolute()) {
-        output = output.write('/');
-      } else {
-        Uri.writePathSegment(path.head(), output);
-      }
-      path = path.tail();
-    }
-  }
-
   @Override
   public abstract String toString();
 
-  private static UriPath empty;
-
-  private static UriPath slash;
-
-  private static ThreadLocal<HashGenCacheSet<String>> segmentCache = new ThreadLocal<>();
-
-  public static UriPathBuilder builder() {
-    return new UriPathBuilder();
-  }
-
-  public static UriPath empty() {
-    if (empty == null) {
-      empty = new UriPathEmpty();
-    }
-    return empty;
-  }
-
-  public static UriPath slash() {
-    if (slash == null) {
-      slash = new UriPathSlash(UriPath.empty());
-    }
-    return slash;
-  }
-
-  static UriPath slash(UriPath tail) {
-    if (tail == empty) {
-      return UriPath.slash();
-    } else {
-      return new UriPathSlash(tail);
-    }
-  }
-
-  public static UriPath segment(String segment) {
-    return UriPath.segment(segment, UriPath.empty());
-  }
-
-  static UriPath segment(String segment, UriPath tail) {
-    if (segment == null) {
-      throw new NullPointerException("segment");
-    }
-    segment = UriPath.cacheSegment(segment);
-    return new UriPathSegment(segment, tail);
-  }
-
-  public static UriPath component(String component) {
-    return UriPath.component(component, UriPath.empty());
-  }
-
-  static UriPath component(String component, UriPath tail) {
-    if (component == null) {
-      throw new NullPointerException();
-    }
-    if (component.equals("/")) {
-      return slash();
-    } else {
-      return segment(component);
-    }
-  }
-
-  public static UriPath from(String... components) {
-    if (components == null) {
-      throw new NullPointerException();
-    }
-    final UriPathBuilder builder = new UriPathBuilder();
-    for (int i = 0, n = components.length; i < n; i += 1) {
-      builder.add(components[i]);
-    }
-    return builder.bind();
-  }
-
-  public static UriPath from(Collection<? extends String> components) {
-    if (components == null) {
-      throw new NullPointerException();
-    }
-    if (components instanceof UriPath) {
-      return (UriPath) components;
-    } else {
-      final UriPathBuilder builder = new UriPathBuilder();
-      builder.addAll(components);
-      return builder.bind();
-    }
-  }
-
-  public static UriPath parse(String string) {
-    return Uri.standardParser().parsePathString(string);
-  }
-
-  static HashGenCacheSet<String> segmentCache() {
-    HashGenCacheSet<String> segmentCache = UriPath.segmentCache.get();
-    if (segmentCache == null) {
-      int segmentCacheSize;
-      try {
-        segmentCacheSize = Integer.parseInt(System.getProperty("swim.uri.segment.cache.size"));
-      } catch (NumberFormatException e) {
-        segmentCacheSize = 64;
-      }
-      segmentCache = new HashGenCacheSet<String>(segmentCacheSize);
-      UriPath.segmentCache.set(segmentCache);
-    }
-    return segmentCache;
-  }
-
-  static String cacheSegment(String segment) {
-    if (segment.length() <= 32) {
-      return segmentCache().put(segment);
-    } else {
-      return segment;
-    }
-  }
-
-  private static Form<UriPath> pathForm;
-
-  @Kind
-  public static Form<UriPath> pathForm() {
-    if (pathForm == null) {
-      pathForm = new UriPathForm(UriPath.empty());
-    }
-    return pathForm;
-  }
 }

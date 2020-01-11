@@ -18,6 +18,7 @@ package swim.concurrent;
  * Thrown when performing an invalid operation on a {@link TaskFunction}.
  */
 public class TaskException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public TaskException(String message, Throwable cause) {
@@ -35,4 +36,5 @@ public class TaskException extends RuntimeException {
   public TaskException() {
     super();
   }
+
 }

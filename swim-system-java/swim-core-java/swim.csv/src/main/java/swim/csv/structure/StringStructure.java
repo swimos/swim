@@ -24,6 +24,7 @@ import swim.structure.Value;
 import swim.util.Builder;
 
 final class StringStructure implements CsvStructureCol {
+
   final Value key;
   final String name;
   final boolean optional;
@@ -88,4 +89,5 @@ final class StringStructure implements CsvStructureCol {
       }
     }
   }
+
 }

@@ -20,7 +20,9 @@ import swim.io.IpInterface;
 import swim.util.Log;
 
 public interface AuthenticatorContext extends IpInterface, Log {
+
   Schedule schedule();
 
   Stage stage();
+
 }

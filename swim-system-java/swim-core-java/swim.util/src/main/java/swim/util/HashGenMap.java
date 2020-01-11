@@ -21,17 +21,48 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
  * A hashed generational map evicts the least recently used value with the
  * worst hit rate per hash bucket.  HashGenMap is a concurrent and lock-free
  * LRFU cache, with O(1) access time, that strongly references its values.
- *
+ * <p>
  * Maintaining four "generations" of cached values per hash bucket, the cache
  * discards from the younger generations based on least recent usage, and
  * promotes younger generations to older generations based on most frequent
  * usage.  Cache misses count as negative usage of the older generations,
  * biasing the cache against least recently used values with poor hit rates.
- *
+ * <p>
  * The evict(K, V) method is guaranteed to be called when a value is displaced
  * from the cache.
  */
 public class HashGenMap<K, V> {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenMapBucket<?, ?>> BUCKET_GEN4_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMapBucket<?, ?>>) (Class<?>) HashGenMapBucket.class, "gen4Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenMapBucket<?, ?>> BUCKET_GEN3_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMapBucket<?, ?>>) (Class<?>) HashGenMapBucket.class, "gen3Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenMapBucket<?, ?>> BUCKET_GEN2_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMapBucket<?, ?>>) (Class<?>) HashGenMapBucket.class, "gen2Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenMapBucket<?, ?>> BUCKET_GEN1_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMapBucket<?, ?>>) (Class<?>) HashGenMapBucket.class, "gen1Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> GEN4_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "gen4Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> GEN3_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "gen3Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> GEN2_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "gen2Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> GEN1_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "gen1Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> MISSES =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "misses");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> EVICTS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "evicts");
   final AtomicReferenceArray<HashGenMapBucket<K, V>> buckets;
   volatile int gen4Hits;
   volatile int gen3Hits;
@@ -71,10 +102,10 @@ public class HashGenMap<K, V> {
           GEN3_HITS.incrementAndGet(this);
           if (BUCKET_GEN3_WEIGHT.incrementAndGet(bucket) > bucket.gen4Weight) {
             newBucket = new HashGenMapBucket<K, V>(
-              bucket.gen3Key, bucket.gen3Val, bucket.gen3Weight,
-              bucket.gen4Key, bucket.gen4Val, bucket.gen4Weight,
-              bucket.gen2Key, bucket.gen2Val, bucket.gen2Weight,
-              bucket.gen1Key, bucket.gen1Val, bucket.gen1Weight);
+                bucket.gen3Key, bucket.gen3Val, bucket.gen3Weight,
+                bucket.gen4Key, bucket.gen4Val, bucket.gen4Weight,
+                bucket.gen2Key, bucket.gen2Val, bucket.gen2Weight,
+                bucket.gen1Key, bucket.gen1Val, bucket.gen1Weight);
           } else {
             newBucket = bucket;
           }
@@ -83,10 +114,10 @@ public class HashGenMap<K, V> {
           GEN2_HITS.incrementAndGet(this);
           if (BUCKET_GEN2_WEIGHT.incrementAndGet(bucket) > bucket.gen3Weight) {
             newBucket = new HashGenMapBucket<K, V>(
-              bucket.gen4Key, bucket.gen4Val, bucket.gen4Weight,
-              bucket.gen2Key, bucket.gen2Val, bucket.gen2Weight,
-              bucket.gen3Key, bucket.gen3Val, bucket.gen3Weight,
-              bucket.gen1Key, bucket.gen1Val, bucket.gen1Weight);
+                bucket.gen4Key, bucket.gen4Val, bucket.gen4Weight,
+                bucket.gen2Key, bucket.gen2Val, bucket.gen2Weight,
+                bucket.gen3Key, bucket.gen3Val, bucket.gen3Weight,
+                bucket.gen1Key, bucket.gen1Val, bucket.gen1Weight);
           } else {
             newBucket = bucket;
           }
@@ -95,10 +126,10 @@ public class HashGenMap<K, V> {
           GEN1_HITS.incrementAndGet(this);
           if (BUCKET_GEN1_WEIGHT.incrementAndGet(bucket) > bucket.gen2Weight) {
             newBucket = new HashGenMapBucket<K, V>(
-              bucket.gen4Key, bucket.gen4Val, bucket.gen4Weight,
-              bucket.gen3Key, bucket.gen3Val, bucket.gen3Weight,
-              bucket.gen1Key, bucket.gen1Val, bucket.gen1Weight,
-              bucket.gen2Key, bucket.gen2Val, bucket.gen2Weight);
+                bucket.gen4Key, bucket.gen4Val, bucket.gen4Weight,
+                bucket.gen3Key, bucket.gen3Val, bucket.gen3Weight,
+                bucket.gen1Key, bucket.gen1Val, bucket.gen1Weight,
+                bucket.gen2Key, bucket.gen2Val, bucket.gen2Weight);
           } else {
             newBucket = bucket;
           }
@@ -259,48 +290,10 @@ public class HashGenMap<K, V> {
     return hits / (hits + (double) this.misses);
   }
 
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenMapBucket<?, ?>> BUCKET_GEN4_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMapBucket<?, ?>>) (Class<?>) HashGenMapBucket.class, "gen4Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenMapBucket<?, ?>> BUCKET_GEN3_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMapBucket<?, ?>>) (Class<?>) HashGenMapBucket.class, "gen3Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenMapBucket<?, ?>> BUCKET_GEN2_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMapBucket<?, ?>>) (Class<?>) HashGenMapBucket.class, "gen2Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenMapBucket<?, ?>> BUCKET_GEN1_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMapBucket<?, ?>>) (Class<?>) HashGenMapBucket.class, "gen1Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> GEN4_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "gen4Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> GEN3_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "gen3Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> GEN2_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "gen2Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> GEN1_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "gen1Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> MISSES =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "misses");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenMap<?, ?>> EVICTS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenMap<?, ?>>) (Class<?>) HashGenMap.class, "evicts");
 }
 
 final class HashGenMapBucket<K, V> {
+
   final K gen4Key;
   final V gen4Val;
   final K gen3Key;
@@ -340,4 +333,5 @@ final class HashGenMapBucket<K, V> {
   HashGenMapBucket() {
     this(null, null, 0, null, null, 0, null, null, 0, null, null, 0);
   }
+
 }

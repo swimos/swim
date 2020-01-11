@@ -15,6 +15,7 @@
 package swim.io.http;
 
 public interface HttpService {
+
   HttpServiceContext httpServiceContext();
 
   void setHttpServiceContext(HttpServiceContext context);
@@ -28,4 +29,5 @@ public interface HttpService {
   void didUnbind();
 
   void didFail(Throwable error);
+
 }

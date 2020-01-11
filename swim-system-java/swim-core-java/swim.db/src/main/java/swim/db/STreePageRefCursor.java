@@ -21,6 +21,7 @@ import swim.structure.Slot;
 import swim.util.Cursor;
 
 final class STreePageRefCursor implements Cursor<Slot> {
+
   final STreePageRef pageRef;
   final Record record;
   int index;
@@ -134,4 +135,5 @@ final class STreePageRefCursor implements Cursor<Slot> {
       return Slot.of(item.key(), item.toValue());
     }
   }
+
 }

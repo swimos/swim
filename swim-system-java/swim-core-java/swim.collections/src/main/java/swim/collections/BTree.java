@@ -28,10 +28,34 @@ import swim.util.OrderedMapCursor;
  * Immutable {@link OrderedMap} backed by a B-tree.
  */
 public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>, Debug {
+
+  private static BTree<Object, Object> empty;
   final BTreePage<K, V, ?> root;
 
   protected BTree(BTreePage<K, V, ?> root) {
     this.root = root;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <K, V> BTree<K, V> empty() {
+    if (empty == null) {
+      empty = new BTree<Object, Object>(BTreePage.empty());
+    }
+    return (BTree<K, V>) (BTree<?, ?>) empty;
+  }
+
+  public static <K, V> BTree<K, V> of(K key, V value) {
+    BTree<K, V> tree = empty();
+    tree = tree.updated(key, value);
+    return tree;
+  }
+
+  public static <K, V> BTree<K, V> from(Map<? extends K, ? extends V> map) {
+    BTree<K, V> tree = empty();
+    for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
+      tree = tree.updated(entry.getKey(), entry.getValue());
+    }
+    return tree;
   }
 
   @Override
@@ -334,27 +358,4 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
     return Format.debug(this);
   }
 
-  private static BTree<Object, Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <K, V> BTree<K, V> empty() {
-    if (empty == null) {
-      empty = new BTree<Object, Object>(BTreePage.empty());
-    }
-    return (BTree<K, V>) (BTree<?, ?>) empty;
-  }
-
-  public static <K, V> BTree<K, V> of(K key, V value) {
-    BTree<K, V> tree = empty();
-    tree = tree.updated(key, value);
-    return tree;
-  }
-
-  public static <K, V> BTree<K, V> from(Map<? extends K, ? extends V> map) {
-    BTree<K, V> tree = empty();
-    for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
-      tree = tree.updated(entry.getKey(), entry.getValue());
-    }
-    return tree;
-  }
 }

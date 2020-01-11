@@ -19,6 +19,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class ContentCodingParser extends Parser<ContentCoding> {
+
   final HttpParser http;
   final StringBuilder name;
   final Parser<Float> weight;
@@ -33,11 +34,6 @@ final class ContentCodingParser extends Parser<ContentCoding> {
 
   ContentCodingParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<ContentCoding> feed(Input input) {
-    return parse(input, this.http, this.name, this.weight, this.step);
   }
 
   static Parser<ContentCoding> parse(Input input, HttpParser http, StringBuilder name,
@@ -99,4 +95,10 @@ final class ContentCodingParser extends Parser<ContentCoding> {
   static Parser<ContentCoding> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<ContentCoding> feed(Input input) {
+    return parse(input, this.http, this.name, this.weight, this.step);
+  }
+
 }

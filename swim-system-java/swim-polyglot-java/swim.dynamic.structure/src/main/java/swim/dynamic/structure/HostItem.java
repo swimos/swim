@@ -23,9 +23,6 @@ import swim.dynamic.java.lang.HostObject;
 import swim.structure.Item;
 
 public final class HostItem {
-  private HostItem() {
-    // static
-  }
 
   public static final HostObjectType<Item> TYPE;
 
@@ -42,9 +39,15 @@ public final class HostItem {
     type.addStaticMember(new HostItemAbsent());
     type.addStaticMember(new HostItemExtant());
   }
+
+  private HostItem() {
+    // static
+  }
+
 }
 
 final class HostItemIsDefined implements HostMethod<Item> {
+
   @Override
   public String key() {
     return "isDefined";
@@ -54,9 +57,11 @@ final class HostItemIsDefined implements HostMethod<Item> {
   public Object invoke(Bridge bridge, Item item, Object... arguments) {
     return item.isDefined();
   }
+
 }
 
 final class HostItemIsDistinct implements HostMethod<Item> {
+
   @Override
   public String key() {
     return "isDistinct";
@@ -66,9 +71,11 @@ final class HostItemIsDistinct implements HostMethod<Item> {
   public Object invoke(Bridge bridge, Item item, Object... arguments) {
     return item.isDistinct();
   }
+
 }
 
 final class HostItemIsConstant implements HostMethod<Item> {
+
   @Override
   public String key() {
     return "isConstant";
@@ -78,9 +85,11 @@ final class HostItemIsConstant implements HostMethod<Item> {
   public Object invoke(Bridge bridge, Item item, Object... arguments) {
     return item.isConstant();
   }
+
 }
 
 final class HostItemStringValue implements HostMethod<Item> {
+
   @Override
   public String key() {
     return "stringValue";
@@ -94,9 +103,11 @@ final class HostItemStringValue implements HostMethod<Item> {
       return item.stringValue((String) arguments[0]);
     }
   }
+
 }
 
 final class HostItemNumberValue implements HostMethod<Item> {
+
   @Override
   public String key() {
     return "numberValue";
@@ -110,9 +121,11 @@ final class HostItemNumberValue implements HostMethod<Item> {
       return item.numberValue((Number) arguments[0]);
     }
   }
+
 }
 
 final class HostItemBooleanValue implements HostMethod<Item> {
+
   @Override
   public String key() {
     return "booleanValue";
@@ -126,9 +139,11 @@ final class HostItemBooleanValue implements HostMethod<Item> {
       return item.booleanValue((Boolean) arguments[0]);
     }
   }
+
 }
 
 final class HostItemAbsent implements HostStaticMethod {
+
   @Override
   public String key() {
     return "absent";
@@ -138,9 +153,11 @@ final class HostItemAbsent implements HostStaticMethod {
   public Object invoke(Bridge bridge, Object... arguments) {
     return Item.absent();
   }
+
 }
 
 final class HostItemExtant implements HostStaticMethod {
+
   @Override
   public String key() {
     return "extant";
@@ -150,4 +167,5 @@ final class HostItemExtant implements HostStaticMethod {
   public Object invoke(Bridge bridge, Object... arguments) {
     return Item.extant();
   }
+
 }

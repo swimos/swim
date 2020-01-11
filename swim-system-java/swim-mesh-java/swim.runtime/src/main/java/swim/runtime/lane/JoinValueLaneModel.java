@@ -43,6 +43,13 @@ import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
 public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, JoinValueLaneUplink> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<JoinValueLaneModel, HashTrieMap<Value, JoinValueLaneDownlink<?>>> DOWNLINKS =
+      AtomicReferenceFieldUpdater.newUpdater(JoinValueLaneModel.class, (Class<HashTrieMap<Value, JoinValueLaneDownlink<?>>>) (Class<?>) HashTrieMap.class, "downlinks");
   protected int flags;
   protected MapData<Value, Value> data;
   protected volatile HashTrieMap<Value, JoinValueLaneDownlink<?>> downlinks;
@@ -126,7 +133,8 @@ public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, J
       if (oldDownlink != null) {
         try {
           oldDownlink.close();
-        } catch (Exception swallow) { }
+        } catch (Exception swallow) {
+        }
       }
     }
   }
@@ -141,7 +149,8 @@ public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, J
       for (JoinValueLaneDownlink<?> downlink : oldDownlinks.values()) {
         try {
           downlink.close();
-        } catch (Exception swallow) { }
+        } catch (Exception swallow) {
+        }
       }
     }
   }
@@ -157,7 +166,8 @@ public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, J
       final JoinValueLaneDownlink<?> downlink = oldDownlinks.get(key);
       try {
         downlink.close();
-      } catch (Exception swallow) { }
+      } catch (Exception swallow) {
+      }
     }
   }
 
@@ -355,16 +365,10 @@ public class JoinValueLaneModel extends WarpLaneModel<JoinValueLaneView<?, ?>, J
     openDownlinks();
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<JoinValueLaneModel, HashTrieMap<Value, JoinValueLaneDownlink<?>>> DOWNLINKS =
-      AtomicReferenceFieldUpdater.newUpdater(JoinValueLaneModel.class, (Class<HashTrieMap<Value, JoinValueLaneDownlink<?>>>) (Class<?>) HashTrieMap.class, "downlinks");
 }
 
 final class JoinValueLaneModelEntryIterator implements Iterator<Map.Entry<Value, Value>> {
+
   final Iterator<Map.Entry<Value, Value>> iterator;
 
   JoinValueLaneModelEntryIterator(Iterator<Map.Entry<Value, Value>> iterator) {
@@ -390,9 +394,11 @@ final class JoinValueLaneModelEntryIterator implements Iterator<Map.Entry<Value,
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }
 
 final class JoinValueLaneModelValueIterator implements Iterator<Value> {
+
   final Iterator<Value> iterator;
 
   JoinValueLaneModelValueIterator(Iterator<Value> iterator) {
@@ -417,15 +423,17 @@ final class JoinValueLaneModelValueIterator implements Iterator<Value> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }
 
 final class JoinValueLaneRelayUpdate extends LaneRelay<JoinValueLaneModel, JoinValueLaneView<?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
+  final Value key;
   Form<Object> keyForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
   Value oldValue;
   Object oldObject;
@@ -571,15 +579,17 @@ final class JoinValueLaneRelayUpdate extends LaneRelay<JoinValueLaneModel, JoinV
       }
     }
   }
+
 }
 
 final class JoinValueLaneRelayRemove extends LaneRelay<JoinValueLaneModel, JoinValueLaneView<?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
+  final Value key;
   Form<Object> keyForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
   Value oldValue;
   Object oldObject;
@@ -699,9 +709,11 @@ final class JoinValueLaneRelayRemove extends LaneRelay<JoinValueLaneModel, JoinV
       }
     }
   }
+
 }
 
 final class JoinValueLaneRelayClear extends LaneRelay<JoinValueLaneModel, JoinValueLaneView<?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -777,11 +789,13 @@ final class JoinValueLaneRelayClear extends LaneRelay<JoinValueLaneModel, JoinVa
       }
     }
   }
+
 }
 
 final class JoinValueLaneRelayDownlink extends LaneRelay<JoinValueLaneModel, JoinValueLaneView<?, ?>> {
-  Form<Object> keyForm;
+
   final Value key;
+  Form<Object> keyForm;
   Object keyObject;
   JoinValueLaneDownlink<Object> downlink;
 
@@ -834,4 +848,5 @@ final class JoinValueLaneRelayDownlink extends LaneRelay<JoinValueLaneModel, Joi
       throw new AssertionError(); // unreachable
     }
   }
+
 }

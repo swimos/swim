@@ -22,12 +22,35 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class PointZ2 extends Z2Shape implements Debug {
+
+  private static int hashSeed;
+  private static PointZ2 origin;
+  private static Z2Form<PointZ2> form;
   public final long x;
   public final long y;
 
   public PointZ2(long x, long y) {
     this.x = x;
     this.y = y;
+  }
+
+  public static PointZ2 origin() {
+    if (origin == null) {
+      origin = new PointZ2(0L, 0L);
+    }
+    return origin;
+  }
+
+  public static PointZ2 of(long x, long y) {
+    return new PointZ2(x, y);
+  }
+
+  @Kind
+  public static Z2Form<PointZ2> form() {
+    if (form == null) {
+      form = new PointZ2Form();
+    }
+    return form;
   }
 
   public final PointZ2 plus(VectorZ2 vector) {
@@ -118,28 +141,4 @@ public class PointZ2 extends Z2Shape implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static PointZ2 origin;
-
-  private static Z2Form<PointZ2> form;
-
-  public static PointZ2 origin() {
-    if (origin == null) {
-      origin = new PointZ2(0L, 0L);
-    }
-    return origin;
-  }
-
-  public static PointZ2 of(long x, long y) {
-    return new PointZ2(x, y);
-  }
-
-  @Kind
-  public static Z2Form<PointZ2> form() {
-    if (form == null) {
-      form = new PointZ2Form();
-    }
-    return form;
-  }
 }

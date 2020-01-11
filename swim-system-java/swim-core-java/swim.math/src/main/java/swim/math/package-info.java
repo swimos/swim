@@ -17,4 +17,5 @@
  * modules and spaces, affine spaces, tensor spaces, probability distributions,
  * and associated operators.
  */
+
 package swim.math;

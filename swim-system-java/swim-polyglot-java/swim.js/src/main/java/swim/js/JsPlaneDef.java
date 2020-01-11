@@ -22,12 +22,30 @@ import swim.uri.UriPath;
 import swim.util.Murmur3;
 
 public class JsPlaneDef implements PlaneDef, Debug {
+
+  private static int hashSeed;
   final String planeName;
   final UriPath modulePath;
 
   public JsPlaneDef(String planeName, UriPath modulePath) {
     this.planeName = planeName;
     this.modulePath = modulePath;
+  }
+
+  public static JsPlaneDef from(String planeName, UriPath modulePath) {
+    return new JsPlaneDef(planeName, modulePath);
+  }
+
+  public static JsPlaneDef from(String planeName, String modulePath) {
+    return new JsPlaneDef(planeName, UriPath.parse(modulePath));
+  }
+
+  public static JsPlaneDef fromModulePath(UriPath modulePath) {
+    return new JsPlaneDef(modulePath.toString(), modulePath);
+  }
+
+  public static JsPlaneDef fromModulePath(String modulePath) {
+    return new JsPlaneDef(modulePath, UriPath.parse(modulePath));
   }
 
   @Override
@@ -83,21 +101,4 @@ public class JsPlaneDef implements PlaneDef, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static JsPlaneDef from(String planeName, UriPath modulePath) {
-    return new JsPlaneDef(planeName, modulePath);
-  }
-
-  public static JsPlaneDef from(String planeName, String modulePath) {
-    return new JsPlaneDef(planeName, UriPath.parse(modulePath));
-  }
-
-  public static JsPlaneDef fromModulePath(UriPath modulePath) {
-    return new JsPlaneDef(modulePath.toString(), modulePath);
-  }
-
-  public static JsPlaneDef fromModulePath(String modulePath) {
-    return new JsPlaneDef(modulePath, UriPath.parse(modulePath));
-  }
 }

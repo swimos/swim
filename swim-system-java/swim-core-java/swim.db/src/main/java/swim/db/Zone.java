@@ -18,6 +18,7 @@ import swim.concurrent.Cont;
 import swim.concurrent.Sync;
 
 public abstract class Zone {
+
   public abstract int id();
 
   public abstract Germ germ();
@@ -41,4 +42,5 @@ public abstract class Zone {
   }
 
   public abstract Chunk commitAndWriteChunk(Commit commit);
+
 }

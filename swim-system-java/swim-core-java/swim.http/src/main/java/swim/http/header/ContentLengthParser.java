@@ -20,6 +20,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class ContentLengthParser extends Parser<ContentLength> {
+
   final long length;
   final int step;
 
@@ -30,11 +31,6 @@ final class ContentLengthParser extends Parser<ContentLength> {
 
   ContentLengthParser() {
     this(0L, 1);
-  }
-
-  @Override
-  public Parser<ContentLength> feed(Input input) {
-    return parse(input, this.length, this.step);
   }
 
   static Parser<ContentLength> parse(Input input, long length, int step) {
@@ -79,4 +75,10 @@ final class ContentLengthParser extends Parser<ContentLength> {
   static Parser<ContentLength> parse(Input input) {
     return parse(input, 0L, 1);
   }
+
+  @Override
+  public Parser<ContentLength> feed(Input input) {
+    return parse(input, this.length, this.step);
+  }
+
 }

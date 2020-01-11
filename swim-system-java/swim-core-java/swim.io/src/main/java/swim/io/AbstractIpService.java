@@ -17,6 +17,7 @@ package swim.io;
 import java.net.InetSocketAddress;
 
 public abstract class AbstractIpService implements IpService, FlowContext {
+
   protected IpServiceContext context;
 
   @Override
@@ -90,4 +91,5 @@ public abstract class AbstractIpService implements IpService, FlowContext {
   public void unbind() {
     this.context.unbind();
   }
+
 }

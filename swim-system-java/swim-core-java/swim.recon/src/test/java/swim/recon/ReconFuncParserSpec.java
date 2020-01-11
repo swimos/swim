@@ -24,6 +24,7 @@ import swim.structure.Value;
 import static swim.recon.ReconParserSpec.assertParses;
 
 public class ReconFuncParserSpec {
+
   @Test
   public void parseFreeLambdaFunc() {
     assertParses("() => 0", Value.extant().lambda(Num.from(0)));
@@ -93,4 +94,5 @@ public class ReconFuncParserSpec {
   public void parsePostfixAttributedValueBindingSelectorLambdaFunc() {
     assertParses("x @pure => $x", Record.of("x", Attr.of("pure")).lambda(Selector.identity().get("x")));
   }
+
 }

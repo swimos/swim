@@ -29,6 +29,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public abstract class MqttSocketBehaviors {
+
   protected abstract IpServiceRef bind(MqttEndpoint endpoint, MqttService service);
 
   protected abstract IpSocketRef connect(MqttEndpoint endpoint, MqttSocket<?, ?> socket);
@@ -57,6 +58,7 @@ public abstract class MqttSocketBehaviors {
       public MqttSocket<?, ?> createSocket() {
         return server;
       }
+
       @Override
       public void didBind() {
         serverBind.countDown();
@@ -96,12 +98,14 @@ public abstract class MqttSocketBehaviors {
         read(Utf8.stringParser());
         write(MqttPublish.from("test").payload("@clientToServer"));
       }
+
       @Override
       public void didRead(MqttPacket<? extends String> packet) {
         assertTrue(packet instanceof MqttPublish<?>);
         assertEquals(((MqttPublish<? extends String>) packet).payload().get(), "@serverToClient");
         clientRead.countDown();
       }
+
       @Override
       public void didWrite(MqttPacket<? extends String> packet) {
         assertEquals(((MqttPublish<? extends String>) packet).payload().get(), "@clientToServer");
@@ -114,12 +118,14 @@ public abstract class MqttSocketBehaviors {
         read(Utf8.stringParser());
         write(MqttPublish.from("test").payload("@serverToClient"));
       }
+
       @Override
       public void didRead(MqttPacket<? extends String> packet) {
         assertTrue(packet instanceof MqttPublish<?>);
         assertEquals(((MqttPublish<? extends String>) packet).payload().get(), "@clientToServer");
         serverRead.countDown();
       }
+
       @Override
       public void didWrite(MqttPacket<? extends String> packet) {
         assertEquals(((MqttPublish<? extends String>) packet).payload().get(), "@serverToClient");
@@ -171,12 +177,14 @@ public abstract class MqttSocketBehaviors {
         public MqttSocket<?, ?> createSocket() {
           return new AbstractMqttSocket<String, String>() {
             boolean closed;
+
             @Override
             public void didConnect() {
               t0.compareAndSet(0L, System.currentTimeMillis());
               read(Utf8.stringParser());
               write(MqttPublish.from("test").payload(payload));
             }
+
             @Override
             public void doWrite() {
               long oldDt;
@@ -199,6 +207,7 @@ public abstract class MqttSocketBehaviors {
               }
               write(MqttPublish.from("test").payload(payload));
             }
+
             @Override
             public void didDisconnect() {
               serverDone.countDown();
@@ -213,10 +222,12 @@ public abstract class MqttSocketBehaviors {
           public void didConnect() {
             read(Utf8.stringParser());
           }
+
           @Override
           public void didRead(MqttPacket<? extends String> packet) {
             read(Utf8.stringParser());
           }
+
           @Override
           public void didDisconnect() {
             clientDone.countDown();
@@ -255,4 +266,5 @@ public abstract class MqttSocketBehaviors {
     }
     benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, payload.toString());
   }
+
 }

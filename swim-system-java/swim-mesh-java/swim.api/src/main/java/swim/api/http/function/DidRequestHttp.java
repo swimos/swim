@@ -19,5 +19,7 @@ import swim.http.HttpRequest;
 
 @FunctionalInterface
 public interface DidRequestHttp<V> extends Preemptive {
+
   void didRequest(HttpRequest<V> request);
+
 }

@@ -17,5 +17,7 @@ package swim.runtime.reflect;
 import swim.structure.Value;
 
 public interface WarpInfo {
+
   Value toValue();
+
 }

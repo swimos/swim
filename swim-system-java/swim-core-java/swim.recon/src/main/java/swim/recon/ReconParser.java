@@ -26,6 +26,7 @@ import swim.util.Builder;
  * Factory for constructing Recon parsers and parse trees.
  */
 public abstract class ReconParser<I, V> {
+
   public abstract boolean isDistinct(V value);
 
   public abstract I item(V value);
@@ -305,4 +306,5 @@ public abstract class ReconParser<I, V> {
     }
     return parser.bind();
   }
+
 }

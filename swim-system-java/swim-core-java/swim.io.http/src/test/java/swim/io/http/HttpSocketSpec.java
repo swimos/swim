@@ -18,6 +18,7 @@ import swim.io.IpServiceRef;
 import swim.io.IpSocketRef;
 
 public class HttpSocketSpec extends HttpSocketBehaviors {
+
   final HttpSettings httpSettings = HttpSettings.standard();
 
   @Override
@@ -29,4 +30,5 @@ public class HttpSocketSpec extends HttpSocketBehaviors {
   protected IpSocketRef connect(HttpEndpoint endpoint, HttpClient client) {
     return endpoint.connectHttp("127.0.0.1", 33556, client, this.httpSettings);
   }
+
 }

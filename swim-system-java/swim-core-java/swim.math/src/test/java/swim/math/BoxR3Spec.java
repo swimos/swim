@@ -20,15 +20,17 @@ import swim.structure.Record;
 import static org.testng.Assert.assertEquals;
 
 public class BoxR3Spec {
+
   @Test
   public void testMold() {
     assertEquals(BoxR3.form().mold(new BoxR3(2.0, 0.5, -1.0, 4.0, 1.0, 3.1)),
-                 Record.of(Attr.of("box", Record.of(2.0, 0.5, -1.0, 4.0, 1.0, 3.1))));
+        Record.of(Attr.of("box", Record.of(2.0, 0.5, -1.0, 4.0, 1.0, 3.1))));
   }
 
   @Test
   public void testCast() {
     assertEquals(BoxR3.form().cast(Record.of(Attr.of("box", Record.of(2.0, 0.5, -1.0, 4.0, 1.0, 3.1)))),
-                 new BoxR3(2.0, 0.5, -1.0, 4.0, 1.0, 3.1));
+        new BoxR3(2.0, 0.5, -1.0, 4.0, 1.0, 3.1));
   }
+
 }

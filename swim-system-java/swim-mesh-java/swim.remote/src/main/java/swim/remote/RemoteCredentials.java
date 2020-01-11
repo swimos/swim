@@ -19,6 +19,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public final class RemoteCredentials implements Credentials {
+
   final Uri requestUri;
   final Uri fromUri;
   final Value claims;
@@ -43,4 +44,5 @@ public final class RemoteCredentials implements Credentials {
   public Value claims() {
     return this.claims;
   }
+
 }

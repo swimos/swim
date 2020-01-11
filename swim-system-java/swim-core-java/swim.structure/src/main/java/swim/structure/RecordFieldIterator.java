@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 final class RecordFieldIterator implements Iterator<Field> {
+
   final Iterator<Item> iterator;
   Field next;
 
@@ -65,4 +66,5 @@ final class RecordFieldIterator implements Iterator<Field> {
   public void remove() {
     this.iterator.remove();
   }
+
 }

@@ -18,5 +18,7 @@ import swim.api.Downlink;
 import swim.dataflow.AbstractRecordOutlet;
 
 public abstract class DownlinkRecord extends AbstractRecordOutlet {
+
   public abstract Downlink downlink();
+
 }

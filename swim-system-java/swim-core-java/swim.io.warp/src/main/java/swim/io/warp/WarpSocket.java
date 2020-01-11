@@ -21,6 +21,7 @@ import swim.warp.Envelope;
 import swim.ws.WsControl;
 
 public interface WarpSocket {
+
   WarpSocketContext warpSocketContext();
 
   void setWarpSocketContext(WarpSocketContext context);
@@ -58,4 +59,5 @@ public interface WarpSocket {
   void didDisconnect();
 
   void didFail(Throwable error);
+
 }

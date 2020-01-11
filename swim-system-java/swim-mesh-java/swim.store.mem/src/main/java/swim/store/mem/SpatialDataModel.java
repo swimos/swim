@@ -27,6 +27,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class SpatialDataModel<S> implements SpatialDataBinding<S> {
+
   protected final Value name;
   protected final QTreeMap<Value, S, Value> tree;
   protected SpatialDataContext<S> dataContext;
@@ -223,4 +224,5 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S> {
       storeBinding.closeData(this.name);
     }
   }
+
 }

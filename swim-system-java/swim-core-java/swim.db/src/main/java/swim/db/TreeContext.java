@@ -17,6 +17,7 @@ package swim.db;
 import swim.structure.Value;
 
 public class TreeContext extends PageContext {
+
   public TreeDelegate treeDelegate() {
     return null;
   }
@@ -92,4 +93,5 @@ public class TreeContext extends PageContext {
   public void utreeDidUpdate(UTree newTree, UTree oldTree, Value newValue, Value oldValue) {
     // nop
   }
+
 }

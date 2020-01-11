@@ -20,6 +20,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 public abstract class Tree {
+
   public abstract TreeType treeType();
 
   public abstract TreeContext treeContext();
@@ -85,4 +86,5 @@ public abstract class Tree {
   public abstract void soften(long version);
 
   public abstract Cursor<? extends Object> cursor();
+
 }

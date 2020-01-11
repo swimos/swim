@@ -15,6 +15,16 @@
 package swim.math;
 
 public abstract class Z2Shape implements Shape {
+
+  private static Z2Form<Z2Shape> shapeForm;
+
+  public static Z2Form<Z2Shape> shapeForm() {
+    if (shapeForm == null) {
+      shapeForm = new Z2ShapeForm();
+    }
+    return shapeForm;
+  }
+
   public abstract long xMin();
 
   public abstract long yMin();
@@ -47,12 +57,4 @@ public abstract class Z2Shape implements Shape {
 
   public abstract R2Shape transform(Z2ToR2Function f);
 
-  private static Z2Form<Z2Shape> shapeForm;
-
-  public static Z2Form<Z2Shape> shapeForm() {
-    if (shapeForm == null) {
-      shapeForm = new Z2ShapeForm();
-    }
-    return shapeForm;
-  }
 }

@@ -15,5 +15,7 @@
 package swim.api.plane;
 
 public interface PlaneDef {
+
   String planeName();
+
 }

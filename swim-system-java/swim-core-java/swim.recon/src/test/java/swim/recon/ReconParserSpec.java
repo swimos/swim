@@ -29,6 +29,7 @@ import static org.testng.Assert.ThrowingRunnable;
 import static org.testng.Assert.assertThrows;
 
 public class ReconParserSpec {
+
   public static void assertParses(String recon, Value expected) {
     Assertions.assertParses(Recon.structureParser().blockParser(), recon, expected);
     Assertions.assertParses(Recon.structureParser().blockParser(), " " + recon + " ", expected);
@@ -922,4 +923,5 @@ public class ReconParserSpec {
     assertParseFails("{}{}");
     assertParseFails("1 2");
   }
+
 }

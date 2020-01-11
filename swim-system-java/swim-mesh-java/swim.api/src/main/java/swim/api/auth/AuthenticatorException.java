@@ -15,6 +15,7 @@
 package swim.api.auth;
 
 public class AuthenticatorException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public AuthenticatorException(String message, Throwable cause) {
@@ -32,4 +33,5 @@ public class AuthenticatorException extends RuntimeException {
   public AuthenticatorException() {
     super();
   }
+
 }

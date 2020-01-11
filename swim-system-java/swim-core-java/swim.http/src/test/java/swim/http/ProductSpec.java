@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class ProductSpec {
+
   public void assertParses(String string, Product product) {
     HttpAssertions.assertParses(Http.standardParser().productParser(), string, product);
   }
@@ -53,4 +54,5 @@ public class ProductSpec {
     assertWrites(Product.from("swim").comment("beta"), "swim (beta)");
     assertWrites(Product.from("swim").comment("beta").comment("debug"), "swim (beta) (debug)");
   }
+
 }

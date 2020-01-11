@@ -38,31 +38,43 @@ import swim.concurrent.Stage;
  * Asynchronous I/O multiplexor.
  */
 public class Station {
+
+  /**
+   * Atomic {@link #status} bit flag indicating that the station has started,
+   * and is currently running.
+   */
+  static final int STARTED = 1 << 0;
+  /**
+   * Atomic {@link #status} bit flag indicating that the station had previously
+   * started, but is now permanently stopped.
+   */
+  static final int STOPPED = 1 << 1;
+  /**
+   * Atomic {@link #status} field updater, used to linearize station startup
+   * and shutdown.
+   */
+  static final AtomicIntegerFieldUpdater<Station> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(Station.class, "status");
   /**
    * Stage on which to execute I/O tasks.
    */
   protected final Stage stage;
-
-  /**
-   * Transport configuration parameters.
-   */
-  protected TransportSettings transportSettings;
-
   /**
    * Barrier used to sequence station startup.
    */
   final CountDownLatch startLatch;
-
   /**
    * Barrier used to sequence station shutdown.
    */
   final CountDownLatch stopLatch;
-
   /**
    * Thread that waits on and dispatches I/O readiness events.
    */
   final StationThread thread;
-
+  /**
+   * Transport configuration parameters.
+   */
+  protected TransportSettings transportSettings;
   /**
    * Atomic bit field with {@link #STARTED} and {@link #STOPPED} flags.
    */
@@ -315,24 +327,6 @@ public class Station {
     }
   }
 
-  /**
-   * Atomic {@link #status} bit flag indicating that the station has started,
-   * and is currently running.
-   */
-  static final int STARTED = 1 << 0;
-
-  /**
-   * Atomic {@link #status} bit flag indicating that the station had previously
-   * started, but is now permanently stopped.
-   */
-  static final int STOPPED = 1 << 1;
-
-  /**
-   * Atomic {@link #status} field updater, used to linearize station startup
-   * and shutdown.
-   */
-  static final AtomicIntegerFieldUpdater<Station> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(Station.class, "status");
 }
 
 /**
@@ -341,36 +335,37 @@ public class Station {
  * control, with respoect to the station's selector.
  */
 final class StationTransport implements TransportContext, TransportRef {
+
+  /**
+   * Atomic {@link #flowControl} field updater, used to linearize transport
+   * flow control modifications.
+   */
+  static final AtomicReferenceFieldUpdater<StationTransport, FlowControl> FLOW_CONTROL =
+      AtomicReferenceFieldUpdater.newUpdater(StationTransport.class, FlowControl.class, "flowControl");
   /**
    * {@code Station} to which the {@code transport} is bound.
    */
   final Station station;
-
   /**
    * {@code Transport} binding on which to invoke I/O callbacks.
    */
   final Transport transport;
-
   /**
    * Atomic reference to the current flow control state of the transport.
    */
   volatile FlowControl flowControl;
-
   /**
    * Sequential {@code Task} that invokes transport read callbacks.
    */
   StationReader reader;
-
   /**
    * Sequential {@code Task} that invokes transport write callbacks.
    */
   StationWriter writer;
-
   /**
    * Registration of the transport channel with the station's selector.
    */
   SelectionKey selectionKey;
-
   /**
    * Monotonic timestamp of the most recent transport I/O operation.
    */
@@ -773,18 +768,13 @@ final class StationTransport implements TransportContext, TransportRef {
     this.station.transportDidFail(this.transport, error);
   }
 
-  /**
-   * Atomic {@link #flowControl} field updater, used to linearize transport
-   * flow control modifications.
-   */
-  static final AtomicReferenceFieldUpdater<StationTransport, FlowControl> FLOW_CONTROL =
-      AtomicReferenceFieldUpdater.newUpdater(StationTransport.class, FlowControl.class, "flowControl");
 }
 
 /**
  * Sequential task from which all transport read operations are performed.
  */
 final class StationReader extends AbstractTask {
+
   final StationTransport context;
 
   StationReader(StationTransport context) {
@@ -795,12 +785,14 @@ final class StationReader extends AbstractTask {
   public void runTask() {
     this.context.doRead();
   }
+
 }
 
 /**
  * Sequential task from which all transport write operations are performed.
  */
 final class StationWriter extends AbstractTask {
+
   final StationTransport context;
 
   StationWriter(StationTransport context) {
@@ -811,29 +803,33 @@ final class StationWriter extends AbstractTask {
   public void runTask() {
     this.context.doWrite();
   }
+
 }
 
 /**
  * Thread of execution that waits on and dispatches I/O readiness events.
  */
 final class StationThread extends Thread {
+
+  /**
+   * Total number of selector threads that have ever been instantiated.  Used
+   * to uniquely name selector threads.
+   */
+  static final AtomicInteger THREAD_COUNT = new AtomicInteger(0);
   /**
    * {@code Station} whose I/O transports this {@code StationThread} manages.
    */
   final Station station;
-
   /**
    * I/O selector used to wait on I/O readiness events.
    */
   final Selector selector;
-
   /**
    * Submission queue used to sequence transport flow control modifications;
    * needed because {@code SelectionKey}'s cannot be atomically mutated by
    * concurrent threads.
    */
   final ConcurrentLinkedQueue<StationTransport> reselectQueue;
-
   /**
    * Monotonic timestamp of most recent timeout check.
    */
@@ -1125,9 +1121,4 @@ final class StationThread extends Thread {
     }
   }
 
-  /**
-   * Total number of selector threads that have ever been instantiated.  Used
-   * to uniquely name selector threads.
-   */
-  static final AtomicInteger THREAD_COUNT = new AtomicInteger(0);
 }

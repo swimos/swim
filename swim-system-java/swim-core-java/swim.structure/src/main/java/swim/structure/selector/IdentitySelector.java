@@ -25,6 +25,18 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public final class IdentitySelector extends Selector {
+
+  private static final IdentitySelector IDENTITY = new IdentitySelector();
+  private static Selector keys;
+  private static Selector values;
+  private static Selector children;
+  private static Selector descendants;
+  private static int hashSeed;
+
+  public static IdentitySelector identity() {
+    return IDENTITY;
+  }
+
   @Override
   public Selector then() {
     return this;
@@ -140,16 +152,4 @@ public final class IdentitySelector extends Selector {
     // nop
   }
 
-  private static final IdentitySelector IDENTITY = new IdentitySelector();
-
-  private static Selector keys;
-  private static Selector values;
-  private static Selector children;
-  private static Selector descendants;
-
-  private static int hashSeed;
-
-  public static IdentitySelector identity() {
-    return IDENTITY;
-  }
 }

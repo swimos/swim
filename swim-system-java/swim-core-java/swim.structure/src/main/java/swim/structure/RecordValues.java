@@ -18,6 +18,7 @@ import java.util.AbstractCollection;
 import java.util.Iterator;
 
 final class RecordValues extends AbstractCollection<Value> {
+
   final Record record;
 
   RecordValues(Record record) {
@@ -33,4 +34,5 @@ final class RecordValues extends AbstractCollection<Value> {
   public Iterator<Value> iterator() {
     return this.record.valueIterator();
   }
+
 }

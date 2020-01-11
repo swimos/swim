@@ -19,5 +19,7 @@ import swim.http.HttpResponse;
 
 @FunctionalInterface
 public interface DidRespondHttp<V> extends Preemptive {
+
   void didRespond(HttpResponse<V> response);
+
 }

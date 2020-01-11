@@ -21,6 +21,7 @@ import swim.csv.schema.CsvHeader;
 import swim.util.Builder;
 
 final class BodyParser<T, R, C> extends Parser<T> {
+
   final CsvParser csv;
   final CsvHeader<T, R, C> header;
   final Builder<R, T> tableBuilder;
@@ -38,11 +39,6 @@ final class BodyParser<T, R, C> extends Parser<T> {
 
   BodyParser(CsvParser csv, CsvHeader<T, R, C> header) {
     this(csv, header, null, null, 1);
-  }
-
-  @Override
-  public Parser<T> feed(Input input) {
-    return parse(input, this.csv, this.header, this.tableBuilder, this.rowParser, this.step);
   }
 
   static <T, R, C> Parser<T> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header,
@@ -116,4 +112,10 @@ final class BodyParser<T, R, C> extends Parser<T> {
   static <T, R, C> Parser<T> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header) {
     return parse(input, csv, header, null, null, 1);
   }
+
+  @Override
+  public Parser<T> feed(Input input) {
+    return parse(input, this.csv, this.header, this.tableBuilder, this.rowParser, this.step);
+  }
+
 }

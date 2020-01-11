@@ -15,6 +15,7 @@
 package swim.math;
 
 public class MersenneTwister64 extends Random {
+
   final long[] state;
   int index;
 
@@ -130,4 +131,5 @@ public class MersenneTwister64 extends Random {
   public boolean nextBoolean() {
     return (next() >>> 63) != 0;
   }
+
 }

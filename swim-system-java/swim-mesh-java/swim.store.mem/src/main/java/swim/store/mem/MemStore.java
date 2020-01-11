@@ -38,6 +38,13 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public class MemStore implements StoreBinding, StoreContext {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<MemStore, HashTrieMap<Value, StoreBinding>> STORES =
+      AtomicReferenceFieldUpdater.newUpdater(MemStore.class, (Class<HashTrieMap<Value, StoreBinding>>) (Class<?>) HashTrieMap.class, "stores");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<MemStore, HashTrieMap<Value, DataBinding>> TREES =
+      AtomicReferenceFieldUpdater.newUpdater(MemStore.class, (Class<HashTrieMap<Value, DataBinding>>) (Class<?>) HashTrieMap.class, "trees");
   protected StoreContext storeContext;
   volatile HashTrieMap<Value, StoreBinding> stores;
   volatile HashTrieMap<Value, DataBinding> trees;
@@ -276,11 +283,4 @@ public class MemStore implements StoreBinding, StoreContext {
     return valueData(Text.from(name));
   }
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<MemStore, HashTrieMap<Value, StoreBinding>> STORES =
-      AtomicReferenceFieldUpdater.newUpdater(MemStore.class, (Class<HashTrieMap<Value, StoreBinding>>) (Class<?>) HashTrieMap.class, "stores");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<MemStore, HashTrieMap<Value, DataBinding>> TREES =
-      AtomicReferenceFieldUpdater.newUpdater(MemStore.class, (Class<HashTrieMap<Value, DataBinding>>) (Class<?>) HashTrieMap.class, "trees");
 }

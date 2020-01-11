@@ -21,6 +21,8 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class MeshPulse extends Pulse {
+
+  private static Form<MeshPulse> form;
   protected final int partCount;
   protected final int hostCount;
   protected final long nodeCount;
@@ -36,6 +38,14 @@ public class MeshPulse extends Pulse {
     this.agents = agents;
     this.downlinks = downlinks;
     this.uplinks = uplinks;
+  }
+
+  @Kind
+  public static Form<MeshPulse> form() {
+    if (form == null) {
+      form = new MeshPulseForm();
+    }
+    return form;
   }
 
   @Override
@@ -73,18 +83,10 @@ public class MeshPulse extends Pulse {
     return form().mold(this).toValue();
   }
 
-  private static Form<MeshPulse> form;
-
-  @Kind
-  public static Form<MeshPulse> form() {
-    if (form == null) {
-      form = new MeshPulseForm();
-    }
-    return form;
-  }
 }
 
 final class MeshPulseForm extends Form<MeshPulse> {
+
   @Override
   public Class<?> type() {
     return MeshPulse.class;
@@ -129,4 +131,5 @@ final class MeshPulseForm extends Form<MeshPulse> {
     final WarpUplinkPulse uplinks = value.get("uplinks").coerce(WarpUplinkPulse.form());
     return new MeshPulse(partCount, hostCount, nodeCount, agents, downlinks, uplinks);
   }
+
 }

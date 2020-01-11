@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.SortedMap;
 
 public interface OrderedMap<K, V> extends IterableMap<K, V>, SortedMap<K, V> {
+
   @Override
   boolean isEmpty();
 
@@ -129,4 +130,5 @@ public interface OrderedMap<K, V> extends IterableMap<K, V>, SortedMap<K, V> {
 
   @Override
   Comparator<? super K> comparator();
+
 }

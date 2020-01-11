@@ -20,15 +20,17 @@ import swim.structure.Record;
 import static org.testng.Assert.assertEquals;
 
 public class VectorR3Spec {
+
   @Test
   public void testMold() {
     assertEquals(VectorR3.form().mold(new VectorR3(2.0, 0.5, -1.0)),
-                 Record.of(Attr.of("vector", Record.of(2.0, 0.5, -1.0))));
+        Record.of(Attr.of("vector", Record.of(2.0, 0.5, -1.0))));
   }
 
   @Test
   public void testCast() {
     assertEquals(VectorR3.form().cast(Record.of(Attr.of("vector", Record.of(2.0, 0.5, -1.0)))),
-                 new VectorR3(2.0, 0.5, -1.0));
+        new VectorR3(2.0, 0.5, -1.0));
   }
+
 }

@@ -21,6 +21,7 @@ import swim.http.HttpHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class HostSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -40,4 +41,5 @@ public class HostSpec {
     assertWrites(Host.from("127.0.0.1"), "Host: 127.0.0.1");
     assertWrites(Host.from("127.0.0.1", 8080), "Host: 127.0.0.1:8080");
   }
+
 }

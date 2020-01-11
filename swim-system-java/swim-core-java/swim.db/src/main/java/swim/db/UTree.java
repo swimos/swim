@@ -22,6 +22,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 public final class UTree extends Tree {
+
   final TreeContext treeContext;
   final UTreePageRef rootRef;
   final Seed seed;
@@ -97,7 +98,7 @@ public final class UTree extends Tree {
   @Override
   public UTree isTransient(boolean isTransient) {
     if (this.isTransient != isTransient) {
-      return new UTree(this.treeContext,  this.rootRef, this.seed, this.isResident, isTransient);
+      return new UTree(this.treeContext, this.rootRef, this.seed, this.isResident, isTransient);
     } else {
       return this;
     }
@@ -118,7 +119,7 @@ public final class UTree extends Tree {
         .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new UTree(this.treeContext, newRoot.pageRef(), this.seed,
-                       this.isResident, this.isTransient);
+          this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -211,4 +212,5 @@ public final class UTree extends Tree {
   public Cursor<Value> cursor() {
     return this.rootRef.cursor();
   }
+
 }

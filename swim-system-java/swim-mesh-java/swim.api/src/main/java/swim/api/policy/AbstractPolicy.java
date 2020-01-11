@@ -31,6 +31,7 @@ import swim.warp.LinkRequest;
 import swim.warp.SyncRequest;
 
 public class AbstractPolicy implements Policy, PlanePolicy, AgentRoutePolicy, AgentPolicy, LanePolicy, UplinkPolicy, DownlinkPolicy {
+
   @Override
   public AgentRoutePolicy agentRoutePolicy(AgentRoute<?> agentRoute) {
     return this;
@@ -118,4 +119,5 @@ public class AbstractPolicy implements Policy, PlanePolicy, AgentRoutePolicy, Ag
   public <T> PolicyDirective<T> forbid() {
     return PolicyDirective.forbid(this);
   }
+
 }

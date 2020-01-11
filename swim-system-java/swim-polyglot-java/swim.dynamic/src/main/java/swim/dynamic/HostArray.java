@@ -18,5 +18,7 @@ package swim.dynamic;
  * A host object that has a dynamic array type descriptor.
  */
 public interface HostArray extends HostValue {
+
   HostArrayType<? extends Object> dynamicType();
+
 }

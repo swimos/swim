@@ -24,6 +24,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface PartContext extends TierContext, CellContext {
+
   MeshBinding mesh();
 
   PartBinding partWrapper();
@@ -78,4 +79,5 @@ public interface PartContext extends TierContext, CellContext {
   void hostDidConnect(Uri hostUri);
 
   void hostDidDisconnect(Uri hostUri);
+
 }

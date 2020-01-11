@@ -20,9 +20,6 @@ import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
 
 public final class HostComparable {
-  private HostComparable() {
-    // static
-  }
 
   public static final HostObjectType<Comparable<Object>> TYPE;
 
@@ -32,9 +29,15 @@ public final class HostComparable {
     type.inheritType(HostObject.TYPE);
     type.addMember(new HostComparableCompareTo());
   }
+
+  private HostComparable() {
+    // static
+  }
+
 }
 
 final class HostComparableCompareTo implements HostMethod<Comparable<Object>> {
+
   @Override
   public String key() {
     return "compareTo";
@@ -44,4 +47,5 @@ final class HostComparableCompareTo implements HostMethod<Comparable<Object>> {
   public Object invoke(Bridge bridge, Comparable<Object> comparable, Object... arguments) {
     return comparable.compareTo(arguments[0]);
   }
+
 }

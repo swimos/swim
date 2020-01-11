@@ -23,6 +23,7 @@ import swim.codec.Unicode;
  * Factory for constructing Format-detecting parsers.
  */
 public abstract class DecipherParser<I, V> {
+
   public abstract Parser<V> parseXml(Input input);
 
   public abstract Parser<V> parseJson(Input input);
@@ -55,4 +56,5 @@ public abstract class DecipherParser<I, V> {
     }
     return parser.bind();
   }
+
 }

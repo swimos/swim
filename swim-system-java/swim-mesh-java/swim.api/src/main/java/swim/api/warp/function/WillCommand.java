@@ -19,5 +19,7 @@ import swim.structure.Value;
 
 @FunctionalInterface
 public interface WillCommand extends Preemptive {
+
   void willCommand(Value body);
+
 }

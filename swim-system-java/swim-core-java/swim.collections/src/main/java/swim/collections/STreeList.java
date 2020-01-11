@@ -32,6 +32,11 @@ import swim.util.Murmur3;
  * Mutable, thread-safe {@link KeyedList} backed by an S-Tree.
  */
 public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Cloneable, Debug {
+
+  @SuppressWarnings("rawtypes")
+  static final AtomicReferenceFieldUpdater<STreeList, STreePage> ROOT =
+      AtomicReferenceFieldUpdater.newUpdater(STreeList.class, STreePage.class, "root");
+  private static int hashSeed;
   volatile STreePage<T> root;
 
   protected STreeList(STreePage<T> root) {
@@ -40,6 +45,19 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
 
   public STreeList() {
     this(STreePage.<T>empty());
+  }
+
+  public static <T> STreeList<T> empty() {
+    return new STreeList<T>();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> STree<T> of(T... values) {
+    final STree<T> tree = new STree<T>();
+    for (T value : values) {
+      tree.add(value);
+    }
+    return tree;
   }
 
   @Override
@@ -526,27 +544,10 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static <T> STreeList<T> empty() {
-    return new STreeList<T>();
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> STree<T> of(T... values) {
-    final STree<T> tree = new STree<T>();
-    for (T value : values) {
-      tree.add(value);
-    }
-    return tree;
-  }
-
-  @SuppressWarnings("rawtypes")
-  static final AtomicReferenceFieldUpdater<STreeList, STreePage> ROOT =
-      AtomicReferenceFieldUpdater.newUpdater(STreeList.class, STreePage.class, "root");
 }
 
 final class STreeListSubList<T> extends AbstractList<T> {
+
   final STreeList<T> inner;
   final int fromIndex;
   final int toIndex;
@@ -583,5 +584,6 @@ final class STreeListSubList<T> extends AbstractList<T> {
     }
     return new STreeListSubList<T>(this.inner, fromIndex, toIndex);
   }
+
 }
 

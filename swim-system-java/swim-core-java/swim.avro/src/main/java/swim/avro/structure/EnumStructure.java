@@ -21,6 +21,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 final class EnumStructure extends AvroEnumType<Value> {
+
   final AvroName fullName;
   final String doc;
   final FingerTrieSeq<AvroName> aliases;
@@ -91,4 +92,5 @@ final class EnumStructure extends AvroEnumType<Value> {
   public Value cast(int ordinal) {
     return this.symbols.get(ordinal);
   }
+
 }

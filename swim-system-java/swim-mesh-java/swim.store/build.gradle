@@ -5,10 +5,10 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.store'
 
 dependencies {
-  implementation group: 'org.swimos', name: 'swim-util', version: version
-  api group: 'org.swimos', name: 'swim-codec', version: version
-  api group: 'org.swimos', name: 'swim-structure', version: version
-  api group: 'org.swimos', name: 'swim-math', version: version
-  api group: 'org.swimos', name: 'swim-spatial', version: version
-  api project(':swim-api')
+    implementation group: 'org.swimos', name: 'swim-util', version: version
+    api group: 'org.swimos', name: 'swim-codec', version: version
+    api group: 'org.swimos', name: 'swim-structure', version: version
+    api group: 'org.swimos', name: 'swim-math', version: version
+    api group: 'org.swimos', name: 'swim-spatial', version: version
+    api project(':swim-api')
 }

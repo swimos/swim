@@ -24,6 +24,7 @@ import swim.codec.UtfErrorMode;
 import swim.util.Builder;
 
 public abstract class ProtobufDecoder<I, V> {
+
   public abstract I item(V value);
 
   public abstract V value(I item);
@@ -46,21 +47,31 @@ public abstract class ProtobufDecoder<I, V> {
 
   public Decoder<V> decodeValue(WireType wireType, Decoder<V> payloadDecoder, InputBuffer input) {
     switch (wireType.code) {
-      case 0: return decodeVarint(input);
-      case 1: return decodeFixed64(input);
-      case 2: return decodeSized(payloadDecoder, input);
-      case 5: return decodeFixed32(input);
-      default: return Decoder.error(new DecoderException("unsupported wire type: " + wireType.name()));
+      case 0:
+        return decodeVarint(input);
+      case 1:
+        return decodeFixed64(input);
+      case 2:
+        return decodeSized(payloadDecoder, input);
+      case 5:
+        return decodeFixed32(input);
+      default:
+        return Decoder.error(new DecoderException("unsupported wire type: " + wireType.name()));
     }
   }
 
   public Decoder<V> decodeValue(WireType wireType, InputBuffer input) {
     switch (wireType.code) {
-      case 0: return decodeVarint(input);
-      case 1: return decodeFixed64(input);
-      case 2: return decodeSized(payloadDecoder(), input);
-      case 5: return decodeFixed32(input);
-      default: return Decoder.error(new DecoderException("unsupported wire type: " + wireType.name()));
+      case 0:
+        return decodeVarint(input);
+      case 1:
+        return decodeFixed64(input);
+      case 2:
+        return decodeSized(payloadDecoder(), input);
+      case 5:
+        return decodeFixed32(input);
+      default:
+        return Decoder.error(new DecoderException("unsupported wire type: " + wireType.name()));
     }
   }
 
@@ -119,4 +130,5 @@ public abstract class ProtobufDecoder<I, V> {
   public Decoder<V> payloadDecoder() {
     return new PayloadDecoder<V>(this);
   }
+
 }

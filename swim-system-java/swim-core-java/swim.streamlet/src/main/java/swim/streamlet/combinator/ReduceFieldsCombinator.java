@@ -17,6 +17,7 @@ package swim.streamlet.combinator;
 import swim.util.CombinerFunction;
 
 public class ReduceFieldsCombinator<K, V, I, O> extends ReduceFieldsOperator<K, V, I, O> {
+
   protected final O identity;
   protected final CombinerFunction<? super V, O> accumulator;
   protected final CombinerFunction<O, O> combiner;
@@ -47,4 +48,5 @@ public class ReduceFieldsCombinator<K, V, I, O> extends ReduceFieldsOperator<K, 
   public O combine(O result, O value) {
     return this.combiner.combine(result, value);
   }
+
 }

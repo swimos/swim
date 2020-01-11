@@ -29,6 +29,8 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public class JsonWebToken implements Debug {
+
+  private static int hashSeed;
   protected final Value value;
 
   public JsonWebToken(Value value) {
@@ -37,6 +39,14 @@ public class JsonWebToken implements Debug {
 
   public JsonWebToken() {
     this(Value.absent());
+  }
+
+  public static JsonWebToken from(Value value) {
+    return new JsonWebToken(value);
+  }
+
+  public static JsonWebToken parse(String json) {
+    return new JsonWebToken(Json.parse(json));
   }
 
   public Value get(String name) {
@@ -168,13 +178,4 @@ public class JsonWebToken implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static JsonWebToken from(Value value) {
-    return new JsonWebToken(value);
-  }
-
-  public static JsonWebToken parse(String json) {
-    return new JsonWebToken(Json.parse(json));
-  }
 }

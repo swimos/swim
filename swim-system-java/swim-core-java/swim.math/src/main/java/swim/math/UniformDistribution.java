@@ -15,6 +15,7 @@
 package swim.math;
 
 public class UniformDistribution extends Distribution {
+
   final Random random;
   final double lower;
   final double upper;
@@ -46,4 +47,5 @@ public class UniformDistribution extends Distribution {
     final double u = this.random.nextDouble();
     return u * this.upper + (1.0 - u) * this.lower;
   }
+
 }

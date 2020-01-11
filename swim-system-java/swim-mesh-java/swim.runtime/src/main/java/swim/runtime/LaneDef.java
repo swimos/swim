@@ -18,9 +18,11 @@ import swim.uri.Uri;
 import swim.uri.UriPattern;
 
 public interface LaneDef extends CellDef {
+
   Uri laneUri();
 
   UriPattern lanePattern();
 
   String laneType();
+
 }

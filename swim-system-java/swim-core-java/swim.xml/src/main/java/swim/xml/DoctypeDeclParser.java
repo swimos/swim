@@ -21,6 +21,7 @@ import swim.codec.Parser;
 import swim.codec.Unicode;
 
 final class DoctypeDeclParser<I, V> extends Parser<I> {
+
   final XmlParser<I, V> xml;
   final Parser<String> nameParser;
   final Output<String> publicId;
@@ -38,12 +39,6 @@ final class DoctypeDeclParser<I, V> extends Parser<I> {
     this.markupDeclParser = markupDeclParser;
     this.quote = quote;
     this.step = step;
-  }
-
-  @Override
-  public Parser<I> feed(Input input) {
-    return parse(input, this.xml, this.nameParser, this.publicId, this.systemId,
-                 this.markupDeclParser, this.quote, this.step);
   }
 
   static <I, V> Parser<I> parse(Input input, XmlParser<I, V> xml, Parser<String> nameParser,
@@ -324,7 +319,7 @@ final class DoctypeDeclParser<I, V> extends Parser<I> {
       return error(input.trap());
     }
     return new DoctypeDeclParser<I, V>(xml, nameParser, publicId, systemId,
-                                       markupDeclParser, quote, step);
+        markupDeclParser, quote, step);
   }
 
   static <I, V> Parser<I> parse(Input input, XmlParser<I, V> xml) {
@@ -334,4 +329,11 @@ final class DoctypeDeclParser<I, V> extends Parser<I> {
   static <I, V> Parser<I> parseRest(Input input, XmlParser<I, V> xml) {
     return parse(input, xml, null, null, null, null, 0, 3);
   }
+
+  @Override
+  public Parser<I> feed(Input input) {
+    return parse(input, this.xml, this.nameParser, this.publicId, this.systemId,
+        this.markupDeclParser, this.quote, this.step);
+  }
+
 }

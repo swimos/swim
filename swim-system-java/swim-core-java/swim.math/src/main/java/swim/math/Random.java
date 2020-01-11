@@ -15,6 +15,18 @@
 package swim.math;
 
 public abstract class Random {
+
+  private static final ThreadLocal<Random> RANDOM = new ThreadLocal<Random>();
+
+  public static Random get() {
+    Random random = RANDOM.get();
+    if (random == null) {
+      random = new MersenneTwister64();
+      RANDOM.set(random);
+    }
+    return random;
+  }
+
   public abstract byte nextByte();
 
   public abstract short nextShort();
@@ -29,14 +41,4 @@ public abstract class Random {
 
   public abstract boolean nextBoolean();
 
-  private static final ThreadLocal<Random> RANDOM = new ThreadLocal<Random>();
-
-  public static Random get() {
-    Random random = RANDOM.get();
-    if (random == null) {
-      random = new MersenneTwister64();
-      RANDOM.set(random);
-    }
-    return random;
-  }
 }

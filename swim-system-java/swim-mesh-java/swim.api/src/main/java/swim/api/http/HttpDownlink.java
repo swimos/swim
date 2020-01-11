@@ -28,6 +28,7 @@ import swim.api.http.function.WillRespondHttp;
 import swim.uri.Uri;
 
 public interface HttpDownlink<V> extends Downlink, HttpLink {
+
   HttpDownlink<V> requestUri(Uri requestUri);
 
   @Override
@@ -62,4 +63,5 @@ public interface HttpDownlink<V> extends Downlink, HttpLink {
 
   @Override
   HttpDownlink<V> open();
+
 }

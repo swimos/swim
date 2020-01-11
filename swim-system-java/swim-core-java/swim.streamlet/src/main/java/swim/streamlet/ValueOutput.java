@@ -15,6 +15,7 @@
 package swim.streamlet;
 
 public class ValueOutput<I> extends AbstractInlet<I> {
+
   protected I state;
 
   public ValueOutput(I state) {
@@ -35,4 +36,5 @@ public class ValueOutput<I> extends AbstractInlet<I> {
       this.state = this.input.get();
     }
   }
+
 }

@@ -19,5 +19,7 @@ import swim.warp.LinkRequest;
 
 @FunctionalInterface
 public interface OnLinkRequest extends Preemptive {
+
   void onLink(LinkRequest request);
+
 }

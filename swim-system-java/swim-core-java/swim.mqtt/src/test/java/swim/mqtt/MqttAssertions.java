@@ -30,6 +30,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public final class MqttAssertions {
+
   private MqttAssertions() {
     // stub
   }
@@ -101,4 +102,5 @@ public final class MqttAssertions {
   public static void assertEncodes(MqttPart part, Data expected) {
     assertEncodes(part.mqttEncoder(), ByteBuffer.wrap(expected.toByteArray()));
   }
+
 }

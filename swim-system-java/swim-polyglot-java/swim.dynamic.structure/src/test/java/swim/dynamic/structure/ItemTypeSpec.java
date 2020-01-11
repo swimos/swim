@@ -22,6 +22,7 @@ import swim.vm.VmBridge;
 import static org.testng.Assert.assertEquals;
 
 public class ItemTypeSpec {
+
   @Test
   public void testItems() {
     try (Context context = Context.create()) {
@@ -47,4 +48,5 @@ public class ItemTypeSpec {
       assertEquals(context.eval("js", "empty.isDistinct()").asBoolean(), true);
     }
   }
+
 }

@@ -16,4 +16,5 @@
  * eXtensible Markup Language (XML) codec that incrementally parses and writes
  * <strong>swim-structure</strong> values.
  */
+
 package swim.xml;

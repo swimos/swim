@@ -22,6 +22,7 @@ import swim.util.OrderedMap;
 import swim.util.OrderedMapCursor;
 
 public class ValueOrderedMap<K, V> extends ValueIterableMap<K, V> implements OrderedMap<K, V> {
+
   public ValueOrderedMap(OrderedMap<? extends Value, ? extends Value> inner, Form<K> keyForm, Form<V> valueForm) {
     super((IterableMap<? extends Value, ? extends Value>) inner, keyForm, valueForm);
   }
@@ -283,4 +284,5 @@ public class ValueOrderedMap<K, V> extends ValueIterableMap<K, V> implements Ord
   public Comparator<? super K> comparator() {
     return null;
   }
+
 }

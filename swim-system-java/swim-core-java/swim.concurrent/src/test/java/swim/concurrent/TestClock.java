@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import org.testng.TestException;
 
 class TestClock extends Clock {
+
   TestClock(int tickMillis, int tickCount) {
     super(tickMillis, tickCount);
   }
@@ -66,4 +67,5 @@ class TestClock extends Clock {
   void await(CountDownLatch latch) {
     await(latch, 1000);
   }
+
 }

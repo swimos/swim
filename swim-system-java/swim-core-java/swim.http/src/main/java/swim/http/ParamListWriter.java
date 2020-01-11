@@ -20,6 +20,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class ParamListWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final Iterator<? extends HttpPart> params;
   final Writer<?, ?> param;
@@ -35,11 +36,6 @@ final class ParamListWriter extends Writer<Object, Object> {
 
   ParamListWriter(HttpWriter http, Iterator<? extends HttpPart> params) {
     this(http, params, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.params, this.param, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
@@ -90,4 +86,10 @@ final class ParamListWriter extends Writer<Object, Object> {
                                       Iterator<? extends HttpPart> params) {
     return write(output, http, params, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.params, this.param, this.step);
+  }
+
 }

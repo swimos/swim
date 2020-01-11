@@ -19,13 +19,17 @@ import swim.util.Murmur3;
 
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class GenericList<T> {
+
   public List<T> list;
+
   public GenericList(List<T> list) {
     this.list = list;
   }
+
   public GenericList() {
     // Form.cast constructor
   }
+
   @Override
   public boolean equals(Object other) {
     if (other instanceof GenericList<?>) {
@@ -34,12 +38,15 @@ public class GenericList<T> {
     }
     return false;
   }
+
   @Override
   public int hashCode() {
     return Murmur3.hash(this.list);
   }
+
   @Override
   public String toString() {
     return "GenericList(" + this.list + ")";
   }
+
 }

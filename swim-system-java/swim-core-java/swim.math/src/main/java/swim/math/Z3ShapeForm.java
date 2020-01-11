@@ -18,6 +18,7 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 final class Z3ShapeForm extends Z3Form<Z3Shape> {
+
   @Override
   public Class<?> type() {
     return Z3Shape.class;
@@ -83,4 +84,5 @@ final class Z3ShapeForm extends Z3Form<Z3Shape> {
     }
     return null;
   }
+
 }

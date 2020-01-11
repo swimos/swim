@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import swim.util.Builder;
 
 public final class UriPathBuilder implements Builder<String, UriPath> {
+
   UriPath first;
   UriPath last;
   int size;
@@ -187,4 +188,5 @@ public final class UriPathBuilder implements Builder<String, UriPath> {
     }
     return xi;
   }
+
 }

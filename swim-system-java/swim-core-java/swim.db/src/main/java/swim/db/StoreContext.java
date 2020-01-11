@@ -15,6 +15,7 @@
 package swim.db;
 
 public class StoreContext {
+
   protected final StoreSettings settings;
 
   public StoreContext(StoreSettings settings) {
@@ -23,6 +24,50 @@ public class StoreContext {
 
   public StoreContext() {
     this(StoreSettings.standard());
+  }
+
+  public static boolean autoCommit(Database database, long autoCommitSize,
+                                   int autoCommitInterval, Commit commit) {
+    if (autoCommitInterval > 0 && (database.diffSize() > autoCommitSize
+        || System.currentTimeMillis() - database.germ().updated() > (long) autoCommitInterval)) {
+      database.commitAsync(commit);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public static Commit autoCommitShifted(Store store, long maxZoneSize, Commit commit) {
+    if (store.zone().size() > maxZoneSize) {
+      return commit.isShifted(true);
+    } else {
+      return commit;
+    }
+  }
+
+  public static boolean autoCompact(Store store, Database database, double minTreeFill,
+                                    long minCompactSize, Compact compact) {
+    if (!store.isCompacting()) {
+      final long treeSize = database.treeSize();
+      final long storeSize = store.size();
+      final double treeFill = (double) treeSize / (double) storeSize;
+      if (storeSize > minCompactSize && treeFill < minTreeFill) {
+        store.compactAsync(compact);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public static Compact autoCompactShifted(Store store, double minZoneFill, Compact compact) {
+    final long zoneSize = store.zone().size();
+    final long storeSize = store.size();
+    final double zoneFill = (double) zoneSize / (double) storeSize;
+    if (zoneSize > 0L && zoneFill > minZoneFill) {
+      return compact.isShifted(true);
+    } else {
+      return compact;
+    }
   }
 
   public final StoreSettings settings() {
@@ -76,7 +121,7 @@ public class StoreContext {
   public void databaseDidCommit(Store store, Database database, Chunk chunk) {
     if (chunk != null && !chunk.commit().isClosed()) {
       autoCompact(store, database, this.settings.minTreeFill, this.settings.minCompactSize,
-                  Compact.forced(this.settings.deleteDelay));
+          Compact.forced(this.settings.deleteDelay));
     }
   }
 
@@ -104,47 +149,4 @@ public class StoreContext {
     // nop
   }
 
-  public static boolean autoCommit(Database database, long autoCommitSize,
-                                   int autoCommitInterval, Commit commit) {
-    if (autoCommitInterval > 0 && (database.diffSize() > autoCommitSize
-        || System.currentTimeMillis() - database.germ().updated() > (long) autoCommitInterval)) {
-      database.commitAsync(commit);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  public static Commit autoCommitShifted(Store store, long maxZoneSize, Commit commit) {
-    if (store.zone().size() > maxZoneSize) {
-      return commit.isShifted(true);
-    } else {
-      return commit;
-    }
-  }
-
-  public static boolean autoCompact(Store store, Database database, double minTreeFill,
-                                    long minCompactSize, Compact compact) {
-    if (!store.isCompacting()) {
-      final long treeSize = database.treeSize();
-      final long storeSize = store.size();
-      final double treeFill = (double) treeSize / (double) storeSize;
-      if (storeSize > minCompactSize && treeFill < minTreeFill) {
-        store.compactAsync(compact);
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public static Compact autoCompactShifted(Store store, double minZoneFill, Compact compact) {
-    final long zoneSize = store.zone().size();
-    final long storeSize = store.size();
-    final double zoneFill = (double) zoneSize / (double) storeSize;
-    if (zoneSize > 0L && zoneFill > minZoneFill) {
-      return compact.isShifted(true);
-    } else {
-      return compact;
-    }
-  }
 }

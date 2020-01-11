@@ -20,6 +20,21 @@ import swim.codec.EncoderException;
 import swim.codec.OutputBuffer;
 
 abstract class DerEncoder<V> {
+
+  static int sizeOfLength(int length) {
+    if (length < 128) {
+      return 1;
+    } else if (length < (1 << 8)) {
+      return 2;
+    } else if (length < (1 << 16)) {
+      return 3;
+    } else if (length < (1 << 24)) {
+      return 4;
+    } else {
+      return 5;
+    }
+  }
+
   public abstract boolean isSequence(V value);
 
   public abstract Iterator<V> iterator(V value);
@@ -92,28 +107,16 @@ abstract class DerEncoder<V> {
     return DerSequenceEncoder.encode(output, this, tag, length, elements);
   }
 
-  static int sizeOfLength(int length) {
-    if (length < 128) {
-      return 1;
-    } else if (length < (1 << 8)) {
-      return 2;
-    } else if (length < (1 << 16)) {
-      return 3;
-    } else if (length < (1 << 24)) {
-      return 4;
-    } else {
-      return 5;
-    }
-  }
 }
 
 final class DerValueEncoder<V> extends Encoder<Object, Object> {
-  DerEncoder<V> der;
+
   final int tag;
   final int length;
   final Encoder<?, ?> data;
   final int offset;
   final int step;
+  DerEncoder<V> der;
 
   DerValueEncoder(DerEncoder<V> der, int tag, int length, Encoder<?, ?> data, int offset, int step) {
     this.der = der;
@@ -126,11 +129,6 @@ final class DerValueEncoder<V> extends Encoder<Object, Object> {
 
   DerValueEncoder(DerEncoder<V> der, int tag, int length, Encoder<?, ?> data) {
     this(der, tag, length, data, 0, 1);
-  }
-
-  @Override
-  public Encoder<Object, Object> pull(OutputBuffer<?> output) {
-    return encode(output, this.der, this.tag, this.length, this.data, this.offset, this.step);
   }
 
   static <V> Encoder<Object, Object> encode(OutputBuffer<?> output, DerEncoder<V> der,
@@ -214,16 +212,23 @@ final class DerValueEncoder<V> extends Encoder<Object, Object> {
                                             int tag, int length, Encoder<?, ?> data) {
     return encode(output, der, tag, length, data, 0, 1);
   }
+
+  @Override
+  public Encoder<Object, Object> pull(OutputBuffer<?> output) {
+    return encode(output, this.der, this.tag, this.length, this.data, this.offset, this.step);
+  }
+
 }
 
 final class DerSequenceEncoder<V> extends Encoder<Object, Object> {
-  DerEncoder<V> der;
+
   final int tag;
   final int length;
   final Iterator<V> elements;
   final Encoder<?, ?> element;
   final int offset;
   final int step;
+  DerEncoder<V> der;
 
   DerSequenceEncoder(DerEncoder<V> der, int tag, int length, Iterator<V> elements,
                      Encoder<?, ?> element, int offset, int step) {
@@ -238,12 +243,6 @@ final class DerSequenceEncoder<V> extends Encoder<Object, Object> {
 
   DerSequenceEncoder(DerEncoder<V> der, int tag, int length, Iterator<V> elements) {
     this(der, tag, length, elements, null, 0, 1);
-  }
-
-  @Override
-  public Encoder<Object, Object> pull(OutputBuffer<?> output) {
-    return encode(output, this.der, this.tag, this.length, this.elements,
-                  this.element, this.offset, this.step);
   }
 
   static <V> Encoder<Object, Object> encode(OutputBuffer<?> output, DerEncoder<V> der, int tag, int length,
@@ -330,4 +329,11 @@ final class DerSequenceEncoder<V> extends Encoder<Object, Object> {
                                             int tag, int length, Iterator<V> elements) {
     return encode(output, der, tag, length, elements, null, 0, 1);
   }
+
+  @Override
+  public Encoder<Object, Object> pull(OutputBuffer<?> output) {
+    return encode(output, this.der, this.tag, this.length, this.elements,
+        this.element, this.offset, this.step);
+  }
+
 }

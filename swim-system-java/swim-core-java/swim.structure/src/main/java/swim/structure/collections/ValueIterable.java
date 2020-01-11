@@ -19,6 +19,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class ValueIterable<T> implements Iterable<T> {
+
   protected Iterable<Value> inner;
   protected Form<T> valueForm;
 
@@ -52,4 +53,5 @@ public class ValueIterable<T> implements Iterable<T> {
     }
     return new ValueIterator<T>(this.inner.iterator(), this.valueForm);
   }
+
 }

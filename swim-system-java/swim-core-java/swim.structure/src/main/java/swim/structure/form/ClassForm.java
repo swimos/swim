@@ -58,6 +58,7 @@ import swim.structure.Value;
  * These rules can be directly inverted to transform {@code Items} to objects.
  */
 public final class ClassForm<T> extends Form<T> implements Cloneable {
+
   final Class<?> type;
   final String tag;
   final T unit;
@@ -297,4 +298,5 @@ public final class ClassForm<T> extends Form<T> implements Cloneable {
   public ClassForm<T> clone() {
     return new ClassForm<T>(this.type, this.tag, this.unit, this.constructor, this.headers, this.members);
   }
+
 }

@@ -17,8 +17,10 @@ package swim.avro.reflection;
 import swim.avro.schema.AvroDoubleType;
 
 final class DoubleReflection extends AvroDoubleType<Double> {
+
   @Override
   public Double cast(double value) {
     return Double.valueOf(value);
   }
+
 }

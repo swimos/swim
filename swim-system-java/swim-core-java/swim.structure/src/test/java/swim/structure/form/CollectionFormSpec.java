@@ -26,6 +26,7 @@ import swim.structure.Record;
 import static org.testng.Assert.assertEquals;
 
 public class CollectionFormSpec {
+
   @Test
   public void moldSet() {
     final HashSet<Integer> set = new HashSet<>();
@@ -122,4 +123,5 @@ public class CollectionFormSpec {
     stringMap.put("c", "3");
     assertEquals(Form.forMap(Form.forString(), Form.forString()).cast(Record.of().slot("a", 1).slot("b", "2").slot("c", 3)), stringMap);
   }
+
 }

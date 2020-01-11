@@ -51,150 +51,87 @@ import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 
 public class JoinMapLaneSpec {
-  static class TestMapLaneAgent extends AbstractAgent {
-    @SwimLane("map")
-    MapLane<String, String> testMap = this.<String, String>mapLane()
-        .observe(new TestMapLaneController());
-
-    class TestMapLaneController implements WillUpdateKey<String, String>, DidUpdateKey<String, String>,
-        WillRemoveKey<String>, DidRemoveKey<String, String> {
-      @Override
-      public String willUpdate(String key, String newValue) {
-        System.out.println(nodeUri() + " willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
-        return newValue;
-      }
-      @Override
-      public void didUpdate(String key, String newValue, String oldValue) {
-        System.out.println(nodeUri() + " didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-      }
-      @Override
-      public void willRemove(String key) {
-        System.out.println(nodeUri() + " willRemove key: " + Format.debug(key));
-      }
-      @Override
-      public void didRemove(String key, String oldValue) {
-        System.out.println(nodeUri() + " didRemove key: " + Format.debug(key) + "; oldValue: " + Format.debug(oldValue));
-      }
-    }
-  }
-
-  static class TestJoinMapLaneAgent extends AbstractAgent {
-    @SwimLane("join")
-    JoinMapLane<String, String, String> testJoinMap = this.<String, String, String>joinMapLane()
-        .observe(new TestJoinMapLaneController());
-
-    class TestJoinMapLaneController implements WillDownlinkMap<String>, DidDownlinkMap<String>,
-        WillUpdateKey<String, String>, DidUpdateKey<String, String>,
-        WillRemoveKey<String>, DidRemoveKey<String, String> {
-      @Override
-      public MapDownlink<?, ?> willDownlink(String key, MapDownlink<?, ?> downlink) {
-        System.out.println(nodeUri() + " willDownlink key: " + Format.debug(key) + "; downlink: " + downlink);
-        return downlink;
-      }
-      @Override
-      public void didDownlink(String key, MapDownlink<?, ?> downlink) {
-        System.out.println(nodeUri() + " didDownlink key: " + Format.debug(key) + "; downlink: " + downlink);
-      }
-      @Override
-      public String willUpdate(String key, String newValue) {
-        System.out.println(nodeUri() + " willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
-        return newValue;
-      }
-      @Override
-      public void didUpdate(String key, String newValue, String oldValue) {
-        System.out.println(nodeUri() + " didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-      }
-      @Override
-      public void willRemove(String key) {
-        System.out.println(nodeUri() + " willRemove key: " + Format.debug(key));
-      }
-      @Override
-      public void didRemove(String key, String oldValue) {
-        System.out.println(nodeUri() + " didRemove key: " + Format.debug(key) + "; oldValue: " + Format.debug(oldValue));
-      }
-    }
-
-    @Override
-    public void didStart() {
-      testJoinMap.downlink("xs").hostUri("warp://localhost:53556").nodeUri("/map/xs").laneUri("map").open();
-      testJoinMap.downlink("ys").hostUri("warp://localhost:53556").nodeUri("/map/ys").laneUri("map").open();
-    }
-  }
-
-  static class TestJoinMapPlane extends AbstractPlane {
-    @SwimRoute("/map/:name")
-    AgentRoute<TestMapLaneAgent> mapRoute;
-
-    @SwimRoute("/join/map/:name")
-    AgentRoute<TestJoinMapLaneAgent> joinMapRoute;
-  }
 
   @Test
   public void testLinkToJoinMapLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestJoinMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-                                         .openPlane("test", TestJoinMapPlane.class);
+        .openPlane("test", TestJoinMapPlane.class);
 
     final CountDownLatch joinDidReceive = new CountDownLatch(4);
     final CountDownLatch joinDidUpdate = new CountDownLatch(4);
     class JoinMapLinkController implements WillUpdateKey<String, String>,
         DidUpdateKey<String, String>, WillReceive, DidReceive, WillLink, DidLink,
         WillSync, DidSync, WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
+
       @Override
       public String willUpdate(String key, String newValue) {
         System.out.println("join link willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
         return newValue;
       }
+
       @Override
       public void didUpdate(String key, String newValue, String oldValue) {
         System.out.println("join link didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
         joinDidUpdate.countDown();
       }
+
       @Override
       public void willReceive(Value body) {
         System.out.println("join link willReceive body: " + Recon.toString(body));
       }
+
       @Override
       public void didReceive(Value body) {
         System.out.println("join link didReceive body: " + Recon.toString(body));
         joinDidReceive.countDown();
       }
+
       @Override
       public void willLink() {
         System.out.println("join link willLink");
       }
+
       @Override
       public void didLink() {
         System.out.println("join link didLink");
       }
+
       @Override
       public void willSync() {
         System.out.println("join link willSync");
       }
+
       @Override
       public void didSync() {
         System.out.println("join link didSync");
       }
+
       @Override
       public void willUnlink() {
         System.out.println("join link willUnlink");
       }
+
       @Override
       public void didUnlink() {
         System.out.println("join link didUnlink");
       }
+
       @Override
       public void didConnect() {
         System.out.println("join link didConnect");
       }
+
       @Override
       public void didDisconnect() {
         System.out.println("join link didDisconnect");
       }
+
       @Override
       public void didClose() {
         System.out.println("join link didClose");
       }
+
     }
 
     try {
@@ -241,4 +178,101 @@ public class JoinMapLaneSpec {
       kernel.stop();
     }
   }
+
+  static class TestMapLaneAgent extends AbstractAgent {
+
+    @SwimLane("map")
+    MapLane<String, String> testMap = this.<String, String>mapLane()
+        .observe(new TestMapLaneController());
+
+    class TestMapLaneController implements WillUpdateKey<String, String>, DidUpdateKey<String, String>,
+        WillRemoveKey<String>, DidRemoveKey<String, String> {
+
+      @Override
+      public String willUpdate(String key, String newValue) {
+        System.out.println(nodeUri() + " willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
+        return newValue;
+      }
+
+      @Override
+      public void didUpdate(String key, String newValue, String oldValue) {
+        System.out.println(nodeUri() + " didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+      }
+
+      @Override
+      public void willRemove(String key) {
+        System.out.println(nodeUri() + " willRemove key: " + Format.debug(key));
+      }
+
+      @Override
+      public void didRemove(String key, String oldValue) {
+        System.out.println(nodeUri() + " didRemove key: " + Format.debug(key) + "; oldValue: " + Format.debug(oldValue));
+      }
+
+    }
+
+  }
+
+  static class TestJoinMapLaneAgent extends AbstractAgent {
+
+    @SwimLane("join")
+    JoinMapLane<String, String, String> testJoinMap = this.<String, String, String>joinMapLane()
+        .observe(new TestJoinMapLaneController());
+
+    @Override
+    public void didStart() {
+      testJoinMap.downlink("xs").hostUri("warp://localhost:53556").nodeUri("/map/xs").laneUri("map").open();
+      testJoinMap.downlink("ys").hostUri("warp://localhost:53556").nodeUri("/map/ys").laneUri("map").open();
+    }
+
+    class TestJoinMapLaneController implements WillDownlinkMap<String>, DidDownlinkMap<String>,
+        WillUpdateKey<String, String>, DidUpdateKey<String, String>,
+        WillRemoveKey<String>, DidRemoveKey<String, String> {
+
+      @Override
+      public MapDownlink<?, ?> willDownlink(String key, MapDownlink<?, ?> downlink) {
+        System.out.println(nodeUri() + " willDownlink key: " + Format.debug(key) + "; downlink: " + downlink);
+        return downlink;
+      }
+
+      @Override
+      public void didDownlink(String key, MapDownlink<?, ?> downlink) {
+        System.out.println(nodeUri() + " didDownlink key: " + Format.debug(key) + "; downlink: " + downlink);
+      }
+
+      @Override
+      public String willUpdate(String key, String newValue) {
+        System.out.println(nodeUri() + " willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
+        return newValue;
+      }
+
+      @Override
+      public void didUpdate(String key, String newValue, String oldValue) {
+        System.out.println(nodeUri() + " didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+      }
+
+      @Override
+      public void willRemove(String key) {
+        System.out.println(nodeUri() + " willRemove key: " + Format.debug(key));
+      }
+
+      @Override
+      public void didRemove(String key, String oldValue) {
+        System.out.println(nodeUri() + " didRemove key: " + Format.debug(key) + "; oldValue: " + Format.debug(oldValue));
+      }
+
+    }
+
+  }
+
+  static class TestJoinMapPlane extends AbstractPlane {
+
+    @SwimRoute("/map/:name")
+    AgentRoute<TestMapLaneAgent> mapRoute;
+
+    @SwimRoute("/join/map/:name")
+    AgentRoute<TestJoinMapLaneAgent> joinMapRoute;
+
+  }
+
 }

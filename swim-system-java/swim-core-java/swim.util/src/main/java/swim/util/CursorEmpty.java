@@ -17,6 +17,7 @@ package swim.util;
 import java.util.NoSuchElementException;
 
 final class CursorEmpty<T> implements Cursor<T> {
+
   @Override
   public boolean isEmpty() {
     return true;
@@ -66,4 +67,5 @@ final class CursorEmpty<T> implements Cursor<T> {
   public T previous() {
     throw new NoSuchElementException();
   }
+
 }

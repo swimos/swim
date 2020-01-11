@@ -19,6 +19,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface PartBinding extends TierBinding, CellBinding, CellContext {
+
   MeshBinding mesh();
 
   PartBinding partWrapper();
@@ -60,4 +61,5 @@ public interface PartBinding extends TierBinding, CellBinding, CellContext {
   void openMetaLane(LaneBinding lane, NodeBinding metaLane);
 
   void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
+
 }

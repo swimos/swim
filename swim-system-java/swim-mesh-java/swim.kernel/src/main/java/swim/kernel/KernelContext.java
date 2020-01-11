@@ -72,6 +72,7 @@ import swim.web.WebRequest;
 import swim.web.WebResponse;
 
 public interface KernelContext extends Kernel, IpInterface, Log {
+
   KernelBinding kernelWrapper();
 
   KernelBinding kernelBinding();
@@ -268,4 +269,5 @@ public interface KernelContext extends Kernel, IpInterface, Log {
   void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink);
 
   void reportDown(Metric metric);
+
 }

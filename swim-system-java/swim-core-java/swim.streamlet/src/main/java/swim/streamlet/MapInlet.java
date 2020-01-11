@@ -18,6 +18,7 @@ package swim.streamlet;
  * Input connector into a {@link Streamlet} for a key-value map state.
  */
 public interface MapInlet<K, V, I> extends Inlet<I> {
+
   /**
    * Marks this {@code MapInlet} as needing an {@code effect} applied to a
    * given {@code key}.  Invalidating an individual key invalidates the entire
@@ -38,4 +39,5 @@ public interface MapInlet<K, V, I> extends Inlet<I> {
    * streamlet.
    */
   void reconcileOutputKey(K key, int version);
+
 }

@@ -15,4 +15,5 @@
 /**
  * Structural type transformation forms.
  */
+
 package swim.structure.form;

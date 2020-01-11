@@ -19,6 +19,7 @@ import swim.dynamic.BridgeGuest;
 import swim.observable.function.WillUpdateShape;
 
 public class GuestWillUpdateShape<K, S, V> extends BridgeGuest implements WillUpdateShape<K, S, V> {
+
   public GuestWillUpdateShape(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -28,4 +29,5 @@ public class GuestWillUpdateShape<K, S, V> extends BridgeGuest implements WillUp
   public V willUpdate(K key, S shape, V newValue) {
     return (V) this.bridge.guestExecute(this.guest, key, shape, newValue);
   }
+
 }

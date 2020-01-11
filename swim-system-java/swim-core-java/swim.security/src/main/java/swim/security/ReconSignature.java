@@ -31,6 +31,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public class ReconSignature {
+
   protected final Value payload;
   protected final Value protectedHeader;
   protected final Value signatureHeader;
@@ -39,63 +40,6 @@ public class ReconSignature {
     this.payload = payload;
     this.protectedHeader = protectedHeader;
     this.signatureHeader = signatureHeader;
-  }
-
-  public final Value payload() {
-    return this.payload;
-  }
-
-  public final Value protectedHeader() {
-    return this.protectedHeader;
-  }
-
-  public final Value signatureHeader() {
-    return this.signatureHeader;
-  }
-
-  public Data hash() {
-    final Value hash = this.signatureHeader.get("hash");
-    if (hash instanceof Data) {
-      return (Data) hash;
-    }
-    return null;
-  }
-
-  protected Data signingInput() {
-    final Output<Data> output = Data.output();
-    Recon.structureWriter().writeValue(this.payload, output);
-    Recon.structureWriter().writeAttr(Text.from("protected"), this.protectedHeader, output);
-    return output.bind();
-  }
-
-  public boolean verifySignature(PublicKey publicKey) {
-    final String algorithm = algorithm(publicKey);
-    try {
-      return verifyRsaSignature(Signature.getInstance(algorithm), publicKey);
-    } catch (GeneralSecurityException cause) {
-      // TODO: return reason
-    }
-    return false;
-  }
-
-  public boolean verifyRsaSignature(Signature signature, PublicKey publicKey) {
-    try {
-      signature.initVerify(publicKey);
-      signature.update(signingInput().asByteBuffer());
-      final Data signatureData = hash();
-      return signature.verify(signatureData.asByteArray(), 0, signatureData.size());
-    } catch (GeneralSecurityException cause) {
-      throw new RuntimeException(cause);
-    }
-  }
-
-  public Value toValue() {
-    Value value = this.payload;
-    if (this.protectedHeader.isDefined()) {
-      value = value.concat(Attr.of("protected", this.protectedHeader));
-    }
-    value = value.concat(Attr.of("signature", this.signatureHeader));
-    return value;
   }
 
   public static ReconSignature from(Value value) {
@@ -177,4 +121,62 @@ public class ReconSignature {
       return null;
     }
   }
+
+  public final Value payload() {
+    return this.payload;
+  }
+
+  public final Value protectedHeader() {
+    return this.protectedHeader;
+  }
+
+  public final Value signatureHeader() {
+    return this.signatureHeader;
+  }
+
+  public Data hash() {
+    final Value hash = this.signatureHeader.get("hash");
+    if (hash instanceof Data) {
+      return (Data) hash;
+    }
+    return null;
+  }
+
+  protected Data signingInput() {
+    final Output<Data> output = Data.output();
+    Recon.structureWriter().writeValue(this.payload, output);
+    Recon.structureWriter().writeAttr(Text.from("protected"), this.protectedHeader, output);
+    return output.bind();
+  }
+
+  public boolean verifySignature(PublicKey publicKey) {
+    final String algorithm = algorithm(publicKey);
+    try {
+      return verifyRsaSignature(Signature.getInstance(algorithm), publicKey);
+    } catch (GeneralSecurityException cause) {
+      // TODO: return reason
+    }
+    return false;
+  }
+
+  public boolean verifyRsaSignature(Signature signature, PublicKey publicKey) {
+    try {
+      signature.initVerify(publicKey);
+      signature.update(signingInput().asByteBuffer());
+      final Data signatureData = hash();
+      return signature.verify(signatureData.asByteArray(), 0, signatureData.size());
+    } catch (GeneralSecurityException cause) {
+      throw new RuntimeException(cause);
+    }
+  }
+
+  public Value toValue() {
+    Value value = this.payload;
+    if (this.protectedHeader.isDefined()) {
+      value = value.concat(Attr.of("protected", this.protectedHeader));
+    }
+    value = value.concat(Attr.of("signature", this.signatureHeader));
+    return value;
+  }
+
 }

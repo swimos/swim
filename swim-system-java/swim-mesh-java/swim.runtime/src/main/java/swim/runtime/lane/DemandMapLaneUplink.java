@@ -24,6 +24,7 @@ import swim.structure.Value;
 import swim.warp.SyncRequest;
 
 public class DemandMapLaneUplink extends MapUplinkModem {
+
   final DemandMapLaneModel laneBinding;
 
   public DemandMapLaneUplink(DemandMapLaneModel laneBinding, WarpBinding linkBinding,
@@ -57,4 +58,5 @@ public class DemandMapLaneUplink extends MapUplinkModem {
     syncDown(this.laneBinding.syncKeys(this));
     super.willSync(request);
   }
+
 }

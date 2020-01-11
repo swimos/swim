@@ -18,7 +18,9 @@ import org.graalvm.polyglot.Source;
 import swim.uri.UriPath;
 
 public interface JsModuleResolver {
+
   UriPath resolveModulePath(UriPath basePath, UriPath modulePath);
 
   Source loadModuleSource(UriPath moduleId);
+
 }

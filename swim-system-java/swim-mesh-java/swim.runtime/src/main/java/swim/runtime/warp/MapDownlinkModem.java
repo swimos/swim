@@ -25,6 +25,10 @@ import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
 public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends WarpDownlinkModel<View> {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<MapDownlinkModem<?>, HashTrieSet<Value>> KEY_QUEUE =
+      AtomicReferenceFieldUpdater.newUpdater((Class<MapDownlinkModem<?>>) (Class<?>) MapDownlinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
   final ConcurrentLinkedQueue<Push<CommandMessage>> upQueue;
   volatile HashTrieSet<Value> keyQueue;
   volatile Value lastKey;
@@ -49,7 +53,7 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
     final float prio = prio();
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
     this.upQueue.add(new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
-                                              prio, null, message, cont));
+        prio, null, message, cont));
   }
 
   public void cueUpKey(Value key) {
@@ -106,7 +110,7 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
       final Value body = nextUpKey(key);
       final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
       return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
-                                      prio, null, message, null);
+          prio, null, message, null);
     } else {
       return null;
     }
@@ -120,7 +124,4 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
     super.feedUp();
   }
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<MapDownlinkModem<?>, HashTrieSet<Value>> KEY_QUEUE =
-      AtomicReferenceFieldUpdater.newUpdater((Class<MapDownlinkModem<?>>) (Class<?>) MapDownlinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
 }

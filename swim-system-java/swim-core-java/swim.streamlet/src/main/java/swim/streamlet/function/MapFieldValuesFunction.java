@@ -16,5 +16,7 @@ package swim.streamlet.function;
 
 @FunctionalInterface
 public interface MapFieldValuesFunction<K, VI, VO> {
+
   VO apply(K key, VI value);
+
 }

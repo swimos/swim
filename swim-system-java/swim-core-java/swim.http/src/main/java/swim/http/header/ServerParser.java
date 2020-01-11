@@ -23,6 +23,7 @@ import swim.http.Product;
 import swim.util.Builder;
 
 final class ServerParser extends Parser<Server> {
+
   final HttpParser http;
   final Parser<Product> product;
   final Builder<Product, FingerTrieSeq<Product>> products;
@@ -38,11 +39,6 @@ final class ServerParser extends Parser<Server> {
 
   ServerParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<Server> feed(Input input) {
-    return parse(input, this.http, this.product, this.products, this.step);
   }
 
   static Parser<Server> parse(Input input, HttpParser http, Parser<Product> product,
@@ -107,4 +103,10 @@ final class ServerParser extends Parser<Server> {
   static Parser<Server> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<Server> feed(Input input) {
+    return parse(input, this.http, this.product, this.products, this.step);
+  }
+
 }

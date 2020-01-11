@@ -17,6 +17,7 @@ package swim.structure;
 import java.util.Iterator;
 
 final class RecordValueIterator implements Iterator<Value> {
+
   final Iterator<Item> iterator;
 
   RecordValueIterator(Iterator<Item> iterator) {
@@ -37,4 +38,5 @@ final class RecordValueIterator implements Iterator<Value> {
   public void remove() {
     this.iterator.remove();
   }
+
 }

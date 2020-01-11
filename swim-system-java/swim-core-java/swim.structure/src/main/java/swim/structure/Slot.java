@@ -25,6 +25,7 @@ import swim.structure.operator.PlusOperator;
 import swim.structure.operator.TimesOperator;
 
 public final class Slot extends Field {
+
   final Value key;
   Value value;
 
@@ -36,6 +37,130 @@ public final class Slot extends Field {
 
   Slot(Value key, Value value) {
     this(key, value, 0);
+  }
+
+  public static Slot of(Value key, Value value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    if (value == null) {
+      throw new NullPointerException("value");
+    }
+    return new Slot(key, value);
+  }
+
+  public static Slot of(Value key, String value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    if (value == null) {
+      throw new NullPointerException("value");
+    }
+    return new Slot(key, Text.from(value));
+  }
+
+  public static Slot of(Value key, int value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(key, Num.from(value));
+  }
+
+  public static Slot of(Value key, long value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(key, Num.from(value));
+  }
+
+  public static Slot of(Value key, float value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(key, Num.from(value));
+  }
+
+  public static Slot of(Value key, double value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(key, Num.from(value));
+  }
+
+  public static Slot of(Value key, boolean value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(key, Bool.from(value));
+  }
+
+  public static Slot of(String key, Value value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    if (value == null) {
+      throw new NullPointerException("value");
+    }
+    return new Slot(Text.from(key), value);
+  }
+
+  public static Slot of(String key, String value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    if (value == null) {
+      throw new NullPointerException("value");
+    }
+    return new Slot(Text.from(key), Text.from(value));
+  }
+
+  public static Slot of(String key, int value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(Text.from(key), Num.from(value));
+  }
+
+  public static Slot of(String key, long value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(Text.from(key), Num.from(value));
+  }
+
+  public static Slot of(String key, float value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(Text.from(key), Num.from(value));
+  }
+
+  public static Slot of(String key, double value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(Text.from(key), Num.from(value));
+  }
+
+  public static Slot of(String key, boolean value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(Text.from(key), Bool.from(value));
+  }
+
+  public static Slot of(Value key) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(key, Value.extant());
+  }
+
+  public static Slot of(String key) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Slot(Text.from(key), Value.extant());
   }
 
   @Override
@@ -400,127 +525,4 @@ public final class Slot extends Field {
     output = output.write(')');
   }
 
-  public static Slot of(Value key, Value value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-    return new Slot(key, value);
-  }
-
-  public static Slot of(Value key, String value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-    return new Slot(key, Text.from(value));
-  }
-
-  public static Slot of(Value key, int value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(key, Num.from(value));
-  }
-
-  public static Slot of(Value key, long value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(key, Num.from(value));
-  }
-
-  public static Slot of(Value key, float value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(key, Num.from(value));
-  }
-
-  public static Slot of(Value key, double value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(key, Num.from(value));
-  }
-
-  public static Slot of(Value key, boolean value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(key, Bool.from(value));
-  }
-
-  public static Slot of(String key, Value value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-    return new Slot(Text.from(key), value);
-  }
-
-  public static Slot of(String key, String value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-    return new Slot(Text.from(key), Text.from(value));
-  }
-
-  public static Slot of(String key, int value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(Text.from(key), Num.from(value));
-  }
-
-  public static Slot of(String key, long value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(Text.from(key), Num.from(value));
-  }
-
-  public static Slot of(String key, float value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(Text.from(key), Num.from(value));
-  }
-
-  public static Slot of(String key, double value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(Text.from(key), Num.from(value));
-  }
-
-  public static Slot of(String key, boolean value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(Text.from(key), Bool.from(value));
-  }
-
-  public static Slot of(Value key) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(key, Value.extant());
-  }
-
-  public static Slot of(String key) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Slot(Text.from(key), Value.extant());
-  }
 }

@@ -17,6 +17,7 @@ package swim.api.auth;
 import swim.api.policy.PolicyDirective;
 
 public interface Authenticator {
+
   AuthenticatorContext authenticatorContext();
 
   void setAuthenticatorContext(AuthenticatorContext context);
@@ -32,4 +33,5 @@ public interface Authenticator {
   void didStop();
 
   void didFail(Throwable error);
+
 }

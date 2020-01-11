@@ -17,6 +17,7 @@ package swim.concurrent;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ConcurrentTrancheQueue<T> {
+
   final ConcurrentLinkedQueue<T>[] queues;
   final float scale;
   final int highest;
@@ -66,4 +67,5 @@ public class ConcurrentTrancheQueue<T> {
     }
     return null;
   }
+
 }

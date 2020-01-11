@@ -20,5 +20,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface OnSyncKeys<K> extends Preemptive {
+
   Iterator<K> onSync(WarpUplink uplink);
+
 }

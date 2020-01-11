@@ -31,6 +31,8 @@ import swim.util.Murmur3;
  * Item} in a {@link Record}; it has no definition for any other type.
  */
 public class ChildrenSelector extends Selector {
+
+  private static int hashSeed;
   final Selector then;
 
   ChildrenSelector(Selector then) {
@@ -166,5 +168,4 @@ public class ChildrenSelector extends Selector {
     this.then.debugThen(output);
   }
 
-  private static int hashSeed;
 }

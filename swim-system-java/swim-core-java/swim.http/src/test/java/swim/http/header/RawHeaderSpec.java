@@ -21,6 +21,7 @@ import swim.http.HttpHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class RawHeaderSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -38,4 +39,5 @@ public class RawHeaderSpec {
     assertWrites(RawHeader.from("Foo", ""), "Foo:");
     assertWrites(RawHeader.from("Foo", "Bar"), "Foo: Bar");
   }
+
 }

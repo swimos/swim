@@ -20,9 +20,6 @@ import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostBuiltinType;
 
 public final class HostObject {
-  private HostObject() {
-    // static
-  }
 
   public static final HostObjectType<Object> TYPE;
 
@@ -33,9 +30,15 @@ public final class HostObject {
     type.addMember(new HostObjectHashCode());
     type.addMember(new HostObjectToString());
   }
+
+  private HostObject() {
+    // static
+  }
+
 }
 
 final class HostObjectEquals implements HostMethod<Object> {
+
   @Override
   public String key() {
     return "equals";
@@ -45,9 +48,11 @@ final class HostObjectEquals implements HostMethod<Object> {
   public Object invoke(Bridge bridge, Object object, Object... arguments) {
     return object.equals(arguments[0]);
   }
+
 }
 
 final class HostObjectHashCode implements HostMethod<Object> {
+
   @Override
   public String key() {
     return "hashCode";
@@ -57,9 +62,11 @@ final class HostObjectHashCode implements HostMethod<Object> {
   public Object invoke(Bridge bridge, Object object, Object... arguments) {
     return object.hashCode();
   }
+
 }
 
 final class HostObjectToString implements HostMethod<Object> {
+
   @Override
   public String key() {
     return "toString";
@@ -69,4 +76,5 @@ final class HostObjectToString implements HostMethod<Object> {
   public Object invoke(Bridge bridge, Object object, Object... arguments) {
     return object.toString();
   }
+
 }

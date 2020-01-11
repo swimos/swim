@@ -20,6 +20,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class RecordMapImmutableSpec {
+
   @Test(expectedExceptions = UnsupportedOperationException.class)
   public void testImmutablePut() {
     final Record xs = Record.of().attr("k", "v").slot("a", "b").commit();
@@ -252,4 +253,5 @@ public class RecordMapImmutableSpec {
     assertEquals(xs, Record.of("a", "b", "c", "d"));
     assertEquals(ys, Record.empty());
   }
+
 }

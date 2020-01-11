@@ -18,8 +18,10 @@ import swim.avro.schema.AvroNullType;
 import swim.structure.Value;
 
 final class NullStructure extends AvroNullType<Value> {
+
   @Override
   public Value cast() {
     return Value.extant();
   }
+
 }

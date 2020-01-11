@@ -15,6 +15,7 @@
 package swim.streamlet;
 
 public class ValueInput<O> extends AbstractOutlet<O> {
+
   protected O state;
 
   public ValueInput(O state) {
@@ -36,4 +37,5 @@ public class ValueInput<O> extends AbstractOutlet<O> {
     invalidateInput();
     return oldState;
   }
+
 }

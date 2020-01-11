@@ -22,13 +22,16 @@ import swim.structure.Kind;
  * Marker interface for a {@link Schedule} definition.
  */
 public interface ScheduleDef {
+
   @Kind
   static Form<ScheduleDef> form() {
     return new ScheduleForm(ClockDef.standard());
   }
+
 }
 
 final class ScheduleForm extends Form<ScheduleDef> {
+
   final ScheduleDef unit;
 
   ScheduleForm(ScheduleDef unit) {
@@ -67,4 +70,5 @@ final class ScheduleForm extends Form<ScheduleDef> {
     }
     return null;
   }
+
 }

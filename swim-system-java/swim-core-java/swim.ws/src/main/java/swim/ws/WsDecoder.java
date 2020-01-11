@@ -21,6 +21,7 @@ import swim.codec.InputBuffer;
 import swim.structure.Data;
 
 public abstract class WsDecoder {
+
   public <T> WsFrame<T> fragment(WsOpcode opcode, Decoder<T> content) {
     return new WsFragment<T>(opcode, content);
   }
@@ -31,10 +32,14 @@ public abstract class WsDecoder {
 
   public <P, T> WsFrame<T> control(WsOpcode opcode, P payload) {
     switch (opcode) {
-      case CLOSE: return close(payload);
-      case PING: return ping(payload);
-      case PONG: return pong(payload);
-      default: throw new IllegalArgumentException(opcode.toString());
+      case CLOSE:
+        return close(payload);
+      case PING:
+        return ping(payload);
+      case PONG:
+        return pong(payload);
+      default:
+        throw new IllegalArgumentException(opcode.toString());
     }
   }
 
@@ -88,13 +93,20 @@ public abstract class WsDecoder {
   public <T> Decoder<WsFrame<T>> decodeFrame(int finRsvOp, Decoder<T> content, InputBuffer input) {
     final int opcode = finRsvOp & 0xf;
     switch (opcode) {
-      case 0x0: return decodeContinuationFrame(finRsvOp, continuationDecoder(content), input);
-      case 0x1: return decodeTextFrame(finRsvOp, textDecoder(content), input);
-      case 0x2: return decodeBinaryFrame(finRsvOp, binaryDecoder(content), input);
-      case 0x8: return decodeCloseFrame(finRsvOp, closeDecoder(content), input);
-      case 0x9: return decodePingFrame(finRsvOp, pingDecoder(content), input);
-      case 0xa: return decodePongFrame(finRsvOp, pongDecoder(content), input);
-      default: return Decoder.error(new DecoderException("reserved opcode: " + WsOpcode.from(opcode)));
+      case 0x0:
+        return decodeContinuationFrame(finRsvOp, continuationDecoder(content), input);
+      case 0x1:
+        return decodeTextFrame(finRsvOp, textDecoder(content), input);
+      case 0x2:
+        return decodeBinaryFrame(finRsvOp, binaryDecoder(content), input);
+      case 0x8:
+        return decodeCloseFrame(finRsvOp, closeDecoder(content), input);
+      case 0x9:
+        return decodePingFrame(finRsvOp, pingDecoder(content), input);
+      case 0xa:
+        return decodePongFrame(finRsvOp, pongDecoder(content), input);
+      default:
+        return Decoder.error(new DecoderException("reserved opcode: " + WsOpcode.from(opcode)));
     }
   }
 
@@ -124,4 +136,5 @@ public abstract class WsDecoder {
   public <P, T> Decoder<WsFrame<T>> decodePongFrame(int finRsvOp, Decoder<P> content, InputBuffer input) {
     return (Decoder<WsFrame<T>>) (Decoder<?>) WsFrameDecoder.decode(input, this, content);
   }
+
 }

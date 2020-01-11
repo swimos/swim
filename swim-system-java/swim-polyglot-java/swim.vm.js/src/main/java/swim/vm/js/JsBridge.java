@@ -30,6 +30,7 @@ import swim.vm.VmBridge;
 import swim.vm.VmHostArray;
 
 public class JsBridge extends VmBridge implements JsModuleResolver, JsModuleLoader {
+
   final Context jsContext;
   HashTrieMap<HostType<?>, Object> guestTypes;
   HashTrieMap<HostType<?>, Object> guestPrototypes;
@@ -215,4 +216,5 @@ public class JsBridge extends VmBridge implements JsModuleResolver, JsModuleLoad
     final Source moduleSource = Source.newBuilder("js", source, moduleId).buildLiteral();
     return eval(UriPath.parse(moduleId), moduleSource);
   }
+
 }

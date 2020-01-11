@@ -17,6 +17,7 @@ package swim.spatial;
 import swim.util.Cursor;
 
 final class QTreeNode<K, S, V> extends QTreePage<K, S, V> {
+
   final QTreePage<K, S, V>[] pages;
   final QTreeEntry<K, S, V>[] slots;
   final long x;
@@ -29,6 +30,57 @@ final class QTreeNode<K, S, V> extends QTreePage<K, S, V> {
     this.x = x;
     this.y = y;
     this.span = span;
+  }
+
+  public static <K, S, V> QTreeNode<K, S, V> create(QTreePage<K, S, V>[] pages,
+                                                    QTreeEntry<K, S, V>[] slots, long span) {
+    int xRank = 0;
+    int yRank = 0;
+    long xBase = 0L;
+    long yBase = 0L;
+    long xMask = -1L;
+    long yMask = -1L;
+    for (int i = 0, pageCount = pages.length; i < pageCount; i += 1) {
+      final QTreePage<K, S, V> page = pages[i];
+      final long cx = page.x();
+      final long cy = page.y();
+      final int cxRank = Long.numberOfLeadingZeros(~cx);
+      final int cyRank = Long.numberOfLeadingZeros(~cy);
+      final long cxBase = cx << cxRank;
+      final long cyBase = cy << cyRank;
+      xRank = Math.max(xRank, cxRank);
+      yRank = Math.max(yRank, cyRank);
+      xBase |= cxBase;
+      yBase |= cyBase;
+      xMask &= cxBase;
+      yMask &= cyBase;
+    }
+    for (int i = 0, slotCount = slots.length; i < slotCount; i += 1) {
+      final QTreeEntry<K, S, V> slot = slots[i];
+      final long tx = slot.x;
+      final long ty = slot.y;
+      final int txRank = Long.numberOfLeadingZeros(~tx);
+      final int tyRank = Long.numberOfLeadingZeros(~ty);
+      final long txBase = tx << txRank;
+      final long tyBase = ty << tyRank;
+      xRank = Math.max(xRank, txRank);
+      yRank = Math.max(yRank, tyRank);
+      xBase |= txBase;
+      yBase |= tyBase;
+      xMask &= txBase;
+      yMask &= tyBase;
+    }
+    xMask ^= xBase;
+    yMask ^= yBase;
+    xRank = Math.max(xRank, 64 - Long.numberOfLeadingZeros(xMask));
+    yRank = Math.max(yRank, 64 - Long.numberOfLeadingZeros(yMask));
+    xMask = ~((1L << xRank) - 1L);
+    yMask = ~((1L << yRank) - 1L);
+    xBase &= xMask;
+    yBase &= yMask;
+    final long x = BitInterval.from(xRank, xBase);
+    final long y = BitInterval.from(yRank, yBase);
+    return new QTreeNode<K, S, V>(pages, slots, x, y, span);
   }
 
   @Override
@@ -1119,54 +1171,4 @@ final class QTreeNode<K, S, V> extends QTreePage<K, S, V> {
     return -(low + 1);
   }
 
-  public static <K, S, V> QTreeNode<K, S, V> create(QTreePage<K, S, V>[] pages,
-                                                    QTreeEntry<K, S, V>[] slots, long span) {
-    int xRank = 0;
-    int yRank = 0;
-    long xBase = 0L;
-    long yBase = 0L;
-    long xMask = -1L;
-    long yMask = -1L;
-    for (int i = 0, pageCount = pages.length; i < pageCount; i += 1) {
-      final QTreePage<K, S, V> page = pages[i];
-      final long cx = page.x();
-      final long cy = page.y();
-      final int cxRank = Long.numberOfLeadingZeros(~cx);
-      final int cyRank = Long.numberOfLeadingZeros(~cy);
-      final long cxBase = cx << cxRank;
-      final long cyBase = cy << cyRank;
-      xRank = Math.max(xRank, cxRank);
-      yRank = Math.max(yRank, cyRank);
-      xBase |= cxBase;
-      yBase |= cyBase;
-      xMask &= cxBase;
-      yMask &= cyBase;
-    }
-    for (int i = 0, slotCount = slots.length; i < slotCount; i += 1) {
-      final QTreeEntry<K, S, V> slot = slots[i];
-      final long tx = slot.x;
-      final long ty = slot.y;
-      final int txRank = Long.numberOfLeadingZeros(~tx);
-      final int tyRank = Long.numberOfLeadingZeros(~ty);
-      final long txBase = tx << txRank;
-      final long tyBase = ty << tyRank;
-      xRank = Math.max(xRank, txRank);
-      yRank = Math.max(yRank, tyRank);
-      xBase |= txBase;
-      yBase |= tyBase;
-      xMask &= txBase;
-      yMask &= tyBase;
-    }
-    xMask ^= xBase;
-    yMask ^= yBase;
-    xRank = Math.max(xRank, 64 - Long.numberOfLeadingZeros(xMask));
-    yRank = Math.max(yRank, 64 - Long.numberOfLeadingZeros(yMask));
-    xMask = ~((1L << xRank) - 1L);
-    yMask = ~((1L << yRank) - 1L);
-    xBase &= xMask;
-    yBase &= yMask;
-    final long x = BitInterval.from(xRank, xBase);
-    final long y = BitInterval.from(yRank, yBase);
-    return new QTreeNode<K, S, V>(pages, slots, x, y, span);
-  }
 }

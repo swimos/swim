@@ -31,6 +31,8 @@ import swim.uri.UriPattern;
 import swim.util.Murmur3;
 
 public class ActorHostDef implements HostDef, Debug {
+
+  private static int hashSeed;
   final UriPattern hostPattern;
   final boolean isPrimary;
   final boolean isReplica;
@@ -56,6 +58,24 @@ public class ActorHostDef implements HostDef, Debug {
     this.storeDef = storeDef;
   }
 
+  public static ActorHostDef fromHostUri(Uri hostUri) {
+    return new ActorHostDef(UriPattern.from(hostUri), false, false, UriMapper.empty(),
+        UriMapper.empty(), null, null, null, null);
+  }
+
+  public static ActorHostDef fromHostUri(String hostUri) {
+    return fromHostUri(Uri.parse(hostUri));
+  }
+
+  public static ActorHostDef fromHostPattern(UriPattern hostPattern) {
+    return new ActorHostDef(hostPattern, false, false, UriMapper.empty(),
+        UriMapper.empty(), null, null, null, null);
+  }
+
+  public static ActorHostDef fromHostPattern(String hostPattern) {
+    return fromHostPattern(UriPattern.parse(hostPattern));
+  }
+
   @Override
   public final Uri hostUri() {
     return this.hostPattern.isUri() ? this.hostPattern.toUri() : null;
@@ -68,7 +88,7 @@ public class ActorHostDef implements HostDef, Debug {
 
   public ActorHostDef hostPattern(UriPattern hostPattern) {
     return copy(hostPattern, this.isPrimary, this.isReplica, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -78,7 +98,7 @@ public class ActorHostDef implements HostDef, Debug {
 
   public ActorHostDef isPrimary(boolean isPrimary) {
     return copy(this.hostPattern, isPrimary, this.isReplica, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -88,7 +108,7 @@ public class ActorHostDef implements HostDef, Debug {
 
   public ActorHostDef isReplica(boolean isReplica) {
     return copy(this.hostPattern, this.isPrimary, isReplica, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -103,8 +123,8 @@ public class ActorHostDef implements HostDef, Debug {
 
   public ActorHostDef nodeDef(NodeDef nodeDef) {
     return copy(this.hostPattern, this.isPrimary, this.isReplica,
-                this.nodeDefs.updated(nodeDef.nodePattern(), nodeDef), this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.nodeDefs.updated(nodeDef.nodePattern(), nodeDef), this.laneDefs,
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -119,8 +139,8 @@ public class ActorHostDef implements HostDef, Debug {
 
   public ActorHostDef laneDef(LaneDef laneDef) {
     return copy(this.hostPattern, this.isPrimary, this.isReplica,
-                this.nodeDefs, this.laneDefs.updated(laneDef.lanePattern(), laneDef),
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.nodeDefs, this.laneDefs.updated(laneDef.lanePattern(), laneDef),
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -130,7 +150,7 @@ public class ActorHostDef implements HostDef, Debug {
 
   public ActorHostDef logDef(LogDef logDef) {
     return copy(this.hostPattern, this.isPrimary, this.isReplica, this.nodeDefs, this.laneDefs,
-                logDef, this.policyDef, this.stageDef, this.storeDef);
+        logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -140,7 +160,7 @@ public class ActorHostDef implements HostDef, Debug {
 
   public ActorHostDef policyDef(PolicyDef policyDef) {
     return copy(this.hostPattern, this.isPrimary, this.isReplica, this.nodeDefs, this.laneDefs,
-                this.logDef, policyDef, this.stageDef, this.storeDef);
+        this.logDef, policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -150,7 +170,7 @@ public class ActorHostDef implements HostDef, Debug {
 
   public ActorHostDef stageDef(StageDef stageDef) {
     return copy(this.hostPattern, this.isPrimary, this.isReplica, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, stageDef, this.storeDef);
+        this.logDef, this.policyDef, stageDef, this.storeDef);
   }
 
   @Override
@@ -160,7 +180,7 @@ public class ActorHostDef implements HostDef, Debug {
 
   public ActorHostDef storeDef(StoreDef storeDef) {
     return copy(this.hostPattern, this.isPrimary, this.isReplica, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, storeDef);
+        this.logDef, this.policyDef, this.stageDef, storeDef);
   }
 
   protected ActorHostDef copy(UriPattern hostPattern, boolean isPrimary, boolean isReplica,
@@ -168,7 +188,7 @@ public class ActorHostDef implements HostDef, Debug {
                               LogDef logDef, PolicyDef policyDef, StageDef stageDef,
                               StoreDef storeDef) {
     return new ActorHostDef(hostPattern, isPrimary, isReplica, nodeDefs, laneDefs,
-                            logDef, policyDef, stageDef, storeDef);
+        logDef, policyDef, stageDef, storeDef);
   }
 
   @Override
@@ -197,7 +217,7 @@ public class ActorHostDef implements HostDef, Debug {
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, this.hostPattern.hashCode()),
-        Murmur3.hash(this.isPrimary)), Murmur3.hash(this.isReplica)), this.nodeDefs.hashCode()),
+            Murmur3.hash(this.isPrimary)), Murmur3.hash(this.isReplica)), this.nodeDefs.hashCode()),
         this.laneDefs.hashCode()), Murmur3.hash(this.logDef)), Murmur3.hash(this.policyDef)),
         Murmur3.hash(this.stageDef)), Murmur3.hash(this.storeDef)));
   }
@@ -241,23 +261,4 @@ public class ActorHostDef implements HostDef, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static ActorHostDef fromHostUri(Uri hostUri) {
-    return new ActorHostDef(UriPattern.from(hostUri), false, false, UriMapper.empty(),
-                            UriMapper.empty(), null, null, null, null);
-  }
-
-  public static ActorHostDef fromHostUri(String hostUri) {
-    return fromHostUri(Uri.parse(hostUri));
-  }
-
-  public static ActorHostDef fromHostPattern(UriPattern hostPattern) {
-    return new ActorHostDef(hostPattern, false, false, UriMapper.empty(),
-                            UriMapper.empty(), null, null, null, null);
-  }
-
-  public static ActorHostDef fromHostPattern(String hostPattern) {
-    return fromHostPattern(UriPattern.parse(hostPattern));
-  }
 }

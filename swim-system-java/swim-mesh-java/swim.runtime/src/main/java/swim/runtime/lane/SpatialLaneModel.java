@@ -36,9 +36,13 @@ import swim.structure.Value;
 import swim.warp.CommandMessage;
 
 public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>, SpatialLaneUplink<S>> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
+  protected final Z2Form<S> shapeForm;
   protected int flags;
   protected SpatialData<Value, S, Value> data;
-  protected final Z2Form<S> shapeForm;
 
   SpatialLaneModel(Z2Form<S> shapeForm, int flags) {
     this.shapeForm = shapeForm;
@@ -267,21 +271,19 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
     super.willLoad();
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
 }
 
 final class SpatialLaneRelayUpdate<S> extends LaneRelay<SpatialLaneModel<S>, SpatialLaneView<?, S, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
+  final Value key;
+  final S shapeObject;
   Form<Object> keyForm;
   Z2Form<Object> shapeForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
-  final S shapeObject;
   Value oldValue;
   Object oldObject;
   Value newValue;
@@ -420,19 +422,21 @@ final class SpatialLaneRelayUpdate<S> extends LaneRelay<SpatialLaneModel<S>, Spa
       }
     }
   }
+
 }
 
 final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, SpatialLaneView<?, S, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
+  final Value key;
+  final S oldShapeObject;
+  final S newShapeObject;
   Form<Object> keyForm;
   Z2Form<Object> shapeForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
-  final S oldShapeObject;
-  final S newShapeObject;
   Value oldValue;
   Object oldObject;
   Value newValue;
@@ -461,7 +465,6 @@ final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, Spati
     this.newShapeObject = newShapeObject;
     this.newValue = newValue;
   }
-
 
   SpatialLaneRelayMove(SpatialLaneModel<S> model, Stage stage, Value key,
                        S oldShapeObject, S newShapeObject, Value newValue) {
@@ -581,18 +584,20 @@ final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, Spati
       }
     }
   }
+
 }
 
 final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, SpatialLaneView<?, S, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
+  final Value key;
+  final S shapeObject;
   Form<Object> keyForm;
   Z2Form<Object> shapeForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
-  final S shapeObject;
   Value oldValue;
   Object oldObject;
 
@@ -714,9 +719,11 @@ final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, Spa
       }
     }
   }
+
 }
 
 final class SpatialLaneRelayClear<S> extends LaneRelay<SpatialLaneModel<S>, SpatialLaneView<?, S, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -792,4 +799,5 @@ final class SpatialLaneRelayClear<S> extends LaneRelay<SpatialLaneModel<S>, Spat
       }
     }
   }
+
 }

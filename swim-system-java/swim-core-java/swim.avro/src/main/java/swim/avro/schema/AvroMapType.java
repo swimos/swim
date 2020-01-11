@@ -19,9 +19,11 @@ import swim.codec.Parser;
 import swim.util.PairBuilder;
 
 public abstract class AvroMapType<K, V, T> extends AvroComplexType<T> {
+
   public abstract Parser<K> parseKey(Input input);
 
   public abstract AvroType<V> valueType();
 
   public abstract PairBuilder<K, V, T> mapBuilder();
+
 }

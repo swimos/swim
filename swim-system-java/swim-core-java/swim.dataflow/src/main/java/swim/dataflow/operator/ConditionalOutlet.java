@@ -21,6 +21,7 @@ import swim.streamlet.OutletInlet;
 import swim.structure.Value;
 
 public final class ConditionalOutlet extends AbstractOutlet<Value> {
+
   final Inlet<Value> ifInlet;
   final Inlet<Value> thenInlet;
   final Inlet<Value> elseInlet;
@@ -70,4 +71,5 @@ public final class ConditionalOutlet extends AbstractOutlet<Value> {
     }
     return Value.absent();
   }
+
 }

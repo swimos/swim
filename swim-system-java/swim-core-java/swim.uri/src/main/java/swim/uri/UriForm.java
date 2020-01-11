@@ -21,6 +21,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public class UriForm extends Form<Uri> {
+
   final Uri unit;
 
   UriForm(Uri unit) {
@@ -64,4 +65,5 @@ public class UriForm extends Form<Uri> {
     }
     return null;
   }
+
 }

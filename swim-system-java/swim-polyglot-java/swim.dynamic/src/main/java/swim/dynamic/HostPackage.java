@@ -20,6 +20,7 @@ import java.util.Collection;
  * A collection of dynamic type descriptors representing a host package.
  */
 public interface HostPackage {
+
   String packageName();
 
   HostType<?> getHostType(String typeName);
@@ -27,4 +28,5 @@ public interface HostPackage {
   HostType<?> getHostType(Class<?> typeClass);
 
   Collection<HostType<?>> hostTypes();
+
 }

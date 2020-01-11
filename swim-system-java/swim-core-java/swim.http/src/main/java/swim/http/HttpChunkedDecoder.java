@@ -22,6 +22,7 @@ import swim.codec.Utf8;
 import swim.http.header.ContentType;
 
 final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
+
   final HttpParser http;
   final HttpMessage<?> message;
   final Decoder<T> content;
@@ -43,12 +44,6 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
 
   HttpChunkedDecoder(HttpParser http, HttpMessage<?> message, Decoder<T> content) {
     this(http, message, content, null, null, 0, 1);
-  }
-
-  @Override
-  public Decoder<HttpMessage<T>> feed(InputBuffer input) {
-    return decode(input, this.http, this.message, this.content, this.header,
-                  this.part, this.offset, this.step);
   }
 
   static <T> Decoder<HttpMessage<T>> decode(InputBuffer input, HttpParser http,
@@ -151,4 +146,11 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
                                             HttpMessage<?> message, Decoder<T> content) {
     return decode(input, http, message, content, null, null, 0, 1);
   }
+
+  @Override
+  public Decoder<HttpMessage<T>> feed(InputBuffer input) {
+    return decode(input, this.http, this.message, this.content, this.header,
+        this.part, this.offset, this.step);
+  }
+
 }

@@ -18,6 +18,7 @@ package swim.codec;
  * Base-10 (decimal) encoding {@link Parser}/{@link Writer} factory.
  */
 public final class Base10 {
+
   private Base10() {
     // nop
   }
@@ -198,4 +199,5 @@ public final class Base10 {
   public static Writer<?, ?> writeDouble(double input, Output<?> output) {
     return StringWriter.write(output, null, input);
   }
+
 }

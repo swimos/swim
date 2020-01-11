@@ -24,6 +24,7 @@ import swim.structure.Value;
  * Number}.
  */
 public final class NumberForm extends Form<Number> {
+
   final Number unit;
 
   public NumberForm(Number unit) {
@@ -63,4 +64,5 @@ public final class NumberForm extends Form<Number> {
       return null;
     }
   }
+
 }

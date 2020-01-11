@@ -18,6 +18,7 @@ import swim.codec.Debug;
 import swim.codec.Output;
 
 public enum MqttQoS implements Debug {
+
   AT_MOST_ONCE(0),
   AT_LEAST_ONCE(1),
   EXACTLY_ONCE(2);
@@ -26,6 +27,19 @@ public enum MqttQoS implements Debug {
 
   MqttQoS(int code) {
     this.code = code;
+  }
+
+  public static MqttQoS from(int code) {
+    switch (code) {
+      case 0:
+        return AT_MOST_ONCE;
+      case 1:
+        return AT_LEAST_ONCE;
+      case 2:
+        return EXACTLY_ONCE;
+      default:
+        throw new IllegalArgumentException(Integer.toString(code));
+    }
   }
 
   public boolean isAtMostOnce() {
@@ -45,12 +59,4 @@ public enum MqttQoS implements Debug {
     output = output.write("MqttQoS").write('.').write(name());
   }
 
-  public static MqttQoS from(int code) {
-    switch (code) {
-      case 0: return AT_MOST_ONCE;
-      case 1: return AT_LEAST_ONCE;
-      case 2: return EXACTLY_ONCE;
-      default: throw new IllegalArgumentException(Integer.toString(code));
-    }
-  }
 }

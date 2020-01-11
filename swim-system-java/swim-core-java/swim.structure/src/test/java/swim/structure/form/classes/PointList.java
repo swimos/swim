@@ -19,13 +19,17 @@ import swim.util.Murmur3;
 
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class PointList {
+
   public List<Point2D> list;
+
   public PointList(List<Point2D> list) {
     this.list = list;
   }
+
   public PointList() {
     // Form.cast constructor
   }
+
   @Override
   public boolean equals(Object other) {
     if (other instanceof PointList) {
@@ -34,12 +38,15 @@ public class PointList {
     }
     return false;
   }
+
   @Override
   public int hashCode() {
     return Murmur3.hash(this.list);
   }
+
   @Override
   public String toString() {
     return "PointList(" + this.list + ")";
   }
+
 }

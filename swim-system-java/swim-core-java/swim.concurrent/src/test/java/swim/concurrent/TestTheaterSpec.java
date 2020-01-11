@@ -23,6 +23,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class TestTheaterSpec {
+
   @Test
   public void runATaskWhenCued() {
     final TestTheater theater = new TestTheater();
@@ -57,6 +58,7 @@ public class TestTheaterSpec {
           assertEquals(execute.getCount(), 1);
           execute.countDown();
         }
+
         @Override
         public boolean taskWillBlock() {
           return true;
@@ -80,6 +82,7 @@ public class TestTheaterSpec {
       theater.start();
       final TaskRef task = theater.task(new AbstractTask() {
         int runs;
+
         @Override
         public void runTask() {
           runs += 1;
@@ -112,6 +115,7 @@ public class TestTheaterSpec {
       theater.start();
       final TaskRef task = theater.task(new AbstractTask() {
         int runs;
+
         @Override
         public void runTask() {
           runs += 1;
@@ -176,6 +180,7 @@ public class TestTheaterSpec {
         public void runTask() {
           // nop
         }
+
         @Override
         public void taskWillCue() {
           assertEquals(taskWillCue.getCount(), 1);
@@ -218,7 +223,7 @@ public class TestTheaterSpec {
   }
 
   @Test
-  public void continueRunningAfterTaskError()  {
+  public void continueRunningAfterTaskError() {
     final CountDownLatch execute = new CountDownLatch(3);
     final CountDownLatch failure = new CountDownLatch(1);
     final TestTheater theater = new TestTheater(1) {
@@ -273,6 +278,7 @@ public class TestTheaterSpec {
           assertEquals(value, result);
           bind.countDown();
         }
+
         @Override
         public void trap(Throwable error) {
           fail();
@@ -296,6 +302,7 @@ public class TestTheaterSpec {
         public void bind(Object value) {
           fail();
         }
+
         @Override
         public void trap(Throwable error) {
           assertEquals(trap.getCount(), 1);
@@ -321,6 +328,7 @@ public class TestTheaterSpec {
           assertEquals(value, "test");
           bind.countDown();
         }
+
         @Override
         public void trap(Throwable error) {
           fail();
@@ -347,17 +355,20 @@ public class TestTheaterSpec {
 
   @Test
   public void awaitSyncContTimeout() {
+    long timeout = 200L;
     final TestTheater theater = new TestTheater();
-    final long timeout = 1000L;
-    final long t0 = System.currentTimeMillis();
+    final long t0 = System.nanoTime();
+
     try {
       theater.start();
-      final Sync<String> sync = new Sync<String>();
+      final Sync<String> sync = new Sync<>();
       theater.await(sync, timeout);
     } catch (SyncException e) {
-      final long dt = System.currentTimeMillis() - t0;
-      assertTrue(dt >= timeout, "timeout too soon");
-      assertTrue(dt <= 2L * timeout, "timeout too long");
+      final long dt = System.nanoTime() - t0;
+      timeout *= 1e6;
+
+      assertTrue(dt > timeout, "Timeout too soon: dt: " + dt);
+      assertTrue(dt < 3L * timeout, "long too soon: dt: " + dt);
     } finally {
       theater.stop();
     }
@@ -378,57 +389,69 @@ public class TestTheaterSpec {
     final CountDownLatch callWillTrap = new CountDownLatch(1);
     final CountDownLatch callDidTrap = new CountDownLatch(1);
     final CountDownLatch callDidFail = new CountDownLatch(1);
-    final TestTheater theater = new TestTheater() {
+    final TestTheater theater = new TestTheater(1) {
       @Override
       protected void didStart() {
         assertEquals(didStart.getCount(), 1);
         didStart.countDown();
       }
+
       @Override
       protected void didStop() {
         assertEquals(didStop.getCount(), 1);
         didStop.countDown();
       }
+
       @Override
       protected void taskWillCue(TaskFunction task) {
         taskWillCue.countDown();
       }
+
       @Override
       protected void taskDidCancel(TaskFunction task) {
         taskDidCancel.countDown();
       }
+
       @Override
       protected void taskWillRun(TaskFunction task) {
         taskWillRun.countDown();
       }
+
       @Override
       protected void taskDidRun(TaskFunction task) {
         taskDidRun.countDown();
       }
+
       @Override
       protected void taskDidFail(TaskFunction task, Throwable error) {
         taskDidFail.countDown();
       }
+
       @Override
       protected void callWillCue(Cont<?> cont) {
         callWillCue.countDown();
       }
+
       @Override
       protected <T> void callWillBind(Cont<T> cont, T value) {
         callWillBind.countDown();
       }
+
       @Override
       protected <T> void callDidBind(Cont<?> cont, T value) {
         callDidBind.countDown();
       }
+
       @Override
       protected void callWillTrap(Cont<?> cont, Throwable error) {
         callWillTrap.countDown();
       }
+
       @Override
       protected void callDidTrap(Cont<?> cont, Throwable error) {
         callDidTrap.countDown();
       }
+
       @Override
       protected void callDidFail(Cont<?> cont, Throwable error) {
         callDidFail.countDown();
@@ -482,6 +505,7 @@ public class TestTheaterSpec {
         public void bind(Object value) {
           // nop
         }
+
         @Override
         public void trap(Throwable error) {
           // nop
@@ -496,6 +520,7 @@ public class TestTheaterSpec {
         public void bind(Object value) {
           // nop
         }
+
         @Override
         public void trap(Throwable error) {
           // nop
@@ -509,6 +534,7 @@ public class TestTheaterSpec {
         public void bind(Object value) {
           throw new RuntimeException("test");
         }
+
         @Override
         public void trap(Throwable error) {
           // nop
@@ -521,4 +547,5 @@ public class TestTheaterSpec {
       theater.await(didStop);
     }
   }
+
 }

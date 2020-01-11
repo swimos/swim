@@ -5,11 +5,11 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.decipher'
 
 dependencies {
-  implementation project(':swim-util')
-  api project(':swim-codec')
-  api project(':swim-structure')
-  api project(':swim-recon')
-  api project(':swim-json')
-  api project(':swim-xml')
-  api project(':swim-protobuf')
+    implementation project(':swim-util')
+    api project(':swim-codec')
+    api project(':swim-structure')
+    api project(':swim-recon')
+    api project(':swim-json')
+    api project(':swim-xml')
+    api project(':swim-protobuf')
 }

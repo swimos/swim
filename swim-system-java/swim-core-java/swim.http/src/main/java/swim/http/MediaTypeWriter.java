@@ -20,6 +20,7 @@ import swim.codec.WriterException;
 import swim.collections.HashTrieMap;
 
 final class MediaTypeWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final String type;
   final String subtype;
@@ -40,11 +41,6 @@ final class MediaTypeWriter extends Writer<Object, Object> {
   MediaTypeWriter(HttpWriter http, String type, String subtype,
                   HashTrieMap<String, String> params) {
     this(http, type, subtype, params, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.type, this.subtype, this.params, this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String type,
@@ -108,4 +104,10 @@ final class MediaTypeWriter extends Writer<Object, Object> {
                                       String subtype, HashTrieMap<String, String> params) {
     return write(output, http, type, subtype, params, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.type, this.subtype, this.params, this.part, this.step);
+  }
+
 }

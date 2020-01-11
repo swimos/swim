@@ -17,9 +17,11 @@ package swim.web;
 import swim.io.http.HttpResponder;
 
 public abstract class WebResponse {
+
   public abstract boolean isAccepted();
 
   public abstract boolean isRejected();
 
   public abstract HttpResponder<?> httpResponder();
+
 }

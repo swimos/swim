@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.util.Builder;
 
 final class XmlDeclParser<I, V> extends Parser<I> {
+
   final XmlParser<I, V> xml;
   final Builder<I, V> attributes;
   final Parser<String> nameParser;
@@ -33,11 +34,6 @@ final class XmlDeclParser<I, V> extends Parser<I> {
     this.nameParser = nameParser;
     this.valueParser = valueParser;
     this.step = step;
-  }
-
-  @Override
-  public Parser<I> feed(Input input) {
-    return parse(input, this.xml, this.attributes, this.nameParser, this.valueParser, this.step);
   }
 
   static <I, V> Parser<I> parse(Input input, XmlParser<I, V> xml, Builder<I, V> attributes,
@@ -214,4 +210,10 @@ final class XmlDeclParser<I, V> extends Parser<I> {
   static <I, V> Parser<I> parseRest(Input input, XmlParser<I, V> xml) {
     return parse(input, xml, null, null, null, 6);
   }
+
+  @Override
+  public Parser<I> feed(Input input) {
+    return parse(input, this.xml, this.attributes, this.nameParser, this.valueParser, this.step);
+  }
+
 }

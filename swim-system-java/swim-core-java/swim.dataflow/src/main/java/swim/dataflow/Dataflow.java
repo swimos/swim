@@ -82,6 +82,7 @@ import swim.structure.selector.KeysSelector;
 import swim.structure.selector.ValuesSelector;
 
 public final class Dataflow {
+
   private Dataflow() {
     // nop
   }
@@ -391,4 +392,5 @@ public final class Dataflow {
     invokeOutlet.argsInlet().bindInput(argsOutlet);
     return invokeOutlet;
   }
+
 }

@@ -23,6 +23,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class ValueList<T> extends ValueCollection<T> implements List<T> {
+
   public ValueList(List<? extends Value> inner, Form<T> valueForm) {
     super(inner, valueForm);
   }
@@ -177,4 +178,5 @@ public class ValueList<T> extends ValueCollection<T> implements List<T> {
     }
     return code;
   }
+
 }

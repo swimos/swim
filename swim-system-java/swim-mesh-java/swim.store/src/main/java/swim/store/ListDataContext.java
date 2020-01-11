@@ -17,6 +17,7 @@ package swim.store;
 import swim.structure.Value;
 
 public interface ListDataContext extends DataContext {
+
   void didUpdate(long index, Value newValue, Value oldValue);
 
   void didInsert(long index, Value newValue);
@@ -28,4 +29,5 @@ public interface ListDataContext extends DataContext {
   void didTake(long upper);
 
   void didClear();
+
 }

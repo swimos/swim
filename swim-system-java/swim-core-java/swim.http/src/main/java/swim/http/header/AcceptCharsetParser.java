@@ -24,6 +24,7 @@ import swim.http.HttpParser;
 import swim.util.Builder;
 
 final class AcceptCharsetParser extends Parser<AcceptCharset> {
+
   final HttpParser http;
   final Parser<HttpCharset> charset;
   final Builder<HttpCharset, FingerTrieSeq<HttpCharset>> charsets;
@@ -39,11 +40,6 @@ final class AcceptCharsetParser extends Parser<AcceptCharset> {
 
   AcceptCharsetParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<AcceptCharset> feed(Input input) {
-    return parse(input, this.http, this.charset, this.charsets, this.step);
   }
 
   static Parser<AcceptCharset> parse(Input input, HttpParser http, Parser<HttpCharset> charset,
@@ -124,4 +120,10 @@ final class AcceptCharsetParser extends Parser<AcceptCharset> {
   static Parser<AcceptCharset> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<AcceptCharset> feed(Input input) {
+    return parse(input, this.http, this.charset, this.charsets, this.step);
+  }
+
 }

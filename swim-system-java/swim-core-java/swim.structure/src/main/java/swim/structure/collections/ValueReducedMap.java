@@ -21,6 +21,7 @@ import swim.util.OrderedMap;
 import swim.util.ReducedMap;
 
 public class ValueReducedMap<K, V, U> extends ValueOrderedMap<K, V> implements ReducedMap<K, V, U> {
+
   protected Form<U> reducedForm;
 
   public ValueReducedMap(ReducedMap<? extends Value, ? extends Value, ? extends Value> inner,
@@ -39,7 +40,7 @@ public class ValueReducedMap<K, V, U> extends ValueOrderedMap<K, V> implements R
   @Override
   public <K2> ValueReducedMap<K2, V, U> keyForm(Form<K2> keyForm) {
     return new ValueReducedMap<K2, V, U>((ReducedMap<Value, Value, Value>) this.inner,
-                                         keyForm, this.valueForm, this.reducedForm);
+        keyForm, this.valueForm, this.reducedForm);
   }
 
   @Override
@@ -51,7 +52,7 @@ public class ValueReducedMap<K, V, U> extends ValueOrderedMap<K, V> implements R
   @Override
   public <V2> ValueReducedMap<K, V2, U> valueForm(Form<V2> valueForm) {
     return new ValueReducedMap<K, V2, U>((ReducedMap<Value, Value, Value>) this.inner,
-                                         this.keyForm, valueForm, this.reducedForm);
+        this.keyForm, valueForm, this.reducedForm);
   }
 
   @Override
@@ -66,7 +67,7 @@ public class ValueReducedMap<K, V, U> extends ValueOrderedMap<K, V> implements R
   @SuppressWarnings("unchecked")
   public <U2> ValueReducedMap<K, V, U2> reducedForm(Form<U2> reducedForm) {
     return new ValueReducedMap<K, V, U2>((ReducedMap<Value, Value, Value>) this.inner,
-                                         this.keyForm, this.valueForm, reducedForm);
+        this.keyForm, this.valueForm, reducedForm);
   }
 
   public <U2> ValueReducedMap<K, V, U2> reducedClass(Class<U2> reducedClass) {
@@ -83,4 +84,5 @@ public class ValueReducedMap<K, V, U> extends ValueOrderedMap<K, V> implements R
     final U reduced = this.reducedForm.cast(reducedValue);
     return reduced;
   }
+
 }

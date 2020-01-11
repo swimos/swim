@@ -18,6 +18,7 @@ package swim.concurrent;
  * Thrown when performing an invalid operation on a {@link TimerFunction}.
  */
 public class TimerException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public TimerException(String message, Throwable cause) {
@@ -35,4 +36,5 @@ public class TimerException extends RuntimeException {
   public TimerException() {
     super();
   }
+
 }

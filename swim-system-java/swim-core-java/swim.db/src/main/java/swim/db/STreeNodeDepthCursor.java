@@ -18,6 +18,7 @@ import swim.structure.Slot;
 import swim.util.Cursor;
 
 final class STreeNodeDepthCursor extends STreeNodeCursor {
+
   final int depth;
 
   STreeNodeDepthCursor(STreeNode page, long index, int childIndex, int depth) {
@@ -33,4 +34,5 @@ final class STreeNodeDepthCursor extends STreeNodeCursor {
   Cursor<Slot> childCursor(STreePageRef childRef) {
     return childRef.depthCursor(this.depth - 1);
   }
+
 }

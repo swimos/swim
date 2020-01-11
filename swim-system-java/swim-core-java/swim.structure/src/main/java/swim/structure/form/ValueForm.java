@@ -25,6 +25,7 @@ import swim.structure.Value;
  * Item#toValue()} against the {@code Item} argument.
  */
 public final class ValueForm extends Form<Value> {
+
   final Value unit;
 
   public ValueForm(Value unit) {
@@ -59,4 +60,5 @@ public final class ValueForm extends Form<Value> {
   public Value cast(Item item) {
     return item.toValue();
   }
+
 }

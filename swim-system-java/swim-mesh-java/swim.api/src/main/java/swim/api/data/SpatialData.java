@@ -20,6 +20,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public interface SpatialData<K, S, V> extends SpatialMap<K, S, V> {
+
   Value name();
 
   Form<K> keyForm();
@@ -47,4 +48,5 @@ public interface SpatialData<K, S, V> extends SpatialMap<K, S, V> {
   SpatialMap<K, S, V> snapshot();
 
   void close();
+
 }

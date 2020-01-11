@@ -21,6 +21,7 @@ import swim.codec.Utf8;
 import swim.codec.Writer;
 
 final class HttpMessageEncoder<T> extends Encoder<Object, HttpMessage<T>> {
+
   final HttpWriter http;
   final HttpMessage<T> message;
   final Object part;
@@ -35,10 +36,6 @@ final class HttpMessageEncoder<T> extends Encoder<Object, HttpMessage<T>> {
 
   HttpMessageEncoder(HttpWriter http, HttpMessage<T> message) {
     this(http, message, null, 1);
-  }
-
-  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
-    return encode(output, this.http, this.message, this.part, this.step);
   }
 
   @SuppressWarnings("unchecked")
@@ -83,4 +80,9 @@ final class HttpMessageEncoder<T> extends Encoder<Object, HttpMessage<T>> {
                                                     HttpMessage<T> message) {
     return encode(output, http, message, null, 1);
   }
+
+  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
+    return encode(output, this.http, this.message, this.part, this.step);
+  }
+
 }

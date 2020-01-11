@@ -20,6 +20,7 @@ import swim.structure.Slot;
 import swim.util.Cursor;
 
 abstract class STreeNodeCursor implements Cursor<Slot> {
+
   final STreeNode page;
   long index;
   int childIndex;
@@ -255,4 +256,5 @@ abstract class STreeNodeCursor implements Cursor<Slot> {
     page.pageRef.loadTreeAsync(false, syncPage);
     syncPage.await(page.pageRef.settings().pageLoadTimeout);
   }
+
 }

@@ -21,6 +21,7 @@ import swim.uri.UriHost;
 import swim.uri.UriPort;
 
 final class HostParser extends Parser<Host> {
+
   final Parser<UriHost> host;
   final Parser<UriPort> port;
   final int step;
@@ -33,11 +34,6 @@ final class HostParser extends Parser<Host> {
 
   HostParser() {
     this(null, null, 1);
-  }
-
-  @Override
-  public Parser<Host> feed(Input input) {
-    return parse(input, this.host, this.port, this.step);
   }
 
   static Parser<Host> parse(Input input, Parser<UriHost> host, Parser<UriPort> port, int step) {
@@ -82,4 +78,10 @@ final class HostParser extends Parser<Host> {
   static Parser<Host> parse(Input input) {
     return parse(input, null, null, 1);
   }
+
+  @Override
+  public Parser<Host> feed(Input input) {
+    return parse(input, this.host, this.port, this.step);
+  }
+
 }

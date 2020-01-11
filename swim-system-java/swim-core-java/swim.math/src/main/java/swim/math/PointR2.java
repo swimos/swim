@@ -22,12 +22,35 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class PointR2 extends R2Shape implements Debug {
+
+  private static int hashSeed;
+  private static PointR2 origin;
+  private static R2Form<PointR2> form;
   public final double x;
   public final double y;
 
   public PointR2(double x, double y) {
     this.x = x;
     this.y = y;
+  }
+
+  public static PointR2 origin() {
+    if (origin == null) {
+      origin = new PointR2(0.0, 0.0);
+    }
+    return origin;
+  }
+
+  public static PointR2 of(double x, double y) {
+    return new PointR2(x, y);
+  }
+
+  @Kind
+  public static R2Form<PointR2> form() {
+    if (form == null) {
+      form = new PointR2Form();
+    }
+    return form;
   }
 
   public final PointR2 plus(VectorR2 vector) {
@@ -118,28 +141,4 @@ public class PointR2 extends R2Shape implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static PointR2 origin;
-
-  private static R2Form<PointR2> form;
-
-  public static PointR2 origin() {
-    if (origin == null) {
-      origin = new PointR2(0.0, 0.0);
-    }
-    return origin;
-  }
-
-  public static PointR2 of(double x, double y) {
-    return new PointR2(x, y);
-  }
-
-  @Kind
-  public static R2Form<PointR2> form() {
-    if (form == null) {
-      form = new PointR2Form();
-    }
-    return form;
-  }
 }

@@ -26,6 +26,7 @@ import swim.codec.OutputBuffer;
  * IpSocket}, and to close the socket.
  */
 public interface IpSocketContext extends IpSocketRef, FlowContext {
+
   /**
    * Returns the configuration parameters that govern the underlying network
    * socket.
@@ -52,4 +53,5 @@ public interface IpSocketContext extends IpSocketRef, FlowContext {
    * receives network I/O callbacks.
    */
   void become(IpSocket socket);
+
 }

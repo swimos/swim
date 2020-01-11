@@ -39,6 +39,8 @@ import swim.util.Murmur3;
  * {@link swim.structure.operator.PlusOperator}.
  */
 public final class LiteralSelector extends Selector {
+
+  private static int hashSeed;
   final Item item;
   final Selector then;
 
@@ -169,5 +171,4 @@ public final class LiteralSelector extends Selector {
     // nop
   }
 
-  private static int hashSeed;
 }

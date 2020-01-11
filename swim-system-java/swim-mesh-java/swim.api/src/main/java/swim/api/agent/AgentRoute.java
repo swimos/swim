@@ -21,6 +21,7 @@ import swim.uri.UriPattern;
  * URI route pattern is accessed.
  */
 public interface AgentRoute<A extends Agent> extends AgentFactory<A> {
+
   /**
    * The internal context used to provide concrete implementations to most
    * {@code AgentRoute} methods.
@@ -43,4 +44,5 @@ public interface AgentRoute<A extends Agent> extends AgentFactory<A> {
    * instance of {@code A} must match.
    */
   UriPattern pattern();
+
 }

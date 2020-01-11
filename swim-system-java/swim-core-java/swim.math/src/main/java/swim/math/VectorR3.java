@@ -22,6 +22,10 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class VectorR3 implements Debug {
+
+  private static int hashSeed;
+  private static VectorR3 zero;
+  private static TensorForm<VectorR3> form;
   public final double x;
   public final double y;
   public final double z;
@@ -30,6 +34,25 @@ public class VectorR3 implements Debug {
     this.x = x;
     this.y = y;
     this.z = z;
+  }
+
+  public static VectorR3 zero() {
+    if (zero == null) {
+      zero = new VectorR3(0.0, 0.0, 0.0);
+    }
+    return zero;
+  }
+
+  public static VectorR3 of(double x, double y, double z) {
+    return new VectorR3(x, y, z);
+  }
+
+  @Kind
+  public static TensorForm<VectorR3> form() {
+    if (form == null) {
+      form = new VectorR3Form();
+    }
+    return form;
   }
 
   public final VectorR3 plus(VectorR3 that) {
@@ -50,8 +73,8 @@ public class VectorR3 implements Debug {
 
   public VectorZ3 transform(R3ToZ3Function f) {
     return new VectorZ3(f.transformX(this.x, this.y, this.z),
-                        f.transformY(this.x, this.y, this.z),
-                        f.transformZ(this.x, this.y, this.z));
+        f.transformY(this.x, this.y, this.z),
+        f.transformZ(this.x, this.y, this.z));
   }
 
   public Value toValue() {
@@ -93,28 +116,4 @@ public class VectorR3 implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static VectorR3 zero;
-
-  private static TensorForm<VectorR3> form;
-
-  public static VectorR3 zero() {
-    if (zero == null) {
-      zero = new VectorR3(0.0, 0.0, 0.0);
-    }
-    return zero;
-  }
-
-  public static VectorR3 of(double x, double y, double z) {
-    return new VectorR3(x, y, z);
-  }
-
-  @Kind
-  public static TensorForm<VectorR3> form() {
-    if (form == null) {
-      form = new VectorR3Form();
-    }
-    return form;
-  }
 }

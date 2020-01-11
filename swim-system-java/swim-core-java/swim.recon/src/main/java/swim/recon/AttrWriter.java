@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class AttrWriter<I, V> extends Writer<Object, Object> {
+
   final ReconWriter<I, V> recon;
   final V key;
   final V value;
@@ -31,11 +32,6 @@ final class AttrWriter<I, V> extends Writer<Object, Object> {
     this.value = value;
     this.part = part;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.key, this.value, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V key, V value) {
@@ -106,4 +102,10 @@ final class AttrWriter<I, V> extends Writer<Object, Object> {
                                              V key, V value) {
     return write(output, recon, key, value, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.recon, this.key, this.value, this.part, this.step);
+  }
+
 }

@@ -34,8 +34,47 @@ import swim.structure.operator.TimesOperator;
 import swim.util.Builder;
 
 public abstract class Value extends Item {
+
   Value() {
     // stub
+  }
+
+  public static Builder<Item, Value> builder() {
+    return new ValueBuilder();
+  }
+
+  public static Value empty() {
+    return Record.empty();
+  }
+
+  public static Value extant() {
+    return Extant.extant();
+  }
+
+  public static Value absent() {
+    return Absent.absent();
+  }
+
+  public static Value fromObject(Object object) {
+    if (object == null) {
+      return Value.extant();
+    } else if (object instanceof Value) {
+      return (Value) object;
+    } else if (object instanceof String) {
+      return Text.from((String) object);
+    } else if (object instanceof Number) {
+      return Num.from((Number) object);
+    } else if (object instanceof Character) {
+      return Num.from(((Character) object).charValue());
+    } else if (object instanceof Boolean) {
+      return Bool.from(((Boolean) object).booleanValue());
+    } else if (object instanceof ByteBuffer) {
+      return Data.from((ByteBuffer) object);
+    } else if (object instanceof byte[]) {
+      return Data.wrap((byte[]) object);
+    } else {
+      throw new IllegalArgumentException(object.toString());
+    }
   }
 
   /**
@@ -1012,41 +1051,4 @@ public abstract class Value extends Item {
     return false;
   }
 
-  public static Builder<Item, Value> builder() {
-    return new ValueBuilder();
-  }
-
-  public static Value empty() {
-    return Record.empty();
-  }
-
-  public static Value extant() {
-    return Extant.extant();
-  }
-
-  public static Value absent() {
-    return Absent.absent();
-  }
-
-  public static Value fromObject(Object object) {
-    if (object == null) {
-      return Value.extant();
-    } else if (object instanceof Value) {
-      return (Value) object;
-    } else if (object instanceof String) {
-      return Text.from((String) object);
-    } else if (object instanceof Number) {
-      return Num.from((Number) object);
-    } else if (object instanceof Character) {
-      return Num.from(((Character) object).charValue());
-    } else if (object instanceof Boolean) {
-      return Bool.from(((Boolean) object).booleanValue());
-    } else if (object instanceof ByteBuffer) {
-      return Data.from((ByteBuffer) object);
-    } else if (object instanceof byte[]) {
-      return Data.wrap((byte[]) object);
-    } else {
-      throw new IllegalArgumentException(object.toString());
-    }
-  }
 }

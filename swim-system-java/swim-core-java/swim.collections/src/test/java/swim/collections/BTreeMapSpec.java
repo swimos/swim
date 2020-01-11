@@ -20,6 +20,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 public class BTreeMapSpec {
+
   @Test
   public void testPutAndGet() {
     final BTreeMap<Integer, Integer, ?> tree = new BTreeMap<Integer, Integer, Object>();
@@ -168,4 +169,5 @@ public class BTreeMapSpec {
       }
     }
   }
+
 }

@@ -29,6 +29,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public final class Assertions {
+
   private Assertions() {
     // static
   }
@@ -104,4 +105,5 @@ public final class Assertions {
   public static <T> void assertDecodes(Decoder<T> decodee, Data input, T expected) {
     assertDecodes(decodee, Binary.inputBuffer(input.toByteBuffer()), expected);
   }
+
 }

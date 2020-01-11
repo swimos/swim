@@ -20,6 +20,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class HttpVersionWriter extends Writer<Object, Object> {
+
   final int major;
   final int minor;
   final int step;
@@ -32,11 +33,6 @@ final class HttpVersionWriter extends Writer<Object, Object> {
 
   HttpVersionWriter(int major, int minor) {
     this(major, minor, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.major, this.minor, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, int major, int minor, int step) {
@@ -83,4 +79,10 @@ final class HttpVersionWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, int major, int minor) {
     return write(output, major, minor, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.major, this.minor, this.step);
+  }
+
 }

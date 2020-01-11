@@ -25,9 +25,6 @@ import swim.dynamic.observable.function.GuestWillTake;
 import swim.observable.ObservableSortedMap;
 
 public final class HostObservableSortedMap {
-  private HostObservableSortedMap() {
-    // static
-  }
 
   public static final HostObjectType<ObservableSortedMap<Object, Object>> TYPE;
 
@@ -43,9 +40,15 @@ public final class HostObservableSortedMap {
     type.addMember(new HostObservableSortedMapWillTake());
     type.addMember(new HostObservableSortedMapDidTake());
   }
+
+  private HostObservableSortedMap() {
+    // static
+  }
+
 }
 
 final class HostObservableSortedMapDrop implements HostMethod<ObservableSortedMap<Object, Object>> {
+
   @Override
   public String key() {
     return "drop";
@@ -56,9 +59,11 @@ final class HostObservableSortedMapDrop implements HostMethod<ObservableSortedMa
     observable.drop((int) arguments[0]);
     return null;
   }
+
 }
 
 final class HostObservableSortedMapTake implements HostMethod<ObservableSortedMap<Object, Object>> {
+
   @Override
   public String key() {
     return "take";
@@ -69,9 +74,11 @@ final class HostObservableSortedMapTake implements HostMethod<ObservableSortedMa
     observable.take((int) arguments[0]);
     return null;
   }
+
 }
 
 final class HostObservableSortedMapWillDrop implements HostMethod<ObservableSortedMap<Object, Object>> {
+
   @Override
   public String key() {
     return "willDrop";
@@ -81,9 +88,11 @@ final class HostObservableSortedMapWillDrop implements HostMethod<ObservableSort
   public Object invoke(Bridge bridge, ObservableSortedMap<Object, Object> observable, Object... arguments) {
     return observable.willDrop(new GuestWillDrop(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableSortedMapDidDrop implements HostMethod<ObservableSortedMap<Object, Object>> {
+
   @Override
   public String key() {
     return "didDrop";
@@ -93,9 +102,11 @@ final class HostObservableSortedMapDidDrop implements HostMethod<ObservableSorte
   public Object invoke(Bridge bridge, ObservableSortedMap<Object, Object> observable, Object... arguments) {
     return observable.didDrop(new GuestDidDrop(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableSortedMapWillTake implements HostMethod<ObservableSortedMap<Object, Object>> {
+
   @Override
   public String key() {
     return "willTake";
@@ -105,9 +116,11 @@ final class HostObservableSortedMapWillTake implements HostMethod<ObservableSort
   public Object invoke(Bridge bridge, ObservableSortedMap<Object, Object> observable, Object... arguments) {
     return observable.willTake(new GuestWillTake(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableSortedMapDidTake implements HostMethod<ObservableSortedMap<Object, Object>> {
+
   @Override
   public String key() {
     return "didTake";
@@ -117,4 +130,5 @@ final class HostObservableSortedMapDidTake implements HostMethod<ObservableSorte
   public Object invoke(Bridge bridge, ObservableSortedMap<Object, Object> observable, Object... arguments) {
     return observable.didTake(new GuestDidTake(bridge, arguments[0]));
   }
+
 }

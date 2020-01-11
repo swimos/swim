@@ -19,6 +19,7 @@ import swim.codec.EncoderException;
 import swim.codec.OutputBuffer;
 
 final class MqttUnsubscribeEncoder extends Encoder<Object, MqttUnsubscribe> {
+
   final MqttEncoder mqtt;
   final MqttUnsubscribe packet;
   final Encoder<?, ?> part;
@@ -38,12 +39,6 @@ final class MqttUnsubscribeEncoder extends Encoder<Object, MqttUnsubscribe> {
 
   MqttUnsubscribeEncoder(MqttEncoder mqtt, MqttUnsubscribe packet) {
     this(mqtt, packet, null, 0, 0, 1);
-  }
-
-  @Override
-  public Encoder<Object, MqttUnsubscribe> pull(OutputBuffer<?> output) {
-    return encode(output, this.mqtt, this.packet, this.part, this.length,
-                  this.remaining, this.step);
   }
 
   static Encoder<Object, MqttUnsubscribe> encode(OutputBuffer<?> output, MqttEncoder mqtt,
@@ -122,4 +117,11 @@ final class MqttUnsubscribeEncoder extends Encoder<Object, MqttUnsubscribe> {
                                                  MqttUnsubscribe packet) {
     return encode(output, mqtt, packet, null, 0, 0, 1);
   }
+
+  @Override
+  public Encoder<Object, MqttUnsubscribe> pull(OutputBuffer<?> output) {
+    return encode(output, this.mqtt, this.packet, this.part, this.length,
+        this.remaining, this.step);
+  }
+
 }

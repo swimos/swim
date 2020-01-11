@@ -25,6 +25,7 @@ import swim.uri.Uri;
 import swim.util.Log;
 
 public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
+
   protected final Uri meshUri;
   protected final Uri hostUri;
   protected final Uri nodeUri;
@@ -283,4 +284,5 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
   public void fail(Object message) {
     linkContext().failUp(message);
   }
+
 }

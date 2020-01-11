@@ -21,12 +21,32 @@ import swim.codec.Writer;
 import swim.util.Murmur3;
 
 public final class HttpVersion extends HttpPart implements Debug {
+
+  public static final HttpVersion HTTP_1_1 = new HttpVersion(1, 1);
+  public static final HttpVersion HTTP_1_0 = new HttpVersion(1, 0);
+  private static int hashSeed;
   final int major;
   final int minor;
 
   HttpVersion(int major, int minor) {
     this.major = major;
     this.minor = minor;
+  }
+
+  public static HttpVersion from(int major, int minor) {
+    if (major == 1 && minor == 1) {
+      return HTTP_1_1;
+    } else if (major == 1 && minor == 0) {
+      return HTTP_1_0;
+    } else if (major >= 0 && minor >= 0) {
+      return new HttpVersion(major, minor);
+    } else {
+      throw new IllegalArgumentException(major + ", " + minor);
+    }
+  }
+
+  public static HttpVersion parseHttp(String string) {
+    return Http.standardParser().parseVersionString(string);
   }
 
   public int major() {
@@ -81,24 +101,4 @@ public final class HttpVersion extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static final HttpVersion HTTP_1_1 = new HttpVersion(1, 1);
-  public static final HttpVersion HTTP_1_0 = new HttpVersion(1, 0);
-
-  public static HttpVersion from(int major, int minor) {
-    if (major == 1 && minor == 1) {
-      return HTTP_1_1;
-    } else if (major == 1 && minor == 0) {
-      return HTTP_1_0;
-    } else if (major >= 0 && minor >= 0) {
-      return new HttpVersion(major, minor);
-    } else {
-      throw new IllegalArgumentException(major + ", " + minor);
-    }
-  }
-
-  public static HttpVersion parseHttp(String string) {
-    return Http.standardParser().parseVersionString(string);
-  }
 }

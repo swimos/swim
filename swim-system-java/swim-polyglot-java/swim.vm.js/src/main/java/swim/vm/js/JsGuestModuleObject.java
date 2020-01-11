@@ -21,6 +21,7 @@ import swim.collections.HashTrieMap;
 import swim.vm.VmProxyArray;
 
 public class JsGuestModuleObject implements ProxyObject {
+
   final JsGuestModule module;
   HashTrieMap<String, Value> dynamicMembers;
 
@@ -114,4 +115,5 @@ public class JsGuestModuleObject implements ProxyObject {
     }
     return new VmProxyArray(memberKeys);
   }
+
 }

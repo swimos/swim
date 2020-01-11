@@ -18,6 +18,7 @@ import swim.io.IpServiceRef;
 import swim.io.IpSocketRef;
 
 public class SecureMqttSocketSpec extends MqttSocketBehaviors {
+
   final MqttSettings mqttSettings = MqttSettings.standard()
       .tlsSettings(TestTlsSettings.tlsSettings());
 
@@ -30,4 +31,5 @@ public class SecureMqttSocketSpec extends MqttSocketBehaviors {
   protected IpSocketRef connect(MqttEndpoint endpoint, MqttSocket<?, ?> socket) {
     return endpoint.connectMqtts("127.0.0.1", 63555, socket, this.mqttSettings);
   }
+
 }

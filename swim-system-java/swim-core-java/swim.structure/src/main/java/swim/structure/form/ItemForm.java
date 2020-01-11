@@ -23,6 +23,7 @@ import swim.structure.Item;
  * Item} argument itself.
  */
 public final class ItemForm extends Form<Item> {
+
   final Item unit;
 
   public ItemForm(Item unit) {
@@ -57,4 +58,5 @@ public final class ItemForm extends Form<Item> {
   public Item cast(Item item) {
     return item;
   }
+
 }

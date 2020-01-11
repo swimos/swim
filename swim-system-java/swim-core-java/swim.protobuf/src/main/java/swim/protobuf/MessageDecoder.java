@@ -20,6 +20,7 @@ import swim.codec.InputBuffer;
 import swim.util.Builder;
 
 final class MessageDecoder<I, V> extends Decoder<V> {
+
   final ProtobufDecoder<I, V> protobuf;
   final Decoder<V> payloadDecoder;
   final Decoder<I> fieldDecoder;
@@ -31,11 +32,6 @@ final class MessageDecoder<I, V> extends Decoder<V> {
     this.payloadDecoder = payloadDecoder;
     this.fieldDecoder = fieldDecoder;
     this.builder = builder;
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.payloadDecoder, this.fieldDecoder, this.builder);
   }
 
   static <I, V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<I, V> protobuf,
@@ -76,4 +72,10 @@ final class MessageDecoder<I, V> extends Decoder<V> {
                                   Decoder<V> payloadDecoder) {
     return decode(input, protobuf, payloadDecoder, null, null);
   }
+
+  @Override
+  public Decoder<V> feed(InputBuffer input) {
+    return decode(input, this.protobuf, this.payloadDecoder, this.fieldDecoder, this.builder);
+  }
+
 }

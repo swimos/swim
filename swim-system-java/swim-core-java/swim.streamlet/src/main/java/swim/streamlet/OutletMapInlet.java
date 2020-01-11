@@ -20,6 +20,7 @@ package swim.streamlet;
  * {@code Outlet} whenever the {@code MapInlet} updates.
  */
 public class OutletMapInlet<K, V, O> extends AbstractMapInlet<K, V, O> {
+
   protected final Outlet<?> outlet;
 
   public OutletMapInlet(Outlet<?> outlet) {
@@ -49,4 +50,5 @@ public class OutletMapInlet<K, V, O> extends AbstractMapInlet<K, V, O> {
   protected void onReconcileOutput(int version) {
     this.outlet.reconcileInput(version);
   }
+
 }

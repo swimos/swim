@@ -22,7 +22,7 @@ import org.testng.TestException;
 final class DeflateUtil {
 
   private DeflateUtil() {
-
+    throw new AssertionError();
   }
 
   /**

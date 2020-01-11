@@ -21,6 +21,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 class QTreeLeafCursor implements Cursor<Slot> {
+
   final QTreeLeaf page;
   final long x;
   final long y;
@@ -192,4 +193,5 @@ class QTreeLeafCursor implements Cursor<Slot> {
     }
     throw new NoSuchElementException();
   }
+
 }

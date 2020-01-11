@@ -22,6 +22,7 @@ import swim.structure.Operator;
  * one operand.
  */
 public abstract class UnaryOperator extends Operator {
+
   final Item operand;
 
   public UnaryOperator(Item operand) {
@@ -42,4 +43,5 @@ public abstract class UnaryOperator extends Operator {
   public boolean isConstant() {
     return this.operand.isConstant();
   }
+
 }

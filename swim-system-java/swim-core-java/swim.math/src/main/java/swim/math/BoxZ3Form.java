@@ -19,6 +19,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 final class BoxZ3Form extends Z3Form<BoxZ3> {
+
   @Override
   public String tag() {
     return "box";
@@ -95,4 +96,5 @@ final class BoxZ3Form extends Z3Form<BoxZ3> {
       return null;
     }
   }
+
 }

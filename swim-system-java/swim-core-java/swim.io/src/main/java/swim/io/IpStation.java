@@ -23,6 +23,7 @@ import java.util.Collection;
 import javax.net.ssl.SSLEngine;
 
 public interface IpStation extends IpInterface {
+
   Station station();
 
   @Override
@@ -100,9 +101,15 @@ public interface IpStation extends IpInterface {
       final SSLEngine sslEngine = tlsSettings.sslContext().createSSLEngine();
       sslEngine.setUseClientMode(true);
       switch (tlsSettings.clientAuth()) {
-        case NEED: sslEngine.setNeedClientAuth(true); break;
-        case WANT: sslEngine.setWantClientAuth(true); break;
-        case NONE: sslEngine.setWantClientAuth(false); break;
+        case NEED:
+          sslEngine.setNeedClientAuth(true);
+          break;
+        case WANT:
+          sslEngine.setWantClientAuth(true);
+          break;
+        case NONE:
+          sslEngine.setWantClientAuth(false);
+          break;
         default:
       }
       final Collection<String> cipherSuites = tlsSettings.cipherSuites();
@@ -130,4 +137,5 @@ public interface IpStation extends IpInterface {
       throw new StationException(remoteAddress.toString(), error);
     }
   }
+
 }

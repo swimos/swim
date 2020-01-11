@@ -23,6 +23,7 @@ import java.util.Collection;
  * IP network connection context.
  */
 public interface IpContext {
+
   /**
    * Returns {@code true} if the underlying network channel is currently
    * connected.
@@ -106,4 +107,5 @@ public interface IpContext {
    * connection is not authenticated.
    */
   Collection<Certificate> remoteCertificates();
+
 }

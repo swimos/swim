@@ -21,6 +21,8 @@ import swim.structure.Operator;
 import swim.util.Murmur3;
 
 public final class ConditionalOperator extends Operator {
+
+  private static int hashSeed;
   final Item ifTerm;
   final Item thenTerm;
   final Item elseTerm;
@@ -129,5 +131,4 @@ public final class ConditionalOperator extends Operator {
         .debug(this.thenTerm).write(", ").debug(this.elseTerm).write(')');
   }
 
-  private static int hashSeed;
 }

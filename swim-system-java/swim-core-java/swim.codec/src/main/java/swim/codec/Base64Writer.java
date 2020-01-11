@@ -17,6 +17,7 @@ package swim.codec;
 import java.nio.ByteBuffer;
 
 final class Base64Writer extends Writer<Object, Object> {
+
   final Object value;
   final ByteBuffer input;
   final Base64 base64;
@@ -51,22 +52,6 @@ final class Base64Writer extends Writer<Object, Object> {
 
   Base64Writer(Base64 base64) {
     this(null, null, base64, 0, 0, 0);
-  }
-
-  @Override
-  public Writer<Object, Object> feed(Object value) {
-    if (value instanceof ByteBuffer) {
-      return new Base64Writer((ByteBuffer) value, this.base64);
-    } else if (value instanceof byte[]) {
-      return new Base64Writer((byte[]) value, this.base64);
-    } else {
-      throw new IllegalArgumentException(value.toString());
-    }
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.value, this.input, this.base64, this.index, this.limit, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, Object value, ByteBuffer input,
@@ -164,4 +149,21 @@ final class Base64Writer extends Writer<Object, Object> {
   static Writer<?, ?> write(Output<?> output, byte[] input, Base64 base64) {
     return write(output, null, input, base64);
   }
+
+  @Override
+  public Writer<Object, Object> feed(Object value) {
+    if (value instanceof ByteBuffer) {
+      return new Base64Writer((ByteBuffer) value, this.base64);
+    } else if (value instanceof byte[]) {
+      return new Base64Writer((byte[]) value, this.base64);
+    } else {
+      throw new IllegalArgumentException(value.toString());
+    }
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.value, this.input, this.base64, this.index, this.limit, this.step);
+  }
+
 }

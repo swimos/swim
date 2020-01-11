@@ -20,6 +20,7 @@ package swim.streamlet;
  * Outlet} whenever the {@code Inlet} updates.
  */
 public class OutletInlet<I> extends AbstractInlet<I> {
+
   protected final Outlet<?> outlet;
 
   public OutletInlet(Outlet<?> outlet) {
@@ -39,4 +40,5 @@ public class OutletInlet<I> extends AbstractInlet<I> {
   protected void onReconcileOutput(int version) {
     this.outlet.reconcileInput(version);
   }
+
 }

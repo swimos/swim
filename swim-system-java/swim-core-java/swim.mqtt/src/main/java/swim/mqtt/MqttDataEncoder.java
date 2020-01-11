@@ -20,6 +20,7 @@ import swim.codec.OutputBuffer;
 import swim.structure.Data;
 
 final class MqttDataEncoder extends Encoder<Data, Data> {
+
   final Data data;
   final Encoder<?, ?> encoder;
   final int step;
@@ -32,16 +33,6 @@ final class MqttDataEncoder extends Encoder<Data, Data> {
 
   MqttDataEncoder(Data data) {
     this(data, null, 1);
-  }
-
-  @Override
-  public Encoder<Data, Data> feed(Data data) {
-    return new MqttDataEncoder(data, null, 1);
-  }
-
-  @Override
-  public Encoder<Data, Data> pull(OutputBuffer<?> output) {
-    return encode(output, this.data, this.encoder, this.step);
   }
 
   static int sizeOf(Data data) {
@@ -84,4 +75,15 @@ final class MqttDataEncoder extends Encoder<Data, Data> {
   static Encoder<Data, Data> encode(OutputBuffer<?> output, Data data) {
     return encode(output, data, null, 1);
   }
+
+  @Override
+  public Encoder<Data, Data> feed(Data data) {
+    return new MqttDataEncoder(data, null, 1);
+  }
+
+  @Override
+  public Encoder<Data, Data> pull(OutputBuffer<?> output) {
+    return encode(output, this.data, this.encoder, this.step);
+  }
+
 }

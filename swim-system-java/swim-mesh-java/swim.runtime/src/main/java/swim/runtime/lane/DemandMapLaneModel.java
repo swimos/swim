@@ -24,6 +24,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class DemandMapLaneModel extends WarpLaneModel<DemandMapLaneView<?, ?>, DemandMapLaneUplink> {
+
   @Override
   public String laneType() {
     return "map";
@@ -84,4 +85,5 @@ public class DemandMapLaneModel extends WarpLaneModel<DemandMapLaneView<?, ?>, D
     }
     return null;
   }
+
 }

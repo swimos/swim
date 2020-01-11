@@ -15,6 +15,7 @@
 package swim.db;
 
 public interface TreeDelegate {
+
   void treeDidLoadPage(Page page);
 
   void treeDidChange(Tree newTree, Tree oldTree);
@@ -22,4 +23,5 @@ public interface TreeDelegate {
   void treeDidCommit(Tree newTree, Tree oldTree);
 
   void treeDidClear(Tree newTree, Tree oldTree);
+
 }

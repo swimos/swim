@@ -21,6 +21,8 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class NodePulse extends Pulse {
+
+  private static Form<NodePulse> form;
   protected final AgentPulse agents;
   protected final WarpDownlinkPulse downlinks;
   protected final WarpUplinkPulse uplinks;
@@ -29,6 +31,14 @@ public class NodePulse extends Pulse {
     this.agents = agents;
     this.downlinks = downlinks;
     this.uplinks = uplinks;
+  }
+
+  @Kind
+  public static Form<NodePulse> form() {
+    if (form == null) {
+      form = new NodePulseForm();
+    }
+    return form;
   }
 
   @Override
@@ -53,18 +63,10 @@ public class NodePulse extends Pulse {
     return form().mold(this).toValue();
   }
 
-  private static Form<NodePulse> form;
-
-  @Kind
-  public static Form<NodePulse> form() {
-    if (form == null) {
-      form = new NodePulseForm();
-    }
-    return form;
-  }
 }
 
 final class NodePulseForm extends Form<NodePulse> {
+
   @Override
   public Class<?> type() {
     return NodePulse.class;
@@ -97,4 +99,5 @@ final class NodePulseForm extends Form<NodePulse> {
     final WarpUplinkPulse uplinks = value.get("uplinks").coerce(WarpUplinkPulse.form());
     return new NodePulse(agents, downlinks, uplinks);
   }
+
 }

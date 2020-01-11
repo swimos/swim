@@ -15,6 +15,7 @@
 package swim.codec;
 
 final class ByteArrayInput extends InputBuffer {
+
   byte[] array;
   int index;
   int limit;
@@ -249,6 +250,7 @@ final class ByteArrayInput extends InputBuffer {
   @Override
   public InputBuffer clone() {
     return new ByteArrayInput(this.array, this.index, this.limit, this.id,
-                              this.offset, this.settings, this.isPart);
+        this.offset, this.settings, this.isPart);
   }
+
 }

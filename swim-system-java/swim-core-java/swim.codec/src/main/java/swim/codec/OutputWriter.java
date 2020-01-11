@@ -15,12 +15,21 @@
 package swim.codec;
 
 final class OutputWriter<I, O> extends Writer<I, O> {
+
   final Output<?> output;
   final Writer<I, O> writer;
 
   OutputWriter(Output<?> output, Writer<I, O> writer) {
     this.output = output;
     this.writer = writer;
+  }
+
+  static <I, O> Writer<I, O> write(Output<?> output, Writer<I, O> writer) {
+    writer = writer.pull(output);
+    if (!writer.isCont()) {
+      return writer;
+    }
+    return new OutputWriter<I, O>(output, writer);
   }
 
   @Override
@@ -51,11 +60,4 @@ final class OutputWriter<I, O> extends Writer<I, O> {
     return this.writer.trap();
   }
 
-  static <I, O> Writer<I, O> write(Output<?> output, Writer<I, O> writer) {
-    writer = writer.pull(output);
-    if (!writer.isCont()) {
-      return writer;
-    }
-    return new OutputWriter<I, O>(output, writer);
-  }
 }

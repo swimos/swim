@@ -37,6 +37,7 @@ import swim.util.OrderedMap;
 import swim.util.OrderedMapCursor;
 
 public class MapDataModel implements MapDataBinding, BTreeDelegate {
+
   protected final Value name;
   protected final BTreeMap tree;
   protected MapDataContext dataContext;
@@ -401,4 +402,5 @@ public class MapDataModel implements MapDataBinding, BTreeDelegate {
       dataContext.didTake(upper);
     }
   }
+
 }

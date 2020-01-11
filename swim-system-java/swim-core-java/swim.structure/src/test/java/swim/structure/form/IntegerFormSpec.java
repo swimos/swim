@@ -24,6 +24,7 @@ import swim.structure.Text;
 import static org.testng.Assert.assertEquals;
 
 public class IntegerFormSpec {
+
   @Test
   public void moldIntegersToNums() {
     assertEquals(Form.forInteger().mold(42), Num.from(42));
@@ -56,4 +57,5 @@ public class IntegerFormSpec {
   public void castAttributedNumsToIntegers() {
     assertEquals(Form.forInteger().cast(Record.of(Attr.of("test"), 42)), Integer.valueOf(42));
   }
+
 }

@@ -17,6 +17,7 @@ package swim.uri;
 import swim.collections.HashTrieMap;
 
 final class UriSchemeLiteral extends UriSchemePattern {
+
   final UriScheme scheme;
   final UriAuthorityPattern rest;
 
@@ -60,4 +61,5 @@ final class UriSchemeLiteral extends UriSchemePattern {
       return false;
     }
   }
+
 }

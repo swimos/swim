@@ -19,6 +19,7 @@ import swim.http.HttpResponse;
 import swim.io.IpSocket;
 
 public interface HttpClient {
+
   HttpClientContext httpClientContext();
 
   void setHttpClientContext(HttpClientContext context);
@@ -50,4 +51,5 @@ public interface HttpClient {
   void didDisconnect();
 
   void didFail(Throwable error);
+
 }

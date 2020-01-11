@@ -15,6 +15,19 @@
 package swim.codec;
 
 final class NullParser<O> extends Parser<O> {
+
+  static <O> Parser<O> parse(Input input) {
+    while (input.isCont()) {
+      input = input.step();
+    }
+    if (input.isDone()) {
+      return done();
+    } else if (input.isError()) {
+      return error(input.trap());
+    }
+    return new NullParser<O>();
+  }
+
   @Override
   public Parser<O> feed(Input input) {
     while (input.isCont()) {
@@ -28,15 +41,4 @@ final class NullParser<O> extends Parser<O> {
     return this;
   }
 
-  static <O> Parser<O> parse(Input input) {
-    while (input.isCont()) {
-      input = input.step();
-    }
-    if (input.isDone()) {
-      return done();
-    } else if (input.isError()) {
-      return error(input.trap());
-    }
-    return new NullParser<O>();
-  }
 }

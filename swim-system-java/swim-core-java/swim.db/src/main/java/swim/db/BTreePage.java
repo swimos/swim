@@ -20,6 +20,22 @@ import swim.util.CombinerFunction;
 import swim.util.OrderedMapCursor;
 
 public abstract class BTreePage extends Page {
+
+  public static BTreePage empty(PageContext context, int stem, long version) {
+    return BTreeLeaf.empty(context, stem, version);
+  }
+
+  public static BTreePage fromValue(BTreePageRef pageRef, Value value) {
+    switch (pageRef.pageType()) {
+      case LEAF:
+        return BTreeLeaf.fromValue(pageRef, value);
+      case NODE:
+        return BTreeNode.fromValue(pageRef, value);
+      default:
+        throw new IllegalArgumentException(pageRef.toString());
+    }
+  }
+
   @Override
   public boolean isBTreePage() {
     return true;
@@ -101,15 +117,4 @@ public abstract class BTreePage extends Page {
 
   public abstract OrderedMapCursor<Value, Value> deltaCursor(long sinceVersion);
 
-  public static BTreePage empty(PageContext context, int stem, long version) {
-    return BTreeLeaf.empty(context, stem, version);
-  }
-
-  public static BTreePage fromValue(BTreePageRef pageRef, Value value) {
-    switch (pageRef.pageType()) {
-      case LEAF: return BTreeLeaf.fromValue(pageRef, value);
-      case NODE: return BTreeNode.fromValue(pageRef, value);
-      default: throw new IllegalArgumentException(pageRef.toString());
-    }
-  }
 }

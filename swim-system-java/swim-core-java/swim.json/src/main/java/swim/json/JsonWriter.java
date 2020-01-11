@@ -27,6 +27,7 @@ import swim.codec.Writer;
  * Factory for constructing JSON writers.
  */
 public abstract class JsonWriter<I, V> {
+
   public abstract Iterator<I> items(I item);
 
   public abstract I item(V value);
@@ -106,4 +107,5 @@ public abstract class JsonWriter<I, V> {
   public Writer<?, ?> writeUndefined(Output<?> output) {
     return Unicode.writeString("undefined", output);
   }
+
 }

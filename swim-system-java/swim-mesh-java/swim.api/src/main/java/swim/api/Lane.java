@@ -19,6 +19,7 @@ import swim.uri.Uri;
 import swim.util.Log;
 
 public interface Lane extends Observable<Object>, Log {
+
   Uri hostUri();
 
   Uri nodeUri();
@@ -32,4 +33,5 @@ public interface Lane extends Observable<Object>, Log {
 
   @Override
   Lane unobserve(Object observer);
+
 }

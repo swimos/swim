@@ -1,0 +1,74 @@
+# CI pipeline for testing swim-system-java on multiple operating systems against different JDKs.
+# - This pipeline does not include intensive tests; they are run by the 'azure-nightly.yml' pipeline.
+# - This pipeline only reports checkstyle violations, it does not fail when they are found.
+# - This pipeline has an upper limit of 60 minutes.
+
+trigger:
+  - master
+
+strategy:
+  matrix:
+
+    jdk8_windows_s2012:
+      imageName: "vs2015-win2012r2"
+      jdk_version: "1.8"
+
+    jdk8_windows_s2016:
+      imageName: "vs2017-win2016"
+      jdk_version: "1.8"
+    jdk11_windows_s2016:
+      imageName: "vs2017-win2016"
+      jdk_version: "1.11"
+
+    jdk8_macOS_HighSierra:
+      imageName: "macOS-10.13"
+      jdk_version: "1.8"
+    jdk11_macOS_HighSierra:
+      imageName: "macOS-10.13"
+      jdk_version: "1.11"
+
+    jdk8_macOS_Mojave:
+      imageName: "macOS-10.14"
+      jdk_version: "1.8"
+    jdk11_macOS_Mojave:
+      imageName: "macOS-10.14"
+      jdk_version: "1.11"
+
+    jdk8_ubuntu_16:
+      imageName: "ubuntu-16.04"
+      jdk_version: "1.8"
+    jdk11_ubuntu_16:
+      imageName: "ubuntu-16.04"
+      jdk_version: "1.11"
+
+    jdk8_ubuntu_18:
+      imageName: "ubuntu-18.04"
+      jdk_version: "1.8"
+    jdk11_ubuntu_18:
+      imageName: "ubuntu-18.04"
+      jdk_version: "1.11"
+
+  maxParallel: 10
+
+pool:
+  vmImage: $(imageName)
+
+steps:
+  - task: Gradle@2
+    timeoutInMinutes: 60
+    inputs:
+      workingDirectory: ''
+      gradleWrapperFile: 'gradlew'
+      gradleOptions: '-Xmx3072m'
+      javaHomeOption: 'JDKVersion'
+      jdkVersionOption: $(jdk_version)
+      jdkArchitectureOption: 'x64'
+      publishJUnitResults: true
+      testResultsFiles: '**/TEST-*.xml'
+
+      #      --info: Display assertion information
+      #      --continue: Continue testing after errors
+      #      -Pslow: Run tests in the 'slow' group
+      #      -Pbenchmark: Run tests in the 'benchmark' group
+      #      --debug: Display Gradle messages at the 'debug' level
+      tasks: 'test --info --continue -Pslow -PbuildServer'

@@ -15,7 +15,9 @@
 package swim.concurrent;
 
 public interface PullContext<T> {
+
   void push(T value);
 
   void skip();
+
 }

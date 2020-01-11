@@ -21,10 +21,46 @@ import swim.codec.Writer;
 import swim.util.Murmur3;
 
 public final class HttpMethod extends HttpPart implements Debug {
+
+  public static final HttpMethod GET = new HttpMethod("GET");
+  public static final HttpMethod HEAD = new HttpMethod("HEAD");
+  public static final HttpMethod POST = new HttpMethod("POST");
+  public static final HttpMethod PUT = new HttpMethod("PUT");
+  public static final HttpMethod DELETE = new HttpMethod("DELETE");
+  public static final HttpMethod CONNECT = new HttpMethod("CONNECT");
+  public static final HttpMethod OPTIONS = new HttpMethod("OPTIONS");
+  public static final HttpMethod TRACE = new HttpMethod("TRACE");
+  private static int hashSeed;
   final String name;
 
   HttpMethod(String name) {
     this.name = name;
+  }
+
+  public static HttpMethod from(String name) {
+    if (name.equals("GET")) {
+      return GET;
+    } else if (name.equals("HEAD")) {
+      return HEAD;
+    } else if (name.equals("POST")) {
+      return POST;
+    } else if (name.equals("PUT")) {
+      return PUT;
+    } else if (name.equals("DELETE")) {
+      return DELETE;
+    } else if (name.equals("CONNECT")) {
+      return CONNECT;
+    } else if (name.equals("OPTIONS")) {
+      return OPTIONS;
+    } else if (name.equals("TRACE")) {
+      return TRACE;
+    } else {
+      return new HttpMethod(name);
+    }
+  }
+
+  public static HttpMethod parseHttp(String string) {
+    return Http.standardParser().parseMethodString(string);
   }
 
   public String name() {
@@ -77,40 +113,4 @@ public final class HttpMethod extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static final HttpMethod GET     = new HttpMethod("GET");
-  public static final HttpMethod HEAD    = new HttpMethod("HEAD");
-  public static final HttpMethod POST    = new HttpMethod("POST");
-  public static final HttpMethod PUT     = new HttpMethod("PUT");
-  public static final HttpMethod DELETE  = new HttpMethod("DELETE");
-  public static final HttpMethod CONNECT = new HttpMethod("CONNECT");
-  public static final HttpMethod OPTIONS = new HttpMethod("OPTIONS");
-  public static final HttpMethod TRACE   = new HttpMethod("TRACE");
-
-  public static HttpMethod from(String name) {
-    if (name.equals("GET")) {
-      return GET;
-    } else if (name.equals("HEAD")) {
-      return HEAD;
-    } else if (name.equals("POST")) {
-      return POST;
-    } else if (name.equals("PUT")) {
-      return PUT;
-    } else if (name.equals("DELETE")) {
-      return DELETE;
-    } else if (name.equals("CONNECT")) {
-      return CONNECT;
-    } else if (name.equals("OPTIONS")) {
-      return OPTIONS;
-    } else if (name.equals("TRACE")) {
-      return TRACE;
-    } else {
-      return new HttpMethod(name);
-    }
-  }
-
-  public static HttpMethod parseHttp(String string) {
-    return Http.standardParser().parseMethodString(string);
-  }
 }

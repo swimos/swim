@@ -24,6 +24,7 @@ import swim.web.WebResponse;
 import swim.web.WebRoute;
 
 public final class ResourceDirectoryRoute implements WebRoute {
+
   final ClassLoader classLoader;
   final UriPath directory;
   final String indexFile;
@@ -57,4 +58,5 @@ public final class ResourceDirectoryRoute implements WebRoute {
     }
     return request.reject();
   }
+
 }

@@ -30,6 +30,7 @@ import swim.dynamic.HostType;
 import swim.dynamic.HostValue;
 
 public class VmBridge extends Bridge {
+
   final HostRuntime hostRuntime;
   String guestLanguage;
 
@@ -249,4 +250,5 @@ public class VmBridge extends Bridge {
       throw new UnsupportedOperationException();
     }
   }
+
 }

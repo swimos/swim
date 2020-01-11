@@ -27,6 +27,7 @@ import swim.io.IpSocketRef;
 import swim.util.Log;
 
 public abstract class AbstractAuthenticator implements Authenticator, IpInterface, Log {
+
   protected AuthenticatorContext context;
 
   @Override
@@ -129,4 +130,5 @@ public abstract class AbstractAuthenticator implements Authenticator, IpInterfac
   public void didFail(Throwable error) {
     // hook
   }
+
 }

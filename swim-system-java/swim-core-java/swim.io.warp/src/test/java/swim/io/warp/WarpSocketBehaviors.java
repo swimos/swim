@@ -42,6 +42,7 @@ import swim.ws.WsResponse;
 import static org.testng.Assert.assertEquals;
 
 public abstract class WarpSocketBehaviors {
+
   protected abstract IpServiceRef bind(HttpEndpoint endpoint, HttpService service);
 
   protected abstract IpSocketRef connect(HttpEndpoint endpoint, WarpSocket socket);
@@ -60,6 +61,7 @@ public abstract class WarpSocketBehaviors {
       public void didConnect() {
         clientConnect.countDown();
       }
+
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         clientUpgrade.countDown();
@@ -70,6 +72,7 @@ public abstract class WarpSocketBehaviors {
       public void didConnect() {
         serverConnect.countDown();
       }
+
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         serverUpgrade.countDown();
@@ -88,6 +91,7 @@ public abstract class WarpSocketBehaviors {
       public HttpServer createServer() {
         return server;
       }
+
       @Override
       public void didBind() {
         serverBind.countDown();
@@ -130,11 +134,13 @@ public abstract class WarpSocketBehaviors {
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         feed(clientToServerCommand);
       }
+
       @Override
       public void didRead(Envelope envelope) {
         assertEquals(envelope, serverToClientCommand);
         clientRead.countDown();
       }
+
       @Override
       public void didWrite(Envelope envelope) {
         assertEquals(envelope, clientToServerCommand);
@@ -146,11 +152,13 @@ public abstract class WarpSocketBehaviors {
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         feed(serverToClientCommand);
       }
+
       @Override
       public void didRead(Envelope envelope) {
         assertEquals(envelope, clientToServerCommand);
         serverRead.countDown();
       }
+
       @Override
       public void didWrite(Envelope envelope) {
         assertEquals(envelope, serverToClientCommand);
@@ -207,11 +215,13 @@ public abstract class WarpSocketBehaviors {
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         feed(linkRequest);
       }
+
       @Override
       public void didRead(Envelope envelope) {
         assertEquals(envelope, linkedResponse);
         clientRead.countDown();
       }
+
       @Override
       public void didWrite(Envelope envelope) {
         assertEquals(envelope, linkRequest);
@@ -225,6 +235,7 @@ public abstract class WarpSocketBehaviors {
         serverRead.countDown();
         feed(linkedResponse);
       }
+
       @Override
       public void didWrite(Envelope envelope) {
         assertEquals(envelope, linkedResponse);
@@ -289,11 +300,13 @@ public abstract class WarpSocketBehaviors {
               final WsResponse wsResponse = wsRequest.accept(wsSettings);
               return upgrade(new AbstractWarpSocket() {
                 boolean closed;
+
                 @Override
                 public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
                   t0.compareAndSet(0L, System.currentTimeMillis());
                   feed(envelope);
                 }
+
                 @Override
                 public void doWrite() {
                   long oldDt;
@@ -316,6 +329,7 @@ public abstract class WarpSocketBehaviors {
                   }
                   feed(envelope);
                 }
+
                 @Override
                 public void didWrite(WsControl<?, ?> frame) {
                   if (frame instanceof WsClose<?, ?>) {
@@ -359,4 +373,5 @@ public abstract class WarpSocketBehaviors {
     final CommandMessage envelope = new CommandMessage("node", "lane", value);
     benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, envelope);
   }
+
 }

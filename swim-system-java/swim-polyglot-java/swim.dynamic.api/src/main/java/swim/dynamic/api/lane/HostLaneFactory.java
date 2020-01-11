@@ -24,9 +24,6 @@ import swim.math.Z2Form;
 import swim.structure.Form;
 
 public final class HostLaneFactory {
-  private HostLaneFactory() {
-    // static
-  }
 
   public static final HostObjectType<LaneFactory> TYPE;
 
@@ -46,9 +43,15 @@ public final class HostLaneFactory {
     type.addMember(new HostLaneFactorySupplyLane());
     type.addMember(new HostLaneFactoryValueLane());
   }
+
+  private HostLaneFactory() {
+    // static
+  }
+
 }
 
 final class HostLaneFactoryCommandLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "commandLane";
@@ -57,11 +60,13 @@ final class HostLaneFactoryCommandLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.commandLane()
-                      .valueForm(Form.forValue());
+        .valueForm(Form.forValue());
   }
+
 }
 
 final class HostLaneFactoryDemandLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "demandLane";
@@ -70,11 +75,13 @@ final class HostLaneFactoryDemandLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.demandLane()
-                      .valueForm(Form.forValue());
+        .valueForm(Form.forValue());
   }
+
 }
 
 final class HostLaneFactoryDemandMapLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "demandMapLane";
@@ -83,12 +90,14 @@ final class HostLaneFactoryDemandMapLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.demandMapLane()
-                      .keyForm(Form.forValue())
-                      .valueForm(Form.forValue());
+        .keyForm(Form.forValue())
+        .valueForm(Form.forValue());
   }
+
 }
 
 final class HostLaneFactoryJoinMapLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "joinMapLane";
@@ -97,13 +106,15 @@ final class HostLaneFactoryJoinMapLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.joinMapLane()
-                      .linkForm(Form.forValue())
-                      .keyForm(Form.forValue())
-                      .valueForm(Form.forValue());
+        .linkForm(Form.forValue())
+        .keyForm(Form.forValue())
+        .valueForm(Form.forValue());
   }
+
 }
 
 final class HostLaneFactoryJoinValueLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "joinValueLane";
@@ -112,12 +123,14 @@ final class HostLaneFactoryJoinValueLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.joinValueLane()
-                      .keyForm(Form.forValue())
-                      .valueForm(Form.forValue());
+        .keyForm(Form.forValue())
+        .valueForm(Form.forValue());
   }
+
 }
 
 final class HostLaneFactoryListLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "listLane";
@@ -126,11 +139,13 @@ final class HostLaneFactoryListLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.listLane()
-                      .valueForm(Form.forValue());
+        .valueForm(Form.forValue());
   }
+
 }
 
 final class HostLaneFactoryMapLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "mapLane";
@@ -139,12 +154,14 @@ final class HostLaneFactoryMapLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.mapLane()
-                      .keyForm(Form.forValue())
-                      .valueForm(Form.forValue());
+        .keyForm(Form.forValue())
+        .valueForm(Form.forValue());
   }
+
 }
 
 final class HostLaneFactorySpatialLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "spatialLane";
@@ -154,12 +171,14 @@ final class HostLaneFactorySpatialLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.spatialLane((Z2Form<Object>) arguments[0])
-                      .keyForm(Form.forValue())
-                      .valueForm(Form.forValue());
+        .keyForm(Form.forValue())
+        .valueForm(Form.forValue());
   }
+
 }
 
 final class HostLaneFactoryGeospatialLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "geospatialLane";
@@ -168,12 +187,14 @@ final class HostLaneFactoryGeospatialLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.geospatialLane()
-                      .keyForm(Form.forValue())
-                      .valueForm(Form.forValue());
+        .keyForm(Form.forValue())
+        .valueForm(Form.forValue());
   }
+
 }
 
 final class HostLaneFactorySupplyLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "supplyLane";
@@ -182,11 +203,13 @@ final class HostLaneFactorySupplyLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.supplyLane()
-                      .valueForm(Form.forValue());
+        .valueForm(Form.forValue());
   }
+
 }
 
 final class HostLaneFactoryValueLane implements HostMethod<LaneFactory> {
+
   @Override
   public String key() {
     return "valueLane";
@@ -195,6 +218,7 @@ final class HostLaneFactoryValueLane implements HostMethod<LaneFactory> {
   @Override
   public Object invoke(Bridge bridge, LaneFactory laneFactory, Object... arguments) {
     return laneFactory.valueLane()
-                      .valueForm(Form.forValue());
+        .valueForm(Form.forValue());
   }
+
 }

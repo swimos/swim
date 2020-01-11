@@ -23,9 +23,6 @@ import swim.dynamic.api.warp.HostWarpLane;
 import swim.dynamic.observable.HostObservableSpatialMap;
 
 public final class HostSpatialLane {
-  private HostSpatialLane() {
-    // static
-  }
 
   public static final HostObjectType<SpatialLane<Object, Object, Object>> TYPE;
 
@@ -39,9 +36,15 @@ public final class HostSpatialLane {
     type.addMember(new HostSpatialLaneObserve());
     type.addMember(new HostSpatialLaneUnobserve());
   }
+
+  private HostSpatialLane() {
+    // static
+  }
+
 }
 
 final class HostSpatialLaneIsResident implements HostMethod<SpatialLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "isResident";
@@ -56,9 +59,11 @@ final class HostSpatialLaneIsResident implements HostMethod<SpatialLane<Object, 
       return lane.isResident((boolean) isResident);
     }
   }
+
 }
 
 final class HostSpatialLaneIsTransient implements HostMethod<SpatialLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "isTransient";
@@ -73,9 +78,11 @@ final class HostSpatialLaneIsTransient implements HostMethod<SpatialLane<Object,
       return lane.isTransient((boolean) isTransient);
     }
   }
+
 }
 
 final class HostSpatialLaneObserve implements HostMethod<SpatialLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "observe";
@@ -88,9 +95,11 @@ final class HostSpatialLaneObserve implements HostMethod<SpatialLane<Object, Obj
     lane.observe(observer);
     return this;
   }
+
 }
 
 final class HostSpatialLaneUnobserve implements HostMethod<SpatialLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "unobserve";
@@ -103,4 +112,5 @@ final class HostSpatialLaneUnobserve implements HostMethod<SpatialLane<Object, O
     lane.unobserve(observer);
     return this;
   }
+
 }

@@ -22,10 +22,28 @@ import swim.codec.OutputBuffer;
 import swim.util.Murmur3;
 
 public final class MqttPingResp extends MqttPacket<Object> implements Debug {
+
+  private static int hashSeed;
+  private static MqttPingResp packet;
   final int packetFlags;
 
   MqttPingResp(int packetFlags) {
     this.packetFlags = packetFlags;
+  }
+
+  public static MqttPingResp packet() {
+    if (packet == null) {
+      packet = new MqttPingResp(0);
+    }
+    return packet;
+  }
+
+  public static MqttPingResp from(int packetFlags) {
+    if (packetFlags == 0) {
+      return packet();
+    } else {
+      return new MqttPingResp(packetFlags);
+    }
   }
 
   @Override
@@ -89,22 +107,4 @@ public final class MqttPingResp extends MqttPacket<Object> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static MqttPingResp packet;
-
-  public static MqttPingResp packet() {
-    if (packet == null) {
-      packet = new MqttPingResp(0);
-    }
-    return packet;
-  }
-
-  public static MqttPingResp from(int packetFlags) {
-    if (packetFlags == 0) {
-      return packet();
-    } else {
-      return new MqttPingResp(packetFlags);
-    }
-  }
 }

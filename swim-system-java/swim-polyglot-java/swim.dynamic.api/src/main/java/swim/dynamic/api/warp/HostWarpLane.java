@@ -30,9 +30,6 @@ import swim.dynamic.api.warp.function.GuestWillLeave;
 import swim.dynamic.api.warp.function.GuestWillUplink;
 
 public final class HostWarpLane {
-  private HostWarpLane() {
-    // static
-  }
 
   public static final HostObjectType<WarpLane> TYPE;
 
@@ -49,9 +46,15 @@ public final class HostWarpLane {
     type.addMember(new HostWarpLaneWillLeave());
     type.addMember(new HostWarpLaneDidLeave());
   }
+
+  private HostWarpLane() {
+    // static
+  }
+
 }
 
 final class HostWarpLaneWillCommand implements HostMethod<WarpLane> {
+
   @Override
   public String key() {
     return "willCommand";
@@ -61,9 +64,11 @@ final class HostWarpLaneWillCommand implements HostMethod<WarpLane> {
   public Object invoke(Bridge bridge, WarpLane lane, Object... arguments) {
     return lane.willCommand(new GuestWillCommand(bridge, arguments[0]));
   }
+
 }
 
 final class HostWarpLaneDidCommand implements HostMethod<WarpLane> {
+
   @Override
   public String key() {
     return "didCommand";
@@ -73,9 +78,11 @@ final class HostWarpLaneDidCommand implements HostMethod<WarpLane> {
   public Object invoke(Bridge bridge, WarpLane lane, Object... arguments) {
     return lane.didCommand(new GuestDidCommand(bridge, arguments[0]));
   }
+
 }
 
 final class HostWarpLaneWillUplink implements HostMethod<WarpLane> {
+
   @Override
   public String key() {
     return "willUplink";
@@ -85,9 +92,11 @@ final class HostWarpLaneWillUplink implements HostMethod<WarpLane> {
   public Object invoke(Bridge bridge, WarpLane lane, Object... arguments) {
     return lane.willUplink(new GuestWillUplink(bridge, arguments[0]));
   }
+
 }
 
 final class HostWarpLaneDidUplink implements HostMethod<WarpLane> {
+
   @Override
   public String key() {
     return "didUplink";
@@ -97,9 +106,11 @@ final class HostWarpLaneDidUplink implements HostMethod<WarpLane> {
   public Object invoke(Bridge bridge, WarpLane lane, Object... arguments) {
     return lane.didUplink(new GuestDidUplink(bridge, arguments[0]));
   }
+
 }
 
 final class HostWarpLaneWillEnter implements HostMethod<WarpLane> {
+
   @Override
   public String key() {
     return "willEnter";
@@ -109,9 +120,11 @@ final class HostWarpLaneWillEnter implements HostMethod<WarpLane> {
   public Object invoke(Bridge bridge, WarpLane lane, Object... arguments) {
     return lane.willEnter(new GuestWillEnter(bridge, arguments[0]));
   }
+
 }
 
 final class HostWarpLaneDidEnter implements HostMethod<WarpLane> {
+
   @Override
   public String key() {
     return "didEnter";
@@ -121,9 +134,11 @@ final class HostWarpLaneDidEnter implements HostMethod<WarpLane> {
   public Object invoke(Bridge bridge, WarpLane lane, Object... arguments) {
     return lane.didEnter(new GuestDidEnter(bridge, arguments[0]));
   }
+
 }
 
 final class HostWarpLaneWillLeave implements HostMethod<WarpLane> {
+
   @Override
   public String key() {
     return "willLeave";
@@ -133,9 +148,11 @@ final class HostWarpLaneWillLeave implements HostMethod<WarpLane> {
   public Object invoke(Bridge bridge, WarpLane lane, Object... arguments) {
     return lane.willLeave(new GuestWillLeave(bridge, arguments[0]));
   }
+
 }
 
 final class HostWarpLaneDidLeave implements HostMethod<WarpLane> {
+
   @Override
   public String key() {
     return "didLeave";
@@ -145,4 +162,5 @@ final class HostWarpLaneDidLeave implements HostMethod<WarpLane> {
   public Object invoke(Bridge bridge, WarpLane lane, Object... arguments) {
     return lane.didLeave(new GuestDidLeave(bridge, arguments[0]));
   }
+
 }

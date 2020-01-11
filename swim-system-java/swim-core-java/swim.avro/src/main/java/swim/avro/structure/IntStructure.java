@@ -19,8 +19,10 @@ import swim.structure.Num;
 import swim.structure.Value;
 
 final class IntStructure extends AvroIntType<Value> {
+
   @Override
   public Value cast(long value) {
     return Num.from((int) value);
   }
+
 }

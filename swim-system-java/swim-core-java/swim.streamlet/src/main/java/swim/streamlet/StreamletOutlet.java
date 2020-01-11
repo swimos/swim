@@ -20,6 +20,7 @@ package swim.streamlet;
  * from the parameterized {@code Streamlet}.
  */
 public class StreamletOutlet<O> extends AbstractOutlet<O> {
+
   protected final Streamlet<?, ? extends O> streamlet;
 
   public StreamletOutlet(Streamlet<?, ? extends O> streamlet) {
@@ -67,4 +68,5 @@ public class StreamletOutlet<O> extends AbstractOutlet<O> {
       ((GenericStreamlet<?, ? extends O>) this.streamlet).didReconcileOutlet(this, version);
     }
   }
+
 }

@@ -20,6 +20,7 @@ import swim.codec.Output;
 import swim.codec.Parser;
 
 final class CDataSectionParser extends Parser<Object> {
+
   final XmlParser<?, ?> xml;
   final Output<?> output;
   final int step;
@@ -28,11 +29,6 @@ final class CDataSectionParser extends Parser<Object> {
     this.xml = xml;
     this.output = output;
     this.step = step;
-  }
-
-  @Override
-  public Parser<Object> feed(Input input) {
-    return parse(input, this.xml, this.output, this.step);
   }
 
   static Parser<Object> parse(Input input, XmlParser<?, ?> xml, Output<?> output, int step) {
@@ -119,4 +115,10 @@ final class CDataSectionParser extends Parser<Object> {
   static Parser<Object> parseRest(Input input, XmlParser<?, ?> xml, Output<?> output) {
     return parse(input, xml, output, 3);
   }
+
+  @Override
+  public Parser<Object> feed(Input input) {
+    return parse(input, this.xml, this.output, this.step);
+  }
+
 }

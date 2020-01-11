@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface DidUpdateKey<K, V> extends Preemptive {
+
   void didUpdate(K key, V newValue, V oldValue);
+
 }

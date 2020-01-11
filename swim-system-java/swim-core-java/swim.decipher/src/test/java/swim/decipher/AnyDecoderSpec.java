@@ -25,6 +25,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public class AnyDecoderSpec {
+
   public static void assertDecodes(Data data, Value value) {
     Assertions.assertDecodes(Decipher.structureDecoder().anyDecoder(), data, value);
   }
@@ -37,7 +38,7 @@ public class AnyDecoderSpec {
   public void decodeAnyXml() {
     assertDecodes("<test/>", Record.of(Attr.of("test")));
     assertDecodes("<!DOCTYPE html><test/>",
-                  Record.of(Attr.of("xml:doctype", "html"), Attr.of("test")));
+        Record.of(Attr.of("xml:doctype", "html"), Attr.of("test")));
   }
 
   @Test
@@ -70,21 +71,21 @@ public class AnyDecoderSpec {
   public void decodeAnyProtobuf() {
     assertDecodes(Data.fromBase16("089601"), Record.of(Slot.of(Num.from(1), 150)));
     assertDecodes(Data.fromBase16("120774657374696E67"),
-                  Record.of(Slot.of(Num.from(2), "testing")));
+        Record.of(Slot.of(Num.from(2), "testing")));
     assertDecodes(Data.fromBase16("1A03089601"),
-                  Record.of(Slot.of(Num.from(3), Record.of(Slot.of(Num.from(1), 150)))));
+        Record.of(Slot.of(Num.from(3), Record.of(Slot.of(Num.from(1), 150)))));
   }
 
   @Test
   public void decodeAnyText() {
     assertDecodes("The quick brown fox jumps over the lazy dog",
-                  Text.from("The quick brown fox jumps over the lazy dog"));
+        Text.from("The quick brown fox jumps over the lazy dog"));
     assertDecodes("<nothtml> The quick brown fox jumps over the lazy dog",
-                  Text.from("<nothtml> The quick brown fox jumps over the lazy dog"));
+        Text.from("<nothtml> The quick brown fox jumps over the lazy dog"));
     assertDecodes("{notjson: true} The quick brown fox jumps over the lazy dog",
-                  Text.from("{notjson: true} The quick brown fox jumps over the lazy dog"));
+        Text.from("{notjson: true} The quick brown fox jumps over the lazy dog"));
     assertDecodes("@notrecon The quick brown fox jumps over the lazy dog",
-                  Text.from("@notrecon The quick brown fox jumps over the lazy dog"));
+        Text.from("@notrecon The quick brown fox jumps over the lazy dog"));
   }
 
   @Test
@@ -95,4 +96,5 @@ public class AnyDecoderSpec {
     assertDecodes(Data.fromBase16("0123456789ABCDEF"), Data.fromBase16("0123456789ABCDEF"));
     assertDecodes(Data.fromBase16("FEDCBA9876543210"), Data.fromBase16("FEDCBA9876543210"));
   }
+
 }

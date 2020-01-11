@@ -28,6 +28,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public abstract class HttpUplinkModem extends AbstractUplinkContext implements HttpContext, HttpUplink {
+
   protected final HttpBinding linkBinding;
   protected final Value linkKey;
 
@@ -118,4 +119,5 @@ public abstract class HttpUplinkModem extends AbstractUplinkContext implements H
   public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
     laneBinding().openMetaUplink(uplink, metaUplink);
   }
+
 }

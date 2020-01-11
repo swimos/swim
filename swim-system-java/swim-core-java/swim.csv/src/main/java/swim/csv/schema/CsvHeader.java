@@ -17,6 +17,7 @@ package swim.csv.schema;
 import swim.util.Builder;
 
 public abstract class CsvHeader<T, R, C> {
+
   public abstract int colCount();
 
   public abstract CsvCol<? extends C> getCol(int index);
@@ -34,4 +35,5 @@ public abstract class CsvHeader<T, R, C> {
   public abstract Builder<C, R> rowBuilder();
 
   public abstract Builder<R, T> tableBuilder();
+
 }

@@ -21,6 +21,7 @@ import swim.http.HttpHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class ContentEncodingSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -38,4 +39,5 @@ public class ContentEncodingSpec {
     assertWrites(ContentEncoding.from("gzip"), "Content-Encoding: gzip");
     assertWrites(ContentEncoding.from("identity", "gzip"), "Content-Encoding: identity, gzip");
   }
+
 }

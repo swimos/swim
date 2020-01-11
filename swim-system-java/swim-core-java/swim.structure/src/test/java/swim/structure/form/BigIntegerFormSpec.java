@@ -63,4 +63,5 @@ public class BigIntegerFormSpec {
   public void castAttributedNumsToIntegers() {
     assertEquals(Form.forBigInteger().cast(Record.of(Attr.of("test"), Num.from(POS))), POS);
   }
+
 }

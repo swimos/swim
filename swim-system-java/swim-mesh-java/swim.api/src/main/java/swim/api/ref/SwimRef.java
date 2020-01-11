@@ -21,6 +21,7 @@ import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
 public interface SwimRef extends DownlinkFactory {
+
   HostRef hostRef(Uri hostUri);
 
   HostRef hostRef(String hostUri);
@@ -74,4 +75,5 @@ public interface SwimRef extends DownlinkFactory {
   void command(String nodeUri, String laneUri, Value body);
 
   void close();
+
 }

@@ -15,4 +15,5 @@
 /**
  * Operator expression trees.
  */
+
 package swim.structure.operator;

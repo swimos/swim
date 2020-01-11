@@ -15,4 +15,5 @@
 /**
  * Nominally typed views of structurally typed collections.
  */
+
 package swim.structure.collections;

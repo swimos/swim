@@ -18,7 +18,9 @@ import swim.api.Downlink;
 import swim.api.Lane;
 
 public interface AgentPolicy extends Policy {
+
   LanePolicy lanePolicy(Lane lane);
 
   DownlinkPolicy downlinkPolicy(Downlink downlink);
+
 }

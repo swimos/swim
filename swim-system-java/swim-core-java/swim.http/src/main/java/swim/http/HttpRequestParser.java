@@ -23,6 +23,7 @@ import swim.uri.Uri;
 import swim.util.Builder;
 
 final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
+
   final HttpParser http;
   final Parser<HttpMethod> method;
   final StringBuilder uri;
@@ -45,12 +46,6 @@ final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
 
   HttpRequestParser(HttpParser http) {
     this(http, null, null, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<HttpRequest<T>> feed(Input input) {
-    return parse(input, this.http, this.method, this.uri, this.version,
-                 this.header, this.headers, this.step);
   }
 
   static <T> Parser<HttpRequest<T>> parse(Input input, HttpParser http, Parser<HttpMethod> method,
@@ -219,4 +214,11 @@ final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
   static <T> Parser<HttpRequest<T>> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, null, null, null, 1);
   }
+
+  @Override
+  public Parser<HttpRequest<T>> feed(Input input) {
+    return parse(input, this.http, this.method, this.uri, this.version,
+        this.header, this.headers, this.step);
+  }
+
 }

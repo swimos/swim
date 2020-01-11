@@ -24,6 +24,7 @@ import swim.recon.Recon;
 import swim.structure.Value;
 
 public class DownlinkLogger implements OnEvent<Value>, DidSync, DidUnlink, DidClose {
+
   final WarpDownlink downlink;
   final String format;
 
@@ -67,4 +68,5 @@ public class DownlinkLogger implements OnEvent<Value>, DidSync, DidUnlink, DidCl
   public void didClose() {
     System.exit(0);
   }
+
 }

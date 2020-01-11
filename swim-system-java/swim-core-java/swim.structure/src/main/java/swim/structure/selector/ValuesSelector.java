@@ -34,6 +34,8 @@ import swim.util.Murmur3;
  * every such "value" for every (top-level) {@code Item} in the {@code Record}.
  */
 public class ValuesSelector extends Selector {
+
+  private static int hashSeed;
   final Selector then;
 
   public ValuesSelector(Selector then) {
@@ -214,5 +216,4 @@ public class ValuesSelector extends Selector {
     this.then.debugThen(output);
   }
 
-  private static int hashSeed;
 }

@@ -17,10 +17,12 @@ package swim.db;
 import swim.concurrent.Cont;
 
 public abstract class PageLoader implements AutoCloseable {
+
   public abstract boolean isResident();
 
   public abstract void loadPageAsync(PageRef pageRef, Cont<Page> cont);
 
   @Override
   public abstract void close();
+
 }

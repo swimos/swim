@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.collections.HashTrieMap;
 
 final class TransferCodingParser extends Parser<TransferCoding> {
+
   final HttpParser http;
   final StringBuilder name;
   final Parser<HashTrieMap<String, String>> params;
@@ -35,11 +36,6 @@ final class TransferCodingParser extends Parser<TransferCoding> {
 
   TransferCodingParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<TransferCoding> feed(Input input) {
-    return parse(input, this.http, this.name, this.params, this.step);
   }
 
   static Parser<TransferCoding> parse(Input input, HttpParser http, StringBuilder name,
@@ -99,4 +95,10 @@ final class TransferCodingParser extends Parser<TransferCoding> {
   static Parser<TransferCoding> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<TransferCoding> feed(Input input) {
+    return parse(input, this.http, this.name, this.params, this.step);
+  }
+
 }

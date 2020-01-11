@@ -20,6 +20,7 @@ import swim.dynamic.BridgeGuest;
 import swim.structure.Value;
 
 public class GuestDidCommand extends BridgeGuest implements DidCommand {
+
   public GuestDidCommand(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -28,4 +29,5 @@ public class GuestDidCommand extends BridgeGuest implements DidCommand {
   public void didCommand(Value body) {
     this.bridge.guestExecuteVoid(this.guest, body);
   }
+
 }

@@ -23,9 +23,6 @@ import swim.dynamic.api.lane.function.GuestOnCue;
 import swim.dynamic.api.warp.HostWarpLane;
 
 public final class HostDemandLane {
-  private HostDemandLane() {
-    // static
-  }
 
   public static final HostObjectType<DemandLane<Object>> TYPE;
 
@@ -38,9 +35,15 @@ public final class HostDemandLane {
     type.addMember(new HostDemandLaneOnCue());
     type.addMember(new HostDemandLaneCue());
   }
+
+  private HostDemandLane() {
+    // static
+  }
+
 }
 
 final class HostDemandLaneObserve implements HostMethod<DemandLane<Object>> {
+
   @Override
   public String key() {
     return "observe";
@@ -53,9 +56,11 @@ final class HostDemandLaneObserve implements HostMethod<DemandLane<Object>> {
     lane.observe(observer);
     return this;
   }
+
 }
 
 final class HostDemandLaneUnobserve implements HostMethod<DemandLane<Object>> {
+
   @Override
   public String key() {
     return "unobserve";
@@ -68,9 +73,11 @@ final class HostDemandLaneUnobserve implements HostMethod<DemandLane<Object>> {
     lane.unobserve(observer);
     return this;
   }
+
 }
 
 final class HostDemandLaneOnCue implements HostMethod<DemandLane<Object>> {
+
   @Override
   public String key() {
     return "onCue";
@@ -80,9 +87,11 @@ final class HostDemandLaneOnCue implements HostMethod<DemandLane<Object>> {
   public Object invoke(Bridge bridge, DemandLane<Object> lane, Object... arguments) {
     return lane.onCue(new GuestOnCue<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostDemandLaneCue implements HostMethod<DemandLane<Object>> {
+
   @Override
   public String key() {
     return "cue";
@@ -93,4 +102,5 @@ final class HostDemandLaneCue implements HostMethod<DemandLane<Object>> {
     lane.cue();
     return null;
   }
+
 }

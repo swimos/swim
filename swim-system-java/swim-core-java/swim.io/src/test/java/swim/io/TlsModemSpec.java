@@ -15,6 +15,7 @@
 package swim.io;
 
 public class TlsModemSpec extends SecureIpModemBehaviors {
+
   final IpSettings ipSettings = TestTlsSettings.ipSettings();
 
   @Override
@@ -26,4 +27,5 @@ public class TlsModemSpec extends SecureIpModemBehaviors {
   protected IpSocketRef connect(IpEndpoint endpoint, IpModem<?, ?> modem) {
     return endpoint.connectTls("127.0.0.1", 53553, modem, this.ipSettings);
   }
+
 }

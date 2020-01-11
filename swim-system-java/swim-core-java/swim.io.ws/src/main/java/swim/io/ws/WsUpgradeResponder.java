@@ -26,6 +26,7 @@ import swim.ws.WsEngine;
 import swim.ws.WsResponse;
 
 public class WsUpgradeResponder extends AbstractHttpResponder<Object> {
+
   final WebSocket<?, ?> webSocket;
   final WsResponse wsResponse;
   final WsSettings wsSettings;
@@ -54,7 +55,7 @@ public class WsUpgradeResponder extends AbstractHttpResponder<Object> {
     final WsDecoder decoder = engine.decoder();
     final WsEncoder encoder = engine.encoder();
     return new IpSocketModem<Object, Object>(new WebSocketModem<Object, Object>(socket, this.wsSettings,
-                                                                                decoder, encoder));
+        decoder, encoder));
   }
 
   @Override
@@ -80,4 +81,5 @@ public class WsUpgradeResponder extends AbstractHttpResponder<Object> {
   public void didDisconnect() {
     this.webSocket.didDisconnect();
   }
+
 }

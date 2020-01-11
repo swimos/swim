@@ -19,6 +19,7 @@ import swim.codec.EncoderException;
 import swim.codec.OutputBuffer;
 
 final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
+
   final WsEncoder ws;
   final WsFrame<O> frame;
   final Encoder<?, ?> content;
@@ -36,11 +37,6 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
 
   WsFrameEncoder(WsEncoder ws, WsFrame<O> frame) {
     this(ws, frame, null, 0L, 0L);
-  }
-
-  @Override
-  public Encoder<Object, WsFrame<O>> pull(OutputBuffer<?> output) {
-    return encode(output, this.ws, this.frame, this.content, this.position, this.offset);
   }
 
   static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsEncoder ws,
@@ -92,18 +88,18 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
           output = output.write(isMasked ? 0x80 | payloadSize : payloadSize);
         } else if (payloadSize < 1 << 16) {
           output = output.write(isMasked ? 254 : 126)
-                         .write(payloadSize >>> 8)
-                         .write(payloadSize);
+              .write(payloadSize >>> 8)
+              .write(payloadSize);
         } else {
           output = output.write(isMasked ? 255 : 127)
-                         .write(0)
-                         .write(0)
-                         .write(0)
-                         .write(0)
-                         .write(payloadSize >>> 24)
-                         .write(payloadSize >>> 16)
-                         .write(payloadSize >>> 8)
-                         .write(payloadSize);
+              .write(0)
+              .write(0)
+              .write(0)
+              .write(0)
+              .write(payloadSize >>> 24)
+              .write(payloadSize >>> 16)
+              .write(payloadSize >>> 8)
+              .write(payloadSize);
         }
 
         if (isMasked) {
@@ -111,14 +107,14 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
           final byte[] maskingKey = new byte[4];
           ws.maskingKey(maskingKey);
           output = output.write(maskingKey[0] & 0xff)
-                         .write(maskingKey[1] & 0xff)
-                         .write(maskingKey[2] & 0xff)
-                         .write(maskingKey[3] & 0xff);
+              .write(maskingKey[1] & 0xff)
+              .write(maskingKey[2] & 0xff)
+              .write(maskingKey[3] & 0xff);
 
           // mask payload, shifting if header smaller than anticipated
           for (int i = 0; i < payloadSize; i += 1) {
             output.set(outputBase + headerSize + i, (output.get(outputBase + maxHeaderSize + i)
-                                                   ^ maskingKey[(int) (position + i) & 0x3]) & 0xff);
+                ^ maskingKey[(int) (position + i) & 0x3]) & 0xff);
           }
         } else if (headerSize < maxHeaderSize) {
           // shift payload if header smaller than anticipated
@@ -144,4 +140,10 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
   static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsEncoder ws, WsFrame<O> frame) {
     return encode(output, ws, frame, null, 0L, 0L);
   }
+
+  @Override
+  public Encoder<Object, WsFrame<O>> pull(OutputBuffer<?> output) {
+    return encode(output, this.ws, this.frame, this.content, this.position, this.offset);
+  }
+
 }

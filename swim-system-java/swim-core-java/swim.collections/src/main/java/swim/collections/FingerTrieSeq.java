@@ -27,6 +27,12 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class FingerTrieSeq<T> implements List<T>, Debug {
+
+  static final Object[] EMPTY_LEAF = new Object[0];
+  static final FingerTrieSeq<?> EMPTY = new FingerTrieSeq<Object>();
+  @SuppressWarnings("unchecked")
+  static final FingerTrieSeq<Object[]> EMPTY_NODE = (FingerTrieSeq<Object[]>) EMPTY;
+  private static int hashSeed;
   final Object[] prefix;
   final FingerTrieSeq<Object[]> branch;
   final Object[] suffix;
@@ -45,6 +51,43 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
     this.branch = (FingerTrieSeq<Object[]>) this;
     this.suffix = EMPTY_LEAF;
     this.length = 0;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> FingerTrieSeq<T> empty() {
+    return (FingerTrieSeq<T>) EMPTY;
+  }
+
+  public static <T> FingerTrieSeq<T> of(T elem0, T elem1) {
+    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
+    builder.add(elem0);
+    builder.add(elem1);
+    return builder.bind();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> FingerTrieSeq<T> of(T... elems) {
+    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
+    for (T elem : elems) {
+      builder.add(elem);
+    }
+    return builder.bind();
+  }
+
+  public static <T> FingerTrieSeq<T> from(Iterable<? extends T> elems) {
+    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
+    for (T elem : elems) {
+      builder.add(elem);
+    }
+    return builder.bind();
+  }
+
+  public static <T> Builder<T, FingerTrieSeq<T>> builder(FingerTrieSeq<? extends T> trie) {
+    return new FingerTrieSeqBuilder<T>(trie);
+  }
+
+  public static <T> Builder<T, FingerTrieSeq<T>> builder() {
+    return new FingerTrieSeqBuilder<T>();
   }
 
   @Override
@@ -537,54 +580,10 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  static final Object[] EMPTY_LEAF = new Object[0];
-
-  static final FingerTrieSeq<?> EMPTY = new FingerTrieSeq<Object>();
-
-  @SuppressWarnings("unchecked")
-  static final FingerTrieSeq<Object[]> EMPTY_NODE = (FingerTrieSeq<Object[]>) EMPTY;
-
-  @SuppressWarnings("unchecked")
-  public static <T> FingerTrieSeq<T> empty() {
-    return (FingerTrieSeq<T>) EMPTY;
-  }
-
-  public static <T> FingerTrieSeq<T> of(T elem0, T elem1) {
-    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
-    builder.add(elem0);
-    builder.add(elem1);
-    return builder.bind();
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> FingerTrieSeq<T> of(T... elems) {
-    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
-    for (T elem : elems) {
-      builder.add(elem);
-    }
-    return builder.bind();
-  }
-
-  public static <T> FingerTrieSeq<T> from(Iterable<? extends T> elems) {
-    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
-    for (T elem : elems) {
-      builder.add(elem);
-    }
-    return builder.bind();
-  }
-
-  public static <T> Builder<T, FingerTrieSeq<T>> builder(FingerTrieSeq<? extends T> trie) {
-    return new FingerTrieSeqBuilder<T>(trie);
-  }
-
-  public static <T> Builder<T, FingerTrieSeq<T>> builder() {
-    return new FingerTrieSeqBuilder<T>();
-  }
 }
 
 final class FingerTrieSeqBuilder<T> implements Builder<T, FingerTrieSeq<T>> {
+
   Object[] prefix;
   FingerTrieSeqBuilder<Object[]> branch;
   Object[] buffer;
@@ -723,7 +722,7 @@ final class FingerTrieSeqBuilder<T> implements Builder<T, FingerTrieSeq<T>> {
       }
       if (prefix == null) {
         return new FingerTrieSeq<T>(this.buffer, FingerTrieSeq.EMPTY_NODE,
-                                    FingerTrieSeq.EMPTY_LEAF, this.length);
+            FingerTrieSeq.EMPTY_LEAF, this.length);
       } else if (branch == null) {
         return new FingerTrieSeq<T>(this.prefix, FingerTrieSeq.EMPTY_NODE, this.buffer, this.length);
       } else {
@@ -731,9 +730,11 @@ final class FingerTrieSeqBuilder<T> implements Builder<T, FingerTrieSeq<T>> {
       }
     }
   }
+
 }
 
 final class FingerTrieSeqSegmenter implements ListIterator<Object[]> {
+
   final Object[] prefix;
   final FingerTrieSeq<Object[]> branch;
   final Object[] suffix;
@@ -901,9 +902,11 @@ final class FingerTrieSeqSegmenter implements ListIterator<Object[]> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }
 
 final class FingerTrieSeqIterator<T> implements ListIterator<T> {
+
   final FingerTrieSeqSegmenter segmenter;
   Object[] page;
   int pageIndex;
@@ -1019,4 +1022,5 @@ final class FingerTrieSeqIterator<T> implements ListIterator<T> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

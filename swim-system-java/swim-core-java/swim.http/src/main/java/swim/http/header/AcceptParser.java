@@ -24,6 +24,7 @@ import swim.http.MediaRange;
 import swim.util.Builder;
 
 final class AcceptParser extends Parser<Accept> {
+
   final HttpParser http;
   final Parser<MediaRange> mediaRange;
   final Builder<MediaRange, FingerTrieSeq<MediaRange>> mediaRanges;
@@ -39,11 +40,6 @@ final class AcceptParser extends Parser<Accept> {
 
   AcceptParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<Accept> feed(Input input) {
-    return parse(input, this.http, this.mediaRange, this.mediaRanges, this.step);
   }
 
   static Parser<Accept> parse(Input input, HttpParser http, Parser<MediaRange> mediaRange,
@@ -124,4 +120,10 @@ final class AcceptParser extends Parser<Accept> {
   static Parser<Accept> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<Accept> feed(Input input) {
+    return parse(input, this.http, this.mediaRange, this.mediaRanges, this.step);
+  }
+
 }

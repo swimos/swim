@@ -20,6 +20,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
 public class GuestOnCueKey<K, V> extends BridgeGuest implements OnCueKey<K, V> {
+
   public GuestOnCueKey(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -29,4 +30,5 @@ public class GuestOnCueKey<K, V> extends BridgeGuest implements OnCueKey<K, V> {
   public V onCue(K key, WarpUplink uplink) {
     return (V) this.bridge.guestExecute(this.guest, key, uplink);
   }
+
 }

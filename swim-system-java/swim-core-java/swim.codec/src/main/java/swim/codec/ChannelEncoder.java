@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 
 final class ChannelEncoder extends Encoder<ReadableByteChannel, ReadableByteChannel> {
+
   final ReadableByteChannel input;
 
   ChannelEncoder(ReadableByteChannel input) {
@@ -63,4 +64,5 @@ final class ChannelEncoder extends Encoder<ReadableByteChannel, ReadableByteChan
       throw error;
     }
   }
+
 }

@@ -26,6 +26,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class HttpProxy implements HttpBinding, HttpContext {
+
   protected final HttpBinding linkBinding;
   protected HttpContext linkContext;
 
@@ -407,4 +408,5 @@ public class HttpProxy implements HttpBinding, HttpContext {
   public void failUp(Object message) {
     this.linkContext.failUp(message);
   }
+
 }

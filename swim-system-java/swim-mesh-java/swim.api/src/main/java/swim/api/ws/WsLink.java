@@ -18,6 +18,7 @@ import swim.api.Link;
 import swim.uri.Uri;
 
 public interface WsLink extends Link {
+
   Uri requestUri();
 
   @Override
@@ -25,4 +26,5 @@ public interface WsLink extends Link {
 
   @Override
   WsLink unobserve(Object observer);
+
 }

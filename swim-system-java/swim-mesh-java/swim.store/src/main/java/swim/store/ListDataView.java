@@ -21,6 +21,7 @@ import swim.structure.collections.ValueKeyedList;
 import swim.util.KeyedList;
 
 public class ListDataView<V> extends ValueKeyedList<V> implements ListData<V>, ListDataContext {
+
   public ListDataView(ListDataBinding dataBinding, Form<V> valueForm) {
     super(dataBinding, valueForm);
     dataBinding.setDataContext(this);
@@ -124,4 +125,5 @@ public class ListDataView<V> extends ValueKeyedList<V> implements ListData<V>, L
   public void didClear() {
     // stub
   }
+
 }

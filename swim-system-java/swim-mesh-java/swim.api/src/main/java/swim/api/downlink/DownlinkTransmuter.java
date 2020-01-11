@@ -20,6 +20,7 @@ import swim.dataflow.Transmuter;
 import swim.structure.Record;
 
 final class DownlinkTransmuter extends Transmuter {
+
   final SwimRef swim;
 
   DownlinkTransmuter(SwimRef swim) {
@@ -35,4 +36,5 @@ final class DownlinkTransmuter extends Transmuter {
     }
     return model;
   }
+
 }

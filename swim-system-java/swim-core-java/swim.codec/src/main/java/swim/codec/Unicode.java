@@ -25,6 +25,7 @@ package swim.codec;
  * Output#bind() bind} a {@code String} containing all written code points.</p>
  */
 public final class Unicode {
+
   private Unicode() {
     // nop
   }
@@ -165,4 +166,5 @@ public final class Unicode {
   public static Parser<String> parseLine(Input input) {
     return LineParser.parse(input, new StringBuilder());
   }
+
 }

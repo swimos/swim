@@ -20,6 +20,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class ValueSet<T> extends ValueCollection<T> implements Set<T> {
+
   public ValueSet(Set<? extends Value> inner, Form<T> valueForm) {
     super(inner, valueForm);
   }
@@ -68,4 +69,5 @@ public class ValueSet<T> extends ValueCollection<T> implements Set<T> {
     }
     return code;
   }
+
 }

@@ -17,8 +17,10 @@ package swim.avro.reflection;
 import swim.avro.schema.AvroFloatType;
 
 final class FloatReflection extends AvroFloatType<Float> {
+
   @Override
   public Float cast(float value) {
     return Float.valueOf(value);
   }
+
 }

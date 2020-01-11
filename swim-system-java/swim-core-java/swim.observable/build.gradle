@@ -5,8 +5,8 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.observable'
 
 dependencies {
-  api project(':swim-util')
-  api project(':swim-collections')
-  api project(':swim-spatial')
-  api project(':swim-concurrent')
+    api project(':swim-util')
+    api project(':swim-collections')
+    api project(':swim-spatial')
+    api project(':swim-concurrent')
 }

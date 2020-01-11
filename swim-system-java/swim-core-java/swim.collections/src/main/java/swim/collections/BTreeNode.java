@@ -19,6 +19,7 @@ import swim.util.CombinerFunction;
 import swim.util.OrderedMapCursor;
 
 class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
+
   final BTreePage<K, V, U>[] pages;
   final K[] knots;
   final U fold;
@@ -575,4 +576,5 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   protected BTreeNode<K, V, U> newNode(BTreePage<K, V, U>[] pages, K[] knots, U fold, int size) {
     return new BTreeNode<K, V, U>(pages, knots, fold, size);
   }
+
 }

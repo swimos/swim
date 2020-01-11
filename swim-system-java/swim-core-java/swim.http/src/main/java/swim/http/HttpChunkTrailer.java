@@ -23,10 +23,40 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Murmur3;
 
 public final class HttpChunkTrailer extends HttpPart implements Debug {
+
+  private static int hashSeed;
+  private static HttpChunkTrailer empty;
   final FingerTrieSeq<HttpHeader> headers;
 
   HttpChunkTrailer(FingerTrieSeq<HttpHeader> headers) {
     this.headers = headers;
+  }
+
+  public static HttpChunkTrailer empty() {
+    if (empty == null) {
+      empty = new HttpChunkTrailer(FingerTrieSeq.<HttpHeader>empty());
+    }
+    return empty;
+  }
+
+  public static HttpChunkTrailer from(FingerTrieSeq<HttpHeader> headers) {
+    if (headers.isEmpty()) {
+      return empty();
+    } else {
+      return new HttpChunkTrailer(headers);
+    }
+  }
+
+  public static HttpChunkTrailer from(HttpHeader... headers) {
+    if (headers.length == 0) {
+      return empty();
+    } else {
+      return new HttpChunkTrailer(FingerTrieSeq.of(headers));
+    }
+  }
+
+  public static HttpChunkTrailer parse(String chunkTrailer) {
+    return Http.standardParser().parseChunkTrailerString(chunkTrailer);
   }
 
   public FingerTrieSeq<HttpHeader> headers() {
@@ -82,34 +112,4 @@ public final class HttpChunkTrailer extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static HttpChunkTrailer empty;
-
-  public static HttpChunkTrailer empty() {
-    if (empty == null) {
-      empty = new HttpChunkTrailer(FingerTrieSeq.<HttpHeader>empty());
-    }
-    return empty;
-  }
-
-  public static HttpChunkTrailer from(FingerTrieSeq<HttpHeader> headers) {
-    if (headers.isEmpty()) {
-      return empty();
-    } else {
-      return new HttpChunkTrailer(headers);
-    }
-  }
-
-  public static HttpChunkTrailer from(HttpHeader... headers) {
-    if (headers.length == 0) {
-      return empty();
-    } else {
-      return new HttpChunkTrailer(FingerTrieSeq.of(headers));
-    }
-  }
-
-  public static HttpChunkTrailer parse(String chunkTrailer) {
-    return Http.standardParser().parseChunkTrailerString(chunkTrailer);
-  }
 }

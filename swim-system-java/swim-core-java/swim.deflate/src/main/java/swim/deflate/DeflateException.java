@@ -15,6 +15,7 @@
 package swim.deflate;
 
 public class DeflateException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   private final int code;
@@ -37,4 +38,5 @@ public class DeflateException extends RuntimeException {
   public int code() {
     return this.code;
   }
+
 }

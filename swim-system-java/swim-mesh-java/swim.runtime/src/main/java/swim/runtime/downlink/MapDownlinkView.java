@@ -74,10 +74,11 @@ import swim.util.OrderedMap;
 import swim.util.OrderedMapCursor;
 
 public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownlink<K, V> {
+
+  protected static final int STATEFUL = 1 << 2;
   protected final Form<K> keyForm;
   protected final Form<V> valueForm;
   protected MapDownlinkModel model;
-
   protected MapOutlet<K, V, ? extends Map<K, V>> input;
   protected HashTrieMap<K, KeyEffect> effects;
   protected HashTrieMap<K, KeyOutlet<K, V>> outlets;
@@ -89,7 +90,7 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
                          float rate, Value body, int flags, Form<K> keyForm,
                          Form<V> valueForm, Object observers) {
     super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-          body, flags, observers);
+        body, flags, observers);
     this.keyForm = keyForm;
     this.valueForm = valueForm;
 
@@ -104,7 +105,7 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
                          Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                          float rate, Value body, Form<K> keyForm, Form<V> valueForm) {
     this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-         body, KEEP_LINKED | KEEP_SYNCED | STATEFUL, keyForm, valueForm, null);
+        body, KEEP_LINKED | KEEP_SYNCED | STATEFUL, keyForm, valueForm, null);
   }
 
   @Override
@@ -115,9 +116,9 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public MapDownlinkView<K, V> hostUri(Uri hostUri) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-                                     hostUri, this.nodeUri, this.laneUri,
-                                     this.prio, this.rate, this.body, this.flags,
-                                     this.keyForm, this.valueForm, this.observers);
+        hostUri, this.nodeUri, this.laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
@@ -128,9 +129,9 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public MapDownlinkView<K, V> nodeUri(Uri nodeUri) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-                                     this.hostUri, nodeUri, this.laneUri,
-                                     this.prio, this.rate, this.body, this.flags,
-                                     this.keyForm, this.valueForm, this.observers);
+        this.hostUri, nodeUri, this.laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
@@ -141,9 +142,9 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public MapDownlinkView<K, V> laneUri(Uri laneUri) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-                                     this.hostUri, this.nodeUri, laneUri,
-                                     this.prio, this.rate, this.body, this.flags,
-                                     this.keyForm, this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
@@ -154,25 +155,25 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public MapDownlinkView<K, V> prio(float prio) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-                                     this.hostUri, this.nodeUri, this.laneUri,
-                                     prio, this.rate, this.body, this.flags,
-                                     this.keyForm, this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, this.laneUri,
+        prio, this.rate, this.body, this.flags,
+        this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> rate(float rate) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-                                     this.hostUri, this.nodeUri, this.laneUri,
-                                     this.prio, rate, this.body, this.flags,
-                                     this.keyForm, this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, this.laneUri,
+        this.prio, rate, this.body, this.flags,
+        this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> body(Value body) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-                                     this.hostUri, this.nodeUri, this.laneUri,
-                                     this.prio, this.rate, body, this.flags,
-                                     this.keyForm, this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, this.laneUri,
+        this.prio, this.rate, body, this.flags,
+        this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
@@ -230,9 +231,9 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public <K2> MapDownlinkView<K2, V> keyForm(Form<K2> keyForm) {
     return new MapDownlinkView<K2, V>(this.cellContext, this.stage, this.meshUri,
-                                      this.hostUri, this.nodeUri, this.laneUri,
-                                      this.prio, this.rate, this.body, this.flags,
-                                      keyForm, this.valueForm, typesafeObservers(this.observers));
+        this.hostUri, this.nodeUri, this.laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        keyForm, this.valueForm, typesafeObservers(this.observers));
   }
 
   @Override
@@ -248,9 +249,9 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public <V2> MapDownlinkView<K, V2> valueForm(Form<V2> valueForm) {
     return new MapDownlinkView<K, V2>(this.cellContext, this.stage, this.meshUri,
-                                      this.hostUri, this.nodeUri, this.laneUri,
-                                      this.prio, this.rate, this.body, this.flags,
-                                      this.keyForm, valueForm, typesafeObservers(this.observers));
+        this.hostUri, this.nodeUri, this.laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        this.keyForm, valueForm, typesafeObservers(this.observers));
   }
 
   @Override
@@ -896,7 +897,7 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public MapDownlinkModel createDownlinkModel() {
     return new MapDownlinkModel(this.meshUri, this.hostUri, this.nodeUri,
-                                this.laneUri, this.prio, this.rate, this.body);
+        this.laneUri, this.prio, this.rate, this.body);
   }
 
   @Override
@@ -1607,5 +1608,4 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
     // stub
   }
 
-  protected static final int STATEFUL = 1 << 2;
 }

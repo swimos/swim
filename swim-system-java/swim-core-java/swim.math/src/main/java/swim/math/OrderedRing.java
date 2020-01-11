@@ -17,6 +17,7 @@ package swim.math;
 import java.util.Comparator;
 
 public interface OrderedRing<S> extends Comparator<S>, Ring<S> {
+
   S abs(S a);
 
   S min(S a, S b);
@@ -25,4 +26,5 @@ public interface OrderedRing<S> extends Comparator<S>, Ring<S> {
 
   @Override
   int compare(S a, S b);
+
 }

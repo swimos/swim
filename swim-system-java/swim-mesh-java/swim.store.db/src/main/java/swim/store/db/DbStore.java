@@ -42,6 +42,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public class DbStore implements StoreBinding, StoreContext {
+
   protected final Store store;
   protected final Value name;
   protected StoreContext storeContext;
@@ -211,4 +212,5 @@ public class DbStore implements StoreBinding, StoreContext {
   public ValueData<Value> valueData(String name) {
     return valueData(Text.from(name));
   }
+
 }

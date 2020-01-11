@@ -21,6 +21,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class UnionDecoder<T> extends Decoder<T> {
+
   final AvroDecoder avro;
   final AvroUnionType<T> type;
   final int variant;
@@ -35,11 +36,6 @@ final class UnionDecoder<T> extends Decoder<T> {
 
   UnionDecoder(AvroDecoder avro, AvroUnionType<T> type) {
     this(avro, type, 0, 0);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.avro, this.type, this.variant, this.shift);
   }
 
   @SuppressWarnings("unchecked")
@@ -75,4 +71,10 @@ final class UnionDecoder<T> extends Decoder<T> {
   static <T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroUnionType<T> type) {
     return decode(input, avro, type, 0, 0);
   }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.avro, this.type, this.variant, this.shift);
+  }
+
 }

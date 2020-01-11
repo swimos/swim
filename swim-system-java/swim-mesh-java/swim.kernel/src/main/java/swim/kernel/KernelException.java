@@ -15,6 +15,7 @@
 package swim.kernel;
 
 public class KernelException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public KernelException(String message, Throwable cause) {
@@ -32,4 +33,5 @@ public class KernelException extends RuntimeException {
   public KernelException() {
     super();
   }
+
 }

@@ -15,6 +15,7 @@
 package swim.api.agent;
 
 public interface Agent {
+
   /**
    * Returns the {@link AgentContext} used to manage this {@code Agent}.
    */
@@ -22,7 +23,7 @@ public interface Agent {
 
   /**
    * Lifecycle callback invoked immediately before this {@code Agent} opens.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding#open
    */
   void willOpen();
@@ -30,7 +31,7 @@ public interface Agent {
   /**
    * Lifecycle callback invoked immediately after this {@code Agent} opens, i.e.
    * before it loads.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding#open
    * //@see swim.runtime.TierBinding#load
    */
@@ -38,7 +39,7 @@ public interface Agent {
 
   /**
    * Lifecycle callback invoked immediately before this {@code Agent} loads.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding#load
    */
   void willLoad();
@@ -46,7 +47,7 @@ public interface Agent {
   /**
    * Lifecycle callback invoked immediately after this {@code Agent} loads, i.e.
    * before it starts.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding#load
    * //@see swim.runtime.TierBinding#start
    */
@@ -54,21 +55,21 @@ public interface Agent {
 
   /**
    * Lifecycle callback invoked immediately before this {@code Agent} starts.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding#start
    */
   void willStart();
 
   /**
    * Lifecycle callback invoked immediately after this {@code Agent} starts.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding#start
    */
   void didStart();
 
   /**
    * Lifecycle callback invoked immediately before this {@code Agent} stops.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding#stop
    */
   void willStop();
@@ -76,7 +77,7 @@ public interface Agent {
   /**
    * Lifecycle callback invoked immediately after this {@code Agent} stops, i.e.
    * before it unloads.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding#stop
    * //@see swim.runtime.TierBinding#unload
    */
@@ -84,7 +85,7 @@ public interface Agent {
 
   /**
    * Lifecycle callback invoked immediately before this {@code Agent} unloads.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding#unload
    */
   void willUnload();
@@ -92,7 +93,7 @@ public interface Agent {
   /**
    * Lifecycle callback invoked immediately after this {@code Agent} unloads,
    * i.e. before it closes.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding.unload
    * //@see swim.runtime.TierBinding.close
    */
@@ -100,14 +101,14 @@ public interface Agent {
 
   /**
    * Lifecycle callback invoked immediately before this {@code Agent} closes.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding.close
    */
   void willClose();
 
   /**
    * Lifecycle callback invoked immediately after this {@code Agent} closes.
-   *
+   * <p>
    * //@see swim.runtime.TierBinding.close
    */
   void didClose();
@@ -117,4 +118,5 @@ public interface Agent {
    * {@code error}.
    */
   void didFail(Throwable error);
+
 }

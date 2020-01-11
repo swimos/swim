@@ -19,9 +19,11 @@ import swim.api.agent.AgentRoute;
 import swim.uri.Uri;
 
 public interface PlanePolicy extends Policy {
+
   AgentRoutePolicy agentRoutePolicy(AgentRoute<?> agentRoute);
 
   DownlinkPolicy downlinkPolicy(Downlink downlink);
 
   PolicyDirective<Object> canConnect(Uri requestUri);
+
 }

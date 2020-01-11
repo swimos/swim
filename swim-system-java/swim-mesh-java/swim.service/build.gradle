@@ -5,5 +5,5 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.service'
 
 dependencies {
-  api project(':swim-kernel')
+    api project(':swim-kernel')
 }

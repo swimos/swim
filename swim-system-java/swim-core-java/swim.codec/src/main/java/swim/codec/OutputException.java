@@ -18,6 +18,7 @@ package swim.codec;
  * Thrown when writing invalid {@link Output}.
  */
 public class OutputException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public OutputException(String message, Throwable cause) {
@@ -35,4 +36,5 @@ public class OutputException extends RuntimeException {
   public OutputException() {
     super();
   }
+
 }

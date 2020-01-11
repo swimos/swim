@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class AvroNamespaceSpec {
+
   @Test
   public void parseSingleComponentNamespaces() {
     assertEquals(AvroNamespace.parse("foo"), AvroNamespace.from("foo"));
@@ -27,4 +28,5 @@ public class AvroNamespaceSpec {
   public void parseMultiComponentNamespaces() {
     assertEquals(AvroNamespace.parse("com.example"), AvroNamespace.from("com", "example"));
   }
+
 }

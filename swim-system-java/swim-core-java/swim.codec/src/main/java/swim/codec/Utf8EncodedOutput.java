@@ -15,6 +15,7 @@
 package swim.codec;
 
 final class Utf8EncodedOutput<T> extends Output<T> {
+
   Output<T> output;
   UtfErrorMode errorMode;
   int c2;
@@ -76,10 +77,20 @@ final class Utf8EncodedOutput<T> extends Output<T> {
     while (index < 4) {
       if (this.output.isCont()) {
         switch (index) {
-          case 1: this.output = this.output.write(c2); this.c2 = 0; break;
-          case 2: this.output = this.output.write(c3); this.c3 = 0; break;
-          case 3: this.output = this.output.write(c4); this.c4 = 0; break;
-          default: throw new AssertionError("unreachable");
+          case 1:
+            this.output = this.output.write(c2);
+            this.c2 = 0;
+            break;
+          case 2:
+            this.output = this.output.write(c3);
+            this.c3 = 0;
+            break;
+          case 3:
+            this.output = this.output.write(c4);
+            this.c4 = 0;
+            break;
+          default:
+            throw new AssertionError("unreachable");
         }
         index += 1;
       } else {
@@ -94,15 +105,15 @@ final class Utf8EncodedOutput<T> extends Output<T> {
       c4 = 0x80 | (c & 0x3f);
       index = 2;
     } else if (c >= 0x0800 && c <= 0xffff || // U+0800..U+D7FF
-               c >= 0xe000 && c <= 0xffff) { // U+E000..U+FFFF
-      c2 = 0xe0 | (c  >>> 12);
-      c3 = 0x80 | ((c >>>  6) & 0x3f);
+        c >= 0xe000 && c <= 0xffff) { // U+E000..U+FFFF
+      c2 = 0xe0 | (c >>> 12);
+      c3 = 0x80 | ((c >>> 6) & 0x3f);
       c4 = 0x80 | (c & 0x3f);
       index = 1;
     } else if (c >= 0x10000 && c <= 0x10ffff) { // U+10000..U+10FFFF
-      c1 = 0xf0 | (c  >>> 18);
+      c1 = 0xf0 | (c >>> 18);
       c2 = 0x80 | ((c >>> 12) & 0x3f);
-      c3 = 0x80 | ((c >>>  6) & 0x3f);
+      c3 = 0x80 | ((c >>> 6) & 0x3f);
       c4 = 0x80 | (c & 0x3f);
       index = 0;
     } else { // surrogate or invalid code point
@@ -114,11 +125,23 @@ final class Utf8EncodedOutput<T> extends Output<T> {
     }
     do {
       switch (index) {
-        case 0: this.output = this.output.write(c1); break;
-        case 1: this.output = this.output.write(c2); this.c2 = 0; break;
-        case 2: this.output = this.output.write(c3); this.c3 = 0; break;
-        case 3: this.output = this.output.write(c4); this.c4 = 0; break;
-        default: throw new AssertionError("unreachable");
+        case 0:
+          this.output = this.output.write(c1);
+          break;
+        case 1:
+          this.output = this.output.write(c2);
+          this.c2 = 0;
+          break;
+        case 2:
+          this.output = this.output.write(c3);
+          this.c3 = 0;
+          break;
+        case 3:
+          this.output = this.output.write(c4);
+          this.c4 = 0;
+          break;
+        default:
+          throw new AssertionError("unreachable");
       }
       index += 1;
     } while (index < 4 && this.output.isCont());
@@ -141,10 +164,20 @@ final class Utf8EncodedOutput<T> extends Output<T> {
     while (index < 4) {
       if (this.output.isCont()) {
         switch (index) {
-          case 1: this.output = this.output.write(this.c2); this.c2 = 0; break;
-          case 2: this.output = this.output.write(this.c3); this.c3 = 0; break;
-          case 3: this.output = this.output.write(this.c4); this.c4 = 0; break;
-          default: throw new AssertionError("unreachable");
+          case 1:
+            this.output = this.output.write(this.c2);
+            this.c2 = 0;
+            break;
+          case 2:
+            this.output = this.output.write(this.c3);
+            this.c3 = 0;
+            break;
+          case 3:
+            this.output = this.output.write(this.c4);
+            this.c4 = 0;
+            break;
+          default:
+            throw new AssertionError("unreachable");
         }
         index += 1;
       } else {
@@ -183,6 +216,7 @@ final class Utf8EncodedOutput<T> extends Output<T> {
   @Override
   public Output<T> clone() {
     return new Utf8EncodedOutput<T>(this.output.clone(), this.errorMode,
-                                    this.c2, this.c3, this.c4, this.index);
+        this.c2, this.c3, this.c4, this.index);
   }
+
 }

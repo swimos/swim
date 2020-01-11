@@ -22,12 +22,50 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Murmur3;
 
 public final class HttpChunkHeader extends HttpPart implements Debug {
+
+  private static int hashSeed;
+  private static HttpChunkHeader sentinel;
   final long size;
   final FingerTrieSeq<ChunkExtension> extensions;
 
   HttpChunkHeader(long size, FingerTrieSeq<ChunkExtension> extensions) {
     this.size = size;
     this.extensions = extensions;
+  }
+
+  public static HttpChunkHeader sentinel() {
+    if (sentinel == null) {
+      sentinel = new HttpChunkHeader(0L, FingerTrieSeq.<ChunkExtension>empty());
+    }
+    return sentinel;
+  }
+
+  public static HttpChunkHeader from(long size, FingerTrieSeq<ChunkExtension> extensions) {
+    if (size == 0L && extensions.isEmpty()) {
+      return sentinel();
+    } else {
+      return new HttpChunkHeader(size, extensions);
+    }
+  }
+
+  public static HttpChunkHeader from(long size, ChunkExtension... extensions) {
+    if (size == 0L && extensions.length == 0) {
+      return sentinel();
+    } else {
+      return new HttpChunkHeader(size, FingerTrieSeq.of(extensions));
+    }
+  }
+
+  public static HttpChunkHeader from(long size) {
+    if (size == 0L) {
+      return sentinel();
+    } else {
+      return new HttpChunkHeader(size, FingerTrieSeq.<ChunkExtension>empty());
+    }
+  }
+
+  public static HttpChunkHeader parse(String string) {
+    return Http.standardParser().parseChunkHeaderString(string);
   }
 
   public boolean isEmpty() {
@@ -91,42 +129,4 @@ public final class HttpChunkHeader extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static HttpChunkHeader sentinel;
-
-  public static HttpChunkHeader sentinel() {
-    if (sentinel == null) {
-      sentinel = new HttpChunkHeader(0L, FingerTrieSeq.<ChunkExtension>empty());
-    }
-    return sentinel;
-  }
-
-  public static HttpChunkHeader from(long size, FingerTrieSeq<ChunkExtension> extensions) {
-    if (size == 0L && extensions.isEmpty()) {
-      return sentinel();
-    } else {
-      return new HttpChunkHeader(size, extensions);
-    }
-  }
-
-  public static HttpChunkHeader from(long size, ChunkExtension... extensions) {
-    if (size == 0L && extensions.length == 0) {
-      return sentinel();
-    } else {
-      return new HttpChunkHeader(size, FingerTrieSeq.of(extensions));
-    }
-  }
-
-  public static HttpChunkHeader from(long size) {
-    if (size == 0L) {
-      return sentinel();
-    } else {
-      return new HttpChunkHeader(size, FingerTrieSeq.<ChunkExtension>empty());
-    }
-  }
-
-  public static HttpChunkHeader parse(String string) {
-    return Http.standardParser().parseChunkHeaderString(string);
-  }
 }

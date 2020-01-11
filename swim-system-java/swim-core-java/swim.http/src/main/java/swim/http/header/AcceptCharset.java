@@ -27,10 +27,32 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class AcceptCharset extends HttpHeader {
+
+  private static int hashSeed;
   final FingerTrieSeq<HttpCharset> charsets;
 
   AcceptCharset(FingerTrieSeq<HttpCharset> charsets) {
     this.charsets = charsets;
+  }
+
+  public static AcceptCharset from(FingerTrieSeq<HttpCharset> charsets) {
+    return new AcceptCharset(charsets);
+  }
+
+  public static AcceptCharset from(HttpCharset... charsets) {
+    return new AcceptCharset(FingerTrieSeq.of(charsets));
+  }
+
+  public static AcceptCharset from(String... charsetStrings) {
+    final Builder<HttpCharset, FingerTrieSeq<HttpCharset>> charsets = FingerTrieSeq.builder();
+    for (int i = 0, n = charsetStrings.length; i < n; i += 1) {
+      charsets.add(HttpCharset.parse(charsetStrings[i]));
+    }
+    return new AcceptCharset(charsets.bind());
+  }
+
+  public static Parser<AcceptCharset> parseHttpValue(Input input, HttpParser http) {
+    return AcceptCharsetParser.parse(input, http);
   }
 
   @Override
@@ -89,25 +111,4 @@ public final class AcceptCharset extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  public static AcceptCharset from(FingerTrieSeq<HttpCharset> charsets) {
-    return new AcceptCharset(charsets);
-  }
-
-  public static AcceptCharset from(HttpCharset... charsets) {
-    return new AcceptCharset(FingerTrieSeq.of(charsets));
-  }
-
-  public static AcceptCharset from(String... charsetStrings) {
-    final Builder<HttpCharset, FingerTrieSeq<HttpCharset>> charsets = FingerTrieSeq.builder();
-    for (int i = 0, n = charsetStrings.length; i < n; i += 1) {
-      charsets.add(HttpCharset.parse(charsetStrings[i]));
-    }
-    return new AcceptCharset(charsets.bind());
-  }
-
-  public static Parser<AcceptCharset> parseHttpValue(Input input, HttpParser http) {
-    return AcceptCharsetParser.parse(input, http);
-  }
 }

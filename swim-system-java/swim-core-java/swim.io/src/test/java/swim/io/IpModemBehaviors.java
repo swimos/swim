@@ -23,6 +23,7 @@ import swim.concurrent.Theater;
 import static org.testng.Assert.assertEquals;
 
 public abstract class IpModemBehaviors {
+
   protected abstract IpServiceRef bind(IpEndpoint endpoint, IpService service);
 
   protected abstract IpSocketRef connect(IpEndpoint endpoint, IpModem<?, ?> modem);
@@ -51,6 +52,7 @@ public abstract class IpModemBehaviors {
       public IpModem<?, ?> createModem() {
         return server;
       }
+
       @Override
       public void didBind() {
         serverBind.countDown();
@@ -112,10 +114,12 @@ public abstract class IpModemBehaviors {
         clientConnect.countDown();
         close();
       }
+
       @Override
       public void didDisconnect() {
         clientDisconnect.countDown();
       }
+
       @Override
       public void didFail(Throwable error) {
         throw new TestException(error);
@@ -127,10 +131,12 @@ public abstract class IpModemBehaviors {
         read(Utf8.outputDecoder(Unicode.stringOutput()));
         serverConnect.countDown();
       }
+
       @Override
       public void didDisconnect() {
         serverDisconnect.countDown();
       }
+
       @Override
       public void didFail(Throwable error) {
         throw new TestException(error);
@@ -174,11 +180,13 @@ public abstract class IpModemBehaviors {
         clientConnect.countDown();
         close();
       }
+
       @Override
       public void didDisconnect() {
         read(Utf8.outputDecoder(Unicode.stringOutput()));
         clientDisconnect.countDown();
       }
+
       @Override
       public void didFail(Throwable error) {
         throw new TestException(error);
@@ -190,10 +198,12 @@ public abstract class IpModemBehaviors {
         serverConnect.countDown();
         close();
       }
+
       @Override
       public void didDisconnect() {
         serverDisconnect.countDown();
       }
+
       @Override
       public void didFail(Throwable error) {
         throw new TestException(error);
@@ -237,11 +247,13 @@ public abstract class IpModemBehaviors {
         write(Utf8.stringWriter("clientToServer\n"));
         read(Utf8.decodedParser(Unicode.lineParser()));
       }
+
       @Override
       public void didWrite(String line) {
         assertEquals(line, "clientToServer\n");
         clientWrite.countDown();
       }
+
       @Override
       public void didRead(String line) {
         assertEquals(line, "serverToClient");
@@ -254,11 +266,13 @@ public abstract class IpModemBehaviors {
         write(Utf8.stringWriter("serverToClient\n"));
         read(Utf8.decodedParser(Unicode.lineParser()));
       }
+
       @Override
       public void didWrite(String line) {
         assertEquals(line, "serverToClient\n");
         serverWrite.countDown();
       }
+
       @Override
       public void didRead(String line) {
         assertEquals(line, "clientToServer");
@@ -288,6 +302,7 @@ public abstract class IpModemBehaviors {
       stage.stop();
     }
   }
+
   @Test
   public void testTransmitMultipleLines() {
     final Theater stage = new Theater();
@@ -302,11 +317,13 @@ public abstract class IpModemBehaviors {
     final AbstractIpModem<String, String> client = new AbstractIpModem<String, String>() {
       int writeCount;
       int readCount;
+
       @Override
       public void didConnect() {
         write(Utf8.stringWriter(line));
         read(Utf8.decodedParser(Unicode.lineParser()));
       }
+
       @Override
       public void didWrite(String line) {
         writeCount += 1;
@@ -317,6 +334,7 @@ public abstract class IpModemBehaviors {
           clientWrite.countDown();
         }
       }
+
       @Override
       public void didRead(String line) {
         assertEquals(line, phrase);
@@ -331,11 +349,13 @@ public abstract class IpModemBehaviors {
     final AbstractIpModem<String, String> server = new AbstractIpModem<String, String>() {
       int writeCount;
       int readCount;
+
       @Override
       public void didConnect() {
         write(Utf8.stringWriter(line));
         read(Utf8.decodedParser(Unicode.lineParser()));
       }
+
       @Override
       public void didWrite(String line) {
         writeCount += 1;
@@ -346,6 +366,7 @@ public abstract class IpModemBehaviors {
           serverWrite.countDown();
         }
       }
+
       @Override
       public void didRead(String line) {
         assertEquals(line, phrase);
@@ -388,6 +409,7 @@ public abstract class IpModemBehaviors {
     }
     return s.toString();
   }
+
   @Test
   public void testTransmitBlobs() {
     final Theater stage = new Theater();
@@ -401,11 +423,13 @@ public abstract class IpModemBehaviors {
     final String chunk = blob(chunkSize);
     final AbstractIpModem<String, String> client = new AbstractIpModem<String, String>() {
       int writeCount;
+
       @Override
       public void didConnect() {
         write(Utf8.stringWriter(chunk));
         read(Utf8.decodedParser(Unicode.lineParser()));
       }
+
       @Override
       public void didWrite(String line) {
         writeCount += 1;
@@ -416,6 +440,7 @@ public abstract class IpModemBehaviors {
           clientWrite.countDown();
         }
       }
+
       @Override
       public void didRead(String line) {
         assertEquals(line.length(), chunkSize * chunkCount);
@@ -424,11 +449,13 @@ public abstract class IpModemBehaviors {
     };
     final AbstractIpModem<String, String> server = new AbstractIpModem<String, String>() {
       int writeCount;
+
       @Override
       public void didConnect() {
         write(Utf8.stringWriter(chunk));
         read(Utf8.decodedParser(Unicode.lineParser()));
       }
+
       @Override
       public void didWrite(String line) {
         writeCount += 1;
@@ -439,6 +466,7 @@ public abstract class IpModemBehaviors {
           serverWrite.countDown();
         }
       }
+
       @Override
       public void didRead(String line) {
         assertEquals(line.length(), chunkSize * chunkCount);
@@ -468,4 +496,5 @@ public abstract class IpModemBehaviors {
       stage.stop();
     }
   }
+
 }

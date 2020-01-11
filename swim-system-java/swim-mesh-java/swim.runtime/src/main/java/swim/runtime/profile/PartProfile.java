@@ -18,6 +18,7 @@ import swim.runtime.Metric;
 import swim.runtime.PartAddress;
 
 public final class PartProfile extends Metric {
+
   final PartAddress cellAddress;
   final int hostOpenDelta;
   final long hostOpenCount;
@@ -267,4 +268,5 @@ public final class PartProfile extends Metric {
   public long uplinkCommandCount() {
     return this.uplinkCommandCount;
   }
+
 }

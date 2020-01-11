@@ -22,6 +22,7 @@ import swim.util.Log;
  * Environment in which a {@link Streamlet} executes.
  */
 public interface StreamletContext extends Log {
+
   /**
    * Returns the {@code Schedule} with which the {@code Streamlet} can set timers.
    */
@@ -31,4 +32,5 @@ public interface StreamletContext extends Log {
    * Returns the {@code Stage} on which the {@code Streamlet} can execute tasks.
    */
   Stage stage();
+
 }

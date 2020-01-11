@@ -22,12 +22,52 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Murmur3;
 
 public final class WebSocketExtension extends HttpPart implements Debug {
+
+  private static int hashSeed;
   final String name;
   final FingerTrieSeq<WebSocketParam> params;
 
   WebSocketExtension(String name, FingerTrieSeq<WebSocketParam> params) {
     this.name = name;
     this.params = params;
+  }
+
+  public static WebSocketExtension permessageDeflate(boolean serverNoContextTakeover,
+                                                     boolean clientNoContextTakeover,
+                                                     int serverMaxWindowBits,
+                                                     int clientMaxWindowBits) {
+    FingerTrieSeq<WebSocketParam> params = FingerTrieSeq.empty();
+    if (serverNoContextTakeover) {
+      params = params.appended(WebSocketParam.serverNoContextTakeover());
+    }
+    if (clientNoContextTakeover) {
+      params = params.appended(WebSocketParam.clientNoContextTakeover());
+    }
+    if (serverMaxWindowBits != 15) {
+      params = params.appended(WebSocketParam.serverMaxWindowBits(serverMaxWindowBits));
+    }
+    if (clientMaxWindowBits == 0) {
+      params = params.appended(WebSocketParam.clientMaxWindowBits());
+    } else if (clientMaxWindowBits != 15) {
+      params = params.appended(WebSocketParam.clientMaxWindowBits(clientMaxWindowBits));
+    }
+    return new WebSocketExtension("permessage-deflate", params);
+  }
+
+  public static WebSocketExtension from(String name, FingerTrieSeq<WebSocketParam> params) {
+    return new WebSocketExtension(name, params);
+  }
+
+  public static WebSocketExtension from(String name, WebSocketParam... params) {
+    return new WebSocketExtension(name, FingerTrieSeq.of(params));
+  }
+
+  public static WebSocketExtension from(String name) {
+    return new WebSocketExtension(name, FingerTrieSeq.<WebSocketParam>empty());
+  }
+
+  public static WebSocketExtension parse(String string) {
+    return Http.standardParser().parseWebSocketExtensionString(string);
   }
 
   public String name() {
@@ -98,43 +138,4 @@ public final class WebSocketExtension extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static WebSocketExtension permessageDeflate(boolean serverNoContextTakeover,
-                                                     boolean clientNoContextTakeover,
-                                                     int serverMaxWindowBits,
-                                                     int clientMaxWindowBits) {
-    FingerTrieSeq<WebSocketParam> params = FingerTrieSeq.empty();
-    if (serverNoContextTakeover) {
-      params = params.appended(WebSocketParam.serverNoContextTakeover());
-    }
-    if (clientNoContextTakeover) {
-      params = params.appended(WebSocketParam.clientNoContextTakeover());
-    }
-    if (serverMaxWindowBits != 15) {
-      params = params.appended(WebSocketParam.serverMaxWindowBits(serverMaxWindowBits));
-    }
-    if (clientMaxWindowBits == 0) {
-      params = params.appended(WebSocketParam.clientMaxWindowBits());
-    } else if (clientMaxWindowBits != 15) {
-      params = params.appended(WebSocketParam.clientMaxWindowBits(clientMaxWindowBits));
-    }
-    return new WebSocketExtension("permessage-deflate", params);
-  }
-
-  public static WebSocketExtension from(String name, FingerTrieSeq<WebSocketParam> params) {
-    return new WebSocketExtension(name, params);
-  }
-
-  public static WebSocketExtension from(String name, WebSocketParam... params) {
-    return new WebSocketExtension(name, FingerTrieSeq.of(params));
-  }
-
-  public static WebSocketExtension from(String name) {
-    return new WebSocketExtension(name, FingerTrieSeq.<WebSocketParam>empty());
-  }
-
-  public static WebSocketExtension parse(String string) {
-    return Http.standardParser().parseWebSocketExtensionString(string);
-  }
 }

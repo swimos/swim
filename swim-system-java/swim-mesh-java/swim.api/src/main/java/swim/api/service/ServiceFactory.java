@@ -15,5 +15,7 @@
 package swim.api.service;
 
 public interface ServiceFactory<S extends Service> {
+
   S createService(ServiceContext context);
+
 }

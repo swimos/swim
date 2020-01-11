@@ -22,9 +22,11 @@ import swim.structure.Data;
 import swim.structure.Value;
 
 final class DataStructure extends AvroDataType<Value> {
+
   @SuppressWarnings("unchecked")
   @Override
   public Decoder<Value> decodeData(InputBuffer input) {
     return (Decoder<Value>) (Decoder<?>) Binary.parseOutput(Data.output(), input);
   }
+
 }

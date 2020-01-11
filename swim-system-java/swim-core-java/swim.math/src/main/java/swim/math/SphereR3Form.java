@@ -19,6 +19,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 final class SphereR3Form extends R3Form<SphereR3> {
+
   @Override
   public String tag() {
     return "sphere";
@@ -92,4 +93,5 @@ final class SphereR3Form extends R3Form<SphereR3> {
       return null;
     }
   }
+
 }

@@ -21,6 +21,7 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 final class ReconFormWriter<T> extends Writer<T, T> {
+
   final ReconWriter<Item, Value> recon;
   final Form<T> form;
   final T object;
@@ -35,16 +36,6 @@ final class ReconFormWriter<T> extends Writer<T, T> {
 
   ReconFormWriter(ReconWriter<Item, Value> recon, Form<T> form) {
     this(recon, form, null, null);
-  }
-
-  @Override
-  public Writer<T, T> feed(T object) {
-    return new ReconFormWriter<T>(recon, form, object, null);
-  }
-
-  @Override
-  public Writer<T, T> pull(Output<?> output) {
-    return write(output, this.recon, this.form, this.object, this.part);
   }
 
   static <T> Writer<T, T> write(Output<?> output, ReconWriter<Item, Value> recon,
@@ -70,4 +61,15 @@ final class ReconFormWriter<T> extends Writer<T, T> {
                                 Form<T> form, T object) {
     return write(output, recon, form, object, null);
   }
+
+  @Override
+  public Writer<T, T> feed(T object) {
+    return new ReconFormWriter<T>(recon, form, object, null);
+  }
+
+  @Override
+  public Writer<T, T> pull(Output<?> output) {
+    return write(output, this.recon, this.form, this.object, this.part);
+  }
+
 }

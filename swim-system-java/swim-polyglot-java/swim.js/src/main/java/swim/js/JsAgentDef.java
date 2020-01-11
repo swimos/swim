@@ -24,6 +24,8 @@ import swim.uri.UriPath;
 import swim.util.Murmur3;
 
 public class JsAgentDef implements AgentDef, Debug {
+
+  private static int hashSeed;
   final UriPath modulePath;
   final Value id;
   final Value props;
@@ -32,6 +34,14 @@ public class JsAgentDef implements AgentDef, Debug {
     this.modulePath = modulePath;
     this.id = id;
     this.props = props;
+  }
+
+  public static JsAgentDef fromModulePath(UriPath modulePath) {
+    return new JsAgentDef(modulePath, Text.from(modulePath.toString()), Value.absent());
+  }
+
+  public static JsAgentDef fromModulePath(String modulePath) {
+    return new JsAgentDef(UriPath.parse(modulePath), Text.from(modulePath), Value.absent());
   }
 
   public final UriPath modulePath() {
@@ -102,13 +112,4 @@ public class JsAgentDef implements AgentDef, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static JsAgentDef fromModulePath(UriPath modulePath) {
-    return new JsAgentDef(modulePath, Text.from(modulePath.toString()), Value.absent());
-  }
-
-  public static JsAgentDef fromModulePath(String modulePath) {
-    return new JsAgentDef(UriPath.parse(modulePath), Text.from(modulePath), Value.absent());
-  }
 }

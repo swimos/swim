@@ -18,13 +18,14 @@ import swim.deflate.Deflate;
 import swim.deflate.Inflate;
 
 public final class Ws {
-  private Ws() {
-    // stub
-  }
 
   private static WsDecoder standardDecoder;
   private static WsEncoder standardEncoderMasked;
   private static WsEncoder standardEncoderUnmasked;
+
+  private Ws() {
+    // stub
+  }
 
   public static WsDecoder standardDecoder() {
     if (standardDecoder == null) {
@@ -70,4 +71,5 @@ public final class Ws {
   public static WsDeflateEncoder deflateEncoderUnmasked() {
     return new WsDeflateEncoderUnmasked(new Deflate<Object>(), Deflate.Z_SYNC_FLUSH);
   }
+
 }

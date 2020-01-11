@@ -24,6 +24,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class HashTrieMapSpec {
+
   @Test
   public void testEmpty() {
     assertTrue(HashTrieMap.empty().isEmpty());
@@ -230,13 +231,14 @@ public class HashTrieMapSpec {
       xs = xs.updated(UUID.randomUUID().toString(), i);
       i++;
     }
-    System.out.println("map size "  + xs.size());
+    System.out.println("map size " + xs.size());
     assertEquals(limit, xs.size(), "map size not same as expected");
     int count = 0;
     for (Map.Entry<String, Integer> x : xs) {
       count += 1;
     }
-    System.out.println("count "  + count);
+    System.out.println("count " + count);
     assertEquals(limit, count, "map iteration size not same as expected");
   }
+
 }

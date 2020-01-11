@@ -20,6 +20,7 @@ import swim.dynamic.HostRuntime;
 import swim.uri.UriPath;
 
 public interface JsRuntime extends HostRuntime {
+
   JsModuleResolver moduleResolver();
 
   void setModuleResolver(JsModuleResolver moduleResolver);
@@ -27,4 +28,5 @@ public interface JsRuntime extends HostRuntime {
   HostLibrary getHostModule(UriPath moduleId);
 
   Map<UriPath, HostLibrary> hostModules();
+
 }

@@ -19,6 +19,7 @@ import swim.io.http.HttpClientContext;
 import swim.ws.WsRequest;
 
 public abstract class AbstractWsClient extends AbstractHttpClient {
+
   protected WsSettings wsSettings;
 
   public AbstractWsClient(WsSettings wsSettings) {
@@ -44,4 +45,5 @@ public abstract class AbstractWsClient extends AbstractHttpClient {
   protected WsUpgradeRequester upgrade(WebSocket<?, ?> webSocket, WsRequest wsRequest) {
     return new WsUpgradeRequester(webSocket, wsRequest, this.wsSettings);
   }
+
 }

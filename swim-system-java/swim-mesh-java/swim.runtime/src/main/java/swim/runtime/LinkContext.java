@@ -22,6 +22,7 @@ import swim.api.auth.Identity;
 import swim.structure.Value;
 
 public interface LinkContext {
+
   LinkBinding linkWrapper();
 
   <T> T unwrapLink(Class<T> linkClass);
@@ -75,4 +76,5 @@ public interface LinkContext {
   void errorUp(Object message);
 
   void failUp(Object message);
+
 }

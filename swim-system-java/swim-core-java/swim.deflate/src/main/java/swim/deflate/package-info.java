@@ -15,4 +15,5 @@
 /**
  * DEFLATE codec that incrementally compresses and decompresses streams.
  */
+
 package swim.deflate;

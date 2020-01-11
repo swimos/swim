@@ -26,6 +26,7 @@ import swim.structure.Value;
 import swim.uri.UriPath;
 
 public class JsNodeModuleResolver implements JsModuleResolver {
+
   final UriPath rootPath;
 
   public JsNodeModuleResolver(UriPath rootPath) {
@@ -192,4 +193,5 @@ public class JsNodeModuleResolver implements JsModuleResolver {
       }
     }
   }
+
 }

@@ -26,6 +26,7 @@ import swim.codec.Encoder;
  * {@code IpSocket}, and to close the socket.
  */
 public interface IpModemContext<I, O> extends IpContext, FlowContext {
+
   /**
    * Returns the configuration parameters that govern the underlying network
    * socket.
@@ -69,4 +70,5 @@ public interface IpModemContext<I, O> extends IpContext, FlowContext {
    * Closes the underlying network socket.
    */
   void close();
+
 }

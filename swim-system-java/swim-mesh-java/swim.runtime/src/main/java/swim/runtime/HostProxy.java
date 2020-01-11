@@ -30,6 +30,7 @@ import swim.uri.Uri;
 import swim.uri.UriMapper;
 
 public class HostProxy implements HostBinding, HostContext {
+
   protected final HostBinding hostBinding;
   protected HostContext hostContext;
 
@@ -461,4 +462,5 @@ public class HostProxy implements HostBinding, HostContext {
   public void didFail(Throwable error) {
     this.hostBinding.didFail(error);
   }
+
 }

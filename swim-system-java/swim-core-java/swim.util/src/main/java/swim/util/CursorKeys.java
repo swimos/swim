@@ -17,6 +17,7 @@ package swim.util;
 import java.util.Map;
 
 final class CursorKeys<K> implements Cursor<K> {
+
   final Cursor<? extends Map.Entry<? extends K, ?>> inner;
 
   CursorKeys(Cursor<? extends Map.Entry<? extends K, ?>> inner) {
@@ -87,4 +88,5 @@ final class CursorKeys<K> implements Cursor<K> {
   public void load() throws InterruptedException {
     this.inner.load();
   }
+
 }

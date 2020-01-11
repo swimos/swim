@@ -27,10 +27,32 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class Server extends HttpHeader {
+
+  private static int hashSeed;
   final FingerTrieSeq<Product> products;
 
   Server(FingerTrieSeq<Product> products) {
     this.products = products;
+  }
+
+  public static Server from(FingerTrieSeq<Product> products) {
+    return new Server(products);
+  }
+
+  public static Server from(Product... products) {
+    return new Server(FingerTrieSeq.of(products));
+  }
+
+  public static Server from(String... productStrings) {
+    final Builder<Product, FingerTrieSeq<Product>> products = FingerTrieSeq.builder();
+    for (int i = 0, n = productStrings.length; i < n; i += 1) {
+      products.add(Product.parse(productStrings[i]));
+    }
+    return new Server(products.bind());
+  }
+
+  public static Parser<Server> parseHttpValue(Input input, HttpParser http) {
+    return ServerParser.parse(input, http);
   }
 
   @Override
@@ -84,25 +106,4 @@ public final class Server extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  public static Server from(FingerTrieSeq<Product> products) {
-    return new Server(products);
-  }
-
-  public static Server from(Product... products) {
-    return new Server(FingerTrieSeq.of(products));
-  }
-
-  public static Server from(String... productStrings) {
-    final Builder<Product, FingerTrieSeq<Product>> products = FingerTrieSeq.builder();
-    for (int i = 0, n = productStrings.length; i < n; i += 1) {
-      products.add(Product.parse(productStrings[i]));
-    }
-    return new Server(products.bind());
-  }
-
-  public static Parser<Server> parseHttpValue(Input input, HttpParser http) {
-    return ServerParser.parse(input, http);
-  }
 }

@@ -18,13 +18,17 @@ import java.util.Arrays;
 
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class PointArray {
+
   public Point2D[] array;
+
   public PointArray(Point2D[] array) {
     this.array = array;
   }
+
   public PointArray() {
     // Form.cast constructor
   }
+
   @Override
   public boolean equals(Object other) {
     if (other instanceof PointArray) {
@@ -33,12 +37,15 @@ public class PointArray {
     }
     return false;
   }
+
   @Override
   public int hashCode() {
     return Arrays.hashCode(this.array);
   }
+
   @Override
   public String toString() {
     return "PointArray(" + this.array + ")";
   }
+
 }

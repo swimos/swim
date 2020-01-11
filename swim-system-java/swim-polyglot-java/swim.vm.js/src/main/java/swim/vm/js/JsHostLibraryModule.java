@@ -23,6 +23,7 @@ import swim.uri.UriPath;
 import swim.vm.VmProxyArray;
 
 public class JsHostLibraryModule implements JsModule, ProxyObject {
+
   final JsBridge bridge;
   final JsModuleSystem moduleSystem;
   final UriPath moduleId;
@@ -88,4 +89,5 @@ public class JsHostLibraryModule implements JsModule, ProxyObject {
     }
     return new VmProxyArray(typeMemberKeys);
   }
+
 }

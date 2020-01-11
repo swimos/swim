@@ -25,9 +25,6 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public final class HostAgentContext {
-  private HostAgentContext() {
-    // static
-  }
 
   public static final HostObjectType<AgentContext> TYPE;
 
@@ -47,9 +44,15 @@ public final class HostAgentContext {
     type.addMember(new HostAgentContextGetLane());
     type.addMember(new HostAgentContextOpenLane());
   }
+
+  private HostAgentContext() {
+    // static
+  }
+
 }
 
 final class HostAgentContextHostUri implements HostMethod<AgentContext> {
+
   @Override
   public String key() {
     return "hostUri";
@@ -59,9 +62,11 @@ final class HostAgentContextHostUri implements HostMethod<AgentContext> {
   public Object invoke(Bridge bridge, AgentContext agentContext, Object... arguments) {
     return agentContext.hostUri();
   }
+
 }
 
 final class HostAgentContextNodeUri implements HostMethod<AgentContext> {
+
   @Override
   public String key() {
     return "nodeUri";
@@ -71,9 +76,11 @@ final class HostAgentContextNodeUri implements HostMethod<AgentContext> {
   public Object invoke(Bridge bridge, AgentContext agentContext, Object... arguments) {
     return agentContext.nodeUri();
   }
+
 }
 
 final class HostAgentContextProps implements HostMethod<AgentContext> {
+
   @Override
   public String key() {
     return "props";
@@ -83,9 +90,11 @@ final class HostAgentContextProps implements HostMethod<AgentContext> {
   public Object invoke(Bridge bridge, AgentContext agentContext, Object... arguments) {
     return agentContext.props();
   }
+
 }
 
 final class HostAgentContextGetProp implements HostMethod<AgentContext> {
+
   @Override
   public String key() {
     return "getProp";
@@ -102,9 +111,11 @@ final class HostAgentContextGetProp implements HostMethod<AgentContext> {
       throw new ClassCastException(key.toString());
     }
   }
+
 }
 
 final class HostAgentContextSchedule implements HostMethod<AgentContext> {
+
   @Override
   public String key() {
     return "schedule";
@@ -114,9 +125,11 @@ final class HostAgentContextSchedule implements HostMethod<AgentContext> {
   public Object invoke(Bridge bridge, AgentContext agentContext, Object... arguments) {
     return agentContext.schedule();
   }
+
 }
 
 final class HostAgentContextStage implements HostMethod<AgentContext> {
+
   @Override
   public String key() {
     return "stage";
@@ -126,9 +139,11 @@ final class HostAgentContextStage implements HostMethod<AgentContext> {
   public Object invoke(Bridge bridge, AgentContext agentContext, Object... arguments) {
     return agentContext.stage();
   }
+
 }
 
 final class HostAgentContextGetLane implements HostMethod<AgentContext> {
+
   @Override
   public String key() {
     return "getLane";
@@ -145,9 +160,11 @@ final class HostAgentContextGetLane implements HostMethod<AgentContext> {
     }
     return agentContext.getLane((Uri) laneUri);
   }
+
 }
 
 final class HostAgentContextOpenLane implements HostMethod<AgentContext> {
+
   @Override
   public String key() {
     return "openLane";
@@ -168,4 +185,5 @@ final class HostAgentContextOpenLane implements HostMethod<AgentContext> {
     }
     return agentContext.openLane((Uri) laneUri, (Lane) lane);
   }
+
 }

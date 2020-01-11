@@ -20,10 +20,32 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public final class MqttSubStatus implements Debug {
+
+  public static final MqttSubStatus AT_MOST_ONCE = new MqttSubStatus(0x00);
+  public static final MqttSubStatus AT_LEAST_ONCE = new MqttSubStatus(0x01);
+  public static final MqttSubStatus EXACTLY_ONCE = new MqttSubStatus(0x02);
+  public static final MqttSubStatus FAILURE = new MqttSubStatus(0x80);
+  static final int MAX_QOS_MASK = 0x3;
+  private static int hashSeed;
   public final int code;
 
   MqttSubStatus(int code) {
     this.code = code;
+  }
+
+  public static MqttSubStatus from(int code) {
+    switch (code) {
+      case 0:
+        return AT_MOST_ONCE;
+      case 1:
+        return AT_LEAST_ONCE;
+      case 2:
+        return EXACTLY_ONCE;
+      case 3:
+        return FAILURE;
+      default:
+        return new MqttSubStatus(code);
+    }
   }
 
   public boolean isSuccess() {
@@ -73,11 +95,20 @@ public final class MqttSubStatus implements Debug {
   public void debug(Output<?> output) {
     output = output.write("MqttSubStatus").write('.');
     switch (code) {
-      case 0x00: output.write("AT_MOST_ONCE"); break;
-      case 0x01: output.write("AT_LEAST_ONCE"); break;
-      case 0x02: output.write("EXACTLY_ONCE"); break;
-      case 0x80: output.write("FAILURE"); break;
-      default: output.write("from").write('(').debug(this.code).write(')');
+      case 0x00:
+        output.write("AT_MOST_ONCE");
+        break;
+      case 0x01:
+        output.write("AT_LEAST_ONCE");
+        break;
+      case 0x02:
+        output.write("EXACTLY_ONCE");
+        break;
+      case 0x80:
+        output.write("FAILURE");
+        break;
+      default:
+        output.write("from").write('(').debug(this.code).write(')');
     }
   }
 
@@ -86,22 +117,4 @@ public final class MqttSubStatus implements Debug {
     return Format.debug(this);
   }
 
-  static final int MAX_QOS_MASK = 0x3;
-
-  private static int hashSeed;
-
-  public static final MqttSubStatus AT_MOST_ONCE = new MqttSubStatus(0x00);
-  public static final MqttSubStatus AT_LEAST_ONCE = new MqttSubStatus(0x01);
-  public static final MqttSubStatus EXACTLY_ONCE = new MqttSubStatus(0x02);
-  public static final MqttSubStatus FAILURE = new MqttSubStatus(0x80);
-
-  public static MqttSubStatus from(int code) {
-    switch (code) {
-      case 0: return AT_MOST_ONCE;
-      case 1: return AT_LEAST_ONCE;
-      case 2: return EXACTLY_ONCE;
-      case 3: return FAILURE;
-      default: return new MqttSubStatus(code);
-    }
-  }
 }

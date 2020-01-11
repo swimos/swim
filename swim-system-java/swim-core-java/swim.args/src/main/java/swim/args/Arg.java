@@ -20,6 +20,8 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public class Arg implements Cloneable, Debug {
+
+  private static int hashSeed;
   final String name;
   String value;
   boolean optional;
@@ -28,6 +30,18 @@ public class Arg implements Cloneable, Debug {
     this.name = name;
     this.value = value;
     this.optional = optional;
+  }
+
+  public static Arg of(String name, String value, boolean optional) {
+    return new Arg(name, value, optional);
+  }
+
+  public static Arg of(String name, String value) {
+    return new Arg(name, value, false);
+  }
+
+  public static Arg of(String name) {
+    return new Arg(name, null, false);
   }
 
   public String name() {
@@ -100,17 +114,4 @@ public class Arg implements Cloneable, Debug {
     return new Arg(this.name, this.value, this.optional);
   }
 
-  private static int hashSeed;
-
-  public static Arg of(String name, String value, boolean optional) {
-    return new Arg(name, value, optional);
-  }
-
-  public static Arg of(String name, String value) {
-    return new Arg(name, value, false);
-  }
-
-  public static Arg of(String name) {
-    return new Arg(name, null, false);
-  }
 }

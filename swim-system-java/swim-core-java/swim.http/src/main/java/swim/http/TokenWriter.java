@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class TokenWriter extends Writer<Object, String> {
+
   final String token;
   final int index;
 
@@ -29,11 +30,6 @@ final class TokenWriter extends Writer<Object, String> {
 
   TokenWriter(String token) {
     this(token, 0);
-  }
-
-  @Override
-  public Writer<Object, String> pull(Output<?> output) {
-    return write(output, this.token, this.index);
   }
 
   static Writer<Object, String> write(Output<?> output, String token, int index) {
@@ -63,4 +59,10 @@ final class TokenWriter extends Writer<Object, String> {
   static Writer<Object, String> write(Output<?> output, String token) {
     return write(output, token, 0);
   }
+
+  @Override
+  public Writer<Object, String> pull(Output<?> output) {
+    return write(output, this.token, this.index);
+  }
+
 }

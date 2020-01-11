@@ -18,6 +18,7 @@ import swim.structure.Value;
 import swim.util.OrderedMapCursor;
 
 final class BTreeNodeDeltaCursor extends BTreeNodeCursor {
+
   final long sinceVersion;
 
   BTreeNodeDeltaCursor(BTreeNode page, long index, int childIndex, long sinceVersion) {
@@ -33,4 +34,5 @@ final class BTreeNodeDeltaCursor extends BTreeNodeCursor {
   OrderedMapCursor<Value, Value> childCursor(BTreePageRef childRef) {
     return childRef.deltaCursor(this.sinceVersion);
   }
+
 }

@@ -21,6 +21,7 @@ import java.util.List;
  * A dynamic type descriptor for a host type.
  */
 public interface HostType<T> {
+
   String typeName();
 
   Class<?> hostClass();
@@ -40,4 +41,5 @@ public interface HostType<T> {
   HostStaticMember getStaticMember(Bridge bridge, String key);
 
   Collection<HostStaticMember> staticMembers(Bridge bridge);
+
 }

@@ -15,6 +15,7 @@
 package swim.runtime;
 
 public interface TierContext {
+
   void close();
 
   void willOpen();
@@ -38,4 +39,5 @@ public interface TierContext {
   void didUnload();
 
   void willClose();
+
 }

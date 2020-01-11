@@ -15,6 +15,7 @@
 package swim.math;
 
 public interface VectorSpace<V, S> extends VectorModule<V, S>, TensorSpace<V, S> {
+
   @Override
   Field<S> scalar();
 
@@ -35,4 +36,5 @@ public interface VectorSpace<V, S> extends VectorModule<V, S>, TensorSpace<V, S>
 
   @Override
   V combine(S a, V u, S b, V v);
+
 }

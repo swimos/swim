@@ -15,7 +15,9 @@
 package swim.store;
 
 public interface DataContext {
+
   void didChange();
 
   void didCommit();
+
 }

@@ -39,9 +39,6 @@ import swim.structure.Value;
 import swim.util.Builder;
 
 public final class AvroStructure {
-  private AvroStructure() {
-    // static
-  }
 
   private static NullStructure nullType;
   private static BooleanStructure booleanType;
@@ -51,6 +48,10 @@ public final class AvroStructure {
   private static DoubleStructure doubleType;
   private static DataStructure dataType;
   private static StringStructure stringType;
+
+  private AvroStructure() {
+    // static
+  }
 
   public static AvroNullType<Value> nullType() {
     if (nullType == null) {
@@ -159,4 +160,5 @@ public final class AvroStructure {
   public static AvroFieldType<Record, Value> field(String name, AvroType<? extends Value> valueType) {
     return new FieldStructure(name, valueType);
   }
+
 }

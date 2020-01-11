@@ -18,9 +18,6 @@ import swim.dynamic.HostPackage;
 import swim.dynamic.JavaHostPackage;
 
 public final class JavaUtil {
-  private JavaUtil() {
-    // static
-  }
 
   public static final HostPackage PACKAGE;
 
@@ -32,4 +29,9 @@ public final class JavaUtil {
     hostPkg.addHostType(HostList.TYPE);
     hostPkg.addHostType(HostMap.TYPE);
   }
+
+  private JavaUtil() {
+    // static
+  }
+
 }

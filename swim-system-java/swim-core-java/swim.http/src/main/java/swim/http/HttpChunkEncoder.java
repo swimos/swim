@@ -21,6 +21,7 @@ import swim.codec.Utf8;
 import swim.codec.Writer;
 
 final class HttpChunkEncoder extends Encoder<Object, Object> {
+
   final HttpWriter http;
   final HttpChunkHeader header;
   final Encoder<?, ?> content;
@@ -38,11 +39,6 @@ final class HttpChunkEncoder extends Encoder<Object, Object> {
 
   HttpChunkEncoder(HttpWriter http, HttpChunkHeader header, Encoder<?, ?> content) {
     this(http, header, content, null, 1);
-  }
-
-  @Override
-  public Encoder<Object, Object> pull(OutputBuffer<?> output) {
-    return encode(output, this.http, this.header, this.content, this.part, this.step);
   }
 
   static Encoder<Object, Object> encode(OutputBuffer<?> output, HttpWriter http, HttpChunkHeader header,
@@ -88,4 +84,10 @@ final class HttpChunkEncoder extends Encoder<Object, Object> {
                                         HttpChunkHeader header, Encoder<?, ?> content) {
     return encode(output, http, header, content, null, 1);
   }
+
+  @Override
+  public Encoder<Object, Object> pull(OutputBuffer<?> output) {
+    return encode(output, this.http, this.header, this.content, this.part, this.step);
+  }
+
 }

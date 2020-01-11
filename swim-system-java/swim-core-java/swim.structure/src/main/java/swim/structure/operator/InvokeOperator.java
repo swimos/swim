@@ -23,6 +23,8 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public final class InvokeOperator extends Operator {
+
+  private static int hashSeed;
   final Value func;
   final Value args;
   Object state;
@@ -131,5 +133,4 @@ public final class InvokeOperator extends Operator {
     output.debug(this.func).write('.').write("invoke").write('(').debug(this.args).write(')');
   }
 
-  private static int hashSeed;
 }

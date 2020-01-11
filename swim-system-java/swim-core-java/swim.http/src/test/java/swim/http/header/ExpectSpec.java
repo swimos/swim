@@ -21,6 +21,7 @@ import swim.http.HttpHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class ExpectSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -34,4 +35,5 @@ public class ExpectSpec {
   public void writeExpectHeaders() {
     assertWrites(Expect.from("100-continue"), "Expect: 100-continue");
   }
+
 }

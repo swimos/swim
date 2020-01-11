@@ -20,6 +20,7 @@ import swim.http.WebSocketExtension;
 import swim.http.WebSocketParam;
 
 final class WsDeflateClientEngine extends WsEngine {
+
   protected final int clientCompressionLevel;
   protected final boolean clientNoContextTakeover;
   protected final int serverMaxWindowBits;
@@ -31,28 +32,6 @@ final class WsDeflateClientEngine extends WsEngine {
     this.clientNoContextTakeover = clientNoContextTakeover;
     this.serverMaxWindowBits = serverMaxWindowBits;
     this.clientMaxWindowBits = clientMaxWindowBits;
-  }
-
-  @Override
-  public WsDecoder decoder() {
-    return Ws.deflateDecoder(new Inflate<Object>(Inflate.Z_NO_WRAP, this.serverMaxWindowBits));
-  }
-
-  @Override
-  public WsEncoder encoder() {
-    final int flush;
-    if (this.clientNoContextTakeover) {
-      flush = Deflate.Z_FULL_FLUSH;
-    } else {
-      flush = Deflate.Z_SYNC_FLUSH;
-    }
-    return Ws.deflateEncoderMasked(new Deflate<Object>(Deflate.Z_NO_WRAP, this.clientCompressionLevel,
-                                   this.clientMaxWindowBits), flush);
-  }
-
-  @Override
-  public WsEngine extension(WebSocketExtension extension, WsEngineSettings settings) {
-    return this;
   }
 
   static WsDeflateClientEngine from(WebSocketExtension extension, WsEngineSettings settings) {
@@ -81,7 +60,30 @@ final class WsDeflateClientEngine extends WsEngine {
       }
     }
     return new WsDeflateClientEngine(settings.clientCompressionLevel, clientNoContextTakeover,
-                                     serverMaxWindowBits, clientMaxWindowBits);
+        serverMaxWindowBits, clientMaxWindowBits);
   }
+
+  @Override
+  public WsDecoder decoder() {
+    return Ws.deflateDecoder(new Inflate<Object>(Inflate.Z_NO_WRAP, this.serverMaxWindowBits));
+  }
+
+  @Override
+  public WsEncoder encoder() {
+    final int flush;
+    if (this.clientNoContextTakeover) {
+      flush = Deflate.Z_FULL_FLUSH;
+    } else {
+      flush = Deflate.Z_SYNC_FLUSH;
+    }
+    return Ws.deflateEncoderMasked(new Deflate<Object>(Deflate.Z_NO_WRAP, this.clientCompressionLevel,
+        this.clientMaxWindowBits), flush);
+  }
+
+  @Override
+  public WsEngine extension(WebSocketExtension extension, WsEngineSettings settings) {
+    return this;
+  }
+
 }
 

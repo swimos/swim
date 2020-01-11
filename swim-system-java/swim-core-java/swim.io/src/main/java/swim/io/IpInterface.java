@@ -17,6 +17,7 @@ package swim.io;
 import java.net.InetSocketAddress;
 
 public interface IpInterface {
+
   IpSettings ipSettings();
 
   IpServiceRef bindTcp(InetSocketAddress localAddress, IpService service, IpSettings ipSettings);
@@ -114,4 +115,5 @@ public interface IpInterface {
     final IpSocket socket = new IpSocketModem<I, O>(modem);
     return connectTls(new InetSocketAddress(address, port), socket, ipSettings());
   }
+
 }

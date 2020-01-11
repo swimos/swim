@@ -20,6 +20,7 @@ import swim.kernel.KernelContext;
 import swim.web.WebRoute;
 
 public class WebServiceFactory implements ServiceFactory<WebService> {
+
   final KernelContext kernel;
   final WebServiceDef serviceDef;
   final WebRoute router;
@@ -46,4 +47,5 @@ public class WebServiceFactory implements ServiceFactory<WebService> {
   public WebService createService(ServiceContext context) {
     return new WebService(this.kernel, context, this.serviceDef, this.router);
   }
+
 }

@@ -21,9 +21,6 @@ import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
 
 public final class HostList {
-  private HostList() {
-    // static
-  }
 
   public static final HostObjectType<List<Object>> TYPE;
 
@@ -33,9 +30,15 @@ public final class HostList {
     type.inheritType(HostCollection.TYPE);
     type.addMember(new HostListlength());
   }
+
+  private HostList() {
+    // static
+  }
+
 }
 
 final class HostListlength implements HostField<List<Object>> {
+
   @Override
   public String key() {
     return "length";
@@ -45,4 +48,5 @@ final class HostListlength implements HostField<List<Object>> {
   public Object get(Bridge bridge, List<Object> list) {
     return list.size();
   }
+
 }

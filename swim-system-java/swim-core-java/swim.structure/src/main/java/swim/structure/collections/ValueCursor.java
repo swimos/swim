@@ -19,6 +19,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 public class ValueCursor<T> implements Cursor<T> {
+
   protected Cursor<Value> inner;
   protected Form<T> valueForm;
 
@@ -139,4 +140,5 @@ public class ValueCursor<T> implements Cursor<T> {
   public void load() throws InterruptedException {
     this.inner.load();
   }
+
 }

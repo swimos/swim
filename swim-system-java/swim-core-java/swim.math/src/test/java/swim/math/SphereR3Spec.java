@@ -20,15 +20,17 @@ import swim.structure.Record;
 import static org.testng.Assert.assertEquals;
 
 public class SphereR3Spec {
+
   @Test
   public void testMold() {
     assertEquals(SphereR3.form().mold(new SphereR3(2.0, 0.5, -1.0, 1.0)),
-                 Record.of(Attr.of("sphere", Record.of(2.0, 0.5, -1.0, 1.0))));
+        Record.of(Attr.of("sphere", Record.of(2.0, 0.5, -1.0, 1.0))));
   }
 
   @Test
   public void testCast() {
     assertEquals(SphereR3.form().cast(Record.of(Attr.of("sphere", Record.of(2.0, 0.5, -1.0, 1.0)))),
-                 new SphereR3(2.0, 0.5, -1.0, 1.0));
+        new SphereR3(2.0, 0.5, -1.0, 1.0));
   }
+
 }

@@ -15,4 +15,5 @@
 package swim.api.policy;
 
 public interface UplinkPolicy extends Policy {
+
 }

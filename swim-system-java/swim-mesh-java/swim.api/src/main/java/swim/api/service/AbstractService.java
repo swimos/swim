@@ -27,6 +27,7 @@ import swim.io.IpSocketRef;
 import swim.util.Log;
 
 public class AbstractService implements Service, IpInterface, Log {
+
   protected final ServiceContext context;
 
   public AbstractService(ServiceContext context) {
@@ -143,4 +144,5 @@ public class AbstractService implements Service, IpInterface, Log {
   public void didFail(Throwable error) {
     // hook
   }
+
 }

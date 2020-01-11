@@ -18,6 +18,7 @@ import swim.codec.Output;
 import swim.codec.OutputSettings;
 
 final class PIOutput<I> extends Output<I> {
+
   final XmlParser<I, ?> xml;
   final String target;
   final StringBuilder builder;
@@ -113,4 +114,5 @@ final class PIOutput<I> extends Output<I> {
   public String toString() {
     return this.builder.toString();
   }
+
 }

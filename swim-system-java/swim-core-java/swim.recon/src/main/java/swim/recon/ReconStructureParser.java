@@ -50,6 +50,7 @@ import swim.structure.operator.TimesOperator;
 import swim.util.Builder;
 
 public class ReconStructureParser extends ReconParser<Item, Value> {
+
   @Override
   public boolean isDistinct(Value value) {
     return value.isDistinct();
@@ -347,4 +348,5 @@ public class ReconStructureParser extends ReconParser<Item, Value> {
   public Value filter(Value selector, Value predicate) {
     return selector.filter(predicate);
   }
+
 }

@@ -23,6 +23,7 @@ import swim.api.http.function.WillRequestHttp;
 import swim.api.http.function.WillRespondHttp;
 
 public class RestLaneView<V> extends HttpLaneView<V> {
+
   protected final AgentContext agentContext;
   protected RestLaneModel laneBinding;
 
@@ -96,4 +97,5 @@ public class RestLaneView<V> extends HttpLaneView<V> {
   public RestLaneView<V> didRespond(DidRespondHttp<?> didRespond) {
     return observe(didRespond);
   }
+
 }

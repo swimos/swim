@@ -19,6 +19,7 @@ import swim.structure.Form;
 import swim.structure.Item;
 
 public final class TagForm<T> extends Form<T> {
+
   final String tag;
   final Form<T> form;
 
@@ -93,4 +94,5 @@ public final class TagForm<T> extends Form<T> {
     }
     return null;
   }
+
 }

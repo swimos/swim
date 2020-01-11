@@ -50,11 +50,14 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLane<L, K, V> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<L> linkForm;
   protected Form<K> keyForm;
   protected Form<V> valueForm;
-
   protected int flags;
   protected JoinMapLaneModel laneBinding;
   protected MapData<K, V> dataView;
@@ -101,7 +104,7 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
   @Override
   public <L2> JoinMapLaneView<L2, K, V> linkForm(Form<L2> linkForm) {
     return new JoinMapLaneView<L2, K, V>(this.agentContext, linkForm, this.keyForm, this.valueForm,
-                                         this.flags, typesafeObservers(this.observers));
+        this.flags, typesafeObservers(this.observers));
   }
 
   @Override
@@ -121,7 +124,7 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
   @Override
   public <K2> JoinMapLaneView<L, K2, V> keyForm(Form<K2> keyForm) {
     return new JoinMapLaneView<L, K2, V>(this.agentContext, this.linkForm, keyForm, this.valueForm,
-                                         this.flags, typesafeObservers(this.observers));
+        this.flags, typesafeObservers(this.observers));
   }
 
   @Override
@@ -141,7 +144,7 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
   @Override
   public <V2> JoinMapLaneView<L, K, V2> valueForm(Form<V2> valueForm) {
     return new JoinMapLaneView<L, K, V2>(this.agentContext, this.linkForm, this.keyForm, valueForm,
-                                         this.flags, typesafeObservers(this.observers));
+        this.flags, typesafeObservers(this.observers));
   }
 
   @Override
@@ -826,7 +829,4 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
     return (Iterator<Map.Entry<L, MapDownlink<?, ?>>>) (Iterator<?>) this.laneBinding.downlinks.iterator();
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
 }

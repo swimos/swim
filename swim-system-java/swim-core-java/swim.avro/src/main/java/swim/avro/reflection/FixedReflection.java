@@ -22,6 +22,7 @@ import swim.codec.InputBuffer;
 import swim.collections.FingerTrieSeq;
 
 final class FixedReflection extends AvroFixedType<byte[]> {
+
   final AvroName fullName;
   final FingerTrieSeq<AvroName> aliases;
   final int size;
@@ -64,4 +65,5 @@ final class FixedReflection extends AvroFixedType<byte[]> {
   public Decoder<byte[]> decodeFixed(InputBuffer input) {
     return Binary.parseOutput(Binary.byteArrayOutput(this.size), input);
   }
+
 }

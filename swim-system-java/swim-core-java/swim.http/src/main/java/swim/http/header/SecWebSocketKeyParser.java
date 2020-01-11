@@ -20,6 +20,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class SecWebSocketKeyParser extends Parser<SecWebSocketKey> {
+
   final Parser<byte[]> key;
 
   SecWebSocketKeyParser(Parser<byte[]> key) {
@@ -28,11 +29,6 @@ final class SecWebSocketKeyParser extends Parser<SecWebSocketKey> {
 
   SecWebSocketKeyParser() {
     this(null);
-  }
-
-  @Override
-  public Parser<SecWebSocketKey> feed(Input input) {
-    return parse(input, key);
   }
 
   static Parser<SecWebSocketKey> parse(Input input, Parser<byte[]> key) {
@@ -59,4 +55,10 @@ final class SecWebSocketKeyParser extends Parser<SecWebSocketKey> {
   static Parser<SecWebSocketKey> parse(Input input) {
     return parse(input, null);
   }
+
+  @Override
+  public Parser<SecWebSocketKey> feed(Input input) {
+    return parse(input, key);
+  }
+
 }

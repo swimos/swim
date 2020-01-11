@@ -15,6 +15,7 @@
 package swim.codec;
 
 final class Base64Parser<O> extends Parser<O> {
+
   final Output<O> output;
   final Base64 base64;
   final int p;
@@ -33,11 +34,6 @@ final class Base64Parser<O> extends Parser<O> {
 
   Base64Parser(Output<O> output, Base64 base64) {
     this(output, base64, 0, 0, 0, 1);
-  }
-
-  @Override
-  public Parser<O> feed(Input input) {
-    return parse(input, this.output.clone(), this.base64, this.p, this.q, this.r, this.step);
   }
 
   static <O> Parser<O> parse(Input input, Output<O> output, Base64 base64, int p, int q, int r, int step) {
@@ -152,4 +148,10 @@ final class Base64Parser<O> extends Parser<O> {
   static <O> Parser<O> parse(Input input, Output<O> output, Base64 base64) {
     return parse(input, output, base64, 0, 0, 0, 1);
   }
+
+  @Override
+  public Parser<O> feed(Input input) {
+    return parse(input, this.output.clone(), this.base64, this.p, this.q, this.r, this.step);
+  }
+
 }

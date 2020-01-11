@@ -17,6 +17,7 @@ package swim.uri;
 import java.util.Map;
 
 final class UriQueryEntry implements Map.Entry<String, String> {
+
   final String key;
   final String value;
 
@@ -55,11 +56,12 @@ final class UriQueryEntry implements Map.Entry<String, String> {
   @Override
   public int hashCode() {
     return (this.key == null ? 0 : this.key.hashCode())
-         ^ (this.value == null ? 0 : this.value.hashCode());
+        ^ (this.value == null ? 0 : this.value.hashCode());
   }
 
   @Override
   public String toString() {
     return this.key.toString() + '=' + this.value.toString();
   }
+
 }

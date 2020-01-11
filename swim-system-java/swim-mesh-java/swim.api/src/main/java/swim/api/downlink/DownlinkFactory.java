@@ -19,6 +19,7 @@ import swim.api.ws.WsDownlink;
 import swim.structure.Value;
 
 public interface DownlinkFactory {
+
   EventDownlink<Value> downlink();
 
   ListDownlink<Value> downlinkList();
@@ -30,4 +31,5 @@ public interface DownlinkFactory {
   <V> HttpDownlink<V> downlinkHttp();
 
   <I, O> WsDownlink<I, O> downlinkWs();
+
 }

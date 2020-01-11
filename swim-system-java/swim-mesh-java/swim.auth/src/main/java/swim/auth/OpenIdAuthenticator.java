@@ -26,6 +26,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class OpenIdAuthenticator extends AbstractAuthenticator {
+
   protected final FingerTrieSeq<String> issuers;
   protected final FingerTrieSeq<String> audiences;
   protected final FingerTrieSeq<PublicKeyDef> publicKeyDefs;
@@ -81,4 +82,5 @@ public class OpenIdAuthenticator extends AbstractAuthenticator {
     }
     return null;
   }
+
 }

@@ -30,6 +30,10 @@ import swim.structure.Value;
  * Factory for constructing JSON parsers and writers.
  */
 public final class Json {
+
+  private static JsonParser<Item, Value> structureParser;
+  private static JsonWriter<Item, Value> structureWriter;
+
   private Json() {
     // static
   }
@@ -85,9 +89,6 @@ public final class Json {
         || c >= 0x10000 && c <= 0xeffff;
   }
 
-  private static JsonParser<Item, Value> structureParser;
-  private static JsonWriter<Item, Value> structureWriter;
-
   public static JsonParser<Item, Value> structureParser() {
     if (structureParser == null) {
       structureParser = new JsonStructureParser();
@@ -141,4 +142,5 @@ public final class Json {
   public static <T> Encoder<T, T> formEncoder(Form<T> form) {
     return Utf8.encodedWriter(formWriter(form));
   }
+
 }

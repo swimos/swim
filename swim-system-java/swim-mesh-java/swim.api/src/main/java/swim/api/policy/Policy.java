@@ -24,6 +24,7 @@ import swim.warp.LinkRequest;
 import swim.warp.SyncRequest;
 
 public interface Policy extends HttpPolicy {
+
   PolicyDirective<LinkRequest> canLink(LinkRequest request, Identity identity);
 
   PolicyDirective<SyncRequest> canSync(SyncRequest request, Identity identity);
@@ -35,4 +36,5 @@ public interface Policy extends HttpPolicy {
   PolicyDirective<HttpMessage<?>> canRequest(HttpRequest<?> request);
 
   PolicyDirective<HttpResponse<?>> canRespond(HttpRequest<?> request, HttpResponse<?> response);
+
 }

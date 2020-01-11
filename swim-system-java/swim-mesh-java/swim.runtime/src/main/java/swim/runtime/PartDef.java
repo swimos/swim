@@ -19,6 +19,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface PartDef extends CellDef {
+
   Value partKey();
 
   PartPredicate predicate();
@@ -36,4 +37,5 @@ public interface PartDef extends CellDef {
   Collection<? extends LaneDef> laneDefs();
 
   LaneDef getLaneDef(Uri laneUri);
+
 }

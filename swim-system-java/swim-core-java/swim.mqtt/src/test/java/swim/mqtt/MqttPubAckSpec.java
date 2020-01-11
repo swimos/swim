@@ -19,6 +19,7 @@ import swim.structure.Data;
 import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttPubAckSpec {
+
   public static void assertDecodes(Data data, MqttPubAck packet) {
     MqttAssertions.assertDecodesPacket(data, packet);
   }
@@ -34,4 +35,5 @@ public class MqttPubAckSpec {
     assertEncodes(MqttPubAck.from(0x0000), Data.fromBase16("40020000"));
     assertEncodes(MqttPubAck.from(0x7E96), Data.fromBase16("40027E96"));
   }
+
 }

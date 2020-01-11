@@ -18,6 +18,7 @@ package swim.concurrent;
  * {@link Stage} that can be started and stopped.
  */
 public interface MainStage extends Stage {
+
   /**
    * Ensures that this {@code Stage} is up and running.
    *
@@ -29,4 +30,5 @@ public interface MainStage extends Stage {
    * Ensures that this {@code Stage} has been permanently stopped.
    */
   void stop();
+
 }

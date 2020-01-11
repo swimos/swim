@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class QValueWriter extends Writer<Object, Object> {
+
   final int weight;
   final int step;
 
@@ -33,11 +34,6 @@ final class QValueWriter extends Writer<Object, Object> {
     }
     this.weight = (int) (weight * 1000f);
     this.step = 1;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.weight, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, int weight, int step) {
@@ -107,4 +103,10 @@ final class QValueWriter extends Writer<Object, Object> {
       return error(new HttpException("invalid qvalue: " + weight));
     }
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.weight, this.step);
+  }
+
 }

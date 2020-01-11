@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface WillDrop extends Preemptive {
+
   void willDrop(int lower);
+
 }

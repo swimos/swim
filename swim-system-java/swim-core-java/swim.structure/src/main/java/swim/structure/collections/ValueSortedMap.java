@@ -20,6 +20,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class ValueSortedMap<K, V> extends ValueMap<K, V> implements SortedMap<K, V> {
+
   public ValueSortedMap(SortedMap<Value, Value> inner, Form<K> keyForm, Form<V> valueForm) {
     super(inner, keyForm, valueForm);
   }
@@ -107,4 +108,5 @@ public class ValueSortedMap<K, V> extends ValueMap<K, V> implements SortedMap<K,
   public Comparator<? super K> comparator() {
     return null;
   }
+
 }

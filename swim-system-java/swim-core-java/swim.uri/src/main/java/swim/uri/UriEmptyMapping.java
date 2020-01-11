@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 final class UriEmptyMapping<T> extends UriTerminalMapper<T> {
+
   @Override
   public boolean isEmpty() {
     return true;
@@ -74,4 +75,5 @@ final class UriEmptyMapping<T> extends UriTerminalMapper<T> {
   public Iterator<T> valueIterator() {
     return Collections.emptyIterator();
   }
+
 }

@@ -18,6 +18,7 @@ import java.util.Iterator;
 import swim.collections.HashTrieMap;
 
 public abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
+
   protected MapOutlet<K, V, ? extends O> input;
   protected HashTrieMap<K, KeyEffect> effects;
   protected int version;
@@ -176,4 +177,5 @@ public abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
   protected void didReconcileOutput(int version) {
     // stub
   }
+
 }

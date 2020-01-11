@@ -42,6 +42,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownlink<V> {
+
   protected final Form<V> valueForm;
   protected EventDownlinkModel model;
 
@@ -50,7 +51,7 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
                            float rate, Value body, int flags, Form<V> valueForm,
                            Object observers) {
     super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-          body, flags, observers);
+        body, flags, observers);
     this.valueForm = valueForm;
   }
 
@@ -58,7 +59,7 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
                            Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                            float rate, Value body, Form<V> valueForm) {
     this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-         body, KEEP_LINKED, valueForm, null);
+        body, KEEP_LINKED, valueForm, null);
   }
 
   @Override
@@ -69,9 +70,9 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
   @Override
   public EventDownlinkView<V> hostUri(Uri hostUri) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    hostUri, this.nodeUri, this.laneUri,
-                                    this.prio, this.rate, this.body, this.flags,
-                                    this.valueForm, this.observers);
+        hostUri, this.nodeUri, this.laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
@@ -82,9 +83,9 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
   @Override
   public EventDownlinkView<V> nodeUri(Uri nodeUri) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, nodeUri, this.laneUri,
-                                    this.prio, this.rate, this.body, this.flags,
-                                    this.valueForm, this.observers);
+        this.hostUri, nodeUri, this.laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
@@ -95,9 +96,9 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
   @Override
   public EventDownlinkView<V> laneUri(Uri laneUri) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, this.nodeUri, laneUri,
-                                    this.prio, this.rate, this.body, this.flags,
-                                    this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
@@ -108,25 +109,25 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
   @Override
   public EventDownlinkView<V> prio(float prio) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, this.nodeUri, this.laneUri,
-                                    prio, this.rate, this.body, this.flags,
-                                    this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, this.laneUri,
+        prio, this.rate, this.body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
   public EventDownlinkView<V> rate(float rate) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, this.nodeUri, this.laneUri,
-                                    this.prio, rate, this.body, this.flags,
-                                    valueForm, this.observers);
+        this.hostUri, this.nodeUri, this.laneUri,
+        this.prio, rate, this.body, this.flags,
+        valueForm, this.observers);
   }
 
   @Override
   public EventDownlinkView<V> body(Value body) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, this.nodeUri, this.laneUri,
-                                    this.prio, this.rate, body, this.flags,
-                                    this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, this.laneUri,
+        this.prio, this.rate, body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
@@ -157,9 +158,9 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
   @Override
   public <V2> EventDownlinkView<V2> valueForm(Form<V2> valueForm) {
     return new EventDownlinkView<V2>(this.cellContext, this.stage, this.meshUri,
-                                     this.hostUri, this.nodeUri, this.laneUri,
-                                     this.prio, this.rate, this.body, this.flags,
-                                     valueForm, typesafeObservers(this.observers));
+        this.hostUri, this.nodeUri, this.laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        valueForm, typesafeObservers(this.observers));
   }
 
   @Override
@@ -306,7 +307,7 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
   @Override
   public EventDownlinkModel createDownlinkModel() {
     return new EventDownlinkModel(this.meshUri, this.hostUri, this.nodeUri,
-                                  this.laneUri, this.prio, this.rate, this.body);
+        this.laneUri, this.prio, this.rate, this.body);
   }
 
   @Override
@@ -322,4 +323,5 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
     }
     return this;
   }
+
 }

@@ -17,6 +17,7 @@ package swim.ws;
 import swim.http.WebSocketExtension;
 
 final class WsStandardClientEngine extends WsEngine {
+
   @Override
   public WsDecoder decoder() {
     return Ws.standardDecoder();
@@ -35,4 +36,5 @@ final class WsStandardClientEngine extends WsEngine {
       return this;
     }
   }
+
 }

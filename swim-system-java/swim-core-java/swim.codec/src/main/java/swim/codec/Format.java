@@ -18,6 +18,9 @@ package swim.codec;
  * Text format utility functions.
  */
 public final class Format {
+
+  private static String lineSeparator;
+
   private Format() {
   }
 
@@ -29,7 +32,7 @@ public final class Format {
    * Display}; otherwise writes the result of {@link Object#toString()}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full display string has been written.
+   *                         state before the full display string has been written.
    */
   public static void display(Object object, Output<?> output) {
     if (object == null) {
@@ -84,7 +87,7 @@ public final class Format {
    * otherwise writes the result of {@link Object#toString()}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full debug string has been written.
+   *                         state before the full debug string has been written.
    */
   public static void debug(Object object, Output<?> output) {
     if (object == null) {
@@ -162,7 +165,7 @@ public final class Format {
    * to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full numeric string has been written.
+   *                         state before the full numeric string has been written.
    */
   public static void displayInt(int value, Output<?> output) {
     if (value < 0) {
@@ -192,7 +195,7 @@ public final class Format {
    * to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full numeric string has been written.
+   *                         state before the full numeric string has been written.
    */
   public static void displayLong(long value, Output<?> output) {
     if (value < 0L) {
@@ -222,7 +225,7 @@ public final class Format {
    * to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full numeric string has been written.
+   *                         state before the full numeric string has been written.
    */
   public static void displayFloat(float value, Output<?> output) {
     output = output.write(Float.toString(value)).write('f');
@@ -233,7 +236,7 @@ public final class Format {
    * to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full numeric string has been written.
+   *                         state before the full numeric string has been written.
    */
   public static void displayDouble(double value, Output<?> output) {
     output = output.write(Double.toString(value));
@@ -244,7 +247,7 @@ public final class Format {
    * {@code value} to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full numeric literal has been written.
+   *                         state before the full numeric literal has been written.
    */
   public static void debugInt(int value, Output<?> output) {
     displayInt(value, output);
@@ -255,7 +258,7 @@ public final class Format {
    * {@code value} to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full numeric literal has been written.
+   *                         state before the full numeric literal has been written.
    */
   public static void debugLong(long value, Output<?> output) {
     displayLong(value, output);
@@ -267,7 +270,7 @@ public final class Format {
    * {@code value} to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full numeric literal has been written.
+   *                         state before the full numeric literal has been written.
    */
   public static void debugFloat(float value, Output<?> output) {
     output = output.write(Float.toString(value)).write('f');
@@ -278,7 +281,7 @@ public final class Format {
    * {@code value} to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full numeric literal has been written.
+   *                         state before the full numeric literal has been written.
    */
   public static void debugDouble(double value, Output<?> output) {
     output = output.write(Double.toString(value));
@@ -289,27 +292,43 @@ public final class Format {
    * {@code character} to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full character literal has been written.
+   *                         state before the full character literal has been written.
    */
   public static void debugChar(int character, Output<?> output) {
     output = output.write('\'');
     switch (character) {
-      case '\b': output.write('\\').write('b'); break;
-      case '\t': output.write('\\').write('t'); break;
-      case '\n': output.write('\\').write('n'); break;
-      case '\f': output.write('\\').write('f'); break;
-      case '\r': output.write('\\').write('r'); break;
-      case '\"': output.write('\\').write('\"'); break;
-      case '\'': output.write('\\').write('\''); break;
-      case '\\': output.write('\\').write('\\'); break;
+      case '\b':
+        output.write('\\').write('b');
+        break;
+      case '\t':
+        output.write('\\').write('t');
+        break;
+      case '\n':
+        output.write('\\').write('n');
+        break;
+      case '\f':
+        output.write('\\').write('f');
+        break;
+      case '\r':
+        output.write('\\').write('r');
+        break;
+      case '\"':
+        output.write('\\').write('\"');
+        break;
+      case '\'':
+        output.write('\\').write('\'');
+        break;
+      case '\\':
+        output.write('\\').write('\\');
+        break;
       default:
         if (character >= 0x0000 && character <= 0x001f
             || character >= 0x007f && character <= 0x009f) {
           output = output.write('\\').write('u')
-            .write(encodeHex(character >>> 12 & 0xf))
-            .write(encodeHex(character >>>  8 & 0xf))
-            .write(encodeHex(character >>>  4 & 0xf))
-            .write(encodeHex(character        & 0xf));
+              .write(encodeHex(character >>> 12 & 0xf))
+              .write(encodeHex(character >>> 8 & 0xf))
+              .write(encodeHex(character >>> 4 & 0xf))
+              .write(encodeHex(character & 0xf));
         } else {
           output = output.write(character);
         }
@@ -322,7 +341,7 @@ public final class Format {
    * {@code string} to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full string literal has been written.
+   *                         state before the full string literal has been written.
    */
   public static void debugString(String string, Output<?> output) {
     output = output.write('\"');
@@ -330,20 +349,34 @@ public final class Format {
     for (int i = 0; i < n; i = string.offsetByCodePoints(i, 1)) {
       final int c = string.codePointAt(i);
       switch (c) {
-        case '\b': output.write('\\').write('b'); break;
-        case '\t': output.write('\\').write('t'); break;
-        case '\n': output.write('\\').write('n'); break;
-        case '\f': output.write('\\').write('f'); break;
-        case '\r': output.write('\\').write('r'); break;
-        case '\"': output.write('\\').write('\"'); break;
-        case '\\': output.write('\\').write('\\'); break;
+        case '\b':
+          output.write('\\').write('b');
+          break;
+        case '\t':
+          output.write('\\').write('t');
+          break;
+        case '\n':
+          output.write('\\').write('n');
+          break;
+        case '\f':
+          output.write('\\').write('f');
+          break;
+        case '\r':
+          output.write('\\').write('r');
+          break;
+        case '\"':
+          output.write('\\').write('\"');
+          break;
+        case '\\':
+          output.write('\\').write('\\');
+          break;
         default:
           if (c >= 0x0000 && c <= 0x001f || c >= 0x007f && c <= 0x009f) {
             output = output.write('\\').write('u')
-              .write(encodeHex(c >>> 12 & 0xf))
-              .write(encodeHex(c >>>  8 & 0xf))
-              .write(encodeHex(c >>>  4 & 0xf))
-              .write(encodeHex(c        & 0xf));
+                .write(encodeHex(c >>> 12 & 0xf))
+                .write(encodeHex(c >>> 8 & 0xf))
+                .write(encodeHex(c >>> 4 & 0xf))
+                .write(encodeHex(c & 0xf));
           } else {
             output = output.write(c);
           }
@@ -360,8 +393,6 @@ public final class Format {
     }
   }
 
-  private static String lineSeparator;
-
   /**
    * Returns the operting system specific string used to separate lines of text.
    */
@@ -371,4 +402,5 @@ public final class Format {
     }
     return lineSeparator;
   }
+
 }

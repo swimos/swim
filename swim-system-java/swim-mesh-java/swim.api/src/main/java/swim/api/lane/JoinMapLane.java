@@ -38,6 +38,7 @@ import swim.observable.function.WillUpdateKey;
 import swim.structure.Form;
 
 public interface JoinMapLane<L, K, V> extends WarpLane, Iterable<Map.Entry<K, V>>, ObservableMap<K, V> {
+
   Form<L> linkForm();
 
   <L2> JoinMapLane<L2, K, V> linkForm(Form<L2> linkForm);
@@ -125,4 +126,5 @@ public interface JoinMapLane<L, K, V> extends WarpLane, Iterable<Map.Entry<K, V>
   Iterator<V> valueIterator();
 
   Iterator<Entry<L, MapDownlink<?, ?>>> downlinkIterator();
+
 }

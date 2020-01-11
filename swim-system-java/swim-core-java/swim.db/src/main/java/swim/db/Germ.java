@@ -27,6 +27,8 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class Germ {
+
+  static final int BLOCK_SIZE = 4 * 1024;
   final int stem;
   final long version;
   final long created;
@@ -39,6 +41,30 @@ public class Germ {
     this.created = created;
     this.updated = updated;
     this.seedRefValue = seedRefValue.commit();
+  }
+
+  public static Germ fromValue(Value value) {
+    Throwable error = null;
+    try {
+      final Value header = value.header("swimdb");
+      if (header != null) {
+        final int stem = header.get("stem").intValue();
+        final long version = header.get("version").longValue();
+        final long created = header.get("created").longValue();
+        final long updated = header.get("updated").longValue();
+        final Value seedRefValue = value.get("seed");
+        return new Germ(stem, version, created, updated, seedRefValue);
+      }
+    } catch (Throwable cause) {
+      if (Conts.isNonFatal(cause)) {
+        error = cause;
+      } else {
+        throw cause;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed germ: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), error);
   }
 
   public int stem() {
@@ -118,29 +144,4 @@ public class Germ {
     return Recon.toString(toValue());
   }
 
-  static final int BLOCK_SIZE = 4 * 1024;
-
-  public static Germ fromValue(Value value) {
-    Throwable error = null;
-    try {
-      final Value header = value.header("swimdb");
-      if (header != null) {
-        final int stem = header.get("stem").intValue();
-        final long version = header.get("version").longValue();
-        final long created = header.get("created").longValue();
-        final long updated = header.get("updated").longValue();
-        final Value seedRefValue = value.get("seed");
-        return new Germ(stem, version, created, updated, seedRefValue);
-      }
-    } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        error = cause;
-      } else {
-        throw cause;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed germ: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), error);
-  }
 }

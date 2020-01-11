@@ -22,12 +22,43 @@ import swim.codec.OutputBuffer;
 import swim.util.Murmur3;
 
 public final class WsClose<P, T> extends WsControl<P, T> implements Debug {
+
+  private static int hashSeed;
   final P payload;
   final Encoder<?, ?> content;
 
   WsClose(P payload, Encoder<?, ?> content) {
     this.payload = payload;
     this.content = content;
+  }
+
+  public static <P, T> WsClose<P, T> empty() {
+    return new WsClose<P, T>(null, Encoder.done());
+  }
+
+  public static <P, T> WsClose<P, T> from(P payload, Encoder<?, ?> content) {
+    return new WsClose<P, T>(payload, content);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <P, T> WsClose<P, T> from(P payload) {
+    if (payload instanceof WsStatus) {
+      return (WsClose<P, T>) from((WsStatus) payload);
+    } else {
+      return new WsClose<P, T>(payload, Encoder.done());
+    }
+  }
+
+  public static <T> WsClose<WsStatus, T> from(WsStatus status) {
+    return new WsClose<WsStatus, T>(status, status.encoder());
+  }
+
+  public static <T> WsClose<WsStatus, T> from(int code, String reason) {
+    return from(WsStatus.from(code, reason));
+  }
+
+  public static <T> WsClose<WsStatus, T> from(int code) {
+    return from(WsStatus.from(code));
   }
 
   @Override
@@ -80,34 +111,4 @@ public final class WsClose<P, T> extends WsControl<P, T> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static <P, T> WsClose<P, T> empty() {
-    return new WsClose<P, T>(null, Encoder.done());
-  }
-
-  public static <P, T> WsClose<P, T> from(P payload, Encoder<?, ?> content) {
-    return new WsClose<P, T>(payload, content);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <P, T> WsClose<P, T> from(P payload) {
-    if (payload instanceof WsStatus) {
-      return (WsClose<P, T>) from((WsStatus) payload);
-    } else {
-      return new WsClose<P, T>(payload, Encoder.done());
-    }
-  }
-
-  public static <T> WsClose<WsStatus, T> from(WsStatus status) {
-    return new WsClose<WsStatus, T>(status, status.encoder());
-  }
-
-  public static <T> WsClose<WsStatus, T> from(int code, String reason) {
-    return from(WsStatus.from(code, reason));
-  }
-
-  public static <T> WsClose<WsStatus, T> from(int code) {
-    return from(WsStatus.from(code));
-  }
 }

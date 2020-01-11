@@ -22,6 +22,8 @@ import swim.uri.Uri;
 import swim.util.Murmur3;
 
 public final class PartAddress extends CellAddress implements Debug {
+
+  private static int hashSeed;
   final String edgeName;
   final Uri meshUri;
   final Value partKey;
@@ -30,6 +32,14 @@ public final class PartAddress extends CellAddress implements Debug {
     this.edgeName = edgeName;
     this.meshUri = meshUri;
     this.partKey = partKey.commit();
+  }
+
+  public static PartAddress from(String edgeName, Uri meshUri, Value partKey) {
+    return new PartAddress(edgeName, meshUri, partKey);
+  }
+
+  public static PartAddress from(String edgeName, String meshUri, Value partKey) {
+    return new PartAddress(edgeName, Uri.parse(meshUri), partKey);
   }
 
   public String edgeName() {
@@ -101,13 +111,4 @@ public final class PartAddress extends CellAddress implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static PartAddress from(String edgeName, Uri meshUri, Value partKey) {
-    return new PartAddress(edgeName, meshUri, partKey);
-  }
-
-  public static PartAddress from(String edgeName, String meshUri, Value partKey) {
-    return new PartAddress(edgeName, Uri.parse(meshUri), partKey);
-  }
 }

@@ -19,6 +19,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 final class VectorR3Form extends TensorForm<VectorR3> {
+
   @Override
   public String tag() {
     return "vector";
@@ -162,4 +163,5 @@ final class VectorR3Form extends TensorForm<VectorR3> {
       tensor[offset] = header.getItem(2).doubleValue(0.0);
     }
   }
+
 }

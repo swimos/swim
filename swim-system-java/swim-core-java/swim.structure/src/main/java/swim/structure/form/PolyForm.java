@@ -40,6 +40,7 @@ import swim.structure.Tag;
 import swim.structure.Text;
 
 public class PolyForm extends Form<Object> implements Cloneable {
+
   final Object unit;
   HashTrieMap<Class<?>, Form<?>> classForms;
   HashTrieMap<String, Form<?>> tagForms;
@@ -543,4 +544,5 @@ public class PolyForm extends Form<Object> implements Cloneable {
   public PolyForm clone() {
     return new PolyForm(this.unit, this.classForms, this.tagForms);
   }
+
 }

@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import swim.util.OrderedMapCursor;
 
 final class BTreeLeafCursor<K, V> implements OrderedMapCursor<K, V> {
+
   final Map.Entry<K, V>[] array;
   int index;
   int limit;
@@ -120,4 +121,5 @@ final class BTreeLeafCursor<K, V> implements OrderedMapCursor<K, V> {
       throw new NoSuchElementException();
     }
   }
+
 }

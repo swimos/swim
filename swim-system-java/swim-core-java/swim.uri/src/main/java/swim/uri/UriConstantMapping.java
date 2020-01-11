@@ -21,6 +21,8 @@ import java.util.NoSuchElementException;
 import swim.util.Murmur3;
 
 final class UriConstantMapping<T> extends UriTerminalMapper<T> {
+
+  private static int hashSeed;
   final Uri key;
   final T value;
 
@@ -88,10 +90,10 @@ final class UriConstantMapping<T> extends UriTerminalMapper<T> {
     return Murmur3.mash(Murmur3.mix(hashSeed, this.value.hashCode()));
   }
 
-  private static int hashSeed;
 }
 
 final class UriConstantMappingIterator<T> implements Iterator<Map.Entry<Uri, T>> {
+
   Uri key;
   T value;
 
@@ -121,9 +123,11 @@ final class UriConstantMappingIterator<T> implements Iterator<Map.Entry<Uri, T>>
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }
 
 final class UriConstantMappingKeyIterator implements Iterator<Uri> {
+
   Uri key;
 
   UriConstantMappingKeyIterator(Uri key) {
@@ -149,9 +153,11 @@ final class UriConstantMappingKeyIterator implements Iterator<Uri> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }
 
 final class UriConstantMappingValueIterator<T> implements Iterator<T> {
+
   T value;
   boolean hasNext;
 
@@ -180,4 +186,5 @@ final class UriConstantMappingValueIterator<T> implements Iterator<T> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

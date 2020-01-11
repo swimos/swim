@@ -17,6 +17,17 @@ package swim.uri;
 import swim.collections.HashTrieMap;
 
 abstract class UriSchemeMapper<T> extends UriMapper<T> {
+
+  static <T> UriSchemeMapper<T> compile(Uri pattern, UriScheme scheme, UriAuthority authority,
+                                        UriPath path, UriQuery query, UriFragment fragment, T value) {
+    if (scheme.isDefined()) {
+      return new UriSchemeMapping<T>(HashTrieMap.<String, UriAuthorityMapper<T>>empty().updated(scheme.name(),
+          UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value)));
+    } else {
+      return UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value);
+    }
+  }
+
   abstract UriMapper<T> getSuffix(UriScheme scheme, UriAuthority authority, UriPath path,
                                   UriQuery query, UriFragment fragment);
 
@@ -50,7 +61,7 @@ abstract class UriSchemeMapper<T> extends UriMapper<T> {
   @Override
   public UriMapper<T> removed(Uri pattern) {
     return removed(pattern.scheme(), pattern.authority(), pattern.path(),
-                   pattern.query(), pattern.fragment());
+        pattern.query(), pattern.fragment());
   }
 
   abstract UriSchemeMapper<T> unmerged(UriSchemeMapper<T> that);
@@ -64,13 +75,4 @@ abstract class UriSchemeMapper<T> extends UriMapper<T> {
     }
   }
 
-  static <T> UriSchemeMapper<T> compile(Uri pattern, UriScheme scheme, UriAuthority authority,
-                                        UriPath path, UriQuery query, UriFragment fragment, T value) {
-    if (scheme.isDefined()) {
-      return new UriSchemeMapping<T>(HashTrieMap.<String, UriAuthorityMapper<T>>empty().updated(scheme.name(),
-                                     UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value)));
-    } else {
-      return UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value);
-    }
-  }
 }

@@ -21,6 +21,7 @@ import swim.server.ServerLoader;
 import swim.uri.UriPath;
 
 public class JsPlaneSpec {
+
   @Test
   public void testJsPlane() {
     final JsKernel jsKernel = new JsKernel();
@@ -36,4 +37,5 @@ public class JsPlaneSpec {
       kernel.stop();
     }
   }
+
 }

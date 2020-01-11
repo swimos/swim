@@ -21,51 +21,53 @@ import static swim.warp.Assertions.assertParses;
 import static swim.warp.Assertions.assertWrites;
 
 public class SyncRequestSpec {
+
   @Test
   public void parseSyncWithNamedHeaders() {
     assertParses("@sync(node: node_uri, lane: lane_uri, prio: 0.5, rate: 1.0)",
-                 new SyncRequest("node_uri", "lane_uri", 0.5f, 1.0f));
+        new SyncRequest("node_uri", "lane_uri", 0.5f, 1.0f));
   }
 
   @Test
   public void parseSyncWithPositionalHeaders() {
     assertParses("@sync(node_uri, lane_uri, prio: 0.5)",
-                 new SyncRequest("node_uri", "lane_uri", 0.5f, 0.0f));
+        new SyncRequest("node_uri", "lane_uri", 0.5f, 0.0f));
   }
 
   @Test
   public void parseSyncWithBody() {
     assertParses("@sync(node_uri, lane_uri)@test",
-                 new SyncRequest("node_uri", "lane_uri", 0.0f, 0.0f, Record.of(Attr.of("test"))));
+        new SyncRequest("node_uri", "lane_uri", 0.0f, 0.0f, Record.of(Attr.of("test"))));
   }
 
   @Test
   public void writeSync() {
     assertWrites(new SyncRequest("node_uri", "lane_uri", 0.0f, 0.0f),
-                 "@sync(node:node_uri,lane:lane_uri)");
+        "@sync(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   public void writeSyncWithPrio() {
     assertWrites(new SyncRequest("node_uri", "lane_uri", 0.5f, 0.0f),
-                 "@sync(node:node_uri,lane:lane_uri,prio:0.5)");
+        "@sync(node:node_uri,lane:lane_uri,prio:0.5)");
   }
 
   @Test
   public void writeSyncWithRate() {
     assertWrites(new SyncRequest("node_uri", "lane_uri", 0.0f, 1.0f),
-                 "@sync(node:node_uri,lane:lane_uri,rate:1)");
+        "@sync(node:node_uri,lane:lane_uri,rate:1)");
   }
 
   @Test
   public void writeSyncWithPrioAndRate() {
     assertWrites(new SyncRequest("node_uri", "lane_uri", 0.5f, 1.0f),
-                 "@sync(node:node_uri,lane:lane_uri,prio:0.5,rate:1)");
+        "@sync(node:node_uri,lane:lane_uri,prio:0.5,rate:1)");
   }
 
   @Test
   public void writeSyncWithBody() {
     assertWrites(new SyncRequest("node_uri", "lane_uri", 0.0f, 0.0f, Record.of(Attr.of("test"))),
-                 "@sync(node:node_uri,lane:lane_uri)@test");
+        "@sync(node:node_uri,lane:lane_uri)@test");
   }
+
 }

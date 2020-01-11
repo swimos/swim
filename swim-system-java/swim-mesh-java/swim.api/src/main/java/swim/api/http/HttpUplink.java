@@ -18,6 +18,7 @@ import swim.api.Uplink;
 import swim.http.HttpRequest;
 
 public interface HttpUplink extends Uplink, HttpLink {
+
   HttpRequest<?> request();
 
   @Override
@@ -25,4 +26,5 @@ public interface HttpUplink extends Uplink, HttpLink {
 
   @Override
   HttpUplink unobserve(Object observer);
+
 }

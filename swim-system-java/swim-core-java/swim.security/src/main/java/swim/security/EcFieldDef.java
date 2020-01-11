@@ -24,9 +24,6 @@ import swim.structure.Kind;
 import swim.structure.Value;
 
 public abstract class EcFieldDef {
-  public abstract ECField toECField();
-
-  public abstract Value toValue();
 
   private static Form<EcFieldDef> form;
 
@@ -47,9 +44,15 @@ public abstract class EcFieldDef {
     }
     return form;
   }
+
+  public abstract ECField toECField();
+
+  public abstract Value toValue();
+
 }
 
 final class EcFieldForm extends Form<EcFieldDef> {
+
   @Override
   public String tag() {
     return "ECField";
@@ -82,4 +85,5 @@ final class EcFieldForm extends Form<EcFieldDef> {
     }
     return null;
   }
+
 }

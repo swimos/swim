@@ -32,6 +32,10 @@ import swim.uri.Uri;
 import swim.warp.UnlinkedResponse;
 
 public class WarpErrorUplinkModem implements WarpContext {
+
+  static final int FEEDING_DOWN = 1 << 0;
+  static final AtomicIntegerFieldUpdater<WarpErrorUplinkModem> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(WarpErrorUplinkModem.class, "status");
   protected final WarpBinding linkBinding;
   protected final Value body;
   volatile int status;
@@ -158,7 +162,7 @@ public class WarpErrorUplinkModem implements WarpContext {
     if (oldStatus != newStatus) {
       final UnlinkedResponse response = getUnlinkedResponse();
       this.linkBinding.pushDown(new Push<UnlinkedResponse>(Uri.empty(), this.linkBinding.hostUri(), this.linkBinding.nodeUri(),
-                                                           this.linkBinding.laneUri(), this.linkBinding.prio(), null, response, null));
+          this.linkBinding.laneUri(), this.linkBinding.prio(), null, response, null));
     } else {
       this.linkBinding.skipDown();
     }
@@ -233,8 +237,4 @@ public class WarpErrorUplinkModem implements WarpContext {
     // nop
   }
 
-  static final int FEEDING_DOWN = 1 << 0;
-
-  static final AtomicIntegerFieldUpdater<WarpErrorUplinkModem> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(WarpErrorUplinkModem.class, "status");
 }

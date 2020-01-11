@@ -23,6 +23,7 @@ import swim.codec.Parser;
 import swim.codec.Utf8;
 
 final class UriHostAddressParser extends Parser<UriHost> {
+
   final UriParser uri;
   final Output<String> output;
   final int c1;
@@ -40,11 +41,6 @@ final class UriHostAddressParser extends Parser<UriHost> {
 
   UriHostAddressParser(UriParser uri) {
     this(uri, null, 0, 0, 1);
-  }
-
-  @Override
-  public Parser<UriHost> feed(Input input) {
-    return parse(input, this.uri, this.output, this.c1, this.x, this.step);
   }
 
   static Parser<UriHost> parse(Input input, UriParser uri, Output<String> output,
@@ -146,4 +142,10 @@ final class UriHostAddressParser extends Parser<UriHost> {
   static Parser<UriHost> parse(Input input, UriParser uri) {
     return parse(input, uri, null, 0, 0, 1);
   }
+
+  @Override
+  public Parser<UriHost> feed(Input input) {
+    return parse(input, this.uri, this.output, this.c1, this.x, this.step);
+  }
+
 }

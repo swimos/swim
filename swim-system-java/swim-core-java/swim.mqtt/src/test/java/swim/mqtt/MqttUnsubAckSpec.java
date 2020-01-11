@@ -19,6 +19,7 @@ import swim.structure.Data;
 import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttUnsubAckSpec {
+
   public static void assertDecodes(Data data, MqttUnsubAck packet) {
     MqttAssertions.assertDecodesPacket(data, packet);
   }
@@ -34,4 +35,5 @@ public class MqttUnsubAckSpec {
     assertEncodes(MqttUnsubAck.from(0x0000), Data.fromBase16("B0020000"));
     assertEncodes(MqttUnsubAck.from(0x7E96), Data.fromBase16("B0027E96"));
   }
+
 }

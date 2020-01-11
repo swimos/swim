@@ -24,6 +24,7 @@ import swim.codec.Utf8;
 import swim.util.PairBuilder;
 
 final class MapDecoder<K, V, T> extends Decoder<T> {
+
   final AvroDecoder avro;
   final AvroMapType<K, V, T> type;
   final PairBuilder<K, V, T> builder;
@@ -52,12 +53,6 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
 
   MapDecoder(AvroDecoder avro, AvroMapType<K, V, T> type) {
     this(avro, type, null, 0L, 0L, 0L, 0, null, null, 1);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.avro, this.type, this.builder, this.count, this.blockSize,
-                  this.keyLength, this.shift, this.keyParser, this.valueDecoder, this.step);
   }
 
   static <K, V, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroMapType<K, V, T> type,
@@ -195,10 +190,17 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
       return error(input.trap());
     }
     return new MapDecoder<K, V, T>(avro, type, builder, count, blockSize, keyLength,
-                                   shift, keyParser, valueDecoder, step);
+        shift, keyParser, valueDecoder, step);
   }
 
   static <K, V, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroMapType<K, V, T> type) {
     return decode(input, avro, type, null, 0L, 0L, 0L, 0, null, null, 1);
   }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.avro, this.type, this.builder, this.count, this.blockSize,
+        this.keyLength, this.shift, this.keyParser, this.valueDecoder, this.step);
+  }
+
 }

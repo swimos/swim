@@ -31,6 +31,13 @@ import swim.codec.OutputBuffer;
 import swim.concurrent.Conts;
 
 class TcpSocket implements Transport, IpSocketContext {
+
+  static final int CLIENT = 1 << 0;
+  static final int SERVER = 1 << 1;
+  static final int CONNECTING = 1 << 2;
+  static final int CONNECTED = 1 << 3;
+  static final AtomicIntegerFieldUpdater<TcpSocket> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(TcpSocket.class, "status");
   final InetSocketAddress localAddress;
   final InetSocketAddress remoteAddress;
   final ByteBuffer readBuffer;
@@ -299,11 +306,4 @@ class TcpSocket implements Transport, IpSocketContext {
     close();
   }
 
-  static final int CLIENT = 1 << 0;
-  static final int SERVER = 1 << 1;
-  static final int CONNECTING = 1 << 2;
-  static final int CONNECTED = 1 << 3;
-
-  static final AtomicIntegerFieldUpdater<TcpSocket> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(TcpSocket.class, "status");
 }

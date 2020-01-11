@@ -29,6 +29,8 @@ import swim.util.KeyedList;
 import swim.util.Murmur3;
 
 public class STree<T> extends STreeContext<T> implements KeyedList<T>, Cloneable, Debug {
+
+  private static int hashSeed;
   STreePage<T> root;
 
   protected STree(STreePage<T> root) {
@@ -37,6 +39,19 @@ public class STree<T> extends STreeContext<T> implements KeyedList<T>, Cloneable
 
   public STree() {
     this(STreePage.<T>empty());
+  }
+
+  public static <T> STree<T> empty() {
+    return new STree<T>();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> STree<T> of(T... values) {
+    final STree<T> tree = new STree<T>();
+    for (T value : values) {
+      tree.add(value);
+    }
+    return tree;
   }
 
   @Override
@@ -286,8 +301,8 @@ public class STree<T> extends STreeContext<T> implements KeyedList<T>, Cloneable
     if (fromIndex != toIndex) {
       final Map.Entry<Object, T> entry = oldRoot.getEntry(fromIndex);
       this.root = oldRoot.removed(fromIndex, this)
-                         .inserted(toIndex, entry.getValue(), entry.getKey(), this)
-                         .balanced(this);
+          .inserted(toIndex, entry.getValue(), entry.getKey(), this)
+          .balanced(this);
     }
   }
 
@@ -490,23 +505,10 @@ public class STree<T> extends STreeContext<T> implements KeyedList<T>, Cloneable
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static <T> STree<T> empty() {
-    return new STree<T>();
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> STree<T> of(T... values) {
-    final STree<T> tree = new STree<T>();
-    for (T value : values) {
-      tree.add(value);
-    }
-    return tree;
-  }
 }
 
 final class STreeSubList<T> extends AbstractList<T> {
+
   final STree<T> inner;
   final int fromIndex;
   final int toIndex;
@@ -543,4 +545,5 @@ final class STreeSubList<T> extends AbstractList<T> {
     }
     return new STreeSubList<T>(this.inner, fromIndex, toIndex);
   }
+
 }

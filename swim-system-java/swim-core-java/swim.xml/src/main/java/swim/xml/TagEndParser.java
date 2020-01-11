@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.util.Builder;
 
 final class TagEndParser<I, V> extends Parser<V> {
+
   final XmlParser<I, V> xml;
   final String tag;
   final Builder<I, V> builder;
@@ -30,11 +31,6 @@ final class TagEndParser<I, V> extends Parser<V> {
     this.tag = tag;
     this.builder = builder;
     this.step = step;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.xml, this.tag, this.builder, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml, String tag,
@@ -113,4 +109,10 @@ final class TagEndParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parseRest(Input input, XmlParser<I, V> xml, String tag, Builder<I, V> builder) {
     return parse(input, xml, tag, builder, 3);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.xml, this.tag, this.builder, this.step);
+  }
+
 }

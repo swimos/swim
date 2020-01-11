@@ -24,5 +24,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SwimTransient {
+
   boolean value() default true;
+
 }

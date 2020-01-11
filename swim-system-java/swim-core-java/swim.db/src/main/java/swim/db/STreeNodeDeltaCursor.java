@@ -18,6 +18,7 @@ import swim.structure.Slot;
 import swim.util.Cursor;
 
 final class STreeNodeDeltaCursor extends STreeNodeCursor {
+
   final long sinceVersion;
 
   STreeNodeDeltaCursor(STreeNode page, long index, int childIndex, long sinceVersion) {
@@ -33,4 +34,5 @@ final class STreeNodeDeltaCursor extends STreeNodeCursor {
   Cursor<Slot> childCursor(STreePageRef childRef) {
     return childRef.deltaCursor(this.sinceVersion);
   }
+
 }

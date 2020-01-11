@@ -21,6 +21,7 @@ import java.util.Collection;
  * a host library.
  */
 public interface HostLibrary {
+
   String libraryName();
 
   HostPackage getHostPackage(String packageName);
@@ -32,4 +33,5 @@ public interface HostLibrary {
   HostType<?> getHostType(Class<?> typeClass);
 
   Collection<HostType<?>> hostTypes();
+
 }

@@ -28,6 +28,7 @@ import swim.runtime.Push;
 import swim.warp.CommandMessage;
 
 public abstract class HttpLaneModel<View extends HttpLaneView<?>, U extends HttpUplinkModem> extends LaneModel<View, U> {
+
   @Override
   public String laneType() {
     return "http";
@@ -114,9 +115,11 @@ public abstract class HttpLaneModel<View extends HttpLaneView<?>, U extends Http
   protected void didRespond(U uplink, HttpResponse<?> response) {
     new HttpLaneRelayDidRespond<View>(this, uplink, response).run();
   }
+
 }
 
 final class HttpLaneRelayWillRequest<View extends HttpLaneView<?>> extends LaneRelay<HttpLaneModel<View, ?>, View> {
+
   final HttpUplinkModem uplink;
   final HttpRequest<?> request;
 
@@ -137,9 +140,11 @@ final class HttpLaneRelayWillRequest<View extends HttpLaneView<?>> extends LaneR
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class HttpLaneRelayDidRequest<View extends HttpLaneView<?>> extends LaneRelay<HttpLaneModel<View, ?>, View> {
+
   final HttpUplinkModem uplink;
   final HttpRequest<Object> request;
 
@@ -160,9 +165,11 @@ final class HttpLaneRelayDidRequest<View extends HttpLaneView<?>> extends LaneRe
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class HttpLaneRelayDoRespond<View extends HttpLaneView<?>, U extends HttpUplinkModem> extends LaneRelay<HttpLaneModel<View, U>, View> {
+
   final U uplink;
   final HttpRequest<Object> request;
   HttpResponse<?> response;
@@ -201,9 +208,11 @@ final class HttpLaneRelayDoRespond<View extends HttpLaneView<?>, U extends HttpU
     }
     this.uplink.writeResponse(this.response);
   }
+
 }
 
 final class HttpLaneRelayWillRespond<View extends HttpLaneView<?>> extends LaneRelay<HttpLaneModel<View, ?>, View> {
+
   final HttpUplinkModem uplink;
   final HttpResponse<?> response;
 
@@ -224,9 +233,11 @@ final class HttpLaneRelayWillRespond<View extends HttpLaneView<?>> extends LaneR
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class HttpLaneRelayDidRespond<View extends HttpLaneView<?>> extends LaneRelay<HttpLaneModel<View, ?>, View> {
+
   final HttpUplinkModem uplink;
   final HttpResponse<?> response;
 
@@ -247,4 +258,5 @@ final class HttpLaneRelayDidRespond<View extends HttpLaneView<?>> extends LaneRe
       throw new AssertionError(); // unreachable
     }
   }
+
 }

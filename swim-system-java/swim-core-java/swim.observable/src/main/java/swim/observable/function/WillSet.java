@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface WillSet<V> extends Preemptive {
+
   V willSet(V newValue);
+
 }

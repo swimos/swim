@@ -26,6 +26,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public abstract class IpSocketBehaviors {
+
   protected abstract IpServiceRef bind(IpEndpoint endpoint, IpService service);
 
   protected abstract IpSocketRef connect(IpEndpoint endpoint, IpSocket socket);
@@ -54,6 +55,7 @@ public abstract class IpSocketBehaviors {
       public IpSocket createSocket() {
         return server;
       }
+
       @Override
       public void didBind() {
         serverBind.countDown();
@@ -119,10 +121,12 @@ public abstract class IpSocketBehaviors {
         clientConnect.countDown();
         close();
       }
+
       @Override
       public void didDisconnect() {
         clientDisconnect.countDown();
       }
+
       @Override
       public void didFail(Throwable error) {
         throw new TestException(error);
@@ -134,10 +138,12 @@ public abstract class IpSocketBehaviors {
         flowControl(FlowModifier.ENABLE_READ);
         serverConnect.countDown();
       }
+
       @Override
       public void didDisconnect() {
         serverDisconnect.countDown();
       }
+
       @Override
       public void didFail(Throwable error) {
         throw new TestException(error);
@@ -184,11 +190,13 @@ public abstract class IpSocketBehaviors {
         clientConnect.countDown();
         close();
       }
+
       @Override
       public void didDisconnect() {
         flowControl(FlowModifier.ENABLE_READ);
         clientDisconnect.countDown();
       }
+
       @Override
       public void didFail(Throwable error) {
         throw new TestException(error);
@@ -200,10 +208,12 @@ public abstract class IpSocketBehaviors {
         serverConnect.countDown();
         close();
       }
+
       @Override
       public void didDisconnect() {
         serverDisconnect.countDown();
       }
+
       @Override
       public void didFail(Throwable error) {
         throw new TestException(error);
@@ -247,6 +257,7 @@ public abstract class IpSocketBehaviors {
       public void didConnect() {
         flowControl(FlowModifier.ENABLE_READ);
       }
+
       @Override
       public void doRead() {
         final byte[] data = new byte[5];
@@ -269,6 +280,7 @@ public abstract class IpSocketBehaviors {
       public void didConnect() {
         flowControl(FlowModifier.ENABLE_READ_WRITE);
       }
+
       @Override
       public void doWrite() {
         final byte[] data;
@@ -279,6 +291,7 @@ public abstract class IpSocketBehaviors {
         }
         Binary.writeByteArray(data, outputBuffer());
       }
+
       @Override
       public void didWrite() {
         flowControl(FlowModifier.DISABLE_WRITE);
@@ -322,10 +335,12 @@ public abstract class IpSocketBehaviors {
       public void didConnect() {
         connect.countDown();
       }
+
       @Override
       public void doRead() {
         fail();
       }
+
       @Override
       public void didDisconnect() {
         disconnect.countDown();
@@ -337,6 +352,7 @@ public abstract class IpSocketBehaviors {
         flowControl(FlowModifier.ENABLE_READ_WRITE);
         connect.countDown();
       }
+
       @Override
       public void doWrite() {
         final byte[] data;
@@ -347,11 +363,13 @@ public abstract class IpSocketBehaviors {
         }
         Binary.writeByteArray(data, outputBuffer());
       }
+
       @Override
       public void didWrite() {
         flowControl(FlowModifier.DISABLE_WRITE);
         serverWrite.countDown();
       }
+
       @Override
       public void didDisconnect() {
         disconnect.countDown();
@@ -398,10 +416,12 @@ public abstract class IpSocketBehaviors {
       public void didConnect() {
         connect.countDown();
       }
+
       @Override
       public void doRead() {
         fail();
       }
+
       @Override
       public void didDisconnect() {
         disconnect.countDown();
@@ -414,6 +434,7 @@ public abstract class IpSocketBehaviors {
         flowControl(FlowModifier.ENABLE_READ_WRITE);
         connect.countDown();
       }
+
       @Override
       public void doWrite() {
         writes.incrementAndGet();
@@ -425,10 +446,12 @@ public abstract class IpSocketBehaviors {
         }
         Binary.writeByteArray(data, outputBuffer());
       }
+
       @Override
       public void didWrite() {
         t1.set(System.currentTimeMillis());
       }
+
       @Override
       public void didDisconnect() {
         disconnect.countDown();
@@ -466,4 +489,5 @@ public abstract class IpSocketBehaviors {
       stage.stop();
     }
   }
+
 }

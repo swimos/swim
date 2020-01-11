@@ -20,17 +20,13 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class IdentWriter extends Writer<Object, Object> {
+
   final String ident;
   final int index;
 
   IdentWriter(String ident, int index) {
     this.ident = ident;
     this.index = index;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.ident, this.index);
   }
 
   static int sizeOf(String ident) {
@@ -73,4 +69,10 @@ final class IdentWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, String ident) {
     return write(output, ident, 0);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.ident, this.index);
+  }
+
 }

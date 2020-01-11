@@ -47,6 +47,7 @@ import swim.uri.Uri;
 import swim.util.KeyedList;
 
 public interface ListDownlink<V> extends WarpDownlink, ObservableList<V>, KeyedList<V> {
+
   @Override
   ListDownlink<V> hostUri(Uri hostUri);
 
@@ -179,4 +180,5 @@ public interface ListDownlink<V> extends WarpDownlink, ObservableList<V>, KeyedL
 
   @Override
   void take(int keep);
+
 }

@@ -37,6 +37,12 @@ import swim.uri.Uri;
 import swim.warp.Envelope;
 
 class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
+
+  static final int FEEDING_DOWN = 1 << 0;
+  static final int FEEDING_UP = 1 << 1;
+  static final int PULLING_UP = 1 << 2;
+  static final AtomicIntegerFieldUpdater<RemoteWarpUplink> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteWarpUplink.class, "status");
   final RemoteHost host;
   final WarpBinding link;
   final Uri remoteNodeUri;
@@ -186,7 +192,7 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if (envelope != null) {
       this.link.pushDown(new Push<Envelope>(Uri.empty(), Uri.empty(), this.link.nodeUri(), this.link.laneUri(),
-                                            this.link.prio(), this.host.remoteIdentity(), envelope, null));
+          this.link.prio(), this.host.remoteIdentity(), envelope, null));
     }
     feedDownQueue();
   }
@@ -328,10 +334,4 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
     this.host.fail(message);
   }
 
-  static final int FEEDING_DOWN = 1 << 0;
-  static final int FEEDING_UP = 1 << 1;
-  static final int PULLING_UP = 1 << 2;
-
-  static final AtomicIntegerFieldUpdater<RemoteWarpUplink> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(RemoteWarpUplink.class, "status");
 }

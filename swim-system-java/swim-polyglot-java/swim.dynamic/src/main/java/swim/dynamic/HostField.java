@@ -18,6 +18,7 @@ package swim.dynamic;
  * A dynamically typed field descriptor for a host type.
  */
 public interface HostField<T> extends HostMember<T> {
+
   Object get(Bridge bridge, T self);
 
   default void set(Bridge bridge, T self, Object value) {
@@ -27,4 +28,5 @@ public interface HostField<T> extends HostMember<T> {
   default boolean remove(Bridge bridge, T self) {
     throw new UnsupportedOperationException();
   }
+
 }

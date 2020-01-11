@@ -16,5 +16,7 @@ package swim.util;
 
 @FunctionalInterface
 public interface CombinerFunction<V, U> {
+
   U combine(U result, V element);
+
 }

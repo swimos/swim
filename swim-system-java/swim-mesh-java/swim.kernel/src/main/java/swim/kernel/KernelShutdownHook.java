@@ -15,6 +15,7 @@
 package swim.kernel;
 
 public final class KernelShutdownHook extends Thread {
+
   final Kernel kernel;
 
   KernelShutdownHook(Kernel kernel) {
@@ -29,4 +30,5 @@ public final class KernelShutdownHook extends Thread {
   public void run() {
     this.kernel.stop();
   }
+
 }

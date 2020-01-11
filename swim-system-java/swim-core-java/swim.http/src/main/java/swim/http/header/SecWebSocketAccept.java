@@ -28,10 +28,29 @@ import swim.http.HttpWriter;
 import swim.util.Murmur3;
 
 public final class SecWebSocketAccept extends HttpHeader {
+
+  private static int hashSeed;
   final byte[] digest;
 
   SecWebSocketAccept(byte[] digest) {
     this.digest = digest;
+  }
+
+  public static SecWebSocketAccept from(byte[] digest) {
+    return new SecWebSocketAccept(digest);
+  }
+
+  public static SecWebSocketAccept from(String digestString) {
+    final Input input = Unicode.stringInput(digestString);
+    Parser<byte[]> parser = Base64.standard().parseByteArray(input);
+    if (input.isCont() && !parser.isError()) {
+      parser = Parser.error(Diagnostic.unexpected(input));
+    }
+    return new SecWebSocketAccept(parser.bind());
+  }
+
+  public static Parser<SecWebSocketAccept> parseHttpValue(Input input, HttpParser http) {
+    return SecWebSocketAcceptParser.parse(input);
   }
 
   @Override
@@ -79,22 +98,4 @@ public final class SecWebSocketAccept extends HttpHeader {
     output = output.write('"').write(')');
   }
 
-  private static int hashSeed;
-
-  public static SecWebSocketAccept from(byte[] digest) {
-    return new SecWebSocketAccept(digest);
-  }
-
-  public static SecWebSocketAccept from(String digestString) {
-    final Input input = Unicode.stringInput(digestString);
-    Parser<byte[]> parser = Base64.standard().parseByteArray(input);
-    if (input.isCont() && !parser.isError()) {
-      parser = Parser.error(Diagnostic.unexpected(input));
-    }
-    return new SecWebSocketAccept(parser.bind());
-  }
-
-  public static Parser<SecWebSocketAccept> parseHttpValue(Input input, HttpParser http) {
-    return SecWebSocketAcceptParser.parse(input);
-  }
 }

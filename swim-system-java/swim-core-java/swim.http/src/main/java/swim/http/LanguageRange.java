@@ -21,6 +21,9 @@ import swim.codec.Writer;
 import swim.util.Murmur3;
 
 public final class LanguageRange extends HttpPart implements Debug {
+
+  private static int hashSeed;
+  private static LanguageRange star;
   final String tag;
   final String subtag;
   final float weight;
@@ -41,6 +44,49 @@ public final class LanguageRange extends HttpPart implements Debug {
 
   LanguageRange(String tag) {
     this(tag, null, 1f);
+  }
+
+  public static LanguageRange star() {
+    if (star == null) {
+      star = new LanguageRange("*");
+    }
+    return star;
+  }
+
+  public static LanguageRange from(String tag, String subtag, float weight) {
+    if (weight == 1f) {
+      return from(tag, subtag);
+    } else {
+      return new LanguageRange(tag, subtag, weight);
+    }
+  }
+
+  public static LanguageRange from(String tag, String subtag) {
+    if (subtag == null) {
+      return from(tag);
+    } else {
+      return new LanguageRange(tag, subtag);
+    }
+  }
+
+  public static LanguageRange from(String tag, float weight) {
+    if (weight == 1f) {
+      return from(tag);
+    } else {
+      return new LanguageRange(tag, weight);
+    }
+  }
+
+  public static LanguageRange from(String tag) {
+    if ("*".equals(tag)) {
+      return star();
+    } else {
+      return new LanguageRange(tag);
+    }
+  }
+
+  public static LanguageRange parse(String string) {
+    return Http.standardParser().parseLanguageRangeString(string);
   }
 
   public String tag() {
@@ -108,50 +154,4 @@ public final class LanguageRange extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static LanguageRange star;
-
-  public static LanguageRange star() {
-    if (star == null) {
-      star = new LanguageRange("*");
-    }
-    return star;
-  }
-
-  public static LanguageRange from(String tag, String subtag, float weight) {
-    if (weight == 1f) {
-      return from(tag, subtag);
-    } else {
-      return new LanguageRange(tag, subtag, weight);
-    }
-  }
-
-  public static LanguageRange from(String tag, String subtag) {
-    if (subtag == null) {
-      return from(tag);
-    } else {
-      return new LanguageRange(tag, subtag);
-    }
-  }
-
-  public static LanguageRange from(String tag, float weight) {
-    if (weight == 1f) {
-      return from(tag);
-    } else {
-      return new LanguageRange(tag, weight);
-    }
-  }
-
-  public static LanguageRange from(String tag) {
-    if ("*".equals(tag)) {
-      return star();
-    } else {
-      return new LanguageRange(tag);
-    }
-  }
-
-  public static LanguageRange parse(String string) {
-    return Http.standardParser().parseLanguageRangeString(string);
-  }
 }

@@ -17,6 +17,17 @@ package swim.math;
 import swim.structure.Kind;
 
 public abstract class Z3Shape implements Shape {
+
+  private static Z3Form<Z3Shape> shapeForm;
+
+  @Kind
+  public static Z3Form<Z3Shape> shapeForm() {
+    if (shapeForm == null) {
+      shapeForm = new Z3ShapeForm();
+    }
+    return shapeForm;
+  }
+
   public abstract long xMin();
 
   public abstract long yMin();
@@ -53,13 +64,4 @@ public abstract class Z3Shape implements Shape {
 
   public abstract R3Shape transform(Z3ToR3Function f);
 
-  private static Z3Form<Z3Shape> shapeForm;
-
-  @Kind
-  public static Z3Form<Z3Shape> shapeForm() {
-    if (shapeForm == null) {
-      shapeForm = new Z3ShapeForm();
-    }
-    return shapeForm;
-  }
 }

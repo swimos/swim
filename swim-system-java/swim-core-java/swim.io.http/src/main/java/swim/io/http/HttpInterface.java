@@ -23,6 +23,7 @@ import swim.io.IpSocketModem;
 import swim.io.IpSocketRef;
 
 public interface HttpInterface extends IpInterface {
+
   HttpSettings httpSettings();
 
   default IpServiceRef bindHttp(InetSocketAddress localAddress, HttpService service, HttpSettings httpSettings) {
@@ -94,4 +95,5 @@ public interface HttpInterface extends IpInterface {
   default IpSocketRef connectHttps(String address, int port, HttpClient client) {
     return connectHttps(new InetSocketAddress(address, port), client, httpSettings());
   }
+
 }

@@ -22,6 +22,9 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class BoxR2 extends R2Shape implements Debug {
+
+  private static int hashSeed;
+  private static R2Form<BoxR2> form;
   public final double xMin;
   public final double yMin;
   public final double xMax;
@@ -32,6 +35,18 @@ public class BoxR2 extends R2Shape implements Debug {
     this.yMin = yMin <= yMax ? yMin : yMax;
     this.xMax = xMin <= xMax ? xMax : xMin;
     this.yMax = yMin <= yMax ? yMax : yMin;
+  }
+
+  public static BoxR2 of(double xMin, double yMin, double xMax, double yMax) {
+    return new BoxR2(xMin, yMin, xMax, yMax);
+  }
+
+  @Kind
+  public static R2Form<BoxR2> form() {
+    if (form == null) {
+      form = new BoxR2Form();
+    }
+    return form;
   }
 
   @Override
@@ -115,7 +130,7 @@ public class BoxR2 extends R2Shape implements Debug {
   @Override
   public BoxZ2 transform(R2ToZ2Function f) {
     return new BoxZ2(f.transformX(this.xMin, this.yMin), f.transformY(this.xMin, this.yMin),
-                     f.transformX(this.xMax, this.yMax), f.transformY(this.xMax, this.yMax));
+        f.transformX(this.xMax, this.yMax), f.transformY(this.xMax, this.yMax));
   }
 
   @Override
@@ -161,19 +176,4 @@ public class BoxR2 extends R2Shape implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static R2Form<BoxR2> form;
-
-  public static BoxR2 of(double xMin, double yMin, double xMax, double yMax) {
-    return new BoxR2(xMin, yMin, xMax, yMax);
-  }
-
-  @Kind
-  public static R2Form<BoxR2> form() {
-    if (form == null) {
-      form = new BoxR2Form();
-    }
-    return form;
-  }
 }

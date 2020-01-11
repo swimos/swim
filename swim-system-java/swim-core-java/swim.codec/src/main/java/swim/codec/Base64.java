@@ -20,8 +20,73 @@ import java.nio.ByteBuffer;
  * Base-64 (7-bit ASCII) encoding {@link Parser}/{@link Writer} factory.
  */
 public abstract class Base64 {
+
+  private static Base64 standard;
+  private static Base64 standardUnpadded;
+  private static Base64 url;
+  private static Base64 urlUnpadded;
+
   Base64() {
     // stub
+  }
+
+  /**
+   * Returns the {@code Base64} encoding with the standard alphabet.
+   */
+  public static Base64 standard() {
+    if (standard == null) {
+      standard = new Base64Standard(true);
+    }
+    return standard;
+  }
+
+  static Base64 standardUnpadded() {
+    if (standardUnpadded == null) {
+      standardUnpadded = new Base64Standard(false);
+    }
+    return standardUnpadded;
+  }
+
+  /**
+   * Returns the {@code Base64} encoding with the standard alphabet, and
+   * required padding, if {@code isPadded} is {@code true}.
+   */
+  public static Base64 standard(boolean isPadded) {
+    if (isPadded) {
+      return standard();
+    } else {
+      return standardUnpadded();
+    }
+  }
+
+  /**
+   * Returns the {@code Base64} encoding with the url and filename safe
+   * alphabet.
+   */
+  public static Base64 url() {
+    if (url == null) {
+      url = new Base64Url(true);
+    }
+    return url;
+  }
+
+  public static Base64 urlUnpadded() {
+    if (urlUnpadded == null) {
+      urlUnpadded = new Base64Url(false);
+    }
+    return urlUnpadded;
+  }
+
+  /**
+   * Returns the {@code Base64} encoding with the url and filename safe
+   * alphabet, and required padding, if {@code isPadded} is {@code true}.
+   */
+  public static Base64 url(boolean isPadded) {
+    if (isPadded) {
+      return url();
+    } else {
+      return urlUnpadded();
+    }
   }
 
   /**
@@ -201,72 +266,10 @@ public abstract class Base64 {
     return Base64Writer.write(output, input, this);
   }
 
-  private static Base64 standard;
-  private static Base64 standardUnpadded;
-  private static Base64 url;
-  private static Base64 urlUnpadded;
-
-  /**
-   * Returns the {@code Base64} encoding with the standard alphabet.
-   */
-  public static Base64 standard() {
-    if (standard == null) {
-      standard = new Base64Standard(true);
-    }
-    return standard;
-  }
-
-  static Base64 standardUnpadded() {
-    if (standardUnpadded == null) {
-      standardUnpadded = new Base64Standard(false);
-    }
-    return standardUnpadded;
-  }
-
-  /**
-   * Returns the {@code Base64} encoding with the standard alphabet, and
-   * required padding, if {@code isPadded} is {@code true}.
-   */
-  public static Base64 standard(boolean isPadded) {
-    if (isPadded) {
-      return standard();
-    } else {
-      return standardUnpadded();
-    }
-  }
-
-  /**
-   * Returns the {@code Base64} encoding with the url and filename safe
-   * alphabet.
-   */
-  public static Base64 url() {
-    if (url == null) {
-      url = new Base64Url(true);
-    }
-    return url;
-  }
-
-  public static Base64 urlUnpadded() {
-    if (urlUnpadded == null) {
-      urlUnpadded = new Base64Url(false);
-    }
-    return urlUnpadded;
-  }
-
-  /**
-   * Returns the {@code Base64} encoding with the url and filename safe
-   * alphabet, and required padding, if {@code isPadded} is {@code true}.
-   */
-  public static Base64 url(boolean isPadded) {
-    if (isPadded) {
-      return url();
-    } else {
-      return urlUnpadded();
-    }
-  }
 }
 
 final class Base64Standard extends Base64 {
+
   final boolean isPadded;
 
   Base64Standard(boolean isPadded) {
@@ -298,9 +301,11 @@ final class Base64Standard extends Base64 {
         || c >= 'a' && c <= 'z'
         || c == '+' || c == '/';
   }
+
 }
 
 final class Base64Url extends Base64 {
+
   final boolean isPadded;
 
   Base64Url(boolean isPadded) {
@@ -332,4 +337,5 @@ final class Base64Url extends Base64 {
         || c >= 'a' && c <= 'z'
         || c == '-' || c == '_';
   }
+
 }

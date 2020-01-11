@@ -26,6 +26,7 @@ import swim.codec.Output;
  * @see FlowContext
  */
 public enum FlowControl implements Debug {
+
   /**
    * <em>accept</em>, <em>connect</em>, <em>read</em>, and <em>write</em> disabled.
    */
@@ -110,6 +111,66 @@ public enum FlowControl implements Debug {
 
   FlowControl(int flags) {
     this.flags = flags;
+  }
+
+  private static FlowControl fromFlags(int flags) {
+    switch (flags) {
+      case 0x0:
+        return WAIT;
+      case 0x1:
+        return ACCEPT;
+      case 0x2:
+        return CONNECT;
+      case 0x3:
+        return ACCEPT_CONNECT;
+      case 0x4:
+        return READ;
+      case 0x5:
+        return ACCEPT_READ;
+      case 0x6:
+        return CONNECT_READ;
+      case 0x7:
+        return ACCEPT_CONNECT_READ;
+      case 0x8:
+        return WRITE;
+      case 0x9:
+        return ACCEPT_WRITE;
+      case 0xa:
+        return CONNECT_WRITE;
+      case 0xb:
+        return ACCEPT_CONNECT_WRITE;
+      case 0xc:
+        return READ_WRITE;
+      case 0xd:
+        return ACCEPT_READ_WRITE;
+      case 0xe:
+        return CONNECT_READ_WRITE;
+      case 0xf:
+        return ACCEPT_CONNECT_READ_WRITE;
+      default:
+        throw new IllegalArgumentException("0x" + Integer.toHexString(flags));
+    }
+  }
+
+  /**
+   * Returns the {@code FlowControl} corresponding to the given {@link
+   * SelectionKey} interest set.
+   */
+  public static FlowControl fromSelectorOps(int selectorOps) {
+    int flags = 0;
+    if ((selectorOps & SelectionKey.OP_ACCEPT) != 0) {
+      flags |= 0x1;
+    }
+    if ((selectorOps & SelectionKey.OP_CONNECT) != 0) {
+      flags |= 0x2;
+    }
+    if ((selectorOps & SelectionKey.OP_READ) != 0) {
+      flags |= 0x4;
+    }
+    if ((selectorOps & SelectionKey.OP_WRITE) != 0) {
+      flags |= 0x8;
+    }
+    return fromFlags(flags);
   }
 
   /**
@@ -276,46 +337,4 @@ public enum FlowControl implements Debug {
     output = output.write("FlowControl").write('.').write(name());
   }
 
-  private static FlowControl fromFlags(int flags) {
-    switch (flags) {
-      case 0x0: return WAIT;
-      case 0x1: return ACCEPT;
-      case 0x2: return CONNECT;
-      case 0x3: return ACCEPT_CONNECT;
-      case 0x4: return READ;
-      case 0x5: return ACCEPT_READ;
-      case 0x6: return CONNECT_READ;
-      case 0x7: return ACCEPT_CONNECT_READ;
-      case 0x8: return WRITE;
-      case 0x9: return ACCEPT_WRITE;
-      case 0xa: return CONNECT_WRITE;
-      case 0xb: return ACCEPT_CONNECT_WRITE;
-      case 0xc: return READ_WRITE;
-      case 0xd: return ACCEPT_READ_WRITE;
-      case 0xe: return CONNECT_READ_WRITE;
-      case 0xf: return ACCEPT_CONNECT_READ_WRITE;
-      default: throw new IllegalArgumentException("0x" + Integer.toHexString(flags));
-    }
-  }
-
-  /**
-   * Returns the {@code FlowControl} corresponding to the given {@link
-   * SelectionKey} interest set.
-   */
-  public static FlowControl fromSelectorOps(int selectorOps) {
-    int flags = 0;
-    if ((selectorOps & SelectionKey.OP_ACCEPT) != 0) {
-      flags |= 0x1;
-    }
-    if ((selectorOps & SelectionKey.OP_CONNECT) != 0) {
-      flags |= 0x2;
-    }
-    if ((selectorOps & SelectionKey.OP_READ) != 0) {
-      flags |= 0x4;
-    }
-    if ((selectorOps & SelectionKey.OP_WRITE) != 0) {
-      flags |= 0x8;
-    }
-    return fromFlags(flags);
-  }
 }

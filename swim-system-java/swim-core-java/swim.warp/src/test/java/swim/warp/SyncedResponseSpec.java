@@ -21,33 +21,35 @@ import static swim.warp.Assertions.assertParses;
 import static swim.warp.Assertions.assertWrites;
 
 public class SyncedResponseSpec {
+
   @Test
   public void parseSyncedWithNamedHeaders() {
     assertParses("@synced(node: node_uri, lane: lane_uri)",
-                 new SyncedResponse("node_uri", "lane_uri"));
+        new SyncedResponse("node_uri", "lane_uri"));
   }
 
   @Test
   public void parseSyncedWithPositionalHeaders() {
     assertParses("@synced(node_uri, lane_uri)",
-                 new SyncedResponse("node_uri", "lane_uri"));
+        new SyncedResponse("node_uri", "lane_uri"));
   }
 
   @Test
   public void parseSyncedWithBody() {
     assertParses("@synced(node_uri, lane_uri)@test",
-                 new SyncedResponse("node_uri", "lane_uri", Record.of(Attr.of("test"))));
+        new SyncedResponse("node_uri", "lane_uri", Record.of(Attr.of("test"))));
   }
 
   @Test
   public void writeSynced() {
     assertWrites(new SyncedResponse("node_uri", "lane_uri"),
-                 "@synced(node:node_uri,lane:lane_uri)");
+        "@synced(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   public void writeSyncedWithBody() {
     assertWrites(new SyncedResponse("node_uri", "lane_uri", Record.of(Attr.of("test"))),
-                 "@synced(node:node_uri,lane:lane_uri)@test");
+        "@synced(node:node_uri,lane:lane_uri)@test");
   }
+
 }

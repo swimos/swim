@@ -32,9 +32,11 @@ import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 
 public abstract class DownlinkView implements Downlink {
+
+  static final AtomicReferenceFieldUpdater<DownlinkView, Object> OBSERVERS =
+      AtomicReferenceFieldUpdater.newUpdater(DownlinkView.class, Object.class, "observers");
   protected final CellContext cellContext;
   protected final Stage stage;
-
   protected volatile Object observers; // Observer | Observer[]
 
   public DownlinkView(CellContext cellContext, Stage stage, Object observers) {
@@ -514,6 +516,4 @@ public abstract class DownlinkView implements Downlink {
     }
   }
 
-  static final AtomicReferenceFieldUpdater<DownlinkView, Object> OBSERVERS =
-      AtomicReferenceFieldUpdater.newUpdater(DownlinkView.class, Object.class, "observers");
 }

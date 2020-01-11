@@ -24,6 +24,7 @@ import swim.structure.Value;
  * String}.
  */
 public final class StringForm extends Form<String> {
+
   final String unit;
 
   public StringForm(String unit) {
@@ -63,4 +64,5 @@ public final class StringForm extends Form<String> {
       return null;
     }
   }
+
 }

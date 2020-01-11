@@ -15,4 +15,5 @@
 /**
  * Swim Authenticator runtime.
  */
+
 package swim.auth;

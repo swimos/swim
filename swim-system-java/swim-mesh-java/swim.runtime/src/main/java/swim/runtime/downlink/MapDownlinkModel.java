@@ -37,8 +37,10 @@ import swim.util.OrderedMapCursor;
 import swim.warp.EventMessage;
 
 public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
-  protected int flags;
+
+  protected static final int STATEFUL = 1 << 0;
   protected final BTreeMap<Value, Value, Value> state;
+  protected int flags;
 
   public MapDownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                           float prio, float rate, Value body) {
@@ -311,15 +313,15 @@ public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
     return this.state.valueIterator();
   }
 
-  protected static final int STATEFUL = 1 << 0;
 }
 
 final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDownlinkView<?, ?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
+  final Value key;
   Form<Object> keyForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
   Value oldValue;
   Value newValue;
@@ -450,14 +452,16 @@ final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDo
       }
     }
   }
+
 }
 
 final class MapDownlinkRelayRemove extends DownlinkRelay<MapDownlinkModel, MapDownlinkView<?, ?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
+  final Value key;
   Form<Object> keyForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
   Value oldValue;
   Object oldObject;
@@ -578,9 +582,11 @@ final class MapDownlinkRelayRemove extends DownlinkRelay<MapDownlinkModel, MapDo
       }
     }
   }
+
 }
 
 final class MapDownlinkRelayDrop extends DownlinkRelay<MapDownlinkModel, MapDownlinkView<?, ?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
   final int lower;
@@ -654,9 +660,11 @@ final class MapDownlinkRelayDrop extends DownlinkRelay<MapDownlinkModel, MapDown
       }
     }
   }
+
 }
 
 final class MapDownlinkRelayTake extends DownlinkRelay<MapDownlinkModel, MapDownlinkView<?, ?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
   final int upper;
@@ -730,9 +738,11 @@ final class MapDownlinkRelayTake extends DownlinkRelay<MapDownlinkModel, MapDown
       }
     }
   }
+
 }
 
 final class MapDownlinkRelayClear extends DownlinkRelay<MapDownlinkModel, MapDownlinkView<?, ?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
 
@@ -803,4 +813,5 @@ final class MapDownlinkRelayClear extends DownlinkRelay<MapDownlinkModel, MapDow
       }
     }
   }
+
 }

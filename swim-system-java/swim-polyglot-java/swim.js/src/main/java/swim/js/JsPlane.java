@@ -21,6 +21,7 @@ import swim.vm.js.JsBridge;
 import swim.vm.js.JsModule;
 
 public class JsPlane implements Plane, GuestWrapper {
+
   protected final PlaneContext planeContext;
   protected final JsBridge bridge;
   protected final JsModule module;
@@ -102,4 +103,5 @@ public class JsPlane implements Plane, GuestWrapper {
       error.printStackTrace();
     }
   }
+
 }

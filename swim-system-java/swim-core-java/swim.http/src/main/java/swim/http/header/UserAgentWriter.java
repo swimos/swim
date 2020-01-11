@@ -22,6 +22,7 @@ import swim.http.HttpWriter;
 import swim.http.Product;
 
 final class UserAgentWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final Iterator<Product> products;
   final Writer<?, ?> part;
@@ -32,11 +33,6 @@ final class UserAgentWriter extends Writer<Object, Object> {
     this.products = products;
     this.part = part;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.products, this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, Iterator<Product> products,
@@ -81,4 +77,10 @@ final class UserAgentWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, Iterator<Product> products) {
     return write(output, http, products, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.products, this.part, this.step);
+  }
+
 }

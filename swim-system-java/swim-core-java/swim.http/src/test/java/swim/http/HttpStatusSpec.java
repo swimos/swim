@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpStatusSpec {
+
   public void assertParses(String string, HttpStatus status) {
     HttpAssertions.assertParses(Http.standardParser().statusParser(), string, status);
   }
@@ -201,4 +202,5 @@ public class HttpStatusSpec {
     assertWrites(HttpStatus.GATEWAY_TIMEOUT, "504 Gateway Timeout");
     assertWrites(HttpStatus.HTTP_VERSION_NOT_SUPPORTED, "505 HTTP Version Not Supported");
   }
+
 }

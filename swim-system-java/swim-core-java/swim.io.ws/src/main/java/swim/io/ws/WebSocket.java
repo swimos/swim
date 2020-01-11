@@ -20,6 +20,7 @@ import swim.io.IpSocket;
 import swim.ws.WsFrame;
 
 public interface WebSocket<I, O> {
+
   WebSocketContext<I, O> webSocketContext();
 
   void setWebSocketContext(WebSocketContext<I, O> context);
@@ -53,4 +54,5 @@ public interface WebSocket<I, O> {
   void didDisconnect();
 
   void didFail(Throwable error);
+
 }

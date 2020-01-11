@@ -15,7 +15,9 @@
 package swim.concurrent;
 
 public interface PullRequest<T> {
+
   float prio();
 
   void pull(PullContext<? super T> context);
+
 }

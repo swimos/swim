@@ -15,6 +15,7 @@
 package swim.collections;
 
 public abstract class BTreeContext<K, V> {
+
   @SuppressWarnings("unchecked")
   protected int compareKey(Object x, Object y) {
     return ((Comparable<Object>) x).compareTo(y);
@@ -31,4 +32,5 @@ public abstract class BTreeContext<K, V> {
   protected boolean pageShouldMerge(BTreePage<K, V, ?> page) {
     return page.arity() < pageSplitSize() >>> 1;
   }
+
 }

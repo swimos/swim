@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface DidLink extends Preemptive {
+
   void didLink();
+
 }

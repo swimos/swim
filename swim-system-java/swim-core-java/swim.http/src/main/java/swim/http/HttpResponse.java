@@ -25,6 +25,8 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Murmur3;
 
 public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
+
+  private static int hashSeed;
   final HttpVersion version;
   final HttpStatus status;
   final FingerTrieSeq<HttpHeader> headers;
@@ -41,6 +43,41 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
   HttpResponse(HttpVersion version, HttpStatus status,
                FingerTrieSeq<HttpHeader> headers) {
     this(version, status, headers, HttpEntity.<T>empty());
+  }
+
+  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status,
+                                         FingerTrieSeq<HttpHeader> headers, HttpEntity<T> entity) {
+    return new HttpResponse<T>(version, status, headers, entity);
+  }
+
+  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status,
+                                         FingerTrieSeq<HttpHeader> headers) {
+    return new HttpResponse<T>(version, status, headers);
+  }
+
+  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status,
+                                         HttpHeader... headers) {
+    return new HttpResponse<T>(version, status, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status) {
+    return new HttpResponse<T>(version, status, FingerTrieSeq.<HttpHeader>empty());
+  }
+
+  public static <T> HttpResponse<T> from(HttpStatus status, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, headers);
+  }
+
+  public static <T> HttpResponse<T> from(HttpStatus status, HttpHeader... headers) {
+    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpResponse<T> from(HttpStatus status) {
+    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, FingerTrieSeq.<HttpHeader>empty());
+  }
+
+  public static <T> HttpResponse<T> parseHttp(String string) {
+    return Http.standardParser().parseResponseString(string);
   }
 
   @Override
@@ -245,40 +282,4 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status,
-                                         FingerTrieSeq<HttpHeader> headers, HttpEntity<T> entity) {
-    return new HttpResponse<T>(version, status, headers, entity);
-  }
-
-  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status,
-                                         FingerTrieSeq<HttpHeader> headers) {
-    return new HttpResponse<T>(version, status, headers);
-  }
-
-  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status,
-                                         HttpHeader... headers) {
-    return new HttpResponse<T>(version, status, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status) {
-    return new HttpResponse<T>(version, status, FingerTrieSeq.<HttpHeader>empty());
-  }
-
-  public static <T> HttpResponse<T> from(HttpStatus status, FingerTrieSeq<HttpHeader> headers) {
-    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, headers);
-  }
-
-  public static <T> HttpResponse<T> from(HttpStatus status, HttpHeader... headers) {
-    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpResponse<T> from(HttpStatus status) {
-    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, FingerTrieSeq.<HttpHeader>empty());
-  }
-
-  public static <T> HttpResponse<T> parseHttp(String string) {
-    return Http.standardParser().parseResponseString(string);
-  }
 }

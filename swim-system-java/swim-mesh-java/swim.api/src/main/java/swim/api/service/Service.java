@@ -15,6 +15,7 @@
 package swim.api.service;
 
 public interface Service {
+
   ServiceContext serviceContext();
 
   void willStart();
@@ -30,4 +31,5 @@ public interface Service {
   void didClose();
 
   void didFail(Throwable error);
+
 }

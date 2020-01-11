@@ -17,5 +17,7 @@ package swim.store;
 import swim.structure.Value;
 
 public interface ValueDataContext extends DataContext {
+
   void didSet(Value newValue, Value oldValue);
+
 }

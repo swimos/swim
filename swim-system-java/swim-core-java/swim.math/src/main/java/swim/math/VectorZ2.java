@@ -22,12 +22,35 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class VectorZ2 implements Debug {
+
+  private static int hashSeed;
+  private static VectorZ2 zero;
+  private static TensorForm<VectorZ2> form;
   public final long x;
   public final long y;
 
   public VectorZ2(long x, long y) {
     this.x = x;
     this.y = y;
+  }
+
+  public static VectorZ2 zero() {
+    if (zero == null) {
+      zero = new VectorZ2(0L, 0L);
+    }
+    return zero;
+  }
+
+  public static VectorZ2 of(long x, long y) {
+    return new VectorZ2(x, y);
+  }
+
+  @Kind
+  public static TensorForm<VectorZ2> form() {
+    if (form == null) {
+      form = new VectorZ2Form();
+    }
+    return form;
   }
 
   public final VectorZ2 plus(VectorZ2 that) {
@@ -89,28 +112,4 @@ public class VectorZ2 implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static VectorZ2 zero;
-
-  private static TensorForm<VectorZ2> form;
-
-  public static VectorZ2 zero() {
-    if (zero == null) {
-      zero = new VectorZ2(0L, 0L);
-    }
-    return zero;
-  }
-
-  public static VectorZ2 of(long x, long y) {
-    return new VectorZ2(x, y);
-  }
-
-  @Kind
-  public static TensorForm<VectorZ2> form() {
-    if (form == null) {
-      form = new VectorZ2Form();
-    }
-    return form;
-  }
 }

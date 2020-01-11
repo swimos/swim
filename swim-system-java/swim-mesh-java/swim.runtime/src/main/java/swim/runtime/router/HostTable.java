@@ -67,10 +67,90 @@ import swim.uri.UriPath;
 import swim.uri.UriPathBuilder;
 
 public class HostTable extends AbstractTierBinding implements HostBinding {
+
+  static final int PRIMARY = 1 << 0;
+  static final int REPLICA = 1 << 1;
+  static final int MASTER = 1 << 2;
+  static final int SLAVE = 1 << 3;
+  static final Uri NODES_URI = Uri.parse("nodes");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<HostTable, UriMapper<NodeBinding>> NODES =
+      AtomicReferenceFieldUpdater.newUpdater(HostTable.class, (Class<UriMapper<NodeBinding>>) (Class<?>) UriMapper.class, "nodes");
+  static final AtomicIntegerFieldUpdater<HostTable> FLAGS =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "flags");
+  static final AtomicIntegerFieldUpdater<HostTable> NODE_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "nodeOpenDelta");
+  static final AtomicLongFieldUpdater<HostTable> NODE_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "nodeOpenCount");
+  static final AtomicIntegerFieldUpdater<HostTable> NODE_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "nodeCloseDelta");
+  static final AtomicLongFieldUpdater<HostTable> NODE_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "nodeCloseCount");
+  static final AtomicIntegerFieldUpdater<HostTable> AGENT_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "agentOpenDelta");
+  static final AtomicLongFieldUpdater<HostTable> AGENT_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentOpenCount");
+  static final AtomicIntegerFieldUpdater<HostTable> AGENT_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "agentCloseDelta");
+  static final AtomicLongFieldUpdater<HostTable> AGENT_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentCloseCount");
+  static final AtomicLongFieldUpdater<HostTable> AGENT_EXEC_DELTA =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentExecDelta");
+  static final AtomicLongFieldUpdater<HostTable> AGENT_EXEC_RATE =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentExecRate");
+  static final AtomicLongFieldUpdater<HostTable> AGENT_EXEC_TIME =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentExecTime");
+  static final AtomicIntegerFieldUpdater<HostTable> TIMER_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "timerEventDelta");
+  static final AtomicIntegerFieldUpdater<HostTable> TIMER_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "timerEventRate");
+  static final AtomicLongFieldUpdater<HostTable> TIMER_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "timerEventCount");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkOpenDelta");
+  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkOpenCount");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkCloseDelta");
+  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkCloseCount");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkEventDelta");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkEventRate");
+  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkEventCount");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkCommandRate");
+  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkCommandCount");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkOpenDelta");
+  static final AtomicLongFieldUpdater<HostTable> UPLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkOpenCount");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkCloseDelta");
+  static final AtomicLongFieldUpdater<HostTable> UPLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkCloseCount");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkEventDelta");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkEventRate");
+  static final AtomicLongFieldUpdater<HostTable> UPLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkEventCount");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkCommandRate");
+  static final AtomicLongFieldUpdater<HostTable> UPLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkCommandCount");
+  static final AtomicLongFieldUpdater<HostTable> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater(HostTable.class, "lastReportTime");
   protected HostContext hostContext;
   volatile UriMapper<NodeBinding> nodes;
   volatile int flags;
-
   volatile int nodeOpenDelta;
   volatile long nodeOpenCount;
   volatile int nodeCloseDelta;
@@ -107,7 +187,6 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   volatile long uplinkCommandCount;
   volatile long lastReportTime;
   HostPulse pulse;
-
   AgentNode metaNode;
   DemandMapLane<Uri, NodeInfo> metaNodes;
   DemandLane<HostPulse> metaPulse;
@@ -698,7 +777,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
       this.metaWarnLog = null;
       this.metaErrorLog = null;
       this.metaFailLog = null;
-    } 
+    }
     flushMetrics();
   }
 
@@ -843,10 +922,10 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     final AgentPulse agentPulse = new AgentPulse(agentCount, agentExecRate, agentExecTime, timerEventRate, timerEventCount);
     final long downlinkCount = downlinkOpenCount - downlinkCloseCount;
     final WarpDownlinkPulse downlinkPulse = new WarpDownlinkPulse(downlinkCount, downlinkEventRate, downlinkEventCount,
-                                                                  downlinkCommandRate, downlinkCommandCount);
+        downlinkCommandRate, downlinkCommandCount);
     final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
     final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
-                                                            uplinkCommandRate, uplinkCommandCount);
+        uplinkCommandRate, uplinkCommandCount);
     this.pulse = new HostPulse(nodeCount, agentPulse, downlinkPulse, uplinkPulse);
     final DemandLane<HostPulse> metaPulse = this.metaPulse;
     if (metaPulse != null) {
@@ -854,105 +933,22 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     }
 
     return new HostProfile(cellAddress(),
-                           nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
-                           agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
-                           agentExecDelta, agentExecRate, agentExecTime,
-                           timerEventDelta, timerEventRate, timerEventCount,
-                           downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
-                           downlinkEventDelta, downlinkEventRate, downlinkEventCount,
-                           downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
-                           uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
-                           uplinkEventDelta, uplinkEventRate, uplinkEventCount,
-                           uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+        nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
+        agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
+        agentExecDelta, agentExecRate, agentExecTime,
+        timerEventDelta, timerEventRate, timerEventCount,
+        downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+        downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+        downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+        uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+        uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+        uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
 
-  static final int PRIMARY = 1 << 0;
-  static final int REPLICA = 1 << 1;
-  static final int MASTER = 1 << 2;
-  static final int SLAVE = 1 << 3;
-
-  static final Uri NODES_URI = Uri.parse("nodes");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<HostTable, UriMapper<NodeBinding>> NODES =
-      AtomicReferenceFieldUpdater.newUpdater(HostTable.class, (Class<UriMapper<NodeBinding>>) (Class<?>) UriMapper.class, "nodes");
-
-  static final AtomicIntegerFieldUpdater<HostTable> FLAGS =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "flags");
-
-  static final AtomicIntegerFieldUpdater<HostTable> NODE_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "nodeOpenDelta");
-  static final AtomicLongFieldUpdater<HostTable> NODE_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "nodeOpenCount");
-  static final AtomicIntegerFieldUpdater<HostTable> NODE_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "nodeCloseDelta");
-  static final AtomicLongFieldUpdater<HostTable> NODE_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "nodeCloseCount");
-  static final AtomicIntegerFieldUpdater<HostTable> AGENT_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "agentOpenDelta");
-  static final AtomicLongFieldUpdater<HostTable> AGENT_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentOpenCount");
-  static final AtomicIntegerFieldUpdater<HostTable> AGENT_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "agentCloseDelta");
-  static final AtomicLongFieldUpdater<HostTable> AGENT_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentCloseCount");
-  static final AtomicLongFieldUpdater<HostTable> AGENT_EXEC_DELTA =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentExecDelta");
-  static final AtomicLongFieldUpdater<HostTable> AGENT_EXEC_RATE =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentExecRate");
-  static final AtomicLongFieldUpdater<HostTable> AGENT_EXEC_TIME =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "agentExecTime");
-  static final AtomicIntegerFieldUpdater<HostTable> TIMER_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "timerEventDelta");
-  static final AtomicIntegerFieldUpdater<HostTable> TIMER_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "timerEventRate");
-  static final AtomicLongFieldUpdater<HostTable> TIMER_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "timerEventCount");
-  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkOpenDelta");
-  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkOpenCount");
-  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkCloseDelta");
-  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkCloseCount");
-  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkEventDelta");
-  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkEventRate");
-  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkEventCount");
-  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkCommandDelta");
-  static final AtomicIntegerFieldUpdater<HostTable> DOWNLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "downlinkCommandRate");
-  static final AtomicLongFieldUpdater<HostTable> DOWNLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "downlinkCommandCount");
-  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkOpenDelta");
-  static final AtomicLongFieldUpdater<HostTable> UPLINK_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkOpenCount");
-  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkCloseDelta");
-  static final AtomicLongFieldUpdater<HostTable> UPLINK_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkCloseCount");
-  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkEventDelta");
-  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkEventRate");
-  static final AtomicLongFieldUpdater<HostTable> UPLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkEventCount");
-  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkCommandDelta");
-  static final AtomicIntegerFieldUpdater<HostTable> UPLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "uplinkCommandRate");
-  static final AtomicLongFieldUpdater<HostTable> UPLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "uplinkCommandCount");
-  static final AtomicLongFieldUpdater<HostTable> LAST_REPORT_TIME =
-      AtomicLongFieldUpdater.newUpdater(HostTable.class, "lastReportTime");
 }
 
 final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncKeys<Uri> {
+
   final HostBinding host;
 
   HostTableNodesController(HostBinding host) {
@@ -1005,9 +1001,11 @@ final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncK
     }
     return this.host.nodes().keyIterator();
   }
+
 }
 
 final class HostTableNodesQueryIterator implements Iterator<Uri> {
+
   final String query;
   final Iterator<Map.Entry<Uri, NodeBinding>> nodes;
   Uri nextNodeUri;
@@ -1047,9 +1045,11 @@ final class HostTableNodesQueryIterator implements Iterator<Uri> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }
 
 final class HostTableNodesChildIterator implements Iterator<Uri> {
+
   final Uri parentUri;
   final Iterator<UriPart> childSegments;
 
@@ -1073,9 +1073,11 @@ final class HostTableNodesChildIterator implements Iterator<Uri> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }
 
 final class HostTablePulseController implements OnCue<HostPulse> {
+
   final HostTable host;
 
   HostTablePulseController(HostTable host) {
@@ -1086,4 +1088,5 @@ final class HostTablePulseController implements OnCue<HostPulse> {
   public HostPulse onCue(WarpUplink uplink) {
     return this.host.pulse;
   }
+
 }

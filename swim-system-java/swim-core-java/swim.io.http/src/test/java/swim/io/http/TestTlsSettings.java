@@ -28,13 +28,14 @@ import swim.io.StationException;
 import swim.io.TlsSettings;
 
 public final class TestTlsSettings {
-  private TestTlsSettings() {
-    // stub
-  }
 
   private static TlsSettings tlsSettings;
   private static IpSettings ipSettings;
   private static HttpSettings httpSettings;
+
+  private TestTlsSettings() {
+    // stub
+  }
 
   public static TlsSettings tlsSettings() {
     if (tlsSettings == null) {
@@ -87,4 +88,5 @@ public final class TestTlsSettings {
     }
     return httpSettings;
   }
+
 }

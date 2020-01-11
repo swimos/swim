@@ -19,9 +19,6 @@ import swim.dynamic.JavaHostClassType;
 import swim.structure.Value;
 
 public final class HostValue {
-  private HostValue() {
-    // static
-  }
 
   public static final HostObjectType<Value> TYPE;
 
@@ -30,4 +27,9 @@ public final class HostValue {
     TYPE = type;
     type.extendType(HostItem.TYPE);
   }
+
+  private HostValue() {
+    // static
+  }
+
 }

@@ -68,6 +68,12 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 public class BootKernel extends KernelProxy implements IpStation {
+
+  static final AtomicReferenceFieldUpdater<BootKernel, Stage> STAGE =
+      AtomicReferenceFieldUpdater.newUpdater(BootKernel.class, Stage.class, "stage");
+  static final AtomicReferenceFieldUpdater<BootKernel, Station> STATION =
+      AtomicReferenceFieldUpdater.newUpdater(BootKernel.class, Station.class, "station");
+  private static final double KERNEL_PRIORITY = Double.NEGATIVE_INFINITY;
   final double kernelPriority;
   final Value moduleConfig;
   KernelShutdownHook shutdownHook;
@@ -85,6 +91,16 @@ public class BootKernel extends KernelProxy implements IpStation {
 
   public BootKernel() {
     this(KERNEL_PRIORITY, Value.absent());
+  }
+
+  public static BootKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || BootKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      return new BootKernel(kernelPriority, moduleConfig);
+    }
+    return null;
   }
 
   @Override
@@ -503,21 +519,4 @@ public class BootKernel extends KernelProxy implements IpStation {
     }
   }
 
-  private static final double KERNEL_PRIORITY = Double.NEGATIVE_INFINITY;
-
-  public static BootKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || BootKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new BootKernel(kernelPriority, moduleConfig);
-    }
-    return null;
-  }
-
-  static final AtomicReferenceFieldUpdater<BootKernel, Stage> STAGE =
-      AtomicReferenceFieldUpdater.newUpdater(BootKernel.class, Stage.class, "stage");
-
-  static final AtomicReferenceFieldUpdater<BootKernel, Station> STATION =
-      AtomicReferenceFieldUpdater.newUpdater(BootKernel.class, Station.class, "station");
 }

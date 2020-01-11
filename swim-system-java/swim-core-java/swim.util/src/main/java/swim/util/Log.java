@@ -18,6 +18,7 @@ package swim.util;
  * Takes actions when presented messages of various severities.
  */
 public interface Log {
+
   /**
    * Logs a trace-level message.
    */
@@ -47,4 +48,5 @@ public interface Log {
    * Logs an fail-level message.
    */
   void fail(Object message);
+
 }

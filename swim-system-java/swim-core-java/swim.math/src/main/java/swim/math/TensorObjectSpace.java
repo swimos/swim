@@ -19,6 +19,7 @@ import swim.codec.Format;
 import swim.codec.Output;
 
 final class TensorObjectSpace implements TensorSpace<Tensor, Double>, Debug {
+
   final TensorSpace<Tensor, Double> next;
   final TensorDims dims;
 
@@ -93,4 +94,5 @@ final class TensorObjectSpace implements TensorSpace<Tensor, Double>, Debug {
   public String toString() {
     return Format.debug(this);
   }
+
 }

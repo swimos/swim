@@ -19,6 +19,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
 public class GuestOnCommand<V> extends BridgeGuest implements OnCommand<V> {
+
   public GuestOnCommand(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -27,4 +28,5 @@ public class GuestOnCommand<V> extends BridgeGuest implements OnCommand<V> {
   public void onCommand(V value) {
     this.bridge.guestExecuteVoid(this.guest, value);
   }
+
 }

@@ -19,6 +19,32 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 
 public class Utf8EncodedOutputSpec {
+
+  static void encodeValidCodePoint(int codePoint, byte[] codeUnits) {
+    final int n = codeUnits.length;
+    for (int i = 1; i <= n; i += 1) {
+      final byte[] actual = new byte[n];
+      final OutputBuffer<?> buffer = Binary.outputBuffer(actual, 0, i);
+      Output<?> output = Utf8.encodedOutput(buffer, UtfErrorMode.fatal());
+      output = output.write(codePoint);
+      buffer.limit(n);
+      if (i != n) {
+        assertNotEquals(actual, codeUnits);
+      }
+      output = output.flush();
+      assertEquals(actual, codeUnits);
+    }
+  }
+
+  static byte[] byteArray(int... xs) {
+    final int n = xs.length;
+    final byte[] bytes = new byte[n];
+    for (int i = 0; i < n; i += 1) {
+      bytes[i] = (byte) xs[i];
+    }
+    return bytes;
+  }
+
   @Test
   public void encodeValid1ByteCodeUnitSequences() {
     // Unicode 11.0.0 § 3.9
@@ -66,28 +92,4 @@ public class Utf8EncodedOutputSpec {
     encodeValidCodePoint(0x10ffff, byteArray(0xf4, 0x8f, 0xbf, 0xbf));
   }
 
-  static void encodeValidCodePoint(int codePoint, byte[] codeUnits) {
-    final int n = codeUnits.length;
-    for (int i = 1; i <= n; i += 1) {
-      final byte[] actual = new byte[n];
-      final OutputBuffer<?> buffer = Binary.outputBuffer(actual, 0, i);
-      Output<?> output = Utf8.encodedOutput(buffer, UtfErrorMode.fatal());
-      output = output.write(codePoint);
-      buffer.limit(n);
-      if (i != n) {
-        assertNotEquals(actual, codeUnits);
-      }
-      output = output.flush();
-      assertEquals(actual, codeUnits);
-    }
-  }
-
-  static byte[] byteArray(int... xs) {
-    final int n = xs.length;
-    final byte[] bytes = new byte[n];
-    for (int i = 0; i < n; i += 1) {
-      bytes[i] = (byte) xs[i];
-    }
-    return bytes;
-  }
 }

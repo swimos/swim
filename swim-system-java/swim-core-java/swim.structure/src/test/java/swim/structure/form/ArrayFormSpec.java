@@ -21,6 +21,7 @@ import swim.structure.Record;
 import static org.testng.Assert.assertEquals;
 
 public class ArrayFormSpec {
+
   @Test
   public void moldArray() {
     final int[] array = {1, 2, 3};
@@ -46,4 +47,5 @@ public class ArrayFormSpec {
     final int[] array = {1};
     assertEquals(Form.forArray(Integer.TYPE, Form.forInteger()).cast(Num.from(1)), array);
   }
+
 }

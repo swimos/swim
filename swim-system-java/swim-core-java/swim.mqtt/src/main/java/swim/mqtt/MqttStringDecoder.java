@@ -20,6 +20,7 @@ import swim.codec.InputBuffer;
 import swim.codec.Utf8;
 
 final class MqttStringDecoder extends Decoder<String> {
+
   final Decoder<String> decoder;
   final int remaining;
   final int step;
@@ -32,11 +33,6 @@ final class MqttStringDecoder extends Decoder<String> {
 
   MqttStringDecoder() {
     this(null, 0, 1);
-  }
-
-  @Override
-  public Decoder<String> feed(InputBuffer input) {
-    return decode(input, this.decoder, this.remaining, this.step);
   }
 
   static Decoder<String> decode(InputBuffer input, Decoder<String> decoder, int remaining, int step) {
@@ -83,4 +79,10 @@ final class MqttStringDecoder extends Decoder<String> {
   static Decoder<String> decode(InputBuffer input) {
     return decode(input, null, 0, 1);
   }
+
+  @Override
+  public Decoder<String> feed(InputBuffer input) {
+    return decode(input, this.decoder, this.remaining, this.step);
+  }
+
 }

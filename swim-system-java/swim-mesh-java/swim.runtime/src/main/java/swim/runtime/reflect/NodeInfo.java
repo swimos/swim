@@ -24,6 +24,8 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class NodeInfo {
+
+  private static Form<NodeInfo> form;
   protected final Uri nodeUri;
   protected final long created;
   protected final FingerTrieSeq<Value> agentIds;
@@ -34,6 +36,23 @@ public class NodeInfo {
     this.created = created;
     this.agentIds = agentIds;
     this.childCount = childCount;
+  }
+
+  public static NodeInfo from(NodeBinding nodeBinding, long childCount) {
+    return new NodeInfo(nodeBinding.nodeUri(), nodeBinding.createdTime(),
+        nodeBinding.agentIds(), childCount);
+  }
+
+  public static NodeInfo from(NodeBinding nodeBinding) {
+    return from(nodeBinding, 0L);
+  }
+
+  @Kind
+  public static Form<NodeInfo> form() {
+    if (form == null) {
+      form = new NodeInfoForm();
+    }
+    return form;
   }
 
   public final Uri nodeUri() {
@@ -56,27 +75,10 @@ public class NodeInfo {
     return form().mold(this).toValue();
   }
 
-  public static NodeInfo from(NodeBinding nodeBinding, long childCount) {
-    return new NodeInfo(nodeBinding.nodeUri(), nodeBinding.createdTime(),
-                        nodeBinding.agentIds(), childCount);
-  }
-
-  public static NodeInfo from(NodeBinding nodeBinding) {
-    return from(nodeBinding, 0L);
-  }
-
-  private static Form<NodeInfo> form;
-
-  @Kind
-  public static Form<NodeInfo> form() {
-    if (form == null) {
-      form = new NodeInfoForm();
-    }
-    return form;
-  }
 }
 
 final class NodeInfoForm extends Form<NodeInfo> {
+
   @Override
   public Class<?> type() {
     return NodeInfo.class;
@@ -121,4 +123,5 @@ final class NodeInfoForm extends Form<NodeInfo> {
     }
     return null;
   }
+
 }

@@ -25,6 +25,7 @@ import swim.csv.schema.CsvCol;
 import swim.csv.schema.CsvHeader;
 
 public class CsvParser {
+
   protected final int delimiter;
 
   public CsvParser(int delimiter) {
@@ -197,4 +198,5 @@ public class CsvParser {
     }
     return parser.bind();
   }
+
 }

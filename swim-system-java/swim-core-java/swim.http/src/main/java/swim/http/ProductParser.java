@@ -21,6 +21,7 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Builder;
 
 final class ProductParser extends Parser<Product> {
+
   final HttpParser http;
   final StringBuilder name;
   final StringBuilder version;
@@ -41,12 +42,6 @@ final class ProductParser extends Parser<Product> {
 
   ProductParser(HttpParser http) {
     this(http, null, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<Product> feed(Input input) {
-    return parse(input, this.http, this.name, this.version, this.comments,
-                 this.comment, this.step);
   }
 
   static Parser<Product> parse(Input input, HttpParser http, StringBuilder name,
@@ -126,7 +121,7 @@ final class ProductParser extends Parser<Product> {
           step = 6;
         } else if (!input.isEmpty()) {
           return done(http.product(name.toString(), version != null ? version.toString() : null,
-                                   comments != null ? comments.bind() : FingerTrieSeq.<String>empty()));
+              comments != null ? comments.bind() : FingerTrieSeq.<String>empty()));
         }
       }
       if (step == 6) {
@@ -179,4 +174,11 @@ final class ProductParser extends Parser<Product> {
   static Parser<Product> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, null, null, 1);
   }
+
+  @Override
+  public Parser<Product> feed(Input input) {
+    return parse(input, this.http, this.name, this.version, this.comments,
+        this.comment, this.step);
+  }
+
 }

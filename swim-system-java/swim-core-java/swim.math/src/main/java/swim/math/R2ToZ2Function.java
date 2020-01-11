@@ -15,7 +15,9 @@
 package swim.math;
 
 public interface R2ToZ2Function {
+
   long transformX(double x, double y);
 
   long transformY(double x, double y);
+
 }

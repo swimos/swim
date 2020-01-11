@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import swim.codec.Output;
 
 final class UriPathEmpty extends UriPath {
+
   @Override
   public boolean isDefined() {
     return false;
@@ -131,4 +132,5 @@ final class UriPathEmpty extends UriPath {
   public String toString() {
     return "";
   }
+
 }

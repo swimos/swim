@@ -33,10 +33,35 @@ import swim.http.HttpWriter;
 import swim.util.Murmur3;
 
 public final class SecWebSocketKey extends HttpHeader {
+
+  private static int hashSeed;
   final byte[] key;
 
   SecWebSocketKey(byte[] key) {
     this.key = key;
+  }
+
+  public static SecWebSocketKey from(byte[] key) {
+    return new SecWebSocketKey(key);
+  }
+
+  public static SecWebSocketKey from(String keyString) {
+    final Input input = Unicode.stringInput(keyString);
+    Parser<byte[]> parser = Base64.standard().parseByteArray(input);
+    if (input.isCont() && !parser.isError()) {
+      parser = Parser.error(Diagnostic.unexpected(input));
+    }
+    return new SecWebSocketKey(parser.bind());
+  }
+
+  public static SecWebSocketKey generate() {
+    final byte[] key = new byte[16];
+    ThreadLocalRandom.current().nextBytes(key);
+    return new SecWebSocketKey(key);
+  }
+
+  public static Parser<SecWebSocketKey> parseHttpValue(Input input, HttpParser http) {
+    return SecWebSocketKeyParser.parse(input);
   }
 
   @Override
@@ -99,28 +124,4 @@ public final class SecWebSocketKey extends HttpHeader {
     output = output.write('"').write(')');
   }
 
-  private static int hashSeed;
-
-  public static SecWebSocketKey from(byte[] key) {
-    return new SecWebSocketKey(key);
-  }
-
-  public static SecWebSocketKey from(String keyString) {
-    final Input input = Unicode.stringInput(keyString);
-    Parser<byte[]> parser = Base64.standard().parseByteArray(input);
-    if (input.isCont() && !parser.isError()) {
-      parser = Parser.error(Diagnostic.unexpected(input));
-    }
-    return new SecWebSocketKey(parser.bind());
-  }
-
-  public static SecWebSocketKey generate() {
-    final byte[] key = new byte[16];
-    ThreadLocalRandom.current().nextBytes(key);
-    return new SecWebSocketKey(key);
-  }
-
-  public static Parser<SecWebSocketKey> parseHttpValue(Input input, HttpParser http) {
-    return SecWebSocketKeyParser.parse(input);
-  }
 }

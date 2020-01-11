@@ -20,9 +20,6 @@ import swim.dynamic.java.lang.JavaLang;
 import swim.dynamic.java.util.JavaUtil;
 
 public final class JavaBase {
-  private JavaBase() {
-    // static
-  }
 
   public static final HostLibrary LIBRARY;
 
@@ -32,4 +29,9 @@ public final class JavaBase {
     hostLib.addHostPackage(JavaLang.PACKAGE);
     hostLib.addHostPackage(JavaUtil.PACKAGE);
   }
+
+  private JavaBase() {
+    // static
+  }
+
 }

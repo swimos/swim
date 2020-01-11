@@ -29,54 +29,67 @@ import swim.api.warp.function.WillUnlink;
 import swim.structure.Value;
 
 public class ClientRuntimeSpec {
+
   @Test
   public void testLink() throws InterruptedException {
     final ClientRuntime client = new ClientRuntime();
     final CountDownLatch didSync = new CountDownLatch(1);
     class IntersectionsController implements OnEvent<Value>, WillLink, DidLink,
         WillSync, DidSync, WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
+
       @Override
       public void onEvent(Value value) {
         System.out.println("onEvent city/intersection: " + value);
       }
+
       @Override
       public void willLink() {
         System.out.println("willLink");
       }
+
       @Override
       public void didLink() {
         System.out.println("didLink");
       }
+
       @Override
       public void willSync() {
         System.out.println("willSync");
       }
+
       @Override
       public void didSync() {
         System.out.println("didSync");
         didSync.countDown();
       }
+
       @Override
       public void willUnlink() {
         System.out.println("willUnlink");
       }
+
       @Override
       public void didUnlink() {
         System.out.println("didUnlink");
       }
+
       @Override
       public void didConnect() {
         System.out.println("didConnect");
       }
+
       @Override
       public void didDisconnect() {
         System.out.println("didDisconnect");
       }
+
       @Override
       public void didClose() {
         System.out.println("didClose");
       }
+
     }
+
     try {
       client.start();
       client.downlink()
@@ -91,4 +104,5 @@ public class ClientRuntimeSpec {
       client.stop();
     }
   }
+
 }

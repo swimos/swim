@@ -20,6 +20,7 @@ import swim.io.FlowControl;
 import swim.io.FlowModifier;
 
 public abstract class AbstractHttpService implements HttpService, FlowContext {
+
   protected HttpServiceContext context;
 
   @Override
@@ -81,4 +82,5 @@ public abstract class AbstractHttpService implements HttpService, FlowContext {
   public void unbind() {
     this.context.unbind();
   }
+
 }

@@ -21,6 +21,7 @@ import swim.http.HttpHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class ContentTypeSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -29,15 +30,16 @@ public class ContentTypeSpec {
   public void parseContentTypeHeaders() {
     assertParses("Content-Type: text/plain", ContentType.from("text", "plain"));
     assertParses("Content-Type: text/html;charset=UTF-8",
-                 ContentType.from("text", "html").param("charset", "UTF-8"));
+        ContentType.from("text", "html").param("charset", "UTF-8"));
     assertParses("Content-Type: text/html ; charset = UTF-8",
-                 ContentType.from("text", "html").param("charset", "UTF-8"));
+        ContentType.from("text", "html").param("charset", "UTF-8"));
   }
 
   @Test
   public void writeContentTypeHeaders() {
     assertWrites(ContentType.from("text", "plain"), "Content-Type: text/plain");
     assertWrites(ContentType.from("text", "html").param("charset", "UTF-8"),
-                 "Content-Type: text/html; charset=UTF-8");
+        "Content-Type: text/html; charset=UTF-8");
   }
+
 }

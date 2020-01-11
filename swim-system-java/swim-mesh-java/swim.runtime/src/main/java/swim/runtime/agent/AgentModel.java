@@ -51,9 +51,71 @@ import swim.uri.Uri;
 import swim.util.Builder;
 
 public class AgentModel extends AgentNode {
+
+  static final AtomicReferenceFieldUpdater<AgentModel, Object> VIEWS =
+      AtomicReferenceFieldUpdater.newUpdater(AgentModel.class, Object.class, "views");
+  static final AtomicIntegerFieldUpdater<AgentModel> AGENT_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "agentOpenDelta");
+  static final AtomicIntegerFieldUpdater<AgentModel> AGENT_OPEN_COUNT =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "agentOpenCount");
+  static final AtomicIntegerFieldUpdater<AgentModel> AGENT_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "agentCloseDelta");
+  static final AtomicIntegerFieldUpdater<AgentModel> AGENT_CLOSE_COUNT =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "agentCloseCount");
+  static final AtomicLongFieldUpdater<AgentModel> AGENT_EXEC_DELTA =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "agentExecDelta");
+  static final AtomicLongFieldUpdater<AgentModel> AGENT_EXEC_RATE =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "agentExecRate");
+  static final AtomicLongFieldUpdater<AgentModel> AGENT_EXEC_TIME =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "agentExecTime");
+  static final AtomicIntegerFieldUpdater<AgentModel> TIMER_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "timerEventDelta");
+  static final AtomicLongFieldUpdater<AgentModel> TIMER_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "timerEventCount");
+  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkOpenDelta");
+  static final AtomicLongFieldUpdater<AgentModel> DOWNLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "downlinkOpenCount");
+  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkCloseDelta");
+  static final AtomicLongFieldUpdater<AgentModel> DOWNLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "downlinkCloseCount");
+  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkEventDelta");
+  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkEventRate");
+  static final AtomicLongFieldUpdater<AgentModel> DOWNLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "downlinkEventCount");
+  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkCommandRate");
+  static final AtomicLongFieldUpdater<AgentModel> DOWNLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "downlinkCommandCount");
+  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkOpenDelta");
+  static final AtomicLongFieldUpdater<AgentModel> UPLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "uplinkOpenCount");
+  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkCloseDelta");
+  static final AtomicLongFieldUpdater<AgentModel> UPLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "uplinkCloseCount");
+  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkEventDelta");
+  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkEventRate");
+  static final AtomicLongFieldUpdater<AgentModel> UPLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "uplinkEventCount");
+  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkCommandRate");
+  static final AtomicLongFieldUpdater<AgentModel> UPLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "uplinkCommandCount");
+  static final AtomicLongFieldUpdater<AgentModel> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "lastReportTime");
   protected final Value props;
   volatile Object views; // AgentView | AgentView[]
-
   volatile int agentOpenDelta;
   volatile int agentOpenCount;
   volatile int agentCloseDelta;
@@ -85,7 +147,6 @@ public class AgentModel extends AgentNode {
   volatile long uplinkCommandCount;
   volatile long lastReportTime;
   NodePulse pulse;
-
   AgentNode metaNode;
   DemandMapLane<Uri, LaneInfo> metaLanes;
   DemandLane<NodePulse> metaPulse;
@@ -244,7 +305,7 @@ public class AgentModel extends AgentNode {
         if (view.id.equals(oldView.id)) {
           return oldView;
         } else {
-          newViews = new AgentView[]{oldView, view};
+          newViews = new AgentView[] {oldView, view};
         }
       } else if (oldViews instanceof AgentView[]) {
         final AgentView[] oldViewArray = (AgentView[]) oldViews;
@@ -297,7 +358,7 @@ public class AgentModel extends AgentNode {
           if (view == null) {
             view = createAgent(agentFactory, id, props);
           }
-          newViews = new AgentView[]{oldView, view};
+          newViews = new AgentView[] {oldView, view};
         }
       } else if (oldViews instanceof AgentView[]) {
         final AgentView[] oldViewArray = (AgentView[]) oldViews;
@@ -558,7 +619,7 @@ public class AgentModel extends AgentNode {
       this.metaWarnLog = null;
       this.metaErrorLog = null;
       this.metaFailLog = null;
-    } 
+    }
     flushMetrics();
   }
 
@@ -721,10 +782,10 @@ public class AgentModel extends AgentNode {
     final AgentPulse agentPulse = new AgentPulse(agentCount, agentExecRate, agentExecTime, timerEventRate, timerEventCount);
     final long downlinkCount = downlinkOpenCount - downlinkCloseCount;
     final WarpDownlinkPulse downlinkPulse = new WarpDownlinkPulse(downlinkCount, downlinkEventRate, downlinkEventCount,
-                                                                  downlinkCommandRate, downlinkCommandCount);
+        downlinkCommandRate, downlinkCommandCount);
     final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
     final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
-                                                            uplinkCommandRate, uplinkCommandCount);
+        uplinkCommandRate, uplinkCommandCount);
     this.pulse = new NodePulse(agentPulse, downlinkPulse, uplinkPulse);
     final DemandLane<NodePulse> metaPulse = this.metaPulse;
     if (metaPulse != null) {
@@ -732,83 +793,21 @@ public class AgentModel extends AgentNode {
     }
 
     return new NodeProfile(cellAddress(),
-                           agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
-                           agentExecDelta, agentExecRate, agentExecTime,
-                           timerEventDelta, timerEventRate, timerEventCount,
-                           downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
-                           downlinkEventDelta, downlinkEventRate, downlinkEventCount,
-                           downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
-                           uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
-                           uplinkEventDelta, uplinkEventRate, uplinkEventCount,
-                           uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+        agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
+        agentExecDelta, agentExecRate, agentExecTime,
+        timerEventDelta, timerEventRate, timerEventCount,
+        downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+        downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+        downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+        uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+        uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+        uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
 
-  static final AtomicReferenceFieldUpdater<AgentModel, Object> VIEWS =
-      AtomicReferenceFieldUpdater.newUpdater(AgentModel.class, Object.class, "views");
-
-  static final AtomicIntegerFieldUpdater<AgentModel> AGENT_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "agentOpenDelta");
-  static final AtomicIntegerFieldUpdater<AgentModel> AGENT_OPEN_COUNT =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "agentOpenCount");
-  static final AtomicIntegerFieldUpdater<AgentModel> AGENT_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "agentCloseDelta");
-  static final AtomicIntegerFieldUpdater<AgentModel> AGENT_CLOSE_COUNT =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "agentCloseCount");
-  static final AtomicLongFieldUpdater<AgentModel> AGENT_EXEC_DELTA =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "agentExecDelta");
-  static final AtomicLongFieldUpdater<AgentModel> AGENT_EXEC_RATE =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "agentExecRate");
-  static final AtomicLongFieldUpdater<AgentModel> AGENT_EXEC_TIME =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "agentExecTime");
-  static final AtomicIntegerFieldUpdater<AgentModel> TIMER_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "timerEventDelta");
-  static final AtomicLongFieldUpdater<AgentModel> TIMER_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "timerEventCount");
-  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkOpenDelta");
-  static final AtomicLongFieldUpdater<AgentModel> DOWNLINK_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "downlinkOpenCount");
-  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkCloseDelta");
-  static final AtomicLongFieldUpdater<AgentModel> DOWNLINK_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "downlinkCloseCount");
-  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkEventDelta");
-  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkEventRate");
-  static final AtomicLongFieldUpdater<AgentModel> DOWNLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "downlinkEventCount");
-  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkCommandDelta");
-  static final AtomicIntegerFieldUpdater<AgentModel> DOWNLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "downlinkCommandRate");
-  static final AtomicLongFieldUpdater<AgentModel> DOWNLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "downlinkCommandCount");
-  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkOpenDelta");
-  static final AtomicLongFieldUpdater<AgentModel> UPLINK_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "uplinkOpenCount");
-  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkCloseDelta");
-  static final AtomicLongFieldUpdater<AgentModel> UPLINK_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "uplinkCloseCount");
-  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkEventDelta");
-  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkEventRate");
-  static final AtomicLongFieldUpdater<AgentModel> UPLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "uplinkEventCount");
-  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkCommandDelta");
-  static final AtomicIntegerFieldUpdater<AgentModel> UPLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(AgentModel.class, "uplinkCommandRate");
-  static final AtomicLongFieldUpdater<AgentModel> UPLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "uplinkCommandCount");
-  static final AtomicLongFieldUpdater<AgentModel> LAST_REPORT_TIME =
-      AtomicLongFieldUpdater.newUpdater(AgentModel.class, "lastReportTime");
 }
 
 final class AgentModelLanesController implements OnCueKey<Uri, LaneInfo>, OnSyncKeys<Uri> {
+
   final NodeBinding node;
 
   AgentModelLanesController(NodeBinding node) {
@@ -828,9 +827,11 @@ final class AgentModelLanesController implements OnCueKey<Uri, LaneInfo>, OnSync
   public Iterator<Uri> onSync(WarpUplink uplink) {
     return this.node.lanes().keyIterator();
   }
+
 }
 
 final class AgentModelPulseController implements OnCue<NodePulse> {
+
   final AgentModel node;
 
   AgentModelPulseController(AgentModel node) {
@@ -841,9 +842,11 @@ final class AgentModelPulseController implements OnCue<NodePulse> {
   public NodePulse onCue(WarpUplink uplink) {
     return this.node.pulse;
   }
+
 }
 
 final class AgentModelPushUp implements Runnable {
+
   final AgentNode node;
   final Push<?> push;
 
@@ -875,9 +878,11 @@ final class AgentModelPushUp implements Runnable {
       }
     }
   }
+
 }
 
 abstract class AgentModelCallback implements Runnable {
+
   final AgentModel model;
 
   AgentModelCallback(AgentModel model) {
@@ -917,9 +922,11 @@ abstract class AgentModelCallback implements Runnable {
   }
 
   abstract void call(AgentView view);
+
 }
 
 final class AgentModelWillLoad extends AgentModelCallback {
+
   AgentModelWillLoad(AgentModel model) {
     super(model);
   }
@@ -928,9 +935,11 @@ final class AgentModelWillLoad extends AgentModelCallback {
   void call(AgentView view) {
     view.willLoad();
   }
+
 }
 
 final class AgentModelDidLoad extends AgentModelCallback {
+
   AgentModelDidLoad(AgentModel model) {
     super(model);
   }
@@ -939,9 +948,11 @@ final class AgentModelDidLoad extends AgentModelCallback {
   void call(AgentView view) {
     view.didLoad();
   }
+
 }
 
 final class AgentModelWillStart extends AgentModelCallback {
+
   AgentModelWillStart(AgentModel model) {
     super(model);
   }
@@ -950,9 +961,11 @@ final class AgentModelWillStart extends AgentModelCallback {
   void call(AgentView view) {
     view.willStart();
   }
+
 }
 
 final class AgentModelDidStart extends AgentModelCallback {
+
   AgentModelDidStart(AgentModel model) {
     super(model);
   }
@@ -961,9 +974,11 @@ final class AgentModelDidStart extends AgentModelCallback {
   void call(AgentView view) {
     view.didStart();
   }
+
 }
 
 final class AgentModelWillStop extends AgentModelCallback {
+
   AgentModelWillStop(AgentModel model) {
     super(model);
   }
@@ -972,9 +987,11 @@ final class AgentModelWillStop extends AgentModelCallback {
   void call(AgentView view) {
     view.willStop();
   }
+
 }
 
 final class AgentModelDidStop extends AgentModelCallback {
+
   AgentModelDidStop(AgentModel model) {
     super(model);
   }
@@ -983,9 +1000,11 @@ final class AgentModelDidStop extends AgentModelCallback {
   void call(AgentView view) {
     view.didStop();
   }
+
 }
 
 final class AgentModelWillUnload extends AgentModelCallback {
+
   AgentModelWillUnload(AgentModel model) {
     super(model);
   }
@@ -994,9 +1013,11 @@ final class AgentModelWillUnload extends AgentModelCallback {
   void call(AgentView view) {
     view.willUnload();
   }
+
 }
 
 final class AgentModelDidUnload extends AgentModelCallback {
+
   AgentModelDidUnload(AgentModel model) {
     super(model);
   }
@@ -1005,9 +1026,11 @@ final class AgentModelDidUnload extends AgentModelCallback {
   void call(AgentView view) {
     view.didUnload();
   }
+
 }
 
 final class AgentModelWillClose extends AgentModelCallback {
+
   AgentModelWillClose(AgentModel model) {
     super(model);
   }
@@ -1016,9 +1039,11 @@ final class AgentModelWillClose extends AgentModelCallback {
   void call(AgentView view) {
     view.willClose();
   }
+
 }
 
 final class AgentModelDidClose extends AgentModelCallback {
+
   AgentModelDidClose(AgentModel model) {
     super(model);
   }
@@ -1027,4 +1052,5 @@ final class AgentModelDidClose extends AgentModelCallback {
   void call(AgentView view) {
     view.didClose();
   }
+
 }

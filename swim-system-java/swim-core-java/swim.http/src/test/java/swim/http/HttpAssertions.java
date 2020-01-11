@@ -34,6 +34,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public final class HttpAssertions {
+
   private HttpAssertions() {
     // stub
   }
@@ -160,4 +161,5 @@ public final class HttpAssertions {
   public static void assertEncodes(Encoder<?, ?> part, String expected) {
     assertEncodes(part, ByteBuffer.wrap(expected.getBytes(Charset.forName("UTF-8"))));
   }
+
 }

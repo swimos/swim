@@ -22,9 +22,6 @@ import swim.dynamic.JavaHostObjectType;
 import swim.dynamic.java.lang.HostObject;
 
 public final class HostAgentRouteContext {
-  private HostAgentRouteContext() {
-    // static
-  }
 
   public static final HostObjectType<AgentRouteContext> TYPE;
 
@@ -35,9 +32,15 @@ public final class HostAgentRouteContext {
     type.addMember(new HostAgentRouteContextRouteName());
     type.addMember(new HostAgentRouteContextPattern());
   }
+
+  private HostAgentRouteContext() {
+    // static
+  }
+
 }
 
 final class HostAgentRouteContextRouteName implements HostMethod<AgentRouteContext> {
+
   @Override
   public String key() {
     return "routeName";
@@ -47,9 +50,11 @@ final class HostAgentRouteContextRouteName implements HostMethod<AgentRouteConte
   public Object invoke(Bridge bridge, AgentRouteContext agentRouteContext, Object... arguments) {
     return agentRouteContext.routeName();
   }
+
 }
 
 final class HostAgentRouteContextPattern implements HostMethod<AgentRouteContext> {
+
   @Override
   public String key() {
     return "pattern";
@@ -59,4 +64,5 @@ final class HostAgentRouteContextPattern implements HostMethod<AgentRouteContext
   public Object invoke(Bridge bridge, AgentRouteContext agentRouteContext, Object... arguments) {
     return agentRouteContext.pattern();
   }
+
 }

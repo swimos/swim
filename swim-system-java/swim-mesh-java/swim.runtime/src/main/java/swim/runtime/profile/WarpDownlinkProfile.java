@@ -18,6 +18,7 @@ import swim.runtime.DownlinkAddress;
 import swim.runtime.Metric;
 
 public final class WarpDownlinkProfile extends Metric {
+
   final DownlinkAddress cellAddress;
   final long execDelta;
   final long execRate;
@@ -110,4 +111,5 @@ public final class WarpDownlinkProfile extends Metric {
   public long commandCount() {
     return this.commandCount;
   }
+
 }

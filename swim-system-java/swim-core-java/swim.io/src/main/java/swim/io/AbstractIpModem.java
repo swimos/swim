@@ -22,6 +22,7 @@ import swim.codec.Decoder;
 import swim.codec.Encoder;
 
 public abstract class AbstractIpModem<I, O> implements IpModem<I, O>, IpContext, FlowContext {
+
   protected IpModemContext<I, O> context;
 
   @Override
@@ -198,4 +199,5 @@ public abstract class AbstractIpModem<I, O> implements IpModem<I, O>, IpContext,
   public void close() {
     this.context.close();
   }
+
 }

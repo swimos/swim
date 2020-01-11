@@ -78,6 +78,41 @@ package swim.codec;
  * intended semantics, are implementation defined.</p>
  */
 public abstract class Writer<I, O> extends Encoder<I, O> {
+
+  private static Writer<Object, Object> done;
+
+  /**
+   * Returns a {@code Writer} in the <em>done</em> state that {@code bind}s
+   * a {@code null} written result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <I, O> Writer<I, O> done() {
+    if (done == null) {
+      done = new WriterDone<Object, Object>(null);
+    }
+    return (Writer<I, O>) done;
+  }
+
+  /**
+   * Returns a {@code Writer} in the <em>done</em> state that {@code bind}s
+   * the given written {@code output}.
+   */
+  public static <I, O> Writer<I, O> done(O output) {
+    if (output == null) {
+      return done();
+    } else {
+      return new WriterDone<I, O>(output);
+    }
+  }
+
+  /**
+   * Returns a {@code Writer} in the <em>error</em> state that {@code trap}s
+   * the given write {@code error}.
+   */
+  public static <I, O> Writer<I, O> error(Throwable error) {
+    return new WriterError<I, O>(error);
+  }
+
   /**
    * Returns {@code true} when {@link #pull(Output) pull} is able to produce
    * {@code Output}.  i.e. this {@code Writer} is in the <em>cont</em> state.
@@ -112,7 +147,7 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
    * the given {@code input} object.
    *
    * @throws IllegalArgumentException if this {@code Writer} does not know how
-   *         to write the given {@code input} object.
+   *                                  to write the given {@code input} object.
    */
   @Override
   public Writer<I, O> feed(I input) {
@@ -150,7 +185,7 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
    * the <em>done</em> state.
    *
    * @throws IllegalStateException if this {@code Writer} is not in the
-   *         <em>done</em> state.
+   *                               <em>done</em> state.
    */
   @Override
   public O bind() {
@@ -162,7 +197,7 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
    * <em>error</em> state.
    *
    * @throws IllegalStateException if this {@code Writer} is not in the
-   *         <em>error</em> state.
+   *                               <em>error</em> state.
    */
   @Override
   public Throwable trap() {
@@ -174,7 +209,7 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
    * A {@code Writer} in the <em>done</em> state can have any input type.
    *
    * @throws IllegalStateException if this {@code Writer} is not in the
-   *         <em>done</em> state.
+   *                               <em>done</em> state.
    */
   @Override
   public <I2> Writer<I2, O> asDone() {
@@ -187,7 +222,7 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
    * and any output type.
    *
    * @throws IllegalStateException if this {@code Writer} is not in the
-   *         <em>error</em> state.
+   *                               <em>error</em> state.
    */
   @Override
   public <I2, O2> Writer<I2, O2> asError() {
@@ -207,42 +242,10 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
     return andThen((Writer<I, O2>) that);
   }
 
-  private static Writer<Object, Object> done;
-
-  /**
-   * Returns a {@code Writer} in the <em>done</em> state that {@code bind}s
-   * a {@code null} written result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <I, O> Writer<I, O> done() {
-    if (done == null) {
-      done = new WriterDone<Object, Object>(null);
-    }
-    return (Writer<I, O>) done;
-  }
-
-  /**
-   * Returns a {@code Writer} in the <em>done</em> state that {@code bind}s
-   * the given written {@code output}.
-   */
-  public static <I, O> Writer<I, O> done(O output) {
-    if (output == null) {
-      return done();
-    } else {
-      return new WriterDone<I, O>(output);
-    }
-  }
-
-  /**
-   * Returns a {@code Writer} in the <em>error</em> state that {@code trap}s
-   * the given write {@code error}.
-   */
-  public static <I, O> Writer<I, O> error(Throwable error) {
-    return new WriterError<I, O>(error);
-  }
 }
 
 final class WriterDone<I, O> extends Writer<I, O> {
+
   private final O output;
 
   WriterDone(O output) {
@@ -279,9 +282,11 @@ final class WriterDone<I, O> extends Writer<I, O> {
   public <O2> Writer<I, O2> andThen(Writer<I, O2> that) {
     return that;
   }
+
 }
 
 final class WriterError<I, O> extends Writer<I, O> {
+
   private final Throwable error;
 
   WriterError(Throwable error) {
@@ -330,9 +335,11 @@ final class WriterError<I, O> extends Writer<I, O> {
   public <O2> Writer<I, O2> andThen(Writer<I, O2> that) {
     return (Writer<I, O2>) this;
   }
+
 }
 
 final class WriterAndThen<I, O> extends Writer<I, O> {
+
   private final Writer<I, ?> head;
   private final Writer<I, O> tail;
 
@@ -351,4 +358,5 @@ final class WriterAndThen<I, O> extends Writer<I, O> {
     }
     return new WriterAndThen<I, O>(head, this.tail);
   }
+
 }

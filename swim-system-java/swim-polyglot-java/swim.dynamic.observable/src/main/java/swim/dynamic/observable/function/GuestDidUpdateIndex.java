@@ -19,6 +19,7 @@ import swim.dynamic.BridgeGuest;
 import swim.observable.function.DidUpdateIndex;
 
 public class GuestDidUpdateIndex<V> extends BridgeGuest implements DidUpdateIndex<V> {
+
   public GuestDidUpdateIndex(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -27,4 +28,5 @@ public class GuestDidUpdateIndex<V> extends BridgeGuest implements DidUpdateInde
   public void didUpdate(int index, V newValue, V oldValue) {
     this.bridge.guestExecuteVoid(this.guest, index, newValue, oldValue);
   }
+
 }

@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpCharsetSpec {
+
   public void assertParses(String string, HttpCharset charset) {
     HttpAssertions.assertParses(Http.standardParser().charsetParser(), string, charset);
   }
@@ -44,4 +45,5 @@ public class HttpCharsetSpec {
   public void writeCharsetsWithWeights() {
     assertWrites(HttpCharset.from("utf-8", 0.5f), "utf-8; q=0.5");
   }
+
 }

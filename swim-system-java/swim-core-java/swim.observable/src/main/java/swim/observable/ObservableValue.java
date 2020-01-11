@@ -18,6 +18,7 @@ import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
 
 public interface ObservableValue<V> extends Observable<Object> {
+
   V get();
 
   V set(V newValue);
@@ -31,4 +32,5 @@ public interface ObservableValue<V> extends Observable<Object> {
   ObservableValue<V> willSet(WillSet<V> willSet);
 
   ObservableValue<V> didSet(DidSet<V> didSet);
+
 }

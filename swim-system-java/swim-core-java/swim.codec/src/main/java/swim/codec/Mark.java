@@ -22,6 +22,9 @@ import swim.util.Murmur3;
  * column number, with an optional note.
  */
 public final class Mark extends Tag implements Comparable<Mark> {
+
+  private static int hashSeed;
+  private static Mark zero;
   final long offset;
   final int line;
   final int column;
@@ -32,6 +35,35 @@ public final class Mark extends Tag implements Comparable<Mark> {
     this.line = line;
     this.column = column;
     this.note = note;
+  }
+
+  /**
+   * Returns a {@code Mark} at byte offset {@code 0}, line {@code 1}, and
+   * column {@code 1}, with no attached note.
+   */
+  public static Mark zero() {
+    if (zero == null) {
+      zero = new Mark(0L, 1, 1, null);
+    }
+    return zero;
+  }
+
+  /**
+   * Returns a new {@code Mark} at the given zero-based byte {@code offset},
+   * one-based {@code line} number, and one-based {@code column} number,
+   * with the attached {@code note}.
+   */
+  public static Mark at(long offset, int line, int column, String note) {
+    return new Mark(offset, line, column, note);
+  }
+
+  /**
+   * Returns a new {@code Mark} at the given zero-based byte {@code offset},
+   * one-based {@code line} number, and one-based {@code column} number,
+   * with no attached note.
+   */
+  public static Mark at(long offset, int line, int column) {
+    return at(offset, line, column, null);
   }
 
   /**
@@ -191,35 +223,4 @@ public final class Mark extends Tag implements Comparable<Mark> {
     return Format.display(this);
   }
 
-  private static int hashSeed;
-  private static Mark zero;
-
-  /**
-   * Returns a {@code Mark} at byte offset {@code 0}, line {@code 1}, and
-   * column {@code 1}, with no attached note.
-   */
-  public static Mark zero() {
-    if (zero == null) {
-      zero = new Mark(0L, 1, 1, null);
-    }
-    return zero;
-  }
-
-  /**
-   * Returns a new {@code Mark} at the given zero-based byte {@code offset},
-   * one-based {@code line} number, and one-based {@code column} number,
-   * with the attached {@code note}.
-   */
-  public static Mark at(long offset, int line, int column, String note) {
-    return new Mark(offset, line, column, note);
-  }
-
-  /**
-   * Returns a new {@code Mark} at the given zero-based byte {@code offset},
-   * one-based {@code line} number, and one-based {@code column} number,
-   * with no attached note.
-   */
-  public static Mark at(long offset, int line, int column) {
-    return at(offset, line, column, null);
-  }
 }

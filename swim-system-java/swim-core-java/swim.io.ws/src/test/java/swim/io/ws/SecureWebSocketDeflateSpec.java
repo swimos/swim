@@ -23,6 +23,7 @@ import swim.uri.Uri;
 import swim.ws.WsRequest;
 
 public class SecureWebSocketDeflateSpec extends WebSocketBehaviors {
+
   final WsSettings wsSettings = WsSettings.defaultCompression().tlsSettings(TestTlsSettings.tlsSettings());
   final Uri wsUri = Uri.parse("ws://127.0.0.1:33555/");
 
@@ -43,4 +44,5 @@ public class SecureWebSocketDeflateSpec extends WebSocketBehaviors {
     };
     return endpoint.connectHttps("127.0.0.1", 33553, client, this.wsSettings.httpSettings());
   }
+
 }

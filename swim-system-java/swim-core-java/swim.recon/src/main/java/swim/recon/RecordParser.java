@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.util.Builder;
 
 final class RecordParser<I, V> extends Parser<V> {
+
   final ReconParser<I, V> recon;
   final Builder<I, V> builder;
   final Parser<V> keyParser;
@@ -33,11 +34,6 @@ final class RecordParser<I, V> extends Parser<V> {
     this.keyParser = keyParser;
     this.valueParser = valueParser;
     this.step = step;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.keyParser, this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -56,7 +52,8 @@ final class RecordParser<I, V> extends Parser<V> {
         return error(Diagnostic.expected('{', input));
       }
     }
-    block: do {
+    block:
+    do {
       if (step == 2) {
         while (input.isCont()) {
           c = input.head();
@@ -202,4 +199,10 @@ final class RecordParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
     return parse(input, recon, null, null, null, 1);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.builder, this.keyParser, this.valueParser, this.step);
+  }
+
 }

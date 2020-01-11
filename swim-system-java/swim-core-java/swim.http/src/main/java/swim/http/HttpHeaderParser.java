@@ -19,6 +19,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class HttpHeaderParser extends Parser<HttpHeader> {
+
   final HttpParser http;
   final StringBuilder name;
   final Parser<? extends HttpHeader> value;
@@ -33,11 +34,6 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
 
   HttpHeaderParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<HttpHeader> feed(Input input) {
-    return parse(input, this.http, this.name, this.value, this.step);
   }
 
   @SuppressWarnings("unchecked")
@@ -132,4 +128,10 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
   static Parser<HttpHeader> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<HttpHeader> feed(Input input) {
+    return parse(input, this.http, this.name, this.value, this.step);
+  }
+
 }

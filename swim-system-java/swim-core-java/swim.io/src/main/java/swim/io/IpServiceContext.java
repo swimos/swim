@@ -22,9 +22,11 @@ package swim.io;
  * the network listener.
  */
 public interface IpServiceContext extends IpServiceRef, FlowContext {
+
   /**
    * Returns the configuration parameters that govern the underlying network
    * listener.
    */
   IpSettings ipSettings();
+
 }

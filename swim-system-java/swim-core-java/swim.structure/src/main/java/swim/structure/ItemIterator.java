@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 final class ItemIterator implements Iterator<Item> {
+
   Item item;
 
   ItemIterator(Item item) {
@@ -43,4 +44,5 @@ final class ItemIterator implements Iterator<Item> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

@@ -24,6 +24,7 @@ import swim.streamlet.OutletMapInlet;
 import swim.structure.Value;
 
 public final class GetOutlet extends AbstractOutlet<Value> {
+
   final OutletInlet<Value> keyInlet;
   final OutletMapInlet<Value, Value, Object> mapInlet;
 
@@ -57,4 +58,5 @@ public final class GetOutlet extends AbstractOutlet<Value> {
     }
     return Value.absent();
   }
+
 }

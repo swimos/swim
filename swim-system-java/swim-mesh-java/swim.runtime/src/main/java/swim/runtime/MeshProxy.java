@@ -30,6 +30,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class MeshProxy implements MeshBinding, MeshContext {
+
   protected final MeshBinding meshBinding;
   protected MeshContext meshContext;
 
@@ -446,4 +447,5 @@ public class MeshProxy implements MeshBinding, MeshContext {
   public void didFail(Throwable error) {
     this.meshBinding.didFail(error);
   }
+
 }

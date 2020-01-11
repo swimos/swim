@@ -24,6 +24,8 @@ import swim.http.HttpWriter;
 import swim.util.Murmur3;
 
 public final class RawHeader extends HttpHeader {
+
+  private static int hashSeed;
   final String lowerCaseName;
   final String name;
   final String value;
@@ -32,6 +34,19 @@ public final class RawHeader extends HttpHeader {
     this.lowerCaseName = lowerCaseName;
     this.name = name;
     this.value = value;
+  }
+
+  public static RawHeader from(String lowerCaseName, String name, String value) {
+    return new RawHeader(lowerCaseName, name, value);
+  }
+
+  public static RawHeader from(String name, String value) {
+    return new RawHeader(name.toLowerCase(), name, value);
+  }
+
+  public static Parser<RawHeader> parseHttpValue(Input input, HttpParser http,
+                                                 String lowerCaseName, String name) {
+    return RawHeaderParser.parse(input, lowerCaseName, name);
   }
 
   @Override
@@ -84,18 +99,4 @@ public final class RawHeader extends HttpHeader {
         .debug(this.name).write(", ").debug(this.value).write(')');
   }
 
-  private static int hashSeed;
-
-  public static RawHeader from(String lowerCaseName, String name, String value) {
-    return new RawHeader(lowerCaseName, name, value);
-  }
-
-  public static RawHeader from(String name, String value) {
-    return new RawHeader(name.toLowerCase(), name, value);
-  }
-
-  public static Parser<RawHeader> parseHttpValue(Input input, HttpParser http,
-                                                 String lowerCaseName, String name) {
-    return RawHeaderParser.parse(input, lowerCaseName, name);
-  }
 }

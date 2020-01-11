@@ -23,6 +23,7 @@ package swim.concurrent;
  * @see Task
  */
 public interface TaskContext extends TaskRef {
+
   /**
    * Returns the execution {@code Stage} to which the task is bound.
    */
@@ -54,4 +55,5 @@ public interface TaskContext extends TaskRef {
    */
   @Override
   boolean cancel();
+
 }

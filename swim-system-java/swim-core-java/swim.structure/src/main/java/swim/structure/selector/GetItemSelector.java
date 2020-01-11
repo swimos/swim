@@ -25,6 +25,8 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public final class GetItemSelector extends Selector {
+
+  private static int hashSeed;
   final Num index;
   final Selector then;
 
@@ -177,5 +179,4 @@ public final class GetItemSelector extends Selector {
     this.then.debugThen(output);
   }
 
-  private static int hashSeed;
 }

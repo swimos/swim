@@ -16,4 +16,5 @@
  * JavaScript Object Notation (JSON) codec that incrementally parses and writes
  * <strong>swim-structure</strong> values.
  */
+
 package swim.json;

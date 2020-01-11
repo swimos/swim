@@ -29,6 +29,7 @@ import swim.uri.Uri;
 import swim.util.Log;
 
 public abstract class ActorCell implements CellBinding, CellContext {
+
   Log log;
   Policy policy;
 
@@ -180,4 +181,5 @@ public abstract class ActorCell implements CellBinding, CellContext {
       cellContext().fail(message);
     }
   }
+
 }

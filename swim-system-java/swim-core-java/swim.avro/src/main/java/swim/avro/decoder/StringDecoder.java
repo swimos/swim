@@ -23,6 +23,7 @@ import swim.codec.Parser;
 import swim.codec.Utf8;
 
 final class StringDecoder<T> extends Decoder<T> {
+
   final AvroStringType<T> type;
   final long length;
   final int shift;
@@ -40,11 +41,6 @@ final class StringDecoder<T> extends Decoder<T> {
 
   StringDecoder(AvroStringType<T> type) {
     this(type, 0L, 0, null, 1);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.length, this.shift, this.parser, this.step);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroStringType<T> type, long length,
@@ -108,4 +104,10 @@ final class StringDecoder<T> extends Decoder<T> {
   static <T> Decoder<T> decode(InputBuffer input, AvroStringType<T> type) {
     return decode(input, type, 0L, 0, null, 1);
   }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type, this.length, this.shift, this.parser, this.step);
+  }
+
 }

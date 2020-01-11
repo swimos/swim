@@ -17,6 +17,7 @@ package swim.math;
 import swim.codec.Output;
 
 public class MutableTensor extends Tensor {
+
   protected MutableTensor(TensorDims dims, Object array, int offset) {
     super(dims, array, offset);
   }
@@ -35,21 +36,6 @@ public class MutableTensor extends Tensor {
 
   public MutableTensor(TensorDims dims, float... array) {
     super(dims, array);
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("MutableTensor").write('.').write("of").write('(')
-        .debug(this.dims).write(", ").debug(this.offset);
-    final Object us = this.array;
-    if (us instanceof double[]) {
-      Tensor.debug(output, (double[]) us);
-    } else if (us instanceof float[]) {
-      Tensor.debug(output, (float[]) us);
-    } else {
-      throw new AssertionError();
-    }
-    output = output.write(')');
   }
 
   public static MutableTensor zero(TensorDims dims, Precision prec) {
@@ -73,4 +59,20 @@ public class MutableTensor extends Tensor {
   public static MutableTensor of(TensorDims dims, int offset, float... array) {
     return new MutableTensor(dims, array, offset);
   }
+
+  @Override
+  public void debug(Output<?> output) {
+    output = output.write("MutableTensor").write('.').write("of").write('(')
+        .debug(this.dims).write(", ").debug(this.offset);
+    final Object us = this.array;
+    if (us instanceof double[]) {
+      Tensor.debug(output, (double[]) us);
+    } else if (us instanceof float[]) {
+      Tensor.debug(output, (float[]) us);
+    } else {
+      throw new AssertionError();
+    }
+    output = output.write(')');
+  }
+
 }

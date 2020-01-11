@@ -23,6 +23,7 @@ import swim.dynamic.HostMethod;
 import swim.dynamic.HostObjectType;
 
 public class VmHostObject<T> extends VmHostProxy<T> implements ProxyObject {
+
   final VmBridge bridge;
   final HostObjectType<? super T> type;
   final T self;
@@ -89,4 +90,5 @@ public class VmHostObject<T> extends VmHostProxy<T> implements ProxyObject {
     }
     return new VmProxyArray(memberKeys);
   }
+
 }

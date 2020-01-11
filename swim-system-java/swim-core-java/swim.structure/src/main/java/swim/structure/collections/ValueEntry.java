@@ -19,6 +19,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public final class ValueEntry<K, V> implements Map.Entry<K, V> {
+
   final Map.Entry<Value, Value> inner;
   final Form<K> keyForm;
   final Form<V> valueForm;
@@ -95,11 +96,12 @@ public final class ValueEntry<K, V> implements Map.Entry<K, V> {
     final K keyObject = getKey();
     final V valueObject = getValue();
     return (keyObject == null ? 0 : keyObject.hashCode())
-         ^ (valueObject == null ? 0 : valueObject.hashCode());
+        ^ (valueObject == null ? 0 : valueObject.hashCode());
   }
 
   @Override
   public String toString() {
     return new StringBuilder().append(getKey()).append('=').append(getValue()).toString();
   }
+
 }

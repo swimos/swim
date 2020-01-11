@@ -19,8 +19,18 @@ import swim.codec.Format;
 import swim.codec.Output;
 
 public class Z2 implements F2<VectorZ2, Long>, Debug {
+
+  private static Z2 module;
+
   protected Z2() {
     // stub
+  }
+
+  public static Z2 module() {
+    if (module == null) {
+      module = new Z2();
+    }
+    return module;
   }
 
   @Override
@@ -83,12 +93,4 @@ public class Z2 implements F2<VectorZ2, Long>, Debug {
     return Format.debug(this);
   }
 
-  private static Z2 module;
-
-  public static Z2 module() {
-    if (module == null) {
-      module = new Z2();
-    }
-    return module;
-  }
 }

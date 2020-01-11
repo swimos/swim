@@ -22,6 +22,8 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Murmur3;
 
 public final class Product extends HttpPart implements Debug {
+
+  private static int hashSeed;
   final String name;
   final String version;
   final FingerTrieSeq<String> comments;
@@ -38,6 +40,26 @@ public final class Product extends HttpPart implements Debug {
 
   Product(String name) {
     this(name, null, FingerTrieSeq.<String>empty());
+  }
+
+  public static Product from(String name, String version, FingerTrieSeq<String> comments) {
+    return new Product(name, version, comments);
+  }
+
+  public static Product from(String name, String version, String... comments) {
+    return new Product(name, version, FingerTrieSeq.of(comments));
+  }
+
+  public static Product from(String name, String version) {
+    return new Product(name, version);
+  }
+
+  public static Product from(String name) {
+    return new Product(name);
+  }
+
+  public static Product parse(String string) {
+    return Http.standardParser().parseProductString(string);
   }
 
   public String name() {
@@ -109,25 +131,4 @@ public final class Product extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static Product from(String name, String version, FingerTrieSeq<String> comments) {
-    return new Product(name, version, comments);
-  }
-
-  public static Product from(String name, String version, String... comments) {
-    return new Product(name, version, FingerTrieSeq.of(comments));
-  }
-
-  public static Product from(String name, String version) {
-    return new Product(name, version);
-  }
-
-  public static Product from(String name) {
-    return new Product(name);
-  }
-
-  public static Product parse(String string) {
-    return Http.standardParser().parseProductString(string);
-  }
 }

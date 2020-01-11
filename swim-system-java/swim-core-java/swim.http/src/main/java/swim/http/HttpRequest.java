@@ -26,6 +26,8 @@ import swim.uri.Uri;
 import swim.util.Murmur3;
 
 public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
+
+  private static int hashSeed;
   final HttpMethod method;
   final Uri uri;
   final HttpVersion version;
@@ -44,6 +46,93 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
   HttpRequest(HttpMethod method, Uri uri, HttpVersion version,
               FingerTrieSeq<HttpHeader> headers) {
     this(method, uri, version, headers, HttpEntity.<T>empty());
+  }
+
+  public static <T> HttpRequest<T> from(HttpMethod method, Uri uri, HttpVersion version,
+                                        FingerTrieSeq<HttpHeader> headers, HttpEntity<T> entity) {
+    return new HttpRequest<T>(method, uri, version, headers, entity);
+  }
+
+  public static <T> HttpRequest<T> from(HttpMethod method, Uri uri, HttpVersion version,
+                                        FingerTrieSeq<HttpHeader> headers) {
+    return new HttpRequest<T>(method, uri, version, headers);
+  }
+
+  public static <T> HttpRequest<T> from(HttpMethod method, Uri uri, HttpVersion version,
+                                        HttpHeader... headers) {
+    return new HttpRequest<T>(method, uri, version, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpRequest<T> from(HttpMethod method, Uri uri, HttpVersion version) {
+    return new HttpRequest<T>(method, uri, version, FingerTrieSeq.<HttpHeader>empty());
+  }
+
+  public static <T> HttpRequest<T> get(Uri uri, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpRequest<T>(HttpMethod.GET, uri, HttpVersion.HTTP_1_1, headers);
+  }
+
+  public static <T> HttpRequest<T> get(Uri uri, HttpHeader... headers) {
+    return new HttpRequest<T>(HttpMethod.GET, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpRequest<T> head(Uri uri, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpRequest<T>(HttpMethod.HEAD, uri, HttpVersion.HTTP_1_1, headers);
+  }
+
+  public static <T> HttpRequest<T> head(Uri uri, HttpHeader... headers) {
+    return new HttpRequest<T>(HttpMethod.HEAD, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpRequest<T> post(Uri uri, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpRequest<T>(HttpMethod.POST, uri, HttpVersion.HTTP_1_1, headers);
+  }
+
+  public static <T> HttpRequest<T> post(Uri uri, HttpHeader... headers) {
+    return new HttpRequest<T>(HttpMethod.POST, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpRequest<T> put(Uri uri, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpRequest<T>(HttpMethod.PUT, uri, HttpVersion.HTTP_1_1, headers);
+  }
+
+  public static <T> HttpRequest<T> put(Uri uri, HttpHeader... headers) {
+    return new HttpRequest<T>(HttpMethod.PUT, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpRequest<T> delete(Uri uri, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpRequest<T>(HttpMethod.DELETE, uri, HttpVersion.HTTP_1_1, headers);
+  }
+
+  public static <T> HttpRequest<T> delete(Uri uri, HttpHeader... headers) {
+    return new HttpRequest<T>(HttpMethod.DELETE, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpRequest<T> connect(Uri uri, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpRequest<T>(HttpMethod.CONNECT, uri, HttpVersion.HTTP_1_1, headers);
+  }
+
+  public static <T> HttpRequest<T> connect(Uri uri, HttpHeader... headers) {
+    return new HttpRequest<T>(HttpMethod.CONNECT, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpRequest<T> options(Uri uri, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpRequest<T>(HttpMethod.OPTIONS, uri, HttpVersion.HTTP_1_1, headers);
+  }
+
+  public static <T> HttpRequest<T> options(Uri uri, HttpHeader... headers) {
+    return new HttpRequest<T>(HttpMethod.OPTIONS, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpRequest<T> trace(Uri uri, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpRequest<T>(HttpMethod.TRACE, uri, HttpVersion.HTTP_1_1, headers);
+  }
+
+  public static <T> HttpRequest<T> trace(Uri uri, HttpHeader... headers) {
+    return new HttpRequest<T>(HttpMethod.TRACE, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpRequest<T> parseHttp(String string) {
+    return Http.standardParser().parseRequestString(string);
   }
 
   public HttpMethod method() {
@@ -257,92 +346,4 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static <T> HttpRequest<T> from(HttpMethod method, Uri uri, HttpVersion version,
-                                        FingerTrieSeq<HttpHeader> headers, HttpEntity<T> entity) {
-    return new HttpRequest<T>(method, uri, version, headers, entity);
-  }
-
-  public static <T> HttpRequest<T> from(HttpMethod method, Uri uri, HttpVersion version,
-                                        FingerTrieSeq<HttpHeader> headers) {
-    return new HttpRequest<T>(method, uri, version, headers);
-  }
-
-  public static <T> HttpRequest<T> from(HttpMethod method, Uri uri, HttpVersion version,
-                                        HttpHeader... headers) {
-    return new HttpRequest<T>(method, uri, version, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpRequest<T> from(HttpMethod method, Uri uri, HttpVersion version) {
-    return new HttpRequest<T>(method, uri, version, FingerTrieSeq.<HttpHeader>empty());
-  }
-
-  public static <T> HttpRequest<T> get(Uri uri, FingerTrieSeq<HttpHeader> headers) {
-    return new HttpRequest<T>(HttpMethod.GET, uri, HttpVersion.HTTP_1_1, headers);
-  }
-
-  public static <T> HttpRequest<T> get(Uri uri, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.GET, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpRequest<T> head(Uri uri, FingerTrieSeq<HttpHeader> headers) {
-    return new HttpRequest<T>(HttpMethod.HEAD, uri, HttpVersion.HTTP_1_1, headers);
-  }
-
-  public static <T> HttpRequest<T> head(Uri uri, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.HEAD, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpRequest<T> post(Uri uri, FingerTrieSeq<HttpHeader> headers) {
-    return new HttpRequest<T>(HttpMethod.POST, uri, HttpVersion.HTTP_1_1, headers);
-  }
-
-  public static <T> HttpRequest<T> post(Uri uri, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.POST, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpRequest<T> put(Uri uri, FingerTrieSeq<HttpHeader> headers) {
-    return new HttpRequest<T>(HttpMethod.PUT, uri, HttpVersion.HTTP_1_1, headers);
-  }
-
-  public static <T> HttpRequest<T> put(Uri uri, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.PUT, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpRequest<T> delete(Uri uri, FingerTrieSeq<HttpHeader> headers) {
-    return new HttpRequest<T>(HttpMethod.DELETE, uri, HttpVersion.HTTP_1_1, headers);
-  }
-
-  public static <T> HttpRequest<T> delete(Uri uri, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.DELETE, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpRequest<T> connect(Uri uri, FingerTrieSeq<HttpHeader> headers) {
-    return new HttpRequest<T>(HttpMethod.CONNECT, uri, HttpVersion.HTTP_1_1, headers);
-  }
-
-  public static <T> HttpRequest<T> connect(Uri uri, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.CONNECT, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpRequest<T> options(Uri uri, FingerTrieSeq<HttpHeader> headers) {
-    return new HttpRequest<T>(HttpMethod.OPTIONS, uri, HttpVersion.HTTP_1_1, headers);
-  }
-
-  public static <T> HttpRequest<T> options(Uri uri, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.OPTIONS, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpRequest<T> trace(Uri uri, FingerTrieSeq<HttpHeader> headers) {
-    return new HttpRequest<T>(HttpMethod.TRACE, uri, HttpVersion.HTTP_1_1, headers);
-  }
-
-  public static <T> HttpRequest<T> trace(Uri uri, HttpHeader... headers) {
-    return new HttpRequest<T>(HttpMethod.TRACE, uri, HttpVersion.HTTP_1_1, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpRequest<T> parseHttp(String string) {
-    return Http.standardParser().parseRequestString(string);
-  }
 }

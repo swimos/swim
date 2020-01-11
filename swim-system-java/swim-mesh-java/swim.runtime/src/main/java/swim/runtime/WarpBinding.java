@@ -17,6 +17,7 @@ package swim.runtime;
 import swim.structure.Value;
 
 public interface WarpBinding extends LinkBinding {
+
   @Override
   WarpBinding linkWrapper();
 
@@ -40,4 +41,5 @@ public interface WarpBinding extends LinkBinding {
   void skipDown();
 
   void pullUp();
+
 }

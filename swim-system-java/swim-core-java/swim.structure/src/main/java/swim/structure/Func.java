@@ -17,6 +17,7 @@ package swim.structure;
 import swim.structure.operator.InvokeOperator;
 
 public abstract class Func extends Expression {
+
   public abstract Item invoke(Value args, Interpreter interpreter, InvokeOperator operator);
 
   public Item expand(Value args, Interpreter interpreter, InvokeOperator operator) {
@@ -27,4 +28,5 @@ public abstract class Func extends Expression {
   public boolean isConstant() {
     return false;
   }
+
 }

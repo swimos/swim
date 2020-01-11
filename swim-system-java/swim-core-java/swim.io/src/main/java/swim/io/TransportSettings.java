@@ -28,6 +28,10 @@ import swim.util.Murmur3;
  * {@link Transport} configuration parameters.
  */
 public class TransportSettings implements Debug {
+
+  private static int hashSeed;
+  private static TransportSettings standard;
+  private static Form<TransportSettings> form;
   protected final int backlog;
   protected final long idleInterval;
   protected final long idleTimeout;
@@ -36,6 +40,48 @@ public class TransportSettings implements Debug {
     this.backlog = backlog;
     this.idleInterval = idleInterval;
     this.idleTimeout = idleTimeout;
+  }
+
+  /**
+   * Returns the default {@code TransportSettings} instance.
+   */
+  public static TransportSettings standard() {
+    if (standard == null) {
+      int backlog;
+      try {
+        backlog = Integer.parseInt(System.getProperty("swim.transport.backlog"));
+      } catch (NumberFormatException error) {
+        backlog = 0;
+      }
+
+      long idleInterval;
+      try {
+        idleInterval = Long.parseLong(System.getProperty("swim.transport.idle.interval"));
+      } catch (NumberFormatException error) {
+        idleInterval = 30000L; // 30 seconds
+      }
+
+      long idleTimeout;
+      try {
+        idleTimeout = Long.parseLong(System.getProperty("swim.transport.idle.timeout"));
+      } catch (NumberFormatException error) {
+        idleTimeout = 90000L; // 90 seconds
+      }
+
+      standard = new TransportSettings(backlog, idleInterval, idleTimeout);
+    }
+    return standard;
+  }
+
+  /**
+   * Returns the structural {@code Form} of {@code TransportSettings}.
+   */
+  @Kind
+  public static Form<TransportSettings> form() {
+    if (form == null) {
+      form = new TransportSettingsForm();
+    }
+    return form;
   }
 
   /**
@@ -145,56 +191,10 @@ public class TransportSettings implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static TransportSettings standard;
-
-  private static Form<TransportSettings> form;
-
-  /**
-   * Returns the default {@code TransportSettings} instance.
-   */
-  public static TransportSettings standard() {
-    if (standard == null) {
-      int backlog;
-      try {
-        backlog = Integer.parseInt(System.getProperty("swim.transport.backlog"));
-      } catch (NumberFormatException error) {
-        backlog = 0;
-      }
-
-      long idleInterval;
-      try {
-        idleInterval = Long.parseLong(System.getProperty("swim.transport.idle.interval"));
-      } catch (NumberFormatException error) {
-        idleInterval = 30000L; // 30 seconds
-      }
-
-      long idleTimeout;
-      try {
-        idleTimeout = Long.parseLong(System.getProperty("swim.transport.idle.timeout"));
-      } catch (NumberFormatException error) {
-        idleTimeout = 90000L; // 90 seconds
-      }
-
-      standard = new TransportSettings(backlog, idleInterval, idleTimeout);
-    }
-    return standard;
-  }
-
-  /**
-   * Returns the structural {@code Form} of {@code TransportSettings}.
-   */
-  @Kind
-  public static Form<TransportSettings> form() {
-    if (form == null) {
-      form = new TransportSettingsForm();
-    }
-    return form;
-  }
 }
 
 final class TransportSettingsForm extends Form<TransportSettings> {
+
   @Override
   public String tag() {
     return "transport";
@@ -242,4 +242,5 @@ final class TransportSettingsForm extends Form<TransportSettings> {
     }
     return null;
   }
+
 }

@@ -18,6 +18,7 @@ import swim.api.agent.AgentRouteContext;
 import swim.uri.UriPattern;
 
 public class ActorAgentRoute implements AgentRouteContext {
+
   final String routeName;
   final UriPattern pattern;
 
@@ -35,4 +36,5 @@ public class ActorAgentRoute implements AgentRouteContext {
   public final UriPattern pattern() {
     return this.pattern;
   }
+
 }

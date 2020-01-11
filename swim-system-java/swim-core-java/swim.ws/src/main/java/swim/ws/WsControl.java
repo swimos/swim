@@ -15,6 +15,7 @@
 package swim.ws;
 
 public abstract class WsControl<P, T> extends WsFrame<T> {
+
   WsControl() {
     // stub
   }
@@ -31,4 +32,5 @@ public abstract class WsControl<P, T> extends WsFrame<T> {
 
   @Override
   public abstract P payload();
+
 }

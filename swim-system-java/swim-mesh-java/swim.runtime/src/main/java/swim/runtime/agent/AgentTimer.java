@@ -22,6 +22,7 @@ import swim.concurrent.TimerFunction;
 import swim.concurrent.TimerRef;
 
 public class AgentTimer implements Timer, TimerContext, TimerRef, Runnable {
+
   protected final AgentNode node;
   protected final TimerFunction timer;
   protected TimerContext timerContext;
@@ -101,4 +102,5 @@ public class AgentTimer implements Timer, TimerContext, TimerRef, Runnable {
       ((AgentModel) this.node).accumulateExecTime(dt);
     }
   }
+
 }

@@ -17,6 +17,7 @@ package swim.codec;
 import java.nio.ByteBuffer;
 
 final class Base16Writer extends Writer<Object, Object> {
+
   final Object value;
   final ByteBuffer input;
   final Base16 base16;
@@ -51,22 +52,6 @@ final class Base16Writer extends Writer<Object, Object> {
 
   Base16Writer(Base16 base16) {
     this(null, null, base16, 0, 0, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> feed(Object value) {
-    if (value instanceof ByteBuffer) {
-      return new Base16Writer((ByteBuffer) value, this.base16);
-    } else if (value instanceof byte[]) {
-      return new Base16Writer((byte[]) value, this.base16);
-    } else {
-      throw new IllegalArgumentException(value.toString());
-    }
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.value, this.input, this.base16, this.index, this.limit, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, Object value, ByteBuffer input,
@@ -108,4 +93,21 @@ final class Base16Writer extends Writer<Object, Object> {
   static Writer<?, ?> write(Output<?> output, byte[] input, Base16 base16) {
     return write(output, null, ByteBuffer.wrap(input), base16);
   }
+
+  @Override
+  public Writer<Object, Object> feed(Object value) {
+    if (value instanceof ByteBuffer) {
+      return new Base16Writer((ByteBuffer) value, this.base16);
+    } else if (value instanceof byte[]) {
+      return new Base16Writer((byte[]) value, this.base16);
+    } else {
+      throw new IllegalArgumentException(value.toString());
+    }
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.value, this.input, this.base16, this.index, this.limit, this.step);
+  }
+
 }

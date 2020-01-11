@@ -18,6 +18,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public interface ValueData<V> {
+
   Value name();
 
   Form<V> valueForm();
@@ -39,4 +40,5 @@ public interface ValueData<V> {
   V set(V newValue);
 
   void close();
+
 }

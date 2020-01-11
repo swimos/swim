@@ -20,6 +20,7 @@ import swim.math.R2Shape;
 import swim.math.Z2Form;
 
 public interface LaneFactory {
+
   <V> CommandLane<V> commandLane();
 
   <V> DemandLane<V> demandLane();
@@ -45,4 +46,5 @@ public interface LaneFactory {
   <V> ValueLane<V> valueLane();
 
   <I, O> WsLane<I, O> wsLane();
+
 }

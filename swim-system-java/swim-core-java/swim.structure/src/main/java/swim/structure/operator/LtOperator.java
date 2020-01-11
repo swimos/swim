@@ -25,6 +25,9 @@ import swim.util.Murmur3;
  * between its two operands.
  */
 public class LtOperator extends BinaryOperator {
+
+  private static int hashSeed;
+
   public LtOperator(Item operand1, Item operand2) {
     super(operand1, operand2);
   }
@@ -102,5 +105,4 @@ public class LtOperator extends BinaryOperator {
     output.debug(this.operand1).write('.').write("lt").write('(').debug(this.operand2).write(')');
   }
 
-  private static int hashSeed;
 }

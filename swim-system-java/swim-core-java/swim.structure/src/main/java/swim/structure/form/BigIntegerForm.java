@@ -25,6 +25,7 @@ import swim.structure.Value;
  * BigInteger}.
  */
 public final class BigIntegerForm extends Form<BigInteger> {
+
   final BigInteger unit;
 
   public BigIntegerForm(BigInteger unit) {
@@ -64,4 +65,5 @@ public final class BigIntegerForm extends Form<BigInteger> {
       return null;
     }
   }
+
 }

@@ -15,6 +15,11 @@
 package swim.uri;
 
 abstract class UriQueryMapper<T> extends UriPathMapper<T> {
+
+  static <T> UriQueryMapper<T> compile(Uri pattern, UriQuery query, UriFragment fragment, T value) {
+    return UriFragmentMapper.compile(pattern, fragment, value);
+  }
+
   abstract UriMapper<T> getSuffix(UriQuery query, UriFragment fragment);
 
   @Override
@@ -70,7 +75,4 @@ abstract class UriQueryMapper<T> extends UriPathMapper<T> {
     }
   }
 
-  static <T> UriQueryMapper<T> compile(Uri pattern, UriQuery query, UriFragment fragment, T value) {
-    return UriFragmentMapper.compile(pattern, fragment, value);
-  }
 }

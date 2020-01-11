@@ -22,6 +22,7 @@ import swim.structure.Value;
 import swim.util.KeyedList;
 
 public class ValueKeyedList<T> extends ValueList<T> implements KeyedList<T> {
+
   public ValueKeyedList(KeyedList<? extends Value> inner, Form<T> valueForm) {
     super(inner, valueForm);
   }
@@ -132,9 +133,11 @@ public class ValueKeyedList<T> extends ValueList<T> implements KeyedList<T> {
       return (ListIterator<Map.Entry<Object, T>>) (ListIterator<?>) ((KeyedList<Value>) this.inner).entryIterator();
     }
   }
+
 }
 
 final class ValueKeyedListEntryIterator<T> implements ListIterator<Map.Entry<Object, T>> {
+
   final ListIterator<Map.Entry<Object, Value>> inner;
   final Form<T> valueForm;
 
@@ -193,4 +196,5 @@ final class ValueKeyedListEntryIterator<T> implements ListIterator<Map.Entry<Obj
   public void remove() {
     this.inner.remove();
   }
+
 }

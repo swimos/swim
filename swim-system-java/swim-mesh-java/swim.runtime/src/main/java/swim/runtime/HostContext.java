@@ -24,6 +24,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface HostContext extends TierContext, CellContext {
+
   PartBinding part();
 
   HostBinding hostWrapper();
@@ -74,4 +75,5 @@ public interface HostContext extends TierContext, CellContext {
   void didConnect();
 
   void didDisconnect();
+
 }

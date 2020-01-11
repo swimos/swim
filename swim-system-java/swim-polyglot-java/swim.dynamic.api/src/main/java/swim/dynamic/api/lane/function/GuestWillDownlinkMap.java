@@ -20,6 +20,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
 public class GuestWillDownlinkMap<L> extends BridgeGuest implements WillDownlinkMap<L> {
+
   public GuestWillDownlinkMap(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -29,4 +30,5 @@ public class GuestWillDownlinkMap<L> extends BridgeGuest implements WillDownlink
     final Object result = this.bridge.guestExecute(this.guest, key, downlink);
     return result != null ? (MapDownlink<?, ?>) result : downlink;
   }
+
 }

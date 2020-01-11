@@ -17,6 +17,7 @@ package swim.db;
 import swim.structure.Value;
 
 public interface STreeDelegate extends TreeDelegate {
+
   void streeDidUpdate(STree newTree, STree oldTree, long index, Value id, Value newValue, Value oldValue);
 
   void streeDidInsert(STree newTree, STree oldTree, long index, Value id, Value newValue);
@@ -26,4 +27,5 @@ public interface STreeDelegate extends TreeDelegate {
   void streeDidDrop(STree newTree, STree oldTree, long lower);
 
   void streeDidTake(STree newTree, STree oldTree, long upper);
+
 }

@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class UpgradeProtocolWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final String name;
   final String version;
@@ -36,11 +37,6 @@ final class UpgradeProtocolWriter extends Writer<Object, Object> {
 
   UpgradeProtocolWriter(HttpWriter http, String name, String version) {
     this(http, name, version, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.name, this.version, this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name, String version,
@@ -89,4 +85,10 @@ final class UpgradeProtocolWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name, String version) {
     return write(output, http, name, version, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.name, this.version, this.part, this.step);
+  }
+
 }

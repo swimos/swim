@@ -18,6 +18,7 @@ import swim.math.Z2Form;
 import swim.util.Cursor;
 
 final class QTreeShapeCursor<K, S, V> implements Cursor<SpatialMap.Entry<K, S, V>> {
+
   final Cursor<QTreeEntry<K, S, V>> inner;
   final Z2Form<S> shapeForm;
   final S shape;
@@ -172,4 +173,5 @@ final class QTreeShapeCursor<K, S, V> implements Cursor<SpatialMap.Entry<K, S, V
     this.previousSlot = null;
     return previousSlot;
   }
+
 }

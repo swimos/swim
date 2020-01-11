@@ -23,6 +23,7 @@ import swim.structure.Value;
  * Transformation between a structurally typed {@link Item} and a {@link Long}.
  */
 public final class LongForm extends Form<Long> {
+
   final Long unit;
 
   public LongForm(Long unit) {
@@ -62,4 +63,5 @@ public final class LongForm extends Form<Long> {
       return null;
     }
   }
+
 }

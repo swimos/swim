@@ -15,6 +15,7 @@
 package swim.math;
 
 public interface VectorModule<V, S> {
+
   Ring<S> scalar();
 
   V zero();
@@ -28,4 +29,5 @@ public interface VectorModule<V, S> {
   V multiply(V u, S a);
 
   V combine(S a, V u, S b, V v);
+
 }

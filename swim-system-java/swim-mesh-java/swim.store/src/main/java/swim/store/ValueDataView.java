@@ -19,6 +19,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class ValueDataView<V> implements ValueData<V>, ValueDataContext {
+
   protected final ValueDataBinding dataBinding;
   protected final Form<V> valueForm;
 
@@ -111,4 +112,5 @@ public class ValueDataView<V> implements ValueData<V>, ValueDataContext {
   public void didSet(Value newValue, Value oldValue) {
     // stub
   }
+
 }

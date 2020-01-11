@@ -30,6 +30,10 @@ import swim.util.ReducedMap;
  * Mutable, thread-safe {@link Map} backed by a B-tree.
  */
 public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<K, V, U>, Cloneable, Debug {
+
+  @SuppressWarnings("rawtypes")
+  static final AtomicReferenceFieldUpdater<BTreeMap, BTreePage> ROOT =
+      AtomicReferenceFieldUpdater.newUpdater(BTreeMap.class, BTreePage.class, "root");
   volatile BTreePage<K, V, U> root;
 
   protected BTreeMap(BTreePage<K, V, U> root) {
@@ -38,6 +42,24 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
 
   public BTreeMap() {
     this(BTreePage.<K, V, U>empty());
+  }
+
+  public static <K, V, U> BTreeMap<K, V, U> empty() {
+    return new BTreeMap<K, V, U>();
+  }
+
+  public static <K, V, U> BTreeMap<K, V, U> of(K key, V value) {
+    final BTreeMap<K, V, U> tree = new BTreeMap<K, V, U>();
+    tree.put(key, value);
+    return tree;
+  }
+
+  public static <K, V, U> BTreeMap<K, V, U> from(Map<? extends K, ? extends V> map) {
+    final BTreeMap<K, V, U> tree = new BTreeMap<K, V, U>();
+    for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
+      tree.put(entry.getKey(), entry.getValue());
+    }
+    return tree;
   }
 
   @Override
@@ -414,25 +436,4 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
     return Format.debug(this);
   }
 
-  public static <K, V, U> BTreeMap<K, V, U> empty() {
-    return new BTreeMap<K, V, U>();
-  }
-
-  public static <K, V, U> BTreeMap<K, V, U> of(K key, V value) {
-    final BTreeMap<K, V, U> tree = new BTreeMap<K, V, U>();
-    tree.put(key, value);
-    return tree;
-  }
-
-  public static <K, V, U> BTreeMap<K, V, U> from(Map<? extends K, ? extends V> map) {
-    final BTreeMap<K, V, U> tree = new BTreeMap<K, V, U>();
-    for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
-      tree.put(entry.getKey(), entry.getValue());
-    }
-    return tree;
-  }
-
-  @SuppressWarnings("rawtypes")
-  static final AtomicReferenceFieldUpdater<BTreeMap, BTreePage> ROOT =
-      AtomicReferenceFieldUpdater.newUpdater(BTreeMap.class, BTreePage.class, "root");
 }

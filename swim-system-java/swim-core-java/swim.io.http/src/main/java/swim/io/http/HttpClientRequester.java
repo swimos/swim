@@ -28,6 +28,12 @@ import swim.io.FlowModifier;
 import swim.io.IpSocket;
 
 public class HttpClientRequester<T> implements HttpRequesterContext {
+
+  static final int REQUESTING = 1 << 0;
+  static final int REQUESTED = 1 << 1;
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HttpClientRequester<?>> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HttpClientRequester<?>>) (Class<?>) HttpClientRequester.class, "status");
   protected final HttpClientModem modem;
   protected final HttpRequester<T> requester;
   volatile HttpRequest<?> request;
@@ -206,10 +212,4 @@ public class HttpClientRequester<T> implements HttpRequesterContext {
     this.requester.didFail(error);
   }
 
-  static final int REQUESTING = 1 << 0;
-  static final int REQUESTED = 1 << 1;
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HttpClientRequester<?>> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HttpClientRequester<?>>) (Class<?>) HttpClientRequester.class, "status");
 }

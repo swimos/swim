@@ -19,5 +19,7 @@ import swim.warp.EventMessage;
 
 @FunctionalInterface
 public interface OnEventMessage extends Preemptive {
+
   void onEvent(EventMessage message);
+
 }

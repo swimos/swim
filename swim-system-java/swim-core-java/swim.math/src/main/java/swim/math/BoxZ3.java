@@ -22,6 +22,9 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class BoxZ3 extends Z3Shape implements Debug {
+
+  private static int hashSeed;
+  private static Z3Form<BoxZ3> form;
   public final long xMin;
   public final long yMin;
   public final long zMin;
@@ -36,6 +39,19 @@ public class BoxZ3 extends Z3Shape implements Debug {
     this.xMax = xMin <= xMax ? xMax : xMin;
     this.yMax = yMin <= yMax ? yMax : yMin;
     this.zMax = zMin <= zMax ? zMax : zMin;
+  }
+
+  public static BoxZ3 of(long xMin, long yMin, long zMin,
+                         long xMax, long yMax, long zMax) {
+    return new BoxZ3(xMin, yMin, zMin, xMax, yMax, zMax);
+  }
+
+  @Kind
+  public static Z3Form<BoxZ3> form() {
+    if (form == null) {
+      form = new BoxZ3Form();
+    }
+    return form;
   }
 
   @Override
@@ -119,11 +135,11 @@ public class BoxZ3 extends Z3Shape implements Debug {
   @Override
   public BoxR3 transform(Z3ToR3Function f) {
     return new BoxR3(f.transformX(this.xMin, this.yMin, this.zMin),
-                     f.transformY(this.xMin, this.yMin, this.zMin),
-                     f.transformZ(this.xMin, this.yMin, this.zMin),
-                     f.transformX(this.xMax, this.yMax, this.zMax),
-                     f.transformY(this.xMax, this.yMax, this.zMax),
-                     f.transformZ(this.xMax, this.yMax, this.zMax));
+        f.transformY(this.xMin, this.yMin, this.zMin),
+        f.transformZ(this.xMin, this.yMin, this.zMin),
+        f.transformX(this.xMax, this.yMax, this.zMax),
+        f.transformY(this.xMax, this.yMax, this.zMax),
+        f.transformZ(this.xMax, this.yMax, this.zMax));
   }
 
   @Override
@@ -170,20 +186,4 @@ public class BoxZ3 extends Z3Shape implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static Z3Form<BoxZ3> form;
-
-  public static BoxZ3 of(long xMin, long yMin, long zMin,
-                         long xMax, long yMax, long zMax) {
-    return new BoxZ3(xMin, yMin, zMin, xMax, yMax, zMax);
-  }
-
-  @Kind
-  public static Z3Form<BoxZ3> form() {
-    if (form == null) {
-      form = new BoxZ3Form();
-    }
-    return form;
-  }
 }

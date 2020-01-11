@@ -22,6 +22,7 @@ import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
 
 public abstract class AbstractIpSocket implements IpSocket, IpContext, FlowContext {
+
   protected IpSocketContext context;
 
   @Override
@@ -193,4 +194,5 @@ public abstract class AbstractIpSocket implements IpSocket, IpContext, FlowConte
   public void close() {
     this.context.close();
   }
+
 }

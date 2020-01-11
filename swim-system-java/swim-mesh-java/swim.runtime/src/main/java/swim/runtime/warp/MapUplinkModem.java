@@ -23,6 +23,10 @@ import swim.runtime.WarpBinding;
 import swim.structure.Value;
 
 public abstract class MapUplinkModem extends WarpUplinkModem {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<MapUplinkModem, HashTrieSet<Value>> KEY_QUEUE =
+      AtomicReferenceFieldUpdater.newUpdater(MapUplinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
   final ConcurrentLinkedQueue<Value> downQueue;
   volatile Iterator<Value> syncQueue;
   volatile HashTrieSet<Value> keyQueue;
@@ -107,7 +111,4 @@ public abstract class MapUplinkModem extends WarpUplinkModem {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<MapUplinkModem, HashTrieSet<Value>> KEY_QUEUE =
-      AtomicReferenceFieldUpdater.newUpdater(MapUplinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
 }

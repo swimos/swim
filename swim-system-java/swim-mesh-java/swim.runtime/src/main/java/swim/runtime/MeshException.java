@@ -15,6 +15,7 @@
 package swim.runtime;
 
 public class MeshException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public MeshException(String message, Throwable cause) {
@@ -32,4 +33,5 @@ public class MeshException extends RuntimeException {
   public MeshException() {
     super();
   }
+
 }

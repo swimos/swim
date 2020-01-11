@@ -20,10 +20,112 @@ import java.nio.ByteBuffer;
  * Base-16 (hexadecimal) encoding {@link Parser}/{@link Writer} factory.
  */
 public final class Base16 {
+
+  private static Base16 lowercase;
+  private static Base16 uppercase;
   final String alphabet;
 
   Base16(String alphabet) {
     this.alphabet = alphabet;
+  }
+
+  /**
+   * Returns the {@code Base16} encoding with lowercase alphanumeric digits.
+   */
+  public static Base16 lowercase() {
+    if (lowercase == null) {
+      lowercase = new Base16("0123456789abcdef");
+    }
+    return lowercase;
+  }
+
+  /**
+   * Returns the {@code Base16} encoding with uppercase alphanumeric digits.
+   */
+  public static Base16 uppercase() {
+    if (uppercase == null) {
+      uppercase = new Base16("0123456789ABCDEF");
+    }
+    return uppercase;
+  }
+
+  /**
+   * Returns {@code true} if the Unicode code point {@code c} is a valid
+   * base-16 digit.
+   */
+  public static boolean isDigit(int c) {
+    return c >= '0' && c <= '9'
+        || c >= 'A' && c <= 'F'
+        || c >= 'a' && c <= 'f';
+  }
+
+  /**
+   * Returns the 4-bit quantity represented by the base-16 digit {@code c}.
+   *
+   * @throws IllegalArgumentException if {@code c} is not a valid base-16 digit.
+   */
+  public static int decodeDigit(int c) {
+    if (c >= '0' && c <= '9') {
+      return c - '0';
+    } else if (c >= 'A' && c <= 'F') {
+      return 10 + (c - 'A');
+    } else if (c >= 'a' && c <= 'f') {
+      return 10 + (c - 'a');
+    } else {
+      final Output<String> message = Unicode.stringOutput();
+      message.write("Invalid base-16 digit: ");
+      Format.debugChar(c, message);
+      throw new IllegalArgumentException(message.bind());
+    }
+  }
+
+  /**
+   * Decodes the base-16 digits {@code c1} and {@code c2}, and writes the 8-bit
+   * quantity they represent to the given {@code output}.
+   */
+  public static void writeQuantum(int c1, int c2, Output<?> output) {
+    final int x = Base16.decodeDigit(c1);
+    final int y = Base16.decodeDigit(c2);
+    output.write(x << 4 | y);
+  }
+
+  /**
+   * Returns a {@code Parser} that decodes base-16 (hexadecimal) encoded input,
+   * and writes the decoded bytes to {@code output}.
+   */
+  public static <O> Parser<O> parser(Output<O> output) {
+    return new Base16Parser<O>(output);
+  }
+
+  /**
+   * Parses the base-16 (hexadecimal) encoded {@code input}, and writes the
+   * decoded bytes to {@code output}, returning a {@code Parser} continuation
+   * that knows how to parse any additional input.
+   */
+  public static <O> Parser<O> parse(Input input, Output<O> output) {
+    return Base16Parser.parse(input, output);
+  }
+
+  /**
+   * Parses the base-16 (hexadecimal) encoded {@code input}, and writes the
+   * decoded bytes to a growable array, returning a {@code Parser} continuation
+   * that knows how to parse any additional input.  The returned {@code Parser}
+   * {@link Parser#bind() binds} a {@code byte[]} array containing all parsed
+   * base-16 data.
+   */
+  public static Parser<byte[]> parseByteArray(Input input) {
+    return Base16Parser.parse(input, Binary.byteArrayOutput());
+  }
+
+  /**
+   * Parses the base-16 (hexadecimal) encoded {@code input}, and writes the
+   * decoded bytes to a growable buffer, returning a {@code Parser} continuation
+   * that knows how to parse any additional input.  The returned {@code Parser}
+   * {@link Parser#bind() binds} a {@code ByteBuffer} containing all parsed
+   * base-16 data.
+   */
+  public static Parser<ByteBuffer> parseByteBuffer(Input input) {
+    return Base16Parser.parse(input, Binary.byteBufferOutput());
   }
 
   /**
@@ -130,105 +232,4 @@ public final class Base16 {
     return Base16IntegerWriter.write(output, null, input, 0, this, true);
   }
 
-  private static Base16 lowercase;
-  private static Base16 uppercase;
-
-  /**
-   * Returns the {@code Base16} encoding with lowercase alphanumeric digits.
-   */
-  public static Base16 lowercase() {
-    if (lowercase == null) {
-      lowercase = new Base16("0123456789abcdef");
-    }
-    return lowercase;
-  }
-
-  /**
-   * Returns the {@code Base16} encoding with uppercase alphanumeric digits.
-   */
-  public static Base16 uppercase() {
-    if (uppercase == null) {
-      uppercase = new Base16("0123456789ABCDEF");
-    }
-    return uppercase;
-  }
-
-  /**
-   * Returns {@code true} if the Unicode code point {@code c} is a valid
-   * base-16 digit.
-   */
-  public static boolean isDigit(int c) {
-    return c >= '0' && c <= '9'
-        || c >= 'A' && c <= 'F'
-        || c >= 'a' && c <= 'f';
-  }
-
-  /**
-   * Returns the 4-bit quantity represented by the base-16 digit {@code c}.
-   *
-   * @throws IllegalArgumentException if {@code c} is not a valid base-16 digit.
-   */
-  public static int decodeDigit(int c) {
-    if (c >= '0' && c <= '9') {
-      return c - '0';
-    } else if (c >= 'A' && c <= 'F') {
-      return 10 + (c - 'A');
-    } else if (c >= 'a' && c <= 'f') {
-      return 10 + (c - 'a');
-    } else {
-      final Output<String> message = Unicode.stringOutput();
-      message.write("Invalid base-16 digit: ");
-      Format.debugChar(c, message);
-      throw new IllegalArgumentException(message.bind());
-    }
-  }
-
-  /**
-   * Decodes the base-16 digits {@code c1} and {@code c2}, and writes the 8-bit
-   * quantity they represent to the given {@code output}.
-   */
-  public static void writeQuantum(int c1, int c2, Output<?> output) {
-    final int x = Base16.decodeDigit(c1);
-    final int y = Base16.decodeDigit(c2);
-    output.write(x << 4 | y);
-  }
-
-  /**
-   * Returns a {@code Parser} that decodes base-16 (hexadecimal) encoded input,
-   * and writes the decoded bytes to {@code output}.
-   */
-  public static <O> Parser<O> parser(Output<O> output) {
-    return new Base16Parser<O>(output);
-  }
-
-  /**
-   * Parses the base-16 (hexadecimal) encoded {@code input}, and writes the
-   * decoded bytes to {@code output}, returning a {@code Parser} continuation
-   * that knows how to parse any additional input.
-   */
-  public static <O> Parser<O> parse(Input input, Output<O> output) {
-    return Base16Parser.parse(input, output);
-  }
-
-  /**
-   * Parses the base-16 (hexadecimal) encoded {@code input}, and writes the
-   * decoded bytes to a growable array, returning a {@code Parser} continuation
-   * that knows how to parse any additional input.  The returned {@code Parser}
-   * {@link Parser#bind() binds} a {@code byte[]} array containing all parsed
-   * base-16 data.
-   */
-  public static Parser<byte[]> parseByteArray(Input input) {
-    return Base16Parser.parse(input, Binary.byteArrayOutput());
-  }
-
-  /**
-   * Parses the base-16 (hexadecimal) encoded {@code input}, and writes the
-   * decoded bytes to a growable buffer, returning a {@code Parser} continuation
-   * that knows how to parse any additional input.  The returned {@code Parser}
-   * {@link Parser#bind() binds} a {@code ByteBuffer} containing all parsed
-   * base-16 data.
-   */
-  public static Parser<ByteBuffer> parseByteBuffer(Input input) {
-    return Base16Parser.parse(input, Binary.byteBufferOutput());
-  }
 }

@@ -20,6 +20,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class CommentsWriter extends Writer<Object, Object> {
+
   final Iterator<String> comments;
   final String comment;
   final int index;
@@ -36,11 +37,6 @@ final class CommentsWriter extends Writer<Object, Object> {
 
   CommentsWriter(Iterator<String> comments) {
     this(comments, null, 0, 0, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.comments, this.comment, this.index, this.escape, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, Iterator<String> comments,
@@ -105,4 +101,10 @@ final class CommentsWriter extends Writer<Object, Object> {
   public static Writer<Object, Object> write(Output<?> output, Iterator<String> comments) {
     return write(output, comments, null, 0, 0, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.comments, this.comment, this.index, this.escape, this.step);
+  }
+
 }

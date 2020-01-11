@@ -15,6 +15,7 @@
 package swim.streamlet;
 
 public interface GenericStreamlet<I, O> extends Streamlet<I, O> {
+
   O getOutput(Outlet<? super O> outlet);
 
   void willInvalidateInlet(Inlet<? extends I> inlet);
@@ -32,4 +33,5 @@ public interface GenericStreamlet<I, O> extends Streamlet<I, O> {
   void willReconcileOutlet(Outlet<? super O> outlet, int version);
 
   void didReconcileOutlet(Outlet<? super O> outlet, int version);
+
 }

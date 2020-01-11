@@ -19,5 +19,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface WillDownlinkMap<L> extends Preemptive {
+
   MapDownlink<?, ?> willDownlink(L key, MapDownlink<?, ?> downlink);
+
 }

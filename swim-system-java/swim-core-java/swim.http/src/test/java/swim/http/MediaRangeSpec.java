@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class MediaRangeSpec {
+
   public void assertParses(String string, MediaRange mediaRange) {
     HttpAssertions.assertParses(Http.standardParser().mediaRangeParser(), string, mediaRange);
   }
@@ -50,28 +51,29 @@ public class MediaRangeSpec {
   @Test
   public void parseMediaRangesWithParams() {
     assertParses("text/*;charset=UTF-8",
-                 MediaRange.from("text", "*").param("charset", "UTF-8"));
+        MediaRange.from("text", "*").param("charset", "UTF-8"));
     assertParses("text/* ; charset = UTF-8",
-                 MediaRange.from("text", "*").param("charset", "UTF-8"));
+        MediaRange.from("text", "*").param("charset", "UTF-8"));
   }
 
   @Test
   public void writeMediaRangesWithParams() {
     assertWrites(MediaRange.from("text", "*").param("charset", "UTF-8"),
-                 "text/*; charset=UTF-8");
+        "text/*; charset=UTF-8");
   }
 
   @Test
   public void parseMediaRangesWithWeightsAndParams() {
     assertParses("text/*;q=0.5;charset=UTF-8",
-                 MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8"));
+        MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8"));
     assertParses("text/* ; q=0.5 ; charset = UTF-8",
-                 MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8"));
+        MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8"));
   }
 
   @Test
   public void writeMediaRangesWithWeightsAndParams() {
     assertWrites(MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8"),
-                 "text/*; q=0.5; charset=UTF-8");
+        "text/*; q=0.5; charset=UTF-8");
   }
+
 }

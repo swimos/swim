@@ -15,6 +15,7 @@
 package swim.avro.schema;
 
 public abstract class AvroFieldType<R, V> {
+
   public abstract String name();
 
   public abstract String doc();
@@ -34,4 +35,5 @@ public abstract class AvroFieldType<R, V> {
   public abstract AvroFieldType<R, V> alias(String alias);
 
   public abstract R updated(R record, V value);
+
 }

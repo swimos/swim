@@ -26,6 +26,9 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class EcDef {
+
+  private static int hashSeed;
+  private static Form<EcDef> form;
   protected final String name;
   protected final EcFieldDef field;
   protected final BigInteger a;
@@ -46,6 +49,19 @@ public class EcDef {
 
   public EcDef(EcFieldDef field, BigInteger a, BigInteger b) {
     this(null, field, a, b, null);
+  }
+
+  public static EcDef from(EllipticCurve curve) {
+    return new EcDef(EcFieldDef.from(curve.getField()), curve.getA(),
+        curve.getB(), curve.getSeed());
+  }
+
+  @Kind
+  public static Form<EcDef> form() {
+    if (form == null) {
+      form = new EcForm();
+    }
+    return form;
   }
 
   public final String name() {
@@ -92,25 +108,10 @@ public class EcDef {
         this.field.hashCode()), this.a.hashCode()), this.b.hashCode()));
   }
 
-  private static int hashSeed;
-
-  private static Form<EcDef> form;
-
-  public static EcDef from(EllipticCurve curve) {
-    return new EcDef(EcFieldDef.from(curve.getField()), curve.getA(),
-                     curve.getB(), curve.getSeed());
-  }
-
-  @Kind
-  public static Form<EcDef> form() {
-    if (form == null) {
-      form = new EcForm();
-    }
-    return form;
-  }
 }
 
 final class EcForm extends Form<EcDef> {
+
   @Override
   public String tag() {
     return "EC";
@@ -148,4 +149,5 @@ final class EcForm extends Form<EcDef> {
     }
     return null;
   }
+
 }

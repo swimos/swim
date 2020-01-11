@@ -17,8 +17,10 @@ package swim.avro.reflection;
 import swim.avro.schema.AvroBooleanType;
 
 final class BooleanReflection extends AvroBooleanType<Boolean> {
+
   @Override
   public Boolean cast(boolean value) {
     return Boolean.valueOf(value);
   }
+
 }

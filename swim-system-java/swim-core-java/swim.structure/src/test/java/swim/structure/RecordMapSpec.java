@@ -22,6 +22,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class RecordMapSpec {
+
   @Test
   public void testEmpty() {
     assertTrue(Record.empty().isEmpty());
@@ -347,4 +348,5 @@ public class RecordMapSpec {
       assertEquals(xs.get(Num.from(key)).intValue(), i);
     }
   }
+
 }

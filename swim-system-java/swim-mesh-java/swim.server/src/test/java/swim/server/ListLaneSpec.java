@@ -53,9 +53,9 @@ public class ListLaneSpec {
 
   private static final int DEF_LATCH_COUNT = 100;
   private static CountDownLatch laneWillUpdate = new CountDownLatch(DEF_LATCH_COUNT);
-  private static CountDownLatch laneDidUpdate  = new CountDownLatch(DEF_LATCH_COUNT);
-  private static CountDownLatch laneDidUpdateLower  = new CountDownLatch(DEF_LATCH_COUNT);
-  private static CountDownLatch laneDidUpdateUpper  = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidUpdate = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidUpdateLower = new CountDownLatch(DEF_LATCH_COUNT);
+  private static CountDownLatch laneDidUpdateUpper = new CountDownLatch(DEF_LATCH_COUNT);
 
   private static CountDownLatch laneWillMove = new CountDownLatch(DEF_LATCH_COUNT);
   private static CountDownLatch laneDidMove = new CountDownLatch(DEF_LATCH_COUNT);
@@ -78,141 +78,6 @@ public class ListLaneSpec {
   private static List<String> listLaneCopy = new ArrayList<String>();
   private static List<String> listLane1Copy = new ArrayList<String>();
   private static List<String> commandList = new ArrayList<String>();
-
-  static class TestListLaneAgent extends AbstractAgent {
-    @SwimLane("list")
-    ListLane<String> testList = listLane()
-        .valueClass(String.class)
-        .observe(new TestListLaneController());
-
-    @SwimLane("list1")
-    ListLane<String> testList1 = listLane().valueClass(String.class)
-        .didUpdate((index, newValue, oldValue) -> {
-          assertNotNull(newValue);
-          listLane1Copy = this.testList1.snapshot();
-        })
-        .didMove((index, newValue, oldValue) -> {
-          assertNotNull(newValue);
-          assertNotNull(oldValue);
-          listLane1Copy = this.testList1.snapshot();
-        })
-        .didRemove((index, oldValue) -> {
-          assertNotNull(oldValue);
-          listLane1Copy = this.testList1.snapshot();
-        })
-        .didDrop((lower) -> listLane1Copy = this.testList1.snapshot())
-        .didTake((upper) -> listLane1Copy = this.testList1.snapshot())
-        .didClear(() -> listLane1Copy = this.testList1.snapshot());
-
-    class TestListLaneController implements WillUpdateIndex<String>, DidUpdateIndex<String>,
-        WillMoveIndex<String>, DidMoveIndex<String>, WillRemoveIndex, DidRemoveIndex<String>,
-        WillDrop, DidDrop, WillTake, DidTake, WillClear, DidClear,
-        WillCommand, DidCommand {
-      @Override
-      public String willUpdate(int index, String newValue) {
-        System.out.println("lane willUpdate index " + index + "; newValue: " + Format.debug(newValue));
-        laneWillUpdate.countDown();
-        return newValue;
-      }
-      @Override
-      public void didUpdate(int index, String newValue, String oldValue) {
-        System.out.println("lane didUpdate index " + index + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        listLaneCopy = testList.snapshot();
-        testList1.add(index, newValue);
-        laneDidUpdate.countDown();
-
-        final char letter = newValue.length() > 0 ? newValue.charAt(0) : '\0';
-        if (Character.isLowerCase(letter)) {
-          laneDidUpdateLower.countDown();
-        } else if (Character.isUpperCase(letter)) {
-          laneDidUpdateUpper.countDown();
-        }
-      }
-      @Override
-      public void willMove(int fromIndex, int toIndex, String value) {
-        System.out.println("lane willMove fromIndex: " + fromIndex + "; toIndex: " + toIndex + "; value: " + Format.debug(value));
-        laneWillMove.countDown();
-      }
-      @Override
-      public void didMove(int fromIndex, int toIndex, String value) {
-        System.out.println("lane didMove fromIndex: " + fromIndex + "; toIndex: " + toIndex + "; value: " + Format.debug(value));
-        listLaneCopy = testList.snapshot();
-        testList1.move(fromIndex, toIndex);
-        laneDidMove.countDown();
-      }
-      @Override
-      public void willRemove(int index) {
-        System.out.println("lane willRemove index: " + index);
-        laneWillRemove.countDown();
-      }
-      @Override
-      public void didRemove(int index, String oldValue) {
-        System.out.println("lane didRemove index: " + index + "; oldValue: " + Format.debug(oldValue));
-        listLaneCopy = testList.snapshot();
-        testList1.remove(index);
-        laneDidRemove.countDown();
-      }
-      @Override
-      public void willCommand(Value body) {
-        System.out.println("lane willCommand body " + Recon.toString(body));
-        laneWillCommand.countDown();
-      }
-      @Override
-      public void didCommand(Value body) {
-        System.out.println("lane didCommand body " + Recon.toString(body));
-        commandList.add(body.stringValue());
-        laneDidCommand.countDown();
-      }
-
-      @Override
-      public void willDrop(int lower) {
-        System.out.println("lane willDrop lower: " + lower);
-        laneWillDrop.countDown();
-      }
-
-      @Override
-      public void didDrop(int lower) {
-        System.out.println("lane didDrop lower : " + lower);
-        listLaneCopy = testList.snapshot();
-        testList1.drop(lower);
-        laneDidDrop.countDown();
-      }
-
-      @Override
-      public void willTake(int upper) {
-        System.out.println("lane willTake upper: " + upper);
-        laneWillTake.countDown();
-      }
-
-      @Override
-      public void didTake(int upper) {
-        System.out.println("lane didTake upper: " + upper);
-        listLaneCopy = testList.snapshot();
-        testList1.take(upper);
-        laneDidTake.countDown();
-      }
-
-      @Override
-      public void willClear() {
-        System.out.println("lane willClear");
-        laneWillClear.countDown();
-      }
-
-      @Override
-      public void didClear() {
-        System.out.println("lane didClear");
-        listLaneCopy = testList.snapshot();
-        testList1.clear();
-        laneDidClear.countDown();
-      }
-
-    }
-  }
-
-  static class TestListPlane extends AbstractPlane {
-    @SwimRoute("/list/:name")
-    AgentRoute<TestListLaneAgent> listRoute;
-  }
 
   @Test
   public void testInsert() throws InterruptedException {
@@ -302,7 +167,6 @@ public class ListLaneSpec {
       kernel.stop();
     }
   }
-
 
   @Test
   public void testMove() throws InterruptedException {
@@ -549,6 +413,153 @@ public class ListLaneSpec {
     } finally {
       kernel.stop();
     }
+  }
+
+  static class TestListLaneAgent extends AbstractAgent {
+
+    @SwimLane("list")
+    ListLane<String> testList = listLane()
+        .valueClass(String.class)
+        .observe(new TestListLaneController());
+
+    @SwimLane("list1")
+    ListLane<String> testList1 = listLane().valueClass(String.class)
+        .didUpdate((index, newValue, oldValue) -> {
+          assertNotNull(newValue);
+          listLane1Copy = this.testList1.snapshot();
+        })
+        .didMove((index, newValue, oldValue) -> {
+          assertNotNull(newValue);
+          assertNotNull(oldValue);
+          listLane1Copy = this.testList1.snapshot();
+        })
+        .didRemove((index, oldValue) -> {
+          assertNotNull(oldValue);
+          listLane1Copy = this.testList1.snapshot();
+        })
+        .didDrop((lower) -> listLane1Copy = this.testList1.snapshot())
+        .didTake((upper) -> listLane1Copy = this.testList1.snapshot())
+        .didClear(() -> listLane1Copy = this.testList1.snapshot());
+
+    class TestListLaneController implements WillUpdateIndex<String>, DidUpdateIndex<String>,
+        WillMoveIndex<String>, DidMoveIndex<String>, WillRemoveIndex, DidRemoveIndex<String>,
+        WillDrop, DidDrop, WillTake, DidTake, WillClear, DidClear,
+        WillCommand, DidCommand {
+
+      @Override
+      public String willUpdate(int index, String newValue) {
+        System.out.println("lane willUpdate index " + index + "; newValue: " + Format.debug(newValue));
+        laneWillUpdate.countDown();
+        return newValue;
+      }
+
+      @Override
+      public void didUpdate(int index, String newValue, String oldValue) {
+        System.out.println("lane didUpdate index " + index + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+        listLaneCopy = testList.snapshot();
+        testList1.add(index, newValue);
+        laneDidUpdate.countDown();
+
+        final char letter = newValue.length() > 0 ? newValue.charAt(0) : '\0';
+        if (Character.isLowerCase(letter)) {
+          laneDidUpdateLower.countDown();
+        } else if (Character.isUpperCase(letter)) {
+          laneDidUpdateUpper.countDown();
+        }
+      }
+
+      @Override
+      public void willMove(int fromIndex, int toIndex, String value) {
+        System.out.println("lane willMove fromIndex: " + fromIndex + "; toIndex: " + toIndex + "; value: " + Format.debug(value));
+        laneWillMove.countDown();
+      }
+
+      @Override
+      public void didMove(int fromIndex, int toIndex, String value) {
+        System.out.println("lane didMove fromIndex: " + fromIndex + "; toIndex: " + toIndex + "; value: " + Format.debug(value));
+        listLaneCopy = testList.snapshot();
+        testList1.move(fromIndex, toIndex);
+        laneDidMove.countDown();
+      }
+
+      @Override
+      public void willRemove(int index) {
+        System.out.println("lane willRemove index: " + index);
+        laneWillRemove.countDown();
+      }
+
+      @Override
+      public void didRemove(int index, String oldValue) {
+        System.out.println("lane didRemove index: " + index + "; oldValue: " + Format.debug(oldValue));
+        listLaneCopy = testList.snapshot();
+        testList1.remove(index);
+        laneDidRemove.countDown();
+      }
+
+      @Override
+      public void willCommand(Value body) {
+        System.out.println("lane willCommand body " + Recon.toString(body));
+        laneWillCommand.countDown();
+      }
+
+      @Override
+      public void didCommand(Value body) {
+        System.out.println("lane didCommand body " + Recon.toString(body));
+        commandList.add(body.stringValue());
+        laneDidCommand.countDown();
+      }
+
+      @Override
+      public void willDrop(int lower) {
+        System.out.println("lane willDrop lower: " + lower);
+        laneWillDrop.countDown();
+      }
+
+      @Override
+      public void didDrop(int lower) {
+        System.out.println("lane didDrop lower : " + lower);
+        listLaneCopy = testList.snapshot();
+        testList1.drop(lower);
+        laneDidDrop.countDown();
+      }
+
+      @Override
+      public void willTake(int upper) {
+        System.out.println("lane willTake upper: " + upper);
+        laneWillTake.countDown();
+      }
+
+      @Override
+      public void didTake(int upper) {
+        System.out.println("lane didTake upper: " + upper);
+        listLaneCopy = testList.snapshot();
+        testList1.take(upper);
+        laneDidTake.countDown();
+      }
+
+      @Override
+      public void willClear() {
+        System.out.println("lane willClear");
+        laneWillClear.countDown();
+      }
+
+      @Override
+      public void didClear() {
+        System.out.println("lane didClear");
+        listLaneCopy = testList.snapshot();
+        testList1.clear();
+        laneDidClear.countDown();
+      }
+
+    }
+
+  }
+
+  static class TestListPlane extends AbstractPlane {
+
+    @SwimRoute("/list/:name")
+    AgentRoute<TestListLaneAgent> listRoute;
+
   }
 
 }

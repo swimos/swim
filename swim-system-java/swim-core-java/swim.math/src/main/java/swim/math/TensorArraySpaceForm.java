@@ -17,6 +17,7 @@ package swim.math;
 import java.lang.reflect.Array;
 
 final class TensorArraySpaceForm<T, V, S> extends TensorArrayForm<T, V> {
+
   final TensorArraySpace<T, V, S> space;
   final TensorForm<V> next;
 
@@ -44,4 +45,5 @@ final class TensorArraySpaceForm<T, V, S> extends TensorArrayForm<T, V> {
   public Object[] toArray(T tensor) {
     return this.space.toArray(tensor);
   }
+
 }

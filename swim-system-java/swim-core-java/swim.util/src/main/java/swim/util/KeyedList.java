@@ -19,6 +19,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 public interface KeyedList<E> extends List<E> {
+
   E get(int index, Object key);
 
   Map.Entry<Object, E> getEntry(int index);
@@ -40,4 +41,5 @@ public interface KeyedList<E> extends List<E> {
   ListIterator<Object> keyIterator();
 
   ListIterator<Map.Entry<Object, E>> entryIterator();
+
 }

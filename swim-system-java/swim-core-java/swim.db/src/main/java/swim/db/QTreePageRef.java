@@ -29,6 +29,7 @@ import swim.util.CombinerFunction;
 import swim.util.Cursor;
 
 public final class QTreePageRef extends PageRef {
+
   final PageContext context;
   final PageType pageType;
   final int stem;
@@ -73,6 +74,51 @@ public final class QTreePageRef extends PageRef {
   public QTreePageRef(PageContext context, PageType pageType, int stem, int post,
                       int zone, long base, long span, long x, long y, Value fold) {
     this(context, pageType, stem, post, zone, base, span, x, y, fold, null, -1, -1, -1, -1L);
+  }
+
+  public static QTreePageRef empty(PageContext context, int stem, long version) {
+    return QTreeLeaf.empty(context, stem, version).pageRef();
+  }
+
+  public static QTreePageRef fromValue(PageContext context, int stem, Value value) {
+    Throwable cause = null;
+    try {
+      final String tag = value.tag();
+      final PageType pageType = PageType.fromTag(tag);
+      if (pageType == null) {
+        return null;
+      }
+      final Value header = value.header(tag);
+      final int zone = header.get("zone").intValue();
+      final int post = header.get("post").intValue(zone);
+      final long base = header.get("base").longValue();
+      final int size = header.get("size").intValue();
+      final long area = header.get("area").longValue();
+      final long span = header.get("span").longValue();
+      final long x = header.get("x").longValue();
+      final long y = header.get("y").longValue();
+      final Value fold = header.get("fold");
+      if (base < 0L) {
+        throw new StoreException("negative page base: " + base);
+      } else if (size < 0) {
+        throw new StoreException("negative page size: " + size);
+      } else if (area < 0) {
+        throw new StoreException("negative page area: " + area);
+      } else if (span < 0) {
+        throw new StoreException("negative page span: " + span);
+      }
+      return new QTreePageRef(context, pageType, stem, post, zone, base, span,
+          x, y, fold, null, -1, size, 0, area);
+    } catch (Throwable error) {
+      if (Conts.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed qtree page ref: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
   @Override
@@ -289,12 +335,12 @@ public final class QTreePageRef extends PageRef {
       header.slot("post", this.post);
     }
     header.slot("zone", this.zone)
-          .slot("base", this.base)
-          .slot("size", pageSize())
-          .slot("area", treeSize())
-          .slot("span", this.span)
-          .slot("x", Num.uint64(this.x))
-          .slot("y", Num.uint64(this.y));
+        .slot("base", this.base)
+        .slot("size", pageSize())
+        .slot("area", treeSize())
+        .slot("span", this.span)
+        .slot("x", Num.uint64(this.x))
+        .slot("y", Num.uint64(this.y));
     final Value fold = fold();
     if (fold.isDefined()) {
       header.slot("fold", fold);
@@ -500,48 +546,4 @@ public final class QTreePageRef extends PageRef {
     return output.bind();
   }
 
-  public static QTreePageRef empty(PageContext context, int stem, long version) {
-    return QTreeLeaf.empty(context, stem, version).pageRef();
-  }
-
-  public static QTreePageRef fromValue(PageContext context, int stem, Value value) {
-    Throwable cause = null;
-    try {
-      final String tag = value.tag();
-      final PageType pageType = PageType.fromTag(tag);
-      if (pageType == null) {
-        return null;
-      }
-      final Value header = value.header(tag);
-      final int zone = header.get("zone").intValue();
-      final int post = header.get("post").intValue(zone);
-      final long base = header.get("base").longValue();
-      final int size = header.get("size").intValue();
-      final long area = header.get("area").longValue();
-      final long span = header.get("span").longValue();
-      final long x = header.get("x").longValue();
-      final long y = header.get("y").longValue();
-      final Value fold = header.get("fold");
-      if (base < 0L) {
-        throw new StoreException("negative page base: " + base);
-      } else if (size < 0) {
-        throw new StoreException("negative page size: " + size);
-      } else if (area < 0) {
-        throw new StoreException("negative page area: " + area);
-      } else if (span < 0) {
-        throw new StoreException("negative page span: " + span);
-      }
-      return new QTreePageRef(context, pageType, stem, post, zone, base, span,
-                              x, y, fold, null, -1, size, 0, area);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed qtree page ref: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
-  }
 }

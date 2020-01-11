@@ -19,9 +19,6 @@ import swim.dynamic.JavaHostClassType;
 import swim.structure.Field;
 
 public final class HostField {
-  private HostField() {
-    // static
-  }
 
   public static final HostObjectType<Field> TYPE;
 
@@ -30,4 +27,9 @@ public final class HostField {
     TYPE = type;
     type.extendType(HostItem.TYPE);
   }
+
+  private HostField() {
+    // static
+  }
+
 }

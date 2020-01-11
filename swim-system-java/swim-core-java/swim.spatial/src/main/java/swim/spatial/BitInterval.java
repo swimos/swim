@@ -53,6 +53,7 @@ import java.util.Comparator;
  * bit interval: 11111111 11111111 11111111 11111111 11111111 11111111 11111111 11111110
  */
 public final class BitInterval {
+
   private BitInterval() {
     // stub
   }
@@ -161,7 +162,7 @@ public final class BitInterval {
         }
       }
     } else { // merge sort
-      final int destLow  = low;
+      final int destLow = low;
       final int destHigh = high;
       low += offset;
       high += offset;
@@ -186,4 +187,5 @@ public final class BitInterval {
       }
     }
   }
+
 }

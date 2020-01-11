@@ -18,6 +18,7 @@ import swim.structure.Slot;
 import swim.util.Cursor;
 
 final class QTreeNodeDepthCursor extends QTreeNodeCursor {
+
   final int depth;
 
   QTreeNodeDepthCursor(QTreeNode page, long x, long y, long index, int slotIndex,
@@ -34,4 +35,5 @@ final class QTreeNodeDepthCursor extends QTreeNodeCursor {
   Cursor<Slot> childCursor(QTreePageRef childRef) {
     return childRef.depthCursor(this.x, this.y, this.depth - 1);
   }
+
 }

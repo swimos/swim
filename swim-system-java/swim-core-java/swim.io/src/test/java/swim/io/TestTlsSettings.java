@@ -24,12 +24,13 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
 public final class TestTlsSettings {
-  private TestTlsSettings() {
-    // stub
-  }
 
   private static TlsSettings tlsSettings;
   private static IpSettings ipSettings;
+
+  private TestTlsSettings() {
+    // stub
+  }
 
   public static TlsSettings tlsSettings() {
     if (tlsSettings == null) {
@@ -75,4 +76,5 @@ public final class TestTlsSettings {
     }
     return ipSettings;
   }
+
 }

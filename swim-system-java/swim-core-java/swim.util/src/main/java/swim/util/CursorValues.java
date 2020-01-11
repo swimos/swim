@@ -17,6 +17,7 @@ package swim.util;
 import java.util.Map;
 
 final class CursorValues<V> implements Cursor<V> {
+
   final Cursor<? extends Map.Entry<?, ? extends V>> inner;
 
   CursorValues(Cursor<? extends Map.Entry<?, ? extends V>> inner) {
@@ -87,4 +88,5 @@ final class CursorValues<V> implements Cursor<V> {
   public void load() throws InterruptedException {
     this.inner.load();
   }
+
 }

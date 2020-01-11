@@ -22,6 +22,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class RecordMapViewSpec {
+
   @Test
   public void testViewIsEmpty() {
     assertTrue(Record.of("a", "b", "c").subList(1, 1).isEmpty());
@@ -208,4 +209,5 @@ public class RecordMapViewSpec {
     assertEquals(iter.next(), Text.from("d"));
     assertFalse(iter.hasNext());
   }
+
 }

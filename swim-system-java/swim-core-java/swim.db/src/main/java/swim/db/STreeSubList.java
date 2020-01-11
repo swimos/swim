@@ -19,6 +19,7 @@ import java.util.List;
 import swim.structure.Value;
 
 final class STreeSubList extends AbstractList<Value> {
+
   final STreeList inner;
   final int fromIndex;
   final int toIndex;
@@ -55,4 +56,5 @@ final class STreeSubList extends AbstractList<Value> {
     }
     return new STreeSubList(this.inner, fromIndex, toIndex);
   }
+
 }

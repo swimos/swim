@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 final class RecordKeyIterator implements Iterator<Value> {
+
   final Iterator<Item> iterator;
   Value next;
 
@@ -65,4 +66,5 @@ final class RecordKeyIterator implements Iterator<Value> {
   public void remove() {
     this.iterator.remove();
   }
+
 }

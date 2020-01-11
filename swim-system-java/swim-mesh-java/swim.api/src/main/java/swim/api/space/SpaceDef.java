@@ -18,9 +18,11 @@ import java.util.Collection;
 import swim.api.plane.PlaneDef;
 
 public interface SpaceDef {
+
   String spaceName();
 
   Collection<? extends PlaneDef> planeDefs();
 
   PlaneDef getPlaneDef(String planeName);
+
 }

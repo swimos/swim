@@ -20,6 +20,7 @@ import swim.uri.Uri;
 import swim.util.Murmur3;
 
 public abstract class LaneAddressed extends Envelope {
+
   final Uri nodeUri;
   final Uri laneUri;
   final Value body;
@@ -81,4 +82,5 @@ public abstract class LaneAddressed extends Envelope {
     }
     output = output.write(')');
   }
+
 }

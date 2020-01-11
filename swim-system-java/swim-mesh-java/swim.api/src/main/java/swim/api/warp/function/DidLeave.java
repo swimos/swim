@@ -19,5 +19,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface DidLeave extends Preemptive {
+
   void didLeave(Identity identity);
+
 }

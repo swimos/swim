@@ -24,6 +24,7 @@ import java.util.concurrent.Executor;
  * @see Theater
  */
 public interface Stage extends Executor, Schedule {
+
   /**
    * Returns an uncued {@code TaskRef} bound to the {@code task}, which can
    * later be used to cue the {@code task}.
@@ -40,4 +41,5 @@ public interface Stage extends Executor, Schedule {
    */
   @Override
   void execute(Runnable runnable);
+
 }

@@ -24,6 +24,7 @@ import swim.http.LanguageRange;
 import swim.util.Builder;
 
 final class AcceptLanguageParser extends Parser<AcceptLanguage> {
+
   final HttpParser http;
   final Parser<LanguageRange> language;
   final Builder<LanguageRange, FingerTrieSeq<LanguageRange>> languages;
@@ -39,11 +40,6 @@ final class AcceptLanguageParser extends Parser<AcceptLanguage> {
 
   AcceptLanguageParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<AcceptLanguage> feed(Input input) {
-    return parse(input, this.http, this.language, this.languages, this.step);
   }
 
   static Parser<AcceptLanguage> parse(Input input, HttpParser http, Parser<LanguageRange> language,
@@ -124,4 +120,10 @@ final class AcceptLanguageParser extends Parser<AcceptLanguage> {
   static Parser<AcceptLanguage> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<AcceptLanguage> feed(Input input) {
+    return parse(input, this.http, this.language, this.languages, this.step);
+  }
+
 }

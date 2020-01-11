@@ -19,5 +19,7 @@ import swim.warp.SyncRequest;
 
 @FunctionalInterface
 public interface OnSyncRequest extends Preemptive {
+
   void onSync(SyncRequest request);
+
 }

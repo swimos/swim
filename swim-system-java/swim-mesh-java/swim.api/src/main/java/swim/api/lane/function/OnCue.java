@@ -19,5 +19,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface OnCue<V> extends Preemptive {
+
   V onCue(WarpUplink uplink);
+
 }

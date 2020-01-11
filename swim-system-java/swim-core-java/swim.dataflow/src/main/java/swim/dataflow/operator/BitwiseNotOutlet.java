@@ -18,8 +18,10 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 public final class BitwiseNotOutlet extends UnaryOutlet {
+
   @Override
   protected Item evaluate(Value argument) {
     return argument.bitwiseNot();
   }
+
 }

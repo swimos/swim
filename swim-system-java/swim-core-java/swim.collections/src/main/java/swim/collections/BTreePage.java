@@ -20,8 +20,13 @@ import swim.util.Cursor;
 import swim.util.OrderedMapCursor;
 
 public abstract class BTreePage<K, V, U> {
+
   BTreePage() {
     // stub
+  }
+
+  public static <K, V, U> BTreePage<K, V, U> empty() {
+    return BTreeLeaf.empty();
   }
 
   public abstract boolean isEmpty();
@@ -95,7 +100,4 @@ public abstract class BTreePage<K, V, U> {
 
   public abstract OrderedMapCursor<K, V> lastIterator();
 
-  public static <K, V, U> BTreePage<K, V, U> empty() {
-    return BTreeLeaf.empty();
-  }
 }

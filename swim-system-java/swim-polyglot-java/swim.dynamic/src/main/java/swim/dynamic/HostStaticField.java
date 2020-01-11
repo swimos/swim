@@ -18,6 +18,7 @@ package swim.dynamic;
  * A dynamically typed static field descriptor for a host type.
  */
 public interface HostStaticField extends HostStaticMember {
+
   Object get(Bridge bridge);
 
   default void set(Bridge bridge, Object value) {
@@ -27,4 +28,5 @@ public interface HostStaticField extends HostStaticMember {
   default boolean remove(Bridge bridge) {
     throw new UnsupportedOperationException();
   }
+
 }

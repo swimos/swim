@@ -23,6 +23,7 @@ import swim.http.Http;
 import swim.util.Builder;
 
 final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
+
   final int version;
   final Builder<Integer, FingerTrieSeq<Integer>> versions;
   final int step;
@@ -35,11 +36,6 @@ final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
 
   SecWebSocketVersionParser() {
     this(0, null, 1);
-  }
-
-  @Override
-  public Parser<SecWebSocketVersion> feed(Input input) {
-    return parse(input, this.version, this.versions, this.step);
   }
 
   static Parser<SecWebSocketVersion> parse(Input input, int version,
@@ -172,4 +168,10 @@ final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
   static Parser<SecWebSocketVersion> parse(Input input) {
     return parse(input, 0, null, 1);
   }
+
+  @Override
+  public Parser<SecWebSocketVersion> feed(Input input) {
+    return parse(input, this.version, this.versions, this.step);
+  }
+
 }

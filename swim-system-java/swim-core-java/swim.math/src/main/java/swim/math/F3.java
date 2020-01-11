@@ -15,6 +15,7 @@
 package swim.math;
 
 public interface F3<V, S> extends VectorModule<V, S> {
+
   V of(S x, S y, S z);
 
   S getX(V v);
@@ -22,4 +23,5 @@ public interface F3<V, S> extends VectorModule<V, S> {
   S getY(V v);
 
   S getZ(V v);
+
 }

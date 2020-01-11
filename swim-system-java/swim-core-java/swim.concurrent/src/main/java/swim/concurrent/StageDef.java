@@ -22,13 +22,16 @@ import swim.structure.Kind;
  * Marker interface for a {@link Stage} definition.
  */
 public interface StageDef {
+
   @Kind
   static Form<StageDef> form() {
     return new StageForm(TheaterDef.standard());
   }
+
 }
 
 final class StageForm extends Form<StageDef> {
+
   final StageDef unit;
 
   StageForm(StageDef unit) {
@@ -67,4 +70,5 @@ final class StageForm extends Form<StageDef> {
     }
     return null;
   }
+
 }

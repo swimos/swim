@@ -27,30 +27,14 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public final class GetAttrSelector extends Selector {
+
+  private static int hashSeed;
   final Text key;
   final Selector then;
 
   public GetAttrSelector(Text key, Selector then) {
     this.key = key;
     this.then = then;
-  }
-
-  public Text accessor() {
-    return this.key;
-  }
-
-  @Override
-  public Selector then() {
-    return this.then;
-  }
-
-  @Override
-  public <T> T forSelected(Interpreter interpreter, Selectee<T> callback) {
-    interpreter.willSelect(this);
-    final Value key = this.key;
-    final T selected = forSelected(key, this.then, interpreter, callback);
-    interpreter.didSelect(this, selected);
-    return selected;
   }
 
   private static <T> T forSelected(Value key, Selector then, Interpreter interpreter, Selectee<T> callback) {
@@ -79,6 +63,49 @@ public final class GetAttrSelector extends Selector {
       // Push the current selection back onto the stack.
       interpreter.pushScope(scope);
     }
+    return selected;
+  }
+
+  private static Item substitute(Text key, Selector then, Interpreter interpreter) {
+    Item selected = null;
+    if (interpreter.scopeDepth() != 0) {
+      // Pop the next selection off of the stack to take it out of scope.
+      final Value scope = interpreter.popScope().toValue();
+      final Field field;
+      // Only records can have members.
+      if (scope instanceof Record) {
+        field = scope.getField(key);
+        if (field instanceof Attr) {
+          // Substitute the field value.
+          selected = field.toValue().substitute(interpreter);
+        }
+      } else {
+        field = null;
+      }
+      if (field != null && selected != null) {
+        substitute(key, then, interpreter);
+      }
+      // Push the current selection back onto the stack.
+      interpreter.pushScope(scope);
+    }
+    return selected;
+  }
+
+  public Text accessor() {
+    return this.key;
+  }
+
+  @Override
+  public Selector then() {
+    return this.then;
+  }
+
+  @Override
+  public <T> T forSelected(Interpreter interpreter, Selectee<T> callback) {
+    interpreter.willSelect(this);
+    final Value key = this.key;
+    final T selected = forSelected(key, this.then, interpreter, callback);
+    interpreter.didSelect(this, selected);
     return selected;
   }
 
@@ -142,31 +169,6 @@ public final class GetAttrSelector extends Selector {
     return new GetAttrSelector(this.key, (Selector) then);
   }
 
-  private static Item substitute(Text key, Selector then, Interpreter interpreter) {
-    Item selected = null;
-    if (interpreter.scopeDepth() != 0) {
-      // Pop the next selection off of the stack to take it out of scope.
-      final Value scope = interpreter.popScope().toValue();
-      final Field field;
-      // Only records can have members.
-      if (scope instanceof Record) {
-        field = scope.getField(key);
-        if (field instanceof Attr) {
-          // Substitute the field value.
-          selected = field.toValue().substitute(interpreter);
-        }
-      } else {
-        field = null;
-      }
-      if (field != null && selected != null) {
-        substitute(key, then, interpreter);
-      }
-      // Push the current selection back onto the stack.
-      interpreter.pushScope(scope);
-    }
-    return selected;
-  }
-
   @Override
   public Selector andThen(Selector then) {
     return new GetAttrSelector(this.key, this.then.andThen(then));
@@ -219,5 +221,4 @@ public final class GetAttrSelector extends Selector {
     this.then.debugThen(output);
   }
 
-  private static int hashSeed;
 }

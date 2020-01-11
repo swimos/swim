@@ -23,6 +23,7 @@ import swim.structure.Value;
 import swim.util.OrderedMapCursor;
 
 final class BTreePageRefCursor implements OrderedMapCursor<Value, Value> {
+
   final BTreePageRef pageRef;
   final Record record;
   int index;
@@ -154,4 +155,5 @@ final class BTreePageRefCursor implements OrderedMapCursor<Value, Value> {
       return Slot.of(item.key(), item.toValue());
     }
   }
+
 }

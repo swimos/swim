@@ -27,6 +27,9 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public abstract class AbstractUplinkContext implements LinkContext, Uplink {
+
+  static final AtomicReferenceFieldUpdater<AbstractUplinkContext, Object> OBSERVERS =
+      AtomicReferenceFieldUpdater.newUpdater(AbstractUplinkContext.class, Object.class, "observers");
   protected volatile Object observers; // Observer | Observer[]
 
   public abstract LaneBinding laneBinding();
@@ -359,6 +362,4 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
     linkBinding().failDown(message);
   }
 
-  static final AtomicReferenceFieldUpdater<AbstractUplinkContext, Object> OBSERVERS =
-      AtomicReferenceFieldUpdater.newUpdater(AbstractUplinkContext.class, Object.class, "observers");
 }

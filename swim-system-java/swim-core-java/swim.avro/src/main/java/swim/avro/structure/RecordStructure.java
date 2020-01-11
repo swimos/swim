@@ -21,6 +21,7 @@ import swim.collections.FingerTrieSeq;
 import swim.structure.Record;
 
 final class RecordStructure extends AvroRecordType<Record, Record> {
+
   final AvroName fullName;
   final String doc;
   final FingerTrieSeq<AvroName> aliases;
@@ -92,4 +93,5 @@ final class RecordStructure extends AvroRecordType<Record, Record> {
   public Record cast(Record record) {
     return record;
   }
+
 }

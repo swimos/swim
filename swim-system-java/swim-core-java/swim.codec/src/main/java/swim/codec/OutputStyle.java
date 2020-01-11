@@ -18,6 +18,7 @@ package swim.codec;
  * Stylized text output utility functions.
  */
 public final class OutputStyle {
+
   private OutputStyle() {
   }
 
@@ -26,7 +27,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void reset(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -39,7 +40,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void bold(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -52,7 +53,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void faint(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -65,7 +66,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void black(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -78,7 +79,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void red(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -91,7 +92,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void green(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -104,7 +105,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void yellow(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -117,7 +118,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void blue(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -130,7 +131,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void magenta(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -143,7 +144,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void cyan(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -156,7 +157,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void gray(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -169,7 +170,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void blackBold(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -182,7 +183,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void redBold(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -195,7 +196,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void greenBold(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -208,7 +209,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void yellowBold(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -221,7 +222,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void blueBold(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -234,7 +235,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void magentaBold(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -247,7 +248,7 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void cyanBold(Output<?> output) {
     if (output.settings().isStyled()) {
@@ -260,11 +261,12 @@ public final class OutputStyle {
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
    * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *         before the full escape code has been written.
+   *                         before the full escape code has been written.
    */
   public static void grayBold(Output<?> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('1').write(';').write('3').write('7').write('m');
     }
   }
+
 }

@@ -18,9 +18,11 @@ import java.security.Key;
 import swim.structure.Value;
 
 public interface EcKeyDef {
+
   EcDomainDef domain();
 
   Key key();
 
   Value toValue();
+
 }

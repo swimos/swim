@@ -18,12 +18,13 @@ import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 
 public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends LaneView> implements Runnable {
+
   protected final Model model;
   protected final Object views; // View | View[]
-  protected int viewIndex;
   protected final int viewCount;
-  protected int phase;
   protected final int phaseCount;
+  protected int viewIndex;
+  protected int phase;
   protected boolean preemptive;
   protected Stage stage;
 
@@ -199,4 +200,5 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
       this.model.accumulateExecTime(dt);
     }
   }
+
 }

@@ -17,6 +17,7 @@ package swim.store;
 import swim.structure.Value;
 
 public interface SpatialDataContext<S> extends DataContext {
+
   void didUpdate(Value key, long x, long y, Value newValue, Value oldValue);
 
   void didMove(Value key, long newX, long newY, Value newValue, long oldX, long oldY, Value oldValue);
@@ -24,4 +25,5 @@ public interface SpatialDataContext<S> extends DataContext {
   void didRemove(Value key, long x, long y, Value oldValue);
 
   void didClear();
+
 }

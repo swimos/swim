@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.structure.Data;
 
 final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
+
   final Data signingInput;
   final Data protectedHeaderData;
   final Data payloadData;
@@ -43,12 +44,6 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
 
   JsonWebSignatureParser() {
     this(null, null, null, null, 0, 0, 0, 1);
-  }
-
-  @Override
-  public Parser<JsonWebSignature> feed(Input input) {
-    return parse(signingInput, protectedHeaderData, payloadData,
-                 signatureData, p, q, r, step, input);
   }
 
   static Parser<JsonWebSignature> parse(Data signingInput, Data protectedHeaderData,
@@ -297,7 +292,7 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
       break;
     } while (true);
     return new JsonWebSignatureParser(signingInput, protectedHeaderData, payloadData,
-                                      signatureData, p, q, r, step);
+        signatureData, p, q, r, step);
   }
 
   static Parser<JsonWebSignature> parse(Input input) {
@@ -349,4 +344,11 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
       data.addByte((byte) ((x << 2) | (y >>> 4)));
     }
   }
+
+  @Override
+  public Parser<JsonWebSignature> feed(Input input) {
+    return parse(signingInput, protectedHeaderData, payloadData,
+        signatureData, p, q, r, step, input);
+  }
+
 }

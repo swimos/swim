@@ -24,6 +24,7 @@ import swim.codec.Parser;
  * Factory for constructing Format-detecting decoders.
  */
 public abstract class DecipherDecoder<I, V> {
+
   public abstract Parser<V> xmlParser();
 
   public abstract Parser<V> parseXml(Input input);
@@ -51,4 +52,5 @@ public abstract class DecipherDecoder<I, V> {
   public Decoder<V> anyDecoder() {
     return new AnyDecoder<I, V>(this);
   }
+
 }

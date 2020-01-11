@@ -15,5 +15,7 @@
 package swim.store;
 
 public interface StoreDef {
+
   String storeName();
+
 }

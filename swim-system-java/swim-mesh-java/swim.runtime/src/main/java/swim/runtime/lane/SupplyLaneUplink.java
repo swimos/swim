@@ -20,6 +20,7 @@ import swim.runtime.WarpBinding;
 import swim.runtime.warp.SupplyUplinkModem;
 
 public class SupplyLaneUplink extends SupplyUplinkModem {
+
   final SupplyLaneModel laneBinding;
 
   public SupplyLaneUplink(SupplyLaneModel laneBinding, WarpBinding linkBinding,
@@ -37,4 +38,5 @@ public class SupplyLaneUplink extends SupplyUplinkModem {
   public Stage stage() {
     return this.laneBinding.stage();
   }
+
 }

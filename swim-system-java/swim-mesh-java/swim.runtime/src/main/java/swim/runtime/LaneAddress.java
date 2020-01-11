@@ -22,6 +22,8 @@ import swim.uri.Uri;
 import swim.util.Murmur3;
 
 public final class LaneAddress extends CellAddress implements Debug {
+
+  private static int hashSeed;
   final String edgeName;
   final Uri meshUri;
   final Value partKey;
@@ -36,6 +38,17 @@ public final class LaneAddress extends CellAddress implements Debug {
     this.hostUri = hostUri;
     this.nodeUri = nodeUri;
     this.laneUri = laneUri;
+  }
+
+  public static LaneAddress from(String edgeName, Uri meshUri, Value partKey,
+                                 Uri hostUri, Uri nodeUri, Uri laneUri) {
+    return new LaneAddress(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri);
+  }
+
+  public static LaneAddress from(String edgeName, String meshUri, Value partKey,
+                                 String hostUri, String nodeUri, String laneUri) {
+    return new LaneAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri),
+        Uri.parse(nodeUri), Uri.parse(laneUri));
   }
 
   public String edgeName() {
@@ -142,16 +155,4 @@ public final class LaneAddress extends CellAddress implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static LaneAddress from(String edgeName, Uri meshUri, Value partKey,
-                                 Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return new LaneAddress(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri);
-  }
-
-  public static LaneAddress from(String edgeName, String meshUri, Value partKey,
-                                 String hostUri, String nodeUri, String laneUri) {
-    return new LaneAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri),
-                           Uri.parse(nodeUri), Uri.parse(laneUri));
-  }
 }

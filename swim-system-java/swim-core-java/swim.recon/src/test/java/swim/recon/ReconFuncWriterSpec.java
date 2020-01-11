@@ -24,6 +24,7 @@ import swim.structure.Value;
 import static swim.recon.ReconWriterSpec.assertWrites;
 
 public class ReconFuncWriterSpec {
+
   @Test
   public void writeFreeLambdaFunc() {
     assertWrites(Value.extant().lambda(Num.from(0)), "() => 0");
@@ -93,4 +94,5 @@ public class ReconFuncWriterSpec {
   public void writePostfixAttributedValueBindingSelectorLambdaFunc() {
     assertWrites(Record.of("x", Attr.of("pure")).lambda(Selector.identity().get("x")), "x@pure => $x");
   }
+
 }

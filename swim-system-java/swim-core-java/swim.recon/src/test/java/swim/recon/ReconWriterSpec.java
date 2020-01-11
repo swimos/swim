@@ -37,6 +37,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class ReconWriterSpec {
+
   public static void assertWrites(Item item, byte... expected) {
     final int size = Recon.structureWriter().sizeOfItem(item);
     final int n = expected.length;
@@ -155,7 +156,7 @@ public class ReconWriterSpec {
     assertWrites(Data.fromBase64("AA=="), "%AA==");
     assertWrites(Data.fromBase64("ABCDabcd12/+"), "%ABCDabcd12/+");
     assertWrites(Data.fromBase64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+"),
-                 "%ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+");
+        "%ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+");
   }
 
   @Test
@@ -436,4 +437,5 @@ public class ReconWriterSpec {
   public void writeMarkupEmbeddedAttributedRecordsWithNonPrefixAttributes() {
     assertWrites(Record.of("Hello, ", Record.of(1, Attr.of("second")), "!"), "[Hello, {1@second}!]");
   }
+
 }

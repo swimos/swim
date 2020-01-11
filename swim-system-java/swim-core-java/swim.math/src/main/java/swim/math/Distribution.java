@@ -15,6 +15,25 @@
 package swim.math;
 
 public abstract class Distribution {
+
+  public static Distribution sigmoidUniform(Random random, double fanIn, double fanOut) {
+    final double r = 4.0 * Math.sqrt(6.0 / (fanIn + fanOut));
+    return new UniformDistribution(-r, r);
+  }
+
+  public static Distribution sigmoidUniform(double fanIn, double fanOut) {
+    return sigmoidUniform(Random.get(), fanIn, fanOut);
+  }
+
+  public static Distribution reluUniform(Random random, double fanIn, double fanOut) {
+    final double u = Math.sqrt(6.0 / fanIn);
+    return new UniformDistribution(-u, u);
+  }
+
+  public static Distribution reluUniform(double fanIn, double fanOut) {
+    return reluUniform(Random.get(), fanIn, fanOut);
+  }
+
   public abstract double density(double x);
 
   public abstract double sample();
@@ -63,21 +82,4 @@ public abstract class Distribution {
     }
   }
 
-  public static Distribution sigmoidUniform(Random random, double fanIn, double fanOut) {
-    final double r = 4.0 * Math.sqrt(6.0 / (fanIn + fanOut));
-    return new UniformDistribution(-r, r);
-  }
-
-  public static Distribution sigmoidUniform(double fanIn, double fanOut) {
-    return sigmoidUniform(Random.get(), fanIn, fanOut);
-  }
-
-  public static Distribution reluUniform(Random random, double fanIn, double fanOut) {
-    final double u = Math.sqrt(6.0 / fanIn);
-    return new UniformDistribution(-u, u);
-  }
-
-  public static Distribution reluUniform(double fanIn, double fanOut) {
-    return reluUniform(Random.get(), fanIn, fanOut);
-  }
 }

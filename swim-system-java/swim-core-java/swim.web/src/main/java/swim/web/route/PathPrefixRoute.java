@@ -20,6 +20,7 @@ import swim.web.WebResponse;
 import swim.web.WebRoute;
 
 public final class PathPrefixRoute implements WebRoute {
+
   final UriPath pathPrefix;
   final WebRoute then;
 
@@ -45,4 +46,5 @@ public final class PathPrefixRoute implements WebRoute {
       return request.reject();
     }
   }
+
 }

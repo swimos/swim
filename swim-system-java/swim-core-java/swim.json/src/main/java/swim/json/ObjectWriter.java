@@ -20,6 +20,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class ObjectWriter<I, V> extends Writer<Object, Object> {
+
   final JsonWriter<I, V> json;
   final Iterator<I> items;
   final Writer<?, ?> part;
@@ -32,11 +33,6 @@ final class ObjectWriter<I, V> extends Writer<Object, Object> {
     this.part = part;
     this.index = index;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.json, this.items, this.part, this.index, this.step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, JsonWriter<I, V> json, Iterator<I> items,
@@ -93,4 +89,10 @@ final class ObjectWriter<I, V> extends Writer<Object, Object> {
   static <I, V> Writer<Object, Object> write(Output<?> output, JsonWriter<I, V> json, Iterator<I> items) {
     return write(output, json, items, null, 0, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.json, this.items, this.part, this.index, this.step);
+  }
+
 }

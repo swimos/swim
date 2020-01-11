@@ -22,6 +22,9 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class SphereR3 extends R3Shape implements Debug {
+
+  private static int hashSeed;
+  private static R3Form<SphereR3> form;
   public final double cx;
   public final double cy;
   public final double cz;
@@ -32,6 +35,18 @@ public class SphereR3 extends R3Shape implements Debug {
     this.cy = cy;
     this.cz = cz;
     this.r = r;
+  }
+
+  public static SphereR3 of(double cx, double cy, double cz, double r) {
+    return new SphereR3(cx, cy, cz, r);
+  }
+
+  @Kind
+  public static R3Form<SphereR3> form() {
+    if (form == null) {
+      form = new SphereR3Form();
+    }
+    return form;
   }
 
   @Override
@@ -153,11 +168,11 @@ public class SphereR3 extends R3Shape implements Debug {
     final double yMax = this.cy + this.r;
     final double zMax = this.cz + this.r;
     return new BoxZ3(f.transformX(xMin, yMin, zMin),
-                     f.transformY(xMin, yMin, zMin),
-                     f.transformZ(xMin, yMin, zMin),
-                     f.transformX(xMax, yMax, xMax),
-                     f.transformY(xMax, yMax, xMax),
-                     f.transformZ(xMax, yMax, xMax));
+        f.transformY(xMin, yMin, zMin),
+        f.transformZ(xMin, yMin, zMin),
+        f.transformX(xMax, yMax, xMax),
+        f.transformY(xMax, yMax, xMax),
+        f.transformZ(xMax, yMax, xMax));
   }
 
   @Override
@@ -203,19 +218,4 @@ public class SphereR3 extends R3Shape implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static R3Form<SphereR3> form;
-
-  public static SphereR3 of(double cx, double cy, double cz, double r) {
-    return new SphereR3(cx, cy, cz, r);
-  }
-
-  @Kind
-  public static R3Form<SphereR3> form() {
-    if (form == null) {
-      form = new SphereR3Form();
-    }
-    return form;
-  }
 }

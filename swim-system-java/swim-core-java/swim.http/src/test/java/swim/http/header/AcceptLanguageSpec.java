@@ -22,6 +22,7 @@ import swim.http.LanguageRange;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class AcceptLanguageSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -39,17 +40,17 @@ public class AcceptLanguageSpec {
     assertParses("Accept-Language: en-US; q=1.000", AcceptLanguage.from(LanguageRange.from("en", "US", 1f)));
     assertParses("Accept-Language: en-US; q=0.005", AcceptLanguage.from(LanguageRange.from("en", "US", 0.005f)));
     assertParses("Accept-Language: en-US,en-UK,*",
-                 AcceptLanguage.from(LanguageRange.from("en", "US"),
-                                     LanguageRange.from("en", "UK"),
-                                     LanguageRange.star()));
+        AcceptLanguage.from(LanguageRange.from("en", "US"),
+            LanguageRange.from("en", "UK"),
+            LanguageRange.star()));
     assertParses("Accept-Language: en-US, en-UK ,*",
-                 AcceptLanguage.from(LanguageRange.from("en", "US"),
-                                     LanguageRange.from("en", "UK"),
-                                     LanguageRange.star()));
+        AcceptLanguage.from(LanguageRange.from("en", "US"),
+            LanguageRange.from("en", "UK"),
+            LanguageRange.star()));
     assertParses("Accept-Language: en-US; q=1, en-UK; q=0.5, *; q=0",
-                 AcceptLanguage.from(LanguageRange.from("en", "US", 1f),
-                                     LanguageRange.from("en", "UK", 0.5f),
-                                     LanguageRange.from("*", 0f)));
+        AcceptLanguage.from(LanguageRange.from("en", "US", 1f),
+            LanguageRange.from("en", "UK", 0.5f),
+            LanguageRange.from("*", 0f)));
   }
 
   @Test
@@ -59,12 +60,13 @@ public class AcceptLanguageSpec {
     assertWrites(AcceptLanguage.from(LanguageRange.from("en", "US", 0f)), "Accept-Language: en-US; q=0");
     assertWrites(AcceptLanguage.from(LanguageRange.from("en", "US", 0.005f)), "Accept-Language: en-US; q=0.005");
     assertWrites(AcceptLanguage.from(LanguageRange.from("en", "US"),
-                                     LanguageRange.from("en", "UK"),
-                                     LanguageRange.star()),
-                 "Accept-Language: en-US, en-UK, *");
+        LanguageRange.from("en", "UK"),
+        LanguageRange.star()),
+        "Accept-Language: en-US, en-UK, *");
     assertWrites(AcceptLanguage.from(LanguageRange.from("en", "US", 1f),
-                                     LanguageRange.from("en", "UK", 0.5f),
-                                     LanguageRange.from("*", 0f)),
-                 "Accept-Language: en-US, en-UK; q=0.5, *; q=0");
+        LanguageRange.from("en", "UK", 0.5f),
+        LanguageRange.from("*", 0f)),
+        "Accept-Language: en-US, en-UK; q=0.5, *; q=0");
   }
+
 }

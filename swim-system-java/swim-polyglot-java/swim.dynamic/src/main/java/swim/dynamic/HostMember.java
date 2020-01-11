@@ -18,5 +18,7 @@ package swim.dynamic;
  * A dynamically typed member descriptor for a host type.
  */
 public interface HostMember<T> {
+
   String key();
+
 }

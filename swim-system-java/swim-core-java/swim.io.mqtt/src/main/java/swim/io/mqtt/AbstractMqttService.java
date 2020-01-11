@@ -20,6 +20,7 @@ import swim.io.FlowControl;
 import swim.io.FlowModifier;
 
 public abstract class AbstractMqttService implements MqttService, FlowContext {
+
   protected MqttServiceContext context;
 
   @Override
@@ -81,4 +82,5 @@ public abstract class AbstractMqttService implements MqttService, FlowContext {
   public void unbind() {
     this.context.unbind();
   }
+
 }

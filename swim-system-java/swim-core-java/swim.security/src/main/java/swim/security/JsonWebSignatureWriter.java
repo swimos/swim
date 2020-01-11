@@ -21,6 +21,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class JsonWebSignatureWriter extends Writer<Object, JsonWebSignature> {
+
   final JsonWebSignature jws;
   final Writer<?, ?> part;
   final int step;
@@ -29,11 +30,6 @@ final class JsonWebSignatureWriter extends Writer<Object, JsonWebSignature> {
     this.jws = jws;
     this.part = part;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, JsonWebSignature> pull(Output<?> output) {
-    return write(output, jws, part, step);
   }
 
   static Writer<Object, JsonWebSignature> write(Output<?> output, JsonWebSignature jws,
@@ -78,4 +74,10 @@ final class JsonWebSignatureWriter extends Writer<Object, JsonWebSignature> {
   static Writer<Object, JsonWebSignature> write(Output<?> output, JsonWebSignature jws) {
     return write(output, jws, null, 1);
   }
+
+  @Override
+  public Writer<Object, JsonWebSignature> pull(Output<?> output) {
+    return write(output, jws, part, step);
+  }
+
 }

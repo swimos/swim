@@ -23,6 +23,7 @@ import swim.io.IpSocket;
 import swim.io.IpSocketModem;
 
 public class MqttSocketService implements IpService, MqttServiceContext {
+
   protected final MqttService service;
   protected final MqttSettings mqttSettings;
   protected IpServiceContext context;
@@ -101,4 +102,5 @@ public class MqttSocketService implements IpService, MqttServiceContext {
   public void unbind() {
     this.context.unbind();
   }
+
 }

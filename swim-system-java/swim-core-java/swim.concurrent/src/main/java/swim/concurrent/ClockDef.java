@@ -25,12 +25,31 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class ClockDef implements ScheduleDef, Debug {
+
+  private static int hashSeed;
+  private static ClockDef standard;
+  private static Form<ClockDef> clockForm;
   final int tickMillis;
   final int tickCount;
 
   public ClockDef(int tickMillis, int tickCount) {
     this.tickMillis = tickMillis;
     this.tickCount = tickCount;
+  }
+
+  public static ClockDef standard() {
+    if (standard == null) {
+      standard = new ClockDef(Clock.TICK_MILLIS, Clock.TICK_COUNT);
+    }
+    return standard;
+  }
+
+  @Kind
+  public static Form<ClockDef> clockForm() {
+    if (clockForm == null) {
+      clockForm = new ClockForm(standard());
+    }
+    return clockForm;
   }
 
   public final int tickMillis() {
@@ -90,29 +109,10 @@ public class ClockDef implements ScheduleDef, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static ClockDef standard;
-
-  private static Form<ClockDef> clockForm;
-
-  public static ClockDef standard() {
-    if (standard == null) {
-      standard = new ClockDef(Clock.TICK_MILLIS, Clock.TICK_COUNT);
-    }
-    return standard;
-  }
-
-  @Kind
-  public static Form<ClockDef> clockForm() {
-    if (clockForm == null) {
-      clockForm = new ClockForm(standard());
-    }
-    return clockForm;
-  }
 }
 
 final class ClockForm extends Form<ClockDef> {
+
   final ClockDef unit;
 
   ClockForm(ClockDef unit) {
@@ -162,4 +162,5 @@ final class ClockForm extends Form<ClockDef> {
     }
     return null;
   }
+
 }

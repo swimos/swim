@@ -22,6 +22,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 abstract class LinkAddressedForm<E extends LinkAddressed> extends Form<E> {
+
   abstract E from(Uri nodeUri, Uri laneUri, float prio, float rate, Value body);
 
   @Override
@@ -84,4 +85,5 @@ abstract class LinkAddressedForm<E extends LinkAddressed> extends Form<E> {
     }
     return null;
   }
+
 }

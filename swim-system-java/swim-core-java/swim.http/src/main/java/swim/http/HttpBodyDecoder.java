@@ -20,6 +20,7 @@ import swim.codec.InputBuffer;
 import swim.http.header.ContentType;
 
 final class HttpBodyDecoder<T> extends Decoder<HttpMessage<T>> {
+
   final HttpMessage<?> message;
   final Decoder<T> content;
   final long length;
@@ -34,11 +35,6 @@ final class HttpBodyDecoder<T> extends Decoder<HttpMessage<T>> {
 
   HttpBodyDecoder(HttpMessage<?> message, Decoder<T> content, long length) {
     this(message, content, length, 0L);
-  }
-
-  @Override
-  public Decoder<HttpMessage<T>> feed(InputBuffer input) {
-    return decode(input, this.message, this.content, this.length, this.offset);
   }
 
   static <T> Decoder<HttpMessage<T>> decode(InputBuffer input, HttpMessage<?> message,
@@ -93,4 +89,10 @@ final class HttpBodyDecoder<T> extends Decoder<HttpMessage<T>> {
                                             Decoder<T> content, long length) {
     return decode(input, message, content, length, 0L);
   }
+
+  @Override
+  public Decoder<HttpMessage<T>> feed(InputBuffer input) {
+    return decode(input, this.message, this.content, this.length, this.offset);
+  }
+
 }

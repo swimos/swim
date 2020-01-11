@@ -27,6 +27,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 public final class UTreePageRef extends PageRef {
+
   final PageContext context;
   final int stem;
   final int post;
@@ -56,6 +57,41 @@ public final class UTreePageRef extends PageRef {
 
   public UTreePageRef(PageContext context, int stem, int post, int zone, long base) {
     this(context, stem, post, zone, base, null, -1, -1, -1);
+  }
+
+  public static UTreePageRef empty(PageContext context, int stem, long version) {
+    return UTreeLeaf.empty(context, stem, version).pageRef();
+  }
+
+  public static UTreePageRef fromValue(PageContext context, int stem, Value value) {
+    Throwable cause = null;
+    try {
+      final String tag = value.tag();
+      final PageType pageType = PageType.fromTag(tag);
+      if (pageType == null) {
+        return null;
+      }
+      final Value header = value.header(tag);
+      final int zone = header.get("zone").intValue();
+      final int post = header.get("post").intValue(zone);
+      final long base = header.get("base").longValue();
+      final int size = header.get("size").intValue();
+      if (base < 0L) {
+        throw new StoreException("negative page base: " + base);
+      } else if (size < 0) {
+        throw new StoreException("negative page size: " + size);
+      }
+      return new UTreePageRef(context, stem, post, zone, base, null, -1, size, 0);
+    } catch (Throwable error) {
+      if (Conts.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed utree page ref: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
   @Override
@@ -216,8 +252,8 @@ public final class UTreePageRef extends PageRef {
       header.slot("post", this.post);
     }
     header.slot("zone", this.zone)
-          .slot("base", this.base)
-          .slot("size", pageSize());
+        .slot("base", this.base)
+        .slot("size", pageSize());
     return Record.create(1).attr(pageType().tag(), header);
   }
 
@@ -368,38 +404,4 @@ public final class UTreePageRef extends PageRef {
     return output.bind();
   }
 
-  public static UTreePageRef empty(PageContext context, int stem, long version) {
-    return UTreeLeaf.empty(context, stem, version).pageRef();
-  }
-
-  public static UTreePageRef fromValue(PageContext context, int stem, Value value) {
-    Throwable cause = null;
-    try {
-      final String tag = value.tag();
-      final PageType pageType = PageType.fromTag(tag);
-      if (pageType == null) {
-        return null;
-      }
-      final Value header = value.header(tag);
-      final int zone = header.get("zone").intValue();
-      final int post = header.get("post").intValue(zone);
-      final long base = header.get("base").longValue();
-      final int size = header.get("size").intValue();
-      if (base < 0L) {
-        throw new StoreException("negative page base: " + base);
-      } else if (size < 0) {
-        throw new StoreException("negative page size: " + size);
-      }
-      return new UTreePageRef(context, stem, post, zone, base, null, -1, size, 0);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed utree page ref: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
-  }
 }

@@ -22,6 +22,8 @@ import swim.uri.Uri;
 import swim.util.Murmur3;
 
 public final class UplinkAddress extends LinkAddress implements Debug {
+
+  private static int hashSeed;
   final String edgeName;
   final Uri meshUri;
   final Value partKey;
@@ -39,6 +41,17 @@ public final class UplinkAddress extends LinkAddress implements Debug {
     this.nodeUri = nodeUri;
     this.laneUri = laneUri;
     this.linkKey = linkKey.commit();
+  }
+
+  public static UplinkAddress from(String edgeName, Uri meshUri, Value partKey,
+                                   Uri hostUri, Uri nodeUri, Uri laneUri, Value linkKey) {
+    return new UplinkAddress(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri, linkKey);
+  }
+
+  public static UplinkAddress from(String edgeName, String meshUri, Value partKey,
+                                   String hostUri, String nodeUri, String laneUri, Value linkKey) {
+    return new UplinkAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri),
+        Uri.parse(nodeUri), Uri.parse(laneUri), linkKey);
   }
 
   public String edgeName() {
@@ -153,16 +166,4 @@ public final class UplinkAddress extends LinkAddress implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static UplinkAddress from(String edgeName, Uri meshUri, Value partKey,
-                                   Uri hostUri, Uri nodeUri, Uri laneUri, Value linkKey) {
-    return new UplinkAddress(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri, linkKey);
-  }
-
-  public static UplinkAddress from(String edgeName, String meshUri, Value partKey,
-                                   String hostUri, String nodeUri, String laneUri, Value linkKey) {
-    return new UplinkAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri),
-                             Uri.parse(nodeUri), Uri.parse(laneUri), linkKey);
-  }
 }

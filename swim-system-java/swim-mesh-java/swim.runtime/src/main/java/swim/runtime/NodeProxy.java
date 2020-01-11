@@ -29,6 +29,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class NodeProxy implements NodeBinding, NodeContext {
+
   protected final NodeBinding nodeBinding;
   protected NodeContext nodeContext;
 
@@ -400,4 +401,5 @@ public class NodeProxy implements NodeBinding, NodeContext {
   public void didFail(Throwable error) {
     this.nodeBinding.didFail(error);
   }
+
 }

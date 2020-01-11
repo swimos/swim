@@ -25,6 +25,7 @@ import swim.vm.VmHostProxy;
 import swim.vm.VmProxyArray;
 
 public class JsHostObject<T> extends VmHostProxy<T> implements ProxyObject {
+
   final JsBridge bridge;
   final HostObjectType<? super T> type;
   final T self;
@@ -108,4 +109,5 @@ public class JsHostObject<T> extends VmHostProxy<T> implements ProxyObject {
     memberKeys[i] = "__proto__";
     return new VmProxyArray(memberKeys);
   }
+
 }

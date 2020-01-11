@@ -19,6 +19,7 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 public abstract class FieldForm<T> extends Form<T> {
+
   public abstract java.lang.reflect.Field field();
 
   public abstract Value key();
@@ -30,4 +31,5 @@ public abstract class FieldForm<T> extends Form<T> {
   public T cast(Item item) {
     return cast(item, null);
   }
+
 }

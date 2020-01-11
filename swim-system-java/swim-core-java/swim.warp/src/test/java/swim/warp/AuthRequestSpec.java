@@ -21,6 +21,7 @@ import static swim.warp.Assertions.assertParses;
 import static swim.warp.Assertions.assertWrites;
 
 public class AuthRequestSpec {
+
   @Test
   public void parseAuth() {
     assertParses("@auth", new AuthRequest());
@@ -40,4 +41,5 @@ public class AuthRequestSpec {
   public void writeAuthWithBody() {
     assertWrites(new AuthRequest(Record.of(Attr.of("test"))), "@auth@test");
   }
+
 }

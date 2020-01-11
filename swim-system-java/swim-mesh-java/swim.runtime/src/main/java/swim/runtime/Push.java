@@ -20,6 +20,7 @@ import swim.concurrent.Conts;
 import swim.uri.Uri;
 
 public class Push<M> {
+
   final Uri meshUri;
   final Uri hostUri;
   final Uri nodeUri;
@@ -92,4 +93,5 @@ public class Push<M> {
       this.cont.trap(error);
     }
   }
+
 }

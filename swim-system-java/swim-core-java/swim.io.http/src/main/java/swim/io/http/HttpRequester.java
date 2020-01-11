@@ -20,6 +20,7 @@ import swim.http.HttpResponse;
 import swim.io.IpSocket;
 
 public interface HttpRequester<T> {
+
   HttpRequesterContext httpRequesterContext();
 
   void setHttpRequesterContext(HttpRequesterContext context);
@@ -45,4 +46,5 @@ public interface HttpRequester<T> {
   void didDisconnect();
 
   void didFail(Throwable error);
+
 }

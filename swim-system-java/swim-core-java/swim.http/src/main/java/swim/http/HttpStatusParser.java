@@ -22,6 +22,7 @@ import swim.codec.Parser;
 import swim.codec.Utf8;
 
 final class HttpStatusParser extends Parser<HttpStatus> {
+
   final HttpParser http;
   final int code;
   final Output<String> phrase;
@@ -36,11 +37,6 @@ final class HttpStatusParser extends Parser<HttpStatus> {
 
   HttpStatusParser(HttpParser http) {
     this(http, 0, null, 1);
-  }
-
-  @Override
-  public Parser<HttpStatus> feed(Input input) {
-    return parse(input, this.http, this.code, this.phrase, this.step);
   }
 
   static Parser<HttpStatus> parse(Input input, HttpParser http, int code,
@@ -96,4 +92,10 @@ final class HttpStatusParser extends Parser<HttpStatus> {
   static Parser<HttpStatus> parse(Input input, HttpParser http) {
     return parse(input, http, 0, null, 1);
   }
+
+  @Override
+  public Parser<HttpStatus> feed(Input input) {
+    return parse(input, this.http, this.code, this.phrase, this.step);
+  }
+
 }

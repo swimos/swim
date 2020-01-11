@@ -23,6 +23,22 @@ import swim.codec.Utf8;
 import swim.codec.UtfErrorMode;
 
 final class AnyDecoder<I, V> extends Decoder<V> {
+
+  static final int DETECTION_WINDOW;
+  static final Decoder<Object> DETECTION_FAILED;
+
+  static {
+    int detectionWindow;
+    try {
+      detectionWindow = Integer.parseInt(System.getProperty("swim.any.decoder.detection.window"));
+    } catch (NumberFormatException e) {
+      detectionWindow = 128;
+    }
+    DETECTION_WINDOW = detectionWindow;
+
+    DETECTION_FAILED = error(new DecoderException("detection failed"));
+  }
+
   final DecipherDecoder<I, V> decipher;
   final Parser<V> xmlParser;
   final Parser<V> jsonParser;
@@ -47,13 +63,6 @@ final class AnyDecoder<I, V> extends Decoder<V> {
 
   AnyDecoder(DecipherDecoder<I, V> decipher) {
     this(decipher, null, null, null, null, null, null, 0);
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.decipher, this.xmlParser, this.jsonParser,
-                  this.reconParser, this.protobufDecoder, this.textDecoder,
-                  this.dataDecoder, this.consumed);
   }
 
   static <I, V> Decoder<V> decode(InputBuffer input, DecipherDecoder<I, V> decipher,
@@ -152,19 +161,19 @@ final class AnyDecoder<I, V> extends Decoder<V> {
         && textDecoder.isError() && dataDecoder.isError()) {
       return xmlParser;
     } else if (xmlParser.isError() && reconParser.isError() && protobufDecoder.isError()
-            && textDecoder.isError() && dataDecoder.isError()) {
+        && textDecoder.isError() && dataDecoder.isError()) {
       return jsonParser;
     } else if (xmlParser.isError() && jsonParser.isError() && protobufDecoder.isError()
-            && textDecoder.isError() && dataDecoder.isError()) {
+        && textDecoder.isError() && dataDecoder.isError()) {
       return reconParser;
     } else if (xmlParser.isError() && jsonParser.isError() && reconParser.isError()
-            && textDecoder.isError() && dataDecoder.isError()) {
+        && textDecoder.isError() && dataDecoder.isError()) {
       return protobufDecoder;
     } else if (xmlParser.isError() && jsonParser.isError() && reconParser.isError()
-            && protobufDecoder.isError() && dataDecoder.isError()) {
+        && protobufDecoder.isError() && dataDecoder.isError()) {
       return textDecoder;
     } else if (xmlParser.isError() && jsonParser.isError() && reconParser.isError()
-            && protobufDecoder.isError() && textDecoder.isError()) {
+        && protobufDecoder.isError() && textDecoder.isError()) {
       return dataDecoder;
     }
 
@@ -175,25 +184,18 @@ final class AnyDecoder<I, V> extends Decoder<V> {
     }
     consumed += inputConsumed;
     return new AnyDecoder<I, V>(decipher, xmlParser, jsonParser, reconParser,
-                                protobufDecoder, textDecoder, dataDecoder, consumed);
+        protobufDecoder, textDecoder, dataDecoder, consumed);
   }
 
   static <I, V> Decoder<V> decode(InputBuffer input, DecipherDecoder<I, V> decipher) {
     return decode(input, decipher, null, null, null, null, null, null, 0);
   }
 
-  static final int DETECTION_WINDOW;
-  static final Decoder<Object> DETECTION_FAILED;
-
-  static {
-    int detectionWindow;
-    try {
-      detectionWindow = Integer.parseInt(System.getProperty("swim.any.decoder.detection.window"));
-    } catch (NumberFormatException e) {
-      detectionWindow = 128;
-    }
-    DETECTION_WINDOW = detectionWindow;
-
-    DETECTION_FAILED = error(new DecoderException("detection failed"));
+  @Override
+  public Decoder<V> feed(InputBuffer input) {
+    return decode(input, this.decipher, this.xmlParser, this.jsonParser,
+        this.reconParser, this.protobufDecoder, this.textDecoder,
+        this.dataDecoder, this.consumed);
   }
+
 }

@@ -24,6 +24,7 @@ import swim.structure.Value;
  * Double}.
  */
 public final class BooleanForm extends Form<Boolean> {
+
   final Boolean unit;
 
   public BooleanForm(Boolean unit) {
@@ -63,4 +64,5 @@ public final class BooleanForm extends Form<Boolean> {
       return null;
     }
   }
+
 }

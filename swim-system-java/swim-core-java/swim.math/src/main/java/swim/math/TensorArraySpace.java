@@ -15,6 +15,15 @@
 package swim.math;
 
 public abstract class TensorArraySpace<T, V, S> implements TensorSpace<T, S> {
+
+  public static <V, S> TensorArraySpace<V[], V, S> from(Class<V> type, TensorSpace<V, S> next, TensorDims dims) {
+    return new TensorArrayIdentitySpace<V, S>(type, next, dims);
+  }
+
+  public static <V, S> TensorArraySpace<V[], V, S> from(Class<V> type, TensorSpace<V, S> next, int n) {
+    return new TensorArrayIdentitySpace<V, S>(type, next, next.dimensions().by(n));
+  }
+
   public abstract TensorSpace<V, S> next();
 
   public abstract T of(Object... array);
@@ -117,11 +126,4 @@ public abstract class TensorArraySpace<T, V, S> implements TensorSpace<T, S> {
     return of(ws);
   }
 
-  public static <V, S> TensorArraySpace<V[], V, S> from(Class<V> type, TensorSpace<V, S> next, TensorDims dims) {
-    return new TensorArrayIdentitySpace<V, S>(type, next, dims);
-  }
-
-  public static <V, S> TensorArraySpace<V[], V, S> from(Class<V> type, TensorSpace<V, S> next, int n) {
-    return new TensorArrayIdentitySpace<V, S>(type, next, next.dimensions().by(n));
-  }
 }

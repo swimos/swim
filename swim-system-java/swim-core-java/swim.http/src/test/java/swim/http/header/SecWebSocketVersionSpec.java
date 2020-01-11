@@ -21,6 +21,7 @@ import swim.http.HttpHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class SecWebSocketVersionSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -42,4 +43,5 @@ public class SecWebSocketVersionSpec {
     assertWrites(SecWebSocketVersion.from(13, 25), "Sec-WebSocket-Version: 13, 25");
     assertWrites(SecWebSocketVersion.from(13, 8, 7), "Sec-WebSocket-Version: 13, 8, 7");
   }
+
 }

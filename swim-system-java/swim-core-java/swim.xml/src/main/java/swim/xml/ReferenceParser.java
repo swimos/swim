@@ -22,6 +22,7 @@ import swim.codec.Output;
 import swim.codec.Parser;
 
 final class ReferenceParser extends Parser<Object> {
+
   final XmlParser<?, ?> xml;
   final Output<?> output;
   final Parser<String> nameParser;
@@ -35,11 +36,6 @@ final class ReferenceParser extends Parser<Object> {
     this.nameParser = nameParser;
     this.code = code;
     this.step = step;
-  }
-
-  @Override
-  public Parser<Object> feed(Input input) {
-    return parse(input, this.xml, this.output, this.nameParser, this.code, this.step);
   }
 
   static Parser<Object> parse(Input input, XmlParser<?, ?> xml, Output<?> output,
@@ -205,4 +201,10 @@ final class ReferenceParser extends Parser<Object> {
   static Parser<Object> parse(Input input, XmlParser<?, ?> xml, Output<?> output) {
     return parse(input, xml, output, null, 0, 1);
   }
+
+  @Override
+  public Parser<Object> feed(Input input) {
+    return parse(input, this.xml, this.output, this.nameParser, this.code, this.step);
+  }
+
 }

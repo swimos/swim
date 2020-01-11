@@ -40,9 +40,11 @@ import swim.uri.UriScheme;
 import swim.ws.WsRequest;
 
 public class RemoteHostClient extends RemoteHost {
+
+  static final double MAX_RECONNECT_TIMEOUT = 15000.0;
+  static final FingerTrieSeq<String> PROTOCOL_LIST = FingerTrieSeq.of("warp0", "swim-0.0");
   final IpInterface endpoint;
   final WarpSettings warpSettings;
-
   HttpClient client;
   TimerRef reconnectTimer;
   double reconnectTimeout;
@@ -150,12 +152,10 @@ public class RemoteHostClient extends RemoteHost {
     reconnect();
   }
 
-  static final double MAX_RECONNECT_TIMEOUT = 15000.0;
-
-  static final FingerTrieSeq<String> PROTOCOL_LIST = FingerTrieSeq.of("warp0", "swim-0.0");
 }
 
 final class RemoteHostClientBinding extends AbstractWarpClient {
+
   final RemoteHostClient client;
   final WarpWebSocket webSocket;
   final WsRequest wsRequest;
@@ -186,9 +186,11 @@ final class RemoteHostClientBinding extends AbstractWarpClient {
     webSocket.close();
     this.client.didDisconnect();
   }
+
 }
 
 final class RemoteHostClientReconnectTimer implements TimerFunction {
+
   final RemoteHostClient client;
 
   RemoteHostClientReconnectTimer(RemoteHostClient client) {
@@ -207,4 +209,5 @@ final class RemoteHostClientReconnectTimer implements TimerFunction {
       }
     }
   }
+
 }

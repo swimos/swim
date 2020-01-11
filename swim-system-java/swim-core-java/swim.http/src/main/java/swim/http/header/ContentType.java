@@ -26,10 +26,32 @@ import swim.http.MediaType;
 import swim.util.Murmur3;
 
 public final class ContentType extends HttpHeader {
+
+  private static int hashSeed;
   final MediaType mediaType;
 
   ContentType(MediaType mediaType) {
     this.mediaType = mediaType;
+  }
+
+  public static ContentType from(MediaType mediaType) {
+    return new ContentType(mediaType);
+  }
+
+  public static ContentType from(String type, String subtype, HashTrieMap<String, String> params) {
+    return from(MediaType.from(type, subtype, params));
+  }
+
+  public static ContentType from(String type, String subtype) {
+    return from(MediaType.from(type, subtype));
+  }
+
+  public static ContentType from(String mediaType) {
+    return from(MediaType.parse(mediaType));
+  }
+
+  public static Parser<ContentType> parseHttpValue(Input input, HttpParser http) {
+    return ContentTypeParser.parse(input, http);
   }
 
   @Override
@@ -100,25 +122,4 @@ public final class ContentType extends HttpHeader {
     }
   }
 
-  private static int hashSeed;
-
-  public static ContentType from(MediaType mediaType) {
-    return new ContentType(mediaType);
-  }
-
-  public static ContentType from(String type, String subtype, HashTrieMap<String, String> params) {
-    return from(MediaType.from(type, subtype, params));
-  }
-
-  public static ContentType from(String type, String subtype) {
-    return from(MediaType.from(type, subtype));
-  }
-
-  public static ContentType from(String mediaType) {
-    return from(MediaType.parse(mediaType));
-  }
-
-  public static Parser<ContentType> parseHttpValue(Input input, HttpParser http) {
-    return ContentTypeParser.parse(input, http);
-  }
 }

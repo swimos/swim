@@ -37,6 +37,7 @@ import swim.util.Builder;
  * WebSocket handshake request.
  */
 public class WsRequest {
+
   protected final HttpRequest<?> httpRequest;
   protected final SecWebSocketKey key;
   protected final FingerTrieSeq<String> protocols;
@@ -48,6 +49,72 @@ public class WsRequest {
     this.key = key;
     this.protocols = protocols;
     this.extensions = extensions;
+  }
+
+  public static WsRequest from(Uri uri, FingerTrieSeq<String> protocols,
+                               FingerTrieSeq<WebSocketExtension> extensions,
+                               FingerTrieSeq<HttpHeader> headers) {
+    final SecWebSocketKey key = SecWebSocketKey.generate();
+    final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> requestHeaders = FingerTrieSeq.builder();
+    requestHeaders.add(Host.from(uri.authority()));
+    requestHeaders.add(Connection.upgrade());
+    requestHeaders.add(Upgrade.websocket());
+    requestHeaders.add(SecWebSocketVersion.version13());
+    requestHeaders.add(key);
+    if (!protocols.isEmpty()) {
+      requestHeaders.add(SecWebSocketProtocol.from(protocols));
+    }
+    if (!extensions.isEmpty()) {
+      requestHeaders.add(SecWebSocketExtensions.from(extensions));
+    }
+    if (headers != null) {
+      requestHeaders.addAll(headers);
+    }
+    final UriPath requestPath = uri.path().isEmpty() ? UriPath.slash() : uri.path();
+    final Uri requestUri = Uri.from(null, null, requestPath, uri.query(), null);
+    final HttpRequest<?> httpRequest = HttpRequest.get(requestUri, requestHeaders.bind());
+    return new WsRequest(httpRequest, key, protocols, extensions);
+  }
+
+  public static WsRequest from(Uri uri, FingerTrieSeq<String> protocols, HttpHeader... headers) {
+    return from(uri, protocols, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
+  }
+
+  public static WsRequest from(Uri uri, FingerTrieSeq<String> protocols) {
+    return from(uri, protocols, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
+  }
+
+  public static WsRequest from(Uri uri, HttpHeader... headers) {
+    return from(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
+  }
+
+  public static WsRequest from(Uri uri) {
+    return from(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
+  }
+
+  public static WsRequest from(HttpRequest<?> httpRequest) {
+    boolean connectionUpgrade = false;
+    boolean upgradeWebSocket = false;
+    SecWebSocketKey key = null;
+    FingerTrieSeq<String> protocols = FingerTrieSeq.empty();
+    FingerTrieSeq<WebSocketExtension> extensions = FingerTrieSeq.empty();
+    for (HttpHeader header : httpRequest.headers()) {
+      if (header instanceof Connection && ((Connection) header).contains("Upgrade")) {
+        connectionUpgrade = true;
+      } else if (header instanceof Upgrade && ((Upgrade) header).supports(UpgradeProtocol.websocket())) {
+        upgradeWebSocket = true;
+      } else if (header instanceof SecWebSocketKey) {
+        key = (SecWebSocketKey) header;
+      } else if (header instanceof SecWebSocketProtocol) {
+        protocols = ((SecWebSocketProtocol) header).protocols();
+      } else if (header instanceof SecWebSocketExtensions) {
+        extensions = ((SecWebSocketExtensions) header).extensions();
+      }
+    }
+    if (connectionUpgrade && upgradeWebSocket && key != null) {
+      return new WsRequest(httpRequest, key, protocols, extensions);
+    }
+    return null;
   }
 
   public final HttpRequest<?> httpRequest() {
@@ -157,69 +224,4 @@ public class WsRequest {
     return null;
   }
 
-  public static WsRequest from(Uri uri, FingerTrieSeq<String> protocols,
-                               FingerTrieSeq<WebSocketExtension> extensions,
-                               FingerTrieSeq<HttpHeader> headers) {
-    final SecWebSocketKey key = SecWebSocketKey.generate();
-    final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> requestHeaders = FingerTrieSeq.builder();
-    requestHeaders.add(Host.from(uri.authority()));
-    requestHeaders.add(Connection.upgrade());
-    requestHeaders.add(Upgrade.websocket());
-    requestHeaders.add(SecWebSocketVersion.version13());
-    requestHeaders.add(key);
-    if (!protocols.isEmpty()) {
-      requestHeaders.add(SecWebSocketProtocol.from(protocols));
-    }
-    if (!extensions.isEmpty()) {
-      requestHeaders.add(SecWebSocketExtensions.from(extensions));
-    }
-    if (headers != null) {
-      requestHeaders.addAll(headers);
-    }
-    final UriPath requestPath = uri.path().isEmpty() ? UriPath.slash() : uri.path();
-    final Uri requestUri = Uri.from(null, null, requestPath, uri.query(), null);
-    final HttpRequest<?> httpRequest = HttpRequest.get(requestUri, requestHeaders.bind());
-    return new WsRequest(httpRequest, key, protocols, extensions);
-  }
-
-  public static WsRequest from(Uri uri, FingerTrieSeq<String> protocols, HttpHeader... headers) {
-    return from(uri, protocols, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
-  }
-
-  public static WsRequest from(Uri uri, FingerTrieSeq<String> protocols) {
-    return from(uri, protocols, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
-  }
-
-  public static WsRequest from(Uri uri, HttpHeader... headers) {
-    return from(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
-  }
-
-  public static WsRequest from(Uri uri) {
-    return from(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
-  }
-
-  public static WsRequest from(HttpRequest<?> httpRequest) {
-    boolean connectionUpgrade = false;
-    boolean upgradeWebSocket = false;
-    SecWebSocketKey key = null;
-    FingerTrieSeq<String> protocols = FingerTrieSeq.empty();
-    FingerTrieSeq<WebSocketExtension> extensions = FingerTrieSeq.empty();
-    for (HttpHeader header : httpRequest.headers()) {
-      if (header instanceof Connection && ((Connection) header).contains("Upgrade")) {
-        connectionUpgrade = true;
-      } else if (header instanceof Upgrade && ((Upgrade) header).supports(UpgradeProtocol.websocket())) {
-        upgradeWebSocket = true;
-      } else if (header instanceof SecWebSocketKey) {
-        key = (SecWebSocketKey) header;
-      } else if (header instanceof SecWebSocketProtocol) {
-        protocols = ((SecWebSocketProtocol) header).protocols();
-      } else if (header instanceof SecWebSocketExtensions) {
-        extensions = ((SecWebSocketExtensions) header).extensions();
-      }
-    }
-    if (connectionUpgrade && upgradeWebSocket && key != null) {
-      return new WsRequest(httpRequest, key, protocols, extensions);
-    }
-    return null;
-  }
 }

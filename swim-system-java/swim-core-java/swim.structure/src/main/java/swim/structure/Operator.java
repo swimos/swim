@@ -19,6 +19,7 @@ package swim.structure;
  * or {@link Selector} expressions.
  */
 public abstract class Operator extends Expression {
+
   @Override
   public abstract Item evaluate(Interpreter interpreter);
 
@@ -37,4 +38,5 @@ public abstract class Operator extends Expression {
 
   @Override
   public abstract int hashCode();
+
 }

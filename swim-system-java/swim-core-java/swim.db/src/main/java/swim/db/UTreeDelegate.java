@@ -17,5 +17,7 @@ package swim.db;
 import swim.structure.Value;
 
 public interface UTreeDelegate extends TreeDelegate {
+
   void utreeDidUpdate(UTree newTree, UTree oldTree, Value newValue, Value oldValue);
+
 }

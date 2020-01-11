@@ -17,6 +17,7 @@ package swim.util;
 import java.util.NoSuchElementException;
 
 final class CursorArray<T> implements Cursor<T> {
+
   final Object[] array;
   int index;
   int limit;
@@ -111,4 +112,5 @@ final class CursorArray<T> implements Cursor<T> {
       throw new NoSuchElementException();
     }
   }
+
 }

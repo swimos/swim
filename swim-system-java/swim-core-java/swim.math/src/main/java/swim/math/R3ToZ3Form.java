@@ -17,6 +17,7 @@ package swim.math;
 import swim.structure.Item;
 
 final class R3ToZ3Form<T> extends Z3Form<T> {
+
   final R3Form<T> form;
   final R3ToZ3Function function;
 
@@ -89,4 +90,5 @@ final class R3ToZ3Form<T> extends Z3Form<T> {
   public T cast(Item item) {
     return this.form.cast(item);
   }
+
 }

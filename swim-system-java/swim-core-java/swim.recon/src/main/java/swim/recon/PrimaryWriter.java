@@ -20,6 +20,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class PrimaryWriter<I, V> extends Writer<Object, Object> {
+
   final ReconWriter<I, V> recon;
   final Iterator<I> items;
   final boolean inParens;
@@ -39,12 +40,6 @@ final class PrimaryWriter<I, V> extends Writer<Object, Object> {
     this.next = next;
     this.part = part;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.items, this.inParens, this.first,
-                 this.item, this.next, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, Iterator<I> items) {
@@ -81,7 +76,7 @@ final class PrimaryWriter<I, V> extends Writer<Object, Object> {
         }
         size += recon.sizeOfBlockItem(item);
       } else if (recon.isValue(item) && !recon.isRecord(item)
-             && (!first && next == null || next != null && recon.isAttr(next))) {
+          && (!first && next == null || next != null && recon.isAttr(next))) {
         size += recon.sizeOfItem(item);
       } else {
         size += 1; // '('
@@ -141,7 +136,7 @@ final class PrimaryWriter<I, V> extends Writer<Object, Object> {
           part = recon.writeBlockItem(item, output);
           step = 4;
         } else if (recon.isValue(item) && !recon.isRecord(item)
-               && (!first && next == null || next != null && recon.isAttr(next))) {
+            && (!first && next == null || next != null && recon.isAttr(next))) {
           part = recon.writeItem(item, output);
           step = 4;
         } else {
@@ -186,4 +181,11 @@ final class PrimaryWriter<I, V> extends Writer<Object, Object> {
                                              Iterator<I> items) {
     return write(output, recon, items, false, true, null, null, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.recon, this.items, this.inParens, this.first,
+        this.item, this.next, this.part, this.step);
+  }
+
 }

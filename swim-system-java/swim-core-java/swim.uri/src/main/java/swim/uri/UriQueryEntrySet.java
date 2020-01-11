@@ -21,10 +21,68 @@ import java.util.Map;
 import java.util.Set;
 
 final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
+
   final UriQuery query;
 
   UriQueryEntrySet(UriQuery query) {
     this.query = query;
+  }
+
+  private static boolean contains(UriQuery query, Map.Entry<?, ?> entry) {
+    while (!query.isEmpty()) {
+      if ((query.key() == null ? entry.getKey() == null : query.key().equals(entry.getKey()))
+          && (query.value() == null ? entry.getValue() == null : query.value().equals(entry.getValue()))) {
+        return true;
+      }
+      query = query.tail();
+    }
+    return false;
+  }
+
+  private static void toArray(UriQuery query, Object[] array) {
+    int i = 0;
+    while (!query.isEmpty()) {
+      array[i] = query.head();
+      query = query.tail();
+      i += 1;
+    }
+  }
+
+  static boolean equals(UriQuery query, Set<?> that) {
+    while (!query.isEmpty()) {
+      if (!that.contains(query.head())) {
+        return false;
+      }
+      query = query.tail();
+    }
+    return true;
+  }
+
+  static int hashCode(UriQuery query) {
+    int code = 0;
+    while (!query.isEmpty()) {
+      final String key = query.key();
+      final String value = query.value();
+      code += (key == null ? 0 : key.hashCode())
+          ^ (value == null ? 0 : value.hashCode());
+      query = query.tail();
+    }
+    return code;
+  }
+
+  private static String toString(UriQuery query) {
+    final StringBuilder s = new StringBuilder();
+    s.append('[');
+    if (!query.isEmpty()) {
+      s.append(query.head().toString());
+      query = query.tail();
+      while (!query.isEmpty()) {
+        s.append(", ").append(query.head().toString());
+        query = query.tail();
+      }
+    }
+    s.append(']');
+    return s.toString();
   }
 
   @Override
@@ -41,17 +99,6 @@ final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
   public boolean contains(Object entry) {
     if (entry instanceof Map.Entry<?, ?>) {
       return UriQueryEntrySet.contains(this.query, (Map.Entry<?, ?>) entry);
-    }
-    return false;
-  }
-
-  private static boolean contains(UriQuery query, Map.Entry<?, ?> entry) {
-    while (!query.isEmpty()) {
-      if ((query.key() == null ? entry.getKey() == null : query.key().equals(entry.getKey()))
-          && (query.value() == null ? entry.getValue() == null : query.value().equals(entry.getValue()))) {
-        return true;
-      }
-      query = query.tail();
     }
     return false;
   }
@@ -122,15 +169,6 @@ final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
     return array;
   }
 
-  private static void toArray(UriQuery query, Object[] array) {
-    int i = 0;
-    while (!query.isEmpty()) {
-      array[i] = query.head();
-      query = query.tail();
-      i += 1;
-    }
-  }
-
   @Override
   public boolean equals(Object other) {
     if (this == other) {
@@ -144,31 +182,9 @@ final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
     return false;
   }
 
-  static boolean equals(UriQuery query, Set<?> that) {
-    while (!query.isEmpty()) {
-      if (!that.contains(query.head())) {
-        return false;
-      }
-      query = query.tail();
-    }
-    return true;
-  }
-
   @Override
   public int hashCode() {
     return UriQueryEntrySet.hashCode(this.query);
-  }
-
-  static int hashCode(UriQuery query) {
-    int code = 0;
-    while (!query.isEmpty()) {
-      final String key = query.key();
-      final String value = query.value();
-      code += (key == null ? 0 : key.hashCode())
-            ^ (value == null ? 0 : value.hashCode());
-      query = query.tail();
-    }
-    return code;
   }
 
   @Override
@@ -176,18 +192,4 @@ final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
     return UriQueryEntrySet.toString(this.query);
   }
 
-  private static String toString(UriQuery query) {
-    final StringBuilder s = new StringBuilder();
-    s.append('[');
-    if (!query.isEmpty()) {
-      s.append(query.head().toString());
-      query = query.tail();
-      while (!query.isEmpty()) {
-        s.append(", ").append(query.head().toString());
-        query = query.tail();
-      }
-    }
-    s.append(']');
-    return s.toString();
-  }
 }

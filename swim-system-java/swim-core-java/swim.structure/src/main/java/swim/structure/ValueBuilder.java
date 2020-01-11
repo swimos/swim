@@ -18,6 +18,7 @@ import java.util.Collection;
 import swim.util.Builder;
 
 final class ValueBuilder implements Builder<Item, Value> {
+
   Record record = null;
   Value value = null;
 
@@ -76,4 +77,5 @@ final class ValueBuilder implements Builder<Item, Value> {
       return Value.absent();
     }
   }
+
 }

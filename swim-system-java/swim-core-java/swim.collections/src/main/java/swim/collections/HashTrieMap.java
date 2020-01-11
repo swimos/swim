@@ -28,6 +28,13 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K, V>, Debug {
+
+  static final int VOID = 0;
+  static final int LEAF = 1;
+  static final int TREE = 2;
+  static final int KNOT = 3;
+  private static int hashSeed;
+  private static HashTrieMap<Object, Object> empty;
   final int treeMap;
   final int leafMap;
   final Object[] slots;
@@ -36,6 +43,187 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K
     this.treeMap = treeMap;
     this.leafMap = leafMap;
     this.slots = slots;
+  }
+
+  static boolean containsKey(HashTrieMap<?, ?> tree, Object key, int keyHash, int shift) {
+    while (true) {
+      final int branch = tree.choose(keyHash, shift);
+      switch (tree.follow(branch)) {
+        case VOID:
+          return false;
+        case LEAF:
+          return key.equals(tree.getKey(branch));
+        case TREE:
+          tree = tree.getTree(branch);
+          shift += 5;
+          break;
+        case KNOT:
+          return tree.getKnot(branch).containsKey(key);
+        default:
+          throw new AssertionError();
+      }
+    }
+  }
+
+  static <K, V> Entry<K, V> head(HashTrieMap<K, V> tree) {
+    loop:
+    while (true) {
+      int treeMap = tree.treeMap;
+      int leafMap = tree.leafMap;
+      while ((treeMap | leafMap) != 0) {
+        switch (leafMap & 1 | (treeMap & 1) << 1) {
+          case VOID:
+            break;
+          case LEAF:
+            return new AbstractMap.SimpleImmutableEntry<K, V>(tree.keyAt(0), tree.valueAt(0));
+          case TREE:
+            tree = tree.treeAt(0);
+            continue loop;
+          case KNOT:
+            return tree.knotAt(0).head();
+          default:
+            throw new AssertionError();
+        }
+        treeMap >>>= 1;
+        leafMap >>>= 1;
+      }
+      return null;
+    }
+  }
+
+  static <K> K headKey(HashTrieMap<K, ?> tree) {
+    loop:
+    while (true) {
+      int treeMap = tree.treeMap;
+      int leafMap = tree.leafMap;
+      while ((treeMap | leafMap) != 0) {
+        switch (leafMap & 1 | (treeMap & 1) << 1) {
+          case VOID:
+            break;
+          case LEAF:
+            return tree.keyAt(0);
+          case TREE:
+            tree = tree.treeAt(0);
+            continue loop;
+          case KNOT:
+            return tree.knotAt(0).headKey();
+          default:
+            throw new AssertionError();
+        }
+        treeMap >>>= 1;
+        leafMap >>>= 1;
+      }
+      return null;
+    }
+  }
+
+  static <V> V headValue(HashTrieMap<?, V> tree) {
+    loop:
+    while (true) {
+      int treeMap = tree.treeMap;
+      int leafMap = tree.leafMap;
+      while ((treeMap | leafMap) != 0) {
+        switch (leafMap & 1 | (treeMap & 1) << 1) {
+          case VOID:
+            break;
+          case LEAF:
+            return tree.valueAt(0);
+          case TREE:
+            tree = tree.treeAt(0);
+            continue loop;
+          case KNOT:
+            return tree.knotAt(0).headValue();
+          default:
+            throw new AssertionError();
+        }
+        treeMap >>>= 1;
+        leafMap >>>= 1;
+      }
+      return null;
+    }
+  }
+
+  static <V> V get(HashTrieMap<?, V> tree, Object key, int keyHash, int shift) {
+    while (true) {
+      final int branch = tree.choose(keyHash, shift);
+      switch (tree.follow(branch)) {
+        case VOID:
+          return null;
+        case LEAF:
+          if (key.equals(tree.getKey(branch))) {
+            return tree.getValue(branch);
+          } else {
+            return null;
+          }
+        case TREE:
+          tree = tree.getTree(branch);
+          shift += 5;
+          break;
+        case KNOT:
+          return tree.getKnot(branch).get(key);
+        default:
+          throw new AssertionError();
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <K, V> HashTrieMap<K, V> empty() {
+    if (empty == null) {
+      empty = new HashTrieMap<Object, Object>(0, 0, new Object[0]);
+    }
+    return (HashTrieMap<K, V>) empty;
+  }
+
+  public static <K, V> HashTrieMap<K, V> of(K key, V value) {
+    return HashTrieMap.<K, V>empty().updated(key, value);
+  }
+
+  public static <K, V> HashTrieMap<K, V> from(Map<? extends K, ? extends V> map) {
+    HashTrieMap<K, V> trie = empty();
+    for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
+      trie = trie.updated(entry.getKey(), entry.getValue());
+    }
+    return trie;
+  }
+
+  public static <K, V> HashTrieMap<K, HashTrieSet<V>> updated(HashTrieMap<K, HashTrieSet<V>> multimap, K key, V value) {
+    HashTrieSet<V> set = multimap.get(key);
+    if (set == null) {
+      set = HashTrieSet.empty();
+    }
+    set = set.added(value);
+    multimap = multimap.updated(key, set);
+    return multimap;
+  }
+
+  public static <K, V> HashTrieMap<K, HashTrieSet<V>> merged(HashTrieMap<K, HashTrieSet<V>> multimap, HashTrieMap<K, HashTrieSet<V>> that) {
+    final Iterator<Entry<K, HashTrieSet<V>>> entries = that.iterator();
+    while (entries.hasNext()) {
+      final Entry<K, HashTrieSet<V>> entry = entries.next();
+      HashTrieSet<V> these = multimap.get(entry.getKey());
+      if (these != null) {
+        these = these.merged(entry.getValue());
+      } else {
+        these = entry.getValue();
+      }
+      multimap = multimap.updated(entry.getKey(), these);
+    }
+    return multimap;
+  }
+
+  public static <K, V> HashTrieMap<K, HashTrieSet<V>> removed(HashTrieMap<K, HashTrieSet<V>> multimap, K key, V value) {
+    HashTrieSet<V> set = multimap.get(key);
+    if (set == null) {
+      return multimap;
+    }
+    set = set.removed(value);
+    if (set.isEmpty()) {
+      multimap = multimap.removed(key);
+    } else {
+      multimap = multimap.updated(key, set);
+    }
+    return multimap;
   }
 
   @Override
@@ -344,101 +532,6 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K
     }
   }
 
-  static boolean containsKey(HashTrieMap<?, ?> tree, Object key, int keyHash, int shift) {
-    while (true) {
-      final int branch = tree.choose(keyHash, shift);
-      switch (tree.follow(branch)) {
-        case VOID:
-          return false;
-        case LEAF:
-          return key.equals(tree.getKey(branch));
-        case TREE:
-          tree = tree.getTree(branch);
-          shift += 5;
-          break;
-        case KNOT:
-          return tree.getKnot(branch).containsKey(key);
-        default:
-          throw new AssertionError();
-      }
-    }
-  }
-
-  static <K, V> Entry<K, V> head(HashTrieMap<K, V> tree) {
-    loop: while (true) {
-      int treeMap = tree.treeMap;
-      int leafMap = tree.leafMap;
-      while ((treeMap | leafMap) != 0) {
-        switch (leafMap & 1 | (treeMap & 1) << 1) {
-          case VOID:
-            break;
-          case LEAF:
-            return new AbstractMap.SimpleImmutableEntry<K, V>(tree.keyAt(0), tree.valueAt(0));
-          case TREE:
-            tree = tree.treeAt(0);
-            continue loop;
-          case KNOT:
-            return tree.knotAt(0).head();
-          default:
-            throw new AssertionError();
-        }
-        treeMap >>>= 1;
-        leafMap >>>= 1;
-      }
-      return null;
-    }
-  }
-
-  static <K> K headKey(HashTrieMap<K, ?> tree) {
-    loop: while (true) {
-      int treeMap = tree.treeMap;
-      int leafMap = tree.leafMap;
-      while ((treeMap | leafMap) != 0) {
-        switch (leafMap & 1 | (treeMap & 1) << 1) {
-          case VOID:
-            break;
-          case LEAF:
-            return tree.keyAt(0);
-          case TREE:
-            tree = tree.treeAt(0);
-            continue loop;
-          case KNOT:
-            return tree.knotAt(0).headKey();
-          default:
-            throw new AssertionError();
-        }
-        treeMap >>>= 1;
-        leafMap >>>= 1;
-      }
-      return null;
-    }
-  }
-
-  static <V> V headValue(HashTrieMap<?, V> tree) {
-    loop: while (true) {
-      int treeMap = tree.treeMap;
-      int leafMap = tree.leafMap;
-      while ((treeMap | leafMap) != 0) {
-        switch (leafMap & 1 | (treeMap & 1) << 1) {
-          case VOID:
-            break;
-          case LEAF:
-            return tree.valueAt(0);
-          case TREE:
-            tree = tree.treeAt(0);
-            continue loop;
-          case KNOT:
-            return tree.knotAt(0).headValue();
-          default:
-            throw new AssertionError();
-        }
-        treeMap >>>= 1;
-        leafMap >>>= 1;
-      }
-      return null;
-    }
-  }
-
   Entry<K, V> next(Object key, int keyHash, int shift) {
     final int block;
     if (key == null) {
@@ -571,30 +664,6 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K
     return null;
   }
 
-  static <V> V get(HashTrieMap<?, V> tree, Object key, int keyHash, int shift) {
-    while (true) {
-      final int branch = tree.choose(keyHash, shift);
-      switch (tree.follow(branch)) {
-        case VOID:
-          return null;
-        case LEAF:
-          if (key.equals(tree.getKey(branch))) {
-            return tree.getValue(branch);
-          } else {
-            return null;
-          }
-        case TREE:
-          tree = tree.getTree(branch);
-          shift += 5;
-          break;
-        case KNOT:
-          return tree.getKnot(branch).get(key);
-        default:
-          throw new AssertionError();
-      }
-    }
-  }
-
   HashTrieMap<K, V> updated(K key, int keyHash, V value, int shift) {
     final int branch = choose(keyHash, shift);
     switch (follow(branch)) {
@@ -612,10 +681,10 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K
           }
         } else if (keyHash != leafHash) {
           return remap(treeMap | branch, leafMap ^ branch)
-            .setTree(branch, merge(leaf, leafHash, getValue(branch), key, keyHash, value, shift + 5));
+              .setTree(branch, merge(leaf, leafHash, getValue(branch), key, keyHash, value, shift + 5));
         } else {
           return remap(treeMap | branch, leafMap)
-            .setKnot(branch, new ArrayMap<K, V>(leaf, getValue(branch), key, value));
+              .setKnot(branch, new ArrayMap<K, V>(leaf, getValue(branch), key, value));
         }
       case TREE:
         final HashTrieMap<K, V> oldTree = getTree(branch);
@@ -684,7 +753,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K
           return remap(treeMap ^ branch, leafMap);
         } else if (newTree.isUnary()) {
           return remap(treeMap ^ branch, leafMap | branch)
-            .setLeaf(branch, newTree.unaryKey(), newTree.unaryValue());
+              .setLeaf(branch, newTree.unaryKey(), newTree.unaryValue());
         } else {
           return remap(treeMap, leafMap).setTree(branch, newTree);
         }
@@ -697,7 +766,7 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K
           return remap(treeMap ^ branch, leafMap);
         } else if (newKnot.isUnary()) {
           return remap(treeMap ^ branch, leafMap | branch)
-            .setLeaf(branch, newKnot.unaryKey(), newKnot.unaryValue());
+              .setLeaf(branch, newKnot.unaryKey(), newKnot.unaryValue());
         } else {
           return remap(treeMap, leafMap).setKnot(branch, newKnot);
         }
@@ -802,79 +871,13 @@ public final class HashTrieMap<K, V> implements Iterable<Map.Entry<K, V>>, Map<K
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  static final int VOID = 0;
-  static final int LEAF = 1;
-  static final int TREE = 2;
-  static final int KNOT = 3;
-
-  private static HashTrieMap<Object, Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <K, V> HashTrieMap<K, V> empty() {
-    if (empty == null) {
-      empty = new HashTrieMap<Object, Object>(0, 0, new Object[0]);
-    }
-    return (HashTrieMap<K, V>) empty;
-  }
-
-  public static <K, V> HashTrieMap<K, V> of(K key, V value) {
-    return HashTrieMap.<K, V>empty().updated(key, value);
-  }
-
-  public static <K, V> HashTrieMap<K, V> from(Map<? extends K, ? extends V> map) {
-    HashTrieMap<K, V> trie = empty();
-    for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
-      trie = trie.updated(entry.getKey(), entry.getValue());
-    }
-    return trie;
-  }
-
-  public static <K, V> HashTrieMap<K, HashTrieSet<V>> updated(HashTrieMap<K, HashTrieSet<V>> multimap, K key, V value) {
-    HashTrieSet<V> set = multimap.get(key);
-    if (set == null) {
-      set = HashTrieSet.empty();
-    }
-    set = set.added(value);
-    multimap = multimap.updated(key, set);
-    return multimap;
-  }
-
-  public static <K, V> HashTrieMap<K, HashTrieSet<V>> merged(HashTrieMap<K, HashTrieSet<V>> multimap, HashTrieMap<K, HashTrieSet<V>> that) {
-    final Iterator<Entry<K, HashTrieSet<V>>> entries = that.iterator();
-    while (entries.hasNext()) {
-      final Entry<K, HashTrieSet<V>> entry = entries.next();
-      HashTrieSet<V> these = multimap.get(entry.getKey());
-      if (these != null) {
-        these = these.merged(entry.getValue());
-      } else {
-        these = entry.getValue();
-      }
-      multimap = multimap.updated(entry.getKey(), these);
-    }
-    return multimap;
-  }
-
-  public static <K, V> HashTrieMap<K, HashTrieSet<V>> removed(HashTrieMap<K, HashTrieSet<V>> multimap, K key, V value) {
-    HashTrieSet<V> set = multimap.get(key);
-    if (set == null) {
-      return multimap;
-    }
-    set = set.removed(value);
-    if (set.isEmpty()) {
-      multimap = multimap.removed(key);
-    } else {
-      multimap = multimap.updated(key, set);
-    }
-    return multimap;
-  }
 }
 
 abstract class HashTrieMapIterator<K, V> {
+
   final Object[] nodes;
-  int depth;
   final int[] stack;
+  int depth;
   int stackPointer;
 
   HashTrieMapIterator(HashTrieMap<K, V> tree) {
@@ -1175,9 +1178,11 @@ abstract class HashTrieMapIterator<K, V> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }
 
 final class HashTrieMapEntryIterator<K, V> extends HashTrieMapIterator<K, V> implements Iterator<Map.Entry<K, V>> {
+
   HashTrieMapEntryIterator(HashTrieMap<K, V> tree) {
     super(tree);
   }
@@ -1186,9 +1191,11 @@ final class HashTrieMapEntryIterator<K, V> extends HashTrieMapIterator<K, V> imp
   public Map.Entry<K, V> next() {
     return nextEntry();
   }
+
 }
 
 final class HashTrieMapKeyIterator<K, V> extends HashTrieMapIterator<K, V> implements Iterator<K> {
+
   HashTrieMapKeyIterator(HashTrieMap<K, V> tree) {
     super(tree);
   }
@@ -1197,9 +1204,11 @@ final class HashTrieMapKeyIterator<K, V> extends HashTrieMapIterator<K, V> imple
   public K next() {
     return nextKey();
   }
+
 }
 
 final class HashTrieMapValueIterator<K, V> extends HashTrieMapIterator<K, V> implements Iterator<V> {
+
   HashTrieMapValueIterator(HashTrieMap<K, V> tree) {
     super(tree);
   }
@@ -1208,9 +1217,11 @@ final class HashTrieMapValueIterator<K, V> extends HashTrieMapIterator<K, V> imp
   public V next() {
     return nextValue();
   }
+
 }
 
 final class HashTrieMapEntrySet<K, V> extends AbstractSet<Map.Entry<K, V>> {
+
   final HashTrieMap<K, V> map;
 
   HashTrieMapEntrySet(HashTrieMap<K, V> map) {
@@ -1226,9 +1237,11 @@ final class HashTrieMapEntrySet<K, V> extends AbstractSet<Map.Entry<K, V>> {
   public Iterator<Map.Entry<K, V>> iterator() {
     return map.iterator();
   }
+
 }
 
 final class HashTrieMapKeySet<K, V> extends AbstractSet<K> {
+
   final HashTrieMap<K, V> map;
 
   HashTrieMapKeySet(HashTrieMap<K, V> map) {
@@ -1244,9 +1257,11 @@ final class HashTrieMapKeySet<K, V> extends AbstractSet<K> {
   public Iterator<K> iterator() {
     return map.keyIterator();
   }
+
 }
 
 final class HashTrieMapValues<K, V> extends AbstractCollection<V> {
+
   final HashTrieMap<K, V> map;
 
   HashTrieMapValues(HashTrieMap<K, V> map) {
@@ -1262,4 +1277,5 @@ final class HashTrieMapValues<K, V> extends AbstractCollection<V> {
   public Iterator<V> iterator() {
     return map.valueIterator();
   }
+
 }

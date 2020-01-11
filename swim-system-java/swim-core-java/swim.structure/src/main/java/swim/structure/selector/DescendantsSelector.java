@@ -32,6 +32,8 @@ import swim.util.Murmur3;
  * it has no definition for any other type.
  */
 public class DescendantsSelector extends Selector {
+
+  private static int hashSeed;
   final Selector then;
 
   DescendantsSelector(Selector then) {
@@ -181,5 +183,4 @@ public class DescendantsSelector extends Selector {
     this.then.debugThen(output);
   }
 
-  private static int hashSeed;
 }

@@ -35,6 +35,7 @@ import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
 public class NodeScope extends Scope implements NodeRef {
+
   protected final Uri meshUri;
   protected final Uri hostUri;
   protected final Uri nodeUri;
@@ -151,4 +152,5 @@ public class NodeScope extends Scope implements NodeRef {
   public void command(String laneUri, Value body) {
     command(Uri.parse(laneUri), body, null);
   }
+
 }

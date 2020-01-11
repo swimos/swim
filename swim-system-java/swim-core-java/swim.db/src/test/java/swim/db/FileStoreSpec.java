@@ -33,6 +33,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 public class FileStoreSpec {
+
   final File testOutputDir = new File("build/test-output");
 
   final StoreSettings storeSettings = StoreSettings.standard()
@@ -100,14 +101,17 @@ public class FileStoreSpec {
       public boolean pageShouldSplit(Store store, Database database, Page page) {
         return page.arity() > 3;
       }
+
       @Override
       public boolean pageShouldMerge(Store store, Database database, Page page) {
         return page.arity() < 2;
       }
+
       @Override
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
+
       @Override
       public void databaseDidCommit(Store store, Database database, Chunk chunk) {
         // Override auto commit and compact behavior.
@@ -184,14 +188,17 @@ public class FileStoreSpec {
       public boolean pageShouldSplit(Store store, Database database, Page page) {
         return page.arity() > 3;
       }
+
       @Override
       public boolean pageShouldMerge(Store store, Database database, Page page) {
         return page.arity() < 2;
       }
+
       @Override
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
+
       @Override
       public void databaseDidCommit(Store store, Database database, Chunk chunk) {
         // Override auto commit and compact behavior.
@@ -258,6 +265,7 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
+
       @Override
       public void databaseDidCommit(Store store, Database database, Chunk chunk) {
         // Override auto commit and compact behavior.
@@ -302,16 +310,19 @@ public class FileStoreSpec {
       public boolean pageShouldSplit(Store store, Database database, Page page) {
         return page.arity() > 3;
       }
+
       @Override
       public boolean pageShouldMerge(Store store, Database database, Page page) {
         return page.arity() < 2;
       }
+
       @Override
       public void treeDidChange(Store store, Database database, Tree newTree, Tree oldTree) {
         if (database.diffSize() > 256) {
           database.commitAsync(Commit.forced());
         }
       }
+
       @Override
       public void databaseDidCommit(Store store, Database database, Chunk chunk) {
         didCommit.countDown();
@@ -347,16 +358,19 @@ public class FileStoreSpec {
       public boolean pageShouldSplit(Store store, Database database, Page page) {
         return page.arity() > 3;
       }
+
       @Override
       public boolean pageShouldMerge(Store store, Database database, Page page) {
         return page.arity() < 2;
       }
+
       @Override
       public void treeDidChange(Store store, Database database, Tree newTree, Tree oldTree) {
         if (database.diffSize() > 1024) {
           database.commitAsync(Commit.forced());
         }
       }
+
       @Override
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         if (store.zone().size() > 16 * 1024) {
@@ -365,10 +379,12 @@ public class FileStoreSpec {
           return commit;
         }
       }
+
       @Override
       public void databaseDidCommit(Store store, Database database, Chunk chunk) {
         // Override auto commit and compact behavior.
       }
+
       @Override
       public void databaseDidShiftZone(Store store, Database database, Zone newZone) {
         didShiftZone.countDown();
@@ -409,16 +425,19 @@ public class FileStoreSpec {
       public boolean pageShouldSplit(Store store, Database database, Page page) {
         return page.arity() > 3;
       }
+
       @Override
       public boolean pageShouldMerge(Store store, Database database, Page page) {
         return page.arity() < 2;
       }
+
       @Override
       public void databaseDidCommit(Store store, Database database, Chunk chunk) {
         if (chunk != null && !chunk.commit().isClosed()) {
           autoCompact(store, database, settings().minTreeFill, 0L, Compact.forced(0));
         }
       }
+
       @Override
       public void databaseDidCompact(Store store, Database database, Compact compact) {
         didCompact.countDown();
@@ -456,6 +475,7 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
+
       @Override
       public void databaseDidCommit(Store store, Database database, Chunk chunk) {
         // Override auto commit and compact behavior.
@@ -508,6 +528,7 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
+
       @Override
       public void databaseDidCommit(Store store, Database database, Chunk chunk) {
         // Override auto commit and compact behavior.
@@ -560,6 +581,7 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
+
       @Override
       public void databaseDidCommit(Store store, Database database, Chunk chunk) {
         // Override auto commit and compact behavior.
@@ -605,6 +627,7 @@ public class FileStoreSpec {
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
       }
+
       @Override
       public void databaseDidCommit(Store store, Database database, Chunk chunk) {
         // Override auto commit and compact behavior.
@@ -643,4 +666,5 @@ public class FileStoreSpec {
       stage.stop();
     }
   }
+
 }

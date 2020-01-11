@@ -21,6 +21,7 @@ import swim.streamlet.AbstractMapInoutlet;
 import swim.util.Cursor;
 
 public abstract class MapFieldValuesOperator<K, VI, VO, I> extends AbstractMapInoutlet<K, VI, VO, I, Map<K, VO>> {
+
   @Override
   public boolean containsKey(K key) {
     if (this.input != null) {
@@ -63,4 +64,5 @@ public abstract class MapFieldValuesOperator<K, VI, VO, I> extends AbstractMapIn
   }
 
   public abstract VO evaluate(K key, VI value);
+
 }

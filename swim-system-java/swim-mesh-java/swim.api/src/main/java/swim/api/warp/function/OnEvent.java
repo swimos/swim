@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface OnEvent<V> extends Preemptive {
+
   void onEvent(V value);
+
 }

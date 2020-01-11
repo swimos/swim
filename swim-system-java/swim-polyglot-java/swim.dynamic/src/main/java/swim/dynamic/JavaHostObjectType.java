@@ -20,6 +20,7 @@ import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 
 public class JavaHostObjectType<T> extends AbstractHostObjectType<T> {
+
   protected final Class<?> hostClass;
   HostType<? super T> superType;
   FingerTrieSeq<HostType<? super T>> baseTypes;
@@ -78,7 +79,7 @@ public class JavaHostObjectType<T> extends AbstractHostObjectType<T> {
     }
     this.superType = (HostType<? super T>) superType;
     this.baseTypes = FingerTrieSeq.from((List<HostType<? super T>>) (List<?>) superType.baseTypes())
-                                  .appended((HostType<? super T>) superType);
+        .appended((HostType<? super T>) superType);
   }
 
   @SuppressWarnings("unchecked")
@@ -100,4 +101,5 @@ public class JavaHostObjectType<T> extends AbstractHostObjectType<T> {
   public void addStaticMember(HostStaticMember staticMember) {
     this.ownStaticMembers = this.ownStaticMembers.updated(staticMember.key(), staticMember);
   }
+
 }

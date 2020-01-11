@@ -23,6 +23,8 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Murmur3;
 
 public final class MqttSubscribe extends MqttPacket<Object> implements Debug {
+
+  private static int hashSeed;
   final int packetFlags;
   final int packetId;
   final FingerTrieSeq<MqttSubscription> subscriptions;
@@ -31,6 +33,23 @@ public final class MqttSubscribe extends MqttPacket<Object> implements Debug {
     this.packetFlags = packetFlags;
     this.packetId = packetId;
     this.subscriptions = subscriptions;
+  }
+
+  public static MqttSubscribe from(int packetFlags, int packetId,
+                                   FingerTrieSeq<MqttSubscription> subscriptions) {
+    return new MqttSubscribe(packetFlags, packetId, subscriptions);
+  }
+
+  public static MqttSubscribe from(int packetId, FingerTrieSeq<MqttSubscription> subscriptions) {
+    return new MqttSubscribe(2, packetId, subscriptions);
+  }
+
+  public static MqttSubscribe from(int packetId, MqttSubscription... subscriptions) {
+    return new MqttSubscribe(2, packetId, FingerTrieSeq.of(subscriptions));
+  }
+
+  public static MqttSubscribe from(int packetId) {
+    return new MqttSubscribe(2, packetId, FingerTrieSeq.<MqttSubscription>empty());
   }
 
   @Override
@@ -136,27 +155,9 @@ public final class MqttSubscribe extends MqttPacket<Object> implements Debug {
     }
   }
 
-  private static int hashSeed;
-
   @Override
   public String toString() {
     return Format.debug(this);
   }
 
-  public static MqttSubscribe from(int packetFlags, int packetId,
-                                   FingerTrieSeq<MqttSubscription> subscriptions) {
-    return new MqttSubscribe(packetFlags, packetId, subscriptions);
-  }
-
-  public static MqttSubscribe from(int packetId, FingerTrieSeq<MqttSubscription> subscriptions) {
-    return new MqttSubscribe(2, packetId, subscriptions);
-  }
-
-  public static MqttSubscribe from(int packetId, MqttSubscription... subscriptions) {
-    return new MqttSubscribe(2, packetId, FingerTrieSeq.of(subscriptions));
-  }
-
-  public static MqttSubscribe from(int packetId) {
-    return new MqttSubscribe(2, packetId, FingerTrieSeq.<MqttSubscription>empty());
-  }
 }

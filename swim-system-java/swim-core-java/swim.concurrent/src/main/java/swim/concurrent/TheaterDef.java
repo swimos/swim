@@ -26,6 +26,10 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class TheaterDef implements StageDef, Debug {
+
+  private static int hashSeed;
+  private static TheaterDef standard;
+  private static Form<TheaterDef> theaterForm;
   final String name;
   final int parallelism;
   final ScheduleDef scheduleDef;
@@ -34,6 +38,25 @@ public class TheaterDef implements StageDef, Debug {
     this.name = name;
     this.parallelism = parallelism;
     this.scheduleDef = scheduleDef;
+  }
+
+  public static TheaterDef standard() {
+    if (standard == null) {
+      standard = new TheaterDef(null, 0, null);
+    }
+    return standard;
+  }
+
+  public static Form<TheaterDef> theaterForm(Form<ScheduleDef> scheduleForm) {
+    return new TheaterForm(scheduleForm, standard());
+  }
+
+  @Kind
+  public static Form<TheaterDef> theaterForm() {
+    if (theaterForm == null) {
+      theaterForm = new TheaterForm(ScheduleDef.form(), standard());
+    }
+    return theaterForm;
   }
 
   public final String name() {
@@ -103,33 +126,10 @@ public class TheaterDef implements StageDef, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static TheaterDef standard;
-
-  private static Form<TheaterDef> theaterForm;
-
-  public static TheaterDef standard() {
-    if (standard == null) {
-      standard = new TheaterDef(null, 0, null);
-    }
-    return standard;
-  }
-
-  public static Form<TheaterDef> theaterForm(Form<ScheduleDef> scheduleForm) {
-    return new TheaterForm(scheduleForm, standard());
-  }
-
-  @Kind
-  public static Form<TheaterDef> theaterForm() {
-    if (theaterForm == null) {
-      theaterForm = new TheaterForm(ScheduleDef.form(), standard());
-    }
-    return theaterForm;
-  }
 }
 
 final class TheaterForm extends Form<TheaterDef> {
+
   final Form<ScheduleDef> scheduleForm;
   final TheaterDef unit;
 
@@ -196,4 +196,5 @@ final class TheaterForm extends Form<TheaterDef> {
     }
     return null;
   }
+
 }

@@ -15,6 +15,7 @@
 package swim.io;
 
 public class TcpModemSpec extends IpModemBehaviors {
+
   final IpSettings ipSettings = IpSettings.standard();
 
   @Override
@@ -26,4 +27,5 @@ public class TcpModemSpec extends IpModemBehaviors {
   protected IpSocketRef connect(IpEndpoint endpoint, IpModem<?, ?> modem) {
     return endpoint.connectTcp("127.0.0.1", 53554, modem, this.ipSettings);
   }
+
 }

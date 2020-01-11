@@ -5,6 +5,6 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.client'
 
 dependencies {
-  api project(':swim-runtime')
-  api project(':swim-remote')
+    api project(':swim-runtime')
+    api project(':swim-remote')
 }

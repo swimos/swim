@@ -19,6 +19,7 @@ import swim.dynamic.BridgeGuest;
 import swim.observable.function.WillTake;
 
 public class GuestWillTake extends BridgeGuest implements WillTake {
+
   public GuestWillTake(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -27,4 +28,5 @@ public class GuestWillTake extends BridgeGuest implements WillTake {
   public void willTake(int upper) {
     this.bridge.guestExecuteVoid(this.guest, upper);
   }
+
 }

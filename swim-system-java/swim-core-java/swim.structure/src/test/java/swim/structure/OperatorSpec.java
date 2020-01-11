@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class OperatorSpec {
+
   @Test
   public void evaluateConditionalOperator() {
     assertEquals(Selector.identity().get("a").conditional(Selector.identity().get("b"), Selector.identity().get("c")).evaluate(Record.of(Slot.of("a", true), Slot.of("b", 2), Slot.of("c", 3))), Num.from(2));
@@ -135,4 +136,5 @@ public class OperatorSpec {
     assertEquals(Selector.identity().get("math").get("round").invoke(Selector.identity().get("b")).evaluate(Record.of(Attr.of("a", 2.1), Slot.of("b", 2.9))), Num.from(3));
     assertEquals(Selector.identity().get("math").get("round").invoke(Selector.identity().get("a")).evaluate(Record.of(Attr.of("a", 2.1), Slot.of("b", 2.9))), Num.from(2));
   }
+
 }

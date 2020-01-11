@@ -20,6 +20,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class EnumDecoder<T> extends Decoder<T> {
+
   final AvroEnumType<T> type;
   final int ordinal;
   final int shift;
@@ -32,11 +33,6 @@ final class EnumDecoder<T> extends Decoder<T> {
 
   EnumDecoder(AvroEnumType<T> type) {
     this(type, 0, 0);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.ordinal, this.shift);
   }
 
   @SuppressWarnings("unchecked")
@@ -66,4 +62,10 @@ final class EnumDecoder<T> extends Decoder<T> {
   static <T> Decoder<T> decode(InputBuffer input, AvroEnumType<T> type) {
     return decode(input, type, 0, 0);
   }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type, this.ordinal, this.shift);
+  }
+
 }

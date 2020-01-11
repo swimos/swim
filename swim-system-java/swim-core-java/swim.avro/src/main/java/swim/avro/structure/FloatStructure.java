@@ -19,8 +19,10 @@ import swim.structure.Num;
 import swim.structure.Value;
 
 final class FloatStructure extends AvroFloatType<Value> {
+
   @Override
   public Value cast(float value) {
     return Num.from(value);
   }
+
 }

@@ -19,6 +19,17 @@ import swim.codec.OutputBuffer;
 import swim.collections.FingerTrieSeq;
 
 public abstract class HttpEntity<T> {
+
+  private static HttpEntity<Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <T> HttpEntity<T> empty() {
+    if (empty == null) {
+      empty = new HttpEmpty();
+    }
+    return (HttpEntity<T>) empty;
+  }
+
   public abstract boolean isDefined();
 
   public abstract T get();
@@ -44,13 +55,4 @@ public abstract class HttpEntity<T> {
     return encodeHttp(message, output, Http.standardWriter());
   }
 
-  private static HttpEntity<Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <T> HttpEntity<T> empty() {
-    if (empty == null) {
-      empty = new HttpEmpty();
-    }
-    return (HttpEntity<T>) empty;
-  }
 }

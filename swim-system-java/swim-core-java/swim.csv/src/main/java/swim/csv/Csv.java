@@ -27,11 +27,12 @@ import swim.structure.Value;
  * Factory for constructing CSV parsers and writers.
  */
 public final class Csv {
+
+  private static CsvParser parser;
+
   private Csv() {
     // static
   }
-
-  private static CsvParser parser;
 
   public static CsvParser parser() {
     if (parser == null) {
@@ -191,4 +192,5 @@ public final class Csv {
   public static <T, R, C> Parser<R> rowParser(int delimiter, CsvHeader<T, R, C> header) {
     return parser(delimiter).rowParser(header);
   }
+
 }

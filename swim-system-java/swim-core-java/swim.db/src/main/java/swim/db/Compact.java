@@ -19,6 +19,7 @@ import swim.concurrent.Cont;
 import swim.concurrent.Conts;
 
 public final class Compact {
+
   final int deleteDelay;
   final boolean isForced;
   final boolean isShifted;
@@ -34,6 +35,10 @@ public final class Compact {
 
   public Compact(int deleteDelay, boolean isForced, boolean isShifted) {
     this(deleteDelay, isForced, isShifted, FingerTrieSeq.<Cont<Store>>empty());
+  }
+
+  public static Compact forced(int deleteDelay) {
+    return new Compact(deleteDelay, true, false);
   }
 
   public int deleteDelay() {
@@ -108,7 +113,4 @@ public final class Compact {
     return new Commit(false, this.isForced, this.isShifted);
   }
 
-  public static Compact forced(int deleteDelay) {
-    return new Compact(deleteDelay, true, false);
-  }
 }

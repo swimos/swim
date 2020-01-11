@@ -23,6 +23,7 @@ import swim.structure.Value;
  * Transformation between a structurally typed {@link Item} and a {@link Short}.
  */
 public final class ShortForm extends Form<Short> {
+
   public final Short unit;
 
   public ShortForm(Short unit) {
@@ -62,4 +63,5 @@ public final class ShortForm extends Form<Short> {
       return null;
     }
   }
+
 }

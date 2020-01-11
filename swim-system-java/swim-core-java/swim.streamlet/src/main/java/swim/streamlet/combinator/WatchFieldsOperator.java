@@ -18,6 +18,7 @@ import swim.streamlet.AbstractMapInlet;
 import swim.streamlet.KeyEffect;
 
 public abstract class WatchFieldsOperator<K, V, O> extends AbstractMapInlet<K, V, O> {
+
   @Override
   protected void onReconcileOutputKey(K key, KeyEffect effect, int version) {
     if (effect == KeyEffect.UPDATE) {
@@ -32,4 +33,5 @@ public abstract class WatchFieldsOperator<K, V, O> extends AbstractMapInlet<K, V
   }
 
   public abstract void evaluate(K key, V value);
+
 }

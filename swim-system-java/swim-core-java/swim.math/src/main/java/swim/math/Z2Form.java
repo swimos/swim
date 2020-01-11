@@ -17,6 +17,11 @@ package swim.math;
 import swim.structure.Form;
 
 public abstract class Z2Form<T> extends Form<T> implements Z2Boundary<T> {
+
+  public static <T> R2Form<T> transformed(Z2Form<T> form, Z2ToR2Function function) {
+    return new Z2ToR2Form<T>(form, function);
+  }
+
   @Override
   public abstract long getXMin(T object);
 
@@ -35,7 +40,4 @@ public abstract class Z2Form<T> extends Form<T> implements Z2Boundary<T> {
   @Override
   public abstract boolean intersects(T s, T t);
 
-  public static <T> R2Form<T> transformed(Z2Form<T> form, Z2ToR2Function function) {
-    return new Z2ToR2Form<T>(form, function);
-  }
 }

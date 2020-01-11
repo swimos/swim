@@ -27,10 +27,32 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class AcceptEncoding extends HttpHeader {
+
+  private static int hashSeed;
   final FingerTrieSeq<ContentCoding> codings;
 
   AcceptEncoding(FingerTrieSeq<ContentCoding> codings) {
     this.codings = codings;
+  }
+
+  public static AcceptEncoding from(FingerTrieSeq<ContentCoding> codings) {
+    return new AcceptEncoding(codings);
+  }
+
+  public static AcceptEncoding from(ContentCoding... codings) {
+    return new AcceptEncoding(FingerTrieSeq.of(codings));
+  }
+
+  public static AcceptEncoding from(String... codingStrings) {
+    final Builder<ContentCoding, FingerTrieSeq<ContentCoding>> codings = FingerTrieSeq.builder();
+    for (int i = 0, n = codingStrings.length; i < n; i += 1) {
+      codings.add(ContentCoding.parse(codingStrings[i]));
+    }
+    return new AcceptEncoding(codings.bind());
+  }
+
+  public static Parser<AcceptEncoding> parseHttpValue(Input input, HttpParser http) {
+    return AcceptEncodingParser.parse(input, http);
   }
 
   @Override
@@ -89,25 +111,4 @@ public final class AcceptEncoding extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  public static AcceptEncoding from(FingerTrieSeq<ContentCoding> codings) {
-    return new AcceptEncoding(codings);
-  }
-
-  public static AcceptEncoding from(ContentCoding... codings) {
-    return new AcceptEncoding(FingerTrieSeq.of(codings));
-  }
-
-  public static AcceptEncoding from(String... codingStrings) {
-    final Builder<ContentCoding, FingerTrieSeq<ContentCoding>> codings = FingerTrieSeq.builder();
-    for (int i = 0, n = codingStrings.length; i < n; i += 1) {
-      codings.add(ContentCoding.parse(codingStrings[i]));
-    }
-    return new AcceptEncoding(codings.bind());
-  }
-
-  public static Parser<AcceptEncoding> parseHttpValue(Input input, HttpParser http) {
-    return AcceptEncodingParser.parse(input, http);
-  }
 }

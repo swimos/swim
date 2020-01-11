@@ -15,6 +15,7 @@
 package swim.codec;
 
 final class ByteOutputArray extends ByteOutput<byte[]> {
+
   ByteOutputArray(byte[] array, int size, OutputSettings settings) {
     super(array, size, settings);
   }
@@ -28,4 +29,5 @@ final class ByteOutputArray extends ByteOutput<byte[]> {
   public Output<byte[]> clone() {
     return new ByteOutputArray(cloneArray(), this.size, this.settings);
   }
+
 }

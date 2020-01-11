@@ -19,6 +19,7 @@ package swim.concurrent;
  * and stopped.
  */
 public class SideStage implements Stage {
+
   protected final Stage stage;
 
   public SideStage(Stage stage) {
@@ -49,4 +50,5 @@ public class SideStage implements Stage {
   public TimerRef setTimer(long millis, TimerFunction timer) {
     return this.stage.setTimer(millis, timer);
   }
+
 }

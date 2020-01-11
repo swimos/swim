@@ -18,6 +18,7 @@ import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 
 public class StaticHttpResponder<T> extends AbstractHttpResponder<T> {
+
   protected final HttpResponse<T> response;
 
   public StaticHttpResponder(HttpResponse<T> response) {
@@ -32,4 +33,5 @@ public class StaticHttpResponder<T> extends AbstractHttpResponder<T> {
   public void doRespond(HttpRequest<T> request) {
     writeResponse(this.response);
   }
+
 }

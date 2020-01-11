@@ -19,5 +19,7 @@ import swim.http.HttpRequest;
 
 @FunctionalInterface
 public interface DoRequestHttp<V> extends Preemptive {
+
   HttpRequest<V> doRequest();
+
 }

@@ -15,6 +15,7 @@
 package swim.api.plane;
 
 public interface Plane {
+
   PlaneContext planeContext();
 
   void willStart();
@@ -30,4 +31,5 @@ public interface Plane {
   void didClose();
 
   void didFail(Throwable error);
+
 }

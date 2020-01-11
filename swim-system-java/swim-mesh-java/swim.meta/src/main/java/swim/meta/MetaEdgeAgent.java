@@ -19,6 +19,7 @@ import swim.runtime.NodeContext;
 import swim.runtime.agent.AgentNode;
 
 public final class MetaEdgeAgent extends AgentNode {
+
   protected final EdgeBinding edge;
 
   public MetaEdgeAgent(EdgeBinding edge) {
@@ -30,4 +31,5 @@ public final class MetaEdgeAgent extends AgentNode {
     super.setNodeContext(nodeContext);
     this.edge.openMetaEdge(this.edge, this);
   }
+
 }

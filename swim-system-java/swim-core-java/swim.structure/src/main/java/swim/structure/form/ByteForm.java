@@ -23,6 +23,7 @@ import swim.structure.Value;
  * Transformation between a structurally typed {@link Item} and a {@link Byte}.
  */
 public final class ByteForm extends Form<Byte> {
+
   final Byte unit;
 
   public ByteForm(Byte unit) {
@@ -62,4 +63,5 @@ public final class ByteForm extends Form<Byte> {
       return null;
     }
   }
+
 }

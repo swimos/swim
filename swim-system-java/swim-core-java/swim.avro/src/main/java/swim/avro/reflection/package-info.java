@@ -15,4 +15,5 @@
 /**
  * Reflectively typed Apache Avro schema.
  */
+
 package swim.avro.reflection;

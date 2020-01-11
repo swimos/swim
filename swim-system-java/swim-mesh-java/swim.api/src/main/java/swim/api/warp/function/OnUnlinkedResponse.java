@@ -19,5 +19,7 @@ import swim.warp.UnlinkedResponse;
 
 @FunctionalInterface
 public interface OnUnlinkedResponse extends Preemptive {
+
   void onUnlinked(UnlinkedResponse response);
+
 }

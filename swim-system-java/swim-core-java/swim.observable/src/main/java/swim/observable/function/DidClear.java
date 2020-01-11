@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface DidClear extends Preemptive {
+
   void didClear();
+
 }

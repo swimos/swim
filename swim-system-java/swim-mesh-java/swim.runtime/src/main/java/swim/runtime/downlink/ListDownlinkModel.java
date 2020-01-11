@@ -35,8 +35,10 @@ import swim.uri.Uri;
 import swim.warp.EventMessage;
 
 public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
-  protected int flags;
+
+  protected static final int STATEFUL = 1 << 0;
   protected final STreeList<Value> state;
+  protected int flags;
 
   public ListDownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                            float prio, float rate, Value body) {
@@ -304,14 +306,14 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
     //relay.run();
   }
 
-  protected static final int STATEFUL = 1 << 0;
 }
 
 final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
-  Object key;
   final int index;
+  Object key;
   Form<Object> valueForm;
   Value oldValue;
   Value newValue;
@@ -444,9 +446,11 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
       }
     }
   }
+
 }
 
 final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
   final int fromIndex;
@@ -560,9 +564,11 @@ final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListD
       }
     }
   }
+
 }
 
 final class ListDownlinkRelayRemove extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
   final int index;
@@ -673,9 +679,11 @@ final class ListDownlinkRelayRemove extends DownlinkRelay<ListDownlinkModel, Lis
       }
     }
   }
+
 }
 
 final class ListDownlinkRelayDrop extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
   final int lower;
@@ -749,9 +757,11 @@ final class ListDownlinkRelayDrop extends DownlinkRelay<ListDownlinkModel, ListD
       }
     }
   }
+
 }
 
 final class ListDownlinkRelayTake extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
   final int upper;
@@ -825,9 +835,11 @@ final class ListDownlinkRelayTake extends DownlinkRelay<ListDownlinkModel, ListD
       }
     }
   }
+
 }
 
 final class ListDownlinkRelayClear extends DownlinkRelay<ListDownlinkModel, ListDownlinkView<?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
 
@@ -898,4 +910,5 @@ final class ListDownlinkRelayClear extends DownlinkRelay<ListDownlinkModel, List
       }
     }
   }
+
 }

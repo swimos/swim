@@ -19,6 +19,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 final class CircleR2Form extends R2Form<CircleR2> {
+
   @Override
   public String tag() {
     return "circle";
@@ -81,4 +82,5 @@ final class CircleR2Form extends R2Form<CircleR2> {
       return null;
     }
   }
+
 }

@@ -15,9 +15,11 @@
 package swim.api;
 
 public interface Uplink extends Link {
+
   @Override
   Uplink observe(Object observer);
 
   @Override
   Uplink unobserve(Object observer);
+
 }

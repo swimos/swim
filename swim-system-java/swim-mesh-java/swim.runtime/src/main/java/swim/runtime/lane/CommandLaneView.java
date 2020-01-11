@@ -33,6 +33,7 @@ import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 
 public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
+
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
 
@@ -75,7 +76,7 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
   @Override
   public <V2> CommandLaneView<V2> valueForm(Form<V2> valueForm) {
     return new CommandLaneView<V2>(this.agentContext, valueForm,
-                                   typesafeObservers(this.observers));
+        typesafeObservers(this.observers));
   }
 
   @Override
@@ -205,4 +206,5 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
       SwimContext.setLane(oldLane);
     }
   }
+
 }

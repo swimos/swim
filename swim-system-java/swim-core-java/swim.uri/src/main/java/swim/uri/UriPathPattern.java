@@ -17,6 +17,20 @@ package swim.uri;
 import swim.collections.HashTrieMap;
 
 abstract class UriPathPattern extends UriAuthorityPattern {
+
+  static UriPathPattern compile(Uri pattern, UriPath path, UriQuery query, UriFragment fragment) {
+    if (!path.isEmpty()) {
+      final String component = path.head();
+      if (!component.isEmpty() && component.charAt(0) == ':') {
+        return new UriPathVariable(component.substring(1), compile(pattern, path.tail(), query, fragment));
+      } else {
+        return new UriPathLiteral(component, compile(pattern, path.tail(), query, fragment));
+      }
+    } else {
+      return UriQueryPattern.compile(pattern, query, fragment);
+    }
+  }
+
   Uri apply(UriScheme scheme, UriAuthority authority, UriPathBuilder path, String[] args, int index) {
     return apply(scheme, authority, path.bind(), args, index);
   }
@@ -46,16 +60,4 @@ abstract class UriPathPattern extends UriAuthorityPattern {
     }
   }
 
-  static UriPathPattern compile(Uri pattern, UriPath path, UriQuery query, UriFragment fragment) {
-    if (!path.isEmpty()) {
-      final String component = path.head();
-      if (!component.isEmpty() && component.charAt(0) == ':') {
-        return new UriPathVariable(component.substring(1), compile(pattern, path.tail(), query, fragment));
-      } else {
-        return new UriPathLiteral(component, compile(pattern, path.tail(), query, fragment));
-      }
-    } else {
-      return UriQueryPattern.compile(pattern, query, fragment);
-    }
-  }
 }

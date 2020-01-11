@@ -19,6 +19,7 @@ import swim.codec.OutputBuffer;
 import swim.structure.Data;
 
 public class MqttEncoder {
+
   public Encoder<?, MqttConnect> connectEncoder(MqttConnect packet) {
     return new MqttConnectEncoder(this, packet);
   }
@@ -167,4 +168,5 @@ public class MqttEncoder {
   public Encoder<Data, Data> encodeData(Data data, OutputBuffer<?> output) {
     return MqttDataEncoder.encode(output, data);
   }
+
 }

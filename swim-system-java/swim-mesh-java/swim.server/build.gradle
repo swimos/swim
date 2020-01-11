@@ -5,24 +5,24 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.server'
 
 dependencies {
-  api project(':swim-kernel')
-  api project(':swim-store-mem')
-  api project(':swim-store-db')
-  api project(':swim-remote')
-  api project(':swim-service')
-  api project(':swim-service-web')
-  api project(':swim-auth')
-  api project(':swim-actor')
-  api project(':swim-java')
+    api project(':swim-kernel')
+    api project(':swim-store-mem')
+    api project(':swim-store-db')
+    api project(':swim-remote')
+    api project(':swim-service')
+    api project(':swim-service-web')
+    api project(':swim-auth')
+    api project(':swim-actor')
+    api project(':swim-java')
 }
 
 test {
-  if (useModules) {
-    doFirst {
-      jvmArgs += [
-        '--add-opens', 'swim.server/swim.server=swim.java',
-        '--add-opens', 'swim.server/swim.server=testng',
-      ]
+    if (useModules) {
+        doFirst {
+            jvmArgs += [
+                    '--add-opens', 'swim.server/swim.server=swim.java',
+                    '--add-opens', 'swim.server/swim.server=testng',
+            ]
+        }
     }
-  }
 }

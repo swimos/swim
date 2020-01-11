@@ -21,6 +21,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 final class QTreeShapeCursor<S> implements Cursor<SpatialMap.Entry<Value, S, Value>> {
+
   final Cursor<Slot> inner;
   final Z2Form<S> shapeForm;
   final S shape;
@@ -213,4 +214,5 @@ final class QTreeShapeCursor<S> implements Cursor<SpatialMap.Entry<Value, S, Val
   public void load() throws InterruptedException {
     this.inner.load();
   }
+
 }

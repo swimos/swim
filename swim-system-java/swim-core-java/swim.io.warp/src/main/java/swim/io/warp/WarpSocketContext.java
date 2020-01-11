@@ -22,6 +22,7 @@ import swim.warp.Envelope;
 import swim.ws.WsControl;
 
 public interface WarpSocketContext extends IpContext, FlowContext {
+
   WarpSettings warpSettings();
 
   void feed(PullRequest<Envelope> pullRequest);
@@ -35,4 +36,5 @@ public interface WarpSocketContext extends IpContext, FlowContext {
   void become(IpSocket socket);
 
   void close();
+
 }

@@ -23,6 +23,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class WarpProxy implements WarpBinding, WarpContext {
+
   protected final WarpBinding linkBinding;
   protected WarpContext linkContext;
 
@@ -419,4 +420,5 @@ public class WarpProxy implements WarpBinding, WarpContext {
   public void failUp(Object message) {
     this.linkContext.failUp(message);
   }
+
 }

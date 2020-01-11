@@ -18,8 +18,10 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 public final class NotOutlet extends UnaryOutlet {
+
   @Override
   protected Item evaluate(Value argument) {
     return argument.not();
   }
+
 }

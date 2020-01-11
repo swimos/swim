@@ -21,6 +21,7 @@ import static swim.warp.Assertions.assertParses;
 import static swim.warp.Assertions.assertWrites;
 
 public class DeauthedResponseSpec {
+
   @Test
   public void parseDeauthed() {
     assertParses("@deauthed", new DeauthedResponse());
@@ -40,4 +41,5 @@ public class DeauthedResponseSpec {
   public void writeDeauthedWithBody() {
     assertWrites(new DeauthedResponse(Record.of(Attr.of("test"))), "@deauthed@test");
   }
+
 }

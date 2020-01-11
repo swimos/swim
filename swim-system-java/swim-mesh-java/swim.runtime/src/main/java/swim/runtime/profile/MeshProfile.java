@@ -18,6 +18,7 @@ import swim.runtime.MeshAddress;
 import swim.runtime.Metric;
 
 public final class MeshProfile extends Metric {
+
   final MeshAddress cellAddress;
   final int partOpenDelta;
   final long partOpenCount;
@@ -292,4 +293,5 @@ public final class MeshProfile extends Metric {
   public long uplinkCommandCount() {
     return this.uplinkCommandCount;
   }
+
 }

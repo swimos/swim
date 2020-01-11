@@ -19,6 +19,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 final class BoxR3Form extends R3Form<BoxR3> {
+
   @Override
   public String tag() {
     return "box";
@@ -95,4 +96,5 @@ final class BoxR3Form extends R3Form<BoxR3> {
       return null;
     }
   }
+
 }

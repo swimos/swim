@@ -23,6 +23,7 @@ import swim.api.policy.PolicyDirective;
 import swim.uri.Uri;
 
 public interface MeshContext extends TierContext, CellContext {
+
   EdgeBinding edge();
 
   MeshBinding meshWrapper();
@@ -77,4 +78,5 @@ public interface MeshContext extends TierContext, CellContext {
   void openAgents(NodeBinding node);
 
   PolicyDirective<Identity> authenticate(Credentials credentials);
+
 }

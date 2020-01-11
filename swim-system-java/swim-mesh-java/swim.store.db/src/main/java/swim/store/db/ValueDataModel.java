@@ -28,6 +28,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class ValueDataModel implements ValueDataBinding, UTreeDelegate {
+
   protected final Value name;
   protected final UTreeValue tree;
   protected ValueDataContext dataContext;
@@ -162,4 +163,5 @@ public class ValueDataModel implements ValueDataBinding, UTreeDelegate {
       dataContext.didSet(newValue, oldValue);
     }
   }
+
 }

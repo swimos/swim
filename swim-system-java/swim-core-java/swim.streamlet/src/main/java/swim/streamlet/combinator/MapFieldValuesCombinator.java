@@ -17,6 +17,7 @@ package swim.streamlet.combinator;
 import swim.streamlet.function.MapFieldValuesFunction;
 
 public class MapFieldValuesCombinator<K, VI, VO, I> extends MapFieldValuesOperator<K, VI, VO, I> {
+
   protected final MapFieldValuesFunction<? super K, ? super VI, ? extends VO> func;
 
   public MapFieldValuesCombinator(MapFieldValuesFunction<? super K, ? super VI, ? extends VO> func) {
@@ -27,4 +28,5 @@ public class MapFieldValuesCombinator<K, VI, VO, I> extends MapFieldValuesOperat
   public VO evaluate(K key, VI value) {
     return this.func.apply(key, value);
   }
+
 }

@@ -22,6 +22,7 @@ package swim.codec;
  * @see Diagnostic
  */
 public abstract class Tag implements Display, Debug {
+
   /**
    * Returns the first source position covered by this {@code Tag}.
    */
@@ -43,4 +44,5 @@ public abstract class Tag implements Display, Debug {
    * {@code mark}.
    */
   public abstract Tag shift(Mark mark);
+
 }

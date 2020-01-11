@@ -24,6 +24,7 @@ import swim.structure.Text;
 import static org.testng.Assert.assertEquals;
 
 public class ByteFormSpec {
+
   @Test
   public void moldBytesToNums() {
     assertEquals(Form.forByte().mold((byte) 42), Num.from(42));
@@ -56,4 +57,5 @@ public class ByteFormSpec {
   public void castAttributedNumsToBytes() {
     assertEquals(Form.forByte().cast(Record.of(Attr.of("test"), (byte) 42)), Byte.valueOf((byte) 42));
   }
+
 }

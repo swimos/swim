@@ -28,9 +28,6 @@ import swim.uri.Uri;
 import swim.uri.UriPattern;
 
 public final class HostPlaneContext {
-  private HostPlaneContext() {
-    // static
-  }
 
   public static final HostObjectType<PlaneContext> TYPE;
 
@@ -51,9 +48,15 @@ public final class HostPlaneContext {
     type.addMember(new HostPlaneContextAddAgentRoute());
     type.addMember(new HostPlaneContextRemoveAgentRoute());
   }
+
+  private HostPlaneContext() {
+    // static
+  }
+
 }
 
 final class HostPlaneContextSchedule implements HostMethod<PlaneContext> {
+
   @Override
   public String key() {
     return "schedule";
@@ -63,9 +66,11 @@ final class HostPlaneContextSchedule implements HostMethod<PlaneContext> {
   public Object invoke(Bridge bridge, PlaneContext planeContext, Object... arguments) {
     return planeContext.schedule();
   }
+
 }
 
 final class HostPlaneContextStage implements HostMethod<PlaneContext> {
+
   @Override
   public String key() {
     return "stage";
@@ -75,9 +80,11 @@ final class HostPlaneContextStage implements HostMethod<PlaneContext> {
   public Object invoke(Bridge bridge, PlaneContext planeContext, Object... arguments) {
     return planeContext.stage();
   }
+
 }
 
 final class HostPlaneContextPolicy implements HostMethod<PlaneContext> {
+
   @Override
   public String key() {
     return "policy";
@@ -87,9 +94,11 @@ final class HostPlaneContextPolicy implements HostMethod<PlaneContext> {
   public Object invoke(Bridge bridge, PlaneContext planeContext, Object... arguments) {
     return planeContext.policy();
   }
+
 }
 
 final class HostPlaneContextSetPolicy implements HostMethod<PlaneContext> {
+
   @Override
   public String key() {
     return "setPolicy";
@@ -102,9 +111,11 @@ final class HostPlaneContextSetPolicy implements HostMethod<PlaneContext> {
     planeContext.setPolicy((PlanePolicy) policy);
     return null;
   }
+
 }
 
 final class HostPlaneContextGetAuthenticator implements HostMethod<PlaneContext> {
+
   @Override
   public String key() {
     return "getAuthenticator";
@@ -115,9 +126,11 @@ final class HostPlaneContextGetAuthenticator implements HostMethod<PlaneContext>
     final Object authenticatorName = arguments[0];
     return planeContext.getAuthenticator((String) authenticatorName);
   }
+
 }
 
 final class HostPlaneContextAddAuthenticator implements HostMethod<PlaneContext> {
+
   @Override
   public String key() {
     return "addAuthenticator";
@@ -131,9 +144,11 @@ final class HostPlaneContextAddAuthenticator implements HostMethod<PlaneContext>
     planeContext.addAuthenticator((String) authenticatorName, (Authenticator) authenticator);
     return null;
   }
+
 }
 
 final class HostPlaneContextGetAgentFactory implements HostMethod<PlaneContext> {
+
   @Override
   public String key() {
     return "getAgentFactory";
@@ -147,9 +162,11 @@ final class HostPlaneContextGetAgentFactory implements HostMethod<PlaneContext> 
     }
     return planeContext.getAgentFactory((Uri) nodeUri);
   }
+
 }
 
 final class HostPlaneContextGetAgentRoute implements HostMethod<PlaneContext> {
+
   @Override
   public String key() {
     return "getAgentRoute";
@@ -160,9 +177,11 @@ final class HostPlaneContextGetAgentRoute implements HostMethod<PlaneContext> {
     final Object routeName = arguments[0];
     return planeContext.getAgentRoute((String) routeName);
   }
+
 }
 
 final class HostPlaneContextAddAgentRoute implements HostMethod<PlaneContext> {
+
   @Override
   public String key() {
     return "addAgentRoute";
@@ -188,9 +207,11 @@ final class HostPlaneContextAddAgentRoute implements HostMethod<PlaneContext> {
     planeContext.addAgentRoute((String) routeName, (UriPattern) pattern, (AgentRoute<?>) agentRoute);
     return null;
   }
+
 }
 
 final class HostPlaneContextRemoveAgentRoute implements HostMethod<PlaneContext> {
+
   @Override
   public String key() {
     return "removeAgentRoute";
@@ -202,4 +223,5 @@ final class HostPlaneContextRemoveAgentRoute implements HostMethod<PlaneContext>
     planeContext.removeAgentRoute((String) routeName);
     return null;
   }
+
 }

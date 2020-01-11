@@ -17,6 +17,7 @@ package swim.ws;
 import java.util.concurrent.ThreadLocalRandom;
 
 final class WsStandardEncoderMasked extends WsStandardEncoder {
+
   @Override
   public boolean isMasked() {
     return true;
@@ -26,4 +27,5 @@ final class WsStandardEncoderMasked extends WsStandardEncoder {
   public void maskingKey(byte[] maskingKey) {
     ThreadLocalRandom.current().nextBytes(maskingKey);
   }
+
 }

@@ -22,6 +22,7 @@ import swim.http.HttpMethod;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class AllowSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -39,4 +40,5 @@ public class AllowSpec {
     assertWrites(Allow.from(HttpMethod.GET), "Allow: GET");
     assertWrites(Allow.from(HttpMethod.GET, HttpMethod.PUT), "Allow: GET, PUT");
   }
+
 }

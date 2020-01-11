@@ -18,15 +18,11 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class UriHostParser extends Parser<UriHost> {
+
   final UriParser uri;
 
   UriHostParser(UriParser uri) {
     this.uri = uri;
-  }
-
-  @Override
-  public Parser<UriHost> feed(Input input) {
-    return parse(input, this.uri);
   }
 
   static Parser<UriHost> parse(Input input, UriParser uri) {
@@ -44,4 +40,10 @@ final class UriHostParser extends Parser<UriHost> {
     }
     return new UriHostParser(uri);
   }
+
+  @Override
+  public Parser<UriHost> feed(Input input) {
+    return parse(input, this.uri);
+  }
+
 }

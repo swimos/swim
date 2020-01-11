@@ -5,7 +5,7 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.meta'
 
 dependencies {
-  implementation group: 'org.swimos', name: 'swim-recon', version: version
-  api project(':swim-runtime')
-  api project(':swim-kernel')
+    implementation group: 'org.swimos', name: 'swim-recon', version: version
+    api project(':swim-runtime')
+    api project(':swim-kernel')
 }

@@ -20,6 +20,7 @@ import swim.codec.Output;
 import swim.codec.Parser;
 
 final class CommentParser<I> extends Parser<I> {
+
   final XmlParser<I, ?> xml;
   final Output<I> output;
   final int step;
@@ -28,11 +29,6 @@ final class CommentParser<I> extends Parser<I> {
     this.xml = xml;
     this.output = output;
     this.step = step;
-  }
-
-  @Override
-  public Parser<I> feed(Input input) {
-    return parse(input, this.xml, this.output, this.step);
   }
 
   static <I> Parser<I> parse(Input input, XmlParser<I, ?> xml, Output<I> output, int step) {
@@ -128,4 +124,10 @@ final class CommentParser<I> extends Parser<I> {
   static <I> Parser<I> parseRest(Input input, XmlParser<I, ?> xml) {
     return parse(input, xml, null, 3);
   }
+
+  @Override
+  public Parser<I> feed(Input input) {
+    return parse(input, this.xml, this.output, this.step);
+  }
+
 }

@@ -17,6 +17,7 @@ package swim.math;
 import java.lang.reflect.Array;
 
 final class TensorArrayIdentityForm<V> extends TensorArrayForm<V[], V> {
+
   final TensorForm<V> next;
 
   TensorArrayIdentityForm(TensorForm<V> next) {
@@ -43,4 +44,5 @@ final class TensorArrayIdentityForm<V> extends TensorArrayForm<V[], V> {
   public Object[] toArray(V[] tensor) {
     return tensor;
   }
+
 }

@@ -31,6 +31,7 @@ import swim.ws.WsData;
 import swim.ws.WsFrame;
 
 public abstract class AbstractWebSocket<I, O> implements WebSocket<I, O>, IpContext, FlowContext {
+
   protected WebSocketContext<I, O> context;
 
   @Override
@@ -216,4 +217,5 @@ public abstract class AbstractWebSocket<I, O> implements WebSocket<I, O>, IpCont
   public void close() {
     this.context.close();
   }
+
 }

@@ -52,135 +52,87 @@ import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 
 public class JoinValueLaneSpec {
-  static class TestValueLaneAgent extends AbstractAgent {
-    @SwimLane("value")
-    ValueLane<String> testValue = valueLane()
-        .valueClass(String.class)
-        .observe(new TestValueLaneController());
-
-    class TestValueLaneController implements WillSet<String>, DidSet<String> {
-      @Override
-      public String willSet(String newValue) {
-        System.out.println(nodeUri() + " willSet newValue: " + Format.debug(newValue));
-        return newValue;
-      }
-      @Override
-      public void didSet(String newValue, String oldValue) {
-        System.out.println(nodeUri() + " didSet newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-      }
-    }
-  }
-
-  static class TestJoinValueLaneAgent extends AbstractAgent {
-    @SwimLane("join")
-    JoinValueLane<String, String> testJoinValue = joinValueLane()
-        .keyClass(String.class)
-        .valueClass(String.class)
-        .observe(new TestJoinValueLaneController());
-
-    class TestJoinValueLaneController implements WillDownlinkValue<String>, DidDownlinkValue<String>,
-        WillUpdateKey<String, String>, DidUpdateKey<String, String> {
-      @Override
-      public ValueDownlink<?> willDownlink(String key, ValueDownlink<?> downlink) {
-        System.out.println(nodeUri() + " willDownlink key: " + Format.debug(key) + "; downlink: " + downlink);
-        return downlink;
-      }
-      @Override
-      public void didDownlink(String key, ValueDownlink<?> downlink) {
-        System.out.println(nodeUri() + " didDownlink key: " + Format.debug(key) + "; downlink: " + downlink);
-      }
-      @Override
-      public String willUpdate(String key, String newValue) {
-        System.out.println(nodeUri() + " willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
-        return newValue;
-      }
-      @Override
-      public void didUpdate(String key, String newValue, String oldValue) {
-        System.out.println(nodeUri() + " didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-      }
-    }
-
-    @Override
-    public void didStart() {
-      testJoinValue.downlink("x").hostUri("warp://localhost:53556").nodeUri("/value/x").laneUri("value").open();
-      testJoinValue.downlink("y").hostUri("warp://localhost:53556").nodeUri("/value/y").laneUri("value").open();
-    }
-  }
-
-  static class TestJoinValuePlane extends AbstractPlane {
-    @SwimRoute("/value/:name")
-    AgentRoute<TestValueLaneAgent> value;
-
-    @SwimRoute("/join/value/:name")
-    AgentRoute<TestJoinValueLaneAgent> joinValue;
-  }
 
   @Test
   public void testLinkToJoinValueLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestJoinValuePlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-                                           .openPlane("test", TestJoinValuePlane.class);
+        .openPlane("test", TestJoinValuePlane.class);
 
     final CountDownLatch joinDidReceive = new CountDownLatch(2);
     final CountDownLatch joinDidUpdate = new CountDownLatch(2 * 2); // 1 for the initial link and 1 for update for x, same for y
     class JoinValueLinkController implements WillUpdateKey<String, String>,
         DidUpdateKey<String, String>, WillReceive, DidReceive, WillLink, DidLink,
         WillSync, DidSync, WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
+
       @Override
       public String willUpdate(String key, String newValue) {
         System.out.println("join link willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
         return newValue;
       }
+
       @Override
       public void didUpdate(String key, String newValue, String oldValue) {
         System.out.println("join link didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
         joinDidUpdate.countDown();
       }
+
       @Override
       public void willReceive(Value body) {
         System.out.println("join link willReceive body: " + Recon.toString(body));
       }
+
       @Override
       public void didReceive(Value body) {
         System.out.println("join link didReceive body: " + Recon.toString(body));
         joinDidReceive.countDown();
       }
+
       @Override
       public void willLink() {
         System.out.println("join link willLink");
       }
+
       @Override
       public void didLink() {
         System.out.println("join link didLink");
       }
+
       @Override
       public void willSync() {
         System.out.println("join link willSync");
       }
+
       @Override
       public void didSync() {
         System.out.println("join link didSync");
       }
+
       @Override
       public void willUnlink() {
         System.out.println("join link willUnlink");
       }
+
       @Override
       public void didUnlink() {
         System.out.println("join link didUnlink");
       }
+
       @Override
       public void didConnect() {
         System.out.println("join link didConnect");
       }
+
       @Override
       public void didDisconnect() {
         System.out.println("join link didDisconnect");
       }
+
       @Override
       public void didClose() {
         System.out.println("join link didClose");
       }
+
     }
 
     try {
@@ -221,4 +173,82 @@ public class JoinValueLaneSpec {
       kernel.stop();
     }
   }
+
+  static class TestValueLaneAgent extends AbstractAgent {
+
+    @SwimLane("value")
+    ValueLane<String> testValue = valueLane()
+        .valueClass(String.class)
+        .observe(new TestValueLaneController());
+
+    class TestValueLaneController implements WillSet<String>, DidSet<String> {
+
+      @Override
+      public String willSet(String newValue) {
+        System.out.println(nodeUri() + " willSet newValue: " + Format.debug(newValue));
+        return newValue;
+      }
+
+      @Override
+      public void didSet(String newValue, String oldValue) {
+        System.out.println(nodeUri() + " didSet newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+      }
+
+    }
+
+  }
+
+  static class TestJoinValueLaneAgent extends AbstractAgent {
+
+    @SwimLane("join")
+    JoinValueLane<String, String> testJoinValue = joinValueLane()
+        .keyClass(String.class)
+        .valueClass(String.class)
+        .observe(new TestJoinValueLaneController());
+
+    @Override
+    public void didStart() {
+      testJoinValue.downlink("x").hostUri("warp://localhost:53556").nodeUri("/value/x").laneUri("value").open();
+      testJoinValue.downlink("y").hostUri("warp://localhost:53556").nodeUri("/value/y").laneUri("value").open();
+    }
+
+    class TestJoinValueLaneController implements WillDownlinkValue<String>, DidDownlinkValue<String>,
+        WillUpdateKey<String, String>, DidUpdateKey<String, String> {
+
+      @Override
+      public ValueDownlink<?> willDownlink(String key, ValueDownlink<?> downlink) {
+        System.out.println(nodeUri() + " willDownlink key: " + Format.debug(key) + "; downlink: " + downlink);
+        return downlink;
+      }
+
+      @Override
+      public void didDownlink(String key, ValueDownlink<?> downlink) {
+        System.out.println(nodeUri() + " didDownlink key: " + Format.debug(key) + "; downlink: " + downlink);
+      }
+
+      @Override
+      public String willUpdate(String key, String newValue) {
+        System.out.println(nodeUri() + " willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
+        return newValue;
+      }
+
+      @Override
+      public void didUpdate(String key, String newValue, String oldValue) {
+        System.out.println(nodeUri() + " didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+      }
+
+    }
+
+  }
+
+  static class TestJoinValuePlane extends AbstractPlane {
+
+    @SwimRoute("/value/:name")
+    AgentRoute<TestValueLaneAgent> value;
+
+    @SwimRoute("/join/value/:name")
+    AgentRoute<TestJoinValueLaneAgent> joinValue;
+
+  }
+
 }

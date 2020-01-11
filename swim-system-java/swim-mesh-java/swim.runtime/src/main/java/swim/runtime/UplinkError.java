@@ -20,6 +20,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public final class UplinkError {
+
   private UplinkError() {
     // static
   }
@@ -94,4 +95,5 @@ public final class UplinkError {
       throw new AssertionError();
     }
   }
+
 }

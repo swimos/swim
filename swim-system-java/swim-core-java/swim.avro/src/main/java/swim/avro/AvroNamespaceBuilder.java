@@ -18,6 +18,7 @@ import java.util.Collection;
 import swim.util.Builder;
 
 final class AvroNamespaceBuilder implements Builder<String, AvroNamespace> {
+
   AvroNamespace first;
   AvroNamespace last;
   int size;
@@ -135,4 +136,5 @@ final class AvroNamespaceBuilder implements Builder<String, AvroNamespace> {
     }
     return xi;
   }
+
 }

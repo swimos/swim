@@ -18,6 +18,7 @@ import swim.codec.Format;
 import swim.codec.Output;
 
 final class AvroNamespaceComponent extends AvroNamespace {
+
   final String head;
   AvroNamespace tail;
   String string;
@@ -87,4 +88,5 @@ final class AvroNamespaceComponent extends AvroNamespace {
     }
     return this.string;
   }
+
 }

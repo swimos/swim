@@ -22,6 +22,19 @@ import swim.collections.HashTrieMap;
 import swim.util.Murmur3;
 
 public final class MediaType extends HttpPart implements Debug {
+
+  private static int hashSeed;
+  private static MediaType applicationJavascript;
+  private static MediaType applicationJson;
+  private static MediaType applicationOctetStream;
+  private static MediaType applicationXml;
+  private static MediaType applicationXRecon;
+  private static MediaType imageJpeg;
+  private static MediaType imagePng;
+  private static MediaType imageSvgXml;
+  private static MediaType textCss;
+  private static MediaType textHtml;
+  private static MediaType textPlain;
   final String type;
   final String subtype;
   final HashTrieMap<String, String> params;
@@ -35,110 +48,6 @@ public final class MediaType extends HttpPart implements Debug {
   MediaType(String type, String subtype) {
     this(type, subtype, HashTrieMap.<String, String>empty());
   }
-
-  public boolean isApplication() {
-    return "application".equalsIgnoreCase(type);
-  }
-
-  public boolean isAudio() {
-    return "audio".equalsIgnoreCase(type);
-  }
-
-  public boolean isImage() {
-    return "image".equalsIgnoreCase(type);
-  }
-
-  public boolean isMultipart() {
-    return "multipart".equalsIgnoreCase(type);
-  }
-
-  public boolean isText() {
-    return "text".equalsIgnoreCase(type);
-  }
-
-  public boolean isVideo() {
-    return "video".equalsIgnoreCase(type);
-  }
-
-  public String type() {
-    return this.type;
-  }
-
-  public String subtype() {
-    return this.subtype;
-  }
-
-  public HashTrieMap<String, String> params() {
-    return this.params;
-  }
-
-  public String getParam(String key) {
-    return this.params.get(key);
-  }
-
-  public MediaType param(String key, String value) {
-    return MediaType.from(this.type, this.subtype, this.params.updated(key, value));
-  }
-
-  @Override
-  public Writer<?, ?> httpWriter(HttpWriter http) {
-    return http.mediaTypeWriter(this.type, this.subtype, this.params);
-  }
-
-  @Override
-  public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeMediaType(this.type, this.subtype, this.params, output);
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof MediaType) {
-      final MediaType that = (MediaType) other;
-      return this.type.equals(that.type) && this.subtype.equals(that.subtype)
-          && this.params.equals(that.params);
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MediaType.class);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
-        this.type.hashCode()), this.subtype.hashCode()), this.params.hashCode()));
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("MediaType").write('.').write("from").write('(')
-        .debug(this.type).write(", ").write(this.subtype).write(')');
-    for (HashTrieMap.Entry<String, String> param : this.params) {
-      output = output.write('.').write("param").write('(')
-          .debug(param.getKey()).write(", ").debug(param.getValue()).write(')');
-    }
-  }
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
-  }
-
-  private static int hashSeed;
-
-  private static MediaType applicationJavascript;
-  private static MediaType applicationJson;
-  private static MediaType applicationOctetStream;
-  private static MediaType applicationXml;
-  private static MediaType applicationXRecon;
-  private static MediaType imageJpeg;
-  private static MediaType imagePng;
-  private static MediaType imageSvgXml;
-  private static MediaType textCss;
-  private static MediaType textHtml;
-  private static MediaType textPlain;
 
   public static MediaType applicationJavascript() {
     if (applicationJavascript == null) {
@@ -285,4 +194,95 @@ public final class MediaType extends HttpPart implements Debug {
       return null;
     }
   }
+
+  public boolean isApplication() {
+    return "application".equalsIgnoreCase(type);
+  }
+
+  public boolean isAudio() {
+    return "audio".equalsIgnoreCase(type);
+  }
+
+  public boolean isImage() {
+    return "image".equalsIgnoreCase(type);
+  }
+
+  public boolean isMultipart() {
+    return "multipart".equalsIgnoreCase(type);
+  }
+
+  public boolean isText() {
+    return "text".equalsIgnoreCase(type);
+  }
+
+  public boolean isVideo() {
+    return "video".equalsIgnoreCase(type);
+  }
+
+  public String type() {
+    return this.type;
+  }
+
+  public String subtype() {
+    return this.subtype;
+  }
+
+  public HashTrieMap<String, String> params() {
+    return this.params;
+  }
+
+  public String getParam(String key) {
+    return this.params.get(key);
+  }
+
+  public MediaType param(String key, String value) {
+    return MediaType.from(this.type, this.subtype, this.params.updated(key, value));
+  }
+
+  @Override
+  public Writer<?, ?> httpWriter(HttpWriter http) {
+    return http.mediaTypeWriter(this.type, this.subtype, this.params);
+  }
+
+  @Override
+  public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
+    return http.writeMediaType(this.type, this.subtype, this.params, output);
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof MediaType) {
+      final MediaType that = (MediaType) other;
+      return this.type.equals(that.type) && this.subtype.equals(that.subtype)
+          && this.params.equals(that.params);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    if (hashSeed == 0) {
+      hashSeed = Murmur3.seed(MediaType.class);
+    }
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+        this.type.hashCode()), this.subtype.hashCode()), this.params.hashCode()));
+  }
+
+  @Override
+  public void debug(Output<?> output) {
+    output = output.write("MediaType").write('.').write("from").write('(')
+        .debug(this.type).write(", ").write(this.subtype).write(')');
+    for (HashTrieMap.Entry<String, String> param : this.params) {
+      output = output.write('.').write("param").write('(')
+          .debug(param.getKey()).write(", ").debug(param.getValue()).write(')');
+    }
+  }
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
+  }
+
 }

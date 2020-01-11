@@ -19,6 +19,7 @@ import swim.codec.OutputBuffer;
 import swim.codec.Utf8;
 
 final class EnvelopeEncoder extends Encoder<Envelope, Envelope> {
+
   final Envelope envelope;
   final Encoder<?, ?> input;
 
@@ -33,16 +34,6 @@ final class EnvelopeEncoder extends Encoder<Envelope, Envelope> {
 
   EnvelopeEncoder() {
     this(null, null);
-  }
-
-  @Override
-  public Encoder<Envelope, Envelope> pull(OutputBuffer<?> output) {
-    return encode(output, this.envelope, this.input);
-  }
-
-  @Override
-  public Encoder<Envelope, Envelope> feed(Envelope envelope) {
-    return new EnvelopeEncoder(envelope);
   }
 
   static Encoder<Envelope, Envelope> encode(OutputBuffer<?> output, Envelope envelope, Encoder<?, ?> input) {
@@ -60,4 +51,15 @@ final class EnvelopeEncoder extends Encoder<Envelope, Envelope> {
     }
     return new EnvelopeEncoder(envelope, input);
   }
+
+  @Override
+  public Encoder<Envelope, Envelope> pull(OutputBuffer<?> output) {
+    return encode(output, this.envelope, this.input);
+  }
+
+  @Override
+  public Encoder<Envelope, Envelope> feed(Envelope envelope) {
+    return new EnvelopeEncoder(envelope);
+  }
+
 }

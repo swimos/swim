@@ -24,6 +24,12 @@ import swim.util.Murmur3;
  * by specialized output producers.
  */
 public class OutputSettings implements Debug {
+
+  private static int hashSeed;
+  private static OutputSettings standard;
+  private static OutputSettings pretty;
+  private static OutputSettings styled;
+  private static OutputSettings prettyStyled;
   protected final String lineSeparator;
   protected final boolean isPretty;
   protected final boolean isStyled;
@@ -32,6 +38,73 @@ public class OutputSettings implements Debug {
     this.lineSeparator = lineSeparator;
     this.isPretty = isPretty;
     this.isStyled = isStyled;
+  }
+
+  /**
+   * Returns {@code OutputSettings} configured with the system line separator,
+   * pretty printing disabled, and styling disabled.
+   */
+  public static final OutputSettings standard() {
+    if (standard == null) {
+      standard = new OutputSettings(Format.lineSeparator(), false, false);
+    }
+    return standard;
+  }
+
+  /**
+   * Returns {@code OutputSettings} configured with the system line separator,
+   * pretty printing enabled, and styling disabled.
+   */
+  public static final OutputSettings pretty() {
+    if (pretty == null) {
+      pretty = new OutputSettings(Format.lineSeparator(), true, false);
+    }
+    return pretty;
+  }
+
+  /**
+   * Returns {@code OutputSettings} configured with the system line separator,
+   * pretty printing disabled, and styling enabled.
+   */
+  public static final OutputSettings styled() {
+    if (styled == null) {
+      styled = new OutputSettings(Format.lineSeparator(), false, true);
+    }
+    return styled;
+  }
+
+  /**
+   * Returns {@code OutputSettings} configured with the system line separator,
+   * pretty printing enabled, and styling enabled.
+   */
+  public static final OutputSettings prettyStyled() {
+    if (prettyStyled == null) {
+      prettyStyled = new OutputSettings(Format.lineSeparator(), true, true);
+    }
+    return prettyStyled;
+  }
+
+  /**
+   * Returns {@code OutputSettings} configured with the given {@code
+   * lineSeparator}, pretty printing enabled if {@code isPretty} is {@code
+   * true}, and styling enabled if {@code isStyled} is {@code true}.
+   */
+  public static final OutputSettings create(String lineSeparator, boolean isPretty, boolean isStyled) {
+    if (lineSeparator == null) {
+      lineSeparator = Format.lineSeparator();
+    }
+    if (Format.lineSeparator().equals(lineSeparator)) {
+      if (!isPretty && !isStyled) {
+        return standard();
+      } else if (isPretty && !isStyled) {
+        return pretty();
+      } else if (!isPretty && isStyled) {
+        return styled();
+      } else {
+        return prettyStyled();
+      }
+    }
+    return new OutputSettings(lineSeparator, isPretty, isStyled);
   }
 
   /**
@@ -132,76 +205,4 @@ public class OutputSettings implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-  private static OutputSettings standard;
-  private static OutputSettings pretty;
-  private static OutputSettings styled;
-  private static OutputSettings prettyStyled;
-
-  /**
-   * Returns {@code OutputSettings} configured with the system line separator,
-   * pretty printing disabled, and styling disabled.
-   */
-  public static final OutputSettings standard() {
-    if (standard == null) {
-      standard = new OutputSettings(Format.lineSeparator(), false, false);
-    }
-    return standard;
-  }
-
-  /**
-   * Returns {@code OutputSettings} configured with the system line separator,
-   * pretty printing enabled, and styling disabled.
-   */
-  public static final OutputSettings pretty() {
-    if (pretty == null) {
-      pretty = new OutputSettings(Format.lineSeparator(), true, false);
-    }
-    return pretty;
-  }
-
-  /**
-   * Returns {@code OutputSettings} configured with the system line separator,
-   * pretty printing disabled, and styling enabled.
-   */
-  public static final OutputSettings styled() {
-    if (styled == null) {
-      styled = new OutputSettings(Format.lineSeparator(), false, true);
-    }
-    return styled;
-  }
-
-  /**
-   * Returns {@code OutputSettings} configured with the system line separator,
-   * pretty printing enabled, and styling enabled.
-   */
-  public static final OutputSettings prettyStyled() {
-    if (prettyStyled == null) {
-      prettyStyled = new OutputSettings(Format.lineSeparator(), true, true);
-    }
-    return prettyStyled;
-  }
-
-  /**
-   * Returns {@code OutputSettings} configured with the given {@code
-   * lineSeparator}, pretty printing enabled if {@code isPretty} is {@code
-   * true}, and styling enabled if {@code isStyled} is {@code true}.
-   */
-  public static final OutputSettings create(String lineSeparator, boolean isPretty, boolean isStyled) {
-    if (lineSeparator == null) {
-      lineSeparator = Format.lineSeparator();
-    }
-    if (Format.lineSeparator().equals(lineSeparator)) {
-      if (!isPretty && !isStyled) {
-        return standard();
-      } else if (isPretty && !isStyled) {
-        return pretty();
-      } else if (!isPretty && isStyled) {
-        return styled();
-      } else {
-        return prettyStyled();
-      }
-    }
-    return new OutputSettings(lineSeparator, isPretty, isStyled);
-  }
 }

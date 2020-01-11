@@ -24,6 +24,7 @@ import swim.structure.Value;
  * Double}.
  */
 public final class DoubleForm extends Form<Double> {
+
   public final Double unit;
 
   public DoubleForm(Double unit) {
@@ -63,4 +64,5 @@ public final class DoubleForm extends Form<Double> {
       return null;
     }
   }
+
 }

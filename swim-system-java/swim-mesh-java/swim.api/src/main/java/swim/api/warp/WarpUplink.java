@@ -27,6 +27,7 @@ import swim.api.warp.function.OnUnlinkedResponse;
 import swim.structure.Value;
 
 public interface WarpUplink extends Uplink, WarpLink {
+
   float prio();
 
   float rate();
@@ -56,4 +57,5 @@ public interface WarpUplink extends Uplink, WarpLink {
   WarpUplink onUnlinked(OnUnlinkedResponse onUnlinked);
 
   WarpUplink didClose(DidClose didClose);
+
 }

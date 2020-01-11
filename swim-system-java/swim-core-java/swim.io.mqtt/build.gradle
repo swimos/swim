@@ -5,8 +5,8 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.io.mqtt'
 
 dependencies {
-  implementation project(':swim-util')
-  api project(':swim-codec')
-  api project(':swim-mqtt')
-  api project(':swim-io')
+    implementation project(':swim-util')
+    api project(':swim-codec')
+    api project(':swim-mqtt')
+    api project(':swim-io')
 }

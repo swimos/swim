@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class LanguageRangeSpec {
+
   public void assertParses(String string, LanguageRange language) {
     HttpAssertions.assertParses(Http.standardParser().languageRangeParser(), string, language);
   }
@@ -46,4 +47,5 @@ public class LanguageRangeSpec {
   public void writeLanguageRangesWithWeights() {
     assertWrites(LanguageRange.from("en", "US", 0.5f), "en-US; q=0.5");
   }
+
 }

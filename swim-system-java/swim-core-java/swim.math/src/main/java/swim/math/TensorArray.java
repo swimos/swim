@@ -20,12 +20,22 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public class TensorArray<V, S> implements Debug {
+
+  private static int hashSeed;
   final TensorSpace<TensorArray<V, S>, S> space;
   final Object[] array;
 
   public TensorArray(TensorSpace<TensorArray<V, S>, S> space, Object... array) {
     this.space = space;
     this.array = array;
+  }
+
+  public static <V, S> TensorArraySpace<TensorArray<V, S>, V, S> space(TensorSpace<V, S> next, TensorDims dims) {
+    return new TensorArrayObjectSpace<V, S>(next, dims);
+  }
+
+  public static <V, S> TensorArraySpace<TensorArray<V, S>, V, S> space(TensorSpace<V, S> next, int n) {
+    return new TensorArrayObjectSpace<V, S>(next, next.dimensions().by(n));
   }
 
   public final TensorSpace<TensorArray<V, S>, S> space() {
@@ -118,13 +128,4 @@ public class TensorArray<V, S> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static <V, S> TensorArraySpace<TensorArray<V, S>, V, S> space(TensorSpace<V, S> next, TensorDims dims) {
-    return new TensorArrayObjectSpace<V, S>(next, dims);
-  }
-
-  public static <V, S> TensorArraySpace<TensorArray<V, S>, V, S> space(TensorSpace<V, S> next, int n) {
-    return new TensorArrayObjectSpace<V, S>(next, next.dimensions().by(n));
-  }
 }

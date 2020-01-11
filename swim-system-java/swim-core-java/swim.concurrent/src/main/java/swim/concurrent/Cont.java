@@ -25,6 +25,7 @@ package swim.concurrent;
  * @see Sync
  */
 public interface Cont<T> {
+
   /**
    * Invoked when the asynchronous operation completes with a {@code value}.
    */
@@ -34,4 +35,5 @@ public interface Cont<T> {
    * Invoked when the asynchronous operation fails with an {@code error}.
    */
   void trap(Throwable error);
+
 }

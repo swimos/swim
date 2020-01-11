@@ -15,4 +15,5 @@
 /**
  * Apache Avro decoder.
  */
+
 package swim.avro.decoder;

@@ -25,10 +25,23 @@ import swim.http.HttpWriter;
 import swim.util.Murmur3;
 
 public final class MaxForwards extends HttpHeader {
+
+  private static int hashSeed;
   final int count;
 
   MaxForwards(int count) {
     this.count = count;
+  }
+
+  public static MaxForwards from(int count) {
+    if (count < 0) {
+      throw new IllegalArgumentException(Integer.toString(count));
+    }
+    return new MaxForwards(count);
+  }
+
+  public static Parser<MaxForwards> parseHttpValue(Input input, HttpParser http) {
+    return MaxForwardsParser.parse(input);
   }
 
   @Override
@@ -75,16 +88,4 @@ public final class MaxForwards extends HttpHeader {
         .debug(this.count).write(')');
   }
 
-  private static int hashSeed;
-
-  public static MaxForwards from(int count) {
-    if (count < 0) {
-      throw new IllegalArgumentException(Integer.toString(count));
-    }
-    return new MaxForwards(count);
-  }
-
-  public static Parser<MaxForwards> parseHttpValue(Input input, HttpParser http) {
-    return MaxForwardsParser.parse(input);
-  }
 }

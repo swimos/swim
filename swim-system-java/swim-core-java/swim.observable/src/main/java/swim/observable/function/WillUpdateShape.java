@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface WillUpdateShape<K, S, V> extends Preemptive {
+
   V willUpdate(K key, S shape, V newValue);
+
 }

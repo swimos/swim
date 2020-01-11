@@ -19,6 +19,7 @@ import swim.concurrent.Conts;
 import swim.structure.Value;
 
 public class UTreeValue {
+
   final Trunk<UTree> trunk;
 
   public UTreeValue(Trunk<UTree> trunk) {
@@ -186,4 +187,5 @@ public class UTreeValue {
   public Chunk commit(Commit commit) throws InterruptedException {
     return this.trunk.commit(commit);
   }
+
 }

@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class MqttPublishDecoder<T> extends Decoder<MqttPublish<T>> {
+
   final MqttDecoder mqtt;
   final Decoder<T> payload;
   final int packetFlags;
@@ -40,12 +41,6 @@ final class MqttPublishDecoder<T> extends Decoder<MqttPublish<T>> {
 
   MqttPublishDecoder(MqttDecoder mqtt, Decoder<T> payload) {
     this(mqtt, payload, 0, null, 0, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttPublish<T>> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.payload, this.packetFlags,
-                  this.topicName, this.packetId, this.remaining, this.step);
   }
 
   static <T> Decoder<MqttPublish<T>> decode(InputBuffer input, MqttDecoder mqtt, Decoder<T> payload,
@@ -127,7 +122,7 @@ final class MqttPublishDecoder<T> extends Decoder<MqttPublish<T>> {
     }
     if (step == 10 && remaining == 0) {
       return done(mqtt.publish(packetFlags, topicName.bind(), packetId,
-                               MqttValue.from(payload.bind())));
+          MqttValue.from(payload.bind())));
     }
     if (remaining < 0) {
       return error(new MqttException("packet length too short"));
@@ -143,4 +138,11 @@ final class MqttPublishDecoder<T> extends Decoder<MqttPublish<T>> {
                                             Decoder<T> payload) {
     return decode(input, mqtt, payload, 0, null, 0, 0, 1);
   }
+
+  @Override
+  public Decoder<MqttPublish<T>> feed(InputBuffer input) {
+    return decode(input, this.mqtt, this.payload, this.packetFlags,
+        this.topicName, this.packetId, this.remaining, this.step);
+  }
+
 }

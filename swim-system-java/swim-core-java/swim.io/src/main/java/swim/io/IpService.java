@@ -17,7 +17,7 @@ package swim.io;
 /**
  * Network service listener that handles asynchronous I/O operations for a
  * non-blocking NIO server socket channel.
- *
+ * <p>
  * An {@code IpService} interfaces with the underlying asynchronous networking
  * system via an {@link IpServiceContext}.  The service context invokes I/O
  * callbacks on the {@code IpService} when the underlying server socket is
@@ -25,6 +25,7 @@ package swim.io;
  * FlowControl}.
  */
 public interface IpService {
+
   /**
    * Returns the network listener context to which this {@code IpService} is
    * bound; returns {@code null} if this {@code IpService} is unbound.
@@ -66,4 +67,5 @@ public interface IpService {
    * automatically be closed.
    */
   void didFail(Throwable error);
+
 }

@@ -32,6 +32,7 @@ import swim.util.Log;
  * {@link Agent}.
  */
 public interface AgentContext extends SwimRef, LaneFactory, Store, Log {
+
   /**
    * The {@code hostUri} of the {@code Agent} managed by this {@code
    * AgentContext}.
@@ -128,4 +129,5 @@ public interface AgentContext extends SwimRef, LaneFactory, Store, Log {
   void closeAgent(Value id);
 
   void closeAgent(String name);
+
 }

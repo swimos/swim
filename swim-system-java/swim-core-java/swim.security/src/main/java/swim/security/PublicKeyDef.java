@@ -22,7 +22,6 @@ import swim.structure.Item;
 import swim.structure.Kind;
 
 public abstract class PublicKeyDef extends KeyDef {
-  public abstract PublicKey publicKey();
 
   private static Form<PublicKeyDef> publicKeyForm;
 
@@ -42,9 +41,13 @@ public abstract class PublicKeyDef extends KeyDef {
     }
     return publicKeyForm;
   }
+
+  public abstract PublicKey publicKey();
+
 }
 
 final class PublicKeyForm extends Form<PublicKeyDef> {
+
   @Override
   public Class<?> type() {
     return PublicKeyDef.class;
@@ -67,4 +70,5 @@ final class PublicKeyForm extends Form<PublicKeyDef> {
     }
     return null;
   }
+
 }

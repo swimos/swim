@@ -21,6 +21,7 @@ import swim.http.HttpHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class ConnectionSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -40,4 +41,5 @@ public class ConnectionSpec {
     assertWrites(Connection.upgrade(), "Connection: Upgrade");
     assertWrites(Connection.from("Upgrade", "HTTP2-Settings"), "Connection: Upgrade, HTTP2-Settings");
   }
+
 }

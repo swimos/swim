@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class RecordMapViewImmutableSpec {
+
   @Test(expectedExceptions = UnsupportedOperationException.class)
   public void testImmutableViewPut() {
     final Record xs = Record.of().attr("k", "v").slot("a", "b").slot("c", "d");
@@ -275,4 +276,5 @@ public class RecordMapViewImmutableSpec {
     assertEquals(xss, Record.of("b", "c"));
     assertEquals(yss, Record.empty());
   }
+
 }

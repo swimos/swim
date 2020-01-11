@@ -22,6 +22,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class JoinMapLaneDownlink<K, V> extends MapDownlinkView<K, V> {
+
   protected final JoinMapLaneModel laneModel;
   protected final Value key;
 
@@ -30,7 +31,7 @@ public class JoinMapLaneDownlink<K, V> extends MapDownlinkView<K, V> {
                              float prio, float rate, Value body, int flags, Form<K> keyForm,
                              Form<V> valueForm, Object observers) {
     super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-          body, flags, keyForm, valueForm, observers);
+        body, flags, keyForm, valueForm, observers);
     this.laneModel = laneModel;
     this.key = key;
   }
@@ -39,73 +40,73 @@ public class JoinMapLaneDownlink<K, V> extends MapDownlinkView<K, V> {
                              Value key, Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                              float prio, float rate, Value body, Form<K> keyForm, Form<V> valueForm) {
     this(cellContext, stage, laneModel, key, meshUri, hostUri, nodeUri, laneUri,
-         prio, rate, body, KEEP_LINKED | KEEP_SYNCED, keyForm, valueForm, null);
+        prio, rate, body, KEEP_LINKED | KEEP_SYNCED, keyForm, valueForm, null);
   }
 
   @Override
   public MapDownlinkView<K, V> hostUri(Uri hostUri) {
     return new JoinMapLaneDownlink<K, V>(this.cellContext, this.stage, this.laneModel,
-                                         this.key,  this.meshUri, hostUri, this.nodeUri,
-                                         this.laneUri, this.prio, this.rate, this.body,
-                                         this.flags, this.keyForm, this.valueForm, this.observers);
+        this.key, this.meshUri, hostUri, this.nodeUri,
+        this.laneUri, this.prio, this.rate, this.body,
+        this.flags, this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> nodeUri(Uri nodeUri) {
     return new JoinMapLaneDownlink<K, V>(this.cellContext, this.stage, this.laneModel,
-                                         this.key, this.meshUri, this.hostUri, nodeUri,
-                                         this.laneUri, this.prio, this.rate, this.body,
-                                         this.flags, this.keyForm, this.valueForm, this.observers);
+        this.key, this.meshUri, this.hostUri, nodeUri,
+        this.laneUri, this.prio, this.rate, this.body,
+        this.flags, this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> laneUri(Uri laneUri) {
     return new JoinMapLaneDownlink<K, V>(this.cellContext, this.stage, this.laneModel,
-                                         this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                         laneUri, this.prio, this.rate, this.body,
-                                         this.flags, this.keyForm, this.valueForm, this.observers);
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        laneUri, this.prio, this.rate, this.body,
+        this.flags, this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> prio(float prio) {
     return new JoinMapLaneDownlink<K, V>(this.cellContext, this.stage, this.laneModel,
-                                         this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                         this.laneUri, prio, this.rate, this.body,
-                                         this.flags, this.keyForm, this.valueForm, this.observers);
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        this.laneUri, prio, this.rate, this.body,
+        this.flags, this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> rate(float rate) {
     return new JoinMapLaneDownlink<K, V>(this.cellContext, this.stage, this.laneModel,
-                                         this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                         this.laneUri, this.prio, rate, this.body,
-                                         this.flags, this.keyForm, this.valueForm, this.observers);
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        this.laneUri, this.prio, rate, this.body,
+        this.flags, this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> body(Value body) {
     return new JoinMapLaneDownlink<K, V>(this.cellContext, this.stage, this.laneModel,
-                                         this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                         this.laneUri, this.prio, this.rate, body,
-                                         this.flags, this.keyForm, this.valueForm, this.observers);
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        this.laneUri, this.prio, this.rate, body,
+        this.flags, this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public <K2> MapDownlinkView<K2, V> keyForm(Form<K2> keyForm) {
     return new JoinMapLaneDownlink<K2, V>(this.cellContext, this.stage, this.laneModel,
-                                          this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                          this.laneUri, this.prio, this.rate, this.body,
-                                          this.flags, keyForm, this.valueForm,
-                                          typesafeObservers(this.observers));
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        this.laneUri, this.prio, this.rate, this.body,
+        this.flags, keyForm, this.valueForm,
+        typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> MapDownlinkView<K, V2> valueForm(Form<V2> valueForm) {
     return new JoinMapLaneDownlink<K, V2>(this.cellContext, this.stage, this.laneModel,
-                                          this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                          this.laneUri, this.prio, this.rate, this.body,
-                                          this.flags, this.keyForm, valueForm,
-                                          typesafeObservers(this.observers));
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        this.laneUri, this.prio, this.rate, this.body,
+        this.flags, this.keyForm, valueForm,
+        typesafeObservers(this.observers));
   }
 
   @Override
@@ -161,4 +162,5 @@ public class JoinMapLaneDownlink<K, V> extends MapDownlinkView<K, V> {
   protected void openDownlink() {
     super.open();
   }
+
 }

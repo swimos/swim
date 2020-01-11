@@ -22,6 +22,7 @@ import swim.structure.Slot;
 import swim.structure.Value;
 
 public class ProtobufDecoderSpec {
+
   public static void assertDecodes(Data data, Value value) {
     Assertions.assertDecodes(Protobuf.structureDecoder().payloadDecoder(), data, value);
   }
@@ -34,12 +35,13 @@ public class ProtobufDecoderSpec {
   @Test
   public void decodeTextFields() {
     assertDecodes(Data.fromBase16("120774657374696E67"),
-                  Record.of(Slot.of(Num.from(2), "testing")));
+        Record.of(Slot.of(Num.from(2), "testing")));
   }
 
   @Test
   public void decodeMessageFields() {
     assertDecodes(Data.fromBase16("1A03089601"),
-                  Record.of(Slot.of(Num.from(3), Record.of(Slot.of(Num.from(1), 150)))));
+        Record.of(Slot.of(Num.from(3), Record.of(Slot.of(Num.from(1), 150)))));
   }
+
 }

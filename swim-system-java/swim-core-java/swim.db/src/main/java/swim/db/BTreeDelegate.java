@@ -17,6 +17,7 @@ package swim.db;
 import swim.structure.Value;
 
 public interface BTreeDelegate extends TreeDelegate {
+
   void btreeDidUpdate(BTree newTree, BTree oldTree, Value key, Value newValue, Value oldValue);
 
   void btreeDidRemove(BTree newTree, BTree oldTree, Value key, Value oldValue);
@@ -24,4 +25,5 @@ public interface BTreeDelegate extends TreeDelegate {
   void btreeDidDrop(BTree newTree, BTree oldTree, long lower);
 
   void btreeDidTake(BTree newTree, BTree oldTree, long upper);
+
 }

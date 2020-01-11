@@ -23,6 +23,7 @@ import swim.uri.Uri;
 import swim.ws.WsRequest;
 
 public class SecureWarpSocketSpec extends WarpSocketBehaviors {
+
   final WarpSettings warpSettings = WarpSettings.standard().tlsSettings(TestTlsSettings.tlsSettings());
   final Uri wsUri = Uri.parse("ws://127.0.0.1:23555/");
 
@@ -43,4 +44,5 @@ public class SecureWarpSocketSpec extends WarpSocketBehaviors {
     };
     return endpoint.connectHttps("127.0.0.1", 23555, client, this.warpSettings.httpSettings());
   }
+
 }

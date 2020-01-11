@@ -19,6 +19,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class UriAuthorityParser extends Parser<UriAuthority> {
+
   final UriParser uri;
   final Parser<UriUser> userParser;
   final Parser<UriHost> hostParser;
@@ -36,11 +37,6 @@ final class UriAuthorityParser extends Parser<UriAuthority> {
 
   UriAuthorityParser(UriParser uri) {
     this(uri, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<UriAuthority> feed(Input input) {
-    return parse(input, this.uri, this.userParser, this.hostParser, this.portParser, this.step);
   }
 
   static Parser<UriAuthority> parse(Input input, UriParser uri, Parser<UriUser> userParser,
@@ -95,7 +91,7 @@ final class UriAuthorityParser extends Parser<UriAuthority> {
           step = 4;
         } else if (!input.isEmpty()) {
           return done(uri.authority(userParser != null ? userParser.bind() : null,
-                                    hostParser.bind(), null));
+              hostParser.bind(), null));
         }
       } else if (hostParser.isError()) {
         return hostParser.asError();
@@ -109,8 +105,8 @@ final class UriAuthorityParser extends Parser<UriAuthority> {
       }
       if (portParser.isDone()) {
         return done(uri.authority(userParser != null ? userParser.bind() : null,
-                                  hostParser != null ? hostParser.bind() : null,
-                                  portParser.bind()));
+            hostParser != null ? hostParser.bind() : null,
+            portParser.bind()));
       } else if (portParser.isError()) {
         return portParser.asError();
       }
@@ -124,4 +120,10 @@ final class UriAuthorityParser extends Parser<UriAuthority> {
   static Parser<UriAuthority> parse(Input input, UriParser uri) {
     return parse(input, uri, null, null, null, 1);
   }
+
+  @Override
+  public Parser<UriAuthority> feed(Input input) {
+    return parse(input, this.uri, this.userParser, this.hostParser, this.portParser, this.step);
+  }
+
 }

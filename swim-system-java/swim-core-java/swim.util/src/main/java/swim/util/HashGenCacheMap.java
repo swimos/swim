@@ -37,6 +37,35 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
  * cache generations.</p>
  */
 public class HashGenCacheMap<K, V> {
+
+  static final SoftReference<Object> NULL_REF = new SoftReference<Object>(null);
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenCacheMapBucket<?, ?>> BUCKET_GEN4_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMapBucket<?, ?>>) (Class<?>) HashGenCacheMapBucket.class, "gen4Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenCacheMapBucket<?, ?>> BUCKET_GEN3_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMapBucket<?, ?>>) (Class<?>) HashGenCacheMapBucket.class, "gen3Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenCacheMapBucket<?, ?>> BUCKET_GEN2_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMapBucket<?, ?>>) (Class<?>) HashGenCacheMapBucket.class, "gen2Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenCacheMapBucket<?, ?>> BUCKET_GEN1_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMapBucket<?, ?>>) (Class<?>) HashGenCacheMapBucket.class, "gen1Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenCacheMap<?, ?>> GEN4_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMap<?, ?>>) (Class<?>) HashGenCacheMap.class, "gen4Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenCacheMap<?, ?>> GEN3_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMap<?, ?>>) (Class<?>) HashGenCacheMap.class, "gen3Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenCacheMap<?, ?>> GEN2_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMap<?, ?>>) (Class<?>) HashGenCacheMap.class, "gen2Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenCacheMap<?, ?>> GEN1_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMap<?, ?>>) (Class<?>) HashGenCacheMap.class, "gen1Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenCacheMap<?, ?>> MISSES =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMap<?, ?>>) (Class<?>) HashGenCacheMap.class, "misses");
   final AtomicReferenceArray<HashGenCacheMapBucket<K, V>> buckets;
   volatile int gen4Hits;
   volatile int gen3Hits;
@@ -46,6 +75,19 @@ public class HashGenCacheMap<K, V> {
 
   public HashGenCacheMap(int size) {
     this.buckets = new AtomicReferenceArray<HashGenCacheMapBucket<K, V>>(size);
+  }
+
+  static final <T> WeakReference<T> weakRef(Reference<T> ref) {
+    if (ref instanceof WeakReference<?>) {
+      return (WeakReference<T>) ref;
+    } else {
+      return new WeakReference<T>(ref.get());
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  static final <T> SoftReference<T> nullRef() {
+    return (SoftReference<T>) NULL_REF;
   }
 
   public V get(K key) {
@@ -77,10 +119,10 @@ public class HashGenCacheMap<K, V> {
         GEN3_HITS.incrementAndGet(this);
         if (BUCKET_GEN3_WEIGHT.incrementAndGet(bucket) > bucket.gen4Weight) {
           this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                           bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                           bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                           bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                           bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
+              bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+              bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+              bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+              bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
         }
         return gen3Val;
       } else {
@@ -95,10 +137,10 @@ public class HashGenCacheMap<K, V> {
         GEN2_HITS.incrementAndGet(this);
         if (BUCKET_GEN2_WEIGHT.incrementAndGet(bucket) > bucket.gen3Weight) {
           this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                           bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                           bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                           bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                           bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
+              bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+              bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+              bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+              bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
         }
         return gen2Val;
       } else {
@@ -113,10 +155,10 @@ public class HashGenCacheMap<K, V> {
         GEN1_HITS.incrementAndGet(this);
         if (BUCKET_GEN1_WEIGHT.incrementAndGet(bucket) > bucket.gen2Weight) {
           this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                           bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                           bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                           bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                           bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight));
+              bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+              bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+              bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+              bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight));
         }
         return gen1Val;
       } else {
@@ -158,10 +200,10 @@ public class HashGenCacheMap<K, V> {
         GEN3_HITS.incrementAndGet(this);
         if (BUCKET_GEN3_WEIGHT.incrementAndGet(bucket) > bucket.gen4Weight) {
           this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                           bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                           bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                           bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                           bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
+              bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+              bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+              bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+              bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
         }
         return gen3Val;
       } else {
@@ -177,10 +219,10 @@ public class HashGenCacheMap<K, V> {
         GEN2_HITS.incrementAndGet(this);
         if (BUCKET_GEN2_WEIGHT.incrementAndGet(bucket) > bucket.gen3Weight) {
           this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                           bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                           bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                           bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                           bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
+              bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+              bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+              bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+              bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
         }
         return gen2Val;
       } else {
@@ -196,10 +238,10 @@ public class HashGenCacheMap<K, V> {
         GEN1_HITS.incrementAndGet(this);
         if (BUCKET_GEN1_WEIGHT.incrementAndGet(bucket) > bucket.gen2Weight) {
           this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                           bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                           bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                           bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                           bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight));
+              bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+              bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+              bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+              bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight));
         }
         return gen1Val;
       } else {
@@ -211,37 +253,37 @@ public class HashGenCacheMap<K, V> {
     MISSES.incrementAndGet(this);
     if (gen4Key == null) {
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                       bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                       bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                       new SoftReference<K>(key), new SoftReference<V>(value), 1));
+          bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+          bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+          bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+          new SoftReference<K>(key), new SoftReference<V>(value), 1));
     } else if (gen3Key == null) {
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                       bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                       bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                       new SoftReference<K>(key), new SoftReference<V>(value), 1));
+          bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+          bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+          bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+          new SoftReference<K>(key), new SoftReference<V>(value), 1));
     } else if (gen2Key == null) {
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                       bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                       bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                       new SoftReference<K>(key), new SoftReference<V>(value), 1));
+          bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+          bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+          bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+          new SoftReference<K>(key), new SoftReference<V>(value), 1));
     } else if (gen1Key == null) {
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                       bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                       bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                       new SoftReference<K>(key), new SoftReference<V>(value), 1));
+          bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+          bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+          bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+          new SoftReference<K>(key), new SoftReference<V>(value), 1));
     } else {
       // Penalize older gens for thrash. Promote gen1 to prevent nacent gens
       // from flip-flopping. If sacrificed gen2 was worth keeping, it likely
       // would have already been promoted.
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight - 1,
-                       bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight - 1,
-                       bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                       new SoftReference<K>(key), new SoftReference<V>(value), 1));
+          bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight - 1,
+          bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight - 1,
+          bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+          new SoftReference<K>(key), new SoftReference<V>(value), 1));
     }
 
     return value;
@@ -262,10 +304,10 @@ public class HashGenCacheMap<K, V> {
       final V gen4Val = bucket.gen4ValRef.get();
       if (gen4Val != null) {
         this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                         weakRef(bucket.gen4KeyRef), weakRef(bucket.gen4ValRef), bucket.gen4Weight,
-                         bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                         bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                         bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
+            weakRef(bucket.gen4KeyRef), weakRef(bucket.gen4ValRef), bucket.gen4Weight,
+            bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+            bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+            bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
         return true;
       } else {
         bucket.gen4KeyRef.clear();
@@ -278,10 +320,10 @@ public class HashGenCacheMap<K, V> {
       final V gen3Val = bucket.gen3ValRef.get();
       if (gen3Val != null) {
         this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                         bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                         weakRef(bucket.gen3KeyRef), weakRef(bucket.gen3ValRef), bucket.gen3Weight,
-                         bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                         bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
+            bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+            weakRef(bucket.gen3KeyRef), weakRef(bucket.gen3ValRef), bucket.gen3Weight,
+            bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+            bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
         return true;
       } else {
         bucket.gen3KeyRef.clear();
@@ -294,10 +336,10 @@ public class HashGenCacheMap<K, V> {
       final V gen2Val = bucket.gen2ValRef.get();
       if (gen2Val != null) {
         this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                         bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                         bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                         weakRef(bucket.gen2KeyRef), weakRef(bucket.gen2ValRef), bucket.gen2Weight,
-                         bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
+            bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+            bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+            weakRef(bucket.gen2KeyRef), weakRef(bucket.gen2ValRef), bucket.gen2Weight,
+            bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight));
         return true;
       } else {
         bucket.gen2KeyRef.clear();
@@ -310,10 +352,10 @@ public class HashGenCacheMap<K, V> {
       final V gen1Val = bucket.gen1ValRef.get();
       if (gen1Val != null) {
         this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                         bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                         bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                         bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                         weakRef(bucket.gen1KeyRef), weakRef(bucket.gen1ValRef), bucket.gen1Weight));
+            bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+            bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+            bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+            weakRef(bucket.gen1KeyRef), weakRef(bucket.gen1ValRef), bucket.gen1Weight));
         return true;
       } else {
         bucket.gen1KeyRef.clear();
@@ -323,28 +365,28 @@ public class HashGenCacheMap<K, V> {
 
     if (gen4Key == null) {
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                       bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                       bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                       HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 1));
+          bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+          bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+          bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+          HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 1));
     } else if (gen3Key == null) {
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                       bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                       bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                       HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 1));
+          bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+          bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+          bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+          HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 1));
     } else if (gen2Key == null) {
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                       bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                       bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                       HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 1));
+          bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+          bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+          bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+          HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 1));
     } else if (gen1Key == null) {
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                       bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                       bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                       HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 1));
+          bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+          bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+          bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+          HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 1));
     }
 
     return false;
@@ -364,10 +406,10 @@ public class HashGenCacheMap<K, V> {
     if (gen4Key != null && key.equals(gen4Key)) {
       final V gen4Val = bucket.gen4ValRef.get();
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                       bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                       bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                       HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0));
+          bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+          bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+          bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+          HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0));
       return gen4Val;
     }
 
@@ -375,10 +417,10 @@ public class HashGenCacheMap<K, V> {
     if (gen3Key != null && key.equals(gen3Key)) {
       final V gen3Val = bucket.gen3ValRef.get();
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                       bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                       bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                       HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0));
+          bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+          bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+          bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+          HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0));
       return gen3Val;
     }
 
@@ -386,10 +428,10 @@ public class HashGenCacheMap<K, V> {
     if (gen2Key != null && key.equals(gen2Key)) {
       final V gen2Val = bucket.gen2ValRef.get();
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                       bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                       bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
-                       HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0));
+          bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+          bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+          bucket.gen1KeyRef, bucket.gen1ValRef, bucket.gen1Weight,
+          HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0));
       return gen2Val;
     }
 
@@ -397,10 +439,10 @@ public class HashGenCacheMap<K, V> {
     if (gen1Key != null && key.equals(gen1Key)) {
       final V gen1Val = bucket.gen1ValRef.get();
       this.buckets.set(index, new HashGenCacheMapBucket<K, V>(
-                       bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
-                       bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
-                       bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
-                       HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0));
+          bucket.gen4KeyRef, bucket.gen4ValRef, bucket.gen4Weight,
+          bucket.gen3KeyRef, bucket.gen3ValRef, bucket.gen3Weight,
+          bucket.gen2KeyRef, bucket.gen2ValRef, bucket.gen2Weight,
+          HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0));
       return gen1Val;
     }
 
@@ -422,59 +464,10 @@ public class HashGenCacheMap<K, V> {
     return hits / (hits + (double) this.misses);
   }
 
-  static final <T> WeakReference<T> weakRef(Reference<T> ref) {
-    if (ref instanceof WeakReference<?>) {
-      return (WeakReference<T>) ref;
-    } else {
-      return new WeakReference<T>(ref.get());
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  static final <T> SoftReference<T> nullRef() {
-    return (SoftReference<T>) NULL_REF;
-  }
-
-  static final SoftReference<Object> NULL_REF = new SoftReference<Object>(null);
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenCacheMapBucket<?, ?>> BUCKET_GEN4_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMapBucket<?, ?>>) (Class<?>) HashGenCacheMapBucket.class, "gen4Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenCacheMapBucket<?, ?>> BUCKET_GEN3_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMapBucket<?, ?>>) (Class<?>) HashGenCacheMapBucket.class, "gen3Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenCacheMapBucket<?, ?>> BUCKET_GEN2_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMapBucket<?, ?>>) (Class<?>) HashGenCacheMapBucket.class, "gen2Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenCacheMapBucket<?, ?>> BUCKET_GEN1_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMapBucket<?, ?>>) (Class<?>) HashGenCacheMapBucket.class, "gen1Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenCacheMap<?, ?>> GEN4_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMap<?, ?>>) (Class<?>) HashGenCacheMap.class, "gen4Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenCacheMap<?, ?>> GEN3_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMap<?, ?>>) (Class<?>) HashGenCacheMap.class, "gen3Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenCacheMap<?, ?>> GEN2_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMap<?, ?>>) (Class<?>) HashGenCacheMap.class, "gen2Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenCacheMap<?, ?>> GEN1_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMap<?, ?>>) (Class<?>) HashGenCacheMap.class, "gen1Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenCacheMap<?, ?>> MISSES =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenCacheMap<?, ?>>) (Class<?>) HashGenCacheMap.class, "misses");
 }
 
 final class HashGenCacheMapBucket<K, V> {
+
   final Reference<K> gen4KeyRef;
   final Reference<V> gen4ValRef;
   final Reference<K> gen3KeyRef;
@@ -509,8 +502,9 @@ final class HashGenCacheMapBucket<K, V> {
 
   HashGenCacheMapBucket() {
     this(HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0,
-         HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0,
-         HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0,
-         HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0);
+        HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0,
+        HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0,
+        HashGenCacheMap.<K>nullRef(), HashGenCacheMap.<V>nullRef(), 0);
   }
+
 }

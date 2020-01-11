@@ -15,4 +15,5 @@
 /**
  * Structurally typed CSV schema.
  */
+
 package swim.csv.structure;

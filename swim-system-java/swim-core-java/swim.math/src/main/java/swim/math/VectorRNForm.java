@@ -19,6 +19,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 final class VectorRNForm extends TensorForm<VectorRN> {
+
   @Override
   public String tag() {
     return "vector";
@@ -160,4 +161,5 @@ final class VectorRNForm extends TensorForm<VectorRN> {
       }
     }
   }
+
 }

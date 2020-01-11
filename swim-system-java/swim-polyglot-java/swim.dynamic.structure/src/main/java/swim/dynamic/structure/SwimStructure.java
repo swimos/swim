@@ -20,12 +20,8 @@ import swim.dynamic.JavaHostLibrary;
 import swim.dynamic.JavaHostPackage;
 
 public final class SwimStructure {
-  private SwimStructure() {
-    // static
-  }
 
   public static final HostPackage PACKAGE;
-
   public static final HostLibrary LIBRARY;
 
   static {
@@ -48,4 +44,9 @@ public final class SwimStructure {
     LIBRARY = hostLib;
     hostLib.addHostPackage(SwimStructure.PACKAGE);
   }
+
+  private SwimStructure() {
+    // static
+  }
+
 }

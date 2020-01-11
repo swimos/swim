@@ -23,6 +23,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class SyncSpec {
+
   @Test
   public void awaitBind() throws InterruptedException {
     final Object result = new Object();
@@ -46,16 +47,20 @@ public class SyncSpec {
 
   @Test
   public void awaitTimeout() throws InterruptedException {
-    final long timeout = 200L;
-    final Sync<Object> sync = new Sync<Object>();
-    final long t0 = System.currentTimeMillis();
+    long timeout = 200L;
+    final Sync<Object> sync = new Sync<>();
+    final long t0 = System.nanoTime();
+
     try {
       sync.await(timeout);
       fail();
     } catch (SyncException e) {
-      final long dt = System.currentTimeMillis() - t0;
-      assertTrue(dt > timeout);
-      assertTrue(dt < 2L * timeout);
+      final long dt = System.nanoTime() - t0;
+
+      timeout *= 1e6;
+
+      assertTrue(dt > timeout, "Timeout too soon: dt: " + dt);
+      assertTrue(dt < 3L * timeout, "long too soon: dt: " + dt);
     }
   }
 
@@ -89,4 +94,5 @@ public class SyncSpec {
       shutdown.await();
     }
   }
+
 }

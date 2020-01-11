@@ -18,6 +18,35 @@ import java.util.ListIterator;
 import java.util.Map;
 
 public interface Cursor<T> extends ListIterator<T> {
+
+  static <T> Cursor<T> empty() {
+    return new CursorEmpty<T>();
+  }
+
+  static <T> Cursor<T> unary(T value) {
+    return new CursorUnary<T>(value);
+  }
+
+  static <T> Cursor<T> array(Object[] array, int index, int limit) {
+    return new CursorArray<T>(array, index, limit);
+  }
+
+  static <T> Cursor<T> array(Object[] array, int index) {
+    return new CursorArray<T>(array, index, array.length);
+  }
+
+  static <T> Cursor<T> array(Object[] array) {
+    return new CursorArray<T>(array, 0, array.length);
+  }
+
+  static <K> Cursor<K> keys(Cursor<? extends Map.Entry<? extends K, ?>> entries) {
+    return new CursorKeys<K>(entries);
+  }
+
+  static <V> Cursor<V> values(Cursor<? extends Map.Entry<?, ? extends V>> entries) {
+    return new CursorValues<V>(entries);
+  }
+
   boolean isEmpty();
 
   T head();
@@ -79,31 +108,4 @@ public interface Cursor<T> extends ListIterator<T> {
     // stub
   }
 
-  static <T> Cursor<T> empty() {
-    return new CursorEmpty<T>();
-  }
-
-  static <T> Cursor<T> unary(T value) {
-    return new CursorUnary<T>(value);
-  }
-
-  static <T> Cursor<T> array(Object[] array, int index, int limit) {
-    return new CursorArray<T>(array, index, limit);
-  }
-
-  static <T> Cursor<T> array(Object[] array, int index) {
-    return new CursorArray<T>(array, index, array.length);
-  }
-
-  static <T> Cursor<T> array(Object[] array) {
-    return new CursorArray<T>(array, 0, array.length);
-  }
-
-  static <K> Cursor<K> keys(Cursor<? extends Map.Entry<? extends K, ?>> entries) {
-    return new CursorKeys<K>(entries);
-  }
-
-  static <V> Cursor<V> values(Cursor<? extends Map.Entry<?, ? extends V>> entries) {
-    return new CursorValues<V>(entries);
-  }
 }

@@ -20,9 +20,6 @@ import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
 
 public final class HostIterable {
-  private HostIterable() {
-    // static
-  }
 
   public static final HostObjectType<Iterable<Object>> TYPE;
 
@@ -32,9 +29,15 @@ public final class HostIterable {
     type.inheritType(HostObject.TYPE);
     type.addMember(new HostIterableIterator());
   }
+
+  private HostIterable() {
+    // static
+  }
+
 }
 
 final class HostIterableIterator implements HostMethod<Iterable<Object>> {
+
   @Override
   public String key() {
     return "iterator";
@@ -44,4 +47,5 @@ final class HostIterableIterator implements HostMethod<Iterable<Object>> {
   public Object invoke(Bridge bridge, Iterable<Object> iterable, Object... arguments) {
     return iterable.iterator();
   }
+
 }

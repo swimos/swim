@@ -5,11 +5,11 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.ws'
 
 dependencies {
-  implementation project(':swim-util')
-  api project(':swim-codec')
-  api project(':swim-structure')
-  api project(':swim-collections')
-  api project(':swim-uri')
-  api project(':swim-deflate')
-  api project(':swim-http')
+    implementation project(':swim-util')
+    api project(':swim-codec')
+    api project(':swim-structure')
+    api project(':swim-collections')
+    api project(':swim-uri')
+    api project(':swim-deflate')
+    api project(':swim-http')
 }

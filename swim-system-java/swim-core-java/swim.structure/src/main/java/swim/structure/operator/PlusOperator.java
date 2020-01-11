@@ -25,6 +25,9 @@ import swim.util.Murmur3;
  * two operands.
  */
 public final class PlusOperator extends BinaryOperator {
+
+  private static int hashSeed;
+
   public PlusOperator(Item operand1, Item operand2) {
     super(operand1, operand2);
   }
@@ -102,5 +105,4 @@ public final class PlusOperator extends BinaryOperator {
     output.debug(this.operand1).write('.').write("plus").write('(').debug(this.operand2).write(')');
   }
 
-  private static int hashSeed;
 }

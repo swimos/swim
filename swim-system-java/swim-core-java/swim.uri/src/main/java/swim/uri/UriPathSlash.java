@@ -18,6 +18,7 @@ import swim.codec.Format;
 import swim.codec.Output;
 
 final class UriPathSlash extends UriPath {
+
   UriPath tail;
   String string;
 
@@ -139,4 +140,5 @@ final class UriPathSlash extends UriPath {
     }
     return this.string;
   }
+
 }

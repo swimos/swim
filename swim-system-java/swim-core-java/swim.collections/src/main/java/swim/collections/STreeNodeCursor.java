@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import swim.util.Cursor;
 
 final class STreeNodeCursor<T> implements Cursor<Map.Entry<Object, T>> {
+
   final STreePage<T>[] pages;
   long index;
   int pageIndex;
@@ -245,4 +246,5 @@ final class STreeNodeCursor<T> implements Cursor<Map.Entry<Object, T>> {
   public void remove() {
     this.pageCursor.remove();
   }
+
 }

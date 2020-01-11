@@ -17,6 +17,7 @@ package swim.ws;
 import swim.deflate.Deflate;
 
 final class WsDeflateEncoderMaskedTest extends WsDeflateEncoder {
+
   final byte[] maskingKey;
 
   WsDeflateEncoderMaskedTest(byte[] maskingKey, Deflate<?> deflate, int flush) {
@@ -37,4 +38,5 @@ final class WsDeflateEncoderMaskedTest extends WsDeflateEncoder {
   public void maskingKey(byte[] maskingKey) {
     System.arraycopy(this.maskingKey, 0, maskingKey, 0, 4);
   }
+
 }

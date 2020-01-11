@@ -20,6 +20,7 @@ import swim.structure.Value;
 import swim.util.Builder;
 
 public interface CsvStructureCol extends CsvCol<Item> {
+
   Value key();
 
   CsvStructureCol key(Value key);
@@ -34,4 +35,5 @@ public interface CsvStructureCol extends CsvCol<Item> {
 
   @Override
   void addCell(Item cell, Builder<Item, ?> rowBuilder);
+
 }

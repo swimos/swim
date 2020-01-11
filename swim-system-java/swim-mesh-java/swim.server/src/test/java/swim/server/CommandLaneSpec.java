@@ -46,75 +46,70 @@ import swim.warp.CommandMessage;
 import static org.testng.Assert.assertEquals;
 
 public class CommandLaneSpec {
-  static class TestCommandLaneAgent extends AbstractAgent {
-    @SwimLane("command")
-    CommandLane<String> testValue = commandLane()
-        .valueClass(String.class)
-        .onCommand(new OnCommand<String>() {
-          @Override
-          public void onCommand(String value) {
-            System.out.println("lane onCommand value: " + Format.debug(value));
-          }
-        });
-  }
-
-  static class TestCommandPlane extends AbstractPlane {
-    @SwimRoute("/command/:name")
-    AgentRoute<TestCommandLaneAgent> commandAgent;
-  }
 
   @Test
   public void testLinkToCommandLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestCommandPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-                                         .openPlane("test", TestCommandPlane.class);
+        .openPlane("test", TestCommandPlane.class);
 
     final CountDownLatch commandDidSend = new CountDownLatch(2);
     final CountDownLatch linkOnEvent = new CountDownLatch(2);
     class CommandLinkController implements OnEvent<String>,
         WillLink, DidLink, WillSync, DidSync, WillUnlink, DidUnlink,
         DidConnect, DidDisconnect, DidClose {
+
       @Override
       public void onEvent(String value) {
         System.out.println("link onEvent value: " + Format.debug(value));
         linkOnEvent.countDown();
       }
+
       @Override
       public void willLink() {
         System.out.println("link willLink");
       }
+
       @Override
       public void didLink() {
         System.out.println("link didLink");
       }
+
       @Override
       public void willSync() {
         System.out.println("link willSync");
       }
+
       @Override
       public void didSync() {
         System.out.println("link didSync");
       }
+
       @Override
       public void willUnlink() {
         System.out.println("link willUnlink");
       }
+
       @Override
       public void didUnlink() {
         System.out.println("link didUnlink");
       }
+
       @Override
       public void didConnect() {
         System.out.println("link didConnect");
       }
+
       @Override
       public void didDisconnect() {
         System.out.println("link didDisconnect");
       }
+
       @Override
       public void didClose() {
         System.out.println("link didClose");
       }
+
     }
 
     try {
@@ -132,6 +127,7 @@ public class CommandLaneSpec {
         public void bind(CommandMessage message) {
           commandDidSend.countDown();
         }
+
         @Override
         public void trap(Throwable error) {
           throw new TestException(error);
@@ -142,6 +138,7 @@ public class CommandLaneSpec {
         public void bind(CommandMessage message) {
           commandDidSend.countDown();
         }
+
         @Override
         public void trap(Throwable error) {
           throw new TestException(error);
@@ -155,4 +152,26 @@ public class CommandLaneSpec {
       kernel.stop();
     }
   }
+
+  static class TestCommandLaneAgent extends AbstractAgent {
+
+    @SwimLane("command")
+    CommandLane<String> testValue = commandLane()
+        .valueClass(String.class)
+        .onCommand(new OnCommand<String>() {
+          @Override
+          public void onCommand(String value) {
+            System.out.println("lane onCommand value: " + Format.debug(value));
+          }
+        });
+
+  }
+
+  static class TestCommandPlane extends AbstractPlane {
+
+    @SwimRoute("/command/:name")
+    AgentRoute<TestCommandLaneAgent> commandAgent;
+
+  }
+
 }

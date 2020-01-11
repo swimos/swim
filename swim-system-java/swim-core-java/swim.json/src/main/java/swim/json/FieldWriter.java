@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class FieldWriter<I, V> extends Writer<Object, Object> {
+
   final JsonWriter<I, V> json;
   final V key;
   final V value;
@@ -31,11 +32,6 @@ final class FieldWriter<I, V> extends Writer<Object, Object> {
     this.value = value;
     this.part = part;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.json, this.key, this.value, this.part, this.step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, JsonWriter<I, V> json,
@@ -81,4 +77,10 @@ final class FieldWriter<I, V> extends Writer<Object, Object> {
                                              V key, V value) {
     return write(output, json, key, value, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.json, this.key, this.value, this.part, this.step);
+  }
+
 }

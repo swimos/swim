@@ -21,6 +21,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class StringWriter extends Writer<Object, Object> {
+
   final String string;
   final int index;
   final int escape;
@@ -33,17 +34,12 @@ final class StringWriter extends Writer<Object, Object> {
     this.step = step;
   }
 
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.string, this.index, this.escape, this.step);
-  }
-
   static int sizeOf(String string) {
     int size = 0;
     size += 1; // '"';
     for (int i = 0, n = string.length(); i < n; i = string.offsetByCodePoints(i, 1)) {
       final int c = string.codePointAt(i);
-      if (c == '"' || c  == '\\' || c == '\b' || c == '\f' || c == '\n' || c == '\r' || c == '\t') {
+      if (c == '"' || c == '\\' || c == '\b' || c == '\f' || c == '\n' || c == '\r' || c == '\t') {
         size += 2;
       } else if (c < 0x20) {
         size += 6;
@@ -139,4 +135,10 @@ final class StringWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, String string) {
     return write(output, string, 0, 0, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.string, this.index, this.escape, this.step);
+  }
+
 }

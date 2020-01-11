@@ -26,6 +26,7 @@ import swim.ws.WsControl;
 import swim.ws.WsData;
 
 public interface WsLane<I, O> extends Lane {
+
   @Override
   WsLane<I, O> observe(Object observer);
 
@@ -49,4 +50,5 @@ public interface WsLane<I, O> extends Lane {
   <O2 extends O> void write(WsData<O2> frame);
 
   <O2 extends O> void write(WsControl<?, O2> frame);
+
 }

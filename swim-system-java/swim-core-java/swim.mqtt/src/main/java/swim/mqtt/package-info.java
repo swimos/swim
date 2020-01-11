@@ -16,4 +16,5 @@
  * MQTT packet model and wire protocol codec that incrementally decodes
  * and encodes MQTT streams without intermediate buffering.
  */
+
 package swim.mqtt;

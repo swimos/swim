@@ -25,6 +25,9 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class RsaPrimeDef {
+
+  private static int hashSeed;
+  private static Form<RsaPrimeDef> form;
   protected final BigInteger factor;
   protected final BigInteger exponent;
   protected final BigInteger coefficient;
@@ -37,6 +40,18 @@ public class RsaPrimeDef {
 
   public RsaPrimeDef(BigInteger factor, BigInteger exponent) {
     this(factor, exponent, null);
+  }
+
+  public static RsaPrimeDef from(RSAOtherPrimeInfo info) {
+    return new RsaPrimeDef(info.getPrime(), info.getExponent(), info.getCrtCoefficient());
+  }
+
+  @Kind
+  public static Form<RsaPrimeDef> form() {
+    if (form == null) {
+      form = new RsaPrimeForm();
+    }
+    return form;
   }
 
   public final BigInteger factor() {
@@ -80,24 +95,10 @@ public class RsaPrimeDef {
         this.factor.hashCode()), this.exponent.hashCode()), Murmur3.hash(this.coefficient)));
   }
 
-  private static int hashSeed;
-
-  private static Form<RsaPrimeDef> form;
-
-  public static RsaPrimeDef from(RSAOtherPrimeInfo info) {
-    return new RsaPrimeDef(info.getPrime(), info.getExponent(), info.getCrtCoefficient());
-  }
-
-  @Kind
-  public static Form<RsaPrimeDef> form() {
-    if (form == null) {
-      form = new RsaPrimeForm();
-    }
-    return form;
-  }
 }
 
 final class RsaPrimeForm extends Form<RsaPrimeDef> {
+
   @Override
   public String tag() {
     return "prime";
@@ -132,4 +133,5 @@ final class RsaPrimeForm extends Form<RsaPrimeDef> {
     }
     return null;
   }
+
 }

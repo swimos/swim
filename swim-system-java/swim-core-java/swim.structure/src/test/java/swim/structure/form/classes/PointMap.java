@@ -19,13 +19,17 @@ import swim.util.Murmur3;
 
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class PointMap {
+
   public Map<String, Point2D> map;
+
   public PointMap(Map<String, Point2D> map) {
     this.map = map;
   }
+
   public PointMap() {
     // Form.cast constructor
   }
+
   @Override
   public boolean equals(Object other) {
     if (other instanceof PointMap) {
@@ -34,12 +38,15 @@ public class PointMap {
     }
     return false;
   }
+
   @Override
   public int hashCode() {
     return Murmur3.hash(this.map);
   }
+
   @Override
   public String toString() {
     return "PointMap(" + this.map + ")";
   }
+
 }

@@ -30,15 +30,16 @@ import swim.io.http.HttpSettings;
 import swim.io.ws.WsSettings;
 
 public final class TestTlsSettings {
-  private TestTlsSettings() {
-    // stub
-  }
 
   private static TlsSettings tlsSettings;
   private static IpSettings ipSettings;
   private static HttpSettings httpSettings;
   private static WsSettings wsSettings;
   private static WarpSettings warpSettings;
+
+  private TestTlsSettings() {
+    // stub
+  }
 
   public static TlsSettings tlsSettings() {
     if (tlsSettings == null) {
@@ -105,4 +106,5 @@ public final class TestTlsSettings {
     }
     return warpSettings;
   }
+
 }

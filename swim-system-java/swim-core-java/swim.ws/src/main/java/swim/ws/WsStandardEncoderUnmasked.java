@@ -15,6 +15,7 @@
 package swim.ws;
 
 final class WsStandardEncoderUnmasked extends WsStandardEncoder {
+
   @Override
   public boolean isMasked() {
     return false;
@@ -24,4 +25,5 @@ final class WsStandardEncoderUnmasked extends WsStandardEncoder {
   public void maskingKey(byte[] maskingKey) {
     // nop
   }
+
 }

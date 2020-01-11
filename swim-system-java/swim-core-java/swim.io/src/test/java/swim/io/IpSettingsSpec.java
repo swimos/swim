@@ -23,6 +23,7 @@ import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 
 public class IpSettingsSpec {
+
   void assertDecodes(Value actualValue, IpSettings expected) {
     final IpSettings actual = IpSettings.form().cast(actualValue);
     assertEquals(actual, expected);
@@ -41,13 +42,13 @@ public class IpSettingsSpec {
   @Test
   public void decodesTcpSettings() {
     assertDecodes(Record.of(Record.of(Attr.of("tcp"),
-                                      Slot.of("keepAlive", true),
-                                      Slot.of("noDelay", true),
-                                      Slot.of("receiveBufferSize", 2),
-                                      Slot.of("sendBufferSize", 3),
-                                      Slot.of("readBufferSize", 5),
-                                      Slot.of("writeBufferSize", 7))),
-                  IpSettings.from(new TcpSettings(true, true, 2, 3, 5, 7)));
+        Slot.of("keepAlive", true),
+        Slot.of("noDelay", true),
+        Slot.of("receiveBufferSize", 2),
+        Slot.of("sendBufferSize", 3),
+        Slot.of("readBufferSize", 5),
+        Slot.of("writeBufferSize", 7))),
+        IpSettings.from(new TcpSettings(true, true, 2, 3, 5, 7)));
   }
 
   @Test
@@ -60,22 +61,22 @@ public class IpSettingsSpec {
   public void decodesTlsAndTcpSettings() {
     final IpSettings settings = IpSettings.form().cast(
         Record.of(Record.of(Attr.of("tls", Record.of(Slot.of("protocol", "TLS"))),
-                            Slot.of("clientAuth", "need"),
-                            Slot.of("cipherSuites", Record.of("ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256")),
-                            Slot.of("protocols", Record.of("TLSv1.1", "TLSv1.2")),
-                            Record.of(Attr.of("keyStore", Record.of(Slot.of("type", "jks"))),
-                                      Slot.of("resource", "keystore.jks"),
-                                      Slot.of("password", "default")),
-                            Record.of(Attr.of("trustStore", Record.of(Slot.of("type", "jks"))),
-                                      Slot.of("resource", "cacerts.jks"),
-                                      Slot.of("password", "default"))),
-                  Record.of(Attr.of("tcp"),
-                            Slot.of("keepAlive", true),
-                            Slot.of("noDelay", true),
-                            Slot.of("receiveBufferSize", 2),
-                            Slot.of("sendBufferSize", 3),
-                            Slot.of("readBufferSize", 5),
-                            Slot.of("writeBufferSize", 7))));
+            Slot.of("clientAuth", "need"),
+            Slot.of("cipherSuites", Record.of("ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256")),
+            Slot.of("protocols", Record.of("TLSv1.1", "TLSv1.2")),
+            Record.of(Attr.of("keyStore", Record.of(Slot.of("type", "jks"))),
+                Slot.of("resource", "keystore.jks"),
+                Slot.of("password", "default")),
+            Record.of(Attr.of("trustStore", Record.of(Slot.of("type", "jks"))),
+                Slot.of("resource", "cacerts.jks"),
+                Slot.of("password", "default"))),
+            Record.of(Attr.of("tcp"),
+                Slot.of("keepAlive", true),
+                Slot.of("noDelay", true),
+                Slot.of("receiveBufferSize", 2),
+                Slot.of("sendBufferSize", 3),
+                Slot.of("readBufferSize", 5),
+                Slot.of("writeBufferSize", 7))));
 
     final TlsSettings tlsSettings = settings.tlsSettings();
     assertEquals(tlsSettings.clientAuth(), ClientAuth.NEED);
@@ -86,4 +87,5 @@ public class IpSettingsSpec {
     final TcpSettings tcpSettings = settings.tcpSettings();
     assertEquals(tcpSettings, new TcpSettings(true, true, 2, 3, 5, 7));
   }
+
 }

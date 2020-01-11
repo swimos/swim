@@ -15,7 +15,8 @@
 /**
  * Lock-free document store—optimized for high rate atomic state changes—that
  * concurrently commits and compacts on-disk log-structured storage files
- * without blocking parallel in-memory updates to associative B-tree maps, 
+ * without blocking parallel in-memory updates to associative B-tree maps,
  * spatial Q-tree maps, sequential S-tree lists, and singleton U-tree values.
  */
+
 package swim.db;

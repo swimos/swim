@@ -21,6 +21,7 @@ import swim.util.Severity;
  * Informational message attached to an input location.
  */
 public final class Diagnostic implements Display {
+
   final Input input;
   final Tag tag;
   final Severity severity;
@@ -36,83 +37,6 @@ public final class Diagnostic implements Display {
     this.message = message;
     this.note = note;
     this.cause = cause;
-  }
-
-  /**
-   * Returns the {@code Input} source to which this diagnostic is attached.
-   */
-  public Input input() {
-    return this.input.clone();
-  }
-
-  /**
-   * Returns the annotated location {@code Tag} in the {@code input} to which
-   * this diagnostic is attached.
-   */
-  public Tag tag() {
-    return this.tag;
-  }
-
-  /**
-   * Returns the level of importance of this diagnostic.
-   */
-  public Severity severity() {
-    return this.severity;
-  }
-
-  /**
-   * Returns the help message that describes this diagnostic.
-   */
-  public String message() {
-    return this.message;
-  }
-
-  /**
-   * Returns an informative comment on the source context to which this
-   * diagnostic is attached.
-   */
-  public String note() {
-    return this.note;
-  }
-
-  /**
-   * Returns the {@code Diagnostic} cause of this diagnostic, forming a linked
-   * chain of diagnostics, or {@code null} if this diagnostic has no cause.
-   */
-  public Diagnostic cause() {
-    return this.cause;
-  }
-
-  private int lineDigits() {
-    int digits = Base10.countDigits(this.tag.end().line());
-    if (this.cause != null) {
-      digits = Math.max(digits, this.cause.lineDigits());
-    }
-    return digits;
-  }
-
-  @Override
-  public void display(Output<?> output) {
-    final Input input = this.input.clone();
-    final Mark start = this.tag.start();
-    final Mark end = this.tag.end();
-    final Severity severity = this.severity;
-    final String message = this.message;
-    final String note = this.note;
-    final Diagnostic cause = this.cause;
-    final int contextLines = 2;
-    final int lineDigits = lineDigits();
-    displayDiagnostic(input, start, end, severity, message, note, cause,
-        contextLines, lineDigits, output);
-  }
-
-  public String toString(OutputSettings settings) {
-    return Format.display(this, settings);
-  }
-
-  @Override
-  public String toString() {
-    return Format.display(this);
   }
 
   public static Diagnostic from(Input input, Tag tag, Severity severity,
@@ -640,4 +564,82 @@ public final class Diagnostic implements Display {
         OutputStyle.magentaBold(output);
     }
   }
+
+  /**
+   * Returns the {@code Input} source to which this diagnostic is attached.
+   */
+  public Input input() {
+    return this.input.clone();
+  }
+
+  /**
+   * Returns the annotated location {@code Tag} in the {@code input} to which
+   * this diagnostic is attached.
+   */
+  public Tag tag() {
+    return this.tag;
+  }
+
+  /**
+   * Returns the level of importance of this diagnostic.
+   */
+  public Severity severity() {
+    return this.severity;
+  }
+
+  /**
+   * Returns the help message that describes this diagnostic.
+   */
+  public String message() {
+    return this.message;
+  }
+
+  /**
+   * Returns an informative comment on the source context to which this
+   * diagnostic is attached.
+   */
+  public String note() {
+    return this.note;
+  }
+
+  /**
+   * Returns the {@code Diagnostic} cause of this diagnostic, forming a linked
+   * chain of diagnostics, or {@code null} if this diagnostic has no cause.
+   */
+  public Diagnostic cause() {
+    return this.cause;
+  }
+
+  private int lineDigits() {
+    int digits = Base10.countDigits(this.tag.end().line());
+    if (this.cause != null) {
+      digits = Math.max(digits, this.cause.lineDigits());
+    }
+    return digits;
+  }
+
+  @Override
+  public void display(Output<?> output) {
+    final Input input = this.input.clone();
+    final Mark start = this.tag.start();
+    final Mark end = this.tag.end();
+    final Severity severity = this.severity;
+    final String message = this.message;
+    final String note = this.note;
+    final Diagnostic cause = this.cause;
+    final int contextLines = 2;
+    final int lineDigits = lineDigits();
+    displayDiagnostic(input, start, end, severity, message, note, cause,
+        contextLines, lineDigits, output);
+  }
+
+  public String toString(OutputSettings settings) {
+    return Format.display(this, settings);
+  }
+
+  @Override
+  public String toString() {
+    return Format.display(this);
+  }
+
 }

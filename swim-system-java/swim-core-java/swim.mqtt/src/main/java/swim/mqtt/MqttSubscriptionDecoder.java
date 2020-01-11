@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class MqttSubscriptionDecoder extends Decoder<MqttSubscription> {
+
   final MqttDecoder mqtt;
   final Decoder<String> topicName;
   final int step;
@@ -31,11 +32,6 @@ final class MqttSubscriptionDecoder extends Decoder<MqttSubscription> {
 
   MqttSubscriptionDecoder(MqttDecoder mqtt) {
     this(mqtt, null, 1);
-  }
-
-  @Override
-  public Decoder<MqttSubscription> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.topicName, this.step);
   }
 
   static Decoder<MqttSubscription> decode(InputBuffer input, MqttDecoder mqtt,
@@ -68,4 +64,10 @@ final class MqttSubscriptionDecoder extends Decoder<MqttSubscription> {
   static Decoder<MqttSubscription> decode(InputBuffer input, MqttDecoder mqtt) {
     return decode(input, mqtt, null, 1);
   }
+
+  @Override
+  public Decoder<MqttSubscription> feed(InputBuffer input) {
+    return decode(input, this.mqtt, this.topicName, this.step);
+  }
+
 }

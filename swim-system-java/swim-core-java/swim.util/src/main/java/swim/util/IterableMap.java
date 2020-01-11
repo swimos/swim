@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 public interface IterableMap<K, V> extends Iterable<Map.Entry<K, V>>, Map<K, V> {
+
   @Override
   boolean isEmpty();
 
@@ -73,9 +74,11 @@ public interface IterableMap<K, V> extends Iterable<Map.Entry<K, V>>, Map<K, V> 
   default Cursor<V> valueIterator() {
     return new CursorValues<V>(iterator());
   }
+
 }
 
 final class IterableMapEntrySet<K, V> extends AbstractSet<Map.Entry<K, V>> {
+
   private final IterableMap<K, V> map;
 
   IterableMapEntrySet(IterableMap<K, V> map) {
@@ -91,9 +94,11 @@ final class IterableMapEntrySet<K, V> extends AbstractSet<Map.Entry<K, V>> {
   public Cursor<Map.Entry<K, V>> iterator() {
     return this.map.iterator();
   }
+
 }
 
 final class IterableMapKeySet<K, V> extends AbstractSet<K> {
+
   private final IterableMap<K, V> map;
 
   IterableMapKeySet(IterableMap<K, V> map) {
@@ -109,9 +114,11 @@ final class IterableMapKeySet<K, V> extends AbstractSet<K> {
   public Cursor<K> iterator() {
     return this.map.keyIterator();
   }
+
 }
 
 final class IterableMapValues<K, V> extends AbstractCollection<V> {
+
   private final IterableMap<K, V> map;
 
   IterableMapValues(IterableMap<K, V> map) {
@@ -127,4 +134,5 @@ final class IterableMapValues<K, V> extends AbstractCollection<V> {
   public Cursor<V> iterator() {
     return this.map.valueIterator();
   }
+
 }

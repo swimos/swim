@@ -27,6 +27,7 @@ import swim.api.warp.function.WillUplink;
 import swim.structure.Form;
 
 public interface CommandLane<V> extends WarpLane {
+
   Form<V> valueForm();
 
   <V2> CommandLane<V2> valueForm(Form<V2> valueForm);
@@ -64,4 +65,5 @@ public interface CommandLane<V> extends WarpLane {
 
   @Override
   CommandLane<V> didLeave(DidLeave didLeave);
+
 }

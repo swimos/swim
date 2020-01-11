@@ -20,5 +20,7 @@ import swim.ws.WsResponse;
 
 @FunctionalInterface
 public interface DoUpgradeWs extends Preemptive {
+
   WsResponse doUpgrade(WsRequest request);
+
 }

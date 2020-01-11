@@ -17,6 +17,7 @@ package swim.uri;
 import swim.codec.Output;
 
 final class UriHostIPv4 extends UriHost {
+
   final String address;
 
   UriHostIPv4(String address) {
@@ -47,4 +48,5 @@ final class UriHostIPv4 extends UriHost {
   public String toString() {
     return this.address;
   }
+
 }

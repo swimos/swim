@@ -29,6 +29,7 @@ import swim.warp.UnlinkRequest;
 import swim.warp.UnlinkedResponse;
 
 public abstract class WarpDownlinkModel<View extends WarpDownlinkView> extends WarpDownlinkModem<View> {
+
   public WarpDownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                            float prio, float rate, Value body) {
     super(meshUri, hostUri, nodeUri, laneUri, prio, rate, body);
@@ -113,9 +114,11 @@ public abstract class WarpDownlinkModel<View extends WarpDownlinkView> extends W
     willUnlink(request);
     new WarpDownlinkRelayWillUnlink<View>(this, request).run();
   }
+
 }
 
 final class WarpDownlinkRelayOnEvent<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
+
   final Push<EventMessage> push;
 
   WarpDownlinkRelayOnEvent(WarpDownlinkModel<View> model, Push<EventMessage> push) {
@@ -147,9 +150,11 @@ final class WarpDownlinkRelayOnEvent<View extends WarpDownlinkView> extends Down
     this.push.bind();
     this.model.cueDown();
   }
+
 }
 
 final class WarpDownlinkRelayWillCommand<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
+
   final CommandMessage message;
 
   WarpDownlinkRelayWillCommand(WarpDownlinkModel<View> model, CommandMessage message) {
@@ -168,9 +173,11 @@ final class WarpDownlinkRelayWillCommand<View extends WarpDownlinkView> extends 
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class WarpDownlinkRelayWillLink<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
+
   final LinkRequest request;
 
   WarpDownlinkRelayWillLink(WarpDownlinkModel<View> model, LinkRequest request) {
@@ -189,9 +196,11 @@ final class WarpDownlinkRelayWillLink<View extends WarpDownlinkView> extends Dow
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class WarpDownlinkRelayDidLink<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
+
   final Push<LinkedResponse> push;
 
   WarpDownlinkRelayDidLink(WarpDownlinkModel<View> model, Push<LinkedResponse> push) {
@@ -216,9 +225,11 @@ final class WarpDownlinkRelayDidLink<View extends WarpDownlinkView> extends Down
     this.push.bind();
     this.model.cueDown();
   }
+
 }
 
 final class WarpDownlinkRelayWillSync<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
+
   final SyncRequest request;
 
   WarpDownlinkRelayWillSync(WarpDownlinkModel<View> model, SyncRequest request) {
@@ -237,9 +248,11 @@ final class WarpDownlinkRelayWillSync<View extends WarpDownlinkView> extends Dow
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class WarpDownlinkRelayDidSync<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
+
   final Push<SyncedResponse> push;
 
   WarpDownlinkRelayDidSync(WarpDownlinkModel<View> model, Push<SyncedResponse> push) {
@@ -264,9 +277,11 @@ final class WarpDownlinkRelayDidSync<View extends WarpDownlinkView> extends Down
     this.push.bind();
     this.model.cueDown();
   }
+
 }
 
 final class WarpDownlinkRelayWillUnlink<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
+
   final UnlinkRequest request;
 
   WarpDownlinkRelayWillUnlink(WarpDownlinkModel<View> model, UnlinkRequest request) {
@@ -285,9 +300,11 @@ final class WarpDownlinkRelayWillUnlink<View extends WarpDownlinkView> extends D
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class WarpDownlinkRelayDidUnlink<View extends WarpDownlinkView> extends DownlinkRelay<WarpDownlinkModel<View>, View> {
+
   final Push<UnlinkedResponse> push;
 
   WarpDownlinkRelayDidUnlink(WarpDownlinkModel<View> model, Push<UnlinkedResponse> push) {
@@ -312,4 +329,5 @@ final class WarpDownlinkRelayDidUnlink<View extends WarpDownlinkView> extends Do
     this.push.bind();
     // Don't cueDown model after unlinked.
   }
+
 }

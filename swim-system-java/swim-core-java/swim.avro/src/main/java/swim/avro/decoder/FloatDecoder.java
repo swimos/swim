@@ -20,6 +20,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class FloatDecoder<T> extends Decoder<T> {
+
   final AvroFloatType<T> type;
   final int value;
   final int shift;
@@ -32,11 +33,6 @@ final class FloatDecoder<T> extends Decoder<T> {
 
   FloatDecoder(AvroFloatType<T> type) {
     this(type, 0, 0);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.value, this.shift);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroFloatType<T> type,
@@ -60,4 +56,10 @@ final class FloatDecoder<T> extends Decoder<T> {
   static <T> Decoder<T> decode(InputBuffer input, AvroFloatType<T> type) {
     return decode(input, type, 0, 0);
   }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type, this.value, this.shift);
+  }
+
 }

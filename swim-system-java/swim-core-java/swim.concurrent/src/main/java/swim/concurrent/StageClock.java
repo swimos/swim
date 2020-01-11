@@ -19,6 +19,7 @@ package swim.concurrent;
  * rather than on the clock thread.
  */
 public class StageClock extends Clock {
+
   /**
    * {@code Stage} on which to execute timer functions.
    */
@@ -68,4 +69,5 @@ public class StageClock extends Clock {
   protected void runTimer(TimerFunction timer, Runnable runnable) {
     this.stage.execute(runnable);
   }
+
 }

@@ -18,9 +18,11 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public abstract class Pulse {
+
+  public static final Uri PULSE_URI = Uri.parse("pulse");
+
   public abstract boolean isDefined();
 
   public abstract Value toValue();
 
-  public static final Uri PULSE_URI = Uri.parse("pulse");
 }

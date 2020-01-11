@@ -35,6 +35,7 @@ import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
 public class LaneScope extends Scope implements LaneRef {
+
   protected final Uri meshUri;
   protected final Uri hostUri;
   protected final Uri nodeUri;
@@ -130,4 +131,5 @@ public class LaneScope extends Scope implements LaneRef {
   public void command(Value body) {
     command(0.0f, body, null);
   }
+
 }

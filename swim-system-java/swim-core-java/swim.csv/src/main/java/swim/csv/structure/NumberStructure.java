@@ -24,6 +24,7 @@ import swim.structure.Value;
 import swim.util.Builder;
 
 final class NumberStructure implements CsvStructureCol {
+
   final Value key;
   final String name;
   final boolean optional;
@@ -87,20 +88,17 @@ final class NumberStructure implements CsvStructureCol {
       }
     }
   }
+
 }
 
 final class NumberStructureParser extends Parser<Item> {
+
   final Parser<Number> numberParser;
   final int step;
 
   NumberStructureParser(Parser<Number> numberParser, int step) {
     this.numberParser = numberParser;
     this.step = step;
-  }
-
-  @Override
-  public Parser<Item> feed(Input input) {
-    return parse(input, this.numberParser, this.step);
   }
 
   static Parser<Item> parse(Input input, Parser<Number> numberParser, int step) {
@@ -135,4 +133,10 @@ final class NumberStructureParser extends Parser<Item> {
     }
     return new NumberStructureParser(numberParser, step);
   }
+
+  @Override
+  public Parser<Item> feed(Input input) {
+    return parse(input, this.numberParser, this.step);
+  }
+
 }

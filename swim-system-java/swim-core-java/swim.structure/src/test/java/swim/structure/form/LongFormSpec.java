@@ -24,6 +24,7 @@ import swim.structure.Text;
 import static org.testng.Assert.assertEquals;
 
 public class LongFormSpec {
+
   @Test
   public void moldLongsToNums() {
     assertEquals(Form.forLong().mold(42L), Num.from(42));
@@ -56,4 +57,5 @@ public class LongFormSpec {
   public void castAttributedNumsToLongs() {
     assertEquals(Form.forLong().cast(Record.of(Attr.of("test"), 42)), Long.valueOf(42));
   }
+
 }

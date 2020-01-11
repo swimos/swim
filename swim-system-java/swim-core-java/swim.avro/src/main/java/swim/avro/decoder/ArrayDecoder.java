@@ -21,6 +21,7 @@ import swim.codec.InputBuffer;
 import swim.util.Builder;
 
 final class ArrayDecoder<I, T> extends Decoder<T> {
+
   final AvroDecoder avro;
   final AvroArrayType<I, T> type;
   final Builder<I, T> builder;
@@ -44,12 +45,6 @@ final class ArrayDecoder<I, T> extends Decoder<T> {
 
   ArrayDecoder(AvroDecoder avro, AvroArrayType<I, T> type) {
     this(avro, type, null, 0L, 0L, 0, null, 1);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.avro, this.type, this.builder, this.count,
-                  this.blockSize, this.shift, this.itemDecoder, this.step);
   }
 
   static <I, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroArrayType<I, T> type,
@@ -140,4 +135,11 @@ final class ArrayDecoder<I, T> extends Decoder<T> {
   static <I, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroArrayType<I, T> type) {
     return decode(input, avro, type, null, 0L, 0L, 0, null, 1);
   }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.avro, this.type, this.builder, this.count,
+        this.blockSize, this.shift, this.itemDecoder, this.step);
+  }
+
 }

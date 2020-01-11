@@ -18,6 +18,7 @@ import swim.runtime.WarpBinding;
 import swim.runtime.WarpProxy;
 
 public class PartTableWarpUplink extends WarpProxy {
+
   protected final PartTable part;
 
   public PartTableWarpUplink(PartTable part, WarpBinding linkBinding) {
@@ -50,4 +51,5 @@ public class PartTableWarpUplink extends WarpProxy {
     super.didCloseUp();
     didClose();
   }
+
 }

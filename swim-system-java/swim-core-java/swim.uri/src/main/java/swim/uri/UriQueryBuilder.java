@@ -19,6 +19,7 @@ import java.util.Map;
 import swim.util.EntryBuilder;
 
 public final class UriQueryBuilder implements EntryBuilder<String, String, UriQuery> {
+
   UriQuery first;
   UriQuery last;
   int size;
@@ -169,4 +170,5 @@ public final class UriQueryBuilder implements EntryBuilder<String, String, UriQu
     }
     return xi;
   }
+
 }

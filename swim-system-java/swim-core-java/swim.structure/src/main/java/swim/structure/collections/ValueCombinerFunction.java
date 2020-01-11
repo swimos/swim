@@ -19,6 +19,7 @@ import swim.structure.Value;
 import swim.util.CombinerFunction;
 
 final class ValueCombinerFunction<V, U> implements CombinerFunction<Value, Value> {
+
   final CombinerFunction<? super V, U> combiner;
   final Form<U> resultForm;
   final Form<V> elementForm;
@@ -37,4 +38,5 @@ final class ValueCombinerFunction<V, U> implements CombinerFunction<Value, Value
     resultValue = this.resultForm.mold(result).toValue();
     return resultValue;
   }
+
 }

@@ -19,9 +19,6 @@ import swim.dynamic.JavaHostClassType;
 import swim.structure.Attr;
 
 public final class HostAttr {
-  private HostAttr() {
-    // static
-  }
 
   public static final HostObjectType<Attr> TYPE;
 
@@ -30,4 +27,9 @@ public final class HostAttr {
     TYPE = type;
     type.extendType(HostField.TYPE);
   }
+
+  private HostAttr() {
+    // static
+  }
+
 }

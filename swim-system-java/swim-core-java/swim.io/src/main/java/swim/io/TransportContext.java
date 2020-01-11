@@ -21,9 +21,11 @@ package swim.io;
  * modify its {@link FlowControl} state, and to close the transport.
  */
 public interface TransportContext extends TransportRef {
+
   /**
    * Returns the configuration parameters that govern the underlying I/O
    * transport.
    */
   TransportSettings transportSettings();
+
 }

@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.util.Builder;
 
 final class SelectorParser<I, V> extends Parser<V> {
+
   final ReconParser<I, V> recon;
   final Builder<I, V> builder;
   final V selector;
@@ -35,13 +36,8 @@ final class SelectorParser<I, V> extends Parser<V> {
     this.step = step;
   }
 
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.selector, this.valueParser, this.step);
-  }
-
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
-                                  V selector, Parser<V> valueParser, int step) {
+                                V selector, Parser<V> valueParser, int step) {
     int c = 0;
     if (step == 1) {
       while (input.isCont()) {
@@ -265,4 +261,10 @@ final class SelectorParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
     return parse(input, recon, builder, null, null, 1);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.builder, this.selector, this.valueParser, this.step);
+  }
+
 }

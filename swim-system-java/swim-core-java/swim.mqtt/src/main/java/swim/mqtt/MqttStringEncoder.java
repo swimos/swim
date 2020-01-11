@@ -20,6 +20,7 @@ import swim.codec.OutputBuffer;
 import swim.codec.Utf8;
 
 final class MqttStringEncoder extends Encoder<String, String> {
+
   final String string;
   final Encoder<?, ?> encoder;
   final int length;
@@ -34,16 +35,6 @@ final class MqttStringEncoder extends Encoder<String, String> {
 
   MqttStringEncoder(String string) {
     this(string, null, 0, 1);
-  }
-
-  @Override
-  public Encoder<String, String> feed(String string) {
-    return new MqttStringEncoder(string, null, 0, 1);
-  }
-
-  @Override
-  public Encoder<String, String> pull(OutputBuffer<?> output) {
-    return encode(output, this.string, this.encoder, this.length, this.step);
   }
 
   static int sizeOf(String string) {
@@ -87,4 +78,15 @@ final class MqttStringEncoder extends Encoder<String, String> {
   static Encoder<String, String> encode(OutputBuffer<?> output, String string) {
     return encode(output, string, null, 0, 1);
   }
+
+  @Override
+  public Encoder<String, String> feed(String string) {
+    return new MqttStringEncoder(string, null, 0, 1);
+  }
+
+  @Override
+  public Encoder<String, String> pull(OutputBuffer<?> output) {
+    return encode(output, this.string, this.encoder, this.length, this.step);
+  }
+
 }

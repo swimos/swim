@@ -5,7 +5,7 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.web'
 
 dependencies {
-  api project(':swim-io-http')
-  api project(':swim-io-ws')
-  api project(':swim-io-warp')
+    api project(':swim-io-http')
+    api project(':swim-io-ws')
+    api project(':swim-io-warp')
 }

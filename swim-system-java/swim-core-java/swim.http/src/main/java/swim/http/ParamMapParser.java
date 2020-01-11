@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.collections.HashTrieMap;
 
 final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
+
   final StringBuilder key;
   final StringBuilder value;
   final HashTrieMap<String, String> params;
@@ -30,11 +31,6 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
     this.value = value;
     this.params = params;
     this.step = step;
-  }
-
-  @Override
-  public Parser<HashTrieMap<String, String>> feed(Input input) {
-    return parse(input, this.key, this.value, this.params, this.step);
   }
 
   static Parser<HashTrieMap<String, String>> parse(Input input, StringBuilder key, StringBuilder value,
@@ -237,4 +233,10 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
   static Parser<HashTrieMap<String, String>> parseRest(Input input, StringBuilder key) {
     return parse(input, key, null, null, 3);
   }
+
+  @Override
+  public Parser<HashTrieMap<String, String>> feed(Input input) {
+    return parse(input, this.key, this.value, this.params, this.step);
+  }
+
 }

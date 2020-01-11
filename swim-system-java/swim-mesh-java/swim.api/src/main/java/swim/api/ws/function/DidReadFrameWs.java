@@ -19,5 +19,7 @@ import swim.ws.WsFrame;
 
 @FunctionalInterface
 public interface DidReadFrameWs<I> extends Preemptive {
+
   void didReadFrame(WsFrame<? extends I> frame);
+
 }

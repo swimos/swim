@@ -28,6 +28,7 @@ import swim.io.IpContext;
 import swim.io.IpSocket;
 
 public abstract class AbstractHttpClient implements HttpClient, IpContext, FlowContext {
+
   protected HttpClientContext context;
 
   @Override
@@ -213,4 +214,5 @@ public abstract class AbstractHttpClient implements HttpClient, IpContext, FlowC
   public void close() {
     this.context.close();
   }
+
 }

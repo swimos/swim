@@ -20,6 +20,10 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public final class LinkedResponse extends LinkAddressed {
+
+  @Kind
+  public static final Form<LinkedResponse> FORM = new LinkedResponseForm();
+
   public LinkedResponse(Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
     super(nodeUri, laneUri, prio, rate, body);
   }
@@ -77,11 +81,10 @@ public final class LinkedResponse extends LinkAddressed {
     return new LinkedResponse(this.nodeUri, this.laneUri, this.prio, this.rate, body);
   }
 
-  @Kind
-  public static final Form<LinkedResponse> FORM = new LinkedResponseForm();
 }
 
 final class LinkedResponseForm extends LinkAddressedForm<LinkedResponse> {
+
   @Override
   public String tag() {
     return "linked";
@@ -96,4 +99,5 @@ final class LinkedResponseForm extends LinkAddressedForm<LinkedResponse> {
   public LinkedResponse from(Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
     return new LinkedResponse(nodeUri, laneUri, prio, rate, body);
   }
+
 }

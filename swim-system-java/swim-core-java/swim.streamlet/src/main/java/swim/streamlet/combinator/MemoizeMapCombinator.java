@@ -21,6 +21,7 @@ import swim.streamlet.KeyEffect;
 import swim.streamlet.MapOutlet;
 
 public class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V, IO, IO> {
+
   protected IO state;
   protected HashTrieMap<K, V> cache;
 
@@ -77,4 +78,5 @@ public class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
   public MapOutlet<K, V, IO> memoize() {
     return this;
   }
+
 }

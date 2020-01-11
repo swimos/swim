@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class AvroNameSpec {
+
   @Test
   public void parseUnqualifiedNames() {
     assertEquals(AvroName.parse("test"), AvroName.from("test"));
@@ -27,4 +28,5 @@ public class AvroNameSpec {
   public void parseQualifiedNames() {
     assertEquals(AvroName.parse("com.example.test"), AvroName.from(AvroNamespace.from("com", "example"), "test"));
   }
+
 }

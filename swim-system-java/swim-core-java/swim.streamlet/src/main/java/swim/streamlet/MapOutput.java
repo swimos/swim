@@ -18,6 +18,7 @@ import java.util.Map;
 import swim.collections.HashTrieMap;
 
 public class MapOutput<K, V> extends AbstractMapInlet<K, V, Map<K, V>> {
+
   protected HashTrieMap<K, V> state;
 
   public MapOutput() {
@@ -43,4 +44,5 @@ public class MapOutput<K, V> extends AbstractMapInlet<K, V, Map<K, V>> {
       this.state = this.state.removed(key);
     }
   }
+
 }

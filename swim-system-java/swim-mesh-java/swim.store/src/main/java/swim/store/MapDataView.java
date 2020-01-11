@@ -22,6 +22,7 @@ import swim.structure.collections.ValueOrderedMap;
 import swim.util.OrderedMap;
 
 public class MapDataView<K, V> extends ValueOrderedMap<K, V> implements MapData<K, V>, MapDataContext {
+
   public MapDataView(MapDataBinding dataBinding, Form<K> keyForm, Form<V> valueForm) {
     super(dataBinding, keyForm, valueForm);
     dataBinding.setDataContext(this);
@@ -138,4 +139,5 @@ public class MapDataView<K, V> extends ValueOrderedMap<K, V> implements MapData<
   public void didClear() {
     // stub
   }
+
 }

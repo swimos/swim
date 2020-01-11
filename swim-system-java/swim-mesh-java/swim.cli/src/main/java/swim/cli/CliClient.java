@@ -22,6 +22,7 @@ import swim.args.Opt;
 import swim.uri.Uri;
 
 public class CliClient {
+
   protected final SwimRef swim;
 
   public CliClient(SwimRef swim) {
@@ -355,4 +356,5 @@ public class CliClient {
     final String format = cmd.getOpt("format").getValue();
     return new DownlinkGetter(downlink, format);
   }
+
 }

@@ -19,10 +19,25 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 public abstract class Field extends Item implements Map.Entry<Value, Value> {
+
+  static final int IMMUTABLE = 1 << 0;
+  static final AtomicIntegerFieldUpdater<Field> FLAGS =
+      AtomicIntegerFieldUpdater.newUpdater(Field.class, "flags");
   volatile int flags;
 
   Field() {
     // stub
+  }
+
+  public static Field of(Object object) {
+    if (object instanceof Field) {
+      return (Field) object;
+    } else if (object instanceof Map.Entry<?, ?>) {
+      final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) object;
+      return Slot.of(Value.fromObject(entry.getKey()), Value.fromObject(entry.getValue()));
+    } else {
+      throw new IllegalArgumentException(object.toString());
+    }
   }
 
   /**
@@ -615,18 +630,4 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
   @Override
   public abstract Field commit();
 
-  static final int IMMUTABLE = 1 << 0;
-  static final AtomicIntegerFieldUpdater<Field> FLAGS =
-      AtomicIntegerFieldUpdater.newUpdater(Field.class, "flags");
-
-  public static Field of(Object object) {
-    if (object instanceof Field) {
-      return (Field) object;
-    } else if (object instanceof Map.Entry<?, ?>) {
-      final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) object;
-      return Slot.of(Value.fromObject(entry.getKey()), Value.fromObject(entry.getValue()));
-    } else {
-      throw new IllegalArgumentException(object.toString());
-    }
-  }
 }

@@ -21,6 +21,8 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class AgentPulse extends Pulse {
+
+  private static Form<AgentPulse> form;
   protected final long agentCount;
   protected final long execRate;
   protected final long execTime;
@@ -34,6 +36,14 @@ public class AgentPulse extends Pulse {
     this.execTime = execTime;
     this.timerEventRate = timerEventRate;
     this.timerEventCount = timerEventCount;
+  }
+
+  @Kind
+  public static Form<AgentPulse> form() {
+    if (form == null) {
+      form = new AgentPulseForm();
+    }
+    return form;
   }
 
   @Override
@@ -67,18 +77,10 @@ public class AgentPulse extends Pulse {
     return form().mold(this).toValue();
   }
 
-  private static Form<AgentPulse> form;
-
-  @Kind
-  public static Form<AgentPulse> form() {
-    if (form == null) {
-      form = new AgentPulseForm();
-    }
-    return form;
-  }
 }
 
 final class AgentPulseForm extends Form<AgentPulse> {
+
   @Override
   public Class<?> type() {
     return AgentPulse.class;
@@ -119,4 +121,5 @@ final class AgentPulseForm extends Form<AgentPulse> {
     final long timerEventCount = value.get("timerEventCount").longValue(0L);
     return new AgentPulse(agentCount, execRate, execTime, timerEventRate, timerEventCount);
   }
+
 }

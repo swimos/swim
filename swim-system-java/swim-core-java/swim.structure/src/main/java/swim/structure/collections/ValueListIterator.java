@@ -19,6 +19,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class ValueListIterator<T> extends ValueIterator<T> implements ListIterator<T> {
+
   public ValueListIterator(ListIterator<? extends Value> inner, Form<T> valueForm) {
     super(inner, valueForm);
   }
@@ -74,4 +75,5 @@ public class ValueListIterator<T> extends ValueIterator<T> implements ListIterat
     final Value newValue = this.valueForm.mold(newObject).toValue();
     ((ListIterator<Value>) this.inner).set(newValue);
   }
+
 }

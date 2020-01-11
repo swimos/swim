@@ -21,6 +21,7 @@ import swim.structure.Slot;
 import swim.util.Cursor;
 
 final class QTreePageRefCursor implements Cursor<Slot> {
+
   final QTreePageRef pageRef;
   final Record record;
   int index;
@@ -133,4 +134,5 @@ final class QTreePageRefCursor implements Cursor<Slot> {
       return Slot.of(item.key(), item.toValue());
     }
   }
+
 }

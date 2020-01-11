@@ -15,6 +15,7 @@
 package swim.api;
 
 public class LinkException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public LinkException(String message, Throwable cause) {
@@ -32,4 +33,5 @@ public class LinkException extends RuntimeException {
   public LinkException() {
     super();
   }
+
 }

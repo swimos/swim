@@ -23,12 +23,26 @@ import swim.codec.Utf8;
 import swim.util.Murmur3;
 
 public final class WsText<T> extends WsData<T> implements Debug {
+
+  private static int hashSeed;
   final T value;
   final Encoder<?, ?> content;
 
   WsText(T value, Encoder<?, ?> content) {
     this.value = value;
     this.content = content;
+  }
+
+  public static <T> WsText<T> from(T value, Encoder<?, ?> content) {
+    return new WsText<T>(value, content);
+  }
+
+  public static <T> WsText<T> from(Encoder<?, ?> content) {
+    return new WsText<T>(null, content);
+  }
+
+  public static WsText<String> from(String value) {
+    return new WsText<String>(value, Utf8.stringWriter(value));
   }
 
   @Override
@@ -94,17 +108,4 @@ public final class WsText<T> extends WsData<T> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static <T> WsText<T> from(T value, Encoder<?, ?> content) {
-    return new WsText<T>(value, content);
-  }
-
-  public static <T> WsText<T> from(Encoder<?, ?> content) {
-    return new WsText<T>(null, content);
-  }
-
-  public static WsText<String> from(String value) {
-    return new WsText<String>(value, Utf8.stringWriter(value));
-  }
 }

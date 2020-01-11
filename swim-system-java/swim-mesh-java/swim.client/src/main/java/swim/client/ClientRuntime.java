@@ -56,6 +56,7 @@ import swim.store.StoreBinding;
 import swim.uri.Uri;
 
 public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContext {
+
   final Stage stage;
   final HttpEndpoint endpoint;
   final EdgeBinding edge;
@@ -381,4 +382,5 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
   public void willClose() {
     // nop
   }
+
 }

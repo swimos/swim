@@ -24,9 +24,6 @@ import swim.dynamic.JavaHostObjectType;
 import swim.dynamic.java.lang.HostObject;
 
 public final class HostAgentFactory {
-  private HostAgentFactory() {
-    // static
-  }
 
   public static final HostObjectType<AgentFactory<Agent>> TYPE;
 
@@ -36,9 +33,15 @@ public final class HostAgentFactory {
     type.inheritType(HostObject.TYPE);
     type.addMember(new HostAgentFactoryCreateAgent());
   }
+
+  private HostAgentFactory() {
+    // static
+  }
+
 }
 
 final class HostAgentFactoryCreateAgent implements HostMethod<AgentFactory<Agent>> {
+
   @Override
   public String key() {
     return "createAgent";
@@ -49,4 +52,5 @@ final class HostAgentFactoryCreateAgent implements HostMethod<AgentFactory<Agent
     final AgentContext agentContext = (AgentContext) arguments[0];
     return agentFactory.createAgent(agentContext);
   }
+
 }

@@ -27,6 +27,50 @@ import static swim.deflate.DeflateUtil.readResource;
 
 public class InflateSpec {
 
+  static void assertInflates(byte[] deflated, byte[] inflated, int wrap, int windowBits, int bufferSize) {
+    final Output<byte[]> output = Binary.byteArrayOutput(inflated.length);
+    Decoder<byte[]> inflater = new Inflate<byte[]>(Binary.outputParser(output), wrap, windowBits);
+    for (int i = 0; i < deflated.length; i += bufferSize) {
+      inflater = inflater.feed(Binary.inputBuffer(deflated, i, Math.min(bufferSize, deflated.length - i)).isPart(deflated.length - i > bufferSize));
+      if (inflater.isError()) {
+        throw new TestException(inflater.trap());
+      }
+    }
+
+
+    assertTrue(inflater.isDone());
+    final byte[] actual = output.bind();
+    assertEquals(actual.length, inflated.length);
+    for (int i = 0, n = inflated.length; i < n; i += 1) {
+      if ((actual[i] & 0xff) != (inflated[i] & 0xff)) {
+        fail("expected 0x" + Integer.toHexString(inflated[i] & 0xff)
+            + ", but found 0x" + Integer.toHexString(actual[i] & 0xff)
+            + " at index " + i);
+      }
+    }
+  }
+
+  static void assertInflates(byte[] deflated, String inflated, int wrap, int windowBits) {
+    assertInflates(deflated, inflated.getBytes(Charset.forName("UTF-8")), wrap, windowBits);
+  }
+
+  static void assertInflates(byte[] deflated, String inflated, int wrap, int windowBits, int bufferSize) {
+    assertInflates(deflated, inflated.getBytes(Charset.forName("UTF-8")), wrap, windowBits, bufferSize);
+  }
+
+  static void assertInflates(byte[] deflated, byte[] inflated, int wrap, int windowBits) {
+    assertInflates(deflated, inflated, wrap, windowBits, deflated.length);
+  }
+
+  static byte[] byteArray(int... bytes) {
+    final int n = bytes.length;
+    final byte[] array = new byte[n];
+    for (int i = 0; i < n; i += 1) {
+      array[i] = (byte) bytes[i];
+    }
+    return array;
+  }
+
   @Test
   public void inflateFixed() {
     assertInflates(byteArray(0xf2, 0x48, 0xcd, 0xc9, 0xc9, 0x07, 0x00, 0x00, 0x00, 0xff, 0xff),
@@ -48,7 +92,6 @@ public class InflateSpec {
         readResource("/lorem.txt", true),
         Inflate.Z_NO_WRAP, Inflate.DEF_WBITS);
   }
-
 
   @Test
   public void inflateImage() {
@@ -99,51 +142,6 @@ public class InflateSpec {
     assertTrue(inflater.isDone());
 
     return output.bind();
-  }
-
-
-  static void assertInflates(byte[] deflated, byte[] inflated, int wrap, int windowBits, int bufferSize) {
-    final Output<byte[]> output = Binary.byteArrayOutput(inflated.length);
-    Decoder<byte[]> inflater = new Inflate<byte[]>(Binary.outputParser(output), wrap, windowBits);
-    for (int i = 0; i < deflated.length; i += bufferSize) {
-      inflater = inflater.feed(Binary.inputBuffer(deflated, i, Math.min(bufferSize, deflated.length - i)).isPart(deflated.length - i > bufferSize));
-      if (inflater.isError()) {
-        throw new TestException(inflater.trap());
-      }
-    }
-
-
-    assertTrue(inflater.isDone());
-    final byte[] actual = output.bind();
-    assertEquals(actual.length, inflated.length);
-    for (int i = 0, n = inflated.length; i < n; i += 1) {
-      if ((actual[i] & 0xff) != (inflated[i] & 0xff)) {
-        fail("expected 0x" + Integer.toHexString(inflated[i] & 0xff)
-            + ", but found 0x" + Integer.toHexString(actual[i] & 0xff)
-            + " at index " + i);
-      }
-    }
-  }
-
-  static void assertInflates(byte[] deflated, String inflated, int wrap, int windowBits) {
-    assertInflates(deflated, inflated.getBytes(Charset.forName("UTF-8")), wrap, windowBits);
-  }
-
-  static void assertInflates(byte[] deflated, String inflated, int wrap, int windowBits, int bufferSize) {
-    assertInflates(deflated, inflated.getBytes(Charset.forName("UTF-8")), wrap, windowBits, bufferSize);
-  }
-
-  static void assertInflates(byte[] deflated, byte[] inflated, int wrap, int windowBits) {
-    assertInflates(deflated, inflated, wrap, windowBits, deflated.length);
-  }
-
-  static byte[] byteArray(int... bytes) {
-    final int n = bytes.length;
-    final byte[] array = new byte[n];
-    for (int i = 0; i < n; i += 1) {
-      array[i] = (byte) bytes[i];
-    }
-    return array;
   }
 
 }

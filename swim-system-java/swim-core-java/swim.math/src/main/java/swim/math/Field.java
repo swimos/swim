@@ -15,7 +15,9 @@
 package swim.math;
 
 public interface Field<S> extends Ring<S> {
+
   S inverse(S a);
 
   S divide(S a, S b);
+
 }

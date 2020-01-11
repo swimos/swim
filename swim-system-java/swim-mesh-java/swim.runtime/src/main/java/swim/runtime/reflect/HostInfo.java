@@ -23,6 +23,8 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class HostInfo {
+
+  private static Form<HostInfo> form;
   protected final Uri hostUri;
   protected final boolean connected;
   protected final boolean remote;
@@ -45,6 +47,20 @@ public class HostInfo {
     this.master = master;
     this.slave = slave;
     this.nodeCount = nodeCount;
+  }
+
+  public static HostInfo from(HostBinding hostBinding) {
+    return new HostInfo(hostBinding.hostUri(), hostBinding.isConnected(), hostBinding.isRemote(),
+        hostBinding.isSecure(), hostBinding.isPrimary(), hostBinding.isReplica(),
+        hostBinding.isMaster(), hostBinding.isSlave(), (long) hostBinding.nodes().size());
+  }
+
+  @Kind
+  public static Form<HostInfo> form() {
+    if (form == null) {
+      form = new HostInfoForm();
+    }
+    return form;
   }
 
   public final Uri hostUri() {
@@ -87,24 +103,10 @@ public class HostInfo {
     return form().mold(this).toValue();
   }
 
-  public static HostInfo from(HostBinding hostBinding) {
-    return new HostInfo(hostBinding.hostUri(), hostBinding.isConnected(), hostBinding.isRemote(),
-                        hostBinding.isSecure(), hostBinding.isPrimary(), hostBinding.isReplica(),
-                        hostBinding.isMaster(), hostBinding.isSlave(), (long) hostBinding.nodes().size());
-  }
-
-  private static Form<HostInfo> form;
-
-  @Kind
-  public static Form<HostInfo> form() {
-    if (form == null) {
-      form = new HostInfoForm();
-    }
-    return form;
-  }
 }
 
 final class HostInfoForm extends Form<HostInfo> {
+
   @Override
   public Class<?> type() {
     return HostInfo.class;
@@ -160,4 +162,5 @@ final class HostInfoForm extends Form<HostInfo> {
     }
     return null;
   }
+
 }

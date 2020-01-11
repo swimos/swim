@@ -85,17 +85,43 @@ import swim.ws.WsPing;
 import swim.ws.WsPong;
 
 public class RemoteHost extends AbstractTierBinding implements HostBinding, WarpSocket {
-  protected HostContext hostContext;
-  protected WarpSocketContext warpSocketContext;
+
+  static final int PRIMARY = 1 << 0;
+  static final int REPLICA = 1 << 1;
+  static final int MASTER = 1 << 2;
+  static final int SLAVE = 1 << 3;
+  static final int URI_RESOLUTION_CACHE_SIZE;
+  static final AtomicIntegerFieldUpdater<RemoteHost> FLAGS =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "flags");
+  static final AtomicReferenceFieldUpdater<RemoteHost, Identity> REMOTE_IDENTITY =
+      AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, Identity.class, "remoteIdentity");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<RemoteHost, HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>>> DOWNLINKS =
+      AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, (Class<HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>>>) (Class<?>) HashTrieMap.class, "downlinks");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<RemoteHost, HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>>> UPLINKS =
+      AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, (Class<HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>>>) (Class<?>) HashTrieMap.class, "uplinks");
+
+  static {
+    int uriResolutionCacheSize;
+    try {
+      uriResolutionCacheSize = Integer.parseInt(System.getProperty("swim.remote.uri.resolution.cache.size"));
+    } catch (NumberFormatException e) {
+      uriResolutionCacheSize = 8;
+    }
+    URI_RESOLUTION_CACHE_SIZE = uriResolutionCacheSize;
+  }
+
   final Uri requestUri;
   final Uri baseUri;
+  final HashGenCacheMap<Uri, Uri> resolveCache;
+  protected HostContext hostContext;
+  protected WarpSocketContext warpSocketContext;
   Uri remoteUri;
-
   volatile int flags;
   volatile Identity remoteIdentity;
   volatile HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> downlinks;
   volatile HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> uplinks;
-  final HashGenCacheMap<Uri, Uri> resolveCache;
 
   public RemoteHost(Uri requestUri, Uri baseUri) {
     this.requestUri = requestUri;
@@ -1100,39 +1126,10 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     this.hostContext.fail(message);
   }
 
-  static final int PRIMARY = 1 << 0;
-  static final int REPLICA = 1 << 1;
-  static final int MASTER = 1 << 2;
-  static final int SLAVE = 1 << 3;
-
-  static final int URI_RESOLUTION_CACHE_SIZE;
-
-  static final AtomicIntegerFieldUpdater<RemoteHost> FLAGS =
-      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "flags");
-
-  static final AtomicReferenceFieldUpdater<RemoteHost, Identity> REMOTE_IDENTITY =
-      AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, Identity.class, "remoteIdentity");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<RemoteHost, HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>>> DOWNLINKS =
-      AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, (Class<HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>>>) (Class<?>) HashTrieMap.class, "downlinks");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<RemoteHost, HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>>> UPLINKS =
-      AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, (Class<HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>>>) (Class<?>) HashTrieMap.class, "uplinks");
-
-  static {
-    int uriResolutionCacheSize;
-    try {
-      uriResolutionCacheSize = Integer.parseInt(System.getProperty("swim.remote.uri.resolution.cache.size"));
-    } catch (NumberFormatException e) {
-      uriResolutionCacheSize = 8;
-    }
-    URI_RESOLUTION_CACHE_SIZE = uriResolutionCacheSize;
-  }
 }
 
 final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
+
   final RemoteHost host;
   final float prio;
   final E envelope;
@@ -1165,4 +1162,5 @@ final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
       }
     }
   }
+
 }

@@ -15,20 +15,13 @@
 package swim.codec;
 
 final class OutputParser<O> extends Parser<O> {
+
   final Input input;
   final Output<O> output;
 
   OutputParser(Input input, Output<O> output) {
     this.input = input;
     this.output = output;
-  }
-
-  @Override
-  public Parser<O> feed(Input input) {
-    if (this.input != null) {
-      input = this.input.fork(input);
-    }
-    return parse(input, this.output);
   }
 
   static <O> Parser<O> parse(Input input, Output<O> output) {
@@ -45,4 +38,13 @@ final class OutputParser<O> extends Parser<O> {
     }
     return new OutputParser<O>(input, output);
   }
+
+  @Override
+  public Parser<O> feed(Input input) {
+    if (this.input != null) {
+      input = this.input.fork(input);
+    }
+    return parse(input, this.output);
+  }
+
 }

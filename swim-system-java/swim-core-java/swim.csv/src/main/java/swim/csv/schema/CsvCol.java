@@ -19,6 +19,7 @@ import swim.codec.Parser;
 import swim.util.Builder;
 
 public interface CsvCol<C> {
+
   String name();
 
   CsvCol<C> name(String name);
@@ -30,4 +31,5 @@ public interface CsvCol<C> {
   Parser<C> parseCell(Input input);
 
   void addCell(C cell, Builder<C, ?> rowBuilder);
+
 }

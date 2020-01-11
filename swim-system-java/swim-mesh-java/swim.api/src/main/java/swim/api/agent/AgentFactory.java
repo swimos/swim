@@ -22,6 +22,7 @@ import swim.uri.Uri;
  * {@code A}.
  */
 public interface AgentFactory<A extends Agent> {
+
   /**
    * Creates an instance of {@code A} with internal context {@code context}.
    */
@@ -30,4 +31,5 @@ public interface AgentFactory<A extends Agent> {
   Value id(Uri nodeUri);
 
   Value props(Uri nodeUri);
+
 }

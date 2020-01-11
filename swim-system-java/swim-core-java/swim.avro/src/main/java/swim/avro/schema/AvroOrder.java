@@ -15,7 +15,9 @@
 package swim.avro.schema;
 
 public enum AvroOrder {
+
   ASCENDING,
   DESCENDING,
   IGNORE;
+
 }

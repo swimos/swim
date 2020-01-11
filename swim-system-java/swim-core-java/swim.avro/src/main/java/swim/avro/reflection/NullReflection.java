@@ -17,8 +17,10 @@ package swim.avro.reflection;
 import swim.avro.schema.AvroNullType;
 
 final class NullReflection<T> extends AvroNullType<T> {
+
   @Override
   public T cast() {
     return null;
   }
+
 }

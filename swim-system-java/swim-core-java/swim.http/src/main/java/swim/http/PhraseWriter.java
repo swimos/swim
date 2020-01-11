@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class PhraseWriter extends Writer<Object, Object> {
+
   final String phrase;
   final int index;
 
@@ -29,11 +30,6 @@ final class PhraseWriter extends Writer<Object, Object> {
 
   PhraseWriter(String phrase) {
     this(phrase, 0);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.phrase, this.index);
   }
 
   static Writer<Object, Object> write(Output<?> output, String phrase, int index) {
@@ -60,4 +56,10 @@ final class PhraseWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, String phrase) {
     return write(output, phrase, 0);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.phrase, this.index);
+  }
+
 }

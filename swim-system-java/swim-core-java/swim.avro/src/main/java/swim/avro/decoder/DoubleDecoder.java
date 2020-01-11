@@ -20,6 +20,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class DoubleDecoder<T> extends Decoder<T> {
+
   final AvroDoubleType<T> type;
   final long value;
   final int shift;
@@ -32,11 +33,6 @@ final class DoubleDecoder<T> extends Decoder<T> {
 
   DoubleDecoder(AvroDoubleType<T> type) {
     this(type, 0L, 0);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.value, this.shift);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroDoubleType<T> type,
@@ -60,4 +56,10 @@ final class DoubleDecoder<T> extends Decoder<T> {
   static <T> Decoder<T> decode(InputBuffer input, AvroDoubleType<T> type) {
     return decode(input, type, 0L, 0);
   }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type, this.value, this.shift);
+  }
+
 }

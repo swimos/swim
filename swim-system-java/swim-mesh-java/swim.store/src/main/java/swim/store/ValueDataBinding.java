@@ -18,6 +18,7 @@ import swim.api.data.ValueData;
 import swim.structure.Value;
 
 public interface ValueDataBinding extends ValueData<Value>, DataBinding {
+
   @Override
   ValueDataContext dataContext();
 
@@ -28,4 +29,5 @@ public interface ValueDataBinding extends ValueData<Value>, DataBinding {
 
   @Override
   ValueDataBinding isTransient(boolean isTransient);
+
 }

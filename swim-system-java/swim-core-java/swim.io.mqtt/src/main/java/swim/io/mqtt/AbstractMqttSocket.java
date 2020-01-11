@@ -27,6 +27,7 @@ import swim.io.IpSocket;
 import swim.mqtt.MqttPacket;
 
 public abstract class AbstractMqttSocket<I, O> implements MqttSocket<I, O>, IpContext, FlowContext {
+
   protected MqttSocketContext<I, O> context;
 
   @Override
@@ -203,4 +204,5 @@ public abstract class AbstractMqttSocket<I, O> implements MqttSocket<I, O>, IpCo
   public void close() {
     this.context.close();
   }
+
 }

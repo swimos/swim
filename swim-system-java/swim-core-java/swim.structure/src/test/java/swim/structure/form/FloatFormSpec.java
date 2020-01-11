@@ -24,6 +24,7 @@ import swim.structure.Text;
 import static org.testng.Assert.assertEquals;
 
 public class FloatFormSpec {
+
   @Test
   public void moldFloatsToNums() {
     assertEquals(Form.forFloat().mold(2.5F), Num.from(2.5F));
@@ -54,4 +55,5 @@ public class FloatFormSpec {
   public void castAttributedNumsToFloats() {
     assertEquals(Form.forFloat().cast(Record.of(Attr.of("test"), 42)), 42f);
   }
+
 }

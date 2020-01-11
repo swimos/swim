@@ -23,6 +23,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class QTreePageSpec {
+
   @Test
   public void updateLeafWithRank0Tiles() {
     final PageContext pageContext = new PageContext();
@@ -786,7 +787,7 @@ public class QTreePageSpec {
                     + "; xRank: " + xRank + "; yRank: " + yRank
                     + "; splitArity: " + splitArity + " ...");
                 testUniformRankNodes(0L, 0L, width, width, xSpan, ySpan,
-                                     xStep, yStep, xRank, yRank, splitArity);
+                    xStep, yStep, xRank, yRank, splitArity);
               }
             }
           }
@@ -803,6 +804,7 @@ public class QTreePageSpec {
       public boolean pageShouldSplit(Page page) {
         return page.arity() > splitArity;
       }
+
       @Override
       public boolean pageShouldMerge(Page page) {
         return page.arity() < (splitArity >> 1);
@@ -873,7 +875,7 @@ public class QTreePageSpec {
                     + "; xStep: " + xStep + "; yStep: " + yStep
                     + "; splitArity: " + splitArity + "; zigzag: " + zigzag + " ...");
                 testNonUniformRankNodes(0L, 0L, width, width, xSpan, ySpan,
-                                        xStep, yStep, splitArity, zigzag);
+                    xStep, yStep, splitArity, zigzag);
               }
             }
           }
@@ -890,6 +892,7 @@ public class QTreePageSpec {
       public boolean pageShouldSplit(Page page) {
         return page.arity() > splitArity;
       }
+
       @Override
       public boolean pageShouldMerge(Page page) {
         return page.arity() < (splitArity >> 1);
@@ -953,4 +956,5 @@ public class QTreePageSpec {
       }
     }
   }
+
 }

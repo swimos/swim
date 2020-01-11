@@ -23,6 +23,7 @@ import swim.structure.Value;
  * Transformation between a structurally typed {@link Item} and a {@link Float}.
  */
 public final class FloatForm extends Form<Float> {
+
   final Float unit;
 
   public FloatForm(Float unit) {
@@ -62,4 +63,5 @@ public final class FloatForm extends Form<Float> {
       return null;
     }
   }
+
 }

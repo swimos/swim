@@ -21,6 +21,7 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Builder;
 
 final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
+
   final HttpParser http;
   final StringBuilder name;
   final Parser<WebSocketParam> param;
@@ -38,11 +39,6 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
 
   WebSocketExtensionParser(HttpParser http) {
     this(http, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<WebSocketExtension> feed(Input input) {
-    return parse(input, this.http, this.name, this.param, this.params, this.step);
   }
 
   static Parser<WebSocketExtension> parse(Input input, HttpParser http, StringBuilder name, Parser<WebSocketParam> param,
@@ -138,4 +134,10 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
   static Parser<WebSocketExtension> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, null, 1);
   }
+
+  @Override
+  public Parser<WebSocketExtension> feed(Input input) {
+    return parse(input, this.http, this.name, this.param, this.params, this.step);
+  }
+
 }

@@ -20,6 +20,7 @@ import swim.codec.Encoder;
 import swim.codec.Utf8;
 
 public class HttpChunkedSpec {
+
   static <T> void assertDecodes(Decoder<T> decodee, String input, T expected) {
     final HttpResponse<T> headers = HttpResponse.from(HttpStatus.OK);
     final HttpResponse<T> response = headers.entity(HttpValue.from(expected));
@@ -58,6 +59,7 @@ public class HttpChunkedSpec {
   @Test
   public void encodeMultipleChunks() {
     assertEncodes(HttpChunked.from(Utf8.stringWriter("Hello, ").andThen(Utf8.stringWriter("world!"))),
-                  "7\r\nHello, \r\n6\r\nworld!\r\n0\r\n\r\n");
+        "7\r\nHello, \r\n6\r\nworld!\r\n0\r\n\r\n");
   }
+
 }

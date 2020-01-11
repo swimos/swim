@@ -17,6 +17,11 @@ package swim.uri;
 import swim.collections.HashTrieMap;
 
 abstract class UriTerminalPattern extends UriFragmentPattern {
+
+  static UriTerminalPattern compile(Uri pattern) {
+    return new UriConstantPattern(pattern);
+  }
+
   abstract HashTrieMap<String, String> unapply(HashTrieMap<String, String> args);
 
   @Override
@@ -35,7 +40,4 @@ abstract class UriTerminalPattern extends UriFragmentPattern {
     }
   }
 
-  static UriTerminalPattern compile(Uri pattern) {
-    return new UriConstantPattern(pattern);
-  }
 }

@@ -18,6 +18,7 @@ package swim.codec;
  * Thrown when a {@link Writer} attempts to write invalid syntax.
  */
 public class WriterException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public WriterException(String message, Throwable cause) {
@@ -35,4 +36,5 @@ public class WriterException extends RuntimeException {
   public WriterException() {
     super();
   }
+
 }

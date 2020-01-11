@@ -29,10 +29,33 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class WarpSettings implements Debug {
+
+  private static int hashSeed;
+  private static WarpSettings standard;
+  private static Form<WarpSettings> form;
   protected final WsSettings wsSettings;
 
   public WarpSettings(WsSettings wsSettings) {
     this.wsSettings = wsSettings;
+  }
+
+  public static WarpSettings standard() {
+    if (standard == null) {
+      standard = new WarpSettings(WsSettings.standard());
+    }
+    return standard;
+  }
+
+  public static WarpSettings from(WsSettings wsSettings) {
+    return new WarpSettings(wsSettings);
+  }
+
+  @Kind
+  public static Form<WarpSettings> form() {
+    if (form == null) {
+      form = new WarpSettingsForm();
+    }
+    return form;
   }
 
   public final WsSettings wsSettings() {
@@ -109,33 +132,10 @@ public class WarpSettings implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static WarpSettings standard;
-
-  private static Form<WarpSettings> form;
-
-  public static WarpSettings standard() {
-    if (standard == null) {
-      standard = new WarpSettings(WsSettings.standard());
-    }
-    return standard;
-  }
-
-  public static WarpSettings from(WsSettings wsSettings) {
-    return new WarpSettings(wsSettings);
-  }
-
-  @Kind
-  public static Form<WarpSettings> form() {
-    if (form == null) {
-      form = new WarpSettingsForm();
-    }
-    return form;
-  }
 }
 
 final class WarpSettingsForm extends Form<WarpSettings> {
+
   @Override
   public WarpSettings unit() {
     return WarpSettings.standard();
@@ -160,4 +160,5 @@ final class WarpSettingsForm extends Form<WarpSettings> {
     final WsSettings wsSettings = WsSettings.form().cast(item);
     return new WarpSettings(wsSettings);
   }
+
 }

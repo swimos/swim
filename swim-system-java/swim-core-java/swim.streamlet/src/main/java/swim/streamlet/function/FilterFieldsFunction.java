@@ -16,5 +16,7 @@ package swim.streamlet.function;
 
 @FunctionalInterface
 public interface FilterFieldsFunction<K, V> {
+
   boolean apply(K key, V value);
+
 }

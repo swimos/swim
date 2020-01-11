@@ -15,6 +15,7 @@
 package swim.avro.schema;
 
 public abstract class AvroEnumType<T> extends AvroNamedType<T> {
+
   public abstract String doc();
 
   public abstract AvroEnumType<T> doc(String doc);
@@ -26,4 +27,5 @@ public abstract class AvroEnumType<T> extends AvroNamedType<T> {
   public abstract AvroEnumType<T> symbol(String symbol);
 
   public abstract T cast(int ordinal);
+
 }

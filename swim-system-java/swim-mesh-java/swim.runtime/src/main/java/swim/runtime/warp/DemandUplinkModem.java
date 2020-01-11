@@ -19,10 +19,12 @@ import swim.runtime.WarpBinding;
 import swim.structure.Value;
 
 public abstract class DemandUplinkModem extends WarpUplinkModem {
+
   public DemandUplinkModem(WarpBinding linkBinding, UplinkAddress uplinkAddress) {
     super(linkBinding, uplinkAddress);
   }
 
   @Override
   protected abstract Value nextDownCue();
+
 }

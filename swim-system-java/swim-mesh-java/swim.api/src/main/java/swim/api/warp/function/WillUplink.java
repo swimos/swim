@@ -19,5 +19,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface WillUplink extends Preemptive {
+
   void willUplink(WarpUplink uplink);
+
 }

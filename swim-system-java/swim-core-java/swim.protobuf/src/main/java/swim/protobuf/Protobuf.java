@@ -21,11 +21,12 @@ import swim.structure.Value;
  * Factory for constructing Protocol Buffer decoders and encoders.
  */
 public final class Protobuf {
+
+  private static ProtobufDecoder<Item, Value> structureDecoder;
+
   private Protobuf() {
     // static
   }
-
-  private static ProtobufDecoder<Item, Value> structureDecoder;
   //private static ProtobufEncoder<Item, Value> structureEncoder;
 
   public static ProtobufDecoder<Item, Value> structureDecoder() {
@@ -41,4 +42,5 @@ public final class Protobuf {
   //  }
   //  return structureEncoder;
   //}
+
 }

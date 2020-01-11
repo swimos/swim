@@ -42,13 +42,61 @@ import swim.warp.UnlinkRequest;
 import swim.warp.UnlinkedResponse;
 
 public abstract class WarpDownlinkModem<View extends DownlinkView> extends DownlinkModel<View> implements WarpBinding {
+
+  @SuppressWarnings("unchecked")
+  protected static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> EXEC_DELTA =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "execDelta");
+  @SuppressWarnings("unchecked")
+  protected static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> EXEC_TIME =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "execTime");
+  static final int OPENED = 1 << 0;
+  static final int LINKED = 1 << 1;
+  static final int LINK = 1 << 2;
+  static final int LINKING = 1 << 3;
+  static final int SYNC = 1 << 4;
+  static final int SYNCING = 1 << 5;
+  static final int UNLINK = 1 << 6;
+  static final int UNLINKING = 1 << 7;
+  static final int FEEDING_DOWN = 1 << 8;
+  static final int PULLING_DOWN = 1 << 9;
+  static final int CUED_UP = 1 << 10;
+  static final int FEEDING_UP = 1 << 11;
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "status");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "openDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> OPEN_COUNT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "openCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "closeDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> CLOSE_COUNT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "closeCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "eventDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "eventCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "commandDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "commandCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "lastReportTime");
   protected final float prio;
   protected final float rate;
   protected final Value body;
   protected WarpContext linkContext;
   protected CellContext cellContext;
   protected volatile int status;
-
   volatile long execDelta;
   volatile long execTime;
   volatile int openDelta;
@@ -353,7 +401,7 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   protected void pushUp(Envelope envelope) {
     this.linkContext.pushUp(new Push<Envelope>(Uri.empty(), hostUri(), nodeUri(), laneUri(),
-                                               prio(), null, envelope, null));
+        prio(), null, envelope, null));
   }
 
   public void link() {
@@ -667,59 +715,9 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
     final long commandCount = COMMAND_COUNT.addAndGet(this, (long) commandDelta);
 
     return new WarpDownlinkProfile(cellAddressDown(), execDelta, execRate, execTime,
-                                   openDelta, openCount, closeDelta, closeCount,
-                                   eventDelta, eventRate, eventCount,
-                                   commandDelta, commandRate, commandCount);
+        openDelta, openCount, closeDelta, closeCount,
+        eventDelta, eventRate, eventCount,
+        commandDelta, commandRate, commandCount);
   }
 
-  static final int OPENED = 1 << 0;
-  static final int LINKED = 1 << 1;
-  static final int LINK = 1 << 2;
-  static final int LINKING = 1 << 3;
-  static final int SYNC = 1 << 4;
-  static final int SYNCING = 1 << 5;
-  static final int UNLINK = 1 << 6;
-  static final int UNLINKING = 1 << 7;
-  static final int FEEDING_DOWN = 1 << 8;
-  static final int PULLING_DOWN = 1 << 9;
-  static final int CUED_UP = 1 << 10;
-  static final int FEEDING_UP = 1 << 11;
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "status");
-
-  @SuppressWarnings("unchecked")
-  protected static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> EXEC_DELTA =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "execDelta");
-  @SuppressWarnings("unchecked")
-  protected static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> EXEC_TIME =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "execTime");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "openDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> OPEN_COUNT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "openCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "closeDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> CLOSE_COUNT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "closeCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "eventDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "eventCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "commandDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "commandCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> LAST_REPORT_TIME =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "lastReportTime");
 }

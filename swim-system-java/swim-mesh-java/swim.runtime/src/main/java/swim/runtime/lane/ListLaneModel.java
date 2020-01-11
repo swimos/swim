@@ -35,6 +35,10 @@ import swim.structure.Value;
 import swim.warp.CommandMessage;
 
 public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
   protected int flags;
   protected ListData<Value> data;
 
@@ -299,12 +303,10 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
     super.willLoad();
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
 }
 
 final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -448,9 +450,11 @@ final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>
       }
     }
   }
+
 }
 
 final class ListLaneRelayMove extends LaneRelay<ListLaneModel, ListLaneView<?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -558,9 +562,11 @@ final class ListLaneRelayMove extends LaneRelay<ListLaneModel, ListLaneView<?>> 
       }
     }
   }
+
 }
 
 final class ListLaneRelayRemove extends LaneRelay<ListLaneModel, ListLaneView<?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -671,9 +677,11 @@ final class ListLaneRelayRemove extends LaneRelay<ListLaneModel, ListLaneView<?>
       }
     }
   }
+
 }
 
 final class ListLaneRelayDrop extends LaneRelay<ListLaneModel, ListLaneView<?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -752,9 +760,11 @@ final class ListLaneRelayDrop extends LaneRelay<ListLaneModel, ListLaneView<?>> 
       }
     }
   }
+
 }
 
 final class ListLaneRelayTake extends LaneRelay<ListLaneModel, ListLaneView<?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -833,9 +843,11 @@ final class ListLaneRelayTake extends LaneRelay<ListLaneModel, ListLaneView<?>> 
       }
     }
   }
+
 }
 
 final class ListLaneRelayClear extends LaneRelay<ListLaneModel, ListLaneView<?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -906,4 +918,5 @@ final class ListLaneRelayClear extends LaneRelay<ListLaneModel, ListLaneView<?>>
       }
     }
   }
+
 }

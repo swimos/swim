@@ -22,10 +22,16 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class EcPrimeFieldDef extends EcFieldDef {
+
+  private static int hashSeed;
   protected final BigInteger prime;
 
   public EcPrimeFieldDef(BigInteger prime) {
     this.prime = prime;
+  }
+
+  public static EcPrimeFieldDef from(ECFieldFp field) {
+    return new EcPrimeFieldDef(field.getP());
   }
 
   public final BigInteger prime() {
@@ -63,9 +69,4 @@ public class EcPrimeFieldDef extends EcFieldDef {
     return Murmur3.mash(Murmur3.mix(hashSeed, this.prime.hashCode()));
   }
 
-  private static int hashSeed;
-
-  public static EcPrimeFieldDef from(ECFieldFp field) {
-    return new EcPrimeFieldDef(field.getP());
-  }
 }

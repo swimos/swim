@@ -22,6 +22,8 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Murmur3;
 
 public class Cmd implements Cloneable, Debug {
+
+  private static int hashSeed;
   final String id;
   final String name;
   String desc;
@@ -39,6 +41,18 @@ public class Cmd implements Cloneable, Debug {
     this.cmds = cmds;
     this.exec = exec;
     this.base = base;
+  }
+
+  public static Cmd of(String id, String name) {
+    return new Cmd(id, name, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(), null, null);
+  }
+
+  public static Cmd of(String id) {
+    return new Cmd(id, id, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(), null, null);
+  }
+
+  public static Cmd help() {
+    return new Cmd("help", "help", null, FingerTrieSeq.empty(), FingerTrieSeq.empty(), new ExecHelpCmd(), null);
   }
 
   public Cmd base() {
@@ -310,26 +324,15 @@ public class Cmd implements Cloneable, Debug {
     return new Cmd(this.id, this.name, this.desc, opts, cmds, this.exec, this.base);
   }
 
-  private static int hashSeed;
-
-  public static Cmd of(String id, String name) {
-    return new Cmd(id, name, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(), null, null);
-  }
-
-  public static Cmd of(String id) {
-    return new Cmd(id, id, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(), null, null);
-  }
-
-  public static Cmd help() {
-    return new Cmd("help", "help", null, FingerTrieSeq.empty(), FingerTrieSeq.empty(), new ExecHelpCmd(), null);
-  }
 }
 
 final class ExecHelpCmd implements ExecCmd {
+
   @Override
   public void exec(Cmd cmd) {
     if (cmd.base != null) {
       System.out.println(cmd.base.toHelp());
     }
   }
+
 }

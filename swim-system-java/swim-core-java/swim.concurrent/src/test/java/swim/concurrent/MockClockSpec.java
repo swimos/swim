@@ -22,6 +22,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class MockClockSpec {
+
   @Test
   public void scheduleAnImmediateTimer() {
     final MockClock clock = new MockClock(100, 512);
@@ -389,6 +390,7 @@ public class MockClockSpec {
       clock.start();
       clock.setTimer(100L, new AbstractTimer() {
         private boolean rescheduled = false;
+
         @Override
         public void runTimer() {
           if (!rescheduled) {
@@ -429,6 +431,7 @@ public class MockClockSpec {
         public void runTimer() {
           fail();
         }
+
         @Override
         public void timerDidCancel() {
           assertEquals(cancel.getCount(), 1);
@@ -460,6 +463,7 @@ public class MockClockSpec {
         public void runTimer() {
           fail();
         }
+
         @Override
         public void timerDidCancel() {
           assertEquals(cancel1.getCount(), 1);
@@ -506,6 +510,7 @@ public class MockClockSpec {
         public void runTimer() {
           fail();
         }
+
         @Override
         public void timerDidCancel() {
           assertEquals(cancel2.getCount(), 1);
@@ -536,6 +541,7 @@ public class MockClockSpec {
         public void runTimer() {
           fail();
         }
+
         @Override
         public void timerDidCancel() {
           assertEquals(cancel1.getCount(), 1);
@@ -582,6 +588,7 @@ public class MockClockSpec {
         public void runTimer() {
           fail();
         }
+
         @Override
         public void timerDidCancel() {
           assertEquals(cancel2.getCount(), 1);
@@ -612,6 +619,7 @@ public class MockClockSpec {
         public void runTimer() {
           fail();
         }
+
         @Override
         public void timerDidCancel() {
           assertEquals(cancel1.getCount(), 1);
@@ -658,6 +666,7 @@ public class MockClockSpec {
         public void runTimer() {
           fail();
         }
+
         @Override
         public void timerDidCancel() {
           assertEquals(cancel2.getCount(), 1);
@@ -688,12 +697,14 @@ public class MockClockSpec {
         public void runTimer() {
           fail();
         }
+
         @Override
         public void timerWillSchedule(long millis) {
           assertEquals(willSchedule.getCount(), 1);
           assertEquals(millis, 50L);
           willSchedule.countDown();
         }
+
         @Override
         public void timerDidCancel() {
           assertEquals(didCancel.getCount(), 1);
@@ -810,50 +821,60 @@ public class MockClockSpec {
         assertEquals(start.getCount(), 2);
         start.countDown();
       }
+
       @Override
       protected void didStart() {
         assertEquals(start.getCount(), 1);
         start.countDown();
       }
+
       @Override
       protected void willStop() {
         assertEquals(stop.getCount(), 2);
         stop.countDown();
       }
+
       @Override
       protected void didStop() {
         assertEquals(stop.getCount(), 1);
         stop.countDown();
       }
+
       @Override
       protected void didFail(Throwable error) {
         fail("didFail", error);
       }
+
       @Override
       protected void didTick(long tick, long waitedMillis) {
         assertTrue(didTick.getCount() > 0);
         didTick.countDown();
       }
+
       @Override
       protected void timerWillSchedule(TimerFunction timer, long millis) {
         assertTrue(timerWillSchedule.getCount() > 0);
         timerWillSchedule.countDown();
       }
+
       @Override
       protected void timerDidCancel(TimerFunction timer) {
         assertTrue(timerDidCancel.getCount() > 0);
         timerDidCancel.countDown();
       }
+
       @Override
       protected void timerWillRun(TimerFunction timer) {
         assertTrue(timerWillRun.getCount() > 0);
         timerWillRun.countDown();
       }
+
       @Override
       protected void timerDidRun(TimerFunction timer) {
         assertTrue(timerDidRun.getCount() > 0);
         timerDidRun.countDown();
       }
+
       @Override
       protected void timerDidFail(TimerFunction timer, Throwable cause) {
         assertEquals(timerDidFail.getCount(), 1);
@@ -896,4 +917,5 @@ public class MockClockSpec {
       clock.await(stop);
     }
   }
+
 }

@@ -15,4 +15,5 @@
 /**
  * Collection interfaces that notify registered observers of precise state changes.
  */
+
 package swim.observable;

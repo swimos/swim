@@ -19,6 +19,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 final class PointZ2Form extends Z2Form<PointZ2> {
+
   @Override
   public String tag() {
     return "point";
@@ -85,4 +86,5 @@ final class PointZ2Form extends Z2Form<PointZ2> {
       return null;
     }
   }
+
 }

@@ -28,6 +28,7 @@ import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
 public class LaneProxy implements LaneBinding, LaneContext {
+
   protected final LaneBinding laneBinding;
   protected LaneContext laneContext;
 
@@ -369,4 +370,5 @@ public class LaneProxy implements LaneBinding, LaneContext {
   public void didFail(Throwable error) {
     this.laneBinding.didFail(error);
   }
+
 }

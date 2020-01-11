@@ -19,6 +19,7 @@ import swim.codec.EncoderException;
 import swim.codec.OutputBuffer;
 
 final class HttpBodyEncoder<T> extends Encoder<Object, HttpMessage<T>> {
+
   final HttpMessage<T> message;
   final Encoder<?, ?> content;
   final long length;
@@ -33,11 +34,6 @@ final class HttpBodyEncoder<T> extends Encoder<Object, HttpMessage<T>> {
 
   HttpBodyEncoder(HttpMessage<T> message, Encoder<?, ?> content, long length) {
     this(message, content, length, 0L);
-  }
-
-  @Override
-  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
-    return encode(output, this.message, this.content, this.length, this.offset);
   }
 
   static <T> Encoder<Object, HttpMessage<T>> encode(OutputBuffer<?> output, HttpMessage<T> message,
@@ -80,4 +76,10 @@ final class HttpBodyEncoder<T> extends Encoder<Object, HttpMessage<T>> {
                                                     Encoder<?, ?> content, long length) {
     return encode(output, message, content, length, 0L);
   }
+
+  @Override
+  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
+    return encode(output, this.message, this.content, this.length, this.offset);
+  }
+
 }

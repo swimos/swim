@@ -19,9 +19,11 @@ import java.security.Key;
 import swim.structure.Value;
 
 public interface RsaKeyDef {
+
   BigInteger modulus();
 
   Key key();
 
   Value toValue();
+
 }

@@ -28,21 +28,13 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 public class ServerKernelSpec {
-  static class TestAgent extends AbstractAgent {
-  }
-
-  static class TestPlane extends AbstractPlane {
-    @SwimAgent("test")
-    @SwimRoute("/test/:name")
-    AgentRoute<TestAgent> testRoute;
-  }
 
   @Test
   public void testAgentRouteReflection() {
     final Kernel kernel = ServerLoader.loadServerStack();
 
     final TestPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-                                  .openPlane("test", TestPlane.class);
+        .openPlane("test", TestPlane.class);
     assertNotNull(plane);
 
     final AgentRoute<?> nopRoute = plane.getAgentRoute("test");
@@ -51,4 +43,17 @@ public class ServerKernelSpec {
     assertEquals(plane.getAgentFactory(Uri.parse("/test/bar")), nopRoute);
     assertNull(plane.getAgentFactory(Uri.parse("/test/")));
   }
+
+  static class TestAgent extends AbstractAgent {
+
+  }
+
+  static class TestPlane extends AbstractPlane {
+
+    @SwimAgent("test")
+    @SwimRoute("/test/:name")
+    AgentRoute<TestAgent> testRoute;
+
+  }
+
 }

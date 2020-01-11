@@ -19,6 +19,7 @@ import swim.runtime.NodeContext;
 import swim.runtime.agent.AgentNode;
 
 final class MetaDownlinkAgent extends AgentNode {
+
   final LinkBinding downlink;
 
   MetaDownlinkAgent(LinkBinding downlink) {
@@ -30,4 +31,5 @@ final class MetaDownlinkAgent extends AgentNode {
     super.setNodeContext(nodeContext);
     this.downlink.openMetaDownlink(this.downlink, this);
   }
+
 }

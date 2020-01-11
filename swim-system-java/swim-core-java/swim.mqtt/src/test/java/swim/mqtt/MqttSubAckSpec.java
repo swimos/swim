@@ -19,6 +19,7 @@ import swim.structure.Data;
 import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttSubAckSpec {
+
   public static void assertDecodes(Data data, MqttSubAck packet) {
     MqttAssertions.assertDecodesPacket(data, packet);
   }
@@ -36,44 +37,45 @@ public class MqttSubAckSpec {
   @Test
   public void decodeSubAckPacketsWithSingleSubscription() {
     assertDecodes(Data.fromBase16("9003000000"),
-                  MqttSubAck.from(0).subscription(MqttSubStatus.AT_MOST_ONCE));
+        MqttSubAck.from(0).subscription(MqttSubStatus.AT_MOST_ONCE));
     assertDecodes(Data.fromBase16("9003000001"),
-                  MqttSubAck.from(0).subscription(MqttSubStatus.AT_LEAST_ONCE));
+        MqttSubAck.from(0).subscription(MqttSubStatus.AT_LEAST_ONCE));
     assertDecodes(Data.fromBase16("9003000002"),
-                  MqttSubAck.from(0).subscription(MqttSubStatus.EXACTLY_ONCE));
+        MqttSubAck.from(0).subscription(MqttSubStatus.EXACTLY_ONCE));
     assertDecodes(Data.fromBase16("9003000080"),
-                  MqttSubAck.from(0).subscription(MqttSubStatus.FAILURE));
+        MqttSubAck.from(0).subscription(MqttSubStatus.FAILURE));
   }
 
   @Test
   public void encodeSubAckPacketsWithSingleSubscription() {
     assertEncodes(MqttSubAck.from(0).subscription(MqttSubStatus.AT_MOST_ONCE),
-                  Data.fromBase16("9003000000"));
+        Data.fromBase16("9003000000"));
     assertEncodes(MqttSubAck.from(0).subscription(MqttSubStatus.AT_LEAST_ONCE),
-                  Data.fromBase16("9003000001"));
+        Data.fromBase16("9003000001"));
     assertEncodes(MqttSubAck.from(0).subscription(MqttSubStatus.EXACTLY_ONCE),
-                  Data.fromBase16("9003000002"));
+        Data.fromBase16("9003000002"));
     assertEncodes(MqttSubAck.from(0).subscription(MqttSubStatus.FAILURE),
-                  Data.fromBase16("9003000080"));
+        Data.fromBase16("9003000080"));
   }
 
   @Test
   public void decodeSubAckPacketsWithMultipleSubscriptions() {
     assertDecodes(Data.fromBase16("9006000000010280"),
-                  MqttSubAck.from(0)
-                            .subscription(MqttSubStatus.AT_MOST_ONCE)
-                            .subscription(MqttSubStatus.AT_LEAST_ONCE)
-                            .subscription(MqttSubStatus.EXACTLY_ONCE)
-                            .subscription(MqttSubStatus.FAILURE));
+        MqttSubAck.from(0)
+            .subscription(MqttSubStatus.AT_MOST_ONCE)
+            .subscription(MqttSubStatus.AT_LEAST_ONCE)
+            .subscription(MqttSubStatus.EXACTLY_ONCE)
+            .subscription(MqttSubStatus.FAILURE));
   }
 
   @Test
   public void encodeSubAckPacketsWithMultipleSubscriptions() {
     assertEncodes(MqttSubAck.from(0)
-                            .subscription(MqttSubStatus.AT_MOST_ONCE)
-                            .subscription(MqttSubStatus.AT_LEAST_ONCE)
-                            .subscription(MqttSubStatus.EXACTLY_ONCE)
-                            .subscription(MqttSubStatus.FAILURE),
-                  Data.fromBase16("9006000000010280"));
+            .subscription(MqttSubStatus.AT_MOST_ONCE)
+            .subscription(MqttSubStatus.AT_LEAST_ONCE)
+            .subscription(MqttSubStatus.EXACTLY_ONCE)
+            .subscription(MqttSubStatus.FAILURE),
+        Data.fromBase16("9006000000010280"));
   }
+
 }

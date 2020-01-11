@@ -43,6 +43,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class MeshTablePart implements PartContext {
+
   protected final MeshTable mesh;
   protected final PartBinding part;
   protected final PartAddress partAddress;
@@ -327,4 +328,5 @@ public class MeshTablePart implements PartContext {
   public void willClose() {
     // nop
   }
+
 }

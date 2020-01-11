@@ -18,9 +18,6 @@ import swim.dynamic.HostPackage;
 import swim.dynamic.JavaHostPackage;
 
 public final class SwimApiAgent {
-  private SwimApiAgent() {
-    // static
-  }
 
   public static final HostPackage PACKAGE;
 
@@ -33,4 +30,9 @@ public final class SwimApiAgent {
     hostPkg.addHostType(HostAgentRoute.TYPE);
     hostPkg.addHostType(HostAgentRouteContext.TYPE);
   }
+
+  private SwimApiAgent() {
+    // static
+  }
+
 }

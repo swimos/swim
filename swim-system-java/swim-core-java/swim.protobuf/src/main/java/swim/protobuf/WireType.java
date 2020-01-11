@@ -15,6 +15,7 @@
 package swim.protobuf;
 
 public enum WireType {
+
   VARINT(0),
   FIXED64(1),
   SIZED(2),
@@ -28,6 +29,29 @@ public enum WireType {
 
   WireType(int code) {
     this.code = code;
+  }
+
+  public static WireType apply(int code) {
+    switch (code) {
+      case 0:
+        return VARINT;
+      case 1:
+        return FIXED64;
+      case 2:
+        return SIZED;
+      case 3:
+        return START_GROUP;
+      case 4:
+        return END_GROUP;
+      case 5:
+        return FIXED32;
+      case 6:
+        return RESERVED6;
+      case 7:
+        return RESERVED7;
+      default:
+        throw new IllegalArgumentException(Integer.toString(code));
+    }
   }
 
   public boolean isVarint() {
@@ -63,17 +87,4 @@ public enum WireType {
     return new StringBuilder("WireType").append('.').append(super.toString()).toString();
   }
 
-  public static WireType apply(int code) {
-    switch (code) {
-      case 0: return VARINT;
-      case 1: return FIXED64;
-      case 2: return SIZED;
-      case 3: return START_GROUP;
-      case 4: return END_GROUP;
-      case 5: return FIXED32;
-      case 6: return RESERVED6;
-      case 7: return RESERVED7;
-      default: throw new IllegalArgumentException(Integer.toString(code));
-    }
-  }
 }

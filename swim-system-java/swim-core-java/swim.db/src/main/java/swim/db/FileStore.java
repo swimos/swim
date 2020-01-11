@@ -31,6 +31,18 @@ import swim.concurrent.Sync;
 import swim.util.HashGenCacheSet;
 
 public class FileStore extends Store {
+
+  static final int OPENING = 1 << 0;
+  static final int OPENED = 1 << 1;
+  static final int COMMITTING = 1 << 2;
+  static final int COMPACTING = 1 << 3;
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<FileStore, HashTrieMap<Integer, FileZone>> ZONES =
+      AtomicReferenceFieldUpdater.newUpdater(FileStore.class, (Class<HashTrieMap<Integer, FileZone>>) (Class<?>) HashTrieMap.class, "zones");
+  static final AtomicReferenceFieldUpdater<FileStore, FileZone> ZONE =
+      AtomicReferenceFieldUpdater.newUpdater(FileStore.class, FileZone.class, "zone");
+  static final AtomicIntegerFieldUpdater<FileStore> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(FileStore.class, "status");
   final StoreContext context;
   final File directory;
   final String baseName;
@@ -400,7 +412,7 @@ public class FileStore extends Store {
       if (zone == null) {
         if (newZone == null) {
           newZone = new FileZone(this, newZoneId, zoneFile(newZoneId), this.stage,
-                                 oldZone.database, oldZone.germ());
+              oldZone.database, oldZone.germ());
           try {
             newZone.open();
           } catch (InterruptedException cause) {
@@ -454,23 +466,10 @@ public class FileStore extends Store {
     super.hitPage(database, page);
   }
 
-  static final int OPENING = 1 << 0;
-  static final int OPENED = 1 << 1;
-  static final int COMMITTING = 1 << 2;
-  static final int COMPACTING = 1 << 3;
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<FileStore, HashTrieMap<Integer, FileZone>> ZONES =
-      AtomicReferenceFieldUpdater.newUpdater(FileStore.class, (Class<HashTrieMap<Integer, FileZone>>) (Class<?>) HashTrieMap.class, "zones");
-
-  static final AtomicReferenceFieldUpdater<FileStore, FileZone> ZONE =
-      AtomicReferenceFieldUpdater.newUpdater(FileStore.class, FileZone.class, "zone");
-
-  static final AtomicIntegerFieldUpdater<FileStore> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(FileStore.class, "status");
 }
 
 final class FileStoreZoneFilter implements FilenameFilter {
+
   final Pattern zonePattern;
 
   FileStoreZoneFilter(Pattern zonePattern) {
@@ -481,9 +480,11 @@ final class FileStoreZoneFilter implements FilenameFilter {
   public boolean accept(File directory, String name) {
     return this.zonePattern.matcher(name).matches();
   }
+
 }
 
 final class FileStoreOpenZone implements Cont<Zone> {
+
   final FileStore store;
   final TreeMap<Integer, File> zoneFiles;
   final Cont<Store> andThen;
@@ -550,9 +551,11 @@ final class FileStoreOpenZone implements Cont<Zone> {
       }
     }
   }
+
 }
 
 final class FileStoreOpenDatabase implements Cont<Store> {
+
   final FileStore store;
   final Cont<Database> cont;
 
@@ -578,9 +581,11 @@ final class FileStoreOpenDatabase implements Cont<Store> {
   public void trap(Throwable error) {
     this.cont.trap(error);
   }
+
 }
 
 final class FileStoreAwait implements ForkJoinPool.ManagedBlocker {
+
   final FileStore store;
 
   FileStoreAwait(FileStore store) {
@@ -599,9 +604,11 @@ final class FileStoreAwait implements ForkJoinPool.ManagedBlocker {
     }
     return (this.store.status & FileStore.OPENING) == 0;
   }
+
 }
 
 final class FileStoreClose implements Cont<Database> {
+
   final FileStore store;
   final Cont<Store> andThen;
 
@@ -628,4 +635,5 @@ final class FileStoreClose implements Cont<Database> {
   public void trap(Throwable error) {
     this.andThen.trap(error);
   }
+
 }

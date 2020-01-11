@@ -22,6 +22,7 @@ import swim.codec.Parser;
 import swim.codec.Utf8;
 
 final class UriPathParser extends Parser<UriPath> {
+
   final UriParser uri;
   final UriPathBuilder builder;
   final Output<String> output;
@@ -42,11 +43,6 @@ final class UriPathParser extends Parser<UriPath> {
 
   UriPathParser(UriParser uri) {
     this(uri, null, null, 0, 1);
-  }
-
-  @Override
-  public Parser<UriPath> feed(Input input) {
-    return parse(input, this.uri, this.builder, this.output, this.c1, this.step);
   }
 
   static Parser<UriPath> parse(Input input, UriParser uri, UriPathBuilder builder,
@@ -142,4 +138,10 @@ final class UriPathParser extends Parser<UriPath> {
   static Parser<UriPath> parse(Input input, UriParser uri) {
     return parse(input, uri, null, null, 0, 1);
   }
+
+  @Override
+  public Parser<UriPath> feed(Input input) {
+    return parse(input, this.uri, this.builder, this.output, this.c1, this.step);
+  }
+
 }

@@ -32,6 +32,8 @@ import swim.http.header.TransferEncoding;
 import swim.util.Murmur3;
 
 public final class HttpChunked<T> extends HttpEntity<T> implements Debug {
+
+  private static int hashSeed;
   final T value;
   final Encoder<?, ?> content;
   final MediaType mediaType;
@@ -40,6 +42,40 @@ public final class HttpChunked<T> extends HttpEntity<T> implements Debug {
     this.value = value;
     this.content = content;
     this.mediaType = mediaType;
+  }
+
+  public static <T> HttpChunked<T> from(T value, Encoder<?, T> content, MediaType mediaType) {
+    return new HttpChunked<T>(value, content, mediaType);
+  }
+
+  public static <T> HttpChunked<T> from(T value, Encoder<?, T> content) {
+    return new HttpChunked<T>(value, content, null);
+  }
+
+  public static <T> HttpChunked<T> from(Encoder<?, T> content, MediaType mediaType) {
+    return new HttpChunked<T>(null, content, mediaType);
+  }
+
+  public static <T> HttpChunked<T> from(Encoder<?, T> content) {
+    return new HttpChunked<T>(null, content, null);
+  }
+
+  public static <T> HttpChunked<T> fromFile(String path, MediaType mediaType) throws IOException {
+    final FileChannel channel = FileChannel.open(Paths.get(path), StandardOpenOption.READ);
+    return new HttpChunked<T>(null, Binary.channelEncoder(channel), mediaType);
+  }
+
+  public static <T> HttpChunked<T> fromFile(String path) throws IOException {
+    return fromFile(path, MediaType.forPath(path));
+  }
+
+  public static <T> Decoder<HttpMessage<T>> httpDecoder(HttpMessage<?> message, Decoder<T> content) {
+    return Http.standardParser().chunkedDecoder(message, content);
+  }
+
+  public static <T> Decoder<HttpMessage<T>> decodeHttp(HttpMessage<?> message, Decoder<T> content,
+                                                       InputBuffer input) {
+    return Http.standardParser().decodeChunked(message, content, input);
   }
 
   @Override
@@ -132,39 +168,4 @@ public final class HttpChunked<T> extends HttpEntity<T> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static <T> HttpChunked<T> from(T value, Encoder<?, T> content, MediaType mediaType) {
-    return new HttpChunked<T>(value, content, mediaType);
-  }
-
-  public static <T> HttpChunked<T> from(T value, Encoder<?, T> content) {
-    return new HttpChunked<T>(value, content, null);
-  }
-
-  public static <T> HttpChunked<T> from(Encoder<?, T> content, MediaType mediaType) {
-    return new HttpChunked<T>(null, content, mediaType);
-  }
-
-  public static <T> HttpChunked<T> from(Encoder<?, T> content) {
-    return new HttpChunked<T>(null, content, null);
-  }
-
-  public static <T> HttpChunked<T> fromFile(String path, MediaType mediaType) throws IOException {
-    final FileChannel channel = FileChannel.open(Paths.get(path), StandardOpenOption.READ);
-    return new HttpChunked<T>(null, Binary.channelEncoder(channel), mediaType);
-  }
-
-  public static <T> HttpChunked<T> fromFile(String path) throws IOException {
-    return fromFile(path, MediaType.forPath(path));
-  }
-
-  public static <T> Decoder<HttpMessage<T>> httpDecoder(HttpMessage<?> message, Decoder<T> content) {
-    return Http.standardParser().chunkedDecoder(message, content);
-  }
-
-  public static <T> Decoder<HttpMessage<T>> decodeHttp(HttpMessage<?> message, Decoder<T> content,
-                                                       InputBuffer input) {
-    return Http.standardParser().decodeChunked(message, content, input);
-  }
 }

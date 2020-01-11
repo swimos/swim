@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import swim.deflate.Deflate;
 
 final class WsDeflateEncoderMasked extends WsDeflateEncoder {
+
   WsDeflateEncoderMasked(Deflate<?> deflate, int flush) {
     super(deflate, flush);
   }
@@ -31,4 +32,5 @@ final class WsDeflateEncoderMasked extends WsDeflateEncoder {
   public void maskingKey(byte[] maskingKey) {
     ThreadLocalRandom.current().nextBytes(maskingKey);
   }
+
 }

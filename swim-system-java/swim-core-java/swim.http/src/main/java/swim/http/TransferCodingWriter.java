@@ -20,6 +20,7 @@ import swim.codec.WriterException;
 import swim.collections.HashTrieMap;
 
 final class TransferCodingWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final String name;
   final HashTrieMap<String, String> params;
@@ -37,11 +38,6 @@ final class TransferCodingWriter extends Writer<Object, Object> {
 
   TransferCodingWriter(HttpWriter http, String name, HashTrieMap<String, String> params) {
     this(http, name, params, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.name, this.params, this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name,
@@ -88,4 +84,10 @@ final class TransferCodingWriter extends Writer<Object, Object> {
                                       HashTrieMap<String, String> params) {
     return write(output, http, name, params, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.name, this.params, this.part, this.step);
+  }
+
 }

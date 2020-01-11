@@ -29,6 +29,9 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class RsaPublicKeyDef extends PublicKeyDef implements RsaKeyDef {
+
+  private static int hashSeed;
+  private static Form<RsaPublicKeyDef> form;
   protected final BigInteger modulus;
   protected final BigInteger publicExponent;
   protected RSAPublicKey publicKey;
@@ -41,6 +44,18 @@ public class RsaPublicKeyDef extends PublicKeyDef implements RsaKeyDef {
 
   public RsaPublicKeyDef(BigInteger modulus, BigInteger publicExponent) {
     this(modulus, publicExponent, null);
+  }
+
+  public static RsaPublicKeyDef from(RSAPublicKey key) {
+    return new RsaPublicKeyDef(key.getModulus(), key.getPublicExponent(), key);
+  }
+
+  @Kind
+  public static Form<RsaPublicKeyDef> form() {
+    if (form == null) {
+      form = new RsaPublicKeyForm();
+    }
+    return form;
   }
 
   @Override
@@ -98,24 +113,10 @@ public class RsaPublicKeyDef extends PublicKeyDef implements RsaKeyDef {
         this.modulus.hashCode()), this.publicExponent.hashCode()));
   }
 
-  private static int hashSeed;
-
-  private static Form<RsaPublicKeyDef> form;
-
-  public static RsaPublicKeyDef from(RSAPublicKey key) {
-    return new RsaPublicKeyDef(key.getModulus(), key.getPublicExponent(), key);
-  }
-
-  @Kind
-  public static Form<RsaPublicKeyDef> form() {
-    if (form == null) {
-      form = new RsaPublicKeyForm();
-    }
-    return form;
-  }
 }
 
 final class RsaPublicKeyForm extends Form<RsaPublicKeyDef> {
+
   @Override
   public String tag() {
     return "RSAPublicKey";
@@ -146,4 +147,5 @@ final class RsaPublicKeyForm extends Form<RsaPublicKeyDef> {
     }
     return null;
   }
+
 }

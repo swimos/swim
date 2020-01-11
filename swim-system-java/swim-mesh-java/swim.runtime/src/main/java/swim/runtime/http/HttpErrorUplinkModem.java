@@ -32,6 +32,7 @@ import swim.runtime.NodeBinding;
 import swim.structure.Value;
 
 public class HttpErrorUplinkModem implements HttpContext {
+
   protected final HttpBinding linkBinding;
 
   public HttpErrorUplinkModem(HttpBinding linkBinding) {
@@ -215,4 +216,5 @@ public class HttpErrorUplinkModem implements HttpContext {
   public void failUp(Object message) {
     // nop
   }
+
 }

@@ -27,10 +27,32 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class UserAgent extends HttpHeader {
+
+  private static int hashSeed;
   final FingerTrieSeq<Product> products;
 
   UserAgent(FingerTrieSeq<Product> products) {
     this.products = products;
+  }
+
+  public static UserAgent from(FingerTrieSeq<Product> products) {
+    return new UserAgent(products);
+  }
+
+  public static UserAgent from(Product... products) {
+    return new UserAgent(FingerTrieSeq.of(products));
+  }
+
+  public static UserAgent from(String... productStrings) {
+    final Builder<Product, FingerTrieSeq<Product>> products = FingerTrieSeq.builder();
+    for (int i = 0, n = productStrings.length; i < n; i += 1) {
+      products.add(Product.parse(productStrings[i]));
+    }
+    return new UserAgent(products.bind());
+  }
+
+  public static Parser<UserAgent> parseHttpValue(Input input, HttpParser http) {
+    return UserAgentParser.parse(input, http);
   }
 
   @Override
@@ -84,25 +106,4 @@ public final class UserAgent extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  public static UserAgent from(FingerTrieSeq<Product> products) {
-    return new UserAgent(products);
-  }
-
-  public static UserAgent from(Product... products) {
-    return new UserAgent(FingerTrieSeq.of(products));
-  }
-
-  public static UserAgent from(String... productStrings) {
-    final Builder<Product, FingerTrieSeq<Product>> products = FingerTrieSeq.builder();
-    for (int i = 0, n = productStrings.length; i < n; i += 1) {
-      products.add(Product.parse(productStrings[i]));
-    }
-    return new UserAgent(products.bind());
-  }
-
-  public static Parser<UserAgent> parseHttpValue(Input input, HttpParser http) {
-    return UserAgentParser.parse(input, http);
-  }
 }

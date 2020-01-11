@@ -29,6 +29,7 @@ import swim.structure.Value;
 import swim.structure.func.MathModule;
 
 public class RecordModel extends AbstractRecordOutlet {
+
   protected Record state;
   protected HashTrieMap<Value, RecordFieldUpdater> fieldUpdaters;
 
@@ -39,6 +40,31 @@ public class RecordModel extends AbstractRecordOutlet {
 
   public RecordModel() {
     this(Record.create());
+  }
+
+  public static RecordModel from(Record record) {
+    final RecordModel model = new RecordModel();
+    model.materialize(record);
+    model.compile(record);
+    return model;
+  }
+
+  public static RecordModel of() {
+    return new RecordModel();
+  }
+
+  public static RecordModel of(Object object) {
+    return from(Record.of(object));
+  }
+
+  public static RecordModel of(Object... objects) {
+    return from(Record.of(objects));
+  }
+
+  public static RecordModel globalScope() {
+    final RecordModel model = new RecordModel();
+    model.materializeField(Slot.of("math", MathModule.scope().branch()));
+    return model;
   }
 
   @Override
@@ -470,28 +496,4 @@ public class RecordModel extends AbstractRecordOutlet {
     }
   }
 
-  public static RecordModel from(Record record) {
-    final RecordModel model = new RecordModel();
-    model.materialize(record);
-    model.compile(record);
-    return model;
-  }
-
-  public static RecordModel of() {
-    return new RecordModel();
-  }
-
-  public static RecordModel of(Object object) {
-    return from(Record.of(object));
-  }
-
-  public static RecordModel of(Object... objects) {
-    return from(Record.of(objects));
-  }
-
-  public static RecordModel globalScope() {
-    final RecordModel model = new RecordModel();
-    model.materializeField(Slot.of("math", MathModule.scope().branch()));
-    return model;
-  }
 }

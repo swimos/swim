@@ -19,6 +19,7 @@ import swim.structure.Num;
 import static org.testng.Assert.assertEquals;
 
 public class BTreePageSpec {
+
   @Test
   public void testUpdate() {
     final PageContext pageContext = new PageContext() {
@@ -26,6 +27,7 @@ public class BTreePageSpec {
       public boolean pageShouldSplit(Page page) {
         return page.arity() >= 1024;
       }
+
       @Override
       public boolean pageShouldMerge(Page page) {
         return page.arity() < 512;
@@ -60,6 +62,7 @@ public class BTreePageSpec {
       public boolean pageShouldSplit(Page page) {
         return page.arity() >= 1024;
       }
+
       @Override
       public boolean pageShouldMerge(Page page) {
         return page.arity() < 512;
@@ -94,12 +97,14 @@ public class BTreePageSpec {
       }
     }
   }
+
   void testDrop(int k, int n) {
     final PageContext pageContext = new PageContext() {
       @Override
       public boolean pageShouldSplit(Page page) {
         return page.arity() >= 16;
       }
+
       @Override
       public boolean pageShouldMerge(Page page) {
         return page.arity() < 8;
@@ -127,12 +132,14 @@ public class BTreePageSpec {
       }
     }
   }
+
   void testTake(int k, int n) {
     final PageContext pageContext = new PageContext() {
       @Override
       public boolean pageShouldSplit(Page page) {
         return page.arity() >= 16;
       }
+
       @Override
       public boolean pageShouldMerge(Page page) {
         return page.arity() < 8;
@@ -150,4 +157,5 @@ public class BTreePageSpec {
       assertEquals(page.get(Num.from(i)), Num.from(i));
     }
   }
+
 }

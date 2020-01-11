@@ -21,6 +21,7 @@ import swim.structure.Value;
 import swim.util.Builder;
 
 final class ArrayStructure extends CsvStructureHeader {
+
   final CsvCol<? extends Item> col;
   final int colCount;
 
@@ -80,4 +81,5 @@ final class ArrayStructure extends CsvStructureHeader {
   public Builder<Value, Record> tableBuilder() {
     return (Builder<Value, Record>) (Builder<?, ?>) Record.create();
   }
+
 }

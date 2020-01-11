@@ -28,12 +28,41 @@ import swim.util.Builder;
 
 // http://openid.net/specs/openid-connect-basic-1_0-27.html#id_token
 public class OpenIdToken extends JsonWebToken {
+
   public OpenIdToken(Value value) {
     super(value);
   }
 
   public OpenIdToken() {
     super();
+  }
+
+  public static OpenIdToken from(Value value) {
+    return new OpenIdToken(value);
+  }
+
+  public static OpenIdToken parse(String json) {
+    return new OpenIdToken(Json.parse(json));
+  }
+
+  public static OpenIdToken verify(JsonWebSignature jws, Iterable<PublicKeyDef> publicKeyDefs) {
+    final Value payload = jws.payload();
+    final OpenIdToken idToken = new OpenIdToken(payload);
+    // TODO: check payload
+    for (PublicKeyDef publicKeyDef : publicKeyDefs) {
+      if (jws.verifySignature(publicKeyDef.publicKey())) {
+        return idToken;
+      }
+    }
+    return null;
+  }
+
+  public static OpenIdToken verify(String compactJws, Iterable<PublicKeyDef> publicKeyDefs) {
+    final JsonWebSignature jws = JsonWebSignature.parse(compactJws);
+    if (jws != null) {
+      return verify(jws, publicKeyDefs);
+    }
+    return null;
   }
 
   @Override
@@ -152,31 +181,4 @@ public class OpenIdToken extends JsonWebToken {
     return new OpenIdToken(value);
   }
 
-  public static OpenIdToken from(Value value) {
-    return new OpenIdToken(value);
-  }
-
-  public static OpenIdToken parse(String json) {
-    return new OpenIdToken(Json.parse(json));
-  }
-
-  public static OpenIdToken verify(JsonWebSignature jws, Iterable<PublicKeyDef> publicKeyDefs) {
-    final Value payload = jws.payload();
-    final OpenIdToken idToken = new OpenIdToken(payload);
-    // TODO: check payload
-    for (PublicKeyDef publicKeyDef : publicKeyDefs) {
-      if (jws.verifySignature(publicKeyDef.publicKey())) {
-        return idToken;
-      }
-    }
-    return null;
-  }
-
-  public static OpenIdToken verify(String compactJws, Iterable<PublicKeyDef> publicKeyDefs) {
-    final JsonWebSignature jws = JsonWebSignature.parse(compactJws);
-    if (jws != null) {
-      return verify(jws, publicKeyDefs);
-    }
-    return null;
-  }
 }

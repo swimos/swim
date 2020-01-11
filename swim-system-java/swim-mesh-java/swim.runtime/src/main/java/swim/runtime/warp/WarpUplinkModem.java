@@ -51,10 +51,30 @@ import swim.warp.UnlinkRequest;
 import swim.warp.UnlinkedResponse;
 
 public abstract class WarpUplinkModem extends AbstractUplinkContext implements WarpContext, WarpUplink {
+
+  static final int LINKED = 1 << 0;
+  static final int LINKING = 1 << 1;
+  static final int SYNCING = 1 << 2;
+  static final int UNLINKING = 1 << 3;
+  static final int CUED_DOWN = 1 << 4;
+  static final int FEEDING_DOWN = 1 << 5;
+  static final int FEEDING_UP = 1 << 6;
+  static final int PULLING_UP = 1 << 7;
+  static final AtomicIntegerFieldUpdater<WarpUplinkModem> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "status");
+  static final AtomicIntegerFieldUpdater<WarpUplinkModem> EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "eventDelta");
+  static final AtomicLongFieldUpdater<WarpUplinkModem> EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "eventCount");
+  static final AtomicIntegerFieldUpdater<WarpUplinkModem> COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "commandDelta");
+  static final AtomicLongFieldUpdater<WarpUplinkModem> COMMAND_TOTAL =
+      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "commandCount");
+  static final AtomicLongFieldUpdater<WarpUplinkModem> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "lastReportTime");
   protected final WarpBinding linkBinding;
   protected final UplinkAddress uplinkAddress;
   protected volatile int status;
-
   volatile int eventDelta;
   volatile long eventCount;
   volatile int commandDelta;
@@ -776,7 +796,7 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
 
   protected void pushDown(Envelope envelope) {
     this.linkBinding.pushDown(new Push<Envelope>(Uri.empty(), hostUri(), nodeUri(), laneUri(),
-                                                 prio(), null, envelope, null));
+        prio(), null, envelope, null));
   }
 
   public void cueUp() {
@@ -1138,35 +1158,14 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
     final long commandCount = COMMAND_TOTAL.addAndGet(this, (long) commandDelta);
 
     return new WarpUplinkProfile(this.uplinkAddress,
-                                 eventDelta, eventRate, eventCount,
-                                 commandDelta, commandRate, commandCount);
+        eventDelta, eventRate, eventCount,
+        commandDelta, commandRate, commandCount);
   }
 
-  static final int LINKED = 1 << 0;
-  static final int LINKING = 1 << 1;
-  static final int SYNCING = 1 << 2;
-  static final int UNLINKING = 1 << 3;
-  static final int CUED_DOWN = 1 << 4;
-  static final int FEEDING_DOWN = 1 << 5;
-  static final int FEEDING_UP = 1 << 6;
-  static final int PULLING_UP = 1 << 7;
-
-  static final AtomicIntegerFieldUpdater<WarpUplinkModem> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "status");
-
-  static final AtomicIntegerFieldUpdater<WarpUplinkModem> EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "eventDelta");
-  static final AtomicLongFieldUpdater<WarpUplinkModem> EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "eventCount");
-  static final AtomicIntegerFieldUpdater<WarpUplinkModem> COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "commandDelta");
-  static final AtomicLongFieldUpdater<WarpUplinkModem> COMMAND_TOTAL =
-      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "commandCount");
-  static final AtomicLongFieldUpdater<WarpUplinkModem> LAST_REPORT_TIME =
-      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "lastReportTime");
 }
 
 final class WarpUplinkModemPullDown implements Runnable {
+
   final WarpUplinkModem uplink;
 
   WarpUplinkModemPullDown(WarpUplinkModem uplink) {
@@ -1177,9 +1176,11 @@ final class WarpUplinkModemPullDown implements Runnable {
   public void run() {
     uplink.runPullDown();
   }
+
 }
 
 final class WarpUplinkModemOnCommand implements Runnable {
+
   final WarpUplinkModem uplink;
   final Push<CommandMessage> push;
 
@@ -1192,9 +1193,11 @@ final class WarpUplinkModemOnCommand implements Runnable {
   public void run() {
     this.uplink.runOnCommand(push);
   }
+
 }
 
 final class WarpUplinkModemOnLink implements Runnable {
+
   final WarpUplinkModem uplink;
   final Push<LinkRequest> push;
 
@@ -1207,9 +1210,11 @@ final class WarpUplinkModemOnLink implements Runnable {
   public void run() {
     this.uplink.runOnLink(push);
   }
+
 }
 
 final class WarpUplinkModemOnSync implements Runnable {
+
   final WarpUplinkModem uplink;
   final Push<SyncRequest> push;
 
@@ -1222,9 +1227,11 @@ final class WarpUplinkModemOnSync implements Runnable {
   public void run() {
     this.uplink.runOnSync(push);
   }
+
 }
 
 final class WarpUplinkModemOnUnlink implements Runnable {
+
   final WarpUplinkModem uplink;
   final Push<UnlinkRequest> push;
 
@@ -1237,4 +1244,5 @@ final class WarpUplinkModemOnUnlink implements Runnable {
   public void run() {
     this.uplink.runOnUnlink(push);
   }
+
 }

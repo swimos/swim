@@ -48,6 +48,7 @@ import swim.ws.WsRequest;
 import swim.ws.WsResponse;
 
 public class WebServer extends AbstractWarpServer {
+
   final KernelContext kernel;
   final WebServiceDef serviceDef;
   WebRoute router;
@@ -138,12 +139,12 @@ public class WebServer extends AbstractWarpServer {
   protected RemoteHost openHost(Uri requestUri) {
     final Uri baseUri = Uri.from(UriScheme.from("warp"),
         UriAuthority.from(UriHost.inetAddress(context.localAddress().getAddress()),
-                          UriPort.from(context.localAddress().getPort())),
+            UriPort.from(context.localAddress().getPort())),
         requestUri.path(), requestUri.query(), requestUri.fragment());
 
     final Uri remoteUri = Uri.from(UriScheme.from("warp"),
         UriAuthority.from(UriHost.inetAddress(context.remoteAddress().getAddress()),
-                          UriPort.from(context.remoteAddress().getPort())), UriPath.slash());
+            UriPort.from(context.remoteAddress().getPort())), UriPath.slash());
 
     final String spaceName = this.serviceDef.spaceName;
     final Space space = this.kernel.getSpace(spaceName);
@@ -158,4 +159,5 @@ public class WebServer extends AbstractWarpServer {
       throw new ServiceException("unknown space: " + spaceName);
     }
   }
+
 }

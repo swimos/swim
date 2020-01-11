@@ -15,6 +15,7 @@
 package swim.math;
 
 public class DimensionException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public DimensionException(String message, Throwable cause) {
@@ -36,4 +37,5 @@ public class DimensionException extends RuntimeException {
   public DimensionException() {
     super();
   }
+
 }

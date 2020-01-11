@@ -15,4 +15,5 @@
 /**
  * Observable collection callback function interfaces.
  */
+
 package swim.observable.function;

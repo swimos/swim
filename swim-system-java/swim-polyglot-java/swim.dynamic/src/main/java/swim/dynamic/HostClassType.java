@@ -18,5 +18,7 @@ package swim.dynamic;
  * A dynamic object type descriptor for an instantiable host type.
  */
 public interface HostClassType<T> extends HostObjectType<T> {
+
   HostConstructor constructor(Bridge bridge);
+
 }

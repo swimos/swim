@@ -26,6 +26,7 @@ import swim.util.Builder;
  * Factory for constructing JSON parsers and parse trees.
  */
 public abstract class JsonParser<I, V> {
+
   public abstract I item(V value);
 
   public abstract V value(I item);
@@ -131,4 +132,5 @@ public abstract class JsonParser<I, V> {
     }
     return parser.bind();
   }
+
 }

@@ -23,6 +23,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public final class CsvStructure {
+
   private CsvStructure() {
     // static
   }
@@ -90,4 +91,5 @@ public final class CsvStructure {
   public static CsvStructureCol parsedCol(Parser<? extends Item> itemParser) {
     return new ParsedStructure(Value.absent(), "", false, itemParser);
   }
+
 }

@@ -24,6 +24,9 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class ValueDataModel implements ValueDataBinding {
+
+  static final AtomicReferenceFieldUpdater<ValueDataModel, Value> VALUE =
+      AtomicReferenceFieldUpdater.newUpdater(ValueDataModel.class, Value.class, "value");
   protected final Value name;
   protected volatile Value value;
   protected ValueDataContext dataContext;
@@ -136,6 +139,4 @@ public class ValueDataModel implements ValueDataBinding {
     }
   }
 
-  static final AtomicReferenceFieldUpdater<ValueDataModel, Value> VALUE =
-      AtomicReferenceFieldUpdater.newUpdater(ValueDataModel.class, Value.class, "value");
 }

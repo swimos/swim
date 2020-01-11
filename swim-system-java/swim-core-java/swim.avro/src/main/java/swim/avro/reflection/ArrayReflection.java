@@ -21,6 +21,7 @@ import swim.avro.schema.AvroType;
 import swim.util.Builder;
 
 final class ArrayReflection<I> extends AvroArrayType<I, Object> {
+
   final Class<?> itemClass;
   final AvroType<I> itemType;
 
@@ -38,9 +39,11 @@ final class ArrayReflection<I> extends AvroArrayType<I, Object> {
   public Builder<I, Object> arrayBuilder() {
     return new ArrayReflectionBuilder<I>(this.itemClass);
   }
+
 }
 
 final class ArrayReflectionBuilder<I> implements Builder<I, Object> {
+
   final Class<?> itemClass;
   Object array;
   int length;
@@ -49,6 +52,16 @@ final class ArrayReflectionBuilder<I> implements Builder<I, Object> {
     this.itemClass = itemClass;
     this.array = null;
     this.length = 0;
+  }
+
+  static int expand(int n) {
+    n = Math.max(8, n) - 1;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    return n + 1;
   }
 
   @Override
@@ -112,13 +125,4 @@ final class ArrayReflectionBuilder<I> implements Builder<I, Object> {
     return array;
   }
 
-  static int expand(int n) {
-    n = Math.max(8, n) - 1;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    return n + 1;
-  }
 }

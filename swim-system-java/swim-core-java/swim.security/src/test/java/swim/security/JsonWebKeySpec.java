@@ -24,6 +24,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class JsonWebKeySpec {
+
   @Test
   public void parseECPublicKey() {
     final ECPublicKey key = (ECPublicKey) JsonWebKey.parse("{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4\",\"y\":\"4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM\",\"use\":\"enc\",\"kid\":\"1\"}").key();
@@ -62,6 +63,7 @@ public class JsonWebKeySpec {
   @Test
   public void parseSymmetricKey() {
     final Key key = JsonWebKey.parse("{\"kty\":\"oct\",\"alg\":\"A128KW\",\"k\":\"GawgguFyGrWKav7AX4VKUg\"}").key();
-    assertEquals(key.getEncoded(), new byte[]{25, -84, 32, -126, -31, 114, 26, -75, -118, 106, -2, -64, 95, -123, 74, 82});
+    assertEquals(key.getEncoded(), new byte[] {25, -84, 32, -126, -31, 114, 26, -75, -118, 106, -2, -64, 95, -123, 74, 82});
   }
+
 }

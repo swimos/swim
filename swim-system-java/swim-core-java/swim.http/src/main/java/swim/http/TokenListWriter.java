@@ -20,6 +20,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class TokenListWriter extends Writer<Object, Object> {
+
   final Iterator<?> tokens;
   final String token;
   final int index;
@@ -34,11 +35,6 @@ final class TokenListWriter extends Writer<Object, Object> {
 
   TokenListWriter(Iterator<?> tokens) {
     this(tokens, null, 0, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.tokens, this.token, this.index, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, Iterator<?> tokens,
@@ -97,4 +93,10 @@ final class TokenListWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, Iterator<?> tokens) {
     return write(output, tokens, null, 0, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.tokens, this.token, this.index, this.step);
+  }
+
 }

@@ -19,6 +19,7 @@ import java.util.List;
 import swim.collections.HashTrieMap;
 
 public abstract class AbstractHostType<T> implements HostType<T> {
+
   @Override
   public String typeName() {
     return hostClass().getSimpleName();
@@ -91,4 +92,5 @@ public abstract class AbstractHostType<T> implements HostType<T> {
     }
     return staticMembers.values();
   }
+
 }

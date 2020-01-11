@@ -19,6 +19,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 public class STreeSpec {
+
   @Test
   public void testAddAndGet() {
     final STree<Integer> tree = new STree<Integer>();
@@ -120,4 +121,5 @@ public class STreeSpec {
       System.out.println("take prefixes of " + n + " items");
     }
   }
+
 }

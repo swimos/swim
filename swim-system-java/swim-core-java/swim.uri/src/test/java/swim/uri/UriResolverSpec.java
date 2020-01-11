@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class UriResolverSpec {
+
   @Test
   public void resolveNormalURIs() {
     final Uri base = Uri.parse("http://a/b/c/d;p?q");
@@ -111,4 +112,5 @@ public class UriResolverSpec {
     assertEquals(Uri.parse("http://a").unresolve(Uri.parse("https://a")), Uri.parse("https://a"));
     assertEquals(Uri.parse("http://a").unresolve(Uri.parse("http://z")), Uri.parse("http://z"));
   }
+
 }

@@ -21,6 +21,7 @@ import swim.codec.Unicode;
 import swim.csv.schema.CsvHeader;
 
 final class HeaderParser<T, R, C> extends Parser<CsvHeader<T, R, C>> {
+
   final CsvParser csv;
   final CsvHeader<T, R, C> header;
   final Parser<String> nameParser;
@@ -40,11 +41,6 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<T, R, C>> {
 
   HeaderParser(CsvParser csv, CsvHeader<T, R, C> header) {
     this(csv, header, null, 0, -1, 1);
-  }
-
-  @Override
-  public Parser<CsvHeader<T, R, C>> feed(Input input) {
-    return parse(input, this.csv, this.header, this.nameParser, this.index, this.head, this.step);
   }
 
   static <T, R, C> Parser<CsvHeader<T, R, C>> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header,
@@ -126,4 +122,10 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<T, R, C>> {
   static <T, R, C> Parser<CsvHeader<T, R, C>> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header) {
     return parse(input, csv, header, null, 0, -1, 1);
   }
+
+  @Override
+  public Parser<CsvHeader<T, R, C>> feed(Input input) {
+    return parse(input, this.csv, this.header, this.nameParser, this.index, this.head, this.step);
+  }
+
 }

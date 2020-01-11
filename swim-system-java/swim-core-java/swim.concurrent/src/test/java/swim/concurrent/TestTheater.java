@@ -22,6 +22,7 @@ import java.util.concurrent.TimeoutException;
 import org.testng.TestException;
 
 class TestTheater extends Theater {
+
   TestTheater() {
     super();
   }
@@ -106,4 +107,5 @@ class TestTheater extends Theater {
   <T> T await(Sync<T> sync) {
     return await(sync, 1000L);
   }
+
 }

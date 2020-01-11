@@ -27,6 +27,9 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class EcPublicKeyDef extends PublicKeyDef implements EcKeyDef {
+
+  private static int hashSeed;
+  private static Form<EcPublicKeyDef> form;
   protected final EcDomainDef domain;
   protected final EcPointDef point;
   protected ECPublicKey publicKey;
@@ -39,6 +42,19 @@ public class EcPublicKeyDef extends PublicKeyDef implements EcKeyDef {
 
   public EcPublicKeyDef(EcDomainDef domain, EcPointDef point) {
     this(domain, point, null);
+  }
+
+  public static EcPublicKeyDef from(ECPublicKey key) {
+    return new EcPublicKeyDef(EcDomainDef.from(key.getParams()),
+        EcPointDef.from(key.getW()), key);
+  }
+
+  @Kind
+  public static Form<EcPublicKeyDef> form() {
+    if (form == null) {
+      form = new EcPublicKeyForm();
+    }
+    return form;
   }
 
   @Override
@@ -56,7 +72,7 @@ public class EcPublicKeyDef extends PublicKeyDef implements EcKeyDef {
     if (publicKey == null) {
       try {
         final ECPublicKeySpec keySpec = new ECPublicKeySpec(this.point.toECPoint(),
-                                                            this.domain.toECParameterSpec());
+            this.domain.toECParameterSpec());
         final KeyFactory keyFactory = KeyFactory.getInstance("EC");
         publicKey = (ECPublicKey) keyFactory.generatePublic(keySpec);
         this.publicKey = publicKey;
@@ -97,25 +113,10 @@ public class EcPublicKeyDef extends PublicKeyDef implements EcKeyDef {
         this.domain.hashCode()), this.point.hashCode()));
   }
 
-  private static int hashSeed;
-
-  private static Form<EcPublicKeyDef> form;
-
-  public static EcPublicKeyDef from(ECPublicKey key) {
-    return new EcPublicKeyDef(EcDomainDef.from(key.getParams()),
-                              EcPointDef.from(key.getW()), key);
-  }
-
-  @Kind
-  public static Form<EcPublicKeyDef> form() {
-    if (form == null) {
-      form = new EcPublicKeyForm();
-    }
-    return form;
-  }
 }
 
 final class EcPublicKeyForm extends Form<EcPublicKeyDef> {
+
   @Override
   public String tag() {
     return "ECPublicKey";
@@ -146,4 +147,5 @@ final class EcPublicKeyForm extends Form<EcPublicKeyDef> {
     }
     return null;
   }
+
 }

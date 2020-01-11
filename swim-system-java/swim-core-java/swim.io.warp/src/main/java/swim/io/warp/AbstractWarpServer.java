@@ -21,6 +21,7 @@ import swim.io.ws.WsUpgradeResponder;
 import swim.ws.WsResponse;
 
 public abstract class AbstractWarpServer extends AbstractWsServer {
+
   protected WarpSettings warpSettings;
 
   public AbstractWarpServer(WarpSettings warpSettings) {
@@ -51,4 +52,5 @@ public abstract class AbstractWarpServer extends AbstractWsServer {
     warpSocket.setWarpSocketContext(webSocket); // eagerly set
     return new WsUpgradeResponder(webSocket, wsResponse, this.wsSettings);
   }
+
 }

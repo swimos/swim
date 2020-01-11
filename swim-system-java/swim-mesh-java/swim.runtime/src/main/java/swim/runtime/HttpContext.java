@@ -19,6 +19,7 @@ import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 
 public interface HttpContext extends LinkContext {
+
   @Override
   HttpBinding linkWrapper();
 
@@ -33,4 +34,5 @@ public interface HttpContext extends LinkContext {
   void willRespond(HttpResponse<?> response);
 
   void didRespond(HttpResponse<?> response);
+
 }

@@ -17,14 +17,15 @@ package swim.collections;
 import swim.util.Murmur3;
 
 public final class HashedInteger {
-  public static HashedInteger valueOf(int value) {
-    return new HashedInteger(value);
-  }
 
   private final int value;
 
   public HashedInteger(int value) {
     this.value = value;
+  }
+
+  public static HashedInteger valueOf(int value) {
+    return new HashedInteger(value);
   }
 
   public int intValue() {
@@ -49,4 +50,5 @@ public final class HashedInteger {
   public String toString() {
     return Integer.toString(value);
   }
+
 }

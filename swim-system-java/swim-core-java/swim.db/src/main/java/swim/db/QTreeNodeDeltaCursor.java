@@ -18,6 +18,7 @@ import swim.structure.Slot;
 import swim.util.Cursor;
 
 final class QTreeNodeDeltaCursor extends QTreeNodeCursor {
+
   final long sinceVersion;
 
   QTreeNodeDeltaCursor(QTreeNode page, long x, long y, long index, int slotIndex,
@@ -34,4 +35,5 @@ final class QTreeNodeDeltaCursor extends QTreeNodeCursor {
   Cursor<Slot> childCursor(QTreePageRef childRef) {
     return childRef.deltaCursor(this.x, this.y, this.sinceVersion);
   }
+
 }

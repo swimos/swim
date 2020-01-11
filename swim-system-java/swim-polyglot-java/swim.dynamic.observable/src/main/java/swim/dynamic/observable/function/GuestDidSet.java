@@ -19,6 +19,7 @@ import swim.dynamic.BridgeGuest;
 import swim.observable.function.DidSet;
 
 public class GuestDidSet<V> extends BridgeGuest implements DidSet<V> {
+
   public GuestDidSet(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -27,4 +28,5 @@ public class GuestDidSet<V> extends BridgeGuest implements DidSet<V> {
   public void didSet(V newValue, V oldValue) {
     this.bridge.guestExecuteVoid(this.guest, newValue, oldValue);
   }
+
 }

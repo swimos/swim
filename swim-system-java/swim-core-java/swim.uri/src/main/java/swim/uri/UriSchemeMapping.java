@@ -20,6 +20,8 @@ import swim.collections.HashTrieMap;
 import swim.util.Murmur3;
 
 final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
+
+  private static int hashSeed;
   final HashTrieMap<String, UriAuthorityMapper<T>> table;
 
   UriSchemeMapping(HashTrieMap<String, UriAuthorityMapper<T>> table) {
@@ -184,10 +186,10 @@ final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
     return Murmur3.mash(Murmur3.mix(hashSeed, this.table.hashCode()));
   }
 
-  private static int hashSeed;
 }
 
 final class UriSchemeMappingIterator<T> extends FlatteningIterator<UriAuthorityMapper<T>, Map.Entry<Uri, T>> {
+
   UriSchemeMappingIterator(Iterator<UriAuthorityMapper<T>> outer) {
     super(outer);
   }
@@ -196,9 +198,11 @@ final class UriSchemeMappingIterator<T> extends FlatteningIterator<UriAuthorityM
   protected Iterator<Map.Entry<Uri, T>> childIterator(UriAuthorityMapper<T> parent) {
     return parent.iterator();
   }
+
 }
 
 final class UriSchemeMappingKeyIterator<T> extends FlatteningIterator<UriAuthorityMapper<T>, Uri> {
+
   UriSchemeMappingKeyIterator(Iterator<UriAuthorityMapper<T>> outer) {
     super(outer);
   }
@@ -207,9 +211,11 @@ final class UriSchemeMappingKeyIterator<T> extends FlatteningIterator<UriAuthori
   protected Iterator<Uri> childIterator(UriAuthorityMapper<T> parent) {
     return parent.keyIterator();
   }
+
 }
 
 final class UriSchemeMappingValueIterator<T> extends FlatteningIterator<UriAuthorityMapper<T>, T> {
+
   UriSchemeMappingValueIterator(Iterator<UriAuthorityMapper<T>> outer) {
     super(outer);
   }
@@ -218,4 +224,5 @@ final class UriSchemeMappingValueIterator<T> extends FlatteningIterator<UriAutho
   protected Iterator<T> childIterator(UriAuthorityMapper<T> parent) {
     return parent.valueIterator();
   }
+
 }

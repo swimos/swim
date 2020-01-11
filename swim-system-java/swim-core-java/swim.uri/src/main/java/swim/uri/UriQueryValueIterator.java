@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 final class UriQueryValueIterator implements Iterator<String> {
+
   UriQuery query;
 
   UriQueryValueIterator(UriQuery query) {
@@ -44,4 +45,5 @@ final class UriQueryValueIterator implements Iterator<String> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

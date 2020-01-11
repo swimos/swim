@@ -21,6 +21,7 @@ import swim.http.HttpHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class SecWebSocketExtensionsSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -28,24 +29,25 @@ public class SecWebSocketExtensionsSpec {
   @Test
   public void parseSecWebSocketExtensionsHeaders() {
     assertParses("Sec-WebSocket-Extensions: foo",
-                 SecWebSocketExtensions.from("foo"));
+        SecWebSocketExtensions.from("foo"));
     assertParses("Sec-WebSocket-Extensions: bar;baz=2",
-                 SecWebSocketExtensions.from("bar; baz=2"));
+        SecWebSocketExtensions.from("bar; baz=2"));
     assertParses("Sec-WebSocket-Extensions: foo , bar ; baz = 2",
-                 SecWebSocketExtensions.from("foo", "bar; baz=2"));
+        SecWebSocketExtensions.from("foo", "bar; baz=2"));
     assertParses("Sec-WebSocket-Extensions: mux; max-channels=\"inf\"; flow-control, deflate-stream",
-                 SecWebSocketExtensions.from("mux; max-channels=inf; flow-control", "deflate-stream"));
+        SecWebSocketExtensions.from("mux; max-channels=inf; flow-control", "deflate-stream"));
   }
 
   @Test
   public void writeSecWebSocketExtensionsHeaders() {
     assertWrites(SecWebSocketExtensions.from("foo"),
-                 "Sec-WebSocket-Extensions: foo");
+        "Sec-WebSocket-Extensions: foo");
     assertWrites(SecWebSocketExtensions.from("bar; baz=2"),
-                 "Sec-WebSocket-Extensions: bar; baz=2");
+        "Sec-WebSocket-Extensions: bar; baz=2");
     assertWrites(SecWebSocketExtensions.from("foo", "bar; baz=2"),
-                 "Sec-WebSocket-Extensions: foo, bar; baz=2");
+        "Sec-WebSocket-Extensions: foo, bar; baz=2");
     assertWrites(SecWebSocketExtensions.from("mux; max-channels=\"inf\"; flow-control", "deflate-stream"),
-                 "Sec-WebSocket-Extensions: mux; max-channels=inf; flow-control, deflate-stream");
+        "Sec-WebSocket-Extensions: mux; max-channels=inf; flow-control, deflate-stream");
   }
+
 }

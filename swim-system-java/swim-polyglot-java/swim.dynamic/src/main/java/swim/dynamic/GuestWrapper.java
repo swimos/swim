@@ -18,8 +18,10 @@ package swim.dynamic;
  * A host object that wraps a guest value.
  */
 public interface GuestWrapper {
+
   /**
    * Returns the guest value that this host object wraps.
    */
   Object unwrap();
+
 }

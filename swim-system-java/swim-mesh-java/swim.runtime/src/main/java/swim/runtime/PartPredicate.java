@@ -27,27 +27,13 @@ import swim.uri.UriPattern;
 import swim.util.Murmur3;
 
 public abstract class PartPredicate {
+
+  private static Form<PartPredicate> form;
+  private static PartPredicate any;
+
   protected PartPredicate() {
     // stub
   }
-
-  public abstract boolean test(Uri nodeUri, int nodeHash);
-
-  public boolean test(Uri nodeUri) {
-    return test(nodeUri, nodeUri.hashCode());
-  }
-
-  public PartPredicate or(PartPredicate that) {
-    return new OrPartPredicate(this, that);
-  }
-
-  public PartPredicate and(PartPredicate that) {
-    return new AndPartPredicate(this, that);
-  }
-
-  public abstract Value toValue();
-
-  private static Form<PartPredicate> form;
 
   @Kind
   public static Form<PartPredicate> form() {
@@ -56,8 +42,6 @@ public abstract class PartPredicate {
     }
     return form;
   }
-
-  private static PartPredicate any;
 
   public static PartPredicate any() {
     if (any == null) {
@@ -109,9 +93,27 @@ public abstract class PartPredicate {
     }
     return null;
   }
+
+  public abstract boolean test(Uri nodeUri, int nodeHash);
+
+  public boolean test(Uri nodeUri) {
+    return test(nodeUri, nodeUri.hashCode());
+  }
+
+  public PartPredicate or(PartPredicate that) {
+    return new OrPartPredicate(this, that);
+  }
+
+  public PartPredicate and(PartPredicate that) {
+    return new AndPartPredicate(this, that);
+  }
+
+  public abstract Value toValue();
+
 }
 
 final class PartPredicateForm extends Form<PartPredicate> {
+
   @Override
   public Class<?> type() {
     return PartPredicate.class;
@@ -131,9 +133,11 @@ final class PartPredicateForm extends Form<PartPredicate> {
   public PartPredicate cast(Item item) {
     return PartPredicate.fromValue(item.toValue());
   }
+
 }
 
 final class AnyPartPredicate extends PartPredicate {
+
   @Override
   public boolean test(Uri nodeUri, int nodeHash) {
     return true;
@@ -153,9 +157,12 @@ final class AnyPartPredicate extends PartPredicate {
   public String toString() {
     return "PartPredicate" + '.' + "ANY";
   }
+
 }
 
 final class OrPartPredicate extends PartPredicate {
+
+  private static int hashSeed;
   final PartPredicate[] predicates;
 
   OrPartPredicate(PartPredicate[] predicates) {
@@ -245,10 +252,11 @@ final class OrPartPredicate extends PartPredicate {
     return s.append(')').toString();
   }
 
-  private static int hashSeed;
 }
 
 final class AndPartPredicate extends PartPredicate {
+
+  private static int hashSeed;
   final PartPredicate[] predicates;
 
   AndPartPredicate(PartPredicate[] predicates) {
@@ -338,14 +346,20 @@ final class AndPartPredicate extends PartPredicate {
     return s.append(')').toString();
   }
 
-  private static int hashSeed;
 }
 
 final class NodePartPredicate extends PartPredicate {
+
+  private static int hashSeed;
   final UriPattern nodePattern;
 
   NodePartPredicate(UriPattern nodePattern) {
     this.nodePattern = nodePattern;
+  }
+
+  public static NodePartPredicate fromValue(Value value) {
+    final UriPattern nodePattern = UriPattern.parse(value.getAttr("node").stringValue());
+    return new NodePartPredicate(nodePattern);
   }
 
   @Override
@@ -383,21 +397,24 @@ final class NodePartPredicate extends PartPredicate {
     return "PartPredicate" + '.' + "node" + '(' + this.nodePattern + ')';
   }
 
-  private static int hashSeed;
-
-  public static NodePartPredicate fromValue(Value value) {
-    final UriPattern nodePattern = UriPattern.parse(value.getAttr("node").stringValue());
-    return new NodePartPredicate(nodePattern);
-  }
 }
 
 final class HashPartPredicate extends PartPredicate {
+
+  private static int hashSeed;
   final int lowerBound;
   final int upperBound;
 
   HashPartPredicate(int lowerBound, int upperBound) {
     this.lowerBound = lowerBound;
     this.upperBound = upperBound;
+  }
+
+  public static HashPartPredicate fromValue(Value value) {
+    final Value header = value.getAttr("hash");
+    final int lowerBound = header.getItem(0).intValue();
+    final int upperBound = header.getItem(1).intValue();
+    return new HashPartPredicate(lowerBound, upperBound);
   }
 
   @Override
@@ -436,12 +453,4 @@ final class HashPartPredicate extends PartPredicate {
     return "PartPredicate" + '.' + "hash" + '(' + this.lowerBound + ", " + this.upperBound + ')';
   }
 
-  private static int hashSeed;
-
-  public static HashPartPredicate fromValue(Value value) {
-    final Value header = value.getAttr("hash");
-    final int lowerBound = header.getItem(0).intValue();
-    final int upperBound = header.getItem(1).intValue();
-    return new HashPartPredicate(lowerBound, upperBound);
-  }
 }

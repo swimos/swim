@@ -27,10 +27,32 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class Accept extends HttpHeader {
+
+  private static int hashSeed;
   final FingerTrieSeq<MediaRange> mediaRanges;
 
   Accept(FingerTrieSeq<MediaRange> mediaRanges) {
     this.mediaRanges = mediaRanges;
+  }
+
+  public static Accept from(FingerTrieSeq<MediaRange> mediaRanges) {
+    return new Accept(mediaRanges);
+  }
+
+  public static Accept from(MediaRange... mediaRanges) {
+    return new Accept(FingerTrieSeq.of(mediaRanges));
+  }
+
+  public static Accept from(String... mediaRangeStrings) {
+    final Builder<MediaRange, FingerTrieSeq<MediaRange>> mediaRanges = FingerTrieSeq.builder();
+    for (int i = 0, n = mediaRangeStrings.length; i < n; i += 1) {
+      mediaRanges.add(MediaRange.parse(mediaRangeStrings[i]));
+    }
+    return new Accept(mediaRanges.bind());
+  }
+
+  public static Parser<Accept> parseHttpValue(Input input, HttpParser http) {
+    return AcceptParser.parse(input, http);
   }
 
   @Override
@@ -84,25 +106,4 @@ public final class Accept extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  public static Accept from(FingerTrieSeq<MediaRange> mediaRanges) {
-    return new Accept(mediaRanges);
-  }
-
-  public static Accept from(MediaRange... mediaRanges) {
-    return new Accept(FingerTrieSeq.of(mediaRanges));
-  }
-
-  public static Accept from(String... mediaRangeStrings) {
-    final Builder<MediaRange, FingerTrieSeq<MediaRange>> mediaRanges = FingerTrieSeq.builder();
-    for (int i = 0, n = mediaRangeStrings.length; i < n; i += 1) {
-      mediaRanges.add(MediaRange.parse(mediaRangeStrings[i]));
-    }
-    return new Accept(mediaRanges.bind());
-  }
-
-  public static Parser<Accept> parseHttpValue(Input input, HttpParser http) {
-    return AcceptParser.parse(input, http);
-  }
 }

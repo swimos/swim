@@ -25,6 +25,9 @@ import swim.util.Murmur3;
  * its two operands.
  */
 public final class TimesOperator extends BinaryOperator {
+
+  private static int hashSeed;
+
   public TimesOperator(Item operand1, Item operand2) {
     super(operand1, operand2);
   }
@@ -102,5 +105,4 @@ public final class TimesOperator extends BinaryOperator {
     output.debug(this.operand1).write('.').write("times").write('(').debug(this.operand2).write(')');
   }
 
-  private static int hashSeed;
 }

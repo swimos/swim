@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class MqttPubRelDecoder extends Decoder<MqttPubRel> {
+
   final MqttDecoder mqtt;
   final int packetFlags;
   final int packetId;
@@ -35,11 +36,6 @@ final class MqttPubRelDecoder extends Decoder<MqttPubRel> {
 
   MqttPubRelDecoder(MqttDecoder mqtt) {
     this(mqtt, 0, 0, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttPubRel> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.packetId, this.remaining, this.step);
   }
 
   static Decoder<MqttPubRel> decode(InputBuffer input, MqttDecoder mqtt, int packetFlags,
@@ -90,4 +86,10 @@ final class MqttPubRelDecoder extends Decoder<MqttPubRel> {
   static Decoder<MqttPubRel> decode(InputBuffer input, MqttDecoder mqtt) {
     return decode(input, mqtt, 0, 0, 0, 1);
   }
+
+  @Override
+  public Decoder<MqttPubRel> feed(InputBuffer input) {
+    return decode(input, this.mqtt, this.packetFlags, this.packetId, this.remaining, this.step);
+  }
+
 }

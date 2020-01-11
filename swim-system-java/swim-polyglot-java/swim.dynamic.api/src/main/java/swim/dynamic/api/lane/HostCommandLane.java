@@ -23,9 +23,6 @@ import swim.dynamic.api.warp.HostWarpLane;
 import swim.dynamic.api.warp.function.GuestOnCommand;
 
 public final class HostCommandLane {
-  private HostCommandLane() {
-    // static
-  }
 
   public static final HostObjectType<CommandLane<Object>> TYPE;
 
@@ -37,9 +34,15 @@ public final class HostCommandLane {
     type.addMember(new HostCommandLaneUnobserve());
     type.addMember(new HostCommandLaneOnCommand());
   }
+
+  private HostCommandLane() {
+    // static
+  }
+
 }
 
 final class HostCommandLaneObserve implements HostMethod<CommandLane<Object>> {
+
   @Override
   public String key() {
     return "observe";
@@ -52,9 +55,11 @@ final class HostCommandLaneObserve implements HostMethod<CommandLane<Object>> {
     lane.observe(observer);
     return this;
   }
+
 }
 
 final class HostCommandLaneUnobserve implements HostMethod<CommandLane<Object>> {
+
   @Override
   public String key() {
     return "unobserve";
@@ -67,9 +72,11 @@ final class HostCommandLaneUnobserve implements HostMethod<CommandLane<Object>> 
     lane.unobserve(observer);
     return this;
   }
+
 }
 
 final class HostCommandLaneOnCommand implements HostMethod<CommandLane<Object>> {
+
   @Override
   public String key() {
     return "onCommand";
@@ -79,4 +86,5 @@ final class HostCommandLaneOnCommand implements HostMethod<CommandLane<Object>> 
   public Object invoke(Bridge bridge, CommandLane<Object> lane, Object... arguments) {
     return lane.onCommand(new GuestOnCommand<Object>(bridge, arguments[0]));
   }
+
 }

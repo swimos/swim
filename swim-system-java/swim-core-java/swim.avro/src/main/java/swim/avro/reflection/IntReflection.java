@@ -17,8 +17,10 @@ package swim.avro.reflection;
 import swim.avro.schema.AvroIntType;
 
 final class IntReflection extends AvroIntType<Integer> {
+
   @Override
   public Integer cast(long value) {
     return Integer.valueOf((int) value);
   }
+
 }

@@ -20,6 +20,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public final class ValueEntryIterator<K, V> implements Iterator<Map.Entry<K, V>> {
+
   final Iterator<Map.Entry<Value, Value>> inner;
   final Form<K> keyForm;
   final Form<V> valueForm;
@@ -73,4 +74,5 @@ public final class ValueEntryIterator<K, V> implements Iterator<Map.Entry<K, V>>
   public void remove() {
     this.inner.remove();
   }
+
 }

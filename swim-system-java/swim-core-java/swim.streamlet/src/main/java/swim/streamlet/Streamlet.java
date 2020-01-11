@@ -19,6 +19,7 @@ package swim.streamlet;
  * Inlets} to compute the state of its {@link Outlet Outlets}.
  */
 public interface Streamlet<I, O> extends StreamletScope<O> {
+
   /**
    * Returns the lexically scoped parent of this {@code Streamlet}.  Returns
    * {@code null} if this {@code Streamlet} has no lexical parent.
@@ -56,7 +57,7 @@ public interface Streamlet<I, O> extends StreamletScope<O> {
    * the identified {@code Inlet}.
    *
    * @throws IllegalArgumentException if this {@code Streamlet} has no {@code
-   *         Inlet} with the given {@code key}.
+   *                                  Inlet} with the given {@code key}.
    */
   void bindInput(String key, Outlet<? extends I> input);
 
@@ -67,7 +68,7 @@ public interface Streamlet<I, O> extends StreamletScope<O> {
    * identified {@code Inlet}.
    *
    * @throws IllegalArgumentException if this {@code Streamlet} has no {@code
-   *         Inlet} with the given {@code key}.
+   *                                  Inlet} with the given {@code key}.
    */
   void unbindInput(String key);
 
@@ -114,4 +115,5 @@ public interface Streamlet<I, O> extends StreamletScope<O> {
    * dependent streamlets to reconcile their own state.
    */
   void reconcile(int version);
+
 }

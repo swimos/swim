@@ -20,6 +20,10 @@ import static org.testng.Assert.assertEquals;
 
 public class DiagnosticSpec {
 
+  static void printDiagnostic(Diagnostic diagnostic) {
+    System.out.println(diagnostic.toString(OutputSettings.styled()));
+  }
+
   /**
    * Strips carriage returns from the actual value. These can be added when on the Windows operating system and
    * will cause equality checks to fail due to a mismatched length in String inputs
@@ -33,10 +37,6 @@ public class DiagnosticSpec {
     }
 
     assertEquals(actual, expected);
-  }
-
-  static void printDiagnostic(Diagnostic diagnostic) {
-    System.out.println(diagnostic.toString(OutputSettings.styled()));
   }
 
   @Test
@@ -387,4 +387,5 @@ public class DiagnosticSpec {
         + "1 | test: true\n"
         + "  | ^^^^ original definition");
   }
+
 }

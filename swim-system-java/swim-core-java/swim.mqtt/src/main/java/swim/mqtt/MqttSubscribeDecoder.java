@@ -20,6 +20,7 @@ import swim.codec.InputBuffer;
 import swim.collections.FingerTrieSeq;
 
 final class MqttSubscribeDecoder extends Decoder<MqttSubscribe> {
+
   final MqttDecoder mqtt;
   final int packetFlags;
   final int packetId;
@@ -43,12 +44,6 @@ final class MqttSubscribeDecoder extends Decoder<MqttSubscribe> {
 
   MqttSubscribeDecoder(MqttDecoder mqtt) {
     this(mqtt, 0, 0, FingerTrieSeq.<MqttSubscription>empty(), null, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttSubscribe> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.packetId,
-                  this.subscriptions, this.subscription, this.remaining, this.step);
   }
 
   static Decoder<MqttSubscribe> decode(InputBuffer input, MqttDecoder mqtt,
@@ -128,10 +123,17 @@ final class MqttSubscribeDecoder extends Decoder<MqttSubscribe> {
       return error(input.trap());
     }
     return new MqttSubscribeDecoder(mqtt, packetFlags, packetId, subscriptions,
-                                    subscription, remaining, step);
+        subscription, remaining, step);
   }
 
   static Decoder<MqttSubscribe> decode(InputBuffer input, MqttDecoder mqtt) {
     return decode(input, mqtt, 0, 0, FingerTrieSeq.<MqttSubscription>empty(), null, 0, 1);
   }
+
+  @Override
+  public Decoder<MqttSubscribe> feed(InputBuffer input) {
+    return decode(input, this.mqtt, this.packetFlags, this.packetId,
+        this.subscriptions, this.subscription, this.remaining, this.step);
+  }
+
 }

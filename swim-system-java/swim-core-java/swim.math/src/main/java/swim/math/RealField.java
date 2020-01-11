@@ -15,4 +15,5 @@
 package swim.math;
 
 public interface RealField<S> extends OrderedField<S>, CompleteField<S> {
+
 }

@@ -28,6 +28,13 @@ import swim.codec.Writer;
 import swim.util.Murmur3;
 
 public class Data extends Value {
+
+  static final int ALIASED = 1 << 0;
+  static final int IMMUTABLE = 1 << 1;
+  static final AtomicIntegerFieldUpdater<Data> FLAGS =
+      AtomicIntegerFieldUpdater.newUpdater(Data.class, "flags");
+  private static Data empty;
+  private static int hashSeed;
   byte[] array;
   int offset;
   int size;
@@ -62,6 +69,93 @@ public class Data extends Value {
     this.offset = 0;
     this.size = 0;
     this.flags = ALIASED;
+  }
+
+  public static Output<Data> output(Data data) {
+    return new DataOutput(data, OutputSettings.standard());
+  }
+
+  public static Output<Data> output(int initialCapacity) {
+    return new DataOutput(new Data(initialCapacity), OutputSettings.standard());
+  }
+
+  public static Output<Data> output() {
+    return new DataOutput(new Data(), OutputSettings.standard());
+  }
+
+  public static Data empty() {
+    if (empty == null) {
+      empty = new Data(null, 0, 0, ALIASED | IMMUTABLE);
+    }
+    return empty;
+  }
+
+  public static Data create() {
+    return new Data(null, 0, 0, ALIASED);
+  }
+
+  public static Data create(int initialCapacity) {
+    return new Data(new byte[initialCapacity], 0, 0, 0);
+  }
+
+  public static Data wrap(ByteBuffer buffer) {
+    if (!buffer.hasArray()) {
+      throw new IllegalArgumentException();
+    }
+    return new Data(buffer.array(), buffer.arrayOffset(), buffer.remaining(), ALIASED);
+  }
+
+  public static Data wrap(byte[] array, int offset, int size) {
+    return new Data(array, offset, size, ALIASED);
+  }
+
+  public static Data wrap(byte[] array) {
+    return new Data(array, 0, array.length, ALIASED);
+  }
+
+  public static Data from(ByteBuffer buffer) {
+    final int n = buffer.remaining();
+    if (buffer.hasArray()) {
+      final byte[] array = buffer.array();
+      return new Data(array, buffer.arrayOffset(), buffer.remaining(), ALIASED);
+    } else {
+      final byte[] array = new byte[n];
+      buffer.get(array);
+      return new Data(array, 0, n, 0);
+    }
+  }
+
+  public static Data fromBase16(String string) {
+    return Base16.parse(Unicode.stringInput(string), output()).bind();
+  }
+
+  public static Data fromBase64(String string, Base64 base64) {
+    return base64.parse(Unicode.stringInput(string), output()).bind();
+  }
+
+  public static Data fromBase64(String string) {
+    return fromBase64(string, Base64.standard());
+  }
+
+  public static Data fromUtf8(String string) {
+    Output<Data> output = Utf8.encodedOutput(output());
+    int i = 0;
+    final int n = string.length();
+    while (i < n) {
+      output = output.write(string.codePointAt(i));
+      i = string.offsetByCodePoints(i, 1);
+    }
+    return output.bind();
+  }
+
+  static int expand(int n) {
+    n = Math.max(32, n) - 1;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    return n + 1;
   }
 
   @Override
@@ -535,100 +629,4 @@ public class Data extends Value {
     }
   }
 
-  static final int ALIASED = 1 << 0;
-  static final int IMMUTABLE = 1 << 1;
-
-  static final AtomicIntegerFieldUpdater<Data> FLAGS =
-      AtomicIntegerFieldUpdater.newUpdater(Data.class, "flags");
-
-  private static Data empty;
-
-  private static int hashSeed;
-
-  public static Output<Data> output(Data data) {
-    return new DataOutput(data, OutputSettings.standard());
-  }
-
-  public static Output<Data> output(int initialCapacity) {
-    return new DataOutput(new Data(initialCapacity), OutputSettings.standard());
-  }
-
-  public static Output<Data> output() {
-    return new DataOutput(new Data(), OutputSettings.standard());
-  }
-
-  public static Data empty() {
-    if (empty == null) {
-      empty = new Data(null, 0, 0, ALIASED | IMMUTABLE);
-    }
-    return empty;
-  }
-
-  public static Data create() {
-    return new Data(null, 0, 0, ALIASED);
-  }
-
-  public static Data create(int initialCapacity) {
-    return new Data(new byte[initialCapacity], 0, 0, 0);
-  }
-
-  public static Data wrap(ByteBuffer buffer) {
-    if (!buffer.hasArray()) {
-      throw new IllegalArgumentException();
-    }
-    return new Data(buffer.array(), buffer.arrayOffset(), buffer.remaining(), ALIASED);
-  }
-
-  public static Data wrap(byte[] array, int offset, int size) {
-    return new Data(array, offset, size, ALIASED);
-  }
-
-  public static Data wrap(byte[] array) {
-    return new Data(array, 0, array.length, ALIASED);
-  }
-
-  public static Data from(ByteBuffer buffer) {
-    final int n = buffer.remaining();
-    if (buffer.hasArray()) {
-      final byte[] array = buffer.array();
-      return new Data(array, buffer.arrayOffset(), buffer.remaining(), ALIASED);
-    } else {
-      final byte[] array = new byte[n];
-      buffer.get(array);
-      return new Data(array, 0, n, 0);
-    }
-  }
-
-  public static Data fromBase16(String string) {
-    return Base16.parse(Unicode.stringInput(string), output()).bind();
-  }
-
-  public static Data fromBase64(String string, Base64 base64) {
-    return base64.parse(Unicode.stringInput(string), output()).bind();
-  }
-
-  public static Data fromBase64(String string) {
-    return fromBase64(string, Base64.standard());
-  }
-
-  public static Data fromUtf8(String string) {
-    Output<Data> output = Utf8.encodedOutput(output());
-    int i = 0;
-    final int n = string.length();
-    while (i < n) {
-      output = output.write(string.codePointAt(i));
-      i = string.offsetByCodePoints(i, 1);
-    }
-    return output.bind();
-  }
-
-  static int expand(int n) {
-    n = Math.max(32, n) - 1;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    return n + 1;
-  }
 }

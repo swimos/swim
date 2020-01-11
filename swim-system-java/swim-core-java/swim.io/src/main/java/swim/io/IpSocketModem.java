@@ -30,12 +30,13 @@ import swim.concurrent.Conts;
  * controlled {@link IpModem}.
  */
 public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
+
   final IpModem<I, O> modem;
   final ConcurrentLinkedQueue<Decoder<? extends I>> readerQueue;
   final ConcurrentLinkedQueue<Encoder<?, ? extends O>> writerQueue;
+  protected volatile IpSocketContext context;
   volatile Decoder<? extends I> reading;
   volatile Encoder<?, ? extends O> writing;
-  protected volatile IpSocketContext context;
 
   public IpSocketModem(IpModem<I, O> modem) {
     this.modem = modem;
@@ -385,4 +386,5 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
   public void close() {
     this.context.close();
   }
+
 }

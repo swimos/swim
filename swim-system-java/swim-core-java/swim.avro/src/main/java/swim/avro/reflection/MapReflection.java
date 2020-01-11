@@ -25,6 +25,7 @@ import swim.codec.Unicode;
 import swim.util.PairBuilder;
 
 final class MapReflection<V> extends AvroMapType<String, V, Map<String, V>> {
+
   final Constructor<Map<String, V>> constructor;
   final AvroType<V> valueType;
 
@@ -47,9 +48,11 @@ final class MapReflection<V> extends AvroMapType<String, V, Map<String, V>> {
   public PairBuilder<String, V, Map<String, V>> mapBuilder() {
     return new MapReflectionBuilder<V>(this.constructor);
   }
+
 }
 
 final class MapReflectionBuilder<V> implements PairBuilder<String, V, Map<String, V>> {
+
   final Constructor<Map<String, V>> constructor;
   Map<String, V> map;
 
@@ -86,4 +89,5 @@ final class MapReflectionBuilder<V> implements PairBuilder<String, V, Map<String
     }
     return map;
   }
+
 }

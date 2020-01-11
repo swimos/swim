@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 final class UriQueryEntryIterator implements Iterator<Map.Entry<String, String>> {
+
   UriQuery query;
 
   UriQueryEntryIterator(UriQuery query) {
@@ -45,4 +46,5 @@ final class UriQueryEntryIterator implements Iterator<Map.Entry<String, String>>
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

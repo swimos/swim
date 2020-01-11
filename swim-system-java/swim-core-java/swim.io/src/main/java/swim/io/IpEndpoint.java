@@ -20,6 +20,7 @@ import swim.concurrent.Stage;
  * Network interface for binding and connecting IP sockets and modems.
  */
 public class IpEndpoint implements IpStation {
+
   protected final Station station;
   protected IpSettings ipSettings;
 
@@ -61,4 +62,5 @@ public class IpEndpoint implements IpStation {
   public void stop() {
     this.station.stop();
   }
+
 }

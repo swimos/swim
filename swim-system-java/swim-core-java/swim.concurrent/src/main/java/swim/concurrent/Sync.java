@@ -23,11 +23,30 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * operation.
  */
 public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
+
+  /**
+   * {@link #status} value indicating the continuation completed with a value.
+   */
+  static final int BIND = 1;
+  /**
+   * {@link #status} value indicating the continuation failed with an exception.
+   */
+  static final int TRAP = 2;
+  /**
+   * Atomic {@link #status} field updater, used to linearize continuation completion.
+   */
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<Sync<?>> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<Sync<?>>) (Class<?>) Sync.class, "status");
+  /**
+   * Thread-local variable used to pass the await timeout through calls to
+   * {@code ForkJoinPool.managedBlock}.
+   */
+  static final ThreadLocal<Long> TIMEOUT = new ThreadLocal<Long>();
   /**
    * Atomic completion status of this {@code Sync} continuation.
    */
   volatile int status;
-
   /**
    * Completed result of this {@code Sync} continuation; either the bound value
    * of type {@code T}, or the trapped error of type {@code Throwable}.  The
@@ -82,7 +101,7 @@ public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
    * starvation while waiting.
    *
    * @throws SyncException if the {@code timeout} milliseconds elapses and this
-   *         {@code Sync} continuation still hasn't been completed.
+   *                       {@code Sync} continuation still hasn't been completed.
    */
   @SuppressWarnings("unchecked")
   public T await(final long timeout) throws InterruptedException {
@@ -153,26 +172,4 @@ public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
     return await(0L);
   }
 
-  /**
-   * {@link #status} value indicating the continuation completed with a value.
-   */
-  static final int BIND = 1;
-
-  /**
-   * {@link #status} value indicating the continuation failed with an exception.
-   */
-  static final int TRAP = 2;
-
-  /**
-   * Atomic {@link #status} field updater, used to linearize continuation completion.
-   */
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<Sync<?>> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<Sync<?>>) (Class<?>) Sync.class, "status");
-
-  /**
-   * Thread-local variable used to pass the await timeout through calls to
-   * {@code ForkJoinPool.managedBlock}.
-   */
-  static final ThreadLocal<Long> TIMEOUT = new ThreadLocal<Long>();
 }

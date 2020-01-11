@@ -21,6 +21,7 @@ import swim.codec.InputBuffer;
 import swim.util.Builder;
 
 abstract class DerDecoder<V> {
+
   public abstract V integer(byte[] data);
 
   public abstract Builder<V, V> sequenceBuilder();
@@ -40,18 +41,15 @@ abstract class DerDecoder<V> {
   public Decoder<V> decodeSequence(InputBuffer input) {
     return DerSequenceDecoder.decode(input, this);
   }
+
 }
 
 final class DerValueDecoder<V> extends Decoder<V> {
+
   final DerDecoder<V> der;
 
   DerValueDecoder(DerDecoder<V> der) {
     this.der = der;
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.der);
   }
 
   static <V> Decoder<V> decode(InputBuffer input, DerDecoder<V> der) {
@@ -59,9 +57,12 @@ final class DerValueDecoder<V> extends Decoder<V> {
       final int tag = input.head();
       input = input.step();
       switch (tag) {
-        case 0x02: return der.decodeInteger(input);
-        case 0x30: return der.decodeSequence(input);
-        default: return error(new DecoderException("Unsupported DER tag: 0x" + Integer.toHexString(tag)));
+        case 0x02:
+          return der.decodeInteger(input);
+        case 0x30:
+          return der.decodeSequence(input);
+        default:
+          return error(new DecoderException("Unsupported DER tag: 0x" + Integer.toHexString(tag)));
       }
     }
     if (input.isDone()) {
@@ -71,9 +72,16 @@ final class DerValueDecoder<V> extends Decoder<V> {
     }
     return new DerValueDecoder<V>(der);
   }
+
+  @Override
+  public Decoder<V> feed(InputBuffer input) {
+    return decode(input, this.der);
+  }
+
 }
 
 final class DerIntegerDecoder<V> extends Decoder<V> {
+
   final DerDecoder<V> der;
   final Decoder<byte[]> data;
   final int remaining;
@@ -84,11 +92,6 @@ final class DerIntegerDecoder<V> extends Decoder<V> {
     this.data = data;
     this.remaining = remaining;
     this.step = step;
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.der, this.data, this.remaining, this.step);
   }
 
   static <V> Decoder<V> decode(InputBuffer input, DerDecoder<V> der,
@@ -148,9 +151,16 @@ final class DerIntegerDecoder<V> extends Decoder<V> {
   static <V> Decoder<V> decode(InputBuffer input, DerDecoder<V> der) {
     return decode(input, der, null, 0, 1);
   }
+
+  @Override
+  public Decoder<V> feed(InputBuffer input) {
+    return decode(input, this.der, this.data, this.remaining, this.step);
+  }
+
 }
 
 final class DerSequenceDecoder<V> extends Decoder<V> {
+
   final DerDecoder<V> der;
   final Builder<V, V> sequence;
   final Decoder<V> element;
@@ -164,11 +174,6 @@ final class DerSequenceDecoder<V> extends Decoder<V> {
     this.element = element;
     this.remaining = remaining;
     this.step = step;
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.der, this.sequence, this.element, this.remaining, this.step);
   }
 
   static <V> Decoder<V> decode(InputBuffer input, DerDecoder<V> der, Builder<V, V> sequence,
@@ -241,4 +246,10 @@ final class DerSequenceDecoder<V> extends Decoder<V> {
   static <V> Decoder<V> decode(InputBuffer input, DerDecoder<V> der) {
     return decode(input, der, null, null, 0, 1);
   }
+
+  @Override
+  public Decoder<V> feed(InputBuffer input) {
+    return decode(input, this.der, this.sequence, this.element, this.remaining, this.step);
+  }
+
 }

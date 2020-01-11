@@ -22,6 +22,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface NodeContext extends TierContext, CellContext {
+
   HostBinding host();
 
   NodeBinding nodeWrapper();
@@ -66,4 +67,5 @@ public interface NodeContext extends TierContext, CellContext {
   <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass);
 
   void openAgents(NodeBinding node);
+
 }

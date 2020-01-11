@@ -22,6 +22,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 abstract class QTreeNodeCursor implements Cursor<Slot> {
+
   final QTreeNode page;
   final long x;
   final long y;
@@ -394,4 +395,5 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
     page.pageRef.loadTreeAsync(false, syncPage);
     syncPage.await(page.pageRef.settings().pageLoadTimeout);
   }
+
 }

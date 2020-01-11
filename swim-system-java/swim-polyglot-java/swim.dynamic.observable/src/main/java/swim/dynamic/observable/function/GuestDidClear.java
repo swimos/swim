@@ -19,6 +19,7 @@ import swim.dynamic.BridgeGuest;
 import swim.observable.function.DidClear;
 
 public class GuestDidClear extends BridgeGuest implements DidClear {
+
   public GuestDidClear(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -27,4 +28,5 @@ public class GuestDidClear extends BridgeGuest implements DidClear {
   public void didClear() {
     this.bridge.guestExecuteVoid(this.guest);
   }
+
 }

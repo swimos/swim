@@ -22,6 +22,7 @@ import swim.avro.schema.AvroType;
 import swim.collections.FingerTrieSeq;
 
 final class FieldReflection<R, V> extends AvroFieldType<R, V> {
+
   final Field field;
   final String doc;
   final AvroType<? extends V> valueType;
@@ -56,7 +57,7 @@ final class FieldReflection<R, V> extends AvroFieldType<R, V> {
   @Override
   public AvroFieldType<R, V> doc(String doc) {
     return new FieldReflection<R, V>(this.field, doc, this.valueType, this.defaultValue,
-                                     this.order, this.aliases);
+        this.order, this.aliases);
   }
 
   @Override
@@ -87,7 +88,7 @@ final class FieldReflection<R, V> extends AvroFieldType<R, V> {
   @Override
   public AvroFieldType<R, V> alias(String alias) {
     return new FieldReflection<R, V>(this.field, this.doc, this.valueType, this.defaultValue,
-                                     this.order, this.aliases.appended(alias));
+        this.order, this.aliases.appended(alias));
   }
 
   @Override
@@ -99,4 +100,5 @@ final class FieldReflection<R, V> extends AvroFieldType<R, V> {
       throw new AvroException(cause);
     }
   }
+
 }

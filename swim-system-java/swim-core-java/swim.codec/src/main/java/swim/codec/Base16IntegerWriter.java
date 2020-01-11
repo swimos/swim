@@ -15,6 +15,7 @@
 package swim.codec;
 
 final class Base16IntegerWriter extends Writer<Object, Object> {
+
   final Object value;
   final long input;
   final int width;
@@ -49,26 +50,6 @@ final class Base16IntegerWriter extends Writer<Object, Object> {
 
   Base16IntegerWriter(int width, Base16 base16, boolean literal) {
     this(null, 0L, width, base16, 0, literal ? -1 : -3);
-  }
-
-  @Override
-  public Writer<Object, Object> feed(Object input) {
-    if (input instanceof Integer) {
-      return new Base16IntegerWriter(input, (Integer) input, this.width, this.base16, this.step == -1);
-    } else if (input instanceof Long) {
-      return new Base16IntegerWriter(input, (Long) input, this.width, this.base16, this.step == -1);
-    } else if (input instanceof Float) {
-      return new Base16IntegerWriter(input, (Float) input, this.width, this.base16, this.step == -1);
-    } else if (input instanceof Double) {
-      return new Base16IntegerWriter(input, (Double) input, this.width, this.base16, this.step == -1);
-    } else {
-      return new StringWriter(input, input);
-    }
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.value, this.input, this.width, this.base16, this.index, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, Object value, long input, int width,
@@ -137,4 +118,25 @@ final class Base16IntegerWriter extends Writer<Object, Object> {
                                       int width, Base16 base16, boolean literal) {
     return write(output, null, Double.doubleToLongBits(input), width, base16, 0, literal ? 1 : 3);
   }
+
+  @Override
+  public Writer<Object, Object> feed(Object input) {
+    if (input instanceof Integer) {
+      return new Base16IntegerWriter(input, (Integer) input, this.width, this.base16, this.step == -1);
+    } else if (input instanceof Long) {
+      return new Base16IntegerWriter(input, (Long) input, this.width, this.base16, this.step == -1);
+    } else if (input instanceof Float) {
+      return new Base16IntegerWriter(input, (Float) input, this.width, this.base16, this.step == -1);
+    } else if (input instanceof Double) {
+      return new Base16IntegerWriter(input, (Double) input, this.width, this.base16, this.step == -1);
+    } else {
+      return new StringWriter(input, input);
+    }
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.value, this.input, this.width, this.base16, this.index, this.step);
+  }
+
 }

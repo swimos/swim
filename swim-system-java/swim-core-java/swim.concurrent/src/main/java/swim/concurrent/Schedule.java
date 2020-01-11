@@ -21,6 +21,7 @@ package swim.concurrent;
  * @see Clock
  */
 public interface Schedule {
+
   /**
    * Returns an unscheduled {@code TimerRef} bound to {@code timer}, which
    * can later be used to schedule {@code timer}.
@@ -33,4 +34,5 @@ public interface Schedule {
    * status of, reschedule, and cancel {@code timer}.
    */
   TimerRef setTimer(long millis, TimerFunction timer);
+
 }

@@ -37,6 +37,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLane<K, V> {
+
   protected final AgentContext agentContext;
   protected Form<K> keyForm;
   protected Form<V> valueForm;
@@ -81,7 +82,7 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   @Override
   public <K2> DemandMapLaneView<K2, V> keyForm(Form<K2> keyForm) {
     return new DemandMapLaneView<K2, V>(this.agentContext, keyForm, this.valueForm,
-                                        typesafeObservers(this.observers));
+        typesafeObservers(this.observers));
   }
 
   @Override
@@ -101,7 +102,7 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   @Override
   public <V2> DemandMapLaneView<K, V2> valueForm(Form<V2> valueForm) {
     return new DemandMapLaneView<K, V2>(this.agentContext, this.keyForm, valueForm,
-                                        typesafeObservers(this.observers));
+        typesafeObservers(this.observers));
   }
 
   @Override
@@ -309,9 +310,11 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   public void remove(K key) {
     this.laneBinding.remove(this.keyForm.mold(key).toValue());
   }
+
 }
 
 final class DemandMapLaneKeyIterator<K> implements Iterator<Value> {
+
   final Iterator<K> inner;
   final Form<K> keyForm;
 
@@ -334,4 +337,5 @@ final class DemandMapLaneKeyIterator<K> implements Iterator<Value> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

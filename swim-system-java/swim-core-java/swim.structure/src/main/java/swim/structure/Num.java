@@ -19,8 +19,87 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public abstract class Num extends Value {
+
   Num() {
     //stub
+  }
+
+  public static Num from(int value) {
+    return NumI32.from(value);
+  }
+
+  public static Num from(long value) {
+    return NumI64.from(value);
+  }
+
+  public static Num from(float value) {
+    return NumF32.from(value);
+  }
+
+  public static Num from(double value) {
+    return NumF64.from(value);
+  }
+
+  public static Num from(BigInteger value) {
+    return NumInt.from(value);
+  }
+
+  public static Num from(Number value) {
+    if (value instanceof Byte) {
+      return from(value.byteValue());
+    } else if (value instanceof Short) {
+      return from(value.shortValue());
+    } else if (value instanceof Integer) {
+      return from(value.intValue());
+    } else if (value instanceof Long) {
+      return from(value.longValue());
+    } else if (value instanceof Float) {
+      return from(value.floatValue());
+    } else if (value instanceof Double) {
+      return from(value.doubleValue());
+    } else if (value instanceof BigInteger) {
+      return from((BigInteger) value);
+    } else {
+      return from(value.doubleValue());
+    }
+  }
+
+  public static Num from(char value) {
+    return NumI32.from((int) value);
+  }
+
+  public static Num from(String value) {
+    if ("NaN".equals(value)) {
+      return NumF64.nan();
+    } else {
+      try {
+        final long longValue = Long.parseLong(value);
+        if ((int) longValue == longValue) {
+          return from((int) longValue);
+        } else {
+          return from(longValue);
+        }
+      } catch (NumberFormatException e1) {
+        try {
+          final double doubleValue = Double.parseDouble(value);
+          if ((float) doubleValue == doubleValue) {
+            return from((float) doubleValue);
+          } else {
+            return from(doubleValue);
+          }
+        } catch (NumberFormatException e2) {
+          return from(new BigInteger(value));
+        }
+      }
+    }
+  }
+
+  public static Num uint32(int value) {
+    return NumI32.uint32(value);
+  }
+
+  public static Num uint64(long value) {
+    return NumI64.uint64(value);
   }
 
   @Override
@@ -428,81 +507,4 @@ public abstract class Num extends Value {
   @Override
   public abstract void display(Output<?> output);
 
-  public static Num from(int value) {
-    return NumI32.from(value);
-  }
-
-  public static Num from(long value) {
-    return NumI64.from(value);
-  }
-
-  public static Num from(float value) {
-    return NumF32.from(value);
-  }
-
-  public static Num from(double value) {
-    return NumF64.from(value);
-  }
-
-  public static Num from(BigInteger value) {
-    return NumInt.from(value);
-  }
-
-  public static Num from(Number value) {
-    if (value instanceof Byte) {
-      return from(value.byteValue());
-    } else if (value instanceof Short) {
-      return from(value.shortValue());
-    } else if (value instanceof Integer) {
-      return from(value.intValue());
-    } else if (value instanceof Long) {
-      return from(value.longValue());
-    } else if (value instanceof Float) {
-      return from(value.floatValue());
-    } else if (value instanceof Double) {
-      return from(value.doubleValue());
-    } else if (value instanceof BigInteger) {
-      return from((BigInteger) value);
-    } else {
-      return from(value.doubleValue());
-    }
-  }
-
-  public static Num from(char value) {
-    return NumI32.from((int) value);
-  }
-
-  public static Num from(String value) {
-    if ("NaN".equals(value)) {
-      return NumF64.nan();
-    } else {
-      try {
-        final long longValue = Long.parseLong(value);
-        if ((int) longValue == longValue) {
-          return from((int) longValue);
-        } else {
-          return from(longValue);
-        }
-      } catch (NumberFormatException e1) {
-        try {
-          final double doubleValue = Double.parseDouble(value);
-          if ((float) doubleValue == doubleValue) {
-            return from((float) doubleValue);
-          } else {
-            return from(doubleValue);
-          }
-        } catch (NumberFormatException e2) {
-          return from(new BigInteger(value));
-        }
-      }
-    }
-  }
-
-  public static Num uint32(int value) {
-    return NumI32.uint32(value);
-  }
-
-  public static Num uint64(long value) {
-    return NumI64.uint64(value);
-  }
 }

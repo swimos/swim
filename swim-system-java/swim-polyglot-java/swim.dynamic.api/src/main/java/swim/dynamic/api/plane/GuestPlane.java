@@ -20,6 +20,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
 public class GuestPlane extends BridgeGuest implements Plane {
+
   protected final PlaneContext planeContext;
 
   public GuestPlane(Bridge bridge, Object guest, PlaneContext planeContext) {
@@ -80,4 +81,5 @@ public class GuestPlane extends BridgeGuest implements Plane {
       this.bridge.guestInvokeMember(this.guest, "didFail", error);
     }
   }
+
 }

@@ -15,7 +15,9 @@
 package swim.math;
 
 public interface Boundary<T> {
+
   boolean contains(T outer, T inner);
 
   boolean intersects(T s, T t);
+
 }

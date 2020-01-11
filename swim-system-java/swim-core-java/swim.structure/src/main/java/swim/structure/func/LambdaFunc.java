@@ -26,6 +26,8 @@ import swim.structure.operator.InvokeOperator;
 import swim.util.Murmur3;
 
 public class LambdaFunc extends Func {
+
+  private static int hashSeed;
   final Value bindings;
   final Value template;
 
@@ -122,5 +124,4 @@ public class LambdaFunc extends Func {
     output.debug(this.bindings).write('.').write("lambda").write('(').debug(this.template).write(')');
   }
 
-  private static int hashSeed;
 }

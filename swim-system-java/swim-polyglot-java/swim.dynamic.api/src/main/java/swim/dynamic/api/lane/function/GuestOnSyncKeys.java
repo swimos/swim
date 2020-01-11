@@ -21,6 +21,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
 public class GuestOnSyncKeys<K> extends BridgeGuest implements OnSyncKeys<K> {
+
   public GuestOnSyncKeys(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -30,4 +31,5 @@ public class GuestOnSyncKeys<K> extends BridgeGuest implements OnSyncKeys<K> {
   public Iterator<K> onSync(WarpUplink uplink) {
     return (Iterator<K>) this.bridge.guestExecute(this.guest, uplink);
   }
+
 }

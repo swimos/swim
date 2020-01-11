@@ -22,6 +22,9 @@ import swim.structure.Value;
  * Factory for constructing XML parsers and writers.
  */
 public final class Xml {
+
+  private static XmlParser<Item, Value> structureParser;
+
   private Xml() {
     // static
   }
@@ -104,8 +107,6 @@ public final class Xml {
         || c == '_'
         || c >= 'a' && c <= 'z';
   }
-
-  private static XmlParser<Item, Value> structureParser;
   //private static XmlWriter<Item, Value> structureWriter;
 
   public static XmlParser<Item, Value> structureParser() {
@@ -133,4 +134,5 @@ public final class Xml {
   public static Parser<Value> parser() {
     return structureParser().documentParser();
   }
+
 }

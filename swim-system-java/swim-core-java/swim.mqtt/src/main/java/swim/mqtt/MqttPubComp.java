@@ -22,12 +22,22 @@ import swim.codec.OutputBuffer;
 import swim.util.Murmur3;
 
 public final class MqttPubComp extends MqttPacket<Object> implements Debug {
+
+  private static int hashSeed;
   final int packetFlags;
   final int packetId;
 
   MqttPubComp(int packetFlags, int packetId) {
     this.packetFlags = packetFlags;
     this.packetId = packetId;
+  }
+
+  public static MqttPubComp from(int packetFlags, int packetId) {
+    return new MqttPubComp(packetFlags, packetId);
+  }
+
+  public static MqttPubComp from(int packetId) {
+    return new MqttPubComp(0, packetId);
   }
 
   @Override
@@ -100,13 +110,4 @@ public final class MqttPubComp extends MqttPacket<Object> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static MqttPubComp from(int packetFlags, int packetId) {
-    return new MqttPubComp(packetFlags, packetId);
-  }
-
-  public static MqttPubComp from(int packetId) {
-    return new MqttPubComp(0, packetId);
-  }
 }

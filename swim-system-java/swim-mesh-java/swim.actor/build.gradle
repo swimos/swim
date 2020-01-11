@@ -5,6 +5,6 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.actor'
 
 dependencies {
-  api project(':swim-runtime')
-  api project(':swim-kernel')
+    api project(':swim-runtime')
+    api project(':swim-kernel')
 }

@@ -26,6 +26,7 @@ import swim.util.Log;
 import swim.warp.CommandMessage;
 
 public interface LaneBinding extends TierBinding, CellBinding, Log {
+
   NodeBinding node();
 
   LaneBinding laneWrapper();
@@ -77,4 +78,5 @@ public interface LaneBinding extends TierBinding, CellBinding, Log {
   void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink);
 
   void reportDown(Metric metric);
+
 }

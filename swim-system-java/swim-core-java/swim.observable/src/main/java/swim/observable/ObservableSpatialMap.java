@@ -25,6 +25,7 @@ import swim.observable.function.WillUpdateShape;
 import swim.spatial.SpatialMap;
 
 public interface ObservableSpatialMap<K, S, V> extends Observable<Object>, SpatialMap<K, S, V> {
+
   @Override
   ObservableSpatialMap<K, S, V> observe(Object observer);
 
@@ -46,4 +47,5 @@ public interface ObservableSpatialMap<K, S, V> extends Observable<Object>, Spati
   ObservableSpatialMap<K, S, V> willClear(WillClear willClear);
 
   ObservableSpatialMap<K, S, V> didClear(DidClear didClear);
+
 }

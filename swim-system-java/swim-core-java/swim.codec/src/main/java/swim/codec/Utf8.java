@@ -21,6 +21,7 @@ import java.io.InputStream;
  * UTF-8 {@link Input}/{@link Output} factory.
  */
 public final class Utf8 {
+
   private Utf8() {
     // nop
   }
@@ -43,7 +44,7 @@ public final class Utf8 {
     } else if (c >= 0x0080 && c <= 0x07FF) { // U+0080..U+07FF
       return 2;
     } else if (c >= 0x0800 && c <= 0xFFFF || // U+0800..U+D7FF
-               c >= 0xE000 && c <= 0xFFFF) { // U+E000..U+FFFF
+        c >= 0xE000 && c <= 0xFFFF) { // U+E000..U+FFFF
       return 3;
     } else if (c >= 0x10000 && c <= 0x10FFFF) { // U+10000..U+10FFFF
       return 4;
@@ -67,7 +68,7 @@ public final class Utf8 {
     } else if (c >= 0x0080 && c <= 0x07FF) { // U+0080..U+07FF
       return 2;
     } else if (c >= 0x0800 && c <= 0xFFFF || // U+0800..U+D7FF
-               c >= 0xE000 && c <= 0xFFFF) { // U+E000..U+FFFF
+        c >= 0xE000 && c <= 0xFFFF) { // U+E000..U+FFFF
       return 3;
     } else if (c >= 0x10000 && c <= 0x10FFFF) { // U+10000..U+10FFFF
       return 4;
@@ -276,4 +277,5 @@ public final class Utf8 {
   public static <O> O read(Parser<O> parser, InputStream input) throws IOException {
     return Binary.read(decodedParser(parser), input);
   }
+
 }

@@ -18,6 +18,7 @@ import java.util.Collection;
 import swim.collections.HashTrieMap;
 
 public class JavaHostPackage implements HostPackage {
+
   protected final String packageName;
   HashTrieMap<String, HostType<?>> hostTypeNames;
   HashTrieMap<Class<?>, HostType<?>> hostTypeClasses;
@@ -52,4 +53,5 @@ public class JavaHostPackage implements HostPackage {
     this.hostTypeNames = this.hostTypeNames.updated(hostType.typeName(), hostType);
     this.hostTypeClasses = this.hostTypeClasses.updated(hostType.hostClass(), hostType);
   }
+
 }

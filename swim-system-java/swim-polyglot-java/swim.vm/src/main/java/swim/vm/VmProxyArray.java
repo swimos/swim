@@ -18,6 +18,7 @@ import org.graalvm.polyglot.Value;
 import org.graalvm.polyglot.proxy.ProxyArray;
 
 public class VmProxyArray extends VmHostProxy<Object[]> implements ProxyArray {
+
   final Object[] array;
 
   public VmProxyArray(Object[] array) {
@@ -48,4 +49,5 @@ public class VmProxyArray extends VmHostProxy<Object[]> implements ProxyArray {
   public boolean remove(long index) {
     throw new UnsupportedOperationException();
   }
+
 }

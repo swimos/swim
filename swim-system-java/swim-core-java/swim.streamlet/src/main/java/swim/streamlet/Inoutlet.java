@@ -15,6 +15,7 @@
 package swim.streamlet;
 
 public interface Inoutlet<I, O> extends Inlet<I>, Outlet<O> {
+
   /**
    * Disconnects all {@code Inlet}s dominated by this {@code Inoutlet} in the
    * dataflow dependency graph.  Used to recursively clean up chains of
@@ -30,4 +31,5 @@ public interface Inoutlet<I, O> extends Inlet<I>, Outlet<O> {
    */
   @Override
   void disconnectOutputs();
+
 }

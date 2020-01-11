@@ -15,12 +15,13 @@
 package swim.http;
 
 public final class Http {
-  private Http() {
-    // stub
-  }
 
   private static HttpParser standardParser;
   private static HttpWriter standardWriter;
+
+  private Http() {
+    // stub
+  }
 
   public static HttpParser standardParser() {
     if (standardParser == null) {
@@ -103,4 +104,5 @@ public final class Http {
     }
     return true;
   }
+
 }

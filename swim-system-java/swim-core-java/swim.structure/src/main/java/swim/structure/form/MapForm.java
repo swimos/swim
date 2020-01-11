@@ -28,6 +28,7 @@ import swim.structure.Value;
  * typed {@code Item} and an instance of that {@code Map}.
  */
 public final class MapForm<K, V> extends Form<Map<K, V>> {
+
   final Class<?> type;
   final Form<K> keyForm;
   final Form<V> valForm;
@@ -131,4 +132,5 @@ public final class MapForm<K, V> extends Form<Map<K, V>> {
     }
     return null;
   }
+
 }

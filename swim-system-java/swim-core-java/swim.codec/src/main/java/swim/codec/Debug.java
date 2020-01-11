@@ -21,12 +21,14 @@ package swim.codec;
  * {@link OutputSettings#isStyled()} returns {@code true}.
  */
 public interface Debug {
+
   /**
    * Writes a developer readable, debug-formatted string representation of this
    * object to {@code output}.
    *
    * @throws OutputException if the {@code output} exits the <em>cont</em>
-   *         state before the full debug string has been written.
+   *                         state before the full debug string has been written.
    */
   void debug(Output<?> output);
+
 }

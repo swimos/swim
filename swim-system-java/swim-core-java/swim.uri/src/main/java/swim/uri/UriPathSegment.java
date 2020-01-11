@@ -18,6 +18,7 @@ import swim.codec.Format;
 import swim.codec.Output;
 
 final class UriPathSegment extends UriPath {
+
   final String head;
   UriPath tail;
   String string;
@@ -143,4 +144,5 @@ final class UriPathSegment extends UriPath {
     }
     return this.string;
   }
+
 }

@@ -39,6 +39,13 @@ import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
 public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, JoinMapLaneUplink> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<JoinMapLaneModel, HashTrieMap<Value, JoinMapLaneDownlink<?, ?>>> DOWNLINKS =
+      AtomicReferenceFieldUpdater.newUpdater(JoinMapLaneModel.class, (Class<HashTrieMap<Value, JoinMapLaneDownlink<?, ?>>>) (Class<?>) HashTrieMap.class, "downlinks");
   protected int flags;
   protected MapData<Value, Value> data;
   protected MapData<Value, Value> linkData;
@@ -123,7 +130,8 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
       if (oldDownlink != null) {
         try {
           oldDownlink.close();
-        } catch (Exception swallow) { }
+        } catch (Exception swallow) {
+        }
       }
     }
   }
@@ -138,7 +146,8 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
       for (JoinMapLaneDownlink<?, ?> downlink : oldDownlinks.values()) {
         try {
           downlink.close();
-        } catch (Exception swallow) { }
+        } catch (Exception swallow) {
+        }
       }
     }
   }
@@ -154,7 +163,8 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
       final JoinMapLaneDownlink<?, ?> downlink = oldDownlinks.get(key);
       try {
         downlink.close();
-      } catch (Exception swallow) { }
+      } catch (Exception swallow) {
+      }
     }
   }
 
@@ -354,22 +364,16 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
     openDownlinks();
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<JoinMapLaneModel, HashTrieMap<Value, JoinMapLaneDownlink<?, ?>>> DOWNLINKS =
-      AtomicReferenceFieldUpdater.newUpdater(JoinMapLaneModel.class, (Class<HashTrieMap<Value, JoinMapLaneDownlink<?, ?>>>) (Class<?>) HashTrieMap.class, "downlinks");
 }
 
 final class JoinMapLaneRelayUpdate extends LaneRelay<JoinMapLaneModel, JoinMapLaneView<?, ?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
+  final Value key;
   Form<Object> keyForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
   Value oldValue;
   Object oldObject;
@@ -498,15 +502,17 @@ final class JoinMapLaneRelayUpdate extends LaneRelay<JoinMapLaneModel, JoinMapLa
       }
     }
   }
+
 }
 
 final class JoinMapLaneRelayRemove extends LaneRelay<JoinMapLaneModel, JoinMapLaneView<?, ?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
+  final Value key;
   Form<Object> keyForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
   Value oldValue;
   Object oldObject;
@@ -630,9 +636,11 @@ final class JoinMapLaneRelayRemove extends LaneRelay<JoinMapLaneModel, JoinMapLa
       }
     }
   }
+
 }
 
 final class JoinMapLaneRelayClear extends LaneRelay<JoinMapLaneModel, JoinMapLaneView<?, ?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -708,11 +716,13 @@ final class JoinMapLaneRelayClear extends LaneRelay<JoinMapLaneModel, JoinMapLan
       }
     }
   }
+
 }
 
 final class JoinMapLaneRelayDownlink extends LaneRelay<JoinMapLaneModel, JoinMapLaneView<?, ?, ?>> {
-  Form<Object> keyForm;
+
   final Value key;
+  Form<Object> keyForm;
   Object keyObject;
   JoinMapLaneDownlink<Object, Object> downlink;
 
@@ -765,4 +775,5 @@ final class JoinMapLaneRelayDownlink extends LaneRelay<JoinMapLaneModel, JoinMap
       throw new AssertionError(); // unreachable
     }
   }
+
 }

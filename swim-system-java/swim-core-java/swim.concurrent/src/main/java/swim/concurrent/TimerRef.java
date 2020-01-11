@@ -22,6 +22,7 @@ package swim.concurrent;
  * @see Schedule
  */
 public interface TimerRef {
+
   /**
    * Returns {@code true} if the timer is currently scheduled to execute.
    */
@@ -43,4 +44,5 @@ public interface TimerRef {
    * if the timer was not scheduled to execute.
    */
   boolean cancel();
+
 }

@@ -18,6 +18,7 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 final class R2ShapeForm extends R2Form<R2Shape> {
+
   @Override
   public Class<?> type() {
     return R2Shape.class;
@@ -75,4 +76,5 @@ final class R2ShapeForm extends R2Form<R2Shape> {
     }
     return null;
   }
+
 }

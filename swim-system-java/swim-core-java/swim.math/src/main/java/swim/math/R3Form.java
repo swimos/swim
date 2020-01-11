@@ -17,6 +17,7 @@ package swim.math;
 import swim.structure.Form;
 
 public abstract class R3Form<T> extends Form<T> implements R3Boundary<T> {
+
   @Override
   public abstract double getXMin(T object);
 
@@ -44,4 +45,5 @@ public abstract class R3Form<T> extends Form<T> implements R3Boundary<T> {
   //public static <T> Z3Form<T> transformed(R3Form<T> form, R3ToZ3Function function) {
   //  return new R3ToZ3Form<T>(form, function);
   //}
+
 }

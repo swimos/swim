@@ -18,6 +18,7 @@ import swim.codec.Output;
 import swim.codec.OutputSettings;
 
 final class DataOutput extends Output<Data> {
+
   final Data data;
   OutputSettings settings;
 
@@ -97,4 +98,5 @@ final class DataOutput extends Output<Data> {
   public Output<Data> clone() {
     return new DataOutput(this.data.branch(), this.settings);
   }
+
 }

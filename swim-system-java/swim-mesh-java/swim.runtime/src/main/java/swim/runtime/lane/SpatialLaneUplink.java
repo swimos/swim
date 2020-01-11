@@ -24,6 +24,7 @@ import swim.structure.Value;
 import swim.warp.SyncRequest;
 
 public class SpatialLaneUplink<S> extends MapUplinkModem {
+
   final SpatialLaneModel<S> laneBinding;
 
   public SpatialLaneUplink(SpatialLaneModel<S> laneBinding, WarpBinding linkBinding,
@@ -57,4 +58,5 @@ public class SpatialLaneUplink<S> extends MapUplinkModem {
     syncDown(this.laneBinding.keyIterator());
     super.willSync(request);
   }
+
 }

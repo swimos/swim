@@ -17,6 +17,7 @@ package swim.math;
 import java.lang.reflect.Array;
 
 final class TensorArrayIdentitySpace<V, S> extends TensorArraySpace<V[], V, S> {
+
   final Class<V> type;
   final TensorSpace<V, S> next;
   final TensorDims dims;
@@ -62,4 +63,5 @@ final class TensorArrayIdentitySpace<V, S> extends TensorArraySpace<V[], V, S> {
   protected Object[] newArray(int length) {
     return (Object[]) Array.newInstance(type, length);
   }
+
 }

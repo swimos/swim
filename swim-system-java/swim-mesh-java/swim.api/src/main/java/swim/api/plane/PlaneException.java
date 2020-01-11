@@ -15,6 +15,7 @@
 package swim.api.plane;
 
 public class PlaneException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public PlaneException(String message, Throwable cause) {
@@ -32,4 +33,5 @@ public class PlaneException extends RuntimeException {
   public PlaneException() {
     super();
   }
+
 }

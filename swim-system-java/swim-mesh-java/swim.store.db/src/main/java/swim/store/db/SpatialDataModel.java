@@ -33,6 +33,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class SpatialDataModel<S> implements SpatialDataBinding<S>, QTreeDelegate {
+
   protected final Value name;
   protected final QTreeMap<S> tree;
   protected SpatialDataContext<S> dataContext;
@@ -293,4 +294,5 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S>, QTreeDelegate
       dataContext.didRemove(key, x, y, oldValue);
     }
   }
+
 }

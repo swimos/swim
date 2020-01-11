@@ -20,6 +20,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
 public class GuestWillLeave extends BridgeGuest implements WillLeave {
+
   public GuestWillLeave(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -28,4 +29,5 @@ public class GuestWillLeave extends BridgeGuest implements WillLeave {
   public void willLeave(Identity identity) {
     this.bridge.guestExecuteVoid(this.guest, identity);
   }
+
 }

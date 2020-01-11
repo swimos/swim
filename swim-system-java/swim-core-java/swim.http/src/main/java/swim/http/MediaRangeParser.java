@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.collections.HashTrieMap;
 
 final class MediaRangeParser extends Parser<MediaRange> {
+
   final HttpParser http;
   final StringBuilder type;
   final StringBuilder subtype;
@@ -39,11 +40,6 @@ final class MediaRangeParser extends Parser<MediaRange> {
 
   MediaRangeParser(HttpParser http) {
     this(http, null, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<MediaRange> feed(Input input) {
-    return parse(input, this.http, this.type, this.subtype, this.weight, this.params, this.step);
   }
 
   static Parser<MediaRange> parse(Input input, HttpParser http, StringBuilder type, StringBuilder subtype,
@@ -128,7 +124,7 @@ final class MediaRangeParser extends Parser<MediaRange> {
         step = 6;
       } else if (!input.isEmpty()) {
         return done(http.mediaRange(type.toString(), subtype.toString(), 1f,
-                                    HashTrieMap.<String, String>empty()));
+            HashTrieMap.<String, String>empty()));
       }
     }
     if (step == 6) {
@@ -197,4 +193,10 @@ final class MediaRangeParser extends Parser<MediaRange> {
   static Parser<MediaRange> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, null, null, 1);
   }
+
+  @Override
+  public Parser<MediaRange> feed(Input input) {
+    return parse(input, this.http, this.type, this.subtype, this.weight, this.params, this.step);
+  }
+
 }

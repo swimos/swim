@@ -30,6 +30,10 @@ import swim.runtime.Push;
 import swim.store.StoreBinding;
 
 public abstract class Scope implements CellContext {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<Scope, HashTrieSet<LinkBinding>> LINKS =
+      AtomicReferenceFieldUpdater.newUpdater(Scope.class, (Class<HashTrieSet<LinkBinding>>) (Class<?>) HashTrieSet.class, "links");
   protected final CellContext cellContext;
   protected final Stage stage;
   volatile HashTrieSet<LinkBinding> links;
@@ -169,7 +173,4 @@ public abstract class Scope implements CellContext {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<Scope, HashTrieSet<LinkBinding>> LINKS =
-      AtomicReferenceFieldUpdater.newUpdater(Scope.class, (Class<HashTrieSet<LinkBinding>>) (Class<?>) HashTrieSet.class, "links");
 }

@@ -21,6 +21,7 @@ import swim.runtime.warp.WarpLaneModel;
 import swim.structure.Value;
 
 public class DemandLaneModel extends WarpLaneModel<DemandLaneView<?>, DemandLaneUplink> {
+
   @Override
   public String laneType() {
     return "demand";
@@ -51,4 +52,5 @@ public class DemandLaneModel extends WarpLaneModel<DemandLaneView<?>, DemandLane
     }
     return null;
   }
+
 }

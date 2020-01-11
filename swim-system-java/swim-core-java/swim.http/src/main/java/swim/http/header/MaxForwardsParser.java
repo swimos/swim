@@ -20,6 +20,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class MaxForwardsParser extends Parser<MaxForwards> {
+
   final int count;
   final int step;
 
@@ -30,11 +31,6 @@ final class MaxForwardsParser extends Parser<MaxForwards> {
 
   MaxForwardsParser() {
     this(0, 1);
-  }
-
-  @Override
-  public Parser<MaxForwards> feed(Input input) {
-    return parse(input, this.count, this.step);
   }
 
   static Parser<MaxForwards> parse(Input input, int count, int step) {
@@ -79,4 +75,10 @@ final class MaxForwardsParser extends Parser<MaxForwards> {
   static Parser<MaxForwards> parse(Input input) {
     return parse(input, 0, 1);
   }
+
+  @Override
+  public Parser<MaxForwards> feed(Input input) {
+    return parse(input, this.count, this.step);
+  }
+
 }

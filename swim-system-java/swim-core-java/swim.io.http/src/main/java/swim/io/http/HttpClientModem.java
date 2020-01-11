@@ -32,12 +32,22 @@ import swim.io.IpModemContext;
 import swim.io.IpSocket;
 
 public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>, HttpClientContext {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<HttpClientModem, FingerTrieSeq<HttpClientRequester<?>>> REQUESTERS =
+      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<FingerTrieSeq<HttpClientRequester<?>>>) (Class<?>) FingerTrieSeq.class, "requesters");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<HttpClientModem, FingerTrieSeq<HttpClientRequester<?>>> RESPONDERS =
+      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<FingerTrieSeq<HttpClientRequester<?>>>) (Class<?>) FingerTrieSeq.class, "responders");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<HttpClientModem, HttpClientRequester<?>> RESPONDING =
+      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<HttpClientRequester<?>>) (Class<?>) HttpClientRequester.class, "responding");
   protected final HttpClient client;
   protected final HttpSettings httpSettings;
+  protected IpModemContext<HttpResponse<?>, HttpRequest<?>> context;
   volatile FingerTrieSeq<HttpClientRequester<?>> requesters;
   volatile FingerTrieSeq<HttpClientRequester<?>> responders;
   volatile HttpClientRequester<?> responding;
-  protected IpModemContext<HttpResponse<?>, HttpRequest<?>> context;
 
   public HttpClientModem(HttpClient client, HttpSettings httpSettings) {
     this.client = client;
@@ -253,7 +263,8 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
   public void doRequest(HttpRequester<?> requester) {
     final HttpClientRequester<?> requesterContext = new HttpClientRequester<Object>(this, (HttpRequester<Object>) requester);
     requester.setHttpRequesterContext(requesterContext);
-    outer: do {
+    outer:
+    do {
       final FingerTrieSeq<HttpClientRequester<?>> oldRequesters = REQUESTERS.get(this);
       final FingerTrieSeq<HttpClientRequester<?>> newRequesters = oldRequesters.appended(requesterContext);
       if (REQUESTERS.compareAndSet(this, oldRequesters, newRequesters)) {
@@ -346,15 +357,4 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
     this.client.didRespond(response);
   }
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<HttpClientModem, FingerTrieSeq<HttpClientRequester<?>>> REQUESTERS =
-      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<FingerTrieSeq<HttpClientRequester<?>>>) (Class<?>) FingerTrieSeq.class, "requesters");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<HttpClientModem, FingerTrieSeq<HttpClientRequester<?>>> RESPONDERS =
-      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<FingerTrieSeq<HttpClientRequester<?>>>) (Class<?>) FingerTrieSeq.class, "responders");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<HttpClientModem, HttpClientRequester<?>> RESPONDING =
-      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<HttpClientRequester<?>>) (Class<?>) HttpClientRequester.class, "responding");
 }

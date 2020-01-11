@@ -21,6 +21,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class DataWriter extends Writer<Object, Object> {
+
   final ByteBuffer buffer;
   final Writer<?, ?> part;
   final int step;
@@ -29,11 +30,6 @@ final class DataWriter extends Writer<Object, Object> {
     this.buffer = buffer;
     this.part = part;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.buffer, this.part, this.step);
   }
 
   static int sizeOf(int length) {
@@ -70,4 +66,10 @@ final class DataWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, ByteBuffer buffer) {
     return write(output, buffer, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.buffer, this.part, this.step);
+  }
+
 }

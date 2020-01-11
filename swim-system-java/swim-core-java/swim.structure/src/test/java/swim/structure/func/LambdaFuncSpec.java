@@ -24,6 +24,7 @@ import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 
 public class LambdaFuncSpec {
+
   @Test
   public void evaluateIdentityLambda() {
     final Record scope = Record.of(Slot.of("f", Text.from("x").lambda(
@@ -65,4 +66,5 @@ public class LambdaFuncSpec {
     assertEquals(Selector.identity().get("f").invoke(Value.extant()).evaluate(scope),
         Num.from(2));
   }
+
 }

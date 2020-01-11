@@ -24,9 +24,6 @@ import swim.dynamic.observable.function.GuestWillSet;
 import swim.observable.ObservableValue;
 
 public final class HostObservableValue {
-  private HostObservableValue() {
-    // static
-  }
 
   public static final HostObjectType<ObservableValue<Object>> TYPE;
 
@@ -39,9 +36,15 @@ public final class HostObservableValue {
     type.addMember(new HostObservableValueWillSet());
     type.addMember(new HostObservableValueDidSet());
   }
+
+  private HostObservableValue() {
+    // static
+  }
+
 }
 
 final class HostObservableValueGet implements HostMethod<ObservableValue<Object>> {
+
   @Override
   public String key() {
     return "get";
@@ -51,9 +54,11 @@ final class HostObservableValueGet implements HostMethod<ObservableValue<Object>
   public Object invoke(Bridge bridge, ObservableValue<Object> observable, Object... arguments) {
     return observable.get();
   }
+
 }
 
 final class HostObservableValueSet implements HostMethod<ObservableValue<Object>> {
+
   @Override
   public String key() {
     return "set";
@@ -63,9 +68,11 @@ final class HostObservableValueSet implements HostMethod<ObservableValue<Object>
   public Object invoke(Bridge bridge, ObservableValue<Object> observable, Object... arguments) {
     return observable.set(arguments[0]);
   }
+
 }
 
 final class HostObservableValueWillSet implements HostMethod<ObservableValue<Object>> {
+
   @Override
   public String key() {
     return "willSet";
@@ -75,9 +82,11 @@ final class HostObservableValueWillSet implements HostMethod<ObservableValue<Obj
   public Object invoke(Bridge bridge, ObservableValue<Object> observable, Object... arguments) {
     return observable.willSet(new GuestWillSet<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableValueDidSet implements HostMethod<ObservableValue<Object>> {
+
   @Override
   public String key() {
     return "didSet";
@@ -87,4 +96,5 @@ final class HostObservableValueDidSet implements HostMethod<ObservableValue<Obje
   public Object invoke(Bridge bridge, ObservableValue<Object> observable, Object... arguments) {
     return observable.didSet(new GuestDidSet<Object>(bridge, arguments[0]));
   }
+
 }

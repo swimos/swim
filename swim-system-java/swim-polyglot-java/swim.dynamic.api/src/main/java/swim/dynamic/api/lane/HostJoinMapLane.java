@@ -26,9 +26,6 @@ import swim.dynamic.java.lang.HostIterable;
 import swim.dynamic.observable.HostObservableMap;
 
 public final class HostJoinMapLane {
-  private HostJoinMapLane() {
-    // static
-  }
 
   public static final HostObjectType<JoinMapLane<Object, Object, Object>> TYPE;
 
@@ -47,9 +44,15 @@ public final class HostJoinMapLane {
     type.addMember(new HostJoinMapLaneDownlink());
     type.addMember(new HostJoinMapLaneGetDownlink());
   }
+
+  private HostJoinMapLane() {
+    // static
+  }
+
 }
 
 final class HostJoinMapLaneIsResident implements HostMethod<JoinMapLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "isResident";
@@ -64,9 +67,11 @@ final class HostJoinMapLaneIsResident implements HostMethod<JoinMapLane<Object, 
       return lane.isResident((boolean) isResident);
     }
   }
+
 }
 
 final class HostJoinMapLaneIsTransient implements HostMethod<JoinMapLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "isTransient";
@@ -81,9 +86,11 @@ final class HostJoinMapLaneIsTransient implements HostMethod<JoinMapLane<Object,
       return lane.isTransient((boolean) isTransient);
     }
   }
+
 }
 
 final class HostJoinMapLaneObserve implements HostMethod<JoinMapLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "observe";
@@ -96,9 +103,11 @@ final class HostJoinMapLaneObserve implements HostMethod<JoinMapLane<Object, Obj
     lane.observe(observer);
     return this;
   }
+
 }
 
 final class HostJoinMapLaneUnobserve implements HostMethod<JoinMapLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "unobserve";
@@ -111,9 +120,11 @@ final class HostJoinMapLaneUnobserve implements HostMethod<JoinMapLane<Object, O
     lane.unobserve(observer);
     return this;
   }
+
 }
 
 final class HostJoinMapLaneWillDownlink implements HostMethod<JoinMapLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "willDownlink";
@@ -123,9 +134,11 @@ final class HostJoinMapLaneWillDownlink implements HostMethod<JoinMapLane<Object
   public Object invoke(Bridge bridge, JoinMapLane<Object, Object, Object> lane, Object... arguments) {
     return lane.willDownlink(new GuestWillDownlinkMap<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostJoinMapLaneDidDownlink implements HostMethod<JoinMapLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "didDownlink";
@@ -135,9 +148,11 @@ final class HostJoinMapLaneDidDownlink implements HostMethod<JoinMapLane<Object,
   public Object invoke(Bridge bridge, JoinMapLane<Object, Object, Object> lane, Object... arguments) {
     return lane.didDownlink(new GuestDidDownlinkMap<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostJoinMapLaneDownlink implements HostMethod<JoinMapLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "downlink";
@@ -147,9 +162,11 @@ final class HostJoinMapLaneDownlink implements HostMethod<JoinMapLane<Object, Ob
   public Object invoke(Bridge bridge, JoinMapLane<Object, Object, Object> lane, Object... arguments) {
     return lane.downlink(arguments[0]);
   }
+
 }
 
 final class HostJoinMapLaneGetDownlink implements HostMethod<JoinMapLane<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "getDownlink";
@@ -159,4 +176,5 @@ final class HostJoinMapLaneGetDownlink implements HostMethod<JoinMapLane<Object,
   public Object invoke(Bridge bridge, JoinMapLane<Object, Object, Object> lane, Object... arguments) {
     return lane.getDownlink(arguments[0]);
   }
+
 }

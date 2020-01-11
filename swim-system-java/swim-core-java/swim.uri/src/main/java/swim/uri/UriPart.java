@@ -15,7 +15,9 @@
 package swim.uri;
 
 public abstract class UriPart {
+
   UriPart() {
     // sealed
   }
+
 }

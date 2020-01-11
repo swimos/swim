@@ -23,6 +23,12 @@ import swim.codec.OutputBuffer;
 import swim.util.Murmur3;
 
 public final class MqttPublish<T> extends MqttPacket<T> implements Debug {
+
+  static final int RETAIN_FLAG = 0x01;
+  static final int QOS_MASK = 0x06;
+  static final int QOS_SHIFT = 1;
+  static final int DUP_FLAG = 0x08;
+  private static int hashSeed;
   final int packetFlags;
   final String topicName;
   final int packetId;
@@ -33,6 +39,23 @@ public final class MqttPublish<T> extends MqttPacket<T> implements Debug {
     this.topicName = topicName;
     this.packetId = packetId;
     this.payload = payload;
+  }
+
+  public static <T> MqttPublish<T> from(int packetFlags, String topicName,
+                                        int packetId, MqttEntity<T> payload) {
+    return new MqttPublish<T>(packetFlags, topicName, packetId, payload);
+  }
+
+  public static <T> MqttPublish<T> from(String topicName, int packetId, MqttEntity<T> payload) {
+    return new MqttPublish<T>(0, topicName, packetId, payload);
+  }
+
+  public static <T> MqttPublish<T> from(String topicName, MqttEntity<T> payload) {
+    return new MqttPublish<T>(0, topicName, 0, payload);
+  }
+
+  public static MqttPublish<Object> from(String topicName) {
+    return new MqttPublish<Object>(0, topicName, 0, MqttEntity.empty());
   }
 
   @Override
@@ -182,27 +205,4 @@ public final class MqttPublish<T> extends MqttPacket<T> implements Debug {
     return Format.debug(this);
   }
 
-  static final int RETAIN_FLAG = 0x01;
-  static final int QOS_MASK = 0x06;
-  static final int QOS_SHIFT = 1;
-  static final int DUP_FLAG = 0x08;
-
-  private static int hashSeed;
-
-  public static <T> MqttPublish<T> from(int packetFlags, String topicName,
-                                        int packetId, MqttEntity<T> payload) {
-    return new MqttPublish<T>(packetFlags, topicName, packetId, payload);
-  }
-
-  public static <T> MqttPublish<T> from(String topicName, int packetId, MqttEntity<T> payload) {
-    return new MqttPublish<T>(0, topicName, packetId, payload);
-  }
-
-  public static <T> MqttPublish<T> from(String topicName, MqttEntity<T> payload) {
-    return new MqttPublish<T>(0, topicName, 0, payload);
-  }
-
-  public static MqttPublish<Object> from(String topicName) {
-    return new MqttPublish<Object>(0, topicName, 0, MqttEntity.empty());
-  }
 }

@@ -21,6 +21,9 @@ import swim.structure.Operator;
 import swim.util.Murmur3;
 
 public final class BitwiseOrOperator extends BinaryOperator {
+
+  private static int hashSeed;
+
   public BitwiseOrOperator(Item operand1, Item operand2) {
     super(operand1, operand2);
   }
@@ -98,5 +101,4 @@ public final class BitwiseOrOperator extends BinaryOperator {
     output.debug(this.operand1).write('.').write("bitwiseOr").write('(').debug(this.operand2).write(')');
   }
 
-  private static int hashSeed;
 }

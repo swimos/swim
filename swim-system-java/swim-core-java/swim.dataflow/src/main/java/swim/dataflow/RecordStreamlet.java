@@ -22,6 +22,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public abstract class RecordStreamlet<I extends Value, O extends Value> extends Record implements Streamlet<I, O> {
+
   @Override
   public boolean isConstant() {
     return false;
@@ -42,4 +43,5 @@ public abstract class RecordStreamlet<I extends Value, O extends Value> extends 
       }
     }
   }
+
 }

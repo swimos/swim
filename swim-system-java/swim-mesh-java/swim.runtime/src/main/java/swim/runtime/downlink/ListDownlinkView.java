@@ -62,6 +62,8 @@ import swim.structure.collections.ValueListIterator;
 import swim.uri.Uri;
 
 public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlink<V> {
+
+  protected static final int STATEFUL = 1 << 2;
   protected final Form<V> valueForm;
   protected ListDownlinkModel model;
 
@@ -69,7 +71,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
                           Uri hostUri, Uri nodeUri, Uri laneUri, float prio, float rate, Value body,
                           int flags, Form<V> valueForm, Object observers) {
     super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-          body, flags, observers);
+        body, flags, observers);
     this.valueForm = valueForm;
   }
 
@@ -88,9 +90,9 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public ListDownlinkView<V> hostUri(Uri hostUri) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                   hostUri, this.nodeUri, this.laneUri, this.prio,
-                                   this.rate, this.body, this.flags, this.valueForm,
-                                   this.observers);
+        hostUri, this.nodeUri, this.laneUri, this.prio,
+        this.rate, this.body, this.flags, this.valueForm,
+        this.observers);
   }
 
   @Override
@@ -101,9 +103,9 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public ListDownlinkView<V> nodeUri(Uri nodeUri) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                   this.hostUri, nodeUri, this.laneUri, this.prio,
-                                   this.rate, this.body, this.flags, this.valueForm,
-                                   this.observers);
+        this.hostUri, nodeUri, this.laneUri, this.prio,
+        this.rate, this.body, this.flags, this.valueForm,
+        this.observers);
   }
 
   @Override
@@ -114,9 +116,9 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public ListDownlinkView<V> laneUri(Uri laneUri) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                   this.hostUri, this.nodeUri, laneUri, this.prio,
-                                   this.rate, this.body, this.flags, this.valueForm,
-                                   this.observers);
+        this.hostUri, this.nodeUri, laneUri, this.prio,
+        this.rate, this.body, this.flags, this.valueForm,
+        this.observers);
   }
 
   @Override
@@ -127,25 +129,25 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public ListDownlinkView<V> prio(float prio) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                   this.hostUri, this.nodeUri, this.laneUri, prio,
-                                   this.rate, this.body, this.flags, this.valueForm,
-                                   this.observers);
+        this.hostUri, this.nodeUri, this.laneUri, prio,
+        this.rate, this.body, this.flags, this.valueForm,
+        this.observers);
   }
 
   @Override
   public ListDownlinkView<V> rate(float rate) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                   this.hostUri, this.nodeUri, this.laneUri, this.prio,
-                                   rate, this.body, this.flags, this.valueForm,
-                                   this.observers);
+        this.hostUri, this.nodeUri, this.laneUri, this.prio,
+        rate, this.body, this.flags, this.valueForm,
+        this.observers);
   }
 
   @Override
   public ListDownlinkView<V> body(Value body) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                   this.hostUri, this.nodeUri, this.laneUri, this.prio,
-                                   this.rate, body, this.flags, this.valueForm,
-                                   this.observers);
+        this.hostUri, this.nodeUri, this.laneUri, this.prio,
+        this.rate, body, this.flags, this.valueForm,
+        this.observers);
   }
 
   @Override
@@ -203,9 +205,9 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public <V2> ListDownlinkView<V2> valueForm(Form<V2> valueForm) {
     return new ListDownlinkView<V2>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, this.nodeUri, this.laneUri, this.prio,
-                                    this.rate, this.body, this.flags, valueForm,
-                                    typesafeObservers(this.observers));
+        this.hostUri, this.nodeUri, this.laneUri, this.prio,
+        this.rate, this.body, this.flags, valueForm,
+        typesafeObservers(this.observers));
   }
 
   @Override
@@ -975,7 +977,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public ListDownlinkModel createDownlinkModel() {
     return new ListDownlinkModel(this.meshUri, this.hostUri, this.nodeUri,
-                                 this.laneUri, this.prio, this.rate, this.body);
+        this.laneUri, this.prio, this.rate, this.body);
   }
 
   @Override
@@ -1116,7 +1118,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
 
   @Override
   public boolean containsAll(Collection<?> elements) {
-    for (Object element: elements) {
+    for (Object element : elements) {
       if (!contains(element)) {
         return false;
       }
@@ -1127,7 +1129,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public boolean addAll(Collection<? extends V> elements) {
     boolean added = false;
-    for (V element: elements) {
+    for (V element : elements) {
       added = added || add(element);
     }
     return added;
@@ -1135,7 +1137,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
 
   @Override
   public boolean addAll(int index, Collection<? extends V> elements) {
-    for (V element: elements) {
+    for (V element : elements) {
       add(index, element);
     }
     return elements.isEmpty();
@@ -1144,7 +1146,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public boolean removeAll(Collection<?> elements) {
     boolean removed = false;
-    for (Object element: elements) {
+    for (Object element : elements) {
       removed = removed || remove(element);
     }
     return removed;
@@ -1153,7 +1155,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public boolean retainAll(Collection<?> elements) {
     boolean modified = false;
-    for (Object element: elements) {
+    for (Object element : elements) {
       if (!elements.contains(element)) {
         modified = modified || remove(element);
       }
@@ -1232,10 +1234,10 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
     return new ListDownlinkViewEntryIterator<V>(this.model.entryIterator(), this.valueForm);
   }
 
-  protected static final int STATEFUL = 1 << 2;
 }
 
 final class ListDownlinkViewEntry<V> implements Map.Entry<Object, V> {
+
   final Map.Entry<Object, Value> entry;
   final Form<V> valueForm;
 
@@ -1283,16 +1285,18 @@ final class ListDownlinkViewEntry<V> implements Map.Entry<Object, V> {
     final Object key = getKey();
     final V value = getValue();
     return (key == null ? 0 : key.hashCode())
-         ^ (value == null ? 0 : value.hashCode());
+        ^ (value == null ? 0 : value.hashCode());
   }
 
   @Override
   public String toString() {
     return new StringBuilder().append(getKey()).append('=').append(getValue()).toString();
   }
+
 }
 
 final class ListDownlinkViewEntryIterator<V> implements ListIterator<Map.Entry<Object, V>> {
+
   private final ListIterator<Map.Entry<Object, Value>> iterator;
   private final Form<V> valueForm;
 
@@ -1345,4 +1349,5 @@ final class ListDownlinkViewEntryIterator<V> implements ListIterator<Map.Entry<O
   public void add(Map.Entry<Object, V> entry) {
     throw new UnsupportedOperationException();
   }
+
 }

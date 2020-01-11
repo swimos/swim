@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class InvokeOperatorWriter<I, V> extends Writer<Object, Object> {
+
   final ReconWriter<I, V> recon;
   final V func;
   final V args;
@@ -31,11 +32,6 @@ final class InvokeOperatorWriter<I, V> extends Writer<Object, Object> {
     this.args = args;
     this.part = part;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.func, this.args, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V func, V args) {
@@ -95,4 +91,10 @@ final class InvokeOperatorWriter<I, V> extends Writer<Object, Object> {
                                              V func, V args) {
     return write(output, recon, func, args, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.recon, this.func, this.args, this.part, this.step);
+  }
+
 }

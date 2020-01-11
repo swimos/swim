@@ -20,6 +20,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class ProductWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final String name;
   final String version;
@@ -39,12 +40,6 @@ final class ProductWriter extends Writer<Object, Object> {
 
   ProductWriter(HttpWriter http, String name, String version, Iterator<String> comments) {
     this(http, name, version, comments, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.name, this.version, this.comments,
-                 this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name,
@@ -114,4 +109,11 @@ final class ProductWriter extends Writer<Object, Object> {
                                       String version, Iterator<String> comments) {
     return write(output, http, name, version, comments, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.name, this.version, this.comments,
+        this.part, this.step);
+  }
+
 }

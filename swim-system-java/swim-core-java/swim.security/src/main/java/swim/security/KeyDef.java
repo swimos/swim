@@ -23,9 +23,6 @@ import swim.structure.Kind;
 import swim.structure.Value;
 
 public abstract class KeyDef {
-  public abstract Key key();
-
-  public abstract Value toValue();
 
   private static Form<KeyDef> keyForm;
 
@@ -45,9 +42,15 @@ public abstract class KeyDef {
     }
     return keyForm;
   }
+
+  public abstract Key key();
+
+  public abstract Value toValue();
+
 }
 
 final class KeyForm extends Form<KeyDef> {
+
   @Override
   public Class<?> type() {
     return KeyDef.class;
@@ -70,4 +73,5 @@ final class KeyForm extends Form<KeyDef> {
     }
     return null;
   }
+
 }

@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface DidTake extends Preemptive {
+
   void didTake(int upper);
+
 }

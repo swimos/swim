@@ -24,6 +24,7 @@ import swim.uri.Uri;
 import swim.util.Log;
 
 public interface Link extends Observable<Object>, Log {
+
   Uri hostUri();
 
   Uri nodeUri();
@@ -63,4 +64,5 @@ public interface Link extends Observable<Object>, Log {
 
   @Override
   Link unobserve(Object observer);
+
 }

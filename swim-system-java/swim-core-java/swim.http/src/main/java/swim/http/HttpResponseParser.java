@@ -21,6 +21,7 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Builder;
 
 final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
+
   final HttpParser http;
   final Parser<HttpVersion> version;
   final Parser<HttpStatus> status;
@@ -41,11 +42,6 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
 
   HttpResponseParser(HttpParser http) {
     this(http, null, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<HttpResponse<T>> feed(Input input) {
-    return parse(input, this.http, this.version, this.status, this.header, this.headers, this.step);
   }
 
   static <T> Parser<HttpResponse<T>> parse(Input input, HttpParser http, Parser<HttpVersion> version,
@@ -181,4 +177,10 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
   static <T> Parser<HttpResponse<T>> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, null, null, 1);
   }
+
+  @Override
+  public Parser<HttpResponse<T>> feed(Input input) {
+    return parse(input, this.http, this.version, this.status, this.header, this.headers, this.step);
+  }
+
 }

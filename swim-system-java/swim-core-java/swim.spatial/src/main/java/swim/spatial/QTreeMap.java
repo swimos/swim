@@ -24,6 +24,11 @@ import swim.util.Cursor;
 import swim.util.Murmur3;
 
 public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<K, S, V>, Comparator<QTreeEntry<K, S, V>>, Cloneable, Debug {
+
+  @SuppressWarnings("rawtypes")
+  static final AtomicReferenceFieldUpdater<QTreeMap, QTreePage> ROOT =
+      AtomicReferenceFieldUpdater.newUpdater(QTreeMap.class, QTreePage.class, "root");
+  private static int hashSeed;
   final Z2Form<S> shapeForm;
   volatile QTreePage<K, S, V> root;
 
@@ -34,6 +39,11 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
 
   public QTreeMap(Z2Form<S> shapeForm) {
     this(shapeForm, QTreePage.<K, S, V>empty());
+  }
+
+  @SuppressWarnings("rawtypes")
+  public static <K, S, V> QTreeMap<K, S, V> empty(Z2Form<S> shapeForm) {
+    return new QTreeMap<K, S, V>(shapeForm);
   }
 
   public Z2Form<S> shapeForm() {
@@ -294,14 +304,4 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  @SuppressWarnings("rawtypes")
-  public static <K, S, V> QTreeMap<K, S, V> empty(Z2Form<S> shapeForm) {
-    return new QTreeMap<K, S, V>(shapeForm);
-  }
-
-  @SuppressWarnings("rawtypes")
-  static final AtomicReferenceFieldUpdater<QTreeMap, QTreePage> ROOT =
-      AtomicReferenceFieldUpdater.newUpdater(QTreeMap.class, QTreePage.class, "root");
 }

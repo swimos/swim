@@ -37,10 +37,17 @@ import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
 public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkContext> extends AbstractTierBinding implements LaneBinding {
+
+  @SuppressWarnings("unchecked")
+  protected static final AtomicReferenceFieldUpdater<LaneModel<?, ?>, Object> VIEWS =
+      AtomicReferenceFieldUpdater.newUpdater((Class<LaneModel<?, ?>>) (Class<?>) LaneModel.class, Object.class, "views");
+  @SuppressWarnings("unchecked")
+  protected static final AtomicReferenceFieldUpdater<LaneModel<?, ?>, FingerTrieSeq<? extends LinkContext>> UPLINKS =
+      AtomicReferenceFieldUpdater.newUpdater((Class<LaneModel<?, ?>>) (Class<?>) LaneModel.class, (Class<FingerTrieSeq<? extends LinkContext>>) (Class<?>) FingerTrieSeq.class, "uplinks");
+  static final Uri UPLINKS_URI = Uri.parse("uplinks");
   protected LaneContext laneContext;
   protected volatile Object views; // View | LaneView[]
   protected volatile FingerTrieSeq<U> uplinks;
-
   AgentNode metaNode;
   DemandMapLane<Value, UplinkInfo> metaUplinks;
 
@@ -173,7 +180,7 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
     do {
       oldLaneViews = this.views;
       if (oldLaneViews instanceof LaneView) {
-        newLaneViews = new LaneView[]{(LaneView) oldLaneViews, (LaneView) view};
+        newLaneViews = new LaneView[] {(LaneView) oldLaneViews, (LaneView) view};
       } else if (oldLaneViews instanceof LaneView[]) {
         final LaneView[] oldLaneViewArray = (LaneView[]) oldLaneViews;
         final int n = oldLaneViewArray.length;
@@ -539,18 +546,10 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
     // hook
   }
 
-  static final Uri UPLINKS_URI = Uri.parse("uplinks");
-
-  @SuppressWarnings("unchecked")
-  protected static final AtomicReferenceFieldUpdater<LaneModel<?, ?>, Object> VIEWS =
-      AtomicReferenceFieldUpdater.newUpdater((Class<LaneModel<?, ?>>) (Class<?>) LaneModel.class, Object.class, "views");
-
-  @SuppressWarnings("unchecked")
-  protected static final AtomicReferenceFieldUpdater<LaneModel<?, ?>, FingerTrieSeq<? extends LinkContext>> UPLINKS =
-      AtomicReferenceFieldUpdater.newUpdater((Class<LaneModel<?, ?>>) (Class<?>) LaneModel.class, (Class<FingerTrieSeq<? extends LinkContext>>) (Class<?>) FingerTrieSeq.class, "uplinks");
 }
 
 final class LaneModelUplinksController implements OnCueKey<Value, UplinkInfo>, OnSyncKeys<Value> {
+
   final LaneBinding lane;
 
   LaneModelUplinksController(LaneBinding lane) {
@@ -570,9 +569,11 @@ final class LaneModelUplinksController implements OnCueKey<Value, UplinkInfo>, O
   public Iterator<Value> onSync(WarpUplink uplink) {
     return new LaneModelUplinksKeyIterator(this.lane.uplinks().iterator());
   }
+
 }
 
 final class LaneModelUplinksKeyIterator implements Iterator<Value> {
+
   final Iterator<LinkContext> uplinks;
 
   LaneModelUplinksKeyIterator(Iterator<LinkContext> uplinks) {
@@ -593,4 +594,5 @@ final class LaneModelUplinksKeyIterator implements Iterator<Value> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

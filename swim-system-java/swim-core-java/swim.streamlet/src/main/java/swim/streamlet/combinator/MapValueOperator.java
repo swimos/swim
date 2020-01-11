@@ -17,6 +17,7 @@ package swim.streamlet.combinator;
 import swim.streamlet.AbstractInoutlet;
 
 public abstract class MapValueOperator<I, O> extends AbstractInoutlet<I, O> {
+
   @Override
   public O get() {
     if (this.input != null) {
@@ -27,4 +28,5 @@ public abstract class MapValueOperator<I, O> extends AbstractInoutlet<I, O> {
   }
 
   public abstract O evaluate(I value);
+
 }

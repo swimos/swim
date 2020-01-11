@@ -21,6 +21,7 @@ import swim.collections.FingerTrieSeq;
 import swim.http.HttpParser;
 
 final class SecWebSocketProtocolParser extends Parser<SecWebSocketProtocol> {
+
   final HttpParser http;
   final Parser<FingerTrieSeq<String>> protocols;
 
@@ -31,11 +32,6 @@ final class SecWebSocketProtocolParser extends Parser<SecWebSocketProtocol> {
 
   SecWebSocketProtocolParser(HttpParser http) {
     this(http, null);
-  }
-
-  @Override
-  public Parser<SecWebSocketProtocol> feed(Input input) {
-    return parse(input, this.http, this.protocols);
   }
 
   static Parser<SecWebSocketProtocol> parse(Input input, HttpParser http,
@@ -63,4 +59,10 @@ final class SecWebSocketProtocolParser extends Parser<SecWebSocketProtocol> {
   static Parser<SecWebSocketProtocol> parse(Input input, HttpParser http) {
     return parse(input, http, null);
   }
+
+  @Override
+  public Parser<SecWebSocketProtocol> feed(Input input) {
+    return parse(input, this.http, this.protocols);
+  }
+
 }

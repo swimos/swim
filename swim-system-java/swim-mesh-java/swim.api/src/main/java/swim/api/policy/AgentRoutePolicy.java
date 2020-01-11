@@ -18,7 +18,9 @@ import swim.api.Downlink;
 import swim.api.agent.Agent;
 
 public interface AgentRoutePolicy extends Policy {
+
   AgentPolicy agentPolicy(Agent agent);
 
   DownlinkPolicy downlinkPolicy(Downlink downlink);
+
 }

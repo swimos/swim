@@ -25,6 +25,12 @@ import swim.structure.Value;
 import swim.util.Builder;
 
 public class XmlStructureParser extends XmlParser<Item, Value> {
+
+  static final Text XML_TAG = Text.from("xml");
+  static final Text XML_DOCTYPE_TAG = Text.from("xml:doctype");
+  static final Text XML_COMMENT_TAG = Text.from("xml:comment");
+  static final Text XML_PI_TAG = Text.from("xml:pi");
+
   @Override
   public Item item(Value value) {
     return value;
@@ -58,16 +64,16 @@ public class XmlStructureParser extends XmlParser<Item, Value> {
   @Override
   public Item doctype(String name, String systemId) {
     return Attr.of(XML_DOCTYPE_TAG,
-                   Record.of(Slot.of("name", name),
-                             Slot.of("system", systemId)));
+        Record.of(Slot.of("name", name),
+            Slot.of("system", systemId)));
   }
 
   @Override
   public Item doctype(String name, String publicId, String systemId) {
     return Attr.of(XML_DOCTYPE_TAG,
-                    Record.of(Slot.of("name", name),
-                              Slot.of("public", publicId),
-                              Slot.of("system", systemId)));
+        Record.of(Slot.of("name", name),
+            Slot.of("public", publicId),
+            Slot.of("system", systemId)));
   }
 
   @Override
@@ -135,8 +141,4 @@ public class XmlStructureParser extends XmlParser<Item, Value> {
     return (Builder<Item, Value>) (Builder<?, ?>) Record.create();
   }
 
-  static final Text XML_TAG = Text.from("xml");
-  static final Text XML_DOCTYPE_TAG = Text.from("xml:doctype");
-  static final Text XML_COMMENT_TAG = Text.from("xml:comment");
-  static final Text XML_PI_TAG = Text.from("xml:pi");
 }

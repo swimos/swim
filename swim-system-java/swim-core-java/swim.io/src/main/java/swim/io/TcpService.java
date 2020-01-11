@@ -22,6 +22,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 class TcpService implements Transport, IpServiceContext {
+
   final Station station;
   final InetSocketAddress localAddress;
   final ServerSocketChannel serverChannel;
@@ -168,4 +169,5 @@ class TcpService implements Transport, IpServiceContext {
   public void didFail(Throwable error) {
     this.service.didFail(error);
   }
+
 }

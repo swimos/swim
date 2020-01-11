@@ -18,6 +18,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class MetaLeaf {
+
   final Value name;
   final TreeType type;
   final Value key;
@@ -56,4 +57,5 @@ public class MetaLeaf {
     record.slot("value", this.value);
     return record;
   }
+
 }

@@ -19,6 +19,7 @@ import swim.structure.Value;
 import swim.util.OrderedMap;
 
 public interface MapData<K, V> extends OrderedMap<K, V> {
+
   Value name();
 
   Form<K> keyForm();
@@ -48,4 +49,5 @@ public interface MapData<K, V> extends OrderedMap<K, V> {
   OrderedMap<K, V> snapshot();
 
   void close();
+
 }

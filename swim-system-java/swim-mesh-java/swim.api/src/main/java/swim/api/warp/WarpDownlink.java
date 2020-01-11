@@ -34,6 +34,7 @@ import swim.uri.Uri;
 import swim.warp.CommandMessage;
 
 public interface WarpDownlink extends Downlink, WarpLink {
+
   WarpDownlink hostUri(Uri hostUri);
 
   WarpDownlink hostUri(String hostUri);
@@ -112,4 +113,5 @@ public interface WarpDownlink extends Downlink, WarpLink {
   void command(float prio, Value body);
 
   void command(Value body);
+
 }

@@ -18,15 +18,19 @@ import swim.util.Murmur3;
 
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class Person {
+
   public String first;
   public String last;
+
   public Person(String first, String last) {
     this.first = first;
     this.last = last;
   }
+
   private Person() {
     // Form.cast constructor
   }
+
   @Override
   public boolean equals(Object other) {
     if (other instanceof Person) {
@@ -35,12 +39,15 @@ public class Person {
     }
     return false;
   }
+
   @Override
   public int hashCode() {
     return Murmur3.mash(Murmur3.mix(this.first.hashCode(), this.last.hashCode()));
   }
+
   @Override
   public String toString() {
     return "Person(" + this.first + ", " + this.last + ")";
   }
+
 }

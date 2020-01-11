@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpChunkHeaderSpec {
+
   public void assertParses(String string, HttpChunkHeader chunkHeader) {
     HttpAssertions.assertParses(Http.standardParser().chunkHeaderParser(), string, chunkHeader);
   }
@@ -76,4 +77,5 @@ public class HttpChunkHeaderSpec {
     assertWrites(HttpChunkHeader.from(0xaL, ChunkExtension.from("foo"), ChunkExtension.from("bar")), "A;foo;bar\r\n");
     assertWrites(HttpChunkHeader.from(0xbL, ChunkExtension.from("p", "q=r"), ChunkExtension.from("s"), ChunkExtension.from("t", "u"), ChunkExtension.from("v")), "B;p=\"q=r\";s;t=u;v\r\n");
   }
+
 }

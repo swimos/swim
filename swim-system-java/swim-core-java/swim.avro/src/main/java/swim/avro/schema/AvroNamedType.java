@@ -18,6 +18,7 @@ import swim.avro.AvroName;
 import swim.avro.AvroNamespace;
 
 public abstract class AvroNamedType<T> extends AvroComplexType<T> {
+
   public AvroNamespace namespace() {
     return fullName().namespace();
   }
@@ -33,4 +34,5 @@ public abstract class AvroNamedType<T> extends AvroComplexType<T> {
   public abstract AvroName getAlias(int index);
 
   public abstract AvroNamedType<T> alias(AvroName alias);
+
 }

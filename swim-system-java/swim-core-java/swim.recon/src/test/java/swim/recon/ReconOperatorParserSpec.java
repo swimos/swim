@@ -23,6 +23,7 @@ import swim.structure.Value;
 import static swim.recon.ReconParserSpec.assertParses;
 
 public class ReconOperatorParserSpec {
+
   @Test
   public void parseConditionalOperator() {
     assertParses("$a ? $b : $c", Selector.identity().get("a").conditional(Selector.identity().get("b"), Selector.identity().get("c")));
@@ -245,4 +246,5 @@ public class ReconOperatorParserSpec {
   public void parseRecordsWithOperators() {
     assertParses("{a: $foo + 2, b: 2 + $bar}", Record.of(Slot.of("a", Selector.identity().get("foo").plus(Num.from(2))), Slot.of("b", Num.from(2).plus(Selector.identity().get("bar")))));
   }
+
 }

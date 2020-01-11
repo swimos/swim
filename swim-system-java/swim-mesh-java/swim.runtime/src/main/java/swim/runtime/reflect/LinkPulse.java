@@ -15,5 +15,7 @@
 package swim.runtime.reflect;
 
 public abstract class LinkPulse extends Pulse {
+
   public abstract long linkCount();
+
 }

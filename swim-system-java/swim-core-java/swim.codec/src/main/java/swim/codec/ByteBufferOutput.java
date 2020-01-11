@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
 final class ByteBufferOutput extends OutputBuffer<ByteBuffer> {
+
   ByteBuffer buffer;
   OutputSettings settings;
   boolean isPart;
@@ -216,4 +217,5 @@ final class ByteBufferOutput extends OutputBuffer<ByteBuffer> {
   public OutputBuffer<ByteBuffer> clone() {
     return new ByteBufferOutput(this.buffer, this.settings, this.isPart);
   }
+
 }

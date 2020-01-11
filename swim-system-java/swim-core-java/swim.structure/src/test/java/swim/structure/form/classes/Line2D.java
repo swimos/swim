@@ -18,15 +18,19 @@ import swim.util.Murmur3;
 
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class Line2D {
+
   public Point2D p0;
   public Point2D p1;
+
   public Line2D(Point2D p0, Point2D p1) {
     this.p0 = p0;
     this.p1 = p1;
   }
+
   public Line2D() {
     // Form.cast constructor
   }
+
   @Override
   public boolean equals(Object other) {
     if (other instanceof Line2D) {
@@ -35,12 +39,15 @@ public class Line2D {
     }
     return false;
   }
+
   @Override
   public int hashCode() {
     return Murmur3.mash(Murmur3.mix(this.p0.hashCode(), this.p1.hashCode()));
   }
+
   @Override
   public String toString() {
     return "Line2D(" + this.p0 + ", " + this.p1 + ")";
   }
+
 }

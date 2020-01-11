@@ -26,8 +26,32 @@ import swim.codec.Format;
 import swim.codec.Output;
 
 public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<Uri, T>, Debug {
+
+  private static UriMapper<Object> empty;
+
   UriMapper() {
     // sealed
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> UriMapper<T> empty() {
+    if (empty == null) {
+      empty = new UriEmptyMapping<Object>();
+    }
+    return (UriMapper<T>) empty;
+  }
+
+  public static <T> UriMapper<T> from(Uri pattern, T value) {
+    return UriSchemeMapper.compile(pattern, pattern.scheme(), pattern.authority(),
+        pattern.path(), pattern.query(), pattern.fragment(), value);
+  }
+
+  public static <T> UriMapper<T> from(UriPattern pattern, T value) {
+    return from(pattern.toUri(), value);
+  }
+
+  public static <T> UriMapper<T> from(String uriString, T value) {
+    return from(Uri.parse(uriString), value);
   }
 
   @Override
@@ -158,31 +182,10 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
     return Format.debug(this);
   }
 
-  private static UriMapper<Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <T> UriMapper<T> empty() {
-    if (empty == null) {
-      empty = new UriEmptyMapping<Object>();
-    }
-    return (UriMapper<T>) empty;
-  }
-
-  public static <T> UriMapper<T> from(Uri pattern, T value) {
-    return UriSchemeMapper.compile(pattern, pattern.scheme(), pattern.authority(),
-                                   pattern.path(), pattern.query(), pattern.fragment(), value);
-  }
-
-  public static <T> UriMapper<T> from(UriPattern pattern, T value) {
-    return from(pattern.toUri(), value);
-  }
-
-  public static <T> UriMapper<T> from(String uriString, T value) {
-    return from(Uri.parse(uriString), value);
-  }
 }
 
 final class UriMapperEntrySet<T> extends AbstractSet<Map.Entry<Uri, T>> {
+
   final UriMapper<T> mapper;
 
   UriMapperEntrySet(UriMapper<T> mapper) {
@@ -203,9 +206,11 @@ final class UriMapperEntrySet<T> extends AbstractSet<Map.Entry<Uri, T>> {
   public Iterator<Map.Entry<Uri, T>> iterator() {
     return this.mapper.iterator();
   }
+
 }
 
 final class UriMapperKeySet<T> extends AbstractSet<Uri> {
+
   final UriMapper<T> mapper;
 
   UriMapperKeySet(UriMapper<T> mapper) {
@@ -226,9 +231,11 @@ final class UriMapperKeySet<T> extends AbstractSet<Uri> {
   public Iterator<Uri> iterator() {
     return this.mapper.keyIterator();
   }
+
 }
 
 final class UriMapperValues<T> extends AbstractCollection<T> {
+
   final UriMapper<T> mapper;
 
   UriMapperValues(UriMapper<T> mapper) {
@@ -249,4 +256,5 @@ final class UriMapperValues<T> extends AbstractCollection<T> {
   public Iterator<T> iterator() {
     return this.mapper.valueIterator();
   }
+
 }

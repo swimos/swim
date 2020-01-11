@@ -19,6 +19,7 @@ import swim.runtime.NodeContext;
 import swim.runtime.agent.AgentNode;
 
 public final class MetaHostAgent extends AgentNode {
+
   protected final HostBinding host;
 
   public MetaHostAgent(HostBinding host) {
@@ -30,4 +31,5 @@ public final class MetaHostAgent extends AgentNode {
     super.setNodeContext(nodeContext);
     this.host.openMetaHost(this.host, this);
   }
+
 }

@@ -18,5 +18,7 @@ package swim.dynamic;
  * A dynamically typed constructor descriptor for a host type.
  */
 public interface HostConstructor {
+
   Object newInstance(Bridge bridge, Object... arguments);
+
 }

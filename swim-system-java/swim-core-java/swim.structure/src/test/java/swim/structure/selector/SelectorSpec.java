@@ -26,6 +26,7 @@ import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 
 public class SelectorSpec {
+
   @Test
   public void selectIdentity() {
     Assert.assertEquals(Selector.identity().evaluate(Value.absent()), Value.absent());
@@ -98,7 +99,7 @@ public class SelectorSpec {
   @Test
   public void selectDescendants() {
     assertEquals(Selector.identity().descendants().evaluate(Record.of(Slot.of("a", Record.of(Slot.of("b", 2), Slot.of("c", 3), Slot.of("d", Record.of(4, 5)), Slot.of("e", 6))))),
-                 Record.of(Slot.of("a", Record.of(Slot.of("b", 2), Slot.of("c", 3), Slot.of("d", Record.of(4, 5)), Slot.of("e", 6))), Slot.of("b", 2), Slot.of("c", 3), Slot.of("d", Record.of(4, 5)), 4, 5, Slot.of("e", 6)));
+        Record.of(Slot.of("a", Record.of(Slot.of("b", 2), Slot.of("c", 3), Slot.of("d", Record.of(4, 5)), Slot.of("e", 6))), Slot.of("b", 2), Slot.of("c", 3), Slot.of("d", Record.of(4, 5)), 4, 5, Slot.of("e", 6)));
     assertEquals(Selector.identity().descendants().evaluate(Record.of(Slot.of("a", 1), Slot.of("b", 2))), Record.of(Slot.of("a", 1), Slot.of("b", 2)));
     assertEquals(Selector.identity().descendants().evaluate(Record.of(1, 2, 3)), Record.of(1, 2, 3));
     assertEquals(Selector.identity().descendants().evaluate(Value.absent()), Value.absent());
@@ -133,7 +134,7 @@ public class SelectorSpec {
   @Test
   public void selectDescendantsKeys() {
     assertEquals(Selector.identity().descendants().keys().evaluate(Record.of(Slot.of("a", Record.of(Slot.of("b", 2), Slot.of("c", 3))), Slot.of("d", Record.of(4, 5)), Slot.of("e", 6))),
-                 Record.of("a", "b", "c", "d", "e"));
+        Record.of("a", "b", "c", "d", "e"));
     assertEquals(Selector.identity().descendants().keys().evaluate(Record.of(Slot.of("a", 1), Slot.of("b", 2))), Record.of("a", "b"));
     assertEquals(Selector.identity().descendants().keys().evaluate(Record.of(1, 2, 3)), Value.absent());
   }
@@ -141,7 +142,7 @@ public class SelectorSpec {
   @Test
   public void selectDescendantsValues() {
     assertEquals(Selector.identity().descendants().values().evaluate(Record.of(Slot.of("a", Record.of(Slot.of("b", 2), Slot.of("c", 3))), Slot.of("d", Record.of(4, 5)), Slot.of("e", 6))),
-                 Record.of(Record.of(Slot.of("b", 2), Slot.of("c", 3)), 2, 3, Record.of(4, 5), 4, 5, 6));
+        Record.of(Record.of(Slot.of("b", 2), Slot.of("c", 3)), 2, 3, Record.of(4, 5), 4, 5, 6));
     assertEquals(Selector.identity().descendants().values().evaluate(Record.of(Slot.of("a", 1), Slot.of("b", 2))), Record.of(1, 2));
     assertEquals(Selector.identity().descendants().values().evaluate(Record.of(1, 2, 3)), Record.of(1, 2, 3));
   }
@@ -220,4 +221,5 @@ public class SelectorSpec {
     assertEquals(Selector.identity().get("b").not().filter().evaluate(Record.of(Attr.of("a", 1), Slot.of("b", 2))), Value.absent());
     assertEquals(Selector.identity().get("c").not().filter().evaluate(Record.of(Attr.of("a", 1), Slot.of("b", 2))), Record.of(Attr.of("a", 1), Slot.of("b", 2)));
   }
+
 }

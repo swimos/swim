@@ -41,6 +41,7 @@ import swim.structure.Form;
 import swim.util.KeyedList;
 
 public interface ListLane<V> extends WarpLane, KeyedList<V>, ObservableList<V> {
+
   Form<V> valueForm();
 
   <V2> ListLane<V2> valueForm(Form<V2> valueForm);
@@ -128,4 +129,5 @@ public interface ListLane<V> extends WarpLane, KeyedList<V>, ObservableList<V> {
   void take(int keep);
 
   List<V> snapshot();
+
 }

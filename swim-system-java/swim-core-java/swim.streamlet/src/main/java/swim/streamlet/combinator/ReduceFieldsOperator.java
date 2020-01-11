@@ -19,6 +19,7 @@ import swim.streamlet.AbstractMapInletOutlet;
 import swim.streamlet.KeyEffect;
 
 public abstract class ReduceFieldsOperator<K, V, I, O> extends AbstractMapInletOutlet<K, V, I, O> {
+
   protected BTreeMap<K, V, O> state;
 
   public ReduceFieldsOperator() {
@@ -51,4 +52,5 @@ public abstract class ReduceFieldsOperator<K, V, I, O> extends AbstractMapInletO
   public abstract O accumulate(O result, V value);
 
   public abstract O combine(O result, O value);
+
 }

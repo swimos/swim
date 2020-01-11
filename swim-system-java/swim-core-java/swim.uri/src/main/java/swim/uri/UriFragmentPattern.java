@@ -17,6 +17,15 @@ package swim.uri;
 import swim.collections.HashTrieMap;
 
 abstract class UriFragmentPattern extends UriQueryPattern {
+
+  static UriFragmentPattern compile(Uri pattern, UriFragment fragment) {
+    if (fragment.isDefined()) {
+      return new UriFragmentLiteral(fragment, UriTerminalPattern.compile(pattern));
+    } else {
+      return UriTerminalPattern.compile(pattern);
+    }
+  }
+
   abstract HashTrieMap<String, String> unapply(UriFragment fragment, HashTrieMap<String, String> args);
 
   @Override
@@ -35,11 +44,4 @@ abstract class UriFragmentPattern extends UriQueryPattern {
     }
   }
 
-  static UriFragmentPattern compile(Uri pattern, UriFragment fragment) {
-    if (fragment.isDefined()) {
-      return new UriFragmentLiteral(fragment, UriTerminalPattern.compile(pattern));
-    } else {
-      return UriTerminalPattern.compile(pattern);
-    }
-  }
 }

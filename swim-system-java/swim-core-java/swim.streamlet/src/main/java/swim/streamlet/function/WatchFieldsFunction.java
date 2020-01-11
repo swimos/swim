@@ -16,5 +16,7 @@ package swim.streamlet.function;
 
 @FunctionalInterface
 public interface WatchFieldsFunction<K, V> {
+
   void apply(K key, V value);
+
 }

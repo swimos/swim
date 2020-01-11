@@ -16,6 +16,7 @@ package swim.deflate;
 
 @SuppressWarnings("checkstyle:all")
 final class GzHeader implements Cloneable {
+
   // true if compressed data believed to be text
   boolean text;
 
@@ -67,4 +68,5 @@ final class GzHeader implements Cloneable {
   public GzHeader clone() {
     return new GzHeader(this);
   }
+
 }

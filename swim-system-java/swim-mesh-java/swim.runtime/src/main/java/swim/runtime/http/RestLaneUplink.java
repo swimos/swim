@@ -21,6 +21,7 @@ import swim.http.HttpResponse;
 import swim.runtime.HttpBinding;
 
 public class RestLaneUplink extends HttpUplinkModem {
+
   protected final RestLaneModel laneBinding;
 
   public RestLaneUplink(RestLaneModel laneBinding, HttpBinding linkBinding) {
@@ -67,4 +68,5 @@ public class RestLaneUplink extends HttpUplinkModem {
   public void didRespond(HttpResponse<?> response) {
     this.laneBinding.didRespond(this, response);
   }
+
 }

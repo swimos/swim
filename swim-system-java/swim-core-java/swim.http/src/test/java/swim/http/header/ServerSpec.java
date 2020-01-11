@@ -22,6 +22,7 @@ import swim.http.Product;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class ServerSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -31,8 +32,8 @@ public class ServerSpec {
     assertParses("Server: swim", Server.from(Product.from("swim")));
     assertParses("Server: swim/1.0", Server.from(Product.from("swim", "1.0")));
     assertParses("Server: swim/1.0 (beta) (debug) recon (xml/json)",
-                 Server.from(Product.from("swim", "1.0").comment("beta").comment("debug"),
-                             Product.from("recon").comment("xml/json")));
+        Server.from(Product.from("swim", "1.0").comment("beta").comment("debug"),
+            Product.from("recon").comment("xml/json")));
   }
 
   @Test
@@ -40,7 +41,8 @@ public class ServerSpec {
     assertWrites(Server.from(Product.from("swim")), "Server: swim");
     assertWrites(Server.from(Product.from("swim", "1.0")), "Server: swim/1.0");
     assertWrites(Server.from(Product.from("swim", "1.0").comment("beta").comment("debug"),
-                             Product.from("recon").comment("xml/json")),
-                 "Server: swim/1.0 (beta) (debug) recon (xml/json)");
+        Product.from("recon").comment("xml/json")),
+        "Server: swim/1.0 (beta) (debug) recon (xml/json)");
   }
+
 }

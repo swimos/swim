@@ -38,6 +38,7 @@ import swim.util.Log;
 import swim.warp.CommandMessage;
 
 public class AbstractPlane implements Plane, SwimRef, Log {
+
   protected final PlaneContext context;
 
   public AbstractPlane(PlaneContext context) {
@@ -313,4 +314,5 @@ public class AbstractPlane implements Plane, SwimRef, Log {
   public void didFail(Throwable error) {
     // hook
   }
+
 }

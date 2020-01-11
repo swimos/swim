@@ -23,9 +23,6 @@ import swim.structure.Value;
 import swim.structure.operator.InvokeOperator;
 
 public final class MathModule {
-  private MathModule() {
-    // stub
-  }
 
   private static Func max;
   private static Func min;
@@ -37,8 +34,11 @@ public final class MathModule {
   private static Func pow;
   private static Func rate;
   private static Func random;
-
   private static Record scope;
+
+  private MathModule() {
+    // stub
+  }
 
   public static Func max() {
     if (max == null) {
@@ -127,9 +127,11 @@ public final class MathModule {
     }
     return scope;
   }
+
 }
 
 final class MaxFunc extends BridgeFunc {
+
   @Override
   public Item invoke(Value args, Interpreter interpreter, InvokeOperator operator) {
     final Item x;
@@ -160,9 +162,11 @@ final class MaxFunc extends BridgeFunc {
     }
     return null;
   }
+
 }
 
 final class MinFunc extends BridgeFunc {
+
   @Override
   public Item invoke(Value args, Interpreter interpreter, InvokeOperator operator) {
     final Item x;
@@ -193,9 +197,11 @@ final class MinFunc extends BridgeFunc {
     }
     return null;
   }
+
 }
 
 final class AbsFunc extends BridgeFunc {
+
   @Override
   public Item invoke(Value args, Interpreter interpreter, InvokeOperator operator) {
     args = args.evaluate(interpreter).toValue();
@@ -204,9 +210,11 @@ final class AbsFunc extends BridgeFunc {
     }
     return Item.absent();
   }
+
 }
 
 final class CeilFunc extends BridgeFunc {
+
   @Override
   public Item invoke(Value args, Interpreter interpreter, InvokeOperator operator) {
     args = args.evaluate(interpreter).toValue();
@@ -215,9 +223,11 @@ final class CeilFunc extends BridgeFunc {
     }
     return Item.absent();
   }
+
 }
 
 final class FloorFunc extends BridgeFunc {
+
   @Override
   public Item invoke(Value args, Interpreter interpreter, InvokeOperator operator) {
     args = args.evaluate(interpreter).toValue();
@@ -226,9 +236,11 @@ final class FloorFunc extends BridgeFunc {
     }
     return Item.absent();
   }
+
 }
 
 final class RoundFunc extends BridgeFunc {
+
   @Override
   public Item invoke(Value args, Interpreter interpreter, InvokeOperator operator) {
     args = args.evaluate(interpreter).toValue();
@@ -237,9 +249,11 @@ final class RoundFunc extends BridgeFunc {
     }
     return Item.absent();
   }
+
 }
 
 final class SqrtFunc extends BridgeFunc {
+
   @Override
   public Item invoke(Value args, Interpreter interpreter, InvokeOperator operator) {
     args = args.evaluate(interpreter).toValue();
@@ -248,9 +262,11 @@ final class SqrtFunc extends BridgeFunc {
     }
     return Item.absent();
   }
+
 }
 
 final class PowFunc extends BridgeFunc {
+
   @Override
   public Item invoke(Value args, Interpreter interpreter, InvokeOperator operator) {
     final Value x = args.getItem(0).evaluate(interpreter).toValue();
@@ -260,16 +276,20 @@ final class PowFunc extends BridgeFunc {
     }
     return Item.absent();
   }
+
 }
 
 final class RateFuncState {
+
   double v0;
   long t0;
   double dv;
   long dt;
+
 }
 
 final class RateFunc extends BridgeFunc {
+
   @Override
   public Item invoke(Value args, Interpreter interpreter, InvokeOperator operator) {
     final double value;
@@ -313,9 +333,11 @@ final class RateFunc extends BridgeFunc {
     args = args.evaluate(interpreter).toValue();
     return invoke(args, interpreter, operator);
   }
+
 }
 
 final class RandomFunc extends BridgeFunc {
+
   @Override
   public Item invoke(Value args, Interpreter interpreter, InvokeOperator operator) {
     args = args.evaluate(interpreter).toValue();
@@ -324,4 +346,5 @@ final class RandomFunc extends BridgeFunc {
     final double value = lower + Math.random() * (upper - lower);
     return Num.from(value);
   }
+
 }

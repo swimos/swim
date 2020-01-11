@@ -20,6 +20,8 @@ import swim.collections.HashTrieMap;
 import swim.util.Murmur3;
 
 final class UriPathMapping<T> extends UriPathMapper<T> {
+
+  private static int hashSeed;
   final HashTrieMap<String, UriPathMapper<T>> table;
   final UriPathMapper<T> wildcard;
   final UriQueryMapper<T> terminal;
@@ -249,10 +251,10 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
         this.table.hashCode()), this.wildcard.hashCode()), terminal.hashCode()));
   }
 
-  private static int hashSeed;
 }
 
 final class UriPathMappingIterator<T> implements Iterator<T> {
+
   final Iterator<T> tableIterator;
   final Iterator<T> wildcardIterator;
   final Iterator<T> terminalIterator;
@@ -283,9 +285,11 @@ final class UriPathMappingIterator<T> implements Iterator<T> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }
 
 final class UriPathMappingEntryIterator<T> extends FlatteningIterator<UriPathMapper<T>, Map.Entry<Uri, T>> {
+
   UriPathMappingEntryIterator(Iterator<UriPathMapper<T>> outer) {
     super(outer);
   }
@@ -294,9 +298,11 @@ final class UriPathMappingEntryIterator<T> extends FlatteningIterator<UriPathMap
   protected Iterator<Map.Entry<Uri, T>> childIterator(UriPathMapper<T> parent) {
     return parent.iterator();
   }
+
 }
 
 final class UriPathMappingKeyIterator<T> extends FlatteningIterator<UriPathMapper<T>, Uri> {
+
   UriPathMappingKeyIterator(Iterator<UriPathMapper<T>> outer) {
     super(outer);
   }
@@ -305,9 +311,11 @@ final class UriPathMappingKeyIterator<T> extends FlatteningIterator<UriPathMappe
   protected Iterator<Uri> childIterator(UriPathMapper<T> parent) {
     return parent.keyIterator();
   }
+
 }
 
 final class UriPathMappingValueIterator<T> extends FlatteningIterator<UriPathMapper<T>, T> {
+
   UriPathMappingValueIterator(Iterator<UriPathMapper<T>> outer) {
     super(outer);
   }
@@ -316,9 +324,11 @@ final class UriPathMappingValueIterator<T> extends FlatteningIterator<UriPathMap
   protected Iterator<T> childIterator(UriPathMapper<T> parent) {
     return parent.valueIterator();
   }
+
 }
 
 final class UriPathMappingChildIterator implements Iterator<UriPart> {
+
   final Iterator<String> componentIterator;
 
   UriPathMappingChildIterator(Iterator<String> componentIterator) {
@@ -339,4 +349,5 @@ final class UriPathMappingChildIterator implements Iterator<UriPart> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

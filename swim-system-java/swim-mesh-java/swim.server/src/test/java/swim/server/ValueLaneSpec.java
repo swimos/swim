@@ -47,35 +47,12 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 public class ValueLaneSpec {
-  static class TestValueLaneAgent extends AbstractAgent {
-    @SwimLane("value")
-    ValueLane<String> testValue = valueLane()
-        .valueClass(String.class)
-        .observe(new TestValueLaneController());
-
-    class TestValueLaneController implements WillSet<String>, DidSet<String> {
-      @Override
-      public String willSet(String newValue) {
-        System.out.println("lane willSet newValue: " + Format.debug(newValue));
-        return newValue;
-      }
-      @Override
-      public void didSet(String newValue, String oldValue) {
-        System.out.println("lane didSet newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-      }
-    }
-  }
-
-  static class TestValuePlane extends AbstractPlane {
-    @SwimRoute("/value/:name")
-    AgentRoute<TestValueLaneAgent> valueRoute;
-  }
 
   @Test
   public void testLinkToValueLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestValuePlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-                                       .openPlane("test", TestValuePlane.class);
+        .openPlane("test", TestValuePlane.class);
 
     final String testValue = "Hello, world!";
     final CountDownLatch linkDidReceive = new CountDownLatch(1);
@@ -83,11 +60,13 @@ public class ValueLaneSpec {
     class ValueLinkController implements WillSet<String>, DidSet<String>,
         WillReceive, DidReceive, WillLink, DidLink, WillSync, DidSync,
         WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
+
       @Override
       public String willSet(String newValue) {
         System.out.println("link willSet newValue: " + Format.debug(newValue));
         return newValue;
       }
+
       @Override
       public void didSet(String newValue, String oldValue) {
         System.out.println("link didSet newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
@@ -95,10 +74,12 @@ public class ValueLaneSpec {
           linkDidSet.countDown();
         }
       }
+
       @Override
       public void willReceive(Value body) {
         System.out.println("link willReceive body: " + Recon.toString(body));
       }
+
       @Override
       public void didReceive(Value body) {
         System.out.println("link didReceive body: " + Recon.toString(body));
@@ -106,42 +87,52 @@ public class ValueLaneSpec {
           linkDidReceive.countDown();
         }
       }
+
       @Override
       public void willLink() {
         System.out.println("link willLink");
       }
+
       @Override
       public void didLink() {
         System.out.println("link didLink");
       }
+
       @Override
       public void willSync() {
         System.out.println("link willSync");
       }
+
       @Override
       public void didSync() {
         System.out.println("link didSync");
       }
+
       @Override
       public void willUnlink() {
         System.out.println("link willUnlink");
       }
+
       @Override
       public void didUnlink() {
         System.out.println("link didUnlink");
       }
+
       @Override
       public void didConnect() {
         System.out.println("link didConnect");
       }
+
       @Override
       public void didDisconnect() {
         System.out.println("link didDisconnect");
       }
+
       @Override
       public void didClose() {
         System.out.println("link didClose");
       }
+
     }
 
     try {
@@ -169,62 +160,75 @@ public class ValueLaneSpec {
   public void testHalfOpenLinkToValueLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestValuePlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-                                       .openPlane("test", TestValuePlane.class);
+        .openPlane("test", TestValuePlane.class);
 
     final String testValue = "Hello, world!";
     class HalfOpenValueLinkController implements WillSet<String>, DidSet<String>,
         WillReceive, WillLink, DidLink, WillSync, DidSync, WillUnlink, DidUnlink,
         DidConnect, DidDisconnect, DidClose {
+
       @Override
       public String willSet(String newValue) {
         System.out.println("half-open link willSet newValue: " + Format.debug(newValue));
         return newValue;
       }
+
       @Override
       public void didSet(String newValue, String oldValue) {
         System.out.println("half-open link didSet newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
       }
+
       @Override
       public void willReceive(Value value) {
         System.out.println("half-open link willReceive value: " + Recon.toString(value));
         fail();
       }
+
       @Override
       public void willLink() {
         System.out.println("half-open link willLink");
       }
+
       @Override
       public void didLink() {
         System.out.println("half-open link didLink");
       }
+
       @Override
       public void willSync() {
         System.out.println("half-open link willSync");
       }
+
       @Override
       public void didSync() {
         System.out.println("half-open link didSync");
       }
+
       @Override
       public void willUnlink() {
         System.out.println("half-open link willUnlink");
       }
+
       @Override
       public void didUnlink() {
         System.out.println("half-open link didUnlink");
       }
+
       @Override
       public void didConnect() {
         System.out.println("half-open link didConnect");
       }
+
       @Override
       public void didDisconnect() {
         System.out.println("half-open link didDisconnect");
       }
+
       @Override
       public void didClose() {
         System.out.println("half-open link didClose");
       }
+
     }
 
     try {
@@ -245,4 +249,36 @@ public class ValueLaneSpec {
       kernel.stop();
     }
   }
+
+  static class TestValueLaneAgent extends AbstractAgent {
+
+    @SwimLane("value")
+    ValueLane<String> testValue = valueLane()
+        .valueClass(String.class)
+        .observe(new TestValueLaneController());
+
+    class TestValueLaneController implements WillSet<String>, DidSet<String> {
+
+      @Override
+      public String willSet(String newValue) {
+        System.out.println("lane willSet newValue: " + Format.debug(newValue));
+        return newValue;
+      }
+
+      @Override
+      public void didSet(String newValue, String oldValue) {
+        System.out.println("lane didSet newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+      }
+
+    }
+
+  }
+
+  static class TestValuePlane extends AbstractPlane {
+
+    @SwimRoute("/value/:name")
+    AgentRoute<TestValueLaneAgent> valueRoute;
+
+  }
+
 }

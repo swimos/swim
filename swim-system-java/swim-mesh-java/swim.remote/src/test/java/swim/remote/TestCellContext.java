@@ -28,6 +28,7 @@ import swim.store.StoreBinding;
 import swim.uri.Uri;
 
 public class TestCellContext implements CellContext {
+
   private final Policy policy;
   private final Schedule schedule;
   private final Stage stage;
@@ -131,4 +132,5 @@ public class TestCellContext implements CellContext {
   @Override
   public void fail(Object message) {
   }
+
 }

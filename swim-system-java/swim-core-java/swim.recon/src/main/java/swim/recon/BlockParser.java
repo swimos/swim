@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.util.Builder;
 
 final class BlockParser<I, V> extends Parser<V> {
+
   final ReconParser<I, V> recon;
   final Builder<I, V> builder;
   final Parser<V> keyParser;
@@ -39,15 +40,11 @@ final class BlockParser<I, V> extends Parser<V> {
     this(recon, null, null, null, 1);
   }
 
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.keyParser, this.valueParser, this.step);
-  }
-
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
                                 Parser<V> keyParser, Parser<V> valueParser, int step) {
     int c = 0;
-    block: do {
+    block:
+    do {
       if (step == 1) {
         while (input.isCont()) {
           c = input.head();
@@ -196,4 +193,10 @@ final class BlockParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
     return parse(input, recon, null, null, null, 1);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.builder, this.keyParser, this.valueParser, this.step);
+  }
+
 }

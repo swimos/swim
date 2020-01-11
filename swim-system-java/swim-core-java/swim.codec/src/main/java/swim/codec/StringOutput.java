@@ -15,6 +15,7 @@
 package swim.codec;
 
 final class StringOutput extends Output<String> {
+
   final StringBuilder builder;
   OutputSettings settings;
 
@@ -102,4 +103,5 @@ final class StringOutput extends Output<String> {
   public String toString() {
     return this.builder.toString();
   }
+
 }

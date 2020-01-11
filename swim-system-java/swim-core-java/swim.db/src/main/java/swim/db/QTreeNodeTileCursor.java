@@ -18,6 +18,7 @@ import swim.structure.Slot;
 import swim.util.Cursor;
 
 final class QTreeNodeTileCursor extends QTreeNodeCursor {
+
   QTreeNodeTileCursor(QTreeNode page, long x, long y, long index, int slotIndex, int childIndex) {
     super(page, x, y, index, slotIndex, childIndex);
   }
@@ -30,4 +31,5 @@ final class QTreeNodeTileCursor extends QTreeNodeCursor {
   Cursor<Slot> childCursor(QTreePageRef childRef) {
     return childRef.tileCursor(this.x, this.y);
   }
+
 }

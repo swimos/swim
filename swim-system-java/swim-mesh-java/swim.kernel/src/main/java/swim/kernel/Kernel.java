@@ -28,6 +28,7 @@ import swim.api.space.SpaceDef;
 import swim.structure.Item;
 
 public interface Kernel {
+
   /**
    * Returns the relative priority of this {@code Kernel} implementation.
    * Kernel implementations with greater priority inject into kernel stacks
@@ -93,4 +94,5 @@ public interface Kernel {
   void stop();
 
   void run();
+
 }

@@ -18,9 +18,11 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface Credentials {
+
   Uri requestUri();
 
   Uri fromUri();
 
   Value claims();
+
 }

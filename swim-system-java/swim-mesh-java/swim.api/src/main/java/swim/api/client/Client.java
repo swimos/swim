@@ -17,9 +17,11 @@ package swim.api.client;
 import swim.api.ref.SwimRef;
 
 public interface Client extends SwimRef {
+
   //Credentials getCredentials(Uri hostUri);
 
   void start();
 
   void stop();
+
 }

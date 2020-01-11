@@ -21,6 +21,8 @@ import swim.deflate.DeflateException;
 import swim.deflate.Inflate;
 
 final class WsFrameInflater<O> extends Decoder<WsFrame<O>> {
+
+  private static final byte[] EMPTY_BLOCK = {(byte) 0x00, (byte) 0x00, (byte) 0xff, (byte) 0xff};
   final WsDeflateDecoder ws;
   final Decoder<O> content;
   final int finRsvOp;
@@ -44,12 +46,6 @@ final class WsFrameInflater<O> extends Decoder<WsFrame<O>> {
 
   WsFrameInflater(WsDeflateDecoder ws, Decoder<O> content) {
     this(ws, content, 0, 0L, 0L, 0L, null, 1);
-  }
-
-  @Override
-  public Decoder<WsFrame<O>> feed(InputBuffer input) {
-    return decode(input, this.ws, this.content, this.finRsvOp, this.position,
-                  this.offset, this.length, this.maskingKey, this.step);
   }
 
   @SuppressWarnings("unchecked")
@@ -212,12 +208,17 @@ final class WsFrameInflater<O> extends Decoder<WsFrame<O>> {
       return error(input.trap());
     }
     return new WsFrameInflater<O>(ws, content, finRsvOp, position, offset,
-                                  length, maskingKey, step);
+        length, maskingKey, step);
   }
 
   static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDeflateDecoder ws, Decoder<O> content) {
     return decode(input, ws, content, 0, 0L, 0L, 0L, null, 1);
   }
 
-  private static final byte[] EMPTY_BLOCK = {(byte) 0x00, (byte) 0x00, (byte) 0xff, (byte) 0xff};
+  @Override
+  public Decoder<WsFrame<O>> feed(InputBuffer input) {
+    return decode(input, this.ws, this.content, this.finRsvOp, this.position,
+        this.offset, this.length, this.maskingKey, this.step);
+  }
+
 }

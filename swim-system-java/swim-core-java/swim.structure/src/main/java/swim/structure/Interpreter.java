@@ -15,6 +15,7 @@
 package swim.structure;
 
 public class Interpreter {
+
   protected InterpreterSettings settings;
 
   Item[] scopeStack;
@@ -32,6 +33,16 @@ public class Interpreter {
 
   public Interpreter() {
     this(InterpreterSettings.standard(), null, 0);
+  }
+
+  static int expand(int n) {
+    n = Math.max(32, n) - 1;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    return n + 1;
   }
 
   public final InterpreterSettings settings() {
@@ -129,13 +140,4 @@ public class Interpreter {
     // stub
   }
 
-  static int expand(int n) {
-    n = Math.max(32, n) - 1;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    return n + 1;
-  }
 }

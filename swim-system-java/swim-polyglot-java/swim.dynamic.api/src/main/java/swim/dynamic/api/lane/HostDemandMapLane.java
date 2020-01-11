@@ -24,9 +24,6 @@ import swim.dynamic.api.lane.function.GuestOnSyncKeys;
 import swim.dynamic.api.warp.HostWarpLane;
 
 public final class HostDemandMapLane {
-  private HostDemandMapLane() {
-    // static
-  }
 
   public static final HostObjectType<DemandMapLane<Object, Object>> TYPE;
 
@@ -41,9 +38,15 @@ public final class HostDemandMapLane {
     type.addMember(new HostDemandMapLaneCue());
     type.addMember(new HostDemandMapLaneRemove());
   }
+
+  private HostDemandMapLane() {
+    // static
+  }
+
 }
 
 final class HostDemandMapLaneObserve implements HostMethod<DemandMapLane<Object, Object>> {
+
   @Override
   public String key() {
     return "observe";
@@ -56,9 +59,11 @@ final class HostDemandMapLaneObserve implements HostMethod<DemandMapLane<Object,
     lane.observe(observer);
     return this;
   }
+
 }
 
 final class HostDemandMapLaneUnobserve implements HostMethod<DemandMapLane<Object, Object>> {
+
   @Override
   public String key() {
     return "unobserve";
@@ -71,9 +76,11 @@ final class HostDemandMapLaneUnobserve implements HostMethod<DemandMapLane<Objec
     lane.unobserve(observer);
     return this;
   }
+
 }
 
 final class HostDemandMapLaneOnCue implements HostMethod<DemandMapLane<Object, Object>> {
+
   @Override
   public String key() {
     return "onCue";
@@ -83,9 +90,11 @@ final class HostDemandMapLaneOnCue implements HostMethod<DemandMapLane<Object, O
   public Object invoke(Bridge bridge, DemandMapLane<Object, Object> lane, Object... arguments) {
     return lane.onCue(new GuestOnCueKey<Object, Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostDemandMapLaneOnSync implements HostMethod<DemandMapLane<Object, Object>> {
+
   @Override
   public String key() {
     return "onSync";
@@ -95,9 +104,11 @@ final class HostDemandMapLaneOnSync implements HostMethod<DemandMapLane<Object, 
   public Object invoke(Bridge bridge, DemandMapLane<Object, Object> lane, Object... arguments) {
     return lane.onSync(new GuestOnSyncKeys<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostDemandMapLaneCue implements HostMethod<DemandMapLane<Object, Object>> {
+
   @Override
   public String key() {
     return "cue";
@@ -108,9 +119,11 @@ final class HostDemandMapLaneCue implements HostMethod<DemandMapLane<Object, Obj
     lane.cue(arguments[0]);
     return null;
   }
+
 }
 
 final class HostDemandMapLaneRemove implements HostMethod<DemandMapLane<Object, Object>> {
+
   @Override
   public String key() {
     return "remove";
@@ -121,4 +134,5 @@ final class HostDemandMapLaneRemove implements HostMethod<DemandMapLane<Object, 
     lane.remove(arguments[0]);
     return null;
   }
+
 }

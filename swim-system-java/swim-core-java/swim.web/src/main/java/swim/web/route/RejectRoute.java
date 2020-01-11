@@ -19,6 +19,7 @@ import swim.web.WebResponse;
 import swim.web.WebRoute;
 
 public final class RejectRoute implements WebRoute {
+
   @Override
   public WebResponse routeRequest(WebRequest request) {
     return request.reject();
@@ -28,4 +29,5 @@ public final class RejectRoute implements WebRoute {
   public WebRoute orElse(WebRoute alternative) {
     return alternative;
   }
+
 }

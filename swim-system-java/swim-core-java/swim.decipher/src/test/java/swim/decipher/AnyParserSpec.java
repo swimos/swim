@@ -28,6 +28,7 @@ import static org.testng.Assert.ThrowingRunnable;
 import static org.testng.Assert.assertThrows;
 
 public class AnyParserSpec {
+
   public static void assertParses(String any, Value expected) {
     Assertions.assertParses(Decipher.structureParser().anyParser(), any, expected);
     Assertions.assertParses(Decipher.structureParser().anyParser(), " " + any + " ", expected);
@@ -46,7 +47,7 @@ public class AnyParserSpec {
   public void parseAnyXml() {
     assertParses("<test/>", Record.of(Attr.of("test")));
     assertParses("<!DOCTYPE html><test/>",
-                 Record.of(Attr.of("xml:doctype", "html"), Attr.of("test")));
+        Record.of(Attr.of("xml:doctype", "html"), Attr.of("test")));
   }
 
   @Test
@@ -74,4 +75,5 @@ public class AnyParserSpec {
     assertParses("1,2,3,4", Record.of(1, 2, 3, 4));
     assertParses("{1,2,3,4}", Record.of(1, 2, 3, 4));
   }
+
 }

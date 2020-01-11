@@ -19,6 +19,9 @@ import swim.concurrent.Cont;
 import swim.concurrent.Conts;
 
 public final class Commit {
+
+  private static Commit closed;
+  private static Commit forced;
   final boolean isClosed;
   final boolean isForced;
   final boolean isShifted;
@@ -34,6 +37,20 @@ public final class Commit {
 
   public Commit(boolean isClosed, boolean isForced, boolean isShifted) {
     this(isClosed, isForced, isShifted, FingerTrieSeq.<Cont<Chunk>>empty());
+  }
+
+  public static Commit closed() {
+    if (closed == null) {
+      closed = new Commit(true, true, false);
+    }
+    return closed;
+  }
+
+  public static Commit forced() {
+    if (forced == null) {
+      forced = new Commit(false, true, false);
+    }
+    return forced;
   }
 
   public boolean isClosed() {
@@ -104,20 +121,4 @@ public final class Commit {
     return new Commit(isClosed, isForced, isShifted, conts);
   }
 
-  private static Commit closed;
-  private static Commit forced;
-
-  public static Commit closed() {
-    if (closed == null) {
-      closed = new Commit(true, true, false);
-    }
-    return closed;
-  }
-
-  public static Commit forced() {
-    if (forced == null) {
-      forced = new Commit(false, true, false);
-    }
-    return forced;
-  }
 }

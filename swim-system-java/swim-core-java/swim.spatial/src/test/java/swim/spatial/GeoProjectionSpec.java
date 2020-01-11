@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class GeoProjectionSpec {
+
   static final double MAX_LAT = Math.toDegrees(Math.atan(Math.sinh(Math.PI)));
 
   @Test
@@ -77,4 +78,5 @@ public class GeoProjectionSpec {
     assertEquals(GeoProjection.sphericalMercatorInverse().transformX(0x14a8d299063d7800L, 0x4e53cbe98b71c400L), -121.895259);
     assertEquals(GeoProjection.sphericalMercatorInverse().transformY(0x14a8d299063d7800L, 0x4e53cbe98b71c400L), 37.333447);
   }
+
 }

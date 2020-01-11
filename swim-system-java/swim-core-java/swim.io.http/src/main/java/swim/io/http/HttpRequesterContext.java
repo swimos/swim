@@ -20,6 +20,7 @@ import swim.io.IpContext;
 import swim.io.IpSocket;
 
 public interface HttpRequesterContext extends IpContext, FlowContext {
+
   HttpSettings httpSettings();
 
   void writeRequest(HttpRequest<?> request);
@@ -27,4 +28,5 @@ public interface HttpRequesterContext extends IpContext, FlowContext {
   void become(IpSocket socket);
 
   void close();
+
 }

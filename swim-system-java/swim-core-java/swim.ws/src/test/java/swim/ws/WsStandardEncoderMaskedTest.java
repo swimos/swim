@@ -15,6 +15,7 @@
 package swim.ws;
 
 final class WsStandardEncoderMaskedTest extends WsEncoder {
+
   final byte[] maskingKey;
 
   WsStandardEncoderMaskedTest(byte[] maskingKey) {
@@ -30,4 +31,5 @@ final class WsStandardEncoderMaskedTest extends WsEncoder {
   public void maskingKey(byte[] maskingKey) {
     System.arraycopy(this.maskingKey, 0, maskingKey, 0, 4);
   }
+
 }

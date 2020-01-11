@@ -53,6 +53,7 @@ import swim.uri.Uri;
 import swim.util.Log;
 
 public class ActorPart extends ActorTier implements PartBinding, PartContext {
+
   final PartBinding partBinding;
   PartContext partContext;
   PartDef partDef;
@@ -463,4 +464,5 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   public void didFail(Throwable error) {
     this.partBinding.didFail(error);
   }
+
 }

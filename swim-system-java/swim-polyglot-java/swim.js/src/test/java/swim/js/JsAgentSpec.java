@@ -43,11 +43,13 @@ public class JsAgentSpec {
     final CountDownLatch linkOnEvent = new CountDownLatch(1);
 
     class CommandLinkController implements OnEvent<String> {
+
       @Override
       public void onEvent(String value) {
         System.out.println("link onEvent value: " + value);
         linkOnEvent.countDown();
       }
+
     }
 
     try {

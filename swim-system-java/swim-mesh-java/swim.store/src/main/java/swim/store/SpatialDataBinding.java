@@ -18,6 +18,7 @@ import swim.api.data.SpatialData;
 import swim.structure.Value;
 
 public interface SpatialDataBinding<S> extends SpatialData<Value, S, Value>, DataBinding {
+
   @Override
   SpatialDataContext<S> dataContext();
 
@@ -28,4 +29,5 @@ public interface SpatialDataBinding<S> extends SpatialData<Value, S, Value>, Dat
 
   @Override
   SpatialDataBinding<S> isTransient(boolean isTransient);
+
 }

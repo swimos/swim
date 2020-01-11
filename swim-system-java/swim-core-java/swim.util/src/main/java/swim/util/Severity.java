@@ -18,147 +18,6 @@ package swim.util;
  * Level of importance.  Used for log levels and diagnostic classifications.
  */
 public final class Severity implements Comparable<Severity> {
-  final int level;
-  final String label;
-
-  private Severity(int level, String label) {
-    this.level = level;
-    this.label = label;
-  }
-
-  /**
-   * Returns the integer level of importance of this {@code Severity}, with
-   * higher levels signifying greater importance.
-   *
-   * @return an integer between {@code 0} and {@code 7}, inclusive.  One of
-   *         {@code TRACE_LEVEL}, {@code DEBUG_LEVEL}, {@code INFO_LEVEL},
-   *         {@code NOTE_LEVEL}, {@code WARNING_LEVEL}, {@code ERROR_LEVEL},
-   *         {@code ALERT_LEVEL}, or {@code FATAL_LEVEL}.
-   */
-  public int level() {
-    return this.level;
-  }
-
-  /**
-   * Returns a descriptive label for this {@code Severity}.
-   */
-  public String label() {
-    return this.label;
-  }
-
-  /**
-   * Returns a new {@code Severity} with the same level as this {@code
-   * Severity}, but with a new descriptive {@code label}.
-   */
-  public Severity label(String label) {
-    if (this.label.equals(label)) {
-      return this;
-    } else {
-      return create(this.level, label);
-    }
-  }
-
-  /**
-   * Returns {@code true} if this {@code Severity} has {@code TRACE_LEVEL}
-   * of importance.
-   */
-  public boolean isTrace() {
-    return this.level == TRACE_LEVEL;
-  }
-
-  /**
-   * Returns {@code true} if this {@code Severity} has {@code DEBUG_LEVEL}
-   * of importance.
-   */
-  public boolean isDebug() {
-    return this.level == DEBUG_LEVEL;
-  }
-
-  /**
-   * Returns {@code true} if this {@code Severity} has {@code INFO_LEVEL}
-   * of importance.
-   */
-  public boolean isInfo() {
-    return this.level == INFO_LEVEL;
-  }
-
-  /**
-   * Returns {@code true} if this {@code Severity} has {@code NOTE_LEVEL}
-   * of importance.
-   */
-  public boolean isNote() {
-    return this.level == NOTE_LEVEL;
-  }
-
-  /**
-   * Returns {@code true} if this {@code Severity} has {@code WARNING_LEVEL}
-   * of importance.
-   */
-  public boolean isWarning() {
-    return this.level == WARNING_LEVEL;
-  }
-
-  /**
-   * Returns {@code true} if this {@code Severity} has {@code ERROR_LEVEL}
-   * of importance.
-   */
-  public boolean isError() {
-    return this.level == ERROR_LEVEL;
-  }
-
-  /**
-   * Returns {@code true} if this {@code Severity} has {@code ALERT_LEVEL}
-   * of importance.
-   */
-  public boolean isAlert() {
-    return this.level == ALERT_LEVEL;
-  }
-
-  /**
-   * Returns {@code true} if this {@code Severity} has {@code FATAL_LEVEL}
-   * of importance.
-   */
-  public boolean isFatal() {
-    return this.level == FATAL_LEVEL;
-  }
-
-  @Override
-  public int compareTo(Severity that) {
-    if (this == that) {
-      return 0;
-    } else if (this.level < that.level) {
-      return -1;
-    } else if (this.level > that.level) {
-      return 1;
-    } else {
-      return this.label.compareTo(that.label);
-    }
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof Severity) {
-      final Severity that = (Severity) other;
-      return this.level == that.level && this.label.equals(that.label);
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Severity.class);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
-        this.level), this.label.hashCode()));
-  }
-
-  @Override
-  public String toString() {
-    return this.label;
-  }
 
   public static final int TRACE_LEVEL = 0;
   public static final int DEBUG_LEVEL = 1;
@@ -168,7 +27,6 @@ public final class Severity implements Comparable<Severity> {
   public static final int ERROR_LEVEL = 5;
   public static final int ALERT_LEVEL = 6;
   public static final int FATAL_LEVEL = 7;
-
   private static int hashSeed;
   private static Severity trace;
   private static Severity debug;
@@ -178,25 +36,41 @@ public final class Severity implements Comparable<Severity> {
   private static Severity error;
   private static Severity alert;
   private static Severity fatal;
+  final int level;
+  final String label;
+
+  private Severity(int level, String label) {
+    this.level = level;
+    this.label = label;
+  }
 
   /**
    * Returns a {@code Severity} with the given importance {@code level},
    * and descriptive {@code label}.
    *
    * @throws IllegalArgumentException if {@code level} is not a valid
-   *         level of importance.
+   *                                  level of importance.
    */
   public static Severity create(int level, String label) {
     switch (level) {
-      case TRACE_LEVEL: return trace(label);
-      case DEBUG_LEVEL: return debug(label);
-      case INFO_LEVEL: return info(label);
-      case NOTE_LEVEL: return note(label);
-      case WARNING_LEVEL: return warning(label);
-      case ERROR_LEVEL: return error(label);
-      case ALERT_LEVEL: return alert(label);
-      case FATAL_LEVEL: return fatal(label);
-      default: throw new IllegalArgumentException(Integer.toString(level));
+      case TRACE_LEVEL:
+        return trace(label);
+      case DEBUG_LEVEL:
+        return debug(label);
+      case INFO_LEVEL:
+        return info(label);
+      case NOTE_LEVEL:
+        return note(label);
+      case WARNING_LEVEL:
+        return warning(label);
+      case ERROR_LEVEL:
+        return error(label);
+      case ALERT_LEVEL:
+        return alert(label);
+      case FATAL_LEVEL:
+        return fatal(label);
+      default:
+        throw new IllegalArgumentException(Integer.toString(level));
     }
   }
 
@@ -204,7 +78,7 @@ public final class Severity implements Comparable<Severity> {
    * Returns the {@code Severity} with the given importance {@code level}.
    *
    * @throws IllegalArgumentException if {@code level} is not a valid
-   *         level of importance.
+   *                                  level of importance.
    */
   public static Severity create(int level) {
     return create(level, null);
@@ -385,4 +259,139 @@ public final class Severity implements Comparable<Severity> {
       return new Severity(FATAL_LEVEL, label);
     }
   }
+
+  /**
+   * Returns the integer level of importance of this {@code Severity}, with
+   * higher levels signifying greater importance.
+   *
+   * @return an integer between {@code 0} and {@code 7}, inclusive.  One of
+   * {@code TRACE_LEVEL}, {@code DEBUG_LEVEL}, {@code INFO_LEVEL},
+   * {@code NOTE_LEVEL}, {@code WARNING_LEVEL}, {@code ERROR_LEVEL},
+   * {@code ALERT_LEVEL}, or {@code FATAL_LEVEL}.
+   */
+  public int level() {
+    return this.level;
+  }
+
+  /**
+   * Returns a descriptive label for this {@code Severity}.
+   */
+  public String label() {
+    return this.label;
+  }
+
+  /**
+   * Returns a new {@code Severity} with the same level as this {@code
+   * Severity}, but with a new descriptive {@code label}.
+   */
+  public Severity label(String label) {
+    if (this.label.equals(label)) {
+      return this;
+    } else {
+      return create(this.level, label);
+    }
+  }
+
+  /**
+   * Returns {@code true} if this {@code Severity} has {@code TRACE_LEVEL}
+   * of importance.
+   */
+  public boolean isTrace() {
+    return this.level == TRACE_LEVEL;
+  }
+
+  /**
+   * Returns {@code true} if this {@code Severity} has {@code DEBUG_LEVEL}
+   * of importance.
+   */
+  public boolean isDebug() {
+    return this.level == DEBUG_LEVEL;
+  }
+
+  /**
+   * Returns {@code true} if this {@code Severity} has {@code INFO_LEVEL}
+   * of importance.
+   */
+  public boolean isInfo() {
+    return this.level == INFO_LEVEL;
+  }
+
+  /**
+   * Returns {@code true} if this {@code Severity} has {@code NOTE_LEVEL}
+   * of importance.
+   */
+  public boolean isNote() {
+    return this.level == NOTE_LEVEL;
+  }
+
+  /**
+   * Returns {@code true} if this {@code Severity} has {@code WARNING_LEVEL}
+   * of importance.
+   */
+  public boolean isWarning() {
+    return this.level == WARNING_LEVEL;
+  }
+
+  /**
+   * Returns {@code true} if this {@code Severity} has {@code ERROR_LEVEL}
+   * of importance.
+   */
+  public boolean isError() {
+    return this.level == ERROR_LEVEL;
+  }
+
+  /**
+   * Returns {@code true} if this {@code Severity} has {@code ALERT_LEVEL}
+   * of importance.
+   */
+  public boolean isAlert() {
+    return this.level == ALERT_LEVEL;
+  }
+
+  /**
+   * Returns {@code true} if this {@code Severity} has {@code FATAL_LEVEL}
+   * of importance.
+   */
+  public boolean isFatal() {
+    return this.level == FATAL_LEVEL;
+  }
+
+  @Override
+  public int compareTo(Severity that) {
+    if (this == that) {
+      return 0;
+    } else if (this.level < that.level) {
+      return -1;
+    } else if (this.level > that.level) {
+      return 1;
+    } else {
+      return this.label.compareTo(that.label);
+    }
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof Severity) {
+      final Severity that = (Severity) other;
+      return this.level == that.level && this.label.equals(that.label);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    if (hashSeed == 0) {
+      hashSeed = Murmur3.seed(Severity.class);
+    }
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+        this.level), this.label.hashCode()));
+  }
+
+  @Override
+  public String toString() {
+    return this.label;
+  }
+
 }

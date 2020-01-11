@@ -20,6 +20,7 @@ import swim.runtime.WarpBinding;
 import swim.structure.Value;
 
 public abstract class SupplyUplinkModem extends WarpUplinkModem {
+
   final ConcurrentLinkedQueue<Value> downQueue;
 
   public SupplyUplinkModem(WarpBinding linkBinding, UplinkAddress uplinkAddress) {
@@ -41,4 +42,5 @@ public abstract class SupplyUplinkModem extends WarpUplinkModem {
   protected Value nextDownQueue() {
     return this.downQueue.poll();
   }
+
 }

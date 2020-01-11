@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class HttpHeaderWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final HttpHeader header;
   final Writer<?, ?> part;
@@ -33,11 +34,6 @@ final class HttpHeaderWriter extends Writer<Object, Object> {
 
   HttpHeaderWriter(HttpWriter http, HttpHeader header) {
     this(http, header, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.header, this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
@@ -90,4 +86,10 @@ final class HttpHeaderWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, HttpHeader header) {
     return write(output, http, header, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.header, this.part, this.step);
+  }
+
 }

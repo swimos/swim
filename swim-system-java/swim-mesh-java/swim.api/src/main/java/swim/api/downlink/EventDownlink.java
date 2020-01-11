@@ -34,6 +34,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface EventDownlink<V> extends WarpDownlink {
+
   @Override
   EventDownlink<V> hostUri(Uri hostUri);
 
@@ -122,4 +123,5 @@ public interface EventDownlink<V> extends WarpDownlink {
 
   @Override
   EventDownlink<V> open();
+
 }

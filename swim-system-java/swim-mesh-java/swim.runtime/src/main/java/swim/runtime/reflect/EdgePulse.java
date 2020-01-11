@@ -21,6 +21,8 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class EdgePulse extends Pulse {
+
+  private static Form<EdgePulse> form;
   protected final int meshCount;
   protected final int partCount;
   protected final int hostCount;
@@ -38,6 +40,14 @@ public class EdgePulse extends Pulse {
     this.agents = agents;
     this.downlinks = downlinks;
     this.uplinks = uplinks;
+  }
+
+  @Kind
+  public static Form<EdgePulse> form() {
+    if (form == null) {
+      form = new EdgePulseForm();
+    }
+    return form;
   }
 
   @Override
@@ -79,18 +89,10 @@ public class EdgePulse extends Pulse {
     return form().mold(this).toValue();
   }
 
-  private static Form<EdgePulse> form;
-
-  @Kind
-  public static Form<EdgePulse> form() {
-    if (form == null) {
-      form = new EdgePulseForm();
-    }
-    return form;
-  }
 }
 
 final class EdgePulseForm extends Form<EdgePulse> {
+
   @Override
   public Class<?> type() {
     return EdgePulse.class;
@@ -139,4 +141,5 @@ final class EdgePulseForm extends Form<EdgePulse> {
     final WarpUplinkPulse uplinks = value.get("uplinks").coerce(WarpUplinkPulse.form());
     return new EdgePulse(edgeCount, partCount, hostCount, nodeCount, agents, downlinks, uplinks);
   }
+
 }

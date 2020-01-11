@@ -30,6 +30,78 @@ import swim.util.Builder;
 import swim.xml.Xml;
 
 public abstract class HttpMessage<T> extends HttpPart {
+
+  static FingerTrieSeq<HttpHeader> updatedHeaders(FingerTrieSeq<HttpHeader> oldHeaders, HttpHeader newHeader) {
+    final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers = FingerTrieSeq.builder();
+    boolean updated = false;
+    boolean changed = false;
+    for (int i = 0, n = oldHeaders.size(); i < n; i += 1) {
+      final HttpHeader oldHeader = oldHeaders.get(i);
+      if (oldHeader.lowerCaseName().equals(newHeader.lowerCaseName())) {
+        updated = true;
+        if (!oldHeader.equals(newHeader)) {
+          changed = true;
+        }
+        headers.add(newHeader);
+      } else {
+        headers.add(oldHeader);
+      }
+    }
+    if (!updated) {
+      headers.add(newHeader);
+      changed = true;
+    }
+    if (changed) {
+      return headers.bind();
+    } else {
+      return oldHeaders;
+    }
+  }
+
+  static FingerTrieSeq<HttpHeader> updatedHeaders(FingerTrieSeq<HttpHeader> oldHeaders,
+                                                  FingerTrieSeq<HttpHeader> newHeaders) {
+    final int newHeaderCount = newHeaders.size();
+    if (newHeaderCount == 0) {
+      return oldHeaders;
+    } else if (newHeaderCount == 1) {
+      return updatedHeaders(oldHeaders, newHeaders.head());
+    } else {
+      final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers = FingerTrieSeq.builder();
+      final HashTrieSet<HttpHeader> absent = HashTrieSet.from(newHeaders);
+      boolean changed = false;
+      loop:
+      for (int i = 0, oldHeaderCount = oldHeaders.size(); i < oldHeaderCount; i += 1) {
+        final HttpHeader oldHeader = oldHeaders.get(i);
+        for (int j = 0; j < newHeaderCount; j += 1) {
+          final HttpHeader newHeader = newHeaders.get(j);
+          if (oldHeader.lowerCaseName().equals(newHeader.lowerCaseName())) {
+            absent.remove(newHeader);
+            if (!oldHeader.equals(newHeader)) {
+              changed = true;
+            }
+            headers.add(newHeader);
+            continue loop;
+          }
+        }
+        headers.add(oldHeader);
+      }
+      if (!absent.isEmpty()) {
+        for (int j = 0; j < newHeaderCount; j += 1) {
+          final HttpHeader newHeader = newHeaders.get(j);
+          if (absent.contains(newHeader)) {
+            headers.add(newHeader);
+            changed = true;
+          }
+        }
+      }
+      if (changed) {
+        return headers.bind();
+      } else {
+        return oldHeaders;
+      }
+    }
+  }
+
   public abstract HttpVersion version();
 
   public abstract FingerTrieSeq<HttpHeader> headers();
@@ -133,7 +205,7 @@ public abstract class HttpMessage<T> extends HttpPart {
       if ("json".equalsIgnoreCase(mediaType.subtype)) {
         return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Json.structureParser().valueParser());
       } else if ("recon".equalsIgnoreCase(mediaType.subtype)
-              || "x-recon".equalsIgnoreCase(mediaType.subtype)) {
+          || "x-recon".equalsIgnoreCase(mediaType.subtype)) {
         return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Recon.structureParser().blockParser());
       } else if ("xml".equalsIgnoreCase(mediaType.subtype)) {
         return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Xml.structureParser().documentParser());
@@ -169,73 +241,4 @@ public abstract class HttpMessage<T> extends HttpPart {
     return encodeHttp(output, Http.standardWriter());
   }
 
-  static FingerTrieSeq<HttpHeader> updatedHeaders(FingerTrieSeq<HttpHeader> oldHeaders, HttpHeader newHeader) {
-    final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers = FingerTrieSeq.builder();
-    boolean updated = false;
-    boolean changed = false;
-    for (int i = 0, n = oldHeaders.size(); i < n; i += 1) {
-      final HttpHeader oldHeader = oldHeaders.get(i);
-      if (oldHeader.lowerCaseName().equals(newHeader.lowerCaseName())) {
-        updated = true;
-        if (!oldHeader.equals(newHeader)) {
-          changed = true;
-        }
-        headers.add(newHeader);
-      } else {
-        headers.add(oldHeader);
-      }
-    }
-    if (!updated) {
-      headers.add(newHeader);
-      changed = true;
-    }
-    if (changed) {
-      return headers.bind();
-    } else {
-      return oldHeaders;
-    }
-  }
-
-  static FingerTrieSeq<HttpHeader> updatedHeaders(FingerTrieSeq<HttpHeader> oldHeaders,
-                                                  FingerTrieSeq<HttpHeader> newHeaders) {
-    final int newHeaderCount = newHeaders.size();
-    if (newHeaderCount == 0) {
-      return oldHeaders;
-    } else if (newHeaderCount == 1) {
-      return updatedHeaders(oldHeaders, newHeaders.head());
-    } else {
-      final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers = FingerTrieSeq.builder();
-      final HashTrieSet<HttpHeader> absent = HashTrieSet.from(newHeaders);
-      boolean changed = false;
-      loop: for (int i = 0, oldHeaderCount = oldHeaders.size(); i < oldHeaderCount; i += 1) {
-        final HttpHeader oldHeader = oldHeaders.get(i);
-        for (int j = 0; j < newHeaderCount; j += 1) {
-          final HttpHeader newHeader = newHeaders.get(j);
-          if (oldHeader.lowerCaseName().equals(newHeader.lowerCaseName())) {
-            absent.remove(newHeader);
-            if (!oldHeader.equals(newHeader)) {
-              changed = true;
-            }
-            headers.add(newHeader);
-            continue loop;
-          }
-        }
-        headers.add(oldHeader);
-      }
-      if (!absent.isEmpty()) {
-        for (int j = 0; j < newHeaderCount; j += 1) {
-          final HttpHeader newHeader = newHeaders.get(j);
-          if (absent.contains(newHeader)) {
-            headers.add(newHeader);
-            changed = true;
-          }
-        }
-      }
-      if (changed) {
-        return headers.bind();
-      } else {
-        return oldHeaders;
-      }
-    }
-  }
 }

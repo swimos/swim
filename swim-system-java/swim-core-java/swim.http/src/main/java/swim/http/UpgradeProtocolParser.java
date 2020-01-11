@@ -19,6 +19,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
+
   final HttpParser http;
   final StringBuilder name;
   final StringBuilder version;
@@ -33,11 +34,6 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
 
   UpgradeProtocolParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<UpgradeProtocol> feed(Input input) {
-    return parse(input, this.http, this.name, this.version, this.step);
   }
 
   static Parser<UpgradeProtocol> parse(Input input, HttpParser http, StringBuilder name,
@@ -117,4 +113,10 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
   static Parser<UpgradeProtocol> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<UpgradeProtocol> feed(Input input) {
+    return parse(input, this.http, this.name, this.version, this.step);
+  }
+
 }

@@ -25,6 +25,34 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class WsFrameEncoderSpec {
+
+  static void assertEncodes(WsEncoder ws, WsFrame<?> frame, Data encoded, int... bufferSizes) {
+    final byte[] actual = new byte[encoded.size()];
+    int bufferSize = encoded.size();
+    Encoder<?, ?> frameEncoder = ws.frameEncoder(frame);
+    for (int k = 0, i = 0, n = actual.length; i < n; i += bufferSize) {
+      if (k < bufferSizes.length) {
+        bufferSize = bufferSizes[k];
+        k += 1;
+      }
+      frameEncoder = frameEncoder.pull(Binary.outputBuffer(actual, i, Math.min(bufferSize, actual.length - i))
+          .isPart(actual.length - i > bufferSize));
+      if (frameEncoder.isError()) {
+        throw new TestException(frameEncoder.trap());
+      }
+    }
+    assertTrue(frameEncoder.isDone());
+    assertEquals(Data.wrap(actual), encoded);
+  }
+
+  static void assertEncodes(WsFrame<?> frame, Data encoded, int... bufferSizes) {
+    assertEncodes(Ws.standardEncoderUnmasked(), frame, encoded, bufferSizes);
+  }
+
+  static void assertEncodes(byte[] maskingKey, WsFrame<?> frame, Data encoded, int... bufferSizes) {
+    assertEncodes(new WsStandardEncoderMaskedTest(maskingKey), frame, encoded, bufferSizes);
+  }
+
   @Test
   public void encodeUnmaskedEmptyTextFrame() {
     assertEncodes(WsText.from(""), Data.fromBase16("8100"));
@@ -151,30 +179,4 @@ public class WsFrameEncoderSpec {
     assertEquals(Data.wrap(output.bind()), frame);
   }
 
-  static void assertEncodes(WsEncoder ws, WsFrame<?> frame, Data encoded, int... bufferSizes) {
-    final byte[] actual = new byte[encoded.size()];
-    int bufferSize = encoded.size();
-    Encoder<?, ?> frameEncoder = ws.frameEncoder(frame);
-    for (int k = 0, i = 0, n = actual.length; i < n; i += bufferSize) {
-      if (k < bufferSizes.length) {
-        bufferSize = bufferSizes[k];
-        k += 1;
-      }
-      frameEncoder = frameEncoder.pull(Binary.outputBuffer(actual, i, Math.min(bufferSize, actual.length - i))
-                                             .isPart(actual.length - i > bufferSize));
-      if (frameEncoder.isError()) {
-        throw new TestException(frameEncoder.trap());
-      }
-    }
-    assertTrue(frameEncoder.isDone());
-    assertEquals(Data.wrap(actual), encoded);
-  }
-
-  static void assertEncodes(WsFrame<?> frame, Data encoded, int... bufferSizes) {
-    assertEncodes(Ws.standardEncoderUnmasked(), frame, encoded, bufferSizes);
-  }
-
-  static void assertEncodes(byte[] maskingKey, WsFrame<?> frame, Data encoded, int... bufferSizes) {
-    assertEncodes(new WsStandardEncoderMaskedTest(maskingKey), frame, encoded, bufferSizes);
-  }
 }

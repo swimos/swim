@@ -15,6 +15,7 @@
 package swim.math;
 
 public interface AffineSpace<P, V, S> {
+
   VectorSpace<V, S> vector();
 
   Field<S> scalar();
@@ -24,4 +25,5 @@ public interface AffineSpace<P, V, S> {
   P translate(P p, V v);
 
   V difference(P p, P q);
+
 }

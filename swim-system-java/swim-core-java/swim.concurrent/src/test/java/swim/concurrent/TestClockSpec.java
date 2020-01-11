@@ -23,6 +23,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 public class TestClockSpec {
+
   @Test
   public void scheduleAnImmediateTimer() {
     final TestClock clock = new TestClock(10, 512);
@@ -142,6 +143,7 @@ public class TestClockSpec {
       clock.start();
       clock.setTimer(10L, new AbstractTimer() {
         private boolean rescheduled = false;
+
         @Override
         public void runTimer() {
           if (!rescheduled) {
@@ -235,6 +237,7 @@ public class TestClockSpec {
                       fail();
                     }
                   }
+
                   @Override
                   public void timerDidCancel() {
                     if (k % 2 != 0) {
@@ -265,7 +268,7 @@ public class TestClockSpec {
     }
   }
 
-  @Test(groups = {"slow"})
+  @Test//(groups = {"slow"})
   public void concurrentSchedulingLongevity() {
     final int threadCount = 8;
     final int timerCount = 10000000;
@@ -281,7 +284,8 @@ public class TestClockSpec {
           @Override
           public void run() {
             try {
-              for (int j = 0; j < timerCount;) {
+              int j = 0;
+              while (j < timerCount) {
                 final CountDownLatch fire = new CountDownLatch(batchSize);
                 barrier.await();
                 for (int k = 0; k < batchSize; j += 1, k += 1) {
@@ -312,4 +316,5 @@ public class TestClockSpec {
       clock.stop();
     }
   }
+
 }

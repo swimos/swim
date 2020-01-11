@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class MqttConnAckDecoder extends Decoder<MqttConnAck> {
+
   final MqttDecoder mqtt;
   final int packetFlags;
   final int connectFlags;
@@ -38,12 +39,6 @@ final class MqttConnAckDecoder extends Decoder<MqttConnAck> {
 
   MqttConnAckDecoder(MqttDecoder mqtt) {
     this(mqtt, 0, 0, 0, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttConnAck> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.connectFlags,
-                  this.connectCode, this.remaining, this.step);
   }
 
   static Decoder<MqttConnAck> decode(InputBuffer input, MqttDecoder mqtt,
@@ -88,10 +83,17 @@ final class MqttConnAckDecoder extends Decoder<MqttConnAck> {
       return error(new DecoderException("incomplete"));
     }
     return new MqttConnAckDecoder(mqtt, packetFlags, connectFlags, connectCode,
-                                  remaining, step);
+        remaining, step);
   }
 
   static Decoder<MqttConnAck> decode(InputBuffer input, MqttDecoder mqtt) {
     return decode(input, mqtt, 0, 0, 0, 0, 1);
   }
+
+  @Override
+  public Decoder<MqttConnAck> feed(InputBuffer input) {
+    return decode(input, this.mqtt, this.packetFlags, this.connectFlags,
+        this.connectCode, this.remaining, this.step);
+  }
+
 }

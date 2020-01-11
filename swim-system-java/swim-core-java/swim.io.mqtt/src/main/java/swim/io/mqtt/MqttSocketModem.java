@@ -28,6 +28,7 @@ import swim.mqtt.Mqtt;
 import swim.mqtt.MqttPacket;
 
 public class MqttSocketModem<I, O> implements IpModem<Object, Object>, MqttSocketContext<I, O> {
+
   protected final MqttSocket<I, O> socket;
   protected final MqttSettings mqttSettings;
   protected IpModemContext<Object, Object> context;
@@ -224,4 +225,5 @@ public class MqttSocketModem<I, O> implements IpModem<Object, Object>, MqttSocke
   public void close() {
     this.context.close();
   }
+
 }

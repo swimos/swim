@@ -20,6 +20,7 @@ import swim.codec.OutputBuffer;
 import swim.codec.Utf8;
 
 final class WsStatusEncoder extends Encoder<Object, WsStatus> {
+
   final WsStatus status;
   final Encoder<?, ?> part;
   final int step;
@@ -32,11 +33,6 @@ final class WsStatusEncoder extends Encoder<Object, WsStatus> {
 
   WsStatusEncoder(WsStatus status) {
     this(status, null, 1);
-  }
-
-  @Override
-  public Encoder<Object, WsStatus> pull(OutputBuffer<?> output) {
-    return encode(output, this.status, this.part, this.step);
   }
 
   static Encoder<Object, WsStatus> encode(OutputBuffer<?> output, WsStatus status,
@@ -72,4 +68,10 @@ final class WsStatusEncoder extends Encoder<Object, WsStatus> {
   static Encoder<Object, WsStatus> encode(OutputBuffer<?> output, WsStatus status) {
     return encode(output, status, null, 1);
   }
+
+  @Override
+  public Encoder<Object, WsStatus> pull(OutputBuffer<?> output) {
+    return encode(output, this.status, this.part, this.step);
+  }
+
 }

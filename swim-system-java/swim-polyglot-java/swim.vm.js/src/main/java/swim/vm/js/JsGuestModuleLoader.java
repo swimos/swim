@@ -18,6 +18,7 @@ import org.graalvm.polyglot.Source;
 import swim.uri.UriPath;
 
 public class JsGuestModuleLoader implements JsModuleResolver, JsModuleLoader {
+
   final JsModuleResolver moduleResolver;
 
   public JsGuestModuleLoader(JsModuleResolver moduleResolver) {
@@ -59,4 +60,5 @@ public class JsGuestModuleLoader implements JsModuleResolver, JsModuleLoader {
   public void evalModule(JsModule module) {
     module.evalModule();
   }
+
 }

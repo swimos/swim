@@ -20,9 +20,6 @@ import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
 
 public final class HostThrowable {
-  private HostThrowable() {
-    // static
-  }
 
   public static final HostObjectType<Throwable> TYPE;
 
@@ -33,9 +30,15 @@ public final class HostThrowable {
     type.addMember(new HostThrowableGetMessage());
     type.addMember(new HostThrowableGetCause());
   }
+
+  private HostThrowable() {
+    // static
+  }
+
 }
 
 final class HostThrowableGetMessage implements HostMethod<Throwable> {
+
   @Override
   public String key() {
     return "getMessage";
@@ -45,9 +48,11 @@ final class HostThrowableGetMessage implements HostMethod<Throwable> {
   public Object invoke(Bridge bridge, Throwable throwable, Object... arguments) {
     return throwable.getMessage();
   }
+
 }
 
 final class HostThrowableGetCause implements HostMethod<Throwable> {
+
   @Override
   public String key() {
     return "getCause";
@@ -57,4 +62,5 @@ final class HostThrowableGetCause implements HostMethod<Throwable> {
   public Object invoke(Bridge bridge, Throwable throwable, Object... arguments) {
     return throwable.getCause();
   }
+
 }

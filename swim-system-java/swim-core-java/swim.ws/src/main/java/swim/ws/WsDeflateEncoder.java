@@ -19,6 +19,7 @@ import swim.codec.OutputBuffer;
 import swim.deflate.Deflate;
 
 public abstract class WsDeflateEncoder extends WsEncoder {
+
   protected final Deflate<?> deflate;
   protected final int flush;
 
@@ -54,4 +55,5 @@ public abstract class WsDeflateEncoder extends WsEncoder {
   public <T> Encoder<?, WsFrame<T>> encodeBinaryFrame(WsFrame<T> frame, OutputBuffer<?> output) {
     return WsFrameDeflater.encode(output, this, frame);
   }
+
 }

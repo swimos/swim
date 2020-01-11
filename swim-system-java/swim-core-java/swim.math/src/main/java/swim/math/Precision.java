@@ -23,10 +23,69 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public final class Precision implements Debug {
+
+  private static int hashSeed;
+  private static Precision undefined;
+  private static Precision f16;
+  private static Precision f32;
+  private static Precision f64;
+  private static Form<Precision> form;
   final int bits;
 
   Precision(int bits) {
     this.bits = bits;
+  }
+
+  public static Precision undefined() {
+    if (undefined == null) {
+      undefined = new Precision(0);
+    }
+    return undefined;
+  }
+
+  public static Precision f16() {
+    if (f16 == null) {
+      f16 = new Precision(16);
+    }
+    return f16;
+  }
+
+  public static Precision f32() {
+    if (f32 == null) {
+      f32 = new Precision(32);
+    }
+    return f32;
+  }
+
+  public static Precision f64() {
+    if (f64 == null) {
+      f64 = new Precision(64);
+    }
+    return f64;
+  }
+
+  public static Precision fromBits(int bits) {
+    if (bits < 0) {
+      throw new IllegalArgumentException();
+    } else if (bits == 0) {
+      return undefined();
+    } else if (bits == 16) {
+      return f16();
+    } else if (bits == 32) {
+      return f32();
+    } else if (bits == 64) {
+      return f64();
+    } else {
+      return new Precision(bits);
+    }
+  }
+
+  @Kind
+  public static Form<Precision> form() {
+    if (form == null) {
+      form = new PrecisionForm();
+    }
+    return form;
   }
 
   public boolean isDefined() {
@@ -105,64 +164,4 @@ public final class Precision implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static Precision undefined;
-  private static Precision f16;
-  private static Precision f32;
-  private static Precision f64;
-
-  private static Form<Precision> form;
-
-  public static Precision undefined() {
-    if (undefined == null) {
-      undefined = new Precision(0);
-    }
-    return undefined;
-  }
-
-  public static Precision f16() {
-    if (f16 == null) {
-      f16 = new Precision(16);
-    }
-    return f16;
-  }
-
-  public static Precision f32() {
-    if (f32 == null) {
-      f32 = new Precision(32);
-    }
-    return f32;
-  }
-
-  public static Precision f64() {
-    if (f64 == null) {
-      f64 = new Precision(64);
-    }
-    return f64;
-  }
-
-  public static Precision fromBits(int bits) {
-    if (bits < 0) {
-      throw new IllegalArgumentException();
-    } else if (bits == 0) {
-      return undefined();
-    } else if (bits == 16) {
-      return f16();
-    } else if (bits == 32) {
-      return f32();
-    } else if (bits == 64) {
-      return f64();
-    } else {
-      return new Precision(bits);
-    }
-  }
-
-  @Kind
-  public static Form<Precision> form() {
-    if (form == null) {
-      form = new PrecisionForm();
-    }
-    return form;
-  }
 }

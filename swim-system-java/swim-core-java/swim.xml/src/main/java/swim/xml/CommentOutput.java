@@ -18,6 +18,7 @@ import swim.codec.Output;
 import swim.codec.OutputSettings;
 
 final class CommentOutput<I> extends Output<I> {
+
   final XmlParser<I, ?> xml;
   final StringBuilder builder;
   OutputSettings settings;
@@ -111,4 +112,5 @@ final class CommentOutput<I> extends Output<I> {
   public String toString() {
     return this.builder.toString();
   }
+
 }

@@ -20,6 +20,7 @@ import swim.codec.InputBuffer;
 import swim.util.Builder;
 
 final class PackedDecoder<I, V> extends Decoder<V> {
+
   final ProtobufDecoder<I, V> protobuf;
   final WireType wireType;
   final Decoder<V> valueDecoder;
@@ -31,11 +32,6 @@ final class PackedDecoder<I, V> extends Decoder<V> {
     this.wireType = wireType;
     this.valueDecoder = valueDecoder;
     this.builder = builder;
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.wireType, this.valueDecoder, this.builder);
   }
 
   static <I, V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<I, V> protobuf,
@@ -73,4 +69,10 @@ final class PackedDecoder<I, V> extends Decoder<V> {
                                   WireType wireType) {
     return decode(input, protobuf, wireType, null, null);
   }
+
+  @Override
+  public Decoder<V> feed(InputBuffer input) {
+    return decode(input, this.protobuf, this.wireType, this.valueDecoder, this.builder);
+  }
+
 }

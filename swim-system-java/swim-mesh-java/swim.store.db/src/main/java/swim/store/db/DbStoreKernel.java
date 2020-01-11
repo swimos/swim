@@ -29,6 +29,8 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 public class DbStoreKernel extends KernelProxy {
+
+  private static final double KERNEL_PRIORITY = -0.75;
   final double kernelPriority;
 
   public DbStoreKernel(double kernelPriority) {
@@ -37,6 +39,16 @@ public class DbStoreKernel extends KernelProxy {
 
   public DbStoreKernel() {
     this(KERNEL_PRIORITY);
+  }
+
+  public static DbStoreKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || DbStoreKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      return new DbStoreKernel(kernelPriority);
+    }
+    return null;
   }
 
   @Override
@@ -97,15 +109,4 @@ public class DbStoreKernel extends KernelProxy {
     }
   }
 
-  private static final double KERNEL_PRIORITY = -0.75;
-
-  public static DbStoreKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || DbStoreKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new DbStoreKernel(kernelPriority);
-    }
-    return null;
-  }
 }

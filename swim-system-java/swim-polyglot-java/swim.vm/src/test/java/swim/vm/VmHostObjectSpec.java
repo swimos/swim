@@ -31,16 +31,21 @@ import swim.dynamic.JavaHostRuntime;
 import static org.testng.Assert.assertEquals;
 
 class Foo {
+
+  static final FooType TYPE = new FooType();
   final String bar = "BAR";
 
   String baz() {
     return "BAZ";
   }
 
-  static final FooType TYPE = new FooType();
 }
 
 class FooType extends AbstractHostObjectType<Foo> {
+
+  static final FooBar BAR = new FooBar();
+  static final FooBaz BAZ = new FooBaz();
+
   @Override
   public Class<?> hostClass() {
     return Foo.class;
@@ -59,9 +64,12 @@ class FooType extends AbstractHostObjectType<Foo> {
   @Override
   public HostMember<? super Foo> getOwnMember(Bridge bridge, Foo foo, String key) {
     switch (key) {
-      case "bar": return BAR;
-      case "baz": return BAZ;
-      default: return null;
+      case "bar":
+        return BAR;
+      case "baz":
+        return BAZ;
+      default:
+        return null;
     }
   }
 
@@ -80,11 +88,10 @@ class FooType extends AbstractHostObjectType<Foo> {
     return Arrays.asList();
   }
 
-  static final FooBar BAR = new FooBar();
-  static final FooBaz BAZ = new FooBaz();
 }
 
 class FooBar implements HostField<Foo> {
+
   @Override
   public String key() {
     return "bar";
@@ -94,9 +101,11 @@ class FooBar implements HostField<Foo> {
   public Object get(Bridge bridge, Foo foo) {
     return foo.bar;
   }
+
 }
 
 class FooBaz implements HostMethod<Foo> {
+
   @Override
   public String key() {
     return "baz";
@@ -106,9 +115,11 @@ class FooBaz implements HostMethod<Foo> {
   public Object invoke(Bridge bridge, Foo foo, Object... arguments) {
     return foo.baz();
   }
+
 }
 
 public class VmHostObjectSpec {
+
   @Test
   public void testGetMember() {
     try (Context context = Context.create()) {
@@ -136,4 +147,5 @@ public class VmHostObjectSpec {
       assertEquals(context.eval("js", "foo.baz()").asString(), "BAZ");
     }
   }
+
 }

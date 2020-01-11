@@ -19,15 +19,19 @@ import swim.util.Murmur3;
 
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class Constant<T> {
+
   @Header
   public final T value;
+
   public Constant(T value) {
     this.value = value;
   }
+
   Constant() {
     // Form.cast constructor
     this.value = null;
   }
+
   @Override
   public boolean equals(Object other) {
     if (other instanceof Constant<?>) {
@@ -36,12 +40,15 @@ public class Constant<T> {
     }
     return false;
   }
+
   @Override
   public int hashCode() {
     return Murmur3.hash(this.value);
   }
+
   @Override
   public String toString() {
     return "Constant(" + this.value + ")";
   }
+
 }

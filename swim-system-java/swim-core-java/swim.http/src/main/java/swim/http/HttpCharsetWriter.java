@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class HttpCharsetWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final String name;
   final float weight;
@@ -35,11 +36,6 @@ final class HttpCharsetWriter extends Writer<Object, Object> {
 
   HttpCharsetWriter(HttpWriter http, String name, float weight) {
     this(http, name, weight, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.name, this.weight, this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name, float weight,
@@ -84,4 +80,10 @@ final class HttpCharsetWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name, float weight) {
     return write(output, http, name, weight, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.name, this.weight, this.part, this.step);
+  }
+
 }

@@ -21,6 +21,7 @@ import swim.dynamic.HostStaticMethod;
 import swim.vm.VmProxyArray;
 
 public class JsHostStaticMethod implements ProxyExecutable, ProxyObject {
+
   final JsBridge bridge;
   final HostStaticMethod staticMethod;
 
@@ -73,4 +74,5 @@ public class JsHostStaticMethod implements ProxyExecutable, ProxyObject {
   public Object getMemberKeys() {
     return new VmProxyArray(new String[] {"__proto__"});
   }
+
 }

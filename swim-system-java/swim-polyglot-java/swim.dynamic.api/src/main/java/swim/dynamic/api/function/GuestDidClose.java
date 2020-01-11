@@ -19,6 +19,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
 public class GuestDidClose extends BridgeGuest implements DidClose {
+
   public GuestDidClose(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -27,4 +28,5 @@ public class GuestDidClose extends BridgeGuest implements DidClose {
   public void didClose() {
     this.bridge.guestExecuteVoid(this.guest);
   }
+
 }

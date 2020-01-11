@@ -18,6 +18,7 @@ import java.util.AbstractSet;
 import java.util.Iterator;
 
 final class RecordKeySet extends AbstractSet<Value> {
+
   final Record record;
 
   RecordKeySet(Record record) {
@@ -33,4 +34,5 @@ final class RecordKeySet extends AbstractSet<Value> {
   public Iterator<Value> iterator() {
     return this.record.keyIterator();
   }
+
 }

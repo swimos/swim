@@ -15,6 +15,7 @@
 package swim.io;
 
 public class TlsSocketSpec extends SecureIpSocketBehaviors {
+
   final IpSettings ipSettings = TestTlsSettings.ipSettings();
 
   @Override
@@ -26,4 +27,5 @@ public class TlsSocketSpec extends SecureIpSocketBehaviors {
   protected IpSocketRef connect(IpEndpoint endpoint, IpSocket socket) {
     return endpoint.connectTls("127.0.0.1", 53555, socket, this.ipSettings);
   }
+
 }

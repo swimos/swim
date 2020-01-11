@@ -19,9 +19,6 @@ import swim.dynamic.JavaHostClassType;
 import swim.structure.Slot;
 
 public final class HostSlot {
-  private HostSlot() {
-    // static
-  }
 
   public static final HostObjectType<Slot> TYPE;
 
@@ -30,4 +27,9 @@ public final class HostSlot {
     TYPE = type;
     type.extendType(HostField.TYPE);
   }
+
+  private HostSlot() {
+    // static
+  }
+
 }

@@ -18,6 +18,7 @@ import swim.runtime.LaneAddress;
 import swim.runtime.Metric;
 
 public final class WarpLaneProfile extends Metric {
+
   final LaneAddress cellAddress;
   final long execDelta;
   final long execRate;
@@ -173,4 +174,5 @@ public final class WarpLaneProfile extends Metric {
   public long uplinkCommandCount() {
     return this.uplinkCommandCount;
   }
+
 }

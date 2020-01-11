@@ -19,6 +19,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
 public class GuestDidFail extends BridgeGuest implements DidFail {
+
   public GuestDidFail(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -27,4 +28,5 @@ public class GuestDidFail extends BridgeGuest implements DidFail {
   public void didFail(Throwable error) {
     this.bridge.guestExecuteVoid(this.guest, error);
   }
+
 }

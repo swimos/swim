@@ -22,6 +22,7 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 public abstract class UnaryOutlet extends AbstractOutlet<Value> {
+
   final Inlet<Value> operandInlet;
 
   public UnaryOutlet() {
@@ -46,4 +47,5 @@ public abstract class UnaryOutlet extends AbstractOutlet<Value> {
   }
 
   protected abstract Item evaluate(Value argument);
+
 }

@@ -25,6 +25,8 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class PartInfo {
+
+  private static Form<PartInfo> form;
   protected final Value partKey;
   protected final PartPredicate predicate;
   protected final Uri masterHostUri;
@@ -35,6 +37,21 @@ public class PartInfo {
     this.predicate = predicate;
     this.masterHostUri = masterHostUri;
     this.hostCount = hostCount;
+  }
+
+  public static PartInfo from(PartBinding partBinding) {
+    final HostBinding master = partBinding.master();
+    return new PartInfo(partBinding.partKey(), partBinding.predicate(),
+        master != null ? master.hostUri() : Uri.empty(),
+        partBinding.hosts().size());
+  }
+
+  @Kind
+  public static Form<PartInfo> form() {
+    if (form == null) {
+      form = new PartInfoForm();
+    }
+    return form;
   }
 
   public final Value partKey() {
@@ -57,25 +74,10 @@ public class PartInfo {
     return form().mold(this).toValue();
   }
 
-  public static PartInfo from(PartBinding partBinding) {
-    final HostBinding master = partBinding.master();
-    return new PartInfo(partBinding.partKey(), partBinding.predicate(),
-                        master != null ? master.hostUri() : Uri.empty(),
-                        partBinding.hosts().size());
-  }
-
-  private static Form<PartInfo> form;
-
-  @Kind
-  public static Form<PartInfo> form() {
-    if (form == null) {
-      form = new PartInfoForm();
-    }
-    return form;
-  }
 }
 
 final class PartInfoForm extends Form<PartInfo> {
+
   @Override
   public Class<?> type() {
     return PartInfo.class;
@@ -111,4 +113,5 @@ final class PartInfoForm extends Form<PartInfo> {
     }
     return null;
   }
+
 }

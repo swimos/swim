@@ -55,6 +55,7 @@ import swim.uri.Uri;
 import swim.util.Log;
 
 public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
+
   final MeshBinding meshBinding;
   MeshContext meshContext;
   MeshDef meshDef;
@@ -488,4 +489,5 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   public void didFail(Throwable error) {
     this.meshBinding.didFail(error);
   }
+
 }

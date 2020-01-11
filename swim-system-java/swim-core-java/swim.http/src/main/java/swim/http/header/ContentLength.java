@@ -25,10 +25,23 @@ import swim.http.HttpWriter;
 import swim.util.Murmur3;
 
 public final class ContentLength extends HttpHeader {
+
+  private static int hashSeed;
   final long length;
 
   ContentLength(long length) {
     this.length = length;
+  }
+
+  public static ContentLength from(long length) {
+    if (length < 0L) {
+      throw new IllegalArgumentException(Long.toString(length));
+    }
+    return new ContentLength(length);
+  }
+
+  public static Parser<ContentLength> parseHttpValue(Input input, HttpParser http) {
+    return ContentLengthParser.parse(input);
   }
 
   @Override
@@ -75,16 +88,4 @@ public final class ContentLength extends HttpHeader {
         .debug(this.length).write(')');
   }
 
-  private static int hashSeed;
-
-  public static ContentLength from(long length) {
-    if (length < 0L) {
-      throw new IllegalArgumentException(Long.toString(length));
-    }
-    return new ContentLength(length);
-  }
-
-  public static Parser<ContentLength> parseHttpValue(Input input, HttpParser http) {
-    return ContentLengthParser.parse(input);
-  }
 }

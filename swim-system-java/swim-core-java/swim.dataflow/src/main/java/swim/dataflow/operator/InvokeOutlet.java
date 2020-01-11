@@ -25,6 +25,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public final class InvokeOutlet extends AbstractOutlet<Value> {
+
   final Record scope;
   final Inlet<Value> funcInlet;
   final Inlet<Value> argsInlet;
@@ -61,4 +62,5 @@ public final class InvokeOutlet extends AbstractOutlet<Value> {
     }
     return Value.absent();
   }
+
 }

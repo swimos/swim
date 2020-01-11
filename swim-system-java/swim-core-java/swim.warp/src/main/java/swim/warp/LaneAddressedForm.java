@@ -22,6 +22,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 abstract class LaneAddressedForm<E extends LaneAddressed> extends Form<E> {
+
   abstract E from(Uri nodeUri, Uri lane, Value body);
 
   @Override
@@ -70,4 +71,5 @@ abstract class LaneAddressedForm<E extends LaneAddressed> extends Form<E> {
     }
     return null;
   }
+
 }

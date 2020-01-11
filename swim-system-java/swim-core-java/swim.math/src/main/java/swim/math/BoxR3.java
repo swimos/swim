@@ -22,6 +22,9 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class BoxR3 extends R3Shape implements Debug {
+
+  private static int hashSeed;
+  private static R3Form<BoxR3> form;
   public final double xMin;
   public final double yMin;
   public final double zMin;
@@ -36,6 +39,19 @@ public class BoxR3 extends R3Shape implements Debug {
     this.xMax = xMin <= xMax ? xMax : xMin;
     this.yMax = yMin <= yMax ? yMax : yMin;
     this.zMax = zMin <= zMax ? zMax : zMin;
+  }
+
+  public static BoxR3 of(double xMin, double yMin, double zMin,
+                         double xMax, double yMax, double zMax) {
+    return new BoxR3(xMin, yMin, zMin, xMax, yMax, zMax);
+  }
+
+  @Kind
+  public static R3Form<BoxR3> form() {
+    if (form == null) {
+      form = new BoxR3Form();
+    }
+    return form;
   }
 
   @Override
@@ -136,11 +152,11 @@ public class BoxR3 extends R3Shape implements Debug {
   @Override
   public BoxZ3 transform(R3ToZ3Function f) {
     return new BoxZ3(f.transformX(this.xMin, this.yMin, this.zMin),
-                     f.transformY(this.xMin, this.yMin, this.zMin),
-                     f.transformZ(this.xMin, this.yMin, this.zMin),
-                     f.transformX(this.xMax, this.yMax, this.zMax),
-                     f.transformY(this.xMax, this.yMax, this.zMax),
-                     f.transformZ(this.zMax, this.zMax, this.zMax));
+        f.transformY(this.xMin, this.yMin, this.zMin),
+        f.transformZ(this.xMin, this.yMin, this.zMin),
+        f.transformX(this.xMax, this.yMax, this.zMax),
+        f.transformY(this.xMax, this.yMax, this.zMax),
+        f.transformZ(this.zMax, this.zMax, this.zMax));
   }
 
   @Override
@@ -187,20 +203,4 @@ public class BoxR3 extends R3Shape implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static R3Form<BoxR3> form;
-
-  public static BoxR3 of(double xMin, double yMin, double zMin,
-                         double xMax, double yMax, double zMax) {
-    return new BoxR3(xMin, yMin, zMin, xMax, yMax, zMax);
-  }
-
-  @Kind
-  public static R3Form<BoxR3> form() {
-    if (form == null) {
-      form = new BoxR3Form();
-    }
-    return form;
-  }
 }

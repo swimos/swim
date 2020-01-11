@@ -15,6 +15,7 @@
 package swim.runtime;
 
 public interface WarpContext extends LinkContext {
+
   @Override
   WarpBinding linkWrapper();
 
@@ -25,4 +26,5 @@ public interface WarpContext extends LinkContext {
   void pushUp(Push<?> push);
 
   void skipUp();
+
 }

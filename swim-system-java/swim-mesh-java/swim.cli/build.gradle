@@ -7,45 +7,45 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.cli'
 
 dependencies {
-  api group: 'org.swimos', name: 'swim-args', version: version
-  api group: 'org.swimos', name: 'swim-recon', version: version
-  api group: 'org.swimos', name: 'swim-json', version: version
-  api project(':swim-client')
+    api group: 'org.swimos', name: 'swim-args', version: version
+    api group: 'org.swimos', name: 'swim-recon', version: version
+    api group: 'org.swimos', name: 'swim-json', version: version
+    api project(':swim-client')
 
-  implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.62'
+    implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.62'
 }
 
 afterEvaluate {
-  ext.dependencyProjects = new HashSet()
-  ext.resolveDependencyProjects = { project ->
-    def dependencies = project.configurations.api.dependencies + project.configurations.implementation.dependencies
-    dependencies.each { dependency ->
-      if (dependency instanceof ProjectDependency) {
-        def dependencyProject = dependency.dependencyProject;
-        if (!ext.dependencyProjects.contains(dependencyProject)) {
-          ext.dependencyProjects.add(dependencyProject)
-          ext.resolveDependencyProjects(dependencyProject)
+    ext.dependencyProjects = new HashSet()
+    ext.resolveDependencyProjects = { project ->
+        def dependencies = project.configurations.api.dependencies + project.configurations.implementation.dependencies
+        dependencies.each { dependency ->
+            if (dependency instanceof ProjectDependency) {
+                def dependencyProject = dependency.dependencyProject;
+                if (!ext.dependencyProjects.contains(dependencyProject)) {
+                    ext.dependencyProjects.add(dependencyProject)
+                    ext.resolveDependencyProjects(dependencyProject)
+                }
+            }
         }
-      }
     }
-  }
-  ext.resolveDependencyProjects(project)
+    ext.resolveDependencyProjects(project)
 
-  ext.javaHome = System.getenv('JAVA_HOME')
+    ext.javaHome = System.getenv('JAVA_HOME')
 
-  task nativeImage(type: Exec) {
-    dependencyProjects.each { dependencyProject ->
-      dependsOn dependencyProject.jar
-    }
-    dependsOn jar
+    task nativeImage(type: Exec) {
+        dependencyProjects.each { dependencyProject ->
+            dependsOn dependencyProject.jar
+        }
+        dependsOn jar
 
-    def outDir = "${buildDir}/native"
-    doFirst {
-      mkdir outDir
-    }
+        def outDir = "${buildDir}/native"
+        doFirst {
+            mkdir outDir
+        }
 
-    workingDir project.projectDir
-    commandLine "${javaHome}/bin/native-image",
+        workingDir project.projectDir
+        commandLine "${javaHome}/bin/native-image",
                 '-cp', sourceSets.main.runtimeClasspath.asPath,
                 "-H:Path=${outDir}",
                 "-H:Name=${project.name}",
@@ -56,16 +56,16 @@ afterEvaluate {
                 '--initialize-at-run-time=org.bouncycastle.crypto.prng.SP800SecureRandom,org.bouncycastle.jcajce.provider.drbg.DRBG$Default,org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV',
                 '-J-Djava.security.properties=native-java.security.overrides',
                 "${mainClassName}"
-  }
-
-  task jlink(type: Exec) {
-    dependencyProjects.each { dependencyProject ->
-      dependsOn dependencyProject.jar
     }
-    dependsOn jar
 
-    workingDir project.projectDir
-    commandLine "${javaHome}/bin/jlink",
+    task jlink(type: Exec) {
+        dependencyProjects.each { dependencyProject ->
+            dependsOn dependencyProject.jar
+        }
+        dependsOn jar
+
+        workingDir project.projectDir
+        commandLine "${javaHome}/bin/jlink",
                 '--module-path', sourceSets.main.runtimeClasspath.asPath,
                 '--add-modules', moduleName,
                 '--launcher', "${project.name}=${moduleName}/${mainClassName}",
@@ -75,5 +75,5 @@ afterEvaluate {
                 '--strip-debug',
                 '--no-header-files',
                 '--no-man-pages'
-  }
+    }
 }

@@ -5,13 +5,13 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.db'
 
 dependencies {
-  api project(':swim-util')
-  api project(':swim-codec')
-  api project(':swim-collections')
-  api project(':swim-structure')
-  api project(':swim-recon')
-  api project(':swim-math')
-  api project(':swim-spatial')
-  api project(':swim-uri')
-  api project(':swim-concurrent')
+    api project(':swim-util')
+    api project(':swim-codec')
+    api project(':swim-collections')
+    api project(':swim-structure')
+    api project(':swim-recon')
+    api project(':swim-math')
+    api project(':swim-spatial')
+    api project(':swim-uri')
+    api project(':swim-concurrent')
 }

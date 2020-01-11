@@ -38,6 +38,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface ValueDownlink<V> extends WarpDownlink, ObservableValue<V>, Inlet<V>, Outlet<V> {
+
   @Override
   ValueDownlink<V> hostUri(Uri hostUri);
 
@@ -140,4 +141,5 @@ public interface ValueDownlink<V> extends WarpDownlink, ObservableValue<V>, Inle
 
   @Override
   V set(V newValue);
+
 }

@@ -52,9 +52,12 @@ import swim.structure.Form;
 import swim.util.KeyedList;
 
 public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
-
   protected int flags;
   protected ListLaneModel laneBinding;
   protected ListData<V> dataView;
@@ -97,7 +100,7 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   @Override
   public <V2> ListLaneView<V2> valueForm(Form<V2> valueForm) {
     return new ListLaneView<V2>(this.agentContext, valueForm, this.flags,
-                                typesafeObservers(this.observers));
+        typesafeObservers(this.observers));
   }
 
   @Override
@@ -965,7 +968,7 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   @Override
   public boolean addAll(Collection<? extends V> elements) {
     boolean added = false;
-    for (V element: elements) {
+    for (V element : elements) {
       added = added || add(element);
     }
     return added;
@@ -974,7 +977,7 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   @Override
   public boolean addAll(int index, Collection<? extends V> elements) {
     int position = index;
-    for (V element: elements) {
+    for (V element : elements) {
       add(position++, element);
     }
     return elements.isEmpty();
@@ -983,7 +986,7 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   @Override
   public boolean removeAll(Collection<?> elements) {
     boolean didRemove = false;
-    for (Object element: elements) {
+    for (Object element : elements) {
       final int index = indexOf(element);
       if (index != -1) {
         didRemove = didRemove || remove(element);
@@ -995,7 +998,7 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   @Override
   public boolean retainAll(Collection<?> elements) {
     boolean modified = false;
-    for (Object element: elements) {
+    for (Object element : elements) {
       if (!elements.contains(element)) {
         modified = modified || remove(element);
       }
@@ -1128,7 +1131,4 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
     return this.dataView.entryIterator();
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
 }

@@ -21,6 +21,7 @@ import swim.uri.Uri;
 import swim.uri.UriPattern;
 
 public abstract class AbstractAgentRoute<A extends Agent> implements AgentRoute<A> {
+
   protected AgentRouteContext context;
 
   @Override
@@ -60,4 +61,5 @@ public abstract class AbstractAgentRoute<A extends Agent> implements AgentRoute<
     }
     return props;
   }
+
 }

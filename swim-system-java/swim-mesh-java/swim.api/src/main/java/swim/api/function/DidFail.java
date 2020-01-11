@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface DidFail extends Preemptive {
+
   void didFail(Throwable error);
+
 }

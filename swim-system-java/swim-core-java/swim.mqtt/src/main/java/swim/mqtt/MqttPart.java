@@ -18,6 +18,7 @@ import swim.codec.Encoder;
 import swim.codec.OutputBuffer;
 
 public abstract class MqttPart {
+
   public abstract Encoder<?, ?> mqttEncoder(MqttEncoder mqtt);
 
   public Encoder<?, ?> mqttEncoder() {
@@ -29,4 +30,5 @@ public abstract class MqttPart {
   public Encoder<?, ?> encodeMqtt(OutputBuffer<?> output) {
     return encodeMqtt(output, Mqtt.standardEncoder());
   }
+
 }

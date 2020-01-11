@@ -24,6 +24,7 @@ import swim.structure.Value;
  * Character}.
  */
 public final class CharacterForm extends Form<Character> {
+
   final Character unit;
 
   public CharacterForm(Character unit) {
@@ -63,4 +64,5 @@ public final class CharacterForm extends Form<Character> {
       return null;
     }
   }
+
 }

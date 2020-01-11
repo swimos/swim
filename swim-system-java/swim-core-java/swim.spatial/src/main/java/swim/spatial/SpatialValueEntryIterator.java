@@ -19,6 +19,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 final class SpatialValueEntryIterator<K, S, V> implements Iterator<SpatialMap.Entry<K, S, V>> {
+
   final Iterator<SpatialMap.Entry<Value, S, Value>> inner;
   final Form<K> keyForm;
   final Form<V> valueForm;
@@ -43,4 +44,5 @@ final class SpatialValueEntryIterator<K, S, V> implements Iterator<SpatialMap.En
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

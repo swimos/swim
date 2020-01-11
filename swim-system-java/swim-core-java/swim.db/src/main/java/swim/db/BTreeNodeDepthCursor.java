@@ -18,6 +18,7 @@ import swim.structure.Value;
 import swim.util.OrderedMapCursor;
 
 final class BTreeNodeDepthCursor extends BTreeNodeCursor {
+
   final int depth;
 
   BTreeNodeDepthCursor(BTreeNode page, long index, int childIndex, int depth) {
@@ -33,4 +34,5 @@ final class BTreeNodeDepthCursor extends BTreeNodeCursor {
   OrderedMapCursor<Value, Value> childCursor(BTreePageRef childRef) {
     return childRef.depthCursor(this.depth - 1);
   }
+
 }

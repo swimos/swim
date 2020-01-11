@@ -20,6 +20,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class RecordMapMutableSpec {
+
   @Test
   public void testMutablePut() {
     final Record xs = Record.of().attr("k", "v").slot("a", "b");
@@ -630,4 +631,5 @@ public class RecordMapMutableSpec {
     assertEquals(xs, Record.empty());
     assertEquals(ys, Record.empty());
   }
+
 }

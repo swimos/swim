@@ -5,7 +5,7 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.store.db'
 
 dependencies {
-  api group: 'org.swimos', name: 'swim-db', version: version
-  api project(':swim-store')
-  api project(':swim-kernel')
+    api group: 'org.swimos', name: 'swim-db', version: version
+    api project(':swim-store')
+    api project(':swim-kernel')
 }

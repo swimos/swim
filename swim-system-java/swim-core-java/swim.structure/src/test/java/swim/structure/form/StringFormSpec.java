@@ -23,6 +23,7 @@ import swim.structure.Text;
 import static org.testng.Assert.assertEquals;
 
 public class StringFormSpec {
+
   @Test
   public void moldStrings() {
     assertEquals(Form.forString().mold("test"), Text.from("test"));
@@ -42,4 +43,5 @@ public class StringFormSpec {
   public void castAttributedStringsToStrings() {
     assertEquals(Form.forString().cast(Record.of(Attr.of("test"), "foo")), "foo");
   }
+
 }

@@ -20,6 +20,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class HttpResponseWriter<T> extends Writer<Object, HttpResponse<T>> {
+
   final HttpWriter http;
   final HttpResponse<T> response;
   final Iterator<HttpHeader> headers;
@@ -37,11 +38,6 @@ final class HttpResponseWriter<T> extends Writer<Object, HttpResponse<T>> {
 
   HttpResponseWriter(HttpWriter http, HttpResponse<T> response) {
     this(http, response, null, null, 1);
-  }
-
-  @Override
-  public Writer<Object, HttpResponse<T>> pull(Output<?> output) {
-    return write(output, this.http, this.response, this.headers, this.part, this.step);
   }
 
   static <T> Writer<Object, HttpResponse<T>> write(Output<?> output, HttpWriter http, HttpResponse<T> response,
@@ -137,4 +133,10 @@ final class HttpResponseWriter<T> extends Writer<Object, HttpResponse<T>> {
                                                    HttpResponse<T> response) {
     return write(output, http, response, null, null, 1);
   }
+
+  @Override
+  public Writer<Object, HttpResponse<T>> pull(Output<?> output) {
+    return write(output, this.http, this.response, this.headers, this.part, this.step);
+  }
+
 }

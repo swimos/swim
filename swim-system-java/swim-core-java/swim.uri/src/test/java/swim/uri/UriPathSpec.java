@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class UriPathSpec {
+
   @Test
   public void testPathName() {
     assertEquals(UriPath.parse("").name(), "");
@@ -69,4 +70,5 @@ public class UriPathSpec {
     assertEquals(UriPath.parse("/foo/bar").body(), UriPath.parse("/foo/"));
     assertEquals(UriPath.parse("/foo/bar/").body(), UriPath.parse("/foo/bar"));
   }
+
 }

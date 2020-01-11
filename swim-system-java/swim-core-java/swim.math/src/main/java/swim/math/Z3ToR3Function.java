@@ -15,9 +15,11 @@
 package swim.math;
 
 public interface Z3ToR3Function {
+
   double transformX(long x, long y, long z);
 
   double transformY(long x, long y, long z);
 
   double transformZ(long x, long y, long z);
+
 }

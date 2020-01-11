@@ -22,6 +22,7 @@ import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 
 public class RecordScopeSpec {
+
   @Test
   public void compileGetSelectorFields() {
     final Value y = Selector.identity().get("x");
@@ -181,4 +182,5 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x").doubleValue(), 3.14);
     assertEquals(scope.get("y").doubleValue(), 3.0);
   }
+
 }

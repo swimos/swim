@@ -26,6 +26,10 @@ import swim.structure.Kind;
 import swim.util.Murmur3;
 
 public class Uri implements Comparable<Uri>, Debug, Display {
+
+  private static Uri empty;
+  private static UriParser standardParser;
+  private static Form<Uri> form;
   protected final UriScheme scheme;
   protected final UriAuthority authority;
   protected final UriPath path;
@@ -40,6 +44,312 @@ public class Uri implements Comparable<Uri>, Debug, Display {
     this.path = path;
     this.query = query;
     this.fragment = fragment;
+  }
+
+  public static Uri empty() {
+    if (empty == null) {
+      empty = new Uri(UriScheme.undefined(), UriAuthority.undefined(), UriPath.empty(),
+          UriQuery.undefined(), UriFragment.undefined());
+    }
+    return empty;
+  }
+
+  public static Uri from(UriScheme scheme, UriAuthority authority, UriPath path,
+                         UriQuery query, UriFragment fragment) {
+    if (scheme == null) {
+      scheme = UriScheme.undefined();
+    }
+    if (authority == null) {
+      authority = UriAuthority.undefined();
+    }
+    if (path == null) {
+      path = UriPath.empty();
+    }
+    if (query == null) {
+      query = UriQuery.undefined();
+    }
+    if (fragment == null) {
+      fragment = UriFragment.undefined();
+    }
+    if (scheme.isDefined() || authority.isDefined() || path.isDefined()
+        || query.isDefined() || fragment.isDefined()) {
+      return new Uri(scheme, authority, path, query, fragment);
+    } else {
+      return empty();
+    }
+  }
+
+  public static Uri from(UriScheme scheme, UriAuthority authority, UriPath path, UriQuery query) {
+    return from(scheme, authority, path, query, null);
+  }
+
+  public static Uri from(UriScheme scheme, UriAuthority authority, UriPath path, UriFragment fragment) {
+    return from(scheme, authority, path, null, fragment);
+  }
+
+  public static Uri from(UriScheme scheme, UriAuthority authority, UriPath path) {
+    return from(scheme, authority, path, null, null);
+  }
+
+  public static Uri from(UriScheme scheme, UriAuthority authority) {
+    return from(scheme, authority, null, null, null);
+  }
+
+  public static Uri from(UriPath path, UriQuery query, UriFragment fragment) {
+    return from(null, null, path, query, fragment);
+  }
+
+  public static Uri from(UriPath path, UriQuery query) {
+    return from(null, null, path, query, null);
+  }
+
+  public static Uri from(UriPath path, UriFragment fragment) {
+    return from(null, null, path, null, fragment);
+  }
+
+  public static Uri from(UriPath path) {
+    return from(null, null, path, null, null);
+  }
+
+  public static Uri from(UriPart part) {
+    if (part instanceof UriScheme) {
+      return from((UriScheme) part, null, null, null, null);
+    } else if (part instanceof UriAuthority) {
+      return from(null, (UriAuthority) part, null, null, null);
+    } else if (part instanceof UriPath) {
+      return from(null, null, (UriPath) part, null, null);
+    } else if (part instanceof UriQuery) {
+      return from(null, null, null, (UriQuery) part, null);
+    } else if (part instanceof UriFragment) {
+      return from(null, null, null, null, (UriFragment) part);
+    } else {
+      throw new ClassCastException(part.toString());
+    }
+  }
+
+  public static UriParser standardParser() {
+    if (standardParser == null) {
+      standardParser = new UriParser();
+    }
+    return standardParser;
+  }
+
+  public static Uri parse(String string) {
+    return standardParser().parseAbsoluteString(string);
+  }
+
+  static boolean isUnreservedChar(int c) {
+    return c >= 'A' && c <= 'Z'
+        || c >= 'a' && c <= 'z'
+        || c >= '0' && c <= '9'
+        || c == '-' || c == '.'
+        || c == '_' || c == '~';
+  }
+
+  static boolean isSubDelimChar(int c) {
+    return c == '!' || c == '$'
+        || c == '&' || c == '('
+        || c == ')' || c == '*'
+        || c == '+' || c == ','
+        || c == ';' || c == '='
+        || c == '\'';
+  }
+
+  static boolean isSchemeChar(int c) {
+    return c >= 'A' && c <= 'Z'
+        || c >= 'a' && c <= 'z'
+        || c >= '0' && c <= '9'
+        || c == '+' || c == '-'
+        || c == '.';
+  }
+
+  static boolean isUserInfoChar(int c) {
+    return isUnreservedChar(c) || isSubDelimChar(c) || c == ':';
+  }
+
+  static boolean isUserChar(int c) {
+    return isUnreservedChar(c) || isSubDelimChar(c);
+  }
+
+  static boolean isHostChar(int c) {
+    return isUnreservedChar(c) || isSubDelimChar(c);
+  }
+
+  static boolean isPathChar(int c) {
+    return isUnreservedChar(c) || isSubDelimChar(c) || c == ':' || c == '@';
+  }
+
+  static boolean isQueryChar(int c) {
+    return isUnreservedChar(c) || isSubDelimChar(c)
+        || c == '/' || c == ':'
+        || c == '?' || c == '@';
+  }
+
+  static boolean isParamChar(int c) {
+    return isUnreservedChar(c)
+        || c == '!' || c == '$'
+        || c == '(' || c == ')'
+        || c == '*' || c == '+'
+        || c == ',' || c == '/'
+        || c == ':' || c == ';'
+        || c == '?' || c == '@'
+        || c == '\'';
+  }
+
+  static boolean isFragmentChar(int c) {
+    return isUnreservedChar(c) || isSubDelimChar(c)
+        || c == '/' || c == ':'
+        || c == '?' || c == '@';
+  }
+
+  static boolean isAlpha(int c) {
+    return c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z';
+  }
+
+  static void writeScheme(String scheme, Output<?> output) {
+    final int n = scheme.length();
+    for (int i = 0; i < n; i = scheme.offsetByCodePoints(i, 1)) {
+      final int c = scheme.codePointAt(i);
+      if (i > 0 && isSchemeChar(c) || i == 0 && isAlpha(c)) {
+        output = output.write(c);
+      } else {
+        throw new UriException("Invalid scheme: " + scheme);
+      }
+    }
+  }
+
+  static void writeUserInfo(String userInfo, Output<?> output) {
+    final int n = userInfo.length();
+    for (int i = 0; i < n; i = userInfo.offsetByCodePoints(i, 1)) {
+      final int c = userInfo.codePointAt(i);
+      if (isUserInfoChar(c)) {
+        output = output.write(c);
+      } else {
+        writeEncoded(c, output);
+      }
+    }
+  }
+
+  static void writeUser(String user, Output<?> output) {
+    final int n = user.length();
+    for (int i = 0; i < n; i = user.offsetByCodePoints(i, 1)) {
+      final int c = user.codePointAt(i);
+      if (isUserChar(c)) {
+        output = output.write(c);
+      } else {
+        writeEncoded(c, output);
+      }
+    }
+  }
+
+  static void writeHost(String address, Output<?> output) {
+    final int n = address.length();
+    for (int i = 0; i < n; i = address.offsetByCodePoints(i, 1)) {
+      final int c = address.codePointAt(i);
+      if (isHostChar(c)) {
+        output = output.write(c);
+      } else {
+        writeEncoded(c, output);
+      }
+    }
+  }
+
+  static void writeHostLiteral(String address, Output<?> output) {
+    final int n = address.length();
+    for (int i = 0; i < n; i = address.offsetByCodePoints(i, 1)) {
+      final int c = address.codePointAt(i);
+      if (isHostChar(c) || c == ':') {
+        output = output.write(c);
+      } else {
+        writeEncoded(c, output);
+      }
+    }
+  }
+
+  static void writePathSegment(String segment, Output<?> output) {
+    final int n = segment.length();
+    for (int i = 0; i < n; i = segment.offsetByCodePoints(i, 1)) {
+      final int c = segment.codePointAt(i);
+      if (isPathChar(c)) {
+        output = output.write(c);
+      } else {
+        writeEncoded(c, output);
+      }
+    }
+  }
+
+  static void writeQuery(String query, Output<?> output) {
+    final int n = query.length();
+    for (int i = 0; i < n; i = query.offsetByCodePoints(i, 1)) {
+      final int c = query.codePointAt(i);
+      if (isQueryChar(c)) {
+        output = output.write(c);
+      } else {
+        writeEncoded(c, output);
+      }
+    }
+  }
+
+  static void writeParam(String param, Output<?> output) {
+    final int n = param.length();
+    for (int i = 0; i < n; i = param.offsetByCodePoints(i, 1)) {
+      final int c = param.codePointAt(i);
+      if (isParamChar(c)) {
+        output = output.write(c);
+      } else {
+        writeEncoded(c, output);
+      }
+    }
+  }
+
+  static void writeFragment(String fragment, Output<?> output) {
+    final int n = fragment.length();
+    for (int i = 0; i < n; i = fragment.offsetByCodePoints(i, 1)) {
+      final int c = fragment.codePointAt(i);
+      if (isFragmentChar(c)) {
+        output = output.write(c);
+      } else {
+        writeEncoded(c, output);
+      }
+    }
+  }
+
+  static void writeEncoded(int c, Output<?> output) {
+    if (c == 0x00) { // modified UTF-8
+      writePctEncoded(0xC0, output);
+      writePctEncoded(0x80, output);
+    } else if (c >= 0x00 && c <= 0x7F) { // U+0000..U+007F
+      writePctEncoded(c, output);
+    } else if (c >= 0x80 && c <= 0x07FF) { // U+0080..U+07FF
+      writePctEncoded(0xC0 | (c >>> 6), output);
+      writePctEncoded(0x80 | (c & 0x3F), output);
+    } else if (c >= 0x0800 && c <= 0xffff) { // (U+0800..U+D7FF, U+E000..U+FFFF, and surrogates
+      writePctEncoded(0xE0 | (c >>> 12), output);
+      writePctEncoded(0x80 | (c >>> 6 & 0x3F), output);
+      writePctEncoded(0x80 | (c & 0x3F), output);
+    } else if (c >= 0x10000 && c <= 0x10FFFF) { // U+10000..U+10FFFF
+      writePctEncoded(0xF0 | (c >>> 18), output);
+      writePctEncoded(0x80 | (c >>> 12 & 0x3F), output);
+      writePctEncoded(0x80 | (c >>> 6 & 0x3F), output);
+      writePctEncoded(0x80 | (c & 0x3F), output);
+    } else { // surrogate or invalid code point
+      writePctEncoded(0xEF, output);
+      writePctEncoded(0xBF, output);
+      writePctEncoded(0xBD, output);
+    }
+  }
+
+  static void writePctEncoded(int c, Output<?> output) {
+    output = output.write('%').write(Base16.lowercase().encodeDigit(c >>> 4 & 0xF))
+        .write(Base16.lowercase().encodeDigit(c & 0xF));
+  }
+
+  @Kind
+  public static Form<Uri> form() {
+    if (form == null) {
+      form = new UriForm(Uri.empty());
+    }
+    return form;
   }
 
   public final boolean isDefined() {
@@ -413,34 +723,34 @@ public class Uri implements Comparable<Uri>, Debug, Display {
   public Uri resolve(Uri relative) {
     if (relative.scheme.isDefined()) {
       return copy(relative.scheme,
-                  relative.authority,
-                  relative.path.removeDotSegments(),
-                  relative.query,
-                  relative.fragment);
+          relative.authority,
+          relative.path.removeDotSegments(),
+          relative.query,
+          relative.fragment);
     } else if (relative.authority.isDefined()) {
       return copy(this.scheme,
-                  relative.authority,
-                  relative.path.removeDotSegments(),
-                  relative.query,
-                  relative.fragment);
+          relative.authority,
+          relative.path.removeDotSegments(),
+          relative.query,
+          relative.fragment);
     } else if (relative.path.isEmpty()) {
       return copy(this.scheme,
-                  this.authority,
-                  this.path,
-                  relative.query.isDefined() ? relative.query : this.query,
-                  relative.fragment);
+          this.authority,
+          this.path,
+          relative.query.isDefined() ? relative.query : this.query,
+          relative.fragment);
     } else if (relative.path.isAbsolute()) {
       return copy(this.scheme,
-                  this.authority,
-                  relative.path.removeDotSegments(),
-                  relative.query,
-                  relative.fragment);
+          this.authority,
+          relative.path.removeDotSegments(),
+          relative.query,
+          relative.fragment);
     } else {
       return copy(this.scheme,
-                  this.authority,
-                  merge(relative.path).removeDotSegments(),
-                  relative.query,
-                  relative.fragment);
+          this.authority,
+          merge(relative.path).removeDotSegments(),
+          relative.query,
+          relative.fragment);
     }
   }
 
@@ -459,10 +769,10 @@ public class Uri implements Comparable<Uri>, Debug, Display {
       return absolute;
     } else {
       return copy(UriScheme.undefined(),
-                  UriAuthority.undefined(),
-                  this.path.unmerge(absolute.path),
-                  absolute.query,
-                  absolute.fragment);
+          UriAuthority.undefined(),
+          this.path.unmerge(absolute.path),
+          absolute.query,
+          absolute.fragment);
     }
   }
 
@@ -530,315 +840,4 @@ public class Uri implements Comparable<Uri>, Debug, Display {
     return this.string;
   }
 
-  private static Uri empty;
-
-  private static UriParser standardParser;
-
-  public static Uri empty() {
-    if (empty == null) {
-      empty = new Uri(UriScheme.undefined(), UriAuthority.undefined(), UriPath.empty(),
-                      UriQuery.undefined(), UriFragment.undefined());
-    }
-    return empty;
-  }
-
-  public static Uri from(UriScheme scheme, UriAuthority authority, UriPath path,
-                         UriQuery query, UriFragment fragment) {
-    if (scheme == null) {
-      scheme = UriScheme.undefined();
-    }
-    if (authority == null) {
-      authority = UriAuthority.undefined();
-    }
-    if (path == null) {
-      path = UriPath.empty();
-    }
-    if (query == null) {
-      query = UriQuery.undefined();
-    }
-    if (fragment == null) {
-      fragment = UriFragment.undefined();
-    }
-    if (scheme.isDefined() || authority.isDefined() || path.isDefined()
-        || query.isDefined() || fragment.isDefined()) {
-      return new Uri(scheme, authority, path, query, fragment);
-    } else {
-      return empty();
-    }
-  }
-
-  public static Uri from(UriScheme scheme, UriAuthority authority, UriPath path, UriQuery query) {
-    return from(scheme, authority, path, query, null);
-  }
-
-  public static Uri from(UriScheme scheme, UriAuthority authority, UriPath path, UriFragment fragment) {
-    return from(scheme, authority, path, null, fragment);
-  }
-
-  public static Uri from(UriScheme scheme, UriAuthority authority, UriPath path) {
-    return from(scheme, authority, path, null, null);
-  }
-
-  public static Uri from(UriScheme scheme, UriAuthority authority) {
-    return from(scheme, authority, null, null, null);
-  }
-
-  public static Uri from(UriPath path, UriQuery query, UriFragment fragment) {
-    return from(null, null, path, query, fragment);
-  }
-
-  public static Uri from(UriPath path, UriQuery query) {
-    return from(null, null, path, query, null);
-  }
-
-  public static Uri from(UriPath path, UriFragment fragment) {
-    return from(null, null, path, null, fragment);
-  }
-
-  public static Uri from(UriPath path) {
-    return from(null, null, path, null, null);
-  }
-
-  public static Uri from(UriPart part) {
-    if (part instanceof UriScheme) {
-      return from((UriScheme) part, null, null, null, null);
-    } else if (part instanceof UriAuthority) {
-      return from(null, (UriAuthority) part, null, null, null);
-    } else if (part instanceof UriPath) {
-      return from(null, null, (UriPath) part, null, null);
-    } else if (part instanceof UriQuery) {
-      return from(null, null, null, (UriQuery) part, null);
-    } else if (part instanceof UriFragment) {
-      return from(null, null, null, null, (UriFragment) part);
-    } else {
-      throw new ClassCastException(part.toString());
-    }
-  }
-
-  public static UriParser standardParser() {
-    if (standardParser == null) {
-      standardParser = new UriParser();
-    }
-    return standardParser;
-  }
-
-  public static Uri parse(String string) {
-    return standardParser().parseAbsoluteString(string);
-  }
-
-  static boolean isUnreservedChar(int c) {
-    return c >= 'A' && c <= 'Z'
-        || c >= 'a' && c <= 'z'
-        || c >= '0' && c <= '9'
-        || c == '-' || c == '.'
-        || c == '_' || c == '~';
-  }
-
-  static boolean isSubDelimChar(int c) {
-    return c == '!' || c == '$'
-        || c == '&' || c == '('
-        || c == ')' || c == '*'
-        || c == '+' || c == ','
-        || c == ';' || c == '='
-        || c == '\'';
-  }
-
-  static boolean isSchemeChar(int c) {
-    return c >= 'A' && c <= 'Z'
-        || c >= 'a' && c <= 'z'
-        || c >= '0' && c <= '9'
-        || c == '+' || c == '-'
-        || c == '.';
-  }
-
-  static boolean isUserInfoChar(int c) {
-    return isUnreservedChar(c) || isSubDelimChar(c) || c == ':';
-  }
-
-  static boolean isUserChar(int c) {
-    return isUnreservedChar(c) || isSubDelimChar(c);
-  }
-
-  static boolean isHostChar(int c) {
-    return isUnreservedChar(c) || isSubDelimChar(c);
-  }
-
-  static boolean isPathChar(int c) {
-    return isUnreservedChar(c) || isSubDelimChar(c) || c == ':' || c == '@';
-  }
-
-  static boolean isQueryChar(int c) {
-    return isUnreservedChar(c) || isSubDelimChar(c)
-        || c == '/' || c == ':'
-        || c == '?' || c == '@';
-  }
-
-  static boolean isParamChar(int c) {
-    return isUnreservedChar(c)
-        || c == '!' || c == '$'
-        || c == '(' || c == ')'
-        || c == '*' || c == '+'
-        || c == ',' || c == '/'
-        || c == ':' || c == ';'
-        || c == '?' || c == '@'
-        || c == '\'';
-  }
-
-  static boolean isFragmentChar(int c) {
-    return isUnreservedChar(c) || isSubDelimChar(c)
-        || c == '/' || c == ':'
-        || c == '?' || c == '@';
-  }
-
-  static boolean isAlpha(int c) {
-    return c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z';
-  }
-
-  static void writeScheme(String scheme, Output<?> output) {
-    final int n = scheme.length();
-    for (int i = 0; i < n; i = scheme.offsetByCodePoints(i, 1)) {
-      final int c = scheme.codePointAt(i);
-      if (i > 0 && isSchemeChar(c) || i == 0 && isAlpha(c)) {
-        output = output.write(c);
-      } else {
-        throw new UriException("Invalid scheme: " + scheme);
-      }
-    }
-  }
-
-  static void writeUserInfo(String userInfo, Output<?> output) {
-    final int n = userInfo.length();
-    for (int i = 0; i < n; i = userInfo.offsetByCodePoints(i, 1)) {
-      final int c = userInfo.codePointAt(i);
-      if (isUserInfoChar(c)) {
-        output = output.write(c);
-      } else {
-        writeEncoded(c, output);
-      }
-    }
-  }
-
-  static void writeUser(String user, Output<?> output) {
-    final int n = user.length();
-    for (int i = 0; i < n; i = user.offsetByCodePoints(i, 1)) {
-      final int c = user.codePointAt(i);
-      if (isUserChar(c)) {
-        output = output.write(c);
-      } else {
-        writeEncoded(c, output);
-      }
-    }
-  }
-
-  static void writeHost(String address, Output<?> output) {
-    final int n = address.length();
-    for (int i = 0; i < n; i = address.offsetByCodePoints(i, 1)) {
-      final int c = address.codePointAt(i);
-      if (isHostChar(c)) {
-        output = output.write(c);
-      } else {
-        writeEncoded(c, output);
-      }
-    }
-  }
-
-  static void writeHostLiteral(String address, Output<?> output) {
-    final int n = address.length();
-    for (int i = 0; i < n; i = address.offsetByCodePoints(i, 1)) {
-      final int c = address.codePointAt(i);
-      if (isHostChar(c) || c == ':') {
-        output = output.write(c);
-      } else {
-        writeEncoded(c, output);
-      }
-    }
-  }
-
-  static void writePathSegment(String segment, Output<?> output) {
-    final int n = segment.length();
-    for (int i = 0; i < n; i = segment.offsetByCodePoints(i, 1)) {
-      final int c = segment.codePointAt(i);
-      if (isPathChar(c)) {
-        output = output.write(c);
-      } else {
-        writeEncoded(c, output);
-      }
-    }
-  }
-
-  static void writeQuery(String query, Output<?> output) {
-    final int n = query.length();
-    for (int i = 0; i < n; i = query.offsetByCodePoints(i, 1)) {
-      final int c = query.codePointAt(i);
-      if (isQueryChar(c)) {
-        output = output.write(c);
-      } else {
-        writeEncoded(c, output);
-      }
-    }
-  }
-
-  static void writeParam(String param, Output<?> output) {
-    final int n = param.length();
-    for (int i = 0; i < n; i = param.offsetByCodePoints(i, 1)) {
-      final int c = param.codePointAt(i);
-      if (isParamChar(c)) {
-        output = output.write(c);
-      } else {
-        writeEncoded(c, output);
-      }
-    }
-  }
-
-  static void writeFragment(String fragment, Output<?> output) {
-    final int n = fragment.length();
-    for (int i = 0; i < n; i = fragment.offsetByCodePoints(i, 1)) {
-      final int c = fragment.codePointAt(i);
-      if (isFragmentChar(c)) {
-        output = output.write(c);
-      } else {
-        writeEncoded(c, output);
-      }
-    }
-  }
-
-  static void writeEncoded(int c, Output<?> output) {
-    if (c == 0x00) { // modified UTF-8
-      writePctEncoded(0xC0, output);
-      writePctEncoded(0x80, output);
-    } else if (c >= 0x00 && c <= 0x7F) { // U+0000..U+007F
-      writePctEncoded(c, output);
-    } else if (c >= 0x80 && c <= 0x07FF) { // U+0080..U+07FF
-      writePctEncoded(0xC0 | (c >>> 6), output);
-      writePctEncoded(0x80 | (c & 0x3F), output);
-    } else if (c >= 0x0800 && c <= 0xffff) { // (U+0800..U+D7FF, U+E000..U+FFFF, and surrogates
-      writePctEncoded(0xE0 | (c >>> 12), output);
-      writePctEncoded(0x80 | (c >>>  6 & 0x3F), output);
-      writePctEncoded(0x80 | (c        & 0x3F), output);
-    } else if (c >= 0x10000 && c <= 0x10FFFF) { // U+10000..U+10FFFF
-      writePctEncoded(0xF0 | (c >>> 18), output);
-      writePctEncoded(0x80 | (c >>> 12 & 0x3F), output);
-      writePctEncoded(0x80 | (c >>>  6 & 0x3F), output);
-      writePctEncoded(0x80 | (c        & 0x3F), output);
-    } else { // surrogate or invalid code point
-      writePctEncoded(0xEF, output);
-      writePctEncoded(0xBF, output);
-      writePctEncoded(0xBD, output);
-    }
-  }
-
-  static void writePctEncoded(int c, Output<?> output) {
-    output = output.write('%').write(Base16.lowercase().encodeDigit(c >>> 4 & 0xF))
-                              .write(Base16.lowercase().encodeDigit(c       & 0xF));
-  }
-
-  private static Form<Uri> form;
-
-  @Kind
-  public static Form<Uri> form() {
-    if (form == null) {
-      form = new UriForm(Uri.empty());
-    }
-    return form;
-  }
 }

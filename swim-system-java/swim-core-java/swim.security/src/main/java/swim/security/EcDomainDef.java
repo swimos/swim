@@ -30,6 +30,8 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public class EcDomainDef {
+
+  private static Form<EcDomainDef> form;
   protected final String name;
   protected final EcDef curve;
   protected final EcPointDef base;
@@ -52,6 +54,36 @@ public class EcDomainDef {
 
   public EcDomainDef(EcDef curve, EcPointDef base, BigInteger order, int cofactor) {
     this(null, curve, base, order, cofactor, null);
+  }
+
+  public static EcDomainDef from(String name, ECParameterSpec params) {
+    return new EcDomainDef(name, EcDef.from(params.getCurve()), EcPointDef.from(params.getGenerator()),
+        params.getOrder(), params.getCofactor(), params);
+  }
+
+  public static EcDomainDef from(ECParameterSpec params) {
+    return from(null, params);
+  }
+
+  public static EcDomainDef forName(String name) {
+    try {
+      final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+      final ECGenParameterSpec parameterSpec = new ECGenParameterSpec(name);
+      keyPairGenerator.initialize(parameterSpec);
+      final KeyPair keyPair = keyPairGenerator.generateKeyPair();
+      final ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+      return from(name, publicKey.getParams());
+    } catch (GeneralSecurityException cause) {
+      return null;
+    }
+  }
+
+  @Kind
+  public static Form<EcDomainDef> form() {
+    if (form == null) {
+      form = new EcDomainForm();
+    }
+    return form;
   }
 
   public final String name() {
@@ -91,40 +123,10 @@ public class EcDomainDef {
     }
   }
 
-  private static Form<EcDomainDef> form;
-
-  public static EcDomainDef from(String name, ECParameterSpec params) {
-    return new EcDomainDef(name, EcDef.from(params.getCurve()), EcPointDef.from(params.getGenerator()),
-                          params.getOrder(), params.getCofactor(), params);
-  }
-
-  public static EcDomainDef from(ECParameterSpec params) {
-    return from(null, params);
-  }
-
-  public static EcDomainDef forName(String name) {
-    try {
-      final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
-      final ECGenParameterSpec parameterSpec = new ECGenParameterSpec(name);
-      keyPairGenerator.initialize(parameterSpec);
-      final KeyPair keyPair = keyPairGenerator.generateKeyPair();
-      final ECPublicKey publicKey  = (ECPublicKey) keyPair.getPublic();
-      return from(name, publicKey.getParams());
-    } catch (GeneralSecurityException cause) {
-      return null;
-    }
-  }
-
-  @Kind
-  public static Form<EcDomainDef> form() {
-    if (form == null) {
-      form = new EcDomainForm();
-    }
-    return form;
-  }
 }
 
 final class EcDomainForm extends Form<EcDomainDef> {
+
   @Override
   public String tag() {
     return "ECDomain";
@@ -171,4 +173,5 @@ final class EcDomainForm extends Form<EcDomainDef> {
     }
     return null;
   }
+
 }

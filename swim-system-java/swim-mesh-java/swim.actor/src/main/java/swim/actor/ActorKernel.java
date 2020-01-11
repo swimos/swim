@@ -45,6 +45,11 @@ import swim.uri.UriMapper;
 import swim.uri.UriPattern;
 
 public class ActorKernel extends KernelProxy {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ActorKernel, HashTrieMap<String, ActorSpace>> SPACES =
+      AtomicReferenceFieldUpdater.newUpdater(ActorKernel.class, (Class<HashTrieMap<String, ActorSpace>>) (Class<?>) HashTrieMap.class, "spaces");
+  private static final double KERNEL_PRIORITY = 1.0;
   final double kernelPriority;
   volatile HashTrieMap<String, ActorSpace> spaces;
 
@@ -55,6 +60,16 @@ public class ActorKernel extends KernelProxy {
 
   public ActorKernel() {
     this(KERNEL_PRIORITY);
+  }
+
+  public static ActorKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || ActorKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      return new ActorKernel(kernelPriority);
+    }
+    return null;
   }
 
   @Override
@@ -146,8 +161,8 @@ public class ActorKernel extends KernelProxy {
           }
         }
         return new ActorSpaceDef(spaceName, planeDefs, authenticatorDefs, meshDefs,
-                                 partDefs, hostDefs, nodeDefs, laneDefs,
-                                 logDef, policyDef, stageDef, storeDef);
+            partDefs, hostDefs, nodeDefs, laneDefs,
+            logDef, policyDef, stageDef, storeDef);
       }
     }
     return null;
@@ -316,7 +331,7 @@ public class ActorKernel extends KernelProxy {
           }
         }
         return new ActorMeshDef(meshUri, partDefs, hostDefs, nodeDefs, laneDefs,
-                                logDef, policyDef, stageDef, storeDef);
+            logDef, policyDef, stageDef, storeDef);
       }
     }
     return null;
@@ -396,7 +411,7 @@ public class ActorKernel extends KernelProxy {
           }
         }
         return new ActorPartDef(partKey, predicate, isGateway, hostDefs, nodeDefs,
-                               laneDefs, logDef, policyDef, stageDef, storeDef);
+            laneDefs, logDef, policyDef, stageDef, storeDef);
       }
     }
     return null;
@@ -470,7 +485,7 @@ public class ActorKernel extends KernelProxy {
           }
         }
         return new ActorHostDef(hostPattern, isPrimary, isReplica, nodeDefs,
-                                laneDefs, logDef, policyDef, stageDef, storeDef);
+            laneDefs, logDef, policyDef, stageDef, storeDef);
       }
     }
     return null;
@@ -535,7 +550,7 @@ public class ActorKernel extends KernelProxy {
         }
         if (nodePattern != null) {
           return new ActorNodeDef(nodePattern, agentDefs, laneDefs,
-                                  logDef, policyDef, stageDef, storeDef);
+              logDef, policyDef, stageDef, storeDef);
         }
       }
     }
@@ -610,19 +625,4 @@ public class ActorKernel extends KernelProxy {
     }
   }
 
-  private static final double KERNEL_PRIORITY = 1.0;
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ActorKernel, HashTrieMap<String, ActorSpace>> SPACES =
-      AtomicReferenceFieldUpdater.newUpdater(ActorKernel.class, (Class<HashTrieMap<String, ActorSpace>>) (Class<?>) HashTrieMap.class, "spaces");
-
-  public static ActorKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || ActorKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new ActorKernel(kernelPriority);
-    }
-    return null;
-  }
 }

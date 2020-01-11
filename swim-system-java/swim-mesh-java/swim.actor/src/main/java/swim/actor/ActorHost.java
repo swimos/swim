@@ -49,6 +49,7 @@ import swim.uri.UriMapper;
 import swim.util.Log;
 
 public class ActorHost extends ActorTier implements HostBinding, HostContext {
+
   final HostBinding hostBinding;
   HostContext hostContext;
   HostDef hostDef;
@@ -471,4 +472,5 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
   public void didFail(Throwable error) {
     this.hostBinding.didFail(error);
   }
+
 }

@@ -18,6 +18,7 @@ import swim.api.data.ListData;
 import swim.structure.Value;
 
 public interface ListDataBinding extends ListData<Value>, DataBinding {
+
   @Override
   ListDataContext dataContext();
 
@@ -28,4 +29,5 @@ public interface ListDataBinding extends ListData<Value>, DataBinding {
 
   @Override
   ListDataBinding isTransient(boolean isTransient);
+
 }

@@ -24,6 +24,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class QTreePageSpec {
+
   static <K, S, V> QTreeEntry<K, S, V> entry(K key, V value) {
     return new QTreeEntry<K, S, V>(key, null, 0L, 0L, value);
   }
@@ -787,7 +788,7 @@ public class QTreePageSpec {
                     + "; xRank: " + xRank + "; yRank: " + yRank
                     + "; splitArity: " + splitArity + " ...");
                 testUniformRankNodes(0L, 0L, width, width, xSpan, ySpan,
-                                     xStep, yStep, xRank, yRank, splitArity);
+                    xStep, yStep, xRank, yRank, splitArity);
               }
             }
           }
@@ -870,7 +871,7 @@ public class QTreePageSpec {
                     + "; xStep: " + xStep + "; yStep: " + yStep
                     + "; splitArity: " + splitArity + "; zigzag: " + zigzag + " ...");
                 testNonUniformRankNodes(0L, 0L, width, width, xSpan, ySpan,
-                                        xStep, yStep, splitArity, zigzag);
+                    xStep, yStep, splitArity, zigzag);
               }
             }
           }
@@ -946,4 +947,5 @@ public class QTreePageSpec {
       }
     }
   }
+
 }

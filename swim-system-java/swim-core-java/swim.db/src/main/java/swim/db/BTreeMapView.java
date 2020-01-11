@@ -27,6 +27,7 @@ import swim.util.OrderedMap;
 import swim.util.OrderedMapCursor;
 
 public class BTreeMapView implements OrderedMap<Value, Value> {
+
   protected final BTree tree;
 
   public BTreeMapView(BTree tree) {
@@ -235,4 +236,5 @@ public class BTreeMapView implements OrderedMap<Value, Value> {
   public Comparator<? super Value> comparator() {
     return null;
   }
+
 }

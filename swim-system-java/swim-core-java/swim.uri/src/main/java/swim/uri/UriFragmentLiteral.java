@@ -17,6 +17,7 @@ package swim.uri;
 import swim.collections.HashTrieMap;
 
 final class UriFragmentLiteral extends UriFragmentPattern {
+
   final UriFragment fragment;
   final UriTerminalPattern rest;
 
@@ -53,4 +54,5 @@ final class UriFragmentLiteral extends UriFragmentPattern {
       return false;
     }
   }
+
 }

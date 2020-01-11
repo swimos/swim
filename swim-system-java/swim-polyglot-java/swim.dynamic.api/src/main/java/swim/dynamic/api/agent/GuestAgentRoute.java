@@ -26,6 +26,7 @@ import swim.uri.Uri;
 import swim.uri.UriPattern;
 
 public class GuestAgentRoute extends BridgeGuest implements AgentRoute<Agent> {
+
   protected AgentRouteContext context;
 
   public GuestAgentRoute(Bridge bridge, Object guest) {
@@ -86,4 +87,5 @@ public class GuestAgentRoute extends BridgeGuest implements AgentRoute<Agent> {
     }
     return Value.absent();
   }
+
 }

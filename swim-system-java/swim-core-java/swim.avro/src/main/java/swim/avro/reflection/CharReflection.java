@@ -17,8 +17,10 @@ package swim.avro.reflection;
 import swim.avro.schema.AvroVarintType;
 
 final class CharReflection extends AvroVarintType<Character> {
+
   @Override
   public Character cast(long value) {
     return Character.valueOf((char) value);
   }
+
 }

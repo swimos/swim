@@ -28,6 +28,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class HostMapSpec {
+
   @Test
   public void testSpecializedMap() {
     try (Context context = Context.create()) {
@@ -67,4 +68,5 @@ public class HostMapSpec {
       assertFalse(context.eval("js", "testMap.containsKey('bar')").asBoolean());
     }
   }
+
 }

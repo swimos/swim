@@ -27,6 +27,7 @@ import swim.structure.Value;
 import swim.util.Builder;
 
 public class JsonStructureParser extends JsonParser<Item, Value> {
+
   @Override
   public Item item(Value value) {
     return value;
@@ -133,4 +134,5 @@ public class JsonStructureParser extends JsonParser<Item, Value> {
   public Value bool(boolean value) {
     return Bool.from(value);
   }
+
 }

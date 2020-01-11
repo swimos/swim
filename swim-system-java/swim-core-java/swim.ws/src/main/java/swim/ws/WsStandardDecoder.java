@@ -15,4 +15,5 @@
 package swim.ws;
 
 public class WsStandardDecoder extends WsDecoder {
+
 }

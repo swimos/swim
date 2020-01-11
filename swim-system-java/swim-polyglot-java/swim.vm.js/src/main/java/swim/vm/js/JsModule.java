@@ -18,6 +18,7 @@ import org.graalvm.polyglot.Value;
 import swim.uri.UriPath;
 
 public interface JsModule {
+
   JsModuleSystem moduleSystem();
 
   UriPath moduleId();
@@ -25,4 +26,5 @@ public interface JsModule {
   Value moduleExports();
 
   void evalModule();
+
 }

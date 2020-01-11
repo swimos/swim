@@ -27,6 +27,7 @@ import swim.uri.UriPattern;
 import swim.util.Log;
 
 public interface PlaneContext extends SwimRef, Log {
+
   Schedule schedule();
 
   Stage stage();
@@ -50,4 +51,5 @@ public interface PlaneContext extends SwimRef, Log {
   void removeAgentRoute(String routeName);
 
   AgentFactory<?> getAgentFactory(Uri nodeUri);
+
 }

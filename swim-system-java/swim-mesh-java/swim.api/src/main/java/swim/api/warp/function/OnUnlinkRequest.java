@@ -19,5 +19,7 @@ import swim.warp.UnlinkRequest;
 
 @FunctionalInterface
 public interface OnUnlinkRequest extends Preemptive {
+
   void onUnlink(UnlinkRequest request);
+
 }

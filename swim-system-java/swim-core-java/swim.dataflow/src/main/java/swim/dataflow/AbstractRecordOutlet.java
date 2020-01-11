@@ -31,6 +31,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 public abstract class AbstractRecordOutlet extends Record implements RecordOutlet {
+
   protected HashTrieMap<Value, KeyEffect> effects;
   protected HashTrieMap<Value, KeyOutlet<Value, Value>> outlets;
   protected Inlet<? super Record>[] outputs;
@@ -330,4 +331,5 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
   protected void didReconcileInput(int version) {
     // stub
   }
+
 }

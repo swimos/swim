@@ -27,6 +27,8 @@ import swim.uri.UriPattern;
 import swim.util.Murmur3;
 
 public class ActorLaneDef implements LaneDef, Debug {
+
+  private static int hashSeed;
   final UriPattern lanePattern;
   final String laneType;
   final LogDef logDef;
@@ -42,6 +44,22 @@ public class ActorLaneDef implements LaneDef, Debug {
     this.policyDef = policyDef;
     this.stageDef = stageDef;
     this.storeDef = storeDef;
+  }
+
+  public static ActorLaneDef fromLaneUri(Uri laneUri) {
+    return new ActorLaneDef(UriPattern.from(laneUri), null, null, null, null, null);
+  }
+
+  public static ActorLaneDef fromLaneUri(String laneUri) {
+    return fromLaneUri(Uri.parse(laneUri));
+  }
+
+  public static ActorLaneDef fromLanePattern(UriPattern lanePattern) {
+    return new ActorLaneDef(lanePattern, null, null, null, null, null);
+  }
+
+  public static ActorLaneDef fromLanePattern(String lanePattern) {
+    return fromLanePattern(UriPattern.parse(lanePattern));
   }
 
   @Override
@@ -104,7 +122,7 @@ public class ActorLaneDef implements LaneDef, Debug {
   }
 
   protected ActorLaneDef copy(UriPattern lanePattern, String laneType, LogDef logDef,
-                               PolicyDef policyDef, StageDef stageDef, StoreDef storeDef) {
+                              PolicyDef policyDef, StageDef stageDef, StoreDef storeDef) {
     return new ActorLaneDef(lanePattern, laneType, logDef, policyDef, stageDef, storeDef);
   }
 
@@ -165,21 +183,4 @@ public class ActorLaneDef implements LaneDef, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static ActorLaneDef fromLaneUri(Uri laneUri) {
-    return new ActorLaneDef(UriPattern.from(laneUri), null, null, null, null, null);
-  }
-
-  public static ActorLaneDef fromLaneUri(String laneUri) {
-    return fromLaneUri(Uri.parse(laneUri));
-  }
-
-  public static ActorLaneDef fromLanePattern(UriPattern lanePattern) {
-    return new ActorLaneDef(lanePattern, null, null, null, null, null);
-  }
-
-  public static ActorLaneDef fromLanePattern(String lanePattern) {
-    return fromLanePattern(UriPattern.parse(lanePattern));
-  }
 }

@@ -28,6 +28,7 @@ import swim.api.warp.function.WillUplink;
 import swim.structure.Form;
 
 public interface DemandMapLane<K, V> extends WarpLane {
+
   Form<K> keyForm();
 
   <K2> DemandMapLane<K2, V> keyForm(Form<K2> keyForm);
@@ -77,4 +78,5 @@ public interface DemandMapLane<K, V> extends WarpLane {
   void cue(K key);
 
   void remove(K key);
+
 }

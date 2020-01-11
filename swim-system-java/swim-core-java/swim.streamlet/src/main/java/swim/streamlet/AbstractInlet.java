@@ -15,6 +15,7 @@
 package swim.streamlet;
 
 public abstract class AbstractInlet<I> implements Inlet<I> {
+
   protected Outlet<? extends I> input;
   protected int version;
 
@@ -108,4 +109,5 @@ public abstract class AbstractInlet<I> implements Inlet<I> {
   protected void didReconcileOutput(int version) {
     // stub
   }
+
 }

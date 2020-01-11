@@ -19,6 +19,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class AttrParser<I, V> extends Parser<I> {
+
   final ReconParser<I, V> recon;
   final Parser<V> keyParser;
   final Parser<V> valueParser;
@@ -29,11 +30,6 @@ final class AttrParser<I, V> extends Parser<I> {
     this.keyParser = keyParser;
     this.valueParser = valueParser;
     this.step = step;
-  }
-
-  @Override
-  public Parser<I> feed(Input input) {
-    return parse(input, this.recon, this.keyParser, this.valueParser, this.step);
   }
 
   static <I, V> Parser<I> parse(Input input, ReconParser<I, V> recon, Parser<V> keyParser,
@@ -147,4 +143,10 @@ final class AttrParser<I, V> extends Parser<I> {
   static <I, V> Parser<I> parse(Input input, ReconParser<I, V> recon) {
     return parse(input, recon, null, null, 1);
   }
+
+  @Override
+  public Parser<I> feed(Input input) {
+    return parse(input, this.recon, this.keyParser, this.valueParser, this.step);
+  }
+
 }

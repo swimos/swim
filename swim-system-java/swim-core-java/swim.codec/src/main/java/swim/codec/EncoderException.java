@@ -18,6 +18,7 @@ package swim.codec;
  * Thrown when an {@link Encoder} encodes invalid data.
  */
 public class EncoderException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public EncoderException(String message, Throwable cause) {
@@ -35,4 +36,5 @@ public class EncoderException extends RuntimeException {
   public EncoderException() {
     super();
   }
+
 }

@@ -15,6 +15,7 @@
 package swim.runtime;
 
 public interface TierBinding {
+
   TierContext tierContext();
 
   boolean isClosed();
@@ -40,4 +41,5 @@ public interface TierBinding {
   void didClose();
 
   void didFail(Throwable error);
+
 }

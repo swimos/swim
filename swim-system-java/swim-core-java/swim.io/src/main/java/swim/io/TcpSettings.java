@@ -30,6 +30,10 @@ import swim.util.Murmur3;
  * TCP configuration parameters.
  */
 public class TcpSettings implements Debug {
+
+  private static int hashSeed;
+  private static TcpSettings standard;
+  private static Form<TcpSettings> form;
   protected final boolean keepAlive;
   protected final boolean noDelay;
   protected final int receiveBufferSize;
@@ -48,6 +52,60 @@ public class TcpSettings implements Debug {
   }
 
   /**
+   * Returns the default {@code TcpSettings} instance.
+   */
+  public static TcpSettings standard() {
+    if (standard == null) {
+      final boolean keepAlive = Boolean.parseBoolean(System.getProperty("swim.tcp.keepalive"));
+
+      final boolean noDelay = Boolean.parseBoolean(System.getProperty("swim.tcp.nodelay"));
+
+      int receiveBufferSize;
+      try {
+        receiveBufferSize = Integer.parseInt(System.getProperty("swim.tcp.receive.buffer.size"));
+      } catch (NumberFormatException error) {
+        receiveBufferSize = 0;
+      }
+
+      int sendBufferSize;
+      try {
+        sendBufferSize = Integer.parseInt(System.getProperty("swim.tcp.send.buffer.size"));
+      } catch (NumberFormatException error) {
+        sendBufferSize = 0;
+      }
+
+      int readBufferSize;
+      try {
+        readBufferSize = Integer.parseInt(System.getProperty("swim.tcp.read.buffer.size"));
+      } catch (NumberFormatException error) {
+        readBufferSize = 4096;
+      }
+
+      int writeBufferSize;
+      try {
+        writeBufferSize = Integer.parseInt(System.getProperty("swim.tcp.write.buffer.size"));
+      } catch (NumberFormatException error) {
+        writeBufferSize = 4096;
+      }
+
+      standard = new TcpSettings(keepAlive, noDelay, receiveBufferSize,
+          sendBufferSize, readBufferSize, writeBufferSize);
+    }
+    return standard;
+  }
+
+  /**
+   * Returns the structural {@code Form} of {@code TcpSettings}.
+   */
+  @Kind
+  public static Form<TcpSettings> form() {
+    if (form == null) {
+      form = new TcpSettingsForm();
+    }
+    return form;
+  }
+
+  /**
    * Returns {@code true} if TCP should be configured with the {@code
    * SO_KEEPALIVE} socket option to send keepalive probes to prevent idle
    * connections from timing out.
@@ -62,7 +120,7 @@ public class TcpSettings implements Debug {
    */
   public TcpSettings keepAlive(boolean keepAlive) {
     return copy(keepAlive, this.noDelay, this.receiveBufferSize,
-                this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
+        this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
   }
 
   /**
@@ -79,7 +137,7 @@ public class TcpSettings implements Debug {
    */
   public TcpSettings noDelay(boolean noDelay) {
     return copy(this.keepAlive, noDelay, this.receiveBufferSize,
-                this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
+        this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
   }
 
   /**
@@ -96,7 +154,7 @@ public class TcpSettings implements Debug {
    */
   public TcpSettings receiveBufferSize(int receiveBufferSize) {
     return copy(this.keepAlive, this.noDelay, receiveBufferSize,
-                this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
+        this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
   }
 
   /**
@@ -113,7 +171,7 @@ public class TcpSettings implements Debug {
    */
   public TcpSettings sendBufferSize(int sendBufferSize) {
     return copy(this.keepAlive, this.noDelay, this.receiveBufferSize,
-                sendBufferSize, this.readBufferSize, this.writeBufferSize);
+        sendBufferSize, this.readBufferSize, this.writeBufferSize);
   }
 
   /**
@@ -130,7 +188,7 @@ public class TcpSettings implements Debug {
    */
   public TcpSettings readBufferSize(int readBufferSize) {
     return copy(this.keepAlive, this.noDelay, this.receiveBufferSize,
-                this.sendBufferSize, readBufferSize, this.writeBufferSize);
+        this.sendBufferSize, readBufferSize, this.writeBufferSize);
   }
 
   /**
@@ -147,7 +205,7 @@ public class TcpSettings implements Debug {
    */
   public TcpSettings writeBufferSize(int writeBufferSize) {
     return copy(this.keepAlive, this.noDelay, this.receiveBufferSize,
-                this.sendBufferSize, this.readBufferSize, writeBufferSize);
+        this.sendBufferSize, this.readBufferSize, writeBufferSize);
   }
 
   /**
@@ -158,7 +216,7 @@ public class TcpSettings implements Debug {
   protected TcpSettings copy(boolean keepAlive, boolean noDelay, int receiveBufferSize,
                              int sendBufferSize, int readBufferSize, int writeBufferSize) {
     return new TcpSettings(keepAlive, noDelay, receiveBufferSize,
-                           sendBufferSize, readBufferSize, writeBufferSize);
+        sendBufferSize, readBufferSize, writeBufferSize);
   }
 
   /**
@@ -229,68 +287,10 @@ public class TcpSettings implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static TcpSettings standard;
-
-  private static Form<TcpSettings> form;
-
-  /**
-   * Returns the default {@code TcpSettings} instance.
-   */
-  public static TcpSettings standard() {
-    if (standard == null) {
-      final boolean keepAlive = Boolean.parseBoolean(System.getProperty("swim.tcp.keepalive"));
-
-      final boolean noDelay = Boolean.parseBoolean(System.getProperty("swim.tcp.nodelay"));
-
-      int receiveBufferSize;
-      try {
-        receiveBufferSize = Integer.parseInt(System.getProperty("swim.tcp.receive.buffer.size"));
-      } catch (NumberFormatException error) {
-        receiveBufferSize = 0;
-      }
-
-      int sendBufferSize;
-      try {
-        sendBufferSize = Integer.parseInt(System.getProperty("swim.tcp.send.buffer.size"));
-      } catch (NumberFormatException error) {
-        sendBufferSize = 0;
-      }
-
-      int readBufferSize;
-      try {
-        readBufferSize = Integer.parseInt(System.getProperty("swim.tcp.read.buffer.size"));
-      } catch (NumberFormatException error) {
-        readBufferSize = 4096;
-      }
-
-      int writeBufferSize;
-      try {
-        writeBufferSize = Integer.parseInt(System.getProperty("swim.tcp.write.buffer.size"));
-      } catch (NumberFormatException error) {
-        writeBufferSize = 4096;
-      }
-
-      standard = new TcpSettings(keepAlive, noDelay, receiveBufferSize,
-                                 sendBufferSize, readBufferSize, writeBufferSize);
-    }
-    return standard;
-  }
-
-  /**
-   * Returns the structural {@code Form} of {@code TcpSettings}.
-   */
-  @Kind
-  public static Form<TcpSettings> form() {
-    if (form == null) {
-      form = new TcpSettingsForm();
-    }
-    return form;
-  }
 }
 
 final class TcpSettingsForm extends Form<TcpSettings> {
+
   @Override
   public String tag() {
     return "tcp";
@@ -347,8 +347,9 @@ final class TcpSettingsForm extends Form<TcpSettings> {
       final int readBufferSize = value.get("readBufferSize").intValue(standard.readBufferSize);
       final int writeBufferSize = value.get("writeBufferSize").intValue(standard.writeBufferSize);
       return new TcpSettings(keepAlive, noDelay, receiveBufferSize,
-                             sendBufferSize, readBufferSize, writeBufferSize);
+          sendBufferSize, readBufferSize, writeBufferSize);
     }
     return null;
   }
+
 }

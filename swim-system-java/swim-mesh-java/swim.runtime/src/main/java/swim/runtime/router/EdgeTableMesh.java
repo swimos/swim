@@ -44,6 +44,7 @@ import swim.store.StoreBinding;
 import swim.uri.Uri;
 
 public class EdgeTableMesh implements MeshContext {
+
   protected final EdgeTable edge;
   protected final MeshBinding mesh;
   protected final MeshAddress meshAddress;
@@ -328,4 +329,5 @@ public class EdgeTableMesh implements MeshContext {
   public void willClose() {
     // nop
   }
+
 }

@@ -22,6 +22,9 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class CircleR2 extends R2Shape implements Debug {
+
+  private static int hashSeed;
+  private static R2Form<CircleR2> form;
   public final double cx;
   public final double cy;
   public final double r;
@@ -30,6 +33,18 @@ public class CircleR2 extends R2Shape implements Debug {
     this.cx = cx;
     this.cy = cy;
     this.r = r;
+  }
+
+  public static CircleR2 of(double cx, double cy, double r) {
+    return new CircleR2(cx, cy, r);
+  }
+
+  @Kind
+  public static R2Form<CircleR2> form() {
+    if (form == null) {
+      form = new CircleR2Form();
+    }
+    return form;
   }
 
   @Override
@@ -128,7 +143,7 @@ public class CircleR2 extends R2Shape implements Debug {
     final double xMax = this.cx + this.r;
     final double yMax = this.cy + this.r;
     return new BoxZ2(f.transformX(xMin, yMin), f.transformY(xMin, yMin),
-                     f.transformX(xMax, yMax), f.transformY(xMax, yMax));
+        f.transformX(xMax, yMax), f.transformY(xMax, yMax));
   }
 
   @Override
@@ -171,19 +186,4 @@ public class CircleR2 extends R2Shape implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static R2Form<CircleR2> form;
-
-  public static CircleR2 of(double cx, double cy, double r) {
-    return new CircleR2(cx, cy, r);
-  }
-
-  @Kind
-  public static R2Form<CircleR2> form() {
-    if (form == null) {
-      form = new CircleR2Form();
-    }
-    return form;
-  }
 }

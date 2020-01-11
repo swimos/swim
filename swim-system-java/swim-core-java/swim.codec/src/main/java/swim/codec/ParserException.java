@@ -18,6 +18,7 @@ package swim.codec;
  * Thrown when a {@link Parser} parses invdalid syntax.
  */
 public class ParserException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   private final Diagnostic diagnostic;
@@ -59,4 +60,5 @@ public class ParserException extends RuntimeException {
       return super.toString();
     }
   }
+
 }

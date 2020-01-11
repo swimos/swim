@@ -20,6 +20,7 @@ import swim.codec.InputSettings;
 import swim.codec.Mark;
 
 final class CsvInput extends Input {
+
   final CsvParser csv;
   Input input;
 
@@ -148,4 +149,5 @@ final class CsvInput extends Input {
   public Input clone() {
     return new CsvInput(this.csv, this.input.clone());
   }
+
 }

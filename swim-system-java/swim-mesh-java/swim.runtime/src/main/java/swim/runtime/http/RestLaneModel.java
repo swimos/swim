@@ -17,8 +17,10 @@ package swim.runtime.http;
 import swim.runtime.HttpBinding;
 
 public class RestLaneModel extends HttpLaneModel<RestLaneView<?>, RestLaneUplink> {
+
   @Override
   protected RestLaneUplink createHttpUplink(HttpBinding link) {
     return new RestLaneUplink(this, link);
   }
+
 }

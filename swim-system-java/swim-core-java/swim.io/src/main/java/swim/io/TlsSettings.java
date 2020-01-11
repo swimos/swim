@@ -42,6 +42,10 @@ import swim.util.Murmur3;
  * TLS configuration parameters.
  */
 public class TlsSettings implements Debug {
+
+  private static int hashSeed;
+  private static TlsSettings standard;
+  private static Form<TlsSettings> form;
   protected final SSLContext sslContext;
   protected final ClientAuth clientAuth;
   protected final Collection<String> cipherSuites;
@@ -55,141 +59,6 @@ public class TlsSettings implements Debug {
     this.cipherSuites = cipherSuites;
     this.protocols = protocols;
   }
-
-  /**
-   * Returns the factory used to create secure sockets.
-   */
-  public final SSLContext sslContext() {
-    return this.sslContext;
-  }
-
-  /**
-   * Returns a copy of these {@code TlsSettings} configured with the given
-   * {@code sslContext} for creating secure sockets.
-   */
-  public TlsSettings sslContext(SSLContext sslContext) {
-    return copy(sslContext, this.clientAuth, this.cipherSuites, this.protocols);
-  }
-
-  /**
-   * Returns the authentication requirement for incoming connections.
-   */
-  public final ClientAuth clientAuth() {
-    return this.clientAuth;
-  }
-
-  /**
-   * Returns a copy of these {@code TlsSettings} configured with the given
-   * {@code clientAuth} authentication requirement for incoming connections.
-   */
-  public TlsSettings clientAuth(ClientAuth clientAuth) {
-    return copy(this.sslContext, clientAuth, this.cipherSuites, this.protocols);
-  }
-
-  /**
-   * Returns the set of permitted cipher suites for secure socket connections,
-   * or {@code null} if the system defaults should be used.
-   */
-  public final Collection<String> cipherSuites() {
-    return this.cipherSuites;
-  }
-
-  /**
-   * Returns a copy of these {@code TlsSettings} configured with the given set
-   * of {@code cipherSuites}; {@code cipherSuites} may be {@code null} if the
-   * system defaults should be used.
-   */
-  public TlsSettings cipherSuites(Collection<String> cipherSuites) {
-    return copy(this.sslContext, this.clientAuth, cipherSuites, this.protocols);
-  }
-
-  /**
-   * Returns the set of permitted secure socket layer protocols, or {@code
-   * null} if the system defaults should be used.
-   */
-  public final Collection<String> protocols() {
-    return this.protocols;
-  }
-
-  /**
-   * Returns a copy of these {@code TlsSettings} configured with the given set
-   * of {@code protocols}; {@code protocols} may be {@code null} if the system
-   * defaults should be used.
-   */
-  public TlsSettings protocols(Collection<String> protocols) {
-    return copy(this.sslContext, this.clientAuth, this.cipherSuites, protocols);
-  }
-
-  /**
-   * Returns a new {@code TlsSettings} instance with the given options.
-   * Subclasses may override this method to ensure the proper class is
-   * instantiated when updating settings.
-   */
-  protected TlsSettings copy(SSLContext sslContext, ClientAuth clientAuth,
-                             Collection<String> cipherSuites,
-                             Collection<String> protocols) {
-    return new TlsSettings(sslContext, clientAuth, cipherSuites, protocols);
-  }
-
-  /**
-   * Returns a structural {@code Value} representing these {@code TlsSettings}.
-   */
-  public Value toValue() {
-    return form().mold(this).toValue();
-  }
-
-  /**
-   * Returns {@code true} if these {@code TlsSettings} can possibly equal some
-   * {@code other} object.
-   */
-  public boolean canEqual(Object other) {
-    return other instanceof TlsSettings;
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof TlsSettings) {
-      final TlsSettings that = (TlsSettings) other;
-      return that.canEqual(this)
-          && (this.sslContext == null ? that.sslContext == null : this.sslContext.equals(that.sslContext))
-          && this.clientAuth.equals(that.clientAuth)
-          && (this.cipherSuites == null ? that.cipherSuites == null : this.cipherSuites.equals(that.cipherSuites))
-          && (this.protocols == null ? that.protocols == null : this.protocols.equals(that.protocols));
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(TlsSettings.class);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
-        Murmur3.hash(this.sslContext)), this.clientAuth.hashCode()),
-        Murmur3.hash(this.cipherSuites)), Murmur3.hash(this.protocols)));
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("TlsSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("sslContext").write('(').debug(this.sslContext).write(')')
-        .write('.').write("clientAuth").write('(').debug(this.clientAuth).write(')')
-        .write('.').write("cipherSuites").write('(').debug(this.cipherSuites).write(')')
-        .write('.').write("protocols").write('(').debug(this.protocols).write(')');
-  }
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
-  }
-
-  private static int hashSeed;
-
-  private static TlsSettings standard;
-
-  private static Form<TlsSettings> form;
 
   public static TlsSettings create(ClientAuth clientAuth,
                                    Collection<String> cipherSuites,
@@ -347,9 +216,140 @@ public class TlsSettings implements Debug {
     }
     return null;
   }
+
+  /**
+   * Returns the factory used to create secure sockets.
+   */
+  public final SSLContext sslContext() {
+    return this.sslContext;
+  }
+
+  /**
+   * Returns a copy of these {@code TlsSettings} configured with the given
+   * {@code sslContext} for creating secure sockets.
+   */
+  public TlsSettings sslContext(SSLContext sslContext) {
+    return copy(sslContext, this.clientAuth, this.cipherSuites, this.protocols);
+  }
+
+  /**
+   * Returns the authentication requirement for incoming connections.
+   */
+  public final ClientAuth clientAuth() {
+    return this.clientAuth;
+  }
+
+  /**
+   * Returns a copy of these {@code TlsSettings} configured with the given
+   * {@code clientAuth} authentication requirement for incoming connections.
+   */
+  public TlsSettings clientAuth(ClientAuth clientAuth) {
+    return copy(this.sslContext, clientAuth, this.cipherSuites, this.protocols);
+  }
+
+  /**
+   * Returns the set of permitted cipher suites for secure socket connections,
+   * or {@code null} if the system defaults should be used.
+   */
+  public final Collection<String> cipherSuites() {
+    return this.cipherSuites;
+  }
+
+  /**
+   * Returns a copy of these {@code TlsSettings} configured with the given set
+   * of {@code cipherSuites}; {@code cipherSuites} may be {@code null} if the
+   * system defaults should be used.
+   */
+  public TlsSettings cipherSuites(Collection<String> cipherSuites) {
+    return copy(this.sslContext, this.clientAuth, cipherSuites, this.protocols);
+  }
+
+  /**
+   * Returns the set of permitted secure socket layer protocols, or {@code
+   * null} if the system defaults should be used.
+   */
+  public final Collection<String> protocols() {
+    return this.protocols;
+  }
+
+  /**
+   * Returns a copy of these {@code TlsSettings} configured with the given set
+   * of {@code protocols}; {@code protocols} may be {@code null} if the system
+   * defaults should be used.
+   */
+  public TlsSettings protocols(Collection<String> protocols) {
+    return copy(this.sslContext, this.clientAuth, this.cipherSuites, protocols);
+  }
+
+  /**
+   * Returns a new {@code TlsSettings} instance with the given options.
+   * Subclasses may override this method to ensure the proper class is
+   * instantiated when updating settings.
+   */
+  protected TlsSettings copy(SSLContext sslContext, ClientAuth clientAuth,
+                             Collection<String> cipherSuites,
+                             Collection<String> protocols) {
+    return new TlsSettings(sslContext, clientAuth, cipherSuites, protocols);
+  }
+
+  /**
+   * Returns a structural {@code Value} representing these {@code TlsSettings}.
+   */
+  public Value toValue() {
+    return form().mold(this).toValue();
+  }
+
+  /**
+   * Returns {@code true} if these {@code TlsSettings} can possibly equal some
+   * {@code other} object.
+   */
+  public boolean canEqual(Object other) {
+    return other instanceof TlsSettings;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof TlsSettings) {
+      final TlsSettings that = (TlsSettings) other;
+      return that.canEqual(this)
+          && (this.sslContext == null ? that.sslContext == null : this.sslContext.equals(that.sslContext))
+          && this.clientAuth.equals(that.clientAuth)
+          && (this.cipherSuites == null ? that.cipherSuites == null : this.cipherSuites.equals(that.cipherSuites))
+          && (this.protocols == null ? that.protocols == null : this.protocols.equals(that.protocols));
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    if (hashSeed == 0) {
+      hashSeed = Murmur3.seed(TlsSettings.class);
+    }
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+        Murmur3.hash(this.sslContext)), this.clientAuth.hashCode()),
+        Murmur3.hash(this.cipherSuites)), Murmur3.hash(this.protocols)));
+  }
+
+  @Override
+  public void debug(Output<?> output) {
+    output = output.write("TlsSettings").write('.').write("standard").write('(').write(')')
+        .write('.').write("sslContext").write('(').debug(this.sslContext).write(')')
+        .write('.').write("clientAuth").write('(').debug(this.clientAuth).write(')')
+        .write('.').write("cipherSuites").write('(').debug(this.cipherSuites).write(')')
+        .write('.').write("protocols").write('(').debug(this.protocols).write(')');
+  }
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
+  }
+
 }
 
 final class TlsSettingsForm extends Form<TlsSettings> {
+
   @Override
   public String tag() {
     return "tls";
@@ -606,4 +606,5 @@ final class TlsSettingsForm extends Form<TlsSettings> {
     }
     return null;
   }
+
 }

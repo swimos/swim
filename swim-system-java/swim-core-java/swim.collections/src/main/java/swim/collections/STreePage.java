@@ -18,6 +18,11 @@ import java.util.Map;
 import swim.util.Cursor;
 
 public abstract class STreePage<T> {
+
+  public static <T> STreePage<T> empty() {
+    return STreeLeaf.empty();
+  }
+
   public abstract boolean isEmpty();
 
   public abstract int size();
@@ -84,7 +89,4 @@ public abstract class STreePage<T> {
 
   public abstract Cursor<Map.Entry<Object, T>> reverseEntryIterator();
 
-  public static <T> STreePage<T> empty() {
-    return STreeLeaf.empty();
-  }
 }

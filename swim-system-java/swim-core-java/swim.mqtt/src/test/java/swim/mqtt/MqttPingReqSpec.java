@@ -19,6 +19,7 @@ import swim.structure.Data;
 import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttPingReqSpec {
+
   public static void assertDecodes(Data data, MqttPingReq packet) {
     MqttAssertions.assertDecodesPacket(data, packet);
   }
@@ -32,4 +33,5 @@ public class MqttPingReqSpec {
   public void encodePingReqPackets() {
     assertEncodes(MqttPingReq.packet(), Data.fromBase16("C000"));
   }
+
 }

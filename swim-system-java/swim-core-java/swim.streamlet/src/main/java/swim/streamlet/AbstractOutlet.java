@@ -18,6 +18,7 @@ import java.util.Iterator;
 import swim.util.Cursor;
 
 public abstract class AbstractOutlet<O> implements Outlet<O> {
+
   protected Inlet<? super O>[] outputs;
   protected int version;
 
@@ -145,4 +146,5 @@ public abstract class AbstractOutlet<O> implements Outlet<O> {
   protected void didReconcileInput(int version) {
     // stub
   }
+
 }

@@ -19,5 +19,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface WillReadFrameWs<I> extends Preemptive {
+
   Decoder<I> willReadFrame();
+
 }

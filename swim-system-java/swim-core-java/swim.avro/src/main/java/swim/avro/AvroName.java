@@ -26,6 +26,8 @@ import swim.util.HashGenCacheSet;
 import swim.util.Murmur3;
 
 public final class AvroName implements Comparable<AvroName>, Debug, Display {
+
+  private static ThreadLocal<HashGenCacheSet<String>> nameCache = new ThreadLocal<>();
   final AvroNamespace namespace;
   final String name;
   String string;
@@ -33,6 +35,53 @@ public final class AvroName implements Comparable<AvroName>, Debug, Display {
   public AvroName(AvroNamespace namespace, String name) {
     this.namespace = namespace;
     this.name = name;
+  }
+
+  public static AvroName from(AvroNamespace namespace, String name) {
+    if (namespace == null) {
+      throw new NullPointerException("namespace");
+    }
+    name = cacheName(name);
+    return new AvroName(namespace, name);
+  }
+
+  public static AvroName from(String name) {
+    name = cacheName(name);
+    return new AvroName(AvroNamespace.empty(), name);
+  }
+
+  public static AvroName parse(String string) {
+    final Input input = Unicode.stringInput(string);
+    Parser<AvroName> parser = AvroNameParser.parse(input);
+    if (input.isCont() && !parser.isError()) {
+      parser = Parser.error(Diagnostic.unexpected(input));
+    } else if (input.isError()) {
+      parser = Parser.error(input.trap());
+    }
+    return parser.bind();
+  }
+
+  static HashGenCacheSet<String> nameCache() {
+    HashGenCacheSet<String> nameCache = AvroName.nameCache.get();
+    if (nameCache == null) {
+      int nameCacheSize;
+      try {
+        nameCacheSize = Integer.parseInt(System.getProperty("swim.avro.name.cache.size"));
+      } catch (NumberFormatException e) {
+        nameCacheSize = 16;
+      }
+      nameCache = new HashGenCacheSet<String>(nameCacheSize);
+      AvroName.nameCache.set(nameCache);
+    }
+    return nameCache;
+  }
+
+  static String cacheName(String name) {
+    if (name.length() <= 32) {
+      return nameCache().put(name);
+    } else {
+      return name;
+    }
   }
 
   public AvroNamespace namespace() {
@@ -90,52 +139,4 @@ public final class AvroName implements Comparable<AvroName>, Debug, Display {
     return this.string;
   }
 
-  private static ThreadLocal<HashGenCacheSet<String>> nameCache = new ThreadLocal<>();
-
-  public static AvroName from(AvroNamespace namespace, String name) {
-    if (namespace == null) {
-      throw new NullPointerException("namespace");
-    }
-    name = cacheName(name);
-    return new AvroName(namespace, name);
-  }
-
-  public static AvroName from(String name) {
-    name = cacheName(name);
-    return new AvroName(AvroNamespace.empty(), name);
-  }
-
-  public static AvroName parse(String string) {
-    final Input input = Unicode.stringInput(string);
-    Parser<AvroName> parser = AvroNameParser.parse(input);
-    if (input.isCont() && !parser.isError()) {
-      parser = Parser.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parser = Parser.error(input.trap());
-    }
-    return parser.bind();
-  }
-
-  static HashGenCacheSet<String> nameCache() {
-    HashGenCacheSet<String> nameCache = AvroName.nameCache.get();
-    if (nameCache == null) {
-      int nameCacheSize;
-      try {
-        nameCacheSize = Integer.parseInt(System.getProperty("swim.avro.name.cache.size"));
-      } catch (NumberFormatException e) {
-        nameCacheSize = 16;
-      }
-      nameCache = new HashGenCacheSet<String>(nameCacheSize);
-      AvroName.nameCache.set(nameCache);
-    }
-    return nameCache;
-  }
-
-  static String cacheName(String name) {
-    if (name.length() <= 32) {
-      return nameCache().put(name);
-    } else {
-      return name;
-    }
-  }
 }

@@ -37,6 +37,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class HostTableNode implements NodeContext {
+
   protected final HostTable host;
   protected final NodeBinding node;
   protected final NodeAddress nodeAddress;
@@ -295,4 +296,5 @@ public class HostTableNode implements NodeContext {
   public void willClose() {
     // nop
   }
+
 }

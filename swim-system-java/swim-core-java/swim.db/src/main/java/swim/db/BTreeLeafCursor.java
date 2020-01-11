@@ -21,6 +21,7 @@ import swim.structure.Value;
 import swim.util.OrderedMapCursor;
 
 final class BTreeLeafCursor implements OrderedMapCursor<Value, Value> {
+
   final Slot[] array;
   int index;
   int limit;
@@ -122,4 +123,5 @@ final class BTreeLeafCursor implements OrderedMapCursor<Value, Value> {
       throw new NoSuchElementException();
     }
   }
+
 }

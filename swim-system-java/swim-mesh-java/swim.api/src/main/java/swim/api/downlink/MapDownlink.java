@@ -48,6 +48,7 @@ import swim.uri.Uri;
 import swim.util.Cursor;
 
 public interface MapDownlink<K, V> extends WarpDownlink, ObservableOrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapDownlink<K, V>> {
+
   @Override
   MapDownlink<K, V> hostUri(Uri hostUri);
 
@@ -177,4 +178,5 @@ public interface MapDownlink<K, V> extends WarpDownlink, ObservableOrderedMap<K,
 
   @Override
   Cursor<K> keyIterator();
+
 }

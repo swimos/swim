@@ -19,6 +19,7 @@ import swim.web.WebResponse;
 import swim.web.WebRoute;
 
 public final class AlternativeRoute implements WebRoute {
+
   final WebRoute[] routes;
 
   public AlternativeRoute(WebRoute... routes) {
@@ -47,4 +48,5 @@ public final class AlternativeRoute implements WebRoute {
     newRoutes[n] = alternative;
     return new AlternativeRoute(newRoutes);
   }
+
 }

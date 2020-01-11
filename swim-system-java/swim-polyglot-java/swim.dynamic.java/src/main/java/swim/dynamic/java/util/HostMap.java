@@ -23,9 +23,6 @@ import swim.dynamic.PolyglotHostObjectType;
 import swim.dynamic.java.lang.HostObject;
 
 public final class HostMap {
-  private HostMap() {
-    // static
-  }
 
   public static final HostObjectType<Map<Object, Object>> TYPE;
 
@@ -38,9 +35,15 @@ public final class HostMap {
     type.addSpecializedMember("js", new HostMapJsHas());
     type.addUnspecializedMember(new HostMapContainsKey());
   }
+
+  private HostMap() {
+    // static
+  }
+
 }
 
 final class HostMapIsEmpty implements HostMethod<Map<Object, Object>> {
+
   @Override
   public String key() {
     return "isEmpty";
@@ -50,9 +53,11 @@ final class HostMapIsEmpty implements HostMethod<Map<Object, Object>> {
   public Object invoke(Bridge bridge, Map<Object, Object> map, Object... arguments) {
     return map.isEmpty();
   }
+
 }
 
 final class HostMapSize implements HostField<Map<Object, Object>> {
+
   @Override
   public String key() {
     return "size";
@@ -62,9 +67,11 @@ final class HostMapSize implements HostField<Map<Object, Object>> {
   public Object get(Bridge bridge, Map<Object, Object> map) {
     return map.size();
   }
+
 }
 
 final class HostMapJsHas implements HostMethod<Map<Object, Object>> {
+
   @Override
   public String key() {
     return "has";
@@ -74,9 +81,11 @@ final class HostMapJsHas implements HostMethod<Map<Object, Object>> {
   public Object invoke(Bridge bridge, Map<Object, Object> map, Object... arguments) {
     return map.containsKey(arguments[0]);
   }
+
 }
 
 final class HostMapContainsKey implements HostMethod<Map<Object, Object>> {
+
   @Override
   public String key() {
     return "containsKey";
@@ -86,4 +95,5 @@ final class HostMapContainsKey implements HostMethod<Map<Object, Object>> {
   public Object invoke(Bridge bridge, Map<Object, Object> map, Object... arguments) {
     return map.containsKey(arguments[0]);
   }
+
 }

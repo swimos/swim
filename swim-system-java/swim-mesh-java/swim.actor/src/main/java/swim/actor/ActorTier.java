@@ -22,6 +22,7 @@ import swim.runtime.TierContext;
 import swim.store.StoreBinding;
 
 public abstract class ActorTier extends ActorCell implements TierBinding, TierContext {
+
   Stage stage;
   StoreBinding store;
 
@@ -192,4 +193,5 @@ public abstract class ActorTier extends ActorCell implements TierBinding, TierCo
     closePolicy();
     closeLog();
   }
+
 }

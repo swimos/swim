@@ -47,88 +47,28 @@ import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 
 public class TraitSpec {
-  static class TestGraphAgent extends AbstractAgent {
-    @SwimLane("info")
-    ValueLane<String> info = valueLane()
-        .valueClass(String.class)
-        .observe(new InfoController());
-
-    class InfoController implements WillSet<String>, DidSet<String> {
-      @Override
-      public String willSet(String newValue) {
-        System.out.println(nodeUri() + " willSet newInfo: " + Format.debug(newValue));
-        return newValue + "!";
-      }
-      @Override
-      public void didSet(String newValue, String oldValue) {
-        System.out.println(nodeUri() + " didSet newInfo: " + Format.debug(newValue) + "; oldInfo: " + Format.debug(oldValue));
-      }
-    }
-
-    @Override
-    public void willOpen() {
-      context.openAgent(Text.from("test"), TestGraphAgentTrait.class);
-    }
-  }
-
-  static class TestGraphAgentTrait extends AbstractAgent {
-    @SwimLane("info")
-    ValueLane<String> info = valueLane()
-        .valueClass(String.class)
-        .observe(new InfoController());
-
-    class InfoController implements WillSet<String>, DidSet<String> {
-      @Override
-      public String willSet(String newValue) {
-        System.out.println(nodeUri() + " trait willSet newInfo: " + Format.debug(newValue));
-        return newValue;
-      }
-      @Override
-      public void didSet(String newValue, String oldValue) {
-        System.out.println(nodeUri() + " trait didSet newInfo: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-      }
-    }
-
-    @SwimLane("value")
-    ValueLane<String> value = valueLane()
-        .valueClass(String.class)
-        .observe(new ValueController());
-
-    class ValueController implements WillSet<String>, DidSet<String> {
-      @Override
-      public String willSet(String newValue) {
-        System.out.println(nodeUri() + " trait willSet newValue: " + Format.debug(newValue));
-        return newValue;
-      }
-      @Override
-      public void didSet(String newValue, String oldValue) {
-        System.out.println(nodeUri() + " trait didSet newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-      }
-    }
-  }
-
-  static class TestGraphPlane extends AbstractPlane {
-    @SwimRoute("/node/:name")
-    AgentRoute<TestGraphAgent> graph;
-  }
 
   @Test
   public void testExtensionLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestGraphPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-                                       .openPlane("test", TestGraphPlane.class);
+        .openPlane("test", TestGraphPlane.class);
 
     final String testValue = "Hello, world!";
     final CountDownLatch valueDidReceive = new CountDownLatch(1);
     final CountDownLatch valueDidSet = new CountDownLatch(2);
+    final CountDownLatch didSync = new CountDownLatch(1);
+
     class ValueLinkController implements WillSet<String>, DidSet<String>,
         WillReceive, DidReceive, WillLink, DidLink, WillSync, DidSync,
         WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
+
       @Override
       public String willSet(String newValue) {
         System.out.println("link willSet newValue: " + Format.debug(newValue));
         return newValue;
       }
+
       @Override
       public void didSet(String newValue, String oldValue) {
         System.out.println("link didSet newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
@@ -136,10 +76,12 @@ public class TraitSpec {
           valueDidSet.countDown();
         }
       }
+
       @Override
       public void willReceive(Value body) {
         System.out.println("link willReceive body: " + Recon.toString(body));
       }
+
       @Override
       public void didReceive(Value body) {
         System.out.println("link didReceive body: " + Recon.toString(body));
@@ -147,42 +89,53 @@ public class TraitSpec {
           valueDidReceive.countDown();
         }
       }
+
       @Override
       public void willLink() {
         System.out.println("link willLink");
       }
+
       @Override
       public void didLink() {
         System.out.println("link didLink");
       }
+
       @Override
       public void willSync() {
         System.out.println("link willSync");
       }
+
       @Override
       public void didSync() {
+        didSync.countDown();
         System.out.println("link didSync");
       }
+
       @Override
       public void willUnlink() {
         System.out.println("link willUnlink");
       }
+
       @Override
       public void didUnlink() {
         System.out.println("link didUnlink");
       }
+
       @Override
       public void didConnect() {
         System.out.println("link didConnect");
       }
+
       @Override
       public void didDisconnect() {
         System.out.println("link didDisconnect");
       }
+
       @Override
       public void didClose() {
         System.out.println("link didClose");
       }
+
     }
 
     try {
@@ -195,9 +148,13 @@ public class TraitSpec {
           .laneUri("value")
           .observe(new ValueLinkController())
           .open();
+
+      didSync.await();
+
       valueLink.set(testValue);
-      valueDidReceive.await(1, TimeUnit.SECONDS);
-      valueDidSet.await(1, TimeUnit.SECONDS);
+      valueDidReceive.await(10, TimeUnit.SECONDS);
+      valueDidSet.await(10, TimeUnit.SECONDS);
+
       assertEquals(valueDidReceive.getCount(), 0);
       assertEquals(valueDidSet.getCount(), 0);
       assertEquals(valueLink.get(), testValue);
@@ -210,7 +167,7 @@ public class TraitSpec {
   public void testOverloadedLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestGraphPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-                                       .openPlane("test", TestGraphPlane.class);
+        .openPlane("test", TestGraphPlane.class);
 
     final String testValue = "Hello, world";
     final String testInfo = testValue + "!";
@@ -220,11 +177,13 @@ public class TraitSpec {
     class InfoLinkController implements WillSet<String>, DidSet<String>,
         WillReceive, DidReceive, WillLink, DidLink, WillSync, DidSync,
         WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
+
       @Override
       public String willSet(String newValue) {
         System.out.println("link willSet newValue: " + Format.debug(newValue));
         return newValue;
       }
+
       @Override
       public void didSet(String newValue, String oldValue) {
         System.out.println("link didSet newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
@@ -234,10 +193,12 @@ public class TraitSpec {
           infoDidSet.countDown();
         }
       }
+
       @Override
       public void willReceive(Value body) {
         System.out.println("link willReceive body: " + Recon.toString(body));
       }
+
       @Override
       public void didReceive(Value body) {
         System.out.println("link didReceive body: " + Recon.toString(body));
@@ -245,42 +206,52 @@ public class TraitSpec {
           infoDidReceive.countDown();
         }
       }
+
       @Override
       public void willLink() {
         System.out.println("link willLink");
       }
+
       @Override
       public void didLink() {
         System.out.println("link didLink");
       }
+
       @Override
       public void willSync() {
         System.out.println("link willSync");
       }
+
       @Override
       public void didSync() {
         System.out.println("link didSync");
       }
+
       @Override
       public void willUnlink() {
         System.out.println("link willUnlink");
       }
+
       @Override
       public void didUnlink() {
         System.out.println("link didUnlink");
       }
+
       @Override
       public void didConnect() {
         System.out.println("link didConnect");
       }
+
       @Override
       public void didDisconnect() {
         System.out.println("link didDisconnect");
       }
+
       @Override
       public void didClose() {
         System.out.println("link didClose");
       }
+
     }
 
     try {
@@ -305,4 +276,84 @@ public class TraitSpec {
       kernel.stop();
     }
   }
+
+  static class TestGraphAgent extends AbstractAgent {
+
+    @SwimLane("info")
+    ValueLane<String> info = valueLane()
+        .valueClass(String.class)
+        .observe(new InfoController());
+
+    @Override
+    public void willOpen() {
+      context.openAgent(Text.from("test"), TestGraphAgentTrait.class);
+    }
+
+    class InfoController implements WillSet<String>, DidSet<String> {
+
+      @Override
+      public String willSet(String newValue) {
+        System.out.println(nodeUri() + " willSet newInfo: " + Format.debug(newValue));
+        return newValue + "!";
+      }
+
+      @Override
+      public void didSet(String newValue, String oldValue) {
+        System.out.println(nodeUri() + " didSet newInfo: " + Format.debug(newValue) + "; oldInfo: " + Format.debug(oldValue));
+      }
+
+    }
+
+  }
+
+  static class TestGraphAgentTrait extends AbstractAgent {
+
+    @SwimLane("info")
+    ValueLane<String> info = valueLane()
+        .valueClass(String.class)
+        .observe(new InfoController());
+    @SwimLane("value")
+    ValueLane<String> value = valueLane()
+        .valueClass(String.class)
+        .observe(new ValueController());
+
+    class InfoController implements WillSet<String>, DidSet<String> {
+
+      @Override
+      public String willSet(String newValue) {
+        System.out.println(nodeUri() + " trait willSet newInfo: " + Format.debug(newValue));
+        return newValue;
+      }
+
+      @Override
+      public void didSet(String newValue, String oldValue) {
+        System.out.println(nodeUri() + " trait didSet newInfo: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+      }
+
+    }
+
+    class ValueController implements WillSet<String>, DidSet<String> {
+
+      @Override
+      public String willSet(String newValue) {
+        System.out.println(nodeUri() + " trait willSet newValue: " + Format.debug(newValue));
+        return newValue;
+      }
+
+      @Override
+      public void didSet(String newValue, String oldValue) {
+        System.out.println(nodeUri() + " trait didSet newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+      }
+
+    }
+
+  }
+
+  static class TestGraphPlane extends AbstractPlane {
+
+    @SwimRoute("/node/:name")
+    AgentRoute<TestGraphAgent> graph;
+
+  }
+
 }

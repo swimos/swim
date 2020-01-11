@@ -21,6 +21,7 @@ import swim.streamlet.OutletInlet;
 import swim.structure.Value;
 
 public final class OrOutlet extends AbstractOutlet<Value> {
+
   final Inlet<Value> operand1Inlet;
   final Inlet<Value> operand2Inlet;
 
@@ -51,4 +52,5 @@ public final class OrOutlet extends AbstractOutlet<Value> {
     }
     return Value.absent();
   }
+
 }

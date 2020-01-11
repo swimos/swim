@@ -17,6 +17,7 @@ package swim.codec;
 import java.nio.ByteBuffer;
 
 final class ByteWriter extends Writer<Object, Object> {
+
   final Object value;
   final Input input;
 
@@ -47,24 +48,6 @@ final class ByteWriter extends Writer<Object, Object> {
 
   ByteWriter() {
     this(null, (Input) null);
-  }
-
-  @Override
-  public Writer<Object, Object> feed(Object value) {
-    if (value == null) {
-      return done();
-    } else if (value instanceof ByteBuffer) {
-      return new ByteWriter(((ByteBuffer) value).duplicate());
-    } else if (value instanceof byte[]) {
-      return new ByteWriter((byte[]) value);
-    } else {
-      throw new IllegalArgumentException(value.toString());
-    }
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.value, this.input.clone());
   }
 
   static Writer<Object, Object> write(Output<?> output, Object value, Input input) {
@@ -99,4 +82,23 @@ final class ByteWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, byte[] input) {
     return write(output, null, Binary.inputBuffer(input));
   }
+
+  @Override
+  public Writer<Object, Object> feed(Object value) {
+    if (value == null) {
+      return done();
+    } else if (value instanceof ByteBuffer) {
+      return new ByteWriter(((ByteBuffer) value).duplicate());
+    } else if (value instanceof byte[]) {
+      return new ByteWriter((byte[]) value);
+    } else {
+      throw new IllegalArgumentException(value.toString());
+    }
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.value, this.input.clone());
+  }
+
 }

@@ -19,6 +19,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface Identity {
+
   boolean isAuthenticated();
 
   Uri requestUri();
@@ -30,4 +31,5 @@ public interface Identity {
   Store data();
 
   Store session();
+
 }

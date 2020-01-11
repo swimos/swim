@@ -21,6 +21,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 final class PrecisionForm extends Form<Precision> {
+
   @Override
   public String tag() {
     return "precision";
@@ -57,4 +58,5 @@ final class PrecisionForm extends Form<Precision> {
     }
     return null;
   }
+
 }

@@ -21,10 +21,52 @@ import swim.util.HashGenCacheMap;
 import swim.util.Murmur3;
 
 public class UriScheme extends UriPart implements Comparable<UriScheme>, Debug, Display {
+
+  private static UriScheme undefined;
+  private static ThreadLocal<HashGenCacheMap<String, UriScheme>> cache = new ThreadLocal<>();
   protected final String name;
 
   protected UriScheme(String name) {
     this.name = name;
+  }
+
+  public static UriScheme undefined() {
+    if (undefined == null) {
+      undefined = new UriScheme("");
+    }
+    return undefined;
+  }
+
+  public static UriScheme from(String name) {
+    if (name == null) {
+      throw new NullPointerException();
+    }
+    final HashGenCacheMap<String, UriScheme> cache = cache();
+    final UriScheme scheme = cache.get(name);
+    if (scheme != null) {
+      return scheme;
+    } else {
+      return cache.put(name, new UriScheme(name));
+    }
+  }
+
+  public static UriScheme parse(String string) {
+    return Uri.standardParser().parseSchemeString(string);
+  }
+
+  static HashGenCacheMap<String, UriScheme> cache() {
+    HashGenCacheMap<String, UriScheme> cache = UriScheme.cache.get();
+    if (cache == null) {
+      int cacheSize;
+      try {
+        cacheSize = Integer.parseInt(System.getProperty("swim.uri.scheme.cache.size"));
+      } catch (NumberFormatException e) {
+        cacheSize = 4;
+      }
+      cache = new HashGenCacheMap<String, UriScheme>(cacheSize);
+      UriScheme.cache.set(cache);
+    }
+    return cache;
   }
 
   public final boolean isDefined() {
@@ -75,46 +117,4 @@ public class UriScheme extends UriPart implements Comparable<UriScheme>, Debug, 
     return this.name;
   }
 
-  private static UriScheme undefined;
-
-  private static ThreadLocal<HashGenCacheMap<String, UriScheme>> cache = new ThreadLocal<>();
-
-  public static UriScheme undefined() {
-    if (undefined == null) {
-      undefined = new UriScheme("");
-    }
-    return undefined;
-  }
-
-  public static UriScheme from(String name) {
-    if (name == null) {
-      throw new NullPointerException();
-    }
-    final HashGenCacheMap<String, UriScheme> cache = cache();
-    final UriScheme scheme = cache.get(name);
-    if (scheme != null) {
-      return scheme;
-    } else {
-      return cache.put(name, new UriScheme(name));
-    }
-  }
-
-  public static UriScheme parse(String string) {
-    return Uri.standardParser().parseSchemeString(string);
-  }
-
-  static HashGenCacheMap<String, UriScheme> cache() {
-    HashGenCacheMap<String, UriScheme> cache = UriScheme.cache.get();
-    if (cache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.uri.scheme.cache.size"));
-      } catch (NumberFormatException e) {
-        cacheSize = 4;
-      }
-      cache = new HashGenCacheMap<String, UriScheme>(cacheSize);
-      UriScheme.cache.set(cache);
-    }
-    return cache;
-  }
 }

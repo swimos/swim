@@ -15,6 +15,8 @@
 package swim.streamlet;
 
 public enum KeyEffect {
+
   UPDATE,
   REMOVE;
+
 }

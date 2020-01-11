@@ -18,6 +18,7 @@ import swim.concurrent.StageDef;
 import swim.store.StoreDef;
 
 public interface CellDef {
+
   LogDef logDef();
 
   PolicyDef policyDef();
@@ -25,4 +26,5 @@ public interface CellDef {
   StageDef stageDef();
 
   StoreDef storeDef();
+
 }

@@ -25,6 +25,7 @@ import swim.structure.Value;
  * ByteBuffer}.
  */
 public final class ByteBufferForm extends Form<ByteBuffer> {
+
   @Override
   public Class<ByteBuffer> type() {
     return ByteBuffer.class;
@@ -48,4 +49,5 @@ public final class ByteBufferForm extends Form<ByteBuffer> {
       return null;
     }
   }
+
 }

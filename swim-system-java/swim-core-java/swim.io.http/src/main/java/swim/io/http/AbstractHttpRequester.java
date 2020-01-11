@@ -28,6 +28,7 @@ import swim.io.IpContext;
 import swim.io.IpSocket;
 
 public abstract class AbstractHttpRequester<T> implements HttpRequester<T>, IpContext, FlowContext {
+
   protected HttpRequesterContext context;
 
   @Override
@@ -184,4 +185,5 @@ public abstract class AbstractHttpRequester<T> implements HttpRequester<T>, IpCo
   public void close() {
     this.context.close();
   }
+
 }

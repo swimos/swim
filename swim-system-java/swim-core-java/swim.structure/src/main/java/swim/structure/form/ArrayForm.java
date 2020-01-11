@@ -25,6 +25,7 @@ import swim.structure.Value;
  * an array of elements with that type.
  */
 public final class ArrayForm extends Form<Object> {
+
   final Class<?> type;
   final Form<Object> form;
   Object unit;
@@ -111,4 +112,5 @@ public final class ArrayForm extends Form<Object> {
     }
     return null;
   }
+
 }

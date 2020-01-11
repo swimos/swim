@@ -19,9 +19,6 @@ import swim.dynamic.JavaHostClassType;
 import swim.structure.Record;
 
 public final class HostRecord {
-  private HostRecord() {
-    // static
-  }
 
   public static final HostObjectType<Record> TYPE;
 
@@ -30,4 +27,9 @@ public final class HostRecord {
     TYPE = type;
     type.extendType(HostValue.TYPE);
   }
+
+  private HostRecord() {
+    // static
+  }
+
 }

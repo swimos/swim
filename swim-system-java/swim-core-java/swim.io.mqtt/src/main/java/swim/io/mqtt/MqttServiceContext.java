@@ -18,9 +18,11 @@ import java.net.InetSocketAddress;
 import swim.io.FlowContext;
 
 public interface MqttServiceContext extends FlowContext {
+
   MqttSettings mqttSettings();
 
   InetSocketAddress localAddress();
 
   void unbind();
+
 }

@@ -21,6 +21,7 @@ package swim.io;
  * @see FlowModifier
  */
 public interface FlowContext {
+
   /**
    * Returns the current {@code FlowControl} state of the underlying network
    * channel.
@@ -38,4 +39,5 @@ public interface FlowContext {
    * control state by applying a {@code flowModifier} delta.
    */
   FlowControl flowControl(FlowModifier flowModifier);
+
 }

@@ -17,6 +17,7 @@ package swim.runtime.reflect;
 import swim.structure.Value;
 
 public interface WarpPulse {
+
   boolean isDefined();
 
   int eventRate();
@@ -28,4 +29,5 @@ public interface WarpPulse {
   long commandCount();
 
   Value toValue();
+
 }

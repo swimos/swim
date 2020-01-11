@@ -72,116 +72,6 @@ package swim.codec;
  * semantics, are implementation defined.</p>
  */
 public abstract class Encoder<I, O> {
-  /**
-   * Returns {@code true} when {@link #pull(OutputBuffer) pull} is able to
-   * produce buffer data.  i.e. this {@code Encoder} is in the <em>cont</em>
-   * state.
-   */
-  public boolean isCont() {
-    return true;
-  }
-
-  /**
-   * Returns {@code true} when encoding has terminated successfully, and {@link
-   * #bind() bind} will return the encoded result.  i.e. this {@code Encoder} is
-   * in the <em>done</em> state.
-   */
-  public boolean isDone() {
-    return false;
-  }
-
-  /**
-   * Returns {@code true} when encoding has terminated in failure, and {@link
-   * #trap() trap} will return the encode error.  i.e. this {@code Encoder} is
-   * in the <em>error</em> state.
-   */
-  public boolean isError() {
-    return false;
-  }
-
-  /**
-   * Returns an {@code Encoder} that represents the continuation of how to
-   * encode the given {@code input} object.
-   *
-   * @throws IllegalArgumentException if this {@code Encoder} does not know how
-   *         to encode the given {@code input} object.
-   */
-  public Encoder<I, O> feed(I input) {
-    throw new IllegalStateException();
-  }
-
-  /**
-   * Incrementally encodes as much {@code output} buffer data as possible, and
-   * returns another {@code Encoder} that represents the continuation of how to
-   * write additional buffer data.  If {@code isLast} is {@code true}, then
-   * {@code pull} <em>must</em> return a terminated {@code Encoder}, i.e. an
-   * {@code Encoder} in the <em>done</em> state, or in the <em>error</em> state.
-   * The given {@code output} buffer is only guaranteed to be valid for the
-   * duration of the method call; references to {@code output} must not be
-   * stored.
-   */
-  public abstract Encoder<I, O> pull(OutputBuffer<?> output);
-
-  /**
-   * Returns an {@code Encoder} continuation whose behavior may be altered by
-   * the given out-of-band {@code condition}.
-   */
-  public Encoder<I, O> fork(Object condition) {
-    return this;
-  }
-
-  /**
-   * Returns the encoded result.  Only guaranteed to return a result when in
-   * the <em>done</em> state.
-   *
-   * @throws IllegalStateException if this {@code Encoder} is not in the
-   *         <em>done</em> state.
-   */
-  public O bind() {
-    return null;
-  }
-
-  /**
-   * Returns the encode error.  Only guaranteed to return an error when in the
-   * <em>error</em> state.
-   *
-   * @throws IllegalStateException if this {@code Encoder} is not in the
-   *         <em>error</em> state.
-   */
-  public Throwable trap() {
-    throw new IllegalStateException();
-  }
-
-  /**
-   * Casts a done {@code Encoder} to a different input type.
-   * An {@code Encoder} in the <em>done</em> state can have any input type.
-   *
-   * @throws IllegalStateException if this {@code Encoder} is not in the
-   *         <em>done</em> state.
-   */
-  public <I2> Encoder<I2, O> asDone() {
-    throw new IllegalStateException();
-  }
-
-  /**
-   * Casts an errored {@code Encoder} to different input and output types.
-   * An {@code Encoder} in the <em>error</em> state can have any input type,
-   * and any output type.
-   *
-   * @throws IllegalStateException if this {@code Encoder} is not in the
-   *         <em>error</em> state.
-   */
-  public <I2, O2> Encoder<I2, O2> asError() {
-    throw new IllegalStateException();
-  }
-
-  /**
-   * Returns an {@code Encoder} that continues encoding {@code that} {@code
-   * Encoder}, after it finishes encoding {@code this} {@code Encoder}.
-   */
-  public <O2> Encoder<I, O2> andThen(Encoder<I, O2> that) {
-    return new EncoderAndThen<I, O2>(this, that);
-  }
 
   private static Encoder<Object, Object> done;
 
@@ -216,9 +106,122 @@ public abstract class Encoder<I, O> {
   public static <I, O> Encoder<I, O> error(Throwable error) {
     return new EncoderError<I, O>(error);
   }
+
+  /**
+   * Returns {@code true} when {@link #pull(OutputBuffer) pull} is able to
+   * produce buffer data.  i.e. this {@code Encoder} is in the <em>cont</em>
+   * state.
+   */
+  public boolean isCont() {
+    return true;
+  }
+
+  /**
+   * Returns {@code true} when encoding has terminated successfully, and {@link
+   * #bind() bind} will return the encoded result.  i.e. this {@code Encoder} is
+   * in the <em>done</em> state.
+   */
+  public boolean isDone() {
+    return false;
+  }
+
+  /**
+   * Returns {@code true} when encoding has terminated in failure, and {@link
+   * #trap() trap} will return the encode error.  i.e. this {@code Encoder} is
+   * in the <em>error</em> state.
+   */
+  public boolean isError() {
+    return false;
+  }
+
+  /**
+   * Returns an {@code Encoder} that represents the continuation of how to
+   * encode the given {@code input} object.
+   *
+   * @throws IllegalArgumentException if this {@code Encoder} does not know how
+   *                                  to encode the given {@code input} object.
+   */
+  public Encoder<I, O> feed(I input) {
+    throw new IllegalStateException();
+  }
+
+  /**
+   * Incrementally encodes as much {@code output} buffer data as possible, and
+   * returns another {@code Encoder} that represents the continuation of how to
+   * write additional buffer data.  If {@code isLast} is {@code true}, then
+   * {@code pull} <em>must</em> return a terminated {@code Encoder}, i.e. an
+   * {@code Encoder} in the <em>done</em> state, or in the <em>error</em> state.
+   * The given {@code output} buffer is only guaranteed to be valid for the
+   * duration of the method call; references to {@code output} must not be
+   * stored.
+   */
+  public abstract Encoder<I, O> pull(OutputBuffer<?> output);
+
+  /**
+   * Returns an {@code Encoder} continuation whose behavior may be altered by
+   * the given out-of-band {@code condition}.
+   */
+  public Encoder<I, O> fork(Object condition) {
+    return this;
+  }
+
+  /**
+   * Returns the encoded result.  Only guaranteed to return a result when in
+   * the <em>done</em> state.
+   *
+   * @throws IllegalStateException if this {@code Encoder} is not in the
+   *                               <em>done</em> state.
+   */
+  public O bind() {
+    return null;
+  }
+
+  /**
+   * Returns the encode error.  Only guaranteed to return an error when in the
+   * <em>error</em> state.
+   *
+   * @throws IllegalStateException if this {@code Encoder} is not in the
+   *                               <em>error</em> state.
+   */
+  public Throwable trap() {
+    throw new IllegalStateException();
+  }
+
+  /**
+   * Casts a done {@code Encoder} to a different input type.
+   * An {@code Encoder} in the <em>done</em> state can have any input type.
+   *
+   * @throws IllegalStateException if this {@code Encoder} is not in the
+   *                               <em>done</em> state.
+   */
+  public <I2> Encoder<I2, O> asDone() {
+    throw new IllegalStateException();
+  }
+
+  /**
+   * Casts an errored {@code Encoder} to different input and output types.
+   * An {@code Encoder} in the <em>error</em> state can have any input type,
+   * and any output type.
+   *
+   * @throws IllegalStateException if this {@code Encoder} is not in the
+   *                               <em>error</em> state.
+   */
+  public <I2, O2> Encoder<I2, O2> asError() {
+    throw new IllegalStateException();
+  }
+
+  /**
+   * Returns an {@code Encoder} that continues encoding {@code that} {@code
+   * Encoder}, after it finishes encoding {@code this} {@code Encoder}.
+   */
+  public <O2> Encoder<I, O2> andThen(Encoder<I, O2> that) {
+    return new EncoderAndThen<I, O2>(this, that);
+  }
+
 }
 
 final class EncoderDone<I, O> extends Encoder<I, O> {
+
   private final O output;
 
   EncoderDone(O output) {
@@ -255,9 +258,11 @@ final class EncoderDone<I, O> extends Encoder<I, O> {
   public <O2> Encoder<I, O2> andThen(Encoder<I, O2> that) {
     return that;
   }
+
 }
 
 final class EncoderError<I, O> extends Encoder<I, O> {
+
   private final Throwable error;
 
   EncoderError(Throwable error) {
@@ -295,9 +300,11 @@ final class EncoderError<I, O> extends Encoder<I, O> {
   public <O2> Encoder<I, O2> andThen(Encoder<I, O2> that) {
     return (Encoder<I, O2>) this;
   }
+
 }
 
 final class EncoderAndThen<I, O> extends Encoder<I, O> {
+
   private final Encoder<I, ?> head;
   private final Encoder<I, O> tail;
 
@@ -320,4 +327,5 @@ final class EncoderAndThen<I, O> extends Encoder<I, O> {
       return new EncoderAndThen<I, O>(head, this.tail);
     }
   }
+
 }

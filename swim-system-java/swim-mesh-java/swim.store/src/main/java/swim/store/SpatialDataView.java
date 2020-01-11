@@ -22,6 +22,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class SpatialDataView<K, S, V> extends SpatialValueMap<K, S, V> implements SpatialData<K, S, V>, SpatialDataContext<S> {
+
   public SpatialDataView(SpatialDataBinding<S> dataBinding, Form<K> keyForm, Form<V> valueForm) {
     super(dataBinding, keyForm, valueForm);
     dataBinding.setDataContext(this);
@@ -45,6 +46,7 @@ public class SpatialDataView<K, S, V> extends SpatialValueMap<K, S, V> implement
   public <K2> SpatialDataView<K2, S, V> keyClass(Class<K2> keyClass) {
     return keyForm(Form.<K2>forClass(keyClass));
   }
+
   @SuppressWarnings("unchecked")
   @Override
   public Z2Form<S> shapeForm() {
@@ -123,4 +125,5 @@ public class SpatialDataView<K, S, V> extends SpatialValueMap<K, S, V> implement
   public void didClear() {
     // stub
   }
+
 }

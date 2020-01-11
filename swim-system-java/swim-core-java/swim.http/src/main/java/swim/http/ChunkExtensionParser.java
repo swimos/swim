@@ -19,6 +19,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class ChunkExtensionParser extends Parser<ChunkExtension> {
+
   final HttpParser http;
   final StringBuilder name;
   final StringBuilder value;
@@ -33,11 +34,6 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
 
   ChunkExtensionParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<ChunkExtension> feed(Input input) {
-    return parse(input, this.http, this.name, this.value, this.step);
   }
 
   static Parser<ChunkExtension> parse(Input input, HttpParser http, StringBuilder name,
@@ -189,4 +185,10 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
   static Parser<ChunkExtension> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<ChunkExtension> feed(Input input) {
+    return parse(input, this.http, this.name, this.value, this.step);
+  }
+
 }

@@ -36,6 +36,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> extends RecordStreamlet<I, O> implements GenericStreamlet<I, O> {
+
   protected StreamletScope<? extends O> scope;
   protected StreamletContext context;
   protected int version;
@@ -47,6 +48,37 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   public AbstractRecordStreamlet() {
     this(null);
+  }
+
+  public static <I extends Value, O extends Value> void compileInlets(Class<?> streamletClass, RecordStreamlet<I, O> streamlet) {
+    while (streamletClass != null) {
+      final java.lang.reflect.Field[] fields = streamletClass.getDeclaredFields();
+      for (java.lang.reflect.Field field : fields) {
+        if (Inlet.class.isAssignableFrom(field.getType())) {
+          final In in = field.getAnnotation(In.class);
+          if (in != null) {
+            String name = in.value();
+            if (name.isEmpty()) {
+              name = field.getName();
+            }
+            final Inlet<I> inlet = AbstractStreamlet.reflectInletField(streamlet, field);
+            streamlet.compileInlet(inlet, name);
+            continue;
+          }
+          final Inout inout = field.getAnnotation(Inout.class);
+          if (inout != null) {
+            String name = inout.value();
+            if (name.isEmpty()) {
+              name = field.getName();
+            }
+            final Inoutlet<I, O> inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, field);
+            streamlet.compileInlet(inoutlet, name);
+            continue;
+          }
+        }
+      }
+      streamletClass = streamletClass.getSuperclass();
+    }
   }
 
   @Override
@@ -551,34 +583,4 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
     // stub
   }
 
-  public static <I extends Value, O extends Value> void compileInlets(Class<?> streamletClass, RecordStreamlet<I, O> streamlet) {
-    while (streamletClass != null) {
-      final java.lang.reflect.Field[] fields = streamletClass.getDeclaredFields();
-      for (java.lang.reflect.Field field : fields) {
-        if (Inlet.class.isAssignableFrom(field.getType())) {
-          final In in = field.getAnnotation(In.class);
-          if (in != null) {
-            String name = in.value();
-            if (name.isEmpty()) {
-              name = field.getName();
-            }
-            final Inlet<I> inlet = AbstractStreamlet.reflectInletField(streamlet, field);
-            streamlet.compileInlet(inlet, name);
-            continue;
-          }
-          final Inout inout = field.getAnnotation(Inout.class);
-          if (inout != null) {
-            String name = inout.value();
-            if (name.isEmpty()) {
-              name = field.getName();
-            }
-            final Inoutlet<I, O> inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, field);
-            streamlet.compileInlet(inoutlet, name);
-            continue;
-          }
-        }
-      }
-      streamletClass = streamletClass.getSuperclass();
-    }
-  }
 }

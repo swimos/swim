@@ -21,8 +21,10 @@ import swim.codec.Decoder;
 import swim.codec.InputBuffer;
 
 final class DataReflection extends AvroDataType<ByteBuffer> {
+
   @Override
   public Decoder<ByteBuffer> decodeData(InputBuffer input) {
     return Binary.parseOutput(Binary.byteBufferOutput(), input);
   }
+
 }

@@ -17,6 +17,7 @@ package swim.util;
 import java.util.NoSuchElementException;
 
 final class CursorUnary<T> implements Cursor<T> {
+
   final T value;
   int index;
 
@@ -102,4 +103,5 @@ final class CursorUnary<T> implements Cursor<T> {
       throw new NoSuchElementException();
     }
   }
+
 }

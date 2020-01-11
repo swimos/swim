@@ -29,8 +29,119 @@ import swim.codec.Unicode;
 import swim.util.Murmur3;
 
 public abstract class AvroNamespace implements Collection<String>, Comparable<AvroNamespace>, Debug, Display {
+
+  private static AvroNamespace empty;
+
   AvroNamespace() {
     // sealed
+  }
+
+  private static int size(AvroNamespace namespace) {
+    int n = 0;
+    while (!namespace.isEmpty()) {
+      n += 1;
+      namespace = namespace.tail();
+    }
+    return n;
+  }
+
+  private static boolean contains(AvroNamespace namespace, String component) {
+    while (!namespace.isEmpty()) {
+      if (component.equals(namespace.head())) {
+        return true;
+      }
+      namespace = namespace.tail();
+    }
+    return false;
+  }
+
+  private static boolean containsAll(AvroNamespace namespace, HashSet<?> missing) {
+    while (!namespace.isEmpty() && !missing.isEmpty()) {
+      missing.remove(namespace.head());
+      namespace = namespace.tail();
+    }
+    return missing.isEmpty();
+  }
+
+  private static void toArray(AvroNamespace path, Object[] array) {
+    int i = 0;
+    while (!path.isEmpty()) {
+      array[i] = path.head();
+      path = path.tail();
+      i += 1;
+    }
+  }
+
+  static void display(AvroNamespace namespace, Output<?> output) {
+    if (!namespace.isEmpty()) {
+      do {
+        output = output.write(namespace.head());
+        namespace = namespace.tail();
+        if (!namespace.isEmpty()) {
+          output = output.write('.');
+        } else {
+          break;
+        }
+      } while (true);
+    }
+  }
+
+  public static AvroNamespaceBuilder builder() {
+    return new AvroNamespaceBuilder();
+  }
+
+  public static AvroNamespace empty() {
+    if (empty == null) {
+      empty = new AvroNamespaceEmpty();
+    }
+    return empty;
+  }
+
+  static AvroNamespace component(String component, AvroNamespace tail) {
+    if (component == null) {
+      throw new NullPointerException("component");
+    }
+    component = AvroName.cacheName(component);
+    return new AvroNamespaceComponent(component, tail);
+  }
+
+  public static AvroNamespace component(String component) {
+    return AvroNamespace.component(component, AvroNamespace.empty());
+  }
+
+  public static AvroNamespace from(Collection<? extends String> components) {
+    if (components == null) {
+      throw new NullPointerException();
+    }
+    if (components instanceof AvroNamespace) {
+      return (AvroNamespace) components;
+    } else {
+      final AvroNamespaceBuilder builder = new AvroNamespaceBuilder();
+      builder.addAll(components);
+      return builder.bind();
+    }
+  }
+
+  public static AvroNamespace from(String... components) {
+    if (components == null) {
+      throw new NullPointerException();
+    }
+    final AvroNamespaceBuilder builder = new AvroNamespaceBuilder();
+    for (int i = 0, n = components.length; i < n; i += 1) {
+      builder.add(components[i]);
+    }
+    return builder.bind();
+  }
+
+  public static AvroNamespace parse(String string) {
+    final Input input = Unicode.stringInput(string);
+    Parser<AvroNamespace> parser = AvroNamespaceParser.parse(input);
+    if (input.isCont() && !parser.isError()) {
+      parser = Parser.error(Diagnostic.unexpected(input));
+    } else if (input.isError()) {
+      parser = Parser.error(input.trap());
+    }
+    return parser.bind();
   }
 
   public abstract boolean isDefined();
@@ -41,15 +152,6 @@ public abstract class AvroNamespace implements Collection<String>, Comparable<Av
   @Override
   public int size() {
     return AvroNamespace.size(this);
-  }
-
-  private static int size(AvroNamespace namespace) {
-    int n = 0;
-    while (!namespace.isEmpty()) {
-      n += 1;
-      namespace = namespace.tail();
-    }
-    return n;
   }
 
   public abstract String head();
@@ -68,30 +170,12 @@ public abstract class AvroNamespace implements Collection<String>, Comparable<Av
     return false;
   }
 
-  private static boolean contains(AvroNamespace namespace, String component) {
-    while (!namespace.isEmpty()) {
-      if (component.equals(namespace.head())) {
-        return true;
-      }
-      namespace = namespace.tail();
-    }
-    return false;
-  }
-
   @Override
   public boolean containsAll(Collection<?> components) {
     if (components == null) {
       throw new NullPointerException();
     }
     return AvroNamespace.containsAll(this, new HashSet<Object>(components));
-  }
-
-  private static boolean containsAll(AvroNamespace namespace, HashSet<?> missing) {
-    while (!namespace.isEmpty() && !missing.isEmpty()) {
-      missing.remove(namespace.head());
-      namespace = namespace.tail();
-    }
-    return missing.isEmpty();
   }
 
   @Override
@@ -186,15 +270,6 @@ public abstract class AvroNamespace implements Collection<String>, Comparable<Av
     return array;
   }
 
-  private static void toArray(AvroNamespace path, Object[] array) {
-    int i = 0;
-    while (!path.isEmpty()) {
-      array[i] = path.head();
-      path = path.tail();
-      i += 1;
-    }
-  }
-
   @Override
   public Iterator<String> iterator() {
     return new AvroNamespaceIterator(this);
@@ -226,85 +301,13 @@ public abstract class AvroNamespace implements Collection<String>, Comparable<Av
   @Override
   public abstract void display(Output<?> output);
 
-  static void display(AvroNamespace namespace, Output<?> output) {
-    if (!namespace.isEmpty()) {
-      do {
-        output = output.write(namespace.head());
-        namespace = namespace.tail();
-        if (!namespace.isEmpty()) {
-          output = output.write('.');
-        } else {
-          break;
-        }
-      } while (true);
-    }
-  }
-
   @Override
   public abstract String toString();
 
-  private static AvroNamespace empty;
-
-  public static AvroNamespaceBuilder builder() {
-    return new AvroNamespaceBuilder();
-  }
-
-  public static AvroNamespace empty() {
-    if (empty == null) {
-      empty = new AvroNamespaceEmpty();
-    }
-    return empty;
-  }
-
-  static AvroNamespace component(String component, AvroNamespace tail) {
-    if (component == null) {
-      throw new NullPointerException("component");
-    }
-    component = AvroName.cacheName(component);
-    return new AvroNamespaceComponent(component, tail);
-  }
-
-  public static AvroNamespace component(String component) {
-    return AvroNamespace.component(component, AvroNamespace.empty());
-  }
-
-  public static AvroNamespace from(Collection<? extends String> components) {
-    if (components == null) {
-      throw new NullPointerException();
-    }
-    if (components instanceof AvroNamespace) {
-      return (AvroNamespace) components;
-    } else {
-      final AvroNamespaceBuilder builder = new AvroNamespaceBuilder();
-      builder.addAll(components);
-      return builder.bind();
-    }
-  }
-
-  public static AvroNamespace from(String... components) {
-    if (components == null) {
-      throw new NullPointerException();
-    }
-    final AvroNamespaceBuilder builder = new AvroNamespaceBuilder();
-    for (int i = 0, n = components.length; i < n; i += 1) {
-      builder.add(components[i]);
-    }
-    return builder.bind();
-  }
-
-  public static AvroNamespace parse(String string) {
-    final Input input = Unicode.stringInput(string);
-    Parser<AvroNamespace> parser = AvroNamespaceParser.parse(input);
-    if (input.isCont() && !parser.isError()) {
-      parser = Parser.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parser = Parser.error(input.trap());
-    }
-    return parser.bind();
-  }
 }
 
 final class AvroNamespaceIterator implements Iterator<String> {
+
   AvroNamespace namespace;
 
   AvroNamespaceIterator(AvroNamespace namespace) {
@@ -331,4 +334,5 @@ final class AvroNamespaceIterator implements Iterator<String> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

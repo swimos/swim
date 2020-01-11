@@ -35,6 +35,9 @@ import swim.http.header.ContentType;
 import swim.util.Murmur3;
 
 public final class HttpBody<T> extends HttpEntity<T> implements Debug {
+
+  private static int hashSeed;
+  private static HttpBody<Object> empty;
   final T value;
   final Encoder<?, ?> content;
   final long length;
@@ -45,6 +48,91 @@ public final class HttpBody<T> extends HttpEntity<T> implements Debug {
     this.content = content;
     this.length = length;
     this.mediaType = mediaType;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> HttpBody<T> empty() {
+    if (empty == null) {
+      empty = new HttpBody<Object>(null, Encoder.done(), 0L, null);
+    }
+    return (HttpBody<T>) empty;
+  }
+
+  public static <T> HttpBody<T> from(T value, Encoder<?, ?> content, long length, MediaType mediaType) {
+    return new HttpBody<T>(value, content, length, mediaType);
+  }
+
+  public static <T> HttpBody<T> from(T value, Encoder<?, ?> content, long length) {
+    return new HttpBody<T>(value, content, length, MediaType.applicationOctetStream());
+  }
+
+  public static <T> HttpBody<T> from(Encoder<?, ?> content, long length, MediaType mediaType) {
+    return new HttpBody<T>(null, content, length, mediaType);
+  }
+
+  public static <T> HttpBody<T> from(Encoder<?, ?> content, long length) {
+    return new HttpBody<T>(null, content, length, MediaType.applicationOctetStream());
+  }
+
+  public static <T> HttpBody<T> from(ByteBuffer data, MediaType mediaType) {
+    return new HttpBody<T>(null, Binary.byteBufferWriter(data), data.remaining(), mediaType);
+  }
+
+  public static <T> HttpBody<T> from(ByteBuffer data) {
+    return from(data, MediaType.applicationOctetStream());
+  }
+
+  public static HttpBody<String> from(String content, MediaType mediaType) {
+    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(content.length()));
+    output = output.write(content);
+    final ByteBuffer data = output.bind();
+    return new HttpBody<String>(content, Binary.byteBufferWriter(data), data.remaining(), mediaType);
+  }
+
+  public static HttpBody<String> from(String content) {
+    return from(content, MediaType.textPlain());
+  }
+
+  public static <T> HttpBody<T> fromFile(String path, MediaType mediaType) throws IOException {
+    final FileChannel channel = FileChannel.open(Paths.get(path), StandardOpenOption.READ);
+    return new HttpBody<T>(null, Binary.channelEncoder(channel), channel.size(), mediaType);
+  }
+
+  public static <T> HttpBody<T> fromFile(String path) throws IOException {
+    return fromFile(path, MediaType.forPath(path));
+  }
+
+  public static <T> HttpBody<T> fromResource(ClassLoader classLoader, String resource, MediaType mediaType) throws IOException {
+    HttpBody<T> body = null;
+    InputStream input = null;
+    try {
+      input = classLoader.getResourceAsStream(resource);
+      if (input != null) {
+        final ByteBuffer data = Binary.read(Binary.outputParser(Binary.byteBufferOutput()), input);
+        body = new HttpBody<T>(null, Binary.byteBufferWriter(data), data.remaining(), mediaType);
+      }
+    } finally {
+      try {
+        if (input != null) {
+          input.close();
+        }
+      } catch (IOException swallow) {
+      }
+    }
+    return body;
+  }
+
+  public static <T> HttpBody<T> fromResource(ClassLoader classLoader, String resource) throws IOException {
+    return fromResource(classLoader, resource, MediaType.forPath(resource));
+  }
+
+  public static <T> Decoder<HttpMessage<T>> httpDecoder(HttpMessage<?> message, Decoder<T> content, long length) {
+    return Http.standardParser().bodyDecoder(message, content, length);
+  }
+
+  public static <T> Decoder<HttpMessage<T>> decodeHttp(HttpMessage<?> message, Decoder<T> content,
+                                                       long length, InputBuffer input) {
+    return Http.standardParser().decodeBody(message, content, length, input);
   }
 
   @Override
@@ -138,92 +226,4 @@ public final class HttpBody<T> extends HttpEntity<T> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static HttpBody<Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <T> HttpBody<T> empty() {
-    if (empty == null) {
-      empty = new HttpBody<Object>(null, Encoder.done(), 0L, null);
-    }
-    return (HttpBody<T>) empty;
-  }
-
-  public static <T> HttpBody<T> from(T value, Encoder<?, ?> content, long length, MediaType mediaType) {
-    return new HttpBody<T>(value, content, length, mediaType);
-  }
-
-  public static <T> HttpBody<T> from(T value, Encoder<?, ?> content, long length) {
-    return new HttpBody<T>(value, content, length, MediaType.applicationOctetStream());
-  }
-
-  public static <T> HttpBody<T> from(Encoder<?, ?> content, long length, MediaType mediaType) {
-    return new HttpBody<T>(null, content, length, mediaType);
-  }
-
-  public static <T> HttpBody<T> from(Encoder<?, ?> content, long length) {
-    return new HttpBody<T>(null, content, length, MediaType.applicationOctetStream());
-  }
-
-  public static <T> HttpBody<T> from(ByteBuffer data, MediaType mediaType) {
-    return new HttpBody<T>(null, Binary.byteBufferWriter(data), data.remaining(), mediaType);
-  }
-
-  public static <T> HttpBody<T> from(ByteBuffer data) {
-    return from(data, MediaType.applicationOctetStream());
-  }
-
-  public static HttpBody<String> from(String content, MediaType mediaType) {
-    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(content.length()));
-    output = output.write(content);
-    final ByteBuffer data = output.bind();
-    return new HttpBody<String>(content, Binary.byteBufferWriter(data), data.remaining(), mediaType);
-  }
-
-  public static HttpBody<String> from(String content) {
-    return from(content, MediaType.textPlain());
-  }
-
-  public static <T> HttpBody<T> fromFile(String path, MediaType mediaType) throws IOException {
-    final FileChannel channel = FileChannel.open(Paths.get(path), StandardOpenOption.READ);
-    return new HttpBody<T>(null, Binary.channelEncoder(channel), channel.size(), mediaType);
-  }
-
-  public static <T> HttpBody<T> fromFile(String path) throws IOException {
-    return fromFile(path, MediaType.forPath(path));
-  }
-
-  public static <T> HttpBody<T> fromResource(ClassLoader classLoader, String resource, MediaType mediaType) throws IOException {
-    HttpBody<T> body = null;
-    InputStream input = null;
-    try {
-      input = classLoader.getResourceAsStream(resource);
-      if (input != null) {
-        final ByteBuffer data = Binary.read(Binary.outputParser(Binary.byteBufferOutput()), input);
-        body = new HttpBody<T>(null, Binary.byteBufferWriter(data), data.remaining(), mediaType);
-      }
-    } finally {
-      try {
-        if (input != null) {
-          input.close();
-        }
-      } catch (IOException swallow) {
-      }
-    }
-    return body;
-  }
-
-  public static <T> HttpBody<T> fromResource(ClassLoader classLoader, String resource) throws IOException {
-    return fromResource(classLoader, resource, MediaType.forPath(resource));
-  }
-
-  public static <T> Decoder<HttpMessage<T>> httpDecoder(HttpMessage<?> message, Decoder<T> content, long length) {
-    return Http.standardParser().bodyDecoder(message, content, length);
-  }
-
-  public static <T> Decoder<HttpMessage<T>> decodeHttp(HttpMessage<?> message, Decoder<T> content,
-                                                       long length, InputBuffer input) {
-    return Http.standardParser().decodeBody(message, content, length, input);
-  }
 }

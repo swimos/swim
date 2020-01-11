@@ -38,6 +38,8 @@ import swim.util.Murmur3;
  * other type.
  */
 public final class KeysSelector extends Selector {
+
+  private static int hashSeed;
   final Selector then;
 
   public KeysSelector(Selector then) {
@@ -204,5 +206,4 @@ public final class KeysSelector extends Selector {
     this.then.debugThen(output);
   }
 
-  private static int hashSeed;
 }

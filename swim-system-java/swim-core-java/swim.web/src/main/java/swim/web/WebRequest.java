@@ -35,6 +35,7 @@ import swim.uri.UriQuery;
 import swim.ws.WsResponse;
 
 public abstract class WebRequest {
+
   public abstract HttpRequest<?> httpRequest();
 
   public HttpMethod httpMethod() {
@@ -102,4 +103,5 @@ public abstract class WebRequest {
   public WebResponse reject() {
     return WebServerRejected.notFound();
   }
+
 }

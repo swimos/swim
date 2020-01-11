@@ -22,6 +22,7 @@ import swim.ws.WsControl;
 import swim.ws.WsData;
 
 public interface WebSocketContext<I, O> extends IpContext, FlowContext {
+
   WsSettings wsSettings();
 
   <I2 extends I> void read(Decoder<I2> content);
@@ -33,4 +34,5 @@ public interface WebSocketContext<I, O> extends IpContext, FlowContext {
   void become(IpSocket socket);
 
   void close();
+
 }

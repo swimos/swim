@@ -19,6 +19,7 @@ import swim.codec.EncoderException;
 import swim.codec.OutputBuffer;
 
 final class MqttPubRecEncoder extends Encoder<Object, MqttPubRec> {
+
   final MqttEncoder mqtt;
   final MqttPubRec packet;
   final int length;
@@ -35,11 +36,6 @@ final class MqttPubRecEncoder extends Encoder<Object, MqttPubRec> {
 
   MqttPubRecEncoder(MqttEncoder mqtt, MqttPubRec packet) {
     this(mqtt, packet, 0, 0, 1);
-  }
-
-  @Override
-  public Encoder<Object, MqttPubRec> pull(OutputBuffer<?> output) {
-    return encode(output, this.mqtt, this.packet, this.length, this.remaining, this.step);
   }
 
   static Encoder<Object, MqttPubRec> encode(OutputBuffer<?> output, MqttEncoder mqtt,
@@ -93,4 +89,10 @@ final class MqttPubRecEncoder extends Encoder<Object, MqttPubRec> {
                                             MqttPubRec packet) {
     return encode(output, mqtt, packet, 0, 0, 1);
   }
+
+  @Override
+  public Encoder<Object, MqttPubRec> pull(OutputBuffer<?> output) {
+    return encode(output, this.mqtt, this.packet, this.length, this.remaining, this.step);
+  }
+
 }

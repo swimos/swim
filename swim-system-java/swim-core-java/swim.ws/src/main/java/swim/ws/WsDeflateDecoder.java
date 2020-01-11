@@ -19,6 +19,7 @@ import swim.codec.InputBuffer;
 import swim.deflate.Inflate;
 
 public class WsDeflateDecoder extends WsDecoder implements Cloneable {
+
   protected final Inflate<?> inflate;
   protected boolean decompressing;
 
@@ -74,4 +75,5 @@ public class WsDeflateDecoder extends WsDecoder implements Cloneable {
   public WsDeflateDecoder clone() {
     return new WsDeflateDecoder(this.inflate.clone(), this.decompressing);
   }
+
 }

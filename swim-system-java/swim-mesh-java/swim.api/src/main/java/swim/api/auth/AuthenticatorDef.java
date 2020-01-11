@@ -15,5 +15,7 @@
 package swim.api.auth;
 
 public interface AuthenticatorDef {
+
   String authenticatorName();
+
 }

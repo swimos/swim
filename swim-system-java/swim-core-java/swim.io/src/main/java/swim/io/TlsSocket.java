@@ -37,6 +37,20 @@ import swim.codec.OutputBuffer;
 import swim.concurrent.Conts;
 
 class TlsSocket implements Transport, IpSocketContext {
+
+  static final int CLIENT = 1 << 0;
+  static final int SERVER = 1 << 1;
+  static final int CONNECTING = 1 << 2;
+  static final int CONNECTED = 1 << 3;
+  static final int HANDSHAKING = 1 << 4;
+  static final int HANDSHAKED = 1 << 5;
+  static final int OPEN = 1 << 6;
+  static final int CLOSING_INBOUND = 1 << 7;
+  static final int CLOSING_OUTBOUND = 1 << 8;
+  static final AtomicReferenceFieldUpdater<TlsSocket, FlowControl> FLOW_CONTROL =
+      AtomicReferenceFieldUpdater.newUpdater(TlsSocket.class, FlowControl.class, "flowControl");
+  static final AtomicIntegerFieldUpdater<TlsSocket> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(TlsSocket.class, "status");
   final InetSocketAddress localAddress;
   final InetSocketAddress remoteAddress;
   final ByteBuffer readBuffer;
@@ -299,7 +313,8 @@ class TlsSocket implements Transport, IpSocketContext {
 
   @Override
   public void doRead() {
-    read: do {
+    read:
+    do {
       final SSLEngineResult result;
       try {
         result = this.sslEngine.unwrap(this.readBuffer, this.inputBuffer);
@@ -330,7 +345,8 @@ class TlsSocket implements Transport, IpSocketContext {
             }
           }
           handshakeStatus = result.getHandshakeStatus();
-          handshake: do {
+          handshake:
+          do {
             switch (handshakeStatus) {
               case NEED_UNWRAP:
                 this.context.flowControl(FlowModifier.ENABLE_READ);
@@ -423,7 +439,8 @@ class TlsSocket implements Transport, IpSocketContext {
     switch (sslStatus) {
       case OK:
         SSLEngineResult.HandshakeStatus handshakeStatus = result.getHandshakeStatus();
-        handshake: do {
+        handshake:
+        do {
           switch (handshakeStatus) {
             case NEED_UNWRAP:
               this.context.flowControl(FlowModifier.ENABLE_READ);
@@ -477,7 +494,8 @@ class TlsSocket implements Transport, IpSocketContext {
     final int status = this.status;
     if ((status & HANDSHAKING) != 0) {
       SSLEngineResult.HandshakeStatus handshakeStatus = this.sslEngine.getHandshakeStatus();
-      handshake: do {
+      handshake:
+      do {
         switch (handshakeStatus) {
           case NEED_UNWRAP:
             this.context.flowControl(FlowModifier.DISABLE_WRITE_ENABLE_READ);
@@ -642,19 +660,4 @@ class TlsSocket implements Transport, IpSocketContext {
     this.context.close();
   }
 
-  static final int CLIENT = 1 << 0;
-  static final int SERVER = 1 << 1;
-  static final int CONNECTING = 1 << 2;
-  static final int CONNECTED = 1 << 3;
-  static final int HANDSHAKING = 1 << 4;
-  static final int HANDSHAKED = 1 << 5;
-  static final int OPEN = 1 << 6;
-  static final int CLOSING_INBOUND = 1 << 7;
-  static final int CLOSING_OUTBOUND = 1 << 8;
-
-  static final AtomicReferenceFieldUpdater<TlsSocket, FlowControl> FLOW_CONTROL =
-      AtomicReferenceFieldUpdater.newUpdater(TlsSocket.class, FlowControl.class, "flowControl");
-
-  static final AtomicIntegerFieldUpdater<TlsSocket> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(TlsSocket.class, "status");
 }

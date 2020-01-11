@@ -20,5 +20,7 @@ import swim.http.HttpResponse;
 
 @FunctionalInterface
 public interface DoRespondHttp<V> extends Preemptive {
+
   HttpResponse<?> doRespond(HttpRequest<V> request);
+
 }

@@ -27,6 +27,7 @@ package swim.concurrent;
  * @see Stage
  */
 public interface Call<T> extends Cont<T> {
+
   /**
    * Returns the {@code Cont}inuation that this {@code Call} completes.
    */
@@ -67,4 +68,5 @@ public interface Call<T> extends Cont<T> {
    * this {@code Call}'s {@code Cont}inuation will eventually be invoked.
    */
   boolean tryTrap(Throwable error);
+
 }

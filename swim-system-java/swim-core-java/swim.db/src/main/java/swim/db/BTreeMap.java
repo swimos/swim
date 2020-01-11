@@ -29,6 +29,7 @@ import swim.util.OrderedMapCursor;
 import swim.util.ReducedMap;
 
 public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Value, Value> {
+
   final Trunk<BTree> trunk;
 
   public BTreeMap(Trunk<BTree> trunk) {
@@ -148,6 +149,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     }
     return false;
   }
+
   private boolean containsKey(Value key) {
     int retries = 0;
     do {
@@ -173,6 +175,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     }
     return false;
   }
+
   private boolean containsValue(Value value) {
     int retries = 0;
     do {
@@ -198,6 +201,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     }
     throw new IllegalArgumentException(key.toString());
   }
+
   private long indexOf(Value key) {
     int retries = 0;
     do {
@@ -223,6 +227,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     }
     return Value.absent();
   }
+
   private Value get(Value key) {
     int retries = 0;
     do {
@@ -248,6 +253,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     }
     return null;
   }
+
   private Slot getEntry(Value key) {
     int retries = 0;
     do {
@@ -564,6 +570,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     }
     return Value.absent();
   }
+
   private Value remove(Value key) {
     int retries = 0;
     do {
@@ -837,4 +844,5 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   public Comparator<? super Value> comparator() {
     return null;
   }
+
 }

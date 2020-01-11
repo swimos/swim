@@ -38,6 +38,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
+
   final Uri meshUri;
   final Uri hostUri;
   final Uri nodeUri;
@@ -333,4 +334,5 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
   public void failDown(Object message) {
     // nop
   }
+
 }

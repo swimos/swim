@@ -24,13 +24,14 @@ import java.nio.channels.SelectableChannel;
  * #channel()} on which to perform asynchronous I/O operations, along with an
  * {@link #readBuffer()} into which input data will be read, and an {@link
  * #writeBuffer()} from which data will be written.
- *
+ * <p>
  * A {@code Transport} interfaces with the underlying asynchronous I/O system
  * via a {@link TransportContext}.  The transport context invokes I/O callbacks
  * on the {@code Transport} when the underlying NIO channel is ready to perform
  * I/O operations permitted by the transport context's {@link FlowControl}.
  */
 public interface Transport {
+
   /**
    * Returns the I/O transport context to which this {@code Transport} is bound;
    * returns {@code null} if this {@code Transport} is unbound.
@@ -124,4 +125,5 @@ public interface Transport {
    * automatically be closed.
    */
   void didFail(Throwable error);
+
 }

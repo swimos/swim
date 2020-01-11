@@ -19,6 +19,7 @@ import swim.codec.Parser;
 import swim.util.Builder;
 
 final class AttrExpressionParser<I, V> extends Parser<V> {
+
   final ReconParser<I, V> recon;
   final Builder<I, V> builder;
   final Parser<I> fieldParser;
@@ -32,11 +33,6 @@ final class AttrExpressionParser<I, V> extends Parser<V> {
     this.fieldParser = fieldParser;
     this.valueParser = valueParser;
     this.step = step;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.fieldParser, this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -63,9 +59,9 @@ final class AttrExpressionParser<I, V> extends Parser<V> {
           } else if (c == '(') {
             step = 4;
           } else if (c == '!' || c == '"' || c == '$' || c == '%'
-                  || c == '\'' || c == '+' || c == '-'
-                  || c >= '0' && c <= '9' || c == '~'
-                  || Recon.isIdentStartChar(c)) {
+              || c == '\'' || c == '+' || c == '-'
+              || c >= '0' && c <= '9' || c == '~'
+              || Recon.isIdentStartChar(c)) {
             step = 3;
           } else if (builder == null) {
             return done(recon.extant());
@@ -180,4 +176,10 @@ final class AttrExpressionParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
     return parse(input, recon, builder, null, null, 1);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.builder, this.fieldParser, this.valueParser, this.step);
+  }
+
 }

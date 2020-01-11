@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package swim.uri;
 
 import swim.structure.Form;
@@ -20,6 +21,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public class UriPatternForm extends Form<UriPattern> {
+
   final UriPattern unit;
 
   UriPatternForm(UriPattern unit) {
@@ -51,7 +53,9 @@ public class UriPatternForm extends Form<UriPattern> {
       if (string != null) {
         return UriPattern.parse(string);
       }
-    } catch (UriException e) { }
+    } catch (UriException e) {
+    }
     return null;
   }
+
 }

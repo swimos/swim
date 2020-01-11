@@ -99,6 +99,49 @@ package swim.codec;
  * semantics, are implementation defined.</p>
  */
 public abstract class Parser<O> extends Decoder<O> {
+
+  private static Parser<Object> done;
+
+  /**
+   * Returns a {@code Parser} in the <em>done</em> state that {@code bind}s
+   * a {@code null} parsed result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <O> Parser<O> done() {
+    if (done == null) {
+      done = new ParserDone<Object>(null);
+    }
+    return (Parser<O>) done;
+  }
+
+  /**
+   * Returns a {@code Parser} in the <em>done</em> state that {@code bind}s
+   * the given parsed {@code output}.
+   */
+  public static <O> Parser<O> done(O output) {
+    if (output == null) {
+      return done();
+    } else {
+      return new ParserDone<O>(output);
+    }
+  }
+
+  /**
+   * Returns a {@code Parser} in the <em>error</em> state that {@code trap}s
+   * the given parse {@code error}.
+   */
+  public static <O> Parser<O> error(Throwable error) {
+    return new ParserError<O>(error);
+  }
+
+  /**
+   * Returns a {@code Parser} in the <em>error</em> state that {@code trap}s a
+   * {@link ParserException} with the given {@code diagnostic}.
+   */
+  public static <O> Parser<O> error(Diagnostic diagnostic) {
+    return error(new ParserException(diagnostic));
+  }
+
   /**
    * Returns {@code true} when {@link #feed(Input) feed} is able to consume
    * {@code Input}.  i.e. this {@code Parser} is in the <em>cont</em> state.
@@ -158,7 +201,7 @@ public abstract class Parser<O> extends Decoder<O> {
    * <em>done</em> state.
    *
    * @throws IllegalStateException if this {@code Parser} is not in the
-   *         <em>done</em> state.
+   *                               <em>done</em> state.
    */
   @Override
   public O bind() {
@@ -170,7 +213,7 @@ public abstract class Parser<O> extends Decoder<O> {
    * <em>error</em> state.
    *
    * @throws IllegalStateException if this {@code Parser} is not in the
-   *         <em>error</em> state.
+   *                               <em>error</em> state.
    */
   @Override
   public Throwable trap() {
@@ -182,57 +225,17 @@ public abstract class Parser<O> extends Decoder<O> {
    * A {@code Parser} in the <em>error</em> state can have any output type.
    *
    * @throws IllegalStateException if this {@code Parser} is not in the
-   *         <em>error</em> state.
+   *                               <em>error</em> state.
    */
   @Override
   public <O2> Parser<O2> asError() {
     throw new IllegalStateException();
   }
 
-  private static Parser<Object> done;
-
-  /**
-   * Returns a {@code Parser} in the <em>done</em> state that {@code bind}s
-   * a {@code null} parsed result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <O> Parser<O> done() {
-    if (done == null) {
-      done = new ParserDone<Object>(null);
-    }
-    return (Parser<O>) done;
-  }
-
-  /**
-   * Returns a {@code Parser} in the <em>done</em> state that {@code bind}s
-   * the given parsed {@code output}.
-   */
-  public static <O> Parser<O> done(O output) {
-    if (output == null) {
-      return done();
-    } else {
-      return new ParserDone<O>(output);
-    }
-  }
-
-  /**
-   * Returns a {@code Parser} in the <em>error</em> state that {@code trap}s
-   * the given parse {@code error}.
-   */
-  public static <O> Parser<O> error(Throwable error) {
-    return new ParserError<O>(error);
-  }
-
-  /**
-   * Returns a {@code Parser} in the <em>error</em> state that {@code trap}s a
-   * {@link ParserException} with the given {@code diagnostic}.
-   */
-  public static <O> Parser<O> error(Diagnostic diagnostic) {
-    return error(new ParserException(diagnostic));
-  }
 }
 
 final class ParserDone<O> extends Parser<O> {
+
   final O output;
 
   ParserDone(O output) {
@@ -258,9 +261,11 @@ final class ParserDone<O> extends Parser<O> {
   public O bind() {
     return this.output;
   }
+
 }
 
 final class ParserError<O> extends Parser<O> {
+
   final Throwable error;
 
   ParserError(Throwable error) {
@@ -303,4 +308,5 @@ final class ParserError<O> extends Parser<O> {
   public <O2> Parser<O2> asError() {
     return (Parser<O2>) this;
   }
+
 }

@@ -49,9 +49,10 @@ import swim.uri.Uri;
 import swim.util.Cursor;
 
 public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownlink<V> {
+
+  protected static final int STATEFUL = 1 << 2;
   protected final Form<V> valueForm;
   protected ValueDownlinkModel model;
-
   protected Outlet<? extends V> input;
   protected Inlet<? super V>[] outputs; // TODO: unify with observers
   protected int version;
@@ -61,7 +62,7 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
                            float rate, Value body, int flags, Form<V> valueForm,
                            Object observers) {
     super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-          body, flags, observers);
+        body, flags, observers);
     this.valueForm = valueForm;
 
     this.input = null;
@@ -73,7 +74,7 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
                            Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                            float rate, Value body, Form<V> valueForm) {
     this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-         body, KEEP_LINKED | KEEP_SYNCED | STATEFUL, valueForm, null);
+        body, KEEP_LINKED | KEEP_SYNCED | STATEFUL, valueForm, null);
   }
 
   @Override
@@ -84,9 +85,9 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   @Override
   public ValueDownlinkView<V> hostUri(Uri hostUri) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    hostUri, this.nodeUri, this.laneUri,
-                                    this.prio, this.rate, this.body, this.flags,
-                                    this.valueForm, this.observers);
+        hostUri, this.nodeUri, this.laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
@@ -97,9 +98,9 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   @Override
   public ValueDownlinkView<V> nodeUri(Uri nodeUri) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, nodeUri, this.laneUri,
-                                    this.prio, this.rate, this.body, this.flags,
-                                    this.valueForm, this.observers);
+        this.hostUri, nodeUri, this.laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
@@ -110,9 +111,9 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   @Override
   public ValueDownlinkView<V> laneUri(Uri laneUri) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, this.nodeUri, laneUri,
-                                    this.prio, this.rate, this.body, this.flags,
-                                    this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
@@ -123,25 +124,25 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   @Override
   public ValueDownlinkView<V> prio(float prio) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, this.nodeUri, this.laneUri,
-                                    prio, this.rate, this.body, this.flags,
-                                    this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, this.laneUri,
+        prio, this.rate, this.body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> rate(float rate) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, this.nodeUri, this.laneUri,
-                                    this.prio, rate, this.body, this.flags,
-                                    this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, this.laneUri,
+        this.prio, rate, this.body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> body(Value body) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-                                    this.hostUri, this.nodeUri, this.laneUri,
-                                    this.prio, this.rate, body, this.flags,
-                                    this.valueForm, this.observers);
+        this.hostUri, this.nodeUri, this.laneUri,
+        this.prio, this.rate, body, this.flags,
+        this.valueForm, this.observers);
   }
 
   @Override
@@ -199,9 +200,9 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   @Override
   public <V2> ValueDownlinkView<V2> valueForm(Form<V2> valueForm) {
     return new ValueDownlinkView<V2>(this.cellContext, this.stage, this.meshUri,
-                                     this.hostUri, this.nodeUri, this.laneUri,
-                                     this.prio, this.rate, this.body, this.flags,
-                                     valueForm, typesafeObservers(this.observers));
+        this.hostUri, this.nodeUri, this.laneUri,
+        this.prio, this.rate, this.body, this.flags,
+        valueForm, typesafeObservers(this.observers));
   }
 
   @Override
@@ -412,7 +413,7 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   @Override
   public ValueDownlinkModel createDownlinkModel() {
     return new ValueDownlinkModel(this.meshUri, this.hostUri, this.nodeUri,
-                                  this.laneUri, this.prio, this.rate, this.body);
+        this.laneUri, this.prio, this.rate, this.body);
   }
 
   @Override
@@ -616,5 +617,4 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
     // stub
   }
 
-  protected static final int STATEFUL = 1 << 2;
 }

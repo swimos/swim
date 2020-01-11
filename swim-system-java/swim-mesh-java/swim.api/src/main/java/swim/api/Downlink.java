@@ -20,6 +20,7 @@ import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
 
 public interface Downlink extends Link {
+
   @Override
   Downlink observe(Object observer);
 
@@ -35,4 +36,5 @@ public interface Downlink extends Link {
   Downlink didFail(DidFail didFail);
 
   Downlink open();
+
 }

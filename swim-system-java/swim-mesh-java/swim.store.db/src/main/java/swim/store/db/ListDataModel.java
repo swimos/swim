@@ -36,6 +36,7 @@ import swim.structure.Value;
 import swim.util.KeyedList;
 
 public class ListDataModel implements ListDataBinding, STreeDelegate {
+
   protected final Value name;
   protected final STreeList tree;
   protected ListDataContext dataContext;
@@ -126,7 +127,7 @@ public class ListDataModel implements ListDataBinding, STreeDelegate {
   @Override
   public ListDataModel isResident(boolean isResident) {
     this.tree.isResident(isResident);
-    return this; 
+    return this;
   }
 
   @Override
@@ -393,4 +394,5 @@ public class ListDataModel implements ListDataBinding, STreeDelegate {
       dataContext.didTake(upper);
     }
   }
+
 }

@@ -23,6 +23,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface NodeBinding extends TierBinding, CellBinding {
+
   HostBinding host();
 
   NodeBinding nodeWrapper();
@@ -70,4 +71,5 @@ public interface NodeBinding extends TierBinding, CellBinding {
   void openMetaLane(LaneBinding lane, NodeBinding metaLane);
 
   void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
+
 }

@@ -19,6 +19,7 @@ import swim.dynamic.BridgeGuest;
 import swim.observable.function.WillMoveIndex;
 
 public class GuestWillMoveIndex<V> extends BridgeGuest implements WillMoveIndex<V> {
+
   public GuestWillMoveIndex(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -27,4 +28,5 @@ public class GuestWillMoveIndex<V> extends BridgeGuest implements WillMoveIndex<
   public void willMove(int fromIndex, int toIndex, V value) {
     this.bridge.guestExecuteVoid(this.guest, fromIndex, toIndex, value);
   }
+
 }

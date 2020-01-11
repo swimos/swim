@@ -18,6 +18,7 @@ import swim.http.HttpRequest;
 import swim.uri.UriPath;
 
 public class WebServerRequest extends WebRequest {
+
   final HttpRequest<?> httpRequest;
   final UriPath routePath;
 
@@ -44,4 +45,5 @@ public class WebServerRequest extends WebRequest {
   public WebRequest routePath(UriPath routePath) {
     return new WebServerRequest(this.httpRequest, routePath);
   }
+
 }

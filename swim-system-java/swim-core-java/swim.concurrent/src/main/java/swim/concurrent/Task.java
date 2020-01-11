@@ -31,6 +31,7 @@ package swim.concurrent;
  * @see Stage
  */
 public interface Task extends TaskFunction {
+
   /**
    * Returns the context used to managed this {@code Task}.  Returns {@code
    * null} if this {@code Task} is not bound to a {@link Stage}.
@@ -69,4 +70,5 @@ public interface Task extends TaskFunction {
    * cancelled.
    */
   void taskDidCancel();
+
 }

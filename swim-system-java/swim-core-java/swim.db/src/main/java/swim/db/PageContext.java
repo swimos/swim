@@ -19,6 +19,15 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class PageContext {
+
+  public static boolean pageShouldSplit(Page page, int pageSplitSize) {
+    return page.pageSize() > pageSplitSize;
+  }
+
+  public static boolean pageShouldMerge(Page page, int pageSplitSize) {
+    return page.pageSize() < pageSplitSize >>> 1;
+  }
+
   public StoreSettings settings() {
     return StoreSettings.standard();
   }
@@ -47,11 +56,4 @@ public class PageContext {
     return Value.absent();
   }
 
-  public static boolean pageShouldSplit(Page page, int pageSplitSize) {
-    return page.pageSize() > pageSplitSize;
-  }
-
-  public static boolean pageShouldMerge(Page page, int pageSplitSize) {
-    return page.pageSize() < pageSplitSize >>> 1;
-  }
 }

@@ -24,6 +24,7 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 public final class AttrForm<T> extends FieldForm<T> {
+
   final java.lang.reflect.Field field;
   final Text key;
   final Form<?> form;
@@ -99,4 +100,5 @@ public final class AttrForm<T> extends FieldForm<T> {
     }
     return object;
   }
+
 }

@@ -18,6 +18,7 @@ package swim.codec;
  * Dynamically generated {@link Decoder} continuation.
  */
 public abstract class DynamicDecoder<O> extends Decoder<O> {
+
   /**
    * Current decoder continuation.
    */
@@ -88,4 +89,5 @@ public abstract class DynamicDecoder<O> extends Decoder<O> {
    * decoding a {@code value}.
    */
   protected abstract void didDecode(O value);
+
 }

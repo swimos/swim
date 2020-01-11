@@ -24,6 +24,36 @@ import swim.util.CombinerFunction;
 import swim.util.Cursor;
 
 public abstract class QTreePage extends Page {
+
+  static final QTreePageRef[] EMPTY_CHILD_REFS = new QTreePageRef[0];
+  static final Slot[] EMPTY_SLOTS = new Slot[0];
+  static final Comparator<QTreePageRef> PAGE_REF_ORDERING = new QTreePageRefOrdering();
+  static final Comparator<Slot> SLOT_ORDERING = new QTreeSlotOrdering();
+
+  public static QTreePage empty(PageContext context, int stem, long version) {
+    return QTreeLeaf.empty(context, stem, version);
+  }
+
+  public static QTreePage fromValue(QTreePageRef pageRef, Value value) {
+    switch (pageRef.pageType()) {
+      case LEAF:
+        return QTreeLeaf.fromValue(pageRef, value);
+      case NODE:
+        return QTreeNode.fromValue(pageRef, value);
+      default:
+        throw new IllegalArgumentException(pageRef.toString());
+    }
+  }
+
+  static Slot slot(Value key, long xk, long yk, Value value) {
+    return Slot.of(key, Record.create(2)
+        .attr("tile", Record.create(2)
+            .item(Num.uint64(xk))
+            .item(Num.uint64(yk)))
+        .concat(value))
+        .commit();
+  }
+
   @Override
   public boolean isQTreePage() {
     return true;
@@ -185,46 +215,22 @@ public abstract class QTreePage extends Page {
     return tileCursor(-1L, -1L);
   }
 
-  static final QTreePageRef[] EMPTY_CHILD_REFS = new QTreePageRef[0];
-
-  static final Slot[] EMPTY_SLOTS = new Slot[0];
-
-  static final Comparator<QTreePageRef> PAGE_REF_ORDERING = new QTreePageRefOrdering();
-
-  static final Comparator<Slot> SLOT_ORDERING = new QTreeSlotOrdering();
-
-  public static QTreePage empty(PageContext context, int stem, long version) {
-    return QTreeLeaf.empty(context, stem, version);
-  }
-
-  public static QTreePage fromValue(QTreePageRef pageRef, Value value) {
-    switch (pageRef.pageType()) {
-      case LEAF: return QTreeLeaf.fromValue(pageRef, value);
-      case NODE: return QTreeNode.fromValue(pageRef, value);
-      default: throw new IllegalArgumentException(pageRef.toString());
-    }
-  }
-
-  static Slot slot(Value key, long xk, long yk, Value value) {
-    return Slot.of(key, Record.create(2)
-        .attr("tile", Record.create(2)
-            .item(Num.uint64(xk))
-            .item(Num.uint64(yk)))
-        .concat(value))
-        .commit();
-  }
 }
 
 final class QTreePageRefOrdering implements Comparator<QTreePageRef> {
+
   @Override
   public int compare(QTreePageRef a, QTreePageRef b) {
     return BitInterval.compare(a.x, a.y, b.x, b.y);
   }
+
 }
 
 final class QTreeSlotOrdering implements Comparator<Slot> {
+
   @Override
   public int compare(Slot a, Slot b) {
     return a.key().compareTo(b.key());
   }
+
 }

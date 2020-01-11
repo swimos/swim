@@ -20,6 +20,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class RecordFieldUpdater extends AbstractInlet<Value> {
+
   protected final Record record;
   protected final Value key;
 
@@ -46,4 +47,5 @@ public class RecordFieldUpdater extends AbstractInlet<Value> {
       }
     }
   }
+
 }

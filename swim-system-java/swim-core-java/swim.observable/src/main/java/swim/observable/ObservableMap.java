@@ -23,6 +23,7 @@ import swim.observable.function.WillRemoveKey;
 import swim.observable.function.WillUpdateKey;
 
 public interface ObservableMap<K, V> extends Observable<Object>, Map<K, V> {
+
   @Override
   ObservableMap<K, V> observe(Object observer);
 
@@ -40,4 +41,5 @@ public interface ObservableMap<K, V> extends Observable<Object>, Map<K, V> {
   ObservableMap<K, V> willClear(WillClear willClear);
 
   ObservableMap<K, V> didClear(DidClear didClear);
+
 }

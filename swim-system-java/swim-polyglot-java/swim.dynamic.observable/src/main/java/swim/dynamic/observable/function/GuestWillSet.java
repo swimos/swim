@@ -19,6 +19,7 @@ import swim.dynamic.BridgeGuest;
 import swim.observable.function.WillSet;
 
 public class GuestWillSet<V> extends BridgeGuest implements WillSet<V> {
+
   public GuestWillSet(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -28,4 +29,5 @@ public class GuestWillSet<V> extends BridgeGuest implements WillSet<V> {
   public V willSet(V newValue) {
     return (V) this.bridge.guestExecute(this.guest, newValue);
   }
+
 }

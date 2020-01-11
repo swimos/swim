@@ -17,6 +17,7 @@ package swim.codec;
 import java.nio.ByteBuffer;
 
 abstract class ByteOutput<T> extends Output<T> {
+
   byte[] array;
   int size;
   OutputSettings settings;
@@ -25,6 +26,16 @@ abstract class ByteOutput<T> extends Output<T> {
     this.array = array;
     this.size = size;
     this.settings = settings;
+  }
+
+  static int expand(int n) {
+    n = Math.max(32, n) - 1;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    return n + 1;
   }
 
   @Override
@@ -133,9 +144,4 @@ abstract class ByteOutput<T> extends Output<T> {
     return this;
   }
 
-  static int expand(int n) {
-    n = Math.max(32, n) - 1;
-    n |= n >> 1; n |= n >> 2; n |= n >> 4; n |= n >> 8; n |= n >> 16;
-    return n + 1;
-  }
 }

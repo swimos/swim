@@ -18,5 +18,7 @@ package swim.dynamic;
  * A dynamically typed static method descriptor for a host type.
  */
 public interface HostStaticMethod extends HostStaticMember {
+
   Object invoke(Bridge bridge, Object... arguments);
+
 }

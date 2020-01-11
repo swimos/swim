@@ -17,5 +17,7 @@ package swim.api.policy;
 import swim.api.Uplink;
 
 public interface LanePolicy extends Policy {
+
   UplinkPolicy uplinkPolicy(Uplink uplink);
+
 }

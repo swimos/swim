@@ -19,6 +19,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 final class QTreeValueCursor implements Cursor<Value> {
+
   final Cursor<Slot> inner;
 
   QTreeValueCursor(Cursor<Slot> inner) {
@@ -89,4 +90,5 @@ final class QTreeValueCursor implements Cursor<Value> {
   public void load() throws InterruptedException {
     this.inner.load();
   }
+
 }

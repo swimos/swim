@@ -16,4 +16,5 @@
  * Comma-Separated Values (CSV) codec that incrementally parses and writes
  * <strong>swim-structure</strong> values.
  */
+
 package swim.csv;

@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class FieldDecoder<I, V> extends Decoder<I> {
+
   final ProtobufDecoder<I, V> protobuf;
   final Decoder<V> payloadDecoder;
   final Decoder<V> valueDecoder;
@@ -34,12 +35,6 @@ final class FieldDecoder<I, V> extends Decoder<I> {
     this.tagShift = tagShift;
     this.valueDecoder = valueDecoder;
     this.step = step;
-  }
-
-  @Override
-  public Decoder<I> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.payloadDecoder, this.valueDecoder,
-                  this.tag, this.tagShift, this.step);
   }
 
   static <I, V> Decoder<I> decode(InputBuffer input, ProtobufDecoder<I, V> protobuf,
@@ -86,4 +81,11 @@ final class FieldDecoder<I, V> extends Decoder<I> {
                                   Decoder<V> payloadDecoder) {
     return decode(input, protobuf, payloadDecoder, null, 0L, 0, 1);
   }
+
+  @Override
+  public Decoder<I> feed(InputBuffer input) {
+    return decode(input, this.protobuf, this.payloadDecoder, this.valueDecoder,
+        this.tag, this.tagShift, this.step);
+  }
+
 }

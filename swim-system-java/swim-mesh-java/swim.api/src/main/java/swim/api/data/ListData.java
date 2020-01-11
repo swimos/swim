@@ -19,6 +19,7 @@ import swim.structure.Value;
 import swim.util.KeyedList;
 
 public interface ListData<V> extends KeyedList<V> {
+
   Value name();
 
   Form<V> valueForm();
@@ -42,4 +43,5 @@ public interface ListData<V> extends KeyedList<V> {
   KeyedList<V> snapshot();
 
   void close();
+
 }

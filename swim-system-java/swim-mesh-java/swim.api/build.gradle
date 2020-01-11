@@ -5,18 +5,18 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.api'
 
 dependencies {
-  api group: 'org.swimos', name: 'swim-util', version: version
-  api group: 'org.swimos', name: 'swim-codec', version: version
-  api group: 'org.swimos', name: 'swim-structure', version: version
-  api group: 'org.swimos', name: 'swim-math', version: version
-  api group: 'org.swimos', name: 'swim-spatial', version: version
-  api group: 'org.swimos', name: 'swim-streamlet', version: version
-  api group: 'org.swimos', name: 'swim-dataflow', version: version
-  api group: 'org.swimos', name: 'swim-observable', version: version
-  api group: 'org.swimos', name: 'swim-http', version: version
-  api group: 'org.swimos', name: 'swim-ws', version: version
-  api group: 'org.swimos', name: 'swim-mqtt', version: version
-  api group: 'org.swimos', name: 'swim-warp', version: version
-  api group: 'org.swimos', name: 'swim-concurrent', version: version
-  api group: 'org.swimos', name: 'swim-io', version: version
+    api group: 'org.swimos', name: 'swim-util', version: version
+    api group: 'org.swimos', name: 'swim-codec', version: version
+    api group: 'org.swimos', name: 'swim-structure', version: version
+    api group: 'org.swimos', name: 'swim-math', version: version
+    api group: 'org.swimos', name: 'swim-spatial', version: version
+    api group: 'org.swimos', name: 'swim-streamlet', version: version
+    api group: 'org.swimos', name: 'swim-dataflow', version: version
+    api group: 'org.swimos', name: 'swim-observable', version: version
+    api group: 'org.swimos', name: 'swim-http', version: version
+    api group: 'org.swimos', name: 'swim-ws', version: version
+    api group: 'org.swimos', name: 'swim-mqtt', version: version
+    api group: 'org.swimos', name: 'swim-warp', version: version
+    api group: 'org.swimos', name: 'swim-concurrent', version: version
+    api group: 'org.swimos', name: 'swim-io', version: version
 }

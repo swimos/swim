@@ -21,17 +21,48 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
  * A hashed generational set evicts the least recently used value with the
  * worst hit rate per hash bucket.  HashGenSet is a concurrent and lock-free
  * LRFU cache, with O(1) access time, that strongly references its values.
- *
+ * <p>
  * Maintaining four "generations" of cached values per hash bucket, the cache
  * discards from the younger generations based on least recent usage, and
  * promotes younger generations to older generations based on most frequent
  * usage.  Cache misses count as negative usage of the older generations,
  * biasing the cache against least recently used values with poor hit rates.
- *
+ * <p>
  * The evict(V) method is guaranteed to be called when a value is displaced
  * from the cache.
  */
 public class HashGenSet<V> {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN4_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen4Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN3_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen3Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN2_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen2Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN1_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen1Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN4_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen4Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN3_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen3Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN2_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen2Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN1_HITS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen1Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSet<?>> MISSES =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "misses");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSet<?>> EVICTS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "evicts");
   final AtomicReferenceArray<HashGenSetBucket<V>> buckets;
   volatile int gen4Hits;
   volatile int gen3Hits;
@@ -44,7 +75,8 @@ public class HashGenSet<V> {
     buckets = new AtomicReferenceArray<HashGenSetBucket<V>>(size);
   }
 
-  protected void evict(V value) { }
+  protected void evict(V value) {
+  }
 
   public V put(V value) {
     if (buckets.length() == 0) {
@@ -186,48 +218,10 @@ public class HashGenSet<V> {
     return hits / (hits + (double) misses);
   }
 
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN4_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen4Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN3_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen3Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN2_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen2Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN1_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen1Weight");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN4_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen4Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN3_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen3Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN2_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen2Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN1_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen1Hits");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> MISSES =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "misses");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> EVICTS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "evicts");
 }
 
 final class HashGenSetBucket<V> {
+
   final V gen4Val;
   final V gen3Val;
   final V gen2Val;
@@ -259,4 +253,5 @@ final class HashGenSetBucket<V> {
   HashGenSetBucket() {
     this(null, 0, null, 0, null, 0, null, 0);
   }
+
 }

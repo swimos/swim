@@ -17,7 +17,7 @@ package swim.io;
 /**
  * Network socket binding that handles asynchronous I/O operations for a
  * non-blocking NIO network channel.
- *
+ * <p>
  * An {@code IpSocket} interfaces with the underlying asynchronous networking
  * system via an {@link IpSocketContext}.  The socket context invokes I/O
  * callbacks on the {@code IpSocket} when the underlying network socket is
@@ -25,6 +25,7 @@ package swim.io;
  * FlowControl}.
  */
 public interface IpSocket {
+
   /**
    * Returns the network socket context to which this {@code IpSocket} is
    * bound; returns {@code null} if this {@code IpSocket} is unbound.
@@ -126,4 +127,5 @@ public interface IpSocket {
    * automatically be closed.
    */
   void didFail(Throwable error);
+
 }

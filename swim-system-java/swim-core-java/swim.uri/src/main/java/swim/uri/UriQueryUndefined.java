@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import swim.codec.Output;
 
 final class UriQueryUndefined extends UriQuery {
+
   @Override
   public boolean isDefined() {
     return false;
@@ -129,4 +130,5 @@ final class UriQueryUndefined extends UriQuery {
   public String toString() {
     return "";
   }
+
 }

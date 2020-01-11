@@ -23,6 +23,7 @@ import swim.structure.Text;
 import static org.testng.Assert.assertEquals;
 
 public class BooleanFormSpec {
+
   @Test
   public void moldBooleans() {
     assertEquals(Form.forBoolean().mold(Boolean.TRUE), Bool.from(true));
@@ -46,4 +47,5 @@ public class BooleanFormSpec {
     assertEquals(Form.forBoolean().cast(Record.of(Attr.of("test"), Bool.from(true))), Boolean.TRUE);
     assertEquals(Form.forBoolean().cast(Record.of(Attr.of("test"), Bool.from(false))), Boolean.FALSE);
   }
+
 }

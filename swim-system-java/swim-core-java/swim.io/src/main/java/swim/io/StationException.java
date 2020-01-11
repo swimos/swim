@@ -18,6 +18,7 @@ package swim.io;
  * Thrown when a {@link Station} encounters an error.
  */
 public class StationException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public StationException(String message, Throwable cause) {
@@ -35,4 +36,5 @@ public class StationException extends RuntimeException {
   public StationException() {
     super();
   }
+
 }

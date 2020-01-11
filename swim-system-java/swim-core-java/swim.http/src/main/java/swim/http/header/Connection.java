@@ -25,10 +25,48 @@ import swim.http.HttpWriter;
 import swim.util.Murmur3;
 
 public final class Connection extends HttpHeader {
+
+  private static int hashSeed;
+  private static Connection close;
+  private static Connection upgrade;
   final FingerTrieSeq<String> options;
 
   Connection(FingerTrieSeq<String> options) {
     this.options = options;
+  }
+
+  public static Connection close() {
+    if (close == null) {
+      close = new Connection(FingerTrieSeq.of("close"));
+    }
+    return close;
+  }
+
+  public static Connection upgrade() {
+    if (upgrade == null) {
+      upgrade = new Connection(FingerTrieSeq.of("Upgrade"));
+    }
+    return upgrade;
+  }
+
+  public static Connection from(FingerTrieSeq<String> options) {
+    if (options.size() == 1) {
+      final String option = options.head();
+      if ("close".equals(option)) {
+        return close();
+      } else if ("Upgrade".equals(option)) {
+        return upgrade();
+      }
+    }
+    return new Connection(options);
+  }
+
+  public static Connection from(String... options) {
+    return from(FingerTrieSeq.of(options));
+  }
+
+  public static Parser<Connection> parseHttpValue(Input input, HttpParser http) {
+    return ConnectionParser.parse(input, http);
   }
 
   @Override
@@ -97,42 +135,4 @@ public final class Connection extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  private static Connection close;
-  private static Connection upgrade;
-
-  public static Connection close() {
-    if (close == null) {
-      close = new Connection(FingerTrieSeq.of("close"));
-    }
-    return close;
-  }
-
-  public static Connection upgrade() {
-    if (upgrade == null) {
-      upgrade = new Connection(FingerTrieSeq.of("Upgrade"));
-    }
-    return upgrade;
-  }
-
-  public static Connection from(FingerTrieSeq<String> options) {
-    if (options.size() == 1) {
-      final String option = options.head();
-      if ("close".equals(option)) {
-        return close();
-      } else if ("Upgrade".equals(option)) {
-        return upgrade();
-      }
-    }
-    return new Connection(options);
-  }
-
-  public static Connection from(String... options) {
-    return from(FingerTrieSeq.of(options));
-  }
-
-  public static Parser<Connection> parseHttpValue(Input input, HttpParser http) {
-    return ConnectionParser.parse(input, http);
-  }
 }

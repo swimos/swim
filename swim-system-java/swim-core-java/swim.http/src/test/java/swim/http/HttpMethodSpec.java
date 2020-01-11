@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpMethodSpec {
+
   public void assertParses(String string, HttpMethod method) {
     HttpAssertions.assertParses(Http.standardParser().methodParser(), string, method);
   }
@@ -45,4 +46,5 @@ public class HttpMethodSpec {
     assertWrites(HttpMethod.OPTIONS, "OPTIONS");
     assertWrites(HttpMethod.TRACE, "TRACE");
   }
+
 }

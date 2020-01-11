@@ -19,6 +19,7 @@ import swim.runtime.NodeContext;
 import swim.runtime.agent.AgentNode;
 
 public final class MetaLaneAgent extends AgentNode {
+
   public final LaneBinding lane;
 
   public MetaLaneAgent(LaneBinding lane) {
@@ -30,4 +31,5 @@ public final class MetaLaneAgent extends AgentNode {
     super.setNodeContext(nodeContext);
     this.lane.openMetaLane(this.lane, this);
   }
+
 }

@@ -24,12 +24,13 @@ import swim.structure.Value;
 import swim.util.Builder;
 
 final class Der {
-  private Der() {
-    // stub
-  }
 
   private static DerDecoder<Value> structureDecoder;
   private static DerEncoder<Value> structureEncoder;
+
+  private Der() {
+    // stub
+  }
 
   public static DerDecoder<Value> structureDecoder() {
     if (structureDecoder == null) {
@@ -44,9 +45,11 @@ final class Der {
     }
     return structureEncoder;
   }
+
 }
 
 class DerStructureDecoder extends DerDecoder<Value> {
+
   @Override
   public Value integer(byte[] data) {
     return Num.from(new BigInteger(data));
@@ -57,9 +60,11 @@ class DerStructureDecoder extends DerDecoder<Value> {
   public Builder<Value, Value> sequenceBuilder() {
     return (Builder<Value, Value>) (Builder<?, ?>) Record.builder();
   }
+
 }
 
 class DerStructureEncoder extends DerEncoder<Value> {
+
   @Override
   public boolean isSequence(Value value) {
     if (value instanceof Record) {
@@ -112,4 +117,5 @@ class DerStructureEncoder extends DerEncoder<Value> {
     }
     throw new IllegalArgumentException(value.toString());
   }
+
 }

@@ -15,6 +15,7 @@
 package swim.dynamic;
 
 public class JavaHostClassType<T> extends JavaHostObjectType<T> implements HostClassType<T> {
+
   HostConstructor constructor;
 
   public JavaHostClassType(Class<?> hostClass) {
@@ -30,4 +31,5 @@ public class JavaHostClassType<T> extends JavaHostObjectType<T> implements HostC
   public void setConstructor(HostConstructor constructor) {
     this.constructor = constructor;
   }
+
 }

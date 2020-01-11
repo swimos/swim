@@ -20,12 +20,13 @@ import swim.collections.FingerTrieSeq;
 import swim.structure.Data;
 
 public class MqttDecoder {
+
   public MqttConnect connect(int packetFlags, String protocolName, int protocolLevel,
                              int connectFlags, int keepAlive, String clientId, String willTopic,
                              Data willMessage, String username, Data password) {
     return MqttConnect.from(packetFlags, protocolName, protocolLevel,
-                            connectFlags, keepAlive, clientId, willTopic,
-                            willMessage, username, password);
+        connectFlags, keepAlive, clientId, willTopic,
+        willMessage, username, password);
   }
 
   public MqttConnAck connAck(int packetFlags, int connectFlags, int connectCode) {
@@ -105,21 +106,50 @@ public class MqttDecoder {
                                                      InputBuffer input) {
     final Decoder<?> decoder;
     switch (packetType) {
-      case 1: decoder = decodeConnect(input); break;
-      case 2: decoder = decodeConnAck(input); break;
-      case 3: decoder = decodePublish(content, input); break;
-      case 4: decoder = decodePubAck(input); break;
-      case 5: decoder = decodePubRec(input); break;
-      case 6: decoder = decodePubRel(input); break;
-      case 7: decoder = decodePubComp(input); break;
-      case 8: decoder = decodeSubscribe(input); break;
-      case 9: decoder = decodeSubAck(input); break;
-      case 10: decoder = decodeUnsubscribe(input); break;
-      case 11: decoder = decodeUnsubAck(input); break;
-      case 12: decoder = decodePingReq(input); break;
-      case 13: decoder = decodePingResp(input); break;
-      case 14: decoder = decodeDisconnect(input); break;
-      default: return Decoder.error(new MqttException("reserved packet type: " + packetType));
+      case 1:
+        decoder = decodeConnect(input);
+        break;
+      case 2:
+        decoder = decodeConnAck(input);
+        break;
+      case 3:
+        decoder = decodePublish(content, input);
+        break;
+      case 4:
+        decoder = decodePubAck(input);
+        break;
+      case 5:
+        decoder = decodePubRec(input);
+        break;
+      case 6:
+        decoder = decodePubRel(input);
+        break;
+      case 7:
+        decoder = decodePubComp(input);
+        break;
+      case 8:
+        decoder = decodeSubscribe(input);
+        break;
+      case 9:
+        decoder = decodeSubAck(input);
+        break;
+      case 10:
+        decoder = decodeUnsubscribe(input);
+        break;
+      case 11:
+        decoder = decodeUnsubAck(input);
+        break;
+      case 12:
+        decoder = decodePingReq(input);
+        break;
+      case 13:
+        decoder = decodePingResp(input);
+        break;
+      case 14:
+        decoder = decodeDisconnect(input);
+        break;
+      default:
+        return Decoder.error(new MqttException("reserved packet type: " + packetType));
     }
     return (Decoder<MqttPacket<T>>) decoder;
   }
@@ -203,4 +233,5 @@ public class MqttDecoder {
   public Decoder<Data> decodeData(InputBuffer input) {
     return MqttDataDecoder.decode(input);
   }
+
 }

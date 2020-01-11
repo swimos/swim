@@ -18,8 +18,16 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public final class Extant extends Value {
+
+  private static final Extant VALUE = new Extant();
+  private static int hashSeed;
+
   private Extant() {
     // stub
+  }
+
+  public static Extant extant() {
+    return VALUE;
   }
 
   /**
@@ -126,11 +134,4 @@ public final class Extant extends Value {
     output = output.write("Value").write('.').write("extant").write('(').write(')');
   }
 
-  private static int hashSeed;
-
-  private static final Extant VALUE = new Extant();
-
-  public static Extant extant() {
-    return VALUE;
-  }
 }

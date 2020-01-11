@@ -17,6 +17,7 @@ package swim.uri;
 import swim.collections.HashTrieMap;
 
 final class UriPathVariable extends UriPathPattern {
+
   final String name;
   final UriPathPattern rest;
 
@@ -59,4 +60,5 @@ final class UriPathVariable extends UriPathPattern {
       return false;
     }
   }
+
 }

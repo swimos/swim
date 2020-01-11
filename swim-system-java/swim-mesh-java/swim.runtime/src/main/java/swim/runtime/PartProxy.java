@@ -30,6 +30,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class PartProxy implements PartBinding, PartContext {
+
   protected final PartBinding partBinding;
   protected PartContext partContext;
 
@@ -436,4 +437,5 @@ public class PartProxy implements PartBinding, PartContext {
   public void didFail(Throwable error) {
     this.partBinding.didFail(error);
   }
+
 }

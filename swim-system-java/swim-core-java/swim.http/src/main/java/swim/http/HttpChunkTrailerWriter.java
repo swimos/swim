@@ -20,6 +20,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class HttpChunkTrailerWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final Iterator<HttpHeader> headers;
   final Writer<?, ?> part;
@@ -35,11 +36,6 @@ final class HttpChunkTrailerWriter extends Writer<Object, Object> {
 
   HttpChunkTrailerWriter(HttpWriter http, Iterator<HttpHeader> headers) {
     this(http, headers, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.headers, this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
@@ -95,4 +91,10 @@ final class HttpChunkTrailerWriter extends Writer<Object, Object> {
                                       Iterator<HttpHeader> headers) {
     return write(output, http, headers, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.headers, this.part, this.step);
+  }
+
 }

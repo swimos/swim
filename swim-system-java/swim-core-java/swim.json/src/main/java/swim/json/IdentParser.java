@@ -20,6 +20,7 @@ import swim.codec.Output;
 import swim.codec.Parser;
 
 final class IdentParser<I, V> extends Parser<V> {
+
   final JsonParser<I, V> json;
   final Output<V> output;
   final int step;
@@ -28,11 +29,6 @@ final class IdentParser<I, V> extends Parser<V> {
     this.json = json;
     this.output = output;
     this.step = step;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.json, this.output, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, JsonParser<I, V> json, Output<V> output, int step) {
@@ -81,4 +77,10 @@ final class IdentParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parse(Input input, JsonParser<I, V> json) {
     return parse(input, json, null, 1);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.json, this.output, this.step);
+  }
+
 }

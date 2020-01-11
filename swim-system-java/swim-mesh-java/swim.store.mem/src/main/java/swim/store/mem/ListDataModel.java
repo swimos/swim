@@ -30,6 +30,7 @@ import swim.structure.Value;
 import swim.util.KeyedList;
 
 public class ListDataModel implements ListDataBinding {
+
   protected final Value name;
   protected final STreeList<Value> tree;
   protected ListDataContext dataContext;
@@ -317,4 +318,5 @@ public class ListDataModel implements ListDataBinding {
   public ListIterator<Map.Entry<Object, Value>> entryIterator() {
     return this.tree.entryIterator();
   }
+
 }

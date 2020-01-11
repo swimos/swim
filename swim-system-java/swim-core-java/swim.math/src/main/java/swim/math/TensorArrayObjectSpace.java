@@ -19,6 +19,7 @@ import swim.codec.Format;
 import swim.codec.Output;
 
 final class TensorArrayObjectSpace<V, S> extends TensorArraySpace<TensorArray<V, S>, V, S> implements Debug {
+
   final TensorSpace<V, S> next;
   final TensorDims dims;
 
@@ -62,4 +63,5 @@ final class TensorArrayObjectSpace<V, S> extends TensorArraySpace<TensorArray<V,
   public String toString() {
     return Format.debug(this);
   }
+
 }

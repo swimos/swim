@@ -21,6 +21,7 @@ import swim.codec.Output;
 import swim.codec.OutputBuffer;
 
 final class MqttEmpty extends MqttEntity<Object> implements Debug {
+
   @Override
   public boolean isDefined() {
     return false;
@@ -55,4 +56,5 @@ final class MqttEmpty extends MqttEntity<Object> implements Debug {
   public String toString() {
     return Format.debug(this);
   }
+
 }

@@ -20,6 +20,11 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public abstract class TensorArrayForm<T, V> extends TensorForm<T> {
+
+  public static <V> TensorArrayForm<V[], V> from(TensorForm<V> next) {
+    return new TensorArrayIdentityForm<V>(next);
+  }
+
   public abstract TensorForm<V> next();
 
   public abstract T fromArray(Object... array);
@@ -177,7 +182,4 @@ public abstract class TensorArrayForm<T, V> extends TensorForm<T> {
     }
   }
 
-  public static <V> TensorArrayForm<V[], V> from(TensorForm<V> next) {
-    return new TensorArrayIdentityForm<V>(next);
-  }
 }

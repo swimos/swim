@@ -18,6 +18,7 @@ import swim.io.IpServiceRef;
 import swim.io.IpSocketRef;
 
 public class MqttSocketSpec extends MqttSocketBehaviors {
+
   final MqttSettings mqttSettings = MqttSettings.standard();
 
   @Override
@@ -29,4 +30,5 @@ public class MqttSocketSpec extends MqttSocketBehaviors {
   protected IpSocketRef connect(MqttEndpoint endpoint, MqttSocket<?, ?> socket) {
     return endpoint.connectMqtt("127.0.0.1", 63556, socket, this.mqttSettings);
   }
+
 }

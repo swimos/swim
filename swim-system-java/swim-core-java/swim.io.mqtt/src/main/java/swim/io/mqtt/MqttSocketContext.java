@@ -21,6 +21,7 @@ import swim.io.IpSocket;
 import swim.mqtt.MqttPacket;
 
 public interface MqttSocketContext<I, O> extends IpContext, FlowContext {
+
   MqttSettings mqttSettings();
 
   <I2 extends I> void read(Decoder<I2> content);
@@ -30,4 +31,5 @@ public interface MqttSocketContext<I, O> extends IpContext, FlowContext {
   void become(IpSocket socket);
 
   void close();
+
 }

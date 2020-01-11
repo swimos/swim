@@ -15,7 +15,9 @@
 package swim.runtime;
 
 public abstract class Metric {
-  public abstract CellAddress cellAddress();
 
   public static final long REPORT_INTERVAL = 1000L;
+
+  public abstract CellAddress cellAddress();
+
 }

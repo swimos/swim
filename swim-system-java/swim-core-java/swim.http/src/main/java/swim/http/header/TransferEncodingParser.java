@@ -24,6 +24,7 @@ import swim.http.TransferCoding;
 import swim.util.Builder;
 
 final class TransferEncodingParser extends Parser<TransferEncoding> {
+
   final HttpParser http;
   final Parser<TransferCoding> coding;
   final Builder<TransferCoding, FingerTrieSeq<TransferCoding>> codings;
@@ -39,11 +40,6 @@ final class TransferEncodingParser extends Parser<TransferEncoding> {
 
   TransferEncodingParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<TransferEncoding> feed(Input input) {
-    return parse(input, this.http, this.coding, this.codings, this.step);
   }
 
   static Parser<TransferEncoding> parse(Input input, HttpParser http, Parser<TransferCoding> coding,
@@ -124,4 +120,10 @@ final class TransferEncodingParser extends Parser<TransferEncoding> {
   static Parser<TransferEncoding> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<TransferEncoding> feed(Input input) {
+    return parse(input, this.http, this.coding, this.codings, this.step);
+  }
+
 }

@@ -31,6 +31,7 @@ import swim.ws.WsControl;
 import swim.ws.WsData;
 
 public interface WsDownlink<I, O> extends Downlink, WsLink {
+
   WsDownlink<I, O> requestUri(Uri requestUri);
 
   @Override
@@ -71,4 +72,5 @@ public interface WsDownlink<I, O> extends Downlink, WsLink {
   <O2 extends O> void write(WsData<O2> frame);
 
   <O2 extends O> void write(WsControl<?, O2> frame);
+
 }

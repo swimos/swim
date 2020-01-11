@@ -15,9 +15,11 @@
 package swim.math;
 
 public interface FN<V, S> extends VectorModule<V, S> {
+
   int size();
 
   V of(Object... vs);
 
   S get(V v, int i);
+
 }

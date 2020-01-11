@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
+
   final WsDecoder ws;
   final Decoder<O> content;
   final int finRsvOp;
@@ -42,12 +43,6 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
 
   WsFrameDecoder(WsDecoder ws, Decoder<O> content) {
     this(ws, content, 0, 0L, 0L, 0L, null, 1);
-  }
-
-  @Override
-  public Decoder<WsFrame<O>> feed(InputBuffer input) {
-    return decode(input, this.ws, this.content, this.finRsvOp, this.position,
-                  this.offset, this.length, this.maskingKey, this.step);
   }
 
   static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDecoder ws, Decoder<O> content,
@@ -161,7 +156,7 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
           } else {
             return error(new DecoderException("decoded fragmented control frame"));
           }
-        } else { 
+        } else {
           return error(new DecoderException("undecoded websocket message"));
         }
       }
@@ -172,10 +167,17 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
       return error(input.trap());
     }
     return new WsFrameDecoder<O>(ws, content, finRsvOp, position, offset,
-                                 length, maskingKey, step);
+        length, maskingKey, step);
   }
 
   static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDecoder ws, Decoder<O> content) {
     return decode(input, ws, content, 0, 0L, 0L, 0L, null, 1);
   }
+
+  @Override
+  public Decoder<WsFrame<O>> feed(InputBuffer input) {
+    return decode(input, this.ws, this.content, this.finRsvOp, this.position,
+        this.offset, this.length, this.maskingKey, this.step);
+  }
+
 }

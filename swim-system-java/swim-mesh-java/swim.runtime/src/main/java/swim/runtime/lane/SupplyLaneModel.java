@@ -18,6 +18,7 @@ import swim.runtime.WarpBinding;
 import swim.runtime.warp.WarpLaneModel;
 
 public class SupplyLaneModel extends WarpLaneModel<SupplyLaneView<?>, SupplyLaneUplink> {
+
   @Override
   public String laneType() {
     return "supply";
@@ -32,4 +33,5 @@ public class SupplyLaneModel extends WarpLaneModel<SupplyLaneView<?>, SupplyLane
   protected void didOpenLaneView(SupplyLaneView<?> view) {
     view.setLaneBinding(this);
   }
+
 }

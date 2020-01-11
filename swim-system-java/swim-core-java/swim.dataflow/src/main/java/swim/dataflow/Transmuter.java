@@ -17,9 +17,11 @@ package swim.dataflow;
 import swim.structure.Record;
 
 public abstract class Transmuter {
-  public abstract Record transmute(RecordModel model);
 
   public static Transmuter system() {
     return null; // TODO
   }
+
+  public abstract Record transmute(RecordModel model);
+
 }

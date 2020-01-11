@@ -27,6 +27,9 @@ import swim.util.CombinerFunction;
 import swim.util.Cursor;
 
 public final class STreeNode extends STreePage {
+
+  static final STreePageRef[] EMPTY_CHILD_REFS = new STreePageRef[0];
+  static final long[] EMPTY_KNOT_INDEXES = new long[0];
   final STreePageRef pageRef;
   final long version;
   final STreePageRef[] childRefs;
@@ -38,6 +41,82 @@ public final class STreeNode extends STreePage {
     this.version = version;
     this.childRefs = childRefs;
     this.knotIndexes = knotIndexes;
+  }
+
+  public static STreeNode create(PageContext context, int stem, long version,
+                                 int post, int zone, long base, long span, Value fold,
+                                 STreePageRef[] childRefs, long[] knotIndexes) {
+    final STreePageRef pageRef = new STreePageRef(context, PageType.NODE, stem,
+        post, zone, base, span, fold);
+    final STreeNode page = new STreeNode(pageRef, version, childRefs, knotIndexes);
+    pageRef.page = page;
+    return page;
+  }
+
+  public static STreeNode create(PageContext context, int stem, long version,
+                                 int zone, long base, long span, Value fold,
+                                 STreePageRef[] childRefs, long[] knotIndexes) {
+    int post = zone;
+    for (int i = 0, n = childRefs.length; i < n; i += 1) {
+      final int childPost = childRefs[i].post;
+      if (childPost != 0) {
+        post = post == 0 ? childPost : Math.min(post, childPost);
+      }
+    }
+    return create(context, stem, version, post, zone, base, span, fold, childRefs, knotIndexes);
+  }
+
+  public static STreeNode create(PageContext context, int stem, long version, long span,
+                                 Value fold, STreePageRef[] childRefs, long[] knotIndexes) {
+    return create(context, stem, version, 0, 0L, span, fold, childRefs, knotIndexes);
+  }
+
+  public static STreeNode create(PageContext context, int stem, long version,
+                                 Value fold, STreePageRef[] childRefs) {
+    final int n = childRefs.length - 1;
+    final long[] knotIndexes = new long[n];
+    int post = 0;
+    long span = 0;
+    for (int i = 0; i < n; i += 1) {
+      final STreePageRef childRef = childRefs[i];
+      final int childPost = childRef.post;
+      if (childPost != 0) {
+        post = post == 0 ? childPost : Math.min(post, childPost);
+      }
+      span += childRef.span;
+      knotIndexes[i] = span;
+    }
+    span += childRefs[n].span;
+    return create(context, stem, version, post, 0, 0L, span, fold, childRefs, knotIndexes);
+  }
+
+  public static STreeNode fromValue(STreePageRef pageRef, Value value) {
+    Throwable cause = null;
+    try {
+      final Value header = value.header("snode");
+      final long version = header.get("v").longValue();
+      final Record tail = value.tail();
+      final int n = tail.size() >>> 1;
+      final STreePageRef[] childRefs = new STreePageRef[n + 1];
+      final long[] knotIndexes = new long[n];
+      childRefs[0] = STreePageRef.fromValue(pageRef.context, pageRef.stem,
+          tail.get(0).toValue());
+      for (int i = 1; i <= n; i += 1) {
+        knotIndexes[i - 1] = tail.get(2 * i - 1).header("knot").get("i").longValue();
+        childRefs[i] = STreePageRef.fromValue(pageRef.context, pageRef.stem,
+            tail.get(2 * i).toValue());
+      }
+      return new STreeNode(pageRef, version, childRefs, knotIndexes);
+    } catch (Throwable error) {
+      if (Conts.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed snode: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
   @Override
@@ -210,7 +289,7 @@ public final class STreeNode extends STreePage {
     }
 
     return create(this.pageRef.context, this.pageRef.stem, newVersion,
-                  newSpan, Value.absent(), newChildRefs, newKnotIndexes);
+        newSpan, Value.absent(), newChildRefs, newKnotIndexes);
   }
 
   STreeNode updatedPageSplit(int x, STreePage newPage, STreePage oldPage, long newVersion) {
@@ -325,7 +404,7 @@ public final class STreeNode extends STreePage {
     newSpan += newChildRefs[n - 1].span;
 
     return create(this.pageRef.context, this.pageRef.stem, newVersion,
-                  newSpan, Value.absent(), newChildRefs, newKnotIndexes);
+        newSpan, Value.absent(), newChildRefs, newKnotIndexes);
   }
 
   @Override
@@ -370,7 +449,7 @@ public final class STreeNode extends STreePage {
               final STreePageRef[] newChildRefs = new STreePageRef[n];
               System.arraycopy(oldChildRefs, x, newChildRefs, 0, n);
               newNode = create(this.pageRef.context, this.pageRef.stem, newVersion,
-                               Value.absent(), newChildRefs);
+                  Value.absent(), newChildRefs);
             } else {
               newNode = this;
             }
@@ -423,7 +502,7 @@ public final class STreeNode extends STreePage {
               System.arraycopy(this.knotIndexes, 0, newKnotIndexes, 0, n - 1);
               final long newSpan = newKnotIndexes[n - 2] + newChildRefs[n - 1].span;
               newNode = create(this.pageRef.context, this.pageRef.stem, newVersion,
-                               newSpan, Value.absent(), newChildRefs, newKnotIndexes);
+                  newSpan, Value.absent(), newChildRefs, newKnotIndexes);
             } else {
               newNode = this;
             }
@@ -540,7 +619,7 @@ public final class STreeNode extends STreePage {
     newKnotIndexes[0] = newLeftPage.span();
 
     return create(this.pageRef.context, this.pageRef.stem, newVersion,
-                  this.pageRef.span, Value.absent(), newChildRefs, newKnotIndexes);
+        this.pageRef.span, Value.absent(), newChildRefs, newKnotIndexes);
   }
 
   @Override
@@ -559,7 +638,7 @@ public final class STreeNode extends STreePage {
     }
 
     return create(this.pageRef.context, this.pageRef.stem, newVersion,
-                  newSpan, Value.absent(), newChildRefs, newKnotIndexes);
+        newSpan, Value.absent(), newChildRefs, newKnotIndexes);
   }
 
   @Override
@@ -582,7 +661,7 @@ public final class STreeNode extends STreePage {
     }
 
     return create(this.pageRef.context, this.pageRef.stem, newVersion,
-                  newSpan, Value.absent(), newChildRefs, newKnotIndexes);
+        newSpan, Value.absent(), newChildRefs, newKnotIndexes);
   }
 
   @Override
@@ -677,7 +756,7 @@ public final class STreeNode extends STreePage {
       fold = combiner.combine(fold, newChildRefs[i].fold());
     }
     return create(this.pageRef.context, this.pageRef.stem, newVersion,
-                  this.pageRef.span, fold, newChildRefs, this.knotIndexes);
+        this.pageRef.span, fold, newChildRefs, this.knotIndexes);
   }
 
   @Override
@@ -697,7 +776,7 @@ public final class STreeNode extends STreePage {
             System.arraycopy(oldChildRefs, i, newChildRefs, i, n - i);
           }
           return create(this.pageRef.context, this.pageRef.stem, version,
-                        this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotIndexes);
+              this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotIndexes);
         }
       }
     }
@@ -723,7 +802,7 @@ public final class STreeNode extends STreePage {
     }
 
     return create(this.pageRef.context, this.pageRef.stem, version, zone, step,
-                  this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotIndexes);
+        this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotIndexes);
   }
 
   @Override
@@ -735,7 +814,7 @@ public final class STreeNode extends STreePage {
       newChildRefs[i] = oldChildRefs[i].uncommitted(version);
     }
     return create(this.pageRef.context, this.pageRef.stem, version,
-                  this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotIndexes);
+        this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotIndexes);
   }
 
   @Override
@@ -754,7 +833,7 @@ public final class STreeNode extends STreePage {
       for (int i = 0; i < n; i += 1) {
         if (i > 0) {
           output.write(',').write('@').write('k').write('n').write('o').write('t')
-                .write('(').write('i').write(':');
+              .write('(').write('i').write(':');
           Recon.write(Num.from(knotIndexes[i - 1]), output);
           output.write(')').write(',');
         }
@@ -826,82 +905,4 @@ public final class STreeNode extends STreePage {
     return output.bind();
   }
 
-  static final STreePageRef[] EMPTY_CHILD_REFS = new STreePageRef[0];
-  static final long[] EMPTY_KNOT_INDEXES = new long[0];
-
-  public static STreeNode create(PageContext context, int stem, long version,
-                                 int post, int zone, long base, long span, Value fold,
-                                 STreePageRef[] childRefs, long[] knotIndexes) {
-    final STreePageRef pageRef = new STreePageRef(context, PageType.NODE, stem,
-                                                  post, zone, base, span, fold);
-    final STreeNode page = new STreeNode(pageRef, version, childRefs, knotIndexes);
-    pageRef.page = page;
-    return page;
-  }
-
-  public static STreeNode create(PageContext context, int stem, long version,
-                                 int zone, long base, long span, Value fold,
-                                 STreePageRef[] childRefs, long[] knotIndexes) {
-    int post = zone;
-    for (int i = 0, n = childRefs.length; i < n; i += 1) {
-      final int childPost = childRefs[i].post;
-      if (childPost != 0) {
-        post = post == 0 ? childPost : Math.min(post, childPost);
-      }
-    }
-    return create(context, stem, version, post, zone, base, span, fold, childRefs, knotIndexes);
-  }
-
-  public static STreeNode create(PageContext context, int stem, long version, long span,
-                                 Value fold, STreePageRef[] childRefs, long[] knotIndexes) {
-    return create(context, stem, version, 0, 0L, span, fold, childRefs, knotIndexes);
-  }
-
-  public static STreeNode create(PageContext context, int stem, long version,
-                                 Value fold, STreePageRef[] childRefs) {
-    final int n = childRefs.length - 1;
-    final long[] knotIndexes = new long[n];
-    int post = 0;
-    long span = 0;
-    for (int i = 0; i < n; i += 1) {
-      final STreePageRef childRef = childRefs[i];
-      final int childPost = childRef.post;
-      if (childPost != 0) {
-        post = post == 0 ? childPost : Math.min(post, childPost);
-      }
-      span += childRef.span;
-      knotIndexes[i] = span;
-    }
-    span += childRefs[n].span;
-    return create(context, stem, version, post, 0, 0L, span, fold, childRefs, knotIndexes);
-  }
-
-  public static STreeNode fromValue(STreePageRef pageRef, Value value) {
-    Throwable cause = null;
-    try {
-      final Value header = value.header("snode");
-      final long version = header.get("v").longValue();
-      final Record tail = value.tail();
-      final int n = tail.size() >>> 1;
-      final STreePageRef[] childRefs = new STreePageRef[n + 1];
-      final long[] knotIndexes = new long[n];
-      childRefs[0] = STreePageRef.fromValue(pageRef.context, pageRef.stem,
-                                            tail.get(0).toValue());
-      for (int i = 1; i <= n; i += 1) {
-        knotIndexes[i - 1] = tail.get(2 * i - 1).header("knot").get("i").longValue();
-        childRefs[i] = STreePageRef.fromValue(pageRef.context, pageRef.stem,
-                                              tail.get(2 * i).toValue());
-      }
-      return new STreeNode(pageRef, version, childRefs, knotIndexes);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed snode: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
-  }
 }

@@ -31,6 +31,7 @@ import swim.kernel.KernelContext;
 import swim.uri.UriPattern;
 
 public class JavaPlaneFactory<P extends Plane> implements PlaneFactory<P> {
+
   protected final KernelContext kernel;
   protected final JavaPlaneDef planeDef;
   protected final Class<? extends P> planeClass;
@@ -231,4 +232,5 @@ public class JavaPlaneFactory<P extends Plane> implements PlaneFactory<P> {
       throw new PlaneException(cause);
     }
   }
+
 }

@@ -23,6 +23,7 @@ import swim.uri.Uri;
 import swim.util.Log;
 
 public interface CellContext extends Log {
+
   CellAddress cellAddress();
 
   String edgeName();
@@ -48,4 +49,5 @@ public interface CellContext extends Log {
   void pushDown(Push<?> push);
 
   void reportDown(Metric metric);
+
 }

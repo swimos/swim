@@ -18,8 +18,10 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 public final class BitwiseXorOutlet extends BinaryOutlet {
+
   @Override
   protected Item evaluate(Value argument1, Value argument2) {
     return argument1.bitwiseXor(argument2);
   }
+
 }

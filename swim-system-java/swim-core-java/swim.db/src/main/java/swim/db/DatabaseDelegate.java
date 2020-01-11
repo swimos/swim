@@ -15,7 +15,9 @@
 package swim.db;
 
 public interface DatabaseDelegate {
+
   void databaseDidCommit(Database database, Chunk chunk);
 
   void databaseDidCompact(Database database, Compact compact);
+
 }

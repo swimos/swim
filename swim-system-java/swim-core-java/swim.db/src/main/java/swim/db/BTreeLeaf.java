@@ -27,6 +27,8 @@ import swim.util.CombinerFunction;
 import swim.util.OrderedMapCursor;
 
 public final class BTreeLeaf extends BTreePage {
+
+  static final Slot[] EMPTY_SLOTS = new Slot[0];
   final BTreePageRef pageRef;
   final long version;
   final Slot[] slots;
@@ -35,6 +37,45 @@ public final class BTreeLeaf extends BTreePage {
     this.pageRef = pageRef;
     this.version = version;
     this.slots = slots;
+  }
+
+  public static BTreeLeaf create(PageContext context, int stem, long version,
+                                 int zone, long base, Value fold, Slot[] slots) {
+    final BTreePageRef pageRef = new BTreePageRef(context, PageType.LEAF, stem, zone,
+        zone, base, slots.length, fold);
+    final BTreeLeaf page = new BTreeLeaf(pageRef, version, slots);
+    pageRef.page = page;
+    return page;
+  }
+
+  public static BTreeLeaf create(PageContext context, int stem, long version,
+                                 Value fold, Slot[] slots) {
+    return create(context, stem, version, 0, 0L, fold, slots);
+  }
+
+  public static BTreeLeaf empty(PageContext context, int stem, long version) {
+    return create(context, stem, version, 0, 0L, Value.absent(), EMPTY_SLOTS);
+  }
+
+  public static BTreeLeaf fromValue(BTreePageRef pageRef, Value value) {
+    Throwable cause = null;
+    try {
+      final Value header = value.header("bleaf");
+      final long version = header.get("v").longValue();
+      final Record tail = value.tail();
+      final Slot[] slots = new Slot[tail.size()];
+      tail.toArray(slots);
+      return new BTreeLeaf(pageRef, version, slots);
+    } catch (Throwable error) {
+      if (Conts.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed bleaf: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
   @Override
@@ -350,7 +391,7 @@ public final class BTreeLeaf extends BTreePage {
     newKnotKeys[0] = newRightPage.minKey();
 
     return BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
-                            this.slots.length, Value.absent(), newChildRefs, newKnotKeys);
+        this.slots.length, Value.absent(), newChildRefs, newKnotKeys);
   }
 
   @Override
@@ -532,44 +573,4 @@ public final class BTreeLeaf extends BTreePage {
     return output.bind();
   }
 
-  static final Slot[] EMPTY_SLOTS = new Slot[0];
-
-  public static BTreeLeaf create(PageContext context, int stem, long version,
-                                 int zone, long base, Value fold, Slot[] slots) {
-    final BTreePageRef pageRef = new BTreePageRef(context, PageType.LEAF, stem, zone,
-                                                  zone, base, slots.length, fold);
-    final BTreeLeaf page = new BTreeLeaf(pageRef, version, slots);
-    pageRef.page = page;
-    return page;
-  }
-
-  public static BTreeLeaf create(PageContext context, int stem, long version,
-                                 Value fold, Slot[] slots) {
-    return create(context, stem, version, 0, 0L, fold, slots);
-  }
-
-  public static BTreeLeaf empty(PageContext context, int stem, long version) {
-    return create(context, stem, version, 0, 0L, Value.absent(), EMPTY_SLOTS);
-  }
-
-  public static BTreeLeaf fromValue(BTreePageRef pageRef, Value value) {
-    Throwable cause = null;
-    try {
-      final Value header = value.header("bleaf");
-      final long version = header.get("v").longValue();
-      final Record tail = value.tail();
-      final Slot[] slots = new Slot[tail.size()];
-      tail.toArray(slots);
-      return new BTreeLeaf(pageRef, version, slots);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed bleaf: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
-  }
 }

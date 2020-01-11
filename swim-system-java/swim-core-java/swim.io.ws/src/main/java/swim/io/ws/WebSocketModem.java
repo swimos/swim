@@ -31,6 +31,7 @@ import swim.ws.WsEncoder;
 import swim.ws.WsFrame;
 
 public class WebSocketModem<I, O> implements IpModem<Object, Object>, WebSocketContext<I, O> {
+
   protected final WebSocket<I, O> socket;
   protected final WsSettings wsSettings;
   protected final WsDecoder decoder;
@@ -237,4 +238,5 @@ public class WebSocketModem<I, O> implements IpModem<Object, Object>, WebSocketC
   public void close() {
     this.context.close();
   }
+
 }

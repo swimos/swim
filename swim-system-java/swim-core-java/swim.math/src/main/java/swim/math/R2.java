@@ -19,8 +19,18 @@ import swim.codec.Format;
 import swim.codec.Output;
 
 public class R2 implements AffineSpace<PointR2, VectorR2, Double>, VectorSpace<VectorR2, Double>, F2<VectorR2, Double>, Debug {
+
+  private static R2 space;
+
   protected R2() {
     // stub
+  }
+
+  public static R2 space() {
+    if (space == null) {
+      space = new R2();
+    }
+    return space;
   }
 
   @Override
@@ -108,12 +118,4 @@ public class R2 implements AffineSpace<PointR2, VectorR2, Double>, VectorSpace<V
     return Format.debug(this);
   }
 
-  private static R2 space;
-
-  public static R2 space() {
-    if (space == null) {
-      space = new R2();
-    }
-    return space;
-  }
 }

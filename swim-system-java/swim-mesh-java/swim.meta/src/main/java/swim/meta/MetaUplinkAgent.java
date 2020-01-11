@@ -19,6 +19,7 @@ import swim.runtime.NodeContext;
 import swim.runtime.agent.AgentNode;
 
 final class MetaUplinkAgent extends AgentNode {
+
   final LinkContext uplink;
 
   MetaUplinkAgent(LinkContext uplink) {
@@ -30,4 +31,5 @@ final class MetaUplinkAgent extends AgentNode {
     super.setNodeContext(nodeContext);
     this.uplink.openMetaUplink(this.uplink.linkWrapper(), this);
   }
+
 }

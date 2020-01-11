@@ -21,9 +21,11 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public interface RecordOutlet extends Outlet<Record>, MapOutlet<Value, Value, Record>, StreamletScope<Value> {
+
   @Override
   Outlet<Value> outlet(Value key);
 
   @Override
   Outlet<Value> outlet(String key);
+
 }

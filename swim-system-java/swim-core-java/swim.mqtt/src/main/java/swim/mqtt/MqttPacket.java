@@ -15,9 +15,11 @@
 package swim.mqtt;
 
 public abstract class MqttPacket<T> extends MqttPart {
+
   public abstract int packetType();
 
   public abstract int packetFlags();
 
   abstract int bodySize(MqttEncoder mqtt);
+
 }

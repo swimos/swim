@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import swim.util.OrderedMapCursor;
 
 final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
+
   final BTreePage<K, V, U>[] pages;
   long index;
   int pageIndex;
@@ -285,4 +286,5 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
   public void remove() {
     this.pageCursor.remove();
   }
+
 }

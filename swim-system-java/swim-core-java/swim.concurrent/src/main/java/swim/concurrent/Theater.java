@@ -25,21 +25,40 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
  * ForkJoinPool}.
  */
 public class Theater implements MainStage, Thread.UncaughtExceptionHandler {
+
+  /**
+   * Atomic {@link #status} bit flag indicating that the theater has started,
+   * and is currently running.
+   */
+  static final int STARTED = 1 << 0;
+  /**
+   * Atomic {@link #status} bit flag indicating that the theater had previously
+   * started, but is now permanently stopped.
+   */
+  static final int STOPPED = 1 << 1;
+  /**
+   * Total number of theaters that have ever been instantiated.  Used to
+   * uniquely name theater threads.
+   */
+  static final AtomicInteger THEATER_COUNT = new AtomicInteger(0);
+  /**
+   * Atomic {@link #status} field updater, used to linearize theater startup
+   * and shutdown.
+   */
+  static final AtomicIntegerFieldUpdater<Theater> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(Theater.class, "status");
   /**
    * Prefix for worker thread names.
    */
   final String name;
-
   /**
    * Thread pool on which to execute timers, tasks, and continuations.
    */
   final ForkJoinPool pool;
-
   /**
    * Schedule used to set timers.
    */
   Schedule schedule;
-
   /**
    * Atomic bit field with {@link #STARTED} and {@link #STOPPED} flags.
    */
@@ -158,6 +177,15 @@ public class Theater implements MainStage, Thread.UncaughtExceptionHandler {
       if (interrupted) {
         Thread.currentThread().interrupt();
       }
+    }
+
+    /*
+      Clock must be stopped to ensure that clock events
+      don't continue to run after the Kernel is stopped
+    */
+    if (schedule instanceof Clock) {
+      final Clock clock = (Clock) schedule;
+      clock.stop();
     }
   }
 
@@ -308,30 +336,6 @@ public class Theater implements MainStage, Thread.UncaughtExceptionHandler {
     didFail(error);
   }
 
-  /**
-   * Atomic {@link #status} bit flag indicating that the theater has started,
-   * and is currently running.
-   */
-  static final int STARTED = 1 << 0;
-
-  /**
-   * Atomic {@link #status} bit flag indicating that the theater had previously
-   * started, but is now permanently stopped.
-   */
-  static final int STOPPED = 1 << 1;
-
-  /**
-   * Total number of theaters that have ever been instantiated.  Used to
-   * uniquely name theater threads.
-   */
-  static final AtomicInteger THEATER_COUNT = new AtomicInteger(0);
-
-  /**
-   * Atomic {@link #status} field updater, used to linearize theater startup
-   * and shutdown.
-   */
-  static final AtomicIntegerFieldUpdater<Theater> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(Theater.class, "status");
 }
 
 /**
@@ -339,16 +343,30 @@ public class Theater implements MainStage, Thread.UncaughtExceptionHandler {
  * Theater} stage.
  */
 class TheaterTask implements TaskContext, Runnable, ForkJoinPool.ManagedBlocker {
+
+  /**
+   * Atomic {@link #status} bit flag indicating that the task is currently
+   * cued for execution.
+   */
+  static final int CUED = 1 << 0;
+  /**
+   * Atomic {@link #status} bit flag indicating that the task is currently
+   * executing.
+   */
+  static final int RUNNING = 1 << 1;
+  /**
+   * Atomic {@link #status} field updater, used to linearize task cueing.
+   */
+  static final AtomicIntegerFieldUpdater<TheaterTask> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(TheaterTask.class, "status");
   /**
    * {@code Theater} to which the {@code task} is bound.
    */
   final Theater theater;
-
   /**
    * {@code TaskFunction} to invoke when the cued task executes.
    */
   final TaskFunction task;
-
   /**
    * Atomic bit field with {@link #CUED} and {@link #RUNNING} flags.
    */
@@ -459,23 +477,6 @@ class TheaterTask implements TaskContext, Runnable, ForkJoinPool.ManagedBlocker 
     return true;
   }
 
-  /**
-   * Atomic {@link #status} bit flag indicating that the task is currently
-   * cued for execution.
-   */
-  static final int CUED = 1 << 0;
-
-  /**
-   * Atomic {@link #status} bit flag indicating that the task is currently
-   * executing.
-   */
-  static final int RUNNING = 1 << 1;
-
-  /**
-   * Atomic {@link #status} field updater, used to linearize task cueing.
-   */
-  static final AtomicIntegerFieldUpdater<TheaterTask> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(TheaterTask.class, "status");
 }
 
 /**
@@ -483,23 +484,47 @@ class TheaterTask implements TaskContext, Runnable, ForkJoinPool.ManagedBlocker 
  * stage.
  */
 final class TheaterCall<T> implements Call<T>, Runnable {
+
+  /**
+   * Atomic {@link #status} bit flag indicating that the call has completed
+   * with a value.
+   */
+  static final int BIND = 1 << 0;
+  /**
+   * Atomic {@link #status} bit flag indicating that the call has failed with
+   * an error.
+   */
+  static final int TRAP = 1 << 1;
+  /**
+   * Atomic {@link #status} bit flag indicating that the continuation has been
+   * cued for execution.
+   */
+  static final int CUED = 1 << 2;
+  /**
+   * Atomic {@link #status} bit flag indicating that the continuation has
+   * finished executing, completing the continuation.
+   */
+  static final int DONE = 1 << 3;
+  /**
+   * Atomic {@link #status} field updater, used to linearize cont completion.
+   */
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<TheaterCall<?>> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<TheaterCall<?>>) (Class<?>) TheaterCall.class, "status");
   /**
    * {@code Theater} stage on which the {@code cont}inuation executes.
    */
   final Theater theater;
-
   /**
    * {@code Cont}inuation to invoke when the call is completed.
    */
   final Cont<T> cont;
-
   /**
    * Completed result of this call; either the bound value of type {@code T},
    * or the trapped error of type {@code Throwable}.  The type of {@code result}
    * is decided by the flags of the {@code status} field.
    */
   volatile Object result;
-
   /**
    * Atomic bit field with {@link #BIND}, {@link #TRAP}, {@link #CUED}, and
    * {@link #DONE} flags.
@@ -617,47 +642,23 @@ final class TheaterCall<T> implements Call<T>, Runnable {
     } while (!STATUS.compareAndSet(this, oldStatus, newStatus));
   }
 
-  /**
-   * Atomic {@link #status} bit flag indicating that the call has completed
-   * with a value.
-   */
-  static final int BIND = 1 << 0;
-
-  /**
-   * Atomic {@link #status} bit flag indicating that the call has failed with
-   * an error.
-   */
-  static final int TRAP = 1 << 1;
-
-  /**
-   * Atomic {@link #status} bit flag indicating that the continuation has been
-   * cued for execution.
-   */
-  static final int CUED = 1 << 2;
-
-  /**
-   * Atomic {@link #status} bit flag indicating that the continuation has
-   * finished executing, completing the continuation.
-   */
-  static final int DONE = 1 << 3;
-
-  /**
-   * Atomic {@link #status} field updater, used to linearize cont completion.
-   */
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<TheaterCall<?>> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<TheaterCall<?>>) (Class<?>) TheaterCall.class, "status");
 }
 
 /**
  * Factory for {@code TheaterWorker} threads.
  */
 final class TheaterWorkerFactory implements ForkJoinPool.ForkJoinWorkerThreadFactory {
+
+  /**
+   * Atomic {@link #workerCount} field updater, used to count instantiated
+   * worker threads.
+   */
+  static final AtomicIntegerFieldUpdater<TheaterWorkerFactory> WORKER_COUNT =
+      AtomicIntegerFieldUpdater.newUpdater(TheaterWorkerFactory.class, "workerCount");
   /**
    * {@code Theater} for which this factory instantiates workers.
    */
   final Theater theater;
-
   /**
    * Total number of worker threads ever started by this factory.
    */
@@ -672,20 +673,16 @@ final class TheaterWorkerFactory implements ForkJoinPool.ForkJoinWorkerThreadFac
     return new TheaterWorker(pool, this.theater, WORKER_COUNT.getAndIncrement(this));
   }
 
-  /**
-   * Atomic {@link #workerCount} field updater, used to count instantiated
-   * worker threads.
-   */
-  static final AtomicIntegerFieldUpdater<TheaterWorkerFactory> WORKER_COUNT =
-      AtomicIntegerFieldUpdater.newUpdater(TheaterWorkerFactory.class, "workerCount");
 }
 
 /**
  * {@code Theater} worker thread.
  */
 final class TheaterWorker extends ForkJoinWorkerThread {
+
   TheaterWorker(ForkJoinPool pool, Theater theater, int workerId) {
     super(pool);
     setName(theater.name + workerId);
   }
+
 }

@@ -48,6 +48,7 @@ import swim.http.header.UserAgent;
 import swim.uri.Uri;
 
 public class HttpParser {
+
   public <T> HttpRequest<T> request(HttpMethod method, Uri uri, HttpVersion version,
                                     FingerTrieSeq<HttpHeader> headers) {
     return HttpRequest.from(method, uri, version, headers);
@@ -540,4 +541,5 @@ public class HttpParser {
                                                    InputBuffer input) {
     return HttpChunkedDecoder.decode(input, this, message, content);
   }
+
 }

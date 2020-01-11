@@ -19,5 +19,7 @@ import swim.ws.WsRequest;
 
 @FunctionalInterface
 public interface WillUpgradeWs extends Preemptive {
+
   void willUpgrade(WsRequest request);
+
 }

@@ -23,6 +23,7 @@ import swim.structure.Slot;
 import swim.structure.Value;
 
 public final class SlotForm<T> extends FieldForm<T> {
+
   final java.lang.reflect.Field field;
   final Value key;
   final Form<?> form;
@@ -98,4 +99,5 @@ public final class SlotForm<T> extends FieldForm<T> {
     }
     return object;
   }
+
 }

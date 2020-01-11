@@ -18,6 +18,7 @@ import swim.codec.Format;
 import swim.codec.Output;
 
 final class UriQueryParam extends UriQuery {
+
   final String key;
   final String value;
   UriQuery tail;
@@ -91,4 +92,5 @@ final class UriQueryParam extends UriQuery {
     }
     return this.string;
   }
+
 }

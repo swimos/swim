@@ -19,6 +19,7 @@ import swim.structure.Data;
 import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttSubscribeSpec {
+
   public static void assertDecodes(Data data, MqttSubscribe packet) {
     MqttAssertions.assertDecodesPacket(data, packet);
   }
@@ -36,62 +37,63 @@ public class MqttSubscribeSpec {
   @Test
   public void decodeSubscribePacketsWithSingleSubscription() {
     assertDecodes(Data.fromBase16("8209000000047465737400"),
-                  MqttSubscribe.from(0).subscription("test"));
+        MqttSubscribe.from(0).subscription("test"));
   }
 
   @Test
   public void encodeSubscribePacketsWithSingleSubscription() {
     assertEncodes(MqttSubscribe.from(0).subscription("test"),
-                  Data.fromBase16("8209000000047465737400"));
+        Data.fromBase16("8209000000047465737400"));
   }
 
   @Test
   public void decodeSubscribePacketsWithSingleSubscriptionWithQoS() {
     assertDecodes(Data.fromBase16("8209000000047465737400"),
-                  MqttSubscribe.from(0).subscription("test", MqttQoS.AT_MOST_ONCE));
+        MqttSubscribe.from(0).subscription("test", MqttQoS.AT_MOST_ONCE));
     assertDecodes(Data.fromBase16("8209000000047465737401"),
-                  MqttSubscribe.from(0).subscription("test", MqttQoS.AT_LEAST_ONCE));
+        MqttSubscribe.from(0).subscription("test", MqttQoS.AT_LEAST_ONCE));
     assertDecodes(Data.fromBase16("8209000000047465737402"),
-                  MqttSubscribe.from(0).subscription("test", MqttQoS.EXACTLY_ONCE));
+        MqttSubscribe.from(0).subscription("test", MqttQoS.EXACTLY_ONCE));
   }
 
   @Test
   public void encodeSubscribePacketsWithSingleSubscriptionWithQoS() {
     assertEncodes(MqttSubscribe.from(0).subscription("test", MqttQoS.AT_MOST_ONCE),
-                  Data.fromBase16("8209000000047465737400"));
+        Data.fromBase16("8209000000047465737400"));
     assertEncodes(MqttSubscribe.from(0).subscription("test", MqttQoS.AT_LEAST_ONCE),
-                  Data.fromBase16("8209000000047465737401"));
+        Data.fromBase16("8209000000047465737401"));
     assertEncodes(MqttSubscribe.from(0).subscription("test", MqttQoS.EXACTLY_ONCE),
-                  Data.fromBase16("8209000000047465737402"));
+        Data.fromBase16("8209000000047465737402"));
   }
 
   @Test
   public void decodeSubscribePacketsWithMultipleSubscriptions() {
     assertDecodes(Data.fromBase16("82150000000474657374000003666F6F00000362617200"),
-                  MqttSubscribe.from(0).subscription("test").subscription("foo").subscription("bar"));
+        MqttSubscribe.from(0).subscription("test").subscription("foo").subscription("bar"));
   }
 
   @Test
   public void encodeSubscribePacketsWithMultipleSubscriptions() {
     assertEncodes(MqttSubscribe.from(0).subscription("test").subscription("foo").subscription("bar"),
-                  Data.fromBase16("82150000000474657374000003666F6F00000362617200"));
+        Data.fromBase16("82150000000474657374000003666F6F00000362617200"));
   }
 
   @Test
   public void decodeSubscribePacketsWithMultipleSubscriptionsWithQoS() {
     assertDecodes(Data.fromBase16("82150000000474657374000003666F6F01000362617202"),
-                  MqttSubscribe.from(0)
-                               .subscription("test", MqttQoS.AT_MOST_ONCE)
-                               .subscription("foo", MqttQoS.AT_LEAST_ONCE)
-                               .subscription("bar", MqttQoS.EXACTLY_ONCE));
+        MqttSubscribe.from(0)
+            .subscription("test", MqttQoS.AT_MOST_ONCE)
+            .subscription("foo", MqttQoS.AT_LEAST_ONCE)
+            .subscription("bar", MqttQoS.EXACTLY_ONCE));
   }
 
   @Test
   public void encodeSubscribePacketsWithMultipleSubscriptionsWithQoS() {
     assertEncodes(MqttSubscribe.from(0)
-                               .subscription("test", MqttQoS.AT_MOST_ONCE)
-                               .subscription("foo", MqttQoS.AT_LEAST_ONCE)
-                               .subscription("bar", MqttQoS.EXACTLY_ONCE),
-                  Data.fromBase16("82150000000474657374000003666F6F01000362617202"));
+            .subscription("test", MqttQoS.AT_MOST_ONCE)
+            .subscription("foo", MqttQoS.AT_LEAST_ONCE)
+            .subscription("bar", MqttQoS.EXACTLY_ONCE),
+        Data.fromBase16("82150000000474657374000003666F6F01000362617202"));
   }
+
 }

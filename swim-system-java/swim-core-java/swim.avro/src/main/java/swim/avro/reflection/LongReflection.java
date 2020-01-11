@@ -17,8 +17,10 @@ package swim.avro.reflection;
 import swim.avro.schema.AvroLongType;
 
 final class LongReflection extends AvroLongType<Long> {
+
   @Override
   public Long cast(long value) {
     return Long.valueOf(value);
   }
+
 }

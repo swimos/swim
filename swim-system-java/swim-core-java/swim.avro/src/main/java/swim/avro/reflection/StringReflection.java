@@ -20,8 +20,10 @@ import swim.codec.Parser;
 import swim.codec.Unicode;
 
 final class StringReflection extends AvroStringType<String> {
+
   @Override
   public Parser<String> parseString(Input input) {
     return Unicode.parseString(input);
   }
+
 }

@@ -15,6 +15,7 @@
 package swim.math;
 
 public interface CompleteField<S> extends Field<S> {
+
   S exp(S a);
 
   S log(S a);
@@ -54,4 +55,5 @@ public interface CompleteField<S> extends Field<S> {
   S floor(S a);
 
   S round(S a);
+
 }

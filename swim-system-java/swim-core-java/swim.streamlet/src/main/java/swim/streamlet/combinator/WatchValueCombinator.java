@@ -17,6 +17,7 @@ package swim.streamlet.combinator;
 import swim.streamlet.function.WatchValueFunction;
 
 public class WatchValueCombinator<I> extends WatchValueOperator<I> {
+
   protected final WatchValueFunction<? super I> func;
 
   public WatchValueCombinator(WatchValueFunction<? super I> func) {
@@ -27,4 +28,5 @@ public class WatchValueCombinator<I> extends WatchValueOperator<I> {
   public void evaluate(I value) {
     this.func.apply(value);
   }
+
 }

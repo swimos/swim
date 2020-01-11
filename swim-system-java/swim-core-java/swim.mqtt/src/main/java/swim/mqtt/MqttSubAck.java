@@ -23,6 +23,8 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Murmur3;
 
 public final class MqttSubAck extends MqttPacket<Object> implements Debug {
+
+  private static int hashSeed;
   final int packetFlags;
   final int packetId;
   final FingerTrieSeq<MqttSubStatus> subscriptions;
@@ -31,6 +33,23 @@ public final class MqttSubAck extends MqttPacket<Object> implements Debug {
     this.packetFlags = packetFlags;
     this.packetId = packetId;
     this.subscriptions = subscriptions;
+  }
+
+  public static MqttSubAck from(int packetFlags, int packetId,
+                                FingerTrieSeq<MqttSubStatus> subscriptions) {
+    return new MqttSubAck(packetFlags, packetId, subscriptions);
+  }
+
+  public static MqttSubAck from(int packetId, FingerTrieSeq<MqttSubStatus> subscriptions) {
+    return new MqttSubAck(0, packetId, subscriptions);
+  }
+
+  public static MqttSubAck from(int packetId, MqttSubStatus... subscriptions) {
+    return new MqttSubAck(0, packetId, FingerTrieSeq.of(subscriptions));
+  }
+
+  public static MqttSubAck from(int packetId) {
+    return new MqttSubAck(0, packetId, FingerTrieSeq.<MqttSubStatus>empty());
   }
 
   @Override
@@ -124,22 +143,4 @@ public final class MqttSubAck extends MqttPacket<Object> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static MqttSubAck from(int packetFlags, int packetId,
-                                FingerTrieSeq<MqttSubStatus> subscriptions) {
-    return new MqttSubAck(packetFlags, packetId, subscriptions);
-  }
-
-  public static MqttSubAck from(int packetId, FingerTrieSeq<MqttSubStatus> subscriptions) {
-    return new MqttSubAck(0, packetId, subscriptions);
-  }
-
-  public static MqttSubAck from(int packetId, MqttSubStatus... subscriptions) {
-    return new MqttSubAck(0, packetId, FingerTrieSeq.of(subscriptions));
-  }
-
-  public static MqttSubAck from(int packetId) {
-    return new MqttSubAck(0, packetId, FingerTrieSeq.<MqttSubStatus>empty());
-  }
 }

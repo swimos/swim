@@ -23,6 +23,7 @@ import swim.structure.Value;
 import swim.xml.Xml;
 
 public class DecipherStructureParser extends DecipherParser<Item, Value> {
+
   @Override
   public Parser<Value> parseXml(Input input) {
     return Xml.structureParser().parseDocument(input);
@@ -37,4 +38,5 @@ public class DecipherStructureParser extends DecipherParser<Item, Value> {
   public Parser<Value> parseRecon(Input input) {
     return Recon.structureParser().parseBlock(input);
   }
+
 }

@@ -18,6 +18,7 @@ import swim.structure.Form;
 import swim.structure.Item;
 
 public abstract class TensorForm<T> extends Form<T> {
+
   public abstract T fromTensor(TensorDims dims, float[] tensor, int offset);
 
   public abstract T fromTensor(TensorDims dims, double[] tensor, int offset);
@@ -41,4 +42,5 @@ public abstract class TensorForm<T> extends Form<T> {
   public void castTensor(Item item, TensorDims dims, double[] tensor, int offset) {
     toTensor(cast(item), dims, tensor, offset);
   }
+
 }

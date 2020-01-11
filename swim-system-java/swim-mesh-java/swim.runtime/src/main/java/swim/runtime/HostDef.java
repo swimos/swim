@@ -19,6 +19,7 @@ import swim.uri.Uri;
 import swim.uri.UriPattern;
 
 public interface HostDef extends CellDef {
+
   Uri hostUri();
 
   UriPattern hostPattern();
@@ -34,4 +35,5 @@ public interface HostDef extends CellDef {
   Collection<? extends LaneDef> laneDefs();
 
   LaneDef getLaneDef(Uri laneUri);
+
 }

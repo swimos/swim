@@ -17,6 +17,7 @@ package swim.streamlet.combinator;
 import swim.streamlet.AbstractInlet;
 
 public abstract class WatchValueOperator<I> extends AbstractInlet<I> {
+
   @Override
   protected void onReconcileOutput(int version) {
     if (this.input != null) {
@@ -25,4 +26,5 @@ public abstract class WatchValueOperator<I> extends AbstractInlet<I> {
   }
 
   public abstract void evaluate(I input);
+
 }

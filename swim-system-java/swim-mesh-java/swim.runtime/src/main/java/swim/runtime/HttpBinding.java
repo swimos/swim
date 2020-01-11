@@ -19,6 +19,7 @@ import swim.http.HttpResponse;
 import swim.uri.Uri;
 
 public interface HttpBinding extends LinkBinding {
+
   @Override
   HttpBinding linkWrapper();
 
@@ -32,4 +33,5 @@ public interface HttpBinding extends LinkBinding {
   HttpRequest<?> doRequest();
 
   void writeResponse(HttpResponse<?> response);
+
 }

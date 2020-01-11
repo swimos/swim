@@ -27,10 +27,32 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class AcceptLanguage extends HttpHeader {
+
+  private static int hashSeed;
   final FingerTrieSeq<LanguageRange> languages;
 
   AcceptLanguage(FingerTrieSeq<LanguageRange> languages) {
     this.languages = languages;
+  }
+
+  public static AcceptLanguage from(FingerTrieSeq<LanguageRange> languages) {
+    return new AcceptLanguage(languages);
+  }
+
+  public static AcceptLanguage from(LanguageRange... languages) {
+    return new AcceptLanguage(FingerTrieSeq.of(languages));
+  }
+
+  public static AcceptLanguage from(String... languageStrings) {
+    final Builder<LanguageRange, FingerTrieSeq<LanguageRange>> languages = FingerTrieSeq.builder();
+    for (int i = 0, n = languageStrings.length; i < n; i += 1) {
+      languages.add(LanguageRange.parse(languageStrings[i]));
+    }
+    return new AcceptLanguage(languages.bind());
+  }
+
+  public static Parser<AcceptLanguage> parseHttpValue(Input input, HttpParser http) {
+    return AcceptLanguageParser.parse(input, http);
   }
 
   @Override
@@ -89,25 +111,4 @@ public final class AcceptLanguage extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  public static AcceptLanguage from(FingerTrieSeq<LanguageRange> languages) {
-    return new AcceptLanguage(languages);
-  }
-
-  public static AcceptLanguage from(LanguageRange... languages) {
-    return new AcceptLanguage(FingerTrieSeq.of(languages));
-  }
-
-  public static AcceptLanguage from(String... languageStrings) {
-    final Builder<LanguageRange, FingerTrieSeq<LanguageRange>> languages = FingerTrieSeq.builder();
-    for (int i = 0, n = languageStrings.length; i < n; i += 1) {
-      languages.add(LanguageRange.parse(languageStrings[i]));
-    }
-    return new AcceptLanguage(languages.bind());
-  }
-
-  public static Parser<AcceptLanguage> parseHttpValue(Input input, HttpParser http) {
-    return AcceptLanguageParser.parse(input, http);
-  }
 }

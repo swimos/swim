@@ -15,4 +15,5 @@
 /**
  * Stateful streaming combinator function interfaces.
  */
+
 package swim.streamlet.function;

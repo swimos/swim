@@ -33,6 +33,8 @@ import swim.uri.UriMapper;
 import swim.util.Murmur3;
 
 public class ActorPartDef implements PartDef, Debug {
+
+  private static int hashSeed;
   final Value partKey;
   final PartPredicate predicate;
   final boolean isGateway;
@@ -60,6 +62,12 @@ public class ActorPartDef implements PartDef, Debug {
     this.storeDef = storeDef;
   }
 
+  public static ActorPartDef fromPartPredicate(Value partKey, PartPredicate predicate) {
+    return new ActorPartDef(partKey, predicate, false, UriMapper.empty(),
+        UriMapper.empty(), UriMapper.empty(),
+        null, null, null, null);
+  }
+
   @Override
   public final Value partKey() {
     return this.partKey;
@@ -67,7 +75,7 @@ public class ActorPartDef implements PartDef, Debug {
 
   public ActorPartDef partKey(Value partKey) {
     return copy(partKey, this.predicate, this.isGateway, this.hostDefs, this.nodeDefs,
-                this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -77,7 +85,7 @@ public class ActorPartDef implements PartDef, Debug {
 
   public ActorPartDef predicate(PartPredicate predicate) {
     return copy(this.partKey, predicate, this.isGateway, this.hostDefs, this.nodeDefs,
-                this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -87,7 +95,7 @@ public class ActorPartDef implements PartDef, Debug {
 
   public ActorPartDef isGateway(boolean isGateway) {
     return copy(this.partKey, this.predicate, isGateway, this.hostDefs, this.nodeDefs,
-                this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -102,8 +110,8 @@ public class ActorPartDef implements PartDef, Debug {
 
   public ActorPartDef hostDef(HostDef hostDef) {
     return copy(this.partKey, this.predicate, this.isGateway,
-                this.hostDefs.updated(hostDef.hostPattern(), hostDef), this.nodeDefs,
-                this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.hostDefs.updated(hostDef.hostPattern(), hostDef), this.nodeDefs,
+        this.laneDefs, this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -118,8 +126,8 @@ public class ActorPartDef implements PartDef, Debug {
 
   public ActorPartDef nodeDef(NodeDef nodeDef) {
     return copy(this.partKey, this.predicate, this.isGateway, this.hostDefs,
-                this.nodeDefs.updated(nodeDef.nodePattern(), nodeDef), this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.nodeDefs.updated(nodeDef.nodePattern(), nodeDef), this.laneDefs,
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -134,8 +142,8 @@ public class ActorPartDef implements PartDef, Debug {
 
   public ActorPartDef laneDef(LaneDef laneDef) {
     return copy(this.partKey, this.predicate, this.isGateway, this.hostDefs,
-                this.nodeDefs, this.laneDefs.updated(laneDef.lanePattern(), laneDef),
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.nodeDefs, this.laneDefs.updated(laneDef.lanePattern(), laneDef),
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -145,7 +153,7 @@ public class ActorPartDef implements PartDef, Debug {
 
   public ActorPartDef logDef(LogDef logDef) {
     return copy(this.partKey, this.predicate, this.isGateway, this.hostDefs, this.nodeDefs,
-                this.laneDefs, logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.laneDefs, logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -155,7 +163,7 @@ public class ActorPartDef implements PartDef, Debug {
 
   public ActorPartDef policyDef(PolicyDef policyDef) {
     return copy(this.partKey, this.predicate, this.isGateway, this.hostDefs, this.nodeDefs,
-                this.laneDefs, this.logDef, policyDef, this.stageDef, this.storeDef);
+        this.laneDefs, this.logDef, policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -165,7 +173,7 @@ public class ActorPartDef implements PartDef, Debug {
 
   public ActorPartDef stageDef(StageDef stageDef) {
     return copy(this.partKey, this.predicate, this.isGateway, this.hostDefs, this.nodeDefs,
-                this.laneDefs, this.logDef, this.policyDef, stageDef, this.storeDef);
+        this.laneDefs, this.logDef, this.policyDef, stageDef, this.storeDef);
   }
 
   @Override
@@ -175,7 +183,7 @@ public class ActorPartDef implements PartDef, Debug {
 
   public ActorPartDef storeDef(StoreDef storeDef) {
     return copy(this.partKey, this.predicate, this.isGateway, this.hostDefs, this.nodeDefs,
-                this.laneDefs, this.logDef, this.policyDef, this.stageDef, storeDef);
+        this.laneDefs, this.logDef, this.policyDef, this.stageDef, storeDef);
   }
 
   protected ActorPartDef copy(Value partKey, PartPredicate predicate, boolean isGateway,
@@ -183,7 +191,7 @@ public class ActorPartDef implements PartDef, Debug {
                               UriMapper<LaneDef> laneDefs, LogDef logDef, PolicyDef policyDef,
                               StageDef stageDef, StoreDef storeDef) {
     return new ActorPartDef(partKey, predicate, isGateway, hostDefs, nodeDefs,
-                            laneDefs, logDef, policyDef, stageDef, storeDef);
+        laneDefs, logDef, policyDef, stageDef, storeDef);
   }
 
   @Override
@@ -213,7 +221,7 @@ public class ActorPartDef implements PartDef, Debug {
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, Murmur3.hash(this.partKey)),
-        Murmur3.hash(this.predicate)), Murmur3.hash(this.isGateway)), this.hostDefs.hashCode()),
+            Murmur3.hash(this.predicate)), Murmur3.hash(this.isGateway)), this.hostDefs.hashCode()),
         this.nodeDefs.hashCode()), this.laneDefs.hashCode()), Murmur3.hash(this.logDef)),
         Murmur3.hash(this.policyDef)), Murmur3.hash(this.stageDef)), Murmur3.hash(this.storeDef)));
   }
@@ -253,11 +261,4 @@ public class ActorPartDef implements PartDef, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static ActorPartDef fromPartPredicate(Value partKey, PartPredicate predicate) {
-    return new ActorPartDef(partKey, predicate, false, UriMapper.empty(),
-                            UriMapper.empty(), UriMapper.empty(),
-                            null, null, null, null);
-  }
 }

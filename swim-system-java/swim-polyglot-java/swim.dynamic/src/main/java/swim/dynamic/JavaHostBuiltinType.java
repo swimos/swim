@@ -15,6 +15,7 @@
 package swim.dynamic;
 
 public class JavaHostBuiltinType<T> extends JavaHostObjectType<T> {
+
   public JavaHostBuiltinType(Class<?> hostClass) {
     super(hostClass);
   }
@@ -23,4 +24,5 @@ public class JavaHostBuiltinType<T> extends JavaHostObjectType<T> {
   public boolean isBuiltin() {
     return true;
   }
+
 }

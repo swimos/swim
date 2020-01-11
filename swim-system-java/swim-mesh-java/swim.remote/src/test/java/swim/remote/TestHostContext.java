@@ -40,6 +40,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class TestHostContext extends TestCellContext implements HostContext {
+
   protected final Uri hostUri;
 
   public TestHostContext(Uri hostUri, Policy policy, Schedule schedule, Stage stage, StoreBinding store) {
@@ -231,4 +232,5 @@ public class TestHostContext extends TestCellContext implements HostContext {
   @Override
   public void willClose() {
   }
+
 }

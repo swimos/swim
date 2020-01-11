@@ -25,6 +25,9 @@ import swim.codec.Utf8;
 import swim.util.Murmur3;
 
 public final class MqttPayload<T> extends MqttEntity<T> implements Debug {
+
+  private static int hashSeed;
+  private static MqttPayload<Object> empty;
   final T value;
   final Encoder<?, ?> content;
   final int length;
@@ -33,6 +36,33 @@ public final class MqttPayload<T> extends MqttEntity<T> implements Debug {
     this.value = value;
     this.content = content;
     this.length = length;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> MqttPayload<T> empty() {
+    if (empty == null) {
+      empty = new MqttPayload<Object>(null, Encoder.done(), 0);
+    }
+    return (MqttPayload<T>) empty;
+  }
+
+  public static <T> MqttPayload<T> from(T value, Encoder<?, ?> content, int length) {
+    return new MqttPayload<T>(value, content, length);
+  }
+
+  public static <T> MqttPayload<T> from(Encoder<?, ?> content, int length) {
+    return new MqttPayload<T>(null, content, length);
+  }
+
+  public static <T> MqttPayload<T> from(ByteBuffer data) {
+    return new MqttPayload<T>(null, Binary.byteBufferWriter(data), data.remaining());
+  }
+
+  public static MqttPayload<String> from(String content) {
+    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(content.length()));
+    output = output.write(content);
+    final ByteBuffer data = output.bind();
+    return new MqttPayload<String>(content, Binary.byteBufferWriter(data), data.remaining());
   }
 
   public boolean isDefined() {
@@ -97,34 +127,4 @@ public final class MqttPayload<T> extends MqttEntity<T> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static MqttPayload<Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <T> MqttPayload<T> empty() {
-    if (empty == null) {
-      empty = new MqttPayload<Object>(null, Encoder.done(), 0);
-    }
-    return (MqttPayload<T>) empty;
-  }
-
-  public static <T> MqttPayload<T> from(T value, Encoder<?, ?> content, int length) {
-    return new MqttPayload<T>(value, content, length);
-  }
-
-  public static <T> MqttPayload<T> from(Encoder<?, ?> content, int length) {
-    return new MqttPayload<T>(null, content, length);
-  }
-
-  public static <T> MqttPayload<T> from(ByteBuffer data) {
-    return new MqttPayload<T>(null, Binary.byteBufferWriter(data), data.remaining());
-  }
-
-  public static MqttPayload<String> from(String content) {
-    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(content.length()));
-    output = output.write(content);
-    final ByteBuffer data = output.bind();
-    return new MqttPayload<String>(content, Binary.byteBufferWriter(data), data.remaining());
-  }
 }

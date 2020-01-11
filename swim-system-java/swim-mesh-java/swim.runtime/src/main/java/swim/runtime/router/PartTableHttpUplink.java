@@ -18,6 +18,7 @@ import swim.runtime.HttpBinding;
 import swim.runtime.HttpProxy;
 
 public class PartTableHttpUplink extends HttpProxy {
+
   protected final PartTable part;
 
   public PartTableHttpUplink(PartTable part, HttpBinding linkBinding) {
@@ -50,4 +51,5 @@ public class PartTableHttpUplink extends HttpProxy {
     super.didCloseUp();
     didClose();
   }
+
 }

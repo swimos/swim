@@ -25,6 +25,7 @@ import swim.streamlet.ValueOutput;
 import static org.testng.Assert.assertEquals;
 
 public class MapFieldValuesOperatorSpec {
+
   @Test
   public void evaluateMapFieldValuesOperatorAfterPut() {
     final MapInput<String, Integer> input = new MapInput<>();
@@ -114,7 +115,7 @@ public class MapFieldValuesOperatorSpec {
     final MapInput<String, Integer> input = new MapInput<>();
     final ValueOutput<Integer> output = new ValueOutput<>();
     final Outlet<Integer> squarePlus1 = input.map((key, value) -> value * value)
-                                             .outlet("number").map(value -> value + 1);
+        .outlet("number").map(value -> value + 1);
     output.bindInput(squarePlus1);
 
     input.put("number", 2);
@@ -129,4 +130,5 @@ public class MapFieldValuesOperatorSpec {
     output.reconcileOutput(1); // reconcile backward
     assertEquals((int) output.get(), 17);
   }
+
 }

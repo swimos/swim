@@ -15,6 +15,7 @@
 package swim.codec;
 
 final class StringInput extends Input {
+
   String string;
   Object id;
   long offset;
@@ -173,6 +174,7 @@ final class StringInput extends Input {
   @Override
   public Input clone() {
     return new StringInput(this.string, this.id, this.offset, this.line,
-                           this.column, this.settings, this.index, this.isPart);
+        this.column, this.settings, this.index, this.isPart);
   }
+
 }

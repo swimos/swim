@@ -18,6 +18,7 @@ import swim.math.Z2Form;
 import swim.structure.Value;
 
 public interface StoreContext {
+
   StoreBinding openStore(Value name);
 
   StoreBinding injectStore(StoreBinding storeBinding);
@@ -39,4 +40,5 @@ public interface StoreContext {
   ValueDataBinding injectValueData(ValueDataBinding dataBinding);
 
   void close();
+
 }

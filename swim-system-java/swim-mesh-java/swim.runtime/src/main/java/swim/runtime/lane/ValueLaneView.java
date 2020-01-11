@@ -40,12 +40,14 @@ import swim.structure.Form;
 import swim.util.Cursor;
 
 public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
-
   protected int flags;
   protected ValueLaneModel laneBinding;
-
   protected Outlet<? extends V> input;
   protected Inlet<? super V>[] outputs; // TODO: unify with observers
   protected int version;
@@ -92,7 +94,7 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   @Override
   public <V2> ValueLaneView<V2> valueForm(Form<V2> valueForm) {
     return new ValueLaneView<V2>(this.agentContext, valueForm, this.flags,
-                                 typesafeObservers(this.observers));
+        typesafeObservers(this.observers));
   }
 
   @Override
@@ -524,7 +526,4 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
     // stub
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
 }

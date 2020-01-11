@@ -23,6 +23,7 @@ import swim.uri.Uri;
 import swim.uri.UriPattern;
 
 public interface NodeDef extends CellDef {
+
   Uri nodeUri();
 
   UriPattern nodePattern();
@@ -46,4 +47,5 @@ public interface NodeDef extends CellDef {
   Collection<? extends LaneDef> laneDefs();
 
   LaneDef getLaneDef(Uri laneUri);
+
 }

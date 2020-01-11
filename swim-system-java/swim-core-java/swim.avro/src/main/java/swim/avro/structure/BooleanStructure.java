@@ -19,8 +19,10 @@ import swim.structure.Bool;
 import swim.structure.Value;
 
 final class BooleanStructure extends AvroBooleanType<Value> {
+
   @Override
   public Value cast(boolean value) {
     return Bool.from(value);
   }
+
 }

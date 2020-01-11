@@ -19,9 +19,6 @@ import swim.dynamic.JavaHostClassType;
 import swim.structure.Absent;
 
 public final class HostAbsent {
-  private HostAbsent() {
-    // static
-  }
 
   public static final HostObjectType<Absent> TYPE;
 
@@ -30,4 +27,9 @@ public final class HostAbsent {
     TYPE = type;
     type.extendType(HostValue.TYPE);
   }
+
+  private HostAbsent() {
+    // static
+  }
+
 }

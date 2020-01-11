@@ -37,6 +37,15 @@ import swim.recon.Recon;
 import swim.structure.Value;
 
 public class FileZone extends Zone {
+
+  static final int OPENING = 1 << 0;
+  static final int OPENED = 1 << 1;
+  static final int FAILED = 1 << 2;
+  static final boolean WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
+  static final AtomicReferenceFieldUpdater<FileZone, Database> DATABASE =
+      AtomicReferenceFieldUpdater.newUpdater(FileZone.class, Database.class, "database");
+  static final AtomicIntegerFieldUpdater<FileZone> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(FileZone.class, "status");
   final Store store;
   final int id;
   final File file;
@@ -190,7 +199,7 @@ public class FileZone extends Zone {
                      boolean isResident, Cont<Page> cont) {
     try {
       this.stage.execute(new FileZonePageReader(this, channel, pageRef.base(), pageRef.pageSize(),
-                                                pageRef, treeDelegate, isResident, cont));
+          pageRef, treeDelegate, isResident, cont));
     } catch (Throwable cause) {
       if (Conts.isNonFatal(cause)) {
         cont.trap(cause);
@@ -261,20 +270,10 @@ public class FileZone extends Zone {
     }
   }
 
-  static final int OPENING = 1 << 0;
-  static final int OPENED = 1 << 1;
-  static final int FAILED = 1 << 2;
-
-  static final boolean WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
-
-  static final AtomicReferenceFieldUpdater<FileZone, Database> DATABASE =
-      AtomicReferenceFieldUpdater.newUpdater(FileZone.class, Database.class, "database");
-
-  static final AtomicIntegerFieldUpdater<FileZone> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(FileZone.class, "status");
 }
 
 abstract class FileZoneReader implements Runnable {
+
   protected final FileZone zone;
   protected final FileChannel channel;
   protected final long offset;
@@ -308,7 +307,7 @@ abstract class FileZoneReader implements Runnable {
         bind(buffer);
       } else {
         throw new StoreException("incomplete read from " + zone.file.getPath()
-                                 + ':' + this.offset + '-' + position);
+            + ':' + this.offset + '-' + position);
       }
     } catch (IOException cause) {
       trap(cause);
@@ -325,9 +324,11 @@ abstract class FileZoneReader implements Runnable {
   public void run() {
     doRead(this.channel);
   }
+
 }
 
 abstract class FileZoneReconReader extends FileZoneReader {
+
   protected FileZoneReconReader(FileZone zone, FileChannel channel, long offset, int size) {
     super(zone, channel, offset, size);
   }
@@ -338,7 +339,7 @@ abstract class FileZoneReconReader extends FileZoneReader {
   protected void bind(ByteBuffer buffer) {
     try {
       final Parser<Value> parser = Utf8.parseDecoded(Recon.structureParser().blockParser(),
-                                                     Binary.inputBuffer(buffer));
+          Binary.inputBuffer(buffer));
       if (parser.isDone()) {
         bind(parser.bind());
       } else {
@@ -347,23 +348,25 @@ abstract class FileZoneReconReader extends FileZoneReader {
     } catch (Throwable cause) {
       if (Conts.isNonFatal(cause)) {
         trap(new StoreException("failed read from " + this.zone.file.getPath()
-                                + ':' + this.offset + '-' + this.size, cause));
+            + ':' + this.offset + '-' + this.size, cause));
       } else {
         throw cause;
       }
     }
   }
+
 }
 
 final class FileZonePageReader extends FileZoneReconReader {
+
   final PageRef pageRef;
   final TreeDelegate treeDelegate;
   final boolean isResident;
   final Cont<Page> cont;
 
   FileZonePageReader(FileZone zone, FileChannel channel, long offset, int size,
-                    PageRef pageRef, TreeDelegate treeDelegate,
-                    boolean isResident, Cont<Page> cont) {
+                     PageRef pageRef, TreeDelegate treeDelegate,
+                     boolean isResident, Cont<Page> cont) {
     super(zone, channel, offset, size);
     this.pageRef = pageRef;
     this.treeDelegate = treeDelegate;
@@ -392,9 +395,11 @@ final class FileZonePageReader extends FileZoneReconReader {
   protected void trap(Throwable error) {
     this.cont.trap(error);
   }
+
 }
 
 final class FileZoneOpenDatabase implements Cont<Zone> {
+
   final FileZone zone;
   final Cont<Database> cont;
 
@@ -433,9 +438,11 @@ final class FileZoneOpenDatabase implements Cont<Zone> {
   public void trap(Throwable error) {
     this.cont.trap(error);
   }
+
 }
 
 final class FileZoneOpen extends FileZoneReader {
+
   final Cont<Zone> cont;
 
   FileZoneOpen(FileZone zone, FileChannel channel, Cont<Zone> cont) {
@@ -530,9 +537,11 @@ final class FileZoneOpen extends FileZoneReader {
       }
     }
   }
+
 }
 
 final class FileZoneAwait implements ForkJoinPool.ManagedBlocker {
+
   final FileZone zone;
 
   FileZoneAwait(FileZone zone) {
@@ -551,4 +560,5 @@ final class FileZoneAwait implements ForkJoinPool.ManagedBlocker {
     }
     return (this.zone.status & FileZone.OPENING) == 0;
   }
+
 }

@@ -23,6 +23,17 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public final class TensorDims implements Debug {
+
+  private static int hashSeed;
+  private static TensorDims undefined;
+  private static TensorDims d1;
+  private static TensorDims d2;
+  private static TensorDims d3;
+  private static TensorDims d4;
+  private static TensorDims d2x2;
+  private static TensorDims d3x3;
+  private static TensorDims d4x4;
+  private static Form<TensorDims> form;
   public final int size;
   public final int stride;
   final TensorDims next;
@@ -31,6 +42,126 @@ public final class TensorDims implements Debug {
     this.size = size;
     this.stride = stride;
     this.next = next;
+  }
+
+  private static boolean conforms(TensorDims these, TensorDims those) {
+    do {
+      if (these.size != those.size) {
+        return false;
+      }
+      these = these.next;
+      those = those.next;
+    } while (these != null && those != null);
+    return these == null && those == null;
+  }
+
+  static boolean equals(TensorDims these, TensorDims those) {
+    do {
+      if (these.size != those.size || these.stride != those.stride) {
+        return false;
+      }
+      these = these.next;
+      those = those.next;
+    } while (these != null && those != null);
+    return these == null && those == null;
+  }
+
+  static int hash(int code, TensorDims dim) {
+    do {
+      code = Murmur3.mix(Murmur3.mix(code, dim.size), dim.stride);
+      dim = dim.next;
+    } while (dim != null);
+    return code;
+  }
+
+  public static TensorDims undefined() {
+    if (undefined == null) {
+      undefined = new TensorDims(0, 0, null);
+    }
+    return undefined;
+  }
+
+  public static TensorDims d1() {
+    if (d1 == null) {
+      d1 = new TensorDims(1, 1, null);
+    }
+    return d1;
+  }
+
+  public static TensorDims d2() {
+    if (d2 == null) {
+      d2 = new TensorDims(2, 1, null);
+    }
+    return d2;
+  }
+
+  public static TensorDims d3() {
+    if (d3 == null) {
+      d3 = new TensorDims(3, 1, null);
+    }
+    return d3;
+  }
+
+  public static TensorDims d4() {
+    if (d4 == null) {
+      d4 = new TensorDims(4, 1, null);
+    }
+    return d4;
+  }
+
+  public static TensorDims d2x2() {
+    if (d2x2 == null) {
+      d2x2 = new TensorDims(2, 2, d2());
+    }
+    return d2x2;
+  }
+
+  public static TensorDims d3x3() {
+    if (d3x3 == null) {
+      d3x3 = new TensorDims(3, 3, d3());
+    }
+    return d3x3;
+  }
+
+  public static TensorDims d4x4() {
+    if (d4x4 == null) {
+      d4x4 = new TensorDims(4, 4, d4());
+    }
+    return d4x4;
+  }
+
+  public static TensorDims of(int size, int stride) {
+    if (size == 0 && stride == 0) {
+      return undefined();
+    } else if (stride == 1) {
+      return of(size);
+    } else {
+      return new TensorDims(size, stride, null);
+    }
+  }
+
+  public static TensorDims of(int size) {
+    if (size == 0) {
+      return undefined();
+    } else if (size == 1) {
+      return d1();
+    } else if (size == 2) {
+      return d2();
+    } else if (size == 3) {
+      return d3();
+    } else if (size == 4) {
+      return d4();
+    } else {
+      return new TensorDims(size, 1, null);
+    }
+  }
+
+  @Kind
+  public static Form<TensorDims> form() {
+    if (form == null) {
+      form = new TensorDimsForm();
+    }
+    return form;
   }
 
   public boolean isDefined() {
@@ -151,16 +282,6 @@ public final class TensorDims implements Debug {
   public boolean conforms(TensorDims that) {
     return conforms(this, that);
   }
-  private static boolean conforms(TensorDims these, TensorDims those) {
-    do {
-      if (these.size != those.size) {
-        return false;
-      }
-      these = these.next;
-      those = those.next;
-    } while (these != null && those != null);
-    return these == null && those == null;
-  }
 
   @Override
   public boolean equals(Object other) {
@@ -171,16 +292,6 @@ public final class TensorDims implements Debug {
     }
     return false;
   }
-  static boolean equals(TensorDims these, TensorDims those) {
-    do {
-      if (these.size != those.size || these.stride != those.stride) {
-        return false;
-      }
-      these = these.next;
-      those = those.next;
-    } while (these != null && those != null);
-    return these == null && those == null;
-  }
 
   @Override
   public int hashCode() {
@@ -188,13 +299,6 @@ public final class TensorDims implements Debug {
       hashSeed = Murmur3.seed(TensorDims.class);
     }
     return Murmur3.mash(hash(hashSeed, this));
-  }
-  static int hash(int code, TensorDims dim) {
-    do {
-      code = Murmur3.mix(Murmur3.mix(code, dim.size), dim.stride);
-      dim = dim.next;
-    } while (dim != null);
-    return code;
   }
 
   @Override
@@ -219,106 +323,4 @@ public final class TensorDims implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static TensorDims undefined;
-  private static TensorDims d1;
-  private static TensorDims d2;
-  private static TensorDims d3;
-  private static TensorDims d4;
-  private static TensorDims d2x2;
-  private static TensorDims d3x3;
-  private static TensorDims d4x4;
-
-  private static Form<TensorDims> form;
-
-  public static TensorDims undefined() {
-    if (undefined == null) {
-      undefined = new TensorDims(0, 0, null);
-    }
-    return undefined;
-  }
-
-  public static TensorDims d1() {
-    if (d1 == null) {
-      d1 = new TensorDims(1, 1, null);
-    }
-    return d1;
-  }
-
-  public static TensorDims d2() {
-    if (d2 == null) {
-      d2 = new TensorDims(2, 1, null);
-    }
-    return d2;
-  }
-
-  public static TensorDims d3() {
-    if (d3 == null) {
-      d3 = new TensorDims(3, 1, null);
-    }
-    return d3;
-  }
-
-  public static TensorDims d4() {
-    if (d4 == null) {
-      d4 = new TensorDims(4, 1, null);
-    }
-    return d4;
-  }
-
-  public static TensorDims d2x2() {
-    if (d2x2 == null) {
-      d2x2 = new TensorDims(2, 2, d2());
-    }
-    return d2x2;
-  }
-
-  public static TensorDims d3x3() {
-    if (d3x3 == null) {
-      d3x3 = new TensorDims(3, 3, d3());
-    }
-    return d3x3;
-  }
-
-  public static TensorDims d4x4() {
-    if (d4x4 == null) {
-      d4x4 = new TensorDims(4, 4, d4());
-    }
-    return d4x4;
-  }
-
-  public static TensorDims of(int size, int stride) {
-    if (size == 0 && stride == 0) {
-      return undefined();
-    } else if (stride == 1) {
-      return of(size);
-    } else {
-      return new TensorDims(size, stride, null);
-    }
-  }
-
-  public static TensorDims of(int size) {
-    if (size == 0) {
-      return undefined();
-    } else if (size == 1) {
-      return d1();
-    } else if (size == 2) {
-      return d2();
-    } else if (size == 3) {
-      return d3();
-    } else if (size == 4) {
-      return d4();
-    } else {
-      return new TensorDims(size, 1, null);
-    }
-  }
-
-  @Kind
-  public static Form<TensorDims> form() {
-    if (form == null) {
-      form = new TensorDimsForm();
-    }
-    return form;
-  }
 }

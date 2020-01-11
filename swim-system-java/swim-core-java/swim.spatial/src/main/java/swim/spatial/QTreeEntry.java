@@ -17,6 +17,7 @@ package swim.spatial;
 import java.util.Map;
 
 public class QTreeEntry<K, S, V> implements SpatialMap.Entry<K, S, V> {
+
   final K key;
   final S shape;
   final long x;
@@ -95,11 +96,12 @@ public class QTreeEntry<K, S, V> implements SpatialMap.Entry<K, S, V> {
   @Override
   public int hashCode() {
     return (this.key == null ? 0 : this.key.hashCode())
-         ^ (this.value == null ? 0 : this.value.hashCode());
+        ^ (this.value == null ? 0 : this.value.hashCode());
   }
 
   @Override
   public String toString() {
     return new StringBuilder().append(this.key).append('=').append(this.value).toString();
   }
+
 }

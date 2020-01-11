@@ -23,6 +23,7 @@ import swim.structure.Value;
 import static swim.recon.ReconWriterSpec.assertWrites;
 
 public class ReconOperatorWriterSpec {
+
   @Test
   public void writeConditionalOperator() {
     assertWrites(Selector.identity().get("a").conditional(Selector.identity().get("b"), Selector.identity().get("c")), "$a ? $b : $c");
@@ -245,4 +246,5 @@ public class ReconOperatorWriterSpec {
   public void writeRecordsWithOperators() {
     assertWrites(Record.of(Slot.of("a", Selector.identity().get("foo").plus(Num.from(2))), Slot.of("b", Num.from(2).plus(Selector.identity().get("bar")))), "{a:$foo + 2,b:2 + $bar}");
   }
+
 }

@@ -29,7 +29,7 @@ import swim.structure.Value;
 
 public class MapDownlinkRecord extends DownlinkRecord
     implements DidUpdateKey<Value, Value>, DidRemoveKey<Value, Value>,
-               DidDrop, DidTake, DidClear {
+    DidDrop, DidTake, DidClear {
 
   protected final MapDownlink<Value, Value> downlink;
 
@@ -219,4 +219,5 @@ public class MapDownlinkRecord extends DownlinkRecord
   public void didClear() {
     // TODO
   }
+
 }

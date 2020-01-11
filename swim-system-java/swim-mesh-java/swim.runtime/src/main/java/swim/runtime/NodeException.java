@@ -15,6 +15,7 @@
 package swim.runtime;
 
 public class NodeException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public NodeException(String message, Throwable cause) {
@@ -32,4 +33,5 @@ public class NodeException extends RuntimeException {
   public NodeException() {
     super();
   }
+
 }

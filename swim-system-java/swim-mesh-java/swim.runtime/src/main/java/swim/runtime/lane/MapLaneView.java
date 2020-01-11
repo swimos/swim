@@ -59,14 +59,16 @@ import swim.util.OrderedMap;
 import swim.util.OrderedMapCursor;
 
 public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<K> keyForm;
   protected Form<V> valueForm;
-
   protected int flags;
   protected MapLaneModel laneBinding;
   protected MapData<K, V> dataView;
-
   protected MapOutlet<K, V, ? extends Map<K, V>> input;
   protected HashTrieMap<K, KeyEffect> effects;
   protected HashTrieMap<K, KeyOutlet<K, V>> outlets;
@@ -119,7 +121,7 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
   @Override
   public <K2> MapLaneView<K2, V> keyForm(Form<K2> keyForm) {
     return new MapLaneView<K2, V>(this.agentContext, keyForm, this.valueForm,
-                                  this.flags, typesafeObservers(this.observers));
+        this.flags, typesafeObservers(this.observers));
   }
 
   @Override
@@ -139,7 +141,7 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
   @Override
   public <V2> MapLaneView<K, V2> valueForm(Form<V2> valueForm) {
     return new MapLaneView<K, V2>(this.agentContext, this.keyForm, valueForm,
-                                  this.flags, typesafeObservers(this.observers));
+        this.flags, typesafeObservers(this.observers));
   }
 
   @Override
@@ -1366,7 +1368,4 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
     // stub
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
 }

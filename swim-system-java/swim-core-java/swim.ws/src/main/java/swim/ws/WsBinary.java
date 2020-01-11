@@ -25,12 +25,30 @@ import swim.structure.Data;
 import swim.util.Murmur3;
 
 public final class WsBinary<T> extends WsData<T> implements Debug {
+
+  private static int hashSeed;
   final T value;
   final Encoder<?, ?> content;
 
   WsBinary(T value, Encoder<?, ?> content) {
     this.value = value;
     this.content = content;
+  }
+
+  public static <T> WsBinary<T> from(T value, Encoder<?, ?> content) {
+    return new WsBinary<T>(value, content);
+  }
+
+  public static <T> WsBinary<T> from(Encoder<?, ?> content) {
+    return new WsBinary<T>(null, content);
+  }
+
+  public static WsBinary<ByteBuffer> from(ByteBuffer payload) {
+    return new WsBinary<ByteBuffer>(payload.duplicate(), Binary.byteBufferWriter(payload));
+  }
+
+  public static WsBinary<Data> from(Data payload) {
+    return new WsBinary<Data>(payload, payload.writer());
   }
 
   @Override
@@ -96,21 +114,4 @@ public final class WsBinary<T> extends WsData<T> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static <T> WsBinary<T> from(T value, Encoder<?, ?> content) {
-    return new WsBinary<T>(value, content);
-  }
-
-  public static <T> WsBinary<T> from(Encoder<?, ?> content) {
-    return new WsBinary<T>(null, content);
-  }
-
-  public static WsBinary<ByteBuffer> from(ByteBuffer payload) {
-    return new WsBinary<ByteBuffer>(payload.duplicate(), Binary.byteBufferWriter(payload));
-  }
-
-  public static WsBinary<Data> from(Data payload) {
-    return new WsBinary<Data>(payload, payload.writer());
-  }
 }

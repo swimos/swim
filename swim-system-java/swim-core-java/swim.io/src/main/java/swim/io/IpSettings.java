@@ -30,12 +30,45 @@ import swim.util.Murmur3;
  * IP Socket configuration parameters.
  */
 public class IpSettings implements Debug {
+
+  private static int hashSeed;
+  private static IpSettings standard;
+  private static Form<IpSettings> form;
   protected final TcpSettings tcpSettings;
   protected final TlsSettings tlsSettings;
 
   public IpSettings(TcpSettings tcpSettings, TlsSettings tlsSettings) {
     this.tcpSettings = tcpSettings;
     this.tlsSettings = tlsSettings;
+  }
+
+  /**
+   * Returns the default {@code IpSettings} instance.
+   */
+  public static IpSettings standard() {
+    if (standard == null) {
+      standard = new IpSettings(TcpSettings.standard(), TlsSettings.standard());
+    }
+    return standard;
+  }
+
+  public static IpSettings from(TcpSettings tcpSettings) {
+    return new IpSettings(tcpSettings, TlsSettings.standard());
+  }
+
+  public static IpSettings from(TlsSettings tlsSettings) {
+    return new IpSettings(TcpSettings.standard(), tlsSettings);
+  }
+
+  /**
+   * Returns the structural {@code Form} of {@code IpSettings}.
+   */
+  @Kind
+  public static Form<IpSettings> form() {
+    if (form == null) {
+      form = new IpSettingsForm();
+    }
+    return form;
   }
 
   /**
@@ -132,43 +165,10 @@ public class IpSettings implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static IpSettings standard;
-
-  private static Form<IpSettings> form;
-
-  /**
-   * Returns the default {@code IpSettings} instance.
-   */
-  public static IpSettings standard() {
-    if (standard == null) {
-      standard = new IpSettings(TcpSettings.standard(), TlsSettings.standard());
-    }
-    return standard;
-  }
-
-  public static IpSettings from(TcpSettings tcpSettings) {
-    return new IpSettings(tcpSettings, TlsSettings.standard());
-  }
-
-  public static IpSettings from(TlsSettings tlsSettings) {
-    return new IpSettings(TcpSettings.standard(), tlsSettings);
-  }
-
-  /**
-   * Returns the structural {@code Form} of {@code IpSettings}.
-   */
-  @Kind
-  public static Form<IpSettings> form() {
-    if (form == null) {
-      form = new IpSettingsForm();
-    }
-    return form;
-  }
 }
 
 final class IpSettingsForm extends Form<IpSettings> {
+
   @Override
   public IpSettings unit() {
     return IpSettings.standard();
@@ -214,4 +214,5 @@ final class IpSettingsForm extends Form<IpSettings> {
     }
     return new IpSettings(tcpSettings, tlsSettings);
   }
+
 }

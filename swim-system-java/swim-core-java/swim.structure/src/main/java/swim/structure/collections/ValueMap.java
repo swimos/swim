@@ -22,6 +22,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class ValueMap<K, V> implements Map<K, V> {
+
   protected Map<Value, Value> inner;
   protected Form<K> keyForm;
   protected Form<V> valueForm;
@@ -239,4 +240,5 @@ public class ValueMap<K, V> implements Map<K, V> {
     sb.append('}');
     return sb.toString();
   }
+
 }

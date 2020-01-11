@@ -20,10 +20,16 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public final class AuthenticatorAddress extends CellAddress implements Debug {
+
+  private static int hashSeed;
   final String authenticatorName;
 
   public AuthenticatorAddress(String authenticatorName) {
     this.authenticatorName = authenticatorName;
+  }
+
+  public static AuthenticatorAddress from(String authenticatorName) {
+    return new AuthenticatorAddress(authenticatorName);
   }
 
   public String authenticatorName() {
@@ -68,9 +74,4 @@ public final class AuthenticatorAddress extends CellAddress implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static AuthenticatorAddress from(String authenticatorName) {
-    return new AuthenticatorAddress(authenticatorName);
-  }
 }

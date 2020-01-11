@@ -15,6 +15,7 @@
 package swim.streamlet;
 
 public class KeyOutlet<K, V> extends AbstractOutlet<V> {
+
   protected final MapOutlet<? super K, ? extends V, ?> input;
   protected final K key;
 
@@ -35,4 +36,5 @@ public class KeyOutlet<K, V> extends AbstractOutlet<V> {
   public V get() {
     return this.input.get(this.key);
   }
+
 }

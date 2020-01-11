@@ -23,6 +23,8 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Murmur3;
 
 public final class MqttUnsubscribe extends MqttPacket<Object> implements Debug {
+
+  private static int hashSeed;
   final int packetFlags;
   final int packetId;
   final FingerTrieSeq<String> topicNames;
@@ -31,6 +33,22 @@ public final class MqttUnsubscribe extends MqttPacket<Object> implements Debug {
     this.packetFlags = packetFlags;
     this.packetId = packetId;
     this.topicNames = topicNames;
+  }
+
+  public static MqttUnsubscribe from(int packetFlags, int packetId, FingerTrieSeq<String> topicNames) {
+    return new MqttUnsubscribe(packetFlags, packetId, topicNames);
+  }
+
+  public static MqttUnsubscribe from(int packetId, FingerTrieSeq<String> topicNames) {
+    return new MqttUnsubscribe(2, packetId, topicNames);
+  }
+
+  public static MqttUnsubscribe from(int packetId, String... topicNames) {
+    return new MqttUnsubscribe(2, packetId, FingerTrieSeq.of(topicNames));
+  }
+
+  public static MqttUnsubscribe from(int packetId) {
+    return new MqttUnsubscribe(2, packetId, FingerTrieSeq.<String>empty());
   }
 
   @Override
@@ -128,21 +146,4 @@ public final class MqttUnsubscribe extends MqttPacket<Object> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static MqttUnsubscribe from(int packetFlags, int packetId, FingerTrieSeq<String> topicNames) {
-    return new MqttUnsubscribe(packetFlags, packetId, topicNames);
-  }
-
-  public static MqttUnsubscribe from(int packetId, FingerTrieSeq<String> topicNames) {
-    return new MqttUnsubscribe(2, packetId, topicNames);
-  }
-
-  public static MqttUnsubscribe from(int packetId, String... topicNames) {
-    return new MqttUnsubscribe(2, packetId, FingerTrieSeq.of(topicNames));
-  }
-
-  public static MqttUnsubscribe from(int packetId) {
-    return new MqttUnsubscribe(2, packetId, FingerTrieSeq.<String>empty());
-  }
 }

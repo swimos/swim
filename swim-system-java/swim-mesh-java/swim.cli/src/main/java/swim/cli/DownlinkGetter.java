@@ -17,6 +17,7 @@ package swim.cli;
 import swim.api.warp.WarpDownlink;
 
 public class DownlinkGetter extends DownlinkLogger {
+
   public DownlinkGetter(WarpDownlink downlink, String format) {
     super(downlink, format);
   }
@@ -25,4 +26,5 @@ public class DownlinkGetter extends DownlinkLogger {
   public void didSync() {
     System.exit(0);
   }
+
 }

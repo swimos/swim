@@ -20,5 +20,7 @@ import swim.http.HttpResponse;
 
 @FunctionalInterface
 public interface DecodeResponseHttp<V> extends Preemptive {
+
   Decoder<V> decodeResponse(HttpResponse<?> response);
+
 }

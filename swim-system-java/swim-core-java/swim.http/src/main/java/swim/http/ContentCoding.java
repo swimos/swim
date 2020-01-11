@@ -21,12 +21,82 @@ import swim.codec.Writer;
 import swim.util.Murmur3;
 
 public final class ContentCoding extends HttpPart implements Debug {
+
+  private static int hashSeed;
+  private static ContentCoding star;
+  private static ContentCoding identity;
+  private static ContentCoding compress;
+  private static ContentCoding deflate;
+  private static ContentCoding gzip;
   final String name;
   final float weight;
 
   ContentCoding(String name, float weight) {
     this.name = name;
     this.weight = weight;
+  }
+
+  public static ContentCoding star() {
+    if (star == null) {
+      star = new ContentCoding("*", 1f);
+    }
+    return star;
+  }
+
+  public static ContentCoding identity() {
+    if (identity == null) {
+      identity = new ContentCoding("identity", 1f);
+    }
+    return identity;
+  }
+
+  public static ContentCoding compress() {
+    if (compress == null) {
+      compress = new ContentCoding("compress", 1f);
+    }
+    return compress;
+  }
+
+  public static ContentCoding deflate() {
+    if (deflate == null) {
+      deflate = new ContentCoding("deflate", 1f);
+    }
+    return deflate;
+  }
+
+  public static ContentCoding gzip() {
+    if (gzip == null) {
+      gzip = new ContentCoding("gzip", 1f);
+    }
+    return gzip;
+  }
+
+  public static ContentCoding from(String name, float weight) {
+    if (weight == 1f) {
+      return from(name);
+    } else {
+      return new ContentCoding(name, weight);
+    }
+  }
+
+  public static ContentCoding from(String name) {
+    if ("*".equals(name)) {
+      return star();
+    } else if ("identity".equals(name)) {
+      return identity();
+    } else if ("compress".equals(name)) {
+      return compress();
+    } else if ("deflate".equals(name)) {
+      return deflate();
+    } else if ("gzip".equals(name)) {
+      return gzip();
+    } else {
+      return new ContentCoding(name, 1f);
+    }
+  }
+
+  public static ContentCoding parse(String string) {
+    return Http.standardParser().parseContentCodingString(string);
   }
 
   public String name() {
@@ -111,74 +181,4 @@ public final class ContentCoding extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static ContentCoding star;
-  private static ContentCoding identity;
-  private static ContentCoding compress;
-  private static ContentCoding deflate;
-  private static ContentCoding gzip;
-
-  public static ContentCoding star() {
-    if (star == null) {
-      star = new ContentCoding("*", 1f);
-    }
-    return star;
-  }
-
-  public static ContentCoding identity() {
-    if (identity == null) {
-      identity = new ContentCoding("identity", 1f);
-    }
-    return identity;
-  }
-
-  public static ContentCoding compress() {
-    if (compress == null) {
-      compress = new ContentCoding("compress", 1f);
-    }
-    return compress;
-  }
-
-  public static ContentCoding deflate() {
-    if (deflate == null) {
-      deflate = new ContentCoding("deflate", 1f);
-    }
-    return deflate;
-  }
-
-  public static ContentCoding gzip() {
-    if (gzip == null) {
-      gzip = new ContentCoding("gzip", 1f);
-    }
-    return gzip;
-  }
-
-  public static ContentCoding from(String name, float weight) {
-    if (weight == 1f) {
-      return from(name);
-    } else {
-      return new ContentCoding(name, weight);
-    }
-  }
-
-  public static ContentCoding from(String name) {
-    if ("*".equals(name)) {
-      return star();
-    } else if ("identity".equals(name)) {
-      return identity();
-    } else if ("compress".equals(name)) {
-      return compress();
-    } else if ("deflate".equals(name)) {
-      return deflate();
-    } else if ("gzip".equals(name)) {
-      return gzip();
-    } else {
-      return new ContentCoding(name, 1f);
-    }
-  }
-
-  public static ContentCoding parse(String string) {
-    return Http.standardParser().parseContentCodingString(string);
-  }
 }

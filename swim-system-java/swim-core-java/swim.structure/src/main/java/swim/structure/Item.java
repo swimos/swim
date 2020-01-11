@@ -24,8 +24,43 @@ import swim.codec.Output;
 import swim.structure.func.MathModule;
 
 public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, Display {
+
+  private static Item globalScope;
+
   Item() {
     // stub
+  }
+
+  public static Item empty() {
+    return Record.empty();
+  }
+
+  public static Item extant() {
+    return Extant.extant();
+  }
+
+  public static Item absent() {
+    return Absent.absent();
+  }
+
+  public static Item fromObject(Object object) {
+    if (object instanceof Item) {
+      return (Item) object;
+    } else if (object instanceof Map.Entry<?, ?>) {
+      final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) object;
+      return Slot.of(Value.fromObject(entry.getKey()), Value.fromObject(entry.getValue()));
+    } else {
+      return Value.fromObject(object);
+    }
+  }
+
+  public static Item globalScope() {
+    if (globalScope == null) {
+      globalScope = Record.create(1)
+          .slot("math", MathModule.scope())
+          .commit();
+    }
+    return globalScope;
   }
 
   /**
@@ -921,37 +956,4 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
     return Format.debug(this);
   }
 
-  public static Item empty() {
-    return Record.empty();
-  }
-
-  public static Item extant() {
-    return Extant.extant();
-  }
-
-  public static Item absent() {
-    return Absent.absent();
-  }
-
-  public static Item fromObject(Object object) {
-    if (object instanceof Item) {
-      return (Item) object;
-    } else if (object instanceof Map.Entry<?, ?>) {
-      final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) object;
-      return Slot.of(Value.fromObject(entry.getKey()), Value.fromObject(entry.getValue()));
-    } else {
-      return Value.fromObject(object);
-    }
-  }
-
-  private static Item globalScope;
-
-  public static Item globalScope() {
-    if (globalScope == null) {
-      globalScope = Record.create(1)
-          .slot("math", MathModule.scope())
-          .commit();
-    }
-    return globalScope;
-  }
 }

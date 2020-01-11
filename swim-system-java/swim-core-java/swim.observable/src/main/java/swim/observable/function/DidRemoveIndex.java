@@ -18,5 +18,7 @@ import swim.concurrent.Preemptive;
 
 @FunctionalInterface
 public interface DidRemoveIndex<V> extends Preemptive {
+
   void didRemove(int index, V oldValue);
+
 }

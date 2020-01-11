@@ -21,6 +21,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class PrefixOperatorWriter<I, V> extends Writer<Object, Object> {
+
   final ReconWriter<I, V> recon;
   final String operator;
   final I rhs;
@@ -36,12 +37,6 @@ final class PrefixOperatorWriter<I, V> extends Writer<Object, Object> {
     this.precedence = precedence;
     this.part = part;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.operator, this.rhs,
-                 this.precedence, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, String operator, I rhs, int precedence) {
@@ -118,4 +113,11 @@ final class PrefixOperatorWriter<I, V> extends Writer<Object, Object> {
                                              String operator, I rhs, int precedence) {
     return write(output, recon, operator, rhs, precedence, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.recon, this.operator, this.rhs,
+        this.precedence, this.part, this.step);
+  }
+
 }

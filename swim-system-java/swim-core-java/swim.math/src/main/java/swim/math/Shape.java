@@ -17,9 +17,11 @@ package swim.math;
 import swim.structure.Value;
 
 public interface Shape {
+
   boolean contains(Shape shape);
 
   boolean intersects(Shape shape);
 
   Value toValue();
+
 }

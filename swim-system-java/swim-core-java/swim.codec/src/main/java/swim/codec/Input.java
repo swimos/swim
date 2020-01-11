@@ -72,176 +72,8 @@ package swim.codec;
  * @see Parser
  */
 public abstract class Input {
-  /**
-   * Returns {@code true} when a {@link #head() lookeahead} token is
-   * immediately available.  i.e. this {@code Input} is in the <em>cont</em>
-   * state.
-   */
-  public abstract boolean isCont();
-
-  /**
-   * Returns {@code true} when no lookahead token is currently available, but
-   * additional input may be available in the future.  i.e. this {@code Input}
-   * is in the <em>empty</em> state.
-   */
-  public abstract boolean isEmpty();
-
-  /**
-   * Returns {@code true} when no lookahead token is currently available, and
-   * no additional input will ever become available.  i.e. this {@code Input}
-   * is in the <em>done</em> state.
-   */
-  public abstract boolean isDone();
-
-  /**
-   * Returns {@code true} when no lookahead token is currently available due to
-   * an error with the token stream.  i.e. this {@code Input} is in the
-   * <em>error</em> state.  When {@code true}, {@link #trap()} will return the
-   * input error.
-   */
-  public abstract boolean isError();
-
-  /**
-   * Returns {@code true} if this is a partial {@code Input} will that enter
-   * the <em>empty</em> state after it consumes the last available input token.
-   */
-  public abstract boolean isPart();
-
-  /**
-   * Returns a partial {@code Input} equivalent to this {@code Input}, if
-   * {@code isPart} is {@code true}; returns a final {@code Input} equivalent
-   * to this {@code Input} if {@code isPart} is {@code false}.  The caller's
-   * reference to {@code this} {@code Input} should be replaced by the returned
-   * {@code Input}.
-   */
-  public abstract Input isPart(boolean isPart);
-
-  /**
-   * Returns the current lookahead token, if this {@code Input} is in the
-   * <em>cont</em> state.
-   *
-   * @throws InputException if this {@code Input} is not in the <em>cont</em>
-   *         state.
-   */
-  public abstract int head();
-
-  /**
-   * Returns an {@code Input} equivalent to this {@code Input}, but advanced to
-   * the next token.  Returns an {@code Input} in the <em>error</em> state if
-   * this {@code Input} is not in the <em>cont</em> state.  The caller's
-   * reference to {@code this} {@code Input} should be replaced by the returned
-   * {@code Input}.
-   */
-  public abstract Input step();
-
-  /**
-   * Returns an {@code Input} equivalent to this {@code Input}, but
-   * repositioned to the given {@code mark}.  Returns an {@code Input} in the
-   * <em>error</em> state if this {@code Input} does not support seeking, or if
-   * this {@code Input} is unable to reposition to the given {@code mark}.  The
-   * caller's reference to {@code this} {@code Input} should be replaced by the
-   * returned {@code Input}.
-   */
-  public abstract Input seek(Mark mark);
-
-  /**
-   * Returns an {@code Input} equivalent to this {@code Input}, but whose
-   * behavior may be altered by the given out-of-band {@code condition}.  The
-   * caller's reference to {@code this} {@code Input} should be replaced by the
-   * returned {@code Input}.
-   */
-  public Input fork(Object condition) {
-    return this;
-  }
-
-  /**
-   * Returns the input error.  Only guaranteed to return an error when in the
-   * <em>error</em> state.
-   *
-   * @throws InputException if this {@code Input} is not in the <em>error</em>
-   *         state.
-   */
-  public Throwable trap() {
-    throw new InputException();
-  }
-
-  /**
-   * Returns an object that identifies the token stream, or {@code null} if the
-   * stream is unidentified.
-   */
-  public abstract Object id();
-
-  /**
-   * Returns an {@code Input} equivalent to this {@code Input}, but logically
-   * identified by the given–possibly {@code null}–{@code id}.  The caller's
-   * reference to {@code this} {@code Input} should be replaced by the returned
-   * {@code Input}.
-   */
-  public abstract Input id(Object id);
-
-  /**
-   * Returns the position of the current lookahead token, relative to the start
-   * of the stream.
-   */
-  public abstract Mark mark();
-
-  /**
-   * Returns an {@code Input} equivalent to this {@code Input}, but logically
-   * positioned at the given {@code mark}.  The physical position in the input
-   * stream is not modified.  The caller's reference to {@code this} {@code
-   * Input} should be replaced by the returned {@code Input}.
-   */
-  public abstract Input mark(Mark mark);
-
-  /**
-   * Returns the byte offset of the current lookahead token, relative to the
-   * start of the stream.
-   */
-  public long offset() {
-    return mark().offset;
-  }
-
-  /**
-   * Returns the one-based line number of the current lookahead token, relative
-   * to the start of the stream.
-   */
-  public int line() {
-    return mark().line;
-  }
-
-  /**
-   * Returns the one-based column number of the current lookahead token,
-   * relative to the current line in the stream.
-   */
-  public int column() {
-    return mark().column;
-  }
-
-  /**
-   * Returns the {@code InputSettings} used to configure the behavior of input
-   * consumers that read from this {@code Input}.
-   */
-  public abstract InputSettings settings();
-
-  /**
-   * Returns an {@code Input} equivalent to this {@code Input}, but with the
-   * given input {@code settings}.  The caller's reference to {@code this}
-   * {@code Input} should be replaced by the returned {@code Input}.
-   */
-  public abstract Input settings(InputSettings settings);
-
-  /**
-   * Returns an independently positioned view into the token stream,
-   * initialized with identical state to this {@code Input}.
-   *
-   * @throws UnsupportedOperationException if this {@code Input} cannot be
-   *         cloned.
-   */
-  @Override
-  public abstract Input clone();
 
   private static Input empty;
-
   private static Input done;
 
   /**
@@ -365,9 +197,179 @@ public abstract class Input {
   public static Input error(Throwable error, Object id, Mark mark, InputSettings settings) {
     return new InputError(error, id, mark, settings);
   }
+
+  /**
+   * Returns {@code true} when a {@link #head() lookeahead} token is
+   * immediately available.  i.e. this {@code Input} is in the <em>cont</em>
+   * state.
+   */
+  public abstract boolean isCont();
+
+  /**
+   * Returns {@code true} when no lookahead token is currently available, but
+   * additional input may be available in the future.  i.e. this {@code Input}
+   * is in the <em>empty</em> state.
+   */
+  public abstract boolean isEmpty();
+
+  /**
+   * Returns {@code true} when no lookahead token is currently available, and
+   * no additional input will ever become available.  i.e. this {@code Input}
+   * is in the <em>done</em> state.
+   */
+  public abstract boolean isDone();
+
+  /**
+   * Returns {@code true} when no lookahead token is currently available due to
+   * an error with the token stream.  i.e. this {@code Input} is in the
+   * <em>error</em> state.  When {@code true}, {@link #trap()} will return the
+   * input error.
+   */
+  public abstract boolean isError();
+
+  /**
+   * Returns {@code true} if this is a partial {@code Input} will that enter
+   * the <em>empty</em> state after it consumes the last available input token.
+   */
+  public abstract boolean isPart();
+
+  /**
+   * Returns a partial {@code Input} equivalent to this {@code Input}, if
+   * {@code isPart} is {@code true}; returns a final {@code Input} equivalent
+   * to this {@code Input} if {@code isPart} is {@code false}.  The caller's
+   * reference to {@code this} {@code Input} should be replaced by the returned
+   * {@code Input}.
+   */
+  public abstract Input isPart(boolean isPart);
+
+  /**
+   * Returns the current lookahead token, if this {@code Input} is in the
+   * <em>cont</em> state.
+   *
+   * @throws InputException if this {@code Input} is not in the <em>cont</em>
+   *                        state.
+   */
+  public abstract int head();
+
+  /**
+   * Returns an {@code Input} equivalent to this {@code Input}, but advanced to
+   * the next token.  Returns an {@code Input} in the <em>error</em> state if
+   * this {@code Input} is not in the <em>cont</em> state.  The caller's
+   * reference to {@code this} {@code Input} should be replaced by the returned
+   * {@code Input}.
+   */
+  public abstract Input step();
+
+  /**
+   * Returns an {@code Input} equivalent to this {@code Input}, but
+   * repositioned to the given {@code mark}.  Returns an {@code Input} in the
+   * <em>error</em> state if this {@code Input} does not support seeking, or if
+   * this {@code Input} is unable to reposition to the given {@code mark}.  The
+   * caller's reference to {@code this} {@code Input} should be replaced by the
+   * returned {@code Input}.
+   */
+  public abstract Input seek(Mark mark);
+
+  /**
+   * Returns an {@code Input} equivalent to this {@code Input}, but whose
+   * behavior may be altered by the given out-of-band {@code condition}.  The
+   * caller's reference to {@code this} {@code Input} should be replaced by the
+   * returned {@code Input}.
+   */
+  public Input fork(Object condition) {
+    return this;
+  }
+
+  /**
+   * Returns the input error.  Only guaranteed to return an error when in the
+   * <em>error</em> state.
+   *
+   * @throws InputException if this {@code Input} is not in the <em>error</em>
+   *                        state.
+   */
+  public Throwable trap() {
+    throw new InputException();
+  }
+
+  /**
+   * Returns an object that identifies the token stream, or {@code null} if the
+   * stream is unidentified.
+   */
+  public abstract Object id();
+
+  /**
+   * Returns an {@code Input} equivalent to this {@code Input}, but logically
+   * identified by the given–possibly {@code null}–{@code id}.  The caller's
+   * reference to {@code this} {@code Input} should be replaced by the returned
+   * {@code Input}.
+   */
+  public abstract Input id(Object id);
+
+  /**
+   * Returns the position of the current lookahead token, relative to the start
+   * of the stream.
+   */
+  public abstract Mark mark();
+
+  /**
+   * Returns an {@code Input} equivalent to this {@code Input}, but logically
+   * positioned at the given {@code mark}.  The physical position in the input
+   * stream is not modified.  The caller's reference to {@code this} {@code
+   * Input} should be replaced by the returned {@code Input}.
+   */
+  public abstract Input mark(Mark mark);
+
+  /**
+   * Returns the byte offset of the current lookahead token, relative to the
+   * start of the stream.
+   */
+  public long offset() {
+    return mark().offset;
+  }
+
+  /**
+   * Returns the one-based line number of the current lookahead token, relative
+   * to the start of the stream.
+   */
+  public int line() {
+    return mark().line;
+  }
+
+  /**
+   * Returns the one-based column number of the current lookahead token,
+   * relative to the current line in the stream.
+   */
+  public int column() {
+    return mark().column;
+  }
+
+  /**
+   * Returns the {@code InputSettings} used to configure the behavior of input
+   * consumers that read from this {@code Input}.
+   */
+  public abstract InputSettings settings();
+
+  /**
+   * Returns an {@code Input} equivalent to this {@code Input}, but with the
+   * given input {@code settings}.  The caller's reference to {@code this}
+   * {@code Input} should be replaced by the returned {@code Input}.
+   */
+  public abstract Input settings(InputSettings settings);
+
+  /**
+   * Returns an independently positioned view into the token stream,
+   * initialized with identical state to this {@code Input}.
+   *
+   * @throws UnsupportedOperationException if this {@code Input} cannot be
+   *                                       cloned.
+   */
+  @Override
+  public abstract Input clone();
+
 }
 
 final class InputEmpty extends Input {
+
   final Object id;
   final Mark mark;
   final InputSettings settings;
@@ -471,9 +473,11 @@ final class InputEmpty extends Input {
   public Input clone() {
     return this;
   }
+
 }
 
 final class InputDone extends Input {
+
   final Object id;
   final Mark mark;
   final InputSettings settings;
@@ -569,9 +573,11 @@ final class InputDone extends Input {
   public Input clone() {
     return this;
   }
+
 }
 
 final class InputError extends Input {
+
   final Throwable error;
   final Object id;
   final Mark mark;
@@ -670,4 +676,5 @@ final class InputError extends Input {
   public Input clone() {
     return this;
   }
+
 }

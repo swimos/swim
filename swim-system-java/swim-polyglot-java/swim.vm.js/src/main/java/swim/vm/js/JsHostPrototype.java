@@ -24,6 +24,7 @@ import swim.dynamic.HostMethod;
 import swim.vm.VmProxyArray;
 
 public class JsHostPrototype implements ProxyObject {
+
   final JsBridge bridge;
   final HostClassType<?> type;
 
@@ -115,4 +116,5 @@ public class JsHostPrototype implements ProxyObject {
   public String toString() {
     return '[' + "JsHostPrototype " + this.type.hostClass().getName() + ']';
   }
+
 }

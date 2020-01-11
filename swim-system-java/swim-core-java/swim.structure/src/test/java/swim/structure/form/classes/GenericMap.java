@@ -19,13 +19,17 @@ import swim.util.Murmur3;
 
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class GenericMap<K, V> {
+
   public Map<K, V> map;
+
   public GenericMap(Map<K, V> map) {
     this.map = map;
   }
+
   public GenericMap() {
     // Form.cast constructor
   }
+
   @Override
   public boolean equals(Object other) {
     if (other instanceof GenericMap<?, ?>) {
@@ -34,12 +38,15 @@ public class GenericMap<K, V> {
     }
     return false;
   }
+
   @Override
   public int hashCode() {
     return Murmur3.hash(this.map);
   }
+
   @Override
   public String toString() {
     return "GenericMap(" + this.map + ")";
   }
+
 }

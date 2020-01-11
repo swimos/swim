@@ -27,6 +27,7 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 public final class KernelLoader {
+
   private KernelLoader() {
     // static
   }
@@ -170,4 +171,5 @@ public final class KernelLoader {
   public static Value parseConfigValue(InputStream configInput) throws IOException {
     return Utf8.read(Recon.structureParser().blockParser(), configInput);
   }
+
 }

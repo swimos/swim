@@ -27,6 +27,7 @@ import swim.codec.Writer;
  * Factory for constructing Recon writers.
  */
 public abstract class ReconWriter<I, V> {
+
   public abstract boolean isField(I item);
 
   public abstract boolean isAttr(I item);
@@ -532,4 +533,5 @@ public abstract class ReconWriter<I, V> {
   public Writer<?, ?> writeAbsent(Output<?> output) {
     return Writer.done();
   }
+
 }

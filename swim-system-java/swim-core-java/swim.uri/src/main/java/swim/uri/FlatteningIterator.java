@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 abstract class FlatteningIterator<P, T> implements Iterator<T> {
+
   Iterator<P> outer;
   Iterator<T> inner;
 
@@ -60,4 +61,5 @@ abstract class FlatteningIterator<P, T> implements Iterator<T> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

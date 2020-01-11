@@ -19,5 +19,7 @@ import swim.warp.SyncedResponse;
 
 @FunctionalInterface
 public interface OnSyncedResponse extends Preemptive {
+
   void onSynced(SyncedResponse response);
+
 }

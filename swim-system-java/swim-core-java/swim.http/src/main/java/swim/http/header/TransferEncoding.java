@@ -27,10 +27,40 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class TransferEncoding extends HttpHeader {
+
+  private static int hashSeed;
+  private static TransferEncoding chunked;
   final FingerTrieSeq<TransferCoding> codings;
 
   TransferEncoding(FingerTrieSeq<TransferCoding> codings) {
     this.codings = codings;
+  }
+
+  public static TransferEncoding chunked() {
+    if (chunked == null) {
+      chunked = new TransferEncoding(FingerTrieSeq.of(TransferCoding.chunked()));
+    }
+    return chunked;
+  }
+
+  public static TransferEncoding from(FingerTrieSeq<TransferCoding> codings) {
+    return new TransferEncoding(codings);
+  }
+
+  public static TransferEncoding from(TransferCoding... codings) {
+    return from(FingerTrieSeq.of(codings));
+  }
+
+  public static TransferEncoding from(String... codingStrings) {
+    final Builder<TransferCoding, FingerTrieSeq<TransferCoding>> codings = FingerTrieSeq.builder();
+    for (int i = 0, n = codingStrings.length; i < n; i += 1) {
+      codings.add(TransferCoding.parse(codingStrings[i]));
+    }
+    return from(codings.bind());
+  }
+
+  public static Parser<TransferEncoding> parseHttpValue(Input input, HttpParser http) {
+    return TransferEncodingParser.parse(input, http);
   }
 
   @Override
@@ -89,34 +119,4 @@ public final class TransferEncoding extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  private static TransferEncoding chunked;
-
-  public static TransferEncoding chunked() {
-    if (chunked == null) {
-      chunked = new TransferEncoding(FingerTrieSeq.of(TransferCoding.chunked()));
-    }
-    return chunked;
-  }
-
-  public static TransferEncoding from(FingerTrieSeq<TransferCoding> codings) {
-    return new TransferEncoding(codings);
-  }
-
-  public static TransferEncoding from(TransferCoding... codings) {
-    return from(FingerTrieSeq.of(codings));
-  }
-
-  public static TransferEncoding from(String... codingStrings) {
-    final Builder<TransferCoding, FingerTrieSeq<TransferCoding>> codings = FingerTrieSeq.builder();
-    for (int i = 0, n = codingStrings.length; i < n; i += 1) {
-      codings.add(TransferCoding.parse(codingStrings[i]));
-    }
-    return from(codings.bind());
-  }
-
-  public static Parser<TransferEncoding> parseHttpValue(Input input, HttpParser http) {
-    return TransferEncodingParser.parse(input, http);
-  }
 }

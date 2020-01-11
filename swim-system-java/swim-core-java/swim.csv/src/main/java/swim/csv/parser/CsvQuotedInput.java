@@ -20,6 +20,7 @@ import swim.codec.InputSettings;
 import swim.codec.Mark;
 
 final class CsvQuotedInput extends Input {
+
   final int quote;
   Input input;
   int head;
@@ -171,4 +172,5 @@ final class CsvQuotedInput extends Input {
   public Input clone() {
     return new CsvQuotedInput(this.quote, this.input.clone(), this.head);
   }
+
 }

@@ -36,6 +36,7 @@ import swim.spatial.SpatialMap;
 import swim.structure.Form;
 
 public interface SpatialLane<K, S, V> extends WarpLane, ObservableSpatialMap<K, S, V> {
+
   Form<K> keyForm();
 
   <K2> SpatialLane<K2, S, V> keyForm(Form<K2> keyForm);
@@ -111,4 +112,5 @@ public interface SpatialLane<K, S, V> extends WarpLane, ObservableSpatialMap<K, 
   SpatialLane<K, S, V> didLeave(DidLeave didLeave);
 
   SpatialMap<K, S, V> snapshot();
+
 }

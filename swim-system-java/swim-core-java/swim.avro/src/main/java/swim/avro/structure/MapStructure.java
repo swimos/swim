@@ -25,6 +25,7 @@ import swim.structure.Value;
 import swim.util.PairBuilder;
 
 final class MapStructure<V extends Value> extends AvroMapType<Value, V, Record> {
+
   final AvroType<V> valueType;
 
   MapStructure(AvroType<V> valueType) {
@@ -47,4 +48,5 @@ final class MapStructure<V extends Value> extends AvroMapType<Value, V, Record> 
   public PairBuilder<Value, V, Record> mapBuilder() {
     return (PairBuilder<Value, V, Record>) (PairBuilder<Value, ?, Record>) Record.create();
   }
+
 }

@@ -19,6 +19,7 @@ import swim.runtime.NodeContext;
 import swim.runtime.agent.AgentNode;
 
 final class MetaNodeAgent extends AgentNode {
+
   final NodeBinding node;
 
   MetaNodeAgent(NodeBinding node) {
@@ -30,4 +31,5 @@ final class MetaNodeAgent extends AgentNode {
     super.setNodeContext(nodeContext);
     this.node.openMetaNode(this.node, this);
   }
+
 }

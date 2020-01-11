@@ -22,6 +22,7 @@ import swim.codec.OutputBuffer;
 import swim.collections.FingerTrieSeq;
 
 final class HttpEmpty extends HttpEntity<Object> implements Debug {
+
   @Override
   public boolean isDefined() {
     return false;
@@ -72,4 +73,5 @@ final class HttpEmpty extends HttpEntity<Object> implements Debug {
   public String toString() {
     return Format.debug(this);
   }
+
 }

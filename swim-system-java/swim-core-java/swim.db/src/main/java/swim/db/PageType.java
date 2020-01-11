@@ -18,6 +18,7 @@ import swim.codec.Debug;
 import swim.codec.Output;
 
 public enum PageType implements Debug {
+
   NODE("node"),
   LEAF("leaf");
 
@@ -25,6 +26,16 @@ public enum PageType implements Debug {
 
   PageType(String tag) {
     this.tag = tag;
+  }
+
+  public static PageType fromTag(String tag) {
+    if ("node".equals(tag)) {
+      return NODE;
+    } else if ("leaf".equals(tag)) {
+      return LEAF;
+    } else {
+      return null;
+    }
   }
 
   public boolean isNode() {
@@ -44,13 +55,4 @@ public enum PageType implements Debug {
     output.write("PageType").write('.').write(name());
   }
 
-  public static PageType fromTag(String tag) {
-    if ("node".equals(tag)) {
-      return NODE;
-    } else if ("leaf".equals(tag)) {
-      return LEAF;
-    } else {
-      return null;
-    }
-  }
 }

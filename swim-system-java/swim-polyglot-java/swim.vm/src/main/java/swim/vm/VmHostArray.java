@@ -19,6 +19,7 @@ import org.graalvm.polyglot.proxy.ProxyArray;
 import swim.dynamic.HostArrayType;
 
 public class VmHostArray<T> extends VmHostProxy<T> implements ProxyArray {
+
   final VmBridge bridge;
   final HostArrayType<? super T> type;
   final T self;
@@ -53,4 +54,5 @@ public class VmHostArray<T> extends VmHostProxy<T> implements ProxyArray {
   public boolean remove(long index) {
     return this.type.removeElement(this.bridge, this.self, index);
   }
+
 }

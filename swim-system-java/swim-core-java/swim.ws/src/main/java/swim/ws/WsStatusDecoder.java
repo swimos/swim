@@ -20,6 +20,7 @@ import swim.codec.InputBuffer;
 import swim.codec.Utf8;
 
 final class WsStatusDecoder extends Decoder<WsStatus> {
+
   final int code;
   final Decoder<String> reason;
   final int step;
@@ -32,11 +33,6 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
 
   WsStatusDecoder() {
     this(0, null, 1);
-  }
-
-  @Override
-  public Decoder<WsStatus> feed(InputBuffer input) {
-    return decode(input, this.code, this.reason, this.step);
   }
 
   static Decoder<WsStatus> decode(InputBuffer input, int code, Decoder<String> reason, int step) {
@@ -73,4 +69,10 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
   static Decoder<WsStatus> decode(InputBuffer input) {
     return decode(input, 0, null, 1);
   }
+
+  @Override
+  public Decoder<WsStatus> feed(InputBuffer input) {
+    return decode(input, this.code, this.reason, this.step);
+  }
+
 }

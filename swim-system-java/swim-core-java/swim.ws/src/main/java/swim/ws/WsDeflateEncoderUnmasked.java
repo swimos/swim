@@ -17,6 +17,7 @@ package swim.ws;
 import swim.deflate.Deflate;
 
 final class WsDeflateEncoderUnmasked extends WsDeflateEncoder {
+
   WsDeflateEncoderUnmasked(Deflate<?> deflate, int flush) {
     super(deflate, flush);
   }
@@ -30,4 +31,5 @@ final class WsDeflateEncoderUnmasked extends WsDeflateEncoder {
   public void maskingKey(byte[] maskingKey) {
     // nop
   }
+
 }

@@ -19,6 +19,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class HttpCharsetParser extends Parser<HttpCharset> {
+
   final HttpParser http;
   final StringBuilder name;
   final Parser<Float> weight;
@@ -33,11 +34,6 @@ final class HttpCharsetParser extends Parser<HttpCharset> {
 
   HttpCharsetParser(HttpParser http) {
     this(http, null, null, 1);
-  }
-
-  @Override
-  public Parser<HttpCharset> feed(Input input) {
-    return parse(input, this.http, this.name, this.weight, this.step);
   }
 
   static Parser<HttpCharset> parse(Input input, HttpParser http, StringBuilder name,
@@ -97,4 +93,10 @@ final class HttpCharsetParser extends Parser<HttpCharset> {
   static Parser<HttpCharset> parse(Input input, HttpParser http) {
     return parse(input, http, null, null, 1);
   }
+
+  @Override
+  public Parser<HttpCharset> feed(Input input) {
+    return parse(input, this.http, this.name, this.weight, this.step);
+  }
+
 }

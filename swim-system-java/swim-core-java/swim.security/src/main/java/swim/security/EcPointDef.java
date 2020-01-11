@@ -25,12 +25,27 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class EcPointDef {
+
+  private static int hashSeed;
+  private static Form<EcPointDef> form;
   protected final BigInteger x;
   protected final BigInteger y;
 
   public EcPointDef(BigInteger x, BigInteger y) {
     this.x = x;
     this.y = y;
+  }
+
+  public static EcPointDef from(ECPoint point) {
+    return new EcPointDef(point.getAffineX(), point.getAffineY());
+  }
+
+  @Kind
+  public static Form<EcPointDef> form() {
+    if (form == null) {
+      form = new EcPointForm();
+    }
+    return form;
   }
 
   public final BigInteger x() {
@@ -69,24 +84,10 @@ public class EcPointDef {
         this.x.hashCode()), this.y.hashCode()));
   }
 
-  private static int hashSeed;
-
-  private static Form<EcPointDef> form;
-
-  public static EcPointDef from(ECPoint point) {
-    return new EcPointDef(point.getAffineX(), point.getAffineY());
-  }
-
-  @Kind
-  public static Form<EcPointDef> form() {
-    if (form == null) {
-      form = new EcPointForm();
-    }
-    return form;
-  }
 }
 
 final class EcPointForm extends Form<EcPointDef> {
+
   @Override
   public String tag() {
     return "ECPoint";
@@ -117,4 +118,5 @@ final class EcPointForm extends Form<EcPointDef> {
     }
     return null;
   }
+
 }

@@ -19,6 +19,7 @@ import swim.codec.EncoderException;
 import swim.codec.OutputBuffer;
 
 final class MqttPingRespEncoder extends Encoder<Object, MqttPingResp> {
+
   final MqttEncoder mqtt;
   final MqttPingResp packet;
   final int length;
@@ -35,11 +36,6 @@ final class MqttPingRespEncoder extends Encoder<Object, MqttPingResp> {
 
   MqttPingRespEncoder(MqttEncoder mqtt, MqttPingResp packet) {
     this(mqtt, packet, 0, 0, 1);
-  }
-
-  @Override
-  public Encoder<Object, MqttPingResp> pull(OutputBuffer<?> output) {
-    return encode(output, this.mqtt, this.packet, this.length, this.remaining, this.step);
   }
 
   static Encoder<Object, MqttPingResp> encode(OutputBuffer<?> output, MqttEncoder mqtt,
@@ -83,4 +79,10 @@ final class MqttPingRespEncoder extends Encoder<Object, MqttPingResp> {
                                               MqttPingResp packet) {
     return encode(output, mqtt, packet, 0, 0, 1);
   }
+
+  @Override
+  public Encoder<Object, MqttPingResp> pull(OutputBuffer<?> output) {
+    return encode(output, this.mqtt, this.packet, this.length, this.remaining, this.step);
+  }
+
 }

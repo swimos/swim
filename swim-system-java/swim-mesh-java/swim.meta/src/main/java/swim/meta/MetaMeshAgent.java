@@ -19,6 +19,7 @@ import swim.runtime.NodeContext;
 import swim.runtime.agent.AgentNode;
 
 public final class MetaMeshAgent extends AgentNode {
+
   protected final MeshBinding mesh;
 
   public MetaMeshAgent(MeshBinding mesh) {
@@ -30,4 +31,5 @@ public final class MetaMeshAgent extends AgentNode {
     super.setNodeContext(nodeContext);
     this.mesh.openMetaMesh(this.mesh, this);
   }
+
 }

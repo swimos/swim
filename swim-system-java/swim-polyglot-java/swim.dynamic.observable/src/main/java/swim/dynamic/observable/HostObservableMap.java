@@ -28,9 +28,6 @@ import swim.dynamic.observable.function.GuestWillUpdateKey;
 import swim.observable.ObservableMap;
 
 public final class HostObservableMap {
-  private HostObservableMap() {
-    // static
-  }
 
   public static final HostObjectType<ObservableMap<Object, Object>> TYPE;
 
@@ -45,9 +42,15 @@ public final class HostObservableMap {
     type.addMember(new HostObservableMapWillClear());
     type.addMember(new HostObservableMapDidClear());
   }
+
+  private HostObservableMap() {
+    // static
+  }
+
 }
 
 final class HostObservableMapWillUpdate implements HostMethod<ObservableMap<Object, Object>> {
+
   @Override
   public String key() {
     return "willUpdate";
@@ -57,9 +60,11 @@ final class HostObservableMapWillUpdate implements HostMethod<ObservableMap<Obje
   public Object invoke(Bridge bridge, ObservableMap<Object, Object> observable, Object... arguments) {
     return observable.willUpdate(new GuestWillUpdateKey<Object, Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableMapDidUpdate implements HostMethod<ObservableMap<Object, Object>> {
+
   @Override
   public String key() {
     return "didUpdate";
@@ -69,9 +74,11 @@ final class HostObservableMapDidUpdate implements HostMethod<ObservableMap<Objec
   public Object invoke(Bridge bridge, ObservableMap<Object, Object> observable, Object... arguments) {
     return observable.didUpdate(new GuestDidUpdateKey<Object, Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableMapWillRemove implements HostMethod<ObservableMap<Object, Object>> {
+
   @Override
   public String key() {
     return "willRemove";
@@ -81,9 +88,11 @@ final class HostObservableMapWillRemove implements HostMethod<ObservableMap<Obje
   public Object invoke(Bridge bridge, ObservableMap<Object, Object> observable, Object... arguments) {
     return observable.willRemove(new GuestWillRemoveKey<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableMapDidRemove implements HostMethod<ObservableMap<Object, Object>> {
+
   @Override
   public String key() {
     return "didRemove";
@@ -93,9 +102,11 @@ final class HostObservableMapDidRemove implements HostMethod<ObservableMap<Objec
   public Object invoke(Bridge bridge, ObservableMap<Object, Object> observable, Object... arguments) {
     return observable.didRemove(new GuestDidRemoveKey<Object, Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableMapWillClear implements HostMethod<ObservableMap<Object, Object>> {
+
   @Override
   public String key() {
     return "willClear";
@@ -105,9 +116,11 @@ final class HostObservableMapWillClear implements HostMethod<ObservableMap<Objec
   public Object invoke(Bridge bridge, ObservableMap<Object, Object> observable, Object... arguments) {
     return observable.willClear(new GuestWillClear(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableMapDidClear implements HostMethod<ObservableMap<Object, Object>> {
+
   @Override
   public String key() {
     return "didClear";
@@ -117,4 +130,5 @@ final class HostObservableMapDidClear implements HostMethod<ObservableMap<Object
   public Object invoke(Bridge bridge, ObservableMap<Object, Object> observable, Object... arguments) {
     return observable.didClear(new GuestDidClear(bridge, arguments[0]));
   }
+
 }

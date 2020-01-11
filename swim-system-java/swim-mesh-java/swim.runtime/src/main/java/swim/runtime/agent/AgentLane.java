@@ -33,6 +33,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class AgentLane implements LaneContext {
+
   protected final AgentNode node;
   protected final LaneBinding lane;
   protected final LaneAddress laneAddress;
@@ -314,4 +315,5 @@ public class AgentLane implements LaneContext {
   public void willClose() {
     this.lane.close();
   }
+
 }

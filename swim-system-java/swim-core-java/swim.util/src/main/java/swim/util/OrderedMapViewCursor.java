@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 final class OrderedMapViewCursor<K, V> implements OrderedMapCursor<K, V> {
+
   final OrderedMap<K, V> map;
   final OrderedMapCursor<K, V> cursor;
   final K fromKey;
@@ -138,4 +139,5 @@ final class OrderedMapViewCursor<K, V> implements OrderedMapCursor<K, V> {
       return ((Comparable<Object>) x).compareTo(y);
     }
   }
+
 }

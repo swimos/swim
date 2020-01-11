@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class SizedDecoder<V> extends Decoder<V> {
+
   final Decoder<V> payloadDecoder;
   final long length;
   final int lengthShift;
@@ -29,11 +30,6 @@ final class SizedDecoder<V> extends Decoder<V> {
     this.length = length;
     this.lengthShift = lengthShift;
     this.step = step;
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.payloadDecoder, this.length, this.lengthShift, this.step);
   }
 
   static <V> Decoder<V> decode(InputBuffer input, Decoder<V> payloadDecoder,
@@ -89,4 +85,10 @@ final class SizedDecoder<V> extends Decoder<V> {
   static <V> Decoder<V> decode(InputBuffer input, Decoder<V> payloadDecoder) {
     return decode(input, payloadDecoder, 0L, 0, 1);
   }
+
+  @Override
+  public Decoder<V> feed(InputBuffer input) {
+    return decode(input, this.payloadDecoder, this.length, this.lengthShift, this.step);
+  }
+
 }

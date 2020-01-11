@@ -18,5 +18,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 public abstract class AvroStringType<T> extends AvroPrimitiveType<T> {
+
   public abstract Parser<T> parseString(Input input);
+
 }

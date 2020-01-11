@@ -23,6 +23,7 @@ import swim.streamlet.MapOutput;
 import static org.testng.Assert.assertEquals;
 
 public class FilterFieldsOperatorSpec {
+
   @Test
   public void evaluateFilterFieldsOperatorAfterPut() {
     final MapInput<String, Integer> input = new MapInput<>();
@@ -76,4 +77,5 @@ public class FilterFieldsOperatorSpec {
     output.reconcileOutput(1); // reconcile backward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("three", 4));
   }
+
 }

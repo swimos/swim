@@ -23,6 +23,15 @@ import swim.structure.Data;
 import swim.util.Murmur3;
 
 public final class MqttConnect extends MqttPacket<Object> implements Debug {
+
+  static final int CLEAN_SESSION_FLAG = 0x02;
+  static final int WILL_FLAG = 0x04;
+  static final int WILL_QOS_MASK = 0x18;
+  static final int WILL_QOS_SHIFT = 3;
+  static final int WILL_RETAIN_FLAG = 0x20;
+  static final int PASSWORD_FLAG = 0x40;
+  static final int USERNAME_FLAG = 0x80;
+  private static int hashSeed;
   final int packetFlags;
   final String protocolName;
   final int protocolLevel;
@@ -49,6 +58,17 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
     this.password = password != null ? password.commit() : null;
   }
 
+  public static MqttConnect from(int packetFlags, String protocolName, int protocolLevel,
+                                 int connectFlags, int keepAlive, String clientId, String willTopic,
+                                 Data willMessage, String username, Data password) {
+    return new MqttConnect(packetFlags, protocolName, protocolLevel, connectFlags,
+        keepAlive, clientId, willTopic, willMessage, username, password);
+  }
+
+  public static MqttConnect from(String clientId) {
+    return new MqttConnect(0, "MQTT", 4, CLEAN_SESSION_FLAG, 0, clientId, null, null, null, null);
+  }
+
   @Override
   public int packetType() {
     return 1;
@@ -61,8 +81,8 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
 
   public MqttConnect packetFlags(int packetFlags) {
     return new MqttConnect(packetFlags, this.protocolName, this.protocolLevel,
-                           this.connectFlags, this.keepAlive, this.clientId,
-                           this.willTopic, this.willMessage, this.username, this.password);
+        this.connectFlags, this.keepAlive, this.clientId,
+        this.willTopic, this.willMessage, this.username, this.password);
   }
 
   public String protocolName() {
@@ -71,8 +91,8 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
 
   public MqttConnect protocolName(String protocolName) {
     return new MqttConnect(this.packetFlags, protocolName, this.protocolLevel,
-                           this.connectFlags, this.keepAlive, this.clientId,
-                           this.willTopic, this.willMessage, this.username, this.password);
+        this.connectFlags, this.keepAlive, this.clientId,
+        this.willTopic, this.willMessage, this.username, this.password);
   }
 
   public int protocolLevel() {
@@ -81,8 +101,8 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
 
   public MqttConnect protocolLevel(int protocolLevel) {
     return new MqttConnect(this.packetFlags, this.protocolName, protocolLevel,
-                           this.connectFlags, this.keepAlive, this.clientId,
-                           this.willTopic, this.willMessage, this.username, this.password);
+        this.connectFlags, this.keepAlive, this.clientId,
+        this.willTopic, this.willMessage, this.username, this.password);
   }
 
   public int connectFlags() {
@@ -95,8 +115,8 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
 
   public MqttConnect keepAlive(int keepAlive) {
     return new MqttConnect(this.packetFlags, this.protocolName, this.protocolLevel,
-                           this.connectFlags, keepAlive, this.clientId, this.willTopic,
-                           this.willMessage, this.username, this.password);
+        this.connectFlags, keepAlive, this.clientId, this.willTopic,
+        this.willMessage, this.username, this.password);
   }
 
   public String clientId() {
@@ -105,8 +125,8 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
 
   public MqttConnect clientId(String clientId) {
     return new MqttConnect(this.packetFlags, this.protocolName, this.protocolLevel,
-                           this.connectFlags, this.keepAlive, clientId, this.willTopic,
-                           this.willMessage, this.username, this.password);
+        this.connectFlags, this.keepAlive, clientId, this.willTopic,
+        this.willMessage, this.username, this.password);
   }
 
   public boolean cleanSession() {
@@ -118,8 +138,8 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
         ? this.connectFlags | CLEAN_SESSION_FLAG
         : this.connectFlags & ~CLEAN_SESSION_FLAG;
     return new MqttConnect(this.packetFlags, this.protocolName, this.protocolLevel,
-                           connectFlags, this.keepAlive, this.clientId, this.willTopic,
-                           this.willMessage, this.username, this.password);
+        connectFlags, this.keepAlive, this.clientId, this.willTopic,
+        this.willMessage, this.username, this.password);
   }
 
   public String willTopic() {
@@ -131,8 +151,8 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
         ? this.connectFlags | WILL_FLAG
         : this.connectFlags & ~WILL_FLAG;
     return new MqttConnect(this.packetFlags, this.protocolName, this.protocolLevel,
-                           connectFlags, this.keepAlive, this.clientId, willTopic,
-                           this.willMessage, this.username, this.password);
+        connectFlags, this.keepAlive, this.clientId, willTopic,
+        this.willMessage, this.username, this.password);
   }
 
   public Data willMessage() {
@@ -144,9 +164,9 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
         ? this.connectFlags | WILL_FLAG
         : this.connectFlags & ~WILL_FLAG;
     return new MqttConnect(this.packetFlags, this.protocolName, this.protocolLevel,
-                           connectFlags, this.keepAlive, this.clientId, this.willTopic,
-                           willMessage != null ? willMessage.commit() : null,
-                           this.username, this.password);
+        connectFlags, this.keepAlive, this.clientId, this.willTopic,
+        willMessage != null ? willMessage.commit() : null,
+        this.username, this.password);
   }
 
   public MqttQoS willQoS() {
@@ -155,10 +175,10 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
 
   public MqttConnect willQoS(MqttQoS willQoS) {
     final int connectFlags = this.connectFlags & ~WILL_QOS_MASK
-                           | (willQoS.code << WILL_QOS_SHIFT) & WILL_QOS_MASK;
+        | (willQoS.code << WILL_QOS_SHIFT) & WILL_QOS_MASK;
     return new MqttConnect(this.packetFlags, this.protocolName, this.protocolLevel,
-                           connectFlags, this.keepAlive, this.clientId, this.willTopic,
-                           this.willMessage, this.username, this.password);
+        connectFlags, this.keepAlive, this.clientId, this.willTopic,
+        this.willMessage, this.username, this.password);
   }
 
   public boolean willRetain() {
@@ -170,8 +190,8 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
         ? this.connectFlags | WILL_RETAIN_FLAG
         : this.connectFlags & ~WILL_RETAIN_FLAG;
     return new MqttConnect(this.packetFlags, this.protocolName, this.protocolLevel,
-                           connectFlags, this.keepAlive, this.clientId, this.willTopic,
-                           this.willMessage, this.username, this.password);
+        connectFlags, this.keepAlive, this.clientId, this.willTopic,
+        this.willMessage, this.username, this.password);
   }
 
   public String username() {
@@ -183,8 +203,8 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
         ? this.connectFlags | USERNAME_FLAG
         : this.connectFlags & ~USERNAME_FLAG;
     return new MqttConnect(this.packetFlags, this.protocolName, this.protocolLevel,
-                           connectFlags, this.keepAlive, this.clientId, this.willTopic,
-                           this.willMessage, username, this.password);
+        connectFlags, this.keepAlive, this.clientId, this.willTopic,
+        this.willMessage, username, this.password);
   }
 
   public Data password() {
@@ -196,9 +216,9 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
         ? this.connectFlags | PASSWORD_FLAG
         : this.connectFlags & ~PASSWORD_FLAG;
     return new MqttConnect(this.packetFlags, this.protocolName, this.protocolLevel,
-                           connectFlags, this.keepAlive, this.clientId, this.willTopic,
-                           this.willMessage, this.username,
-                           password != null ? password.commit() : null);
+        connectFlags, this.keepAlive, this.clientId, this.willTopic,
+        this.willMessage, this.username,
+        password != null ? password.commit() : null);
   }
 
   @Override
@@ -252,8 +272,8 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
-        this.packetFlags), this.protocolName.hashCode()), this.protocolLevel),
-        this.connectFlags), this.keepAlive), this.clientId.hashCode()),
+            this.packetFlags), this.protocolName.hashCode()), this.protocolLevel),
+            this.connectFlags), this.keepAlive), this.clientId.hashCode()),
         Murmur3.hash(this.willTopic)), Murmur3.hash(this.willMessage)),
         Murmur3.hash(this.username)), Murmur3.hash(this.password)));
   }
@@ -302,24 +322,4 @@ public final class MqttConnect extends MqttPacket<Object> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  static final int CLEAN_SESSION_FLAG = 0x02;
-  static final int WILL_FLAG = 0x04;
-  static final int WILL_QOS_MASK = 0x18;
-  static final int WILL_QOS_SHIFT = 3;
-  static final int WILL_RETAIN_FLAG = 0x20;
-  static final int PASSWORD_FLAG = 0x40;
-  static final int USERNAME_FLAG = 0x80;
-
-  public static MqttConnect from(int packetFlags, String protocolName, int protocolLevel,
-                                 int connectFlags, int keepAlive, String clientId, String willTopic,
-                                 Data willMessage, String username, Data password) {
-    return new MqttConnect(packetFlags, protocolName, protocolLevel, connectFlags, 
-                           keepAlive, clientId, willTopic, willMessage, username, password);
-  }
-
-  public static MqttConnect from(String clientId) {
-    return new MqttConnect(0, "MQTT", 4, CLEAN_SESSION_FLAG, 0, clientId, null, null, null, null);
-  }
 }

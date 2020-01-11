@@ -38,6 +38,14 @@ import swim.vm.js.JsNodeModuleResolver;
 import swim.vm.js.JsRuntime;
 
 public class JsKernel extends KernelProxy {
+
+  static final AtomicReferenceFieldUpdater<JsKernel, Engine> JS_ENGINE =
+      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, Engine.class, "jsEngine");
+  static final AtomicReferenceFieldUpdater<JsKernel, JsRuntime> JS_RUNTIME =
+      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, JsRuntime.class, "jsRuntime");
+  static final AtomicReferenceFieldUpdater<JsKernel, UriPath> ROOT_PATH =
+      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, UriPath.class, "rootPath");
+  private static final double KERNEL_PRIORITY = 1.75;
   final double kernelPriority;
   volatile Engine jsEngine;
   volatile JsRuntime jsRuntime;
@@ -49,6 +57,16 @@ public class JsKernel extends KernelProxy {
 
   public JsKernel() {
     this(KERNEL_PRIORITY);
+  }
+
+  public static JsKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || JsKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      return new JsKernel(kernelPriority);
+    }
+    return null;
   }
 
   @Override
@@ -252,24 +270,4 @@ public class JsKernel extends KernelProxy {
     return new JsAgentFactory(this, rootPath(), agentDef);
   }
 
-  private static final double KERNEL_PRIORITY = 1.75;
-
-  public static JsKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || JsKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new JsKernel(kernelPriority);
-    }
-    return null;
-  }
-
-  static final AtomicReferenceFieldUpdater<JsKernel, Engine> JS_ENGINE =
-      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, Engine.class, "jsEngine");
-
-  static final AtomicReferenceFieldUpdater<JsKernel, JsRuntime> JS_RUNTIME =
-      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, JsRuntime.class, "jsRuntime");
-
-  static final AtomicReferenceFieldUpdater<JsKernel, UriPath> ROOT_PATH =
-      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, UriPath.class, "rootPath");
 }

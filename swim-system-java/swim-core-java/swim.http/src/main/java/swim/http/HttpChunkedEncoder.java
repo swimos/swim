@@ -20,6 +20,7 @@ import swim.codec.EncoderException;
 import swim.codec.OutputBuffer;
 
 final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
+
   final HttpMessage<T> message;
   final Encoder<?, ?> content;
   final int step;
@@ -32,11 +33,6 @@ final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
 
   HttpChunkedEncoder(HttpMessage<T> message, Encoder<?, ?> content) {
     this(message, content, 1);
-  }
-
-  @Override
-  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
-    return encode(output, this.message, this.content, this.step);
   }
 
   static <T> Encoder<Object, HttpMessage<T>> encode(OutputBuffer<?> output, HttpMessage<T> message,
@@ -72,7 +68,7 @@ final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
       } while (true);
       final int chunkLength = chunkEnd - chunkStart;
       output = output.move(chunkStart, outputStart, chunkLength)
-                     .index(outputStart + chunkLength);
+          .index(outputStart + chunkLength);
       if (content.isDone()) {
         if (chunkSize > 0) {
           step = 2;
@@ -103,4 +99,10 @@ final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
                                                     Encoder<?, ?> content) {
     return encode(output, message, content, 1);
   }
+
+  @Override
+  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
+    return encode(output, this.message, this.content, this.step);
+  }
+
 }

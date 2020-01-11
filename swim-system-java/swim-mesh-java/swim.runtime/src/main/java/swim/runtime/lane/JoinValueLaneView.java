@@ -54,10 +54,13 @@ import swim.structure.collections.ValueIterator;
 import swim.uri.Uri;
 
 public class JoinValueLaneView<K, V> extends WarpLaneView implements JoinValueLane<K, V> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<K> keyForm;
   protected Form<V> valueForm;
-
   protected int flags;
   protected JoinValueLaneModel laneBinding;
   protected MapData<K, V> dataView;
@@ -102,7 +105,7 @@ public class JoinValueLaneView<K, V> extends WarpLaneView implements JoinValueLa
   @Override
   public <K2> JoinValueLaneView<K2, V> keyForm(Form<K2> keyForm) {
     return new JoinValueLaneView<K2, V>(this.agentContext, keyForm, this.valueForm,
-                                        this.flags, typesafeObservers(this.observers));
+        this.flags, typesafeObservers(this.observers));
   }
 
   @Override
@@ -122,7 +125,7 @@ public class JoinValueLaneView<K, V> extends WarpLaneView implements JoinValueLa
   @Override
   public <V2> JoinValueLaneView<K, V2> valueForm(Form<V2> valueForm) {
     return new JoinValueLaneView<K, V2>(this.agentContext, this.keyForm, valueForm,
-                                        this.flags, typesafeObservers(this.observers));
+        this.flags, typesafeObservers(this.observers));
   }
 
   @Override
@@ -709,9 +712,9 @@ public class JoinValueLaneView<K, V> extends WarpLaneView implements JoinValueLa
   public ValueDownlink<V> downlink(K key) {
     final LaneContext laneContext = this.laneBinding.laneContext();
     return new JoinValueLaneDownlink<V>(laneContext, laneContext.stage(), this.laneBinding,
-                                        this.keyForm.mold(key).toValue(), this.laneBinding.meshUri(),
-                                        Uri.empty(), Uri.empty(), Uri.empty(), 0.0f, 0.0f,
-                                        Value.absent(), this.valueForm);
+        this.keyForm.mold(key).toValue(), this.laneBinding.meshUri(),
+        Uri.empty(), Uri.empty(), Uri.empty(), 0.0f, 0.0f,
+        Value.absent(), this.valueForm);
   }
 
   @Override
@@ -833,12 +836,10 @@ public class JoinValueLaneView<K, V> extends WarpLaneView implements JoinValueLa
     return (Iterator<Map.Entry<K, ValueDownlink<?>>>) (Iterator<?>) this.laneBinding.downlinks.iterator();
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
 }
 
 final class JoinValueLaneViewEntrySet<K, V> extends AbstractSet<Map.Entry<K, V>> {
+
   final JoinValueLaneView<K, V> view;
 
   JoinValueLaneViewEntrySet(JoinValueLaneView<K, V> view) {
@@ -854,9 +855,11 @@ final class JoinValueLaneViewEntrySet<K, V> extends AbstractSet<Map.Entry<K, V>>
   public Iterator<Map.Entry<K, V>> iterator() {
     return this.view.iterator();
   }
+
 }
 
 final class JoinValueLaneViewValues<K, V> extends AbstractCollection<V> {
+
   final JoinValueLaneView<K, V> view;
 
   JoinValueLaneViewValues(JoinValueLaneView<K, V> view) {
@@ -872,4 +875,5 @@ final class JoinValueLaneViewValues<K, V> extends AbstractCollection<V> {
   public Iterator<V> iterator() {
     return this.view.valueIterator();
   }
+
 }

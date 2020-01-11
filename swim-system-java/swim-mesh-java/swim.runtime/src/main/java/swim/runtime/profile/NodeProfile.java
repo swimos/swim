@@ -18,6 +18,7 @@ import swim.runtime.Metric;
 import swim.runtime.NodeAddress;
 
 public final class NodeProfile extends Metric {
+
   final NodeAddress cellAddress;
   final int agentOpenDelta;
   final int agentOpenCount;
@@ -217,4 +218,5 @@ public final class NodeProfile extends Metric {
   public long uplinkCommandCount() {
     return this.uplinkCommandCount;
   }
+
 }

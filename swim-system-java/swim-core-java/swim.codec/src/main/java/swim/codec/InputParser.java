@@ -15,12 +15,23 @@
 package swim.codec;
 
 final class InputParser<O> extends Parser<O> {
+
   final Input input;
   final Parser<O> parser;
 
   InputParser(Input input, Parser<O> parser) {
     this.input = input;
     this.parser = parser;
+  }
+
+  static <O> Parser<O> parse(Input input, Parser<O> parser) {
+    parser = parser.feed(input);
+    if (!parser.isCont()) {
+      return parser;
+    } else if (input.isError()) {
+      return error(input.trap());
+    }
+    return new InputParser<O>(input, parser);
   }
 
   @Override
@@ -46,13 +57,4 @@ final class InputParser<O> extends Parser<O> {
     return this.parser.trap();
   }
 
-  static <O> Parser<O> parse(Input input, Parser<O> parser) {
-    parser = parser.feed(input);
-    if (!parser.isCont()) {
-      return parser;
-    } else if (input.isError()) {
-      return error(input.trap());
-    }
-    return new InputParser<O>(input, parser);
-  }
 }

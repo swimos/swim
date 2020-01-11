@@ -15,4 +15,5 @@
 package swim.math;
 
 public interface OrderedField<S> extends OrderedRing<S>, Field<S> {
+
 }

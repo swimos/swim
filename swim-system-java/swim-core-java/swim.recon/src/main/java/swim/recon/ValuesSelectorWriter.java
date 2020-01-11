@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class ValuesSelectorWriter<I, V> extends Writer<Object, Object> {
+
   final ReconWriter<I, V> recon;
   final V then;
   final int step;
@@ -27,11 +28,6 @@ final class ValuesSelectorWriter<I, V> extends Writer<Object, Object> {
     this.recon = recon;
     this.then = then;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.then, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V then) {
@@ -73,4 +69,10 @@ final class ValuesSelectorWriter<I, V> extends Writer<Object, Object> {
   static <I, V> Writer<Object, Object> writeThen(Output<?> output, ReconWriter<I, V> recon, V then) {
     return write(output, recon, then, 2);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.recon, this.then, this.step);
+  }
+
 }

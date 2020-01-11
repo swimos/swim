@@ -23,8 +23,10 @@ package swim.concurrent;
  */
 //@FunctionalInterface
 public interface TimerFunction {
+
   /**
    * Executes scheduled logic when this timer fires.
    */
   void runTimer();
+
 }

@@ -22,6 +22,9 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 final class ArraySet<T> implements Debug {
+
+  private static int hashSeed;
+  private static ArraySet<Object> empty;
   final Object[] slots;
 
   ArraySet(Object[] slots) {
@@ -37,6 +40,22 @@ final class ArraySet<T> implements Debug {
     slots = new Object[2];
     slots[0] = elem0;
     slots[1] = elem1;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> ArraySet<T> empty() {
+    if (empty == null) {
+      empty = new ArraySet<Object>(new Object[0]);
+    }
+    return (ArraySet<T>) empty;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> ArraySet<T> of(T... elems) {
+    final int n = elems.length;
+    final Object[] slots = new Object[n];
+    System.arraycopy(elems, 0, slots, 0, n);
+    return new ArraySet<T>(slots);
   }
 
   public boolean isEmpty() {
@@ -188,27 +207,10 @@ final class ArraySet<T> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-  private static ArraySet<Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <T> ArraySet<T> empty() {
-    if (empty == null) {
-      empty = new ArraySet<Object>(new Object[0]);
-    }
-    return (ArraySet<T>) empty;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> ArraySet<T> of(T... elems) {
-    final int n = elems.length;
-    final Object[] slots = new Object[n];
-    System.arraycopy(elems, 0, slots, 0, n);
-    return new ArraySet<T>(slots);
-  }
 }
 
 final class ArraySetIterator<T> implements Iterator<T> {
+
   final Object[] slots;
   int index;
 
@@ -236,4 +238,5 @@ final class ArraySetIterator<T> implements Iterator<T> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

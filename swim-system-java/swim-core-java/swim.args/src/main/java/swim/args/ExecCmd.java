@@ -15,5 +15,7 @@
 package swim.args;
 
 public interface ExecCmd {
+
   void exec(Cmd cmd);
+
 }

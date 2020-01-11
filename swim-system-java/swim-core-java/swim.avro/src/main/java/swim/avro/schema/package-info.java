@@ -15,4 +15,5 @@
 /**
  * Abstract Apache Avro schema.
  */
+
 package swim.avro.schema;

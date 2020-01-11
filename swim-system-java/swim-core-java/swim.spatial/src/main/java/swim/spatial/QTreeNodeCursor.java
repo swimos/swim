@@ -18,6 +18,7 @@ import java.util.NoSuchElementException;
 import swim.util.Cursor;
 
 final class QTreeNodeCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
+
   final QTreeNode<K, S, V> page;
   final long x;
   final long y;
@@ -364,4 +365,5 @@ final class QTreeNodeCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
     }
     throw new NoSuchElementException();
   }
+
 }

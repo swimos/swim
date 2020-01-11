@@ -21,12 +21,45 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public class UriUser implements Debug, Display {
+
+  private static int hashSeed;
+  private static UriUser undefined;
   protected final String username;
   protected final String password;
 
   protected UriUser(String username, String password) {
     this.username = username;
     this.password = password;
+  }
+
+  public static UriUser undefined() {
+    if (undefined == null) {
+      undefined = new UriUser(null, null);
+    }
+    return undefined;
+  }
+
+  public static UriUser from(String username) {
+    if (username != null) {
+      return new UriUser(username, null);
+    } else {
+      return undefined();
+    }
+  }
+
+  public static UriUser from(String username, String password) {
+    if (username != null || password != null) {
+      if (username == null) {
+        username = "";
+      }
+      return new UriUser(username, password);
+    } else {
+      return undefined();
+    }
+  }
+
+  public static UriUser parse(String string) {
+    return Uri.standardParser().parseUserString(string);
   }
 
   public boolean isDefined() {
@@ -108,37 +141,4 @@ public class UriUser implements Debug, Display {
     return Format.display(this);
   }
 
-  private static int hashSeed;
-
-  private static UriUser undefined;
-
-  public static UriUser undefined() {
-    if (undefined == null) {
-      undefined = new UriUser(null, null);
-    }
-    return undefined;
-  }
-
-  public static UriUser from(String username) {
-    if (username != null) {
-      return new UriUser(username, null);
-    } else {
-      return undefined();
-    }
-  }
-
-  public static UriUser from(String username, String password) {
-    if (username != null || password != null) {
-      if (username == null) {
-        username = "";
-      }
-      return new UriUser(username, password);
-    } else {
-      return undefined();
-    }
-  }
-
-  public static UriUser parse(String string) {
-    return Uri.standardParser().parseUserString(string);
-  }
 }

@@ -25,6 +25,7 @@ import swim.structure.Value;
 import swim.util.KeyedList;
 
 public class ListDataProxy implements ListDataBinding, ListDataContext {
+
   protected final ListDataBinding dataBinding;
   protected ListDataContext dataContext;
 
@@ -343,4 +344,5 @@ public class ListDataProxy implements ListDataBinding, ListDataContext {
   public void didClear() {
     this.dataContext.didClear();
   }
+
 }

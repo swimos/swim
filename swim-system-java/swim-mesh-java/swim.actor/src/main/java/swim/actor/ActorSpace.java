@@ -76,16 +76,27 @@ import swim.uri.UriPattern;
 import swim.util.Log;
 
 public class ActorSpace extends AbstractTierBinding implements EdgeContext, PlaneContext, Space {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, Plane>> PLANES =
+      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, Plane>>) (Class<?>) HashTrieMap.class, "planes");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, AgentRoute<?>>> AGENT_ROUTES =
+      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, AgentRoute<?>>>) (Class<?>) HashTrieMap.class, "agentRoutes");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ActorSpace, UriMapper<AgentFactory<?>>> AGENT_FACTORIES =
+      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<UriMapper<AgentFactory<?>>>) (Class<?>) UriMapper.class, "agentFactories");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, Authenticator>> AUTHENTICATORS =
+      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, Authenticator>>) (Class<?>) HashTrieMap.class, "authenticators");
   final EdgeAddress edgeAddress;
   final ActorSpaceDef spaceDef;
   final KernelContext kernel;
   final EdgeBinding edge;
-
   Log log;
   PlanePolicy policy;
   Stage stage;
   StoreBinding store;
-
   volatile HashTrieMap<String, Plane> planes;
   volatile HashTrieMap<String, AgentRoute<?>> agentRoutes;
   volatile UriMapper<AgentFactory<?>> agentFactories;
@@ -1038,19 +1049,4 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     }
   }
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, Plane>> PLANES =
-      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, Plane>>) (Class<?>) HashTrieMap.class, "planes");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, AgentRoute<?>>> AGENT_ROUTES =
-      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, AgentRoute<?>>>) (Class<?>) HashTrieMap.class, "agentRoutes");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ActorSpace, UriMapper<AgentFactory<?>>> AGENT_FACTORIES =
-      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<UriMapper<AgentFactory<?>>>) (Class<?>) UriMapper.class, "agentFactories");
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, Authenticator>> AUTHENTICATORS =
-      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, Authenticator>>) (Class<?>) HashTrieMap.class, "authenticators");
 }

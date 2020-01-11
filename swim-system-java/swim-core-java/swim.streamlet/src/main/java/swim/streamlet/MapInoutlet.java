@@ -15,4 +15,5 @@
 package swim.streamlet;
 
 public interface MapInoutlet<K, VI, VO, I, O> extends Inoutlet<I, O>, MapInlet<K, VI, I>, MapOutlet<K, VO, O> {
+
 }

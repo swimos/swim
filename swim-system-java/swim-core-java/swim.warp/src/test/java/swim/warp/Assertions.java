@@ -17,6 +17,7 @@ package swim.warp;
 import static org.testng.Assert.assertEquals;
 
 public final class Assertions {
+
   private Assertions() {
     // stub
   }
@@ -28,4 +29,5 @@ public final class Assertions {
   public static void assertWrites(Envelope envelope, String recon) {
     assertEquals(envelope.toRecon(), recon);
   }
+
 }

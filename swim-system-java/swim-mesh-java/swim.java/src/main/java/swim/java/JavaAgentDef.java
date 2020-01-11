@@ -23,6 +23,8 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class JavaAgentDef implements AgentDef, Debug {
+
+  private static int hashSeed;
   final String className;
   final Value id;
   final Value props;
@@ -31,6 +33,10 @@ public class JavaAgentDef implements AgentDef, Debug {
     this.className = className;
     this.id = id;
     this.props = props;
+  }
+
+  public static JavaAgentDef fromClassName(String className) {
+    return new JavaAgentDef(className, Text.from(className), Value.absent());
   }
 
   public final String className() {
@@ -101,9 +107,4 @@ public class JavaAgentDef implements AgentDef, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static JavaAgentDef fromClassName(String className) {
-    return new JavaAgentDef(className, Text.from(className), Value.absent());
-  }
 }

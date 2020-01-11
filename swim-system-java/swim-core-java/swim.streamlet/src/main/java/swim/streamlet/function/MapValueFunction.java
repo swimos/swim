@@ -16,5 +16,7 @@ package swim.streamlet.function;
 
 @FunctionalInterface
 public interface MapValueFunction<I, O> {
+
   O apply(I value);
+
 }

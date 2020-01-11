@@ -23,6 +23,7 @@ import swim.math.Z2Form;
 import swim.structure.Value;
 
 public interface Store {
+
   ListData<Value> listData(Value name);
 
   ListData<Value> listData(String name);
@@ -42,4 +43,5 @@ public interface Store {
   ValueData<Value> valueData(Value name);
 
   ValueData<Value> valueData(String name);
+
 }

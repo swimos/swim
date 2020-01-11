@@ -21,6 +21,7 @@ import swim.codec.Output;
 import swim.codec.Parser;
 
 final class StringParser<I, V> extends Parser<V> {
+
   final ReconParser<I, V> recon;
   final Output<V> output;
   final int quote;
@@ -33,11 +34,6 @@ final class StringParser<I, V> extends Parser<V> {
     this.quote = quote;
     this.code = code;
     this.step = step;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.output, this.quote, this.code, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output,
@@ -67,7 +63,8 @@ final class StringParser<I, V> extends Parser<V> {
         return error(Diagnostic.expected("string", input));
       }
     }
-    string: do {
+    string:
+    do {
       if (step == 2) {
         while (input.isCont()) {
           c = input.head();
@@ -175,4 +172,10 @@ final class StringParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output) {
     return parse(input, recon, output, 0, 0, 1);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.output, this.quote, this.code, this.step);
+  }
+
 }

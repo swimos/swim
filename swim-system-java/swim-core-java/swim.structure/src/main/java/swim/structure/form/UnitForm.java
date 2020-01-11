@@ -18,6 +18,7 @@ import swim.structure.Form;
 import swim.structure.Item;
 
 public final class UnitForm<T> extends Form<T> {
+
   final T unit;
   final Form<T> form;
 
@@ -74,4 +75,5 @@ public final class UnitForm<T> extends Form<T> {
   public T cast(Item item) {
     return this.form.cast(item);
   }
+
 }

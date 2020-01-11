@@ -19,6 +19,7 @@ import swim.codec.Utf8;
 import swim.codec.Writer;
 
 public abstract class HttpPart {
+
   public abstract Writer<?, ?> httpWriter(HttpWriter http);
 
   public Writer<?, ?> httpWriter() {
@@ -36,4 +37,5 @@ public abstract class HttpPart {
     writeHttp(output);
     return output.bind();
   }
+
 }

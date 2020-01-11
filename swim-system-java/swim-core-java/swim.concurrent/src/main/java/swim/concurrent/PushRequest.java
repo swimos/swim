@@ -15,6 +15,7 @@
 package swim.concurrent;
 
 public class PushRequest<T> implements PullRequest<T> {
+
   final T value;
   final float prio;
 
@@ -40,4 +41,5 @@ public class PushRequest<T> implements PullRequest<T> {
   public void pull(PullContext<? super T> context) {
     context.push(this.value);
   }
+
 }

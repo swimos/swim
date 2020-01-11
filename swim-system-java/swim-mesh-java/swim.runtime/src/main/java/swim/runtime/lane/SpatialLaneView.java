@@ -47,11 +47,14 @@ import swim.spatial.SpatialMap;
 import swim.structure.Form;
 
 public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLane<K, S, V> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<K> keyForm;
   protected Z2Form<S> shapeForm;
   protected Form<V> valueForm;
-
   protected SpatialLaneModel<S> laneBinding;
   protected SpatialData<K, S, V> dataView;
   protected int flags;
@@ -440,7 +443,7 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
 
   @SuppressWarnings("unchecked")
   public boolean dispatchDidMove(Link link, K key, S newShape, V newValue, S oldShape, V oldValue,
-                                               boolean preemptive) {
+                                 boolean preemptive) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
     try {
@@ -794,7 +797,4 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
     return this.dataView.valueIterator();
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
 }

@@ -35,6 +35,85 @@ import swim.structure.Value;
 import swim.warp.CommandMessage;
 
 public abstract class WarpLaneModel<View extends WarpLaneView, U extends WarpUplinkModem> extends LaneModel<View, U> {
+
+  @SuppressWarnings("unchecked")
+  protected static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> EXEC_DELTA =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "execDelta");
+  @SuppressWarnings("unchecked")
+  protected static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> EXEC_TIME =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "execTime");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "commandDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkOpenDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_OPEN_COUNT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkOpenCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkCloseDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_CLOSE_COUNT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkCloseCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_EXEC_DELTA =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkExecDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_EXEC_RATE =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkExecRate");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkEventDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkEventRate");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkEventCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkCommandDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkCommandRate");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkCommandCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkOpenDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_OPEN_COUNT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkOpenCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkCloseDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_CLOSE_COUNT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkCloseCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkEventDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkEventRate");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> UPLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkEventCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkCommandDelta");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkCommandRate");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> UPLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkCommandCount");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "lastReportTime");
   volatile long execDelta;
   volatile long execTime;
   volatile int commandDelta;
@@ -277,95 +356,18 @@ public abstract class WarpLaneModel<View extends WarpLaneView, U extends WarpUpl
     final long execTime = EXEC_TIME.addAndGet(this, execDelta);
 
     return new WarpLaneProfile(cellAddress(), execDelta, execRate, execTime,
-                               downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
-                               downlinkEventDelta, downlinkEventRate, downlinkEventCount,
-                               downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
-                               uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
-                               uplinkEventDelta, uplinkEventRate, uplinkEventCount,
-                               uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+        downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+        downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+        downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+        uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+        uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+        uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
 
-  @SuppressWarnings("unchecked")
-  protected static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> EXEC_DELTA =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "execDelta");
-  @SuppressWarnings("unchecked")
-  protected static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> EXEC_TIME =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "execTime");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "commandDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkOpenDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_OPEN_COUNT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkOpenCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkCloseDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_CLOSE_COUNT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkCloseCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_EXEC_DELTA =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkExecDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_EXEC_RATE =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkExecRate");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkEventDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkEventRate");
-  @SuppressWarnings("unchecked")
-  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkEventCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkCommandDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkCommandRate");
-  @SuppressWarnings("unchecked")
-  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> DOWNLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "downlinkCommandCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkOpenDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_OPEN_COUNT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkOpenCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkCloseDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_CLOSE_COUNT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkCloseCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkEventDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkEventRate");
-  @SuppressWarnings("unchecked")
-  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> UPLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkEventCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkCommandDelta");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpLaneModel<?, ?>> UPLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkCommandRate");
-  @SuppressWarnings("unchecked")
-  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> UPLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "uplinkCommandCount");
-  @SuppressWarnings("unchecked")
-  static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> LAST_REPORT_TIME =
-      AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "lastReportTime");
 }
 
 final class WarpLaneRelayOnCommand<View extends WarpLaneView> extends LaneRelay<WarpLaneModel<View, ?>, View> {
+
   final CommandMessage message;
   final Cont<CommandMessage> cont;
 
@@ -406,9 +408,11 @@ final class WarpLaneRelayOnCommand<View extends WarpLaneView> extends LaneRelay<
       }
     }
   }
+
 }
 
 final class WarpLaneRelayDidUplink<View extends WarpLaneView> extends LaneRelay<LaneModel<View, ?>, View> {
+
   final WarpUplink uplink;
 
   WarpLaneRelayDidUplink(LaneModel<View, ?> model, WarpUplink uplink) {
@@ -427,9 +431,11 @@ final class WarpLaneRelayDidUplink<View extends WarpLaneView> extends LaneRelay<
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class WarpLaneRelayDidEnter<View extends WarpLaneView> extends LaneRelay<WarpLaneModel<View, ?>, View> {
+
   final Identity identity;
 
   WarpLaneRelayDidEnter(WarpLaneModel<View, ?> model, Identity identity) {
@@ -448,9 +454,11 @@ final class WarpLaneRelayDidEnter<View extends WarpLaneView> extends LaneRelay<W
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class WarpLaneRelayDidLeave<View extends WarpLaneView> extends LaneRelay<WarpLaneModel<View, ?>, View> {
+
   final Identity identity;
 
   WarpLaneRelayDidLeave(WarpLaneModel<View, ?> model, Identity identity) {
@@ -469,4 +477,5 @@ final class WarpLaneRelayDidLeave<View extends WarpLaneView> extends LaneRelay<W
       throw new AssertionError(); // unreachable
     }
   }
+
 }

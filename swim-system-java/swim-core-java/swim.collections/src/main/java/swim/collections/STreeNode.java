@@ -18,6 +18,7 @@ import java.util.Map;
 import swim.util.Cursor;
 
 final class STreeNode<T> extends STreePage<T> {
+
   final STreePage<T>[] pages;
   final int[] knots;
   final int size;
@@ -497,4 +498,5 @@ final class STreeNode<T> extends STreePage<T> {
     }
     return -(lo + 1);
   }
+
 }

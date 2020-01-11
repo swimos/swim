@@ -22,6 +22,10 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class PointZ3 extends Z3Shape implements Debug {
+
+  private static int hashSeed;
+  private static PointZ3 origin;
+  private static Z3Form<PointZ3> form;
   public final long x;
   public final long y;
   public final long z;
@@ -30,6 +34,25 @@ public class PointZ3 extends Z3Shape implements Debug {
     this.x = x;
     this.y = y;
     this.z = z;
+  }
+
+  public static PointZ3 origin() {
+    if (origin == null) {
+      origin = new PointZ3(0L, 0L, 0L);
+    }
+    return origin;
+  }
+
+  public static PointZ3 of(long x, long y, long z) {
+    return new PointZ3(x, y, z);
+  }
+
+  @Kind
+  public static Z3Form<PointZ3> form() {
+    if (form == null) {
+      form = new PointZ3Form();
+    }
+    return form;
   }
 
   public final PointZ3 plus(VectorZ3 vector) {
@@ -89,8 +112,8 @@ public class PointZ3 extends Z3Shape implements Debug {
   @Override
   public PointR3 transform(Z3ToR3Function f) {
     return new PointR3(f.transformX(this.x, this.y, this.z),
-                       f.transformY(this.x, this.y, this.z),
-                       f.transformZ(this.x, this.y, this.z));
+        f.transformY(this.x, this.y, this.z),
+        f.transformZ(this.x, this.y, this.z));
   }
 
   @Override
@@ -133,28 +156,4 @@ public class PointZ3 extends Z3Shape implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static PointZ3 origin;
-
-  private static Z3Form<PointZ3> form;
-
-  public static PointZ3 origin() {
-    if (origin == null) {
-      origin = new PointZ3(0L, 0L, 0L);
-    }
-    return origin;
-  }
-
-  public static PointZ3 of(long x, long y, long z) {
-    return new PointZ3(x, y, z);
-  }
-
-  @Kind
-  public static Z3Form<PointZ3> form() {
-    if (form == null) {
-      form = new PointZ3Form();
-    }
-    return form;
-  }
 }

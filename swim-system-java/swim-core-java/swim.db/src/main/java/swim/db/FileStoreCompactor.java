@@ -21,6 +21,9 @@ import swim.concurrent.AbstractTask;
 import swim.concurrent.Conts;
 
 final class FileStoreCompactor extends AbstractTask {
+
+  static final AtomicReferenceFieldUpdater<FileStoreCompactor, Compact> COMPACT =
+      AtomicReferenceFieldUpdater.newUpdater(FileStoreCompactor.class, Compact.class, "compact");
   final FileStore store;
   volatile Compact compact;
 
@@ -143,6 +146,4 @@ final class FileStoreCompactor extends AbstractTask {
     }
   }
 
-  static final AtomicReferenceFieldUpdater<FileStoreCompactor, Compact> COMPACT =
-      AtomicReferenceFieldUpdater.newUpdater(FileStoreCompactor.class, Compact.class, "compact");
 }

@@ -15,6 +15,7 @@
 package swim.math;
 
 public interface Ring<S> {
+
   S zero();
 
   S unit();
@@ -26,4 +27,5 @@ public interface Ring<S> {
   S subtract(S a, S b);
 
   S multiply(S a, S b);
+
 }

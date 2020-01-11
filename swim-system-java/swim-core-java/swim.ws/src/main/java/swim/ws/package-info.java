@@ -16,4 +16,5 @@
  * WebSocket frame model and wire protocol codec that incrementally decodes
  * and encodes fragmented WebSocket streams without intermediate buffering.
  */
+
 package swim.ws;

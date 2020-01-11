@@ -15,6 +15,7 @@
 package swim.io.mqtt;
 
 public interface MqttService {
+
   MqttServiceContext mqttServiceContext();
 
   void setMqttServiceContext(MqttServiceContext context);
@@ -28,4 +29,5 @@ public interface MqttService {
   void didUnbind();
 
   void didFail(Throwable error);
+
 }

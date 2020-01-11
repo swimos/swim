@@ -25,10 +25,24 @@ import swim.http.HttpWriter;
 import swim.util.Murmur3;
 
 public final class SecWebSocketProtocol extends HttpHeader {
+
+  private static int hashSeed;
   final FingerTrieSeq<String> protocols;
 
   SecWebSocketProtocol(FingerTrieSeq<String> protocols) {
     this.protocols = protocols;
+  }
+
+  public static SecWebSocketProtocol from(FingerTrieSeq<String> protocols) {
+    return new SecWebSocketProtocol(protocols);
+  }
+
+  public static SecWebSocketProtocol from(String... protocols) {
+    return new SecWebSocketProtocol(FingerTrieSeq.of(protocols));
+  }
+
+  public static Parser<SecWebSocketProtocol> parseHttpValue(Input input, HttpParser http) {
+    return SecWebSocketProtocolParser.parse(input, http);
   }
 
   @Override
@@ -87,17 +101,4 @@ public final class SecWebSocketProtocol extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  public static SecWebSocketProtocol from(FingerTrieSeq<String> protocols) {
-    return new SecWebSocketProtocol(protocols);
-  }
-
-  public static SecWebSocketProtocol from(String... protocols) {
-    return new SecWebSocketProtocol(FingerTrieSeq.of(protocols));
-  }
-
-  public static Parser<SecWebSocketProtocol> parseHttpValue(Input input, HttpParser http) {
-    return SecWebSocketProtocolParser.parse(input, http);
-  }
 }

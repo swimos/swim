@@ -23,6 +23,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface LinkBinding {
+
   LinkBinding linkWrapper();
 
   LinkContext linkContext();
@@ -100,4 +101,5 @@ public interface LinkBinding {
   void errorDown(Object message);
 
   void failDown(Object message);
+
 }

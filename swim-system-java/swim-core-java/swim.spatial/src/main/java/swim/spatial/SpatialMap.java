@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public interface SpatialMap<K, S, V> extends Iterable<SpatialMap.Entry<K, S, V>> {
+
   boolean isEmpty();
 
   int size();
@@ -47,10 +48,13 @@ public interface SpatialMap<K, S, V> extends Iterable<SpatialMap.Entry<K, S, V>>
   Iterator<V> valueIterator();
 
   interface Entry<K, S, V> extends Map.Entry<K, V> {
+
     S getShape();
+
   }
 
   class SimpleEntry<K, S, V> implements Entry<K, S, V> {
+
     protected K key;
     protected S shape;
     protected V value;
@@ -111,5 +115,7 @@ public interface SpatialMap<K, S, V> extends Iterable<SpatialMap.Entry<K, S, V>>
     public String toString() {
       return new StringBuilder().append(getKey()).append('=').append(getValue()).toString();
     }
+
   }
+
 }

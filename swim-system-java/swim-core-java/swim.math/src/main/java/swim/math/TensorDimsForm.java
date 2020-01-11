@@ -22,6 +22,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 final class TensorDimsForm extends Form<TensorDims> {
+
   @Override
   public String tag() {
     return "dim";
@@ -79,4 +80,5 @@ final class TensorDimsForm extends Form<TensorDims> {
     }
     return next;
   }
+
 }

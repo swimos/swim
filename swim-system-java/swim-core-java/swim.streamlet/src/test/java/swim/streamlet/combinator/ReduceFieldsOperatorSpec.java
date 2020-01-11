@@ -22,6 +22,7 @@ import swim.streamlet.ValueOutput;
 import static org.testng.Assert.assertEquals;
 
 public class ReduceFieldsOperatorSpec {
+
   @Test
   public void evaluateReduceFieldsOperatorAfterPut() {
     final MapInput<String, Integer> input = new MapInput<>();
@@ -31,10 +32,12 @@ public class ReduceFieldsOperatorSpec {
       public Integer identity() {
         return 0;
       }
+
       @Override
       public Integer accumulate(Integer result, Integer value) {
         return result + value;
       }
+
       @Override
       public Integer combine(Integer result, Integer value) {
         return result + value;
@@ -67,4 +70,5 @@ public class ReduceFieldsOperatorSpec {
     output.reconcileOutput(1); // reconcile backward
     assertEquals(output.get().intValue(), 5);
   }
+
 }

@@ -18,6 +18,7 @@ import java.util.Collection;
 import swim.collections.HashTrieMap;
 
 public class JavaHostRuntime implements HostRuntime {
+
   HashTrieMap<String, HostLibrary> hostLibraries;
   HashTrieMap<String, HostPackage> hostPackages;
   HashTrieMap<Class<?>, HostType<?>> hostTypes;
@@ -81,4 +82,5 @@ public class JavaHostRuntime implements HostRuntime {
   public void addHostType(HostType<?> hostType) {
     this.hostTypes = this.hostTypes.updated(hostType.hostClass(), hostType);
   }
+
 }

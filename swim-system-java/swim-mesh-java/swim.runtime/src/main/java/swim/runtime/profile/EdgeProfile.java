@@ -18,6 +18,7 @@ import swim.runtime.EdgeAddress;
 import swim.runtime.Metric;
 
 public final class EdgeProfile extends Metric {
+
   final EdgeAddress cellAddress;
   final int meshOpenDelta;
   final long meshOpenCount;
@@ -317,4 +318,5 @@ public final class EdgeProfile extends Metric {
   public long uplinkCommandCount() {
     return this.uplinkCommandCount;
   }
+
 }

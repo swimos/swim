@@ -19,6 +19,7 @@ import swim.io.IpContext;
 import swim.io.IpSocket;
 
 public interface HttpServerContext extends IpContext, FlowContext {
+
   HttpSettings httpSettings();
 
   void readRequest();
@@ -26,4 +27,5 @@ public interface HttpServerContext extends IpContext, FlowContext {
   void become(IpSocket socket);
 
   void close();
+
 }

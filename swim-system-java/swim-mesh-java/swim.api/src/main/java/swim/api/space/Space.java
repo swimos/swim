@@ -24,6 +24,7 @@ import swim.concurrent.Stage;
 import swim.util.Log;
 
 public interface Space extends SwimRef, Log {
+
   Schedule schedule();
 
   Stage stage();
@@ -39,4 +40,5 @@ public interface Space extends SwimRef, Log {
   <P extends Plane> P getPlane(Class<? extends P> planeClass);
 
   Collection<? extends Plane> planes();
+
 }

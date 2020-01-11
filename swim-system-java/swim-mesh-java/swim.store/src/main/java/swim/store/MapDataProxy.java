@@ -26,6 +26,7 @@ import swim.util.OrderedMap;
 import swim.util.OrderedMapCursor;
 
 public class MapDataProxy implements MapDataBinding, MapDataContext {
+
   protected final MapDataBinding dataBinding;
   protected MapDataContext dataContext;
 
@@ -354,4 +355,5 @@ public class MapDataProxy implements MapDataBinding, MapDataContext {
   public void didClear() {
     this.dataContext.didClear();
   }
+
 }

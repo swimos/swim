@@ -24,6 +24,7 @@ import swim.structure.Data;
 import swim.structure.Value;
 
 final class FixedStructure extends AvroFixedType<Value> {
+
   final AvroName fullName;
   final FingerTrieSeq<AvroName> aliases;
   final int size;
@@ -67,4 +68,5 @@ final class FixedStructure extends AvroFixedType<Value> {
   public Decoder<Value> decodeFixed(InputBuffer input) {
     return (Decoder<Value>) (Decoder<?>) Binary.parseOutput(Data.output(this.size), input);
   }
+
 }

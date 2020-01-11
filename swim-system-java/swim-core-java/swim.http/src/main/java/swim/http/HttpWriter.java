@@ -23,6 +23,7 @@ import swim.codec.Writer;
 import swim.collections.HashTrieMap;
 
 public class HttpWriter {
+
   public <T> Writer<?, HttpRequest<T>> requestWriter(HttpRequest<T> request) {
     return new HttpRequestWriter<T>(this, request);
   }
@@ -270,4 +271,5 @@ public class HttpWriter {
                                                         OutputBuffer<?> output) {
     return HttpChunkedEncoder.encode(output, message, content);
   }
+
 }

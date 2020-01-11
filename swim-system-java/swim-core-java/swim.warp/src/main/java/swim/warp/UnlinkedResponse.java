@@ -20,6 +20,10 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public final class UnlinkedResponse extends LaneAddressed {
+
+  @Kind
+  public static final Form<UnlinkedResponse> FORM = new UnlinkedForm();
+
   public UnlinkedResponse(Uri nodeUri, Uri laneUri, Value body) {
     super(nodeUri, laneUri, body);
   }
@@ -61,11 +65,10 @@ public final class UnlinkedResponse extends LaneAddressed {
     return new UnlinkedResponse(this.nodeUri, this.laneUri, body);
   }
 
-  @Kind
-  public static final Form<UnlinkedResponse> FORM = new UnlinkedForm();
 }
 
 final class UnlinkedForm extends LaneAddressedForm<UnlinkedResponse> {
+
   @Override
   public String tag() {
     return "unlinked";
@@ -80,4 +83,5 @@ final class UnlinkedForm extends LaneAddressedForm<UnlinkedResponse> {
   public UnlinkedResponse from(Uri nodeUri, Uri laneUri, Value body) {
     return new UnlinkedResponse(nodeUri, laneUri, body);
   }
+
 }

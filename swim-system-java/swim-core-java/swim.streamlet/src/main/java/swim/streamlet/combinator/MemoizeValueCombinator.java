@@ -18,6 +18,7 @@ import swim.streamlet.AbstractInoutlet;
 import swim.streamlet.Outlet;
 
 public class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
+
   protected IO state;
 
   public MemoizeValueCombinator() {
@@ -40,4 +41,5 @@ public class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
   public Outlet<IO> memoize() {
     return this;
   }
+
 }

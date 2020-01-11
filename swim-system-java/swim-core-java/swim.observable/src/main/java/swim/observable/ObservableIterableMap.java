@@ -17,4 +17,5 @@ package swim.observable;
 import swim.util.IterableMap;
 
 public interface ObservableIterableMap<K, V> extends ObservableMap<K, V>, IterableMap<K, V> {
+
 }

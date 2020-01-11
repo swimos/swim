@@ -17,4 +17,5 @@
  * subcomponents, and URI patterns, including an efficient and safe codec
  * for parsing and writing compliant URI strings.
  */
+
 package swim.uri;

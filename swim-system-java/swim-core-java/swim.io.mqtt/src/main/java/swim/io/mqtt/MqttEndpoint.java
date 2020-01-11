@@ -20,6 +20,7 @@ import swim.io.IpStation;
 import swim.io.Station;
 
 public class MqttEndpoint implements IpStation, MqttInterface {
+
   protected final Station station;
   protected MqttSettings mqttSettings;
 
@@ -66,4 +67,5 @@ public class MqttEndpoint implements IpStation, MqttInterface {
   public void stop() {
     this.station.stop();
   }
+
 }

@@ -21,6 +21,12 @@ import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
 
 public class WsEngineSettingsSpec {
+
+  static void assertDecodes(Value actualValue, WsEngineSettings expected) {
+    final WsEngineSettings actual = WsEngineSettings.engineForm().cast(actualValue);
+    assertEquals(actual, expected);
+  }
+
   @Test
   public void decodeStandardEngineSettings() {
     assertDecodes(Record.empty(), WsEngineSettings.standard());
@@ -29,25 +35,21 @@ public class WsEngineSettingsSpec {
   @Test
   public void decodeCustomEngineSettings() {
     assertDecodes(Record.of(Slot.of("maxFrameSize", 2048),
-                            Slot.of("maxMessageSize", 4096),
-                            Slot.of("serverCompressionLevel", 7),
-                            Slot.of("clientCompressionLevel", 9),
-                            Slot.of("serverNoContextTakeover", true),
-                            Slot.of("clientNoContextTakeover", true),
-                            Slot.of("serverMaxWindowBits", 11),
-                            Slot.of("clientMaxWindowBits", 13)),
-                  WsEngineSettings.standard().maxFrameSize(2048)
-                                             .maxMessageSize(4096)
-                                             .serverCompressionLevel(7)
-                                             .clientCompressionLevel(9)
-                                             .serverNoContextTakeover(true)
-                                             .clientNoContextTakeover(true)
-                                             .serverMaxWindowBits(11)
-                                             .clientMaxWindowBits(13));
+        Slot.of("maxMessageSize", 4096),
+        Slot.of("serverCompressionLevel", 7),
+        Slot.of("clientCompressionLevel", 9),
+        Slot.of("serverNoContextTakeover", true),
+        Slot.of("clientNoContextTakeover", true),
+        Slot.of("serverMaxWindowBits", 11),
+        Slot.of("clientMaxWindowBits", 13)),
+        WsEngineSettings.standard().maxFrameSize(2048)
+            .maxMessageSize(4096)
+            .serverCompressionLevel(7)
+            .clientCompressionLevel(9)
+            .serverNoContextTakeover(true)
+            .clientNoContextTakeover(true)
+            .serverMaxWindowBits(11)
+            .clientMaxWindowBits(13));
   }
 
-  static void assertDecodes(Value actualValue, WsEngineSettings expected) {
-    final WsEngineSettings actual = WsEngineSettings.engineForm().cast(actualValue);
-    assertEquals(actual, expected);
-  }
 }

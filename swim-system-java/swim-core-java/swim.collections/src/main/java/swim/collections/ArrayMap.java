@@ -24,6 +24,9 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 final class ArrayMap<K, V> implements Debug {
+
+  private static int hashSeed;
+  private static ArrayMap<Object, Object> empty;
   final Object[] slots;
 
   ArrayMap(Object[] slots) {
@@ -42,6 +45,19 @@ final class ArrayMap<K, V> implements Debug {
     slots[1] = value0;
     slots[2] = key1;
     slots[3] = value1;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <K, V> ArrayMap<K, V> empty() {
+    if (empty == null) {
+      empty = new ArrayMap<Object, Object>(new Object[0]);
+    }
+    return (ArrayMap<K, V>) empty;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <K, V> ArrayMap<K, V> of(K key, V value) {
+    return new ArrayMap<K, V>(key, value);
   }
 
   public boolean isEmpty() {
@@ -289,24 +305,10 @@ final class ArrayMap<K, V> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-  private static ArrayMap<Object, Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <K, V> ArrayMap<K, V> empty() {
-    if (empty == null) {
-      empty = new ArrayMap<Object, Object>(new Object[0]);
-    }
-    return (ArrayMap<K, V>) empty;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <K, V> ArrayMap<K, V> of(K key, V value) {
-    return new ArrayMap<K, V>(key, value);
-  }
 }
 
 final class ArrayMapIterator<K, V> implements Iterator<Map.Entry<K, V>> {
+
   final Object[] slots;
   int index;
 
@@ -335,4 +337,5 @@ final class ArrayMapIterator<K, V> implements Iterator<Map.Entry<K, V>> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

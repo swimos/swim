@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class UriParserSpec {
+
   @Test
   public void parseEmptyURIs() {
     assertEquals(Uri.parse(""), Uri.empty());
@@ -313,4 +314,5 @@ public class UriParserSpec {
     assertEquals(Uri.parse("scheme://domain/path?query#fragment"), Uri.empty().schemeName("scheme").hostName("domain").path("/", "path").query(null, "query").fragmentIdentifier("fragment"));
     assertEquals(Uri.parse("scheme://domain:80/path?query#fragment"), Uri.empty().schemeName("scheme").hostName("domain").portNumber(80).path("/", "path").query(null, "query").fragmentIdentifier("fragment"));
   }
+
 }

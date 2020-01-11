@@ -22,6 +22,7 @@ import swim.api.auth.Identity;
 import swim.api.policy.PolicyDirective;
 
 public interface EdgeContext extends TierContext, CellContext {
+
   EdgeBinding edgeWrapper();
 
   <T> T unwrapEdge(Class<T> edgeClass);
@@ -77,4 +78,5 @@ public interface EdgeContext extends TierContext, CellContext {
   void openAgents(NodeBinding node);
 
   PolicyDirective<Identity> authenticate(Credentials credentials);
+
 }

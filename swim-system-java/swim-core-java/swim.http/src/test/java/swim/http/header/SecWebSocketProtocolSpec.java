@@ -21,6 +21,7 @@ import swim.http.HttpHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class SecWebSocketProtocolSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -38,4 +39,5 @@ public class SecWebSocketProtocolSpec {
     assertWrites(SecWebSocketProtocol.from("chat"), "Sec-WebSocket-Protocol: chat");
     assertWrites(SecWebSocketProtocol.from("chat", "superchat"), "Sec-WebSocket-Protocol: chat, superchat");
   }
+
 }

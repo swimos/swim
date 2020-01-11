@@ -15,6 +15,7 @@
 package swim.streamlet;
 
 public interface StreamletScope<O> {
+
   /**
    * Returns the lexically scoped parent of this {@code StreamletScope}.
    * Returns {@code null} if this {@code StreamletScope} has no lexical parent.
@@ -31,4 +32,5 @@ public interface StreamletScope<O> {
    * updates.
    */
   Outlet<O> outlet(String key);
+
 }

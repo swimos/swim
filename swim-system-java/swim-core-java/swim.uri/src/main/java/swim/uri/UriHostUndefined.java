@@ -17,6 +17,7 @@ package swim.uri;
 import swim.codec.Output;
 
 final class UriHostUndefined extends UriHost {
+
   @Override
   public boolean isDefined() {
     return false;
@@ -41,4 +42,5 @@ final class UriHostUndefined extends UriHost {
   public String toString() {
     return "";
   }
+
 }

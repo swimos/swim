@@ -19,12 +19,41 @@ import swim.structure.Data;
 import swim.structure.Value;
 
 public class GoogleIdToken extends OpenIdToken {
+
   public GoogleIdToken(Value value) {
     super(value);
   }
 
   public GoogleIdToken() {
     super();
+  }
+
+  public static GoogleIdToken from(Value value) {
+    return new GoogleIdToken(value);
+  }
+
+  public static GoogleIdToken parse(String json) {
+    return new GoogleIdToken(Json.parse(json));
+  }
+
+  public static GoogleIdToken verify(JsonWebSignature jws, Iterable<PublicKeyDef> publicKeyDefs) {
+    final Value payload = jws.payload();
+    final GoogleIdToken idToken = new GoogleIdToken(payload);
+    // TODO: check payload
+    for (PublicKeyDef publicKeyDef : publicKeyDefs) {
+      if (jws.verifySignature(publicKeyDef.publicKey())) {
+        return idToken;
+      }
+    }
+    return null;
+  }
+
+  public static GoogleIdToken verify(String compactJws, Iterable<PublicKeyDef> publicKeyDefs) {
+    final JsonWebSignature jws = JsonWebSignature.parse(compactJws);
+    if (jws != null) {
+      return verify(jws, publicKeyDefs);
+    }
+    return null;
   }
 
   @Override
@@ -160,31 +189,4 @@ public class GoogleIdToken extends OpenIdToken {
     return new GoogleIdToken(value);
   }
 
-  public static GoogleIdToken from(Value value) {
-    return new GoogleIdToken(value);
-  }
-
-  public static GoogleIdToken parse(String json) {
-    return new GoogleIdToken(Json.parse(json));
-  }
-
-  public static GoogleIdToken verify(JsonWebSignature jws, Iterable<PublicKeyDef> publicKeyDefs) {
-    final Value payload = jws.payload();
-    final GoogleIdToken idToken = new GoogleIdToken(payload);
-    // TODO: check payload
-    for (PublicKeyDef publicKeyDef : publicKeyDefs) {
-      if (jws.verifySignature(publicKeyDef.publicKey())) {
-        return idToken;
-      }
-    }
-    return null;
-  }
-
-  public static GoogleIdToken verify(String compactJws, Iterable<PublicKeyDef> publicKeyDefs) {
-    final JsonWebSignature jws = JsonWebSignature.parse(compactJws);
-    if (jws != null) {
-      return verify(jws, publicKeyDefs);
-    }
-    return null;
-  }
 }

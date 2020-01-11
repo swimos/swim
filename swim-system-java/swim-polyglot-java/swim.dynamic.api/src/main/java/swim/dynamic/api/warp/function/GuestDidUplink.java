@@ -20,6 +20,7 @@ import swim.dynamic.Bridge;
 import swim.dynamic.BridgeGuest;
 
 public class GuestDidUplink extends BridgeGuest implements DidUplink {
+
   public GuestDidUplink(Bridge bridge, Object guest) {
     super(bridge, guest);
   }
@@ -28,4 +29,5 @@ public class GuestDidUplink extends BridgeGuest implements DidUplink {
   public void didUplink(WarpUplink uplink) {
     this.bridge.guestExecuteVoid(this.guest, uplink);
   }
+
 }

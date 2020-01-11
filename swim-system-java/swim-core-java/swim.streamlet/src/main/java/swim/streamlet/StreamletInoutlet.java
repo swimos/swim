@@ -21,6 +21,7 @@ package swim.streamlet;
  * state from the parameterized {@code Streamlet}.
  */
 public class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
+
   protected final Streamlet<? super I, ? extends O> streamlet;
 
   public StreamletInoutlet(Streamlet<? super I, ? extends O> streamlet) {
@@ -75,4 +76,5 @@ public class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
       ((GenericStreamlet<? super I, ? extends O>) this.streamlet).didReconcileOutlet(this, version);
     }
   }
+
 }

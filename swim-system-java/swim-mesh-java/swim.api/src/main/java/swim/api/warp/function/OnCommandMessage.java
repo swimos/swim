@@ -19,5 +19,7 @@ import swim.warp.CommandMessage;
 
 @FunctionalInterface
 public interface OnCommandMessage extends Preemptive {
+
   void onCommand(CommandMessage message);
+
 }

@@ -25,12 +25,39 @@ import swim.structure.Data;
 import swim.util.Murmur3;
 
 public final class WsPong<P, T> extends WsControl<P, T> implements Debug {
+
+  private static int hashSeed;
   final P payload;
   final Encoder<?, ?> content;
 
   WsPong(P payload, Encoder<?, ?> content) {
     this.payload = payload;
     this.content = content;
+  }
+
+  public static <P, T> WsPong<P, T> empty() {
+    return new WsPong<P, T>(null, Encoder.done());
+  }
+
+  public static <P, T> WsPong<P, T> from(P payload, Encoder<?, ?> content) {
+    return new WsPong<P, T>(payload, content);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <P, T> WsPong<P, T> from(P payload) {
+    if (payload instanceof Data) {
+      return (WsPong<P, T>) from((Data) payload);
+    } else {
+      return new WsPong<P, T>(payload, Encoder.done());
+    }
+  }
+
+  public static <T> WsPong<ByteBuffer, T> from(ByteBuffer payload) {
+    return new WsPong<ByteBuffer, T>(payload.duplicate(), Binary.byteBufferWriter(payload));
+  }
+
+  public static <T> WsPong<Data, T> from(Data payload) {
+    return new WsPong<Data, T>(payload, payload.writer());
   }
 
   @Override
@@ -83,30 +110,4 @@ public final class WsPong<P, T> extends WsControl<P, T> implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static <P, T> WsPong<P, T> empty() {
-    return new WsPong<P, T>(null, Encoder.done());
-  }
-
-  public static <P, T> WsPong<P, T> from(P payload, Encoder<?, ?> content) {
-    return new WsPong<P, T>(payload, content);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <P, T> WsPong<P, T> from(P payload) {
-    if (payload instanceof Data) {
-      return (WsPong<P, T>) from((Data) payload);
-    } else {
-      return new WsPong<P, T>(payload, Encoder.done());
-    }
-  }
-
-  public static <T> WsPong<ByteBuffer, T> from(ByteBuffer payload) {
-    return new WsPong<ByteBuffer, T>(payload.duplicate(), Binary.byteBufferWriter(payload));
-  }
-
-  public static <T> WsPong<Data, T> from(Data payload) {
-    return new WsPong<Data, T>(payload, payload.writer());
-  }
 }

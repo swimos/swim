@@ -32,6 +32,7 @@ import swim.kernel.KernelContext;
 import swim.web.WebRoute;
 
 public class WebService implements Service, HttpService, HttpInterface {
+
   final KernelContext kernel;
   final ServiceContext serviceContext;
   final WebServiceDef serviceDef;
@@ -175,4 +176,5 @@ public class WebService implements Service, HttpService, HttpInterface {
   public void didFail(Throwable error) {
     error.printStackTrace();
   }
+
 }

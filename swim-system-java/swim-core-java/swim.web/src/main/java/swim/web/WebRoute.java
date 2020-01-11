@@ -18,9 +18,11 @@ import swim.web.route.AlternativeRoute;
 
 @FunctionalInterface
 public interface WebRoute {
+
   WebResponse routeRequest(WebRequest request);
 
   default WebRoute orElse(WebRoute alternative) {
     return new AlternativeRoute(this, alternative);
   }
+
 }

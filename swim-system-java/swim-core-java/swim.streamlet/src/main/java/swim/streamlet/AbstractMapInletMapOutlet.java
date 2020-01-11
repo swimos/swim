@@ -19,6 +19,7 @@ import swim.collections.HashTrieMap;
 import swim.util.Cursor;
 
 public abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements MapInletMapOutlet<KI, KO, VI, VO, I, O> {
+
   protected MapOutlet<KI, VI, ? extends I> input;
   protected HashTrieMap<KI, KeyEffect> outputEffects;
   protected HashTrieMap<KO, KeyEffect> inputEffects;
@@ -396,4 +397,5 @@ public abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements
   protected void didReconcile(int version) {
     // stub
   }
+
 }

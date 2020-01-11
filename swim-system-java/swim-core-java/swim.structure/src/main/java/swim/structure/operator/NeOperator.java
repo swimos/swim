@@ -25,6 +25,9 @@ import swim.util.Murmur3;
  * its two operands.
  */
 public final class NeOperator extends BinaryOperator {
+
+  private static int hashSeed;
+
   public NeOperator(Item operand1, Item operand2) {
     super(operand1, operand2);
   }
@@ -95,5 +98,4 @@ public final class NeOperator extends BinaryOperator {
     output.debug(this.operand1).write('.').write("ne").write('(').debug(this.operand2).write(')');
   }
 
-  private static int hashSeed;
 }

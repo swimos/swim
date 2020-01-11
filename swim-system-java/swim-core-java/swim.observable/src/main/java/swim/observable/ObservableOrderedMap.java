@@ -17,4 +17,5 @@ package swim.observable;
 import swim.util.OrderedMap;
 
 public interface ObservableOrderedMap<K, V> extends ObservableIterableMap<K, V>, ObservableSortedMap<K, V>, OrderedMap<K, V> {
+
 }

@@ -21,6 +21,7 @@ import swim.codec.Utf8;
 import swim.http.Http;
 
 final class RawHeaderParser extends Parser<RawHeader> {
+
   final String lowerCaseName;
   final String name;
   final Output<String> value;
@@ -35,11 +36,6 @@ final class RawHeaderParser extends Parser<RawHeader> {
 
   RawHeaderParser(String lowerCaseName, String name) {
     this(lowerCaseName, name, null, 1);
-  }
-
-  @Override
-  public Parser<RawHeader> feed(Input input) {
-    return parse(input, this.lowerCaseName, this.name, this.value, this.step);
   }
 
   static Parser<RawHeader> parse(Input input, String lowerCaseName, String name,
@@ -96,4 +92,10 @@ final class RawHeaderParser extends Parser<RawHeader> {
   static Parser<RawHeader> parse(Input input, String lowerCaseName, String name) {
     return parse(input, lowerCaseName, name, null, 1);
   }
+
+  @Override
+  public Parser<RawHeader> feed(Input input) {
+    return parse(input, this.lowerCaseName, this.name, this.value, this.step);
+  }
+
 }

@@ -21,6 +21,7 @@ import swim.uri.UriPattern;
  * AgentRoute} methods.
  */
 public interface AgentRouteContext {
+
   /**
    * @see AgentRoute#routeName()
    */
@@ -30,4 +31,5 @@ public interface AgentRouteContext {
    * @see AgentRoute#pattern()
    */
   UriPattern pattern();
+
 }

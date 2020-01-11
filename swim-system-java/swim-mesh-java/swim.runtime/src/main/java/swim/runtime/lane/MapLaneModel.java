@@ -34,6 +34,10 @@ import swim.structure.Value;
 import swim.warp.CommandMessage;
 
 public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink> {
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+  static final int SIGNED = 1 << 2;
   protected int flags;
   protected MapData<Value, Value> data;
 
@@ -191,7 +195,7 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
     relay.run();
     if (relay.valueForm == valueForm || valueForm == null) {
       return (V) relay.oldObject;
-    } else  {
+    } else {
       return valueForm.unit();
     }
   }
@@ -239,18 +243,16 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
     super.willLoad();
   }
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
 }
 
 final class MapLaneRelayUpdate extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
+  final Value key;
   Form<Object> keyForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
   Value oldValue;
   Object oldObject;
@@ -382,15 +384,17 @@ final class MapLaneRelayUpdate extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
       }
     }
   }
+
 }
 
 final class MapLaneRelayRemove extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
+  final Value key;
   Form<Object> keyForm;
   Form<Object> valueForm;
-  final Value key;
   Object keyObject;
   Value oldValue;
   Object oldObject;
@@ -511,9 +515,11 @@ final class MapLaneRelayRemove extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
       }
     }
   }
+
 }
 
 final class MapLaneRelayDrop extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -592,9 +598,11 @@ final class MapLaneRelayDrop extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> 
       }
     }
   }
+
 }
 
 final class MapLaneRelayTake extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -673,9 +681,11 @@ final class MapLaneRelayTake extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> 
       }
     }
   }
+
 }
 
 final class MapLaneRelayClear extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> {
+
   final Link link;
   final CommandMessage message;
   final Cont<CommandMessage> cont;
@@ -750,4 +760,5 @@ final class MapLaneRelayClear extends LaneRelay<MapLaneModel, MapLaneView<?, ?>>
       }
     }
   }
+
 }

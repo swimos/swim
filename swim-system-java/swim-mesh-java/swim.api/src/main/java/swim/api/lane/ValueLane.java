@@ -31,6 +31,7 @@ import swim.streamlet.Outlet;
 import swim.structure.Form;
 
 public interface ValueLane<V> extends WarpLane, ObservableValue<V>, Inlet<V>, Outlet<V> {
+
   Form<V> valueForm();
 
   <V2> ValueLane<V2> valueForm(Form<V2> valueForm);
@@ -86,4 +87,5 @@ public interface ValueLane<V> extends WarpLane, ObservableValue<V>, Inlet<V>, Ou
 
   @Override
   V set(V newValue);
+
 }

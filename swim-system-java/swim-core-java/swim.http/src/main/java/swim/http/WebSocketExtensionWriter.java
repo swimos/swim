@@ -20,6 +20,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class WebSocketExtensionWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final String name;
   final Iterator<WebSocketParam> params;
@@ -37,11 +38,6 @@ final class WebSocketExtensionWriter extends Writer<Object, Object> {
 
   WebSocketExtensionWriter(HttpWriter http, String name, Iterator<WebSocketParam> params) {
     this(http, name, params, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.name, this.params, this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name,
@@ -100,4 +96,10 @@ final class WebSocketExtensionWriter extends Writer<Object, Object> {
                                       Iterator<WebSocketParam> params) {
     return write(output, http, name, params, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.name, this.params, this.part, this.step);
+  }
+
 }

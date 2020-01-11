@@ -20,6 +20,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class ActorIdentity implements Identity {
+
   final Uri requestUri;
   final Uri fromUri;
   final Value subject;
@@ -59,4 +60,5 @@ public class ActorIdentity implements Identity {
   public Store session() {
     throw new UnsupportedOperationException(); // TODO
   }
+
 }

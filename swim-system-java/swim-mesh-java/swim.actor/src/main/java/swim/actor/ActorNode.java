@@ -45,6 +45,7 @@ import swim.uri.Uri;
 import swim.util.Log;
 
 public class ActorNode extends ActorTier implements NodeBinding, NodeContext {
+
   final NodeBinding nodeBinding;
   NodeContext nodeContext;
   NodeDef nodeDef;
@@ -386,4 +387,5 @@ public class ActorNode extends ActorTier implements NodeBinding, NodeContext {
   public void didFail(Throwable error) {
     this.nodeBinding.didFail(error);
   }
+
 }

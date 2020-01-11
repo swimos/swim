@@ -19,6 +19,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class ConditionalOperatorWriter<I, V> extends Writer<Object, Object> {
+
   final ReconWriter<I, V> recon;
   final I ifTerm;
   final I thenTerm;
@@ -36,12 +37,6 @@ final class ConditionalOperatorWriter<I, V> extends Writer<Object, Object> {
     this.precedence = precedence;
     this.part = part;
     this.step = step;
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.ifTerm, this.thenTerm, this.elseTerm,
-                 this.precedence, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, I ifTerm, I thenTerm, I elseTerm, int precedence) {
@@ -151,11 +146,18 @@ final class ConditionalOperatorWriter<I, V> extends Writer<Object, Object> {
       return error(output.trap());
     }
     return new ConditionalOperatorWriter<I, V>(recon, ifTerm, thenTerm, elseTerm,
-                                               precedence, part, step);
+        precedence, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
                                              I ifTerm, I thenTerm, I elseTerm, int precedence) {
     return write(output, recon, ifTerm, thenTerm, elseTerm, precedence, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.recon, this.ifTerm, this.thenTerm, this.elseTerm,
+        this.precedence, this.part, this.step);
+  }
+
 }

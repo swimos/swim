@@ -74,6 +74,41 @@ package swim.codec;
  * semantics, are implementation defined.</p>
  */
 public abstract class Decoder<O> {
+
+  private static Decoder<Object> done;
+
+  /**
+   * Returns a {@code Decoder} in the <em>done</em> state that {@code bind}s
+   * a {@code null} decoded result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <O> Decoder<O> done() {
+    if (done == null) {
+      done = new DecoderDone<Object>(null);
+    }
+    return (Decoder<O>) done;
+  }
+
+  /**
+   * Returns a {@code Decoder} in the <em>done</em> state that {@code bind}s
+   * the given decoded {@code output}.
+   */
+  public static <O> Decoder<O> done(O output) {
+    if (output == null) {
+      return done();
+    } else {
+      return new DecoderDone<O>(output);
+    }
+  }
+
+  /**
+   * Returns a {@code Decoder} in the <em>error</em> state that {@code trap}s
+   * the given decode {@code error}.
+   */
+  public static <O> Decoder<O> error(Throwable error) {
+    return new DecoderError<O>(error);
+  }
+
   /**
    * Returns {@code true} when {@link #feed(InputBuffer) feed} is able to
    * consume {@code InputBuffer} data.  i.e. this {@code Decoder} is in the
@@ -126,7 +161,7 @@ public abstract class Decoder<O> {
    * the <em>done</em> state.
    *
    * @throws IllegalStateException if this {@code Decoder} is not in the
-   *         <em>done</em> state.
+   *                               <em>done</em> state.
    */
   public O bind() {
     throw new IllegalStateException();
@@ -137,7 +172,7 @@ public abstract class Decoder<O> {
    * <em>error</em> state.
    *
    * @throws IllegalStateException if this {@code Decoder} is not in the
-   *         <em>error</em> state.
+   *                               <em>error</em> state.
    */
   public Throwable trap() {
     throw new IllegalStateException();
@@ -148,48 +183,16 @@ public abstract class Decoder<O> {
    * A {@code Decoder} in the <em>error</em> state can have any output type.
    *
    * @throws IllegalStateException if this {@code Decoder} is not in the
-   *         <em>error</em> state.
+   *                               <em>error</em> state.
    */
   public <O> Decoder<O> asError() {
     throw new IllegalStateException();
   }
 
-  private static Decoder<Object> done;
-
-  /**
-   * Returns a {@code Decoder} in the <em>done</em> state that {@code bind}s
-   * a {@code null} decoded result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <O> Decoder<O> done() {
-    if (done == null) {
-      done = new DecoderDone<Object>(null);
-    }
-    return (Decoder<O>) done;
-  }
-
-  /**
-   * Returns a {@code Decoder} in the <em>done</em> state that {@code bind}s
-   * the given decoded {@code output}.
-   */
-  public static <O> Decoder<O> done(O output) {
-    if (output == null) {
-      return done();
-    } else {
-      return new DecoderDone<O>(output);
-    }
-  }
-
-  /**
-   * Returns a {@code Decoder} in the <em>error</em> state that {@code trap}s
-   * the given decode {@code error}.
-   */
-  public static <O> Decoder<O> error(Throwable error) {
-    return new DecoderError<O>(error);
-  }
 }
 
 final class DecoderDone<O> extends Decoder<O> {
+
   private final O output;
 
   DecoderDone(O output) {
@@ -215,9 +218,11 @@ final class DecoderDone<O> extends Decoder<O> {
   public O bind() {
     return this.output;
   }
+
 }
 
 final class DecoderError<O> extends Decoder<O> {
+
   private final Throwable error;
 
   DecoderError(Throwable error) {
@@ -249,4 +254,5 @@ final class DecoderError<O> extends Decoder<O> {
   public <O> Decoder<O> asError() {
     return (Decoder<O>) this;
   }
+
 }

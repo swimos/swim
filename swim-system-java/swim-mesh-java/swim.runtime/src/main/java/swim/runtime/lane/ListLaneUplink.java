@@ -25,6 +25,7 @@ import swim.structure.Value;
 import swim.warp.SyncRequest;
 
 public class ListLaneUplink extends ListUplinkModem {
+
   final ListLaneModel laneBinding;
 
   public ListLaneUplink(ListLaneModel laneBinding, WarpBinding linkBinding,
@@ -54,4 +55,5 @@ public class ListLaneUplink extends ListUplinkModem {
     }
     super.willSync(request);
   }
+
 }

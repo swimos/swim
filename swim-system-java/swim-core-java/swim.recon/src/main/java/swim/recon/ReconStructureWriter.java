@@ -52,6 +52,7 @@ import swim.structure.selector.LiteralSelector;
 import swim.structure.selector.ValuesSelector;
 
 public class ReconStructureWriter extends ReconWriter<Item, Value> {
+
   @Override
   public boolean isField(Item item) {
     return item instanceof Field;
@@ -487,4 +488,5 @@ public class ReconStructureWriter extends ReconWriter<Item, Value> {
     }
     return Writer.error(new WriterException("No Recon serialization for " + then));
   }
+
 }

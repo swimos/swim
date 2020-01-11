@@ -15,5 +15,7 @@
 package swim.api.plane;
 
 public interface PlaneFactory<P extends Plane> {
+
   P createPlane(PlaneContext context);
+
 }

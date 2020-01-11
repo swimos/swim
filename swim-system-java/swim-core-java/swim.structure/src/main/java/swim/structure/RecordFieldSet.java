@@ -18,6 +18,7 @@ import java.util.AbstractSet;
 import java.util.Iterator;
 
 final class RecordFieldSet extends AbstractSet<Field> {
+
   final Record record;
 
   RecordFieldSet(Record record) {
@@ -33,4 +34,5 @@ final class RecordFieldSet extends AbstractSet<Field> {
   public Iterator<Field> iterator() {
     return this.record.fieldIterator();
   }
+
 }

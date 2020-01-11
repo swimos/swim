@@ -42,6 +42,8 @@ import swim.util.Murmur3;
  * Interpreter} is in {@code predicate.forSelected}--exactly as it should be.
  */
 public final class FilterSelector extends Selector implements Selectee<Item> {
+
+  private static int hashSeed;
   final Selector predicate;
   final Selector then;
 
@@ -176,5 +178,4 @@ public final class FilterSelector extends Selector implements Selectee<Item> {
     this.then.debugThen(output);
   }
 
-  private static int hashSeed;
 }

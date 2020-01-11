@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import swim.dynamic.structure.SwimStructure;
 
 public class JsHostPrototypeSpec {
+
   @Test
   public void testHostObjectPrototypeChain() {
     try (Context context = Context.create()) {
@@ -40,4 +41,5 @@ public class JsHostPrototypeSpec {
       System.out.println("Item.absent().__proto__.constructor: " + bridge.guestToHost(module.moduleExports()));
     }
   }
+
 }

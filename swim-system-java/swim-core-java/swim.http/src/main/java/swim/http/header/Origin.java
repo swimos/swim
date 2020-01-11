@@ -28,10 +28,48 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class Origin extends HttpHeader {
+
+  private static int hashSeed;
+  private static Origin empty;
   final FingerTrieSeq<Uri> origins;
 
   Origin(FingerTrieSeq<Uri> origins) {
     this.origins = origins;
+  }
+
+  public static Origin empty() {
+    if (empty == null) {
+      empty = new Origin(FingerTrieSeq.<Uri>empty());
+    }
+    return empty;
+  }
+
+  public static Origin from(FingerTrieSeq<Uri> origins) {
+    if (origins.isEmpty()) {
+      return empty();
+    } else {
+      return new Origin(origins);
+    }
+  }
+
+  public static Origin from(Uri... origins) {
+    if (origins.length == 0) {
+      return empty();
+    } else {
+      return new Origin(FingerTrieSeq.of(origins));
+    }
+  }
+
+  public static Origin from(String... originStrings) {
+    final Builder<Uri, FingerTrieSeq<Uri>> origins = FingerTrieSeq.builder();
+    for (int i = 0, n = originStrings.length; i < n; i += 1) {
+      origins.add(Uri.parse(originStrings[i]));
+    }
+    return new Origin(origins.bind());
+  }
+
+  public static Parser<Origin> parseHttpValue(Input input, HttpParser http) {
+    return OriginParser.parse(input);
   }
 
   @Override
@@ -91,42 +129,4 @@ public final class Origin extends HttpHeader {
     }
   }
 
-  private static int hashSeed;
-
-  private static Origin empty;
-
-  public static Origin empty() {
-    if (empty == null) {
-      empty = new Origin(FingerTrieSeq.<Uri>empty());
-    }
-    return empty;
-  }
-
-  public static Origin from(FingerTrieSeq<Uri> origins) {
-    if (origins.isEmpty()) {
-      return empty();
-    } else {
-      return new Origin(origins);
-    }
-  }
-
-  public static Origin from(Uri... origins) {
-    if (origins.length == 0) {
-      return empty();
-    } else {
-      return new Origin(FingerTrieSeq.of(origins));
-    }
-  }
-
-  public static Origin from(String... originStrings) {
-    final Builder<Uri, FingerTrieSeq<Uri>> origins = FingerTrieSeq.builder();
-    for (int i = 0, n = originStrings.length; i < n; i += 1) {
-      origins.add(Uri.parse(originStrings[i]));
-    }
-    return new Origin(origins.bind());
-  }
-
-  public static Parser<Origin> parseHttpValue(Input input, HttpParser http) {
-    return OriginParser.parse(input);
-  }
 }

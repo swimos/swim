@@ -22,6 +22,7 @@ import swim.codec.Parser;
 import swim.codec.Utf8;
 
 final class UriUserParser extends Parser<UriUser> {
+
   final UriParser uri;
   final Output<String> usernameOutput;
   final Output<String> passwordOutput;
@@ -39,11 +40,6 @@ final class UriUserParser extends Parser<UriUser> {
 
   UriUserParser(UriParser uri) {
     this(uri, null, null, 0, 1);
-  }
-
-  @Override
-  public Parser<UriUser> feed(Input input) {
-    return parse(input, this.uri, this.usernameOutput, this.passwordOutput, this.c1, this.step);
   }
 
   static Parser<UriUser> parse(Input input, UriParser uri, Output<String> usernameOutput,
@@ -164,4 +160,10 @@ final class UriUserParser extends Parser<UriUser> {
   static Parser<UriUser> parse(Input input, UriParser uri) {
     return parse(input, uri, null, null, 0, 1);
   }
+
+  @Override
+  public Parser<UriUser> feed(Input input) {
+    return parse(input, this.uri, this.usernameOutput, this.passwordOutput, this.c1, this.step);
+  }
+
 }

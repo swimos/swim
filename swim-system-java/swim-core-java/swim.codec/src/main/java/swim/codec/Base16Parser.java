@@ -15,6 +15,7 @@
 package swim.codec;
 
 final class Base16Parser<O> extends Parser<O> {
+
   final Output<O> output;
   final int p;
   final int step;
@@ -27,11 +28,6 @@ final class Base16Parser<O> extends Parser<O> {
 
   Base16Parser(Output<O> output) {
     this(output, 0, 1);
-  }
-
-  @Override
-  public Parser<O> feed(Input input) {
-    return parse(input, this.output.clone(), this.p, this.step);
   }
 
   static <O> Parser<O> parse(Input input, Output<O> output, int p, int step) {
@@ -76,4 +72,10 @@ final class Base16Parser<O> extends Parser<O> {
   static <O> Parser<O> parse(Input input, Output<O> output) {
     return parse(input, output, 0, 1);
   }
+
+  @Override
+  public Parser<O> feed(Input input) {
+    return parse(input, this.output.clone(), this.p, this.step);
+  }
+
 }

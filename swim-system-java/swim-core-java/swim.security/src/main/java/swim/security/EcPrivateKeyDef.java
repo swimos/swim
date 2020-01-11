@@ -29,6 +29,9 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class EcPrivateKeyDef extends PrivateKeyDef implements EcKeyDef {
+
+  private static int hashSeed;
+  private static Form<EcPrivateKeyDef> form;
   protected final EcDomainDef domain;
   protected final BigInteger secret;
   protected ECPrivateKey privateKey;
@@ -41,6 +44,18 @@ public class EcPrivateKeyDef extends PrivateKeyDef implements EcKeyDef {
 
   public EcPrivateKeyDef(EcDomainDef domain, BigInteger secret) {
     this(domain, secret, null);
+  }
+
+  public static EcPrivateKeyDef from(ECPrivateKey key) {
+    return new EcPrivateKeyDef(EcDomainDef.from(key.getParams()), key.getS(), key);
+  }
+
+  @Kind
+  public static Form<EcPrivateKeyDef> form() {
+    if (form == null) {
+      form = new EcPrivateKeyForm();
+    }
+    return form;
   }
 
   @Override
@@ -98,24 +113,10 @@ public class EcPrivateKeyDef extends PrivateKeyDef implements EcKeyDef {
         this.domain.hashCode()), this.secret.hashCode()));
   }
 
-  private static int hashSeed;
-
-  private static Form<EcPrivateKeyDef> form;
-
-  public static EcPrivateKeyDef from(ECPrivateKey key) {
-    return new EcPrivateKeyDef(EcDomainDef.from(key.getParams()), key.getS(), key);
-  }
-
-  @Kind
-  public static Form<EcPrivateKeyDef> form() {
-    if (form == null) {
-      form = new EcPrivateKeyForm();
-    }
-    return form;
-  }
 }
 
 final class EcPrivateKeyForm extends Form<EcPrivateKeyDef> {
+
   @Override
   public String tag() {
     return "ECPrivateKey";
@@ -146,4 +147,5 @@ final class EcPrivateKeyForm extends Form<EcPrivateKeyDef> {
     }
     return null;
   }
+
 }

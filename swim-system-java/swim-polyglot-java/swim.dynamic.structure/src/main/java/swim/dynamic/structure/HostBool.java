@@ -19,9 +19,6 @@ import swim.dynamic.JavaHostClassType;
 import swim.structure.Bool;
 
 public final class HostBool {
-  private HostBool() {
-    // static
-  }
 
   public static final HostObjectType<Bool> TYPE;
 
@@ -30,4 +27,9 @@ public final class HostBool {
     TYPE = type;
     type.extendType(HostValue.TYPE);
   }
+
+  private HostBool() {
+    // static
+  }
+
 }

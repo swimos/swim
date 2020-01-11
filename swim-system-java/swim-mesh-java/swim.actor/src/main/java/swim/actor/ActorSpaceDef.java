@@ -39,6 +39,8 @@ import swim.uri.UriMapper;
 import swim.util.Murmur3;
 
 public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
+
+  private static int hashSeed;
   final String spaceName;
   final FingerTrieSeq<PlaneDef> planeDefs;
   final HashTrieMap<String, AuthenticatorDef> authenticatorDefs;
@@ -72,6 +74,18 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
     this.storeDef = storeDef;
   }
 
+  public static ActorSpaceDef fromName(String spaceName) {
+    return new ActorSpaceDef(spaceName, FingerTrieSeq.empty(), HashTrieMap.empty(),
+        HashTrieMap.empty(), HashTrieMap.empty(), UriMapper.empty(),
+        UriMapper.empty(), UriMapper.empty(), null, null, null, null);
+  }
+
+  public static ActorSpaceDef fromPlaneDef(PlaneDef planeDef) {
+    return new ActorSpaceDef(planeDef.planeName(), FingerTrieSeq.of(planeDef), HashTrieMap.empty(),
+        HashTrieMap.empty(), HashTrieMap.empty(), UriMapper.empty(),
+        UriMapper.empty(), UriMapper.empty(), null, null, null, null);
+  }
+
   @Override
   public final String spaceName() {
     return this.spaceName;
@@ -79,8 +93,8 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef spaceName(String spaceName) {
     return copy(spaceName, this.planeDefs, this.authenticatorDefs, this.meshDefs,
-                this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -100,9 +114,9 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef planeDef(PlaneDef planeDef) {
     return copy(this.spaceName, this.planeDefs.appended(planeDef),
-                this.authenticatorDefs, this.meshDefs, this.partDefs, this.hostDefs,
-                this.nodeDefs, this.laneDefs, this.logDef, this.policyDef,
-                this.stageDef, this.storeDef);
+        this.authenticatorDefs, this.meshDefs, this.partDefs, this.hostDefs,
+        this.nodeDefs, this.laneDefs, this.logDef, this.policyDef,
+        this.stageDef, this.storeDef);
   }
 
   public final Collection<? extends AuthenticatorDef> authenticatorDefs() {
@@ -115,9 +129,9 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef authenticatorDef(AuthenticatorDef authenticatorDef) {
     return copy(this.spaceName, this.planeDefs,
-                this.authenticatorDefs.updated(authenticatorDef.authenticatorName(), authenticatorDef),
-                this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.authenticatorDefs.updated(authenticatorDef.authenticatorName(), authenticatorDef),
+        this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -132,9 +146,9 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef meshDef(MeshDef meshDef) {
     return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
-                this.meshDefs.updated(meshDef.meshUri(), meshDef),
-                this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.meshDefs.updated(meshDef.meshUri(), meshDef),
+        this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -149,9 +163,9 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef partDef(PartDef partDef) {
     return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
-                this.meshDefs, this.partDefs.updated(partDef.partKey(), partDef),
-                this.hostDefs, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.meshDefs, this.partDefs.updated(partDef.partKey(), partDef),
+        this.hostDefs, this.nodeDefs, this.laneDefs,
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -166,9 +180,9 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef hostDef(HostDef hostDef) {
     return copy(this.spaceName, this.planeDefs, this.authenticatorDefs, this.meshDefs,
-                this.partDefs, this.hostDefs.updated(hostDef.hostPattern(), hostDef),
-                this.nodeDefs, this.laneDefs, this.logDef, this.policyDef,
-                this.stageDef, this.storeDef);
+        this.partDefs, this.hostDefs.updated(hostDef.hostPattern(), hostDef),
+        this.nodeDefs, this.laneDefs, this.logDef, this.policyDef,
+        this.stageDef, this.storeDef);
   }
 
   @Override
@@ -183,9 +197,9 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef nodeDef(NodeDef nodeDef) {
     return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
-                this.meshDefs, this.partDefs, this.hostDefs,
-                this.nodeDefs.updated(nodeDef.nodePattern(), nodeDef), this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.meshDefs, this.partDefs, this.hostDefs,
+        this.nodeDefs.updated(nodeDef.nodePattern(), nodeDef), this.laneDefs,
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -200,9 +214,9 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef laneDef(LaneDef laneDef) {
     return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
-                this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs,
-                this.laneDefs.updated(laneDef.lanePattern(), laneDef),
-                this.logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs,
+        this.laneDefs.updated(laneDef.lanePattern(), laneDef),
+        this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -212,8 +226,8 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef logDef(LogDef logDef) {
     return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
-                this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
-                logDef, this.policyDef, this.stageDef, this.storeDef);
+        this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
+        logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -223,8 +237,8 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef policyDef(PolicyDef policyDef) {
     return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
-                this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
-                this.logDef, policyDef, this.stageDef, this.storeDef);
+        this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
+        this.logDef, policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -234,8 +248,8 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef stageDef(StageDef stageDef) {
     return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
-                this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, stageDef, this.storeDef);
+        this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
+        this.logDef, this.policyDef, stageDef, this.storeDef);
   }
 
   @Override
@@ -245,8 +259,8 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
 
   public ActorSpaceDef storeDef(StoreDef storeDef) {
     return copy(this.spaceName, this.planeDefs, this.authenticatorDefs,
-                this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
-                this.logDef, this.policyDef, this.stageDef, storeDef);
+        this.meshDefs, this.partDefs, this.hostDefs, this.nodeDefs, this.laneDefs,
+        this.logDef, this.policyDef, this.stageDef, storeDef);
   }
 
   protected ActorSpaceDef copy(String spaceName, FingerTrieSeq<PlaneDef> planeDefs,
@@ -254,10 +268,10 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
                                HashTrieMap<Uri, MeshDef> meshDefs, HashTrieMap<Value, PartDef> partDefs,
                                UriMapper<HostDef> hostDefs, UriMapper<NodeDef> nodeDefs,
                                UriMapper<LaneDef> laneDefs, LogDef logDef, PolicyDef policyDef,
-                           StageDef stageDef, StoreDef storeDef) {
+                               StageDef stageDef, StoreDef storeDef) {
     return new ActorSpaceDef(spaceName, planeDefs, authenticatorDefs, meshDefs,
-                             partDefs, hostDefs, nodeDefs, laneDefs,
-                             logDef, policyDef, stageDef, storeDef);
+        partDefs, hostDefs, nodeDefs, laneDefs,
+        logDef, policyDef, stageDef, storeDef);
   }
 
   @Override
@@ -289,8 +303,8 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
-        Murmur3.hash(this.spaceName)), this.planeDefs.hashCode()), this.authenticatorDefs.hashCode()),
-        this.meshDefs.hashCode()), this.partDefs.hashCode()), this.hostDefs.hashCode()),
+            Murmur3.hash(this.spaceName)), this.planeDefs.hashCode()), this.authenticatorDefs.hashCode()),
+            this.meshDefs.hashCode()), this.partDefs.hashCode()), this.hostDefs.hashCode()),
         this.nodeDefs.hashCode()), this.laneDefs.hashCode()), Murmur3.hash(this.logDef)),
         Murmur3.hash(this.policyDef)), Murmur3.hash(this.stageDef)), Murmur3.hash(this.storeDef)));
   }
@@ -339,17 +353,4 @@ public class ActorSpaceDef implements SpaceDef, EdgeDef, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static ActorSpaceDef fromName(String spaceName) {
-    return new ActorSpaceDef(spaceName, FingerTrieSeq.empty(), HashTrieMap.empty(),
-                             HashTrieMap.empty(), HashTrieMap.empty(), UriMapper.empty(),
-                             UriMapper.empty(), UriMapper.empty(), null, null, null, null);
-  }
-
-  public static ActorSpaceDef fromPlaneDef(PlaneDef planeDef) {
-    return new ActorSpaceDef(planeDef.planeName(), FingerTrieSeq.of(planeDef), HashTrieMap.empty(),
-                             HashTrieMap.empty(), HashTrieMap.empty(), UriMapper.empty(),
-                             UriMapper.empty(), UriMapper.empty(), null, null, null, null);
-  }
 }

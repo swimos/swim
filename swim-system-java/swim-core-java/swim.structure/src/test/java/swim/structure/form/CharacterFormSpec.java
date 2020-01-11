@@ -23,6 +23,7 @@ import swim.structure.Text;
 import static org.testng.Assert.assertEquals;
 
 public class CharacterFormSpec {
+
   @Test
   public void moldCharacters() {
     assertEquals(Form.forCharacter().mold('*'), Num.from(42));
@@ -44,4 +45,5 @@ public class CharacterFormSpec {
   public void castAttributedNumsToCharacters() {
     assertEquals(Form.forCharacter().cast(Record.of(Attr.of("test"), (char) 42)), Character.valueOf('*'));
   }
+
 }

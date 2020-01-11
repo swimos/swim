@@ -23,6 +23,7 @@ package swim.concurrent;
  * @see Timer
  */
 public interface TimerContext extends TimerRef {
+
   /**
    * Returns the {@code Schedule} to which the timer is bound.
    */
@@ -52,4 +53,5 @@ public interface TimerContext extends TimerRef {
    */
   @Override
   boolean cancel();
+
 }

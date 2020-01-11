@@ -19,6 +19,7 @@ import swim.codec.EncoderException;
 import swim.codec.OutputBuffer;
 
 public abstract class WsEncoder {
+
   public abstract boolean isMasked();
 
   public abstract void maskingKey(byte[] maskingKey);
@@ -26,26 +27,40 @@ public abstract class WsEncoder {
   public <T> Encoder<?, WsFrame<T>> frameEncoder(WsFrame<T> frame) {
     final WsOpcode opcode = frame.opcode();
     switch (opcode) {
-      case CONTINUATION: return Encoder.error(new EncoderException("invalid opcode: " + opcode));
-      case TEXT: return textFrameEncoder(frame);
-      case BINARY: return binaryFrameEncoder(frame);
-      case CLOSE: return closeFrameEncoder(frame);
-      case PING: return pingFrameEncoder(frame);
-      case PONG: return pongFrameEncoder(frame);
-      default: return Encoder.error(new EncoderException("reserved opcode: " + opcode));
+      case CONTINUATION:
+        return Encoder.error(new EncoderException("invalid opcode: " + opcode));
+      case TEXT:
+        return textFrameEncoder(frame);
+      case BINARY:
+        return binaryFrameEncoder(frame);
+      case CLOSE:
+        return closeFrameEncoder(frame);
+      case PING:
+        return pingFrameEncoder(frame);
+      case PONG:
+        return pongFrameEncoder(frame);
+      default:
+        return Encoder.error(new EncoderException("reserved opcode: " + opcode));
     }
   }
 
   public <T> Encoder<?, WsFrame<T>> encodeFrame(WsFrame<T> frame, OutputBuffer<?> output) {
     final WsOpcode opcode = frame.opcode();
     switch (opcode) {
-      case CONTINUATION: return Encoder.error(new EncoderException("invalid opcode: " + opcode));
-      case TEXT: return encodeTextFrame(frame, output);
-      case BINARY: return encodeBinaryFrame(frame, output);
-      case CLOSE: return encodeCloseFrame(frame, output);
-      case PING: return encodePingFrame(frame, output);
-      case PONG: return encodePongFrame(frame, output);
-      default: return Encoder.error(new EncoderException("reserved opcode: " + opcode));
+      case CONTINUATION:
+        return Encoder.error(new EncoderException("invalid opcode: " + opcode));
+      case TEXT:
+        return encodeTextFrame(frame, output);
+      case BINARY:
+        return encodeBinaryFrame(frame, output);
+      case CLOSE:
+        return encodeCloseFrame(frame, output);
+      case PING:
+        return encodePingFrame(frame, output);
+      case PONG:
+        return encodePongFrame(frame, output);
+      default:
+        return Encoder.error(new EncoderException("reserved opcode: " + opcode));
     }
   }
 
@@ -88,4 +103,5 @@ public abstract class WsEncoder {
   public <T> Encoder<?, WsFrame<T>> encodePongFrame(WsFrame<T> frame, OutputBuffer<?> output) {
     return WsFrameEncoder.encode(output, this, frame);
   }
+
 }

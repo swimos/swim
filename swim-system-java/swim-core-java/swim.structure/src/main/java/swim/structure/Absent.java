@@ -19,8 +19,16 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public final class Absent extends Value {
+
+  private static final Absent VALUE = new Absent();
+  private static int hashSeed;
+
   private Absent() {
     // stub
+  }
+
+  public static Absent absent() {
+    return VALUE;
   }
 
   /**
@@ -187,11 +195,4 @@ public final class Absent extends Value {
     output = output.write("Value").write('.').write("absent").write('(').write(')');
   }
 
-  private static int hashSeed;
-
-  private static final Absent VALUE = new Absent();
-
-  public static Absent absent() {
-    return VALUE;
-  }
 }

@@ -19,6 +19,7 @@ import java.util.AbstractMap;
 import java.util.Map;
 
 public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> {
+
   protected StreamletScope<? extends O> scope;
   protected StreamletContext context;
   protected int version;
@@ -30,149 +31,6 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
 
   public AbstractStreamlet() {
     this(null);
-  }
-
-  @Override
-  public StreamletScope<? extends O> streamletScope() {
-    return this.scope;
-  }
-
-  @Override
-  public void setStreamletScope(StreamletScope<? extends O> scope) {
-    this.scope = scope;
-  }
-
-  @Override
-  public StreamletContext streamletContext() {
-    if (this.context != null) {
-      return this.context;
-    }
-    final StreamletScope<? extends O> scope = streamletScope();
-    if (scope != null) {
-      return scope.streamletContext();
-    }
-    return null;
-  }
-
-  @Override
-  public void setStreamletContext(StreamletContext context) {
-    this.context = context;
-  }
-
-  @Override
-  public Inlet<I> inlet(String key) {
-    return reflectInletKey(key, this, getClass());
-  }
-
-  protected <I2 extends I> Inlet<I2> inlet() {
-    return new StreamletInlet<I2>(this);
-  }
-
-  @Override
-  public void bindInput(String key, Outlet<? extends I> input) {
-    final Inlet<I> inlet = inlet(key);
-    if (inlet == null) {
-      throw new IllegalArgumentException(key.toString());
-    }
-    inlet.bindInput(input);
-  }
-
-  @Override
-  public void unbindInput(String key) {
-    final Inlet<I> inlet = inlet(key);
-    if (inlet == null) {
-      throw new IllegalArgumentException(key.toString());
-    }
-    inlet.unbindInput();
-  }
-
-  @Override
-  public Outlet<O> outlet(String key) {
-    return reflectOutletKey(key, this, getClass());
-  }
-
-  @SuppressWarnings("unchecked")
-  protected <O2> Outlet<O2> outlet() {
-    return new StreamletOutlet<O2>((Streamlet<I, ? extends O2>) this);
-  }
-
-  @SuppressWarnings("unchecked")
-  protected <I2 extends I, O2> Inoutlet<I2, O2> inoutlet() {
-    return new StreamletInoutlet<I2, O2>((Streamlet<? super I2, ? extends O2>) this);
-  }
-
-  @Override
-  public void invalidate() {
-    if (this.version >= 0) {
-      willInvalidate();
-      this.version = -1;
-      onInvalidate();
-      onInvalidateOutlets();
-      didInvalidate();
-    }
-  }
-
-  @Override
-  public void reconcile(int version) {
-    if (this.version < 0) {
-      willReconcile(version);
-      this.version = version;
-      onReconcileInlets(version);
-      onReconcile(version);
-      onReconcileOutlets(version);
-      didReconcile(version);
-    }
-  }
-
-  public <I2 extends I> I2 getInput(Inlet<I2> inlet) {
-    final Outlet<? extends I2> input = inlet.input();
-    if (input != null) {
-      return input.get();
-    }
-    return null;
-  }
-
-  @SuppressWarnings("unchecked")
-  public <I2 extends I> I2 getInput(String key) {
-    final Inlet<I2> inlet = (Inlet<I2>) inlet(key);
-    if (inlet != null) {
-      return getInput(inlet);
-    }
-    return null;
-  }
-
-  public <I2 extends I> I2 getInput(Inlet<I2> inlet, I2 orElse) {
-    I2 input = getInput(inlet);
-    if (input == null) {
-      input = orElse;
-    }
-    return input;
-  }
-
-  public <I2 extends I> I2 getInput(String key, I2 orElse) {
-    I2 input = getInput(key);
-    if (input == null) {
-      input = orElse;
-    }
-    return input;
-  }
-
-  @Override
-  public O getOutput(Outlet<? super O> outlet) {
-    return null;
-  }
-
-  public O getOutput(String key) {
-    final Outlet<O> outlet = outlet(key);
-    if (outlet != null) {
-      return getOutput(outlet);
-    }
-    return null;
-  }
-
-  @Override
-  public void disconnectInputs() {
-    disconnectInputs(this, getClass());
   }
 
   public static <I, O> void disconnectInputs(Streamlet<I, O> streamlet, Class<?> streamletClass) {
@@ -197,11 +55,6 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
     }
   }
 
-  @Override
-  public void disconnectOutputs() {
-    disconnectOutputs(this, getClass());
-  }
-
   public static <I, O> void disconnectOutputs(Streamlet<I, O> streamlet, Class<?> streamletClass) {
     while (streamletClass != null) {
       final Field[] fields = streamletClass.getDeclaredFields();
@@ -222,58 +75,6 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
       final Inoutlet<I, O> inoutlet = reflectInoutletField(streamlet, field);
       inoutlet.disconnectOutputs();
     }
-  }
-
-  @Override
-  public void willInvalidateInlet(Inlet<? extends I> inlet) {
-    // stub
-  }
-
-  @Override
-  public void didInvalidateInlet(Inlet<? extends I> inlet) {
-    invalidate();
-  }
-
-  @Override
-  public void willReconcileInlet(Inlet<? extends I> inlet, int version) {
-    // stub
-  }
-
-  @Override
-  public void didReconcileInlet(Inlet<? extends I> inlet, int version) {
-    reconcile(version);
-  }
-
-  @Override
-  public void willInvalidateOutlet(Outlet<? super O> outlet) {
-    // stub
-  }
-
-  @Override
-  public void didInvalidateOutlet(Outlet<? super O> outlet) {
-    // stub
-  }
-
-  @Override
-  public void willReconcileOutlet(Outlet<? super O> outlet, int version) {
-    // stub
-  }
-
-  @Override
-  public void didReconcileOutlet(Outlet<? super O> outlet, int version) {
-    // stub
-  }
-
-  protected void willInvalidate() {
-    // stub
-  }
-
-  protected void onInvalidate() {
-    // stub
-  }
-
-  protected void onInvalidateOutlets() {
-    invalidateOutlets(this, getClass());
   }
 
   public static <I, O> void invalidateOutlets(Streamlet<I, O> streamlet, Class<?> streamletClass) {
@@ -298,18 +99,6 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
     }
   }
 
-  protected void didInvalidate() {
-    // stub
-  }
-
-  protected void willReconcile(int version) {
-    // stub
-  }
-
-  protected void onReconcileInlets(int version) {
-    reconcileInlets(version, this, getClass());
-  }
-
   public static <I, O> void reconcileInlets(int version, Streamlet<I, O> streamlet, Class<?> streamletClass) {
     while (streamletClass != null) {
       final Field[] fields = streamletClass.getDeclaredFields();
@@ -332,14 +121,6 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
     }
   }
 
-  protected void onReconcile(int version) {
-    // stub
-  }
-
-  protected void onReconcileOutlets(int version) {
-    reconcileOutlets(version, this, getClass());
-  }
-
   public static <I, O> void reconcileOutlets(int version, Streamlet<I, O> streamlet, Class<?> streamletClass) {
     while (streamletClass != null) {
       final Field[] fields = streamletClass.getDeclaredFields();
@@ -360,10 +141,6 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
       final Inoutlet<I, O> inoutlet = reflectInoutletField(streamlet, field);
       inoutlet.reconcileInput(version);
     }
-  }
-
-  protected void didReconcile(int version) {
-    // stub
   }
 
   public static <I, O> int reflectInletCount(Class<?> streamletClass) {
@@ -629,4 +406,229 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
   private static <I, O> Inoutlet<I, O> reflectMapInoutletField(Streamlet<I, O> streamlet, Field field) {
     return null; // TODO
   }
+
+  @Override
+  public StreamletScope<? extends O> streamletScope() {
+    return this.scope;
+  }
+
+  @Override
+  public void setStreamletScope(StreamletScope<? extends O> scope) {
+    this.scope = scope;
+  }
+
+  @Override
+  public StreamletContext streamletContext() {
+    if (this.context != null) {
+      return this.context;
+    }
+    final StreamletScope<? extends O> scope = streamletScope();
+    if (scope != null) {
+      return scope.streamletContext();
+    }
+    return null;
+  }
+
+  @Override
+  public void setStreamletContext(StreamletContext context) {
+    this.context = context;
+  }
+
+  @Override
+  public Inlet<I> inlet(String key) {
+    return reflectInletKey(key, this, getClass());
+  }
+
+  protected <I2 extends I> Inlet<I2> inlet() {
+    return new StreamletInlet<I2>(this);
+  }
+
+  @Override
+  public void bindInput(String key, Outlet<? extends I> input) {
+    final Inlet<I> inlet = inlet(key);
+    if (inlet == null) {
+      throw new IllegalArgumentException(key.toString());
+    }
+    inlet.bindInput(input);
+  }
+
+  @Override
+  public void unbindInput(String key) {
+    final Inlet<I> inlet = inlet(key);
+    if (inlet == null) {
+      throw new IllegalArgumentException(key.toString());
+    }
+    inlet.unbindInput();
+  }
+
+  @Override
+  public Outlet<O> outlet(String key) {
+    return reflectOutletKey(key, this, getClass());
+  }
+
+  @SuppressWarnings("unchecked")
+  protected <O2> Outlet<O2> outlet() {
+    return new StreamletOutlet<O2>((Streamlet<I, ? extends O2>) this);
+  }
+
+  @SuppressWarnings("unchecked")
+  protected <I2 extends I, O2> Inoutlet<I2, O2> inoutlet() {
+    return new StreamletInoutlet<I2, O2>((Streamlet<? super I2, ? extends O2>) this);
+  }
+
+  @Override
+  public void invalidate() {
+    if (this.version >= 0) {
+      willInvalidate();
+      this.version = -1;
+      onInvalidate();
+      onInvalidateOutlets();
+      didInvalidate();
+    }
+  }
+
+  @Override
+  public void reconcile(int version) {
+    if (this.version < 0) {
+      willReconcile(version);
+      this.version = version;
+      onReconcileInlets(version);
+      onReconcile(version);
+      onReconcileOutlets(version);
+      didReconcile(version);
+    }
+  }
+
+  public <I2 extends I> I2 getInput(Inlet<I2> inlet) {
+    final Outlet<? extends I2> input = inlet.input();
+    if (input != null) {
+      return input.get();
+    }
+    return null;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <I2 extends I> I2 getInput(String key) {
+    final Inlet<I2> inlet = (Inlet<I2>) inlet(key);
+    if (inlet != null) {
+      return getInput(inlet);
+    }
+    return null;
+  }
+
+  public <I2 extends I> I2 getInput(Inlet<I2> inlet, I2 orElse) {
+    I2 input = getInput(inlet);
+    if (input == null) {
+      input = orElse;
+    }
+    return input;
+  }
+
+  public <I2 extends I> I2 getInput(String key, I2 orElse) {
+    I2 input = getInput(key);
+    if (input == null) {
+      input = orElse;
+    }
+    return input;
+  }
+
+  @Override
+  public O getOutput(Outlet<? super O> outlet) {
+    return null;
+  }
+
+  public O getOutput(String key) {
+    final Outlet<O> outlet = outlet(key);
+    if (outlet != null) {
+      return getOutput(outlet);
+    }
+    return null;
+  }
+
+  @Override
+  public void disconnectInputs() {
+    disconnectInputs(this, getClass());
+  }
+
+  @Override
+  public void disconnectOutputs() {
+    disconnectOutputs(this, getClass());
+  }
+
+  @Override
+  public void willInvalidateInlet(Inlet<? extends I> inlet) {
+    // stub
+  }
+
+  @Override
+  public void didInvalidateInlet(Inlet<? extends I> inlet) {
+    invalidate();
+  }
+
+  @Override
+  public void willReconcileInlet(Inlet<? extends I> inlet, int version) {
+    // stub
+  }
+
+  @Override
+  public void didReconcileInlet(Inlet<? extends I> inlet, int version) {
+    reconcile(version);
+  }
+
+  @Override
+  public void willInvalidateOutlet(Outlet<? super O> outlet) {
+    // stub
+  }
+
+  @Override
+  public void didInvalidateOutlet(Outlet<? super O> outlet) {
+    // stub
+  }
+
+  @Override
+  public void willReconcileOutlet(Outlet<? super O> outlet, int version) {
+    // stub
+  }
+
+  @Override
+  public void didReconcileOutlet(Outlet<? super O> outlet, int version) {
+    // stub
+  }
+
+  protected void willInvalidate() {
+    // stub
+  }
+
+  protected void onInvalidate() {
+    // stub
+  }
+
+  protected void onInvalidateOutlets() {
+    invalidateOutlets(this, getClass());
+  }
+
+  protected void didInvalidate() {
+    // stub
+  }
+
+  protected void willReconcile(int version) {
+    // stub
+  }
+
+  protected void onReconcileInlets(int version) {
+    reconcileInlets(version, this, getClass());
+  }
+
+  protected void onReconcile(int version) {
+    // stub
+  }
+
+  protected void onReconcileOutlets(int version) {
+    reconcileOutlets(version, this, getClass());
+  }
+
+  protected void didReconcile(int version) {
+    // stub
+  }
+
 }

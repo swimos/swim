@@ -15,5 +15,7 @@
 package swim.runtime.reflect;
 
 public abstract class LanePulse extends Pulse {
+
   public abstract long laneCount();
+
 }

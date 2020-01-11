@@ -26,57 +26,13 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public abstract class Envelope implements Debug {
-  Envelope() {
-    // stub
-  }
-
-  public abstract String tag();
-
-  public abstract Form<? extends Envelope> form();
-
-  public abstract Uri nodeUri();
-
-  public abstract Uri laneUri();
-
-  public abstract Value body();
-
-  public abstract Envelope nodeUri(Uri node);
-
-  public abstract Envelope laneUri(Uri lane);
-
-  public abstract Envelope body(Value body);
-
-  @SuppressWarnings("unchecked")
-  public Value toValue() {
-    return ((Form<Envelope>) form()).mold(this).toValue();
-  }
-
-  public Encoder<?, Envelope> reconEncoder() {
-    return new EnvelopeEncoder(this);
-  }
-
-  public Writer<?, ?> reconWriter() {
-    return Recon.write(toValue(), Output.full());
-  }
-
-  public Writer<?, ?> writeRecon(Output<?> output) {
-    return Recon.write(toValue(), output);
-  }
-
-  public String toRecon() {
-    return Recon.toString(toValue());
-  }
-
-  @Override
-  public abstract void debug(Output<?> output);
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
-  }
 
   private static Decoder<Envelope> decoder;
   private static Encoder<Envelope, Envelope> encoder;
+
+  Envelope() {
+    // stub
+  }
 
   public static Decoder<Envelope> decoder() {
     if (decoder == null) {
@@ -136,4 +92,50 @@ public abstract class Envelope implements Debug {
     }
     return null;
   }
+
+  public abstract String tag();
+
+  public abstract Form<? extends Envelope> form();
+
+  public abstract Uri nodeUri();
+
+  public abstract Uri laneUri();
+
+  public abstract Value body();
+
+  public abstract Envelope nodeUri(Uri node);
+
+  public abstract Envelope laneUri(Uri lane);
+
+  public abstract Envelope body(Value body);
+
+  @SuppressWarnings("unchecked")
+  public Value toValue() {
+    return ((Form<Envelope>) form()).mold(this).toValue();
+  }
+
+  public Encoder<?, Envelope> reconEncoder() {
+    return new EnvelopeEncoder(this);
+  }
+
+  public Writer<?, ?> reconWriter() {
+    return Recon.write(toValue(), Output.full());
+  }
+
+  public Writer<?, ?> writeRecon(Output<?> output) {
+    return Recon.write(toValue(), output);
+  }
+
+  public String toRecon() {
+    return Recon.toString(toValue());
+  }
+
+  @Override
+  public abstract void debug(Output<?> output);
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
+  }
+
 }

@@ -19,6 +19,7 @@ import swim.structure.Func;
 import swim.structure.Item;
 
 public abstract class BridgeFunc extends Func {
+
   @Override
   public int typeOrder() {
     return 51;
@@ -50,4 +51,5 @@ public abstract class BridgeFunc extends Func {
   public void debug(Output<?> output) {
     output = output.write(getClass().getName()).write('@').write(Integer.toHexString(hashCode()));
   }
+
 }

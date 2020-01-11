@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class Fixed32Decoder<V> extends Decoder<V> {
+
   final ProtobufDecoder<?, V> protobuf;
   final int value;
   final int shift;
@@ -27,11 +28,6 @@ final class Fixed32Decoder<V> extends Decoder<V> {
     this.protobuf = protobuf;
     this.value = value;
     this.shift = shift;
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.value, this.shift);
   }
 
   static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf,
@@ -55,4 +51,10 @@ final class Fixed32Decoder<V> extends Decoder<V> {
   static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf) {
     return decode(input, protobuf, 0, 0);
   }
+
+  @Override
+  public Decoder<V> feed(InputBuffer input) {
+    return decode(input, this.protobuf, this.value, this.shift);
+  }
+
 }

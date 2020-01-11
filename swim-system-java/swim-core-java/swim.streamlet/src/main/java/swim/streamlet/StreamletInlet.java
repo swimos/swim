@@ -20,6 +20,7 @@ package swim.streamlet;
  * Streamlet} whenever the {@code Inlet} updates.
  */
 public class StreamletInlet<I> extends AbstractInlet<I> {
+
   protected final Streamlet<? super I, ?> streamlet;
 
   public StreamletInlet(Streamlet<? super I, ?> streamlet) {
@@ -61,4 +62,5 @@ public class StreamletInlet<I> extends AbstractInlet<I> {
       this.streamlet.reconcile(version);
     }
   }
+
 }

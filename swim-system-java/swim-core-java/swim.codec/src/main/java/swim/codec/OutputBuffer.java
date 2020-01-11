@@ -21,91 +21,8 @@ import java.nio.channels.ReadableByteChannel;
  * Non-blocking token stream buffer.
  */
 public abstract class OutputBuffer<T> extends Output<T> {
-  public abstract OutputBuffer<T> isPart(boolean isPart);
-
-  public abstract int index();
-
-  public abstract OutputBuffer<T> index(int index);
-
-  public abstract int limit();
-
-  public abstract OutputBuffer<T> limit(int limit);
-
-  public abstract int capacity();
-
-  public abstract int remaining();
-
-  public abstract byte[] array();
-
-  public abstract int arrayOffset();
-
-  public abstract boolean has(int index);
-
-  public abstract int get(int index);
-
-  public abstract void set(int index, int token);
-
-  public abstract int write(ReadableByteChannel channel) throws IOException;
-
-  @Override
-  public abstract OutputBuffer<T> write(int token);
-
-  @Override
-  public OutputBuffer<T> write(String string) {
-    OutputBuffer<T> output = this;
-    final int n = string.length();
-    for (int i = 0; i < n; i = string.offsetByCodePoints(i, 1)) {
-      output = output.write(string.codePointAt(i));
-    }
-    return output;
-  }
-
-  @Override
-  public OutputBuffer<T> writeln(String string) {
-    return write(string).writeln();
-  }
-
-  @Override
-  public OutputBuffer<T> writeln() {
-    return write(settings().lineSeparator());
-  }
-
-  @Override
-  public OutputBuffer<T> display(Object object) {
-    Format.display(object, this);
-    return this;
-  }
-
-  @Override
-  public OutputBuffer<T> debug(Object object) {
-    Format.debug(object, this);
-    return this;
-  }
-
-  public abstract OutputBuffer<T> move(int fromIndex, int toIndex, int length);
-
-  public abstract OutputBuffer<T> step(int offset);
-
-  @Override
-  public OutputBuffer<T> flush() {
-    return this;
-  }
-
-  @Override
-  public OutputBuffer<T> fork(Object condition) {
-    return this;
-  }
-
-  @Override
-  public abstract OutputBuffer<T> settings(OutputSettings settings);
-
-  @Override
-  public OutputBuffer<T> clone() {
-    throw new UnsupportedOperationException();
-  }
 
   private static OutputBuffer<Object> full;
-
   private static OutputBuffer<Object> done;
 
   /**
@@ -213,9 +130,94 @@ public abstract class OutputBuffer<T> extends Output<T> {
   public static <T> OutputBuffer<T> error(Throwable error, OutputSettings settings) {
     return new OutputBufferError<T>(error, settings);
   }
+
+  public abstract OutputBuffer<T> isPart(boolean isPart);
+
+  public abstract int index();
+
+  public abstract OutputBuffer<T> index(int index);
+
+  public abstract int limit();
+
+  public abstract OutputBuffer<T> limit(int limit);
+
+  public abstract int capacity();
+
+  public abstract int remaining();
+
+  public abstract byte[] array();
+
+  public abstract int arrayOffset();
+
+  public abstract boolean has(int index);
+
+  public abstract int get(int index);
+
+  public abstract void set(int index, int token);
+
+  public abstract int write(ReadableByteChannel channel) throws IOException;
+
+  @Override
+  public abstract OutputBuffer<T> write(int token);
+
+  @Override
+  public OutputBuffer<T> write(String string) {
+    OutputBuffer<T> output = this;
+    final int n = string.length();
+    for (int i = 0; i < n; i = string.offsetByCodePoints(i, 1)) {
+      output = output.write(string.codePointAt(i));
+    }
+    return output;
+  }
+
+  @Override
+  public OutputBuffer<T> writeln(String string) {
+    return write(string).writeln();
+  }
+
+  @Override
+  public OutputBuffer<T> writeln() {
+    return write(settings().lineSeparator());
+  }
+
+  @Override
+  public OutputBuffer<T> display(Object object) {
+    Format.display(object, this);
+    return this;
+  }
+
+  @Override
+  public OutputBuffer<T> debug(Object object) {
+    Format.debug(object, this);
+    return this;
+  }
+
+  public abstract OutputBuffer<T> move(int fromIndex, int toIndex, int length);
+
+  public abstract OutputBuffer<T> step(int offset);
+
+  @Override
+  public OutputBuffer<T> flush() {
+    return this;
+  }
+
+  @Override
+  public OutputBuffer<T> fork(Object condition) {
+    return this;
+  }
+
+  @Override
+  public abstract OutputBuffer<T> settings(OutputSettings settings);
+
+  @Override
+  public OutputBuffer<T> clone() {
+    throw new UnsupportedOperationException();
+  }
+
 }
 
 final class OutputBufferFull<T> extends OutputBuffer<T> {
+
   final T value;
   final OutputSettings settings;
 
@@ -383,9 +385,11 @@ final class OutputBufferFull<T> extends OutputBuffer<T> {
   public OutputBuffer<T> clone() {
     return this;
   }
+
 }
 
 final class OutputBufferDone<T> extends OutputBuffer<T> {
+
   final T value;
   final OutputSettings settings;
 
@@ -553,9 +557,11 @@ final class OutputBufferDone<T> extends OutputBuffer<T> {
   public OutputBuffer<T> clone() {
     return this;
   }
+
 }
 
 final class OutputBufferError<T> extends OutputBuffer<T> {
+
   final Throwable error;
   final OutputSettings settings;
 
@@ -724,4 +730,5 @@ final class OutputBufferError<T> extends OutputBuffer<T> {
   public OutputBuffer<T> clone() {
     return this;
   }
+
 }

@@ -17,7 +17,9 @@ package swim.util;
 import java.util.Map;
 
 public interface OrderedMapCursor<K, V> extends Cursor<Map.Entry<K, V>> {
+
   K nextKey();
 
   K previousKey();
+
 }

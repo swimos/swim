@@ -53,6 +53,7 @@ import swim.structure.operator.TimesOperator;
  * objects.
  */
 public abstract class Expression extends Value {
+
   @Override
   public Item conditional(Item thenTerm, Item elseTerm) {
     return new ConditionalOperator(this, thenTerm, elseTerm);
@@ -247,4 +248,5 @@ public abstract class Expression extends Value {
   public Operator inverse() {
     return new DivideOperator(Num.from(1.0), this);
   }
+
 }

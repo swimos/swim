@@ -24,6 +24,7 @@ package swim.concurrent;
  * @see Schedule
  */
 public interface Timer extends TimerFunction {
+
   /**
    * Returns the context used to manage this {@code Timer}.  Returns {@code
    * null} if this {@code Timer} is not bound to a {@link Schedule}.
@@ -54,4 +55,5 @@ public interface Timer extends TimerFunction {
    * cancelled.
    */
   void timerDidCancel();
+
 }

@@ -34,9 +34,6 @@ import swim.dynamic.observable.function.GuestWillUpdateIndex;
 import swim.observable.ObservableList;
 
 public final class HostObservableList {
-  private HostObservableList() {
-    // static
-  }
 
   public static final HostObjectType<ObservableList<Object>> TYPE;
 
@@ -60,9 +57,15 @@ public final class HostObservableList {
     type.addMember(new HostObservableListWillClear());
     type.addMember(new HostObservableListDidClear());
   }
+
+  private HostObservableList() {
+    // static
+  }
+
 }
 
 final class HostObservableListDrop implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "drop";
@@ -73,9 +76,11 @@ final class HostObservableListDrop implements HostMethod<ObservableList<Object>>
     observable.drop((int) arguments[0]);
     return null;
   }
+
 }
 
 final class HostObservableListTake implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "take";
@@ -86,9 +91,11 @@ final class HostObservableListTake implements HostMethod<ObservableList<Object>>
     observable.take((int) arguments[0]);
     return null;
   }
+
 }
 
 final class HostObservableListMove implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "move";
@@ -99,9 +106,11 @@ final class HostObservableListMove implements HostMethod<ObservableList<Object>>
     observable.move((int) arguments[0], (int) arguments[1]);
     return null;
   }
+
 }
 
 final class HostObservableListWillUpdate implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "willUpdate";
@@ -111,9 +120,11 @@ final class HostObservableListWillUpdate implements HostMethod<ObservableList<Ob
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.willUpdate(new GuestWillUpdateIndex<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListDidUpdate implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "didUpdate";
@@ -123,9 +134,11 @@ final class HostObservableListDidUpdate implements HostMethod<ObservableList<Obj
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.didUpdate(new GuestDidUpdateIndex<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListWillMove implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "willMove";
@@ -135,9 +148,11 @@ final class HostObservableListWillMove implements HostMethod<ObservableList<Obje
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.willMove(new GuestWillMoveIndex<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListDidMove implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "didMove";
@@ -147,9 +162,11 @@ final class HostObservableListDidMove implements HostMethod<ObservableList<Objec
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.didMove(new GuestDidMoveIndex<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListWillRemove implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "willRemove";
@@ -159,9 +176,11 @@ final class HostObservableListWillRemove implements HostMethod<ObservableList<Ob
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.willRemove(new GuestWillRemoveIndex(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListDidRemove implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "didRemove";
@@ -171,9 +190,11 @@ final class HostObservableListDidRemove implements HostMethod<ObservableList<Obj
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.didRemove(new GuestDidRemoveIndex<Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListWillDrop implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "willDrop";
@@ -183,9 +204,11 @@ final class HostObservableListWillDrop implements HostMethod<ObservableList<Obje
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.willDrop(new GuestWillDrop(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListDidDrop implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "didDrop";
@@ -195,9 +218,11 @@ final class HostObservableListDidDrop implements HostMethod<ObservableList<Objec
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.didDrop(new GuestDidDrop(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListWillTake implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "willTake";
@@ -207,9 +232,11 @@ final class HostObservableListWillTake implements HostMethod<ObservableList<Obje
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.willTake(new GuestWillTake(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListDidTake implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "didTake";
@@ -219,9 +246,11 @@ final class HostObservableListDidTake implements HostMethod<ObservableList<Objec
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.didTake(new GuestDidTake(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListWillClear implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "willClear";
@@ -231,9 +260,11 @@ final class HostObservableListWillClear implements HostMethod<ObservableList<Obj
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.willClear(new GuestWillClear(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableListDidClear implements HostMethod<ObservableList<Object>> {
+
   @Override
   public String key() {
     return "didClear";
@@ -243,4 +274,5 @@ final class HostObservableListDidClear implements HostMethod<ObservableList<Obje
   public Object invoke(Bridge bridge, ObservableList<Object> observable, Object... arguments) {
     return observable.didClear(new GuestDidClear(bridge, arguments[0]));
   }
+
 }

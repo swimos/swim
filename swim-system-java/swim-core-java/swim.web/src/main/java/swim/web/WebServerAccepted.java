@@ -17,6 +17,7 @@ package swim.web;
 import swim.io.http.HttpResponder;
 
 final class WebServerAccepted extends WebResponse {
+
   final HttpResponder<?> httpResponder;
 
   WebServerAccepted(HttpResponder<?> httpResponder) {
@@ -37,4 +38,5 @@ final class WebServerAccepted extends WebResponse {
   public HttpResponder<?> httpResponder() {
     return this.httpResponder;
   }
+
 }

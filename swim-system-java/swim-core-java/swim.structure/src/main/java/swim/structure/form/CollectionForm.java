@@ -23,6 +23,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public final class CollectionForm<T> extends Form<Collection<T>> {
+
   final Class<?> type;
   final Form<T> form;
   final Constructor<Collection<T>> constructor;
@@ -122,4 +123,5 @@ public final class CollectionForm<T> extends Form<Collection<T>> {
     }
     return null;
   }
+
 }

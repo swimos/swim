@@ -20,6 +20,7 @@ import swim.uri.Uri;
 import swim.util.Murmur3;
 
 public abstract class LinkAddressed extends LaneAddressed {
+
   final float prio;
   final float rate;
 
@@ -78,4 +79,5 @@ public abstract class LinkAddressed extends LaneAddressed {
     }
     output = output.write(')');
   }
+
 }

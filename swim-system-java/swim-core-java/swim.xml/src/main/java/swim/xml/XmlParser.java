@@ -25,6 +25,7 @@ import swim.util.Builder;
  * Factory for constructing XML parsers and parse trees.
  */
 public abstract class XmlParser<I, V> {
+
   public abstract I item(V value);
 
   public abstract String name(String name);
@@ -233,4 +234,5 @@ public abstract class XmlParser<I, V> {
     }
     return parser.bind();
   }
+
 }

@@ -24,10 +24,20 @@ import swim.http.HttpWriter;
 import swim.util.Murmur3;
 
 public final class Expect extends HttpHeader {
+
+  private static int hashSeed;
   final String value;
 
   Expect(String value) {
     this.value = value;
+  }
+
+  public static Expect from(String value) {
+    return new Expect(value);
+  }
+
+  public static Parser<Expect> parseHttpValue(Input input, HttpParser http) {
+    return ExpectParser.parse(input);
   }
 
   @Override
@@ -83,13 +93,4 @@ public final class Expect extends HttpHeader {
     output = output.write("Expect").write('.').write("from").write('(').debug(this.value).write(')');
   }
 
-  private static int hashSeed;
-
-  public static Expect from(String value) {
-    return new Expect(value);
-  }
-
-  public static Parser<Expect> parseHttpValue(Input input, HttpParser http) {
-    return ExpectParser.parse(input);
-  }
 }

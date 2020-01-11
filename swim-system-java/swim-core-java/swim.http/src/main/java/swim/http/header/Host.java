@@ -29,12 +29,42 @@ import swim.uri.UriPort;
 import swim.util.Murmur3;
 
 public final class Host extends HttpHeader {
+
+  private static int hashSeed;
   final UriHost host;
   final UriPort port;
 
   Host(UriHost host, UriPort port) {
     this.host = host;
     this.port = port;
+  }
+
+  public static Host from(UriHost host, UriPort port) {
+    return new Host(host, port);
+  }
+
+  public static Host from(UriHost host) {
+    return new Host(host, UriPort.undefined());
+  }
+
+  public static Host from(UriAuthority authority) {
+    return new Host(authority.host(), authority.port());
+  }
+
+  public static Host from(String host, int port) {
+    return new Host(UriHost.parse(host), UriPort.from(port));
+  }
+
+  public static Host from(String host) {
+    return new Host(UriHost.parse(host), UriPort.undefined());
+  }
+
+  public static Host from(InetSocketAddress address) {
+    return new Host(UriHost.inetAddress(address.getAddress()), UriPort.from(address.getPort()));
+  }
+
+  public static Parser<Host> parseHttpValue(Input input, HttpParser http) {
+    return HostParser.parse(input);
   }
 
   @Override
@@ -93,33 +123,4 @@ public final class Host extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  public static Host from(UriHost host, UriPort port) {
-    return new Host(host, port);
-  }
-
-  public static Host from(UriHost host) {
-    return new Host(host, UriPort.undefined());
-  }
-
-  public static Host from(UriAuthority authority) {
-    return new Host(authority.host(), authority.port());
-  }
-
-  public static Host from(String host, int port) {
-    return new Host(UriHost.parse(host), UriPort.from(port));
-  }
-
-  public static Host from(String host) {
-    return new Host(UriHost.parse(host), UriPort.undefined());
-  }
-
-  public static Host from(InetSocketAddress address) {
-    return new Host(UriHost.inetAddress(address.getAddress()), UriPort.from(address.getPort()));
-  }
-
-  public static Parser<Host> parseHttpValue(Input input, HttpParser http) {
-    return HostParser.parse(input);
-  }
 }

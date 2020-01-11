@@ -20,6 +20,7 @@ import swim.codec.Parser;
 import swim.util.Builder;
 
 final class TagStartParser<I, V> extends Parser<V> {
+
   final XmlParser<I, V> xml;
   final Builder<I, V> builder;
   final Parser<String> tagParser;
@@ -38,12 +39,6 @@ final class TagStartParser<I, V> extends Parser<V> {
     this.nameParser = nameParser;
     this.valueParser = valueParser;
     this.step = step;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.xml, this.builder, this.tagParser, this.attributes,
-                 this.nameParser, this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml, Builder<I, V> builder,
@@ -249,7 +244,7 @@ final class TagStartParser<I, V> extends Parser<V> {
       return error(input.trap());
     }
     return new TagStartParser<I, V>(xml, builder, tagParser, attributes,
-                                    nameParser, valueParser, step);
+        nameParser, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml) {
@@ -263,4 +258,11 @@ final class TagStartParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parseRest(Input input, XmlParser<I, V> xml) {
     return parse(input, xml, null, null, null, null, null, 2);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.xml, this.builder, this.tagParser, this.attributes,
+        this.nameParser, this.valueParser, this.step);
+  }
+
 }

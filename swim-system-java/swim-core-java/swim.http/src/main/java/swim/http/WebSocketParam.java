@@ -21,12 +21,68 @@ import swim.codec.Writer;
 import swim.util.Murmur3;
 
 public final class WebSocketParam extends HttpPart implements Debug {
+
+  private static int hashSeed;
+  private static WebSocketParam serverNoContextTakeover;
+  private static WebSocketParam clientNoContextTakeover;
+  private static WebSocketParam clientMaxWindowBits;
   final String key;
   final String value;
 
   WebSocketParam(String key, String value) {
     this.key = key;
     this.value = value;
+  }
+
+  public static WebSocketParam serverMaxWindowBits(int maxWindowBits) {
+    return new WebSocketParam("server_max_window_bits", Integer.toString(maxWindowBits));
+  }
+
+  public static WebSocketParam clientMaxWindowBits(int maxWindowBits) {
+    return new WebSocketParam("client_max_window_bits", Integer.toString(maxWindowBits));
+  }
+
+  public static WebSocketParam clientMaxWindowBits() {
+    if (clientMaxWindowBits == null) {
+      clientMaxWindowBits = new WebSocketParam("client_max_window_bits", "");
+    }
+    return clientMaxWindowBits;
+  }
+
+  public static WebSocketParam serverNoContextTakeover() {
+    if (serverNoContextTakeover == null) {
+      serverNoContextTakeover = new WebSocketParam("server_no_context_takeover", "");
+    }
+    return serverNoContextTakeover;
+  }
+
+  public static WebSocketParam clientNoContextTakeover() {
+    if (clientNoContextTakeover == null) {
+      clientNoContextTakeover = new WebSocketParam("client_no_context_takeover", "");
+    }
+    return clientNoContextTakeover;
+  }
+
+  public static WebSocketParam from(String key, String value) {
+    if ("".equals(value)) {
+      return from(key);
+    } else {
+      return new WebSocketParam(key, value);
+    }
+  }
+
+  public static WebSocketParam from(String key) {
+    if ("server_no_context_takeover".equals(key)) {
+      return serverNoContextTakeover();
+    } else if ("client_no_context_takeover".equals(key)) {
+      return clientNoContextTakeover();
+    } else {
+      return new WebSocketParam(key, "");
+    }
+  }
+
+  public static WebSocketParam parse(String string) {
+    return Http.standardParser().parseWebSocketParamString(string);
   }
 
   public String key() {
@@ -80,60 +136,4 @@ public final class WebSocketParam extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static WebSocketParam serverNoContextTakeover;
-  private static WebSocketParam clientNoContextTakeover;
-  private static WebSocketParam clientMaxWindowBits;
-
-  public static WebSocketParam serverMaxWindowBits(int maxWindowBits) {
-    return new WebSocketParam("server_max_window_bits", Integer.toString(maxWindowBits));
-  }
-
-  public static WebSocketParam clientMaxWindowBits(int maxWindowBits) {
-    return new WebSocketParam("client_max_window_bits", Integer.toString(maxWindowBits));
-  }
-
-  public static WebSocketParam clientMaxWindowBits() {
-    if (clientMaxWindowBits == null) {
-      clientMaxWindowBits = new WebSocketParam("client_max_window_bits", "");
-    }
-    return clientMaxWindowBits;
-  }
-
-  public static WebSocketParam serverNoContextTakeover() {
-    if (serverNoContextTakeover == null) {
-      serverNoContextTakeover = new WebSocketParam("server_no_context_takeover", "");
-    }
-    return serverNoContextTakeover;
-  }
-
-  public static WebSocketParam clientNoContextTakeover() {
-    if (clientNoContextTakeover == null) {
-      clientNoContextTakeover = new WebSocketParam("client_no_context_takeover", "");
-    }
-    return clientNoContextTakeover;
-  }
-
-  public static WebSocketParam from(String key, String value) {
-    if ("".equals(value)) {
-      return from(key);
-    } else {
-      return new WebSocketParam(key, value);
-    }
-  }
-
-  public static WebSocketParam from(String key) {
-    if ("server_no_context_takeover".equals(key)) {
-      return serverNoContextTakeover();
-    } else if ("client_no_context_takeover".equals(key)) {
-      return clientNoContextTakeover();
-    } else {
-      return new WebSocketParam(key, "");
-    }
-  }
-
-  public static WebSocketParam parse(String string) {
-    return Http.standardParser().parseWebSocketParamString(string);
-  }
 }

@@ -21,6 +21,7 @@ import swim.codec.Writer;
 import swim.codec.WriterException;
 
 final class ParamMapWriter extends Writer<Object, Object> {
+
   final HttpWriter http;
   final Iterator<? extends Map.Entry<?, ?>> params;
   final Writer<?, ?> part;
@@ -36,11 +37,6 @@ final class ParamMapWriter extends Writer<Object, Object> {
 
   ParamMapWriter(HttpWriter http, Iterator<? extends Map.Entry<?, ?>> params) {
     this(http, params, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.params, this.part, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
@@ -88,4 +84,10 @@ final class ParamMapWriter extends Writer<Object, Object> {
                                              Iterator<? extends Map.Entry<?, ?>> params) {
     return write(output, http, params, null, 1);
   }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.http, this.params, this.part, this.step);
+  }
+
 }

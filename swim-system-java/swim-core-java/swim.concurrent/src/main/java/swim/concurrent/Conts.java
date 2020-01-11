@@ -18,10 +18,11 @@ package swim.concurrent;
  * Factory functions for {@link Cont}inuation combinators.
  */
 public final class Conts {
-  private Conts() {
-  }
 
   private static Cont<Object> ignore;
+
+  private Conts() {
+  }
 
   /**
    * Returns a {@code Runnable} that, when executed, invokes the given {@code
@@ -59,13 +60,15 @@ public final class Conts {
    */
   public static boolean isNonFatal(Throwable throwable) {
     return !(throwable instanceof InterruptedException
-          || throwable instanceof LinkageError
-          || throwable instanceof ThreadDeath
-          || throwable instanceof VirtualMachineError && !(throwable instanceof StackOverflowError));
+        || throwable instanceof LinkageError
+        || throwable instanceof ThreadDeath
+        || throwable instanceof VirtualMachineError && !(throwable instanceof StackOverflowError));
   }
+
 }
 
 final class ConstantCont<X, T> implements Cont<X>, Runnable {
+
   private final Cont<T> cont;
   private final T value;
 
@@ -96,9 +99,11 @@ final class ConstantCont<X, T> implements Cont<X>, Runnable {
   public void trap(Throwable error) {
     this.cont.trap(error);
   }
+
 }
 
 final class IgnoreCont<T> implements Cont<T> {
+
   @Override
   public void bind(T value) {
     // nop
@@ -114,4 +119,5 @@ final class IgnoreCont<T> implements Cont<T> {
       throw new ContException(error);
     }
   }
+
 }

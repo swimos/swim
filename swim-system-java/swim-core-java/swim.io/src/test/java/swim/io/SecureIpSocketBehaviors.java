@@ -21,6 +21,7 @@ import swim.concurrent.Theater;
 import static org.testng.Assert.assertEquals;
 
 public abstract class SecureIpSocketBehaviors extends IpSocketBehaviors {
+
   @Test
   public void testSecure() {
     final Theater stage = new Theater();
@@ -45,6 +46,7 @@ public abstract class SecureIpSocketBehaviors extends IpSocketBehaviors {
       public IpSocket createSocket() {
         return server;
       }
+
       @Override
       public void didBind() {
         serverBind.countDown();
@@ -75,4 +77,5 @@ public abstract class SecureIpSocketBehaviors extends IpSocketBehaviors {
       stage.stop();
     }
   }
+
 }

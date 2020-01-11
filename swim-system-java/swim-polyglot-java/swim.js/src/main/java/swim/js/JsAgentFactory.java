@@ -25,6 +25,7 @@ import swim.vm.js.JsModule;
 import swim.vm.js.JsModuleSystem;
 
 public class JsAgentFactory extends AbstractAgentRoute<JsAgent> {
+
   protected final JsKernel jsKernel;
   protected final UriPath basePath;
   protected final JsAgentDef agentDef;
@@ -101,4 +102,5 @@ public class JsAgentFactory extends AbstractAgentRoute<JsAgent> {
   public Value id(Uri nodeUri) {
     return this.agentDef.id();
   }
+
 }

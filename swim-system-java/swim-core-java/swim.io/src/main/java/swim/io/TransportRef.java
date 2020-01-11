@@ -18,8 +18,10 @@ package swim.io;
  * External handle to an I/O {@link Transport}.
  */
 public interface TransportRef extends FlowContext {
+
   /**
    * Closes the underlying I/O transport.
    */
   void close();
+
 }

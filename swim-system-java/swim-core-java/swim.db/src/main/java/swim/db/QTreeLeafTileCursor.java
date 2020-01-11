@@ -17,6 +17,7 @@ package swim.db;
 import swim.structure.Slot;
 
 final class QTreeLeafTileCursor extends QTreeLeafCursor {
+
   QTreeLeafTileCursor(QTreeLeaf page, long x, long y, int index) {
     super(page, x, y, index);
   }
@@ -29,4 +30,5 @@ final class QTreeLeafTileCursor extends QTreeLeafCursor {
   protected Slot getSlot(Slot slot) {
     return slot;
   }
+
 }

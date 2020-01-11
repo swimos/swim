@@ -18,6 +18,10 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.uri.Uri;
 
 public abstract class DownlinkModel<View extends DownlinkView> extends AbstractDownlinkBinding implements LinkBinding {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<DownlinkModel<?>, Object> VIEWS =
+      AtomicReferenceFieldUpdater.newUpdater((Class<DownlinkModel<?>>) (Class<?>) DownlinkModel.class, Object.class, "views");
   protected volatile Object views; // View | DownlinkView[]
 
   public DownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri) {
@@ -30,7 +34,7 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
     do {
       oldViews = this.views;
       if (oldViews instanceof DownlinkView) {
-        newViews = new DownlinkView[]{(DownlinkView) oldViews, view};
+        newViews = new DownlinkView[] {(DownlinkView) oldViews, view};
       } else if (oldViews instanceof DownlinkView[]) {
         final DownlinkView[] oldViewArray = (DownlinkView[]) oldViews;
         final int n = oldViewArray.length;
@@ -176,12 +180,10 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
     // hook
   }
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<DownlinkModel<?>, Object> VIEWS =
-      AtomicReferenceFieldUpdater.newUpdater((Class<DownlinkModel<?>>) (Class<?>) DownlinkModel.class, Object.class, "views");
 }
 
 final class DownlinkRelayDidConnect<View extends DownlinkView> extends DownlinkRelay<DownlinkModel<View>, View> {
+
   DownlinkRelayDidConnect(DownlinkModel<View> model) {
     super(model);
   }
@@ -197,9 +199,11 @@ final class DownlinkRelayDidConnect<View extends DownlinkView> extends DownlinkR
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class DownlinkRelayDidDisconnect<View extends DownlinkView> extends DownlinkRelay<DownlinkModel<View>, View> {
+
   DownlinkRelayDidDisconnect(DownlinkModel<View> model) {
     super(model);
   }
@@ -215,9 +219,11 @@ final class DownlinkRelayDidDisconnect<View extends DownlinkView> extends Downli
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class DownlinkRelayDidClose<View extends DownlinkView> extends DownlinkRelay<DownlinkModel<View>, View> {
+
   DownlinkRelayDidClose(DownlinkModel<View> model) {
     super(model);
   }
@@ -233,9 +239,11 @@ final class DownlinkRelayDidClose<View extends DownlinkView> extends DownlinkRel
       throw new AssertionError(); // unreachable
     }
   }
+
 }
 
 final class DownlinkRelayDidFail<View extends DownlinkView> extends DownlinkRelay<DownlinkModel<View>, View> {
+
   final Throwable error;
 
   DownlinkRelayDidFail(DownlinkModel<View> model, Throwable error) {
@@ -254,4 +262,5 @@ final class DownlinkRelayDidFail<View extends DownlinkView> extends DownlinkRela
       throw new AssertionError(); // unreachable
     }
   }
+
 }

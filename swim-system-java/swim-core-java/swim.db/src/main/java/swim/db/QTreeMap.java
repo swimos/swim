@@ -25,6 +25,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
+
   final Trunk<QTree> trunk;
   final Z2Form<S> shapeForm;
 
@@ -172,6 +173,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     }
     return false;
   }
+
   private boolean containsKey(Value key) {
     int retries = 0;
     do {
@@ -197,6 +199,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     }
     return false;
   }
+
   private boolean containsValue(Value value) {
     int retries = 0;
     do {
@@ -222,6 +225,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     }
     return Value.absent();
   }
+
   private Value get(Value key) {
     int retries = 0;
     do {
@@ -538,4 +542,5 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   public Chunk commit(Commit commit) throws InterruptedException {
     return this.trunk.commit(commit);
   }
+
 }

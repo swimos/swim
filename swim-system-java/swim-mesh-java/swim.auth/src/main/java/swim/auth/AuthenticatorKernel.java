@@ -21,6 +21,8 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 public class AuthenticatorKernel extends KernelProxy {
+
+  private static final double KERNEL_PRIORITY = 0.9;
   final double kernelPriority;
 
   public AuthenticatorKernel(double kernelPriority) {
@@ -29,6 +31,16 @@ public class AuthenticatorKernel extends KernelProxy {
 
   public AuthenticatorKernel() {
     this(KERNEL_PRIORITY);
+  }
+
+  public static AuthenticatorKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || AuthenticatorKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      return new AuthenticatorKernel(kernelPriority);
+    }
+    return null;
   }
 
   @Override
@@ -56,15 +68,4 @@ public class AuthenticatorKernel extends KernelProxy {
     }
   }
 
-  private static final double KERNEL_PRIORITY = 0.9;
-
-  public static AuthenticatorKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || AuthenticatorKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new AuthenticatorKernel(kernelPriority);
-    }
-    return null;
-  }
 }

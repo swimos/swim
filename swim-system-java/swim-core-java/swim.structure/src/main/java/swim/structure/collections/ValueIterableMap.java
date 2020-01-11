@@ -20,6 +20,7 @@ import swim.util.Cursor;
 import swim.util.IterableMap;
 
 public class ValueIterableMap<K, V> extends ValueMap<K, V> implements IterableMap<K, V> {
+
   public ValueIterableMap(IterableMap<? extends Value, ? extends Value> inner, Form<K> keyForm, Form<V> valueForm) {
     super(inner, keyForm, valueForm);
   }
@@ -71,4 +72,5 @@ public class ValueIterableMap<K, V> extends ValueMap<K, V> implements IterableMa
       return (Cursor<V>) ((IterableMap<Value, Value>) this.inner).valueIterator();
     }
   }
+
 }

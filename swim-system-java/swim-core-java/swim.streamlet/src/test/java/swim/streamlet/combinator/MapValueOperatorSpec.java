@@ -21,6 +21,7 @@ import swim.streamlet.ValueOutput;
 import static org.testng.Assert.assertEquals;
 
 public class MapValueOperatorSpec {
+
   @Test
   public void evaluateMapValueOperatorAfterSet() {
     final ValueInput<Integer> input = new ValueInput<>(0);
@@ -58,4 +59,5 @@ public class MapValueOperatorSpec {
     output.reconcileOutput(1); // reconcile backward
     assertEquals((int) output.get(), 64);
   }
+
 }

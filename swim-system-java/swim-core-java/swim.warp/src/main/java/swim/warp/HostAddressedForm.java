@@ -20,6 +20,7 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 abstract class HostAddressedForm<E extends HostAddressed> extends Form<E> {
+
   abstract E from(Value body);
 
   @Override
@@ -45,4 +46,5 @@ abstract class HostAddressedForm<E extends HostAddressed> extends Form<E> {
     }
     return null;
   }
+
 }

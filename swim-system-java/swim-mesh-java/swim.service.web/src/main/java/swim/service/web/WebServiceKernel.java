@@ -26,6 +26,8 @@ import swim.web.WebRoute;
 import swim.web.route.RejectRoute;
 
 public class WebServiceKernel extends KernelProxy {
+
+  private static final double KERNEL_PRIORITY = 0.75;
   final double kernelPriority;
 
   public WebServiceKernel(double kernelPriority) {
@@ -34,6 +36,16 @@ public class WebServiceKernel extends KernelProxy {
 
   public WebServiceKernel() {
     this(KERNEL_PRIORITY);
+  }
+
+  public static WebServiceKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || WebServiceKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      return new WebServiceKernel(kernelPriority);
+    }
+    return null;
   }
 
   @Override
@@ -73,7 +85,7 @@ public class WebServiceKernel extends KernelProxy {
         final UriPath resourceRoot = value.get("resourceRoot").cast(UriPath.pathForm());
         final WarpSettings warpSettings = WarpSettings.form().cast(value);
         return new WebServiceDef(serviceName, address, port, isSecure, spaceName,
-                                 documentRoot, resourceRoot, warpSettings);
+            documentRoot, resourceRoot, warpSettings);
       }
     }
     return null;
@@ -98,15 +110,4 @@ public class WebServiceKernel extends KernelProxy {
     return new RejectRoute(); // TODO: parse from config
   }
 
-  private static final double KERNEL_PRIORITY = 0.75;
-
-  public static WebServiceKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || WebServiceKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new WebServiceKernel(kernelPriority);
-    }
-    return null;
-  }
 }

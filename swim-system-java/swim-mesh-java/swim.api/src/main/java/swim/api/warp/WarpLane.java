@@ -25,6 +25,7 @@ import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 
 public interface WarpLane extends Lane {
+
   @Override
   WarpLane observe(Object observer);
 
@@ -46,4 +47,5 @@ public interface WarpLane extends Lane {
   WarpLane willLeave(WillLeave willLeave);
 
   WarpLane didLeave(DidLeave didLeave);
+
 }

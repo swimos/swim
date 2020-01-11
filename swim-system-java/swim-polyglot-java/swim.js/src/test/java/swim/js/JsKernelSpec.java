@@ -23,6 +23,7 @@ import swim.vm.js.JsStaticModuleResolver;
 import static org.testng.Assert.assertNotNull;
 
 public class JsKernelSpec {
+
   @Test
   public void testLoadJsPlane() {
     final JsKernel jsKernel = new JsKernel();
@@ -67,4 +68,5 @@ public class JsKernelSpec {
     final JsPlane plane = (JsPlane) kernel.openSpace(spaceDef).getPlane("main");
     assertNotNull(plane);
   }
+
 }

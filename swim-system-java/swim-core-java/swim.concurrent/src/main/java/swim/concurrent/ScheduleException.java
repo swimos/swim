@@ -18,6 +18,7 @@ package swim.concurrent;
  * Thrown when a {@link Schedule} encounters an error.
  */
 public class ScheduleException extends RuntimeException {
+
   private static final long serialVersionUID = 1L;
 
   public ScheduleException(String message, Throwable cause) {
@@ -35,4 +36,5 @@ public class ScheduleException extends RuntimeException {
   public ScheduleException() {
     super();
   }
+
 }

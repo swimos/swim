@@ -23,12 +23,26 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class LaneInfo {
+
+  private static Form<LaneInfo> form;
   protected final Uri laneUri;
   protected final String laneType;
 
   public LaneInfo(Uri laneUri, String laneType) {
     this.laneUri = laneUri;
     this.laneType = laneType;
+  }
+
+  public static LaneInfo from(LaneBinding laneBinding) {
+    return new LaneInfo(laneBinding.laneUri(), laneBinding.laneType());
+  }
+
+  @Kind
+  public static Form<LaneInfo> form() {
+    if (form == null) {
+      form = new LaneInfoForm();
+    }
+    return form;
   }
 
   public final Uri laneUri() {
@@ -43,22 +57,10 @@ public class LaneInfo {
     return form().mold(this).toValue();
   }
 
-  public static LaneInfo from(LaneBinding laneBinding) {
-    return new LaneInfo(laneBinding.laneUri(), laneBinding.laneType());
-  }
-
-  private static Form<LaneInfo> form;
-
-  @Kind
-  public static Form<LaneInfo> form() {
-    if (form == null) {
-      form = new LaneInfoForm();
-    }
-    return form;
-  }
 }
 
 final class LaneInfoForm extends Form<LaneInfo> {
+
   @Override
   public Class<?> type() {
     return LaneInfo.class;
@@ -86,4 +88,5 @@ final class LaneInfoForm extends Form<LaneInfo> {
     }
     return null;
   }
+
 }

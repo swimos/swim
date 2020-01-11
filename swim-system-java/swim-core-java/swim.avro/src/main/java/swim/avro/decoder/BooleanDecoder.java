@@ -20,15 +20,11 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class BooleanDecoder<T> extends Decoder<T> {
+
   final AvroBooleanType<T> type;
 
   BooleanDecoder(AvroBooleanType<T> type) {
     this.type = type;
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroBooleanType<T> type) {
@@ -48,4 +44,10 @@ final class BooleanDecoder<T> extends Decoder<T> {
     }
     return new BooleanDecoder<T>(type);
   }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type);
+  }
+
 }

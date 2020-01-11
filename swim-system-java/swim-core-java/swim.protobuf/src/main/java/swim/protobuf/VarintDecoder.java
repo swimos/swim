@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class VarintDecoder<V> extends Decoder<V> {
+
   final ProtobufDecoder<?, V> protobuf;
   final boolean signed;
   final long value;
@@ -29,11 +30,6 @@ final class VarintDecoder<V> extends Decoder<V> {
     this.signed = signed;
     this.value = value;
     this.shift = shift;
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.signed, this.value, this.shift);
   }
 
   static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf,
@@ -71,4 +67,10 @@ final class VarintDecoder<V> extends Decoder<V> {
   static <V> Decoder<V> decodeSigned(InputBuffer input, ProtobufDecoder<?, V> protobuf) {
     return decode(input, protobuf, true, 0L, 0);
   }
+
+  @Override
+  public Decoder<V> feed(InputBuffer input) {
+    return decode(input, this.protobuf, this.signed, this.value, this.shift);
+  }
+
 }

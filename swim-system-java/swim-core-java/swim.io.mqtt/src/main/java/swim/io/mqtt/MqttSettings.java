@@ -28,12 +28,42 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class MqttSettings implements Debug {
+
+  private static int hashSeed;
+  private static MqttSettings standard;
+  private static Form<MqttSettings> form;
   protected final IpSettings ipSettings;
   protected final int maxPayloadSize;
 
   public MqttSettings(IpSettings ipSettings, int maxPayloadSize) {
     this.ipSettings = ipSettings;
     this.maxPayloadSize = maxPayloadSize;
+  }
+
+  public static MqttSettings standard() {
+    if (standard == null) {
+      int maxPayloadSize;
+      try {
+        maxPayloadSize = Integer.parseInt(System.getProperty("swim.mqtt.max.payload.size"));
+      } catch (NumberFormatException error) {
+        maxPayloadSize = 16 * 1024 * 1024;
+      }
+
+      standard = new MqttSettings(IpSettings.standard(), maxPayloadSize);
+    }
+    return standard;
+  }
+
+  public static MqttSettings from(IpSettings ipSettings) {
+    return standard().ipSettings(ipSettings);
+  }
+
+  @Kind
+  public static Form<MqttSettings> form() {
+    if (form == null) {
+      form = new MqttSettingsForm();
+    }
+    return form;
   }
 
   public final IpSettings ipSettings() {
@@ -109,40 +139,10 @@ public class MqttSettings implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static MqttSettings standard;
-
-  private static Form<MqttSettings> form;
-
-  public static MqttSettings standard() {
-    if (standard == null) {
-      int maxPayloadSize;
-      try {
-        maxPayloadSize = Integer.parseInt(System.getProperty("swim.mqtt.max.payload.size"));
-      } catch (NumberFormatException error) {
-        maxPayloadSize = 16 * 1024 * 1024;
-      }
-
-      standard = new MqttSettings(IpSettings.standard(), maxPayloadSize);
-    }
-    return standard;
-  }
-
-  public static MqttSettings from(IpSettings ipSettings) {
-    return standard().ipSettings(ipSettings);
-  }
-
-  @Kind
-  public static Form<MqttSettings> form() {
-    if (form == null) {
-      form = new MqttSettingsForm();
-    }
-    return form;
-  }
 }
 
 final class MqttSettingsForm extends Form<MqttSettings> {
+
   @Override
   public MqttSettings unit() {
     return MqttSettings.standard();
@@ -180,4 +180,5 @@ final class MqttSettingsForm extends Form<MqttSettings> {
     final IpSettings ipSettings = IpSettings.form().cast(value);
     return new MqttSettings(ipSettings, maxPayloadSize);
   }
+
 }

@@ -15,11 +15,6 @@
 package swim.mqtt;
 
 public abstract class MqttEntity<T> extends MqttPart {
-  public abstract boolean isDefined();
-
-  public abstract T get();
-
-  public abstract int mqttSize();
 
   private static MqttEntity<Object> empty;
 
@@ -30,4 +25,11 @@ public abstract class MqttEntity<T> extends MqttPart {
     }
     return (MqttEntity<T>) empty;
   }
+
+  public abstract boolean isDefined();
+
+  public abstract T get();
+
+  public abstract int mqttSize();
+
 }

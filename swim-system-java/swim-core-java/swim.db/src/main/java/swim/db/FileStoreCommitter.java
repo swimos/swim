@@ -19,6 +19,9 @@ import swim.concurrent.AbstractTask;
 import swim.concurrent.Conts;
 
 final class FileStoreCommitter extends AbstractTask {
+
+  static final AtomicReferenceFieldUpdater<FileStoreCommitter, Commit> COMMIT =
+      AtomicReferenceFieldUpdater.newUpdater(FileStoreCommitter.class, Commit.class, "commit");
   final FileStore store;
   volatile Commit commit;
 
@@ -106,6 +109,4 @@ final class FileStoreCommitter extends AbstractTask {
     }
   }
 
-  static final AtomicReferenceFieldUpdater<FileStoreCommitter, Commit> COMMIT =
-      AtomicReferenceFieldUpdater.newUpdater(FileStoreCommitter.class, Commit.class, "commit");
 }

@@ -23,6 +23,7 @@ import swim.http.WebSocketExtension;
  * WebSocket handshake response.
  */
 public class WsResponse {
+
   protected final HttpRequest<?> httpRequest;
   protected final HttpResponse<?> httpResponse;
   protected final String protocol;
@@ -59,4 +60,5 @@ public class WsResponse {
   public WsEngine serverEngine(WsEngineSettings settings) {
     return WsEngine.standardServerEngine().extensions(this.extensions, settings);
   }
+
 }

@@ -32,6 +32,8 @@ import swim.uri.Uri;
 import swim.uri.UriPath;
 
 public class MetaKernel extends KernelProxy {
+
+  private static final double KERNEL_PRIORITY = 2.0;
   final double kernelPriority;
 
   public MetaKernel(double kernelPriority) {
@@ -40,6 +42,16 @@ public class MetaKernel extends KernelProxy {
 
   public MetaKernel() {
     this(KERNEL_PRIORITY);
+  }
+
+  public static MetaKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || MetaKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      return new MetaKernel(kernelPriority);
+    }
+    return null;
   }
 
   @Override
@@ -345,15 +357,4 @@ public class MetaKernel extends KernelProxy {
     return null;
   }
 
-  private static final double KERNEL_PRIORITY = 2.0;
-
-  public static MetaKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || MetaKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new MetaKernel(kernelPriority);
-    }
-    return null;
-  }
 }

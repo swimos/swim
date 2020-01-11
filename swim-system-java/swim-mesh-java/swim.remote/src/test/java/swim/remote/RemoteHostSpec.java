@@ -32,28 +32,47 @@ import swim.warp.Envelope;
 import swim.ws.WsRequest;
 import swim.ws.WsResponse;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
 
 public class RemoteHostSpec {
+
   @Test
   public void testRemoteHostConnection() throws InterruptedException {
     final Theater stage = new Theater();
     final HttpEndpoint endpoint = new HttpEndpoint(stage);
     final CountDownLatch clientUpgrade = new CountDownLatch(1);
     final CountDownLatch serverUpgrade = new CountDownLatch(1);
+    final CountDownLatch clientDidConnect = new CountDownLatch(1);
+    final CountDownLatch serverDidConnect = new CountDownLatch(1);
+
     final Uri hostUri = Uri.parse("warp://127.0.0.1:53556/");
 
     final RemoteHostClient clientHost = new RemoteHostClient(hostUri, endpoint) {
+      @Override
+      public void didConnect() {
+        super.didConnect();
+        clientDidConnect.countDown();
+      }
+
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
         clientUpgrade.countDown();
       }
+
       @Override
       protected void reconnect() {
         // prevent reconnect
       }
     };
+
     final RemoteHost serverHost = new RemoteHost(hostUri) {
+      @Override
+      public void didConnect() {
+        super.didConnect();
+        serverDidConnect.countDown();
+      }
+
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
@@ -82,8 +101,12 @@ public class RemoteHostSpec {
       endpoint.bindHttp("127.0.0.1", 53556, service);
       clientHost.setHostContext(new TestHostContext(hostUri, endpoint.stage()));
       clientHost.connect();
-      clientUpgrade.await(1, TimeUnit.SECONDS);
-      serverUpgrade.await(1, TimeUnit.SECONDS);
+
+      serverDidConnect.await();
+      clientDidConnect.await();
+
+      clientUpgrade.await(10, TimeUnit.SECONDS);
+      serverUpgrade.await(10, TimeUnit.SECONDS);
       assertEquals(clientUpgrade.getCount(), 0);
       assertEquals(serverUpgrade.getCount(), 0);
     } finally {
@@ -102,18 +125,28 @@ public class RemoteHostSpec {
     final CountDownLatch serverPush = new CountDownLatch(1);
     final CountDownLatch clientPull = new CountDownLatch(1);
     final CountDownLatch serverPull = new CountDownLatch(1);
+    final CountDownLatch clientDidConnect = new CountDownLatch(1);
+    final CountDownLatch serverDidConnect = new CountDownLatch(1);
+
     final CommandMessage clientToServerCommand = new CommandMessage("warp://127.0.0.1:53556/a", "x");
     final CommandMessage serverToClientCommand = new CommandMessage("warp://127.0.0.1:53556/b", "y");
     final Uri hostUri = Uri.parse("warp://127.0.0.1:53556/");
 
     final RemoteHostClient clientHost = new RemoteHostClient(hostUri, endpoint) {
       @Override
+      public void didConnect() {
+        super.didConnect();
+        clientDidConnect.countDown();
+      }
+
+      @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
         pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), clientToServerCommand.nodeUri(),
-                                  clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
+            clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
         clientPush.countDown();
       }
+
       @Override
       protected void reconnect() {
         // prevent reconnect
@@ -121,10 +154,16 @@ public class RemoteHostSpec {
     };
     final RemoteHost serverHost = new RemoteHost(hostUri) {
       @Override
+      public void didConnect() {
+        super.didConnect();
+        serverDidConnect.countDown();
+      }
+
+      @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
         pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), serverToClientCommand.nodeUri(),
-                                  serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
+            serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
         serverPush.countDown();
       }
     };
@@ -139,6 +178,7 @@ public class RemoteHostSpec {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
         final WsRequest wsRequest = WsRequest.from(httpRequest);
+        assertNotNull(wsRequest);
         final WsResponse wsResponse = wsRequest.accept(wsSettings);
         return upgrade(serverHost, wsResponse);
       }
@@ -161,11 +201,17 @@ public class RemoteHostSpec {
           clientPull.countDown();
         }
       });
+
       clientHost.connect();
-      clientPush.await(1, TimeUnit.SECONDS);
-      serverPush.await(1, TimeUnit.SECONDS);
-      clientPull.await(1, TimeUnit.SECONDS);
-      serverPull.await(1, TimeUnit.SECONDS);
+
+      serverDidConnect.await();
+      clientDidConnect.await();
+
+      clientPush.await(10, TimeUnit.SECONDS);
+      serverPush.await(10, TimeUnit.SECONDS);
+      clientPull.await(10, TimeUnit.SECONDS);
+      serverPull.await(10, TimeUnit.SECONDS);
+
       assertEquals(clientPush.getCount(), 0);
       assertEquals(serverPush.getCount(), 0);
       assertEquals(clientPull.getCount(), 0);
@@ -186,6 +232,9 @@ public class RemoteHostSpec {
     final CountDownLatch serverPush = new CountDownLatch(1);
     final CountDownLatch clientPull = new CountDownLatch(1);
     final CountDownLatch serverPull = new CountDownLatch(1);
+    final CountDownLatch serverDidConnect = new CountDownLatch(1);
+    final CountDownLatch clientDidConnect = new CountDownLatch(1);
+
     final CommandMessage clientToServerCommand = new CommandMessage("warp://127.0.0.1:53556/a", "x");
     final CommandMessage serverToClientCommand = new CommandMessage("warp://127.0.0.1:53556/b", "y");
     final Uri hostUri = Uri.parse("warp://127.0.0.1:53556/");
@@ -193,6 +242,13 @@ public class RemoteHostSpec {
 
     final RemoteHostClient clientHost = new RemoteHostClient(hostUri, endpoint) {
       volatile int attempt = 0;
+
+      @Override
+      public void didConnect() {
+        super.didConnect();
+        clientDidConnect.countDown();
+      }
+
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
@@ -201,10 +257,11 @@ public class RemoteHostSpec {
           throw new RuntimeException("FORCED FAILURE " + attempt + " of " + failedAttempts);
         } else {
           pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), clientToServerCommand.nodeUri(),
-                                    clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
+              clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
           clientPush.countDown();
         }
       }
+
       @Override
       protected void reconnect() {
         if (attempt <= failedAttempts) {
@@ -216,10 +273,16 @@ public class RemoteHostSpec {
     };
     final RemoteHost serverHost = new RemoteHost(hostUri) {
       @Override
+      public void didConnect() {
+        super.didConnect();
+        serverDidConnect.countDown();
+      }
+
+      @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
         pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), serverToClientCommand.nodeUri(),
-                                  serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
+            serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
         serverPush.countDown();
       }
     };
@@ -234,6 +297,8 @@ public class RemoteHostSpec {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
         final WsRequest wsRequest = WsRequest.from(httpRequest);
+        assertNotNull(wsRequest);
+
         final WsResponse wsResponse = wsRequest.accept(wsSettings);
         return upgrade(serverHost, wsResponse);
       }
@@ -257,10 +322,15 @@ public class RemoteHostSpec {
         }
       });
       clientHost.connect();
-      clientPush.await(2, TimeUnit.SECONDS);
-      serverPush.await(2, TimeUnit.SECONDS);
-      clientPull.await(2, TimeUnit.SECONDS);
-      serverPull.await(2, TimeUnit.SECONDS);
+
+      serverDidConnect.await();
+      clientDidConnect.await();
+
+      clientPush.await(10, TimeUnit.SECONDS);
+      serverPush.await(10, TimeUnit.SECONDS);
+      clientPull.await(10, TimeUnit.SECONDS);
+      serverPull.await(10, TimeUnit.SECONDS);
+
       assertEquals(clientPush.getCount(), 0);
       assertEquals(serverPush.getCount(), 0);
       assertEquals(clientPull.getCount(), 0);
@@ -272,4 +342,5 @@ public class RemoteHostSpec {
       stage.stop();
     }
   }
+
 }

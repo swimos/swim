@@ -71,6 +71,7 @@ import swim.warp.CommandMessage;
  * internal, immutable {@link AgentContext}.
  */
 public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Store, Log {
+
   /**
    * Internal, immutable context that provides contextual {@code Lane} and
    * {@code Store} creation mechanisms, URI-based addressability, logging, and
@@ -799,4 +800,5 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
   public void close() {
     this.context.close();
   }
+
 }

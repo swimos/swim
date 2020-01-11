@@ -32,6 +32,21 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public class GoogleIdAuthenticatorDef implements AuthenticatorDef, Debug {
+
+  static final Uri PUBLIC_KEY_URI;
+  private static int hashSeed;
+  private static Form<GoogleIdAuthenticatorDef> form;
+
+  static {
+    Uri publicKeyUri;
+    try {
+      publicKeyUri = Uri.parse(System.getProperty("swim.auth.google.public.key.uri"));
+    } catch (NullPointerException | ParserException error) {
+      publicKeyUri = Uri.parse("https://www.googleapis.com/oauth2/v3/certs");
+    }
+    PUBLIC_KEY_URI = publicKeyUri;
+  }
+
   final String authenticatorName;
   final FingerTrieSeq<String> audiences;
   final HashTrieSet<String> emails;
@@ -46,6 +61,14 @@ public class GoogleIdAuthenticatorDef implements AuthenticatorDef, Debug {
     this.emails = emails;
     this.publicKeyUri = publicKeyUri;
     this.httpSettings = httpSettings;
+  }
+
+  @Kind
+  public static Form<GoogleIdAuthenticatorDef> form() {
+    if (form == null) {
+      form = new GoogleIdAuthenticatorForm();
+    }
+    return form;
   }
 
   @Override
@@ -105,32 +128,10 @@ public class GoogleIdAuthenticatorDef implements AuthenticatorDef, Debug {
     return Format.debug(this);
   }
 
-  static final Uri PUBLIC_KEY_URI;
-
-  private static int hashSeed;
-
-  private static Form<GoogleIdAuthenticatorDef> form;
-
-  @Kind
-  public static Form<GoogleIdAuthenticatorDef> form() {
-    if (form == null) {
-      form = new GoogleIdAuthenticatorForm();
-    }
-    return form;
-  }
-
-  static {
-    Uri publicKeyUri;
-    try {
-      publicKeyUri = Uri.parse(System.getProperty("swim.auth.google.public.key.uri"));
-    } catch (NullPointerException | ParserException error) {
-      publicKeyUri = Uri.parse("https://www.googleapis.com/oauth2/v3/certs");
-    }
-    PUBLIC_KEY_URI = publicKeyUri;
-  }
 }
 
 final class GoogleIdAuthenticatorForm extends Form<GoogleIdAuthenticatorDef> {
+
   @Override
   public String tag() {
     return "googleId";
@@ -184,8 +185,9 @@ final class GoogleIdAuthenticatorForm extends Form<GoogleIdAuthenticatorDef> {
       }
       final HttpSettings httpSettings = HttpSettings.form().cast(value);
       return new GoogleIdAuthenticatorDef(authenticatorName, audiences.bind(),
-                                          emails, publicKeyUri, httpSettings);
+          emails, publicKeyUri, httpSettings);
     }
     return null;
   }
+
 }

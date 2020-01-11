@@ -28,6 +28,7 @@ import swim.store.mem.MemStoreKernel;
 import static org.testng.Assert.assertNotNull;
 
 public class ServerLoaderSpec {
+
   @Test
   public void testLoadServerStack() {
     final Kernel kernel = ServerLoader.loadServerStack();
@@ -48,4 +49,5 @@ public class ServerLoaderSpec {
     kernel.start();
     kernel.stop();
   }
+
 }

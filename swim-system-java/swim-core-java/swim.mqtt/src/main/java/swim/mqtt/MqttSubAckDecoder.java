@@ -20,6 +20,7 @@ import swim.codec.InputBuffer;
 import swim.collections.FingerTrieSeq;
 
 final class MqttSubAckDecoder extends Decoder<MqttSubAck> {
+
   final MqttDecoder mqtt;
   final int packetFlags;
   final int packetId;
@@ -39,12 +40,6 @@ final class MqttSubAckDecoder extends Decoder<MqttSubAck> {
 
   MqttSubAckDecoder(MqttDecoder mqtt) {
     this(mqtt, 0, 0, FingerTrieSeq.<MqttSubStatus>empty(), 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttSubAck> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.packetId,
-                  this.subscriptions, this.remaining, this.step);
   }
 
   static Decoder<MqttSubAck> decode(InputBuffer input,
@@ -111,4 +106,11 @@ final class MqttSubAckDecoder extends Decoder<MqttSubAck> {
   static Decoder<MqttSubAck> decode(InputBuffer input, MqttDecoder mqtt) {
     return decode(input, mqtt, 0, 0, FingerTrieSeq.<MqttSubStatus>empty(), 0, 1);
   }
+
+  @Override
+  public Decoder<MqttSubAck> feed(InputBuffer input) {
+    return decode(input, this.mqtt, this.packetFlags, this.packetId,
+        this.subscriptions, this.remaining, this.step);
+  }
+
 }

@@ -24,6 +24,7 @@ import swim.structure.selector.KeysSelector;
  */
 //@FunctionalInterface
 public interface Selectee<T> {
+
   /**
    * Performs this operation against {@code interpreter}.  By convention, a null
    * return value indicates to "collection-oriented" calling {@code Selectors}
@@ -33,4 +34,5 @@ public interface Selectee<T> {
    * immediately.
    */
   T selected(Interpreter interpreter);
+
 }

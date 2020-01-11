@@ -20,6 +20,10 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public final class SyncedResponse extends LaneAddressed {
+
+  @Kind
+  public static final Form<SyncedResponse> FORM = new SyncedResponseForm();
+
   public SyncedResponse(Uri nodeUri, Uri laneUri, Value body) {
     super(nodeUri, laneUri, body);
   }
@@ -61,11 +65,10 @@ public final class SyncedResponse extends LaneAddressed {
     return new SyncedResponse(this.nodeUri, this.laneUri, body);
   }
 
-  @Kind
-  public static final Form<SyncedResponse> FORM = new SyncedResponseForm();
 }
 
 final class SyncedResponseForm extends LaneAddressedForm<SyncedResponse> {
+
   @Override
   public String tag() {
     return "synced";
@@ -80,4 +83,5 @@ final class SyncedResponseForm extends LaneAddressedForm<SyncedResponse> {
   public SyncedResponse from(Uri nodeUri, Uri laneUri, Value body) {
     return new SyncedResponse(nodeUri, laneUri, body);
   }
+
 }

@@ -18,6 +18,7 @@ import swim.collections.HashTrieMap;
 import swim.uri.Uri;
 
 public interface EdgeBinding extends TierBinding, CellBinding, CellContext {
+
   EdgeBinding edgeWrapper();
 
   EdgeContext edgeContext();
@@ -55,4 +56,5 @@ public interface EdgeBinding extends TierBinding, CellBinding, CellContext {
   void openMetaLane(LaneBinding lane, NodeBinding metaLane);
 
   void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink);
+
 }

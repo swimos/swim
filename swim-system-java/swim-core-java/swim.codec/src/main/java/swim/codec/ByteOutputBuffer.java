@@ -17,6 +17,7 @@ package swim.codec;
 import java.nio.ByteBuffer;
 
 final class ByteOutputBuffer extends ByteOutput<ByteBuffer> {
+
   ByteOutputBuffer(byte[] array, int size, OutputSettings settings) {
     super(array, size, settings);
   }
@@ -30,4 +31,5 @@ final class ByteOutputBuffer extends ByteOutput<ByteBuffer> {
   public Output<ByteBuffer> clone() {
     return new ByteOutputBuffer(cloneArray(), this.size, this.settings);
   }
+
 }

@@ -23,6 +23,14 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class LogEntry {
+
+  public static final Uri TRACE_LOG_URI = Uri.parse("traceLog");
+  public static final Uri DEBUG_LOG_URI = Uri.parse("debugLog");
+  public static final Uri INFO_LOG_URI = Uri.parse("infoLog");
+  public static final Uri WARN_LOG_URI = Uri.parse("warnLog");
+  public static final Uri ERROR_LOG_URI = Uri.parse("errorLog");
+  public static final Uri FAIL_LOG_URI = Uri.parse("failLog");
+  private static Form<LogEntry> form;
   protected final String tag;
   protected final long time;
   protected final Uri nodeUri;
@@ -35,26 +43,6 @@ public class LogEntry {
     this.nodeUri = nodeUri;
     this.laneUri = laneUri;
     this.message = message;
-  }
-
-  public final String tag() {
-    return this.tag;
-  }
-
-  public final long time() {
-    return this.time;
-  }
-
-  public final Uri nodeUri() {
-    return this.nodeUri;
-  }
-
-  public final Uri laneUri() {
-    return this.laneUri;
-  }
-
-  public Value toValue() {
-    return form().mold(this).toValue();
   }
 
   public static LogEntry message(String tag, Uri nodeUri, Uri laneUri, Object message) {
@@ -134,15 +122,6 @@ public class LogEntry {
     return message("fail", Uri.empty(), Uri.empty(), message instanceof Throwable ? moldException((Throwable) message) : message);
   }
 
-  public static final Uri TRACE_LOG_URI = Uri.parse("traceLog");
-  public static final Uri DEBUG_LOG_URI = Uri.parse("debugLog");
-  public static final Uri INFO_LOG_URI = Uri.parse("infoLog");
-  public static final Uri WARN_LOG_URI = Uri.parse("warnLog");
-  public static final Uri ERROR_LOG_URI = Uri.parse("errorLog");
-  public static final Uri FAIL_LOG_URI = Uri.parse("failLog");
-
-  private static Form<LogEntry> form;
-
   @Kind
   public static Form<LogEntry> form() {
     if (form == null) {
@@ -177,9 +156,31 @@ public class LogEntry {
     }
     return Record.create(1).attr("at", header);
   }
+
+  public final String tag() {
+    return this.tag;
+  }
+
+  public final long time() {
+    return this.time;
+  }
+
+  public final Uri nodeUri() {
+    return this.nodeUri;
+  }
+
+  public final Uri laneUri() {
+    return this.laneUri;
+  }
+
+  public Value toValue() {
+    return form().mold(this).toValue();
+  }
+
 }
 
 final class LogEntryForm extends Form<LogEntry> {
+
   @Override
   public Class<?> type() {
     return LogEntry.class;
@@ -217,4 +218,5 @@ final class LogEntryForm extends Form<LogEntry> {
     }
     return null;
   }
+
 }

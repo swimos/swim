@@ -23,9 +23,11 @@ import swim.structure.Text;
 import swim.structure.Value;
 
 final class StringStructure extends AvroStringType<Value> {
+
   @SuppressWarnings("unchecked")
   @Override
   public Parser<Value> parseString(Input input) {
     return Unicode.parseOutput((Output<Value>) (Output<?>) Text.output(), input);
   }
+
 }

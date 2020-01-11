@@ -19,10 +19,15 @@ import swim.avro.schema.AvroUnionType;
 import swim.collections.FingerTrieSeq;
 
 final class UnionReflection<T> extends AvroUnionType<T> {
+
   final FingerTrieSeq<AvroType<? extends T>> variants;
 
   UnionReflection(FingerTrieSeq<AvroType<? extends T>> variants) {
     this.variants = variants;
+  }
+
+  static <T> UnionReflection<T> empty() {
+    return new UnionReflection<T>(FingerTrieSeq.empty());
   }
 
   @Override
@@ -40,7 +45,4 @@ final class UnionReflection<T> extends AvroUnionType<T> {
     return new UnionReflection<T>(this.variants.appended(variant));
   }
 
-  static <T> UnionReflection<T> empty() {
-    return new UnionReflection<T>(FingerTrieSeq.empty());
-  }
 }

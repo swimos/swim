@@ -19,6 +19,7 @@ import java.util.Map;
 import swim.collections.HashTrieMap;
 
 public class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
+
   protected HashTrieMap<K, V> state;
 
   public MapInput(HashTrieMap<K, V> state) {
@@ -71,4 +72,5 @@ public class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
   public Iterator<K> keyIterator() {
     return this.state.keyIterator();
   }
+
 }

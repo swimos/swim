@@ -20,6 +20,7 @@ import java.util.Collection;
  * Interface between a guest language execution environment and a host runtime.
  */
 public abstract class Bridge {
+
   public abstract HostRuntime hostRuntime();
 
   public abstract String guestLanguage();
@@ -51,4 +52,5 @@ public abstract class Bridge {
   public abstract boolean guestCanInvokeMember(Object guestObject, String member);
 
   public abstract Object guestInvokeMember(Object guestObject, String member, Object... arguments);
+
 }

@@ -22,6 +22,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class SpatialDataProxy<S> implements SpatialDataBinding<S>, SpatialDataContext<S> {
+
   protected final SpatialDataBinding<S> dataBinding;
   protected SpatialDataContext<S> dataContext;
 
@@ -245,4 +246,5 @@ public class SpatialDataProxy<S> implements SpatialDataBinding<S>, SpatialDataCo
   public void didClear() {
     this.dataContext.didClear();
   }
+
 }

@@ -21,6 +21,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 public class ValueEntryCursor<K, V> implements Cursor<Map.Entry<K, V>> {
+
   final Cursor<Map.Entry<Value, Value>> inner;
   final Form<K> keyForm;
   final Form<V> valueForm;
@@ -142,4 +143,5 @@ public class ValueEntryCursor<K, V> implements Cursor<Map.Entry<K, V>> {
   public void load() throws InterruptedException {
     this.inner.load();
   }
+
 }

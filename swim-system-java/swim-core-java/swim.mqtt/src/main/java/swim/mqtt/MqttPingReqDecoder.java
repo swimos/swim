@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class MqttPingReqDecoder extends Decoder<MqttPingReq> {
+
   final MqttDecoder mqtt;
   final int packetFlags;
   final int remaining;
@@ -33,11 +34,6 @@ final class MqttPingReqDecoder extends Decoder<MqttPingReq> {
 
   MqttPingReqDecoder(MqttDecoder mqtt) {
     this(mqtt, 0, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttPingReq> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.remaining, this.step);
   }
 
   static Decoder<MqttPingReq> decode(InputBuffer input, MqttDecoder mqtt,
@@ -76,4 +72,10 @@ final class MqttPingReqDecoder extends Decoder<MqttPingReq> {
   static Decoder<MqttPingReq> decode(InputBuffer input, MqttDecoder mqtt) {
     return decode(input, mqtt, 0, 0, 1);
   }
+
+  @Override
+  public Decoder<MqttPingReq> feed(InputBuffer input) {
+    return decode(input, this.mqtt, this.packetFlags, this.remaining, this.step);
+  }
+
 }

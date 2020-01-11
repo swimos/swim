@@ -15,6 +15,7 @@
 package swim.math;
 
 public interface TensorSpace<V, S> {
+
   Field<S> scalar();
 
   TensorDims dimensions();
@@ -30,4 +31,5 @@ public interface TensorSpace<V, S> {
   V multiply(V u, S a);
 
   V combine(S a, V u, S b, V v);
+
 }

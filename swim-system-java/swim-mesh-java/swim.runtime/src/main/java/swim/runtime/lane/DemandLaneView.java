@@ -35,6 +35,7 @@ import swim.structure.Form;
 import swim.structure.Value;
 
 public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
+
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
 
@@ -216,4 +217,5 @@ public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
   public void cue() {
     this.laneBinding.cueDown();
   }
+
 }

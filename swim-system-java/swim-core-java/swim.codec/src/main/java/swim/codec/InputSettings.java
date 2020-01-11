@@ -22,10 +22,47 @@ import swim.util.Murmur3;
  * Parser Parsers}.
  */
 public class InputSettings implements Debug {
+
+  private static int hashSeed;
+  private static InputSettings standard;
+  private static InputSettings stripped;
   protected final boolean isStripped;
 
   protected InputSettings(boolean isStripped) {
     this.isStripped = isStripped;
+  }
+
+  /**
+   * Returns {@code InputSettings} configured to include diagnostic metadata
+   * in generated output.
+   */
+  public static final InputSettings standard() {
+    if (standard == null) {
+      standard = new InputSettings(false);
+    }
+    return standard;
+  }
+
+  /**
+   * Returns {@code InputSettings} configured to not include diagnostic
+   * metadata in generated output.
+   */
+  public static final InputSettings stripped() {
+    if (stripped == null) {
+      stripped = new InputSettings(true);
+    }
+    return stripped;
+  }
+
+  /**
+   * Returns {@code InputSettings} configured to not include diagnostic
+   * metadata in generated output, if {@code isStripped} is {@code true}.
+   */
+  public static final InputSettings create(boolean isStripped) {
+    if (isStripped) {
+      return stripped();
+    }
+    return standard();
   }
 
   protected boolean canEqual(Object other) {
@@ -86,40 +123,4 @@ public class InputSettings implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-  private static InputSettings standard;
-  private static InputSettings stripped;
-
-  /**
-   * Returns {@code InputSettings} configured to include diagnostic metadata
-   * in generated output.
-   */
-  public static final InputSettings standard() {
-    if (standard == null) {
-      standard = new InputSettings(false);
-    }
-    return standard;
-  }
-
-  /**
-   * Returns {@code InputSettings} configured to not include diagnostic
-   * metadata in generated output.
-   */
-  public static final InputSettings stripped() {
-    if (stripped == null) {
-      stripped = new InputSettings(true);
-    }
-    return stripped;
-  }
-
-  /**
-   * Returns {@code InputSettings} configured to not include diagnostic
-   * metadata in generated output, if {@code isStripped} is {@code true}.
-   */
-  public static final InputSettings create(boolean isStripped) {
-    if (isStripped) {
-      return stripped();
-    }
-    return standard();
-  }
 }

@@ -32,6 +32,7 @@ import swim.streamlet.function.WatchValueFunction;
  * &quot;unplugs&quot; an {@code Inlet} from the {@code Outlet}.
  */
 public interface Outlet<O> {
+
   /**
    * Returns the current state of this {@code Outlet}.
    */
@@ -111,4 +112,5 @@ public interface Outlet<O> {
     combinator.bindInput(this);
     return this;
   }
+
 }

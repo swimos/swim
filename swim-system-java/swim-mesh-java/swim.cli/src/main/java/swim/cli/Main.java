@@ -18,6 +18,7 @@ import swim.args.Cmd;
 import swim.client.ClientRuntime;
 
 public final class Main {
+
   private Main() {
     // stub
   }
@@ -30,4 +31,5 @@ public final class Main {
     final Cmd cmd = cli.mainCmd().parse(args, 0);
     cmd.run();
   }
+
 }

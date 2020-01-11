@@ -23,6 +23,7 @@ import swim.structure.Slot;
 import static swim.recon.ReconParserSpec.assertParses;
 
 public class ReconSelectorParserSpec {
+
   @Test
   public void parseGetSelector() {
     assertParses("$a", Selector.identity().get("a"));
@@ -268,4 +269,5 @@ public class ReconSelectorParserSpec {
   public void parseRecordsWithSelectors() {
     assertParses("{a: $foo, b: $bar}", Record.of(Slot.of("a", Selector.identity().get("foo")), Slot.of("b", Selector.identity().get("bar"))));
   }
+
 }

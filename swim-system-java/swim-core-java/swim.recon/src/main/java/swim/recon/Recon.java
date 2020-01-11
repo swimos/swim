@@ -30,6 +30,10 @@ import swim.structure.Value;
  * Factory for constructing Recon parsers and writers.
  */
 public final class Recon {
+
+  private static ReconParser<Item, Value> structureParser;
+  private static ReconWriter<Item, Value> structureWriter;
+
   private Recon() {
     // static
   }
@@ -84,9 +88,6 @@ public final class Recon {
         || c >= 0xfdf0 && c <= 0xfffd
         || c >= 0x10000 && c <= 0xeffff;
   }
-
-  private static ReconParser<Item, Value> structureParser;
-  private static ReconWriter<Item, Value> structureWriter;
 
   public static ReconParser<Item, Value> structureParser() {
     if (structureParser == null) {
@@ -165,4 +166,5 @@ public final class Recon {
   public static <T> Encoder<T, T> formEncoder(Form<T> form) {
     return Utf8.encodedWriter(formWriter(form));
   }
+
 }

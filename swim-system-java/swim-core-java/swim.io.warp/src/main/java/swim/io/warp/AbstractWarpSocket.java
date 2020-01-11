@@ -33,6 +33,7 @@ import swim.ws.WsPing;
 import swim.ws.WsPong;
 
 public abstract class AbstractWarpSocket implements WarpSocket, IpContext, FlowContext {
+
   protected WarpSocketContext context;
 
   @Override
@@ -238,4 +239,5 @@ public abstract class AbstractWarpSocket implements WarpSocket, IpContext, FlowC
   public void close() {
     this.context.close();
   }
+
 }

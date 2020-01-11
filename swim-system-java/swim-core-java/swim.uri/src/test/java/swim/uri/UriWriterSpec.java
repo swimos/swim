@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class UriWriterSpec {
+
   @Test
   public void writeEmptyURIs() {
     assertEquals(Uri.empty().toString(), "");
@@ -302,4 +303,5 @@ public class UriWriterSpec {
     assertEquals(Uri.empty().schemeName("scheme").hostName("domain").path("/", "path").query(null, "query").fragmentIdentifier("fragment").toString(), "scheme://domain/path?query#fragment");
     assertEquals(Uri.empty().schemeName("scheme").hostName("domain").portNumber(80).path("/", "path").query(null, "query").fragmentIdentifier("fragment").toString(), "scheme://domain:80/path?query#fragment");
   }
+
 }

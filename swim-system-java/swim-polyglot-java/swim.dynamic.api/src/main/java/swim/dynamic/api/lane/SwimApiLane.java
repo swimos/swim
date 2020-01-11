@@ -18,9 +18,6 @@ import swim.dynamic.HostPackage;
 import swim.dynamic.JavaHostPackage;
 
 public final class SwimApiLane {
-  private SwimApiLane() {
-    // static
-  }
 
   public static final HostPackage PACKAGE;
 
@@ -39,4 +36,9 @@ public final class SwimApiLane {
     hostPkg.addHostType(HostValueLane.TYPE);
     hostPkg.addHostType(HostLaneFactory.TYPE);
   }
+
+  private SwimApiLane() {
+    // static
+  }
+
 }

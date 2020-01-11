@@ -21,6 +21,7 @@ import swim.structure.Item;
 import swim.structure.Value;
 
 final class JsonFormWriter<T> extends Writer<T, T> {
+
   final JsonWriter<Item, Value> json;
   final Form<T> form;
   final T object;
@@ -35,16 +36,6 @@ final class JsonFormWriter<T> extends Writer<T, T> {
 
   JsonFormWriter(JsonWriter<Item, Value> json, Form<T> form) {
     this(json, form, null, null);
-  }
-
-  @Override
-  public Writer<T, T> feed(T object) {
-    return new JsonFormWriter<T>(json, form, object, null);
-  }
-
-  @Override
-  public Writer<T, T> pull(Output<?> output) {
-    return write(output, this.json, this.form, this.object, this.part);
   }
 
   static <T> Writer<T, T> write(Output<?> output, JsonWriter<Item, Value> json,
@@ -70,4 +61,15 @@ final class JsonFormWriter<T> extends Writer<T, T> {
                                 Form<T> form, T object) {
     return write(output, json, form, object, null);
   }
+
+  @Override
+  public Writer<T, T> feed(T object) {
+    return new JsonFormWriter<T>(json, form, object, null);
+  }
+
+  @Override
+  public Writer<T, T> pull(Output<?> output) {
+    return write(output, this.json, this.form, this.object, this.part);
+  }
+
 }

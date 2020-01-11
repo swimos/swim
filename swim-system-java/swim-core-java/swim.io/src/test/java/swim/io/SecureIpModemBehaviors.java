@@ -21,6 +21,7 @@ import swim.concurrent.Theater;
 import static org.testng.Assert.assertEquals;
 
 public abstract class SecureIpModemBehaviors extends IpModemBehaviors {
+
   @Test
   public void testSecure() {
     final Theater stage = new Theater();
@@ -45,6 +46,7 @@ public abstract class SecureIpModemBehaviors extends IpModemBehaviors {
       public IpModem<?, ?> createModem() {
         return server;
       }
+
       @Override
       public void didBind() {
         serverBind.countDown();
@@ -72,4 +74,5 @@ public abstract class SecureIpModemBehaviors extends IpModemBehaviors {
       stage.stop();
     }
   }
+
 }

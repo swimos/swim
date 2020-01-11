@@ -26,6 +26,7 @@ import swim.api.warp.function.WillUplink;
 import swim.structure.Form;
 
 public interface SupplyLane<V> extends WarpLane {
+
   Form<V> valueForm();
 
   <V2> SupplyLane<V2> valueForm(Form<V2> valueForm);
@@ -63,4 +64,5 @@ public interface SupplyLane<V> extends WarpLane {
   SupplyLane<V> didLeave(DidLeave didLeave);
 
   void push(V value);
+
 }

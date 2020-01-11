@@ -21,6 +21,7 @@ import swim.structure.Record;
 import swim.util.Builder;
 
 final class ArrayStructure<I extends Item> extends AvroArrayType<I, Record> {
+
   final AvroType<I> itemType;
 
   ArrayStructure(AvroType<I> itemType) {
@@ -37,4 +38,5 @@ final class ArrayStructure<I extends Item> extends AvroArrayType<I, Record> {
   public Builder<I, Record> arrayBuilder() {
     return (Builder<I, Record>) (Builder<?, Record>) Record.create();
   }
+
 }

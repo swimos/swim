@@ -30,9 +30,6 @@ import swim.dynamic.observable.function.GuestWillUpdateShape;
 import swim.observable.ObservableSpatialMap;
 
 public final class HostObservableSpatialMap {
-  private HostObservableSpatialMap() {
-    // static
-  }
 
   public static final HostObjectType<ObservableSpatialMap<Object, Object, Object>> TYPE;
 
@@ -49,9 +46,15 @@ public final class HostObservableSpatialMap {
     type.addMember(new HostObservableSpatialMapWillClear());
     type.addMember(new HostObservableSpatialMapDidClear());
   }
+
+  private HostObservableSpatialMap() {
+    // static
+  }
+
 }
 
 final class HostObservableSpatialMapWillUpdate implements HostMethod<ObservableSpatialMap<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "willUpdate";
@@ -61,9 +64,11 @@ final class HostObservableSpatialMapWillUpdate implements HostMethod<ObservableS
   public Object invoke(Bridge bridge, ObservableSpatialMap<Object, Object, Object> observable, Object... arguments) {
     return observable.willUpdate(new GuestWillUpdateShape<Object, Object, Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableSpatialMapDidUpdate implements HostMethod<ObservableSpatialMap<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "didUpdate";
@@ -73,9 +78,11 @@ final class HostObservableSpatialMapDidUpdate implements HostMethod<ObservableSp
   public Object invoke(Bridge bridge, ObservableSpatialMap<Object, Object, Object> observable, Object... arguments) {
     return observable.didUpdate(new GuestDidUpdateShape<Object, Object, Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableSpatialMapWillMove implements HostMethod<ObservableSpatialMap<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "willMove";
@@ -85,9 +92,11 @@ final class HostObservableSpatialMapWillMove implements HostMethod<ObservableSpa
   public Object invoke(Bridge bridge, ObservableSpatialMap<Object, Object, Object> observable, Object... arguments) {
     return observable.willMove(new GuestWillMoveShape<Object, Object, Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableSpatialMapDidMove implements HostMethod<ObservableSpatialMap<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "didMove";
@@ -97,9 +106,11 @@ final class HostObservableSpatialMapDidMove implements HostMethod<ObservableSpat
   public Object invoke(Bridge bridge, ObservableSpatialMap<Object, Object, Object> observable, Object... arguments) {
     return observable.didMove(new GuestDidMoveShape<Object, Object, Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableSpatialMapWillRemove implements HostMethod<ObservableSpatialMap<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "willRemove";
@@ -109,9 +120,11 @@ final class HostObservableSpatialMapWillRemove implements HostMethod<ObservableS
   public Object invoke(Bridge bridge, ObservableSpatialMap<Object, Object, Object> observable, Object... arguments) {
     return observable.willRemove(new GuestWillRemoveShape<Object, Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableSpatialMapDidRemove implements HostMethod<ObservableSpatialMap<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "didRemove";
@@ -121,9 +134,11 @@ final class HostObservableSpatialMapDidRemove implements HostMethod<ObservableSp
   public Object invoke(Bridge bridge, ObservableSpatialMap<Object, Object, Object> observable, Object... arguments) {
     return observable.didRemove(new GuestDidRemoveShape<Object, Object, Object>(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableSpatialMapWillClear implements HostMethod<ObservableSpatialMap<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "willClear";
@@ -133,9 +148,11 @@ final class HostObservableSpatialMapWillClear implements HostMethod<ObservableSp
   public Object invoke(Bridge bridge, ObservableSpatialMap<Object, Object, Object> observable, Object... arguments) {
     return observable.willClear(new GuestWillClear(bridge, arguments[0]));
   }
+
 }
 
 final class HostObservableSpatialMapDidClear implements HostMethod<ObservableSpatialMap<Object, Object, Object>> {
+
   @Override
   public String key() {
     return "didClear";
@@ -145,4 +162,5 @@ final class HostObservableSpatialMapDidClear implements HostMethod<ObservableSpa
   public Object invoke(Bridge bridge, ObservableSpatialMap<Object, Object, Object> observable, Object... arguments) {
     return observable.didClear(new GuestDidClear(bridge, arguments[0]));
   }
+
 }

@@ -22,9 +22,6 @@ import swim.dynamic.JavaHostObjectType;
 import swim.dynamic.api.warp.HostWarpLane;
 
 public final class HostSupplyLane {
-  private HostSupplyLane() {
-    // static
-  }
 
   public static final HostObjectType<SupplyLane<Object>> TYPE;
 
@@ -36,9 +33,15 @@ public final class HostSupplyLane {
     type.addMember(new HostSupplyLaneUnobserve());
     type.addMember(new HostSupplyLanePush());
   }
+
+  private HostSupplyLane() {
+    // static
+  }
+
 }
 
 final class HostSupplyLaneObserve implements HostMethod<SupplyLane<Object>> {
+
   @Override
   public String key() {
     return "observe";
@@ -51,9 +54,11 @@ final class HostSupplyLaneObserve implements HostMethod<SupplyLane<Object>> {
     lane.observe(observer);
     return this;
   }
+
 }
 
 final class HostSupplyLaneUnobserve implements HostMethod<SupplyLane<Object>> {
+
   @Override
   public String key() {
     return "unobserve";
@@ -66,9 +71,11 @@ final class HostSupplyLaneUnobserve implements HostMethod<SupplyLane<Object>> {
     lane.unobserve(observer);
     return this;
   }
+
 }
 
 final class HostSupplyLanePush implements HostMethod<SupplyLane<Object>> {
+
   @Override
   public String key() {
     return "push";
@@ -79,4 +86,5 @@ final class HostSupplyLanePush implements HostMethod<SupplyLane<Object>> {
     lane.push(arguments[0]);
     return null;
   }
+
 }

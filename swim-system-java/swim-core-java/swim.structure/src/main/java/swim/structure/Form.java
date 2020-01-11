@@ -56,84 +56,6 @@ import swim.structure.form.ValueForm;
  * typed Java object.
  */
 public abstract class Form<T> {
-  /**
-   * Returns the key of the tag attribute that distinguishes structures of this
-   * {@code Form}; returns {@code null} if this {@code Form} has no
-   * distinguishing tag attribute.  Used to accelerate distrcrimination of
-   * polymorphic structural types with nominal type hints.
-   */
-  public String tag() {
-    return null;
-  }
-
-  /**
-   * Returns a version of this {@code Form} that requires a head {@link Attr}
-   * with the given {@code tag} name.
-   */
-  public Form<T> tag(String tag) {
-    if (tag != null) {
-      return new TagForm<T>(tag, this);
-    } else {
-      return this;
-    }
-  }
-
-  /**
-   * Returns a default–possibly {@code null}–value of type {@code T}.  Used
-   * as the fallback return value when {@link Item#coerce(Form) coercing} an
-   * invalid structural value.
-   */
-  public T unit() {
-    return null;
-  }
-
-  /**
-   * Returns a version of this {@code Form} with the given {@code unit} value.
-   */
-  public Form<T> unit(T unit) {
-    if (unit != null) {
-      return new UnitForm<T>(unit, this);
-    } else {
-      return this;
-    }
-  }
-
-  /**
-   * Returns the reified {@code Class} of type {@code T}.
-   */
-  public abstract Class<?> type();
-
-  /**
-   * Converts a nominally typed Java {@code object} into its structurally typed
-   * equivalent based on the provided prototype {@code item}.  The passed-in
-   * {@code item} is assumed to be non-{@code null}.  The returned {@code Item}
-   * must never be {@code null}.
-   */
-  public Item mold(T object, Item item) {
-    return item.concat(mold(object));
-  }
-
-  /**
-   * Converts a nominally typed Java {@code object} into its structurally typed
-   * equivalent.  The returned {@code Item} must never be {@code null}.
-   */
-  public abstract Item mold(T object);
-
-  /**
-   * Converts a structurally typed {@code item} into a nominally typed Java
-   * object based on the provided prototype {@code object}.  The passed-in
-   * {@code item} is assumed to be non-{@code null}.  The passed-in prototype
-   * {@code object} may be {@code null}.
-   */
-  public T cast(Item item, T object) {
-    return cast(item);
-  }
-
-  /**
-   * Converts a structurally typed {@code item} into a nominally typed Java
-   * object.  The passed-in {@code item} is assumed to be non-{@code null}.
-   */
-  public abstract T cast(Item item);
 
   private static Form<Byte> byteForm;
   private static Form<Short> shortForm;
@@ -336,7 +258,7 @@ public abstract class Form<T> {
    * casts} return objects of type {@code type}.
    *
    * @throws ClassCastException if {@code type} does not extend {@link
-   * java.util.Map}
+   *                            java.util.Map}
    */
   @SuppressWarnings("unchecked")
   public static <CC, K, V> Form<CC> forMap(Class<?> type, Form<K> keyForm, Form<V> valForm) {
@@ -437,4 +359,84 @@ public abstract class Form<T> {
   public static <T> Form<T> forClass(Class<?> type) {
     return forClass(type, null);
   }
+
+  /**
+   * Returns the key of the tag attribute that distinguishes structures of this
+   * {@code Form}; returns {@code null} if this {@code Form} has no
+   * distinguishing tag attribute.  Used to accelerate distrcrimination of
+   * polymorphic structural types with nominal type hints.
+   */
+  public String tag() {
+    return null;
+  }
+
+  /**
+   * Returns a version of this {@code Form} that requires a head {@link Attr}
+   * with the given {@code tag} name.
+   */
+  public Form<T> tag(String tag) {
+    if (tag != null) {
+      return new TagForm<T>(tag, this);
+    } else {
+      return this;
+    }
+  }
+
+  /**
+   * Returns a default–possibly {@code null}–value of type {@code T}.  Used
+   * as the fallback return value when {@link Item#coerce(Form) coercing} an
+   * invalid structural value.
+   */
+  public T unit() {
+    return null;
+  }
+
+  /**
+   * Returns a version of this {@code Form} with the given {@code unit} value.
+   */
+  public Form<T> unit(T unit) {
+    if (unit != null) {
+      return new UnitForm<T>(unit, this);
+    } else {
+      return this;
+    }
+  }
+
+  /**
+   * Returns the reified {@code Class} of type {@code T}.
+   */
+  public abstract Class<?> type();
+
+  /**
+   * Converts a nominally typed Java {@code object} into its structurally typed
+   * equivalent based on the provided prototype {@code item}.  The passed-in
+   * {@code item} is assumed to be non-{@code null}.  The returned {@code Item}
+   * must never be {@code null}.
+   */
+  public Item mold(T object, Item item) {
+    return item.concat(mold(object));
+  }
+
+  /**
+   * Converts a nominally typed Java {@code object} into its structurally typed
+   * equivalent.  The returned {@code Item} must never be {@code null}.
+   */
+  public abstract Item mold(T object);
+
+  /**
+   * Converts a structurally typed {@code item} into a nominally typed Java
+   * object based on the provided prototype {@code object}.  The passed-in
+   * {@code item} is assumed to be non-{@code null}.  The passed-in prototype
+   * {@code object} may be {@code null}.
+   */
+  public T cast(Item item, T object) {
+    return cast(item);
+  }
+
+  /**
+   * Converts a structurally typed {@code item} into a nominally typed Java
+   * object.  The passed-in {@code item} is assumed to be non-{@code null}.
+   */
+  public abstract T cast(Item item);
+
 }

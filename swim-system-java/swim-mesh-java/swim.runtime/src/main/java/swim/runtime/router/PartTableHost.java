@@ -41,6 +41,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class PartTableHost implements HostContext {
+
   protected final PartTable part;
   protected final HostBinding host;
   protected final HostAddress hostAddress;
@@ -315,4 +316,5 @@ public class PartTableHost implements HostContext {
   public void willClose() {
     // nop
   }
+
 }

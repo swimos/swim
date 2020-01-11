@@ -38,6 +38,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 public class JsonWriterSpec {
+
   public static void assertWrites(Item item, byte... expected) {
     for (int i = 0, n = expected.length; i <= n; i += 1) {
       final byte[] actual = new byte[n];
@@ -103,7 +104,7 @@ public class JsonWriterSpec {
     assertWrites(Data.fromBase64("AA=="), "\"AA==\"");
     assertWrites(Data.fromBase64("ABCDabcd12/+"), "\"ABCDabcd12/+\"");
     assertWrites(Data.fromBase64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+"),
-                 "\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+\"");
+        "\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+\"");
   }
 
   @Test
@@ -161,7 +162,7 @@ public class JsonWriterSpec {
   public void writeRecordsWithNonStringKeys() {
     assertWrites(Record.of(Slot.of(Num.from(1), "a")), "{\"$0\":{\"$key\":1,\"$value\":\"a\"}}");
     assertWrites(Record.of(Slot.of(Num.from(1), "a"), Slot.of(Record.empty(), "b")),
-                 "{\"$0\":{\"$key\":1,\"$value\":\"a\"},\"$1\":{\"$key\":[],\"$value\":\"b\"}}");
+        "{\"$0\":{\"$key\":1,\"$value\":\"a\"},\"$1\":{\"$key\":[],\"$value\":\"b\"}}");
   }
 
   @Test
@@ -177,22 +178,23 @@ public class JsonWriterSpec {
   @Test
   public void writeNestedRecords() {
     assertWrites(Record.of(1, Record.of(Attr.of("b", 2), 3), Slot.of("d", 4)),
-                 "{\"$0\":1,\"$1\":{\"@b\":2,\"$1\":3},\"d\":4}");
+        "{\"$0\":1,\"$1\":{\"@b\":2,\"$1\":3},\"d\":4}");
   }
-  
+
   @Test
   public void writeAttributes() {
     assertWrites(Attr.of("foo", 1), "\"@foo\":1");
     assertWrites(Attr.of("bar", 2), "\"@bar\":2");
     assertWrites(Attr.of("baz", 3), "\"@baz\":3");
   }
-  
+
   @Test
   public void writeFields() {
     Map.Entry<Integer, String> entry = new AbstractMap.SimpleEntry<>(42, "foo");
     assertWrites(Field.of(entry), "{\"$key\":42,\"$value\":\"foo\"}");
-    
+
     entry = new AbstractMap.SimpleEntry<>(13, "bar");
     assertWrites(Field.of(entry), "{\"$key\":13,\"$value\":\"bar\"}");
   }
+
 }

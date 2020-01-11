@@ -20,9 +20,11 @@ import swim.io.IpInterface;
 import swim.util.Log;
 
 public interface ServiceContext extends IpInterface, Log {
+
   Schedule schedule();
 
   Stage stage();
 
   void close();
+
 }

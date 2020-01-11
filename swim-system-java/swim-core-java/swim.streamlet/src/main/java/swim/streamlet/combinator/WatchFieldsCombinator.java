@@ -17,6 +17,7 @@ package swim.streamlet.combinator;
 import swim.streamlet.function.WatchFieldsFunction;
 
 public class WatchFieldsCombinator<K, V, O> extends WatchFieldsOperator<K, V, O> {
+
   protected final WatchFieldsFunction<? super K, ? super V> func;
 
   public WatchFieldsCombinator(WatchFieldsFunction<? super K, ? super V> func) {
@@ -27,4 +28,5 @@ public class WatchFieldsCombinator<K, V, O> extends WatchFieldsOperator<K, V, O>
   public void evaluate(K key, V value) {
     this.func.apply(key, value);
   }
+
 }

@@ -17,5 +17,7 @@ package swim.vm;
 import org.graalvm.polyglot.proxy.Proxy;
 
 public abstract class VmHostProxy<T> implements Proxy {
+
   public abstract T unwrap();
+
 }

@@ -27,10 +27,46 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class Upgrade extends HttpHeader {
+
+  private static int hashSeed;
+  private static Upgrade websocket;
   final FingerTrieSeq<UpgradeProtocol> protocols;
 
   Upgrade(FingerTrieSeq<UpgradeProtocol> protocols) {
     this.protocols = protocols;
+  }
+
+  public static Upgrade websocket() {
+    if (websocket == null) {
+      websocket = new Upgrade(FingerTrieSeq.of(UpgradeProtocol.websocket()));
+    }
+    return websocket;
+  }
+
+  public static Upgrade from(FingerTrieSeq<UpgradeProtocol> protocols) {
+    if (protocols.size() == 1) {
+      final UpgradeProtocol protocol = protocols.head();
+      if (protocol == UpgradeProtocol.websocket()) {
+        return websocket();
+      }
+    }
+    return new Upgrade(protocols);
+  }
+
+  public static Upgrade from(UpgradeProtocol... protocols) {
+    return from(FingerTrieSeq.of(protocols));
+  }
+
+  public static Upgrade from(String... protocolStrings) {
+    final Builder<UpgradeProtocol, FingerTrieSeq<UpgradeProtocol>> protocols = FingerTrieSeq.builder();
+    for (int i = 0, n = protocolStrings.length; i < n; i += 1) {
+      protocols.add(UpgradeProtocol.parse(protocolStrings[i]));
+    }
+    return from(protocols.bind());
+  }
+
+  public static Parser<Upgrade> parseHttpValue(Input input, HttpParser http) {
+    return UpgradeParser.parse(input, http);
   }
 
   @Override
@@ -94,40 +130,4 @@ public final class Upgrade extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  private static Upgrade websocket;
-
-  public static Upgrade websocket() {
-    if (websocket == null) {
-      websocket = new Upgrade(FingerTrieSeq.of(UpgradeProtocol.websocket()));
-    }
-    return websocket;
-  }
-
-  public static Upgrade from(FingerTrieSeq<UpgradeProtocol> protocols) {
-    if (protocols.size() == 1) {
-      final UpgradeProtocol protocol = protocols.head();
-      if (protocol == UpgradeProtocol.websocket()) {
-        return websocket();
-      }
-    }
-    return new Upgrade(protocols);
-  }
-
-  public static Upgrade from(UpgradeProtocol... protocols) {
-    return from(FingerTrieSeq.of(protocols));
-  }
-
-  public static Upgrade from(String... protocolStrings) {
-    final Builder<UpgradeProtocol, FingerTrieSeq<UpgradeProtocol>> protocols = FingerTrieSeq.builder();
-    for (int i = 0, n = protocolStrings.length; i < n; i += 1) {
-      protocols.add(UpgradeProtocol.parse(protocolStrings[i]));
-    }
-    return from(protocols.bind());
-  }
-
-  public static Parser<Upgrade> parseHttpValue(Input input, HttpParser http) {
-    return UpgradeParser.parse(input, http);
-  }
 }

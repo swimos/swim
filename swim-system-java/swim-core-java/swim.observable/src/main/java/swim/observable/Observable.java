@@ -15,7 +15,9 @@
 package swim.observable;
 
 public interface Observable<O> {
+
   Observable<O> observe(O observer);
 
   Observable<O> unobserve(O observer);
+
 }

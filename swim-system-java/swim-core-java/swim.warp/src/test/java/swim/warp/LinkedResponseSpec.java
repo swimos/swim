@@ -21,51 +21,53 @@ import static swim.warp.Assertions.assertParses;
 import static swim.warp.Assertions.assertWrites;
 
 public class LinkedResponseSpec {
+
   @Test
   public void parseLinkedWithNamedHeaders() {
     assertParses("@linked(node: node_uri, lane: lane_uri, prio: 0.5, rate: 1.0)",
-                 new LinkedResponse("node_uri", "lane_uri", 0.5f, 1.0f));
+        new LinkedResponse("node_uri", "lane_uri", 0.5f, 1.0f));
   }
 
   @Test
   public void parseLinkedWithPositionalHeaders() {
     assertParses("@linked(node_uri, lane_uri)",
-                 new LinkedResponse("node_uri", "lane_uri", 0.0f, 0.0f));
+        new LinkedResponse("node_uri", "lane_uri", 0.0f, 0.0f));
   }
 
   @Test
   public void parseLinkedWithBody() {
     assertParses("@linked(node_uri, lane_uri)@test",
-                 new LinkedResponse("node_uri", "lane_uri", 0.0f, 0.0f, Record.of(Attr.of("test"))));
+        new LinkedResponse("node_uri", "lane_uri", 0.0f, 0.0f, Record.of(Attr.of("test"))));
   }
 
   @Test
   public void writeLinked() {
     assertWrites(new LinkedResponse("node_uri", "lane_uri", 0.0f, 0.0f),
-                 "@linked(node:node_uri,lane:lane_uri)");
+        "@linked(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   public void writeLinkedWithPrio() {
     assertWrites(new LinkedResponse("node_uri", "lane_uri", 0.5f, 0.0f),
-                 "@linked(node:node_uri,lane:lane_uri,prio:0.5)");
+        "@linked(node:node_uri,lane:lane_uri,prio:0.5)");
   }
 
   @Test
   public void writeLinkedWithRate() {
     assertWrites(new LinkedResponse("node_uri", "lane_uri", 0.0f, 1.0f),
-                 "@linked(node:node_uri,lane:lane_uri,rate:1)");
+        "@linked(node:node_uri,lane:lane_uri,rate:1)");
   }
 
   @Test
   public void writeLinkedWithPrioAndRate() {
     assertWrites(new LinkedResponse("node_uri", "lane_uri", 0.5f, 1.0f),
-                 "@linked(node:node_uri,lane:lane_uri,prio:0.5,rate:1)");
+        "@linked(node:node_uri,lane:lane_uri,prio:0.5,rate:1)");
   }
 
   @Test
   public void writeLinkedWithBody() {
     assertWrites(new LinkedResponse("node_uri", "lane_uri", 0.0f, 0.0f, Record.of(Attr.of("test"))),
-                 "@linked(node:node_uri,lane:lane_uri)@test");
+        "@linked(node:node_uri,lane:lane_uri)@test");
   }
+
 }

@@ -19,6 +19,7 @@ import java.util.NoSuchElementException;
 import swim.codec.Output;
 
 final class AvroNamespaceEmpty extends AvroNamespace {
+
   @Override
   public boolean isDefined() {
     return false;
@@ -83,4 +84,5 @@ final class AvroNamespaceEmpty extends AvroNamespace {
   public String toString() {
     return "";
   }
+
 }

@@ -5,7 +5,7 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.xml'
 
 dependencies {
-  implementation project(':swim-util')
-  api project(':swim-codec')
-  api project(':swim-structure')
+    implementation project(':swim-util')
+    api project(':swim-codec')
+    api project(':swim-structure')
 }

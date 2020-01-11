@@ -22,6 +22,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class UriMapperSpec {
+
   @Test
   public void mapUriPathMatches() {
     assertEquals(UriMapper.from("path", "test").get("path"), "test");
@@ -282,4 +283,5 @@ public class UriMapperSpec {
     assertEquals(childIterator.next(), UriPath.segment("3"));
     assertFalse(childIterator.hasNext());
   }
+
 }

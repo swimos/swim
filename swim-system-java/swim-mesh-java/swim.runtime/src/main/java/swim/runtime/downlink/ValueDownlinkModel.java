@@ -30,6 +30,10 @@ import swim.warp.CommandMessage;
 import swim.warp.EventMessage;
 
 public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>> {
+
+  protected static final int STATEFUL = 1 << 0;
+  static final AtomicReferenceFieldUpdater<ValueDownlinkModel, Value> STATE =
+      AtomicReferenceFieldUpdater.newUpdater(ValueDownlinkModel.class, Value.class, "state");
   protected int flags;
   protected volatile Value state;
 
@@ -78,7 +82,7 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
     final Value body = this.state;
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
     return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
-                                    prio, null, message, null);
+        prio, null, message, null);
   }
 
   @Override
@@ -132,13 +136,10 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
   protected void didSet(Value newValue, Value oldValue) {
   }
 
-  protected static final int STATEFUL = 1 << 0;
-
-  static final AtomicReferenceFieldUpdater<ValueDownlinkModel, Value> STATE =
-      AtomicReferenceFieldUpdater.newUpdater(ValueDownlinkModel.class, Value.class, "state");
 }
 
 final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, ValueDownlinkView<?>> {
+
   final EventMessage message;
   final Cont<EventMessage> cont;
   Form<Object> valueForm;
@@ -262,4 +263,5 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
       }
     }
   }
+
 }

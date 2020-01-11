@@ -19,5 +19,7 @@ import swim.structure.Value;
 
 @FunctionalInterface
 public interface DidCommand extends Preemptive {
+
   void didCommand(Value body);
+
 }

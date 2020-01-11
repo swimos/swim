@@ -67,6 +67,116 @@ package swim.codec;
  * @see Writer
  */
 public abstract class Output<T> {
+
+  private static Output<Object> full;
+  private static Output<Object> done;
+
+  /**
+   * Returns an {@code Output} in the <em>full</em> state, that binds a {@code
+   * null} result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Output<T> full() {
+    if (full == null) {
+      full = new OutputFull<Object>(null, OutputSettings.standard());
+    }
+    return (Output<T>) full;
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>full</em> state, with the given
+   * {@code settings}.
+   */
+  public static <T> Output<T> full(OutputSettings settings) {
+    if (settings == OutputSettings.standard()) {
+      return full();
+    }
+    return new OutputFull<T>(null, settings);
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>full</em> state, that binds the given
+   * {@code value}.
+   */
+  public static <T> Output<T> full(T value) {
+    if (value == null) {
+      return full();
+    }
+    return new OutputFull<T>(value, OutputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>full</em> state, that binds the given
+   * {@code value}, with the given {@code settings}.
+   */
+  public static <T> Output<T> full(T value, OutputSettings settings) {
+    if (value == null && settings == OutputSettings.standard()) {
+      return full();
+    }
+    return new OutputFull<T>(value, settings);
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>done</em> state, that binds a {@code
+   * null} result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Output<T> done() {
+    if (done == null) {
+      done = new OutputDone<Object>(null, OutputSettings.standard());
+    }
+    return (Output<T>) done;
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>done</em> state, with the given {@code
+   * settings}.
+   */
+  public static <T> Output<T> done(OutputSettings settings) {
+    if (settings == OutputSettings.standard()) {
+      return done();
+    }
+    return new OutputDone<T>(null, settings);
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>done</em> state, that binds the given
+   * {@code value}.
+   */
+  public static <T> Output<T> done(T value) {
+    if (value == null) {
+      return done();
+    }
+    return new OutputDone<T>(value, OutputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>done</em> state, that binds the given
+   * {@code value}, with the given {@code settings}.
+   */
+  public static <T> Output<T> done(T value, OutputSettings settings) {
+    if (value == null && settings == OutputSettings.standard()) {
+      return done();
+    }
+    return new OutputDone<T>(value, settings);
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>error</em> state, with the given
+   * output {@code error}.
+   */
+  public static <T> Output<T> error(Throwable error) {
+    return new OutputError<T>(error, OutputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>error</em> state, with the given
+   * output {@code error} and {@code settings}.
+   */
+  public static <T> Output<T> error(Throwable error, OutputSettings settings) {
+    return new OutputError<T>(error, settings);
+  }
+
   /**
    * Returns {@code true} when the next {@link #write(int)} will succeed.
    * i.e. this {@code Output} is in the <em>cont</em> state.
@@ -215,7 +325,7 @@ public abstract class Output<T> {
    * <em>error</em> state.
    *
    * @throws OutputException if this {@code Output} is not in the
-   *         <em>error</em> state.
+   *                         <em>error</em> state.
    */
   public Throwable trap() {
     throw new OutputException();
@@ -238,125 +348,17 @@ public abstract class Output<T> {
    * Returns an implementation-defined branch of the token stream.
    *
    * @throws UnsupportedOperationException if this {@code Output} cannot be
-   *         cloned.
+   *                                       cloned.
    */
   @Override
   public Output<T> clone() {
     throw new UnsupportedOperationException();
   }
 
-  private static Output<Object> full;
-
-  private static Output<Object> done;
-
-  /**
-   * Returns an {@code Output} in the <em>full</em> state, that binds a {@code
-   * null} result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> Output<T> full() {
-    if (full == null) {
-      full = new OutputFull<Object>(null, OutputSettings.standard());
-    }
-    return (Output<T>) full;
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>full</em> state, with the given
-   * {@code settings}.
-   */
-  public static <T> Output<T> full(OutputSettings settings) {
-    if (settings == OutputSettings.standard()) {
-      return full();
-    }
-    return new OutputFull<T>(null, settings);
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>full</em> state, that binds the given
-   * {@code value}.
-   */
-  public static <T> Output<T> full(T value) {
-    if (value == null) {
-      return full();
-    }
-    return new OutputFull<T>(value, OutputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>full</em> state, that binds the given
-   * {@code value}, with the given {@code settings}.
-   */
-  public static <T> Output<T> full(T value, OutputSettings settings) {
-    if (value == null && settings == OutputSettings.standard()) {
-      return full();
-    }
-    return new OutputFull<T>(value, settings);
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>done</em> state, that binds a {@code
-   * null} result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> Output<T> done() {
-    if (done == null) {
-      done = new OutputDone<Object>(null, OutputSettings.standard());
-    }
-    return (Output<T>) done;
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>done</em> state, with the given {@code
-   * settings}.
-   */
-  public static <T> Output<T> done(OutputSettings settings) {
-    if (settings == OutputSettings.standard()) {
-      return done();
-    }
-    return new OutputDone<T>(null, settings);
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>done</em> state, that binds the given
-   * {@code value}.
-   */
-  public static <T> Output<T> done(T value) {
-    if (value == null) {
-      return done();
-    }
-    return new OutputDone<T>(value, OutputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>done</em> state, that binds the given
-   * {@code value}, with the given {@code settings}.
-   */
-  public static <T> Output<T> done(T value, OutputSettings settings) {
-    if (value == null && settings == OutputSettings.standard()) {
-      return done();
-    }
-    return new OutputDone<T>(value, settings);
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>error</em> state, with the given
-   * output {@code error}.
-   */
-  public static <T> Output<T> error(Throwable error) {
-    return new OutputError<T>(error, OutputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>error</em> state, with the given
-   * output {@code error} and {@code settings}.
-   */
-  public static <T> Output<T> error(Throwable error, OutputSettings settings) {
-    return new OutputError<T>(error, settings);
-  }
 }
 
 final class OutputFull<T> extends Output<T> {
+
   final T value;
   final OutputSettings settings;
 
@@ -438,9 +440,11 @@ final class OutputFull<T> extends Output<T> {
   public Output<T> clone() {
     return this;
   }
+
 }
 
 final class OutputDone<T> extends Output<T> {
+
   final T value;
   final OutputSettings settings;
 
@@ -522,9 +526,11 @@ final class OutputDone<T> extends Output<T> {
   public Output<T> clone() {
     return this;
   }
+
 }
 
 final class OutputError<T> extends Output<T> {
+
   final Throwable error;
   final OutputSettings settings;
 
@@ -607,4 +613,5 @@ final class OutputError<T> extends Output<T> {
   public Output<T> clone() {
     return this;
   }
+
 }

@@ -22,6 +22,10 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class PointR3 extends R3Shape implements Debug {
+
+  private static int hashSeed;
+  private static PointR3 origin;
+  private static R3Form<PointR3> form;
   public final double x;
   public final double y;
   public final double z;
@@ -30,6 +34,25 @@ public class PointR3 extends R3Shape implements Debug {
     this.x = x;
     this.y = y;
     this.z = z;
+  }
+
+  public static PointR3 origin() {
+    if (origin == null) {
+      origin = new PointR3(0.0, 0.0, 0.0);
+    }
+    return origin;
+  }
+
+  public static PointR3 of(double x, double y, double z) {
+    return new PointR3(x, y, z);
+  }
+
+  @Kind
+  public static R3Form<PointR3> form() {
+    if (form == null) {
+      form = new PointR3Form();
+    }
+    return form;
   }
 
   public final PointR3 plus(VectorR3 vector) {
@@ -89,8 +112,8 @@ public class PointR3 extends R3Shape implements Debug {
   @Override
   public PointZ3 transform(R3ToZ3Function f) {
     return new PointZ3(f.transformX(this.x, this.y, this.z),
-                       f.transformY(this.x, this.y, this.z),
-                       f.transformZ(this.x, this.y, this.z));
+        f.transformY(this.x, this.y, this.z),
+        f.transformZ(this.x, this.y, this.z));
   }
 
   @Override
@@ -133,28 +156,4 @@ public class PointR3 extends R3Shape implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static PointR3 origin;
-
-  private static R3Form<PointR3> form;
-
-  public static PointR3 origin() {
-    if (origin == null) {
-      origin = new PointR3(0.0, 0.0, 0.0);
-    }
-    return origin;
-  }
-
-  public static PointR3 of(double x, double y, double z) {
-    return new PointR3(x, y, z);
-  }
-
-  @Kind
-  public static R3Form<PointR3> form() {
-    if (form == null) {
-      form = new PointR3Form();
-    }
-    return form;
-  }
 }

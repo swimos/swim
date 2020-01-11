@@ -22,12 +22,35 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class VectorR2 implements Debug {
+
+  private static int hashSeed;
+  private static VectorR2 zero;
+  private static TensorForm<VectorR2> form;
   public final double x;
   public final double y;
 
   public VectorR2(double x, double y) {
     this.x = x;
     this.y = y;
+  }
+
+  public static VectorR2 zero() {
+    if (zero == null) {
+      zero = new VectorR2(0.0, 0.0);
+    }
+    return zero;
+  }
+
+  public static VectorR2 of(double x, double y) {
+    return new VectorR2(x, y);
+  }
+
+  @Kind
+  public static TensorForm<VectorR2> form() {
+    if (form == null) {
+      form = new VectorR2Form();
+    }
+    return form;
   }
 
   public final VectorR2 plus(VectorR2 that) {
@@ -89,28 +112,4 @@ public class VectorR2 implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static VectorR2 zero;
-
-  private static TensorForm<VectorR2> form;
-
-  public static VectorR2 zero() {
-    if (zero == null) {
-      zero = new VectorR2(0.0, 0.0);
-    }
-    return zero;
-  }
-
-  public static VectorR2 of(double x, double y) {
-    return new VectorR2(x, y);
-  }
-
-  @Kind
-  public static TensorForm<VectorR2> form() {
-    if (form == null) {
-      form = new VectorR2Form();
-    }
-    return form;
-  }
 }

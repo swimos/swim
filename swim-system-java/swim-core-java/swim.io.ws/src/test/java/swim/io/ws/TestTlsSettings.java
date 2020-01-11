@@ -29,14 +29,15 @@ import swim.io.TlsSettings;
 import swim.io.http.HttpSettings;
 
 public final class TestTlsSettings {
-  private TestTlsSettings() {
-    // stub
-  }
 
   private static TlsSettings tlsSettings;
   private static IpSettings ipSettings;
   private static HttpSettings httpSettings;
   private static WsSettings wsSettings;
+
+  private TestTlsSettings() {
+    // stub
+  }
 
   public static TlsSettings tlsSettings() {
     if (tlsSettings == null) {
@@ -96,4 +97,5 @@ public final class TestTlsSettings {
     }
     return wsSettings;
   }
+
 }

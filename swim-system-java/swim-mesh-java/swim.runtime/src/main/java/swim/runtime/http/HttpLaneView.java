@@ -32,6 +32,7 @@ import swim.http.HttpResponse;
 import swim.runtime.LaneView;
 
 public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
+
   public HttpLaneView(Object observers) {
     super(observers);
   }
@@ -386,4 +387,5 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
   public void laneDidRespond(HttpUplink uplink, HttpResponse<?> response) {
     // stub
   }
+
 }

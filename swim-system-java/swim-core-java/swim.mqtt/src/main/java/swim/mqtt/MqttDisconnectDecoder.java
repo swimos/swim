@@ -19,6 +19,7 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 
 final class MqttDisconnectDecoder extends Decoder<MqttDisconnect> {
+
   final MqttDecoder mqtt;
   final int packetFlags;
   final int remaining;
@@ -33,11 +34,6 @@ final class MqttDisconnectDecoder extends Decoder<MqttDisconnect> {
 
   MqttDisconnectDecoder(MqttDecoder mqtt) {
     this(mqtt, 0, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttDisconnect> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.remaining, this.step);
   }
 
   static Decoder<MqttDisconnect> decode(InputBuffer input, MqttDecoder mqtt,
@@ -76,4 +72,10 @@ final class MqttDisconnectDecoder extends Decoder<MqttDisconnect> {
   static Decoder<MqttDisconnect> decode(InputBuffer input, MqttDecoder mqtt) {
     return decode(input, mqtt, 0, 0, 1);
   }
+
+  @Override
+  public Decoder<MqttDisconnect> feed(InputBuffer input) {
+    return decode(input, this.mqtt, this.packetFlags, this.remaining, this.step);
+  }
+
 }

@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import org.testng.TestException;
 
 class MockClock extends Clock {
+
   final CyclicBarrier tickBarrier;
   volatile long nanos;
 
@@ -109,4 +110,5 @@ class MockClock extends Clock {
   void await(CountDownLatch latch) {
     await(latch, 1000);
   }
+
 }

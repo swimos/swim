@@ -20,37 +20,11 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public abstract class PolicyDirective<T> implements Debug {
-  PolicyDirective() { }
-
-  public boolean isAllowed() {
-    return false;
-  }
-
-  public boolean isDenied() {
-    return false;
-  }
-
-  public boolean isForbidden() {
-    return false;
-  }
-
-  public boolean isDefined() {
-    return false;
-  }
-
-  public T get() {
-    throw null;
-  }
-
-  public Policy policy() {
-    return null;
-  }
-
-  public Object reason() {
-    return null;
-  }
 
   private static Allow<Object> allow;
+
+  PolicyDirective() {
+  }
 
   private static Allow<Object> staticAllow() {
     if (allow == null) {
@@ -105,7 +79,37 @@ public abstract class PolicyDirective<T> implements Debug {
     return new Forbid<T>(null, null);
   }
 
+  public boolean isAllowed() {
+    return false;
+  }
+
+  public boolean isDenied() {
+    return false;
+  }
+
+  public boolean isForbidden() {
+    return false;
+  }
+
+  public boolean isDefined() {
+    return false;
+  }
+
+  public T get() {
+    throw null;
+  }
+
+  public Policy policy() {
+    return null;
+  }
+
+  public Object reason() {
+    return null;
+  }
+
   static final class Allow<T> extends PolicyDirective<T> {
+
+    private static int hashSeed;
     final T value;
 
     Allow(T value) {
@@ -147,12 +151,10 @@ public abstract class PolicyDirective<T> implements Debug {
       return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(value)));
     }
 
-    private static int hashSeed;
-
     @Override
     public void debug(Output<?> output) {
       output = output.write("PolicyDirective").write('.').write("allow")
-        .write('(');
+          .write('(');
       if (value != null) {
         output = output.debug(value);
       }
@@ -163,9 +165,12 @@ public abstract class PolicyDirective<T> implements Debug {
     public String toString() {
       return Format.debug(this);
     }
+
   }
 
   static final class Deny<T> extends PolicyDirective<T> {
+
+    private static int hashSeed;
     final Policy policy;
     final Object reason;
 
@@ -196,7 +201,7 @@ public abstract class PolicyDirective<T> implements Debug {
       } else if (other instanceof Deny<?>) {
         final Deny<?> that = (Deny<?>) other;
         return (policy == null ? that.policy == null : policy.equals(that.policy))
-          && (reason == null ? that.reason == null : reason.equals(that.reason));
+            && (reason == null ? that.reason == null : reason.equals(that.reason));
       } else {
         return false;
       }
@@ -210,8 +215,6 @@ public abstract class PolicyDirective<T> implements Debug {
       return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
           Murmur3.hash(policy)), Murmur3.hash(reason)));
     }
-
-    private static int hashSeed;
 
     @Override
     public void debug(Output<?> output) {
@@ -227,9 +230,12 @@ public abstract class PolicyDirective<T> implements Debug {
     public String toString() {
       return Format.debug(this);
     }
+
   }
 
   static final class Forbid<T> extends PolicyDirective<T> {
+
+    private static int hashSeed;
     final Policy policy;
     final Object reason;
 
@@ -260,7 +266,7 @@ public abstract class PolicyDirective<T> implements Debug {
       } else if (other instanceof Forbid<?>) {
         final Forbid<?> that = (Forbid<?>) other;
         return (policy == null ? that.policy == null : policy.equals(that.policy))
-          && (reason == null ? that.reason == null : reason.equals(that.reason));
+            && (reason == null ? that.reason == null : reason.equals(that.reason));
       } else {
         return false;
       }
@@ -274,8 +280,6 @@ public abstract class PolicyDirective<T> implements Debug {
       return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
           Murmur3.hash(policy)), Murmur3.hash(reason)));
     }
-
-    private static int hashSeed;
 
     @Override
     public void debug(Output<?> output) {
@@ -291,5 +295,7 @@ public abstract class PolicyDirective<T> implements Debug {
     public String toString() {
       return Format.debug(this);
     }
+
   }
+
 }

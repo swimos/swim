@@ -23,6 +23,7 @@ import swim.api.http.function.WillRequestHttp;
 import swim.api.http.function.WillRespondHttp;
 
 public interface HttpLane<V> extends Lane {
+
   @Override
   HttpLane<V> observe(Object observer);
 
@@ -40,4 +41,5 @@ public interface HttpLane<V> extends Lane {
   HttpLane<V> willRespond(WillRespondHttp<?> willRespond);
 
   HttpLane<V> didRespond(DidRespondHttp<?> didRespond);
+
 }

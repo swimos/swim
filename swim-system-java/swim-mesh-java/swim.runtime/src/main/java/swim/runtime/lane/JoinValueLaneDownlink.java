@@ -22,6 +22,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class JoinValueLaneDownlink<V> extends ValueDownlinkView<V> {
+
   protected final JoinValueLaneModel laneModel;
   protected final Value key;
 
@@ -30,7 +31,7 @@ public class JoinValueLaneDownlink<V> extends ValueDownlinkView<V> {
                                float prio, float rate, Value body, int flags, Form<V> valueForm,
                                Object observers) {
     super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-          body, flags, valueForm, observers);
+        body, flags, valueForm, observers);
     this.laneModel = laneModel;
     this.key = key;
   }
@@ -39,63 +40,63 @@ public class JoinValueLaneDownlink<V> extends ValueDownlinkView<V> {
                                Value key, Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                                float prio, float rate, Value body, Form<V> valueForm) {
     this(cellContext, stage, laneModel, key, meshUri, hostUri, nodeUri, laneUri,
-         prio, rate, body, KEEP_LINKED | KEEP_SYNCED, valueForm, null);
+        prio, rate, body, KEEP_LINKED | KEEP_SYNCED, valueForm, null);
   }
 
   @Override
   public ValueDownlinkView<V> hostUri(Uri hostUri) {
     return new JoinValueLaneDownlink<V>(this.cellContext, this.stage, this.laneModel,
-                                        this.key, this.meshUri, hostUri, this.nodeUri,
-                                        this.laneUri, this.prio, this.rate, this.body,
-                                        this.flags, this.valueForm, this.observers);
+        this.key, this.meshUri, hostUri, this.nodeUri,
+        this.laneUri, this.prio, this.rate, this.body,
+        this.flags, this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> nodeUri(Uri nodeUri) {
     return new JoinValueLaneDownlink<V>(this.cellContext, this.stage, this.laneModel,
-                                        this.key, this.meshUri, this.hostUri, nodeUri,
-                                        this.laneUri, this.prio, this.rate, this.body,
-                                        this.flags, this.valueForm, this.observers);
+        this.key, this.meshUri, this.hostUri, nodeUri,
+        this.laneUri, this.prio, this.rate, this.body,
+        this.flags, this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> laneUri(Uri laneUri) {
     return new JoinValueLaneDownlink<V>(this.cellContext, this.stage, this.laneModel,
-                                        this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                        laneUri, this.prio, this.rate, this.body,
-                                        this.flags, this.valueForm, this.observers);
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        laneUri, this.prio, this.rate, this.body,
+        this.flags, this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> prio(float prio) {
     return new JoinValueLaneDownlink<V>(this.cellContext, this.stage, this.laneModel,
-                                        this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                        this.laneUri, prio, this.rate, this.body,
-                                        this.flags, this.valueForm, this.observers);
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        this.laneUri, prio, this.rate, this.body,
+        this.flags, this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> rate(float rate) {
     return new JoinValueLaneDownlink<V>(this.cellContext, this.stage, this.laneModel,
-                                        this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                        this.laneUri, this.prio, rate, this.body,
-                                        this.flags, this.valueForm, this.observers);
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        this.laneUri, this.prio, rate, this.body,
+        this.flags, this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> body(Value body) {
     return new JoinValueLaneDownlink<V>(this.cellContext, this.stage, this.laneModel,
-                                        this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                        this.laneUri, this.prio, this.rate, body,
-                                        this.flags, this.valueForm, this.observers);
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        this.laneUri, this.prio, this.rate, body,
+        this.flags, this.valueForm, this.observers);
   }
 
   @Override
   public <V2> ValueDownlinkView<V2> valueForm(Form<V2> valueForm) {
     return new JoinValueLaneDownlink<V2>(this.cellContext, this.stage, this.laneModel,
-                                        this.key, this.meshUri, this.hostUri, this.nodeUri,
-                                        this.laneUri, this.prio, this.rate, this.body,
-                                        this.flags, valueForm, typesafeObservers(this.observers));
+        this.key, this.meshUri, this.hostUri, this.nodeUri,
+        this.laneUri, this.prio, this.rate, this.body,
+        this.flags, valueForm, typesafeObservers(this.observers));
   }
 
   @Override
@@ -121,4 +122,5 @@ public class JoinValueLaneDownlink<V> extends ValueDownlinkView<V> {
   public Value setValue(Value newValue) {
     return this.model.setValue(newValue);
   }
+
 }

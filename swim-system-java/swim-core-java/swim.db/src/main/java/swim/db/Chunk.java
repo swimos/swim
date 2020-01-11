@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import swim.collections.FingerTrieSeq;
 
 public class Chunk {
+
   final Database database;
   final Commit commit;
   final int zone;
@@ -92,4 +93,5 @@ public class Chunk {
   public String toString() {
     return new String(this.buffer.array(), Charset.forName("UTF-8"));
   }
+
 }

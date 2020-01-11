@@ -21,6 +21,7 @@ import swim.io.IpSocketModem;
 import swim.io.IpSocketRef;
 
 public interface MqttInterface extends IpInterface {
+
   MqttSettings mqttSettings();
 
   default IpServiceRef bindMqtt(InetSocketAddress localAddress, MqttService service, MqttSettings mqttSettings) {
@@ -92,4 +93,5 @@ public interface MqttInterface extends IpInterface {
   default <I, O> IpSocketRef connectMqtts(String address, int port, MqttSocket<I, O> socket) {
     return connectMqtts(new InetSocketAddress(address, port), socket, mqttSettings());
   }
+
 }

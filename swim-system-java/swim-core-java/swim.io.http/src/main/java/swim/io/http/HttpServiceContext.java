@@ -18,9 +18,11 @@ import java.net.InetSocketAddress;
 import swim.io.FlowContext;
 
 public interface HttpServiceContext extends FlowContext {
+
   HttpSettings httpSettings();
 
   InetSocketAddress localAddress();
 
   void unbind();
+
 }

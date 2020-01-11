@@ -18,5 +18,7 @@ import swim.codec.Decoder;
 import swim.codec.InputBuffer;
 
 public abstract class AvroDataType<T> extends AvroPrimitiveType<T> {
+
   public abstract Decoder<T> decodeData(InputBuffer input);
+
 }

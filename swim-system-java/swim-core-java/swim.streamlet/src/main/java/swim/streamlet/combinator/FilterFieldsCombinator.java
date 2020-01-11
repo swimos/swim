@@ -17,6 +17,7 @@ package swim.streamlet.combinator;
 import swim.streamlet.function.FilterFieldsFunction;
 
 public class FilterFieldsCombinator<K, V, I> extends FilterFieldsOperator<K, V, I> {
+
   protected final FilterFieldsFunction<? super K, ? super V> func;
 
   public FilterFieldsCombinator(FilterFieldsFunction<? super K, ? super V> func) {
@@ -27,4 +28,5 @@ public class FilterFieldsCombinator<K, V, I> extends FilterFieldsOperator<K, V, 
   public boolean evaluate(K key, V value) {
     return this.func.apply(key, value);
   }
+
 }

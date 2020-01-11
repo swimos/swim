@@ -27,10 +27,32 @@ import swim.util.Builder;
 import swim.util.Murmur3;
 
 public final class SecWebSocketExtensions extends HttpHeader {
+
+  private static int hashSeed;
   final FingerTrieSeq<WebSocketExtension> extensions;
 
   SecWebSocketExtensions(FingerTrieSeq<WebSocketExtension> extensions) {
     this.extensions = extensions;
+  }
+
+  public static SecWebSocketExtensions from(FingerTrieSeq<WebSocketExtension> extensions) {
+    return new SecWebSocketExtensions(extensions);
+  }
+
+  public static SecWebSocketExtensions from(WebSocketExtension... extensions) {
+    return new SecWebSocketExtensions(FingerTrieSeq.of(extensions));
+  }
+
+  public static SecWebSocketExtensions from(String... extensionStrings) {
+    final Builder<WebSocketExtension, FingerTrieSeq<WebSocketExtension>> extensions = FingerTrieSeq.builder();
+    for (int i = 0, n = extensionStrings.length; i < n; i += 1) {
+      extensions.add(WebSocketExtension.parse(extensionStrings[i]));
+    }
+    return new SecWebSocketExtensions(extensions.bind());
+  }
+
+  public static Parser<SecWebSocketExtensions> parseHttpValue(Input input, HttpParser http) {
+    return SecWebSocketExtensionsParser.parse(input, http);
   }
 
   @Override
@@ -89,25 +111,4 @@ public final class SecWebSocketExtensions extends HttpHeader {
     output = output.write(')');
   }
 
-  private static int hashSeed;
-
-  public static SecWebSocketExtensions from(FingerTrieSeq<WebSocketExtension> extensions) {
-    return new SecWebSocketExtensions(extensions);
-  }
-
-  public static SecWebSocketExtensions from(WebSocketExtension... extensions) {
-    return new SecWebSocketExtensions(FingerTrieSeq.of(extensions));
-  }
-
-  public static SecWebSocketExtensions from(String... extensionStrings) {
-    final Builder<WebSocketExtension, FingerTrieSeq<WebSocketExtension>> extensions = FingerTrieSeq.builder();
-    for (int i = 0, n = extensionStrings.length; i < n; i += 1) {
-      extensions.add(WebSocketExtension.parse(extensionStrings[i]));
-    }
-    return new SecWebSocketExtensions(extensions.bind());
-  }
-
-  public static Parser<SecWebSocketExtensions> parseHttpValue(Input input, HttpParser http) {
-    return SecWebSocketExtensionsParser.parse(input, http);
-  }
 }

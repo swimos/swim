@@ -42,6 +42,7 @@ import swim.util.Log;
 import swim.warp.CommandMessage;
 
 public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
+
   final LaneBinding laneBinding;
   LaneContext laneContext;
   LaneDef laneDef;
@@ -323,4 +324,5 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   public void didFail(Throwable error) {
     this.laneBinding.didFail(error);
   }
+
 }

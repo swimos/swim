@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpVersionSpec {
+
   public void assertParses(String string, HttpVersion version) {
     HttpAssertions.assertParses(Http.standardParser().versionParser(), string, version);
   }
@@ -33,4 +34,5 @@ public class HttpVersionSpec {
     assertWrites(HttpVersion.HTTP_1_1, "HTTP/1.1");
     assertWrites(HttpVersion.HTTP_1_0, "HTTP/1.0");
   }
+
 }

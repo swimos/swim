@@ -21,6 +21,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 public class ListDownlinkRecord extends DownlinkRecord {
+
   protected final ListDownlink<Value> downlink;
 
   public ListDownlinkRecord(ListDownlink<Value> downlink) {
@@ -174,4 +175,5 @@ public class ListDownlinkRecord extends DownlinkRecord {
   public Iterator<Value> keyIterator() {
     return Cursor.empty();
   }
+
 }

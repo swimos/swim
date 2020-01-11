@@ -19,6 +19,7 @@ import swim.concurrent.Stage;
 import swim.concurrent.Sync;
 
 public abstract class Store {
+
   public abstract StoreContext storeContext();
 
   public StoreSettings settings() {
@@ -130,4 +131,5 @@ public abstract class Store {
   void databaseCompactDidFail(Database database, Throwable error) {
     storeContext().databaseCompactDidFail(this, database, error);
   }
+
 }

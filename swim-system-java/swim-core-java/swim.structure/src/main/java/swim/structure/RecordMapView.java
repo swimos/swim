@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 final class RecordMapView extends Record {
+
   RecordMap record;
   int lower;
   int upper;
@@ -814,4 +815,5 @@ final class RecordMapView extends Record {
     }
     return new RecordMapView(this.record, this.lower + lower, this.lower + upper);
   }
+
 }

@@ -24,6 +24,7 @@ import swim.structure.Value;
 import swim.util.Cursor;
 
 public class ValueDownlinkRecord extends DownlinkRecord implements DidSet<Value> {
+
   protected final ValueDownlink<Value> downlink;
 
   public ValueDownlinkRecord(ValueDownlink<Value> downlink) {
@@ -347,4 +348,5 @@ public class ValueDownlinkRecord extends DownlinkRecord implements DidSet<Value>
     this.invalidateInput();
     this.reconcileInput(0); // TODO: debounce
   }
+
 }

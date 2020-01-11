@@ -17,6 +17,7 @@ package swim.store;
 import swim.structure.Value;
 
 public interface MapDataContext extends DataContext {
+
   void didUpdate(Value key, Value newValue, Value oldValue);
 
   void didRemove(Value key, Value oldValue);
@@ -26,4 +27,5 @@ public interface MapDataContext extends DataContext {
   void didTake(long upper);
 
   void didClear();
+
 }

@@ -21,6 +21,7 @@ import swim.collections.FingerTrieSeq;
 import swim.http.HttpParser;
 
 final class ContentEncodingParser extends Parser<ContentEncoding> {
+
   final HttpParser http;
   final Parser<FingerTrieSeq<String>> codings;
 
@@ -31,11 +32,6 @@ final class ContentEncodingParser extends Parser<ContentEncoding> {
 
   ContentEncodingParser(HttpParser http) {
     this(http, null);
-  }
-
-  @Override
-  public Parser<ContentEncoding> feed(Input input) {
-    return parse(input, this.http, this.codings);
   }
 
   static Parser<ContentEncoding> parse(Input input, HttpParser http,
@@ -63,4 +59,10 @@ final class ContentEncodingParser extends Parser<ContentEncoding> {
   static Parser<ContentEncoding> parse(Input input, HttpParser http) {
     return parse(input, http, null);
   }
+
+  @Override
+  public Parser<ContentEncoding> feed(Input input) {
+    return parse(input, this.http, this.codings);
+  }
+
 }

@@ -19,6 +19,7 @@ import org.graalvm.polyglot.proxy.ProxyExecutable;
 import swim.dynamic.HostStaticMethod;
 
 public class VmHostStaticMethod implements ProxyExecutable {
+
   final VmBridge bridge;
   final HostStaticMethod staticMethod;
 
@@ -38,4 +39,5 @@ public class VmHostStaticMethod implements ProxyExecutable {
     final Object guestResult = this.bridge.hostToGuest(hostResult);
     return guestResult;
   }
+
 }

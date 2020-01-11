@@ -21,6 +21,7 @@ import swim.http.HttpHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class UpgradeSpec {
+
   public void assertParses(String string, HttpHeader header) {
     HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
@@ -29,13 +30,14 @@ public class UpgradeSpec {
   public void parseUpgradeHeaders() {
     assertParses("Upgrade: websocket", Upgrade.from("websocket"));
     assertParses("Upgrade: h2c, SHTTP/1.3, IRC/6.9, RTA/x11",
-                 Upgrade.from("h2c", "SHTTP/1.3", "IRC/6.9", "RTA/x11"));
+        Upgrade.from("h2c", "SHTTP/1.3", "IRC/6.9", "RTA/x11"));
   }
 
   @Test
   public void writeUpgradeHeaders() {
     assertWrites(Upgrade.from("websocket"), "Upgrade: websocket");
     assertWrites(Upgrade.from("h2c", "SHTTP/1.3", "IRC/6.9", "RTA/x11"),
-                 "Upgrade: h2c, SHTTP/1.3, IRC/6.9, RTA/x11");
+        "Upgrade: h2c, SHTTP/1.3, IRC/6.9, RTA/x11");
   }
+
 }

@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 final class UriPathIterator implements Iterator<String> {
+
   UriPath path;
 
   UriPathIterator(UriPath path) {
@@ -44,4 +45,5 @@ final class UriPathIterator implements Iterator<String> {
   public void remove() {
     throw new UnsupportedOperationException();
   }
+
 }

@@ -21,6 +21,7 @@ import swim.codec.Parser;
 import swim.codec.Utf8;
 
 final class AvroNameParser extends Parser<AvroName> {
+
   final AvroNamespaceBuilder builder;
   final Output<String> output;
   final int step;
@@ -33,11 +34,6 @@ final class AvroNameParser extends Parser<AvroName> {
 
   AvroNameParser() {
     this(null, null, 1);
-  }
-
-  @Override
-  public Parser<AvroName> feed(Input input) {
-    return parse(input, this.builder, this.output, this.step);
   }
 
   static Parser<AvroName> parse(Input input, AvroNamespaceBuilder builder,
@@ -93,4 +89,10 @@ final class AvroNameParser extends Parser<AvroName> {
   static Parser<AvroName> parse(Input input) {
     return parse(input, null, null, 1);
   }
+
+  @Override
+  public Parser<AvroName> feed(Input input) {
+    return parse(input, this.builder, this.output, this.step);
+  }
+
 }

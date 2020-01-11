@@ -18,6 +18,7 @@ import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 
 public class TestStore extends Store {
+
   public final StoreContext context;
 
   public TestStore(StoreContext context) {
@@ -122,4 +123,5 @@ public class TestStore extends Store {
   public Zone shiftZone() {
     return null;
   }
+
 }

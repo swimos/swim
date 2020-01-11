@@ -18,6 +18,7 @@ import swim.runtime.HostAddress;
 import swim.runtime.Metric;
 
 public final class HostProfile extends Metric {
+
   final HostAddress cellAddress;
   final int nodeOpenDelta;
   final long nodeOpenCount;
@@ -242,4 +243,5 @@ public final class HostProfile extends Metric {
   public long uplinkCommandCount() {
     return this.uplinkCommandCount;
   }
+
 }

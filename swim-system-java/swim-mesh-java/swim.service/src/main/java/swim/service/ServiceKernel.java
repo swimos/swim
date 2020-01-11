@@ -25,6 +25,11 @@ import swim.kernel.KernelProxy;
 import swim.structure.Value;
 
 public class ServiceKernel extends KernelProxy {
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ServiceKernel, HashTrieMap<String, Service>> SERVICES =
+      AtomicReferenceFieldUpdater.newUpdater(ServiceKernel.class, (Class<HashTrieMap<String, Service>>) (Class<?>) HashTrieMap.class, "services");
+  private static final double KERNEL_PRIORITY = 0.5;
   final double kernelPriority;
   volatile HashTrieMap<String, Service> services;
 
@@ -35,6 +40,16 @@ public class ServiceKernel extends KernelProxy {
 
   public ServiceKernel() {
     this(KERNEL_PRIORITY);
+  }
+
+  public static ServiceKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || ServiceKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      return new ServiceKernel(kernelPriority);
+    }
+    return null;
   }
 
   @Override
@@ -114,19 +129,4 @@ public class ServiceKernel extends KernelProxy {
     }
   }
 
-  private static final double KERNEL_PRIORITY = 0.5;
-
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ServiceKernel, HashTrieMap<String, Service>> SERVICES =
-      AtomicReferenceFieldUpdater.newUpdater(ServiceKernel.class, (Class<HashTrieMap<String, Service>>) (Class<?>) HashTrieMap.class, "services");
-
-  public static ServiceKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || ServiceKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new ServiceKernel(kernelPriority);
-    }
-    return null;
-  }
 }

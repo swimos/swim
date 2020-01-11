@@ -19,6 +19,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface MeshDef extends CellDef {
+
   Uri meshUri();
 
   Collection<? extends PartDef> partDefs();
@@ -36,4 +37,5 @@ public interface MeshDef extends CellDef {
   Collection<? extends LaneDef> laneDefs();
 
   LaneDef getLaneDef(Uri laneUri);
+
 }

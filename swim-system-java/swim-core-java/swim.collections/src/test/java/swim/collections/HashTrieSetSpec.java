@@ -22,6 +22,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class HashTrieSetSpec {
+
   @Test
   public void testEmpty() {
     assertTrue(HashTrieSet.empty().isEmpty());
@@ -172,4 +173,5 @@ public class HashTrieSetSpec {
     iter = xs.iterator();
     assertFalse(iter.hasNext());
   }
+
 }

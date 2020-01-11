@@ -22,6 +22,7 @@ import swim.structure.Record;
 import swim.structure.Value;
 
 public class ValueCollection<T> extends ValueIterable<T> implements Collection<T> {
+
   public ValueCollection(Collection<? extends Value> inner, Form<T> valueForm) {
     super(inner, valueForm);
   }
@@ -243,4 +244,5 @@ public class ValueCollection<T> extends ValueIterable<T> implements Collection<T
     } while (true);
     return sb.append(']').toString();
   }
+
 }

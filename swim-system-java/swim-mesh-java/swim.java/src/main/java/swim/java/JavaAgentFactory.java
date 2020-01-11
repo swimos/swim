@@ -55,6 +55,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
+
   protected final JavaAgentDef agentDef;
   protected final Class<? extends A> agentClass;
   protected final Constructor<? extends A> constructor;
@@ -72,67 +73,6 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
 
   public JavaAgentFactory(Class<? extends A> agentClass) {
     this(null, agentClass, reflectConstructor(agentClass));
-  }
-
-  public final JavaAgentDef agentDef() {
-    return this.agentDef;
-  }
-
-  public final Class<? extends A> agentClass() {
-    return this.agentClass;
-  }
-
-  @Override
-  public A createAgent(AgentContext agentContext) {
-    final A agent = constructAgent(agentContext);
-    reflectLaneFields(this.agentClass, agentContext, agent);
-    return agent;
-  }
-
-  @Override
-  public Value id(Uri nodeUri) {
-    final JavaAgentDef agentDef = this.agentDef;
-    if (agentDef != null) {
-      return this.agentDef.id();
-    } else {
-      return Text.from(this.agentClass.getName());
-    }
-  }
-
-  protected A constructAgent(AgentContext agentContext) {
-    final Constructor<? extends A> constructor = this.constructor;
-    final int parameterCount = constructor.getParameterCount();
-    if (parameterCount == 0) {
-      return constructAgentWithNoArgs(agentContext, constructor);
-    } else if (parameterCount == 1) {
-      return constructAgentWithContext(agentContext, constructor);
-    } else {
-      throw new AgentException(constructor.toString());
-    }
-  }
-
-  A constructAgentWithNoArgs(AgentContext agentContext, Constructor<? extends A> constructor) {
-    SwimContext.setAgentContext(agentContext);
-    try {
-      constructor.setAccessible(true);
-      return constructor.newInstance();
-    } catch (ReflectiveOperationException cause) {
-      throw new AgentException(cause);
-    } finally {
-      SwimContext.clear();
-    }
-  }
-
-  A constructAgentWithContext(AgentContext agentContext, Constructor<? extends A> constructor) {
-    SwimContext.setAgentContext(agentContext);
-    try {
-      constructor.setAccessible(true);
-      return constructor.newInstance(agentContext);
-    } catch (ReflectiveOperationException cause) {
-      throw new AgentException(cause);
-    } finally {
-      SwimContext.clear();
-    }
   }
 
   static <A extends Agent> Constructor<? extends A> reflectConstructor(Class<? extends A> agentClass) {
@@ -577,4 +517,66 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
       throw new AgentException(cause);
     }
   }
+
+  public final JavaAgentDef agentDef() {
+    return this.agentDef;
+  }
+
+  public final Class<? extends A> agentClass() {
+    return this.agentClass;
+  }
+
+  @Override
+  public A createAgent(AgentContext agentContext) {
+    final A agent = constructAgent(agentContext);
+    reflectLaneFields(this.agentClass, agentContext, agent);
+    return agent;
+  }
+
+  @Override
+  public Value id(Uri nodeUri) {
+    final JavaAgentDef agentDef = this.agentDef;
+    if (agentDef != null) {
+      return this.agentDef.id();
+    } else {
+      return Text.from(this.agentClass.getName());
+    }
+  }
+
+  protected A constructAgent(AgentContext agentContext) {
+    final Constructor<? extends A> constructor = this.constructor;
+    final int parameterCount = constructor.getParameterCount();
+    if (parameterCount == 0) {
+      return constructAgentWithNoArgs(agentContext, constructor);
+    } else if (parameterCount == 1) {
+      return constructAgentWithContext(agentContext, constructor);
+    } else {
+      throw new AgentException(constructor.toString());
+    }
+  }
+
+  A constructAgentWithNoArgs(AgentContext agentContext, Constructor<? extends A> constructor) {
+    SwimContext.setAgentContext(agentContext);
+    try {
+      constructor.setAccessible(true);
+      return constructor.newInstance();
+    } catch (ReflectiveOperationException cause) {
+      throw new AgentException(cause);
+    } finally {
+      SwimContext.clear();
+    }
+  }
+
+  A constructAgentWithContext(AgentContext agentContext, Constructor<? extends A> constructor) {
+    SwimContext.setAgentContext(agentContext);
+    try {
+      constructor.setAccessible(true);
+      return constructor.newInstance(agentContext);
+    } catch (ReflectiveOperationException cause) {
+      throw new AgentException(cause);
+    } finally {
+      SwimContext.clear();
+    }
+  }
+
 }

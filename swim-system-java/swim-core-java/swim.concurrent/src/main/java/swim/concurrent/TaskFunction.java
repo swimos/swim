@@ -32,9 +32,11 @@ package swim.concurrent;
  */
 //@FunctionalInterface
 public interface TaskFunction {
+
   /**
    * Executes this sequential process.  Only one thread at a time will execute
    * {@code runTask} for this {@code TaskFunction}.
    */
   void runTask();
+
 }

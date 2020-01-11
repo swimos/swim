@@ -31,12 +31,48 @@ import swim.util.Murmur3;
  * HTTP configuration parameters.
  */
 public class HttpSettings implements Debug {
+
+  private static int hashSeed;
+  private static HttpSettings standard;
+  private static Form<HttpSettings> form;
   protected final IpSettings ipSettings;
   protected final int maxMessageSize;
 
   public HttpSettings(IpSettings ipSettings, int maxMessageSize) {
     this.ipSettings = ipSettings;
     this.maxMessageSize = maxMessageSize;
+  }
+
+  /**
+   * Returns the default {@code HttpSettings} instance.
+   */
+  public static HttpSettings standard() {
+    if (standard == null) {
+      int maxMessageSize;
+      try {
+        maxMessageSize = Integer.parseInt(System.getProperty("swim.http.max.message.size"));
+      } catch (NumberFormatException error) {
+        maxMessageSize = 16 * 1024 * 1024;
+      }
+
+      standard = new HttpSettings(IpSettings.standard(), maxMessageSize);
+    }
+    return standard;
+  }
+
+  public static HttpSettings from(IpSettings ipSettings) {
+    return standard().ipSettings(ipSettings);
+  }
+
+  /**
+   * Returns the structural {@code Form} of {@code HttpSettings}.
+   */
+  @Kind
+  public static Form<HttpSettings> form() {
+    if (form == null) {
+      form = new HttpSettingsForm();
+    }
+    return form;
   }
 
   /**
@@ -157,46 +193,10 @@ public class HttpSettings implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static HttpSettings standard;
-
-  private static Form<HttpSettings> form;
-
-  /**
-   * Returns the default {@code HttpSettings} instance.
-   */
-  public static HttpSettings standard() {
-    if (standard == null) {
-      int maxMessageSize;
-      try {
-        maxMessageSize = Integer.parseInt(System.getProperty("swim.http.max.message.size"));
-      } catch (NumberFormatException error) {
-        maxMessageSize = 16 * 1024 * 1024;
-      }
-
-      standard = new HttpSettings(IpSettings.standard(), maxMessageSize);
-    }
-    return standard;
-  }
-
-  public static HttpSettings from(IpSettings ipSettings) {
-    return standard().ipSettings(ipSettings);
-  }
-
-  /**
-   * Returns the structural {@code Form} of {@code HttpSettings}.
-   */
-  @Kind
-  public static Form<HttpSettings> form() {
-    if (form == null) {
-      form = new HttpSettingsForm();
-    }
-    return form;
-  }
 }
 
 final class HttpSettingsForm extends Form<HttpSettings> {
+
   @Override
   public HttpSettings unit() {
     return HttpSettings.standard();
@@ -234,4 +234,5 @@ final class HttpSettingsForm extends Form<HttpSettings> {
     final IpSettings ipSettings = IpSettings.form().cast(item);
     return new HttpSettings(ipSettings, maxMessageSize);
   }
+
 }

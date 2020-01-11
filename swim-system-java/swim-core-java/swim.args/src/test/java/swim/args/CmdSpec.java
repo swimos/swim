@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
 
 public class CmdSpec {
+
   @Test
   public void parseCmd() {
     final Cmd cmd = Cmd.of("test").cmd("exec");
@@ -116,4 +117,5 @@ public class CmdSpec {
     final Cmd run = cmd.clone().parse(params);
     run.run();
   }
+
 }

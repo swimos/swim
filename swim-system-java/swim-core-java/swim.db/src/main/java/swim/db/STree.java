@@ -24,6 +24,7 @@ import swim.util.CombinerFunction;
 import swim.util.Cursor;
 
 public final class STree extends Tree {
+
   final TreeContext treeContext;
   final STreePageRef rootRef;
   final Seed seed;
@@ -128,7 +129,7 @@ public final class STree extends Tree {
         .balanced(newVersion).evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-                       this.isResident, this.isTransient);
+          this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -139,7 +140,7 @@ public final class STree extends Tree {
     final STreePage newRoot = oldRoot.inserted(index, key, newValue, newVersion)
         .balanced(newVersion).evacuated(newPost, newVersion);
     return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-                     this.isResident, this.isTransient);
+        this.isResident, this.isTransient);
   }
 
   public STree appended(Value key, Value newValue, long newVersion, int newPost) {
@@ -147,7 +148,7 @@ public final class STree extends Tree {
     final STreePage newRoot = oldRoot.appended(key, newValue, newVersion)
         .balanced(newVersion).evacuated(newPost, newVersion);
     return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-                     this.isResident, this.isTransient);
+        this.isResident, this.isTransient);
   }
 
   public STree prepended(Value key, Value newValue, long newVersion, int newPost) {
@@ -155,7 +156,7 @@ public final class STree extends Tree {
     final STreePage newRoot = oldRoot.prepended(key, newValue, newVersion)
         .balanced(newVersion).evacuated(newPost, newVersion);
     return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-                     this.isResident, this.isTransient);
+        this.isResident, this.isTransient);
   }
 
   public STree removed(long index, long newVersion, int newPost) {
@@ -163,7 +164,7 @@ public final class STree extends Tree {
     final STreePage newRoot = oldRoot.removed(index, newVersion)
         .balanced(newVersion).evacuated(newPost, newVersion);
     return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-                     this.isResident, this.isTransient);
+        this.isResident, this.isTransient);
   }
 
   public STree removed(Object object, long newVersion, int newPost) {
@@ -172,7 +173,7 @@ public final class STree extends Tree {
         .balanced(newVersion).evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-                       this.isResident, this.isTransient);
+          this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -189,7 +190,7 @@ public final class STree extends Tree {
         newRoot = STreePage.empty(this.treeContext, this.seed.stem, newVersion);
       }
       return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-                       this.isResident, this.isTransient);
+          this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -206,7 +207,7 @@ public final class STree extends Tree {
         newRoot = STreePage.empty(this.treeContext, this.seed.stem, newVersion);
       }
       return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-                       this.isResident, this.isTransient);
+          this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -216,7 +217,7 @@ public final class STree extends Tree {
     if (!this.rootRef.isEmpty()) {
       final STreePage newRoot = STreePage.empty(this.treeContext, this.seed.stem, newVersion);
       return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-                       this.isResident, this.isTransient);
+          this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -357,4 +358,5 @@ public final class STree extends Tree {
   public Cursor<Slot> deltaCursor(long sinceVersion) {
     return this.rootRef.deltaCursor(sinceVersion);
   }
+
 }

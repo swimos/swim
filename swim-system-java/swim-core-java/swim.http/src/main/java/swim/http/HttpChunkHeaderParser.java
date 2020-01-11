@@ -22,6 +22,7 @@ import swim.collections.FingerTrieSeq;
 import swim.util.Builder;
 
 final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
+
   final HttpParser http;
   final long size;
   final Parser<ChunkExtension> extension;
@@ -39,11 +40,6 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
 
   HttpChunkHeaderParser(HttpParser http) {
     this(http, 0L, null, null, 1);
-  }
-
-  @Override
-  public Parser<HttpChunkHeader> feed(Input input) {
-    return parse(input, this.http, this.size, this.extension, this.extensions, this.step);
   }
 
   static Parser<HttpChunkHeader> parse(Input input, HttpParser http, long size, Parser<ChunkExtension> extension,
@@ -153,4 +149,10 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
   static Parser<HttpChunkHeader> parse(Input input, HttpParser http) {
     return parse(input, http, 0L, null, null, 1);
   }
+
+  @Override
+  public Parser<HttpChunkHeader> feed(Input input) {
+    return parse(input, this.http, this.size, this.extension, this.extensions, this.step);
+  }
+
 }

@@ -17,6 +17,7 @@ package swim.uri;
 import swim.collections.HashTrieMap;
 
 final class UriConstantPattern extends UriTerminalPattern {
+
   final Uri uri;
 
   UriConstantPattern(Uri uri) {
@@ -50,4 +51,5 @@ final class UriConstantPattern extends UriTerminalPattern {
   boolean matches() {
     return true;
   }
+
 }

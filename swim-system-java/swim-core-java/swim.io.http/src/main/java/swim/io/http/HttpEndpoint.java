@@ -20,6 +20,7 @@ import swim.io.IpStation;
 import swim.io.Station;
 
 public class HttpEndpoint implements IpStation, HttpInterface {
+
   protected final Station station;
   protected HttpSettings httpSettings;
 
@@ -66,4 +67,5 @@ public class HttpEndpoint implements IpStation, HttpInterface {
   public void stop() {
     this.station.stop();
   }
+
 }

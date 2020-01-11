@@ -20,6 +20,7 @@ import swim.uri.Uri;
 import swim.util.Murmur3;
 
 public abstract class HostAddressed extends Envelope {
+
   final Value body;
 
   HostAddressed(Value body) {
@@ -78,4 +79,5 @@ public abstract class HostAddressed extends Envelope {
     }
     output = output.write(')');
   }
+
 }

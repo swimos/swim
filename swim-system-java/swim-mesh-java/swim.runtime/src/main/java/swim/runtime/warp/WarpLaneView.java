@@ -34,6 +34,7 @@ import swim.structure.Value;
 import swim.warp.CommandMessage;
 
 public abstract class WarpLaneView extends LaneView implements WarpLane {
+
   public WarpLaneView(Object observers) {
     super(observers);
   }
@@ -471,4 +472,5 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
   public void laneDidLeave(Identity identity) {
     // stub
   }
+
 }

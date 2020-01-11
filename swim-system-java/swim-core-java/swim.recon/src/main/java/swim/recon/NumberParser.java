@@ -21,6 +21,7 @@ import swim.codec.Input;
 import swim.codec.Parser;
 
 final class NumberParser<I, V> extends Parser<V> {
+
   final ReconParser<I, V> recon;
   final int sign;
   final long value;
@@ -33,11 +34,6 @@ final class NumberParser<I, V> extends Parser<V> {
     this.value = value;
     this.mode = mode;
     this.step = step;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.sign, this.value, this.mode, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, int sign,
@@ -132,9 +128,16 @@ final class NumberParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parseInteger(Input input, ReconParser<I, V> recon) {
     return parse(input, recon, 1, 0L, 0, 1);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.sign, this.value, this.mode, this.step);
+  }
+
 }
 
 final class BigIntegerParser<I, V> extends Parser<V> {
+
   final ReconParser<I, V> recon;
   final int sign;
   final BigInteger value;
@@ -143,11 +146,6 @@ final class BigIntegerParser<I, V> extends Parser<V> {
     this.recon = recon;
     this.sign = sign;
     this.value = value;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.sign, this.value);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, int sign, BigInteger value) {
@@ -165,9 +163,16 @@ final class BigIntegerParser<I, V> extends Parser<V> {
     }
     return new BigIntegerParser<I, V>(recon, sign, value);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.sign, this.value);
+  }
+
 }
 
 final class DecimalParser<I, V> extends Parser<V> {
+
   final ReconParser<I, V> recon;
   final StringBuilder builder;
   final int mode;
@@ -178,11 +183,6 @@ final class DecimalParser<I, V> extends Parser<V> {
     this.builder = builder;
     this.mode = mode;
     this.step = step;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.mode, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, StringBuilder builder,
@@ -306,9 +306,16 @@ final class DecimalParser<I, V> extends Parser<V> {
     }
     return parse(input, recon, builder, mode, 1);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.builder, this.mode, this.step);
+  }
+
 }
 
 final class HexadecimalParser<I, V> extends Parser<V> {
+
   final ReconParser<I, V> recon;
   final long value;
   final int size;
@@ -317,11 +324,6 @@ final class HexadecimalParser<I, V> extends Parser<V> {
     this.recon = recon;
     this.value = value;
     this.size = size;
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.value, this.size);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, long value, int size) {
@@ -356,4 +358,10 @@ final class HexadecimalParser<I, V> extends Parser<V> {
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
     return parse(input, recon, 0L, 0);
   }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.value, this.size);
+  }
+
 }

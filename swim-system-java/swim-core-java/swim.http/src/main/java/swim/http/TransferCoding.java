@@ -22,6 +22,12 @@ import swim.collections.HashTrieMap;
 import swim.util.Murmur3;
 
 public final class TransferCoding extends HttpPart implements Debug {
+
+  private static int hashSeed;
+  private static TransferCoding chunked;
+  private static TransferCoding compress;
+  private static TransferCoding deflate;
+  private static TransferCoding gzip;
   final String name;
   final HashTrieMap<String, String> params;
 
@@ -32,6 +38,57 @@ public final class TransferCoding extends HttpPart implements Debug {
 
   TransferCoding(String name) {
     this(name, HashTrieMap.<String, String>empty());
+  }
+
+  public static TransferCoding chunked() {
+    if (chunked == null) {
+      chunked = new TransferCoding("chunked");
+    }
+    return chunked;
+  }
+
+  public static TransferCoding compress() {
+    if (compress == null) {
+      compress = new TransferCoding("compress");
+    }
+    return compress;
+  }
+
+  public static TransferCoding deflate() {
+    if (deflate == null) {
+      deflate = new TransferCoding("deflate");
+    }
+    return deflate;
+  }
+
+  public static TransferCoding gzip() {
+    if (gzip == null) {
+      gzip = new TransferCoding("gzip");
+    }
+    return gzip;
+  }
+
+  public static TransferCoding from(String name, HashTrieMap<String, String> params) {
+    if (params.isEmpty()) {
+      if ("chunked".equals(name)) {
+        return chunked();
+      } else if ("compress".equals(name)) {
+        return compress();
+      } else if ("deflate".equals(name)) {
+        return deflate();
+      } else if ("gzip".equals(name)) {
+        return gzip();
+      }
+    }
+    return new TransferCoding(name, params);
+  }
+
+  public static TransferCoding from(String name) {
+    return from(name, HashTrieMap.<String, String>empty());
+  }
+
+  public static TransferCoding parse(String string) {
+    return Http.standardParser().parseTransferCodingString(string);
   }
 
   public String name() {
@@ -111,61 +168,4 @@ public final class TransferCoding extends HttpPart implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  private static TransferCoding chunked;
-  private static TransferCoding compress;
-  private static TransferCoding deflate;
-  private static TransferCoding gzip;
-
-  public static TransferCoding chunked() {
-    if (chunked == null) {
-      chunked = new TransferCoding("chunked");
-    }
-    return chunked;
-  }
-
-  public static TransferCoding compress() {
-    if (compress == null) {
-      compress = new TransferCoding("compress");
-    }
-    return compress;
-  }
-
-  public static TransferCoding deflate() {
-    if (deflate == null) {
-      deflate = new TransferCoding("deflate");
-    }
-    return deflate;
-  }
-
-  public static TransferCoding gzip() {
-    if (gzip == null) {
-      gzip = new TransferCoding("gzip");
-    }
-    return gzip;
-  }
-
-  public static TransferCoding from(String name, HashTrieMap<String, String> params) {
-    if (params.isEmpty()) {
-      if ("chunked".equals(name)) {
-        return chunked();
-      } else if ("compress".equals(name)) {
-        return compress();
-      } else if ("deflate".equals(name)) {
-        return deflate();
-      } else if ("gzip".equals(name)) {
-        return gzip();
-      }
-    }
-    return new TransferCoding(name, params);
-  }
-
-  public static TransferCoding from(String name) {
-    return from(name, HashTrieMap.<String, String>empty());
-  }
-
-  public static TransferCoding parse(String string) {
-    return Http.standardParser().parseTransferCodingString(string);
-  }
 }

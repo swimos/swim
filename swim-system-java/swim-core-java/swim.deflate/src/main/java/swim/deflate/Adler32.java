@@ -21,15 +21,15 @@
 package swim.deflate;
 
 final class Adler32 {
-  private Adler32() {
-    // stub
-  }
 
   // largest prime smaller than 65536
   static final int BASE = 65521;
-
   // largest n such that 255n(n+1)/2 + (n+1)(BASE-1) <= 2^32-1
   static final int NMAX = 5552;
+
+  private Adler32() {
+    // stub
+  }
 
   static int adler32(int adler, byte[] buffer, int offset, int length) {
     int sum2;
@@ -60,7 +60,8 @@ final class Adler32 {
     // in case short lengths are provided, keep it somewhat fast
     if (length < 16) {
       while (length-- != 0) {
-        adler += buffer[offset++]; sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
       }
       if (adler >= BASE) {
         adler -= BASE;
@@ -74,22 +75,38 @@ final class Adler32 {
       length -= NMAX;
       n = NMAX / 16; // NMAX is divisible by 16
       do {
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
       } while (--n != 0);
       adler %= BASE;
       sum2 %= BASE;
@@ -99,25 +116,42 @@ final class Adler32 {
     if (length != 0) { // avoid modulos if none remaining
       while (length >= 16) {
         length -= 16;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
-        adler += buffer[offset++]; sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
       }
       while (length-- != 0) {
-        adler += buffer[offset++]; sum2 += adler;
+        adler += buffer[offset++];
+        sum2 += adler;
       }
       adler %= BASE;
       sum2 %= BASE;
@@ -126,4 +160,5 @@ final class Adler32 {
     // return recombined sums
     return adler | (sum2 << 16);
   }
+
 }

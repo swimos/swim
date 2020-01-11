@@ -18,6 +18,7 @@ import swim.codec.Encoder;
 import swim.codec.OutputBuffer;
 
 public abstract class WsFrame<T> {
+
   WsFrame() {
     // stub
   }
@@ -33,4 +34,5 @@ public abstract class WsFrame<T> {
   public abstract Encoder<?, ?> contentEncoder(WsEncoder ws);
 
   public abstract Encoder<?, ?> encodeContent(OutputBuffer<?> output, WsEncoder ws);
+
 }

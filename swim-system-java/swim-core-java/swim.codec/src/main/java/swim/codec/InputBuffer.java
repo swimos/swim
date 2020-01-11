@@ -18,58 +18,8 @@ package swim.codec;
  * Non-blocking token stream buffer.
  */
 public abstract class InputBuffer extends Input {
-  @Override
-  public abstract InputBuffer isPart(boolean isPart);
-
-  public abstract int index();
-
-  public abstract InputBuffer index(int index);
-
-  public abstract int limit();
-
-  public abstract InputBuffer limit(int limit);
-
-  public abstract int capacity();
-
-  public abstract int remaining();
-
-  public abstract byte[] array();
-
-  public abstract int arrayOffset();
-
-  public abstract boolean has(int index);
-
-  public abstract int get(int index);
-
-  public abstract void set(int index, int token);
-
-  @Override
-  public abstract InputBuffer step();
-
-  public abstract InputBuffer step(int offset);
-
-  @Override
-  public abstract InputBuffer seek(Mark mark);
-
-  @Override
-  public InputBuffer fork(Object condition) {
-    return this;
-  }
-
-  @Override
-  public abstract InputBuffer id(Object id);
-
-  @Override
-  public abstract InputBuffer mark(Mark mark);
-
-  @Override
-  public abstract InputBuffer settings(InputSettings settings);
-
-  @Override
-  public abstract InputBuffer clone();
 
   private static InputBuffer empty;
-
   private static InputBuffer done;
 
   /**
@@ -193,9 +143,61 @@ public abstract class InputBuffer extends Input {
   public static InputBuffer error(Throwable error, Object id, Mark mark, InputSettings settings) {
     return new InputBufferError(error, id, mark, settings);
   }
+
+  @Override
+  public abstract InputBuffer isPart(boolean isPart);
+
+  public abstract int index();
+
+  public abstract InputBuffer index(int index);
+
+  public abstract int limit();
+
+  public abstract InputBuffer limit(int limit);
+
+  public abstract int capacity();
+
+  public abstract int remaining();
+
+  public abstract byte[] array();
+
+  public abstract int arrayOffset();
+
+  public abstract boolean has(int index);
+
+  public abstract int get(int index);
+
+  public abstract void set(int index, int token);
+
+  @Override
+  public abstract InputBuffer step();
+
+  public abstract InputBuffer step(int offset);
+
+  @Override
+  public abstract InputBuffer seek(Mark mark);
+
+  @Override
+  public InputBuffer fork(Object condition) {
+    return this;
+  }
+
+  @Override
+  public abstract InputBuffer id(Object id);
+
+  @Override
+  public abstract InputBuffer mark(Mark mark);
+
+  @Override
+  public abstract InputBuffer settings(InputSettings settings);
+
+  @Override
+  public abstract InputBuffer clone();
+
 }
 
 final class InputBufferEmpty extends InputBuffer {
+
   final Object id;
   final Mark mark;
   final InputSettings settings;
@@ -370,9 +372,11 @@ final class InputBufferEmpty extends InputBuffer {
   public InputBuffer clone() {
     return this;
   }
+
 }
 
 final class InputBufferDone extends InputBuffer {
+
   final Object id;
   final Mark mark;
   final InputSettings settings;
@@ -539,9 +543,11 @@ final class InputBufferDone extends InputBuffer {
   public InputBuffer clone() {
     return this;
   }
+
 }
 
 final class InputBufferError extends InputBuffer {
+
   final Throwable error;
   final Object id;
   final Mark mark;
@@ -711,4 +717,5 @@ final class InputBufferError extends InputBuffer {
   public InputBuffer clone() {
     return this;
   }
+
 }

@@ -19,5 +19,7 @@ import swim.ws.WsFrame;
 
 @FunctionalInterface
 public interface WillWriteFrameWs<O> extends Preemptive {
+
   void willWriteFrame(WsFrame<? extends O> frame);
+
 }

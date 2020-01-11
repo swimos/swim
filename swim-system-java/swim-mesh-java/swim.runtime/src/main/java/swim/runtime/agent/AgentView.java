@@ -69,6 +69,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public class AgentView extends AbstractTierBinding implements TierContext, AgentContext {
+
   protected final AgentModel node;
   protected final Value id;
   protected final Value props;
@@ -508,4 +509,5 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
   public void didFail(Throwable error) {
     this.agent.didFail(error);
   }
+
 }

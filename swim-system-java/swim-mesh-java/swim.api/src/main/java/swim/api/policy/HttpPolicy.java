@@ -19,7 +19,9 @@ import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 
 public interface HttpPolicy {
+
   PolicyDirective<HttpMessage<?>> canRequest(HttpRequest<?> request);
 
   PolicyDirective<HttpResponse<?>> canRespond(HttpRequest<?> request, HttpResponse<?> response);
+
 }

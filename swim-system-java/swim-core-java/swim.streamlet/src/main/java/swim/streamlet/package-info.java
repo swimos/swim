@@ -17,4 +17,5 @@
  * continuously consume input state from streaming inlets, and continuously
  * produce output state on streaming outlets.
  */
+
 package swim.streamlet;

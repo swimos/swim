@@ -31,6 +31,7 @@ import java.nio.channels.ReadableByteChannel;
  * Output#bind() bind} a {@code ByteBuffer} containing all written bytes.</p>
  */
 public final class Binary {
+
   private Binary() {
     // nop
   }
@@ -262,4 +263,5 @@ public final class Binary {
       }
     }
   }
+
 }

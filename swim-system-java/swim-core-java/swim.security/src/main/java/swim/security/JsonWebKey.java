@@ -53,10 +53,66 @@ import swim.structure.Value;
 import swim.util.Murmur3;
 
 public class JsonWebKey implements Debug {
+
+  static ECParameterSpec p256;
+  static ECParameterSpec p384;
+  static ECParameterSpec p521;
+  private static int hashSeed;
   protected final Value value;
 
   public JsonWebKey(Value value) {
     this.value = value.commit();
+  }
+
+  public static JsonWebKey from(Value value) {
+    // TODO: validate
+    return new JsonWebKey(value);
+  }
+
+  public static JsonWebKey parse(String jwk) {
+    return from(Json.parse(jwk));
+  }
+
+  private static byte[] parseBase64Url(String value) {
+    return Base64.urlUnpadded().parseByteArray(Unicode.stringInput(value)).bind();
+  }
+
+  private static BigInteger parseBase64UrlUInt(String value) {
+    return new BigInteger(1, parseBase64Url(value));
+  }
+
+  private static ECParameterSpec ecParameterSpec(String crv) {
+    if ("P-256".equals(crv)) {
+      if (p256 == null) {
+        p256 = createECParameterSpec("secp256r1");
+      }
+      return p256;
+    } else if ("P-384".equals(crv)) {
+      if (p384 == null) {
+        p384 = createECParameterSpec("secp384r1");
+      }
+      return p384;
+    } else if ("P-521".equals(crv)) {
+      if (p521 == null) {
+        p521 = createECParameterSpec("secp521r1");
+      }
+      return p521;
+    } else {
+      return null;
+    }
+  }
+
+  private static ECParameterSpec createECParameterSpec(String stdName) {
+    try {
+      final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+      final ECGenParameterSpec parameterSpec = new ECGenParameterSpec(stdName);
+      keyPairGenerator.initialize(parameterSpec);
+      final KeyPair keyPair = keyPairGenerator.generateKeyPair();
+      final ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+      return publicKey.getParams();
+    } catch (GeneralSecurityException cause) {
+      throw new RuntimeException(cause);
+    }
   }
 
   public Value get(String name) {
@@ -243,7 +299,7 @@ public class JsonWebKey implements Debug {
         final Value oth = this.value.get("oth");
         if (!oth.isDefined()) {
           keySpec = new RSAPrivateCrtKeySpec(modulus, publicExponent, privateExponent, primeP, primeQ,
-                                             primeExponentP, primeExponentQ, crtCoefficient);
+              primeExponentP, primeExponentQ, crtCoefficient);
         } else {
           final RSAOtherPrimeInfo[] otherPrimeInfo = new RSAOtherPrimeInfo[oth.length()];
           for (int i = 0; i < otherPrimeInfo.length; i += 1) {
@@ -254,8 +310,8 @@ public class JsonWebKey implements Debug {
             otherPrimeInfo[i] = new RSAOtherPrimeInfo(prime, primeExponent, coefficient);
           }
           keySpec = new RSAMultiPrimePrivateCrtKeySpec(modulus, publicExponent, privateExponent,
-                                                       primeP, primeQ, primeExponentP, primeExponentQ,
-                                                       crtCoefficient, otherPrimeInfo);
+              primeP, primeQ, primeExponentP, primeExponentQ,
+              crtCoefficient, otherPrimeInfo);
         }
       }
       return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
@@ -315,60 +371,4 @@ public class JsonWebKey implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  static ECParameterSpec p256;
-  static ECParameterSpec p384;
-  static ECParameterSpec p521;
-
-  public static JsonWebKey from(Value value) {
-    // TODO: validate
-    return new JsonWebKey(value);
-  }
-
-  public static JsonWebKey parse(String jwk) {
-    return from(Json.parse(jwk));
-  }
-
-  private static byte[] parseBase64Url(String value) {
-    return Base64.urlUnpadded().parseByteArray(Unicode.stringInput(value)).bind();
-  }
-
-  private static BigInteger parseBase64UrlUInt(String value) {
-    return new BigInteger(1, parseBase64Url(value));
-  }
-
-  private static ECParameterSpec ecParameterSpec(String crv) {
-    if ("P-256".equals(crv)) {
-      if (p256 == null) {
-        p256 = createECParameterSpec("secp256r1");
-      }
-      return p256;
-    } else if ("P-384".equals(crv)) {
-      if (p384 == null) {
-        p384 = createECParameterSpec("secp384r1");
-      }
-      return p384;
-    } else if ("P-521".equals(crv)) {
-      if (p521 == null) {
-        p521 = createECParameterSpec("secp521r1");
-      }
-      return p521;
-    } else {
-      return null;
-    }
-  }
-
-  private static ECParameterSpec createECParameterSpec(String stdName) {
-    try {
-      final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
-      final ECGenParameterSpec parameterSpec = new ECGenParameterSpec(stdName);
-      keyPairGenerator.initialize(parameterSpec); 
-      final KeyPair keyPair = keyPairGenerator.generateKeyPair(); 
-      final ECPublicKey publicKey  = (ECPublicKey) keyPair.getPublic();
-      return publicKey.getParams();
-    } catch (GeneralSecurityException cause) {
-      throw new RuntimeException(cause);
-    }
-  }
 }

@@ -18,5 +18,7 @@ package swim.dynamic;
  * A dynamic function type descriptor for a host type.
  */
 public interface HostFunctionType<T> extends HostType<T> {
+
   Object execute(Bridge bridge, T self, Object... arguments);
+
 }

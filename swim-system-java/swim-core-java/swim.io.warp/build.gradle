@@ -5,14 +5,14 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.io.warp'
 
 dependencies {
-  implementation project(':swim-util')
-  api project(':swim-codec')
-  api project(':swim-uri')
-  api project(':swim-http')
-  api project(':swim-ws')
-  api project(':swim-warp')
-  implementation project(':swim-concurrent')
-  api project(':swim-io')
-  api project(':swim-io-http')
-  api project(':swim-io-ws')
+    implementation project(':swim-util')
+    api project(':swim-codec')
+    api project(':swim-uri')
+    api project(':swim-http')
+    api project(':swim-ws')
+    api project(':swim-warp')
+    implementation project(':swim-concurrent')
+    api project(':swim-io')
+    api project(':swim-io-http')
+    api project(':swim-io-ws')
 }

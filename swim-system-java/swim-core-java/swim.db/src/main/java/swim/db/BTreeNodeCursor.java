@@ -21,6 +21,7 @@ import swim.structure.Value;
 import swim.util.OrderedMapCursor;
 
 abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
+
   final BTreeNode page;
   long index;
   int childIndex;
@@ -302,4 +303,5 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
     this.page.pageRef.loadTreeAsync(false, syncPage);
     syncPage.await(this.page.pageRef.settings().pageLoadTimeout);
   }
+
 }

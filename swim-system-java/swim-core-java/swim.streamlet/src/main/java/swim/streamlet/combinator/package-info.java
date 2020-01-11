@@ -15,4 +15,5 @@
 /**
  * Stateful streaming operators and combinators.
  */
+
 package swim.streamlet.combinator;

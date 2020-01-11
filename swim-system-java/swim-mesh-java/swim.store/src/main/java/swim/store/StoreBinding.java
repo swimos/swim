@@ -19,6 +19,7 @@ import swim.api.store.Store;
 import swim.structure.Value;
 
 public interface StoreBinding extends Store {
+
   StoreContext storeContext();
 
   void setStoreContext(StoreContext storeContext);
@@ -28,4 +29,5 @@ public interface StoreBinding extends Store {
   void closeData(Value name);
 
   void close();
+
 }

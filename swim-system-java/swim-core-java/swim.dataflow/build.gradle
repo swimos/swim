@@ -5,8 +5,8 @@ ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim
 ext.moduleName = 'swim.dataflow'
 
 dependencies {
-  implementation project(':swim-util')
-  api project(':swim-structure')
-  api project(':swim-collections')
-  api project(':swim-streamlet')
+    implementation project(':swim-util')
+    api project(':swim-structure')
+    api project(':swim-collections')
+    api project(':swim-streamlet')
 }

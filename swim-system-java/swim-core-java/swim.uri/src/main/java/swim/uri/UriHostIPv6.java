@@ -17,6 +17,7 @@ package swim.uri;
 import swim.codec.Output;
 
 final class UriHostIPv6 extends UriHost {
+
   final String address;
   String string;
 
@@ -58,4 +59,5 @@ final class UriHostIPv6 extends UriHost {
     }
     return this.string;
   }
+
 }

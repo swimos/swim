@@ -17,9 +17,11 @@ package swim.vm.js;
 import swim.uri.UriPath;
 
 public interface JsModuleLoader {
+
   UriPath resolveModulePath(UriPath basePath, UriPath modulePath);
 
   JsModule loadModule(JsModuleSystem moduleSystem, UriPath moduleId);
 
   void evalModule(JsModule module);
+
 }

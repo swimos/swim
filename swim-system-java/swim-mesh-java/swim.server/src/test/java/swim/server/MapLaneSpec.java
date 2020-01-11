@@ -63,108 +63,6 @@ public class MapLaneSpec {
   private static OrderedMap<String, String> mapLaneCopy;
   private static OrderedMap<String, String> mapLane1Copy;
 
-  private static class TestMapLaneAgent extends AbstractAgent {
-    @SwimLane("map")
-    MapLane<String, String> testMap = this.<String, String>mapLane()
-        .keyClass(String.class)
-        .valueClass(String.class)
-        .observe(new TestMapLaneController());
-
-    @SwimLane("map1")
-    MapLane<String, String> testMap1 = this.<String, String>mapLane().keyClass(String.class).valueClass(String.class)
-        .didUpdate((key, newValue, oldValue) -> {
-          assertNotNull(newValue);
-          mapLane1Copy = this.testMap1.snapshot();
-        })
-        .didRemove((key, oldValue) -> {
-          assertNotNull(oldValue);
-          mapLane1Copy = this.testMap1.snapshot();
-        })
-        .didDrop((lower) -> mapLane1Copy = this.testMap1.snapshot())
-        .didTake((upper) -> mapLane1Copy = this.testMap1.snapshot())
-        .didClear(() -> mapLane1Copy = this.testMap1.snapshot());
-
-    class TestMapLaneController implements WillUpdateKey<String, String>,
-        DidUpdateKey<String, String>, WillRemoveKey<String>, DidRemoveKey<String, String>,
-        WillClear, DidClear, WillDrop, DidDrop, WillTake, DidTake {
-      @Override
-      public String willUpdate(String key, String newValue) {
-        System.out.println("lane willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
-        laneWillUpdate.countDown();
-        return newValue;
-      }
-
-      @Override
-      public void didUpdate(String key, String newValue, String oldValue) {
-        System.out.println("lane didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        mapLaneCopy = testMap.snapshot();
-        testMap1.put(key, newValue);
-        laneDidUpdate.countDown();
-      }
-
-      @Override
-      public void willRemove(String key) {
-        System.out.println("lane willRemove key: " + Format.debug(key));
-        laneWillRemove.countDown();
-      }
-
-      @Override
-      public void didRemove(String key, String oldValue) {
-        System.out.println("lane didRemove key: " + Format.debug(key) + "; oldValue: " + Format.debug(oldValue));
-        mapLaneCopy = testMap.snapshot();
-        testMap1.remove(key);
-        laneDidRemove.countDown();
-      }
-
-      @Override
-      public void willClear() {
-        System.out.println("lane willClear");
-        laneWillClear.countDown();
-      }
-
-      @Override
-      public void didClear() {
-        System.out.println("lane didClear");
-        mapLaneCopy = testMap.snapshot();
-        testMap1.clear();
-        laneDidClear.countDown();
-      }
-
-      @Override
-      public void willDrop(int lower) {
-        System.out.println("lane willDrop " + lower);
-        laneWillDrop.countDown();
-      }
-
-      @Override
-      public void didDrop(int lower) {
-        System.out.println("lane didDrop " + lower);
-        mapLaneCopy = testMap.snapshot();
-        testMap1.drop(lower);
-        laneDidDrop.countDown();
-      }
-
-      @Override
-      public void willTake(int upper) {
-        System.out.println("lane willTake " + upper);
-        laneWillTake.countDown();
-      }
-
-      @Override
-      public void didTake(int upper) {
-        System.out.println("lane didTake " + upper);
-        mapLaneCopy = testMap.snapshot();
-        testMap1.take(upper);
-        laneDidTake.countDown();
-      }
-    }
-  }
-
-  static class TestMapPlane extends AbstractPlane {
-    @SwimRoute("/map/:name")
-    AgentRoute<TestMapLaneAgent> mapRoute;
-  }
-
   @Test
   public void testPut() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
@@ -386,4 +284,113 @@ public class MapLaneSpec {
       kernel.stop();
     }
   }
+
+  private static class TestMapLaneAgent extends AbstractAgent {
+
+    @SwimLane("map")
+    MapLane<String, String> testMap = this.<String, String>mapLane()
+        .keyClass(String.class)
+        .valueClass(String.class)
+        .observe(new TestMapLaneController());
+
+    @SwimLane("map1")
+    MapLane<String, String> testMap1 = this.<String, String>mapLane().keyClass(String.class).valueClass(String.class)
+        .didUpdate((key, newValue, oldValue) -> {
+          assertNotNull(newValue);
+          mapLane1Copy = this.testMap1.snapshot();
+        })
+        .didRemove((key, oldValue) -> {
+          assertNotNull(oldValue);
+          mapLane1Copy = this.testMap1.snapshot();
+        })
+        .didDrop((lower) -> mapLane1Copy = this.testMap1.snapshot())
+        .didTake((upper) -> mapLane1Copy = this.testMap1.snapshot())
+        .didClear(() -> mapLane1Copy = this.testMap1.snapshot());
+
+    class TestMapLaneController implements WillUpdateKey<String, String>,
+        DidUpdateKey<String, String>, WillRemoveKey<String>, DidRemoveKey<String, String>,
+        WillClear, DidClear, WillDrop, DidDrop, WillTake, DidTake {
+
+      @Override
+      public String willUpdate(String key, String newValue) {
+        System.out.println("lane willUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue));
+        laneWillUpdate.countDown();
+        return newValue;
+      }
+
+      @Override
+      public void didUpdate(String key, String newValue, String oldValue) {
+        System.out.println("lane didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
+        mapLaneCopy = testMap.snapshot();
+        testMap1.put(key, newValue);
+        laneDidUpdate.countDown();
+      }
+
+      @Override
+      public void willRemove(String key) {
+        System.out.println("lane willRemove key: " + Format.debug(key));
+        laneWillRemove.countDown();
+      }
+
+      @Override
+      public void didRemove(String key, String oldValue) {
+        System.out.println("lane didRemove key: " + Format.debug(key) + "; oldValue: " + Format.debug(oldValue));
+        mapLaneCopy = testMap.snapshot();
+        testMap1.remove(key);
+        laneDidRemove.countDown();
+      }
+
+      @Override
+      public void willClear() {
+        System.out.println("lane willClear");
+        laneWillClear.countDown();
+      }
+
+      @Override
+      public void didClear() {
+        System.out.println("lane didClear");
+        mapLaneCopy = testMap.snapshot();
+        testMap1.clear();
+        laneDidClear.countDown();
+      }
+
+      @Override
+      public void willDrop(int lower) {
+        System.out.println("lane willDrop " + lower);
+        laneWillDrop.countDown();
+      }
+
+      @Override
+      public void didDrop(int lower) {
+        System.out.println("lane didDrop " + lower);
+        mapLaneCopy = testMap.snapshot();
+        testMap1.drop(lower);
+        laneDidDrop.countDown();
+      }
+
+      @Override
+      public void willTake(int upper) {
+        System.out.println("lane willTake " + upper);
+        laneWillTake.countDown();
+      }
+
+      @Override
+      public void didTake(int upper) {
+        System.out.println("lane didTake " + upper);
+        mapLaneCopy = testMap.snapshot();
+        testMap1.take(upper);
+        laneDidTake.countDown();
+      }
+
+    }
+
+  }
+
+  static class TestMapPlane extends AbstractPlane {
+
+    @SwimRoute("/map/:name")
+    AgentRoute<TestMapLaneAgent> mapRoute;
+
+  }
+
 }

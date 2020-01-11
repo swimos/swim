@@ -25,6 +25,9 @@ import swim.util.Murmur3;
  * two operands.
  */
 public final class DivideOperator extends BinaryOperator {
+
+  private static int hashSeed;
+
   public DivideOperator(Item operand1, Item operand2) {
     super(operand1, operand2);
   }
@@ -102,5 +105,4 @@ public final class DivideOperator extends BinaryOperator {
     output.debug(this.operand1).write('.').write("divide").write('(').debug(this.operand2).write(')');
   }
 
-  private static int hashSeed;
 }

@@ -21,6 +21,8 @@ import swim.codec.Output;
 import swim.util.Murmur3;
 
 public class UriAuthority extends UriPart implements Comparable<UriAuthority>, Debug, Display {
+
+  private static UriAuthority undefined;
   protected final UriUser user;
   protected final UriHost host;
   protected final UriPort port;
@@ -30,6 +32,42 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
     this.user = user;
     this.host = host;
     this.port = port;
+  }
+
+  public static UriAuthority undefined() {
+    if (undefined == null) {
+      undefined = new UriAuthority(UriUser.undefined(), UriHost.undefined(), UriPort.undefined());
+    }
+    return undefined;
+  }
+
+  public static UriAuthority from(UriUser user, UriHost host, UriPort port) {
+    if (user == null) {
+      user = UriUser.undefined();
+    }
+    if (host == null) {
+      host = UriHost.undefined();
+    }
+    if (port == null) {
+      port = UriPort.undefined();
+    }
+    if (user.isDefined() || host.isDefined() || port.isDefined()) {
+      return new UriAuthority(user, host, port);
+    } else {
+      return undefined();
+    }
+  }
+
+  public static UriAuthority from(UriHost host, UriPort port) {
+    return from(null, host, port);
+  }
+
+  public static UriAuthority from(UriHost host) {
+    return from(null, host, null);
+  }
+
+  public static UriAuthority parse(String string) {
+    return Uri.standardParser().parseAuthorityString(string);
   }
 
   public final boolean isDefined() {
@@ -209,41 +247,4 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
     return this.string;
   }
 
-  private static UriAuthority undefined;
-
-  public static UriAuthority undefined() {
-    if (undefined == null) {
-      undefined = new UriAuthority(UriUser.undefined(), UriHost.undefined(), UriPort.undefined());
-    }
-    return undefined;
-  }
-
-  public static UriAuthority from(UriUser user, UriHost host, UriPort port) {
-    if (user == null) {
-      user = UriUser.undefined();
-    }
-    if (host == null) {
-      host = UriHost.undefined();
-    }
-    if (port == null) {
-      port = UriPort.undefined();
-    }
-    if (user.isDefined() || host.isDefined() || port.isDefined()) {
-      return new UriAuthority(user, host, port);
-    } else {
-      return undefined();
-    }
-  }
-
-  public static UriAuthority from(UriHost host, UriPort port) {
-    return from(null, host, port);
-  }
-
-  public static UriAuthority from(UriHost host) {
-    return from(null, host, null);
-  }
-
-  public static UriAuthority parse(String string) {
-    return Uri.standardParser().parseAuthorityString(string);
-  }
 }

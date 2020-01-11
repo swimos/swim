@@ -15,6 +15,7 @@
 package swim.codec;
 
 final class Base10IntegerWriter extends Writer<Object, Object> {
+
   final Object value;
   final long input;
   final int index;
@@ -33,22 +34,6 @@ final class Base10IntegerWriter extends Writer<Object, Object> {
 
   Base10IntegerWriter() {
     this(null, 0L, 0, 0);
-  }
-
-  @Override
-  public Writer<Object, Object> feed(Object input) {
-    if (input instanceof Integer) {
-      return new Base10IntegerWriter(input, ((Integer) input).longValue());
-    } else if (input instanceof Long) {
-      return new Base10IntegerWriter(input, ((Long) input).longValue());
-    } else {
-      return new StringWriter(input, input);
-    }
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.value, this.input, this.index, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, Object value, long input, int index, int step) {
@@ -102,4 +87,21 @@ final class Base10IntegerWriter extends Writer<Object, Object> {
   static Writer<Object, Object> write(Output<?> output, Object value, long input) {
     return write(output, value, input, 0, 1);
   }
+
+  @Override
+  public Writer<Object, Object> feed(Object input) {
+    if (input instanceof Integer) {
+      return new Base10IntegerWriter(input, ((Integer) input).longValue());
+    } else if (input instanceof Long) {
+      return new Base10IntegerWriter(input, ((Long) input).longValue());
+    } else {
+      return new StringWriter(input, input);
+    }
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.value, this.input, this.index, this.step);
+  }
+
 }

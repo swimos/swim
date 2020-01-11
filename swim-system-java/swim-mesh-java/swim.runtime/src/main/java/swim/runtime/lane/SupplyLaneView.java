@@ -28,6 +28,7 @@ import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 
 public class SupplyLaneView<V> extends WarpLaneView implements SupplyLane<V> {
+
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
 
@@ -142,4 +143,5 @@ public class SupplyLaneView<V> extends WarpLaneView implements SupplyLane<V> {
   public void push(V value) {
     this.laneBinding.sendDown(this.valueForm.mold(value).toValue());
   }
+
 }
