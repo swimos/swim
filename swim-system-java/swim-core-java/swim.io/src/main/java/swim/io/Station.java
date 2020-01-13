@@ -531,10 +531,13 @@ final class StationTransport implements TransportContext, TransportRef {
   /**
    * I/O callback invoked by the station's selector thread when the transport
    * is ready to perform a <em>read</em> operation.
+   *
+   * @return Whether the operation has yielded control without completing.
    */
-  void doRead() {
+  boolean doRead() {
     final ByteBuffer readBuffer = this.transport.readBuffer();
     final ReadableByteChannel channel = (ReadableByteChannel) this.transport.channel();
+    boolean yield = false;
     // Loop while reading is permitted.
     while (FLOW_CONTROL.get(this).isReadEnabled()) {
       final int count;
@@ -583,10 +586,18 @@ final class StationTransport implements TransportContext, TransportRef {
           }
         }
         if (readBuffer.hasRemaining()) {
+          final int currentPos = readBuffer.position();
           // The transport binding didn't read all the input bytes from the
           // input buffer; compact the input buffer to make room to read more
           // input data.
           readBuffer.compact();
+          if (count == 0 && currentPos == 0) {
+            //No progress was made in this iteration, however, the task is not
+            //complete. It should yield to allow other pending IO tasks to run
+            //that could potentially unblock this task.
+            yield = true;
+            break;
+          }
         } else {
           // The transport binding read all bytes from the input buffer; reset
           // the input buffer.
@@ -602,6 +613,7 @@ final class StationTransport implements TransportContext, TransportRef {
         break;
       }
     }
+    return yield;
   }
 
   /**
@@ -783,7 +795,11 @@ final class StationReader extends AbstractTask {
 
   @Override
   public void runTask() {
-    this.context.doRead();
+    final boolean didYield = this.context.doRead();
+    if (didYield) {
+      //The task yielded control but had not completed so needs to be rescheduled.
+      cue();
+    }
   }
 
 }
