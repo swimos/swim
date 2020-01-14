@@ -185,20 +185,36 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
           context = this.context;
           if (context != null) {
             context.flowControl(FlowModifier.DISABLE_READ);
-            // Reconcile read flow control race.
-            reader = this.readerQueue.poll();
-            this.reading = reader;
-            if (reader != null) {
-              context.flowControl(FlowModifier.ENABLE_READ);
-            } else {
-              break;
-            }
-          } else {
-            break;
+            reconcileReadFlowControl();
           }
+          break;
         }
       }
     } while (inputBuffer.isCont());
+  }
+
+  void reconcileReadFlowControl() {
+    do {
+      final IpSocketContext context = this.context;
+      if (context == null) {
+        break;
+      }
+      Decoder<? extends I> reader = this.reading;
+      if (reader != null) {
+        context.flowControl(FlowModifier.ENABLE_READ);
+      } else {
+        reader = this.readerQueue.poll();
+        this.reading = reader;
+        if (reader == null) {
+          context.flowControl(FlowModifier.DISABLE_READ);
+        } else {
+          continue;
+        }
+      }
+      if (reader == this.reading) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
@@ -206,21 +222,14 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
     Encoder<?, ? extends O> writer = this.writing;
     if (writer == null) {
       writer = this.writerQueue.poll();
+      this.writing = writer;
       if (writer == null) {
         final IpSocketContext context = this.context;
         if (context != null) {
           context.flowControl(FlowModifier.DISABLE_WRITE);
-          // Reconcile write flow control race.
-          writer = this.writerQueue.poll();
-          this.writing = writer;
-          if (writer != null) {
-            context.flowControl(FlowModifier.ENABLE_WRITE);
-          } else {
-            return;
-          }
-        } else {
-          return;
+          reconcileWriteFlowControl();
         }
+        return;
       }
     }
     OutputBuffer<?> outputBuffer = this.context.outputBuffer();
@@ -241,7 +250,7 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
   @Override
   public void didWrite() {
     Encoder<?, ? extends O> writer = this.writing;
-    if (!writer.isCont()) {
+    if (writer != null && !writer.isCont()) {
       if (writer.isDone()) {
         this.modem.didWrite(writer.bind());
       } else if (writer.isError()) {
@@ -258,16 +267,35 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
           final IpSocketContext context = this.context;
           if (context != null) {
             context.flowControl(FlowModifier.DISABLE_WRITE);
-            // Reconcile write flow control race.
-            writer = this.writerQueue.poll();
-            this.writing = writer;
-            if (writer != null) {
-              context.flowControl(FlowModifier.ENABLE_WRITE);
-            }
+            reconcileWriteFlowControl();
           }
         }
       }
     }
+  }
+
+  void reconcileWriteFlowControl() {
+    do {
+      final IpSocketContext context = this.context;
+      if (context == null) {
+        break;
+      }
+      Encoder<?, ? extends O> writer = this.writing;
+      if (writer != null) {
+        context.flowControl(FlowModifier.ENABLE_WRITE);
+      } else {
+        writer = this.writerQueue.poll();
+        this.writing = writer;
+        if (writer == null) {
+          context.flowControl(FlowModifier.DISABLE_WRITE);
+        } else {
+          continue;
+        }
+      }
+      if (writer == this.writing) {
+        break;
+      }
+    } while (true);
   }
 
   @Override

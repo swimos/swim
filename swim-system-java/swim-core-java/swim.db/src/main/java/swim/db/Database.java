@@ -44,30 +44,7 @@ import swim.util.Cursor;
 
 public class Database {
 
-  static final int OPENING = 1 << 0;
-  static final int OPENED = 1 << 1;
-  static final int FAILED = 1 << 2;
-  static final AtomicIntegerFieldUpdater<Database> STEM =
-      AtomicIntegerFieldUpdater.newUpdater(Database.class, "stem");
-  static final AtomicLongFieldUpdater<Database> VERSION =
-      AtomicLongFieldUpdater.newUpdater(Database.class, "version");
-  static final AtomicIntegerFieldUpdater<Database> POST =
-      AtomicIntegerFieldUpdater.newUpdater(Database.class, "post");
-  static final AtomicLongFieldUpdater<Database> DIFF_SIZE =
-      AtomicLongFieldUpdater.newUpdater(Database.class, "diffSize");
-  static final AtomicLongFieldUpdater<Database> TREE_SIZE =
-      AtomicLongFieldUpdater.newUpdater(Database.class, "treeSize");
-  static final AtomicIntegerFieldUpdater<Database> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(Database.class, "status");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<Database, HashTrieMap<Value, WeakReference<Trunk<Tree>>>> TRUNKS =
-      AtomicReferenceFieldUpdater.newUpdater(Database.class, (Class<HashTrieMap<Value, WeakReference<Trunk<Tree>>>>) (Class<?>) HashTrieMap.class, "trunks");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<Database, HashTrieMap<Value, Trunk<Tree>>> SPROUTS =
-      AtomicReferenceFieldUpdater.newUpdater(Database.class, (Class<HashTrieMap<Value, Trunk<Tree>>>) (Class<?>) HashTrieMap.class, "sprouts");
   final Store store;
-  final Trunk<BTree> metaTrunk;
-  final Trunk<BTree> seedTrunk;
   volatile DatabaseDelegate delegate;
   volatile Germ germ;
   volatile int stem;
@@ -75,6 +52,8 @@ public class Database {
   volatile long version;
   volatile long diffSize;
   volatile long treeSize;
+  final Trunk<BTree> metaTrunk;
+  final Trunk<BTree> seedTrunk;
   volatile HashTrieMap<Value, WeakReference<Trunk<Tree>>> trunks;
   volatile HashTrieMap<Value, Trunk<Tree>> sprouts;
   volatile int status;
@@ -109,12 +88,6 @@ public class Database {
 
   Database(Store store) {
     this(store, 10, 1L);
-  }
-
-  private static void assertStep(OutputBuffer<?> output, long base, long step) {
-    if (output.index() != (int) (step - base)) {
-      throw new StoreException("chunk offset skew: " + (output.index() - (int) (step - base)));
-    }
   }
 
   public Store store() {
@@ -614,6 +587,18 @@ public class Database {
     return new Chunk(this, commit, zone, germ, commits, output.bind());
   }
 
+  private static void assertStep(OutputBuffer<?> output, long base, long step) {
+    final int skew = output.index() - (int) (step - base);
+    if (skew != 0) {
+      final StoreException error = new StoreException("chunk offset skew: " + skew + "; base: " + base + "; step: " + step);
+      if (skew < 0) {
+        throw error;
+      } else {
+        error.printStackTrace();
+      }
+    }
+  }
+
   public void uncommit(long version) {
     final Cursor<Map.Entry<Value, Value>> seedCursor = this.seedTrunk.tree.cursor();
     while (seedCursor.hasNext()) {
@@ -724,6 +709,36 @@ public class Database {
   public void databaseDidCloseTrunk(Trunk<?> trunk) {
     this.store.treeDidClose(this, trunk.tree);
   }
+
+  static final int OPENING = 1 << 0;
+  static final int OPENED = 1 << 1;
+  static final int FAILED = 1 << 2;
+
+  static final AtomicIntegerFieldUpdater<Database> STEM =
+      AtomicIntegerFieldUpdater.newUpdater(Database.class, "stem");
+
+  static final AtomicLongFieldUpdater<Database> VERSION =
+      AtomicLongFieldUpdater.newUpdater(Database.class, "version");
+
+  static final AtomicIntegerFieldUpdater<Database> POST =
+      AtomicIntegerFieldUpdater.newUpdater(Database.class, "post");
+
+  static final AtomicLongFieldUpdater<Database> DIFF_SIZE =
+      AtomicLongFieldUpdater.newUpdater(Database.class, "diffSize");
+
+  static final AtomicLongFieldUpdater<Database> TREE_SIZE =
+      AtomicLongFieldUpdater.newUpdater(Database.class, "treeSize");
+
+  static final AtomicIntegerFieldUpdater<Database> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(Database.class, "status");
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<Database, HashTrieMap<Value, WeakReference<Trunk<Tree>>>> TRUNKS =
+      AtomicReferenceFieldUpdater.newUpdater(Database.class, (Class<HashTrieMap<Value, WeakReference<Trunk<Tree>>>>) (Class<?>) HashTrieMap.class, "trunks");
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<Database, HashTrieMap<Value, Trunk<Tree>>> SPROUTS =
+      AtomicReferenceFieldUpdater.newUpdater(Database.class, (Class<HashTrieMap<Value, Trunk<Tree>>>) (Class<?>) HashTrieMap.class, "sprouts");
 
 }
 

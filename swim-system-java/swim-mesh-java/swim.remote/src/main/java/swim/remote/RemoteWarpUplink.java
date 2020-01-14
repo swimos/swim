@@ -38,16 +38,11 @@ import swim.warp.Envelope;
 
 class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
 
-  static final int FEEDING_DOWN = 1 << 0;
-  static final int FEEDING_UP = 1 << 1;
-  static final int PULLING_UP = 1 << 2;
-  static final AtomicIntegerFieldUpdater<RemoteWarpUplink> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(RemoteWarpUplink.class, "status");
   final RemoteHost host;
   final WarpBinding link;
   final Uri remoteNodeUri;
   final Value linkKey;
-  final ConcurrentLinkedQueue<Envelope> downQueue;
+  final ConcurrentLinkedQueue<Push<Envelope>> downQueue;
   PullContext<? super Envelope> pullContext;
   volatile int status;
 
@@ -56,7 +51,7 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
     this.link = link;
     this.remoteNodeUri = remoteNodeUri;
     this.linkKey = linkKey.commit();
-    this.downQueue = new ConcurrentLinkedQueue<Envelope>();
+    this.downQueue = new ConcurrentLinkedQueue<Push<Envelope>>();
   }
 
   RemoteWarpUplink(RemoteHost host, WarpBinding link, Uri remoteNodeUri) {
@@ -168,8 +163,8 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
     return this.host.remoteCertificates();
   }
 
-  public void queueDown(Envelope envelope) {
-    this.downQueue.add(envelope);
+  public void queueDown(Push<Envelope> push) {
+    this.downQueue.add(push);
     int oldStatus;
     int newStatus;
     do {
@@ -183,16 +178,15 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
 
   @Override
   public void pullDown() {
-    final Envelope envelope = this.downQueue.poll();
+    final Push<Envelope> push = this.downQueue.poll();
     int oldStatus;
     int newStatus;
     do {
       oldStatus = this.status;
       newStatus = oldStatus & ~FEEDING_DOWN;
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if (envelope != null) {
-      this.link.pushDown(new Push<Envelope>(Uri.empty(), Uri.empty(), this.link.nodeUri(), this.link.laneUri(),
-          this.link.prio(), this.host.remoteIdentity(), envelope, null));
+    if (push != null) {
+      this.link.pushDown(push);
     }
     feedDownQueue();
   }
@@ -333,5 +327,12 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   public void failUp(Object message) {
     this.host.fail(message);
   }
+
+  static final int FEEDING_DOWN = 1 << 0;
+  static final int FEEDING_UP = 1 << 1;
+  static final int PULLING_UP = 1 << 2;
+
+  static final AtomicIntegerFieldUpdater<RemoteWarpUplink> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteWarpUplink.class, "status");
 
 }

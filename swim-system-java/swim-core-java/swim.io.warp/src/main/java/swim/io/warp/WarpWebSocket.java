@@ -41,75 +41,6 @@ import swim.ws.WsText;
 
 public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketContext, PullContext<Envelope> {
 
-  static final long SUPPLY_MAX;
-  static final long DEMAND_MAX;
-  static final long BUFFER_MAX;
-  static final int DEMAND_SHIFT;
-  static final int BUFFER_SHIFT;
-  static final long SUPPLY_MASK;
-  static final long DEMAND_MASK;
-  static final long BUFFER_MASK;
-  static final long UPGRADED;
-  static final long CLOSING;
-  static final long TARGET_DEMAND;
-  static final int TRANCHES;
-  static final AtomicLongFieldUpdater<WarpWebSocket> STATUS =
-      AtomicLongFieldUpdater.newUpdater(WarpWebSocket.class, "status");
-
-  static {
-    int supplyBits;
-    try {
-      supplyBits = Integer.parseInt(System.getProperty("swim.warp.supply.bits"));
-    } catch (NumberFormatException e) {
-      supplyBits = 24;
-    }
-
-    int demandBits;
-    try {
-      demandBits = Integer.parseInt(System.getProperty("swim.warp.demand.bits"));
-    } catch (NumberFormatException e) {
-      demandBits = 12;
-    }
-
-    int bufferBits;
-    try {
-      bufferBits = Integer.parseInt(System.getProperty("swim.warp.buffer.bits"));
-    } catch (NumberFormatException e) {
-      bufferBits = 24;
-    }
-
-    if (supplyBits < 0 || demandBits < 0 || bufferBits < 0 || supplyBits + demandBits + bufferBits > 60) {
-      throw new ExceptionInInitializerError();
-    }
-
-    SUPPLY_MAX = (1L << supplyBits) - 1L;
-    DEMAND_MAX = (1L << demandBits) - 1L;
-    BUFFER_MAX = (1L << bufferBits) - 1L;
-    DEMAND_SHIFT = supplyBits;
-    BUFFER_SHIFT = supplyBits + demandBits;
-    SUPPLY_MASK = SUPPLY_MAX;
-    DEMAND_MASK = DEMAND_MAX << DEMAND_SHIFT;
-    BUFFER_MASK = BUFFER_MAX << BUFFER_SHIFT;
-    UPGRADED = 1L << 60;
-    CLOSING = 1L << 61;
-
-    int targetDemand;
-    try {
-      targetDemand = Integer.parseInt(System.getProperty("swim.warp.demand.target"));
-    } catch (NumberFormatException e) {
-      targetDemand = 32;
-    }
-    TARGET_DEMAND = targetDemand;
-
-    int tranches;
-    try {
-      tranches = Integer.parseInt(System.getProperty("swim.warp.tranches"));
-    } catch (NumberFormatException e) {
-      tranches = 5;
-    }
-    TRANCHES = tranches;
-  }
-
   protected final WarpSocket socket;
   protected final WarpSettings warpSettings;
   final ConcurrentTrancheQueue<PullRequest<Envelope>> supply;
@@ -491,6 +422,77 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
     if (context != null) {
       context.close();
     }
+  }
+
+  static final long SUPPLY_MAX;
+  static final long DEMAND_MAX;
+  static final long BUFFER_MAX;
+  static final int DEMAND_SHIFT;
+  static final int BUFFER_SHIFT;
+  static final long SUPPLY_MASK;
+  static final long DEMAND_MASK;
+  static final long BUFFER_MASK;
+  static final long UPGRADED;
+  static final long CLOSING;
+
+  static final long TARGET_DEMAND;
+  static final int TRANCHES;
+
+  static final AtomicLongFieldUpdater<WarpWebSocket> STATUS =
+      AtomicLongFieldUpdater.newUpdater(WarpWebSocket.class, "status");
+
+  static {
+    int supplyBits;
+    try {
+      supplyBits = Integer.parseInt(System.getProperty("swim.warp.supply.bits"));
+    } catch (NumberFormatException e) {
+      supplyBits = 24;
+    }
+
+    int demandBits;
+    try {
+      demandBits = Integer.parseInt(System.getProperty("swim.warp.demand.bits"));
+    } catch (NumberFormatException e) {
+      demandBits = 12;
+    }
+
+    int bufferBits;
+    try {
+      bufferBits = Integer.parseInt(System.getProperty("swim.warp.buffer.bits"));
+    } catch (NumberFormatException e) {
+      bufferBits = 24;
+    }
+
+    if (supplyBits < 0 || demandBits < 0 || bufferBits < 0 || supplyBits + demandBits + bufferBits > 60) {
+      throw new ExceptionInInitializerError();
+    }
+
+    SUPPLY_MAX = (1L << supplyBits) - 1L;
+    DEMAND_MAX = (1L << demandBits) - 1L;
+    BUFFER_MAX = (1L << bufferBits) - 1L;
+    DEMAND_SHIFT = supplyBits;
+    BUFFER_SHIFT = supplyBits + demandBits;
+    SUPPLY_MASK = SUPPLY_MAX;
+    DEMAND_MASK = DEMAND_MAX << DEMAND_SHIFT;
+    BUFFER_MASK = BUFFER_MAX << BUFFER_SHIFT;
+    UPGRADED = 1L << 60;
+    CLOSING = 1L << 61;
+
+    int targetDemand;
+    try {
+      targetDemand = Integer.parseInt(System.getProperty("swim.warp.demand.target"));
+    } catch (NumberFormatException e) {
+      targetDemand = Math.min(Math.max(32, 4 * Runtime.getRuntime().availableProcessors()), (int) DEMAND_MAX - 1);
+    }
+    TARGET_DEMAND = targetDemand;
+
+    int tranches;
+    try {
+      tranches = Integer.parseInt(System.getProperty("swim.warp.tranches"));
+    } catch (NumberFormatException e) {
+      tranches = 5;
+    }
+    TRANCHES = tranches;
   }
 
 }

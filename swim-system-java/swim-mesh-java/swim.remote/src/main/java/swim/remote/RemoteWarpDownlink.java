@@ -24,6 +24,7 @@ import swim.api.LinkException;
 import swim.api.auth.Identity;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
+import swim.io.warp.WarpSocketContext;
 import swim.runtime.CellContext;
 import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
@@ -240,7 +241,10 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
       }
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if ((oldStatus & PULLING_DOWN) == 0) {
-      this.host.warpSocketContext.feed(this);
+      final WarpSocketContext warpSocketContext = this.host.warpSocketContext;
+      if (warpSocketContext != null) {
+        warpSocketContext.feed(this);
+      }
     }
   }
 
@@ -262,8 +266,11 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
       } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
       if (oldStatus != newStatus) {
         final Envelope remoteEnvelope = ((Envelope) message).nodeUri(this.remoteNodeUri);
-        this.pullContext.push(remoteEnvelope);
-        this.pullContext = null;
+        final PullContext<? super Envelope> pullContext = this.pullContext;
+        if (pullContext != null) {
+          pullContext.push(remoteEnvelope);
+          this.pullContext = null;
+        }
       }
     } else {
       push.trap(new LinkException("unsupported message: " + message));
@@ -279,8 +286,11 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
       newStatus = oldStatus & ~PULLING_DOWN;
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldStatus != newStatus) {
-      this.pullContext.skip();
-      this.pullContext = null;
+      final PullContext<? super Envelope> pullContext = this.pullContext;
+      if (pullContext != null) {
+        pullContext.skip();
+        this.pullContext = null;
+      }
     }
   }
 
