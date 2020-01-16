@@ -3,7 +3,7 @@ class TestCommandAgent {
         this.context = context;
         this.testLane = context.openLane("command", context.commandLane());
 
-        this.testLane.onCommand(value = > {
+        this.testLane.onCommand(value => {
             console.log("lane onCommand value: " + value.stringValue())
         }
     )

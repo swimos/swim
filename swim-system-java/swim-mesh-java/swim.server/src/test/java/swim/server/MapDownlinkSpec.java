@@ -170,7 +170,7 @@ public class MapDownlinkSpec {
     final CountDownLatch willRemove = new CountDownLatch(2);
     final CountDownLatch didRemove = new CountDownLatch(2);
     final CountDownLatch readOnlyLinkDidReceive = new CountDownLatch(2);
-    final CountDownLatch readOnlyLinkDidRemove = new CountDownLatch(2);
+    final CountDownLatch readOnlyLinkDidRemove = new CountDownLatch(1);
 
     class MapLinkController implements DidReceive, WillRemoveKey<String>, DidRemoveKey<String, String> {
 
