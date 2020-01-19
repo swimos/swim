@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Objects} from "@swim/util";
 import {PointR2, BoxR2, SegmentR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {RenderingContext} from "@swim/render";
 import {MemberAnimator, ViewInit, RenderView, StrokeViewInit, StrokeView} from "@swim/view";
 import {AnyLngLat, LngLat} from "./LngLat";
-import {MapView} from "./MapView";
 import {MapViewContext} from "./MapViewContext";
+import {MapView} from "./MapView";
 import {MapGraphicView} from "./MapGraphicView";
 import {MapGraphicViewController} from "./MapGraphicViewController";
 
@@ -88,7 +89,7 @@ export class MapLineView extends MapGraphicView implements StrokeView {
     this.stroke.onFrame(t);
     this.strokeWidth.onFrame(t);
 
-    if (oldStart !== newStart || oldEnd !== newEnd) {
+    if (!Objects.equal(oldStart, newStart) || !Objects.equal(oldEnd, newEnd)) {
       this.requireUpdate(MapView.NeedsProject);
     }
   }

@@ -133,7 +133,7 @@ export class LineGraphView<X, Y> extends GraphView<X, Y> implements StrokeView {
         if (typeof opacity === "number") {
           color = color.alpha(opacity);
         }
-        const offset = (p.xCoord - x0) / (dx || 1);
+        const offset = (xCoord - x0) / (dx || 1);
         gradient!.addColorStop(offset, color.toString());
       }
       i += 1;

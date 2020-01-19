@@ -391,7 +391,7 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
-    if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
+    if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout | ~View.UpdateFlagsMask)) !== 0) {
       updateFlags = updateFlags | View.NeedsRender;
     }
     return updateFlags;

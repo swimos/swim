@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Objects} from "@swim/util";
 import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
@@ -29,8 +30,8 @@ import {
   StrokeView,
 } from "@swim/view";
 import {AnyLngLat, LngLat} from "./LngLat";
-import {MapView} from "./MapView";
 import {MapViewContext} from "./MapViewContext";
+import {MapView} from "./MapView";
 import {MapGraphicView} from "./MapGraphicView";
 import {MapGraphicViewController} from "./MapGraphicViewController";
 
@@ -38,6 +39,7 @@ export type AnyMapPolygonView = MapPolygonView | MapPolygonViewInit;
 
 export interface MapPolygonViewInit extends ViewInit, FillViewInit, StrokeViewInit {
   coords?: AnyLngLat[];
+  animateCoords?: boolean;
 }
 
 export class MapPolygonView extends MapGraphicView implements FillView, StrokeView {
@@ -47,11 +49,17 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
   readonly _coords: MemberAnimator<this, LngLat, AnyLngLat>[];
   /** @hidden */
   readonly _points: PointR2[];
+  /** @hidden */
+  _animateCoords: boolean;
+  /** @hidden */
+  _clipViewport: boolean;
 
   constructor() {
     super();
     this._coords = [];
     this._points = [];
+    this._animateCoords = false;
+    this._clipViewport = true;
   }
 
   get viewController(): MapGraphicViewController<MapPolygonView> | null {
@@ -100,6 +108,28 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
     this._points.splice(index, 1);
   }
 
+  animateCoords(): boolean;
+  animateCoords(animateCoords: boolean): this;
+  animateCoords(animateCoords?: boolean): boolean | this {
+    if (animateCoords === void 0) {
+      return this._animateCoords;
+    } else {
+      this._animateCoords = animateCoords;
+      return this;
+    }
+  }
+
+  clipViewport(): boolean;
+  clipViewport(clipViewport: boolean): this;
+  clipViewport(clipViewport?: boolean): boolean | this {
+    if (clipViewport === void 0) {
+      return this._clipViewport;
+    } else {
+      this._clipViewport = clipViewport;
+      return this;
+    }
+  }
+
   @MemberAnimator(Color, {inherit: true})
   fill: MemberAnimator<this, Color, AnyColor>;
 
@@ -112,14 +142,16 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
   protected onAnimate(viewContext: MapViewContext): void {
     const t = viewContext.updateTime;
     let moved = false;
-    const coords = this._coords;
-    for (let i = 0, n = coords.length; i < n; i += 1) {
-      const point = coords[i];
-      const oldPoint = point.value!;
-      point.onFrame(t);
-      const newPoint = point.value!;
-      if (oldPoint !== newPoint) {
-        moved = true;
+    if (this._animateCoords) {
+      const coords = this._coords;
+      for (let i = 0, n = coords.length; i < n; i += 1) {
+        const coord = coords[i];
+        const oldCoord = coord.value!;
+        coord.onFrame(t);
+        const newCoord = coord.value!;
+        if (!Objects.equal(oldCoord, newCoord)) {
+          moved = true;
+        }
       }
     }
     this.fill.onFrame(t);
@@ -171,11 +203,12 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
     const hitBounds = this._hitBounds;
     if (hitBounds !== null) {
       const bounds = this._bounds;
-      // check if 3x3 viewport fully contains hitBounds
-      const contained = bounds.xMin - bounds.width <= hitBounds.xMin
-                     && hitBounds.xMax <= bounds.xMax + bounds.width
-                     && bounds.yMin - bounds.height <= hitBounds.yMin
-                     && hitBounds.yMax <= bounds.yMax + bounds.height;
+      // check if 9x9 viewport fully contains hitBounds
+      const contained = !this._clipViewport
+                     || bounds.xMin - 4 * bounds.width <= hitBounds.xMin
+                     && hitBounds.xMax <= bounds.xMax + 4 * bounds.width
+                     && bounds.yMin - 4 * bounds.height <= hitBounds.yMin
+                     && hitBounds.yMax <= bounds.yMax + 4 * bounds.height;
       const culled = !contained || !bounds.intersects(hitBounds);
       this.setCulled(culled);
     } else {
@@ -294,6 +327,9 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
         for (let i = 0, n = coords.length; i < n; i += 1) {
           view.appendCoord(coords[i]);
         }
+      }
+      if (polygon.animateCoords !== void 0) {
+        view.animateCoords(polygon.animateCoords);
       }
       return view;
     }

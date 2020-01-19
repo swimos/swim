@@ -36,16 +36,37 @@ export {MapLayerViewObserver} from "./MapLayerViewObserver";
 export {MapLayerViewController} from "./MapLayerViewController";
 
 export {
-  AnyMapLineView,
-  MapLineViewInit,
-  MapLineView,
-} from "./MapLineView";
+  MapPointLabelPlacement,
+  AnyMapPoint,
+} from "./MapPoint";
+export {
+  AnyMapPointView,
+  MapPointView,
+} from "./MapPointView";
 
 export {
   AnyMapCircleView,
   MapCircleViewInit,
   MapCircleView,
 } from "./MapCircleView";
+
+export {
+  AnyMapArcView,
+  MapArcViewInit,
+  MapArcView,
+} from "./MapArcView";
+
+export {
+  AnyMapLineView,
+  MapLineViewInit,
+  MapLineView,
+} from "./MapLineView";
+
+export {
+  AnyMapPolylineView,
+  MapPolylineViewInit,
+  MapPolylineView,
+} from "./MapPolylineView";
 
 export {
   AnyMapPolygonView,

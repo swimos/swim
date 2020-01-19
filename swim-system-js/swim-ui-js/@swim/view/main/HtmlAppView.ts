@@ -380,7 +380,14 @@ export class HtmlAppView extends HtmlView implements AppView, LayoutManager {
 
   requestUpdate(updateFlags: number, immediate: boolean): void {
     if (immediate) {
-      this.performUpdate();
+      if (this._updateTimer) {
+        clearTimeout(this._updateTimer);
+        this._updateTimer = 0;
+      }
+      if (!this._updateFrame) {
+        this._updateFrame = requestAnimationFrame(this.performUpdate);
+        this._updateDelay = 16;
+      }
     } else if (!this._updateFrame && !this._updateTimer) {
       if (this._updateDelay === 16) {
         this._updateFrame = requestAnimationFrame(this.performUpdate);

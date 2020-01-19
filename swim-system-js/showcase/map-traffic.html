@@ -36,7 +36,7 @@ const map = new mapboxgl.Map({
 const mapView = new swim.MapboxView(map);
 mapView.overlayCanvas();
 
-const host = swim.hostRef("warp://traffic.swim.services")
+const host = swim.hostRef("warps://traffic.swim.services")
 
 const intersectionsLink = host.downlinkMap()
     .nodeUri("/city/PaloAlto_CA_US")

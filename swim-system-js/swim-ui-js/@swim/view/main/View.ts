@@ -716,6 +716,7 @@ export abstract class View {
   static readonly NeedsLayout: number = 1 << 2;
   static readonly NeedsScroll: number = 1 << 3;
   static readonly NeedsRender: number = 1 << 4;
+  static readonly UpdateFlagsMask: number = (1 << 5) - 1;
 
   // Forward type declarations
   /** @hidden */
