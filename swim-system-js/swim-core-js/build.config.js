@@ -89,20 +89,6 @@ const core = [
     ],
   },
   {
-    id: "recon",
-    name: "@swim/recon",
-    targets: [
-      {
-        id: "main",
-        deps: ["util", "codec", "structure"],
-      },
-      {
-        id: "test",
-        deps: ["util", "codec", "unit", "structure", "recon"],
-      },
-    ],
-  },
-  {
     id: "streamlet",
     name: "@swim/streamlet",
     targets: [
@@ -127,6 +113,20 @@ const core = [
       {
         id: "test",
         deps: ["util", "codec", "unit", "collections", "structure", "streamlet", "dataflow"],
+      },
+    ],
+  },
+  {
+    id: "recon",
+    name: "@swim/recon",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "structure"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "structure", "recon"],
       },
     ],
   },
@@ -187,6 +187,6 @@ const core = [
 ];
 
 export default {
-  version: "3.10.1",
+  version: "3.10.2",
   projects: core,
 };

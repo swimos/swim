@@ -96,21 +96,6 @@ const core = [
     ],
   },
   {
-    id: "recon",
-    name: "@swim/recon",
-    path: "swim-core-js/@swim/recon",
-    targets: [
-      {
-        id: "main",
-        deps: ["util", "codec", "structure"],
-      },
-      {
-        id: "test",
-        deps: ["util", "codec", "unit", "structure", "recon"],
-      },
-    ],
-  },
-  {
     id: "streamlet",
     name: "@swim/streamlet",
     path: "swim-core-js/@swim/streamlet",
@@ -137,6 +122,21 @@ const core = [
       {
         id: "test",
         deps: ["util", "codec", "unit", "collections", "structure", "streamlet", "dataflow"],
+      },
+    ],
+  },
+  {
+    id: "recon",
+    name: "@swim/recon",
+    path: "swim-core-js/@swim/recon",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "structure"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "structure", "recon"],
       },
     ],
   },
@@ -624,7 +624,7 @@ const system = [
 ];
 
 export default {
-  version: "3.10.1",
+  version: "3.10.2",
   projects: core.concat(mesh).concat(ui).concat(ux).concat(web).concat(system),
   gaID: "UA-79441805-2",
 };

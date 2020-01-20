@@ -19,7 +19,6 @@ import {
   ScaleTransform,
   RotateTransform,
   SkewTransform,
-  AffineTransform,
   TransformList,
 } from "@swim/transform";
 import {Interpolator} from "./Interpolator";
@@ -64,43 +63,19 @@ export abstract class TransformInterpolator<F extends Transform = Transform> ext
       f0 = f1;
     }
     if (f0 instanceof TranslateTransform && f1 instanceof TranslateTransform) {
-      return TransformInterpolator.translate(f0, f1);
+      return new TransformInterpolator.Translate(f0, f1);
     } else if (f0 instanceof ScaleTransform && f1 instanceof ScaleTransform) {
-      return TransformInterpolator.scale(f0, f1);
+      return new TransformInterpolator.Scale(f0, f1);
     } else if (f0 instanceof RotateTransform && f1 instanceof RotateTransform) {
-      return TransformInterpolator.rotate(f0, f1);
+      return new TransformInterpolator.Rotate(f0, f1);
     } else if (f0 instanceof SkewTransform && f1 instanceof SkewTransform) {
-      return TransformInterpolator.skew(f0, f1);
+      return new TransformInterpolator.Skew(f0, f1);
     } else if (f0 instanceof TransformList && f1 instanceof TransformList) {
       if (f0.conformsTo(f1)) {
-        return TransformInterpolator.list(f0, f1);
+        return new TransformInterpolator.List(f0, f1);
       }
     }
-    return TransformInterpolator.affine(f0!.toAffine(), f1!.toAffine());
-  }
-
-  static translate(f0?: TranslateTransform, f1?: TranslateTransform): TranslateTransformInterpolator {
-    return new TransformInterpolator.Translate(f0, f1);
-  }
-
-  static scale(f0?: ScaleTransform, f1?: ScaleTransform): ScaleTransformInterpolator {
-    return new TransformInterpolator.Scale(f0, f1);
-  }
-
-  static rotate(f0?: RotateTransform, f1?: RotateTransform): RotateTransformInterpolator {
-    return new TransformInterpolator.Rotate(f0, f1);
-  }
-
-  static skew(f0?: SkewTransform, f1?: SkewTransform): SkewTransformInterpolator {
-    return new TransformInterpolator.Skew(f0, f1);
-  }
-
-  static affine(f0?: AffineTransform, f1?: AffineTransform): AffineTransformInterpolator {
-    return new TransformInterpolator.Affine(f0, f1);
-  }
-
-  static list(f0?: TransformList, f1?: TransformList): TransformListInterpolator {
-    return new TransformInterpolator.List(f0, f1);
+    return new TransformInterpolator.Affine(f0!.toAffine(), f1!.toAffine());
   }
 
   // Forward type declarations

@@ -1,6 +1,6 @@
 {
   "name": "@swim/system",
-  "version": "3.9.0",
+  "version": "3.10.2",
   "description": "Swim System TypeScript Implementation",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -8,17 +8,17 @@
   "repository": "https://github.com/swimos/swim.git",
   "private": true,
   "devDependencies": {
-    "@types/mapbox-gl": "1.5",
-    "@types/node": "12",
-    "@types/ws": "6",
-    "rollup": "1.26",
+    "@types/mapbox-gl": "1.6",
+    "@types/node": "13",
+    "@types/ws": "7",
+    "rollup": "1.29",
     "rollup-plugin-node-resolve": "5",
     "rollup-plugin-sourcemaps": "0",
     "terser": "4",
     "tslib": "1",
     "tslint": "5",
-    "typedoc": "0.15",
-    "typescript": "3.6",
+    "typedoc": "0.16",
+    "typescript": "3.7",
     "ws": "7"
   },
   "scripts": {

@@ -786,19 +786,30 @@ export class Target {
     OutputStyle.reset(output);
     console.log(output.bind());
 
-    const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
     const outDir = path.join(this.project.baseDir, "doc", "/");
 
-    const doc = new typedoc.Application({
-      name: this.project.title || this.project.name,
-      readme: "none",
-      mode: "modules",
-      tsconfig: configPath,
-      gaID: this.project.build.gaID,
-      excludeNotExported: true,
-      excludePrivate: true,
-      hideGenerator: true,
-    });
+    const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
+    const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
+    this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
+    delete commandLine.options.declaration;
+    delete commandLine.options.declarationMap;
+    delete commandLine.options.incremental;
+    delete commandLine.options.removeComments;
+    delete commandLine.options.sourceMap;
+    delete commandLine.options.tsBuildInfoFile;
+    delete commandLine.options.configFilePath;
+
+    const docOptions = commandLine.options as typedoc.TypeDocAndTSOptions;
+    docOptions.name = this.project.title || this.project.name;
+    docOptions.readme = "none";
+    docOptions.mode = "modules";
+    docOptions.tsconfig = configPath!;
+    if (this.project.build.gaID !== void 0) {
+      docOptions.gaID = this.project.build.gaID;
+    }
+    docOptions.excludeNotExported = true;
+    docOptions.excludePrivate = true;
+    docOptions.hideGenerator = true;
 
     const fileNames: string[] = [];
     const fileTargetMap: {[fileName: string]: {target: Target} | undefined} = {};
@@ -812,6 +823,9 @@ export class Target {
         fileTargetMap[fileName] = {target};
       }
     }
+
+    const doc = new typedoc.Application();
+    doc.bootstrap(docOptions);
 
     const docTarget = doc.converter.getComponent("doc-target");
     if (docTarget instanceof DocTarget) {

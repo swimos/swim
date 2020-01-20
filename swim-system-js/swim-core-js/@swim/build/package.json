@@ -1,30 +1,30 @@
 {
   "name": "@swim/build",
-  "version": "3.10.1",
+  "version": "3.10.2",
   "description": "Swim build tool",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/build",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2019 SWIM.AI inc.",
+  "copyright": "2015-2020 SWIM.AI inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-build.js",
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "devDependencies": {
-    "@types/node": "12",
-    "rollup": "1.26",
+    "@types/node": "13",
+    "rollup": "1.29",
     "rollup-plugin-node-resolve": "5",
     "rollup-plugin-sourcemaps": "0",
     "terser": "4",
     "tslib": "1",
     "tslint": "5",
-    "typedoc": "0.15",
-    "typescript": "3.6"
+    "typedoc": "0.16",
+    "typescript": "3.7"
   },
   "dependencies": {
-    "@swim/util": "3.10.1",
-    "@swim/codec": "3.10.1",
-    "@swim/args": "3.10.1"
+    "@swim/util": "3.10.2",
+    "@swim/codec": "3.10.2",
+    "@swim/args": "3.10.2"
   },
   "scripts": {
     "compile": "tsc -b",
