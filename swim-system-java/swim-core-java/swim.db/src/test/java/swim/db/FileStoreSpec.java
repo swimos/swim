@@ -466,7 +466,7 @@ public class FileStoreSpec {
     }
   }
 
-  @Test
+  @Test(groups = {"benchmark"})
   public void benchmarkLargeWrites() throws InterruptedException {
     final File storePath = new File(testOutputDir, "large-writes.swimdb");
     final Theater stage = new Theater();
@@ -519,7 +519,7 @@ public class FileStoreSpec {
     }
   }
 
-  @Test
+  @Test(groups = {"benchmark"})
   public void benchmarkSmallWrites() throws InterruptedException {
     final File storePath = new File(testOutputDir, "small-writes.swimdb");
     final Theater stage = new Theater();
@@ -572,7 +572,7 @@ public class FileStoreSpec {
     }
   }
 
-  @Test
+  @Test(groups = {"benchmark"})
   public void benchmarkStateChanges() throws InterruptedException {
     final File storePath = new File(testOutputDir, "state-changes.swimdb");
     final Theater stage = new Theater();
@@ -618,7 +618,7 @@ public class FileStoreSpec {
     }
   }
 
-  @Test
+  @Test(groups = {"benchmark"})
   public void benchmarkQTreeUpdates() throws InterruptedException {
     final File storePath = new File(testOutputDir, "qtree-updates.swimdb");
     final Theater stage = new Theater();
