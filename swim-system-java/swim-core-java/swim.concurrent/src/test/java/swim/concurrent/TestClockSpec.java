@@ -268,7 +268,7 @@ public class TestClockSpec {
     }
   }
 
-  @Test//(groups = {"slow"})
+  @Test(groups = {"slow"})
   public void concurrentSchedulingLongevity() {
     final int threadCount = 8;
     final int timerCount = 10000000;
