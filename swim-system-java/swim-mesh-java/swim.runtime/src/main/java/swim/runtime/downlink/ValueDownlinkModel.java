@@ -15,6 +15,7 @@
 package swim.runtime.downlink;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.concurrent.Cont;
 import swim.concurrent.Conts;
@@ -34,8 +35,17 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
   protected static final int STATEFUL = 1 << 0;
   static final AtomicReferenceFieldUpdater<ValueDownlinkModel, Value> STATE =
       AtomicReferenceFieldUpdater.newUpdater(ValueDownlinkModel.class, Value.class, "state");
+  static final AtomicLongFieldUpdater<ValueDownlinkModel> EPOCH =
+      AtomicLongFieldUpdater.newUpdater(ValueDownlinkModel.class, "epoch");
+  static final AtomicLongFieldUpdater<ValueDownlinkModel> SENT_EPOCH =
+      AtomicLongFieldUpdater.newUpdater(ValueDownlinkModel.class, "sentEpoch");
+
   protected int flags;
   protected volatile Value state;
+  @SuppressWarnings("FieldMayBeFinal")
+  private volatile long epoch = 0;
+  @SuppressWarnings("FieldMayBeFinal")
+  private volatile long sentEpoch = Long.MIN_VALUE;
 
   public ValueDownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                             float prio, float rate, Value body) {
@@ -147,6 +157,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
   Value newValue;
   Object oldObject;
   Object newObject;
+  private final long epoch;
 
   ValueDownlinkRelaySet(ValueDownlinkModel model, EventMessage message, Cont<EventMessage> cont, Value newValue) {
     super(model, 4);
@@ -154,6 +165,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
     this.cont = cont;
     this.oldValue = newValue;
     this.newValue = newValue;
+    this.epoch = -1;
   }
 
   ValueDownlinkRelaySet(ValueDownlinkModel model, Stage stage, Value newValue) {
@@ -162,6 +174,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
     this.cont = null;
     this.oldValue = newValue;
     this.newValue = newValue;
+    this.epoch = ValueDownlinkModel.EPOCH.getAndIncrement(model);
   }
 
   ValueDownlinkRelaySet(ValueDownlinkModel model, Value newValue) {
@@ -170,6 +183,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
     this.cont = null;
     this.oldValue = newValue;
     this.newValue = newValue;
+    this.epoch = ValueDownlinkModel.EPOCH.getAndIncrement(model);
   }
 
   @Override
@@ -249,7 +263,13 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
     if (this.message != null) {
       this.model.cueDown();
     } else {
-      this.model.cueUp();
+      final long current = epoch;
+      final long newLastSent = ValueDownlinkModel.SENT_EPOCH.updateAndGet(
+          model, e -> Math.max(current, e));
+
+      if (current == newLastSent) {
+        this.model.cueUp();
+      }
     }
     if (this.cont != null) {
       try {
