@@ -452,9 +452,9 @@ final class FileZoneOpen extends FileZoneReader {
 
   @Override
   protected void bind(ByteBuffer buffer) {
-    buffer.position(0).limit(Germ.BLOCK_SIZE);
+    ((Buffer) buffer).position(0).limit(Germ.BLOCK_SIZE);
     final Germ germ0 = parseGerm(Utf8.decodedInput(Binary.inputBuffer(buffer)));
-    buffer.position(Germ.BLOCK_SIZE).limit(2 * Germ.BLOCK_SIZE);
+    ((Buffer) buffer).position(Germ.BLOCK_SIZE).limit(2 * Germ.BLOCK_SIZE);
     final Germ germ1 = parseGerm(Utf8.decodedInput(Binary.inputBuffer(buffer)));
     final Germ germ;
     if (germ0 != null && germ1 != null) {
