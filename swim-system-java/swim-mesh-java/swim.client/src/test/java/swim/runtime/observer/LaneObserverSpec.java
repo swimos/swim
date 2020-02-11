@@ -84,7 +84,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-public class LaneObserverTest {
+public class LaneObserverSpec {
 
   private CountDownLatch willReceiveLatch;
   private CountDownLatch willClearLatch;
@@ -118,7 +118,7 @@ public class LaneObserverTest {
       return newValue;
     }
 
-    public boolean zero() {
+    public boolean isDone() {
       return willReceiveLatch.getCount() == 0 &&
           willClearLatch.getCount() == 0 &&
           willUpdateLatch.getCount() == 0;
@@ -144,6 +144,30 @@ public class LaneObserverTest {
   }
 
   @Test
+  public void testIsObserved() {
+    final LaneObserver laneObserver = new LaneObserver();
+
+    TestObserver testObserver = new TestObserver();
+    laneObserver.observe(testObserver);
+
+    assertTrue(laneObserver.observed(testObserver.getClass()));
+    assertFalse(laneObserver.observed(WillRespondHttp.class));
+  }
+
+  @Test
+  public void testUnobserve() {
+    final LaneObserver laneObserver = new LaneObserver();
+    TestObserver testObserver = new TestObserver();
+    laneObserver.observe(testObserver);
+
+    assertTrue(laneObserver.dispatchWillReceive(null, false, Value.fromObject("hello")));
+    assertTrue(laneObserver.dispatchWillClear(null, false));
+
+    laneObserver.unobserve(testObserver);
+    assertFalse(laneObserver.observed(TestObserver.class));
+  }
+
+  @Test
   public void testObserve() {
     final LaneObserver laneObserver = new LaneObserver();
     TestObserver testObserver = new TestObserver();
@@ -156,9 +180,8 @@ public class LaneObserverTest {
     assertTrue(result.getKey());
     assertEquals(result.getValue(), "value");
 
-    assertTrue(testObserver.zero());
+    assertTrue(testObserver.isDone());
   }
-
 
   @Test
   public void testLaneDidFail() {

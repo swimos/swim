@@ -103,7 +103,7 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
 
   @Override
   public LaneView unobserve(Observer oldObserver) {
-    //todo
+    this.observers.unobserve(oldObserver);
     return this;
   }
 

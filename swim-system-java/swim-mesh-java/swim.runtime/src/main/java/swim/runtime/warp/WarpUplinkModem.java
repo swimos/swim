@@ -236,41 +236,7 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   }
 
   protected void dispatchDidClose() {
-    //todo
-    final Link oldLink = SwimContext.getLink();
-    SwimContext.setLink(this);
-    try {
-      final Object observers = this.observers;
-      if (observers instanceof DidClose) {
-        try {
-          ((DidClose) observers).didClose();
-        } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            didFail(error);
-          } else {
-            throw error;
-          }
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidClose) {
-            try {
-              ((DidClose) observer).didClose();
-            } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                didFail(error);
-              } else {
-                throw error;
-              }
-            }
-          }
-        }
-      }
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    this.observers.dispatchDidClose(this, null);
   }
 
   protected boolean downQueueIsEmpty() {

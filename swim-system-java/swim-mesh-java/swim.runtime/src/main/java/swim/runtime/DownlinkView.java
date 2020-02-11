@@ -181,7 +181,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public DownlinkView unobserve(Observer oldObserver) {
-    //todo
+    this.observers.unobserve(oldObserver);
     return this;
   }
 

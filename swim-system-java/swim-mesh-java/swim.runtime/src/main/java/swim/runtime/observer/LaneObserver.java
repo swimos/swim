@@ -82,7 +82,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-@SuppressWarnings( {"UnusedReturnValue", "unused"})
 public final class LaneObserver {
 
   static final AtomicReferenceFieldUpdater<LaneObserver, Observer[]> OBSERVERS =
@@ -97,6 +96,38 @@ public final class LaneObserver {
 
   public LaneObserver(final Lane lane) {
     this.lane = lane;
+  }
+
+  public void unobserve(final Observer oldObserver) {
+    if (oldObserver == null) {
+      return;
+    }
+
+    do {
+      final Observer[] newObservers;
+      final Observer[] oldObservers = this.observers;
+      final int oldCount = oldObservers.length;
+
+      int i = 0;
+      while (i < oldCount) {
+        if (oldObservers[i] == oldObserver) {
+          break;
+        }
+        i += 1;
+      }
+      if (i < oldCount) {
+        final Observer[] newArray = new Observer[oldCount - 1];
+        System.arraycopy(oldObservers, 0, newArray, 0, i);
+        System.arraycopy(oldObservers, i + 1, newArray, i, oldCount - 1 - i);
+        newObservers = newArray;
+      } else {
+        break;
+      }
+
+      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
+        break;
+      }
+    } while (true);
   }
 
   public void observe(final Observer newObserver) {
@@ -119,6 +150,15 @@ public final class LaneObserver {
         break;
       }
     } while (true);
+  }
+
+  public boolean observed(final Class<?> clazz) {
+    for (Observer o : observers) {
+      if (clazz.isAssignableFrom(o.getClass())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public void laneDidFail(Throwable error) {
@@ -416,8 +456,8 @@ public final class LaneObserver {
     return dispatchResult.complete;
   }
 
-  private <T extends Observer, R> DispatchResult<R> dispatch(final Link link, final Boolean preemptive,
-                                                             final Dispatcher<R> dispatcher, Observer observer) {
+  private <R> DispatchResult<R> dispatch(final Link link, final Boolean preemptive,
+                                         final Dispatcher<R> dispatcher, Observer observer) {
     final Lane oldLane = SwimContext.getLane();
     final Link oldLink = SwimContext.getLink();
 
@@ -460,12 +500,10 @@ public final class LaneObserver {
                                                              final Class<T> clazz, final Dispatcher<R> dispatcher) {
     DispatchResult<R> dispatchResult = null;
 
-    boolean dispatched = false;
 
     for (Observer o : this.observers) {
       if (clazz.isAssignableFrom(o.getClass())) {
         dispatchResult = dispatch(link, preemptive, dispatcher, o);
-        dispatched = true;
       }
     }
 
@@ -572,7 +610,7 @@ public final class LaneObserver {
   }
 
   @SuppressWarnings("unchecked")
-  public <V> Decoder<Object> dispatchDecodeRequestHttp(Link link, HttpRequest<?> request) {
+  public Decoder<Object> dispatchDecodeRequestHttp(Link link, HttpRequest<?> request) {
     return dispatch(link, null, DecodeRequestHttp.class, (p -> ((DecodeRequestHttp<Object>) p).decodeRequest(request))).v;
   }
 
