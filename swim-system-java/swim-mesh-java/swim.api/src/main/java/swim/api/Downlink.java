@@ -18,14 +18,15 @@ import swim.api.function.DidClose;
 import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
+import swim.observable.Observer;
 
 public interface Downlink extends Link {
 
   @Override
-  Downlink observe(Object observer);
+  Downlink observe(Observer observer);
 
   @Override
-  Downlink unobserve(Object observer);
+  Downlink unobserve(Observer observer);
 
   Downlink didConnect(DidConnect didConnect);
 

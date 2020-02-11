@@ -36,6 +36,7 @@ import swim.api.warp.function.WillReceive;
 import swim.codec.Format;
 import swim.collections.HashTrieMap;
 import swim.kernel.Kernel;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
 import swim.observable.function.DidRemoveKey;
@@ -73,7 +74,7 @@ public class MapDownlinkSpec {
     kernel.stop();
   }
 
-  private MapDownlink<String, String> getDownlink(final String nodeUri, final String laneUri, final Object observer) {
+  private MapDownlink<String, String> getDownlink(final String nodeUri, final String laneUri, final Observer observer) {
     final CountDownLatch didSyncLatch = new CountDownLatch(1);
     final MapDownlink<String, String> downlink = plane.downlinkMap()
         .keyClass(String.class)
@@ -89,7 +90,7 @@ public class MapDownlinkSpec {
 
     downlink.open();
     try {
-      didSyncLatch.await();
+      didSyncLatch.await(5, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       fail("Filed to open downlink", e);
     }
@@ -493,7 +494,7 @@ public class MapDownlinkSpec {
         .didSync(didSync::countDown)
         .open();
 
-    didSync.await();
+    didSync.await(5, TimeUnit.SECONDS);
 
     mapLink.put("a", "indefinite article");
     mapLink.put("the", "definite article");

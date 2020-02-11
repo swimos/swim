@@ -634,7 +634,7 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
   @Override
   public void didFail(Throwable error) {
     error.printStackTrace();
-    super.didFail(error);
+//    super.didFail(error);
   }
 
   @Override

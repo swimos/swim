@@ -33,6 +33,7 @@ import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.concurrent.Conts;
 import swim.math.Z2Form;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidMoveShape;
 import swim.observable.function.DidRemoveShape;
@@ -42,6 +43,7 @@ import swim.observable.function.WillMoveShape;
 import swim.observable.function.WillRemoveShape;
 import swim.observable.function.WillUpdateShape;
 import swim.runtime.LaneBinding;
+import swim.runtime.observer.LaneObserver;
 import swim.runtime.warp.WarpLaneView;
 import swim.spatial.SpatialMap;
 import swim.structure.Form;
@@ -60,7 +62,7 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
   protected int flags;
 
   SpatialLaneView(AgentContext agentContext, Form<K> keyForm, Z2Form<S> shapeForm, Form<V> valueForm,
-                  int flags, Object observers) {
+                  int flags, LaneObserver observers) {
     super(observers);
     this.agentContext = agentContext;
     this.keyForm = keyForm;
@@ -132,7 +134,7 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
     this.valueForm = valueForm;
   }
 
-  protected Object typesafeObservers(Object observers) {
+  protected LaneObserver typesafeObservers(LaneObserver observers) {
     // TODO: filter out WillUpdateKey, DidUpdateKey, WillRemoveKey, DidRemoveKey,
     //       WillDrop, DidDrop, WillTake, DidTake, WillClear, DidClear
     return observers;
@@ -202,13 +204,13 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
   }
 
   @Override
-  public SpatialLaneView<K, S, V> observe(Object observer) {
+  public SpatialLaneView<K, S, V> observe(Observer observer) {
     super.observe(observer);
     return this;
   }
 
   @Override
-  public SpatialLaneView<K, S, V> unobserve(Object observer) {
+  public SpatialLaneView<K, S, V> unobserve(Observer observer) {
     super.unobserve(observer);
     return this;
   }

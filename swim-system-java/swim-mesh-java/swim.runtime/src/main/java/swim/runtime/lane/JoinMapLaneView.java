@@ -14,14 +14,11 @@
 
 package swim.runtime.lane;
 
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import swim.api.Lane;
 import swim.api.Link;
-import swim.api.SwimContext;
 import swim.api.agent.AgentContext;
 import swim.api.data.MapData;
 import swim.api.downlink.MapDownlink;
@@ -36,7 +33,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
-import swim.concurrent.Conts;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidRemoveKey;
 import swim.observable.function.DidUpdateKey;
@@ -44,6 +41,7 @@ import swim.observable.function.WillClear;
 import swim.observable.function.WillRemoveKey;
 import swim.observable.function.WillUpdateKey;
 import swim.runtime.LaneContext;
+import swim.runtime.observer.LaneObserver;
 import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 import swim.structure.Value;
@@ -63,7 +61,7 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
   protected MapData<K, V> dataView;
 
   JoinMapLaneView(AgentContext agentContext, Form<L> linkForm, Form<K> keyForm,
-                  Form<V> valueForm, int flags, Object observers) {
+                  Form<V> valueForm, int flags, LaneObserver observers) {
     super(observers);
     this.agentContext = agentContext;
     this.linkForm = linkForm;
@@ -156,7 +154,7 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
     this.valueForm = valueForm;
   }
 
-  protected Object typesafeObservers(Object observers) {
+  protected LaneObserver typesafeObservers(LaneObserver observers) {
     // TODO: filter out WillDownlinkMap, DidDownlinkMap, WillUpdateKey, DidUpdateKey,
     //       WillRemoveKey, DidRemoveKey, WillClear, DidClear
     return observers;
@@ -226,13 +224,13 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
   }
 
   @Override
-  public JoinMapLaneView<L, K, V> observe(Object observer) {
+  public JoinMapLaneView<L, K, V> observe(Observer observer) {
     super.observe(observer);
     return this;
   }
 
   @Override
-  public JoinMapLaneView<L, K, V> unobserve(Object observer) {
+  public JoinMapLaneView<L, K, V> unobserve(Observer observer) {
     super.unobserve(observer);
     return this;
   }
@@ -317,388 +315,36 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
     return observe(didLeave);
   }
 
-  @SuppressWarnings("unchecked")
   public Map.Entry<Boolean, V> dispatchWillUpdate(Link link, K key, V newValue, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLane(this);
-      SwimContext.setLink(link);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillUpdateKey<?, ?>) {
-        if (((WillUpdateKey<?, ?>) observers).isPreemptive() == preemptive) {
-          try {
-            newValue = ((WillUpdateKey<K, V>) observers).willUpdate(key, newValue);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillUpdateKey<?, ?>) {
-            if (((WillUpdateKey<?, ?>) observer).isPreemptive() == preemptive) {
-              try {
-                newValue = ((WillUpdateKey<K, V>) observer).willUpdate(key, newValue);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return new AbstractMap.SimpleImmutableEntry<Boolean, V>(complete, newValue);
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchWillUpdateKey(link, preemptive, key, newValue);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchDidUpdate(Link link, K key, V newValue, V oldValue, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLane(this);
-      SwimContext.setLink(link);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidUpdateKey<?, ?>) {
-        if (((DidUpdateKey<?, ?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidUpdateKey<K, V>) observers).didUpdate(key, newValue, oldValue);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidUpdateKey<?, ?>) {
-            if (((DidUpdateKey<?, ?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidUpdateKey<K, V>) observer).didUpdate(key, newValue, oldValue);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchDidUpdateKey(link, preemptive, key, newValue, oldValue);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchWillRemove(Link link, K key, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLane(this);
-      SwimContext.setLink(link);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillRemoveKey<?>) {
-        if (((WillRemoveKey<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((WillRemoveKey<K>) observers).willRemove(key);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillRemoveKey<?>) {
-            if (((WillRemoveKey<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((WillRemoveKey<K>) observer).willRemove(key);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchWillRemoveKey(link, preemptive, key);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchDidRemove(Link link, K key, V oldValue, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLane(this);
-      SwimContext.setLink(link);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidRemoveKey<?, ?>) {
-        if (((DidRemoveKey<?, ?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidRemoveKey<K, V>) observers).didRemove(key, oldValue);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidRemoveKey<?, ?>) {
-            if (((DidRemoveKey<?, ?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidRemoveKey<K, V>) observer).didRemove(key, oldValue);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchDidRemoveKey(link, preemptive, key, oldValue);
   }
 
   public boolean dispatchWillClear(Link link, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLane(this);
-      SwimContext.setLink(link);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillClear) {
-        if (((WillClear) observers).isPreemptive() == preemptive) {
-          try {
-            ((WillClear) observers).willClear();
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillClear) {
-            if (((WillClear) observer).isPreemptive() == preemptive) {
-              try {
-                ((WillClear) observer).willClear();
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchWillClear(link, preemptive);
   }
 
   public boolean dispatchDidClear(Link link, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLane(this);
-      SwimContext.setLink(link);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidClear) {
-        if (((DidClear) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidClear) observers).didClear();
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidClear) {
-            if (((DidClear) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidClear) observer).didClear();
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchDidClear(link, preemptive);
   }
 
-  @SuppressWarnings("unchecked")
   public Map.Entry<Boolean, MapDownlink<?, ?>> dispatchWillDownlink(L key, MapDownlink<?, ?> downlink, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    try {
-      SwimContext.setLane(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillDownlinkMap<?>) {
-        if (((WillDownlinkMap<?>) observers).isPreemptive() == preemptive) {
-          try {
-            downlink = ((WillDownlinkMap<L>) observers).willDownlink(key, downlink);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillDownlinkMap<?>) {
-            if (((WillDownlinkMap<?>) observer).isPreemptive() == preemptive) {
-              try {
-                downlink = ((WillDownlinkMap<L>) observer).willDownlink(key, downlink);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return new AbstractMap.SimpleImmutableEntry<Boolean, MapDownlink<?, ?>>(complete, downlink);
-    } finally {
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchWillDownlinkMap(downlink, key, downlink, preemptive);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchDidDownlink(L key, MapDownlink<?, ?> downlink, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    try {
-      SwimContext.setLane(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidDownlinkMap<?>) {
-        if (((DidDownlinkMap<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidDownlinkMap<L>) observers).didDownlink(key, downlink);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidDownlinkMap<?>) {
-            if (((DidDownlinkMap<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidDownlinkMap<L>) observer).didDownlink(key, downlink);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchDidDownlinkMap(downlink, key, downlink, preemptive);
   }
 
   public MapDownlink<K, V> laneWillDownlink(L key, MapDownlink<K, V> downlink) {

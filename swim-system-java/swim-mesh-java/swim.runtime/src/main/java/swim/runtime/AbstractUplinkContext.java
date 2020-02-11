@@ -23,14 +23,15 @@ import swim.api.Uplink;
 import swim.api.auth.Identity;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Stage;
+import swim.observable.Observer;
+import swim.runtime.observer.LaneObserver;
 import swim.structure.Value;
 import swim.uri.Uri;
 
 public abstract class AbstractUplinkContext implements LinkContext, Uplink {
 
-  static final AtomicReferenceFieldUpdater<AbstractUplinkContext, Object> OBSERVERS =
-      AtomicReferenceFieldUpdater.newUpdater(AbstractUplinkContext.class, Object.class, "observers");
-  protected volatile Object observers; // Observer | Observer[]
+
+  protected volatile LaneObserver observers; // Observer | Observer[]
 
   public abstract LaneBinding laneBinding();
 
@@ -38,6 +39,10 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
   public abstract LinkBinding linkWrapper();
 
   public abstract LinkBinding linkBinding();
+
+  public AbstractUplinkContext(){
+    this.observers = new LaneObserver();
+  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -199,78 +204,14 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
   }
 
   @Override
-  public AbstractUplinkContext observe(Object newObserver) {
-    do {
-      final Object oldObservers = this.observers;
-      final Object newObservers;
-      if (oldObservers == null) {
-        newObservers = newObserver;
-      } else if (!(oldObservers instanceof Object[])) {
-        final Object[] newArray = new Object[2];
-        newArray[0] = oldObservers;
-        newArray[1] = newObserver;
-        newObservers = newArray;
-      } else {
-        final Object[] oldArray = (Object[]) oldObservers;
-        final int oldCount = oldArray.length;
-        final Object[] newArray = new Object[oldCount + 1];
-        System.arraycopy(oldArray, 0, newArray, 0, oldCount);
-        newArray[oldCount] = newObserver;
-        newObservers = newArray;
-      }
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
-        break;
-      }
-    } while (true);
+  public AbstractUplinkContext observe(Observer newObserver) {
+   this.observers.observe(newObserver);
     return this;
   }
 
   @Override
-  public AbstractUplinkContext unobserve(Object oldObserver) {
-    do {
-      final Object oldObservers = this.observers;
-      final Object newObservers;
-      if (oldObservers == null) {
-        break;
-      } else if (!(oldObservers instanceof Object[])) {
-        if (oldObservers == oldObserver) { // found as sole observer
-          newObservers = null;
-        } else {
-          break; // not found
-        }
-      } else {
-        final Object[] oldArray = (Object[]) oldObservers;
-        final int oldCount = oldArray.length;
-        if (oldCount == 2) {
-          if (oldArray[0] == oldObserver) { // found at index 0
-            newObservers = oldArray[1];
-          } else if (oldArray[1] == oldObserver) { // found at index 1
-            newObservers = oldArray[0];
-          } else {
-            break; // not found
-          }
-        } else {
-          int i = 0;
-          while (i < oldCount) {
-            if (oldArray[i] == oldObserver) { // found at index i
-              break;
-            }
-            i += 1;
-          }
-          if (i < oldCount) {
-            final Object[] newArray = new Object[oldCount - 1];
-            System.arraycopy(oldArray, 0, newArray, 0, i);
-            System.arraycopy(oldArray, i + 1, newArray, i, oldCount - 1 - i);
-            newObservers = newArray;
-          } else {
-            break; // not found
-          }
-        }
-      }
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
-        break;
-      }
-    } while (true);
+  public AbstractUplinkContext unobserve(Observer oldObserver) {
+   // todo
     return this;
   }
 

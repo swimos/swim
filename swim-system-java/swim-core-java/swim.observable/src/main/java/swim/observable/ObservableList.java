@@ -28,7 +28,7 @@ import swim.observable.function.WillRemoveIndex;
 import swim.observable.function.WillTake;
 import swim.observable.function.WillUpdateIndex;
 
-public interface ObservableList<V> extends Observable<Object>, List<V> {
+public interface ObservableList<V> extends Observable, List<V> {
 
   void drop(int lower);
 
@@ -37,10 +37,10 @@ public interface ObservableList<V> extends Observable<Object>, List<V> {
   void move(int fromIndex, int toIndex);
 
   @Override
-  ObservableList<V> observe(Object observer);
+  ObservableList<V> observe(Observer observer);
 
   @Override
-  ObservableList<V> unobserve(Object observer);
+  ObservableList<V> unobserve(Observer observer);
 
   ObservableList<V> willUpdate(WillUpdateIndex<V> willUpdate);
 

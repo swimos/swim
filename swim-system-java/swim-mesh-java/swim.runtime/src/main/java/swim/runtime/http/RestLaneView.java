@@ -21,13 +21,15 @@ import swim.api.http.function.DidRespondHttp;
 import swim.api.http.function.DoRespondHttp;
 import swim.api.http.function.WillRequestHttp;
 import swim.api.http.function.WillRespondHttp;
+import swim.observable.Observer;
+import swim.runtime.observer.LaneObserver;
 
 public class RestLaneView<V> extends HttpLaneView<V> {
 
   protected final AgentContext agentContext;
   protected RestLaneModel laneBinding;
 
-  public RestLaneView(AgentContext agentContext, Object observers) {
+  public RestLaneView(AgentContext agentContext, LaneObserver observers) {
     super(observers);
     this.agentContext = agentContext;
   }
@@ -57,13 +59,13 @@ public class RestLaneView<V> extends HttpLaneView<V> {
   }
 
   @Override
-  public RestLaneView<V> observe(Object observer) {
+  public RestLaneView<V> observe(Observer observer) {
     super.observe(observer);
     return this;
   }
 
   @Override
-  public RestLaneView<V> unobserve(Object observer) {
+  public RestLaneView<V> unobserve(Observer observer) {
     super.unobserve(observer);
     return this;
   }

@@ -34,8 +34,10 @@ import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.concurrent.Conts;
 import swim.concurrent.Stage;
+import swim.observable.Observer;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.observer.LaneObserver;
 import swim.runtime.warp.WarpDownlinkView;
 import swim.structure.Form;
 import swim.structure.Value;
@@ -49,7 +51,7 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
   public EventDownlinkView(CellContext cellContext, Stage stage, Uri meshUri,
                            Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                            float rate, Value body, int flags, Form<V> valueForm,
-                           Object observers) {
+                           LaneObserver observers) {
     super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
         body, flags, observers);
     this.valueForm = valueForm;
@@ -168,20 +170,20 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
     return valueForm(Form.<V2>forClass(valueClass));
   }
 
-  protected Object typesafeObservers(Object observers) {
+  protected LaneObserver typesafeObservers(LaneObserver observers) {
     // TODO: filter out OnEvent
     return observers;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public EventDownlinkView<V> observe(Object observer) {
+  public EventDownlinkView<V> observe(Observer observer) {
     return (EventDownlinkView<V>) super.observe(observer);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public EventDownlinkView<V> unobserve(Object observer) {
+  public EventDownlinkView<V> unobserve(Observer observer) {
     return (EventDownlinkView<V>) super.unobserve(observer);
   }
 
@@ -255,50 +257,8 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
     return observe(didFail);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchOnEvent(V value, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof OnEvent<?>) {
-        if (((OnEvent<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((OnEvent<V>) observers).onEvent(value);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof OnEvent<?>) {
-            if (((OnEvent<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((OnEvent<V>) observer).onEvent(value);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+   return this.observers.dispatchOnEvent(this, preemptive, value);
   }
 
   public void downlinkOnEvent(V value) {

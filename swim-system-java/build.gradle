@@ -166,14 +166,14 @@ gradle.projectsEvaluated {
 }
 
 task installCommitHook(type: Copy) {
-  group 'hooks'
-  
-  from new File(rootProject.rootDir, 'pre-commit')
-  into { new File(rootProject.rootDir.parent, '/.git/hooks') }
-  fileMode 0777
+    group 'hooks'
+
+    from new File(rootProject.rootDir, 'pre-commit')
+    into { new File(rootProject.rootDir.parent, '/.git/hooks') }
+    fileMode 0777
 }
 
 task removeCommitHook(type: Delete) {
-  group 'hooks'
-  delete file(rootProject.rootDir.parent + '/.git/hooks/pre-commit')
+    group 'hooks'
+    delete file(rootProject.rootDir.parent + '/.git/hooks/pre-commit')
 }

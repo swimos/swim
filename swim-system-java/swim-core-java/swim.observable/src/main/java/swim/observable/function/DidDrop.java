@@ -14,10 +14,10 @@
 
 package swim.observable.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface DidDrop extends Preemptive {
+public interface DidDrop extends Observer {
 
   void didDrop(int lower);
 

@@ -25,6 +25,7 @@ import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableList;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
 import swim.observable.function.DidMoveIndex;
@@ -57,10 +58,10 @@ public interface ListLane<V> extends WarpLane, KeyedList<V>, ObservableList<V> {
   ListLane<V> isTransient(boolean isTransient);
 
   @Override
-  ListLane<V> observe(Object observer);
+  ListLane<V> observe(Observer observer);
 
   @Override
-  ListLane<V> unobserve(Object observer);
+  ListLane<V> unobserve(Observer observer);
 
   @Override
   ListLane<V> willUpdate(WillUpdateIndex<V> willUpdate);

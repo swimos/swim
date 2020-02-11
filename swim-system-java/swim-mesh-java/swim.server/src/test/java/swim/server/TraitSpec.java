@@ -149,7 +149,7 @@ public class TraitSpec {
           .observe(new ValueLinkController())
           .open();
 
-      didSync.await();
+      didSync.await(5, TimeUnit.SECONDS);
 
       valueLink.set(testValue);
       valueDidReceive.await(10, TimeUnit.SECONDS);

@@ -32,6 +32,8 @@ import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.concurrent.Conts;
+import swim.observable.Observer;
+import swim.runtime.observer.LaneObserver;
 import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 import swim.structure.Value;
@@ -44,7 +46,7 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
 
   protected DemandMapLaneModel laneBinding;
 
-  public DemandMapLaneView(AgentContext agentContext, Form<K> keyForm, Form<V> valueForm, Object observers) {
+  public DemandMapLaneView(AgentContext agentContext, Form<K> keyForm, Form<V> valueForm, LaneObserver observers) {
     super(observers);
     this.agentContext = agentContext;
     this.keyForm = keyForm;
@@ -114,7 +116,7 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
     this.valueForm = valueForm;
   }
 
-  protected Object typesafeObservers(Object observers) {
+  protected LaneObserver typesafeObservers(LaneObserver observers) {
     // TODO: filter out OnCueKey, OnSyncKeys
     return observers;
   }
@@ -125,13 +127,13 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   }
 
   @Override
-  public DemandMapLaneView<K, V> observe(Object observer) {
+  public DemandMapLaneView<K, V> observe(Observer observer) {
     super.observe(observer);
     return this;
   }
 
   @Override
-  public DemandMapLaneView<K, V> unobserve(Object observer) {
+  public DemandMapLaneView<K, V> unobserve(Observer observer) {
     super.unobserve(observer);
     return this;
   }

@@ -23,14 +23,15 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
+import swim.observable.Observer;
 
 public interface WarpLane extends Lane {
 
   @Override
-  WarpLane observe(Object observer);
+  WarpLane observe(Observer observer);
 
   @Override
-  WarpLane unobserve(Object observer);
+  WarpLane unobserve(Observer observer);
 
   WarpLane willCommand(WillCommand willCommand);
 

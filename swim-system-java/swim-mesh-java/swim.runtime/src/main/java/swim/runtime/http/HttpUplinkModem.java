@@ -18,6 +18,7 @@ import swim.api.http.HttpUplink;
 import swim.codec.Decoder;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
+import swim.observable.Observer;
 import swim.runtime.AbstractUplinkContext;
 import swim.runtime.HttpBinding;
 import swim.runtime.HttpContext;
@@ -82,13 +83,13 @@ public abstract class HttpUplinkModem extends AbstractUplinkContext implements H
   }
 
   @Override
-  public HttpUplinkModem observe(Object observer) {
+  public HttpUplinkModem observe(Observer observer) {
     super.observe(observer);
     return this;
   }
 
   @Override
-  public HttpUplinkModem unobserve(Object observer) {
+  public HttpUplinkModem unobserve(Observer observer) {
     super.unobserve(observer);
     return this;
   }

@@ -29,6 +29,7 @@ import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.concurrent.Cont;
+import swim.observable.Observer;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.warp.CommandMessage;
@@ -68,10 +69,10 @@ public interface WarpDownlink extends Downlink, WarpLink {
   WarpDownlink keepSynced(boolean keepSynced);
 
   @Override
-  WarpDownlink observe(Object observer);
+  WarpDownlink observe(Observer observer);
 
   @Override
-  WarpDownlink unobserve(Object observer);
+  WarpDownlink unobserve(Observer observer);
 
   WarpDownlink willReceive(WillReceive willReceive);
 

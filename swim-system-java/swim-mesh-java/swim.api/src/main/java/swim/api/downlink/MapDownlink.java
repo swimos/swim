@@ -30,6 +30,7 @@ import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.observable.ObservableOrderedMap;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
 import swim.observable.function.DidRemoveKey;
@@ -99,10 +100,10 @@ public interface MapDownlink<K, V> extends WarpDownlink, ObservableOrderedMap<K,
   <V2> MapDownlink<K, V2> valueClass(Class<V2> valueClass);
 
   @Override
-  MapDownlink<K, V> observe(Object observer);
+  MapDownlink<K, V> observe(Observer observer);
 
   @Override
-  MapDownlink<K, V> unobserve(Object observer);
+  MapDownlink<K, V> unobserve(Observer observer);
 
   @Override
   MapDownlink<K, V> willUpdate(WillUpdateKey<K, V> willUpdate);

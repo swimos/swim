@@ -29,6 +29,7 @@ import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
+import swim.observable.Observer;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -75,10 +76,10 @@ public interface EventDownlink<V> extends WarpDownlink {
   <V2> EventDownlink<V2> valueClass(Class<V2> valueClass);
 
   @Override
-  EventDownlink<V> observe(Object observer);
+  EventDownlink<V> observe(Observer observer);
 
   @Override
-  EventDownlink<V> unobserve(Object observer);
+  EventDownlink<V> unobserve(Observer observer);
 
   EventDownlink<V> onEvent(OnEvent<V> onEvent);
 

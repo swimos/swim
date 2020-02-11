@@ -14,10 +14,10 @@
 
 package swim.observable.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface WillMoveIndex<V> extends Preemptive {
+public interface WillMoveIndex<V> extends Observer {
 
   void willMove(int fromIndex, int toIndex, V value);
 

@@ -23,6 +23,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
+import swim.observable.Observer;
 import swim.structure.Form;
 
 public interface SupplyLane<V> extends WarpLane {
@@ -34,10 +35,10 @@ public interface SupplyLane<V> extends WarpLane {
   <V2> SupplyLane<V2> valueClass(Class<V2> valueClass);
 
   @Override
-  SupplyLane<V> observe(Object observer);
+  SupplyLane<V> observe(Observer observer);
 
   @Override
-  SupplyLane<V> unobserve(Object observer);
+  SupplyLane<V> unobserve(Observer observer);
 
   @Override
   SupplyLane<V> willCommand(WillCommand willCommand);

@@ -14,10 +14,10 @@
 
 package swim.observable.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface WillSet<V> extends Preemptive {
+public interface WillSet<V> extends Observer {
 
   V willSet(V newValue);
 

@@ -24,6 +24,7 @@ import swim.dynamic.api.lane.function.GuestWillDownlinkValue;
 import swim.dynamic.api.warp.HostWarpLane;
 import swim.dynamic.java.lang.HostIterable;
 import swim.dynamic.observable.HostObservableMap;
+import swim.observable.Observer;
 
 public final class HostJoinValueLane {
 
@@ -100,7 +101,11 @@ final class HostJoinValueLaneObserve implements HostMethod<JoinValueLane<Object,
   public Object invoke(Bridge bridge, JoinValueLane<Object, Object> lane, Object... arguments) {
     final Object observer = arguments[0];
     // TODO: bridge observer callback members.
-    lane.observe(observer);
+    if (observer instanceof Observer) {
+      lane.unobserve((Observer) observer);
+    } else {
+      throw new IllegalArgumentException(observer + " is not an Observer");
+    }
     return this;
   }
 
@@ -117,7 +122,11 @@ final class HostJoinValueLaneUnobserve implements HostMethod<JoinValueLane<Objec
   public Object invoke(Bridge bridge, JoinValueLane<Object, Object> lane, Object... arguments) {
     final Object observer = arguments[0];
     // TODO: bridge observer callback members.
-    lane.unobserve(observer);
+    if (observer instanceof Observer) {
+      lane.unobserve((Observer) observer);
+    } else {
+      throw new IllegalArgumentException(observer + " is not an Observer");
+    }
     return this;
   }
 

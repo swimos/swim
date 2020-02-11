@@ -17,17 +17,17 @@ package swim.observable;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
 
-public interface ObservableValue<V> extends Observable<Object> {
+public interface ObservableValue<V> extends Observable {
 
   V get();
 
   V set(V newValue);
 
   @Override
-  ObservableValue<V> observe(Object observer);
+  ObservableValue<V> observe(Observer observer);
 
   @Override
-  ObservableValue<V> unobserve(Object observer);
+  ObservableValue<V> unobserve(Observer observer);
 
   ObservableValue<V> willSet(WillSet<V> willSet);
 

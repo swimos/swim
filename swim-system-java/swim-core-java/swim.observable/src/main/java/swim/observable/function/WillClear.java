@@ -14,10 +14,10 @@
 
 package swim.observable.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface WillClear extends Preemptive {
+public interface WillClear extends Observer {
 
   void willClear();
 

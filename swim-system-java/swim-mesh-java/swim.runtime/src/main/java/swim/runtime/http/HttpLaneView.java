@@ -29,22 +29,24 @@ import swim.codec.Decoder;
 import swim.concurrent.Conts;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
+import swim.observable.Observer;
 import swim.runtime.LaneView;
+import swim.runtime.observer.LaneObserver;
 
 public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
 
-  public HttpLaneView(Object observers) {
+  public HttpLaneView(LaneObserver observers) {
     super(observers);
   }
 
   @Override
-  public HttpLaneView<V> observe(Object observer) {
+  public HttpLaneView<V> observe(Observer observer) {
     super.observe(observer);
     return this;
   }
 
   @Override
-  public HttpLaneView<V> unobserve(Object observer) {
+  public HttpLaneView<V> unobserve(Observer observer) {
     super.unobserve(observer);
     return this;
   }
@@ -67,301 +69,28 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
   @Override
   public abstract HttpLaneView<V> didRespond(DidRespondHttp<?> didRespond);
 
-  @SuppressWarnings("unchecked")
   protected Decoder<Object> dispatchDecodeRequest(HttpUplink uplink, HttpRequest<?> request) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    SwimContext.setLane(this);
-    SwimContext.setLink(uplink);
-    try {
-      final Object observers = this.observers;
-      if (observers instanceof DecodeRequestHttp<?>) {
-        try {
-          final Decoder<Object> decoder = ((DecodeRequestHttp<Object>) observers).decodeRequest((HttpRequest<Object>) request);
-          if (decoder != null) {
-            return decoder;
-          }
-        } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            laneDidFail(error);
-          }
-          throw error;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DecodeRequestHttp<?>) {
-            try {
-              final Decoder<Object> decoder = ((DecodeRequestHttp<Object>) observer).decodeRequest((HttpRequest<Object>) request);
-              if (decoder != null) {
-                return decoder;
-              }
-            } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                laneDidFail(error);
-              }
-              throw error;
-            }
-          }
-        }
-      }
-      return null;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchDecodeRequestHttp(uplink, request);
   }
 
-  @SuppressWarnings("unchecked")
   protected boolean dispatchWillRequest(HttpUplink uplink, HttpRequest<?> request, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    SwimContext.setLane(this);
-    SwimContext.setLink(uplink);
-    try {
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillRequestHttp<?>) {
-        if (((WillRequestHttp<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((WillRequestHttp<Object>) observers).willRequest((HttpRequest<Object>) request);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillRequestHttp<?>) {
-            if (((WillRequestHttp<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((WillRequestHttp<Object>) observer).willRequest((HttpRequest<Object>) request);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchWillRequestHttp(uplink, request, preemptive);
   }
 
-  @SuppressWarnings("unchecked")
   protected boolean dispatchDidRequest(HttpUplink uplink, HttpRequest<Object> request, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    SwimContext.setLane(this);
-    SwimContext.setLink(uplink);
-    try {
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidRequestHttp<?>) {
-        if (((DidRequestHttp<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidRequestHttp<Object>) observers).didRequest(request);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidRequestHttp<?>) {
-            if (((DidRequestHttp<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidRequestHttp<Object>) observer).didRequest(request);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchDidRequestHttp(uplink, request, preemptive);
   }
 
-  @SuppressWarnings("unchecked")
   protected Object dispatchDoRespond(HttpUplink uplink, HttpRequest<Object> request, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    SwimContext.setLane(this);
-    SwimContext.setLink(uplink);
-    try {
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DoRespondHttp<?>) {
-        if (((DoRespondHttp<?>) observers).isPreemptive() == preemptive) {
-          try {
-            final HttpResponse<?> response = ((DoRespondHttp<Object>) observers).doRespond(request);
-            if (response != null) {
-              return response;
-            }
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DoRespondHttp<?>) {
-            if (((DoRespondHttp<?>) observer).isPreemptive() == preemptive) {
-              try {
-                final HttpResponse<?> response = ((DoRespondHttp<Object>) observer).doRespond(request);
-                if (response != null) {
-                  return response;
-                }
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchDoRespondHttp(uplink, request, preemptive);
   }
 
-  @SuppressWarnings("unchecked")
   protected boolean dispatchWillRespond(HttpUplink uplink, HttpResponse<?> response, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    SwimContext.setLane(this);
-    SwimContext.setLink(uplink);
-    try {
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillRespondHttp<?>) {
-        if (((WillRespondHttp<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((WillRespondHttp<Object>) observers).willRespond((HttpResponse<Object>) response);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillRespondHttp<?>) {
-            if (((WillRespondHttp<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((WillRespondHttp<Object>) observer).willRespond((HttpResponse<Object>) response);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchWillRespondHttp(uplink, response, preemptive);
   }
 
-  @SuppressWarnings("unchecked")
   protected boolean dispatchDidRespond(HttpUplink uplink, HttpResponse<?> response, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    SwimContext.setLane(this);
-    SwimContext.setLink(uplink);
-    try {
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidRespondHttp<?>) {
-        if (((DidRespondHttp<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidRespondHttp<Object>) observers).didRespond((HttpResponse<Object>) response);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidRespondHttp<?>) {
-            if (((DidRespondHttp<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidRespondHttp<Object>) observer).didRespond((HttpResponse<Object>) response);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchDidRespondHttp(uplink, response, preemptive);
   }
 
   public Decoder<Object> laneDecodeRequest(HttpUplink uplink, HttpRequest<?> request) {

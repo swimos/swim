@@ -755,7 +755,7 @@ final class JoinMapLaneRelayDownlink extends LaneRelay<JoinMapLaneModel, JoinMap
       if (preemptive) {
         this.downlink = (JoinMapLaneDownlink<Object, Object>) ((JoinMapLaneView<Object, Object, Object>) view).laneWillDownlink(this.keyObject, this.downlink);
       }
-      final Map.Entry<Boolean, MapDownlink<?, ?>> result = ((JoinMapLaneView<Object, Object, Object>) view).dispatchWillDownlink(this.keyObject, this.downlink, preemptive);
+      final Map.Entry<Boolean, MapDownlink<?, ?>> result = ((JoinMapLaneView<Object, Object, Object>) view).dispatchWillDownlink( this.keyObject, this.downlink, preemptive);
       this.downlink = (JoinMapLaneDownlink<Object, Object>) result.getValue();
       return result.getKey();
     } else if (phase == 1) {

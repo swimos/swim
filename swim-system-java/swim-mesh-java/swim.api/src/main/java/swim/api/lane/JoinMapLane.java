@@ -29,6 +29,7 @@ import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableMap;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidRemoveKey;
 import swim.observable.function.DidUpdateKey;
@@ -66,10 +67,10 @@ public interface JoinMapLane<L, K, V> extends WarpLane, Iterable<Map.Entry<K, V>
   JoinMapLane<L, K, V> isTransient(boolean isTransient);
 
   @Override
-  JoinMapLane<L, K, V> observe(Object observer);
+  JoinMapLane<L, K, V> observe(Observer observer);
 
   @Override
-  JoinMapLane<L, K, V> unobserve(Object observer);
+  JoinMapLane<L, K, V> unobserve(Observer observer);
 
   JoinMapLane<L, K, V> willDownlink(WillDownlinkMap<L> willDownlink);
 

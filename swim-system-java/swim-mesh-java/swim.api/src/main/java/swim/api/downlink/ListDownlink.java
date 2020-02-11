@@ -29,6 +29,7 @@ import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.observable.ObservableList;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
 import swim.observable.function.DidMoveIndex;
@@ -92,10 +93,10 @@ public interface ListDownlink<V> extends WarpDownlink, ObservableList<V>, KeyedL
   <V2> ListDownlink<V2> valueClass(Class<V2> valueClass);
 
   @Override
-  ListDownlink<V> observe(Object observer);
+  ListDownlink<V> observe(Observer observer);
 
   @Override
-  ListDownlink<V> unobserve(Object observer);
+  ListDownlink<V> unobserve(Observer observer);
 
   @Override
   ListDownlink<V> willUpdate(WillUpdateIndex<V> willUpdate);

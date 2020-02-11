@@ -29,6 +29,8 @@ import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.concurrent.Conts;
+import swim.observable.Observer;
+import swim.runtime.observer.LaneObserver;
 import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 
@@ -39,7 +41,7 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
 
   protected CommandLaneModel laneBinding;
 
-  public CommandLaneView(AgentContext agentContext, Form<V> valueForm, Object observers) {
+  public CommandLaneView(AgentContext agentContext, Form<V> valueForm, LaneObserver observers) {
     super(observers);
     this.agentContext = agentContext;
     this.valueForm = valueForm;
@@ -88,7 +90,7 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
     this.valueForm = valueForm;
   }
 
-  protected Object typesafeObservers(Object observers) {
+  protected LaneObserver typesafeObservers(LaneObserver observers) {
     // TODO: filter out OnCommand
     return observers;
   }
@@ -99,13 +101,13 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
   }
 
   @Override
-  public CommandLaneView<V> observe(Object observer) {
+  public CommandLaneView<V> observe(Observer observer) {
     super.observe(observer);
     return this;
   }
 
   @Override
-  public CommandLaneView<V> unobserve(Object observer) {
+  public CommandLaneView<V> unobserve(Observer observer) {
     super.unobserve(observer);
     return this;
   }
@@ -158,53 +160,8 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
   public void laneOnCommand(V value) {
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchOnCommand(Link link, V value, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLane(this);
-      SwimContext.setLink(link);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof OnCommand<?>) {
-        if (((OnCommand<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((OnCommand<V>) observers).onCommand(value);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof OnCommand<?>) {
-            if (((OnCommand<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((OnCommand<V>) observer).onCommand(value);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchOnCommand(link,preemptive, value);
   }
 
 }

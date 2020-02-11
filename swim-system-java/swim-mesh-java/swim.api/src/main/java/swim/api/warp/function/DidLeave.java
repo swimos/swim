@@ -15,10 +15,10 @@
 package swim.api.warp.function;
 
 import swim.api.auth.Identity;
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface DidLeave extends Preemptive {
+public interface DidLeave extends Observer {
 
   void didLeave(Identity identity);
 

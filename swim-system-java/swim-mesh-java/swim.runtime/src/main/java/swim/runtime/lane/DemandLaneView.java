@@ -30,6 +30,8 @@ import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.concurrent.Conts;
+import swim.observable.Observer;
+import swim.runtime.observer.LaneObserver;
 import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 import swim.structure.Value;
@@ -42,7 +44,7 @@ public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
   protected DemandLaneModel laneBinding;
   protected volatile OnCue<V> onCue;
 
-  public DemandLaneView(AgentContext agentContext, Form<V> valueForm, Object observers) {
+  public DemandLaneView(AgentContext agentContext, Form<V> valueForm, LaneObserver observers) {
     super(observers);
     this.agentContext = agentContext;
     this.valueForm = valueForm;
@@ -91,7 +93,7 @@ public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
     this.valueForm = valueForm;
   }
 
-  protected Object typesafeObservers(Object observers) {
+  protected LaneObserver typesafeObservers(LaneObserver observers) {
     // TODO: filter out OnCue
     return observers;
   }
@@ -102,13 +104,13 @@ public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
   }
 
   @Override
-  public DemandLaneView<V> observe(Object observer) {
+  public DemandLaneView<V> observe(Observer observer) {
     super.observe(observer);
     return this;
   }
 
   @Override
-  public DemandLaneView<V> unobserve(Object observer) {
+  public DemandLaneView<V> unobserve(Observer observer) {
     super.unobserve(observer);
     return this;
   }

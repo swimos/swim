@@ -137,12 +137,15 @@ public class JoinMapLaneSpec {
     try {
       kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
       kernel.start();
+
+      final CountDownLatch downlinksDidSync = new CountDownLatch(2);
       final MapDownlink<String, String> xs = plane.downlinkMap()
           .keyClass(String.class)
           .valueClass(String.class)
           .hostUri("warp://localhost:53556/")
           .nodeUri("/map/xs")
           .laneUri("map")
+          .didSync(downlinksDidSync::countDown)
           .open();
       final MapDownlink<String, String> ys = plane.downlinkMap()
           .keyClass(String.class)
@@ -150,7 +153,11 @@ public class JoinMapLaneSpec {
           .hostUri("warp://localhost:53556/")
           .nodeUri("/map/ys")
           .laneUri("map")
+          .didSync(downlinksDidSync::countDown)
           .open();
+
+      downlinksDidSync.await(5, TimeUnit.SECONDS);
+
       xs.put("x0", "a");
       xs.put("x1", "b");
       ys.put("y0", "c");

@@ -25,6 +25,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
+import swim.observable.Observer;
 import swim.structure.Form;
 
 public interface DemandMapLane<K, V> extends WarpLane {
@@ -42,10 +43,10 @@ public interface DemandMapLane<K, V> extends WarpLane {
   <V2> DemandMapLane<K, V2> valueClass(Class<V2> valueClass);
 
   @Override
-  DemandMapLane<K, V> observe(Object observer);
+  DemandMapLane<K, V> observe(Observer observer);
 
   @Override
-  DemandMapLane<K, V> unobserve(Object observer);
+  DemandMapLane<K, V> unobserve(Observer observer);
 
   DemandMapLane<K, V> onCue(OnCueKey<K, V> onCue);
 

@@ -14,11 +14,11 @@
 
 package swim.api.http.function;
 
-import swim.concurrent.Preemptive;
 import swim.http.HttpResponse;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface DidRespondHttp<V> extends Preemptive {
+public interface DidRespondHttp<V> extends Observer {
 
   void didRespond(HttpResponse<V> response);
 

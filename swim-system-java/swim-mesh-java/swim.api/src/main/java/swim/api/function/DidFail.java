@@ -14,10 +14,10 @@
 
 package swim.api.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface DidFail extends Preemptive {
+public interface DidFail extends Observer {
 
   void didFail(Throwable error);
 

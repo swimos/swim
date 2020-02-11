@@ -16,15 +16,16 @@ package swim.api.http;
 
 import swim.api.Uplink;
 import swim.http.HttpRequest;
+import swim.observable.Observer;
 
 public interface HttpUplink extends Uplink, HttpLink {
 
   HttpRequest<?> request();
 
   @Override
-  HttpUplink observe(Object observer);
+  HttpUplink observe(Observer observer);
 
   @Override
-  HttpUplink unobserve(Object observer);
+  HttpUplink unobserve(Observer observer);
 
 }

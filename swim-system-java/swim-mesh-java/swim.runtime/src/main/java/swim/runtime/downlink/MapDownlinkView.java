@@ -14,7 +14,6 @@
 
 package swim.runtime.downlink;
 
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -40,6 +39,7 @@ import swim.api.warp.function.WillUnlink;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Conts;
 import swim.concurrent.Stage;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
 import swim.observable.function.DidRemoveKey;
@@ -52,6 +52,7 @@ import swim.observable.function.WillTake;
 import swim.observable.function.WillUpdateKey;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.observer.LaneObserver;
 import swim.runtime.warp.WarpDownlinkView;
 import swim.streamlet.Inlet;
 import swim.streamlet.KeyEffect;
@@ -88,7 +89,7 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   public MapDownlinkView(CellContext cellContext, Stage stage, Uri meshUri,
                          Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                          float rate, Value body, int flags, Form<K> keyForm,
-                         Form<V> valueForm, Object observers) {
+                         Form<V> valueForm, LaneObserver observers) {
     super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
         body, flags, observers);
     this.keyForm = keyForm;
@@ -259,7 +260,7 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
     return valueForm(Form.<V2>forClass(valueClass));
   }
 
-  protected Object typesafeObservers(Object observers) {
+  protected LaneObserver typesafeObservers(LaneObserver observers) {
     // TODO: filter out WillUpdateKey, DidUpdateKey, WillRemoveKey, DidRemoveKey,
     //       WillDrop, DidDrop, WillTake, DidTake, WillClear, DidClear
     return observers;
@@ -267,13 +268,13 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
 
   @SuppressWarnings("unchecked")
   @Override
-  public MapDownlinkView<K, V> observe(Object observer) {
+  public MapDownlinkView<K, V> observe(Observer observer) {
     return (MapDownlinkView<K, V>) super.observe(observer);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public MapDownlinkView<K, V> unobserve(Object observer) {
+  public MapDownlinkView<K, V> unobserve(Observer observer) {
     return (MapDownlinkView<K, V>) super.unobserve(observer);
   }
 
@@ -440,458 +441,44 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   public void downlinkDidClear() {
   }
 
-  @SuppressWarnings("unchecked")
   public Entry<Boolean, V> dispatchWillUpdate(K key, V newValue, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillUpdateKey<?, ?>) {
-        if (((WillUpdateKey<?, ?>) observers).isPreemptive() == preemptive) {
-          try {
-            newValue = ((WillUpdateKey<K, V>) observers).willUpdate(key, newValue);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillUpdateKey<?, ?>) {
-            if (((WillUpdateKey<?, ?>) observer).isPreemptive() == preemptive) {
-              try {
-                newValue = ((WillUpdateKey<K, V>) observer).willUpdate(key, newValue);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return new AbstractMap.SimpleImmutableEntry<Boolean, V>(complete, newValue);
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchWillUpdateKey(this, preemptive, key, newValue);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchDidUpdate(K key, V newValue, V oldValue, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidUpdateKey<?, ?>) {
-        if (((DidUpdateKey<?, ?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidUpdateKey<K, V>) observers).didUpdate(key, newValue, oldValue);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidUpdateKey<?, ?>) {
-            if (((DidUpdateKey<?, ?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidUpdateKey<K, V>) observer).didUpdate(key, newValue, oldValue);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchDidUpdateKey(this, preemptive, key, newValue, oldValue);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchWillRemove(K key, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillRemoveKey<?>) {
-        if (((WillRemoveKey<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((WillRemoveKey<K>) observers).willRemove(key);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillRemoveKey<?>) {
-            if (((WillRemoveKey<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((WillRemoveKey<K>) observer).willRemove(key);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchWillRemoveKey(this, preemptive, key);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchDidRemove(K key, V oldValue, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidRemoveKey<?, ?>) {
-        if (((DidRemoveKey<?, ?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidRemoveKey<K, V>) observers).didRemove(key, oldValue);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidRemoveKey<?, ?>) {
-            if (((DidRemoveKey<?, ?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidRemoveKey<K, V>) observer).didRemove(key, oldValue);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchDidRemoveKey(this, preemptive, key, oldValue);
   }
 
   public boolean dispatchWillDrop(int lower, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillDrop) {
-        if (((WillDrop) observers).isPreemptive() == preemptive) {
-          try {
-            ((WillDrop) observers).willDrop(lower);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillDrop) {
-            if (((WillDrop) observer).isPreemptive() == preemptive) {
-              try {
-                ((WillDrop) observer).willDrop(lower);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchWillDrop(this, preemptive, lower);
   }
 
   public boolean dispatchDidDrop(int lower, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidDrop) {
-        if (((DidDrop) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidDrop) observers).didDrop(lower);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidDrop) {
-            if (((DidDrop) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidDrop) observer).didDrop(lower);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchDidDrop(this, preemptive, lower);
   }
 
   public boolean dispatchWillTake(int upper, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillTake) {
-        if (((WillTake) observers).isPreemptive() == preemptive) {
-          try {
-            ((WillTake) observers).willTake(upper);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillTake) {
-            if (((WillTake) observer).isPreemptive() == preemptive) {
-              try {
-                ((WillTake) observer).willTake(upper);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchWillTake(this, preemptive, upper);
   }
 
   public boolean dispatchDidTake(int upper, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidTake) {
-        if (((DidTake) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidTake) observers).didTake(upper);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidTake) {
-            if (((DidTake) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidTake) observer).didTake(upper);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchDidTake(this, preemptive, upper);
   }
 
   public boolean dispatchWillClear(boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillClear) {
-        if (((WillClear) observers).isPreemptive() == preemptive) {
-          try {
-            ((WillClear) observers).willClear();
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillClear) {
-            if (((WillClear) observer).isPreemptive() == preemptive) {
-              try {
-                ((WillClear) observer).willClear();
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchWillClear(this, preemptive);
   }
 
   public boolean dispatchDidClear(boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidClear) {
-        if (((DidClear) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidClear) observers).didClear();
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidClear) {
-            if (((DidClear) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidClear) observer).didClear();
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchDidClear(this, preemptive);
   }
 
   @Override

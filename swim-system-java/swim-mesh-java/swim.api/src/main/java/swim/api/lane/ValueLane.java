@@ -24,6 +24,7 @@ import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableValue;
+import swim.observable.Observer;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
 import swim.streamlet.Inlet;
@@ -47,10 +48,10 @@ public interface ValueLane<V> extends WarpLane, ObservableValue<V>, Inlet<V>, Ou
   ValueLane<V> isTransient(boolean isTransient);
 
   @Override
-  ValueLane<V> observe(Object observer);
+  ValueLane<V> observe(Observer observer);
 
   @Override
-  ValueLane<V> unobserve(Object observer);
+  ValueLane<V> unobserve(Observer observer);
 
   @Override
   ValueLane<V> willSet(WillSet<V> willSet);

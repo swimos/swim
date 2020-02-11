@@ -14,10 +14,10 @@
 
 package swim.observable.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface WillRemoveKey<K> extends Preemptive {
+public interface WillRemoveKey<K> extends Observer {
 
   void willRemove(K key);
 

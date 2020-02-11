@@ -14,10 +14,10 @@
 
 package swim.observable;
 
-public interface Observable<O> {
+public interface Observable {
 
-  Observable<O> observe(O observer);
+  Observable observe(Observer observer);
 
-  Observable<O> unobserve(O observer);
+  Observable unobserve(Observer observer);
 
 }

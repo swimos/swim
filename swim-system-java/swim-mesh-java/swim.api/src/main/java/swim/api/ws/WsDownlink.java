@@ -26,6 +26,7 @@ import swim.api.ws.function.DoUpgradeWs;
 import swim.api.ws.function.WillReadFrameWs;
 import swim.api.ws.function.WillUpgradeWs;
 import swim.api.ws.function.WillWriteFrameWs;
+import swim.observable.Observer;
 import swim.uri.Uri;
 import swim.ws.WsControl;
 import swim.ws.WsData;
@@ -35,10 +36,10 @@ public interface WsDownlink<I, O> extends Downlink, WsLink {
   WsDownlink<I, O> requestUri(Uri requestUri);
 
   @Override
-  WsDownlink<I, O> observe(Object observer);
+  WsDownlink<I, O> observe(Observer observer);
 
   @Override
-  WsDownlink<I, O> unobserve(Object observer);
+  WsDownlink<I, O> unobserve(Observer observer);
 
   WsDownlink<I, O> willUpgrade(WillUpgradeWs willUpgrade);
 

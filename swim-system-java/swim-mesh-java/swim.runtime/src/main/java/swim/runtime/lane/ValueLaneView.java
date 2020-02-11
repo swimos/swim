@@ -31,8 +31,10 @@ import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.concurrent.Conts;
+import swim.observable.Observer;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
+import swim.runtime.observer.LaneObserver;
 import swim.runtime.warp.WarpLaneView;
 import swim.streamlet.Inlet;
 import swim.streamlet.Outlet;
@@ -52,7 +54,7 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   protected Inlet<? super V>[] outputs; // TODO: unify with observers
   protected int version;
 
-  ValueLaneView(AgentContext agentContext, Form<V> valueForm, int flags, Object observers) {
+  ValueLaneView(AgentContext agentContext, Form<V> valueForm, int flags, LaneObserver observers) {
     super(observers);
     this.agentContext = agentContext;
     this.valueForm = valueForm;
@@ -106,7 +108,7 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
     this.valueForm = valueForm;
   }
 
-  protected Object typesafeObservers(Object observers) {
+  protected LaneObserver typesafeObservers(LaneObserver observers) {
     // TODO: filter out WillSet, DidSet
     return observers;
   }
@@ -171,13 +173,13 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   }
 
   @Override
-  public ValueLaneView<V> observe(Object observer) {
+  public ValueLaneView<V> observe(Observer observer) {
     super.observe(observer);
     return this;
   }
 
   @Override
-  public ValueLaneView<V> unobserve(Object observer) {
+  public ValueLaneView<V> unobserve(Observer observer) {
     super.unobserve(observer);
     return this;
   }
@@ -232,102 +234,13 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
     return observe(didLeave);
   }
 
-  @SuppressWarnings("unchecked")
+
   public Map.Entry<Boolean, V> dispatchWillSet(Link link, V newValue, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLane(this);
-      SwimContext.setLink(link);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillSet<?>) {
-        if (((WillSet<?>) observers).isPreemptive() == preemptive) {
-          try {
-            newValue = ((WillSet<V>) observers).willSet(newValue);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillSet<?>) {
-            if (((WillSet<?>) observer).isPreemptive() == preemptive) {
-              try {
-                newValue = ((WillSet<V>) observer).willSet(newValue);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return new AbstractMap.SimpleImmutableEntry<Boolean, V>(complete, newValue);
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchWillSet(link, newValue, preemptive);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchDidSet(Link link, V newValue, V oldValue, boolean preemptive) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLane(this);
-      SwimContext.setLink(link);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidSet<?>) {
-        if (((DidSet<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidSet<V>) observers).didSet(newValue, oldValue);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidSet<?>) {
-            if (((DidSet<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidSet<V>) observer).didSet(newValue, oldValue);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-      SwimContext.setLane(oldLane);
-    }
+    return this.observers.dispatchDidSet(link, newValue, oldValue, preemptive);
   }
 
   public V laneWillSet(V newValue) {

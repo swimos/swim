@@ -15,11 +15,11 @@
 package swim.api.http.function;
 
 import swim.codec.Decoder;
-import swim.concurrent.Preemptive;
 import swim.http.HttpRequest;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface DecodeRequestHttp<V> extends Preemptive {
+public interface DecodeRequestHttp<V> extends Observer {
 
   Decoder<V> decodeRequest(HttpRequest<?> request);
 

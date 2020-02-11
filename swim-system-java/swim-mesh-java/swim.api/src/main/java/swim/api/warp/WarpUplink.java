@@ -24,6 +24,7 @@ import swim.api.warp.function.OnSyncRequest;
 import swim.api.warp.function.OnSyncedResponse;
 import swim.api.warp.function.OnUnlinkRequest;
 import swim.api.warp.function.OnUnlinkedResponse;
+import swim.observable.Observer;
 import swim.structure.Value;
 
 public interface WarpUplink extends Uplink, WarpLink {
@@ -35,10 +36,10 @@ public interface WarpUplink extends Uplink, WarpLink {
   Value body();
 
   @Override
-  WarpUplink observe(Object observer);
+  WarpUplink observe(Observer observer);
 
   @Override
-  WarpUplink unobserve(Object observer);
+  WarpUplink unobserve(Observer observer);
 
   WarpUplink onEvent(OnEventMessage onEvent);
 

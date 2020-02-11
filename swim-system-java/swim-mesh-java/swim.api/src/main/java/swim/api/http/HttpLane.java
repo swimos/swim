@@ -21,14 +21,15 @@ import swim.api.http.function.DidRespondHttp;
 import swim.api.http.function.DoRespondHttp;
 import swim.api.http.function.WillRequestHttp;
 import swim.api.http.function.WillRespondHttp;
+import swim.observable.Observer;
 
 public interface HttpLane<V> extends Lane {
 
   @Override
-  HttpLane<V> observe(Object observer);
+  HttpLane<V> observe(Observer observer);
 
   @Override
-  HttpLane<V> unobserve(Object observer);
+  HttpLane<V> unobserve(Observer observer);
 
   HttpLane<V> decodeRequest(DecodeRequestHttp<V> decodeRequest);
 

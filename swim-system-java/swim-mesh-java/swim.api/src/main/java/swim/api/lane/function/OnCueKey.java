@@ -15,10 +15,10 @@
 package swim.api.lane.function;
 
 import swim.api.warp.WarpUplink;
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface OnCueKey<K, V> extends Preemptive {
+public interface OnCueKey<K, V> extends Observer {
 
   V onCue(K key, WarpUplink uplink);
 

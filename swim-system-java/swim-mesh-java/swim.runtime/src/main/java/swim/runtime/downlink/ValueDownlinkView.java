@@ -36,10 +36,12 @@ import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.concurrent.Conts;
 import swim.concurrent.Stage;
+import swim.observable.Observer;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
+import swim.runtime.observer.LaneObserver;
 import swim.runtime.warp.WarpDownlinkView;
 import swim.streamlet.Inlet;
 import swim.streamlet.Outlet;
@@ -60,7 +62,7 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   public ValueDownlinkView(CellContext cellContext, Stage stage, Uri meshUri,
                            Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                            float rate, Value body, int flags, Form<V> valueForm,
-                           Object observers) {
+                           LaneObserver observers) {
     super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
         body, flags, observers);
     this.valueForm = valueForm;
@@ -210,20 +212,20 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
     return valueForm(Form.<V2>forClass(valueClass));
   }
 
-  protected Object typesafeObservers(Object observers) {
+  protected LaneObserver typesafeObservers(LaneObserver observers) {
     // TODO: filter out WillSet, DidSet
     return observers;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public ValueDownlinkView<V> observe(Object observer) {
+  public ValueDownlinkView<V> observe(Observer observer) {
     return (ValueDownlinkView<V>) super.observe(observer);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public ValueDownlinkView<V> unobserve(Object observer) {
+  public ValueDownlinkView<V> unobserve(Observer observer) {
     return (ValueDownlinkView<V>) super.unobserve(observer);
   }
 
@@ -302,96 +304,12 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
     return observe(didFail);
   }
 
-  @SuppressWarnings("unchecked")
   public Map.Entry<Boolean, V> dispatchWillSet(V newValue, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof WillSet<?>) {
-        if (((WillSet<?>) observers).isPreemptive() == preemptive) {
-          try {
-            newValue = ((WillSet<V>) observers).willSet(newValue);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof WillSet<?>) {
-            if (((WillSet<?>) observer).isPreemptive() == preemptive) {
-              try {
-                newValue = ((WillSet<V>) observer).willSet(newValue);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return new AbstractMap.SimpleImmutableEntry<Boolean, V>(complete, newValue);
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchWillSet(this, newValue, preemptive);
   }
 
-  @SuppressWarnings("unchecked")
   public boolean dispatchDidSet(V newValue, V oldValue, boolean preemptive) {
-    final Link oldLink = SwimContext.getLink();
-    try {
-      SwimContext.setLink(this);
-      final Object observers = this.observers;
-      boolean complete = true;
-      if (observers instanceof DidSet<?>) {
-        if (((DidSet<?>) observers).isPreemptive() == preemptive) {
-          try {
-            ((DidSet<V>) observers).didSet(newValue, oldValue);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
-            }
-            throw error;
-          }
-        } else if (preemptive) {
-          complete = false;
-        }
-      } else if (observers instanceof Object[]) {
-        final Object[] array = (Object[]) observers;
-        for (int i = 0, n = array.length; i < n; i += 1) {
-          final Object observer = array[i];
-          if (observer instanceof DidSet<?>) {
-            if (((DidSet<?>) observer).isPreemptive() == preemptive) {
-              try {
-                ((DidSet<V>) observer).didSet(newValue, oldValue);
-              } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
-                }
-                throw error;
-              }
-            } else if (preemptive) {
-              complete = false;
-            }
-          }
-        }
-      }
-      return complete;
-    } finally {
-      SwimContext.setLink(oldLink);
-    }
+    return this.observers.dispatchDidSet(this, newValue, oldValue, preemptive);
   }
 
   public Value downlinkWillSetValue(Value newValue) {

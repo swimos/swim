@@ -15,6 +15,7 @@
 package swim.api.http;
 
 import swim.api.Link;
+import swim.observable.Observer;
 import swim.uri.Uri;
 
 public interface HttpLink extends Link {
@@ -22,9 +23,9 @@ public interface HttpLink extends Link {
   Uri requestUri();
 
   @Override
-  HttpLink observe(Object observer);
+  HttpLink observe(Observer observer);
 
   @Override
-  HttpLink unobserve(Object observer);
+  HttpLink unobserve(Observer observer);
 
 }

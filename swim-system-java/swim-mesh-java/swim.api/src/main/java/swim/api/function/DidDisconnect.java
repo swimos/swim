@@ -14,10 +14,10 @@
 
 package swim.api.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface DidDisconnect extends Preemptive {
+public interface DidDisconnect extends Observer {
 
   void didDisconnect();
 

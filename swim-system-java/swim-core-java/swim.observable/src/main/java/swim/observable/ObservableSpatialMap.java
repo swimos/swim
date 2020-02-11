@@ -24,13 +24,13 @@ import swim.observable.function.WillRemoveShape;
 import swim.observable.function.WillUpdateShape;
 import swim.spatial.SpatialMap;
 
-public interface ObservableSpatialMap<K, S, V> extends Observable<Object>, SpatialMap<K, S, V> {
+public interface ObservableSpatialMap<K, S, V> extends Observable, SpatialMap<K, S, V> {
 
   @Override
-  ObservableSpatialMap<K, S, V> observe(Object observer);
+  ObservableSpatialMap<K, S, V> observe(Observer observer);
 
   @Override
-  ObservableSpatialMap<K, S, V> unobserve(Object observer);
+  ObservableSpatialMap<K, S, V> unobserve(Observer observer);
 
   ObservableSpatialMap<K, S, V> willUpdate(WillUpdateShape<K, S, V> willUpdate);
 

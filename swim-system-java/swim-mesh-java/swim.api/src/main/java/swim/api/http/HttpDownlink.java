@@ -25,6 +25,7 @@ import swim.api.http.function.DidRespondHttp;
 import swim.api.http.function.DoRequestHttp;
 import swim.api.http.function.WillRequestHttp;
 import swim.api.http.function.WillRespondHttp;
+import swim.observable.Observer;
 import swim.uri.Uri;
 
 public interface HttpDownlink<V> extends Downlink, HttpLink {
@@ -32,10 +33,10 @@ public interface HttpDownlink<V> extends Downlink, HttpLink {
   HttpDownlink<V> requestUri(Uri requestUri);
 
   @Override
-  HttpDownlink<V> observe(Object observer);
+  HttpDownlink<V> observe(Observer observer);
 
   @Override
-  HttpDownlink<V> unobserve(Object observer);
+  HttpDownlink<V> unobserve(Observer observer);
 
   HttpDownlink<V> doRequest(DoRequestHttp<?> doRequest);
 

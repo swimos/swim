@@ -14,10 +14,6 @@
 
 package swim.server;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.testng.annotations.Test;
 import swim.actor.ActorSpaceDef;
 import swim.api.SwimLane;
@@ -46,6 +42,10 @@ import swim.observable.function.WillUpdateIndex;
 import swim.recon.Recon;
 import swim.service.web.WebServiceDef;
 import swim.structure.Value;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -78,6 +78,7 @@ public class ListLaneSpec {
   private static List<String> listLaneCopy = new ArrayList<String>();
   private static List<String> listLane1Copy = new ArrayList<String>();
   private static List<String> commandList = new ArrayList<String>();
+
 
   @Test
   public void testInsert() throws InterruptedException {

@@ -15,10 +15,10 @@
 package swim.api.lane.function;
 
 import swim.api.downlink.ValueDownlink;
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface WillDownlinkValue<K> extends Preemptive {
+public interface WillDownlinkValue<K> extends Observer {
 
   ValueDownlink<?> willDownlink(K key, ValueDownlink<?> downlink);
 

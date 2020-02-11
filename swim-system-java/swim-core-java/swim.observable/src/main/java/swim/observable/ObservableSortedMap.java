@@ -27,10 +27,10 @@ public interface ObservableSortedMap<K, V> extends ObservableMap<K, V>, SortedMa
   void take(int upper);
 
   @Override
-  ObservableSortedMap<K, V> observe(Object observer);
+  ObservableSortedMap<K, V> observe(Observer observer);
 
   @Override
-  ObservableSortedMap<K, V> unobserve(Object observer);
+  ObservableSortedMap<K, V> unobserve(Observer observer);
 
   ObservableSortedMap<K, V> willDrop(WillDrop willDrop);
 

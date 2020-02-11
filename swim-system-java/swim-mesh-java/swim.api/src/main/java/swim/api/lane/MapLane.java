@@ -25,6 +25,7 @@ import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableOrderedMap;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
 import swim.observable.function.DidRemoveKey;
@@ -64,10 +65,10 @@ public interface MapLane<K, V> extends WarpLane, ObservableOrderedMap<K, V>, Map
   MapLane<K, V> isTransient(boolean isTransient);
 
   @Override
-  MapLane<K, V> observe(Object observer);
+  MapLane<K, V> observe(Observer observer);
 
   @Override
-  MapLane<K, V> unobserve(Object observer);
+  MapLane<K, V> unobserve(Observer observer);
 
   @Override
   MapLane<K, V> willUpdate(WillUpdateKey<K, V> willUpdate);

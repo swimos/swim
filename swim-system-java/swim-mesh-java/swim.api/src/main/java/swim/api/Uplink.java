@@ -14,12 +14,14 @@
 
 package swim.api;
 
+import swim.observable.Observer;
+
 public interface Uplink extends Link {
 
   @Override
-  Uplink observe(Object observer);
+  Uplink observe(Observer observer);
 
   @Override
-  Uplink unobserve(Object observer);
+  Uplink unobserve(Observer observer);
 
 }

@@ -15,10 +15,11 @@
 package swim.api;
 
 import swim.observable.Observable;
+import swim.observable.Observer;
 import swim.uri.Uri;
 import swim.util.Log;
 
-public interface Lane extends Observable<Object>, Log {
+public interface Lane extends Observable, Log {
 
   Uri hostUri();
 
@@ -29,9 +30,9 @@ public interface Lane extends Observable<Object>, Log {
   void close();
 
   @Override
-  Lane observe(Object observer);
+  Lane observe(Observer observer);
 
   @Override
-  Lane unobserve(Object observer);
+  Lane unobserve(Observer observer);
 
 }

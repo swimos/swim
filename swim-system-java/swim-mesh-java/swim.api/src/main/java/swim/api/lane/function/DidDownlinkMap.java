@@ -15,10 +15,10 @@
 package swim.api.lane.function;
 
 import swim.api.downlink.MapDownlink;
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface DidDownlinkMap<L> extends Preemptive {
+public interface DidDownlinkMap<L> extends Observer {
 
   void didDownlink(L key, MapDownlink<?, ?> downlink);
 

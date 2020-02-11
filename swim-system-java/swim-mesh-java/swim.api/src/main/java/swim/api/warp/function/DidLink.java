@@ -14,10 +14,10 @@
 
 package swim.api.warp.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface DidLink extends Preemptive {
+public interface DidLink extends Observer {
 
   void didLink();
 

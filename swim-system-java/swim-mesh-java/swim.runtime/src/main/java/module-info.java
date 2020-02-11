@@ -22,7 +22,6 @@ module swim.runtime {
   requires transitive swim.math;
   requires transitive swim.spatial;
   requires transitive swim.http;
-  requires transitive swim.mqtt;
   requires transitive swim.warp;
   requires transitive swim.concurrent;
   requires transitive swim.api;
@@ -33,6 +32,7 @@ module swim.runtime {
   exports swim.runtime.downlink;
   exports swim.runtime.http;
   exports swim.runtime.lane;
+  exports swim.runtime.observer;
   exports swim.runtime.profile;
   exports swim.runtime.reflect;
   exports swim.runtime.router;

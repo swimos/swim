@@ -14,11 +14,11 @@
 
 package swim.api.warp.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 import swim.warp.SyncRequest;
 
 @FunctionalInterface
-public interface OnSyncRequest extends Preemptive {
+public interface OnSyncRequest extends Observer {
 
   void onSync(SyncRequest request);
 

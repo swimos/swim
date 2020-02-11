@@ -24,6 +24,8 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
+import swim.observable.Observer;
+import swim.runtime.observer.LaneObserver;
 import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 
@@ -34,7 +36,7 @@ public class SupplyLaneView<V> extends WarpLaneView implements SupplyLane<V> {
 
   protected SupplyLaneModel laneBinding;
 
-  public SupplyLaneView(AgentContext agentContext, Form<V> valueForm, Object observers) {
+  public SupplyLaneView(AgentContext agentContext, Form<V> valueForm, LaneObserver observers) {
     super(observers);
     this.agentContext = agentContext;
     this.valueForm = valueForm;
@@ -88,13 +90,13 @@ public class SupplyLaneView<V> extends WarpLaneView implements SupplyLane<V> {
   }
 
   @Override
-  public SupplyLaneView<V> observe(Object observer) {
+  public SupplyLaneView<V> observe(Observer observer) {
     super.observe(observer);
     return this;
   }
 
   @Override
-  public SupplyLaneView<V> unobserve(Object observer) {
+  public SupplyLaneView<V> unobserve(Observer observer) {
     super.unobserve(observer);
     return this;
   }

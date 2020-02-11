@@ -15,10 +15,10 @@
 package swim.api.warp.function;
 
 import swim.api.warp.WarpUplink;
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface WillUplink extends Preemptive {
+public interface WillUplink extends Observer {
 
   void willUplink(WarpUplink uplink);
 

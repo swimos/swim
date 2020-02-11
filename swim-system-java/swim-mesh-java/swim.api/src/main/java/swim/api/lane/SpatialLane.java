@@ -24,6 +24,7 @@ import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.observable.ObservableSpatialMap;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidMoveShape;
 import swim.observable.function.DidRemoveShape;
@@ -58,10 +59,10 @@ public interface SpatialLane<K, S, V> extends WarpLane, ObservableSpatialMap<K, 
   SpatialLane<K, S, V> isTransient(boolean isTransient);
 
   @Override
-  SpatialLane<K, S, V> observe(Object observer);
+  SpatialLane<K, S, V> observe(Observer observer);
 
   @Override
-  SpatialLane<K, S, V> unobserve(Object observer);
+  SpatialLane<K, S, V> unobserve(Observer observer);
 
   @Override
   SpatialLane<K, S, V> willUpdate(WillUpdateShape<K, S, V> willUpdate);

@@ -14,11 +14,11 @@
 
 package swim.api.warp.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 import swim.structure.Value;
 
 @FunctionalInterface
-public interface WillCommand extends Preemptive {
+public interface WillCommand extends Observer {
 
   void willCommand(Value body);
 

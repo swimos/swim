@@ -29,6 +29,7 @@ import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.observable.ObservableValue;
+import swim.observable.Observer;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
 import swim.streamlet.Inlet;
@@ -83,10 +84,10 @@ public interface ValueDownlink<V> extends WarpDownlink, ObservableValue<V>, Inle
   <V2> ValueDownlink<V2> valueClass(Class<V2> valueClass);
 
   @Override
-  ValueDownlink<V> observe(Object observer);
+  ValueDownlink<V> observe(Observer observer);
 
   @Override
-  ValueDownlink<V> unobserve(Object observer);
+  ValueDownlink<V> unobserve(Observer observer);
 
   @Override
   ValueDownlink<V> willSet(WillSet<V> willSet);

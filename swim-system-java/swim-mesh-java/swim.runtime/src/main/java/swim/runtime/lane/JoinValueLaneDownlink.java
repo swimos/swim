@@ -17,6 +17,7 @@ package swim.runtime.lane;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
 import swim.runtime.downlink.ValueDownlinkView;
+import swim.runtime.observer.LaneObserver;
 import swim.structure.Form;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -29,7 +30,7 @@ public class JoinValueLaneDownlink<V> extends ValueDownlinkView<V> {
   public JoinValueLaneDownlink(CellContext cellContext, Stage stage, JoinValueLaneModel laneModel,
                                Value key, Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                                float prio, float rate, Value body, int flags, Form<V> valueForm,
-                               Object observers) {
+                               LaneObserver observers) {
     super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
         body, flags, valueForm, observers);
     this.laneModel = laneModel;

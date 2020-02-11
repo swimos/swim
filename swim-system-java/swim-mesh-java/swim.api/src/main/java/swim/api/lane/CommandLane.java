@@ -24,6 +24,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
+import swim.observable.Observer;
 import swim.structure.Form;
 
 public interface CommandLane<V> extends WarpLane {
@@ -35,10 +36,10 @@ public interface CommandLane<V> extends WarpLane {
   <V2> CommandLane<V2> valueClass(Class<V2> valueClass);
 
   @Override
-  CommandLane<V> observe(Object observer);
+  CommandLane<V> observe(Observer observer);
 
   @Override
-  CommandLane<V> unobserve(Object observer);
+  CommandLane<V> unobserve(Observer observer);
 
   CommandLane<V> onCommand(OnCommand<V> value);
 

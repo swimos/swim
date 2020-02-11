@@ -15,6 +15,7 @@
 package swim.api.ws;
 
 import swim.api.Uplink;
+import swim.observable.Observer;
 import swim.ws.WsRequest;
 
 public interface WsUplink extends Uplink, WsLink {
@@ -22,9 +23,9 @@ public interface WsUplink extends Uplink, WsLink {
   WsRequest request();
 
   @Override
-  WsUplink observe(Object observer);
+  WsUplink observe(Observer observer);
 
   @Override
-  WsUplink unobserve(Object observer);
+  WsUplink unobserve(Observer observer);
 
 }

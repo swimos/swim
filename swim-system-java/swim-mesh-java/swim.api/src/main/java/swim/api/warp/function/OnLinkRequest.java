@@ -14,11 +14,11 @@
 
 package swim.api.warp.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 import swim.warp.LinkRequest;
 
 @FunctionalInterface
-public interface OnLinkRequest extends Preemptive {
+public interface OnLinkRequest extends Observer {
 
   void onLink(LinkRequest request);
 

@@ -14,24 +14,28 @@
 
 package swim.runtime;
 
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.Objects;
 import swim.api.Downlink;
 import swim.api.Lane;
 import swim.api.agent.AgentContext;
 import swim.api.policy.Policy;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.observable.Observer;
+import swim.runtime.observer.LaneObserver;
 import swim.store.StoreBinding;
 import swim.uri.Uri;
 
 public abstract class LaneView extends AbstractTierBinding implements Lane {
 
-  static final AtomicReferenceFieldUpdater<LaneView, Object> OBSERVERS =
-      AtomicReferenceFieldUpdater.newUpdater(LaneView.class, Object.class, "observers");
-  protected volatile Object observers; // Observer | Observer[]
+//  static final AtomicReferenceFieldUpdater<LaneView, Object> OBSERVERS =
+//      AtomicReferenceFieldUpdater.newUpdater(LaneView.class, Object.class, "observers");
+//  protected volatile Object observers; // Observer | Observer[]
 
-  public LaneView(Object observers) {
-    this.observers = observers;
+  protected volatile LaneObserver observers;
+
+  public LaneView(LaneObserver observers) {
+    this.observers = Objects.requireNonNullElseGet(observers, () -> new LaneObserver(this));
   }
 
   @Override
@@ -92,78 +96,14 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   public abstract void close();
 
   @Override
-  public LaneView observe(Object newObserver) {
-    do {
-      final Object oldObservers = this.observers;
-      final Object newObservers;
-      if (oldObservers == null) {
-        newObservers = newObserver;
-      } else if (!(oldObservers instanceof Object[])) {
-        final Object[] newArray = new Object[2];
-        newArray[0] = oldObservers;
-        newArray[1] = newObserver;
-        newObservers = newArray;
-      } else {
-        final Object[] oldArray = (Object[]) oldObservers;
-        final int oldCount = oldArray.length;
-        final Object[] newArray = new Object[oldCount + 1];
-        System.arraycopy(oldArray, 0, newArray, 0, oldCount);
-        newArray[oldCount] = newObserver;
-        newObservers = newArray;
-      }
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
-        break;
-      }
-    } while (true);
+  public LaneView observe(Observer newObserver) {
+    this.observers.observe(newObserver);
     return this;
   }
 
   @Override
-  public LaneView unobserve(Object oldObserver) {
-    do {
-      final Object oldObservers = this.observers;
-      final Object newObservers;
-      if (oldObservers == null) {
-        break;
-      } else if (!(oldObservers instanceof Object[])) {
-        if (oldObservers == oldObserver) { // found as sole observer
-          newObservers = null;
-        } else {
-          break; // not found
-        }
-      } else {
-        final Object[] oldArray = (Object[]) oldObservers;
-        final int oldCount = oldArray.length;
-        if (oldCount == 2) {
-          if (oldArray[0] == oldObserver) { // found at index 0
-            newObservers = oldArray[1];
-          } else if (oldArray[1] == oldObserver) { // found at index 1
-            newObservers = oldArray[0];
-          } else {
-            break; // not found
-          }
-        } else {
-          int i = 0;
-          while (i < oldCount) {
-            if (oldArray[i] == oldObserver) { // found at index i
-              break;
-            }
-            i += 1;
-          }
-          if (i < oldCount) {
-            final Object[] newArray = new Object[oldCount - 1];
-            System.arraycopy(oldArray, 0, newArray, 0, i);
-            System.arraycopy(oldArray, i + 1, newArray, i, oldCount - 1 - i);
-            newObservers = newArray;
-          } else {
-            break; // not found
-          }
-        }
-      }
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
-        break;
-      }
-    } while (true);
+  public LaneView unobserve(Observer oldObserver) {
+    //todo
     return this;
   }
 

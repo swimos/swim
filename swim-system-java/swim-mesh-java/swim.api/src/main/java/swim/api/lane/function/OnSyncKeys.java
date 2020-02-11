@@ -16,10 +16,10 @@ package swim.api.lane.function;
 
 import java.util.Iterator;
 import swim.api.warp.WarpUplink;
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface OnSyncKeys<K> extends Preemptive {
+public interface OnSyncKeys<K> extends Observer {
 
   Iterator<K> onSync(WarpUplink uplink);
 

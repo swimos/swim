@@ -14,7 +14,6 @@
 
 package swim.server;
 
-import java.util.concurrent.CountDownLatch;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -30,6 +29,7 @@ import swim.api.warp.function.DidReceive;
 import swim.api.warp.function.WillReceive;
 import swim.codec.Format;
 import swim.kernel.Kernel;
+import swim.observable.Observer;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
 import swim.observable.function.DidMoveIndex;
@@ -45,6 +45,8 @@ import swim.observable.function.WillUpdateIndex;
 import swim.recon.Recon;
 import swim.service.web.WebServiceDef;
 import swim.structure.Value;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -119,8 +121,8 @@ public class ListDownlinkSpec {
     listLink.add(0, "a");
     listLink.add(1, "b");
     listLink.add(2, "c");
-    linkDidReceive.await();
-    linkDidUpdate.await();
+    linkDidReceive.await(5, TimeUnit.SECONDS);
+    linkDidUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(linkDidReceive.getCount(), 0);
     assertEquals(linkWillUpdate.getCount(), 0);
     assertEquals(linkDidUpdate.getCount(), 0);
@@ -128,14 +130,14 @@ public class ListDownlinkSpec {
     assertEquals(listLink.get(0), "a");
     assertEquals(listLink.get(1), "b");
     assertEquals(listLink.get(2), "c");
-    readOnlyLinkDidUpdate.await();
+    readOnlyLinkDidUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyListLink.size(), 3);
     assertEquals(readOnlyListLink.get(0), "a");
     assertEquals(readOnlyListLink.get(1), "b");
     assertEquals(readOnlyListLink.get(2), "c");
   }
 
-  private ListDownlink<String> getDownlink(Object observer) {
+  private ListDownlink<String> getDownlink(Observer observer) {
     final CountDownLatch didSyncLatch = new CountDownLatch(1);
     final ListDownlink<String> listLink = plane.downlinkList()
         .valueClass(String.class)
@@ -151,7 +153,7 @@ public class ListDownlinkSpec {
     listLink.open();
 
     try {
-      didSyncLatch.await();
+      didSyncLatch.await(5, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       fail("Failed to open list downlink", e);
     }
@@ -221,23 +223,23 @@ public class ListDownlinkSpec {
     listLink.add(0, "a");
     listLink.add(1, "b");
     listLink.add(2, "c");
-    linkDidReceiveLower.await();
-    linkDidUpdateLower.await();
+    linkDidReceiveLower.await(5, TimeUnit.SECONDS);
+    linkDidUpdateLower.await(5, TimeUnit.SECONDS);
     assertEquals(linkDidReceiveLower.getCount(), 0);
     assertEquals(linkDidUpdateLower.getCount(), 0);
 
     listLink.add(0, "A");
     listLink.add(1, "B");
     listLink.add(2, "C");
-    linkDidReceiveUpper.await();
-    linkDidUpdateUpper.await();
+    linkDidReceiveUpper.await(5, TimeUnit.SECONDS);
+    linkDidUpdateUpper.await(5, TimeUnit.SECONDS);
     assertEquals(linkDidReceiveUpper.getCount(), 0);
     assertEquals(linkDidUpdateUpper.getCount(), 0);
     assertEquals(listLink.size(), 3);
     assertEquals(listLink.get(0), "A");
     assertEquals(listLink.get(1), "B");
     assertEquals(listLink.get(2), "C");
-    readOnlyLinkDidUpdate.await();
+    readOnlyLinkDidUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyLinkDidUpdate.getCount(), 0);
     assertEquals(readOnlyListLink.size(), 3);
     assertEquals(readOnlyListLink.get(0), "A");
@@ -297,16 +299,16 @@ public class ListDownlinkSpec {
     listLink.add(0, "a");
     listLink.add(1, "b");
     listLink.add(2, "c");
-    linkDidUpdate.await();
+    linkDidUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(linkDidUpdate.getCount(), 0);
     assertEquals(listLink.size(), 3);
-    readOnlyLinkDidUpdate.await();
+    readOnlyLinkDidUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyLinkDidUpdate.getCount(), 0);
     assertEquals(readOnlyListLink.size(), 3);
 
     listLink.move(1, 0);
     listLink.move(2, 1);
-    linkDidMove.await();
+    linkDidMove.await(5, TimeUnit.SECONDS);
     assertEquals(linkWillMove.getCount(), 0);
     assertEquals(linkDidMove.getCount(), 0);
     assertEquals(listLink.size(), 3);
@@ -314,7 +316,7 @@ public class ListDownlinkSpec {
     assertEquals(listLink.get(1), "c");
     assertEquals(listLink.get(2), "a");
 
-    readOnlyLinkDidMove.await();
+    readOnlyLinkDidMove.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyLinkDidMove.getCount(), 0);
     assertEquals(readOnlyListLink.size(), 3);
     assertEquals(readOnlyListLink.get(0), "b");
@@ -374,22 +376,22 @@ public class ListDownlinkSpec {
     listLink.add(0, "a");
     listLink.add(1, "b");
     listLink.add(2, "c");
-    linkDidUpdate.await();
+    linkDidUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(linkDidUpdate.getCount(), 0);
     assertEquals(listLink.size(), 3);
-    readOnlyLinkDidUpdate.await();
+    readOnlyLinkDidUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyLinkDidUpdate.getCount(), 0);
     assertEquals(readOnlyListLink.size(), 3);
 
     listLink.remove(1);
-    linkDidRemove.await();
+    linkDidRemove.await(5, TimeUnit.SECONDS);
     assertEquals(linkWillRemove.getCount(), 0);
     assertEquals(linkDidRemove.getCount(), 0);
     assertEquals(listLink.size(), 2);
     assertEquals(listLink.get(0), "a");
     assertEquals(listLink.get(1), "c");
 
-    readOnlyLinkDidRemove.await();
+    readOnlyLinkDidRemove.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyListLink.size(), 2);
     assertEquals(readOnlyListLink.get(0), "a");
     assertEquals(readOnlyListLink.get(1), "c");
@@ -451,15 +453,15 @@ public class ListDownlinkSpec {
       listLink.add(i, Integer.toString(i));
     }
 
-    didUpdate.await();
+    didUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(didUpdate.getCount(), 0);
     assertEquals(listLink.size(), total);
-    readOnlyDidUpdate.await();
+    readOnlyDidUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyDidUpdate.getCount(), 0);
     assertEquals(readOnlyListLink.size(), total);
 
     listLink.drop(2);
-    didDrop.await();
+    didDrop.await(5, TimeUnit.SECONDS);
     assertEquals(willDrop.getCount(), 0);
     assertEquals(didDrop.getCount(), 0);
     assertEquals(listLink.size(), 3);
@@ -467,7 +469,7 @@ public class ListDownlinkSpec {
     assertEquals(listLink.get(1), "3");
     assertEquals(listLink.get(2), "4");
 
-    readOnlyDidDrop.await();
+    readOnlyDidDrop.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyListLink.size(), 3);
     assertEquals(readOnlyListLink.get(0), "2");
     assertEquals(readOnlyListLink.get(1), "3");
@@ -529,32 +531,86 @@ public class ListDownlinkSpec {
       listLink.add(i, Integer.toString(i));
     }
 
-    didUpdate.await();
+    didUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(didUpdate.getCount(), 0);
     assertEquals(listLink.size(), total);
-    readOnlyDidUpdate.await();
+    readOnlyDidUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyDidUpdate.getCount(), 0);
     assertEquals(readOnlyListLink.size(), total);
 
     listLink.take(2);
-    didTake.await();
+    didTake.await(5, TimeUnit.SECONDS);
     assertEquals(willTake.getCount(), 0);
     assertEquals(didTake.getCount(), 0);
     assertEquals(listLink.size(), 2);
     assertEquals(listLink.get(0), "0");
     assertEquals(listLink.get(1), "1");
 
-    readOnlyDidTake.await();
+    readOnlyDidTake.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyListLink.size(), 2);
     assertEquals(readOnlyListLink.get(0), "0");
     assertEquals(readOnlyListLink.get(1), "1");
   }
 
+
+//  @Test
+  public void benchmarkLargeInserts() throws InterruptedException {
+    System.out.println("Warming up...");
+    for (int i = 0; i < 300; i++) {
+      if (i % 100 == 0) {
+        System.out.println("Warm up: " + i);
+      }
+      if (i != 0) {
+        setTestPlane();
+      }
+
+      run(100_00);
+      stop();
+      System.gc();
+    }
+
+    System.out.println("Warmed up...");
+    System.out.println("Benchmarking...");
+
+    for (int i = 1; i < 101; i++) {
+      setTestPlane();
+      final long t0 = System.currentTimeMillis();
+      run(1_000_000);
+      final long t1 = System.currentTimeMillis();
+      stop();
+
+      System.gc();
+      final long dt = t1 - t0;
+      System.out.println("Run " + i + ": " + dt);
+    }
+  }
+
+  private void run(int insertionCount) throws InterruptedException {
+    final CountDownLatch linkDidSync = new CountDownLatch(1);
+    final CountDownLatch linkDidUpdate = new CountDownLatch(insertionCount);
+
+    final ListDownlink<Integer> listLink = plane.downlinkList()
+        .valueClass(Integer.class)
+        .hostUri("warp://localhost:53556")
+        .nodeUri("/list/insert")
+        .laneUri("list")
+        .didSync(linkDidSync::countDown)
+        .didUpdate((index, newValue, oldValue) -> linkDidUpdate.countDown())
+        .open();
+
+    linkDidSync.await(5, TimeUnit.SECONDS);
+
+    for (int i = 0; i < insertionCount; i++) {
+      listLink.add(i);
+    }
+
+    linkDidUpdate.await(10, TimeUnit.SECONDS);
+  }
+
   @Test
   public void testClear() throws InterruptedException {
     final int total = 3;
-  
-  
+
     final CountDownLatch didSyncListLinkLatch = new CountDownLatch(1);
     final CountDownLatch didSyncReadOnlyListLinkLatch = new CountDownLatch(1);
     final CountDownLatch didUpdate = new CountDownLatch(2 * total);
@@ -589,20 +645,20 @@ public class ListDownlinkSpec {
 
       @Override
       public void didClear() {
-        System.out.println("ListLinkController- didClear");
+        System.out.println("ReadOnlyListLinkController- didClear");
         readOnlyDidClear.countDown();
       }
 
       @Override
       public void didUpdate(int index, String newValue, String oldValue) {
-        System.out.println("ListLinkController- didUpdate at index " + index + " newValue " + newValue);
+        System.out.println("ReadOnlyListLinkController- didUpdate at index " + index + " newValue " + newValue);
         readOnlyDidUpdate.countDown();
       }
 
     }
 
     final ListDownlink<String> listLink = getDownlink(new ListLinkController());
-    listLink.observe(new ListLinkController()).open();
+    listLink.observe(new ListLinkController());
 
     final ListDownlink<String> readOnlyListLink = getDownlink(new ReadOnlyListLinkController());
 
@@ -610,20 +666,20 @@ public class ListDownlinkSpec {
       listLink.add(i, Integer.toString(i));
     }
 
-    didUpdate.await();
+    didUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(didUpdate.getCount(), 0);
     assertEquals(listLink.size(), total);
-    readOnlyDidUpdate.await();
+    readOnlyDidUpdate.await(5, TimeUnit.SECONDS);
     assertEquals(didUpdate.getCount(), 0);
     assertEquals(readOnlyListLink.size(), total);
 
     listLink.clear();
-    didClear.await();
+    didClear.await(5, TimeUnit.SECONDS);
     assertEquals(willClear.getCount(), 0);
     assertEquals(didClear.getCount(), 0);
     assertEquals(listLink.size(), 0);
 
-    readOnlyDidClear.await();
+    readOnlyDidClear.await(5, TimeUnit.SECONDS);
     assertEquals(readOnlyListLink.size(), 0);
   }
 

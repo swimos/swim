@@ -24,6 +24,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
+import swim.observable.Observer;
 import swim.structure.Form;
 
 public interface DemandLane<V> extends WarpLane {
@@ -35,10 +36,10 @@ public interface DemandLane<V> extends WarpLane {
   <V2> DemandLane<V2> valueClass(Class<V2> valueClass);
 
   @Override
-  DemandLane<V> observe(Object observer);
+  DemandLane<V> observe(Observer observer);
 
   @Override
-  DemandLane<V> unobserve(Object observer);
+  DemandLane<V> unobserve(Observer observer);
 
   DemandLane<V> onCue(OnCue<V> onCue);
 

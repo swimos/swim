@@ -21,6 +21,7 @@ import swim.dynamic.HostObjectType;
 import swim.dynamic.JavaHostObjectType;
 import swim.dynamic.api.lane.function.GuestOnCue;
 import swim.dynamic.api.warp.HostWarpLane;
+import swim.observable.Observer;
 
 public final class HostDemandLane {
 
@@ -53,7 +54,11 @@ final class HostDemandLaneObserve implements HostMethod<DemandLane<Object>> {
   public Object invoke(Bridge bridge, DemandLane<Object> lane, Object... arguments) {
     final Object observer = arguments[0];
     // TODO: bridge observer callback members.
-    lane.observe(observer);
+    if (observer instanceof Observer) {
+      lane.unobserve((Observer) observer);
+    } else {
+      throw new IllegalArgumentException(observer + " is not an Observer");
+    }
     return this;
   }
 
@@ -70,7 +75,11 @@ final class HostDemandLaneUnobserve implements HostMethod<DemandLane<Object>> {
   public Object invoke(Bridge bridge, DemandLane<Object> lane, Object... arguments) {
     final Object observer = arguments[0];
     // TODO: bridge observer callback members.
-    lane.unobserve(observer);
+    if (observer instanceof Observer) {
+      lane.unobserve((Observer) observer);
+    } else {
+      throw new IllegalArgumentException(observer + " is not an Observer");
+    }
     return this;
   }
 

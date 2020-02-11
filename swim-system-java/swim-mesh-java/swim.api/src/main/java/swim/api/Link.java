@@ -20,10 +20,11 @@ import java.security.cert.Certificate;
 import java.util.Collection;
 import swim.api.auth.Identity;
 import swim.observable.Observable;
+import swim.observable.Observer;
 import swim.uri.Uri;
 import swim.util.Log;
 
-public interface Link extends Observable<Object>, Log {
+public interface Link extends Observable, Log {
 
   Uri hostUri();
 
@@ -60,9 +61,9 @@ public interface Link extends Observable<Object>, Log {
   void close();
 
   @Override
-  Link observe(Object observer);
+  Link observe(Observer observer);
 
   @Override
-  Link unobserve(Object observer);
+  Link unobserve(Observer observer);
 
 }

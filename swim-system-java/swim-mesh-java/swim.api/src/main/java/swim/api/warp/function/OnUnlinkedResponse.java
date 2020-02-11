@@ -14,11 +14,11 @@
 
 package swim.api.warp.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 import swim.warp.UnlinkedResponse;
 
 @FunctionalInterface
-public interface OnUnlinkedResponse extends Preemptive {
+public interface OnUnlinkedResponse extends Observer {
 
   void onUnlinked(UnlinkedResponse response);
 

@@ -14,10 +14,10 @@
 
 package swim.observable.function;
 
-import swim.concurrent.Preemptive;
+import swim.observable.Observer;
 
 @FunctionalInterface
-public interface DidMoveShape<K, S, V> extends Preemptive {
+public interface DidMoveShape<K, S, V> extends Observer {
 
   void didMove(K key, S newShape, V newValue, S oldShape, V oldValue);
 
