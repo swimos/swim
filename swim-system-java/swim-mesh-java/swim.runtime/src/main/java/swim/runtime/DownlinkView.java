@@ -32,11 +32,8 @@ import swim.runtime.observer.LaneObserver;
 
 public abstract class DownlinkView implements Downlink {
 
-  //  static final AtomicReferenceFieldUpdater<DownlinkView, LaneObserver> OBSERVERS =
-//      AtomicReferenceFieldUpdater.newUpdater(DownlinkView.class, LaneObserver.class, "observers");
   protected final CellContext cellContext;
   protected final Stage stage;
-  //  protected volatile Object observers; // Observer | Observer[]
   protected volatile LaneObserver observers;
 
   public DownlinkView(CellContext cellContext, Stage stage, LaneObserver observers) {

@@ -553,7 +553,7 @@ public class ListDownlinkSpec {
   }
 
 
-//  @Test
+  @Test
   public void benchmarkLargeInserts() throws InterruptedException {
     System.out.println("Warming up...");
     for (int i = 0; i < 300; i++) {
@@ -564,7 +564,7 @@ public class ListDownlinkSpec {
         setTestPlane();
       }
 
-      run(100_00);
+      run(10000);
       stop();
       System.gc();
     }
@@ -574,18 +574,15 @@ public class ListDownlinkSpec {
 
     for (int i = 1; i < 101; i++) {
       setTestPlane();
-      final long t0 = System.currentTimeMillis();
-      run(1_000_000);
-      final long t1 = System.currentTimeMillis();
+      final long dt = run(1_000_000);
       stop();
 
       System.gc();
-      final long dt = t1 - t0;
       System.out.println("Run " + i + ": " + dt);
     }
   }
 
-  private void run(int insertionCount) throws InterruptedException {
+  private long run(int insertionCount) throws InterruptedException {
     final CountDownLatch linkDidSync = new CountDownLatch(1);
     final CountDownLatch linkDidUpdate = new CountDownLatch(insertionCount);
 
@@ -599,12 +596,16 @@ public class ListDownlinkSpec {
         .open();
 
     linkDidSync.await(5, TimeUnit.SECONDS);
+    final long t0 = System.currentTimeMillis();
 
     for (int i = 0; i < insertionCount; i++) {
       listLink.add(i);
     }
 
     linkDidUpdate.await(10, TimeUnit.SECONDS);
+    final long t1 = System.currentTimeMillis();
+
+    return t1 - t0;
   }
 
   @Test

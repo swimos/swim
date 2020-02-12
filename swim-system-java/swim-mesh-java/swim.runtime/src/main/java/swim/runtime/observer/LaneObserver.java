@@ -78,17 +78,17 @@ import swim.warp.SyncedResponse;
 import swim.warp.UnlinkRequest;
 import swim.warp.UnlinkedResponse;
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("DuplicatedCode")
 public final class LaneObserver {
 
-  static final AtomicReferenceFieldUpdater<LaneObserver, Observer[]> OBSERVERS =
-      AtomicReferenceFieldUpdater.newUpdater(LaneObserver.class, Observer[].class, "observers");
-
+  private Map<Class<?>, List<Observer>> observers = new ConcurrentHashMap<>();
   private Lane lane;
-  private volatile Observer[] observers = new Observer[0];
 
   public LaneObserver() {
     this(null);
@@ -98,67 +98,42 @@ public final class LaneObserver {
     this.lane = lane;
   }
 
+
   public void unobserve(final Observer oldObserver) {
     if (oldObserver == null) {
       return;
     }
 
-    do {
-      final Observer[] newObservers;
-      final Observer[] oldObservers = this.observers;
-      final int oldCount = oldObservers.length;
-
-      int i = 0;
-      while (i < oldCount) {
-        if (oldObservers[i] == oldObserver) {
-          break;
-        }
-        i += 1;
-      }
-      if (i < oldCount) {
-        final Observer[] newArray = new Observer[oldCount - 1];
-        System.arraycopy(oldObservers, 0, newArray, 0, i);
-        System.arraycopy(oldObservers, i + 1, newArray, i, oldCount - 1 - i);
-        newObservers = newArray;
-      } else {
-        break;
-      }
-
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
-        break;
-      }
-    } while (true);
+    observers.values().removeIf(v -> v == oldObserver);
+    observers.entrySet().removeIf((k) -> k.getValue().size() == 0);
   }
 
   public void observe(final Observer newObserver) {
     if (newObserver == null) {
-      throw new NullPointerException();
+      return;
     }
 
-    do {
-      final Observer[] newObservers;
-      final Observer[] oldObservers = this.observers;
-      final Observer[] oldArray = this.observers;
-      final int oldCount = oldArray.length;
-      final Observer[] newArray = new Observer[oldCount + 1];
-
-      System.arraycopy(oldArray, 0, newArray, 0, oldCount);
-      newArray[oldCount] = newObserver;
-      newObservers = newArray;
-
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
-        break;
-      }
-    } while (true);
+    List<Class<?>> interfaces = getObserverInterfaces(newObserver);
+    for (Class<?> c : interfaces) {
+      observers.computeIfAbsent(c, k -> new ArrayList<>()).add(newObserver);
+    }
   }
 
-  public boolean observed(final Class<?> clazz) {
-    for (Observer o : observers) {
-      if (clazz.isAssignableFrom(o.getClass())) {
-        return true;
+  private static List<Class<?>> getObserverInterfaces(final Observer observer) {
+    final List<Class<?>> interfaces = new ArrayList<>();
+    Class<?> clazz = observer.getClass();
+
+    while (clazz != Object.class) {
+      for (final Class<?> intf : clazz.getInterfaces()) {
+        if (Observer.class.isAssignableFrom(intf)) {
+          interfaces.add(intf);
+        }
       }
+
+      clazz = clazz.getSuperclass();
     }
-    return false;
+
+    return interfaces;
   }
 
   public void laneDidFail(Throwable error) {
@@ -167,219 +142,119 @@ public final class LaneObserver {
 
   @SuppressWarnings("unchecked")
   public final <K, V> boolean dispatchDidUpdateKey(final Link link, final Boolean preemptive, final K key, final V newValue, final V oldValue) {
-    return dispatch(link, preemptive, DidUpdateKey.class, p -> {
-      ((DidUpdateKey<K, V>) p).didUpdate(key, newValue, oldValue);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidUpdateKey.class, p -> ((DidUpdateKey<K, V>) p).didUpdate(key, newValue, oldValue));
   }
 
   @SuppressWarnings("unchecked")
   public final <K, V> boolean dispatchDidRemoveKey(final Link link, final Boolean preemptive, final K key, final V oldValue) {
-    return dispatch(link, preemptive, DidRemoveKey.class, p -> {
-      ((DidRemoveKey<K, V>) p).didRemove(key, oldValue);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidRemoveKey.class, p -> ((DidRemoveKey<K, V>) p).didRemove(key, oldValue));
   }
 
   @SuppressWarnings("unchecked")
   public final <K> boolean dispatchWillRemoveKey(final Link link, final Boolean preemptive, final K key) {
-    return dispatch(link, preemptive, WillRemoveKey.class, p -> {
-      ((WillRemoveKey<K>) p).willRemove(key);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, WillRemoveKey.class, p -> ((WillRemoveKey<K>) p).willRemove(key));
   }
 
   public final boolean dispatchWillReceive(final Link link, final Boolean preemptive, final Value body) {
-    return dispatch(link, preemptive, WillReceive.class, p -> {
-      ((WillReceive) p).willReceive(body);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, WillReceive.class, p -> ((WillReceive) p).willReceive(body));
   }
 
   public final boolean dispatchDidConnect(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, DidConnect.class, p -> {
-      ((DidConnect) p).didConnect();
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidConnect.class, p -> ((DidConnect) p).didConnect());
   }
 
   public final boolean dispatchDidClose(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, DidClose.class, p -> {
-      ((DidClose) p).didClose();
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidClose.class, p -> ((DidClose) p).didClose());
   }
 
   public final boolean dispatchDidFail(final Link link, final Boolean preemptive, final Throwable cause) {
-    return dispatch(link, preemptive, DidFail.class, p -> {
-      ((DidFail) p).didFail(cause);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidFail.class, p -> ((DidFail) p).didFail(cause));
   }
 
   public final boolean dispatchDidDisconnect(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, DidDisconnect.class, p -> {
-      ((DidDisconnect) p).didDisconnect();
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidDisconnect.class, p -> ((DidDisconnect) p).didDisconnect());
   }
 
   public final boolean dispatchDidReceive(final Link link, final Boolean preemptive, final Value body) {
-    return dispatch(link, preemptive, DidReceive.class, p -> {
-      ((DidReceive) p).didReceive(body);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidReceive.class, p -> ((DidReceive) p).didReceive(body));
   }
 
   public final boolean dispatchWillCommand(final Link link, final Boolean preemptive, final Value body) {
-    return dispatch(link, preemptive, WillCommand.class, p -> {
-      ((WillCommand) p).willCommand(body);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, WillCommand.class, p -> ((WillCommand) p).willCommand(body));
   }
 
   public final boolean dispatchDidCommand(final Link link, final Boolean preemptive, final Value body) {
-    return dispatch(link, preemptive, DidCommand.class, p -> {
-      ((DidCommand) p).didCommand(body);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidCommand.class, p -> ((DidCommand) p).didCommand(body));
   }
 
   @SuppressWarnings("unchecked")
   public final <V> boolean dispatchOnCommand(final Link link, final Boolean preemptive, final V body) {
-    return dispatch(link, preemptive, OnCommand.class, p -> {
-      ((OnCommand<V>) p).onCommand(body);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, OnCommand.class, p -> ((OnCommand<V>) p).onCommand(body));
   }
 
   public final boolean dispatchWillLink(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, WillLink.class, p -> {
-      ((WillLink) p).willLink();
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, WillLink.class, p -> ((WillLink) p).willLink());
   }
 
   public final boolean dispatchOnLinkRequest(final Link link, final Boolean preemptive, final LinkRequest request) {
-    return dispatch(link, preemptive, OnLinkRequest.class, p -> {
-      ((OnLinkRequest) p).onLink(request);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, OnLinkRequest.class, p -> ((OnLinkRequest) p).onLink(request));
   }
 
   public final boolean dispatchOnSyncRequest(final Link link, final Boolean preemptive, final SyncRequest request) {
-    return dispatch(link, preemptive, OnSyncRequest.class, p -> {
-      ((OnSyncRequest) p).onSync(request);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, OnSyncRequest.class, p -> ((OnSyncRequest) p).onSync(request));
   }
 
   public final boolean dispatchOnUnlinkRequest(final Link link, final Boolean preemptive, final UnlinkRequest request) {
-    return dispatch(link, preemptive, OnUnlinkRequest.class, p -> {
-      ((OnUnlinkRequest) p).onUnlink(request);
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, OnUnlinkRequest.class, p -> ((OnUnlinkRequest) p).onUnlink(request));
   }
 
   public final boolean dispatchDidLink(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, DidLink.class, p -> {
-      ((DidLink) p).didLink();
-
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidLink.class, p -> ((DidLink) p).didLink());
   }
 
   public final boolean dispatchWillClear(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, WillClear.class, p -> {
-      ((WillClear) p).willClear();
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, WillClear.class, p -> ((WillClear) p).willClear());
   }
 
   public final boolean dispatchDidClear(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, DidClear.class, p -> {
-      ((DidClear) p).didClear();
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidClear.class, p -> ((DidClear) p).didClear());
   }
 
   public final boolean dispatchDidSync(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, DidSync.class, p -> {
-      ((DidSync) p).didSync();
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidSync.class, p -> ((DidSync) p).didSync());
   }
 
   public final boolean dispatchWillSync(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, WillSync.class, p -> {
-      ((WillSync) p).willSync();
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, WillSync.class, p -> ((WillSync) p).willSync());
   }
 
   public final boolean dispatchWillUnlink(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, WillUnlink.class, p -> {
-      ((WillUnlink) p).willUnlink();
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, WillUnlink.class, p -> ((WillUnlink) p).willUnlink());
   }
 
   public final boolean dispatchDidUnlink(final Link link, final Boolean preemptive) {
-    return dispatch(link, preemptive, DidUnlink.class, p -> {
-      ((DidUnlink) p).didUnlink();
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidUnlink.class, p -> ((DidUnlink) p).didUnlink());
   }
 
   public final boolean dispatchOnUnlinkedResponse(final Link link, final Boolean preemptive, final UnlinkedResponse unlinkedResponse) {
-    return dispatch(link, preemptive, OnUnlinkedResponse.class, p -> {
-      ((OnUnlinkedResponse) p).onUnlinked(unlinkedResponse);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, OnUnlinkedResponse.class, p -> ((OnUnlinkedResponse) p).onUnlinked(unlinkedResponse));
   }
 
   public final boolean dispatchOnSyncedResponse(final Link link, final Boolean preemptive, final SyncedResponse syncedResponse) {
-    return dispatch(link, preemptive, OnSyncedResponse.class, p -> {
-      ((OnSyncedResponse) p).onSynced(syncedResponse);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, OnSyncedResponse.class, p -> ((OnSyncedResponse) p).onSynced(syncedResponse));
   }
 
   public final boolean dispatchOnLinkedResponse(final Link link, final Boolean preemptive, final LinkedResponse response) {
-    return dispatch(link, preemptive, OnLinkedResponse.class, p -> {
-      ((OnLinkedResponse) p).onLinked(response);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, OnLinkedResponse.class, p -> ((OnLinkedResponse) p).onLinked(response));
   }
 
   public final boolean dispatchOnEventMessage(final Link link, final Boolean preemptive, final EventMessage message) {
-    return dispatch(link, preemptive, OnEventMessage.class, p -> {
-      ((OnEventMessage) p).onEvent(message);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, OnEventMessage.class, p -> ((OnEventMessage) p).onEvent(message));
   }
 
   @SuppressWarnings("unchecked")
   public final <V> boolean dispatchOnEvent(final Link link, final Boolean preemptive, final V v) {
-    return dispatch(link, preemptive, OnEvent.class, p -> {
-      ((OnEvent<V>) p).onEvent(v);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, OnEvent.class, p -> ((OnEvent<V>) p).onEvent(v));
   }
 
   @SuppressWarnings("unchecked")
@@ -404,149 +279,141 @@ public final class LaneObserver {
 
   @SuppressWarnings("unchecked")
   public final <L> boolean dispatchDidDownlinkValue(final Link link, L key, ValueDownlink<?> downlink, boolean preemptive) {
-    return dispatch(link, preemptive, DidDownlinkValue.class, p -> {
-      ((DidDownlinkValue<L>) p).didDownlink(key, downlink);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidDownlinkValue.class, p -> ((DidDownlinkValue<L>) p).didDownlink(key, downlink));
   }
 
   @SuppressWarnings("unchecked")
   public final <L> boolean dispatchDidDownlinkMap(final Link link, L key, MapDownlink<?, ?> downlink, boolean preemptive) {
-    DispatchResult<MapDownlink<?, ?>> dispatchResult = dispatch(link, preemptive, DidDownlinkMap.class, p -> {
-      ((DidDownlinkMap<L>) p).didDownlink(key, downlink);
-      return null;
-    });
-
-    return dispatchResult.complete;
+    return voidDispatch(link, preemptive, DidDownlinkMap.class, p -> ((DidDownlinkMap<L>) p).didDownlink(key, downlink));
   }
 
   public final boolean dispatchWillDrop(final Link link, boolean preemptive, int lower) {
-    DispatchResult<MapDownlink<?, ?>> dispatchResult = dispatch(link, preemptive, WillDrop.class, p -> {
-      ((WillDrop) p).willDrop(lower);
-      return null;
-    });
-
-    return dispatchResult.complete;
+    return voidDispatch(link, preemptive, WillDrop.class, p -> ((WillDrop) p).willDrop(lower));
   }
 
   public final boolean dispatchWillTake(final Link link, boolean preemptive, int upper) {
-    DispatchResult<MapDownlink<?, ?>> dispatchResult = dispatch(link, preemptive, WillTake.class, p -> {
-      ((WillTake) p).willTake(upper);
-      return null;
-    });
-
-    return dispatchResult.complete;
+    return voidDispatch(link, preemptive, WillTake.class, p -> ((WillTake) p).willTake(upper));
   }
 
   public final boolean dispatchDidTake(final Link link, boolean preemptive, int upper) {
-    DispatchResult<MapDownlink<?, ?>> dispatchResult = dispatch(link, preemptive, DidTake.class, p -> {
-      ((DidTake) p).didTake(upper);
-      return null;
-    });
-
-    return dispatchResult.complete;
+    return voidDispatch(link, preemptive, DidTake.class, p -> ((DidTake) p).didTake(upper));
   }
 
   public final boolean dispatchDidDrop(final Link link, boolean preemptive, int lower) {
-    DispatchResult<MapDownlink<?, ?>> dispatchResult = dispatch(link, preemptive, DidDrop.class, p -> {
-      ((DidDrop) p).didDrop(lower);
-      return null;
-    });
-
-    return dispatchResult.complete;
+    return voidDispatch(link, preemptive, DidDrop.class, p -> ((DidDrop) p).didDrop(lower));
   }
 
-  private <R> DispatchResult<R> dispatch(final Link link, final Boolean preemptive,
-                                         final Dispatcher<R> dispatcher, Observer observer) {
-    final Lane oldLane = SwimContext.getLane();
-    final Link oldLink = SwimContext.getLink();
+  private void setSwimContext(final Link link) {
+    if (lane != null) {
+      SwimContext.setLane(lane);
+    }
+    if (link != null) {
+      SwimContext.setLink(link);
+    }
+  }
 
-    try {
-      if (lane != null) {
-        SwimContext.setLane(lane);
-      }
-      if (link != null) {
-        SwimContext.setLink(link);
-      }
-
-      boolean complete = true;
-      R r = null;
-
-      if (preemptive == null || observer.isPreemptive() == preemptive) {
-        try {
-          r = dispatcher.dispatch(observer);
-        } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            laneDidFail(error);
-          }
-          throw error;
-        }
-      } else if (preemptive) {
-        complete = false;
-      }
-
-      return new DispatchResult<>(r, complete, true);
-    } finally {
-      if (lane != null) {
-        SwimContext.setLane(oldLane);
-      }
-      if (oldLink != null) {
-        SwimContext.setLink(oldLink);
-      }
+  private void clearSwimContext(final Link oldLink, final Lane oldLane) {
+    if (lane != null) {
+      SwimContext.setLane(oldLane);
+    }
+    if (oldLink != null) {
+      SwimContext.setLink(oldLink);
     }
   }
 
   private <T extends Observer, R> DispatchResult<R> dispatch(final Link link, final Boolean preemptive,
                                                              final Class<T> clazz, final Dispatcher<R> dispatcher) {
     DispatchResult<R> dispatchResult = null;
+    if (this.observers.containsKey(clazz)) {
+      for (Observer o : this.observers.get(clazz)) {
+        final Lane oldLane = SwimContext.getLane();
+        final Link oldLink = SwimContext.getLink();
 
+        try {
+          setSwimContext(link);
 
-    for (Observer o : this.observers) {
-      if (clazz.isAssignableFrom(o.getClass())) {
-        dispatchResult = dispatch(link, preemptive, dispatcher, o);
+          boolean complete = true;
+          R r = null;
+
+          if (preemptive == null || o.isPreemptive() == preemptive) {
+            try {
+              r = dispatcher.dispatch(o);
+            } catch (Throwable error) {
+              if (Conts.isNonFatal(error)) {
+                laneDidFail(error);
+              }
+              throw error;
+            }
+          } else if (preemptive) {
+            complete = false;
+          }
+
+          dispatchResult = new DispatchResult<>(r, complete, true);
+        } finally {
+          clearSwimContext(oldLink, oldLane);
+        }
       }
     }
 
     return dispatchResult == null ? new DispatchResult<>(null, true, false) : dispatchResult;
   }
 
+  private <T extends Observer> boolean voidDispatch(final Link link, final Boolean preemptive,
+                                                    final Class<T> clazz, final VoidDispatcher dispatcher) {
+    boolean complete = true;
+
+    if (this.observers.containsKey(clazz)) {
+      for (Observer o : this.observers.get(clazz)) {
+        final Lane oldLane = SwimContext.getLane();
+        final Link oldLink = SwimContext.getLink();
+
+        try {
+          setSwimContext(link);
+
+          if (preemptive == null || o.isPreemptive() == preemptive) {
+            try {
+              dispatcher.dispatch(o);
+            } catch (Throwable error) {
+              if (Conts.isNonFatal(error)) {
+                laneDidFail(error);
+              }
+              throw error;
+            }
+          } else if (preemptive) {
+            complete = false;
+          }
+
+        } finally {
+          clearSwimContext(oldLink, oldLane);
+        }
+      }
+    }
+
+    return complete;
+  }
+
   @SuppressWarnings("unchecked")
   public <V> boolean dispatchDidRemoveIndex(Link link, int index, V oldValue, boolean preemptive) {
-    return dispatch(link, preemptive, DidRemoveIndex.class, p -> {
-      ((DidRemoveIndex<V>) p).didRemove(index, oldValue);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidRemoveIndex.class, p -> ((DidRemoveIndex<V>) p).didRemove(index, oldValue));
   }
 
   public boolean dispatchWillRemoveIndex(Link link, int index, boolean preemptive) {
-    return dispatch(link, preemptive, WillRemoveIndex.class, p -> {
-      ((WillRemoveIndex) p).willRemove(index);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, WillRemoveIndex.class, p -> ((WillRemoveIndex) p).willRemove(index));
   }
 
   @SuppressWarnings("unchecked")
   public <V> boolean dispatchDidMoveIndex(Link link, int fromIndex, int toIndex, V value, boolean preemptive) {
-    return dispatch(link, preemptive, DidMoveIndex.class, p -> {
-      ((DidMoveIndex<V>) p).didMove(fromIndex, toIndex, value);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidMoveIndex.class, p -> ((DidMoveIndex<V>) p).didMove(fromIndex, toIndex, value));
   }
 
   @SuppressWarnings("unchecked")
   public <V> boolean dispatchWillMoveIndex(Link link, int fromIndex, int toIndex, V value, boolean preemptive) {
-    return dispatch(link, preemptive, WillMoveIndex.class, p -> {
-      ((WillMoveIndex<V>) p).willMove(fromIndex, toIndex, value);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, WillMoveIndex.class, p -> ((WillMoveIndex<V>) p).willMove(fromIndex, toIndex, value));
   }
 
   @SuppressWarnings("unchecked")
   public <V> boolean dispatchDidUpdateIndex(Link link, int index, V newValue, V oldValue, boolean preemptive) {
-    return dispatch(link, preemptive, DidUpdateIndex.class, p -> {
-      ((DidUpdateIndex<V>) p).didUpdate(index, newValue, oldValue);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidUpdateIndex.class, p -> ((DidUpdateIndex<V>) p).didUpdate(index, newValue, oldValue));
   }
 
   @SuppressWarnings("unchecked")
@@ -565,34 +432,22 @@ public final class LaneObserver {
 
   @SuppressWarnings("unchecked")
   public <V> boolean dispatchDidSet(Link link, V newValue, V oldValue, boolean preemptive) {
-    return dispatch(link, preemptive, DidSet.class, p -> {
-      ((DidSet<V>) p).didSet(newValue, oldValue);
-      return null;
-    }).complete;
+    return voidDispatch(link, preemptive, DidSet.class, p -> ((DidSet<V>) p).didSet(newValue, oldValue));
   }
 
   @SuppressWarnings("unchecked")
   public <V> boolean dispatchWillRespondHttp(Link link, HttpResponse<V> response, boolean preemptive) {
-    return dispatch(link, preemptive, WillRespondHttp.class, (p -> {
-      ((WillRespondHttp<V>) p).willRespond(response);
-      return null;
-    })).complete;
+    return voidDispatch(link, preemptive, WillRespondHttp.class, (p -> ((WillRespondHttp<V>) p).willRespond(response)));
   }
 
   @SuppressWarnings("unchecked")
   public <V> boolean dispatchDidRespondHttp(Link link, HttpResponse<V> response, boolean preemptive) {
-    return dispatch(link, preemptive, DidRespondHttp.class, (p -> {
-      ((DidRespondHttp<V>) p).didRespond(response);
-      return null;
-    })).complete;
+    return voidDispatch(link, preemptive, DidRespondHttp.class, (p -> ((DidRespondHttp<V>) p).didRespond(response)));
   }
 
   @SuppressWarnings("unchecked")
   public <V> boolean dispatchWillRequestHttp(Link link, HttpRequest<V> request, boolean preemptive) {
-    return dispatch(link, preemptive, WillRequestHttp.class, (p -> {
-      ((WillRequestHttp<V>) p).willRequest(request);
-      return null;
-    })).complete;
+    return voidDispatch(link, preemptive, WillRequestHttp.class, (p -> ((WillRequestHttp<V>) p).willRequest(request)));
   }
 
   @SuppressWarnings("unchecked")
@@ -603,10 +458,7 @@ public final class LaneObserver {
 
   @SuppressWarnings("unchecked")
   public <V> boolean dispatchDidRequestHttp(Link link, HttpRequest<V> request, boolean preemptive) {
-    return dispatch(link, preemptive, DidRequestHttp.class, (p -> {
-      ((DidRequestHttp<V>) p).didRequest(request);
-      return null;
-    })).complete;
+    return voidDispatch(link, preemptive, DidRequestHttp.class, (p -> ((DidRequestHttp<V>) p).didRequest(request)));
   }
 
   @SuppressWarnings("unchecked")
@@ -615,50 +467,38 @@ public final class LaneObserver {
   }
 
   public boolean dispatchWillUplink(final Link link, final boolean preemptive, final WarpUplink uplink) {
-    return dispatch(link, preemptive, WillUplink.class, (p -> {
-      ((WillUplink) p).willUplink(uplink);
-      return null;
-    })).complete;
+    return voidDispatch(link, preemptive, WillUplink.class, (p -> ((WillUplink) p).willUplink(uplink)));
   }
 
   public boolean dispatchDidUplink(final Link link, final boolean preemptive, final WarpUplink uplink) {
-    return dispatch(link, preemptive, DidUplink.class, (p -> {
-      ((DidUplink) p).didUplink(uplink);
-      return null;
-    })).complete;
+    return voidDispatch(link, preemptive, DidUplink.class, (p -> ((DidUplink) p).didUplink(uplink)));
   }
 
   public boolean dispatchWillEnter(final Link link, final boolean preemptive, final Identity identity) {
-    return dispatch(link, preemptive, WillEnter.class, (p -> {
-      ((WillEnter) p).willEnter(identity);
-      return null;
-    })).complete;
+    return voidDispatch(link, preemptive, WillEnter.class, (p -> ((WillEnter) p).willEnter(identity)));
   }
 
   public boolean dispatchDidEnter(final Link link, final boolean preemptive, final Identity identity) {
-    return dispatch(link, preemptive, DidEnter.class, (p -> {
-      ((DidEnter) p).didEnter(identity);
-      return null;
-    })).complete;
+    return voidDispatch(link, preemptive, DidEnter.class, (p -> ((DidEnter) p).didEnter(identity)));
   }
 
   public boolean dispatchWillLeave(final Link link, final boolean preemptive, final Identity identity) {
-    return dispatch(link, preemptive, WillLeave.class, (p -> {
-      ((WillLeave) p).willLeave(identity);
-      return null;
-    })).complete;
+    return voidDispatch(link, preemptive, WillLeave.class, (p -> ((WillLeave) p).willLeave(identity)));
   }
 
   public boolean dispatchDidLeave(final Link link, final boolean preemptive, final Identity identity) {
-    return dispatch(link, preemptive, DidLeave.class, (p -> {
-      ((DidLeave) p).didLeave(identity);
-      return null;
-    })).complete;
+    return voidDispatch(link, preemptive, DidLeave.class, (p -> ((DidLeave) p).didLeave(identity)));
   }
 
   public interface Dispatcher<V> {
 
     V dispatch(Observer p);
+
+  }
+
+  public interface VoidDispatcher {
+
+    void dispatch(Observer p);
 
   }
 

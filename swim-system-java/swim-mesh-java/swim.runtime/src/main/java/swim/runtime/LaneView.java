@@ -28,10 +28,6 @@ import swim.uri.Uri;
 
 public abstract class LaneView extends AbstractTierBinding implements Lane {
 
-//  static final AtomicReferenceFieldUpdater<LaneView, Object> OBSERVERS =
-//      AtomicReferenceFieldUpdater.newUpdater(LaneView.class, Object.class, "observers");
-//  protected volatile Object observers; // Observer | Observer[]
-
   protected volatile LaneObserver observers;
 
   public LaneView(LaneObserver observers) {

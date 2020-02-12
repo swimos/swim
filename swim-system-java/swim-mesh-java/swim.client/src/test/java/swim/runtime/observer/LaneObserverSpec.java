@@ -144,30 +144,6 @@ public class LaneObserverSpec {
   }
 
   @Test
-  public void testIsObserved() {
-    final LaneObserver laneObserver = new LaneObserver();
-
-    TestObserver testObserver = new TestObserver();
-    laneObserver.observe(testObserver);
-
-    assertTrue(laneObserver.observed(testObserver.getClass()));
-    assertFalse(laneObserver.observed(WillRespondHttp.class));
-  }
-
-  @Test
-  public void testUnobserve() {
-    final LaneObserver laneObserver = new LaneObserver();
-    TestObserver testObserver = new TestObserver();
-    laneObserver.observe(testObserver);
-
-    assertTrue(laneObserver.dispatchWillReceive(null, false, Value.fromObject("hello")));
-    assertTrue(laneObserver.dispatchWillClear(null, false));
-
-    laneObserver.unobserve(testObserver);
-    assertFalse(laneObserver.observed(TestObserver.class));
-  }
-
-  @Test
   public void testObserve() {
     final LaneObserver laneObserver = new LaneObserver();
     TestObserver testObserver = new TestObserver();
