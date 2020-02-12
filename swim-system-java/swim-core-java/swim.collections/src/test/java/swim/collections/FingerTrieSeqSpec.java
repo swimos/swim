@@ -146,7 +146,7 @@ public class FingerTrieSeqSpec {
   public void testPrependAndDropSeqs() {
     for (int prependCount = 0; prependCount < 128; prependCount += 1) {
       for (int dropCount = 0; dropCount < prependCount; dropCount += 1) {
-        testAppendAndDrop(prependCount, dropCount);
+        testPrependAndDrop(prependCount, dropCount);
       }
     }
   }
