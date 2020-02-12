@@ -60,6 +60,7 @@ import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.api.warp.function.WillUplink;
 import swim.codec.Decoder;
+import swim.collections.HashTrieMap;
 import swim.concurrent.Conts;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
@@ -95,11 +96,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 public final class LaneObserver {
 
-  private final Map<Class<?>, List<Observer>> observers = new ConcurrentHashMap<>();
+  @SuppressWarnings("rawtypes")
+  private static final AtomicReferenceFieldUpdater<LaneObserver, HashTrieMap> OBSERVERS =
+      AtomicReferenceFieldUpdater.newUpdater(LaneObserver.class, HashTrieMap.class, "observers");
+  private volatile HashTrieMap<Class<?>, List<Observer>> observers = HashTrieMap.empty();
   private final Lane lane;
 
   public LaneObserver() {
@@ -127,24 +131,64 @@ public final class LaneObserver {
     return interfaces;
   }
 
+  @SuppressWarnings("DuplicatedCode")
   public void unobserve(final Observer oldObserver) {
     if (oldObserver == null) {
       return;
     }
 
-    observers.values().removeIf(v -> v == oldObserver);
-    observers.entrySet().removeIf((k) -> k.getValue().size() == 0);
+    final List<Class<?>> interfaces = getObserverInterfaces(oldObserver);
+    HashTrieMap<Class<?>, List<Observer>> oldMap;
+    HashTrieMap<Class<?>, List<Observer>> newMap;
+
+    do {
+      oldMap = observers;
+      newMap = observers;
+
+      for (Class<?> c : interfaces) {
+        if (newMap.containsKey(c)) {
+          List<Observer> observers = newMap.get(c);
+          List<Observer> newObservers = new ArrayList<>(observers);
+
+          newObservers.remove(oldObserver);
+          if (newObservers.size() == 0) {
+            newMap = newMap.removed(c);
+          } else {
+            newMap = newMap.updated(c, newObservers);
+          }
+        }
+      }
+    } while (!OBSERVERS.compareAndSet(this, oldMap, newMap));
   }
 
+  @SuppressWarnings("DuplicatedCode")
   public void observe(final Observer newObserver) {
     if (newObserver == null) {
       return;
     }
 
     final List<Class<?>> interfaces = getObserverInterfaces(newObserver);
-    for (Class<?> c : interfaces) {
-      observers.computeIfAbsent(c, k -> new ArrayList<>()).add(newObserver);
-    }
+    HashTrieMap<Class<?>, List<Observer>> oldMap;
+    HashTrieMap<Class<?>, List<Observer>> newMap;
+
+    do {
+      oldMap = observers;
+      newMap = observers;
+
+      for (Class<?> c : interfaces) {
+        if (newMap.containsKey(c)) {
+          List<Observer> observers = newMap.get(c);
+          List<Observer> newObservers = new ArrayList<>(observers);
+
+          newObservers.add(newObserver);
+          newMap = newMap.updated(c, newObservers);
+        } else {
+          List<Observer> newObservers = new ArrayList<>();
+          newObservers.add(newObserver);
+          newMap = newMap.updated(c, newObservers);
+        }
+      }
+    } while (!OBSERVERS.compareAndSet(this, oldMap, newMap));
   }
 
   public void laneDidFail(final Throwable error) {
