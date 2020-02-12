@@ -74,57 +74,6 @@ public class MapDownlinkSpec {
     kernel.stop();
   }
 
-  @Test
-  public void map_benchmarkLargeInserts() throws InterruptedException {
-    System.out.println("Warming up...");
-    int count = 100_000;
-
-    for (int i = 0; i < 300; i++) {
-      if (i % 100 == 0) {
-        System.out.println("Warm up: " + i);
-      }
-      if (i != 0) {
-        setupResources();
-      }
-
-      runMap(10_000);
-      closeResources();
-      System.gc();
-    }
-
-    System.out.println("Warmed up...");
-    System.out.println("Benchmarking...");
-
-    for (int i = 1; i < 101; i++) {
-      setupResources();
-      final long dt = runMap(count);
-      closeResources();
-
-      System.gc();
-      System.out.println("Run " + i + ": " + dt);
-    }
-  }
-
-  private long runMap(int count) throws InterruptedException {
-    final MapDownlink<String, String> mapLink = getDownlink("/map/words", "map", null);
-    final CountDownLatch countDownLatch = new CountDownLatch(count);
-
-    mapLink.didUpdate((key, newValue, oldValue) -> countDownLatch.countDown());
-    final long t0 = System.currentTimeMillis();
-
-    for (int i = 0; i < count; i++) {
-      String s = Integer.toString(i);
-      mapLink.put(s, s);
-    }
-
-    countDownLatch.await(5, TimeUnit.SECONDS);
-    final long t1 = System.currentTimeMillis();
-
-    assertEquals(countDownLatch.getCount(), 0);
-
-    return t1 - t0;
-  }
-
   private MapDownlink<String, String> getDownlink(final String nodeUri, final String laneUri, final Observer observer) {
     final CountDownLatch didSyncLatch = new CountDownLatch(1);
     final MapDownlink<String, String> downlink = plane.downlinkMap()

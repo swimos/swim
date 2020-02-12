@@ -552,62 +552,6 @@ public class ListDownlinkSpec {
     assertEquals(readOnlyListLink.get(1), "1");
   }
 
-
-  @Test
-  public void benchmarkLargeInserts() throws InterruptedException {
-    System.out.println("Warming up...");
-    for (int i = 0; i < 300; i++) {
-      if (i % 100 == 0) {
-        System.out.println("Warm up: " + i);
-      }
-      if (i != 0) {
-        setTestPlane();
-      }
-
-      run(10000);
-      stop();
-      System.gc();
-    }
-
-    System.out.println("Warmed up...");
-    System.out.println("Benchmarking...");
-
-    for (int i = 1; i < 101; i++) {
-      setTestPlane();
-      final long dt = run(1_000_000);
-      stop();
-
-      System.gc();
-      System.out.println("Run " + i + ": " + dt);
-    }
-  }
-
-  private long run(int insertionCount) throws InterruptedException {
-    final CountDownLatch linkDidSync = new CountDownLatch(1);
-    final CountDownLatch linkDidUpdate = new CountDownLatch(insertionCount);
-
-    final ListDownlink<Integer> listLink = plane.downlinkList()
-        .valueClass(Integer.class)
-        .hostUri("warp://localhost:53556")
-        .nodeUri("/list/insert")
-        .laneUri("list")
-        .didSync(linkDidSync::countDown)
-        .didUpdate((index, newValue, oldValue) -> linkDidUpdate.countDown())
-        .open();
-
-    linkDidSync.await(5, TimeUnit.SECONDS);
-    final long t0 = System.currentTimeMillis();
-
-    for (int i = 0; i < insertionCount; i++) {
-      listLink.add(i);
-    }
-
-    linkDidUpdate.await(10, TimeUnit.SECONDS);
-    final long t1 = System.currentTimeMillis();
-
-    return t1 - t0;
-  }
-
   @Test
   public void testClear() throws InterruptedException {
     final int total = 3;
