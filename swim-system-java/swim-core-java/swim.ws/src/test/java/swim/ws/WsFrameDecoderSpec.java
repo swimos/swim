@@ -114,6 +114,11 @@ public class WsFrameDecoderSpec {
   }
 
   @Test
+  public void decodeEmptyCloseFrame() {
+    assertDecodes(Data.fromBase16("8800"), WsClose.empty());
+  }
+
+  @Test
   public void decodeMaxTinyFrame() {
     final int payloadSize = 125;
     final Data payload = Data.wrap(new byte[payloadSize]);
