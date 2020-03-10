@@ -36,10 +36,14 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
   }
 
   static Decoder<WsStatus> decode(InputBuffer input, int code, Decoder<String> reason, int step) {
-    if (step == 1 && input.isCont()) {
-      code = input.head() << 8;
-      input = input.step();
-      step = 2;
+    if (step == 1) {
+      if (input.isCont()) {
+        code = input.head() << 8;
+        input = input.step();
+        step = 2;
+      } else if (input.isDone()) {
+        return done(null);
+      }
     }
     if (step == 2 && input.isCont()) {
       code |= input.head();
@@ -74,5 +78,4 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
   public Decoder<WsStatus> feed(InputBuffer input) {
     return decode(input, this.code, this.reason, this.step);
   }
-
 }
