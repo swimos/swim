@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicViewObserver} from "@swim/view";
+import {GraphicsViewObserver} from "@swim/view";
 import {AxisView} from "./AxisView";
 
-export interface AxisViewObserver<D = any, V extends AxisView<D> = AxisView<D>> extends GraphicViewObserver<V> {
+export interface AxisViewObserver<D = any, V extends AxisView<D> = AxisView<D>> extends GraphicsViewObserver<V> {
 }

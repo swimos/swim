@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicViewController} from "@swim/view";
+import {GraphicsViewController} from "@swim/view";
 import {AxisView} from "./axis/AxisView";
 import {ChartView} from "./ChartView";
 import {ChartViewObserver} from "./ChartViewObserver";
 
-export class ChartViewController<X = any, Y = any, V extends ChartView<X, Y> = ChartView<X, Y>> extends GraphicViewController<V> implements ChartViewObserver<X, Y, V> {
+export class ChartViewController<X = any, Y = any, V extends ChartView<X, Y> = ChartView<X, Y>> extends GraphicsViewController<V> implements ChartViewObserver<X, Y, V> {
   topAxis(): AxisView<X> | null {
     const view = this._view;
     return view ? view.topAxis() : null;

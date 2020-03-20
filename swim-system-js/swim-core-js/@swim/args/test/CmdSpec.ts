@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Spec, Test, Exam} from "@swim/unit";
-import {Opt, Cmd} from "@swim/args";
+import {Arg, Opt, Cmd} from "@swim/args";
 
 export class CmdSpec extends Spec {
   @Test
@@ -77,10 +77,32 @@ export class CmdSpec extends Spec {
   }
 
   @Test
+  parseCmdArg(exam: Exam): void {
+    const cmd = Cmd.of("test").arg(Arg.of("path"));
+    const run = cmd.clone().parse(["test", "value"]);
+    exam.equal(run.getArg(0).value(), "value");
+    exam.equal(run.getValue(0), "value");
+  }
+
+  @Test
+  testDefaultHelpCmd(exam: Exam): void {
+    const cmd = Cmd.of("test")
+        .cmd(Cmd.of("data").desc("access data")
+            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
+            .cmd(Cmd.of("store").desc("store data"))
+            .helpCmd()
+            .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
+            .opt(Opt.of("force").desc("overwrite existing file")))
+        .helpCmd();
+    const run = cmd.clone().parse(["test"]);
+    run.run();
+  }
+
+  @Test
   testHelpCmd(exam: Exam): void {
     const cmd = Cmd.of("test")
         .cmd(Cmd.of("data").desc("access data")
-            .cmd(Cmd.of("load").desc("load data"))
+            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
             .cmd(Cmd.of("store").desc("store data"))
             .helpCmd()
             .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
@@ -94,13 +116,27 @@ export class CmdSpec extends Spec {
   testHelpSubcmd(exam: Exam): void {
     const cmd = Cmd.of("test")
         .cmd(Cmd.of("data").desc("access data")
-            .cmd(Cmd.of("load").desc("load data"))
+            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
             .cmd(Cmd.of("store").desc("store data"))
             .helpCmd()
             .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
             .opt(Opt.of("force").desc("overwrite existing file")))
         .helpCmd();
     const run = cmd.clone().parse(["test", "data", "help"]);
+    run.run();
+  }
+
+  @Test
+  testHelpCmdArg(exam: Exam): void {
+    const cmd = Cmd.of("test")
+        .cmd(Cmd.of("data").desc("access data")
+            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
+            .cmd(Cmd.of("store").desc("store data"))
+            .helpCmd()
+            .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
+            .opt(Opt.of("force").desc("overwrite existing file")))
+        .helpCmd();
+    const run = cmd.clone().parse(["test", "data", "load", "help"]);
     run.run();
   }
 }

@@ -15,13 +15,13 @@
 import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
 import {View} from "./View";
-import {RenderView} from "./RenderView";
+import {RenderedView} from "./RenderedView";
 
 export interface FillViewInit {
   fill?: AnyColor | null;
 }
 
-export interface FillView extends RenderView {
+export interface FillView extends RenderedView {
   fill(): Color | null | undefined;
   fill(value: AnyColor | null, tween?: Tween<Color>): this;
 }

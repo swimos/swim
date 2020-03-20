@@ -25,11 +25,11 @@ export class MapFieldValuesOperatorSpec extends Spec {
     output.bindInput(square);
 
     input.set("two", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     exam.equal(output.get(), new BTree().updated("two", 4));
 
     input.set("three", 3);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     exam.equal(output.get(), new BTree().updated("two", 4).updated("three", 9));
   }
 
@@ -41,15 +41,15 @@ export class MapFieldValuesOperatorSpec extends Spec {
     output.bindInput(square);
 
     input.set("number", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     exam.equal(output.get(), 4);
 
     input.set("other", 3);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     exam.equal(output.get(), 4); // updating other key has no effect
 
     input.set("number", 4);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     exam.equal(output.get(), 16);
   }
 
@@ -62,15 +62,15 @@ export class MapFieldValuesOperatorSpec extends Spec {
     output.bindInput(squarePlus1);
 
     input.set("number", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     exam.equal(output.get(), 5);
 
     input.set("other", 3);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     exam.equal(output.get(), 5); // updating other key has no effect
 
     input.set("number", 4);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     exam.equal(output.get(), 17);
   }
 }

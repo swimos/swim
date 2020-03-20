@@ -15,12 +15,12 @@
 import {Map} from "@swim/util";
 import {Value, Form} from "@swim/structure";
 import {Outlet, Inoutlet, StreamletScope, Out, Inout} from "@swim/streamlet";
-import {AbstractRecordStreamlet, Transmuter} from "@swim/dataflow";
+import {AbstractRecordStreamlet, Reifier} from "@swim/dataflow";
 import {DownlinkType, Downlink} from "./Downlink";
 import {ValueDownlink} from "./ValueDownlink";
 import {DownlinkRecord} from "./DownlinkRecord";
 import {MapDownlinkRecord} from "./MapDownlinkRecord";
-import {DownlinkTransmuter} from "./DownlinkTransmuter";
+import {DownlinkReifier} from "./DownlinkReifier";
 import {WarpRef} from "../WarpRef";
 import {client} from "..";
 
@@ -85,7 +85,7 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
     return void 0;
   }
 
-  protected onReconcile(version: number): void {
+  protected onRecohere(version: number): void {
     const hostUri = this.castInput(this.hostUri, Form.forString());
     const nodeUri = this.castInput(this.nodeUri, Form.forString());
     const laneUri = this.castInput(this.laneUri, Form.forString());
@@ -161,16 +161,16 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
     }
   }
 
-  private static _transmuter: DownlinkTransmuter | undefined;
+  private static _reifier: DownlinkReifier | undefined;
 
-  static transmuter(warp?: WarpRef): Transmuter {
+  static reifier(warp?: WarpRef): Reifier {
     if (warp === void 0) {
-      if (!DownlinkStreamlet._transmuter) {
-        DownlinkStreamlet._transmuter = new DownlinkTransmuter();
+      if (!DownlinkStreamlet._reifier) {
+        DownlinkStreamlet._reifier = new DownlinkReifier();
       }
-      return DownlinkStreamlet._transmuter;
+      return DownlinkStreamlet._reifier;
     } else {
-      return new DownlinkTransmuter(warp);
+      return new DownlinkReifier(warp);
     }
   }
 }

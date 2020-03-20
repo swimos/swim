@@ -308,7 +308,7 @@ export class Format {
    */
   static lineSeparator(): string {
     if (!Format._lineSeparator) {
-      if (typeof require === "function") {
+      if (typeof exports === "object" && typeof module !== "undefined" && typeof require === "function") {
         const os = require("os");
         if (os) {
           Format._lineSeparator = os.EOL;

@@ -68,99 +68,99 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
     // nop
   }
 
-  invalidateOutputKey(key: K, effect: KeyEffect): void {
+  decohereOutputKey(key: K, effect: KeyEffect): void {
     const oldEffects = this._effects;
     if (oldEffects.get(key) !== effect) {
-      this.willInvalidateOutputKey(key, effect);
+      this.willDecohereOutputKey(key, effect);
       this._effects = oldEffects.updated(key, effect);
       this._version = -1;
-      this.onInvalidateOutputKey(key, effect);
-      this.didInvalidateOutputKey(key, effect);
+      this.onDecohereOutputKey(key, effect);
+      this.didDecohereOutputKey(key, effect);
     }
   }
 
-  invalidateOutput(): void {
+  decohereOutput(): void {
     if (this._version >= 0) {
-      this.willInvalidateOutput();
+      this.willDecohereOutput();
       this._version = -1;
-      this.onInvalidateOutput();
-      this.didInvalidateOutput();
+      this.onDecohereOutput();
+      this.didDecohereOutput();
     }
   }
 
-  reconcileOutputKey(key: K, version: number): void {
+  recohereOutputKey(key: K, version: number): void {
     if (this._version < 0) {
       const oldEffects = this._effects;
       const effect = oldEffects.get(key);
       if (effect !== void 0) {
-        this.willReconcileOutputKey(key, effect, version);
+        this.willRecohereOutputKey(key, effect, version);
         this._effects = oldEffects.removed(key);
         if (this._input !== null) {
-          this._input.reconcileInputKey(key, version);
+          this._input.recohereInputKey(key, version);
         }
-        this.onReconcileOutputKey(key, effect, version);
-        this.didReconcileOutputKey(key, effect, version);
+        this.onRecohereOutputKey(key, effect, version);
+        this.didRecohereOutputKey(key, effect, version);
       }
     }
   }
 
-  reconcileOutput(version: number): void {
+  recohereOutput(version: number): void {
     if (this._version < 0) {
-      this.willReconcileOutput(version);
+      this.willRecohereOutput(version);
       this._effects.forEach(function (key: K): void {
-        this.reconcileOutputKey(key, version);
+        this.recohereOutputKey(key, version);
       }, this);
       this._version = version;
-      this.onReconcileOutput(version);
-      this.didReconcileOutput(version);
+      this.onRecohereOutput(version);
+      this.didRecohereOutput(version);
     }
   }
 
-  protected willInvalidateOutputKey(key: K, effect: KeyEffect): void {
-    // stub
+  protected willDecohereOutputKey(key: K, effect: KeyEffect): void {
+    // hook
   }
 
-  protected onInvalidateOutputKey(key: K, effect: KeyEffect): void {
-    // stub
+  protected onDecohereOutputKey(key: K, effect: KeyEffect): void {
+    // hook
   }
 
-  protected didInvalidateOutputKey(key: K, effect: KeyEffect): void {
-    // stub
+  protected didDecohereOutputKey(key: K, effect: KeyEffect): void {
+    // hook
   }
 
-  protected willInvalidateOutput(): void {
-    // stub
+  protected willDecohereOutput(): void {
+    // hook
   }
 
-  protected onInvalidateOutput(): void {
-    // stub
+  protected onDecohereOutput(): void {
+    // hook
   }
 
-  protected didInvalidateOutput(): void {
-    // stub
+  protected didDecohereOutput(): void {
+    // hook
   }
 
-  protected willReconcileOutputKey(key: K, effect: KeyEffect, version: number): void {
-    // stub
+  protected willRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+    // hook
   }
 
-  protected onReconcileOutputKey(key: K, effect: KeyEffect, version: number): void {
-    // stub
+  protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+    // hook
   }
 
-  protected didReconcileOutputKey(key: K, effect: KeyEffect, version: number): void {
-    // stub
+  protected didRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+    // hook
   }
 
-  protected willReconcileOutput(version: number): void {
-    // stub
+  protected willRecohereOutput(version: number): void {
+    // hook
   }
 
-  protected onReconcileOutput(version: number): void {
-    // stub
+  protected onRecohereOutput(version: number): void {
+    // hook
   }
 
-  protected didReconcileOutput(version: number): void {
-    // stub
+  protected didRecohereOutput(version: number): void {
+    // hook
   }
 }

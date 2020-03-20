@@ -20,7 +20,7 @@ import {RecordOutlet} from "./RecordOutlet";
 import {RecordStreamlet} from "./RecordStreamlet";
 import {AbstractRecordOutlet} from "./AbstractRecordOutlet";
 import {RecordFieldUpdater} from "./RecordFieldUpdater";
-import {Transmuter} from "./Transmuter";
+import {Reifier} from "./Reifier";
 
 export class RecordModel extends AbstractRecordOutlet {
   /** @hidden */
@@ -157,7 +157,7 @@ export class RecordModel extends AbstractRecordOutlet {
     } else {
       this._state.set(key, newValue);
     }
-    this.invalidateInputKey(key, KeyEffect.Update);
+    this.decohereInputKey(key, KeyEffect.Update);
     return this;
   }
 
@@ -173,7 +173,7 @@ export class RecordModel extends AbstractRecordOutlet {
     } else {
       this._state.setAttr(key, newValue);
     }
-    this.invalidateInputKey(key, KeyEffect.Update);
+    this.decohereInputKey(key, KeyEffect.Update);
     return this;
   }
 
@@ -189,7 +189,7 @@ export class RecordModel extends AbstractRecordOutlet {
     } else {
       this._state.setSlot(key, newValue);
     }
-    this.invalidateInputKey(key, KeyEffect.Update);
+    this.decohereInputKey(key, KeyEffect.Update);
     return this;
   }
 
@@ -199,17 +199,17 @@ export class RecordModel extends AbstractRecordOutlet {
     this._state.setItem(index, newItem);
     if (oldItem instanceof Field && newItem instanceof Field) {
       if (oldItem.key.equals(newItem.key)) {
-        this.invalidateInputKey(oldItem.key, KeyEffect.Update);
+        this.decohereInputKey(oldItem.key, KeyEffect.Update);
       } else {
-        this.invalidateInputKey(oldItem.key, KeyEffect.Remove);
-        this.invalidateInputKey(newItem.key, KeyEffect.Update);
+        this.decohereInputKey(oldItem.key, KeyEffect.Remove);
+        this.decohereInputKey(newItem.key, KeyEffect.Update);
       }
     } else if (oldItem instanceof Field) {
-      this.invalidateInputKey(oldItem.key, KeyEffect.Remove);
+      this.decohereInputKey(oldItem.key, KeyEffect.Remove);
     } else if (newItem instanceof Field) {
-      this.invalidateInputKey(newItem.key, KeyEffect.Update);
+      this.decohereInputKey(newItem.key, KeyEffect.Update);
     } else {
-      this.invalidateInput();
+      this.decohereInput();
     }
     return this;
   }
@@ -220,7 +220,7 @@ export class RecordModel extends AbstractRecordOutlet {
     while (i < n) {
       const newItem = this._state.get(i);
       if (newItem instanceof Field) {
-        this.invalidateInputKey(newItem.key, KeyEffect.Update);
+        this.decohereInputKey(newItem.key, KeyEffect.Update);
       }
       i += 1;
     }
@@ -238,13 +238,13 @@ export class RecordModel extends AbstractRecordOutlet {
     for (let i = 0; i < deleted.length; i += 1) {
       const oldItem = deleted[i];
       if (oldItem instanceof Field) {
-        this.invalidateInputKey(oldItem.key, KeyEffect.Remove);
+        this.decohereInputKey(oldItem.key, KeyEffect.Remove);
       }
     }
     for (let i = start; i < start + newItems.length; i += 1) {
       const newItem = this._state.get(i);
       if (newItem instanceof Field) {
-        this.invalidateInputKey(newItem.key, KeyEffect.Update);
+        this.decohereInputKey(newItem.key, KeyEffect.Update);
       }
     }
     return deleted;
@@ -253,7 +253,7 @@ export class RecordModel extends AbstractRecordOutlet {
   delete(key: AnyValue): Item {
     const oldItem = this._state.delete(key);
     if (oldItem instanceof Field) {
-      this.invalidateInputKey(oldItem.key, KeyEffect.Remove);
+      this.decohereInputKey(oldItem.key, KeyEffect.Remove);
     }
     return oldItem;
   }
@@ -263,7 +263,7 @@ export class RecordModel extends AbstractRecordOutlet {
     this._state.clear();
     oldState.forEach(function (oldItem: Item): void {
       if (oldItem instanceof Field) {
-        this.invalidateInputKey(oldItem.key, KeyEffect.Remove);
+        this.decohereInputKey(oldItem.key, KeyEffect.Remove);
       }
     }, this);
   }
@@ -357,13 +357,13 @@ export class RecordModel extends AbstractRecordOutlet {
       if (value instanceof RecordStreamlet) {
         // Lexically bind nested streamlet.
         value.compile();
-        // Invalidate nested scope key.
-        this.invalidateInputKey(key, KeyEffect.Update);
+        // Decohere nested scope key.
+        this.decohereInputKey(key, KeyEffect.Update);
       } else if (value instanceof Record) {
         // Recursively compile nested scope.
         (this._state.getItem(index).toValue() as RecordModel).compile(value);
-        // Invalidate nested scope key.
-        this.invalidateInputKey(key, KeyEffect.Update);
+        // Decohere nested scope key.
+        this.decohereInputKey(key, KeyEffect.Update);
       } else {
         // Set placeholder value.
         field.setValue(Value.extant());
@@ -371,8 +371,8 @@ export class RecordModel extends AbstractRecordOutlet {
         this.bindValue(key, value);
       }
     } else {
-      // Invalidate constant key.
-      this.invalidateInputKey(key, KeyEffect.Update);
+      // Decohere constant key.
+      this.decohereInputKey(key, KeyEffect.Update);
     }
   }
 
@@ -389,51 +389,21 @@ export class RecordModel extends AbstractRecordOutlet {
     }
   }
 
-  transmute(transmuter: Transmuter | null = Transmuter.system()): void {
+  reify(reifier: Reifier | null = Reifier.system()): void {
     this.forEach(function (oldItem: Item, index: number): void {
-      const newItem = this.transmuteItem(oldItem, transmuter);
+      const newItem = this.reifyItem(oldItem, reifier);
       if (oldItem !== newItem) {
         this.setItem(index, newItem);
       }
     }, this);
   }
 
-  transmuteItem(item: Item, transmuter: Transmuter | null): Item {
-    if (item instanceof Field) {
-      return this.transmuteField(item, transmuter);
-    } else {
-      return this.transmuteValue(item, transmuter);
-    }
-  }
-
-  transmuteField(field: Field, transmuter: Transmuter | null): Field {
-    const oldValue = field.value;
-    const newValue = this.transmuteValue(oldValue, transmuter);
-    if (oldValue !== newValue) {
-      return field.updatedValue(newValue);
-    } else {
-      return field;
-    }
-  }
-
-  transmuteValue(oldValue: Value, transmuter: Transmuter | null): Value {
-    if (oldValue instanceof RecordModel) {
-      let newValue = this.transmuteModel(oldValue);
-      if (oldValue === newValue && transmuter) {
-        newValue = transmuter.transmute(oldValue);
-      }
-      return newValue;
-    } else {
-      return oldValue;
-    }
-  }
-
-  transmuteModel(model: RecordModel): Record {
+  reifyItem(item: Item, reifier: Reifier | null): Item {
     const scope = this.streamletScope();
     if (scope instanceof RecordModel) {
-      return scope.transmuteModel(model);
+      return scope.reifyItem(item, reifier);
     } else {
-      return model;
+      return item;
     }
   }
 

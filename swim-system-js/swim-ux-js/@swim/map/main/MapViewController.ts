@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {View, RenderViewController} from "@swim/view";
+import {View, RenderedViewController} from "@swim/view";
 import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
 import {MapViewObserver} from "./MapViewObserver";
 
-export interface MapViewController<V extends MapView = MapView> extends RenderViewController<V>, MapViewObserver<V> {
+export interface MapViewController<V extends MapView = MapView> extends RenderedViewController<V>, MapViewObserver<V> {
   readonly view: V | null;
 
   setView(view: V | null): void;

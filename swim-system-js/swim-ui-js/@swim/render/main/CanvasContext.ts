@@ -14,7 +14,7 @@
 
 import {DrawingContext} from "./DrawingContext";
 
-export interface RenderingContext extends DrawingContext {
+export interface CanvasContext extends DrawingContext {
   save(): void;
   restore(): void;
 

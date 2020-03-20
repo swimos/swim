@@ -12,9 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicViewObserver} from "@swim/view";
-import {MapViewObserver} from "./MapViewObserver";
-import {MapGraphicView} from "./MapGraphicView";
+import {MapGraphicsViewObserver} from "@swim/map";
+import {GoogleMapProjection} from "./GoogleMapProjection";
+import {GoogleMapView} from "./GoogleMapView";
 
-export interface MapGraphicViewObserver<V extends MapGraphicView = MapGraphicView> extends GraphicViewObserver<V>, MapViewObserver<V> {
+export interface GoogleMapViewObserver<V extends GoogleMapView = GoogleMapView> extends MapGraphicsViewObserver<V> {
+  viewWillSetProjection?(projection: GoogleMapProjection, view: V): void;
+
+  viewDidSetProjection?(projection: GoogleMapProjection, view: V): void;
+
+  viewWillSetZoom?(zoom: number, view: V): void;
+
+  viewDidSetZoom?(newZoom: number, oldZoom: number, view: V): void;
 }

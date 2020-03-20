@@ -17,8 +17,8 @@ import {PointR2, BoxR2} from "@swim/math";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {ContinuousScale} from "@swim/scale";
-import {RenderingContext} from "@swim/render";
-import {MemberAnimator, ViewInit, View, RenderViewContext, GraphicView} from "@swim/view";
+import {CanvasRenderer, CanvasContext} from "@swim/render";
+import {MemberAnimator, ViewInit, View, RenderedViewContext, GraphicsView} from "@swim/view";
 import {AxisView} from "../axis/AxisView";
 import {AnyDatumView, DatumView} from "../data/DatumView";
 import {PlotViewController} from "./PlotViewController";
@@ -42,7 +42,7 @@ export interface PlotViewInit<X, Y> extends ViewInit {
   textColor?: AnyColor | null;
 }
 
-export abstract class PlotView<X, Y> extends GraphicView {
+export abstract class PlotView<X, Y> extends GraphicsView {
   /** @hidden */
   _viewController: PlotViewController<X, Y> | null;
 
@@ -121,20 +121,20 @@ export abstract class PlotView<X, Y> extends GraphicView {
   @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
-  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+  needsUpdate(updateFlags: number, viewContext: RenderedViewContext): number {
     if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
       updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout | View.NeedsRender;
     }
     return updateFlags;
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.font.onFrame(t);
     this.textColor.onFrame(t);
   }
 
-  protected onLayout(viewContext: RenderViewContext): void {
+  protected onLayout(viewContext: RenderedViewContext): void {
     if (this._xAxis && this._yAxis) {
       this.layoutData(this._xAxis.scale.value!, this._yAxis.scale.value!, this._bounds, this._anchor);
     }
@@ -241,33 +241,42 @@ export abstract class PlotView<X, Y> extends GraphicView {
     }
   }
 
-  protected willUpdate(viewContext: RenderViewContext): void {
+  protected willUpdate(viewContext: RenderedViewContext): void {
     super.willUpdate(viewContext);
-    const context = viewContext.renderingContext;
-    context.save();
-    this.clipPlot(context, this._bounds);
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      this.clipPlot(context, this._bounds);
+    }
   }
 
-  protected onRender(viewContext: RenderViewContext): void {
-    const context = viewContext.renderingContext;
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    this.renderPlot(context, bounds, anchor);
+  protected onRender(viewContext: RenderedViewContext): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      const bounds = this._bounds;
+      const anchor = this._anchor;
+      this.renderPlot(context, bounds, anchor);
+    }
   }
 
-  protected didUpdate(viewContext: RenderViewContext): void {
-    const context = viewContext.renderingContext;
-    context.restore();
+  protected didUpdate(viewContext: RenderedViewContext): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.restore();
+    }
     super.didUpdate(viewContext);
   }
 
-  protected clipPlot(context: RenderingContext, bounds: BoxR2): void {
+  protected clipPlot(context: CanvasContext, bounds: BoxR2): void {
     context.beginPath();
     context.rect(bounds.x, bounds.y, bounds.width, bounds.height);
     context.clip();
   }
 
-  protected abstract renderPlot(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void;
+  protected abstract renderPlot(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void;
 
   static fromAny<X, Y>(plot: AnyPlotView<X, Y>): PlotView<X, Y> {
     if (plot instanceof PlotView) {

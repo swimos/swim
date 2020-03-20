@@ -29,7 +29,7 @@ export abstract class ReduceFieldsOperator<K, V, I, O> extends AbstractMapInletO
     return this._state.reduced(this.identity(), this.accumulate.bind(this), this.combine.bind(this));
   }
 
-  protected onReconcileOutputKey(key: K, effect: KeyEffect, version: number): void {
+  protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
       if (this._input !== null) {
         const value = this._input.get(key);

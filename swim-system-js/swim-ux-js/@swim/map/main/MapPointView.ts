@@ -17,21 +17,21 @@ import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
-import {RenderingContext} from "@swim/render";
-import {MemberAnimator, View, RenderView, TypesetView} from "@swim/view";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
+import {MemberAnimator, View, RenderedView, TypesetView} from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 import {AnyLngLat, LngLat} from "./LngLat";
 import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
-import {MapGraphicView} from "./MapGraphicView";
-import {MapGraphicViewController} from "./MapGraphicViewController";
+import {MapGraphicsView} from "./MapGraphicsView";
+import {MapGraphicsViewController} from "./MapGraphicsViewController";
 import {MapPointLabelPlacement, AnyMapPoint} from "./MapPoint";
 
 export type AnyMapPointView = MapPointView | AnyMapPoint;
 
-export class MapPointView extends MapGraphicView {
+export class MapPointView extends MapGraphicsView {
   /** @hidden */
-  _viewController: MapGraphicViewController<MapPointView> | null;
+  _viewController: MapGraphicsViewController<MapPointView> | null;
   /** @hidden */
   _hitRadius: number;
   /** @hidden */
@@ -44,7 +44,7 @@ export class MapPointView extends MapGraphicView {
     this._labelPlacement = "auto";
   }
 
-  get viewController(): MapGraphicViewController<MapPointView> | null {
+  get viewController(): MapGraphicsViewController<MapPointView> | null {
     return this._viewController;
   }
 
@@ -167,7 +167,7 @@ export class MapPointView extends MapGraphicView {
     const culled = invalid || !bounds.intersectsPoint(anchor);
 
     const label = this.label();
-    if (RenderView.is(label)) {
+    if (RenderedView.is(label)) {
       this.layoutLabel(label, this._bounds, this._anchor);
     }
 
@@ -175,7 +175,7 @@ export class MapPointView extends MapGraphicView {
     this.layoutChildViews(viewContext);
   }
 
-  protected layoutLabel(label: RenderView, bounds: BoxR2, anchor: PointR2): void {
+  protected layoutLabel(label: RenderedView, bounds: BoxR2, anchor: PointR2): void {
     const placement = this._labelPlacement;
     // TODO: auto placement
 
@@ -197,18 +197,20 @@ export class MapPointView extends MapGraphicView {
     }
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: MapViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      const bounds = this._bounds;
-      const anchor = this._anchor;
-      hit = this.hiteTestPoint(x, y, context, bounds, anchor);
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        hit = this.hiteTestPoint(x, y, context, this._bounds, this._anchor);
+      }
     }
     return hit;
   }
 
-  protected hiteTestPoint(x: number, y: number, context: RenderingContext,
-                          bounds: BoxR2, anchor: PointR2): RenderView | null {
+  protected hiteTestPoint(x: number, y: number, context: CanvasContext,
+                          bounds: BoxR2, anchor: PointR2): RenderedView | null {
     let hitRadius = this._hitRadius;
     const radius = this.r.value;
     if (radius) {

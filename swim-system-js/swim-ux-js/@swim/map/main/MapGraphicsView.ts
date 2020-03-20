@@ -13,16 +13,16 @@
 // limitations under the License.
 
 import {BoxR2} from "@swim/math";
-import {View, RenderViewContext, RenderView, GraphicView} from "@swim/view";
+import {View, RenderedViewContext, RenderedView, GraphicsView} from "@swim/view";
 import {MapProjection} from "./MapProjection";
 import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
 import {MapViewObserver} from "./MapViewObserver";
-import {MapGraphicViewController} from "./MapGraphicViewController";
+import {MapGraphicsViewController} from "./MapGraphicsViewController";
 
-export class MapGraphicView extends GraphicView implements MapView {
+export class MapGraphicsView extends GraphicsView implements MapView {
   /** @hidden */
-  _viewController: MapGraphicViewController | null;
+  _viewController: MapGraphicsViewController | null;
   /** @Hidden */
   _hitBounds: BoxR2 | null;
 
@@ -31,7 +31,7 @@ export class MapGraphicView extends GraphicView implements MapView {
     this._hitBounds = null;
   }
 
-  get viewController(): MapGraphicViewController | null {
+  get viewController(): MapGraphicsViewController | null {
     return this._viewController;
   }
 
@@ -43,6 +43,16 @@ export class MapGraphicView extends GraphicView implements MapView {
   get zoom(): number {
     const parentView = this.parentView;
     return MapView.is(parentView) ? parentView.zoom : 0;
+  }
+
+  get heading(): number {
+    const parentView = this.parentView;
+    return MapView.is(parentView) ? parentView.heading : 0;
+  }
+
+  get tilt(): number {
+    const parentView = this.parentView;
+    return MapView.is(parentView) ? parentView.tilt : 0;
   }
 
   needsUpdate(updateFlags: number, viewContext: MapViewContext): number {
@@ -116,8 +126,8 @@ export class MapGraphicView extends GraphicView implements MapView {
     });
   }
 
-  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
-    if (RenderView.is(childView)) {
+  protected layoutChildView(childView: View, viewContext: RenderedViewContext): void {
+    if (RenderedView.is(childView)) {
       childView.setBounds(this._bounds);
       // Don't set anchor.
     }
@@ -136,7 +146,7 @@ export class MapGraphicView extends GraphicView implements MapView {
     const childViews = this._childViews;
     for (let i = 0, n = childViews.length; i < n; i += 1) {
       const childView = childViews[i];
-      if (RenderView.is(childView)) {
+      if (RenderedView.is(childView)) {
         const childHitBounds = childView.hitBounds;
         if (childHitBounds) {
           hitBounds = hitBounds ? hitBounds.union(childHitBounds) : childHitBounds;

@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface DrawingContext {
+import {GraphicsContext} from "./GraphicsContext";
+
+export interface DrawingContext extends GraphicsContext {
   moveTo(x: number, y: number): void;
 
   closePath(): void;

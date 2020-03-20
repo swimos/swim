@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicViewController} from "./GraphicViewController";
+import {GraphicsViewController} from "./GraphicsViewController";
 import {LayerView} from "./LayerView";
 import {LayerViewObserver} from "./LayerViewObserver";
 
-export class LayerViewController<V extends LayerView = LayerView> extends GraphicViewController<V> implements LayerViewObserver<V> {
+export class LayerViewController<V extends LayerView = LayerView> extends GraphicsViewController<V> implements LayerViewObserver<V> {
 }

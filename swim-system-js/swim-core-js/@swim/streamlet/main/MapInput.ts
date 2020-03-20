@@ -46,7 +46,7 @@ export class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
   set(key: K, newValue: V): V | undefined {
     const oldValue = this._state.get(key);
     this._state = this._state.updated(key, newValue);
-    this.invalidateInputKey(key, KeyEffect.Update);
+    this.decohereInputKey(key, KeyEffect.Update);
     return oldValue;
   }
 
@@ -55,7 +55,7 @@ export class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
     const newState = oldState.removed(key);
     if (oldState !== newState) {
       this._state = newState;
-      this.invalidateInputKey(key, KeyEffect.Remove);
+      this.decohereInputKey(key, KeyEffect.Remove);
     }
     return this;
   }

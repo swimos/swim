@@ -21,8 +21,8 @@ import {NumberInterpolator} from "@swim/interpolate";
 import {ContinuousScale, LinearScale, TimeScale} from "@swim/scale";
 import {Tween, AnyTransition, Transition} from "@swim/transition";
 import {StyleValue} from "@swim/style";
-import {RenderingContext} from "@swim/render";
-import {MemberAnimator, ViewInit, View, RenderViewContext, GraphicView} from "@swim/view";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
+import {MemberAnimator, ViewInit, View, RenderedViewContext, GraphicsView} from "@swim/view";
 import {AnyTickView, TickView} from "../tick/TickView";
 import {TickGenerator} from "../tick/TickGenerator";
 import {AxisViewController} from "./AxisViewController";
@@ -61,7 +61,7 @@ export interface AxisViewInit<D> extends ViewInit {
   textColor?: AnyColor | null;
 }
 
-export abstract class AxisView<D> extends GraphicView {
+export abstract class AxisView<D> extends GraphicsView {
   /** @hidden */
   _viewController: AxisViewController<D> | null;
 
@@ -207,29 +207,35 @@ export abstract class AxisView<D> extends GraphicView {
     }
   }
 
-  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+  needsUpdate(updateFlags: number, viewContext: RenderedViewContext): number {
     if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
       updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout | View.NeedsRender;
     }
     return updateFlags;
   }
 
-  protected willUpdate(viewContext: RenderViewContext): void {
+  protected willUpdate(viewContext: RenderedViewContext): void {
     super.willUpdate(viewContext);
-    const context = viewContext.renderingContext;
-    context.save();
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+    }
   }
 
-  protected didUpdate(viewContext: RenderViewContext): void {
-    const context = viewContext.renderingContext;
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    this.renderDomain(context, bounds, anchor);
-    context.restore();
+  protected didUpdate(viewContext: RenderedViewContext): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      const bounds = this._bounds;
+      const anchor = this._anchor;
+      this.renderDomain(context, bounds, anchor);
+      context.restore();
+    }
     super.didUpdate(viewContext);
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.scale.onFrame(t);
 
@@ -250,7 +256,7 @@ export abstract class AxisView<D> extends GraphicView {
     this.textColor.onFrame(t);
   }
 
-  protected onLayout(viewContext: RenderViewContext): void {
+  protected onLayout(viewContext: RenderedViewContext): void {
     if (this._tickGenerator) {
       this.generateTicks(this._tickGenerator);
       this.layoutTicks(this._bounds, this._anchor);
@@ -339,7 +345,7 @@ export abstract class AxisView<D> extends GraphicView {
     }
   }
 
-  protected abstract renderDomain(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void;
+  protected abstract renderDomain(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void;
 
   protected layoutTicks(bounds: BoxR2, anchor: PointR2): void {
     const childViews = this._childViews;
@@ -366,7 +372,7 @@ export abstract class AxisView<D> extends GraphicView {
     }
   }
 
-  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
+  protected layoutChildView(childView: View, viewContext: RenderedViewContext): void {
     if (childView instanceof TickView) {
       this.layoutTick(childView, this._bounds, this._anchor);
     } else {

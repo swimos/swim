@@ -15,7 +15,7 @@
 import {AbstractInlet} from "../AbstractInlet";
 
 export abstract class WatchValueOperator<I> extends AbstractInlet<I> {
-  onReconcileOutput(version: number): void {
+  onRecohereOutput(version: number): void {
     if (this._input !== null) {
       this.evaluate(this._input.get());
     }

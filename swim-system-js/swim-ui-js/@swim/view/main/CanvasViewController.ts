@@ -13,23 +13,71 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {RenderViewContext} from "./RenderViewContext";
-import {RenderViewController} from "./RenderViewController";
+import {RenderedViewContext} from "./RenderedViewContext";
+import {RenderedViewController} from "./RenderedViewController";
 import {HtmlViewController} from "./HtmlViewController";
 import {ViewCanvas, CanvasView} from "./CanvasView";
 import {CanvasViewObserver} from "./CanvasViewObserver";
 
-export class CanvasViewController<V extends CanvasView = CanvasView> extends HtmlViewController<V> implements RenderViewController<V>, CanvasViewObserver<V> {
+export class CanvasViewController<V extends CanvasView = CanvasView> extends HtmlViewController<V> implements RenderedViewController<V>, CanvasViewObserver<V> {
   get node(): ViewCanvas | null {
     const view = this._view;
     return view ? view.node : null;
   }
 
-  viewWillRender(context: RenderViewContext, view: V): void {
+  viewWillUpdate(viewContext: RenderedViewContext, view: V): void {
     // hook
   }
 
-  viewDidRender(context: RenderViewContext, view: V): void {
+  viewDidUpdate(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillCompute(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidCompute(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillAnimate(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidAnimate(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillLayout(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidLayout(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillScroll(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidScroll(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillRender(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidRender(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillUpdateChildViews(viewContext: RenderedViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidUpdateChildViews(viewContext: RenderedViewContext, view: V): void {
     // hook
   }
 

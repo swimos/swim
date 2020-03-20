@@ -14,7 +14,7 @@
 
 import {PointR2, BoxR2} from "@swim/math";
 import {ContinuousScale} from "@swim/scale";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext} from "@swim/render";
 import {TickView} from "../tick/TickView";
 import {AxisOrientation, AxisView} from "./AxisView";
 
@@ -27,7 +27,7 @@ export class BottomAxisView<D> extends AxisView<D> {
     return "bottom";
   }
 
-  protected renderDomain(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderDomain(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const ax = anchor.x;
     const ay = anchor.y;
     const [x0, x1] = this.scale.value!.range();

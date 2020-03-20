@@ -16,11 +16,11 @@ import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont} from "@swim/font";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
-  RenderViewContext,
+  RenderedViewContext,
   FillViewInit,
   FillView,
   StrokeViewInit,
@@ -102,7 +102,7 @@ export class BubblePlotView<X, Y> extends PlotView<X, Y> implements FillView, St
     }
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.radius.onFrame(t);
     this.fill.onFrame(t);
@@ -111,7 +111,7 @@ export class BubblePlotView<X, Y> extends PlotView<X, Y> implements FillView, St
     super.onAnimate(viewContext);
   }
 
-  protected renderPlot(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderPlot(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const size = Math.min(bounds.width, bounds.height);
     const radius = this.radius.value!;
     const fill = this.fill.value;

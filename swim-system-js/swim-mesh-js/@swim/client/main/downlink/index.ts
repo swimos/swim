@@ -58,4 +58,4 @@ export {MapDownlinkRecord} from "./MapDownlinkRecord";
 export {ValueDownlinkRecord} from "./ValueDownlinkRecord";
 
 export {DownlinkStreamlet} from "./DownlinkStreamlet";
-export {DownlinkTransmuter} from "./DownlinkTransmuter";
+export {DownlinkReifier} from "./DownlinkReifier";

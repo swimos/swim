@@ -15,22 +15,21 @@
 import {PointR2, BoxR2} from "@swim/math";
 import {Transform} from "@swim/transform";
 import {Animator} from "@swim/animate";
-import {RenderingContext} from "@swim/render";
+import {Renderer} from "@swim/render";
 import {ViewEvent, ViewMouseEvent, ViewEventHandler} from "./ViewEvent";
 import {View} from "./View";
 import {ViewObserver} from "./ViewObserver";
-import {AnimatedViewObserver} from "./AnimatedViewObserver";
-import {RenderViewContext} from "./RenderViewContext";
-import {RenderView} from "./RenderView";
-import {RenderViewObserver} from "./RenderViewObserver";
-import {GraphicViewController} from "./GraphicViewController";
+import {RenderedViewContext} from "./RenderedViewContext";
+import {RenderedView} from "./RenderedView";
+import {GraphicsViewObserver} from "./GraphicsViewObserver";
+import {GraphicsViewController} from "./GraphicsViewController";
 import {CanvasView} from "./CanvasView";
 
-export class GraphicView extends View implements RenderView {
+export class GraphicsView extends View implements RenderedView {
   /** @hidden */
   _key: string | null;
   /** @hidden */
-  _viewController: GraphicViewController | null;
+  _viewController: GraphicsViewController | null;
   /** @hidden */
   readonly _viewObservers: ViewObserver[];
   /** @hidden */
@@ -85,11 +84,11 @@ export class GraphicView extends View implements RenderView {
     }
   }
 
-  get viewController(): GraphicViewController | null {
+  get viewController(): GraphicsViewController | null {
     return this._viewController;
   }
 
-  setViewController(viewController: GraphicViewController | null): void {
+  setViewController(viewController: GraphicsViewController | null): void {
     if (this._viewController !== viewController) {
       this.willSetViewController(viewController);
       if (this._viewController) {
@@ -137,21 +136,7 @@ export class GraphicView extends View implements RenderView {
 
   get canvasView(): CanvasView | null {
     const parentView = this.parentView;
-    return RenderView.is(parentView) ? parentView.canvasView : null;
-  }
-
-  get renderingContext(): RenderingContext | null {
-    const parentView = this.parentView;
-    return RenderView.is(parentView) ? parentView.renderingContext : null;
-  }
-
-  get pixelRatio(): number {
-    const parentView = this._parentView;
-    if (RenderView.is(parentView)) {
-      return parentView.pixelRatio;
-    } else {
-      return window.devicePixelRatio || 1;
-    }
+    return RenderedView.is(parentView) ? parentView.canvasView : null;
   }
 
   get parentView(): View | null {
@@ -182,7 +167,7 @@ export class GraphicView extends View implements RenderView {
   }
 
   setChildView(key: string, newChildView: View | null): View | null {
-    if (newChildView !== null && !RenderView.is(newChildView)) {
+    if (newChildView !== null && !RenderedView.is(newChildView)) {
       throw new TypeError("" + newChildView);
     }
     let oldChildView: View | null = null;
@@ -218,13 +203,13 @@ export class GraphicView extends View implements RenderView {
     return oldChildView;
   }
 
-  append(child: RenderView): typeof child {
+  append(child: RenderedView): typeof child {
     this.appendChildView(child);
     return child;
   }
 
   appendChildView(childView: View): void {
-    if (!RenderView.is(childView)) {
+    if (!RenderedView.is(childView)) {
       throw new TypeError("" + childView);
     }
     this.willInsertChildView(childView, null);
@@ -234,13 +219,13 @@ export class GraphicView extends View implements RenderView {
     this.didInsertChildView(childView, null);
   }
 
-  prepend(child: RenderView): typeof child {
+  prepend(child: RenderedView): typeof child {
     this.prependChildView(child);
     return child;
   }
 
   prependChildView(childView: View): void {
-    if (!RenderView.is(childView)) {
+    if (!RenderedView.is(childView)) {
       throw new TypeError("" + childView);
     }
     this.willInsertChildView(childView, null);
@@ -250,16 +235,16 @@ export class GraphicView extends View implements RenderView {
     this.didInsertChildView(childView, null);
   }
 
-  insert(child: RenderView, target: View | null): typeof child {
+  insert(child: RenderedView, target: View | null): typeof child {
     this.insertChildView(child, target);
     return child;
   }
 
   insertChildView(childView: View, targetView: View | null): void {
-    if (!RenderView.is(childView)) {
+    if (!RenderedView.is(childView)) {
       throw new TypeError("" + childView);
     }
-    if (targetView !== null && !RenderView.is(childView)) {
+    if (targetView !== null && !RenderedView.is(childView)) {
       throw new TypeError("" + targetView);
     }
     if (targetView !== null && targetView.parentView !== this) {
@@ -279,7 +264,7 @@ export class GraphicView extends View implements RenderView {
   }
 
   removeChildView(childView: View): void {
-    if (!RenderView.is(childView)) {
+    if (!RenderedView.is(childView)) {
       throw new TypeError("" + childView);
     }
     if (childView.parentView !== this) {
@@ -348,6 +333,11 @@ export class GraphicView extends View implements RenderView {
     }
   }
 
+  get renderer(): Renderer | null {
+    const parentView = this.parentView;
+    return RenderedView.is(parentView) ? parentView.renderer : null;
+  }
+
   /** @hidden */
   get updateFlags(): number {
     return this._updateFlags;
@@ -358,21 +348,21 @@ export class GraphicView extends View implements RenderView {
     this._updateFlags = updateFlags;
   }
 
-  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+  needsUpdate(updateFlags: number, viewContext: RenderedViewContext): number {
     if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
       updateFlags = updateFlags | View.NeedsRender;
     }
     return updateFlags;
   }
 
-  cascadeUpdate(updateFlags: number, viewContext: RenderViewContext): void {
+  cascadeUpdate(updateFlags: number, viewContext: RenderedViewContext): void {
     updateFlags = updateFlags | this.updateFlags;
     updateFlags = this.needsUpdate(updateFlags, viewContext);
     this.doUpdate(updateFlags, viewContext);
   }
 
   /** @hidden */
-  doUpdate(updateFlags: number, viewContext: RenderViewContext): void {
+  doUpdate(updateFlags: number, viewContext: RenderedViewContext): void {
     this.willUpdate(viewContext);
     if (((updateFlags | this._updateFlags) & View.NeedsCompute) !== 0) {
       this._updateFlags = this._updateFlags & ~View.NeedsCompute;
@@ -400,7 +390,7 @@ export class GraphicView extends View implements RenderView {
   }
 
   /** @hidden */
-  doAnimate(viewContext: RenderViewContext): void {
+  doAnimate(viewContext: RenderedViewContext): void {
     if (this.parentView) {
       this.willAnimate(viewContext);
       this.onAnimate(viewContext);
@@ -408,20 +398,20 @@ export class GraphicView extends View implements RenderView {
     }
   }
 
-  protected willAnimate(viewContext: RenderViewContext): void {
-    this.willObserve(function (viewObserver: AnimatedViewObserver): void {
+  protected willAnimate(viewContext: RenderedViewContext): void {
+    this.willObserve(function (viewObserver: GraphicsViewObserver): void {
       if (viewObserver.viewWillAnimate) {
         viewObserver.viewWillAnimate(viewContext, this);
       }
     });
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     // hook
   }
 
-  protected didAnimate(viewContext: RenderViewContext): void {
-    this.didObserve(function (viewObserver: AnimatedViewObserver): void {
+  protected didAnimate(viewContext: RenderedViewContext): void {
+    this.didObserve(function (viewObserver: GraphicsViewObserver): void {
       if (viewObserver.viewDidAnimate) {
         viewObserver.viewDidAnimate(viewContext, this);
       }
@@ -429,7 +419,7 @@ export class GraphicView extends View implements RenderView {
   }
 
   /** @hidden */
-  doRender(viewContext: RenderViewContext): void {
+  doRender(viewContext: RenderedViewContext): void {
     if (this.parentView && !this.hidden && !this.culled) {
       this.willRender(viewContext);
       this.onRender(viewContext);
@@ -437,20 +427,20 @@ export class GraphicView extends View implements RenderView {
     }
   }
 
-  protected willRender(viewContext: RenderViewContext): void {
-    this.willObserve(function (viewObserver: RenderViewObserver): void {
+  protected willRender(viewContext: RenderedViewContext): void {
+    this.willObserve(function (viewObserver: GraphicsViewObserver): void {
       if (viewObserver.viewWillRender) {
         viewObserver.viewWillRender(viewContext, this);
       }
     });
   }
 
-  protected onRender(viewContext: RenderViewContext): void {
+  protected onRender(viewContext: RenderedViewContext): void {
     // hook
   }
 
-  protected didRender(viewContext: RenderViewContext): void {
-    this.didObserve(function (viewObserver: RenderViewObserver): void {
+  protected didRender(viewContext: RenderedViewContext): void {
+    this.didObserve(function (viewObserver: GraphicsViewObserver): void {
       if (viewObserver.viewDidRender) {
         viewObserver.viewDidRender(viewContext, this);
       }
@@ -463,7 +453,7 @@ export class GraphicView extends View implements RenderView {
       return true;
     } else {
       const parentView = this._parentView;
-      return RenderView.is(parentView) ? parentView.hidden : false;
+      return RenderedView.is(parentView) ? parentView.hidden : false;
     }
   }
 
@@ -489,7 +479,7 @@ export class GraphicView extends View implements RenderView {
     }
     const viewObservers = this._viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i] as RenderViewObserver;
+      const viewObserver = viewObservers[i] as GraphicsViewObserver;
       if (viewObserver.viewWillSetHidden) {
         viewObserver.viewWillSetHidden(hidden, this);
       }
@@ -502,7 +492,7 @@ export class GraphicView extends View implements RenderView {
   }
 
   protected didSetHidden(hidden: boolean): void {
-    this.didObserve(function (viewObserver: RenderViewObserver): void {
+    this.didObserve(function (viewObserver: GraphicsViewObserver): void {
       if (viewObserver.viewDidSetHidden) {
         viewObserver.viewDidSetHidden(hidden, this);
       }
@@ -514,7 +504,7 @@ export class GraphicView extends View implements RenderView {
       return true;
     } else {
       const parentView = this._parentView;
-      return RenderView.is(parentView) ? parentView.culled : false;
+      return RenderedView.is(parentView) ? parentView.culled : false;
     }
   }
 
@@ -540,7 +530,7 @@ export class GraphicView extends View implements RenderView {
     }
     const viewObservers = this._viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i] as RenderViewObserver;
+      const viewObserver = viewObservers[i] as GraphicsViewObserver;
       if (viewObserver.viewWillSetCulled) {
         viewObserver.viewWillSetCulled(culled, this);
       }
@@ -555,19 +545,19 @@ export class GraphicView extends View implements RenderView {
   }
 
   protected didSetCulled(culled: boolean): void {
-    this.didObserve(function (viewObserver: RenderViewObserver): void {
+    this.didObserve(function (viewObserver: GraphicsViewObserver): void {
       if (viewObserver.viewDidSetCulled) {
         viewObserver.viewDidSetCulled(culled, this);
       }
     });
   }
 
-  protected onLayout(viewContext: RenderViewContext): void {
+  protected onLayout(viewContext: RenderedViewContext): void {
     super.onLayout(viewContext);
     this.layoutChildViews(viewContext);
   }
 
-  protected layoutChildViews(viewContext: RenderViewContext): void {
+  protected layoutChildViews(viewContext: RenderedViewContext): void {
     const childViews = this._childViews;
     for (let i = 0; i < childViews.length; i += 1) {
       const childView = childViews[i];
@@ -575,15 +565,15 @@ export class GraphicView extends View implements RenderView {
     }
   }
 
-  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
-    if (RenderView.is(childView)) {
+  protected layoutChildView(childView: View, viewContext: RenderedViewContext): void {
+    if (RenderedView.is(childView)) {
       childView.setBounds(this._bounds);
       childView.setAnchor(this._anchor);
     }
   }
 
   /** @hidden */
-  doUpdateChildViews(updateFlags: number, viewContext: RenderViewContext): void {
+  doUpdateChildViews(updateFlags: number, viewContext: RenderedViewContext): void {
     this.willUpdateChildViews(viewContext);
     const childViews = this._childViews;
     for (let i = 0; i < childViews.length; i += 1) {
@@ -594,7 +584,7 @@ export class GraphicView extends View implements RenderView {
     this.didUpdateChildViews(viewContext);
   }
 
-  childViewContext(childView: View, viewContext: RenderViewContext): RenderViewContext {
+  childViewContext(childView: View, viewContext: RenderedViewContext): RenderedViewContext {
     return viewContext;
   }
 
@@ -604,7 +594,7 @@ export class GraphicView extends View implements RenderView {
 
   get parentTransform(): Transform {
     const parentView = this._parentView;
-    if (RenderView.is(parentView)) {
+    if (RenderedView.is(parentView)) {
       const parentBounds = parentView.bounds;
       const bounds = this.bounds;
       const dx = bounds.x - parentBounds.x;
@@ -654,7 +644,7 @@ export class GraphicView extends View implements RenderView {
     }
     const viewObservers = this._viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i] as RenderViewObserver;
+      const viewObserver = viewObservers[i] as GraphicsViewObserver;
       if (viewObserver.viewWillSetBounds) {
         viewObserver.viewWillSetBounds(bounds, this);
       }
@@ -668,7 +658,7 @@ export class GraphicView extends View implements RenderView {
   }
 
   protected didSetBounds(newBounds: BoxR2, oldBounds: BoxR2): void {
-    this.didObserve(function (viewObserver: RenderViewObserver): void {
+    this.didObserve(function (viewObserver: GraphicsViewObserver): void {
       if (viewObserver.viewDidSetBounds) {
         viewObserver.viewDidSetBounds(newBounds, oldBounds, this);
       }
@@ -700,7 +690,7 @@ export class GraphicView extends View implements RenderView {
     }
     const viewObservers = this._viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i] as RenderViewObserver;
+      const viewObserver = viewObservers[i] as GraphicsViewObserver;
       if (viewObserver.viewWillSetAnchor) {
         viewObserver.viewWillSetAnchor(anchor, this);
       }
@@ -714,7 +704,7 @@ export class GraphicView extends View implements RenderView {
   }
 
   protected didSetAnchor(newAnchor: PointR2, oldAnchor: PointR2): void {
-    this.didObserve(function (viewObserver: RenderViewObserver): void {
+    this.didObserve(function (viewObserver: GraphicsViewObserver): void {
       if (viewObserver.viewDidSetAnchor) {
         viewObserver.viewDidSetAnchor(newAnchor, oldAnchor, this);
       }
@@ -725,15 +715,15 @@ export class GraphicView extends View implements RenderView {
     return null;
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit: RenderView | null = null;
+  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+    let hit: RenderedView | null = null;
     const childViews = this._childViews;
     for (let i = childViews.length - 1; i >= 0; i -= 1) {
       const childView = childViews[i];
-      if (RenderView.is(childView) && !childView.culled) {
+      if (RenderedView.is(childView) && !childView.culled) {
         const hitBounds = childView.hitBounds || childView.bounds;
         if (hitBounds.contains(x, y)) {
-          hit = childView.hitTest(x, y, context);
+          hit = childView.hitTest(x, y, viewContext);
           if (hit !== null) {
             break;
           }
@@ -833,7 +823,7 @@ export class GraphicView extends View implements RenderView {
     this.handleEvent(event);
     if (event.bubbles && !event.cancelBubble) {
       const parentView = this._parentView;
-      if (RenderView.is(parentView)) {
+      if (RenderedView.is(parentView)) {
         return parentView.bubbleEvent(event);
       } else {
         return parentView;
@@ -895,4 +885,4 @@ export class GraphicView extends View implements RenderView {
     }
   }
 }
-View.Graphic = GraphicView;
+View.Graphics = GraphicsView;

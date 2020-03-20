@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicViewObserver} from "./GraphicViewObserver";
+import {GraphicsViewObserver} from "./GraphicsViewObserver";
 import {LayerView} from "./LayerView";
 
-export interface LayerViewObserver<V extends LayerView = LayerView> extends GraphicViewObserver<V> {
+export interface LayerViewObserver<V extends LayerView = LayerView> extends GraphicsViewObserver<V> {
 }

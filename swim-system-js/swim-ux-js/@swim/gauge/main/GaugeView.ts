@@ -20,10 +20,10 @@ import {
   MemberAnimator,
   ViewInit,
   View,
-  RenderViewContext,
+  RenderedViewContext,
   TypesetView,
-  GraphicView,
-  GraphicViewController,
+  GraphicsView,
+  GraphicsViewController,
 } from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 import {AnyDialView, DialView} from "./DialView";
@@ -53,9 +53,9 @@ export interface GaugeViewInit extends ViewInit {
   dials?: AnyDialView[] | null;
 }
 
-export class GaugeView extends GraphicView {
+export class GaugeView extends GraphicsView {
   /** @hidden */
-  _viewController: GraphicViewController<GaugeView> | null;
+  _viewController: GraphicsViewController<GaugeView> | null;
 
   constructor() {
     super();
@@ -77,7 +77,7 @@ export class GaugeView extends GraphicView {
     this.tickColor.setState(Color.black());
   }
 
-  get viewController(): GraphicViewController<GaugeView> | null {
+  get viewController(): GraphicsViewController<GaugeView> | null {
     return this._viewController;
   }
 
@@ -154,7 +154,7 @@ export class GaugeView extends GraphicView {
     this.appendChildView(dial);
   }
 
-  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+  needsUpdate(updateFlags: number, viewContext: RenderedViewContext): number {
     if ((updateFlags & View.NeedsAnimate) !== 0) {
       updateFlags = updateFlags | View.NeedsLayout;
     }
@@ -164,7 +164,7 @@ export class GaugeView extends GraphicView {
     return updateFlags;
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.limit.onFrame(t);
     this.innerRadius.onFrame(t);
@@ -195,7 +195,7 @@ export class GaugeView extends GraphicView {
     }
   }
 
-  protected onLayout(viewContext: RenderViewContext): void {
+  protected onLayout(viewContext: RenderedViewContext): void {
     super.onLayout(viewContext);
     this.layoutGauge();
   }

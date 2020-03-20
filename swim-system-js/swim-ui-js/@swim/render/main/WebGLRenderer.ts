@@ -12,13 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Record} from "@swim/structure";
-import {RecordModel} from "./RecordModel";
+import {Renderer} from "./Renderer";
+import {WebGLContext} from "./WebGLContext";
 
-export abstract class Transmuter {
-  abstract transmute(model: RecordModel): Record;
+export class WebGLRenderer extends Renderer {
+  /** @hidden */
+  readonly _context: WebGLContext;
+  /** @hidden */
+  readonly _pixelRatio: number;
 
-  static system(): Transmuter {
-    return null as unknown as Transmuter;
+  constructor(context: WebGLContext, pixelRatio: number = window.devicePixelRatio || 1) {
+    super();
+    this._context = context;
+    this._pixelRatio = pixelRatio;
+  }
+
+  get context(): WebGLContext {
+    return this._context;
+  }
+
+  get pixelRatio(): number {
+    return this._pixelRatio;
   }
 }

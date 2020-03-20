@@ -15,18 +15,18 @@
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
-  RenderViewContext,
-  RenderView,
+  RenderedViewContext,
+  RenderedView,
   FillViewInit,
   FillView,
   StrokeViewInit,
   StrokeView,
-  GraphicView,
-  GraphicViewController,
+  GraphicsView,
+  GraphicsViewController,
 } from "@swim/view";
 import {Rect} from "./Rect";
 
@@ -39,9 +39,9 @@ export interface RectViewInit extends ViewInit, FillViewInit, StrokeViewInit {
   height?: AnyLength;
 }
 
-export class RectView extends GraphicView implements FillView, StrokeView {
+export class RectView extends GraphicsView implements FillView, StrokeView {
   /** @hidden */
-  _viewController: GraphicViewController<RectView> | null;
+  _viewController: GraphicsViewController<RectView> | null;
 
   constructor(x: Length = Length.zero(), y: Length = Length.zero(),
               width: Length = Length.zero(), height: Length = Length.zero()) {
@@ -52,7 +52,7 @@ export class RectView extends GraphicView implements FillView, StrokeView {
     this.height.setState(height);
   }
 
-  get viewController(): GraphicViewController<RectView> | null {
+  get viewController(): GraphicsViewController<RectView> | null {
     return this._viewController;
   }
 
@@ -115,7 +115,7 @@ export class RectView extends GraphicView implements FillView, StrokeView {
     }
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.x.onFrame(t);
     this.y.onFrame(t);
@@ -126,9 +126,17 @@ export class RectView extends GraphicView implements FillView, StrokeView {
     this.strokeWidth.onFrame(t);
   }
 
-  protected onRender(viewContext: RenderViewContext): void {
-    const context = viewContext.renderingContext;
-    context.save();
+  protected onRender(viewContext: RenderedViewContext): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      this.renderRect(context);
+      context.restore();
+    }
+  }
+
+  protected renderRect(context: CanvasContext): void {
     context.beginPath();
     context.rect(this.x.value!.pxValue(), this.y.value!.pxValue(),
                  this.width.value!.pxValue(), this.height.value!.pxValue());
@@ -148,35 +156,42 @@ export class RectView extends GraphicView implements FillView, StrokeView {
       context.strokeStyle = stroke.toString();
       context.stroke();
     }
-    context.restore();
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      context.save();
-      const pixelRatio = this.pixelRatio;
-      x *= pixelRatio;
-      y *= pixelRatio;
-      context.beginPath();
-      context.rect(this.x.value!.pxValue(), this.y.value!.pxValue(),
-                   this.width.value!.pxValue(), this.height.value!.pxValue());
-      if (this.fill.value && context.isPointInPath(x, y)) {
-        hit = this;
-      } else if (this.stroke.value) {
-        const strokeWidth = this.strokeWidth.value;
-        if (strokeWidth) {
-          const bounds = this._bounds;
-          const size = Math.min(bounds.width, bounds.height);
-          context.lineWidth = strokeWidth.pxValue(size);
-          if (context.isPointInStroke(x, y)) {
-            hit = this;
-          }
-        }
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        context.save();
+        x *= renderer.pixelRatio;
+        y *= renderer.pixelRatio;
+        hit = this.hitTestRect(x, y, context);
+        context.restore();
       }
-      context.restore();
     }
     return hit;
+  }
+
+  protected hitTestRect(x: number, y: number, context: CanvasContext): RenderedView | null {
+    context.beginPath();
+    context.rect(this.x.value!.pxValue(), this.y.value!.pxValue(),
+                 this.width.value!.pxValue(), this.height.value!.pxValue());
+    if (this.fill.value && context.isPointInPath(x, y)) {
+      return this;
+    } else if (this.stroke.value) {
+      const strokeWidth = this.strokeWidth.value;
+      if (strokeWidth) {
+        const bounds = this._bounds;
+        const size = Math.min(bounds.width, bounds.height);
+        context.lineWidth = strokeWidth.pxValue(size);
+        if (context.isPointInStroke(x, y)) {
+          return this;
+        }
+      }
+    }
+    return null;
   }
 
   static fromAny(rect: AnyRectView): RectView {

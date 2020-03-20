@@ -22,7 +22,7 @@ export {RecordFieldUpdater} from "./RecordFieldUpdater";
 export {RecordModel} from "./RecordModel";
 export {RecordScope} from "./RecordScope";
 
-export {Transmuter} from "./Transmuter";
+export {Reifier} from "./Reifier";
 
 export * from "./selector";
 export * from "./operator";

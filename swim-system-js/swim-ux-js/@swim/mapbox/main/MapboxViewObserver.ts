@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapGraphicViewObserver} from "@swim/map";
+import {MapGraphicsViewObserver} from "@swim/map";
 import {MapboxProjection} from "./MapboxProjection";
 import {MapboxView} from "./MapboxView";
 
-export interface MapboxViewObserver<V extends MapboxView = MapboxView> extends MapGraphicViewObserver<V> {
+export interface MapboxViewObserver<V extends MapboxView = MapboxView> extends MapGraphicsViewObserver<V> {
   viewWillSetProjection?(projection: MapboxProjection, view: V): void;
 
   viewDidSetProjection?(projection: MapboxProjection, view: V): void;

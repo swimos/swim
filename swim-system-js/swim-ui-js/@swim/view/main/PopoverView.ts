@@ -20,15 +20,15 @@ import {Ease, Tween, AnyTransition, Transition} from "@swim/transition";
 import {MemberAnimator} from "./member/MemberAnimator";
 import {ViewContext} from "./ViewContext";
 import {View} from "./View";
-import {RenderView} from "./RenderView";
-import {RenderViewObserver} from "./RenderViewObserver";
+import {RenderedView} from "./RenderedView";
+import {RenderedViewObserver} from "./RenderedViewObserver";
 import {HtmlView} from "./HtmlView";
 import {HtmlViewObserver} from "./HtmlViewObserver";
 import {PopoverState, PopoverPlacement, Popover} from "./Popover";
 import {PopoverViewObserver} from "./PopoverViewObserver";
 import {PopoverViewController} from "./PopoverViewController";
 
-export class PopoverView extends HtmlView implements Popover, HtmlViewObserver, RenderViewObserver {
+export class PopoverView extends HtmlView implements Popover, HtmlViewObserver, RenderedViewObserver {
   /** @hidden */
   _viewController: PopoverViewController | null;
   /** @hidden */
@@ -698,7 +698,7 @@ export class PopoverView extends HtmlView implements Popover, HtmlViewObserver, 
     this.place();
   }
 
-  viewDidSetAnchor(newAnchor: PointR2, oldAnchor: PointR2, view: RenderView): void {
+  viewDidSetAnchor(newAnchor: PointR2, oldAnchor: PointR2, view: RenderedView): void {
     this.place();
   }
 }

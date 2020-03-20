@@ -30,7 +30,7 @@ export class MapOutput<K, V> extends AbstractMapInlet<K, V, Map<K, V>> {
     return this._state;
   }
 
-  protected onReconcileOutputKey(key: K, effect: KeyEffect, version: number): void {
+  protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
       if (this._input !== null) {
         const value = this._input.get(key);

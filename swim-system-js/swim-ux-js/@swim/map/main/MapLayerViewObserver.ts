@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapGraphicViewObserver} from "./MapGraphicViewObserver";
+import {MapGraphicsViewObserver} from "./MapGraphicsViewObserver";
 import {MapLayerView} from "./MapLayerView";
 
-export interface MapLayerViewObserver<V extends MapLayerView = MapLayerView> extends MapGraphicViewObserver<V> {
+export interface MapLayerViewObserver<V extends MapLayerView = MapLayerView> extends MapGraphicsViewObserver<V> {
 }

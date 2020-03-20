@@ -16,7 +16,7 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {View} from "./View";
-import {RenderView} from "./RenderView";
+import {RenderedView} from "./RenderedView";
 
 export interface TypesetViewInit {
   font?: AnyFont | null;
@@ -25,7 +25,7 @@ export interface TypesetViewInit {
   textColor?: AnyColor | null;
 }
 
-export interface TypesetView extends RenderView {
+export interface TypesetView extends RenderedView {
   font(): Font | null | undefined;
   font(font: AnyFont | null, tween?: Tween<Font>): this;
 

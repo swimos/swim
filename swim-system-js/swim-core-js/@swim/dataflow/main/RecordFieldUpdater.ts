@@ -28,13 +28,13 @@ export class RecordFieldUpdater extends AbstractInlet<Value> {
     this._key = key;
   }
 
-  protected onInvalidateOutput(): void {
+  protected onDecohereOutput(): void {
     if (RecordOutlet.is(this._record)) {
-      this._record.invalidateInputKey(this._key, KeyEffect.Update);
+      this._record.decohereInputKey(this._key, KeyEffect.Update);
     }
   }
 
-  protected onReconcileOutput(version: number): void {
+  protected onRecohereOutput(version: number): void {
     if (this._input !== null) {
       const value = this._input.get();
       if (value !== void 0) {

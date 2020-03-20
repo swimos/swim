@@ -14,13 +14,13 @@
 
 import * as mapboxgl from "mapbox-gl";
 import {AnyPointR2, PointR2} from "@swim/math";
-import {View, RenderViewContext, CanvasView} from "@swim/view";
-import {AnyLngLat, LngLat, MapViewContext, MapView, MapGraphicView} from "@swim/map";
+import {View, RenderedViewContext, CanvasView} from "@swim/view";
+import {AnyLngLat, LngLat, MapViewContext, MapView, MapGraphicsView} from "@swim/map";
 import {MapboxProjection} from "./MapboxProjection";
 import {MapboxViewObserver} from "./MapboxViewObserver";
 import {MapboxViewController} from "./MapboxViewController";
 
-export class MapboxView extends MapGraphicView {
+export class MapboxView extends MapGraphicsView {
   /** @hidden */
   readonly _map: mapboxgl.Map;
   /** @hidden */
@@ -29,15 +29,19 @@ export class MapboxView extends MapGraphicView {
   _projection: MapboxProjection;
   /** @hidden */
   _zoom: number;
+  /** @hidden */
+  _heading: number;
+  /** @hidden */
+  _tilt: number;
 
   constructor(map: mapboxgl.Map, key: string | null = null) {
     super(key);
-    this.onMapLoad = this.onMapLoad.bind(this);
     this.onMapRender = this.onMapRender.bind(this);
-    this.onMapZoom = this.onMapZoom.bind(this);
     this._map = map;
     this._projection = new MapboxProjection(this._map);
     this._zoom = map.getZoom();
+    this._heading = map.getBearing();
+    this._tilt = map.getPitch();
     this.initMap(this._map);
   }
 
@@ -46,8 +50,6 @@ export class MapboxView extends MapGraphicView {
   }
 
   protected initMap(map: mapboxgl.Map): void {
-    map.on("load", this.onMapLoad);
-    map.on("zoom", this.onMapZoom);
     map.on("render", this.onMapRender);
   }
 
@@ -72,16 +74,13 @@ export class MapboxView extends MapGraphicView {
   }
 
   setProjection(projection: MapboxProjection): void {
-    const newProjection = this.willSetProjection(projection);
-    if (newProjection !== void 0) {
-      projection = newProjection;
-    }
+    this.willSetProjection(projection);
     this._projection = projection;
     this.onSetProjection(projection);
     this.didSetProjection(projection);
   }
 
-  protected willSetProjection(projection: MapboxProjection): MapboxProjection | void {
+  protected willSetProjection(projection: MapboxProjection): void {
     this.willObserve(function (viewObserver: MapboxViewObserver): void {
       if (viewObserver.viewWillSetProjection) {
         viewObserver.viewWillSetProjection(projection, this);
@@ -105,12 +104,15 @@ export class MapboxView extends MapGraphicView {
     return this._zoom;
   }
 
-  setZoom(zoom: number): void {
-    this.willSetZoom(zoom);
+  setZoom(newZoom: number): void {
     const oldZoom = this._zoom;
-    this._zoom = zoom;
-    this.onSetZoom(zoom, oldZoom);
-    this.didSetZoom(zoom, oldZoom);
+    if (oldZoom !== newZoom) {
+      this.willSetZoom(newZoom);
+      const oldZoom = this._zoom;
+      this._zoom = newZoom;
+      this.onSetZoom(newZoom, oldZoom);
+      this.didSetZoom(newZoom, oldZoom);
+    }
   }
 
   protected willSetZoom(zoom: number): void {
@@ -133,8 +135,16 @@ export class MapboxView extends MapGraphicView {
     });
   }
 
+  get heading(): number {
+    return this._heading;
+  }
+
+  get tilt(): number {
+    return this._tilt;
+  }
+
   /** @hidden */
-  doUpdate(updateFlags: number, viewContext: RenderViewContext): void {
+  doUpdate(updateFlags: number, viewContext: RenderedViewContext): void {
     const mapViewContext = this.mapViewContext(viewContext);
     this.willUpdate(mapViewContext);
     if (((updateFlags | this._updateFlags) & View.NeedsCompute) !== 0) {
@@ -170,30 +180,20 @@ export class MapboxView extends MapGraphicView {
     return viewContext;
   }
 
-  mapViewContext(viewContext: RenderViewContext): MapViewContext {
-    return {
-      updateTime: viewContext.updateTime,
-      viewport: viewContext.viewport,
-      viewIdiom: viewContext.viewIdiom,
-      renderingContext: viewContext.renderingContext,
-      pixelRatio: viewContext.pixelRatio,
-      projection: this._projection,
-      zoom: this._zoom,
-    };
-  }
-
-  protected onMapLoad(): void {
-    const map = this._map;
-    map.off("load", this.onMapLoad);
-    // hook
+  mapViewContext(viewContext: RenderedViewContext): MapViewContext {
+    const mapViewContext = Object.create(viewContext);
+    mapViewContext.projection = this._projection;
+    mapViewContext.zoom = this._zoom;
+    mapViewContext.heading = this._heading;
+    mapViewContext.tilt = this._tilt;
+    return mapViewContext;
   }
 
   protected onMapRender(): void {
-    this.setProjection(this._projection);
-  }
-
-  protected onMapZoom(): void {
+    this._heading = this._map.getBearing();
+    this._tilt = this._map.getPitch();
     this.setZoom(this._map.getZoom());
+    this.setProjection(this._projection);
   }
 
   overlayCanvas(): CanvasView | null {

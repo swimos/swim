@@ -32,7 +32,9 @@
       "@swim/pie": ["@swim/pie/main"],
       "@swim/chart": ["@swim/chart/main"],
       "@swim/map": ["@swim/map/main"],
-      "@swim/mapbox": ["@swim/mapbox/main"]
+      "@swim/mapbox": ["@swim/mapbox/main"],
+      "@swim/googlemap": ["@swim/googlemap/main"],
+      "@swim/esrimap": ["@swim/esrimap/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
@@ -41,6 +43,8 @@
     {"path": "../../pie/main"},
     {"path": "../../chart/main"},
     {"path": "../../map/main"},
-    {"path": "../../mapbox/main"}
+    {"path": "../../mapbox/main"},
+    {"path": "../../googlemap/main"},
+    {"path": "../../esrimap/main"}
   ]
 }

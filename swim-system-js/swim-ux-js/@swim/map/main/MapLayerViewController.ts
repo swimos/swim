@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapGraphicViewController} from "./MapGraphicViewController";
+import {MapGraphicsViewController} from "./MapGraphicsViewController";
 import {MapLayerView} from "./MapLayerView";
 import {MapLayerViewObserver} from "./MapLayerViewObserver";
 
-export class MapLayerViewController<V extends MapLayerView = MapLayerView> extends MapGraphicViewController<V> implements MapLayerViewObserver<V> {
+export class MapLayerViewController<V extends MapLayerView = MapLayerView> extends MapGraphicsViewController<V> implements MapLayerViewObserver<V> {
 }

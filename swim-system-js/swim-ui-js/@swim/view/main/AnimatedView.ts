@@ -28,8 +28,8 @@ export const AnimatedView = {
   is(object: unknown): object is AnimatedView {
     if (typeof object === "object" && object) {
       const view = object as AnimatedView;
-      return view instanceof View.Graphic || view instanceof View
-          && typeof view.animate === "function";
+      return view instanceof View.Graphics
+          || view instanceof View && typeof view.animate === "function";
     }
     return false;
   },

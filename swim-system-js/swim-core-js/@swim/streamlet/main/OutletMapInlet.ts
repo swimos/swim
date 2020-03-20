@@ -17,9 +17,9 @@ import {KeyEffect} from "./KeyEffect";
 import {AbstractMapInlet} from "./AbstractMapInlet";
 
 /**
- * A `MapInlet` that invalidates a parameterized `Outlet` whenever the
- * `MapInlet` is invalidated, and that updates the parameterized `Outlet`
- * whenever the `MapInlet` updates.
+ * A `MapInlet` that decoheres a parameterized `Outlet` whenever the
+ * `MapInlet` decoheres, and that recoheres the parameterized `Outlet`
+ * whenever the `MapInlet` recoheres.
  */
 export class OutletMapInlet<K, V, O> extends AbstractMapInlet<K, V, O> {
   /** @hidden */
@@ -34,19 +34,19 @@ export class OutletMapInlet<K, V, O> extends AbstractMapInlet<K, V, O> {
     return this._outlet;
   }
 
-  protected onInvalidateOutputKey(key: K, effect: KeyEffect): void {
-    this._outlet.invalidateInput();
+  protected onDecohereOutputKey(key: K, effect: KeyEffect): void {
+    this._outlet.decohereInput();
   }
 
-  protected onInvalidateOutput(): void {
-    this._outlet.invalidateInput();
+  protected onDecohereOutput(): void {
+    this._outlet.decohereInput();
   }
 
-  protected onReconcileOutputKey(key: K, effect: KeyEffect, version: number): void {
-    this._outlet.reconcileInput(version);
+  protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+    this._outlet.recohereInput(version);
   }
 
-  protected onReconcileOutput(version: number): void {
-    this._outlet.reconcileInput(version);
+  protected onRecohereOutput(version: number): void {
+    this._outlet.recohereInput(version);
   }
 }

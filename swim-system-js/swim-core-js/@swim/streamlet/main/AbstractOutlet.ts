@@ -93,52 +93,52 @@ export abstract class AbstractOutlet<O> implements Outlet<O> {
     // nop
   }
 
-  invalidateInput(): void {
+  decohereInput(): void {
     if (this._version >= 0) {
-      this.willInvalidateInput();
+      this.willDecohereInput();
       this._version = -1;
-      this.onInvalidateInput();
+      this.onDecohereInput();
       for (let i = 0, n = this._outputs !== null ? this._outputs.length : 0; i < n; i += 1) {
-        this._outputs![i].invalidateOutput();
+        this._outputs![i].decohereOutput();
       }
-      this.didInvalidateInput();
+      this.didDecohereInput();
     }
   }
 
-  reconcileInput(version: number): void {
+  recohereInput(version: number): void {
     if (this._version < 0) {
-      this.willReconcileInput(version);
+      this.willRecohereInput(version);
       this._version = version;
-      this.onReconcileInput(version);
+      this.onRecohereInput(version);
       for (let i = 0, n = this._outputs !== null ? this._outputs.length : 0; i < n; i += 1) {
-        this._outputs![i].reconcileOutput(version);
+        this._outputs![i].recohereOutput(version);
       }
-      this.didReconcileInput(version);
+      this.didRecohereInput(version);
     }
   }
 
-  protected willInvalidateInput(): void {
-    // stub
+  protected willDecohereInput(): void {
+    // hook
   }
 
-  protected onInvalidateInput(): void {
-    // stub
+  protected onDecohereInput(): void {
+    // hook
   }
 
-  protected didInvalidateInput(): void {
-    // stub
+  protected didDecohereInput(): void {
+    // hook
   }
 
-  protected willReconcileInput(version: number): void {
-    // stub
+  protected willRecohereInput(version: number): void {
+    // hook
   }
 
-  protected onReconcileInput(version: number): void {
-    // stub
+  protected onRecohereInput(version: number): void {
+    // hook
   }
 
-  protected didReconcileInput(version: number): void {
-    // stub
+  protected didRecohereInput(version: number): void {
+    // hook
   }
 
   memoize(): Outlet<O> {

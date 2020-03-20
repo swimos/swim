@@ -16,18 +16,18 @@ import {AnyAngle, Angle} from "@swim/angle";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
-  RenderViewContext,
-  RenderView,
+  RenderedViewContext,
+  RenderedView,
   FillViewInit,
   FillView,
   StrokeViewInit,
   StrokeView,
-  GraphicView,
-  GraphicViewController,
+  GraphicsView,
+  GraphicsViewController,
 } from "@swim/view";
 import {ArcInit, Arc} from "./Arc";
 
@@ -36,9 +36,9 @@ export type AnyArcView = ArcView | Arc | ArcViewInit;
 export interface ArcViewInit extends ViewInit, FillViewInit, StrokeViewInit, ArcInit {
 }
 
-export class ArcView extends GraphicView implements FillView, StrokeView {
+export class ArcView extends GraphicsView implements FillView, StrokeView {
   /** @hidden */
-  _viewController: GraphicViewController<ArcView> | null;
+  _viewController: GraphicsViewController<ArcView> | null;
 
   constructor(innerRadius: Length = Length.zero(), outerRadius: Length = Length.zero(),
               startAngle: Angle = Angle.zero(), sweepAngle: Angle = Angle.zero(),
@@ -54,7 +54,7 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
     this.cornerRadius.setState(cornerRadius);
   }
 
-  get viewController(): GraphicViewController<ArcView> | null {
+  get viewController(): GraphicsViewController<ArcView> | null {
     return this._viewController;
   }
 
@@ -139,7 +139,7 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
     }
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.innerRadius.onFrame(t);
     this.outerRadius.onFrame(t);
@@ -153,12 +153,20 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
     this.strokeWidth.onFrame(t);
   }
 
-  protected onRender(viewContext: RenderViewContext): void {
-    const context = viewContext.renderingContext;
-    context.save();
+  protected onRender(viewContext: RenderedViewContext): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      this.renderArc(renderer.context);
+      context.restore();
+    }
+  }
+
+  protected renderArc(context: CanvasContext): void {
     const bounds = this._bounds;
     const arc = this.value;
-    arc.render(context, bounds, this._anchor);
+    arc.draw(context, bounds, this._anchor);
     const fill = this.fill.value;
     if (fill) {
       context.fillStyle = fill.toString();
@@ -174,35 +182,42 @@ export class ArcView extends GraphicView implements FillView, StrokeView {
       context.strokeStyle = stroke.toString();
       context.stroke();
     }
-    context.restore();
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      context.save();
-      const pixelRatio = this.pixelRatio;
-      x *= pixelRatio;
-      y *= pixelRatio;
-      context.beginPath();
-      const bounds = this._bounds;
-      const arc = this.value;
-      arc.render(context, bounds, this._anchor);
-      if (this.fill.value && context.isPointInPath(x, y)) {
-        hit = this;
-      } else if (this.stroke.value) {
-        const strokeWidth = this.strokeWidth.value;
-        if (strokeWidth) {
-          const size = Math.min(bounds.width, bounds.height);
-          context.lineWidth = strokeWidth.pxValue(size);
-          if (context.isPointInStroke(x, y)) {
-            hit = this;
-          }
-        }
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        context.save();
+        x *= renderer.pixelRatio;
+        y *= renderer.pixelRatio;
+        hit = this.hitTestArc(x, y, context);
+        context.restore();
       }
-      context.restore();
     }
     return hit;
+  }
+
+  protected hitTestArc(x: number, y: number, context: CanvasContext): RenderedView | null {
+    context.beginPath();
+    const bounds = this._bounds;
+    const arc = this.value;
+    arc.draw(context, bounds, this._anchor);
+    if (this.fill.value && context.isPointInPath(x, y)) {
+      return this;
+    } else if (this.stroke.value) {
+      const strokeWidth = this.strokeWidth.value;
+      if (strokeWidth) {
+        const size = Math.min(bounds.width, bounds.height);
+        context.lineWidth = strokeWidth.pxValue(size);
+        if (context.isPointInStroke(x, y)) {
+          return this;
+        }
+      }
+    }
+    return null;
   }
 
   static from(innerRadius: AnyLength = Length.zero(),

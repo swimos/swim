@@ -49,8 +49,8 @@ export interface Outlet<O = unknown> {
 
   /**
    * Adds an `output` to the set of `Inlet`s that depend on the state of this
-   * `Outlet`.  The `output` will be invalidated when the state of this
-   * `Outlet` is invalidated, and updated when this `Outlet` is updated.
+   * `Outlet`.  The `output` will be decohered when the state of this
+   * `Outlet` is decohered, and recohered when this `Outlet` is recohered.
    */
   bindOutput(output: Inlet<O>): void;
 
@@ -83,18 +83,19 @@ export interface Outlet<O = unknown> {
 
   /**
    * Marks this `Outlet`—and all [[outputIterator outputs]] that depend on the
-   * state of this `Outlet`—as having stale state.
+   * state of this `Outlet`—as having decoherent state.
    */
-  invalidateInput(): void;
+  decohereInput(): void;
 
   /**
-   * Reconciles the state of this `Outlet`, if the version of this `Outlet`'s
-   * state differs from the target `version`.  To reconcile its state, the
-   * `Outlet` first invokes [[Streamlet.reconcile]] on the `Streamlet` to which
-   * it's attached. It then invokes [[Inlet.reconcileOutput]] on each of its
+   * Updates the state of this `Outlet` to make it consistent with the target
+   * `version`.  The `Outlet` only needs to update if its current `version`
+   * differs from the target `version`.  To update its state, the `Outlet`
+   * first invokes [[Streamlet.recohere]] on the `Streamlet` to which
+   * it's attached. It then invokes [[Inlet.recohereOutput]] on each of its
    * dependent [[outputIterator outputs]].
    */
-  reconcileInput(version: number): void;
+  recohereInput(version: number): void;
 
   memoize(): Outlet<O>;
 

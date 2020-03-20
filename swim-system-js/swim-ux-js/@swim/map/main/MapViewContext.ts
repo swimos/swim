@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {RenderViewContext} from "@swim/view";
+import {RenderedViewContext} from "@swim/view";
 import {MapProjection} from "./MapProjection";
 
-export interface MapViewContext extends RenderViewContext {
+export interface MapViewContext extends RenderedViewContext {
   readonly projection: MapProjection;
 
   readonly zoom: number;
+
+  readonly heading: number;
+
+  readonly tilt: number;
 }

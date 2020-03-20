@@ -12,9 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {PointR2, BoxR2} from "@swim/math";
-import {RenderingContext} from "./RenderingContext";
+import {Renderer} from "./Renderer";
+import {PathContext} from "./PathContext";
 
-export interface Graphic {
-  render(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void;
+export class PathRenderer extends Renderer {
+  /** @hidden */
+  readonly _context: PathContext;
+
+  constructor(context: PathContext = new PathContext()) {
+    super();
+    this._context = context;
+  }
+
+  get context(): PathContext {
+    return this._context;
+  }
 }

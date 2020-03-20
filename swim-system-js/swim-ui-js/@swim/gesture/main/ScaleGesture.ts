@@ -15,7 +15,7 @@
 import {Objects} from "@swim/util";
 import {ContinuousScale, LinearScale, TimeScale} from "@swim/scale";
 import {CustomEvent} from "@swim/dom";
-import {View, RenderView, ElementView} from "@swim/view";
+import {View, RenderedView, ElementView} from "@swim/view";
 import {MultitouchEvent, MultitouchPoint, Multitouch} from "./Multitouch";
 
 export interface ScaleGestureEventInit<D> extends CustomEventInit {
@@ -463,7 +463,7 @@ export abstract class ScaleGesture<D> {
 export class HorizontalScaleGesture<D> extends ScaleGesture<D> {
   protected coords(clientX: number, clientY: number): {domainCoord: D, rangeCoord: number} {
     let ruler = this._ruler;
-    const dx = RenderView.is(ruler) ? ruler.bounds.x : 0;
+    const dx = RenderedView.is(ruler) ? ruler.bounds.x : 0;
     do {
       if (ruler instanceof ElementView) {
         const bounds = ruler.node.getBoundingClientRect();
@@ -481,7 +481,7 @@ export class HorizontalScaleGesture<D> extends ScaleGesture<D> {
 
   protected rangeCoord(clientX: number, clientY: number): number {
     let ruler = this._ruler;
-    const dx = RenderView.is(ruler) ? ruler.bounds.x : 0;
+    const dx = RenderedView.is(ruler) ? ruler.bounds.x : 0;
     do {
       if (ruler instanceof ElementView) {
         const bounds = ruler.node.getBoundingClientRect();
@@ -504,7 +504,7 @@ export class HorizontalScaleGesture<D> extends ScaleGesture<D> {
 export class VerticalScaleGesture<D> extends ScaleGesture<D> {
   protected coords(clientX: number, clientY: number): {domainCoord: D, rangeCoord: number} {
     let ruler = this._ruler;
-    const dy = RenderView.is(ruler) ? ruler.bounds.y : 0;
+    const dy = RenderedView.is(ruler) ? ruler.bounds.y : 0;
     do {
       if (ruler instanceof ElementView) {
         const bounds = ruler.node.getBoundingClientRect();
@@ -522,7 +522,7 @@ export class VerticalScaleGesture<D> extends ScaleGesture<D> {
 
   protected rangeCoord(clientX: number, clientY: number): number {
     let ruler = this._ruler;
-    const dy = RenderView.is(ruler) ? ruler.bounds.y : 0;
+    const dy = RenderedView.is(ruler) ? ruler.bounds.y : 0;
     do {
       if (ruler instanceof ElementView) {
         const bounds = ruler.node.getBoundingClientRect();

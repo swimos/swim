@@ -25,10 +25,10 @@ import {ViewContext} from "./ViewContext";
 import {ViewObserver} from "./ViewObserver";
 import {ViewController} from "./ViewController";
 import {AppView} from "./AppView";
-import {AnimatedView} from "./AnimatedView";
-import {RenderView} from "./RenderView";
 import {LayoutView} from "./LayoutView";
-import {GraphicView} from "./GraphicView";
+import {AnimatedView} from "./AnimatedView";
+import {RenderedView} from "./RenderedView";
+import {GraphicsView} from "./GraphicsView";
 import {LayerView} from "./LayerView";
 import {ViewNode, NodeView} from "./NodeView";
 import {TextView} from "./TextView";
@@ -722,13 +722,13 @@ export abstract class View {
   /** @hidden */
   static App: typeof AppView; // defined by AppView
   /** @hidden */
-  static Animated: typeof AnimatedView; // defined by AnimatedView
-  /** @hidden */
-  static Render: typeof RenderView; // defined by RenderView
-  /** @hidden */
   static Layout: typeof LayoutView; // defined by LayoutView
   /** @hidden */
-  static Graphic: typeof GraphicView; // defined by GraphicView
+  static Animated: typeof AnimatedView; // defined by AnimatedView
+  /** @hidden */
+  static Rendered: typeof RenderedView; // defined by RenderedView
+  /** @hidden */
+  static Graphics: typeof GraphicsView; // defined by GraphicsView
   /** @hidden */
   static Layer: typeof LayerView; // defined by LayerView
   /** @hidden */

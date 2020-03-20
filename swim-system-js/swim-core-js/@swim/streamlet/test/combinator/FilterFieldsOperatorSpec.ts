@@ -25,19 +25,19 @@ export class FilterFieldsOperatorSpec extends Spec {
     output.bindInput(isEven);
 
     input.set("two", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     exam.equal(output.get(), new BTree().updated("two", 2));
 
     input.set("three", 3);
-    input.reconcileInput(1); // reconcile forward
+    input.recohereInput(1); // recohere forward
     exam.equal(output.get(), new BTree().updated("two", 2));
 
     input.set("three", 4);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     exam.equal(output.get(), new BTree().updated("two", 2).updated("three", 4));
 
     input.set("two", 3);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     exam.equal(output.get(), new BTree().updated("three", 4));
   }
 }

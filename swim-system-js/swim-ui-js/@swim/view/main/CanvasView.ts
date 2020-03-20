@@ -13,13 +13,13 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {RenderingContext} from "@swim/render";
+import {AnyRenderer, RendererType, Renderer, CanvasRenderer, WebGLRenderer} from "@swim/render";
 import {ViewEvent, ViewMouseEvent, ViewTouch, ViewTouchEvent} from "./ViewEvent";
 import {ViewContext} from "./ViewContext";
 import {View} from "./View";
-import {RenderViewContext} from "./RenderViewContext";
-import {RenderView} from "./RenderView";
-import {RenderViewObserver} from "./RenderViewObserver";
+import {RenderedViewContext} from "./RenderedViewContext";
+import {RenderedView} from "./RenderedView";
+import {RenderedViewObserver} from "./RenderedViewObserver";
 import {ViewNode, NodeView} from "./NodeView";
 import {TextView} from "./TextView";
 import {ElementViewClass, ElementView} from "./ElementView";
@@ -31,13 +31,15 @@ export interface ViewCanvas extends HTMLCanvasElement {
   view?: CanvasView;
 }
 
-export class CanvasView extends HtmlView implements RenderView {
+export class CanvasView extends HtmlView implements RenderedView {
   /** @hidden */
   readonly _node: ViewCanvas;
   /** @hidden */
   _viewController: CanvasViewController | null;
   /** @hidden */
-  readonly _renderViews: RenderView[];
+  readonly _renderedViews: RenderedView[];
+  /** @hidden */
+  _renderer: Renderer | null | undefined;
   /** @hidden */
   _bounds: BoxR2;
   /** @hidden */
@@ -51,10 +53,10 @@ export class CanvasView extends HtmlView implements RenderView {
   /** @hidden */
   _screenY: number;
   /**
-   * The `RenderView` over which the mouse is currently hovering.
+   * The `RenderedView` over which the mouse is currently hovering.
    * @hidden
    */
-  _hoverView: RenderView | null;
+  _hoverView: RenderedView | null;
   /**
    * The currently active touches.
    * @hidden
@@ -75,7 +77,8 @@ export class CanvasView extends HtmlView implements RenderView {
     this.onTouchCancel = this.onTouchCancel.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
 
-    this._renderViews = [];
+    this._renderedViews = [];
+    this._renderer = void 0;
     this._bounds = BoxR2.empty();
     this._anchor = PointR2.origin();
     this._clientX = 0;
@@ -102,14 +105,6 @@ export class CanvasView extends HtmlView implements RenderView {
     return this;
   }
 
-  get renderingContext(): RenderingContext | null {
-    return this._node.getContext("2d");
-  }
-
-  get pixelRatio(): number {
-    return window.devicePixelRatio || 1;
-  }
-
   get childViews(): ReadonlyArray<View> {
     const childNodes = this._node.childNodes;
     const childViews = [];
@@ -119,16 +114,16 @@ export class CanvasView extends HtmlView implements RenderView {
         childViews.push(childView);
       }
     }
-    childViews.push.apply(childViews, this._renderViews);
+    childViews.push.apply(childViews, this._renderedViews);
     return childViews;
   }
 
   getChildView(key: string): View | null {
-    const renderViews = this._renderViews;
-    for (let i = renderViews.length - 1; i >= 0; i -= 1) {
-      const renderView = renderViews[i];
-      if (renderView.key() === key) {
-        return renderView;
+    const renderedViews = this._renderedViews;
+    for (let i = renderedViews.length - 1; i >= 0; i -= 1) {
+      const renderedView = renderedViews[i];
+      if (renderedView.key() === key) {
+        return renderedView;
       }
     }
     const childNodes = this._node.childNodes;
@@ -142,29 +137,29 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   setChildView(key: string, newChildView: View | null): View | null {
-    if (RenderView.is(newChildView)) {
-      return this.setRenderView(key, newChildView);
+    if (RenderedView.is(newChildView)) {
+      return this.setRenderedView(key, newChildView);
     } else {
       return super.setChildView(key, newChildView);
     }
   }
 
-  setRenderView(key: string, newChildView: RenderView | null): RenderView | null {
-    if (!RenderView.is(newChildView)) {
+  setRenderedView(key: string, newChildView: RenderedView | null): RenderedView | null {
+    if (!RenderedView.is(newChildView)) {
       throw new TypeError("" + newChildView);
     }
-    let oldChildView: RenderView | null = null;
-    let targetView: RenderView | null = null;
-    const renderViews = this._renderViews;
-    let index = renderViews.length - 1;
+    let oldChildView: RenderedView | null = null;
+    let targetView: RenderedView | null = null;
+    const renderedViews = this._renderedViews;
+    let index = renderedViews.length - 1;
     while (index >= 0) {
-      const childView = renderViews[index];
+      const childView = renderedViews[index];
       if (childView.key() === key) {
         oldChildView = childView;
-        targetView = renderViews[index + 1] || null;
+        targetView = renderedViews[index + 1] || null;
         this.willRemoveChildView(childView);
         childView.setParentView(null);
-        renderViews.splice(index, 1);
+        renderedViews.splice(index, 1);
         this.onRemoveChildView(childView);
         this.didRemoveChildView(childView);
         break;
@@ -175,9 +170,9 @@ export class CanvasView extends HtmlView implements RenderView {
       newChildView.key(key);
       this.willInsertChildView(newChildView, targetView);
       if (index >= 0) {
-        renderViews.splice(index, 0, newChildView);
+        renderedViews.splice(index, 0, newChildView);
       } else {
-        renderViews.push(newChildView);
+        renderedViews.push(newChildView);
       }
       newChildView.setParentView(this);
       this.onInsertChildView(newChildView, targetView);
@@ -186,8 +181,8 @@ export class CanvasView extends HtmlView implements RenderView {
     return oldChildView;
   }
 
-  get renderViews(): ReadonlyArray<RenderView> {
-    return this._renderViews;
+  get renderedViews(): ReadonlyArray<RenderedView> {
+    return this._renderedViews;
   }
 
   append(child: "svg"): SvgView;
@@ -198,7 +193,7 @@ export class CanvasView extends HtmlView implements RenderView {
   append(child: Text): TextView;
   append(child: Node): NodeView;
   append(child: NodeView): typeof child;
-  append(child: RenderView): typeof child;
+  append(child: RenderedView): typeof child;
   append<V extends ElementView>(child: ElementViewClass<Element, V>, key?: string): V;
   append<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>, key?: string): View {
     if (typeof child === "string") {
@@ -215,19 +210,19 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   appendChildView(childView: View): void {
-    if (RenderView.is(childView)) {
-      this.appendRenderView(childView);
+    if (RenderedView.is(childView)) {
+      this.appendRenderedView(childView);
     } else {
       super.appendChildView(childView);
     }
   }
 
-  appendRenderView(renderView: RenderView): void {
-    this.willInsertChildView(renderView, null);
-    this._renderViews.push(renderView);
-    renderView.setParentView(this);
-    this.onInsertChildView(renderView, null);
-    this.didInsertChildView(renderView, null);
+  appendRenderedView(renderedView: RenderedView): void {
+    this.willInsertChildView(renderedView, null);
+    this._renderedViews.push(renderedView);
+    renderedView.setParentView(this);
+    this.onInsertChildView(renderedView, null);
+    this.didInsertChildView(renderedView, null);
   }
 
   prepend(child: "svg"): SvgView;
@@ -238,7 +233,7 @@ export class CanvasView extends HtmlView implements RenderView {
   prepend(child: Text): TextView;
   prepend(child: Node): NodeView;
   prepend(child: NodeView): typeof child;
-  prepend(child: RenderView): typeof child;
+  prepend(child: RenderedView): typeof child;
   prepend<V extends ElementView>(child: ElementViewClass<Element, V>, key?: string): V;
   prepend<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>, key?: string): View {
     if (typeof child === "string") {
@@ -255,19 +250,19 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   prependChildView(childView: View): void {
-    if (RenderView.is(childView)) {
-      this.prependRenderView(childView);
+    if (RenderedView.is(childView)) {
+      this.prependRenderedView(childView);
     } else {
       super.prependChildView(childView);
     }
   }
 
-  prependRenderView(renderView: RenderView): void {
-    this.willInsertChildView(renderView, null);
-    this._renderViews.unshift(renderView);
-    renderView.setParentView(this);
-    this.onInsertChildView(renderView, null);
-    this.didInsertChildView(renderView, null);
+  prependRenderedView(renderedView: RenderedView): void {
+    this.willInsertChildView(renderedView, null);
+    this._renderedViews.unshift(renderedView);
+    renderedView.setParentView(this);
+    this.onInsertChildView(renderedView, null);
+    this.didInsertChildView(renderedView, null);
   }
 
   insert(child: "svg", target: View | Node | null): SvgView;
@@ -278,7 +273,7 @@ export class CanvasView extends HtmlView implements RenderView {
   insert(child: Text, target: View | Node | null): TextView;
   insert(child: Node, target: View | Node | null): NodeView;
   insert(child: NodeView, target: View | Node | null): typeof child;
-  insert(child: RenderView, target: View | Node | null): typeof child;
+  insert(child: RenderedView, target: View | Node | null): typeof child;
   insert<V extends ElementView>(child: ElementViewClass<Element, V>,
                                 target: View | Node | null, key?: string): V;
   insert<V extends ElementView>(child: string | Node | View | ElementViewClass<Element, V>,
@@ -297,80 +292,121 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   insertChildView(childView: View, targetView: View | null): void {
-    if (RenderView.is(childView) && RenderView.is(targetView)) {
-      this.insertRenderView(childView, targetView);
+    if (RenderedView.is(childView) && RenderedView.is(targetView)) {
+      this.insertRenderedView(childView, targetView);
     } else {
       super.insertChildView(childView, targetView);
     }
   }
 
-  insertRenderView(renderView: RenderView, targetView: View | null): void {
-    if (targetView !== null && !RenderView.is(targetView)) {
+  insertRenderedView(renderedView: RenderedView, targetView: View | null): void {
+    if (targetView !== null && !RenderedView.is(targetView)) {
       throw new TypeError("" + targetView);
     }
     if (targetView !== null && targetView.parentView !== this) {
       throw new TypeError("" + targetView);
     }
-    const renderViews = this._renderViews;
-    this.willInsertChildView(renderView, targetView);
-    const index = targetView ? renderViews.indexOf(targetView) : -1;
+    const renderedViews = this._renderedViews;
+    this.willInsertChildView(renderedView, targetView);
+    const index = targetView ? renderedViews.indexOf(targetView) : -1;
     if (index >= 0) {
-      renderViews.splice(index, 0, renderView);
+      renderedViews.splice(index, 0, renderedView);
     } else {
-      renderViews.push(renderView);
+      renderedViews.push(renderedView);
     }
-    renderView.setParentView(this);
-    this.onInsertChildView(renderView, targetView);
-    this.didInsertChildView(renderView, targetView);
+    renderedView.setParentView(this);
+    this.onInsertChildView(renderedView, targetView);
+    this.didInsertChildView(renderedView, targetView);
   }
 
   protected onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
-    if (RenderView.is(childView)) {
+    if (RenderedView.is(childView)) {
       this.setChildViewBounds(childView, this._bounds);
       this.setChildViewAnchor(childView, this._anchor);
     }
   }
 
   removeChildView(childView: View): void {
-    if (RenderView.is(childView)) {
-      this.removeRenderView(childView);
+    if (RenderedView.is(childView)) {
+      this.removeRenderedView(childView);
     } else {
       super.removeChildView(childView);
     }
   }
 
-  removeRenderView(renderView: RenderView): void {
-    if (renderView.parentView !== this) {
-      throw new TypeError("" + renderView);
+  removeRenderedView(renderedView: RenderedView): void {
+    if (renderedView.parentView !== this) {
+      throw new TypeError("" + renderedView);
     }
-    const renderViews = this._renderViews;
-    this.willRemoveChildView(renderView);
-    renderView.setParentView(null);
-    const index = renderViews.indexOf(renderView);
+    const renderedViews = this._renderedViews;
+    this.willRemoveChildView(renderedView);
+    renderedView.setParentView(null);
+    const index = renderedViews.indexOf(renderedView);
     if (index >= 0) {
-      renderViews.splice(index, 1);
+      renderedViews.splice(index, 1);
     }
-    this.onRemoveChildView(renderView);
-    this.didRemoveChildView(renderView);
+    this.onRemoveChildView(renderedView);
+    this.didRemoveChildView(renderedView);
   }
 
   removeAll(): void {
     super.removeAll();
-    const renderViews = this._renderViews;
+    const renderedViews = this._renderedViews;
     do {
-      const count = renderViews.length;
+      const count = renderedViews.length;
       if (count > 0) {
-        const childView = renderViews[count - 1];
+        const childView = renderedViews[count - 1];
         this.willRemoveChildView(childView);
         childView.setParentView(null);
-        renderViews.pop();
+        renderedViews.pop();
         this.onRemoveChildView(childView);
         this.didRemoveChildView(childView);
         continue;
       }
       break;
     } while (true);
+  }
+
+  get pixelRatio(): number {
+    return window.devicePixelRatio || 1;
+  }
+
+  get renderer(): Renderer | null {
+    let renderer = this._renderer;
+    if (renderer === void 0) {
+      renderer = this.createRenderer();
+      this._renderer = renderer;
+    }
+    return renderer;
+  }
+
+  setRenderer(renderer: AnyRenderer | null): void {
+    if (typeof renderer === "string") {
+      renderer = this.createRenderer(renderer as RendererType);
+    }
+    this._renderer = renderer;
+    this.resetRenderer();
+  }
+
+  protected createRenderer(rendererType: RendererType = "canvas"): Renderer | null {
+    if (rendererType === "canvas") {
+      const context = this._node.getContext("2d");
+      if (context) {
+        return new CanvasRenderer(context, this.pixelRatio);
+      } else {
+        throw new Error("Failed to create canvas rendering context");
+      }
+    } else if (rendererType === "webgl") {
+      const context = this._node.getContext("webgl");
+      if (context) {
+        return new WebGLRenderer(context, this.pixelRatio);
+      } else {
+        throw new Error("Failed to create webgl rendering context");
+      }
+    } else {
+      throw new Error("Failed to create " + rendererType + " renderer");
+    }
   }
 
   requireUpdate(updateFlags: number, immediate: boolean = false): void {
@@ -390,7 +426,7 @@ export class CanvasView extends HtmlView implements RenderView {
     }
   }
 
-  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+  needsUpdate(updateFlags: number, viewContext: RenderedViewContext): number {
     if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout | ~View.UpdateFlagsMask)) !== 0) {
       updateFlags = updateFlags | View.NeedsRender;
     }
@@ -429,9 +465,10 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   /** @hidden */
-  doLayout(viewContext: RenderViewContext): void {
+  doLayout(viewContext: RenderedViewContext): void {
     if (this.parentView) {
       this.resizeCanvas(this._node);
+      this.resetRenderer();
       this.willLayout(viewContext);
       this.onLayout(viewContext);
       this.didLayout(viewContext);
@@ -439,7 +476,7 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   /** @hidden */
-  doRender(viewContext: RenderViewContext): void {
+  doRender(viewContext: RenderedViewContext): void {
     if (this.parentView) {
       this.willRender(viewContext);
       this.onRender(viewContext);
@@ -447,22 +484,20 @@ export class CanvasView extends HtmlView implements RenderView {
     }
   }
 
-  protected willRender(viewContext: RenderViewContext): void {
-    this.willObserve(function (viewObserver: RenderViewObserver): void {
+  protected willRender(viewContext: RenderedViewContext): void {
+    this.willObserve(function (viewObserver: RenderedViewObserver): void {
       if (viewObserver.viewWillRender) {
         viewObserver.viewWillRender(viewContext, this);
       }
     });
   }
 
-  protected onRender(viewContext: RenderViewContext): void {
-    const renderingContext = viewContext.renderingContext;
-    const bounds = this._bounds;
-    renderingContext.clearRect(0, 0, bounds.width, bounds.height);
+  protected onRender(viewContext: RenderedViewContext): void {
+    this.clearCanvas();
   }
 
-  protected didRender(viewContext: RenderViewContext): void {
-    this.didObserve(function (viewObserver: RenderViewObserver): void {
+  protected didRender(viewContext: RenderedViewContext): void {
+    this.didObserve(function (viewObserver: RenderedViewObserver): void {
       if (viewObserver.viewDidRender) {
         viewObserver.viewDidRender(viewContext, this);
       }
@@ -497,9 +532,9 @@ export class CanvasView extends HtmlView implements RenderView {
     const oldBounds = this._bounds;
     this._bounds = bounds;
     this.onSetBounds(bounds, oldBounds);
-    const renderViews = this._renderViews;
-    for (let i = 0, n = renderViews.length; i < n; i += 1) {
-      this.setChildViewBounds(renderViews[i], bounds);
+    const renderedViews = this._renderedViews;
+    for (let i = 0, n = renderedViews.length; i < n; i += 1) {
+      this.setChildViewBounds(renderedViews[i], bounds);
     }
     this.didSetBounds(bounds, oldBounds);
   }
@@ -514,7 +549,7 @@ export class CanvasView extends HtmlView implements RenderView {
     }
     const viewObservers = this._viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i] as RenderViewObserver;
+      const viewObserver = viewObservers[i] as RenderedViewObserver;
       if (viewObserver.viewWillSetBounds) {
         viewObserver.viewWillSetBounds(bounds, this);
       }
@@ -526,14 +561,14 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   protected didSetBounds(newBounds: BoxR2, oldBounds: BoxR2): void {
-    this.didObserve(function (viewObserver: RenderViewObserver): void {
+    this.didObserve(function (viewObserver: RenderedViewObserver): void {
       if (viewObserver.viewDidSetBounds) {
         viewObserver.viewDidSetBounds(newBounds, oldBounds, this);
       }
     });
   }
 
-  protected setChildViewBounds(childView: RenderView, bounds: BoxR2): void {
+  protected setChildViewBounds(childView: RenderedView, bounds: BoxR2): void {
     childView.setBounds(bounds);
   }
 
@@ -549,9 +584,9 @@ export class CanvasView extends HtmlView implements RenderView {
     const oldAnchor = this._anchor;
     this._anchor = anchor;
     this.onSetAnchor(anchor, oldAnchor);
-    const renderViews = this._renderViews;
-    for (let i = 0, n = renderViews.length; i < n; i += 1) {
-      this.setChildViewAnchor(renderViews[i], anchor);
+    const renderedViews = this._renderedViews;
+    for (let i = 0, n = renderedViews.length; i < n; i += 1) {
+      this.setChildViewAnchor(renderedViews[i], anchor);
     }
     this.didSetAnchor(anchor, oldAnchor);
   }
@@ -566,7 +601,7 @@ export class CanvasView extends HtmlView implements RenderView {
     }
     const viewObservers = this._viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i] as RenderViewObserver;
+      const viewObserver = viewObservers[i] as RenderedViewObserver;
       if (viewObserver.viewWillSetAnchor) {
         viewObserver.viewWillSetAnchor(anchor, this);
       }
@@ -578,14 +613,14 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   protected didSetAnchor(newAnchor: PointR2, oldAnchor: PointR2): void {
-    this.didObserve(function (viewObserver: RenderViewObserver): void {
+    this.didObserve(function (viewObserver: RenderedViewObserver): void {
       if (viewObserver.viewDidSetAnchor) {
         viewObserver.viewDidSetAnchor(newAnchor, oldAnchor, this);
       }
     });
   }
 
-  protected setChildViewAnchor(childView: RenderView, anchor: PointR2): void {
+  protected setChildViewAnchor(childView: RenderedView, anchor: PointR2): void {
     childView.setAnchor(anchor);
   }
 
@@ -607,10 +642,10 @@ export class CanvasView extends HtmlView implements RenderView {
         childView.cascadeMount();
       }
     }
-    const renderViews = this._renderViews;
-    for (let i = 0; i < renderViews.length; i += 1) {
-      const renderView = renderViews[i];
-      renderView.cascadeMount();
+    const renderedViews = this._renderedViews;
+    for (let i = 0; i < renderedViews.length; i += 1) {
+      const renderedView = renderedViews[i];
+      renderedView.cascadeMount();
     }
   }
 
@@ -623,40 +658,40 @@ export class CanvasView extends HtmlView implements RenderView {
         childView.cascadeUnmount();
       }
     }
-    const renderViews = this._renderViews;
-    for (let i = 0; i < renderViews.length; i += 1) {
-      const renderView = renderViews[i];
-      renderView.cascadeUnmount();
+    const renderedViews = this._renderedViews;
+    for (let i = 0; i < renderedViews.length; i += 1) {
+      const renderedView = renderedViews[i];
+      renderedView.cascadeUnmount();
     }
   }
 
-  protected didUpdate(viewContext: RenderViewContext): void {
+  protected didUpdate(viewContext: RenderedViewContext): void {
     super.didUpdate(viewContext);
     this.detectMouseHover();
   }
 
-  protected onLayout(viewContext: RenderViewContext): void {
+  protected onLayout(viewContext: RenderedViewContext): void {
     super.onLayout(viewContext);
     this.layoutChildViews(viewContext);
   }
 
-  protected layoutChildViews(viewContext: RenderViewContext): void {
-    const renderViews = this._renderViews;
-    for (let i = 0; i < renderViews.length; i += 1) {
-      const renderView = renderViews[i];
-      this.layoutChildView(renderView, viewContext);
+  protected layoutChildViews(viewContext: RenderedViewContext): void {
+    const renderedViews = this._renderedViews;
+    for (let i = 0; i < renderedViews.length; i += 1) {
+      const renderedView = renderedViews[i];
+      this.layoutChildView(renderedView, viewContext);
     }
   }
 
-  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
-    if (RenderView.is(childView)) {
+  protected layoutChildView(childView: View, viewContext: RenderedViewContext): void {
+    if (RenderedView.is(childView)) {
       childView.setBounds(this._bounds);
       childView.setAnchor(this._anchor);
     }
   }
 
   /** @hidden */
-  doUpdateChildViews(updateFlags: number, viewContext: RenderViewContext): void {
+  doUpdateChildViews(updateFlags: number, viewContext: RenderedViewContext): void {
     this.willUpdateChildViews(viewContext);
     const childNodes = this._node.childNodes;
     for (let i = 0; i < childNodes.length; i += 1) {
@@ -666,26 +701,28 @@ export class CanvasView extends HtmlView implements RenderView {
         childView.cascadeUpdate(updateFlags, childViewContext);
       }
     }
-    const renderViews = this._renderViews;
-    for (let i = 0; i < renderViews.length; i += 1) {
-      const renderView = renderViews[i];
-      const renderViewContext = this.childViewContext(renderView, viewContext);
-      renderView.cascadeUpdate(updateFlags, renderViewContext);
+    const renderedViews = this._renderedViews;
+    for (let i = 0; i < renderedViews.length; i += 1) {
+      const renderedView = renderedViews[i];
+      const renderedViewContext = this.childViewContext(renderedView, viewContext);
+      renderedView.cascadeUpdate(updateFlags, renderedViewContext);
     }
     this.didUpdateChildViews(viewContext);
   }
 
-  childViewContext(childView: View, viewContext: RenderViewContext): RenderViewContext {
+  childViewContext(childView: View, viewContext: RenderedViewContext): RenderedViewContext {
     return viewContext;
   }
 
-  canvasViewContext(viewContext: ViewContext): RenderViewContext {
+  canvasViewContext(viewContext?: ViewContext): RenderedViewContext {
+    if (viewContext === void 0) {
+      viewContext = this.appView!.appViewContext();
+    }
     return {
       updateTime: viewContext.updateTime,
       viewport: viewContext.viewport,
       viewIdiom: viewContext.viewIdiom,
-      renderingContext: this.renderingContext!,
-      pixelRatio: this.pixelRatio,
+      renderer: this.renderer,
     };
   }
 
@@ -693,18 +730,18 @@ export class CanvasView extends HtmlView implements RenderView {
     return null;
   }
 
-  hitTest(x: number, y: number, context?: RenderingContext): RenderView | null {
-    if (context === void 0) {
-      context = this.renderingContext!;
+  hitTest(x: number, y: number, viewContext?: RenderedViewContext): RenderedView | null {
+    if (viewContext === void 0) {
+      viewContext = this.canvasViewContext();
     }
-    let hit: RenderView | null = null;
-    const renderViews = this._renderViews;
-    for (let i = renderViews.length - 1; i >= 0; i -= 1) {
-      const renderView = renderViews[i];
-      if (!renderView.hidden && !renderView.culled) {
-        const hitBounds = renderView.hitBounds || renderView.bounds;
+    let hit: RenderedView | null = null;
+    const renderedViews = this._renderedViews;
+    for (let i = renderedViews.length - 1; i >= 0; i -= 1) {
+      const renderedView = renderedViews[i];
+      if (!renderedView.hidden && !renderedView.culled) {
+        const hitBounds = renderedView.hitBounds || renderedView.bounds;
         if (hitBounds.contains(x, y)) {
-          hit = renderView.hitTest(x, y, context);
+          hit = renderedView.hitTest(x, y, viewContext);
           if (hit !== null) {
             break;
           }
@@ -757,7 +794,7 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   /** @hidden */
-  fireEvent(event: ViewEvent, clientX: number, clientY: number): RenderView | null {
+  fireEvent(event: ViewEvent, clientX: number, clientY: number): RenderedView | null {
     const bounds = this.clientBounds;
     if (bounds.contains(clientX, clientY)) {
       const x = clientX - bounds.x;
@@ -773,7 +810,7 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   /** @hidden */
-  private fireMouseEvent(event: MouseEvent): RenderView | null {
+  private fireMouseEvent(event: MouseEvent): RenderedView | null {
     return this.fireEvent(event, event.clientX, event.clientY);
   }
 
@@ -821,7 +858,7 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   /** @hidden */
-  protected onMouseHoverChange(newHoverView: RenderView | null, oldHoverView: RenderView | null): void {
+  protected onMouseHoverChange(newHoverView: RenderedView | null, oldHoverView: RenderedView | null): void {
     const eventInit: MouseEventInit = {
       clientX: this._clientX,
       clientY: this._clientY,
@@ -859,11 +896,11 @@ export class CanvasView extends HtmlView implements RenderView {
   }
 
   /** @hidden */
-  private fireTouchEvent(type: string, originalEvent: TouchEvent, dispatched: RenderView[]): void {
+  private fireTouchEvent(type: string, originalEvent: TouchEvent, dispatched: RenderedView[]): void {
     const changedTouches = originalEvent.changedTouches;
     for (let i = 0, n = changedTouches.length; i < n; i += 1) {
       const changedTouch = changedTouches[i] as ViewTouch;
-      const targetView = changedTouch.targetView as RenderView | undefined;
+      const targetView = changedTouch.targetView as RenderedView | undefined;
       if (targetView && dispatched.indexOf(targetView) < 0) {
         const startEvent = new TouchEvent(type, {
           changedTouches: changedTouches as unknown as Touch[],
@@ -911,7 +948,7 @@ export class CanvasView extends HtmlView implements RenderView {
       }
       this._touches[changedTouch.identifier] = changedTouch;
     }
-    const dispatched: RenderView[] = [];
+    const dispatched: RenderedView[] = [];
     this.fireTouchEvent("touchstart", event, dispatched);
   }
 
@@ -925,7 +962,7 @@ export class CanvasView extends HtmlView implements RenderView {
         changedTouch.targetView = touch.targetView;
       }
     }
-    const dispatched: RenderView[] = [];
+    const dispatched: RenderedView[] = [];
     this.fireTouchEvent("touchmove", event, dispatched);
   }
 
@@ -940,7 +977,7 @@ export class CanvasView extends HtmlView implements RenderView {
         changedTouch.targetView = touch.targetView;
       }
     }
-    const dispatched: RenderView[] = [];
+    const dispatched: RenderedView[] = [];
     this.fireTouchEvent("touchcancel", event, dispatched);
     for (let i = 0; i < n; i += 1) {
       const changedTouch = changedTouches[i] as ViewTouch;
@@ -959,7 +996,7 @@ export class CanvasView extends HtmlView implements RenderView {
         changedTouch.targetView = touch.targetView;
       }
     }
-    const dispatched: RenderView[] = [];
+    const dispatched: RenderedView[] = [];
     this.fireTouchEvent("touchend", event, dispatched);
     for (let i = 0; i < n; i += 1) {
       const changedTouch = changedTouches[i] as ViewTouch;
@@ -993,10 +1030,30 @@ export class CanvasView extends HtmlView implements RenderView {
       height = Math.floor(node.height);
       pixelRatio = 1;
     }
-    const context = this.renderingContext!;
-    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     this.setBounds(new BoxR2(0, 0, width, height));
     this.setAnchor(new PointR2(width / 2, height / 2));
+  }
+
+  clearCanvas(): void {
+    const renderer = this.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const bounds = this._bounds;
+      renderer.context.clearRect(0, 0, bounds.width, bounds.height);
+    } else if (renderer instanceof WebGLRenderer) {
+      const context = renderer.context;
+      context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+    }
+  }
+
+  resetRenderer(): void {
+    const renderer = this.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const pixelRatio = this.pixelRatio;
+      renderer.context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    } else if (renderer instanceof WebGLRenderer) {
+      const bounds = this._bounds;
+      renderer.context.viewport(0, 0, bounds.width, bounds.height);
+    }
   }
 
   /** @hidden */

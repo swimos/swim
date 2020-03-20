@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {BoxR2, CircleR2} from "@swim/math";
+import {PointR2, BoxR2, CircleR2} from "@swim/math";
 import {AnyAngle, Angle} from "@swim/angle";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
-  RenderView,
+  RenderedView,
   FillViewInit,
   FillView,
   StrokeViewInit,
@@ -30,8 +30,8 @@ import {
 import {ArcInit, Arc} from "@swim/shape";
 import {AnyLngLat, LngLat} from "./LngLat";
 import {MapViewContext} from "./MapViewContext";
-import {MapGraphicView} from "./MapGraphicView";
-import {MapGraphicViewController} from "./MapGraphicViewController";
+import {MapGraphicsView} from "./MapGraphicsView";
+import {MapGraphicsViewController} from "./MapGraphicsViewController";
 
 export type AnyMapArcView = MapArcView | MapArcViewInit;
 
@@ -39,9 +39,9 @@ export interface MapArcViewInit extends ViewInit, FillViewInit, StrokeViewInit, 
   center?: AnyLngLat;
 }
 
-export class MapArcView extends MapGraphicView implements FillView, StrokeView {
+export class MapArcView extends MapGraphicsView implements FillView, StrokeView {
   /** @hidden */
-  _viewController: MapGraphicViewController<MapArcView> | null;
+  _viewController: MapGraphicsViewController<MapArcView> | null;
 
   constructor(center: LngLat = LngLat.origin(), innerRadius: Length = Length.zero(),
               outerRadius: Length = Length.zero(), startAngle: Angle = Angle.zero(),
@@ -58,7 +58,7 @@ export class MapArcView extends MapGraphicView implements FillView, StrokeView {
     this.cornerRadius.setState(cornerRadius);
   }
 
-  get viewController(): MapGraphicViewController<MapArcView> | null {
+  get viewController(): MapGraphicsViewController<MapArcView> | null {
     return this._viewController;
   }
 
@@ -186,11 +186,18 @@ export class MapArcView extends MapGraphicView implements FillView, StrokeView {
   }
 
   protected onRender(viewContext: MapViewContext): void {
-    const context = viewContext.renderingContext;
-    context.save();
-    const bounds = this._bounds;
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      this.renderArc(context, this._bounds, this._anchor);
+      context.restore();
+    }
+  }
+
+  protected renderArc(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const arc = this.value;
-    arc.render(context, bounds, this._anchor);
+    arc.draw(context, bounds, anchor);
     const fill = this.fill.value;
     if (fill) {
       context.fillStyle = fill.toString();
@@ -206,48 +213,59 @@ export class MapArcView extends MapGraphicView implements FillView, StrokeView {
       context.strokeStyle = stroke.toString();
       context.stroke();
     }
-    context.restore();
   }
 
   get popoverBounds(): BoxR2 {
-    const inversePageTransform = this.pageTransform.inverse();
-    const hitBounds = this._hitBounds;
-    if (hitBounds !== null) {
-      return hitBounds.transform(inversePageTransform);
-    } else {
-      const pageAnchor = this.anchor.transform(inversePageTransform);
-      const pageX = Math.round(pageAnchor.x);
-      const pageY = Math.round(pageAnchor.y);
-      return new BoxR2(pageX, pageY, pageX, pageY);
+    const bounds = this._bounds;
+    const anchor = this._anchor;
+    let size: number | undefined;
+    if (bounds) {
+      size = Math.min(bounds.width, bounds.height);
     }
+    const inversePageTransform = this.pageTransform.inverse();
+    const c = anchor.transform(inversePageTransform);
+    const r = (this.innerRadius.value!.pxValue(size) + this.outerRadius.value!.pxValue(size)) / 2;
+    const a = this.startAngle.value!.radValue() + this.sweepAngle.value!.radValue() / 2;
+    const x = c.x + r * Math.cos(a);
+    const y = c.y + r * Math.sin(a);
+    return new BoxR2(x, y, x, y);
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: MapViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      context.save();
-      const pixelRatio = this.pixelRatio;
-      x *= pixelRatio;
-      y *= pixelRatio;
-      context.beginPath();
-      const bounds = this._bounds;
-      const arc = this.value;
-      arc.render(context, bounds, this._anchor);
-      if (this.fill.value && context.isPointInPath(x, y)) {
-        hit = this;
-      } else if (this.stroke.value) {
-        const strokeWidth = this.strokeWidth.value;
-        if (strokeWidth) {
-          const size = Math.min(bounds.width, bounds.height);
-          context.lineWidth = strokeWidth.pxValue(size);
-          if (context.isPointInStroke(x, y)) {
-            hit = this;
-          }
-        }
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        context.save();
+        x *= renderer.pixelRatio;
+        y *= renderer.pixelRatio;
+        hit = this.hitTestArc(x, y, context, this._bounds, this._anchor);
+        context.restore();
       }
-      context.restore();
     }
     return hit;
+  }
+
+  protected hitTestArc(x: number, y: number, context: CanvasContext,
+                       bounds: BoxR2, anchor: PointR2): RenderedView | null {
+    const arc = this.value;
+    context.beginPath();
+    arc.draw(context, bounds, anchor);
+    if (this.fill.value && context.isPointInPath(x, y)) {
+      return this;
+    }
+    if (this.stroke.value) {
+      const strokeWidth = this.strokeWidth.value;
+      if (strokeWidth) {
+        const size = Math.min(bounds.width, bounds.height);
+        context.lineWidth = strokeWidth.pxValue(size);
+        if (context.isPointInStroke(x, y)) {
+          return this;
+        }
+      }
+    }
+    return null;
   }
 
   static from(center: AnyLngLat = LngLat.origin(),

@@ -24,7 +24,7 @@ export class RecordScopeSpec extends Spec {
     exam.equal(scope.get("x").numberValue(), 2);
     exam.equal(scope.get("y"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     exam.equal(scope.get("x").numberValue(), 2);
     exam.equal(scope.get("y").numberValue(), 2);
 
@@ -32,7 +32,7 @@ export class RecordScopeSpec extends Spec {
     exam.equal(scope.get("x").numberValue(), 4);
     exam.equal(scope.get("y").numberValue(), 2);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     exam.equal(scope.get("x").numberValue(), 4);
     exam.equal(scope.get("y").numberValue(), 4);
   }
@@ -44,7 +44,7 @@ export class RecordScopeSpec extends Spec {
     exam.equal(scope.get("x"), Record.of(Slot.of("y")));
     exam.equal(scope.get("z").numberValue(), 2);
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     exam.equal(scope.get("x"), Record.of(Slot.of("y", 2)));
     exam.equal(scope.get("z").numberValue(), 2);
 
@@ -52,7 +52,7 @@ export class RecordScopeSpec extends Spec {
     exam.equal(scope.get("x"), Record.of(Slot.of("y", 2)));
     exam.equal(scope.get("z").numberValue(), 4);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     exam.equal(scope.get("x"), Record.of(Slot.of("y", 4)));
     exam.equal(scope.get("z").numberValue(), 4);
   }
@@ -64,7 +64,7 @@ export class RecordScopeSpec extends Spec {
     exam.equal(scope.get("x"), Record.of(Slot.of("a", 0), Slot.of("y", 2)));
     exam.equal(scope.get("z"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     exam.equal(scope.get("x"), Record.of(Slot.of("a", 0), Slot.of("y", 2)));
     exam.equal(scope.get("z").numberValue(), 2);
 
@@ -72,7 +72,7 @@ export class RecordScopeSpec extends Spec {
     exam.equal(scope.get("x"), Record.of(Slot.of("a", 0), Slot.of("y", 4)));
     exam.equal(scope.get("z").numberValue(), 2);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     exam.equal(scope.get("x"), Record.of(Slot.of("a", 0), Slot.of("y", 4)));
     exam.equal(scope.get("z").numberValue(), 4);
   }
@@ -84,7 +84,7 @@ export class RecordScopeSpec extends Spec {
     exam.equal(scope.get("x").stringValue(), "a");
     exam.equal(scope.get("y"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     exam.equal(scope.get("x").stringValue(), "a");
     exam.equal(scope.get("y").numberValue(), 2);
 
@@ -92,7 +92,7 @@ export class RecordScopeSpec extends Spec {
     exam.equal(scope.get("x").stringValue(), "b");
     exam.equal(scope.get("y").numberValue(), 2);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     exam.equal(scope.get("x").stringValue(), "b");
     exam.equal(scope.get("y").numberValue(), 4);
   }
@@ -103,19 +103,19 @@ export class RecordScopeSpec extends Spec {
     const scope = RecordScope.of(Slot.of("x", true), Slot.of("z", z), Slot.of("y", 3), Slot.of("w", 5));
     exam.equal(scope.get("z"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     exam.equal(scope.get("z").numberValue(), 3);
 
     scope.set("x", false);
     exam.equal(scope.get("z").numberValue(), 3);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     exam.equal(scope.get("z").numberValue(), 5);
 
     scope.set("w", 7);
     exam.equal(scope.get("z").numberValue(), 5);
 
-    scope.reconcileInput(2);
+    scope.recohereInput(2);
     exam.equal(scope.get("z").numberValue(), 7);
   }
 
@@ -125,19 +125,19 @@ export class RecordScopeSpec extends Spec {
     const scope = RecordScope.of(Slot.of("x", 2), Slot.of("z", z), Slot.of("y", 3));
     exam.equal(scope.get("z"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     exam.equal(scope.get("z").numberValue(), 5);
 
     scope.set("x", 7);
     exam.equal(scope.get("z").numberValue(), 5);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     exam.equal(scope.get("z").numberValue(), 10);
 
     scope.set("y", 11);
     exam.equal(scope.get("z").numberValue(), 10);
 
-    scope.reconcileInput(2);
+    scope.recohereInput(2);
     exam.equal(scope.get("z").numberValue(), 18);
   }
 
@@ -147,13 +147,13 @@ export class RecordScopeSpec extends Spec {
     const scope = RecordScope.of(Slot.of("x", 2), Slot.of("z", z));
     exam.equal(scope.get("z"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     exam.equal(scope.get("z").numberValue(), -2);
 
     scope.set("x", 3);
     exam.equal(scope.get("z").numberValue(), -2);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     exam.equal(scope.get("z").numberValue(), -3);
   }
 
@@ -164,7 +164,7 @@ export class RecordScopeSpec extends Spec {
     exam.equal(scope.get("x").numberValue(), 2.1);
     exam.equal(scope.get("y"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     exam.equal(scope.get("x").numberValue(), 2.1);
     exam.equal(scope.get("y").numberValue(), 2.0);
 
@@ -172,7 +172,7 @@ export class RecordScopeSpec extends Spec {
     exam.equal(scope.get("x").numberValue(), 3.14);
     exam.equal(scope.get("y").numberValue(), 2.0);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     exam.equal(scope.get("x").numberValue(), 3.14);
     exam.equal(scope.get("y").numberValue(), 3.0);
   }

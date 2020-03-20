@@ -17,17 +17,17 @@ import {AnyAngle, Angle} from "@swim/angle";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
   View,
-  RenderViewContext,
-  RenderView,
+  RenderedViewContext,
+  RenderedView,
   FillView,
   TypesetView,
-  GraphicView,
-  GraphicViewController,
+  GraphicsView,
+  GraphicsViewController,
 } from "@swim/view";
 import {Arc} from "@swim/shape";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
@@ -57,9 +57,9 @@ export interface SliceViewInit extends ViewInit {
   legend?: View | string | null;
 }
 
-export class SliceView extends GraphicView {
+export class SliceView extends GraphicsView {
   /** @hidden */
-  _viewController: GraphicViewController<SliceView> | null;
+  _viewController: GraphicsViewController<SliceView> | null;
   /** @hidden */
   _total: number;
 
@@ -70,7 +70,7 @@ export class SliceView extends GraphicView {
     this.phaseAngle.setState(Angle.zero());
   }
 
-  get viewController(): GraphicViewController<SliceView> | null {
+  get viewController(): GraphicsViewController<SliceView> | null {
     return this._viewController;
   }
 
@@ -164,7 +164,7 @@ export class SliceView extends GraphicView {
     }
   }
 
-  onAnimate(viewContext: RenderViewContext): void {
+  onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.value.onFrame(t);
     this.innerRadius.onFrame(t);
@@ -186,23 +186,24 @@ export class SliceView extends GraphicView {
   }
 
   protected layoutChildView(childView: View): void {
-    if (RenderView.is(childView)) {
+    if (RenderedView.is(childView)) {
       childView.setBounds(this._bounds);
       // Don't set anchor.
     }
   }
 
-  protected onRender(viewContext: RenderViewContext): void {
-    const context = viewContext.renderingContext;
-    context.save();
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    this.renderSlice(context, bounds, anchor);
-    this.renderTick(context, bounds, anchor);
-    context.restore();
+  protected onRender(viewContext: RenderedViewContext): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      this.renderSlice(context, this._bounds, this._anchor);
+      this.renderTick(context, this._bounds, this._anchor);
+      context.restore();
+    }
   }
 
-  protected renderSlice(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderSlice(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const size = Math.min(bounds.width, bounds.height);
 
     const r0 = this.innerRadius.value!.pxValue(size);
@@ -217,11 +218,11 @@ export class SliceView extends GraphicView {
     context.beginPath();
     const sliceColor = this.sliceColor.value!;
     context.fillStyle = sliceColor.toString();
-    arc.render(context, bounds, anchor);
+    arc.draw(context, bounds, anchor);
     context.fill();
 
     const label = this.label();
-    if (RenderView.is(label)) {
+    if (RenderedView.is(label)) {
       const a = a0 + da / 2;
       const r = r0 + this.labelRadius.value!.pxValue(r1 - r0);
       const rx = r * Math.cos(a);
@@ -236,9 +237,9 @@ export class SliceView extends GraphicView {
     }
   }
 
-  protected renderTick(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderTick(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const legend = this.legend();
-    if (RenderView.is(legend) && !legend.hidden) {
+    if (RenderedView.is(legend) && !legend.hidden) {
       const width = bounds.width;
       const height = bounds.height;
       const size = Math.min(width, height);
@@ -305,23 +306,24 @@ export class SliceView extends GraphicView {
     }
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      context.save();
-      const pixelRatio = this.pixelRatio;
-      x *= pixelRatio;
-      y *= pixelRatio;
-      const bounds = this._bounds;
-      const anchor = this._anchor;
-      hit = this.hitTestSlice(x, y, context, bounds, anchor);
-      context.restore();
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        context.save();
+        x *= renderer.pixelRatio;
+        y *= renderer.pixelRatio;
+        hit = this.hitTestSlice(x, y, context, this._bounds, this._anchor);
+        context.restore();
+      }
     }
     return hit;
   }
 
-  protected hitTestSlice(x: number, y: number, context: RenderingContext,
-                         bounds: BoxR2, anchor: PointR2): RenderView | null {
+  protected hitTestSlice(x: number, y: number, context: CanvasContext,
+                         bounds: BoxR2, anchor: PointR2): RenderedView | null {
     const size = Math.min(bounds.width, bounds.height);
 
     const r0 = this.innerRadius.value!.pxValue(size);
@@ -334,7 +336,7 @@ export class SliceView extends GraphicView {
     const arc = new Arc(Length.px(r0), Length.px(r1), Angle.rad(a0), Angle.rad(da), ap, rp, Length.px(rc));
 
     context.beginPath();
-    arc.render(context, bounds, anchor);
+    arc.draw(context, bounds, anchor);
     if (context.isPointInPath(x, y)) {
       return this;
     }

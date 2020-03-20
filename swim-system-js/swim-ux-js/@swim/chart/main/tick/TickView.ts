@@ -17,15 +17,15 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Transition} from "@swim/transition";
 import {TweenState} from "@swim/animate";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
   View,
-  RenderViewContext,
-  RenderView,
-  GraphicView,
-  GraphicViewController,
+  RenderedViewContext,
+  RenderedView,
+  GraphicsView,
+  GraphicsViewController,
 } from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 import {TopTickView} from "./TopTickView";
@@ -65,9 +65,9 @@ export interface TickViewInit<D> extends ViewInit {
   tickLabel?: View | string | null;
 }
 
-export abstract class TickView<D> extends GraphicView {
+export abstract class TickView<D> extends GraphicsView {
   /** @hidden */
-  _viewController: GraphicViewController<TickView<D>> | null;
+  _viewController: GraphicsViewController<TickView<D>> | null;
   /** @hidden */
   readonly _value: D;
   /** @hidden */
@@ -91,7 +91,7 @@ export abstract class TickView<D> extends GraphicView {
     this.opacity.interpolate = TickView.interpolateOpacity;
   }
 
-  get viewController(): GraphicViewController<TickView<D>> | null {
+  get viewController(): GraphicsViewController<TickView<D>> | null {
     return this._viewController;
   }
 
@@ -175,14 +175,14 @@ export abstract class TickView<D> extends GraphicView {
     }
   }
 
-  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+  needsUpdate(updateFlags: number, viewContext: RenderedViewContext): number {
     if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
       updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout | View.NeedsRender;
     }
     return updateFlags;
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.opacity.onFrame(t);
 
@@ -199,39 +199,48 @@ export abstract class TickView<D> extends GraphicView {
     this.textColor.onFrame(t);
   }
 
-  protected onLayout(viewContext: RenderViewContext): void {
+  protected onLayout(viewContext: RenderedViewContext): void {
     const tickLabel = this.tickLabel();
-    if (RenderView.is(tickLabel)) {
+    if (RenderedView.is(tickLabel)) {
       this.layoutTickLabel(tickLabel, this._bounds, this._anchor);
     }
   }
 
-  protected willUpdate(viewContext: RenderViewContext): void {
+  protected willUpdate(viewContext: RenderedViewContext): void {
     super.willUpdate(viewContext);
-    const context = viewContext.renderingContext;
-    context.save();
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+    }
   }
 
-  protected onRender(viewContext: RenderViewContext): void {
-    const context = viewContext.renderingContext;
-    context.globalAlpha = this.opacity.value!;
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    this.renderTick(context, bounds, anchor);
+  protected onRender(viewContext: RenderedViewContext): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.globalAlpha = this.opacity.value!;
+      const bounds = this._bounds;
+      const anchor = this._anchor;
+      this.renderTick(context, bounds, anchor);
+    }
   }
 
-  protected didUpdate(viewContext: RenderViewContext): void {
-    const context = viewContext.renderingContext;
-    context.restore();
+  protected didUpdate(viewContext: RenderedViewContext): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.restore();
+    }
     super.didUpdate(viewContext);
   }
 
-  protected abstract layoutTickLabel(tickLabel: RenderView, bounds: BoxR2, anchor: PointR2): void;
+  protected abstract layoutTickLabel(tickLabel: RenderedView, bounds: BoxR2, anchor: PointR2): void;
 
-  protected abstract renderTick(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void;
+  protected abstract renderTick(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void;
 
-  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
-    if (childView.key() === "tickLabel" && RenderView.is(childView)) {
+  protected layoutChildView(childView: View, viewContext: RenderedViewContext): void {
+    if (childView.key() === "tickLabel" && RenderedView.is(childView)) {
       this.layoutTickLabel(childView, this._bounds, this._anchor);
     } else {
       super.layoutChildView(childView, viewContext);

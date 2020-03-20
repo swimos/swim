@@ -46,6 +46,26 @@ const ux = [
     ],
   },
   {
+    id: "googlemap",
+    name: "@swim/googlemap",
+    targets: [
+      {
+        id: "main",
+        deps: ["map"],
+      },
+    ],
+  },
+  {
+    id: "esrimap",
+    name: "@swim/esrimap",
+    targets: [
+      {
+        id: "main",
+        deps: ["map"],
+      },
+    ],
+  },
+  {
     id: "ux",
     name: "@swim/ux",
     title: "Swim UI Widgets",
@@ -53,7 +73,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["gauge", "pie", "chart", "map", "mapbox"],
+        deps: ["gauge", "pie", "chart", "map", "mapbox", "googlemap", "esrimap"],
       },
     ],
   },

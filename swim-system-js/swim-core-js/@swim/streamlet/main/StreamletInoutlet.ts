@@ -17,9 +17,9 @@ import {GenericStreamlet} from "./GenericStreamlet";
 import {AbstractInoutlet} from "./AbstractInoutlet";
 
 /**
- * An `Inoutlet` that invalidates a parameterized `Streamlet` whenever the
- * `Inoutlet` is invalidated, that updates the parameterized `Streamlet`
- * whenever the `Inoutlet` updates, and which gets its state from the
+ * An `Inoutlet` that decoheres a parameterized `Streamlet` whenever the
+ * `Inoutlet` decoheres, that recoheres the parameterized `Streamlet`
+ * whenever the `Inoutlet` recoheres, and which gets its state from the
  * parameterized `Streamlet`.
  */
 export class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
@@ -49,33 +49,33 @@ export class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
     return void 0;
   }
 
-  protected willInvalidate(): void {
+  protected willDecohere(): void {
     const streamlet = this._streamlet as GenericStreamlet<I, O>;
-    if (streamlet.willInvalidateOutlet) {
-      streamlet.willInvalidateOutlet(this);
+    if (streamlet.willDecohereOutlet) {
+      streamlet.willDecohereOutlet(this);
     }
   }
 
-  protected didInvalidate(): void {
+  protected didDecohere(): void {
     const streamlet = this._streamlet as GenericStreamlet<I, O>;
-    if (streamlet.didInvalidateOutlet) {
-      streamlet.didInvalidateOutlet(this);
+    if (streamlet.didDecohereOutlet) {
+      streamlet.didDecohereOutlet(this);
     } else {
-      streamlet.invalidate();
+      streamlet.decohere();
     }
   }
 
-  protected willUpdate(version: number): void {
+  protected willRecohere(version: number): void {
     const streamlet = this._streamlet as GenericStreamlet<I, O>;
-    if (streamlet.willReconcileOutlet) {
-      streamlet.willReconcileOutlet(this, version);
+    if (streamlet.willRecohereOutlet) {
+      streamlet.willRecohereOutlet(this, version);
     }
   }
 
-  protected didUpdate(version: number): void {
+  protected didRecohere(version: number): void {
     const streamlet = this._streamlet as GenericStreamlet<I, O>;
-    if (streamlet.didReconcileOutlet) {
-      streamlet.didReconcileOutlet(this, version);
+    if (streamlet.didRecohereOutlet) {
+      streamlet.didRecohereOutlet(this, version);
     }
   }
 }

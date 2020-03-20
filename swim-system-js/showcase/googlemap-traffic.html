@@ -3,8 +3,6 @@
   <head>
     <title>Swim Traffic Map</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
-    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.0/mapbox-gl.css">
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.0/mapbox-gl.js"></script>
   </head>
   <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
     <div id="app" style="display: flex; position: relative; width: 100%; height: 100%;">
@@ -13,6 +11,7 @@
     <script src="../swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBI-Gz_lh3-rKXFwlpElD7pInA60U-iK0c"></script>
     <script>
 
 const RED = swim.Color.parse("#a50f21");
@@ -23,17 +22,13 @@ const RIPPLE_COLOR = swim.Color.parse("#efefef").alpha(0.25);
 
 const app = new swim.HtmlAppView(document.getElementById("app"));
 
-mapboxgl.accessToken = "pk.eyJ1Ijoic3dpbWl0IiwiYSI6ImNqY2c3NXZkYzFoa2QycXQ1eXl1Mnd6M3EifQ.qpRE7xC08AyZfxJ56LoN7w";
-const map = new mapboxgl.Map({
-  container: app.node,
-  style: "mapbox://styles/swimit/cjmcivx8t8yul2sp7neiwgy8g",
-  center: {lng: -122.157139, lat: 37.450809},
-  pitch: 70,
-  zoom: 18,
-  bearing: -160,
+const map = new google.maps.Map(app.node, {
+  center: {lng: -122.162, lat: 37.445},
+  zoom: 17,
+  heading: -160,
 });
 
-const mapView = new swim.MapboxView(map);
+const mapView = new swim.GoogleMapView(map);
 mapView.overlayCanvas();
 
 const host = swim.hostRef("warps://traffic.swim.services")
@@ -186,6 +181,7 @@ function linkIntersection(intersectionId, node, intersection) {
     const tween = swim.Transition.duration(2000);
     ripple.stroke(RIPPLE_COLOR.alpha(0), tween)
           .radius(radius, tween.onEnd(function () { ripple.remove(); }));
+    ripple.requireUpdate(swim.View.NeedsAnimate | swim.MapView.NeedsProject);
   }
 }
 

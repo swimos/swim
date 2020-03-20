@@ -64,15 +64,15 @@ export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
     }
   }
 
-  protected onInvalidateOutputKey(key: K, effect: KeyEffect): void {
-    this.invalidateInputKey(key, effect);
+  protected onDecohereOutputKey(key: K, effect: KeyEffect): void {
+    this.decohereInputKey(key, effect);
   }
 
-  protected onReconcileOutputKey(key: K, effect: KeyEffect, version: number): void {
-    this.reconcileInputKey(key, version);
+  protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+    this.recohereInputKey(key, version);
   }
 
-  protected willReconcileInputKey(key: K, effect: KeyEffect, version: number): KeyEffect {
+  protected willRecohereInputKey(key: K, effect: KeyEffect, version: number): KeyEffect {
     if (effect === KeyEffect.Update) {
       if (this._input !== null) {
         const value = this._input.get(key);

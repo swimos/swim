@@ -23,7 +23,7 @@ export class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
     return this._state;
   }
 
-  protected onReconcile(version: number): void {
+  protected onRecohere(version: number): void {
     if (this._input !== null) {
       this._state = this._input.get();
     }

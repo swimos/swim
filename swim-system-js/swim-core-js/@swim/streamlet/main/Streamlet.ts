@@ -88,24 +88,26 @@ export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
   disconnectOutputs(): void;
 
   /**
-   * Marks this `Streamlet`—and all of its outlets—as having stale state.
-   * Invalidating a `Streamlet` will recursively invalidate all streamlets
-   * that transitively depend on the state of this `Streamlet`.  Invalidating
-   * a `Streamlet` does not cause its state to be recomputed.  A subsequent
-   * [[reconcile]] call will reconcile the state of the `Streamlet`.
+   * Marks this `Streamlet`—and all of its outlets—as having decoherent state.
+   * Decohering a `Streamlet` will recursively decohere all streamlets that
+   * transitively depend on the state of this `Streamlet`.  Decohering a
+   * `Streamlet` does not cause its state to be recomputed.  A subsequent
+   * [[recohere]] call will eventually make the state of the `Streamlet`
+   * coherent again.
    */
-  invalidate(): void;
+  decohere(): void;
 
   /**
-   * Reconciles the state of this `Streamlet`, if the version of this
-   * `Streamlet`'s state differs from the target `version`.  To reconcile its
-   * state, the `Streamlet` first invokes [[Inlet.reconcileOutput]] on each of
-   * its inlets, to ensure that its input states are up-to-date.  It then
-   * recomputes its own state, in an implementation defined manner.  Finally,
-   * it invokes [[Outlet.reconcileInput]] on its outlets, causing all
-   * transitively dependent streamlets to reconcile their own state.
+   * Updates the state of this `Streamlet` to make it consistent with the
+   * target `version`.  The `Streamlet` only needs to update if its current
+   * `version` differs from the target `version`.  To update its state, the
+   * `Streamlet` first invokes [[Inlet.recohereOutput]] on each of its inlets,
+   * to ensure that its input states are coherent.  It then recomputes its own
+   * state in an implementation defined manner.  Finally, it invokes
+   * [[Outlet.recohereInput]] on its outlets, causing all transitively
+   * dependent streamlets to make their own states coherent again.
    */
-  reconcile(version: number): void;
+  recohere(version: number): void;
 }
 
 /** @hidden */

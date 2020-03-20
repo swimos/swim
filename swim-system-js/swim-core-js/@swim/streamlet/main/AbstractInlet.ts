@@ -60,48 +60,48 @@ export abstract class AbstractInlet<I> implements Inlet<I> {
     // nop
   }
 
-  invalidateOutput(): void {
+  decohereOutput(): void {
     if (this._version >= 0) {
-      this.willInvalidateOutput();
+      this.willDecohereOutput();
       this._version = -1;
-      this.onInvalidateOutput();
-      this.didInvalidateOutput();
+      this.onDecohereOutput();
+      this.didDecohereOutput();
     }
   }
 
-  reconcileOutput(version: number): void {
+  recohereOutput(version: number): void {
     if (this._version < 0) {
-      this.willReconcileOutput(version);
+      this.willRecohereOutput(version);
       this._version = version;
       if (this._input !== null) {
-        this._input.reconcileInput(version);
+        this._input.recohereInput(version);
       }
-      this.onReconcileOutput(version);
-      this.didReconcileOutput(version);
+      this.onRecohereOutput(version);
+      this.didRecohereOutput(version);
     }
   }
 
-  protected willInvalidateOutput(): void {
-    // stub
+  protected willDecohereOutput(): void {
+    // hook
   }
 
-  protected onInvalidateOutput(): void {
-    // stub
+  protected onDecohereOutput(): void {
+    // hook
   }
 
-  protected didInvalidateOutput(): void {
-    // stub
+  protected didDecohereOutput(): void {
+    // hook
   }
 
-  protected willReconcileOutput(version: number): void {
-    // stub
+  protected willRecohereOutput(version: number): void {
+    // hook
   }
 
-  protected onReconcileOutput(version: number): void {
-    // stub
+  protected onRecohereOutput(version: number): void {
+    // hook
   }
 
-  protected didReconcileOutput(version: number): void {
-    // stub
+  protected didRecohereOutput(version: number): void {
+    // hook
   }
 }

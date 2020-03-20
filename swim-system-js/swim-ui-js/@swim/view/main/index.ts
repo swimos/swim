@@ -54,17 +54,17 @@ export {AppView} from "./AppView";
 export {AppViewObserver} from "./AppViewObserver";
 export {AppViewController} from "./AppViewController";
 
+export {LayoutView} from "./LayoutView";
+
 export {AnimatedViewContext} from "./AnimatedViewContext";
 export {AnimatedView} from "./AnimatedView";
 export {AnimatedViewObserver} from "./AnimatedViewObserver";
 export {AnimatedViewController} from "./AnimatedViewController";
 
-export {RenderViewContext} from "./RenderViewContext";
-export {RenderView} from "./RenderView";
-export {RenderViewObserver} from "./RenderViewObserver";
-export {RenderViewController} from "./RenderViewController";
-
-export {LayoutView} from "./LayoutView";
+export {RenderedViewContext} from "./RenderedViewContext";
+export {RenderedView} from "./RenderedView";
+export {RenderedViewObserver} from "./RenderedViewObserver";
+export {RenderedViewController} from "./RenderedViewController";
 
 export {
   FillViewInit,
@@ -79,9 +79,9 @@ export {
   TypesetView,
 } from "./TypesetView";
 
-export {GraphicView} from "./GraphicView";
-export {GraphicViewObserver} from "./GraphicViewObserver";
-export {GraphicViewController} from "./GraphicViewController";
+export {GraphicsView} from "./GraphicsView";
+export {GraphicsViewObserver} from "./GraphicsViewObserver";
+export {GraphicsViewController} from "./GraphicsViewController";
 
 export {LayerViewContext} from "./LayerViewContext";
 export {LayerView} from "./LayerView";

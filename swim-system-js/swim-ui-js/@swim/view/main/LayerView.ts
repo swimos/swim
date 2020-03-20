@@ -14,23 +14,26 @@
 
 import {PointR2, BoxR2} from "@swim/math";
 import {Transform} from "@swim/transform";
-import {RenderingContext} from "@swim/render";
+import {AnyRenderer, RendererType, Renderer, CanvasRenderer, WebGLRenderer} from "@swim/render";
 import {View} from "./View";
-import {RenderViewContext} from "./RenderViewContext";
-import {RenderView} from "./RenderView";
-import {GraphicView} from "./GraphicView";
+import {RenderedViewContext} from "./RenderedViewContext";
+import {RenderedView} from "./RenderedView";
+import {GraphicsView} from "./GraphicsView";
 import {LayerViewContext} from "./LayerViewContext";
 import {LayerViewController} from "./LayerViewController";
 
-export class LayerView extends GraphicView {
+export class LayerView extends GraphicsView {
   /** @hidden */
   _canvas: HTMLCanvasElement;
   /** @hidden */
   _viewController: LayerViewController | null;
+  /** @hidden */
+  _renderer: Renderer | null | undefined;
 
   constructor(key: string | null = null) {
     super(key);
     this._canvas = this.createCanvas();
+    this._renderer = void 0;
   }
 
   get canvas(): HTMLCanvasElement {
@@ -41,17 +44,54 @@ export class LayerView extends GraphicView {
     return this._viewController;
   }
 
-  get renderingContext(): RenderingContext | null {
-    return this._canvas.getContext("2d");
+  get pixelRatio(): number {
+    return window.devicePixelRatio || 1;
   }
 
-  get layeringContext(): RenderingContext | null {
+  get layerRenderer(): Renderer | null {
     const parentView = this.parentView;
-    return RenderView.is(parentView) ? parentView.renderingContext : null;
+    return RenderedView.is(parentView) ? parentView.renderer : null;
+  }
+
+  get renderer(): Renderer | null {
+    let renderer = this._renderer;
+    if (renderer === void 0) {
+      renderer = this.createRenderer();
+      this._renderer = renderer;
+    }
+    return renderer;
+  }
+
+  setRenderer(renderer: AnyRenderer | null): void {
+    if (typeof renderer === "string") {
+      renderer = this.createRenderer(renderer as RendererType);
+    }
+    this._renderer = renderer;
+    this.resetRenderer();
+  }
+
+  protected createRenderer(rendererType: RendererType = "canvas"): Renderer | null {
+    if (rendererType === "canvas") {
+      const context = this._canvas.getContext("2d");
+      if (context) {
+        return new CanvasRenderer(context, this.pixelRatio);
+      } else {
+        throw new Error("Failed to create canvas rendering context");
+      }
+    } else if (rendererType === "webgl") {
+      const context = this._canvas.getContext("webgl");
+      if (context) {
+        return new WebGLRenderer(context, this.pixelRatio);
+      } else {
+        throw new Error("Failed to create webgl rendering context");
+      }
+    } else {
+      throw new Error("Failed to create " + rendererType + " renderer");
+    }
   }
 
   /** @hidden */
-  doUpdate(updateFlags: number, viewContext: RenderViewContext): void {
+  doUpdate(updateFlags: number, viewContext: RenderedViewContext): void {
     const layerViewContext = this.layerViewContext(viewContext);
     this.willUpdate(layerViewContext);
     if (((updateFlags | this._updateFlags) & View.NeedsCompute) !== 0) {
@@ -80,11 +120,7 @@ export class LayerView extends GraphicView {
   }
 
   protected onRender(viewContext: LayerViewContext): void {
-    if (this.parentView) {
-      const bounds = this._bounds;
-      viewContext.layeringContext.clearRect(0, 0, bounds.width, bounds.height);
-    }
-    super.onRender(viewContext);
+    this.clearCanvas();
   }
 
   protected didUpdateChildViews(viewContext: LayerViewContext): void {
@@ -92,26 +128,15 @@ export class LayerView extends GraphicView {
     this.copyLayerImage(viewContext);
   }
 
-  protected copyLayerImage(viewContext: LayerViewContext): void {
-    const bounds = this._bounds;
-    const pixelRatio = this.pixelRatio;
-    const imageData = viewContext.layeringContext.getImageData(0, 0, bounds.width * pixelRatio, bounds.height * pixelRatio);
-    viewContext.renderingContext.putImageData(imageData, bounds.x * pixelRatio, bounds.y * pixelRatio);
-  }
-
   childViewContext(childView: View, viewContext: LayerViewContext): LayerViewContext {
     return viewContext;
   }
 
-  layerViewContext(viewContext: RenderViewContext): LayerViewContext {
-    return {
-      updateTime: viewContext.updateTime,
-      viewport: viewContext.viewport,
-      viewIdiom: viewContext.viewIdiom,
-      renderingContext: this.renderingContext!,
-      layeringContext: viewContext.renderingContext,
-      pixelRatio: this.pixelRatio,
-    };
+  layerViewContext(viewContext: RenderedViewContext): LayerViewContext {
+    const layerViewContext = Object.create(viewContext);
+    layerViewContext.layerRenderer = viewContext.renderer;
+    layerViewContext.renderer = this.renderer;
+    return layerViewContext;
   }
 
   get parentTransform(): Transform {
@@ -133,12 +158,13 @@ export class LayerView extends GraphicView {
   protected onSetBounds(newBounds: BoxR2, oldBounds: BoxR2): void {
     if (!newBounds.equals(oldBounds)) {
       this.resizeCanvas(this._canvas, newBounds);
+      this.resetRenderer();
       this.requireUpdate(View.NeedsLayout);
     }
   }
 
   protected layoutChildView(childView: View): void {
-    if (RenderView.is(childView)) {
+    if (RenderedView.is(childView)) {
       let bounds = this._bounds;
       let anchor = this._anchor;
       const x = bounds.x;
@@ -158,18 +184,18 @@ export class LayerView extends GraphicView {
     }
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    const layerContext = this.renderingContext!;
+  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+    const layerViewContext = this.layerViewContext(viewContext);
     const bounds = this._bounds;
     x -= bounds.x;
     y -= bounds.y;
 
-    let hit: RenderView | null = null;
+    let hit: RenderedView | null = null;
     const childViews = this._childViews;
     for (let i = childViews.length - 1; i >= 0; i -= 1) {
       const childView = childViews[i];
-      if (RenderView.is(childView) && childView.bounds.contains(x, y)) {
-        hit = childView.hitTest(x, y, layerContext);
+      if (RenderedView.is(childView) && childView.bounds.contains(x, y)) {
+        hit = childView.hitTest(x, y, layerViewContext);
         if (hit !== null) {
           break;
         }
@@ -190,8 +216,39 @@ export class LayerView extends GraphicView {
     node.height = height * pixelRatio;
     node.style.width = width + "px";
     node.style.height = height + "px";
-    const context = this.renderingContext!;
-    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+  }
+
+  clearCanvas(): void {
+    const renderer = this.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const bounds = this._bounds;
+      renderer.context.clearRect(0, 0, bounds.width, bounds.height);
+    } else if (renderer instanceof WebGLRenderer) {
+      const context = renderer.context;
+      context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
+    }
+  }
+
+  resetRenderer(): void {
+    const renderer = this.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const pixelRatio = this.pixelRatio;
+      renderer.context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    } else if (renderer instanceof WebGLRenderer) {
+      const bounds = this._bounds;
+      renderer.context.viewport(0, 0, bounds.width, bounds.height);
+    }
+  }
+
+  protected copyLayerImage(viewContext: LayerViewContext): void {
+    const layerRenderer = viewContext.layerRenderer;
+    const renderer = viewContext.renderer;
+    if (layerRenderer instanceof CanvasRenderer && renderer instanceof CanvasRenderer) {
+      const bounds = this._bounds;
+      const pixelRatio = this.pixelRatio;
+      const imageData = layerRenderer.context.getImageData(0, 0, bounds.width * pixelRatio, bounds.height * pixelRatio);
+      renderer.context.putImageData(imageData, bounds.x * pixelRatio, bounds.y * pixelRatio);
+    }
   }
 }
 View.Layer = LayerView;

@@ -17,3 +17,5 @@ export * from "@swim/pie";
 export * from "@swim/chart";
 export * from "@swim/map";
 export * from "@swim/mapbox";
+export * from "@swim/googlemap";
+export * from "@swim/esrimap";

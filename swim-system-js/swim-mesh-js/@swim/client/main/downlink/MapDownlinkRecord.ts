@@ -139,13 +139,13 @@ export class MapDownlinkRecord extends DownlinkRecord {
   }
 
   didUpdate(key: Value, newValue: Value, oldValue: Value): void {
-    this.invalidateInputKey(key, KeyEffect.Update);
-    this.reconcileInput(0); // TODO: debounce
+    this.decohereInputKey(key, KeyEffect.Update);
+    this.recohereInput(0); // TODO: debounce
   }
 
   didRemove(key: Value, oldValue: Value): void {
-    this.invalidateInputKey(key, KeyEffect.Remove);
-    this.reconcileInput(0); // TODO: debounce
+    this.decohereInputKey(key, KeyEffect.Remove);
+    this.recohereInput(0); // TODO: debounce
   }
 
   didDrop(lower: number): void {

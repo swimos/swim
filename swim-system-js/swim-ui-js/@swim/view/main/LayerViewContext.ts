@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {RenderingContext} from "@swim/render";
-import {RenderViewContext} from "./RenderViewContext";
+import {Renderer} from "@swim/render";
+import {RenderedViewContext} from "./RenderedViewContext";
 
-export interface LayerViewContext extends RenderViewContext {
-  layeringContext: RenderingContext;
+export interface LayerViewContext extends RenderedViewContext {
+  readonly layerRenderer: Renderer | null;
 }

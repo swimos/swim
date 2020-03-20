@@ -30,7 +30,7 @@ export class ValueInput<O> extends AbstractOutlet<O> {
   set(newState: O | undefined): O | undefined {
     const oldState = this._state;
     this._state = newState;
-    this.invalidateInput();
+    this.decohereInput();
     return oldState;
   }
 }

@@ -16,9 +16,9 @@ import {Outlet} from "./Outlet";
 import {AbstractInlet} from "./AbstractInlet";
 
 /**
- * An `Inlet` that invalidates a parameterized `Outlet` whenever the `Inlet`
- * is invalidated, and that updates the parameterized `Outlet` whenever the
- * `Inlet` updates.
+ * An `Inlet` that decoheres a parameterized `Outlet` whenever the `Inlet`
+ * decoheres, and that recoheres the parameterized `Outlet` whenever the
+ * `Inlet` recoheres.
  */
 export class OutletInlet<I> extends AbstractInlet<I> {
   /** @hidden */
@@ -33,11 +33,11 @@ export class OutletInlet<I> extends AbstractInlet<I> {
     return this._outlet;
   }
 
-  protected onInvalidateOutput(): void {
-    this._outlet.invalidateInput();
+  protected onDecohereOutput(): void {
+    this._outlet.decohereInput();
   }
 
-  protected onReconcileOutput(version: number): void {
-    this._outlet.reconcileInput(version);
+  protected onRecohereOutput(version: number): void {
+    this._outlet.recohereInput(version);
   }
 }

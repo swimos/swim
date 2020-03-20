@@ -8,6 +8,8 @@
   "repository": "https://github.com/swimos/swim.git",
   "private": true,
   "devDependencies": {
+    "@types/arcgis-js-api": "4.14",
+    "@types/googlemaps": "3.39",
     "@types/mapbox-gl": "1.6",
     "@types/node": "13",
     "@types/ws": "7",

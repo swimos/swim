@@ -44,6 +44,8 @@
       "@swim/chart": ["swim-ux-js/@swim/chart/main"],
       "@swim/map": ["swim-ux-js/@swim/map/main"],
       "@swim/mapbox": ["swim-ux-js/@swim/mapbox/main"],
+      "@swim/googlemap": ["swim-ux-js/@swim/googlemap/main"],
+      "@swim/esrimap": ["swim-ux-js/@swim/esrimap/main"],
       "@swim/ux": ["swim-ux-js/@swim/ux/main"],
 
       "@swim/website": ["swim-web-js/@swim/website/main"],
@@ -93,6 +95,8 @@
     {"path": "../../../swim-ux-js/@swim/chart/main"},
     {"path": "../../../swim-ux-js/@swim/map/main"},
     {"path": "../../../swim-ux-js/@swim/mapbox/main"},
+    {"path": "../../../swim-ux-js/@swim/googlemap/main"},
+    {"path": "../../../swim-ux-js/@swim/esrimap/main"},
     {"path": "../../../swim-ux-js/@swim/ux/main"},
 
     {"path": "../../../swim-web-js/@swim/website/main"},

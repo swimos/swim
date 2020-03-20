@@ -16,24 +16,24 @@ import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   View,
-  RenderViewContext,
-  RenderView,
+  RenderedViewContext,
+  RenderedView,
   TypesetView,
-  GraphicView,
-  GraphicViewController,
+  GraphicsView,
+  GraphicsViewController,
 } from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 import {DatumCategory, DatumLabelPlacement, AnyDatum} from "./Datum";
 
 export type AnyDatumView<X, Y> = DatumView<X, Y> | AnyDatum<X, Y>;
 
-export class DatumView<X, Y> extends GraphicView {
+export class DatumView<X, Y> extends GraphicsView {
   /** @hidden */
-  _viewController: GraphicViewController<DatumView<X, Y>> | null;
+  _viewController: GraphicsViewController<DatumView<X, Y>> | null;
   /** @hidden */
   _y2Coord: number | null;
   /** @hidden */
@@ -53,7 +53,7 @@ export class DatumView<X, Y> extends GraphicView {
     this._labelPlacement = "auto";
   }
 
-  get viewController(): GraphicViewController<DatumView<X, Y>> | null {
+  get viewController(): GraphicsViewController<DatumView<X, Y>> | null {
     return this._viewController;
   }
 
@@ -147,14 +147,14 @@ export class DatumView<X, Y> extends GraphicView {
     return !!this.color.value || typeof this.opacity.value === "number";
   }
 
-  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+  needsUpdate(updateFlags: number, viewContext: RenderedViewContext): number {
     if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
       updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout | View.NeedsRender;
     }
     return updateFlags;
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.x.onFrame(t);
     this.y.onFrame(t);
@@ -170,14 +170,14 @@ export class DatumView<X, Y> extends GraphicView {
     this.textColor.onFrame(t);
   }
 
-  protected onLayout(viewContext: RenderViewContext): void {
+  protected onLayout(viewContext: RenderedViewContext): void {
     const label = this.label();
-    if (RenderView.is(label)) {
+    if (RenderedView.is(label)) {
       this.layoutLabel(label, this._bounds, this._anchor);
     }
   }
 
-  protected layoutLabel(label: RenderView, bounds: BoxR2, anchor: PointR2): void {
+  protected layoutLabel(label: RenderedView, bounds: BoxR2, anchor: PointR2): void {
     let placement = this._labelPlacement;
     if (placement !== "above" && placement !== "below") {
       const category = this._category;
@@ -208,18 +208,22 @@ export class DatumView<X, Y> extends GraphicView {
     }
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      const bounds = this._bounds;
-      const anchor = this._anchor;
-      hit = this.hitTestDatum(x, y, context, bounds, anchor);
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        const bounds = this._bounds;
+        const anchor = this._anchor;
+        hit = this.hitTestDatum(x, y, context, bounds, anchor);
+      }
     }
     return hit;
   }
 
-  protected hitTestDatum(x: number, y: number, context: RenderingContext,
-                         bounds: BoxR2, anchor: PointR2): RenderView | null {
+  protected hitTestDatum(x: number, y: number, context: CanvasContext,
+                         bounds: BoxR2, anchor: PointR2): RenderedView | null {
     let hitRadius = this._hitRadius;
     const radius = this.r.value;
     if (radius) {

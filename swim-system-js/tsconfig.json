@@ -45,6 +45,8 @@
     {"path": "./swim-ux-js/@swim/chart"},
     {"path": "./swim-ux-js/@swim/map"},
     {"path": "./swim-ux-js/@swim/mapbox"},
+    {"path": "./swim-ux-js/@swim/googlemap"},
+    {"path": "./swim-ux-js/@swim/esrimap"},
     {"path": "./swim-ux-js/@swim/ux"},
 
     {"path": "./swim-web-js/@swim/website"},

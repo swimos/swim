@@ -7,6 +7,8 @@
     {"path": "./@swim/chart"},
     {"path": "./@swim/map"},
     {"path": "./@swim/mapbox"},
+    {"path": "./@swim/googlemap"},
+    {"path": "./@swim/esrimap"},
     {"path": "./@swim/ux"}
   ]
 }

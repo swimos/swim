@@ -26,9 +26,9 @@ export {MapView} from "./MapView";
 export {MapViewObserver} from "./MapViewObserver";
 export {MapViewController} from "./MapViewController";
 
-export {MapGraphicView} from "./MapGraphicView";
-export {MapGraphicViewObserver} from "./MapGraphicViewObserver";
-export {MapGraphicViewController} from "./MapGraphicViewController";
+export {MapGraphicsView} from "./MapGraphicsView";
+export {MapGraphicsViewObserver} from "./MapGraphicsViewObserver";
+export {MapGraphicsViewController} from "./MapGraphicsViewController";
 
 export {MapLayerViewContext} from "./MapLayerViewContext";
 export {MapLayerView} from "./MapLayerView";

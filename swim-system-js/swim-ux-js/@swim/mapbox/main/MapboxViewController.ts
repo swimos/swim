@@ -12,95 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {PointR2, BoxR2} from "@swim/math";
-import {View} from "@swim/view";
-import {MapViewContext, MapGraphicViewController} from "@swim/map";
+import {MapGraphicsViewController} from "@swim/map";
 import {MapboxProjection} from "./MapboxProjection";
 import {MapboxView} from "./MapboxView";
 import {MapboxViewObserver} from "./MapboxViewObserver";
 
-export interface MapboxViewController<V extends MapboxView = MapboxView> extends MapGraphicViewController<V>, MapboxViewObserver<V> {
-  readonly view: V | null;
+export class MapboxViewController<V extends MapboxView = MapboxView> extends MapGraphicsViewController<V> implements MapboxViewObserver<V> {
+  viewWillSetProjection(projection: MapboxProjection, view: V): void {
+    // hook
+  }
 
-  setView(view: V | null): void;
+  viewDidSetProjection(projection: MapboxProjection, view: V): void {
+    // hook
+  }
 
-  viewWillSetKey(key: string | null, view: V): void;
+  viewWillSetZoom(zoom: number, view: V): void {
+    // hook
+  }
 
-  viewDidSetKey(key: string | null, view: V): void;
-
-  viewWillSetParentView(parentView: View | null, view: V): void;
-
-  viewDidSetParentView(parentView: View | null, view: V): void;
-
-  viewWillInsertChildView(childView: View, targetView: View | null | undefined, view: V): void;
-
-  viewDidInsertChildView(childView: View, targetView: View | null | undefined, view: V): void;
-
-  viewWillRemoveChildView(childView: View, view: V): void;
-
-  viewDidRemoveChildView(childView: View, view: V): void;
-
-  viewWillMount(view: V): void;
-
-  viewDidMount(view: V): void;
-
-  viewWillUnmount(view: V): void;
-
-  viewDidUnmount(view: V): void;
-
-  viewWillUpdate(viewContext: MapViewContext, view: V): void;
-
-  viewDidUpdate(viewContext: MapViewContext, view: V): void;
-
-  viewWillCompute(viewContext: MapViewContext, view: V): void;
-
-  viewDidCompute(viewContext: MapViewContext, view: V): void;
-
-  viewWillAnimate(viewContext: MapViewContext, view: V): void;
-
-  viewDidAnimate(viewContext: MapViewContext, view: V): void;
-
-  viewWillProject(viewContext: MapViewContext, view: V): void;
-
-  viewDidProject(viewContext: MapViewContext, view: V): void;
-
-  viewWillLayout(viewContext: MapViewContext, view: V): void;
-
-  viewDidLayout(viewContext: MapViewContext, view: V): void;
-
-  viewWillScroll(viewContext: MapViewContext, view: V): void;
-
-  viewDidScroll(viewContext: MapViewContext, view: V): void;
-
-  viewWillRender(viewContext: MapViewContext, view: V): void;
-
-  viewDidRender(viewContext: MapViewContext, view: V): void;
-
-  viewWillUpdateChildViews(viewContext: MapViewContext, view: V): void;
-
-  viewDidUpdateChildViews(viewContext: MapViewContext, view: V): void;
-
-  viewWillSetHidden(hidden: boolean, view: V): boolean | void;
-
-  viewDidSetHidden(hidden: boolean, view: V): void;
-
-  viewWillSetCulled(culled: boolean, view: V): boolean | void;
-
-  viewDidSetCulled(culled: boolean, view: V): void;
-
-  viewWillSetBounds(bounds: BoxR2, view: V): BoxR2 | void;
-
-  viewDidSetBounds(newBounds: BoxR2, oldBounds: BoxR2, view: V): void;
-
-  viewWillSetAnchor(anchor: PointR2, view: V): PointR2 | void;
-
-  viewDidSetAnchor(newAnchor: PointR2, oldAnchor: PointR2, view: V): void;
-
-  viewWillSetProjection(projection: MapboxProjection, view: V): void;
-
-  viewDidSetProjection(projection: MapboxProjection, view: V): void;
-
-  viewWillSetZoom(zoom: number, view: V): void;
-
-  viewDidSetZoom(newZoom: number, oldZoom: number, view: V): void;
+  viewDidSetZoom(newZoom: number, oldZoom: number, view: V): void {
+    // hook
+  }
 }

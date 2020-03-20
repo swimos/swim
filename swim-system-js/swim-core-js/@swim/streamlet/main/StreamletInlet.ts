@@ -17,9 +17,9 @@ import {GenericStreamlet} from "./GenericStreamlet";
 import {AbstractInlet} from "./AbstractInlet";
 
 /**
- * An `Inlet` that invalidates a parameterized `Streamlet` whenever the `Inlet`
- * is invalidated, and that updates the parameterized `Streamlet` whenever the
- * `Inlet` updates.
+ * An `Inlet` that decoheres a parameterized `Streamlet` whenever the `Inlet`
+ * decoheres, and that recoheres the parameterized `Streamlet` whenever the
+ * `Inlet` recoheres.
  */
 export class StreamletInlet<I> extends AbstractInlet<I> {
   /** @hidden */
@@ -34,35 +34,35 @@ export class StreamletInlet<I> extends AbstractInlet<I> {
     return this._streamlet;
   }
 
-  protected willInvalidateOutput(): void {
+  protected willDecohereOutput(): void {
     const streamlet = this._streamlet as GenericStreamlet<I, unknown>;
-    if (streamlet.willInvalidateInlet) {
-      streamlet.willInvalidateInlet(this);
+    if (streamlet.willDecohereInlet) {
+      streamlet.willDecohereInlet(this);
     }
   }
 
-  protected didInvalidateOutput(): void {
+  protected didDecohereOutput(): void {
     const streamlet = this._streamlet as GenericStreamlet<I, unknown>;
-    if (streamlet.didInvalidateInlet) {
-      streamlet.didInvalidateInlet(this);
+    if (streamlet.didDecohereInlet) {
+      streamlet.didDecohereInlet(this);
     } else {
-      streamlet.invalidate();
+      streamlet.decohere();
     }
   }
 
-  protected willReconcileOutput(version: number): void {
+  protected willRecohereOutput(version: number): void {
     const streamlet = this._streamlet as GenericStreamlet<I, unknown>;
-    if (streamlet.willReconcileInlet) {
-      streamlet.willReconcileInlet(this, version);
+    if (streamlet.willRecohereInlet) {
+      streamlet.willRecohereInlet(this, version);
     }
   }
 
-  protected didReconcileOutput(version: number): void {
+  protected didRecohereOutput(version: number): void {
     const streamlet = this._streamlet as GenericStreamlet<I, unknown>;
-    if (streamlet.didReconcileInlet) {
-      streamlet.didReconcileInlet(this, version);
+    if (streamlet.didRecohereInlet) {
+      streamlet.didRecohereInlet(this, version);
     } else {
-      streamlet.reconcile(version);
+      streamlet.recohere(version);
     }
   }
 }

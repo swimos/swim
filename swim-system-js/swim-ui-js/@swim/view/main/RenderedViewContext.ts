@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {RenderViewObserver} from "./RenderViewObserver";
-import {GraphicView} from "./GraphicView";
+import {Renderer} from "@swim/render";
+import {AnimatedViewContext} from "./AnimatedViewContext";
 
-export interface GraphicViewObserver<V extends GraphicView = GraphicView> extends RenderViewObserver<V> {
+export interface RenderedViewContext extends AnimatedViewContext {
+  readonly renderer: Renderer | null;
 }

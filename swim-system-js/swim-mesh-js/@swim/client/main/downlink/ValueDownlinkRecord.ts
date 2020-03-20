@@ -221,7 +221,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
   }
 
   didSet(newValue: Value, oldValue: Value): void {
-    this.invalidateInput();
-    this.reconcileInput(0); // TODO: debounce
+    this.decohereInput();
+    this.recohereInput(0); // TODO: debounce
   }
 }

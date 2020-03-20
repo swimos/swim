@@ -21,22 +21,23 @@ import {KeyEffect} from "./KeyEffect";
 export interface MapInlet<K, V, I> extends Inlet<I> {
   /**
    * Marks this `MapInlet` as needing an `effect` applied to a given `key`.
-   * Invalidating an individual key invalidates the entire state of the `Inlet`.
-   * But only the invalidated keys need to be updated in order to reconcile the
+   * Decohering an individual key decoheres the entire state of the `Inlet`.
+   * But only the decoherent keys need to be updated in order to recohere the
    * overall state of the `Inlet`.
    */
-  invalidateOutputKey(key: K, effect: KeyEffect): void;
+  decohereOutputKey(key: K, effect: KeyEffect): void;
 
   /**
-   * Reconciles the state of an individual `key` in this `MapInlet`, if the
-   * version of this `MapInlet`'s state differs from the target `version`.
-   * To reconcile the state of a key, the `MapInlet` first invokes
-   * [[MapOutlet.reconcileInputKey]] on its [[input]], if its input is a
-   * `MapOutlet`, or it invokes [[Outlet.reconcileInput]], if its input is not
-   * a `MapOutlet`.  Then, if all invalid keys have been reconciled, the
-   * `MapInlet` invokes [[Streamletreconcile]] on its attached streamlet.
+   * Updates the state of an individual `key` in this `MapInlet` to make it
+   * consistent with the target `version`.  The `MapInlet` only needs to update
+   * if the current `version` differs from the target `version`.  To update the
+   * state of a key, the `MapInlet` first invokes [[MapOutlet.recohereInputKey]]
+   * on its [[input]], if its input is a `MapOutlet`, or it invokes
+   * [[Outlet.recohereInput]], if its input is not a `MapOutlet`.  Then,
+   * if all decoherent keys have been recohered, the `MapInlet` invokes
+   * [[Streamlet.recohere]] on its attached streamlet.
    */
-  reconcileOutputKey(key: K, version: number): void;
+  recohereOutputKey(key: K, version: number): void;
 }
 
 /** @hidden */
@@ -45,8 +46,8 @@ export const MapInlet = {
     if (typeof object === "object" && object) {
       const inlet = object as MapInlet<K, V, I>;
       return Inlet.is(inlet)
-          && typeof inlet.invalidateOutputKey === "function"
-          && typeof inlet.reconcileOutputKey === "function";
+          && typeof inlet.decohereOutputKey === "function"
+          && typeof inlet.recohereOutputKey === "function";
     }
     return false;
   },

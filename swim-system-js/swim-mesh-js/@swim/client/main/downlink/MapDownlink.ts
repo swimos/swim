@@ -485,8 +485,8 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
         observer.didUpdate(keyObject, newObject, oldObject, this);
       }
     }
-    this.invalidateInputKey(keyObject, KeyEffect.Update);
-    this.reconcileInput(0); // TODO: debounce and track version
+    this.decohereInputKey(keyObject, KeyEffect.Update);
+    this.recohereInput(0); // TODO: debounce and track version
   }
 
   /** @hidden */
@@ -520,8 +520,8 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
         observer.didRemove(keyObject, oldObject, this);
       }
     }
-    this.invalidateInputKey(keyObject, KeyEffect.Remove);
-    this.reconcileInput(0); // TODO: debounce and track version
+    this.decohereInputKey(keyObject, KeyEffect.Remove);
+    this.recohereInput(0); // TODO: debounce and track version
   }
 
   /** @hidden */
@@ -764,148 +764,148 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
     }
   }
 
-  invalidateOutputKey(key: K, effect: KeyEffect): void {
-    this.invalidateKey(key, effect);
+  decohereOutputKey(key: K, effect: KeyEffect): void {
+    this.decohereKey(key, effect);
   }
 
-  invalidateInputKey(key: K, effect: KeyEffect): void {
-    this.invalidateKey(key, effect);
+  decohereInputKey(key: K, effect: KeyEffect): void {
+    this.decohereKey(key, effect);
   }
 
-  invalidateKey(key: K, effect: KeyEffect): void {
+  decohereKey(key: K, effect: KeyEffect): void {
     const oldEffects = this._effects;
     if (oldEffects.get(key) !== effect) {
-      this.willInvalidateKey(key, effect);
+      this.willDecohereKey(key, effect);
       this._effects = oldEffects.updated(key, effect);
       this._version = -1;
-      this.onInvalidateKey(key, effect);
+      this.onDecohereKey(key, effect);
       const n = this._outputs !== null ? this._outputs.length : 0;
       for (let i = 0; i < n; i += 1) {
         const output = this._outputs![i];
         if (MapInlet.is(output)) {
-          output.invalidateOutputKey(key, effect);
+          output.decohereOutputKey(key, effect);
         } else {
-          output.invalidateOutput();
+          output.decohereOutput();
         }
       }
       const outlet = this._outlets.get(key);
       if (outlet !== void 0) {
-        outlet.invalidateInput();
+        outlet.decohereInput();
       }
-      this.didInvalidateKey(key, effect);
+      this.didDecohereKey(key, effect);
     }
   }
 
-  invalidateOutput(): void {
-    this.invalidate();
+  decohereOutput(): void {
+    this.decohere();
   }
 
-  invalidateInput(): void {
-    this.invalidate();
+  decohereInput(): void {
+    this.decohere();
   }
 
-  invalidate(): void {
+  decohere(): void {
     if (this._version >= 0) {
-      this.willInvalidate();
+      this.willDecohere();
       this._version = -1;
-      this.onInvalidate();
+      this.onDecohere();
       const n = this._outputs !== null ? this._outputs.length : 0;
       for (let i = 0; i < n; i += 1) {
-        this._outputs![i].invalidateOutput();
+        this._outputs![i].decohereOutput();
       }
       this._outlets.forEach(function (key: K, outlet: KeyOutlet<K, V>): void {
-        outlet.invalidateInput();
+        outlet.decohereInput();
       }, this);
-      this.didInvalidate();
+      this.didDecohere();
     }
   }
 
-  reconcileOutputKey(key: K, version: number): void {
-    this.reconcileKey(key, version);
+  recohereOutputKey(key: K, version: number): void {
+    this.recohereKey(key, version);
   }
 
-  reconcileInputKey(key: K, version: number): void {
-    this.reconcileKey(key, version);
+  recohereInputKey(key: K, version: number): void {
+    this.recohereKey(key, version);
   }
 
-  reconcileKey(key: K, version: number): void {
+  recohereKey(key: K, version: number): void {
     if (this._version < 0) {
       const oldEffects = this._effects;
       const effect = oldEffects.get(key);
       if (effect !== void 0) {
-        this.willReconcileKey(key, effect, version);
+        this.willRecohereKey(key, effect, version);
         this._effects = oldEffects.removed(key);
         if (this._input !== null) {
-          this._input.reconcileInputKey(key, version);
+          this._input.recohereInputKey(key, version);
         }
-        this.onReconcileKey(key, effect, version);
+        this.onRecohereKey(key, effect, version);
         for (let i = 0, n = this._outputs !== null ? this._outputs.length : 0; i < n; i += 1) {
           const output = this._outputs![i];
           if (MapInlet.is(output)) {
-            output.reconcileOutputKey(key, version);
+            output.recohereOutputKey(key, version);
           }
         }
         const outlet = this._outlets.get(key);
         if (outlet !== void 0) {
-          outlet.reconcileInput(version);
+          outlet.recohereInput(version);
         }
-        this.didReconcileKey(key, effect, version);
+        this.didRecohereKey(key, effect, version);
       }
     }
   }
 
-  reconcileOutput(version: number): void {
-    this.reconcile(version);
+  recohereOutput(version: number): void {
+    this.recohere(version);
   }
 
-  reconcileInput(version: number): void {
-    this.reconcile(version);
+  recohereInput(version: number): void {
+    this.recohere(version);
   }
 
-  reconcile(version: number): void {
+  recohere(version: number): void {
     if (this._version < 0) {
-      this.willReconcile(version);
+      this.willRecohere(version);
       this._effects.forEach(function (key: K): void {
-        this.reconcileKey(key, version);
+        this.recohereKey(key, version);
       }, this);
       this._version = version;
-      this.onReconcile(version);
+      this.onRecohere(version);
       for (let i = 0, n = this._outputs !== null ? this._outputs.length : 0; i < n; i += 1) {
-        this._outputs![i].reconcileOutput(version);
+        this._outputs![i].recohereOutput(version);
       }
-      this.didReconcile(version);
+      this.didRecohere(version);
     }
   }
 
-  protected willInvalidateKey(key: K, effect: KeyEffect): void {
-    // stub
+  protected willDecohereKey(key: K, effect: KeyEffect): void {
+    // hook
   }
 
-  protected onInvalidateKey(key: K, effect: KeyEffect): void {
-    // stub
+  protected onDecohereKey(key: K, effect: KeyEffect): void {
+    // hook
   }
 
-  protected didInvalidateKey(key: K, effect: KeyEffect): void {
-    // stub
+  protected didDecohereKey(key: K, effect: KeyEffect): void {
+    // hook
   }
 
-  protected willInvalidate(): void {
-    // stub
+  protected willDecohere(): void {
+    // hook
   }
 
-  protected onInvalidate(): void {
-    // stub
+  protected onDecohere(): void {
+    // hook
   }
 
-  protected didInvalidate(): void {
-    // stub
+  protected didDecohere(): void {
+    // hook
   }
 
-  protected willReconcileKey(key: K, effect: KeyEffect, version: number): void {
-    // stub
+  protected willRecohereKey(key: K, effect: KeyEffect, version: number): void {
+    // hook
   }
 
-  protected onReconcileKey(key: K, effect: KeyEffect, version: number): void {
+  protected onRecohereKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
       if (this._input !== null) {
         const value = this._input.get(key);
@@ -920,20 +920,20 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
     }
   }
 
-  protected didReconcileKey(key: K, effect: KeyEffect, version: number): void {
-    // stub
+  protected didRecohereKey(key: K, effect: KeyEffect, version: number): void {
+    // hook
   }
 
-  protected willReconcile(version: number): void {
-    // stub
+  protected willRecohere(version: number): void {
+    // hook
   }
 
-  protected onReconcile(version: number): void {
-    // stub
+  protected onRecohere(version: number): void {
+    // hook
   }
 
-  protected didReconcile(version: number): void {
-    // stub
+  protected didRecohere(version: number): void {
+    // hook
   }
 
   memoize(): MapOutlet<K, V, MapDownlink<K, V, KU, VU>> {

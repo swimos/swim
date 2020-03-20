@@ -24,11 +24,11 @@ export class MapValueOperatorSpec extends Spec {
     output.bindInput(square);
 
     input.set(2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     exam.equal(output.get(), 4);
 
     input.set(8);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     exam.equal(output.get(), 64);
   }
 }

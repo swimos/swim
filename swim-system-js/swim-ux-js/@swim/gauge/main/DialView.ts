@@ -17,17 +17,17 @@ import {AnyAngle, Angle} from "@swim/angle";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
   View,
-  RenderViewContext,
-  RenderView,
+  RenderedViewContext,
+  RenderedView,
   FillView,
   TypesetView,
-  GraphicView,
-  GraphicViewController,
+  GraphicsView,
+  GraphicsViewController,
 } from "@swim/view";
 import {Arc} from "@swim/shape";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
@@ -60,9 +60,9 @@ export interface DialViewInit extends ViewInit {
   legend?: View | string | null;
 }
 
-export class DialView extends GraphicView {
+export class DialView extends GraphicsView {
   /** @hidden */
-  _viewController: GraphicViewController<DialView> | null;
+  _viewController: GraphicsViewController<DialView> | null;
   /** @hidden */
   _arrangement: DialViewArrangement;
 
@@ -73,7 +73,7 @@ export class DialView extends GraphicView {
     this._arrangement = "auto";
   }
 
-  get viewController(): GraphicViewController<DialView> | null {
+  get viewController(): GraphicsViewController<DialView> | null {
     return this._viewController;
   }
 
@@ -170,7 +170,7 @@ export class DialView extends GraphicView {
     }
   }
 
-  onAnimate(viewContext: RenderViewContext): void {
+  onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.value.onFrame(t);
     this.total.onFrame(t);
@@ -192,24 +192,25 @@ export class DialView extends GraphicView {
     this.textColor.onFrame(t);
   }
 
-  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
-    if (RenderView.is(childView)) {
+  protected layoutChildView(childView: View, viewContext: RenderedViewContext): void {
+    if (RenderedView.is(childView)) {
       childView.setBounds(this._bounds);
       // Don't set anchor.
     }
   }
 
-  protected onRender(viewContext: RenderViewContext): void {
-    const context = viewContext.renderingContext;
-    context.save();
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    this.renderDial(context, bounds, anchor);
-    context.restore();
-    this.renderTick(context, bounds, anchor);
+  protected onRender(viewContext: RenderedViewContext): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      this.renderDial(context, this._bounds, this._anchor);
+      context.restore();
+      this.renderTick(context, this._bounds, this._anchor);
+    }
   }
 
-  protected renderDial(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderDial(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const size = Math.min(bounds.width, bounds.height);
 
     const r0 = this.innerRadius.value!.pxValue(size);
@@ -223,18 +224,18 @@ export class DialView extends GraphicView {
     context.beginPath();
     const dialColor = this.dialColor.value!;
     context.fillStyle = dialColor.toString();
-    dial.render(context, bounds, anchor);
+    dial.draw(context, bounds, anchor);
     context.fill();
     context.clip();
 
     context.beginPath();
     const meterColor = this.meterColor.value!;
     context.fillStyle = meterColor.toString();
-    meter.render(context, bounds, anchor);
+    meter.draw(context, bounds, anchor);
     context.fill();
 
     const label = this.label();
-    if (RenderView.is(label)) {
+    if (RenderedView.is(label)) {
       const r = (r0 + r1) / 2;
       const rx = r * Math.cos(a0 + 1e-12);
       const ry = r * Math.sin(a0 + 1e-12);
@@ -268,9 +269,9 @@ export class DialView extends GraphicView {
     }
   }
 
-  protected renderTick(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderTick(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const legend = this.legend();
-    if (RenderView.is(legend) && !legend.hidden) {
+    if (RenderedView.is(legend) && !legend.hidden) {
       const width = bounds.width;
       const height = bounds.height;
       const size = Math.min(width, height);
@@ -337,23 +338,24 @@ export class DialView extends GraphicView {
     }
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      context.save();
-      const pixelRatio = this.pixelRatio;
-      x *= pixelRatio;
-      y *= pixelRatio;
-      const bounds = this._bounds;
-      const anchor = this._anchor;
-      hit = this.hitTestDial(x, y, context, bounds, anchor);
-      context.restore();
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        context.save();
+        x *= renderer.pixelRatio;
+        y *= renderer.pixelRatio;
+        hit = this.hitTestDial(x, y, context, this._bounds, this._anchor);
+        context.restore();
+      }
     }
     return hit;
   }
 
-  protected hitTestDial(x: number, y: number, context: RenderingContext,
-                        bounds: BoxR2, anchor: PointR2): RenderView | null {
+  protected hitTestDial(x: number, y: number, context: CanvasContext,
+                        bounds: BoxR2, anchor: PointR2): RenderedView | null {
     const size = Math.min(bounds.width, bounds.height);
 
     const r0 = this.innerRadius.value!.pxValue(size);
@@ -364,7 +366,7 @@ export class DialView extends GraphicView {
     const dial = new Arc(Length.px(r0), Length.px(r1), Angle.rad(a0), Angle.rad(da), Angle.zero(), null, Length.px(rc));
 
     context.beginPath();
-    dial.render(context, bounds, anchor);
+    dial.draw(context, bounds, anchor);
     if (context.isPointInPath(x, y)) {
       return this;
     }

@@ -15,11 +15,11 @@
 import {PointR2, BoxR2} from "@swim/math";
 import {View} from "./View";
 import {AnimatedViewController} from "./AnimatedViewController";
-import {RenderViewContext} from "./RenderViewContext";
-import {RenderView} from "./RenderView";
-import {RenderViewObserver} from "./RenderViewObserver";
+import {RenderedViewContext} from "./RenderedViewContext";
+import {RenderedView} from "./RenderedView";
+import {RenderedViewObserver} from "./RenderedViewObserver";
 
-export interface RenderViewController<V extends RenderView = RenderView> extends AnimatedViewController<V>, RenderViewObserver<V> {
+export interface RenderedViewController<V extends RenderedView = RenderedView> extends AnimatedViewController<V>, RenderedViewObserver<V> {
   readonly view: V | null;
 
   setView(view: V | null): void;
@@ -48,33 +48,33 @@ export interface RenderViewController<V extends RenderView = RenderView> extends
 
   viewDidUnmount(view: V): void;
 
-  viewWillUpdate(viewContext: RenderViewContext, view: V): void;
+  viewWillUpdate(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidUpdate(viewContext: RenderViewContext, view: V): void;
+  viewDidUpdate(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillCompute(viewContext: RenderViewContext, view: V): void;
+  viewWillCompute(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidCompute(viewContext: RenderViewContext, view: V): void;
+  viewDidCompute(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillAnimate(viewContext: RenderViewContext, view: V): void;
+  viewWillAnimate(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidAnimate(viewContext: RenderViewContext, view: V): void;
+  viewDidAnimate(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillLayout(viewContext: RenderViewContext, view: V): void;
+  viewWillLayout(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidLayout(viewContext: RenderViewContext, view: V): void;
+  viewDidLayout(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillScroll(viewContext: RenderViewContext, view: V): void;
+  viewWillScroll(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidScroll(viewContext: RenderViewContext, view: V): void;
+  viewDidScroll(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillRender(viewContext: RenderViewContext, view: V): void;
+  viewWillRender(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidRender(viewContext: RenderViewContext, view: V): void;
+  viewDidRender(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillUpdateChildViews(viewContext: RenderViewContext, view: V): void;
+  viewWillUpdateChildViews(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidUpdateChildViews(viewContext: RenderViewContext, view: V): void;
+  viewDidUpdateChildViews(viewContext: RenderedViewContext, view: V): void;
 
   viewWillSetHidden(hidden: boolean, view: V): boolean | void;
 

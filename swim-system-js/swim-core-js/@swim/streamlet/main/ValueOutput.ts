@@ -27,7 +27,7 @@ export class ValueOutput<I> extends AbstractInlet<I> {
     return this._state;
   }
 
-  protected onReconcileOutput(version: number): void {
+  protected onRecohereOutput(version: number): void {
     if (this._input !== null) {
       this._state = this._input.get();
     }

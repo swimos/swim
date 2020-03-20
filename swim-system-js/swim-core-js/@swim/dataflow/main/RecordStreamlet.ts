@@ -45,9 +45,9 @@ export abstract class RecordStreamlet<I extends Value = Value, O extends Value =
 
   abstract disconnectOutputs(): void;
 
-  abstract invalidate(): void;
+  abstract decohere(): void;
 
-  abstract reconcile(version: number): void;
+  abstract recohere(version: number): void;
 
   compile(): void {
     AbstractStreamlet.reflectEachInlet<I, O, void, this>(this, this.streamletClass(), function (inlet: Inlet<I>, name: string): void {

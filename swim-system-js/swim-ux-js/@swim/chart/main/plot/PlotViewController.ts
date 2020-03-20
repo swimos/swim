@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicViewController} from "@swim/view";
+import {GraphicsViewController} from "@swim/view";
 import {AxisView} from "../axis/AxisView";
 import {PlotType, PlotView} from "./PlotView";
 import {PlotViewObserver} from "./PlotViewObserver";
 
-export class PlotViewController<X = any, Y = any, V extends PlotView<X, Y> = PlotView<X, Y>> extends GraphicViewController<V> implements PlotViewObserver<X, Y, V> {
+export class PlotViewController<X = any, Y = any, V extends PlotView<X, Y> = PlotView<X, Y>> extends GraphicsViewController<V> implements PlotViewObserver<X, Y, V> {
   get type(): PlotType {
     const view = this._view;
     return view ? view.type : void 0 as any;

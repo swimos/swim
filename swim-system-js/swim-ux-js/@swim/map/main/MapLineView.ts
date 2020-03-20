@@ -16,13 +16,13 @@ import {Objects} from "@swim/util";
 import {PointR2, BoxR2, SegmentR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
-import {RenderingContext} from "@swim/render";
-import {MemberAnimator, ViewInit, RenderView, StrokeViewInit, StrokeView} from "@swim/view";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
+import {MemberAnimator, ViewInit, RenderedView, StrokeViewInit, StrokeView} from "@swim/view";
 import {AnyLngLat, LngLat} from "./LngLat";
 import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
-import {MapGraphicView} from "./MapGraphicView";
-import {MapGraphicViewController} from "./MapGraphicViewController";
+import {MapGraphicsView} from "./MapGraphicsView";
+import {MapGraphicsViewController} from "./MapGraphicsViewController";
 
 export type AnyMapLineView = MapLineView | MapLineViewInit;
 
@@ -32,9 +32,9 @@ export interface MapLineViewInit extends ViewInit, StrokeViewInit {
   hitWidth?: number;
 }
 
-export class MapLineView extends MapGraphicView implements StrokeView {
+export class MapLineView extends MapGraphicsView implements StrokeView {
   /** @hidden */
-  _viewController: MapGraphicViewController<MapLineView> | null;
+  _viewController: MapGraphicsViewController<MapLineView> | null;
   /** @hidden */
   _startPoint: PointR2;
   /** @hidden */
@@ -51,7 +51,7 @@ export class MapLineView extends MapGraphicView implements StrokeView {
     this._hitWidth = 0;
   }
 
-  get viewController(): MapGraphicViewController<MapLineView> | null {
+  get viewController(): MapGraphicsViewController<MapLineView> | null {
     return this._viewController;
   }
 
@@ -118,15 +118,16 @@ export class MapLineView extends MapGraphicView implements StrokeView {
   }
 
   protected onRender(viewContext: MapViewContext): void {
-    const context = viewContext.renderingContext;
-    context.save();
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    this.renderLine(context, bounds, anchor);
-    context.restore();
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      this.renderLine(context, this._bounds, this._anchor);
+      context.restore();
+    }
   }
 
-  protected renderLine(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderLine(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const stroke = this.stroke.value;
     if (stroke) {
       const strokeWidth = this.strokeWidth.value;
@@ -144,23 +145,24 @@ export class MapLineView extends MapGraphicView implements StrokeView {
     }
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: MapViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      context.save();
-      const pixelRatio = this.pixelRatio;
-      x *= pixelRatio;
-      y *= pixelRatio;
-      const bounds = this._bounds;
-      const anchor = this._anchor;
-      hit = this.hitTestLine(x, y, context, bounds, anchor);
-      context.restore();
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        context.save();
+        x *= renderer.pixelRatio;
+        y *= renderer.pixelRatio;
+        hit = this.hitTestLine(x, y, context, this._bounds, this._anchor);
+        context.restore();
+      }
     }
     return hit;
   }
 
-  protected hitTestLine(x: number, y: number, context: RenderingContext,
-                        bounds: BoxR2, anchor: PointR2): RenderView | null {
+  protected hitTestLine(x: number, y: number, context: CanvasContext,
+                        bounds: BoxR2, anchor: PointR2): RenderedView | null {
     const start = this._startPoint;
     const end = this._endPoint;
 

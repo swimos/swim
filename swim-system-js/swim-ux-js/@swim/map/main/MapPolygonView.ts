@@ -17,13 +17,13 @@ import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   AnyMemberAnimator,
   ViewInit,
   View,
-  RenderView,
+  RenderedView,
   FillViewInit,
   FillView,
   StrokeViewInit,
@@ -32,8 +32,8 @@ import {
 import {AnyLngLat, LngLat} from "./LngLat";
 import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
-import {MapGraphicView} from "./MapGraphicView";
-import {MapGraphicViewController} from "./MapGraphicViewController";
+import {MapGraphicsView} from "./MapGraphicsView";
+import {MapGraphicsViewController} from "./MapGraphicsViewController";
 
 export type AnyMapPolygonView = MapPolygonView | MapPolygonViewInit;
 
@@ -42,9 +42,9 @@ export interface MapPolygonViewInit extends ViewInit, FillViewInit, StrokeViewIn
   animateCoords?: boolean;
 }
 
-export class MapPolygonView extends MapGraphicView implements FillView, StrokeView {
+export class MapPolygonView extends MapGraphicsView implements FillView, StrokeView {
   /** @hidden */
-  _viewController: MapGraphicViewController<MapPolygonView> | null;
+  _viewController: MapGraphicsViewController<MapPolygonView> | null;
   /** @hidden */
   readonly _coords: MemberAnimator<this, LngLat, AnyLngLat>[];
   /** @hidden */
@@ -62,7 +62,7 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
     this._clipViewport = true;
   }
 
-  get viewController(): MapGraphicViewController<MapPolygonView> | null {
+  get viewController(): MapGraphicsViewController<MapPolygonView> | null {
     return this._viewController;
   }
 
@@ -218,15 +218,16 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
   }
 
   protected onRender(viewContext: MapViewContext): void {
-    const context = viewContext.renderingContext;
-    context.save();
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    this.renderPolygon(context, bounds, anchor);
-    context.restore();
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      this.renderPolygon(context, this._bounds, this._anchor);
+      context.restore();
+    }
   }
 
-  protected renderPolygon(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderPolygon(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const points = this._points;
     const n = points.length;
     if (n > 0) {
@@ -258,23 +259,24 @@ export class MapPolygonView extends MapGraphicView implements FillView, StrokeVi
     }
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: MapViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      context.save();
-      const pixelRatio = this.pixelRatio;
-      x *= pixelRatio;
-      y *= pixelRatio;
-      const bounds = this._bounds;
-      const anchor = this._anchor;
-      hit = this.hitTestPolygon(x, y, context, bounds, anchor);
-      context.restore();
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        context.save();
+        x *= renderer.pixelRatio;
+        y *= renderer.pixelRatio;
+        hit = this.hitTestPolygon(x, y, context, this._bounds, this._anchor);
+        context.restore();
+      }
     }
     return hit;
   }
 
-  protected hitTestPolygon(x: number, y: number, context: RenderingContext,
-                           bounds: BoxR2, anchor: PointR2): RenderView | null {
+  protected hitTestPolygon(x: number, y: number, context: CanvasContext,
+                           bounds: BoxR2, anchor: PointR2): RenderedView | null {
     const points = this._points;
     const n = points.length;
     if (n > 0) {

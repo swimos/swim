@@ -41,6 +41,14 @@ component libraries:
   ([npm](https://www.npmjs.com/package/@swim/mapbox),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_mapbox.html)) –
   support for overlaying **@swim/map** views on Mapbox maps.
+- [**@swim/googlemap**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/googlemap)
+  ([npm](https://www.npmjs.com/package/@swim/googlemap),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_googlemap.html)) –
+  support for overlaying **@swim/map** views on Google maps.
+- [**@swim/esrimap**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/esrimap)
+  ([npm](https://www.npmjs.com/package/@swim/esrimap),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_esrimap.html)) –
+  support for overlaying **@swim/map** views on ArcGIS maps.
 
 **@swim/ux** builds on the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
 and [**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ui)

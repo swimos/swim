@@ -15,11 +15,11 @@
 import {PointR2, BoxR2, CircleR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
-  RenderView,
+  RenderedView,
   FillViewInit,
   FillView,
   StrokeViewInit,
@@ -28,8 +28,8 @@ import {
 import {AnyLngLat, LngLat} from "./LngLat";
 import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
-import {MapGraphicView} from "./MapGraphicView";
-import {MapGraphicViewController} from "./MapGraphicViewController";
+import {MapGraphicsView} from "./MapGraphicsView";
+import {MapGraphicsViewController} from "./MapGraphicsViewController";
 
 export type AnyMapCircleView = MapCircleView | MapCircleViewInit;
 
@@ -39,9 +39,11 @@ export interface MapCircleViewInit extends ViewInit, FillViewInit, StrokeViewIni
   hitRadius?: number;
 }
 
-export class MapCircleView extends MapGraphicView implements FillView, StrokeView {
+export class MapCircleView extends MapGraphicsView implements FillView, StrokeView {
   /** @hidden */
-  _viewController: MapGraphicViewController<MapCircleView> | null;
+  _viewController: MapGraphicsViewController<MapCircleView> | null;
+  /** @hidden */
+  _point: PointR2;
   /** @hidden */
   _hitRadius: number;
 
@@ -49,10 +51,11 @@ export class MapCircleView extends MapGraphicView implements FillView, StrokeVie
     super();
     this.center.setState(center);
     this.radius.setState(radius);
+    this._point = PointR2.origin();
     this._hitRadius = 0;
   }
 
-  get viewController(): MapGraphicViewController<MapCircleView> | null {
+  get viewController(): MapGraphicsViewController<MapCircleView> | null {
     return this._viewController;
   }
 
@@ -100,41 +103,42 @@ export class MapCircleView extends MapGraphicView implements FillView, StrokeVie
   protected onProject(viewContext: MapViewContext): void {
     const projection = viewContext.projection;
     const bounds = this._bounds;
-    const anchor = projection.project(this.center.value!);
+    const point = projection.project(this.center.value!);
+    this._point = point;
     const size = Math.min(bounds.width, bounds.height);
     const radius = this.radius.value!.pxValue(size);
     const hitRadius = Math.max(this._hitRadius, radius);
-    this._hitBounds = new BoxR2(anchor.x - hitRadius, anchor.y - hitRadius,
-                                anchor.x + hitRadius, anchor.y + hitRadius);
-    this.setAnchor(anchor);
+    this._hitBounds = new BoxR2(point.x - hitRadius, point.y - hitRadius,
+                                point.x + hitRadius, point.y + hitRadius);
   }
 
   protected onLayout(viewContext: MapViewContext): void {
     const bounds = this._bounds;
-    const anchor = this._anchor;
+    const point = this._point;
     const size = Math.min(bounds.width, bounds.height);
     const radius = this.radius.value!.pxValue(size);
-    const invalid = !isFinite(anchor.x) || !isFinite(anchor.y) || !isFinite(radius);
-    const culled = invalid || !bounds.intersectsCircle(new CircleR2(anchor.x, anchor.y, radius));
+    const invalid = !isFinite(point.x) || !isFinite(point.y) || !isFinite(radius);
+    const culled = invalid || !bounds.intersectsCircle(new CircleR2(point.x, point.y, radius));
     this.setCulled(culled);
     this.layoutChildViews(viewContext);
   }
 
   protected onRender(viewContext: MapViewContext): void {
-    const context = viewContext.renderingContext;
-    context.save();
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    this.renderCircle(context, bounds, anchor);
-    context.restore();
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      this.renderCircle(context, this._bounds, this._anchor);
+      context.restore();
+    }
   }
 
-  protected renderCircle(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderCircle(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const size = Math.min(bounds.width, bounds.height);
 
     context.beginPath();
     const radius = this.radius.value!.pxValue(size);
-    context.arc(anchor.x, anchor.y, radius, 0, 2 * Math.PI);
+    context.arc(this._point.x, this._point.y, radius, 0, 2 * Math.PI);
 
     const fill = this.fill.value;
     if (fill) {
@@ -159,32 +163,35 @@ export class MapCircleView extends MapGraphicView implements FillView, StrokeVie
     if (hitBounds !== null) {
       return hitBounds.transform(inversePageTransform);
     } else {
-      const pageAnchor = this.anchor.transform(inversePageTransform);
-      const pageX = Math.round(pageAnchor.x);
-      const pageY = Math.round(pageAnchor.y);
-      return new BoxR2(pageX, pageY, pageX, pageY);
+      const point = this._point.transform(inversePageTransform);
+      const pointX = Math.round(point.x);
+      const pointY = Math.round(point.y);
+      return new BoxR2(pointX, pointY, pointX, pointY);
     }
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: MapViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      const bounds = this._bounds;
-      const anchor = this._anchor;
-      hit = this.hitTestCircle(x, y, context, bounds, anchor);
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        hit = this.hitTestCircle(x, y, context, this._bounds, this._anchor, renderer.pixelRatio);
+      }
     }
     return hit;
   }
 
-  protected hitTestCircle(x: number, y: number, context: RenderingContext,
-                          bounds: BoxR2, anchor: PointR2): RenderView | null {
+  protected hitTestCircle(x: number, y: number, context: CanvasContext,
+                          bounds: BoxR2, anchor: PointR2,
+                          pixelRatio: number): RenderedView | null {
     const size = Math.min(bounds.width, bounds.height);
     const radius = this.radius.value!.pxValue(size);
 
     if (this.fill.value) {
       const hitRadius = Math.max(this._hitRadius, radius);
-      const dx = anchor.x - x;
-      const dy = anchor.y - y;
+      const dx = this._point.x - x;
+      const dy = this._point.y - y;
       if (dx * dx + dy * dy < hitRadius * hitRadius) {
         return this;
       }
@@ -192,13 +199,12 @@ export class MapCircleView extends MapGraphicView implements FillView, StrokeVie
 
     const strokeWidth = this.strokeWidth.value;
     if (this.stroke.value && strokeWidth) {
-      const pixelRatio = this.pixelRatio;
       x *= pixelRatio;
       y *= pixelRatio;
 
       context.save();
       context.beginPath();
-      context.arc(anchor.x, anchor.y, radius, 0, 2 * Math.PI);
+      context.arc(this._point.x, this._point.y, radius, 0, 2 * Math.PI);
       context.lineWidth = strokeWidth.pxValue(size);
       if (context.isPointInStroke(x, y)) {
         context.restore();

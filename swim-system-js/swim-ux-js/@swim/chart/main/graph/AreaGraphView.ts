@@ -15,11 +15,12 @@
 import {PointR2, BoxR2} from "@swim/math";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont} from "@swim/font";
-import {RenderingContext} from "@swim/render";
-import {MemberAnimator,
+import {CanvasContext} from "@swim/render";
+import {
+  MemberAnimator,
   ViewInit,
-  RenderViewContext,
-  RenderView,
+  RenderedViewContext,
+  RenderedView,
   FillViewInit,
   FillView,
 } from "@swim/view";
@@ -61,13 +62,13 @@ export class AreaGraphView<X, Y> extends GraphView<X, Y> implements FillView {
   @MemberAnimator(Color)
   fill: MemberAnimator<this, Color, AnyColor>;
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.fill.onFrame(t);
     super.onAnimate(viewContext);
   }
 
-  protected renderPlot(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderPlot(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const data = this._data;
     const n = data.size;
 
@@ -131,8 +132,8 @@ export class AreaGraphView<X, Y> extends GraphView<X, Y> implements FillView {
     context.fill();
   }
 
-  protected hitTestGraph(x: number, y: number, context: RenderingContext,
-                         bounds: BoxR2, anchor: PointR2): RenderView | null {
+  protected hitTestGraph(x: number, y: number, context: CanvasContext,
+                         bounds: BoxR2, anchor: PointR2): RenderedView | null {
     const data = this._data;
     const n = data.size;
 

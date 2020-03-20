@@ -15,14 +15,15 @@
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
-  RenderViewContext,
+  RenderedViewContext,
   TypesetViewInit,
   TypesetView,
-  GraphicView,
-  GraphicViewController,
+  GraphicsView,
+  GraphicsViewController,
 } from "@swim/view";
 import {TextRun} from "./TextRun";
 
@@ -32,16 +33,16 @@ export interface TextRunViewInit extends ViewInit, TypesetViewInit {
   text?: string;
 }
 
-export class TextRunView extends GraphicView implements TypesetView {
+export class TextRunView extends GraphicsView implements TypesetView {
   /** @hidden */
-  _viewController: GraphicViewController<TextRunView> | null;
+  _viewController: GraphicsViewController<TextRunView> | null;
 
   constructor(text: string = "") {
     super();
     this.text.setState(text);
   }
 
-  get viewController(): GraphicViewController<TextRunView> | null {
+  get viewController(): GraphicsViewController<TextRunView> | null {
     return this._viewController;
   }
 
@@ -98,7 +99,7 @@ export class TextRunView extends GraphicView implements TypesetView {
     }
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.text.onFrame(t);
     this.font.onFrame(t);
@@ -107,8 +108,14 @@ export class TextRunView extends GraphicView implements TypesetView {
     this.textColor.onFrame(t);
   }
 
-  protected onRender(viewContext: RenderViewContext): void {
-    const context = viewContext.renderingContext;
+  protected onRender(viewContext: RenderedViewContext): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      this.renderText(renderer.context);
+    }
+  }
+
+  protected renderText(context: CanvasContext): void {
     context.save();
     const anchor = this._anchor;
     const font = this.font.value;

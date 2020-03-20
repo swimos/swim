@@ -12,37 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {RenderViewContext} from "./RenderViewContext";
-import {RenderViewObserver} from "./RenderViewObserver";
+import {RenderedViewContext} from "./RenderedViewContext";
+import {RenderedViewObserver} from "./RenderedViewObserver";
 import {HtmlViewObserver} from "./HtmlViewObserver";
 import {CanvasView} from "./CanvasView";
 
-export interface CanvasViewObserver<V extends CanvasView = CanvasView> extends HtmlViewObserver<V>, RenderViewObserver<V> {
-  viewWillUpdate?(viewContext: RenderViewContext, view: V): void;
+export interface CanvasViewObserver<V extends CanvasView = CanvasView> extends HtmlViewObserver<V>, RenderedViewObserver<V> {
+  viewWillUpdate?(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidUpdate?(viewContext: RenderViewContext, view: V): void;
+  viewDidUpdate?(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillCompute?(viewContext: RenderViewContext, view: V): void;
+  viewWillCompute?(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidCompute?(viewContext: RenderViewContext, view: V): void;
+  viewDidCompute?(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillAnimate?(viewContext: RenderViewContext, view: V): void;
+  viewWillAnimate?(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidAnimate?(viewContext: RenderViewContext, view: V): void;
+  viewDidAnimate?(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillLayout?(viewContext: RenderViewContext, view: V): void;
+  viewWillLayout?(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidLayout?(viewContext: RenderViewContext, view: V): void;
+  viewDidLayout?(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillScroll?(viewContext: RenderViewContext, view: V): void;
+  viewWillScroll?(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidScroll?(viewContext: RenderViewContext, view: V): void;
+  viewDidScroll?(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillRender?(viewContext: RenderViewContext, view: V): void;
+  viewWillRender?(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidRender?(viewContext: RenderViewContext, view: V): void;
+  viewDidRender?(viewContext: RenderedViewContext, view: V): void;
 
-  viewWillUpdateChildViews?(viewContext: RenderViewContext, view: V): void;
+  viewWillUpdateChildViews?(viewContext: RenderedViewContext, view: V): void;
 
-  viewDidUpdateChildViews?(viewContext: RenderViewContext, view: V): void;
+  viewDidUpdateChildViews?(viewContext: RenderedViewContext, view: V): void;
 }

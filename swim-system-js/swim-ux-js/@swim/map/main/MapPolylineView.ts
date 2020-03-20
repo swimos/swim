@@ -16,12 +16,12 @@ import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
-import {RenderingContext} from "@swim/render";
-import {MemberAnimator, ViewInit, View, RenderView, StrokeViewInit, StrokeView} from "@swim/view";
+import {CanvasContext, CanvasRenderer} from "@swim/render";
+import {MemberAnimator, ViewInit, View, RenderedView, StrokeViewInit, StrokeView} from "@swim/view";
 import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
-import {MapGraphicView} from "./MapGraphicView";
-import {MapGraphicViewController} from "./MapGraphicViewController";
+import {MapGraphicsView} from "./MapGraphicsView";
+import {MapGraphicsViewController} from "./MapGraphicsViewController";
 import {AnyMapPointView, MapPointView} from "./MapPointView";
 
 export type AnyMapPolylineView = MapPolylineView | MapPolylineViewInit;
@@ -35,9 +35,9 @@ export interface MapPolylineViewInit extends ViewInit, StrokeViewInit {
   textColor?: AnyColor | null;
 }
 
-export class MapPolylineView extends MapGraphicView implements StrokeView {
+export class MapPolylineView extends MapGraphicsView implements StrokeView {
   /** @hidden */
-  _viewController: MapGraphicViewController<MapPolylineView> | null;
+  _viewController: MapGraphicsViewController<MapPolylineView> | null;
   /** @hidden */
   _gradientStops: number;
   /** @hidden */
@@ -51,7 +51,7 @@ export class MapPolylineView extends MapGraphicView implements StrokeView {
     this._hitWidth = 5;
   }
 
-  get viewController(): MapGraphicViewController<MapPolylineView> | null {
+  get viewController(): MapGraphicsViewController<MapPolylineView> | null {
     return this._viewController;
   }
 
@@ -169,19 +169,20 @@ export class MapPolylineView extends MapGraphicView implements StrokeView {
   }
 
   protected onRender(viewContext: MapViewContext): void {
-    const context = viewContext.renderingContext;
-    context.save();
-    const bounds = this._bounds;
-    const anchor = this._anchor;
-    if (this._gradientStops) {
-      this.renderPolylineGradient(context, bounds, anchor);
-    } else {
-      this.renderPolylineStroke(context, bounds, anchor);
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      if (this._gradientStops) {
+        this.renderPolylineGradient(context, this._bounds, this._anchor);
+      } else {
+        this.renderPolylineStroke(context, this._bounds, this._anchor);
+      }
+      context.restore();
     }
-    context.restore();
   }
 
-  protected renderPolylineStroke(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderPolylineStroke(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const childViews = this._childViews;
     const stroke = this.stroke.value!;
     const strokeWidth = this.strokeWidth.value!.pxValue(Math.min(bounds.width, bounds.height));
@@ -206,7 +207,7 @@ export class MapPolylineView extends MapGraphicView implements StrokeView {
     context.stroke();
   }
 
-  protected renderPolylineGradient(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderPolylineGradient(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const childViews = this._childViews;
     const stroke = this.stroke.value!;
     const strokeWidth = this.strokeWidth.value!.pxValue(Math.min(bounds.width, bounds.height));
@@ -248,23 +249,24 @@ export class MapPolylineView extends MapGraphicView implements StrokeView {
     }
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: MapViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      context.save();
-      const pixelRatio = this.pixelRatio;
-      x *= pixelRatio;
-      y *= pixelRatio;
-      const bounds = this._bounds;
-      const anchor = this._anchor;
-      hit = this.hitTestPolyline(x, y, context, bounds, anchor);
-      context.restore();
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        context.save();
+        x *= renderer.pixelRatio;
+        y *= renderer.pixelRatio;
+        hit = this.hitTestPolyline(x, y, context, this._bounds, this._anchor);
+        context.restore();
+      }
     }
     return hit;
   }
 
-  protected hitTestPolyline(x: number, y: number, context: RenderingContext,
-                            bounds: BoxR2, anchor: PointR2): RenderView | null {
+  protected hitTestPolyline(x: number, y: number, context: CanvasContext,
+                            bounds: BoxR2, anchor: PointR2): RenderedView | null {
     let hitWidth = this._hitWidth;
     const strokeWidth = this.strokeWidth.value;
     if (strokeWidth) {

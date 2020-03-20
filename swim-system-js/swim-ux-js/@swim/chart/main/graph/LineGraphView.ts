@@ -16,12 +16,12 @@ import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont} from "@swim/font";
-import {RenderingContext} from "@swim/render";
+import {CanvasContext} from "@swim/render";
 import {
   MemberAnimator,
   ViewInit,
-  RenderViewContext,
-  RenderView,
+  RenderedViewContext,
+  RenderedView,
   StrokeViewInit,
   StrokeView,
 } from "@swim/view";
@@ -83,14 +83,14 @@ export class LineGraphView<X, Y> extends GraphView<X, Y> implements StrokeView {
     }
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.stroke.onFrame(t);
     this.strokeWidth.onFrame(t);
     super.onAnimate(viewContext);
   }
 
-  protected renderPlot(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderPlot(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const data = this._data;
     const n = data.size;
 
@@ -144,8 +144,8 @@ export class LineGraphView<X, Y> extends GraphView<X, Y> implements StrokeView {
     context.stroke();
   }
 
-  protected hitTestGraph(x: number, y: number, context: RenderingContext,
-                         bounds: BoxR2, anchor: PointR2): RenderView | null {
+  protected hitTestGraph(x: number, y: number, context: CanvasContext,
+                         bounds: BoxR2, anchor: PointR2): RenderedView | null {
     let hitWidth = this._hitWidth;
     const strokeWidth = this.strokeWidth.value;
     if (strokeWidth) {

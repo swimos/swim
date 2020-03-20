@@ -16,14 +16,14 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
 import {View} from "./View";
-import {RenderView} from "./RenderView";
+import {RenderedView} from "./RenderedView";
 
 export interface StrokeViewInit {
   stroke?: AnyColor | null;
   strokeWidth?: AnyLength | null;
 }
 
-export interface StrokeView extends RenderView {
+export interface StrokeView extends RenderedView {
   stroke(): Color | null | undefined;
   stroke(value: AnyColor | null, tween?: Tween<Color>): this;
 

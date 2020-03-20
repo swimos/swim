@@ -165,8 +165,8 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
         observer.didSet(newObject, oldObject, this);
       }
     }
-    this.invalidate();
-    this.reconcile(0); // TODO: debounce update; track version
+    this.decohere();
+    this.recohere(0); // TODO: debounce update; track version
   }
 
   initialState(): Value;
@@ -312,68 +312,68 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
     }
   }
 
-  invalidateOutput(): void {
-    this.invalidate();
+  decohereOutput(): void {
+    this.decohere();
   }
 
-  invalidateInput(): void {
-    this.invalidate();
+  decohereInput(): void {
+    this.decohere();
   }
 
-  invalidate(): void {
+  decohere(): void {
     if (this._version >= 0) {
-      this.willInvalidate();
+      this.willDecohere();
       this._version = -1;
-      this.onInvalidate();
+      this.onDecohere();
       const n = this._outputs !== null ? this._outputs.length : 0;
       for (let i = 0; i < n; i += 1) {
-        this._outputs![i].invalidateOutput();
+        this._outputs![i].decohereOutput();
       }
-      this.didInvalidate();
+      this.didDecohere();
     }
   }
 
-  reconcileOutput(version: number): void {
-    this.reconcile(version);
+  recohereOutput(version: number): void {
+    this.recohere(version);
   }
 
-  reconcileInput(version: number): void {
-    this.reconcile(version);
+  recohereInput(version: number): void {
+    this.recohere(version);
   }
 
-  reconcile(version: number): void {
+  recohere(version: number): void {
     if (this._version < 0) {
-      this.willReconcile(version);
+      this.willRecohere(version);
       this._version = version;
       if (this._input !== null) {
-        this._input.reconcileInput(version);
+        this._input.recohereInput(version);
       }
-      this.onReconcile(version);
+      this.onRecohere(version);
       const n = this._outputs !== null ? this._outputs.length : 0;
       for (let i = 0; i < n; i += 1) {
-        this._outputs![i].reconcileOutput(version);
+        this._outputs![i].recohereOutput(version);
       }
-      this.didReconcile(version);
+      this.didRecohere(version);
     }
   }
 
-  protected willInvalidate(): void {
-    // stub
+  protected willDecohere(): void {
+    // hook
   }
 
-  protected onInvalidate(): void {
-    // stub
+  protected onDecohere(): void {
+    // hook
   }
 
-  protected didInvalidate(): void {
-    // stub
+  protected didDecohere(): void {
+    // hook
   }
 
-  protected willReconcile(version: number): void {
-    // stub
+  protected willRecohere(version: number): void {
+    // hook
   }
 
-  protected onReconcile(version: number): void {
+  protected onRecohere(version: number): void {
     if (this._input !== null) {
       const value = this._input.get();
       if (value !== void 0) {
@@ -382,8 +382,8 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
     }
   }
 
-  protected didReconcile(version: number): void {
-    // stub
+  protected didRecohere(version: number): void {
+    // hook
   }
 
   memoize(): Outlet<V> {

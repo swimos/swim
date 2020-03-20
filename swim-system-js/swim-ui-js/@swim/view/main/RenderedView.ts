@@ -13,24 +13,22 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {RenderingContext} from "@swim/render";
+import {Renderer} from "@swim/render";
 import {ViewEvent} from "./ViewEvent";
 import {View} from "./View";
 import {AnimatedView} from "./AnimatedView";
-import {RenderViewContext} from "./RenderViewContext";
-import {RenderViewController} from "./RenderViewController";
+import {RenderedViewContext} from "./RenderedViewContext";
+import {RenderedViewController} from "./RenderedViewController";
 import {CanvasView} from "./CanvasView";
 
-export interface RenderView extends AnimatedView {
-  readonly viewController: RenderViewController | null;
+export interface RenderedView extends AnimatedView {
+  readonly viewController: RenderedViewController | null;
 
   readonly canvasView: CanvasView | null;
 
-  readonly renderingContext: RenderingContext | null;
+  readonly renderer: Renderer | null;
 
-  readonly pixelRatio: number;
-
-  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number;
+  needsUpdate(updateFlags: number, viewContext: RenderedViewContext): number;
 
   readonly hidden: boolean;
 
@@ -50,7 +48,7 @@ export interface RenderView extends AnimatedView {
 
   readonly hitBounds: BoxR2 | null;
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null;
+  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null;
 
   /** @hidden */
   handleEvent(event: ViewEvent): void;
@@ -66,14 +64,14 @@ export interface RenderView extends AnimatedView {
 }
 
 /** @hidden */
-export const RenderView = {
-  is(object: unknown): object is RenderView {
+export const RenderedView = {
+  is(object: unknown): object is RenderedView {
     if (typeof object === "object" && object) {
-      const view = object as RenderView;
+      const view = object as RenderedView;
       return AnimatedView.is(view)
           && typeof view.hitTest === "function";
     }
     return false;
   },
 };
-View.Render = RenderView;
+View.Rendered = RenderedView;

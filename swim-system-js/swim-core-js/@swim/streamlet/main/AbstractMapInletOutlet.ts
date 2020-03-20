@@ -137,128 +137,128 @@ export abstract class AbstractMapInletOutlet<K, V, I, O> implements MapInletOutl
     }
   }
 
-  invalidateOutputKey(key: K, effect: KeyEffect): void {
+  decohereOutputKey(key: K, effect: KeyEffect): void {
     const oldEffects = this._effects;
     if (oldEffects.get(key) !== effect) {
-      this.willInvalidateOutputKey(key, effect);
+      this.willDecohereOutputKey(key, effect);
       this._effects = oldEffects.updated(key, effect);
       this._version = -1;
-      this.onInvalidateOutputKey(key, effect);
+      this.onDecohereOutputKey(key, effect);
       const n = this._outputs !== null ? this._outputs.length : 0;
       for (let i = 0; i < n; i += 1) {
         const output = this._outputs![i];
-        output.invalidateOutput();
+        output.decohereOutput();
       }
-      this.didInvalidateOutputKey(key, effect);
+      this.didDecohereOutputKey(key, effect);
     }
   }
 
-  invalidateOutput(): void {
-    this.invalidate();
+  decohereOutput(): void {
+    this.decohere();
   }
 
-  invalidateInput(): void {
-    this.invalidate();
+  decohereInput(): void {
+    this.decohere();
   }
 
-  invalidate(): void {
+  decohere(): void {
     if (this._version >= 0) {
-      this.willInvalidate();
+      this.willDecohere();
       this._version = -1;
-      this.onInvalidate();
+      this.onDecohere();
       const n = this._outputs !== null ? this._outputs.length : 0;
       for (let i = 0; i < n; i += 1) {
-        this._outputs![i].invalidateOutput();
+        this._outputs![i].decohereOutput();
       }
-      this.didInvalidate();
+      this.didDecohere();
     }
   }
 
-  reconcileOutputKey(key: K, version: number): void {
+  recohereOutputKey(key: K, version: number): void {
     if (this._version < 0) {
       const oldEffects = this._effects;
       const effect = oldEffects.get(key);
       if (effect !== void 0) {
-        this.willReconcileOutputKey(key, effect, version);
+        this.willRecohereOutputKey(key, effect, version);
         this._effects = oldEffects.removed(key);
         if (this._input !== null) {
-          this._input.reconcileInputKey(key, version);
+          this._input.recohereInputKey(key, version);
         }
-        this.onReconcileOutputKey(key, effect, version);
-        this.didReconcileOutputKey(key, effect, version);
+        this.onRecohereOutputKey(key, effect, version);
+        this.didRecohereOutputKey(key, effect, version);
       }
     }
   }
 
-  reconcileOutput(version: number): void {
-    this.reconcile(version);
+  recohereOutput(version: number): void {
+    this.recohere(version);
   }
 
-  reconcileInput(version: number): void {
-    this.reconcile(version);
+  recohereInput(version: number): void {
+    this.recohere(version);
   }
 
-  reconcile(version: number): void {
+  recohere(version: number): void {
     if (this._version < 0) {
-      this.willReconcile(version);
+      this.willRecohere(version);
       this._effects.forEach(function (key: K): void {
-        this.reconcileOutputKey(key, version);
+        this.recohereOutputKey(key, version);
       }, this);
       this._version = version;
-      this.onReconcile(version);
+      this.onRecohere(version);
       for (let i = 0, n = this._outputs !== null ? this._outputs.length : 0; i < n; i += 1) {
-        this._outputs![i].reconcileOutput(version);
+        this._outputs![i].recohereOutput(version);
       }
-      this.didReconcile(version);
+      this.didRecohere(version);
     }
   }
 
-  protected willInvalidateOutputKey(key: K, effect: KeyEffect): void {
-    // stub
+  protected willDecohereOutputKey(key: K, effect: KeyEffect): void {
+    // hook
   }
 
-  protected onInvalidateOutputKey(key: K, effect: KeyEffect): void {
-    // stub
+  protected onDecohereOutputKey(key: K, effect: KeyEffect): void {
+    // hook
   }
 
-  protected didInvalidateOutputKey(key: K, effect: KeyEffect): void {
-    // stub
+  protected didDecohereOutputKey(key: K, effect: KeyEffect): void {
+    // hook
   }
 
-  protected willInvalidate(): void {
-    // stub
+  protected willDecohere(): void {
+    // hook
   }
 
-  protected onInvalidate(): void {
-    // stub
+  protected onDecohere(): void {
+    // hook
   }
 
-  protected didInvalidate(): void {
-    // stub
+  protected didDecohere(): void {
+    // hook
   }
 
-  protected willReconcileOutputKey(key: K, effect: KeyEffect, version: number): void {
-    // stub
+  protected willRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+    // hook
   }
 
-  protected onReconcileOutputKey(key: K, effect: KeyEffect, version: number): void {
-    // stub
+  protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+    // hook
   }
 
-  protected didReconcileOutputKey(key: K, effect: KeyEffect, version: number): void {
-    // stub
+  protected didRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+    // hook
   }
 
-  protected willReconcile(version: number): void {
-    // stub
+  protected willRecohere(version: number): void {
+    // hook
   }
 
-  protected onReconcile(version: number): void {
-    // stub
+  protected onRecohere(version: number): void {
+    // hook
   }
 
-  protected didReconcile(version: number): void {
-    // stub
+  protected didRecohere(version: number): void {
+    // hook
   }
 
   memoize(): Outlet<O> {

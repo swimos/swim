@@ -57,22 +57,23 @@ export interface MapOutlet<K, V, O> extends Outlet<O> {
 
   /**
    * Marks this `MapOutlet` as needing an `effect` applied to a given `key`.
-   * Invalidating an individual key invalidates the entire state of the
-   * `Outlet`.  But only the invalidated keys need to be updated in order to
-   * reconcile the overall state of the `Outlet`.
+   * Decohering an individual key decoheres the entire state of the `Outlet`.
+   * But only the decoherent keys need to be updated in order to recohere the
+   * overall state of the `Outlet`.
    */
-  invalidateInputKey(key: K, effect: KeyEffect): void;
+  decohereInputKey(key: K, effect: KeyEffect): void;
 
   /**
-   * Reconciles the state of an individual `key` in this `MapOutlet`, if the
-   * version of this `MapOutlet`'s state differs from the target `version`.
-   * To reconcile the state of a key, the `MapOutlet` first invokes
-   * [[Streamlet.reconcile]] on its attached streamlets.  Then, for each
-   * dependent output, it invokes [[MapInlet.reconcileOutputKey]], if the
-   * dependent output is a [[MapInlet]], or it invokes [[Inlet.reconcile]],
+   * Updates the state of an individual `key` in this `MapOutlet` to make it
+   * consistent with the target `version`.  The `MapOutlet` only needs to
+   * update if its current `version` differs from the target `version`.
+   * To update the state of a key, the `MapOutlet` first invokes
+   * [[Streamlet.recohere]] on its attached streamlets.  Then, for each
+   * dependent output, it invokes [[MapInlet.recohereOutputKey]], if the
+   * dependent output is a [[MapInlet]], or it invokes [[Inlet.recohere]],
    * if the dependent output is not a `MapInlet`.
    */
-  reconcileInputKey(key: K, version: number): void;
+  recohereInputKey(key: K, version: number): void;
 
   memoize(): MapOutlet<K, V, O>;
 

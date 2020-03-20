@@ -32,12 +32,12 @@ export interface InletOptions {
  * connected `Outlet`.
  *
  * The state of an `Inlet` has an integral _version_.  When its version is
- * negative, the state of the `Inlet` is considered _invalid_.  When any state
- * on which an `Inlet` transitively depends changes, the `Inlet` will be
- * [[invalidatOutput invalidated]].  Invalidation does not immediately cause an
- * `Inlet` to recompute its state.  Instead, a separate [[reconcileOutput
- * reconcile]] step causes all of the invalid paths in the dataflow graph
- * passing through the `Inlet` to reconcile their state.
+ * negative, the state of the `Inlet` is considered _decoherent_.  When any
+ * state on which an `Inlet` transitively depends changes, the `Inlet` will be
+ * [[decohereOutput decohered]].  Decoherence does not immediately cause an
+ * `Inlet` to recompute its state.  Instead, a separate [[recohereOutput
+ * recohere]] step causes all of the decoherent paths in the dataflow graph
+ * passing through the `Inlet` to make their states coherent again.
  */
 export interface Inlet<I = unknown> {
   /**
@@ -77,22 +77,24 @@ export interface Inlet<I = unknown> {
 
   /**
    * Marks this `Inlet`—and the `Streamlet` to which this `Inlet` is attached—as
-   * having stale state.  Invalidating an `Inlet` will recursively invalidate
+   * having decoherent state.  Decohering an `Inlet` will recursively decohere
    * all streamlets that transitively depend on the state of this `Inlet`.
-   * Invalidating an `Inlet` does not cause its state to be recomputed.  A
-   * subsequent [[reconcileOutput]] call will reconcile the state of the `Inlet`.
+   * Decohering an `Inlet` does not cause its state to be recomputed.  A
+   * subsequent [[recohereOutput]] call will eventually make the state of the
+   * `Inlet` coherent again.
    */
-  invalidateOutput(): void;
+  decohereOutput(): void;
 
   /**
-   * Reconciles the state of this `Inlet`, if the version of this `Inlet`'s
-   * state differs from the target `version`.  To reconcile its state, the
-   * `Inlet` first invokes [[Outlet.reconcileInput]] on its [[input]], to
-   * ensure that its input is up-to-date.  It then invokes
-   * [[Streamlet.reconcile]] on the `Streamlet` to which it's attached,
-   * causing the `Streamlet` to reconcile its own state.
+   * Updates the state of this `Inlet` to make it consistent with the target
+   * `version`. The `Inlet` only needs to update if its current `version`
+   * differs from the target `version`.  To update its state, the `Inlet` first
+   * invokes [[Outlet.recohereInput]] on its [[input]], to ensure that its
+   * input is coherent.  It then invokes [[Streamlet.recohere]] on the
+   * `Streamlet` to which it's attached, causing the `Streamlet` to make its
+   * own state coherent again.
    */
-  reconcileOutput(version: number): void;
+  recohereOutput(version: number): void;
 }
 
 /** @hidden */

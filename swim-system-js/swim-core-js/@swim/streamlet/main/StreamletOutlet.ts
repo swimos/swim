@@ -17,8 +17,8 @@ import {GenericStreamlet} from "./GenericStreamlet";
 import {AbstractOutlet} from "./AbstractOutlet";
 
 /**
- * An `Outlet` that invalidates a parameterized `Streamlet` whenever the
- * `Outlet` is invalidated, and which gets its state from the parameterized
+ * An `Outlet` that decoheres a parameterized `Streamlet` whenever the
+ * `Outlet` decoheres, and which gets its state from the parameterized
  * `Streamlet`.
  */
 export class StreamletOutlet<O> extends AbstractOutlet<O> {
@@ -42,33 +42,33 @@ export class StreamletOutlet<O> extends AbstractOutlet<O> {
     return void 0;
   }
 
-  protected willInvalidateInput(): void {
+  protected willDecohereInput(): void {
     const streamlet = this._streamlet as GenericStreamlet<unknown, O>;
-    if (streamlet.willInvalidateOutlet) {
-      streamlet.willInvalidateOutlet(this);
+    if (streamlet.willDecohereOutlet) {
+      streamlet.willDecohereOutlet(this);
     }
   }
 
-  protected didInvalidateInput(): void {
+  protected didDecohereInput(): void {
     const streamlet = this._streamlet as GenericStreamlet<unknown, O>;
-    if (streamlet.didInvalidateOutlet) {
-      streamlet.didInvalidateOutlet(this);
+    if (streamlet.didDecohereOutlet) {
+      streamlet.didDecohereOutlet(this);
     } else {
-      streamlet.invalidate();
+      streamlet.decohere();
     }
   }
 
-  protected willReconcileInput(version: number): void {
+  protected willRecohereInput(version: number): void {
     const streamlet = this._streamlet as GenericStreamlet<unknown, O>;
-    if (streamlet.willReconcileOutlet) {
-      streamlet.willReconcileOutlet(this, version);
+    if (streamlet.willRecohereOutlet) {
+      streamlet.willRecohereOutlet(this, version);
     }
   }
 
-  protected didReconcileInput(version: number): void {
+  protected didRecohereInput(version: number): void {
     const streamlet = this._streamlet as GenericStreamlet<unknown, O>;
-    if (streamlet.didReconcileOutlet) {
-      streamlet.didReconcileOutlet(this, version);
+    if (streamlet.didRecohereOutlet) {
+      streamlet.didRecohereOutlet(this, version);
     }
   }
 }

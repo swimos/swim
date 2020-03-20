@@ -149,24 +149,24 @@ export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericSt
     return new StreamletInoutlet<I2, O2>(this as Streamlet<I2, O2>);
   }
 
-  invalidate(): void {
+  decohere(): void {
     if (this._version >= 0) {
-      this.willInvalidate();
+      this.willDecohere();
       this._version = -1;
-      this.onInvalidate();
-      this.onInvalidateOutlets();
-      this.didInvalidate();
+      this.onDecohere();
+      this.onDecohereOutlets();
+      this.didDecohere();
     }
   }
 
-  reconcile(version: number): void {
+  recohere(version: number): void {
     if (this._version < 0) {
-      this.willReconcile(version);
+      this.willRecohere(version);
       this._version = version;
-      this.onReconcileInlets(version);
-      this.onReconcile(version);
-      this.onReconcileOutlets(version);
-      this.didReconcile(version);
+      this.onRecohereInlets(version);
+      this.onRecohere(version);
+      this.onRecohereOutlets(version);
+      this.didRecohere(version);
     }
   }
 
@@ -239,62 +239,62 @@ export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericSt
     }
   }
 
-  willInvalidateInlet(inlet: Inlet<I>): void {
-    // stub
+  willDecohereInlet(inlet: Inlet<I>): void {
+    // hook
   }
 
-  didInvalidateInlet(inlet: Inlet<I>): void {
-    this.invalidate();
+  didDecohereInlet(inlet: Inlet<I>): void {
+    this.decohere();
   }
 
-  willReconcileInlet(inlet: Inlet<I>, version: number): void {
-    // stub
+  willRecohereInlet(inlet: Inlet<I>, version: number): void {
+    // hook
   }
 
-  didReconcileInlet(inlet: Inlet<I>, version: number): void {
-    this.reconcile(version);
+  didRecohereInlet(inlet: Inlet<I>, version: number): void {
+    this.recohere(version);
   }
 
-  willInvalidateOutlet(outlet: Outlet<O>): void {
-    // stub
+  willDecohereOutlet(outlet: Outlet<O>): void {
+    // hook
   }
 
-  didInvalidateOutlet(outlet: Outlet<O>): void {
-    // stub
+  didDecohereOutlet(outlet: Outlet<O>): void {
+    // hook
   }
 
-  willReconcileOutlet(outlet: Outlet<O>, version: number): void {
-    // stub
+  willRecohereOutlet(outlet: Outlet<O>, version: number): void {
+    // hook
   }
 
-  didReconcileOutlet(outlet: Outlet<O>, version: number): void {
-    // stub
+  didRecohereOutlet(outlet: Outlet<O>, version: number): void {
+    // hook
   }
 
-  protected willInvalidate(): void {
-    // stub
+  protected willDecohere(): void {
+    // hook
   }
 
-  protected onInvalidate(): void {
-    // stub
+  protected onDecohere(): void {
+    // hook
   }
 
-  protected onInvalidateOutlets(): void {
-    AbstractStreamlet.invalidateOutlets(this, this.streamletClass());
+  protected onDecohereOutlets(): void {
+    AbstractStreamlet.decohereOutlets(this, this.streamletClass());
   }
 
   /** @hidden */
-  static invalidateOutlets<I, O>(streamlet: Streamlet<I, O>, streamletClass: StreamletClass | null): void {
+  static decohereOutlets<I, O>(streamlet: Streamlet<I, O>, streamletClass: StreamletClass | null): void {
     while (streamletClass) {
       if (streamletClass.hasOwnProperty("_outlets")) {
         for (const name in streamletClass._outlets) {
           const outletDescriptor = streamletClass._outlets[name]!;
           if (outletDescriptor instanceof OutletDescriptor) {
             const outlet = AbstractStreamlet.reflectOutletField(streamlet, outletDescriptor);
-            outlet.invalidateInput();
+            outlet.decohereInput();
           } else if (outletDescriptor instanceof InoutletDescriptor) {
             const inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, outletDescriptor);
-            inoutlet.invalidateInput();
+            inoutlet.decohereInput();
           }
         }
       }
@@ -302,30 +302,30 @@ export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericSt
     }
   }
 
-  protected didInvalidate(): void {
-    // stub
+  protected didDecohere(): void {
+    // hook
   }
 
-  protected willReconcile(version: number): void {
-    // stub
+  protected willRecohere(version: number): void {
+    // hook
   }
 
-  protected onReconcileInlets(version: number): void {
-    AbstractStreamlet.reconcileInlets(version, this, this.streamletClass());
+  protected onRecohereInlets(version: number): void {
+    AbstractStreamlet.recohereInlets(version, this, this.streamletClass());
   }
 
   /** @hidden */
-  static reconcileInlets<I, O>(version: number, streamlet: Streamlet<I, O>, streamletClass: StreamletClass | null): void {
+  static recohereInlets<I, O>(version: number, streamlet: Streamlet<I, O>, streamletClass: StreamletClass | null): void {
     while (streamletClass) {
       if (streamletClass.hasOwnProperty("_inlets")) {
         for (const name in streamletClass._inlets) {
           const inletDescriptor = streamletClass._inlets[name]!;
           if (inletDescriptor instanceof InletDescriptor) {
             const inlet = AbstractStreamlet.reflectInletField(streamlet, inletDescriptor);
-            inlet.reconcileOutput(version);
+            inlet.recohereOutput(version);
           } else if (inletDescriptor instanceof InoutletDescriptor) {
             const inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, inletDescriptor);
-            inoutlet.reconcileOutput(version);
+            inoutlet.recohereOutput(version);
           }
         }
       }
@@ -333,26 +333,26 @@ export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericSt
     }
   }
 
-  protected onReconcile(version: number): void {
-    // stub
+  protected onRecohere(version: number): void {
+    // hook
   }
 
-  protected onReconcileOutlets(version: number): void {
-    AbstractStreamlet.reconcileOutlets(version, this, this.streamletClass());
+  protected onRecohereOutlets(version: number): void {
+    AbstractStreamlet.recohereOutlets(version, this, this.streamletClass());
   }
 
   /** @hidden */
-  static reconcileOutlets<I, O>(version: number, streamlet: Streamlet<I, O>, streamletClass: StreamletClass | null): void {
+  static recohereOutlets<I, O>(version: number, streamlet: Streamlet<I, O>, streamletClass: StreamletClass | null): void {
     while (streamletClass) {
       if (streamletClass.hasOwnProperty("_outlets")) {
         for (const name in streamletClass._outlets) {
           const outletDescriptor = streamletClass._outlets[name]!;
           if (outletDescriptor instanceof OutletDescriptor) {
             const outlet = AbstractStreamlet.reflectOutletField(streamlet, outletDescriptor);
-            outlet.reconcileInput(version);
+            outlet.recohereInput(version);
           } else if (outletDescriptor instanceof InoutletDescriptor) {
             const inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, outletDescriptor);
-            inoutlet.reconcileInput(version);
+            inoutlet.recohereInput(version);
           }
         }
       }
@@ -360,8 +360,8 @@ export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericSt
     }
   }
 
-  protected didReconcile(version: number): void {
-    // stub
+  protected didRecohere(version: number): void {
+    // hook
   }
 
   /** @hidden */

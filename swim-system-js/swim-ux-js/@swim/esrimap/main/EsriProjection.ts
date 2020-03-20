@@ -12,26 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Record} from "@swim/structure";
-import {RecordModel, Transmuter} from "@swim/dataflow";
-import {DownlinkStreamlet} from "./DownlinkStreamlet";
-import {WarpRef} from "../WarpRef";
+import * as EsriViewsView from "esri/views/View";
+import {MapProjection} from "@swim/map";
 
-/** @hidden */
-export class DownlinkTransmuter extends Transmuter {
-  warp: WarpRef | undefined;
-
-  constructor(warp?: WarpRef) {
-    super();
-    this.warp = warp;
-  }
-
-  transmute(model: RecordModel): Record {
-    if (model.tag() === "link") {
-      const streamlet = new DownlinkStreamlet(this.warp, model);
-      streamlet.compile();
-      return streamlet;
-    }
-    return model;
-  }
+export interface EsriProjection extends MapProjection {
+  readonly map: EsriViewsView;
 }

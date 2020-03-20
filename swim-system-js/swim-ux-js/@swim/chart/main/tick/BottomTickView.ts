@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {RenderingContext} from "@swim/render";
-import {RenderView, TypesetView} from "@swim/view";
+import {CanvasContext} from "@swim/render";
+import {RenderedView, TypesetView} from "@swim/view";
 import {TickOrientation, TickView} from "./TickView";
 
 export class BottomTickView<D> extends TickView<D> {
@@ -26,7 +26,7 @@ export class BottomTickView<D> extends TickView<D> {
     return "bottom";
   }
 
-  protected layoutTickLabel(tickLabel: RenderView, bounds: BoxR2, anchor: PointR2): void {
+  protected layoutTickLabel(tickLabel: RenderedView, bounds: BoxR2, anchor: PointR2): void {
     const x = Math.round(anchor.x);
     const y0 = Math.round(anchor.y);
     const y1 = y0 + this.tickMarkLength.value!;
@@ -40,7 +40,7 @@ export class BottomTickView<D> extends TickView<D> {
     }
   }
 
-  protected renderTick(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  protected renderTick(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     const x = Math.round(anchor.x);
     const y0 = Math.round(anchor.y);
     const y1 = y0 + this.tickMarkLength.value!;

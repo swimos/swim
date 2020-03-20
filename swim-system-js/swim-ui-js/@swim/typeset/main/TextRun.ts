@@ -17,7 +17,7 @@ import {Output, Debug, Format} from "@swim/codec";
 import {PointR2, BoxR2} from "@swim/math";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
-import {RenderingContext, Graphic} from "@swim/render";
+import {Renderer, CanvasContext, CanvasRenderer, Graphics} from "@swim/render";
 
 export type AnyTextRun = TextRun | TextRunInit | string;
 
@@ -29,7 +29,7 @@ export interface TextRunInit {
   textColor?: AnyColor | null;
 }
 
-export class TextRun implements Graphic, Equals, Debug {
+export class TextRun implements Graphics, Equals, Debug {
   /** @hidden */
   readonly _text: string;
   /** @hidden */
@@ -122,7 +122,17 @@ export class TextRun implements Graphic, Equals, Debug {
     }
   }
 
-  render(context: RenderingContext, bounds: BoxR2, anchor: PointR2): void {
+  render(renderer: Renderer, bounds: BoxR2, anchor: PointR2): void {
+    if (renderer instanceof CanvasRenderer) {
+      this.draw(renderer.context, bounds, anchor);
+    }
+  }
+
+  draw(context: CanvasContext, bounds: BoxR2, anchor: PointR2) {
+    this.renderText(context, bounds, anchor);
+  }
+
+  protected renderText(context: CanvasContext, bounds: BoxR2, anchor: PointR2): void {
     context.save();
     if (this._font !== null) {
       context.font = this._font.toString();

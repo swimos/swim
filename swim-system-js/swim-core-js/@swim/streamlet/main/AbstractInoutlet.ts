@@ -128,72 +128,72 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
     }
   }
 
-  invalidateOutput(): void {
-    this.invalidate();
+  decohereOutput(): void {
+    this.decohere();
   }
 
-  invalidateInput(): void {
-    this.invalidate();
+  decohereInput(): void {
+    this.decohere();
   }
 
-  invalidate(): void {
+  decohere(): void {
     if (this._version >= 0) {
-      this.willInvalidate();
+      this.willDecohere();
       this._version = -1;
-      this.onInvalidate();
+      this.onDecohere();
       const n = this._outputs !== null ? this._outputs.length : 0;
       for (let i = 0; i < n; i += 1) {
-        this._outputs![i].invalidateOutput();
+        this._outputs![i].decohereOutput();
       }
-      this.didInvalidate();
+      this.didDecohere();
     }
   }
 
-  reconcileOutput(version: number): void {
-    this.reconcile(version);
+  recohereOutput(version: number): void {
+    this.recohere(version);
   }
 
-  reconcileInput(version: number): void {
-    this.reconcile(version);
+  recohereInput(version: number): void {
+    this.recohere(version);
   }
 
-  reconcile(version: number): void {
+  recohere(version: number): void {
     if (this._version < 0) {
-      this.willReconcile(version);
+      this.willRecohere(version);
       this._version = version;
       if (this._input !== null) {
-        this._input.reconcileInput(version);
+        this._input.recohereInput(version);
       }
-      this.onReconcile(version);
+      this.onRecohere(version);
       const n = this._outputs !== null ? this._outputs.length : 0;
       for (let i = 0; i < n; i += 1) {
-        this._outputs![i].reconcileOutput(version);
+        this._outputs![i].recohereOutput(version);
       }
-      this.didReconcile(version);
+      this.didRecohere(version);
     }
   }
 
-  protected willInvalidate(): void {
+  protected willDecohere(): void {
     // stub
   }
 
-  protected onInvalidate(): void {
+  protected onDecohere(): void {
     // stub
   }
 
-  protected didInvalidate(): void {
+  protected didDecohere(): void {
     // stub
   }
 
-  protected willReconcile(version: number): void {
+  protected willRecohere(version: number): void {
     // stub
   }
 
-  protected onReconcile(version: number): void {
+  protected onRecohere(version: number): void {
     // stub
   }
 
-  protected didReconcile(version: number): void {
+  protected didRecohere(version: number): void {
     // stub
   }
 

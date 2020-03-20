@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicViewObserver} from "@swim/view";
+import {GraphicsViewObserver} from "@swim/view";
 import {ChartView} from "./ChartView";
 
-export interface ChartViewObserver<X = any, Y = any, V extends ChartView<X, Y> = ChartView<X, Y>> extends GraphicViewObserver<V> {
+export interface ChartViewObserver<X = any, Y = any, V extends ChartView<X, Y> = ChartView<X, Y>> extends GraphicsViewObserver<V> {
 }

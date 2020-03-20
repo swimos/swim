@@ -16,8 +16,8 @@ import {Objects} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {PointR2, BoxR2} from "@swim/math";
 import {ContinuousScale} from "@swim/scale";
-import {RenderingContext} from "@swim/render";
-import {View, RenderView} from "@swim/view";
+import {CanvasRenderer, CanvasContext} from "@swim/render";
+import {View, RenderedViewContext, RenderedView} from "@swim/view";
 import {DatumCategory} from "../data/Datum";
 import {AnyDatumView, DatumView} from "../data/DatumView";
 import {AnyPlotView, PlotViewInit, PlotView} from "../plot/PlotView";
@@ -229,23 +229,24 @@ export abstract class GraphView<X, Y> extends PlotView<X, Y> {
     this._gradientStops = gradientStops;
   }
 
-  hitTest(x: number, y: number, context: RenderingContext): RenderView | null {
-    let hit = super.hitTest(x, y, context);
+  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+    let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
-      context.save();
-      const pixelRatio = this.pixelRatio;
-      x *= pixelRatio;
-      y *= pixelRatio;
-      const bounds = this._bounds;
-      const anchor = this._anchor;
-      hit = this.hitTestGraph(x, y, context, bounds, anchor);
-      context.restore();
+      const renderer = viewContext.renderer;
+      if (renderer instanceof CanvasRenderer) {
+        const context = renderer.context;
+        context.save();
+        x *= renderer.pixelRatio;
+        y *= renderer.pixelRatio;
+        hit = this.hitTestGraph(x, y, context, this._bounds, this._anchor);
+        context.restore();
+      }
     }
     return hit;
   }
 
-  protected abstract hitTestGraph(x: number, y: number, context: RenderingContext,
-                                  bounds: BoxR2, anchor: PointR2): RenderView | null;
+  protected abstract hitTestGraph(x: number, y: number, context: CanvasContext,
+                                  bounds: BoxR2, anchor: PointR2): RenderedView | null;
 
   protected onInsertChildView(childView: View, targetView: View): void {
     super.onInsertChildView(childView, targetView);

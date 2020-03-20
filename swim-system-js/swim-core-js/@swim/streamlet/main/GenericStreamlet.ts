@@ -19,19 +19,19 @@ import {Streamlet} from "./Streamlet";
 export interface GenericStreamlet<I = unknown, O = I> extends Streamlet<I, O> {
   getOutput(outlet: Outlet<O>): O | undefined;
 
-  willInvalidateInlet(inlet: Inlet<I>): void;
+  willDecohereInlet(inlet: Inlet<I>): void;
 
-  didInvalidateInlet(inlet: Inlet<I>): void;
+  didDecohereInlet(inlet: Inlet<I>): void;
 
-  willReconcileInlet(inlet: Inlet<I>, version: number): void;
+  willRecohereInlet(inlet: Inlet<I>, version: number): void;
 
-  didReconcileInlet(inlet: Inlet<I>, version: number): void;
+  didRecohereInlet(inlet: Inlet<I>, version: number): void;
 
-  willInvalidateOutlet(outlet: Outlet<O>): void;
+  willDecohereOutlet(outlet: Outlet<O>): void;
 
-  didInvalidateOutlet(outlet: Outlet<O>): void;
+  didDecohereOutlet(outlet: Outlet<O>): void;
 
-  willReconcileOutlet(outlet: Outlet<O>, version: number): void;
+  willRecohereOutlet(outlet: Outlet<O>, version: number): void;
 
-  didReconcileOutlet(outlet: Outlet<O>, version: number): void;
+  didRecohereOutlet(outlet: Outlet<O>, version: number): void;
 }

@@ -50,7 +50,7 @@ export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
     return this._cache.keys();
   }
 
-  protected onReconcileKey(key: K, effect: KeyEffect, version: number): void {
+  protected onRecohereKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
       if (this._input !== null) {
         const value = this._input.get(key);
@@ -65,7 +65,7 @@ export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
     }
   }
 
-  protected onReconcile(version: number): void {
+  protected onRecohere(version: number): void {
     this._state = void 0;
   }
 

@@ -24,7 +24,7 @@ A compiled `RecordScope` has all of its nested expressions replaced by their
 evaluated state.  But unlike evaluating a `Record` with an `Interpreter`, if a
 member of a `RecordScope` changes, all expressions that transitively depend on
 that member get flagged for recomputation, which occurs the next time
-`reconcileInput` gets invoked on the `RecordScope`.
+`recohereInput` gets invoked on the `RecordScope`.
 
 The `Dataflow.compile` method can also be used to compile an arbitrary
 **@swim/structure** expression into an `Outlet` that updates whenever

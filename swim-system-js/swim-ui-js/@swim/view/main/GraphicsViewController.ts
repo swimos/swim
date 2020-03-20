@@ -14,31 +14,31 @@
 
 import {PointR2, BoxR2} from "@swim/math";
 import {ViewController} from "./ViewController";
-import {RenderViewContext} from "./RenderViewContext";
-import {RenderViewController} from "./RenderViewController";
-import {GraphicView} from "./GraphicView";
-import {GraphicViewObserver} from "./GraphicViewObserver";
+import {RenderedViewContext} from "./RenderedViewContext";
+import {RenderedViewController} from "./RenderedViewController";
+import {GraphicsView} from "./GraphicsView";
+import {GraphicsViewObserver} from "./GraphicsViewObserver";
 import {CanvasView} from "./CanvasView";
 
-export class GraphicViewController<V extends GraphicView = GraphicView> extends ViewController<V> implements RenderViewController<V>, GraphicViewObserver<V> {
+export class GraphicsViewController<V extends GraphicsView = GraphicsView> extends ViewController<V> implements RenderedViewController<V>, GraphicsViewObserver<V> {
   get canvasView(): CanvasView | null {
     const view = this._view;
     return view ? view.canvasView : null;
   }
 
-  viewWillAnimate(viewContext: RenderViewContext, view: V): void {
+  viewWillAnimate(viewContext: RenderedViewContext, view: V): void {
     // hook
   }
 
-  viewDidAnimate(viewContext: RenderViewContext, view: V): void {
+  viewDidAnimate(viewContext: RenderedViewContext, view: V): void {
     // hook
   }
 
-  viewWillRender(viewContext: RenderViewContext, view: V): void {
+  viewWillRender(viewContext: RenderedViewContext, view: V): void {
     // hook
   }
 
-  viewDidRender(viewContext: RenderViewContext, view: V): void {
+  viewDidRender(viewContext: RenderedViewContext, view: V): void {
     // hook
   }
 

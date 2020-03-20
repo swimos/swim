@@ -20,10 +20,10 @@ import {
   MemberAnimator,
   ViewInit,
   View,
-  RenderViewContext,
+  RenderedViewContext,
   TypesetView,
-  GraphicView,
-  GraphicViewController,
+  GraphicsView,
+  GraphicsViewController,
 } from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 import {AnySliceView, SliceView} from "./SliceView";
@@ -52,9 +52,9 @@ export interface PieViewInit extends ViewInit {
   slices?: AnySliceView[] | null;
 }
 
-export class PieView extends GraphicView {
+export class PieView extends GraphicsView {
   /** @hidden */
-  _viewController: GraphicViewController<PieView> | null;
+  _viewController: GraphicsViewController<PieView> | null;
 
   constructor() {
     super();
@@ -75,7 +75,7 @@ export class PieView extends GraphicView {
     this.tickColor.setState(Color.black());
   }
 
-  get viewController(): GraphicViewController<PieView> | null {
+  get viewController(): GraphicsViewController<PieView> | null {
     return this._viewController;
   }
 
@@ -149,7 +149,7 @@ export class PieView extends GraphicView {
     this.appendChildView(slice);
   }
 
-  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+  needsUpdate(updateFlags: number, viewContext: RenderedViewContext): number {
     if ((updateFlags & View.NeedsAnimate) !== 0) {
       updateFlags = updateFlags | View.NeedsLayout;
     }
@@ -159,7 +159,7 @@ export class PieView extends GraphicView {
     return updateFlags;
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.limit.onFrame(t);
     this.baseAngle.onFrame(t);
@@ -189,7 +189,7 @@ export class PieView extends GraphicView {
     }
   }
 
-  protected onLayout(viewContext: RenderViewContext): void {
+  protected onLayout(viewContext: RenderedViewContext): void {
     super.onLayout(viewContext);
     this.layoutPie();
   }

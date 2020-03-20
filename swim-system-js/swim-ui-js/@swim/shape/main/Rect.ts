@@ -14,8 +14,9 @@
 
 import {Equals} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
+import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
-import {DrawingContext, PathContext, Graphic} from "@swim/render";
+import {DrawingContext, Renderer, PathContext, PathRenderer, Graphics} from "@swim/render";
 
 export type AnyRect = Rect | RectInit;
 
@@ -26,7 +27,7 @@ export interface RectInit {
   height: AnyLength;
 }
 
-export class Rect implements Graphic, Equals, Debug {
+export class Rect implements Graphics, Equals, Debug {
   /** @hidden */
   readonly _x: Length;
   /** @hidden */
@@ -104,14 +105,33 @@ export class Rect implements Graphic, Equals, Debug {
   }
 
   render(): string;
-  render(context: DrawingContext): void;
-  render(context?: DrawingContext): string | void {
-    const ctx = context || new PathContext();
-    ctx.rect(this._x.pxValue(), this._y.pxValue(),
-             this._width.pxValue(), this._height.pxValue());
-    if (!context) {
-      return ctx.toString();
+  render(renderer: Renderer, bounds?: BoxR2, anchor?: PointR2): void;
+  render(renderer?: Renderer, bounds?: BoxR2, anchor?: PointR2): string | void {
+    if (renderer === void 0) {
+      const context = new PathContext();
+      this.draw(context, bounds, anchor);
+      return context.toString();
+    } else if (renderer instanceof PathRenderer) {
+      this.draw(renderer.context, bounds, anchor);
     }
+  }
+
+  draw(context: DrawingContext, bounds?: BoxR2, anchor?: PointR2): void {
+    this.renderRect(context, bounds, anchor);
+  }
+
+  protected renderRect(context: DrawingContext, bounds: BoxR2 | undefined, anchor: PointR2 | undefined): void {
+    let x: number;
+    let y: number;
+    if (anchor !== void 0) {
+      x = anchor.x;
+      y = anchor.y;
+    } else {
+      x = 0;
+      y = 0;
+    }
+    context.rect(x + this._x.pxValue(), y + this._y.pxValue(),
+                 this._width.pxValue(), this._height.pxValue());
   }
 
   protected copy(x: Length, y: Length, width: Length, height: Length): Rect {

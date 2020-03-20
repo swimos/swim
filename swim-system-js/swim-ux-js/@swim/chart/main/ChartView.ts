@@ -18,7 +18,7 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween, AnyTransition, Transition} from "@swim/transition";
-import {MemberAnimator, ViewInit, View, RenderViewContext, RenderView, GraphicView} from "@swim/view";
+import {MemberAnimator, ViewInit, View, RenderedViewContext, RenderedView, GraphicsView} from "@swim/view";
 import {Multitouch, ScaleGestureEvent, ScaleGesture} from "@swim/gesture";
 import {AnyAxisView, AxisView} from "./axis/AxisView";
 import {AnyPlotView, PlotView} from "./plot/PlotView";
@@ -83,7 +83,7 @@ export interface ChartViewInit<X = any, Y = any> extends ViewInit {
   textColor?: AnyColor | null;
 }
 
-export class ChartView<X = any, Y = any> extends GraphicView {
+export class ChartView<X = any, Y = any> extends GraphicsView {
   /** @hidden */
   _viewController: ChartViewController<X, Y> | null;
 
@@ -190,7 +190,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     this.gridLineColor.setState(Color.transparent());
     this.gridLineWidth.setState(0);
 
-    this.setChildView("surface", new GraphicView());
+    this.setChildView("surface", new GraphicsView());
   }
 
   get viewController(): ChartViewController<X, Y> | null {
@@ -242,12 +242,12 @@ export class ChartView<X = any, Y = any> extends GraphicView {
   @MemberAnimator(Color, {inherit: true})
   textColor: MemberAnimator<this, Color, AnyColor>;
 
-  surface(): RenderView | null;
-  surface(surface: RenderView | null): this;
-  surface(surface?: RenderView | null): RenderView | null | this {
+  surface(): RenderedView | null;
+  surface(surface: RenderedView | null): this;
+  surface(surface?: RenderedView | null): RenderedView | null | this {
     if (surface === void 0) {
       const childView = this.getChildView("surface");
-      return RenderView.is(childView) ? childView : null;
+      return RenderedView.is(childView) ? childView : null;
     } else {
       this.setChildView("surface", surface);
       return this;
@@ -873,20 +873,20 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     }
   }
 
-  needsUpdate(updateFlags: number, viewContext: RenderViewContext): number {
+  needsUpdate(updateFlags: number, viewContext: RenderedViewContext): number {
     if ((updateFlags & (View.NeedsAnimate | View.NeedsLayout)) !== 0) {
       updateFlags = updateFlags | View.NeedsAnimate | View.NeedsLayout | View.NeedsRender;
     }
     return updateFlags;
   }
 
-  protected didUpdate(viewContext: RenderViewContext): void {
+  protected didUpdate(viewContext: RenderedViewContext): void {
     super.didUpdate(viewContext);
     this.autoscale();
     this.rebound();
   }
 
-  protected onAnimate(viewContext: RenderViewContext): void {
+  protected onAnimate(viewContext: RenderedViewContext): void {
     const t = viewContext.updateTime;
     this.topGutter.onFrame(t);
     this.rightGutter.onFrame(t);
@@ -910,7 +910,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     this.textColor.onFrame(t);
   }
 
-  protected onLayout(viewContext: RenderViewContext): void {
+  protected onLayout(viewContext: RenderedViewContext): void {
     if (this._topGesture) {
       this._topGesture.scale(this.topAxis()!.scale.value!);
     }
@@ -926,9 +926,9 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     this.layoutChildViews(viewContext);
   }
 
-  protected layoutChildView(childView: View, viewContext: RenderViewContext): void {
+  protected layoutChildView(childView: View, viewContext: RenderedViewContext): void {
     const childKey = childView.key();
-    if (childKey === "surface" && RenderView.is(childView)) {
+    if (childKey === "surface" && RenderedView.is(childView)) {
       this.layoutSurface(childView, this._bounds);
     } else if (childView instanceof AxisView) {
       if (childKey === "topAxis") {
@@ -947,7 +947,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
     }
   }
 
-  protected layoutSurface(surface: RenderView, bounds: BoxR2): void {
+  protected layoutSurface(surface: RenderedView, bounds: BoxR2): void {
     const topGutter = this.topGutter.value!.pxValue(bounds.height);
     const rightGutter = this.rightGutter.value!.pxValue(bounds.width);
     const bottomGutter = this.bottomGutter.value!.pxValue(bounds.height);
@@ -1088,7 +1088,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
   protected onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     const childKey = childView.key();
-    if (childKey === "surface" && RenderView.is(childView)) {
+    if (childKey === "surface" && RenderedView.is(childView)) {
       this.layoutSurface(childView, this._bounds);
       return;
     } else if (childView instanceof AxisView) {
@@ -1128,7 +1128,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
   }
 
   autoscaleTop(tween?: Tween<any>): void {
-    if (this._trackTopDomain) {
+    if (this._fitTopDomain && this._trackTopDomain) {
       const topAxis = this.topAxis();
       if (topAxis) {
         if (tween === void 0) {
@@ -1143,7 +1143,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
   }
 
   autoscaleRight(tween?: Tween<any>): void {
-    if (this._trackRightDomain) {
+    if (this._fitRightDomain && this._trackRightDomain) {
       const rightAxis = this.rightAxis();
       if (rightAxis) {
         if (tween === void 0) {
@@ -1158,7 +1158,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
   }
 
   autoscaleBottom(tween?: Tween<any>): void {
-    if (this._trackBottomDomain) {
+    if (this._fitBottomDomain && this._trackBottomDomain) {
       const bottomAxis = this.bottomAxis();
       if (bottomAxis) {
         if (tween === void 0) {
@@ -1173,7 +1173,7 @@ export class ChartView<X = any, Y = any> extends GraphicView {
   }
 
   autoscaleLeft(tween?: Tween<any>): void {
-    if (this._trackLeftDomain) {
+    if (this._fitLeftDomain && this._trackLeftDomain) {
       const leftAxis = this.leftAxis();
       if (leftAxis) {
         if (tween === void 0) {

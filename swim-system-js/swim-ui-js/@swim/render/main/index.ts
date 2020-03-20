@@ -12,9 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export {GraphicsContext} from "./GraphicsContext";
 export {DrawingContext} from "./DrawingContext";
+
+export {
+  AnyRenderer,
+  RendererType,
+  Renderer,
+} from "./Renderer";
+
 export {PathContext} from "./PathContext";
+export {PathRenderer} from "./PathRenderer";
 
-export {RenderingContext} from "./RenderingContext";
+export {CanvasContext} from "./CanvasContext";
+export {CanvasRenderer} from "./CanvasRenderer";
 
-export {Graphic} from "./Graphic";
+export {WebGLContext} from "./WebGLContext";
+export {WebGLRenderer} from "./WebGLRenderer";
+
+export {Graphics} from "./Graphics";
