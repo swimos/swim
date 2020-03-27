@@ -37,10 +37,6 @@ public abstract class DecipherDecoder<I, V> {
 
   public abstract Parser<V> parseRecon(Input input);
 
-  public abstract Decoder<V> protobufDecoder();
-
-  public abstract Decoder<V> decodeProtobuf(InputBuffer input);
-
   public abstract Output<V> textOutput();
 
   public abstract Output<V> dataOutput();

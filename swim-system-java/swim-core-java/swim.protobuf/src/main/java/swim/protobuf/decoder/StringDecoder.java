@@ -12,42 +12,59 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.protobuf;
+package swim.protobuf.decoder;
 
 import swim.codec.Decoder;
 import swim.codec.DecoderException;
+import swim.codec.Input;
 import swim.codec.InputBuffer;
+import swim.codec.Parser;
+import swim.codec.Utf8;
+import swim.protobuf.schema.ProtobufStringType;
 
-final class SizedDecoder<V> extends Decoder<V> {
+final class StringDecoder<T> extends Decoder<T> {
 
-  final Decoder<V> payloadDecoder;
+  final ProtobufStringType<T> type;
+  final Parser<T> parser;
   final long length;
-  final int lengthShift;
+  final int shift;
   final int step;
 
-  SizedDecoder(Decoder<V> payloadDecoder, long length, int lengthShift, int step) {
-    this.payloadDecoder = payloadDecoder;
+  StringDecoder(ProtobufStringType<T> type, Parser<T> parser, long length, int shift, int step) {
+    this.type = type;
+    this.parser = parser;
     this.length = length;
-    this.lengthShift = lengthShift;
+    this.shift = shift;
     this.step = step;
   }
 
-  static <V> Decoder<V> decode(InputBuffer input, Decoder<V> payloadDecoder,
-                               long length, int lengthShift, int step) {
+  StringDecoder(ProtobufStringType<T> type) {
+    this(type, null, 0L, 0, 1);
+  }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type, this.parser, this.length, this.shift, this.step);
+  }
+
+  static <T> Decoder<T> decode(InputBuffer input, ProtobufStringType<T> type,
+                               Parser<T> parser, long length, int shift, int step) {
     if (step == 1) {
       while (input.isCont()) {
         final int b = input.head();
-        if (lengthShift < 64) {
+        if (shift < 64) {
           input = input.step();
-          length |= (long) (b & 0x7f) << lengthShift;
+          length |= (long) (b & 0x7f) << shift;
         } else {
-          return error(new DecoderException("varint overflow"));
+          return error(new DecoderException("string length overflow"));
         }
         if ((b & 0x80) == 0) {
+          shift = 0;
           step = 2;
           break;
+        } else {
+          shift += 7;
         }
-        lengthShift += 7;
       }
     }
     if (step == 2) {
@@ -61,17 +78,22 @@ final class SizedDecoder<V> extends Decoder<V> {
       if (length <= inputRemaining) {
         input = input.isPart(false);
       }
-      payloadDecoder = payloadDecoder.feed(input);
+      final Input stringInput = Utf8.decodedInput(input);
+      if (parser == null) {
+        parser = type.parseString(input);
+      } else {
+        parser = parser.feed(input);
+      }
       input = input.limit(inputLimit).isPart(inputPart);
       length -= input.index() - inputStart;
-      if (payloadDecoder.isDone()) {
+      if (parser.isDone()) {
         if (length == 0L) {
-          return payloadDecoder;
+          return parser;
         } else {
           return error(new DecoderException("unconsumed input"));
         }
-      } else if (payloadDecoder.isError()) {
-        return payloadDecoder.asError();
+      } else if (parser.isError()) {
+        return parser.asError();
       }
     }
     if (input.isDone()) {
@@ -79,16 +101,11 @@ final class SizedDecoder<V> extends Decoder<V> {
     } else if (input.isError()) {
       return error(input.trap());
     }
-    return new SizedDecoder<V>(payloadDecoder, length, lengthShift, step);
+    return new StringDecoder<T>(type, parser, length, shift, step);
   }
 
-  static <V> Decoder<V> decode(InputBuffer input, Decoder<V> payloadDecoder) {
-    return decode(input, payloadDecoder, 0L, 0, 1);
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.payloadDecoder, this.length, this.lengthShift, this.step);
+  static <T> Decoder<T> decode(InputBuffer input, ProtobufStringType<T> type) {
+    return decode(input, type, null, 0L, 0, 1);
   }
 
 }

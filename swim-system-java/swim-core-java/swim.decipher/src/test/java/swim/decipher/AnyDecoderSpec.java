@@ -68,15 +68,6 @@ public class AnyDecoderSpec {
   }
 
   @Test
-  public void decodeAnyProtobuf() {
-    assertDecodes(Data.fromBase16("089601"), Record.of(Slot.of(Num.from(1), 150)));
-    assertDecodes(Data.fromBase16("120774657374696E67"),
-        Record.of(Slot.of(Num.from(2), "testing")));
-    assertDecodes(Data.fromBase16("1A03089601"),
-        Record.of(Slot.of(Num.from(3), Record.of(Slot.of(Num.from(1), 150)))));
-  }
-
-  @Test
   public void decodeAnyText() {
     assertDecodes("The quick brown fox jumps over the lazy dog",
         Text.from("The quick brown fox jumps over the lazy dog"));

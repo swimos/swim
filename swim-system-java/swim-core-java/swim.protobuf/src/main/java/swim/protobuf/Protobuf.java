@@ -14,33 +14,44 @@
 
 package swim.protobuf;
 
-import swim.structure.Item;
-import swim.structure.Value;
+import swim.codec.Decoder;
+import swim.codec.InputBuffer;
+import swim.protobuf.decoder.ProtobufDecoder;
+import swim.protobuf.schema.ProtobufMessageType;
+import swim.protobuf.schema.ProtobufType;
 
 /**
- * Factory for constructing Protocol Buffer decoders and encoders.
+ * Factory for constructing Protocol Buffers decoders and encoders.
  */
 public final class Protobuf {
-
-  private static ProtobufDecoder<Item, Value> structureDecoder;
 
   private Protobuf() {
     // static
   }
-  //private static ProtobufEncoder<Item, Value> structureEncoder;
 
-  public static ProtobufDecoder<Item, Value> structureDecoder() {
-    if (structureDecoder == null) {
-      structureDecoder = new ProtobufStructureDecoder();
+  private static ProtobufDecoder decoder;
+
+  public static ProtobufDecoder decoder() {
+    if (decoder == null) {
+      decoder = new ProtobufDecoder();
     }
-    return structureDecoder;
+    return decoder;
   }
 
-  //public static ProtobufEncoder<Item, Value> structureEncoder() {
-  //  if (structureEncoder == null) {
-  //    structureEncoder = new ProtobufStructureEncoder();
-  //  }
-  //  return structureEncoder;
-  //}
+  public static <T> Decoder<T> decodeType(ProtobufType<T> type, InputBuffer input) {
+    return decoder().decodeType(type, input);
+  }
+
+  public static <T> Decoder<T> typeDecoder(ProtobufType<T> type) {
+    return decoder().typeDecoder(type);
+  }
+
+  public static <T> Decoder<T> decodePayload(ProtobufMessageType<T, ?> type, InputBuffer input) {
+    return decoder().decodePayload(type, input);
+  }
+
+  public static <T> Decoder<T> payloadDecoder(ProtobufMessageType<T, ?> type) {
+    return decoder().payloadDecoder(type);
+  }
 
 }

@@ -12,32 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.protobuf;
+package swim.protobuf.decoder;
 
 import swim.codec.Decoder;
 import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
+import swim.protobuf.schema.ProtobufFixed64Type;
 
-final class Fixed32Decoder<V> extends Decoder<V> {
+final class Fixed64Decoder<T> extends Decoder<T> {
 
-  final ProtobufDecoder<?, V> protobuf;
-  final int value;
+  final ProtobufFixed64Type<T> type;
+  final long value;
   final int shift;
 
-  Fixed32Decoder(ProtobufDecoder<?, V> protobuf, int value, int shift) {
-    this.protobuf = protobuf;
+  Fixed64Decoder(ProtobufFixed64Type<T> type, long value, int shift) {
+    this.type = type;
     this.value = value;
     this.shift = shift;
   }
 
-  static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf,
-                               int value, int shift) {
+  Fixed64Decoder(ProtobufFixed64Type<T> type) {
+    this(type, 0L, 0);
+  }
+
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return decode(input, this.type, this.value, this.shift);
+  }
+
+  static <T> Decoder<T> decode(InputBuffer input, ProtobufFixed64Type<T> type,
+                               long value, int shift) {
     while (input.isCont()) {
-      value |= input.head() << shift;
+      value |= (long) input.head() << shift;
       input = input.step();
       shift += 8;
-      if (shift == 32) {
-        return done(protobuf.fixed(value));
+      if (shift == 64) {
+        return done(type.cast(value));
       }
     }
     if (input.isDone()) {
@@ -45,16 +55,11 @@ final class Fixed32Decoder<V> extends Decoder<V> {
     } else if (input.isError()) {
       return error(input.trap());
     }
-    return new Fixed32Decoder<V>(protobuf, value, shift);
+    return new Fixed64Decoder<T>(type, value, shift);
   }
 
-  static <V> Decoder<V> decode(InputBuffer input, ProtobufDecoder<?, V> protobuf) {
-    return decode(input, protobuf, 0, 0);
-  }
-
-  @Override
-  public Decoder<V> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.value, this.shift);
+  static <T> Decoder<T> decode(InputBuffer input, ProtobufFixed64Type<T> type) {
+    return decode(input, type, 0L, 0);
   }
 
 }

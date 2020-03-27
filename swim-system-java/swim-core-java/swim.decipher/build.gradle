@@ -11,5 +11,4 @@ dependencies {
     api project(':swim-recon')
     api project(':swim-json')
     api project(':swim-xml')
-    api project(':swim-protobuf')
 }

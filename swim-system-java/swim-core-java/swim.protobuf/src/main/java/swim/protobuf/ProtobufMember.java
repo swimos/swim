@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Protocol Buffers (protobuf) codec that incrementally parses and writes
- * <strong>swim-structure</strong> values.
- */
-module swim.protobuf {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.structure;
+package swim.protobuf;
 
-  exports swim.protobuf;
-  exports swim.protobuf.schema;
-  exports swim.protobuf.decoder;
-  exports swim.protobuf.reflection;
-  exports swim.protobuf.structure;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Documented
+@Target({ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ProtobufMember {
+
+  String value() default "";
+
 }

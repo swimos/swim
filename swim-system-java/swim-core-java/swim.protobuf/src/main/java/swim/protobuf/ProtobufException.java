@@ -12,18 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Protocol Buffers (protobuf) codec that incrementally parses and writes
- * <strong>swim-structure</strong> values.
- */
-module swim.protobuf {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.structure;
+package swim.protobuf;
 
-  exports swim.protobuf;
-  exports swim.protobuf.schema;
-  exports swim.protobuf.decoder;
-  exports swim.protobuf.reflection;
-  exports swim.protobuf.structure;
+public class ProtobufException extends RuntimeException {
+
+  private static final long serialVersionUID = 1L;
+
+  public ProtobufException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public ProtobufException(String message) {
+    super(message);
+  }
+
+  public ProtobufException(Throwable cause) {
+    super(cause);
+  }
+
+  public ProtobufException() {
+    super();
+  }
+
 }

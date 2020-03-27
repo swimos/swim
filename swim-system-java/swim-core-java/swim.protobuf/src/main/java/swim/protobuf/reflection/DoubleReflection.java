@@ -12,18 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Protocol Buffers (protobuf) codec that incrementally parses and writes
- * <strong>swim-structure</strong> values.
- */
-module swim.protobuf {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.structure;
+package swim.protobuf.reflection;
 
-  exports swim.protobuf;
-  exports swim.protobuf.schema;
-  exports swim.protobuf.decoder;
-  exports swim.protobuf.reflection;
-  exports swim.protobuf.structure;
+import swim.protobuf.schema.ProtobufFixed64Type;
+
+final class DoubleReflection extends ProtobufFixed64Type<Double> {
+
+  @Override
+  public Double cast(long value) {
+    return Double.valueOf(Double.longBitsToDouble(value));
+  }
+
 }

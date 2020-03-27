@@ -14,7 +14,7 @@
 
 package swim.protobuf;
 
-public enum WireType {
+public enum ProtobufWireType {
 
   VARINT(0),
   FIXED64(1),
@@ -27,11 +27,11 @@ public enum WireType {
 
   public final int code;
 
-  WireType(int code) {
+  ProtobufWireType(int code) {
     this.code = code;
   }
 
-  public static WireType apply(int code) {
+  public static ProtobufWireType from(int code) {
     switch (code) {
       case 0:
         return VARINT;
@@ -54,37 +54,41 @@ public enum WireType {
     }
   }
 
+  public boolean isPrimitive() {
+    return this.code == 0 || this.code == 1 || this.code == 5;
+  }
+
   public boolean isVarint() {
-    return code == 0;
+    return this.code == 0;
   }
 
   public boolean isFixed64() {
-    return code == 1;
+    return this.code == 1;
   }
 
   public boolean isSized() {
-    return code == 2;
+    return this.code == 2;
   }
 
   public boolean isStartGroup() {
-    return code == 3;
+    return this.code == 3;
   }
 
   public boolean isEndGroup() {
-    return code == 4;
+    return this.code == 4;
   }
 
   public boolean isFixed32() {
-    return code == 5;
+    return this.code == 5;
   }
 
   public boolean isReserved() {
-    return code == 6 || code == 7;
+    return this.code == 6 || this.code == 7;
   }
 
   @Override
   public String toString() {
-    return new StringBuilder("WireType").append('.').append(super.toString()).toString();
+    return new StringBuilder("ProtobufWireType").append('.').append(super.toString()).toString();
   }
 
 }

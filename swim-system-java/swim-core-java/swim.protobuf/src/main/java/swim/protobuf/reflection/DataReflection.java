@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Protocol Buffers (protobuf) codec that incrementally parses and writes
- * <strong>swim-structure</strong> values.
- */
-module swim.protobuf {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.structure;
+package swim.protobuf.reflection;
 
-  exports swim.protobuf;
-  exports swim.protobuf.schema;
-  exports swim.protobuf.decoder;
-  exports swim.protobuf.reflection;
-  exports swim.protobuf.structure;
+import java.nio.ByteBuffer;
+import swim.protobuf.schema.ProtobufDataType;
+import swim.codec.Binary;
+import swim.codec.Decoder;
+import swim.codec.InputBuffer;
+
+final class DataReflection extends ProtobufDataType<ByteBuffer> {
+
+  @Override
+  public Decoder<ByteBuffer> decodeData(InputBuffer input) {
+    return Binary.parseOutput(Binary.byteBufferOutput(), input);
+  }
+
 }

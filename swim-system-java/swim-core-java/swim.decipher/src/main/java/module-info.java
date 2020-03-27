@@ -14,7 +14,7 @@
 
 /**
  * Universal decoder that detects and incrementally parses Recon, JSON, XML,
- * Protobuf, raw text, and binary data formats as <strong>swim-structure</strong> values.
+ * raw text, and binary data formats as <strong>swim-structure</strong> values.
  */
 module swim.decipher {
   requires swim.util;
@@ -23,7 +23,6 @@ module swim.decipher {
   requires transitive swim.recon;
   requires transitive swim.json;
   requires transitive swim.xml;
-  requires transitive swim.protobuf;
 
   exports swim.decipher;
 }

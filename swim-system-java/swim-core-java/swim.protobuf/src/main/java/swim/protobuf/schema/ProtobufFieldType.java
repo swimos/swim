@@ -12,18 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Protocol Buffers (protobuf) codec that incrementally parses and writes
- * <strong>swim-structure</strong> values.
- */
-module swim.protobuf {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.structure;
+package swim.protobuf.schema;
 
-  exports swim.protobuf;
-  exports swim.protobuf.schema;
-  exports swim.protobuf.decoder;
-  exports swim.protobuf.reflection;
-  exports swim.protobuf.structure;
+public abstract class ProtobufFieldType<M, V> {
+
+  public abstract long fieldNumber();
+
+  public abstract ProtobufType<? extends V> valueType();
+
+  public abstract M updated(M message, V value);
+
+  public abstract ProtobufFieldType<M, ?> packedType();
+
 }
