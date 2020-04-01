@@ -78,4 +78,5 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
   public Decoder<WsStatus> feed(InputBuffer input) {
     return decode(input, this.code, this.reason, this.step);
   }
+
 }
