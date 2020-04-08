@@ -35,6 +35,8 @@ export class CanvasView extends HtmlView implements RenderedView {
   /** @hidden */
   readonly _node: ViewCanvas;
   /** @hidden */
+  _eventSurface: Node;
+  /** @hidden */
   _viewController: CanvasViewController | null;
   /** @hidden */
   readonly _renderedViews: RenderedView[];
@@ -77,6 +79,7 @@ export class CanvasView extends HtmlView implements RenderedView {
     this.onTouchCancel = this.onTouchCancel.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
 
+    this._eventSurface = this._node;
     this._renderedViews = [];
     this._renderer = void 0;
     this._bounds = BoxR2.empty();
@@ -625,11 +628,11 @@ export class CanvasView extends HtmlView implements RenderedView {
   }
 
   protected onMount(): void {
-    this.addEventListeners(this._node);
+    this.addEventListeners(this._eventSurface);
   }
 
   protected onUnmount(): void {
-    this.removeEventListeners(this._node);
+    this.removeEventListeners(this._eventSurface);
     super.onUnmount();
   }
 
@@ -751,6 +754,21 @@ export class CanvasView extends HtmlView implements RenderedView {
     return hit;
   }
 
+  get eventSurface(): Node {
+    return this._eventSurface;
+  }
+
+  setEventSurface(eventSurface?: Node): void {
+    if (eventSurface === void 0) {
+      eventSurface = this._node;
+    }
+    if (this._eventSurface !== eventSurface) {
+      this.removeEventListeners(this._eventSurface);
+      this._eventSurface = eventSurface;
+      this.addEventListeners(this._eventSurface);
+    }
+  }
+
   /** @hidden */
   handleEvent(event: ViewEvent): void {
     // nop
@@ -758,6 +776,7 @@ export class CanvasView extends HtmlView implements RenderedView {
 
   /** @hidden */
   bubbleEvent(event: ViewEvent): View | null {
+    this.handleEvent(event);
     return this;
   }
 
