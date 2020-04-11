@@ -16,11 +16,11 @@ import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont} from "@swim/font";
-import {CanvasContext} from "@swim/render";
+import {CanvasRenderer, CanvasContext} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
   RenderedViewContext,
+  RenderedViewInit,
   RenderedView,
   StrokeViewInit,
   StrokeView,
@@ -33,7 +33,7 @@ import {GraphViewController} from "./GraphViewController";
 
 export type AnyLineGraphView<X, Y> = LineGraphView<X, Y> | LineGraphViewInit<X, Y>;
 
-export interface LineGraphViewInit<X, Y> extends ViewInit, StrokeViewInit {
+export interface LineGraphViewInit<X, Y> extends RenderedViewInit, StrokeViewInit {
   xAxis?: AxisView<X> | null;
   yAxis?: AxisView<Y> | null;
 
@@ -144,8 +144,8 @@ export class LineGraphView<X, Y> extends GraphView<X, Y> implements StrokeView {
     context.stroke();
   }
 
-  protected hitTestGraph(x: number, y: number, context: CanvasContext,
-                         bounds: BoxR2, anchor: PointR2): RenderedView | null {
+  protected hitTestGraph(x: number, y: number, renderer: CanvasRenderer): RenderedView | null {
+    const context = renderer.context;
     let hitWidth = this._hitWidth;
     const strokeWidth = this.strokeWidth.value;
     if (strokeWidth) {
@@ -169,7 +169,11 @@ export class LineGraphView<X, Y> extends GraphView<X, Y> implements StrokeView {
 
     context.lineWidth = hitWidth;
     if (context.isPointInStroke(x, y)) {
-      return this;
+      if (this._hitMode === "graph") {
+        return this;
+      } else if (this._hitMode === "data") {
+        return this.hitTestData(x, y, renderer);
+      }
     }
     return null;
   }
@@ -219,6 +223,13 @@ export class LineGraphView<X, Y> extends GraphView<X, Y> implements StrokeView {
       }
       if (graph.textColor !== void 0) {
         view.textColor(graph.textColor);
+      }
+
+      if (graph.hidden !== void 0) {
+        view.setHidden(graph.hidden);
+      }
+      if (graph.culled !== void 0) {
+        view.setCulled(graph.culled);
       }
 
       return view;

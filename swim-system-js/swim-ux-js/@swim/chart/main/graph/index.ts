@@ -14,6 +14,7 @@
 
 export {
   GraphType,
+  GraphHitMode,
   AnyGraphView,
   GraphViewInit,
   GraphView,

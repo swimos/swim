@@ -18,7 +18,6 @@ import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
   RenderedViewContext,
   RenderedView,
   FillViewInit,
@@ -32,7 +31,7 @@ import {Rect} from "./Rect";
 
 export type AnyRectView = RectView | Rect | RectViewInit;
 
-export interface RectViewInit extends ViewInit, FillViewInit, StrokeViewInit {
+export interface RectViewInit extends FillViewInit, StrokeViewInit {
   x?: AnyLength;
   y?: AnyLength;
   width?: AnyLength;
@@ -112,6 +111,12 @@ export class RectView extends GraphicsView implements FillView, StrokeView {
     }
     if (rect.strokeWidth !== void 0) {
       this.strokeWidth(rect.strokeWidth, tween);
+    }
+    if (rect.hidden !== void 0) {
+      this.setHidden(rect.hidden);
+    }
+    if (rect.culled !== void 0) {
+      this.setCulled(rect.culled);
     }
   }
 

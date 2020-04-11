@@ -18,9 +18,9 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {
   MemberAnimator,
-  ViewInit,
   View,
   RenderedViewContext,
+  RenderedViewInit,
   TypesetView,
   GraphicsView,
   GraphicsViewController,
@@ -30,7 +30,7 @@ import {AnySliceView, SliceView} from "./SliceView";
 
 export type AnyPieView = PieView | PieViewInit;
 
-export interface PieViewInit extends ViewInit {
+export interface PieViewInit extends RenderedViewInit {
   limit?: number;
   baseAngle?: AnyAngle;
   innerRadius?: AnyLength;
@@ -295,6 +295,12 @@ export class PieView extends GraphicsView {
         for (let i = 0, n = slices.length; i < n; i += 1) {
           view.addSlice(slices[i]);
         }
+      }
+      if (pie.hidden !== void 0) {
+        view.setHidden(pie.hidden);
+      }
+      if (pie.culled !== void 0) {
+        view.setCulled(pie.culled);
       }
       return view;
     }

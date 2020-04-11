@@ -18,9 +18,9 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {
   MemberAnimator,
-  ViewInit,
   View,
   RenderedViewContext,
+  RenderedViewInit,
   TypesetView,
   GraphicsView,
   GraphicsViewController,
@@ -30,7 +30,7 @@ import {AnyDialView, DialView} from "./DialView";
 
 export type AnyGaugeView = GaugeView | GaugeViewInit;
 
-export interface GaugeViewInit extends ViewInit {
+export interface GaugeViewInit extends RenderedViewInit {
   limit?: number;
   innerRadius?: AnyLength;
   outerRadius?: AnyLength;
@@ -332,6 +332,12 @@ export class GaugeView extends GraphicsView {
         for (let i = 0, n = dials.length; i < n; i += 1) {
           view.addDial(dials[i]);
         }
+      }
+      if (gauge.hidden !== void 0) {
+        view.setHidden(gauge.hidden);
+      }
+      if (gauge.culled !== void 0) {
+        view.setCulled(gauge.culled);
       }
       return view;
     }

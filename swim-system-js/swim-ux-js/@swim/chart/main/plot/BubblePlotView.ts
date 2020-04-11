@@ -19,8 +19,8 @@ import {AnyFont} from "@swim/font";
 import {CanvasContext} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
   RenderedViewContext,
+  RenderedViewInit,
   FillViewInit,
   FillView,
   StrokeViewInit,
@@ -33,7 +33,7 @@ import {PlotViewController} from "./PlotViewController";
 
 export type AnyBubblePlotView<X, Y> = BubblePlotView<X, Y> | BubblePlotViewInit<X, Y>;
 
-export interface BubblePlotViewInit<X, Y> extends ViewInit, FillViewInit, StrokeViewInit {
+export interface BubblePlotViewInit<X, Y> extends RenderedViewInit, FillViewInit, StrokeViewInit {
   xAxis?: AxisView<X> | null;
   yAxis?: AxisView<Y> | null;
 
@@ -191,6 +191,13 @@ export class BubblePlotView<X, Y> extends PlotView<X, Y> implements FillView, St
       }
       if (plot.textColor !== void 0) {
         view.textColor(plot.textColor);
+      }
+
+      if (plot.hidden !== void 0) {
+        view.setHidden(plot.hidden);
+      }
+      if (plot.culled !== void 0) {
+        view.setCulled(plot.culled);
       }
 
       return view;

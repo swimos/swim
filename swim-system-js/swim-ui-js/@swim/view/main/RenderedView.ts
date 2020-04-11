@@ -15,11 +15,16 @@
 import {PointR2, BoxR2} from "@swim/math";
 import {Renderer} from "@swim/render";
 import {ViewEvent} from "./ViewEvent";
-import {View} from "./View";
+import {ViewInit, View} from "./View";
 import {AnimatedView} from "./AnimatedView";
 import {RenderedViewContext} from "./RenderedViewContext";
 import {RenderedViewController} from "./RenderedViewController";
 import {CanvasView} from "./CanvasView";
+
+export interface RenderedViewInit extends ViewInit {
+  hidden?: boolean;
+  culled?: boolean;
+}
 
 export interface RenderedView extends AnimatedView {
   readonly viewController: RenderedViewController | null;

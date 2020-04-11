@@ -35,12 +35,10 @@ export {MapLayerView} from "./MapLayerView";
 export {MapLayerViewObserver} from "./MapLayerViewObserver";
 export {MapLayerViewController} from "./MapLayerViewController";
 
-export {
-  MapPointLabelPlacement,
-  AnyMapPoint,
-} from "./MapPoint";
+export {MapPointLabelPlacement} from "./MapPoint";
 export {
   AnyMapPointView,
+  MapPointViewInit,
   MapPointView,
 } from "./MapPointView";
 

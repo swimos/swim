@@ -18,7 +18,6 @@ import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
   RenderedViewContext,
   TypesetViewInit,
   TypesetView,
@@ -29,7 +28,7 @@ import {TextRun} from "./TextRun";
 
 export type AnyTextRunView = TextRunView | TextRun | TextRunViewInit | string;
 
-export interface TextRunViewInit extends ViewInit, TypesetViewInit {
+export interface TextRunViewInit extends TypesetViewInit {
   text?: string;
 }
 
@@ -95,6 +94,12 @@ export class TextRunView extends GraphicsView implements TypesetView {
       }
       if (run.textColor !== void 0) {
         this.textColor(run.textColor, tween);
+      }
+      if (run.hidden !== void 0) {
+        this.setHidden(run.hidden);
+      }
+      if (run.culled !== void 0) {
+        this.setCulled(run.culled);
       }
     }
   }

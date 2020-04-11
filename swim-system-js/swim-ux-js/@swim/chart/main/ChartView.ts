@@ -18,7 +18,14 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween, AnyTransition, Transition} from "@swim/transition";
-import {MemberAnimator, ViewInit, View, RenderedViewContext, RenderedView, GraphicsView} from "@swim/view";
+import {
+  MemberAnimator,
+  View,
+  RenderedViewContext,
+  RenderedViewInit,
+  RenderedView,
+  GraphicsView,
+} from "@swim/view";
 import {Multitouch, ScaleGestureEvent, ScaleGesture} from "@swim/gesture";
 import {AnyAxisView, AxisView} from "./axis/AxisView";
 import {AnyPlotView, PlotView} from "./plot/PlotView";
@@ -30,7 +37,7 @@ export type ChartDomainPadding<D> = [D | null, D | null];
 
 export type AnyChartView<X = any, Y = any> = ChartView<X, Y> | ChartViewInit<X, Y>;
 
-export interface ChartViewInit<X = any, Y = any> extends ViewInit {
+export interface ChartViewInit<X = any, Y = any> extends RenderedViewInit {
   topAxis?: AnyAxisView<X> | null;
   rightAxis?: AnyAxisView<Y> | null;
   bottomAxis?: AnyAxisView<X> | null;
@@ -1563,6 +1570,13 @@ export class ChartView<X = any, Y = any> extends GraphicsView {
       }
       if (chart.textColor !== void 0) {
         view.textColor(chart.textColor);
+      }
+
+      if (chart.hidden !== void 0) {
+        view.setHidden(chart.hidden);
+      }
+      if (chart.culled !== void 0) {
+        view.setCulled(chart.culled);
       }
 
       return view;

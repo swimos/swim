@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Swim Line Chart</title>
+    <title>Swim Chart Labels</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
   </head>
   <body style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; margin: 0; overflow: hidden;">
@@ -27,22 +27,21 @@ const chart = new swim.ChartView()
     .textColor("#4a4a4a");
 canvas.append(chart);
 
-chart.leftAxis().insertTick({
-  value: 0.5,
-  tickLabel: "0.5",
-  gridLineColor: '#989898',
-  gridLineWidth: 1,
-});
-
 const plot = new swim.LineGraphView()
-    .hitMode("graph")
+    .hitMode("domain")
     .stroke("#4a4a4a")
     .strokeWidth(2)
-    .on("mouseenter", function (event) {
-      plot.stroke("#1db0ef", {duration: 200});
+    .on("mouseover", function (event) {
+      const datum = event.targetView;
+      const y = datum.y.value;
+      datum.label(swim.TextRunView.fromAny({
+        text: y.toFixed(2),
+        textColor: "#1db0ef",
+      }));
     })
-    .on("mouseleave", function (event) {
-      plot.stroke("#4a4a4a", {duration: 200});
+    .on("mouseout", function (event) {
+      const datum = event.targetView;
+      datum.label(null);
     });
 chart.addPlot(plot);
 
@@ -50,9 +49,15 @@ const cycles = 2;
 const samples = 100;
 for (let i = 0, n = cycles * samples; i <= n; i += 1) {
   const x = i * 2 * Math.PI / samples;
-  const y = Math.sin(x);
+  const y = Math.round(1000 * Math.sin(x)) / 1000;
   const opacity = i === 0 ? 0.75 : i === n ? 0.25 : void 0;
-  plot.insertDatum({x: x, y: y, opacity: opacity});
+  plot.insertDatum({
+    x: x,
+    y: y,
+    opacity: opacity,
+    labelPadding: 2,
+    labelPlacement: y > 0 ? "above" : y < 0 ? "below" : "middle",
+  });
 }
 
     </script>

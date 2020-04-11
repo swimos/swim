@@ -16,7 +16,7 @@ import {Objects} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {PointR2, BoxR2} from "@swim/math";
 import {ContinuousScale} from "@swim/scale";
-import {CanvasRenderer, CanvasContext} from "@swim/render";
+import {CanvasRenderer} from "@swim/render";
 import {View, RenderedViewContext, RenderedView} from "@swim/view";
 import {DatumCategory} from "../data/Datum";
 import {AnyDatumView, DatumView} from "../data/DatumView";
@@ -25,24 +25,28 @@ import {GraphViewController} from "./GraphViewController";
 
 export type GraphType = "line" | "area";
 
+export type GraphHitMode = "domain" | "graph" | "data" | "none";
+
 export type AnyGraphView<X, Y> = GraphView<X, Y> | GraphViewInit<X, Y> | GraphType;
 
 export interface GraphViewInit<X, Y> extends PlotViewInit<X, Y> {
+  hitMode?: GraphHitMode;
 }
 
 export abstract class GraphView<X, Y> extends PlotView<X, Y> {
   /** @hidden */
   _viewController: GraphViewController<X, Y> | null;
-
   /** @hidden */
   readonly _data: BTree<X, DatumView<X, Y>>;
-
+  /** @hidden */
+  _hitMode: GraphHitMode;
   /** @hidden */
   _gradientStops: number;
 
   constructor() {
     super();
     this._data = new BTree();
+    this._hitMode = "domain";
     this._gradientStops = 0;
   }
 
@@ -229,24 +233,59 @@ export abstract class GraphView<X, Y> extends PlotView<X, Y> {
     this._gradientStops = gradientStops;
   }
 
+  hitMode(): GraphHitMode;
+  hitMode(hitMode: GraphHitMode): this;
+  hitMode(hitMode?: GraphHitMode): GraphHitMode | this {
+    if (hitMode === void 0) {
+      return this._hitMode;
+    } else {
+      this._hitMode = hitMode;
+      return this;
+    }
+  }
+
   hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
     let hit = super.hitTest(x, y, viewContext);
-    if (hit === null) {
+    if (hit === null && this._hitMode !== "none") {
       const renderer = viewContext.renderer;
       if (renderer instanceof CanvasRenderer) {
         const context = renderer.context;
         context.save();
         x *= renderer.pixelRatio;
         y *= renderer.pixelRatio;
-        hit = this.hitTestGraph(x, y, context, this._bounds, this._anchor);
+        if (this._hitMode === "domain") {
+          hit = this.hitTestData(x, y, renderer);
+        } else {
+          hit = this.hitTestGraph(x, y, renderer);
+        }
         context.restore();
       }
     }
     return hit;
   }
 
-  protected abstract hitTestGraph(x: number, y: number, context: CanvasContext,
-                                  bounds: BoxR2, anchor: PointR2): RenderedView | null;
+  protected abstract hitTestGraph(x: number, y: number, renderer: CanvasRenderer): RenderedView | null;
+
+  protected hitTestData(x: number, y: number, renderer: CanvasRenderer): RenderedView | null {
+    if (this._xAxis) {
+      const xScale = this._xAxis.scale.state!;
+      const d = xScale.unscale(x / renderer.pixelRatio - this._anchor.x);
+      const x0 = this._data.previousValue(d);
+      const x1 = this._data.nextValue(d);
+      const dx0 = x0 !== void 0 ? +d - +x0.x.state! : NaN;
+      const dx1 = x1 !== void 0 ? +x1.x.state! - +d : NaN;
+      if (dx0 <= dx1) {
+        return x0!;
+      } else if (dx0 > dx1) {
+        return x1!;
+      } else if (x0 !== void 0) {
+        return x0!;
+      } else if (x1 !== void 0) {
+        return x1!;
+      }
+    }
+    return null;
+  }
 
   protected onInsertChildView(childView: View, targetView: View): void {
     super.onInsertChildView(childView, targetView);

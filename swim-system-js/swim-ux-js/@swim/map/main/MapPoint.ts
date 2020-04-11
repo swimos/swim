@@ -12,28 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength} from "@swim/length";
-import {AnyColor} from "@swim/color";
-import {AnyFont} from "@swim/font";
-import {ViewInit, View} from "@swim/view";
-import {AnyLngLat} from "./LngLat";
-
 export type MapPointLabelPlacement = "auto" | "top" | "right" | "bottom" | "left";
-
-export interface AnyMapPoint extends ViewInit {
-  coord: AnyLngLat;
-  r?: AnyLength | null;
-
-  hitRadius?: number;
-
-  color?: AnyColor | null;
-  opacity?: number | null;
-
-  labelPadding?: AnyLength | null;
-  labelPlacement?: MapPointLabelPlacement;
-
-  font?: AnyFont | null;
-  textColor?: AnyColor | null;
-
-  label?: View | string | null;
-}

@@ -18,16 +18,40 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {MemberAnimator, View, RenderedView, TypesetView} from "@swim/view";
+import {
+  MemberAnimator,
+  View,
+  RenderedViewInit,
+  RenderedView,
+  TypesetView,
+} from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 import {AnyLngLat, LngLat} from "./LngLat";
 import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
 import {MapGraphicsView} from "./MapGraphicsView";
 import {MapGraphicsViewController} from "./MapGraphicsViewController";
-import {MapPointLabelPlacement, AnyMapPoint} from "./MapPoint";
+import {MapPointLabelPlacement} from "./MapPoint";
 
-export type AnyMapPointView = MapPointView | AnyMapPoint;
+export type AnyMapPointView = MapPointView | MapPointViewInit;
+
+export interface MapPointViewInit extends RenderedViewInit {
+  coord: AnyLngLat;
+  r?: AnyLength | null;
+
+  hitRadius?: number;
+
+  color?: AnyColor | null;
+  opacity?: number | null;
+
+  labelPadding?: AnyLength | null;
+  labelPlacement?: MapPointLabelPlacement;
+
+  font?: AnyFont | null;
+  textColor?: AnyColor | null;
+
+  label?: View | string | null;
+}
 
 export class MapPointView extends MapGraphicsView {
   /** @hidden */
@@ -203,14 +227,14 @@ export class MapPointView extends MapGraphicsView {
       const renderer = viewContext.renderer;
       if (renderer instanceof CanvasRenderer) {
         const context = renderer.context;
-        hit = this.hiteTestPoint(x, y, context, this._bounds, this._anchor);
+        hit = this.hitTestPoint(x, y, context, this._bounds, this._anchor);
       }
     }
     return hit;
   }
 
-  protected hiteTestPoint(x: number, y: number, context: CanvasContext,
-                          bounds: BoxR2, anchor: PointR2): RenderedView | null {
+  protected hitTestPoint(x: number, y: number, context: CanvasContext,
+                         bounds: BoxR2, anchor: PointR2): RenderedView | null {
     let hitRadius = this._hitRadius;
     const radius = this.r.value;
     if (radius) {
@@ -265,6 +289,13 @@ export class MapPointView extends MapGraphicsView {
 
       if (point.label !== void 0) {
         view.label(point.label);
+      }
+
+      if (point.hidden !== void 0) {
+        view.setHidden(point.hidden);
+      }
+      if (point.culled !== void 0) {
+        view.setCulled(point.culled);
       }
 
       return view;

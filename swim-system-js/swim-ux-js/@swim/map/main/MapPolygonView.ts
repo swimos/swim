@@ -21,8 +21,8 @@ import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   AnyMemberAnimator,
-  ViewInit,
   View,
+  RenderedViewInit,
   RenderedView,
   FillViewInit,
   FillView,
@@ -37,7 +37,7 @@ import {MapGraphicsViewController} from "./MapGraphicsViewController";
 
 export type AnyMapPolygonView = MapPolygonView | MapPolygonViewInit;
 
-export interface MapPolygonViewInit extends ViewInit, FillViewInit, StrokeViewInit {
+export interface MapPolygonViewInit extends RenderedViewInit, FillViewInit, StrokeViewInit {
   coords?: AnyLngLat[];
   animateCoords?: boolean;
 }
@@ -332,6 +332,12 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
       }
       if (polygon.animateCoords !== void 0) {
         view.animateCoords(polygon.animateCoords);
+      }
+      if (polygon.hidden !== void 0) {
+        view.setHidden(polygon.hidden);
+      }
+      if (polygon.culled !== void 0) {
+        view.setCulled(polygon.culled);
       }
       return view;
     }

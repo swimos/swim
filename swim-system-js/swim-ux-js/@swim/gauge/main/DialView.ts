@@ -20,9 +20,9 @@ import {AnyFont, Font} from "@swim/font";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
   View,
   RenderedViewContext,
+  RenderedViewInit,
   RenderedView,
   FillView,
   TypesetView,
@@ -36,7 +36,7 @@ export type DialViewArrangement = "auto" | "manual";
 
 export type AnyDialView = DialView | DialViewInit;
 
-export interface DialViewInit extends ViewInit {
+export interface DialViewInit extends RenderedViewInit {
   value?: number;
   total?: number;
   innerRadius?: AnyLength;
@@ -443,6 +443,12 @@ export class DialView extends GraphicsView {
       }
       if (dial.legend !== void 0) {
         view.legend(dial.legend);
+      }
+      if (dial.hidden !== void 0) {
+        view.setHidden(dial.hidden);
+      }
+      if (dial.culled !== void 0) {
+        view.setCulled(dial.culled);
       }
       return view;
     }

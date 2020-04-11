@@ -17,7 +17,13 @@ import {PointR2, BoxR2, SegmentR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {MemberAnimator, ViewInit, RenderedView, StrokeViewInit, StrokeView} from "@swim/view";
+import {
+  MemberAnimator,
+  RenderedViewInit,
+  RenderedView,
+  StrokeViewInit,
+  StrokeView,
+} from "@swim/view";
 import {AnyLngLat, LngLat} from "./LngLat";
 import {MapViewContext} from "./MapViewContext";
 import {MapView} from "./MapView";
@@ -26,7 +32,7 @@ import {MapGraphicsViewController} from "./MapGraphicsViewController";
 
 export type AnyMapLineView = MapLineView | MapLineViewInit;
 
-export interface MapLineViewInit extends ViewInit, StrokeViewInit {
+export interface MapLineViewInit extends RenderedViewInit, StrokeViewInit {
   start?: AnyLngLat;
   end?: AnyLngLat;
   hitWidth?: number;
@@ -205,6 +211,12 @@ export class MapLineView extends MapGraphicsView implements StrokeView {
       }
       if (line.hitWidth !== void 0) {
         view.hitWidth(line.hitWidth);
+      }
+      if (line.hidden !== void 0) {
+        view.setHidden(line.hidden);
+      }
+      if (line.culled !== void 0) {
+        view.setCulled(line.culled);
       }
       return view;
     }

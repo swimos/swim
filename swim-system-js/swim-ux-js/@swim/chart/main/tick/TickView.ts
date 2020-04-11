@@ -20,9 +20,9 @@ import {TweenState} from "@swim/animate";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
   View,
   RenderedViewContext,
+  RenderedViewInit,
   RenderedView,
   GraphicsView,
   GraphicsViewController,
@@ -46,7 +46,7 @@ export type TickOrientation = "top" | "right" | "bottom" | "left";
 
 export type AnyTickView<D> = TickView<D> | TickViewInit<D>;
 
-export interface TickViewInit<D> extends ViewInit {
+export interface TickViewInit<D> extends RenderedViewInit {
   orientation?: TickOrientation;
   value: D;
 
@@ -322,6 +322,13 @@ export abstract class TickView<D> extends GraphicsView {
 
       if (tick.tickLabel !== void 0) {
         view.tickLabel(tick.tickLabel);
+      }
+
+      if (tick.hidden !== void 0) {
+        view.setHidden(tick.hidden);
+      }
+      if (tick.culled !== void 0) {
+        view.setCulled(tick.culled);
       }
 
       return view;

@@ -28,6 +28,7 @@ const chart = new swim.ChartView()
 canvas.append(chart);
 
 const plot = new swim.AreaGraphView()
+    .hitMode("graph")
     .fill("#4a4a4a")
     .on("mouseenter", function (event) {
       plot.fill("#1db0ef", {duration: 200});
@@ -37,8 +38,10 @@ const plot = new swim.AreaGraphView()
     });
 chart.addPlot(plot);
 
-for (let i = 0, n = Math.floor(10 * 4 * Math.PI); i <= n; i += 1) {
-  const x = i / 10;
+const cycles = 2;
+const samples = 100;
+for (let i = 0, n = cycles * samples; i <= n; i += 1) {
+  const x = i * 2 * Math.PI / samples;
   const y = Math.sin(x) + 1;
   const y2 = Math.sin(x) - 1;
   const opacity = i === 0 ? 0.75 : i === n ? 0.25 : void 0;

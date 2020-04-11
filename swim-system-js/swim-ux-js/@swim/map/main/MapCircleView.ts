@@ -18,7 +18,7 @@ import {AnyColor, Color} from "@swim/color";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
+  RenderedViewInit,
   RenderedView,
   FillViewInit,
   FillView,
@@ -33,7 +33,7 @@ import {MapGraphicsViewController} from "./MapGraphicsViewController";
 
 export type AnyMapCircleView = MapCircleView | MapCircleViewInit;
 
-export interface MapCircleViewInit extends ViewInit, FillViewInit, StrokeViewInit {
+export interface MapCircleViewInit extends RenderedViewInit, FillViewInit, StrokeViewInit {
   center?: AnyLngLat;
   radius?: AnyLength;
   hitRadius?: number;
@@ -241,6 +241,12 @@ export class MapCircleView extends MapGraphicsView implements FillView, StrokeVi
       }
       if (circle.strokeWidth !== void 0) {
         view.strokeWidth(circle.strokeWidth);
+      }
+      if (circle.hidden !== void 0) {
+        view.setHidden(circle.hidden);
+      }
+      if (circle.culled !== void 0) {
+        view.setCulled(circle.culled);
       }
       return view;
     }

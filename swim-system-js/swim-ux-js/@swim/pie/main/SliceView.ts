@@ -20,9 +20,9 @@ import {AnyFont, Font} from "@swim/font";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
   View,
   RenderedViewContext,
+  RenderedViewInit,
   RenderedView,
   FillView,
   TypesetView,
@@ -34,7 +34,7 @@ import {AnyTextRunView, TextRunView} from "@swim/typeset";
 
 export type AnySliceView = SliceView | SliceViewInit;
 
-export interface SliceViewInit extends ViewInit {
+export interface SliceViewInit extends RenderedViewInit {
   value?: number;
   total?: number;
   innerRadius?: AnyLength;
@@ -410,6 +410,12 @@ export class SliceView extends GraphicsView {
       }
       if (slice.legend !== void 0) {
         view.legend(slice.legend);
+      }
+      if (slice.hidden !== void 0) {
+        view.setHidden(slice.hidden);
+      }
+      if (slice.culled !== void 0) {
+        view.setCulled(slice.culled);
       }
       return view;
     }

@@ -908,7 +908,7 @@ export class CanvasView extends HtmlView implements RenderedView {
       const y = this._clientY - bounds.y;
       const oldHoverView = this._hoverView;
       const newHoverView = this.hitTest(x, y);
-      if (newHoverView !== this._hoverView) {
+      if (newHoverView !== oldHoverView) {
         this.onMouseHoverChange(newHoverView, oldHoverView);
       }
     }

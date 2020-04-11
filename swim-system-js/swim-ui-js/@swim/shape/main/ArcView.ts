@@ -19,7 +19,6 @@ import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
   RenderedViewContext,
   RenderedView,
   FillViewInit,
@@ -33,7 +32,7 @@ import {ArcInit, Arc} from "./Arc";
 
 export type AnyArcView = ArcView | Arc | ArcViewInit;
 
-export interface ArcViewInit extends ViewInit, FillViewInit, StrokeViewInit, ArcInit {
+export interface ArcViewInit extends FillViewInit, StrokeViewInit, ArcInit {
 }
 
 export class ArcView extends GraphicsView implements FillView, StrokeView {
@@ -136,6 +135,12 @@ export class ArcView extends GraphicsView implements FillView, StrokeView {
     }
     if (arc.strokeWidth !== void 0) {
       this.strokeWidth(arc.strokeWidth, tween);
+    }
+    if (arc.hidden !== void 0) {
+      this.setHidden(arc.hidden);
+    }
+    if (arc.culled !== void 0) {
+      this.setCulled(arc.culled);
     }
   }
 

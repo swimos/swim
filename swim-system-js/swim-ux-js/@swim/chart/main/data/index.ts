@@ -15,10 +15,10 @@
 export {
   DatumCategory,
   DatumLabelPlacement,
-  AnyDatum,
 } from "./Datum";
 
 export {
   AnyDatumView,
+  DatumViewInit,
   DatumView,
 } from "./DatumView";

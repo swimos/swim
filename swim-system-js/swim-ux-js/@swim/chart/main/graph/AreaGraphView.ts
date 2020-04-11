@@ -15,11 +15,11 @@
 import {PointR2, BoxR2} from "@swim/math";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont} from "@swim/font";
-import {CanvasContext} from "@swim/render";
+import {CanvasRenderer, CanvasContext} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
   RenderedViewContext,
+  RenderedViewInit,
   RenderedView,
   FillViewInit,
   FillView,
@@ -32,7 +32,7 @@ import {GraphViewController} from "./GraphViewController";
 
 export type AnyAreaGraphView<X, Y> = AreaGraphView<X, Y> | AreaGraphViewInit<X, Y>;
 
-export interface AreaGraphViewInit<X, Y> extends ViewInit, FillViewInit {
+export interface AreaGraphViewInit<X, Y> extends RenderedViewInit, FillViewInit {
   xAxis?: AxisView<X> | null;
   yAxis?: AxisView<Y> | null;
 
@@ -132,8 +132,8 @@ export class AreaGraphView<X, Y> extends GraphView<X, Y> implements FillView {
     context.fill();
   }
 
-  protected hitTestGraph(x: number, y: number, context: CanvasContext,
-                         bounds: BoxR2, anchor: PointR2): RenderedView | null {
+  protected hitTestGraph(x: number, y: number, renderer: CanvasRenderer): RenderedView | null {
+    const context = renderer.context;
     const data = this._data;
     const n = data.size;
 
@@ -156,7 +156,11 @@ export class AreaGraphView<X, Y> extends GraphView<X, Y> implements FillView {
     }
 
     if (context.isPointInPath(x, y)) {
-      return this;
+      if (this._hitMode === "graph") {
+        return this;
+      } else if (this._hitMode === "data") {
+        return this.hitTestData(x, y, renderer);
+      }
     }
     return null;
   }
@@ -199,6 +203,13 @@ export class AreaGraphView<X, Y> extends GraphView<X, Y> implements FillView {
       }
       if (graph.textColor !== void 0) {
         view.textColor(graph.textColor);
+      }
+
+      if (graph.hidden !== void 0) {
+        view.setHidden(graph.hidden);
+      }
+      if (graph.culled !== void 0) {
+        view.setCulled(graph.culled);
       }
 
       return view;

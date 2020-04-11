@@ -18,7 +18,13 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {ContinuousScale} from "@swim/scale";
 import {CanvasRenderer, CanvasContext} from "@swim/render";
-import {MemberAnimator, ViewInit, View, RenderedViewContext, GraphicsView} from "@swim/view";
+import {
+  MemberAnimator,
+  View,
+  RenderedViewContext,
+  RenderedViewInit,
+  GraphicsView,
+} from "@swim/view";
 import {AxisView} from "../axis/AxisView";
 import {AnyDatumView, DatumView} from "../data/DatumView";
 import {PlotViewController} from "./PlotViewController";
@@ -30,7 +36,7 @@ export type PlotType = "bubble" | "line" | "area";
 
 export type AnyPlotView<X, Y> = PlotView<X, Y> | PlotViewInit<X, Y> | PlotType;
 
-export interface PlotViewInit<X, Y> extends ViewInit {
+export interface PlotViewInit<X, Y> extends RenderedViewInit {
   type: PlotType;
 
   xAxis?: AxisView<X> | null;

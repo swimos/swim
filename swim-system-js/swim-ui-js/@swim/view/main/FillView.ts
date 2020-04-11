@@ -15,9 +15,9 @@
 import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
 import {View} from "./View";
-import {RenderedView} from "./RenderedView";
+import {RenderedViewInit, RenderedView} from "./RenderedView";
 
-export interface FillViewInit {
+export interface FillViewInit extends RenderedViewInit {
   fill?: AnyColor | null;
 }
 

@@ -20,7 +20,7 @@ import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
-  ViewInit,
+  RenderedViewInit,
   RenderedView,
   FillViewInit,
   FillView,
@@ -35,7 +35,7 @@ import {MapGraphicsViewController} from "./MapGraphicsViewController";
 
 export type AnyMapArcView = MapArcView | MapArcViewInit;
 
-export interface MapArcViewInit extends ViewInit, FillViewInit, StrokeViewInit, ArcInit {
+export interface MapArcViewInit extends RenderedViewInit, FillViewInit, StrokeViewInit, ArcInit {
   center?: AnyLngLat;
 }
 
@@ -146,6 +146,12 @@ export class MapArcView extends MapGraphicsView implements FillView, StrokeView 
     }
     if (arc.strokeWidth !== void 0) {
       this.strokeWidth(arc.strokeWidth, tween);
+    }
+    if (arc.hidden !== void 0) {
+      this.setHidden(arc.hidden);
+    }
+    if (arc.culled !== void 0) {
+      this.setCulled(arc.culled);
     }
   }
 

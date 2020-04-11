@@ -16,9 +16,9 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
 import {View} from "./View";
-import {RenderedView} from "./RenderedView";
+import {RenderedViewInit, RenderedView} from "./RenderedView";
 
-export interface StrokeViewInit {
+export interface StrokeViewInit extends RenderedViewInit {
   stroke?: AnyColor | null;
   strokeWidth?: AnyLength | null;
 }

@@ -22,7 +22,13 @@ import {ContinuousScale, LinearScale, TimeScale} from "@swim/scale";
 import {Tween, AnyTransition, Transition} from "@swim/transition";
 import {StyleValue} from "@swim/style";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {MemberAnimator, ViewInit, View, RenderedViewContext, GraphicsView} from "@swim/view";
+import {
+  MemberAnimator,
+  View,
+  RenderedViewContext,
+  RenderedViewInit,
+  GraphicsView,
+} from "@swim/view";
 import {AnyTickView, TickView} from "../tick/TickView";
 import {TickGenerator} from "../tick/TickGenerator";
 import {AxisViewController} from "./AxisViewController";
@@ -35,7 +41,7 @@ export type AxisOrientation = "top" | "right" | "bottom" | "left";
 
 export type AnyAxisView<D> = AxisView<D> | AxisViewInit<D>;
 
-export interface AxisViewInit<D> extends ViewInit {
+export interface AxisViewInit<D> extends RenderedViewInit {
   orientation: AxisOrientation;
   scale: ContinuousScale<D, number> | string;
 
@@ -476,6 +482,13 @@ export abstract class AxisView<D> extends GraphicsView {
       }
       if (axis.textColor !== void 0) {
         view.textColor(axis.textColor);
+      }
+
+      if (axis.hidden !== void 0) {
+        view.setHidden(axis.hidden);
+      }
+      if (axis.culled !== void 0) {
+        view.setCulled(axis.culled);
       }
 
       return view;

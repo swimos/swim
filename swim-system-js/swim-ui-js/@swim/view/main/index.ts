@@ -62,7 +62,10 @@ export {AnimatedViewObserver} from "./AnimatedViewObserver";
 export {AnimatedViewController} from "./AnimatedViewController";
 
 export {RenderedViewContext} from "./RenderedViewContext";
-export {RenderedView} from "./RenderedView";
+export {
+  RenderedViewInit,
+  RenderedView,
+} from "./RenderedView";
 export {RenderedViewObserver} from "./RenderedViewObserver";
 export {RenderedViewController} from "./RenderedViewController";
 

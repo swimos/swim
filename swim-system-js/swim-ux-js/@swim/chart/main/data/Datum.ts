@@ -12,33 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength} from "@swim/length";
-import {AnyColor} from "@swim/color";
-import {AnyFont} from "@swim/font";
-import {ViewInit, View} from "@swim/view";
-
 export type DatumCategory = "flat" | "increasing" | "decreasing" | "maxima" | "minima";
 
-export type DatumLabelPlacement = "auto" | "above" | "below";
-
-export interface AnyDatum<X, Y> extends ViewInit {
-  x: X;
-  y: Y;
-  y2?: Y;
-  r?: AnyLength | null;
-
-  hitRadius?: number;
-
-  category?: DatumCategory | null;
-
-  color?: AnyColor | null;
-  opacity?: number | null;
-
-  labelPadding?: AnyLength | null;
-  labelPlacement?: DatumLabelPlacement;
-
-  font?: AnyFont | null;
-  textColor?: AnyColor | null;
-
-  label?: View | string | null;
-}
+export type DatumLabelPlacement = "auto" | "above" | "middle" | "below";

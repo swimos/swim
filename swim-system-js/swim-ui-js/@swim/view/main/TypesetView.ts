@@ -16,9 +16,9 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {View} from "./View";
-import {RenderedView} from "./RenderedView";
+import {RenderedViewInit, RenderedView} from "./RenderedView";
 
-export interface TypesetViewInit {
+export interface TypesetViewInit extends RenderedViewInit {
   font?: AnyFont | null;
   textAlign?: CanvasTextAlign | null;
   textBaseline?: CanvasTextBaseline | null;

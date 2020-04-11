@@ -16,20 +16,44 @@ import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
+import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   MemberAnimator,
   View,
   RenderedViewContext,
+  RenderedViewInit,
   RenderedView,
   TypesetView,
   GraphicsView,
   GraphicsViewController,
 } from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
-import {DatumCategory, DatumLabelPlacement, AnyDatum} from "./Datum";
+import {DatumCategory, DatumLabelPlacement} from "./Datum";
 
-export type AnyDatumView<X, Y> = DatumView<X, Y> | AnyDatum<X, Y>;
+export type AnyDatumView<X, Y> = DatumView<X, Y> | DatumViewInit<X, Y>;
+
+export interface DatumViewInit<X, Y> extends RenderedViewInit {
+  x: X;
+  y: Y;
+  y2?: Y;
+  r?: AnyLength | null;
+
+  hitRadius?: number;
+
+  category?: DatumCategory | null;
+
+  color?: AnyColor | null;
+  opacity?: number | null;
+
+  labelPadding?: AnyLength | null;
+  labelPlacement?: DatumLabelPlacement;
+
+  font?: AnyFont | null;
+  textColor?: AnyColor | null;
+
+  label?: View | string | null;
+}
 
 export class DatumView<X, Y> extends GraphicsView {
   /** @hidden */
@@ -143,6 +167,59 @@ export class DatumView<X, Y> extends GraphicsView {
     }
   }
 
+  setState(datum: DatumViewInit<X, Y>, tween?: Tween<any>): void {
+    if (datum.key !== void 0) {
+      this.key(datum.key);
+    }
+
+    if (datum.y2 !== void 0) {
+      this.y2(datum.y2, tween);
+    }
+    if (datum.r !== void 0) {
+      this.r(datum.r, tween);
+    }
+
+    if (datum.hitRadius !== void 0) {
+      this.hitRadius(datum.hitRadius);
+    }
+
+    if (datum.category !== void 0) {
+      this.category(datum.category);
+    }
+
+    if (datum.color !== void 0) {
+      this.color(datum.color, tween);
+    }
+    if (datum.opacity !== void 0) {
+      this.opacity(datum.opacity, tween);
+    }
+
+    if (datum.labelPadding !== void 0) {
+      this.labelPadding(datum.labelPadding, tween);
+    }
+    if (datum.labelPlacement !== void 0) {
+      this.labelPlacement(datum.labelPlacement);
+    }
+
+    if (datum.font !== void 0) {
+      this.font(datum.font, tween);
+    }
+    if (datum.textColor !== void 0) {
+      this.textColor(datum.textColor, tween);
+    }
+
+    if (datum.label !== void 0) {
+      this.label(datum.label);
+    }
+
+    if (datum.hidden !== void 0) {
+      this.setHidden(datum.hidden);
+    }
+    if (datum.culled !== void 0) {
+      this.setCulled(datum.culled);
+    }
+  }
+
   isGradientStop(): boolean {
     return !!this.color.value || typeof this.opacity.value === "number";
   }
@@ -179,7 +256,7 @@ export class DatumView<X, Y> extends GraphicsView {
 
   protected layoutLabel(label: RenderedView, bounds: BoxR2, anchor: PointR2): void {
     let placement = this._labelPlacement;
-    if (placement !== "above" && placement !== "below") {
+    if (placement !== "above" && placement !== "below" && placement !== "middle") {
       const category = this._category;
       if (category === "increasing" || category === "maxima") {
         placement = "above";
@@ -190,7 +267,8 @@ export class DatumView<X, Y> extends GraphicsView {
       }
     }
 
-    const padding = this.labelPadding.value!.pxValue(Math.min(bounds.width, bounds.height));
+    const labelPadding = this.labelPadding.value;
+    const padding = labelPadding ? labelPadding.pxValue(Math.min(bounds.width, bounds.height)) : 0;
     const x = anchor.x;
     const y0 = anchor.y;
     let y1 = y0;
@@ -204,7 +282,13 @@ export class DatumView<X, Y> extends GraphicsView {
     label.setAnchor(labelAnchor);
     if (TypesetView.is(label)) {
       label.textAlign("center");
-      label.textBaseline("bottom");
+      if (placement === "above") {
+        label.textBaseline("bottom");
+      } else if (placement === "below") {
+        label.textBaseline("top");
+      } else if (placement === "middle") {
+        label.textBaseline("middle");
+      }
     }
   }
 
@@ -245,47 +329,7 @@ export class DatumView<X, Y> extends GraphicsView {
       return datum;
     } else if (typeof datum === "object" && datum) {
       const view = new DatumView(datum.x, datum.y, datum.key);
-
-      if (datum.y2 !== void 0) {
-        view.y2(datum.y2);
-      }
-      if (datum.r !== void 0) {
-        view.r(datum.r);
-      }
-
-      if (datum.hitRadius !== void 0) {
-        view.hitRadius(datum.hitRadius);
-      }
-
-      if (datum.category !== void 0) {
-        view.category(datum.category);
-      }
-
-      if (datum.color !== void 0) {
-        view.color(datum.color);
-      }
-      if (datum.opacity !== void 0) {
-        view.opacity(datum.opacity);
-      }
-
-      if (datum.labelPadding !== void 0) {
-        view.labelPadding(datum.labelPadding);
-      }
-      if (datum.labelPlacement !== void 0) {
-        view.labelPlacement(datum.labelPlacement);
-      }
-
-      if (datum.font !== void 0) {
-        view.font(datum.font);
-      }
-      if (datum.textColor !== void 0) {
-        view.textColor(datum.textColor);
-      }
-
-      if (datum.label !== void 0) {
-        view.label(datum.label);
-      }
-
+      view.setState(datum);
       return view;
     }
     throw new TypeError("" + datum);
