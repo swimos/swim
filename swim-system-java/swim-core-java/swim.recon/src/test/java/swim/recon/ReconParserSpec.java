@@ -326,6 +326,8 @@ public class ReconParserSpec {
   public void parseBigIntegers() {
     assertParses("9223372036854775808", Num.from(new BigInteger("9223372036854775808")));
     assertParses("-9223372036854775809", Num.from(new BigInteger("-9223372036854775809")));
+    assertParses("259804429589205426119611", Num.from(new BigInteger("259804429589205426119611")));
+    assertParses("-259804429589205426119611", Num.from(new BigInteger("-259804429589205426119611")));
   }
 
   @Test
