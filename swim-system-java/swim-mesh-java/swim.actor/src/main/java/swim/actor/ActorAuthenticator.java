@@ -42,9 +42,12 @@ public class ActorAuthenticator implements AuthenticatorContext {
   Log log;
   Stage stage;
 
-  public ActorAuthenticator(String authenticatorName, KernelContext kernel) {
+  public ActorAuthenticator(String authenticatorName, Authenticator authenticator, KernelContext kernel) {
     this.authenticatorName = authenticatorName;
     this.kernel = kernel;
+    this.authenticator = authenticator;
+    this.authenticator.setAuthenticatorContext(this);
+    start();
   }
 
   public final String authenticatorName() {
@@ -67,10 +70,6 @@ public class ActorAuthenticator implements AuthenticatorContext {
 
   public final Authenticator authenticator() {
     return this.authenticator;
-  }
-
-  public void setAuthenticator(Authenticator authenticator) {
-    this.authenticator = authenticator;
   }
 
   @Override

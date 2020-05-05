@@ -24,7 +24,6 @@ import swim.api.agent.AgentFactory;
 import swim.api.agent.AgentRoute;
 import swim.api.agent.AgentRouteContext;
 import swim.api.auth.Authenticator;
-import swim.api.auth.AuthenticatorContext;
 import swim.api.auth.Credentials;
 import swim.api.auth.Identity;
 import swim.api.plane.Plane;
@@ -197,8 +196,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public void addAuthenticator(String authenticatorName, Authenticator authenticator) {
-    final AuthenticatorContext authenticatorContext = new ActorAuthenticator(authenticatorName, this.kernel);
-    authenticator.setAuthenticatorContext(authenticatorContext);
+    final ActorAuthenticator authenticatorContext = new ActorAuthenticator(authenticatorName, authenticator, this.kernel);
 
     HashTrieMap<String, Authenticator> oldAuthenticators;
     HashTrieMap<String, Authenticator> newAuthenticators;
