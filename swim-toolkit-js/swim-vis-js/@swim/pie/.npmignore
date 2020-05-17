@@ -1,0 +1,9 @@
+.gitignore
+.npmignore
+.tsbuildinfo
+dist/test
+doc/
+lib/test
+rollup.config.js
+test/
+tsconfig.json

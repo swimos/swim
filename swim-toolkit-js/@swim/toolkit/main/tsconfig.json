@@ -1,0 +1,97 @@
+{
+  "extends": "../../../tsconfig-main",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/main",
+    "paths": {
+      "@swim/util": ["../swim-system-js/swim-core-js/@swim/util/main"],
+      "@swim/codec": ["../swim-system-js/swim-core-js/@swim/codec/main"],
+      "@swim/collections": ["../swim-system-js/swim-core-js/@swim/collections/main"],
+      "@swim/interpolate": ["../swim-system-js/swim-core-js/@swim/interpolate/main"],
+      "@swim/structure": ["../swim-system-js/swim-core-js/@swim/structure/main"],
+      "@swim/math": ["../swim-system-js/swim-core-js/@swim/math/main"],
+      "@swim/time": ["../swim-system-js/swim-core-js/@swim/time/main"],
+      "@swim/uri": ["../swim-system-js/swim-core-js/@swim/uri/main"],
+
+      "@swim/angle": ["swim-ui-js/@swim/angle/main"],
+      "@swim/length": ["swim-ui-js/@swim/length/main"],
+      "@swim/color": ["swim-ui-js/@swim/color/main"],
+      "@swim/font": ["swim-ui-js/@swim/font/main"],
+      "@swim/shadow": ["swim-ui-js/@swim/shadow/main"],
+      "@swim/transform": ["swim-ui-js/@swim/transform/main"],
+      "@swim/scale": ["swim-ui-js/@swim/scale/main"],
+      "@swim/transition": ["swim-ui-js/@swim/transition/main"],
+      "@swim/animate": ["swim-ui-js/@swim/animate/main"],
+      "@swim/style": ["swim-ui-js/@swim/style/main"],
+      "@swim/render": ["swim-ui-js/@swim/render/main"],
+      "@swim/constraint": ["swim-ui-js/@swim/constraint/main"],
+      "@swim/view": ["swim-ui-js/@swim/view/main"],
+      "@swim/shape": ["swim-ui-js/@swim/shape/main"],
+      "@swim/typeset": ["swim-ui-js/@swim/typeset/main"],
+      "@swim/gesture": ["swim-ui-js/@swim/gesture/main"],
+      "@swim/ui": ["swim-ui-js/@swim/ui/main"],
+
+      "@swim/theme": ["swim-ux-js/@swim/theme/main"],
+      "@swim/app": ["swim-ux-js/@swim/app/main"],
+      "@swim/controls": ["swim-ux-js/@swim/controls/main"],
+      "@swim/navigation": ["swim-ux-js/@swim/navigation/main"],
+      "@swim/ux": ["swim-ux-js/@swim/ux/main"],
+
+      "@swim/gauge": ["swim-vis-js/@swim/gauge/main"],
+      "@swim/pie": ["swim-vis-js/@swim/pie/main"],
+      "@swim/chart": ["swim-vis-js/@swim/chart/main"],
+      "@swim/vis": ["swim-vis-js/@swim/vis/main"],
+
+      "@swim/map": ["swim-maps-js/@swim/map/main"],
+      "@swim/mapbox": ["swim-maps-js/@swim/mapbox/main"],
+      "@swim/googlemap": ["swim-maps-js/@swim/googlemap/main"],
+      "@swim/esirmap": ["swim-maps-js/@swim/esirmap/main"],
+      "@swim/maps": ["swim-maps-js/@swim/maps/main"],
+
+      "@swim/website": ["swim-web-js/@swim/website/main"],
+      "@swim/webapp": ["swim-web-js/@swim/webapp/main"],
+      "@swim/web": ["swim-web-js/@swim/web/main"]
+    },
+    "tsBuildInfoFile": ".tsbuildinfo"
+  },
+  "references": [
+    {"path": "../../../swim-ui-js/@swim/angle/main"},
+    {"path": "../../../swim-ui-js/@swim/length/main"},
+    {"path": "../../../swim-ui-js/@swim/color/main"},
+    {"path": "../../../swim-ui-js/@swim/font/main"},
+    {"path": "../../../swim-ui-js/@swim/shadow/main"},
+    {"path": "../../../swim-ui-js/@swim/transform/main"},
+    {"path": "../../../swim-ui-js/@swim/scale/main"},
+    {"path": "../../../swim-ui-js/@swim/transition/main"},
+    {"path": "../../../swim-ui-js/@swim/animate/main"},
+    {"path": "../../../swim-ui-js/@swim/style/main"},
+    {"path": "../../../swim-ui-js/@swim/render/main"},
+    {"path": "../../../swim-ui-js/@swim/constraint/main"},
+    {"path": "../../../swim-ui-js/@swim/view/main"},
+    {"path": "../../../swim-ui-js/@swim/shape/main"},
+    {"path": "../../../swim-ui-js/@swim/typeset/main"},
+    {"path": "../../../swim-ui-js/@swim/gesture/main"},
+    {"path": "../../../swim-ui-js/@swim/ui/main"},
+
+    {"path": "../../../swim-vis-js/@swim/gauge/main"},
+    {"path": "../../../swim-vis-js/@swim/pie/main"},
+    {"path": "../../../swim-vis-js/@swim/chart/main"},
+    {"path": "../../../swim-vis-js/@swim/vis/main"},
+
+    {"path": "../../../swim-maps-js/@swim/map/main"},
+    {"path": "../../../swim-maps-js/@swim/mapbox/main"},
+    {"path": "../../../swim-maps-js/@swim/googlemap/main"},
+    {"path": "../../../swim-maps-js/@swim/esrimap/main"},
+    {"path": "../../../swim-maps-js/@swim/maps/main"},
+
+    {"path": "../../../swim-ux-js/@swim/theme/main"},
+    {"path": "../../../swim-ux-js/@swim/app/main"},
+    {"path": "../../../swim-ux-js/@swim/controls/main"},
+    {"path": "../../../swim-ux-js/@swim/navigation/main"},
+    {"path": "../../../swim-ux-js/@swim/ux/main"},
+
+    {"path": "../../../swim-web-js/@swim/website/main"},
+    {"path": "../../../swim-web-js/@swim/webapp/main"},
+    {"path": "../../../swim-web-js/@swim/web/main"}
+  ]
+}

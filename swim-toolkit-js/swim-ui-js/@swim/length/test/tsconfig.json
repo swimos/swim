@@ -1,0 +1,18 @@
+{
+  "extends": "../../../tsconfig-test",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/test",
+    "paths": {
+      "@swim/util": ["../../swim-system-js/swim-core-js/@swim/util/main"],
+      "@swim/codec": ["../../swim-system-js/swim-core-js/@swim/codec/main"],
+      "@swim/unit": ["../../swim-system-js/swim-core-js/@swim/unit/main"],
+      "@swim/interpolate": ["../../swim-system-js/swim-core-js/@swim/interpolate/main"],
+      "@swim/structure": ["../../swim-system-js/swim-core-js/@swim/structure/main"],
+      "@swim/length": ["@swim/length/main"]
+    }
+  },
+  "references": [
+    {"path": "../../length/main"}
+  ]
+}

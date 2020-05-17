@@ -1,0 +1,8 @@
+# Ignore MacOS hidden files
+.DS_Store
+*.DS_Store
+
+# Ignore generated files
+dist
+doc
+lib

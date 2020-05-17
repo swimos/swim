@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {"path": "./@swim/theme"},
+    {"path": "./@swim/app"},
+    {"path": "./@swim/controls"},
+    {"path": "./@swim/navigation"},
+    {"path": "./@swim/ux"}
+  ]
+}

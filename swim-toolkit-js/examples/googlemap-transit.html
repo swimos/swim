@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Transit Map</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <div id="ui" style="display: flex; width: 100%; height: 100%;">
+    </div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBI-Gz_lh3-rKXFwlpElD7pInA60U-iK0c"></script>
+    <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script src="../swim-maps-js/@swim/maps/dist/main/swim-maps.js"></script>
+    <script>
+
+const VEHICLE_COLOR = swim.Color.parse("#00a6ed");
+const RIPPLE_COLOR = swim.Color.parse("#efefef").alpha(0.25);
+
+const uiView = new swim.UiView(document.getElementById("ui"));
+
+const map = new google.maps.Map(uiView.node, {
+  center: {lng: -118, lat: 33.95},
+  zoom: 9.7,
+});
+
+const mapView = new swim.GoogleMapView(map);
+mapView.overlayCanvas();
+
+const mapLayer = mapView.append(new swim.MapLayerView(undefined, 0, 12));
+//mapLayer.tileOutlineColor("#cc0000");
+
+const vehiclesLink = swim.downlinkMap()
+    .hostUri("warp://transit.swim.services")
+    .nodeUri("/state/US/S-CA")
+    .laneUri("vehicles")
+    .didUpdate(function (key, value) {
+      key = key.stringValue();
+      const lng = value.get("longitude").numberValue(0);
+      const lat = value.get("latitude").numberValue(0);
+      const tween = swim.Transition.duration(10000);
+
+      let vehicleView = mapLayer.getChildView(key);
+      if (vehicleView !== null) {
+        vehicleView.geoCenter([lng, lat], tween);
+        if (!document.hidden && mapView.geoBounds.contains(lng, lat)) {
+          ripple(lng, lat);
+        }
+      } else {
+        vehicleView = new swim.MapCircleView().geoCenter([lng, lat]).radius(5).fill(VEHICLE_COLOR);
+        mapLayer.setChildView(key, vehicleView);
+      }
+    })
+    .open();
+
+function ripple(lng, lat) {
+  const ripple = new swim.MapCircleView()
+      .geoCenter([lng, lat])
+      .radius(0)
+      .stroke(RIPPLE_COLOR)
+      .strokeWidth(1);
+  mapView.append(ripple);
+  const frame = mapView.viewFrame;
+  const radius = Math.min(frame.width, frame.height) / 8;
+  const tween = swim.Transition.duration(2000);
+  ripple.stroke(RIPPLE_COLOR.alpha(0), tween)
+        .radius(radius, tween.onEnd(function () { ripple.remove(); }));
+}
+
+    </script>
+  </body>
+</html>

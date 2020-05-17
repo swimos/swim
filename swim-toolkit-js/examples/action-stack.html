@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Action Stack</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body style="display: flex; width: 100vw; height: 100vh; margin: 0; background-color: #1e2022; font-family: sans-serif;">
+    <div id="app" style="position: relative; flex-grow: 1;">
+    </div>
+    <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
+    <script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+const appView = new swim.AppView(document.getElementById("app"));
+
+const actionStack = appView.append(swim.ActionStack)
+  .position("absolute")
+  .top("60%")
+  .right("50%")
+  .bottom("40%")
+  .left("50%");
+actionStack.setViewController(new swim.ActionStackController());
+
+const actionIcon = swim.SvgView.create("svg").width(24).height(24).viewBox("0 0 24 24");
+actionIcon.append("path").d("M18,1.61 L24,12 L18,22.39 L6,22.39 L0,12 L6,1.61 L18,1.61 Z M16.85,3.61 L7.15,3.61 L2.31,12 L7.15,20.39 L16.85,20.39 L21.69,12 L16.85,3.61 Z M18,13 L13,13 L13,18 L11,18 L11,13 L6,13 L6,11 L11,11 L11,6 L13,6 L13,11 L18,11 L18,13 Z");
+actionStack.setButtonIcon(actionIcon, false);
+
+const actionIcon1 = swim.SvgView.create("svg").width(24).height(24).viewBox("0 0 24 24");
+actionIcon1.append("path").d("M18,1.61 L24,12 L18,22.39 L6,22.39 L0,12 L6,1.61 L18,1.61 Z M16.85,3.61 L7.15,3.61 L2.31,12 L7.15,20.39 L16.85,20.39 L21.69,12 L16.85,3.61 Z M18,13 L13,13 L13,18 L11,18 L11,13 L6,13 L6,11 L11,11 L11,6 L13,6 L13,11 L18,11 L18,13 Z");
+const actionItem1 = swim.HtmlView.create(swim.ActionItem);
+actionItem1.append(actionIcon1, "icon");
+actionItem1.append("span", "label").text("Action 1");
+actionStack.append(actionItem1);
+
+const actionIcon2 = swim.SvgView.create("svg").width(24).height(24).viewBox("0 0 24 24");
+actionIcon2.append("path").d("M18,1.61 L24,12 L18,22.39 L6,22.39 L0,12 L6,1.61 L18,1.61 Z M16.85,3.61 L7.15,3.61 L2.31,12 L7.15,20.39 L16.85,20.39 L21.69,12 L16.85,3.61 Z M18,13 L13,13 L13,18 L11,18 L11,13 L6,13 L6,11 L11,11 L11,6 L13,6 L13,11 L18,11 L18,13 Z");
+const actionItem2 = swim.HtmlView.create(swim.ActionItem);
+actionItem2.append(actionIcon2, "icon");
+actionItem2.append("span", "label").text("Action 2");
+actionStack.append(actionItem2);
+
+const actionIcon3 = swim.SvgView.create("svg").width(24).height(24).viewBox("0 0 24 24");
+actionIcon3.append("path").d("M18,1.61 L24,12 L18,22.39 L6,22.39 L0,12 L6,1.61 L18,1.61 Z M16.85,3.61 L7.15,3.61 L2.31,12 L7.15,20.39 L16.85,20.39 L21.69,12 L16.85,3.61 Z M18,13 L13,13 L13,18 L11,18 L11,13 L6,13 L6,11 L11,11 L11,6 L13,6 L13,11 L18,11 L18,13 Z");
+const actionItem3 = swim.HtmlView.create(swim.ActionItem);
+actionItem3.append(actionIcon3, "icon");
+actionItem3.append("span", "label").text("Action 3");
+actionStack.append(actionItem3);
+
+    </script>
+  </body>
+</html>
