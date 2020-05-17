@@ -1,9 +1,9 @@
-# swimOS &ensp; ![version](https://img.shields.io/github/tag/swimOS/swim.svg?label=version) [![javadoc](https://img.shields.io/badge/doc-JavaDoc-blue.svg)](https://docs.swimos.org/java/latest) [![typedoc](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest) [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community) [![license](https://img.shields.io/github/license/swimOS/swim.svg)](https://github.com/swimos/swim/blob/master/LICENSE) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
+# SwimOS &ensp; ![version](https://img.shields.io/github/tag/SwimOS/swim.svg?label=version) [![javadoc](https://img.shields.io/badge/doc-JavaDoc-blue.svg)](https://docs.swimos.org/java/latest) [![typedoc](https://img.shields.io/badge/doc-TypeDoc-blue.svg)](https://docs.swimos.org/js/latest) [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community) [![license](https://img.shields.io/github/license/SwimOS/swim.svg)](https://github.com/swimos/swim/blob/master/LICENSE) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v1.4%20adopted-ff69b4.svg)](CODE_OF_CONDUCT.md)
 
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
-**swimOS** is a complete, self-contained distributed software platform for
-building stateful, massively real-time streaming applications.  **swimOS**
+**SwimOS** is a complete, self-contained distributed software platform for
+building stateful, massively real-time streaming applications.  **SwimOS**
 implements a distributed microkernel, called the **Swim Kernel**, that is
 persistent without a database, reactive without a message broker, autonomous
 without a job manager, and which executes general purpose stateful applications
@@ -11,7 +11,7 @@ without a separate app server.
 
 ## Getting Started
 
-Check out the [**swimOS** cookbook](https://www.swimos.org/tutorials) to learn
+Check out the [**SwimOS** cookbook](https://www.swimos.org/tutorials) to learn
 how to build massively real-time streaming applications.  Use the
 [**Swim API**](https://mvnrepository.com/artifact/ai.swim/swim-api) to write
 Web Agents that run on the **Swim Kernel**.  Use the
@@ -23,11 +23,11 @@ To write WARP client applications that run in Node.js and web browsers,
 install the [**@swim/mesh**](swim-system-js/swim-mesh-js) library from npm.
 To build a real-time Web UI, npm install the [**@swim/ui**](swim-system-js/swim-ui-js)
 and [**@swim/ux**](swim-system-js/swim-ux-js) libraries.
-Visit [**swimOS.org**](https://www.swimos.org) to learn more.
+Visit [**SwimOS.org**](https://www.swimos.org) to learn more.
 
 ## Architecture
 
-**swimOS**, and the multiplexed streaming WARP protocol, make the World Wide
+**SwimOS**, and the multiplexed streaming WARP protocol, make the World Wide
 Web stateful, and massively real-time.  Massive real-time means that every
 aspect of a Web application can be efficiently streamed in real-time—keeping
 the whole WARP Web continuously in sync.  The **Swim Kernel** accomplishes this
@@ -37,9 +37,9 @@ using point-to-point multiplexed streaming APIs.  Web Agents can also natively
 expose HTTP, WebSocket, and MQTT interfaces, making it easy to integrate
 Web Agents into existing systems.
 
-The architecture of **swimOS** fundamentally differs from traditional
+The architecture of **SwimOS** fundamentally differs from traditional
 distributed software platforms.  Instead of depending on a stack of middleware,
-**swimOS** is architected like a higher order distributed operating system.
+**SwimOS** is architected like a higher order distributed operating system.
 The **Swim Kernel** holistically distributes and executes all aspects of
 stateful Web Agent applications, providing builtin distributed persistence,
 messaging, scheduling, and multiplexed streaming APIs.
@@ -49,9 +49,9 @@ messaging, scheduling, and multiplexed streaming APIs.
 Vertical integration greatly simplifies application development and operations,
 while radically improving performance.  CPUs are 1,000,000x+ faster than
 networks.  By optimizing for data locality, and thereby eliminating numerous
-superfluous network round-trips, **swimOS** slashes the time it takes to
+superfluous network round-trips, **SwimOS** slashes the time it takes to
 perform many application operations from milliseconds to nanoseconds.
-This performance boost doesn't trade-off scalability: **swimOS** is fully
+This performance boost doesn't trade-off scalability: **SwimOS** is fully
 distributed, and linearly scalable.
 
 ## [**Swim System** Java Implementation](swim-system-java)
@@ -198,7 +198,7 @@ component libraries:
 
 The **Swim Polyglot** Java framework provides multi-language API bindings and
 [GraalVM](https://www.graalvm.org/) integration for embedding guest languages
-into **swimOS** applications.  **Swim Polyglot** consists of the following
+into **SwimOS** applications.  **Swim Polyglot** consists of the following
 component libraries:
 
 - [**swim-dynamic**](swim-system-java/swim-polyglot-java/swim.dynamic) –
@@ -212,15 +212,12 @@ component libraries:
 
 ## [**Swim System** TypeScript Implementation](swim-system-js)
 
-The **Swim System** Typescript implementation provides a standalone set
-of frameworks for building massively real-time streaming WARP clients and
-web user interface applications.  **Swim System** encompasses the
-[**Swim Core**](swim-system-js/swim-core-js) foundation framework, the
-[**Swim Mesh**](swim-system-js/swim-mesh-js) multiplexed streaming WARP
-framework, the [**Swim UI**](swim-system-js/swim-ui-js) and
-[**Swim UX**](swim-system-js/swim-ux-js) real-time user interface toolkits,
-and the [**Swim Web**](swim-system-js/swim-web-js) real-time web application
-framework.  **Swim System** provides the following top-level libraries:
+The **Swim System** Typescript implementation provides a standalone set of
+frameworks for building massively real-time streaming WARP client applications.
+**Swim System** encompasses the [**Swim Core**](swim-system-js/swim-core-js)
+foundation framework, and the [**Swim Mesh**](swim-system-js/swim-mesh-js)
+multiplexed streaming WARP framework.  **Swim System** provides the following
+top-level libraries:
 
 - [**@swim/system**](swim-system-js/@swim/system) –
   umbrella package that depends on, and re-exports, all **Swim System** child
@@ -247,6 +244,8 @@ libraries.  **Swim Core** consists of the following component libraries:
 - [**@swim/collections**](swim-system-js/swim-core-js/@swim/collections) –
   immutable, structure sharing collections, including B-trees and S-trees
   (sequence trees).
+- [**@swim/interpolate**](swim-system-js/swim-core-js/@swim/interpolate) –
+  extensible interpolators for smoothly blending between values.
 - [**@swim/structure**](swim-system-js/swim-core-js/@swim/structure) –
   generic structured data model, with support for selectors, expressions,
   and lambda functions.  Used as a common abstract syntax tree for Recon,
@@ -289,112 +288,152 @@ the following component libraries:
 - [**@swim/cli**](swim-system-js/swim-mesh-js/@swim/cli) –
   command line client for linking to Web Agent lanes over the WARP protocol.
 
-### [**Swim UI** TypeScript Framework](swim-system-js/swim-ui-js)
+## [**Swim Toolkit** TypeScript Implementation](swim-toolkit-js)
 
-The **Swim UI** TypeScript framework implements a massively real-time user
-interface toolkit, with a unified view hierarchy for HTML, SVG, and Canvas
-components, animated procedural styling, and constraint-based layouts.
-**Swim UI** consists of the following component libraries:
+The **Swim Toolkit** TypeScript implementation provides user interface
+frameworks for building advanced real-time applications.  **Swim Toolkit**
+incorporates the [**Swim UI**](swim-toolkit-js/swim-ui-js) real-time user
+interface toolkit, the [**Swim UX**](swim-toolkit-js/swim-ux-js) real-time
+application framework, the [**Swim Visualizations**](swim-toolkit-js/swim-vis-js)
+framework, the [**Swim Maps**](swim-toolkit-js/swim-maps-js) framework, and the
+[**Swim Web**](swim-toolkit-js/swim-web-js) real-time web application framework.
+**Swim Toolkit** provides the following top-level libraries:
 
-- [**@swim/ui**](swim-system-js/swim-ui-js/@swim/ui) –
+- [**@swim/toolkit**](swim-toolkit-js/@swim/toolkit) –
+  umbrella package that depends on, and re-exports, all **Swim Toolkit**
+  child frameworks and libraries.
+
+### [**Swim UI** TypeScript Framework](swim-toolkit-js/swim-ui-js)
+
+The **Swim UI** TypeScript framework implements a user interface toolkit for
+pervasively real-time applications.  A unified view hierarchy, with builtin
+procedural styling and animation, makes it easy for **Swim UI** components to
+uniformly style, animate, and render mixed HTML, SVG, Canvas, and WebGL
+components.  **Swim UI** consists of the following component libraries:
+
+- [**@swim/ui**](swim-toolkit-js/swim-ui-js/@swim/ui) –
   umbrella package that depends on, and re-exports, all **Swim UI** libraries.
-- [**@swim/angle**](swim-system-js/swim-ui-js/@swim/angle) –
+- [**@swim/angle**](swim-toolkit-js/swim-ui-js/@swim/angle) –
   dimensional angle types with unit-aware algebraic operators, conversions,
   and parsers.
-- [**@swim/length**](swim-system-js/swim-ui-js/@swim/length) –
+- [**@swim/length**](swim-toolkit-js/swim-ui-js/@swim/length) –
   DOM-relative length types with unit-aware algebraic operators, conversions,
   and parsers.
-- [**@swim/color**](swim-system-js/swim-ui-js/@swim/color) –
+- [**@swim/color**](swim-toolkit-js/swim-ui-js/@swim/color) –
   RGB and HSL color types with color-space-aware operators, conversions,
   and parsers.
-- [**@swim/font**](swim-system-js/swim-ui-js/@swim/font) –
+- [**@swim/font**](swim-toolkit-js/swim-ui-js/@swim/font) –
   CSS font property types and parsers.
-- [**@swim/transform**](swim-system-js/swim-ui-js/@swim/transform) –
+- [**@swim/shadow**](swim-toolkit-js/swim-ui-js/@swim/shadow) –
+  CSS box shadow types and parsers.
+- [**@swim/transform**](swim-toolkit-js/swim-ui-js/@swim/transform) –
   CSS and SVG compatible transform types with unit-aware algebraic operators
   and parsers.
-- [**@swim/interpolate**](swim-system-js/swim-ui-js/@swim/interpolate) –
-  interpolator types for blending between values, including numbers, dates,
-  angles, lengths, colors, transforms, shapes, arrays, structures, and
-  other interpolators.
-- [**@swim/scale**](swim-system-js/swim-ui-js/@swim/scale) –
+- [**@swim/scale**](swim-toolkit-js/swim-ui-js/@swim/scale) –
   scale types that map numeric and temporal input domains to interpolated
   output ranges, with support for continuous domain clamping, domain solving,
   range unscaling, and interpolation between scales.
-- [**@swim/transition**](swim-system-js/swim-ui-js/@swim/transition) –
+- [**@swim/transition**](swim-toolkit-js/swim-ui-js/@swim/transition) –
   transition types that specify duration, ease, interpolator, and lifecycle
   callback parameters for tween animations.
-- [**@swim/animate**](swim-system-js/swim-ui-js/@swim/animate) –
+- [**@swim/animate**](swim-toolkit-js/swim-ui-js/@swim/animate) –
   property-managing animator types that efficiently tween values between
   discrete state changes.
-- [**@swim/dom**](swim-system-js/swim-ui-js/@swim/dom) –
-  CustomEvent and ResizeObserver polyfills.
-- [**@swim/style**](swim-system-js/swim-ui-js/@swim/style) –
+- [**@swim/style**](swim-toolkit-js/swim-ui-js/@swim/style) –
   CSS style types and universal style value parser.
-- [**@swim/render**](swim-system-js/swim-ui-js/@swim/render) –
+- [**@swim/render**](swim-toolkit-js/swim-ui-js/@swim/render) –
   renderable graphic types for SVG/Canvas-compatible path drawing contexts,
   and Canvas-compatible rendering contexts.
-- [**@swim/constraint**](swim-system-js/swim-ui-js/@swim/constraint) –
+- [**@swim/constraint**](swim-toolkit-js/swim-ui-js/@swim/constraint) –
   incremental solver for systems of linear layout constraints.
-- [**@swim/view**](swim-system-js/swim-ui-js/@swim/view) –
+- [**@swim/view**](swim-toolkit-js/swim-ui-js/@swim/view) –
   unified HTML, SVG, and Canvas view hierarchy, with integrated controller
   architecture, animated procedural styling, and constraint-based layouts.
-- [**@swim/shape**](swim-system-js/swim-ui-js/@swim/shape) –
+- [**@swim/shape**](swim-toolkit-js/swim-ui-js/@swim/shape) –
   canvas shape views, with animated geometry and style properties.
-- [**@swim/typeset**](swim-system-js/swim-ui-js/@swim/typeset) –
+- [**@swim/typeset**](swim-toolkit-js/swim-ui-js/@swim/typeset) –
   canvas typesetting views, with animated text, layout, font, and style properties.
-- [**@swim/gesture**](swim-system-js/swim-ui-js/@swim/gesture) –
+- [**@swim/gesture**](swim-toolkit-js/swim-ui-js/@swim/gesture) –
   multitouch gesture recognizers, with kinematic surface modeling.
 
-### [**Swim UX** TypeScript Framework](swim-system-js/swim-ux-js)
+### [**Swim UX** TypeScript Framework](swim-toolkit-js/swim-ux-js)
 
-The **Swim UX** TypeScript framework implements seamlessly animated user
-interface widgets, including gauges, pie charts, line, area, and bubble charts,
-and geospatial map overlays.  **Swim UX** consists of the following component
-libraries:
+The **Swim UX** TypeScript framework implements a user interface framework for
+advanced real-time applications.  **Swim UX** provides popovers, drawers, menus,
+toolbars, controls, and other interactive application views and controllers.
+**Swim UX** consists of the following component libraries:
 
-- [**@swim/ux**](swim-system-js/swim-ux-js/@swim/ux) –
+- [**@swim/ux**](swim-toolkit-js/swim-ux-js/@swim/ux) –
   umbrella package that depends on, and re-exports, all **Swim UX** libraries.
-- [**@swim/gauge**](swim-system-js/swim-ux-js/@swim/gauge) –
+- [**@swim/theme**](swim-toolkit-js/swim-ux-js/@swim/theme) –
+  semantic looks and feels for mood-aware UX components.
+- [**@swim/app**](swim-toolkit-js/swim-ux-js/@swim/app) –
+  application model for coordinating window-level components, such as popovers
+  and drawers.
+- [**@swim/controls**](swim-toolkit-js/swim-ux-js/@swim/controls) –
+  buttons, switches, sliders, and other user interface controls.
+- [**@swim/navigation**](swim-toolkit-js/swim-ux-js/@swim/navigation) –
+  menus, tree views, nav bars, tab bars, and other user interface navigation
+  components.
+
+### [**Swim Visualizations** TypeScript Framework](swim-toolkit-js/swim-vis-js)
+
+The **Swim Visualizations** TypeScript framework implements seamlessly animated
+diagram widgets, including gauges, pie charts, and line, area, and bubble
+charts.  **Swim Visualizations** consists of the following component libraries:
+
+- [**@swim/vis**](swim-toolkit-js/swim-vis-js/@swim/vis) –
+  umbrella package that depends on, and re-exports, all **Swim Visualizations** libraries.
+- [**@swim/gauge**](swim-toolkit-js/swim-vis-js/@swim/gauge) –
   multi-dial, fully animatable, canvas rendered gauge widget.
-- [**@swim/pie**](swim-system-js/swim-ux-js/@swim/pie) –
+- [**@swim/pie**](swim-toolkit-js/swim-vis-js/@swim/pie) –
   multi-slice, fully animatable, canvas rendered pie chart widget.
-- [**@swim/chart**](swim-system-js/swim-ux-js/@swim/chart) –
+- [**@swim/chart**](swim-toolkit-js/swim-vis-js/@swim/chart) –
   multi-plot, fully animatable, canvas rendered chart widget, suppporting line,
   area, and bubble graphs, with customizeable axes, and kinematic multitouch
   scale gestures for panning and zooming with momentum.
-- [**@swim/map**](swim-system-js/swim-ux-js/@swim/map) –
+
+### [**Swim Maps** TypeScript Framework](swim-toolkit-js/swim-maps-js)
+
+The **Swim Maps** TypeScript framework implements real-time geospatial map
+overlays, with support for Mapbox, Google, and Esri maps.  **Swim Maps**
+consists of the following component libraries:
+
+- [**@swim/maps**](swim-toolkit-js/swim-maps-js/@swim/maps) –
+  umbrella package that depends on, and re-exports, all **Swim Maps** libraries.
+- [**@swim/map**](swim-toolkit-js/swim-maps-js/@swim/map) –
   canvas views for efficiently rendering geospatially located map overlays,
   including fully animatable views for lines, circles, and polygons.
-- [**@swim/mapbox**](swim-system-js/swim-ux-js/@swim/mapbox) –
+- [**@swim/mapbox**](swim-toolkit-js/swim-maps-js/@swim/mapbox) –
   support for overlaying **@swim/map** views on Mapbox maps.
-- [**@swim/googlemap**](swim-system-js/swim-ux-js/@swim/googlemap) –
+- [**@swim/googlemap**](swim-toolkit-js/swim-maps-js/@swim/googlemap) –
   support for overlaying **@swim/map** views on Google maps.
-- [**@swim/esrimap**](swim-system-js/swim-ux-js/@swim/esrimap) –
+- [**@swim/esrimap**](swim-toolkit-js/swim-maps-js/@swim/esrimap) –
   support for overlaying **@swim/map** views on ArcGIS maps.
 
-### [**Swim Web** TypeScript Framework](swim-system-js/swim-web-js)
+### [**Swim Web** TypeScript Framework](swim-toolkit-js/swim-web-js)
 
 The **Swim Web** TypeScript framework implements a thin web application
 framework built on the **Swim UI** toolkit.  **Swim Web** consists of the
 following component libraries:
 
-- [**@swim/web**](swim-system-js/swim-web-js/@swim/web) –
-  umbrella package that depends on, and re-exports, all Swim Web libraries.
-- [**@swim/site**](swim-system-js/swim-web-js/@swim/site) –
+- [**@swim/web**](swim-toolkit-js/swim-web-js/@swim/web) –
+  umbrella package that depends on, and re-exports, all **Swim Web** libraries.
+- [**@swim/website**](swim-toolkit-js/swim-web-js/@swim/website) –
   minimalist components that implement common dynamic website behaviors.
-- [**@swim/app**](swim-system-js/swim-web-js/@swim/app) –
-  lightweight application loader that dynamically instantiates views and
+- [**@swim/webapp**](swim-toolkit-js/swim-web-js/@swim/webapp) –
+  lightweight web application loader that dynamically instantiates views and
   controllers declared by `swim-` HTML attributes.
 
 ## Concepts
 
-**swimOS** unifies the traditionally disparate roles of database, message broker,
+**SwimOS** unifies the traditionally disparate roles of database, message broker,
 job manager, and application server, into a few simple constructs: Web Agents,
 Lanes, Links, and Recon.  Web Agents run like continuous, general purpose
 processes on heterogeneous distributed computers, called a Fabrics.
 
 ### Web Agents
-**swimOS** applications consist of interconnected, distributed objects, called
+**SwimOS** applications consist of interconnected, distributed objects, called
 Web Agents.  Each Web Agent has URI address, like a REST endpoint. But unlike
 RESTful Web Services, Web Agents are stateful, and accessed via streaming APIs.
 
@@ -411,12 +450,12 @@ changes to keep all parts of an application in sync, without the overhead of
 queries or remote procedure calls.
 
 ### Recon
-Communication only works if all parties understands one another.  **swimOS**
+Communication only works if all parties understands one another.  **SwimOS**
 natively speaks a universal, structured data language, called Recon. A superset
 of JSON, XML, Protocol Buffers, and more, Recon naturally translates into many
 tongues.
 
 ### Fabrics
-**swimOS** serves as the higher order operating system for distributed computers,
-called Fabrics, which **swimOS** coherently stitches together from non-uniformly
+**SwimOS** serves as the higher order operating system for distributed computers,
+called Fabrics, which **SwimOS** coherently stitches together from non-uniformly
 distributed, heterogeneous sets of machines.
