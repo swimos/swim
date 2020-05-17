@@ -33,6 +33,8 @@ public abstract class JsonParser<I, V> {
 
   public abstract I field(V key, V value);
 
+  public abstract Builder<I, V> documentBuilder();
+
   public abstract Builder<I, V> objectBuilder();
 
   public abstract Builder<I, V> arrayBuilder();
@@ -93,6 +95,10 @@ public abstract class JsonParser<I, V> {
 
   public Parser<V> arrayParser() {
     return new ArrayParser<I, V>(this);
+  }
+
+  public Parser<V> documentParser() {
+    return new DocumentParser<I, V>(this);
   }
 
   public V parseValueString(String string) {

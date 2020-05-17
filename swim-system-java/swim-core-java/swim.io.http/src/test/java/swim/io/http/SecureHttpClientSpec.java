@@ -84,8 +84,8 @@ public class SecureHttpClientSpec {
         port = 443;
       }
       endpoint.connectHttps(address, port, client, HttpSettings.standard());
-      clientRequest.await(5, TimeUnit.SECONDS);
-      clientWillRespond.await(5, TimeUnit.SECONDS);
+      clientRequest.await(2, TimeUnit.SECONDS);
+      clientWillRespond.await(2, TimeUnit.SECONDS);
       clientDidRespond.await(5, TimeUnit.SECONDS);
       assertEquals(clientRequest.getCount(), 0, "Client didRequest not invoked");
       assertEquals(clientDidRespond.getCount(), 0, "Client didRespond not invoked");
