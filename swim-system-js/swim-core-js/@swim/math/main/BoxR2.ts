@@ -48,6 +48,11 @@ export class BoxR2 extends R2Shape implements HashCode, Debug {
     this._yMax = yMin <= yMax ? yMax : yMin;
   }
 
+  isDefined(): boolean {
+    return this._xMin !== 0 || this._yMin !== 0
+        || this._xMax !== 0 || this._yMax !== 0;
+  }
+
   get xMin(): number {
     return this._xMin;
   }
@@ -94,6 +99,10 @@ export class BoxR2 extends R2Shape implements HashCode, Debug {
 
   get left(): number {
     return this._xMin;
+  }
+
+  get center(): PointR2 {
+    return new PointR2((this._xMin + this._xMax) / 2, (this._yMin + this._yMax) / 2);
   }
 
   contains(that: AnyShape): boolean;
@@ -231,6 +240,10 @@ export class BoxR2 extends R2Shape implements HashCode, Debug {
                      f.transformX(this.xMax, this.yMax), f.transformY(this.xMax, this.yMax));
   }
 
+  boundingBox(): BoxR2 {
+    return this;
+  }
+
   toAny(): BoxR2Init {
     return {
       xMin: this._xMin,
@@ -275,26 +288,54 @@ export class BoxR2 extends R2Shape implements HashCode, Debug {
 
   private static _hashSeed?: number;
 
-  private static _empty: BoxR2 | undefined;
+  private static _empty?: BoxR2;
 
   static empty(): BoxR2 {
-    if (!BoxR2._empty) {
+    if (BoxR2._empty === void 0) {
       BoxR2._empty = new BoxR2(0, 0, 0, 0);
     }
     return BoxR2._empty;
   }
 
-  static of(xMin: number, yMin: number, xMax: number, yMax: number): BoxR2 {
+  static from(xMin: number, yMin: number, xMax?: number, yMax?: number): BoxR2 {
+    if (xMax === void 0) {
+      xMax = xMin;
+    }
+    if (yMax === void 0) {
+      yMax = yMin;
+    }
     return new BoxR2(xMin, yMin, xMax, yMax);
   }
 
-  static fromAny(box: AnyBoxR2): BoxR2 {
-    if (box instanceof BoxR2) {
-      return box;
-    } else if (typeof box === "object" && box) {
-      return new BoxR2(box.xMin, box.yMin, box.xMax, box.yMax);
+  static fromInit(value: BoxR2Init): BoxR2 {
+    return new BoxR2(value.xMin, value.yMin, value.xMax, value.yMax);
+  }
+
+  static fromAny(value: AnyBoxR2): BoxR2 {
+    if (value instanceof BoxR2) {
+      return value;
+    } else if (BoxR2.isInit(value)) {
+      return BoxR2.fromInit(value);
     }
-    throw new TypeError("" + box);
+    throw new TypeError("" + value);
+  }
+
+  /** @hidden */
+  static isInit(value: unknown): value is BoxR2Init {
+    if (typeof value === "object" && value !== null) {
+      const init = value as BoxR2Init;
+      return typeof init.xMin === "number"
+          && typeof init.yMin === "number"
+          && typeof init.xMax === "number"
+          && typeof init.yMax === "number";
+    }
+    return false;
+  }
+
+  /** @hidden */
+  static isAny(value: unknown): value is AnyBoxR2 {
+    return value instanceof BoxR2
+        || BoxR2.isInit(value);
   }
 }
 R2Shape.Box = BoxR2;

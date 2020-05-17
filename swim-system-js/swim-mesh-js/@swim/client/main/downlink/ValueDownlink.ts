@@ -58,13 +58,13 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
               observers?: ReadonlyArray<ValueDownlinkObserver<V, VU>> | ValueDownlinkObserver<V, VU> | null,
               valueForm?: Form<V, VU>, state0: Value = Value.absent()) {
     super(context, owner, init, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
-    if (init) {
+    if (init !== void 0) {
       const observer = this._observers![this._observers!.length - 1];
       observer.willSet = init.willSet || observer.willSet;
       observer.didSet = init.didSet || observer.didSet;
-      valueForm = init.valueForm ? init.valueForm : valueForm;
+      valueForm = init.valueForm !== void 0 ? init.valueForm : valueForm;
     }
-    this._valueForm = valueForm || Form.forValue() as any;
+    this._valueForm = valueForm !== void 0 ? valueForm : Form.forValue() as any;
     this._state0 = state0;
     this._input = null;
     this._outputs = null;
@@ -129,11 +129,11 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
   /** @hidden */
   valueWillSet(newValue: Value): Value {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     let newObject: V | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willSet) {
+      if (observer.willSet !== void 0) {
         if (newObject === void 0) {
           newObject = newValue.coerce(this._valueForm);
         }
@@ -150,12 +150,12 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
   /** @hidden */
   valueDidSet(newValue: Value, oldValue: Value) {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     let newObject: V | undefined;
     let oldObject: V | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didSet) {
+      if (observer.didSet !== void 0) {
         if (newObject === void 0) {
           newObject = newValue.coerce(this._valueForm);
         }
@@ -203,7 +203,7 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
       nodeUri = hostUri.unresolve(nodeUri);
     }
     let model = this._context.getDownlink(hostUri, nodeUri, laneUri);
-    if (model) {
+    if (model !== void 0) {
       if (!(model instanceof ValueDownlinkModel)) {
         throw new Error("downlink type mismatch");
       }
@@ -217,7 +217,7 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
       this._context.openDownlink(model);
       this._model = model as ValueDownlinkModel;
     }
-    if (this._owner) {
+    if (this._owner !== void 0) {
       this._owner.addDownlink(this);
     }
     return this;

@@ -96,7 +96,7 @@ export class Opt implements Equals, Debug {
 
   getValue(index: number = 0): string | undefined {
     const arg = this._args[index];
-    return arg ? arg.value() : void 0;
+    return arg !== void 0 ? arg.value() : void 0;
   }
 
   parse(params: string[], paramIndex: number): number {
@@ -155,7 +155,7 @@ export class Opt implements Equals, Debug {
   }
 
   static of(name: string, flag: string | null = null, desc: string | null = null, anyArgs?: AnyArg[]): Opt {
-    const argCount = anyArgs ? anyArgs.length : 0;
+    const argCount = anyArgs !== void 0 ? anyArgs.length : 0;
     const args = new Array<Arg>(argCount);
     for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
       args[argIndex] = Arg.fromAny(anyArgs![argIndex]);
@@ -171,7 +171,7 @@ export class Opt implements Equals, Debug {
     } else {
       const flag = opt.flag !== void 0 ? opt.flag : null;
       const desc = opt.desc !== void 0 ? opt.desc : null;
-      const argCount = opt.args ? opt.args.length : 0;
+      const argCount = opt.args !== void 0 ? opt.args.length : 0;
       const args = new Array<Arg>(argCount);
       for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
         args[argIndex] = Arg.fromAny(opt.args![argIndex]);

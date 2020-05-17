@@ -8,6 +8,7 @@
       "@swim/codec": ["@swim/codec/main"],
       "@swim/unit": ["@swim/unit/main"],
       "@swim/collections": ["@swim/collections/main"],
+      "@swim/dataflow": ["@swim/dataflow/main"],
       "@swim/structure": ["@swim/structure/main"],
       "@swim/streamlet": ["@swim/streamlet/main"],
       "@swim/dataflow": ["@swim/dataflow/main"]
@@ -18,6 +19,7 @@
     {"path": "../../codec/main"},
     {"path": "../../unit/main"},
     {"path": "../../collections/main"},
+    {"path": "../../dataflow/main"},
     {"path": "../../structure/main"},
     {"path": "../../streamlet/main"},
     {"path": "../../dataflow/main"}

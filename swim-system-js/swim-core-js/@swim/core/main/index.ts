@@ -15,6 +15,7 @@
 export * from "@swim/util";
 export * from "@swim/codec";
 export * from "@swim/collections";
+export * from "@swim/interpolate";
 export * from "@swim/structure";
 export * from "@swim/streamlet";
 export * from "@swim/dataflow";

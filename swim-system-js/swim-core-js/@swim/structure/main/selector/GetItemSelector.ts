@@ -111,7 +111,7 @@ export class GetItemSelector extends Selector {
       }
       // Push the current selection back onto the stack.
       interpreter.pushScope(scope);
-      if (selected) {
+      if (selected !== void 0) {
         return selected;
       }
     }

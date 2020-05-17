@@ -48,10 +48,10 @@ export class PatternParser extends Parser<DateTimeInit> {
     while (step < n) {
       const p = pattern.charCodeAt(step);
       if (p === 37/*'%'*/) {
-        if (!dateParser) {
+        if (dateParser === void 0) {
           const s = pattern.charAt(step + 1);
           const format = specifiers[s];
-          if (format) {
+          if (format !== void 0) {
             dateParser = format.parseDateTime(input, date);
           } else {
             return Parser.error(Diagnostic.message("unknown format specifier: " + s, input));

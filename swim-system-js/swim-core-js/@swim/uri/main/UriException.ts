@@ -26,7 +26,7 @@ export class UriException extends Error {
   }
 
   toString(): string {
-    if (this.diagnostic) {
+    if (this.diagnostic !== void 0) {
       return this.diagnostic.toString();
     } else {
       return super.toString();

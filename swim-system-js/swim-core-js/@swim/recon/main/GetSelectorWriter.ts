@@ -69,7 +69,7 @@ export class GetSelectorWriter<I, V> extends Writer {
       }
     }
     if (step === 4) {
-      if (!part) {
+      if (part === void 0) {
         if (recon.isRecord(recon.item(key))) {
           part = recon.writeBlockValue(key, output);
         } else {

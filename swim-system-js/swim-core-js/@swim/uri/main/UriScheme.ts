@@ -88,7 +88,7 @@ export class UriScheme implements Comparable<UriScheme>, HashCode, Debug, Displa
   static from(name: string): UriScheme {
     const cache = UriScheme.cache();
     const scheme = cache.get(name);
-    if (scheme) {
+    if (scheme !== void 0) {
       return scheme;
     } else {
       return cache.put(name, new UriScheme(name));

@@ -70,7 +70,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
               observers?: ReadonlyArray<ListDownlinkObserver<V, VU>> | ListDownlinkObserver<V, VU> | null,
               valueForm?: Form<V, VU>, state0?: STree<Value, Value>) {
     super(context, owner, init, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
-    if (init) {
+    if (init !== void 0) {
       const observer = this._observers![this._observers!.length - 1];
       observer.willUpdate = init.willUpdate || observer.willUpdate;
       observer.didUpdate = init.didUpdate || observer.didUpdate;
@@ -84,9 +84,9 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
       observer.didTake = init.didTake || observer.didTake;
       observer.willClear = init.willClear || observer.willClear;
       observer.didClear = init.didClear || observer.didClear;
-      valueForm = init.valueForm ? init.valueForm : valueForm;
+      valueForm = init.valueForm !== void 0 ? init.valueForm : valueForm;
     }
-    this._valueForm = valueForm || Form.forValue() as any;
+    this._valueForm = valueForm !== void 0 ? valueForm : Form.forValue() as any;
     this._state0 = state0;
   }
 
@@ -133,7 +133,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
 
   getEntry(index: number, id?: Value): [V, Value] | undefined {
     const entry = this._model!.getEntry(index, id);
-    if (entry) {
+    if (entry !== void 0) {
       return [entry[0].coerce(this._valueForm), entry[1]];
     }
     return void 0;
@@ -305,11 +305,11 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listWillUpdate(index: number, newValue: Value): Value {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     let newObject: V | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willUpdate) {
+      if (observer.willUpdate !== void 0) {
         if (newObject === void 0) {
           newObject = newValue.coerce(this._valueForm);
         }
@@ -326,12 +326,12 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listDidUpdate(index: number, newValue: Value, oldValue: Value): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     let newObject: V | undefined;
     let oldObject: V | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didUpdate) {
+      if (observer.didUpdate !== void 0) {
         if (newObject === void 0) {
           newObject = newValue.coerce(this._valueForm);
         }
@@ -346,11 +346,11 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listWillMove(fromIndex: number, toIndex: number, value: Value): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     let object: V | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willMove) {
+      if (observer.willMove !== void 0) {
         if (object === void 0) {
           object = value.coerce(this._valueForm);
         }
@@ -362,11 +362,11 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listDidMove(fromIndex: number, toIndex: number, value: Value): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     let object: V | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didMove) {
+      if (observer.didMove !== void 0) {
         if (object === void 0) {
           object = value.coerce(this._valueForm);
         }
@@ -378,10 +378,10 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listWillRemove(index: number): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willRemove) {
+      if (observer.willRemove !== void 0) {
         observer.willRemove(index, this);
       }
     }
@@ -390,11 +390,11 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listDidRemove(index: number, oldValue: Value): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     let oldObject: V | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didRemove) {
+      if (observer.didRemove !== void 0) {
         if (oldObject === void 0) {
           oldObject = oldValue.coerce(this._valueForm);
         }
@@ -406,10 +406,10 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listWillDrop(lower: number): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willDrop) {
+      if (observer.willDrop !== void 0) {
         observer.willDrop(lower, this);
       }
     }
@@ -418,10 +418,10 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listDidDrop(lower: number): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didDrop) {
+      if (observer.didDrop !== void 0) {
         observer.didDrop(lower, this);
       }
     }
@@ -430,10 +430,10 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listWillTake(upper: number): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willTake) {
+      if (observer.willTake !== void 0) {
         observer.willTake(upper, this);
       }
     }
@@ -442,10 +442,10 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listDidTake(upper: number): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didTake) {
+      if (observer.didTake !== void 0) {
         observer.didTake(upper, this);
       }
     }
@@ -454,10 +454,10 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listWillClear(): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willClear) {
+      if (observer.willClear !== void 0) {
         observer.willClear(this);
       }
     }
@@ -466,10 +466,10 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   /** @hidden */
   listDidClear(): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didClear) {
+      if (observer.didClear !== void 0) {
         observer.didClear(this);
       }
     }
@@ -511,7 +511,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
       nodeUri = hostUri.unresolve(nodeUri);
     }
     let model = this._context.getDownlink(hostUri, nodeUri, laneUri);
-    if (model) {
+    if (model !== void 0) {
       if (!(model instanceof ListDownlinkModel)) {
         throw new Error("downlink type mismatch");
       }
@@ -525,7 +525,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
       this._context.openDownlink(model);
       this._model = model as ListDownlinkModel;
     }
-    if (this._owner) {
+    if (this._owner !== void 0) {
       this._owner.addDownlink(this);
     }
     return this;

@@ -53,7 +53,7 @@ export class MockServer {
   }
 
   close(): void {
-    if (this.socket) {
+    if (this.socket !== void 0) {
       this.socket.close();
       this.socket = void 0;
     }
@@ -85,18 +85,18 @@ export class MockServer {
   }
 
   stop(): Promise<void> {
-    if (this.client) {
+    if (this.client !== void 0) {
       this.client.close();
     }
-    if (this.socket) {
+    if (this.socket !== void 0) {
       this.socket.terminate();
       this.socket = void 0;
     }
-    if (this.wsServer) {
+    if (this.wsServer !== void 0) {
       this.wsServer.close();
       this.wsServer = void 0;
     }
-    if (this.httpServer) {
+    if (this.httpServer !== void 0) {
       return new Promise((resolve: () => void, reject: (reason: unknown) => void): void => {
         this.httpServer!.close(() => {
           this.httpServer = void 0;
@@ -124,7 +124,7 @@ export class MockServer {
   }
 
   onClose(): void {
-    if (this.socket) {
+    if (this.socket !== void 0) {
       this.socket.onopen = void 0 as any;
       this.socket.onmessage = void 0 as any;
       this.socket.onclose = void 0 as any;

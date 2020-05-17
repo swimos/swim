@@ -102,7 +102,7 @@ export class SpecUnit {
     const units = this._func.call(spec) as Spec[] | Spec | undefined;
     if (Array.isArray(units)) {
       return this.runUnit(report, spec, units, 0);
-    } else if (units) {
+    } else if (units !== void 0) {
       units._parent = spec;
       this.willRunUnit(report, spec, units);
       return units.run(report)

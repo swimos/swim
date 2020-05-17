@@ -54,7 +54,7 @@ export class AttrParser<I, V> extends Parser<I> {
       }
     }
     if (step === 2) {
-      if (!keyParser) {
+      if (keyParser === void 0) {
         if (input.isCont()) {
           c = input.head();
           if (c === 34/*'"'*/ || c === 39/*'\''*/) {
@@ -70,7 +70,7 @@ export class AttrParser<I, V> extends Parser<I> {
       } else {
         keyParser = keyParser.feed(input);
       }
-      if (keyParser) {
+      if (keyParser !== void 0) {
         if (keyParser.isDone()) {
           step = 3;
         } else if (keyParser.isError()) {
@@ -102,7 +102,7 @@ export class AttrParser<I, V> extends Parser<I> {
       }
     }
     if (step === 5) {
-      if (!valueParser) {
+      if (valueParser === void 0) {
         valueParser = recon.parseBlock(input);
       }
       while (valueParser.isCont() && !input.isEmpty()) {

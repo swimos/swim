@@ -53,7 +53,7 @@ export class UriPathParser extends Parser<UriPath> {
         if (input.isCont() && c === 47/*'/'*/) {
           input = input.step();
           builder = builder || uri.pathBuilder();
-          if (output) {
+          if (output !== void 0) {
             builder.addSegment(output.bind());
             output = void 0;
           }
@@ -63,11 +63,11 @@ export class UriPathParser extends Parser<UriPath> {
           input = input.step();
           step = 2;
         } else if (!input.isEmpty()) {
-          if (output) {
+          if (output !== void 0) {
             builder = builder || uri.pathBuilder();
             builder.addSegment(output.bind());
           }
-          if (builder) {
+          if (builder !== void 0) {
             return Parser.done(builder.bind());
           } else {
             return Parser.done(uri.pathEmpty());

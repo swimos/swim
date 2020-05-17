@@ -38,7 +38,7 @@ export class Murmur3 {
    * primitive value.
    */
   static seed(value: object | string | number | boolean | null | undefined) {
-    if (typeof value === "object" && value) {
+    if (typeof value === "object" && value !== null) {
       if (value.constructor && typeof (value.constructor as any).name === "string") {
         value = (value.constructor as any).name as string;
       } else {

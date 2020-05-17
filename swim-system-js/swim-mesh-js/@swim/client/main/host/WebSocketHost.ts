@@ -45,14 +45,14 @@ export class WebSocketHost extends RemoteHost {
   }
 
   isConnected(): boolean {
-    return this._socket ? this._socket.readyState === this._socket.OPEN : false;
+    return this._socket !== void 0 ? this._socket.readyState === this._socket.OPEN : false;
   }
 
   open(): void {
     this.clearReconnect();
-    if (!this._socket) {
+    if (this._socket === void 0) {
       const WebSocket = this.WebSocket;
-      if (!WebSocket) {
+      if (WebSocket === void 0) {
         throw new Error("WebSocket undefined");
       }
       let hostUri = this._hostUri;
@@ -62,7 +62,7 @@ export class WebSocketHost extends RemoteHost {
       } else if (schemeName === "warps" || schemeName === "swims") {
         hostUri = hostUri.scheme("wss");
       }
-      if (this._options.protocols) {
+      if (this._options.protocols !== void 0) {
         this._socket = new WebSocket(hostUri.toString(), this._options.protocols);
       } else {
         this._socket = new WebSocket(hostUri.toString());
@@ -77,7 +77,7 @@ export class WebSocketHost extends RemoteHost {
   close(): void {
     this.clearReconnect();
     this.clearIdle();
-    if (this._socket) {
+    if (this._socket !== void 0) {
       this._socket.close();
       if (!this._context.isOnline()) {
         this.onWebSocketClose(); // force close event
@@ -125,7 +125,7 @@ export class WebSocketHost extends RemoteHost {
     const data = message.data;
     if (typeof data === "string") {
       const envelope = Envelope.parseRecon(data);
-      if (envelope) {
+      if (envelope !== void 0) {
         this.onEnvelope(envelope);
       } else {
         this.onUnknownEnvelope(data);
@@ -134,7 +134,7 @@ export class WebSocketHost extends RemoteHost {
   }
 
   protected onWebSocketClose(): void {
-    if (this._socket) {
+    if (this._socket !== void 0) {
       this._socket.onopen = null;
       this._socket.onmessage = null;
       this._socket.onclose = null;
@@ -153,7 +153,7 @@ export class WebSocketHost extends RemoteHost {
   }
 
   protected onWebSocketError(): void {
-    if (this._socket) {
+    if (this._socket !== void 0) {
       this._socket.close();
       if (!this._context.isOnline()) {
         this.onWebSocketClose(); // force close event

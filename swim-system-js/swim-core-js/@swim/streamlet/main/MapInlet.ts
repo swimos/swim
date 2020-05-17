@@ -43,7 +43,7 @@ export interface MapInlet<K, V, I> extends Inlet<I> {
 /** @hidden */
 export const MapInlet = {
   is<K, V, I>(object: unknown): object is MapInlet<K, V, I> {
-    if (typeof object === "object" && object) {
+    if (typeof object === "object" && object !== null) {
       const inlet = object as MapInlet<K, V, I>;
       return Inlet.is(inlet)
           && typeof inlet.decohereOutputKey === "function"

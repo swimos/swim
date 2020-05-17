@@ -7,6 +7,7 @@
     {"path": "./@swim/args"},
     {"path": "./@swim/unit"},
     {"path": "./@swim/collections"},
+    {"path": "./@swim/interpolate"},
     {"path": "./@swim/structure"},
     {"path": "./@swim/streamlet"},
     {"path": "./@swim/dataflow"},

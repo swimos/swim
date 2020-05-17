@@ -72,7 +72,7 @@ export class ConditionalOperatorWriter<I, V> extends Writer {
       }
     }
     if (step === 2) {
-      if (!part) {
+      if (part === void 0) {
         part = recon.writeItem(ifTerm, output);
       } else {
         part = part.pull(output);
@@ -107,7 +107,7 @@ export class ConditionalOperatorWriter<I, V> extends Writer {
       step = 7;
     }
     if (step === 7) {
-      if (!part) {
+      if (part === void 0) {
         part = recon.writeItem(thenTerm, output);
       } else {
         part = part.pull(output);
@@ -132,7 +132,7 @@ export class ConditionalOperatorWriter<I, V> extends Writer {
       step = 11;
     }
     if (step === 11) {
-      if (!part) {
+      if (part === void 0) {
         part = recon.writeItem(elseTerm, output);
       } else {
         part = part.pull(output);

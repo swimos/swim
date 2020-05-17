@@ -17,6 +17,7 @@
     "@swim/util": "3.10.2",
     "@swim/codec": "3.10.2",
     "@swim/collections": "3.10.2",
+    "@swim/interpolate": "3.10.2",
     "@swim/structure": "3.10.2",
     "@swim/streamlet": "3.10.2",
     "@swim/dataflow": "3.10.2",

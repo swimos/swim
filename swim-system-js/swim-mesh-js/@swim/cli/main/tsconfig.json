@@ -8,6 +8,7 @@
       "@swim/codec": ["../swim-core-js/@swim/codec/main"],
       "@swim/args": ["../swim-core-js/@swim/args/main"],
       "@swim/collections": ["../swim-core-js/@swim/collections/main"],
+      "@swim/interpolate": ["../swim-core-js/@swim/interpolate/main"],
       "@swim/structure": ["../swim-core-js/@swim/structure/main"],
       "@swim/streamlet": ["../swim-core-js/@swim/streamlet/main"],
       "@swim/dataflow": ["../swim-core-js/@swim/dataflow/main"],

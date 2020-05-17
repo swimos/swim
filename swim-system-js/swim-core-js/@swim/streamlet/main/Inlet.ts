@@ -100,7 +100,7 @@ export interface Inlet<I = unknown> {
 /** @hidden */
 export const Inlet = {
   is<I>(object: unknown): object is Inlet<I> {
-    if (typeof object === "object" && object) {
+    if (typeof object === "object" && object !== null) {
       const inlet = object as Inlet<I>;
       return typeof inlet.input === "function"
           && typeof inlet.bindInput === "function"

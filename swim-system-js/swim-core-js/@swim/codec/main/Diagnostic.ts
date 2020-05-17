@@ -515,7 +515,7 @@ export class Diagnostic implements Display {
     OutputStyle.bold(output);
     output = output.write(label).write(58/*':'*/);
     OutputStyle.reset(output);
-    if (comment != null) {
+    if (comment !== null) {
       output = output.write(32/*' '*/).write(comment);
     }
   }

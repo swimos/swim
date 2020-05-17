@@ -75,16 +75,30 @@ const core = [
     ],
   },
   {
+    id: "interpolate",
+    name: "@swim/interpolate",
+    targets: [
+      {
+        id: "main",
+        deps: ["util"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "interpolate"],
+      },
+    ],
+  },
+  {
     id: "structure",
     name: "@swim/structure",
     targets: [
       {
         id: "main",
-        deps: ["util", "codec"],
+        deps: ["util", "codec", "interpolate"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "structure"],
+        deps: ["util", "codec", "unit", "interpolate", "structure"],
       },
     ],
   },
@@ -108,11 +122,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet"],
+        deps: ["util", "codec", "collections", "interpolate", "structure", "streamlet"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "collections", "structure", "streamlet", "dataflow"],
+        deps: ["util", "codec", "unit", "collections", "interpolate", "structure", "streamlet", "dataflow"],
       },
     ],
   },
@@ -122,11 +136,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "structure"],
+        deps: ["util", "codec", "interpolate", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "structure", "recon"],
+        deps: ["util", "codec", "unit", "interpolate", "structure", "recon"],
       },
     ],
   },
@@ -136,11 +150,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "structure"],
+        deps: ["util", "codec", "interpolate", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "structure", "math"],
+        deps: ["util", "codec", "unit", "interpolate", "structure", "math"],
       },
     ],
   },
@@ -150,11 +164,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "structure"],
+        deps: ["util", "codec", "interpolate", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "structure", "time"],
+        deps: ["util", "codec", "unit", "interpolate", "structure", "time"],
       },
     ],
   },
@@ -164,11 +178,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "structure"],
+        deps: ["util", "codec", "interpolate", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "structure", "uri"],
+        deps: ["util", "codec", "unit", "interpolate", "structure", "uri"],
       },
     ],
   },
@@ -180,7 +194,7 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri"],
+        deps: ["util", "codec", "collections", "interpolate", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri"],
       },
     ],
   },

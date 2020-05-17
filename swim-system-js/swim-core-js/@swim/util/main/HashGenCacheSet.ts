@@ -145,7 +145,7 @@ export class HashGenCacheSet<T> {
     }
     const index = Math.abs(Objects.hash(value)) % this._buckets.length;
     const bucket = this._buckets[index];
-    if (!bucket) {
+    if (bucket === void 0) {
       return false;
     }
 

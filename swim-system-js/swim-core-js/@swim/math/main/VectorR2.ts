@@ -33,6 +33,10 @@ export class VectorR2 implements HashCode, Debug {
     this._y = y;
   }
 
+  isDefined(): boolean {
+    return this._x !== 0 || this._y !== 0;
+  }
+
   get x(): number {
     return this._x;
   }
@@ -109,12 +113,32 @@ export class VectorR2 implements HashCode, Debug {
     return new VectorR2(x, y);
   }
 
-  static fromAny(vector: AnyVectorR2): VectorR2 {
-    if (vector instanceof VectorR2) {
-      return vector;
-    } else if (typeof vector === "object" && vector) {
-      return new VectorR2(vector.x, vector.y);
+  static fromInit(value: VectorR2Init): VectorR2 {
+    return new VectorR2(value.x, value.y);
+  }
+
+  static fromAny(value: AnyVectorR2): VectorR2 {
+    if (value instanceof VectorR2) {
+      return value;
+    } else if (VectorR2.isInit(value)) {
+      return VectorR2.fromInit(value);
     }
-    throw new TypeError("" + vector);
+    throw new TypeError("" + value);
+  }
+
+  /** @hidden */
+  static isInit(value: unknown): value is VectorR2Init {
+    if (typeof value === "object" && value !== null) {
+      const init = value as VectorR2Init;
+      return typeof init.x === "number"
+          && typeof init.y === "number";
+    }
+    return false;
+  }
+
+  /** @hidden */
+  static isAny(value: unknown): value is AnyVectorR2 {
+    return value instanceof VectorR2
+        || VectorR2.isInit(value);
   }
 }

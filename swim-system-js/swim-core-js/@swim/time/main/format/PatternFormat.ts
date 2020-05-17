@@ -41,7 +41,7 @@ export class PatternFormat extends DateTimeFormat {
         }
         const s = pattern.charAt(j + 1);
         const f = specifiers[s];
-        if (f) {
+        if (f !== void 0) {
           f.writeDate(date, output);
         }
         j += 2;

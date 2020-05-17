@@ -46,7 +46,7 @@ export class ComparisonOperatorParser<I, V> extends Parser<V> {
                      operator?: string, rhsParser?: Parser<V>, step: number = 1): Parser<V> {
     let c = 0;
     if (step === 1) {
-      if (!lhsParser) {
+      if (lhsParser === void 0) {
         lhsParser = recon.parseAttrExpression(input, builder);
       }
       while (lhsParser.isCont() && !input.isEmpty()) {
@@ -145,7 +145,7 @@ export class ComparisonOperatorParser<I, V> extends Parser<V> {
       }
     }
     if (step === 7) {
-      if (!rhsParser) {
+      if (rhsParser === void 0) {
         rhsParser = recon.parseAttrExpression(input, builder);
       }
       while (rhsParser.isCont() && !input.isEmpty()) {

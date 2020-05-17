@@ -86,7 +86,7 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
               observers?: ReadonlyArray<MapDownlinkObserver<K, V, KU, VU>> | MapDownlinkObserver<K, V, KU, VU> | null,
               keyForm?: Form<K, KU>, valueForm?: Form<V, VU>, state0?: BTree<Value, Value>) {
     super(context, owner, init, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
-    if (init) {
+    if (init !== void 0) {
       const observer = this._observers![this._observers!.length - 1];
       observer.willUpdate = init.willUpdate || observer.willUpdate;
       observer.didUpdate = init.didUpdate || observer.didUpdate;
@@ -98,11 +98,11 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
       observer.didTake = init.didTake || observer.didTake;
       observer.willClear = init.willClear || observer.willClear;
       observer.didClear = init.didClear || observer.didClear;
-      keyForm = init.keyForm ? init.keyForm : keyForm;
-      valueForm = init.valueForm ? init.valueForm : valueForm;
+      keyForm = init.keyForm !== void 0 ? init.keyForm : keyForm;
+      valueForm = init.valueForm !== void 0 ? init.valueForm : valueForm;
     }
-    this._keyForm = keyForm || Form.forValue() as any;
-    this._valueForm = valueForm || Form.forValue() as any;
+    this._keyForm = keyForm !== void 0 ? keyForm : Form.forValue() as any;
+    this._valueForm = valueForm !== void 0 ? valueForm : Form.forValue() as any;
     this._state0 = state0;
     this._input = null;
     this._effects = new BTree();
@@ -180,7 +180,7 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
 
   getEntry(index: number): [K, V] | undefined {
     const entry = this._model!.getEntry(index);
-    if (entry) {
+    if (entry !== void 0) {
       return [entry[0].coerce(this._keyForm), entry[1].coerce(this._valueForm)];
     }
     return void 0;
@@ -444,12 +444,12 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   mapWillUpdate(key: Value, newValue: Value): Value {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     let keyObject: K | undefined;
     let newObject: V | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willUpdate) {
+      if (observer.willUpdate !== void 0) {
         if (keyObject === void 0) {
           keyObject = key.coerce(this._keyForm);
         }
@@ -469,13 +469,13 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   mapDidUpdate(key: Value, newValue: Value, oldValue: Value): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     const keyObject = key.coerce(this._keyForm);
     let newObject: V | undefined;
     let oldObject: V | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didUpdate) {
+      if (observer.didUpdate !== void 0) {
         if (newObject === void 0) {
           newObject = newValue.coerce(this._valueForm);
         }
@@ -492,11 +492,11 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   mapWillRemove(key: Value): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     let keyObject: K | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willRemove) {
+      if (observer.willRemove !== void 0) {
         if (keyObject === void 0) {
           keyObject = key.coerce(this._keyForm);
         }
@@ -508,12 +508,12 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   mapDidRemove(key: Value, oldValue: Value): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     const keyObject = key.coerce(this._keyForm);
     let oldObject: V | undefined;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didRemove) {
+      if (observer.didRemove !== void 0) {
         if (oldObject === void 0) {
           oldObject = oldValue.coerce(this._valueForm);
         }
@@ -527,10 +527,10 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   mapWillDrop(lower: number): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willDrop) {
+      if (observer.willDrop !== void 0) {
         observer.willDrop(lower, this);
       }
     }
@@ -539,10 +539,10 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   mapDidDrop(lower: number): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didDrop) {
+      if (observer.didDrop !== void 0) {
         observer.didDrop(lower, this);
       }
     }
@@ -551,10 +551,10 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   mapWillTake(upper: number): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willTake) {
+      if (observer.willTake !== void 0) {
         observer.willTake(upper, this);
       }
     }
@@ -563,10 +563,10 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   mapDidTake(upper: number): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didTake) {
+      if (observer.didTake !== void 0) {
         observer.didTake(upper, this);
       }
     }
@@ -575,10 +575,10 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   mapWillClear(): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willClear) {
+      if (observer.willClear !== void 0) {
         observer.willClear(this);
       }
     }
@@ -587,10 +587,10 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   /** @hidden */
   mapDidClear(): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didClear) {
+      if (observer.didClear !== void 0) {
         observer.didClear(this);
       }
     }
@@ -632,7 +632,7 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
       nodeUri = hostUri.unresolve(nodeUri);
     }
     let model = this._context.getDownlink(hostUri, nodeUri, laneUri);
-    if (model) {
+    if (model !== void 0) {
       if (!(model instanceof MapDownlinkModel)) {
         throw new Error("downlink type mismatch");
       }
@@ -646,7 +646,7 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
       this._context.openDownlink(model);
       this._model = model as MapDownlinkModel;
     }
-    if (this._owner) {
+    if (this._owner !== void 0) {
       this._owner.addDownlink(this);
     }
     return this;

@@ -93,7 +93,7 @@ export class Base16 {
    * Returns the `Base16` encoding with lowercase alphanumeric digits.
    */
   public static lowercase(): Base16 {
-    if (!Base16._lowercase) {
+    if (Base16._lowercase === void 0) {
       Base16._lowercase = new Base16("0123456789abcdef");
     }
     return Base16._lowercase;
@@ -103,7 +103,7 @@ export class Base16 {
    * Returns the `Base16` encoding with uppercase alphanumeric digits.
    */
   public static uppercase(): Base16 {
-    if (!Base16._uppercase) {
+    if (Base16._uppercase === void 0) {
       Base16._uppercase = new Base16("0123456789ABCDEF");
     }
     return Base16._uppercase;

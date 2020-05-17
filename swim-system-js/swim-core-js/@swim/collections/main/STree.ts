@@ -264,7 +264,7 @@ export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
     let index = start;
     do {
       const entry = root.getEntry(index);
-      if (entry && this.compare(entry[0], id) === 0) {
+      if (entry !== void 0 && this.compare(entry[0], id) === 0) {
         return index;
       }
       index = (index + 1) % root.size;

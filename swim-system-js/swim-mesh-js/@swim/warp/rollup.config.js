@@ -1,4 +1,4 @@
-import nodeResolve from "rollup-plugin-node-resolve";
+import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
 const script = "swim-warp";
@@ -13,6 +13,7 @@ const main = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
+      "@swim/interpolate": "swim",
       "@swim/structure": "swim",
       "@swim/recon": "swim",
       "@swim/uri": "swim",
@@ -24,6 +25,7 @@ const main = {
   external: [
     "@swim/util",
     "@swim/codec",
+    "@swim/interpolate",
     "@swim/structure",
     "@swim/recon",
     "@swim/uri",

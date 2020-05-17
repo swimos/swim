@@ -216,11 +216,11 @@ export class Spec {
    * the `Spec` class on which `run` is invoked, if `specClass` is undefined.
    * Creates a new `ConsoleReport` if `report` is undefined.
    */
-  static run(report?: Report, specClass?: SpecClass, spec?: Spec): Promise<Report> {
+  static run(report?: Report, specClass: SpecClass | null = null, spec?: Spec): Promise<Report> {
     if (report === void 0) {
       report = new ConsoleReport();
     }
-    if (specClass === void 0) {
+    if (specClass === null) {
       specClass = this.prototype as unknown as SpecClass;
     }
     if (spec === void 0) {
@@ -235,8 +235,8 @@ export class Spec {
       if (specClass.hasOwnProperty("_units")) {
         units = units.concat(specClass._units!);
       }
-      specClass = (specClass as any).__proto__ as SpecClass | undefined;
-    } while (specClass);
+      specClass = (specClass as any).__proto__ as SpecClass | null;
+    } while (specClass !== null);
 
     if (typeof spec.willRunSpec === "function") {
       spec.willRunSpec(report);

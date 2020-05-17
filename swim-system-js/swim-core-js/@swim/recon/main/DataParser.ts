@@ -49,7 +49,7 @@ export class DataParser<I, V> extends Parser<V> {
       }
     }
     if (step === 2) {
-      if (!base64Parser) {
+      if (base64Parser === void 0) {
         base64Parser = Base64.standard().parse(input, recon.dataOutput());
       }
       while (base64Parser.isCont() && !input.isEmpty()) {

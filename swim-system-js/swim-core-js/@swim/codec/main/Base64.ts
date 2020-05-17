@@ -177,12 +177,12 @@ export abstract class Base64 {
    */
   static standard(isPadded: boolean = true): Base64 {
     if (isPadded) {
-      if (!Base64._standard) {
+      if (Base64._standard === void 0) {
         Base64._standard = new Base64Standard(true);
       }
       return Base64._standard;
     } else {
-      if (!Base64._standardUnpadded) {
+      if (Base64._standardUnpadded === void 0) {
         Base64._standardUnpadded = new Base64Standard(true);
       }
       return Base64._standardUnpadded;
@@ -195,12 +195,12 @@ export abstract class Base64 {
    */
   static url(isPadded: boolean = true): Base64 {
     if (isPadded) {
-      if (!Base64._url) {
+      if (Base64._url === void 0) {
         Base64._url = new Base64Url(true);
       }
       return Base64._url;
     } else {
-      if (!Base64._urlUnpadded) {
+      if (Base64._urlUnpadded === void 0) {
         Base64._urlUnpadded = new Base64Url(false);
       }
       return Base64._urlUnpadded;

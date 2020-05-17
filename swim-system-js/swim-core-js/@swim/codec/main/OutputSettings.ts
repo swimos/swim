@@ -170,7 +170,7 @@ export class OutputSettings implements Debug, HashCode {
    * pretty printing disabled, and styling disabled.
    */
   static standard(): OutputSettings {
-    if (!OutputSettings._standard) {
+    if (OutputSettings._standard === void 0) {
       OutputSettings._standard = new OutputSettings(Format.lineSeparator(), false, false);
     }
     return OutputSettings._standard;
@@ -181,7 +181,7 @@ export class OutputSettings implements Debug, HashCode {
    * pretty printing enabled, and styling disabled.
    */
   static pretty(): OutputSettings {
-    if (!OutputSettings._pretty) {
+    if (OutputSettings._pretty === void 0) {
       OutputSettings._pretty = new OutputSettings(Format.lineSeparator(), true, false);
     }
     return OutputSettings._pretty;
@@ -192,7 +192,7 @@ export class OutputSettings implements Debug, HashCode {
    * pretty printing disabled, and styling enabled.
    */
   static styled(): OutputSettings {
-    if (!OutputSettings._styled) {
+    if (OutputSettings._styled === void 0) {
       OutputSettings._styled = new OutputSettings(Format.lineSeparator(), false, true);
     }
     return OutputSettings._styled;
@@ -203,7 +203,7 @@ export class OutputSettings implements Debug, HashCode {
    * pretty printing enabled, and styling enabled.
    */
   static prettyStyled(): OutputSettings {
-    if (!OutputSettings._prettyStyled) {
+    if (OutputSettings._prettyStyled === void 0) {
       OutputSettings._prettyStyled = new OutputSettings(Format.lineSeparator(), true, true);
     }
     return OutputSettings._prettyStyled;
@@ -244,7 +244,7 @@ export class OutputSettings implements Debug, HashCode {
   static fromAny(settings: AnyOutputSettings | undefined): OutputSettings {
     if (settings instanceof OutputSettings) {
       return settings;
-    } else if (typeof settings === "object" && settings) {
+    } else if (typeof settings === "object" && settings !== null) {
       return OutputSettings.create(settings.lineSeparator, settings.isPretty, settings.isStyled);
     }
     return OutputSettings.standard();

@@ -195,7 +195,7 @@ export class Severity implements Comparable<Severity>, HashCode {
    */
   static trace(label: string = "trace"): Severity {
     if (label === "trace") {
-      if (!Severity._trace) {
+      if (Severity._trace === void 0) {
         Severity._trace = new Severity(Severity.TRACE_LEVEL, label);
       }
       return Severity._trace;
@@ -210,7 +210,7 @@ export class Severity implements Comparable<Severity>, HashCode {
    */
   static debug(label: string = "debug"): Severity {
     if (label === "debug") {
-      if (!Severity._debug) {
+      if (Severity._debug === void 0) {
         Severity._debug = new Severity(Severity.DEBUG_LEVEL, label);
       }
       return Severity._debug;
@@ -225,7 +225,7 @@ export class Severity implements Comparable<Severity>, HashCode {
    */
   static info(label: string = "info"): Severity {
     if (label === "info") {
-      if (!Severity._info) {
+      if (Severity._info === void 0) {
         Severity._info = new Severity(Severity.INFO_LEVEL, label);
       }
       return Severity._info;
@@ -240,7 +240,7 @@ export class Severity implements Comparable<Severity>, HashCode {
    */
   static note(label: string = "note"): Severity {
     if (label === "note") {
-      if (!Severity._note) {
+      if (Severity._note === void 0) {
         Severity._note = new Severity(Severity.NOTE_LEVEL, label);
       }
       return Severity._note;
@@ -255,7 +255,7 @@ export class Severity implements Comparable<Severity>, HashCode {
    */
   static warning(label: string = "warning"): Severity {
     if (label === "warning") {
-      if (!Severity._warning) {
+      if (Severity._warning === void 0) {
         Severity._warning = new Severity(Severity.WARNING_LEVEL, label);
       }
       return Severity._warning;
@@ -270,7 +270,7 @@ export class Severity implements Comparable<Severity>, HashCode {
    */
   static error(label: string = "error"): Severity {
     if (label === "error") {
-      if (!Severity._error) {
+      if (Severity._error === void 0) {
         Severity._error = new Severity(Severity.ERROR_LEVEL, label);
       }
       return Severity._error;
@@ -285,7 +285,7 @@ export class Severity implements Comparable<Severity>, HashCode {
    */
   static alert(label: string = "alert"): Severity {
     if (label === "alert") {
-      if (!Severity._alert) {
+      if (Severity._alert === void 0) {
         Severity._alert = new Severity(Severity.ALERT_LEVEL, label);
       }
       return Severity._alert;
@@ -300,7 +300,7 @@ export class Severity implements Comparable<Severity>, HashCode {
    */
   static fatal(label: string = "fatal"): Severity {
     if (label === "fatal") {
-      if (!Severity._fatal) {
+      if (Severity._fatal === void 0) {
         Severity._fatal = new Severity(Severity.FATAL_LEVEL, label);
       }
       return Severity._fatal;

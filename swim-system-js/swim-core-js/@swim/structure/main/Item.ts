@@ -540,7 +540,7 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
   private static _globalScope?: Item;
 
   static globalScope(): Item {
-    if (!Item._globalScope) {
+    if (Item._globalScope === void 0) {
       Item._globalScope = Item.Record.create(1)
           .slot("math", Item.MathModule.scope())
           .commit();

@@ -112,42 +112,42 @@ export abstract class Form<T extends U, U = T> {
   private static _valueForm?: Form<Value, AnyValue>;
 
   static forString(): Form<string> {
-    if (!Form._stringForm) {
+    if (Form._stringForm === void 0) {
       Form._stringForm = new Form.StringForm("");
     }
     return Form._stringForm;
   }
 
   static forNumber(): Form<number> {
-    if (!Form._numberForm) {
+    if (Form._numberForm === void 0) {
       Form._numberForm = new Form.NumberForm(0);
     }
     return Form._numberForm;
   }
 
   static forBoolean(): Form<boolean> {
-    if (!Form._booleanForm) {
+    if (Form._booleanForm === void 0) {
       Form._booleanForm = new Form.BooleanForm(false);
     }
     return Form._booleanForm;
   }
 
   static forAny(): Form<AnyItem> {
-    if (!Form._anyForm) {
+    if (Form._anyForm === void 0) {
       Form._anyForm = new Form.AnyForm(void 0);
     }
     return Form._anyForm;
   }
 
   static forItem(): Form<Item, AnyItem> {
-    if (!Form._itemForm) {
+    if (Form._itemForm === void 0) {
       Form._itemForm = new Form.ItemForm(Item.absent());
     }
     return Form._itemForm;
   }
 
   static forValue(): Form<Value, AnyValue> {
-    if (!Form._valueForm) {
+    if (Form._valueForm === void 0) {
       Form._valueForm = new Form.ValueForm(Value.absent());
     }
     return Form._valueForm;

@@ -87,7 +87,7 @@ export class InterpreterSettings implements Debug, HashCode {
   private static _standard?: InterpreterSettings;
 
   static standard(): InterpreterSettings {
-    if (!InterpreterSettings._standard) {
+    if (InterpreterSettings._standard === void 0) {
       const maxScopeDepth = 1024;
       InterpreterSettings._standard = new InterpreterSettings(maxScopeDepth);
     }

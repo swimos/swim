@@ -40,7 +40,7 @@ export const DateTimeSpecifiers = {
     if (locale === DateTimeLocale.standard()) {
       specifiers = DateTimeSpecifiers._standard;
     }
-    if (!specifiers) {
+    if (specifiers === void 0) {
       specifiers = {
         Y: DateTimeFormat.year(),
         m: DateTimeFormat.monthOfYear(),

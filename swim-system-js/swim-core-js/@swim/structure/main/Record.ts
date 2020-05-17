@@ -824,7 +824,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
       return value;
     } else if (Array.isArray(value)) {
       return Record.fromArray(value);
-    } else if (value && typeof value === "object") {
+    } else if (typeof value === "object" && value !== null) {
       return Record.fromObject(value as {[key: string]: AnyValue});
     } else {
       throw new TypeError("" + value);

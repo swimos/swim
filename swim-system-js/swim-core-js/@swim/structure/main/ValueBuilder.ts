@@ -55,9 +55,9 @@ export class ValueBuilder implements Builder<Item, Value> {
 
   /** @hidden */
   pushValue(item: Value): void {
-    if (this._record != null) {
+    if (this._record !== null) {
       this._record.push(item);
-    } else if (this._value == null) {
+    } else if (this._value === null) {
       this._value = item;
     } else {
       this._record = Item.Record.create();

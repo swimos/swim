@@ -50,9 +50,9 @@ export class PrimaryWriter<I, V> extends Writer {
     let inParens = false;
     let first = true;
     let next: I | undefined;
-    while (next || items.hasNext()) {
+    while (next !== void 0 || items.hasNext()) {
       let item: I | undefined;
-      if (!next) {
+      if (next === void 0) {
         item = items.next().value!;
       } else {
         item = next;
@@ -79,7 +79,7 @@ export class PrimaryWriter<I, V> extends Writer {
         }
         size += recon.sizeOfBlockItem(item);
       } else if (recon.isValue(item) && !recon.isRecord(item)
-             && (!first && !next || next && recon.isAttr(next))) {
+             && (!first && next === void 0 || next !== void 0 && recon.isAttr(next))) {
         size += recon.sizeOfItem(item);
       } else {
         size += 1; // '('
@@ -99,11 +99,11 @@ export class PrimaryWriter<I, V> extends Writer {
                      next?: I, part?: Writer, step: number = 1): Writer {
     do {
       if (step === 1) {
-        if (!next && !items.hasNext()) {
+        if (next === void 0 && !items.hasNext()) {
           step = 5;
           break;
         } else {
-          if (!next) {
+          if (next === void 0) {
             item = items.next().value!;
           } else {
             item = next;
@@ -139,7 +139,7 @@ export class PrimaryWriter<I, V> extends Writer {
           part = recon.writeBlockItem(item!, output);
           step = 4;
         } else if (recon.isValue(item!) && !recon.isRecord(item!)
-               && (!first && !next || next && recon.isAttr(next))) {
+               && (!first && next === void 0 || next !== void 0 && recon.isAttr(next))) {
           part = recon.writeItem(item!, output);
           step = 4;
         } else {

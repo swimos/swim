@@ -104,15 +104,15 @@ export abstract class Downlink {
               prio: number = 0, rate: number = 0, body: Value = Value.absent(),
               flags: number = 0, observers: ReadonlyArray<DownlinkObserver> | DownlinkObserver | null = null) {
     let observer: DownlinkObserver | undefined;
-    if (!observers) {
+    if (observers === null) {
       observers = [];
     } else if (!Array.isArray(observers)) {
       observer = observers as DownlinkObserver;
       observers = [observer];
     }
-    if (init) {
+    if (init !== void 0) {
       observer = observer || {};
-      observers = observers ? observers.concat(observer) : [observer];
+      observers = observers !== null ? observers.concat(observer) : [observer];
       hostUri = init.hostUri !== void 0 ? Uri.fromAny(init.hostUri) : hostUri;
       nodeUri = init.nodeUri !== void 0 ? Uri.fromAny(init.nodeUri) : nodeUri;
       laneUri = init.laneUri !== void 0 ? Uri.fromAny(init.laneUri) : laneUri;
@@ -247,7 +247,7 @@ export abstract class Downlink {
 
   observe(observer: DownlinkObserver): this {
     const oldObservers = this._observers;
-    const n = oldObservers ? oldObservers.length : 0;
+    const n = oldObservers !== null ? oldObservers.length : 0;
     const newObservers = new Array<DownlinkObserver>(n + 1);
     for (let i = 0; i < n; i += 1) {
       newObservers[i] = oldObservers![i];
@@ -259,7 +259,7 @@ export abstract class Downlink {
 
   unobserve(observer: unknown): this {
     const oldObservers = this._observers;
-    const n = oldObservers ? oldObservers.length : 0;
+    const n = oldObservers !== null ? oldObservers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const oldObserver = oldObservers![i] as {[key: string]: unknown};
       let found = oldObserver === observer; // check object identity
@@ -339,32 +339,32 @@ export abstract class Downlink {
   }
 
   isConnected(): boolean {
-    return this._model ? this._model.isConnected() : false;
+    return this._model !== null ? this._model.isConnected() : false;
   }
 
   isAuthenticated(): boolean {
-    return this._model ? this._model.isAuthenticated() : false;
+    return this._model !== null ? this._model.isAuthenticated() : false;
   }
 
   isLinked(): boolean {
-    return this._model ? this._model.isLinked() : false;
+    return this._model !== null ? this._model.isLinked() : false;
   }
 
   isSynced(): boolean {
-    return this._model ? this._model.isSynced() : false;
+    return this._model !== null ? this._model.isSynced() : false;
   }
 
   session(): Value {
-    return this._model ? this._model.session() : Value.absent();
+    return this._model !== null ? this._model.session() : Value.absent();
   }
 
   /** @hidden */
   onEventMessage(message: EventMessage): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.onEvent) {
+      if (observer.onEvent !== void 0) {
         observer.onEvent(message.body(), this);
       }
     }
@@ -373,10 +373,10 @@ export abstract class Downlink {
   /** @hidden */
   onCommandMessage(body: Value): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.onCommand) {
+      if (observer.onCommand !== void 0) {
         observer.onCommand(body, this);
       }
     }
@@ -385,10 +385,10 @@ export abstract class Downlink {
   /** @hidden */
   onLinkRequest(request?: LinkRequest): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willLink) {
+      if (observer.willLink !== void 0) {
         observer.willLink(this);
       }
     }
@@ -397,10 +397,10 @@ export abstract class Downlink {
   /** @hidden */
   onLinkedResponse(response?: LinkedResponse): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didLink) {
+      if (observer.didLink !== void 0) {
         observer.didLink(this);
       }
     }
@@ -409,10 +409,10 @@ export abstract class Downlink {
   /** @hidden */
   onSyncRequest(request?: SyncRequest): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willSync) {
+      if (observer.willSync !== void 0) {
         observer.willSync(this);
       }
     }
@@ -421,10 +421,10 @@ export abstract class Downlink {
   /** @hidden */
   onSyncedResponse(response?: SyncedResponse): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didSync) {
+      if (observer.didSync !== void 0) {
         observer.didSync(this);
       }
     }
@@ -433,10 +433,10 @@ export abstract class Downlink {
   /** @hidden */
   onUnlinkRequest(request?: UnlinkRequest): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.willUnlink) {
+      if (observer.willUnlink !== void 0) {
         observer.willUnlink(this);
       }
     }
@@ -445,10 +445,10 @@ export abstract class Downlink {
   /** @hidden */
   onUnlinkedResponse(response?: UnlinkedResponse): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didUnlink) {
+      if (observer.didUnlink !== void 0) {
         observer.didUnlink(this);
       }
     }
@@ -457,10 +457,10 @@ export abstract class Downlink {
   /** @hidden */
   hostDidConnect(): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didConnect) {
+      if (observer.didConnect !== void 0) {
         observer.didConnect(this);
       }
     }
@@ -469,10 +469,10 @@ export abstract class Downlink {
   /** @hidden */
   hostDidDisconnect(): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didDisconnect) {
+      if (observer.didDisconnect !== void 0) {
         observer.didDisconnect(this);
       }
     }
@@ -481,10 +481,10 @@ export abstract class Downlink {
   /** @hidden */
   hostDidFail(error: unknown): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didFail) {
+      if (observer.didFail !== void 0) {
         observer.didFail(error, this);
       }
     }
@@ -497,10 +497,10 @@ export abstract class Downlink {
   abstract open(): this;
 
   close(): void {
-    if (this._owner) {
+    if (this._owner !== void 0) {
       this._owner.removeDownlink(this);
     }
-    if (this._model) {
+    if (this._model !== null) {
       this._model.removeDownlink(this);
     }
   }
@@ -513,19 +513,19 @@ export abstract class Downlink {
   /** @hidden */
   closeUp(): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didClose) {
+      if (observer.didClose !== void 0) {
         observer.didClose(this);
       }
     }
   }
 
-  private static _initForm: Form<DownlinkInit | undefined>;
+  private static _initForm?: Form<DownlinkInit | undefined>;
 
   static initForm(): Form<DownlinkInit | undefined> {
-    if (!Downlink._initForm) {
+    if (Downlink._initForm === void 0) {
       Downlink._initForm = new DownlinkInitForm();
     }
     return Downlink._initForm;
@@ -547,7 +547,7 @@ class DownlinkInitForm extends Form<DownlinkInit | undefined> {
   }
 
   mold(init: DownlinkInit | undefined): Item {
-    if (init) {
+    if (init !== void 0) {
       const header = Record.create();
       if (init.hostUri !== void 0) {
         header.slot("host", Uri.fromAny(init.hostUri).toString());

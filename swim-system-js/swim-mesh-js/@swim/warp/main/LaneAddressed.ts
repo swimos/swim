@@ -124,7 +124,7 @@ export abstract class LaneAddressed extends Envelope {
         }
       }
     });
-    if (node && lane) {
+    if (node !== void 0 && lane !== void 0) {
       const body = value.body();
       return new E!(node, lane, body);
     }

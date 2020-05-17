@@ -84,7 +84,7 @@ export class Target {
     this.redoc = false;
 
     this.compileStart = 0;
-    this.createWatchProgram = this.createWatchProgram.bind(this);
+    this.createProgram = this.createProgram.bind(this);
     this.onCompileUpdate = this.onCompileUpdate.bind(this);
     this.onCompileResult = this.onCompileResult.bind(this);
     this.onCompileError = this.onCompileError.bind(this);
@@ -96,12 +96,12 @@ export class Target {
   }
 
   initDeps(config: TargetConfig): void {
-    if (config.deps) {
+    if (config.deps !== void 0) {
       for (let i = 0; i < config.deps.length; i += 1) {
         const dep = config.deps[i];
         const [projectId, targetId] = dep.split(":");
-        const project = this.project.build.projects[projectId];
-        const target = project.targets[targetId || "main"];
+        const project = this.project.build.projects[projectId]!;
+        const target = project.targets[targetId || "main"]!;
         this.deps.push(target);
       }
     }
@@ -112,14 +112,14 @@ export class Target {
       bundleConfig.input = path.resolve(this.project.baseDir, bundleConfig.input);
     }
     const bundleOutput = bundleConfig.output as rollup.OutputOptions;
-    if (bundleOutput && typeof bundleOutput.file === "string") {
+    if (bundleOutput !== void 0 && typeof bundleOutput.file === "string") {
       bundleOutput.file = path.resolve(this.project.baseDir, bundleOutput.file);
       if (this.preamble === void 0) {
         if (typeof bundleOutput.banner === "string") {
           this.preamble = bundleOutput.banner;
         } else {
           this.preamble = "// " + path.basename(bundleOutput.file, ".js") + "-" + this.project.package.version;
-          if (this.project.package.copyright) {
+          if (typeof this.project.package.copyright === "string") {
             this.preamble += "; copyright " + this.project.package.copyright;
           }
         }
@@ -150,7 +150,7 @@ export class Target {
     for (let i = 0; i < targets.length; i += 1) {
       const target = targets[i];
       newRefs.push({path: target.baseDir});
-      if (target.id === "main" && compilerOptions) {
+      if (target.id === "main" && compilerOptions !== void 0) {
         compilerOptions.paths = compilerOptions.paths || {};
         if (!compilerOptions.paths[target.project.name]) {
           compilerOptions.paths[target.project.name] = [target.baseDir];
@@ -161,7 +161,7 @@ export class Target {
   }
 
   protected injectCompilerOptions(compilerOptions: ts.CompilerOptions): void {
-    // stub
+    // hook
   }
 
   protected canCompile(): boolean {
@@ -195,35 +195,13 @@ export class Target {
       const projectReferences = this.injectProjectReferences(commandLine.projectReferences, commandLine.options);
       this.injectCompilerOptions(commandLine.options);
 
-      const incrementalProgram = ts.createIncrementalProgram<ts.EmitAndSemanticDiagnosticsBuilderProgram>({
-        rootNames: commandLine.fileNames,
-        options: commandLine.options,
-        projectReferences: projectReferences,
-        configFileParsingDiagnostics: commandLine.errors,
-      });
-      this.program = incrementalProgram.getProgram();
+      const rootNames = projectReferences.map(ref => ref.path);
+      rootNames.push(this.baseDir);
+      const solutionBuilderHost = ts.createSolutionBuilderHost(ts.sys, this.createProgram, this.onCompileError, this.onCompileUpdate);
+      const solutionBuilder = ts.createSolutionBuilder(solutionBuilderHost, rootNames, {incremental: true, watch: true});
+
       this.compileStart = Date.now();
-
-      let nextDiagnostic: ts.AffectedFileResult<ReadonlyArray<ts.Diagnostic>>;
-      while (nextDiagnostic = incrementalProgram.getSemanticDiagnosticsOfNextAffectedFile()) {
-        const diagnostics = nextDiagnostic.result;
-        for (let i = 0; i < diagnostics.length; i += 1) {
-          const diagnostic = diagnostics[i];
-          if (diagnostic.category !== ts.DiagnosticCategory.Message) {
-            this.onCompileError(diagnostics[i]);
-          }
-        }
-      }
-
-      if (!this.failed) {
-        let nextEmit: ts.AffectedFileResult<ts.EmitResult>;
-        while (nextEmit = incrementalProgram.emitNextAffectedFile()) {
-          if ((nextEmit.affected as ts.SourceFile).kind === ts.SyntaxKind.SourceFile) {
-            const sourceFile = nextEmit.affected as ts.SourceFile;
-            this.onEmitSourceFile(sourceFile);
-          }
-        }
-      }
+      solutionBuilder.build();
 
       if (!this.failed) {
         this.lint();
@@ -260,7 +238,7 @@ export class Target {
 
     const rootNames = projectReferences.map(ref => ref.path);
     rootNames.push(this.baseDir);
-    const solutionBuilderHost = ts.createSolutionBuilderWithWatchHost(ts.sys, this.createWatchProgram, this.onCompileError,
+    const solutionBuilderHost = ts.createSolutionBuilderWithWatchHost(ts.sys, this.createProgram, this.onCompileError,
                                                                       this.onCompileUpdate, this.onCompileResult);
     const solutionBuilder = ts.createSolutionBuilderWithWatch(solutionBuilderHost, rootNames, {incremental: true, watch: true});
 
@@ -268,26 +246,26 @@ export class Target {
     solutionBuilder.build();
   }
 
-  private createWatchProgram(rootNames: ReadonlyArray<string>,
-                             options: ts.CompilerOptions,
-                             host?: ts.CompilerHost,
-                             oldProgram?: ts.EmitAndSemanticDiagnosticsBuilderProgram,
-                             configFileParsingDiagnostics?: ReadonlyArray<ts.Diagnostic>,
-                             projectReferences?: ReadonlyArray<ts.ProjectReference>): ts.EmitAndSemanticDiagnosticsBuilderProgram {
+  private createProgram(rootNames: ReadonlyArray<string>,
+                        options: ts.CompilerOptions,
+                        host?: ts.CompilerHost,
+                        oldProgram?: ts.EmitAndSemanticDiagnosticsBuilderProgram,
+                        configFileParsingDiagnostics?: ReadonlyArray<ts.Diagnostic>,
+                        projectReferences?: ReadonlyArray<ts.ProjectReference>): ts.EmitAndSemanticDiagnosticsBuilderProgram {
     projectReferences = this.injectProjectReferences(projectReferences, options);
-    const watchProgram = ts.createEmitAndSemanticDiagnosticsBuilderProgram(rootNames, options, host, oldProgram,
-                                                                           configFileParsingDiagnostics, projectReferences);
-    this.program = watchProgram.getProgram();
+    const program = ts.createEmitAndSemanticDiagnosticsBuilderProgram(rootNames, options, host, oldProgram,
+                                                                      configFileParsingDiagnostics, projectReferences);
+    this.program = program.getProgram();
     const emit = this.program.emit;
     this.program.emit = function (this: Target, targetSourceFile?: ts.SourceFile, writeFile?: ts.WriteFileCallback, cancellationToken?: ts.CancellationToken, emitOnlyDtsFiles?: boolean, customTransformers?: ts.CustomTransformers): ts.EmitResult {
       this.onEmitSourceFile(targetSourceFile!);
       return emit.call(this.program, targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers);
     }.bind(this);
-    return watchProgram;
+    return program;
   }
 
   protected onEmitSourceFile(sourceFile: ts.SourceFile): void {
-    if (this.program && !this.program.isSourceFileFromExternalLibrary(sourceFile)
+    if (this.program !== void 0 && !this.program.isSourceFileFromExternalLibrary(sourceFile)
         && !this.program.isSourceFileDefaultLibrary(sourceFile)
         && sourceFile.fileName.indexOf(".d.ts") < 0
         && this.emittedSourceFiles.indexOf(sourceFile) < 0) {
@@ -335,7 +313,7 @@ export class Target {
   }
 
   protected onCompileUpdate(status: ts.Diagnostic) {
-    // stub
+    // hook
   }
 
   protected onCompileError(error: ts.Diagnostic): void {
@@ -350,7 +328,7 @@ export class Target {
     if (severity.level() >= Severity.ERROR_LEVEL) {
       this.failed = true;
     }
-    if (error.file) {
+    if (error.file !== void 0) {
       let tag: Tag;
       if (error.length! > 1) {
         const start = Target.tsMark(error.start!, error.file);
@@ -498,7 +476,7 @@ export class Target {
     console.log(output.bind());
 
     const bundleConfig = this.project.bundleConfig[this.id] as rollup.RollupOptions | undefined;
-    if (bundleConfig) {
+    if (bundleConfig !== void 0) {
       const t0 = Date.now();
       const cwd = process.cwd();
       process.chdir(this.project.baseDir);
@@ -569,7 +547,9 @@ export class Target {
       const scriptName = path.basename(inputChunk.fileName, ".js") + ".min.js";
       const scriptPath = path.resolve(outputDir, scriptName);
       const terserOptions: any = {
-        output: {},
+        output: {
+          comments: false,
+        },
       };
       if (!options.banner) {
         terserOptions.output.preamble = this.preamble;
@@ -632,14 +612,14 @@ export class Target {
       return; // suppress superfluous warnings
     }
     const output = Unicode.stringOutput(OutputSettings.styled());
-    if (warning.importer) {
+    if (warning.importer !== void 0) {
       output.write(warning.importer);
       output.write(" ");
     }
     OutputStyle.blue(output);
     output.write("warning:");
     OutputStyle.reset(output);
-    if (warning.message) {
+    if (warning.message.length !== 0) {
       output.write(" ");
       output.write(warning.message);
     }
@@ -682,7 +662,7 @@ export class Target {
       fs.writeFileSync(scriptPath, code, "utf8");
 
       if (options.sourcemap) {
-        fs.writeFileSync(sourceMappingPath, chunk.map, "utf8");
+        fs.writeFileSync(sourceMappingPath, chunk.map!.toString(), "utf8");
       }
     }
   }
@@ -706,10 +686,10 @@ export class Target {
     console.log(output.bind());
 
     const bundleConfig = this.project.bundleConfig[this.id] as rollup.RollupOptions | undefined;
-    const bundleOutput = bundleConfig ? bundleConfig.output as rollup.OutputOptions : void 0;
-    const outputFile = bundleOutput ? bundleOutput.file : void 0;
-    const scriptPath = outputFile ? path.resolve(this.project.baseDir, outputFile) : void 0;
-    if (scriptPath && fs.existsSync(scriptPath)) {
+    const bundleOutput = bundleConfig !== void 0 ? bundleConfig.output as rollup.OutputOptions : void 0;
+    const outputFile = bundleOutput !== void 0 ? bundleOutput.file : void 0;
+    const scriptPath = outputFile !== void 0 ? path.resolve(this.project.baseDir, outputFile) : void 0;
+    if (scriptPath !== void 0 && fs.existsSync(scriptPath)) {
       return new Promise((resolve, reject): void => {
         const args: string[] = [];
 
@@ -835,7 +815,7 @@ export class Target {
 
     const t0 = Date.now();
     const project = doc.convert(fileNames);
-    if (project) {
+    if (project !== void 0) {
       doc.generateDocs(project, outDir);
       const dt = Date.now() - t0;
 
@@ -873,7 +853,7 @@ export class Target {
       const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
       const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
       const tsBuildInfoFile = commandLine.options.tsBuildInfoFile;
-      if (tsBuildInfoFile && fs.existsSync(tsBuildInfoFile)) {
+      if (tsBuildInfoFile !== void 0 && tsBuildInfoFile.length !== 0 && fs.existsSync(tsBuildInfoFile)) {
         const output = Unicode.stringOutput(OutputSettings.styled());
         OutputStyle.greenBold(output);
         output.write("deleting");

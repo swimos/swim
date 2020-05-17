@@ -8,8 +8,7 @@
 
 **@swim/mesh** implements a multiplexed streaming WARP client that runs in both
 Node.js and web browsers. **@swim/mesh** can be used in concert with the
-[**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/ui)
-and [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ux)
+[**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/ui)
 user interface toolkits to build massively real-time streaming applications.
 **@swim/mesh** is part of the broader
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system) framework.
@@ -51,7 +50,7 @@ bundles all **@swim/mesh** component libraries, can be found in
 ### Browser
 
 Browser applications can load `swim-mesh.js`, along with its `swim-core.js`
-dependency, from the swimOS CDN.
+dependency, from the SwimOS CDN.
 
 ```html
 <!-- Development -->
@@ -64,7 +63,7 @@ dependency, from the swimOS CDN.
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the swimOS CDN, which bundles **@swim/mesh** together with all other
+from the SwimOS CDN, which bundles **@swim/mesh** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 frameworks.
 

@@ -93,7 +93,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
 
   firstEntry(): [K, V] | undefined {
     const pages = this._pages;
-    if (pages.length) {
+    if (pages.length !== 0) {
       return pages[0].firstEntry();
     } else {
       return void 0;
@@ -102,7 +102,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
 
   lastEntry(): [K, V] | undefined {
     const pages = this._pages;
-    if (pages.length) {
+    if (pages.length !== 0) {
       return pages[pages.length - 1].lastEntry();
     } else {
       return void 0;

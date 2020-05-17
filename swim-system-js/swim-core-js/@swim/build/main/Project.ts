@@ -47,7 +47,7 @@ export class Project {
   readonly packagePath: string;
   readonly package: any;
 
-  readonly targets: {[name: string]: Target};
+  readonly targets: {[name: string]: Target | undefined};
   readonly targetList: Target[];
 
   readonly devel: boolean;
@@ -102,7 +102,7 @@ export class Project {
   initDeps(config: ProjectConfig): void {
     for (let i = 0; i < config.targets.length; i += 1) {
       const targetConfig = config.targets[i];
-      const target = this.targets[targetConfig.id];
+      const target = this.targets[targetConfig.id]!;
       target.initDeps(targetConfig);
     }
   }
@@ -115,7 +115,7 @@ export class Project {
           for (let i = 0; i < this.targetList.length; i += 1) {
             const target = this.targetList[i];
             const targetBundleConfig = bundleConfig[target.id];
-            if (targetBundleConfig) {
+            if (targetBundleConfig !== void 0) {
               target.initBundle(targetBundleConfig);
             }
           }
@@ -132,7 +132,7 @@ export class Project {
     const pkg = this.package;
     let modified = false;
 
-    if (build.version) {
+    if (build.version !== void 0) {
       if (pkg.version !== build.version) {
         pkg.version = build.version;
         modified = true;

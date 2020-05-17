@@ -73,16 +73,16 @@ export abstract class OutputBuffer<T = unknown> extends Output<T> {
     throw new Error();
   }
 
-  private static _fullBuffer: OutputBuffer<any>;
+  private static _fullBuffer?: OutputBuffer<any>;
 
-  private static _doneBuffer: OutputBuffer<any>;
+  private static _doneBuffer?: OutputBuffer<any>;
 
   /**
    * Returns an `OutputBuffer` in the _full_ state, that binds a `null` result.
    */
   static full<T>(value: T | null = null, settings: OutputSettings = OutputSettings.standard()): OutputBuffer<T> {
     if (value === null && settings === OutputSettings.standard()) {
-      if (!OutputBuffer._fullBuffer) {
+      if (OutputBuffer._fullBuffer === void 0) {
         OutputBuffer._fullBuffer = new OutputBufferFull(value, OutputSettings.standard());
       }
       return OutputBuffer._fullBuffer;
@@ -96,7 +96,7 @@ export abstract class OutputBuffer<T = unknown> extends Output<T> {
    */
   static done<T>(value: T | null = null, settings: OutputSettings = OutputSettings.standard()): OutputBuffer<T> {
     if (value === null && settings === OutputSettings.standard()) {
-      if (!OutputBuffer._doneBuffer) {
+      if (OutputBuffer._doneBuffer === void 0) {
         OutputBuffer._doneBuffer = new OutputBufferDone(value, OutputSettings.standard());
       }
       return OutputBuffer._doneBuffer;

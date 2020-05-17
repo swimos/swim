@@ -1,7 +1,7 @@
 {
   "name": "@swim/system",
   "version": "3.10.2",
-  "description": "Framework for building massively real-time streaming WARP clients and web user interface applications",
+  "description": "Framework for building massively real-time streaming WARP client applications",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2020 SWIM.AI inc.",
@@ -12,9 +12,6 @@
   "types": "lib/main/index.d.ts",
   "dependencies": {
     "@swim/core": "3.10.2",
-    "@swim/mesh": "3.10.2",
-    "@swim/ui": "3.10.2",
-    "@swim/ux": "3.10.2",
-    "@swim/web": "3.10.2"
+    "@swim/mesh": "3.10.2"
   }
 }

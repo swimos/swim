@@ -73,13 +73,13 @@ export class BlockItemParser<I, V> extends Parser<V> {
           } else if (c === 36/*'$'*/) {
             valueParser = recon.parseSelector(input);
             step = 4;
-          } else if (!builder) {
+          } else if (builder === void 0) {
             return Parser.done(recon.extant());
           } else {
             return Parser.done(builder.bind());
           }
         } else if (input.isDone()) {
-          if (!builder) {
+          if (builder === void 0) {
             return Parser.done(recon.extant());
           } else {
             return Parser.done(builder.bind());

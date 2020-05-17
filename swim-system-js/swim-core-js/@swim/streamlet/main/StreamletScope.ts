@@ -37,7 +37,7 @@ export interface StreamletScope<O> {
 /** @hidden */
 export const StreamletScope = {
   is<O>(object: unknown): object is StreamletScope<O> {
-    if (typeof object === "object" && object) {
+    if (typeof object === "object" && object !== null) {
       const scope = object as StreamletScope<O>;
       return typeof scope.streamletScope === "function"
           && typeof scope.streamletContext === "function"

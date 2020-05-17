@@ -84,7 +84,7 @@ export class TimeZone implements HashCode, Debug {
 
   private static _utc?: TimeZone;
   static utc(): TimeZone {
-    if (!TimeZone._utc) {
+    if (TimeZone._utc === void 0) {
       TimeZone._utc = new TimeZone("UTC", 0);
     }
     return TimeZone._utc;
@@ -92,7 +92,7 @@ export class TimeZone implements HashCode, Debug {
 
   private static _local?: TimeZone;
   static local(): TimeZone {
-    if (!TimeZone._local) {
+    if (TimeZone._local === void 0) {
       TimeZone._local = TimeZone.forOffset(-new Date().getTimezoneOffset());
     }
     return TimeZone._local;
@@ -146,6 +146,13 @@ export class TimeZone implements HashCode, Debug {
     return void 0;
   }
 
+  /** @hidden */
+  static isAny(value: unknown): value is AnyTimeZone {
+    return value instanceof TimeZone
+        || typeof value === "string"
+        || typeof value === "number";
+  }
+
   private static _form: Form<TimeZone, AnyTimeZone>;
   static form(unit?: AnyTimeZone): Form<TimeZone, AnyTimeZone> {
     if (unit !== void 0) {
@@ -154,7 +161,7 @@ export class TimeZone implements HashCode, Debug {
     if (unit !== TimeZone.utc()) {
       return new TimeZone.Form(unit);
     } else {
-      if (!TimeZone._form) {
+      if (TimeZone._form === void 0) {
         TimeZone._form = new TimeZone.Form(TimeZone.utc());
       }
       return TimeZone._form;

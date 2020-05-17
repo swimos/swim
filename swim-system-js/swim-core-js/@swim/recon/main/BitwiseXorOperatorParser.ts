@@ -45,7 +45,7 @@ export class BitwiseXorOperatorParser<I, V> extends Parser<V> {
     let c = 0;
     do {
       if (step === 1) {
-        if (!lhsParser) {
+        if (lhsParser === void 0) {
           lhsParser = recon.parseBitwiseAndOperator(input, builder);
         }
         while (lhsParser.isCont() && !input.isEmpty()) {
@@ -73,7 +73,7 @@ export class BitwiseXorOperatorParser<I, V> extends Parser<V> {
         }
       }
       if (step === 3) {
-        if (!rhsParser) {
+        if (rhsParser === void 0) {
           rhsParser = recon.parseBitwiseAndOperator(input, builder);
         }
         while (rhsParser.isCont() && !input.isEmpty()) {

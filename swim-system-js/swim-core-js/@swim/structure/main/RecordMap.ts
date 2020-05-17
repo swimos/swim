@@ -1119,7 +1119,7 @@ export class RecordMap extends Record {
   private static _empty?: RecordMap;
 
   static empty(): RecordMap {
-    if (!RecordMap._empty) {
+    if (RecordMap._empty === void 0) {
       RecordMap._empty = new RecordMap(null, null, 0, 0, Record.ALIASED | Record.IMMUTABLE);
     }
     return RecordMap._empty;

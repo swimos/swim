@@ -54,7 +54,7 @@ export class HashGenCacheMap<K, V> {
     }
     const index = Math.abs(Objects.hash(key)) % this._buckets.length;
     const bucket = this._buckets[index];
-    if (!bucket) {
+    if (bucket === void 0) {
       return void 0;
     }
 
@@ -250,7 +250,7 @@ export class HashGenCacheMap<K, V> {
     }
     const index = Math.abs(Objects.hash(key)) % this._buckets.length;
     const bucket = this._buckets[index];
-    if (!bucket) {
+    if (bucket === void 0) {
       return void 0;
     }
 

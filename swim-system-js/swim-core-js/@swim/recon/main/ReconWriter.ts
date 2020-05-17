@@ -218,7 +218,7 @@ export abstract class ReconWriter<I, V> {
   }
 
   writeData(value: Uint8Array | undefined, output: Output): Writer {
-    if (value) {
+    if (value !== void 0) {
       return DataWriter.write(output, value);
     } else {
       return Unicode.writeString("%", output);

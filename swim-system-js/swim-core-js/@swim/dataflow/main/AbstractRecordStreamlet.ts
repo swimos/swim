@@ -49,7 +49,7 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
   }
 
   streamletContext(): StreamletContext | null {
-    if (this.context) {
+    if (this.context !== null) {
       return this.context;
     }
     const scope = this.streamletScope();

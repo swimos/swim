@@ -11,9 +11,8 @@ and strongly typed baseline on which to build higher level libraries.
 **Swim Core** forms the foundation on which the
 [**Swim Mesh**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js)
 multiplexed streaming WARP framework, and the
-[**Swim UI**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js)
-and [**Swim UX**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js)
-real-time user interface toolkits, are built.  **Swim Core** is part of the broader
+[**Swim UI**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js)
+real-time user interface toolkit, are built.  **Swim Core** is part of the broader
 [**Swim System**](https://github.com/swimos/swim/tree/master/swim-system-js) framework.
 
 ## Framework
@@ -35,6 +34,8 @@ The **Swim Core** framework consists of the following component libraries:
 - [**@swim/collections**](@swim/collections) –
   immutable, structure sharing collections, including B-trees and S-trees
   (sequence trees).
+- [**@swim/interpolate**](@swim/interpolate) –
+  extensible interpolators for smoothly blending between values.
 - [**@swim/structure**](@swim/structure) –
   generic structured data model, with support for selectors, expressions,
   and lambda functions.  Used as a common abstract syntax tree for Recon,
@@ -72,7 +73,7 @@ bundles all **@swim/core** component libraries, can be found in
 
 ### Browser
 
-Browser applications can load `swim-core.js` directly from the swimOS CDN.
+Browser applications can load `swim-core.js` directly from the SwimOS CDN.
 
 ```html
 <!-- Development -->
@@ -83,7 +84,7 @@ Browser applications can load `swim-core.js` directly from the swimOS CDN.
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the swimOS CDN, which bundles **@swim/core** together with all other
+from the SwimOS CDN, which bundles **@swim/core** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 frameworks.
 

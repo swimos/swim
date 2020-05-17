@@ -42,7 +42,7 @@ export class DocTarget extends ConverterComponent {
   onDeclarationCreate(context: Context, reflection: typedoc.Reflection): void {
     const fileName = reflection.originalName;
     const fileInfo = this.fileTargetMap[fileName];
-    if (fileInfo) {
+    if (fileInfo !== void 0) {
       fileInfo.reflection = reflection;
     }
   }
@@ -65,13 +65,13 @@ export class DocTarget extends ConverterComponent {
       const target = targets[i];
       const indexPath = path.resolve(target.baseDir, "index.ts");
       const targetInfo = this.fileTargetMap[indexPath];
-      if (targetInfo) {
+      if (targetInfo !== void 0) {
         delete this.fileTargetMap[indexPath];
         targetReflections[target.uid] = targetInfo;
 
         const targetReflection = targetInfo.reflection as typedoc.ContainerReflection;
         targetReflection.name = target.project.name;
-        targetReflection.kind = typedoc.ReflectionKind.Module;
+        targetReflection.kind = typedoc.ReflectionKind.Namespace;
 
         const readmePath = path.join(target.project.baseDir, target.project.readme || "README.md");
         if (fs.existsSync(readmePath)) {
@@ -95,9 +95,9 @@ export class DocTarget extends ConverterComponent {
       // lift file reflections into library reflection
       const fileInfo = this.fileTargetMap[fileName]!;
       const targetInfo = targetReflections[fileInfo.target.uid]!;
-      const fileReflection = fileInfo.reflection as typedoc.DeclarationReflection;
+      const fileReflection = fileInfo.reflection as typedoc.DeclarationReflection | undefined;
       const targetReflection = targetInfo.reflection as typedoc.ContainerReflection;
-      if (!targetReflection.children) {
+      if (targetReflection.children === void 0) {
         targetReflection.children = [];
       }
 
@@ -107,17 +107,19 @@ export class DocTarget extends ConverterComponent {
         childReflection.parent = targetReflection;
         targetReflection.children.push(childReflection);
       }
-      if (fileReflection.children) {
-        fileReflection.children.length = 0;
+      if (fileReflection !== void 0) {
+        if (fileReflection.children !== void 0) {
+          fileReflection.children.length = 0;
+        }
+        context.project.removeReflection(fileReflection);
       }
-      context.project.removeReflection(fileReflection);
     }
 
     if (rootTarget.project.umbrella) {
       for (let i = 0; i < targets.length; i += 1) {
         const target = targets[i];
         const targetReflection = targetReflections[target.uid]!.reflection as typedoc.ContainerReflection;
-        if (!targetReflection.children) {
+        if (targetReflection.children === void 0) {
           targetReflection.children = [];
         }
         if (targetReflection !== rootReflection && target.project.umbrella) {
@@ -127,7 +129,7 @@ export class DocTarget extends ConverterComponent {
             const targetDep = targetDeps[j];
             const depReflection = targetReflections[targetDep.uid]!.reflection as typedoc.DeclarationReflection;
             const oldParentReflection = depReflection.parent as typedoc.ContainerReflection | undefined;
-            if (oldParentReflection && oldParentReflection.children) {
+            if (oldParentReflection !== void 0 && oldParentReflection.children !== void 0) {
               const index = oldParentReflection.children.indexOf(depReflection);
               if (index >= 0) {
                 oldParentReflection.children.splice(index, 1);
@@ -142,7 +144,7 @@ export class DocTarget extends ConverterComponent {
       context.project.removeReflection(rootReflection);
     } else {
       // lift root library reflections into project reflection
-      if (!context.project.children) {
+      if (context.project.children === void 0) {
         context.project.children = [];
       }
       const childReflections = reflections.filter((reflection) => reflection.parent === rootReflection);
@@ -151,7 +153,7 @@ export class DocTarget extends ConverterComponent {
         childReflection.parent = context.project;
         context.project.children.push(childReflection);
       }
-      if (rootReflection.children) {
+      if (rootReflection.children !== void 0) {
         rootReflection.children.length = 0;
       }
       context.project.comment = rootReflection.comment;

@@ -19,6 +19,7 @@ import {RecordMapSpec} from "./RecordMapSpec";
 import {RecordMapViewSpec} from "./RecordMapViewSpec";
 import {SelectorSpec} from "./SelectorSpec";
 import {OperatorSpec} from "./OperatorSpec";
+import {InterpolatorSpec} from "./InterpolatorSpec";
 
 import {FuncSpec} from "./func";
 import {FormSpec} from "./form";
@@ -59,6 +60,11 @@ class StructureSpec extends Spec {
   formSpec(): Spec {
     return new FormSpec();
   }
+
+  @Unit
+  interpolatorSpec(): Spec {
+    return new InterpolatorSpec();
+  }
 }
 
 export {
@@ -67,6 +73,7 @@ export {
   RecordMapViewSpec,
   SelectorSpec,
   OperatorSpec,
+  InterpolatorSpec,
 };
 
 export * from "./func";

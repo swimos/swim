@@ -37,7 +37,7 @@ export class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
 
   get(): O | undefined {
     const streamlet = this._streamlet as GenericStreamlet<I, O>;
-    if (streamlet.getOutput) {
+    if (streamlet.getOutput !== void 0) {
       const output = streamlet.getOutput(this);
       if (output !== void 0) {
         return output;
@@ -51,14 +51,14 @@ export class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
 
   protected willDecohere(): void {
     const streamlet = this._streamlet as GenericStreamlet<I, O>;
-    if (streamlet.willDecohereOutlet) {
+    if (streamlet.willDecohereOutlet !== void 0) {
       streamlet.willDecohereOutlet(this);
     }
   }
 
   protected didDecohere(): void {
     const streamlet = this._streamlet as GenericStreamlet<I, O>;
-    if (streamlet.didDecohereOutlet) {
+    if (streamlet.didDecohereOutlet !== void 0) {
       streamlet.didDecohereOutlet(this);
     } else {
       streamlet.decohere();
@@ -67,14 +67,14 @@ export class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
 
   protected willRecohere(version: number): void {
     const streamlet = this._streamlet as GenericStreamlet<I, O>;
-    if (streamlet.willRecohereOutlet) {
+    if (streamlet.willRecohereOutlet !== void 0) {
       streamlet.willRecohereOutlet(this, version);
     }
   }
 
   protected didRecohere(version: number): void {
     const streamlet = this._streamlet as GenericStreamlet<I, O>;
-    if (streamlet.didRecohereOutlet) {
+    if (streamlet.didRecohereOutlet !== void 0) {
       streamlet.didRecohereOutlet(this, version);
     }
   }

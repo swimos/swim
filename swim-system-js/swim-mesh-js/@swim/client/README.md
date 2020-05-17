@@ -435,7 +435,7 @@ be found in `node_modules/@swim/client/dist/main/swim-client.js`.
 ### Browser
 
 Browser applications can load `swim-mesh.js`—which bundles the **@swim/client**
-library—along with its `swim-core.js` dependency, directly from the swimOS CDN.
+library—along with its `swim-core.js` dependency, directly from the SwimOS CDN.
 
 ```html
 <!-- Development -->
@@ -448,7 +448,7 @@ library—along with its `swim-core.js` dependency, directly from the swimOS CDN
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the swimOS CDN, which bundles **@swim/client** together with all other
+from the SwimOS CDN, which bundles **@swim/client** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 libraries.
 

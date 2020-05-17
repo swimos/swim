@@ -109,9 +109,9 @@ export class UriUser implements HashCode, Debug, Display {
   }
 
   display(output: Output): void {
-    if (this._username != null) {
+    if (this._username !== null) {
       Uri.writeUser(this._username, output);
-      if (this._password != null) {
+      if (this._password !== null) {
         output = output.write(58/*':'*/);
         Uri.writeUser(this._password, output);
       }

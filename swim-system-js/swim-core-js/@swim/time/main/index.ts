@@ -25,7 +25,11 @@ export {
   DateTimeInit,
   DateTime,
 } from "./DateTime";
+
 export {DateTimeParser} from "./DateTimeParser";
+
+export {DateTimeInterpolator} from "./DateTimeInterpolator";
+
 export {DateTimeForm} from "./DateTimeForm";
 
 export {DateTimeFormat} from "./DateTimeFormat";

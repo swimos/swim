@@ -37,7 +37,7 @@ export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
   get(key: K): V | undefined;
   get(key?: K): IO | V | undefined {
     if (key === void 0) {
-      if (this._state === void 0 && this._input != null) {
+      if (this._state === void 0 && this._input !== null) {
         this._state = this._input.get();
       }
       return this._state;

@@ -188,7 +188,7 @@ export abstract class Writer<I = unknown, O = unknown> {
 
   static done<I, O>(output?: O): Writer<I, O> {
     if (output === void 0) {
-      if (!Writer._done) {
+      if (Writer._done === void 0) {
         Writer._done = new WriterDone<any, any>(void 0);
       }
       return Writer._done;

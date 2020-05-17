@@ -44,7 +44,7 @@ And a pre-built UMD script can be found in
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-**@swim/dataflow** library, directly from the swimOS CDN.
+**@swim/dataflow** library, directly from the SwimOS CDN.
 
 ```html
 <!-- Development -->
@@ -55,7 +55,7 @@ Browser applications can load `swim-core.js`, which comes bundled with the
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the swimOS CDN, which bundles **@swim/dataflow** together with all other
+from the SwimOS CDN, which bundles **@swim/dataflow** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 libraries.
 

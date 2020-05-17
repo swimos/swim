@@ -219,9 +219,9 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
     throw new Error();
   }
 
-  private static _full: Output<any>;
+  private static _full?: Output<any>;
 
-  private static _done: Output<any>;
+  private static _done?: Output<any>;
 
   /**
    * Return an `Output` in the _full_ state, that binds the given `value`,
@@ -229,7 +229,7 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
    */
   static full<T>(value: T | null = null, settings: OutputSettings = OutputSettings.standard()): Output<T> {
     if (value === null && settings === OutputSettings.standard()) {
-      if (!Output._full) {
+      if (Output._full === void 0) {
         Output._full = new OutputFull(value, OutputSettings.standard());
       }
       return Output._full;
@@ -244,7 +244,7 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
    */
   static done<T>(value: T | null = null, settings: OutputSettings = OutputSettings.standard()): Output<T> {
     if (value === null && settings === OutputSettings.standard()) {
-      if (!Output._done) {
+      if (Output._done === void 0) {
         Output._done = new OutputDone(value, OutputSettings.standard());
       }
       return Output._done;

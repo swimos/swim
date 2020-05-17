@@ -62,7 +62,7 @@ export class GetSelector extends Selector {
       // Only records can have members.
       if (scope instanceof Item.Record) {
         field = scope.getField(key);
-        if (field) {
+        if (field !== void 0) {
           // Push the field value onto the scope stack.
           interpreter.pushScope(field.toValue());
           // Subselect the field value.
@@ -93,7 +93,7 @@ export class GetSelector extends Selector {
       // Only records can have members.
       if (scope instanceof Item.Record) {
         const oldField = scope.getField(key);
-        if (oldField) {
+        if (oldField !== void 0) {
           // Push the field value onto the scope stack.
           interpreter.pushScope(oldField.toValue());
           // Transform the field value.
@@ -132,7 +132,7 @@ export class GetSelector extends Selector {
     // Evaluate the key, in case it's dynamic.
     const key = this._key.evaluate(interpreter).toValue();
     const value = GetSelector.substitute(key, this._then, interpreter);
-    if (value) {
+    if (value !== void 0) {
       return value;
     }
     let then = this._then.substitute(interpreter);
@@ -151,7 +151,7 @@ export class GetSelector extends Selector {
       // Only records can have members.
       if (scope instanceof Item.Record) {
         field = scope.getField(key);
-        if (field) {
+        if (field !== void 0) {
           // Substitute the field value.
           selected = field.toValue().substitute(interpreter);
         }

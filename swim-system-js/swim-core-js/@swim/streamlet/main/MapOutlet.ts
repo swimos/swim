@@ -91,7 +91,7 @@ export interface MapOutlet<K, V, O> extends Outlet<O> {
 /** @hidden */
 export const MapOutlet = {
   is<K, V, I>(object: unknown): object is MapOutlet<K, V, I> {
-    if (typeof object === "object" && object) {
+    if (typeof object === "object" && object !== null) {
       const outlet = object as MapOutlet<K, V, I>;
       return Outlet.is(outlet)
           && typeof outlet.keyIterator === "function"

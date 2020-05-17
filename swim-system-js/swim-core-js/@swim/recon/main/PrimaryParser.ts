@@ -57,7 +57,7 @@ export class PrimaryParser<I, V> extends Parser<V> {
       }
     }
     if (step === 2) {
-      if (!exprParser) {
+      if (exprParser === void 0) {
         exprParser = recon.parseLiteral(input, builder);
       }
       while (exprParser.isCont() && !input.isEmpty()) {
@@ -70,7 +70,7 @@ export class PrimaryParser<I, V> extends Parser<V> {
       }
     }
     if (step === 3) {
-      if (!exprParser) {
+      if (exprParser === void 0) {
         exprParser = recon.parseBlockExpression(input, builder);
       }
       while (exprParser.isCont() && !input.isEmpty()) {
@@ -90,8 +90,8 @@ export class PrimaryParser<I, V> extends Parser<V> {
         if (input.isCont()) {
           if (c === 44/*','*/) {
             input = input.step();
-            if (exprParser) {
-              if (!builder) {
+            if (exprParser !== void 0) {
+              if (builder === void 0) {
                 builder = recon.recordBuilder();
                 builder.push(recon.item(exprParser.bind()));
               }
@@ -100,7 +100,7 @@ export class PrimaryParser<I, V> extends Parser<V> {
             step = 5;
           } else if (c === 41/*')'*/) {
             input = input.step();
-            if (exprParser) {
+            if (exprParser !== void 0) {
               return exprParser;
             } else {
               return Parser.done(builder!.bind());
@@ -113,7 +113,7 @@ export class PrimaryParser<I, V> extends Parser<V> {
         }
       }
       if (step === 5) {
-        if (!exprParser) {
+        if (exprParser === void 0) {
           exprParser = recon.parseBlockExpression(input, builder);
         }
         while (exprParser.isCont() && !input.isEmpty()) {

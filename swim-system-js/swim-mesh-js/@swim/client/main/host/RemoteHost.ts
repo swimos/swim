@@ -146,15 +146,15 @@ export abstract class RemoteHost extends Host {
     this.clearIdle();
     const nodeUri = this.resolve(downlink.nodeUri());
     const laneUri = downlink.laneUri();
-    if (!this._downlinkCount) {
+    if (this._downlinkCount === 0) {
       this.open();
     }
     let nodeDownlinks = this._downlinks.get(nodeUri);
-    if (!nodeDownlinks) {
+    if (nodeDownlinks === void 0) {
       nodeDownlinks = new BTree();
       this._downlinks.set(nodeUri, nodeDownlinks);
     }
-    if (nodeDownlinks.get(laneUri)) {
+    if (nodeDownlinks.get(laneUri) !== void 0) {
       throw new Error("duplicate downlink");
     }
     nodeDownlinks.set(laneUri, downlink);
@@ -169,7 +169,7 @@ export abstract class RemoteHost extends Host {
     const nodeUri = this.resolve(downlink.nodeUri());
     const laneUri = downlink.laneUri();
     const nodeDownlinks = this._downlinks.get(nodeUri);
-    if (nodeDownlinks && nodeDownlinks.get(laneUri) && this.isConnected()) {
+    if (nodeDownlinks !== void 0 && nodeDownlinks.get(laneUri) && this.isConnected()) {
       const request = UnlinkRequest.of(this.unresolve(nodeUri), laneUri);
       downlink.onUnlinkRequest(request, this);
       this.push(request);
@@ -180,14 +180,14 @@ export abstract class RemoteHost extends Host {
     const nodeUri = this.resolve(downlink.nodeUri());
     const laneUri = downlink.laneUri();
     const nodeDownlinks = this._downlinks.get(nodeUri);
-    if (nodeDownlinks) {
+    if (nodeDownlinks !== void 0) {
       if (nodeDownlinks.get(laneUri)) {
         this._downlinkCount -= 1;
         nodeDownlinks.delete(laneUri);
         if (nodeDownlinks.isEmpty()) {
           this._downlinks.delete(nodeUri);
         }
-        if (!this._downlinkCount) {
+        if (this._downlinkCount === 0) {
           this.watchIdle();
         }
         downlink.closeUp(this);
@@ -238,9 +238,9 @@ export abstract class RemoteHost extends Host {
     const nodeUri = this.resolve(message.node());
     const laneUri = message.lane();
     const nodeDownlinks = this._downlinks.get(nodeUri);
-    if (nodeDownlinks) {
+    if (nodeDownlinks !== void 0) {
       const downlink = nodeDownlinks.get(laneUri);
-      if (downlink) {
+      if (downlink !== void 0) {
         const resolvedMessage = message.node(nodeUri);
         downlink.onEventMessage(resolvedMessage, this);
       }
@@ -259,9 +259,9 @@ export abstract class RemoteHost extends Host {
     const nodeUri = this.resolve(response.node());
     const laneUri = response.lane();
     const nodeDownlinks = this._downlinks.get(nodeUri);
-    if (nodeDownlinks) {
+    if (nodeDownlinks !== void 0) {
       const downlink = nodeDownlinks.get(laneUri);
-      if (downlink) {
+      if (downlink !== void 0) {
         const resolvedResponse = response.node(nodeUri);
         downlink.onLinkedResponse(resolvedResponse, this);
       }
@@ -276,9 +276,9 @@ export abstract class RemoteHost extends Host {
     const nodeUri = this.resolve(response.node());
     const laneUri = response.lane();
     const nodeDownlinks = this._downlinks.get(nodeUri);
-    if (nodeDownlinks) {
+    if (nodeDownlinks !== void 0) {
       const downlink = nodeDownlinks.get(laneUri);
-      if (downlink) {
+      if (downlink !== void 0) {
         const resolvedResponse = response.node(nodeUri);
         downlink.onSyncedResponse(resolvedResponse, this);
       }
@@ -293,9 +293,9 @@ export abstract class RemoteHost extends Host {
     const nodeUri = this.resolve(response.node());
     const laneUri = response.lane();
     const nodeDownlinks = this._downlinks.get(nodeUri);
-    if (nodeDownlinks) {
+    if (nodeDownlinks !== void 0) {
       const downlink = nodeDownlinks.get(laneUri);
-      if (downlink) {
+      if (downlink !== void 0) {
         const resolvedResponse = response.node(nodeUri);
         downlink.onUnlinkedResponse(resolvedResponse, this);
       }
@@ -357,8 +357,8 @@ export abstract class RemoteHost extends Host {
   }
 
   protected reconnect(): void {
-    if (!this._reconnectTimer) {
-      if (!this._reconnectTimeout) {
+    if (this._reconnectTimer === 0) {
+      if (this._reconnectTimeout === 0) {
         this._reconnectTimeout = Math.floor(500 + 1000 * Math.random());
       } else {
         this._reconnectTimeout = Math.min(Math.floor(1.8 * this._reconnectTimeout), this.maxReconnectTimeout());
@@ -368,20 +368,20 @@ export abstract class RemoteHost extends Host {
   }
 
   protected clearReconnect(): void {
-    if (this._reconnectTimer) {
+    if (this._reconnectTimer !== 0) {
       clearTimeout(this._reconnectTimer);
       this._reconnectTimer = 0;
     }
   }
 
   protected watchIdle(): void {
-    if (!this._idleTimer && this.isConnected() && this.isIdle()) {
+    if (this._idleTimer === 0 && this.isConnected() && this.isIdle()) {
       this._idleTimer = setTimeout(this.checkIdle.bind(this), this.idleTimeout()) as any;
     }
   }
 
   protected clearIdle(): void {
-    if (this._idleTimer) {
+    if (this._idleTimer !== 0) {
       clearTimeout(this._idleTimer);
       this._idleTimer = 0;
     }

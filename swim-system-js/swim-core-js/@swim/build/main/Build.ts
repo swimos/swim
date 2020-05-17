@@ -32,7 +32,7 @@ export interface BuildConfig {
 export class Build {
   readonly baseDir: string;
   readonly version: string | undefined;
-  readonly projects: {[id: string]: Project};
+  readonly projects: {[id: string]: Project | undefined};
   readonly projectList: Project[];
   readonly compilerOptions: ts.CompilerOptions;
   readonly gaID: string | undefined;
@@ -60,13 +60,13 @@ export class Build {
 
     for (let i = 0; i < config.projects.length; i += 1) {
       const projectConfig = config.projects[i];
-      const project = this.projects[projectConfig.id];
+      const project = this.projects[projectConfig.id]!;
       project.initTargets(projectConfig);
     }
 
     for (let i = 0; i < config.projects.length; i += 1) {
       const projectConfig = config.projects[i];
-      const project = this.projects[projectConfig.id];
+      const project = this.projects[projectConfig.id]!;
       project.initDeps(projectConfig);
     }
   }
@@ -92,16 +92,16 @@ export class Build {
     } else if (typeof specifiers === "string") {
       specifiers = specifiers.split(",");
     }
-    let targets: Target[] = [];
+    const targets: Target[] = [];
     for (let i = 0; i < specifiers.length; i += 1) {
       const specifier = specifiers[i];
       const [projectId, targetId] = specifier.split(":");
-      if (projectId) { // <project>(:<target>)?
+      if (projectId !== void 0) { // <project>(:<target>)?
         const project = this.projects[projectId];
-        if (project) {
-          if (targetId) { // <project>:<target>
+        if (project !== void 0) {
+          if (targetId !== void 0) { // <project>:<target>
             const target = project.targets[targetId];
-            if (target) {
+            if (target !== void 0) {
               target.selected = true;
               if (targets.indexOf(target) < 0) {
                 targets.push(target);
@@ -127,10 +127,10 @@ export class Build {
           OutputStyle.reset(output);
           console.log(output.bind());
         }
-      } else if (targetId) { // :<target>
+      } else if (targetId !== void 0) { // :<target>
         for (let j = 0; j < this.projectList.length; j += 1) {
           const target = this.projectList[j].targets[targetId];
-          if (target) {
+          if (target !== void 0) {
             target.selected = true;
             if (targets.indexOf(target) < 0) {
               targets.push(target);
@@ -152,12 +152,12 @@ export class Build {
     for (let i = 0; i < specifiers.length; i += 1) {
       const specifier = specifiers[i];
       const [projectId, targetId] = specifier.split(":");
-      if (projectId) { // <project>(:<target>)?
+      if (projectId !== void 0) { // <project>(:<target>)?
         const project = this.projects[projectId];
-        if (project) {
-          if (targetId) { // <project>:<target>
+        if (project !== void 0) {
+          if (targetId !== void 0) { // <project>:<target>
             const target = project.targets[targetId];
-            if (target) {
+            if (target !== void 0) {
               target.selected = true;
               targets = target.transitiveDeps(targets);
             }
@@ -179,10 +179,10 @@ export class Build {
           OutputStyle.reset(output);
           console.log(output.bind());
         }
-      } else if (targetId) { // :<target>
+      } else if (targetId !== void 0) { // :<target>
         for (let j = 0; j < this.projectList.length; j += 1) {
           const target = this.projectList[j].targets[targetId];
-          if (target) {
+          if (target !== void 0) {
             target.selected = true;
             targets = target.transitiveDeps(targets);
           }
@@ -201,7 +201,7 @@ export class Build {
     if (i < targets.length) {
       const target = targets[i];
       const result = callback(target);
-      if (result) {
+      if (result !== void 0) {
         return result.then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
       } else {
         return Promise.resolve(void 0).then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
@@ -220,7 +220,7 @@ export class Build {
     if (i < targets.length) {
       const target = targets[i];
       const result = callback(target);
-      if (result) {
+      if (result !== void 0) {
         return result.then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
       } else {
         return Promise.resolve(void 0).then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
@@ -242,9 +242,9 @@ export class Build {
       const specifier = specifiers[i];
       const [projectId] = specifier.split(":");
       const project = this.projects[projectId];
-      if (project) {
+      if (project !== void 0) {
         const result = callback(project);
-        if (result) {
+        if (result !== void 0) {
           return result.then(this.forEachProject.bind(this, specifiers, callback, i + 1));
         }
       } else {

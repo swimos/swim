@@ -210,9 +210,9 @@ export abstract class Input {
    */
   abstract clone(): Input;
 
-  private static _empty: Input;
+  private static _empty?: Input;
 
-  private static _done: Input;
+  private static _done?: Input;
 
   /**
    * Returns an `Input` reader in the _empty_ state, with the given `settings`,
@@ -221,7 +221,7 @@ export abstract class Input {
   static empty(id: unknown | null = null, mark: Mark = Mark.zero(),
                settings: InputSettings = InputSettings.standard()): Input {
     if (id === null && mark === Mark.zero() && settings === InputSettings.standard()) {
-      if (!Input._empty) {
+      if (Input._empty === void 0) {
         Input._empty = new InputEmpty(null, Mark.zero(), InputSettings.standard());
       }
       return Input._empty;
@@ -236,7 +236,7 @@ export abstract class Input {
   static done(id: unknown | null = null, mark: Mark = Mark.zero(),
               settings: InputSettings = InputSettings.standard()): Input {
     if (id === null && mark === Mark.zero() && settings === InputSettings.standard()) {
-      if (!Input._done) {
+      if (Input._done === void 0) {
         Input._done = new InputDone(null, Mark.zero(), InputSettings.standard());
       }
       return Input._done;

@@ -44,7 +44,7 @@ export class InvokeOperatorParser<I, V> extends Parser<V> {
                      exprParser?: Parser<V>, argsParser?: Parser<V>, step: number = 1): Parser<V> {
     let c = 0;
     if (step === 1) {
-      if (!exprParser) {
+      if (exprParser === void 0) {
         exprParser = recon.parsePrimary(input, builder);
       }
       while (exprParser.isCont() && !input.isEmpty()) {
@@ -91,7 +91,7 @@ export class InvokeOperatorParser<I, V> extends Parser<V> {
         }
       }
       if (step === 4) {
-        if (!argsParser) {
+        if (argsParser === void 0) {
           argsParser = recon.parseBlock(input);
         }
         while (argsParser.isCont() && !input.isEmpty()) {

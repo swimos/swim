@@ -65,7 +65,7 @@ export class Base10IntegerWriter extends Writer<any, any> {
         const digits = new Array<number>(19);
         let x = input;
         let i = 18;
-        while (x) {
+        while (x !== 0) {
           digits[i] = Math.abs((x % 10) | 0);
           x = (x / 10) | 0;
           i -= 1;

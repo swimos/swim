@@ -54,15 +54,15 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
   abstract hostUri(): Uri;
 
   isConnected(): boolean {
-    return this._host ? this._host.isConnected() : false;
+    return this._host !== void 0 ? this._host.isConnected() : false;
   }
 
   isAuthenticated(): boolean {
-    return this._host ? this._host.isAuthenticated() : false;
+    return this._host !== void 0 ? this._host.isAuthenticated() : false;
   }
 
   session(): Value {
-    return this._host ? this._host.session() : Value.absent();
+    return this._host !== void 0 ? this._host.session() : Value.absent();
   }
 
   authenticate(credentials: AnyValue): void {
@@ -118,7 +118,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
 
   observe(observer: WarpObserver): this {
     const oldObservers = this._observers;
-    const n = oldObservers ? oldObservers.length : 0;
+    const n = oldObservers !== null ? oldObservers.length : 0;
     const newObservers = new Array<WarpObserver>(n + 1);
     for (let i = 0; i < n; i += 1) {
       newObservers[i] = oldObservers![i];
@@ -130,7 +130,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
 
   unobserve(observer: unknown): this {
     const oldObservers = this._observers;
-    const n = oldObservers ? oldObservers.length : 0;
+    const n = oldObservers !== null ? oldObservers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const oldObserver = oldObservers![i] as {[key: string]: unknown};
       let found = oldObserver === observer; // check object identity
@@ -185,10 +185,10 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
   hostDidConnect(host: Host): void {
     this._host = host;
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didConnect) {
+      if (observer.didConnect !== void 0) {
         observer.didConnect(host, this);
       }
     }
@@ -197,10 +197,10 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
   /** @hidden */
   hostDidAuthenticate(body: Value, host: Host): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didAuthenticate) {
+      if (observer.didAuthenticate !== void 0) {
         observer.didAuthenticate(body, host, this);
       }
     }
@@ -209,10 +209,10 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
   /** @hidden */
   hostDidDeauthenticate(body: Value, host: Host): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didDeauthenticate) {
+      if (observer.didDeauthenticate !== void 0) {
         observer.didDeauthenticate(body, host, this);
       }
     }
@@ -222,10 +222,10 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
   hostDidDisconnect(host: Host): void {
     this._host = void 0;
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didDisconnect) {
+      if (observer.didDisconnect !== void 0) {
         observer.didDisconnect(host, this);
       }
     }
@@ -234,10 +234,10 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
   /** @hidden */
   hostDidFail(error: unknown, host: Host): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didFail) {
+      if (observer.didFail !== void 0) {
         observer.didFail(error, host, this);
       }
     }

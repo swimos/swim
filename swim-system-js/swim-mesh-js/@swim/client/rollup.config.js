@@ -1,4 +1,4 @@
-import nodeResolve from "rollup-plugin-node-resolve";
+import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
 const script = "swim-client";
@@ -14,6 +14,7 @@ const main = {
       "@swim/util": "swim",
       "@swim/codec": "swim",
       "@swim/collections": "swim",
+      "@swim/interpolate": "swim",
       "@swim/structure": "swim",
       "@swim/streamlet": "swim",
       "@swim/dataflow": "swim",
@@ -30,6 +31,7 @@ const main = {
     "@swim/util",
     "@swim/codec",
     "@swim/collections",
+    "@swim/interpolate",
     "@swim/structure",
     "@swim/streamlet",
     "@swim/dataflow",

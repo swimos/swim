@@ -1,9 +1,0 @@
-{
-  "files": [],
-  "include": [],
-  "references": [
-    {"path": "./@swim/website"},
-    {"path": "./@swim/webapp"},
-    {"path": "./@swim/web"}
-  ]
-}

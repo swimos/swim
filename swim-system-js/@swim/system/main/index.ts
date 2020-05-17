@@ -14,6 +14,3 @@
 
 export * from "@swim/core";
 export * from "@swim/mesh";
-export * from "@swim/ui";
-export * from "@swim/ux";
-export * from "@swim/web";

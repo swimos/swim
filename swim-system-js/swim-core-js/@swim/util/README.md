@@ -81,11 +81,11 @@ export interface ToAny<T> {
 
 `FromAny` is implicitly implemented by classes that have a static `fromAny`
 method that converts a loosely typed JavaScript value into a strongly typed
-TypeScript value.  `FromAny` is implemented by many **@swim/ui** and
-**@swim/ux** classes, and is used to abstract over the conversion of loosely
-typed values to strongly typed values.  For example, **@swim/view**'s
-`MemberAnimator` classes leverage `FromAny` to generically convert loosely
-typed animator arguments to strongly typed, tweenable values.
+TypeScript value.  `FromAny` is implemented by many **@swim/ui** classes, and
+is used to abstract over the conversion of loosely typed values to strongly
+typed values.  For example, **@swim/view**'s `MemberAnimator` classes leverage
+`FromAny` to generically convert loosely typed animator arguments to strongly
+typed, tweenable values.
 
 `ToAny` is implemented by classes that have a `tonAny` method that returns a
 loosely typed JavaScript value.  `ToAny` is used to abstract over the
@@ -152,7 +152,7 @@ be found in `node_modules/@swim/util/dist/main/swim-util.js`.
 ### Browser
 
 Browser applications can load `swim-core.js`, which comes bundled with the
-**@swim/util** library, directly from the swimOS CDN.
+**@swim/util** library, directly from the SwimOS CDN.
 
 ```html
 <!-- Development -->
@@ -163,7 +163,7 @@ Browser applications can load `swim-core.js`, which comes bundled with the
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the swimOS CDN, which bundles **@swim/util** together with all other
+from the SwimOS CDN, which bundles **@swim/util** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 libraries.
 

@@ -1,4 +1,4 @@
-import nodeResolve from "rollup-plugin-node-resolve";
+import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
 const script = "swim-math";
@@ -13,6 +13,7 @@ const main = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
+      "@swim/interpolate": "swim",
       "@swim/structure": "swim",
     },
     sourcemap: true,
@@ -22,6 +23,7 @@ const main = {
   external: [
     "@swim/util",
     "@swim/codec",
+    "@swim/interpolate",
     "@swim/structure",
   ],
   plugins: [

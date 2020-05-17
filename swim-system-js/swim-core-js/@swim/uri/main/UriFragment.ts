@@ -77,7 +77,7 @@ export class UriFragment implements Comparable<UriFragment>, HashCode, Debug, Di
   }
 
   toString(): string {
-    if (this._string == null) {
+    if (this._string === void 0) {
       this._string = Format.display(this);
     }
     return this._string;
@@ -98,7 +98,7 @@ export class UriFragment implements Comparable<UriFragment>, HashCode, Debug, Di
     if (identifier !== null) {
       const cache = UriFragment.cache();
       const fragment = cache.get(identifier);
-      if (fragment) {
+      if (fragment !== void 0) {
         return fragment;
       } else {
         return cache.put(identifier, new UriFragment(identifier));

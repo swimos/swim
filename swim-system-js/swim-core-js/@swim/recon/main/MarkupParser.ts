@@ -72,13 +72,13 @@ export class MarkupParser<I, V> extends Parser<V> {
           if (c === 93/*']'*/) {
             input = input.step();
             builder = builder || recon.recordBuilder();
-            if (textOutput) {
+            if (textOutput !== void 0) {
               builder.push(recon.item(textOutput.bind()));
             }
             return Parser.done(builder.bind());
           } else if (c === 64/*'@'*/) {
             builder = builder || recon.recordBuilder();
-            if (textOutput) {
+            if (textOutput !== void 0) {
               builder.push(recon.item(textOutput.bind()));
               textOutput = void 0;
             }
@@ -86,7 +86,7 @@ export class MarkupParser<I, V> extends Parser<V> {
             step = 3;
           } else if (c === 123/*'{'*/) {
             builder = builder || recon.recordBuilder();
-            if (textOutput) {
+            if (textOutput !== void 0) {
               builder.push(recon.item(textOutput.bind()));
               textOutput = void 0;
             }
@@ -94,7 +94,7 @@ export class MarkupParser<I, V> extends Parser<V> {
             step = 4;
           } else if (c === 91/*'['*/) {
             builder = builder || recon.recordBuilder();
-            if (textOutput) {
+            if (textOutput !== void 0) {
               builder.push(recon.item(textOutput.bind()));
               textOutput = void 0;
             }

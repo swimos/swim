@@ -34,6 +34,7 @@ export {
 export {
   AnyPointR2,
   PointR2Init,
+  PointR2Tuple,
   PointR2,
 } from "./PointR2";
 
@@ -54,3 +55,9 @@ export {
   CircleR2Init,
   CircleR2,
 } from "./CircleR2";
+
+export {R2ShapeInterpolator} from "./R2ShapeInterpolator";
+export {PointR2Interpolator} from "./PointR2Interpolator";
+export {SegmentR2Interpolator} from "./SegmentR2Interpolator";
+export {BoxR2Interpolator} from "./BoxR2Interpolator";
+export {CircleR2Interpolator} from "./CircleR2Interpolator";

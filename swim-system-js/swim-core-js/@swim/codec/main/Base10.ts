@@ -73,7 +73,7 @@ export class Base10 {
     do {
       size += 1;
       value = (value / 10) | 0;
-    } while (value);
+    } while (value !== 0);
     return size;
   }
 

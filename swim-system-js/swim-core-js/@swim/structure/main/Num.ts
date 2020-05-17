@@ -352,7 +352,7 @@ export class Num extends Value {
 
   /** @hidden */
   static cache(): HashGenCacheSet<Num> {
-    if (Num._cache == null) {
+    if (Num._cache === void 0) {
       const cacheSize = 16;
       Num._cache = new HashGenCacheSet<Num>(cacheSize);
     }

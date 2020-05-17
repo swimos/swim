@@ -71,7 +71,7 @@ export class InvokeOperator extends Operator {
     const func = this._func.evaluate(interpreter);
     if (func instanceof Item.Func) {
       const result = func.expand(this._args, interpreter, this);
-      if (result) {
+      if (result !== void 0) {
         return result;
       }
     }

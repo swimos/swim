@@ -41,7 +41,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
 
   get(index: number): V | undefined {
     const slot = this._slots[index];
-    if (slot) {
+    if (slot !== void 0) {
       return slot[1];
     } else {
       return void 0;

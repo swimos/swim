@@ -145,14 +145,14 @@ export class Objects {
       if (typeof y === "number") {
         return isNaN(x) && isNaN(y);
       }
-    } else if (typeof x === "object" && x && typeof (x as any).equals === "function") {
+    } else if (typeof x === "object" && x !== null && typeof (x as any).equals === "function") {
       return (x as Equals).equals(y);
     } else if (Array.isArray(x)) {
       if (Array.isArray(y)) {
         return Objects.equalArray(x, y);
       }
-    } else if (typeof x === "object" && x) {
-      if (typeof y === "object" && y) {
+    } else if (typeof x === "object" && x !== null) {
+      if (typeof y === "object" && y !== null) {
         return Objects.equalObject(x, y);
       }
     }

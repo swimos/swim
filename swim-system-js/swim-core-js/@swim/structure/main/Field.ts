@@ -309,7 +309,7 @@ export abstract class Field extends Item {
   static fromAny(field: AnyField): Field {
     if (field instanceof Field) {
       return field;
-    } else if (field && typeof field === "object") {
+    } else if (typeof field === "object" && field !== null) {
       if ((field as any).$key !== void 0) {
         return Field.of((field as any).$key, (field as any).$value);
       } else {

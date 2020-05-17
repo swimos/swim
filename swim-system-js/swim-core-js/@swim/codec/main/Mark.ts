@@ -187,7 +187,7 @@ export class Mark extends Tag {
    * attached note.
    */
   static zero(): Mark {
-    if (!Mark._zero) {
+    if (Mark._zero === void 0) {
       Mark._zero = new Mark(0, 1, 1, null);
     }
     return Mark._zero;

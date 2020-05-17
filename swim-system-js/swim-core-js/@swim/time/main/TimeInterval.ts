@@ -79,7 +79,7 @@ export abstract class TimeInterval {
   static year(): UnitTimeInterval;
   static year(k: number): TimeInterval;
   static year(k?: number): TimeInterval {
-    if (!TimeInterval._year) {
+    if (TimeInterval._year === void 0) {
       TimeInterval._year = new TimeInterval.Year();
     }
     if (k === void 0) {
@@ -93,7 +93,7 @@ export abstract class TimeInterval {
   static month(): UnitTimeInterval;
   static month(k: number): TimeInterval;
   static month(k?: number): TimeInterval {
-    if (!TimeInterval._month) {
+    if (TimeInterval._month === void 0) {
       TimeInterval._month = new TimeInterval.Month();
     }
     if (k === void 0) {
@@ -105,7 +105,7 @@ export abstract class TimeInterval {
 
   private static _week?: WeekInterval;
   static week(): TimeInterval {
-    if (!TimeInterval._week) {
+    if (TimeInterval._week === void 0) {
       TimeInterval._week = new TimeInterval.Week();
     }
     return TimeInterval._week;
@@ -115,7 +115,7 @@ export abstract class TimeInterval {
   static day(): UnitTimeInterval;
   static day(k: number): TimeInterval;
   static day(k?: number): TimeInterval {
-    if (!TimeInterval._day) {
+    if (TimeInterval._day === void 0) {
       TimeInterval._day = new TimeInterval.Day();
     }
     if (k === void 0) {
@@ -129,7 +129,7 @@ export abstract class TimeInterval {
   static hour(): UnitTimeInterval;
   static hour(k: number): TimeInterval;
   static hour(k?: number): TimeInterval {
-    if (!TimeInterval._hour) {
+    if (TimeInterval._hour === void 0) {
       TimeInterval._hour = new TimeInterval.Hour();
     }
     if (k === void 0) {
@@ -143,7 +143,7 @@ export abstract class TimeInterval {
   static minute(): UnitTimeInterval;
   static minute(k: number): TimeInterval;
   static minute(k?: number): TimeInterval {
-    if (!TimeInterval._minute) {
+    if (TimeInterval._minute === void 0) {
       TimeInterval._minute = new TimeInterval.Minute();
     }
     if (k === void 0) {
@@ -157,7 +157,7 @@ export abstract class TimeInterval {
   static second(): UnitTimeInterval;
   static second(k: number): TimeInterval;
   static second(k?: number): TimeInterval {
-    if (!TimeInterval._second) {
+    if (TimeInterval._second === void 0) {
       TimeInterval._second = new TimeInterval.Second();
     }
     if (k === void 0) {
@@ -171,7 +171,7 @@ export abstract class TimeInterval {
   static millisecond(): UnitTimeInterval;
   static millisecond(k: number): TimeInterval;
   static millisecond(k?: number): TimeInterval {
-    if (!TimeInterval._millisecond) {
+    if (TimeInterval._millisecond === void 0) {
       TimeInterval._millisecond = new TimeInterval.Millisecond();
     }
     if (k === void 0) {

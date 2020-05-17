@@ -7,6 +7,7 @@
       "@swim/util": ["@swim/util/main"],
       "@swim/codec": ["@swim/codec/main"],
       "@swim/unit": ["@swim/unit/main"],
+      "@swim/interpolate": ["@swim/interpolate/main"],
       "@swim/structure": ["@swim/structure/main"],
       "@swim/time": ["@swim/time/main"]
     }
@@ -15,6 +16,7 @@
     {"path": "../../util/main"},
     {"path": "../../codec/main"},
     {"path": "../../unit/main"},
+    {"path": "../../interpolate/main"},
     {"path": "../../structure/main"},
     {"path": "../../time/main"}
   ]

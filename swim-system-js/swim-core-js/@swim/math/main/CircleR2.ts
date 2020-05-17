@@ -44,6 +44,10 @@ export class CircleR2 extends R2Shape implements HashCode, Debug {
     this._r = r;
   }
 
+  isDefined(): boolean {
+    return this._cx !== 0 || this._cy !== 0 || this._r !== 0;
+  }
+
   get cx(): number {
     return this._cx;
   }
@@ -263,13 +267,34 @@ export class CircleR2 extends R2Shape implements HashCode, Debug {
     return new CircleR2(cx, cy, r);
   }
 
-  static fromAny(circle: AnyCircleR2): CircleR2 {
-    if (circle instanceof CircleR2) {
-      return circle;
-    } else if (typeof circle === "object" && circle) {
-      return new CircleR2(circle.cx, circle.cy, circle.r);
+  static fromInit(value: CircleR2Init): CircleR2 {
+    return new CircleR2(value.cx, value.cy, value.r);
+  }
+
+  static fromAny(value: AnyCircleR2): CircleR2 {
+    if (value instanceof CircleR2) {
+      return value;
+    } else if (CircleR2.isInit(value)) {
+      return CircleR2.fromInit(value);
     }
-    throw new TypeError("" + circle);
+    throw new TypeError("" + value);
+  }
+
+  /** @hidden */
+  static isInit(value: unknown): value is CircleR2Init {
+    if (typeof value === "object" && value !== null) {
+      const init = value as CircleR2Init;
+      return typeof init.cx === "number"
+          && typeof init.cy === "number"
+          && typeof init.r === "number";
+    }
+    return false;
+  }
+
+  /** @hidden */
+  static isAny(value: unknown): value is AnyCircleR2 {
+    return value instanceof CircleR2
+        || CircleR2.isInit(value);
   }
 }
 R2Shape.Circle = CircleR2;

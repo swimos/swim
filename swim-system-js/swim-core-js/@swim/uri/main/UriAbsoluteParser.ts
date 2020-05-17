@@ -70,7 +70,7 @@ export class UriAbsoluteParser extends Parser<Uri> {
       }
     }
     if (step === 2) {
-      if (!schemeParser) {
+      if (schemeParser === void 0) {
         schemeParser = uri.parseScheme(input);
       } else {
         schemeParser = schemeParser.feed(input);
@@ -102,7 +102,7 @@ export class UriAbsoluteParser extends Parser<Uri> {
           step = 6;
         }
       } else if (input.isDone()) {
-        return Parser.done(uri.absolute(schemeParser && schemeParser.bind()));
+        return Parser.done(uri.absolute(schemeParser !== void 0 ? schemeParser.bind() : void 0));
       }
     }
     if (step === 4) {
@@ -115,13 +115,13 @@ export class UriAbsoluteParser extends Parser<Uri> {
         pathParser = uri.parsePath(input, pathBuilder);
         step = 6;
       } else if (input.isDone()) {
-        return Parser.done(uri.absolute(schemeParser && schemeParser.bind(),
+        return Parser.done(uri.absolute(schemeParser !== void 0 ? schemeParser.bind() : void 0,
                                         void 0,
                                         Uri.Path.slash()));
       }
     }
     if (step === 5) {
-      if (!authorityParser) {
+      if (authorityParser === void 0) {
         authorityParser = uri.parseAuthority(input);
       } else {
         authorityParser = authorityParser.feed(input);
@@ -139,15 +139,15 @@ export class UriAbsoluteParser extends Parser<Uri> {
             step = 6;
           }
         } else if (input.isDone()) {
-          return Parser.done(uri.absolute(schemeParser && schemeParser.bind(),
-                                          authorityParser && authorityParser.bind()));
+          return Parser.done(uri.absolute(schemeParser !== void 0 ? schemeParser.bind() : void 0,
+                                          authorityParser !== void 0 ? authorityParser.bind() : void 0));
         }
       } else if (authorityParser.isError()) {
         return authorityParser.asError();
       }
     }
     if (step === 6) {
-      if (!pathParser) {
+      if (pathParser === void 0) {
         pathParser = uri.parsePath(input);
       } else {
         pathParser = pathParser.feed(input);
@@ -160,8 +160,8 @@ export class UriAbsoluteParser extends Parser<Uri> {
           input = input.step();
           step = 8;
         } else if (!input.isEmpty()) {
-          return Parser.done(uri.absolute(schemeParser && schemeParser.bind(),
-                                          authorityParser && authorityParser.bind(),
+          return Parser.done(uri.absolute(schemeParser !== void 0 ? schemeParser.bind() : void 0,
+                                          authorityParser !== void 0 ? authorityParser.bind() : void 0,
                                           pathParser.bind()));
         }
       } else if (pathParser.isError()) {
@@ -169,7 +169,7 @@ export class UriAbsoluteParser extends Parser<Uri> {
       }
     }
     if (step === 7) {
-      if (!queryParser) {
+      if (queryParser === void 0) {
         queryParser = uri.parseQuery(input);
       } else {
         queryParser = queryParser.feed(input);
@@ -179,9 +179,9 @@ export class UriAbsoluteParser extends Parser<Uri> {
           input = input.step();
           step = 8;
         } else if (!input.isEmpty()) {
-          return Parser.done(uri.absolute(schemeParser && schemeParser.bind(),
-                                          authorityParser && authorityParser.bind(),
-                                          pathParser && pathParser.bind(),
+          return Parser.done(uri.absolute(schemeParser !== void 0 ? schemeParser.bind() : void 0,
+                                          authorityParser !== void 0 ? authorityParser.bind() : void 0,
+                                          pathParser !== void 0 ? pathParser.bind() : void 0,
                                           queryParser.bind()));
         }
       } else if (queryParser.isError()) {
@@ -189,16 +189,16 @@ export class UriAbsoluteParser extends Parser<Uri> {
       }
     }
     if (step === 8) {
-      if (!fragmentParser) {
+      if (fragmentParser === void 0) {
         fragmentParser = uri.parseFragment(input);
       } else {
         fragmentParser = fragmentParser.feed(input);
       }
       if (fragmentParser.isDone()) {
-        return Parser.done(uri.absolute(schemeParser && schemeParser.bind(),
-                                        authorityParser && authorityParser.bind(),
-                                        pathParser && pathParser.bind(),
-                                        queryParser && queryParser.bind(),
+        return Parser.done(uri.absolute(schemeParser !== void 0 ? schemeParser.bind() : void 0,
+                                        authorityParser !== void 0 ? authorityParser.bind() : void 0,
+                                        pathParser !== void 0 ? pathParser.bind() : void 0,
+                                        queryParser !== void 0 ? queryParser.bind() : void 0,
                                         fragmentParser.bind()));
       } else if (fragmentParser.isError()) {
         return fragmentParser.asError();

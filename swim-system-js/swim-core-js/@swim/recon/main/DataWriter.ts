@@ -42,7 +42,7 @@ export class DataWriter extends Writer {
       step = 2;
     }
     if (step === 2) {
-      if (!part) {
+      if (part === void 0) {
         part = Base64.standard().writeUint8Array(array, output);
       } else {
         part = part.pull(output);

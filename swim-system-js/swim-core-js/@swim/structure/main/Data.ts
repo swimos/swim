@@ -96,7 +96,7 @@ export class Data extends Value {
     const n = this.size;
     const oldArray = this._array;
     const newArray = new Uint8Array(Data.expand(n + 1));
-    if (oldArray != null) {
+    if (oldArray !== null) {
       newArray.set(oldArray, 0);
     }
     newArray[n] = value;
@@ -215,7 +215,7 @@ export class Data extends Value {
 
   asUint8Array(): Uint8Array | undefined {
     let array: Uint8Array | undefined;
-    if (this._array && this._size > 0) {
+    if (this._array !== null && this._size > 0) {
       array = this._array;
       if (array.length !== this._size) {
         array = new Uint8Array(array.buffer, array.byteOffset, this._size);
@@ -387,7 +387,7 @@ export class Data extends Value {
   }
 
   static empty(): Data {
-    if (Data._empty == null) {
+    if (Data._empty === void 0) {
       Data._empty = new Data(null, 0, Data.ALIASED | Data.IMMUTABLE);
     }
     return Data._empty;

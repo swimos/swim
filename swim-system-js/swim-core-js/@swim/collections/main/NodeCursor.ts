@@ -41,7 +41,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   isEmpty(): boolean {
     do {
-      if (this._pageCursor) {
+      if (this._pageCursor !== void 0) {
         if (!this._pageCursor.isEmpty()) {
           return false;
         } else {
@@ -59,7 +59,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   head(): T {
     do {
-      if (this._pageCursor) {
+      if (this._pageCursor !== void 0) {
         if (!this._pageCursor.isEmpty()) {
           return this._pageCursor.head();
         } else {
@@ -79,7 +79,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   step(): void {
     do {
-      if (this._pageCursor) {
+      if (this._pageCursor !== void 0) {
         if (!this._pageCursor.isEmpty()) {
           this._index += 1;
           return;
@@ -100,7 +100,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   skip(count: number): void {
     while (count > 0) {
-      if (this._pageCursor) {
+      if (this._pageCursor !== void 0) {
         if (this._pageCursor.hasNext()) {
           this._index += 1;
           count -= 1;
@@ -132,7 +132,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   hasNext(): boolean {
     do {
-      if (this._pageCursor) {
+      if (this._pageCursor !== void 0) {
         if (this._pageCursor.hasNext()) {
           return true;
         } else {
@@ -154,7 +154,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   next(): {value?: T, done: boolean} {
     do {
-      if (this._pageCursor) {
+      if (this._pageCursor !== void 0) {
         if (this._pageCursor.hasNext()) {
           this._index += 1;
           return this._pageCursor.next();
@@ -175,7 +175,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   hasPrevious(): boolean {
     do {
-      if (this._pageCursor) {
+      if (this._pageCursor !== void 0) {
         if (this._pageCursor.hasPrevious()) {
           return true;
         } else {
@@ -197,7 +197,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   previous(): {value?: T, done: boolean} {
     do {
-      if (this._pageCursor) {
+      if (this._pageCursor !== void 0) {
         if (this._pageCursor.hasPrevious()) {
           this._index -= 1;
           return this._pageCursor.previous();

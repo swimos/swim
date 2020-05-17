@@ -13,10 +13,7 @@
 // limitations under the License.
 
 /** @hidden */
-const crypto = (
-  typeof window !== "undefined" &&
-  (window.crypto || (window as any).msCrypto)
-) as RandomSource | undefined;
+const crypto = (typeof window !== "undefined" ? (window.crypto || (window as any).msCrypto) : void 0) as RandomSource | undefined;
 
 /** @hidden */
 function fillBytesCrypto(typedArray: Int8Array | Uint8Array
@@ -63,5 +60,5 @@ export class Random {
   private constructor() {
   }
 
-  static fillBytes = crypto ? fillBytesCrypto : fillBytesMath;
+  static fillBytes = crypto !== void 0 ? fillBytesCrypto : fillBytesMath;
 }

@@ -155,7 +155,7 @@ export class Text extends Value {
   }
 
   static empty(): Text {
-    if (!Text._empty) {
+    if (Text._empty === void 0) {
       Text._empty = new Text("");
     }
     return Text._empty;
@@ -186,7 +186,7 @@ export class Text extends Value {
 
   /** @hidden */
   static cache(): HashGenCacheSet<Text> {
-    if (Text._cache == null) {
+    if (Text._cache === void 0) {
       const cacheSize = 128;
       Text._cache = new HashGenCacheSet<Text>(cacheSize);
     }

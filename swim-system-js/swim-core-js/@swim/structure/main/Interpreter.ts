@@ -62,7 +62,7 @@ export class Interpreter {
     let newScopeStack;
     if (oldScopeStack === null || scopeDepth + 1 > oldScopeStack.length) {
       newScopeStack = new Array<Item>(Interpreter.expand(scopeDepth + 1));
-      if (oldScopeStack != null) {
+      if (oldScopeStack !== null) {
         for (let i = 0; i < scopeDepth; i += 1) {
           newScopeStack[i] = oldScopeStack[i];
         }
@@ -136,7 +136,7 @@ export class Interpreter {
     if (!(interpreter instanceof Interpreter)) {
       const scope = interpreter;
       interpreter = new Interpreter();
-      if (globalScope) {
+      if (globalScope !== void 0) {
         interpreter.pushScope(globalScope);
       }
       if (scope !== void 0) {

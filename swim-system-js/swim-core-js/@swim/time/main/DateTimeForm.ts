@@ -43,7 +43,7 @@ export class DateTimeForm extends Form<DateTime, AnyDateTime> {
     let date: DateTime | undefined;
     try {
       date = DateTime.fromValue(value);
-      if (!date) {
+      if (date === void 0) {
         const millis = value.numberValue(void 0);
         if (millis !== void 0) {
           date = new DateTime(millis);

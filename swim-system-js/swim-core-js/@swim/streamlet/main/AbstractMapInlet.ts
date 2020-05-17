@@ -49,7 +49,7 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
   }
 
   unbindInput(): void {
-    if (this._input != null) {
+    if (this._input !== null) {
       this._input.unbindOutput(this);
     }
     this._input = null;

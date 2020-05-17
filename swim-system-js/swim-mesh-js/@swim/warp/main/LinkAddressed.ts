@@ -115,7 +115,7 @@ export abstract class LinkAddressed extends Envelope {
   debug(output: Output): void {
     output = output.write((this as any).__proto__.constructor.name).write(46/*'.'*/).write("of").write(40/*'('*/)
         .debug(this._node.toString()).write(", ").debug(this._lane.toString());
-    if (this._prio || this._rate) {
+    if (this._prio !== 0 || this._rate !== 0) {
       output = output.write(", ").debug(this._prio).write(", ").debug(this._rate);
     }
     if (this._body.isDefined()) {
@@ -128,10 +128,10 @@ export abstract class LinkAddressed extends Envelope {
     const header = Record.create(4)
         .slot("node", this._node.toString())
         .slot("lane", this._lane.toString());
-    if (this._prio) {
+    if (this._prio !== 0) {
       header.slot("prio", this._prio);
     }
-    if (this._rate) {
+    if (this._rate !== 0) {
       header.slot("rate", this._rate);
     }
     return Attr.of(this.tag(), header).concat(this._body);
@@ -167,7 +167,7 @@ export abstract class LinkAddressed extends Envelope {
         }
       }
     });
-    if (node && lane) {
+    if (node !== void 0 && lane !== void 0) {
       const body = value.body();
       return new E!(node, lane, prio, rate, body);
     }

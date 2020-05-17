@@ -78,10 +78,10 @@ export abstract class STreePage<V = unknown, I = unknown> {
 
   abstract reverseEntries(): Cursor<[I, V]>;
 
-  private static _empty: STreeLeaf<unknown, unknown>;
+  private static _empty?: STreeLeaf<unknown, unknown>;
 
   static empty<V, I>(): STreeLeaf<V, I> {
-    if (!STreePage._empty) {
+    if (STreePage._empty === void 0) {
       STreePage._empty = new STree.Leaf([]);
     }
     return STreePage._empty as STreeLeaf<V, I>;

@@ -49,7 +49,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
 
   firstKey(): K | undefined {
     const entry = this.root.firstEntry();
-    if (entry) {
+    if (entry !== void 0) {
       return entry[0];
     } else {
       return void 0;
@@ -58,7 +58,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
 
   firstValue(): V | undefined {
     const entry = this.root.firstEntry();
-    if (entry) {
+    if (entry !== void 0) {
       return entry[1];
     } else {
       return void 0;
@@ -71,7 +71,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
 
   lastKey(): K | undefined {
     const entry = this.root.lastEntry();
-    if (entry) {
+    if (entry !== void 0) {
       return entry[0];
     } else {
       return void 0;
@@ -80,7 +80,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
 
   lastValue(): V | undefined {
     const entry = this.root.lastEntry();
-    if (entry) {
+    if (entry !== void 0) {
       return entry[1];
     } else {
       return void 0;
@@ -93,7 +93,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
 
   nextKey(key: K): K | undefined {
     const entry = this.root.nextEntry(key, this);
-    if (entry) {
+    if (entry !== void 0) {
       return entry[0];
     } else {
       return void 0;
@@ -102,7 +102,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
 
   nextValue(key: K): V | undefined {
     const entry = this.root.nextEntry(key, this);
-    if (entry) {
+    if (entry !== void 0) {
       return entry[1];
     } else {
       return void 0;
@@ -115,7 +115,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
 
   previousKey(key: K): K | undefined {
     const entry = this.root.previousEntry(key, this);
-    if (entry) {
+    if (entry !== void 0) {
       return entry[0];
     } else {
       return void 0;
@@ -124,7 +124,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
 
   previousValue(key: K): V | undefined {
     const entry = this.root.previousEntry(key, this);
-    if (entry) {
+    if (entry !== void 0) {
       return entry[1];
     } else {
       return void 0;

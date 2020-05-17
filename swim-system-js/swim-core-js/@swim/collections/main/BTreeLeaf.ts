@@ -71,16 +71,18 @@ export class BTreeLeaf<K, V, U> extends BTreePage<K, V, U> {
   }
 
   firstEntry(): [K, V] | undefined {
-    if (this._slots.length) {
-      return this._slots[0];
+    const slots = this._slots;
+    if (slots.length !== 0) {
+      return slots[0];
     } else {
       return void 0;
     }
   }
 
   lastEntry(): [K, V] | undefined {
-    if (this._slots.length) {
-      return this._slots[this._slots.length - 1];
+    const slots = this._slots;
+    if (slots.length !== 0) {
+      return slots[slots.length - 1];
     } else {
       return void 0;
     }

@@ -36,14 +36,14 @@ export class StreamletInlet<I> extends AbstractInlet<I> {
 
   protected willDecohereOutput(): void {
     const streamlet = this._streamlet as GenericStreamlet<I, unknown>;
-    if (streamlet.willDecohereInlet) {
+    if (streamlet.willDecohereInlet !== void 0) {
       streamlet.willDecohereInlet(this);
     }
   }
 
   protected didDecohereOutput(): void {
     const streamlet = this._streamlet as GenericStreamlet<I, unknown>;
-    if (streamlet.didDecohereInlet) {
+    if (streamlet.didDecohereInlet !== void 0) {
       streamlet.didDecohereInlet(this);
     } else {
       streamlet.decohere();
@@ -52,14 +52,14 @@ export class StreamletInlet<I> extends AbstractInlet<I> {
 
   protected willRecohereOutput(version: number): void {
     const streamlet = this._streamlet as GenericStreamlet<I, unknown>;
-    if (streamlet.willRecohereInlet) {
+    if (streamlet.willRecohereInlet !== void 0) {
       streamlet.willRecohereInlet(this, version);
     }
   }
 
   protected didRecohereOutput(version: number): void {
     const streamlet = this._streamlet as GenericStreamlet<I, unknown>;
-    if (streamlet.didRecohereInlet) {
+    if (streamlet.didRecohereInlet !== void 0) {
       streamlet.didRecohereInlet(this, version);
     } else {
       streamlet.recohere(version);

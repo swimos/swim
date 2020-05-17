@@ -77,7 +77,7 @@ export class InfixOperatorWriter<I, V> extends Writer {
       }
     }
     if (step === 2) {
-      if (!part) {
+      if (part === void 0) {
         part = recon.writeItem(lhs, output);
       } else {
         part = part.pull(output);
@@ -104,7 +104,7 @@ export class InfixOperatorWriter<I, V> extends Writer {
       step = 5;
     }
     if (step === 5) {
-      if (!part) {
+      if (part === void 0) {
         part = Unicode.writeString(operator, output);
       } else {
         part = part.pull(output);
@@ -131,7 +131,7 @@ export class InfixOperatorWriter<I, V> extends Writer {
       }
     }
     if (step === 8) {
-      if (!part) {
+      if (part === void 0) {
         part = recon.writeItem(rhs, output);
       } else {
         part = part.pull(output);

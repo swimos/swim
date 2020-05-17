@@ -37,7 +37,7 @@ WARP aims to support.
 The third most important design goal for WARP is minimalism.  WARP supports
 forward-compatible, per-link subprotocols, enabling protocol stability without
 stagnation.  The core WARP protocol remains unchanged since its original
-implementation in 2015, despite significant evolution of swimOS, and its
+implementation in 2015, despite significant evolution of SwimOS, and its
 extensive use of WARP subprotocols.
 
 Future evolution of the WARP protocol must maintain the delicate balance
@@ -206,7 +206,7 @@ be found in `node_modules/@swim/warp/dist/main/swim-warp.js`.
 ### Browser
 
 Browser applications can load `swim-mesh.js`—which bundles the **@swim/warp**
-library—along with its `swim-core.js` dependency, directly from the swimOS CDN.
+library—along with its `swim-core.js` dependency, directly from the SwimOS CDN.
 
 ```html
 <!-- Development -->
@@ -219,7 +219,7 @@ library—along with its `swim-core.js` dependency, directly from the swimOS CDN
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the swimOS CDN, which bundles **@swim/warp** together with all other
+from the SwimOS CDN, which bundles **@swim/warp** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 libraries.
 

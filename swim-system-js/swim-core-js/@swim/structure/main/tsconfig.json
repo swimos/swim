@@ -5,12 +5,14 @@
     "outDir": "../lib/main",
     "paths": {
       "@swim/util": ["@swim/util/main"],
-      "@swim/codec": ["@swim/codec/main"]
+      "@swim/codec": ["@swim/codec/main"],
+      "@swim/interpolate": ["@swim/interpolate/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../util/main"},
-    {"path": "../../codec/main"}
+    {"path": "../../codec/main"},
+    {"path": "../../interpolate/main"}
   ]
 }

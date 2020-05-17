@@ -83,7 +83,7 @@ export class Format {
         }
         output = output.write(object);
       }
-    } else if (object && typeof (object as any).display === "function") {
+    } else if (typeof (object as any).display === "function") {
       if (!(output instanceof Output)) {
         output = Unicode.stringOutput(output);
       }
@@ -197,7 +197,7 @@ export class Format {
         const digits = new Array<number>(19);
         let x = value;
         let i = 18;
-        while (x) {
+        while (x !== 0) {
           digits[i] = Math.abs((x % 10) | 0);
           x = (x / 10) | 0;
           i -= 1;
@@ -307,14 +307,14 @@ export class Format {
    * Returns the operting system specific string used to separate lines of text.
    */
   static lineSeparator(): string {
-    if (!Format._lineSeparator) {
+    if (Format._lineSeparator === void 0) {
       if (typeof exports === "object" && typeof module !== "undefined" && typeof require === "function") {
         const os = require("os");
-        if (os) {
+        if (typeof os === "object" && os !== null) {
           Format._lineSeparator = os.EOL;
         }
       }
-      if (!Format._lineSeparator) {
+      if (Format._lineSeparator === void 0) {
         Format._lineSeparator = "\n";
       }
     }
@@ -416,18 +416,18 @@ export class Format {
         s += weeks + "w";
       }
       if (days !== void 0) {
-        s += (s ? separator : "") + days + "d";
+        s += (s.length !== 0 ? separator : "") + days + "d";
       }
       if (hours !== void 0) {
-        s += (s ? separator : "") + hours + "h";
+        s += (s.length !== 0 ? separator : "") + hours + "h";
       }
       if (minutes !== void 0) {
-        s += (s ? separator : "") + minutes + "m";
+        s += (s.length !== 0 ? separator : "") + minutes + "m";
       }
-      if (seconds !== void 0 || !millis) {
-        s += (s ? separator : "") + (seconds || 0) + "s";
+      if (seconds !== void 0 || millis === 0) {
+        s += (s.length !== 0 ? separator : "") + (seconds !== void 0 ? seconds : 0) + "s";
       }
-      if (millis && !s) {
+      if (millis !== 0 && s.length === 0) {
         s += millis + "ms";
       }
       return s;

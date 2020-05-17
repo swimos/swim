@@ -49,7 +49,7 @@ export class InlineItemParser<I, V> extends Parser<V> {
           fieldParser = recon.parseAttr(input);
           step = 2;
         } else if (c === 123/*'{'*/) {
-          if (builder) {
+          if (builder !== void 0) {
             valueParser = recon.parseRecord(input, builder);
             step = 5;
           } else {
@@ -57,20 +57,20 @@ export class InlineItemParser<I, V> extends Parser<V> {
             step = 4;
           }
         } else if (c === 91/*'['*/) {
-          if (builder) {
+          if (builder !== void 0) {
             valueParser = recon.parseMarkup(input, builder);
             step = 5;
           } else {
             valueParser = recon.parseMarkup(input);
             step = 4;
           }
-        } else if (!builder) {
+        } else if (builder === void 0) {
           return Parser.done(recon.extant());
         } else {
           return Parser.done(builder.bind());
         }
       } else if (input.isDone()) {
-        if (!builder) {
+        if (builder === void 0) {
           return Parser.done(recon.extant());
         } else {
           return Parser.done(builder.bind());

@@ -55,9 +55,9 @@ export abstract class InputBuffer extends Input {
 
   abstract clone(): InputBuffer;
 
-  private static _emptyBuffer: InputBuffer;
+  private static _emptyBuffer?: InputBuffer;
 
-  private static _doneBuffer: InputBuffer;
+  private static _doneBuffer?: InputBuffer;
 
   /**
    * Returns an `InputBuffer}` in the _empty_ state.
@@ -65,7 +65,7 @@ export abstract class InputBuffer extends Input {
   static empty(id: unknown | null = null, mark: Mark = Mark.zero(),
                settings: InputSettings = InputSettings.standard()): InputBuffer {
     if (id === null && mark === Mark.zero() && settings === InputSettings.standard()) {
-      if (!InputBuffer._emptyBuffer) {
+      if (InputBuffer._emptyBuffer === void 0) {
         InputBuffer._emptyBuffer = new InputBufferEmpty(null, Mark.zero(), InputSettings.standard());
       }
       return InputBuffer._emptyBuffer;
@@ -79,7 +79,7 @@ export abstract class InputBuffer extends Input {
   static done(id: unknown | null = null, mark: Mark = Mark.zero(),
               settings: InputSettings = InputSettings.standard()): InputBuffer {
     if (id === null && mark === Mark.zero() && settings === InputSettings.standard()) {
-      if (!InputBuffer._doneBuffer) {
+      if (InputBuffer._doneBuffer === void 0) {
         InputBuffer._doneBuffer = new InputBufferDone(null, Mark.zero(), InputSettings.standard());
       }
       return InputBuffer._doneBuffer;

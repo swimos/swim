@@ -60,14 +60,14 @@ export class BlockParser<I, V> extends Parser<V> {
             input = input.step();
             step = 7;
           } else {
-            if (builder) {
+            if (builder !== void 0) {
               return Parser.done(builder.bind());
             } else {
               return Parser.done(recon.absent());
             }
           }
         } else if (input.isDone()) {
-          if (builder) {
+          if (builder !== void 0) {
             return Parser.done(builder.bind());
           } else {
             return Parser.done(recon.absent());
@@ -75,7 +75,7 @@ export class BlockParser<I, V> extends Parser<V> {
         }
       }
       if (step === 2) {
-        if (!keyParser) {
+        if (keyParser === void 0) {
           keyParser = recon.parseBlockExpression(input);
         }
         while (keyParser.isCont() && !input.isEmpty()) {
@@ -117,7 +117,7 @@ export class BlockParser<I, V> extends Parser<V> {
         }
       }
       if (step === 5) {
-        if (!valueParser) {
+        if (valueParser === void 0) {
           valueParser = recon.parseBlockExpression(input);
         }
         while (valueParser.isCont() && !input.isEmpty()) {

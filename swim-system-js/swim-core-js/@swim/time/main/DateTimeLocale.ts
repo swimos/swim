@@ -31,9 +31,9 @@ export class DateTimeLocale {
     this.shortMonths = shortMonths;
   }
 
-  private static _standard: DateTimeLocale;
+  private static _standard?: DateTimeLocale;
   static standard(): DateTimeLocale {
-    if (!DateTimeLocale._standard) {
+    if (DateTimeLocale._standard === void 0) {
       DateTimeLocale._standard = new DateTimeLocale();
     }
     return DateTimeLocale._standard;

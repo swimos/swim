@@ -82,7 +82,7 @@ export class SelectorParser<I, V> extends Parser<V> {
     }
     do {
       if (step === 3) {
-        if (!valueParser) {
+        if (valueParser === void 0) {
           valueParser = recon.parseLiteral(input, recon.valueBuilder());
         }
         while (valueParser.isCont() && !input.isEmpty()) {
@@ -97,7 +97,7 @@ export class SelectorParser<I, V> extends Parser<V> {
         }
       }
       if (step === 4) {
-        if (!valueParser) {
+        if (valueParser === void 0) {
           valueParser = recon.parseInteger(input);
         }
         while (valueParser.isCont() && !input.isEmpty()) {
@@ -146,7 +146,7 @@ export class SelectorParser<I, V> extends Parser<V> {
         }
       }
       if (step === 7) {
-        if (!valueParser) {
+        if (valueParser === void 0) {
           valueParser = recon.parseIdent(input);
         }
         while (valueParser.isCont() && !input.isEmpty()) {
@@ -161,7 +161,7 @@ export class SelectorParser<I, V> extends Parser<V> {
         }
       }
       if (step === 8) {
-        if (!valueParser) {
+        if (valueParser === void 0) {
           valueParser = recon.parseBlockExpression(input);
         }
         while (valueParser.isCont() && !input.isEmpty()) {
@@ -204,14 +204,14 @@ export class SelectorParser<I, V> extends Parser<V> {
           } else if (c === 46/*'.'*/) {
             input = input.step();
             step = 11;
-          } else if (builder) {
+          } else if (builder !== void 0) {
             builder.push(recon.item(selector!));
             return Parser.done(builder.bind());
           } else {
             return Parser.done(selector!);
           }
         } else if (input.isDone()) {
-          if (builder) {
+          if (builder !== void 0) {
             builder.push(recon.item(selector!));
             return Parser.done(builder.bind());
           } else {

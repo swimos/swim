@@ -139,7 +139,7 @@ export class Cmd implements Equals, Debug {
 
   getValue(index: number = 0): string | undefined {
     const arg = this._args[index];
-    return arg ? arg.value() : void 0;
+    return arg !== void 0 ? arg.value() : void 0;
   }
 
   parse(params?: string[], paramIndex?: number): Cmd {
@@ -214,7 +214,7 @@ export class Cmd implements Equals, Debug {
   }
 
   run(): void {
-    if (this._exec) {
+    if (this._exec !== null) {
       const opts = {} as {[name: string]: string | null | undefined};
       const args = [] as string[];
       let cmd: Cmd | undefined = this;
@@ -238,14 +238,14 @@ export class Cmd implements Equals, Debug {
           }
         }
         cmd = cmd._base;
-      } while (cmd);
+      } while (cmd !== void 0);
       this._exec.call(this, opts, args);
     }
   }
 
   /** @hidden */
   writeFullName(output: Output): void {
-    if (this._base) {
+    if (this._base !== void 0) {
       this._base.writeFullName(output);
       output.write(32/*' '*/);
     }
@@ -259,10 +259,10 @@ export class Cmd implements Equals, Debug {
     const optCount = this._opts.length;
     const argCount = this._args.length;
     const cmdCount = this._cmds.length;
-    if (optCount) {
+    if (optCount !== 0) {
       output.write(32/*' '*/).write("[options]");
     }
-    if (argCount) {
+    if (argCount !== 0) {
       for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
         const arg = this._args[argIndex];
         output.write(32/*' '*/).write(91/*'['*/).write(arg._name).write(93/*']'*/);
@@ -270,16 +270,16 @@ export class Cmd implements Equals, Debug {
           output.write(63/*'?'*/);
         }
       }
-    } else if (cmdCount) {
+    } else if (cmdCount !== 0) {
       output.write(32/*' '*/).write("<command>");
     }
     output.writeln();
-    if (optCount) {
+    if (optCount !== 0) {
       output.writeln();
       output.writeln("Options:");
       for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
         const opt = this._opts[optIndex];
-        if (opt._flag) {
+        if (opt._flag !== null) {
           output.write("  -").write(opt._flag).write(", --").write(opt._name);
         } else {
           output.write("      --").write(opt._name);
@@ -298,13 +298,13 @@ export class Cmd implements Equals, Debug {
         for (let i = optLength; i < 15; i += 1) {
           output.write(32/*' '*/);
         }
-        if (opt._desc) {
+        if (opt._desc !== null) {
           output.write(32/*' '*/).write(opt._desc);
         }
         output.writeln();
       }
     }
-    if (cmdCount) {
+    if (cmdCount !== 0) {
       output.writeln();
       output.writeln("Commands:");
       for (let cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
@@ -313,7 +313,7 @@ export class Cmd implements Equals, Debug {
         for (let i = cmd._name.length; i < 20; i += 1) {
           output.write(32/*' '*/);
         }
-        if (cmd._desc) {
+        if (cmd._desc !== null) {
           output.write("  ").write(cmd._desc);
         }
         output.writeln();
@@ -393,17 +393,17 @@ export class Cmd implements Equals, Debug {
   static of(id: string, name: string = id, desc: string | null = null,
             anyOpts?: AnyOpt[], anyArgs?: AnyArg[], anyCmds?: AnyCmd[],
             exec: ExecCmd | null = null): Cmd {
-    const optCount = anyOpts ? anyOpts.length : 0;
+    const optCount = anyOpts !== void 0 ? anyOpts.length : 0;
     const opts = new Array<Opt>(optCount);
     for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
       opts[optIndex] = Opt.fromAny(anyOpts![optIndex]);
     }
-    const argCount = anyArgs ? anyArgs.length : 0;
+    const argCount = anyArgs !== void 0 ? anyArgs.length : 0;
     const args = new Array<Arg>(argCount);
     for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
       args[argIndex] = Arg.fromAny(anyArgs![argIndex]);
     }
-    const cmdCount = anyCmds ? anyCmds.length : 0;
+    const cmdCount = anyCmds !== void 0 ? anyCmds.length : 0;
     const cmds = new Array<Cmd>(cmdCount);
     for (let cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
       cmds[cmdIndex] = Cmd.fromAny(anyCmds![cmdIndex]);
@@ -419,17 +419,17 @@ export class Cmd implements Equals, Debug {
     } else {
       const id = cmd.id !== void 0 ? cmd.id : cmd.name;
       const desc = cmd.desc !== void 0 ? cmd.desc : null;
-      const optCount = cmd.opts ? cmd.opts.length : 0;
+      const optCount = cmd.opts !== void 0 ? cmd.opts.length : 0;
       const opts = new Array<Opt>(optCount);
       for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
         opts[optIndex] = Opt.fromAny(cmd.opts![optIndex]);
       }
-      const argCount = cmd.args ? cmd.args.length : 0;
+      const argCount = cmd.args !== void 0 ? cmd.args.length : 0;
       const args = new Array<Arg>(argCount);
       for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
         args[argIndex] = Arg.fromAny(cmd.args![argIndex]);
       }
-      const cmdCount = cmd.cmds ? cmd.cmds.length : 0;
+      const cmdCount = cmd.cmds !== void 0 ? cmd.cmds.length : 0;
       const cmds = new Array<Cmd>(cmdCount);
       for (let cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
         cmds[cmdIndex] = Cmd.fromAny(cmd.cmds![cmdIndex]);
@@ -445,7 +445,7 @@ export class Cmd implements Equals, Debug {
 }
 
 function execHelpCmd(this: Cmd, args: {[name: string]: string}) {
-  if (this._base) {
+  if (this._base !== void 0) {
     console.log(this._base.toHelp());
   }
 }

@@ -78,7 +78,7 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
     if (outlet === this.state) {
       if (this.downlink instanceof ValueDownlink) {
         return this.downlink.get();
-      } else if (this.downlinkRecord) {
+      } else if (this.downlinkRecord !== void 0) {
         return this.downlinkRecord;
       }
     }
@@ -97,7 +97,7 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
         || prio !== this.inputPrio || rate !== this.inputRate
         || (body === void 0 ? this.inputBody !== void 0 : !body.equals(this.inputBody))
         || type !== this.inputType) {
-      if (this.downlink) {
+      if (this.downlink !== void 0) {
         this.downlink.close();
         this.downlink = void 0;
         this.downlinkRecord = void 0;
@@ -161,11 +161,11 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
     }
   }
 
-  private static _reifier: DownlinkReifier | undefined;
+  private static _reifier?: DownlinkReifier;
 
   static reifier(warp?: WarpRef): Reifier {
     if (warp === void 0) {
-      if (!DownlinkStreamlet._reifier) {
+      if (DownlinkStreamlet._reifier === void 0) {
         DownlinkStreamlet._reifier = new DownlinkReifier();
       }
       return DownlinkStreamlet._reifier;

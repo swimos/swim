@@ -541,7 +541,7 @@ export class Uri implements Comparable<Uri>, HashCode, Debug, Display {
   }
 
   display(output: Output): void {
-    if (this._string != null) {
+    if (this._string !== void 0) {
       output = output.write(this._string);
     } else {
       if (this._scheme.isDefined()) {
@@ -737,7 +737,7 @@ export class Uri implements Comparable<Uri>, HashCode, Debug, Display {
   }
 
   static standardParser(): UriParser {
-    if (!this._standardParser) {
+    if (this._standardParser === void 0) {
       this._standardParser = new Uri.Parser();
     }
     return this._standardParser;
@@ -1035,7 +1035,7 @@ export class Uri implements Comparable<Uri>, HashCode, Debug, Display {
   private static _form?: Form<Uri>;
 
   static form(): Form<Uri> {
-    if (!Uri._form) {
+    if (Uri._form === void 0) {
       Uri._form = new Uri.Form(Uri.empty());
     }
     return Uri._form;

@@ -69,7 +69,7 @@ export class EventDownlink extends Downlink {
       nodeUri = hostUri.unresolve(nodeUri);
     }
     let model = this._context.getDownlink(hostUri, nodeUri, laneUri);
-    if (model) {
+    if (model !== void 0) {
       if (!(model instanceof EventDownlinkModel)) {
         throw new Error("downlink type mismatch");
       }
@@ -81,7 +81,7 @@ export class EventDownlink extends Downlink {
       this._context.openDownlink(model);
     }
     this._model = model as EventDownlinkModel;
-    if (this._owner) {
+    if (this._owner !== void 0) {
       this._owner.addDownlink(this);
     }
     return this;

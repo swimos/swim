@@ -83,18 +83,18 @@ export class Recon {
         || c >= 0x10000 && c <= 0xeffff;
   }
 
-  private static _structureParser: ReconParser<Item, Value>;
-  private static _structureWriter: ReconWriter<Item, Value>;
+  private static _structureParser?: ReconParser<Item, Value>;
+  private static _structureWriter?: ReconWriter<Item, Value>;
 
   static structureParser(): ReconParser<Item, Value> {
-    if (!Recon._structureParser) {
+    if (Recon._structureParser === void 0) {
       Recon._structureParser = new ReconStructureParser();
     }
     return Recon._structureParser;
   }
 
   static structureWriter(): ReconWriter<Item, Value> {
-    if (!Recon._structureWriter) {
+    if (Recon._structureWriter === void 0) {
       Recon._structureWriter = new ReconStructureWriter();
     }
     return Recon._structureWriter;

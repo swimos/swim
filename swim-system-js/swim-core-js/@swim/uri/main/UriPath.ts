@@ -416,7 +416,7 @@ export abstract class UriPath implements Comparable<UriPath>, HashCode, Debug, D
   private static _pathForm?: Form<UriPath>;
 
   static pathForm(): Form<UriPath> {
-    if (!UriPath._pathForm) {
+    if (UriPath._pathForm === void 0) {
       UriPath._pathForm = new Uri.PathForm(UriPath.empty());
     }
     return UriPath._pathForm;

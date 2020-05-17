@@ -39,77 +39,77 @@ export class MathModule {
   private static _scope?: Record;
 
   static max(): Func {
-    if (!MathModule._max) {
+    if (MathModule._max === void 0) {
       MathModule._max = new MaxFunc();
     }
     return MathModule._max;
   }
 
   static min(): Func {
-    if (!MathModule._min) {
+    if (MathModule._min === void 0) {
       MathModule._min = new MinFunc();
     }
     return MathModule._min;
   }
 
   static abs(): Func {
-    if (!MathModule._abs) {
+    if (MathModule._abs === void 0) {
       MathModule._abs = new AbsFunc();
     }
     return MathModule._abs;
   }
 
   static ceil(): Func {
-    if (!MathModule._ceil) {
+    if (MathModule._ceil === void 0) {
       MathModule._ceil = new CeilFunc();
     }
     return MathModule._ceil;
   }
 
   static floor(): Func {
-    if (!MathModule._floor) {
+    if (MathModule._floor === void 0) {
       MathModule._floor = new FloorFunc();
     }
     return MathModule._floor;
   }
 
   static round(): Func {
-    if (!MathModule._round) {
+    if (MathModule._round === void 0) {
       MathModule._round = new RoundFunc();
     }
     return MathModule._round;
   }
 
   static sqrt(): Func {
-    if (!MathModule._sqrt) {
+    if (MathModule._sqrt === void 0) {
       MathModule._sqrt = new SqrtFunc();
     }
     return MathModule._sqrt;
   }
 
   static pow(): Func {
-    if (!MathModule._pow) {
+    if (MathModule._pow === void 0) {
       MathModule._pow = new PowFunc();
     }
     return MathModule._pow;
   }
 
   static rate(): Func {
-    if (!MathModule._rate) {
+    if (MathModule._rate === void 0) {
       MathModule._rate = new RateFunc();
     }
     return MathModule._rate;
   }
 
   static random(): Func {
-    if (!MathModule._random) {
+    if (MathModule._random === void 0) {
       MathModule._random = new RandomFunc();
     }
     return MathModule._random;
   }
 
   static scope(): Record {
-    if (!MathModule._scope) {
+    if (MathModule._scope === void 0) {
       MathModule._scope = Item.Record.create(10)
           .slot("max", MathModule.max())
           .slot("min", MathModule.min())
@@ -142,7 +142,7 @@ class MaxFunc extends BridgeFunc {
     }
     if (y !== void 0) {
       return x.max(y);
-    } else if (operator) {
+    } else if (operator !== void 0) {
       y = operator.state() as Item;
       const max = y !== void 0 ? x.max(y) : x;
       operator.setState(max);
@@ -174,7 +174,7 @@ class MinFunc extends BridgeFunc {
     }
     if (y !== void 0) {
       return x.min(y);
-    } else if (operator) {
+    } else if (operator !== void 0) {
       y = operator.state() as Item;
       const min = y !== void 0 ? x.min(y) : x;
       operator.setState(min);
@@ -273,7 +273,7 @@ class RateFunc extends BridgeFunc {
       value = args.evaluate(interpreter).numberValue(NaN);
       period = 1000;
     }
-    if (isFinite(value) && operator) {
+    if (isFinite(value) && operator !== void 0) {
       let state = operator.state() as {v0: number, t0: number, dv: number, dt: number} | undefined;
       if (state === void 0) {
         state = {v0: value, t0: Date.now(), dv: 0, dt: 0};

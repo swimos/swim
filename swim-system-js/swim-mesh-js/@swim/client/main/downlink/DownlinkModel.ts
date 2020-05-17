@@ -116,15 +116,15 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   unlinkDelay(): number {
-    return this._host ? this._host.unlinkDelay() : 0;
+    return this._host !== null ? this._host.unlinkDelay() : 0;
   }
 
   isConnected(): boolean {
-    return !!(this._host && this._host.isConnected());
+    return this._host !== null ? this._host.isConnected() : false;
   }
 
   isAuthenticated(): boolean {
-    return !!(this._host && this._host.isAuthenticated());
+    return this._host !== null ? this._host.isAuthenticated() : false;
   }
 
   isLinked(): boolean {
@@ -136,7 +136,7 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   session(): Value {
-    return this._host ? this._host.session() : Value.absent();
+    return this._host !== null ? this._host.session() : Value.absent();
   }
 
   addDownlink(view: Downlink): void {

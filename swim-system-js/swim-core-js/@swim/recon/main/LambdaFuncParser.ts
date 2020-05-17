@@ -43,7 +43,7 @@ export class LambdaFuncParser<I, V> extends Parser<V> {
                      bindingsParser?: Parser<V>, templateParser?: Parser<V>, step: number = 1): Parser<V> {
     let c = 0;
     if (step === 1) {
-      if (!bindingsParser) {
+      if (bindingsParser === void 0) {
         bindingsParser = recon.parseConditionalOperator(input, builder);
       }
       while (bindingsParser.isCont() && !input.isEmpty()) {
@@ -70,7 +70,7 @@ export class LambdaFuncParser<I, V> extends Parser<V> {
       }
     }
     if (step === 3) {
-      if (!templateParser) {
+      if (templateParser === void 0) {
         templateParser = recon.parseConditionalOperator(input);
       }
       while (templateParser.isCont() && !input.isEmpty()) {

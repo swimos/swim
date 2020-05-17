@@ -102,7 +102,7 @@ export abstract class DateTimeFormat {
 
   private static _year?: YearFormat;
   static year(): YearFormat {
-    if (!DateTimeFormat._year) {
+    if (DateTimeFormat._year === void 0) {
       DateTimeFormat._year = new DateTimeFormat.Year();
     }
     return DateTimeFormat._year;
@@ -110,7 +110,7 @@ export abstract class DateTimeFormat {
 
   private static _monthOfYear?: MonthOfYearFormat;
   static monthOfYear(): MonthOfYearFormat {
-    if (!DateTimeFormat._monthOfYear) {
+    if (DateTimeFormat._monthOfYear === void 0) {
       DateTimeFormat._monthOfYear = new DateTimeFormat.MonthOfYear();
     }
     return DateTimeFormat._monthOfYear;
@@ -121,7 +121,7 @@ export abstract class DateTimeFormat {
     if (locale !== DateTimeLocale.standard()) {
       return new DateTimeFormat.Month(locale);
     } else {
-      if (!DateTimeFormat._month) {
+      if (DateTimeFormat._month === void 0) {
         DateTimeFormat._month = new DateTimeFormat.Month(locale);
       }
       return DateTimeFormat._month;
@@ -133,7 +133,7 @@ export abstract class DateTimeFormat {
     if (locale !== DateTimeLocale.standard()) {
       return new DateTimeFormat.ShortMonth(locale);
     } else {
-      if (!DateTimeFormat._shortMonth) {
+      if (DateTimeFormat._shortMonth === void 0) {
         DateTimeFormat._shortMonth = new DateTimeFormat.ShortMonth(locale);
       }
       return DateTimeFormat._shortMonth;
@@ -142,7 +142,7 @@ export abstract class DateTimeFormat {
 
   private static _dayOfMonth?: DayOfMonthFormat;
   static dayOfMonth(): DayOfMonthFormat {
-    if (!DateTimeFormat._dayOfMonth) {
+    if (DateTimeFormat._dayOfMonth === void 0) {
       DateTimeFormat._dayOfMonth = new DateTimeFormat.DayOfMonth();
     }
     return DateTimeFormat._dayOfMonth;
@@ -153,7 +153,7 @@ export abstract class DateTimeFormat {
     if (locale !== DateTimeLocale.standard()) {
       return new DateTimeFormat.Weekday(locale);
     } else {
-      if (!DateTimeFormat._weekday) {
+      if (DateTimeFormat._weekday === void 0) {
         DateTimeFormat._weekday = new DateTimeFormat.Weekday(locale);
       }
       return DateTimeFormat._weekday;
@@ -165,7 +165,7 @@ export abstract class DateTimeFormat {
     if (locale !== DateTimeLocale.standard()) {
       return new DateTimeFormat.ShortWeekday(locale);
     } else {
-      if (!DateTimeFormat._shortWeekday) {
+      if (DateTimeFormat._shortWeekday === void 0) {
         DateTimeFormat._shortWeekday = new DateTimeFormat.ShortWeekday(locale);
       }
       return DateTimeFormat._shortWeekday;
@@ -174,7 +174,7 @@ export abstract class DateTimeFormat {
 
   private static _hour24?: Hour24Format;
   static hour24(): Hour24Format {
-    if (!DateTimeFormat._hour24) {
+    if (DateTimeFormat._hour24 === void 0) {
       DateTimeFormat._hour24 = new DateTimeFormat.Hour24();
     }
     return DateTimeFormat._hour24;
@@ -182,7 +182,7 @@ export abstract class DateTimeFormat {
 
   private static _hour12?: Hour12Format;
   static hour12(): Hour12Format {
-    if (!DateTimeFormat._hour12) {
+    if (DateTimeFormat._hour12 === void 0) {
       DateTimeFormat._hour12 = new DateTimeFormat.Hour12();
     }
     return DateTimeFormat._hour12;
@@ -193,7 +193,7 @@ export abstract class DateTimeFormat {
     if (locale !== DateTimeLocale.standard()) {
       return new DateTimeFormat.Period(locale);
     } else {
-      if (!DateTimeFormat._period) {
+      if (DateTimeFormat._period === void 0) {
         DateTimeFormat._period = new DateTimeFormat.Period(locale);
       }
       return DateTimeFormat._period;
@@ -202,7 +202,7 @@ export abstract class DateTimeFormat {
 
   private static _minute?: MinuteFormat;
   static minute(): MinuteFormat {
-    if (!DateTimeFormat._minute) {
+    if (DateTimeFormat._minute === void 0) {
       DateTimeFormat._minute = new DateTimeFormat.Minute();
     }
     return DateTimeFormat._minute;
@@ -210,7 +210,7 @@ export abstract class DateTimeFormat {
 
   private static _second?: SecondFormat;
   static second(): SecondFormat {
-    if (!DateTimeFormat._second) {
+    if (DateTimeFormat._second === void 0) {
       DateTimeFormat._second = new DateTimeFormat.Second();
     }
     return DateTimeFormat._second;
@@ -218,14 +218,14 @@ export abstract class DateTimeFormat {
 
   private static _millisecond?: YearFormat;
   static millisecond(): YearFormat {
-    if (!DateTimeFormat._millisecond) {
+    if (DateTimeFormat._millisecond === void 0) {
       DateTimeFormat._millisecond = new DateTimeFormat.Millisecond();
     }
     return DateTimeFormat._millisecond;
   }
 
   static pattern(pattern: string, specifiers?: DateTimeSpecifiers | DateTimeLocale): PatternFormat {
-    if (!specifiers || specifiers instanceof DateTimeLocale) {
+    if (specifiers === void 0 || specifiers instanceof DateTimeLocale) {
       specifiers = DateTimeSpecifiers.standard(specifiers);
     }
     return new DateTimeFormat.Pattern(pattern, specifiers);
@@ -233,7 +233,7 @@ export abstract class DateTimeFormat {
 
   private static _iso8601?: DateTimeFormat;
   static iso8601(): DateTimeFormat {
-    if (!DateTimeFormat._iso8601) {
+    if (DateTimeFormat._iso8601 === void 0) {
       DateTimeFormat._iso8601 = new DateTimeFormat.Pattern("%Y-%m-%dT%H:%M:%S.%LZ", DateTimeSpecifiers.standard());
     }
     return DateTimeFormat._iso8601;
@@ -260,7 +260,7 @@ export abstract class DateTimeFormat {
         return Parser.error(Diagnostic.expected(desc, input));
       }
     }
-    return factory.cont(date || {}, value, step, input);
+    return factory.cont(date !== void 0 ? date : {}, value, step, input);
   }
 
   /** @hidden */

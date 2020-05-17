@@ -72,7 +72,7 @@ function offsetByCodePoints(this: String, index: number, count: number): number 
   return index;
 }
 
-if (!String.prototype.codePointAt) {
+if (String.prototype.codePointAt === void 0) {
   Object.defineProperty(String.prototype, "codePointAt", {
     value: codePointAt,
     configurable: true,
@@ -80,7 +80,7 @@ if (!String.prototype.codePointAt) {
   });
 }
 
-if (!String.prototype.offsetByCodePoints) {
+if (String.prototype.offsetByCodePoints === void 0) {
   Object.defineProperty(String.prototype, "offsetByCodePoints", {
     value: offsetByCodePoints,
     configurable: true,

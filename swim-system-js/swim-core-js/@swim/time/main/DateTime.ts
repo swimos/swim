@@ -283,7 +283,7 @@ export class DateTime implements Comparable<AnyDateTime>, HashCode, Display {
     return new DateTime(date.getTime() - 60000 * zone._offset, zone);
   }
 
-  static from(init: DateTimeInit, zone?: AnyTimeZone): DateTime {
+  static fromInit(init: DateTimeInit, zone?: AnyTimeZone): DateTime {
     let time = Date.UTC(init.year !== void 0 ? init.year : 1970,
                         init.month !== void 0 ? init.month : 0,
                         init.day !== void 0 ? init.day : 1,
@@ -314,8 +314,8 @@ export class DateTime implements Comparable<AnyDateTime>, HashCode, Display {
       return new DateTime(date, zone);
     } else if (typeof date === "string") {
       return DateTime.parse(date, zone);
-    } else if (date && typeof date === "object") {
-      return DateTime.from(date, zone);
+    } else if (DateTime.isInit(date)) {
+      return DateTime.fromInit(date, zone);
     }
     throw new TypeError("" + date);
   }
@@ -371,7 +371,7 @@ export class DateTime implements Comparable<AnyDateTime>, HashCode, Display {
       }
     });
     if (DateTime.isInit(init)) {
-      return DateTime.from(init);
+      return DateTime.fromInit(init);
     }
     return void 0;
   }
@@ -389,8 +389,8 @@ export class DateTime implements Comparable<AnyDateTime>, HashCode, Display {
       return date;
     } else if (typeof date === "string") {
       return DateTime.parse(date).time();
-    } else if (date && typeof date === "object") {
-      return DateTime.from(date).time();
+    } else if (DateTime.isInit(date)) {
+      return DateTime.fromInit(date).time();
     }
     throw new TypeError("" + date);
   }
@@ -405,13 +405,34 @@ export class DateTime implements Comparable<AnyDateTime>, HashCode, Display {
 
   /** @hidden */
   static isInit(value: unknown): value is DateTimeInit {
-    if (value && typeof value === "object") {
+    if (typeof value === "object" && value !== null) {
       const init = value as DateTimeInit;
-      return init.year !== void 0 || init.month !== void 0 || init.day !== void 0
-          || init.hour !== void 0 || init.minute !== void 0 || init.second !== void 0
-          || init.millisecond !== void 0;
+      return (typeof init.year === "undefined" || typeof init.year === "number")
+          && (typeof init.month === "undefined" || typeof init.month === "number")
+          && (typeof init.day === "undefined" || typeof init.day === "number")
+          && (typeof init.hour === "undefined" || typeof init.hour === "number")
+          && (typeof init.minute === "undefined" || typeof init.minute === "number")
+          && (typeof init.second === "undefined" || typeof init.second === "number")
+          && (typeof init.millisecond === "undefined" || typeof init.millisecond === "number")
+          && (typeof init.zone === "undefined" || TimeZone.isAny(init.zone))
+          && (typeof init.year === "number"
+           || typeof init.month === "number"
+           || typeof init.day === "number"
+           || typeof init.hour === "number"
+           || typeof init.minute === "number"
+           || typeof init.second === "number"
+           || typeof init.millisecond === "number");
     }
     return false;
+  }
+
+  /** @hidden */
+  static isAny(value: unknown): value is AnyDateTime {
+    return value instanceof DateTime
+        || value instanceof Date
+        || typeof value === "number"
+        || typeof value === "string"
+        || DateTime.isInit(value);
   }
 
   private static _form: Form<DateTime, AnyDateTime>;
@@ -422,7 +443,7 @@ export class DateTime implements Comparable<AnyDateTime>, HashCode, Display {
     if (unit !== void 0) {
       return new DateTime.Form(unit);
     } else {
-      if (!DateTime._form) {
+      if (DateTime._form === void 0) {
         DateTime._form = new DateTime.Form();
       }
       return DateTime._form;

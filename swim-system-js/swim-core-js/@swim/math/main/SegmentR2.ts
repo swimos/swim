@@ -46,6 +46,11 @@ export class SegmentR2 extends R2Shape implements HashCode, Debug {
     this._y1 = y1;
   }
 
+  isDefined(): boolean {
+    return this._x0 !== 0 || this._y0 !== 0
+        || this._x1 !== 0 || this._y1 !== 0;
+  }
+
   get x0(): number {
     return this._x0;
   }
@@ -215,13 +220,35 @@ export class SegmentR2 extends R2Shape implements HashCode, Debug {
     return new SegmentR2(x0, y0, x1, y1);
   }
 
-  static fromAny(segment: AnySegmentR2): SegmentR2 {
-    if (segment instanceof SegmentR2) {
-      return segment;
-    } else if (typeof segment === "object" && segment) {
-      return new SegmentR2(segment.x0, segment.y0, segment.x1, segment.y1);
+  static fromInit(value: SegmentR2Init): SegmentR2 {
+    return new SegmentR2(value.x0, value.y0, value.x1, value.y1);
+  }
+
+  static fromAny(value: AnySegmentR2): SegmentR2 {
+    if (value instanceof SegmentR2) {
+      return value;
+    } else if (SegmentR2.isInit(value)) {
+      return SegmentR2.fromInit(value);
     }
-    throw new TypeError("" + segment);
+    throw new TypeError("" + value);
+  }
+
+  /** @hidden */
+  static isInit(value: unknown): value is SegmentR2Init {
+    if (typeof value === "object" && value !== null) {
+      const init = value as SegmentR2Init;
+      return typeof init.x0 === "number"
+          && typeof init.y0 === "number"
+          && typeof init.x1 === "number"
+          && typeof init.y1 === "number";
+    }
+    return false;
+  }
+
+  /** @hidden */
+  static isAny(value: unknown): value is AnySegmentR2 {
+    return value instanceof SegmentR2
+        || SegmentR2.isInit(value);
   }
 }
 R2Shape.Segment = SegmentR2;

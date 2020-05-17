@@ -54,7 +54,7 @@ export abstract class Selector extends Expression {
     const selected = Item.Record.create();
     this.forSelected(interpreter, function (interpreter: Interpreter): void {
       const scope = interpreter.peekScope();
-      if (scope) {
+      if (scope !== void 0) {
         selected.push(scope);
       }
     }, this);
@@ -149,28 +149,28 @@ export abstract class Selector extends Expression {
   }
 
   static keys(): Selector {
-    if (!Selector._keys) {
+    if (Selector._keys === void 0) {
       Selector._keys = new Item.KeysSelector(Selector.identity());
     }
     return Selector._keys;
   }
 
   static values(): Selector {
-    if (!Selector._values) {
+    if (Selector._values === void 0) {
       Selector._values = new Item.ValuesSelector(Selector.identity());
     }
     return Selector._values;
   }
 
   static children(): Selector {
-    if (!Selector._children) {
+    if (Selector._children === void 0) {
       Selector._children = new Item.ChildrenSelector(Selector.identity());
     }
     return Selector._children;
   }
 
   static descendants(): Selector {
-    if (!Selector._descendants) {
+    if (Selector._descendants === void 0) {
       Selector._descendants = new Item.DescendantsSelector(Selector.identity());
     }
     return Selector._descendants;

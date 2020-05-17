@@ -11,15 +11,15 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "devDependencies": {
-    "@types/node": "13",
-    "rollup": "1.29",
-    "rollup-plugin-node-resolve": "5",
-    "rollup-plugin-sourcemaps": "0",
+    "@rollup/plugin-node-resolve": "7",
+    "@types/node": "14",
+    "rollup": "2.10",
+    "rollup-plugin-sourcemaps": "0.6",
     "terser": "4",
-    "tslib": "1",
-    "tslint": "5",
-    "typedoc": "0.16",
-    "typescript": "3.7"
+    "tslib": "2",
+    "tslint": "6",
+    "typedoc": "0.17",
+    "typescript": "3.9"
   },
   "dependencies": {
     "@swim/util": "3.10.2",

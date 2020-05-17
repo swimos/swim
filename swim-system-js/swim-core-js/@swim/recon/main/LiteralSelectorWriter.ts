@@ -63,7 +63,7 @@ export class LiteralSelectorWriter<I, V> extends Writer {
       }
     }
     if (step === 2) {
-      if (!part) {
+      if (part === void 0) {
         part = recon.writeItem(item, output);
       } else {
         part = part.pull(output);

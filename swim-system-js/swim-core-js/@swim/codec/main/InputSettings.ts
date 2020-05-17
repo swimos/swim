@@ -106,7 +106,7 @@ export class InputSettings implements Debug, HashCode {
    * generated output.
    */
   static standard(): InputSettings {
-    if (!InputSettings._standard) {
+    if (InputSettings._standard === void 0) {
       InputSettings._standard = new InputSettings(false);
     }
     return InputSettings._standard;
@@ -117,7 +117,7 @@ export class InputSettings implements Debug, HashCode {
    * generated output.
    */
   static stripped(): InputSettings {
-    if (!InputSettings._stripped) {
+    if (InputSettings._stripped === void 0) {
       InputSettings._stripped = new InputSettings(false);
     }
     return InputSettings._stripped;
@@ -140,7 +140,7 @@ export class InputSettings implements Debug, HashCode {
   static fromAny(settings: AnyInputSettings | undefined): InputSettings {
     if (settings instanceof InputSettings) {
       return settings;
-    } else if (typeof settings === "object" && settings) {
+    } else if (typeof settings === "object" && settings !== null) {
        return InputSettings.create(settings.isStripped);
     } else {
       return InputSettings.standard();

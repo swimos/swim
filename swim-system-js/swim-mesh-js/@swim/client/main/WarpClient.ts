@@ -137,7 +137,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   openHost(hostUri: AnyUri): Host {
     hostUri = Uri.fromAny(hostUri);
     let host = this._hosts.get(hostUri);
-    if (!host) {
+    if (host === void 0) {
       host = new WebSocketHost(this, hostUri, this._options);
       this._hosts.set(hostUri, host);
     }
@@ -146,7 +146,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
 
   /** @hidden */
   closeHost(host: Host): void {
-    if (this._hosts.get(host.hostUri())) {
+    if (this._hosts.get(host.hostUri()) !== void 0) {
       this._hosts.delete(host.hostUri());
       host.closeUp();
     }
@@ -155,9 +155,9 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   /** @hidden */
   getDownlink(hostUri: Uri, nodeUri: Uri, laneUri: Uri): DownlinkModel | undefined {
     const hostDownlinks = this._downlinks.get(hostUri);
-    if (hostDownlinks) {
+    if (hostDownlinks !== void 0) {
       const nodeDownlinks = hostDownlinks.get(nodeUri);
-      if (nodeDownlinks) {
+      if (nodeDownlinks !== void 0) {
         return nodeDownlinks.get(laneUri);
       }
     }
@@ -170,12 +170,12 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
     const nodeUri = downlink.nodeUri();
     const laneUri = downlink.laneUri();
     let hostDownlinks = this._downlinks.get(hostUri);
-    if (!hostDownlinks) {
+    if (hostDownlinks === void 0) {
       hostDownlinks = new BTree();
       this._downlinks.set(hostUri, hostDownlinks);
     }
     let nodeDownlinks = hostDownlinks.get(nodeUri);
-    if (!nodeDownlinks) {
+    if (nodeDownlinks === void 0) {
       nodeDownlinks = new BTree();
       hostDownlinks.set(nodeUri, nodeDownlinks);
     }
@@ -192,7 +192,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   unlinkDownlink(downlink: DownlinkModel): void {
     const hostUri = downlink.hostUri();
     const host = this.getHost(hostUri);
-    if (host) {
+    if (host !== void 0) {
       host.unlinkDownlink(downlink);
     }
   }
@@ -203,9 +203,9 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
     const nodeUri = downlink.nodeUri();
     const laneUri = downlink.laneUri();
     const hostDownlinks = this._downlinks.get(hostUri);
-    if (hostDownlinks) {
+    if (hostDownlinks !== void 0) {
       const nodeDownlinks = hostDownlinks.get(nodeUri);
-      if (nodeDownlinks) {
+      if (nodeDownlinks !== void 0) {
         if (nodeDownlinks.get(laneUri)) {
           this._downlinkCount -= 1;
           nodeDownlinks.delete(laneUri);
@@ -216,7 +216,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
             }
           }
           const host = this.getHost(hostUri);
-          if (host) {
+          if (host !== void 0) {
             host.closeDownlink(downlink);
           }
         }
@@ -335,7 +335,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
         nodeDownlinks.forEach(function (laneUri: Uri, downlink: DownlinkModel): void {
           downlink.closeUp();
           const host = this.getHost(hostUri);
-          if (host) {
+          if (host !== void 0) {
             host.closeDownlink(downlink);
           }
         }, this);
@@ -350,7 +350,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
 
   observe(observer: WarpObserver): this {
     const oldObservers = this._observers;
-    const n = oldObservers ? oldObservers.length : 0;
+    const n = oldObservers !== null ? oldObservers.length : 0;
     const newObservers = new Array<WarpObserver>(n + 1);
     for (let i = 0; i < n; i += 1) {
       newObservers[i] = oldObservers![i];
@@ -362,7 +362,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
 
   unobserve(observer: unknown): this {
     const oldObservers = this._observers;
-    const n = oldObservers ? oldObservers.length : 0;
+    const n = oldObservers !== null ? oldObservers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const oldObserver = oldObservers![i] as {[key: string]: unknown};
       let found = oldObserver === observer; // check object identity
@@ -416,10 +416,10 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   /** @hidden */
   hostDidConnect(host: Host): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didConnect) {
+      if (observer.didConnect !== void 0) {
         observer.didConnect(host, this);
       }
     }
@@ -434,10 +434,10 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   /** @hidden */
   hostDidAuthenticate(body: Value, host: Host): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didAuthenticate) {
+      if (observer.didAuthenticate !== void 0) {
         observer.didAuthenticate(body, host, this);
       }
     }
@@ -452,10 +452,10 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   /** @hidden */
   hostDidDeauthenticate(body: Value, host: Host): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didDeauthenticate) {
+      if (observer.didDeauthenticate !== void 0) {
         observer.didDeauthenticate(body, host, this);
       }
     }
@@ -470,10 +470,10 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   /** @hidden */
   hostDidDisconnect(host: Host): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didDisconnect) {
+      if (observer.didDisconnect !== void 0) {
         observer.didDisconnect(host, this);
       }
     }
@@ -488,10 +488,10 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   /** @hidden */
   hostDidFail(error: unknown, host: Host): void {
     const observers = this._observers;
-    const n = observers ? observers.length : 0;
+    const n = observers !== null ? observers.length : 0;
     for (let i = 0; i < n; i += 1) {
       const observer = observers![i];
-      if (observer.didFail) {
+      if (observer.didFail !== void 0) {
         observer.didFail(error, host, this);
       }
     }

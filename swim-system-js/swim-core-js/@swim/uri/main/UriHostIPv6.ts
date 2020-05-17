@@ -21,7 +21,7 @@ export class UriHostIPv6 extends UriHost {
   /** @hidden */
   readonly _address: string;
   /** @hidden */
-  _string: string;
+  _string?: string;
 
   /** @hidden */
   constructor(address: string) {
@@ -43,7 +43,7 @@ export class UriHostIPv6 extends UriHost {
   }
 
   display(output: Output): void {
-    if (this._string != null) {
+    if (this._string !== void 0) {
       output = output.write(this._string);
     } else {
       output = output.write(91/*'['*/);
@@ -53,7 +53,7 @@ export class UriHostIPv6 extends UriHost {
   }
 
   toString(): string {
-    if (this._string == null) {
+    if (this._string === void 0) {
       this._string = "[" + this.address + "]";
     }
     return this._string;

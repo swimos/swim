@@ -107,7 +107,7 @@ export interface Outlet<O = unknown> {
 /** @hidden */
 export const Outlet = {
   is<O>(object: unknown): object is Outlet<O> {
-    if (typeof object === "object" && object) {
+    if (typeof object === "object" && object !== null) {
       const outlet = object as Outlet<O>;
       return typeof outlet.outputIterator === "function"
           && typeof outlet.bindOutput === "function"

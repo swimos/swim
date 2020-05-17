@@ -77,7 +77,7 @@ export abstract class UtfErrorMode implements HashCode, Debug {
    * when invalid code unit sequences are encountered.
    */
   static fatal(): UtfErrorMode {
-    if (!UtfErrorMode._fatal) {
+    if (UtfErrorMode._fatal === void 0) {
       UtfErrorMode._fatal = new UtfFatalErrorMode(false);
     }
     return UtfErrorMode._fatal;
@@ -88,7 +88,7 @@ export abstract class UtfErrorMode implements HashCode, Debug {
    * when invalid code unit sequences, and {@code NUL} bytes, are encountered.
    */
   static fatalNonZero(): UtfErrorMode {
-    if (!UtfErrorMode._fatalNonZero) {
+    if (UtfErrorMode._fatalNonZero === void 0) {
       UtfErrorMode._fatalNonZero = new UtfFatalErrorMode(true);
     }
     return UtfErrorMode._fatalNonZero;
@@ -108,7 +108,7 @@ export abstract class UtfErrorMode implements HashCode, Debug {
 
   static replacement(replacementChar?: number): UtfErrorMode {
     if (replacementChar === void 0 || replacementChar === 0xfffd) {
-      if (!UtfErrorMode._replacement) {
+      if (UtfErrorMode._replacement === void 0) {
         UtfErrorMode._replacement = new UtfReplacementErrorMode(0xfffd, false);
       }
       return UtfErrorMode._replacement;
@@ -133,7 +133,7 @@ export abstract class UtfErrorMode implements HashCode, Debug {
 
   static replacementNonZero(replacementChar?: number): UtfErrorMode {
     if (replacementChar === void 0 || replacementChar === 0xfffd) {
-      if (!UtfErrorMode._replacementNonZero) {
+      if (UtfErrorMode._replacementNonZero === void 0) {
         UtfErrorMode._replacementNonZero = new UtfReplacementErrorMode(0xfffd, true);
       }
       return UtfErrorMode._replacementNonZero;
@@ -188,7 +188,7 @@ class UtfFatalErrorMode extends UtfErrorMode {
 
   debug(output: Output): void {
     output = output.write("UtfErrorMode").write(46/*'.'*/)
-        .write(this.isNonZero ? "fatalNonZero" : "fatal")
+        .write(this._isNonZero ? "fatalNonZero" : "fatal")
         .write(40/*'('*/).write(41/*')'*/);
   }
 
@@ -235,8 +235,8 @@ class UtfReplacementErrorMode extends UtfErrorMode {
     if (this === that) {
       return true;
     } else if (that instanceof UtfReplacementErrorMode) {
-      return this.replacementChar === that.replacementChar
-          && this.isNonZero === that.isNonZero;
+      return this._replacementChar === that._replacementChar
+          && this._isNonZero === that._isNonZero;
     }
     return false;
   }

@@ -49,7 +49,7 @@ export class InvokeOperatorWriter<I, V> extends Writer {
   static write<I, V>(output: Output, recon: ReconWriter<I, V>, func: V, args: V,
                      part?: Writer, step: number = 1): Writer {
     if (step === 1) {
-      if (!part) {
+      if (part === void 0) {
         part = recon.writeValue(func, output);
       } else {
         part = part.pull(output);
@@ -66,7 +66,7 @@ export class InvokeOperatorWriter<I, V> extends Writer {
       step = 3;
     }
     if (step === 3) {
-      if (!part) {
+      if (part === void 0) {
         part = recon.writeBlockValue(args, output);
       } else {
         part = part.pull(output);

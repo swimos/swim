@@ -1,4 +1,4 @@
-import nodeResolve from "rollup-plugin-node-resolve";
+import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
 const script = "swim-system";
@@ -11,7 +11,6 @@ const main = {
     name: namespace,
     format: "umd",
     globals: {
-      "mapbox-gl": "mapboxgl",
       ws: "ws",
     },
     sourcemap: true,
@@ -19,15 +18,11 @@ const main = {
     extend: true,
   },
   external: [
-    "mapbox-gl",
     "ws",
   ],
   plugins: [
     nodeResolve({customResolveOptions: {paths: ["../../swim-core-js",
-                                                "../../swim-mesh-js",
-                                                "../../swim-ui-js",
-                                                "../../swim-ux-js",
-                                                "../../swim-web-js"]}}),
+                                                "../../swim-mesh-js"]}}),
     sourcemaps(),
   ],
   onwarn(warning, warn) {

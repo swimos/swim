@@ -47,7 +47,7 @@ export class ConditionalOperatorParser<I, V> extends Parser<V> {
                      elseParser?: Parser<V>, step: number = 1): Parser<V> {
     let c = 0;
     if (step === 1) {
-      if (!ifParser) {
+      if (ifParser === void 0) {
         ifParser = recon.parseOrOperator(input, builder);
       }
       while (ifParser.isCont() && !input.isEmpty()) {
@@ -75,7 +75,7 @@ export class ConditionalOperatorParser<I, V> extends Parser<V> {
       }
     }
     if (step === 3) {
-      if (!thenParser) {
+      if (thenParser === void 0) {
         thenParser = recon.parseConditionalOperator(input, builder);
       }
       while (thenParser.isCont() && !input.isEmpty()) {
@@ -103,7 +103,7 @@ export class ConditionalOperatorParser<I, V> extends Parser<V> {
       }
     }
     if (step === 5) {
-      if (!elseParser) {
+      if (elseParser === void 0) {
         elseParser = recon.parseConditionalOperator(input, builder);
       }
       while (elseParser.isCont() && !input.isEmpty()) {

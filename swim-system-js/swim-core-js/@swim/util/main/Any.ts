@@ -19,7 +19,7 @@ export interface FromAny<T, U = T> {
 /** @hidden */
 export const FromAny = {
   is<T, U = T>(object: unknown): object is FromAny<T, U> {
-    if (typeof object === "object" && object || typeof object === "function") {
+    if (typeof object === "object" && object !== null || typeof object === "function") {
       return typeof (object as FromAny<T, U>).fromAny === "function";
     }
     return false;
@@ -33,7 +33,7 @@ export interface ToAny<T> {
 /** @hidden */
 export const ToAny = {
   is<T>(object: unknown): object is ToAny<T> {
-    if (typeof object === "object" && object) {
+    if (typeof object === "object" && object !== null) {
       return typeof (object as ToAny<T>).toAny === "function";
     }
     return false;

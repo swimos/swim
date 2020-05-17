@@ -112,3 +112,14 @@ export {ValueForm} from "./form/ValueForm";
 
 export {ValueCursor} from "./collections/ValueCursor";
 export {ValueEntryCursor} from "./collections/ValueEntryCursor";
+
+export {ItemInterpolator} from "./interpolator/ItemInterpolator";
+export {AttrInterpolator} from "./interpolator/AttrInterpolator";
+export {SlotInterpolator} from "./interpolator/SlotInterpolator";
+export {ValueInterpolator} from "./interpolator/ValueInterpolator";
+export {RecordInterpolator} from "./interpolator/RecordInterpolator";
+export {NumInterpolator} from "./interpolator/NumInterpolator";
+export {ConditionalOperatorInterpolator} from "./interpolator/ConditionalOperatorInterpolator";
+export {BinaryOperatorInterpolator} from "./interpolator/BinaryOperatorInterpolator";
+export {UnaryOperatorInterpolator} from "./interpolator/UnaryOperatorInterpolator";
+export {InvokeOperatorInterpolator} from "./interpolator/InvokeOperatorInterpolator";

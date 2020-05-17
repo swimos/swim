@@ -14,12 +14,12 @@
 
 import {AnyShape, Shape} from "./Shape";
 import {R2Function} from "./R2Function";
-import {PointR2, PointR2Init} from "./PointR2";
-import {SegmentR2, SegmentR2Init} from "./SegmentR2";
-import {BoxR2, BoxR2Init} from "./BoxR2";
-import {CircleR2, CircleR2Init} from "./CircleR2";
+import {PointR2Init, PointR2Tuple, PointR2} from "./PointR2";
+import {SegmentR2Init, SegmentR2} from "./SegmentR2";
+import {BoxR2Init, BoxR2} from "./BoxR2";
+import {CircleR2Init, CircleR2} from "./CircleR2";
 
-export type AnyR2Shape = R2Shape | PointR2Init | SegmentR2Init | BoxR2Init | CircleR2Init | [number, number];
+export type AnyR2Shape = R2Shape | PointR2Init | PointR2Tuple | SegmentR2Init | BoxR2Init | CircleR2Init;
 
 export abstract class R2Shape implements Shape {
   abstract get xMin(): number;
@@ -46,8 +46,35 @@ export abstract class R2Shape implements Shape {
 
   abstract transform(f: R2Function): R2Shape;
 
-  static fromAny(shape: AnyR2Shape): R2Shape {
-    return Shape.fromAny(shape) as R2Shape;
+  boundingBox(): BoxR2 {
+    return new R2Shape.Box(this.xMin, this.yMin, this.xMax, this.yMax);
+  }
+
+  static fromAny(value: AnyR2Shape): R2Shape {
+    if (value instanceof R2Shape) {
+      return value;
+    } else if (R2Shape.Point.isInit(value)) {
+      return R2Shape.Point.fromInit(value);
+    } else if (R2Shape.Point.isTuple(value)) {
+      return R2Shape.Point.fromTuple(value);
+    } else if (R2Shape.Segment.isInit(value)) {
+      return R2Shape.Segment.fromInit(value);
+    } else if (R2Shape.Box.isInit(value)) {
+      return R2Shape.Box.fromInit(value);
+    } else if (R2Shape.Circle.isInit(value)) {
+      return R2Shape.Circle.fromInit(value);
+    }
+    throw new TypeError("" + value);
+  }
+
+  /** @hidden */
+  static isAny(value: unknown): value is AnyR2Shape {
+    return value instanceof R2Shape
+        || R2Shape.Point.isInit(value)
+        || R2Shape.Point.isTuple(value)
+        || R2Shape.Segment.isInit(value)
+        || R2Shape.Box.isInit(value)
+        || R2Shape.Circle.isInit(value);
   }
 
   // Forward type declarations

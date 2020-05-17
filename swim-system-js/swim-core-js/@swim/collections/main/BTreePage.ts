@@ -93,10 +93,10 @@ export abstract class BTreePage<K, V, U> {
 
   abstract reverseEntries(): Cursor<[K, V]>;
 
-  private static _empty: BTreeLeaf<unknown, unknown, unknown>;
+  private static _empty?: BTreeLeaf<unknown, unknown, unknown>;
 
   static empty<K, V, U>(): BTreeLeaf<K, V, U> {
-    if (!BTreePage._empty) {
+    if (BTreePage._empty === void 0) {
       BTreePage._empty = new BTree.Leaf([], void 0);
     }
     return BTreePage._empty as BTreeLeaf<K, V, U>;

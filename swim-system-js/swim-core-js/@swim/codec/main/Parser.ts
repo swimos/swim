@@ -184,7 +184,7 @@ export abstract class Parser<O> {
 
   static done<O>(output?: O): Parser<O> {
     if (output === void 0) {
-      if (!Parser._done) {
+      if (Parser._done === void 0) {
         Parser._done = new ParserDone<any>(void 0);
       }
       return Parser._done;

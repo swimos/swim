@@ -69,7 +69,7 @@ export class PrefixOperatorParser<I, V> extends Parser<V> {
       }
     }
     if (step === 2) {
-      if (!rhsParser) {
+      if (rhsParser === void 0) {
         rhsParser = recon.parsePrefixOperator(input, builder);
       }
       while (rhsParser.isCont() && !input.isEmpty()) {

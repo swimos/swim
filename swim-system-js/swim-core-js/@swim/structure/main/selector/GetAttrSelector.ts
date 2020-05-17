@@ -130,7 +130,7 @@ export class GetAttrSelector extends Selector {
     interpreter = Interpreter.fromAny(interpreter);
     const key = this._key;
     const value = GetAttrSelector.substitute(key, this._then, interpreter);
-    if (value) {
+    if (value !== void 0) {
       return value;
     }
     let then = this._then.substitute(interpreter);

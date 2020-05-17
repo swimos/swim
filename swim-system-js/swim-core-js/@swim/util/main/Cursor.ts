@@ -48,7 +48,7 @@ export abstract class Cursor<T> implements Iterator<T> {
 
   private static _empty?: Cursor<any>;
   static empty<T>(): Cursor<T> {
-    if (!Cursor._empty) {
+    if (Cursor._empty === void 0) {
       Cursor._empty = new Cursor.Empty();
     }
     return Cursor._empty;

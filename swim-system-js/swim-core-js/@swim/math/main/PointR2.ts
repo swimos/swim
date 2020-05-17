@@ -19,12 +19,14 @@ import {R2Function} from "./R2Function";
 import {R2Shape} from "./R2Shape";
 import {AnyVectorR2, VectorR2} from "./VectorR2";
 
-export type AnyPointR2 = PointR2 | PointR2Init | [number, number];
+export type AnyPointR2 = PointR2 | PointR2Init | PointR2Tuple;
 
 export interface PointR2Init {
   x: number;
   y: number;
 }
+
+export type PointR2Tuple = [number, number];
 
 export class PointR2 extends R2Shape implements HashCode, Debug {
   /** @hidden */
@@ -36,6 +38,10 @@ export class PointR2 extends R2Shape implements HashCode, Debug {
     super();
     this._x = x;
     this._y = y;
+  }
+
+  isDefined(): boolean {
+    return this._x !== 0 || this._y !== 0;
   }
 
   get x(): number {
@@ -156,22 +162,48 @@ export class PointR2 extends R2Shape implements HashCode, Debug {
     return new PointR2(x, y);
   }
 
-  static fromAny(point: AnyPointR2): PointR2 {
-    if (point instanceof PointR2) {
-      return point;
-    } else if (typeof point === "object" && point) {
-      let x: number;
-      let y: number;
-      if (Array.isArray(point)) {
-        x = point[0];
-        y = point[1];
-      } else {
-        x = point.x;
-        y = point.y;
-      }
-      return new PointR2(x, y);
+  static fromInit(value: PointR2Init): PointR2 {
+    return new PointR2(value.x, value.y);
+  }
+
+  static fromTuple(value: PointR2Tuple): PointR2 {
+    return new PointR2(value[0], value[1]);
+  }
+
+  static fromAny(value: AnyPointR2): PointR2 {
+    if (value instanceof PointR2) {
+      return value;
+    } else if (PointR2.isInit(value)) {
+      return PointR2.fromInit(value);
+    } else if (PointR2.isTuple(value)) {
+      return PointR2.fromTuple(value);
     }
-    throw new TypeError("" + point);
+    throw new TypeError("" + value);
+  }
+
+  /** @hidden */
+  static isInit(value: unknown): value is PointR2Init {
+    if (typeof value === "object" && value !== null) {
+      const init = value as PointR2Init;
+      return typeof init.x === "number"
+          && typeof init.y === "number";
+    }
+    return false;
+  }
+
+  /** @hidden */
+  static isTuple(value: unknown): value is PointR2Tuple {
+    return Array.isArray(value)
+        && value.length === 2
+        && typeof value[0] === "number"
+        && typeof value[1] === "number";
+  }
+
+  /** @hidden */
+  static isAny(value: unknown): value is AnyPointR2 {
+    return value instanceof PointR2
+        || PointR2.isInit(value)
+        || PointR2.isTuple(value);
   }
 }
 R2Shape.Point = PointR2;

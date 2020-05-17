@@ -40,7 +40,7 @@ export interface RecordOutlet extends Outlet<Record>, MapOutlet<Value, Value, Re
 /** @hidden */
 export const RecordOutlet = {
   is(object: unknown): object is RecordOutlet {
-    if (typeof object === "object" && object) {
+    if (typeof object === "object" && object !== null) {
       const outlet = object as RecordOutlet;
       return MapOutlet.is(outlet) && StreamletScope.is(outlet);
     }

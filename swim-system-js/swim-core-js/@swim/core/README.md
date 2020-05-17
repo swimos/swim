@@ -11,8 +11,7 @@ and strongly typed baseline on which to build higher level libraries.
 **@swim/core** forms the foundation on which the
 [**@swim/mesh**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/mesh)
 multiplexed streaming WARP framework, and the
-[**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ui-js/@swim/ui)
-and [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-ux-js/@swim/ux)
+[**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/ui)
 real-time user interface toolkits, are built.  **@swim/core** is a part of the broader
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system) framework.
 
@@ -36,6 +35,10 @@ component libraries:
   [doc](https://docs.swimos.org/js/latest/modules/_swim_collections.html)) –
   immutable, structure sharing collections, including B-trees and S-trees
   (sequence trees).
+- [**@swim/interpolate**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/interpolate)
+  ([npm](https://www.npmjs.com/package/@swim/interpolate),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_interpolate.html)) –
+  extensible interpolators for smoothly blending between values.
 - [**@swim/structure**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/structure)
   ([npm](https://www.npmjs.com/package/@swim/structure),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_structure.html)) –
@@ -87,7 +90,7 @@ bundles all **@swim/core** component libraries, can be found in
 
 ### Browser
 
-Browser applications can load `swim-core.js` directly from the swimOS CDN.
+Browser applications can load `swim-core.js` directly from the SwimOS CDN.
 
 ```html
 <!-- Development -->
@@ -98,7 +101,7 @@ Browser applications can load `swim-core.js` directly from the swimOS CDN.
 ```
 
 Alternatively, the standalone `swim-system.js` script may be loaded
-from the swimOS CDN, which bundles **@swim/core** together with all other
+from the SwimOS CDN, which bundles **@swim/core** together with all other
 [**@swim/system**](https://github.com/swimos/swim/tree/master/swim-system-js/@swim/system)
 frameworks.
 

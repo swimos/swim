@@ -61,7 +61,7 @@ export class UriAuthorityParser extends Parser<UriAuthority> {
       }
     }
     if (step === 2) {
-      if (!userParser) {
+      if (userParser === void 0) {
         userParser = uri.parseUser(input);
       } else {
         userParser = userParser.feed(input);
@@ -78,7 +78,7 @@ export class UriAuthorityParser extends Parser<UriAuthority> {
       }
     }
     if (step === 3) {
-      if (!hostParser) {
+      if (hostParser === void 0) {
         hostParser = uri.parseHost(input);
       } else {
         hostParser = hostParser.feed(input);
@@ -88,7 +88,7 @@ export class UriAuthorityParser extends Parser<UriAuthority> {
           input = input.step();
           step = 4;
         } else if (!input.isEmpty()) {
-          return Parser.done(uri.authority(userParser && userParser.bind(),
+          return Parser.done(uri.authority(userParser !== void 0 ? userParser.bind() : void 0,
                                            hostParser.bind()));
         }
       } else if (hostParser.isError()) {
@@ -96,13 +96,13 @@ export class UriAuthorityParser extends Parser<UriAuthority> {
       }
     }
     if (step === 4) {
-      if (!portParser) {
+      if (portParser === void 0) {
         portParser = uri.parsePort(input);
       } else {
         portParser = portParser.feed(input);
       }
       if (portParser.isDone()) {
-        return Parser.done(uri.authority(userParser && userParser.bind(),
+        return Parser.done(uri.authority(userParser !== void 0 ? userParser.bind() : void 0,
                                          hostParser!.bind(),
                                          portParser.bind()));
       } else if (portParser.isError()) {

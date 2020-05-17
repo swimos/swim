@@ -1,4 +1,4 @@
-import nodeResolve from "rollup-plugin-node-resolve";
+import nodeResolve from "@rollup/plugin-node-resolve";
 import sourcemaps from "rollup-plugin-sourcemaps";
 
 const script = "swim-dataflow";
@@ -13,6 +13,7 @@ const main = {
     globals: {
       "@swim/util": "swim",
       "@swim/collections": "swim",
+      "@swim/interpolate": "swim",
       "@swim/structure": "swim",
       "@swim/streamlet": "swim",
     },
@@ -23,6 +24,7 @@ const main = {
   external: [
     "@swim/util",
     "@swim/collections",
+    "@swim/interpolate",
     "@swim/structure",
     "@swim/streamlet",
   ],

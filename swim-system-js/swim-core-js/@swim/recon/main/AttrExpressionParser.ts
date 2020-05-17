@@ -61,13 +61,13 @@ export class AttrExpressionParser<I, V> extends Parser<V> {
                   || c >= 48/*'0'*/ && c <= 57/*'9'*/ || c === 126/*'~'*/
                   || Recon.isIdentStartChar(c)) {
             step = 3;
-          } else if (!builder) {
+          } else if (builder === void 0) {
             return Parser.done(recon.extant());
           } else {
             return Parser.done(builder.bind());
           }
         } else if (input.isDone()) {
-          if (!builder) {
+          if (builder === void 0) {
             return Parser.done(recon.extant());
           } else {
             return Parser.done(builder.bind());
@@ -75,7 +75,7 @@ export class AttrExpressionParser<I, V> extends Parser<V> {
         }
       }
       if (step === 2) {
-        if (!fieldParser) {
+        if (fieldParser === void 0) {
           fieldParser = recon.parseAttr(input);
         }
         while (fieldParser.isCont() && !input.isEmpty()) {
@@ -92,7 +92,7 @@ export class AttrExpressionParser<I, V> extends Parser<V> {
         }
       }
       if (step === 3) {
-        if (!valueParser) {
+        if (valueParser === void 0) {
           valueParser = recon.parseAdditiveOperator(input);
         }
         while (valueParser.isCont() && !input.isEmpty()) {
@@ -108,14 +108,14 @@ export class AttrExpressionParser<I, V> extends Parser<V> {
         }
       }
       if (step === 4) {
-        if (!valueParser) {
+        if (valueParser === void 0) {
           valueParser = recon.parseAdditiveOperator(input, builder);
         }
         while (valueParser.isCont() && !input.isEmpty()) {
           valueParser = valueParser.feed(input);
         }
         if (valueParser.isDone()) {
-          if (!builder) {
+          if (builder === void 0) {
             builder = recon.valueBuilder();
             builder.push(recon.item(valueParser.bind()));
           }
@@ -126,7 +126,7 @@ export class AttrExpressionParser<I, V> extends Parser<V> {
         }
       }
       if (step === 5) {
-        if (!valueParser) {
+        if (valueParser === void 0) {
           valueParser = recon.parseAdditiveOperator(input, builder);
         }
         while (valueParser.isCont() && !input.isEmpty()) {
