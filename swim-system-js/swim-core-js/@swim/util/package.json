@@ -1,6 +1,6 @@
 {
   "name": "@swim/util",
-  "version": "3.10.2",
+  "version": "3.11.0-dev.20200517",
   "description": "Ordering, equality, and hashing; type conversions; iterators; builders; maps; caches; and assertions",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/util",
   "author": "Chris Sachs <chris@swimos.org>",
