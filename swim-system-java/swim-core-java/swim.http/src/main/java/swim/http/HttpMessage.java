@@ -203,7 +203,7 @@ public abstract class HttpMessage<T> extends HttpPart {
       return (Decoder<Object>) (Decoder<?>) Utf8.stringParser();
     } else if (mediaType.isApplication()) {
       if ("json".equalsIgnoreCase(mediaType.subtype)) {
-        return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Json.structureParser().valueParser());
+        return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Json.structureParser().documentParser());
       } else if ("recon".equalsIgnoreCase(mediaType.subtype)
           || "x-recon".equalsIgnoreCase(mediaType.subtype)) {
         return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Recon.structureParser().blockParser());

@@ -19,8 +19,13 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.UnresolvedAddressException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import javax.net.ssl.SNIHostName;
+import javax.net.ssl.SNIServerName;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLParameters;
 
 public interface IpStation extends IpInterface {
 
@@ -100,6 +105,12 @@ public interface IpStation extends IpInterface {
       final TlsSettings tlsSettings = ipSettings.tlsSettings();
       final SSLEngine sslEngine = tlsSettings.sslContext().createSSLEngine();
       sslEngine.setUseClientMode(true);
+      final SNIHostName serverName = new SNIHostName(remoteAddress.getHostName());
+      final List<SNIServerName> serverNames = new ArrayList<>(1);
+      serverNames.add(serverName);
+      final SSLParameters sslParameters = sslEngine.getSSLParameters();
+      sslParameters.setServerNames(serverNames);
+      sslEngine.setSSLParameters(sslParameters);
       switch (tlsSettings.clientAuth()) {
         case NEED:
           sslEngine.setNeedClientAuth(true);

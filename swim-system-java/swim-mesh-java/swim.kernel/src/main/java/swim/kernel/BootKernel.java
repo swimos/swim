@@ -36,6 +36,7 @@ import swim.io.IpStation;
 import swim.io.Station;
 import swim.io.TransportSettings;
 import swim.math.R2Shape;
+import swim.runtime.AuthenticatorAddress;
 import swim.runtime.CellAddress;
 import swim.runtime.EdgeAddress;
 import swim.runtime.EdgeBinding;
@@ -258,7 +259,11 @@ public class BootKernel extends KernelProxy implements IpStation {
   @Override
   public Stage createStage(CellAddress cellAddress) {
     Stage stage = super.createStage(cellAddress);
-    if (stage == null && (cellAddress instanceof EdgeAddress || cellAddress instanceof StoreAddress)) {
+    if (stage == null
+        && (cellAddress instanceof EdgeAddress
+            || cellAddress instanceof StoreAddress
+            || cellAddress instanceof AuthenticatorAddress)
+    ) {
       // Provide default boot stage to edge and store cells.
       stage = stage();
       if (stage instanceof MainStage) {

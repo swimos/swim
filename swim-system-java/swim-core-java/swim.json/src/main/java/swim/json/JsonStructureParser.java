@@ -51,6 +51,12 @@ public class JsonStructureParser extends JsonParser<Item, Value> {
 
   @SuppressWarnings("unchecked")
   @Override
+  public Builder<Item, Value> documentBuilder() {
+    return (Builder<Item, Value>) (Builder<?, ?>) Record.create();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
   public Builder<Item, Value> objectBuilder() {
     return (Builder<Item, Value>) (Builder<?, ?>) Record.create();
   }

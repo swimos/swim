@@ -34,6 +34,12 @@ public class JsonParserSpec {
     Assertions.assertParses(Json.structureParser().valueParser(), " " + json + " ", expected);
   }
 
+  public static void assertParsesObject(String json, Value expected) {
+    assertParses(json, expected);
+    Assertions.assertParses(Json.structureParser().documentParser(), json, expected);
+    Assertions.assertParses(Json.structureParser().documentParser(), " " + json + " ", expected);
+  }
+
   public static void assertParseFails(final String json) {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
@@ -45,7 +51,7 @@ public class JsonParserSpec {
 
   @Test
   public void parseEmptyObjects() {
-    assertParses("{}", Record.empty());
+    assertParsesObject("{}", Record.empty());
   }
 
   @Test
@@ -318,7 +324,7 @@ public class JsonParserSpec {
 
   @Test
   public void parseNonEmptyObjects() {
-    assertParses("{\"object\":{},\"array\":[],\"string\":\"\",\"number\":0,\"true\":true,\"false\":false,\"null\":null}",
+    assertParsesObject("{\"object\":{},\"array\":[],\"string\":\"\",\"number\":0,\"true\":true,\"false\":false,\"null\":null}",
         Record.of(Slot.of("object", Record.empty()), Slot.of("array", Record.empty()),
             Slot.of("string", ""), Slot.of("number", 0), Slot.of("true", Bool.from(true)),
             Slot.of("false", Bool.from(false)), Slot.of("null")));
@@ -326,13 +332,13 @@ public class JsonParserSpec {
 
   @Test
   public void parseObjectsWithAttributes() {
-    assertParses("{\"@test\": null}", Record.of(Attr.of("test")));
+    assertParsesObject("{\"@test\": null}", Record.of(Attr.of("test")));
   }
 
   @Test
   public void parseObjectsWithWhitespace() {
-    assertParses(" { } ", Record.empty());
-    assertParses(" { \"a\" : 1 , \"b\" : 2 } ", Record.of(Slot.of("a", 1), Slot.of("b", 2)));
+    assertParsesObject(" { } ", Record.empty());
+    assertParsesObject(" { \"a\" : 1 , \"b\" : 2 } ", Record.of(Slot.of("a", 1), Slot.of("b", 2)));
   }
 
   @Test
