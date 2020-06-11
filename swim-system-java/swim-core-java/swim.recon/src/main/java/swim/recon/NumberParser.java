@@ -80,7 +80,7 @@ final class NumberParser<I, V> extends Parser<V> {
         c = input.head();
         if (c >= '0' && c <= '9') {
           final long newValue = 10 * value + sign * (c - '0');
-          if (value >> 63 == newValue >> 63) {
+          if (newValue / value >= 10) {
             value = newValue;
             input = input.step();
           } else {
