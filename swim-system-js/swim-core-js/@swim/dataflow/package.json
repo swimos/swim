@@ -1,6 +1,6 @@
 {
   "name": "@swim/dataflow",
-  "version": "3.11.0-dev.20200517",
+  "version": "3.11.0-dev.20200619",
   "description": "Compiler from @swim/structure expressions to live-updated data models",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/dataflow",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,10 +11,10 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20200517",
-    "@swim/collections": "3.11.0-dev.20200517",
-    "@swim/interpolate": "3.11.0-dev.20200517",
-    "@swim/structure": "3.11.0-dev.20200517",
-    "@swim/streamlet": "3.11.0-dev.20200517"
+    "@swim/util": "3.11.0-dev.20200619",
+    "@swim/collections": "3.11.0-dev.20200619",
+    "@swim/interpolate": "3.11.0-dev.20200619",
+    "@swim/structure": "3.11.0-dev.20200619",
+    "@swim/streamlet": "3.11.0-dev.20200619"
   }
 }
