@@ -1,6 +1,6 @@
 {
   "name": "@swim/render",
-  "version": "3.11.0-dev.20200517",
+  "version": "3.11.0-dev.20200619",
   "description": "Renderable graphic types for SVG/Canvas-compatible path drawing contexts, and Canvas-compatible rendering contexts",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/render",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,20 +11,20 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20200517",
-    "@swim/codec": "3.11.0-dev.20200517",
-    "@swim/interpolate": "3.11.0-dev.20200517",
-    "@swim/structure": "3.11.0-dev.20200517",
-    "@swim/math": "3.11.0-dev.20200517",
-    "@swim/time": "3.11.0-dev.20200517",
-    "@swim/angle": "3.11.0-dev.20200517",
-    "@swim/length": "3.11.0-dev.20200517",
-    "@swim/color": "3.11.0-dev.20200517",
-    "@swim/font": "3.11.0-dev.20200517",
-    "@swim/shadow": "3.11.0-dev.20200517",
-    "@swim/transform": "3.11.0-dev.20200517",
-    "@swim/scale": "3.11.0-dev.20200517",
-    "@swim/transition": "3.11.0-dev.20200517",
-    "@swim/style": "3.11.0-dev.20200517"
+    "@swim/util": "3.11.0-dev.20200619",
+    "@swim/codec": "3.11.0-dev.20200619",
+    "@swim/interpolate": "3.11.0-dev.20200619",
+    "@swim/structure": "3.11.0-dev.20200619",
+    "@swim/math": "3.11.0-dev.20200619",
+    "@swim/time": "3.11.0-dev.20200619",
+    "@swim/angle": "3.11.0-dev.20200619",
+    "@swim/length": "3.11.0-dev.20200619",
+    "@swim/color": "3.11.0-dev.20200619",
+    "@swim/font": "3.11.0-dev.20200619",
+    "@swim/shadow": "3.11.0-dev.20200619",
+    "@swim/transform": "3.11.0-dev.20200619",
+    "@swim/scale": "3.11.0-dev.20200619",
+    "@swim/transition": "3.11.0-dev.20200619",
+    "@swim/style": "3.11.0-dev.20200619"
   }
 }

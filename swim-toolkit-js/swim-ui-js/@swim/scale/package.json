@@ -1,6 +1,6 @@
 {
   "name": "@swim/scale",
-  "version": "3.11.0-dev.20200517",
+  "version": "3.11.0-dev.20200619",
   "description": "Scale types that map numeric and temporal input domains to interpolated output ranges, with support for continuous domain clamping, domain solving, range unscaling, and interpolation between scales",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/scale",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,15 +11,15 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20200517",
-    "@swim/codec": "3.11.0-dev.20200517",
-    "@swim/interpolate": "3.11.0-dev.20200517",
-    "@swim/structure": "3.11.0-dev.20200517",
-    "@swim/math": "3.11.0-dev.20200517",
-    "@swim/time": "3.11.0-dev.20200517",
-    "@swim/angle": "3.11.0-dev.20200517",
-    "@swim/length": "3.11.0-dev.20200517",
-    "@swim/color": "3.11.0-dev.20200517",
-    "@swim/transform": "3.11.0-dev.20200517"
+    "@swim/util": "3.11.0-dev.20200619",
+    "@swim/codec": "3.11.0-dev.20200619",
+    "@swim/interpolate": "3.11.0-dev.20200619",
+    "@swim/structure": "3.11.0-dev.20200619",
+    "@swim/math": "3.11.0-dev.20200619",
+    "@swim/time": "3.11.0-dev.20200619",
+    "@swim/angle": "3.11.0-dev.20200619",
+    "@swim/length": "3.11.0-dev.20200619",
+    "@swim/color": "3.11.0-dev.20200619",
+    "@swim/transform": "3.11.0-dev.20200619"
   }
 }

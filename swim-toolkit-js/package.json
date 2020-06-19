@@ -1,6 +1,6 @@
 {
   "name": "@swim/toolkit",
-  "version": "3.11.0-dev.20200517",
+  "version": "3.11.0-dev.20200619",
   "description": "Swim Toolkit TypeScript Implementation",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",

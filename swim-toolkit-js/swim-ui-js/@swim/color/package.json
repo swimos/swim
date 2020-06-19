@@ -1,6 +1,6 @@
 {
   "name": "@swim/color",
-  "version": "3.11.0-dev.20200517",
+  "version": "3.11.0-dev.20200619",
   "description": "RGB and HSL color types with color-space-aware operators, conversions, and parsers",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/color",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,10 +11,10 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20200517",
-    "@swim/codec": "3.11.0-dev.20200517",
-    "@swim/interpolate": "3.11.0-dev.20200517",
-    "@swim/structure": "3.11.0-dev.20200517",
-    "@swim/angle": "3.11.0-dev.20200517"
+    "@swim/util": "3.11.0-dev.20200619",
+    "@swim/codec": "3.11.0-dev.20200619",
+    "@swim/interpolate": "3.11.0-dev.20200619",
+    "@swim/structure": "3.11.0-dev.20200619",
+    "@swim/angle": "3.11.0-dev.20200619"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@swim/transition",
-  "version": "3.11.0-dev.20200517",
+  "version": "3.11.0-dev.20200619",
   "description": "Transition types that specify duration, ease, interpolator, and lifecycle callback parameters for tween animations",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/transition",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,15 +11,15 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20200517",
-    "@swim/codec": "3.11.0-dev.20200517",
-    "@swim/interpolate": "3.11.0-dev.20200517",
-    "@swim/structure": "3.11.0-dev.20200517",
-    "@swim/math": "3.11.0-dev.20200517",
-    "@swim/time": "3.11.0-dev.20200517",
-    "@swim/angle": "3.11.0-dev.20200517",
-    "@swim/length": "3.11.0-dev.20200517",
-    "@swim/color": "3.11.0-dev.20200517",
-    "@swim/transform": "3.11.0-dev.20200517"
+    "@swim/util": "3.11.0-dev.20200619",
+    "@swim/codec": "3.11.0-dev.20200619",
+    "@swim/interpolate": "3.11.0-dev.20200619",
+    "@swim/structure": "3.11.0-dev.20200619",
+    "@swim/math": "3.11.0-dev.20200619",
+    "@swim/time": "3.11.0-dev.20200619",
+    "@swim/angle": "3.11.0-dev.20200619",
+    "@swim/length": "3.11.0-dev.20200619",
+    "@swim/color": "3.11.0-dev.20200619",
+    "@swim/transform": "3.11.0-dev.20200619"
   }
 }

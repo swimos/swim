@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:swimos/swim-toolkit-js.git
 	branch = master
-	commit = 650a0d70125ad00d53e662b235ae26906e5da6b0
-	parent = f5a6ea7d08bf534b296bd53d68d92cb7a75ba350
+	commit = 09b51436bd33274789bdb25f6996108a85905a6c
+	parent = 67c1cf755366f851626c5dc5a665f846a2cdf968
 	method = merge
 	cmdver = 0.4.1
