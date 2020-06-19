@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {ViewFlags, View, MemberAnimator, RenderedView, TypesetView} from "@swim/view";
+import {ViewFlags, View, ViewAnimator, GraphicsView, TypesetView} from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 import {AnyGeoPoint, GeoPointInit, GeoPointTuple, GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
-import {MapViewContext} from "../MapViewContext";
-import {MapViewInit} from "../MapView";
-import {MapGraphicsView} from "../graphics/MapGraphicsView";
+import {MapGraphicsViewContext} from "../graphics/MapGraphicsViewContext";
+import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
 import {MapGraphicsViewController} from "../graphics/MapGraphicsViewController";
+import {MapGraphicsNodeView} from "../graphics/MapGraphicsNodeView";
 
 export type MapPointLabelPlacement = "auto" | "top" | "right" | "bottom" | "left";
 
 export type AnyMapPointView = MapPointView | MapPointViewInit | GeoPoint | GeoPointInit | GeoPointTuple;
 
-export interface MapPointViewInit extends MapViewInit {
+export interface MapPointViewInit extends MapGraphicsViewInit {
   lng?: number;
   lat?: number;
   x?: number;
@@ -50,10 +50,10 @@ export interface MapPointViewInit extends MapViewInit {
   font?: AnyFont;
   textColor?: AnyColor;
 
-  label?: View | string | null;
+  label?: GraphicsView | string | null;
 }
 
-export class MapPointView extends MapGraphicsView {
+export class MapPointView extends MapGraphicsNodeView {
   /** @hidden */
   _hitRadius?: number;
   /** @hidden */
@@ -63,7 +63,7 @@ export class MapPointView extends MapGraphicsView {
 
   constructor() {
     super();
-    this._geoBounds = GeoBox.empty();
+    this._geoBounds = GeoBox.undefined();
     this.geoPoint.onUpdate = this.onSetGeoPoint.bind(this);
   }
 
@@ -71,29 +71,29 @@ export class MapPointView extends MapGraphicsView {
     return this._viewController;
   }
 
-  @MemberAnimator(GeoPoint, {value: GeoPoint.origin()})
-  geoPoint: MemberAnimator<this, GeoPoint, AnyGeoPoint>;
+  @ViewAnimator(GeoPoint, {value: GeoPoint.origin()})
+  geoPoint: ViewAnimator<this, GeoPoint, AnyGeoPoint>;
 
-  @MemberAnimator(PointR2, {value: PointR2.origin()})
-  viewPoint: MemberAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator(PointR2, {value: PointR2.origin()})
+  viewPoint: ViewAnimator<this, PointR2, AnyPointR2>;
 
-  @MemberAnimator(Length)
-  radius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length)
+  radius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color)
-  color: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color)
+  color: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Number)
-  opacity: MemberAnimator<this, number>;
+  @ViewAnimator(Number)
+  opacity: ViewAnimator<this, number>;
 
-  @MemberAnimator(Length)
-  labelPadding: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length)
+  labelPadding: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Font, {inherit: true})
-  font: MemberAnimator<this, Font, AnyFont>;
+  @ViewAnimator(Font, {inherit: true})
+  font: ViewAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, {inherit: true})
-  textColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  textColor: ViewAnimator<this, Color, AnyColor>;
 
   hitRadius(): number | null;
   hitRadius(hitRadius: number | null): this;
@@ -110,13 +110,14 @@ export class MapPointView extends MapGraphicsView {
     }
   }
 
-  label(): View | null;
-  label(label: View | AnyTextRunView | null): this;
-  label(label?: View | AnyTextRunView | null): View | null | this {
+  label(): GraphicsView | null;
+  label(label: GraphicsView | AnyTextRunView | null): this;
+  label(label?: GraphicsView | AnyTextRunView | null): GraphicsView | null | this {
     if (label === void 0) {
-      return this.getChildView("label");
+      const childView = this.getChildView("label");
+      return childView instanceof GraphicsView ? childView : null;
     } else {
-      if (label !== null && !(label instanceof View)) {
+      if (label !== null && !(label instanceof GraphicsView)) {
         label = TextRunView.fromAny(label);
       }
       this.setChildView("label", label);
@@ -216,7 +217,7 @@ export class MapPointView extends MapGraphicsView {
     return additionalFlags;
   }
 
-  protected onProject(viewContext: MapViewContext): void {
+  protected onProject(viewContext: MapGraphicsViewContext): void {
     super.onProject(viewContext);
     if (this.viewPoint.isAuto()) {
       const viewPoint = viewContext.geoProjection.project(this.geoPoint.value!);
@@ -226,15 +227,15 @@ export class MapPointView extends MapGraphicsView {
     }
   }
 
-  protected onLayout(viewContext: MapViewContext): void {
+  protected onLayout(viewContext: MapGraphicsViewContext): void {
     super.onLayout(viewContext);
     const label = this.label();
-    if (RenderedView.is(label)) {
+    if (label !== null) {
       this.layoutLabel(label, this.viewFrame);
     }
   }
 
-  protected layoutLabel(label: RenderedView, frame: BoxR2): void {
+  protected layoutLabel(label: GraphicsView, frame: BoxR2): void {
     const placement = this._labelPlacement !== void 0 ? this._labelPlacement : "auto";
     // TODO: auto placement
 
@@ -270,7 +271,7 @@ export class MapPointView extends MapGraphicsView {
     return this._geoBounds;
   }
 
-  hitTest(x: number, y: number, viewContext: MapViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext: MapGraphicsViewContext): GraphicsView | null {
     let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -282,7 +283,7 @@ export class MapPointView extends MapGraphicsView {
     return hit;
   }
 
-  protected hitTestPoint(hx: number, hy: number, context: CanvasContext, frame: BoxR2): RenderedView | null {
+  protected hitTestPoint(hx: number, hy: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
     const {x, y} = this.viewPoint.value!;
     const radius = this.radius.value;
 

@@ -14,37 +14,46 @@
 
 const uiView = new swim.UiView(document.getElementById("ui"));
 
-const canvas = uiView.append("canvas");
+const canvas = uiView.append("canvas")
+    .wheelEventsEnabled(true)
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
 
-const chart = new swim.ChartView()
-    .bottomAxis("linear")
-    .leftAxis("linear")
-    .bottomGesture(true)
-    .bottomDomainPadding([10, 10])
-    .leftDomainPadding([10, 10])
-    .domainColor("#4a4a4a")
+const chart = canvas.append(swim.ChartView)
+    .bottomAxis(true)
+    .leftAxis(true)
+    .xGestures(true)
+    .yGestures(true)
+    .xRangePadding(20, 20)
+    .yRangePadding(20, 20)
+    .fitAspectRatio(-1)
+    .preserveAspectRatio(true)
+    .domainTracking(true)
+    .borderColor("#4a4a4a")
     .tickMarkColor("#4a4a4a")
     .font("12px sans-serif")
-    .textColor("#4a4a4a");
-canvas.append(chart);
+    .textColor("#4a4a4a")
+    .rescaleTransition(undefined);
+const graph = chart.graph();
 
 chart.leftAxis().createTickLabel = function (tickValue) {
   return tickValue + "%";
 };
 
-const plot = new swim.BubblePlotView()
+const plot = graph.append(swim.BubblePlotView)
     .fill("#4a4a4a")
-    .on("mouseover", function (event) {
-      if (event.targetView instanceof swim.DatumView) {
+    .on("pointerover", function (event) {
+      if (event.targetView instanceof swim.DataPointView) {
         event.targetView.color("#1db0ef", {duration: 200});
       }
     })
-    .on("mouseout", function (event) {
-      if (event.targetView instanceof swim.DatumView) {
+    .on("pointerout", function (event) {
+      if (event.targetView instanceof swim.DataPointView) {
         event.targetView.color("#4a4a4a", {duration: 200});
       }
     });
-chart.addPlot(plot);
 
 const n = 10;
 
@@ -54,8 +63,8 @@ for (let i = 0; i < n; i += 1) {
   const y = Math.round(100 * Math.random());
   const r = 10 + Math.round(Math.random() * 10);
   const opacity = 0.5 + 0.5 * Math.random();
-  const datum = swim.DatumView.fromAny({x: x, y: y, r: r, color: "#4a4a4a", opacity: opacity});
-  plot.insertDatum(datum, key);
+  const bubble = swim.DataPointView.fromAny({x: x, y: y, r: r, color: "#4a4a4a", opacity: opacity});
+  plot.insertDataPoint(bubble, key);
 }
 
 setInterval(function () {
@@ -66,7 +75,7 @@ setInterval(function () {
     const y = Math.round(100 * Math.random());
     const r = 10 + Math.round(Math.random() * 10);
     const opacity = 0.5 + 0.5 * Math.random();
-    plot.getDatum(key)
+    plot.getDataPoint(key)
         .x(x, tween)
         .y(y, tween)
         .r(r, tween)

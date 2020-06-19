@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,13 +48,25 @@ export interface ViewObserver<V extends View = View> {
 
   viewDidProcess?(viewContext: ViewContext, view: V): void;
 
+  viewWillResize?(viewContext: ViewContext, view: V): void;
+
+  viewDidResize?(viewContext: ViewContext, view: V): void;
+
   viewWillScroll?(viewContext: ViewContext, view: V): void;
 
   viewDidScroll?(viewContext: ViewContext, view: V): void;
 
-  viewWillDerive?(viewContext: ViewContext, view: V): void;
+  viewWillCompute?(viewContext: ViewContext, view: V): void;
 
-  viewDidDerive?(viewContext: ViewContext, view: V): void;
+  viewDidCompute?(viewContext: ViewContext, view: V): void;
+
+  viewWillAnimate?(viewContext: ViewContext, view: V): void;
+
+  viewDidAnimate?(viewContext: ViewContext, view: V): void;
+
+  viewWillLayout?(viewContext: ViewContext, view: V): void;
+
+  viewDidLayout?(viewContext: ViewContext, view: V): void;
 
   viewWillProcessChildViews?(viewContext: ViewContext, view: V): void;
 
@@ -63,10 +75,6 @@ export interface ViewObserver<V extends View = View> {
   viewWillDisplay?(viewContext: ViewContext, view: V): void;
 
   viewDidDisplay?(viewContext: ViewContext, view: V): void;
-
-  viewWillLayout?(viewContext: ViewContext, view: V): void;
-
-  viewDidLayout?(viewContext: ViewContext, view: V): void;
 
   viewWillDisplayChildViews?(viewContext: ViewContext, view: V): void;
 

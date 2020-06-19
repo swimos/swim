@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,26 +15,29 @@
 import {Interpolator} from "@swim/interpolate";
 import {Scale} from "./Scale";
 
-export abstract class ContinuousScale<D extends DU, R extends RU, DU = D, RU = R> extends Scale<D, R, DU, RU> {
-  abstract norm(x: DU): number;
+export abstract class ContinuousScale<D, R, DU = D, RU = R> extends Scale<D, R, DU, RU> {
+  abstract norm(x: D | DU): number;
 
-  abstract unscale(y: RU): D;
+  abstract unscale(y: R | RU): D;
 
-  abstract clampScale(x: DU): R;
+  abstract domain(): readonly [D, D];
+  abstract domain(xs: readonly [D | DU, D | DU]): ContinuousScale<D, R, DU, RU>;
+  abstract domain(x0: D | DU, x1?: D | DU): ContinuousScale<D, R, DU, RU>;
 
-  abstract domain(): ReadonlyArray<D>;
-  abstract domain(xs: ReadonlyArray<DU>): ContinuousScale<D, R, DU, RU>;
-  abstract domain(x0: DU, x1?: DU): ContinuousScale<D, R, DU, RU>;
-
-  abstract range(): ReadonlyArray<R>;
-  abstract range(ys: ReadonlyArray<RU>): ContinuousScale<D, R, DU, RU>;
-  abstract range(y0: RU, y1?: RU): ContinuousScale<D, R, DU, RU>;
+  abstract range(): readonly [R, R];
+  abstract range(ys: readonly [R | RU, R | RU]): ContinuousScale<D, R, DU, RU>;
+  abstract range(y0: R | RU, y1?: R | RU): ContinuousScale<D, R, DU, RU>;
 
   abstract interpolator(): Interpolator<R, RU>;
   abstract interpolator(fx: Interpolator<R, RU>): ContinuousScale<D, R, DU, RU>;
 
-  abstract clampDomain(xMin?: DU, xMax?: DU, zMin?: number, zMax?: number, epsilon?: number): ContinuousScale<D, R, DU, RU>;
+  abstract clampDomain(xMin: D | DU | null, xMax: D | DU | null,
+                       zMin: number | null, zMax: number | null,
+                       epsilon?: number): ContinuousScale<D, R, DU, RU>;
 
-  abstract solveDomain(x1: DU, y1: RU, x2?: DU, y2?: RU, epsilon?: number): ContinuousScale<D, R, DU, RU>;
+  abstract solveDomain(x1: D | DU, y1: R | RU,
+                       x2?: D | DU, y2?: R | RU,
+                       reflect?: boolean,
+                       epsilon?: number): ContinuousScale<D, R, DU, RU>;
 }
 Scale.Continuous = ContinuousScale;

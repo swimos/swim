@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,1499 +12,397 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Objects} from "@swim/util";
 import {PointR2, BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
-import {AnyFont, Font} from "@swim/font";
-import {Tween, AnyTransition, Transition} from "@swim/transition";
-import {
-  ViewFlags,
-  View,
-  MemberAnimator,
-  RenderedViewContext,
-  RenderedViewInit,
-  RenderedView,
-  GraphicsView,
-} from "@swim/view";
-import {Multitouch, ScaleGestureEvent, ScaleGesture} from "@swim/gesture";
-import {AnyAxisView, AxisView} from "./axis/AxisView";
-import {AnyPlotView, PlotView} from "./plot/PlotView";
+import {Ease, AnyTransition, Transition} from "@swim/transition";
+import {View, ViewScope, ViewAnimator} from "@swim/view";
 import {ChartViewController} from "./ChartViewController";
+import {ScaleViewInit, ScaleView} from "./scale/ScaleView";
+import {AnyGraphView, GraphView} from "./graph/GraphView";
+import {AnyAxisView, AxisView} from "./axis/AxisView";
 
-export type ChartDomainBounds<D> = [D | boolean, D | boolean];
+export type AnyChartView<X = unknown, Y = unknown> = ChartView<X, Y> | ChartViewInit<X, Y>;
 
-export type ChartDomainPadding<D> = [D | null, D | null];
+export interface ChartViewInit<X = unknown, Y = unknown> extends ScaleViewInit<X, Y> {
+  graph?: AnyGraphView<X, Y>;
 
-export type AnyChartView<X = any, Y = any> = ChartView<X, Y> | ChartViewInit<X, Y>;
+  topAxis?: AnyAxisView<X> | true;
+  rightAxis?: AnyAxisView<Y> | true;
+  bottomAxis?: AnyAxisView<X> | true;
+  leftAxis?: AnyAxisView<Y> | true;
 
-export interface ChartViewInit<X = any, Y = any> extends RenderedViewInit {
-  topAxis?: AnyAxisView<X>;
-  rightAxis?: AnyAxisView<Y>;
-  bottomAxis?: AnyAxisView<X>;
-  leftAxis?: AnyAxisView<Y>;
+  gutterTop?: AnyLength;
+  gutterRight?: AnyLength;
+  gutterBottom?: AnyLength;
+  gutterLeft?: AnyLength;
 
-  plots?: AnyPlotView<X, Y>[];
-
-  fitTopDomain?: boolean;
-  fitRightDomain?: boolean;
-  fitBottomDomain?: boolean;
-  fitLeftDomain?: boolean;
-
-  topDomainBounds?: ChartDomainBounds<X>;
-  rightDomainBounds?: ChartDomainBounds<Y>;
-  bottomDomainBounds?: ChartDomainBounds<X>;
-  leftDomainBounds?: ChartDomainBounds<Y>;
-
-  topDomainPadding?: ChartDomainPadding<X>;
-  rightDomainPadding?: ChartDomainPadding<Y>;
-  bottomDomainPadding?: ChartDomainPadding<X>;
-  leftDomainPadding?: ChartDomainPadding<Y>;
-
-  rescaleTransition?: AnyTransition<any>;
-
-  multitouch?: Multitouch | boolean;
-  topGesture?: ScaleGesture<X> | boolean;
-  rightGesture?: ScaleGesture<Y> | boolean;
-  bottomGesture?: ScaleGesture<X> | boolean;
-  leftGesture?: ScaleGesture<Y> | boolean;
-
-  topGutter?: AnyLength;
-  rightGutter?: AnyLength;
-  bottomGutter?: AnyLength;
-  leftGutter?: AnyLength;
-
-  domainColor?: AnyColor;
-  domainWidth?: number;
-  domainSerif?: number;
+  borderColor?: AnyColor;
+  borderWidth?: number;
+  borderSerif?: number;
 
   tickMarkColor?: AnyColor;
   tickMarkWidth?: number;
   tickMarkLength?: number;
-
   tickLabelPadding?: number;
+  tickTransition?: AnyTransition<any>;
 
   gridLineColor?: AnyColor;
   gridLineWidth?: number;
-
-  font?: AnyFont;
-  textColor?: AnyColor;
 }
 
-export class ChartView<X = any, Y = any> extends GraphicsView {
-  /** @hidden */
-  _fitTopDomain: boolean;
-  /** @hidden */
-  _fitRightDomain: boolean;
-  /** @hidden */
-  _fitBottomDomain: boolean;
-  /** @hidden */
-  _fitLeftDomain: boolean;
-
-  /** @hidden */
-  _trackTopDomain: boolean;
-  /** @hidden */
-  _trackRightDomain: boolean;
-  /** @hidden */
-  _trackBottomDomain: boolean;
-  /** @hidden */
-  _trackLeftDomain: boolean;
-
-  /** @hidden */
-  readonly _topDomainBounds: ChartDomainBounds<X>;
-  /** @hidden */
-  readonly _rightDomainBounds: ChartDomainBounds<Y>;
-  /** @hidden */
-  readonly _bottomDomainBounds: ChartDomainBounds<X>;
-  /** @hidden */
-  readonly _leftDomainBounds: ChartDomainBounds<Y>;
-
-  /** @hidden */
-  readonly _topDomainPadding: ChartDomainPadding<X>;
-  /** @hidden */
-  readonly _rightDomainPadding: ChartDomainPadding<Y>;
-  /** @hidden */
-  readonly _bottomDomainPadding: ChartDomainPadding<X>;
-  /** @hidden */
-  readonly _leftDomainPadding: ChartDomainPadding<Y>;
-
-  /** @hidden */
-  _multitouch: Multitouch | null;
-  /** @hidden */
-  _topGesture: ScaleGesture<X> | null;
-  /** @hidden */
-  _rightGesture: ScaleGesture<Y> | null;
-  /** @hidden */
-  _bottomGesture: ScaleGesture<X> | null;
-  /** @hidden */
-  _leftGesture: ScaleGesture<Y> | null;
-
-  /** @hidden */
-  _rescaleTransition: Transition<any> | null;
-
+export class ChartView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
   constructor() {
     super();
-    this.onScaleStart = this.onScaleStart.bind(this);
-    this.onScaleChange = this.onScaleChange.bind(this);
-    this.onScaleCancel = this.onScaleCancel.bind(this);
-    this.onScaleEnd = this.onScaleEnd.bind(this);
-
-    this._fitTopDomain = true;
-    this._fitRightDomain = true;
-    this._fitBottomDomain = true;
-    this._fitLeftDomain = true;
-
-    this._trackTopDomain = true;
-    this._trackRightDomain = true;
-    this._trackBottomDomain = true;
-    this._trackLeftDomain = true;
-
-    this._topDomainBounds = [true, true];
-    this._rightDomainBounds = [true, true];
-    this._bottomDomainBounds = [true, true];
-    this._leftDomainBounds = [true, true];
-
-    this._topDomainPadding = [null, null];
-    this._rightDomainPadding = [null, null];
-    this._bottomDomainPadding = [null, null];
-    this._leftDomainPadding = [null, null];
-
-    this._multitouch = null;
-    this._topGesture = null;
-    this._rightGesture = null;
-    this._bottomGesture = null;
-    this._leftGesture = null;
-
-    this._rescaleTransition = null;
-
-    this.setChildView("surface", new GraphicsView());
+    this.initChart();
   }
 
   get viewController(): ChartViewController<X, Y> | null {
     return this._viewController;
   }
 
-  @MemberAnimator(Length, {value: Length.px(20)})
-  topGutter: MemberAnimator<this, Length, AnyLength>;
+  protected initChart(): void {
+    this.setChildView("graph", this.createGraph());
+  }
 
-  @MemberAnimator(Length, {value: Length.px(40)})
-  rightGutter: MemberAnimator<this, Length, AnyLength>;
+  protected createGraph(): GraphView<X, Y> | null {
+    return new GraphView();
+  }
 
-  @MemberAnimator(Length, {value: Length.px(20)})
-  bottomGutter: MemberAnimator<this, Length, AnyLength>;
-
-  @MemberAnimator(Length, {value: Length.px(40)})
-  leftGutter: MemberAnimator<this, Length, AnyLength>;
-
-  @MemberAnimator(Color, {value: Color.black()})
-  domainColor: MemberAnimator<this, Color, AnyColor>;
-
-  @MemberAnimator(Number, {value: 1})
-  domainWidth: MemberAnimator<this, number>;
-
-  @MemberAnimator(Number, {value: 6})
-  domainSerif: MemberAnimator<this, number>;
-
-  @MemberAnimator(Color, {value: Color.black()})
-  tickMarkColor: MemberAnimator<this, Color, AnyColor>;
-
-  @MemberAnimator(Number, {value: 1})
-  tickMarkWidth: MemberAnimator<this, number>;
-
-  @MemberAnimator(Number, {value: 6})
-  tickMarkLength: MemberAnimator<this, number>;
-
-  @MemberAnimator(Number, {value: 2})
-  tickLabelPadding: MemberAnimator<this, number>;
-
-  @MemberAnimator(Color, {value: Color.transparent()})
-  gridLineColor: MemberAnimator<this, Color, AnyColor>;
-
-  @MemberAnimator(Number, {value: 0})
-  gridLineWidth: MemberAnimator<this, number>;
-
-  @MemberAnimator(Font, {inherit: true})
-  font: MemberAnimator<this, Font, AnyFont>;
-
-  @MemberAnimator(Color, {inherit: true})
-  textColor: MemberAnimator<this, Color, AnyColor>;
-
-  surface(): RenderedView | null;
-  surface(surface: RenderedView | null): this;
-  surface(surface?: RenderedView | null): RenderedView | null | this {
-    if (surface === void 0) {
-      const childView = this.getChildView("surface");
-      return RenderedView.is(childView) ? childView : null;
+  graph(): GraphView<X, Y> | null;
+  graph(graph: AnyGraphView<X, Y> | null): this;
+  graph(graph?: AnyGraphView<X, Y> | null): GraphView<X, Y> | null | this {
+    if (graph === void 0) {
+      const childView = this.getChildView("graph");
+      return childView instanceof GraphView ? childView : null;
     } else {
-      this.setChildView("surface", surface);
+      if (graph !== null) {
+        graph = GraphView.fromAny(graph);
+      }
+      this.setChildView("graph", graph);
       return this;
     }
   }
 
   topAxis(): AxisView<X> | null;
-  topAxis(topAxis: AnyAxisView<X> | string | null): this;
-  topAxis(topAxis?: AnyAxisView<X> | string | null): AxisView<X> | null | this {
+  topAxis(topAxis: AnyAxisView<X> | true | null): this;
+  topAxis(topAxis?: AnyAxisView<X> | true | null): AxisView<X> | null | this {
     if (topAxis === void 0) {
       const childView = this.getChildView("topAxis");
       return childView instanceof AxisView ? childView : null;
     } else {
-      if (typeof topAxis === "string") {
-        topAxis = AxisView.top(topAxis);
-      } else if (topAxis !== null) {
-        topAxis = AxisView.fromAny(topAxis);
+      if (topAxis !== null) {
+        topAxis = AxisView.fromAny(topAxis, "top");
       }
-      this.setChildView("topAxis", topAxis);
+      if (topAxis !== null) {
+        this.prependChildView(topAxis, "topAxis");
+      } else {
+        this.removeChildView("topAxis");
+      }
       return this;
     }
   }
 
   rightAxis(): AxisView<Y> | null;
-  rightAxis(rightAxis: AnyAxisView<Y> | string | null): this;
-  rightAxis(rightAxis?: AnyAxisView<Y> | string | null): AxisView<Y> | null | this {
+  rightAxis(rightAxis: AnyAxisView<Y> | true | null): this;
+  rightAxis(rightAxis?: AnyAxisView<Y> | true | null): AxisView<Y> | null | this {
     if (rightAxis === void 0) {
       const childView = this.getChildView("rightAxis");
       return childView instanceof AxisView ? childView : null;
     } else {
-      if (typeof rightAxis === "string") {
-        rightAxis = AxisView.right(rightAxis);
-      } else if (rightAxis !== null) {
-        rightAxis = AxisView.fromAny(rightAxis);
+      if (rightAxis !== null) {
+        rightAxis = AxisView.fromAny(rightAxis, "right");
       }
-      this.setChildView("rightAxis", rightAxis);
+      if (rightAxis !== null) {
+        this.prependChildView(rightAxis, "rightAxis");
+      } else {
+        this.removeChildView("rightAxis");
+      }
       return this;
     }
   }
 
   bottomAxis(): AxisView<X> | null;
-  bottomAxis(bottomAxis: AnyAxisView<X> | string | null): this;
-  bottomAxis(bottomAxis?: AnyAxisView<X> | string | null): AxisView<X> | null | this {
+  bottomAxis(bottomAxis: AnyAxisView<X> | true | null): this;
+  bottomAxis(bottomAxis?: AnyAxisView<X> | true | null): AxisView<X> | null | this {
     if (bottomAxis === void 0) {
       const childView = this.getChildView("bottomAxis");
       return childView instanceof AxisView ? childView : null;
     } else {
-      if (typeof bottomAxis === "string") {
-        bottomAxis = AxisView.bottom(bottomAxis);
-      } else if (bottomAxis !== null) {
-        bottomAxis = AxisView.fromAny(bottomAxis);
+      if (bottomAxis !== null) {
+        bottomAxis = AxisView.fromAny(bottomAxis, "bottom");
       }
-      this.setChildView("bottomAxis", bottomAxis);
+      if (bottomAxis !== null) {
+        this.prependChildView(bottomAxis, "bottomAxis");
+      } else {
+        this.removeChildView("bottomAxis");
+      }
       return this;
     }
   }
 
   leftAxis(): AxisView<Y> | null;
-  leftAxis(leftAxis: AnyAxisView<Y> | string | null): this;
-  leftAxis(leftAxis?: AnyAxisView<Y> | string | null): AxisView<Y> | null | this {
+  leftAxis(leftAxis: AnyAxisView<Y> | true | null): this;
+  leftAxis(leftAxis?: AnyAxisView<Y> | true | null): AxisView<Y> | null | this {
     if (leftAxis === void 0) {
       const childView = this.getChildView("leftAxis");
       return childView instanceof AxisView ? childView : null;
     } else {
-      if (typeof leftAxis === "string") {
-        leftAxis = AxisView.left(leftAxis);
-      } else if (leftAxis !== null) {
-        leftAxis = AxisView.fromAny(leftAxis);
+      if (leftAxis !== null) {
+        leftAxis = AxisView.fromAny(leftAxis, "left");
       }
-      this.setChildView("leftAxis", leftAxis);
-      return this;
-    }
-  }
-
-  addPlot(plot: AnyPlotView<X, Y>): void {
-    plot = PlotView.fromAny(plot);
-    this.appendChildView(plot);
-  }
-
-  multitouch(): Multitouch | null;
-  multitouch(multitouch: Multitouch | boolean | null): this;
-  multitouch(multitouch?: Multitouch | boolean | null): Multitouch | null | this {
-    if (multitouch === void 0) {
-      return this._multitouch;
-    } else {
-      if (multitouch === true) {
-        multitouch = Multitouch.create();
-      } else if (multitouch === false) {
-        multitouch = null;
-      }
-      if (this._multitouch !== null) {
-        this._multitouch.surface(null);
-      }
-      this._multitouch = multitouch;
-      if (this._multitouch !== null) {
-        this._multitouch.surface(this.surface());
+      if (leftAxis !== null) {
+        this.prependChildView(leftAxis, "leftAxis");
+      } else {
+        this.removeChildView("leftAxis");
       }
       return this;
     }
   }
 
-  topGesture(): ScaleGesture<X> | null;
-  topGesture(topGesture: ScaleGesture<X> | boolean | null): this;
-  topGesture(topGesture?: ScaleGesture<X> | boolean | null): ScaleGesture<X> | null | this {
-    if (topGesture === void 0) {
-      return this._topGesture;
-    } else {
-      if (topGesture === true) {
-        topGesture = ScaleGesture.horizontal();
-      } else if (topGesture === false) {
-        topGesture = null;
-      }
-      if (this._topGesture !== null) {
-        this._topGesture.multitouch(null).ruler(null).scale(null);
-      }
-      this._topGesture = topGesture;
-      if (this._topGesture !== null) {
-        if (this._multitouch === null) {
-          this.multitouch(true);
-        }
-        this._topGesture.multitouch(this._multitouch)
-                        .ruler(this.surface())
-                        .scale(this.topAxis()!.scale.value!);
-        if (this._multitouch !== null && this.isMounted()) {
-          this._topGesture.attach(this._multitouch);
-        }
-        this.reboundTop();
-      }
-      return this;
-    }
+  @ViewAnimator(Length, {value: Length.px(20)})
+  gutterTop: ViewAnimator<this, Length, AnyLength>;
+
+  @ViewAnimator(Length, {value: Length.px(40)})
+  gutterRight: ViewAnimator<this, Length, AnyLength>;
+
+  @ViewAnimator(Length, {value: Length.px(20)})
+  gutterBottom: ViewAnimator<this, Length, AnyLength>;
+
+  @ViewAnimator(Length, {value: Length.px(40)})
+  gutterLeft: ViewAnimator<this, Length, AnyLength>;
+
+  @ViewAnimator(Color, {value: Color.black()})
+  borderColor: ViewAnimator<this, Color, AnyColor>;
+
+  @ViewAnimator(Number, {value: 1})
+  borderWidth: ViewAnimator<this, number>;
+
+  @ViewAnimator(Number, {value: 6})
+  borderSerif: ViewAnimator<this, number>;
+
+  @ViewAnimator(Color, {value: Color.black()})
+  tickMarkColor: ViewAnimator<this, Color, AnyColor>;
+
+  @ViewAnimator(Number, {value: 1})
+  tickMarkWidth: ViewAnimator<this, number>;
+
+  @ViewAnimator(Number, {value: 6})
+  tickMarkLength: ViewAnimator<this, number>;
+
+  @ViewAnimator(Number, {value: 2})
+  tickLabelPadding: ViewAnimator<this, number>;
+
+  @ViewScope(Object, {
+    inherit: true,
+    init(): Transition<any> {
+      return Transition.duration(250, Ease.cubicOut);
+    },
+  })
+  tickTransition: ViewScope<this, Transition<any>>;
+
+  @ViewAnimator(Color, {value: Color.transparent()})
+  gridLineColor: ViewAnimator<this, Color, AnyColor>;
+
+  @ViewAnimator(Number, {value: 0})
+  gridLineWidth: ViewAnimator<this, number>;
+
+  xRange(): readonly [number, number] | undefined {
+    const frame = this.viewFrame;
+    const gutterLeft = this.gutterLeft.value!.pxValue(frame.width);
+    const gutterRight = this.gutterRight.value!.pxValue(frame.width);
+    const xRangeMin = this._xRangePadding[0];
+    const xRangeMax = this.viewFrame.width - gutterRight - gutterLeft - this._xRangePadding[1];
+    return [xRangeMin, xRangeMax];
   }
 
-  rightGesture(): ScaleGesture<Y> | null;
-  rightGesture(rightGesture: ScaleGesture<Y> | boolean | null): this;
-  rightGesture(rightGesture?: ScaleGesture<Y> | boolean | null): ScaleGesture<Y> | null | this {
-    if (rightGesture === void 0) {
-      return this._rightGesture;
-    } else {
-      if (rightGesture === true) {
-        rightGesture = ScaleGesture.vertical();
-      } else if (rightGesture === false) {
-        rightGesture = null;
-      }
-      if (this._rightGesture !== null) {
-        this._rightGesture.multitouch(null).ruler(null).scale(null);
-      }
-      this._rightGesture = rightGesture;
-      if (this._rightGesture !== null) {
-        if (this._multitouch === null) {
-          this.multitouch(true);
-        }
-        this._rightGesture.multitouch(this._multitouch)
-                          .ruler(this.surface())
-                          .scale(this.rightAxis()!.scale.value!);
-        if (this._multitouch !== null && this.isMounted()) {
-          this._rightGesture.attach(this._multitouch);
-        }
-        this.reboundRight();
-      }
-      return this;
-    }
-  }
-
-  bottomGesture(): ScaleGesture<X> | null;
-  bottomGesture(bottomGesture: ScaleGesture<X> | boolean | null): this;
-  bottomGesture(bottomGesture?: ScaleGesture<X> | boolean | null): ScaleGesture<X> | null | this {
-    if (bottomGesture === void 0) {
-      return this._bottomGesture;
-    } else {
-      if (bottomGesture === true) {
-        bottomGesture = ScaleGesture.horizontal();
-      } else if (bottomGesture === false) {
-        bottomGesture = null;
-      }
-      if (this._bottomGesture !== null) {
-        this._bottomGesture.multitouch(null).ruler(null).scale(null);
-      }
-      this._bottomGesture = bottomGesture;
-      if (this._bottomGesture !== null) {
-        if (this._multitouch === null) {
-          this.multitouch(true);
-        }
-        this._bottomGesture.multitouch(this._multitouch)
-                           .ruler(this.surface())
-                           .scale(this.bottomAxis()!.scale.value!);
-        if (this._multitouch !== null && this.isMounted()) {
-          this._bottomGesture.attach(this._multitouch);
-        }
-        this.reboundBottom();
-      }
-      return this;
-    }
-  }
-
-  leftGesture(): ScaleGesture<Y> | null;
-  leftGesture(leftGesture: ScaleGesture<Y> | boolean | null): this;
-  leftGesture(leftGesture?: ScaleGesture<Y> | boolean | null): ScaleGesture<Y> | null | this {
-    if (leftGesture === void 0) {
-      return this._leftGesture;
-    } else {
-      if (leftGesture === true) {
-        leftGesture = ScaleGesture.vertical();
-      } else if (leftGesture === false) {
-        leftGesture = null;
-      }
-      if (this._leftGesture !== null) {
-        this._leftGesture.multitouch(null).ruler(null).scale(null);
-      }
-      this._leftGesture = leftGesture;
-      if (this._leftGesture !== null) {
-        if (this._multitouch === null) {
-          this.multitouch(true);
-        }
-        this._leftGesture.multitouch(this._multitouch)
-                         .ruler(this.surface())
-                         .scale(this.leftAxis()!.scale.value!);
-        if (this._multitouch !== null && this.isMounted()) {
-          this._leftGesture.attach(this._multitouch);
-        }
-        this.reboundLeft();
-      }
-      return this;
-    }
-  }
-
-  rescaleTransition(): Transition<any> | null;
-  rescaleTransition(rescaleTransition: AnyTransition<any> | null): this;
-  rescaleTransition(rescaleTransition?: AnyTransition<any> | null): Transition<any> | null | this {
-    if (rescaleTransition === void 0) {
-      return this._rescaleTransition;
-    } else {
-      if (rescaleTransition !== null) {
-        rescaleTransition = Transition.fromAny(rescaleTransition);
-      }
-      this._rescaleTransition = rescaleTransition;
-      return this;
-    }
-  }
-
-  fitTopDomain(): boolean;
-  fitTopDomain(fitTopDomain: boolean): this;
-  fitTopDomain(fitTopDomain?: boolean): boolean | this {
-    if (fitTopDomain === void 0) {
-      return this._fitTopDomain;
-    } else {
-      if (!this._fitTopDomain && fitTopDomain) {
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this._fitTopDomain = fitTopDomain;
-      return this;
-    }
-  }
-
-  fitRightDomain(): boolean;
-  fitRightDomain(fitRightDomain: boolean): this;
-  fitRightDomain(fitRightDomain?: boolean): boolean | this {
-    if (fitRightDomain === void 0) {
-      return this._fitRightDomain;
-    } else {
-      if (!this._fitRightDomain && fitRightDomain) {
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this._fitRightDomain = fitRightDomain;
-      return this;
-    }
-  }
-
-  fitBottomDomain(): boolean;
-  fitBottomDomain(fitBottomDomain: boolean): this;
-  fitBottomDomain(fitBottomDomain?: boolean): boolean | this {
-    if (fitBottomDomain === void 0) {
-      return this._fitBottomDomain;
-    } else {
-      if (!this._fitBottomDomain && fitBottomDomain) {
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this._fitBottomDomain = fitBottomDomain;
-      return this;
-    }
-  }
-
-  fitLeftDomain(): boolean;
-  fitLeftDomain(fitLeftDomain: boolean): this;
-  fitLeftDomain(fitLeftDomain?: boolean): boolean | this {
-    if (fitLeftDomain === void 0) {
-      return this._fitLeftDomain;
-    } else {
-      if (!this._fitLeftDomain && fitLeftDomain) {
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this._fitLeftDomain = fitLeftDomain;
-      return this;
-    }
-  }
-
-  topDomainBounds(): ChartDomainBounds<X>;
-  topDomainBounds(topDomainBounds: Readonly<ChartDomainBounds<X>>): this;
-  topDomainBounds(topDomainBounds?: Readonly<ChartDomainBounds<X>>): ChartDomainBounds<X> | this {
-    if (topDomainBounds === void 0) {
-      return this._topDomainBounds;
-    } else {
-      this._topDomainBounds[0] = topDomainBounds[0];
-      this._topDomainBounds[1] = topDomainBounds[1];
-      this.reboundTop();
-      return this;
-    }
-  }
-
-  rightDomainBounds(): ChartDomainBounds<Y>;
-  rightDomainBounds(rightDomainBounds: Readonly<ChartDomainBounds<Y>>): this;
-  rightDomainBounds(rightDomainBounds?: Readonly<ChartDomainBounds<Y>>): ChartDomainBounds<Y> | this {
-    if (rightDomainBounds === void 0) {
-      return this._rightDomainBounds;
-    } else {
-      this._rightDomainBounds[0] = rightDomainBounds[0];
-      this._rightDomainBounds[1] = rightDomainBounds[1];
-      this.reboundRight();
-      return this;
-    }
-  }
-
-  bottomDomainBounds(): ChartDomainBounds<X>;
-  bottomDomainBounds(bottomDomainBounds: Readonly<ChartDomainBounds<X>>): this;
-  bottomDomainBounds(bottomDomainBounds?: Readonly<ChartDomainBounds<X>>): ChartDomainBounds<X> | this {
-    if (bottomDomainBounds === void 0) {
-      return this._bottomDomainBounds;
-    } else {
-      this._bottomDomainBounds[0] = bottomDomainBounds[0];
-      this._bottomDomainBounds[1] = bottomDomainBounds[1];
-      this.reboundBottom();
-      return this;
-    }
-  }
-
-  leftDomainBounds(): ChartDomainBounds<Y>;
-  leftDomainBounds(leftDomainBounds: Readonly<ChartDomainBounds<Y>>): this;
-  leftDomainBounds(leftDomainBounds?: Readonly<ChartDomainBounds<Y>>): ChartDomainBounds<Y> | this {
-    if (leftDomainBounds === void 0) {
-      return this._leftDomainBounds;
-    } else {
-      this._leftDomainBounds[0] = leftDomainBounds[0];
-      this._leftDomainBounds[1] = leftDomainBounds[1];
-      this.reboundLeft();
-      return this;
-    }
-  }
-
-  topDomainPadding(): ChartDomainPadding<X>;
-  topDomainPadding(topDomainPadding: Readonly<ChartDomainPadding<X>>): this;
-  topDomainPadding(topDomainPadding?: Readonly<ChartDomainPadding<X>>): ChartDomainPadding<X> | this {
-    if (topDomainPadding === void 0) {
-      return this._topDomainPadding;
-    } else {
-      this._topDomainPadding[0] = topDomainPadding[0];
-      this._topDomainPadding[1] = topDomainPadding[1];
-      this.requireUpdate(View.NeedsLayout);
-      return this;
-    }
-  }
-
-  rightDomainPadding(): ChartDomainPadding<Y>;
-  rightDomainPadding(rightDomainPadding: Readonly<ChartDomainPadding<Y>>): this;
-  rightDomainPadding(rightDomainPadding?: Readonly<ChartDomainPadding<Y>>): ChartDomainPadding<Y> | this {
-    if (rightDomainPadding === void 0) {
-      return this._rightDomainPadding;
-    } else {
-      this._rightDomainPadding[0] = rightDomainPadding[0];
-      this._rightDomainPadding[1] = rightDomainPadding[1];
-      this.requireUpdate(View.NeedsLayout);
-      return this;
-    }
-  }
-
-  bottomDomainPadding(): ChartDomainPadding<X>;
-  bottomDomainPadding(bottomDomainPadding: Readonly<ChartDomainPadding<X>>): this;
-  bottomDomainPadding(bottomDomainPadding?: Readonly<ChartDomainPadding<X>>): ChartDomainPadding<X> | this {
-    if (bottomDomainPadding === void 0) {
-      return this._bottomDomainPadding;
-    } else {
-      this._bottomDomainPadding[0] = bottomDomainPadding[0];
-      this._bottomDomainPadding[1] = bottomDomainPadding[1];
-      this.requireUpdate(View.NeedsLayout);
-      return this;
-    }
-  }
-
-  leftDomainPadding(): ChartDomainPadding<Y>;
-  leftDomainPadding(leftDomainPadding: Readonly<ChartDomainPadding<Y>>): this;
-  leftDomainPadding(leftDomainPadding?: Readonly<ChartDomainPadding<Y>>): ChartDomainPadding<Y> | this {
-    if (leftDomainPadding === void 0) {
-      return this._leftDomainPadding;
-    } else {
-      this._leftDomainPadding[0] = leftDomainPadding[0];
-      this._leftDomainPadding[1] = leftDomainPadding[1];
-      this.requireUpdate(View.NeedsLayout);
-      return this;
-    }
-  }
-
-  topDomain(): Readonly<[X | null, X | null]> {
-    const topDomain: [X | null, X | null] = [null, null];
-    const topAxis = this.topAxis();
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (childView instanceof PlotView && childView.xAxis() === topAxis) {
-        const xDomain = childView.xDomain();
-        if (topDomain[0] === null || xDomain[0] !== null && Objects.compare(topDomain[0], xDomain[0]) > 0) {
-          topDomain[0] = xDomain[0];
-        }
-        if (topDomain[1] === null || xDomain[1] !== null && Objects.compare(topDomain[1], xDomain[1]) < 0) {
-          topDomain[1] = xDomain[1];
-        }
-      }
-    }
-    return topDomain;
-  }
-
-  rightDomain(): Readonly<[Y | null, Y | null]> {
-    const rightDomain: [Y | null, Y | null] = [null, null];
-    const rightAxis = this.rightAxis();
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (childView instanceof PlotView && childView.yAxis() === rightAxis) {
-        const yDomain = childView.yDomain();
-        if (rightDomain[0] === null || yDomain[0] !== null && Objects.compare(rightDomain[0], yDomain[0]) > 0) {
-          rightDomain[0] = yDomain[0];
-        }
-        if (rightDomain[1] === null || yDomain[1] !== null && Objects.compare(rightDomain[1], yDomain[1]) < 0) {
-          rightDomain[1] = yDomain[1];
-        }
-      }
-    }
-    return rightDomain;
-  }
-
-  bottomDomain(): Readonly<[X | null, X | null]> {
-    const bottomDomain: [X | null, X | null] = [null, null];
-    const bottomAxis = this.bottomAxis();
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (childView instanceof PlotView && childView.xAxis() === bottomAxis) {
-        const xDomain = childView.xDomain();
-        if (bottomDomain[0] === null || xDomain[0] !== null && Objects.compare(bottomDomain[0], xDomain[0]) > 0) {
-          bottomDomain[0] = xDomain[0];
-        }
-        if (bottomDomain[1] === null || xDomain[1] !== null && Objects.compare(bottomDomain[1], xDomain[1]) < 0) {
-          bottomDomain[1] = xDomain[1];
-        }
-      }
-    }
-    return bottomDomain;
-  }
-
-  leftDomain(): Readonly<[Y | null, Y | null]> {
-    const leftDomain: [Y | null, Y | null] = [null, null];
-    const leftAxis = this.leftAxis();
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (childView instanceof PlotView && childView.yAxis() === leftAxis) {
-        const yDomain = childView.yDomain();
-        if (leftDomain[0] === null || yDomain[0] !== null && Objects.compare(leftDomain[0], yDomain[0]) > 0) {
-          leftDomain[0] = yDomain[0];
-        }
-        if (leftDomain[1] === null || yDomain[1] !== null && Objects.compare(leftDomain[1], yDomain[1]) < 0) {
-          leftDomain[1] = yDomain[1];
-        }
-      }
-    }
-    return leftDomain;
-  }
-
-  topDomainPadded(): Readonly<[X | null, X | null]> {
-    let [xMin, xMax] = this.topDomain();
-    const [padMin, padMax] = this._topDomainPadding;
-    if (xMin !== null && padMin !== null) {
-      xMin = (+xMin - +padMin) as unknown as X;
-    }
-    if (xMax !== null && padMax !== null) {
-      xMax = (+xMax + +padMax) as unknown as X;
-    }
-    return [xMin, xMax];
-  }
-
-  rightDomainPadded(): Readonly<[Y | null, Y | null]> {
-    let [yMin, yMax] = this.rightDomain();
-    const [padMin, padMax] = this._topDomainPadding;
-    if (yMin !== null && padMin !== null) {
-      yMin = (+yMin - +padMin) as unknown as Y;
-    }
-    if (yMax !== null && padMax !== null) {
-      yMax = (+yMax + +padMax) as unknown as Y;
-    }
-    return [yMin, yMax];
-  }
-
-  bottomDomainPadded(): Readonly<[X | null, X | null]> {
-    let [xMin, xMax] = this.bottomDomain();
-    const [padMin, padMax] = this._bottomDomainPadding;
-    if (xMin !== null && padMin !== null) {
-      xMin = (+xMin - +padMin) as unknown as X;
-    }
-    if (xMax !== null && padMax !== null) {
-      xMax = (+xMax + +padMax) as unknown as X;
-    }
-    return [xMin, xMax];
-  }
-
-  leftDomainPadded(): Readonly<[Y | null, Y | null]> {
-    let [yMin, yMax] = this.leftDomain();
-    const [padMin, padMax] = this._leftDomainPadding;
-    if (yMin !== null && padMin !== null) {
-      yMin = (+yMin - +padMin) as unknown as Y;
-    }
-    if (yMax !== null && padMax !== null) {
-      yMax = (+yMax + +padMax) as unknown as Y;
-    }
-    return [yMin, yMax];
-  }
-
-  topRange(): Readonly<[number, number]> {
-    const topRange: [number, number] = [Infinity, -Infinity];
-    const topAxis = this.topAxis();
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (childView instanceof PlotView && childView.xAxis() === topAxis) {
-        const xRange = childView.xRange();
-        topRange[0] = Math.min(topRange[0], xRange[0]);
-        topRange[1] = Math.max(topRange[1], xRange[1]);
-      }
-    }
-    return topRange;
-  }
-
-  rightRange(): Readonly<[number, number]> {
-    const rightRange: [number, number] = [Infinity, -Infinity];
-    const rightAxis = this.rightAxis();
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (childView instanceof PlotView && childView.yAxis() === rightAxis) {
-        const yRange = childView.yRange();
-        rightRange[0] = Math.min(rightRange[0], yRange[0]);
-        rightRange[1] = Math.max(rightRange[1], yRange[1]);
-      }
-    }
-    return rightRange;
-  }
-
-  bottomRange(): Readonly<[number, number]> {
-    const bottomRange: [number, number] = [Infinity, -Infinity];
-    const bottomAxis = this.bottomAxis();
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (childView instanceof PlotView && childView.xAxis() === bottomAxis) {
-        const xRange = childView.xRange();
-        bottomRange[0] = Math.min(bottomRange[0], xRange[0]);
-        bottomRange[1] = Math.max(bottomRange[1], xRange[1]);
-      }
-    }
-    return bottomRange;
-  }
-
-  leftRange(): Readonly<[number, number]> {
-    const leftRange: [number, number] = [Infinity, -Infinity];
-    const leftAxis = this.leftAxis();
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (childView instanceof PlotView && childView.yAxis() === leftAxis) {
-        const yRange = childView.yRange();
-        leftRange[0] = Math.min(leftRange[0], yRange[0]);
-        leftRange[1] = Math.max(leftRange[1], yRange[1]);
-      }
-    }
-    return leftRange;
-  }
-
-  protected onMount(): void {
-    super.onMount();
-    if (this._multitouch !== null) {
-      this._multitouch.attach(this);
-      if (this._topGesture !== null) {
-        this._topGesture.attach(this._multitouch);
-      }
-      if (this._rightGesture !== null) {
-        this._rightGesture.attach(this._multitouch);
-      }
-      if (this._bottomGesture !== null) {
-        this._bottomGesture.attach(this._multitouch);
-      }
-      if (this._leftGesture !== null) {
-        this._leftGesture.attach(this._multitouch);
-      }
-    }
-    this.on("scalestart", this.onScaleStart);
-    this.on("scalechange", this.onScaleChange);
-    this.on("scalecancel", this.onScaleCancel);
-    this.on("scaleend", this.onScaleEnd);
-  }
-
-  protected onUnmount(): void {
-    this.off("scalestart", this.onScaleStart);
-    this.off("scalechange", this.onScaleChange);
-    this.off("scalecancel", this.onScaleCancel);
-    this.off("scaleend", this.onScaleEnd);
-    if (this._multitouch !== null) {
-      if (this._topGesture !== null) {
-        this._topGesture.detach(this._multitouch);
-      }
-      if (this._rightGesture !== null) {
-        this._rightGesture.detach(this._multitouch);
-      }
-      if (this._bottomGesture !== null) {
-        this._bottomGesture.detach(this._multitouch);
-      }
-      if (this._leftGesture !== null) {
-        this._leftGesture.detach(this._multitouch);
-      }
-      this._multitouch.detach(this);
-    }
-    super.onUnmount();
-  }
-
-  protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
-    let additionalFlags = 0;
-    if ((updateFlags & View.NeedsAnimate) !== 0) {
-      additionalFlags |= View.NeedsLayout;
-    }
-    additionalFlags |= super.modifyUpdate(updateFlags | additionalFlags);
-    return additionalFlags;
-  }
-
-  protected onLayout(viewContext: RenderedViewContext): void {
-    super.onLayout(viewContext);
-    if (this._topGesture !== null) {
-      this._topGesture.scale(this.topAxis()!.scale.value!);
-    }
-    if (this._rightGesture !== null) {
-      this._rightGesture.scale(this.rightAxis()!.scale.value!);
-    }
-    if (this._bottomGesture !== null) {
-      this._bottomGesture.scale(this.bottomAxis()!.scale.value!);
-    }
-    if (this._leftGesture !== null) {
-      this._leftGesture.scale(this.leftAxis()!.scale.value!);
-    }
-    this.layoutChildViews(this.viewFrame);
-  }
-
-  protected didLayout(viewContext: RenderedViewContext): void {
-    super.didLayout(viewContext);
-    this.autoscale();
-    this.rebound();
-  }
-
-  protected layoutChildViews(frame: BoxR2): void {
-    const childViews = this._childViews;
-    for (let i = 0; i < childViews.length; i += 1) {
-      const childView = childViews[i];
-      this.layoutChildView(childView, frame);
-    }
-  }
-
-  protected layoutChildView(childView: View, frame: BoxR2): void {
-    const childKey = childView.key;
-    if (childKey === "surface" && RenderedView.is(childView)) {
-      this.layoutSurface(childView, frame);
-    } else if (childView instanceof AxisView) {
-      if (childKey === "topAxis") {
-        this.layoutTopAxis(childView, frame);
-      } else if (childKey === "rightAxis") {
-        this.layoutRightAxis(childView, frame);
-      } else if (childKey === "bottomAxis") {
-        this.layoutBottomAxis(childView, frame);
-      } else if (childKey === "leftAxis") {
-        this.layoutLeftAxis(childView, frame);
-      }
-    } else if (childView instanceof PlotView) {
-      this.layoutPlot(childView, frame);
-    }
-  }
-
-  protected layoutSurface(surface: RenderedView, frame: BoxR2): void {
-    const topGutter = this.topGutter.value!.pxValue(frame.height);
-    const rightGutter = this.rightGutter.value!.pxValue(frame.width);
-    const bottomGutter = this.bottomGutter.value!.pxValue(frame.height);
-    const leftGutter = this.leftGutter.value!.pxValue(frame.width);
-    const xMin = frame.xMin + leftGutter;
-    const yMin = frame.yMin + topGutter;
-    const xMax = frame.xMax - rightGutter;
-    const yMax = frame.yMax - bottomGutter;
-    surface.setViewFrame(new BoxR2(xMin, yMin, xMax, yMax));
-  }
-
-  protected layoutTopAxis(axis: AxisView<X>, frame: BoxR2): void {
-    const topGutter = this.topGutter.value!.pxValue(frame.height);
-    const rightGutter = this.rightGutter.value!.pxValue(frame.width);
-    const bottomGutter = this.bottomGutter.value!.pxValue(frame.height);
-    const leftGutter = this.leftGutter.value!.pxValue(frame.width);
-    const originX = frame.xMin + leftGutter;
-    const originY = frame.yMin + topGutter;
-    const xMin = originX;
-    const yMin = frame.yMin;
-    const xMax = frame.xMax - rightGutter;
-    const yMax = frame.yMax - bottomGutter;
-    axis.range(0, xMax - xMin);
-    axis.setViewFrame(new BoxR2(xMin, yMin, xMax, yMax));
-    axis.origin.setAutoState(new PointR2(originX, originY));
-  }
-
-  protected layoutRightAxis(axis: AxisView<Y>, frame: BoxR2): void {
-    const topGutter = this.topGutter.value!.pxValue(frame.height);
-    const rightGutter = this.rightGutter.value!.pxValue(frame.width);
-    const bottomGutter = this.bottomGutter.value!.pxValue(frame.height);
-    const leftGutter = this.leftGutter.value!.pxValue(frame.width);
-    const originX = Math.max(frame.xMin + leftGutter, frame.xMax - rightGutter);
-    const originY = frame.yMin + topGutter;
-    const xMin = frame.xMin + leftGutter;
-    const yMin = originY;
-    const xMax = frame.xMax;
-    const yMax = frame.yMax - bottomGutter;
-    axis.range(yMax - yMin, 0);
-    axis.setViewFrame(new BoxR2(xMin, yMin, xMax, yMax));
-    axis.origin.setAutoState(new PointR2(originX, originY));
-  }
-
-  protected layoutBottomAxis(axis: AxisView<X>, frame: BoxR2): void {
-    const topGutter = this.topGutter.value!.pxValue(frame.height);
-    const rightGutter = this.rightGutter.value!.pxValue(frame.width);
-    const bottomGutter = this.bottomGutter.value!.pxValue(frame.height);
-    const leftGutter = this.leftGutter.value!.pxValue(frame.width);
-    const originX = frame.xMin + leftGutter;
-    const originY = Math.max(frame.yMin + topGutter, frame.yMax - bottomGutter);
-    const xMin = originX;
-    const yMin = frame.yMin + topGutter;
-    const xMax = frame.xMax - rightGutter;
-    const yMax = frame.yMax;
-    axis.range(0, xMax - xMin);
-    axis.setViewFrame(new BoxR2(xMin, yMin, xMax, yMax));
-    axis.origin.setAutoState(new PointR2(originX, originY));
-  }
-
-  protected layoutLeftAxis(axis: AxisView<Y>, frame: BoxR2): void {
-    const topGutter = this.topGutter.value!.pxValue(frame.height);
-    const rightGutter = this.rightGutter.value!.pxValue(frame.width);
-    const bottomGutter = this.bottomGutter.value!.pxValue(frame.height);
-    const leftGutter = this.leftGutter.value!.pxValue(frame.width);
-    const originX = frame.xMin + leftGutter;
-    const originY = frame.yMin + topGutter;
-    const xMin = frame.xMin;
-    const yMin = originY;
-    const xMax = frame.xMax - rightGutter;
-    const yMax = frame.yMax - bottomGutter;
-    axis.range(yMax - yMin, 0);
-    axis.setViewFrame(new BoxR2(xMin, yMin, xMax, yMax));
-    axis.origin.setAutoState(new PointR2(originX, originY));
-  }
-
-  protected layoutPlot(plot: PlotView<X, Y>, frame: BoxR2): void {
-    const topGutter = this.topGutter.value!.pxValue(frame.height);
-    const rightGutter = this.rightGutter.value!.pxValue(frame.width);
-    const bottomGutter = this.bottomGutter.value!.pxValue(frame.height);
-    const leftGutter = this.leftGutter.value!.pxValue(frame.width);
-    const xMin = frame.xMin + leftGutter;
-    const yMin = frame.yMin + topGutter;
-    const xMax = frame.xMax - rightGutter;
-    const yMax = frame.yMax - bottomGutter;
-    plot.setViewFrame(new BoxR2(xMin, yMin, xMax, yMax));
-    plot.origin.setAutoState(new PointR2(xMin, yMin));
+  yRange(): readonly [number, number] | undefined {
+    const frame = this.viewFrame;
+    const gutterTop = this.gutterTop.value!.pxValue(frame.height);
+    const gutterBottom = this.gutterBottom.value!.pxValue(frame.height);
+    const yRangeMin = this._yRangePadding[0];
+    const yRangeMax = this.viewFrame.height - gutterBottom - gutterTop - this._yRangePadding[1];
+    return [yRangeMin, yRangeMax];
   }
 
   protected onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
-    if (childView instanceof PlotView) {
-      this.onInsertPlot(childView);
+    if (childView instanceof GraphView) {
+      this.onInsertGraph(childView);
+    } else if (childView instanceof AxisView) {
+      this.onInsertAxis(childView);
     }
   }
 
   protected onRemoveChildView(childView: View): void {
-    if (childView instanceof PlotView) {
-      this.onRemovePlot(childView);
+    if (childView instanceof GraphView) {
+      this.onInsertGraph(childView);
+    } else if (childView instanceof AxisView) {
+      this.onRemoveAxis(childView);
     }
     super.onRemoveChildView(childView);
   }
 
-  protected onInsertPlot(plot: PlotView<X, Y>): void {
-    if (plot.xAxis() === null || plot.yAxis() === null) {
-      const childViews = this._childViews;
-      for (let i = 0, n = childViews.length; i < n; i += 1) {
-        const childView = childViews[i];
-        if (childView instanceof AxisView) {
-          const childKey = childView.key;
-          if (childKey === "topAxis" && plot.xAxis() === null) {
-            plot.xAxis(childView);
-          } else if (childKey === "rightAxis" && plot.yAxis() === null) {
-            plot.yAxis(childView);
-          } else if (childKey === "bottomAxis" && plot.xAxis() === null) {
-            plot.xAxis(childView);
-          } else if (childKey === "leftAxis" && plot.yAxis() === null) {
-            plot.yAxis(childView);
-          }
-        }
-      }
-    }
-  }
-
-  protected onRemovePlot(plot: PlotView<X, Y>): void {
+  protected onInsertGraph(graph: GraphView<X, Y>): void {
     // hook
   }
 
-  autoscale(tween?: Tween<any>): void {
-    if (tween === void 0) {
-      tween = this._rescaleTransition || void 0;
-    }
-    this.autoscaleTop(tween);
-    this.autoscaleRight(tween);
-    this.autoscaleBottom(tween);
-    this.autoscaleLeft(tween);
+  protected onRemoveGraph(graph: GraphView<X, Y>): void {
+    // hook
   }
 
-  autoscaleTop(tween?: Tween<any>): void {
-    if (this._fitTopDomain && this._trackTopDomain) {
-      const topAxis = this.topAxis();
-      if (topAxis !== null) {
-        if (tween === void 0) {
-          tween = this._rescaleTransition || void 0;
-        }
-        const [xMin, xMax] = this.topDomainPadded();
-        if (xMin !== null && xMax !== null) {
-          topAxis.domain(xMin, xMax, tween);
-        }
+  protected onInsertAxis(axis: AxisView<X | Y>): void {
+    // hook
+  }
+
+  protected onRemoveAxis(axis: AxisView<X | Y>): void {
+    // hook
+  }
+
+  protected updateScales(): void {
+    super.updateScales();
+    this.layoutChart(this.viewFrame);
+  }
+
+  protected layoutChart(frame: BoxR2): void {
+    const gutterTop = this.gutterTop.value!.pxValue(frame.height);
+    const gutterRight = this.gutterRight.value!.pxValue(frame.width);
+    const gutterBottom = this.gutterBottom.value!.pxValue(frame.height);
+    const gutterLeft = this.gutterLeft.value!.pxValue(frame.width);
+
+    const graphTop = frame.yMin + gutterTop;
+    const graphRight = frame.xMax - gutterRight;
+    const graphBottom = frame.yMax - gutterBottom;
+    const graphLeft = frame.xMin + gutterLeft;
+
+    const topAxis = this.topAxis();
+    if (topAxis !== null) {
+      const topFrame = topAxis.viewFrame;
+      if (topFrame.xMin !== graphLeft || topFrame.yMin !== frame.yMin ||
+          topFrame.xMax !== graphRight || topFrame.yMax !== graphBottom) {
+        topAxis.setViewFrame(new BoxR2(graphLeft, frame.yMin, graphRight, graphBottom));
+        topAxis.origin.setAutoState(new PointR2(graphLeft, graphTop));
+        topAxis.requireUpdate(View.NeedsLayout);
       }
     }
-  }
-
-  autoscaleRight(tween?: Tween<any>): void {
-    if (this._fitRightDomain && this._trackRightDomain) {
-      const rightAxis = this.rightAxis();
-      if (rightAxis !== null) {
-        if (tween === void 0) {
-          tween = this._rescaleTransition || void 0;
-        }
-        const [yMin, yMax] = this.rightDomainPadded();
-        if (yMin !== null && yMax !== null) {
-          rightAxis.domain(yMin, yMax, tween);
-        }
+    const rightAxis = this.rightAxis();
+    if (rightAxis !== null) {
+      const rightFrame = rightAxis.viewFrame;
+      if (rightFrame.xMin !== graphLeft || rightFrame.yMin !== graphTop ||
+          rightFrame.xMax !== frame.xMax || rightFrame.yMax !== graphBottom) {
+        rightAxis.setViewFrame(new BoxR2(graphLeft, graphTop, frame.xMax, graphBottom));
+        rightAxis.origin.setAutoState(new PointR2(Math.max(graphLeft, graphRight), graphBottom));
+        rightAxis.requireUpdate(View.NeedsLayout);
       }
     }
-  }
-
-  autoscaleBottom(tween?: Tween<any>): void {
-    if (this._fitBottomDomain && this._trackBottomDomain) {
-      const bottomAxis = this.bottomAxis();
-      if (bottomAxis !== null) {
-        if (tween === void 0) {
-          tween = this._rescaleTransition || void 0;
-        }
-        const [xMin, xMax] = this.bottomDomainPadded();
-        if (xMin !== null && xMax !== null) {
-          bottomAxis.domain(xMin, xMax, tween);
-        }
+    const bottomAxis = this.bottomAxis();
+    if (bottomAxis !== null) {
+      const bottomFrame = bottomAxis.viewFrame;
+      if (bottomFrame.xMin !== graphLeft || bottomFrame.yMin !== graphTop ||
+          bottomFrame.xMax !== graphRight || bottomFrame.yMax !== frame.yMax) {
+        bottomAxis.setViewFrame(new BoxR2(graphLeft, graphTop, graphRight, frame.yMax));
+        bottomAxis.origin.setAutoState(new PointR2(graphLeft, Math.max(graphTop, graphBottom)));
+        bottomAxis.requireUpdate(View.NeedsLayout);
       }
     }
-  }
-
-  autoscaleLeft(tween?: Tween<any>): void {
-    if (this._fitLeftDomain && this._trackLeftDomain) {
-      const leftAxis = this.leftAxis();
-      if (leftAxis !== null) {
-        if (tween === void 0) {
-          tween = this._rescaleTransition || void 0;
-        }
-        const [yMin, yMax] = this.leftDomainPadded();
-        if (yMin !== null && yMax !== null) {
-          leftAxis.domain(yMin, yMax, tween);
-        }
+    const leftAxis = this.leftAxis();
+    if (leftAxis !== null) {
+      const leftFrame = leftAxis.viewFrame;
+      if (leftFrame.xMin !== frame.xMin || leftFrame.yMin !== graphTop ||
+          leftFrame.xMax !== graphRight || leftFrame.yMax !== graphBottom) {
+        leftAxis.setViewFrame(new BoxR2(frame.xMin, graphTop, graphRight, graphBottom));
+        leftAxis.origin.setAutoState(new PointR2(graphLeft, graphBottom));
+        leftAxis.requireUpdate(View.NeedsLayout);
       }
     }
-  }
 
-  rebound(): void {
-    this.reboundTop();
-    this.reboundRight();
-    this.reboundBottom();
-    this.reboundLeft();
-  }
-
-  reboundTop(): void {
-    const topGesture = this._topGesture;
-    if (topGesture !== null) {
-      let [xMin, xMax] = this.topDomainPadded();
-      if (xMin !== null && xMax !== null) {
-        const [boundMin, boundMax] = this._topDomainBounds;
-        if (typeof boundMin !== "boolean") {
-          xMin = (+xMin - +boundMin) as unknown as X;
-        }
-        if (typeof boundMax !== "boolean") {
-          xMax = (+xMax + +boundMax) as unknown as X;
-        }
-        topGesture.domainBounds(typeof boundMin !== "boolean" || boundMin ? xMin : null,
-                                typeof boundMax !== "boolean" || boundMax ? xMax : null);
+    const graph = this.graph();
+    if (graph !== null) {
+      const graphFrame = graph.viewFrame;
+      if (graphFrame.xMin !== graphLeft || graphFrame.yMin !== graphTop ||
+          graphFrame.xMax !== graphRight || graphFrame.yMax !== graphBottom) {
+        graph.setViewFrame(new BoxR2(graphLeft, graphTop, graphRight, graphBottom));
+        graph.requireUpdate(View.NeedsLayout);
       }
     }
   }
 
-  reboundRight(): void {
-    const rightGesture = this._rightGesture;
-    if (rightGesture !== null) {
-      let [yMin, yMax] = this.rightDomainPadded();
-      if (yMin !== null && yMax !== null) {
-        const [boundMin, boundMax] = this._rightDomainBounds;
-        if (typeof boundMin !== "boolean") {
-          yMin = (+yMin - +boundMin) as unknown as Y;
-        }
-        if (typeof boundMax !== "boolean") {
-          yMax = (+yMax + +boundMax) as unknown as Y;
-        }
-        rightGesture.domainBounds(typeof boundMin !== "boolean" || boundMin ? yMin : null,
-                                  typeof boundMax !== "boolean" || boundMax ? yMax : null);
-      }
-    }
-  }
-
-  reboundBottom(): void {
-    const bottomGesture = this._bottomGesture;
-    if (bottomGesture !== null) {
-      let [xMin, xMax] = this.bottomDomainPadded();
-      if (xMin !== null && xMax !== null) {
-        const [boundMin, boundMax] = this._bottomDomainBounds;
-        if (typeof boundMin !== "boolean") {
-          xMin = (+xMin - +boundMin) as unknown as X;
-        }
-        if (typeof boundMax !== "boolean") {
-          xMax = (+xMax + +boundMax) as unknown as X;
-        }
-        bottomGesture.domainBounds(typeof boundMin !== "boolean" || boundMin ? xMin : null,
-                                   typeof boundMax !== "boolean" || boundMax ? xMax : null);
-      }
-    }
-  }
-
-  reboundLeft(): void {
-    const leftGesture = this._leftGesture;
-    if (leftGesture !== null) {
-      let [yMin, yMax] = this.leftDomainPadded();
-      if (yMin !== null && yMax !== null) {
-        const [boundMin, boundMax] = this._leftDomainBounds;
-        if (typeof boundMin !== "boolean") {
-          yMin = (+yMin - +boundMin) as unknown as Y;
-        }
-        if (typeof boundMax !== "boolean") {
-          yMax = (+yMax + +boundMax) as unknown as Y;
-        }
-        leftGesture.domainBounds(typeof boundMin !== "boolean" || boundMin ? yMin : null,
-                                 typeof boundMax !== "boolean" || boundMax ? yMax : null);
-      }
-    }
-  }
-
-  protected retrackTop(): void {
-    const topGesture = this._topGesture;
-    if (topGesture !== null) {
-      const [xMin, xMax] = topGesture.scale()!.domain();
-      const boundMin = topGesture.domainMin();
-      const boundMax = topGesture.domainMax();
-      if (xMin !== null && xMax !== null && boundMin !== null && boundMax !== null) {
-        const order = Objects.compare(xMin, xMax);
-        if (order < 0 && Objects.compare(xMin, boundMin) <= 0 && Objects.compare(xMax, boundMax) >= 0
-            || order > 0 && Objects.compare(xMax, boundMin) <= 0 && Objects.compare(xMin, boundMax) >= 0) {
-          this._trackTopDomain = true;
-        }
-      }
-    }
-  }
-
-  protected retrackRight(): void {
-    const rightGesture = this._rightGesture;
-    if (rightGesture !== null) {
-      const [yMin, yMax] = rightGesture.scale()!.domain();
-      const boundMin = rightGesture.domainMin();
-      const boundMax = rightGesture.domainMax();
-      if (yMin !== null && yMax !== null && boundMin !== null && boundMax !== null) {
-        const order = Objects.compare(yMin, yMax);
-        if (order < 0 && Objects.compare(yMin, boundMin) <= 0 && Objects.compare(yMax, boundMax) >= 0
-            || order > 0 && Objects.compare(yMax, boundMin) <= 0 && Objects.compare(yMin, boundMax) >= 0) {
-          this._trackRightDomain = true;
-        }
-      }
-    }
-  }
-
-  protected retrackBottom(): void {
-    const bottomGesture = this._bottomGesture;
-    if (bottomGesture !== null) {
-      const [xMin, xMax] = bottomGesture.scale()!.domain();
-      const boundMin = bottomGesture.domainMin();
-      const boundMax = bottomGesture.domainMax();
-      if (xMin !== null && xMax !== null && boundMin !== null && boundMax !== null) {
-        const order = Objects.compare(xMin, xMax);
-        if (order < 0 && Objects.compare(xMin, boundMin) <= 0 && Objects.compare(xMax, boundMax) >= 0
-            || order > 0 && Objects.compare(xMax, boundMin) <= 0 && Objects.compare(xMin, boundMax) >= 0) {
-          this._trackBottomDomain = true;
-        }
-      }
-    }
-  }
-
-  protected retrackLeft(): void {
-    const leftGesture = this._leftGesture;
-    if (leftGesture !== null) {
-      const [yMin, yMax] = leftGesture.scale()!.domain();
-      const boundMin = leftGesture.domainMin();
-      const boundMax = leftGesture.domainMax();
-      if (yMin !== null && yMax !== null && boundMin !== null && boundMax !== null) {
-        const order = Objects.compare(yMin, yMax);
-        if (order < 0 && Objects.compare(yMin, boundMin) <= 0 && Objects.compare(yMax, boundMax) >= 0
-            || order > 0 && Objects.compare(yMax, boundMin) <= 0 && Objects.compare(yMin, boundMax) >= 0) {
-          this._trackLeftDomain = true;
-        }
-      }
-    }
-  }
-
-  protected onScaleStart(event: ScaleGestureEvent<unknown>): void {
-    if (event.gesture === this._topGesture) {
-      const topAxis = this.topAxis();
-      if (topAxis !== null) {
-        topAxis.domain(event.scale.domain() as X[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this._trackTopDomain = false;
-    } else if (event.gesture === this._rightGesture) {
-      const rightAxis = this.rightAxis();
-      if (rightAxis !== null) {
-        rightAxis.domain(event.scale.domain() as Y[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this._trackRightDomain = false;
-    } else if (event.gesture === this._bottomGesture) {
-      const bottomAxis = this.bottomAxis();
-      if (bottomAxis !== null) {
-        bottomAxis.domain(event.scale.domain() as X[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this._trackBottomDomain = false;
-    } else if (event.gesture === this._leftGesture) {
-      const leftAxis = this.leftAxis();
-      if (leftAxis !== null) {
-        leftAxis.domain(event.scale.domain() as Y[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this._trackLeftDomain = false;
-    }
-  }
-
-  protected onScaleChange(event: ScaleGestureEvent<unknown>): void {
-    if (event.gesture === this._topGesture) {
-      const topAxis = this.topAxis();
-      if (topAxis !== null) {
-        topAxis.domain(event.scale.domain() as X[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-    } else if (event.gesture === this._rightGesture) {
-      const rightAxis = this.rightAxis();
-      if (rightAxis !== null) {
-        rightAxis.domain(event.scale.domain() as Y[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-    } else if (event.gesture === this._bottomGesture) {
-      const bottomAxis = this.bottomAxis();
-      if (bottomAxis !== null) {
-        bottomAxis.domain(event.scale.domain() as X[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-    } else if (event.gesture === this._leftGesture) {
-      const leftAxis = this.leftAxis();
-      if (leftAxis !== null) {
-        leftAxis.domain(event.scale.domain() as Y[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-    }
-  }
-
-  protected onScaleCancel(event: ScaleGestureEvent<unknown>): void {
-    this.onScaleEnd(event);
-  }
-
-  protected onScaleEnd(event: ScaleGestureEvent<unknown>): void {
-    if (event.gesture === this._topGesture) {
-      const topAxis = this.topAxis();
-      if (topAxis !== null) {
-        topAxis.domain(event.scale.domain() as X[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this.retrackTop();
-    } else if (event.gesture === this._rightGesture) {
-      const rightAxis = this.rightAxis();
-      if (rightAxis !== null) {
-        rightAxis.domain(event.scale.domain() as Y[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this.retrackRight();
-    } else if (event.gesture === this._bottomGesture) {
-      const bottomAxis = this.bottomAxis();
-      if (bottomAxis !== null) {
-        bottomAxis.domain(event.scale.domain() as X[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this.retrackBottom();
-    } else if (event.gesture === this._leftGesture) {
-      const leftAxis = this.leftAxis();
-      if (leftAxis !== null) {
-        leftAxis.domain(event.scale.domain() as Y[]);
-        this.requireUpdate(View.NeedsLayout);
-      }
-      this.retrackLeft();
-    }
-  }
-
-  static fromAny<X = any, Y = any>(chart: AnyChartView<X, Y>): ChartView<X, Y> {
+  static fromAny<X, Y>(chart: AnyChartView<X, Y>): ChartView<X, Y> {
     if (chart instanceof ChartView) {
       return chart;
     } else if (typeof chart === "object" && chart !== null) {
-      const view = new ChartView();
-
-      if (chart.bottomAxis !== void 0) {
-        view.bottomAxis(chart.bottomAxis);
-      }
-      if (chart.leftAxis !== void 0) {
-        view.leftAxis(chart.leftAxis);
-      }
-      if (chart.topAxis !== void 0) {
-        view.topAxis(chart.topAxis);
-      }
-      if (chart.rightAxis !== void 0) {
-        view.rightAxis(chart.rightAxis);
-      }
-
-      const plots = chart.plots;
-      if (plots !== void 0) {
-        for (let i = 0, n = plots.length; i < n; i += 1) {
-          view.addPlot(plots[i]);
-        }
-      }
-
-      if (chart.fitTopDomain !== void 0) {
-        view.fitTopDomain(chart.fitTopDomain);
-      }
-      if (chart.fitRightDomain !== void 0) {
-        view.fitRightDomain(chart.fitRightDomain);
-      }
-      if (chart.fitBottomDomain !== void 0) {
-        view.fitBottomDomain(chart.fitBottomDomain);
-      }
-      if (chart.fitLeftDomain !== void 0) {
-        view.fitLeftDomain(chart.fitLeftDomain);
-      }
-
-      if (chart.topDomainBounds !== void 0) {
-        view.topDomainBounds(chart.topDomainBounds);
-      }
-      if (chart.rightDomainBounds !== void 0) {
-        view.rightDomainBounds(chart.rightDomainBounds);
-      }
-      if (chart.bottomDomainBounds !== void 0) {
-        view.bottomDomainBounds(chart.bottomDomainBounds);
-      }
-      if (chart.leftDomainBounds !== void 0) {
-        view.leftDomainBounds(chart.leftDomainBounds);
-      }
-
-      if (chart.topDomainPadding !== void 0) {
-        view.topDomainPadding(chart.topDomainPadding);
-      }
-      if (chart.rightDomainPadding !== void 0) {
-        view.rightDomainPadding(chart.rightDomainPadding);
-      }
-      if (chart.bottomDomainPadding !== void 0) {
-        view.bottomDomainPadding(chart.bottomDomainPadding);
-      }
-      if (chart.leftDomainPadding !== void 0) {
-        view.leftDomainPadding(chart.leftDomainPadding);
-      }
-
-      if (chart.multitouch !== void 0) {
-        view.multitouch(chart.multitouch);
-      }
-      if (chart.topGesture !== void 0) {
-        view.topGesture(chart.topGesture);
-      }
-      if (chart.rightGesture !== void 0) {
-        view.rightGesture(chart.rightGesture);
-      }
-      if (chart.bottomGesture !== void 0) {
-        view.bottomGesture(chart.bottomGesture);
-      }
-      if (chart.leftGesture !== void 0) {
-        view.leftGesture(chart.leftGesture);
-      }
-
-      if (chart.rescaleTransition !== void 0) {
-        view.rescaleTransition(chart.rescaleTransition);
-      }
-
-      if (chart.topGutter !== void 0) {
-        view.topGutter(chart.topGutter);
-      }
-      if (chart.rightGutter !== void 0) {
-        view.rightGutter(chart.rightGutter);
-      }
-      if (chart.bottomGutter !== void 0) {
-        view.bottomGutter(chart.bottomGutter);
-      }
-      if (chart.leftGutter !== void 0) {
-        view.leftGutter(chart.leftGutter);
-      }
-
-      if (chart.domainColor !== void 0) {
-        view.domainColor(chart.domainColor);
-      }
-      if (chart.domainWidth !== void 0) {
-        view.domainWidth(chart.domainWidth);
-      }
-      if (chart.domainSerif !== void 0) {
-        view.domainSerif(chart.domainSerif);
-      }
-
-      if (chart.tickMarkColor !== void 0) {
-        view.tickMarkColor(chart.tickMarkColor);
-      }
-      if (chart.tickMarkWidth !== void 0) {
-        view.tickMarkWidth(chart.tickMarkWidth);
-      }
-      if (chart.tickMarkLength !== void 0) {
-        view.tickMarkLength(chart.tickMarkLength);
-      }
-
-      if (chart.tickLabelPadding !== void 0) {
-        view.tickLabelPadding(chart.tickLabelPadding);
-      }
-
-      if (chart.gridLineColor !== void 0) {
-        view.gridLineColor(chart.gridLineColor);
-      }
-      if (chart.gridLineWidth !== void 0) {
-        view.gridLineWidth(chart.gridLineWidth);
-      }
-
-      if (chart.font !== void 0) {
-        view.font(chart.font);
-      }
-      if (chart.textColor !== void 0) {
-        view.textColor(chart.textColor);
-      }
-
-      if (chart.hidden !== void 0) {
-        view.setHidden(chart.hidden);
-      }
-      if (chart.culled !== void 0) {
-        view.setCulled(chart.culled);
-      }
-
-      return view;
+      return ChartView.fromInit(chart);
     }
     throw new TypeError("" + chart);
+  }
+
+  static fromInit<X, Y>(init: ChartViewInit<X, Y>): ChartView<X, Y> {
+    const view = new ChartView<X, Y>();
+    ScaleView.init(view, init);
+
+    if (init.graph !== void 0) {
+      view.graph(init.graph);
+    }
+
+    if (init.topAxis !== void 0) {
+      view.topAxis(init.topAxis);
+    }
+    if (init.rightAxis !== void 0) {
+      view.rightAxis(init.rightAxis);
+    }
+    if (init.bottomAxis !== void 0) {
+      view.bottomAxis(init.bottomAxis);
+    }
+    if (init.leftAxis !== void 0) {
+      view.leftAxis(init.leftAxis);
+    }
+
+    if (init.gutterTop !== void 0) {
+      view.gutterTop(init.gutterTop);
+    }
+    if (init.gutterRight !== void 0) {
+      view.gutterRight(init.gutterRight);
+    }
+    if (init.gutterBottom !== void 0) {
+      view.gutterBottom(init.gutterBottom);
+    }
+    if (init.gutterLeft !== void 0) {
+      view.gutterLeft(init.gutterLeft);
+    }
+
+    if (init.borderColor !== void 0) {
+      view.borderColor(init.borderColor);
+    }
+    if (init.borderWidth !== void 0) {
+      view.borderWidth(init.borderWidth);
+    }
+    if (init.borderSerif !== void 0) {
+      view.borderSerif(init.borderSerif);
+    }
+
+    if (init.tickMarkColor !== void 0) {
+      view.tickMarkColor(init.tickMarkColor);
+    }
+    if (init.tickMarkWidth !== void 0) {
+      view.tickMarkWidth(init.tickMarkWidth);
+    }
+    if (init.tickMarkLength !== void 0) {
+      view.tickMarkLength(init.tickMarkLength);
+    }
+    if (init.tickLabelPadding !== void 0) {
+      view.tickLabelPadding(init.tickLabelPadding);
+    }
+    if (init.tickTransition !== void 0) {
+      view.tickTransition(Transition.fromAny(init.tickTransition));
+    }
+
+    if (init.gridLineColor !== void 0) {
+      view.gridLineColor(init.gridLineColor);
+    }
+    if (init.gridLineWidth !== void 0) {
+      view.gridLineWidth(init.gridLineWidth);
+    }
+
+    return view;
   }
 }

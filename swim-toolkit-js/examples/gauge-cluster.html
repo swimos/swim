@@ -14,7 +14,9 @@
 
 const uiView = new swim.UiView(document.getElementById("ui"));
 
-const canvas = uiView.append("canvas");
+const canvas = uiView.append("canvas")
+    .pointerEventsEnabled(true)
+    .touchAction("manipulation");
 
 const gauge = new swim.GaugeView()
     .innerRadius(swim.Length.pct(25))
@@ -24,12 +26,12 @@ const gauge = new swim.GaugeView()
     .title(new swim.TextRunView().text("Gauge").font("20px sans-serif"))
     .font("14px sans-serif")
     .textColor("#4a4a4a")
-    .on("mouseover", function (event) {
+    .on("pointerover", function (event) {
       if (event.targetView instanceof swim.DialView) {
         event.targetView.dialColor("#dddddd", {duration: 200});
       }
     })
-    .on("mouseout", function (event) {
+    .on("pointerout", function (event) {
       if (event.targetView instanceof swim.DialView) {
         event.targetView.dialColor("#cccccc", {duration: 200});
       }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,20 +14,29 @@
 
 import {BoxR2} from "@swim/math";
 import {Transform} from "@swim/transform";
-import {ConstraintStrength} from "@swim/constraint";
-import {ViewScopeDescriptor, ViewScopeConstructor, ViewScope} from "./scope/ViewScope";
-import {Viewport} from "./Viewport";
-import {ViewIdiom} from "./ViewIdiom";
+import {AnimatorContext, Animator} from "@swim/animate";
+import {
+  Constrain,
+  ConstrainVariable,
+  ConstrainBinding,
+  ConstraintRelation,
+  AnyConstraintStrength,
+  ConstraintStrength,
+  Constraint,
+} from "@swim/constraint";
+import {Viewport} from "./viewport/Viewport";
+import {ViewIdiom} from "./viewport/ViewIdiom";
 import {ViewContext} from "./ViewContext";
 import {ViewObserver} from "./ViewObserver";
 import {ViewController} from "./ViewController";
 import {RootView} from "./root/RootView";
-import {LayoutAnchorDescriptor, LayoutAnchorConstructor, LayoutAnchor} from "./layout/LayoutAnchor";
-import {LayoutView} from "./layout/LayoutView";
-import {AnimatedView} from "./animated/AnimatedView";
-import {RenderedViewConstructor, RenderedView} from "./rendered/RenderedView";
+import {ViewScopeDescriptor, ViewScopeConstructor, ViewScope} from "./scope/ViewScope";
+import {ViewAnimatorDescriptor, ViewAnimatorConstructor, ViewAnimator} from "./animator/ViewAnimator";
+import {LayoutContext} from "./layout/LayoutContext";
+import {LayoutAnchor} from "./layout/LayoutAnchor";
 import {GraphicsView} from "./graphics/GraphicsView";
-import {CompositedView} from "./composited/CompositedView";
+import {GraphicsNodeView} from "./graphics/GraphicsNodeView";
+import {GraphicsLeafView} from "./graphics/GraphicsLeafView";
 import {RasterView} from "./raster/RasterView";
 import {ViewNode, NodeView} from "./node/NodeView";
 import {TextView} from "./text/TextView";
@@ -44,12 +53,19 @@ export type ViewFlags = number;
 export interface ViewInit {
 }
 
+export interface ViewConstructor<V extends View = View> {
+  new(): V;
+}
+
 export interface ViewClass {
   /** @hidden */
   _viewScopeDescriptors?: {[scopeName: string]: ViewScopeDescriptor<View, unknown> | undefined};
+
+  /** @hidden */
+  _viewAnimatorDescriptors?: {[animatorName: string]: ViewAnimatorDescriptor<View, unknown> | undefined};
 }
 
-export abstract class View {
+export abstract class View implements AnimatorContext, LayoutContext {
   abstract get viewController(): ViewController | null;
 
   abstract setViewController(viewController: ViewControllerType<this> | null): void;
@@ -163,7 +179,12 @@ export abstract class View {
     });
   }
 
+  abstract get childViewCount(): number;
+
   abstract get childViews(): ReadonlyArray<View>;
+
+  abstract forEachChildView<T, S = unknown>(callback: (this: S, childView: View) => T | void,
+                                            thisArg?: S): T | undefined;
 
   abstract getChildView(key: string): View | null;
 
@@ -184,7 +205,7 @@ export abstract class View {
   }
 
   protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
-    this.requireUpdate(View.NeedsLayout);
+    // hook
   }
 
   protected didInsertChildView(childView: View, targetView: View | null | undefined): void {
@@ -211,7 +232,7 @@ export abstract class View {
   }
 
   protected onRemoveChildView(childView: View): void {
-    this.requireUpdate(View.NeedsLayout);
+    // hook
   }
 
   protected didRemoveChildView(childView: View): void {
@@ -330,7 +351,7 @@ export abstract class View {
   }
 
   requireUpdate(updateFlags: ViewFlags, immediate: boolean = false): void {
-    updateFlags &= ~View.LifecycleMask;
+    updateFlags &= ~View.StatusMask;
     this.willRequireUpdate(updateFlags, immediate);
     const oldUpdateFlags = this.viewFlags;
     const newUpdateFlags = oldUpdateFlags | updateFlags;
@@ -361,7 +382,7 @@ export abstract class View {
 
   protected willRequestUpdate(updateFlags: ViewFlags, immediate: boolean): ViewFlags {
     let additionalFlags = this.modifyUpdate(updateFlags);
-    additionalFlags &= ~View.LifecycleMask;
+    additionalFlags &= ~View.StatusMask;
     if (additionalFlags !== 0) {
       updateFlags |= additionalFlags;
       this.setViewFlags(this.viewFlags | additionalFlags);
@@ -421,6 +442,26 @@ export abstract class View {
     });
   }
 
+  protected willResize(viewContext: ViewContext): void {
+    this.willObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewWillResize !== void 0) {
+        viewObserver.viewWillResize(viewContext, this);
+      }
+    });
+  }
+
+  protected onResize(viewContext: ViewContext): void {
+    // hook
+  }
+
+  protected didResize(viewContext: ViewContext): void {
+    this.didObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewDidResize !== void 0) {
+        viewObserver.viewDidResize(viewContext, this);
+      }
+    });
+  }
+
   protected willScroll(viewContext: ViewContext): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillScroll !== void 0) {
@@ -441,22 +482,62 @@ export abstract class View {
     });
   }
 
-  protected willDerive(viewContext: ViewContext): void {
+  protected willCompute(viewContext: ViewContext): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewWillDerive !== void 0) {
-        viewObserver.viewWillDerive(viewContext, this);
+      if (viewObserver.viewWillCompute !== void 0) {
+        viewObserver.viewWillCompute(viewContext, this);
       }
     });
   }
 
-  protected onDerive(viewContext: ViewContext): void {
+  protected onCompute(viewContext: ViewContext): void {
     // hook
   }
 
-  protected didDerive(viewContext: ViewContext): void {
+  protected didCompute(viewContext: ViewContext): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewDidDerive !== void 0) {
-        viewObserver.viewDidDerive(viewContext, this);
+      if (viewObserver.viewDidCompute !== void 0) {
+        viewObserver.viewDidCompute(viewContext, this);
+      }
+    });
+  }
+
+  protected willAnimate(viewContext: ViewContext): void {
+    this.willObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewWillAnimate !== void 0) {
+        viewObserver.viewWillAnimate(viewContext, this);
+      }
+    });
+  }
+
+  protected onAnimate(viewContext: ViewContext): void {
+    // hook
+  }
+
+  protected didAnimate(viewContext: ViewContext): void {
+    this.didObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewDidAnimate !== void 0) {
+        viewObserver.viewDidAnimate(viewContext, this);
+      }
+    });
+  }
+
+  protected willLayout(viewContext: ViewContext): void {
+    this.willObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewWillLayout !== void 0) {
+        viewObserver.viewWillLayout(viewContext, this);
+      }
+    });
+  }
+
+  protected onLayout(viewContext: ViewContext): void {
+    // hook
+  }
+
+  protected didLayout(viewContext: ViewContext): void {
+    this.didObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewDidLayout !== void 0) {
+        viewObserver.viewDidLayout(viewContext, this);
       }
     });
   }
@@ -531,26 +612,6 @@ export abstract class View {
     });
   }
 
-  protected willLayout(viewContext: ViewContext): void {
-    this.willObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewWillLayout !== void 0) {
-        viewObserver.viewWillLayout(viewContext, this);
-      }
-    });
-  }
-
-  protected onLayout(viewContext: ViewContext): void {
-    // hook
-  }
-
-  protected didLayout(viewContext: ViewContext): void {
-    this.didObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewDidLayout !== void 0) {
-        viewObserver.viewDidLayout(viewContext, this);
-      }
-    });
-  }
-
   /** @hidden */
   protected doDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContext): void {
     const childViews = this.childViews;
@@ -594,18 +655,19 @@ export abstract class View {
 
   abstract hasViewScope(scopeName: string): boolean;
 
-  abstract getViewScope(scopeName: string): ViewScope<View, unknown> | null;
+  abstract getViewScope(scopeName: string): ViewScope<this, unknown> | null;
 
-  abstract setViewScope(scopeName: string, viewScope: ViewScope<View, unknown> | null): void;
+  abstract setViewScope(scopeName: string, viewScope: ViewScope<this, unknown> | null): void;
 
   /** @hidden */
-  getLazyViewScope(scopeName: string): ViewScope<View, unknown> | null {
+  getLazyViewScope(scopeName: string): ViewScope<this, unknown> | null {
     let viewScope = this.getViewScope(scopeName);
     if (viewScope === null) {
       const viewClass = (this as any).__proto__ as ViewClass;
       const descriptor = View.getViewScopeDescriptor(scopeName, viewClass);
       if (descriptor !== null && descriptor.scopeType !== void 0) {
-        viewScope = View.initViewScope(descriptor.scopeType, this, scopeName, descriptor);
+        const ViewScope = descriptor.scopeType;
+        viewScope = new ViewScope<this>(this, scopeName, descriptor);
         this.setViewScope(scopeName, viewScope);
       }
     }
@@ -613,15 +675,144 @@ export abstract class View {
   }
 
   /** @hidden */
-  viewScopeDidSetState<T>(viewScope: ViewScope<View, T>, newState: T | undefined, oldState: T | undefined): void {
-    this.requireUpdate(View.NeedsDerive);
+  viewScopeDidSetAuto<T, U>(viewScope: ViewScope<View, T, U>, auto: boolean): void {
+    if (auto) {
+      this.requireUpdate(View.NeedsCompute);
+    }
+  }
+
+  /** @hidden */
+  viewScopeDidSetState<T, U>(viewScope: ViewScope<View, T, U>, newState: T | undefined, oldState: T | undefined): void {
+    this.requireUpdate(View.NeedsCompute);
+  }
+
+  abstract hasViewAnimator(animatorName: string): boolean;
+
+  abstract getViewAnimator(animatorName: string): ViewAnimator<this, unknown> | null;
+
+  abstract setViewAnimator(animatorName: string, animator: ViewAnimator<this, unknown> | null): void;
+
+  /** @hidden */
+  getLazyViewAnimator(animatorName: string): ViewAnimator<this, unknown> | null {
+    let viewAnimator = this.getViewAnimator(animatorName);
+    if (viewAnimator === null) {
+      const viewClass = (this as any).__proto__ as ViewClass;
+      const descriptor = View.getViewAnimatorDescriptor(animatorName, viewClass);
+      if (descriptor !== null && descriptor.animatorType !== void 0) {
+        const ViewAnimator = descriptor.animatorType;
+        viewAnimator = new ViewAnimator<this>(this, animatorName, descriptor);
+        this.setViewAnimator(animatorName, viewAnimator);
+      }
+    }
+    return viewAnimator;
+  }
+
+  /** @hidden */
+  animatorDidSetAuto(animator: Animator, auto: boolean): void {
+    if (auto && animator instanceof View.Animator) {
+      this.requireUpdate(View.NeedsCompute);
+    }
+  }
+
+  /** @hidden */
+  animate(animator: Animator): void {
+    this.requireUpdate(View.NeedsAnimate);
   }
 
   abstract hasLayoutAnchor(anchorName: string): boolean;
 
-  abstract getLayoutAnchor(anchorName: string): LayoutAnchor<LayoutView> | null;
+  abstract getLayoutAnchor(anchorName: string): LayoutAnchor<this> | null;
 
-  abstract setLayoutAnchor(anchorName: string, layoutAnchor: LayoutAnchor<LayoutView> | null): void;
+  abstract setLayoutAnchor(anchorName: string, layoutAnchor: LayoutAnchor<this> | null): void;
+
+  constraint(lhs: Constrain | number, relation: ConstraintRelation,
+             rhs?: Constrain | number, strength?: AnyConstraintStrength): Constraint {
+    if (typeof lhs === "number") {
+      lhs = Constrain.constant(lhs);
+    }
+    if (typeof rhs === "number") {
+      rhs = Constrain.constant(rhs);
+    }
+    const constrain = rhs !== void 0 ? lhs.minus(rhs) : lhs;
+    if (strength === void 0) {
+      strength = ConstraintStrength.Required;
+    } else {
+      strength = ConstraintStrength.fromAny(strength);
+    }
+    return new Constraint(this, constrain, relation, strength);
+  }
+
+  abstract get constraints(): ReadonlyArray<Constraint>;
+
+  abstract hasConstraint(constraint: Constraint): boolean;
+
+  abstract addConstraint(constraint: Constraint): void;
+
+  abstract removeConstraint(constraint: Constraint): void;
+
+  /** @hidden */
+  activateConstraint(constraint: Constraint): void {
+    const rootView = this.rootView;
+    if (rootView !== null) {
+      rootView.activateConstraint(constraint);
+      this.requireUpdate(View.NeedsLayout);
+    }
+  }
+
+  /** @hidden */
+  deactivateConstraint(constraint: Constraint): void {
+    const rootView = this.rootView;
+    if (rootView !== null) {
+      rootView.deactivateConstraint(constraint);
+      this.requireUpdate(View.NeedsLayout);
+    }
+  }
+
+  constraintVariable(name: string, value?: number, strength?: AnyConstraintStrength): ConstrainVariable {
+    if (value === void 0) {
+      value = 0;
+    }
+    if (strength === void 0) {
+      strength = ConstraintStrength.Strong;
+    } else {
+      strength = ConstraintStrength.fromAny(strength);
+    }
+    return new ConstrainBinding(this, name, value, strength);
+  }
+
+  abstract get constraintVariables(): ReadonlyArray<ConstrainVariable>;
+
+  abstract hasConstraintVariable(constraintVariable: ConstrainVariable): boolean;
+
+  abstract addConstraintVariable(constraintVariable: ConstrainVariable): void;
+
+  abstract removeConstraintVariable(constraintVariable: ConstrainVariable): void;
+
+  /** @hidden */
+  activateConstraintVariable(constraintVariable: ConstrainVariable): void {
+    const rootView = this.rootView;
+    if (rootView !== null) {
+      rootView.activateConstraintVariable(constraintVariable);
+      this.requireUpdate(View.NeedsLayout);
+    }
+  }
+
+  /** @hidden */
+  deactivateConstraintVariable(constraintVariable: ConstrainVariable): void {
+    const rootView = this.rootView;
+    if (rootView !== null) {
+      rootView.deactivateConstraintVariable(constraintVariable);
+      this.requireUpdate(View.NeedsLayout);
+    }
+  }
+
+  /** @hidden */
+  setConstraintVariable(constraintVariable: ConstrainVariable, state: number): void {
+    const rootView = this.rootView;
+    if (rootView !== null) {
+      rootView.setConstraintVariable(constraintVariable, state);
+    }
+  }
 
   get viewport(): Viewport | null {
     const parentView = this.parentView;
@@ -705,7 +896,7 @@ export abstract class View {
                options?: EventListenerOptions | boolean): this;
 
   /** @hidden */
-  static getViewScopeDescriptor(scopeName: string, viewClass: ViewClass | null = null): ViewScopeDescriptor<View, unknown> | null {
+  static getViewScopeDescriptor<V extends View>(scopeName: string, viewClass: ViewClass | null = null): ViewScopeDescriptor<V, unknown> | null {
     if (viewClass === null) {
       viewClass = this.prototype as unknown as ViewClass;
     }
@@ -722,36 +913,18 @@ export abstract class View {
   }
 
   /** @hidden */
-  static initViewScope<V extends View, T>(ViewScope: ViewScopeConstructor, view: V, scopeName: string,
-                                          descriptor: ViewScopeDescriptor<V, T>): ViewScope<V, T> {
-    let value: T | undefined;
-    let inherit: string | null | undefined;
-    if (descriptor.init !== void 0) {
-      value = descriptor.init.call(view)
-    } else {
-      value = descriptor.value;
-    }
-    if (typeof descriptor.inherit === "string") {
-      inherit = descriptor.inherit;
-    } else if (descriptor.inherit === true) {
-      inherit = scopeName;
-    }
-    return new ViewScope<V, T>(view, scopeName, value, inherit);
-  }
-
-  /** @hidden */
-  static decorateViewScope<V extends View, T>(
-      ViewScope: ViewScopeConstructor, descriptor: ViewScopeDescriptor<V, T>,
-      viewClass: ViewClass, scopeName: string): void {
+  static decorateViewScope<V extends View, T, U>(ViewScope: ViewScopeConstructor<T, U>,
+                                                 descriptor: ViewScopeDescriptor<V, T, U> | undefined,
+                                                 viewClass: ViewClass, scopeName: string): void {
     if (!viewClass.hasOwnProperty("_viewScopeDescriptors")) {
       viewClass._viewScopeDescriptors = {};
     }
     viewClass._viewScopeDescriptors![scopeName] = descriptor;
     Object.defineProperty(viewClass, scopeName, {
-      get: function (this: V): ViewScope<V, T> {
-        let viewScope = this.getViewScope(scopeName) as ViewScope<V, T> | null;
+      get: function (this: V): ViewScope<V, T, U> {
+        let viewScope = this.getViewScope(scopeName) as ViewScope<V, T, U> | null;
         if (viewScope === null) {
-          viewScope = View.initViewScope(ViewScope, this, scopeName, descriptor);
+          viewScope = new ViewScope<V>(this, scopeName, descriptor);
           this.setViewScope(scopeName, viewScope);
         }
         return viewScope;
@@ -762,41 +935,35 @@ export abstract class View {
   }
 
   /** @hidden */
-  static initLayoutAnchor<V extends LayoutView>(LayoutAnchor: LayoutAnchorConstructor, view: V, anchorName: string,
-                                                descriptor: LayoutAnchorDescriptor<V> | undefined): LayoutAnchor<V> {
-    let value: number;
-    let strength: ConstraintStrength;
-    if (descriptor !== void 0 && descriptor.value !== void 0) {
-      value = descriptor.value;
-    } else {
-      value = NaN;
+  static getViewAnimatorDescriptor<V extends View>(animatorName: string, viewClass: ViewClass | null): ViewAnimatorDescriptor<V, unknown> | null {
+    while (viewClass !== null) {
+      if (viewClass.hasOwnProperty("_viewAnimatorDescriptors")) {
+        const descriptor = viewClass._viewAnimatorDescriptors![animatorName];
+        if (descriptor !== void 0) {
+          return descriptor;
+        }
+      }
+      viewClass = (viewClass as any).__proto__ as ViewClass | null;
     }
-    if (descriptor !== void 0 && descriptor.strength !== void 0 && descriptor.strength !== null) {
-      strength = ConstraintStrength.fromAny(descriptor.strength);
-    } else {
-      strength = ConstraintStrength.Strong;
-    }
-    const enabled = descriptor !== void 0 ? !!descriptor.enabled : false;
-    const getState = descriptor !== void 0 ? descriptor.get : void 0;
-    const setValue = descriptor !== void 0 ? descriptor.set : void 0;
-    const layoutAnchor =  new LayoutAnchor<V>(view, anchorName, value, strength, enabled);
-    layoutAnchor.getState = getState;
-    layoutAnchor.setValue = setValue;
-    return layoutAnchor;
+    return null;
   }
 
   /** @hidden */
-  static decorateLayoutAnchor<V extends LayoutView>(
-      LayoutAnchor: LayoutAnchorConstructor, descriptor: LayoutAnchorDescriptor<V> | undefined,
-      viewClass: unknown, anchorName: string): void {
-    Object.defineProperty(viewClass, anchorName, {
-      get: function (this: V): LayoutAnchor<V> {
-        let layoutAnchor = this.getLayoutAnchor(anchorName) as LayoutAnchor<V> | null;
-        if (layoutAnchor === null) {
-          layoutAnchor = View.initLayoutAnchor(LayoutAnchor, this, anchorName, descriptor);
-          this.setLayoutAnchor(anchorName, layoutAnchor);
+  static decorateViewAnimator<V extends View, T, U>(ViewAnimator: ViewAnimatorConstructor<T, U>,
+                                                    descriptor: ViewAnimatorDescriptor<V, T, U> | undefined,
+                                                    viewClass: ViewClass, animatorName: string): void {
+    if (!viewClass.hasOwnProperty("_viewAnimatorDescriptors")) {
+      viewClass._viewAnimatorDescriptors = {};
+    }
+    viewClass._viewAnimatorDescriptors![animatorName] = descriptor;
+    Object.defineProperty(viewClass, animatorName, {
+      get: function (this: V): ViewAnimator<V, T, U> {
+        let animator = this.getViewAnimator(animatorName) as ViewAnimator<V, T, U> | null;
+        if (animator === null) {
+          animator = new ViewAnimator<V>(this, animatorName, descriptor);
+          this.setViewAnimator(animatorName, animator);
         }
-        return layoutAnchor;
+        return animator;
       },
       configurable: true,
       enumerable: true,
@@ -851,8 +1018,8 @@ export abstract class View {
     }
   }
 
-  static fromConstructor<C extends ElementViewConstructor | RenderedViewConstructor>(viewConstructor: C): InstanceType<C>;
-  static fromConstructor(viewConstructor: ElementViewConstructor | RenderedViewConstructor): View {
+  static fromConstructor<C extends ElementViewConstructor | ViewConstructor>(viewConstructor: C): InstanceType<C>;
+  static fromConstructor(viewConstructor: ElementViewConstructor | ViewConstructor): View {
     if (View.Element.isConstructor(viewConstructor)) {
       if (viewConstructor.namespace === void 0) {
         return new viewConstructor(document.createElement(viewConstructor.tag));
@@ -873,8 +1040,8 @@ export abstract class View {
   static create(node: Text): TextView;
   static create(node: Node): NodeView;
   static create<C extends ElementViewConstructor>(viewConstructor: C): InstanceType<C>;
-  static create<C extends RenderedViewConstructor>(viewConstructor: C): InstanceType<C>;
-  static create(source: string | Node | ElementViewConstructor | RenderedViewConstructor): View {
+  static create<C extends ViewConstructor>(viewConstructor: C): InstanceType<C>;
+  static create(source: string | Node | ElementViewConstructor | ViewConstructor): View {
     if (typeof source === "string") {
       return View.fromTag(source);
     } else if (source instanceof Node) {
@@ -894,46 +1061,43 @@ export abstract class View {
   /** @hidden */
   static readonly CulledFlag: ViewFlags = 1 << 3;
   /** @hidden */
-  static readonly HoveringFlag: ViewFlags = 1 << 4;
+  static readonly ProcessingFlag: ViewFlags = 1 << 4;
   /** @hidden */
-  static readonly ProcessingFlag: ViewFlags = 1 << 5;
+  static readonly DisplayingFlag: ViewFlags = 1 << 5;
   /** @hidden */
-  static readonly DisplayingFlag: ViewFlags = 1 << 6;
+  static readonly ImmediateFlag: ViewFlags = 1 << 6;
   /** @hidden */
-  static readonly ImmediateFlag: ViewFlags = 1 << 7;
-  /** @hidden */
-  static readonly RemovingFlag: ViewFlags = 1 << 8;
+  static readonly RemovingFlag: ViewFlags = 1 << 7;
   /** @hidden */
   static readonly UpdatingMask: ViewFlags = View.ProcessingFlag
                                           | View.DisplayingFlag;
   /** @hidden */
-  static readonly LifecycleMask: ViewFlags = View.MountedFlag
-                                           | View.PoweredFlag
-                                           | View.HiddenFlag
-                                           | View.CulledFlag
-                                           | View.HoveringFlag
-                                           | View.ProcessingFlag
-                                           | View.DisplayingFlag
-                                           | View.RemovingFlag;
+  static readonly StatusMask: ViewFlags = View.MountedFlag
+                                        | View.PoweredFlag
+                                        | View.HiddenFlag
+                                        | View.CulledFlag
+                                        | View.ProcessingFlag
+                                        | View.DisplayingFlag
+                                        | View.RemovingFlag;
 
-  static readonly NeedsProcess: ViewFlags = 1 << 9;
-  static readonly NeedsResize: ViewFlags = 1 << 10;
-  static readonly NeedsScroll: ViewFlags = 1 << 11;
-  static readonly NeedsDerive: ViewFlags = 1 << 12;
-  static readonly NeedsAnimate: ViewFlags = 1 << 13;
-  static readonly NeedsProject: ViewFlags = 1 << 14;
+  static readonly NeedsProcess: ViewFlags = 1 << 8;
+  static readonly NeedsResize: ViewFlags = 1 << 9;
+  static readonly NeedsScroll: ViewFlags = 1 << 10;
+  static readonly NeedsCompute: ViewFlags = 1 << 11;
+  static readonly NeedsAnimate: ViewFlags = 1 << 12;
+  static readonly NeedsProject: ViewFlags = 1 << 13;
   /** @hidden */
   static readonly ProcessMask: ViewFlags = View.NeedsProcess
                                          | View.NeedsResize
                                          | View.NeedsScroll
-                                         | View.NeedsDerive
+                                         | View.NeedsCompute
                                          | View.NeedsAnimate
                                          | View.NeedsProject;
 
-  static readonly NeedsDisplay: ViewFlags = 1 << 15;
-  static readonly NeedsLayout: ViewFlags = 1 << 16;
-  static readonly NeedsRender: ViewFlags = 1 << 17;
-  static readonly NeedsComposite: ViewFlags = 1 << 18;
+  static readonly NeedsDisplay: ViewFlags = 1 << 14;
+  static readonly NeedsLayout: ViewFlags = 1 << 15;
+  static readonly NeedsRender: ViewFlags = 1 << 16;
+  static readonly NeedsComposite: ViewFlags = 1 << 17;
   /** @hidden */
   static readonly DisplayMask: ViewFlags = View.NeedsDisplay
                                          | View.NeedsLayout
@@ -945,23 +1109,21 @@ export abstract class View {
                                         | View.DisplayMask;
 
   /** @hidden */
-  static readonly ViewFlagShift: ViewFlags = 19;
+  static readonly ViewFlagShift: ViewFlags = 24;
   /** @hidden */
   static readonly ViewFlagMask: ViewFlags = (1 << View.ViewFlagShift) - 1;
 
   // Forward type declarations
   /** @hidden */
+  static Animator: typeof ViewAnimator; // defined by ViewAnimator
+  /** @hidden */
   static Root: typeof RootView; // defined by RootView
-  /** @hidden */
-  static Layout: typeof LayoutView; // defined by LayoutView
-  /** @hidden */
-  static Animated: typeof AnimatedView; // defined by AnimatedView
-  /** @hidden */
-  static Rendered: typeof RenderedView; // defined by RenderedView
   /** @hidden */
   static Graphics: typeof GraphicsView; // defined by GraphicsView
   /** @hidden */
-  static Composited: typeof CompositedView; // defined by CompositedView
+  static GraphicsNode: typeof GraphicsNodeView; // defined by GraphicsNodeView
+  /** @hidden */
+  static GraphicsLeaf: typeof GraphicsLeafView; // defined by GraphicsLeafView
   /** @hidden */
   static Raster: typeof RasterView; // defined by RasterView
   /** @hidden */

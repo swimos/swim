@@ -4,7 +4,7 @@
   "description": "Scale types that map numeric and temporal input domains to interpolated output ranges, with support for continuous domain clamping, domain solving, range unscaling, and interpolation between scales",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/scale",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2020 SWIM.AI inc.",
+  "copyright": "2015-2020 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-scale.js",

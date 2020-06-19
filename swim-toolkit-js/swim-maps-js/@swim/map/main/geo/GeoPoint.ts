@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,10 @@ export class GeoPoint implements HashCode, Debug {
   constructor(lng: number, lat: number) {
     this._lng = lng;
     this._lat = lat;
+  }
+
+  isDefined(): boolean {
+    return isFinite(this._lng) && isFinite(this._lat);
   }
 
   get lng(): number {
@@ -88,7 +92,6 @@ export class GeoPoint implements HashCode, Debug {
   private static _hashSeed?: number;
 
   private static _origin?: GeoPoint;
-
   static origin(): GeoPoint {
     if (GeoPoint._origin === void 0) {
       GeoPoint._origin = new GeoPoint(0, 0);

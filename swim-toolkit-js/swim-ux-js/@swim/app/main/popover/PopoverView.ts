@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,8 +23,7 @@ import {
   View,
   ModalState,
   Modal,
-  MemberAnimator,
-  RenderedViewObserver,
+  ViewAnimator,
   HtmlView,
   HtmlViewObserver,
 } from "@swim/view";
@@ -33,7 +32,7 @@ import {PopoverViewController} from "./PopoverViewController";
 
 export type PopoverPlacement = "none" | "above" | "below" | "over" | "top" | "bottom" | "right" | "left";
 
-export class PopoverView extends HtmlView implements Modal, HtmlViewObserver, RenderedViewObserver {
+export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   /** @hidden */
   _source: View | null;
   /** @hidden */
@@ -57,6 +56,7 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver, Re
     this._placement = ["top", "bottom", "right", "left"];
     this._placementFrame = null;
     this._popoverTransition = Transition.duration(250, Ease.cubicOut);
+    this.backgroundColor.didUpdate = this.didUpdateBackgroundColor.bind(this);
 
     const arrow = this.createArrow();
     if (arrow !== null) {
@@ -79,11 +79,11 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver, Re
     return this._viewController;
   }
 
-  @MemberAnimator(Length)
-  arrowWidth: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length)
+  arrowWidth: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length)
-  arrowHeight: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length)
+  arrowHeight: ViewAnimator<this, Length, AnyLength>;
 
   get source(): View | null {
     return this._source;
@@ -328,11 +328,12 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver, Re
     this.place();
   }
 
-  place(): PopoverPlacement {
+  place(force: boolean = true): PopoverPlacement {
     const source = this._source;
     const oldSourceFrame = this._sourceFrame;
     const newSourceFrame = source !== null ? source.popoverFrame : null;
-    if (newSourceFrame !== null && this._placement.length !== 0 && !newSourceFrame.equals(oldSourceFrame)) {
+    if (newSourceFrame !== null && this._placement.length !== 0 &&
+        (force || !newSourceFrame.equals(oldSourceFrame))) {
       const placement = this.placePopover(source!, newSourceFrame);
       const arrow = this.getChildView("arrow");
       if (arrow instanceof HtmlView) {
@@ -435,68 +436,68 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver, Re
     let right: number | undefined;
     let bottom: number | undefined;
     if (placement === "above") {
-      left = placementLeft;
-      top = placementTop;
-      right = (placementFrame !== null ? placementFrame.width : window.innerWidth) - placementRight;
-      maxWidth = Math.max(0, placementRight - placementLeft);
-      maxHeight = Math.max(0, placementBottom - placementTop);
+      left = Math.round(placementLeft);
+      top = Math.round(placementTop);
+      right = Math.round((placementFrame !== null ? placementFrame.width : window.innerWidth) - placementRight);
+      maxWidth = Math.round(Math.max(0, placementRight - placementLeft));
+      maxHeight = Math.round(Math.max(0, placementBottom - placementTop));
     } else if (placement === "below") {
-      left = placementLeft;
-      top = placementBottom - popoverHeight;
-      right = placementRight - (placementFrame !== null ? placementFrame.width : window.innerWidth);
-      maxWidth = Math.max(0, placementRight - placementLeft);
-      maxHeight = Math.max(0, placementBottom - placementTop);
+      left = Math.round(placementLeft);
+      top = Math.round(placementBottom - popoverHeight);
+      right = Math.round(placementRight - (placementFrame !== null ? placementFrame.width : window.innerWidth));
+      maxWidth = Math.round(Math.max(0, placementRight - placementLeft));
+      maxHeight = Math.round(Math.max(0, placementBottom - placementTop));
     } else if (placement === "over") {
-      left = placementLeft;
-      top = placementTop;
-      right = placementRight - (placementFrame !== null ? placementFrame.width : window.innerWidth);
-      bottom = placementBottom - (placementFrame !== null ? placementFrame.height : window.innerHeight);
-      maxWidth = Math.max(0, placementRight - placementLeft);
-      maxHeight = Math.max(0, placementBottom - placementTop);
+      left = Math.round(placementLeft);
+      top = Math.round(placementTop);
+      right = Math.round(placementRight - (placementFrame !== null ? placementFrame.width : window.innerWidth));
+      bottom = Math.round(placementBottom - (placementFrame !== null ? placementFrame.height : window.innerHeight));
+      maxWidth = Math.round(Math.max(0, placementRight - placementLeft));
+      maxHeight = Math.round(Math.max(0, placementBottom - placementTop));
     } else if (placement === "top") {
-      if (sourceX - popoverWidth/2 <= placementLeft) {
-        left = placementLeft;
-      } else if (sourceX + popoverWidth/2 >= placementRight) {
-        left = placementRight - popoverWidth;
+      if (sourceX - popoverWidth / 2 <= placementLeft) {
+        left = Math.round(placementLeft);
+      } else if (sourceX + popoverWidth / 2 >= placementRight) {
+        left = Math.round(placementRight - popoverWidth);
       } else {
-        left = sourceX - popoverWidth/2;
+        left = Math.round(sourceX - popoverWidth / 2);
       }
-      top = Math.max(placementTop, sourceTop - (popoverHeight + arrowHeight));
-      maxWidth = Math.max(0, placementRight - placementLeft);
-      maxHeight = Math.max(0, sourceBottom - placementTop);
+      top = Math.round(Math.max(placementTop, sourceTop - (popoverHeight + arrowHeight)));
+      maxWidth = Math.round(Math.max(0, placementRight - placementLeft));
+      maxHeight = Math.round(Math.max(0, sourceBottom - placementTop));
     } else if (placement === "bottom") {
-      if (sourceX - popoverWidth/2 <= placementLeft) {
-        left = placementLeft;
-      } else if (sourceX + popoverWidth/2 >= placementRight) {
-        left = placementRight - popoverWidth;
+      if (sourceX - popoverWidth / 2 <= placementLeft) {
+        left = Math.round(placementLeft);
+      } else if (sourceX + popoverWidth / 2 >= placementRight) {
+        left = Math.round(placementRight - popoverWidth);
       } else {
-        left = sourceX - popoverWidth/2;
+        left = Math.round(sourceX - popoverWidth / 2);
       }
-      top = Math.max(placementTop, sourceBottom + arrowHeight);
-      maxWidth = Math.max(0, placementRight - placementLeft);
-      maxHeight = Math.max(0, placementBottom - sourceTop);
+      top = Math.round(Math.max(placementTop, sourceBottom + arrowHeight));
+      maxWidth = Math.round(Math.max(0, placementRight - placementLeft));
+      maxHeight = Math.round(Math.max(0, placementBottom - sourceTop));
     } else if (placement === "left") {
-      left = Math.max(placementLeft, sourceLeft - (popoverWidth + arrowHeight));
-      if (sourceY - popoverHeight/2 <= placementTop) {
-        top = placementTop;
-      } else if (sourceY + popoverHeight/2 >= placementBottom) {
-        top = placementBottom - popoverHeight;
+      left = Math.round(Math.max(placementLeft, sourceLeft - (popoverWidth + arrowHeight)));
+      if (sourceY - popoverHeight / 2 <= placementTop) {
+        top = Math.round(placementTop);
+      } else if (sourceY + popoverHeight / 2 >= placementBottom) {
+        top = Math.round(placementBottom - popoverHeight);
       } else {
-        top = sourceY - popoverHeight/2;
+        top = Math.round(sourceY - popoverHeight / 2);
       }
-      maxWidth = Math.max(0, sourceRight - placementLeft);
-      maxHeight = Math.max(0, placementBottom - placementTop);
+      maxWidth = Math.round(Math.max(0, sourceRight - placementLeft));
+      maxHeight = Math.round(Math.max(0, placementBottom - placementTop));
     } else if (placement === "right") {
-      left = Math.max(placementLeft, sourceRight + arrowHeight);
-      if (sourceY - popoverHeight/2 <= placementTop) {
-        top = placementTop;
-      } else if (sourceY + popoverHeight/2 >= placementBottom) {
-        top = placementBottom - popoverHeight;
+      left = Math.round(Math.max(placementLeft, sourceRight + arrowHeight));
+      if (sourceY - popoverHeight / 2 <= placementTop) {
+        top = Math.round(placementTop);
+      } else if (sourceY + popoverHeight / 2 >= placementBottom) {
+        top = Math.round(placementBottom - popoverHeight);
       } else {
-        top = sourceY - popoverHeight/2;
+        top = Math.round(sourceY - popoverHeight / 2);
       }
-      maxWidth = Math.max(0, placementRight - sourceLeft);
-      maxHeight = Math.max(0, placementBottom - placementTop);
+      maxWidth = Math.round(Math.max(0, placementRight - sourceLeft));
+      maxHeight = Math.round(Math.max(0, placementBottom - placementTop));
     }
 
     if (placement !== "none" && (left !== node.offsetLeft || top !== node.offsetTop
@@ -564,25 +565,28 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver, Re
     const sourceTop = sourceFrame.top - window.pageYOffset - parentTop;
     const sourceWidth = sourceFrame.width;
     const sourceHeight = sourceFrame.height;
-    const sourceX = sourceLeft + sourceWidth/2;
-    const sourceY = sourceTop + sourceHeight/2;
+    const sourceX = sourceLeft + sourceWidth / 2;
+    const sourceY = sourceTop + sourceHeight / 2;
 
     const offsetLeft = node.offsetLeft;
     const offsetRight = offsetLeft + node.clientWidth;
     const offsetTop = node.offsetTop;
     const offsetBottom = offsetTop + node.clientHeight;
 
-    const backgroundColor = this.backgroundColor() || Color.transparent();
+    let backgroundColor = this.backgroundColor.value;
+    if (backgroundColor === void 0) {
+      backgroundColor = Color.transparent();
+    }
     const borderRadius = this.borderRadius();
     const radius = borderRadius instanceof Length ? borderRadius.pxValue() : 0;
 
     const arrowWidth = this.arrowWidth.value!.pxValue();
     const arrowHeight = this.arrowHeight.value!.pxValue();
 
-    const arrowXMin = offsetLeft + radius + arrowWidth/2;
-    const arrowXMax = offsetRight - radius - arrowWidth/2;
-    const arrowYMin = offsetTop + radius + arrowWidth/2;
-    const arrowYMax = offsetBottom - radius - arrowWidth/2;
+    const arrowXMin = offsetLeft + radius + arrowWidth / 2;
+    const arrowXMax = offsetRight - radius - arrowWidth / 2;
+    const arrowYMin = offsetTop + radius + arrowWidth / 2;
+    const arrowYMax = offsetBottom - radius - arrowWidth / 2;
 
     arrowNode.style.removeProperty("top");
     arrowNode.style.removeProperty("right");
@@ -600,74 +604,79 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver, Re
     arrowNode.style.removeProperty("border-bottom-width");
     arrowNode.style.removeProperty("border-bottom-style");
     arrowNode.style.removeProperty("border-bottom-color");
+    arrowNode.style.setProperty("z-index", "100");
 
     if (placement === "none" || placement === "above" || placement === "below" || placement === "over") {
       // hide arrow
       arrowNode.style.setProperty("display", "none");
-    } else if (offsetTop - arrowHeight >= sourceY // arrow tip below source center
+    } else if (Math.round(sourceY) <= Math.round(offsetTop - arrowHeight) // arrow tip below source center
         && arrowXMin <= sourceX && sourceX <= arrowXMax) { // arrow base on top popover edge
       // top arrow
       arrowNode.style.setProperty("display", "block");
-      arrowNode.style.setProperty("top", (-arrowHeight) + "px");
-      arrowNode.style.setProperty("left", (sourceX - offsetLeft - arrowWidth/2) + "px");
-      arrowNode.style.setProperty("border-left-width", (arrowWidth/2) + "px");
+      arrowNode.style.setProperty("top", Math.round(-arrowHeight) + "px");
+      arrowNode.style.setProperty("left", Math.round(sourceX - offsetLeft - arrowWidth / 2) + "px");
+      arrowNode.style.setProperty("border-left-width", Math.round(arrowWidth / 2) + "px");
       arrowNode.style.setProperty("border-left-style", "solid");
       arrowNode.style.setProperty("border-left-color", "transparent");
-      arrowNode.style.setProperty("border-right-width", (arrowWidth/2) + "px");
+      arrowNode.style.setProperty("border-right-width", Math.round(arrowWidth / 2) + "px");
       arrowNode.style.setProperty("border-right-style", "solid");
       arrowNode.style.setProperty("border-right-color", "transparent");
-      arrowNode.style.setProperty("border-bottom-width", arrowHeight + "px");
+      arrowNode.style.setProperty("border-bottom-width", Math.round(arrowHeight) + "px");
       arrowNode.style.setProperty("border-bottom-style", "solid");
       arrowNode.style.setProperty("border-bottom-color", backgroundColor.toString());
-    } else if (offsetBottom + arrowHeight <= sourceY // arrow tip above source center
+    } else if (Math.round(offsetBottom + arrowHeight) <= Math.round(sourceY) // arrow tip above source center
         && arrowXMin <= sourceX && sourceX <= arrowXMax) { // arrow base on bottom popover edge
       // bottom arrow
       arrowNode.style.setProperty("display", "block");
-      arrowNode.style.setProperty("bottom", (-arrowHeight) + "px");
-      arrowNode.style.setProperty("left", (sourceX - offsetLeft - arrowWidth/2) + "px");
-      arrowNode.style.setProperty("border-left-width", (arrowWidth/2) + "px");
+      arrowNode.style.setProperty("bottom", Math.round(-arrowHeight) + "px");
+      arrowNode.style.setProperty("left", Math.round(sourceX - offsetLeft - arrowWidth / 2) + "px");
+      arrowNode.style.setProperty("border-left-width", Math.round(arrowWidth / 2) + "px");
       arrowNode.style.setProperty("border-left-style", "solid");
       arrowNode.style.setProperty("border-left-color", "transparent");
-      arrowNode.style.setProperty("border-right-width", (arrowWidth/2) + "px");
+      arrowNode.style.setProperty("border-right-width", Math.round(arrowWidth / 2) + "px");
       arrowNode.style.setProperty("border-right-style", "solid");
       arrowNode.style.setProperty("border-right-color", "transparent");
-      arrowNode.style.setProperty("border-top-width", arrowHeight + "px");
+      arrowNode.style.setProperty("border-top-width", Math.round(arrowHeight) + "px");
       arrowNode.style.setProperty("border-top-style", "solid");
       arrowNode.style.setProperty("border-top-color", backgroundColor.toString());
-    } else if (offsetLeft - arrowHeight >= sourceX // arrow tip right of source center
+    } else if (Math.round(sourceX) <= Math.round(offsetLeft - arrowHeight) // arrow tip right of source center
         && arrowYMin <= sourceY && sourceY <= arrowYMax) { // arrow base on left popover edge
       // left arrow
       arrowNode.style.setProperty("display", "block");
-      arrowNode.style.setProperty("left", (-arrowHeight) + "px");
-      arrowNode.style.setProperty("top", (sourceY - offsetTop - arrowWidth/2) + "px");
-      arrowNode.style.setProperty("border-top-width", (arrowWidth/2) + "px");
+      arrowNode.style.setProperty("left", Math.round(-arrowHeight) + "px");
+      arrowNode.style.setProperty("top", Math.round(sourceY - offsetTop - arrowWidth / 2) + "px");
+      arrowNode.style.setProperty("border-top-width", Math.round(arrowWidth / 2) + "px");
       arrowNode.style.setProperty("border-top-style", "solid");
       arrowNode.style.setProperty("border-top-color", "transparent");
-      arrowNode.style.setProperty("border-bottom-width", (arrowWidth/2) + "px");
+      arrowNode.style.setProperty("border-bottom-width", Math.round(arrowWidth / 2) + "px");
       arrowNode.style.setProperty("border-bottom-style", "solid");
       arrowNode.style.setProperty("border-bottom-color", "transparent");
-      arrowNode.style.setProperty("border-right-width", arrowHeight + "px");
+      arrowNode.style.setProperty("border-right-width", Math.round(arrowHeight) + "px");
       arrowNode.style.setProperty("border-right-style", "solid");
       arrowNode.style.setProperty("border-right-color", backgroundColor.toString());
-    } else if (offsetRight + arrowHeight <= sourceX // arrow tip left of source center
+    } else if (Math.round(offsetRight + arrowHeight) <= Math.round(sourceX) // arrow tip left of source center
         && arrowYMin <= sourceY && sourceY <= arrowYMax) { // arrow base on right popover edge
       // right arrow
       arrowNode.style.setProperty("display", "block");
-      arrowNode.style.setProperty("right", (-arrowHeight) + "px");
-      arrowNode.style.setProperty("top", (sourceY - offsetTop - arrowWidth/2) + "px");
-      arrowNode.style.setProperty("border-top-width", (arrowWidth/2) + "px");
+      arrowNode.style.setProperty("right", Math.round(-arrowHeight) + "px");
+      arrowNode.style.setProperty("top", Math.round(sourceY - offsetTop - arrowWidth / 2) + "px");
+      arrowNode.style.setProperty("border-top-width", Math.round(arrowWidth / 2) + "px");
       arrowNode.style.setProperty("border-top-style", "solid");
       arrowNode.style.setProperty("border-top-color", "transparent");
-      arrowNode.style.setProperty("border-bottom-width", (arrowWidth/2) + "px");
+      arrowNode.style.setProperty("border-bottom-width", Math.round(arrowWidth / 2) + "px");
       arrowNode.style.setProperty("border-bottom-style", "solid");
       arrowNode.style.setProperty("border-bottom-color", "transparent");
-      arrowNode.style.setProperty("border-left-width", arrowHeight + "px");
+      arrowNode.style.setProperty("border-left-width", Math.round(arrowHeight) + "px");
       arrowNode.style.setProperty("border-left-style", "solid");
       arrowNode.style.setProperty("border-left-color", backgroundColor.toString());
     } else {
       // no arrow
       arrowNode.style.setProperty("display", "none");
     }
+  }
+
+  protected didUpdateBackgroundColor(backgroundColor: Color | undefined): void {
+    this.place(true);
   }
 
   viewDidMount(view: View): void {
@@ -678,11 +687,23 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver, Re
     this.place();
   }
 
+  viewDidResize(viewContext: ViewContext, view: View): void {
+    this.place();
+  }
+
   viewDidScroll(viewContext: ViewContext, view: View): void {
     this.place();
   }
 
+  viewDidAnimate(viewContext: ViewContext, view: View): void {
+    this.place();
+  }
+
   viewDidLayout(viewContext: ViewContext, view: View): void {
+    this.place();
+  }
+
+  viewDidProject(viewContext: ViewContext, view: View): void {
     this.place();
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -113,6 +113,12 @@ export class Transition<T> {
     } else {
       return Transition.from(this._duration, this._ease, this._interpolator, observers);
     }
+  }
+
+  observer(observer: TransitionObserver<T>): Transition<T> {
+    const observers = this._observers !== void 0 ? this._observers.slice(0) : [];
+    observers.push(observer);
+    return Transition.from(this._duration, this._ease, this._interpolator, observers);
   }
 
   onBegin(onBegin: TransitionBegin<T>): Transition<T> {

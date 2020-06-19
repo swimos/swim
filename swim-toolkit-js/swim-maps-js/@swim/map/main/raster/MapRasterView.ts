@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,15 +22,14 @@ import {
   CanvasRenderer,
   WebGLRenderer,
 } from "@swim/render";
-import {ViewFlags, View, MemberAnimator, RenderedView} from "@swim/view";
-import {MapViewContext} from "../MapViewContext";
-import {MapGraphicsView} from "../graphics/MapGraphicsView";
-import {CompositedMapViewContext} from "../composited/CompositedMapViewContext";
-import {CompositedMapView} from "../composited/CompositedMapView";
+import {ViewFlags, View, ViewAnimator, GraphicsView} from "@swim/view";
+import {MapGraphicsViewContext} from "../graphics/MapGraphicsViewContext";
+import {MapGraphicsNodeView} from "../graphics/MapGraphicsNodeView";
+import {MapRasterViewContext} from "./MapRasterViewContext";
 import {MapRasterViewObserver} from "./MapRasterViewObserver";
 import {MapRasterViewController} from "./MapRasterViewController";
 
-export class MapRasterView extends MapGraphicsView implements CompositedMapView {
+export class MapRasterView extends MapGraphicsNodeView {
   /** @hidden */
   _canvas: HTMLCanvasElement;
   /** @hidden */
@@ -42,18 +41,18 @@ export class MapRasterView extends MapGraphicsView implements CompositedMapView 
     super();
     this._canvas = this.createCanvas();
     this._renderer = void 0;
-    this._rasterFrame = BoxR2.empty();
+    this._rasterFrame = BoxR2.undefined();
   }
 
   get viewController(): MapRasterViewController | null {
     return this._viewController;
   }
 
-  @MemberAnimator(Number, {value: 1})
-  opacity: MemberAnimator<this, number>;
+  @ViewAnimator(Number, {value: 1})
+  opacity: ViewAnimator<this, number>;
 
-  @MemberAnimator(String, {value: "source-over"})
-  compositeOperation: MemberAnimator<this, CanvasCompositeOperation>;
+  @ViewAnimator(String, {value: "source-over"})
+  compositeOperation: ViewAnimator<this, CanvasCompositeOperation>;
 
   get pixelRatio(): number {
     return window.devicePixelRatio || 1;
@@ -65,7 +64,7 @@ export class MapRasterView extends MapGraphicsView implements CompositedMapView 
 
   get compositor(): Renderer | null {
     const parentView = this.parentView;
-    return RenderedView.is(parentView) ? parentView.renderer : null;
+    return parentView instanceof GraphicsView ? parentView.renderer : null;
   }
 
   get renderer(): Renderer | null {
@@ -119,18 +118,18 @@ export class MapRasterView extends MapGraphicsView implements CompositedMapView 
     return additionalFlags;
   }
 
-  cascadeProcess(processFlags: ViewFlags, viewContext: MapViewContext): void {
+  cascadeProcess(processFlags: ViewFlags, viewContext: MapGraphicsViewContext): void {
     viewContext = this.rasterViewContext(viewContext);
     super.cascadeProcess(processFlags, viewContext);
   }
 
-  cascadeDisplay(displayFlags: ViewFlags, viewContext: MapViewContext): void {
+  cascadeDisplay(displayFlags: ViewFlags, viewContext: MapGraphicsViewContext): void {
     viewContext = this.rasterViewContext(viewContext);
     super.cascadeDisplay(displayFlags, viewContext);
   }
 
   /** @hidden */
-  protected doDisplay(displayFlags: ViewFlags, viewContext: CompositedMapViewContext): void {
+  protected doDisplay(displayFlags: ViewFlags, viewContext: MapRasterViewContext): void {
     let cascadeFlags = displayFlags;
     this.willDisplay(viewContext);
     this._viewFlags |= View.DisplayingFlag;
@@ -179,18 +178,18 @@ export class MapRasterView extends MapGraphicsView implements CompositedMapView 
     }
   }
 
-  protected onLayout(viewContext: CompositedMapViewContext): void {
+  protected onLayout(viewContext: MapRasterViewContext): void {
     super.onLayout(viewContext);
     this.resizeCanvas(this._canvas);
     this.resetRenderer();
   }
 
-  protected onRender(viewContext: CompositedMapViewContext): void {
+  protected onRender(viewContext: MapRasterViewContext): void {
     super.onRender(viewContext);
     this.clearCanvas();
   }
 
-  protected willComposite(viewContext: CompositedMapViewContext): void {
+  protected willComposite(viewContext: MapRasterViewContext): void {
     this.willObserve(function (viewObserver: MapRasterViewObserver): void {
       if (viewObserver.viewWillRender !== void 0) {
         viewObserver.viewWillRender(viewContext, this);
@@ -198,11 +197,11 @@ export class MapRasterView extends MapGraphicsView implements CompositedMapView 
     });
   }
 
-  protected onComposite(viewContext: CompositedMapViewContext): void {
+  protected onComposite(viewContext: MapRasterViewContext): void {
     this.compositeImage(viewContext);
   }
 
-  protected didComposite(viewContext: CompositedMapViewContext): void {
+  protected didComposite(viewContext: MapRasterViewContext): void {
     this.didObserve(function (viewObserver: MapRasterViewObserver): void {
       if (viewObserver.viewDidRender !== void 0) {
         viewObserver.viewDidRender(viewContext, this);
@@ -210,11 +209,11 @@ export class MapRasterView extends MapGraphicsView implements CompositedMapView 
     });
   }
 
-  childViewContext(childView: View, viewContext: CompositedMapViewContext): CompositedMapViewContext {
+  childViewContext(childView: View, viewContext: MapRasterViewContext): MapRasterViewContext {
     return viewContext;
   }
 
-  rasterViewContext(viewContext: MapViewContext): CompositedMapViewContext {
+  rasterViewContext(viewContext: MapGraphicsViewContext): MapRasterViewContext {
     const rasterViewContext = Object.create(viewContext);
     rasterViewContext.compositor = viewContext.renderer;
     rasterViewContext.renderer = this.renderer;
@@ -226,7 +225,7 @@ export class MapRasterView extends MapGraphicsView implements CompositedMapView 
     let viewFrame = this._viewFrame;
     if (viewFrame === void 0) {
       const parentView = this._parentView;
-      viewFrame = RenderedView.is(parentView) ? parentView.viewFrame : BoxR2.empty();
+      viewFrame = parentView instanceof GraphicsView ? parentView.viewFrame : BoxR2.undefined();
     }
     return viewFrame;
   }
@@ -243,17 +242,17 @@ export class MapRasterView extends MapGraphicsView implements CompositedMapView 
     }
   }
 
-  hitTest(x: number, y: number, viewContext: CompositedMapViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext: MapRasterViewContext): GraphicsView | null {
     const rasterViewContext = this.rasterViewContext(viewContext);
     const compositeFrame = this.compositeFrame;
     x -= Math.floor(compositeFrame.xMin);
     y -= Math.floor(compositeFrame.yMin);
 
-    let hit: RenderedView | null = null;
+    let hit: GraphicsView | null = null;
     const childViews = this._childViews;
     for (let i = childViews.length - 1; i >= 0; i -= 1) {
       const childView = childViews[i];
-      if (RenderedView.is(childView) && !childView.isHidden() && !childView.isCulled()) {
+      if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isCulled()) {
         const hitBounds = childView.hitBounds;
         if (hitBounds.contains(x, y)) {
           hit = childView.hitTest(x, y, rasterViewContext);
@@ -319,7 +318,7 @@ export class MapRasterView extends MapGraphicsView implements CompositedMapView 
     }
   }
 
-  protected compositeImage(viewContext: CompositedMapViewContext): void {
+  protected compositeImage(viewContext: MapRasterViewContext): void {
     const compositor = viewContext.compositor;
     const renderer = viewContext.renderer;
     if (compositor instanceof CanvasRenderer && renderer instanceof CanvasRenderer) {

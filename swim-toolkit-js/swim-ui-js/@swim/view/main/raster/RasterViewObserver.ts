@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,48 +13,51 @@
 // limitations under the License.
 
 import {GraphicsViewObserver} from "../graphics/GraphicsViewObserver";
-import {CompositedViewContext} from "../composited/CompositedViewContext";
-import {CompositedViewObserver} from "../composited/CompositedViewObserver";
+import {RasterViewContext} from "./RasterViewContext";
 import {RasterView} from "./RasterView";
 
-export interface RasterViewObserver<V extends RasterView = RasterView> extends GraphicsViewObserver<V>, CompositedViewObserver<V> {
-  viewWillProcess?(viewContext: CompositedViewContext, view: V): void;
+export interface RasterViewObserver<V extends RasterView = RasterView> extends GraphicsViewObserver<V> {
+  viewWillProcess?(viewContext: RasterViewContext, view: V): void;
 
-  viewDidProcess?(viewContext: CompositedViewContext, view: V): void;
+  viewDidProcess?(viewContext: RasterViewContext, view: V): void;
 
-  viewWillScroll?(viewContext: CompositedViewContext, view: V): void;
+  viewWillResize?(viewContext: RasterViewContext, view: V): void;
 
-  viewDidScroll?(viewContext: CompositedViewContext, view: V): void;
+  viewDidResize?(viewContext: RasterViewContext, view: V): void;
 
-  viewWillDerive?(viewContext: CompositedViewContext, view: V): void;
+  viewWillScroll?(viewContext: RasterViewContext, view: V): void;
 
-  viewDidDerive?(viewContext: CompositedViewContext, view: V): void;
+  viewDidScroll?(viewContext: RasterViewContext, view: V): void;
 
-  viewWillAnimate?(viewContext: CompositedViewContext, view: V): void;
+  viewWillCompute?(viewContext: RasterViewContext, view: V): void;
 
-  viewDidAnimate?(viewContext: CompositedViewContext, view: V): void;
+  viewDidCompute?(viewContext: RasterViewContext, view: V): void;
 
-  viewWillProcessChildViews?(viewContext: CompositedViewContext, view: V): void;
+  viewWillAnimate?(viewContext: RasterViewContext, view: V): void;
 
-  viewDidProcessChildViews?(viewContext: CompositedViewContext, view: V): void;
+  viewDidAnimate?(viewContext: RasterViewContext, view: V): void;
 
-  viewWillDisplay?(viewContext: CompositedViewContext, view: V): void;
+  viewWillProcessChildViews?(viewContext: RasterViewContext, view: V): void;
 
-  viewDidDisplay?(viewContext: CompositedViewContext, view: V): void;
+  viewDidProcessChildViews?(viewContext: RasterViewContext, view: V): void;
 
-  viewWillLayout?(viewContext: CompositedViewContext, view: V): void;
+  viewWillDisplay?(viewContext: RasterViewContext, view: V): void;
 
-  viewDidLayout?(viewContext: CompositedViewContext, view: V): void;
+  viewDidDisplay?(viewContext: RasterViewContext, view: V): void;
 
-  viewWillRender?(viewContext: CompositedViewContext, view: V): void;
+  viewWillLayout?(viewContext: RasterViewContext, view: V): void;
 
-  viewDidRender?(viewContext: CompositedViewContext, view: V): void;
+  viewDidLayout?(viewContext: RasterViewContext, view: V): void;
 
-  viewWillComposite?(viewContext: CompositedViewContext, view: V): void;
+  viewWillRender?(viewContext: RasterViewContext, view: V): void;
 
-  viewDidComposite?(viewContext: CompositedViewContext, view: V): void;
+  viewDidRender?(viewContext: RasterViewContext, view: V): void;
 
-  viewWillDisplayChildViews?(viewContext: CompositedViewContext, view: V): void;
+  viewWillComposite?(viewContext: RasterViewContext, view: V): void;
 
-  viewDidDisplayChildViews?(viewContext: CompositedViewContext, view: V): void;
+  viewDidComposite?(viewContext: RasterViewContext, view: V): void;
+
+  viewWillDisplayChildViews?(viewContext: RasterViewContext, view: V): void;
+
+  viewDidDisplayChildViews?(viewContext: RasterViewContext, view: V): void;
 }

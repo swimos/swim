@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import {BoxR2} from "@swim/math";
-import {Animator} from "@swim/animate";
 import {AttributeString, StyleString, StyledElement} from "@swim/style";
 import {View} from "../View";
 import {NodeView} from "../node/NodeView";
@@ -40,9 +39,9 @@ export interface ElementViewConstructor<E extends Element = Element, V extends E
 
 export class ElementView extends NodeView {
   /** @hidden */
-  _attributeAnimators?: {[animatorName: string]: Animator | undefined};
+  _attributeAnimators?: {[animatorName: string]: AttributeAnimator<ElementView, unknown> | undefined};
   /** @hidden */
-  _styleAnimators?: {[animatorName: string]: Animator | undefined};
+  _styleAnimators?: {[animatorName: string]: StyleAnimator<ElementView, unknown> | undefined};
 
   constructor(node: Element) {
     super(node);
@@ -97,19 +96,25 @@ export class ElementView extends NodeView {
     return attributeAnimators !== void 0 && attributeAnimators[animatorName] !== void 0;
   }
 
-  getAttributeAnimator(animatorName: string): Animator | null {
+  getAttributeAnimator(animatorName: string): AttributeAnimator<this, unknown> | null {
     const attributeAnimators = this._attributeAnimators;
-    return attributeAnimators !== void 0 ? attributeAnimators[animatorName] || null : null;
+    if (attributeAnimators !== void 0) {
+      const attributeAnimator = attributeAnimators[animatorName];
+      if (attributeAnimator !== void 0) {
+        return attributeAnimator as AttributeAnimator<this, unknown>;
+      }
+    }
+    return null;
   }
 
-  setAttributeAnimator(animatorName: string, animator: Animator | null): void {
+  setAttributeAnimator(animatorName: string, attributeAnimator: AttributeAnimator<this, unknown> | null): void {
     let attributeAnimators = this._attributeAnimators;
     if (attributeAnimators === void 0) {
       attributeAnimators = {};
       this._attributeAnimators = attributeAnimators;
     }
-    if (animator !== null) {
-      attributeAnimators[animatorName] = animator;
+    if (attributeAnimator !== null) {
+      attributeAnimators[animatorName] = attributeAnimator;
     } else {
       delete attributeAnimators[animatorName];
     }
@@ -167,12 +172,18 @@ export class ElementView extends NodeView {
     return styleAnimators !== void 0 && styleAnimators[animatorName] !== void 0;
   }
 
-  getStyleAnimator(animatorName: string): Animator | null {
+  getStyleAnimator(animatorName: string): StyleAnimator<this, unknown> | null {
     const styleAnimators = this._styleAnimators;
-    return styleAnimators !== void 0 ? styleAnimators[animatorName] || null : null;
+    if (styleAnimators !== void 0) {
+      const styleAnimator = styleAnimators[animatorName];
+      if (styleAnimator !== void 0) {
+        return styleAnimator as StyleAnimator<this, unknown>;
+      }
+    }
+    return null;
   }
 
-  setStyleAnimator(animatorName: string, animator: Animator | null): void {
+  setStyleAnimator(animatorName: string, animator: StyleAnimator<this, unknown> | null): void {
     let styleAnimators = this._styleAnimators;
     if (styleAnimators === void 0) {
       styleAnimators = {};

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,21 +20,21 @@ import {AnyFont, Font} from "@swim/font";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   View,
-  MemberAnimator,
-  RenderedViewContext,
-  RenderedViewInit,
-  RenderedView,
-  FillView,
-  TypesetView,
+  ViewAnimator,
+  GraphicsViewContext,
+  GraphicsViewInit,
   GraphicsView,
   GraphicsViewController,
+  GraphicsNodeView,
+  FillView,
+  TypesetView,
 } from "@swim/view";
 import {Arc} from "@swim/shape";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 
 export type AnySliceView = SliceView | SliceViewInit;
 
-export interface SliceViewInit extends RenderedViewInit {
+export interface SliceViewInit extends GraphicsViewInit {
   value?: number;
   total?: number;
   center?: AnyPointR2;
@@ -54,79 +54,80 @@ export interface SliceViewInit extends RenderedViewInit {
   tickColor?: AnyColor;
   font?: AnyFont;
   textColor?: AnyColor;
-  label?: View | string | null;
-  legend?: View | string | null;
+  label?: GraphicsView | string | null;
+  legend?: GraphicsView | string | null;
 }
 
-export class SliceView extends GraphicsView {
+export class SliceView extends GraphicsNodeView {
   get viewController(): GraphicsViewController<SliceView> | null {
     return this._viewController;
   }
 
-  @MemberAnimator(Number, {value: 0})
-  value: MemberAnimator<this, number>;
+  @ViewAnimator(Number, {value: 0})
+  value: ViewAnimator<this, number>;
 
-  @MemberAnimator(Number, {value: 1})
-  total: MemberAnimator<this, number>;
+  @ViewAnimator(Number, {value: 1})
+  total: ViewAnimator<this, number>;
 
-  @MemberAnimator(PointR2, {inherit: true})
-  center: MemberAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator(PointR2, {inherit: true})
+  center: ViewAnimator<this, PointR2, AnyPointR2>;
 
-  @MemberAnimator(Length, {inherit: true})
-  innerRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  innerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {inherit: true})
-  outerRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  outerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Angle, {value: Angle.zero()})
-  phaseAngle: MemberAnimator<this, Angle, AnyAngle>;
+  @ViewAnimator(Angle, {value: Angle.zero()})
+  phaseAngle: ViewAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Angle, {inherit: true})
-  padAngle: MemberAnimator<this, Angle, AnyAngle>;
+  @ViewAnimator(Angle, {inherit: true})
+  padAngle: ViewAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Length, {inherit: true})
-  padRadius: MemberAnimator<this, Length | null, AnyLength | null>;
+  @ViewAnimator(Length, {inherit: true})
+  padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
 
-  @MemberAnimator(Length, {inherit: true})
-  cornerRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  cornerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {inherit: true})
-  labelRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  labelRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, {inherit: true})
-  sliceColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  sliceColor: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Number, {inherit: true})
-  tickAlign: MemberAnimator<this, number>;
+  @ViewAnimator(Number, {inherit: true})
+  tickAlign: ViewAnimator<this, number>;
 
-  @MemberAnimator(Length, {inherit: true})
-  tickRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  tickRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {inherit: true})
-  tickLength: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  tickLength: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {inherit: true})
-  tickWidth: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  tickWidth: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {inherit: true})
-  tickPadding: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  tickPadding: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, {inherit: true})
-  tickColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  tickColor: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Font, {inherit: true})
-  font: MemberAnimator<this, Font, AnyFont>;
+  @ViewAnimator(Font, {inherit: true})
+  font: ViewAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, {inherit: true})
-  textColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  textColor: ViewAnimator<this, Color, AnyColor>;
 
-  label(): View | null;
-  label(label: View | AnyTextRunView | null): this;
-  label(label?: View | AnyTextRunView | null): View | null | this {
+  label(): GraphicsView | null;
+  label(label: GraphicsView | AnyTextRunView | null): this;
+  label(label?: GraphicsView | AnyTextRunView | null): GraphicsView | null | this {
     if (label === void 0) {
-      return this.getChildView("label");
+      const childView = this.getChildView("label");
+      return childView instanceof GraphicsView ? childView : null;
     } else {
-      if (label !== null && !(label instanceof View)) {
+      if (label !== null && !(label instanceof GraphicsView)) {
         label = TextRunView.fromAny(label);
       }
       this.setChildView("label", label);
@@ -134,13 +135,14 @@ export class SliceView extends GraphicsView {
     }
   }
 
-  legend(): View | null;
-  legend(legend: View | AnyTextRunView | null): this;
-  legend(legend?: View | AnyTextRunView | null): View | null | this {
+  legend(): GraphicsView | null;
+  legend(legend: GraphicsView | AnyTextRunView | null): this;
+  legend(legend?: GraphicsView | AnyTextRunView | null): GraphicsView | null | this {
     if (legend === void 0) {
-      return this.getChildView("legend");
+      const childView = this.getChildView("legend");
+      return childView instanceof GraphicsView ? childView : null;
     } else {
-      if (legend !== null && !(legend instanceof View)) {
+      if (legend !== null && !(legend instanceof GraphicsView)) {
         legend = TextRunView.fromAny(legend);
       }
       this.setChildView("legend", legend);
@@ -148,7 +150,15 @@ export class SliceView extends GraphicsView {
     }
   }
 
-  protected onRender(viewContext: RenderedViewContext): void {
+  protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
+    this.requireUpdate(View.NeedsAnimate);
+  }
+
+  protected onRemoveChildView(childView: View): void {
+    this.requireUpdate(View.NeedsAnimate);
+  }
+
+  protected onRender(viewContext: GraphicsViewContext): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -185,7 +195,7 @@ export class SliceView extends GraphicsView {
     context.fill();
 
     const label = this.label();
-    if (RenderedView.is(label) && !label.isHidden()) {
+    if (label !== null && !label.isHidden()) {
       const labelRadius = this.labelRadius.value!.pxValue(deltaRadius);
       const labelAngle = startAngle.value + sweepAngle.value / 2;
       const r = innerRadius.value + labelRadius;
@@ -200,7 +210,7 @@ export class SliceView extends GraphicsView {
     }
 
     const legend = this.legend();
-    if (RenderedView.is(legend) && !legend.isHidden()) {
+    if (legend !== null && !legend.isHidden()) {
       const tickAlign = this.tickAlign.value!;
       const tickAngle = startAngle.value + sweepAngle.value * tickAlign;
       const tickRadius = this.tickRadius.value!.pxValue(size);
@@ -260,7 +270,7 @@ export class SliceView extends GraphicsView {
     }
   }
 
-  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext: GraphicsViewContext): GraphicsView | null {
     let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -276,7 +286,7 @@ export class SliceView extends GraphicsView {
     return hit;
   }
 
-  protected hitTestSlice(x: number, y: number, context: CanvasContext, frame: BoxR2): RenderedView | null {
+  protected hitTestSlice(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
     const size = Math.min(frame.width, frame.height);
     const value = this.value.value!;
     const total = this.total.value!;

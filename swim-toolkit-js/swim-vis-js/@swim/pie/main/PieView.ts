@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,19 +20,19 @@ import {AnyFont, Font} from "@swim/font";
 import {
   ViewFlags,
   View,
-  MemberAnimator,
-  RenderedViewContext,
-  RenderedViewInit,
-  TypesetView,
-  GraphicsView,
+  ViewAnimator,
+  GraphicsViewContext,
+  GraphicsViewInit,
   GraphicsViewController,
+  GraphicsNodeView,
+  TypesetView,
 } from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 import {AnySliceView, SliceView} from "./SliceView";
 
 export type AnyPieView = PieView | PieViewInit;
 
-export interface PieViewInit extends RenderedViewInit {
+export interface PieViewInit extends GraphicsViewInit {
   limit?: number;
   center?: AnyPointR2;
   baseAngle?: AnyAngle;
@@ -55,64 +55,64 @@ export interface PieViewInit extends RenderedViewInit {
   slices?: AnySliceView[];
 }
 
-export class PieView extends GraphicsView {
+export class PieView extends GraphicsNodeView {
   get viewController(): GraphicsViewController<PieView> | null {
     return this._viewController;
   }
 
-  @MemberAnimator(Number, {value: 0})
-  limit: MemberAnimator<this, number>;
+  @ViewAnimator(Number, {value: 0})
+  limit: ViewAnimator<this, number>;
 
-  @MemberAnimator(PointR2, {value: PointR2.origin()})
-  center: MemberAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator(PointR2, {value: PointR2.origin()})
+  center: ViewAnimator<this, PointR2, AnyPointR2>;
 
-  @MemberAnimator(Angle, {value: Angle.rad(-Math.PI / 2)})
-  baseAngle: MemberAnimator<this, Angle, AnyAngle>;
+  @ViewAnimator(Angle, {value: Angle.rad(-Math.PI / 2)})
+  baseAngle: ViewAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Length, {value: Length.pct(3)})
-  innerRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.pct(3)})
+  innerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {value: Length.pct(25)})
-  outerRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.pct(25)})
+  outerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Angle, {value: Angle.deg(2)})
-  padAngle: MemberAnimator<this, Angle, AnyAngle>;
+  @ViewAnimator(Angle, {value: Angle.deg(2)})
+  padAngle: ViewAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Length, {value: null})
-  padRadius: MemberAnimator<this, Length | null, AnyLength | null>;
+  @ViewAnimator(Length, {value: null})
+  padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
 
-  @MemberAnimator(Length, {value: Length.zero()})
-  cornerRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.zero()})
+  cornerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {value: Length.pct(50)})
-  labelRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.pct(50)})
+  labelRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, {value: Color.black()})
-  sliceColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {value: Color.black()})
+  sliceColor: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Number, {value: 0.5})
-  tickAlign: MemberAnimator<this, number>;
+  @ViewAnimator(Number, {value: 0.5})
+  tickAlign: ViewAnimator<this, number>;
 
-  @MemberAnimator(Length, {value: Length.pct(30)})
-  tickRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.pct(30)})
+  tickRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {value: Length.pct(50)})
-  tickLength: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.pct(50)})
+  tickLength: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {value: Length.px(1)})
-  tickWidth: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.px(1)})
+  tickWidth: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {value: Length.px(1)})
-  tickPadding: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.px(1)})
+  tickPadding: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, {value: Color.black()})
-  tickColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {value: Color.black()})
+  tickColor: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Font, {inherit: true})
-  font: MemberAnimator<this, Font, AnyFont>;
+  @ViewAnimator(Font, {inherit: true})
+  font: ViewAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, {inherit: true})
-  textColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  textColor: ViewAnimator<this, Color, AnyColor>;
 
   title(): View | null;
   title(title: View | AnyTextRunView | null): this;
@@ -133,18 +133,33 @@ export class PieView extends GraphicsView {
     this.appendChildView(slice);
   }
 
+  protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
+    this.requireUpdate(View.NeedsAnimate);
+  }
+
+  protected onRemoveChildView(childView: View): void {
+    this.requireUpdate(View.NeedsAnimate);
+  }
+
   protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
     let additionalFlags = 0;
     if ((updateFlags & View.NeedsAnimate) !== 0) {
-      additionalFlags |= View.NeedsLayout;
+      additionalFlags |= View.NeedsAnimate;
     }
     additionalFlags |= super.modifyUpdate(updateFlags | additionalFlags);
     return additionalFlags;
   }
 
-  protected onLayout(viewContext: RenderedViewContext): void {
-    super.onLayout(viewContext);
+  needsProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): ViewFlags {
+    if ((this._viewFlags & View.NeedsLayout) !== 0) {
+      processFlags |= View.NeedsAnimate;
+    }
+    return processFlags;
+  }
+
+  protected didAnimate(viewContext: GraphicsViewContext): void {
     this.layoutPie(this.viewFrame);
+    super.didAnimate(viewContext);
   }
 
   protected layoutPie(frame: BoxR2): void {
@@ -189,6 +204,8 @@ export class PieView extends GraphicsView {
       title.textBaseline.setAutoState("middle");
       title.textOrigin.setAutoState(this.center.state);
     }
+
+    this._viewFlags &= ~View.NeedsLayout;
   }
 
   static fromAny(pie: AnyPieView): PieView {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,5 +15,5 @@
 import {GraphicsViewObserver} from "@swim/view";
 import {PlotView} from "./PlotView";
 
-export interface PlotViewObserver<X = any, Y = any, V extends PlotView<X, Y> = PlotView<X, Y>> extends GraphicsViewObserver<V> {
+export interface PlotViewObserver<X = unknown, Y = unknown, V extends PlotView<X, Y> = PlotView<X, Y>> extends GraphicsViewObserver<V> {
 }

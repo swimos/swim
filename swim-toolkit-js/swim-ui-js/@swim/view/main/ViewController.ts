@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Viewport} from "./Viewport";
-import {ViewIdiom} from "./ViewIdiom";
 import {ViewContext} from "./ViewContext";
 import {View} from "./View";
 import {ViewObserver} from "./ViewObserver";
+import {Viewport} from "./viewport/Viewport";
+import {ViewIdiom} from "./viewport/ViewIdiom";
 import {RootView} from "./root/RootView";
 import {RootViewController} from "./root/RootViewController";
 
@@ -309,6 +309,14 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
+  viewWillResize(viewContext: ViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidResize(viewContext: ViewContext, view: V): void {
+    // hook
+  }
+
   viewWillScroll(viewContext: ViewContext, view: V): void {
     // hook
   }
@@ -317,11 +325,27 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
-  viewWillDerive(viewContext: ViewContext, view: V): void {
+  viewWillCompute(viewContext: ViewContext, view: V): void {
     // hook
   }
 
-  viewDidDerive(viewContext: ViewContext, view: V): void {
+  viewDidCompute(viewContext: ViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillAnimate(viewContext: ViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidAnimate(viewContext: ViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillLayout(viewContext: ViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidLayout(viewContext: ViewContext, view: V): void {
     // hook
   }
 
@@ -343,14 +367,6 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   viewDidDisplay(viewContext: ViewContext, view: V): void {
-    // hook
-  }
-
-  viewWillLayout(viewContext: ViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidLayout(viewContext: ViewContext, view: V): void {
     // hook
   }
 

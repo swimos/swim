@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,19 +20,19 @@ import {
   ViewNode,
   ModalState,
   Modal,
-  MemberAnimator,
+  ViewAnimator,
   SvgView,
   HtmlView,
 } from "@swim/view";
+import {PositionGestureInput, PositionGesture, PositionGestureDelegate} from "@swim/gesture";
 import {ActionButton} from "./ActionButton";
 import {ActionItem} from "./ActionItem";
 import {ActionStackObserver} from "./ActionStackObserver";
 import {ActionStackController} from "./ActionStackController";
-import {ActionStackGestureController} from "./ActionStackGestureController";
 
 export type ActionStackState = "collapsed" | "expanding" | "expanded" | "collapsing";
 
-export class ActionStack extends HtmlView implements Modal {
+export class ActionStack extends HtmlView implements Modal, PositionGestureDelegate {
   /** @hidden */
   _stackState: ActionStackState;
   /** @hidden */
@@ -43,6 +43,10 @@ export class ActionStack extends HtmlView implements Modal {
   _buttonSpacing: number;
   /** @hidden */
   _itemSpacing: number;
+  /** @hidden */
+  _itemCount: number;
+  /** @hidden */
+  _gesture: PositionGesture<ActionButton> | null;
 
   constructor(node: HTMLElement) {
     super(node);
@@ -53,6 +57,8 @@ export class ActionStack extends HtmlView implements Modal {
     this._buttonIcon = null;
     this._buttonSpacing = 36;
     this._itemSpacing = 20;
+    this._itemCount = 0;
+    this._gesture = null;
     this.initChildren();
   }
 
@@ -87,8 +93,8 @@ export class ActionStack extends HtmlView implements Modal {
     return this._stackState === "collapsed" || this._stackState === "collapsing";
   }
 
-  @MemberAnimator(Number, {value: 0})
-  stackPhase: MemberAnimator<this, number>; // 0 = collapsed; 1 = expanded
+  @ViewAnimator(Number, {value: 0})
+  stackPhase: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
 
   get modalState(): ModalState {
     const stackState = this._stackState;
@@ -200,6 +206,10 @@ export class ActionStack extends HtmlView implements Modal {
     const phase = this.stackPhase.value!;
     const childNodes = this._node.childNodes;
     const childCount = childNodes.length;
+    const button = this.button;
+    if (button !== null) {
+      button.zIndex(childCount);
+    }
     const buttonHeight = 56;
     const itemHeight = 48;
     let itemIndex = 0;
@@ -207,16 +217,12 @@ export class ActionStack extends HtmlView implements Modal {
     for (let i = 0; i < childCount; i += 1) {
       const childView = (childNodes[i] as ViewNode).view;
       if (childView instanceof ActionItem) {
-        const bottom = buttonHeight + this._buttonSpacing + itemIndex * (itemHeight + this._itemSpacing);
+        const bottom = buttonHeight + this._buttonSpacing + itemIndex * (this._itemSpacing + itemHeight);
         childView.display(phase === 0 ? "none" : "flex")
                  .bottom(phase * bottom)
                  .zIndex(zIndex);
         itemIndex += 1;
         zIndex -= 1;
-      }
-      const button = this.button;
-      if (button !== null) {
-        button.zIndex(childCount);
       }
     }
   }
@@ -242,25 +248,28 @@ export class ActionStack extends HtmlView implements Modal {
   }
 
   protected onInsertButton(button: ActionButton): void {
+    this._gesture = new PositionGesture(button, this);
+    button.addViewObserver(this._gesture);
     if (this.isCollapsed && this._buttonIcon !== null) {
       button.setIcon(this._buttonIcon);
     } else if (this.isExpanded()) {
       button.setIcon(this.createCloseIcon());
     }
     button.zIndex(0);
-    button.addViewObserver(new ActionStackGestureController(this) as any);
   }
 
   protected onRemoveButton(button: ActionButton): void {
-    // hook
+    button.removeViewObserver(this._gesture!);
+    this._gesture = null;
   }
 
   protected onInsertItem(item: ActionItem): void {
     item.position("absolute").right(4).bottom(4).left(4).zIndex(0);
+    this._itemCount += 1;
   }
 
   protected onRemoveItem(item: ActionItem): void {
-    // hook
+    this._itemCount -= 1;
   }
 
   expand(tween?: Tween<any>): void {
@@ -424,6 +433,67 @@ export class ActionStack extends HtmlView implements Modal {
         viewObserver.actionStackDidHide(this);
       }
     });
+  }
+
+  didBeginPress(input: PositionGestureInput, event: Event | null): void {
+    // hook
+  }
+
+  didHoldPress(input: PositionGestureInput): void {
+    this.toggle();
+    input.preventDefault();
+  }
+
+  didMovePress(input: PositionGestureInput, event: Event | null): void {
+    if (!input.defaultPrevented && this.isCollapsed()) {
+      const itemHeight = 48;
+      const itemCount = this._itemCount;
+      let stackHeight = 0;
+      if (itemCount > 0) {
+        stackHeight += this._buttonSpacing + itemHeight;
+        if (itemCount > 1) {
+          stackHeight += (itemCount - 1) * (this._itemSpacing + itemHeight);
+        }
+        const stackPhase = Math.min(Math.max(0, -(input.y - input.y0) / (0.5 * stackHeight)), 1);
+        this.stackPhase.setState(stackPhase);
+        this.requireUpdate(View.NeedsLayout);
+        if (stackPhase > 0.1) {
+          input.clearHoldTimer();
+        }
+      }
+    }
+  }
+
+  didEndPress(input: PositionGestureInput, event: Event | null): void {
+    if (!input.defaultPrevented) {
+      const stackPhase = this.stackPhase.value!;
+      if (input.t - input.t0 < input.holdDelay) {
+        if (stackPhase < 0.1 || this.stackState === "expanded") {
+          this.collapse();
+        } else {
+          this.expand();
+        }
+      } else {
+        if (stackPhase < 0.5) {
+          this.collapse();
+        } else if (stackPhase >= 0.5) {
+          this.expand();
+        }
+      }
+    }
+  }
+
+  didCancelPress(input: PositionGestureInput, event: Event | null): void {
+    if (input.buttons === 2) {
+      this.toggle();
+    } else {
+      const stackPhase = this.stackPhase.value!;
+      if (stackPhase < 0.1 || this.stackState === "expanded") {
+        this.collapse();
+      } else {
+        this.expand();
+      }
+    }
   }
 
   protected onClick(event: MouseEvent): void {

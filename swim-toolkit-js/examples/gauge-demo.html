@@ -155,7 +155,10 @@ const updateRate = document.getElementById("updateRate");
 // Create a new ui view
 const uiView = new swim.UiView(document.getElementById("ui"));
 // and append a canvas.
-const canvas = uiView.append("canvas");
+const canvas = uiView.append("canvas")
+    .pointerEventsEnabled(true)
+    .touchAction("manipulation")
+    .userSelect("none");
 
 // Create a new gauge view
 const gauge = new swim.GaugeView()
@@ -186,10 +189,10 @@ function createDial() {
       .label(new swim.TextRunView().textColor("#4a4a4a"))
       .legend("");
   // Add mouse event handlers.
-  dial.on("mouseenter", function (event) {
+  dial.on("pointerenter", function (event) {
         dial.meterColor(hoverColors[Math.floor(Math.random() * hoverColors.length)], {duration: 200});
       })
-      .on("mouseleave", function (event) {
+      .on("pointerleave", function (event) {
         dial.meterColor(meterColor, {duration: 200});
       });
   // Return the initialized dial.

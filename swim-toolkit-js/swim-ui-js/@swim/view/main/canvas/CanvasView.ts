@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
 
 import {BoxR2} from "@swim/math";
 import {AnyRenderer, RendererType, Renderer, CanvasRenderer, WebGLRenderer} from "@swim/render";
-import {ViewEvent, ViewMouseEvent, ViewTouch, ViewTouchEvent} from "../ViewEvent";
+import {ViewEvent} from "../event/ViewEvent";
+import {ViewMouseEventInit, ViewMouseEvent} from "../event/ViewMouseEvent";
+import {ViewPointerEventInit, ViewPointerEvent} from "../event/ViewPointerEvent";
+import {ViewTouchInit, ViewTouch, ViewTouchEvent} from "../event/ViewTouchEvent";
 import {ViewContext} from "../ViewContext";
 import {ViewFlags, View} from "../View";
-import {RenderedViewContext} from "../rendered/RenderedViewContext";
-import {RenderedView} from "../rendered/RenderedView";
-import {RenderedViewObserver} from "../rendered/RenderedViewObserver";
+import {GraphicsViewContext} from "../graphics/GraphicsViewContext";
+import {GraphicsView} from "../graphics/GraphicsView";
 import {ViewNode, ViewNodeType, NodeView} from "../node/NodeView";
 import {TextView} from "../text/TextView";
 import {ElementViewConstructor, ElementView} from "../element/ElementView";
@@ -27,61 +29,74 @@ import {HtmlChildViewTagMap, HtmlView} from "../html/HtmlView";
 import {CanvasViewObserver} from "./CanvasViewObserver";
 import {CanvasViewController} from "./CanvasViewController";
 
+export type CanvasFlags = number;
+
+export interface CanvasViewMouse extends ViewMouseEventInit {
+}
+
+export interface CanvasViewPointer extends ViewPointerEventInit {
+}
+
+export interface CanvasViewTouch extends ViewTouchInit {
+}
+
 export interface ViewCanvas extends HTMLCanvasElement {
   view?: CanvasView;
 }
 
-export class CanvasView extends HtmlView implements RenderedView {
+export class CanvasView extends HtmlView {
   /** @hidden */
-  _eventSurface: Node;
-  /** @hidden */
-  readonly _renderedViews: RenderedView[];
+  readonly _graphicsViews: GraphicsView[];
   /** @hidden */
   _renderer: Renderer | null | undefined;
   /** @hidden */
   _viewFrame: BoxR2;
   /** @hidden */
-  _clientX: number;
+  _canvasFlags: number;
   /** @hidden */
-  _clientY: number;
+  _eventNode: Node;
   /** @hidden */
-  _screenX: number;
+  _mouse: CanvasViewMouse | null;
   /** @hidden */
-  _screenY: number;
-  /**
-   * The `RenderedView` over which the mouse is currently hovering.
-   * @hidden
-   */
-  _hoverView: RenderedView | null;
-  /**
-   * The currently active touches.
-   * @hidden
-   */
-  readonly _touches: {[identifier: string]: ViewTouch | undefined};
+  readonly _pointers: {[id: string]: CanvasViewPointer | undefined};
+  /** @hidden */
+  readonly _touches: {[id: string]: CanvasViewTouch | undefined};
 
   constructor(node: HTMLCanvasElement) {
     super(node);
+
     this.onClick = this.onClick.bind(this);
     this.onDblClick = this.onDblClick.bind(this);
     this.onContextMenu = this.onContextMenu.bind(this);
+
+    this.onWheel = this.onWheel.bind(this);
+
+    this.onMouseEnter = this.onMouseEnter.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
-    this.onWheel = this.onWheel.bind(this);
+
+    this.onPointerEnter = this.onPointerEnter.bind(this);
+    this.onPointerLeave = this.onPointerLeave.bind(this);
+    this.onPointerDown = this.onPointerDown.bind(this);
+    this.onPointerMove = this.onPointerMove.bind(this);
+    this.onPointerUp = this.onPointerUp.bind(this);
+    this.onPointerCancel = this.onPointerCancel.bind(this);
+
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchMove = this.onTouchMove.bind(this);
-    this.onTouchCancel = this.onTouchCancel.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
+    this.onTouchCancel = this.onTouchCancel.bind(this);
 
-    this._eventSurface = this._node;
-    this._renderedViews = [];
+    this._graphicsViews = [];
     this._renderer = void 0;
-    this._viewFrame = BoxR2.empty();
-    this._clientX = 0;
-    this._clientY = 0;
-    this._screenX = 0;
-    this._screenY = 0;
-    this._hoverView = null;
+    this._viewFrame = BoxR2.undefined();
+    this._canvasFlags = CanvasView.ClickEventsFlag;
+
+    this._eventNode = this._node;
+    this._mouse = null;
+    this._pointers = {};
     this._touches = {};
   }
 
@@ -101,6 +116,19 @@ export class CanvasView extends HtmlView implements RenderedView {
     return this;
   }
 
+  get childViewCount(): number {
+    let childViewCount = 0;
+    const childNodes = this._node.childNodes;
+    for (let i = 0, n = childNodes.length; i < n; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView !== void 0) {
+        childViewCount += 1;
+      }
+    }
+    childViewCount += this._graphicsViews.length;
+    return childViewCount;
+  }
+
   get childViews(): ReadonlyArray<View> {
     const childNodes = this._node.childNodes;
     const childViews = [];
@@ -110,30 +138,71 @@ export class CanvasView extends HtmlView implements RenderedView {
         childViews.push(childView);
       }
     }
-    childViews.push.apply(childViews, this._renderedViews);
+    childViews.push.apply(childViews, this._graphicsViews);
     return childViews;
   }
 
+  forEachChildView<T, S = unknown>(callback: (this: S, childView: View) => T | void,
+                                   thisArg?: S): T | undefined {
+    const childNodes = this._node.childNodes;
+    if (childNodes.length !== 0) {
+      let i = 0;
+      do {
+        const childNode = childNodes[i];
+        const childView = (childNode as ViewNode).view;
+        if (childView !== void 0) {
+          const result = callback.call(thisArg, childView);
+          if (result !== void 0) {
+            return result;
+          }
+        }
+        if (i < childNodes.length) {
+          if (childNodes[i] === childNode) {
+            i += 1;
+          }
+          continue;
+        }
+        break;
+      } while (true);
+    }
+    const graphicsViews = this._graphicsViews;
+    if (graphicsViews.length !== 0) {
+      let i = 0;
+      do {
+        const childView = graphicsViews[i];
+        const result = callback.call(thisArg, childView);
+        if (result !== void 0) {
+          return result;
+        }
+        if (i < graphicsViews.length) {
+          if (graphicsViews[i] === childView) {
+            i += 1;
+          }
+          continue;
+        }
+        break;
+      } while (true);
+    }
+    return void 0;
+  }
+
   setChildView(key: string, newChildView: View | null): View | null {
-    if (RenderedView.is(newChildView)) {
-      return this.setRenderedView(key, newChildView);
+    if (newChildView instanceof GraphicsView) {
+      return this.setGraphicsView(key, newChildView);
     } else {
       return super.setChildView(key, newChildView);
     }
   }
 
-  setRenderedView(key: string, newChildView: RenderedView | null): View | null {
-    if (newChildView !== null && !RenderedView.is(newChildView)) {
-      throw new TypeError("" + newChildView);
-    }
+  setGraphicsView(key: string, newChildView: GraphicsView | null): View | null {
     let index = -1;
     let oldChildView: View | null = null;
     let targetView: View | null = null;
-    const childViews = this._renderedViews;
+    const childViews = this._graphicsViews;
     const childViewMap = this._childViewMap;
     if (childViewMap !== void 0) {
       const childView = childViewMap[key];
-      if (RenderedView.is(childView)) {
+      if (childView instanceof GraphicsView) {
         index = childViews.indexOf(childView);
         // assert(index >= 0);
         oldChildView = childView;
@@ -181,8 +250,8 @@ export class CanvasView extends HtmlView implements RenderedView {
     return oldChildView;
   }
 
-  get renderedViews(): ReadonlyArray<RenderedView> {
-    return this._renderedViews;
+  get graphicsViews(): ReadonlyArray<GraphicsView> {
+    return this._graphicsViews;
   }
 
   append<T extends keyof HtmlChildViewTagMap>(tag: T, key?: string): HtmlChildViewTagMap[T];
@@ -191,7 +260,7 @@ export class CanvasView extends HtmlView implements RenderedView {
   append(childNode: Element, key?: string): ElementView;
   append(childNode: Text, key?: string): TextView;
   append(childNode: Node, key?: string): NodeView;
-  append<V extends NodeView | RenderedView>(childView: V, key?: string): V;
+  append<V extends NodeView | GraphicsView>(childView: V, key?: string): V;
   append<C extends ElementViewConstructor>(viewConstructor: C, key?: string): InstanceType<C>;
   append(child: string | Node | View | ElementViewConstructor, key?: string): View {
     if (typeof child === "string") {
@@ -206,20 +275,20 @@ export class CanvasView extends HtmlView implements RenderedView {
   }
 
   appendChildView(childView: View, key?: string): void {
-    if (RenderedView.is(childView)) {
-      this.appendRenderedView(childView, key);
+    if (childView instanceof GraphicsView) {
+      this.appendGraphicsView(childView, key);
     } else {
       super.appendChildView(childView, key);
     }
   }
 
-  appendRenderedView(childView: RenderedView, key?: string): void {
+  appendGraphicsView(childView: GraphicsView, key?: string): void {
     if (key !== void 0) {
       this.removeChildView(key);
       childView.setKey(key);
     }
     this.willInsertChildView(childView, null);
-    this._renderedViews.push(childView);
+    this._graphicsViews.push(childView);
     this.insertChildViewMap(childView);
     childView.setParentView(this, null);
     this.onInsertChildView(childView, null);
@@ -232,7 +301,7 @@ export class CanvasView extends HtmlView implements RenderedView {
   prepend(childNode: Element, key?: string): ElementView;
   prepend(childNode: Text, key?: string): TextView;
   prepend(childNode: Node, key?: string): NodeView;
-  prepend<V extends NodeView | RenderedView>(childView: V, key?: string): V;
+  prepend<V extends NodeView | GraphicsView>(childView: V, key?: string): V;
   prepend<C extends ElementViewConstructor>(viewConstructor: C, key?: string): InstanceType<C>;
   prepend(child: string | Node | View | ElementViewConstructor, key?: string): View {
     if (typeof child === "string") {
@@ -247,20 +316,20 @@ export class CanvasView extends HtmlView implements RenderedView {
   }
 
   prependChildView(childView: View, key?: string): void {
-    if (RenderedView.is(childView)) {
-      this.prependRenderedView(childView);
+    if (childView instanceof GraphicsView) {
+      this.prependGraphicsView(childView);
     } else {
       super.prependChildView(childView);
     }
   }
 
-  prependRenderedView(childView: RenderedView, key?: string): void {
+  prependGraphicsView(childView: GraphicsView, key?: string): void {
     if (key !== void 0) {
       this.removeChildView(key);
       childView.setKey(key);
     }
     this.willInsertChildView(childView, null);
-    this._renderedViews.unshift(childView);
+    this._graphicsViews.unshift(childView);
     this.insertChildViewMap(childView);
     childView.setParentView(this, null);
     this.onInsertChildView(childView, null);
@@ -273,7 +342,7 @@ export class CanvasView extends HtmlView implements RenderedView {
   insert(childNode: Element, target: View | Node | null, key?: string): ElementView;
   insert(childNode: Text, target: View | Node | null, key?: string): TextView;
   insert(childNode: Node, target: View | Node | null, key?: string): NodeView;
-  insert<V extends NodeView | RenderedView>(childView: V, target: View | Node | null, key?: string): V;
+  insert<V extends NodeView | GraphicsView>(childView: V, target: View | Node | null, key?: string): V;
   insert<C extends ElementViewConstructor>(viewConstructor: C, target: View | Node | null, key?: string): InstanceType<C>;
   insert(child: string | Node | View | ElementViewConstructor, target: View | Node | null, key?: string): View {
     if (typeof child === "string") {
@@ -288,15 +357,15 @@ export class CanvasView extends HtmlView implements RenderedView {
   }
 
   insertChildView(childView: View, targetView: View | null, key?: string): void {
-    if (RenderedView.is(childView) && RenderedView.is(targetView)) {
-      this.insertRenderedView(childView, targetView, key);
+    if (childView instanceof GraphicsView && targetView instanceof GraphicsView) {
+      this.insertGraphicsView(childView, targetView, key);
     } else {
       super.insertChildView(childView, targetView, key);
     }
   }
 
-  insertRenderedView(childView: RenderedView, targetView: View | null, key?: string): void {
-    if (targetView !== null && !RenderedView.is(targetView)) {
+  insertGraphicsView(childView: GraphicsView, targetView: GraphicsView | null, key?: string): void {
+    if (targetView !== null && !(targetView instanceof GraphicsView)) {
       throw new TypeError("" + targetView);
     }
     if (targetView !== null && targetView.parentView !== this) {
@@ -307,12 +376,12 @@ export class CanvasView extends HtmlView implements RenderedView {
       childView.setKey(key);
     }
     this.willInsertChildView(childView, targetView);
-    const renderedViews = this._renderedViews;
-    const index = targetView !== null ? renderedViews.indexOf(targetView) : -1;
+    const graphicsViews = this._graphicsViews;
+    const index = targetView !== null ? graphicsViews.indexOf(targetView) : -1;
     if (index >= 0) {
-      renderedViews.splice(index, 0, childView);
+      graphicsViews.splice(index, 0, childView);
     } else {
-      renderedViews.push(childView);
+      graphicsViews.push(childView);
     }
     this.insertChildViewMap(childView);
     childView.setParentView(this, null);
@@ -332,8 +401,8 @@ export class CanvasView extends HtmlView implements RenderedView {
     } else {
       childView = key;
     }
-    if (RenderedView.is(childView)) {
-      this.removeRenderedView(childView);
+    if (childView instanceof GraphicsView) {
+      this.removeGraphicsView(childView);
     } else {
       super.removeChildView(childView);
     }
@@ -342,17 +411,17 @@ export class CanvasView extends HtmlView implements RenderedView {
     }
   }
 
-  removeRenderedView(childView: RenderedView): void {
+  removeGraphicsView(childView: GraphicsView): void {
     if (childView.parentView !== this) {
       throw new Error("not a child view");
     }
     this.willRemoveChildView(childView);
     childView.setParentView(null, this);
     this.removeChildViewMap(childView);
-    const renderedViews = this._renderedViews;
-    const index = renderedViews.indexOf(childView);
+    const graphicsViews = this._graphicsViews;
+    const index = graphicsViews.indexOf(childView);
     if (index >= 0) {
-      renderedViews.splice(index, 1);
+      graphicsViews.splice(index, 1);
     }
     this.onRemoveChildView(childView);
     this.didRemoveChildView(childView);
@@ -361,15 +430,15 @@ export class CanvasView extends HtmlView implements RenderedView {
 
   removeAll(): void {
     super.removeAll();
-    const renderedViews = this._renderedViews;
+    const graphicsViews = this._graphicsViews;
     do {
-      const count = renderedViews.length;
+      const count = graphicsViews.length;
       if (count > 0) {
-        const childView = renderedViews[count - 1];
+        const childView = graphicsViews[count - 1];
         this.willRemoveChildView(childView);
         childView.setParentView(null, this);
         this.removeChildViewMap(childView);
-        renderedViews.pop();
+        graphicsViews.pop();
         this.onRemoveChildView(childView);
         this.didRemoveChildView(childView);
         childView.setKey(null);
@@ -422,7 +491,7 @@ export class CanvasView extends HtmlView implements RenderedView {
 
   protected onMount(): void {
     super.onMount();
-    this.addEventListeners(this._eventSurface);
+    this.attachEvents(this._eventNode);
   }
 
   /** @hidden */
@@ -434,15 +503,15 @@ export class CanvasView extends HtmlView implements RenderedView {
         childView.cascadeMount();
       }
     }
-    const renderedViews = this._renderedViews;
-    for (let i = 0; i < renderedViews.length; i += 1) {
-      const childView = renderedViews[i];
+    const graphicsViews = this._graphicsViews;
+    for (let i = 0; i < graphicsViews.length; i += 1) {
+      const childView = graphicsViews[i];
       childView.cascadeMount();
     }
   }
 
   protected onUnmount(): void {
-    this.removeEventListeners(this._eventSurface);
+    this.detachEvents(this._eventNode);
     super.onUnmount();
   }
 
@@ -455,11 +524,16 @@ export class CanvasView extends HtmlView implements RenderedView {
         childView.cascadeUnmount();
       }
     }
-    const renderedViews = this._renderedViews;
-    for (let i = 0; i < renderedViews.length; i += 1) {
-      const childView = renderedViews[i];
+    const graphicsViews = this._graphicsViews;
+    for (let i = 0; i < graphicsViews.length; i += 1) {
+      const childView = graphicsViews[i];
       childView.cascadeUnmount();
     }
+  }
+
+  onPower(): void {
+    super.onPower();
+    this.requireUpdate(View.NeedsRender);
   }
 
   /** @hidden */
@@ -471,9 +545,9 @@ export class CanvasView extends HtmlView implements RenderedView {
         childView.cascadePower();
       }
     }
-    const renderedViews = this._renderedViews;
-    for (let i = 0; i < renderedViews.length; i += 1) {
-      const childView = renderedViews[i];
+    const graphicsViews = this._graphicsViews;
+    for (let i = 0; i < graphicsViews.length; i += 1) {
+      const childView = graphicsViews[i];
       childView.cascadePower();
     }
   }
@@ -487,9 +561,9 @@ export class CanvasView extends HtmlView implements RenderedView {
         childView.cascadeUnpower();
       }
     }
-    const renderedViews = this._renderedViews;
-    for (let i = 0; i < renderedViews.length; i += 1) {
-      const childView = renderedViews[i];
+    const graphicsViews = this._graphicsViews;
+    for (let i = 0; i < graphicsViews.length; i += 1) {
+      const childView = graphicsViews[i];
       childView.cascadeUnpower();
     }
   }
@@ -508,21 +582,34 @@ export class CanvasView extends HtmlView implements RenderedView {
     return additionalFlags;
   }
 
-  cascadeProcess(processFlags: ViewFlags, viewContext: RenderedViewContext): void {
+  needsProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): ViewFlags {
+    if ((processFlags & View.ProcessMask) !== 0) {
+      this.requireUpdate(View.NeedsRender);
+    }
+    return processFlags;
+  }
+
+  cascadeProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): void {
     viewContext = this.canvasViewContext(viewContext);
     super.cascadeProcess(processFlags, viewContext);
   }
 
-  protected onScroll(viewContext: RenderedViewContext): void {
+  protected onResize(viewContext: GraphicsViewContext): void {
+    super.onResize(viewContext);
+    this.resizeCanvas(this._node);
+    this.resetRenderer();
+  }
+
+  protected onScroll(viewContext: GraphicsViewContext): void {
     super.onScroll(viewContext);
     this.setCulled(!this.intersectsViewport());
   }
 
   /** @hidden */
-  protected doProcessChildViews(processFlags: ViewFlags, viewContext: RenderedViewContext): void {
+  protected doProcessChildViews(processFlags: ViewFlags, viewContext: GraphicsViewContext): void {
     const childNodes = this._node.childNodes;
-    const renderedViews = this._renderedViews;
-    if ((processFlags & View.ProcessMask) !== 0 && (childNodes.length !== 0 || renderedViews.length !== 0)) {
+    const graphicsViews = this._graphicsViews;
+    if ((processFlags & View.ProcessMask) !== 0 && (childNodes.length !== 0 || graphicsViews.length !== 0)) {
       this.willProcessChildViews(viewContext);
       let i = 0;
       while (i < childNodes.length) {
@@ -539,8 +626,8 @@ export class CanvasView extends HtmlView implements RenderedView {
         i += 1;
       }
       i = 0;
-      while (i < renderedViews.length) {
-        const childView = renderedViews[i];
+      while (i < graphicsViews.length) {
+        const childView = graphicsViews[i];
         const childViewContext = this.childViewContext(childView, viewContext);
         this.doProcessChildView(childView, processFlags, childViewContext);
         if ((childView.viewFlags & View.RemovingFlag) !== 0) {
@@ -554,13 +641,18 @@ export class CanvasView extends HtmlView implements RenderedView {
     }
   }
 
-  cascadeDisplay(displayFlags: ViewFlags, viewContext: RenderedViewContext): void {
+  needsDisplay(displayFlags: ViewFlags, viewContext: GraphicsViewContext): ViewFlags {
+    displayFlags |= View.NeedsRender;
+    return displayFlags;
+  }
+
+  cascadeDisplay(displayFlags: ViewFlags, viewContext: GraphicsViewContext): void {
     viewContext = this.canvasViewContext(viewContext);
     super.cascadeDisplay(displayFlags, viewContext);
   }
 
   /** @hidden */
-  protected doDisplay(displayFlags: ViewFlags, viewContext: RenderedViewContext): void {
+  protected doDisplay(displayFlags: ViewFlags, viewContext: GraphicsViewContext): void {
     let cascadeFlags = displayFlags;
     this._viewFlags &= ~(View.NeedsDisplay | View.NeedsComposite);
     this.willDisplay(viewContext);
@@ -599,31 +691,25 @@ export class CanvasView extends HtmlView implements RenderedView {
     }
   }
 
-  protected didDisplay(viewContext: RenderedViewContext): void {
-    this.detectMouseHover();
+  protected didDisplay(viewContext: GraphicsViewContext): void {
+    this.detectHitTargets();
     super.didDisplay(viewContext);
   }
 
-  protected onLayout(viewContext: RenderedViewContext): void {
-    super.onLayout(viewContext);
-    this.resizeCanvas(this._node);
-    this.resetRenderer();
-  }
-
-  protected willRender(viewContext: RenderedViewContext): void {
-    this.willObserve(function (viewObserver: RenderedViewObserver): void {
+  protected willRender(viewContext: GraphicsViewContext): void {
+    this.willObserve(function (viewObserver: CanvasViewObserver): void {
       if (viewObserver.viewWillRender !== void 0) {
         viewObserver.viewWillRender(viewContext, this);
       }
     });
   }
 
-  protected onRender(viewContext: RenderedViewContext): void {
+  protected onRender(viewContext: GraphicsViewContext): void {
     this.clearCanvas();
   }
 
-  protected didRender(viewContext: RenderedViewContext): void {
-    this.didObserve(function (viewObserver: RenderedViewObserver): void {
+  protected didRender(viewContext: GraphicsViewContext): void {
+    this.didObserve(function (viewObserver: CanvasViewObserver): void {
       if (viewObserver.viewDidRender !== void 0) {
         viewObserver.viewDidRender(viewContext, this);
       }
@@ -631,10 +717,10 @@ export class CanvasView extends HtmlView implements RenderedView {
   }
 
   /** @hidden */
-  protected doDisplayChildViews(displayFlags: ViewFlags, viewContext: RenderedViewContext): void {
+  protected doDisplayChildViews(displayFlags: ViewFlags, viewContext: GraphicsViewContext): void {
     const childNodes = this._node.childNodes;
-    const renderedViews = this._renderedViews;
-    if ((displayFlags & View.DisplayMask) !== 0 && (childNodes.length !== 0 || renderedViews.length !== 0)) {
+    const graphicsViews = this._graphicsViews;
+    if ((displayFlags & View.DisplayMask) !== 0 && (childNodes.length !== 0 || graphicsViews.length !== 0)) {
       this.willDisplayChildViews(viewContext);
       let i = 0;
       while (i < childNodes.length) {
@@ -651,8 +737,8 @@ export class CanvasView extends HtmlView implements RenderedView {
         i += 1;
       }
       i = 0;
-      while (i < renderedViews.length) {
-        const childView = renderedViews[i];
+      while (i < graphicsViews.length) {
+        const childView = graphicsViews[i];
         const childViewContext = this.childViewContext(childView, viewContext);
         this.doDisplayChildView(childView, displayFlags, childViewContext);
         if ((childView.viewFlags & View.RemovingFlag) !== 0) {
@@ -666,11 +752,11 @@ export class CanvasView extends HtmlView implements RenderedView {
     }
   }
 
-  childViewContext(childView: View, viewContext: RenderedViewContext): RenderedViewContext {
+  childViewContext(childView: View, viewContext: GraphicsViewContext): GraphicsViewContext {
     return viewContext;
   }
 
-  canvasViewContext(viewContext?: ViewContext): RenderedViewContext {
+  canvasViewContext(viewContext?: ViewContext): GraphicsViewContext {
     if (viewContext === void 0) {
       viewContext = this.rootView!.viewContext;
     }
@@ -709,7 +795,9 @@ export class CanvasView extends HtmlView implements RenderedView {
   }
 
   protected onSetHidden(hidden: boolean): void {
-    this.requireUpdate(View.NeedsLayout);
+    if (!hidden) {
+      this.requireUpdate(View.NeedsRender);
+    }
   }
 
   protected didSetHidden(hidden: boolean): void {
@@ -748,7 +836,7 @@ export class CanvasView extends HtmlView implements RenderedView {
 
   protected onSetCulled(culled: boolean): void {
     if (!culled) {
-      this.requireUpdate(View.NeedsLayout);
+      this.requireUpdate(View.NeedsRender);
     }
   }
 
@@ -776,14 +864,14 @@ export class CanvasView extends HtmlView implements RenderedView {
     return this._viewFrame;
   }
 
-  hitTest(x: number, y: number, viewContext?: RenderedViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext?: GraphicsViewContext): GraphicsView | null {
     if (viewContext === void 0) {
       viewContext = this.canvasViewContext();
     }
-    let hit: RenderedView | null = null;
-    const renderedViews = this._renderedViews;
-    for (let i = renderedViews.length - 1; i >= 0; i -= 1) {
-      const childView = renderedViews[i];
+    let hit: GraphicsView | null = null;
+    const graphicsViews = this._graphicsViews;
+    for (let i = graphicsViews.length - 1; i >= 0; i -= 1) {
+      const childView = graphicsViews[i];
       if (!childView.isHidden() && !childView.isCulled()) {
         const hitBounds = childView.hitBounds;
         if (hitBounds.contains(x, y)) {
@@ -797,18 +885,131 @@ export class CanvasView extends HtmlView implements RenderedView {
     return hit;
   }
 
-  get eventSurface(): Node {
-    return this._eventSurface;
+  /** @hidden */
+  protected detectHitTargets(clientBounds?: BoxR2): void {
+    if ((this._canvasFlags & CanvasView.MouseEventsFlag) !== 0) {
+      const mouse = this._mouse;
+      if (mouse !== null) {
+        if (clientBounds === void 0) {
+          clientBounds = this.clientBounds;
+        }
+        this.detectMouseTarget(mouse, this.clientBounds);
+      }
+    }
+    if ((this._canvasFlags & CanvasView.PointerEventsFlag) !== 0) {
+      const pointers = this._pointers;
+      for (const id in pointers) {
+        const pointer = pointers[id]!;
+        if (clientBounds === void 0) {
+          clientBounds = this.clientBounds;
+        }
+        this.detectPointerTarget(pointer, clientBounds);
+      }
+    }
   }
 
-  setEventSurface(eventSurface?: Node): void {
-    if (eventSurface === void 0) {
-      eventSurface = this._node;
+  get eventNode(): Node {
+    return this._eventNode;
+  }
+
+  setEventNode(eventNode: Node | null): void {
+    if (eventNode === null) {
+      eventNode = this._node;
     }
-    if (this._eventSurface !== eventSurface) {
-      this.removeEventListeners(this._eventSurface);
-      this._eventSurface = eventSurface;
-      this.addEventListeners(this._eventSurface);
+    if (this._eventNode !== eventNode) {
+      this.detachEvents(this._eventNode);
+      this._eventNode = eventNode;
+      this.attachEvents(this._eventNode);
+    }
+  }
+
+  clickEventsEnabled(): boolean;
+  clickEventsEnabled(clickEvents: boolean): this;
+  clickEventsEnabled(newClickEvents?: boolean): boolean | this {
+    const oldClickEvents = (this._canvasFlags & CanvasView.ClickEventsFlag) !== 0;
+    if (newClickEvents === void 0) {
+      return oldClickEvents;
+    } else {
+      if (newClickEvents && !oldClickEvents) {
+        this._canvasFlags |= CanvasView.ClickEventsFlag;
+        this.attachClickEvents(this._eventNode);
+      } else if (!newClickEvents && oldClickEvents) {
+        this._canvasFlags &= ~CanvasView.ClickEventsFlag;
+        this.detachClickEvents(this._eventNode);
+      }
+      return this;
+    }
+  }
+
+  wheelEventsEnabled(): boolean;
+  wheelEventsEnabled(wheelEvents: boolean): this;
+  wheelEventsEnabled(newWheelEvents?: boolean): boolean | this {
+    const oldWheelEvents = (this._canvasFlags & CanvasView.WheelEventsFlag) !== 0;
+    if (newWheelEvents === void 0) {
+      return oldWheelEvents;
+    } else {
+      if (newWheelEvents && !oldWheelEvents) {
+        this._canvasFlags |= CanvasView.WheelEventsFlag;
+        this.attachWheelEvents(this._eventNode);
+      } else if (!newWheelEvents && oldWheelEvents) {
+        this._canvasFlags &= ~CanvasView.WheelEventsFlag;
+        this.detachWheelEvents(this._eventNode);
+      }
+      return this;
+    }
+  }
+
+  mouseEventsEnabled(): boolean;
+  mouseEventsEnabled(mouseEvents: boolean): this;
+  mouseEventsEnabled(newMouseEvents?: boolean): boolean | this {
+    const oldMouseEvents = (this._canvasFlags & CanvasView.MouseEventsFlag) !== 0;
+    if (newMouseEvents === void 0) {
+      return oldMouseEvents;
+    } else {
+      if (newMouseEvents && !oldMouseEvents) {
+        this._canvasFlags |= CanvasView.MouseEventsFlag;
+        this.attachPassiveMouseEvents(this._eventNode);
+      } else if (!newMouseEvents && oldMouseEvents) {
+        this._canvasFlags &= ~CanvasView.MouseEventsFlag;
+        this.detachPassiveMouseEvents(this._eventNode);
+      }
+      return this;
+    }
+  }
+
+  pointerEventsEnabled(): boolean;
+  pointerEventsEnabled(pointerEvents: boolean): this;
+  pointerEventsEnabled(newPointerEvents?: boolean): boolean | this {
+    const oldPointerEvents = (this._canvasFlags & CanvasView.PointerEventsFlag) !== 0;
+    if (newPointerEvents === void 0) {
+      return oldPointerEvents;
+    } else {
+      if (newPointerEvents && !oldPointerEvents) {
+        this._canvasFlags |= CanvasView.PointerEventsFlag;
+        this.attachPassivePointerEvents(this._eventNode);
+      } else if (!newPointerEvents && oldPointerEvents) {
+        this._canvasFlags &= ~CanvasView.PointerEventsFlag;
+        this.detachPassivePointerEvents(this._eventNode);
+      }
+      return this;
+    }
+  }
+
+  touchEventsEnabled(): boolean;
+  touchEventsEnabled(touchEvents: boolean): this;
+  touchEventsEnabled(newTouchEvents?: boolean): boolean | this {
+    const oldTouchEvents = (this._canvasFlags & CanvasView.TouchEventsFlag) !== 0;
+    if (newTouchEvents === void 0) {
+      return oldTouchEvents;
+    } else {
+      if (newTouchEvents && !oldTouchEvents) {
+        this._canvasFlags |= CanvasView.TouchEventsFlag;
+        this.attachPassiveTouchEvents(this._eventNode);
+      } else if (!newTouchEvents && oldTouchEvents) {
+        this._canvasFlags &= ~CanvasView.TouchEventsFlag;
+        this.detachPassiveTouchEvents(this._eventNode);
+      }
+      return this;
     }
   }
 
@@ -824,39 +1025,46 @@ export class CanvasView extends HtmlView implements RenderedView {
   }
 
   /** @hidden */
-  protected addEventListeners(node: Node): void {
-    node.addEventListener("click", this.onClick);
-    node.addEventListener("dblclick", this.onDblClick);
-    node.addEventListener("contextmenu", this.onContextMenu);
-    node.addEventListener("mousedown", this.onMouseDown);
-    window.addEventListener("mousemove", this.onMouseMove);
-    node.addEventListener("mouseup", this.onMouseUp);
-    node.addEventListener("wheel", this.onWheel, {passive: true});
+  protected attachEvents(eventNode: Node): void {
+    if ((this._canvasFlags & CanvasView.ClickEventsFlag) !== 0) {
+      this.attachClickEvents(eventNode);
+    }
 
-    node.addEventListener("touchstart", this.onTouchStart, {passive: true});
-    node.addEventListener("touchmove", this.onTouchMove, {passive: true});
-    node.addEventListener("touchcancel", this.onTouchCancel);
-    node.addEventListener("touchend", this.onTouchEnd);
+    if ((this._canvasFlags & CanvasView.WheelEventsFlag) !== 0) {
+      this.attachWheelEvents(eventNode);
+    }
+
+    if ((this._canvasFlags & CanvasView.MouseEventsFlag) !== 0) {
+      this.attachPassiveMouseEvents(eventNode);
+    }
+
+    if ((this._canvasFlags & CanvasView.PointerEventsFlag) !== 0) {
+      this.attachPassivePointerEvents(eventNode);
+    }
+
+    if ((this._canvasFlags & CanvasView.TouchEventsFlag) !== 0) {
+      this.attachPassiveTouchEvents(eventNode);
+    }
   }
 
   /** @hidden */
-  protected removeEventListeners(node: Node): void {
-    node.removeEventListener("click", this.onClick);
-    node.removeEventListener("dblclick", this.onDblClick);
-    node.removeEventListener("contextmenu", this.onContextMenu);
-    node.removeEventListener("mousedown", this.onMouseDown);
-    window.removeEventListener("mousemove", this.onMouseMove);
-    node.removeEventListener("mouseup", this.onMouseUp);
-    node.removeEventListener("wheel", this.onWheel);
+  protected detachEvents(eventNode: Node): void {
+    this.detachClickEvents(eventNode);
 
-    node.removeEventListener("touchstart", this.onTouchStart);
-    node.removeEventListener("touchmove", this.onTouchMove);
-    node.removeEventListener("touchcancel", this.onTouchCancel);
-    node.removeEventListener("touchend", this.onTouchEnd);
+    this.detachWheelEvents(eventNode);
+
+    this.detachPassiveMouseEvents(eventNode);
+    this.detachActiveMouseEvents(eventNode);
+
+    this.detachPassivePointerEvents(eventNode);
+    this.detachActivePointerEvents(eventNode);
+
+    this.detachPassiveTouchEvents(eventNode);
+    this.detachActiveTouchEvents(eventNode);
   }
 
   /** @hidden */
-  fireEvent(event: ViewEvent, clientX: number, clientY: number): RenderedView | null {
+  fireEvent(event: ViewEvent, clientX: number, clientY: number): GraphicsView | null {
     const clientBounds = this.clientBounds;
     if (clientBounds.contains(clientX, clientY)) {
       const x = clientX - clientBounds.x;
@@ -872,104 +1080,481 @@ export class CanvasView extends HtmlView implements RenderedView {
   }
 
   /** @hidden */
-  private fireMouseEvent(event: MouseEvent): RenderedView | null {
+  protected attachClickEvents(eventNode: Node): void {
+    eventNode.addEventListener("click", this.onClick);
+    eventNode.addEventListener("dblclick", this.onDblClick);
+    eventNode.addEventListener("contextmenu", this.onContextMenu);
+  }
+
+  /** @hidden */
+  protected detachClickEvents(eventNode: Node): void {
+    eventNode.removeEventListener("click", this.onClick);
+    eventNode.removeEventListener("dblclick", this.onDblClick);
+    eventNode.removeEventListener("contextmenu", this.onContextMenu);
+  }
+
+  /** @hidden */
+  protected attachWheelEvents(eventNode: Node): void {
+    eventNode.addEventListener("wheel", this.onWheel);
+  }
+
+  /** @hidden */
+  protected detachWheelEvents(eventNode: Node): void {
+    eventNode.removeEventListener("wheel", this.onWheel);
+  }
+
+  /** @hidden */
+  protected attachPassiveMouseEvents(eventNode: Node): void {
+    eventNode.addEventListener("mouseenter", this.onMouseEnter);
+    eventNode.addEventListener("mouseleave", this.onMouseLeave);
+    eventNode.addEventListener("mousedown", this.onMouseDown);
+  }
+
+  /** @hidden */
+  protected detachPassiveMouseEvents(eventNode: Node): void {
+    eventNode.removeEventListener("mouseenter", this.onMouseEnter);
+    eventNode.removeEventListener("mouseleave", this.onMouseLeave);
+    eventNode.removeEventListener("mousedown", this.onMouseDown);
+  }
+
+  /** @hidden */
+  protected attachActiveMouseEvents(eventNode: Node): void {
+    document.body.addEventListener("mousemove", this.onMouseMove);
+    document.body.addEventListener("mouseup", this.onMouseUp);
+  }
+
+  /** @hidden */
+  protected detachActiveMouseEvents(eventNode: Node): void {
+    document.body.removeEventListener("mousemove", this.onMouseMove);
+    document.body.removeEventListener("mouseup", this.onMouseUp);
+  }
+
+  /** @hidden */
+  protected updateMouse(mouse: CanvasViewMouse, event: MouseEvent): void {
+    mouse.button = event.button;
+    mouse.buttons = event.buttons;
+    mouse.altKey = event.altKey;
+    mouse.ctrlKey = event.ctrlKey;
+    mouse.metaKey = event.metaKey;
+    mouse.shiftKey = event.shiftKey;
+
+    mouse.clientX = event.clientX;
+    mouse.clientY = event.clientY;
+    mouse.screenX = event.screenX;
+    mouse.screenY = event.screenY;
+    mouse.movementX = event.movementX;
+    mouse.movementY = event.movementY;
+
+    mouse.view = event.view;
+    mouse.detail = event.detail;
+    mouse.relatedTarget = event.relatedTarget;
+  }
+
+  /** @hidden */
+  protected fireMouseEvent(event: MouseEvent): GraphicsView | null {
     return this.fireEvent(event, event.clientX, event.clientY);
   }
 
   /** @hidden */
   protected onClick(event: MouseEvent): void {
+    const mouse = this._mouse;
+    if (mouse !== null) {
+      this.updateMouse(mouse, event);
+    }
     this.fireMouseEvent(event);
   }
 
   /** @hidden */
   protected onDblClick(event: MouseEvent): void {
+    const mouse = this._mouse;
+    if (mouse !== null) {
+      this.updateMouse(mouse, event);
+    }
     this.fireMouseEvent(event);
   }
 
   /** @hidden */
   protected onContextMenu(event: MouseEvent): void {
-    this.fireMouseEvent(event);
-  }
-
-  /** @hidden */
-  protected onMouseDown(event: MouseEvent): void {
-    this.fireMouseEvent(event);
-  }
-
-  /** @hidden */
-  protected onMouseMove(event: MouseEvent): void {
-    this._clientX = event.clientX;
-    this._clientY = event.clientY;
-    this._screenX = event.screenX;
-    this._screenY = event.screenY;
-    const oldHoverView = this._hoverView;
-    const newHoverView = this.fireMouseEvent(event);
-    if (newHoverView !== this._hoverView) {
-      this.onMouseHoverChange(newHoverView, oldHoverView);
+    const mouse = this._mouse;
+    if (mouse !== null) {
+      this.updateMouse(mouse, event);
     }
-  }
-
-  /** @hidden */
-  protected onMouseUp(event: MouseEvent): void {
     this.fireMouseEvent(event);
   }
 
   /** @hidden */
   protected onWheel(event: WheelEvent): void {
+    const mouse = this._mouse;
+    if (mouse !== null) {
+      this.updateMouse(mouse, event);
+    }
     this.fireMouseEvent(event);
   }
 
   /** @hidden */
-  protected onMouseHoverChange(newHoverView: RenderedView | null, oldHoverView: RenderedView | null): void {
-    const eventInit: MouseEventInit = {
-      clientX: this._clientX,
-      clientY: this._clientY,
-      screenX: this._screenX,
-      screenY: this._screenY,
-      bubbles: true,
-    };
-    if (oldHoverView !== null) {
-      const outEvent = new MouseEvent("mouseout", eventInit) as ViewMouseEvent;
-      outEvent.targetView = oldHoverView;
-      outEvent.relatedTargetView = newHoverView;
-      oldHoverView.bubbleEvent(outEvent);
+  protected onMouseEnter(event: MouseEvent): void {
+    let mouse = this._mouse;
+    if (mouse === null) {
+      this.attachActiveMouseEvents(this._eventNode);
+      mouse = {};
+      this._mouse = mouse;
     }
-    this._hoverView = newHoverView;
-    if (newHoverView !== null) {
-      const overEvent = new MouseEvent("mouseover", eventInit) as ViewMouseEvent;
-      overEvent.targetView = newHoverView;
-      overEvent.relatedTargetView = oldHoverView;
-      newHoverView.bubbleEvent(overEvent);
+    this.updateMouse(mouse, event);
+  }
+
+  /** @hidden */
+  protected onMouseLeave(event: MouseEvent): void {
+    const mouse = this._mouse;
+    if (mouse !== null) {
+      this._mouse = null;
+      this.detachActiveMouseEvents(this._eventNode);
     }
   }
 
   /** @hidden */
-  protected detectMouseHover(): void {
-    const clientBounds = this.clientBounds;
-    if (clientBounds.contains(this._clientX, this._clientY)) {
-      const x = this._clientX - clientBounds.x;
-      const y = this._clientY - clientBounds.y;
-      const oldHoverView = this._hoverView;
-      const newHoverView = this.hitTest(x, y);
-      if (newHoverView !== oldHoverView) {
-        this.onMouseHoverChange(newHoverView, oldHoverView);
+  protected onMouseDown(event: MouseEvent): void {
+    let mouse = this._mouse;
+    if (mouse === null) {
+      this.attachActiveMouseEvents(this._eventNode);
+      mouse = {};
+      this._mouse = mouse;
+    }
+    this.updateMouse(mouse, event);
+    this.fireMouseEvent(event);
+  }
+
+  /** @hidden */
+  protected onMouseMove(event: MouseEvent): void {
+    let mouse = this._mouse;
+    if (mouse === null) {
+      mouse = {};
+      this._mouse = mouse;
+    }
+    this.updateMouse(mouse, event);
+    const oldTargetView = mouse.targetView as GraphicsView | undefined;
+    let newTargetView: GraphicsView | null | undefined = this.fireMouseEvent(event);
+    if (newTargetView === null) {
+      newTargetView = void 0;
+    }
+    if (newTargetView !== oldTargetView) {
+      this.onMouseTargetChange(mouse, newTargetView, oldTargetView);
+    }
+  }
+
+  /** @hidden */
+  protected onMouseUp(event: MouseEvent): void {
+    const mouse = this._mouse;
+    if (mouse !== null) {
+      this.updateMouse(mouse, event);
+    }
+    this.fireMouseEvent(event);
+  }
+
+  /** @hidden */
+  protected onMouseTargetChange(mouse: CanvasViewMouse, newTargetView: GraphicsView | undefined,
+                                oldTargetView: GraphicsView | undefined): void {
+    mouse.bubbles = true;
+    if (oldTargetView !== void 0) {
+      const outEvent = new MouseEvent("mouseout", mouse) as ViewMouseEvent;
+      outEvent.targetView = oldTargetView;
+      outEvent.relatedTargetView = newTargetView;
+      oldTargetView.bubbleEvent(outEvent);
+    }
+    mouse.targetView = newTargetView;
+    if (newTargetView !== void 0) {
+      const overEvent = new MouseEvent("mouseover", mouse) as ViewMouseEvent;
+      overEvent.targetView = newTargetView;
+      overEvent.relatedTargetView = oldTargetView;
+      newTargetView.bubbleEvent(overEvent);
+    }
+  }
+
+  /** @hidden */
+  protected detectMouseTarget(mouse: CanvasViewMouse, clientBounds: BoxR2): void {
+    const clientX = mouse.clientX!;
+    const clientY = mouse.clientY!;
+    if (clientBounds.contains(clientX, clientY)) {
+      const x = clientX - clientBounds.x;
+      const y = clientY - clientBounds.y;
+      const oldTargetView = mouse.targetView as GraphicsView | undefined;
+      let newTargetView: GraphicsView | null | undefined = this.hitTest(x, y);
+      if (newTargetView === null) {
+        newTargetView = void 0;
+      }
+      if (newTargetView !== oldTargetView) {
+        this.onMouseTargetChange(mouse, newTargetView, oldTargetView);
       }
     }
   }
 
   /** @hidden */
-  private fireTouchEvent(type: string, originalEvent: TouchEvent, dispatched: RenderedView[]): void {
+  protected attachPassivePointerEvents(eventNode: Node): void {
+    eventNode.addEventListener("pointerenter", this.onPointerEnter);
+    eventNode.addEventListener("pointerleave", this.onPointerLeave);
+    eventNode.addEventListener("pointerdown", this.onPointerDown);
+  }
+
+  /** @hidden */
+  protected detachPassivePointerEvents(eventNode: Node): void {
+    eventNode.removeEventListener("pointerenter", this.onPointerEnter);
+    eventNode.removeEventListener("pointerleave", this.onPointerLeave);
+    eventNode.removeEventListener("pointerdown", this.onPointerDown);
+  }
+
+  /** @hidden */
+  protected attachActivePointerEvents(eventNode: Node): void {
+    document.body.addEventListener("pointermove", this.onPointerMove);
+    document.body.addEventListener("pointerup", this.onPointerUp);
+    document.body.addEventListener("pointercancel", this.onPointerCancel);
+  }
+
+  /** @hidden */
+  protected detachActivePointerEvents(eventNode: Node): void {
+    document.body.removeEventListener("pointermove", this.onPointerMove);
+    document.body.removeEventListener("pointerup", this.onPointerUp);
+    document.body.removeEventListener("pointercancel", this.onPointerCancel);
+  }
+
+  /** @hidden */
+  protected updatePointer(pointer: CanvasViewPointer, event: PointerEvent): void {
+    pointer.pointerId = event.pointerId;
+    pointer.pointerType = event.pointerType;
+    pointer.isPrimary = event.isPrimary;
+
+    pointer.button = event.button;
+    pointer.buttons = event.buttons;
+    pointer.altKey = event.altKey;
+    pointer.ctrlKey = event.ctrlKey;
+    pointer.metaKey = event.metaKey;
+    pointer.shiftKey = event.shiftKey;
+
+    pointer.clientX = event.clientX;
+    pointer.clientY = event.clientY;
+    pointer.screenX = event.screenX;
+    pointer.screenY = event.screenY;
+    pointer.movementX = event.movementX;
+    pointer.movementY = event.movementY;
+
+    pointer.width = event.width;
+    pointer.height = event.height;
+    pointer.tiltX = event.tiltX;
+    pointer.tiltY = event.tiltY;
+    pointer.twist = event.twist;
+    pointer.pressure = event.pressure;
+    pointer.tangentialPressure = event.tangentialPressure;
+
+    pointer.view = event.view;
+    pointer.detail = event.detail;
+    pointer.relatedTarget = event.relatedTarget;
+  }
+
+  /** @hidden */
+  protected firePointerEvent(event: PointerEvent): GraphicsView | null {
+    return this.fireEvent(event, event.clientX, event.clientY);
+  }
+
+  /** @hidden */
+  protected onPointerEnter(event: PointerEvent): void {
+    const id = "" + event.pointerId;
+    const pointers = this._pointers;
+    let pointer = pointers[id];
+    if (pointer === void 0) {
+      if (Object.keys(pointers).length === 0) {
+        this.attachActivePointerEvents(this._eventNode);
+      }
+      pointer = {};
+      pointers[id] = pointer;
+    }
+    this.updatePointer(pointer, event);
+  }
+
+  /** @hidden */
+  protected onPointerLeave(event: PointerEvent): void {
+    const id = "" + event.pointerId;
+    const pointers = this._pointers;
+    const pointer = pointers[id];
+    if (pointer !== void 0) {
+      if (pointer.targetView !== void 0) {
+        this.onPointerTargetChange(pointer, void 0, pointer.targetView as GraphicsView);
+      }
+      delete pointers[id];
+      if (Object.keys(pointers).length === 0) {
+        this.detachActivePointerEvents(this._eventNode);
+      }
+    }
+  }
+
+  /** @hidden */
+  protected onPointerDown(event: PointerEvent): void {
+    const id = "" + event.pointerId;
+    const pointers = this._pointers;
+    let pointer = pointers[id];
+    if (pointer === void 0) {
+      if (Object.keys(pointers).length === 0) {
+        this.attachActivePointerEvents(this._eventNode);
+      }
+      pointer = {};
+      pointers[id] = pointer;
+    }
+    this.updatePointer(pointer, event);
+    this.firePointerEvent(event);
+  }
+
+  /** @hidden */
+  protected onPointerMove(event: PointerEvent): void {
+    const id = "" + event.pointerId;
+    const pointers = this._pointers;
+    let pointer = pointers[id];
+    if (pointer === void 0) {
+      if (Object.keys(pointers).length === 0) {
+        this.attachActivePointerEvents(this._eventNode);
+      }
+      pointer = {};
+      pointers[id] = pointer;
+    }
+    this.updatePointer(pointer, event);
+    const oldTargetView = pointer.targetView as GraphicsView | undefined;
+    let newTargetView: GraphicsView | null | undefined = this.firePointerEvent(event);
+    if (newTargetView === null) {
+      newTargetView = void 0;
+    }
+    if (newTargetView !== oldTargetView) {
+      this.onPointerTargetChange(pointer, newTargetView, oldTargetView);
+    }
+  }
+
+  /** @hidden */
+  protected onPointerUp(event: PointerEvent): void {
+    const id = "" + event.pointerId;
+    const pointers = this._pointers;
+    const pointer = pointers[id];
+    if (pointer !== void 0) {
+      this.updatePointer(pointer, event);
+    }
+    this.firePointerEvent(event);
+    if (pointer !== void 0 && event.pointerType !== "mouse") {
+      if (pointer.targetView !== void 0) {
+        this.onPointerTargetChange(pointer, void 0, pointer.targetView as GraphicsView);
+      }
+      delete pointers[id];
+      if (Object.keys(pointers).length === 0) {
+        this.detachActivePointerEvents(this._eventNode);
+      }
+    }
+  }
+
+  /** @hidden */
+  protected onPointerCancel(event: PointerEvent): void {
+    const id = "" + event.pointerId;
+    const pointers = this._pointers;
+    const pointer = pointers[id];
+    if (pointer !== void 0) {
+      this.updatePointer(pointer, event);
+    }
+    this.firePointerEvent(event);
+    if (pointer !== void 0 && event.pointerType !== "mouse") {
+      if (pointer.targetView !== void 0) {
+        this.onPointerTargetChange(pointer, void 0, pointer.targetView as GraphicsView);
+      }
+      delete pointers[id];
+      if (Object.keys(pointers).length === 0) {
+        this.detachActivePointerEvents(this._eventNode);
+      }
+    }
+  }
+
+  /** @hidden */
+  protected onPointerTargetChange(pointer: CanvasViewPointer, newTargetView: GraphicsView | undefined,
+                                  oldTargetView: GraphicsView | undefined): void {
+    pointer.bubbles = true;
+    if (oldTargetView !== void 0) {
+      const outEvent = new PointerEvent("pointerout", pointer) as ViewPointerEvent;
+      outEvent.targetView = oldTargetView;
+      outEvent.relatedTargetView = newTargetView;
+      oldTargetView.bubbleEvent(outEvent);
+    }
+    pointer.targetView = newTargetView;
+    if (newTargetView !== void 0) {
+      const overEvent = new PointerEvent("pointerover", pointer) as ViewPointerEvent;
+      overEvent.targetView = newTargetView;
+      overEvent.relatedTargetView = oldTargetView;
+      newTargetView.bubbleEvent(overEvent);
+    }
+  }
+
+  /** @hidden */
+  protected detectPointerTarget(pointer: CanvasViewPointer, clientBounds: BoxR2): void {
+    const clientX = pointer.clientX!;
+    const clientY = pointer.clientY!;
+    if (clientBounds.contains(clientX, clientY)) {
+      const x = clientX - clientBounds.x;
+      const y = clientY - clientBounds.y;
+      const oldTargetView = pointer.targetView as GraphicsView | undefined;
+      let newTargetView: GraphicsView | null | undefined = this.hitTest(x, y);
+      if (newTargetView === null) {
+        newTargetView = void 0;
+      }
+      if (newTargetView !== oldTargetView) {
+        this.onPointerTargetChange(pointer, newTargetView, oldTargetView);
+      }
+    }
+  }
+
+  /** @hidden */
+  protected attachPassiveTouchEvents(eventNode: Node): void {
+    eventNode.addEventListener("touchstart", this.onTouchStart);
+  }
+
+  /** @hidden */
+  protected detachPassiveTouchEvents(eventNode: Node): void {
+    eventNode.removeEventListener("touchstart", this.onTouchStart);
+  }
+
+  /** @hidden */
+  protected attachActiveTouchEvents(eventNode: Node): void {
+    eventNode.addEventListener("touchmove", this.onTouchMove);
+    eventNode.addEventListener("touchend", this.onTouchEnd);
+    eventNode.addEventListener("touchcancel", this.onTouchCancel);
+  }
+
+  /** @hidden */
+  protected detachActiveTouchEvents(eventNode: Node): void {
+    eventNode.removeEventListener("touchmove", this.onTouchMove);
+    eventNode.removeEventListener("touchend", this.onTouchEnd);
+    eventNode.removeEventListener("touchcancel", this.onTouchCancel);
+  }
+
+  /** @hidden */
+  protected updateTouch(touch: CanvasViewTouch, event: Touch): void {
+    touch.clientX = event.clientX;
+    touch.clientY = event.clientY;
+    touch.screenX = event.screenX;
+    touch.screenY = event.screenY;
+    touch.pageX = event.pageX;
+    touch.pageY = event.pageY;
+
+    touch.radiusX = event.radiusX;
+    touch.radiusY = event.radiusY;
+    touch.altitudeAngle = event.altitudeAngle;
+    touch.azimuthAngle = event.azimuthAngle;
+    touch.rotationAngle = event.rotationAngle;
+    touch.force = event.force;
+  }
+
+  /** @hidden */
+  protected fireTouchEvent(type: string, originalEvent: TouchEvent): void {
     const changedTouches = originalEvent.changedTouches;
+    const dispatched: GraphicsView[] = [];
     for (let i = 0, n = changedTouches.length; i < n; i += 1) {
       const changedTouch = changedTouches[i] as ViewTouch;
-      const targetView = changedTouch.targetView as RenderedView | undefined;
+      const targetView = changedTouch.targetView as GraphicsView | undefined;
       if (targetView !== void 0 && dispatched.indexOf(targetView) < 0) {
-        const startEvent = new TouchEvent(type, {
+        const startEvent: ViewTouchEvent = new TouchEvent(type, {
           changedTouches: changedTouches as unknown as Touch[],
           targetTouches: originalEvent.targetTouches as unknown as Touch[],
           touches: originalEvent.touches as unknown as Touch[],
           bubbles: true,
-        }) as ViewTouchEvent;
+        });
         startEvent.targetView = targetView;
         const targetViewTouches: Touch[] = [changedTouch];
         for (let j = i + 1; j < n; j += 1) {
@@ -994,75 +1579,124 @@ export class CanvasView extends HtmlView implements RenderedView {
 
   /** @hidden */
   protected onTouchStart(event: TouchEvent): void {
-    const clientBounds = this.clientBounds;
+    let clientBounds: BoxR2 | undefined;
+    const touches = this._touches;
     const changedTouches = event.changedTouches;
     for (let i = 0, n = changedTouches.length; i < n; i += 1) {
       const changedTouch = changedTouches[i] as ViewTouch;
-      const clientX = changedTouch.clientX;
-      const clientY = changedTouch.clientY;
+      const id = "" + changedTouch.identifier;
+      let touch = touches[id];
+      if (touch === void 0) {
+        if (Object.keys(touches).length === 0) {
+          this.attachActiveTouchEvents(this._eventNode);
+        }
+        touch = {
+          identifier: changedTouch.identifier,
+          touchType: changedTouch.touchType,
+          target: changedTouch.target,
+        };
+        touches[id] = touch;
+      }
+      this.updateTouch(touch, changedTouch);
+      const clientX = touch.clientX!;
+      const clientY = touch.clientY!;
+      if (clientBounds === void 0) {
+        clientBounds = this.clientBounds;
+      }
       if (clientBounds.contains(clientX, clientY)) {
         const x = clientX - clientBounds.x;
         const y = clientY - clientBounds.y;
         const hit = this.hitTest(x, y);
         if (hit !== null) {
+          touch.targetView = hit;
           changedTouch.targetView = hit;
         }
       }
-      this._touches[changedTouch.identifier] = changedTouch;
     }
-    const dispatched: RenderedView[] = [];
-    this.fireTouchEvent("touchstart", event, dispatched);
+    this.fireTouchEvent("touchstart", event);
   }
 
   /** @hidden */
   protected onTouchMove(event: TouchEvent): void {
+    const touches = this._touches;
     const changedTouches = event.changedTouches;
     for (let i = 0, n = changedTouches.length; i < n; i += 1) {
       const changedTouch = changedTouches[i] as ViewTouch;
-      const touch = this._touches[changedTouch.identifier];
-      if (touch !== void 0) {
-        changedTouch.targetView = touch.targetView;
+      const id = "" + changedTouch.identifier;
+      let touch = touches[id];
+      if (touch === void 0) {
+        touch = {
+          identifier: changedTouch.identifier,
+          touchType: changedTouch.touchType,
+          target: changedTouch.target,
+        };
+        touches[id] = touch;
       }
+      this.updateTouch(touch, changedTouch);
+      changedTouch.targetView = touch.targetView;
     }
-    const dispatched: RenderedView[] = [];
-    this.fireTouchEvent("touchmove", event, dispatched);
-  }
-
-  /** @hidden */
-  protected onTouchCancel(event: TouchEvent): void {
-    const changedTouches = event.changedTouches;
-    const n = changedTouches.length;
-    for (let i = 0; i < n; i += 1) {
-      const changedTouch = changedTouches[i] as ViewTouch;
-      const touch = this._touches[changedTouch.identifier];
-      if (touch !== void 0) {
-        changedTouch.targetView = touch.targetView;
-      }
-    }
-    const dispatched: RenderedView[] = [];
-    this.fireTouchEvent("touchcancel", event, dispatched);
-    for (let i = 0; i < n; i += 1) {
-      const changedTouch = changedTouches[i] as ViewTouch;
-      delete this._touches[changedTouch.identifier];
-    }
+    this.fireTouchEvent("touchmove", event);
   }
 
   /** @hidden */
   protected onTouchEnd(event: TouchEvent): void {
+    const touches = this._touches;
     const changedTouches = event.changedTouches;
     const n = changedTouches.length;
     for (let i = 0; i < n; i += 1) {
       const changedTouch = changedTouches[i] as ViewTouch;
-      const touch = this._touches[changedTouch.identifier];
-      if (touch !== void 0) {
-        changedTouch.targetView = touch.targetView;
+      const id = "" + changedTouch.identifier;
+      let touch = touches[id];
+      if (touch === void 0) {
+        touch = {
+          identifier: changedTouch.identifier,
+          touchType: changedTouch.touchType,
+          target: changedTouch.target,
+        };
+        touches[id] = touch;
       }
+      this.updateTouch(touch, changedTouch);
+      changedTouch.targetView = touch.targetView;
     }
-    const dispatched: RenderedView[] = [];
-    this.fireTouchEvent("touchend", event, dispatched);
+    this.fireTouchEvent("touchend", event);
     for (let i = 0; i < n; i += 1) {
       const changedTouch = changedTouches[i] as ViewTouch;
-      delete this._touches[changedTouch.identifier];
+      const id = "" + changedTouch.identifier;
+      delete touches[id];
+      if (Object.keys(touches).length === 0) {
+        this.detachActiveTouchEvents(this._eventNode);
+      }
+    }
+  }
+
+  /** @hidden */
+  protected onTouchCancel(event: TouchEvent): void {
+    const touches = this._touches;
+    const changedTouches = event.changedTouches;
+    const n = changedTouches.length;
+    for (let i = 0; i < n; i += 1) {
+      const changedTouch = changedTouches[i] as ViewTouch;
+      const id = "" + changedTouch.identifier;
+      let touch = touches[id];
+      if (touch === void 0) {
+        touch = {
+          identifier: changedTouch.identifier,
+          touchType: changedTouch.touchType,
+          target: changedTouch.target,
+        };
+        touches[id] = touch;
+      }
+      this.updateTouch(touch, changedTouch);
+      changedTouch.targetView = touch.targetView;
+    }
+    this.fireTouchEvent("touchcancel", event);
+    for (let i = 0; i < n; i += 1) {
+      const changedTouch = changedTouches[i] as ViewTouch;
+      const id = "" + changedTouch.identifier;
+      delete touches[id];
+      if (Object.keys(touches).length === 0) {
+        this.detachActiveTouchEvents(this._eventNode);
+      }
     }
   }
 
@@ -1119,5 +1753,22 @@ export class CanvasView extends HtmlView implements RenderedView {
 
   /** @hidden */
   static readonly tag: string = "canvas";
+
+  /** @hidden */
+  static readonly ClickEventsFlag: CanvasFlags = 1 << 0;
+  /** @hidden */
+  static readonly WheelEventsFlag: CanvasFlags = 1 << 1;
+  /** @hidden */
+  static readonly MouseEventsFlag: CanvasFlags = 1 << 2;
+  /** @hidden */
+  static readonly PointerEventsFlag: CanvasFlags = 1 << 3;
+  /** @hidden */
+  static readonly TouchEventsFlag: CanvasFlags = 1 << 4;
+  /** @hidden */
+  static readonly EventsMask: CanvasFlags = CanvasView.ClickEventsFlag
+                                          | CanvasView.WheelEventsFlag
+                                          | CanvasView.MouseEventsFlag
+                                          | CanvasView.PointerEventsFlag
+                                          | CanvasView.TouchEventsFlag;
 }
 View.Canvas = CanvasView;

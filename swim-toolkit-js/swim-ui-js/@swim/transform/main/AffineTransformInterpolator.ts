@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,16 +40,17 @@ export class AffineTransformInterpolator extends TransformInterpolator<AffineTra
     return 0; // TODO: interpolate matrices
   }
 
-  range(): ReadonlyArray<AffineTransform>;
-  range(fs: ReadonlyArray<AffineTransform>): AffineTransformInterpolator;
+  range(): readonly [AffineTransform, AffineTransform];
+  range(fs: readonly [AffineTransform, AffineTransform]): AffineTransformInterpolator;
   range(f0: AffineTransform, f1: AffineTransform): AffineTransformInterpolator;
-  range(fs: ReadonlyArray<AnyTransform>): TransformInterpolator;
+  range(fs: readonly [AnyTransform, AnyTransform]): TransformInterpolator;
   range(f0: AnyTransform, f1: AnyTransform): TransformInterpolator;
-  range(f0?: ReadonlyArray<AnyTransform> | AnyTransform, f1?: AnyTransform): ReadonlyArray<AffineTransform> | TransformInterpolator {
+  range(f0?: readonly [AnyTransform, AnyTransform] | AnyTransform,
+        f1?: AnyTransform): readonly [AffineTransform, AffineTransform] | TransformInterpolator {
     if (f0 === void 0) {
       return [this.interpolate(0), this.interpolate(1)];
     } else if (f1 === void 0) {
-      f0 = f0 as ReadonlyArray<AnyTransform>
+      f0 = f0 as readonly [AnyTransform, AnyTransform];
       return AffineTransformInterpolator.between(f0[0], f0[1]);
     } else {
       return AffineTransformInterpolator.between(f0 as AnyTransform, f1);

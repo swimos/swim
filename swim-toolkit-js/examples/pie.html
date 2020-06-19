@@ -14,7 +14,9 @@
 
 const uiView = new swim.UiView(document.getElementById("ui"));
 
-const canvas = uiView.append("canvas");
+const canvas = uiView.append("canvas")
+    .pointerEventsEnabled(true)
+    .touchAction("manipulation");
 
 const pie = new swim.PieView()
     .tickColor("#4a4a4a")
@@ -27,10 +29,10 @@ const slice0 = new swim.SliceView()
     .sliceColor("#4a4a4a")
     .label(new swim.TextRunView().text("Label 0").textColor("#ffffff"))
     .legend("Legend 0")
-    .on("mouseenter", function (event) {
+    .on("pointerenter", function (event) {
       slice0.sliceColor("#1db0ef", {duration: 200});
     })
-    .on("mouseleave", function (event) {
+    .on("pointerleave", function (event) {
       slice0.sliceColor("#4a4a4a", {duration: 200});
     });
 pie.append(slice0, "slice0");
@@ -40,10 +42,10 @@ const slice1 = new swim.SliceView()
     .sliceColor("#989898")
     .label(new swim.TextRunView().text("Label 1").textColor("#ffffff"))
     .legend("Legend 1")
-    .on("mouseenter", function (event) {
+    .on("pointerenter", function (event) {
       slice1.sliceColor("#71d600", {duration: 200});
     })
-    .on("mouseleave", function (event) {
+    .on("pointerleave", function (event) {
       slice1.sliceColor("#989898", {duration: 200});
     });
 pie.append(slice1, "slice1");

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@ import {AnyPointR2, PointR2, BoxR2, SegmentR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {View, MemberAnimator, RenderedView, StrokeViewInit, StrokeView} from "@swim/view";
+import {View, ViewAnimator, GraphicsView, StrokeViewInit, StrokeView} from "@swim/view";
 import {AnyGeoPoint, GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
-import {MapViewContext} from "../MapViewContext";
-import {MapViewInit} from "../MapView";
-import {MapGraphicsView} from "../graphics/MapGraphicsView";
+import {MapGraphicsViewContext} from "../graphics/MapGraphicsViewContext";
+import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
 import {MapGraphicsViewController} from "../graphics/MapGraphicsViewController";
+import {MapGraphicsLeafView} from "../graphics/MapGraphicsLeafView";
 
 export type AnyMapLineView = MapLineView | MapLineViewInit;
 
-export interface MapLineViewInit extends MapViewInit, StrokeViewInit {
+export interface MapLineViewInit extends MapGraphicsViewInit, StrokeViewInit {
   geoStart?: AnyGeoPoint;
   geoEnd?: AnyGeoPoint;
   viewStart?: AnyPointR2;
@@ -34,7 +34,7 @@ export interface MapLineViewInit extends MapViewInit, StrokeViewInit {
   hitWidth?: number;
 }
 
-export class MapLineView extends MapGraphicsView implements StrokeView {
+export class MapLineView extends MapGraphicsLeafView implements StrokeView {
   /** @hidden */
   _hitWidth?: number;
   /** @hidden */
@@ -42,7 +42,7 @@ export class MapLineView extends MapGraphicsView implements StrokeView {
 
   constructor() {
     super();
-    this._geoBounds = GeoBox.empty();
+    this._geoBounds = GeoBox.undefined();
     this.geoStart.onUpdate = this.onSetGeoStart.bind(this);
     this.geoEnd.onUpdate = this.onSetGeoEnd.bind(this);
   }
@@ -51,23 +51,23 @@ export class MapLineView extends MapGraphicsView implements StrokeView {
     return this._viewController;
   }
 
-  @MemberAnimator(GeoPoint, {value: GeoPoint.origin()})
-  geoStart: MemberAnimator<this, GeoPoint, AnyGeoPoint>;
+  @ViewAnimator(GeoPoint, {value: GeoPoint.origin()})
+  geoStart: ViewAnimator<this, GeoPoint, AnyGeoPoint>;
 
-  @MemberAnimator(GeoPoint, {value: GeoPoint.origin()})
-  geoEnd: MemberAnimator<this, GeoPoint, AnyGeoPoint>;
+  @ViewAnimator(GeoPoint, {value: GeoPoint.origin()})
+  geoEnd: ViewAnimator<this, GeoPoint, AnyGeoPoint>;
 
-  @MemberAnimator(PointR2, {value: PointR2.origin()})
-  viewStart: MemberAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator(PointR2, {value: PointR2.origin()})
+  viewStart: ViewAnimator<this, PointR2, AnyPointR2>;
 
-  @MemberAnimator(PointR2, {value: PointR2.origin()})
-  viewEnd: MemberAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator(PointR2, {value: PointR2.origin()})
+  viewEnd: ViewAnimator<this, PointR2, AnyPointR2>;
 
-  @MemberAnimator(Color, {inherit: true})
-  stroke: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  stroke: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, {inherit: true})
-  strokeWidth: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  strokeWidth: ViewAnimator<this, Length, AnyLength>;
 
   hitWidth(): number | null;
   hitWidth(hitWidth: number | null): this;
@@ -112,7 +112,7 @@ export class MapLineView extends MapGraphicsView implements StrokeView {
     this.requireUpdate(View.NeedsProject);
   }
 
-  protected onProject(viewContext: MapViewContext): void {
+  protected onProject(viewContext: MapGraphicsViewContext): void {
     super.onProject(viewContext);
     const geoProjection = viewContext.geoProjection;
     let viewStart: PointR2;
@@ -138,7 +138,7 @@ export class MapLineView extends MapGraphicsView implements StrokeView {
     this.setCulled(culled);
   }
 
-  protected onRender(viewContext: MapViewContext): void {
+  protected onRender(viewContext: MapGraphicsViewContext): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -196,7 +196,7 @@ export class MapLineView extends MapGraphicsView implements StrokeView {
     return this._geoBounds;
   }
 
-  hitTest(x: number, y: number, viewContext: MapViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext: MapGraphicsViewContext): GraphicsView | null {
     let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -212,7 +212,7 @@ export class MapLineView extends MapGraphicsView implements StrokeView {
     return hit;
   }
 
-  protected hitTestLine(x: number, y: number, context: CanvasContext, frame: BoxR2): RenderedView | null {
+  protected hitTestLine(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
     const viewStart = this.viewStart.value!;
     const viewEnd = this.viewEnd.value!;
 
@@ -237,30 +237,34 @@ export class MapLineView extends MapGraphicsView implements StrokeView {
     if (line instanceof MapLineView) {
       return line;
     } else if (typeof line === "object" && line !== null) {
-      const view = new MapLineView();
-      if (line.geoStart !== void 0) {
-        view.geoStart(line.geoStart);
-      }
-      if (line.geoEnd !== void 0) {
-        view.geoEnd(line.geoEnd);
-      }
-      if (line.stroke !== void 0) {
-        view.stroke(line.stroke);
-      }
-      if (line.strokeWidth !== void 0) {
-        view.strokeWidth(line.strokeWidth);
-      }
-      if (line.hitWidth !== void 0) {
-        view.hitWidth(line.hitWidth);
-      }
-      if (line.hidden !== void 0) {
-        view.setHidden(line.hidden);
-      }
-      if (line.culled !== void 0) {
-        view.setCulled(line.culled);
-      }
-      return view;
+      return MapLineView.fromInit(line);
     }
     throw new TypeError("" + line);
+  }
+
+  static fromInit(init: MapLineViewInit): MapLineView {
+    const view = new MapLineView();
+    if (init.geoStart !== void 0) {
+      view.geoStart(init.geoStart);
+    }
+    if (init.geoEnd !== void 0) {
+      view.geoEnd(init.geoEnd);
+    }
+    if (init.stroke !== void 0) {
+      view.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      view.strokeWidth(init.strokeWidth);
+    }
+    if (init.hitWidth !== void 0) {
+      view.hitWidth(init.hitWidth);
+    }
+    if (init.hidden !== void 0) {
+      view.setHidden(init.hidden);
+    }
+    if (init.culled !== void 0) {
+      view.setCulled(init.culled);
+    }
+    return view;
   }
 }

@@ -14,46 +14,66 @@
 
 const uiView = new swim.UiView(document.getElementById("ui"));
 
-const canvas = uiView.append("canvas");
+const canvas = uiView.append("canvas")
+    .wheelEventsEnabled(true)
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
 
-const chart = new swim.ChartView()
-    .bottomAxis("linear")
-    .leftAxis("linear")
-    .bottomGesture(true)
-    .leftDomainPadding([0.1, 0.1])
-    .domainColor("#4a4a4a")
+const chart = canvas.append(swim.ChartView)
+    .topAxis(true)
+    .rightAxis(true)
+    .bottomAxis(true)
+    .leftAxis(true)
+    .xRangePadding(2)
+    .yRangePadding(2)
+    .fitAspectRatio(1)
+    .domainTracking(true)
+    .xGestures(true)
+    .borderColor("#4a4a4a")
     .tickMarkColor("#4a4a4a")
     .font("12px sans-serif")
     .textColor("#4a4a4a");
-canvas.append(chart);
+const graph = chart.graph();
 
-const plot = new swim.LineGraphView()
+chart.topAxis()
+    .tickGenerator(null)
+    .tickMarkWidth(0)
+    .tickMarkLength(0)
+    .borderWidth(0);
+chart.rightAxis()
+    .tickGenerator(null)
+    .tickMarkWidth(0)
+    .tickMarkLength(0)
+    .borderWidth(0);
+
+const plot = graph.append(swim.LinePlotView)
     .hitMode("domain")
     .stroke("#4a4a4a")
     .strokeWidth(2)
-    .on("mouseover", function (event) {
-      const datum = event.targetView;
-      const x = datum.x.value;
-      chart.bottomAxis().insertTick({
+    .on("pointerover", function (event) {
+      const dataPoint = event.targetView;
+      const x = dataPoint.x.value;
+      chart.topAxis().insertTick({
         value: x,
         tickLabel: x.toFixed(2),
         gridLineColor: '#1db0ef',
         gridLineWidth: 1,
       });
-      const y = datum.y.value;
-      chart.leftAxis().insertTick({
+      const y = dataPoint.y.value;
+      chart.rightAxis().insertTick({
         value: y,
         tickLabel: y.toFixed(2),
         gridLineColor: '#1db0ef',
         gridLineWidth: 1,
       });
     })
-    .on("mouseout", function (event) {
-      const datum = event.targetView;
-      chart.bottomAxis().removeTick(datum.x.value);
-      chart.leftAxis().removeTick(datum.y.value);
+    .on("pointerout", function (event) {
+      const dataPoint = event.targetView;
+      chart.topAxis().removeTick(dataPoint.x.value);
+      chart.rightAxis().removeTick(dataPoint.y.value);
     });
-chart.addPlot(plot);
 
 const cycles = 2;
 const samples = 100;
@@ -61,7 +81,7 @@ for (let i = 0, n = cycles * samples; i <= n; i += 1) {
   const x = i * 2 * Math.PI / samples;
   const y = Math.sin(x);
   const opacity = i === 0 ? 0.75 : i === n ? 0.25 : void 0;
-  plot.insertDatum({x: x, y: y, opacity: opacity});
+  plot.insertDataPoint({x: x, y: y, opacity: opacity});
 }
 
     </script>

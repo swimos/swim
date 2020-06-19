@@ -4,7 +4,7 @@
   "description": "Renderable graphic types for SVG/Canvas-compatible path drawing contexts, and Canvas-compatible rendering contexts",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/render",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2020 SWIM.AI inc.",
+  "copyright": "2015-2020 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-render.js",

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import {Interpolator} from "@swim/interpolate";
 import {Scale} from "./Scale";
 import {ContinuousScale} from "./ContinuousScale";
 
-export class LinearScale<R extends RU, RU = R> extends ContinuousScale<number, R, number, RU> {
+export class LinearScale<R, RU = R> extends ContinuousScale<number, R, number, RU> {
   readonly x0: number;
   readonly dx: number;
   readonly fx: Interpolator<R, RU>;
@@ -37,26 +37,22 @@ export class LinearScale<R extends RU, RU = R> extends ContinuousScale<number, R
     return this.fx.interpolate(u);
   }
 
-  unscale(y: RU): number {
+  unscale(y: R | RU): number {
     const u = this.fx.deinterpolate(y);
     return this.x0 + this.dx * u;
   }
 
-  clampScale(x: number): R {
-    const u = Math.min(Math.max(0, this.norm(x)), 1);
-    return this.fx.interpolate(u);
-  }
-
-  domain(): ReadonlyArray<number>;
-  domain(xs: ReadonlyArray<number>): LinearScale<R, RU>;
+  domain(): readonly [number, number];
+  domain(xs: readonly [number, number]): LinearScale<R, RU>;
   domain(x0: number, x1?: number): LinearScale<R, RU>;
-  domain(x0?: ReadonlyArray<number> | number, x1?: number): ReadonlyArray<number> | LinearScale<R, RU> {
+  domain(x0?: readonly [number, number] | number,
+         x1?: number): readonly [number, number] | LinearScale<R, RU> {
     if (x0 === void 0) {
       return [this.x0, this.x0 + this.dx];
     } else {
       if (x1 === void 0) {
-        x1 = (x0 as ReadonlyArray<number>)[1];
-        x0 = (x0 as ReadonlyArray<number>)[0];
+        x1 = (x0 as readonly [number, number])[1];
+        x0 = (x0 as readonly [number, number])[0];
       }
       const dx = x1 - (x0 as number);
       if (x0 === this.x0 && dx === this.dx) {
@@ -67,14 +63,15 @@ export class LinearScale<R extends RU, RU = R> extends ContinuousScale<number, R
     }
   }
 
-  range(): ReadonlyArray<R>;
-  range(ys: ReadonlyArray<RU>): LinearScale<R, RU>;
-  range(y0: RU, y1?: RU): LinearScale<R, RU>;
-  range(y0?: ReadonlyArray<RU> | RU, y1?: RU): ReadonlyArray<R> | LinearScale<R, RU> {
+  range(): readonly [R, R];
+  range(ys: readonly [R | RU, R | RU]): LinearScale<R, RU>;
+  range(y0: R | RU, y1?: R | RU): LinearScale<R, RU>;
+  range(y0?: readonly [R | RU, R | RU] | R | RU,
+        y1?: R | RU): readonly [R, R] | LinearScale<R, RU> {
     if (y0 === void 0) {
       return this.fx.range();
     } else if (y1 === void 0) {
-      y0 = y0 as ReadonlyArray<RU>;
+      y0 = y0 as readonly [R | RU, R | RU];
       return new LinearScale(this.x0, this.x0 + this.dx, this.fx.range(y0));
     } else {
       y0 = y0 as R;
@@ -92,41 +89,58 @@ export class LinearScale<R extends RU, RU = R> extends ContinuousScale<number, R
     }
   }
 
-  clampDomain(xMin?: number, xMax?: number, zMin?: number, zMax?: number, epsilon?: number): LinearScale<R, RU> {
+  clampDomain(xMin: number | null, xMax: number | null,
+              zMin: number | null, zMax: number | null,
+              epsilon?: number): LinearScale<R, RU> {
     let x0 = this.x0;
-    let x1 = this.x0 + this.dx;
-    if (xMin !== void 0) {
-      if (x0 < x1 && x0 < xMin) {
+    let dx = this.dx;
+    let x1 = this.x0 + dx;
+    if (xMin !== null && xMax !== null && Math.abs(dx) > xMax - xMin) {
+      if (x0 < x1) {
         x0 = xMin;
-      } else if (x1 < x0 && x1 < xMin) {
+        x1 = xMax;
+      } else {
         x1 = xMin;
+        x0 = xMax;
       }
-    }
-    if (xMax !== void 0) {
-      if (x0 < x1 && x1 > xMax) {
-        x1 = xMax;
-      } else if (x1 < x0 && x0 > xMax) {
-        x1 = xMax;
+    } else {
+      if (xMin !== null) {
+        if (x0 < x1 && x0 < xMin) {
+          x1 += xMin - x0;
+          x0 = xMin;
+        } else if (x1 < x0 && x1 < xMin) {
+          x0 += xMin - x1;
+          x1 = xMin;
+        }
+      }
+      if (xMax !== null) {
+        if (x0 < x1 && x1 > xMax) {
+          x0 -= x1 - xMax;
+          x1 = xMax;
+        } else if (x1 < x0 && x0 > xMax) {
+          x1 -= x0 - xMax;
+          x0 = xMax;
+        }
       }
     }
 
     const y0 = +this.scale(x0);
     const y1 = +this.scale(x1);
-    const dy = y1 - y0;
+    const dy = y0 < y1 ? y1 - y0 : y0 - y1;
     const z = Math.abs(dy / (x1 - x0));
-    if (zMin !== void 0 && z < 1/zMin) {
-      const dx = dy * zMin;
+    if (zMin !== null && z < 1 / zMin) {
+      const dz = dy * zMin;
       const xSum = x0 + x1;
-      x0 = (xSum - dx) / 2;
-      x1 = (xSum + dx) / 2;
-    } else if (zMax !== void 0 && z > 1/zMax) {
-      const dx = dy * zMax;
+      x0 = (xSum - dz) / 2;
+      x1 = (xSum + dz) / 2;
+    } else if (zMax !== null && z > 1 / zMax) {
+      const dz = dy * zMax;
       const xSum = x0 + x1;
-      x0 = (xSum - dx) / 2;
-      x1 = (xSum + dx) / 2;
+      x0 = (xSum - dz) / 2;
+      x1 = (xSum + dz) / 2;
     }
 
-    const dx = x1 - x0;
+    dx = x1 - x0;
     if (epsilon === void 0) {
       epsilon = 1e-12;
     }
@@ -137,25 +151,31 @@ export class LinearScale<R extends RU, RU = R> extends ContinuousScale<number, R
     }
   }
 
-  solveDomain(x1: number, y1: RU, x2?: number, y2?: RU, epsilon?: number): LinearScale<R, RU> {
+  solveDomain(x1: number, y1: R | RU,
+              x2?: number, y2?: R | RU,
+              reflect?: boolean,
+              epsilon?: number): LinearScale<R, RU> {
+    if (epsilon === void 0) {
+      epsilon = 1e-12;
+    }
     const range = this.fx.range();
     const y0 = +range[0];
     const y3 = +range[1];
     let m;
-    if (x2 === void 0 || y2 === void 0 || x1 === x2 || y1 === y2) {
-      m = (y3 - y0) / (this.dx || 1);
+    if (x2 === void 0 || y2 === void 0 || Math.abs(x2 - x1) <= epsilon || Math.abs(+y2 - +y1) <= epsilon) {
+      m = (y3 - y0) / (this.dx !== 0 ? this.dx : epsilon);
     } else {
       m = (+y2 - +y1) / (x2 - x1);
+      if ((reflect === void 0 || !reflect) && (m < 0 !== (y3 - y0) / this.dx < 0)) {
+        m = -m;
+      }
     }
     const b = +y1 - m * x1;
     const x0 = (y0 - b) / m;
     const x3 = (y3 - b) / m;
 
     const dx = x3 - x0;
-    if (epsilon === void 0) {
-      epsilon = 1e-12;
-    }
-    if (Math.abs(x0 - this.x0) < epsilon && Math.abs(dx - this.dx) < epsilon) {
+    if (Math.abs(x0 - this.x0) <= epsilon && Math.abs(dx - this.dx) <= epsilon) {
       return this;
     } else {
       return new LinearScale(x0, x3, this.fx);

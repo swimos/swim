@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,27 @@
 
 export {
   ViewScopeInit,
+  ViewScopeFromAny,
+  ViewScopeTypeConstructor,
+  ViewScopeDescriptorType,
   ViewScopeDescriptor,
   ViewScopeConstructor,
   ViewScopeClass,
   ViewScope,
 } from "./ViewScope";
 
-export {AtomicViewScope} from "./AtomicViewScope";
+export {
+  AnyViewScopeClass,
+  AnyViewScope,
+} from "./AnyViewScope";
+
+export {
+  ObjectViewScopeClass,
+  ObjectViewScope,
+} from "./ObjectViewScope";
+
+export {StringViewScope} from "./StringViewScope";
+
+export {BooleanViewScope} from "./BooleanViewScope";
+
+export {NumberViewScope} from "./NumberViewScope";

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,15 +20,16 @@ import {
   ViewEdgeInsets,
   ViewContext,
   View,
-  MemberAnimator,
+  ViewAnimator,
   SvgView,
   HtmlView,
+  HtmlViewController,
 } from "@swim/view";
-import {GestureViewController} from "@swim/gesture";
+import {PositionGestureDelegate} from "@swim/gesture";
 import {TactileView} from "@swim/app";
 import {MenuList} from "./MenuList";
 
-export class MenuItem extends TactileView {
+export class MenuItem extends TactileView implements PositionGestureDelegate {
   /** @hidden */
   _highlighted: boolean;
 
@@ -58,26 +59,26 @@ export class MenuItem extends TactileView {
     this.paddingRight.setAutoState(Length.px(4));
   }
 
-  get viewController(): GestureViewController<MenuItem> | null {
+  get viewController(): HtmlViewController<MenuItem> | null {
     return this._viewController;
   }
 
-  @MemberAnimator(Number, {inherit: true})
-  drawerStretch: MemberAnimator<this, number>; // 0 = collapsed; 1 = expanded
+  @ViewAnimator(Number, {inherit: true})
+  drawerStretch: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
 
-  @MemberAnimator(Color)
-  normalFillColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color)
+  normalFillColor: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color)
-  highlightFillColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color)
+  highlightFillColor: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color)
-  highlightCellColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color)
+  highlightCellColor: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color)
-  hoverColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color)
+  hoverColor: ViewAnimator<this, Color, AnyColor>;
 
-  @ViewScope({inherit: true})
+  @ViewScope(Object, {inherit: true})
   edgeInsets: ViewScope<this, ViewEdgeInsets>;
 
   get highlighted(): boolean {
@@ -241,23 +242,6 @@ export class MenuItem extends TactileView {
     // hook
   }
 
-  protected onStartHovering(): void {
-    const hoverColor = this.hoverColor.value;
-    if (hoverColor !== void 0 && this.backgroundColor.isAuto()) {
-      if (this.backgroundColor.value === void 0) {
-        this.backgroundColor.setAutoState(hoverColor.alpha(0), false);
-      }
-      this.backgroundColor.setAutoState(hoverColor, this.tactileTransition);
-    }
-  }
-
-  protected onStopHovering(): void {
-    const hoverColor = this.hoverColor.value;
-    if (hoverColor !== void 0 && this.backgroundColor.isAuto()) {
-      this.backgroundColor.setAutoState(hoverColor.alpha(0), this.tactileTransition);
-    }
-  }
-
   highlight(tween?: Tween<any>): this {
     if (!this._highlighted) {
       this._highlighted = true;
@@ -300,6 +284,23 @@ export class MenuItem extends TactileView {
       }
     }
     return this;
+  }
+
+  didStartHovering(): void {
+    const hoverColor = this.hoverColor.value;
+    if (hoverColor !== void 0 && this.backgroundColor.isAuto()) {
+      if (this.backgroundColor.value === void 0) {
+        this.backgroundColor.setAutoState(hoverColor.alpha(0), false);
+      }
+      this.backgroundColor.setAutoState(hoverColor, this.tactileTransition);
+    }
+  }
+
+  didStopHovering(): void {
+    const hoverColor = this.hoverColor.value;
+    if (hoverColor !== void 0 && this.backgroundColor.isAuto()) {
+      this.backgroundColor.setAutoState(hoverColor.alpha(0), this.tactileTransition);
+    }
   }
 
   protected onClick(event: MouseEvent): void {

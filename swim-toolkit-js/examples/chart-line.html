@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
   </head>
   <body style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; margin: 0; overflow: hidden;">
-    <div id="ui" style="display: flex; width: 80%; height: 80%; touch-action: none;">
+    <div id="ui" style="display: flex; width: 90%; height: 90%; touch-action: none;">
     </div>
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
@@ -14,46 +14,58 @@
 
 const uiView = new swim.UiView(document.getElementById("ui"));
 
-const canvas = uiView.append("canvas");
+const canvas = uiView.append("canvas")
+    .wheelEventsEnabled(true)
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
 
-const chart = new swim.ChartView()
-    .bottomAxis("linear")
-    .leftAxis("linear")
-    .bottomGesture(true)
-    .leftDomainPadding([0.1, 0.1])
-    .domainColor("#4a4a4a")
-    .tickMarkColor("#4a4a4a")
-    .font("12px sans-serif")
-    .textColor("#4a4a4a");
-canvas.append(chart);
+const chart = canvas.append(swim.ChartView)
+    .bottomAxis(true)
+    .leftAxis(true)
+    //.xDomainBounds(false, false)
+    //.yDomainBounds(false, false)
+    .xDomainPadding(Math.PI, Math.PI)
+    .yDomainPadding(1, 1)
+    .xRangePadding(2)
+    .yRangePadding(2)
+    .fitAspectRatio(-1 / 4)
+    .preserveAspectRatio(true)
+    .domainTracking(true)
+    .xGestures(true)
+    .yGestures(true);
+const graph = chart.graph();
 
-chart.leftAxis().insertTick({
-  value: 0.5,
-  tickLabel: "0.5",
-  gridLineColor: '#989898',
-  gridLineWidth: 1,
-});
+chart.leftAxis().gridLineColor("#d8d8d8")
+                .gridLineWidth(1);
 
-const plot = new swim.LineGraphView()
-    .hitMode("graph")
+const plot = graph.append(swim.LinePlotView)
+    .hitMode("plot")
     .stroke("#4a4a4a")
-    .strokeWidth(2)
-    .on("mouseenter", function (event) {
-      plot.stroke("#1db0ef", {duration: 200});
+    .strokeWidth(4)
+    .on("pointerenter", function (event) {
+      plot.stroke("#1db0ef", {duration: 250});
     })
-    .on("mouseleave", function (event) {
-      plot.stroke("#4a4a4a", {duration: 200});
+    .on("pointerleave", function (event) {
+      plot.stroke("#4a4a4a", {duration: 250});
     });
-chart.addPlot(plot);
 
-const cycles = 2;
-const samples = 100;
-for (let i = 0, n = cycles * samples; i <= n; i += 1) {
-  const x = i * 2 * Math.PI / samples;
-  const y = Math.sin(x);
-  const opacity = i === 0 ? 0.75 : i === n ? 0.25 : void 0;
-  plot.insertDatum({x: x, y: y, opacity: opacity});
+const cycles = 4;
+const samplesPerCycle = 100;
+let i = 0;
+let n = cycles * samplesPerCycle
+while (i <= n) {
+  const x = i * 2 * Math.PI / samplesPerCycle;
+  const y = Math.sin(x) * x;
+  plot.insertDataPoint({x: x, y: y});
+  i += 1;
 }
+
+//setTimeout(function () {
+//  chart.xDomain(0, Math.PI, {duration: 10000, ease: "cubic-in-out"});
+//  chart.yDomain(-1, 1, {duration: 10000, ease: "cubic-in-out"});
+//}, 1000);
 
     </script>
   </body>

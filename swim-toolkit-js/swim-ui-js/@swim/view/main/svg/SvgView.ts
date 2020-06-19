@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ import {
   TouchAction,
 } from "@swim/style";
 import {View} from "../View";
-import {RenderedViewConstructor} from "../rendered/RenderedView";
 import {ViewNode, NodeView} from "../node/NodeView";
 import {TextView} from "../text/TextView";
 import {AttributeAnimator} from "../attribute/AttributeAnimator";
@@ -351,14 +350,6 @@ export class SvgView extends ElementView {
       return new SvgView(node);
     }
     throw new TypeError("" + node);
-  }
-
-  static fromConstructor<C extends ElementViewConstructor | RenderedViewConstructor>(viewConstructor: C): InstanceType<C>;
-  static fromConstructor(viewConstructor: ElementViewConstructor | RenderedViewConstructor): View {
-    if (ElementView.isConstructor(viewConstructor)) {
-      return new viewConstructor(document.createElementNS(SvgView.namespace, viewConstructor.tag));
-    }
-    throw new TypeError("" + viewConstructor);
   }
 
   static create<T extends keyof SvgViewTagMap>(tag: T): SvgViewTagMap[T];

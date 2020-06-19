@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,82 +13,89 @@
 // limitations under the License.
 
 import {BoxR2} from "@swim/math";
-import {RenderedViewContext} from "../rendered/RenderedViewContext";
-import {RenderedViewController} from "../rendered/RenderedViewController";
+import {GraphicsViewContext} from "../graphics/GraphicsViewContext";
 import {HtmlViewController} from "../html/HtmlViewController";
 import {CanvasView} from "./CanvasView";
 import {CanvasViewObserver} from "./CanvasViewObserver";
 
-export class CanvasViewController<V extends CanvasView = CanvasView> extends HtmlViewController<V> implements RenderedViewController<V>, CanvasViewObserver<V> {
-  viewWillProcess(viewContext: RenderedViewContext, view: V): void {
+export class CanvasViewController<V extends CanvasView = CanvasView> extends HtmlViewController<V> implements CanvasViewObserver<V> {
+  viewWillProcess(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewDidProcess(viewContext: RenderedViewContext, view: V): void {
+  viewDidProcess(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewWillScroll(viewContext: RenderedViewContext, view: V): void {
+  viewWillResizel(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewDidScroll(viewContext: RenderedViewContext, view: V): void {
+  viewDidResize(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewWillDerive(viewContext: RenderedViewContext, view: V): void {
+  viewWillScroll(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewDidDerive(viewContext: RenderedViewContext, view: V): void {
+  viewDidScroll(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewWillAnimate(viewContext: RenderedViewContext, view: V): void {
+  viewWillCompute(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewDidAnimate(viewContext: RenderedViewContext, view: V): void {
+  viewDidCompute(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewWillProcessChildViews(viewContext: RenderedViewContext, view: V): void {
+  viewWillAnimate(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewDidProcessChildViews(viewContext: RenderedViewContext, view: V): void {
+  viewDidAnimate(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewWillDisplay(viewContext: RenderedViewContext, view: V): void {
+  viewWillProcessChildViews(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewDidDisplay(viewContext: RenderedViewContext, view: V): void {
+  viewDidProcessChildViews(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewWillLayout(viewContext: RenderedViewContext, view: V): void {
+  viewWillDisplay(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewDidLayout(viewContext: RenderedViewContext, view: V): void {
+  viewDidDisplay(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewWillRender(viewContext: RenderedViewContext, view: V): void {
+  viewWillLayout(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewDidRender(viewContext: RenderedViewContext, view: V): void {
+  viewDidLayout(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewWillDisplayChildViews(viewContext: RenderedViewContext, view: V): void {
+  viewWillRender(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewDidDisplayChildViews(viewContext: RenderedViewContext, view: V): void {
+  viewDidRender(viewContext: GraphicsViewContext, view: V): void {
+    // hook
+  }
+
+  viewWillDisplayChildViews(viewContext: GraphicsViewContext, view: V): void {
+    // hook
+  }
+
+  viewDidDisplayChildViews(viewContext: GraphicsViewContext, view: V): void {
     // hook
   }
 
@@ -120,16 +127,16 @@ export class CanvasViewController<V extends CanvasView = CanvasView> extends Htm
 
   get viewFrame(): BoxR2 {
     const view = this._view;
-    return view !== null ? view.viewFrame : BoxR2.empty();
+    return view !== null ? view.viewFrame : BoxR2.undefined();
   }
 
   get viewBounds(): BoxR2 {
     const view = this._view;
-    return view !== null ? view.viewBounds : BoxR2.empty();
+    return view !== null ? view.viewBounds : BoxR2.undefined();
   }
 
   get hitBounds(): BoxR2 {
     const view = this._view;
-    return view !== null ? view.hitBounds : BoxR2.empty();
+    return view !== null ? view.hitBounds : BoxR2.undefined();
   }
 }

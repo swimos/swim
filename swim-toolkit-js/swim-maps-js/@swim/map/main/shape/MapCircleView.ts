@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ import {AnyColor, Color} from "@swim/color";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   View,
-  MemberAnimator,
-  RenderedView,
+  ViewAnimator,
+  GraphicsView,
   FillViewInit,
   FillView,
   StrokeViewInit,
@@ -27,21 +27,21 @@ import {
 } from "@swim/view";
 import {AnyGeoPoint, GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
-import {MapViewContext} from "../MapViewContext";
-import {MapViewInit} from "../MapView";
-import {MapGraphicsView} from "../graphics/MapGraphicsView";
+import {MapGraphicsViewContext} from "../graphics/MapGraphicsViewContext";
+import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
 import {MapGraphicsViewController} from "../graphics/MapGraphicsViewController";
+import {MapGraphicsLeafView} from "../graphics/MapGraphicsLeafView";
 
 export type AnyMapCircleView = MapCircleView | MapCircleViewInit;
 
-export interface MapCircleViewInit extends MapViewInit, FillViewInit, StrokeViewInit {
+export interface MapCircleViewInit extends MapGraphicsViewInit, FillViewInit, StrokeViewInit {
   geoCenter?: AnyGeoPoint;
   viewCenter?: AnyPointR2;
   radius?: AnyLength;
   hitRadius?: number;
 }
 
-export class MapCircleView extends MapGraphicsView implements FillView, StrokeView {
+export class MapCircleView extends MapGraphicsLeafView implements FillView, StrokeView {
   /** @hidden */
   _hitRadius?: number;
   /** @hidden */
@@ -49,7 +49,7 @@ export class MapCircleView extends MapGraphicsView implements FillView, StrokeVi
 
   constructor() {
     super();
-    this._geoBounds = GeoBox.empty();
+    this._geoBounds = GeoBox.undefined();
     this.geoCenter.onUpdate = this.onSetGeoCenter.bind(this);
   }
 
@@ -57,23 +57,23 @@ export class MapCircleView extends MapGraphicsView implements FillView, StrokeVi
     return this._viewController;
   }
 
-  @MemberAnimator(GeoPoint, {value: GeoPoint.origin()})
-  geoCenter: MemberAnimator<this, GeoPoint, AnyGeoPoint>;
+  @ViewAnimator(GeoPoint, {value: GeoPoint.origin()})
+  geoCenter: ViewAnimator<this, GeoPoint, AnyGeoPoint>;
 
-  @MemberAnimator(PointR2, {value: PointR2.origin()})
-  viewCenter: MemberAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator(PointR2, {value: PointR2.origin()})
+  viewCenter: ViewAnimator<this, PointR2, AnyPointR2>;
 
-  @MemberAnimator(Length, {value: 0})
-  radius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: 0})
+  radius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, {inherit: true})
-  fill: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  fill: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color, {inherit: true})
-  stroke: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  stroke: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, {inherit: true})
-  strokeWidth: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  strokeWidth: ViewAnimator<this, Length, AnyLength>;
 
   hitRadius(): number | null;
   hitRadius(hitRadius: number | null): this;
@@ -100,7 +100,7 @@ export class MapCircleView extends MapGraphicsView implements FillView, StrokeVi
     this.requireUpdate(View.NeedsProject);
   }
 
-  protected onProject(viewContext: MapViewContext): void {
+  protected onProject(viewContext: MapGraphicsViewContext): void {
     super.onProject(viewContext);
     let viewCenter: PointR2;
     if (this.viewCenter.isAuto()) {
@@ -118,7 +118,7 @@ export class MapCircleView extends MapGraphicsView implements FillView, StrokeVi
     this.setCulled(culled);
   }
 
-  protected onRender(viewContext: MapViewContext): void {
+  protected onRender(viewContext: MapGraphicsViewContext): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -187,7 +187,7 @@ export class MapCircleView extends MapGraphicsView implements FillView, StrokeVi
     return this._geoBounds;
   }
 
-  hitTest(x: number, y: number, viewContext: MapViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext: MapGraphicsViewContext): GraphicsView | null {
     let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -200,7 +200,7 @@ export class MapCircleView extends MapGraphicsView implements FillView, StrokeVi
   }
 
   protected hitTestCircle(x: number, y: number, context: CanvasContext,
-                          frame: BoxR2, pixelRatio: number): RenderedView | null {
+                          frame: BoxR2, pixelRatio: number): GraphicsView | null {
     const size = Math.min(frame.width, frame.height);
     const viewCenter = this.viewCenter.value!;
     const radius = this.radius.value!.pxValue(size);
@@ -237,36 +237,40 @@ export class MapCircleView extends MapGraphicsView implements FillView, StrokeVi
     if (circle instanceof MapCircleView) {
       return circle;
     } else if (typeof circle === "object" && circle !== null) {
-      const view = new MapCircleView();
-      if (circle.geoCenter !== void 0) {
-        view.geoCenter(circle.geoCenter);
-      }
-      if (circle.viewCenter !== void 0) {
-        view.viewCenter(circle.viewCenter);
-      }
-      if (circle.radius !== void 0) {
-        view.radius(circle.radius);
-      }
-      if (circle.hitRadius !== void 0) {
-        view.hitRadius(circle.hitRadius);
-      }
-      if (circle.fill !== void 0) {
-        view.fill(circle.fill);
-      }
-      if (circle.stroke !== void 0) {
-        view.stroke(circle.stroke);
-      }
-      if (circle.strokeWidth !== void 0) {
-        view.strokeWidth(circle.strokeWidth);
-      }
-      if (circle.hidden !== void 0) {
-        view.setHidden(circle.hidden);
-      }
-      if (circle.culled !== void 0) {
-        view.setCulled(circle.culled);
-      }
-      return view;
+      return MapCircleView.fromInit(circle);
     }
     throw new TypeError("" + circle);
+  }
+
+  static fromInit(init: MapCircleViewInit): MapCircleView {
+    const view = new MapCircleView();
+    if (init.geoCenter !== void 0) {
+      view.geoCenter(init.geoCenter);
+    }
+    if (init.viewCenter !== void 0) {
+      view.viewCenter(init.viewCenter);
+    }
+    if (init.radius !== void 0) {
+      view.radius(init.radius);
+    }
+    if (init.hitRadius !== void 0) {
+      view.hitRadius(init.hitRadius);
+    }
+    if (init.fill !== void 0) {
+      view.fill(init.fill);
+    }
+    if (init.stroke !== void 0) {
+      view.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      view.strokeWidth(init.strokeWidth);
+    }
+    if (init.hidden !== void 0) {
+      view.setHidden(init.hidden);
+    }
+    if (init.culled !== void 0) {
+      view.setCulled(init.culled);
+    }
+    return view;
   }
 }

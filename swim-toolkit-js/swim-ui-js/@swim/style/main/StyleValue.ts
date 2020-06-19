@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Input, Parser, Diagnostic, Unicode} from "@swim/codec";
-import {Interpolator} from "@swim/interpolate";
+import {Interpolator, StepInterpolator} from "@swim/interpolate";
 import {Form} from "@swim/structure";
 import {AnyDateTime, DateTime} from "@swim/time";
 import {AnyAngle, Angle} from "@swim/angle";
@@ -22,7 +22,7 @@ import {AnyColor, Color, RgbColorInit, HslColorInit} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {AnyBoxShadow, BoxShadowInit, BoxShadow} from "@swim/shadow";
 import {AnyTransform, Transform} from "@swim/transform";
-import {Scale} from "@swim/scale";
+import {Scale, ContinuousScale, LinearScale, TimeScale} from "@swim/scale";
 import {AnyTransition, TransitionInit, Transition} from "@swim/transition";
 import {StyleValueParser} from "./StyleValueParser";
 import {StyleValueForm} from "./StyleValueForm";
@@ -56,7 +56,43 @@ export type StyleValue = DateTime
                        | number
                        | boolean;
 
-export const StyleValue = {
+export interface StyleValueClass {
+  fromAny(value: AnyStyleValue): StyleValue;
+
+  parse(input: Input | string): StyleValue;
+
+  parseScale<X, Y>(input: string): ContinuousScale<X, Y>;
+
+  /** @hidden */
+  _form: Form<StyleValue, AnyStyleValue> | undefined;
+  form(unit?: AnyStyleValue): Form<StyleValue, AnyStyleValue>;
+
+  /** @hidden */
+  _interpolatorForm: Form<Interpolator<StyleValue, AnyStyleValue>> | undefined;
+  interpolatorForm(unit?: Interpolator<StyleValue, AnyStyleValue>): Form<Interpolator<StyleValue, AnyStyleValue>>;
+
+  /** @hidden */
+  _scaleForm: Form<Scale<StyleValue, StyleValue, AnyStyleValue, AnyStyleValue>> | undefined,
+  scaleForm(unit?: Scale<StyleValue, StyleValue, AnyStyleValue, AnyStyleValue>): Form<Scale<StyleValue, StyleValue, AnyStyleValue, AnyStyleValue>>;
+
+  /** @hidden */
+  _transitionForm: Form<Transition<StyleValue>, AnyTransition<StyleValue>> | undefined;
+  transitionForm(unit?: AnyTransition<StyleValue> | null): Form<Transition<StyleValue>, AnyTransition<StyleValue>>;
+
+  // Forward type declarations
+  /** @hidden */
+  Parser: typeof StyleValueParser, // defined by StyleValueParser
+  /** @hidden */
+  Form: typeof StyleValueForm, // defined by StyleValueForm
+  /** @hidden */
+  InterpolatorForm: typeof StyleInterpolatorForm, // defined by StyleInterpolatorForm
+  /** @hidden */
+  ScaleForm: typeof StyleScaleForm, // defined by StyleScaleForm
+  /** @hidden */
+  TransitionForm: typeof StyleTransitionForm, // defined by StyleTransitionForm
+}
+
+export const StyleValue: StyleValueClass = {
   fromAny(value: AnyStyleValue): StyleValue {
     if (value instanceof DateTime
         || value instanceof Angle
@@ -104,6 +140,26 @@ export const StyleValue = {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
     return parser.bind();
+  },
+
+  parseScale<X, Y>(input: string): ContinuousScale<X, Y> {
+    if (input === "linear") {
+      return new LinearScale(0, 1, new StepInterpolator(void 0, void 0)) as unknown as ContinuousScale<X, Y>;
+    } else if (input === "time") {
+      const d1 = DateTime.current();
+      const d0 = d1.day(d1.day() - 1);
+      return new TimeScale(d0, d1, new StepInterpolator(void 0, void 0)) as unknown as ContinuousScale<X, Y>;
+    } else {
+      const domain = input.split("...");
+      const x0 = StyleValue.parse(domain[0]);
+      const x1 = StyleValue.parse(domain[1]);
+      if (typeof x0 === "number" && typeof x1 === "number") {
+        return new LinearScale(x0, x1, new StepInterpolator(void 0, void 0)) as unknown as ContinuousScale<X, Y>;
+      } else if (x0 instanceof DateTime && x1 instanceof DateTime) {
+        return new TimeScale(x0, x1, new StepInterpolator(void 0, void 0)) as unknown as ContinuousScale<X, Y>;
+      }
+    }
+    throw new TypeError("" + input);
   },
 
   /** @hidden */

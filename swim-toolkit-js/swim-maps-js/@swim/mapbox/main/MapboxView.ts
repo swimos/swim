@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
 
 import * as mapboxgl from "mapbox-gl";
 import {AnyPointR2, PointR2} from "@swim/math";
-import {ViewFlags, View, RenderedViewContext, RenderedView, CanvasView} from "@swim/view";
-import {AnyGeoPoint, GeoPoint, GeoBox, MapViewContext, MapGraphicsView} from "@swim/map";
+import {ViewFlags, View, GraphicsViewContext, GraphicsView, CanvasView} from "@swim/view";
+import {AnyGeoPoint, GeoPoint, GeoBox, MapGraphicsViewContext, MapGraphicsNodeView} from "@swim/map";
 import {MapboxProjection} from "./MapboxProjection";
 import {MapboxViewObserver} from "./MapboxViewObserver";
 import {MapboxViewController} from "./MapboxViewController";
 
-export class MapboxView extends MapGraphicsView {
+export class MapboxView extends MapGraphicsNodeView {
   /** @hidden */
   readonly _map: mapboxgl.Map;
   /** @hidden */
@@ -147,21 +147,21 @@ export class MapboxView extends MapGraphicsView {
     this.requireUpdate(View.NeedsProject);
   }
 
-  cascadeProcess(processFlags: ViewFlags, viewContext: RenderedViewContext): void {
+  cascadeProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): void {
     viewContext = this.mapViewContext(viewContext);
     super.cascadeProcess(processFlags, viewContext);
   }
 
-  cascadeDisplay(displayFlags: ViewFlags, viewContext: RenderedViewContext): void {
+  cascadeDisplay(displayFlags: ViewFlags, viewContext: GraphicsViewContext): void {
     viewContext = this.mapViewContext(viewContext);
     super.cascadeDisplay(displayFlags, viewContext);
   }
 
-  childViewContext(childView: View, viewContext: MapViewContext): MapViewContext {
+  childViewContext(childView: View, viewContext: MapGraphicsViewContext): MapGraphicsViewContext {
     return viewContext;
   }
 
-  mapViewContext(viewContext: RenderedViewContext): MapViewContext {
+  mapViewContext(viewContext: GraphicsViewContext): MapGraphicsViewContext {
     const mapViewContext = Object.create(viewContext);
     mapViewContext.geoProjection = this._geoProjection;
     mapViewContext.geoFrame = this.geoFrame;
@@ -184,9 +184,9 @@ export class MapboxView extends MapGraphicsView {
     this.setGeoProjection(this._geoProjection);
   }
 
-  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext: GraphicsViewContext): GraphicsView | null {
     viewContext = this.mapViewContext(viewContext);
-    return super.hitTest(x, y, viewContext);
+    return super.hitTest(x, y, viewContext as MapGraphicsViewContext);
   }
 
   overlayCanvas(): CanvasView | null {
@@ -197,6 +197,7 @@ export class MapboxView extends MapGraphicsView {
       View.fromNode(map.getContainer());
       const canvasContainer = View.fromNode(map.getCanvasContainer());
       const canvas = canvasContainer.append("canvas");
+      canvas.setEventNode(canvasContainer.node);
       canvas.append(this);
       return canvas;
     }

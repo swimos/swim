@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,14 +39,15 @@ export class AngleInterpolator extends Interpolator<Angle, AnyAngle> {
     return this.dv !== 0 ? (v - this.v0) / this.dv : this.dv;
   }
 
-  range(): ReadonlyArray<Angle>;
-  range(ts: ReadonlyArray<AnyAngle>): AngleInterpolator;
+  range(): readonly [Angle, Angle];
+  range(ts: readonly [AnyAngle, AnyAngle]): AngleInterpolator;
   range(t0: AnyAngle, t1: AnyAngle): AngleInterpolator;
-  range(a0?: ReadonlyArray<AnyAngle> | AnyAngle, a1?: AnyAngle): ReadonlyArray<Angle> | AngleInterpolator {
+  range(a0?: readonly [AnyAngle, AnyAngle] | AnyAngle,
+        a1?: AnyAngle): readonly [Angle, Angle] | AngleInterpolator {
     if (a0 === void 0) {
       return [Angle.from(this.v0, this.units), Angle.from(this.v0 + this.dv, this.units)];
     } else if (a1 === void 0) {
-      a0 = a0 as ReadonlyArray<AnyAngle>;
+      a0 = a0 as readonly [AnyAngle, AnyAngle];
       return AngleInterpolator.between(a0[0], a0[1]);
     } else {
       return AngleInterpolator.between(a0 as AnyAngle, a1);

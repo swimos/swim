@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,34 @@ export {PlotViewObserver} from "./PlotViewObserver";
 export {PlotViewController} from "./PlotViewController";
 
 export {
+  ScatterPlotType,
+  AnyScatterPlotView,
+  ScatterPlotViewInit,
+  ScatterPlotView,
+} from "./ScatterPlotView";
+
+export {
+  SeriesPlotHitMode,
+  SeriesPlotType,
+  AnySeriesPlotView,
+  SeriesPlotViewInit,
+  SeriesPlotView,
+} from "./SeriesPlotView";
+
+export {
   AnyBubblePlotView,
   BubblePlotViewInit,
   BubblePlotView,
 } from "./BubblePlotView";
+
+export {
+  AnyLinePlotView,
+  LinePlotViewInit,
+  LinePlotView,
+} from "./LinePlotView";
+
+export {
+  AnyAreaPlotView,
+  AreaPlotViewInit,
+  AreaPlotView,
+} from "./AreaPlotView";

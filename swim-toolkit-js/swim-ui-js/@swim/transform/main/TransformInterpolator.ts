@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ import {AffineTransformInterpolator} from "./AffineTransformInterpolator";
 import {TransformListInterpolator} from "./TransformListInterpolator";
 
 export abstract class TransformInterpolator<F extends Transform = Transform> extends Interpolator<F, AnyTransform> {
-  abstract range(): ReadonlyArray<F>;
-  abstract range(fs: ReadonlyArray<F>): TransformInterpolator<F>;
+  abstract range(): readonly [F, F];
+  abstract range(fs: readonly [F, F]): TransformInterpolator<F>;
   abstract range(f0: F, f1: F): TransformInterpolator<F>;
-  abstract range(fs: ReadonlyArray<AnyTransform>): TransformInterpolator;
+  abstract range(fs: readonly [AnyTransform, AnyTransform]): TransformInterpolator;
   abstract range(f0: AnyTransform, f1: AnyTransform): TransformInterpolator;
 
   static between(f0: AnyTransform, f1: AnyTransform): TransformInterpolator;

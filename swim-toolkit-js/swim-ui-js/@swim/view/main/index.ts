@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {
-  ViewEvent,
-  ViewMouseEvent,
-  ViewTouch,
-  ViewTouchEvent,
-  ViewEventHandler,
-} from "./ViewEvent";
-
-export {ViewEdgeInsets} from "./ViewMetrics";
-export {
-  ViewportColorScheme,
-  Viewport,
-} from "./Viewport";
-
-export {ViewIdiom} from "./ViewIdiom";
-
 export {ViewContext} from "./ViewContext";
 export {
   ViewControllerType,
@@ -39,23 +23,21 @@ export {
 export {ViewObserver} from "./ViewObserver";
 export {ViewController} from "./ViewController";
 
-export * from "./layout";
+export * from "./viewport";
 
-export * from "./root";
+export * from "./event";
 
 export * from "./modal";
 
+export * from "./root";
+
 export * from "./scope";
 
-export * from "./member";
+export * from "./animator";
 
-export * from "./animated";
-
-export * from "./rendered";
+export * from "./layout";
 
 export * from "./graphics";
-
-export * from "./composited";
 
 export * from "./raster";
 

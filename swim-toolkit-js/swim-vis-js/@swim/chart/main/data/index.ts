@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,12 +13,12 @@
 // limitations under the License.
 
 export {
-  DatumCategory,
-  DatumLabelPlacement,
-} from "./Datum";
+  DataPointCategory,
+  DataPointLabelPlacement,
+} from "./DataPoint";
 
 export {
-  AnyDatumView,
-  DatumViewInit,
-  DatumView,
-} from "./DatumView";
+  AnyDataPointView,
+  DataPointViewInit,
+  DataPointView,
+} from "./DataPointView";

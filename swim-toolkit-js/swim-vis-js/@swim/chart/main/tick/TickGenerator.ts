@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ export abstract class TickGenerator<D> {
   abstract count(): number;
   abstract count(n: number): this;
 
-  abstract domain(): D[];
-  abstract domain(xs: ReadonlyArray<D>): this;
+  abstract domain(): readonly [D, D];
+  abstract domain(xs: readonly [D, D]): this;
   abstract domain(x0: D, x1: D): this;
 
   abstract generate(): D[];
@@ -126,15 +126,15 @@ export class NumberTickGenerator extends TickGenerator<number> {
     }
   }
 
-  domain(): number[];
-  domain(xs: ReadonlyArray<number>): this;
+  domain(): readonly [number, number];
+  domain(xs: readonly [number, number]): this;
   domain(x0: number, x1: number): this;
-  domain(x0?: ReadonlyArray<number> | number, x1?: number): number[] | this {
+  domain(x0?: readonly [number, number] | number, x1?: number): readonly [number, number] | this {
     if (x0 === void 0) {
       return [this.x0, this.x0 + this.dx];
     } else if (x1 === void 0) {
-      this.x0 = (x0 as ReadonlyArray<number>)[0];
-      this.dx = (x0 as ReadonlyArray<number>)[1] - this.x0;
+      this.x0 = (x0 as readonly [number, number])[0];
+      this.dx = (x0 as readonly [number, number])[1] - this.x0;
       return this;
     } else {
       this.x0 = x0 as number;
@@ -227,16 +227,17 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
     }
   }
 
-  domain(): DateTime[];
-  domain(ts: ReadonlyArray<AnyDateTime>): this;
+  domain(): readonly [DateTime, DateTime];
+  domain(ts: readonly [AnyDateTime, AnyDateTime]): this;
   domain(d0: AnyDateTime, d1: AnyDateTime): this;
-  domain(d0?: ReadonlyArray<AnyDateTime> | AnyDateTime, d1?: AnyDateTime): DateTime[] | this {
+  domain(d0?: readonly [AnyDateTime, AnyDateTime] | AnyDateTime,
+         d1?: AnyDateTime): readonly [DateTime, DateTime] | this {
     if (d0 === void 0) {
       return [new DateTime(this.t0, this.zone), new DateTime(this.t0 + this.dt, this.zone)];
     } else {
       if (d1 === void 0) {
-        d1 = (d0 as ReadonlyArray<AnyDateTime>)[1];
-        d0 = (d0 as ReadonlyArray<AnyDateTime>)[0];
+        d1 = (d0 as readonly [AnyDateTime, AnyDateTime])[1];
+        d0 = (d0 as readonly [AnyDateTime, AnyDateTime])[0];
       } else {
         d0 = d0 as AnyDateTime;
       }

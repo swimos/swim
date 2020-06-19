@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import {
   View,
   ModalState,
   Modal,
-  MemberAnimator,
+  ViewAnimator,
   HtmlView,
 } from "@swim/view";
 import {DrawerViewObserver} from "./DrawerViewObserver";
@@ -87,17 +87,17 @@ export class DrawerView extends HtmlView implements Modal {
     return this._drawerState === "collapsed" || this._drawerState === "collapsing";
   }
 
-  @MemberAnimator(Length)
-  collapsedWidth: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length)
+  collapsedWidth: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length)
-  expandedWidth: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length)
+  expandedWidth: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Number)
-  drawerSlide: MemberAnimator<this, number>; // 0 = hidden; 1 = shown
+  @ViewAnimator(Number)
+  drawerSlide: ViewAnimator<this, number>; // 0 = hidden; 1 = shown
 
-  @MemberAnimator(Number)
-  drawerStretch: MemberAnimator<this, number>; // 0 = collapsed; 1 = expanded
+  @ViewAnimator(Number)
+  drawerStretch: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
 
   drawerPlacement(): DrawerPlacement;
   drawerPlacement(drawerPlacement: DrawerPlacement): this;
@@ -124,7 +124,7 @@ export class DrawerView extends HtmlView implements Modal {
     return this._drawerPlacement === "left" || this._drawerPlacement === "right";
   }
 
-  @ViewScope
+  @ViewScope(Object)
   edgeInsets: ViewScope<this, ViewEdgeInsets>;
 
   protected willSetDrawerPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
@@ -358,11 +358,12 @@ export class DrawerView extends HtmlView implements Modal {
       } else {
         tween = Transition.forTween(tween);
       }
-      this.willShow();
+      this._drawerState = "showing";
       if (tween !== null) {
         this.drawerStretch(1, tween)
-            .drawerSlide(1, tween.onEnd(this.didShow.bind(this)));
+            .drawerSlide(1, tween.onBegin(this.willShow.bind(this)).onEnd(this.didShow.bind(this)));
       } else {
+        this.willShow();
         this.drawerStretch(1)
             .drawerSlide(1);
         this.didShow();
@@ -376,7 +377,6 @@ export class DrawerView extends HtmlView implements Modal {
         viewObserver.drawerWillShow(this);
       }
     });
-    this._drawerState = "showing";
     this.display("flex");
   }
 
@@ -396,9 +396,9 @@ export class DrawerView extends HtmlView implements Modal {
       } else {
         tween = Transition.forTween(tween);
       }
-      this.willHide();
+      this._drawerState = "hiding";
       if (tween !== null) {
-        this.drawerSlide(0, tween.onEnd(this.didHide.bind(this)));
+        this.drawerSlide(0, tween.onBegin(this.willHide.bind(this)).onEnd(this.didHide.bind(this)));
       } else {
         this.drawerSlide(0);
         this.didHide();
@@ -412,7 +412,6 @@ export class DrawerView extends HtmlView implements Modal {
         viewObserver.drawerWillHide(this);
       }
     });
-    this._drawerState = "hiding";
   }
 
   protected didHide(): void {
@@ -432,10 +431,10 @@ export class DrawerView extends HtmlView implements Modal {
       } else {
         tween = Transition.forTween(tween);
       }
-      this.willExpand();
+      this._drawerState = "showing";
       if (tween !== null) {
         this.drawerSlide(1, tween)
-            .drawerStretch(1, tween.onEnd(this.didExpand.bind(this)));
+            .drawerStretch(1, tween.onBegin(this.willExpand.bind(this)).onEnd(this.didExpand.bind(this)));
       } else {
         this.drawerSlide(1)
             .drawerStretch(1);
@@ -450,7 +449,6 @@ export class DrawerView extends HtmlView implements Modal {
         viewObserver.drawerWillExpand(this);
       }
     });
-    this._drawerState = "showing";
   }
 
   protected didExpand(): void {
@@ -469,10 +467,10 @@ export class DrawerView extends HtmlView implements Modal {
       } else {
         tween = Transition.forTween(tween);
       }
-      this.willCollapse();
+      this._drawerState = "collapsing";
       if (tween !== null) {
         this.drawerSlide(1, tween)
-            .drawerStretch(0, tween.onEnd(this.didCollapse.bind(this)));
+            .drawerStretch(0, tween.onBegin(this.willCollapse.bind(this)).onEnd(this.didCollapse.bind(this)));
       } else {
         this.drawerSlide(1)
             .drawerStretch(0);
@@ -487,7 +485,6 @@ export class DrawerView extends HtmlView implements Modal {
         viewObserver.drawerWillCollapse(this);
       }
     });
-    this._drawerState = "collapsing";
     this.display("flex");
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,16 +23,20 @@ import {
   WebGLRenderer,
 } from "@swim/render";
 import {ViewFlags, View} from "../View";
-import {MemberAnimator} from "../member/MemberAnimator";
-import {RenderedViewContext} from "../rendered/RenderedViewContext";
-import {RenderedView} from "../rendered/RenderedView";
-import {GraphicsView} from "../graphics/GraphicsView";
-import {CompositedViewContext} from "../composited/CompositedViewContext";
-import {CompositedView} from "../composited/CompositedView";
+import {ViewAnimator} from "../animator/ViewAnimator";
+import {GraphicsViewContext} from "../graphics/GraphicsViewContext";
+import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
+import {GraphicsNodeView} from "../graphics/GraphicsNodeView";
+import {RasterViewContext} from "./RasterViewContext";
 import {RasterViewObserver} from "./RasterViewObserver";
 import {RasterViewController} from "./RasterViewController";
 
-export class RasterView extends GraphicsView implements CompositedView {
+export interface RasterViewInit extends GraphicsViewInit {
+  opacity?: number;
+  compositeOperation?: CanvasCompositeOperation;
+}
+
+export class RasterView extends GraphicsNodeView {
   /** @hidden */
   _canvas: HTMLCanvasElement;
   /** @hidden */
@@ -44,18 +48,18 @@ export class RasterView extends GraphicsView implements CompositedView {
     super();
     this._canvas = this.createCanvas();
     this._renderer = void 0;
-    this._rasterFrame = BoxR2.empty();
+    this._rasterFrame = BoxR2.undefined();
   }
 
   get viewController(): RasterViewController | null {
     return this._viewController;
   }
 
-  @MemberAnimator(Number, {value: 1})
-  opacity: MemberAnimator<this, number>;
+  @ViewAnimator(Number, {value: 1})
+  opacity: ViewAnimator<this, number>;
 
-  @MemberAnimator(String, {value: "source-over"})
-  compositeOperation: MemberAnimator<this, CanvasCompositeOperation>;
+  @ViewAnimator(String, {value: "source-over"})
+  compositeOperation: ViewAnimator<this, CanvasCompositeOperation>;
 
   get pixelRatio(): number {
     return window.devicePixelRatio || 1;
@@ -67,7 +71,11 @@ export class RasterView extends GraphicsView implements CompositedView {
 
   get compositor(): Renderer | null {
     const parentView = this.parentView;
-    return RenderedView.is(parentView) ? parentView.renderer : null;
+    if (parentView instanceof GraphicsView || parentView instanceof View.Canvas) {
+      return parentView.renderer;
+    } else {
+      return null;
+    }
   }
 
   get renderer(): Renderer | null {
@@ -121,18 +129,18 @@ export class RasterView extends GraphicsView implements CompositedView {
     return additionalFlags;
   }
 
-  cascadeProcess(processFlags: ViewFlags, viewContext: RenderedViewContext): void {
+  cascadeProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): void {
     viewContext = this.rasterViewContext(viewContext);
     super.cascadeProcess(processFlags, viewContext);
   }
 
-  cascadeDisplay(displayFlags: ViewFlags, viewContext: RenderedViewContext): void {
+  cascadeDisplay(displayFlags: ViewFlags, viewContext: GraphicsViewContext): void {
     viewContext = this.rasterViewContext(viewContext);
     super.cascadeDisplay(displayFlags, viewContext);
   }
 
   /** @hidden */
-  protected doDisplay(displayFlags: ViewFlags, viewContext: CompositedViewContext): void {
+  protected doDisplay(displayFlags: ViewFlags, viewContext: RasterViewContext): void {
     let cascadeFlags = displayFlags;
     this.willDisplay(viewContext);
     this._viewFlags |= View.DisplayingFlag;
@@ -181,18 +189,18 @@ export class RasterView extends GraphicsView implements CompositedView {
     }
   }
 
-  protected onLayout(viewContext: CompositedViewContext): void {
-    super.onLayout(viewContext);
+  protected onResize(viewContext: RasterViewContext): void {
+    super.onResize(viewContext);
     this.resizeCanvas(this._canvas);
     this.resetRenderer();
   }
 
-  protected onRender(viewContext: CompositedViewContext): void {
+  protected onRender(viewContext: RasterViewContext): void {
     super.onRender(viewContext);
     this.clearCanvas();
   }
 
-  protected willComposite(viewContext: CompositedViewContext): void {
+  protected willComposite(viewContext: RasterViewContext): void {
     this.willObserve(function (viewObserver: RasterViewObserver): void {
       if (viewObserver.viewWillRender !== void 0) {
         viewObserver.viewWillRender(viewContext, this);
@@ -200,11 +208,11 @@ export class RasterView extends GraphicsView implements CompositedView {
     });
   }
 
-  protected onComposite(viewContext: CompositedViewContext): void {
+  protected onComposite(viewContext: RasterViewContext): void {
     this.compositeImage(viewContext);
   }
 
-  protected didComposite(viewContext: CompositedViewContext): void {
+  protected didComposite(viewContext: RasterViewContext): void {
     this.didObserve(function (viewObserver: RasterViewObserver): void {
       if (viewObserver.viewDidRender !== void 0) {
         viewObserver.viewDidRender(viewContext, this);
@@ -212,11 +220,11 @@ export class RasterView extends GraphicsView implements CompositedView {
     });
   }
 
-  childViewContext(childView: View, viewContext: CompositedViewContext): CompositedViewContext {
+  childViewContext(childView: View, viewContext: RasterViewContext): RasterViewContext {
     return viewContext;
   }
 
-  rasterViewContext(viewContext: RenderedViewContext): CompositedViewContext {
+  rasterViewContext(viewContext: GraphicsViewContext): RasterViewContext {
     const rasterViewContext = Object.create(viewContext);
     rasterViewContext.compositor = viewContext.renderer;
     rasterViewContext.renderer = this.renderer;
@@ -228,7 +236,11 @@ export class RasterView extends GraphicsView implements CompositedView {
     let viewFrame = this._viewFrame;
     if (viewFrame === void 0) {
       const parentView = this._parentView;
-      viewFrame = RenderedView.is(parentView) ? parentView.viewFrame : BoxR2.empty();
+      if (parentView instanceof GraphicsView || parentView instanceof View.Canvas) {
+        viewFrame = parentView.viewFrame;
+      } else {
+        viewFrame = BoxR2.undefined();
+      }
     }
     return viewFrame;
   }
@@ -245,17 +257,17 @@ export class RasterView extends GraphicsView implements CompositedView {
     }
   }
 
-  hitTest(x: number, y: number, viewContext: CompositedViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext: RasterViewContext): GraphicsView | null {
     const rasterViewContext = this.rasterViewContext(viewContext);
     const compositeFrame = this.compositeFrame;
     x -= Math.floor(compositeFrame.xMin);
     y -= Math.floor(compositeFrame.yMin);
 
-    let hit: RenderedView | null = null;
+    let hit: GraphicsView | null = null;
     const childViews = this._childViews;
     for (let i = childViews.length - 1; i >= 0; i -= 1) {
       const childView = childViews[i];
-      if (RenderedView.is(childView) && !childView.isHidden() && !childView.isCulled()) {
+      if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isCulled()) {
         const hitBounds = childView.hitBounds;
         if (hitBounds.contains(x, y)) {
           hit = childView.hitTest(x, y, rasterViewContext);
@@ -321,7 +333,7 @@ export class RasterView extends GraphicsView implements CompositedView {
     }
   }
 
-  protected compositeImage(viewContext: CompositedViewContext): void {
+  protected compositeImage(viewContext: RasterViewContext): void {
     const compositor = viewContext.compositor;
     const renderer = viewContext.renderer;
     if (compositor instanceof CanvasRenderer && renderer instanceof CanvasRenderer) {

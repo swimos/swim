@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,11 +14,11 @@
 
 import {PointR2, BoxR2} from "@swim/math";
 import {CanvasContext} from "@swim/render";
-import {RenderedView, TypesetView} from "@swim/view";
+import {GraphicsView, TypesetView} from "@swim/view";
 import {TickOrientation, TickView} from "./TickView";
 
-export class TopTickView<D> extends TickView<D> {
-  constructor(value: D) {
+export class TopTickView<X> extends TickView<X> {
+  constructor(value: X) {
     super(value);
   }
 
@@ -26,10 +26,10 @@ export class TopTickView<D> extends TickView<D> {
     return "top";
   }
 
-  protected layoutTickLabel(tickLabel: RenderedView, frame: BoxR2): void {
-    const origin = this.origin.value!;
-    const x = Math.round(origin.x);
-    const y0 = Math.round(origin.y);
+  protected layoutTickLabel(tickLabel: GraphicsView): void {
+    const anchor = this.anchor.value!;
+    const x = Math.round(anchor.x);
+    const y0 = Math.round(anchor.y);
     const y1 = y0 - this.tickMarkLength.value!;
     const y2 = y1 - this.tickLabelPadding.value!;
 
@@ -41,20 +41,24 @@ export class TopTickView<D> extends TickView<D> {
   }
 
   protected renderTick(context: CanvasContext, frame: BoxR2): void {
-    const origin = this.origin.value!;
-    const x = Math.round(origin.x);
-    const y0 = Math.round(origin.y);
-    const y1 = y0 - this.tickMarkLength.value!;
+    const anchor = this.anchor.value!;
+    const x = Math.round(anchor.x);
+    const y0 = Math.round(anchor.y);
+    const tickMarkLength = this.tickMarkLength.value!;
+    const y1 = y0 - tickMarkLength;
 
-    context.beginPath();
-    context.strokeStyle = this.tickMarkColor.value!.toString();
-    context.lineWidth = this.tickMarkWidth.value!;
-    context.moveTo(x, y0);
-    context.lineTo(x, y1);
-    context.stroke();
+    const tickMarkWidth = this.tickMarkWidth.value;
+    if (tickMarkWidth !== void 0 && tickMarkWidth !== 0 && tickMarkLength !== 0) {
+      context.beginPath();
+      context.strokeStyle = this.tickMarkColor.value!.toString();
+      context.lineWidth = tickMarkWidth;
+      context.moveTo(x, y0);
+      context.lineTo(x, y1);
+      context.stroke();
+    }
 
-    const gridLineWidth = this.gridLineWidth.value!;
-    if (gridLineWidth !== 0 && frame.xMin < x && x < frame.xMax) {
+    const gridLineWidth = this.gridLineWidth.value;
+    if (gridLineWidth !== void 0 && gridLineWidth !== 0 && frame.xMin < x && x < frame.xMax) {
       context.beginPath();
       context.strokeStyle = this.gridLineColor.value!.toString();
       context.lineWidth = gridLineWidth;

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {
   ViewContext,
   ViewFlags,
   View,
-  MemberAnimator,
+  ViewAnimator,
   SvgView,
   HtmlView,
   HtmlViewController,
@@ -47,14 +47,14 @@ export class ActionItem extends HtmlView {
     return this._viewController;
   }
 
-  @ViewScope({inherit: true})
+  @ViewScope(Object, {inherit: true})
   theme: ViewScope<this, Theme>;
 
-  @MemberAnimator(Number, {inherit: true})
-  stackPhase: MemberAnimator<this, number>; // 0 = collapsed; 1 = expanded
+  @ViewAnimator(Number, {inherit: true})
+  stackPhase: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
 
-  @MemberAnimator(Color)
-  hoverColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color)
+  hoverColor: ViewAnimator<this, Color, AnyColor>;
 
   get icon(): SvgView | HtmlView | null {
     const childView = this.getChildView("icon");
@@ -78,7 +78,8 @@ export class ActionItem extends HtmlView {
   }
 
   protected onMount(): void {
-    this.requireUpdate(View.NeedsDerive);
+    super.onMount();
+    this.requireUpdate(View.NeedsCompute);
   }
 
   protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
@@ -90,8 +91,8 @@ export class ActionItem extends HtmlView {
     return additionalFlags;
   }
 
-  protected onDerive(viewContext: ViewContext): void {
-    super.onDerive(viewContext);
+  protected onCompute(viewContext: ViewContext): void {
+    super.onCompute(viewContext);
     const theme = this.theme.state;
     if (theme !== void 0) {
       this.setTheme(theme);
@@ -144,7 +145,8 @@ export class ActionItem extends HtmlView {
         .fontWeight("500")
         .lineHeight("48px")
         .whiteSpace("nowrap")
-        .color("#cccccc");
+        .color("#cccccc")
+        .opacity(this.stackPhase.value || 0);
   }
 
   protected onRemoveLabel(label: HtmlView): void {

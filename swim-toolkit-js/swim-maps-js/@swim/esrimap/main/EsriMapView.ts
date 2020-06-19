@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ export class EsriMapView extends EsriView {
       const esriViewRoot = View.fromNode(container.node.querySelector(".esri-view-root") as HTMLDivElement);
       const esriOverlaySurface = View.fromNode(esriViewRoot.node.querySelector(".esri-overlay-surface") as HTMLDivElement);
       const canvas = esriOverlaySurface.append("canvas");
-      canvas.setEventSurface(esriViewRoot.node);
+      canvas.setEventNode(esriViewRoot.node);
       canvas.append(this);
       return canvas;
     }

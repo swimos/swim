@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
 import {GraphicsViewController} from "@swim/view";
 import {GeoBox} from "../geo/GeoBox";
 import {GeoProjection} from "../geo/GeoProjection";
-import {MapViewContext} from "../MapViewContext";
-import {MapViewController} from "../MapViewController";
+import {MapGraphicsViewContext} from "./MapGraphicsViewContext";
 import {MapGraphicsView} from "./MapGraphicsView";
 import {MapGraphicsViewObserver} from "./MapGraphicsViewObserver";
 
-export class MapGraphicsViewController<V extends MapGraphicsView = MapGraphicsView> extends GraphicsViewController<V> implements MapViewController<V>, MapGraphicsViewObserver<V> {
+export class MapGraphicsViewController<V extends MapGraphicsView = MapGraphicsView> extends GraphicsViewController<V> implements MapGraphicsViewObserver<V> {
   get geoProjection(): GeoProjection | null {
     const view = this._view;
     return view !== null ? view.geoProjection : null;
@@ -48,14 +47,14 @@ export class MapGraphicsViewController<V extends MapGraphicsView = MapGraphicsVi
 
   get geoBounds(): GeoBox {
     const view = this._view;
-    return view !== null ? view.geoBounds : GeoBox.empty();
+    return view !== null ? view.geoBounds : GeoBox.undefined();
   }
 
-  viewWillProject(viewContext: MapViewContext, view: V): void {
+  viewWillProject(viewContext: MapGraphicsViewContext, view: V): void {
     // hook
   }
 
-  viewDidProject(viewContext: MapViewContext, view: V): void {
+  viewDidProject(viewContext: MapGraphicsViewContext, view: V): void {
     // hook
   }
 }

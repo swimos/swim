@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,45 +12,56 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {RenderedViewContext} from "../rendered/RenderedViewContext";
-import {RenderedViewObserver} from "../rendered/RenderedViewObserver";
+import {GraphicsViewContext} from "../graphics/GraphicsViewContext";
 import {HtmlViewObserver} from "../html/HtmlViewObserver";
 import {CanvasView} from "./CanvasView";
 
-export interface CanvasViewObserver<V extends CanvasView = CanvasView> extends HtmlViewObserver<V>, RenderedViewObserver<V> {
-  viewWillProcess?(viewContext: RenderedViewContext, view: V): void;
+export interface CanvasViewObserver<V extends CanvasView = CanvasView> extends HtmlViewObserver<V> {
+  viewWillProcess?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewDidProcess?(viewContext: RenderedViewContext, view: V): void;
+  viewDidProcess?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewWillScroll?(viewContext: RenderedViewContext, view: V): void;
+  viewWillResize?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewDidScroll?(viewContext: RenderedViewContext, view: V): void;
+  viewDidResize?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewWillDerive?(viewContext: RenderedViewContext, view: V): void;
+  viewWillScroll?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewDidDerive?(viewContext: RenderedViewContext, view: V): void;
+  viewDidScroll?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewWillAnimate?(viewContext: RenderedViewContext, view: V): void;
+  viewWillCompute?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewDidAnimate?(viewContext: RenderedViewContext, view: V): void;
+  viewDidCompute?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewWillProcessChildViews?(viewContext: RenderedViewContext, view: V): void;
+  viewWillAnimate?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewDidProcessChildViews?(viewContext: RenderedViewContext, view: V): void;
+  viewDidAnimate?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewWillDisplay?(viewContext: RenderedViewContext, view: V): void;
+  viewWillProcessChildViews?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewDidDisplay?(viewContext: RenderedViewContext, view: V): void;
+  viewDidProcessChildViews?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewWillLayout?(viewContext: RenderedViewContext, view: V): void;
+  viewWillDisplay?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewDidLayout?(viewContext: RenderedViewContext, view: V): void;
+  viewDidDisplay?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewWillRender?(viewContext: RenderedViewContext, view: V): void;
+  viewWillLayout?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewDidRender?(viewContext: RenderedViewContext, view: V): void;
+  viewDidLayout?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewWillDisplayChildViews?(viewContext: RenderedViewContext, view: V): void;
+  viewWillRender?(viewContext: GraphicsViewContext, view: V): void;
 
-  viewDidDisplayChildViews?(viewContext: RenderedViewContext, view: V): void;
+  viewDidRender?(viewContext: GraphicsViewContext, view: V): void;
+
+  viewWillDisplayChildViews?(viewContext: GraphicsViewContext, view: V): void;
+
+  viewDidDisplayChildViews?(viewContext: GraphicsViewContext, view: V): void;
+
+  viewWillSetHidden?(hidden: boolean, view: V): void;
+
+  viewDidSetHidden?(hidden: boolean, view: V): void;
+
+  viewWillSetCulled?(culled: boolean, view: V): void;
+
+  viewDidSetCulled?(culled: boolean, view: V): void;
 }

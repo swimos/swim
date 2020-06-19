@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -66,16 +66,17 @@ export class RgbColorInterpolator extends ColorInterpolator<RgbColor> {
     return lc !== 0 ? dp / lc : lc;
   }
 
-  range(): ReadonlyArray<RgbColor>;
-  range(cs: ReadonlyArray<RgbColor | RgbColorInit>): RgbColorInterpolator;
+  range(): readonly [RgbColor, RgbColor];
+  range(cs: readonly [RgbColor | RgbColorInit, RgbColor | RgbColorInit]): RgbColorInterpolator;
   range(c0: RgbColor | RgbColorInit, c1: RgbColor | RgbColorInit): RgbColorInterpolator;
-  range(cs: ReadonlyArray<AnyColor>): ColorInterpolator;
+  range(cs: readonly [AnyColor, AnyColor]): ColorInterpolator;
   range(c0: AnyColor, c1: AnyColor): ColorInterpolator;
-  range(c0?: ReadonlyArray<AnyColor> | AnyColor, c1?: AnyColor): ReadonlyArray<RgbColor> | ColorInterpolator {
+  range(c0?: readonly [AnyColor, AnyColor] | AnyColor,
+        c1?: AnyColor): readonly [RgbColor, RgbColor] | ColorInterpolator {
     if (c0 === void 0) {
       return [this.interpolate(0), this.interpolate(1)];
     } else if (c1 === void 0) {
-      c0 = c0 as ReadonlyArray<AnyColor>
+      c0 = c0 as readonly [AnyColor, AnyColor];
       return RgbColorInterpolator.between(c0[0], c0[1]);
     } else {
       return RgbColorInterpolator.between(c0 as AnyColor, c1);

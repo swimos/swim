@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {PlotViewController} from "../plot/PlotViewController";
-import {GraphType, GraphView} from "./GraphView";
+import {ScaleViewController} from "../scale/ScaleViewController";
+import {GraphView} from "./GraphView";
 import {GraphViewObserver} from "./GraphViewObserver";
 
-export class GraphViewController<X = any, Y = any, V extends GraphView<X, Y> = GraphView<X, Y>> extends PlotViewController<X, Y, V> implements GraphViewObserver<X, Y, V> {
-  get type(): GraphType {
-    const view = this._view;
-    return view !== null ? view.type : void 0 as any;
-  }
+export class GraphViewController<X = unknown, Y = unknown, V extends GraphView<X, Y> = GraphView<X, Y>> extends ScaleViewController<X, Y, V> implements GraphViewObserver<X, Y, V> {
 }

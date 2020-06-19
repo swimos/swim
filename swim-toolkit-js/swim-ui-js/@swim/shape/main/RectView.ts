@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
-  MemberAnimator,
-  RenderedViewContext,
-  RenderedView,
+  ViewAnimator,
+  GraphicsViewContext,
+  GraphicsView,
+  GraphicsViewController,
+  GraphicsLeafView,
   FillViewInit,
   FillView,
   StrokeViewInit,
   StrokeView,
-  GraphicsView,
-  GraphicsViewController,
 } from "@swim/view";
 import {Rect} from "./Rect";
 
@@ -39,31 +39,31 @@ export interface RectViewInit extends FillViewInit, StrokeViewInit {
   height?: AnyLength;
 }
 
-export class RectView extends GraphicsView implements FillView, StrokeView {
+export class RectView extends GraphicsLeafView implements FillView, StrokeView {
   get viewController(): GraphicsViewController<RectView> | null {
     return this._viewController;
   }
 
-  @MemberAnimator(Length, {value: Length.zero()})
-  x: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.zero()})
+  x: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {value: Length.zero()})
-  y: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.zero()})
+  y: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {value: Length.zero()})
-  width: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.zero()})
+  width: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {value: Length.zero()})
-  height: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.zero()})
+  height: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, {inherit: true})
-  fill: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  fill: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color, {inherit: true})
-  stroke: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  stroke: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, {inherit: true})
-  strokeWidth: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  strokeWidth: ViewAnimator<this, Length, AnyLength>;
 
   get value(): Rect {
     return new Rect(this.x.value!, this.y.value!, this.width.value!, this.height.value!);
@@ -106,7 +106,7 @@ export class RectView extends GraphicsView implements FillView, StrokeView {
     }
   }
 
-  protected onRender(viewContext: RenderedViewContext): void {
+  protected onRender(viewContext: GraphicsViewContext): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -150,7 +150,7 @@ export class RectView extends GraphicsView implements FillView, StrokeView {
     return new BoxR2(x, y, x + width, y + height);
   }
 
-  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext: GraphicsViewContext): GraphicsView | null {
     let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -166,7 +166,7 @@ export class RectView extends GraphicsView implements FillView, StrokeView {
     return hit;
   }
 
-  protected hitTestRect(hx: number, hy: number, context: CanvasContext, frame: BoxR2): RenderedView | null {
+  protected hitTestRect(hx: number, hy: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
     const x = this.x.value!.pxValue(frame.width);
     const y = this.y.value!.pxValue(frame.height);
     const width = this.width.value!.pxValue(frame.width);

@@ -14,36 +14,43 @@
 
 const uiView = new swim.UiView(document.getElementById("ui"));
 
-const canvas = uiView.append("canvas");
+const canvas = uiView.append("canvas")
+    .wheelEventsEnabled(true)
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
 
-const chart = new swim.ChartView()
-    .bottomAxis("linear")
-    .leftAxis("linear")
-    .bottomGesture(true)
-    .leftDomainPadding([0.1, 0.1])
-    .domainColor("#4a4a4a")
+const chart = canvas.append(swim.ChartView)
+    .bottomAxis(true)
+    .leftAxis(true)
+    .xRangePadding(2)
+    .yRangePadding(2)
+    .fitAspectRatio(1)
+    .domainTracking(true)
+    .xGestures(true)
+    .borderColor("#4a4a4a")
     .tickMarkColor("#4a4a4a")
     .font("12px sans-serif")
     .textColor("#4a4a4a");
-canvas.append(chart);
+const graph = chart.graph();
 
-const plot = new swim.LineGraphView()
+const plot = graph.append(swim.LinePlotView)
     .hitMode("domain")
     .stroke("#4a4a4a")
     .strokeWidth(2)
-    .on("mouseover", function (event) {
-      const datum = event.targetView;
-      const y = datum.y.value;
-      datum.label(swim.TextRunView.fromAny({
+    .on("pointerover", function (event) {
+      const dataPoint = event.targetView;
+      const y = dataPoint.y.value;
+      dataPoint.label(swim.TextRunView.fromAny({
         text: y.toFixed(2),
         textColor: "#1db0ef",
       }));
     })
-    .on("mouseout", function (event) {
-      const datum = event.targetView;
-      datum.label(null);
+    .on("pointerout", function (event) {
+      const dataPoint = event.targetView;
+      dataPoint.label(null);
     });
-chart.addPlot(plot);
 
 const cycles = 2;
 const samples = 100;
@@ -51,7 +58,7 @@ for (let i = 0, n = cycles * samples; i <= n; i += 1) {
   const x = i * 2 * Math.PI / samples;
   const y = Math.round(1000 * Math.sin(x)) / 1000;
   const opacity = i === 0 ? 0.75 : i === n ? 0.25 : void 0;
-  plot.insertDatum({
+  plot.insertDataPoint({
     x: x,
     y: y,
     opacity: opacity,

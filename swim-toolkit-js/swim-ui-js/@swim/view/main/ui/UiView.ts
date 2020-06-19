@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,24 +13,22 @@
 // limitations under the License.
 
 import {ConstrainVariable, Constraint, ConstraintSolver} from "@swim/constraint";
-import {LayoutManager} from "../layout/LayoutManager";
-import {LayoutSolver} from "../layout/LayoutSolver";
-import {LayoutAnchor} from "../layout/LayoutAnchor";
-import {ViewEdgeInsets} from "../ViewMetrics";
-import {ViewportColorScheme, Viewport} from "../Viewport";
-import {ViewIdiom} from "../ViewIdiom";
 import {ViewContext} from "../ViewContext";
 import {ViewFlags, View} from "../View";
+import {ViewEdgeInsets} from "../viewport/ViewDimensions";
+import {ViewportColorScheme, Viewport} from "../viewport/Viewport";
+import {ViewIdiom} from "../viewport/ViewIdiom";
 import {ModalOptions, Modal} from "../modal/Modal";
 import {RootView} from "../root/RootView";
 import {RootViewObserver} from "../root/RootViewObserver";
+import {LayoutSolver} from "../layout/LayoutSolver";
+import {LayoutAnchor} from "../layout/LayoutAnchor";
 import {ViewNode} from "../node/NodeView";
 import {HtmlView} from "../html/HtmlView";
 import {UiViewContext} from "./UiViewContext";
-import {UiViewObserver} from "./UiViewObserver";
 import {UiViewController} from "./UiViewController";
 
-export class UiView extends HtmlView implements RootView, LayoutManager {
+export class UiView extends HtmlView implements RootView {
   /** @hidden */
   readonly _viewContext: UiViewContext;
   /** @hidden */
@@ -42,9 +40,9 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
   /** @hidden */
   _reorientationTimer: number;
   /** @hidden */
-  _layoutSolver: LayoutSolver | undefined;
+  _layoutSolver?: LayoutSolver;
   /** @hidden */
-  _modals: Modal[] | undefined;
+  _modals?: Modal[];
 
   constructor(node: HTMLElement) {
     super(node);
@@ -74,9 +72,9 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
 
   @LayoutAnchor<UiView>({
     get(oldState: number): number {
-      const newState = this.viewport.safeArea.insetTop;
+      const newState = this.scope.viewport.safeArea.insetTop;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsLayout);
       }
       return newState;
     },
@@ -86,9 +84,9 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
 
   @LayoutAnchor<UiView>({
     get(oldState: number): number {
-      const newState = this.viewport.safeArea.insetRight;
+      const newState = this.scope.viewport.safeArea.insetRight;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsLayout);
       }
       return newState;
     },
@@ -98,9 +96,9 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
 
   @LayoutAnchor<UiView>({
     get(oldState: number): number {
-      const newState = this.viewport.safeArea.insetBottom;
+      const newState = this.scope.viewport.safeArea.insetBottom;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsLayout);
       }
       return newState;
     },
@@ -110,9 +108,9 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
 
   @LayoutAnchor<UiView>({
     get(oldState: number): number {
-      const newState = this.viewport.safeArea.insetLeft;
+      const newState = this.scope.viewport.safeArea.insetLeft;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsLayout);
       }
       return newState;
     },
@@ -152,11 +150,11 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
 
   protected onMount(): void {
     super.onMount();
-    this.addEventListeners(this._node);
+    this.attachNode(this._node);
   }
 
   protected onUnmount(): void {
-    this.removeEventListeners(this._node);
+    this.detachNode(this._node);
     super.onUnmount();
   }
 
@@ -202,12 +200,9 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
   protected scheduleUpdate(): void {
     const viewFlags = this._viewFlags;
     if (this._displayFrame === 0 && this._processTimer === 0
-        && (viewFlags & (View.ProcessingFlag | View.DisplayingFlag)) === 0) {
-      if ((viewFlags & View.ProcessMask) !== 0) {
-        this._processTimer = setTimeout(this.runProcessPass, this._updateDelay) as any;
-      } else if ((viewFlags & View.DisplayMask) !== 0) {
-        this._displayFrame = requestAnimationFrame(this.runDisplayPass);
-      }
+        && (viewFlags & (View.ProcessingFlag | View.DisplayingFlag)) === 0
+        && (viewFlags & View.UpdateMask) !== 0) {
+      this._processTimer = setTimeout(this.runProcessPass, this._updateDelay) as any;
     }
   }
 
@@ -301,74 +296,17 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
     // ignore ancestor updates
   }
 
-  /** @hidden */
-  protected doProcess(processFlags: ViewFlags, viewContext: UiViewContext): void {
-    let cascadeFlags = processFlags;
-    this._viewFlags &= ~(View.NeedsProcess | View.NeedsProject);
-    this.willProcess(viewContext);
-    this._viewFlags |= View.ProcessingFlag;
-    try {
-      if (((this._viewFlags | processFlags) & View.NeedsResize) !== 0) {
-        cascadeFlags |= View.NeedsResize;
-        this._viewFlags &= ~View.NeedsResize;
-        this.willResize(viewContext);
-      }
-      if (((this._viewFlags | processFlags) & View.NeedsScroll) !== 0) {
-        cascadeFlags |= View.NeedsScroll;
-        this._viewFlags &= ~View.NeedsScroll;
-        this.willScroll(viewContext);
-      }
-      if (((this._viewFlags | processFlags) & View.NeedsDerive) !== 0) {
-        cascadeFlags |= View.NeedsDerive;
-        this._viewFlags &= ~View.NeedsDerive;
-        this.willDerive(viewContext);
-      }
-      if (((this._viewFlags | processFlags) & View.NeedsAnimate) !== 0) {
-        cascadeFlags |= View.NeedsAnimate;
-        this._viewFlags &= ~View.NeedsAnimate;
-        this.willAnimate(viewContext);
-      }
-
-      this.onProcess(viewContext);
-      if ((cascadeFlags & View.NeedsResize) !== 0) {
-        this.onResize(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsScroll) !== 0) {
-        this.onScroll(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsDerive) !== 0) {
-        this.onDerive(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsAnimate) !== 0) {
-        this.onAnimate(viewContext);
-      }
-
-      this.doProcessChildViews(cascadeFlags, viewContext);
-
-      if ((cascadeFlags & View.NeedsAnimate) !== 0) {
-        this.didAnimate(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsDerive) !== 0) {
-        this.didDerive(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsScroll) !== 0) {
-        this.didScroll(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsResize) !== 0) {
-        this.didResize(viewContext);
-      }
-    } finally {
-      this._viewFlags &= ~View.ProcessingFlag;
-      this.didProcess(viewContext);
-    }
+  protected willResize(viewContext: UiViewContext): void {
+    this._viewContext.viewport = this.detectViewport();
+    super.willResize(viewContext);
   }
 
   cascadeDisplay(displayFlags: ViewFlags, viewContext: ViewContext): void {
     // ignore ancestor updates
   }
 
-  protected updateLayoutStates(): void {
-    super.updateLayoutStates();
+  protected updateConstraints(): void {
+    super.updateConstraints();
     const safeAreaInsetTop = this.getLayoutAnchor("safeAreaInsetTop");
     if (safeAreaInsetTop !== null) {
       this.safeAreaInsetTop.updateState();
@@ -385,26 +323,6 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
     if (safeAreaInsetLeft !== null) {
       safeAreaInsetLeft.updateState();
     }
-  }
-
-  protected willResize(viewContext: UiViewContext): void {
-    this.willObserve(function (viewObserver: UiViewObserver): void {
-      if (viewObserver.viewWillResize !== void 0) {
-        viewObserver.viewWillResize(viewContext, this);
-      }
-    });
-  }
-
-  protected onResize(viewContext: UiViewContext): void {
-    this._viewContext.viewport = this.detectViewport();
-  }
-
-  protected didResize(viewContext: UiViewContext): void {
-    this.didObserve(function (viewObserver: UiViewObserver): void {
-      if (viewObserver.viewDidResize !== void 0) {
-        viewObserver.viewDidResize(viewContext, this);
-      }
-    });
   }
 
   /** @hidden */
@@ -715,7 +633,7 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
   }
 
   /** @hidden */
-  protected addEventListeners(node: Node): void {
+  protected attachNode(node: Node): void {
     if (typeof window !== "undefined") {
       window.addEventListener("resize", this.throttleResize);
       window.addEventListener("scroll", this.throttleScroll, {passive: true});
@@ -728,7 +646,7 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
   }
 
   /** @hidden */
-  protected removeEventListeners(node: Node): void {
+  protected detachNode(node: Node): void {
     if (typeof window !== "undefined") {
       window.removeEventListener("resize", this.throttleResize);
       window.removeEventListener("scroll", this.throttleScroll);
@@ -742,7 +660,7 @@ export class UiView extends HtmlView implements RootView, LayoutManager {
 
   /** @hidden */
   throttleResize(): void {
-    this.requireUpdate(View.NeedsResize | View.NeedsLayout);
+    this.requireUpdate(View.NeedsResize);
   }
 
   /** @hidden */

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
-  MemberAnimator,
-  RenderedViewContext,
-  RenderedView,
+  ViewAnimator,
+  GraphicsViewContext,
+  GraphicsView,
+  GraphicsViewController,
+  GraphicsLeafView,
   FillViewInit,
   FillView,
   StrokeViewInit,
   StrokeView,
-  GraphicsView,
-  GraphicsViewController,
 } from "@swim/view";
 import {ArcInit, Arc} from "./Arc";
 
@@ -36,43 +36,43 @@ export type AnyArcView = ArcView | Arc | ArcViewInit;
 export interface ArcViewInit extends FillViewInit, StrokeViewInit, ArcInit {
 }
 
-export class ArcView extends GraphicsView implements FillView, StrokeView {
+export class ArcView extends GraphicsLeafView implements FillView, StrokeView {
   get viewController(): GraphicsViewController<ArcView> | null {
     return this._viewController;
   }
 
-  @MemberAnimator(PointR2, {value: PointR2.origin()})
-  center: MemberAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator(PointR2, {value: PointR2.origin()})
+  center: ViewAnimator<this, PointR2, AnyPointR2>;
 
-  @MemberAnimator(Length, {value: Length.zero()})
-  innerRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.zero()})
+  innerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Length, {value: Length.zero()})
-  outerRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.zero()})
+  outerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Angle, {value: Angle.zero()})
-  startAngle: MemberAnimator<this, Angle, AnyAngle>;
+  @ViewAnimator(Angle, {value: Angle.zero()})
+  startAngle: ViewAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Angle, {value: Angle.zero()})
-  sweepAngle: MemberAnimator<this, Angle, AnyAngle>;
+  @ViewAnimator(Angle, {value: Angle.zero()})
+  sweepAngle: ViewAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Angle, {value: Angle.zero()})
-  padAngle: MemberAnimator<this, Angle, AnyAngle>;
+  @ViewAnimator(Angle, {value: Angle.zero()})
+  padAngle: ViewAnimator<this, Angle, AnyAngle>;
 
-  @MemberAnimator(Length, {value: null})
-  padRadius: MemberAnimator<this, Length | null, AnyLength | null>;
+  @ViewAnimator(Length, {value: null})
+  padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
 
-  @MemberAnimator(Length, {value: Length.zero()})
-  cornerRadius: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {value: Length.zero()})
+  cornerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Color, {inherit: true})
-  fill: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  fill: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color, {inherit: true})
-  stroke: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  stroke: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, {inherit: true})
-  strokeWidth: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  strokeWidth: ViewAnimator<this, Length, AnyLength>;
 
   get value(): Arc {
     return new Arc(this.center.value!, this.innerRadius.value!, this.outerRadius.value!,
@@ -131,7 +131,7 @@ export class ArcView extends GraphicsView implements FillView, StrokeView {
     }
   }
 
-  protected onRender(viewContext: RenderedViewContext): void {
+  protected onRender(viewContext: GraphicsViewContext): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -184,7 +184,7 @@ export class ArcView extends GraphicsView implements FillView, StrokeView {
                      center.x + radius, center.y + radius);
   }
 
-  hitTest(x: number, y: number, viewContext: RenderedViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext: GraphicsViewContext): GraphicsView | null {
     let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -200,7 +200,7 @@ export class ArcView extends GraphicsView implements FillView, StrokeView {
     return hit;
   }
 
-  protected hitTestArc(x: number, y: number, context: CanvasContext, frame: BoxR2): RenderedView | null {
+  protected hitTestArc(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
     context.beginPath();
     const arc = this.value;
     arc.draw(context, frame);

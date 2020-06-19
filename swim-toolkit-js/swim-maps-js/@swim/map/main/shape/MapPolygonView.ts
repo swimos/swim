@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
   View,
-  MemberAnimator,
-  RenderedView,
+  ViewAnimator,
+  GraphicsView,
   FillViewInit,
   FillView,
   StrokeViewInit,
@@ -29,15 +29,15 @@ import {
 } from "@swim/view";
 import {GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
-import {MapViewContext} from "../MapViewContext";
-import {MapViewInit} from "../MapView";
-import {MapGraphicsView} from "../graphics/MapGraphicsView";
+import {MapGraphicsViewContext} from "../graphics/MapGraphicsViewContext";
+import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
 import {MapGraphicsViewController} from "../graphics/MapGraphicsViewController";
+import {MapGraphicsNodeView} from "../graphics/MapGraphicsNodeView";
 import {AnyMapPointView, MapPointView} from "./MapPointView";
 
 export type AnyMapPolygonView = MapPolygonView | MapPolygonViewInit;
 
-export interface MapPolygonViewInit extends MapViewInit, FillViewInit, StrokeViewInit {
+export interface MapPolygonViewInit extends MapGraphicsViewInit, FillViewInit, StrokeViewInit {
   points?: AnyMapPointView[];
 
   clipViewport?: true;
@@ -46,25 +46,25 @@ export interface MapPolygonViewInit extends MapViewInit, FillViewInit, StrokeVie
   textColor?: AnyColor;
 }
 
-export class MapPolygonView extends MapGraphicsView implements FillView, StrokeView {
+export class MapPolygonView extends MapGraphicsNodeView implements FillView, StrokeView {
   /** @hidden */
-  _geoCenter: GeoPoint;
+  _geoCentroid: GeoPoint;
   /** @hidden */
-  _viewCenter: PointR2;
+  _viewCentroid: PointR2;
   /** @hidden */
   _clipViewport: boolean;
   /** @hidden */
-  _viewBounds: BoxR2;
-  /** @hidden */
   _geoBounds: GeoBox;
+  /** @hidden */
+  _viewBounds: BoxR2;
 
   constructor() {
     super();
-    this._geoCenter = GeoPoint.origin();
-    this._viewCenter = PointR2.origin();
+    this._geoCentroid = GeoPoint.origin();
+    this._viewCentroid = PointR2.origin();
     this._clipViewport = true;
-    this._viewBounds = BoxR2.empty();
-    this._geoBounds = GeoBox.empty();
+    this._geoBounds = GeoBox.undefined();
+    this._viewBounds = BoxR2.undefined();
   }
 
   get viewController(): MapGraphicsViewController<MapPolygonView> | null {
@@ -137,11 +137,11 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
       if (!invalid && j !== 0) {
         lngMid /= j;
         latMid /= j;
-        this._geoCenter = new GeoPoint(lngMid, latMid);
+        this._geoCentroid = new GeoPoint(lngMid, latMid);
         this._geoBounds = new GeoBox(lngMin, latMin, lngMax, latMax);
       } else {
-        this._geoCenter = GeoPoint.origin();
-        this._geoBounds = GeoBox.empty();
+        this._geoCentroid = GeoPoint.origin();
+        this._geoBounds = GeoBox.undefined();
       }
       const newGeoBounds = this._geoBounds;
       if (!oldGeoBounds.equals(newGeoBounds)) {
@@ -174,28 +174,28 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
     }
   }
 
-  get geoCenter(): GeoPoint {
-    return this._geoCenter;
+  get geoCentroid(): GeoPoint {
+    return this._geoCentroid;
   }
 
-  get viewCenter(): PointR2 {
-    return this._viewCenter;
+  get viewCentroid(): PointR2 {
+    return this._viewCentroid;
   }
 
-  @MemberAnimator(Color, {inherit: true})
-  fill: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  fill: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Color, {inherit: true})
-  stroke: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  stroke: ViewAnimator<this, Color, AnyColor>;
 
-  @MemberAnimator(Length, {inherit: true})
-  strokeWidth: MemberAnimator<this, Length, AnyLength>;
+  @ViewAnimator(Length, {inherit: true})
+  strokeWidth: ViewAnimator<this, Length, AnyLength>;
 
-  @MemberAnimator(Font, {inherit: true})
-  font: MemberAnimator<this, Font, AnyFont>;
+  @ViewAnimator(Font, {inherit: true})
+  font: ViewAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(Color, {inherit: true})
-  textColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  textColor: ViewAnimator<this, Color, AnyColor>;
 
   protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
     super.onInsertChildView(childView, targetView);
@@ -208,7 +208,7 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
     childView.requireUpdate(View.NeedsAnimate | View.NeedsProject);
   }
 
-  protected didProject(viewContext: MapViewContext): void {
+  protected didProject(viewContext: MapGraphicsViewContext): void {
     const oldGeoBounds = this._geoBounds;
     let lngMin = Infinity;
     let latMin = Infinity;
@@ -242,7 +242,7 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
         xMax = Math.max(x, xMax);
         yMax = Math.max(y, yMax);
         xMid += x;
-        yMid += x;
+        yMid += y;
         invalid = invalid || !isFinite(x) || !isFinite(y);
         pointCount += 1;
       }
@@ -250,11 +250,11 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
     if (!invalid && pointCount !== 0) {
       lngMid /= pointCount;
       latMid /= pointCount;
-      this._geoCenter = new GeoPoint(lngMid, latMid);
+      this._geoCentroid = new GeoPoint(lngMid, latMid);
       this._geoBounds = new GeoBox(lngMin, latMin, lngMax, latMax);
       xMid /= pointCount;
       yMid /= pointCount;
-      this._viewCenter = new PointR2(xMid, yMid);
+      this._viewCentroid = new PointR2(xMid, yMid);
       this._viewBounds = new BoxR2(xMin, yMin, xMax, yMax);
       if (viewContext.geoFrame.intersects(this._geoBounds)) {
         const frame = this.viewFrame;
@@ -271,10 +271,10 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
         this.setCulled(true);
       }
     } else {
-      this._geoCenter = GeoPoint.origin();
-      this._geoBounds = GeoBox.empty();
-      this._viewCenter = PointR2.origin();
-      this._viewBounds = BoxR2.empty();
+      this._geoCentroid = GeoPoint.origin();
+      this._geoBounds = GeoBox.undefined();
+      this._viewCentroid = PointR2.origin();
+      this._viewBounds = BoxR2.undefined();
       this.setCulled(true);
     }
     const newGeoBounds = this._geoBounds;
@@ -284,7 +284,7 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
     super.didProject(viewContext);
   }
 
-  protected onRender(viewContext: MapViewContext): void {
+  protected onRender(viewContext: MapGraphicsViewContext): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -331,10 +331,14 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
   }
 
   get popoverFrame(): BoxR2 {
-    const viewCenter = this._viewCenter;
+    const viewCentroid = this._viewCentroid;
     const inversePageTransform = this.pageTransform.inverse();
-    const [px, py] = inversePageTransform.transform(viewCenter.x, viewCenter.y);
+    const [px, py] = inversePageTransform.transform(viewCentroid.x, viewCentroid.y);
     return new BoxR2(px, py, px, py);
+  }
+
+  get geoBounds(): GeoBox {
+    return this._geoBounds;
   }
 
   get viewBounds(): BoxR2 {
@@ -345,11 +349,7 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
     return this.viewBounds;
   }
 
-  get geoBounds(): GeoBox {
-    return this._geoBounds;
-  }
-
-  hitTest(x: number, y: number, viewContext: MapViewContext): RenderedView | null {
+  hitTest(x: number, y: number, viewContext: MapGraphicsViewContext): GraphicsView | null {
     let hit = super.hitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -365,7 +365,7 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
     return hit;
   }
 
-  protected hitTestPolygon(x: number, y: number, context: CanvasContext, frame: BoxR2): RenderedView | null {
+  protected hitTestPolygon(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
     const childViews = this._childViews;
     const childCount = childViews.length;
     let pointCount = 0;
@@ -405,37 +405,41 @@ export class MapPolygonView extends MapGraphicsView implements FillView, StrokeV
     if (polygon instanceof MapPolygonView) {
       return polygon;
     } else if (typeof polygon === "object" && polygon !== null) {
-      const view = new MapPolygonView();
-      if (polygon.clipViewport !== void 0) {
-        view.clipViewport(polygon.clipViewport);
-      }
-      if (polygon.fill !== void 0) {
-        view.fill(polygon.fill);
-      }
-      if (polygon.stroke !== void 0) {
-        view.stroke(polygon.stroke);
-      }
-      if (polygon.strokeWidth !== void 0) {
-        view.strokeWidth(polygon.strokeWidth);
-      }
-      if (polygon.font !== void 0) {
-        view.font(polygon.font);
-      }
-      if (polygon.textColor !== void 0) {
-        view.textColor(polygon.textColor);
-      }
-      const points = polygon.points;
-      if (points !== void 0) {
-        view.points(points);
-      }
-      if (polygon.hidden !== void 0) {
-        view.setHidden(polygon.hidden);
-      }
-      if (polygon.culled !== void 0) {
-        view.setCulled(polygon.culled);
-      }
-      return view;
+      return MapPolygonView.fromInit(polygon);
     }
     throw new TypeError("" + polygon);
+  }
+
+  static fromInit(init: MapPolygonViewInit): MapPolygonView {
+    const view = new MapPolygonView();
+    if (init.clipViewport !== void 0) {
+      view.clipViewport(init.clipViewport);
+    }
+    if (init.fill !== void 0) {
+      view.fill(init.fill);
+    }
+    if (init.stroke !== void 0) {
+      view.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      view.strokeWidth(init.strokeWidth);
+    }
+    if (init.font !== void 0) {
+      view.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      view.textColor(init.textColor);
+    }
+    const points = init.points;
+    if (points !== void 0) {
+      view.points(points);
+    }
+    if (init.hidden !== void 0) {
+      view.setHidden(init.hidden);
+    }
+    if (init.culled !== void 0) {
+      view.setCulled(init.culled);
+    }
+    return view;
   }
 }

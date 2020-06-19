@@ -11,8 +11,8 @@
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
     <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
-    <script src="../swim-maps-js/@swim/maps/dist/main/swim-maps.js"></script>
     <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
+    <script src="../swim-maps-js/@swim/maps/dist/main/swim-maps.js"></script>
     <script src="https://js.arcgis.com/4.15/"></script>
     <script>
 
@@ -41,10 +41,12 @@ require([
     rotation: -160,
   });
   const mapView = new swim.EsriMapView(esriMapView);
-  mapView.overlayCanvas();
+  mapView.overlayCanvas()
+      .pointerEventsEnabled(true)
+      .touchAction("manipulation");
 
   const mapLayer = mapView.append(new swim.MapLayerView(undefined, 0, 15));
-  mapLayer.tileOutlineColor("#cc0000");
+  //mapLayer.tileOutlineColor("#cc0000");
 
   const host = swim.hostRef("warps://traffic.swim.services")
 
@@ -86,7 +88,7 @@ require([
         intersectionPopover.setSource(intersectionView);
         intersectionPopover.hideModal();
       }
-      appView.toggleModal(intersectionPopover, {multi: event.altKey});
+      appView.toggleModal(intersectionPopover, {multi: event.shiftKey});
     });
 
     const schematicLink = node.downlinkValue()
@@ -105,10 +107,10 @@ require([
                     stroke: swim.Color.transparent(),
                     strokeWidth: 3,
                   })
-                  .on("mouseenter", function (event) {
+                  .on("pointerenter", function (event) {
                     updateApproach(approachView);
                   })
-                  .on("mouseleave", function (event) {
+                  .on("pointerleave", function (event) {
                     updateApproach(approachView);
                   });
                 approaches[approachId] = approachView;
@@ -176,11 +178,12 @@ require([
       if (approachView.occupied === false) {
         phaseColor = phaseColor.alpha(0.25);
       }
-      approachView.fill(phaseColor, swim.Transition.duration(500));
+    const tween = swim.Transition.duration(250, "cubic-out");
+      approachView.fill(phaseColor, tween);
       if (approachView.isHovering()) {
-        approachView.stroke("#ffffff", {duration: 200});
+        approachView.stroke("#ffffff", tween);
       } else {
-        approachView.stroke(swim.Color.transparent(), {duration: 200});
+        approachView.stroke(swim.Color.transparent(), tween);
       }
     }
 

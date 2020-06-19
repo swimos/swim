@@ -14,29 +14,35 @@
 
 const uiView = new swim.UiView(document.getElementById("ui"));
 
-const canvas = uiView.append("canvas");
+const canvas = uiView.append("canvas")
+    .wheelEventsEnabled(true)
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
 
-const chart = new swim.ChartView()
-    .bottomAxis("linear")
-    .leftAxis("linear")
-    .bottomGesture(true)
-    .leftDomainPadding([0.1, 0.1])
-    .domainColor("#4a4a4a")
+const chart = canvas.append(swim.ChartView)
+    .bottomAxis(true)
+    .leftAxis(true)
+    .fitAspectRatio(1)
+    .preserveAspectRatio(true)
+    .domainTracking(true)
+    .gestures(true)
+    .borderColor("#4a4a4a")
     .tickMarkColor("#4a4a4a")
     .font("12px sans-serif")
     .textColor("#4a4a4a");
-canvas.append(chart);
+const graph = chart.graph();
 
-const plot = new swim.AreaGraphView()
-    .hitMode("graph")
+const plot = graph.append(swim.AreaPlotView)
+    .hitMode("plot")
     .fill("#4a4a4a")
-    .on("mouseenter", function (event) {
-      plot.fill("#1db0ef", {duration: 200});
+    .on("pointerenter", function (event) {
+      plot.fill("#1db0ef", {duration: 250});
     })
-    .on("mouseleave", function (event) {
-      plot.fill("#4a4a4a", {duration: 200});
+    .on("pointerleave", function (event) {
+      plot.fill("#4a4a4a", {duration: 250});
     });
-chart.addPlot(plot);
 
 const cycles = 2;
 const samples = 100;
@@ -45,7 +51,7 @@ for (let i = 0, n = cycles * samples; i <= n; i += 1) {
   const y = Math.sin(x) + 1;
   const y2 = Math.sin(x) - 1;
   const opacity = i === 0 ? 0.75 : i === n ? 0.25 : void 0;
-  plot.insertDatum({x: x, y: y, y2: y2, opacity: opacity});
+  plot.insertDataPoint({x: x, y: y, y2: y2, opacity: opacity});
 }
 
     </script>

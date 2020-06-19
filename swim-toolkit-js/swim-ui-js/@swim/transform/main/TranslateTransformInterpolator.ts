@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,16 +65,17 @@ export class TranslateTransformInterpolator extends TransformInterpolator<Transl
     return 0;
   }
 
-  range(): ReadonlyArray<TranslateTransform>;
-  range(fs: ReadonlyArray<TranslateTransform>): TranslateTransformInterpolator;
+  range(): readonly [TranslateTransform, TranslateTransform];
+  range(fs: readonly [TranslateTransform, TranslateTransform]): TranslateTransformInterpolator;
   range(f0: TranslateTransform, f1: TranslateTransform): TranslateTransformInterpolator;
-  range(fs: ReadonlyArray<AnyTransform>): TransformInterpolator;
+  range(fs: readonly [AnyTransform, AnyTransform]): TransformInterpolator;
   range(f0: AnyTransform, f1: AnyTransform): TransformInterpolator;
-  range(f0?: ReadonlyArray<AnyTransform> | AnyTransform, f1?: AnyTransform): ReadonlyArray<TranslateTransform> | TransformInterpolator {
+  range(f0?: readonly [AnyTransform, AnyTransform] | AnyTransform,
+        f1?: AnyTransform): readonly [TranslateTransform, TranslateTransform] | TransformInterpolator {
     if (f0 === void 0) {
       return [this.interpolate(0), this.interpolate(1)];
     } else if (f1 === void 0) {
-      f0 = f0 as ReadonlyArray<AnyTransform>
+      f0 = f0 as readonly [AnyTransform, AnyTransform];
       return TranslateTransformInterpolator.between(f0[0], f0[1]);
     } else {
       return TranslateTransformInterpolator.between(f0 as AnyTransform, f1);

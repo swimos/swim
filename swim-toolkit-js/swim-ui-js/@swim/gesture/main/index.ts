@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,37 +13,37 @@
 // limitations under the License.
 
 export {
-  MultitouchEventInit,
-  MultitouchEventClass,
-  MultitouchEvent,
-  MultitouchPoint,
-  MultitouchTrack,
-  MultitouchGhost,
-  Multitouch,
-  MultitouchPointer,
-  MultitouchTouch,
-  MultitouchMouse,
-} from "./Multitouch";
+  GestureInputType,
+  GestureInput,
+} from "./GestureInput";
+export {GestureDelegate} from "./GestureDelegate";
 
+export {PositionGestureInput} from "./PositionGestureInput";
+export {PositionGestureDelegate} from "./PositionGestureDelegate";
 export {
-  ScaleGestureEventInit,
-  ScaleGestureEventClass,
-  ScaleGestureEvent,
-  ScaleGesturePoint,
+  AbstractPositionGesture,
+  PointerPositionGesture,
+  TouchPositionGesture,
+  MousePositionGesture,
+  PositionGesture,
+} from "./PositionGesture";
+
+export {MomentumGestureInput} from "./MomentumGestureInput";
+export {MomentumGestureDelegate} from "./MomentumGestureDelegate";
+export {
+  AbstractMomentumGesture,
+  PointerMomentumGesture,
+  TouchMomentumGesture,
+  MouseMomentumGesture,
+  MomentumGesture,
+} from "./MomentumGesture";
+
+export {ScaleGestureInput} from "./ScaleGestureInput";
+export {ScaleGestureDelegate} from "./ScaleGestureDelegate";
+export {
+  AbstractScaleGesture,
+  PointerScaleGesture,
+  TouchScaleGesture,
+  MouseScaleGesture,
   ScaleGesture,
-  HorizontalScaleGesture,
-  VerticalScaleGesture,
 } from "./ScaleGesture";
-
-export {
-  GestureViewPointerType,
-  GestureViewHover,
-  GestureViewTrack,
-  BaseGestureView,
-  PointerGestureView,
-  TouchGestureView,
-  MouseGestureView,
-  GestureView,
-} from "./GestureView";
-export {GestureViewObserver} from "./GestureViewObserver";
-export {GestureViewController} from "./GestureViewController";

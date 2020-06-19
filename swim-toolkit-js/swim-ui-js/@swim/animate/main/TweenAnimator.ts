@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -155,35 +155,6 @@ export abstract class TweenAnimator<T> extends Animator {
     }
   }
 
-  range(): ReadonlyArray<T> | null;
-  range(ys: ReadonlyArray<T>): this;
-  range(y0: T | undefined, y1: T | undefined): this;
-  range(y0?: ReadonlyArray<T> | T, y1?: T): ReadonlyArray<T> | null | this {
-    const interpolator = this._interpolator;
-    if (arguments.length === 0) {
-      return interpolator !== null ? interpolator.range() : null;
-    } else {
-      if (arguments.length === 1) {
-        y0 = y0 as ReadonlyArray<T>;
-        y1 = y0[1];
-        y0 = y0[0];
-      }
-      if (y1 === void 0) {
-        y1 = y0 as T | undefined;
-      } else if (y0 === void 0) {
-        y0 = y1;
-      }
-      if (y0 !== void 0 && y1 !== void 0) {
-        if (interpolator !== null) {
-          this._interpolator = interpolator.range(y0 as T, y1);
-        } else {
-          this._interpolator = Interpolator.between(y0 as T, y1);
-        }
-      }
-      return this;
-    }
-  }
-
   observers(): ReadonlyArray<TransitionObserver<T>> | null;
   observers(observers: ReadonlyArray<TransitionObserver<T>> | null): this;
   observers(observers?: ReadonlyArray<TransitionObserver<T>> | null): ReadonlyArray<TransitionObserver<T>> | null | this {
@@ -193,6 +164,10 @@ export abstract class TweenAnimator<T> extends Animator {
       this._observers = observers !== null ? observers.slice(0) : null;
       return this;
     }
+  }
+
+  isTweening(): boolean {
+    return this._tweenState === TweenState.Tracking;
   }
 
   get value(): T | undefined {
@@ -232,7 +207,13 @@ export abstract class TweenAnimator<T> extends Animator {
       }
     } else if (this._tweenState !== TweenState.Quiesced || !Objects.equal(this._state, state)) {
       const value = this.value;
-      this.range(value, state);
+      if (this._interpolator !== null) {
+        this._interpolator = this._interpolator.range(value, state);
+      } else if (value !== void 0) {
+        this._interpolator = Interpolator.between<T, unknown>(value, state);
+      } else {
+        this._interpolator = Interpolator.between<T, unknown>(state, state);
+      }
       this._state = state;
       this._beginTime = 0;
       if (this._tweenState === TweenState.Tracking) {

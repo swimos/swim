@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,37 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewFlags, View, GraphicsView} from "@swim/view";
+import {ViewFlags, View, GraphicsViewInit, GraphicsView} from "@swim/view";
 import {GeoBox} from "../geo/GeoBox";
 import {GeoProjection} from "../geo/GeoProjection";
-import {MapViewContext} from "../MapViewContext";
-import {MapView} from "../MapView";
+import {MapGraphicsViewContext} from "./MapGraphicsViewContext";
 import {MapGraphicsViewObserver} from "./MapGraphicsViewObserver";
 import {MapGraphicsViewController} from "./MapGraphicsViewController";
 
-export class MapGraphicsView extends GraphicsView implements MapView {
+export interface MapGraphicsViewInit extends GraphicsViewInit {
+}
+
+export abstract class MapGraphicsView extends GraphicsView {
   get viewController(): MapGraphicsViewController | null {
     return this._viewController;
   }
 
   get geoProjection(): GeoProjection | null {
     const parentView = this.parentView;
-    return MapView.is(parentView) ? parentView.geoProjection : null;
+    return parentView instanceof MapGraphicsView ? parentView.geoProjection : null;
   }
 
   get mapZoom(): number {
     const parentView = this.parentView;
-    return MapView.is(parentView) ? parentView.mapZoom : 0;
+    return parentView instanceof MapGraphicsView ? parentView.mapZoom : 0;
   }
 
   get mapHeading(): number {
     const parentView = this.parentView;
-    return MapView.is(parentView) ? parentView.mapHeading : 0;
+    return parentView instanceof MapGraphicsView ? parentView.mapHeading : 0;
   }
 
   get mapTilt(): number {
     const parentView = this.parentView;
-    return MapView.is(parentView) ? parentView.mapTilt : 0;
+    return parentView instanceof MapGraphicsView ? parentView.mapTilt : 0;
   }
 
   protected onMount(): void {
@@ -50,16 +52,7 @@ export class MapGraphicsView extends GraphicsView implements MapView {
     this.requireUpdate(View.NeedsProject);
   }
 
-  protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
-    let additionalFlags = 0;
-    if ((updateFlags & View.NeedsProject) !== 0) {
-      additionalFlags |= View.NeedsLayout;
-    }
-    additionalFlags |= super.modifyUpdate(updateFlags | additionalFlags);
-    return additionalFlags;
-  }
-
-  needsProcess(processFlags: ViewFlags, viewContext: MapViewContext): ViewFlags {
+  needsProcess(processFlags: ViewFlags, viewContext: MapGraphicsViewContext): ViewFlags {
     if ((this._viewFlags & View.NeedsAnimate) === 0) {
       processFlags &= ~View.NeedsAnimate;
     }
@@ -67,26 +60,36 @@ export class MapGraphicsView extends GraphicsView implements MapView {
   }
 
   /** @hidden */
-  protected doProcess(processFlags: ViewFlags, viewContext: MapViewContext): void {
+  protected doProcess(processFlags: ViewFlags, viewContext: MapGraphicsViewContext): void {
     let cascadeFlags = processFlags;
-    this._viewFlags &= ~(View.NeedsProcess | View.NeedsResize);
+    this._viewFlags &= ~View.NeedsProcess;
     this.willProcess(viewContext);
     this._viewFlags |= View.ProcessingFlag;
     try {
+      if (((this._viewFlags | processFlags) & View.NeedsResize) !== 0) {
+        cascadeFlags |= View.NeedsResize;
+        this._viewFlags &= ~View.NeedsResize;
+        this.willResize(viewContext);
+      }
       if (((this._viewFlags | processFlags) & View.NeedsScroll) !== 0) {
         cascadeFlags |= View.NeedsScroll;
         this._viewFlags &= ~View.NeedsScroll;
         this.willScroll(viewContext);
       }
-      if (((this._viewFlags | processFlags) & View.NeedsDerive) !== 0) {
-        cascadeFlags |= View.NeedsDerive;
-        this._viewFlags &= ~View.NeedsDerive;
-        this.willDerive(viewContext);
+      if (((this._viewFlags | processFlags) & View.NeedsCompute) !== 0) {
+        cascadeFlags |= View.NeedsCompute;
+        this._viewFlags &= ~View.NeedsCompute;
+        this.willCompute(viewContext);
       }
       if (((this._viewFlags | processFlags) & View.NeedsAnimate) !== 0) {
         cascadeFlags |= View.NeedsAnimate;
         this._viewFlags &= ~View.NeedsAnimate;
         this.willAnimate(viewContext);
+      }
+      if (((this._viewFlags | processFlags) & View.NeedsLayout) !== 0) {
+        cascadeFlags |= View.NeedsLayout;
+        this._viewFlags &= ~View.NeedsLayout;
+        this.willLayout(viewContext);
       }
       if (((this._viewFlags | processFlags) & View.NeedsProject) !== 0) {
         cascadeFlags |= View.NeedsProject;
@@ -95,14 +98,20 @@ export class MapGraphicsView extends GraphicsView implements MapView {
       }
 
       this.onProcess(viewContext);
+      if ((cascadeFlags & View.NeedsResize) !== 0) {
+        this.onResize(viewContext);
+      }
       if ((cascadeFlags & View.NeedsScroll) !== 0) {
         this.onScroll(viewContext);
       }
-      if ((cascadeFlags & View.NeedsDerive) !== 0) {
-        this.onDerive(viewContext);
+      if ((cascadeFlags & View.NeedsCompute) !== 0) {
+        this.onCompute(viewContext);
       }
       if ((cascadeFlags & View.NeedsAnimate) !== 0) {
         this.onAnimate(viewContext);
+      }
+      if ((cascadeFlags & View.NeedsLayout) !== 0) {
+        this.onLayout(viewContext);
       }
       if ((cascadeFlags & View.NeedsProject) !== 0) {
         this.onProject(viewContext);
@@ -113,14 +122,20 @@ export class MapGraphicsView extends GraphicsView implements MapView {
       if ((cascadeFlags & View.NeedsProject) !== 0) {
         this.didProject(viewContext);
       }
+      if ((cascadeFlags & View.NeedsLayout) !== 0) {
+        this.didLayout(viewContext);
+      }
       if ((cascadeFlags & View.NeedsAnimate) !== 0) {
         this.didAnimate(viewContext);
       }
-      if ((cascadeFlags & View.NeedsDerive) !== 0) {
-        this.didDerive(viewContext);
+      if ((cascadeFlags & View.NeedsCompute) !== 0) {
+        this.didCompute(viewContext);
       }
       if ((cascadeFlags & View.NeedsScroll) !== 0) {
         this.didScroll(viewContext);
+      }
+      if ((cascadeFlags & View.NeedsResize) !== 0) {
+        this.didResize(viewContext);
       }
     } finally {
       this._viewFlags &= ~View.ProcessingFlag;
@@ -128,7 +143,7 @@ export class MapGraphicsView extends GraphicsView implements MapView {
     }
   }
 
-  protected willProject(viewContext: MapViewContext): void {
+  protected willProject(viewContext: MapGraphicsViewContext): void {
     this.willObserve(function (viewObserver: MapGraphicsViewObserver): void {
       if (viewObserver.viewWillProject !== void 0) {
         viewObserver.viewWillProject(viewContext, this);
@@ -136,11 +151,11 @@ export class MapGraphicsView extends GraphicsView implements MapView {
     });
   }
 
-  protected onProject(viewContext: MapViewContext): void {
+  protected onProject(viewContext: MapGraphicsViewContext): void {
     // hook
   }
 
-  protected didProject(viewContext: MapViewContext): void {
+  protected didProject(viewContext: MapGraphicsViewContext): void {
     this.didObserve(function (viewObserver: MapGraphicsViewObserver): void {
       if (viewObserver.viewDidProject !== void 0) {
         viewObserver.viewDidProject(viewContext, this);
@@ -148,33 +163,54 @@ export class MapGraphicsView extends GraphicsView implements MapView {
     });
   }
 
+  protected onSetHidden(hidden: boolean): void {
+    if (!hidden) {
+      this.requireUpdate(View.NeedsProject);
+    }
+  }
+
+  protected onSetCulled(culled: boolean): void {
+    if (!culled) {
+      this.requireUpdate(View.NeedsProject);
+    }
+  }
+
   cullGeoFrame(geoFrame: GeoBox = this.geoFrame): void {
     this.setCulled(!geoFrame.intersects(this.geoBounds));
   }
 
+  /**
+   * The map-specified geographic bounding box in which this view should layout
+   * and render geometry.
+   */
   get geoFrame(): GeoBox {
     const parentView = this.parentView;
-    return MapView.is(parentView) ? parentView.geoFrame : GeoBox.globe();
+    return parentView instanceof MapGraphicsView ? parentView.geoFrame : GeoBox.globe();
   }
 
+  /**
+   * The self-defined geographic bounding box surrounding all geometry this
+   * view could possibly render.  Views with geo bounds that don't overlap
+   * their map frames may be culled from rendering and hit testing.
+   */
   get geoBounds(): GeoBox {
     return this.geoFrame;
   }
 
   deriveGeoBounds(): GeoBox {
     let geoBounds: GeoBox | undefined;
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const childView = childViews[i];
-      if (MapView.is(childView) && !childView.isHidden()) {
+    this.forEachChildView(function (childView: View): void {
+      if (childView instanceof MapGraphicsView && !childView.isHidden()) {
         const childGeoBounds = childView.geoBounds;
-        if (geoBounds === void 0) {
-          geoBounds = childGeoBounds;
-        } else {
-          geoBounds = geoBounds.union(childGeoBounds);
+        if (childGeoBounds.isDefined()) {
+          if (geoBounds !== void 0) {
+            geoBounds = geoBounds.union(childGeoBounds);
+          } else {
+            geoBounds = childGeoBounds;
+          }
         }
       }
-    }
+    }, this);
     if (geoBounds === void 0) {
       geoBounds = this.geoFrame;
     }
@@ -183,12 +219,12 @@ export class MapGraphicsView extends GraphicsView implements MapView {
 
   protected didSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
     const parentView = this._parentView;
-    if (MapView.is(parentView)) {
+    if (parentView instanceof MapGraphicsView) {
       parentView.childViewDidSetGeoBounds(this, newGeoBounds, oldGeoBounds);
     }
   }
 
-  childViewDidSetGeoBounds(childView: MapView, newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-    // nop
+  childViewDidSetGeoBounds(childView: MapGraphicsView, newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
+    // hook
   }
 }

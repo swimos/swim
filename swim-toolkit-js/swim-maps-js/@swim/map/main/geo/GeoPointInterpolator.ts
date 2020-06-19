@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,14 +48,15 @@ export class GeoPointInterpolator extends Interpolator<GeoPoint> {
     return l !== 0 ? dp / l : l;
   }
 
-  range(): ReadonlyArray<GeoPoint>;
-  range(ps: ReadonlyArray<AnyGeoPoint>): GeoPointInterpolator;
+  range(): readonly [GeoPoint, GeoPoint];
+  range(ps: readonly [AnyGeoPoint, AnyGeoPoint]): GeoPointInterpolator;
   range(p0: AnyGeoPoint, p1: AnyGeoPoint): GeoPointInterpolator;
-  range(p0?: ReadonlyArray<AnyGeoPoint> | AnyGeoPoint, p1?: AnyGeoPoint): ReadonlyArray<GeoPoint> | GeoPointInterpolator {
+  range(p0?: readonly [AnyGeoPoint, AnyGeoPoint] | AnyGeoPoint,
+        p1?: AnyGeoPoint): readonly [GeoPoint, GeoPoint] | GeoPointInterpolator {
     if (p0 === void 0) {
       return [this.interpolate(0), this.interpolate(1)];
     } else if (p1 === void 0) {
-      p0 = p0 as ReadonlyArray<AnyGeoPoint>
+      p0 = p0 as readonly [AnyGeoPoint, AnyGeoPoint];
       return GeoPointInterpolator.between(p0[0], p0[1]);
     } else {
       return GeoPointInterpolator.between(p0 as AnyGeoPoint, p1);

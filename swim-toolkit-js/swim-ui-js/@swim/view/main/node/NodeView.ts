@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,16 +14,13 @@
 
 import {BoxR2} from "@swim/math";
 import {Transform} from "@swim/transform";
-import {Animator} from "@swim/animate";
-import {ViewScope} from "../scope/ViewScope";
+import {ConstrainVariable, Constraint} from "@swim/constraint";
 import {ViewContext} from "../ViewContext";
 import {ViewControllerType, ViewFlags, View} from "../View";
 import {ViewObserver} from "../ViewObserver";
+import {ViewScope} from "../scope/ViewScope";
+import {ViewAnimator} from "../animator/ViewAnimator";
 import {LayoutAnchor} from "../layout/LayoutAnchor";
-import {LayoutView} from "../layout/LayoutView";
-import {MemberAnimator} from "../member/MemberAnimator";
-import {AnimatedViewClass, AnimatedView} from "../animated/AnimatedView";
-import {AnimatedViewObserver} from "../animated/AnimatedViewObserver";
 import {NodeViewObserver} from "./NodeViewObserver";
 import {NodeViewController} from "./NodeViewController";
 
@@ -33,7 +30,7 @@ export interface ViewNode extends Node {
 
 export type ViewNodeType<V extends NodeView> = V extends {readonly node: infer N} ? N : Node;
 
-export class NodeView extends View implements AnimatedView {
+export class NodeView extends View {
   /** @hidden */
   readonly _node: ViewNodeType<this>;
   /** @hidden */
@@ -49,9 +46,13 @@ export class NodeView extends View implements AnimatedView {
   /** @hidden */
   _viewScopes?: {[scopeName: string]: ViewScope<View, unknown> | undefined};
   /** @hidden */
-  _layoutAnchors?: {[anchorName: string]: LayoutAnchor<LayoutView> | undefined};
+  _viewAnimators?: {[animatorName: string]: ViewAnimator<View, unknown> | undefined};
   /** @hidden */
-  _memberAnimators?: {[animatorName: string]: Animator | undefined};
+  _layoutAnchors?: {[anchorName: string]: LayoutAnchor<View> | undefined};
+  /** @hidden */
+  _constraints?: Constraint[];
+  /** @hidden */
+  _constraintVariables?: ConstrainVariable[];
 
   constructor(node: Node) {
     super();
@@ -173,6 +174,18 @@ export class NodeView extends View implements AnimatedView {
     this.didSetParentView(newParentView, oldParentView);
   }
 
+  get childViewCount(): number {
+    let childViewCount = 0;
+    const childNodes = this._node.childNodes;
+    for (let i = 0, n = childNodes.length; i < n; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView !== void 0) {
+        childViewCount += 1;
+      }
+    }
+    return childViewCount;
+  }
+
   get childViews(): ReadonlyArray<View> {
     const childNodes = this._node.childNodes;
     const childViews = [];
@@ -183,6 +196,32 @@ export class NodeView extends View implements AnimatedView {
       }
     }
     return childViews;
+  }
+
+  forEachChildView<T, S = unknown>(callback: (this: S, childView: View) => T | void,
+                                   thisArg?: S): T | undefined {
+    const childNodes = this._node.childNodes;
+    if (childNodes.length !== 0) {
+      let i = 0;
+      do {
+        const childNode = childNodes[i];
+        const childView = (childNode as ViewNode).view;
+        if (childView !== void 0) {
+          const result = callback.call(thisArg, childView);
+          if (result !== void 0) {
+            return result;
+          }
+        }
+        if (i < childNodes.length) {
+          if (childNodes[i] === childNode) {
+            i += 1;
+          }
+          continue;
+        }
+        break;
+      } while (true);
+    }
+    return void 0;
   }
 
   getChildView(key: string): View | null {
@@ -433,6 +472,11 @@ export class NodeView extends View implements AnimatedView {
     this.didInsertChildView(childView, targetView);
   }
 
+  protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
+    super.onInsertChildView(childView, targetView);
+    this.requireUpdate(View.NeedsLayout);
+  }
+
   insertChildNode(childNode: Node, targetNode: Node | null, key?: string): void {
     const childView = (childNode as ViewNode).view;
     const targetView = targetNode !== null ? (targetNode as ViewNode).view : null;
@@ -540,6 +584,10 @@ export class NodeView extends View implements AnimatedView {
     if (typeof key === "string") {
       return childView;
     }
+  }
+
+  protected onRemoveChildView(childView: View): void {
+    this.requireUpdate(View.NeedsLayout);
   }
 
   removeChildNode(childNode: Node): void {
@@ -674,6 +722,16 @@ export class NodeView extends View implements AnimatedView {
     }
   }
 
+  protected onMount(): void {
+    super.onMount();
+    this.requireUpdate(View.NeedsResize | View.NeedsLayout);
+  }
+
+  protected didMount(): void {
+    this.activateLayout();
+    super.didMount();
+  }
+
   /** @hidden */
   doMountChildViews(): void {
     const childNodes = this._node.childNodes;
@@ -697,6 +755,16 @@ export class NodeView extends View implements AnimatedView {
     }
   }
 
+  protected willUnmount(): void {
+    super.willUnmount();
+    this.deactivateLayout();
+  }
+
+  protected onUnmount(): void {
+    this.cancelAnimators();
+    this._viewFlags &= ~View.ViewFlagMask;
+  }
+
   /** @hidden */
   doUnmountChildViews(): void {
     const childNodes = this._node.childNodes;
@@ -706,11 +774,6 @@ export class NodeView extends View implements AnimatedView {
         childView.cascadeUnmount();
       }
     }
-  }
-
-  protected onUnmount(): void {
-    this.cancelAnimators();
-    this._viewFlags = 0;
   }
 
   cascadePower(): void {
@@ -768,19 +831,24 @@ export class NodeView extends View implements AnimatedView {
   /** @hidden */
   protected doProcess(processFlags: ViewFlags, viewContext: ViewContext): void {
     let cascadeFlags = processFlags;
-    this._viewFlags &= ~(View.NeedsProcess | View.NeedsResize | View.NeedsProject);
+    this._viewFlags &= ~(View.NeedsProcess | View.NeedsProject);
     this.willProcess(viewContext);
     this._viewFlags |= View.ProcessingFlag;
     try {
+      if (((this._viewFlags | processFlags) & View.NeedsResize) !== 0) {
+        cascadeFlags |= View.NeedsResize;
+        this._viewFlags &= ~View.NeedsResize;
+        this.willResize(viewContext);
+      }
       if (((this._viewFlags | processFlags) & View.NeedsScroll) !== 0) {
         cascadeFlags |= View.NeedsScroll;
         this._viewFlags &= ~View.NeedsScroll;
         this.willScroll(viewContext);
       }
-      if (((this._viewFlags | processFlags) & View.NeedsDerive) !== 0) {
-        cascadeFlags |= View.NeedsDerive;
-        this._viewFlags &= ~View.NeedsDerive;
-        this.willDerive(viewContext);
+      if (((this._viewFlags | processFlags) & View.NeedsCompute) !== 0) {
+        cascadeFlags |= View.NeedsCompute;
+        this._viewFlags &= ~View.NeedsCompute;
+        this.willCompute(viewContext);
       }
       if (((this._viewFlags | processFlags) & View.NeedsAnimate) !== 0) {
         cascadeFlags |= View.NeedsAnimate;
@@ -789,11 +857,14 @@ export class NodeView extends View implements AnimatedView {
       }
 
       this.onProcess(viewContext);
+      if ((cascadeFlags & View.NeedsResize) !== 0) {
+        this.onResize(viewContext);
+      }
       if ((cascadeFlags & View.NeedsScroll) !== 0) {
         this.onScroll(viewContext);
       }
-      if ((cascadeFlags & View.NeedsDerive) !== 0) {
-        this.onDerive(viewContext);
+      if ((cascadeFlags & View.NeedsCompute) !== 0) {
+        this.onCompute(viewContext);
       }
       if ((cascadeFlags & View.NeedsAnimate) !== 0) {
         this.onAnimate(viewContext);
@@ -804,11 +875,14 @@ export class NodeView extends View implements AnimatedView {
       if ((cascadeFlags & View.NeedsAnimate) !== 0) {
         this.didAnimate(viewContext);
       }
-      if ((cascadeFlags & View.NeedsDerive) !== 0) {
-        this.didDerive(viewContext);
+      if ((cascadeFlags & View.NeedsCompute) !== 0) {
+        this.didCompute(viewContext);
       }
       if ((cascadeFlags & View.NeedsScroll) !== 0) {
         this.didScroll(viewContext);
+      }
+      if ((cascadeFlags & View.NeedsResize) !== 0) {
+        this.didResize(viewContext);
       }
     } finally {
       this._viewFlags &= ~View.ProcessingFlag;
@@ -816,24 +890,18 @@ export class NodeView extends View implements AnimatedView {
     }
   }
 
-  protected willAnimate(viewContext: ViewContext): void {
-    this.willObserve(function (viewObserver: AnimatedViewObserver): void {
-      if (viewObserver.viewWillAnimate !== void 0) {
-        viewObserver.viewWillAnimate(viewContext, this);
-      }
-    });
-  }
-
   protected onAnimate(viewContext: ViewContext): void {
-    this.animateMembers(viewContext.updateTime);
+    this.updateAnimators(viewContext.updateTime);
   }
 
-  protected didAnimate(viewContext: ViewContext): void {
-    this.didObserve(function (viewObserver: AnimatedViewObserver): void {
-      if (viewObserver.viewDidAnimate !== void 0) {
-        viewObserver.viewDidAnimate(viewContext, this);
-      }
-    });
+  protected willLayout(viewContext: ViewContext): void {
+    super.willLayout(viewContext);
+    this.updateConstraints();
+  }
+
+  protected didLayout(viewContext: ViewContext): void {
+    this.updateConstraintVariables();
+    super.didLayout(viewContext);
   }
 
   /** @hidden */
@@ -920,12 +988,18 @@ export class NodeView extends View implements AnimatedView {
     return viewScopes !== void 0 && viewScopes[scopeName] !== void 0;
   }
 
-  getViewScope(scopeName: string): ViewScope<View, unknown> | null {
+  getViewScope(scopeName: string): ViewScope<this, unknown> | null {
     const viewScopes = this._viewScopes;
-    return viewScopes !== void 0 ? viewScopes[scopeName] || null : null;
+    if (viewScopes !== void 0) {
+      const viewScope = viewScopes[scopeName];
+      if (viewScope !== void 0) {
+        return viewScope as ViewScope<this, unknown>;
+      }
+    }
+    return null;
   }
 
-  setViewScope(scopeName: string, viewScope: ViewScope<View, unknown> | null): void {
+  setViewScope(scopeName: string, viewScope: ViewScope<this, unknown> | null): void {
     let viewScopes = this._viewScopes;
     if (viewScopes === void 0) {
       viewScopes = {};
@@ -938,17 +1012,84 @@ export class NodeView extends View implements AnimatedView {
     }
   }
 
+  hasViewAnimator(animatorName: string): boolean {
+    const viewAnimators = this._viewAnimators;
+    return viewAnimators !== void 0 && viewAnimators[animatorName] !== void 0;
+  }
+
+  getViewAnimator(animatorName: string): ViewAnimator<this, unknown> | null {
+    const viewAnimators = this._viewAnimators;
+    if (viewAnimators !== void 0) {
+      const viewAnimator = viewAnimators[animatorName];
+      if (viewAnimator !== void 0) {
+        return viewAnimator as ViewAnimator<this, unknown>;
+      }
+    }
+    return null;
+  }
+
+  setViewAnimator(animatorName: string, viewAnimator: ViewAnimator<this, unknown> | null): void {
+    let viewAnimators = this._viewAnimators;
+    if (viewAnimators === void 0) {
+      viewAnimators = {};
+      this._viewAnimators = viewAnimators;
+    }
+    if (viewAnimator !== null) {
+      viewAnimators[animatorName] = viewAnimator;
+    } else {
+      delete viewAnimators[animatorName];
+    }
+  }
+
+  /** @hidden */
+  updateAnimators(t: number): void {
+    this.updateViewAnimators(t);
+  }
+
+  /** @hidden */
+  updateViewAnimators(t: number): void {
+    const viewAnimators = this._viewAnimators;
+    if (viewAnimators !== void 0) {
+      for (const animatorName in viewAnimators) {
+        const animator = viewAnimators[animatorName]!;
+        animator.onFrame(t);
+      }
+    }
+  }
+
+  /** @hidden */
+  cancelAnimators(): void {
+    this.cancelViewAnimators();
+  }
+
+  /** @hidden */
+  cancelViewAnimators(): void {
+    const viewAnimators = this._viewAnimators;
+    if (viewAnimators !== void 0) {
+      for (const animatorName in viewAnimators) {
+        const animator = viewAnimators[animatorName]!;
+        animator.cancel();
+      }
+    }
+  }
+
   hasLayoutAnchor(anchorName: string): boolean {
     const layoutAnchors = this._layoutAnchors;
     return layoutAnchors !== void 0 && layoutAnchors[anchorName] !== void 0;
   }
 
-  getLayoutAnchor(anchorName: string): LayoutAnchor<LayoutView> | null {
+  getLayoutAnchor(anchorName: string): LayoutAnchor<this> | null {
     const layoutAnchors = this._layoutAnchors;
-    return layoutAnchors !== void 0 ? layoutAnchors[anchorName] || null : null;
+    if (layoutAnchors !== void 0) {
+      const layoutAnchor = layoutAnchors[anchorName];
+      if (layoutAnchor !== void 0) {
+        return layoutAnchor as LayoutAnchor<this>;
+      }
+    }
+    return null;
   }
 
-  setLayoutAnchor(anchorName: string, layoutAnchor: LayoutAnchor<LayoutView> | null): void {
+  setLayoutAnchor(anchorName: string, layoutAnchor: LayoutAnchor<this> | null): void {
     let layoutAnchors = this._layoutAnchors;
     if (layoutAnchors === void 0) {
       layoutAnchors = {};
@@ -961,77 +1102,137 @@ export class NodeView extends View implements AnimatedView {
     }
   }
 
-  hasMemberAnimator(animatorName: string): boolean {
-    const memberAnimators = this._memberAnimators;
-    return memberAnimators !== void 0 && memberAnimators[animatorName] !== void 0;
-  }
-
-  getMemberAnimator(animatorName: string): Animator | null {
-    const memberAnimators = this._memberAnimators;
-    return memberAnimators !== void 0 ? memberAnimators[animatorName] || null : null;
-  }
-
-  setMemberAnimator(animatorName: string, animator: Animator | null): void {
-    let memberAnimators = this._memberAnimators;
-    if (memberAnimators === void 0) {
-      memberAnimators = {};
-      this._memberAnimators = memberAnimators;
+  get constraints(): ReadonlyArray<Constraint> {
+    let constraints = this._constraints;
+    if (constraints === void 0) {
+      constraints = [];
+      this._constraints = constraints;
     }
-    if (animator !== null) {
-      memberAnimators[animatorName] = animator;
-    } else {
-      delete memberAnimators[animatorName];
-    }
+    return constraints;
   }
 
-  /** @hidden */
-  getLazyMemberAnimator(animatorName: string): Animator | null {
-    let memberAnimator = this.getMemberAnimator(animatorName);
-    if (memberAnimator === null) {
-      const viewClass = (this as any).__proto__ as AnimatedViewClass;
-      const descriptor = AnimatedView.getMemberAnimatorDescriptor(animatorName, viewClass);
-      if (descriptor !== null && descriptor.animatorType !== void 0) {
-        memberAnimator = AnimatedView.initMemberAnimator(descriptor.animatorType, this, animatorName, descriptor);
-        this.setMemberAnimator(animatorName, memberAnimator);
-      }
-    }
-    return memberAnimator;
+  hasConstraint(constraint: Constraint): boolean {
+    const constraints = this._constraints;
+    return constraints !== void 0 && constraints.indexOf(constraint) >= 0;
   }
 
-  /** @hidden */
-  animatorDidSetAuto(animator: Animator, auto: boolean): void {
-    if (animator instanceof MemberAnimator) {
-      this.requireUpdate(View.NeedsDerive);
+  addConstraint(constraint: Constraint): void {
+    let constraints = this._constraints;
+    if (constraints === void 0) {
+      constraints = [];
+      this._constraints = constraints;
+    }
+    if (constraints.indexOf(constraint) < 0) {
+      constraints.push(constraint);
+      this.activateConstraint(constraint);
     }
   }
 
-  /** @hidden */
-  animateMembers(t: number): void {
-    const memberAnimators = this._memberAnimators;
-    if (memberAnimators !== void 0) {
-      for (const animatorName in memberAnimators) {
-        const animator = memberAnimators[animatorName]!;
-        animator.onFrame(t);
+  removeConstraint(constraint: Constraint): void {
+    const constraints = this._constraints;
+    if (constraints !== void 0) {
+      const index = constraints.indexOf(constraint);
+      if (index >= 0) {
+        constraints.splice(index, 1);
+        this.deactivateConstraint(constraint);
       }
     }
   }
 
-  animate(animator: Animator): void {
-    this.requireUpdate(View.NeedsAnimate);
+  get constraintVariables(): ReadonlyArray<ConstrainVariable> {
+    let constraintVariables = this._constraintVariables;
+    if (constraintVariables === void 0) {
+      constraintVariables = [];
+      this._constraintVariables = constraintVariables;
+    }
+    return constraintVariables;
+  }
+
+  hasConstraintVariable(constraintVariable: ConstrainVariable): boolean {
+    const constraintVariables = this._constraintVariables;
+    return constraintVariables !== void 0 && constraintVariables.indexOf(constraintVariable) >= 0;
+  }
+
+  addConstraintVariable(constraintVariable: ConstrainVariable): void {
+    let constraintVariables = this._constraintVariables;
+    if (constraintVariables === void 0) {
+      constraintVariables = [];
+      this._constraintVariables = constraintVariables;
+    }
+    if (constraintVariables.indexOf(constraintVariable) < 0) {
+      constraintVariables.push(constraintVariable);
+      this.activateConstraintVariable(constraintVariable);
+    }
+  }
+
+  removeConstraintVariable(constraintVariable: ConstrainVariable): void {
+    const constraintVariables = this._constraintVariables;
+    if (constraintVariables !== void 0) {
+      const index = constraintVariables.indexOf(constraintVariable);
+      if (index >= 0) {
+        this.deactivateConstraintVariable(constraintVariable);
+        constraintVariables.splice(index, 1);
+      }
+    }
+  }
+
+  protected updateConstraints(): void {
+    // hook
   }
 
   /** @hidden */
-  cancelAnimators(): void {
-    this.cancelMemberAnimators();
+  updateConstraintVariables(): void {
+    const rootView = this.rootView;
+    if (rootView !== null) {
+      rootView.updateConstraintVariables();
+    }
   }
 
   /** @hidden */
-  cancelMemberAnimators(): void {
-    const memberAnimators = this._memberAnimators;
-    if (memberAnimators !== void 0) {
-      for (const animatorName in memberAnimators) {
-        const animator = memberAnimators[animatorName]!;
-        animator.cancel();
+  activateLayout(): void {
+    const constraints = this._constraints;
+    const constraintVariables = this._constraintVariables;
+    if (constraints !== void 0 || constraintVariables !== void 0) {
+      const rootView = this.rootView;
+      if (rootView !== null) {
+        if (constraintVariables !== void 0) {
+          for (let i = 0, n = constraintVariables.length; i < n; i += 1) {
+            const constraintVariable = constraintVariables[i];
+            if (constraintVariable instanceof LayoutAnchor) {
+              rootView.activateConstraintVariable(constraintVariable);
+              this.requireUpdate(View.NeedsLayout);
+            }
+          }
+        }
+        if (constraints !== void 0) {
+          for (let i = 0, n = constraints.length; i < n; i += 1) {
+            rootView.activateConstraint(constraints[i]);
+            this.requireUpdate(View.NeedsLayout);
+          }
+        }
+      }
+    }
+  }
+
+  /** @hidden */
+  deactivateLayout(): void {
+    const constraints = this._constraints;
+    const constraintVariables = this._constraintVariables;
+    if (constraints !== void 0 || constraintVariables !== void 0) {
+      const rootView = this.rootView;
+      if (rootView !== null) {
+        if (constraints !== void 0) {
+          for (let i = 0, n = constraints.length; i < n; i += 1) {
+            rootView.deactivateConstraint(constraints![i]);
+            this.requireUpdate(View.NeedsLayout);
+          }
+        }
+        if (constraintVariables !== void 0) {
+          for (let i = 0, n = constraintVariables.length; i < n; i += 1) {
+            rootView.deactivateConstraintVariable(constraintVariables![i]);
+            this.requireUpdate(View.NeedsLayout);
+          }
+        }
       }
     }
   }

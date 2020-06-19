@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,48 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapViewObserver} from "../MapViewObserver";
-import {MapViewContext} from "../MapViewContext";
+import {MapGraphicsViewObserver} from "../graphics/MapGraphicsViewObserver";
 import {MapLayerView} from "./MapLayerView";
 
-export interface MapLayerViewObserver<V extends MapLayerView = MapLayerView> extends MapViewObserver<V> {
-  viewWillProcess?(viewContext: MapViewContext, view: V): void;
-
-  viewDidProcess?(viewContext: MapViewContext, view: V): void;
-
-  viewWillScroll?(viewContext: MapViewContext, view: V): void;
-
-  viewDidScroll?(viewContext: MapViewContext, view: V): void;
-
-  viewWillDerive?(viewContext: MapViewContext, view: V): void;
-
-  viewDidDerive?(viewContext: MapViewContext, view: V): void;
-
-  viewWillAnimate?(viewContext: MapViewContext, view: V): void;
-
-  viewDidAnimate?(viewContext: MapViewContext, view: V): void;
-
-  viewWillProject?(viewContext: MapViewContext, view: V): void;
-
-  viewDidProject?(viewContext: MapViewContext, view: V): void;
-
-  viewWillProcessChildViews?(viewContext: MapViewContext, view: V): void;
-
-  viewDidProcessChildViews?(viewContext: MapViewContext, view: V): void;
-
-  viewWillDisplay?(viewContext: MapViewContext, view: V): void;
-
-  viewDidDisplay?(viewContext: MapViewContext, view: V): void;
-
-  viewWillLayout?(viewContext: MapViewContext, view: V): void;
-
-  viewDidLayout?(viewContext: MapViewContext, view: V): void;
-
-  viewWillRender?(viewContext: MapViewContext, view: V): void;
-
-  viewDidRender?(viewContext: MapViewContext, view: V): void;
-
-  viewWillDisplayChildViews?(viewContext: MapViewContext, view: V): void;
-
-  viewDidDisplayChildViews?(viewContext: MapViewContext, view: V): void;
+export interface MapLayerViewObserver<V extends MapLayerView = MapLayerView> extends MapGraphicsViewObserver<V> {
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {MapTile} from "./MapTile";
+export {MapLayerTile} from "./MapLayerTile";
 
 export {MapLayerView} from "./MapLayerView";
 export {MapLayerViewObserver} from "./MapLayerViewObserver";

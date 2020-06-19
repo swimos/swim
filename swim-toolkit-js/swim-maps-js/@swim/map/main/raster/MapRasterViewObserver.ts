@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,52 +13,55 @@
 // limitations under the License.
 
 import {MapGraphicsViewObserver} from "../graphics/MapGraphicsViewObserver";
-import {CompositedMapViewContext} from "../composited/CompositedMapViewContext";
-import {CompositedMapViewObserver} from "../composited/CompositedMapViewObserver";
+import {MapRasterViewContext} from "./MapRasterViewContext";
 import {MapRasterView} from "./MapRasterView";
 
-export interface MapRasterViewObserver<V extends MapRasterView = MapRasterView> extends MapGraphicsViewObserver<V>, CompositedMapViewObserver<V> {
-  viewWillProcess?(viewContext: CompositedMapViewContext, view: V): void;
+export interface MapRasterViewObserver<V extends MapRasterView = MapRasterView> extends MapGraphicsViewObserver<V> {
+  viewWillProcess?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidProcess?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidProcess?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewWillScroll?(viewContext: CompositedMapViewContext, view: V): void;
+  viewWillResize?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidScroll?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidResize?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewWillDerive?(viewContext: CompositedMapViewContext, view: V): void;
+  viewWillScroll?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidDerive?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidScroll?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewWillAnimate?(viewContext: CompositedMapViewContext, view: V): void;
+  viewWillCompute?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidAnimate?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidCompute?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewWillProject?(viewContext: CompositedMapViewContext, view: V): void;
+  viewWillAnimate?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidProject?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidAnimate?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewWillProcessChildViews?(viewContext: CompositedMapViewContext, view: V): void;
+  viewWillProject?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidProcessChildViews?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidProject?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewWillDisplay?(viewContext: CompositedMapViewContext, view: V): void;
+  viewWillProcessChildViews?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidDisplay?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidProcessChildViews?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewWillLayout?(viewContext: CompositedMapViewContext, view: V): void;
+  viewWillDisplay?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidLayout?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidDisplay?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewWillRender?(viewContext: CompositedMapViewContext, view: V): void;
+  viewWillLayout?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidRender?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidLayout?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewWillComposite?(viewContext: CompositedMapViewContext, view: V): void;
+  viewWillRender?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidComposite?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidRender?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewWillDisplayChildViews?(viewContext: CompositedMapViewContext, view: V): void;
+  viewWillComposite?(viewContext: MapRasterViewContext, view: V): void;
 
-  viewDidDisplayChildViews?(viewContext: CompositedMapViewContext, view: V): void;
+  viewDidComposite?(viewContext: MapRasterViewContext, view: V): void;
+
+  viewWillDisplayChildViews?(viewContext: MapRasterViewContext, view: V): void;
+
+  viewDidDisplayChildViews?(viewContext: MapRasterViewContext, view: V): void;
 }

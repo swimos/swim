@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View, GraphicsViewController} from "@swim/view";
+import {GraphicsView, GraphicsViewController} from "@swim/view";
 import {TickView} from "../tick/TickView";
 import {AxisOrientation, AxisView} from "./AxisView";
 import {AxisViewObserver} from "./AxisViewObserver";
 
-export class AxisViewController<D = any, V extends AxisView<D> = AxisView<D>> extends GraphicsViewController<V> implements AxisViewObserver<D, V> {
+export class AxisViewController<D = unknown, V extends AxisView<D> = AxisView<D>> extends GraphicsViewController<V> implements AxisViewObserver<D, V> {
   get orientation(): AxisOrientation {
     const view = this._view;
     return view !== null ? view.orientation : void 0 as any;
@@ -27,7 +27,7 @@ export class AxisViewController<D = any, V extends AxisView<D> = AxisView<D>> ex
     return void 0;
   }
 
-  createTickLabel(tickValue: D, tickView: TickView<D>): View | string | null | undefined {
+  createTickLabel(tickValue: D, tickView: TickView<D>): GraphicsView | string | null | undefined {
     return void 0;
   }
 

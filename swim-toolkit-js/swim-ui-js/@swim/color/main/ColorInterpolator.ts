@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import {RgbColorInterpolator} from "./RgbColorInterpolator";
 import {HslColorInterpolator} from "./HslColorInterpolator";
 
 export abstract class ColorInterpolator<C extends Color = Color> extends Interpolator<C, AnyColor> {
-  abstract range(): ReadonlyArray<C>;
-  abstract range(cs: ReadonlyArray<C>): ColorInterpolator<C>;
+  abstract range(): readonly [C, C];
+  abstract range(cs: readonly [C, C]): ColorInterpolator<C>;
   abstract range(c0: C, c1: C): ColorInterpolator<C>;
-  abstract range(cs: ReadonlyArray<AnyColor>): ColorInterpolator;
+  abstract range(cs: readonly [AnyColor, AnyColor]): ColorInterpolator;
   abstract range(c0: AnyColor, c1: AnyColor): ColorInterpolator;
 
   static between(c0: AnyColor, c1: AnyColor): ColorInterpolator;

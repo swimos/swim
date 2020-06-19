@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,22 +65,8 @@ import {
   WhiteSpace,
   Width,
 } from "@swim/style";
-import {
-  Constrain,
-  ConstrainVariable,
-  ConstrainBinding,
-  ConstraintRelation,
-  AnyConstraintStrength,
-  ConstraintStrength,
-  Constraint,
-} from "@swim/constraint";
-import {ViewContext} from "../ViewContext";
 import {View} from "../View";
-import {LayoutScope} from "../layout/LayoutScope";
-import {LayoutManager} from "../layout/LayoutManager";
 import {LayoutAnchor} from "../layout/LayoutAnchor";
-import {LayoutView} from "../layout/LayoutView";
-import {RenderedViewConstructor} from "../rendered/RenderedView";
 import {ViewNode, NodeView} from "../node/NodeView";
 import {TextView} from "../text/TextView";
 import {AttributeAnimator} from "../attribute/AttributeAnimator";
@@ -102,12 +88,7 @@ export interface HtmlChildViewTagMap extends HtmlViewTagMap {
   "svg": SvgView;
 }
 
-export class HtmlView extends ElementView implements LayoutView {
-  /** @hidden */
-  _constraints: Constraint[] | undefined;
-  /** @hidden */
-  _constraintVariables: ConstrainVariable[] | undefined;
-
+export class HtmlView extends ElementView {
   constructor(node: HTMLElement) {
     super(node);
   }
@@ -183,229 +164,8 @@ export class HtmlView extends ElementView implements LayoutView {
     return child;
   }
 
-  protected didMount(): void {
-    super.didMount();
-    this.activateLayout();
-  }
-
-  protected willUnmount(): void {
-    this.deactivateLayout();
-    super.willUnmount();
-  }
-
-  protected willLayout(viewContext: ViewContext): void {
-    super.willLayout(viewContext);
-    this.updateLayoutStates();
-  }
-
-  protected didLayout(viewContext: ViewContext): void {
-    this.updateConstraintVariables();
-    super.didLayout(viewContext);
-  }
-
-  constraint(lhs: Constrain | number, relation: ConstraintRelation,
-             rhs?: Constrain | number, strength?: AnyConstraintStrength): Constraint {
-    if (typeof lhs === "number") {
-      lhs = Constrain.constant(lhs);
-    }
-    if (typeof rhs === "number") {
-      rhs = Constrain.constant(rhs);
-    }
-    const constrain = rhs !== void 0 ? lhs.minus(rhs) : lhs;
-    if (strength === void 0) {
-      strength = ConstraintStrength.Required;
-    } else {
-      strength = ConstraintStrength.fromAny(strength);
-    }
-    return new Constraint(this, constrain, relation, strength);
-  }
-
-  get constraints(): ReadonlyArray<Constraint> {
-    let constraints = this._constraints;
-    if (constraints === void 0) {
-      constraints = [];
-      this._constraints = constraints;
-    }
-    return constraints;
-  }
-
-  hasConstraint(constraint: Constraint): boolean {
-    const constraints = this._constraints;
-    return constraints !== void 0 && constraints.indexOf(constraint) >= 0;
-  }
-
-  addConstraint(constraint: Constraint): void {
-    let constraints = this._constraints;
-    if (constraints === void 0) {
-      constraints = [];
-      this._constraints = constraints;
-    }
-    if (constraints.indexOf(constraint) < 0) {
-      constraints.push(constraint);
-      this.activateConstraint(constraint);
-    }
-  }
-
-  /** @hidden */
-  activateConstraint(constraint: Constraint): void {
-    const rootView = this.rootView;
-    if (LayoutManager.is(rootView)) {
-      rootView.activateConstraint(constraint);
-      this.requireUpdate(View.NeedsLayout);
-    }
-  }
-
-  removeConstraint(constraint: Constraint): void {
-    const constraints = this._constraints;
-    if (constraints !== void 0) {
-      const index = constraints.indexOf(constraint);
-      if (index >= 0) {
-        constraints.splice(index, 1);
-        this.deactivateConstraint(constraint);
-      }
-    }
-  }
-
-  /** @hidden */
-  deactivateConstraint(constraint: Constraint): void {
-    const rootView = this.rootView;
-    if (LayoutManager.is(rootView)) {
-      rootView.deactivateConstraint(constraint);
-      this.requireUpdate(View.NeedsLayout);
-    }
-  }
-
-  constraintVariable(name: string, value?: number, strength?: AnyConstraintStrength): ConstrainVariable {
-    if (value === void 0) {
-      value = 0;
-    }
-    if (strength === void 0) {
-      strength = ConstraintStrength.Strong;
-    } else {
-      strength = ConstraintStrength.fromAny(strength);
-    }
-    return new ConstrainBinding(this, name, value, strength);
-  }
-
-  get constraintVariables(): ReadonlyArray<ConstrainVariable> {
-    let constraintVariables = this._constraintVariables;
-    if (constraintVariables === void 0) {
-      constraintVariables = [];
-      this._constraintVariables = constraintVariables;
-    }
-    return constraintVariables;
-  }
-
-  hasConstraintVariable(constraintVariable: ConstrainVariable): boolean {
-    const constraintVariables = this._constraintVariables;
-    return constraintVariables !== void 0 && constraintVariables.indexOf(constraintVariable) >= 0;
-  }
-
-  addConstraintVariable(constraintVariable: ConstrainVariable): void {
-    let constraintVariables = this._constraintVariables;
-    if (constraintVariables === void 0) {
-      constraintVariables = [];
-      this._constraintVariables = constraintVariables;
-    }
-    if (constraintVariables.indexOf(constraintVariable) < 0) {
-      constraintVariables.push(constraintVariable);
-      this.activateConstraintVariable(constraintVariable);
-    }
-  }
-
-  /** @hidden */
-  activateConstraintVariable(constraintVariable: ConstrainVariable): void {
-    const rootView = this.rootView;
-    if (LayoutManager.is(rootView)) {
-      rootView.activateConstraintVariable(constraintVariable);
-      this.requireUpdate(View.NeedsLayout);
-    }
-  }
-
-  removeConstraintVariable(constraintVariable: ConstrainVariable): void {
-    const constraintVariables = this._constraintVariables;
-    if (constraintVariables !== void 0) {
-      const index = constraintVariables.indexOf(constraintVariable);
-      if (index >= 0) {
-        this.deactivateConstraintVariable(constraintVariable);
-        constraintVariables.splice(index, 1);
-      }
-    }
-  }
-
-  /** @hidden */
-  deactivateConstraintVariable(constraintVariable: ConstrainVariable): void {
-    const rootView = this.rootView;
-    if (LayoutManager.is(rootView)) {
-      rootView.deactivateConstraintVariable(constraintVariable);
-      this.requireUpdate(View.NeedsLayout);
-    }
-  }
-
-  /** @hidden */
-  setConstraintVariable(constraintVariable: ConstrainVariable, state: number): void {
-    const rootView = this.rootView;
-    if (LayoutManager.is(rootView)) {
-      rootView.setConstraintVariable(constraintVariable, state);
-    }
-  }
-
-  /** @hidden */
-  updateConstraintVariables(): void {
-    const rootView = this.rootView;
-    if (LayoutScope.is(rootView)) {
-      rootView.updateConstraintVariables();
-    }
-  }
-
-  /** @hidden */
-  activateLayout(): void {
-    const constraints = this._constraints;
-    const constraintVariables = this._constraintVariables;
-    let rootView: View | null;
-    if ((constraints !== void 0 || constraintVariables !== void 0)
-        && (rootView = this.rootView, LayoutManager.is(rootView))) {
-      if (constraintVariables !== void 0) {
-        for (let i = 0, n = constraintVariables.length; i < n; i += 1) {
-          const constraintVariable = constraintVariables[i];
-          if (constraintVariable instanceof LayoutAnchor) {
-            rootView.activateConstraintVariable(constraintVariable);
-            this.requireUpdate(View.NeedsLayout);
-          }
-        }
-      }
-      if (constraints !== void 0) {
-        for (let i = 0, n = constraints.length; i < n; i += 1) {
-          rootView.activateConstraint(constraints[i]);
-          this.requireUpdate(View.NeedsLayout);
-        }
-      }
-    }
-  }
-
-  /** @hidden */
-  deactivateLayout(): void {
-    const constraints = this._constraints;
-    const constraintVariables = this._constraintVariables;
-    let rootView: View | null;
-    if ((constraints !== void 0 || constraintVariables !== void 0)
-        && (rootView = this.rootView, LayoutManager.is(rootView))) {
-      if (constraints !== void 0) {
-        for (let i = 0, n = constraints.length; i < n; i += 1) {
-          rootView.deactivateConstraint(constraints![i]);
-          this.requireUpdate(View.NeedsLayout);
-        }
-      }
-      if (constraintVariables !== void 0) {
-        for (let i = 0, n = constraintVariables.length; i < n; i += 1) {
-          rootView.deactivateConstraintVariable(constraintVariables![i]);
-          this.requireUpdate(View.NeedsLayout);
-        }
-      }
-    }
-  }
-
-  protected updateLayoutStates(): void {
+  protected updateConstraints(): void {
+    super.updateConstraints();
     const topAnchor = this.getLayoutAnchor("topAnchor");
     if (topAnchor !== null) {
       topAnchor.updateState();
@@ -477,18 +237,18 @@ export class HtmlView extends ElementView implements LayoutView {
 
   @LayoutAnchor<HtmlView>({
     get(oldState: number): number {
-      const offsetParent = this._node.offsetParent!;
+      const offsetParent = this.scope.node.offsetParent!;
       const offsetBounds = offsetParent.getBoundingClientRect();
-      const bounds = this._node.getBoundingClientRect();
+      const bounds = this.scope.node.getBoundingClientRect();
       const newState = bounds.top - offsetBounds.top;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsLayout);
       }
       return newState;
     },
     set(newValue: number): void {
-      this.top.setState(Length.px(newValue));
-      this.requireUpdate(View.NeedsLayout);
+      this.scope.top.setState(Length.px(newValue));
+      this.scope.requireUpdate(View.NeedsLayout);
     },
     strength: "strong",
   })
@@ -496,18 +256,18 @@ export class HtmlView extends ElementView implements LayoutView {
 
   @LayoutAnchor<HtmlView>({
     get(oldState: number): number {
-      const offsetParent = this._node.offsetParent!;
+      const offsetParent = this.scope.node.offsetParent!;
       const offsetBounds = offsetParent.getBoundingClientRect();
-      const bounds = this._node.getBoundingClientRect();
+      const bounds = this.scope.node.getBoundingClientRect();
       const newState = offsetBounds.right + bounds.right;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsLayout);
       }
       return newState;
     },
     set(newValue: number): void {
-      this.right.setState(Length.px(newValue));
-      this.requireUpdate(View.NeedsLayout);
+      this.scope.right.setState(Length.px(newValue));
+      this.scope.requireUpdate(View.NeedsLayout);
     },
     strength: "strong",
   })
@@ -515,18 +275,18 @@ export class HtmlView extends ElementView implements LayoutView {
 
   @LayoutAnchor<HtmlView>({
     get(oldState: number): number {
-      const offsetParent = this._node.offsetParent!;
+      const offsetParent = this.scope.node.offsetParent!;
       const offsetBounds = offsetParent.getBoundingClientRect();
-      const bounds = this._node.getBoundingClientRect();
+      const bounds = this.scope.node.getBoundingClientRect();
       const newState = offsetBounds.bottom + bounds.bottom;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsLayout);
       }
       return newState;
     },
     set(newValue: number): void {
-      this.bottom.setState(Length.px(newValue));
-      this.requireUpdate(View.NeedsLayout);
+      this.scope.bottom.setState(Length.px(newValue));
+      this.scope.requireUpdate(View.NeedsLayout);
     },
     strength: "strong",
   })
@@ -534,18 +294,18 @@ export class HtmlView extends ElementView implements LayoutView {
 
   @LayoutAnchor<HtmlView>({
     get(oldState: number): number {
-      const offsetParent = this._node.offsetParent!;
+      const offsetParent = this.scope.node.offsetParent!;
       const offsetBounds = offsetParent.getBoundingClientRect();
-      const bounds = this._node.getBoundingClientRect();
+      const bounds = this.scope.node.getBoundingClientRect();
       const newState = bounds.left - offsetBounds.left;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsLayout);
       }
       return newState;
     },
     set(newValue: number): void {
-      this.left.setState(Length.px(newValue));
-      this.requireUpdate(View.NeedsLayout);
+      this.scope.left.setState(Length.px(newValue));
+      this.scope.requireUpdate(View.NeedsLayout);
     },
     strength: "strong",
   })
@@ -553,16 +313,16 @@ export class HtmlView extends ElementView implements LayoutView {
 
   @LayoutAnchor<HtmlView>({
     get(oldState: number): number {
-      const bounds = this._node.getBoundingClientRect();
+      const bounds = this.scope.node.getBoundingClientRect();
       const newState = bounds.width;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsResize | View.NeedsLayout);
       }
       return newState;
     },
     set(newValue: number): void {
-      this.width.setState(Length.px(newValue));
-      this.requireUpdate(View.NeedsLayout);
+      this.scope.width.setState(Length.px(newValue));
+      this.scope.requireUpdate(View.NeedsResize | View.NeedsLayout);
     },
     strength: "strong",
   })
@@ -570,16 +330,16 @@ export class HtmlView extends ElementView implements LayoutView {
 
   @LayoutAnchor<HtmlView>({
     get(oldState: number): number {
-      const bounds = this._node.getBoundingClientRect();
+      const bounds = this.scope.node.getBoundingClientRect();
       const newState = bounds.height;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsResize | View.NeedsLayout);
       }
       return newState;
     },
     set(newValue: number): void {
-      this.height.setState(Length.px(newValue));
-      this.requireUpdate(View.NeedsLayout);
+      this.scope.height.setState(Length.px(newValue));
+      this.scope.requireUpdate(View.NeedsResize | View.NeedsLayout);
     },
     strength: "strong",
   })
@@ -587,28 +347,28 @@ export class HtmlView extends ElementView implements LayoutView {
 
   @LayoutAnchor<HtmlView>({
     get(oldState: number): number {
-      const offsetParent = this._node.offsetParent!;
+      const offsetParent = this.scope.node.offsetParent!;
       const offsetBounds = offsetParent.getBoundingClientRect();
-      const bounds = this._node.getBoundingClientRect();
+      const bounds = this.scope.node.getBoundingClientRect();
       const newState = bounds.left + 0.5 * bounds.width - offsetBounds.left;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsLayout);
       }
       return newState;
     },
     set(newValue: number): void {
-      const rightAnchor = this.getLayoutAnchor("rightAnchor");
-      const leftAnchor = this.getLayoutAnchor("leftAnchor");
-      const widthAnchor = this.getLayoutAnchor("widthAnchor");
+      const rightAnchor = this.scope.getLayoutAnchor("rightAnchor");
+      const leftAnchor = this.scope.getLayoutAnchor("leftAnchor");
+      const widthAnchor = this.scope.getLayoutAnchor("widthAnchor");
       if (leftAnchor !== null && leftAnchor.enabled()) {
-        this.width.setState(Length.px(2 * (newValue - leftAnchor.value)));
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.width.setState(Length.px(2 * (newValue - leftAnchor.value)));
+        this.scope.requireUpdate(View.NeedsResize | View.NeedsLayout);
       } else if (rightAnchor !== null && rightAnchor.enabled()) {
-        this.width.setState(Length.px(2 * (rightAnchor.value - newValue)));
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.width.setState(Length.px(2 * (rightAnchor.value - newValue)));
+        this.scope.requireUpdate(View.NeedsResize | View.NeedsLayout);
       } else if (widthAnchor !== null && widthAnchor.enabled()) {
-        this.left.setState(Length.px(newValue - 0.5 * widthAnchor.value));
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.left.setState(Length.px(newValue - 0.5 * widthAnchor.value));
+        this.scope.requireUpdate(View.NeedsLayout);
       }
     },
     strength: "strong",
@@ -617,28 +377,28 @@ export class HtmlView extends ElementView implements LayoutView {
 
   @LayoutAnchor<HtmlView>({
     get(oldState: number): number {
-      const offsetParent = this._node.offsetParent!;
+      const offsetParent = this.scope.node.offsetParent!;
       const offsetBounds = offsetParent.getBoundingClientRect();
-      const bounds = this._node.getBoundingClientRect();
+      const bounds = this.scope.node.getBoundingClientRect();
       const newState = bounds.top + 0.5 * bounds.height - offsetBounds.top;
       if (oldState !== newState) {
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.requireUpdate(View.NeedsLayout);
       }
       return newState;
     },
     set(newValue: number): void {
-      const topAnchor = this.getLayoutAnchor("topAnchor");
-      const bottomAnchor = this.getLayoutAnchor("bottomAnchor");
-      const heightAnchor = this.getLayoutAnchor("heightAnchor");
+      const topAnchor = this.scope.getLayoutAnchor("topAnchor");
+      const bottomAnchor = this.scope.getLayoutAnchor("bottomAnchor");
+      const heightAnchor = this.scope.getLayoutAnchor("heightAnchor");
       if (topAnchor !== null && topAnchor.enabled()) {
-        this.height.setState(Length.px(2 * (newValue - topAnchor.value)));
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.height.setState(Length.px(2 * (newValue - topAnchor.value)));
+        this.scope.requireUpdate(View.NeedsResize | View.NeedsLayout);
       } else if (bottomAnchor !== null && bottomAnchor.enabled()) {
-        this.height.setState(Length.px(2 * (bottomAnchor.value - newValue)));
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.height.setState(Length.px(2 * (bottomAnchor.value - newValue)));
+        this.scope.requireUpdate(View.NeedsResize | View.NeedsLayout);
       } else if (heightAnchor !== null && heightAnchor.enabled()) {
-        this.top.setState(Length.px(newValue - 0.5 * heightAnchor.value));
-        this.requireUpdate(View.NeedsLayout);
+        this.scope.top.setState(Length.px(newValue - 0.5 * heightAnchor.value));
+        this.scope.requireUpdate(View.NeedsLayout);
       }
     },
     strength: "strong",
@@ -1433,14 +1193,6 @@ export class HtmlView extends ElementView implements LayoutView {
       return new HtmlView(node);
     }
     throw new TypeError("" + node);
-  }
-
-  static fromConstructor<C extends ElementViewConstructor | RenderedViewConstructor>(viewConstructor: C): InstanceType<C>;
-  static fromConstructor(viewConstructor: ElementViewConstructor | RenderedViewConstructor): View {
-    if (ElementView.isConstructor(viewConstructor)) {
-      return new viewConstructor(document.createElement(viewConstructor.tag));
-    }
-    throw new TypeError("" + viewConstructor);
   }
 
   static create<T extends keyof HtmlViewTagMap>(tag: T): HtmlViewTagMap[T];

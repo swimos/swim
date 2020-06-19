@@ -14,7 +14,9 @@
 
 const uiView = new swim.UiView(document.getElementById("ui"));
 
-const canvas = uiView.append("canvas");
+const canvas = uiView.append("canvas")
+    .pointerEventsEnabled(true)
+    .touchAction("manipulation");
 
 const gauge = new swim.GaugeView()
     .dialColor("#cccccc")
@@ -28,10 +30,10 @@ const dial = new swim.DialView()
     .value(0.33)
     .meterColor("#989898")
     .legend("Legend")
-    .on("mouseenter", function (event) {
+    .on("pointerenter", function (event) {
       dial.dialColor("#dddddd", {duration: 200});
     })
-    .on("mouseleave", function (event) {
+    .on("pointerleave", function (event) {
       dial.dialColor("#cccccc", {duration: 200});
     });
 gauge.append(dial);

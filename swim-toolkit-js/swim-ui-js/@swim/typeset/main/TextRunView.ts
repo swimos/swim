@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
-  MemberAnimator,
-  RenderedViewContext,
+  ViewAnimator,
+  GraphicsViewContext,
+  GraphicsViewController,
+  GraphicsLeafView,
   TypesetViewInit,
   TypesetView,
-  GraphicsView,
-  GraphicsViewController,
 } from "@swim/view";
 import {TextRun} from "./TextRun";
 
@@ -33,28 +33,28 @@ export interface TextRunViewInit extends TypesetViewInit {
   text?: string;
 }
 
-export class TextRunView extends GraphicsView implements TypesetView {
+export class TextRunView extends GraphicsLeafView implements TypesetView {
   get viewController(): GraphicsViewController<TextRunView> | null {
     return this._viewController;
   }
 
-  @MemberAnimator(String, {value: ""})
-  text: MemberAnimator<this, string>;
+  @ViewAnimator(String, {value: ""})
+  text: ViewAnimator<this, string>;
 
-  @MemberAnimator(Font, {inherit: true})
-  font: MemberAnimator<this, Font, AnyFont>;
+  @ViewAnimator(Font, {inherit: true})
+  font: ViewAnimator<this, Font, AnyFont>;
 
-  @MemberAnimator(String, {inherit: true})
-  textAlign: MemberAnimator<this, CanvasTextAlign>;
+  @ViewAnimator(String, {inherit: true})
+  textAlign: ViewAnimator<this, CanvasTextAlign>;
 
-  @MemberAnimator(String, {inherit: true})
-  textBaseline: MemberAnimator<this, CanvasTextBaseline>;
+  @ViewAnimator(String, {inherit: true})
+  textBaseline: ViewAnimator<this, CanvasTextBaseline>;
 
-  @MemberAnimator(PointR2, {inherit: true})
-  textOrigin: MemberAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator(PointR2, {inherit: true})
+  textOrigin: ViewAnimator<this, PointR2, AnyPointR2>;
 
-  @MemberAnimator(Color, {inherit: true})
-  textColor: MemberAnimator<this, Color, AnyColor>;
+  @ViewAnimator(Color, {inherit: true})
+  textColor: ViewAnimator<this, Color, AnyColor>;
 
   get value(): TextRun {
     return new TextRun(this.text.value!, this.font.value!, this.textAlign.value!,
@@ -100,7 +100,7 @@ export class TextRunView extends GraphicsView implements TypesetView {
     }
   }
 
-  protected onRender(viewContext: RenderedViewContext): void {
+  protected onRender(viewContext: GraphicsViewContext): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {

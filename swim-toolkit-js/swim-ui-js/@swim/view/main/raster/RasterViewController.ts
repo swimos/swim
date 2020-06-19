@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,17 +13,16 @@
 // limitations under the License.
 
 import {GraphicsViewController} from "../graphics/GraphicsViewController";
-import {CompositedViewContext} from "../composited/CompositedViewContext";
-import {CompositedViewController} from "../composited/CompositedViewController";
+import {RasterViewContext} from "./RasterViewContext";
 import {RasterView} from "./RasterView";
 import {RasterViewObserver} from "./RasterViewObserver";
 
-export class RasterViewController<V extends RasterView = RasterView> extends GraphicsViewController<V> implements CompositedViewController<V>, RasterViewObserver<V> {
-  viewWillComposite(viewContext: CompositedViewContext, view: V): void {
+export class RasterViewController<V extends RasterView = RasterView> extends GraphicsViewController<V> implements RasterViewObserver<V> {
+  viewWillComposite(viewContext: RasterViewContext, view: V): void {
     // hook
   }
 
-  viewDidComposite(viewContext: CompositedViewContext, view: V): void {
+  viewDidComposite(viewContext: RasterViewContext, view: V): void {
     // hook
   }
 }

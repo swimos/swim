@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,45 +15,48 @@
 import {PointR2, BoxR2} from "@swim/math";
 import {ContinuousScale} from "@swim/scale";
 import {CanvasContext} from "@swim/render";
+import {ViewAnimator, ContinuousScaleViewAnimator} from "@swim/view";
 import {TickView} from "../tick/TickView";
 import {AxisOrientation, AxisView} from "./AxisView";
 
-export class RightAxisView<D> extends AxisView<D> {
-  constructor(scale: ContinuousScale<D, number>) {
-    super(scale);
-  }
-
+export class RightAxisView<Y = unknown> extends AxisView<Y> {
   get orientation(): AxisOrientation {
     return "right";
   }
 
-  protected renderDomain(context: CanvasContext, frame: BoxR2): void {
-    const origin = this.origin.value!;
-    const x0 = origin.x;
-    const y0 = origin.y;
-    const [dy0, dy1] = this.scale.value!.range();
-    const dx = this.domainSerif.value!;
+  @ViewAnimator(ContinuousScale, {inherit: "yScale"})
+  scale: ContinuousScaleViewAnimator<this, Y, number>;
 
-    context.beginPath();
-    context.strokeStyle = this.domainColor.value!.toString();
-    context.lineWidth = this.domainWidth.value!;
-    if (dx !== 0) {
-      context.moveTo(x0 + dx, y0 + dy0);
-      context.lineTo(x0,      y0 + dy0);
-      context.lineTo(x0,      y0 + dy1);
-      context.lineTo(x0 + dx, y0 + dy1);
-    } else {
-      context.moveTo(x0, y0 + dy0);
-      context.lineTo(x0, y0 + dy1);
+  protected layoutTick(tick: TickView<Y>, origin: PointR2, frame: BoxR2,
+                       scale: ContinuousScale<Y, number>): void {
+    if (tick.anchor.isAuto()) {
+      tick._offset = scale.scale(tick._value);
+      tick.anchor.setAutoState(new PointR2(origin.x, frame.yMin + tick._offset));
     }
-    context.stroke();
   }
 
-  protected layoutTick(tick: TickView<D>, frame: BoxR2): void {
-    const origin = this.origin.value!;
-    const dy = this.scale.value!.scale(tick.value);
-    tick.origin.setAutoState(new PointR2(origin.x, origin.y + dy));
-    tick.setCoord(dy);
+  protected renderDomain(context: CanvasContext, origin: PointR2, frame: BoxR2): void {
+    const borderWidth = this.borderWidth.value;
+    if (borderWidth !== void 0 && borderWidth !== 0) {
+      const x = origin.x;
+      const dx = this.borderSerif.value!;
+      const y0 = frame.yMin;
+      const y1 = frame.yMax;
+
+      context.beginPath();
+      context.strokeStyle = this.borderColor.value!.toString();
+      context.lineWidth = borderWidth;
+      if (dx !== 0) {
+        context.moveTo(x + dx, y0);
+        context.lineTo(x,      y0);
+        context.lineTo(x,      y1);
+        context.lineTo(x + dx, y1);
+      } else {
+        context.moveTo(x, y0);
+        context.lineTo(x, y1);
+      }
+      context.stroke();
+    }
   }
 }
 AxisView.Right = RightAxisView;

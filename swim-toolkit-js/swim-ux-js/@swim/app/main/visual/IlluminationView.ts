@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ export class IlluminationView extends HtmlView {
         this._illuminationTimer = setTimeout(illuminate, delay) as any;
       } else {
         this.willIlluminate();
-        const clientBounds = this._node.offsetParent!.getBoundingClientRect()
+        const clientBounds = this._node.offsetParent!.getBoundingClientRect();
         const cx = clientX - clientBounds.left;
         const cy = clientY - clientBounds.top;
         const rx = Math.max(cx, clientBounds.width - cx);

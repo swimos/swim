@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -66,16 +66,17 @@ export class HslColorInterpolator extends ColorInterpolator<HslColor> {
     return lc !== 0 ? dp / lc : lc;
   }
 
-  range(): ReadonlyArray<HslColor>;
-  range(cs: ReadonlyArray<HslColor | HslColorInit>): HslColorInterpolator;
+  range(): readonly [HslColor, HslColor];
+  range(cs: readonly [HslColor | HslColorInit, HslColor | HslColorInit]): HslColorInterpolator;
   range(c0: HslColor | HslColorInit, c1: HslColor | HslColorInit): HslColorInterpolator;
-  range(cs: ReadonlyArray<AnyColor>): ColorInterpolator;
+  range(cs: readonly [AnyColor, AnyColor]): ColorInterpolator;
   range(c0: AnyColor, c1: AnyColor): ColorInterpolator;
-  range(c0?: ReadonlyArray<AnyColor> | AnyColor, c1?: AnyColor): ReadonlyArray<HslColor> | ColorInterpolator {
+  range(c0?: readonly [AnyColor, AnyColor] | AnyColor,
+        c1?: AnyColor): readonly [HslColor, HslColor] | ColorInterpolator {
     if (c0 === void 0) {
       return [this.interpolate(0), this.interpolate(1)];
     } else if (c1 === void 0) {
-      c0 = c0 as ReadonlyArray<AnyColor>
+      c0 = c0 as readonly [AnyColor, AnyColor];
       return HslColorInterpolator.between(c0[0], c0[1]);
     } else {
       return HslColorInterpolator.between(c0 as AnyColor, c1);

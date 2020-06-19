@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {ContinuousScale} from "@swim/scale";
 import {GraphicsViewController} from "@swim/view";
-import {AxisView} from "../axis/AxisView";
 import {PlotType, PlotView} from "./PlotView";
 import {PlotViewObserver} from "./PlotViewObserver";
 
-export class PlotViewController<X = any, Y = any, V extends PlotView<X, Y> = PlotView<X, Y>> extends GraphicsViewController<V> implements PlotViewObserver<X, Y, V> {
-  get type(): PlotType {
+export class PlotViewController<X = unknown, Y = unknown, V extends PlotView<X, Y> = PlotView<X, Y>> extends GraphicsViewController<V> implements PlotViewObserver<X, Y, V> {
+  get plotType(): PlotType {
     const view = this._view;
-    return view !== null ? view.type : void 0 as any;
+    return view !== null ? view.plotType : void 0 as any;
   }
 
-  xAxis(): AxisView<X> | null {
+  xScale(): ContinuousScale<X, number> | undefined {
     const view = this._view;
-    return view !== null ? view.xAxis() : null;
+    return view !== null ? view.xScale() : void 0;
   }
 
-  yAxis(): AxisView<Y> | null {
+  yScale(): ContinuousScale<Y, number> | undefined {
     const view = this._view;
-    return view !== null ? view.yAxis() : null;
+    return view !== null ? view.yScale() : void 0;
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,17 +13,16 @@
 // limitations under the License.
 
 import {MapGraphicsViewController} from "../graphics/MapGraphicsViewController";
-import {CompositedMapViewContext} from "../composited/CompositedMapViewContext";
-import {CompositedMapViewController} from "../composited/CompositedMapViewController";
+import {MapRasterViewContext} from "./MapRasterViewContext";
 import {MapRasterView} from "./MapRasterView";
 import {MapRasterViewObserver} from "./MapRasterViewObserver";
 
-export class MapRasterViewController<V extends MapRasterView = MapRasterView> extends MapGraphicsViewController<V> implements CompositedMapViewController<V>, MapRasterViewObserver<V> {
-  viewWillComposite(viewContext: CompositedMapViewContext, view: V): void {
+export class MapRasterViewController<V extends MapRasterView = MapRasterView> extends MapGraphicsViewController<V> implements MapRasterViewObserver<V> {
+  viewWillComposite(viewContext: MapRasterViewContext, view: V): void {
     // hook
   }
 
-  viewDidComposite(viewContext: CompositedMapViewContext, view: V): void {
+  viewDidComposite(viewContext: MapRasterViewContext, view: V): void {
     // hook
   }
 }

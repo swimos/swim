@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,6 +45,9 @@ export interface LayoutManager {
 
   /** @hidden */
   didUpdateConstraintVariable(constraintVariable: ConstrainVariable, newValue: number, oldValue: number): void;
+
+  /** @hidden */
+  updateConstraintVariables(): void;
 }
 
 /** @hidden */
@@ -52,7 +55,7 @@ export const LayoutManager = {
   is(object: unknown): object is LayoutManager {
     if (typeof object === "object" && object !== null) {
       const view = object as LayoutManager;
-      return typeof view.setConstraintVariable === "function";
+      return typeof view.updateConstraintVariables === "function";
     }
     return false;
   },

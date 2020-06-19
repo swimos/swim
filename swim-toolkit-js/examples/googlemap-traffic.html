@@ -11,8 +11,8 @@
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
     <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
-    <script src="../swim-maps-js/@swim/maps/dist/main/swim-maps.js"></script>
     <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
+    <script src="../swim-maps-js/@swim/maps/dist/main/swim-maps.js"></script>
     <script>
 
 const RED = swim.Color.parse("#a50f21");
@@ -30,7 +30,8 @@ const map = new google.maps.Map(appView.node, {
 });
 
 const mapView = new swim.GoogleMapView(map);
-mapView.overlayCanvas();
+mapView.overlayCanvas()
+    .pointerEventsEnabled(true);
 
 const mapLayer = mapView.append(new swim.MapLayerView(undefined, 0, 15));
 //mapLayer.tileOutlineColor("#cc0000");
@@ -75,7 +76,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
       intersectionPopover.setSource(intersectionView);
       intersectionPopover.hideModal();
     }
-    appView.toggleModal(intersectionPopover, {multi: event.altKey});
+    appView.toggleModal(intersectionPopover, {multi: event.shiftKey});
   });
 
   const schematicLink = node.downlinkValue()
@@ -94,10 +95,10 @@ function linkIntersection(intersectionId, node, intersectionView) {
                   stroke: swim.Color.transparent(),
                   strokeWidth: 3,
                 })
-                .on("mouseenter", function (event) {
+                .on("pointerenter", function (event) {
                   updateApproach(approachView);
                 })
-                .on("mouseleave", function (event) {
+                .on("pointerleave", function (event) {
                   updateApproach(approachView);
                 });
               approaches[approachId] = approachView;
@@ -165,11 +166,12 @@ function linkIntersection(intersectionId, node, intersectionView) {
     if (approachView.occupied === false) {
       phaseColor = phaseColor.alpha(0.25);
     }
-    approachView.fill(phaseColor, swim.Transition.duration(500));
+    const tween = swim.Transition.duration(250, "cubic-out");
+    approachView.fill(phaseColor, tween);
     if (approachView.isHovering()) {
-      approachView.stroke("#ffffff", {duration: 200});
+      approachView.stroke("#ffffff", tween);
     } else {
-      approachView.stroke(swim.Color.transparent(), {duration: 200});
+      approachView.stroke(swim.Color.transparent(), tween);
     }
   }
 

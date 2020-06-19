@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
 import {Angle} from "@swim/angle";
 import {Transform} from "@swim/transform";
 import {Tween, Transition} from "@swim/transition";
-import {ViewScope, ViewContext, View, SvgView, HtmlView} from "@swim/view";
-import {GestureViewTrack, GestureViewController} from "@swim/gesture";
+import {ViewScope, ViewContext, View, SvgView, HtmlView, HtmlViewController} from "@swim/view";
+import {PositionGestureInput, PositionGestureDelegate} from "@swim/gesture";
 import {Theme} from "@swim/theme";
 import {TactileView} from "@swim/app";
 
-export class ActionButton extends TactileView {
+export class ActionButton extends TactileView implements PositionGestureDelegate {
   constructor(node: HTMLElement) {
     super(node);
   }
@@ -40,11 +40,11 @@ export class ActionButton extends TactileView {
         .cursor("pointer");
   }
 
-  get viewController(): GestureViewController<ActionButton> | null {
+  get viewController(): HtmlViewController<ActionButton> | null {
     return this._viewController;
   }
 
-  @ViewScope({inherit: true})
+  @ViewScope(Object, {inherit: true})
   theme: ViewScope<this, Theme>;
 
   get iconContainer(): HtmlView | null {
@@ -107,11 +107,11 @@ export class ActionButton extends TactileView {
 
   protected onMount(): void {
     super.onMount();
-    this.requireUpdate(View.NeedsDerive);
+    this.requireUpdate(View.NeedsCompute);
   }
 
-  protected onDerive(viewContext: ViewContext): void {
-    super.onDerive(viewContext);
+  protected onCompute(viewContext: ViewContext): void {
+    super.onCompute(viewContext);
     const theme = this.theme.state;
     if (theme !== void 0) {
       this.setTheme(theme);
@@ -142,21 +142,21 @@ export class ActionButton extends TactileView {
     // hook
   }
 
-  protected onStartHovering(): void {
+  didStartHovering(): void {
     const theme = this.theme.state;
     if (theme !== void 0) {
       this.backgroundColor.setAutoState(theme.primary.fillColor.darker(0.5), this.tactileTransition);
     }
   }
 
-  protected onStopHovering(): void {
+  didStopHovering(): void {
     const theme = this.theme.state;
     if (theme !== void 0) {
       this.backgroundColor.setAutoState(theme.primary.fillColor, this.tactileTransition);
     }
   }
 
-  protected onMoveTrack(track: GestureViewTrack, event: Event | null): void {
+  didMovePress(input: PositionGestureInput, event: Event | null): void {
     // nop
   }
 }

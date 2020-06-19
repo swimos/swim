@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,14 +39,15 @@ export class LengthInterpolator extends Interpolator<Length, AnyLength> {
     return this.dv !== 0 ? (v - this.v0) / this.dv : this.dv;
   }
 
-  range(): ReadonlyArray<Length>;
-  range(ts: ReadonlyArray<AnyLength>): LengthInterpolator;
+  range(): readonly [Length, Length];
+  range(ts: readonly [AnyLength, AnyLength]): LengthInterpolator;
   range(t0: AnyLength, t1: AnyLength): LengthInterpolator;
-  range(l0?: ReadonlyArray<AnyLength> | AnyLength, l1?: AnyLength): ReadonlyArray<Length> | LengthInterpolator {
+  range(l0?: readonly [AnyLength, AnyLength] | AnyLength,
+        l1?: AnyLength): readonly [Length, Length] | LengthInterpolator {
     if (l0 === void 0) {
       return [Length.from(this.v0, this.units), Length.from(this.v0 + this.dv, this.units)];
     } else if (l1 === void 0) {
-      l0 = l0 as ReadonlyArray<AnyLength>;
+      l0 = l0 as readonly [AnyLength, AnyLength];
       return LengthInterpolator.between(l0[0], l0[1]);
     } else {
       return LengthInterpolator.between(l0 as AnyLength, l1);

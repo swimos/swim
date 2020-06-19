@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import {LinearScaleInterpolator} from "./LinearScaleInterpolator";
 import {TimeScaleInterpolator} from "./TimeScaleInterpolator";
 
 export abstract class ScaleInterpolator<D extends DU, R extends RU, DU = D, RU = R, S extends ContinuousScale<D, R, DU, RU> = ContinuousScale<D, R, DU, RU>> extends Interpolator<S, ContinuousScale<D, R, DU, RU>> {
-  range(): ReadonlyArray<S>;
-  range(ss: ReadonlyArray<ContinuousScale<D, R, DU, RU>>): ScaleInterpolator<D, R, DU, RU, S>;
+  range(): readonly [S, S];
+  range(ss: readonly [ContinuousScale<D, R, DU, RU>, ContinuousScale<D, R, DU, RU>]): ScaleInterpolator<D, R, DU, RU, S>;
   range(s0: ContinuousScale<D, R, DU, RU>, s1: ContinuousScale<D, R, DU, RU>): ScaleInterpolator<D, R, DU, RU, S>;
-  range(s0?: ReadonlyArray<ContinuousScale<D, R, DU, RU>> | ContinuousScale<D, R, DU, RU>,
-        s1?: ContinuousScale<D, R, DU, RU>): ReadonlyArray<S> | ScaleInterpolator<D, R, DU, RU, S> {
+  range(s0?: readonly [ContinuousScale<D, R, DU, RU>, ContinuousScale<D, R, DU, RU>] | ContinuousScale<D, R, DU, RU>,
+        s1?: ContinuousScale<D, R, DU, RU>): readonly [S, S] | ScaleInterpolator<D, R, DU, RU, S> {
     if (s0 === void 0) {
       return [this.interpolate(0), this.interpolate(1)];
     } else if (s1 === void 0) {
-      s0 = s0 as ReadonlyArray<ContinuousScale<D, R, DU, RU>>;
+      s0 = s0 as readonly [ContinuousScale<D, R, DU, RU>, ContinuousScale<D, R, DU, RU>];
       return ScaleInterpolator.between(s0[0], s0[1]) as ScaleInterpolator<D, R, DU, RU, S>;
     } else {
       return ScaleInterpolator.between(s0 as ContinuousScale<D, R, DU, RU>, s1) as ScaleInterpolator<D, R, DU, RU, S>;
