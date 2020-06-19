@@ -4,7 +4,7 @@
   "description": "Lightweight, portable, dependency-free, and strongly typed foundation framework",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2020 SWIM.AI inc.",
+  "copyright": "2015-2020 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-core.js",

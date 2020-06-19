@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ export class DocTarget extends ConverterComponent {
 
     const targetReflections: {[uid: string]: TargetReflection | undefined} = {};
 
-    const targets = this.target.transitiveDeps();
+    const targets = this.target.transitiveTargets();
     for (let i = 0; i < targets.length; i += 1) {
       const target = targets[i];
       const indexPath = path.resolve(target.baseDir, "index.ts");

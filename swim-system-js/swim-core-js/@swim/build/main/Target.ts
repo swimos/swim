@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {fork} from "child_process";
+import * as child_process from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as ts from "typescript";
@@ -130,9 +130,19 @@ export class Target {
     }
   }
 
-  transitiveDeps(targets: Target[] = []): Target[] {
+  transitiveProjects(projects: Project[] = []): Project[] {
     for (let i = 0; i < this.deps.length; i += 1) {
-      targets = this.deps[i].transitiveDeps(targets);
+      projects = this.deps[i].transitiveProjects(projects);
+    }
+    if (projects.indexOf(this.project) < 0) {
+      projects.push(this.project);
+    }
+    return projects;
+  }
+
+  transitiveTargets(targets: Target[] = []): Target[] {
+    for (let i = 0; i < this.deps.length; i += 1) {
+      targets = this.deps[i].transitiveTargets(targets);
     }
     if (targets.indexOf(this) < 0) {
       targets.push(this);
@@ -145,7 +155,7 @@ export class Target {
     const newRefs: ts.ProjectReference[] = [];
     let targets: Target[] = [];
     for (let i = 0; i < this.deps.length; i += 1) {
-      targets = this.deps[i].transitiveDeps(targets);
+      targets = this.deps[i].transitiveTargets(targets);
     }
     for (let i = 0; i < targets.length; i += 1) {
       const target = targets[i];
@@ -167,7 +177,7 @@ export class Target {
   protected canCompile(): boolean {
     let targets = [] as Target[];
     for (let i = 0; i < this.deps.length; i += 1) {
-      targets = this.deps[i].transitiveDeps(targets);
+      targets = this.deps[i].transitiveTargets(targets);
     }
     for (let i = 0; i < targets.length; i += 1) {
       const target = targets[i];
@@ -577,6 +587,8 @@ export class Target {
           exports: inputChunk.exports,
           isEntry: inputChunk.isEntry,
           isDynamicEntry: inputChunk.isDynamicEntry,
+          isImplicitEntry: false,
+          implicitlyLoadedBefore: [],
         };
         bundle.output.push(outputChunk);
       } else {
@@ -694,7 +706,7 @@ export class Target {
         const args: string[] = [];
 
         const t0 = Date.now();
-        const proc = fork(scriptPath, args);
+        const proc = child_process.fork(scriptPath, args);
         proc.on("exit", (code: number): void => {
           const dt = Date.now() - t0;
           if (code === 0) {
@@ -793,7 +805,7 @@ export class Target {
 
     const fileNames: string[] = [];
     const fileTargetMap: {[fileName: string]: {target: Target} | undefined} = {};
-    const targets = this.transitiveDeps();
+    const targets = this.transitiveTargets();
     for (let i = 0; i < targets.length; i += 1) {
       const target = targets[i];
       const targetFileNames = target.getRootFileNames();

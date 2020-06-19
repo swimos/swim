@@ -4,7 +4,7 @@
   "description": "WebSocket protocol for dynamically multiplexing large numbers of bidirectional links to streaming API endpoints, called lanes, of URI-addressed distributed objects, called nodes, that run stateful distributed processes, called Web Agents",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/warp",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2020 SWIM.AI inc.",
+  "copyright": "2015-2020 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-warp.js",

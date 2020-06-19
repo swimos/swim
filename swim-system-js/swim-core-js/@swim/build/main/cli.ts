@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -102,6 +102,25 @@ function runUpdate(this: Cmd, args: {[name: string]: string | null | undefined})
   });
 }
 
+function runPublish(this: Cmd, args: {[name: string]: string | null | undefined}): void {
+  Build.load(args.config!, args.devel === null).then((build: Build): void => {
+    function publishProject(project: Project): Promise<unknown> | void {
+      const options = {
+        tag: typeof args.tag === "string" ? args.tag : void 0,
+        "dry-run": args["dry-run"] === null,
+      };
+      return project.publish(options);
+    }
+    if (args.recursive === void 0) {
+      build.forEachProject(args.projects!, publishProject);
+    } else {
+      build.forEachTransitiveProject(args.projects!, publishProject, "main");
+    }
+  }, (reason: any): void => {
+    console.log(reason);
+  });
+}
+
 function runClean(this: Cmd, args: {[name: string]: string | null | undefined}): void {
   Build.load(args.config!, args.devel === null).then((build: Build): void => {
     build.forEachProject(args.projects!, (project: Project): void => {
@@ -157,6 +176,14 @@ const updateCmd: Cmd = Cmd.of("update")
     .opt(Opt.of("projects").flag("p").arg("project(,project)*").desc("comma-separated list of projects to update"))
     .exec(runUpdate);
 
+const publishCmd: Cmd = Cmd.of("publish")
+    .desc("publish packages to npm")
+    .opt(Opt.of("projects").flag("p").arg("project(,project)*").desc("comma-separated list of projects to publish"))
+    .opt(Opt.of("recursive").flag("r").desc("recursively publish project dependencies"))
+    .opt(Opt.of("dry-run").desc("does everything publish would do except actually publishing to the registry"))
+    .opt(Opt.of("tag").arg("tag").desc("registers the published package with the given tag"))
+    .exec(runPublish);
+
 const cleanCmd: Cmd = Cmd.of("clean")
     .desc("delete generated files")
     .opt(Opt.of("projects").flag("p").arg("project(,project)*").desc("comma-separated list of projects to clean"))
@@ -171,5 +198,6 @@ export const cli = Cmd.of("build")
     .cmd(docCmd)
     .cmd(watchCmd)
     .cmd(updateCmd)
+    .cmd(publishCmd)
     .cmd(cleanCmd)
     .helpCmd();

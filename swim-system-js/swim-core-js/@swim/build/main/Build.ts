@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -86,6 +86,43 @@ export class Build {
     });
   }
 
+  transitiveProjects(specifiers: string[] | string | undefined, targetId: string | undefined): Project[] {
+    if (specifiers === void 0) {
+      specifiers = Object.keys(this.projects);
+    } else if (typeof specifiers === "string") {
+      specifiers = specifiers.split(",");
+    }
+    let projects: Project[] = [];
+    for (let i = 0; i < specifiers.length; i += 1) {
+      const projectId = specifiers[i];
+      const project = this.projects[projectId];
+      if (project !== void 0) {
+        if (targetId !== void 0) {
+          const target = project.targets[targetId];
+          if (target !== void 0) {
+            projects = target.transitiveProjects(projects);
+          }
+        } else {
+          for (let j = 0; j < project.targetList.length; j += 1) {
+            const target = project.targetList[j];
+            projects = target.transitiveProjects(projects);
+          }
+        }
+      } else {
+        const output = Unicode.stringOutput(OutputSettings.styled());
+        OutputStyle.redBold(output);
+        output.write("unknown project");
+        OutputStyle.reset(output);
+        output.write(" ");
+        OutputStyle.yellow(output);
+        output.write(projectId);
+        OutputStyle.reset(output);
+        console.log(output.bind());
+      }
+    }
+    return projects;
+  }
+
   targets(specifiers: string[] | string | undefined): Target[] {
     if (specifiers === void 0) {
       specifiers = Object.keys(this.projects);
@@ -159,13 +196,13 @@ export class Build {
             const target = project.targets[targetId];
             if (target !== void 0) {
               target.selected = true;
-              targets = target.transitiveDeps(targets);
+              targets = target.transitiveTargets(targets);
             }
           } else { // <project>(:?)
             for (let j = 0; j < project.targetList.length; j += 1) {
               const target = project.targetList[j];
               target.selected = true;
-              targets = target.transitiveDeps(targets);
+              targets = target.transitiveTargets(targets);
             }
           }
         } else {
@@ -184,12 +221,66 @@ export class Build {
           const target = this.projectList[j].targets[targetId];
           if (target !== void 0) {
             target.selected = true;
-            targets = target.transitiveDeps(targets);
+            targets = target.transitiveTargets(targets);
           }
         }
       }
     }
     return targets;
+  }
+
+  forEachProject(specifiers: string[] | string | undefined,
+                 callback: (project: Project) => Promise<unknown> | void,
+                 i: number = 0): Promise<unknown> {
+    if (specifiers === void 0) {
+      specifiers = Object.keys(this.projects);
+    } else if (typeof specifiers === "string") {
+      specifiers = specifiers.split(",");
+    }
+    if (i < specifiers.length) {
+      const specifier = specifiers[i];
+      const [projectId] = specifier.split(":");
+      const project = this.projects[projectId];
+      if (project !== void 0) {
+        const result = callback(project);
+        if (result !== void 0) {
+          return result.then(this.forEachProject.bind(this, specifiers, callback, i + 1));
+        }
+      } else {
+        const output = Unicode.stringOutput(OutputSettings.styled());
+        OutputStyle.redBold(output);
+        output.write("unknown project");
+        OutputStyle.reset(output);
+        output.write(" ");
+        OutputStyle.yellow(output);
+        output.write(projectId);
+        OutputStyle.reset(output);
+        console.log(output.bind());
+      }
+      return Promise.resolve(void 0).then(this.forEachProject.bind(this, specifiers, callback, i + 1));
+    } else {
+      return Promise.resolve(void 0);
+    }
+  }
+
+  forEachTransitiveProject(projects: Project[] | string | undefined,
+                           callback: (project: Project) => Promise<unknown> | void,
+                           targetId: string | undefined,
+                           i: number = 0): Promise<unknown> {
+    if (!Array.isArray(projects)) {
+      projects = this.transitiveProjects(projects, targetId);
+    }
+    if (i < projects.length) {
+      const project = projects[i];
+      const result = callback(project);
+      if (result !== void 0) {
+        return result.then(this.forEachTransitiveProject.bind(this, projects, callback, targetId, i + 1));
+      } else {
+        return Promise.resolve(void 0).then(this.forEachTransitiveProject.bind(this, projects, callback, targetId, i + 1));
+      }
+    } else {
+      return Promise.resolve(void 0);
+    }
   }
 
   forEachTarget(targets: Target[] | string | undefined,
@@ -225,40 +316,6 @@ export class Build {
       } else {
         return Promise.resolve(void 0).then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
       }
-    } else {
-      return Promise.resolve(void 0);
-    }
-  }
-
-  forEachProject(specifiers: string[] | string | undefined,
-                 callback: (project: Project) => Promise<unknown> | void,
-                 i: number = 0): Promise<unknown> {
-    if (specifiers === void 0) {
-      specifiers = Object.keys(this.projects);
-    } else if (typeof specifiers === "string") {
-      specifiers = specifiers.split(",");
-    }
-    if (i < specifiers.length) {
-      const specifier = specifiers[i];
-      const [projectId] = specifier.split(":");
-      const project = this.projects[projectId];
-      if (project !== void 0) {
-        const result = callback(project);
-        if (result !== void 0) {
-          return result.then(this.forEachProject.bind(this, specifiers, callback, i + 1));
-        }
-      } else {
-        const output = Unicode.stringOutput(OutputSettings.styled());
-        OutputStyle.redBold(output);
-        output.write("unknown project");
-        OutputStyle.reset(output);
-        output.write(" ");
-        OutputStyle.yellow(output);
-        output.write(projectId);
-        OutputStyle.reset(output);
-        console.log(output.bind());
-      }
-      return Promise.resolve(void 0).then(this.forEachProject.bind(this, specifiers, callback, i + 1));
     } else {
       return Promise.resolve(void 0);
     }

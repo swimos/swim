@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as child_process from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import * as ts from "typescript";
@@ -152,6 +153,76 @@ export class Project {
     if (modified) {
       fs.writeFileSync(this.packagePath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
     }
+  }
+
+  publish(options?: {tag?: string, "dry-run"?: boolean}): Promise<unknown> {
+    const output = Unicode.stringOutput(OutputSettings.styled());
+    OutputStyle.greenBold(output);
+    output.write("publishing");
+    OutputStyle.reset(output);
+    output.write(" ");
+    OutputStyle.yellow(output);
+    output.write(this.id);
+    OutputStyle.reset(output);
+    console.log(output.bind());
+
+    return new Promise((resolve, reject): void => {
+      const command = "npm";
+      const args = ["publish"];
+      if (options !== void 0) {
+        if (options.tag !== void 0) {
+          args.push("--tag", options.tag);
+        }
+        if (options["dry-run"]) {
+          args.push("--dry-run");
+        }
+      }
+      const output = Unicode.stringOutput(OutputSettings.styled());
+      OutputStyle.gray(output);
+      output.write("npm");
+      OutputStyle.reset(output);
+      for (let i = 0; i < args.length; i += 1) {
+        output.write(" ");
+        OutputStyle.gray(output);
+        output.write(args[i]);
+        OutputStyle.reset(output);
+      }
+      console.log(output.bind());
+
+      const t0 = Date.now();
+      const proc = child_process.spawn(command, args, {cwd: this.baseDir, stdio: "inherit"});
+      proc.on("exit", (code: number): void => {
+        const dt = Date.now() - t0;
+        if (code === 0) {
+          const output = Unicode.stringOutput(OutputSettings.styled());
+          OutputStyle.greenBold(output);
+          output.write("published");
+          OutputStyle.reset(output);
+          output.write(" ");
+          OutputStyle.yellow(output);
+          output.write(this.id);
+          OutputStyle.reset(output);
+          output.write(" in ");
+          output.debug(dt);
+          output.write("ms");
+          console.log(output.bind());
+          console.log();
+          resolve();
+        } else {
+          const output = Unicode.stringOutput(OutputSettings.styled());
+          OutputStyle.redBold(output);
+          output.write("failed to publish");
+          OutputStyle.reset(output);
+          output.write(" ");
+          OutputStyle.yellow(output);
+          output.write(this.id);
+          OutputStyle.reset(output);
+          console.log(output.bind());
+          console.log();
+          reject(code);
+        }
+      });
+    });
   }
 
   clean(): void {
