@@ -401,17 +401,11 @@ export class STreeNode<V, I> extends STreePage<V, I> {
     return new STreeNode(newPages, newKnots, newSize);
   }
 
-  forEach<T, S>(callback: (this: S,
-                           value: V,
-                           index: number,
-                           tree: STree<V, I>,
-                           id: I) => T | void,
-                thisArg: S,
-                offset: number,
-                tree: STree<V, I>): T | undefined {
+  forEach<T, S>(callback: (this: S, value: V, index: number, id: I) => T | void,
+                thisArg: S, offset: number): T | undefined {
     for (let i = 0; i < this._pages.length; i += 1) {
       const page = this._pages[i];
-      const result = page.forEach(callback, thisArg, offset, tree);
+      const result = page.forEach(callback, thisArg, offset);
       if (result !== void 0) {
         return result;
       }

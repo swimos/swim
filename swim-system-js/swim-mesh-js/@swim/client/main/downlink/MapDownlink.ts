@@ -346,10 +346,7 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
     this._model!.clear();
   }
 
-  forEach<T, S = unknown>(callback: (this: S,
-                                     key: K,
-                                     value: V,
-                                     downlink: MapDownlink<K, V, KU, VU>) => T | void,
+  forEach<T, S = unknown>(callback: (this: S, key: K, value: V) => T | void,
                           thisArg?: S): T | undefined {
     if (this._keyForm as any === Form.forValue() && this._valueForm as any === Form.forValue()) {
       return this._model!._state.forEach(callback as any, thisArg);
@@ -357,7 +354,7 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
       return this._model!._state.forEach(function (key: Value, value: Value): T | void {
         const keyObject = key.coerce(this._keyForm);
         const object = value.coerce(this._valueForm);
-        return callback.call(thisArg, keyObject, object, this);
+        return callback.call(thisArg, keyObject, object);
       }, this);
     }
   }

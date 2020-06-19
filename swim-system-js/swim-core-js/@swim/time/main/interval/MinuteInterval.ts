@@ -58,7 +58,8 @@ export class MinuteInterval extends UnitTimeInterval {
   }
 
   private static modulo(k: number, d: DateTime): boolean {
-    return d.minute() % k === 0;
+    const minute = d.minute();
+    return isFinite(minute) && minute % k === 0;
   }
 }
 TimeInterval.Minute = MinuteInterval;

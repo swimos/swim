@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {AnyDateTime, DateTime} from "./DateTime";
-import {FilterInterval} from "./interval/FilterInterval";
+import {FilterTimeInterval} from "./interval/FilterTimeInterval";
 import {YearInterval} from "./interval/YearInterval";
 import {YearsInterval} from "./interval/YearsInterval";
 import {MonthInterval} from "./interval/MonthInterval";
@@ -63,7 +63,7 @@ export abstract class TimeInterval {
     const ds = [];
     step = typeof step === "number" ? Math.floor(step) : 1;
     if (step > 0) {
-      while (d0.time() < d1) {
+      while (d0.isDefined() && d0.time() < d1) {
         ds.push(d0);
         d0 = this.next(d0, step);
       }
@@ -215,7 +215,7 @@ export abstract class TimeInterval {
 
   // Forward type declarations
   /** @hidden */
-  static Filter: typeof FilterInterval; // defined by FilterInterval
+  static Filter: typeof FilterTimeInterval; // defined by FilterTimeInterval
   /** @hidden */
   static Year: typeof YearInterval; // defined by YearInterval
   /** @hidden */

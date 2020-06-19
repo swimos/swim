@@ -222,15 +222,9 @@ export class ListDownlinkModel extends DownlinkModel {
     this.command(Record.create(1).attr("clear"));
   }
 
-  forEach<T, S = unknown>(callback: (this: typeof thisArg,
-                                     value: Value,
-                                     index: number,
-                                     downlink: ListDownlinkModel,
-                                     key: Value) => T | void,
+  forEach<T, S = unknown>(callback: (this: typeof thisArg, value: Value, index: number, key: Value) => T | void,
                           thisArg?: S): T | undefined {
-    return this._state.forEach(function (value: Value, index: number, tree: STree<Value, Value>, key: Value): T | void {
-      return callback.call(thisArg, value, index, this, key);
-    }, this);
+    return this._state.forEach(callback, thisArg);
   }
 
   values(): Cursor<Value> {

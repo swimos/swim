@@ -54,7 +54,8 @@ export class MonthInterval extends UnitTimeInterval {
   }
 
   private static modulo(k: number, d: DateTime): boolean {
-    return d.month() % k === 0;
+    const month = d.month();
+    return isFinite(month) && month % k === 0;
   }
 }
 TimeInterval.Month = MonthInterval;

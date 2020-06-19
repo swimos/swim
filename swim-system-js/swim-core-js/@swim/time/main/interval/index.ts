@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {FilterInterval} from "./FilterInterval";
+export {FilterTimeInterval} from "./FilterTimeInterval";
 export {YearInterval} from "./YearInterval";
 export {YearsInterval} from "./YearsInterval";
 export {MonthInterval} from "./MonthInterval";

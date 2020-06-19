@@ -73,7 +73,8 @@ export class HourInterval extends UnitTimeInterval {
   }
 
   private static modulo(k: number, d: DateTime): boolean {
-    return d.hour() % k === 0;
+    const hour = d.hour();
+    return isFinite(hour) && hour % k === 0;
   }
 }
 TimeInterval.Hour = HourInterval;

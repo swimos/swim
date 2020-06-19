@@ -66,12 +66,14 @@ export abstract class BTreePage<K, V, U> {
   abstract reduced(identity: U, accumulator: (result: U, element: V) => U,
                    combiner: (result: U, result2: U) => U): BTreePage<K, V, U>;
 
-  abstract forEach<T, S>(callback: (this: S,
-                                    key: K,
-                                    value: V,
-                                    tree: BTree<K, V>) => T | void,
-                         thisArg: S,
-                         tree: BTree<K, V>): T | undefined;
+  abstract forEach<T, S>(callback: (this: S, key: K, value: V) => T | void,
+                         thisArg: S): T | undefined;
+
+  abstract forEachKey<T, S>(callback: (this: S, key: K) => T | void,
+                            thisArg: S): T | undefined;
+
+  abstract forEachValue<T, S>(callback: (this: S, value: V) => T | void,
+                              thisArg: S): T | undefined;
 
   keys(): Cursor<K> {
     return new KeysCursor(this.entries());

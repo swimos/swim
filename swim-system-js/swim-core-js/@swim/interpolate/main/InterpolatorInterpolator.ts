@@ -46,15 +46,15 @@ export class InterpolatorInterpolator<T extends U, U = T> extends Interpolator<I
     return 0; // not implemented
   }
 
-  range(): ReadonlyArray<Interpolator<T, U>>;
-  range(is: ReadonlyArray<Interpolator<T, U>>): InterpolatorInterpolator<T, U>;
+  range(): readonly [Interpolator<T, U>, Interpolator<T, U>];
+  range(is: readonly [Interpolator<T, U>, Interpolator<T, U>]): InterpolatorInterpolator<T, U>;
   range(i0: Interpolator<T, U>, i1: Interpolator<T, U>): InterpolatorInterpolator<T, U>;
-  range(i0?: ReadonlyArray<Interpolator<T, U>> | Interpolator<T, U>,
-        i1?: Interpolator<T, U>): ReadonlyArray<Interpolator<T, U>> | InterpolatorInterpolator<T, U> {
+  range(i0?: readonly [Interpolator<T, U>, Interpolator<T, U>] | Interpolator<T, U>,
+        i1?: Interpolator<T, U>): readonly [Interpolator<T, U>, Interpolator<T, U>] | InterpolatorInterpolator<T, U> {
     if (i0 === void 0) {
       return [this.i0, this.i1];
     } else if (i1 === void 0) {
-      i0 = i0 as ReadonlyArray<Interpolator<T, U>>;
+      i0 = i0 as readonly [Interpolator<T, U>, Interpolator<T, U>];
       return InterpolatorInterpolator.between(i0[0], i0[1]);
     } else {
       return InterpolatorInterpolator.between(i0 as Interpolator<T, U>, i1);

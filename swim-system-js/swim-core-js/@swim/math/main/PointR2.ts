@@ -41,7 +41,7 @@ export class PointR2 extends R2Shape implements HashCode, Debug {
   }
 
   isDefined(): boolean {
-    return this._x !== 0 || this._y !== 0;
+    return isFinite(this._x) || isFinite(this._y);
   }
 
   get x(): number {
@@ -150,7 +150,6 @@ export class PointR2 extends R2Shape implements HashCode, Debug {
   private static _hashSeed?: number;
 
   private static _origin?: PointR2;
-
   static origin(): PointR2 {
     if (PointR2._origin === void 0) {
       PointR2._origin = new PointR2(0, 0);

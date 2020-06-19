@@ -28,10 +28,10 @@ export interface InterpolatorFactory {
 export abstract class Interpolator<T, U = T> implements Equals {
   abstract interpolate(u: number): T;
 
-  abstract deinterpolate(y: U): number;
+  abstract deinterpolate(y: T | U): number;
 
-  abstract range(): ReadonlyArray<T>;
-  abstract range(ys: ReadonlyArray<T | U>): Interpolator<T, U>;
+  abstract range(): readonly [T, T];
+  abstract range(ys: readonly [T | U, T | U]): Interpolator<T, U>;
   abstract range(y0: T | U, y1: T | U): Interpolator<T, U>;
 
   map<FT>(f: (value: T) => FT): Interpolator<FT, T> {

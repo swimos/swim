@@ -33,16 +33,16 @@ import {UnaryOperatorInterpolator} from "./UnaryOperatorInterpolator";
 import {InvokeOperatorInterpolator} from "./InvokeOperatorInterpolator";
 
 export abstract class ItemInterpolator<I extends Item = Item> extends Interpolator<I, AnyItem> {
-  range(): ReadonlyArray<I>;
-  range(is: ReadonlyArray<I>): ItemInterpolator<I>;
+  range(): readonly [I, I];
+  range(is: readonly [I, I]): ItemInterpolator<I>;
   range(i0: I, i1: I): ItemInterpolator<I>;
-  range(is: ReadonlyArray<AnyItem>): ItemInterpolator;
+  range(is: readonly [AnyItem, AnyItem]): ItemInterpolator;
   range(i0: AnyItem, i1: AnyItem): ItemInterpolator;
-  range(i0?: ReadonlyArray<AnyItem> | AnyItem, i1?: AnyItem): ReadonlyArray<I> | ItemInterpolator {
+  range(i0?: readonly [AnyItem, AnyItem] | AnyItem, i1?: AnyItem): readonly [I, I] | ItemInterpolator {
     if (i0 === void 0) {
       return [this.interpolate(0), this.interpolate(1)];
     } else if (i1 === void 0) {
-      i0 = i0 as ReadonlyArray<AnyItem>
+      i0 = i0 as readonly [AnyItem, AnyItem];
       return ItemInterpolator.between(i0[0] as AnyItem, i0[1] as AnyItem);
     } else {
       return ItemInterpolator.between(i0 as AnyItem, i1);

@@ -204,18 +204,14 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
     this._model!.clear();
   }
 
-  forEach<T, S = unknown>(callback: (this: S,
-                                     value: V,
-                                     index: number,
-                                     downlink: ListDownlink<V, VU>,
-                                     id: Value) => T | void,
+  forEach<T, S = unknown>(callback: (this: S, value: V, index: number, id: Value) => T | void,
                           thisArg?: S): T | undefined {
     if (this._valueForm as any === Form.forValue()) {
       return this._model!._state.forEach(callback as any, thisArg);
     } else {
-      return this._model!._state.forEach(function (value: Value, index: number, tree: STree<Value, Value>, id: Value): T | void {
+      return this._model!._state.forEach(function (value: Value, index: number, id: Value): T | void {
         const object = value.coerce(this._valueForm);
-        return callback.call(thisArg, object, index, this, id);
+        return callback.call(thisArg, object, index, id);
       }, this);
     }
   }

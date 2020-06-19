@@ -132,9 +132,7 @@ export class ListDownlinkRecord extends DownlinkRecord {
 
   forEach<T, S = unknown>(callback: (this: S, item: Item, index: number) => T | void,
                           thisArg?: S): T | undefined {
-    return this._downlink.forEach(function (value: Value, index: number): T | void {
-      return callback.call(thisArg, value, index);
-    });
+    return this._downlink.forEach(callback, thisArg);
   }
 
   keyIterator(): Cursor<Value> {

@@ -511,15 +511,35 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  forEach<T, S>(callback: (this: S,
-                           key: K,
-                           value: V,
-                           tree: BTree<K, V>) => T | void,
-                thisArg: S,
-                tree: BTree<K, V>): T | undefined {
+  forEach<T, S>(callback: (this: S, key: K, value: V) => T | void,
+                thisArg: S): T | undefined {
     const pages = this._pages;
     for (let i = 0, n = pages.length; i < n; i += 1) {
-      const result = pages[i].forEach(callback, thisArg, tree);
+      const result = pages[i].forEach(callback, thisArg);
+      if (result !== void 0) {
+        return result;
+      }
+    }
+    return void 0;
+  }
+
+  forEachKey<T, S>(callback: (this: S, key: K) => T | void,
+                   thisArg: S): T | undefined {
+    const pages = this._pages;
+    for (let i = 0, n = pages.length; i < n; i += 1) {
+      const result = pages[i].forEachKey(callback, thisArg);
+      if (result !== void 0) {
+        return result;
+      }
+    }
+    return void 0;
+  }
+
+  forEachValue<T, S>(callback: (this: S, value: V) => T | void,
+                     thisArg: S): T | undefined {
+    const pages = this._pages;
+    for (let i = 0, n = pages.length; i < n; i += 1) {
+      const result = pages[i].forEachValue(callback, thisArg);
       if (result !== void 0) {
         return result;
       }

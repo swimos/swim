@@ -44,6 +44,10 @@ export class DateTime implements Comparable<AnyDateTime>, HashCode, Display {
     this._zone = zone;
   }
 
+  isDefined(): boolean {
+    return isFinite(new Date(this._time).getTime());
+  }
+
   time(): number;
   time(time: number): DateTime;
   time(time?: number): number | DateTime {

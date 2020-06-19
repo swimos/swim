@@ -58,14 +58,15 @@ export class SegmentR2Interpolator extends R2ShapeInterpolator<SegmentR2, AnySeg
     return 0;
   }
 
-  range(): ReadonlyArray<SegmentR2>;
-  range(ss: ReadonlyArray<AnySegmentR2>): SegmentR2Interpolator;
+  range(): readonly [SegmentR2, SegmentR2];
+  range(ss: readonly [AnySegmentR2, AnySegmentR2]): SegmentR2Interpolator;
   range(s0: AnySegmentR2, s1: AnySegmentR2): SegmentR2Interpolator;
-  range(s0?: ReadonlyArray<AnySegmentR2> | AnySegmentR2, s1?: AnySegmentR2): ReadonlyArray<SegmentR2> | SegmentR2Interpolator {
+  range(s0?: readonly [AnySegmentR2, AnySegmentR2] | AnySegmentR2,
+        s1?: AnySegmentR2): readonly [SegmentR2, SegmentR2] | SegmentR2Interpolator {
     if (s0 === void 0) {
       return [this.interpolate(0), this.interpolate(1)];
     } else if (s1 === void 0) {
-      s0 = s0 as ReadonlyArray<AnySegmentR2>
+      s0 = s0 as readonly [AnySegmentR2, AnySegmentR2];
       return SegmentR2Interpolator.between(s0[0], s0[1]);
     } else {
       return SegmentR2Interpolator.between(s0 as AnySegmentR2, s1);

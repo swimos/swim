@@ -42,14 +42,15 @@ export class ArrayInterpolator<T> extends Interpolator<T[]> {
     return 0; // not implemented
   }
 
-  range(): ReadonlyArray<T[]>;
-  range(as: ReadonlyArray<ReadonlyArray<T>>): ArrayInterpolator<T>;
-  range(a0: ReadonlyArray<T>, a1: ReadonlyArray<T>): ArrayInterpolator<T>;
-  range(a0?: ReadonlyArray<ReadonlyArray<T>> | ReadonlyArray<T>, a1?: ReadonlyArray<T>): ReadonlyArray<T[]> | ArrayInterpolator<T> {
+  range(): readonly [T[], T[]];
+  range(as: readonly [readonly T[], readonly T[]]): ArrayInterpolator<T>;
+  range(a0: readonly T[], a1: readonly T[]): ArrayInterpolator<T>;
+  range(a0?: readonly [readonly T[], readonly T[]] | readonly T[],
+        a1?: readonly T[]): readonly[T[], T[]] | ArrayInterpolator<T> {
     if (a0 === void 0) {
       return [this.interpolate(0), this.interpolate(1)];
     } else if (a1 === void 0) {
-      a0 = a0 as  ReadonlyArray<ReadonlyArray<T>>;
+      a0 = a0 as readonly [readonly T[], readonly T[]];
       return ArrayInterpolator.between(a0[0], a0[1]);
     } else {
       return ArrayInterpolator.between(a0 as ReadonlyArray<T>, a1);
@@ -73,7 +74,7 @@ export class ArrayInterpolator<T> extends Interpolator<T[]> {
     return false;
   }
 
-  static between<T>(f0: ReadonlyArray<T>, f1: ReadonlyArray<T>): ArrayInterpolator<T>;
+  static between<T>(f0: readonly T[], f1: readonly T[]): ArrayInterpolator<T>;
   static between(a: unknown, b: unknown): Interpolator<unknown>;
   static between(a: unknown, b: unknown): Interpolator<unknown> {
     if (Array.isArray(a) && Array.isArray(b)) {

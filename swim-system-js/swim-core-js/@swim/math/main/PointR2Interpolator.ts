@@ -49,14 +49,15 @@ export class PointR2Interpolator extends R2ShapeInterpolator<PointR2, AnyPointR2
     return l !== 0 ? dp / l : l;
   }
 
-  range(): ReadonlyArray<PointR2>;
-  range(ps: ReadonlyArray<AnyPointR2>): PointR2Interpolator;
+  range(): readonly [PointR2, PointR2];
+  range(ps: readonly [AnyPointR2, AnyPointR2]): PointR2Interpolator;
   range(p0: AnyPointR2, p1: AnyPointR2): PointR2Interpolator;
-  range(p0?: ReadonlyArray<AnyPointR2> | AnyPointR2, p1?: AnyPointR2): ReadonlyArray<PointR2> | PointR2Interpolator {
+  range(p0?: readonly [AnyPointR2, AnyPointR2] | AnyPointR2,
+        p1?: AnyPointR2): readonly [PointR2, PointR2] | PointR2Interpolator {
     if (p0 === void 0) {
       return [this.interpolate(0), this.interpolate(1)];
     } else if (p1 === void 0) {
-      p0 = p0 as ReadonlyArray<AnyPointR2>
+      p0 = p0 as readonly [AnyPointR2, AnyPointR2];
       return PointR2Interpolator.between(p0[0], p0[1]);
     } else {
       return PointR2Interpolator.between(p0 as AnyPointR2, p1);

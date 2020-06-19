@@ -49,14 +49,8 @@ export abstract class STreePage<V = unknown, I = unknown> {
 
   abstract splitRight(index: number): STreePage<V, I>;
 
-  abstract forEach<T, S>(callback: (this: S,
-                                    value: V,
-                                    index: number,
-                                    tree: STree<V, I>,
-                                    id: I) => T | void,
-                         thisArg: S,
-                         offset: number,
-                         tree: STree<V, I>): T | undefined;
+  abstract forEach<T, S>(callback: (this: S, value: V, index: number, id: I) => T | void,
+                         thisArg: S, offset: number): T | undefined;
 
   keys(): Cursor<I> {
     return new KeysCursor(this.entries());

@@ -34,15 +34,15 @@ export class InterpolatorMap<T, FT> extends Interpolator<FT, T> {
     return 0; // not implemented
   }
 
-  range(): ReadonlyArray<FT>;
-  range(ys: ReadonlyArray<FT | T>): Interpolator<FT, T>;
+  range(): readonly [FT, FT];
+  range(ys: readonly [FT | T, FT | T]): Interpolator<FT, T>;
   range(y0: FT | T, y1: FT | T): Interpolator<FT, T>;
-  range(y0?: ReadonlyArray<FT | T> | FT | T, y1?: FT | T): ReadonlyArray<FT> | Interpolator<FT, T> {
-    if (y0 === void 0) {
+  range(y0?: readonly [FT | T, FT | T] | FT | T,
+        y1?: FT | T): readonly [FT, FT] | Interpolator<FT, T> {
+    if (arguments.length === 0) {
       const range = this.interpolator.range();
       return [this.transform(range[0]), this.transform(range[1])];
     } else if (y1 === void 0) {
-      y0 = y0 as ReadonlyArray<FT | T>;
       return this;
     } else {
       return this;

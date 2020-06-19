@@ -224,12 +224,19 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
     return newRoot.fold()!;
   }
 
-  forEach<T, S = unknown>(callback: (this: S,
-                                     key: K,
-                                     value: V,
-                                     tree: BTree<K, V>) => T | void,
+  forEach<T, S = unknown>(callback: (this: S, key: K, value: V) => T | void,
                           thisArg?: S): T | undefined {
-    return this.root.forEach(callback, thisArg, this);
+    return this.root.forEach(callback, thisArg);
+  }
+
+  forEachKey<T, S = unknown>(callback: (this: S, key: K) => T | void,
+                             thisArg?: S): T | undefined {
+    return this.root.forEachKey(callback, thisArg);
+  }
+
+  forEachValue<T, S = unknown>(callback: (this: S, value: V) => T | void,
+                               thisArg?: S): T | undefined {
+    return this.root.forEachValue(callback, thisArg);
   }
 
   keys(): Cursor<K> {

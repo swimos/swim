@@ -193,17 +193,11 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     return new STreeLeaf(newSlots);
   }
 
-  forEach<T, S>(callback: (this: S,
-                           value: V,
-                           index: number,
-                           tree: STree<V, I>,
-                           id: I) => T | void,
-                thisArg: S,
-                offset: number,
-                tree: STree<V, I>): T | undefined {
+  forEach<T, S>(callback: (this: S, value: V, index: number, id: I) => T | void,
+                thisArg: S, offset: number): T | undefined {
     for (let i = 0; i < this._slots.length; i += 1) {
       const slot = this._slots[i];
-      const result = callback.call(thisArg, slot[1], offset + i, tree, slot[0]);
+      const result = callback.call(thisArg, slot[1], offset + i, slot[0]);
       if (result !== void 0) {
         return result;
       }

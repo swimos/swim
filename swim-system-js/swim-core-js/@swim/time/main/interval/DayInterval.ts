@@ -54,7 +54,8 @@ export class DayInterval extends UnitTimeInterval {
   }
 
   private static modulo(k: number, d: DateTime): boolean {
-    return d.day() % k === 0;
+    const day = d.day();
+    return isFinite(day) && day % k === 0;
   }
 }
 TimeInterval.Day = DayInterval;

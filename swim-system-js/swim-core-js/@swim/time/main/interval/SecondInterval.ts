@@ -59,7 +59,8 @@ export class SecondInterval extends UnitTimeInterval {
   }
 
   private static modulo(k: number, d: DateTime): boolean {
-    return d.second() % k === 0;
+    const second = d.second();
+    return isFinite(second) && second % k === 0;
   }
 }
 TimeInterval.Second = SecondInterval;

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * Endianness of multi-byte datums.
+ * Endianness of multi-byte words.
  */
 export const enum ByteOrder {
   /**

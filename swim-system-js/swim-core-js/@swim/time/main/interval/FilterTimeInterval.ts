@@ -16,7 +16,7 @@ import {AnyDateTime, DateTime} from "../DateTime";
 import {TimeInterval} from "../TimeInterval";
 
 /** @hidden */
-export class FilterInterval extends TimeInterval {
+export class FilterTimeInterval extends TimeInterval {
   private readonly unit: TimeInterval;
   private readonly predicate: (d: DateTime) => boolean;
 
@@ -32,13 +32,13 @@ export class FilterInterval extends TimeInterval {
     while (k < 0) {
       do {
         d = this.unit.offset(d, -1);
-      } while (!this.predicate(d));
+      } while (d.isDefined() && !this.predicate(d));
       k += 1;
     }
     while (k > 0) {
       do {
         d = this.unit.offset(d, 1);
-      } while (!this.predicate(d));
+      } while (d.isDefined() && !this.predicate(d));
       k -= 1;
     }
     return d;
@@ -46,10 +46,10 @@ export class FilterInterval extends TimeInterval {
 
   floor(d: AnyDateTime): DateTime {
     d = DateTime.fromAny(d);
-    while (d = this.unit.floor(d), !this.predicate(d)) {
+    while (d = this.unit.floor(d), d.isDefined() && !this.predicate(d)) {
       d = d.time(d.time() - 1);
     }
     return d;
   }
 }
-TimeInterval.Filter = FilterInterval;
+TimeInterval.Filter = FilterTimeInterval;

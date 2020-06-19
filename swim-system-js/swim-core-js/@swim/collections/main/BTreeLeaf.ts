@@ -259,16 +259,38 @@ export class BTreeLeaf<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  forEach<T, S>(callback: (this: S,
-                           key: K,
-                           value: V,
-                           tree: BTree<K, V>) => T | void,
-                thisArg: S,
-                tree: BTree<K, V>): T | undefined {
+  forEach<T, S>(callback: (this: S, key: K, value: V) => T | void,
+                thisArg: S): T | undefined {
     const slots = this._slots;
     for (let i = 0, n = slots.length; i < n; i += 1) {
       const slot = slots[i];
-      const result = callback.call(thisArg, slot[0], slot[1], tree);
+      const result = callback.call(thisArg, slot[0], slot[1]);
+      if (result !== void 0) {
+        return result;
+      }
+    }
+    return void 0;
+  }
+
+  forEachKey<T, S>(callback: (this: S, key: K) => T | void,
+                   thisArg: S): T | undefined {
+    const slots = this._slots;
+    for (let i = 0, n = slots.length; i < n; i += 1) {
+      const slot = slots[i];
+      const result = callback.call(thisArg, slot[0]);
+      if (result !== void 0) {
+        return result;
+      }
+    }
+    return void 0;
+  }
+
+  forEachValue<T, S>(callback: (this: S, value: V) => T | void,
+                     thisArg: S): T | undefined {
+    const slots = this._slots;
+    for (let i = 0, n = slots.length; i < n; i += 1) {
+      const slot = slots[i];
+      const result = callback.call(thisArg, slot[1]);
       if (result !== void 0) {
         return result;
       }

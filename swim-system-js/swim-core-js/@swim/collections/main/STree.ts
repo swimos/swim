@@ -207,13 +207,9 @@ export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
     this.root = STree.Page.empty();
   }
 
-  forEach<T, S = unknown>(callback: (this: S,
-                                     value: V,
-                                     index: number,
-                                     tree: STree<V, I>,
-                                     id: I) => T | void,
+  forEach<T, S = unknown>(callback: (this: S, value: V, index: number, id: I) => T | void,
                           thisArg?: S): T | undefined {
-    return this.root.forEach(callback, thisArg, 0, this);
+    return this.root.forEach(callback, thisArg, 0);
   }
 
   keys(): Cursor<I> {

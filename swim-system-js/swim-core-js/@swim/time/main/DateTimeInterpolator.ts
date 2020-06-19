@@ -40,14 +40,15 @@ export class DateTimeInterpolator extends Interpolator<DateTime, AnyDateTime> {
     return this.dt !== 0 ? (t - this.t0) / this.dt : this.dt;
   }
 
-  range(): ReadonlyArray<DateTime>;
-  range(ts: ReadonlyArray<AnyDateTime>): DateTimeInterpolator;
+  range(): readonly [DateTime, DateTime];
+  range(ts: readonly [AnyDateTime, AnyDateTime]): DateTimeInterpolator;
   range(t0: AnyDateTime, t1: AnyDateTime): DateTimeInterpolator;
-  range(t0?: ReadonlyArray<AnyDateTime> | AnyDateTime, t1?: AnyDateTime): ReadonlyArray<DateTime> | DateTimeInterpolator {
+  range(t0?: readonly [AnyDateTime, AnyDateTime] | AnyDateTime,
+        t1?: AnyDateTime): readonly [DateTime, DateTime] | DateTimeInterpolator {
     if (t0 === void 0) {
       return [new DateTime(this.t0, this.zone), new DateTime(this.t0 + this.dt, this.zone)];
     } else if (t1 === void 0) {
-      t0 = t0 as ReadonlyArray<AnyDateTime>;
+      t0 = t0 as readonly [AnyDateTime, AnyDateTime];
       return DateTimeInterpolator.between(t0[0], t0[1], this.zone);
     } else {
       return DateTimeInterpolator.between(t0 as AnyDateTime, t1, this.zone);

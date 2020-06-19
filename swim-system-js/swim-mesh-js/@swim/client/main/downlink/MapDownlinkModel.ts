@@ -107,14 +107,9 @@ export class MapDownlinkModel extends DownlinkModel {
     this.command(Record.create(1).attr("clear"));
   }
 
-  forEach<T, S = unknown>(callback: (this: S,
-                                     key: Value,
-                                     value: Value,
-                                     downlink: MapDownlinkModel) => T | void,
+  forEach<T, S = unknown>(callback: (this: S, key: Value, value: Value) => T | void,
                           thisArg?: S): T | undefined {
-    return this._state.forEach(function (key: Value, value: Value): T | void {
-      return callback.call(thisArg, key, value, this);
-    }, this);
+    return this._state.forEach(callback, thisArg);
   }
 
   keys(): Cursor<Value> {

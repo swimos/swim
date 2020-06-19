@@ -42,15 +42,15 @@ export class BoxR2 extends R2Shape implements HashCode, Debug {
 
   constructor(xMin: number, yMin: number, xMax: number, yMax: number) {
     super();
-    this._xMin = xMin <= xMax ? xMin : xMax;
-    this._yMin = yMin <= yMax ? yMin : yMax;
-    this._xMax = xMin <= xMax ? xMax : xMin;
-    this._yMax = yMin <= yMax ? yMax : yMin;
+    this._xMin = xMin;
+    this._yMin = yMin;
+    this._xMax = xMax;
+    this._yMax = yMax;
   }
 
   isDefined(): boolean {
-    return this._xMin !== 0 || this._yMin !== 0
-        || this._xMax !== 0 || this._yMax !== 0;
+    return isFinite(this._xMin) && isFinite(this._yMin)
+        && isFinite(this._xMax) && isFinite(this._yMax);
   }
 
   get xMin(): number {
@@ -288,13 +288,13 @@ export class BoxR2 extends R2Shape implements HashCode, Debug {
 
   private static _hashSeed?: number;
 
-  private static _empty?: BoxR2;
+  private static _undefined?: BoxR2;
 
-  static empty(): BoxR2 {
-    if (BoxR2._empty === void 0) {
-      BoxR2._empty = new BoxR2(0, 0, 0, 0);
+  static undefined(): BoxR2 {
+    if (BoxR2._undefined === void 0) {
+      BoxR2._undefined = new BoxR2(Infinity, Infinity, -Infinity, -Infinity);
     }
-    return BoxR2._empty;
+    return BoxR2._undefined;
   }
 
   static from(xMin: number, yMin: number, xMax?: number, yMax?: number): BoxR2 {
