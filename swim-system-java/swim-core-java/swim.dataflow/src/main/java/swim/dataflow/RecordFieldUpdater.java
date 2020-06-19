@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,14 +30,14 @@ public class RecordFieldUpdater extends AbstractInlet<Value> {
   }
 
   @Override
-  protected void onInvalidateOutput() {
+  protected void onDecohereOutput() {
     if (this.record instanceof RecordOutlet) {
-      ((RecordOutlet) this.record).invalidateInputKey(this.key, KeyEffect.UPDATE);
+      ((RecordOutlet) this.record).decohereInputKey(this.key, KeyEffect.UPDATE);
     }
   }
 
   @Override
-  protected void onReconcileOutput(int version) {
+  protected void onRecohereOutput(int version) {
     if (this.input != null) {
       final Value value = this.input.get();
       if (value != null) {

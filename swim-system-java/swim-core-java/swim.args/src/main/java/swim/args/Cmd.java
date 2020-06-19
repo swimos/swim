@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,31 +28,36 @@ public class Cmd implements Cloneable, Debug {
   final String name;
   String desc;
   FingerTrieSeq<Opt> opts;
+  FingerTrieSeq<Arg> args;
   FingerTrieSeq<Cmd> cmds;
   ExecCmd exec;
   Cmd base;
 
   public Cmd(String id, String name, String desc, FingerTrieSeq<Opt> opts,
-             FingerTrieSeq<Cmd> cmds, ExecCmd exec, Cmd base) {
+             FingerTrieSeq<Arg> args, FingerTrieSeq<Cmd> cmds, ExecCmd exec, Cmd base) {
     this.id = id;
     this.name = name;
     this.desc = desc;
     this.opts = opts;
+    this.args = args;
     this.cmds = cmds;
     this.exec = exec;
     this.base = base;
   }
 
   public static Cmd of(String id, String name) {
-    return new Cmd(id, name, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(), null, null);
+    return new Cmd(id, name, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(),
+                   FingerTrieSeq.empty(), null, null);
   }
 
   public static Cmd of(String id) {
-    return new Cmd(id, id, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(), null, null);
+    return new Cmd(id, id, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(),
+                   FingerTrieSeq.empty(), null, null);
   }
 
   public static Cmd help() {
-    return new Cmd("help", "help", null, FingerTrieSeq.empty(), FingerTrieSeq.empty(), new ExecHelpCmd(), null);
+    return new Cmd("help", "help", null, FingerTrieSeq.empty(), FingerTrieSeq.empty(),
+                   FingerTrieSeq.empty(), new ExecHelpCmd(), null);
   }
 
   public Cmd base() {
@@ -89,6 +94,19 @@ public class Cmd implements Cloneable, Debug {
     return opt(Opt.of(opt));
   }
 
+  public FingerTrieSeq<Arg> args() {
+    return this.args;
+  }
+
+  public Cmd arg(Arg arg) {
+    this.args = this.args.appended(arg);
+    return this;
+  }
+
+  public Cmd arg(String arg) {
+    return arg(Arg.of(arg));
+  }
+
   public FingerTrieSeq<Cmd> cmds() {
     return this.cmds;
   }
@@ -112,6 +130,23 @@ public class Cmd implements Cloneable, Debug {
     throw new IllegalArgumentException("undefined opt: " + name);
   }
 
+  public Arg getArg() {
+    return getArg(0);
+  }
+
+  public Arg getArg(int index) {
+    return this.args.get(index);
+  }
+
+  public String getValue() {
+    return getValue(0);
+  }
+
+  public String getValue(int index) {
+    final Arg arg = this.args.get(index);
+    return arg != null ? arg.value() : null;
+  }
+
   public Cmd parse(String[] params) {
     return parse(params, 1);
   }
@@ -119,18 +154,22 @@ public class Cmd implements Cloneable, Debug {
   public Cmd parse(String[] params, int paramIndex) {
     final int paramCount = params.length;
     final int optCount = this.opts.size();
-    final int cmdCount = this.cmds.size();
+    final int argCount = this.args.size();
 
-    while (paramIndex < paramCount) {
-      final String param = params[paramIndex];
+    if (paramIndex < paramCount) {
+      final int cmdCount = this.cmds.size();
       for (int cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
         final Cmd cmd = this.cmds.get(cmdIndex);
-        if (param.equals(cmd.name)) {
-          final Cmd subCmd = cmd;
-          subCmd.base = this;
-          return subCmd.parse(params, paramIndex + 1);
+        if (params[paramIndex].equals(cmd.name)) {
+          cmd.base = this;
+          return cmd.parse(params, paramIndex + 1);
         }
       }
+    }
+
+    int argIndex = 0;
+    while (paramIndex < paramCount) {
+      final String param = params[paramIndex];
       paramIndex += 1;
       final int argLength = param.length();
       if (argLength > 2 && param.charAt(0) == '-' && param.charAt(1) == '-') {
@@ -155,6 +194,10 @@ public class Cmd implements Cloneable, Debug {
             }
           }
         }
+      } else if (argIndex < argCount) {
+        final Arg arg = this.args.get(argIndex);
+        arg.value(param);
+        argIndex += 1;
       }
     }
     return this;
@@ -176,7 +219,11 @@ public class Cmd implements Cloneable, Debug {
   }
 
   public Cmd helpCmd() {
-    return this.cmd(Cmd.help());
+    final Cmd cmd = this.cmd(Cmd.help());
+    if (cmd.exec == null) {
+      cmd.exec = new ExecDefaultHelpCmd();
+    }
+    return cmd;
   }
 
   public void writeFullName(Output<String> output) {
@@ -191,12 +238,21 @@ public class Cmd implements Cloneable, Debug {
     output.write("Usage: ");
     this.writeFullName(output);
     final int optCount = this.opts.size();
-    if (optCount != 0) {
-      output.write(" [options]");
-    }
+    final int argCount = this.args.size();
     final int cmdCount = this.cmds.size();
-    if (cmdCount != 0) {
-      output.write(" <command>");
+    if (optCount != 0) {
+      output.write(' ').write("[options]");
+    }
+    if (argCount != 0) {
+      for (int argIndex = 0; argIndex < argCount; argIndex += 1) {
+        final Arg arg = this.args.get(argIndex);
+        output.write(' ').write('[').write(arg.name).write(']');
+        if (arg.optional) {
+          output.write('?');
+        }
+      }
+    } else if (cmdCount != 0) {
+      output.write(' ').write("<command>");
     }
     output.writeln();
     if (optCount != 0) {
@@ -210,12 +266,12 @@ public class Cmd implements Cloneable, Debug {
           output.write("      --").write(opt.name);
         }
         int optLength = opt.name.length();
-        final int argCount = opt.args.size();
-        for (int argIndex = 0; argIndex < argCount; argIndex += 1) {
-          final Arg arg = opt.args.get(argIndex);
-          output.write(' ').write('<').write(arg.name).write('>');
-          optLength += 2 + arg.name.length() + 1;
-          if (arg.optional) {
+        final int optArgCount = opt.args.size();
+        for (int optArgIndex = 0; optArgIndex < optArgCount; optArgIndex += 1) {
+          final Arg optArg = opt.args.get(optArgIndex);
+          output.write(' ').write('<').write(optArg.name).write('>');
+          optLength += 2 + optArg.name.length() + 1;
+          if (optArg.optional) {
             output.write('?');
             optLength += 1;
           }
@@ -264,7 +320,8 @@ public class Cmd implements Cloneable, Debug {
       final Cmd that = (Cmd) other;
       return that.canEqual(this) && this.id.equals(that.id) && this.name.equals(that.name)
           && (this.desc == null ? that.desc == null : this.desc.equals(that.desc))
-          && this.opts.equals(that.opts) && this.cmds.equals(that.cmds)
+          && this.opts.equals(that.opts) && this.args.equals(that.args)
+          && this.cmds.equals(that.cmds)
           && (this.exec == null ? that.exec == null : this.exec.equals(that.exec));
     }
     return false;
@@ -275,9 +332,9 @@ public class Cmd implements Cloneable, Debug {
     if (hashSeed == 0) {
       hashSeed = Murmur3.seed(Cmd.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         hashSeed, this.id.hashCode()), this.name.hashCode()), Murmur3.hash(this.desc)),
-        opts.hashCode()), cmds.hashCode()), Murmur3.hash(this.exec)));
+        this.opts.hashCode()), this.args.hashCode()), this.cmds.hashCode()), Murmur3.hash(this.exec)));
   }
 
   @Override
@@ -290,6 +347,11 @@ public class Cmd implements Cloneable, Debug {
     for (int optIndex = 0; optIndex < optCount; optIndex += 1) {
       final Opt opt = this.opts.get(optIndex);
       output = output.write('.').write("opt").write('(').debug(opt).write(')');
+    }
+    final int argCount = this.args.size();
+    for (int argIndex = 0; argIndex < argCount; argIndex += 1) {
+      final Arg arg = this.args.get(argIndex);
+      output = output.write('.').write("arg").write('(').debug(arg).write(')');
     }
     final int cmdCount = this.cmds.size();
     for (int cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
@@ -316,12 +378,17 @@ public class Cmd implements Cloneable, Debug {
     for (int i = 0; i < optCount; i += 1) {
       opts = opts.appended(this.opts.get(i).clone());
     }
+    final int argCount = this.args.size();
+    FingerTrieSeq<Arg> args = FingerTrieSeq.empty();
+    for (int i = 0; i < argCount; i += 1) {
+      args = args.appended(this.args.get(i).clone());
+    }
     final int cmdCount = this.cmds.size();
     FingerTrieSeq<Cmd> cmds = FingerTrieSeq.empty();
     for (int i = 0; i < cmdCount; i += 1) {
       cmds = cmds.appended(this.cmds.get(i).clone());
     }
-    return new Cmd(this.id, this.name, this.desc, opts, cmds, this.exec, this.base);
+    return new Cmd(this.id, this.name, this.desc, opts, args, cmds, this.exec, this.base);
   }
 
 }
@@ -333,6 +400,15 @@ final class ExecHelpCmd implements ExecCmd {
     if (cmd.base != null) {
       System.out.println(cmd.base.toHelp());
     }
+  }
+
+}
+
+final class ExecDefaultHelpCmd implements ExecCmd {
+
+  @Override
+  public void exec(Cmd cmd) {
+    System.out.println(cmd.toHelp());
   }
 
 }

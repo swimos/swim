@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -77,69 +77,69 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
     }
   }
 
-  public static <I, O> void invalidateOutlets(Streamlet<I, O> streamlet, Class<?> streamletClass) {
+  public static <I, O> void decohereOutlets(Streamlet<I, O> streamlet, Class<?> streamletClass) {
     while (streamletClass != null) {
       final Field[] fields = streamletClass.getDeclaredFields();
       for (Field field : fields) {
         if (Outlet.class.isAssignableFrom(field.getType())) {
-          invalidateOutletField(streamlet, field);
+          decohereOutletField(streamlet, field);
         }
       }
       streamletClass = streamletClass.getSuperclass();
     }
   }
 
-  private static <I, O> void invalidateOutletField(Streamlet<I, O> streamlet, Field field) {
+  private static <I, O> void decohereOutletField(Streamlet<I, O> streamlet, Field field) {
     if (field.getAnnotation(Out.class) != null) {
       final Outlet<O> outlet = reflectOutletField(streamlet, field);
-      outlet.invalidateInput();
+      outlet.decohereInput();
     } else if (field.getAnnotation(Inout.class) != null) {
       final Inoutlet<I, O> inoutlet = reflectInoutletField(streamlet, field);
-      inoutlet.invalidateInput();
+      inoutlet.decohereInput();
     }
   }
 
-  public static <I, O> void reconcileInlets(int version, Streamlet<I, O> streamlet, Class<?> streamletClass) {
+  public static <I, O> void recohereInlets(int version, Streamlet<I, O> streamlet, Class<?> streamletClass) {
     while (streamletClass != null) {
       final Field[] fields = streamletClass.getDeclaredFields();
       for (Field field : fields) {
         if (Inlet.class.isAssignableFrom(field.getType())) {
-          reconcileInletField(version, streamlet, field);
+          recohereInletField(version, streamlet, field);
         }
       }
       streamletClass = streamletClass.getSuperclass();
     }
   }
 
-  private static <I, O> void reconcileInletField(int version, Streamlet<I, O> streamlet, Field field) {
+  private static <I, O> void recohereInletField(int version, Streamlet<I, O> streamlet, Field field) {
     if (field.getAnnotation(In.class) != null) {
       final Inlet<I> inlet = reflectInletField(streamlet, field);
-      inlet.reconcileOutput(version);
+      inlet.recohereOutput(version);
     } else if (field.getAnnotation(Inout.class) != null) {
       final Inoutlet<I, O> inoutlet = reflectInoutletField(streamlet, field);
-      inoutlet.reconcileOutput(version);
+      inoutlet.recohereOutput(version);
     }
   }
 
-  public static <I, O> void reconcileOutlets(int version, Streamlet<I, O> streamlet, Class<?> streamletClass) {
+  public static <I, O> void recohereOutlets(int version, Streamlet<I, O> streamlet, Class<?> streamletClass) {
     while (streamletClass != null) {
       final Field[] fields = streamletClass.getDeclaredFields();
       for (Field field : fields) {
         if (Outlet.class.isAssignableFrom(field.getType())) {
-          reconcileOutletField(version, streamlet, field);
+          recohereOutletField(version, streamlet, field);
         }
       }
       streamletClass = streamletClass.getSuperclass();
     }
   }
 
-  private static <I, O> void reconcileOutletField(int version, Streamlet<I, O> streamlet, Field field) {
+  private static <I, O> void recohereOutletField(int version, Streamlet<I, O> streamlet, Field field) {
     if (field.getAnnotation(Out.class) != null) {
       final Outlet<O> outlet = reflectOutletField(streamlet, field);
-      outlet.reconcileInput(version);
+      outlet.recohereInput(version);
     } else if (field.getAnnotation(Inout.class) != null) {
       final Inoutlet<I, O> inoutlet = reflectInoutletField(streamlet, field);
-      inoutlet.reconcileInput(version);
+      inoutlet.recohereInput(version);
     }
   }
 
@@ -477,25 +477,25 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
   }
 
   @Override
-  public void invalidate() {
+  public void decohere() {
     if (this.version >= 0) {
-      willInvalidate();
+      willDecohere();
       this.version = -1;
-      onInvalidate();
-      onInvalidateOutlets();
-      didInvalidate();
+      onDecohere();
+      onDecohereOutlets();
+      didDecohere();
     }
   }
 
   @Override
-  public void reconcile(int version) {
+  public void recohere(int version) {
     if (this.version < 0) {
-      willReconcile(version);
+      willRecohere(version);
       this.version = version;
-      onReconcileInlets(version);
-      onReconcile(version);
-      onReconcileOutlets(version);
-      didReconcile(version);
+      onRecohereInlets(version);
+      onRecohere(version);
+      onRecohereOutlets(version);
+      didRecohere(version);
     }
   }
 
@@ -556,79 +556,79 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
   }
 
   @Override
-  public void willInvalidateInlet(Inlet<? extends I> inlet) {
-    // stub
+  public void willDecohereInlet(Inlet<? extends I> inlet) {
+    // hook
   }
 
   @Override
-  public void didInvalidateInlet(Inlet<? extends I> inlet) {
-    invalidate();
+  public void didDecohereInlet(Inlet<? extends I> inlet) {
+    decohere();
   }
 
   @Override
-  public void willReconcileInlet(Inlet<? extends I> inlet, int version) {
-    // stub
+  public void willRecohereInlet(Inlet<? extends I> inlet, int version) {
+    // hook
   }
 
   @Override
-  public void didReconcileInlet(Inlet<? extends I> inlet, int version) {
-    reconcile(version);
+  public void didRecohereInlet(Inlet<? extends I> inlet, int version) {
+    recohere(version);
   }
 
   @Override
-  public void willInvalidateOutlet(Outlet<? super O> outlet) {
-    // stub
+  public void willDecohereOutlet(Outlet<? super O> outlet) {
+    // hook
   }
 
   @Override
-  public void didInvalidateOutlet(Outlet<? super O> outlet) {
-    // stub
+  public void didDecohereOutlet(Outlet<? super O> outlet) {
+    // hook
   }
 
   @Override
-  public void willReconcileOutlet(Outlet<? super O> outlet, int version) {
-    // stub
+  public void willRecohereOutlet(Outlet<? super O> outlet, int version) {
+    // hook
   }
 
   @Override
-  public void didReconcileOutlet(Outlet<? super O> outlet, int version) {
-    // stub
+  public void didRecohereOutlet(Outlet<? super O> outlet, int version) {
+    // hook
   }
 
-  protected void willInvalidate() {
-    // stub
+  protected void willDecohere() {
+    // hook
   }
 
-  protected void onInvalidate() {
-    // stub
+  protected void onDecohere() {
+    // hook
   }
 
-  protected void onInvalidateOutlets() {
-    invalidateOutlets(this, getClass());
+  protected void onDecohereOutlets() {
+    decohereOutlets(this, getClass());
   }
 
-  protected void didInvalidate() {
-    // stub
+  protected void didDecohere() {
+    // hook
   }
 
-  protected void willReconcile(int version) {
-    // stub
+  protected void willRecohere(int version) {
+    // hook
   }
 
-  protected void onReconcileInlets(int version) {
-    reconcileInlets(version, this, getClass());
+  protected void onRecohereInlets(int version) {
+    recohereInlets(version, this, getClass());
   }
 
-  protected void onReconcile(int version) {
-    // stub
+  protected void onRecohere(int version) {
+    // hook
   }
 
-  protected void onReconcileOutlets(int version) {
-    reconcileOutlets(version, this, getClass());
+  protected void onRecohereOutlets(int version) {
+    recohereOutlets(version, this, getClass());
   }
 
-  protected void didReconcile(int version) {
-    // stub
+  protected void didRecohere(int version) {
+    // hook
   }
 
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
 
 package swim.dataflow;
 
-import swim.structure.Record;
+import swim.structure.Item;
 
-public abstract class Transmuter {
+public abstract class Reifier {
 
-  public static Transmuter system() {
+  public static Reifier system() {
     return null; // TODO
   }
 
-  public abstract Record transmute(RecordModel model);
+  public abstract Item reify(Item item);
 
 }

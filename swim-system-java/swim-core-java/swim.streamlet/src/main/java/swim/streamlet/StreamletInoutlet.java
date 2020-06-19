@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@
 package swim.streamlet;
 
 /**
- * An {@code Inoutlet} that invalidates a parameterized {@code Streamlet}
- * whenever the {@code Inoutlet} is invalidated, that updates the parameterized
- * {@code Streamlet} whenever the {@code Inoutlet} updates, and which gets its
- * state from the parameterized {@code Streamlet}.
+ * An {@code Inoutlet} that decoheres a parameterized {@code Streamlet}
+ * whenever the {@code Inoutlet} decoheres, that recoheres the parameterized
+ * {@code Streamlet} whenever the {@code Inoutlet} recoheres, and which gets
+ * its state from the parameterized {@code Streamlet}.
  */
 public class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
 
@@ -48,32 +48,32 @@ public class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
   }
 
   @Override
-  protected void willInvalidate() {
+  protected void willDecohere() {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<? super I, ? extends O>) this.streamlet).willInvalidateOutlet(this);
+      ((GenericStreamlet<? super I, ? extends O>) this.streamlet).willDecohereOutlet(this);
     }
   }
 
   @Override
-  protected void didInvalidate() {
+  protected void didDecohere() {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<? super I, ? extends O>) this.streamlet).didInvalidateOutlet(this);
+      ((GenericStreamlet<? super I, ? extends O>) this.streamlet).didDecohereOutlet(this);
     } else {
-      this.streamlet.invalidate();
+      this.streamlet.decohere();
     }
   }
 
   @Override
-  protected void willReconcile(int version) {
+  protected void willRecohere(int version) {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<? super I, ? extends O>) this.streamlet).willReconcileOutlet(this, version);
+      ((GenericStreamlet<? super I, ? extends O>) this.streamlet).willRecohereOutlet(this, version);
     }
   }
 
   @Override
-  protected void didReconcile(int version) {
+  protected void didRecohere(int version) {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<? super I, ? extends O>) this.streamlet).didReconcileOutlet(this, version);
+      ((GenericStreamlet<? super I, ? extends O>) this.streamlet).didRecohereOutlet(this, version);
     }
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -95,25 +95,26 @@ public interface Streamlet<I, O> extends StreamletScope<O> {
   void disconnectOutputs();
 
   /**
-   * Marks this {@code Streamlet}—and all of its outlets—as having stale state.
-   * Invalidating a {@code Streamlet} will recursively invalidate all
+   * Marks this {@code Streamlet}—and all of its outlets—as having inconsistent
+   * state.  Decohering a {@code Streamlet} will recursively decohere all
    * streamlets that transitively depend on the state of this {@code Streamlet}.
-   * Invalidating a {@code Streamlet} does not cause its state to be
-   * recomputed.  A subsequent {@link #reconcile(int)} call will reconcile the
-   * state of the {@code Streamlet}.
+   * Decohering a {@code Streamlet} does not cause its state to be recomputed.
+   * A subsequent {@link #recohere(int)} call will eventually make the state of
+   * the {@code Streamlet} coherent again.
    */
-  void invalidate();
+  void decohere();
 
   /**
-   * Reconciles the state of this {@code Streamlet}, if the version of this
-   * {@code Streamlet}'s state differs from the target {@code version}.
-   * To reconcile its state, the {@code Streamlet} first invokes {@link
-   * Inlet#reconcileOutput(int)} on each of its inlets, to ensure that its
-   * input states are up-to-date.  It then recomputes its own state, in an
+   * Updates the state of this {@code Streamlet} to make it consistent with the
+   * target {@code version}.  The {@code Streamlet} only needs to update if its
+   * current {@code version} differs from the target {@code version}.
+   * To update its state, the {@code Streamlet} first invokes {@link
+   * Inlet#recohereOutput(int)} on each of its inlets, to ensure that its
+   * input states are coherent.  It then recomputes its own state in an
    * implementation defined manner.  Finally, it invokes {@link
-   * Outlet#reconcileInput(int)} on its outlets, causing all transitively
-   * dependent streamlets to reconcile their own state.
+   * Outlet#recohereInput(int)} on its outlets, causing all transitively
+   * dependent streamlets to make their own states coherent again.
    */
-  void reconcile(int version);
+  void recohere(int version);
 
 }

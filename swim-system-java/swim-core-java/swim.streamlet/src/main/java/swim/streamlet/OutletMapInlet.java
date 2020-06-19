@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 package swim.streamlet;
 
 /**
- * A {@code MapInlet} that invalidates a parameterized {@code Outlet} whenever
- * the {@code MapInlet} is invalidated, and that updates the parameterized
- * {@code Outlet} whenever the {@code MapInlet} updates.
+ * A {@code MapInlet} that decoheres a parameterized {@code Outlet} whenever
+ * the {@code MapInlet} decoheres, and that recoheres the parameterized
+ * {@code Outlet} whenever the {@code MapInlet} recoheres.
  */
 public class OutletMapInlet<K, V, O> extends AbstractMapInlet<K, V, O> {
 
@@ -32,23 +32,23 @@ public class OutletMapInlet<K, V, O> extends AbstractMapInlet<K, V, O> {
   }
 
   @Override
-  protected void onInvalidateOutputKey(K key, KeyEffect effect) {
-    this.outlet.invalidateInput();
+  protected void onDecohereOutputKey(K key, KeyEffect effect) {
+    this.outlet.decohereInput();
   }
 
   @Override
-  protected void onInvalidateOutput() {
-    this.outlet.invalidateInput();
+  protected void onDecohereOutput() {
+    this.outlet.decohereInput();
   }
 
   @Override
-  protected void onReconcileOutputKey(K key, KeyEffect effect, int version) {
-    this.outlet.reconcileInput(version);
+  protected void onRecohereOutputKey(K key, KeyEffect effect, int version) {
+    this.outlet.recohereInput(version);
   }
 
   @Override
-  protected void onReconcileOutput(int version) {
-    this.outlet.reconcileInput(version);
+  protected void onRecohereOutput(int version) {
+    this.outlet.recohereInput(version);
   }
 
 }

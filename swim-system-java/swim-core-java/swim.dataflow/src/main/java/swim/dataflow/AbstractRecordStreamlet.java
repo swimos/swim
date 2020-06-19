@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -333,25 +333,25 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   @Override
-  public void invalidate() {
+  public void decohere() {
     if (this.version >= 0) {
-      willInvalidate();
+      willDecohere();
       this.version = -1;
-      onInvalidate();
-      onInvalidateOutlets();
-      didInvalidate();
+      onDecohere();
+      onDecohereOutlets();
+      didDecohere();
     }
   }
 
   @Override
-  public void reconcile(int version) {
+  public void recohere(int version) {
     if (this.version < 0) {
-      willReconcile(version);
+      willRecohere(version);
       this.version = version;
-      onReconcileInlets(version);
-      onReconcile(version);
-      onReconcileOutlets(version);
-      didReconcile(version);
+      onRecohereInlets(version);
+      onRecohere(version);
+      onRecohereOutlets(version);
+      didRecohere(version);
     }
   }
 
@@ -508,79 +508,79 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   @Override
-  public void willInvalidateInlet(Inlet<? extends I> inlet) {
-    // stub
+  public void willDecohereInlet(Inlet<? extends I> inlet) {
+    // hook
   }
 
   @Override
-  public void didInvalidateInlet(Inlet<? extends I> inlet) {
-    invalidate();
+  public void didDecohereInlet(Inlet<? extends I> inlet) {
+    decohere();
   }
 
   @Override
-  public void willReconcileInlet(Inlet<? extends I> inlet, int version) {
-    // stub
+  public void willRecohereInlet(Inlet<? extends I> inlet, int version) {
+    // hook
   }
 
   @Override
-  public void didReconcileInlet(Inlet<? extends I> inlet, int version) {
-    reconcile(version);
+  public void didRecohereInlet(Inlet<? extends I> inlet, int version) {
+    recohere(version);
   }
 
   @Override
-  public void willInvalidateOutlet(Outlet<? super O> outlet) {
-    // stub
+  public void willDecohereOutlet(Outlet<? super O> outlet) {
+    // hook
   }
 
   @Override
-  public void didInvalidateOutlet(Outlet<? super O> outlet) {
-    // stub
+  public void didDecohereOutlet(Outlet<? super O> outlet) {
+    // hook
   }
 
   @Override
-  public void willReconcileOutlet(Outlet<? super O> outlet, int version) {
-    // stub
+  public void willRecohereOutlet(Outlet<? super O> outlet, int version) {
+    // hook
   }
 
   @Override
-  public void didReconcileOutlet(Outlet<? super O> outlet, int version) {
-    // stub
+  public void didRecohereOutlet(Outlet<? super O> outlet, int version) {
+    // hook
   }
 
-  protected void willInvalidate() {
-    // stub
+  protected void willDecohere() {
+    // hook
   }
 
-  protected void onInvalidate() {
-    // stub
+  protected void onDecohere() {
+    // hook
   }
 
-  protected void onInvalidateOutlets() {
-    AbstractStreamlet.invalidateOutlets(this, getClass());
+  protected void onDecohereOutlets() {
+    AbstractStreamlet.decohereOutlets(this, getClass());
   }
 
-  protected void didInvalidate() {
-    // stub
+  protected void didDecohere() {
+    // hook
   }
 
-  protected void willReconcile(int version) {
-    // stub
+  protected void willRecohere(int version) {
+    // hook
   }
 
-  protected void onReconcileInlets(int version) {
-    AbstractStreamlet.reconcileInlets(version, this, getClass());
+  protected void onRecohereInlets(int version) {
+    AbstractStreamlet.recohereInlets(version, this, getClass());
   }
 
-  protected void onReconcile(int version) {
-    // stub
+  protected void onRecohere(int version) {
+    // hook
   }
 
-  protected void onReconcileOutlets(int version) {
-    AbstractStreamlet.reconcileOutlets(version, this, getClass());
+  protected void onRecohereOutlets(int version) {
+    AbstractStreamlet.recohereOutlets(version, this, getClass());
   }
 
-  protected void didReconcile(int version) {
-    // stub
+  protected void didRecohere(int version) {
+    // hook
   }
 
 }

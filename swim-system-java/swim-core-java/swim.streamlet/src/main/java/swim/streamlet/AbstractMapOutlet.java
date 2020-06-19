@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -142,136 +142,136 @@ public abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
 
   @SuppressWarnings("unchecked")
   @Override
-  public void invalidateInputKey(K key, KeyEffect effect) {
+  public void decohereInputKey(K key, KeyEffect effect) {
     final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
     if (oldEffects.get(key) != effect) {
-      willInvalidateInputKey(key, effect);
+      willDecohereInputKey(key, effect);
       this.effects = oldEffects.updated(key, effect);
       this.version = -1;
-      onInvalidateInputKey(key, effect);
+      onDecohereInputKey(key, effect);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         final Inlet<?> output = this.outputs[i];
         if (output instanceof MapInlet<?, ?, ?>) {
-          ((MapInlet<K, V, ? super O>) output).invalidateOutputKey(key, effect);
+          ((MapInlet<K, V, ? super O>) output).decohereOutputKey(key, effect);
         } else {
-          output.invalidateOutput();
+          output.decohereOutput();
         }
       }
       final KeyOutlet<K, V> outlet = this.outlets.get(key);
       if (outlet != null) {
-        outlet.invalidateInput();
+        outlet.decohereInput();
       }
-      didInvalidateInputKey(key, effect);
+      didDecohereInputKey(key, effect);
     }
   }
 
   @Override
-  public void invalidateInput() {
+  public void decohereInput() {
     if (this.version >= 0) {
-      willInvalidateInput();
+      willDecohereInput();
       this.version = -1;
-      onInvalidateInput();
+      onDecohereInput();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
-        this.outputs[i].invalidateOutput();
+        this.outputs[i].decohereOutput();
       }
       final Iterator<KeyOutlet<K, V>> outlets = this.outlets.valueIterator();
       while (outlets.hasNext()) {
-        outlets.next().invalidateInput();
+        outlets.next().decohereInput();
       }
-      didInvalidateInput();
+      didDecohereInput();
     }
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public void reconcileInputKey(K key, int version) {
+  public void recohereInputKey(K key, int version) {
     if (this.version < 0) {
       final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
       final KeyEffect effect = oldEffects.get(key);
       if (effect != null) {
-        willReconcileInputKey(key, effect, version);
+        willRecohereInputKey(key, effect, version);
         this.effects = oldEffects.removed(key);
-        onReconcileInputKey(key, effect, version);
+        onRecohereInputKey(key, effect, version);
         for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
           final Inlet<?> output = this.outputs[i];
           if (output instanceof MapInlet<?, ?, ?>) {
-            ((MapInlet<K, V, ? super O>) output).reconcileOutputKey(key, version);
+            ((MapInlet<K, V, ? super O>) output).recohereOutputKey(key, version);
           }
         }
         final KeyOutlet<K, V> outlet = this.outlets.get(key);
         if (outlet != null) {
-          outlet.reconcileInput(version);
+          outlet.recohereInput(version);
         }
-        didReconcileInputKey(key, effect, version);
+        didRecohereInputKey(key, effect, version);
       }
     }
   }
 
   @Override
-  public void reconcileInput(int version) {
+  public void recohereInput(int version) {
     if (this.version < 0) {
-      willReconcileInput(version);
+      willRecohereInput(version);
       final Iterator<K> keys = this.effects.keyIterator();
       while (keys.hasNext()) {
-        reconcileInputKey(keys.next(), version);
+        recohereInputKey(keys.next(), version);
       }
       this.version = version;
-      onReconcileInput(version);
+      onRecohereInput(version);
       for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
-        this.outputs[i].reconcileOutput(version);
+        this.outputs[i].recohereOutput(version);
       }
-      didReconcileInput(version);
+      didRecohereInput(version);
     }
   }
 
-  protected void willInvalidateInputKey(K key, KeyEffect effect) {
-    // stub
+  protected void willDecohereInputKey(K key, KeyEffect effect) {
+    // hook
   }
 
-  protected void onInvalidateInputKey(K key, KeyEffect effect) {
-    // stub
+  protected void onDecohereInputKey(K key, KeyEffect effect) {
+    // hook
   }
 
-  protected void didInvalidateInputKey(K key, KeyEffect effect) {
-    // stub
+  protected void didDecohereInputKey(K key, KeyEffect effect) {
+    // hook
   }
 
-  protected void willInvalidateInput() {
-    // stub
+  protected void willDecohereInput() {
+    // hook
   }
 
-  protected void onInvalidateInput() {
-    // stub
+  protected void onDecohereInput() {
+    // hook
   }
 
-  protected void didInvalidateInput() {
-    // stub
+  protected void didDecohereInput() {
+    // hook
   }
 
-  protected void willReconcileInputKey(K key, KeyEffect effect, int version) {
-    // stub
+  protected void willRecohereInputKey(K key, KeyEffect effect, int version) {
+    // hook
   }
 
-  protected void onReconcileInputKey(K key, KeyEffect effect, int version) {
-    // stub
+  protected void onRecohereInputKey(K key, KeyEffect effect, int version) {
+    // hook
   }
 
-  protected void didReconcileInputKey(K key, KeyEffect effect, int version) {
-    // stub
+  protected void didRecohereInputKey(K key, KeyEffect effect, int version) {
+    // hook
   }
 
-  protected void willReconcileInput(int version) {
-    // stub
+  protected void willRecohereInput(int version) {
+    // hook
   }
 
-  protected void onReconcileInput(int version) {
-    // stub
+  protected void onRecohereInput(int version) {
+    // hook
   }
 
-  protected void didReconcileInput(int version) {
-    // stub
+  protected void didRecohereInput(int version) {
+    // hook
   }
 
 }

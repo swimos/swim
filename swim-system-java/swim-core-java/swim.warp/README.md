@@ -37,7 +37,7 @@ WARP aims to support.
 The third most important design goal for WARP is minimalism.  WARP supports
 forward-compatible, per-link subprotocols, enabling protocol stability without
 stagnation.  The core WARP protocol remains unchanged since its original
-implementation in 2015, despite significant evolution of swimOS, and its
+implementation in 2015, despite significant evolution of SwimOS, and its
 extensive use of WARP subprotocols.
 
 Future evolution of the WARP protocol must maintain the delicate balance

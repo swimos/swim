@@ -1,6 +1,6 @@
 # Swim Core Java Framework
 
-[![package](https://img.shields.io/github/tag/swimOS/swim.svg?label=maven)](https://mvnrepository.com/artifact/org.swimos)
+[![package](https://img.shields.io/github/tag/SwimOS/swim.svg?label=maven)](https://mvnrepository.com/artifact/org.swimos)
 [![documentation](https://img.shields.io/badge/doc-JavaDoc-blue.svg)](https://docs.swimos.org/java/latest)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 

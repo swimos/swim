@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -335,8 +335,8 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   }
 
   public void laneDidSet(V newValue, V oldValue) {
-    invalidate();
-    reconcile(0); // TODO: debounce and track version
+    decohere();
+    recohere(0); // TODO: debounce and track version
   }
 
   @Override
@@ -451,79 +451,79 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   }
 
   @Override
-  public void invalidateOutput() {
-    invalidate();
+  public void decohereOutput() {
+    decohere();
   }
 
   @Override
-  public void invalidateInput() {
-    invalidate();
+  public void decohereInput() {
+    decohere();
   }
 
-  public void invalidate() {
+  public void decohere() {
     if (this.version >= 0) {
-      willInvalidate();
+      willDecohere();
       this.version = -1;
-      onInvalidate();
+      onDecohere();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
-        this.outputs[i].invalidateOutput();
+        this.outputs[i].decohereOutput();
       }
-      didInvalidate();
+      didDecohere();
     }
   }
 
   @Override
-  public void reconcileOutput(int version) {
-    reconcile(version);
+  public void recohereOutput(int version) {
+    recohere(version);
   }
 
   @Override
-  public void reconcileInput(int version) {
-    reconcile(version);
+  public void recohereInput(int version) {
+    recohere(version);
   }
 
-  public void reconcile(int version) {
+  public void recohere(int version) {
     if (this.version < 0) {
-      willReconcile(version);
+      willRecohere(version);
       this.version = version;
       if (this.input != null) {
-        this.input.reconcileInput(version);
+        this.input.recohereInput(version);
       }
-      onReconcile(version);
+      onRecohere(version);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
-        this.outputs[i].reconcileOutput(version);
+        this.outputs[i].recohereOutput(version);
       }
-      didReconcile(version);
+      didRecohere(version);
     }
   }
 
-  protected void willInvalidate() {
-    // stub
+  protected void willDecohere() {
+    // hook
   }
 
-  protected void onInvalidate() {
-    // stub
+  protected void onDecohere() {
+    // hook
   }
 
-  protected void didInvalidate() {
-    // stub
+  protected void didDecohere() {
+    // hook
   }
 
-  protected void willReconcile(int version) {
-    // stub
+  protected void willRecohere(int version) {
+    // hook
   }
 
-  protected void onReconcile(int version) {
+  protected void onRecohere(int version) {
     if (this.input != null) {
       final V value = this.input.get();
       set(value);
     }
   }
 
-  protected void didReconcile(int version) {
-    // stub
+  protected void didRecohere(int version) {
+    // hook
   }
 
 }

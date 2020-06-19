@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 package swim.streamlet;
 
 /**
- * An {@code Outlet} that invalidates a parameterized {@code Streamlet}
- * whenever the {@code Outlet} is invalidated, and which gets its state
- * from the parameterized {@code Streamlet}.
+ * An {@code Outlet} that decoheres a parameterized {@code Streamlet}
+ * whenever the {@code Outlet} decoheres, and which gets its state from
+ * the parameterized {@code Streamlet}.
  */
 public class StreamletOutlet<O> extends AbstractOutlet<O> {
 
@@ -40,32 +40,32 @@ public class StreamletOutlet<O> extends AbstractOutlet<O> {
   }
 
   @Override
-  protected void willInvalidateInput() {
+  protected void willDecohereInput() {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<?, ? extends O>) this.streamlet).willInvalidateOutlet(this);
+      ((GenericStreamlet<?, ? extends O>) this.streamlet).willDecohereOutlet(this);
     }
   }
 
   @Override
-  protected void didInvalidateInput() {
+  protected void didDecohereInput() {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<?, ? extends O>) this.streamlet).didInvalidateOutlet(this);
+      ((GenericStreamlet<?, ? extends O>) this.streamlet).didDecohereOutlet(this);
     } else {
-      this.streamlet.invalidate();
+      this.streamlet.decohere();
     }
   }
 
   @Override
-  protected void willReconcileInput(int version) {
+  protected void willRecohereInput(int version) {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<?, ? extends O>) this.streamlet).willReconcileOutlet(this, version);
+      ((GenericStreamlet<?, ? extends O>) this.streamlet).willRecohereOutlet(this, version);
     }
   }
 
   @Override
-  protected void didReconcileInput(int version) {
+  protected void didRecohereInput(int version) {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<?, ? extends O>) this.streamlet).didReconcileOutlet(this, version);
+      ((GenericStreamlet<?, ? extends O>) this.streamlet).didRecohereOutlet(this, version);
     }
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,12 +27,12 @@ package swim.streamlet;
  * <p>
  * The state of an {@code Inlet} has an integral <em>version</em>.  When its
  * version is negative, the state of the {@code Inlet} is considered
- * <em>invalid</em>.  When any state on which an {@code Inlet} transitively
- * depends changes, the {@code Inlet} will be {@link #invalidateOutput()
- * invalidated}.  Invalidation does not immediately cause an {@code Inlet} to
- * recompute its state.  Instead, a separate {@link #reconcileOutput(int)} step
- * causes all of the invalid paths in the dataflow graph passing through the
- * {@code Inlet} to reconcile their state.
+ * <em>decoherent</em>.  When any state on which an {@code Inlet} transitively
+ * depends changes, the {@code Inlet} will be {@link #decohereOutput()
+ * decohered}.  Decoherence does not immediately cause an {@code Inlet} to
+ * recompute its state.  Instead, a separate {@link #recohereOutput(int)
+ * recohere} step causes all of the decoherent paths in the dataflow graph
+ * passing through the {@code Inlet} to make their states coherent again.
  */
 public interface Inlet<I> {
 
@@ -75,23 +75,24 @@ public interface Inlet<I> {
 
   /**
    * Marks this {@code Inlet}—and the {@code Streamlet} to which this {@code
-   * Inlet} is attached—as having stale state.  Invalidating an {@code Inlet}
-   * will recursively invalidate all streamlets that transitively depend on the
-   * state of this {@code Inlet}.  Invalidating an {@code Inlet} does not cause
-   * its state to be recomputed.  A subsequent {@link #reconcileOutput(int)}
-   * call will reconcile the state of the {@code Inlet}.
+   * Inlet} is attached—as having decoherent state.  Decohering an {@code Inlet}
+   * will recursively decohere all streamlets that transitively depend on the
+   * state of this {@code Inlet}.  Decohering an {@code Inlet} does not cause
+   * its state to be recomputed.  A subsequent {@link #recohereOutput(int)}
+   * call will eventually make the state of the {@code Inlet} coherent again.
    */
-  void invalidateOutput();
+  void decohereOutput();
 
   /**
-   * Reconciles the state of this {@code Inlet}, if the version of this {@code
-   * Inlet}'s state differs from the target {@code version}.  To reconcile its
-   * state, the {@code Inlet} first invokes {@link Outlet#reconcileInput(int)}
-   * on its {@link #input() input}, to ensure that its input is up-to-date.  It
-   * then invokes {@link Streamlet#reconcile(int)} on the {@code Streamlet} to
-   * which it's attached, causing the {@code Streamlet} to reconcile its own
-   * state.
+   * Updates the state of this {@code Inlet} to make it consistent with the
+   * {@code target} version.  The {@code Inlet} only needs to update if its
+   * current {@code version} differs from the target {@code version}.
+   * To update its state, the {@code Inlet} first invokes {@link
+   * Outlet#recohereInput(int)} on its {@link #input() input}, to ensure that
+   * its input is coherent.  It then invokes {@link Streamlet#recohere(int)} on
+   * the {@code Streamlet} to which it's attached, causing the {@code Streamlet}
+   * to make its own state coherent again.
    */
-  void reconcileOutput(int version);
+  void recohereOutput(int version);
 
 }

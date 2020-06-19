@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package swim.api.downlink;
 import swim.api.Downlink;
 import swim.api.ref.SwimRef;
 import swim.dataflow.AbstractRecordStreamlet;
-import swim.dataflow.Transmuter;
+import swim.dataflow.Reifier;
 import swim.streamlet.Inout;
 import swim.streamlet.Inoutlet;
 import swim.streamlet.Out;
@@ -65,8 +65,8 @@ public class DownlinkStreamlet extends AbstractRecordStreamlet<Value, Value> {
     this(swim, null);
   }
 
-  public static Transmuter transmuter(SwimRef swim) {
-    return new DownlinkTransmuter(swim);
+  public static Reifier reifier(SwimRef swim) {
+    return new DownlinkReifier(swim);
   }
 
   @SuppressWarnings("unchecked")
@@ -84,7 +84,7 @@ public class DownlinkStreamlet extends AbstractRecordStreamlet<Value, Value> {
 
   @SuppressWarnings("unchecked")
   @Override
-  protected void onReconcile(int version) {
+  protected void onRecohere(int version) {
     final String hostUri = this.castInput(this.hostUri, Form.forString());
     final String nodeUri = this.castInput(this.nodeUri, Form.forString());
     final String laneUri = this.castInput(this.laneUri, Form.forString());

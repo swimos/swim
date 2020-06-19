@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -88,10 +88,35 @@ public class CmdSpec {
   }
 
   @Test
+  public void parseCmdArg() {
+    final Cmd cmd = Cmd.of("test").arg(Arg.of("path"));
+    final String[] params = new String[] {"test", "value"};
+    final Cmd run = cmd.clone().parse(params);
+    assertEquals(run.getArg(0).value(), "value");
+    assertEquals(run.getValue(0), "value");
+  }
+
+  @Test
+  public void testDefaultHelpCmd() {
+    final Cmd cmd = Cmd.of("test")
+        .cmd(Cmd.of("data").desc("access data")
+            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
+            .cmd(Cmd.of("store").desc("store data"))
+            .helpCmd()
+            .opt(Opt.of("help").flag('h').desc("show help"))
+            .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
+            .opt(Opt.of("force").desc("overwrite existing file")))
+        .helpCmd();
+    final String[] params = new String[] {"test"};
+    final Cmd run = cmd.clone().parse(params);
+    run.run();
+  }
+
+  @Test
   public void testHelpCmd() {
     final Cmd cmd = Cmd.of("test")
         .cmd(Cmd.of("data").desc("access data")
-            .cmd(Cmd.of("load").desc("load data"))
+            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
             .cmd(Cmd.of("store").desc("store data"))
             .helpCmd()
             .opt(Opt.of("help").flag('h').desc("show help"))
@@ -107,13 +132,28 @@ public class CmdSpec {
   public void testHelpSubcmd() {
     final Cmd cmd = Cmd.of("test")
         .cmd(Cmd.of("data").desc("access data")
-            .cmd(Cmd.of("load").desc("load data"))
+            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
             .cmd(Cmd.of("store").desc("store data"))
             .helpCmd()
             .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
             .opt(Opt.of("force").desc("overwrite existing file")))
         .helpCmd();
     final String[] params = new String[] {"test", "data", "help"};
+    final Cmd run = cmd.clone().parse(params);
+    run.run();
+  }
+
+  @Test
+  public void testHelpCmdArg() {
+    final Cmd cmd = Cmd.of("test")
+        .cmd(Cmd.of("data").desc("access data")
+            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
+            .cmd(Cmd.of("store").desc("store data"))
+            .helpCmd()
+            .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
+            .opt(Opt.of("force").desc("overwrite existing file")))
+        .helpCmd();
+    final String[] params = new String[] {"test", "data", "load", "help"};
     final Cmd run = cmd.clone().parse(params);
     run.run();
   }

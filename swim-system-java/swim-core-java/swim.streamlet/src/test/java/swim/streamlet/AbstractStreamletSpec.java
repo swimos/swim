@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -99,12 +99,12 @@ public class AbstractStreamletSpec {
 
     foo.set(2);
     bar.set(3);
-    foo.reconcileInput(0); // reconcile forward
+    foo.recohereInput(0); // recohere forward
     assertEquals((int) output.get(), 5);
 
     foo.set(5);
     bar.set(7);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     assertEquals((int) output.get(), 12);
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 package swim.streamlet;
 
 /**
- * An {@code Inlet} that invalidates a parameterized {@code Streamlet} whenever
- * the {@code Inlet} is invalidated, and that updates the parameterized {@code
- * Streamlet} whenever the {@code Inlet} updates.
+ * An {@code Inlet} that decoheres a parameterized {@code Streamlet} whenever
+ * the {@code Inlet} decoheres, and that recoheres the parameterized {@code
+ * Streamlet} whenever the {@code Inlet} recoheres.
  */
 public class StreamletInlet<I> extends AbstractInlet<I> {
 
@@ -32,34 +32,34 @@ public class StreamletInlet<I> extends AbstractInlet<I> {
   }
 
   @Override
-  protected void willInvalidateOutput() {
+  protected void willDecohereOutput() {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<? super I, ?>) this.streamlet).willInvalidateInlet(this);
+      ((GenericStreamlet<? super I, ?>) this.streamlet).willDecohereInlet(this);
     }
   }
 
   @Override
-  protected void didInvalidateOutput() {
+  protected void didDecohereOutput() {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<? super I, ?>) this.streamlet).didInvalidateInlet(this);
+      ((GenericStreamlet<? super I, ?>) this.streamlet).didDecohereInlet(this);
     } else {
-      this.streamlet.invalidate();
+      this.streamlet.decohere();
     }
   }
 
   @Override
-  protected void willReconcileOutput(int version) {
+  protected void willRecohereOutput(int version) {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<? super I, ?>) this.streamlet).willReconcileInlet(this, version);
+      ((GenericStreamlet<? super I, ?>) this.streamlet).willRecohereInlet(this, version);
     }
   }
 
   @Override
-  protected void didReconcileOutput(int version) {
+  protected void didRecohereOutput(int version) {
     if (this.streamlet instanceof GenericStreamlet<?, ?>) {
-      ((GenericStreamlet<? super I, ?>) this.streamlet).didReconcileInlet(this, version);
+      ((GenericStreamlet<? super I, ?>) this.streamlet).didRecohereInlet(this, version);
     } else {
-      this.streamlet.reconcile(version);
+      this.streamlet.recohere(version);
     }
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,23 +21,23 @@ public interface MapInlet<K, V, I> extends Inlet<I> {
 
   /**
    * Marks this {@code MapInlet} as needing an {@code effect} applied to a
-   * given {@code key}.  Invalidating an individual key invalidates the entire
-   * state of the {@code Inlet}.  But only the invalidated keys need to be
-   * updated in order to reconcile the overall state of the {@code Inlet}.
+   * given {@code key}.  Decohering an individual key decoheres the entire
+   * state of the {@code Inlet}.  But only the decoherent keys need to be
+   * updated in order to recohere the overall state of the {@code Inlet}.
    */
-  void invalidateOutputKey(K key, KeyEffect effect);
+  void decohereOutputKey(K key, KeyEffect effect);
 
   /**
-   * Reconciles the state of an individual {@code key} in this {@code MapInlet},
-   * if the version of this {@code MapInlet}'s state differs from the target
-   * {@code version}.  To reconcile the state of a key, the {@code MapInlet}
-   * first invokes {@link MapOutlet#reconcileInputKey(Object, int)} on its
+   * Updates the state of an individual {@code key} in this {@code MapInlet} to
+   * make it consistent with the target {@code version}.  The {@code MapInlet}
+   * only needs to update if the current {@code version} differs from the target
+   * {@code version}.  To update the state of a key, the {@code MapInlet}
+   * first invokes {@link MapOutlet#recohereInputKey(Object, int)} on its
    * {@link #input() input}, if its input is a {@link MapOutlet}, or it invokes
-   * {@link Outlet#reconcileInput(int)}, if its input is not a {@code
-   * MapOutlet}.  Then, if all invalid keys have been reconciled, the {@code
-   * MapInlet} invokes {@link Streamlet#reconcile(int)} on its attached
-   * streamlet.
+   * {@link Outlet#recohereInput(int)}, if its input is not a {@code MapOutlet}.
+   * Then, if all decoherent keys have been recohered, the {@code MapInlet}
+   * invokes {@link Streamlet#recohere(int)} on its attached streamlet.
    */
-  void reconcileOutputKey(K key, int version);
+  void recohereOutputKey(K key, int version);
 
 }

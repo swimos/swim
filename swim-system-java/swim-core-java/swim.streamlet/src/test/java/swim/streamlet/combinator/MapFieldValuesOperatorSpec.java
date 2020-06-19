@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,11 +40,11 @@ public class MapFieldValuesOperatorSpec {
     output.bindInput(square);
 
     input.put("two", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("two", 4));
 
     input.put("three", 3);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("two", 4).updated("three", 9));
   }
 
@@ -56,11 +56,11 @@ public class MapFieldValuesOperatorSpec {
     output.bindInput(square);
 
     input.put("two", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("two", 4));
 
     input.put("three", 3);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("two", 4).updated("three", 9));
   }
 
@@ -78,15 +78,15 @@ public class MapFieldValuesOperatorSpec {
     output.bindInput(square);
 
     input.put("number", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     assertEquals((int) output.get(), 4);
 
     input.put("other", 3);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     assertEquals((int) output.get(), 4); // updating other key has no effect
 
     input.put("number", 4);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     assertEquals((int) output.get(), 16);
   }
 
@@ -98,15 +98,15 @@ public class MapFieldValuesOperatorSpec {
     output.bindInput(square);
 
     input.put("number", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     assertEquals((int) output.get(), 4);
 
     input.put("other", 3);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     assertEquals((int) output.get(), 4); // updating other key has no effect
 
     input.put("number", 4);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     assertEquals((int) output.get(), 16);
   }
 
@@ -119,15 +119,15 @@ public class MapFieldValuesOperatorSpec {
     output.bindInput(squarePlus1);
 
     input.put("number", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     assertEquals((int) output.get(), 5);
 
     input.put("other", 3);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     assertEquals((int) output.get(), 5); // updating other key has no effect
 
     input.put("number", 4);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     assertEquals((int) output.get(), 17);
   }
 

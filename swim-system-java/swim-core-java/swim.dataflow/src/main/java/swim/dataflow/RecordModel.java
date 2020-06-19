@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -201,7 +201,7 @@ public class RecordModel extends AbstractRecordOutlet {
     } else {
       oldValue = this.state.put(key, newValue);
     }
-    invalidateInputKey(key, KeyEffect.UPDATE);
+    decohereInputKey(key, KeyEffect.UPDATE);
     return oldValue;
   }
 
@@ -223,7 +223,7 @@ public class RecordModel extends AbstractRecordOutlet {
     } else {
       oldValue = this.state.putAttr(key, newValue);
     }
-    invalidateInputKey(key, KeyEffect.UPDATE);
+    decohereInputKey(key, KeyEffect.UPDATE);
     return oldValue;
   }
 
@@ -245,7 +245,7 @@ public class RecordModel extends AbstractRecordOutlet {
     } else {
       oldValue = this.state.putSlot(key, newValue);
     }
-    invalidateInputKey(key, KeyEffect.UPDATE);
+    decohereInputKey(key, KeyEffect.UPDATE);
     return oldValue;
   }
 
@@ -259,17 +259,17 @@ public class RecordModel extends AbstractRecordOutlet {
     final Item oldItem = this.state.setItem(index, newItem);
     if (oldItem instanceof Field && newItem instanceof Field) {
       if (oldItem.key().equals(newItem.key())) {
-        invalidateInputKey(oldItem.key(), KeyEffect.UPDATE);
+        decohereInputKey(oldItem.key(), KeyEffect.UPDATE);
       } else {
-        invalidateInputKey(oldItem.key(), KeyEffect.REMOVE);
-        invalidateInputKey(newItem.key(), KeyEffect.UPDATE);
+        decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
+        decohereInputKey(newItem.key(), KeyEffect.UPDATE);
       }
     } else if (oldItem instanceof Field) {
-      invalidateInputKey(oldItem.key(), KeyEffect.REMOVE);
+      decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
     } else if (newItem instanceof Field) {
-      invalidateInputKey(newItem.key(), KeyEffect.UPDATE);
+      decohereInputKey(newItem.key(), KeyEffect.UPDATE);
     } else {
-      invalidateInput();
+      decohereInput();
     }
     return oldItem;
   }
@@ -278,7 +278,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public boolean add(Item item) {
     this.state.add(item);
     if (item instanceof Field) {
-      invalidateInputKey(item.key(), KeyEffect.UPDATE);
+      decohereInputKey(item.key(), KeyEffect.UPDATE);
     }
     return true;
   }
@@ -287,7 +287,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public void add(int index, Item item) {
     this.state.add(index, item);
     if (item instanceof Field) {
-      invalidateInputKey(item.key(), KeyEffect.UPDATE);
+      decohereInputKey(item.key(), KeyEffect.UPDATE);
     }
   }
 
@@ -296,7 +296,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public Item remove(int index) {
     final Item oldItem = this.state.remove(index);
     if (oldItem instanceof Field) {
-      invalidateInputKey(oldItem.key(), KeyEffect.REMOVE);
+      decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
     }
     return oldItem;
   }
@@ -307,7 +307,7 @@ public class RecordModel extends AbstractRecordOutlet {
     this.state.clear();
     for (Item oldItem : oldState) {
       if (oldItem instanceof Field) {
-        invalidateInputKey(oldItem.key(), KeyEffect.REMOVE);
+        decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
       }
     }
   }
@@ -410,13 +410,13 @@ public class RecordModel extends AbstractRecordOutlet {
       if (value instanceof RecordStreamlet) {
         // Lexically bind nested streamlet.
         ((RecordStreamlet) value).compile();
-        // Invalidate nested scope key.
-        invalidateInputKey(key, KeyEffect.UPDATE);
+        // Decohere nested scope key.
+        decohereInputKey(key, KeyEffect.UPDATE);
       } else if (value instanceof Record) {
         // Recursively compile nested scope.
         ((RecordModel) this.state.getItem(index).toValue()).compile((Record) value);
-        // Invalidate nested scope key.
-        invalidateInputKey(key, KeyEffect.UPDATE);
+        // Decohere nested scope key.
+        decohereInputKey(key, KeyEffect.UPDATE);
       } else {
         // Set placeholder value.
         field.setValue(Value.extant());
@@ -424,8 +424,8 @@ public class RecordModel extends AbstractRecordOutlet {
         bindValue(key, value);
       }
     } else {
-      // Invalidate constant key.
-      invalidateInputKey(key, KeyEffect.UPDATE);
+      // Decohere constant key.
+      decohereInputKey(key, KeyEffect.UPDATE);
     }
   }
 
@@ -442,10 +442,10 @@ public class RecordModel extends AbstractRecordOutlet {
     }
   }
 
-  public void transmute(Transmuter transmuter) {
+  public void reify(Reifier reifier) {
     int index = 0;
     for (Item oldItem : this) {
-      final Item newItem = transmuteItem(oldItem, transmuter);
+      final Item newItem = reifyItem(oldItem, reifier);
       if (oldItem != newItem) {
         setItem(index, newItem);
       }
@@ -453,46 +453,16 @@ public class RecordModel extends AbstractRecordOutlet {
     }
   }
 
-  public void transmute() {
-    transmute(Transmuter.system());
+  public void reify() {
+    reify(Reifier.system());
   }
 
-  public Item transmuteItem(Item item, Transmuter transmuter) {
-    if (item instanceof Field) {
-      return transmuteField((Field) item, transmuter);
-    } else {
-      return transmuteValue((Value) item, transmuter);
-    }
-  }
-
-  public Field transmuteField(Field field, Transmuter transmuter) {
-    final Value oldValue = field.value();
-    final Value newValue = transmuteValue(oldValue, transmuter);
-    if (oldValue != newValue) {
-      return field.updatedValue(newValue);
-    } else {
-      return field;
-    }
-  }
-
-  public Value transmuteValue(Value oldValue, Transmuter transmuter) {
-    if (oldValue instanceof RecordModel) {
-      Record newValue = this.transmuteModel((RecordModel) oldValue);
-      if (oldValue == newValue && transmuter != null) {
-        newValue = transmuter.transmute((RecordModel) oldValue);
-      }
-      return newValue;
-    } else {
-      return oldValue;
-    }
-  }
-
-  public Record transmuteModel(RecordModel model) {
+  public Item reifyItem(Item item, Reifier reifier) {
     final StreamletScope<? extends Value> scope = streamletScope();
     if (scope instanceof RecordModel) {
-      return ((RecordModel) scope).transmuteModel(model);
+      return ((RecordModel) scope).reifyItem(item, reifier);
     } else {
-      return model;
+      return item;
     }
   }
 

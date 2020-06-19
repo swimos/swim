@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -58,23 +58,24 @@ public interface MapOutlet<K, V, O> extends Outlet<O> {
 
   /**
    * Marks this {@code MapOutlet} as needing an {@code effect} applied to a
-   * given {@code key}.  Invalidating an individual key invalidates the entire
-   * state of the {@code Outlet}.  But only the invalidated keys need to be
-   * updated in order to reconcile the overall state of the {@code Outlet}.
+   * given {@code key}.  Decohering an individual key decoheres the entire
+   * state of the {@code Outlet}.  But only the decoherent keys need to be
+   * updated in order to recohere the overall state of the {@code Outlet}.
    */
-  void invalidateInputKey(K key, KeyEffect effect);
+  void decohereInputKey(K key, KeyEffect effect);
 
   /**
-   * Reconciles the state of an individual {@code key} in this {@code
-   * MapOutlet}, if the version of this {@code MapOutlet}'s state differs from
-   * the target {@code version}.  To reconcile the state of a key, the {@code
-   * MapOutlet} first invokes {@link Streamlet#reconcile(int)} on its attached
+   * Updates the state of an individual {@code key} in this {@code MapOutlet}
+   * to make it consistent with the target {@code version}.  The {@code
+   * MapOutlet} only needs to update if its current {@code version} differs
+   * from the target {@code version}.  To update the state of a key, the {@code
+   * MapOutlet} first invokes {@link Streamlet#recohere(int)} on its attached
    * streamlets.  Then, for each dependent output, it invokes {@link
-   * MapInlet#reconcileOutputKey(Object, int)}, if the dependent output is a
-   * {@link MapInlet}, or it invokes {@link Inlet#reconcileOutput(int)}, if the
+   * MapInlet#recohereOutputKey(Object, int)}, if the dependent output is a
+   * {@link MapInlet}, or it invokes {@link Inlet#recohereOutput(int)}, if the
    * dependent output is not a {@code MapInlet}.
    */
-  void reconcileInputKey(K key, int version);
+  void recohereInputKey(K key, int version);
 
   @Override
   default MapOutlet<K, V, O> memoize() {

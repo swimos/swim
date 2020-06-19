@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import swim.streamlet.AbstractInlet;
 public abstract class WatchValueOperator<I> extends AbstractInlet<I> {
 
   @Override
-  protected void onReconcileOutput(int version) {
+  protected void onRecohereOutput(int version) {
     if (this.input != null) {
       evaluate(this.input.get());
     }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
   }
 
   @Override
-  protected void onReconcileKey(K key, KeyEffect effect, int version) {
+  protected void onRecohereKey(K key, KeyEffect effect, int version) {
     if (effect == KeyEffect.UPDATE) {
       if (this.input != null) {
         final V value = this.input.get(key);
@@ -70,7 +70,7 @@ public class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
   }
 
   @Override
-  protected void onReconcile(int version) {
+  protected void onRecohere(int version) {
     this.state = null;
   }
 

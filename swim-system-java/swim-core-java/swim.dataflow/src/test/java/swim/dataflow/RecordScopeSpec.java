@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x").intValue(), 2);
     assertEquals(scope.get("y"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     assertEquals(scope.get("x").intValue(), 2);
     assertEquals(scope.get("y").intValue(), 2);
 
@@ -38,7 +38,7 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x").intValue(), 4);
     assertEquals(scope.get("y").intValue(), 2);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     assertEquals(scope.get("x").intValue(), 4);
     assertEquals(scope.get("y").intValue(), 4);
   }
@@ -50,7 +50,7 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x"), Record.of(Slot.of("y")));
     assertEquals(scope.get("z").intValue(), 2);
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     assertEquals(scope.get("x"), Record.of(Slot.of("y", 2)));
     assertEquals(scope.get("z").intValue(), 2);
 
@@ -58,7 +58,7 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x"), Record.of(Slot.of("y", 2)));
     assertEquals(scope.get("z").intValue(), 4);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     assertEquals(scope.get("x"), Record.of(Slot.of("y", 4)));
     assertEquals(scope.get("z").intValue(), 4);
   }
@@ -70,7 +70,7 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x"), Record.of(Slot.of("a", 0), Slot.of("y", 2)));
     assertEquals(scope.get("z"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     assertEquals(scope.get("x"), Record.of(Slot.of("a", 0), Slot.of("y", 2)));
     assertEquals(scope.get("z").intValue(), 2);
 
@@ -78,7 +78,7 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x"), Record.of(Slot.of("a", 0), Slot.of("y", 4)));
     assertEquals(scope.get("z").intValue(), 2);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     assertEquals(scope.get("x"), Record.of(Slot.of("a", 0), Slot.of("y", 4)));
     assertEquals(scope.get("z").intValue(), 4);
   }
@@ -90,7 +90,7 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x").stringValue(), "a");
     assertEquals(scope.get("y"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     assertEquals(scope.get("x").stringValue(), "a");
     assertEquals(scope.get("y").intValue(), 2);
 
@@ -98,7 +98,7 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x").stringValue(), "b");
     assertEquals(scope.get("y").intValue(), 2);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     assertEquals(scope.get("x").stringValue(), "b");
     assertEquals(scope.get("y").intValue(), 4);
   }
@@ -109,19 +109,19 @@ public class RecordScopeSpec {
     final RecordScope scope = RecordScope.of(Slot.of("x", true), Slot.of("z", z), Slot.of("y", 3), Slot.of("w", 5));
     assertEquals(scope.get("z"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     assertEquals(scope.get("z").intValue(), 3);
 
     scope.put("x", false);
     assertEquals(scope.get("z").intValue(), 3);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     assertEquals(scope.get("z").intValue(), 5);
 
     scope.put("w", 7);
     assertEquals(scope.get("z").intValue(), 5);
 
-    scope.reconcileInput(2);
+    scope.recohereInput(2);
     assertEquals(scope.get("z").intValue(), 7);
   }
 
@@ -131,19 +131,19 @@ public class RecordScopeSpec {
     final RecordScope scope = RecordScope.of(Slot.of("x", 2), Slot.of("z", z), Slot.of("y", 3));
     assertEquals(scope.get("z"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     assertEquals(scope.get("z").intValue(), 5);
 
     scope.put("x", 7);
     assertEquals(scope.get("z").intValue(), 5);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     assertEquals(scope.get("z").intValue(), 10);
 
     scope.put("y", 11);
     assertEquals(scope.get("z").intValue(), 10);
 
-    scope.reconcileInput(2);
+    scope.recohereInput(2);
     assertEquals(scope.get("z").intValue(), 18);
   }
 
@@ -153,13 +153,13 @@ public class RecordScopeSpec {
     final RecordScope scope = RecordScope.of(Slot.of("x", 2), Slot.of("z", z));
     assertEquals(scope.get("z"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     assertEquals(scope.get("z").intValue(), -2);
 
     scope.put("x", 3);
     assertEquals(scope.get("z").intValue(), -2);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     assertEquals(scope.get("z").intValue(), -3);
   }
 
@@ -170,7 +170,7 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x").doubleValue(), 2.1);
     assertEquals(scope.get("y"), Value.extant());
 
-    scope.reconcileInput(0);
+    scope.recohereInput(0);
     assertEquals(scope.get("x").doubleValue(), 2.1);
     assertEquals(scope.get("y").doubleValue(), 2.0);
 
@@ -178,7 +178,7 @@ public class RecordScopeSpec {
     assertEquals(scope.get("x").doubleValue(), 3.14);
     assertEquals(scope.get("y").doubleValue(), 2.0);
 
-    scope.reconcileInput(1);
+    scope.recohereInput(1);
     assertEquals(scope.get("x").doubleValue(), 3.14);
     assertEquals(scope.get("y").doubleValue(), 3.0);
   }

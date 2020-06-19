@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,9 +46,9 @@ public interface Outlet<O> {
 
   /**
    * Adds an {@code output} to the set of {@code Inlet}s that depend on the
-   * state of this {@code Outlet}.  The {@code output} will be invalidated when
-   * the state of this {@code Outlet} is invalidated, and updated when this
-   * {@code Outlet} is updated.
+   * state of this {@code Outlet}.  The {@code output} will be decohered when
+   * the state of this {@code Outlet} is decohered, and recohered when this
+   * {@code Outlet} is recohered.
    */
   void bindOutput(Inlet<? super O> output);
 
@@ -81,19 +81,20 @@ public interface Outlet<O> {
 
   /**
    * Marks this {@code Outlet}—and all {@link #outputIterator() outputs} that
-   * depend on the state of this {@code Outlet}—as having stale state.
+   * depend on the state of this {@code Outlet}—as having decoherent state.
    */
-  void invalidateInput();
+  void decohereInput();
 
   /**
-   * Reconciles the state of this {@code Outlet}, if the version of this {@code
-   * Outlet}'s state differs from the target {@code version}.  To reconcile its
-   * state, the {@code Outlet} first invokes {@link Streamlet#reconcile(int)}
-   * on the {@code Streamlet} to which it's attached. It then invokes {@link
-   * Inlet#reconcileOutput(int)} on each of its dependent {@link
-   * #outputIterator() outputs}.
+   * Updates the state of this {@code Outlet} to make it consistent with the
+   * target {@code version}.  The {@code Outlet} only needs to update if its
+   * current {@code version} differs from the target {@code version}.
+   * To update its state, the {@code Outlet} first invokes {@link
+   * Streamlet#recohere(int)} on the {@code Streamlet} to which it's attached.
+   * It then invokes {@link Inlet#recohereOutput(int)} on each of its dependent
+   * {@link #outputIterator() outputs}.
    */
-  void reconcileInput(int version);
+  void recohereInput(int version);
 
   default Outlet<O> memoize() {
     final MemoizeValueCombinator<O> combinator = new MemoizeValueCombinator<O>();

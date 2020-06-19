@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
   }
 
   @Override
-  protected void onReconcile(int version) {
+  protected void onRecohere(int version) {
     if (this.input != null) {
       this.state = this.input.get();
     }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -195,14 +195,14 @@ public class MapDownlinkRecord extends DownlinkRecord
 
   @Override
   public void didUpdate(Value key, Value newValue, Value oldValue) {
-    this.invalidateInputKey(key, KeyEffect.UPDATE);
-    this.reconcileInput(0); // TODO: debounce
+    this.decohereInputKey(key, KeyEffect.UPDATE);
+    this.recohereInput(0); // TODO: debounce
   }
 
   @Override
   public void didRemove(Value key, Value oldValue) {
-    this.invalidateInputKey(key, KeyEffect.REMOVE);
-    this.reconcileInput(0); // TODO: debounce
+    this.decohereInputKey(key, KeyEffect.REMOVE);
+    this.recohereInput(0); // TODO: debounce
   }
 
   @Override

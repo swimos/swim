@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ public class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
   public V put(K key, V newValue) {
     final V oldValue = this.state.get(key);
     this.state = this.state.updated(key, newValue);
-    invalidateInputKey(key, KeyEffect.UPDATE);
+    decohereInputKey(key, KeyEffect.UPDATE);
     return oldValue;
   }
 
@@ -56,7 +56,7 @@ public class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
     final HashTrieMap<K, V> newState = oldState.removed(key);
     if (oldState != newState) {
       this.state = newState;
-      invalidateInputKey(key, KeyEffect.REMOVE);
+      decohereInputKey(key, KeyEffect.REMOVE);
       return true;
     } else {
       return false;

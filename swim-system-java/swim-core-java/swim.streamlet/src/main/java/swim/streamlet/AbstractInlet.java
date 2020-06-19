@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -64,50 +64,50 @@ public abstract class AbstractInlet<I> implements Inlet<I> {
   }
 
   @Override
-  public void invalidateOutput() {
+  public void decohereOutput() {
     if (this.version >= 0) {
-      willInvalidateOutput();
+      willDecohereOutput();
       this.version = -1;
-      onInvalidateOutput();
-      didInvalidateOutput();
+      onDecohereOutput();
+      didDecohereOutput();
     }
   }
 
   @Override
-  public void reconcileOutput(int version) {
+  public void recohereOutput(int version) {
     if (this.version < 0) {
-      willReconcileOutput(version);
+      willRecohereOutput(version);
       this.version = version;
       if (this.input != null) {
-        this.input.reconcileInput(version);
+        this.input.recohereInput(version);
       }
-      onReconcileOutput(version);
-      didReconcileOutput(version);
+      onRecohereOutput(version);
+      didRecohereOutput(version);
     }
   }
 
-  protected void willInvalidateOutput() {
-    // stub
+  protected void willDecohereOutput() {
+    // hook
   }
 
-  protected void onInvalidateOutput() {
-    // stub
+  protected void onDecohereOutput() {
+    // hook
   }
 
-  protected void didInvalidateOutput() {
-    // stub
+  protected void didDecohereOutput() {
+    // hook
   }
 
-  protected void willReconcileOutput(int version) {
-    // stub
+  protected void willRecohereOutput(int version) {
+    // hook
   }
 
-  protected void onReconcileOutput(int version) {
-    // stub
+  protected void onRecohereOutput(int version) {
+    // hook
   }
 
-  protected void didReconcileOutput(int version) {
-    // stub
+  protected void didRecohereOutput(int version) {
+    // hook
   }
 
 }

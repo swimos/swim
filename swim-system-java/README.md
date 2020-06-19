@@ -1,6 +1,6 @@
 # Swim System Java Implementation
 
-[![package](https://img.shields.io/github/tag/swimOS/swim.svg?label=maven)](https://mvnrepository.com/artifact/org.swimos)
+[![package](https://img.shields.io/github/tag/SwimOS/swim.svg?label=maven)](https://mvnrepository.com/artifact/org.swimos)
 [![documentation](https://img.shields.io/badge/doc-JavaDoc-blue.svg)](https://docs.swimos.org/java/latest)
 [![chat](https://img.shields.io/badge/chat-Gitter-green.svg)](https://gitter.im/swimos/community)
 
@@ -8,7 +8,7 @@
 
 The **Swim System** Java implementation provides a self-contained distributed
 software platform executing stateful Web Agent applications.  **Swim System**
-encompasses the [**Swim Core**](swim-core-java) foundation framework, the
+incorporates the [**Swim Core**](swim-core-java) foundation framework, the
 [**Swim Mesh**](swim-mesh-java) distributed microkernel and Web Agent framework,
 and the [**Swim Polyglot**](swim-polyglot-java) multi-language virtual machine
 framework.
@@ -157,7 +157,7 @@ component libraries:
 
 The **Swim Polyglot** framework provides multi-language API bindings and
 [GraalVM](https://www.graalvm.org/) integration for embedding guest languages
-into **swimOS** applications.  **Swim Polyglot** consists of the following
+into **SwimOS** applications.  **Swim Polyglot** consists of the following
 component libraries:
 
 - [**swim-dynamic**](swim-polyglot-java/swim.dynamic) –
@@ -192,8 +192,8 @@ compile group: 'org.swimos', name: 'swim-server', version: '3.10.0'
 
 ## Development
 
-**swimOS** runs on any Java 8+ VM with a minimal `java.base` classpath.
-**swimOS** uses [Gradle](https://gradle.org/) as its standard build system.
+**SwimOS** runs on any Java 8+ VM with a minimal `java.base` classpath.
+**SwimOS** uses [Gradle](https://gradle.org/) as its standard build system.
 The included `gradlew` script can be used to build the platform.
 
 ### Setup

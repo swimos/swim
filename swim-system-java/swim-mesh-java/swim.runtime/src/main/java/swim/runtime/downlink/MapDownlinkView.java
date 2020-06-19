@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -404,8 +404,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   }
 
   public void downlinkDidUpdate(K key, V newValue, V oldValue) {
-    invalidateInputKey(key, KeyEffect.UPDATE);
-    reconcileInput(0); // TODO: debounce and track version
+    decohereInputKey(key, KeyEffect.UPDATE);
+    recohereInput(0); // TODO: debounce and track version
   }
 
   public void downlinkWillRemoveValue(Value key) {
@@ -418,8 +418,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   }
 
   public void downlinkDidRemove(K key, V oldValue) {
-    invalidateInputKey(key, KeyEffect.REMOVE);
-    reconcileInput(0); // TODO: debounce and track version
+    decohereInputKey(key, KeyEffect.REMOVE);
+    recohereInput(0); // TODO: debounce and track version
   }
 
   public void downlinkWillDrop(int lower) {
@@ -1415,167 +1415,159 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   }
 
   @Override
-  public void invalidateOutputKey(K key, KeyEffect effect) {
-    invalidateKey(key, effect);
+  public void decohereOutputKey(K key, KeyEffect effect) {
+    decohereKey(key, effect);
   }
 
   @Override
-  public void invalidateInputKey(K key, KeyEffect effect) {
-    invalidateKey(key, effect);
+  public void decohereInputKey(K key, KeyEffect effect) {
+    decohereKey(key, effect);
   }
 
   @SuppressWarnings("unchecked")
-  public void invalidateKey(K key, KeyEffect effect) {
+  public void decohereKey(K key, KeyEffect effect) {
     final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
     if (oldEffects.get(key) != effect) {
-      willInvalidateKey(key, effect);
+      willDecohereKey(key, effect);
       this.effects = oldEffects.updated(key, effect);
       this.version = -1;
-      onInvalidateKey(key, effect);
+      onDecohereKey(key, effect);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         final Inlet<?> output = this.outputs[i];
         if (output instanceof MapInlet<?, ?, ?>) {
-          ((MapInlet<K, V, ? super MapDownlink<K, V>>) output).invalidateOutputKey(key, effect);
+          ((MapInlet<K, V, ? super MapDownlink<K, V>>) output).decohereOutputKey(key, effect);
         } else {
-          output.invalidateOutput();
+          output.decohereOutput();
         }
       }
       final KeyOutlet<K, V> outlet = this.outlets.get(key);
       if (outlet != null) {
-        outlet.invalidateInput();
+        outlet.decohereInput();
       }
-      didInvalidateKey(key, effect);
+      didDecohereKey(key, effect);
     }
   }
 
   @Override
-  public void invalidateOutput() {
-    invalidate();
+  public void decohereOutput() {
+    decohere();
   }
 
   @Override
-  public void invalidateInput() {
-    invalidate();
+  public void decohereInput() {
+    decohere();
   }
 
-  public void invalidate() {
+  public void decohere() {
     if (this.version >= 0) {
-      willInvalidate();
+      willDecohere();
       this.version = -1;
-      onInvalidate();
+      onDecohere();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
-        this.outputs[i].invalidateOutput();
+        this.outputs[i].decohereOutput();
       }
       final Iterator<KeyOutlet<K, V>> outlets = this.outlets.valueIterator();
       while (outlets.hasNext()) {
-        outlets.next().invalidateInput();
+        outlets.next().decohereInput();
       }
-      didInvalidate();
+      didDecohere();
     }
   }
 
   @Override
-  public void reconcileOutputKey(K key, int version) {
-    reconcileKey(key, version);
+  public void recohereOutputKey(K key, int version) {
+    recohereKey(key, version);
   }
 
   @Override
-  public void reconcileInputKey(K key, int version) {
-    reconcileKey(key, version);
+  public void recohereInputKey(K key, int version) {
+    recohereKey(key, version);
   }
 
   @SuppressWarnings("unchecked")
-  public void reconcileKey(K key, int version) {
+  public void recohereKey(K key, int version) {
     if (this.version < 0) {
       final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
       final KeyEffect effect = oldEffects.get(key);
       if (effect != null) {
-        willReconcileKey(key, effect, version);
+        willRecohereKey(key, effect, version);
         this.effects = oldEffects.removed(key);
         if (this.input != null) {
-          this.input.reconcileInputKey(key, version);
+          this.input.recohereInputKey(key, version);
         }
-        onReconcileKey(key, effect, version);
+        onRecohereKey(key, effect, version);
         for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
           final Inlet<?> output = this.outputs[i];
           if (output instanceof MapInlet<?, ?, ?>) {
-            ((MapInlet<K, V, ? super MapDownlink<K, V>>) output).reconcileOutputKey(key, version);
+            ((MapInlet<K, V, ? super MapDownlink<K, V>>) output).recohereOutputKey(key, version);
           }
         }
         final KeyOutlet<K, V> outlet = this.outlets.get(key);
         if (outlet != null) {
-          outlet.reconcileInput(version);
+          outlet.recohereInput(version);
         }
-        didReconcileKey(key, effect, version);
+        didRecohereKey(key, effect, version);
       }
     }
   }
 
   @Override
-  public void reconcileOutput(int version) {
-    reconcile(version);
+  public void recohereOutput(int version) {
+    recohere(version);
   }
 
   @Override
-  public void reconcileInput(int version) {
-    reconcile(version);
+  public void recohereInput(int version) {
+    recohere(version);
   }
 
-  public void reconcile(int version) {
+  public void recohere(int version) {
     if (this.version < 0) {
-      willReconcile(version);
+      willRecohere(version);
       final Iterator<K> keys = this.effects.keyIterator();
       while (keys.hasNext()) {
-        reconcileKey(keys.next(), version);
+        recohereKey(keys.next(), version);
       }
       this.version = version;
-      onReconcile(version);
+      onRecohere(version);
       for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
-        this.outputs[i].reconcileOutput(version);
+        this.outputs[i].recohereOutput(version);
       }
-      didReconcile(version);
+      didRecohere(version);
     }
   }
 
-  protected void willInvalidateKey(K key, KeyEffect effect) {
-    // stub
+  protected void willDecohereKey(K key, KeyEffect effect) {
+    // hook
   }
 
-  protected void onInvalidateKey(K key, KeyEffect effect) {
-    // stub
+  protected void onDecohereKey(K key, KeyEffect effect) {
+    // hook
   }
 
-  protected void didInvalidateKey(K key, KeyEffect effect) {
-    // stub
+  protected void didDecohereKey(K key, KeyEffect effect) {
+    // hook
   }
 
-  protected void willInvalidate() {
-    // stub
+  protected void willDecohere() {
+    // hook
   }
 
-  protected void onInvalidate() {
-    // stub
+  protected void onDecohere() {
+    // hook
   }
 
-  protected void didInvalidate() {
-    // stub
+  protected void didDecohere() {
+    // hook
   }
 
-  protected void willUpdate(int version) {
-    // stub
+  protected void willRecohereKey(K key, KeyEffect effect, int version) {
+    // hook
   }
 
-  protected void didUpdate(int version) {
-    // stub
-  }
-
-  protected void willReconcileKey(K key, KeyEffect effect, int version) {
-    // stub
-  }
-
-  protected void onReconcileKey(K key, KeyEffect effect, int version) {
+  protected void onRecohereKey(K key, KeyEffect effect, int version) {
     if (effect == KeyEffect.UPDATE) {
       if (this.input != null) {
         final V value = this.input.get(key);
@@ -1592,20 +1584,20 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
     }
   }
 
-  protected void didReconcileKey(K key, KeyEffect effect, int version) {
-    // stub
+  protected void didRecohereKey(K key, KeyEffect effect, int version) {
+    // hook
   }
 
-  protected void willReconcile(int version) {
-    // stub
+  protected void willRecohere(int version) {
+    // hook
   }
 
-  protected void onReconcile(int version) {
-    // stub
+  protected void onRecohere(int version) {
+    // hook
   }
 
-  protected void didReconcile(int version) {
-    // stub
+  protected void didRecohere(int version) {
+    // hook
   }
 
 }

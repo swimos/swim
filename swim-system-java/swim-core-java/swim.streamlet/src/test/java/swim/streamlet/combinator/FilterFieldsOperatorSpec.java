@@ -1,4 +1,4 @@
-// Copyright 2015-2020 SWIM.AI inc.
+// Copyright 2015-2020 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,19 +38,19 @@ public class FilterFieldsOperatorSpec {
     output.bindInput(isEven);
 
     input.put("two", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("two", 2));
 
     input.put("three", 3);
-    input.reconcileInput(1); // reconcile forward
+    input.recohereInput(1); // recohere forward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("two", 2));
 
     input.put("three", 4);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("two", 2).updated("three", 4));
 
     input.put("two", 3);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("three", 4));
   }
 
@@ -62,19 +62,19 @@ public class FilterFieldsOperatorSpec {
     output.bindInput(isEven);
 
     input.put("two", 2);
-    input.reconcileInput(0); // reconcile forward
+    input.recohereInput(0); // recohere forward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("two", 2));
 
     input.put("three", 3);
-    input.reconcileInput(1); // reconcile forward
+    input.recohereInput(1); // recohere forward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("two", 2));
 
     input.put("three", 4);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("two", 2).updated("three", 4));
 
     input.put("two", 3);
-    output.reconcileOutput(1); // reconcile backward
+    output.recohereOutput(1); // recohere backward
     assertEquals(output.get(), HashTrieMap.<String, Integer>empty().updated("three", 4));
   }
 
