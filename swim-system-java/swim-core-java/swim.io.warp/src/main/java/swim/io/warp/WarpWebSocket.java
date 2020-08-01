@@ -363,7 +363,7 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
         final long oldDemand = (oldStatus & DEMAND_MASK) >>> DEMAND_SHIFT;
         final long oldBuffer = (oldStatus & BUFFER_MASK) >>> BUFFER_SHIFT;
         if (pullRequest == null && oldSupply > 0L && oldDemand + oldBuffer < TARGET_DEMAND) {
-          pullRequest = supply.poll();
+          pullRequest = this.supply.poll();
         }
         if (pullRequest != null) {
           final long newDemand = oldDemand + 1L;
@@ -418,6 +418,16 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
 
   @Override
   public void close() {
+    PullRequest<Envelope> pullRequest = null;
+    do {
+      pullRequest = this.supply.poll();
+      if (pullRequest != null) {
+        pullRequest.drop();
+        continue;
+      }
+      break;
+    } while (true);
+
     final WebSocketContext<Envelope, Envelope> context = this.context;
     if (context != null) {
       context.close();

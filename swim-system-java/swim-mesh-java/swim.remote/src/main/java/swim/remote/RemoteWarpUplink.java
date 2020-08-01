@@ -231,6 +231,11 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   }
 
   @Override
+  public void drop() {
+    // nop
+  }
+
+  @Override
   public void pushUp(Push<?> push) {
     final Object message = push.message();
     if (message instanceof Envelope) {

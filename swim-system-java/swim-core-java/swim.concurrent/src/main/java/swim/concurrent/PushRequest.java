@@ -42,4 +42,9 @@ public class PushRequest<T> implements PullRequest<T> {
     context.push(this.value);
   }
 
+  @Override
+  public void drop() {
+    // nop
+  }
+
 }

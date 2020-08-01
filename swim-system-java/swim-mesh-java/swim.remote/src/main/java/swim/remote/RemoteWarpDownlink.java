@@ -255,6 +255,11 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   }
 
   @Override
+  public void drop() {
+    // nop
+  }
+
+  @Override
   public void pushDown(Push<?> push) {
     final Object message = push.message();
     if (message instanceof Envelope) {

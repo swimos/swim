@@ -20,4 +20,6 @@ public interface PullRequest<T> {
 
   void pull(PullContext<? super T> context);
 
+  void drop();
+
 }

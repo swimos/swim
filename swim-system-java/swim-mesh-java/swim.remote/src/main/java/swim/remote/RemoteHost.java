@@ -1265,4 +1265,11 @@ final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
     }
   }
 
+  @Override
+  public void drop() {
+    if (this.cont != null) {
+      this.cont.trap(new HostException("dropped"));
+    }
+  }
+
 }
