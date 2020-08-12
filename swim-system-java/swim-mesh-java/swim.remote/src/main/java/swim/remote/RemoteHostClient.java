@@ -37,6 +37,7 @@ import swim.uri.Uri;
 import swim.uri.UriAuthority;
 import swim.uri.UriPath;
 import swim.uri.UriScheme;
+import swim.ws.WsClose;
 import swim.ws.WsRequest;
 
 public class RemoteHostClient extends RemoteHost {
@@ -143,13 +144,51 @@ public class RemoteHostClient extends RemoteHost {
   }
 
   @Override
-  public void didFail(Throwable error) {
-    final WarpSocketContext warpSocketContext = this.warpSocketContext;
-    if (warpSocketContext != null) {
-      this.warpSocketContext = null;
-      warpSocketContext.close();
+  protected void didReadClose(WsClose<?, ?> frame) {
+    Throwable failure = null;
+    try {
+      final WarpSocketContext warpSocketContext = this.warpSocketContext;
+      if (warpSocketContext != null) {
+        this.warpSocketContext = null;
+        warpSocketContext.close();
+      }
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    } finally {
+      reconnect();
     }
-    reconnect();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
+  }
+
+  @Override
+  public void didFail(Throwable error) {
+    Throwable failure = null;
+    try {
+      final WarpSocketContext warpSocketContext = this.warpSocketContext;
+      if (warpSocketContext != null) {
+        this.warpSocketContext = null;
+        warpSocketContext.close();
+      }
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    } finally {
+      reconnect();
+    }
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
 }
@@ -183,8 +222,22 @@ final class RemoteHostClientBinding extends AbstractWarpClient {
 
   @Override
   public void didDisconnect() {
-    webSocket.close();
-    this.client.didDisconnect();
+    Throwable failure = null;
+    try {
+      webSocket.close();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    } finally {
+      this.client.didDisconnect();
+    }
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
 }
@@ -204,9 +257,8 @@ final class RemoteHostClientReconnectTimer implements TimerFunction {
     } catch (Throwable error) {
       if (Conts.isNonFatal(error)) {
         this.client.reconnect(); // schedule reconnect
-      } else {
-        throw error;
       }
+      throw error;
     }
   }
 

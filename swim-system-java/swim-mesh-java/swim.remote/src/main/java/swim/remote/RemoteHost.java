@@ -30,6 +30,7 @@ import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
 import swim.concurrent.Cont;
 import swim.concurrent.Conts;
+import swim.concurrent.DropException;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.concurrent.Schedule;
@@ -584,13 +585,17 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       if (warpSocketContext != null) {
         warpSocketContext.write(WsClose.from(1000));
       } else {
-        close();
+        didReadClose((WsClose<?, ?>) frame);
       }
     } else if (frame instanceof WsPing<?, ?>) {
       if (warpSocketContext != null) {
         warpSocketContext.write(WsPong.from(frame.payload()));
       }
     }
+  }
+
+  protected void didReadClose(WsClose<?, ?> frame) {
+    close();
   }
 
   protected void onEventMessage(EventMessage message) {
@@ -953,15 +958,29 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void didDisconnect() {
-    final RemoteHostMessageCont messageCont = this.messageCont;
-    if (messageCont != null) {
-      messageCont.host = null;
-      this.messageCont = null;
+    Throwable failure = null;
+    try {
+      final RemoteHostMessageCont messageCont = this.messageCont;
+      if (messageCont != null) {
+        messageCont.host = null;
+        this.messageCont = null;
+      }
+      MESSAGE_BACKLOG.set(this, 0);
+      disconnectUplinks();
+      this.hostContext.didDisconnect();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    } finally {
+      reconnect();
     }
-    MESSAGE_BACKLOG.set(this, 0);
-    disconnectUplinks();
-    this.hostContext.didDisconnect();
-    reconnect();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
   @Override
@@ -990,12 +1009,26 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void didFail(Throwable error) {
-    final WarpSocketContext warpSocketContext = this.warpSocketContext;
-    if (warpSocketContext != null) {
-      this.warpSocketContext = null;
-      warpSocketContext.close();
+    Throwable failure = null;
+    try {
+      final WarpSocketContext warpSocketContext = this.warpSocketContext;
+      if (warpSocketContext != null) {
+        this.warpSocketContext = null;
+        warpSocketContext.close();
+      }
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    } finally {
+      this.hostContext.close();
     }
-    this.hostContext.close();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
   @Override
@@ -1268,7 +1301,7 @@ final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
   @Override
   public void drop() {
     if (this.cont != null) {
-      this.cont.trap(new HostException("dropped"));
+      this.cont.trap(new DropException());
     }
   }
 

@@ -20,6 +20,7 @@ import java.security.cert.Certificate;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import swim.concurrent.ConcurrentTrancheQueue;
+import swim.concurrent.Conts;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.concurrent.PushRequest;
@@ -418,19 +419,39 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
 
   @Override
   public void close() {
-    PullRequest<Envelope> pullRequest = null;
-    do {
-      pullRequest = this.supply.poll();
-      if (pullRequest != null) {
-        pullRequest.drop();
-        continue;
+    Throwable failure = null;
+    try {
+      PullRequest<Envelope> pullRequest = null;
+      do {
+        pullRequest = this.supply.poll();
+        if (pullRequest != null) {
+          try {
+            pullRequest.drop();
+          } catch (Throwable cause) {
+            if (!Conts.isNonFatal(cause)) {
+              throw cause;
+            }
+            failure = cause;
+          }
+          continue;
+        }
+        break;
+      } while (true);
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
-      break;
-    } while (true);
-
-    final WebSocketContext<Envelope, Envelope> context = this.context;
-    if (context != null) {
-      context.close();
+      failure = cause;
+    } finally {
+      final WebSocketContext<Envelope, Envelope> context = this.context;
+      if (context != null) {
+        context.close();
+      }
+    }
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
     }
   }
 

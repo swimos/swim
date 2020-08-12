@@ -282,14 +282,17 @@ public abstract class WarpSocketBehaviors {
     final HttpEndpoint endpoint = new HttpEndpoint(stage);
     final AtomicLong t0 = new AtomicLong();
     final AtomicLong dt = new AtomicLong();
-    final AtomicInteger count = new AtomicInteger();
+    final AtomicLong count = new AtomicLong();
     final CountDownLatch clientDone = new CountDownLatch(connections);
     final CountDownLatch serverDone = new CountDownLatch(connections);
+    final AtomicInteger permits = new AtomicInteger(1000);
+    final long warmupDuration = 2000L;
+    final long testDuration = warmupDuration + duration;
 
     try {
       stage.start();
       endpoint.start();
-      System.out.println("Warming up for " + duration + " milliseconds...");
+      System.out.println("Warming up for " + warmupDuration + " milliseconds...");
       bind(endpoint, new AbstractHttpService() {
         @Override
         public HttpServer createServer() {
@@ -314,20 +317,52 @@ public abstract class WarpSocketBehaviors {
                   do {
                     oldDt = dt.get();
                     newDt = System.currentTimeMillis() - t0.get();
-                  } while ((oldDt < 2L * duration || newDt < 2L * duration) && !dt.compareAndSet(oldDt, newDt));
-                  if (newDt >= 2L * duration) {
+                  } while ((oldDt < testDuration || newDt < testDuration) && !dt.compareAndSet(oldDt, newDt));
+                  if (newDt >= testDuration) {
                     if (!closed) {
                       closed = true;
                       write(WsClose.from(1000));
                     }
                     return;
-                  } else if (newDt >= duration) {
-                    if (oldDt < duration) {
-                      System.out.println("Benchmarking for " + duration + " milliseconds...");
+                  } else if (newDt >= warmupDuration) {
+                    if (oldDt < warmupDuration) {
+                      System.out.println("Benchmarking for " + warmupDuration + " milliseconds...");
                     }
-                    count.incrementAndGet();
+                    final long newCount = count.incrementAndGet();
+                    if (newCount % 1000000L == 0) {
+                      final int rate = (int) (1000L * newCount / newDt);
+                      System.out.println(newCount + " envelopes in " + newDt + " milliseconds (" + rate + " per second)");
+                    }
                   }
-                  feed(envelope);
+                  int oldPermits;
+                  int newPermits;
+                  do {
+                    oldPermits = permits.get();
+                    newPermits = oldPermits - 1;
+                    if (newPermits < 0) {
+                      System.out.println("out of permits");
+                      continue;
+                    } else if (!permits.compareAndSet(oldPermits, newPermits)) {
+                      continue;
+                    }
+                    break;
+                  } while (true);
+                  feed(new swim.concurrent.PullRequest<Envelope>() {
+                    @Override
+                    public float prio() {
+                      return 0.0f;
+                    }
+                    @Override
+                    public void pull(swim.concurrent.PullContext<? super Envelope> context) {
+                      permits.incrementAndGet();
+                      context.push(envelope);
+                    }
+                    @Override
+                    public void drop() {
+                      permits.incrementAndGet();
+                      throw new TestException("drop");
+                    }
+                  });
                 }
 
                 @Override
