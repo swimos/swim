@@ -432,15 +432,27 @@ final class StationTransport implements TransportContext, TransportRef {
 
   @Override
   public void close() {
+    Throwable failure = null;
     try {
       // Close the transport's NIO channel.
       this.transport.channel().close();
     } catch (IOException error) {
       // Report close failure to the station, but not to the transport binding.
       this.station.transportDidFail(this.transport, error);
+    } catch (Throwable error) {
+      if (!Conts.isNonFatal(error)) {
+        throw error;
+      }
+      failure = error;
+    } finally {
+      // Complete the transport close.
+      didClose();
     }
-    // Complete the transport close.
-    didClose();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
   /**
@@ -517,15 +529,22 @@ final class StationTransport implements TransportContext, TransportRef {
    * station's stage.
    */
   void cueRead() {
-    StationReader reader = this.reader;
-    if (reader == null) {
-      // Lazily instantiate the reader task, and bind it to the station's stage.
-      reader = new StationReader(this);
-      this.station.stage.task(reader);
-      this.reader = reader;
+    try {
+      StationReader reader = this.reader;
+      if (reader == null) {
+        // Lazily instantiate the reader task, and bind it to the station's stage.
+        reader = new StationReader(this);
+        this.station.stage.task(reader);
+        this.reader = reader;
+      }
+      // Schedule the reader task to run.
+      reader.cue();
+    } catch (Throwable error) {
+      if (!Conts.isNonFatal(error)) {
+        throw error;
+      }
+      close();
     }
-    // Schedule the reader task to run.
-    reader.cue();
   }
 
   /**
@@ -621,15 +640,22 @@ final class StationTransport implements TransportContext, TransportRef {
    * station's stage.
    */
   void cueWrite() {
-    StationWriter writer = this.writer;
-    if (writer == null) {
-      // Lazily instantiate the writer task, and bind it to the station's stage.
-      writer = new StationWriter(this);
-      this.station.stage.task(writer);
-      this.writer = writer;
+    try {
+      StationWriter writer = this.writer;
+      if (writer == null) {
+        // Lazily instantiate the writer task, and bind it to the station's stage.
+        writer = new StationWriter(this);
+        this.station.stage.task(writer);
+        this.writer = writer;
+      }
+      // Schedule the writer task to run.
+      writer.cue();
+    } catch (Throwable error) {
+      if (!Conts.isNonFatal(error)) {
+        throw error;
+      }
+      close();
     }
-    // Schedule the writer task to run.
-    writer.cue();
   }
 
   /**
@@ -744,40 +770,90 @@ final class StationTransport implements TransportContext, TransportRef {
   }
 
   void didTimeout() {
-    // Inform the transport binding that the transport has timed out.
-    this.transport.didTimeout();
-    // Inform the station that the transport has timed out.
-    this.station.transportDidTimeout(this.transport);
+    Throwable failure = null;
+    try {
+      // Inform the transport binding that the transport has timed out.
+      this.transport.didTimeout();
+    } catch (Throwable error) {
+      if (!Conts.isNonFatal(error)) {
+        throw error;
+      }
+      failure = error;
+    } finally {
+      // Inform the station that the transport has timed out.
+      this.station.transportDidTimeout(this.transport);
+    }
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
   /**
    * Clean up the transport after it has closed.
    */
   void didClose() {
-    final StationReader reader = this.reader;
-    if (reader != null) {
-      // Best effort to prevent the reader task from running post-close.
-      reader.cancel();
+    Throwable failure = null;
+    try {
+      final StationReader reader = this.reader;
+      if (reader != null) {
+        // Best effort to prevent the reader task from running post-close.
+        reader.cancel();
+      }
+      final StationWriter writer = this.writer;
+      if (writer != null) {
+        // Best effort to prevent the writer task from running post-close.
+        writer.cancel();
+      }
+    } catch (Throwable error) {
+      if (!Conts.isNonFatal(error)) {
+        throw error;
+      }
+      failure = error;
+    } finally {
+      try {
+        // Inform the transport binding that the transport has closed.
+        this.transport.didClose();
+      } catch (Throwable error) {
+        if (!Conts.isNonFatal(error)) {
+          throw error;
+        }
+        failure = error;
+      } finally {
+        // Inform the station that the transport has closed.
+        this.station.transportDidClose(this.transport);
+      }
     }
-    final StationWriter writer = this.writer;
-    if (writer != null) {
-      // Best effort to prevent the writer task from running post-close.
-      writer.cancel();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
     }
-    // Inform the transport binding that the transport has closed.
-    this.transport.didClose();
-    // Inform the station that the transport has closed.
-    this.station.transportDidClose(this.transport);
   }
 
   /**
    * Report a—possibly non-fatal—transport error.
    */
   void didFail(Throwable error) {
-    // Inform the transport binding that the transport failed.
-    this.transport.didFail(error);
-    // Inform the station that the transport failed.
-    this.station.transportDidFail(this.transport, error);
+    Throwable failure = null;
+    try {
+      // Inform the transport binding that the transport failed.
+      this.transport.didFail(error);
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    } finally {
+      // Inform the station that the transport failed.
+      this.station.transportDidFail(this.transport, error);
+    }
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
 }
@@ -795,10 +871,17 @@ final class StationReader extends AbstractTask {
 
   @Override
   public void runTask() {
-    final boolean didYield = this.context.doRead();
-    if (didYield) {
-      //The task yielded control but had not completed so needs to be rescheduled.
-      cue();
+    try {
+      final boolean didYield = this.context.doRead();
+      if (didYield) {
+        //The task yielded control but had not completed so needs to be rescheduled.
+        cue();
+      }
+    } catch (Throwable error) {
+      if (!Conts.isNonFatal(error)) {
+        throw error;
+      }
+      this.context.close();
     }
   }
 
@@ -817,7 +900,14 @@ final class StationWriter extends AbstractTask {
 
   @Override
   public void runTask() {
-    this.context.doWrite();
+    try {
+      this.context.doWrite();
+    } catch (Throwable error) {
+      if (!Conts.isNonFatal(error)) {
+        throw error;
+      }
+      this.context.close();
+    }
   }
 
 }
