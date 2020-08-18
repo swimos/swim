@@ -21,9 +21,11 @@ import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import swim.concurrent.ConcurrentTrancheQueue;
 import swim.concurrent.Conts;
+import swim.concurrent.DropException;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.concurrent.PushRequest;
+import swim.concurrent.StayContext;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.io.FlowControl;
@@ -40,7 +42,7 @@ import swim.ws.WsFragment;
 import swim.ws.WsFrame;
 import swim.ws.WsText;
 
-public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketContext, PullContext<Envelope> {
+public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketContext, PullContext<Envelope>, StayContext {
 
   protected final WarpSocket socket;
   protected final WarpSettings warpSettings;
@@ -286,12 +288,18 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
       final long oldSupply = oldStatus & SUPPLY_MASK;
       final long newSupply = oldSupply + 1L;
       if (newSupply <= SUPPLY_MAX) {
-        final long newStatus = oldStatus & ~SUPPLY_MASK | newSupply;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          break;
+        if (pullRequest.stay(this, (int) oldSupply)) {
+          final long newStatus = oldStatus & ~SUPPLY_MASK | newSupply;
+          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+            break;
+          }
+        } else {
+          pullRequest.drop(new DropException("exceeded desired backlog: " + oldSupply));
+          return;
         }
       } else {
-        throw new WarpException("exceeded maximum supply: " + newSupply);
+        pullRequest.drop(new DropException("exceeded maximum supply: " + newSupply));
+        return;
       }
     } while (true);
     this.supply.add(pullRequest, pullRequest.prio());
@@ -422,11 +430,15 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
     Throwable failure = null;
     try {
       PullRequest<Envelope> pullRequest = null;
+      Throwable reason = null;
       do {
         pullRequest = this.supply.poll();
         if (pullRequest != null) {
+          if (reason == null) {
+            reason = new DropException("warp websocket closed");
+          }
           try {
-            pullRequest.drop();
+            pullRequest.drop(reason);
           } catch (Throwable cause) {
             if (!Conts.isNonFatal(cause)) {
               throw cause;

@@ -43,8 +43,13 @@ public class PushRequest<T> implements PullRequest<T> {
   }
 
   @Override
-  public void drop() {
+  public void drop(Throwable reason) {
     // nop
+  }
+
+  @Override
+  public boolean stay(StayContext context, int backlog) {
+    return true;
   }
 
 }

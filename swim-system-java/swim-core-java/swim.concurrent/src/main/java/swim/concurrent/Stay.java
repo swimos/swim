@@ -14,14 +14,19 @@
 
 package swim.concurrent;
 
-public interface PullRequest<T> {
+/**
+ * Backpressure aware continuation.
+ *
+ * @see Cont
+ */
+public interface Stay<T> extends Cont<T> {
 
-  float prio();
-
-  void pull(PullContext<? super T> context);
-
-  void drop(Throwable reason);
-
+  /**
+   * Invoked when the asynchronous operation needs to wait before proceeding.
+   * Returns {@code true} if the operation should continue; returns
+   * {@code false} if the operation should preemptively terminate and
+   * {@link #trap(Throwable)} the continuation.
+   */
   boolean stay(StayContext context, int backlog);
 
 }

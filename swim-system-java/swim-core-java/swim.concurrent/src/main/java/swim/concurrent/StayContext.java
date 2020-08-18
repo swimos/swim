@@ -14,14 +14,11 @@
 
 package swim.concurrent;
 
-public interface PullRequest<T> {
-
-  float prio();
-
-  void pull(PullContext<? super T> context);
-
-  void drop(Throwable reason);
-
-  boolean stay(StayContext context, int backlog);
+/**
+ * Source that can delay continuations.
+ *
+ * @see Stay
+ */
+public interface StayContext {
 
 }

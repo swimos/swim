@@ -30,11 +30,12 @@ import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
 import swim.concurrent.Cont;
 import swim.concurrent.Conts;
-import swim.concurrent.DropException;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
+import swim.concurrent.Stay;
+import swim.concurrent.StayContext;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.io.FlowModifier;
@@ -86,7 +87,7 @@ import swim.ws.WsControl;
 import swim.ws.WsPing;
 import swim.ws.WsPong;
 
-public class RemoteHost extends AbstractTierBinding implements HostBinding, WarpSocket {
+public class RemoteHost extends AbstractTierBinding implements HostBinding, WarpSocket, StayContext {
 
   protected HostContext hostContext;
   protected WarpSocketContext warpSocketContext;
@@ -98,7 +99,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   volatile Identity remoteIdentity;
   volatile HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> downlinks;
   volatile HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> uplinks;
-  volatile int messageBacklog;
+  volatile int receiveBacklog;
   RemoteHostMessageCont messageCont;
   final HashGenCacheMap<Uri, Uri> resolveCache;
 
@@ -655,13 +656,13 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   protected void willPushMessage(Envelope envelope) {
     //do {
-    //  final int oldMessageBacklog = this.messageBacklog;
-    //  final int newMessageBacklog = oldMessageBacklog + 1;
-    //  if (MESSAGE_BACKLOG.compareAndSet(this, oldMessageBacklog, newMessageBacklog)) {
-    //    if (newMessageBacklog == MAX_MESSAGE_BACKLOG) {
+    //  final int oldReceiveBacklog = this.receiveBacklog;
+    //  final int newReceiveBacklog = oldReceiveBacklog + 1;
+    //  if (RECEIVE_BACKLOG.compareAndSet(this, oldReceiveBacklog, newReceiveBacklog)) {
+    //    if (newReceiveBacklog == MAX_RECEIVE_BACKLOG) {
     //      this.warpSocketContext.flowControl(FlowModifier.DISABLE_READ);
-    //      if (newMessageBacklog != this.messageBacklog) {
-    //        reconcileMessageBacklog();
+    //      if (newReceiveBacklog != this.receiveBacklog) {
+    //        reconcileReceiveBacklog();
     //      }
     //    }
     //    break;
@@ -671,13 +672,13 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   protected void didPushMessage(Envelope envelope) {
     //do {
-    //  final int oldMessageBacklog = this.messageBacklog;
-    //  final int newMessageBacklog = oldMessageBacklog - 1;
-    //  if (MESSAGE_BACKLOG.compareAndSet(this, oldMessageBacklog, newMessageBacklog)) {
-    //    if (oldMessageBacklog == MAX_MESSAGE_BACKLOG) {
+    //  final int oldReceiveBacklog = this.receiveBacklog;
+    //  final int newReceiveBacklog = oldReceiveBacklog - 1;
+    //  if (RECEIVE_BACKLOG.compareAndSet(this, oldReceiveBacklog, newReceiveBacklog)) {
+    //    if (oldReceiveBacklog == MAX_RECEIVE_BACKLOG) {
     //      this.warpSocketContext.flowControl(FlowModifier.ENABLE_READ);
-    //      if (newMessageBacklog != this.messageBacklog) {
-    //        reconcileMessageBacklog();
+    //      if (newReceiveBacklog != this.receiveBacklog) {
+    //        reconcileReceiveBacklog();
     //      }
     //    }
     //    break;
@@ -685,15 +686,15 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     //} while (true);
   }
 
-  protected void reconcileMessageBacklog() {
+  protected void reconcileReceiveBacklog() {
     do {
-      final int messageBacklog = this.messageBacklog;
-      if (messageBacklog < MAX_MESSAGE_BACKLOG) {
+      final int receiveBacklog = this.receiveBacklog;
+      if (receiveBacklog < MAX_RECEIVE_BACKLOG) {
         this.warpSocketContext.flowControl(FlowModifier.ENABLE_READ);
       } else {
         this.warpSocketContext.flowControl(FlowModifier.DISABLE_READ);
       }
-      if (messageBacklog == this.messageBacklog) {
+      if (receiveBacklog == this.receiveBacklog) {
         break;
       }
     } while (true);
@@ -965,7 +966,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         messageCont.host = null;
         this.messageCont = null;
       }
-      MESSAGE_BACKLOG.set(this, 0);
+      RECEIVE_BACKLOG.set(this, 0);
       disconnectUplinks();
       this.hostContext.didDisconnect();
     } catch (Throwable cause) {
@@ -1197,7 +1198,8 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   static final int MASTER = 1 << 2;
   static final int SLAVE = 1 << 3;
 
-  static final int MAX_MESSAGE_BACKLOG;
+  static final int MAX_SEND_BACKLOG;
+  static final int MAX_RECEIVE_BACKLOG;
   static final int URI_RESOLUTION_CACHE_SIZE;
 
   static final AtomicIntegerFieldUpdater<RemoteHost> FLAGS =
@@ -1206,8 +1208,8 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   static final AtomicReferenceFieldUpdater<RemoteHost, Identity> REMOTE_IDENTITY =
       AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, Identity.class, "remoteIdentity");
 
-  static final AtomicIntegerFieldUpdater<RemoteHost> MESSAGE_BACKLOG =
-      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "messageBacklog");
+  static final AtomicIntegerFieldUpdater<RemoteHost> RECEIVE_BACKLOG =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "receiveBacklog");
 
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<RemoteHost, HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>>> DOWNLINKS =
@@ -1218,13 +1220,21 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, (Class<HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>>>) (Class<?>) HashTrieMap.class, "uplinks");
 
   static {
-    int maxMessageBacklog;
+    int maxSendBacklog;
     try {
-      maxMessageBacklog = Integer.parseInt(System.getProperty("swim.remote.max.message.backlog"));
+      maxSendBacklog = Integer.parseInt(System.getProperty("swim.remote.max.send.backlog"));
     } catch (NumberFormatException e) {
-      maxMessageBacklog = Math.max(512, 128 * Runtime.getRuntime().availableProcessors());
+      maxSendBacklog = Math.max(512, 128 * Runtime.getRuntime().availableProcessors());
     }
-    MAX_MESSAGE_BACKLOG = maxMessageBacklog;
+    MAX_SEND_BACKLOG = maxSendBacklog;
+
+    int maxReceiveBacklog;
+    try {
+      maxReceiveBacklog = Integer.parseInt(System.getProperty("swim.remote.max.receive.backlog"));
+    } catch (NumberFormatException e) {
+      maxReceiveBacklog = Math.max(512, 128 * Runtime.getRuntime().availableProcessors());
+    }
+    MAX_RECEIVE_BACKLOG = maxReceiveBacklog;
 
     int uriResolutionCacheSize;
     try {
@@ -1299,9 +1309,18 @@ final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
   }
 
   @Override
-  public void drop() {
+  public void drop(Throwable reason) {
     if (this.cont != null) {
-      this.cont.trap(new DropException());
+      this.cont.trap(reason);
+    }
+  }
+
+  @Override
+  public boolean stay(StayContext context, int backlog) {
+    if (this.cont instanceof Stay) {
+      return ((Stay) this.cont).stay(host, backlog);
+    } else {
+      return backlog < RemoteHost.MAX_SEND_BACKLOG;
     }
   }
 

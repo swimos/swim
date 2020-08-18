@@ -24,6 +24,7 @@ import swim.api.LinkException;
 import swim.api.auth.Identity;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
+import swim.concurrent.StayContext;
 import swim.runtime.DownlinkAddress;
 import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
@@ -231,8 +232,13 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   }
 
   @Override
-  public void drop() {
+  public void drop(Throwable reason) {
     // nop
+  }
+
+  @Override
+  public boolean stay(StayContext context, int backlog) {
+    return true;
   }
 
   @Override

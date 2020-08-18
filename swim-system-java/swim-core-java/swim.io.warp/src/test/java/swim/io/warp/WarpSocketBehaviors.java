@@ -358,9 +358,13 @@ public abstract class WarpSocketBehaviors {
                       context.push(envelope);
                     }
                     @Override
-                    public void drop() {
+                    public void drop(Throwable reason) {
                       permits.incrementAndGet();
                       throw new TestException("drop");
+                    }
+                    @Override
+                    public boolean stay(swim.concurrent.StayContext context, int backlog) {
+                      return true;
                     }
                   });
                 }
