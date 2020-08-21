@@ -187,14 +187,40 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
         break;
       }
     } while (true);
-    this.socket.didDisconnect();
+    Throwable failure = null;
+    try {
+      this.socket.didDisconnect();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    }
     close();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
   @Override
   public void didFail(Throwable error) {
-    this.socket.didFail(error);
+    Throwable failure = null;
+    try {
+      this.socket.didFail(error);
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    }
     close();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
   @Override
@@ -454,11 +480,10 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
         throw cause;
       }
       failure = cause;
-    } finally {
-      final WebSocketContext<Envelope, Envelope> context = this.context;
-      if (context != null) {
-        context.close();
-      }
+    }
+    final WebSocketContext<Envelope, Envelope> context = this.context;
+    if (context != null) {
+      context.close();
     }
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;

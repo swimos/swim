@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.codec.Decoder;
 import swim.codec.Utf8;
 import swim.collections.FingerTrieSeq;
+import swim.concurrent.Conts;
 import swim.http.Http;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
@@ -123,21 +124,42 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
 
   @Override
   public void didTimeout() {
+    Throwable failure = null;
     for (HttpServerResponder<?> responderContext : RESPONDERS.get(this)) {
-      responderContext.didTimeout();
+      try {
+        responderContext.didTimeout();
+      } catch (Throwable cause) {
+        if (!Conts.isNonFatal(cause)) {
+          throw cause;
+        }
+        failure = cause;
+      }
     }
     this.server.didTimeout();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
   @Override
   public void didDisconnect() {
+    Throwable failure = null;
     do {
       final FingerTrieSeq<HttpServerResponder<?>> oldResponders = RESPONDERS.get(this);
       final FingerTrieSeq<HttpServerResponder<?>> newResponders = FingerTrieSeq.empty();
       if (oldResponders != newResponders) {
         if (RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
           for (HttpServerResponder<?> responderContext : oldResponders) {
-            responderContext.didDisconnect();
+            try {
+              responderContext.didDisconnect();
+            } catch (Throwable cause) {
+              if (!Conts.isNonFatal(cause)) {
+                throw cause;
+              }
+              failure = cause;
+            }
           }
           break;
         }
@@ -145,19 +167,39 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
         break;
       }
     } while (true);
-    server.didDisconnect();
+    try {
+      this.server.didDisconnect();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    }
     close();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
   @Override
   public void didFail(Throwable error) {
+    Throwable failure = null;
     do {
       final FingerTrieSeq<HttpServerResponder<?>> oldResponders = RESPONDERS.get(this);
       final FingerTrieSeq<HttpServerResponder<?>> newResponders = FingerTrieSeq.empty();
       if (oldResponders != newResponders) {
         if (RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
           for (HttpServerResponder<?> responderContext : oldResponders) {
-            responderContext.didFail(error);
+            try {
+              responderContext.didFail(error);
+            } catch (Throwable cause) {
+              if (!Conts.isNonFatal(cause)) {
+                throw cause;
+              }
+              failure = cause;
+            }
           }
           break;
         }
@@ -165,8 +207,20 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
         break;
       }
     } while (true);
-    server.didFail(error);
+    try {
+      server.didFail(error);
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    }
     close();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
   @Override

@@ -22,6 +22,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import javax.net.ssl.SSLEngine;
+import swim.concurrent.Conts;
 
 class TlsService implements Transport, IpServiceContext {
 
@@ -107,7 +108,7 @@ class TlsService implements Transport, IpServiceContext {
     final SocketChannel channel;
     try {
       channel = this.serverChannel.accept();
-    } catch (ClosedChannelException error) {
+    } catch (ClosedChannelException cause) {
       return;
     }
     if (channel == null) {
@@ -144,10 +145,17 @@ class TlsService implements Transport, IpServiceContext {
 
     final IpSocket socket = this.service.createSocket();
     final TlsSocket transport = new TlsSocket(this.localAddress, remoteAddress, channel, sslEngine, this.ipSettings, false);
-    transport.become(socket);
-    this.station.transport(transport, FlowControl.WAIT);
-    this.service.didAccept(socket);
-    transport.didConnect();
+    try {
+      transport.become(socket);
+      this.station.transport(transport, FlowControl.WAIT);
+      this.service.didAccept(socket);
+      transport.didConnect();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      socket.didFail(cause);
+    }
   }
 
   @Override

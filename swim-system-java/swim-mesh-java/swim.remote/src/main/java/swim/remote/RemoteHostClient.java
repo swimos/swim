@@ -66,34 +66,34 @@ public class RemoteHostClient extends RemoteHost {
   }
 
   public void connect() {
+    final String scheme = this.baseUri.schemeName();
+    final boolean isSecure = "warps".equals(scheme) || "swims".equals(scheme);
+
+    final UriAuthority remoteAuthority = this.baseUri.authority();
+    final String remoteAddress = remoteAuthority.host().address();
+    final int remotePort = remoteAuthority.port().number();
+    final int requestPort = remotePort > 0 ? remotePort : isSecure ? 443 : 80;
+
+    if (this.client == null) {
+      final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, UriPath.slash(), this.baseUri.query());
+      final WsRequest wsRequest = WsRequest.from(requestUri, PROTOCOL_LIST);
+      final WarpWebSocket webSocket = new WarpWebSocket(this, this.warpSettings);
+      this.client = new RemoteHostClientBinding(this, webSocket, wsRequest, this.warpSettings);
+      setWarpSocketContext(webSocket); // eagerly set
+    }
+
     try {
-      final String scheme = this.baseUri.schemeName();
-      final boolean isSecure = "warps".equals(scheme) || "swims".equals(scheme);
-
-      final UriAuthority remoteAuthority = this.baseUri.authority();
-      final String remoteAddress = remoteAuthority.host().address();
-      final int remotePort = remoteAuthority.port().number();
-      final int requestPort = remotePort > 0 ? remotePort : isSecure ? 443 : 80;
-
-      if (this.client == null) {
-        final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, UriPath.slash(), this.baseUri.query());
-        final WsRequest wsRequest = WsRequest.from(requestUri, PROTOCOL_LIST);
-        final WarpWebSocket webSocket = new WarpWebSocket(this, this.warpSettings);
-        this.client = new RemoteHostClientBinding(this, webSocket, wsRequest, this.warpSettings);
-        setWarpSocketContext(webSocket); // eagerly set
-      }
       if (isSecure) {
         connectHttps(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
       } else {
         connectHttp(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
       }
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        error.printStackTrace();
-        reconnect();
-      } else {
-        throw error;
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
+      cause.printStackTrace();
+      reconnect();
     }
   }
 
@@ -157,9 +157,8 @@ public class RemoteHostClient extends RemoteHost {
         throw cause;
       }
       failure = cause;
-    } finally {
-      reconnect();
     }
+    reconnect();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -181,9 +180,8 @@ public class RemoteHostClient extends RemoteHost {
         throw cause;
       }
       failure = cause;
-    } finally {
-      reconnect();
     }
+    reconnect();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -230,9 +228,8 @@ final class RemoteHostClientBinding extends AbstractWarpClient {
         throw cause;
       }
       failure = cause;
-    } finally {
-      this.client.didDisconnect();
     }
+    this.client.didDisconnect();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -252,13 +249,20 @@ final class RemoteHostClientReconnectTimer implements TimerFunction {
 
   @Override
   public void runTimer() {
+    Throwable failure = null;
     try {
       this.client.connect();
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        this.client.reconnect(); // schedule reconnect
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
-      throw error;
+      failure = cause;
+    }
+    this.client.reconnect(); // schedule reconnect
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
     }
   }
 

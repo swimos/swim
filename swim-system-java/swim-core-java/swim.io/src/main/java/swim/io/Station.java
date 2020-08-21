@@ -160,7 +160,7 @@ public class Station {
       try {
         // Wait for selector thread startup to complete.
         this.startLatch.await();
-      } catch (InterruptedException error) {
+      } catch (InterruptedException cause) {
         interrupted = true;
       }
     }
@@ -190,7 +190,7 @@ public class Station {
             try {
               // Wait for the selector thread to exit.
               this.thread.join(100);
-            } catch (InterruptedException error) {
+            } catch (InterruptedException cause) {
               interrupted = true;
             }
           }
@@ -436,18 +436,17 @@ final class StationTransport implements TransportContext, TransportRef {
     try {
       // Close the transport's NIO channel.
       this.transport.channel().close();
-    } catch (IOException error) {
+    } catch (IOException cause) {
       // Report close failure to the station, but not to the transport binding.
-      this.station.transportDidFail(this.transport, error);
-    } catch (Throwable error) {
-      if (!Conts.isNonFatal(error)) {
-        throw error;
+      this.station.transportDidFail(this.transport, cause);
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
-      failure = error;
-    } finally {
-      // Complete the transport close.
-      didClose();
+      failure = cause;
     }
+    // Complete the transport close.
+    didClose();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -465,20 +464,19 @@ final class StationTransport implements TransportContext, TransportRef {
       this.transport.doAccept();
       // Inform the station that the transport completed the accept operation.
       this.station.transportDidAccept(this.transport);
-    } catch (ClosedChannelException error) {
+    } catch (ClosedChannelException cause) {
       // Channel closed during the accept operation; complete the close.
       didClose();
-    } catch (IOException error) {
+    } catch (IOException cause) {
       // Report the transport I/O exception.
-      didFail(error);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        // Report the non-fatal transport exception.
-        didFail(error);
-      } else {
+      didFail(cause);
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
         // Rethrow the fatal exception.
-        throw error;
+        throw cause;
       }
+      // Report the non-fatal transport exception.
+      didFail(cause);
     }
   }
 
@@ -507,20 +505,19 @@ final class StationTransport implements TransportContext, TransportRef {
       this.transport.doConnect();
       // Inform the station that the transport completed the connect operation.
       this.station.transportDidConnect(this.transport);
-    } catch (ClosedChannelException error) {
+    } catch (ClosedChannelException cause) {
       // Channel closed during the connect operation; complete the close.
       didClose();
-    } catch (IOException error) {
+    } catch (IOException cause) {
       // Report the transport I/O exception.
-      didFail(error);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        // Report the non-fatal transport exception.
-        didFail(error);
-      } else {
+      didFail(cause);
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
         // Rethrow the fatal exception.
-        throw error;
+        throw cause;
       }
+      // Report the non-fatal transport exception.
+      didFail(cause);
     }
   }
 
@@ -529,8 +526,8 @@ final class StationTransport implements TransportContext, TransportRef {
    * station's stage.
    */
   void cueRead() {
+    StationReader reader = this.reader;
     try {
-      StationReader reader = this.reader;
       if (reader == null) {
         // Lazily instantiate the reader task, and bind it to the station's stage.
         reader = new StationReader(this);
@@ -539,11 +536,11 @@ final class StationTransport implements TransportContext, TransportRef {
       }
       // Schedule the reader task to run.
       reader.cue();
-    } catch (Throwable error) {
-      if (!Conts.isNonFatal(error)) {
-        throw error;
+    } catch (Throwable cause) {
+      if (Conts.isNonFatal(cause)) {
+        close();
       }
-      close();
+      throw cause;
     }
   }
 
@@ -563,23 +560,22 @@ final class StationTransport implements TransportContext, TransportRef {
       try {
         // Try to read input bytes from the transport channel.
         count = channel.read(readBuffer);
-      } catch (ClosedChannelException error) {
+      } catch (ClosedChannelException cause) {
         // Channel closed during the read operation; complete the close.
         didClose();
         break;
-      } catch (IOException error) {
+      } catch (IOException cause) {
         // Report the transport I/O exception.
-        didFail(error);
+        didFail(cause);
         break;
-      } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
-          // Report the non-fatal transport exception.
-          didFail(error);
-          break;
-        } else {
+      } catch (Throwable cause) {
+        if (!Conts.isNonFatal(cause)) {
           // Rethrow the fatal exception.
-          throw error;
+          throw cause;
         }
+        // Report the non-fatal transport exception.
+        didFail(cause);
+        break;
       }
       if (count < 0) {
         // The transport channel has reached the end of the stream; close the
@@ -594,15 +590,14 @@ final class StationTransport implements TransportContext, TransportRef {
           // Tell the transport binding to read input bytes from the input
           // buffer.
           this.transport.doRead();
-        } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            // Report the non-fatal transport exception.
-            didFail(error);
-            break;
-          } else {
+        } catch (Throwable cause) {
+          if (!Conts.isNonFatal(cause)) {
             // Rethrow the fatal exception.
-            throw error;
+            throw cause;
           }
+          // Report the non-fatal transport exception.
+          didFail(cause);
+          break;
         }
         if (readBuffer.hasRemaining()) {
           final int currentPos = readBuffer.position();
@@ -640,8 +635,8 @@ final class StationTransport implements TransportContext, TransportRef {
    * station's stage.
    */
   void cueWrite() {
+    StationWriter writer = this.writer;
     try {
-      StationWriter writer = this.writer;
       if (writer == null) {
         // Lazily instantiate the writer task, and bind it to the station's stage.
         writer = new StationWriter(this);
@@ -650,11 +645,11 @@ final class StationTransport implements TransportContext, TransportRef {
       }
       // Schedule the writer task to run.
       writer.cue();
-    } catch (Throwable error) {
-      if (!Conts.isNonFatal(error)) {
-        throw error;
+    } catch (Throwable cause) {
+      if (Conts.isNonFatal(cause)) {
+        close();
       }
-      close();
+      throw cause;
     }
   }
 
@@ -674,23 +669,22 @@ final class StationTransport implements TransportContext, TransportRef {
         try {
           // Try to write the remaining output bytes to the transport channel.
           count = channel.write(writeBuffer);
-        } catch (ClosedChannelException error) {
+        } catch (ClosedChannelException cause) {
           // Channel closed during the write operation; complete the close.
           didClose();
           break;
-        } catch (IOException error) {
+        } catch (IOException cause) {
           // Report the transport I/O exception.
-          didFail(error);
+          didFail(cause);
           break;
-        } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            // Report the non-fatal transport exception.
-            didFail(error);
-            break;
-          } else {
+        } catch (Throwable cause) {
+          if (!Conts.isNonFatal(cause)) {
             // Rethrow the fatal exception.
-            throw error;
+            throw cause;
           }
+          // Report the non-fatal transport exception.
+          didFail(cause);
+          break;
         }
         if (count > 0) {
           // Output bytes were successfully written to the transport channel.
@@ -699,15 +693,14 @@ final class StationTransport implements TransportContext, TransportRef {
             try {
               // Inform the transport binding that the write completed.
               this.transport.didWrite();
-            } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                // Report the non-fatal transport exception.
-                didFail(error);
-                return;
-              } else {
+            } catch (Throwable cause) {
+              if (!Conts.isNonFatal(cause)) {
                 // Rethrow the fatal exception.
-                throw error;
+                throw cause;
               }
+              // Report the non-fatal transport exception.
+              didFail(cause);
+              break;
             }
             continue;
           } else {
@@ -733,15 +726,14 @@ final class StationTransport implements TransportContext, TransportRef {
           // Tell the transport binding to write more output bytes to the
           // output buffer.
           this.transport.doWrite();
-        } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            // Report the non-fatal transport exception.
-            didFail(error);
-            return;
-          } else {
+        } catch (Throwable cause) {
+          if (!Conts.isNonFatal(cause)) {
             // Rethrow the fatal exception.
-            throw error;
+            throw cause;
           }
+          // Report the non-fatal transport exception.
+          didFail(cause);
+          break;
         }
         // Prepare the output buffer to be written to the transport channel.
         ((Buffer) writeBuffer).flip();
@@ -774,15 +766,14 @@ final class StationTransport implements TransportContext, TransportRef {
     try {
       // Inform the transport binding that the transport has timed out.
       this.transport.didTimeout();
-    } catch (Throwable error) {
-      if (!Conts.isNonFatal(error)) {
-        throw error;
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
-      failure = error;
-    } finally {
-      // Inform the station that the transport has timed out.
-      this.station.transportDidTimeout(this.transport);
+      failure = cause;
     }
+    // Inform the station that the transport has timed out.
+    this.station.transportDidTimeout(this.transport);
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -801,29 +792,41 @@ final class StationTransport implements TransportContext, TransportRef {
         // Best effort to prevent the reader task from running post-close.
         reader.cancel();
       }
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    }
+    try {
       final StationWriter writer = this.writer;
       if (writer != null) {
         // Best effort to prevent the writer task from running post-close.
         writer.cancel();
       }
-    } catch (Throwable error) {
-      if (!Conts.isNonFatal(error)) {
-        throw error;
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
-      failure = error;
-    } finally {
-      try {
-        // Inform the transport binding that the transport has closed.
-        this.transport.didClose();
-      } catch (Throwable error) {
-        if (!Conts.isNonFatal(error)) {
-          throw error;
-        }
-        failure = error;
-      } finally {
-        // Inform the station that the transport has closed.
-        this.station.transportDidClose(this.transport);
+      failure = cause;
+    }
+    try {
+      // Inform the transport binding that the transport has closed.
+      this.transport.didClose();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
+      failure = cause;
+    }
+    try {
+      // Inform the station that the transport has closed.
+      this.station.transportDidClose(this.transport);
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
     }
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
@@ -845,10 +848,9 @@ final class StationTransport implements TransportContext, TransportRef {
         throw cause;
       }
       failure = cause;
-    } finally {
-      // Inform the station that the transport failed.
-      this.station.transportDidFail(this.transport, error);
     }
+    // Inform the station that the transport failed.
+    this.station.transportDidFail(this.transport, error);
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -877,11 +879,11 @@ final class StationReader extends AbstractTask {
         //The task yielded control but had not completed so needs to be rescheduled.
         cue();
       }
-    } catch (Throwable error) {
-      if (!Conts.isNonFatal(error)) {
-        throw error;
+    } catch (Throwable cause) {
+      if (Conts.isNonFatal(cause)) {
+        this.context.close();
       }
-      this.context.close();
+      throw cause;
     }
   }
 
@@ -902,11 +904,11 @@ final class StationWriter extends AbstractTask {
   public void runTask() {
     try {
       this.context.doWrite();
-    } catch (Throwable error) {
-      if (!Conts.isNonFatal(error)) {
-        throw error;
+    } catch (Throwable cause) {
+      if (Conts.isNonFatal(cause)) {
+        this.context.close();
       }
-      this.context.close();
+      throw cause;
     }
   }
 
@@ -956,6 +958,7 @@ final class StationThread extends Thread {
   @Override
   public void run() {
     final Station station = this.station;
+    Throwable failure = null;
 
     try {
       // Linearization point for station start.
@@ -975,30 +978,53 @@ final class StationThread extends Thread {
       } while ((Station.STATUS.get(station) & Station.STOPPED) == 0);
 
       station.willStop();
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        // Report internal station error.
-        station.didFail(error);
-      } else {
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
         // Rethrow fatal exception.
-        throw error;
+        throw cause;
       }
-    } finally {
-      // Close all registered transports.
-      closeAll();
-      try {
-        // Close the I/O selector.
-        this.selector.close();
-      } catch (IOException error) {
-        // Report I/O selector close failure.
-        station.didFail(error);
-      }
+      failure = cause;
+      // Report internal station error.
+      station.didFail(cause);
+    }
 
+    // Close all registered transports.
+    try {
+      closeAll();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        // Rethrow fatal exception.
+        throw cause;
+      }
+      failure = cause;
+    }
+    try {
+      // Close the I/O selector.
+      this.selector.close();
+    } catch (IOException cause) {
+      failure = cause;
+      // Report I/O selector close failure.
+      station.didFail(cause);
+    }
+
+    try {
       // Force the station into the stopped state.
       Station.STATUS.set(station, Station.STOPPED);
       // Linearization point for station stop.
       station.stopLatch.countDown();
       station.didStop();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        // Rethrow fatal exception.
+        throw cause;
+      }
+      failure = cause;
+    }
+
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
     }
   }
 
@@ -1022,8 +1048,17 @@ final class StationThread extends Thread {
       // Dequeue the next transport from the reselect queue.
       final StationTransport context = this.reselectQueue.poll();
       if (context != null) {
-        // Synchronize the transport's flow control state with the I/O selector.
-        reflow(context);
+        try {
+          // Synchronize the transport's flow control state with the I/O selector.
+          reflow(context);
+        } catch (Throwable cause) {
+          if (!Conts.isNonFatal(cause)) {
+            // Rethrow fatal exception.
+            throw cause;
+          }
+          // Inform station of non-fatal reflow exception.
+          this.station.transportDidFail(context.transport, cause);
+        }
       } else {
         // No more transports to reselect.
         break;
@@ -1045,7 +1080,7 @@ final class StationThread extends Thread {
       try {
         // Update the selection key's permitted I/O operations.
         selectionKey.interestOps(interestOps);
-      } catch (CancelledKeyException error) {
+      } catch (CancelledKeyException cause) {
         // Transport channel closed during the I/O operation update; complete
         // the close.
         context.didClose();
@@ -1055,17 +1090,16 @@ final class StationThread extends Thread {
       try {
         // Try to register the transport channel with the I/O selector.
         context.selectionKey = context.transport.channel().register(this.selector, interestOps, context);
-      } catch (CancelledKeyException | ClosedChannelException error) {
+      } catch (CancelledKeyException | ClosedChannelException cause) {
         // Transport channel closed during registration; complete the close.
         context.didClose();
-      } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
-          // Report transport channel registration exception.
-          context.didFail(error);
-        } else {
+      } catch (Throwable cause) {
+        if (!Conts.isNonFatal(cause)) {
           // Rethrhrow fatal exception.
-          throw error;
+          throw cause;
         }
+        // Report transport channel registration exception.
+        context.didFail(cause);
       }
     }
   }
@@ -1075,46 +1109,68 @@ final class StationThread extends Thread {
    * with the I/O selector.
    */
   void select() {
+    final int selectedCount;
     try {
       // Wait for I/O readiness events, or for timeout check time to elapse.
-      final int selectedCount = this.selector.select(this.station.transportSettings.idleInterval);
-      if (selectedCount > 0) {
-        final Iterator<SelectionKey> selectedKeys = this.selector.selectedKeys().iterator();
-        while (selectedKeys.hasNext()) {
-          // Get the next ready selection key.
-          final SelectionKey selectionKey = selectedKeys.next();
-          // Remove the key from the selected set.
-          selectedKeys.remove();
-          // Get the transport context attached to the selection key.
-          final StationTransport context = (StationTransport) selectionKey.attachment();
+      selectedCount = this.selector.select(this.station.transportSettings.idleInterval);
+    } catch (IOException cause) {
+      // Report the selector I/O exception.
+      this.station.didFail(cause);
+      return;
+    }
+    if (selectedCount > 0) {
+      final Iterator<SelectionKey> selectedKeys = this.selector.selectedKeys().iterator();
+      while (selectedKeys.hasNext()) {
+        // Get the next ready selection key.
+        final SelectionKey selectionKey = selectedKeys.next();
+        // Remove the key from the selected set.
+        selectedKeys.remove();
+        // Get the transport context attached to the selection key.
+        final Object attachment = selectionKey.attachment();
+        if (attachment instanceof StationTransport) {
+          final StationTransport context = (StationTransport) attachment;
           try {
-            // Get the set of ready I/O operations for the transport channel.
-            final int readyOps = selectionKey.readyOps();
-            if ((readyOps & SelectionKey.OP_ACCEPT) != 0) {
-              // Dispatch the ready transport accept operation.
-              doAccept(selectionKey, context);
+            // Dispatch I/O readiness events for the transport.
+            select(selectionKey, context);
+          } catch (Throwable cause) {
+            if (!Conts.isNonFatal(cause)) {
+              // Rethrow fatal exception.
+              throw cause;
             }
-            if ((readyOps & SelectionKey.OP_CONNECT) != 0) {
-              // Dispatch the ready transport connect operation.
-              doConnect(selectionKey, context);
-            }
-            if ((readyOps & SelectionKey.OP_READ) != 0) {
-              // Dispatch the ready transport read operation.
-              doRead(selectionKey, context);
-            }
-            if ((readyOps & SelectionKey.OP_WRITE) != 0) {
-              // Dispatch the ready transport write operation.
-              doWrite(selectionKey, context);
-            }
-          } catch (CancelledKeyException error) {
-            // Transport closed during select operation; complete the close.
-            context.didClose();
+            // Inform station of non-fatal reflow exception.
+            this.station.transportDidFail(context.transport, cause);
           }
         }
       }
-    } catch (IOException error) {
-      // Report the selector I/O exception.
-      this.station.didFail(error);
+    }
+  }
+
+  /**
+   * Dispatches I/O readiness events for the given transport {@code context}.
+   */
+  void select(SelectionKey selectionKey, StationTransport context) {
+    try {
+      // Get the set of ready I/O operations for the transport channel.
+      final int readyOps = selectionKey.readyOps();
+      if ((readyOps & SelectionKey.OP_ACCEPT) != 0) {
+        // Dispatch the ready transport accept operation.
+        doAccept(selectionKey, context);
+      }
+      if ((readyOps & SelectionKey.OP_CONNECT) != 0) {
+        // Dispatch the ready transport connect operation.
+        doConnect(selectionKey, context);
+      }
+      if ((readyOps & SelectionKey.OP_READ) != 0) {
+        // Dispatch the ready transport read operation.
+        doRead(selectionKey, context);
+      }
+      if ((readyOps & SelectionKey.OP_WRITE) != 0) {
+        // Dispatch the ready transport write operation.
+        doWrite(selectionKey, context);
+      }
+    } catch (CancelledKeyException cause) {
+      // Transport closed during select operation; complete the close.
+      context.didClose();
     }
   }
 
@@ -1140,18 +1196,38 @@ final class StationThread extends Thread {
           }
           // Zero indicates no idle timeout.
           if (idleTimeout > 0L && now - context.lastSelectTime > idleTimeout) {
+            Throwable failure = null;
             // Idle timeout has elapsed.
             try {
               // Close the transport channel.
               key.channel().close();
+            } catch (IOException cause) {
+              failure = cause;
+            }
+            try {
               // Timeout the transport.
               context.didTimeout();
-            } catch (IOException error) {
-              // Report the transport I/O exception.
-              this.station.transportDidFail(context.transport, error);
+            } catch (Throwable cause) {
+              if (!Conts.isNonFatal(cause)) {
+                // Rethrhrow fatal exception.
+                throw cause;
+              }
+              failure = cause;
             }
-            // Close the transport.
-            context.didClose();
+            try {
+              // Close the transport.
+              context.didClose();
+            } catch (Throwable cause) {
+              if (!Conts.isNonFatal(cause)) {
+                // Rethrhrow fatal exception.
+                throw cause;
+              }
+              failure = cause;
+            }
+            if (failure != null) {
+              // Report the transport failure.
+              this.station.transportDidFail(context.transport, failure);
+            }
           }
         }
       }
@@ -1214,14 +1290,13 @@ final class StationThread extends Thread {
       if (context != null) {
         try {
           context.close();
-        } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            // Report transport close error.
-            this.station.transportDidFail(context.transport, error);
-          } else {
+        } catch (Throwable cause) {
+          if (!Conts.isNonFatal(cause)) {
             // Rethrow fatal exception.
-            throw error;
+            throw cause;
           }
+          // Report transport close error.
+          this.station.transportDidFail(context.transport, cause);
         }
       }
     }

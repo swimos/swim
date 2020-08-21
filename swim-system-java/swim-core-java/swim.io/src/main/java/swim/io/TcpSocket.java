@@ -221,14 +221,13 @@ class TcpSocket implements Transport, IpSocketContext {
     try {
       this.channel.finishConnect();
       didConnect();
-    } catch (ConnectException error) {
+    } catch (ConnectException cause) {
       didClose();
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
-      } else {
-        throw error;
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
+      didFail(cause);
     }
   }
 
@@ -300,10 +299,23 @@ class TcpSocket implements Transport, IpSocketContext {
 
   @Override
   public void didFail(Throwable error) {
+    Throwable failure = null;
     if (!(error instanceof IOException)) {
-      this.socket.didFail(error);
+      try {
+        this.socket.didFail(error);
+      } catch (Throwable cause) {
+        if (!Conts.isNonFatal(cause)) {
+          throw cause;
+        }
+        failure = cause;
+      }
     }
     close();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
 }

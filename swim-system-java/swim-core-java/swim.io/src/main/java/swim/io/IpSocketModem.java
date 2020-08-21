@@ -347,17 +347,17 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
     this.context.flowControl(FlowModifier.DISABLE_READ_WRITE);
     Decoder<? extends I> reader = this.reading;
     this.reading = null;
+    Throwable failure = null;
     do {
       if (reader != null) {
         try {
           reader.feed(InputBuffer.done());
-        } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            // swallow
-          } else {
+        } catch (Throwable cause) {
+          if (!Conts.isNonFatal(cause)) {
             // Rethrow fatal exception.
-            throw error;
+            throw cause;
           }
+          failure = cause;
         }
       }
       reader = this.readerQueue.poll();
@@ -368,19 +368,31 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
       if (writer != null) {
         try {
           writer.pull(OutputBuffer.done());
-        } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            // swallow
-          } else {
+        } catch (Throwable cause) {
+          if (!Conts.isNonFatal(cause)) {
             // Rethrow fatal exception.
-            throw error;
+            throw cause;
           }
+          failure = cause;
         }
       }
       writer = this.writerQueue.poll();
     } while (writer != null);
-    this.modem.didDisconnect();
+    try {
+      this.modem.didDisconnect();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        // Rethrow fatal exception.
+        throw cause;
+      }
+      failure = cause;
+    }
     close();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
   @Override

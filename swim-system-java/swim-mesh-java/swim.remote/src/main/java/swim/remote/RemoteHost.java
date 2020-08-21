@@ -959,24 +959,31 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void didDisconnect() {
+    final RemoteHostMessageCont messageCont = this.messageCont;
+    if (messageCont != null) {
+      messageCont.host = null;
+      this.messageCont = null;
+    }
+    RECEIVE_BACKLOG.set(this, 0);
+
     Throwable failure = null;
     try {
-      final RemoteHostMessageCont messageCont = this.messageCont;
-      if (messageCont != null) {
-        messageCont.host = null;
-        this.messageCont = null;
-      }
-      RECEIVE_BACKLOG.set(this, 0);
       disconnectUplinks();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    }
+    try {
       this.hostContext.didDisconnect();
     } catch (Throwable cause) {
       if (!Conts.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
-    } finally {
-      reconnect();
     }
+    reconnect();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -987,24 +994,49 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   @Override
   protected void willClose() {
     super.willClose();
+    Throwable failure = null;
     try {
       closeDownlinks();
-    } finally {
-      try {
-        closeUplinks();
-      } finally {
-        try {
-          final HostContext hostContext = this.hostContext;
-          if (hostContext != null) {
-            hostContext.close();
-          }
-        } finally {
-          final WarpSocketContext warpSocketContext = this.warpSocketContext;
-          if (warpSocketContext != null) {
-            warpSocketContext.close();
-          }
-        }
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
+      failure = cause;
+    }
+    try {
+      closeUplinks();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    }
+    try {
+      final HostContext hostContext = this.hostContext;
+      if (hostContext != null) {
+        hostContext.close();
+      }
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    }
+    try {
+      final WarpSocketContext warpSocketContext = this.warpSocketContext;
+      if (warpSocketContext != null) {
+        warpSocketContext.close();
+      }
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    }
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
     }
   }
 
@@ -1022,9 +1054,8 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         throw cause;
       }
       failure = cause;
-    } finally {
-      this.hostContext.close();
     }
+    this.hostContext.close();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -1294,17 +1325,26 @@ final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
 
   @Override
   public void pull(PullContext<? super E> context) {
-    context.push(this.envelope);
-    if (this.cont != null) {
-      try {
-        this.cont.bind(this.envelope);
-      } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
-          this.cont.trap(error);
-        } else {
-          throw error;
-        }
+    Throwable failure = null;
+    try {
+      context.push(this.envelope);
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
+      failure = cause;
+    }
+    if (this.cont != null) {
+      if (failure == null) {
+        this.cont.bind(this.envelope);
+      } else {
+        this.cont.trap(failure);
+      }
+    }
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
     }
   }
 

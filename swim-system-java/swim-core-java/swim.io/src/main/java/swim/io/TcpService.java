@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import swim.concurrent.Conts;
 
 class TcpService implements Transport, IpServiceContext {
 
@@ -105,7 +106,7 @@ class TcpService implements Transport, IpServiceContext {
     final SocketChannel channel;
     try {
       channel = this.serverChannel.accept();
-    } catch (ClosedChannelException error) {
+    } catch (ClosedChannelException cause) {
       return;
     }
     if (channel == null) {
@@ -117,10 +118,17 @@ class TcpService implements Transport, IpServiceContext {
     final IpSocket socket = this.service.createSocket();
     final InetSocketAddress remoteAddress = (InetSocketAddress) channel.socket().getRemoteSocketAddress();
     final TcpSocket transport = new TcpSocket(this.localAddress, remoteAddress, channel, this.ipSettings, false);
-    transport.become(socket);
-    this.station.transport(transport, FlowControl.WAIT);
-    this.service.didAccept(socket);
-    transport.didConnect();
+    try {
+      transport.become(socket);
+      this.station.transport(transport, FlowControl.WAIT);
+      this.service.didAccept(socket);
+      transport.didConnect();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      socket.didFail(cause);
+    }
   }
 
   @Override

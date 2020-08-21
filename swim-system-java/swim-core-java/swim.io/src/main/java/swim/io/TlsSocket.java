@@ -198,7 +198,7 @@ class TlsSocket implements Transport, IpSocketContext {
   public Principal remotePrincipal() {
     try {
       return this.sslEngine.getSession().getPeerPrincipal();
-    } catch (SSLException error) {
+    } catch (SSLException cause) {
       return null;
     }
   }
@@ -210,7 +210,7 @@ class TlsSocket implements Transport, IpSocketContext {
       if (certificates != null) {
         return Arrays.asList(certificates);
       }
-    } catch (SSLException error) {
+    } catch (SSLException cause) {
       // ignore
     }
     return Collections.emptyList();
@@ -300,14 +300,13 @@ class TlsSocket implements Transport, IpSocketContext {
     try {
       this.channel.finishConnect();
       didConnect();
-    } catch (ConnectException error) {
+    } catch (ConnectException cause) {
       didClose();
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
-      } else {
-        throw error;
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
+      didFail(cause);
     }
   }
 
@@ -318,18 +317,17 @@ class TlsSocket implements Transport, IpSocketContext {
       final SSLEngineResult result;
       try {
         result = this.sslEngine.unwrap(this.readBuffer, this.inputBuffer);
-      } catch (SSLException error) {
-        this.socket.didFail(error);
+      } catch (SSLException cause) {
+        this.socket.didFail(cause);
         this.context.close();
         return;
-      } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
-          this.socket.didFail(error);
-          this.context.close();
-          return;
-        } else {
-          throw error;
+      } catch (Throwable cause) {
+        if (!Conts.isNonFatal(cause)) {
+          throw cause;
         }
+        this.socket.didFail(cause);
+        this.context.close();
+        return;
       }
       final SSLEngineResult.Status sslStatus = result.getStatus();
       SSLEngineResult.HandshakeStatus handshakeStatus;
@@ -422,18 +420,17 @@ class TlsSocket implements Transport, IpSocketContext {
     final SSLEngineResult result;
     try {
       result = this.sslEngine.wrap(this.outputBuffer, this.writeBuffer);
-    } catch (SSLException error) {
-      this.socket.didFail(error);
+    } catch (SSLException cause) {
+      this.socket.didFail(cause);
       this.context.close();
       return;
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        this.socket.didFail(error);
-        this.context.close();
-        return;
-      } else {
-        throw error;
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
       }
+      this.socket.didFail(cause);
+      this.context.close();
+      return;
     }
     final SSLEngineResult.Status sslStatus = result.getStatus();
     switch (sslStatus) {
@@ -654,10 +651,23 @@ class TlsSocket implements Transport, IpSocketContext {
 
   @Override
   public void didFail(Throwable error) {
+    Throwable failure = null;
     if (!(error instanceof IOException)) {
-      this.socket.didFail(error);
+      try {
+        this.socket.didFail(error);
+      } catch (Throwable cause) {
+        if (!Conts.isNonFatal(cause)) {
+          throw cause;
+        }
+        failure = cause;
+      }
     }
     this.context.close();
+    if (failure instanceof RuntimeException) {
+      throw (RuntimeException) failure;
+    } else if (failure instanceof Error) {
+      throw (Error) failure;
+    }
   }
 
 }
