@@ -54,6 +54,8 @@ public class WebServer extends AbstractWarpServer {
   WebRoute router;
 
   public WebServer(KernelContext kernel, WebServiceDef serviceDef, WebRoute router) {
+    super(serviceDef.warpSettings);
+
     this.kernel = kernel;
     this.serviceDef = serviceDef;
 

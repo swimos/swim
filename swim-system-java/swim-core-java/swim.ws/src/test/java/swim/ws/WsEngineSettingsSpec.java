@@ -15,6 +15,9 @@
 package swim.ws;
 
 import org.testng.annotations.Test;
+import swim.collections.FingerTrieSeq;
+import swim.http.WebSocketExtension;
+import swim.http.WebSocketParam;
 import swim.structure.Record;
 import swim.structure.Slot;
 import swim.structure.Value;
@@ -50,6 +53,33 @@ public class WsEngineSettingsSpec {
             .clientNoContextTakeover(true)
             .serverMaxWindowBits(11)
             .clientMaxWindowBits(13));
+  }
+
+  @Test
+  public void wsExtensions() {
+    final WsEngineSettings wsEngineSettings = WsEngineSettings.standard().maxFrameSize(2048)
+        .maxMessageSize(4096)
+        .serverCompressionLevel(7)
+        .clientCompressionLevel(9)
+        .serverNoContextTakeover(true)
+        .clientNoContextTakeover(true)
+        .serverMaxWindowBits(11)
+        .clientMaxWindowBits(15);
+
+    final FingerTrieSeq<WebSocketExtension> requestExtensions = FingerTrieSeq.of(WebSocketExtension.permessageDeflate(false, false, 10, 10));
+    final FingerTrieSeq<WebSocketExtension> responseExtensions = wsEngineSettings.acceptExtensions(requestExtensions);
+
+    assertEquals(responseExtensions.size(), 1);
+    final WebSocketExtension responseDeflateExtension = responseExtensions.get(0);
+    final WebSocketExtension expected = WebSocketExtension.from(
+        "permessage-deflate",
+        WebSocketParam.from("server_no_context_takeover"),
+        WebSocketParam.from("client_no_context_takeover"),
+        WebSocketParam.from("server_max_window_bits", "10"),
+        WebSocketParam.from("client_max_window_bits", "10")
+    );
+
+    assertEquals(responseDeflateExtension, expected);
   }
 
 }
