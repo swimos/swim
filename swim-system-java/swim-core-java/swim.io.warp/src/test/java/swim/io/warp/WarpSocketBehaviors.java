@@ -352,16 +352,19 @@ public abstract class WarpSocketBehaviors {
                     public float prio() {
                       return 0.0f;
                     }
+
                     @Override
                     public void pull(swim.concurrent.PullContext<? super Envelope> context) {
                       permits.incrementAndGet();
                       context.push(envelope);
                     }
+
                     @Override
                     public void drop(Throwable reason) {
                       permits.incrementAndGet();
                       throw new TestException("drop");
                     }
+                    
                     @Override
                     public boolean stay(swim.concurrent.StayContext context, int backlog) {
                       return true;
