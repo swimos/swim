@@ -57,7 +57,7 @@ public class WsEngineSettingsSpec {
 
   @Test
   public void wsExtensions() {
-    WsEngineSettings wsEngineSettings = WsEngineSettings.standard().maxFrameSize(2048)
+    final WsEngineSettings wsEngineSettings = WsEngineSettings.standard().maxFrameSize(2048)
         .maxMessageSize(4096)
         .serverCompressionLevel(7)
         .clientCompressionLevel(9)
@@ -66,12 +66,12 @@ public class WsEngineSettingsSpec {
         .serverMaxWindowBits(11)
         .clientMaxWindowBits(15);
 
-    FingerTrieSeq<WebSocketExtension> requestExtensions = FingerTrieSeq.of(WebSocketExtension.permessageDeflate(false, false, 10, 10));
-    FingerTrieSeq<WebSocketExtension> responseExtensions = wsEngineSettings.acceptExtensions(requestExtensions);
+    final FingerTrieSeq<WebSocketExtension> requestExtensions = FingerTrieSeq.of(WebSocketExtension.permessageDeflate(false, false, 10, 10));
+    final FingerTrieSeq<WebSocketExtension> responseExtensions = wsEngineSettings.acceptExtensions(requestExtensions);
 
     assertEquals(responseExtensions.size(), 1);
-    WebSocketExtension responseDeflateExtension = responseExtensions.get(0);
-    WebSocketExtension expected = WebSocketExtension.from(
+    final WebSocketExtension responseDeflateExtension = responseExtensions.get(0);
+    final WebSocketExtension expected = WebSocketExtension.from(
         "permessage-deflate",
         WebSocketParam.from("server_no_context_takeover"),
         WebSocketParam.from("client_no_context_takeover"),
