@@ -22,6 +22,7 @@ import swim.structure.Record;
 import swim.structure.Slot;
 import swim.structure.Value;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 public class WsEngineSettingsSpec {
 
@@ -96,6 +97,7 @@ public class WsEngineSettingsSpec {
     try {
       final FingerTrieSeq<WebSocketExtension> requestExtensions = FingerTrieSeq.of(WebSocketExtension.permessageDeflate(false, false, 15, 1));
       wsEngineSettings.acceptExtensions(requestExtensions);
+      fail();
     } catch (WsException e) {
       assertEquals(e.getLocalizedMessage(), "invalid permessage-deflate parameter: client_max_window_bits; client_max_window_bits=1");
     }
@@ -103,6 +105,7 @@ public class WsEngineSettingsSpec {
     try {
       final FingerTrieSeq<WebSocketExtension> requestExtensions = FingerTrieSeq.of(WebSocketExtension.permessageDeflate(false, false, 1, 15));
       wsEngineSettings.acceptExtensions(requestExtensions);
+      fail();
     } catch (WsException e) {
       assertEquals(e.getLocalizedMessage(), "invalid permessage-deflate parameter: server_max_window_bits; server_max_window_bits=1");
     }
