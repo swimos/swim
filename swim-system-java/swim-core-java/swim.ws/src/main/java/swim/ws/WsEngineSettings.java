@@ -261,6 +261,10 @@ public class WsEngineSettings implements Debug {
           } else if ("server_max_window_bits".equals(key)) {
             try {
               requestServerMaxWindowBits = Integer.parseInt(value);
+
+              if (requestServerMaxWindowBits < 8 || requestServerMaxWindowBits > 15) {
+                throw new WsException("invalid permessage-deflate parameter: server_max_window_bits; " + param.toHttp());
+              }
             } catch (NumberFormatException error) {
               throw new WsException("invalid permessage-deflate; " + param.toHttp());
             }
@@ -270,6 +274,10 @@ public class WsEngineSettings implements Debug {
             } else {
               try {
                 requestClientMaxWindowBits = Integer.parseInt(value);
+
+                if (requestClientMaxWindowBits < 8 || requestClientMaxWindowBits > 15) {
+                  throw new WsException("invalid permessage-deflate parameter: client_max_window_bits; " + param.toHttp());
+                }
               } catch (NumberFormatException error) {
                 throw new WsException("invalid permessage-deflate; " + param.toHttp());
               }
@@ -283,6 +291,7 @@ public class WsEngineSettings implements Debug {
         } else if (requestClientMaxWindowBits == 0) {
           requestClientMaxWindowBits = clientMaxWindowBits;
         }
+
         permessageDeflate = WebSocketExtension.permessageDeflate(
             requestServerNoContextTakeover || this.serverNoContextTakeover,
             requestClientNoContextTakeover || this.clientNoContextTakeover,
