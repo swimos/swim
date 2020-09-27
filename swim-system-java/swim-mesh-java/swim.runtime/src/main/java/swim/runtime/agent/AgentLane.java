@@ -71,6 +71,16 @@ public class AgentLane implements LaneContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLane(Class<T> laneClass) {
+    if (laneClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public final LaneAddress cellAddress() {
     return this.laneAddress;

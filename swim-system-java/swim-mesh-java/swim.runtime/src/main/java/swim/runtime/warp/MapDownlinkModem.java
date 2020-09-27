@@ -53,7 +53,7 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
     final float prio = prio();
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
     this.upQueue.add(new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
-        prio, null, message, cont));
+                                              prio, null, message, cont));
   }
 
   public void cueUpKey(Value key) {
@@ -110,7 +110,7 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
       final Value body = nextUpKey(key);
       final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
       return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
-          prio, null, message, null);
+                                      prio, null, message, null);
     } else {
       return null;
     }

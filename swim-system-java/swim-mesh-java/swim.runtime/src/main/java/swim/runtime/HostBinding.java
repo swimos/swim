@@ -30,6 +30,8 @@ public interface HostBinding extends TierBinding, CellBinding {
 
   <T> T unwrapHost(Class<T> hostClass);
 
+  <T> T bottomHost(Class<T> hostClass);
+
   HostAddress cellAddress();
 
   Uri meshUri();

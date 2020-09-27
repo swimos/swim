@@ -76,6 +76,16 @@ public class TestHostContext extends TestCellContext implements HostContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomHost(Class<T> hostClass) {
+    if (hostClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public HostAddress cellAddress() {
     return new HostAddress(edgeName(), meshUri(), partKey(), hostUri());

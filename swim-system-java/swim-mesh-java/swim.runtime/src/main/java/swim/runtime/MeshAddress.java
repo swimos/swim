@@ -21,9 +21,8 @@ import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Murmur3;
 
-public final class MeshAddress extends CellAddress implements Debug {
+public final class MeshAddress implements EdgeAddressed, MeshAddressed, Debug {
 
-  private static int hashSeed;
   final String edgeName;
   final Uri meshUri;
 
@@ -32,26 +31,22 @@ public final class MeshAddress extends CellAddress implements Debug {
     this.meshUri = meshUri;
   }
 
-  public static MeshAddress from(String edgeName, Uri meshUri) {
-    return new MeshAddress(edgeName, meshUri);
-  }
-
-  public static MeshAddress from(String edgeName, String meshUri) {
-    return new MeshAddress(edgeName, Uri.parse(meshUri));
-  }
-
+  @Override
   public String edgeName() {
     return this.edgeName;
   }
 
+  @Override
   public Uri meshUri() {
     return this.meshUri;
   }
 
+  @Override
   public MeshAddress meshUri(Uri meshUri) {
     return copy(this.edgeName, meshUri);
   }
 
+  @Override
   public MeshAddress meshUri(String meshUri) {
     return meshUri(Uri.parse(meshUri));
   }
@@ -60,6 +55,7 @@ public final class MeshAddress extends CellAddress implements Debug {
     return new MeshAddress(edgeName, meshUri);
   }
 
+  @Override
   public PartAddress partKey(Value partKey) {
     return new PartAddress(this.edgeName, this.meshUri, partKey);
   }
@@ -93,6 +89,16 @@ public final class MeshAddress extends CellAddress implements Debug {
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static int hashSeed;
+
+  public static MeshAddress from(String edgeName, Uri meshUri) {
+    return new MeshAddress(edgeName, meshUri);
+  }
+
+  public static MeshAddress from(String edgeName, String meshUri) {
+    return new MeshAddress(edgeName, Uri.parse(meshUri));
   }
 
 }

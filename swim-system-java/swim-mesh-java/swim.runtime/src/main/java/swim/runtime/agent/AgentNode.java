@@ -146,6 +146,16 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomNode(Class<T> nodeClass) {
+    T node = this.nodeContext.bottomNode(nodeClass);
+    if (node == null && nodeClass.isAssignableFrom(getClass())) {
+      node = (T) this;
+    }
+    return node;
+  }
+
   @Override
   public final TaskContext taskContext() {
     return this.taskContext;
@@ -464,7 +474,10 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   @Override
   public void openUplink(LinkBinding link) {
     final Uri laneUri = normalizezLaneUri(link.laneUri());
-    final LaneBinding laneBinding = getLane(laneUri);
+    LaneBinding laneBinding = getLane(laneUri);
+    if (laneBinding != null) {
+      laneBinding = laneBinding.bottomLane(LaneBinding.class);
+    }
     if (laneBinding != null) {
       laneBinding.openUplink(link);
     } else if (link instanceof WarpBinding) {
@@ -493,7 +506,10 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   @Override
   public void pushUp(Push<?> push) {
     final Uri laneUri = push.laneUri();
-    final LaneBinding laneBinding = getLane(laneUri);
+    LaneBinding laneBinding = getLane(laneUri);
+    if (laneBinding != null) {
+      laneBinding = laneBinding.bottomLane(LaneBinding.class);
+    }
     if (laneBinding != null) {
       laneBinding.pushUp(push);
     } else {

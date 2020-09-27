@@ -19,17 +19,12 @@ import swim.codec.Format;
 import swim.codec.Output;
 import swim.util.Murmur3;
 
-public final class StoreAddress extends CellAddress implements Debug {
+public final class StoreAddress implements CellAddress, Debug {
 
-  private static int hashSeed;
   final String storeName;
 
   public StoreAddress(String storeName) {
     this.storeName = storeName;
-  }
-
-  public static StoreAddress from(String storeName) {
-    return new StoreAddress(storeName);
   }
 
   public String storeName() {
@@ -74,4 +69,9 @@ public final class StoreAddress extends CellAddress implements Debug {
     return Format.debug(this);
   }
 
+  private static int hashSeed;
+
+  public static StoreAddress from(String storeName) {
+    return new StoreAddress(storeName);
+  }
 }

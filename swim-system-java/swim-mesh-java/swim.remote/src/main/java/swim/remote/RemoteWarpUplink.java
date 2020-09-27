@@ -35,6 +35,7 @@ import swim.runtime.WarpBinding;
 import swim.runtime.WarpContext;
 import swim.structure.Value;
 import swim.uri.Uri;
+import swim.warp.CommandMessage;
 import swim.warp.Envelope;
 
 class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
@@ -71,6 +72,16 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLink(Class<T> linkClass) {
+    if (linkClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLink(Class<T> linkClass) {
     if (linkClass.isAssignableFrom(getClass())) {
       return (T) this;
     } else {
@@ -256,6 +267,10 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
         this.pullContext.push(remoteEnvelope);
         this.pullContext = null;
         push.bind();
+        if (remoteEnvelope instanceof CommandMessage) {
+          RemoteHost.UPLINK_COMMAND_DELTA.incrementAndGet(this.host);
+          this.host.didUpdateMetrics();
+        }
       }
     } else {
       push.trap(new LinkException("unsupported message: " + message));

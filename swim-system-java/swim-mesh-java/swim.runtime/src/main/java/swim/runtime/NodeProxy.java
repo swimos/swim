@@ -77,6 +77,16 @@ public class NodeProxy implements NodeBinding, NodeContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomNode(Class<T> nodeClass) {
+    T node = this.nodeContext.bottomNode(nodeClass);
+    if (node == null && nodeClass.isAssignableFrom(getClass())) {
+      node = (T) this;
+    }
+    return node;
+  }
+
   @Override
   public NodeAddress cellAddress() {
     return this.nodeContext.cellAddress();

@@ -37,6 +37,8 @@ public interface LaneBinding extends TierBinding, CellBinding, Log {
 
   <T> T unwrapLane(Class<T> laneClass);
 
+  <T> T bottomLane(Class<T> laneClass);
+
   LaneAddress cellAddress();
 
   Uri meshUri();

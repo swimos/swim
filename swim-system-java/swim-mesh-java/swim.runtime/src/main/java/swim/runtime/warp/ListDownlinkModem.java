@@ -66,7 +66,7 @@ public abstract class ListDownlinkModem<View extends WarpDownlinkView> extends W
       final Value body = delta.toValue();
       final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
       return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
-          prio, null, message, null);
+                                      prio, null, message, null);
     } else {
       return null;
     }

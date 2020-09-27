@@ -78,6 +78,16 @@ public class MeshProxy implements MeshBinding, MeshContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomMesh(Class<T> meshClass) {
+    T mesh = this.meshContext.bottomMesh(meshClass);
+    if (mesh == null && meshClass.isAssignableFrom(getClass())) {
+      mesh = (T) this;
+    }
+    return mesh;
+  }
+
   @Override
   public MeshAddress cellAddress() {
     return this.meshContext.cellAddress();

@@ -257,6 +257,16 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomEdge(Class<T> edgeClass) {
+    T edge = this.edgeContext.bottomEdge(edgeClass);
+    if (edge == null && edgeClass.isAssignableFrom(getClass())) {
+      edge = (T) this;
+    }
+    return edge;
+  }
+
   protected MeshContext createMeshContext(MeshAddress meshAddress, MeshBinding mesh) {
     return new EdgeTableMesh(this, mesh, meshAddress);
   }
@@ -523,13 +533,15 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   public LinkBinding bindDownlink(Downlink downlink) {
     final LinkBinding link = ((DownlinkView) downlink).createDownlinkModel();
     link.setCellContext(this);
-    openUplink(link);
+    final EdgeBinding edgeBinding = bottomEdge(EdgeBinding.class);
+    edgeBinding.openUplink(link);
     return link;
   }
 
   @Override
   public void openDownlink(LinkBinding link) {
-    openUplink(link);
+    final EdgeBinding edgeBinding = bottomEdge(EdgeBinding.class);
+    edgeBinding.openUplink(link);
     link.setCellContext(this);
   }
 
@@ -540,7 +552,10 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
 
   @Override
   public void openUplink(LinkBinding link) {
-    final MeshBinding meshBinding = openMesh(link.meshUri());
+    MeshBinding meshBinding = openMesh(link.meshUri());
+    if (meshBinding != null) {
+      meshBinding = meshBinding.bottomMesh(MeshBinding.class);
+    }
     if (meshBinding != null) {
       meshBinding.openUplink(link);
     } else {
@@ -556,7 +571,10 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @Override
   public void pushUp(Push<?> push) {
     final Uri meshUri = push.meshUri();
-    final MeshBinding meshBinding = openMesh(meshUri);
+    MeshBinding meshBinding = openMesh(meshUri);
+    if (meshBinding != null) {
+      meshBinding = meshBinding.bottomMesh(MeshBinding.class);
+    }
     if (meshBinding != null) {
       meshBinding.pushUp(push);
     } else {

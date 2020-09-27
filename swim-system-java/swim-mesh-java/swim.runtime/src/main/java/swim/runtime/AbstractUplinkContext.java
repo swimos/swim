@@ -49,6 +49,16 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLink(Class<T> linkClass) {
+    if (linkClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   public abstract Stage stage();
 
   @Override

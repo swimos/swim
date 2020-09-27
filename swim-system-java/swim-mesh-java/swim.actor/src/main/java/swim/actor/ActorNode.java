@@ -98,6 +98,16 @@ public class ActorNode extends ActorTier implements NodeBinding, NodeContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomNode(Class<T> nodeClass) {
+    T node = this.nodeContext.bottomNode(nodeClass);
+    if (node == null && nodeClass.isAssignableFrom(getClass())) {
+      node = (T) this;
+    }
+    return node;
+  }
+
   @Override
   public final CellBinding cellBinding() {
     return this.nodeBinding;

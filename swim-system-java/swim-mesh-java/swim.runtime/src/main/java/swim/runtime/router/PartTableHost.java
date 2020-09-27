@@ -72,6 +72,17 @@ public class PartTableHost implements HostContext {
     }
   }
 
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomHost(Class<T> hostClass) {
+    if (hostClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public final HostAddress cellAddress() {
     return this.hostAddress;

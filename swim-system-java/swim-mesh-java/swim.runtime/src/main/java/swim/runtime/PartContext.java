@@ -31,6 +31,8 @@ public interface PartContext extends TierContext, CellContext {
 
   <T> T unwrapPart(Class<T> partClass);
 
+  <T> T bottomPart(Class<T> partClass);
+
   @Override
   PartAddress cellAddress();
 

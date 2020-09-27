@@ -102,6 +102,16 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomHost(Class<T> hostClass) {
+    T host = this.hostContext.bottomHost(hostClass);
+    if (host == null && hostClass.isAssignableFrom(getClass())) {
+      host = (T) this;
+    }
+    return host;
+  }
+
   @Override
   public final CellBinding cellBinding() {
     return this.hostBinding;

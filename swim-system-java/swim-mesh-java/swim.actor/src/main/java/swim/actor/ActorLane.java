@@ -95,6 +95,16 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLane(Class<T> laneClass) {
+    T lane = this.laneContext.bottomLane(laneClass);
+    if (lane == null && laneClass.isAssignableFrom(getClass())) {
+      lane = (T) this;
+    }
+    return lane;
+  }
+
   @Override
   public final CellBinding cellBinding() {
     return this.laneBinding;

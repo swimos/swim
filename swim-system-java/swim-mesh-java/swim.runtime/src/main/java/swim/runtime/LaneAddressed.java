@@ -14,6 +14,15 @@
 
 package swim.runtime;
 
-public interface LinkAddress extends CellAddress {
+import swim.structure.Value;
+import swim.uri.Uri;
 
+public interface LaneAddressed extends CellAddress {
+  Uri laneUri();
+
+  LaneAddressed laneUri(Uri laneUri);
+
+  LaneAddressed laneUri(String laneUri);
+
+  UplinkAddressed linkKey(Value linkKey);
 }

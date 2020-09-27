@@ -90,6 +90,16 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLane(Class<T> laneClass) {
+    T lane = this.laneContext.bottomLane(laneClass);
+    if (lane == null && laneClass.isAssignableFrom(getClass())) {
+      lane = (T) this;
+    }
+    return lane;
+  }
+
   protected abstract U createUplink(LinkBinding link);
 
   protected UplinkAddress createUplinkAddress(LinkBinding link) {

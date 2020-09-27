@@ -78,6 +78,16 @@ public class HostProxy implements HostBinding, HostContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomHost(Class<T> hostClass) {
+    T host = this.hostContext.bottomHost(hostClass);
+    if (host == null && hostClass.isAssignableFrom(getClass())) {
+      host = (T) this;
+    }
+    return host;
+  }
+
   @Override
   public HostAddress cellAddress() {
     return this.hostContext.cellAddress();

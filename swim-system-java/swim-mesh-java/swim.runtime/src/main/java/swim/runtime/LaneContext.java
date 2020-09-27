@@ -26,6 +26,8 @@ public interface LaneContext extends TierContext, CellContext {
 
   <T> T unwrapLane(Class<T> laneClass);
 
+  <T> T bottomLane(Class<T> laneClass);
+
   @Override
   LaneAddress cellAddress();
 

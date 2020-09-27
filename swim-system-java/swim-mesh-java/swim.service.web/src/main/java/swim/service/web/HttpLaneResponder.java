@@ -40,8 +40,8 @@ import swim.uri.Uri;
 public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
 
   final Uri meshUri;
-  final Uri hostUri;
-  final Uri nodeUri;
+  Uri hostUri;
+  Uri nodeUri;
   final Uri laneUri;
   final HttpRequest<?> request;
 
@@ -101,6 +101,16 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLink(Class<T> linkClass) {
+    T link = this.linkContext.bottomLink(linkClass);
+    if (link == null && linkClass.isAssignableFrom(getClass())) {
+      link = (T) this;
+    }
+    return link;
+  }
+
   @Override
   public Uri meshUri() {
     return this.meshUri;
@@ -112,8 +122,18 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
   }
 
   @Override
+  public void setHostUri(Uri hostUri) {
+    this.hostUri = hostUri;
+  }
+
+  @Override
   public Uri nodeUri() {
     return this.nodeUri;
+  }
+
+  @Override
+  public void setNodeUri(Uri nodeUri) {
+    this.nodeUri = nodeUri;
   }
 
   @Override

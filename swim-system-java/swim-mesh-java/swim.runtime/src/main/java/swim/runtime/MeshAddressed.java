@@ -14,6 +14,15 @@
 
 package swim.runtime;
 
-public interface LinkAddress extends CellAddress {
+import swim.structure.Value;
+import swim.uri.Uri;
 
+public interface MeshAddressed extends CellAddress {
+  Uri meshUri();
+
+  MeshAddressed meshUri(Uri meshUri);
+
+  MeshAddressed meshUri(String meshUri);
+
+  PartAddressed partKey(Value partKey);
 }

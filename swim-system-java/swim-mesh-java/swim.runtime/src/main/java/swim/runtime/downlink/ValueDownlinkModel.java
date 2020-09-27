@@ -82,7 +82,7 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
     final Value body = this.state;
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
     return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
-        prio, null, message, null);
+                                    prio, null, message, null);
   }
 
   @Override

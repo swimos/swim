@@ -68,6 +68,16 @@ public class HostTableNode implements NodeContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomNode(Class<T> nodeClass) {
+    if (nodeClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public final NodeAddress cellAddress() {
     return this.nodeAddress;

@@ -105,6 +105,15 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public <T> T bottomNode(Class<T> nodeClass) {
+    if (nodeClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public NodeAddress cellAddress() {
     return this.node.cellAddress();

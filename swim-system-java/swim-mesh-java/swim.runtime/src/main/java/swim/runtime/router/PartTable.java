@@ -251,6 +251,16 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomPart(Class<T> partClass) {
+    T part = this.partContext.bottomPart(partClass);
+    if (part == null && partClass.isAssignableFrom(getClass())) {
+      part = (T) this;
+    }
+    return part;
+  }
+
   protected HostContext createHostContext(HostAddress hostAddress, HostBinding host) {
     return new PartTableHost(this, host, hostAddress);
   }
@@ -557,6 +567,9 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
       hostBinding = openHost(hostUri);
     }
     if (hostBinding != null) {
+      hostBinding = hostBinding.bottomHost(HostBinding.class);
+    }
+    if (hostBinding != null) {
       if (link instanceof WarpBinding) {
         hostBinding.openUplink(new PartTableWarpUplink(this, (WarpBinding) link));
       } else if (link instanceof HttpBinding) {
@@ -601,6 +614,9 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
     }
     if (hostBinding == null) {
       hostBinding = openHost(hostUri);
+    }
+    if (hostBinding != null) {
+      hostBinding = hostBinding.bottomHost(HostBinding.class);
     }
     if (hostBinding != null) {
       hostBinding.pushUp(push);

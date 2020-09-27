@@ -30,6 +30,8 @@ public interface MeshBinding extends TierBinding, CellBinding, CellContext {
 
   <T> T unwrapMesh(Class<T> meshClass);
 
+  <T> T bottomMesh(Class<T> meshClass);
+
   MeshAddress cellAddress();
 
   Uri meshUri();

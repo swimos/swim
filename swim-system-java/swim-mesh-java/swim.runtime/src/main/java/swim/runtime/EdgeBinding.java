@@ -27,6 +27,8 @@ public interface EdgeBinding extends TierBinding, CellBinding, CellContext {
 
   <T> T unwrapEdge(Class<T> edgeClass);
 
+  <T> T bottomEdge(Class<T> edgeClass);
+
   EdgeAddress cellAddress();
 
   String edgeName();

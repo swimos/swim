@@ -14,6 +14,10 @@
 
 package swim.runtime;
 
-public interface LinkAddress extends CellAddress {
+import swim.structure.Value;
 
+public interface UplinkAddressed extends LinkAddress {
+  Value linkKey();
+
+  UplinkAddressed linkKey(Value linkKey);
 }

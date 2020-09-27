@@ -58,6 +58,16 @@ public class HttpErrorUplinkModem implements HttpContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLink(Class<T> linkClass) {
+    if (linkClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public Value linkKey() {
     return Value.absent(); // never opened

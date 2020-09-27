@@ -106,6 +106,16 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomPart(Class<T> partClass) {
+    T part = this.partContext.bottomPart(partClass);
+    if (part == null && partClass.isAssignableFrom(getClass())) {
+      part = (T) this;
+    }
+    return part;
+  }
+
   @Override
   public final CellBinding cellBinding() {
     return this.partBinding;

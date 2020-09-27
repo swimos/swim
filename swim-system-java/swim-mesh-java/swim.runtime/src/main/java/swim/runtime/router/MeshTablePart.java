@@ -74,6 +74,16 @@ public class MeshTablePart implements PartContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomPart(Class<T> partClass) {
+    if (partClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public final PartAddress cellAddress() {
     return this.partAddress;

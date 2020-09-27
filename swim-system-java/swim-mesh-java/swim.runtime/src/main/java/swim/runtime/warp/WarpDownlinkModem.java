@@ -401,7 +401,7 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   protected void pushUp(Envelope envelope) {
     this.linkContext.pushUp(new Push<Envelope>(Uri.empty(), hostUri(), nodeUri(), laneUri(),
-        prio(), null, envelope, null));
+                                               prio(), null, envelope, null));
   }
 
   public void link() {

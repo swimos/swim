@@ -64,6 +64,16 @@ public class WarpErrorUplinkModem implements WarpContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLink(Class<T> linkClass) {
+    if (linkClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public Value linkKey() {
     return Value.absent(); // never opened
@@ -162,7 +172,7 @@ public class WarpErrorUplinkModem implements WarpContext {
     if (oldStatus != newStatus) {
       final UnlinkedResponse response = getUnlinkedResponse();
       this.linkBinding.pushDown(new Push<UnlinkedResponse>(Uri.empty(), this.linkBinding.hostUri(), this.linkBinding.nodeUri(),
-          this.linkBinding.laneUri(), this.linkBinding.prio(), null, response, null));
+                                                           this.linkBinding.laneUri(), this.linkBinding.prio(), null, response, null));
     } else {
       this.linkBinding.skipDown();
     }

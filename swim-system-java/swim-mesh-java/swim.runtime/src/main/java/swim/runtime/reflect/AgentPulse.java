@@ -48,7 +48,7 @@ public class AgentPulse extends Pulse {
 
   @Override
   public boolean isDefined() {
-    return this.agentCount != 0L || this.execRate != 9L || this.execTime != 0L
+    return this.agentCount != 0L || this.execRate != 0L || this.execTime != 0L
         || this.timerEventRate != 0 || this.timerEventCount != 0L;
   }
 

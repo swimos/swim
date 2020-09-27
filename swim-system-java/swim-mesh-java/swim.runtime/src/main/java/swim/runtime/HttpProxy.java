@@ -25,7 +25,7 @@ import swim.http.HttpResponse;
 import swim.structure.Value;
 import swim.uri.Uri;
 
-public class HttpProxy implements HttpBinding, HttpContext {
+public abstract class HttpProxy implements HttpBinding, HttpContext {
 
   protected final HttpBinding linkBinding;
   protected HttpContext linkContext;
@@ -34,13 +34,13 @@ public class HttpProxy implements HttpBinding, HttpContext {
     this.linkBinding = linkBinding;
   }
 
+  public final HttpBinding linkBinding() {
+    return this.linkBinding;
+  }
+
   @Override
   public final HttpBinding linkWrapper() {
     return this.linkBinding.linkWrapper();
-  }
-
-  public final HttpBinding linkBinding() {
-    return this.linkBinding;
   }
 
   @Override
@@ -74,6 +74,16 @@ public class HttpProxy implements HttpBinding, HttpContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLink(Class<T> linkClass) {
+    T link = this.linkContext.bottomLink(linkClass);
+    if (link == null && linkClass.isAssignableFrom(getClass())) {
+      link = (T) this;
+    }
+    return link;
+  }
+
   @Override
   public Uri requestUri() {
     return this.linkBinding.requestUri();
@@ -95,8 +105,18 @@ public class HttpProxy implements HttpBinding, HttpContext {
   }
 
   @Override
+  public void setHostUri(Uri hostUri) {
+    this.linkBinding.setHostUri(hostUri);
+  }
+
+  @Override
   public Uri nodeUri() {
     return this.linkBinding.nodeUri();
+  }
+
+  @Override
+  public void setNodeUri(Uri nodeUri) {
+    this.linkBinding.setNodeUri(nodeUri);
   }
 
   @Override

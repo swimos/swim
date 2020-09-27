@@ -21,9 +21,8 @@ import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Murmur3;
 
-public final class LaneAddress extends CellAddress implements Debug {
+public final class LaneAddress implements EdgeAddressed, MeshAddressed, PartAddressed, HostAddressed, NodeAddressed, LaneAddressed, Debug {
 
-  private static int hashSeed;
   final String edgeName;
   final Uri meshUri;
   final Value partKey;
@@ -40,73 +39,77 @@ public final class LaneAddress extends CellAddress implements Debug {
     this.laneUri = laneUri;
   }
 
-  public static LaneAddress from(String edgeName, Uri meshUri, Value partKey,
-                                 Uri hostUri, Uri nodeUri, Uri laneUri) {
-    return new LaneAddress(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri);
-  }
-
-  public static LaneAddress from(String edgeName, String meshUri, Value partKey,
-                                 String hostUri, String nodeUri, String laneUri) {
-    return new LaneAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri),
-        Uri.parse(nodeUri), Uri.parse(laneUri));
-  }
-
+  @Override
   public String edgeName() {
     return this.edgeName;
   }
 
+  @Override
   public Uri meshUri() {
     return this.meshUri;
   }
 
+  @Override
   public LaneAddress meshUri(Uri meshUri) {
     return copy(this.edgeName, meshUri, this.partKey, this.hostUri, this.nodeUri, this.laneUri);
   }
 
+  @Override
   public LaneAddress meshUri(String meshUri) {
     return meshUri(Uri.parse(meshUri));
   }
 
+  @Override
   public Value partKey() {
     return this.partKey;
   }
 
+  @Override
   public LaneAddress partKey(Value partKey) {
     return copy(this.edgeName, this.meshUri, partKey, this.hostUri, this.nodeUri, this.laneUri);
   }
 
+  @Override
   public Uri hostUri() {
     return this.hostUri;
   }
 
+  @Override
   public LaneAddress hostUri(Uri hostUri) {
     return copy(this.edgeName, this.meshUri, this.partKey, hostUri, this.nodeUri, this.laneUri);
   }
 
+  @Override
   public LaneAddress hostUri(String hostUri) {
     return hostUri(Uri.parse(hostUri));
   }
 
+  @Override
   public Uri nodeUri() {
     return this.nodeUri;
   }
 
+  @Override
   public LaneAddress nodeUri(Uri nodeUri) {
     return copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, nodeUri, this.laneUri);
   }
 
+  @Override
   public LaneAddress nodeUri(String nodeUri) {
     return nodeUri(Uri.parse(nodeUri));
   }
 
+  @Override
   public Uri laneUri() {
     return this.laneUri;
   }
 
+  @Override
   public LaneAddress laneUri(Uri laneUri) {
     return copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, this.nodeUri, laneUri);
   }
 
+  @Override
   public LaneAddress laneUri(String laneUri) {
     return laneUri(Uri.parse(laneUri));
   }
@@ -115,6 +118,7 @@ public final class LaneAddress extends CellAddress implements Debug {
     return new LaneAddress(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri);
   }
 
+  @Override
   public UplinkAddress linkKey(Value linkKey) {
     return new UplinkAddress(this.edgeName, this.meshUri, this.partKey, this.hostUri, this.nodeUri, this.laneUri, linkKey);
   }
@@ -155,4 +159,16 @@ public final class LaneAddress extends CellAddress implements Debug {
     return Format.debug(this);
   }
 
+  private static int hashSeed;
+
+  public static LaneAddress from(String edgeName, Uri meshUri, Value partKey,
+                                 Uri hostUri, Uri nodeUri, Uri laneUri) {
+    return new LaneAddress(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri);
+  }
+
+  public static LaneAddress from(String edgeName, String meshUri, Value partKey,
+                                 String hostUri, String nodeUri, String laneUri) {
+    return new LaneAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri),
+                           Uri.parse(nodeUri), Uri.parse(laneUri));
+  }
 }

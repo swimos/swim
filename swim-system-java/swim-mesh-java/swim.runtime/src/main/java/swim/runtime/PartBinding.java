@@ -30,6 +30,8 @@ public interface PartBinding extends TierBinding, CellBinding, CellContext {
 
   <T> T unwrapPart(Class<T> partClass);
 
+  <T> T bottomPart(Class<T> partClass);
+
   PartAddress cellAddress();
 
   Uri meshUri();

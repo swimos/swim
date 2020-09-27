@@ -30,6 +30,8 @@ public interface MeshContext extends TierContext, CellContext {
 
   <T> T unwrapMesh(Class<T> meshClass);
 
+  <T> T bottomMesh(Class<T> meshClass);
+
   @Override
   MeshAddress cellAddress();
 

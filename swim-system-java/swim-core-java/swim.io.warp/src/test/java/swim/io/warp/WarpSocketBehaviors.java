@@ -364,7 +364,7 @@ public abstract class WarpSocketBehaviors {
                       permits.incrementAndGet();
                       throw new TestException("drop");
                     }
-                    
+
                     @Override
                     public boolean stay(swim.concurrent.StayContext context, int backlog) {
                       return true;

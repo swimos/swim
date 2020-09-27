@@ -75,6 +75,16 @@ public class EdgeTableMesh implements MeshContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomMesh(Class<T> meshClass) {
+    if (meshClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public final MeshAddress cellAddress() {
     return this.meshAddress;

@@ -44,7 +44,7 @@ public abstract class SupplyDownlinkModem<View extends WarpDownlinkView> extends
     final float prio = prio();
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
     this.upQueue.add(new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
-        prio, null, message, cont));
+                                              prio, null, message, cont));
   }
 
   @Override

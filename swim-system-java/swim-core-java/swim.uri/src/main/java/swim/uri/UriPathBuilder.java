@@ -32,8 +32,12 @@ public final class UriPathBuilder implements Builder<String, UriPath> {
     this.aliased = 0;
   }
 
-  boolean isEmpty() {
+  public boolean isEmpty() {
     return this.size == 0;
+  }
+
+  public int size() {
+    return this.size;
   }
 
   @Override

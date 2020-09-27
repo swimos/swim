@@ -236,6 +236,16 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomHost(Class<T> hostClass) {
+    T host = this.hostContext.bottomHost(hostClass);
+    if (host == null && hostClass.isAssignableFrom(getClass())) {
+      host = (T) this;
+    }
+    return host;
+  }
+
   protected NodeContext createNodeContext(NodeAddress nodeAddress, NodeBinding node) {
     return new HostTableNode(this, node, nodeAddress);
   }
@@ -636,7 +646,10 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   @Override
   public void openUplink(LinkBinding link) {
-    final NodeBinding nodeBinding = openNode(link.nodeUri());
+    NodeBinding nodeBinding = openNode(link.nodeUri());
+    if (nodeBinding != null) {
+      nodeBinding = nodeBinding.bottomNode(NodeBinding.class);
+    }
     if (nodeBinding != null) {
       nodeBinding.openUplink(link);
     } else {
@@ -647,7 +660,10 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @Override
   public void pushUp(Push<?> push) {
     final Uri nodeUri = push.nodeUri();
-    final NodeBinding nodeBinding = openNode(nodeUri);
+    NodeBinding nodeBinding = openNode(nodeUri);
+    if (nodeBinding != null) {
+      nodeBinding = nodeBinding.bottomNode(NodeBinding.class);
+    }
     if (nodeBinding != null) {
       nodeBinding.pushUp(push);
     } else {

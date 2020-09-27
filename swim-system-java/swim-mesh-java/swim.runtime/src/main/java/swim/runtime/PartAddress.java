@@ -21,9 +21,8 @@ import swim.structure.Value;
 import swim.uri.Uri;
 import swim.util.Murmur3;
 
-public final class PartAddress extends CellAddress implements Debug {
+public final class PartAddress implements EdgeAddressed, MeshAddressed, PartAddressed, Debug {
 
-  private static int hashSeed;
   final String edgeName;
   final Uri meshUri;
   final Value partKey;
@@ -34,34 +33,32 @@ public final class PartAddress extends CellAddress implements Debug {
     this.partKey = partKey.commit();
   }
 
-  public static PartAddress from(String edgeName, Uri meshUri, Value partKey) {
-    return new PartAddress(edgeName, meshUri, partKey);
-  }
-
-  public static PartAddress from(String edgeName, String meshUri, Value partKey) {
-    return new PartAddress(edgeName, Uri.parse(meshUri), partKey);
-  }
-
+  @Override
   public String edgeName() {
     return this.edgeName;
   }
 
+  @Override
   public Uri meshUri() {
     return this.meshUri;
   }
 
+  @Override
   public PartAddress meshUri(Uri meshUri) {
     return copy(this.edgeName, meshUri, this.partKey);
   }
 
+  @Override
   public PartAddress meshUri(String meshUri) {
     return meshUri(Uri.parse(meshUri));
   }
 
+  @Override
   public Value partKey() {
     return this.partKey;
   }
 
+  @Override
   public PartAddress partKey(Value partKey) {
     return copy(this.edgeName, this.meshUri, partKey);
   }
@@ -70,10 +67,12 @@ public final class PartAddress extends CellAddress implements Debug {
     return new PartAddress(edgeName, meshUri, partKey);
   }
 
+  @Override
   public HostAddress hostUri(Uri hostUri) {
     return new HostAddress(this.edgeName, this.meshUri, this.partKey, hostUri);
   }
 
+  @Override
   public HostAddress hostUri(String hostUri) {
     return hostUri(Uri.parse(hostUri));
   }
@@ -109,6 +108,16 @@ public final class PartAddress extends CellAddress implements Debug {
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static int hashSeed;
+
+  public static PartAddress from(String edgeName, Uri meshUri, Value partKey) {
+    return new PartAddress(edgeName, meshUri, partKey);
+  }
+
+  public static PartAddress from(String edgeName, String meshUri, Value partKey) {
+    return new PartAddress(edgeName, Uri.parse(meshUri), partKey);
   }
 
 }

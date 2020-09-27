@@ -37,6 +37,7 @@ import swim.runtime.WarpContext;
 import swim.structure.Value;
 import swim.uri.Uri;
 import swim.warp.Envelope;
+import swim.warp.EventMessage;
 import swim.warp.LinkRequest;
 import swim.warp.SyncRequest;
 
@@ -49,8 +50,9 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   static final AtomicIntegerFieldUpdater<RemoteWarpDownlink> STATUS =
       AtomicIntegerFieldUpdater.newUpdater(RemoteWarpDownlink.class, "status");
   final RemoteHost host;
+  Uri hostUri;
   final Uri remoteNodeUri;
-  final Uri nodeUri;
+  Uri nodeUri;
   final Uri laneUri;
   final float prio;
   final float rate;
@@ -63,6 +65,7 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   RemoteWarpDownlink(RemoteHost host, Uri remoteNodeUri, Uri nodeUri,
                      Uri laneUri, float prio, float rate, Value body) {
     this.host = host;
+    this.hostUri = Uri.empty();
     this.remoteNodeUri = remoteNodeUri;
     this.nodeUri = nodeUri;
     this.laneUri = laneUri;
@@ -109,6 +112,19 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLink(Class<T> linkClass) {
+    T link = null;
+    if (this.linkContext != null) {
+      link = this.linkContext.bottomLink(linkClass);
+    }
+    if (link == null && linkClass.isAssignableFrom(getClass())) {
+      link = (T) this;
+    }
+    return link;
+  }
+
   @Override
   public final Uri meshUri() {
     return Uri.empty();
@@ -116,12 +132,22 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
 
   @Override
   public final Uri hostUri() {
-    return Uri.empty();
+    return this.hostUri;
+  }
+
+  @Override
+  public void setHostUri(Uri hostUri) {
+    this.hostUri = hostUri;
   }
 
   @Override
   public final Uri nodeUri() {
     return this.nodeUri;
+  }
+
+  @Override
+  public void setNodeUri(Uri nodeUri) {
+    this.nodeUri = nodeUri;
   }
 
   @Override
@@ -281,6 +307,10 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
         if (pullContext != null) {
           pullContext.push(remoteEnvelope);
           this.pullContext = null;
+          if (remoteEnvelope instanceof EventMessage) {
+            RemoteHost.DOWNLINK_EVENT_DELTA.incrementAndGet(this.host);
+            this.host.didUpdateMetrics();
+          }
         }
       }
     } else {
@@ -332,7 +362,7 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if (envelope != null) {
       this.linkContext.pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), this.nodeUri, this.laneUri,
-          this.prio, this.host.remoteIdentity(), envelope, null));
+                                                 this.prio, this.host.remoteIdentity(), envelope, null));
     }
     feedUpQueue();
   }

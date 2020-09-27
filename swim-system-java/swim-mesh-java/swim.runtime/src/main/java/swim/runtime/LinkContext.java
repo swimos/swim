@@ -27,6 +27,8 @@ public interface LinkContext {
 
   <T> T unwrapLink(Class<T> linkClass);
 
+  <T> T bottomLink(Class<T> linkClass);
+
   Value linkKey();
 
   LinkAddress cellAddressUp();

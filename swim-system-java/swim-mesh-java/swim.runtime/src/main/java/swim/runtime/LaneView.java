@@ -58,6 +58,15 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  public <T> T bottomLane(Class<T> laneClass) {
+    if (laneClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public LaneAddress cellAddress() {
     return laneContext().cellAddress();

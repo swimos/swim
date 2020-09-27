@@ -46,20 +46,45 @@ public class Push<M> {
     return this.meshUri;
   }
 
+  public Push<M> meshUri(Uri meshUri) {
+    return copy(meshUri, this.hostUri, this.nodeUri, this.laneUri,
+                this.prio, this.identity, this.message, this.cont);
+  }
+
   public final Uri hostUri() {
     return this.hostUri;
+  }
+
+  public Push<M> hostUri(Uri hostUri) {
+    return copy(this.meshUri, hostUri, this.nodeUri, this.laneUri,
+                this.prio, this.identity, this.message, this.cont);
   }
 
   public final Uri nodeUri() {
     return this.nodeUri;
   }
 
+  public Push<M> nodeUri(Uri nodeUri) {
+    return copy(this.meshUri, this.hostUri, nodeUri, this.laneUri,
+                this.prio, this.identity, this.message, this.cont);
+  }
+
   public final Uri laneUri() {
     return this.laneUri;
   }
 
+  public Push<M> laneUri(Uri laneUri) {
+    return copy(this.meshUri, this.hostUri, this.nodeUri, laneUri,
+                this.prio, this.identity, this.message, this.cont);
+  }
+
   public final float prio() {
     return this.prio;
+  }
+
+  public Push<M> prio(float prio) {
+    return copy(this.meshUri, this.hostUri, this.nodeUri, this.laneUri,
+                prio, this.identity, this.message, this.cont);
   }
 
   public final Identity identity() {
@@ -72,6 +97,11 @@ public class Push<M> {
 
   public Cont<M> cont() {
     return this.cont;
+  }
+
+  protected <M> Push<M> copy(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
+                             Identity identity, M message, Cont<M> cont) {
+    return new Push<M>(meshUri, hostUri, nodeUri, laneUri, prio, identity, message, cont);
   }
 
   public void bind() {

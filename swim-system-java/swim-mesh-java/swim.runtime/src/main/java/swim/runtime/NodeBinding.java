@@ -34,6 +34,8 @@ public interface NodeBinding extends TierBinding, CellBinding {
 
   <T> T unwrapNode(Class<T> nodeClass);
 
+  <T> T bottomNode(Class<T> nodeClass);
+
   NodeAddress cellAddress();
 
   Uri meshUri();

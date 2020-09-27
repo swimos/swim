@@ -27,6 +27,8 @@ public interface EdgeContext extends TierContext, CellContext {
 
   <T> T unwrapEdge(Class<T> edgeClass);
 
+  <T> T bottomEdge(Class<T> edgeClass);
+
   @Override
   EdgeAddress cellAddress();
 

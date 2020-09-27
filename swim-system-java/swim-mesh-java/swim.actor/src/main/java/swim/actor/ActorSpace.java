@@ -141,6 +141,16 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomEdge(Class<T> edgeClass) {
+    if (edgeClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public final EdgeAddress cellAddress() {
     return this.edgeAddress;

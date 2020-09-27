@@ -29,6 +29,8 @@ public interface NodeContext extends TierContext, CellContext {
 
   <T> T unwrapNode(Class<T> nodeClass);
 
+  <T> T bottomNode(Class<T> nodeClass);
+
   @Override
   NodeAddress cellAddress();
 

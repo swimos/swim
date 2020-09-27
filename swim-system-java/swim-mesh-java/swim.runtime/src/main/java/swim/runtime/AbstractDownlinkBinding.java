@@ -27,8 +27,8 @@ import swim.util.Log;
 public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
 
   protected final Uri meshUri;
-  protected final Uri hostUri;
-  protected final Uri nodeUri;
+  protected Uri hostUri;
+  protected Uri nodeUri;
   protected final Uri laneUri;
 
   public AbstractDownlinkBinding(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri) {
@@ -57,6 +57,16 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLink(Class<T> linkClass) {
+    T link = linkContext().bottomLink(linkClass);
+    if (link == null && linkClass.isAssignableFrom(getClass())) {
+      link = (T) this;
+    }
+    return link;
+  }
+
   @Override
   public final Uri meshUri() {
     return this.meshUri;
@@ -68,8 +78,18 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
   }
 
   @Override
+  public void setHostUri(Uri hostUri) {
+    this.hostUri = hostUri;
+  }
+
+  @Override
   public final Uri nodeUri() {
     return this.nodeUri;
+  }
+
+  @Override
+  public void setNodeUri(Uri nodeUri) {
+    this.nodeUri = nodeUri;
   }
 
   @Override

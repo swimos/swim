@@ -143,7 +143,7 @@ public class RemoteHostSpec {
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
         pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), clientToServerCommand.nodeUri(),
-            clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
+                                  clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
         clientPush.countDown();
       }
 
@@ -163,7 +163,7 @@ public class RemoteHostSpec {
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
         pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), serverToClientCommand.nodeUri(),
-            serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
+                                  serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
         serverPush.countDown();
       }
     };
@@ -257,7 +257,7 @@ public class RemoteHostSpec {
           throw new RuntimeException("FORCED FAILURE " + attempt + " of " + failedAttempts);
         } else {
           pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), clientToServerCommand.nodeUri(),
-              clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
+                                    clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
           clientPush.countDown();
         }
       }
@@ -282,7 +282,7 @@ public class RemoteHostSpec {
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
         pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), serverToClientCommand.nodeUri(),
-            serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
+                                  serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
         serverPush.countDown();
       }
     };

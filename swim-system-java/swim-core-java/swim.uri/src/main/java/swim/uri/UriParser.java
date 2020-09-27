@@ -84,9 +84,6 @@ public class UriParser {
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
-    if (!parser.isDone()) {
-      System.out.println(parser);
-    }
     return parser.bind();
   }
 

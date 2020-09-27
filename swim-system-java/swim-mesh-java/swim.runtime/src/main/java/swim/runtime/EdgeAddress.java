@@ -20,19 +20,15 @@ import swim.codec.Output;
 import swim.uri.Uri;
 import swim.util.Murmur3;
 
-public final class EdgeAddress extends CellAddress implements Debug {
+public final class EdgeAddress implements EdgeAddressed, Debug {
 
-  private static int hashSeed;
   final String edgeName;
 
   public EdgeAddress(String edgeName) {
     this.edgeName = edgeName;
   }
 
-  public static EdgeAddress from(String edgeName) {
-    return new EdgeAddress(edgeName);
-  }
-
+  @Override
   public String edgeName() {
     return this.edgeName;
   }
@@ -45,10 +41,12 @@ public final class EdgeAddress extends CellAddress implements Debug {
     return new EdgeAddress(edgeName);
   }
 
+  @Override
   public MeshAddress meshUri(Uri meshUri) {
     return new MeshAddress(this.edgeName, meshUri);
   }
 
+  @Override
   public MeshAddress meshUri(String meshUri) {
     return meshUri(Uri.parse(meshUri));
   }
@@ -81,6 +79,12 @@ public final class EdgeAddress extends CellAddress implements Debug {
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static int hashSeed;
+
+  public static EdgeAddress from(String edgeName) {
+    return new EdgeAddress(edgeName);
   }
 
 }

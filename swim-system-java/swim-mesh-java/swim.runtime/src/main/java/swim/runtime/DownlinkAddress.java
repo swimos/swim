@@ -20,19 +20,14 @@ import swim.codec.Output;
 import swim.structure.Value;
 import swim.util.Murmur3;
 
-public final class DownlinkAddress extends LinkAddress implements Debug {
+public final class DownlinkAddress implements LinkAddress, Debug {
 
-  private static int hashSeed;
   final CellAddress cellAddress;
   final Value linkKey;
 
   public DownlinkAddress(CellAddress cellAddress, Value linkKey) {
     this.cellAddress = cellAddress;
     this.linkKey = linkKey.commit();
-  }
-
-  public static DownlinkAddress from(CellAddress cellAddress, Value linkKey) {
-    return new DownlinkAddress(cellAddress, linkKey);
   }
 
   public CellAddress cellAddress() {
@@ -86,4 +81,9 @@ public final class DownlinkAddress extends LinkAddress implements Debug {
     return Format.debug(this);
   }
 
+  private static int hashSeed;
+
+  public static DownlinkAddress from(CellAddress cellAddress, Value linkKey) {
+    return new DownlinkAddress(cellAddress, linkKey);
+  }
 }

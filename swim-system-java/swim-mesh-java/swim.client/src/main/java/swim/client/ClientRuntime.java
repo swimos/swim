@@ -109,6 +109,16 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomEdge(Class<T> edgeClass) {
+    if (edgeClass.isAssignableFrom(getClass())) {
+      return (T) this;
+    } else {
+      return null;
+    }
+  }
+
   @Override
   public EdgeAddress cellAddress() {
     return new EdgeAddress(edgeName());

@@ -14,6 +14,6 @@
 
 package swim.runtime;
 
-public abstract class CellAddress {
+public interface CellAddress {
 
 }

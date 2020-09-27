@@ -72,6 +72,16 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomEdge(Class<T> edgeClass) {
+    T edge = this.edgeContext.bottomEdge(edgeClass);
+    if (edge == null && edgeClass.isAssignableFrom(getClass())) {
+      edge = (T) this;
+    }
+    return edge;
+  }
+
   @Override
   public EdgeAddress cellAddress() {
     return this.edgeContext.cellAddress();

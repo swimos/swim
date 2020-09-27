@@ -78,6 +78,16 @@ public class PartProxy implements PartBinding, PartContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomPart(Class<T> partClass) {
+    T part = this.partContext.bottomPart(partClass);
+    if (part == null && partClass.isAssignableFrom(getClass())) {
+      part = (T) this;
+    }
+    return part;
+  }
+
   @Override
   public PartAddress cellAddress() {
     return this.partContext.cellAddress();

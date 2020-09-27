@@ -254,6 +254,16 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomMesh(Class<T> meshClass) {
+    T mesh = this.meshContext.bottomMesh(meshClass);
+    if (mesh == null && meshClass.isAssignableFrom(getClass())) {
+      mesh = (T) this;
+    }
+    return mesh;
+  }
+
   protected PartContext createPartContext(PartAddress partAddress, PartBinding part) {
     return new MeshTablePart(this, part, partAddress);
   }
@@ -633,7 +643,10 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   @Override
   public void openUplink(LinkBinding link) {
-    final PartBinding partBinding = openPart(link.nodeUri());
+    PartBinding partBinding = openPart(link.nodeUri());
+    if (partBinding != null) {
+      partBinding = partBinding.bottomPart(PartBinding.class);
+    }
     if (partBinding != null) {
       partBinding.openUplink(link);
     } else {
@@ -649,7 +662,10 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @Override
   public void pushUp(Push<?> push) {
     final Uri nodeUri = push.nodeUri();
-    final PartBinding partBinding = openPart(nodeUri);
+    PartBinding partBinding = openPart(nodeUri);
+    if (partBinding != null) {
+      partBinding = partBinding.bottomPart(PartBinding.class);
+    }
     if (partBinding != null) {
       partBinding.pushUp(push);
     } else {

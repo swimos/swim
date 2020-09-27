@@ -796,7 +796,7 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
 
   protected void pushDown(Envelope envelope) {
     this.linkBinding.pushDown(new Push<Envelope>(Uri.empty(), hostUri(), nodeUri(), laneUri(),
-        prio(), null, envelope, null));
+                                                 prio(), null, envelope, null));
   }
 
   public void cueUp() {

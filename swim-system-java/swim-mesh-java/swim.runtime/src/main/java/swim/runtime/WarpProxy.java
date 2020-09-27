@@ -22,7 +22,7 @@ import swim.api.auth.Identity;
 import swim.structure.Value;
 import swim.uri.Uri;
 
-public class WarpProxy implements WarpBinding, WarpContext {
+public abstract class WarpProxy implements WarpBinding, WarpContext {
 
   protected final WarpBinding linkBinding;
   protected WarpContext linkContext;
@@ -31,13 +31,13 @@ public class WarpProxy implements WarpBinding, WarpContext {
     this.linkBinding = linkBinding;
   }
 
+  public final WarpBinding linkBinding() {
+    return this.linkBinding;
+  }
+
   @Override
   public final WarpBinding linkWrapper() {
     return this.linkBinding.linkWrapper();
-  }
-
-  public final WarpBinding linkBinding() {
-    return this.linkBinding;
   }
 
   @Override
@@ -71,6 +71,16 @@ public class WarpProxy implements WarpBinding, WarpContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLink(Class<T> linkClass) {
+    T link = this.linkContext.bottomLink(linkClass);
+    if (link == null && linkClass.isAssignableFrom(getClass())) {
+      link = (T) this;
+    }
+    return link;
+  }
+
   @Override
   public Uri meshUri() {
     return this.linkBinding.meshUri();
@@ -82,8 +92,18 @@ public class WarpProxy implements WarpBinding, WarpContext {
   }
 
   @Override
+  public void setHostUri(Uri hostUri) {
+    this.linkBinding.setHostUri(hostUri);
+  }
+
+  @Override
   public Uri nodeUri() {
     return this.linkBinding.nodeUri();
+  }
+
+  @Override
+  public void setNodeUri(Uri nodeUri) {
+    this.linkBinding.setNodeUri(nodeUri);
   }
 
   @Override

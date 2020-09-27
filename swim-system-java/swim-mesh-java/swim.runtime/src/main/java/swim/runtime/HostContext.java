@@ -31,6 +31,8 @@ public interface HostContext extends TierContext, CellContext {
 
   <T> T unwrapHost(Class<T> hostClass);
 
+  <T> T bottomHost(Class<T> hostClass);
+
   @Override
   HostAddress cellAddress();
 

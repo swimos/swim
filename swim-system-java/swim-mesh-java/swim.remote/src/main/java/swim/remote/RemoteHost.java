@@ -20,11 +20,15 @@ import java.security.cert.Certificate;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.Downlink;
 import swim.api.auth.Identity;
+import swim.api.lane.DemandLane;
+import swim.api.lane.function.OnCue;
 import swim.api.policy.Policy;
 import swim.api.policy.PolicyDirective;
+import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
@@ -57,6 +61,11 @@ import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.WarpBinding;
 import swim.runtime.agent.AgentNode;
+import swim.runtime.profile.HostProfile;
+import swim.runtime.reflect.AgentPulse;
+import swim.runtime.reflect.HostPulse;
+import swim.runtime.reflect.WarpDownlinkPulse;
+import swim.runtime.reflect.WarpUplinkPulse;
 import swim.store.StoreBinding;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -103,6 +112,27 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   RemoteHostMessageCont messageCont;
   final HashGenCacheMap<Uri, Uri> resolveCache;
 
+  volatile int downlinkOpenDelta;
+  volatile long downlinkOpenCount;
+  volatile int downlinkCloseDelta;
+  volatile long downlinkCloseCount;
+  volatile int downlinkEventDelta;
+  volatile long downlinkEventCount;
+  volatile int downlinkCommandDelta;
+  volatile long downlinkCommandCount;
+  volatile int uplinkOpenDelta;
+  volatile long uplinkOpenCount;
+  volatile int uplinkCloseDelta;
+  volatile long uplinkCloseCount;
+  volatile int uplinkEventDelta;
+  volatile long uplinkEventCount;
+  volatile int uplinkCommandDelta;
+  volatile long uplinkCommandCount;
+  volatile long lastReportTime;
+  HostPulse pulse;
+  AgentNode metaNode;
+  DemandLane<HostPulse> metaPulse;
+
   public RemoteHost(Uri requestUri, Uri baseUri) {
     this.requestUri = requestUri;
     this.baseUri = baseUri;
@@ -138,6 +168,16 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     } else {
       return this.hostContext.unwrapHost(hostClass);
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomHost(Class<T> hostClass) {
+    T host = this.hostContext.bottomHost(hostClass);
+    if (host == null && hostClass.isAssignableFrom(getClass())) {
+      host = (T) this;
+    }
+    return host;
   }
 
   @Override
@@ -443,6 +483,9 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       newUplinks = oldUplinks.updated(remoteNodeUri, nodeUplinks);
     } while (!UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
 
+    if (oldUplinks != newUplinks) {
+      didOpenUplink(uplink);
+    }
     if (isConnected()) {
       uplink.didConnect();
     }
@@ -483,6 +526,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
     if (oldUplinks != newUplinks) {
       uplink.didCloseUp();
+      didCloseUplink(uplink);
     }
   }
 
@@ -617,6 +661,9 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         }
       }
     }
+
+    UPLINK_EVENT_DELTA.incrementAndGet(this);
+    didUpdateMetrics();
   }
 
   protected void onCommandMessage(CommandMessage message) {
@@ -628,30 +675,30 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         if (newMessage != null) {
           message = newMessage;
         }
-      } else if (directive.isDenied()) {
-        return;
-      } else {
+
+        final Uri nodeUri = resolve(message.nodeUri());
+        final Uri laneUri = message.laneUri();
+        final CommandMessage resolvedMessage = message.nodeUri(nodeUri);
+
+        final HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = this.downlinks.get(nodeUri);
+        if (nodeDownlinks != null) {
+          final RemoteWarpDownlink laneDownlink = nodeDownlinks.get(laneUri);
+          if (laneDownlink != null) {
+            laneDownlink.queueUp(resolvedMessage);
+            return;
+          }
+        }
+
+        willPushMessage(resolvedMessage);
+        this.hostContext.pushDown(new Push<Envelope>(Uri.empty(), Uri.empty(), nodeUri, laneUri,
+                                                     0.0f, null, resolvedMessage, this.messageCont));
+      } else if (directive.isForbidden()) {
         forbid();
-        return;
       }
     }
 
-    final Uri nodeUri = resolve(message.nodeUri());
-    final Uri laneUri = message.laneUri();
-    final CommandMessage resolvedMessage = message.nodeUri(nodeUri);
-
-    final HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = this.downlinks.get(nodeUri);
-    if (nodeDownlinks != null) {
-      final RemoteWarpDownlink laneDownlink = nodeDownlinks.get(laneUri);
-      if (laneDownlink != null) {
-        laneDownlink.queueUp(resolvedMessage);
-        return;
-      }
-    }
-
-    willPushMessage(resolvedMessage);
-    this.hostContext.pushDown(new Push<Envelope>(Uri.empty(), Uri.empty(), nodeUri, laneUri,
-                              0.0f, null, resolvedMessage, this.messageCont));
+    DOWNLINK_COMMAND_DELTA.incrementAndGet(this);
+    didUpdateMetrics();
   }
 
   protected void willPushMessage(Envelope envelope) {
@@ -739,9 +786,20 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
     if (oldDownlinks != newDownlinks) {
       downlink.openDown();
+      didOpenDownlink(downlink);
     }
     final LinkAddressed resolvedEnvelope = envelope.nodeUri(nodeUri);
     downlink.queueUp(resolvedEnvelope);
+  }
+
+  protected void didOpenDownlink(RemoteWarpDownlink downlink) {
+    DOWNLINK_OPEN_DELTA.incrementAndGet(this);
+    flushMetrics();
+  }
+
+  protected void didCloseDownlink(RemoteWarpDownlink downlink) {
+    DOWNLINK_CLOSE_DELTA.incrementAndGet(this);
+    flushMetrics();
   }
 
   protected void routeUplink(LaneAddressed envelope) {
@@ -760,6 +818,16 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         }
       }
     }
+  }
+
+  protected void didOpenUplink(RemoteWarpUplink uplink) {
+    UPLINK_OPEN_DELTA.incrementAndGet(this);
+    flushMetrics();
+  }
+
+  protected void didCloseUplink(RemoteWarpUplink uplink) {
+    UPLINK_CLOSE_DELTA.incrementAndGet(this);
+    flushMetrics();
   }
 
   protected void onLinkRequest(LinkRequest request) {
@@ -845,6 +913,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     if (downlink != null) {
       final UnlinkRequest resolvedRequest = request.nodeUri(nodeUri);
       downlink.queueUp(resolvedRequest);
+      didCloseDownlink(downlink);
     }
   }
 
@@ -885,6 +954,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         final RemoteWarpUplink uplink = uplinksIterator.next();
         uplink.queueDown(new Push<Envelope>(Uri.empty(), Uri.empty(), uplink.nodeUri(), uplink.laneUri(),
                                             uplink.prio(), remoteIdentity(), resolvedResponse, null));
+        didCloseUplink(uplink);
       }
     }
   }
@@ -1041,6 +1111,17 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   @Override
+  public void didClose() {
+    super.didClose();
+    final AgentNode metaNode = this.metaNode;
+    if (metaNode != null) {
+      metaNode.close();
+      this.metaNode = null;
+    }
+    flushMetrics();
+  }
+
+  @Override
   public void didFail(Throwable error) {
     Throwable failure = null;
     try {
@@ -1065,12 +1146,22 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void openMetaHost(HostBinding host, NodeBinding metaHost) {
-    openMetaLanes(host, (AgentNode) metaHost);
+    if (metaHost instanceof AgentNode) {
+      this.metaNode = (AgentNode) metaHost;
+      openMetaLanes(host, (AgentNode) metaHost);
+    }
     this.hostContext.openMetaHost(host, metaHost);
   }
 
   protected void openMetaLanes(HostBinding host, AgentNode metaHost) {
-    // TODO
+    openReflectLanes(host, metaHost);
+  }
+
+  protected void openReflectLanes(HostBinding host, AgentNode metaHost) {
+    this.metaPulse = metaNode.demandLane()
+        .valueForm(HostPulse.form())
+        .observe(new RemoteHostPulseController(this));
+    metaNode.openLane(HostPulse.PULSE_URI, this.metaPulse);
   }
 
   @Override
@@ -1136,6 +1227,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       while (laneDownlinks.hasNext()) {
         final RemoteWarpDownlink downlink = laneDownlinks.next();
         downlink.closeDown();
+        didCloseDownlink(downlink);
       }
     }
   }
@@ -1157,6 +1249,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         while (uplinksIterator.hasNext()) {
           final RemoteWarpUplink uplink = uplinksIterator.next();
           uplink.closeUp();
+          didCloseUplink(uplink);
         }
       }
     }
@@ -1224,6 +1317,118 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     this.hostContext.fail(message);
   }
 
+  protected void didUpdateMetrics() {
+    do {
+      final long newReportTime = System.currentTimeMillis();
+      final long oldReportTime = this.lastReportTime;
+      final long dt = newReportTime - oldReportTime;
+      if (dt >= Metric.REPORT_INTERVAL) {
+        if (LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
+          try {
+            reportMetrics(dt);
+          } catch (Throwable error) {
+            if (Conts.isNonFatal(error)) {
+              didFail(error);
+            } else {
+              throw error;
+            }
+          }
+          break;
+        }
+      } else {
+        break;
+      }
+    } while (true);
+  }
+
+  protected void flushMetrics() {
+    final long newReportTime = System.currentTimeMillis();
+    final long oldReportTime = LAST_REPORT_TIME.getAndSet(this, newReportTime);
+    final long dt = newReportTime - oldReportTime;
+    try {
+      reportMetrics(dt);
+    } catch (Throwable error) {
+      if (Conts.isNonFatal(error)) {
+        didFail(error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  protected void reportMetrics(long dt) {
+    final HostProfile profile = collectProfile(dt);
+    this.hostContext.reportDown(profile);
+  }
+
+  protected HostProfile collectProfile(long dt) {
+    final int nodeOpenDelta = 0;
+    final long nodeOpenCount = 0L;
+    final int nodeCloseDelta = 0;
+    final long nodeCloseCount = 0L;
+
+    final int agentOpenDelta = 0;
+    final long agentOpenCount = 0L;
+    final int agentCloseDelta = 0;
+    final long agentCloseCount = 0L;
+    final long agentExecDelta = 0L;
+    final long agentExecRate = 0L;
+    final long agentExecTime = 0L;
+
+    final int timerEventDelta = 0;
+    final int timerEventRate = 0;
+    final long timerEventCount = 0L;
+
+    final int downlinkOpenDelta = DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long downlinkOpenCount = DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
+    final int downlinkCloseDelta = DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long downlinkCloseCount = DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
+    final int downlinkEventDelta = DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int downlinkEventRate = (int) Math.ceil((1000.0 * (double) downlinkEventDelta) / (double) dt);
+    final long downlinkEventCount = DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
+    final int downlinkCommandDelta = DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int downlinkCommandRate = (int) Math.ceil((1000.0 * (double) downlinkCommandDelta) / (double) dt);
+    final long downlinkCommandCount = DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
+
+    final int uplinkOpenDelta = UPLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long uplinkOpenCount = UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
+    final int uplinkCloseDelta = UPLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long uplinkCloseCount = UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
+    final int uplinkEventDelta = UPLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int uplinkEventRate = (int) Math.ceil((1000.0 * (double) uplinkEventDelta) / (double) dt);
+    final long uplinkEventCount = UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
+    final int uplinkCommandDelta = UPLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int uplinkCommandRate = (int) Math.ceil((1000.0 * (double) uplinkCommandDelta) / (double) dt);
+    final long uplinkCommandCount = UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
+
+    final long nodeCount = nodeOpenCount - nodeCloseCount;
+    final long agentCount = agentOpenCount - agentCloseCount;
+    final AgentPulse agentPulse = new AgentPulse(agentCount, agentExecRate, agentExecTime, timerEventRate, timerEventCount);
+    final long downlinkCount = downlinkOpenCount - downlinkCloseCount;
+    final WarpDownlinkPulse downlinkPulse = new WarpDownlinkPulse(downlinkCount, downlinkEventRate, downlinkEventCount,
+        downlinkCommandRate, downlinkCommandCount);
+    final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
+    final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
+        uplinkCommandRate, uplinkCommandCount);
+    this.pulse = new HostPulse(nodeCount, agentPulse, downlinkPulse, uplinkPulse);
+    final DemandLane<HostPulse> metaPulse = this.metaPulse;
+    if (metaPulse != null) {
+      metaPulse.cue();
+    }
+
+    return new HostProfile(cellAddress(),
+        nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
+        agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
+        agentExecDelta, agentExecRate, agentExecTime,
+        timerEventDelta, timerEventRate, timerEventCount,
+        downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+        downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+        downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+        uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+        uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+        uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+  }
+
   static final int PRIMARY = 1 << 0;
   static final int REPLICA = 1 << 1;
   static final int MASTER = 1 << 2;
@@ -1249,6 +1454,41 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<RemoteHost, HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>>> UPLINKS =
       AtomicReferenceFieldUpdater.newUpdater(RemoteHost.class, (Class<HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>>>) (Class<?>) HashTrieMap.class, "uplinks");
+
+  static final AtomicIntegerFieldUpdater<RemoteHost> DOWNLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "downlinkOpenDelta");
+  static final AtomicLongFieldUpdater<RemoteHost> DOWNLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(RemoteHost.class, "downlinkOpenCount");
+  static final AtomicIntegerFieldUpdater<RemoteHost> DOWNLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "downlinkCloseDelta");
+  static final AtomicLongFieldUpdater<RemoteHost> DOWNLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(RemoteHost.class, "downlinkCloseCount");
+  static final AtomicIntegerFieldUpdater<RemoteHost> DOWNLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "downlinkEventDelta");
+  static final AtomicLongFieldUpdater<RemoteHost> DOWNLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(RemoteHost.class, "downlinkEventCount");
+  static final AtomicIntegerFieldUpdater<RemoteHost> DOWNLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "downlinkCommandDelta");
+  static final AtomicLongFieldUpdater<RemoteHost> DOWNLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(RemoteHost.class, "downlinkCommandCount");
+  static final AtomicIntegerFieldUpdater<RemoteHost> UPLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "uplinkOpenDelta");
+  static final AtomicLongFieldUpdater<RemoteHost> UPLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(RemoteHost.class, "uplinkOpenCount");
+  static final AtomicIntegerFieldUpdater<RemoteHost> UPLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "uplinkCloseDelta");
+  static final AtomicLongFieldUpdater<RemoteHost> UPLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(RemoteHost.class, "uplinkCloseCount");
+  static final AtomicIntegerFieldUpdater<RemoteHost> UPLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "uplinkEventDelta");
+  static final AtomicLongFieldUpdater<RemoteHost> UPLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(RemoteHost.class, "uplinkEventCount");
+  static final AtomicIntegerFieldUpdater<RemoteHost> UPLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteHost.class, "uplinkCommandDelta");
+  static final AtomicLongFieldUpdater<RemoteHost> UPLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(RemoteHost.class, "uplinkCommandCount");
+  static final AtomicLongFieldUpdater<RemoteHost> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater(RemoteHost.class, "lastReportTime");
 
   static {
     int maxSendBacklog;
@@ -1326,8 +1566,16 @@ final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
   @Override
   public void pull(PullContext<? super E> context) {
     Throwable failure = null;
+    final E envelope = this.envelope;
     try {
       context.push(this.envelope);
+      if (envelope instanceof EventMessage) {
+        RemoteHost.DOWNLINK_EVENT_DELTA.incrementAndGet(this.host);
+        this.host.didUpdateMetrics();
+      } else if (envelope instanceof CommandMessage) {
+        RemoteHost.UPLINK_COMMAND_DELTA.incrementAndGet(this.host);
+        this.host.didUpdateMetrics();
+      }
     } catch (Throwable cause) {
       if (!Conts.isNonFatal(cause)) {
         throw cause;
@@ -1336,7 +1584,7 @@ final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
     }
     if (this.cont != null) {
       if (failure == null) {
-        this.cont.bind(this.envelope);
+        this.cont.bind(envelope);
       } else {
         this.cont.trap(failure);
       }
@@ -1362,6 +1610,21 @@ final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
     } else {
       return backlog < RemoteHost.MAX_SEND_BACKLOG;
     }
+  }
+
+}
+
+final class RemoteHostPulseController implements OnCue<HostPulse> {
+
+  final RemoteHost host;
+
+  RemoteHostPulseController(RemoteHost host) {
+    this.host = host;
+  }
+
+  @Override
+  public HostPulse onCue(WarpUplink uplink) {
+    return this.host.pulse;
   }
 
 }

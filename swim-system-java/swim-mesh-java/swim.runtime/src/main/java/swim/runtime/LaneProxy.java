@@ -76,6 +76,16 @@ public class LaneProxy implements LaneBinding, LaneContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T bottomLane(Class<T> laneClass) {
+    T lane = this.laneContext.bottomLane(laneClass);
+    if (lane == null && laneClass.isAssignableFrom(getClass())) {
+      lane = (T) this;
+    }
+    return lane;
+  }
+
   @Override
   public LaneAddress cellAddress() {
     return this.laneContext.cellAddress();

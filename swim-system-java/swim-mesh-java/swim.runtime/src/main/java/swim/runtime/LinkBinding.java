@@ -36,11 +36,17 @@ public interface LinkBinding {
 
   <T> T unwrapLink(Class<T> linkClass);
 
+  <T> T bottomLink(Class<T> linkClass);
+
   Uri meshUri();
 
   Uri hostUri();
 
+  void setHostUri(Uri hostUri);
+
   Uri nodeUri();
+
+  void setNodeUri(Uri nodeUri);
 
   Uri laneUri();
 
