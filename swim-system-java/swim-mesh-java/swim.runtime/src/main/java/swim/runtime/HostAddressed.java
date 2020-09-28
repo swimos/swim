@@ -17,6 +17,7 @@ package swim.runtime;
 import swim.uri.Uri;
 
 public interface HostAddressed extends CellAddress {
+
   Uri hostUri();
 
   HostAddressed hostUri(Uri hostUri);
@@ -26,4 +27,5 @@ public interface HostAddressed extends CellAddress {
   NodeAddressed nodeUri(Uri nodeUri);
 
   NodeAddressed nodeUri(String nodeUri);
+
 }

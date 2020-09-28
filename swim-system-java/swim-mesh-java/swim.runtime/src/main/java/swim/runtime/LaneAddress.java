@@ -171,4 +171,5 @@ public final class LaneAddress implements EdgeAddressed, MeshAddressed, PartAddr
     return new LaneAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri),
                            Uri.parse(nodeUri), Uri.parse(laneUri));
   }
+
 }

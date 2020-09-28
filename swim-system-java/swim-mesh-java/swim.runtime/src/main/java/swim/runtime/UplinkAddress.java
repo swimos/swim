@@ -183,4 +183,5 @@ public final class UplinkAddress implements EdgeAddressed, MeshAddressed, PartAd
     return new UplinkAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri),
         Uri.parse(nodeUri), Uri.parse(laneUri), linkKey);
   }
+
 }

@@ -18,6 +18,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface MeshAddressed extends CellAddress {
+
   Uri meshUri();
 
   MeshAddressed meshUri(Uri meshUri);
@@ -25,4 +26,5 @@ public interface MeshAddressed extends CellAddress {
   MeshAddressed meshUri(String meshUri);
 
   PartAddressed partKey(Value partKey);
+
 }

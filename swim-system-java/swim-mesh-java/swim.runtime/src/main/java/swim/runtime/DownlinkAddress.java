@@ -86,4 +86,5 @@ public final class DownlinkAddress implements LinkAddress, Debug {
   public static DownlinkAddress from(CellAddress cellAddress, Value linkKey) {
     return new DownlinkAddress(cellAddress, linkKey);
   }
+
 }

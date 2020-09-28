@@ -17,9 +17,11 @@ package swim.runtime;
 import swim.uri.Uri;
 
 public interface EdgeAddressed extends CellAddress {
+
   String edgeName();
 
   MeshAddressed meshUri(Uri meshUri);
 
   MeshAddressed meshUri(String meshUri);
+
 }

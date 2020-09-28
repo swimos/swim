@@ -18,6 +18,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface LaneAddressed extends CellAddress {
+
   Uri laneUri();
 
   LaneAddressed laneUri(Uri laneUri);
@@ -25,4 +26,5 @@ public interface LaneAddressed extends CellAddress {
   LaneAddressed laneUri(String laneUri);
 
   UplinkAddressed linkKey(Value linkKey);
+
 }

@@ -18,6 +18,7 @@ import swim.structure.Value;
 import swim.uri.Uri;
 
 public interface PartAddressed extends CellAddress {
+
   Value partKey();
 
   PartAddressed partKey(Value partKey);
@@ -25,4 +26,5 @@ public interface PartAddressed extends CellAddress {
   HostAddressed hostUri(Uri hostUri);
 
   HostAddressed hostUri(String hostUri);
+
 }

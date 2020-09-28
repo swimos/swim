@@ -74,4 +74,5 @@ public final class StoreAddress implements CellAddress, Debug {
   public static StoreAddress from(String storeName) {
     return new StoreAddress(storeName);
   }
+
 }

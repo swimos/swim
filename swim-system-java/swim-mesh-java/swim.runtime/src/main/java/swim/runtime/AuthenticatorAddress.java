@@ -74,4 +74,5 @@ public final class AuthenticatorAddress implements CellAddress, Debug {
   public static AuthenticatorAddress from(String authenticatorName) {
     return new AuthenticatorAddress(authenticatorName);
   }
+
 }

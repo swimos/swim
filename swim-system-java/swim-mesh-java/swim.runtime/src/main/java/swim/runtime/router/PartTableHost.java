@@ -72,7 +72,6 @@ public class PartTableHost implements HostContext {
     }
   }
 
-
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomHost(Class<T> hostClass) {
