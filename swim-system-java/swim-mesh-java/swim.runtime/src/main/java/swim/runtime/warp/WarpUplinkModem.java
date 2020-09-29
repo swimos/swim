@@ -1097,6 +1097,7 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   @Override
   protected void didClose() {
     super.didClose();
+    dispatchDidClose();
     flushMetrics();
   }
 

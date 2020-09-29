@@ -141,7 +141,10 @@ public class SupplyLaneView<V> extends WarpLaneView implements SupplyLane<V> {
 
   @Override
   public void push(V value) {
-    this.laneBinding.sendDown(this.valueForm.mold(value).toValue());
+    final SupplyLaneModel laneBinding = this.laneBinding;
+    if (laneBinding != null && laneBinding.isLinked()) {
+      laneBinding.sendDown(this.valueForm.mold(value).toValue());
+    }
   }
 
 }

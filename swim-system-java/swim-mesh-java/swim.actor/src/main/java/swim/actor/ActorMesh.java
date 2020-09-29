@@ -301,10 +301,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
 
   @Override
   public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
-    final ActorSpace edge = actorEdge();
-    if (edge != null) {
-      edge.openMetaMesh(mesh, metaMesh);
-    }
+    this.meshContext.openMetaMesh(mesh, metaMesh);
   }
 
   public PartDef getPartDef(PartAddress partAddress) {
@@ -330,10 +327,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
 
   @Override
   public void openMetaPart(PartBinding part, NodeBinding metaPart) {
-    final ActorSpace edge = actorEdge();
-    if (edge != null) {
-      edge.openMetaPart(part, metaPart);
-    }
+    this.meshContext.openMetaPart(part, metaPart);
   }
 
   public HostDef getHostDef(HostAddress hostAddress) {
@@ -358,10 +352,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
 
   @Override
   public void openMetaHost(HostBinding host, NodeBinding metaHost) {
-    final ActorSpace edge = actorEdge();
-    if (edge != null) {
-      edge.openMetaHost(host, metaHost);
-    }
+    this.meshContext.openMetaHost(host, metaHost);
   }
 
   public NodeDef getNodeDef(NodeAddress nodeAddress) {
@@ -395,10 +386,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
 
   @Override
   public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
-    final ActorSpace edge = actorEdge();
-    if (edge != null) {
-      edge.openMetaNode(node, metaNode);
-    }
+    this.meshContext.openMetaNode(node, metaNode);
   }
 
   public LaneDef getLaneDef(LaneAddress laneAddress) {
@@ -423,26 +411,17 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
 
   @Override
   public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
-    final ActorSpace edge = actorEdge();
-    if (edge != null) {
-      edge.openMetaLane(lane, metaLane);
-    }
+    this.meshContext.openMetaLane(lane, metaLane);
   }
 
   @Override
   public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
-    final ActorSpace edge = actorEdge();
-    if (edge != null) {
-      edge.openMetaUplink(uplink, metaUplink);
-    }
+    this.meshContext.openMetaUplink(uplink, metaUplink);
   }
 
   @Override
   public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
-    final ActorSpace edge = actorEdge();
-    if (edge != null) {
-      edge.openMetaDownlink(downlink, metaDownlink);
-    }
+    this.meshContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override

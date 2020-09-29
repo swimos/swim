@@ -67,6 +67,8 @@ public interface LaneBinding extends TierBinding, CellBinding, Log {
 
   void openMetaLane(LaneBinding lane, NodeBinding metaLane);
 
+  boolean isLinked();
+
   FingerTrieSeq<LinkContext> uplinks();
 
   LinkContext getUplink(Value linkKey);

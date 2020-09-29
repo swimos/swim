@@ -166,6 +166,11 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   }
 
   @Override
+  public boolean isLinked() {
+    return this.laneBinding.isLinked();
+  }
+
+  @Override
   public FingerTrieSeq<LinkContext> uplinks() {
     return this.laneBinding.uplinks();
   }
@@ -303,26 +308,17 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
 
   @Override
   public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
-    final ActorNode node = actorNode();
-    if (node != null) {
-      node.openMetaLane(lane, metaLane);
-    }
+    this.laneContext.openMetaLane(lane, metaLane);
   }
 
   @Override
   public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
-    final ActorNode node = actorNode();
-    if (node != null) {
-      node.openMetaUplink(uplink, metaUplink);
-    }
+    this.laneContext.openMetaUplink(uplink, metaUplink);
   }
 
   @Override
   public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
-    final ActorNode node = actorNode();
-    if (node != null) {
-      node.openMetaDownlink(downlink, metaDownlink);
-    }
+    this.laneContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override

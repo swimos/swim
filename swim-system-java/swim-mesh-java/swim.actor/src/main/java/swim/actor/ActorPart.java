@@ -304,10 +304,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
 
   @Override
   public void openMetaPart(PartBinding part, NodeBinding metaPart) {
-    final ActorMesh mesh = actorMesh();
-    if (mesh != null) {
-      mesh.openMetaPart(part, metaPart);
-    }
+    this.partContext.openMetaPart(part, metaPart);
   }
 
   public HostDef getHostDef(HostAddress hostAddress) {
@@ -333,10 +330,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
 
   @Override
   public void openMetaHost(HostBinding host, NodeBinding metaHost) {
-    final ActorMesh mesh = actorMesh();
-    if (mesh != null) {
-      mesh.openMetaHost(host, metaHost);
-    }
+    this.partContext.openMetaHost(host, metaHost);
   }
 
   public NodeDef getNodeDef(NodeAddress nodeAddress) {
@@ -370,10 +364,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
 
   @Override
   public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
-    final ActorMesh mesh = actorMesh();
-    if (mesh != null) {
-      mesh.openMetaNode(node, metaNode);
-    }
+    this.partContext.openMetaNode(node, metaNode);
   }
 
   public LaneDef getLaneDef(LaneAddress laneAddress) {
@@ -398,26 +389,17 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
 
   @Override
   public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
-    final ActorMesh mesh = actorMesh();
-    if (mesh != null) {
-      mesh.openMetaLane(lane, metaLane);
-    }
+    this.partContext.openMetaLane(lane, metaLane);
   }
 
   @Override
   public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
-    final ActorMesh mesh = actorMesh();
-    if (mesh != null) {
-      mesh.openMetaUplink(uplink, metaUplink);
-    }
+    this.partContext.openMetaUplink(uplink, metaUplink);
   }
 
   @Override
   public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
-    final ActorMesh mesh = actorMesh();
-    if (mesh != null) {
-      mesh.openMetaDownlink(downlink, metaDownlink);
-    }
+    this.partContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override

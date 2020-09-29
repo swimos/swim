@@ -330,10 +330,7 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
 
   @Override
   public void openMetaHost(HostBinding host, NodeBinding metaHost) {
-    final ActorPart part = actorPart();
-    if (part != null) {
-      part.openMetaHost(host, metaHost);
-    }
+    this.hostContext.openMetaHost(host, metaHost);
   }
 
   public NodeDef getNodeDef(NodeAddress nodeAddress) {
@@ -368,10 +365,7 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
 
   @Override
   public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
-    final ActorPart part = actorPart();
-    if (part != null) {
-      part.openMetaNode(node, metaNode);
-    }
+    this.hostContext.openMetaNode(node, metaNode);
   }
 
   public LaneDef getLaneDef(LaneAddress laneAddress) {
@@ -396,26 +390,17 @@ public class ActorHost extends ActorTier implements HostBinding, HostContext {
 
   @Override
   public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
-    final ActorPart part = actorPart();
-    if (part != null) {
-      part.openMetaLane(lane, metaLane);
-    }
+    this.hostContext.openMetaLane(lane, metaLane);
   }
 
   @Override
   public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
-    final ActorPart part = actorPart();
-    if (part != null) {
-      part.openMetaUplink(uplink, metaUplink);
-    }
+    this.hostContext.openMetaUplink(uplink, metaUplink);
   }
 
   @Override
   public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
-    final ActorPart part = actorPart();
-    if (part != null) {
-      part.openMetaDownlink(downlink, metaDownlink);
-    }
+    this.hostContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override

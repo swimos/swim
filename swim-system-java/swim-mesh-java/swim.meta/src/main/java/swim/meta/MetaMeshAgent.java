@@ -14,9 +14,11 @@
 
 package swim.meta;
 
+import swim.runtime.LinkBinding;
 import swim.runtime.MeshBinding;
 import swim.runtime.NodeContext;
 import swim.runtime.agent.AgentNode;
+import swim.uri.Uri;
 
 public final class MetaMeshAgent extends AgentNode {
 
@@ -32,4 +34,16 @@ public final class MetaMeshAgent extends AgentNode {
     this.mesh.openMetaMesh(this.mesh, this);
   }
 
+  @Override
+  protected void openUnknownUplink(Uri laneUri, LinkBinding link) {
+    if (NODES_URI.equals(laneUri)) {
+      link.setNodeUri(META_HOST_URI);
+      this.host().openUplink(link);
+    } else {
+      super.openUnknownUplink(laneUri, link);
+    }
+  }
+
+  static final Uri NODES_URI = Uri.parse("nodes");
+  static final Uri META_HOST_URI = Uri.parse("swim:meta:host");
 }

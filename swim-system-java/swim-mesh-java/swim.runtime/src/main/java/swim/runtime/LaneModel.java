@@ -261,6 +261,11 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
     }
   }
 
+  @Override
+  public boolean isLinked() {
+    return !this.uplinks.isEmpty();
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public FingerTrieSeq<LinkContext> uplinks() {

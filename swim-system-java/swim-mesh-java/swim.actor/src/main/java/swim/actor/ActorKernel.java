@@ -370,7 +370,7 @@ public class ActorKernel extends KernelProxy {
             predicate = PartPredicate.fromValue(item.toValue());
             continue;
           }
-          if (item.keyEquals("isGateway")) {
+          if (item.keyEquals("gateway")) {
             isGateway = item.toValue().booleanValue(isGateway);
             continue;
           }

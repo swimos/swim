@@ -481,8 +481,12 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
     if (laneBinding != null) {
       laneBinding.openUplink(link);
     } else if (link instanceof WarpBinding) {
-      UplinkError.rejectLaneNotFound(link);
+      openUnknownUplink(laneUri, link);
     }
+  }
+
+  protected void openUnknownUplink(Uri laneUri, LinkBinding link) {
+    UplinkError.rejectLaneNotFound(link);
   }
 
   @Override

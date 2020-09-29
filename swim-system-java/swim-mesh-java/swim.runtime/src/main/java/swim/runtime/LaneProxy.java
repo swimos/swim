@@ -167,6 +167,11 @@ public class LaneProxy implements LaneBinding, LaneContext {
   }
 
   @Override
+  public boolean isLinked() {
+    return this.laneBinding.isLinked();
+  }
+
+  @Override
   public FingerTrieSeq<LinkContext> uplinks() {
     return this.laneBinding.uplinks();
   }

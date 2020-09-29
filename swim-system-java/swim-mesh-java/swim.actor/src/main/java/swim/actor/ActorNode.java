@@ -282,10 +282,7 @@ public class ActorNode extends ActorTier implements NodeBinding, NodeContext {
 
   @Override
   public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
-    final ActorHost host = actorHost();
-    if (host != null) {
-      host.openMetaNode(node, metaNode);
-    }
+    this.nodeContext.openMetaNode(node, metaNode);
   }
 
   public LaneDef getLaneDef(LaneAddress laneAddress) {
@@ -321,26 +318,17 @@ public class ActorNode extends ActorTier implements NodeBinding, NodeContext {
 
   @Override
   public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
-    final ActorHost host = actorHost();
-    if (host != null) {
-      host.openMetaLane(lane, metaLane);
-    }
+    this.nodeContext.openMetaLane(lane, metaLane);
   }
 
   @Override
   public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
-    final ActorHost host = actorHost();
-    if (host != null) {
-      host.openMetaUplink(uplink, metaUplink);
-    }
+    this.nodeContext.openMetaUplink(uplink, metaUplink);
   }
 
   @Override
   public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
-    final ActorHost host = actorHost();
-    if (host != null) {
-      host.openMetaDownlink(downlink, metaDownlink);
-    }
+    this.nodeContext.openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override
