@@ -561,10 +561,12 @@ export class Uri implements Comparable<Uri>, HashCode, Debug, Display {
   }
 
   toString(): string {
-    if (this._string === void 0) {
-      this._string = Format.display(this);
+    let string = this._string;
+    if (string === void 0) {
+      string = Format.display(this);
+      this._string = string;
     }
-    return this._string;
+    return string;
   }
 
   private static _empty?: Uri;

@@ -21,20 +21,20 @@ import {DownlinkOwner} from "./DownlinkOwner";
 import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
 import {ListDownlinkModel} from "./ListDownlinkModel";
 
-export type ListDownlinkWillUpdate<V extends VU, VU = V> = (index: number, newValue: V, downlink: ListDownlink<V, VU>) => V | void;
-export type ListDownlinkDidUpdate<V extends VU, VU = V> = (index: number, newValue: V, oldValue: V, downlink: ListDownlink<V, VU>) => void;
-export type ListDownlinkWillMove<V extends VU, VU = V> = (fromIndex: number, toIndex: number, value: V, downlink: ListDownlink<V, VU>) => void;
-export type ListDownlinkDidMove<V extends VU, VU = V> = (fromIndex: number, toIndex: number, value: V, downlink: ListDownlink<V, VU>) => void;
-export type ListDownlinkWillRemove<V extends VU, VU = V> = (index: number, downlink: ListDownlink<V, VU>) => void;
-export type ListDownlinkDidRemove<V extends VU, VU = V> = (index: number, oldValue: V, downlink: ListDownlink<V, VU>) => void;
-export type ListDownlinkWillDrop<V extends VU, VU = V> = (lower: number, downlink: ListDownlink<V, VU>) => void;
-export type ListDownlinkDidDrop<V extends VU, VU = V> = (lower: number, downlink: ListDownlink<V, VU>) => void;
-export type ListDownlinkWillTake<V extends VU, VU = V> = (upper: number, downlink: ListDownlink<V, VU>) => void;
-export type ListDownlinkDidTake<V extends VU, VU = V> = (upper: number, downlink: ListDownlink<V, VU>) => void;
-export type ListDownlinkWillClear<V extends VU, VU = V> = (downlink: ListDownlink<V, VU>) => void;
-export type ListDownlinkDidClear<V extends VU, VU = V> = (downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkWillUpdate<V, VU = V> = (index: number, newValue: V, downlink: ListDownlink<V, VU>) => V | void;
+export type ListDownlinkDidUpdate<V, VU = V> = (index: number, newValue: V, oldValue: V, downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkWillMove<V, VU = V> = (fromIndex: number, toIndex: number, value: V, downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkDidMove<V, VU = V> = (fromIndex: number, toIndex: number, value: V, downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkWillRemove<V, VU = V> = (index: number, downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkDidRemove<V, VU = V> = (index: number, oldValue: V, downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkWillDrop<V, VU = V> = (lower: number, downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkDidDrop<V, VU = V> = (lower: number, downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkWillTake<V, VU = V> = (upper: number, downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkDidTake<V, VU = V> = (upper: number, downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkWillClear<V, VU = V> = (downlink: ListDownlink<V, VU>) => void;
+export type ListDownlinkDidClear<V, VU = V> = (downlink: ListDownlink<V, VU>) => void;
 
-export interface ListDownlinkObserver<V extends VU, VU = V> extends DownlinkObserver {
+export interface ListDownlinkObserver<V, VU = V> extends DownlinkObserver {
   willUpdate?: ListDownlinkWillUpdate<V, VU>;
   didUpdate?: ListDownlinkDidUpdate<V, VU>;
   willMove?: ListDownlinkWillMove<V, VU>;
@@ -49,11 +49,11 @@ export interface ListDownlinkObserver<V extends VU, VU = V> extends DownlinkObse
   didClear?: ListDownlinkDidClear<V, VU>;
 }
 
-export interface ListDownlinkInit<V extends VU, VU = V> extends ListDownlinkObserver<V, VU>, DownlinkInit {
+export interface ListDownlinkInit<V, VU = V> extends ListDownlinkObserver<V, VU>, DownlinkInit {
   valueForm?: Form<V, VU>;
 }
 
-export class ListDownlink<V extends VU, VU = V> extends Downlink {
+export class ListDownlink<V, VU = V> extends Downlink {
   /** @hidden */
   _observers: ReadonlyArray<ListDownlinkObserver<V, VU>> | null;
   /** @hidden */
@@ -107,8 +107,8 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
   }
 
   valueForm(): Form<V, VU>;
-  valueForm<V2 extends V2U, V2U = V2>(valueForm: Form<V2, V2U>): ListDownlink<V2, V2U>;
-  valueForm<V2 extends V2U, V2U = V2>(valueForm?: Form<V2, V2U>): Form<V, VU> | ListDownlink<V2, V2U> {
+  valueForm<V2, V2U = V2>(valueForm: Form<V2, V2U>): ListDownlink<V2, V2U>;
+  valueForm<V2, V2U = V2>(valueForm?: Form<V2, V2U>): Form<V, VU> | ListDownlink<V2, V2U> {
     if (valueForm === void 0) {
       return this._valueForm;
     } else {
@@ -118,12 +118,12 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
     }
   }
 
-  isEmpty(): boolean {
-    return this._model!.isEmpty();
-  }
-
   get length(): number {
     return this._model!.length;
+  }
+
+  isEmpty(): boolean {
+    return this._model!.isEmpty();
   }
 
   get(index: number, id?: Value): V {
@@ -139,13 +139,13 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
     return void 0;
   }
 
-  set(index: number, newObject: VU, id?: Value): this {
+  set(index: number, newObject: V | VU, id?: Value): this {
     const newValue = this._valueForm.mold(newObject);
     this._model!.set(index, newValue, id);
     return this;
   }
 
-  insert(index: number, newObject: VU, id?: Value): this {
+  insert(index: number, newObject: V | VU, id?: Value): this {
     const newValue = this._valueForm.mold(newObject);
     this._model!.insert(index, newValue, id);
     return this;
@@ -156,7 +156,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
     return this;
   }
 
-  push(...newObjects: VU[]): number {
+  push(...newObjects: (V | VU)[]): number {
     const newValues = new Array(newObjects.length);
     for (let i = 0; i < newObjects.length; i += 1) {
       newValues[i] = this._valueForm.mold(newObjects[i]);
@@ -169,7 +169,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
     return value.coerce(this._valueForm);
   }
 
-  unshift(...newObjects: VU[]): number {
+  unshift(...newObjects: (V | VU)[]): number {
     const newValues = new Array(newObjects.length);
     for (let i = 0; i < newObjects.length; i += 1) {
       newValues[i] = this._valueForm.mold(newObjects[i]);
@@ -187,7 +187,7 @@ export class ListDownlink<V extends VU, VU = V> extends Downlink {
     return this;
   }
 
-  splice(start: number, deleteCount?: number, ...newObjects: VU[]): V[] {
+  splice(start: number, deleteCount?: number, ...newObjects: (V | VU)[]): V[] {
     const newValues = new Array(newObjects.length);
     for (let i = 0; i < newObjects.length; i += 1) {
       newValues[i] = this._valueForm.mold(newObjects[i]);

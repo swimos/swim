@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {AnyValue, Value} from "@swim/structure";
-import {Uri} from "@swim/uri";
+import {AnyUri, Uri} from "@swim/uri";
 import {Host} from "../host/Host";
 import {DownlinkOwner} from "../downlink/DownlinkOwner";
 import {Downlink} from "../downlink/Downlink";
@@ -22,6 +22,9 @@ import {ListDownlinkInit, ListDownlink} from "../downlink/ListDownlink";
 import {MapDownlinkInit, MapDownlink} from "../downlink/MapDownlink";
 import {ValueDownlinkInit, ValueDownlink} from "../downlink/ValueDownlink";
 import {RefContext} from "./RefContext";
+import {HostRef} from "./HostRef";
+import {NodeRef} from "./NodeRef";
+import {LaneRef} from "./LaneRef";
 import {WarpRef} from "../WarpRef";
 import {
   WarpDidConnect,
@@ -79,6 +82,14 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
 
   abstract downlinkValue(init?: ValueDownlinkInit<Value, AnyValue>): ValueDownlink<Value, AnyValue>;
   abstract downlinkValue<V extends VU, VU = V>(init?: ValueDownlinkInit<V, VU>): ValueDownlink<V, VU>;
+
+  abstract hostRef(hostUri: AnyUri): HostRef;
+
+  abstract nodeRef(hostUri: AnyUri, nodeUri: AnyUri): NodeRef;
+  abstract nodeRef(nodeUri: AnyUri): NodeRef;
+
+  abstract laneRef(hostUri: AnyUri, nodeUri: AnyUri, laneUri: AnyUri): LaneRef;
+  abstract laneRef(nodeUri: AnyUri, laneUri: AnyUri): LaneRef;
 
   /** @hidden */
   addDownlink(downlink: Downlink): void {

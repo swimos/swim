@@ -40,13 +40,13 @@ export class NumberInterpolator extends Interpolator<number, number | string> {
   range(y0: number | string, y1: number | string): NumberInterpolator;
   range(y0?: readonly [number | string, number | string] | number | string,
         y1?: number | string): readonly [number, number] | NumberInterpolator {
-    if (y0 === void 0) {
+    if (arguments.length === 0) {
       return [this.y0, this.y0 + this.dy];
-    } else if (y1 === void 0) {
+    } else if (arguments.length === 1) {
       y0 = y0 as readonly [number | string, number | string];
       return NumberInterpolator.between(y0[0], y0[1]);
     } else {
-      return NumberInterpolator.between(y0 as number | string, y1);
+      return NumberInterpolator.between(y0 as number | string, y1 as number | string);
     }
   }
 

@@ -27,7 +27,7 @@ import {ValueForm} from "./form/ValueForm";
  * Transformation between a structurally typed [Item] and a nominally typed
  * JavaScript object.
  */
-export abstract class Form<T extends U, U = T> {
+export abstract class Form<T, U = T> {
   /**
    * Returns the key of the tag attribute that distinguishes structures of this
    * `Form`; returns `undefined` if this `Form` has no distinguishing tag
@@ -78,7 +78,7 @@ export abstract class Form<T extends U, U = T> {
    * Converts a nominally typed JavaScript `object` into its structurally typed
    * equivalent, optionally based on the provided prototype `item`.
    */
-  abstract mold(object: U, item?: Item): Item;
+  abstract mold(object: T | U, item?: Item): Item;
 
   /**
    * Converts a structurally typed `item` into a nominally typed JavaScript

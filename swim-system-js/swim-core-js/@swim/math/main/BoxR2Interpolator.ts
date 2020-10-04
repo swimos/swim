@@ -63,13 +63,13 @@ export class BoxR2Interpolator extends R2ShapeInterpolator<BoxR2, AnyBoxR2> {
   range(s0: AnyBoxR2, s1: AnyBoxR2): BoxR2Interpolator;
   range(s0?: readonly [AnyBoxR2, AnyBoxR2] | AnyBoxR2,
         s1?: AnyBoxR2): readonly [BoxR2, BoxR2] | BoxR2Interpolator {
-    if (s0 === void 0) {
+    if (arguments.length === 0) {
       return [this.interpolate(0), this.interpolate(1)];
-    } else if (s1 === void 0) {
+    } else if (arguments.length === 1) {
       s0 = s0 as readonly [AnyBoxR2, AnyBoxR2];
       return BoxR2Interpolator.between(s0[0], s0[1]);
     } else {
-      return BoxR2Interpolator.between(s0 as AnyBoxR2, s1);
+      return BoxR2Interpolator.between(s0 as AnyBoxR2, s1 as AnyBoxR2);
     }
   }
 

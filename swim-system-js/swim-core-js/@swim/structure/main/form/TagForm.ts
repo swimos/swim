@@ -17,7 +17,7 @@ import {Attr} from "../Attr";
 import {Form} from "../Form";
 
 /** @hidden */
-export class TagForm<T extends U, U = T> extends Form<T, U> {
+export class TagForm<T, U = T> extends Form<T, U> {
   /** @hidden */
   readonly _tag: string;
   /** @hidden */
@@ -51,7 +51,7 @@ export class TagForm<T extends U, U = T> extends Form<T, U> {
     }
   }
 
-  mold(object: U, item?: Item): Item {
+  mold(object: T | U, item?: Item): Item {
     item = this._form.mold(object, item);
     if (!item.header(this._tag).isDefined()) {
       item = item.prepended(Attr.of(this._tag));

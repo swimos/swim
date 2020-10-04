@@ -40,12 +40,12 @@ export class ListDownlinkModel extends DownlinkModel {
     return "list";
   }
 
-  isEmpty(): boolean {
-    return this._state.isEmpty();
-  }
-
   get length(): number {
     return this._state.length;
+  }
+
+  isEmpty(): boolean {
+    return this._state.isEmpty();
   }
 
   get(index: number, key?: Value): Value {

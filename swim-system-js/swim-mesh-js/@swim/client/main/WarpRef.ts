@@ -13,10 +13,14 @@
 // limitations under the License.
 
 import {AnyValue, Value} from "@swim/structure";
+import {AnyUri} from "@swim/uri";
 import {EventDownlinkInit, EventDownlink} from "./downlink/EventDownlink";
 import {ListDownlinkInit, ListDownlink} from "./downlink/ListDownlink";
 import {MapDownlinkInit, MapDownlink} from "./downlink/MapDownlink";
 import {ValueDownlinkInit, ValueDownlink} from "./downlink/ValueDownlink";
+import {HostRef} from "./ref/HostRef";
+import {NodeRef} from "./ref/NodeRef";
+import {LaneRef} from "./ref/LaneRef";
 import {
   WarpDidConnect,
   WarpDidAuthenticate,
@@ -37,6 +41,14 @@ export interface WarpRef {
 
   downlinkValue(init?: ValueDownlinkInit<Value, AnyValue>): ValueDownlink<Value, AnyValue>;
   downlinkValue<V extends VU, VU = V>(init?: ValueDownlinkInit<V, VU>): ValueDownlink<V, VU>;
+
+  hostRef(hostUri: AnyUri): HostRef;
+
+  nodeRef(hostUri: AnyUri, nodeUri: AnyUri): NodeRef;
+  nodeRef(nodeUri: AnyUri): NodeRef;
+
+  laneRef(hostUri: AnyUri, nodeUri: AnyUri, laneUri: AnyUri): LaneRef;
+  laneRef(nodeUri: AnyUri, laneUri: AnyUri): LaneRef;
 
   observe(observer: WarpObserver): this;
   unobserve(observer: unknown): this;

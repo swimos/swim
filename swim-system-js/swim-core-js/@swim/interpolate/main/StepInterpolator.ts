@@ -41,11 +41,11 @@ export class StepInterpolator<T> extends Interpolator<T> {
   range(y0?: readonly [T, T] | T, y1?: T): readonly [T, T] | Interpolator<T> {
     if (arguments.length === 0) {
       return [this.interpolate(0), this.interpolate(1)];
-    } else if (y1 === void 0) {
+    } else if (arguments.length === 1) {
       y0 = y0 as readonly [T, T];
       return Interpolator.between(y0[0], y0[1]);
     } else {
-      return Interpolator.between(y0 as T, y1);
+      return Interpolator.between(y0 as T, y1 as T);
     }
   }
 

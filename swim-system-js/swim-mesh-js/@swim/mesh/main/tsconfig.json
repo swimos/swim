@@ -12,8 +12,6 @@
       "@swim/streamlet": ["../swim-core-js/@swim/streamlet/main"],
       "@swim/dataflow": ["../swim-core-js/@swim/dataflow/main"],
       "@swim/recon": ["../swim-core-js/@swim/recon/main"],
-      "@swim/math": ["../swim-core-js/@swim/math/main"],
-      "@swim/time": ["../swim-core-js/@swim/time/main"],
       "@swim/uri": ["../swim-core-js/@swim/uri/main"],
       "@swim/warp": ["@swim/warp/main"],
       "@swim/client": ["@swim/client/main"]

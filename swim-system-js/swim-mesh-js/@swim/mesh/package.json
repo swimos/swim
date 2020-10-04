@@ -22,8 +22,6 @@
     "@swim/streamlet": "3.11.0-dev.20200619",
     "@swim/dataflow": "3.11.0-dev.20200619",
     "@swim/recon": "3.11.0-dev.20200619",
-    "@swim/math": "3.11.0-dev.20200619",
-    "@swim/time": "3.11.0-dev.20200619",
     "@swim/uri": "3.11.0-dev.20200619",
     "@swim/warp": "3.11.0-dev.20200619",
     "@swim/client": "3.11.0-dev.20200619",

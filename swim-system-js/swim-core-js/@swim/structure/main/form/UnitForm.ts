@@ -16,7 +16,7 @@ import {Item} from "../Item";
 import {Form} from "../Form";
 
 /** @hidden */
-export class UnitForm<T extends U, U = T> extends Form<T, U> {
+export class UnitForm<T, U = T> extends Form<T, U> {
   /** @hidden */
   readonly _unit: T;
   /** @hidden */
@@ -50,7 +50,7 @@ export class UnitForm<T extends U, U = T> extends Form<T, U> {
     }
   }
 
-  mold(object: U, item?: Item): Item {
+  mold(object: T | U, item?: Item): Item {
     return this._form.mold.apply(this._form, arguments);
   }
 

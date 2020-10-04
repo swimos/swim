@@ -28,18 +28,18 @@ import {DownlinkOwner} from "./DownlinkOwner";
 import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
 import {MapDownlinkModel} from "./MapDownlinkModel";
 
-export type MapDownlinkWillUpdate<K extends KU, V extends VU, KU = K, VU = V> = (key: K, newValue: V, downlink: MapDownlink<K, V, KU, VU>) => V | void;
-export type MapDownlinkDidUpdate<K extends KU, V extends VU, KU = K, VU = V> = (key: K, newValue: V, oldValue: V, downlink: MapDownlink<K, V, KU, VU>) => void;
-export type MapDownlinkWillRemove<K extends KU, V extends VU, KU = K, VU = V> = (key: K, downlink: MapDownlink<K, V, KU, VU>) => void;
-export type MapDownlinkDidRemove<K extends KU, V extends VU, KU = K, VU = V> = (key: K, oldValue: V, downlink: MapDownlink<K, V, KU, VU>) => void;
-export type MapDownlinkWillDrop<K extends KU, V extends VU, KU = K, VU = V> = (lower: number, downlink: MapDownlink<K, V, KU, VU>) => void;
-export type MapDownlinkDidDrop<K extends KU, V extends VU, KU = K, VU = V> = (lower: number, downlink: MapDownlink<K, V, KU, VU>) => void;
-export type MapDownlinkWillTake<K extends KU, V extends VU, KU = K, VU = V> = (upper: number, downlink: MapDownlink<K, V, KU, VU>) => void;
-export type MapDownlinkDidTake<K extends KU, V extends VU, KU = K, VU = V> = (upper: number, downlink: MapDownlink<K, V, KU, VU>) => void;
-export type MapDownlinkWillClear<K extends KU, V extends VU, KU = K, VU = V> = (downlink: MapDownlink<K, V, KU, VU>) => void;
-export type MapDownlinkDidClear<K extends KU, V extends VU, KU = K, VU = V> = (downlink: MapDownlink<K, V, KU, VU>) => void;
+export type MapDownlinkWillUpdate<K, V, KU = K, VU = V> = (key: K, newValue: V, downlink: MapDownlink<K, V, KU, VU>) => V | void;
+export type MapDownlinkDidUpdate<K, V, KU = K, VU = V> = (key: K, newValue: V, oldValue: V, downlink: MapDownlink<K, V, KU, VU>) => void;
+export type MapDownlinkWillRemove<K, V, KU = K, VU = V> = (key: K, downlink: MapDownlink<K, V, KU, VU>) => void;
+export type MapDownlinkDidRemove<K, V, KU = K, VU = V> = (key: K, oldValue: V, downlink: MapDownlink<K, V, KU, VU>) => void;
+export type MapDownlinkWillDrop<K, V, KU = K, VU = V> = (lower: number, downlink: MapDownlink<K, V, KU, VU>) => void;
+export type MapDownlinkDidDrop<K, V, KU = K, VU = V> = (lower: number, downlink: MapDownlink<K, V, KU, VU>) => void;
+export type MapDownlinkWillTake<K, V, KU = K, VU = V> = (upper: number, downlink: MapDownlink<K, V, KU, VU>) => void;
+export type MapDownlinkDidTake<K, V, KU = K, VU = V> = (upper: number, downlink: MapDownlink<K, V, KU, VU>) => void;
+export type MapDownlinkWillClear<K, V, KU = K, VU = V> = (downlink: MapDownlink<K, V, KU, VU>) => void;
+export type MapDownlinkDidClear<K, V, KU = K, VU = V> = (downlink: MapDownlink<K, V, KU, VU>) => void;
 
-export interface MapDownlinkObserver<K extends KU, V extends VU, KU = K, VU = V> extends DownlinkObserver {
+export interface MapDownlinkObserver<K, V, KU = K, VU = V> extends DownlinkObserver {
   willUpdate?: MapDownlinkWillUpdate<K, V, KU, VU>;
   didUpdate?: MapDownlinkDidUpdate<K, V, KU, VU>;
   willRemove?: MapDownlinkWillRemove<K, V, KU, VU>;
@@ -52,12 +52,12 @@ export interface MapDownlinkObserver<K extends KU, V extends VU, KU = K, VU = V>
   didClear?: MapDownlinkDidClear<K, V, KU, VU>;
 }
 
-export interface MapDownlinkInit<K extends KU, V extends VU, KU = K, VU = V> extends MapDownlinkObserver<K, V, KU, VU>, DownlinkInit {
+export interface MapDownlinkInit<K, V, KU = K, VU = V> extends MapDownlinkObserver<K, V, KU, VU>, DownlinkInit {
   keyForm?: Form<K, KU>;
   valueForm?: Form<V, VU>;
 }
 
-export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Downlink implements OrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapDownlink<K, V, KU, VU>> {
+export class MapDownlink<K, V, KU = K, VU = V> extends Downlink implements OrderedMap<K, V>, MapInlet<K, V, Map<K, V>>, MapOutlet<K, V, MapDownlink<K, V, KU, VU>> {
   /** @hidden */
   _observers: ReadonlyArray<MapDownlinkObserver<K, V, KU, VU>> | null;
   /** @hidden */
@@ -130,8 +130,8 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   }
 
   keyForm(): Form<K, KU>;
-  keyForm<K2 extends K2U, K2U = K2>(keyForm: Form<K2, K2U>): MapDownlink<K2, V, K2U, VU>;
-  keyForm<K2 extends K2U, K2U = K2>(keyForm?: Form<K2, K2U>): Form<K, KU> | MapDownlink<K2, V, K2U, VU> {
+  keyForm<K2, K2U = K2>(keyForm: Form<K2, K2U>): MapDownlink<K2, V, K2U, VU>;
+  keyForm<K2, K2U = K2>(keyForm?: Form<K2, K2U>): Form<K, KU> | MapDownlink<K2, V, K2U, VU> {
     if (keyForm === void 0) {
       return this._keyForm;
     } else {
@@ -142,8 +142,8 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
   }
 
   valueForm(): Form<V, VU>;
-  valueForm<V2 extends V2U, V2U = V2>(valueForm: Form<V2, V2U>): MapDownlink<K, V2, KU, V2U>;
-  valueForm<V2 extends V2U, V2U = V2>(valueForm?: Form<V2, V2U>): Form<V, VU> | MapDownlink<K, V2, KU, V2U> {
+  valueForm<V2, V2U = V2>(valueForm: Form<V2, V2U>): MapDownlink<K, V2, KU, V2U>;
+  valueForm<V2, V2U = V2>(valueForm?: Form<V2, V2U>): Form<V, VU> | MapDownlink<K, V2, KU, V2U> {
     if (valueForm === void 0) {
       return this._valueForm;
     } else {
@@ -161,14 +161,14 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
     return this._model!.isEmpty();
   }
 
-  has(key: KU): boolean {
+  has(key: K | KU): boolean {
     const keyObject = this._keyForm.mold(key);
     return this._model!.has(keyObject);
   }
 
   get(): MapDownlink<K, V, KU, VU>;
-  get(key: KU): V;
-  get(key?: KU): MapDownlink<K, V, KU, VU> | V {
+  get(key: K | KU): V;
+  get(key?: K | KU): MapDownlink<K, V, KU, VU> | V {
     if (key === void 0) {
       return this;
     } else {
@@ -320,14 +320,14 @@ export class MapDownlink<K extends KU, V extends VU, KU = K, VU = V> extends Dow
     return void 0;
   }
 
-  set(key: KU, newValue: VU): this {
+  set(key: K | KU, newValue: V | VU): this {
     const keyObject = this._keyForm.mold(key);
     const newObject = this._valueForm.mold(newValue);
     this._model!.set(keyObject, newObject);
     return this;
   }
 
-  delete(key: KU): boolean {
+  delete(key: K | KU): boolean {
     const keyObject = this._keyForm.mold(key);
     return this._model!.delete(keyObject);
   }

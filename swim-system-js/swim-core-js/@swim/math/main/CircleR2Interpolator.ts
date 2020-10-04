@@ -56,13 +56,13 @@ export class CircleR2Interpolator extends R2ShapeInterpolator<CircleR2, AnyCircl
   range(s0: AnyCircleR2, s1: AnyCircleR2): CircleR2Interpolator;
   range(s0?: readonly [AnyCircleR2, AnyCircleR2] | AnyCircleR2,
         s1?: AnyCircleR2): readonly [CircleR2, CircleR2] | CircleR2Interpolator {
-    if (s0 === void 0) {
+    if (arguments.length === 0) {
       return [this.interpolate(0), this.interpolate(1)];
-    } else if (s1 === void 0) {
+    } else if (arguments.length === 1) {
       s0 = s0 as readonly [AnyCircleR2, AnyCircleR2];
       return CircleR2Interpolator.between(s0[0], s0[1]);
     } else {
-      return CircleR2Interpolator.between(s0 as AnyCircleR2, s1);
+      return CircleR2Interpolator.between(s0 as AnyCircleR2, s1 as AnyCircleR2);
     }
   }
 

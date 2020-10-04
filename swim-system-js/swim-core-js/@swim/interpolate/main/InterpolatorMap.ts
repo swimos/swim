@@ -42,7 +42,7 @@ export class InterpolatorMap<T, FT> extends Interpolator<FT, T> {
     if (arguments.length === 0) {
       const range = this.interpolator.range();
       return [this.transform(range[0]), this.transform(range[1])];
-    } else if (y1 === void 0) {
+    } else if (arguments.length === 1) {
       return this;
     } else {
       return this;

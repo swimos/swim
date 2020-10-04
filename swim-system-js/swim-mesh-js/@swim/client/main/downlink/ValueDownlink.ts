@@ -23,19 +23,19 @@ import {DownlinkOwner} from "./DownlinkOwner";
 import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
 import {ValueDownlinkModel} from "./ValueDownlinkModel";
 
-export type ValueDownlinkWillSet<V extends VU, VU = V> = (newValue: V, downlink: ValueDownlink<V, VU>) => V | void;
-export type VaueDownlinkDidSet<V extends VU, VU = V> = (newValue: V, oldValue: V, downlink: ValueDownlink<V, VU>) => void;
+export type ValueDownlinkWillSet<V, VU = V> = (newValue: V, downlink: ValueDownlink<V, VU>) => V | void;
+export type VaueDownlinkDidSet<V, VU = V> = (newValue: V, oldValue: V, downlink: ValueDownlink<V, VU>) => void;
 
-export interface ValueDownlinkObserver<V extends VU, VU = V> extends DownlinkObserver {
+export interface ValueDownlinkObserver<V, VU = V> extends DownlinkObserver {
   willSet?: ValueDownlinkWillSet<V, VU>;
   didSet?: VaueDownlinkDidSet<V, VU>;
 }
 
-export interface ValueDownlinkInit<V extends VU, VU = V> extends ValueDownlinkObserver<V, VU>, DownlinkInit {
+export interface ValueDownlinkInit<V, VU = V> extends ValueDownlinkObserver<V, VU>, DownlinkInit {
   valueForm?: Form<V, VU>;
 }
 
-export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inlet<V>, Outlet<V> {
+export class ValueDownlink<V, VU = V> extends Downlink implements Inlet<V>, Outlet<V> {
   /** @hidden */
   _observers: ReadonlyArray<ValueDownlinkObserver<V, VU>> | null;
   /** @hidden */
@@ -88,8 +88,8 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
   }
 
   valueForm(): Form<V, VU>;
-  valueForm<V2 extends V2U, V2U = V2>(valueForm: Form<V2, V2U>): ValueDownlink<V2, V2U>;
-  valueForm<V2 extends V2U, V2U = V2>(valueForm?: Form<V2, V2U>): Form<V, VU> | ValueDownlink<V2, V2U> {
+  valueForm<V2, V2U = V2>(valueForm: Form<V2, V2U>): ValueDownlink<V2, V2U>;
+  valueForm<V2, V2U = V2>(valueForm?: Form<V2, V2U>): Form<V, VU> | ValueDownlink<V2, V2U> {
     if (valueForm === void 0) {
       return this._valueForm;
     } else {
@@ -105,7 +105,7 @@ export class ValueDownlink<V extends VU, VU = V> extends Downlink implements Inl
     return object;
   }
 
-  set(newObject: VU): void {
+  set(newObject: V | VU): void {
     const newValue = this._valueForm.mold(newObject);
     this._model!.set(newValue);
   }

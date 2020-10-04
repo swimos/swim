@@ -54,13 +54,13 @@ export class PointR2Interpolator extends R2ShapeInterpolator<PointR2, AnyPointR2
   range(p0: AnyPointR2, p1: AnyPointR2): PointR2Interpolator;
   range(p0?: readonly [AnyPointR2, AnyPointR2] | AnyPointR2,
         p1?: AnyPointR2): readonly [PointR2, PointR2] | PointR2Interpolator {
-    if (p0 === void 0) {
+    if (arguments.length === 0) {
       return [this.interpolate(0), this.interpolate(1)];
-    } else if (p1 === void 0) {
+    } else if (arguments.length === 1) {
       p0 = p0 as readonly [AnyPointR2, AnyPointR2];
       return PointR2Interpolator.between(p0[0], p0[1]);
     } else {
-      return PointR2Interpolator.between(p0 as AnyPointR2, p1);
+      return PointR2Interpolator.between(p0 as AnyPointR2, p1 as AnyPointR2);
     }
   }
 

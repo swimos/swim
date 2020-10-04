@@ -19,8 +19,7 @@ import * as ts from "typescript";
 import * as tslint from "tslint";
 import * as rollup from "rollup";
 import * as typedoc from "typedoc";
-// tslint:disable: no-var-requires
-const terser = require("terser");
+import * as terser from "terser";
 
 import {Severity} from "@swim/util";
 import {Tag, Mark, Span, OutputSettings, OutputStyle, Diagnostic, Unicode} from "@swim/codec";
@@ -498,12 +497,13 @@ export class Target {
           }
           return build.generate(bundleConfig.output as rollup.OutputOptions);
         })
-        .then((bundle: rollup.RollupOutput): rollup.RollupOutput => {
+        .then((bundle: rollup.RollupOutput): Promise<rollup.RollupOutput> => {
           const bundleOutput = bundleConfig.output as rollup.OutputOptions;
           bundle.output[0].fileName = bundleOutput.file!;
-          bundle = this.minify(bundle, bundleOutput);
-
-          this.writeBundle(bundle, bundleOutput);
+          return this.minify(bundle, bundleOutput);
+        })
+        .then((bundle: rollup.RollupOutput): rollup.RollupOutput => {
+          this.writeBundle(bundle, bundleConfig.output as rollup.OutputOptions);
 
           const dt = Date.now() - t0;
           const output = Unicode.stringOutput(OutputSettings.styled());
@@ -550,7 +550,7 @@ export class Target {
     }
   }
 
-  minify(bundle: rollup.RollupOutput, options: rollup.OutputOptions): rollup.RollupOutput {
+  minify(bundle: rollup.RollupOutput, options: rollup.OutputOptions): Promise<rollup.RollupOutput> {
     if (!this.project.devel) {
       const inputChunk = bundle.output[0] as rollup.OutputChunk;
       const outputDir = path.dirname(inputChunk.fileName);
@@ -572,33 +572,36 @@ export class Target {
           url: sourceMappingURL,
         };
       }
-      const output = terser.minify(inputChunk.code, terserOptions);
-      if (!output.error) {
-        const outputChunk: rollup.OutputChunk = {
-          type: "chunk",
-          fileName: scriptPath,
-          code: output.code,
-          map: output.map,
-          name: inputChunk.name,
-          facadeModuleId: inputChunk.facadeModuleId,
-          modules: inputChunk.modules,
-          imports: inputChunk.imports,
-          dynamicImports: inputChunk.dynamicImports,
-          exports: inputChunk.exports,
-          isEntry: inputChunk.isEntry,
-          isDynamicEntry: inputChunk.isDynamicEntry,
-          isImplicitEntry: false,
-          implicitlyLoadedBefore: [],
-        };
-        bundle.output.push(outputChunk);
-      } else {
-        this.onMinifyError(output.error);
-      }
+      return terser.minify(inputChunk.code, terserOptions)
+        .then((output: terser.MinifyOutput): rollup.RollupOutput => {
+          const outputChunk: rollup.OutputChunk = {
+            type: "chunk",
+            fileName: scriptPath,
+            code: output.code!,
+            map: output.map as unknown as rollup.SourceMap,
+            name: inputChunk.name,
+            facadeModuleId: inputChunk.facadeModuleId,
+            modules: inputChunk.modules,
+            imports: inputChunk.imports,
+            importedBindings: inputChunk.importedBindings,
+            dynamicImports: inputChunk.dynamicImports,
+            exports: inputChunk.exports,
+            referencedFiles: inputChunk.referencedFiles,
+            isEntry: inputChunk.isEntry,
+            isDynamicEntry: inputChunk.isDynamicEntry,
+            isImplicitEntry: inputChunk.isImplicitEntry,
+            implicitlyLoadedBefore: inputChunk.implicitlyLoadedBefore,
+          };
+          bundle.output.push(outputChunk);
+          return bundle;
+        })
+        .catch(this.onMinifyError);
+    } else {
+      return Promise.resolve(bundle);
     }
-    return bundle;
   }
 
-  protected onMinifyError(error: Error): void {
+  protected onMinifyError(error: Error): Promise<any> {
     const output = Unicode.stringOutput(OutputSettings.styled());
     OutputStyle.redBold(output);
     output.write("error:");
@@ -607,6 +610,7 @@ export class Target {
     output.write(error.message);
     console.log(output.bind());
     console.log();
+    return Promise.reject(error);
   }
 
   protected onBundleSuccess(): void {

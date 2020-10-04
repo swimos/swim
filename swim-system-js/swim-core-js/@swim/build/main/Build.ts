@@ -379,6 +379,7 @@ export class Build {
       .then((build: rollup.RollupBuild): Promise<rollup.RollupOutput> => {
         return build.generate({
           format: "cjs",
+          exports: "default",
         });
       })
       .then((bundle: rollup.RollupOutput): Promise<unknown> => {

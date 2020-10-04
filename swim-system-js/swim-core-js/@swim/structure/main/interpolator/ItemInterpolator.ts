@@ -39,13 +39,13 @@ export abstract class ItemInterpolator<I extends Item = Item> extends Interpolat
   range(is: readonly [AnyItem, AnyItem]): ItemInterpolator;
   range(i0: AnyItem, i1: AnyItem): ItemInterpolator;
   range(i0?: readonly [AnyItem, AnyItem] | AnyItem, i1?: AnyItem): readonly [I, I] | ItemInterpolator {
-    if (i0 === void 0) {
+    if (arguments.length === 0) {
       return [this.interpolate(0), this.interpolate(1)];
-    } else if (i1 === void 0) {
+    } else if (arguments.length === 1) {
       i0 = i0 as readonly [AnyItem, AnyItem];
       return ItemInterpolator.between(i0[0] as AnyItem, i0[1] as AnyItem);
     } else {
-      return ItemInterpolator.between(i0 as AnyItem, i1);
+      return ItemInterpolator.between(i0 as AnyItem, i1 as AnyItem);
     }
   }
 

@@ -45,13 +45,13 @@ export class DateTimeInterpolator extends Interpolator<DateTime, AnyDateTime> {
   range(t0: AnyDateTime, t1: AnyDateTime): DateTimeInterpolator;
   range(t0?: readonly [AnyDateTime, AnyDateTime] | AnyDateTime,
         t1?: AnyDateTime): readonly [DateTime, DateTime] | DateTimeInterpolator {
-    if (t0 === void 0) {
+    if (arguments.length === 0) {
       return [new DateTime(this.t0, this.zone), new DateTime(this.t0 + this.dt, this.zone)];
-    } else if (t1 === void 0) {
+    } else if (arguments.length === 1) {
       t0 = t0 as readonly [AnyDateTime, AnyDateTime];
       return DateTimeInterpolator.between(t0[0], t0[1], this.zone);
     } else {
-      return DateTimeInterpolator.between(t0 as AnyDateTime, t1, this.zone);
+      return DateTimeInterpolator.between(t0 as AnyDateTime, t1 as AnyDateTime, this.zone);
     }
   }
 

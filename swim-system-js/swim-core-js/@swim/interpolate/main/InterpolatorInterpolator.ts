@@ -14,7 +14,7 @@
 
 import {Interpolator} from "./Interpolator";
 
-export class InterpolatorInterpolator<T extends U, U = T> extends Interpolator<Interpolator<T, U>> {
+export class InterpolatorInterpolator<T, U = T> extends Interpolator<Interpolator<T, U>> {
   /** @hidden */
   readonly i0: Interpolator<T, U>;
   /** @hidden */
@@ -51,13 +51,13 @@ export class InterpolatorInterpolator<T extends U, U = T> extends Interpolator<I
   range(i0: Interpolator<T, U>, i1: Interpolator<T, U>): InterpolatorInterpolator<T, U>;
   range(i0?: readonly [Interpolator<T, U>, Interpolator<T, U>] | Interpolator<T, U>,
         i1?: Interpolator<T, U>): readonly [Interpolator<T, U>, Interpolator<T, U>] | InterpolatorInterpolator<T, U> {
-    if (i0 === void 0) {
+    if (arguments.length === 0) {
       return [this.i0, this.i1];
-    } else if (i1 === void 0) {
+    } else if (arguments.length === 1) {
       i0 = i0 as readonly [Interpolator<T, U>, Interpolator<T, U>];
       return InterpolatorInterpolator.between(i0[0], i0[1]);
     } else {
-      return InterpolatorInterpolator.between(i0 as Interpolator<T, U>, i1);
+      return InterpolatorInterpolator.between(i0 as Interpolator<T, U>, i1 as Interpolator<T, U>);
     }
   }
 
@@ -70,7 +70,7 @@ export class InterpolatorInterpolator<T extends U, U = T> extends Interpolator<I
     return false;
   }
 
-  static between<T extends U, U = T>(i0: Interpolator<T, U>, i1: Interpolator<T, U>): InterpolatorInterpolator<T, U>;
+  static between<T, U = T>(i0: Interpolator<T, U>, i1: Interpolator<T, U>): InterpolatorInterpolator<T, U>;
   static between(a: unknown, b: unknown): Interpolator<unknown>;
   static between(a: unknown, b: unknown): Interpolator<unknown> {
     if (a instanceof Interpolator && b instanceof Interpolator) {
