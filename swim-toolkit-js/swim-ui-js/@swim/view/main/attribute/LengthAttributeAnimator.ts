@@ -12,42 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {AnyLength, Length} from "@swim/length";
-import {Tween} from "@swim/transition";
-import {AttributeAnimatorConstructor, AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimator} from "./AttributeAnimator";
 import {ElementView} from "../element/ElementView";
 
 /** @hidden */
-export interface LengthAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Length, AnyLength> {
+export abstract class LengthAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Length, AnyLength> {
+  parse(value: string): Length {
+    return Length.parse(value, this.node);
+  }
+
+  fromAny(value: AnyLength): Length {
+    return Length.fromAny(value, this.node);
+  }
 }
-
-/** @hidden */
-export const LengthAttributeAnimator: AttributeAnimatorConstructor<Length, AnyLength> = (function (_super: typeof AttributeAnimator): AttributeAnimatorConstructor<Length, AnyLength> {
-  const LengthAttributeAnimator: AttributeAnimatorConstructor<Length, AnyLength> = function <V extends ElementView>(
-      this: LengthAttributeAnimator<V>, view: V, animatorName: string, attributeName: string): LengthAttributeAnimator<V> {
-    let _this: LengthAttributeAnimator<V> = function accessor(value?: AnyLength, tween?: Tween<Length>): Length | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as LengthAttributeAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, attributeName) || _this;
-    return _this;
-  } as unknown as AttributeAnimatorConstructor<Length, AnyLength>;
-  __extends(LengthAttributeAnimator, _super);
-
-  LengthAttributeAnimator.prototype.parse = function (this: LengthAttributeAnimator<ElementView>, value: string): Length {
-    return Length.parse(value, this._view._node);
-  };
-
-  LengthAttributeAnimator.prototype.fromAny = function (this: LengthAttributeAnimator<ElementView>, value: AnyLength): Length {
-    return Length.fromAny(value, this._view._node);
-  };
-
-  return LengthAttributeAnimator;
-}(AttributeAnimator));
 AttributeAnimator.Length = LengthAttributeAnimator;

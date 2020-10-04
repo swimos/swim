@@ -38,26 +38,26 @@ export class FontForm extends Form<Font, AnyFont> {
   mold(font: AnyFont): Item {
     font = Font.fromAny(font);
     const header = Record.create(7);
-    if (font._style !== null) {
+    if (font._style !== void 0) {
       header.slot("style", font._style);
     }
-    if (font._variant !== null) {
+    if (font._variant !== void 0) {
       header.slot("variant", font._variant);
     }
-    if (font._weight !== null) {
+    if (font._weight !== void 0) {
       header.slot("weight", font._weight);
     }
-    if (font._stretch !== null) {
+    if (font._stretch !== void 0) {
       header.slot("stretch", font._stretch);
     }
     if (font._size instanceof Length) {
       header.slot("size", Length.form().mold(font._size));
-    } else if (font._size !== null) {
+    } else if (font._size !== void 0) {
       header.slot("size", font._size);
     }
     if (font._height instanceof Length) {
       header.slot("height", Length.form().mold(font._height));
-    } else if (font._height !== null) {
+    } else if (font._height !== void 0) {
       header.slot("height", font._height);
     }
     if (Array.isArray(font._family)) {

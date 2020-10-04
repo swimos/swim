@@ -12,42 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
-import {Tween} from "@swim/transition";
 import {View} from "../View";
-import {ViewAnimatorDescriptor, ViewAnimatorConstructor, ViewAnimator} from "./ViewAnimator";
+import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
-export interface BooleanViewAnimator<V extends View> extends ViewAnimator<V, boolean, boolean | string> {
+export abstract class BooleanViewAnimator<V extends View> extends ViewAnimator<V, boolean | null | undefined, boolean | string | null | undefined> {
+  fromAny(value: boolean | string | null | undefined): boolean | null | undefined {
+    return !!value;
+  }
 }
-
-/** @hidden */
-export const BooleanViewAnimator: ViewAnimatorConstructor<boolean, boolean | string> = (function (_super: typeof ViewAnimator): ViewAnimatorConstructor<boolean, boolean | string> {
-  const BooleanViewAnimator: ViewAnimatorConstructor<boolean, boolean | string> = function <V extends View>(
-      this: BooleanViewAnimator<V>, view: V, animatorName: string | undefined,
-      descriptor?: ViewAnimatorDescriptor<V, boolean, boolean | string>): BooleanViewAnimator<V> {
-    let _this: BooleanViewAnimator<V> = function accessor(value?: boolean | string, tween?: Tween<boolean>): boolean | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as BooleanViewAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, descriptor) || _this;
-    return _this;
-  } as unknown as ViewAnimatorConstructor<boolean, boolean | string>;
-  __extends(BooleanViewAnimator, _super);
-
-  BooleanViewAnimator.prototype.fromAny = function (this: BooleanViewAnimator<View>, value: boolean | string | null): boolean | null {
-    if (typeof value === "string") {
-      return !!value;
-    } else {
-      return value;
-    }
-  };
-
-  return BooleanViewAnimator;
-}(ViewAnimator));
 ViewAnimator.Boolean = BooleanViewAnimator;

@@ -18,7 +18,7 @@ export {FrameAnimator} from "./FrameAnimator";
 export {ChildAnimator} from "./ChildAnimator";
 
 export {
-  TweenState,
+  TweenAnimatorFlags,
   TweenAnimator,
 } from "./TweenAnimator";
 export {TweenFrameAnimator} from "./TweenFrameAnimator";

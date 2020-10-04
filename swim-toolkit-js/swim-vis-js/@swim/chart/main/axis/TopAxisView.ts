@@ -24,7 +24,7 @@ export class TopAxisView<X = unknown> extends AxisView<X> {
     return "top";
   }
 
-  @ViewAnimator(ContinuousScale, {inherit: "xScale"})
+  @ViewAnimator({type: ContinuousScale, inherit: "xScale"})
   scale: ContinuousScaleViewAnimator<this, X, number>;
 
   protected layoutTick(tick: TickView<X>, origin: PointR2, frame: BoxR2,
@@ -41,10 +41,10 @@ export class TopAxisView<X = unknown> extends AxisView<X> {
       const x0 = frame.xMin;
       const x1 = frame.xMax;
       const y = origin.y;
-      const dy = this.borderSerif.value!;
+      const dy = this.borderSerif.getValue();
 
       context.beginPath();
-      context.strokeStyle = this.borderColor.value!.toString();
+      context.strokeStyle = this.borderColor.getValue().toString();
       context.lineWidth = borderWidth;
       if (dy !== 0) {
         context.moveTo(x0, y - dy);

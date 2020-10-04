@@ -24,6 +24,8 @@ export class ScaleTransform extends Transform {
   readonly _x: number;
   /** @hidden */
   readonly _y: number;
+  /** @hidden */
+  _string?: string;
 
   constructor(x: number, y: number) {
     super();
@@ -118,13 +120,18 @@ export class ScaleTransform extends Transform {
   }
 
   toString(): string {
-    if (this._x !== 0 && this._y === 0) {
-      return "scaleX(" + this._x + ")";
-    } else if (this._x === 0 && this._y !== 0) {
-      return "scaleY(" + this._y + ")";
-    } else {
-      return "scale(" + this._x + "," + this._y + ")";
+    let string = this._string;
+    if (string === void 0) {
+      if (this._x !== 0 && this._y === 0) {
+        string = "scaleX(" + this._x + ")";
+      } else if (this._x === 0 && this._y !== 0) {
+        string = "scaleY(" + this._y + ")";
+      } else {
+        string = "scale(" + this._x + "," + this._y + ")";
+      }
+      this._string = string;
     }
+    return string;
   }
 
   private static _hashSeed?: number;
@@ -132,6 +139,16 @@ export class ScaleTransform extends Transform {
   static from(x: string | number, y: string | number): ScaleTransform {
     x = +x;
     y = +y;
+    return new ScaleTransform(x, y);
+  }
+
+  static fromCssTransformComponent(component: CSSScale): ScaleTransform {
+    const x = typeof component.x === "number"
+            ? component.x
+            : component.x.to("number").value;
+    const y = typeof component.y === "number"
+            ? component.y
+            : component.y.to("number").value;
     return new ScaleTransform(x, y);
   }
 
@@ -186,5 +203,10 @@ export class ScaleTransform extends Transform {
     }
     return parser.bind();
   }
+}
+if (typeof CSSScale !== "undefined") { // CSS Typed OM support
+  ScaleTransform.prototype.toCssTransformComponent = function (this: ScaleTransform): CSSTransformComponent | undefined {
+    return new CSSScale(this._x, this._y);
+  };
 }
 Transform.Scale = ScaleTransform;

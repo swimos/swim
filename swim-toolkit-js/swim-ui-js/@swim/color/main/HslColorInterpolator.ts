@@ -73,13 +73,13 @@ export class HslColorInterpolator extends ColorInterpolator<HslColor> {
   range(c0: AnyColor, c1: AnyColor): ColorInterpolator;
   range(c0?: readonly [AnyColor, AnyColor] | AnyColor,
         c1?: AnyColor): readonly [HslColor, HslColor] | ColorInterpolator {
-    if (c0 === void 0) {
+    if (arguments.length === 0) {
       return [this.interpolate(0), this.interpolate(1)];
-    } else if (c1 === void 0) {
+    } else if (arguments.length === 1) {
       c0 = c0 as readonly [AnyColor, AnyColor];
       return HslColorInterpolator.between(c0[0], c0[1]);
     } else {
-      return HslColorInterpolator.between(c0 as AnyColor, c1);
+      return HslColorInterpolator.between(c0 as AnyColor, c1 as AnyColor);
     }
   }
 

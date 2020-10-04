@@ -15,6 +15,7 @@
       "@swim/color": ["../swim-ui-js/@swim/color/main"],
       "@swim/font": ["../swim-ui-js/@swim/font/main"],
       "@swim/shadow": ["../swim-ui-js/@swim/shadow/main"],
+      "@swim/gradient": ["../swim-ui-js/@swim/gradient/main"],
       "@swim/transform": ["../swim-ui-js/@swim/transform/main"],
       "@swim/scale": ["../swim-ui-js/@swim/scale/main"],
       "@swim/transition": ["../swim-ui-js/@swim/transition/main"],

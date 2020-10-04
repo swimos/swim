@@ -19,14 +19,13 @@ import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
+  ViewContextType,
   ViewFlags,
   View,
   ViewAnimator,
-  GraphicsViewContext,
   GraphicsViewInit,
   GraphicsView,
-  GraphicsViewController,
-  GraphicsNodeView,
+  LayerView,
   TypesetView,
 } from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
@@ -56,7 +55,7 @@ export interface DataPointViewInit<X, Y> extends GraphicsViewInit {
   label?: GraphicsView | string | null;
 }
 
-export class DataPointView<X, Y> extends GraphicsNodeView {
+export class DataPointView<X, Y> extends LayerView {
   /** @hidden */
   _xCoord: number;
   /** @hidden */
@@ -80,8 +79,9 @@ export class DataPointView<X, Y> extends GraphicsNodeView {
     this.y.setAutoState(y);
   }
 
-  get viewController(): GraphicsViewController<DataPointView<X, Y>> | null {
-    return this._viewController;
+  initView(init: DataPointViewInit<X, Y>): void {
+    super.initView(init);
+    this.setState(init);
   }
 
   get xCoord(): number {
@@ -96,32 +96,32 @@ export class DataPointView<X, Y> extends GraphicsNodeView {
     return this._y2Coord;
   }
 
-  @ViewAnimator(Object)
-  x: ViewAnimator<this, X>;
+  @ViewAnimator({type: Object})
+  x: ViewAnimator<this, X | undefined>;
 
-  @ViewAnimator(Object)
-  y: ViewAnimator<this, Y>;
+  @ViewAnimator({type: Object})
+  y: ViewAnimator<this, Y | undefined>;
 
-  @ViewAnimator(Object)
-  y2: ViewAnimator<this, Y>;
+  @ViewAnimator({type: Object})
+  y2: ViewAnimator<this, Y | undefined>;
 
-  @ViewAnimator(Length)
-  r: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length})
+  r: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Color)
-  color: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color})
+  color: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Number)
-  opacity: ViewAnimator<this, number>;
+  @ViewAnimator({type: Number})
+  opacity: ViewAnimator<this, number | undefined>;
 
-  @ViewAnimator(Length)
-  labelPadding: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length})
+  labelPadding: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Font, {inherit: true})
-  font: ViewAnimator<this, Font, AnyFont>;
+  @ViewAnimator({type: Font, inherit: true})
+  font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  textColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
   hitRadius(): number;
   hitRadius(hitRadius: number): this;
@@ -215,13 +215,6 @@ export class DataPointView<X, Y> extends GraphicsNodeView {
     if (point.label !== void 0) {
       this.label(point.label);
     }
-
-    if (point.hidden !== void 0) {
-      this.setHidden(point.hidden);
-    }
-    if (point.culled !== void 0) {
-      this.setCulled(point.culled);
-    }
   }
 
   isGradientStop(): boolean {
@@ -255,21 +248,21 @@ export class DataPointView<X, Y> extends GraphicsNodeView {
     // hook
   }
 
-  protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
+  protected modifyUpdate(targetView: View, updateFlags: ViewFlags): ViewFlags {
     let additionalFlags = 0;
     if ((updateFlags & View.NeedsAnimate) !== 0) {
       additionalFlags |= View.NeedsLayout;
     }
-    additionalFlags |= super.modifyUpdate(updateFlags | additionalFlags);
+    additionalFlags |= super.modifyUpdate(targetView, updateFlags | additionalFlags);
     return additionalFlags;
   }
 
-  protected onAnimate(viewContext: GraphicsViewContext): void {
+  protected onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
     this._gradientStop = this.color.value !== void 0 || this.opacity.value !== void 0;
   }
 
-  protected onLayout(viewContext: GraphicsViewContext): void {
+  protected onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     const label = this.label();
     if (label !== null) {
@@ -314,8 +307,8 @@ export class DataPointView<X, Y> extends GraphicsNodeView {
     }
   }
 
-  hitTest(x: number, y: number, viewContext: GraphicsViewContext): GraphicsView | null {
-    let hit = super.hitTest(x, y, viewContext);
+  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
       if (renderer instanceof CanvasRenderer) {
@@ -346,10 +339,14 @@ export class DataPointView<X, Y> extends GraphicsNodeView {
     if (point instanceof DataPointView) {
       return point;
     } else if (typeof point === "object" && point !== null) {
-      const view = new DataPointView(point.x, point.y);
-      view.setState(point);
-      return view;
+      return DataPointView.fromInit(point);
     }
     throw new TypeError("" + point);
+  }
+
+  static fromInit<X, Y>(init: DataPointViewInit<X, Y>): DataPointView<X, Y> {
+    const view = new DataPointView(init.x, init.y);
+    view.initView(init);
+    return view;
   }
 }

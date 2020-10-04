@@ -12,36 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
-import {Tween} from "@swim/transition";
 import {View} from "../View";
-import {ViewAnimatorDescriptor, ViewAnimatorConstructor, ViewAnimator} from "./ViewAnimator";
+import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
-export interface NumberViewAnimator<V extends View> extends ViewAnimator<V, number, number | string> {
-}
-
-/** @hidden */
-export const NumberViewAnimator: ViewAnimatorConstructor<number, number | string> = (function (_super: typeof ViewAnimator): ViewAnimatorConstructor<number, number | string> {
-  const NumberViewAnimator: ViewAnimatorConstructor<number, number | string> = function <V extends View>(
-      this: NumberViewAnimator<V>, view: V, animatorName: string | undefined,
-      descriptor?: ViewAnimatorDescriptor<V, number, number | string>): NumberViewAnimator<V> {
-    let _this: NumberViewAnimator<V> = function accessor(value?: number | string, tween?: Tween<number>): number | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as NumberViewAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, descriptor) || _this;
-    return _this;
-  } as unknown as ViewAnimatorConstructor<number, number | string>;
-  __extends(NumberViewAnimator, _super);
-
-  NumberViewAnimator.prototype.fromAny = function (this: NumberViewAnimator<View>, value: number | string | null): number | null {
-    if (typeof value === "string") {
+export abstract class NumberViewAnimator<V extends View> extends ViewAnimator<V, number | null | undefined, number | string | null | undefined> {
+  fromAny(value: number | string): number {
+    if (typeof value === "number") {
+      return value;
+    } else if (typeof value === "string") {
       const number = +value;
       if (isFinite(number)) {
         return number;
@@ -51,8 +30,6 @@ export const NumberViewAnimator: ViewAnimatorConstructor<number, number | string
     } else {
       return value;
     }
-  };
-
-  return NumberViewAnimator;
-}(ViewAnimator));
+  }
+}
 ViewAnimator.Number = NumberViewAnimator;

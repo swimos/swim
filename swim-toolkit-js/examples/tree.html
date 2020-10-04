@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Tree View</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body style="display: flex; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
+    <script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+const bodyView = swim.ThemedHtmlView.fromNode(document.body);
+
+const container = swim.HtmlView.create("div")
+  .position("relative")
+  .flexGrow(1)
+  .userSelect("none");
+
+container.addViewObserver({
+  viewWillResize(viewContext, view) {
+    if (viewContext.viewIdiom === "desktop") {
+      view.margin(60);
+    } else {
+      view.margin(0);
+    }
+  },
+});
+
+bodyView.append(container);
+
+const iconCell = {
+  key: "icon",
+  cellType: "polygon",
+  sides: 6,
+  radius: 20,
+};
+const disclosureCell = {
+  key: "disclose",
+  cellType: "disclosure",
+};
+const tree0 = swim.TreeView.fromAny({
+  //depth: 1,
+  seed: {
+    roots: [
+      {
+        key: "icon",
+        shrink: 0,
+        basis: 80,
+      },
+      {
+        key: "name",
+        grow: 1,
+        basis: 240,
+      },
+      {
+        key: "kpi1",
+        optional: true,
+        basis: 120,
+      },
+      {
+        key: "kpi2",
+        optional: true,
+        basis: 120,
+      },
+      {
+        key: "disclose",
+        shrink: 0,
+        basis: 60,
+      },
+    ],
+  },
+  stem: {
+    veins: [
+      {
+        key: "name",
+        text: "Category",
+      },
+      {
+        key: "kpi1",
+        text: "Count",
+      },
+      {
+        key: "kpi2",
+        text: "Status",
+      },
+    ],
+  },
+  limbs: [
+    {
+      key: "limb00",
+      leaf: {
+        cells: [
+          iconCell,
+          {
+            key: "name",
+            cellType: "title",
+            text: "Places",
+          },
+          {
+            key: "kpi1",
+            text: "0",
+          },
+          {
+            key: "kpi2",
+            text: "idle",
+          },
+          disclosureCell,
+        ],
+      },
+      subtree: {
+        stem: {
+          veins: [
+            {
+              key: "name",
+              text: "Name",
+            },
+            {
+              key: "kpi1",
+              text: "Country",
+            },
+            {
+              key: "kpi2",
+              text: "Status",
+            },
+          ],
+        },
+        limbs: [
+          {
+            key: "limb010",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Campbell",
+                },
+                {
+                  key: "kpi1",
+                  text: "USA",
+                },
+                {
+                  key: "kpi2",
+                  text: "quarantined",
+                },
+              ],
+            },
+          },
+          {
+            key: "limb011",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Cambridge",
+                },
+                {
+                  key: "kpi1",
+                  text: "UK",
+                },
+                {
+                  key: "kpi2",
+                  text: "brexited",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      key: "limb01",
+      leaf: {
+        cells: [
+          iconCell,
+          {
+            key: "name",
+            cellType: "title",
+            text: "People",
+          },
+          {
+            key: "kpi1",
+            text: "3",
+          },
+          {
+            key: "kpi2",
+            text: "active",
+          },
+          disclosureCell,
+        ],
+      },
+      subtree: {
+        stem: {
+          veins: [
+            {
+              key: "name",
+              text: "Name",
+            },
+            {
+              key: "kpi1",
+              text: "Role",
+            },
+            {
+              key: "kpi2",
+              text: "Status",
+            },
+          ],
+        },
+        limbs: [
+          {
+            key: "limb010",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Chris",
+                },
+                {
+                  key: "kpi1",
+                  text: "root",
+                },
+                {
+                  key: "kpi2",
+                  text: "busy",
+                },
+                disclosureCell,
+              ],
+            },
+            subtree: {
+              stem: {
+                veins: [
+                  {
+                    key: "name",
+                    text: "Task",
+                  },
+                  {
+                    key: "kpi1",
+                    text: "Points",
+                  },
+                  {
+                    key: "kpi2",
+                    text: "Status",
+                  },
+                ],
+              },
+              limbs: [
+                {
+                  key: "limb0120",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Architecting",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "NaN",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "implementing",
+                      },
+                      disclosureCell,
+                    ],
+                  },
+                  subtree: {
+                    stem: {
+                      veins: [
+                        {
+                          key: "name",
+                          text: "Subtask",
+                        },
+                        {
+                          key: "kpi1",
+                          text: "Complete",
+                        },
+                        {
+                          key: "kpi2",
+                          text: "Status",
+                        },
+                      ],
+                    },
+                    limbs: [
+                      {
+                        key: "limb01200",
+                        leaf: {
+                          cells: [
+                            iconCell,
+                            {
+                              key: "name",
+                              cellType: "title",
+                              text: "Iterating",
+                            },
+                            {
+                              key: "kpi1",
+                              text: "never",
+                            },
+                            {
+                              key: "kpi2",
+                              text: "in progress",
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  key: "limb0121",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Contemplating",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "0",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "perpetual",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: "limb011",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Ajay",
+                },
+                {
+                  key: "kpi1",
+                  text: "admin",
+                },
+                {
+                  key: "kpi2",
+                  text: "online",
+                },
+                disclosureCell,
+              ],
+            },
+            subtree: {
+              stem: {
+                veins: [
+                  {
+                    key: "name",
+                    text: "Task",
+                  },
+                  {
+                    key: "kpi1",
+                    text: "Points",
+                  },
+                  {
+                    key: "kpi2",
+                    text: "Status",
+                  },
+                ],
+              },
+              limbs: [
+                {
+                  key: "limb0120",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Engineering",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "100",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "unknown",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: "limb012",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Will",
+                },
+                {
+                  key: "kpi1",
+                  text: "admin",
+                },
+                {
+                  key: "kpi2",
+                  text: "extant",
+                },
+                disclosureCell,
+              ],
+            },
+            subtree: {
+              stem: {
+                veins: [
+                  {
+                    key: "name",
+                    text: "Task",
+                  },
+                  {
+                    key: "kpi1",
+                    text: "Points",
+                  },
+                  {
+                    key: "kpi2",
+                    text: "Status",
+                  },
+                ],
+              },
+              limbs: [
+                {
+                  key: "limb0120",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Design",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "100",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "unknown",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: "limb013",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Rohit",
+                },
+                {
+                  key: "kpi1",
+                  text: "admin",
+                },
+                {
+                  key: "kpi2",
+                  text: "online",
+                },
+                disclosureCell,
+              ],
+            },
+            subtree: {
+              stem: {
+                veins: [
+                  {
+                    key: "name",
+                    text: "Task",
+                  },
+                  {
+                    key: "kpi1",
+                    text: "Points",
+                  },
+                  {
+                    key: "kpi2",
+                    text: "Status",
+                  },
+                ],
+              },
+              limbs: [
+                {
+                  key: "limb0120",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Engineering",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "100",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "unknown",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: "limb014",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Dian",
+                },
+                {
+                  key: "kpi1",
+                  text: "admin",
+                },
+                {
+                  key: "kpi2",
+                  text: "online",
+                },
+                disclosureCell,
+              ],
+            },
+            subtree: {
+              stem: {
+                veins: [
+                  {
+                    key: "name",
+                    text: "Task",
+                  },
+                  {
+                    key: "kpi1",
+                    text: "Points",
+                  },
+                  {
+                    key: "kpi2",
+                    text: "Status",
+                  },
+                ],
+              },
+              limbs: [
+                {
+                  key: "limb0120",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Engineering",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "100",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "unknown",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: "limb015",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Greg",
+                },
+                {
+                  key: "kpi1",
+                  text: "admin",
+                },
+                {
+                  key: "kpi2",
+                  text: "online",
+                },
+                disclosureCell,
+              ],
+            },
+            subtree: {
+              stem: {
+                veins: [
+                  {
+                    key: "name",
+                    text: "Task",
+                  },
+                  {
+                    key: "kpi1",
+                    text: "Points",
+                  },
+                  {
+                    key: "kpi2",
+                    text: "Status",
+                  },
+                ],
+              },
+              limbs: [
+                {
+                  key: "limb0120",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Engineering",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "100",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "unknown",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: "limb016",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Tom",
+                },
+                {
+                  key: "kpi1",
+                  text: "admin",
+                },
+                {
+                  key: "kpi2",
+                  text: "online",
+                },
+                disclosureCell,
+              ],
+            },
+            subtree: {
+              stem: {
+                veins: [
+                  {
+                    key: "name",
+                    text: "Task",
+                  },
+                  {
+                    key: "kpi1",
+                    text: "Points",
+                  },
+                  {
+                    key: "kpi2",
+                    text: "Status",
+                  },
+                ],
+              },
+              limbs: [
+                {
+                  key: "limb0120",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Engineering",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "100",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "unknown",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: "limb017",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Dobromir",
+                },
+                {
+                  key: "kpi1",
+                  text: "admin",
+                },
+                {
+                  key: "kpi2",
+                  text: "online",
+                },
+                disclosureCell,
+              ],
+            },
+            subtree: {
+              stem: {
+                veins: [
+                  {
+                    key: "name",
+                    text: "Task",
+                  },
+                  {
+                    key: "kpi1",
+                    text: "Points",
+                  },
+                  {
+                    key: "kpi2",
+                    text: "Status",
+                  },
+                ],
+              },
+              limbs: [
+                {
+                  key: "limb0120",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Engineering",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "100",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "unknown",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: "limb018",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Scott",
+                },
+                {
+                  key: "kpi1",
+                  text: "admin",
+                },
+                {
+                  key: "kpi2",
+                  text: "online",
+                },
+                disclosureCell,
+              ],
+            },
+            subtree: {
+              stem: {
+                veins: [
+                  {
+                    key: "name",
+                    text: "Task",
+                  },
+                  {
+                    key: "kpi1",
+                    text: "Points",
+                  },
+                  {
+                    key: "kpi2",
+                    text: "Status",
+                  },
+                ],
+              },
+              limbs: [
+                {
+                  key: "limb0120",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Engineering",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "100",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "unknown",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            key: "limb019",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Trinh",
+                },
+                {
+                  key: "kpi1",
+                  text: "admin",
+                },
+                {
+                  key: "kpi2",
+                  text: "online",
+                },
+                disclosureCell,
+              ],
+            },
+            subtree: {
+              stem: {
+                veins: [
+                  {
+                    key: "name",
+                    text: "Task",
+                  },
+                  {
+                    key: "kpi1",
+                    text: "Points",
+                  },
+                  {
+                    key: "kpi2",
+                    text: "Status",
+                  },
+                ],
+              },
+              limbs: [
+                {
+                  key: "limb0120",
+                  leaf: {
+                    cells: [
+                      iconCell,
+                      {
+                        key: "name",
+                        cellType: "title",
+                        text: "Engineering",
+                      },
+                      {
+                        key: "kpi1",
+                        text: "100",
+                      },
+                      {
+                        key: "kpi2",
+                        text: "unknown",
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      key: "tree02",
+      leaf: {
+        cells: [
+          iconCell,
+          {
+            key: "name",
+            cellType: "title",
+            text: "Things",
+          },
+          {
+            key: "kpi1",
+            text: "0",
+          },
+          {
+            key: "kpi2",
+            text: "idle",
+          },
+          disclosureCell,
+        ],
+      },
+      subtree: {
+        stem: {
+          veins: [
+            {
+              key: "name",
+              text: "Name",
+            },
+            {
+              key: "kpi1",
+              text: "Dimensions",
+            },
+            {
+              key: "kpi2",
+              text: "Status",
+            },
+          ],
+        },
+        limbs: [
+          {
+            key: "limb010",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "Tesseract",
+                },
+                {
+                  key: "kpi1",
+                  text: "4",
+                },
+                {
+                  key: "kpi2",
+                  text: "projected",
+                },
+              ],
+            },
+          },
+          {
+            key: "limb011",
+            leaf: {
+              cells: [
+                iconCell,
+                {
+                  key: "name",
+                  cellType: "title",
+                  text: "String",
+                },
+                {
+                  key: "kpi1",
+                  text: "11",
+                },
+                {
+                  key: "kpi2",
+                  text: "imaginary",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+});
+tree0.modifyTheme(swim.Feel.default, [swim.Feel.primary, 1]);
+container.append(tree0, "tree0");
+
+const limb01 = tree0.getChildView("limb01");
+const tree01 = limb01.subtree;
+const limb010 = tree01.getChildView("limb010");
+const limb011 = tree01.getChildView("limb011");
+const limb012 = tree01.getChildView("limb012");
+const tree02 = limb012.subtree;
+const limb0120 = tree02.getChildView("limb0120");
+const limb013 = tree01.getChildView("limb013");
+const limb014 = tree01.getChildView("limb014");
+const limb015 = tree01.getChildView("limb015");
+const limb016 = tree01.getChildView("limb016");
+const limb017 = tree01.getChildView("limb017");
+const limb018 = tree01.getChildView("limb018");
+const limb019 = tree01.getChildView("limb019");
+
+function updateMood(view) {
+  const warnThreshold = 0.8;
+  const alertThreshold = 0.95;
+  let u = Math.random();
+  if (u < warnThreshold) {
+    view.modifyMood(swim.Feel.default, [swim.Feel.warning, undefined], [swim.Feel.alert, undefined]);
+  } else if (u < alertThreshold) {
+    u = (u - warnThreshold) / (alertThreshold - warnThreshold);
+    u = 0.6 + 0.4 * u;
+    view.modifyMood(swim.Feel.default, [swim.Feel.warning, 1], [swim.Feel.alert, undefined]);
+  } else {
+    u = (u - alertThreshold) / (1 - alertThreshold);
+    u = 0.6 + 0.4 * u;
+    view.modifyMood(swim.Feel.default, [swim.Feel.warning, undefined], [swim.Feel.alert, u]);
+  }
+}
+function updateMoods() {
+  updateMood(limb010);
+  updateMood(limb011);
+  updateMood(limb012);
+  updateMood(limb013);
+  updateMood(limb014);
+  updateMood(limb015);
+  updateMood(limb016);
+  updateMood(limb017);
+  updateMood(limb018);
+  updateMood(limb019);
+}
+setInterval(updateMoods, 4000);
+updateMoods();
+
+    </script>
+  </body>
+</html>

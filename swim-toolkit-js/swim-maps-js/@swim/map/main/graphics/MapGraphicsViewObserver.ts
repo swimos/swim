@@ -12,52 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicsViewObserver} from "@swim/view";
-import {MapGraphicsViewContext} from "./MapGraphicsViewContext";
+import {ViewContextType, GraphicsViewObserver} from "@swim/view";
 import {MapGraphicsView} from "./MapGraphicsView";
 
 export interface MapGraphicsViewObserver<V extends MapGraphicsView = MapGraphicsView> extends GraphicsViewObserver<V> {
-  viewWillProcess?(viewContext: MapGraphicsViewContext, view: V): void;
+  viewWillProject?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidProcess?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewWillResize?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewDidResize?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewWillScroll?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewDidScroll?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewWillCompute?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewDidCompute?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewWillAnimate?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewDidAnimate?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewWillProject?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewDidProject?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewWillProcessChildViews?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewDidProcessChildViews?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewWillDisplay?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewDidDisplay?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewWillLayout?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewDidLayout?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewWillRender?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewDidRender?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewWillDisplayChildViews?(viewContext: MapGraphicsViewContext, view: V): void;
-
-  viewDidDisplayChildViews?(viewContext: MapGraphicsViewContext, view: V): void;
+  viewDidProject?(viewContext: ViewContextType<V>, view: V): void;
 }

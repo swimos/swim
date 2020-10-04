@@ -18,13 +18,18 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {View, ViewAnimator, GraphicsView, StrokeViewInit, StrokeView} from "@swim/view";
+import {
+  ViewContextType,
+  View,
+  ViewAnimator,
+  GraphicsView,
+  StrokeViewInit,
+  StrokeView,
+} from "@swim/view";
 import {GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
-import {MapGraphicsViewContext} from "../graphics/MapGraphicsViewContext";
 import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
-import {MapGraphicsViewController} from "../graphics/MapGraphicsViewController";
-import {MapGraphicsNodeView} from "../graphics/MapGraphicsNodeView";
+import {MapLayerView} from "../graphics/MapLayerView";
 import {AnyMapPointView, MapPointView} from "./MapPointView";
 
 export type AnyMapPolylineView = MapPolylineView | MapPolylineViewInit;
@@ -38,7 +43,7 @@ export interface MapPolylineViewInit extends MapGraphicsViewInit, StrokeViewInit
   textColor?: AnyColor;
 }
 
-export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
+export class MapPolylineView extends MapLayerView implements StrokeView {
   /** @hidden */
   _hitWidth?: number;
   /** @hidden */
@@ -61,8 +66,27 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
     this._viewBounds = BoxR2.undefined();
   }
 
-  get viewController(): MapGraphicsViewController<MapPolylineView> | null {
-    return this._viewController;
+  initView(init: MapPolylineViewInit): void {
+    super.initView(init);
+    if (init.stroke !== void 0) {
+      this.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      this.strokeWidth(init.strokeWidth);
+    }
+    if (init.hitWidth !== void 0) {
+      this.hitWidth(init.hitWidth);
+    }
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
+    const points = init.points;
+    if (points !== void 0) {
+      this.points(points);
+    }
   }
 
   points(): ReadonlyArray<MapPointView>;
@@ -94,7 +118,7 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
         if (childView instanceof MapPointView) {
           const point = points[j];
           childView.setState(point);
-          const {lng, lat} = childView.geoPoint.value!;
+          const {lng, lat} = childView.geoPoint.getValue();
           lngMid += lng;
           latMid += lat;
           lngMin = Math.min(lngMin, lng);
@@ -109,7 +133,7 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
       while (j < points.length) {
         const point = MapPointView.fromAny(points[j]);
         this.appendChildView(point);
-        const {lng, lat} = point.geoPoint.value!;
+        const {lng, lat} = point.geoPoint.getValue();
         lngMid += lng;
         latMid += lat;
         lngMin = Math.min(lngMin, lng);
@@ -165,17 +189,17 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
     return this._viewCentroid;
   }
 
-  @ViewAnimator(Color, {inherit: true})
-  stroke: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  stroke: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  strokeWidth: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  strokeWidth: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Font, {inherit: true})
-  font: ViewAnimator<this, Font, AnyFont>;
+  @ViewAnimator({type: Font, inherit: true})
+  font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  textColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
   hitWidth(): number | null;
   hitWidth(hitWidth: number | null): this;
@@ -203,7 +227,7 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
     childView.requireUpdate(View.NeedsAnimate | View.NeedsProject);
   }
 
-  protected didProject(viewContext: MapGraphicsViewContext): void {
+  protected didProject(viewContext: ViewContextType<this>): void {
     const oldGeoBounds = this._geoBounds;
     let lngMin = Infinity;
     let latMin = Infinity;
@@ -224,7 +248,7 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
     for (let i = 0; i < childViews.length; i += 1) {
       const childView = childViews[i];
       if (childView instanceof MapPointView) {
-        const {lng, lat} = childView.geoPoint.value!;
+        const {lng, lat} = childView.geoPoint.getValue();
         lngMid += lng;
         latMid += lat;
         lngMin = Math.min(lngMin, lng);
@@ -232,7 +256,7 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
         lngMax = Math.max(lng, lngMax);
         latMax = Math.max(lat, latMax);
         invalid = invalid || !isFinite(lng) || !isFinite(lat);
-        const {x, y} = childView.viewPoint.value!;
+        const {x, y} = childView.viewPoint.getValue();
         xMin = Math.min(xMin, x);
         yMin = Math.min(yMin, y);
         xMax = Math.max(x, xMax);
@@ -271,7 +295,7 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
     super.didProject(viewContext);
   }
 
-  protected onRender(viewContext: MapGraphicsViewContext): void {
+  protected onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -294,7 +318,7 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
     for (let i = 0; i < childCount; i += 1) {
       const childView = childViews[i];
       if (childView instanceof MapPointView) {
-        const {x, y} = childView.viewPoint.value!;
+        const {x, y} = childView.viewPoint.getValue();
         if (pointCount === 0) {
           context.moveTo(x, y);
         } else {
@@ -307,7 +331,7 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
       const stroke = this.stroke.value;
       if (stroke !== void 0) {
         const size = Math.min(frame.width, frame.height);
-        const strokeWidth = this.strokeWidth.value!.pxValue(size);
+        const strokeWidth = this.strokeWidth.getValue().pxValue(size);
         context.strokeStyle = stroke.toString();
         context.lineWidth = strokeWidth;
         context.stroke();
@@ -316,9 +340,9 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
   }
 
   protected renderPolylineGradient(context: CanvasContext, frame: BoxR2): void {
-    const stroke = this.stroke.value!;
+    const stroke = this.stroke.getValue();
     const size = Math.min(frame.width, frame.height);
-    const strokeWidth = this.strokeWidth.value!.pxValue(size);
+    const strokeWidth = this.strokeWidth.getValue().pxValue(size);
     const childViews = this._childViews;
     const childCount = childViews.length;
     let p0: MapPointView | undefined;
@@ -326,10 +350,10 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
       const p1 = childViews[i];
       if (p1 instanceof MapPointView) {
         if (p0 !== void 0) {
-          const x0 = p0.viewPoint.value!.x;
-          const y0 = p0.viewPoint.value!.y;
-          const x1 = p1.viewPoint.value!.x;
-          const y1 = p1.viewPoint.value!.y;
+          const x0 = p0.viewPoint.getValue().x;
+          const y0 = p0.viewPoint.getValue().y;
+          const x1 = p1.viewPoint.getValue().x;
+          const y1 = p1.viewPoint.getValue().y;
           const gradient = context.createLinearGradient(x0, y0, x1, y1);
 
           let color = p0.color.value;
@@ -383,8 +407,8 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
     return this.viewBounds;
   }
 
-  hitTest(x: number, y: number, viewContext: MapGraphicsViewContext): GraphicsView | null {
-    let hit = super.hitTest(x, y, viewContext);
+  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
       if (renderer instanceof CanvasRenderer) {
@@ -407,7 +431,7 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
     for (let i = 0; i < childCount; i += 1) {
       const childView = this._childViews[i];
       if (childView instanceof MapPointView) {
-        const {x, y} = childView.viewPoint.value!;
+        const {x, y} = childView.viewPoint.getValue();
         if (i === 0) {
           context.moveTo(x, y);
         } else {
@@ -442,31 +466,7 @@ export class MapPolylineView extends MapGraphicsNodeView implements StrokeView {
 
   static fromInit(init: MapPolylineViewInit): MapPolylineView {
     const view = new MapPolylineView();
-    if (init.stroke !== void 0) {
-      view.stroke(init.stroke);
-    }
-    if (init.strokeWidth !== void 0) {
-      view.strokeWidth(init.strokeWidth);
-    }
-    if (init.hitWidth !== void 0) {
-      view.hitWidth(init.hitWidth);
-    }
-    if (init.font !== void 0) {
-      view.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      view.textColor(init.textColor);
-    }
-    const points = init.points;
-    if (points !== void 0) {
-      view.points(points);
-    }
-    if (init.hidden !== void 0) {
-      view.setHidden(init.hidden);
-    }
-    if (init.culled !== void 0) {
-      view.setCulled(init.culled);
-    }
+    view.initView(init);
     return view;
   }
 }

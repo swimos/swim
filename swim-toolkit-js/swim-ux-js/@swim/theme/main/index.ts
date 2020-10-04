@@ -12,29 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {
-  ViewStyleType,
-  BaseLook,
-  AccentLook,
-  SurfaceLook,
-  Theme,
-  ThemeClass,
-} from "./Theme";
+export * from "./look";
 
-export {
-  DarkBase,
-  DarkPrimary,
-  DarkSecondary,
-  DarkDisabled,
-  DarkFloating,
-  DarkTheme,
-} from "./DarkTheme";
+export * from "./feel";
 
-export {
-  LightBase,
-  LightPrimary,
-  LightSecondary,
-  LightDisabled,
-  LightFloating,
-  LightTheme,
-} from "./LightTheme";
+export * from "./mood";
+
+export * from "./theme";
+
+export * from "./looks";
+
+export * from "./feels";
+
+export * from "./moods";
+
+export * from "./themed";
+
+export * from "./manager";
+
+export * from "./themes";
+
+import {ThemeService} from "./manager/ThemeService";
+declare module "@swim/view" {
+  abstract class View {
+    get themeService(): ThemeService<this>; // defined by ThemeService
+  }
+}

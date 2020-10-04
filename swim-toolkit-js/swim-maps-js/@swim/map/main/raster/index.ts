@@ -13,6 +13,9 @@
 // limitations under the License.
 
 export {MapRasterViewContext} from "./MapRasterViewContext";
-export {MapRasterView} from "./MapRasterView";
+export {
+  MapRasterViewInit,
+  MapRasterView,
+} from "./MapRasterView";
 export {MapRasterViewObserver} from "./MapRasterViewObserver";
 export {MapRasterViewController} from "./MapRasterViewController";

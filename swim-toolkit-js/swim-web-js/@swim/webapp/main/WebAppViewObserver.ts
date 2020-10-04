@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {UiViewObserver} from "@swim/view";
+import {HtmlViewObserver} from "@swim/view";
 import {WebAppView} from "./WebAppView";
 
-export interface WebAppViewObserver<V extends WebAppView = WebAppView> extends UiViewObserver<V> {
+export interface WebAppViewObserver<V extends WebAppView = WebAppView> extends HtmlViewObserver<V> {
 }

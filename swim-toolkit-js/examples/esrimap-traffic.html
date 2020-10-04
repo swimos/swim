@@ -6,14 +6,14 @@
     <link rel="stylesheet" href="https://js.arcgis.com/4.14/esri/themes/light/main.css">
   </head>
   <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
-    <div id="app" style="display: flex; position: relative; width: 100%; height: 100%;">
+    <div id="ui" style="display: flex; position: relative; width: 100%; height: 100%;">
     </div>
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
     <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
     <script src="../swim-maps-js/@swim/maps/dist/main/swim-maps.js"></script>
-    <script src="https://js.arcgis.com/4.15/"></script>
+    <script src="https://js.arcgis.com/4.16/"></script>
     <script>
 
 const RED = swim.Color.parse("#a50f21");
@@ -22,7 +22,7 @@ const GREEN = swim.Color.parse("#54e218");
 const INTERSECTION_COLOR = swim.Color.parse("#00a6ed");
 const RIPPLE_COLOR = swim.Color.parse("#efefef").alpha(0.25);
 
-const appView = new swim.AppView(document.getElementById("app"));
+const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
 
 require([
     "esri/Map",
@@ -34,7 +34,7 @@ require([
     basemap: "dark-gray-vector",
   });
   const esriMapView = new EsriMapView({
-    container: appView.node,
+    container: uiView.node,
     map: esriMap,
     center: [-122.157139, 37.450809],
     zoom: 14,
@@ -45,10 +45,10 @@ require([
       .pointerEventsEnabled(true)
       .touchAction("manipulation");
 
-  const mapLayer = mapView.append(new swim.MapLayerView(undefined, 0, 15));
-  //mapLayer.tileOutlineColor("#cc0000");
+  const mapGrid = mapView.append(swim.MapGridView);
+  //mapGrid.tileOutlineColor("#008f11");
 
-  const host = swim.hostRef("warps://traffic.swim.services")
+  const host = swim.hostRef("warps://traffic.swim.services");
 
   const intersectionsLink = host.downlinkMap()
       .nodeUri("/city/PaloAlto_CA_US")
@@ -58,14 +58,14 @@ require([
         const lng = value.get("lng").numberValue();
         const lat = value.get("lat").numberValue();
 
-        let intersectionView = mapLayer.getChildView(key);
+        let intersectionView = mapGrid.getChildView(key);
         if (intersectionView === null) {
           const intersectionId = value.get("id").stringValue();
           intersectionView = new swim.MapCircleView()
               .geoCenter([lng, lat])
               .radius(5)
               .fill(INTERSECTION_COLOR);
-          mapLayer.setChildView(key, intersectionView);
+          mapGrid.setChildView(key, intersectionView);
           linkIntersection(intersectionId, host.nodeRef(key), intersectionView);
         }
       })
@@ -79,7 +79,7 @@ require([
     intersectionView.on("click", function (event) {
       event.stopPropagation();
       if (!intersectionPopover) {
-        intersectionPopover = new swim.PopoverView()
+        intersectionPopover = swim.View.create(swim.PopoverView)
             .width(240)
             .height(360)
             .borderRadius(5)
@@ -88,7 +88,7 @@ require([
         intersectionPopover.setSource(intersectionView);
         intersectionPopover.hideModal();
       }
-      appView.toggleModal(intersectionPopover, {multi: event.shiftKey});
+      uiView.modalService.toggleModal(intersectionPopover, {multi: event.shiftKey});
     });
 
     const schematicLink = node.downlinkValue()
@@ -126,7 +126,7 @@ require([
                   detectorApproaches.push(approachView);
                   detectors[detectorId] = detectorApproaches;
                 }
-                mapLayer.setChildView(approachKey, approachView);
+                mapGrid.setChildView(approachKey, approachView);
               }
             }
           })

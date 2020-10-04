@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContext} from "./ViewContext";
-import {View} from "./View";
+import {ViewContextType, ViewContext} from "./ViewContext";
+import {ViewFlags, View} from "./View";
 import {ViewObserver} from "./ViewObserver";
-import {Viewport} from "./viewport/Viewport";
 import {ViewIdiom} from "./viewport/ViewIdiom";
-import {RootView} from "./root/RootView";
-import {RootViewController} from "./root/RootViewController";
+import {Viewport} from "./viewport/Viewport";
+
+export type ViewControllerType<V extends View> =
+  V extends {readonly viewController: infer VC} ? VC : unknown;
 
 export class ViewController<V extends View = View> implements ViewObserver<V> {
   /** @hidden */
@@ -51,9 +52,9 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
-  get key(): string | null {
+  get key(): string | undefined {
     const view = this._view;
-    return view !== null ? view.key : null;
+    return view !== null ? view.key : void 0;
   }
 
   get parentView(): View | null {
@@ -249,6 +250,16 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
+  getSuperView<V extends View>(viewClass: {new(...args: any[]): V}): V | null {
+    const view = this._view;
+    return view !== null ? view.getSuperView(viewClass) : null;
+  }
+
+  getBaseView<V extends View>(viewClass: {new(...args: any[]): V}): V | null {
+    const view = this._view;
+    return view !== null ? view.getBaseView(viewClass) : null;
+  }
+
   isMounted(): boolean {
     const view = this._view;
     return view !== null && view.isMounted();
@@ -291,6 +302,32 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
+  isCulled(): boolean {
+    const view = this._view;
+    return view !== null && view.isCulled();
+  }
+
+  viewWillCull(view: V): void {
+    // hook
+  }
+
+  viewDidCull(view: V): void {
+    // hook
+  }
+
+  viewWillUncull(view: V): void {
+    // hook
+  }
+
+  viewDidUncull(view: V): void {
+    // hook
+  }
+
+  isTraversing(): boolean {
+    const view = this._view;
+    return view !== null && view.isTraversing();
+  }
+
   isUpdating(): boolean {
     const view = this._view;
     return view !== null && view.isUpdating();
@@ -301,59 +338,59 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     return view !== null && view.isProcessing();
   }
 
-  viewWillProcess(viewContext: ViewContext, view: V): void {
+  viewWillProcess(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidProcess(viewContext: ViewContext, view: V): void {
+  viewDidProcess(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewWillResize(viewContext: ViewContext, view: V): void {
+  viewWillResize(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidResize(viewContext: ViewContext, view: V): void {
+  viewDidResize(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewWillScroll(viewContext: ViewContext, view: V): void {
+  viewWillScroll(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidScroll(viewContext: ViewContext, view: V): void {
+  viewDidScroll(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewWillCompute(viewContext: ViewContext, view: V): void {
+  viewWillChange(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidCompute(viewContext: ViewContext, view: V): void {
+  viewDidChange(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewWillAnimate(viewContext: ViewContext, view: V): void {
+  viewWillAnimate(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidAnimate(viewContext: ViewContext, view: V): void {
+  viewDidAnimate(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewWillLayout(viewContext: ViewContext, view: V): void {
+  viewWillLayout(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidLayout(viewContext: ViewContext, view: V): void {
+  viewDidLayout(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewWillProcessChildViews(viewContext: ViewContext, view: V): void {
+  viewWillProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidProcessChildViews(viewContext: ViewContext, view: V): void {
+  viewDidProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
@@ -362,44 +399,32 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     return view !== null && view.isDisplaying();
   }
 
-  viewWillDisplay(viewContext: ViewContext, view: V): void {
+  viewWillDisplay(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidDisplay(viewContext: ViewContext, view: V): void {
+  viewDidDisplay(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewWillDisplayChildViews(viewContext: ViewContext, view: V): void {
+  viewWillDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidDisplayChildViews(viewContext: ViewContext, view: V): void {
+  viewDidDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  get viewport(): Viewport | null {
+  get viewContext(): ViewContext {
     const view = this._view;
-    return view !== null ? view.viewport : null;
+    return view !== null ? view.viewContext : ViewContext.default();
   }
 
   get viewIdiom(): ViewIdiom {
-    const view = this._view;
-    return view !== null ? view.viewIdiom : "unspecified";
+    return this.viewContext.viewIdiom;
   }
 
-  get rootView(): RootView | null {
-    const view = this._view;
-    return view !== null ? view.rootView : null;
-  }
-
-  get rootViewController(): RootViewController | null {
-    const rootView = this.rootView;
-    return rootView !== null ? rootView.viewController : null;
-  }
-
-  intersectsViewport(): boolean {
-    const view = this._view;
-    return view !== null && view.intersectsViewport();
+  get viewport(): Viewport {
+    return this.viewContext.viewport;
   }
 }

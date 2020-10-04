@@ -20,27 +20,15 @@ import {TweenAnimator} from "./TweenAnimator";
 export class TweenChildAnimator<T> extends TweenAnimator<T> {
   parent: AnimatorContext | null;
 
-  constructor(parent: AnimatorContext | null, value: T | undefined, transition: Transition<T> | null) {
+  constructor(parent: AnimatorContext | null, value: T, transition: Transition<T> | null) {
     super(value, transition);
     this.parent = parent;
   }
 
   animate(animator: Animator = this): void {
     const parent = this.parent;
-    if (parent !== null && this._enabled) {
+    if (parent !== null && (this._animatorFlags & TweenAnimator.DisabledFlag) === 0) {
       parent.animate(animator);
     }
-  }
-
-  update(newValue: T | undefined, oldValue: T | undefined): void {
-    // hook
-  }
-
-  cancel(): void {
-    // nop
-  }
-
-  delete(): void {
-    // nop
   }
 }

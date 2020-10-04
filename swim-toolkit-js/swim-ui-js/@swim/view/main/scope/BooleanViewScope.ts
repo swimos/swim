@@ -12,40 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {View} from "../View";
-import {ViewScopeDescriptor, ViewScopeConstructor, ViewScope} from "./ViewScope";
+import {ViewScope} from "./ViewScope";
 
 /** @hidden */
-export interface BooleanViewScope<V extends View> extends ViewScope<V, boolean, boolean | string> {
+export abstract class BooleanViewScope<V extends View> extends ViewScope<V, boolean | null | undefined, boolean | string | null | undefined> {
+  fromAny(value: boolean | string | null | undefined): boolean | null | undefined {
+    return !!value;
+  }
 }
-
-/** @hidden */
-export const BooleanViewScope: ViewScopeConstructor<boolean, boolean | string> = (function (_super: typeof ViewScope): ViewScopeConstructor<boolean, boolean | string> {
-  const BooleanViewScope: ViewScopeConstructor<boolean, boolean | string> = function <V extends View>(
-      this: BooleanViewScope<V>, view: V, scopeName: string, descriptor?: ViewScopeDescriptor<V, boolean, boolean | string>): BooleanViewScope<V> {
-    let _this: BooleanViewScope<V> = function accessor(state?: boolean | string): boolean | undefined | V {
-      if (arguments.length === 0) {
-        return _this.state;
-      } else {
-        _this.setState(state);
-        return _this._view;
-      }
-    } as BooleanViewScope<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, scopeName, descriptor) || _this;
-    return _this;
-  } as unknown as ViewScopeConstructor<boolean, boolean | string>;
-  __extends(BooleanViewScope, _super);
-
-  BooleanViewScope.prototype.fromAny = function (this: BooleanViewScope<View>, value: boolean | string | null): boolean | null {
-    if (typeof value === "string") {
-      return !!value;
-    } else {
-      return value;
-    }
-  };
-
-  return BooleanViewScope;
-}(ViewScope));
 ViewScope.Boolean = BooleanViewScope;

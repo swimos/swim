@@ -27,19 +27,20 @@ export interface TypesetViewInit extends GraphicsViewInit {
 }
 
 export interface TypesetView extends GraphicsView {
-  readonly font: ViewAnimator<this, Font, AnyFont>;
+  readonly font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
 
-  readonly textAlign: ViewAnimator<this, CanvasTextAlign>;
+  readonly textAlign: ViewAnimator<this, CanvasTextAlign | undefined>;
 
-  readonly textBaseline: ViewAnimator<this, CanvasTextBaseline>;
+  readonly textBaseline: ViewAnimator<this, CanvasTextBaseline | undefined>;
 
-  readonly textOrigin: ViewAnimator<this, PointR2, AnyPointR2>;
+  readonly textOrigin: ViewAnimator<this, PointR2 | undefined, AnyPointR2 | undefined>;
 
-  readonly textColor: ViewAnimator<this, Color, AnyColor>;
+  readonly textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 }
 
 /** @hidden */
 export const TypesetView = {
+  /** @hidden */
   is(object: unknown): object is TypesetView {
     if (typeof object === "object" && object !== null) {
       const view = object as TypesetView;
@@ -51,5 +52,23 @@ export const TypesetView = {
           && "textColor" in view;
     }
     return false;
+  },
+
+  initView(view: TypesetView, init: TypesetViewInit): void {
+    if (init.font !== void 0) {
+      view.font(init.font);
+    }
+    if (init.textAlign !== void 0) {
+      view.textAlign(init.textAlign);
+    }
+    if (init.textBaseline !== void 0) {
+      view.textBaseline(init.textBaseline);
+    }
+    if (init.textOrigin !== void 0) {
+      view.textOrigin(init.textOrigin);
+    }
+    if (init.textColor !== void 0) {
+      view.textColor(init.textColor);
+    }
   },
 };

@@ -13,21 +13,33 @@
 // limitations under the License.
 
 import {BoxR2} from "@swim/math";
-import {AttributeString, StyleString, StyledElement} from "@swim/style";
-import {View} from "../View";
-import {NodeView} from "../node/NodeView";
+import {
+  ToAttributeString,
+  ToStyleString,
+  ToCssValue,
+  StyleContext,
+  StyleAnimator,
+} from "@swim/style";
+import {Animator} from "@swim/animate";
+import {ViewClass, View} from "../View";
+import {NodeViewInit, NodeView} from "../node/NodeView";
 import {AttributeAnimatorConstructor, AttributeAnimator} from "../attribute/AttributeAnimator";
-import {StyleAnimatorConstructor, StyleAnimator} from "../style/StyleAnimator";
 import {ElementViewObserver} from "./ElementViewObserver";
 import {ElementViewController} from "./ElementViewController";
 import {SvgViewTagMap} from "../svg/SvgView";
 import {HtmlViewTagMap} from "../html/HtmlView";
 
-export interface ViewElement extends StyledElement {
+export interface ViewElement extends Element, ElementCSSInlineStyle {
+  viewController?: ElementViewController;
   view?: ElementView;
 }
 
 export interface ElementViewTagMap extends SvgViewTagMap, HtmlViewTagMap {
+}
+
+export interface ElementViewInit extends NodeViewInit {
+  id?: string;
+  classList?: string[];
 }
 
 export interface ElementViewConstructor<E extends Element = Element, V extends ElementView = ElementView> {
@@ -37,7 +49,7 @@ export interface ElementViewConstructor<E extends Element = Element, V extends E
   readonly namespace?: string;
 }
 
-export class ElementView extends NodeView {
+export class ElementView extends NodeView implements StyleContext {
   /** @hidden */
   _attributeAnimators?: {[animatorName: string]: AttributeAnimator<ElementView, unknown> | undefined};
   /** @hidden */
@@ -47,12 +59,23 @@ export class ElementView extends NodeView {
     super(node);
   }
 
-  get node(): ViewElement {
-    return this._node;
-  }
+  // @ts-ignore
+  declare readonly node: ViewElement;
 
-  get viewController(): ElementViewController | null {
-    return this._viewController;
+  // @ts-ignore
+  declare readonly viewController: ElementViewController | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<ElementViewObserver>;
+
+  initView(init: ElementViewInit): void {
+    super.initView(init);
+    if (init.id !== void 0) {
+      this.id(init.id);
+    }
+    if (init.classList !== void 0) {
+      this.addClass(...init.classList);
+    }
   }
 
   getAttribute(attributeName: string): string | null {
@@ -62,7 +85,7 @@ export class ElementView extends NodeView {
   setAttribute(attributeName: string, value: unknown): this {
     this.willSetAttribute(attributeName, value);
     if (value !== void 0) {
-      this._node.setAttribute(attributeName, AttributeString(value));
+      this._node.setAttribute(attributeName, ToAttributeString(value));
     } else {
       this._node.removeAttribute(attributeName);
     }
@@ -120,7 +143,8 @@ export class ElementView extends NodeView {
     }
   }
 
-  getStyle(propertyNames: string | ReadonlyArray<string>): string {
+  getStyle(propertyNames: string | ReadonlyArray<string>): CSSStyleValue | string | undefined {
+    // Conditionally overridden when CSS Typed OM is available.
     const style = this._node.style;
     if (typeof propertyNames === "string") {
       return style.getPropertyValue(propertyNames);
@@ -136,9 +160,10 @@ export class ElementView extends NodeView {
   }
 
   setStyle(propertyName: string, value: unknown, priority?: string): this {
+    // Conditionally overridden when CSS Typed OM is available.
     this.willSetStyle(propertyName, value, priority);
     if (value !== void 0) {
-      this._node.style.setProperty(propertyName, StyleString(value), priority);
+      this._node.style.setProperty(propertyName, ToStyleString(value), priority);
     } else {
       this._node.style.removeProperty(propertyName);
     }
@@ -197,30 +222,41 @@ export class ElementView extends NodeView {
   }
 
   /** @hidden */
-  cancelAnimators(): void {
-    super.cancelAnimators();
-    this.cancelAttributeAnimators();
-    this.cancelStyleAnimators();
+  animate(animator: Animator): void {
+    super.animate(animator);
+    if (animator instanceof AttributeAnimator || animator instanceof StyleAnimator) {
+      this._viewFlags |= View.AnimatingFlag;
+    }
   }
 
   /** @hidden */
-  cancelAttributeAnimators(): void {
+  updateAnimators(t: number): void {
+    this.updateViewAnimators(t);
+    if ((this._viewFlags & View.AnimatingFlag) !== 0) {
+      this._viewFlags &= ~View.AnimatingFlag;
+      this.updateAttributeAnimators(t);
+      this.updateStyleAnimators(t);
+    }
+  }
+
+  /** @hidden */
+  updateAttributeAnimators(t: number): void {
     const attributeAnimators = this._attributeAnimators;
     if (attributeAnimators !== void 0) {
       for (const animatorName in attributeAnimators) {
-        const animator = attributeAnimators[animatorName]!;
-        animator.cancel();
+        const attributeAnimator = attributeAnimators[animatorName]!;
+        attributeAnimator.onAnimate(t);
       }
     }
   }
 
   /** @hidden */
-  cancelStyleAnimators(): void {
+  updateStyleAnimators(t: number): void {
     const styleAnimators = this._styleAnimators;
     if (styleAnimators !== void 0) {
       for (const animatorName in styleAnimators) {
-        const animator = styleAnimators[animatorName]!;
-        animator.cancel();
+        const styleAnimator = styleAnimators[animatorName]!;
+        styleAnimator.onAnimate(t);
       }
     }
   }
@@ -322,21 +358,13 @@ export class ElementView extends NodeView {
   }
 
   /** @hidden */
-  static initAttributeAnimator<V extends ElementView, T, U>(
-      AttributeAnimator: AttributeAnimatorConstructor<T, U>, view: V,
-      animatorName: string, attributeName: string): AttributeAnimator<V, T, U> {
-    return new AttributeAnimator<V>(view, animatorName, attributeName);
-  }
-
-  /** @hidden */
-  static decorateAttributeAnimator<V extends ElementView, T, U>(
-      AttributeAnimator: AttributeAnimatorConstructor<T, U>, attributeName: string,
-      viewClass: unknown, animatorName: string): void {
+  static decorateAttributeAnimator<V extends ElementView, T, U>(constructor: AttributeAnimatorConstructor<V, T, U>,
+                                                                viewClass: ViewClass, animatorName: string): void {
     Object.defineProperty(viewClass, animatorName, {
       get: function (this: V): AttributeAnimator<V, T, U> {
         let animator = this.getAttributeAnimator(animatorName) as AttributeAnimator<V, T, U> | null;
         if (animator === null) {
-          animator = ElementView.initAttributeAnimator(AttributeAnimator, this, animatorName, attributeName);
+          animator = new constructor(this, animatorName);
           this.setAttributeAnimator(animatorName, animator);
         }
         return animator;
@@ -345,30 +373,42 @@ export class ElementView extends NodeView {
       enumerable: true,
     });
   }
-
-  /** @hidden */
-  static initStyleAnimator<V extends ElementView, T, U>(
-      StyleAnimator: StyleAnimatorConstructor<T, U>, view: V,
-      animatorName: string, propertyNames: string | ReadonlyArray<string>): StyleAnimator<V, T, U> {
-    return new StyleAnimator<V>(view, animatorName, propertyNames);
-  }
-
-  /** @hidden */
-  static decorateStyleAnimator<V extends ElementView, T, U>(
-      StyleAnimator: StyleAnimatorConstructor<T, U>, propertyNames: string | ReadonlyArray<string>,
-      viewClass: unknown, animatorName: string): void {
-    Object.defineProperty(viewClass, animatorName, {
-      get: function (this: V): StyleAnimator<V, T, U> {
-        let animator = this.getStyleAnimator(animatorName) as StyleAnimator<V, T, U> | null;
-        if (animator === null) {
-          animator = ElementView.initStyleAnimator(StyleAnimator, this, animatorName, propertyNames);
-          this.setStyleAnimator(animatorName, animator);
+}
+if (typeof CSSStyleValue !== "undefined") { // CSS Typed OM support
+  ElementView.prototype.getStyle = function (this: ElementView, propertyNames: string | ReadonlyArray<string>): CSSStyleValue | string | undefined {
+    const style = this._node.attributeStyleMap;
+    if (typeof propertyNames === "string") {
+      return style.get(propertyNames);
+    } else {
+      for (let i = 0, n = propertyNames.length; i < n; i += 1) {
+        const value = style.get(propertyNames[i]);
+        if (value !== "") {
+          return value;
         }
-        return animator;
-      },
-      configurable: true,
-      enumerable: true,
-    });
-  }
+      }
+      return "";
+    }
+  };
+  ElementView.prototype.setStyle = function (this: ElementView, propertyName: string,
+                                             value: unknown, priority?: string): ElementView {
+    this.willSetStyle(propertyName, value, priority);
+    if (value !== void 0) {
+      const cssValue = ToCssValue(value);
+      if (cssValue !== void 0) {
+        try {
+          this._node.attributeStyleMap.set(propertyName, cssValue);
+        } catch (e) {
+          // swallow
+        }
+      } else {
+        this._node.style.setProperty(propertyName, ToStyleString(value), priority);
+      }
+    } else {
+      this._node.attributeStyleMap.delete(propertyName);
+    }
+    this.onSetStyle(propertyName, value, priority);
+    this.didSetStyle(propertyName, value, priority);
+    return this;
+  };
 }
 View.Element = ElementView;

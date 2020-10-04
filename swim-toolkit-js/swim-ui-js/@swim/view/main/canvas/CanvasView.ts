@@ -18,14 +18,14 @@ import {ViewEvent} from "../event/ViewEvent";
 import {ViewMouseEventInit, ViewMouseEvent} from "../event/ViewMouseEvent";
 import {ViewPointerEventInit, ViewPointerEvent} from "../event/ViewPointerEvent";
 import {ViewTouchInit, ViewTouch, ViewTouchEvent} from "../event/ViewTouchEvent";
-import {ViewContext} from "../ViewContext";
+import {ViewContextType, ViewContext} from "../ViewContext";
 import {ViewFlags, View} from "../View";
 import {GraphicsViewContext} from "../graphics/GraphicsViewContext";
 import {GraphicsView} from "../graphics/GraphicsView";
 import {ViewNode, ViewNodeType, NodeView} from "../node/NodeView";
 import {TextView} from "../text/TextView";
 import {ElementViewConstructor, ElementView} from "../element/ElementView";
-import {HtmlChildViewTagMap, HtmlView} from "../html/HtmlView";
+import {HtmlChildViewTagMap, HtmlViewInit, HtmlView} from "../html/HtmlView";
 import {CanvasViewObserver} from "./CanvasViewObserver";
 import {CanvasViewController} from "./CanvasViewController";
 
@@ -42,6 +42,16 @@ export interface CanvasViewTouch extends ViewTouchInit {
 
 export interface ViewCanvas extends HTMLCanvasElement {
   view?: CanvasView;
+}
+
+export interface CanvasViewInit extends HtmlViewInit {
+  viewController?: CanvasViewController;
+  renderer?: AnyRenderer;
+  clickEventsEnabled?: boolean;
+  wheelEventsEnabled?: boolean;
+  mouseEventsEnabled?: boolean;
+  pointerEventsEnabled?: boolean;
+  touchEventsEnabled?: boolean;
 }
 
 export class CanvasView extends HtmlView {
@@ -100,20 +110,40 @@ export class CanvasView extends HtmlView {
     this._touches = {};
   }
 
-  get node(): ViewCanvas {
-    return this._node;
-  }
-
   protected initNode(node: ViewNodeType<this>): void {
-    node.style.position = "absolute";
+    super.initNode(node);
+    this.position.setAutoState("absolute");
   }
 
-  get viewController(): CanvasViewController | null {
-    return this._viewController;
-  }
+  // @ts-ignore
+  declare readonly node: ViewCanvas;
 
-  get canvasView(): CanvasView | null {
-    return this;
+  // @ts-ignore
+  declare readonly viewController: CanvasViewController | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<CanvasViewObserver>;
+
+  initView(init: CanvasViewInit): void {
+    super.initView(init);
+    if (init.renderer !== void 0) {
+      this.setRenderer(init.renderer);
+    }
+    if (init.clickEventsEnabled !== void 0) {
+      this.clickEventsEnabled(init.clickEventsEnabled);
+    }
+    if (init.wheelEventsEnabled !== void 0) {
+      this.wheelEventsEnabled(init.wheelEventsEnabled);
+    }
+    if (init.mouseEventsEnabled !== void 0) {
+      this.mouseEventsEnabled(init.mouseEventsEnabled);
+    }
+    if (init.pointerEventsEnabled !== void 0) {
+      this.pointerEventsEnabled(init.pointerEventsEnabled);
+    }
+    if (init.touchEventsEnabled !== void 0) {
+      this.touchEventsEnabled(init.touchEventsEnabled);
+    }
   }
 
   get childViewCount(): number {
@@ -142,48 +172,124 @@ export class CanvasView extends HtmlView {
     return childViews;
   }
 
-  forEachChildView<T, S = unknown>(callback: (this: S, childView: View) => T | void,
-                                   thisArg?: S): T | undefined {
+  firstChildView(): View | null {
     const childNodes = this._node.childNodes;
-    if (childNodes.length !== 0) {
-      let i = 0;
-      do {
-        const childNode = childNodes[i];
-        const childView = (childNode as ViewNode).view;
-        if (childView !== void 0) {
-          const result = callback.call(thisArg, childView);
-          if (result !== void 0) {
-            return result;
-          }
-        }
-        if (i < childNodes.length) {
-          if (childNodes[i] === childNode) {
-            i += 1;
-          }
-          continue;
-        }
-        break;
-      } while (true);
+    for (let i = 0, n = childNodes.length; i < n; i += 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView !== void 0) {
+        return childView;
+      }
     }
     const graphicsViews = this._graphicsViews;
     if (graphicsViews.length !== 0) {
-      let i = 0;
+      return graphicsViews[0];
+    }
+    return null;
+  }
+
+  lastChildView(): View | null {
+    const graphicsViews = this._graphicsViews;
+    if (graphicsViews.length !== 0) {
+      return graphicsViews[graphicsViews.length - 1];
+    }
+    const childNodes = this._node.childNodes;
+    for (let i = childNodes.length - 1; i >= 0; i -= 1) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView !== void 0) {
+        return childView;
+      }
+    }
+    return null;
+  }
+
+  nextChildView(targetView: View): View | null {
+    const graphicsViews = this._graphicsViews;
+    if (targetView instanceof NodeView && targetView.parentView === this) {
+      let targetNode: ViewNode | null = targetView._node;
       do {
-        const childView = graphicsViews[i];
-        const result = callback.call(thisArg, childView);
-        if (result !== void 0) {
-          return result;
+        targetNode = targetNode!.nextSibling;
+        if (targetNode !== null) {
+          if (targetNode.view !== void 0) {
+            return targetNode.view;
+          }
+          continue;
         }
-        if (i < graphicsViews.length) {
-          if (graphicsViews[i] === childView) {
-            i += 1;
+        break;
+      } while (true);
+      if (graphicsViews.length !== 0) {
+        return graphicsViews[0];
+      }
+    } else if (targetView instanceof GraphicsView) {
+      const targetIndex = graphicsViews.indexOf(targetView);
+      if (targetIndex >= 0 && targetIndex + 1 < graphicsViews.length) {
+        return graphicsViews[targetIndex + 1];
+      }
+    }
+    return null;
+  }
+
+  previousChildView(targetView: View): View | null {
+    let targetNode: ViewNode | null = null;
+    if (targetView instanceof GraphicsView) {
+      const graphicsViews = this._graphicsViews;
+      const targetIndex = graphicsViews.indexOf(targetView);
+      if (targetIndex - 1 >= 0) {
+        return graphicsViews[targetIndex - 1];
+      } else if (targetIndex === 0) {
+        targetNode = this._node.lastChild;
+        if (targetNode !== null && targetNode.view !== void 0) {
+          return targetNode.view;
+        }
+      }
+    } else if (targetView instanceof NodeView && targetView.parentView === this) {
+      targetNode = targetView._node;
+    }
+    if (targetNode !== null) {
+      do {
+        targetNode = targetNode!.previousSibling;
+        if (targetNode !== null) {
+          if (targetNode.view !== void 0) {
+            return targetNode.view;
           }
           continue;
         }
         break;
       } while (true);
     }
-    return void 0;
+    return null;
+  }
+
+  forEachChildView<T, S = unknown>(callback: (this: S, childView: View) => T | void,
+                                   thisArg?: S): T | undefined {
+    let result: T | undefined;
+    const childNodes = this._node.childNodes;
+    let i = 0;
+    while (i < childNodes.length) {
+      const childNode = childNodes[i] as ViewNode;
+      const childView = childNode.view;
+      if (childView !== void 0) {
+        result = callback.call(thisArg, childView);
+        if (result !== void 0) {
+          break;
+        }
+      }
+      if (childNodes[i] === childNode) {
+        i += 1;
+      }
+    }
+    const graphicsViews = this._graphicsViews;
+    i = 0;
+    while (i < graphicsViews.length) {
+      const childView = graphicsViews[i];
+      result = callback.call(thisArg, childView);
+      if (result !== void 0) {
+        break;
+      }
+      if (graphicsViews[i] === childView) {
+        i += 1;
+      }
+    }
+    return result;
   }
 
   setChildView(key: string, newChildView: View | null): View | null {
@@ -213,7 +319,7 @@ export class CanvasView extends HtmlView {
         childViews.splice(index, 1);
         this.onRemoveChildView(childView);
         this.didRemoveChildView(childView);
-        childView.setKey(null);
+        childView.setKey(void 0);
       } else if (childView !== void 0) {
         oldChildView = childView;
         if (!(childView instanceof NodeView)) {
@@ -231,7 +337,7 @@ export class CanvasView extends HtmlView {
         this.onRemoveChildView(childView);
         this.didRemoveChildNode(childNode);
         this.didRemoveChildView(childView);
-        childView.setKey(null);
+        childView.setKey(void 0);
       }
     }
     if (newChildView !== null) {
@@ -246,6 +352,7 @@ export class CanvasView extends HtmlView {
       newChildView.setParentView(this, null);
       this.onInsertChildView(newChildView, targetView);
       this.didInsertChildView(newChildView, targetView);
+      newChildView.cascadeInsert();
     }
     return oldChildView;
   }
@@ -261,7 +368,7 @@ export class CanvasView extends HtmlView {
   append(childNode: Text, key?: string): TextView;
   append(childNode: Node, key?: string): NodeView;
   append<V extends NodeView | GraphicsView>(childView: V, key?: string): V;
-  append<C extends ElementViewConstructor>(viewConstructor: C, key?: string): InstanceType<C>;
+  append<VC extends ElementViewConstructor>(viewConstructor: VC, key?: string): InstanceType<VC>;
   append(child: string | Node | View | ElementViewConstructor, key?: string): View {
     if (typeof child === "string") {
       child = View.fromTag(child);
@@ -293,6 +400,7 @@ export class CanvasView extends HtmlView {
     childView.setParentView(this, null);
     this.onInsertChildView(childView, null);
     this.didInsertChildView(childView, null);
+    childView.cascadeInsert();
   }
 
   prepend<T extends keyof HtmlChildViewTagMap>(tag: T, key?: string): HtmlChildViewTagMap[T];
@@ -302,7 +410,7 @@ export class CanvasView extends HtmlView {
   prepend(childNode: Text, key?: string): TextView;
   prepend(childNode: Node, key?: string): NodeView;
   prepend<V extends NodeView | GraphicsView>(childView: V, key?: string): V;
-  prepend<C extends ElementViewConstructor>(viewConstructor: C, key?: string): InstanceType<C>;
+  prepend<VC extends ElementViewConstructor>(viewConstructor: VC, key?: string): InstanceType<VC>;
   prepend(child: string | Node | View | ElementViewConstructor, key?: string): View {
     if (typeof child === "string") {
       child = View.fromTag(child);
@@ -328,12 +436,15 @@ export class CanvasView extends HtmlView {
       this.removeChildView(key);
       childView.setKey(key);
     }
-    this.willInsertChildView(childView, null);
-    this._graphicsViews.unshift(childView);
+    const graphicsViews = this._graphicsViews;
+    const targetView = graphicsViews.length !== 0 ? graphicsViews[0] : null;
+    this.willInsertChildView(childView, targetView);
+    graphicsViews.unshift(childView);
     this.insertChildViewMap(childView);
-    childView.setParentView(this, null);
-    this.onInsertChildView(childView, null);
-    this.didInsertChildView(childView, null);
+    childView.setParentView(this, targetView);
+    this.onInsertChildView(childView, targetView);
+    this.didInsertChildView(childView, targetView);
+    childView.cascadeInsert();
   }
 
   insert<T extends keyof HtmlChildViewTagMap>(tag: T, target: View | Node | null, key?: string): HtmlChildViewTagMap[T];
@@ -343,7 +454,7 @@ export class CanvasView extends HtmlView {
   insert(childNode: Text, target: View | Node | null, key?: string): TextView;
   insert(childNode: Node, target: View | Node | null, key?: string): NodeView;
   insert<V extends NodeView | GraphicsView>(childView: V, target: View | Node | null, key?: string): V;
-  insert<C extends ElementViewConstructor>(viewConstructor: C, target: View | Node | null, key?: string): InstanceType<C>;
+  insert<VC extends ElementViewConstructor>(viewConstructor: VC, target: View | Node | null, key?: string): InstanceType<VC>;
   insert(child: string | Node | View | ElementViewConstructor, target: View | Node | null, key?: string): View {
     if (typeof child === "string") {
       child = View.fromTag(child);
@@ -387,6 +498,7 @@ export class CanvasView extends HtmlView {
     childView.setParentView(this, null);
     this.onInsertChildView(childView, targetView);
     this.didInsertChildView(childView, targetView);
+    childView.cascadeInsert();
   }
 
   removeChildView(key: string): View | null;
@@ -425,7 +537,7 @@ export class CanvasView extends HtmlView {
     }
     this.onRemoveChildView(childView);
     this.didRemoveChildView(childView);
-    childView.setKey(null);
+    childView.setKey(void 0);
   }
 
   removeAll(): void {
@@ -441,7 +553,7 @@ export class CanvasView extends HtmlView {
         graphicsViews.pop();
         this.onRemoveChildView(childView);
         this.didRemoveChildView(childView);
-        childView.setKey(null);
+        childView.setKey(void 0);
         continue;
       }
       break;
@@ -497,16 +609,30 @@ export class CanvasView extends HtmlView {
   /** @hidden */
   doMountChildViews(): void {
     const childNodes = this._node.childNodes;
-    for (let i = 0; i < childNodes.length; i += 1) {
+    let i = 0;
+    while (i < childNodes.length) {
       const childView = (childNodes[i] as ViewNode).view;
       if (childView !== void 0) {
         childView.cascadeMount();
+        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
+          childView._viewFlags &= ~View.RemovingFlag;
+          this.removeChildView(childView);
+          continue;
+        }
       }
+      i += 1;
     }
     const graphicsViews = this._graphicsViews;
-    for (let i = 0; i < graphicsViews.length; i += 1) {
+    i = 0;
+    while (i < graphicsViews.length) {
       const childView = graphicsViews[i];
       childView.cascadeMount();
+      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
+        this.removeChildView(childView);
+        continue;
+      }
+      i += 1;
     }
   }
 
@@ -518,57 +644,94 @@ export class CanvasView extends HtmlView {
   /** @hidden */
   doUnmountChildViews(): void {
     const childNodes = this._node.childNodes;
-    for (let i = 0; i < childNodes.length; i += 1) {
+    let i = 0;
+    while (i < childNodes.length) {
       const childView = (childNodes[i] as ViewNode).view;
       if (childView !== void 0) {
         childView.cascadeUnmount();
+        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
+          childView._viewFlags &= ~View.RemovingFlag;
+          this.removeChildView(childView);
+          continue;
+        }
       }
+      i += 1;
     }
     const graphicsViews = this._graphicsViews;
-    for (let i = 0; i < graphicsViews.length; i += 1) {
+    i = 0;
+    while (i < graphicsViews.length) {
       const childView = graphicsViews[i];
       childView.cascadeUnmount();
+      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
+        this.removeChildView(childView);
+        continue;
+      }
+      i += 1;
     }
-  }
-
-  onPower(): void {
-    super.onPower();
-    this.requireUpdate(View.NeedsRender);
   }
 
   /** @hidden */
   doPowerChildViews(): void {
     const childNodes = this._node.childNodes;
-    for (let i = 0; i < childNodes.length; i += 1) {
+    let i = 0;
+    while (i < childNodes.length) {
       const childView = (childNodes[i] as ViewNode).view;
       if (childView !== void 0) {
         childView.cascadePower();
+        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
+          childView._viewFlags &= ~View.RemovingFlag;
+          this.removeChildView(childView);
+          continue;
+        }
       }
+      i += 1;
     }
     const graphicsViews = this._graphicsViews;
-    for (let i = 0; i < graphicsViews.length; i += 1) {
+    i = 0;
+    while (i < graphicsViews.length) {
       const childView = graphicsViews[i];
       childView.cascadePower();
+      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
+        this.removeChildView(childView);
+        continue;
+      }
+      i += 1;
     }
   }
 
   /** @hidden */
   doUnpowerChildViews(): void {
     const childNodes = this._node.childNodes;
-    for (let i = 0; i < childNodes.length; i += 1) {
+    let i = 0;
+    while (i < childNodes.length) {
       const childView = (childNodes[i] as ViewNode).view;
       if (childView !== void 0) {
         childView.cascadeUnpower();
+        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
+          childView._viewFlags &= ~View.RemovingFlag;
+          this.removeChildView(childView);
+          continue;
+        }
       }
+      i += 1;
     }
     const graphicsViews = this._graphicsViews;
-    for (let i = 0; i < graphicsViews.length; i += 1) {
+    i = 0;
+    while (i < graphicsViews.length) {
       const childView = graphicsViews[i];
       childView.cascadeUnpower();
+      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
+        this.removeChildView(childView);
+        continue;
+      }
+      i += 1;
     }
   }
 
-  protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
+  protected modifyUpdate(targetView: View, updateFlags: ViewFlags): ViewFlags {
     let additionalFlags = 0;
     if ((updateFlags & View.UpdateMask) !== 0) {
       if ((updateFlags & View.ProcessMask) !== 0) {
@@ -582,91 +745,106 @@ export class CanvasView extends HtmlView {
     return additionalFlags;
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): ViewFlags {
+  cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void {
+    const viewFlags = this._viewFlags;
+    if ((viewFlags & (View.MountedFlag | View.PoweredFlag)) === (View.MountedFlag | View.PoweredFlag)) {
+      if (updateFlags === void 0) {
+        updateFlags = 0;
+      }
+      updateFlags |= viewFlags & View.UpdateMask;
+      if ((updateFlags & View.ProcessMask) !== 0) {
+        if (viewContext === void 0) {
+          viewContext = this.superViewContext;
+        }
+        this.cascadeProcess(updateFlags, viewContext);
+      }
+    }
+  }
+
+  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.ProcessMask) !== 0) {
       this.requireUpdate(View.NeedsRender);
     }
     return processFlags;
   }
 
-  cascadeProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): void {
-    viewContext = this.canvasViewContext(viewContext);
-    super.cascadeProcess(processFlags, viewContext);
-  }
-
-  protected onResize(viewContext: GraphicsViewContext): void {
+  protected onResize(viewContext: ViewContextType<this>): void {
     super.onResize(viewContext);
     this.resizeCanvas(this._node);
     this.resetRenderer();
   }
 
-  protected onScroll(viewContext: GraphicsViewContext): void {
+  protected onScroll(viewContext: ViewContextType<this>): void {
     super.onScroll(viewContext);
     this.setCulled(!this.intersectsViewport());
   }
 
   /** @hidden */
-  protected doProcessChildViews(processFlags: ViewFlags, viewContext: GraphicsViewContext): void {
-    const childNodes = this._node.childNodes;
-    const graphicsViews = this._graphicsViews;
-    if ((processFlags & View.ProcessMask) !== 0 && (childNodes.length !== 0 || graphicsViews.length !== 0)) {
-      this.willProcessChildViews(viewContext);
-      let i = 0;
-      while (i < childNodes.length) {
-        const childView = (childNodes[i] as ViewNode).view;
-        if (childView !== void 0) {
-          const childViewContext = this.childViewContext(childView, viewContext);
-          this.doProcessChildView(childView, processFlags, childViewContext);
-          if ((childView._viewFlags & View.RemovingFlag) !== 0) {
-            childView._viewFlags &= ~View.RemovingFlag;
-            this.removeChildView(childView);
-            continue;
-          }
-        }
-        i += 1;
-      }
-      i = 0;
-      while (i < graphicsViews.length) {
-        const childView = graphicsViews[i];
-        const childViewContext = this.childViewContext(childView, viewContext);
-        this.doProcessChildView(childView, processFlags, childViewContext);
-        if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-          childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
-          this.removeChildView(childView);
-          continue;
-        }
-        i += 1;
-      }
-      this.didProcessChildViews(viewContext);
+  protected doProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    if ((processFlags & View.ProcessMask) !== 0 &&
+        (this._graphicsViews.length !== 0 || this._node.childNodes.length !== 0)) {
+      this.willProcessChildViews(processFlags, viewContext);
+      this.onProcessChildViews(processFlags, viewContext);
+      this.didProcessChildViews(processFlags, viewContext);
     }
   }
 
-  needsDisplay(displayFlags: ViewFlags, viewContext: GraphicsViewContext): ViewFlags {
+  protected processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
+                              callback?: (this: this, childView: View) => void): void {
+    const childNodes = this._node.childNodes;
+    const graphicsViews = this._graphicsViews;
+    let i = 0;
+    while (i < childNodes.length) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView !== void 0) {
+        this.processChildView(childView, processFlags, viewContext);
+        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
+          childView._viewFlags &= ~View.RemovingFlag;
+          this.removeChildView(childView);
+          continue;
+        } else if (callback !== void 0) {
+          callback.call(this, childView);
+        }
+      }
+      i += 1;
+    }
+    i = 0;
+    while (i < graphicsViews.length) {
+      const childView = graphicsViews[i];
+      this.processChildView(childView, processFlags, viewContext);
+      if (callback !== void 0) {
+        callback.call(this, childView);
+      }
+      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
+        this.removeChildView(childView);
+        continue;
+      }
+      i += 1;
+    }
+  }
+
+  needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     displayFlags |= View.NeedsRender;
     return displayFlags;
   }
 
-  cascadeDisplay(displayFlags: ViewFlags, viewContext: GraphicsViewContext): void {
-    viewContext = this.canvasViewContext(viewContext);
-    super.cascadeDisplay(displayFlags, viewContext);
-  }
-
   /** @hidden */
-  protected doDisplay(displayFlags: ViewFlags, viewContext: GraphicsViewContext): void {
+  protected doDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     let cascadeFlags = displayFlags;
+    this._viewFlags |= View.TraversingFlag | View.DisplayingFlag;
     this._viewFlags &= ~(View.NeedsDisplay | View.NeedsComposite);
-    this.willDisplay(viewContext);
-    this._viewFlags |= View.DisplayingFlag;
     try {
+      this.willDisplay(viewContext);
       if (((this._viewFlags | displayFlags) & View.NeedsLayout) !== 0) {
+        this.willLayout(viewContext);
         cascadeFlags |= View.NeedsLayout;
         this._viewFlags &= ~View.NeedsLayout;
-        this.willLayout(viewContext);
       }
       if (((this._viewFlags | displayFlags) & View.NeedsRender) !== 0) {
+        this.willRender(viewContext);
         cascadeFlags |= View.NeedsRender;
         this._viewFlags &= ~View.NeedsRender;
-        this.willRender(viewContext);
       }
 
       this.onDisplay(viewContext);
@@ -685,18 +863,18 @@ export class CanvasView extends HtmlView {
       if ((cascadeFlags & View.NeedsLayout) !== 0) {
         this.didLayout(viewContext);
       }
-    } finally {
-      this._viewFlags &= ~View.DisplayingFlag;
       this.didDisplay(viewContext);
+    } finally {
+      this._viewFlags &= ~(View.TraversingFlag | View.DisplayingFlag);
     }
   }
 
-  protected didDisplay(viewContext: GraphicsViewContext): void {
+  protected didDisplay(viewContext: ViewContextType<this>): void {
     this.detectHitTargets();
     super.didDisplay(viewContext);
   }
 
-  protected willRender(viewContext: GraphicsViewContext): void {
+  protected willRender(viewContext: ViewContextType<this>): void {
     this.willObserve(function (viewObserver: CanvasViewObserver): void {
       if (viewObserver.viewWillRender !== void 0) {
         viewObserver.viewWillRender(viewContext, this);
@@ -704,11 +882,11 @@ export class CanvasView extends HtmlView {
     });
   }
 
-  protected onRender(viewContext: GraphicsViewContext): void {
+  protected onRender(viewContext: ViewContextType<this>): void {
     this.clearCanvas();
   }
 
-  protected didRender(viewContext: GraphicsViewContext): void {
+  protected didRender(viewContext: ViewContextType<this>): void {
     this.didObserve(function (viewObserver: CanvasViewObserver): void {
       if (viewObserver.viewDidRender !== void 0) {
         viewObserver.viewDidRender(viewContext, this);
@@ -717,55 +895,48 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  protected doDisplayChildViews(displayFlags: ViewFlags, viewContext: GraphicsViewContext): void {
+  protected doDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    if ((displayFlags & View.DisplayMask) !== 0 &&
+        (this._graphicsViews.length !== 0 || this._node.childNodes.length !== 0)) {
+      this.willDisplayChildViews(displayFlags, viewContext);
+      this.onDisplayChildViews(displayFlags, viewContext);
+      this.didDisplayChildViews(displayFlags, viewContext);
+    }
+  }
+
+  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                              callback?: (this: this, childView: View) => void): void {
     const childNodes = this._node.childNodes;
     const graphicsViews = this._graphicsViews;
-    if ((displayFlags & View.DisplayMask) !== 0 && (childNodes.length !== 0 || graphicsViews.length !== 0)) {
-      this.willDisplayChildViews(viewContext);
-      let i = 0;
-      while (i < childNodes.length) {
-        const childView = (childNodes[i] as ViewNode).view;
-        if (childView !== void 0) {
-          const childViewContext = this.childViewContext(childView, viewContext);
-          this.doDisplayChildView(childView, displayFlags, childViewContext);
-          if ((childView._viewFlags & View.RemovingFlag) !== 0) {
-            childView._viewFlags &= ~View.RemovingFlag;
-            this.removeChildView(childView);
-            continue;
-          }
+    let i = 0;
+    while (i < childNodes.length) {
+      const childView = (childNodes[i] as ViewNode).view;
+      if (childView !== void 0) {
+        this.displayChildView(childView, displayFlags, viewContext);
+        if (callback !== void 0) {
+          callback.call(this, childView);
         }
-        i += 1;
-      }
-      i = 0;
-      while (i < graphicsViews.length) {
-        const childView = graphicsViews[i];
-        const childViewContext = this.childViewContext(childView, viewContext);
-        this.doDisplayChildView(childView, displayFlags, childViewContext);
-        if ((childView.viewFlags & View.RemovingFlag) !== 0) {
-          childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
+        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
+          childView._viewFlags &= ~View.RemovingFlag;
           this.removeChildView(childView);
           continue;
         }
-        i += 1;
       }
-      this.didDisplayChildViews(viewContext);
+      i += 1;
     }
-  }
-
-  childViewContext(childView: View, viewContext: GraphicsViewContext): GraphicsViewContext {
-    return viewContext;
-  }
-
-  canvasViewContext(viewContext?: ViewContext): GraphicsViewContext {
-    if (viewContext === void 0) {
-      viewContext = this.rootView!.viewContext;
+    i = 0;
+    while (i < graphicsViews.length) {
+      const childView = graphicsViews[i];
+      this.displayChildView(childView, displayFlags, viewContext);
+      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
+        this.removeChildView(childView);
+        continue;
+      } else if (callback !== void 0) {
+        callback.call(this, childView);
+      }
+      i += 1;
     }
-    return {
-      updateTime: viewContext.updateTime,
-      viewport: viewContext.viewport,
-      viewIdiom: viewContext.viewIdiom,
-      renderer: this.renderer,
-    };
   }
 
   isHidden(): boolean {
@@ -808,45 +979,14 @@ export class CanvasView extends HtmlView {
     });
   }
 
-  isCulled(): boolean {
-    return (this._viewFlags & View.CulledFlag) !== 0;
+  extendViewContext(viewContext: ViewContext): ViewContextType<this> {
+    const canvasViewContext = Object.create(viewContext);
+    canvasViewContext.renderer = this.renderer;
+    return canvasViewContext;
   }
 
-  setCulled(newCulled: boolean): void {
-    const oldCulled = (this._viewFlags & View.CulledFlag) !== 0;
-    if (oldCulled !== newCulled) {
-      this.willSetCulled(newCulled);
-      if (newCulled) {
-        this._viewFlags |= View.CulledFlag;
-      } else {
-        this._viewFlags &= ~View.CulledFlag;
-      }
-      this.onSetCulled(newCulled);
-      this.didSetCulled(newCulled);
-    }
-  }
-
-  protected willSetCulled(culled: boolean): void {
-    this.willObserve(function (viewObserver: CanvasViewObserver): void {
-      if (viewObserver.viewWillSetCulled !== void 0) {
-        viewObserver.viewWillSetCulled(culled, this);
-      }
-    });
-  }
-
-  protected onSetCulled(culled: boolean): void {
-    if (!culled) {
-      this.requireUpdate(View.NeedsRender);
-    }
-  }
-
-  protected didSetCulled(culled: boolean): void {
-    this.didObserve(function (viewObserver: CanvasViewObserver): void {
-      if (viewObserver.viewDidSetCulled !== void 0) {
-        viewObserver.viewDidSetCulled(culled, this);
-      }
-    });
-  }
+  // @ts-ignore
+  declare readonly viewContext: GraphicsViewContext;
 
   get viewFrame(): BoxR2 {
     return this._viewFrame;
@@ -864,10 +1004,15 @@ export class CanvasView extends HtmlView {
     return this._viewFrame;
   }
 
-  hitTest(x: number, y: number, viewContext?: GraphicsViewContext): GraphicsView | null {
+  hitTest(x: number, y: number, viewContext?: ViewContext): GraphicsView | null {
     if (viewContext === void 0) {
-      viewContext = this.canvasViewContext();
+      viewContext = this.superViewContext;
     }
+    const extendedViewContext = this.extendViewContext(viewContext);
+    return this.doHitTest(x, y, extendedViewContext);
+  }
+
+  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit: GraphicsView | null = null;
     const graphicsViews = this._graphicsViews;
     for (let i = graphicsViews.length - 1; i >= 0; i -= 1) {
@@ -1770,5 +1915,8 @@ export class CanvasView extends HtmlView {
                                           | CanvasView.MouseEventsFlag
                                           | CanvasView.PointerEventsFlag
                                           | CanvasView.TouchEventsFlag;
+
+  static readonly powerFlags: ViewFlags = HtmlView.powerFlags | View.NeedsRender;
+  static readonly uncullFlags: ViewFlags = HtmlView.uncullFlags | View.NeedsRender;
 }
 View.Canvas = CanvasView;

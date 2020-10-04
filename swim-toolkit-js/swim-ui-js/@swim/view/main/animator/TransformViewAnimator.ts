@@ -12,39 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {AnyTransform, Transform} from "@swim/transform";
-import {Tween} from "@swim/transition";
 import {View} from "../View";
-import {ViewAnimatorDescriptor, ViewAnimatorConstructor, ViewAnimator} from "./ViewAnimator";
+import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
-export interface TransformViewAnimator<V extends View> extends ViewAnimator<V, Transform, AnyTransform> {
+export abstract class TransformViewAnimator<V extends View> extends ViewAnimator<V, Transform | null | undefined, AnyTransform | null | undefined> {
+  fromAny(value: AnyTransform | null | undefined): Transform | null | undefined {
+    return value !== void 0 && value !== null ? Transform.fromAny(value) : null;
+  }
 }
-
-/** @hidden */
-export const TransformViewAnimator: ViewAnimatorConstructor<Transform, AnyTransform> = (function (_super: typeof ViewAnimator): ViewAnimatorConstructor<Transform, AnyTransform> {
-  const TransformViewAnimator: ViewAnimatorConstructor<Transform, AnyTransform> = function <V extends View>(
-      this: TransformViewAnimator<V>, view: V, animatorName: string | undefined,
-      descriptor?: ViewAnimatorDescriptor<V, Transform, AnyTransform>): TransformViewAnimator<V> {
-    let _this: TransformViewAnimator<V> = function accessor(value?: AnyTransform, tween?: Tween<Transform>): Transform | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as TransformViewAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, descriptor) || _this;
-    return _this;
-  } as unknown as ViewAnimatorConstructor<Transform, AnyTransform>;
-  __extends(TransformViewAnimator, _super);
-
-  TransformViewAnimator.prototype.fromAny = function (this: TransformViewAnimator<View>, value: AnyTransform | null): Transform | null {
-    return value !== null ? Transform.fromAny(value) : null;
-  };
-
-  return TransformViewAnimator;
-}(ViewAnimator));
 ViewAnimator.Transform = TransformViewAnimator;

@@ -17,12 +17,12 @@
     "@swim/structure": "3.11.0-dev.20200619",
     "@swim/math": "3.11.0-dev.20200619",
     "@swim/time": "3.11.0-dev.20200619",
-    "@swim/uri": "3.11.0-dev.20200619",
     "@swim/angle": "3.11.0-dev.20200619",
     "@swim/length": "3.11.0-dev.20200619",
     "@swim/color": "3.11.0-dev.20200619",
     "@swim/font": "3.11.0-dev.20200619",
     "@swim/shadow": "3.11.0-dev.20200619",
+    "@swim/gradient": "3.11.0-dev.20200619",
     "@swim/transform": "3.11.0-dev.20200619",
     "@swim/scale": "3.11.0-dev.20200619",
     "@swim/transition": "3.11.0-dev.20200619",
@@ -30,6 +30,8 @@
     "@swim/style": "3.11.0-dev.20200619",
     "@swim/render": "3.11.0-dev.20200619",
     "@swim/constraint": "3.11.0-dev.20200619",
-    "@swim/view": "3.11.0-dev.20200619"
+    "@swim/view": "3.11.0-dev.20200619",
+    "@swim/theme": "3.11.0-dev.20200619",
+    "@swim/modal": "3.11.0-dev.20200619"
   }
 }

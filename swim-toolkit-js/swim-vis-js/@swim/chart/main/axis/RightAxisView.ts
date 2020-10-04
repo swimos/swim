@@ -24,7 +24,7 @@ export class RightAxisView<Y = unknown> extends AxisView<Y> {
     return "right";
   }
 
-  @ViewAnimator(ContinuousScale, {inherit: "yScale"})
+  @ViewAnimator({type: ContinuousScale, inherit: "yScale"})
   scale: ContinuousScaleViewAnimator<this, Y, number>;
 
   protected layoutTick(tick: TickView<Y>, origin: PointR2, frame: BoxR2,
@@ -39,12 +39,12 @@ export class RightAxisView<Y = unknown> extends AxisView<Y> {
     const borderWidth = this.borderWidth.value;
     if (borderWidth !== void 0 && borderWidth !== 0) {
       const x = origin.x;
-      const dx = this.borderSerif.value!;
+      const dx = this.borderSerif.getValue();
       const y0 = frame.yMin;
       const y1 = frame.yMax;
 
       context.beginPath();
-      context.strokeStyle = this.borderColor.value!.toString();
+      context.strokeStyle = this.borderColor.getValue().toString();
       context.lineWidth = borderWidth;
       if (dx !== 0) {
         context.moveTo(x + dx, y0);

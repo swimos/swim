@@ -24,6 +24,8 @@ export class TranslateTransform extends Transform {
   readonly _x: Length;
   /** @hidden */
   readonly _y: Length;
+  /** @hidden */
+  _string?: string;
 
   constructor(x: Length, y: Length) {
     super();
@@ -120,13 +122,18 @@ export class TranslateTransform extends Transform {
   }
 
   toString(): string {
-    if (this._x.isDefined() && !this._y.isDefined()) {
-      return "translate(" + this._x + ",0)";
-    } else if (!this._x.isDefined() && this._y.isDefined()) {
-      return "translate(0," + this._y + ")";
-    } else {
-      return "translate(" + this._x + "," + this._y + ")";
+    let string = this._string;
+    if (string === void 0) {
+      if (this._x.isDefined() && !this._y.isDefined()) {
+        string = "translate(" + this._x + ",0)";
+      } else if (!this._x.isDefined() && this._y.isDefined()) {
+        string = "translate(0," + this._y + ")";
+      } else {
+        string = "translate(" + this._x + "," + this._y + ")";
+      }
+      this._string = string;
     }
+    return string;
   }
 
   toAttributeString(): string {
@@ -144,6 +151,16 @@ export class TranslateTransform extends Transform {
   static from(x: AnyLength, y: AnyLength): TranslateTransform {
     x = Length.fromAny(x);
     y = Length.fromAny(y);
+    return new TranslateTransform(x, y);
+  }
+
+  static fromCssTransformComponent(component: CSSTranslate): TranslateTransform {
+    const x = typeof component.x === "number"
+            ? Length.px(component.x)
+            : Length.fromCss(component.x);
+    const y = typeof component.y === "number"
+            ? Length.px(component.y)
+            : Length.fromCss(component.y);
     return new TranslateTransform(x, y);
   }
 
@@ -198,5 +215,12 @@ export class TranslateTransform extends Transform {
     }
     return parser.bind();
   }
+}
+if (typeof CSSTranslate !== "undefined") { // CSS Typed OM support
+  TranslateTransform.prototype.toCssTransformComponent = function (this: TranslateTransform): CSSTransformComponent | undefined {
+    const x = this._x.toCssValue();
+    const y = this._y.toCssValue();
+    return new CSSTranslate(x!, y!);
+  };
 }
 Transform.Translate = TranslateTransform;

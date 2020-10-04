@@ -72,13 +72,13 @@ export class SkewTransformInterpolator extends TransformInterpolator<SkewTransfo
   range(f0: AnyTransform, f1: AnyTransform): TransformInterpolator;
   range(f0?: readonly [AnyTransform, AnyTransform] | AnyTransform,
         f1?: AnyTransform): readonly [SkewTransform, SkewTransform] | TransformInterpolator {
-    if (f0 === void 0) {
+    if (arguments.length === 0) {
       return [this.interpolate(0), this.interpolate(1)];
-    } else if (f1 === void 0) {
+    } else if (arguments.length === 1) {
       f0 = f0 as readonly [AnyTransform, AnyTransform];
       return SkewTransformInterpolator.between(f0[0], f0[1]);
     } else {
-      return SkewTransformInterpolator.between(f0 as AnyTransform, f1);
+      return SkewTransformInterpolator.between(f0 as AnyTransform, f1 as AnyTransform);
     }
   }
 

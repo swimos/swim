@@ -20,21 +20,19 @@ import {
   ElementViewController,
   SvgView,
   HtmlView,
-  UiView,
 } from "@swim/view";
+import {WebAppViewObserver} from "./WebAppViewObserver";
 import {WebAppViewController} from "./WebAppViewController";
 
-export class WebAppView extends UiView {
+export class WebAppView extends HtmlView {
   /** @hidden */
   readonly _mutationObserver: MutationObserver;
 
-  constructor(node: HTMLElement) {
-    super(node);
-  }
+  // @ts-ignore
+  declare readonly viewController: WebAppViewController | null;
 
-  get viewController(): WebAppViewController | null {
-    return this._viewController;
-  }
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<WebAppViewObserver>;
 
   materializeTree(parentView: NodeView = this): void {
     const childNodes = parentView.node.childNodes;

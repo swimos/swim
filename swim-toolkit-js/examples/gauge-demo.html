@@ -153,7 +153,7 @@ const tickPadding = document.getElementById("tickPadding");
 const updateRate = document.getElementById("updateRate");
 
 // Create a new ui view
-const uiView = new swim.UiView(document.getElementById("ui"));
+const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
 // and append a canvas.
 const canvas = uiView.append("canvas")
     .pointerEventsEnabled(true)

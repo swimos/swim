@@ -15,7 +15,7 @@
 import {Murmur3} from "@swim/util";
 import {Output, Base16} from "@swim/codec";
 import {Item, Value} from "@swim/structure";
-import {BRIGHTER, DARKER, Color} from "./Color";
+import {BRIGHTER, DARKER, AnyColor, Color} from "./Color";
 import {HslColor} from "./HslColor";
 
 export type AnyRgbColor = RgbColor | RgbColorInit | string;
@@ -32,6 +32,8 @@ export class RgbColor extends Color {
   readonly g: number;
   readonly b: number;
   readonly a: number;
+  /** @hidden */
+  _string?: string;
 
   constructor(r: number, g: number, b: number, a: number = 1) {
     super();
@@ -66,7 +68,23 @@ export class RgbColor extends Color {
     return (max + min) / 2;
   }
 
-  brighter(k?: number): RgbColor {
+  plus(that: AnyColor): RgbColor {
+    that = Color.fromAny(that).rgb();
+    return new RgbColor(this.r + (that as RgbColor).r, this.g + (that as RgbColor).g,
+                        this.b + (that as RgbColor).b, this.a + (that as RgbColor).a);
+  }
+
+  times(scalar: number): RgbColor {
+    return new RgbColor(this.r * scalar, this.g * scalar, this.b * scalar, this.a * scalar);
+  }
+
+  combine(that: AnyColor, scalar: number = 1): Color {
+    that = Color.fromAny(that).rgb();
+    return new RgbColor(this.r + (that as RgbColor).r * scalar, this.g + (that as RgbColor).g * scalar,
+                        this.b + (that as RgbColor).b * scalar, this.a + (that as RgbColor).a * scalar);
+  }
+
+  lighter(k?: number): RgbColor {
     k = k === void 0 ? BRIGHTER : Math.pow(BRIGHTER, k);
     return k !== 1 ? new RgbColor(this.r * k, this.g * k, this.b * k, this.a) : this;
   }
@@ -145,25 +163,29 @@ export class RgbColor extends Color {
   }
 
   toString(): string {
-    let a = this.a;
-    a = isNaN(a) ? 1 : Math.max(0, Math.min(this.a, 1));
-    if (a === 1) {
-      return this.toHexString();
-    } else {
-      let s = a === 1 ? "rgb" : "rgba";
-      s += "(";
-      s += Math.max(0, Math.min(Math.round(this.r) || 0, 255));
-      s += ",";
-      s += Math.max(0, Math.min(Math.round(this.g) || 0, 255));
-      s += ",";
-      s += Math.max(0, Math.min(Math.round(this.b) || 0, 255));
-      if (a !== 1) {
+    let s = this._string;
+    if (s === void 0) {
+      let a = this.a;
+      a = isNaN(a) ? 1 : Math.max(0, Math.min(this.a, 1));
+      if (a === 1) {
+        s = this.toHexString();
+      } else {
+        s = a === 1 ? "rgb" : "rgba";
+        s += "(";
+        s += Math.max(0, Math.min(Math.round(this.r) || 0, 255));
         s += ",";
-        s += a;
+        s += Math.max(0, Math.min(Math.round(this.g) || 0, 255));
+        s += ",";
+        s += Math.max(0, Math.min(Math.round(this.b) || 0, 255));
+        if (a !== 1) {
+          s += ",";
+          s += a;
+        }
+        s += ")";
       }
-      s += ")";
-      return s;
+      this._string = s;
     }
+    return s;
   }
 
   private static _hashSeed?: number;

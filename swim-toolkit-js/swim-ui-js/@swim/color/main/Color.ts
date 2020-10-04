@@ -39,14 +39,20 @@ export abstract class Color implements HashCode, Debug {
   abstract alpha(): number;
   abstract alpha(a: number): Color;
 
+  abstract plus(that: AnyColor): Color;
+
+  abstract times(scalar: number): Color;
+
+  abstract combine(that: AnyColor, scalar?: number): Color;
+
   abstract lightness(): number;
 
-  abstract brighter(k?: number): Color;
+  abstract lighter(k?: number): Color;
 
   abstract darker(k?: number): Color;
 
   contrast(k?: number): Color {
-    return this.lightness() < 0.67 ? this.brighter(k) : this.darker(k);
+    return this.lightness() < 0.67 ? this.lighter(k) : this.darker(k);
   }
 
   abstract rgb(): RgbColor;

@@ -14,46 +14,38 @@
 
 import {BoxR2} from "@swim/math";
 import {AnyColor, Color} from "@swim/color";
-import {AnyFont} from "@swim/font";
-import {ContinuousScale} from "@swim/scale";
 import {CanvasRenderer, CanvasContext} from "@swim/render";
-import {ViewAnimator, GraphicsViewInit, GraphicsView, FillViewInit, FillView} from "@swim/view";
-import {AnyDataPointView} from "../data/DataPointView";
+import {ViewAnimator, GraphicsView, FillViewInit, FillView} from "@swim/view";
 import {PlotView} from "./PlotView";
 import {PlotViewController} from "./PlotViewController";
-import {SeriesPlotHitMode, SeriesPlotType, AnySeriesPlotView, SeriesPlotView} from "./SeriesPlotView";
+import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
 
 export type AnyAreaPlotView<X, Y> = AreaPlotView<X, Y> | AreaPlotViewInit<X, Y>;
 
-export interface AreaPlotViewInit<X, Y> extends GraphicsViewInit, FillViewInit {
-  xScale?: ContinuousScale<X, number>;
-  yScale?: ContinuousScale<Y, number>;
-
-  data?: AnyDataPointView<X, Y>[];
-
-  hitMode?: SeriesPlotHitMode;
-
-  font?: AnyFont;
-  textColor?: AnyColor;
+export interface AreaPlotViewInit<X, Y> extends SeriesPlotViewInit<X, Y>, FillViewInit {
+  viewController?: PlotViewController<X, Y>;
 }
 
 export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView {
-  get viewController(): PlotViewController<X, Y, AreaPlotView<X, Y>> | null {
-    return this._viewController;
+  initView(init: AreaPlotViewInit<X, Y>): void {
+    super.initView(init);
+    if (init.fill !== void 0) {
+      this.fill(init.fill);
+    }
   }
 
   get plotType(): SeriesPlotType {
     return "area";
   }
 
-  @ViewAnimator(Color, {value: Color.black()})
+  @ViewAnimator({type: Color, state: Color.black()})
   fill: ViewAnimator<this, Color, AnyColor>;
 
   protected renderPlot(context: CanvasContext, frame: BoxR2): void {
     const data = this._data;
     const n = data.size;
 
-    const fill = this.fill.value!;
+    const fill = this.fill.getValue();
     const gradientStops = this._gradientStops;
     let gradient: CanvasGradient | undefined;
 
@@ -146,7 +138,7 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
     return null;
   }
 
-  static fromAny<X, Y>(plot: AnySeriesPlotView<X, Y>): AreaPlotView<X, Y> {
+  static fromAny<X, Y>(plot: AnyAreaPlotView<X, Y>): AreaPlotView<X, Y> {
     if (plot instanceof AreaPlotView) {
       return plot;
     } else if (typeof plot === "object" && plot !== null) {
@@ -157,43 +149,7 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
 
   static fromInit<X, Y>(init: AreaPlotViewInit<X, Y>): AreaPlotView<X, Y> {
     const view = new AreaPlotView<X, Y>();
-
-    if (init.xScale !== void 0) {
-      view.xScale(init.xScale);
-    }
-    if (init.yScale !== void 0) {
-      view.yScale(init.yScale);
-    }
-
-    const data = init.data;
-    if (data !== void 0) {
-      for (let i = 0, n = data.length; i < n; i += 1) {
-        view.insertDataPoint(data[i]);
-      }
-    }
-
-    if (init.hitMode !== void 0) {
-      view.hitMode(init.hitMode);
-    }
-
-    if (init.fill !== void 0) {
-      view.fill(init.fill);
-    }
-
-    if (init.font !== void 0) {
-      view.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      view.textColor(init.textColor);
-    }
-
-    if (init.hidden !== void 0) {
-      view.setHidden(init.hidden);
-    }
-    if (init.culled !== void 0) {
-      view.setCulled(init.culled);
-    }
-
+    view.initView(init);
     return view;
   }
 }

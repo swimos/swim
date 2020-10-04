@@ -86,4 +86,9 @@ export class RadAngle extends Angle {
     return RadAngle._zero;
   }
 }
+if (typeof CSSUnitValue !== "undefined") { // CSS Typed OM support
+  RadAngle.prototype.toCssValue = function (this: RadAngle): CSSUnitValue | undefined {
+    return new CSSUnitValue(this._value, "rad");
+  };
+}
 Angle.Rad = RadAngle;

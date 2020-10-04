@@ -19,6 +19,7 @@ import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
+  ViewContextType,
   View,
   ViewAnimator,
   GraphicsView,
@@ -29,10 +30,8 @@ import {
 } from "@swim/view";
 import {GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
-import {MapGraphicsViewContext} from "../graphics/MapGraphicsViewContext";
 import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
-import {MapGraphicsViewController} from "../graphics/MapGraphicsViewController";
-import {MapGraphicsNodeView} from "../graphics/MapGraphicsNodeView";
+import {MapLayerView} from "../graphics/MapLayerView";
 import {AnyMapPointView, MapPointView} from "./MapPointView";
 
 export type AnyMapPolygonView = MapPolygonView | MapPolygonViewInit;
@@ -46,7 +45,7 @@ export interface MapPolygonViewInit extends MapGraphicsViewInit, FillViewInit, S
   textColor?: AnyColor;
 }
 
-export class MapPolygonView extends MapGraphicsNodeView implements FillView, StrokeView {
+export class MapPolygonView extends MapLayerView implements FillView, StrokeView {
   /** @hidden */
   _geoCentroid: GeoPoint;
   /** @hidden */
@@ -67,8 +66,30 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
     this._viewBounds = BoxR2.undefined();
   }
 
-  get viewController(): MapGraphicsViewController<MapPolygonView> | null {
-    return this._viewController;
+  initView(init: MapPolygonViewInit): void {
+    super.initView(init);
+    if (init.clipViewport !== void 0) {
+      this.clipViewport(init.clipViewport);
+    }
+    if (init.fill !== void 0) {
+      this.fill(init.fill);
+    }
+    if (init.stroke !== void 0) {
+      this.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      this.strokeWidth(init.strokeWidth);
+    }
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
+    const points = init.points;
+    if (points !== void 0) {
+      this.points(points);
+    }
   }
 
   points(): ReadonlyArray<MapPointView>;
@@ -100,7 +121,7 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
         if (childView instanceof MapPointView) {
           const point = points[j];
           childView.setState(point);
-          const {lng, lat} = childView.geoPoint.value!;
+          const {lng, lat} = childView.geoPoint.getValue();
           lngMid += lng;
           latMid += lat;
           lngMin = Math.min(lngMin, lng);
@@ -115,7 +136,7 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
       while (j < points.length) {
         const point = MapPointView.fromAny(points[j]);
         this.appendChildView(point);
-        const {lng, lat} = point.geoPoint.value!;
+        const {lng, lat} = point.geoPoint.getValue();
         lngMid += lng;
         latMid += lat;
         lngMin = Math.min(lngMin, lng);
@@ -182,20 +203,20 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
     return this._viewCentroid;
   }
 
-  @ViewAnimator(Color, {inherit: true})
-  fill: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  fill: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  stroke: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  stroke: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  strokeWidth: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  strokeWidth: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Font, {inherit: true})
-  font: ViewAnimator<this, Font, AnyFont>;
+  @ViewAnimator({type: Font, inherit: true})
+  font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  textColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
   protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
     super.onInsertChildView(childView, targetView);
@@ -208,7 +229,7 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
     childView.requireUpdate(View.NeedsAnimate | View.NeedsProject);
   }
 
-  protected didProject(viewContext: MapGraphicsViewContext): void {
+  protected didProject(viewContext: ViewContextType<this>): void {
     const oldGeoBounds = this._geoBounds;
     let lngMin = Infinity;
     let latMin = Infinity;
@@ -228,7 +249,7 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
     for (let i = 0; i < childViews.length; i += 1) {
       const childView = childViews[i];
       if (childView instanceof MapPointView) {
-        const {lng, lat} = childView.geoPoint.value!;
+        const {lng, lat} = childView.geoPoint.getValue();
         lngMid += lng;
         latMid += lat;
         lngMin = Math.min(lngMin, lng);
@@ -236,7 +257,7 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
         lngMax = Math.max(lng, lngMax);
         latMax = Math.max(lat, latMax);
         invalid = invalid || !isFinite(lng) || !isFinite(lat);
-        const {x, y} = childView.viewPoint.value!;
+        const {x, y} = childView.viewPoint.getValue();
         xMin = Math.min(xMin, x);
         yMin = Math.min(yMin, y);
         xMax = Math.max(x, xMax);
@@ -284,7 +305,7 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
     super.didProject(viewContext);
   }
 
-  protected onRender(viewContext: MapGraphicsViewContext): void {
+  protected onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -303,7 +324,7 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
     for (let i = 0; i < childCount; i += 1) {
       const childView = childViews[i];
       if (childView instanceof MapPointView) {
-        const {x, y} = childView.viewPoint.value!;
+        const {x, y} = childView.viewPoint.getValue();
         if (pointCount === 0) {
           context.moveTo(x, y);
         } else {
@@ -349,8 +370,8 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
     return this.viewBounds;
   }
 
-  hitTest(x: number, y: number, viewContext: MapGraphicsViewContext): GraphicsView | null {
-    let hit = super.hitTest(x, y, viewContext);
+  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
       if (renderer instanceof CanvasRenderer) {
@@ -373,7 +394,7 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
     for (let i = 0; i < childCount; i += 1) {
       const childView = this._childViews[i];
       if (childView instanceof MapPointView) {
-        const {x, y} = childView.viewPoint.value!;
+        const {x, y} = childView.viewPoint.getValue();
         if (i === 0) {
           context.moveTo(x, y);
         } else {
@@ -412,34 +433,7 @@ export class MapPolygonView extends MapGraphicsNodeView implements FillView, Str
 
   static fromInit(init: MapPolygonViewInit): MapPolygonView {
     const view = new MapPolygonView();
-    if (init.clipViewport !== void 0) {
-      view.clipViewport(init.clipViewport);
-    }
-    if (init.fill !== void 0) {
-      view.fill(init.fill);
-    }
-    if (init.stroke !== void 0) {
-      view.stroke(init.stroke);
-    }
-    if (init.strokeWidth !== void 0) {
-      view.strokeWidth(init.strokeWidth);
-    }
-    if (init.font !== void 0) {
-      view.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      view.textColor(init.textColor);
-    }
-    const points = init.points;
-    if (points !== void 0) {
-      view.points(points);
-    }
-    if (init.hidden !== void 0) {
-      view.setHidden(init.hidden);
-    }
-    if (init.culled !== void 0) {
-      view.setCulled(init.culled);
-    }
+    view.initView(init);
     return view;
   }
 }

@@ -17,6 +17,7 @@ export * from "@swim/length";
 export * from "@swim/color";
 export * from "@swim/font";
 export * from "@swim/shadow";
+export * from "@swim/gradient";
 export * from "@swim/transform";
 export * from "@swim/scale";
 export * from "@swim/transition";

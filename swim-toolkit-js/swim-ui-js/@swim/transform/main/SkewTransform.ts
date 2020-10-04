@@ -25,6 +25,8 @@ export class SkewTransform extends Transform {
   readonly _x: Angle;
   /** @hidden */
   readonly _y: Angle;
+  /** @hidden */
+  _string?: string;
 
   constructor(x: Angle, y: Angle) {
     super();
@@ -123,13 +125,18 @@ export class SkewTransform extends Transform {
   }
 
   toString(): string {
-    if (this._x.isDefined() && !this._y.isDefined()) {
-      return "skewX(" + this._x + ")";
-    } else if (!this._x.isDefined() && this._y.isDefined()) {
-      return "skewY(" + this._y + ")";
-    } else {
-      return "skew(" + this._x + "," + this._y + ")";
+    let string = this._string;
+    if (string === void 0) {
+      if (this._x.isDefined() && !this._y.isDefined()) {
+        string = "skewX(" + this._x + ")";
+      } else if (!this._x.isDefined() && this._y.isDefined()) {
+        string = "skewY(" + this._y + ")";
+      } else {
+        string = "skew(" + this._x + "," + this._y + ")";
+      }
+      this._string = string;
     }
+    return string;
   }
 
   toAttributeString(): string {
@@ -147,6 +154,16 @@ export class SkewTransform extends Transform {
   static from(x: AnyAngle, y: AnyAngle): SkewTransform {
     x = Angle.fromAny(x, "deg");
     y = Angle.fromAny(y, "deg");
+    return new SkewTransform(x, y);
+  }
+
+  static fromCssTransformComponent(component: CSSSkew): SkewTransform {
+    const x = typeof component.ax === "number"
+            ? Angle.rad(component.ax)
+            : Angle.fromCss(component.ax);
+    const y = typeof component.ay === "number"
+            ? Angle.rad(component.ay)
+            : Angle.fromCss(component.ay);
     return new SkewTransform(x, y);
   }
 
@@ -201,5 +218,12 @@ export class SkewTransform extends Transform {
     }
     return parser.bind();
   }
+}
+if (typeof CSSSkew !== "undefined") { // CSS Typed OM support
+  SkewTransform.prototype.toCssTransformComponent = function (this: SkewTransform): CSSTransformComponent | undefined {
+    const x = this._x.toCssValue();
+    const y = this._y.toCssValue();
+    return new CSSSkew(x!, y!);
+  };
 }
 Transform.Skew = SkewTransform;

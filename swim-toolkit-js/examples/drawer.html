@@ -11,9 +11,7 @@
       }
     </style>
   </head>
-  <body style="display: flex; width: 100vw; height: 100vh; margin: 0; background-color: #1e2022; font-family: sans-serif;">
-    <div id="app" style="position: relative; flex-grow: 1;">
-    </div>
+  <body style="display: flex; width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
@@ -37,44 +35,41 @@ if (navigator.standalone) {
   document.body.style.height = "100%";
 }
 
-const appView = new swim.AppView(document.getElementById("app"));
+const bodyView = swim.ThemedHtmlView.fromNode(document.body);
 
-const drawerButton = appView.append(swim.DrawerButton)
+const drawerButton = bodyView.append(swim.DrawerButton)
   .position("absolute")
   .top("50%")
   .right("50%")
   .bottom("50%")
   .left("50%");
 
-const drawerView = appView.append(swim.DrawerView).drawerPlacement("left");
+const drawerView = bodyView.append(swim.DrawerView).drawerPlacement("left");
 drawerButton.setDrawerView(drawerView);
 
-const menuList = swim.HtmlView.create(swim.MenuList);
-const menuListController = new swim.MenuListController();
-//menuList.setViewController(menuListController);
-drawerView.append(menuList);
+const menuList = drawerView.append(swim.MenuList);
 
 const icon1 = swim.SvgView.create("svg").width(24).height(24).viewBox("0 0 24 24");
 icon1.append("path").d("M7.5,21 C7.12,21 6.79,20.79 6.62,20.47 L2.18,12.57 C2.06,12.41 2,12.21 2,12 C2,11.79 2.06,11.59 2.18,11.43 L6.62,3.53 C6.79,3.21 7.12,3 7.5,3 L16.5,3 C16.88,3 17.21,3.21 17.38,3.53 L21.82,11.43 C21.94,11.59 22,11.79 22,12 C22,12.21 21.94,12.41 21.82,12.57 L17.38,20.47 C17.21,20.79 16.88,21 16.5,21 L7.5,21 Z M19.85,12 L15.91,5 L8.09,5 L4.15,12 L8.09,19 L15.91,19 L19.85,12 Z M7.44065808,16.4296639 L11.14,7.02069092 L12.8625488,7.02069092 L16.5634001,16.4305109 L7.44065808,16.4296639 Z M9.96,14.71 L14.03,14.71 L12,9.29 L9.96,14.71 Z");
-const item1 = swim.HtmlView.create(swim.MenuItem)
+const item1 = menuList.append(swim.MenuItem, "agents")
   .iconView(icon1)
   .titleView("Agents");
-menuList.append(item1);
-//menuListController.selectItem(item1);
 
 const icon2 = swim.SvgView.create("svg").width(24).height(24).viewBox("0 0 24 24");
 icon2.append("path").d("M10,2 C8.89,2 8,2.89 8,4 L8,7 C8,8.11 8.89,9 10,9 L11,9 L11,11 L2,11 L2,13 L6,13 L6,15 L5,15 C3.89,15 3,15.89 3,17 L3,20 C3,21.11 3.89,22 5,22 L9,22 C10.11,22 11,21.11 11,20 L11,17 C11,15.89 10.11,15 9,15 L8,15 L8,13 L16,13 L16,15 L15,15 C13.89,15 13,15.89 13,17 L13,20 C13,21.11 13.89,22 15,22 L19,22 C20.11,22 21,21.11 21,20 L21,17 C21,15.89 20.11,15 19,15 L18,15 L18,13 L22,13 L22,11 L13,11 L13,9 L14,9 C15.11,9 16,8.11 16,7 L16,4 C16,2.89 15.11,2 14,2 L10,2 L10,2 Z M10,4 L14,4 L14,7 L10,7 L10,4 L10,4 Z M5,17 L9,17 L9,20 L5,20 L5,17 L5,17 Z M15,17 L19,17 L19,20 L15,20 L15,17 Z");
-const item2 = swim.HtmlView.create(swim.MenuItem)
+const item2 = menuList.append(swim.MenuItem, "fabric")
   .iconView(icon2)
   .titleView("Fabric");
-menuList.append(item2);
 
 const settingsIcon = swim.SvgView.create("svg").width(20).height(20).viewBox("0 0 20 20");
 settingsIcon.append("path").d("M17.6501795,10.975 C17.6887518,10.6625 17.7144667,10.3375 17.7144667,10 C17.7144667,9.6625 17.6887518,9.3375 17.637322,9.025 L19.8102301,7.375 C20.0030918,7.225 20.0545216,6.95 19.9388046,6.7375 L17.8816135,3.275 C17.753039,3.05 17.4830327,2.975 17.2515987,3.05 L14.6929672,4.05 C14.1529546,3.65 13.587227,3.325 12.9572122,3.075 L12.5714889,0.425 C12.5329166,0.175 12.31434,0 12.0571911,0 L7.94280888,0 C7.68566,0 7.47994088,0.175 7.44136855,0.425 L7.05564522,3.075 C6.42563044,3.325 5.84704544,3.6625 5.31989021,4.05 L2.76125876,3.05 C2.52982476,2.9625 2.25981843,3.05 2.13124398,3.275 L0.0740528683,6.7375 C-0.0545215764,6.9625 -0.00309179853,7.225 0.202627313,7.375 L2.37553543,9.025 C2.32410565,9.3375 2.28553332,9.675 2.28553332,10 C2.28553332,10.325 2.31124821,10.6625 2.36267798,10.975 L0.189769869,12.625 C-0.00309179853,12.775 -0.0545215764,13.05 0.0611954238,13.2625 L2.11838654,16.725 C2.24696098,16.95 2.51696732,17.025 2.74840132,16.95 L5.30703277,15.95 C5.84704544,16.35 6.41277299,16.675 7.04278777,16.925 L7.42851111,19.575 C7.47994088,19.825 7.68566,20 7.94280888,20 L12.0571911,20 C12.31434,20 12.5329166,19.825 12.5586314,19.575 L12.9443548,16.925 C13.5743696,16.675 14.1529546,16.3375 14.6801098,15.95 L17.2387412,16.95 C17.4701752,17.0375 17.7401816,16.95 17.868756,16.725 L19.9259471,13.2625 C20.0545216,13.0375 20.0030918,12.775 19.7973727,12.625 L17.6501795,10.975 L17.6501795,10.975 Z M10,13.75 C7.87852166,13.75 6.14276666,12.0625 6.14276666,10 C6.14276666,7.9375 7.87852166,6.25 10,6.25 C12.1214783,6.25 13.8572333,7.9375 13.8572333,10 C13.8572333,12.0625 12.1214783,13.75 10,13.75 Z");
-const settingsItem = swim.HtmlView.create(swim.MenuItem)
+const settingsItem = drawerView.append(swim.MenuItem)
   .iconView(settingsIcon)
   .titleView("Settings");
-drawerView.append(settingsItem);
+
+const menuListController = new swim.MenuListController();
+menuList.setViewController(menuListController);
+menuListController.selectItem(item1);
 
 drawerView.show();
 

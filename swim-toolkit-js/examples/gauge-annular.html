@@ -12,7 +12,7 @@
     <script src="../swim-vis-js/@swim/vis/dist/main/swim-vis.js"></script>
     <script>
 
-const uiView = new swim.UiView(document.getElementById("ui"));
+const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
 
 const canvas = uiView.append("canvas");
 

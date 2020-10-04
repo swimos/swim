@@ -17,6 +17,7 @@ export {
   CanvasViewMouse,
   CanvasViewPointer,
   ViewCanvas,
+  CanvasViewInit,
   CanvasView,
 } from "./CanvasView";
 export {CanvasViewObserver} from "./CanvasViewObserver";

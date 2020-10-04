@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Output, Debug, Format} from "@swim/codec";
 import {Constrain} from "./Constrain";
 import {ConstrainVariable} from "./ConstrainVariable";
 import {AnyConstraintStrength, ConstraintStrength} from "./ConstraintStrength";
 import {ConstraintScope} from "./ConstraintScope";
 
-export class ConstrainBinding extends ConstrainVariable {
+export class ConstrainBinding extends ConstrainVariable implements Debug {
   /** @hidden */
   readonly _scope: ConstraintScope;
   /** @hidden */
@@ -88,6 +89,15 @@ export class ConstrainBinding extends ConstrainVariable {
     if (isFinite(state) && oldStrength !== newStrength) {
       this._scope.addConstraintVariable(this);
     }
+  }
+
+  debug(output: Output): void {
+    output = output.debug(this.scope).write(46/*'.'*/).write("variable").write(40/*'('*/)
+        .debug(this.name).write(", ").debug(this.value).write(41/*')'*/);
+  }
+
+  toString(): string {
+    return Format.debug(this);
   }
 }
 Constrain.Binding = ConstrainBinding;

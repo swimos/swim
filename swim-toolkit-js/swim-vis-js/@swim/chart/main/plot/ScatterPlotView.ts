@@ -20,35 +20,27 @@ import {ContinuousScale} from "@swim/scale";
 import {Tween} from "@swim/transition";
 import {CanvasRenderer, CanvasContext} from "@swim/render";
 import {
+  ViewContextType,
   ViewFlags,
   View,
   ViewAnimator,
   ContinuousScaleViewAnimator,
-  GraphicsViewContext,
-  GraphicsViewInit,
-  GraphicsNodeView,
+  LayerView,
 } from "@swim/view";
 import {AnyDataPointView, DataPointView} from "../data/DataPointView";
-import {PlotView} from "./PlotView";
+import {PlotViewInit, PlotView} from "./PlotView";
+import {PlotViewObserver} from "./PlotViewObserver";
 import {PlotViewController} from "./PlotViewController";
 
 export type ScatterPlotType = "bubble";
 
 export type AnyScatterPlotView<X, Y> = ScatterPlotView<X, Y> | ScatterPlotViewInit<X, Y> | ScatterPlotType;
 
-export interface ScatterPlotViewInit<X, Y> extends GraphicsViewInit {
-  plotType: ScatterPlotType;
-
-  xScale?: ContinuousScale<X, number>;
-  yScale?: ContinuousScale<Y, number>;
-
-  data?: AnyDataPointView<X, Y>[];
-
-  font?: AnyFont;
-  textColor?: AnyColor;
+export interface ScatterPlotViewInit<X, Y> extends PlotViewInit<X, Y> {
+  plotType?: ScatterPlotType;
 }
 
-export abstract class ScatterPlotView<X, Y> extends GraphicsNodeView implements PlotView<X, Y> {
+export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotView<X, Y> {
   /** @hidden */
   _xDataDomain: [X, X] | undefined;
   /** @hidden */
@@ -66,16 +58,72 @@ export abstract class ScatterPlotView<X, Y> extends GraphicsNodeView implements 
     this._yDataRange = void 0;
   }
 
-  get viewController(): PlotViewController<X, Y, ScatterPlotView<X, Y>> | null {
-    return this._viewController;
+  // @ts-ignore
+  declare readonly viewController: PlotViewController<X, Y> | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<PlotViewObserver<X, Y>>;
+
+  initView(init: ScatterPlotViewInit<X, Y>): void {
+    super.initView(init);
+    if (init.xScale !== void 0) {
+      this.xScale(init.xScale);
+    }
+    if (init.yScale !== void 0) {
+      this.yScale(init.yScale);
+    }
+
+    const data = init.data;
+    if (data !== void 0) {
+      for (let i = 0, n = data.length; i < n; i += 1) {
+        this.insertDataPoint(data[i]);
+      }
+    }
+
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
   }
 
   abstract get plotType(): ScatterPlotType;
 
-  @ViewAnimator(ContinuousScale, {inherit: true})
+  getDataPoint(key: string): DataPointView<X, Y> | undefined {
+    const point = this.getChildView(key);
+    return point instanceof DataPointView ? point : void 0;
+  }
+
+  insertDataPoint(point: AnyDataPointView<X, Y>, key?: string): DataPointView<X, Y> {
+    if (key === void 0) {
+      key = point.key;
+    }
+    point = DataPointView.fromAny(point);
+    this.appendChildView(point, key);
+    return point;
+  }
+
+  insertDataPoints(...points: AnyDataPointView<X, Y>[]): void {
+    for (let i = 0, n = arguments.length; i < n; i += 1) {
+      this.insertDataPoint(arguments[i]);
+    }
+  }
+
+  removeDataPoint(key: string): DataPointView<X, Y> | null {
+    const point = this.getChildView(key);
+    if (point instanceof DataPointView) {
+      point.remove();
+      return point;
+    } else {
+      return null;
+    }
+  }
+
+  @ViewAnimator({type: ContinuousScale, inherit: true})
   xScale: ContinuousScaleViewAnimator<this, X, number>;
 
-  @ViewAnimator(ContinuousScale, {inherit: true})
+  @ViewAnimator({type: ContinuousScale, inherit: true})
   yScale: ContinuousScaleViewAnimator<this, Y, number>;
 
   xDomain(): readonly [X, X] | undefined;
@@ -176,11 +224,11 @@ export abstract class ScatterPlotView<X, Y> extends GraphicsNodeView implements 
     return this._yDataRange;
   }
 
-  @ViewAnimator(Font, {inherit: true})
-  font: ViewAnimator<this, Font, AnyFont>;
+  @ViewAnimator({type: Font, inherit: true})
+  font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  textColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
   protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
     this.requireUpdate(View.NeedsAnimate);
@@ -190,23 +238,23 @@ export abstract class ScatterPlotView<X, Y> extends GraphicsNodeView implements 
     this.requireUpdate(View.NeedsAnimate);
   }
 
-  protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
+  protected modifyUpdate(targetView: View, updateFlags: ViewFlags): ViewFlags {
     let additionalFlags = 0;
     if ((updateFlags & View.NeedsAnimate) !== 0) {
       additionalFlags |= View.NeedsAnimate;
     }
-    additionalFlags |= super.modifyUpdate(updateFlags | additionalFlags);
+    additionalFlags |= super.modifyUpdate(targetView, updateFlags | additionalFlags);
     return additionalFlags;
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): ViewFlags {
+  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsLayout) !== 0) {
       processFlags |= View.NeedsAnimate;
     }
     return processFlags;
   }
 
-  protected willResize(viewContext: GraphicsViewContext): void {
+  protected willResize(viewContext: ViewContextType<this>): void {
     super.willResize(viewContext);
     this.resizeScales(this.viewFrame);
   }
@@ -225,21 +273,13 @@ export abstract class ScatterPlotView<X, Y> extends GraphicsNodeView implements 
     }
   }
 
-  protected didAnimate(viewContext: GraphicsViewContext): void {
-    const xScale = this.xScale.value;
-    const yScale = this.yScale.value;
-    if (xScale !== void 0 && yScale !== void 0) {
-      this.processData(xScale, yScale, this.viewFrame);
-    }
-    super.didAnimate(viewContext);
-  }
-
-  /**
-   * Computes domain and range extrema.
-   */
-  protected processData(xScale: ContinuousScale<X, number>,
-                        yScale: ContinuousScale<Y, number>,
-                        frame: BoxR2): void {
+  protected processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
+                              callback?: (this: this, childView: View) => void): void {
+    // Compute domain and range extrema while animating child views.
+    let needsAnimate = (processFlags & View.NeedsAnimate) !== 0;
+    const xScale = needsAnimate ? this.xScale.value : void 0;
+    const yScale = needsAnimate ? this.yScale.value : void 0;
+    const frame = needsAnimate ? this.viewFrame : void 0;
     let point0: DataPointView<X, Y> | undefined;
     let xDomainMin: X | undefined;
     let yDomainMin: Y | undefined;
@@ -249,16 +289,15 @@ export abstract class ScatterPlotView<X, Y> extends GraphicsNodeView implements 
     let yRangeMin: number | undefined;
     let xRangeMax: number | undefined;
     let yRangeMax: number | undefined;
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const point1 = childViews[i];
+
+    function animateChildView(this: ScatterPlotView<X, Y>, point1: View): void {
       if (point1 instanceof DataPointView) {
-        const x1 = point1.x.value!;
-        const y1 = point1.y.value!;
-        const sx1 = xScale.scale(x1);
-        const sy1 = yScale.scale(y1);
-        point1._xCoord = frame.xMin + sx1;
-        point1._yCoord = frame.yMin + sy1;
+        const x1 = point1.x.getValue();
+        const y1 = point1.y.getValue();
+        const sx1 = xScale!.scale(x1);
+        const sy1 = yScale!.scale(y1);
+        point1._xCoord = frame!.xMin + sx1;
+        point1._yCoord = frame!.yMin + sy1;
 
         if (point0 !== void 0) {
           // compute extrema
@@ -295,84 +334,90 @@ export abstract class ScatterPlotView<X, Y> extends GraphicsNodeView implements 
 
         point0 = point1;
       }
-    }
 
-    if (point0 !== void 0) {
-      // update extrema
-      let xDataDomain = this._xDataDomain;
-      if (xDataDomain === void 0) {
-        xDataDomain = [xDomainMin!, xDomainMax!];
-        this._xDataDomain = xDataDomain;
-      } else {
-        xDataDomain[0] = xDomainMin!;
-        xDataDomain[1] = xDomainMax!;
+      if (callback !== void 0) {
+        callback.call(this, point1);
       }
-      let yDataDomain = this._yDataDomain;
-      if (yDataDomain === void 0) {
-        yDataDomain = [yDomainMin!, yDomainMax!];
-        this._yDataDomain = yDataDomain;
-      } else {
-        yDataDomain[0] = yDomainMin!;
-        yDataDomain[1] = yDomainMax!;
-      }
-      let xDataRange = this._xDataRange;
-      if (xDataRange === void 0) {
-        xDataRange = [xRangeMin!, xRangeMax!];
-        this._xDataRange = xDataRange;
-      } else {
-        xDataRange[0] = xRangeMin!;
-        xDataRange[1] = xRangeMax!;
-      }
-      let yDataRange = this._yDataRange;
-      if (yDataRange === void 0) {
-        yDataRange = [yRangeMin!, yRangeMax!];
-        this._yDataRange = yDataRange;
-      } else {
-        yDataRange[0] = yRangeMin!;
-        yDataRange[1] = yRangeMax!;
-      }
-    } else {
-      this._xDataDomain = void 0;
-      this._yDataDomain = void 0;
-      this._xDataRange = void 0;
-      this._yDataRange = void 0;
     }
+    needsAnimate = needsAnimate && xScale !== void 0 && yScale !== void 0;
+    super.processChildViews(processFlags, viewContext, needsAnimate ? animateChildView : callback);
 
-    // We don't need to run the layout phase unless the view frame changes
-    // between now and the display pass.
-    this._viewFlags &= ~View.NeedsLayout;
+    if (needsAnimate) {
+      if (point0 !== void 0) {
+        // update extrema
+        let xDataDomain = this._xDataDomain;
+        if (xDataDomain === void 0) {
+          xDataDomain = [xDomainMin!, xDomainMax!];
+          this._xDataDomain = xDataDomain;
+        } else {
+          xDataDomain[0] = xDomainMin!;
+          xDataDomain[1] = xDomainMax!;
+        }
+        let yDataDomain = this._yDataDomain;
+        if (yDataDomain === void 0) {
+          yDataDomain = [yDomainMin!, yDomainMax!];
+          this._yDataDomain = yDataDomain;
+        } else {
+          yDataDomain[0] = yDomainMin!;
+          yDataDomain[1] = yDomainMax!;
+        }
+        let xDataRange = this._xDataRange;
+        if (xDataRange === void 0) {
+          xDataRange = [xRangeMin!, xRangeMax!];
+          this._xDataRange = xDataRange;
+        } else {
+          xDataRange[0] = xRangeMin!;
+          xDataRange[1] = xRangeMax!;
+        }
+        let yDataRange = this._yDataRange;
+        if (yDataRange === void 0) {
+          yDataRange = [yRangeMin!, yRangeMax!];
+          this._yDataRange = yDataRange;
+        } else {
+          yDataRange[0] = yRangeMin!;
+          yDataRange[1] = yRangeMax!;
+        }
+      } else {
+        this._xDataDomain = void 0;
+        this._yDataDomain = void 0;
+        this._xDataRange = void 0;
+        this._yDataRange = void 0;
+      }
+
+      // We don't need to run the layout phase unless the view frame changes
+      // between now and the display pass.
+      this._viewFlags &= ~View.NeedsLayout;
+    }
   }
 
-  protected onLayout(viewContext: GraphicsViewContext): void {
-    super.onLayout(viewContext);
-    const xScale = this.xScale.value;
-    const yScale = this.yScale.value;
-    if (xScale !== void 0 && yScale !== void 0) {
-      this.layoutData(xScale, yScale, this.viewFrame);
+  needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+    if ((this._viewFlags & View.NeedsLayout) === 0) {
+      displayFlags &= ~View.NeedsLayout;
     }
+    return displayFlags;
   }
 
-  /**
-   * Recomputes range extrema.
-   */
-  protected layoutData(xScale: ContinuousScale<X, number>,
-                       yScale: ContinuousScale<Y, number>,
-                       frame: BoxR2): void {
+  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                              callback?: (this: this, childView: View) => void): void {
+    // Recompute range extrema when laying out child views.
+    const needsLayout = (displayFlags & View.NeedsLayout) !== 0;
+    const xScale = needsLayout ? this.xScale.value : void 0;
+    const yScale = needsLayout ? this.yScale.value : void 0;
+    const frame = needsLayout ? this.viewFrame : void 0;
     let point0: DataPointView<X, Y> | undefined;
     let xRangeMin: number | undefined;
     let yRangeMin: number | undefined;
     let xRangeMax: number | undefined;
     let yRangeMax: number | undefined;
-    const childViews = this._childViews;
-    for (let i = 0, n = childViews.length; i < n; i += 1) {
-      const point1 = childViews[i];
+
+    function layoutChildView(this: ScatterPlotView<X, Y>, point1: View): void {
       if (point1 instanceof DataPointView) {
-        const x1 = point1.x.value!;
-        const y1 = point1.y.value!;
-        const sx1 = xScale.scale(x1);
-        const sy1 = yScale.scale(y1);
-        point1._xCoord = frame.xMin + sx1;
-        point1._yCoord = frame.yMin + sy1;
+        const x1 = point1.x.getValue();
+        const y1 = point1.y.getValue();
+        const sx1 = xScale!.scale(x1);
+        const sy1 = yScale!.scale(y1);
+        point1._xCoord = frame!.xMin + sx1;
+        point1._yCoord = frame!.yMin + sy1;
 
         if (point0 !== void 0) {
           // compute extrema
@@ -395,33 +440,40 @@ export abstract class ScatterPlotView<X, Y> extends GraphicsNodeView implements 
 
         point0 = point1;
       }
-    }
 
-    if (point0 !== void 0) {
-      // update extrema
-      let xDataRange = this._xDataRange;
-      if (xDataRange === void 0) {
-        xDataRange = [xRangeMin!, xRangeMax!];
-        this._xDataRange = xDataRange;
-      } else {
-        xDataRange[0] = xRangeMin!;
-        xDataRange[1] = xRangeMax!;
+      if (callback !== void 0) {
+        callback.call(this, point1);
       }
-      let yDataRange = this._yDataRange;
-      if (yDataRange === void 0) {
-        yDataRange = [yRangeMin!, yRangeMax!];
-        this._yDataRange = yDataRange;
+    }
+    super.displayChildViews(displayFlags, viewContext, needsLayout ? layoutChildView : callback);
+
+    if (needsLayout) {
+      if (point0 !== void 0) {
+        // update extrema
+        let xDataRange = this._xDataRange;
+        if (xDataRange === void 0) {
+          xDataRange = [xRangeMin!, xRangeMax!];
+          this._xDataRange = xDataRange;
+        } else {
+          xDataRange[0] = xRangeMin!;
+          xDataRange[1] = xRangeMax!;
+        }
+        let yDataRange = this._yDataRange;
+        if (yDataRange === void 0) {
+          yDataRange = [yRangeMin!, yRangeMax!];
+          this._yDataRange = yDataRange;
+        } else {
+          yDataRange[0] = yRangeMin!;
+          yDataRange[1] = yRangeMax!;
+        }
       } else {
-        yDataRange[0] = yRangeMin!;
-        yDataRange[1] = yRangeMax!;
+        this._xDataRange = void 0;
+        this._yDataRange = void 0;
       }
-    } else {
-      this._xDataRange = void 0;
-      this._yDataRange = void 0;
     }
   }
 
-  protected onRender(viewContext: GraphicsViewContext): void {
+  protected onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {

@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicsViewController} from "@swim/view";
+import {ViewContextType, GraphicsViewController} from "@swim/view";
 import {GeoBox} from "../geo/GeoBox";
 import {GeoProjection} from "../geo/GeoProjection";
-import {MapGraphicsViewContext} from "./MapGraphicsViewContext";
 import {MapGraphicsView} from "./MapGraphicsView";
 import {MapGraphicsViewObserver} from "./MapGraphicsViewObserver";
 
@@ -50,11 +49,11 @@ export class MapGraphicsViewController<V extends MapGraphicsView = MapGraphicsVi
     return view !== null ? view.geoBounds : GeoBox.undefined();
   }
 
-  viewWillProject(viewContext: MapGraphicsViewContext, view: V): void {
+  viewWillProject(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidProject(viewContext: MapGraphicsViewContext, view: V): void {
+  viewDidProject(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 }

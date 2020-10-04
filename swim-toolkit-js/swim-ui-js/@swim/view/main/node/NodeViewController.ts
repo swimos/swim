@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContext} from "../ViewContext";
 import {ViewController} from "../ViewController";
 import {ViewNodeType, NodeView} from "./NodeView";
 import {NodeViewObserver} from "./NodeViewObserver";
@@ -72,14 +71,6 @@ export class NodeViewController<V extends NodeView = NodeView> extends ViewContr
   }
 
   viewDidRemoveChildNode(childNode: Node, view: V): void {
-    // hook
-  }
-
-  viewWillAnimate(viewContext: ViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidAnimate(viewContext: ViewContext, view: V): void {
     // hook
   }
 }

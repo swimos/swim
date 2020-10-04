@@ -36,7 +36,8 @@ export abstract class Angle implements HashCode, Debug {
   abstract get units(): AngleUnits;
 
   plus(that: AnyAngle, units: AngleUnits = this.units): Angle {
-    return Angle.from(this.toValue(units) + Angle.fromAny(that).toValue(units), units);
+    that = Angle.fromAny(that);
+    return Angle.from(this.toValue(units) + that.toValue(units), units);
   }
 
   opposite(units: AngleUnits = this.units): Angle {
@@ -44,7 +45,8 @@ export abstract class Angle implements HashCode, Debug {
   }
 
   minus(that: AnyAngle, units: AngleUnits = this.units): Angle {
-    return Angle.from(this.toValue(units) - Angle.fromAny(that).toValue(units), units);
+    that = Angle.fromAny(that);
+    return Angle.from(this.toValue(units) - that.toValue(units), units);
   }
 
   times(scalar: number, units: AngleUnits = this.units): Angle {
@@ -55,8 +57,14 @@ export abstract class Angle implements HashCode, Debug {
     return Angle.from(this.toValue(units) / scalar, units);
   }
 
+  combine(that: AnyAngle, scalar: number = 1, units: AngleUnits = this.units): Angle {
+    that = Angle.fromAny(that);
+    return Angle.from(this.toValue(units) + that.toValue(units) * scalar, units);
+  }
+
   norm(total: AnyAngle, units: AngleUnits = this.units): Angle {
-    return Angle.from(this.toValue(units) / Angle.fromAny(total).toValue(units), units);
+    total = Angle.fromAny(total);
+    return Angle.from(this.toValue(units) / total.toValue(units), units);
   }
 
   abstract degValue(): number;
@@ -103,6 +111,10 @@ export abstract class Angle implements HashCode, Debug {
     }
   }
 
+  toCssValue(): CSSUnitValue | undefined {
+    return void 0; // conditionally overridden when CSS Typed OM is available
+  }
+
   abstract equals(that: unknown): boolean;
 
   abstract hashCode(): number;
@@ -144,6 +156,14 @@ export abstract class Angle implements HashCode, Debug {
       case "grad": return Angle.grad(value);
       case "turn": return Angle.turn(value);
       default: throw new Error("unknown angle units: " + units);
+    }
+  }
+
+  static fromCss(value: CSSStyleValue): Angle {
+    if (value instanceof CSSUnitValue) {
+      return Angle.from(value.value, value.unit as AngleUnits);
+    } else {
+      throw new TypeError("" + value);
     }
   }
 

@@ -109,4 +109,9 @@ export class EmLength extends Length {
     }
   }
 }
+if (typeof CSSUnitValue !== "undefined") { // CSS Typed OM support
+  EmLength.prototype.toCssValue = function (this: EmLength): CSSUnitValue | undefined {
+    return new CSSUnitValue(this._value, "em");
+  };
+}
 Length.Em = EmLength;

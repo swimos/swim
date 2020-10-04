@@ -21,20 +21,30 @@ component libraries:
   ([npm](https://www.npmjs.com/package/@swim/theme),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_theme.html)) –
   semantic looks and feels for mood-aware UX components.
-- [**@swim/app**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/app)
-  ([npm](https://www.npmjs.com/package/@swim/app),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_app.html)) –
-  application model for coordinating window-level components, such as popovers
-  and drawers.
-- [**@swim/controls**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/controls)
-  ([npm](https://www.npmjs.com/package/@swim/controls),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_controls.html)) –
-  buttons, switches, sliders, and other user interface controls.
-- [**@swim/navigation**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/navigation)
-  ([npm](https://www.npmjs.com/package/@swim/navigation),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_navigation.html)) –
-  menus, tree views, nav bars, tab bars, and other user interface navigation
-  components.
+- [**@swim/button**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/button)
+  ([npm](https://www.npmjs.com/package/@swim/button),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_button.html)) –
+  procedurally styled multitouch buttons.
+- [**@swim/modal**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/modal)
+  ([npm](https://www.npmjs.com/package/@swim/modal),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_modal.html)) –
+  auto-placed, source-tracking popover views.
+- [**@swim/drawer**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/drawer)
+  ([npm](https://www.npmjs.com/package/@swim/drawer),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_drawer.html)) –
+  responsive, minifiable drawer views.
+- [**@swim/token**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/token)
+  ([npm](https://www.npmjs.com/package/@swim/token),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_token.html)) –
+  compact, editable pin and chip token views.
+- [**@swim/menu**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/menu)
+  ([npm](https://www.npmjs.com/package/@swim/menu),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_menu.html)) –
+  context-sensitive menu lists and menu items.
+- [**@swim/tree**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/tree)
+  ([npm](https://www.npmjs.com/package/@swim/tree),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_tree.html)) –
+  disclosable tree views with tabular columns.
 
 **@swim/ux** builds on the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
 and [**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/ui)

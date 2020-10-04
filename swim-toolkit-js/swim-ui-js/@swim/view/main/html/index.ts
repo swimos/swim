@@ -16,6 +16,9 @@ export {
   ViewHtml,
   HtmlViewTagMap,
   HtmlChildViewTagMap,
+  HtmlViewAttributesInit,
+  HtmlViewStyleInit,
+  HtmlViewInit,
   HtmlView,
 } from "./HtmlView";
 export {HtmlViewObserver} from "./HtmlViewObserver";

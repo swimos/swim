@@ -1,0 +1,9 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    {"path": "./@swim/model"},
+    {"path": "./@swim/component"},
+    {"path": "./@swim/mvc"}
+  ]
+}

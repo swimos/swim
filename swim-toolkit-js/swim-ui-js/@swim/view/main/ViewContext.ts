@@ -12,13 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Viewport} from "./viewport/Viewport";
+import {View} from "./View";
 import {ViewIdiom} from "./viewport/ViewIdiom";
+import {Viewport} from "./viewport/Viewport";
+
+export type ViewContextType<V extends View> =
+  V extends {readonly viewContext: infer VC} ? VC : unknown;
 
 export interface ViewContext {
   readonly updateTime: number;
 
-  readonly viewport: Viewport;
-
   readonly viewIdiom: ViewIdiom;
+
+  readonly viewport: Viewport;
 }
+
+/** @hidden */
+export const ViewContext = {
+  default(): ViewContext {
+    return {
+      updateTime: performance.now(),
+      viewIdiom: "unspecified",
+      viewport: Viewport.detect(),
+    };
+  },
+};

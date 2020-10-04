@@ -86,4 +86,9 @@ export class GradAngle extends Angle {
     return GradAngle._zero;
   }
 }
+if (typeof CSSUnitValue !== "undefined") { // CSS Typed OM support
+  GradAngle.prototype.toCssValue = function (this: GradAngle): CSSUnitValue | undefined {
+    return new CSSUnitValue(this._value, "grad");
+  };
+}
 Angle.Grad = GradAngle;

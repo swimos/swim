@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Objects} from "@swim/util";
 import {Transition} from "@swim/transition";
 import {TweenFrameAnimator} from "./TweenFrameAnimator";
 
@@ -20,33 +19,13 @@ export class PropertyAnimator<O, K extends keyof O> extends TweenFrameAnimator<O
   readonly target: O;
   readonly key: K;
 
-  constructor(target: O, key: K, value: O[K] | undefined, transition: Transition<O[K]> | null = null) {
+  constructor(target: O, key: K, value: O[K], transition: Transition<O[K]> | null = null) {
     super(value, transition);
     this.target = target;
     this.key = key;
   }
 
-  update(newValue: O[K] | undefined, oldValue: O[K] | undefined): void {
-    if (!Objects.equal(oldValue, newValue)) {
-      this.willUpdate(newValue, oldValue);
-      this.onUpdate(newValue, oldValue);
-      this.didUpdate(newValue, oldValue);
-    }
-  }
-
-  protected willUpdate(newValue: O[K] | undefined, oldValue: O[K] | undefined): void {
-    // hook
-  }
-
-  protected onUpdate(newValue: O[K] | undefined, oldValue: O[K] | undefined): void {
+  onUpdate(newValue: O[K], oldValue: O[K]): void {
     this.target[this.key] = newValue!;
-  }
-
-  protected didUpdate(newValue: O[K] | undefined, oldValue: O[K] | undefined): void {
-    // hook
-  }
-
-  delete(): void {
-    delete this.target[this.key];
   }
 }

@@ -224,6 +224,10 @@ export class AbstractMomentumGesture<V extends View> extends AbstractPositionGes
     input.deriveVelocity(this.velocityMax());
   }
 
+  isCoasting(): boolean {
+    return this._coastCount !== 0;
+  }
+
   protected startCoasting(): void {
     this.willStartCoasting();
     this.onStartCoasting();
@@ -456,6 +460,7 @@ export class PointerMomentumGesture<V extends View> extends AbstractMomentumGest
   }
 
   protected updateInput(input: MomentumGestureInput, event: PointerEvent): void {
+    input.target = event.target;
     input.button = event.button;
     input.buttons = event.buttons;
     input.altKey = event.altKey;
@@ -484,7 +489,9 @@ export class PointerMomentumGesture<V extends View> extends AbstractMomentumGest
       const input = this.getOrCreateInput(event.pointerId, PointerMomentumGesture.inputType(event.pointerType),
                                           event.isPrimary, event.clientX, event.clientY, event.timeStamp);
       this.updateInput(input, event);
-      this.beginHover(input, event);
+      if (!input.hovering) {
+        this.beginHover(input, event);
+      }
     }
   }
 
@@ -503,7 +510,9 @@ export class PointerMomentumGesture<V extends View> extends AbstractMomentumGest
     const input = this.getOrCreateInput(event.pointerId, PointerMomentumGesture.inputType(event.pointerType),
                                         event.isPrimary, event.clientX, event.clientY, event.timeStamp);
     this.updateInput(input, event);
-    this.beginPress(input, event);
+    if (!input.pressing) {
+      this.beginPress(input, event);
+    }
     if (event.pointerType === "mouse" && event.button !== 0) {
       this.cancelPress(input, event);
     }
@@ -586,6 +595,7 @@ export class TouchMomentumGesture<V extends View> extends AbstractMomentumGestur
   }
 
   protected updateInput(input: MomentumGestureInput, event: TouchEvent, touch: Touch): void {
+    input.target = touch.target;
     input.altKey = event.altKey;
     input.ctrlKey = event.ctrlKey;
     input.metaKey = event.metaKey;
@@ -607,7 +617,9 @@ export class TouchMomentumGesture<V extends View> extends AbstractMomentumGestur
       const input = this.getOrCreateInput(touch.identifier, "touch", false,
                                           touch.clientX, touch.clientY, event.timeStamp);
       this.updateInput(input, event, touch);
-      this.beginPress(input, event);
+      if (!input.pressing) {
+        this.beginPress(input, event);
+      }
     }
   }
 
@@ -690,6 +702,7 @@ export class MouseMomentumGesture<V extends View> extends AbstractMomentumGestur
   }
 
   protected updateInput(input: MomentumGestureInput, event: MouseEvent): void {
+    input.target = event.target;
     input.button = event.button;
     input.buttons = event.buttons;
     input.altKey = event.altKey;
@@ -710,7 +723,9 @@ export class MouseMomentumGesture<V extends View> extends AbstractMomentumGestur
       const input = this.getOrCreateInput("mouse", "mouse", true,
                                           event.clientX, event.clientY, event.timeStamp);
       this.updateInput(input, event);
-      this.beginHover(input, event);
+      if (!input.hovering) {
+        this.beginHover(input, event);
+      }
     }
   }
 
@@ -726,7 +741,9 @@ export class MouseMomentumGesture<V extends View> extends AbstractMomentumGestur
     const input = this.getOrCreateInput("mouse", "mouse", true,
                                         event.clientX, event.clientY, event.timeStamp);
     this.updateInput(input, event);
-    this.beginPress(input, event);
+    if (!input.pressing) {
+      this.beginPress(input, event);
+    }
     if (event.button !== 0) {
       this.cancelPress(input, event);
     }

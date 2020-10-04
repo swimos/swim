@@ -11,7 +11,7 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "devDependencies": {
-    "@types/arcgis-js-api": "4.15"
+    "@types/arcgis-js-api": "4.16"
   },
   "dependencies": {
     "@swim/util": "3.11.0-dev.20200619",
@@ -25,6 +25,7 @@
     "@swim/color": "3.11.0-dev.20200619",
     "@swim/font": "3.11.0-dev.20200619",
     "@swim/shadow": "3.11.0-dev.20200619",
+    "@swim/gradient": "3.11.0-dev.20200619",
     "@swim/transform": "3.11.0-dev.20200619",
     "@swim/scale": "3.11.0-dev.20200619",
     "@swim/transition": "3.11.0-dev.20200619",

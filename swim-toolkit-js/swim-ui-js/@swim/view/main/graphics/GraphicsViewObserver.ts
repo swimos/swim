@@ -12,56 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {ViewContextType} from "../ViewContext";
 import {ViewObserver} from "../ViewObserver";
-import {GraphicsViewContext} from "./GraphicsViewContext";
 import {GraphicsView} from "./GraphicsView";
 
 export interface GraphicsViewObserver<V extends GraphicsView = GraphicsView> extends ViewObserver<V> {
-  viewWillProcess?(viewContext: GraphicsViewContext, view: V): void;
+  viewWillRender?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidProcess?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewWillResize?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewDidResize?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewWillScroll?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewDidScroll?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewWillCompute?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewDidCompute?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewWillAnimate?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewDidAnimate?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewWillProcessChildViews?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewDidProcessChildViews?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewWillDisplay?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewDidDisplay?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewWillLayout?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewDidLayout?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewWillRender?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewDidRender?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewWillDisplayChildViews?(viewContext: GraphicsViewContext, view: V): void;
-
-  viewDidDisplayChildViews?(viewContext: GraphicsViewContext, view: V): void;
+  viewDidRender?(viewContext: ViewContextType<V>, view: V): void;
 
   viewWillSetHidden?(hidden: boolean, view: V): void;
 
   viewDidSetHidden?(hidden: boolean, view: V): void;
-
-  viewWillSetCulled?(culled: boolean, view: V): void;
-
-  viewDidSetCulled?(culled: boolean, view: V): void;
 }

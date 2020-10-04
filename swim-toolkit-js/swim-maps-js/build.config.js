@@ -41,7 +41,7 @@ const maps = [
   {
     id: "maps",
     name: "@swim/maps",
-    title: "Swim UI Maps",
+    title: "Swim Maps Framework",
     umbrella: true,
     targets: [
       {

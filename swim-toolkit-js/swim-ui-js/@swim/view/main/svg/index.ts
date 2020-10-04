@@ -16,6 +16,9 @@ export {
   ViewSvg,
   SvgViewTagMap,
   SvgChildViewTagMap,
+  SvgViewAttributesInit,
+  SvgViewStyleInit,
+  SvgViewInit,
   SvgView,
 } from "./SvgView";
 export {SvgViewObserver} from "./SvgViewObserver";

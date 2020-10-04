@@ -20,14 +20,18 @@ The **Swim UX** framework consists of the following component libraries:
   umbrella package that depends on, and re-exports, all **Swim UX** libraries.
 - [**@swim/theme**](@swim/theme) –
   semantic looks and feels for mood-aware UX components.
-- [**@swim/app**](@swim/app) –
-  application model for coordinating window-level components, such as popovers
-  and drawers.
-- [**@swim/controls**](@swim/controls) –
-  buttons, switches, sliders, and other user interface controls.
-- [**@swim/navigation**](@swim/navigation) –
-  menus, tree views, nav bars, tab bars, and other user interface navigation
-  components.
+- [**@swim/button**](@swim/button) –
+  procedurally styled multitouch buttons.
+- [**@swim/modal**](@swim/modal) –
+  auto-placed, source-tracking popover views.
+- [**@swim/drawer**](@swim/drawer) –
+  responsive, minifiable drawer views.
+- [**@swim/token**](@swim/token) –
+  compact, editable pin and chip token views.
+- [**@swim/menu**](@swim/menu) –
+  context-sensitive menu lists and menu items.
+- [**@swim/tree**](@swim/tree) –
+  disclosable tree views with tabular columns.
 
 **Swim UX** builds on the [**Swim Core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js)
 and [**Swim UI**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js)
@@ -156,11 +160,11 @@ swim-ux-js $ bin/build.js compile
 
 To compile a subset of projects and targets, include a `--projects` (`-p`)
 option, with a comma-separated list of `$project:($target)?` specifiers.
-For example, to build the `main` target of the `app` project, and all
+For example, to build the `main` target of the `modal` project, and all
 targets of the `ux` project, run:
 
 ```sh
-swim-ux-js $ bin/build.js compile -p app:main,ux
+swim-ux-js $ bin/build.js compile -p modal:main,ux
 ```
 
 ### Running tests
@@ -176,11 +180,11 @@ swim-ux-js $ bin/build.js test -p theme
 
 Use the `watch` build script command to automatically rebuild projects when
 dependent source files change.  For example, to continuously recompile the
-`main` target of the `controls` project when any source file in the project–or
+`main` target of the `button` project when any source file in the project–or
 in one of the project's transitive local dependencies–changes, run:
 
 ```sh
-swim-ux-js $ bin/build.js watch -p controls:main
+swim-ux-js $ bin/build.js watch -p button:main
 ```
 
 Pass the `--devel` (`-d`) option to expedite recompilation by skipping the

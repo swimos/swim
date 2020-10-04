@@ -19,13 +19,12 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
+  ViewContextType,
   View,
   ViewAnimator,
-  GraphicsViewContext,
   GraphicsViewInit,
   GraphicsView,
-  GraphicsViewController,
-  GraphicsNodeView,
+  LayerView,
   FillView,
   TypesetView,
 } from "@swim/view";
@@ -58,67 +57,130 @@ export interface SliceViewInit extends GraphicsViewInit {
   legend?: GraphicsView | string | null;
 }
 
-export class SliceView extends GraphicsNodeView {
-  get viewController(): GraphicsViewController<SliceView> | null {
-    return this._viewController;
+export class SliceView extends LayerView {
+  initView(init: SliceViewInit): void {
+    super.initView(init);
+    if (init.value !== void 0) {
+      this.value(init.value);
+    }
+    if (init.total !== void 0) {
+      this.total(init.total);
+    }
+    if (init.center !== void 0) {
+      this.center(init.center);
+    }
+    if (init.innerRadius !== void 0) {
+      this.innerRadius(init.innerRadius);
+    }
+    if (init.outerRadius !== void 0) {
+      this.outerRadius(init.outerRadius);
+    }
+    if (init.phaseAngle !== void 0) {
+      this.phaseAngle(init.phaseAngle);
+    }
+    if (init.padAngle !== void 0) {
+      this.padAngle(init.padAngle);
+    }
+    if (init.padRadius !== void 0) {
+      this.padRadius(init.padRadius);
+    }
+    if (init.cornerRadius !== void 0) {
+      this.cornerRadius(init.cornerRadius);
+    }
+    if (init.labelRadius !== void 0) {
+      this.labelRadius(init.labelRadius);
+    }
+    if (init.sliceColor !== void 0) {
+      this.sliceColor(init.sliceColor);
+    }
+    if (init.tickAlign !== void 0) {
+      this.tickAlign(init.tickAlign);
+    }
+    if (init.tickRadius !== void 0) {
+      this.tickRadius(init.tickRadius);
+    }
+    if (init.tickLength !== void 0) {
+      this.tickLength(init.tickLength);
+    }
+    if (init.tickWidth !== void 0) {
+      this.tickWidth(init.tickWidth);
+    }
+    if (init.tickPadding !== void 0) {
+      this.tickPadding(init.tickPadding);
+    }
+    if (init.tickColor !== void 0) {
+      this.tickColor(init.tickColor);
+    }
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
+    if (init.label !== void 0) {
+      this.label(init.label);
+    }
+    if (init.legend !== void 0) {
+      this.legend(init.legend);
+    }
   }
 
-  @ViewAnimator(Number, {value: 0})
+  @ViewAnimator({type: Number, state: 0})
   value: ViewAnimator<this, number>;
 
-  @ViewAnimator(Number, {value: 1})
+  @ViewAnimator({type: Number, state: 1})
   total: ViewAnimator<this, number>;
 
-  @ViewAnimator(PointR2, {inherit: true})
-  center: ViewAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator({type: PointR2, inherit: true})
+  center: ViewAnimator<this, PointR2 | undefined, AnyPointR2 | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  innerRadius: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  innerRadius: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  outerRadius: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  outerRadius: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Angle, {value: Angle.zero()})
-  phaseAngle: ViewAnimator<this, Angle, AnyAngle>;
+  @ViewAnimator({type: Angle, state: Angle.zero()})
+  phaseAngle: ViewAnimator<this, Angle | undefined, AnyAngle | undefined>;
 
-  @ViewAnimator(Angle, {inherit: true})
-  padAngle: ViewAnimator<this, Angle, AnyAngle>;
+  @ViewAnimator({type: Angle, inherit: true})
+  padAngle: ViewAnimator<this, Angle | undefined, AnyAngle | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ViewAnimator({type: Length, inherit: true})
+  padRadius: ViewAnimator<this, Length | null | undefined, AnyLength | null | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  cornerRadius: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  cornerRadius: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  labelRadius: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  labelRadius: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  sliceColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  sliceColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Number, {inherit: true})
-  tickAlign: ViewAnimator<this, number>;
+  @ViewAnimator({type: Number, inherit: true})
+  tickAlign: ViewAnimator<this, number | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  tickRadius: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  tickRadius: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  tickLength: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  tickLength: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  tickWidth: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  tickWidth: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  tickPadding: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  tickPadding: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  tickColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  tickColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Font, {inherit: true})
-  font: ViewAnimator<this, Font, AnyFont>;
+  @ViewAnimator({type: Font, inherit: true})
+  font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  textColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
   label(): GraphicsView | null;
   label(label: GraphicsView | AnyTextRunView | null): this;
@@ -158,7 +220,7 @@ export class SliceView extends GraphicsNodeView {
     this.requireUpdate(View.NeedsAnimate);
   }
 
-  protected onRender(viewContext: GraphicsViewContext): void {
+  protected onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -173,30 +235,30 @@ export class SliceView extends GraphicsNodeView {
     const width = frame.width;
     const height = frame.height;
     const size = Math.min(width, height);
-    const value = this.value.value!;
-    const total = this.total.value!;
+    const value = this.value.getValue();
+    const total = this.total.getValue();
     const delta = total !== 0 ? value / total : 0;
 
-    const center = this.center.value!;
-    const innerRadius = this.innerRadius.value!.px(size);
-    const outerRadius = this.outerRadius.value!.px(size);
+    const center = this.center.getValue();
+    const innerRadius = this.innerRadius.getValue().px(size);
+    const outerRadius = this.outerRadius.getValue().px(size);
     const deltaRadius = outerRadius.value - innerRadius.value;
-    const startAngle = this.phaseAngle.value!.rad();
+    const startAngle = this.phaseAngle.getValue().rad();
     const sweepAngle = Angle.rad(2 * Math.PI * delta);
-    const padAngle = this.padAngle.value!;
-    const padRadius = this.padRadius.value! as Length | null;
-    const cornerRadius = this.cornerRadius.value!.px(deltaRadius);
+    const padAngle = this.padAngle.getValue();
+    const padRadius = this.padRadius.getValue() as Length | null;
+    const cornerRadius = this.cornerRadius.getValue().px(deltaRadius);
     const arc = new Arc(center, innerRadius, outerRadius, startAngle,
                         sweepAngle, padAngle, padRadius, cornerRadius);
 
     context.beginPath();
-    context.fillStyle = this.sliceColor.value!.toString();
+    context.fillStyle = this.sliceColor.getValue().toString();
     arc.draw(context, frame);
     context.fill();
 
     const label = this.label();
     if (label !== null && !label.isHidden()) {
-      const labelRadius = this.labelRadius.value!.pxValue(deltaRadius);
+      const labelRadius = this.labelRadius.getValue().pxValue(deltaRadius);
       const labelAngle = startAngle.value + sweepAngle.value / 2;
       const r = innerRadius.value + labelRadius;
       const rx = r * Math.cos(labelAngle);
@@ -211,12 +273,12 @@ export class SliceView extends GraphicsNodeView {
 
     const legend = this.legend();
     if (legend !== null && !legend.isHidden()) {
-      const tickAlign = this.tickAlign.value!;
+      const tickAlign = this.tickAlign.getValue();
       const tickAngle = startAngle.value + sweepAngle.value * tickAlign;
-      const tickRadius = this.tickRadius.value!.pxValue(size);
-      const tickLength = this.tickLength.value!.pxValue(width);
-      const tickWidth = this.tickWidth.value!.pxValue(size);
-      const tickColor = this.tickColor.value!;
+      const tickRadius = this.tickRadius.getValue().pxValue(size);
+      const tickLength = this.tickLength.getValue().pxValue(width);
+      const tickWidth = this.tickWidth.getValue().pxValue(size);
+      const tickColor = this.tickColor.getValue();
 
       const cx = center.x;
       const cy = center.y;
@@ -259,7 +321,7 @@ export class SliceView extends GraphicsNodeView {
       }
 
       if (TypesetView.is(legend)) {
-        const tickPadding = this.tickPadding.value!.pxValue(size);
+        const tickPadding = this.tickPadding.getValue().pxValue(size);
         if (FillView.is(legend)) {
           legend.fill.setAutoState(tickColor);
         }
@@ -270,8 +332,8 @@ export class SliceView extends GraphicsNodeView {
     }
   }
 
-  hitTest(x: number, y: number, viewContext: GraphicsViewContext): GraphicsView | null {
-    let hit = super.hitTest(x, y, viewContext);
+  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
       if (renderer instanceof CanvasRenderer) {
@@ -288,19 +350,19 @@ export class SliceView extends GraphicsNodeView {
 
   protected hitTestSlice(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
     const size = Math.min(frame.width, frame.height);
-    const value = this.value.value!;
-    const total = this.total.value!;
+    const value = this.value.getValue();
+    const total = this.total.getValue();
     const delta = total !== 0 ? value / total : 0;
 
-    const center = this.center.value!;
-    const innerRadius = this.innerRadius.value!.px(size);
-    const outerRadius = this.outerRadius.value!.px(size);
+    const center = this.center.getValue();
+    const innerRadius = this.innerRadius.getValue().px(size);
+    const outerRadius = this.outerRadius.getValue().px(size);
     const deltaRadius = outerRadius.value - innerRadius.value;
-    const startAngle = this.phaseAngle.value!.rad();
+    const startAngle = this.phaseAngle.getValue().rad();
     const sweepAngle = Angle.rad(2 * Math.PI * delta);
-    const padAngle = this.padAngle.value!;
-    const padRadius = this.padRadius.value! as Length | null;
-    const cornerRadius = this.cornerRadius.value!.px(deltaRadius);
+    const padAngle = this.padAngle.getValue();
+    const padRadius = this.padRadius.getValue() as Length | null;
+    const cornerRadius = this.cornerRadius.getValue().px(deltaRadius);
     const arc = new Arc(center, innerRadius, outerRadius, startAngle,
                         sweepAngle, padAngle, padRadius, cornerRadius);
 
@@ -316,78 +378,14 @@ export class SliceView extends GraphicsNodeView {
     if (slice instanceof SliceView) {
       return slice;
     } else if (typeof slice === "object" && slice !== null) {
-      const view = new SliceView();
-      if (slice.value !== void 0) {
-        view.value(slice.value);
-      }
-      if (slice.total !== void 0) {
-        view.total(slice.total);
-      }
-      if (slice.center !== void 0) {
-        view.center(slice.center);
-      }
-      if (slice.innerRadius !== void 0) {
-        view.innerRadius(slice.innerRadius);
-      }
-      if (slice.outerRadius !== void 0) {
-        view.outerRadius(slice.outerRadius);
-      }
-      if (slice.phaseAngle !== void 0) {
-        view.phaseAngle(slice.phaseAngle);
-      }
-      if (slice.padAngle !== void 0) {
-        view.padAngle(slice.padAngle);
-      }
-      if (slice.padRadius !== void 0) {
-        view.padRadius(slice.padRadius);
-      }
-      if (slice.cornerRadius !== void 0) {
-        view.cornerRadius(slice.cornerRadius);
-      }
-      if (slice.labelRadius !== void 0) {
-        view.labelRadius(slice.labelRadius);
-      }
-      if (slice.sliceColor !== void 0) {
-        view.sliceColor(slice.sliceColor);
-      }
-      if (slice.tickAlign !== void 0) {
-        view.tickAlign(slice.tickAlign);
-      }
-      if (slice.tickRadius !== void 0) {
-        view.tickRadius(slice.tickRadius);
-      }
-      if (slice.tickLength !== void 0) {
-        view.tickLength(slice.tickLength);
-      }
-      if (slice.tickWidth !== void 0) {
-        view.tickWidth(slice.tickWidth);
-      }
-      if (slice.tickPadding !== void 0) {
-        view.tickPadding(slice.tickPadding);
-      }
-      if (slice.tickColor !== void 0) {
-        view.tickColor(slice.tickColor);
-      }
-      if (slice.font !== void 0) {
-        view.font(slice.font);
-      }
-      if (slice.textColor !== void 0) {
-        view.textColor(slice.textColor);
-      }
-      if (slice.label !== void 0) {
-        view.label(slice.label);
-      }
-      if (slice.legend !== void 0) {
-        view.legend(slice.legend);
-      }
-      if (slice.hidden !== void 0) {
-        view.setHidden(slice.hidden);
-      }
-      if (slice.culled !== void 0) {
-        view.setCulled(slice.culled);
-      }
-      return view;
+      return SliceView.fromInit(slice);
     }
     throw new TypeError("" + slice);
+  }
+
+  static fromInit(init: SliceViewInit): SliceView {
+    const view = new SliceView();
+    view.initView(init);
+    return view;
   }
 }

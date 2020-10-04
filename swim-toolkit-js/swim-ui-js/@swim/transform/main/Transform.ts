@@ -98,6 +98,18 @@ export abstract class Transform implements Transformation, R2Operator, HashCode,
 
   abstract toAffine(): AffineTransform;
 
+  toMatrix(): DOMMatrix {
+    return this.toAffine().toMatrix();
+  }
+
+  toCssTransformComponent(): CSSTransformComponent | undefined {
+    return void 0; // conditionally overridden when CSS Typed OM is available
+  }
+
+  toCssValue(): CSSStyleValue | undefined {
+    return void 0; // conditionally overridden when CSS Typed OM is available
+  }
+
   abstract toValue(): Value;
 
   abstract conformsTo(that: Transform): boolean;
@@ -170,6 +182,40 @@ export abstract class Transform implements Transformation, R2Operator, HashCode,
 
   static list(...transforms: AnyTransform[]): TransformList {
     return Transform.List.from(transforms);
+  }
+
+  static fromCss(value: CSSStyleValue): Transform {
+    if (value instanceof CSSTransformValue) {
+      return Transform.fromCssTransform(value);
+    } else {
+      throw new TypeError("" + value);
+    }
+  }
+
+  /** @hidden */
+  static fromCssTransform(value: CSSTransformValue): Transform {
+    const n = value.length;
+    const transforms = new Array<Transform>(n);
+    for (let i = 0; i < n; i += 1) {
+      transforms[i] = Transform.fromCssTransformComponent(value[i]!);
+    }
+    return new Transform.List(transforms);
+  }
+
+  static fromCssTransformComponent(component: CSSTransformComponent): Transform {
+    if (component instanceof CSSTranslate) {
+      return Transform.Translate.fromCssTransformComponent(component);
+    } else if (component instanceof CSSRotate) {
+      return Transform.Rotate.fromCssTransformComponent(component);
+    } else if (component instanceof CSSScale) {
+      return Transform.Scale.fromCssTransformComponent(component);
+    } else if (component instanceof CSSSkew) {
+      return Transform.Skew.fromCssTransformComponent(component);
+    } else if (component instanceof CSSMatrixComponent) {
+      return Transform.Affine.fromCssTransformComponent(component);
+    } else {
+      throw new TypeError("" + component);
+    }
   }
 
   static fromAny(value: AnyTransform): Transform {
@@ -261,4 +307,10 @@ export abstract class Transform implements Transformation, R2Operator, HashCode,
   static Parser: typeof TransformParser; // defined by TransformParser
   /** @hidden */
   static Form: typeof TransformForm; // defined by TransformForm
+}
+if (typeof CSSTransformValue !== "undefined") { // CSS Typed OM support
+  Transform.prototype.toCssValue = function (this: Transform): CSSTransformValue | undefined {
+    const component = this.toCssTransformComponent();
+    return component !== void 0 ? new CSSTransformValue([component]) : void 0;
+  };
 }

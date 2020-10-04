@@ -12,36 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {View} from "../View";
-import {ViewScopeDescriptor, ViewScopeConstructor, ViewScope} from "./ViewScope";
+import {ViewScope} from "./ViewScope";
 
 /** @hidden */
-export interface StringViewScope<V extends View> extends ViewScope<V, string> {
-}
-
-/** @hidden */
-export const StringViewScope: ViewScopeConstructor<string> = (function (_super: typeof ViewScope): ViewScopeConstructor<string> {
-  const StringViewScope: ViewScopeConstructor<string> = function <V extends View>(
-      this: StringViewScope<V>, view: V, scopeName: string, descriptor?: ViewScopeDescriptor<V, string>): StringViewScope<V> {
-    let _this: StringViewScope<V> = function accessor(state?: string): string | undefined | V {
-      if (arguments.length === 0) {
-        return _this.state;
-      } else {
-        _this.setState(state);
-        return _this._view;
-      }
-    } as StringViewScope<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, scopeName, descriptor) || _this;
-    return _this;
-  } as unknown as ViewScopeConstructor<string>;
-  __extends(StringViewScope, _super);
-
-  StringViewScope.prototype.fromAny = function (this: StringViewScope<View>, value: string | null): string | null {
+export abstract class StringViewScope<V extends View> extends ViewScope<V, string | null | undefined> {
+  fromAny(value: string | null | undefined): string | null | undefined {
     return value;
-  };
-
-  return StringViewScope;
-}(ViewScope));
+  }
+}
 ViewScope.String = StringViewScope;

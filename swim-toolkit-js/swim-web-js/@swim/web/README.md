@@ -8,7 +8,8 @@
 
 **@swim/web** implements a thin web application framework built on the
 **@swim/ui** toolkit.  **@swim/web** makes it easy to embed
-[**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/ui)
+[**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/ui) and
+[**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/ux)
 views in any web page by simply adding special `swim-` attributes to ordinary
 HTML elements.  **@swim/web** is a part of the broader
 [**@swim/toolkit**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/@swim/toolkit) framework.
@@ -28,8 +29,9 @@ component libraries:
   lightweight web application loader that dynamically instantiates views and
   controllers declared by `swim-` HTML attributes.
 
-**@swim/web** builds on the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
-and [**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/ui)
+**@swim/web** builds on the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core),
+[**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/ui), and
+[**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/ux)
 frameworks; it has no additional dependencies.
 
 ## Installation
@@ -45,18 +47,20 @@ bundles all **@swim/web** component libraries, can be found in
 
 ### Browser
 
-Browser applications can load `swim-web.js`, along with its `swim-core.js`
-and `swim-ui.js` dependencies, from the SwimOS CDN.
+Browser applications can load `swim-web.js`, along with its `swim-core.js`,
+`swim-ui.js`, and `swim-ux.js` dependencies, from the SwimOS CDN.
 
 ```html
 <!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ux.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-web.js"></script>
 
 <!-- Production -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-ux.min.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-web.min.js"></script>
 ```
 
@@ -98,9 +102,10 @@ var swim = require("@swim/web");
 
 When loaded by a web browser, the `swim-web.js` script adds all component
 library exports to the global `swim` namespace.  The `swim-web.js` script
-requires that `swim-core.js` and `swim-ui.js` have already been loaded.
+requires that `swim-core.js`, `swim-ui.js`, and `swim-ux.js` have already
+been loaded.
 
 The `swim-toolkit.js` script also adds all **@swim/web** component library
 exports to the global `swim` namespace, making it a drop-in replacement
-for `swim-ui.js` and `swim-web.js` when additional **@swim/toolkit**
-frameworks are needed.
+for `swim-ui.js`, `swim-ux.js`, and `swim-web.js` when additional
+**@swim/toolkit** frameworks are needed.

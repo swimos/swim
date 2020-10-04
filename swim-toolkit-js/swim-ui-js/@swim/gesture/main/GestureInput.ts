@@ -19,6 +19,7 @@ export class GestureInput {
   inputType: GestureInputType;
   isPrimary: boolean;
 
+  target: EventTarget | null;
   button: number;
   buttons: number;
   altKey: boolean;
@@ -52,6 +53,7 @@ export class GestureInput {
     this.inputType = inputType;
     this.isPrimary = isPrimary;
 
+    this.target = null;
     this.button = 0;
     this.buttons = 0;
     this.altKey = false;

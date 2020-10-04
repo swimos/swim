@@ -20,25 +20,27 @@ import {AnyFont, Font} from "@swim/font";
 import {Scale, ContinuousScale, LinearScale, TimeScale} from "@swim/scale";
 import {Ease, Tween, AnyTransition, Transition} from "@swim/transition";
 import {
+  ViewContextType,
   ViewFlags,
   View,
   ViewScope,
   ViewAnimator,
   ContinuousScaleViewAnimator,
-  GraphicsViewContext,
   GraphicsViewInit,
-  GraphicsNodeView,
+  LayerView,
 } from "@swim/view";
 import {ScaleGestureInput, ScaleGestureDelegate, ScaleGesture} from "@swim/gesture";
 import {ScaleXView} from "./ScaleXView";
 import {ScaleYView} from "./ScaleYView";
 import {ScaleXYView} from "./ScaleXYView";
+import {ScaleViewObserver} from "./ScaleViewObserver";
 import {ScaleViewController} from "./ScaleViewController";
 
 /** @hidden */
 export type ScaleFlags = number;
 
 export interface ScaleViewInit<X = unknown, Y = unknown> extends GraphicsViewInit {
+  viewController?: ScaleViewController<X, Y>;
   xScale?: ContinuousScale<X, number>;
   yScale?: ContinuousScale<Y, number>;
 
@@ -74,7 +76,7 @@ export interface ScaleViewInit<X = unknown, Y = unknown> extends GraphicsViewIni
   textColor?: AnyColor;
 }
 
-export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeView
+export abstract class ScaleView<X = unknown, Y = unknown> extends LayerView
   implements ScaleXYView<X, Y>, ScaleGestureDelegate<X, Y> {
 
   /** @hidden */
@@ -131,8 +133,6 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
     this._xDataRange = void 0;
     this._yDataRange = void 0;
     this._fitAspectRatio = void 0;
-    this.xScale.onUpdate = this.onUpdateXScale.bind(this);
-    this.yScale.onUpdate = this.onUpdateYScale.bind(this);
     this.onBeginFittingXScale = this.onBeginFittingXScale.bind(this);
     this.onEndFittingXScale = this.onEndFittingXScale.bind(this);
     this.onInterruptFittingXScale = this.onInterruptFittingXScale.bind(this);
@@ -147,14 +147,106 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
     this.onInterruptBoundingYScale = this.onInterruptBoundingYScale.bind(this);
   }
 
-  get viewController(): ScaleViewController<X, Y> | null {
-    return this._viewController;
+  initView(init: ScaleViewInit<X, Y>): void {
+    super.initView(init);
+    if (init.xScale !== void 0) {
+      this.xScale(init.xScale);
+    }
+    if (init.yScale !== void 0) {
+      this.yScale(init.yScale);
+    }
+
+    if (init.xDomainBounds !== void 0) {
+      this.xDomainBounds(init.xDomainBounds);
+    }
+    if (init.yDomainBounds !== void 0) {
+      this.yDomainBounds(init.yDomainBounds);
+    }
+    if (init.xZoomBounds !== void 0) {
+      this.xZoomBounds(init.xZoomBounds);
+    }
+    if (init.yZoomBounds !== void 0) {
+      this.yZoomBounds(init.yZoomBounds);
+    }
+
+    if (init.xDomainPadding !== void 0) {
+      this.xDomainPadding(init.xDomainPadding);
+    }
+    if (init.yDomainPadding !== void 0) {
+      this.yDomainPadding(init.yDomainPadding);
+    }
+    if (init.xRangePadding !== void 0) {
+      this.xRangePadding(init.xRangePadding);
+    }
+    if (init.yRangePadding !== void 0) {
+      this.yRangePadding(init.yRangePadding);
+    }
+
+    if (init.fitAlign !== void 0) {
+      this.fitAlign(init.fitAlign);
+    }
+    if (init.xFitAlign !== void 0) {
+      this.xFitAlign(init.xFitAlign);
+    }
+    if (init.yFitAlign !== void 0) {
+      this.yFitAlign(init.yFitAlign);
+    }
+    if (init.fitAspectRatio !== void 0) {
+      this.fitAspectRatio(init.fitAspectRatio);
+    }
+    if (init.preserveAspectRatio !== void 0) {
+      this.preserveAspectRatio(init.preserveAspectRatio);
+    }
+
+    if (init.domainTracking !== void 0) {
+      this.domainTracking(init.domainTracking);
+    }
+    if (init.xDomainTracking !== void 0) {
+      this.xDomainTracking(init.xDomainTracking);
+    }
+    if (init.yDomainTracking !== void 0) {
+      this.yDomainTracking(init.yDomainTracking);
+    }
+
+    if (init.gestures !== void 0) {
+      this.gestures(init.gestures);
+    }
+    if (init.xGestures !== void 0) {
+      this.xGestures(init.xGestures);
+    }
+    if (init.yGestures !== void 0) {
+      this.yGestures(init.yGestures);
+    }
+
+    if (init.scaleGesture !== void 0) {
+      this.scaleGesture.setState(init.scaleGesture);
+      init.scaleGesture.setView(this);
+    }
+    if (init.rescaleTransition !== void 0) {
+      this.rescaleTransition.setState(init.rescaleTransition);
+    }
+    if (init.reboundTransition !== void 0) {
+      this.reboundTransition.setState(init.reboundTransition);
+    }
+
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
   }
 
-  @ViewAnimator(ContinuousScale, {inherit: true})
+  // @ts-ignore
+  declare readonly viewController: ScaleViewController<X, Y> | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<ScaleViewObserver<X, Y>>;
+
+  @ViewAnimator({type: ContinuousScale, inherit: true})
   xScale: ContinuousScaleViewAnimator<this, X, number>;
 
-  @ViewAnimator(ContinuousScale, {inherit: true})
+  @ViewAnimator({type: ContinuousScale, inherit: true})
   yScale: ContinuousScaleViewAnimator<this, Y, number>;
 
   xDomain(): readonly [X, X] | undefined;
@@ -697,9 +789,10 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
     return new ScaleGesture(this, this);
   }
 
-  @ViewScope<ScaleView<X, Y>, typeof ScaleGesture>(ScaleGesture, {
+  @ViewScope<ScaleView<X, Y>, ScaleGesture<X, Y> | undefined, ScaleGesture<X, Y> | boolean | undefined>({
+    type: ScaleGesture,
     inherit: true,
-    fromAny(value: ScaleGesture<X, Y> | boolean): ScaleGesture<X, Y> | undefined {
+    fromAny(value: ScaleGesture<X, Y> | boolean | undefined): ScaleGesture<X, Y> | undefined {
       if (value === true) {
         return this.view.createScaleGesture();
       } else if (value === false) {
@@ -709,29 +802,31 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
       }
     }
   })
-  scaleGesture: ViewScope<this, ScaleGesture<X, Y>, ScaleGesture<X, Y> | boolean>;
+  scaleGesture: ViewScope<this, ScaleGesture<X, Y> | undefined, ScaleGesture<X, Y> | boolean | undefined>;
 
-  @ViewScope(Object, {
+  @ViewScope({
+    type: Transition,
     inherit: true,
-    init(): Transition<any> {
+    initState(): Transition<any> | undefined {
       return Transition.duration(250, Ease.linear);
     },
   })
-  rescaleTransition: ViewScope<this, Transition<any>>;
+  rescaleTransition: ViewScope<this, Transition<any> | undefined, AnyTransition<any> | undefined>;
 
-  @ViewScope(Object, {
+  @ViewScope({
+    type: Transition,
     inherit: true,
-    init(): Transition<any> {
+    initState(): Transition<any> | undefined {
       return Transition.duration(250, Ease.cubicOut);
     },
   })
-  reboundTransition: ViewScope<this, Transition<any>>;
+  reboundTransition: ViewScope<this, Transition<any> | undefined, AnyTransition<any> | undefined>;
 
-  @ViewAnimator(Font, {inherit: true})
-  font: ViewAnimator<this, Font, AnyFont>;
+  @ViewAnimator({type: Font, inherit: true})
+  font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  textColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
   xDomainInRange(): boolean {
     return (this._scaleFlags & ScaleView.XInRangeMask) === ScaleView.XInRangeMask;
@@ -789,38 +884,23 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
     this.requireUpdate(View.NeedsAnimate);
   }
 
-  protected onPower(): void {
-    super.onPower();
-    this.requireUpdate(View.NeedsResize);
-  }
-
-  protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
-    super.onInsertChildView(childView, targetView);
-    this.requireUpdate(View.NeedsAnimate);
-  }
-
-  protected onRemoveChildView(childView: View): void {
-    this.requireUpdate(View.NeedsAnimate);
-    super.onRemoveChildView(childView);
-  }
-
-  protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
+  protected modifyUpdate(targetView: View, updateFlags: ViewFlags): ViewFlags {
     let additionalFlags = 0;
     if ((updateFlags & View.NeedsAnimate) !== 0) {
       additionalFlags |= View.NeedsAnimate;
     }
-    additionalFlags |= super.modifyUpdate(updateFlags | additionalFlags);
+    additionalFlags |= super.modifyUpdate(targetView, updateFlags | additionalFlags);
     return additionalFlags;
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): ViewFlags {
+  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsLayout) !== 0) {
       processFlags |= View.NeedsAnimate;
     }
     return processFlags;
   }
 
-  protected willResize(viewContext: GraphicsViewContext): void {
+  protected willResize(viewContext: ViewContextType<this>): void {
     super.willResize(viewContext);
     this.resizeScales(this.viewFrame);
     this._scaleFlags |= ScaleView.RescaleFlag;
@@ -838,7 +918,7 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
         this.xScale.setRange(xRange);
         this.requireUpdate(View.NeedsAnimate);
         this._scaleFlags |= ScaleView.RescaleFlag;
-      } else if (this.xScale.value === void 0) {
+      } else if (this.xScale.superValue === void 0) {
         const xDataDomain = this.xDataDomain();
         if (xDataDomain !== void 0) {
           const xScale = Scale.from(xDataDomain[0], xDataDomain[1],
@@ -856,7 +936,7 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
         this.yScale.setRange(yRange[1], yRange[0]);
         this.requireUpdate(View.NeedsAnimate);
         this._scaleFlags |= ScaleView.RescaleFlag;
-      } else if (this.yScale.value === void 0) {
+      } else if (this.yScale.superValue === void 0) {
         const yDataDomain = this.yDataDomain();
         if (yDataDomain !== void 0) {
           const yScale = Scale.from(yDataDomain[0], yDataDomain[1],
@@ -868,9 +948,16 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
     }
   }
 
-  protected didAnimate(viewContext: GraphicsViewContext): void {
+  protected didAnimate(viewContext: ViewContextType<this>): void {
     this.updateScales();
     super.didAnimate(viewContext);
+  }
+
+  needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+    if ((this._viewFlags & View.NeedsLayout) === 0) {
+      displayFlags &= ~View.NeedsLayout;
+    }
+    return displayFlags;
   }
 
   protected updateScales(): void {
@@ -1168,7 +1255,7 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
       this.requireUpdate(View.NeedsLayout);
       this._scaleFlags &= ~ScaleView.XFitFlag;
       if (transition === void 0) {
-        this.didFitX(this.xScale.state!);
+        this.didFitX(this.xScale.getState());
       }
     }
 
@@ -1187,7 +1274,7 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
       this.requireUpdate(View.NeedsLayout);
       this._scaleFlags &= ~ScaleView.YFitFlag;
       if (transition === void 0) {
-        this.didFitY(this.yScale.state!);
+        this.didFitY(this.yScale.getState());
       }
     }
 
@@ -1244,8 +1331,8 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
   protected boundScales(oldXScale: ContinuousScale<X, number>,
                         oldYScale: ContinuousScale<Y, number>): void {
     const scaleGesture = this.scaleGesture.state;
-    const isPressing = scaleGesture !== void 0 && scaleGesture._pressCount !== 0;
-    const isCoasting = scaleGesture !== void 0 && scaleGesture._coastCount !== 0;
+    const isPressing = scaleGesture !== void 0 && scaleGesture.isPressing();
+    const isCoasting = scaleGesture !== void 0 && scaleGesture.isCoasting();
     this._scaleFlags &= ~ScaleView.ClampedMask;
 
     const xDataDomainPadded = this._xDataDomainPadded;
@@ -1484,7 +1571,7 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
       this.xDomain(newXDomain, transition);
       this.requireUpdate(View.NeedsLayout);
       if (transition === void 0) {
-        this.didReboundX(this.xScale.state!);
+        this.didReboundX(this.xScale.getState());
       }
     }
 
@@ -1507,7 +1594,7 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
       this.yDomain(newYDomain, transition);
       this.requireUpdate(View.NeedsLayout);
       if (transition === void 0) {
-        this.didReboundY(this.yScale.state!);
+        this.didReboundY(this.yScale.getState());
       }
     }
 
@@ -1593,14 +1680,6 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
       input.vy = 0;
       input.ay = 0;
     }
-  }
-
-  protected onUpdateXScale(xScale: ContinuousScale<X, number> | undefined): void {
-    this.requireUpdate(View.NeedsAnimate);
-  }
-
-  protected onUpdateYScale(yScale: ContinuousScale<X, number> | undefined): void {
-    this.requireUpdate(View.NeedsAnimate);
   }
 
   /** @hidden */
@@ -1732,100 +1811,8 @@ export abstract class ScaleView<X = unknown, Y = unknown> extends GraphicsNodeVi
   /** @hidden */
   static TimeZoomMax: number = 1;
 
-  /** @hidden */
-  static init<X, Y>(view: ScaleView<X, Y>, init: ScaleViewInit<X, Y>): void {
-    if (init.xScale !== void 0) {
-      view.xScale(init.xScale);
-    }
-    if (init.yScale !== void 0) {
-      view.yScale(init.yScale);
-    }
+  static readonly powerFlags: ViewFlags = LayerView.powerFlags | View.NeedsResize;
 
-    if (init.xDomainBounds !== void 0) {
-      view.xDomainBounds(init.xDomainBounds);
-    }
-    if (init.yDomainBounds !== void 0) {
-      view.yDomainBounds(init.yDomainBounds);
-    }
-    if (init.xZoomBounds !== void 0) {
-      view.xZoomBounds(init.xZoomBounds);
-    }
-    if (init.yZoomBounds !== void 0) {
-      view.yZoomBounds(init.yZoomBounds);
-    }
-
-    if (init.xDomainPadding !== void 0) {
-      view.xDomainPadding(init.xDomainPadding);
-    }
-    if (init.yDomainPadding !== void 0) {
-      view.yDomainPadding(init.yDomainPadding);
-    }
-    if (init.xRangePadding !== void 0) {
-      view.xRangePadding(init.xRangePadding);
-    }
-    if (init.yRangePadding !== void 0) {
-      view.yRangePadding(init.yRangePadding);
-    }
-
-    if (init.fitAlign !== void 0) {
-      view.fitAlign(init.fitAlign);
-    }
-    if (init.xFitAlign !== void 0) {
-      view.xFitAlign(init.xFitAlign);
-    }
-    if (init.yFitAlign !== void 0) {
-      view.yFitAlign(init.yFitAlign);
-    }
-    if (init.fitAspectRatio !== void 0) {
-      view.fitAspectRatio(init.fitAspectRatio);
-    }
-    if (init.preserveAspectRatio !== void 0) {
-      view.preserveAspectRatio(init.preserveAspectRatio);
-    }
-
-    if (init.domainTracking !== void 0) {
-      view.domainTracking(init.domainTracking);
-    }
-    if (init.xDomainTracking !== void 0) {
-      view.xDomainTracking(init.xDomainTracking);
-    }
-    if (init.yDomainTracking !== void 0) {
-      view.yDomainTracking(init.yDomainTracking);
-    }
-
-    if (init.gestures !== void 0) {
-      view.gestures(init.gestures);
-    }
-    if (init.xGestures !== void 0) {
-      view.xGestures(init.xGestures);
-    }
-    if (init.yGestures !== void 0) {
-      view.yGestures(init.yGestures);
-    }
-
-    if (init.scaleGesture !== void 0) {
-      view.scaleGesture.setState(init.scaleGesture);
-      init.scaleGesture.setView(view);
-    }
-    if (init.rescaleTransition !== void 0) {
-      view.rescaleTransition.setState(Transition.fromAny(init.rescaleTransition));
-    }
-    if (init.reboundTransition !== void 0) {
-      view.reboundTransition.setState(Transition.fromAny(init.reboundTransition));
-    }
-
-    if (init.font !== void 0) {
-      view.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      view.textColor(init.textColor);
-    }
-
-    if (init.hidden !== void 0) {
-      view.setHidden(init.hidden);
-    }
-    if (init.culled !== void 0) {
-      view.setCulled(init.culled);
-    }
-  }
+  static readonly insertChildFlags: ViewFlags = LayerView.insertChildFlags | View.NeedsResize | View.NeedsAnimate;
+  static readonly removeChildFlags: ViewFlags = LayerView.removeChildFlags | View.NeedsAnimate;
 }

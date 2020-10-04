@@ -12,54 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {AnyLength, Length} from "@swim/length";
-import {Tween} from "@swim/transition";
-import {AttributeAnimatorConstructor, AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimator} from "./AttributeAnimator";
 import {ElementView} from "../element/ElementView";
 
 /** @hidden */
-export interface LengthOrStringAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Length | string, AnyLength | string> {
-}
-
-/** @hidden */
-export const LengthOrStringAttributeAnimator: AttributeAnimatorConstructor<Length | string, AnyLength | string> = (function (_super: typeof AttributeAnimator): AttributeAnimatorConstructor<Length | string, AnyLength | string> {
-  const LengthOrStringAttributeAnimator: AttributeAnimatorConstructor<Length | string, AnyLength | string> = function <V extends ElementView>(
-      this: LengthOrStringAttributeAnimator<V>, view: V, animatorName: string, attributeName: string): LengthOrStringAttributeAnimator<V> {
-    let _this: LengthOrStringAttributeAnimator<V> = function accessor(value?: AnyLength | string, tween?: Tween<Length | string>): Length | string | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as LengthOrStringAttributeAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, attributeName) || _this;
-    return _this;
-  } as unknown as AttributeAnimatorConstructor<Length | string, AnyLength | string>;
-  __extends(LengthOrStringAttributeAnimator, _super);
-
-  LengthOrStringAttributeAnimator.prototype.parse = function (this: LengthOrStringAttributeAnimator<ElementView>, value: string): Length | string {
+export abstract class LengthOrStringAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Length | string, AnyLength | string> {
+  parse(value: string): Length | string {
     try {
-      return Length.parse(value, this._view._node);
+      return Length.parse(value, this.node);
     } catch (swallow) {
       return value;
     }
-  };
+  }
 
-  LengthOrStringAttributeAnimator.prototype.fromAny = function (this: LengthOrStringAttributeAnimator<ElementView>, value: AnyLength | string): Length | string {
+  fromAny(value: AnyLength | string): Length | string {
     if (typeof value === "string") {
       try {
-        return Length.parse(value, this._view._node);
+        return Length.parse(value, this.node);
       } catch (swallow) {
         return value;
       }
     } else {
-      return Length.fromAny(value, this._view._node);
+      return Length.fromAny(value, this.node);
     }
-  };
-
-  return LengthOrStringAttributeAnimator;
-}(AttributeAnimator));
+  }
+}
 AttributeAnimator.LengthOrString = LengthOrStringAttributeAnimator;

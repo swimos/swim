@@ -12,45 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
-import {Tween} from "@swim/transition";
-import {AttributeAnimatorConstructor, AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimator} from "./AttributeAnimator";
 import {ElementView} from "../element/ElementView";
 
 /** @hidden */
-export interface BooleanAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, boolean, boolean | string> {
-}
-
-/** @hidden */
-export const BooleanAttributeAnimator: AttributeAnimatorConstructor<boolean, boolean | string> = (function (_super: typeof AttributeAnimator): AttributeAnimatorConstructor<boolean, boolean | string> {
-  const BooleanAttributeAnimator: AttributeAnimatorConstructor<boolean, boolean | string> = function <V extends ElementView>(
-      this: BooleanAttributeAnimator<V>, view: V, animatorName: string, attributeName: string): BooleanAttributeAnimator<V> {
-    let _this: BooleanAttributeAnimator<V> = function accessor(value?: boolean | string, tween?: Tween<boolean>): boolean | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as BooleanAttributeAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, attributeName) || _this;
-    return _this;
-  } as unknown as AttributeAnimatorConstructor<boolean, boolean | string>;
-  __extends(BooleanAttributeAnimator, _super);
-
-  BooleanAttributeAnimator.prototype.parse = function (this: BooleanAttributeAnimator<ElementView>, value: string): boolean {
+export abstract class BooleanAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, boolean, boolean | string> {
+  parse(value: string): boolean {
     return !!value;
-  };
+  }
 
-  BooleanAttributeAnimator.prototype.fromAny = function (this: BooleanAttributeAnimator<ElementView>, value: boolean | string): boolean {
-    if (typeof value === "string") {
-      return !!value;
-    } else {
-      return value;
-    }
-  };
-
-  return BooleanAttributeAnimator;
-}(AttributeAnimator));
+  fromAny(value: boolean | string): boolean {
+    return !!value;
+  }
+}
 AttributeAnimator.Boolean = BooleanAttributeAnimator;

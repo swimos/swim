@@ -13,89 +13,17 @@
 // limitations under the License.
 
 import {BoxR2} from "@swim/math";
-import {GraphicsViewContext} from "../graphics/GraphicsViewContext";
+import {ViewContextType} from "../ViewContext";
 import {HtmlViewController} from "../html/HtmlViewController";
 import {CanvasView} from "./CanvasView";
 import {CanvasViewObserver} from "./CanvasViewObserver";
 
 export class CanvasViewController<V extends CanvasView = CanvasView> extends HtmlViewController<V> implements CanvasViewObserver<V> {
-  viewWillProcess(viewContext: GraphicsViewContext, view: V): void {
+  viewWillRender(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidProcess(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewWillResizel(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidResize(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewWillScroll(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidScroll(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewWillCompute(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidCompute(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewWillAnimate(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidAnimate(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewWillProcessChildViews(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidProcessChildViews(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewWillDisplay(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidDisplay(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewWillLayout(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidLayout(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewWillRender(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidRender(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewWillDisplayChildViews(viewContext: GraphicsViewContext, view: V): void {
-    // hook
-  }
-
-  viewDidDisplayChildViews(viewContext: GraphicsViewContext, view: V): void {
+  viewDidRender(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
@@ -109,19 +37,6 @@ export class CanvasViewController<V extends CanvasView = CanvasView> extends Htm
   }
 
   viewDidSetHidden(hidden: boolean, view: V): void {
-    // hook
-  }
-
-  isCulled(): boolean {
-    const view = this._view;
-    return view !== null && view.isCulled();
-  }
-
-  viewWillSetCulled(culled: boolean, view: V): boolean | void {
-    // hook
-  }
-
-  viewDidSetCulled(culled: boolean, view: V): void {
     // hook
   }
 

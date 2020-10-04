@@ -25,13 +25,13 @@ export abstract class ScaleInterpolator<D extends DU, R extends RU, DU = D, RU =
   range(s0: ContinuousScale<D, R, DU, RU>, s1: ContinuousScale<D, R, DU, RU>): ScaleInterpolator<D, R, DU, RU, S>;
   range(s0?: readonly [ContinuousScale<D, R, DU, RU>, ContinuousScale<D, R, DU, RU>] | ContinuousScale<D, R, DU, RU>,
         s1?: ContinuousScale<D, R, DU, RU>): readonly [S, S] | ScaleInterpolator<D, R, DU, RU, S> {
-    if (s0 === void 0) {
+    if (arguments.length === 0) {
       return [this.interpolate(0), this.interpolate(1)];
-    } else if (s1 === void 0) {
+    } else if (arguments.length === 1) {
       s0 = s0 as readonly [ContinuousScale<D, R, DU, RU>, ContinuousScale<D, R, DU, RU>];
       return ScaleInterpolator.between(s0[0], s0[1]) as ScaleInterpolator<D, R, DU, RU, S>;
     } else {
-      return ScaleInterpolator.between(s0 as ContinuousScale<D, R, DU, RU>, s1) as ScaleInterpolator<D, R, DU, RU, S>;
+      return ScaleInterpolator.between(s0 as ContinuousScale<D, R, DU, RU>, s1 as ContinuousScale<D, R, DU, RU>) as ScaleInterpolator<D, R, DU, RU, S>;
     }
   }
 

@@ -96,4 +96,9 @@ export class IdentityTransform extends Transform {
     return void 0;
   }
 }
+if (typeof CSSKeywordValue !== "undefined") { // CSS Typed OM support
+  IdentityTransform.prototype.toCssValue = function (this: IdentityTransform): CSSStyleValue | undefined {
+    return new CSSKeywordValue("identity");
+  };
+}
 Transform.Identity = IdentityTransform;

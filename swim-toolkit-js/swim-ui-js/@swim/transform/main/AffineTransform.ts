@@ -31,6 +31,8 @@ export class AffineTransform extends Transform {
   readonly _tx: number;
   /** @hidden */
   readonly _ty: number;
+  /** @hidden */
+  _string?: string;
 
   constructor(x0: number, y0: number, x1: number, y1: number, tx: number, ty: number) {
     super();
@@ -135,6 +137,10 @@ export class AffineTransform extends Transform {
     return this;
   }
 
+  toMatrix(): DOMMatrix {
+    return new DOMMatrix([this._x0, this._y0, this._x1, this._y1, this._tx, this._ty]);
+  }
+
   toValue(): Value {
     return Record.of(Attr.of("matrix", Record.of(this._x0, this._y0,
                                                  this._x1, this._y1,
@@ -173,9 +179,14 @@ export class AffineTransform extends Transform {
   }
 
   toString(): string {
-    return "matrix(" + this._x0 + "," + this._y0 + ","
-                     + this._x1 + "," + this._y1 + ","
-                     + this._tx + "," + this._ty + ")";
+    let string = this._string;
+    if (string === void 0) {
+      string = "matrix(" + this._x0 + "," + this._y0 + ","
+                         + this._x1 + "," + this._y1 + ","
+                         + this._tx + "," + this._ty + ")";
+      this._string = string;
+    }
+    return string;
   }
 
   private static _hashSeed?: number;
@@ -207,6 +218,14 @@ export class AffineTransform extends Transform {
       return AffineTransform.parse(value);
     }
     throw new TypeError("" + value);
+  }
+
+  static fromMatrix(matrix: DOMMatrixReadOnly): AffineTransform {
+    return new AffineTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
+  }
+
+  static fromCssTransformComponent(component: CSSMatrixComponent): AffineTransform {
+    return AffineTransform.fromMatrix(component.matrix);
   }
 
   static fromValue(value: Value): AffineTransform | undefined {
@@ -267,5 +286,10 @@ export class AffineTransform extends Transform {
     }
     return parser.bind();
   }
+}
+if (typeof CSSMatrixComponent !== "undefined") { // CSS Typed OM support
+  AffineTransform.prototype.toCssTransformComponent = function (this: AffineTransform): CSSTransformComponent | undefined {
+    return new CSSMatrixComponent(this.toMatrix());
+  };
 }
 Transform.Affine = AffineTransform;

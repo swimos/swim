@@ -23,6 +23,8 @@ import {AffineTransform} from "./AffineTransform";
 export class RotateTransform extends Transform {
   /** @hidden */
   readonly _a: Angle;
+  /** @hidden */
+  _string?: string;
 
   constructor(a: Angle) {
     super();
@@ -112,7 +114,12 @@ export class RotateTransform extends Transform {
   }
 
   toString(): string {
-    return "rotate(" + this._a + ")";
+    let string = this._string;
+    if (string === void 0) {
+      string = "rotate(" + this._a + ")";
+      this._string = string;
+    }
+    return string;
   }
 
   toAttributeString(): string {
@@ -123,6 +130,11 @@ export class RotateTransform extends Transform {
 
   static from(a: AnyAngle): RotateTransform {
     a = Angle.fromAny(a, "deg");
+    return new RotateTransform(a);
+  }
+
+  static fromCssTransformComponent(component: CSSRotate): RotateTransform {
+    const a = Angle.fromCss(component.angle);
     return new RotateTransform(a);
   }
 
@@ -168,5 +180,11 @@ export class RotateTransform extends Transform {
     }
     return parser.bind();
   }
+}
+if (typeof CSSRotate !== "undefined") { // CSS Typed OM support
+  RotateTransform.prototype.toCssTransformComponent = function (this: RotateTransform): CSSTransformComponent | undefined {
+    const angle = this._a.toCssValue();
+    return new CSSRotate(angle!);
+  };
 }
 Transform.Rotate = RotateTransform;

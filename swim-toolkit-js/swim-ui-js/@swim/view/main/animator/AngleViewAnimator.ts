@@ -12,39 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {AnyAngle, Angle} from "@swim/angle";
-import {Tween} from "@swim/transition";
 import {View} from "../View";
-import {ViewAnimatorDescriptor, ViewAnimatorConstructor, ViewAnimator} from "./ViewAnimator";
+import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
-export interface AngleViewAnimator<V extends View> extends ViewAnimator<V, Angle, AnyAngle> {
+export abstract class AngleViewAnimator<V extends View> extends ViewAnimator<V, Angle | null | undefined, AnyAngle | null | undefined> {
+  fromAny(value: AnyAngle | null): Angle | null {
+    return value !== void 0 && value !== null ? Angle.fromAny(value) : value;
+  }
 }
-
-/** @hidden */
-export const AngleViewAnimator: ViewAnimatorConstructor<Angle, AnyAngle> = (function (_super: typeof ViewAnimator): ViewAnimatorConstructor<Angle, AnyAngle> {
-  const AngleViewAnimator: ViewAnimatorConstructor<Angle, AnyAngle> = function <V extends View>(
-      this: AngleViewAnimator<V>, view: V, animatorName: string | undefined,
-      descriptor?: ViewAnimatorDescriptor<V, Angle, AnyAngle>): AngleViewAnimator<V> {
-    let _this: AngleViewAnimator<V> = function accessor(value?: AnyAngle, tween?: Tween<Angle>): Angle | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as AngleViewAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, descriptor) || _this;
-    return _this;
-  } as unknown as ViewAnimatorConstructor<Angle, AnyAngle>;
-  __extends(AngleViewAnimator, _super);
-
-  AngleViewAnimator.prototype.fromAny = function (this: AngleViewAnimator<View>, value: AnyAngle | null): Angle | null {
-    return value !== null ? Angle.fromAny(value) : null;
-  };
-
-  return AngleViewAnimator;
-}(ViewAnimator));
 ViewAnimator.Angle = AngleViewAnimator;

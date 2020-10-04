@@ -19,11 +19,10 @@ import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
+  ViewContextType,
   ViewAnimator,
-  GraphicsViewContext,
   GraphicsView,
-  GraphicsViewController,
-  GraphicsLeafView,
+  LayerView,
   FillViewInit,
   FillView,
   StrokeViewInit,
@@ -36,54 +35,55 @@ export type AnyArcView = ArcView | Arc | ArcViewInit;
 export interface ArcViewInit extends FillViewInit, StrokeViewInit, ArcInit {
 }
 
-export class ArcView extends GraphicsLeafView implements FillView, StrokeView {
-  get viewController(): GraphicsViewController<ArcView> | null {
-    return this._viewController;
+export class ArcView extends LayerView implements FillView, StrokeView {
+  initView(init: ArcViewInit): void {
+    super.initView(init);
+    this.setState(init);
   }
 
-  @ViewAnimator(PointR2, {value: PointR2.origin()})
+  @ViewAnimator({type: PointR2, state: PointR2.origin()})
   center: ViewAnimator<this, PointR2, AnyPointR2>;
 
-  @ViewAnimator(Length, {value: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero()})
   innerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Length, {value: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero()})
   outerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Angle, {value: Angle.zero()})
+  @ViewAnimator({type: Angle, state: Angle.zero()})
   startAngle: ViewAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator(Angle, {value: Angle.zero()})
+  @ViewAnimator({type: Angle, state: Angle.zero()})
   sweepAngle: ViewAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator(Angle, {value: Angle.zero()})
+  @ViewAnimator({type: Angle, state: Angle.zero()})
   padAngle: ViewAnimator<this, Angle, AnyAngle>;
 
-  @ViewAnimator(Length, {value: null})
+  @ViewAnimator({type: Length, state: null})
   padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator(Length, {value: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero()})
   cornerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Color, {inherit: true})
-  fill: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  fill: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  stroke: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  stroke: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  strokeWidth: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  strokeWidth: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
   get value(): Arc {
-    return new Arc(this.center.value!, this.innerRadius.value!, this.outerRadius.value!,
-                   this.startAngle.value!, this.sweepAngle.value!, this.padAngle.value!,
-                   this.padRadius.value!, this.cornerRadius.value!);
+    return new Arc(this.center.getValue(), this.innerRadius.getValue(), this.outerRadius.getValue(),
+                   this.startAngle.getValue(), this.sweepAngle.getValue(), this.padAngle.getValue(),
+                   this.padRadius.getValue(), this.cornerRadius.getValue());
   }
 
   get state(): Arc {
-    return new Arc(this.center.state!, this.innerRadius.state!, this.outerRadius.state!,
-                   this.startAngle.state!, this.sweepAngle.state!, this.padAngle.state!,
-                   this.padRadius.state!, this.cornerRadius.state!);
+    return new Arc(this.center.getState(), this.innerRadius.getState(), this.outerRadius.getState(),
+                   this.startAngle.getState(), this.sweepAngle.getState(), this.padAngle.getState(),
+                   this.padRadius.getState(), this.cornerRadius.getState());
   }
 
   setState(arc: Arc | ArcViewInit, tween?: Tween<any>): void {
@@ -123,15 +123,9 @@ export class ArcView extends GraphicsLeafView implements FillView, StrokeView {
     if (arc.strokeWidth !== void 0) {
       this.strokeWidth(arc.strokeWidth, tween);
     }
-    if (arc.hidden !== void 0) {
-      this.setHidden(arc.hidden);
-    }
-    if (arc.culled !== void 0) {
-      this.setCulled(arc.culled);
-    }
   }
 
-  protected onRender(viewContext: GraphicsViewContext): void {
+  protected onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -166,10 +160,10 @@ export class ArcView extends GraphicsLeafView implements FillView, StrokeView {
     const frame = this.viewFrame;
     const size = Math.min(frame.width, frame.height);
     const inversePageTransform = this.pageTransform.inverse();
-    const center = this.center.value!;
+    const center = this.center.getValue();
     const [px, py] = inversePageTransform.transform(center.x, center.y);
-    const r = (this.innerRadius.value!.pxValue(size) + this.outerRadius.value!.pxValue(size)) / 2;
-    const a = this.startAngle.value!.radValue() + this.sweepAngle.value!.radValue() / 2;
+    const r = (this.innerRadius.getValue().pxValue(size) + this.outerRadius.getValue().pxValue(size)) / 2;
+    const a = this.startAngle.getValue().radValue() + this.sweepAngle.getValue().radValue() / 2;
     const x = px + r * Math.cos(a);
     const y = py + r * Math.sin(a);
     return new BoxR2(x, y, x, y);
@@ -178,14 +172,14 @@ export class ArcView extends GraphicsLeafView implements FillView, StrokeView {
   get viewBounds(): BoxR2 {
     const frame = this.viewFrame;
     const size = Math.min(frame.width, frame.height);
-    const center = this.center.value!;
-    const radius = this.outerRadius.value!.pxValue(size);
+    const center = this.center.getValue();
+    const radius = this.outerRadius.getValue().pxValue(size);
     return new BoxR2(center.x - radius, center.y - radius,
                      center.x + radius, center.y + radius);
   }
 
-  hitTest(x: number, y: number, viewContext: GraphicsViewContext): GraphicsView | null {
-    let hit = super.hitTest(x, y, viewContext);
+  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
       if (renderer instanceof CanvasRenderer) {
@@ -222,11 +216,23 @@ export class ArcView extends GraphicsLeafView implements FillView, StrokeView {
   static fromAny(arc: AnyArcView): ArcView {
     if (arc instanceof ArcView) {
       return arc;
-    } else if (arc instanceof Arc || typeof arc === "object" && arc !== null) {
-      const view = new ArcView();
-      view.setState(arc);
-      return view;
+    } else if (arc instanceof Arc) {
+      return ArcView.fromArc(arc);
+    } else if (typeof arc === "object" && arc !== null) {
+      return ArcView.fromInit(arc);
     }
     throw new TypeError("" + arc);
+  }
+
+  static fromArc(arc: Arc): ArcView {
+    const view = new ArcView();
+    view.setState(arc);
+    return view;
+  }
+
+  static fromInit(init: ArcViewInit): ArcView {
+    const view = new ArcView();
+    view.initView(init);
+    return view;
   }
 }

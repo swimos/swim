@@ -19,16 +19,14 @@ export abstract class TweenFrameAnimator<T> extends TweenAnimator<T> {
   /** @hidden */
   _animationFrame: number;
 
-  constructor(value: T | undefined, transition: Transition<T> | null) {
+  constructor(value: T, transition: Transition<T> | null) {
     super(value, transition);
+    this.onAnimationFrame = this.onAnimationFrame.bind(this);
     this._animationFrame = 0;
   }
 
   animate(): void {
-    if (this._animationFrame === 0 && this._enabled) {
-      if (!this.hasOwnProperty("onAnimationFrame")) {
-        this.onAnimationFrame = this.onAnimationFrame.bind(this);
-      }
+    if (this._animationFrame === 0 && (this._animatorFlags & TweenAnimator.DisabledFlag) === 0) {
       this._animationFrame = requestAnimationFrame(this.onAnimationFrame);
     }
   }
@@ -42,6 +40,6 @@ export abstract class TweenFrameAnimator<T> extends TweenAnimator<T> {
 
   protected onAnimationFrame(timestamp: number): void {
     this._animationFrame = 0;
-    this.onFrame(timestamp);
+    this.onAnimate(timestamp);
   }
 }

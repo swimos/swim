@@ -109,4 +109,9 @@ export class RemLength extends Length {
     }
   }
 }
+if (typeof CSSUnitValue !== "undefined") { // CSS Typed OM support
+  RemLength.prototype.toCssValue = function (this: RemLength): CSSUnitValue | undefined {
+    return new CSSUnitValue(this._value, "rem");
+  };
+}
 Length.Rem = RemLength;

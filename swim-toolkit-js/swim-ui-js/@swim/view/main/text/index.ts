@@ -15,6 +15,7 @@
 export {TextAnimator} from "./TextAnimator";
 export {
   ViewText,
+  TextViewInit,
   TextView,
 } from "./TextView";
 export {TextViewObserver} from "./TextViewObserver";

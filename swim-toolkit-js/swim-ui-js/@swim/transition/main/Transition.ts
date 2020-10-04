@@ -17,9 +17,9 @@ import {Interpolator} from "@swim/interpolate";
 import {AnyEase, Ease} from "./Ease";
 import {TransitionObserver} from "./TransitionObserver";
 
-export type TransitionBegin<T> = (value: T | undefined) => void;
-export type TransitionEnd<T> = (value: T | undefined) => void;
-export type TransitionInterrupt<T> = (value: T | undefined) => void;
+export type TransitionBegin<T> = (value: T) => void;
+export type TransitionEnd<T> = (value: T) => void;
+export type TransitionInterrupt<T> = (value: T) => void;
 
 export type Tween<T> = AnyTransition<T> | boolean | null;
 
@@ -243,7 +243,7 @@ export class Transition<T> {
     throw new TypeError("" + transition);
   }
 
-  static forTween<T>(tween: Tween<T> | undefined, value?: T,
+  static forTween<T>(tween: Tween<T> | undefined, value?: T extends undefined ? never : T,
                      duration: number | null = null,
                      ease: AnyEase | null = null): Transition<T> | null {
     if (tween instanceof Transition) {

@@ -14,27 +14,40 @@
 
 import {BoxR2} from "@swim/math";
 import {CanvasRenderer, CanvasContext} from "@swim/render";
-import {View, GraphicsViewContext, GraphicsView} from "@swim/view";
+import {ViewContextType, View, GraphicsView} from "@swim/view";
 import {ScaleViewInit, ScaleView} from "../scale/ScaleView";
 import {AnyPlotView, PlotView} from "../plot/PlotView";
+import {GraphViewObserver} from "./GraphViewObserver";
 import {GraphViewController} from "./GraphViewController";
 
 export type AnyGraphView<X = unknown, Y = unknown> = GraphView<X, Y> | GraphViewInit<X, Y>;
 
 export interface GraphViewInit<X = unknown, Y = unknown> extends ScaleViewInit<X, Y> {
+  viewController?: GraphViewController<X, Y>;
   plots?: AnyPlotView<X, Y>[];
 }
 
 export class GraphView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
-  constructor() {
-    super();
+  // @ts-ignore
+  declare readonly viewController: GraphViewController<X, Y> | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<GraphViewObserver<X, Y>>;
+
+  initView(init: GraphViewInit<X, Y>): void {
+    super.initView(init);
+    const plots = init.plots;
+    if (plots !== void 0) {
+      for (let i = 0, n = plots.length; i < n; i += 1) {
+        this.addPlot(plots[i]);
+      }
+    }
   }
 
-  get viewController(): GraphViewController<X, Y> | null {
-    return this._viewController;
-  }
-
-  addPlot(plot: AnyPlotView<X, Y>): void {
+  addPlot(plot: AnyPlotView<X, Y>, key?: string): void {
+    if (key === void 0 && typeof plot === "object" && plot !== null) {
+      key = plot.key;
+    }
     plot = PlotView.fromAny(plot);
     this.appendChildView(plot);
   }
@@ -61,7 +74,7 @@ export class GraphView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
     // hook
   }
 
-  protected willRender(viewContext: GraphicsViewContext): void {
+  protected willRender(viewContext: ViewContextType<this>): void {
     super.willRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
@@ -71,7 +84,7 @@ export class GraphView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
     }
   }
 
-  protected didRender(viewContext: GraphicsViewContext): void {
+  protected didRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
@@ -86,8 +99,8 @@ export class GraphView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
     context.clip();
   }
 
-  hitTest(x: number, y: number, viewContext: GraphicsViewContext): GraphicsView | null {
-    let hit = super.hitTest(x, y, viewContext);
+  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       hit = this;
     }
@@ -105,15 +118,7 @@ export class GraphView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
 
   static fromInit<X, Y>(init: GraphViewInit<X, Y>): GraphView<X, Y> {
     const view = new GraphView<X, Y>();
-    ScaleView.init(view, init);
-
-    const plots = init.plots;
-    if (plots !== void 0) {
-      for (let i = 0, n = plots.length; i < n; i += 1) {
-        view.addPlot(plots[i]);
-      }
-    }
-
+    view.initView(init);
     return view;
   }
 }

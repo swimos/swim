@@ -13,13 +13,13 @@
 // limitations under the License.
 
 import {AnyPointR2, PointR2} from "@swim/math";
-import {ViewFlags, View, GraphicsViewContext, GraphicsView, CanvasView} from "@swim/view";
-import {AnyGeoPoint, GeoPoint, MapGraphicsViewContext, MapGraphicsNodeView} from "@swim/map";
+import {ViewContextType, ViewFlags, View, GraphicsViewContext, CanvasView} from "@swim/view";
+import {AnyGeoPoint, GeoPoint, MapLayerView} from "@swim/map";
 import {EsriProjection} from "./EsriProjection";
 import {EsriViewObserver} from "./EsriViewObserver";
 import {EsriViewController} from "./EsriViewController";
 
-export abstract class EsriView extends MapGraphicsNodeView {
+export abstract class EsriView extends MapLayerView {
   constructor() {
     super();
     EsriProjection.init();
@@ -27,9 +27,11 @@ export abstract class EsriView extends MapGraphicsNodeView {
 
   abstract get map(): __esri.View;
 
-  get viewController(): EsriViewController | null {
-    return this._viewController;
-  }
+  // @ts-ignore
+  declare readonly viewController: EsriViewController | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<EsriViewObserver>;
 
   abstract project(lnglat: AnyGeoPoint): PointR2;
   abstract project(lng: number, lat: number): PointR2;
@@ -87,26 +89,7 @@ export abstract class EsriView extends MapGraphicsNodeView {
 
   abstract get mapTilt(): number;
 
-  protected onPower(): void {
-    super.onPower();
-    this.requireUpdate(View.NeedsProject);
-  }
-
-  cascadeProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): void {
-    viewContext = this.mapViewContext(viewContext);
-    super.cascadeProcess(processFlags, viewContext);
-  }
-
-  cascadeDisplay(displayFlags: ViewFlags, viewContext: GraphicsViewContext): void {
-    viewContext = this.mapViewContext(viewContext);
-    super.cascadeDisplay(displayFlags, viewContext);
-  }
-
-  childViewContext(childView: View, viewContext: MapGraphicsViewContext): MapGraphicsViewContext {
-    return viewContext;
-  }
-
-  mapViewContext(viewContext: GraphicsViewContext): MapGraphicsViewContext {
+  extendViewContext(viewContext: GraphicsViewContext): ViewContextType<this> {
     const mapViewContext = Object.create(viewContext);
     mapViewContext.geoProjection = this.geoProjection;
     mapViewContext.geoFrame = this.geoFrame;
@@ -116,10 +99,7 @@ export abstract class EsriView extends MapGraphicsNodeView {
     return mapViewContext;
   }
 
-  hitTest(x: number, y: number, viewContext: GraphicsViewContext): GraphicsView | null {
-    viewContext = this.mapViewContext(viewContext);
-    return super.hitTest(x, y, viewContext as MapGraphicsViewContext);
-  }
-
   abstract overlayCanvas(): CanvasView | null;
+
+  static readonly powerFlags: ViewFlags = MapLayerView.powerFlags | View.NeedsProject;
 }

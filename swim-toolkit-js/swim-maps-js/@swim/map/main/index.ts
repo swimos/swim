@@ -18,6 +18,6 @@ export * from "./graphics";
 
 export * from "./raster";
 
-export * from "./layer";
+export * from "./grid";
 
 export * from "./shape";

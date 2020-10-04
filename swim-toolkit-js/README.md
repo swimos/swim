@@ -9,10 +9,11 @@
 The **Swim Toolkit** TypeScript implementation provides a set of frameworks for
 building pervasively real-time user interface applications.  **Swim Toolkit**
 incorporates the [**Swim UI**](swim-ui-js) real-time user interface toolkit,
-the [**Swim UX**](swim-ux-js) real-time application framework, the [**Swim
-Visualizations**](swim-vis-js) framework, the [**Swim Maps**](swim-maps-js)
-framework, and the [**Swim Web**](swim-web-js) real-time web application
-framework.
+the [**Swim UX**](swim-ux-js) real-time application framework, the
+[**Swim Visualizations**](swim-vis-js) real-time visualizations framework, the
+[**Swim Maps**](swim-maps-js) real-time maps framework, the
+[**Swim MVC**](swim-mvc-js) real-time component framework, and the
+[**Swim Web**](swim-web-js) real-time web application framework.
 
 ## Umbrella Framework
 
@@ -47,6 +48,8 @@ style, animate, and render mixed HTML, SVG, Canvas, and WebGL components.
   CSS font property types and parsers.
 - [**@swim/shadow**](swim-ui-js/@swim/shadow) –
   CSS box shadow types and parsers.
+- [**@swim/gradient**](swim-ui-js/@swim/gradient) –
+  CSS gradient types and parsers.
 - [**@swim/transform**](swim-ui-js/@swim/transform) –
   CSS and SVG compatible transform types with unit-aware algebraic operators
   and parsers.
@@ -57,11 +60,11 @@ style, animate, and render mixed HTML, SVG, Canvas, and WebGL components.
 - [**@swim/transition**](swim-ui-js/@swim/transition) –
   transition types that specify duration, ease, interpolator, and lifecycle
   callback parameters for tween animations.
+- [**@swim/style**](swim-ui-js/@swim/style) –
+  CSS style types and universal style value parser.
 - [**@swim/animate**](swim-ui-js/@swim/animate) –
   property-managing animator types that efficiently tween values between
   discrete state changes.
-- [**@swim/style**](swim-ui-js/@swim/style) –
-  CSS style types and universal style value parser.
 - [**@swim/render**](swim-ui-js/@swim/render) –
   renderable graphic types for SVG/Canvas-compatible path drawing contexts,
   and Canvas-compatible rendering contexts.
@@ -88,14 +91,18 @@ toolbars, controls, and other interactive application views and controllers.
   umbrella package that depends on, and re-exports, all **Swim UX** libraries.
 - [**@swim/theme**](swim-ux-js/@swim/theme) –
   semantic looks and feels for mood-aware UX components.
-- [**@swim/app**](swim-ux-js/@swim/app) –
-  application model for coordinating window-level components, such as popovers
-  and drawers.
-- [**@swim/controls**](swim-ux-js/@swim/controls) –
-  buttons, switches, sliders, and other user interface controls.
-- [**@swim/navigation**](swim-ux-js/@swim/navigation) –
-  menus, tree views, nav bars, tab bars, and other user interface navigation
-  components.
+- [**@swim/button**](swim-ux-js/@swim/button) –
+  procedurally styled multitouch buttons.
+- [**@swim/modal**](swim-ux-js/@swim/modal) –
+  auto-placed, source-tracking popover views.
+- [**@swim/drawer**](swim-ux-js/@swim/drawer) –
+  responsive, minifiable drawer views.
+- [**@swim/token**](swim-ux-js/@swim/token) –
+  compact, editable pin and chip token views.
+- [**@swim/menu**](swim-ux-js/@swim/menu) –
+  context-sensitive menu lists and menu items.
+- [**@swim/tree**](swim-ux-js/@swim/tree) –
+  disclosable tree views with tabular columns.
 
 ### [**Swim Visualizations** Framework](swim-vis-js)
 
@@ -132,6 +139,19 @@ the following component libraries:
 - [**@swim/esrimap**](swim-maps-js/@swim/esrimap) –
   support for overlaying **@swim/map** views on ArcGIS maps.
 
+### [**Swim MVC** Framework](swim-mvc-js)
+
+The **Swim MVC** framework implements a model-view-controller framework built
+on the **Swim UI** toolkit.  **Swim MVC** consists of the following component
+libraries:
+
+- [**@swim/mvc**](swim-mvc-js/@swim/mvc) –
+  umbrella package that depends on, and re-exports, all **Swim MVC** libraries.
+- [**@swim/model**](swim-mvc-js/@swim/model) –
+  lifecycle-managed model hierarchy supporting dynamic scoping and service injection.
+- [**@swim/component**](swim-mvc-js/@swim/component) –
+  componentized controller layer with application lifecycle and service management.
+
 ### [**Swim Web** Framework](swim-web-js)
 
 The **Swim Web** framework implements a thin web application framework built
@@ -161,8 +181,8 @@ bundles all **@swim/toolkit** child frameworks, can be found in
 
 Browser applications can load `swim-toolkit.js`, along with its `swim-system.js`
 dependency, from the SwimOS CDN.  The `swim-toolkit.js` bundle supersedes
-`swim-ui.js`, `swim-vis.js`, `swim-maps.js`, and `swim-web.js`—those scripts
-need not be loaded when using `swim-toolkit.js`.
+`swim-ui.js`, `swim-ux.js`, `swim-vis.js`, `swim-maps.js`, and
+`swim-web.js`—those scripts need not be loaded when using `swim-toolkit.js`.
 
 ```html
 <!-- Development -->
@@ -197,7 +217,7 @@ var swim = require("@swim/toolkit");
 
 ### Browser
 
-When loaded by a web browser, the `swim-tookit.js` script adds all child
+When loaded by a web browser, the `swim-toolkit.js` script adds all child
 framework exports to the global `swim` namespace.  The `swim-toolkit.js` script
 requires that either `swim-core.js` or `swim-system.js` has already been loaded.
 

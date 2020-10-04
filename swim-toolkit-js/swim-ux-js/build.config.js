@@ -6,11 +6,15 @@ const ux = [
       {
         id: "main",
       },
+      {
+        id: "test",
+        deps: ["theme"],
+      },
     ],
   },
   {
-    id: "app",
-    name: "@swim/app",
+    id: "modal",
+    name: "@swim/modal",
     targets: [
       {
         id: "main",
@@ -19,22 +23,52 @@ const ux = [
     ],
   },
   {
-    id: "controls",
-    name: "@swim/controls",
+    id: "button",
+    name: "@swim/button",
     targets: [
       {
         id: "main",
-        deps: ["theme", "app"],
+        deps: ["theme", "modal"],
       },
     ],
   },
   {
-    id: "navigation",
-    name: "@swim/navigation",
+    id: "token",
+    name: "@swim/token",
     targets: [
       {
         id: "main",
-        deps: ["theme", "app"],
+        deps: ["theme", "modal", "button"],
+      },
+    ],
+  },
+  {
+    id: "drawer",
+    name: "@swim/drawer",
+    targets: [
+      {
+        id: "main",
+        deps: ["theme", "modal", "button"],
+      },
+    ],
+  },
+  {
+    id: "menu",
+    name: "@swim/menu",
+    targets: [
+      {
+        id: "main",
+        deps: ["theme", "modal", "button"],
+      },
+    ],
+  },
+  {
+    id: "tree",
+    name: "@swim/tree",
+    targets: [
+      {
+        id: "main",
+        deps: ["theme", "modal", "button"],
       },
     ],
   },
@@ -46,7 +80,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["theme", "app", "controls", "navigation"],
+        deps: ["theme", "modal", "button", "token", "drawer", "menu", "tree"],
       },
     ],
   },

@@ -109,4 +109,9 @@ export class PctLength extends Length {
     }
   }
 }
+if (typeof CSSUnitValue !== "undefined") { // CSS Typed OM support
+  PctLength.prototype.toCssValue = function (this: PctLength): CSSUnitValue | undefined {
+    return new CSSUnitValue(this._value, "percent");
+  };
+}
 Length.Pct = PctLength;

@@ -41,17 +41,17 @@ export class BoxShadowForm extends Form<BoxShadow, AnyBoxShadow> {
     const record = Record.create();
     do {
       const header = Record.create(5);
-      if (shadow.inset) {
+      if (shadow._inset) {
         header.push("inset");
       }
-      header.push(Length.form().mold(shadow.offsetX));
-      header.push(Length.form().mold(shadow.offsetY));
-      header.push(Length.form().mold(shadow.blurRadius));
-      header.push(Length.form().mold(shadow.spreadRadius));
-      header.push(Color.form().mold(shadow.color));
+      header.push(Length.form().mold(shadow._offsetX));
+      header.push(Length.form().mold(shadow._offsetY));
+      header.push(Length.form().mold(shadow._blurRadius));
+      header.push(Length.form().mold(shadow._spreadRadius));
+      header.push(Color.form().mold(shadow._color));
       record.attr("boxShadow", header);
-      if (shadow.next !== null) {
-        shadow = shadow.next;
+      if (shadow._next !== null) {
+        shadow = shadow._next;
         continue;
       }
       break;

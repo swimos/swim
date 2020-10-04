@@ -12,39 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {AnyFont, Font} from "@swim/font";
-import {Tween} from "@swim/transition";
 import {View} from "../View";
-import {ViewAnimatorDescriptor, ViewAnimatorConstructor, ViewAnimator} from "./ViewAnimator";
+import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
-export interface FontViewAnimator<V extends View> extends ViewAnimator<V, Font, AnyFont> {
+export abstract class FontViewAnimator<V extends View> extends ViewAnimator<V, Font | null | undefined, AnyFont | null | undefined> {
+  fromAny(value: AnyFont | null | undefined): Font | null | undefined {
+    return value !== void 0 && value !== null ? Font.fromAny(value) : value;
+  }
 }
-
-/** @hidden */
-export const FontViewAnimator: ViewAnimatorConstructor<Font, AnyFont> = (function (_super: typeof ViewAnimator): ViewAnimatorConstructor<Font, AnyFont> {
-  const FontViewAnimator: ViewAnimatorConstructor<Font, AnyFont> = function <V extends View>(
-      this: FontViewAnimator<V>, view: V, animatorName: string | undefined,
-      descriptor?: ViewAnimatorDescriptor<V, Font, AnyFont>): FontViewAnimator<V> {
-    let _this: FontViewAnimator<V> = function accessor(value?: AnyFont, tween?: Tween<Font>): Font | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as FontViewAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, descriptor) || _this;
-    return _this;
-  } as unknown as ViewAnimatorConstructor<Font, AnyFont>;
-  __extends(FontViewAnimator, _super);
-
-  FontViewAnimator.prototype.fromAny = function (this: FontViewAnimator<View>, value: AnyFont | null): Font | null {
-    return value !== null ? Font.fromAny(value) : null;
-  };
-
-  return FontViewAnimator;
-}(ViewAnimator));
 ViewAnimator.Font = FontViewAnimator;

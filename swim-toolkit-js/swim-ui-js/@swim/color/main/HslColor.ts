@@ -16,7 +16,7 @@ import {Murmur3} from "@swim/util";
 import {Output} from "@swim/codec";
 import {Item, Value} from "@swim/structure";
 import {AnyAngle, Angle} from "@swim/angle";
-import {BRIGHTER, DARKER, Color} from "./Color";
+import {BRIGHTER, DARKER, AnyColor, Color} from "./Color";
 import {RgbColor} from "./RgbColor";
 
 export type AnyHslColor = HslColor | HslColorInit | string;
@@ -33,6 +33,8 @@ export class HslColor extends Color {
   readonly s: number;
   readonly l: number;
   readonly a: number;
+  /** @hidden */
+  _string?: string;
 
   constructor(h: number, s: number, l: number, a: number = 1) {
     super();
@@ -62,7 +64,23 @@ export class HslColor extends Color {
     return this.l;
   }
 
-  brighter(k?: number): HslColor {
+  plus(that: AnyColor): HslColor {
+    that = Color.fromAny(that).hsl();
+    return new HslColor(this.h + (that as HslColor).h, this.s + (that as HslColor).s,
+                        this.l + (that as HslColor).l, this.a + (that as HslColor).a);
+  }
+
+  times(scalar: number): HslColor {
+    return new HslColor(this.h * scalar, this.s * scalar, this.l * scalar, this.a * scalar);
+  }
+
+  combine(that: AnyColor, scalar: number = 1): HslColor {
+    that = Color.fromAny(that).hsl();
+    return new HslColor(this.h + (that as HslColor).h * scalar, this.s + (that as HslColor).s * scalar,
+                        this.l + (that as HslColor).l * scalar, this.a + (that as HslColor).a * scalar);
+  }
+
+  lighter(k?: number): HslColor {
     k = k === void 0 ? BRIGHTER : Math.pow(BRIGHTER, k);
     return k !== 1 ? new HslColor(this.h, this.s, this.l * k, this.a) : this;
   }
@@ -124,20 +142,24 @@ export class HslColor extends Color {
   }
 
   toString(): string {
-    let a = this.a;
-    a = isNaN(a) ? 1 : Math.max(0, Math.min(this.a, 1));
-    let s = a === 1 ? "hsl" : "hsla";
-    s += "(";
-    s += Math.max(0, Math.min(Math.round(this.h) || 0, 360));
-    s += ",";
-    s += Math.max(0, Math.min(100 * Math.round(this.s) || 0, 100)) + "%";
-    s += ",";
-    s += Math.max(0, Math.min(100 * Math.round(this.l) || 0, 100)) + "%";
-    if (a !== 1) {
+    let s = this._string;
+    if (s === void 0) {
+      let a = this.a;
+      a = isNaN(a) ? 1 : Math.max(0, Math.min(this.a, 1));
+      s = a === 1 ? "hsl" : "hsla";
+      s += "(";
+      s += Math.max(0, Math.min(Math.round(this.h) || 0, 360));
       s += ",";
-      s += a;
+      s += Math.max(0, Math.min(100 * Math.round(this.s) || 0, 100)) + "%";
+      s += ",";
+      s += Math.max(0, Math.min(100 * Math.round(this.l) || 0, 100)) + "%";
+      if (a !== 1) {
+        s += ",";
+        s += a;
+      }
+      s += ")";
+      this._string = s;
     }
-    s += ")";
     return s;
   }
 

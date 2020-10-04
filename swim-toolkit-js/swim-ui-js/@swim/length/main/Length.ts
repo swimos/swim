@@ -41,7 +41,8 @@ export abstract class Length implements HashCode, Debug {
   abstract get node(): Node | null;
 
   plus(that: AnyLength, units: LengthUnits = this.units): Length {
-    return Length.from(this.toValue(units) + Length.fromAny(that).toValue(units), units);
+    that = Length.fromAny(that);
+    return Length.from(this.toValue(units) + that.toValue(units), units);
   }
 
   opposite(units: LengthUnits = this.units): Length {
@@ -49,7 +50,8 @@ export abstract class Length implements HashCode, Debug {
   }
 
   minus(that: AnyLength, units: LengthUnits = this.units): Length {
-    return Length.from(this.toValue(units) - Length.fromAny(that).toValue(units), units);
+    that = Length.fromAny(that);
+    return Length.from(this.toValue(units) - that.toValue(units), units);
   }
 
   times(scalar: number, units: LengthUnits = this.units): Length {
@@ -58,6 +60,11 @@ export abstract class Length implements HashCode, Debug {
 
   divide(scalar: number, units: LengthUnits = this.units): Length {
     return Length.from(this.toValue(units) / scalar, units);
+  }
+
+  combine(that: AnyLength, scalar: number = 1, units: LengthUnits = this.units): Length {
+    that = Length.fromAny(that);
+    return Length.from(this.toValue(units) + that.toValue(units) * scalar, units);
   }
 
   /** Returns the base unit value, in pixels. */
@@ -111,6 +118,10 @@ export abstract class Length implements HashCode, Debug {
       case "%": return this.pct();
       default: throw new Error("unknown length units: " + units);
     }
+  }
+
+  toCssValue(): CSSUnitValue | undefined {
+    return void 0; // conditionally overridden when CSS Typed OM is available
   }
 
   abstract equals(that: unknown): boolean;
@@ -172,6 +183,21 @@ export abstract class Length implements HashCode, Debug {
       case "%": return Length.pct(value, node);
       case "": return Length.unitless(value, node);
       default: throw new Error("unknown length units: " + units);
+    }
+  }
+
+  static fromCss(value: CSSStyleValue, node?: Node | null): Length {
+    if (value instanceof CSSUnitValue) {
+      switch (value.unit) {
+        case "px": return Length.px(value.value, node);
+        case "em": return Length.em(value.value, node);
+        case "rem": return Length.rem(value.value, node);
+        case "percent": return Length.pct(value.value, node);
+        case "number": return Length.unitless(value.value, node);
+        default: throw new Error("unknown length units: " + value.unit);
+      }
+    } else {
+      throw new TypeError("" + value);
     }
   }
 

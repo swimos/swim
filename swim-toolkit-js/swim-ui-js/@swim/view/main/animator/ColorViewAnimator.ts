@@ -12,39 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {AnyColor, Color} from "@swim/color";
-import {Tween} from "@swim/transition";
 import {View} from "../View";
-import {ViewAnimatorDescriptor, ViewAnimatorConstructor, ViewAnimator} from "./ViewAnimator";
+import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
-export interface ColorViewAnimator<V extends View> extends ViewAnimator<V, Color, AnyColor> {
+export abstract class ColorViewAnimator<V extends View> extends ViewAnimator<V, Color | null | undefined, AnyColor | null | undefined> {
+  fromAny(value: AnyColor | null): Color | null {
+    return value !== void 0 && value !== null ? Color.fromAny(value) : value;
+  }
 }
-
-/** @hidden */
-export const ColorViewAnimator: ViewAnimatorConstructor<Color, AnyColor> = (function (_super: typeof ViewAnimator): ViewAnimatorConstructor<Color, AnyColor> {
-  const ColorViewAnimator: ViewAnimatorConstructor<Color, AnyColor> = function <V extends View>(
-      this: ColorViewAnimator<V>, view: V, animatorName: string | undefined,
-      descriptor?: ViewAnimatorDescriptor<V, Color, AnyColor>): ColorViewAnimator<V> {
-    let _this: ColorViewAnimator<V> = function accessor(value?: AnyColor, tween?: Tween<Color>): Color | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as ColorViewAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, descriptor) || _this;
-    return _this;
-  } as unknown as ViewAnimatorConstructor<Color, AnyColor>;
-  __extends(ColorViewAnimator, _super);
-
-  ColorViewAnimator.prototype.fromAny = function (this: ColorViewAnimator<View>, value: AnyColor | null): Color | null {
-    return value !== null ? Color.fromAny(value) : null;
-  };
-
-  return ColorViewAnimator;
-}(ViewAnimator));
 ViewAnimator.Color = ColorViewAnimator;

@@ -22,14 +22,21 @@ import {
   CanvasRenderer,
   WebGLRenderer,
 } from "@swim/render";
-import {ViewFlags, View, ViewAnimator, GraphicsView} from "@swim/view";
+import {ViewContextType, ViewFlags, View, ViewAnimator, GraphicsView} from "@swim/view";
 import {MapGraphicsViewContext} from "../graphics/MapGraphicsViewContext";
-import {MapGraphicsNodeView} from "../graphics/MapGraphicsNodeView";
+import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
+import {MapLayerView} from "../graphics/MapLayerView";
 import {MapRasterViewContext} from "./MapRasterViewContext";
 import {MapRasterViewObserver} from "./MapRasterViewObserver";
 import {MapRasterViewController} from "./MapRasterViewController";
 
-export class MapRasterView extends MapGraphicsNodeView {
+export interface MapRasterViewInit extends MapGraphicsViewInit {
+  viewController?: MapRasterViewController;
+  opacity?: number;
+  compositeOperation?: CanvasCompositeOperation;
+}
+
+export class MapRasterView extends MapLayerView {
   /** @hidden */
   _canvas: HTMLCanvasElement;
   /** @hidden */
@@ -44,14 +51,26 @@ export class MapRasterView extends MapGraphicsNodeView {
     this._rasterFrame = BoxR2.undefined();
   }
 
-  get viewController(): MapRasterViewController | null {
-    return this._viewController;
+  // @ts-ignore
+  declare readonly viewController: MapRasterViewController | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<MapRasterViewObserver>;
+
+  initView(init: MapRasterViewInit): void {
+    super.initView(init);
+    if (init.opacity !== void 0) {
+      this.opacity(init.opacity);
+    }
+    if (init.compositeOperation !== void 0) {
+      this.compositeOperation(init.compositeOperation);
+    }
   }
 
-  @ViewAnimator(Number, {value: 1})
+  @ViewAnimator({type: Number, state: 1})
   opacity: ViewAnimator<this, number>;
 
-  @ViewAnimator(String, {value: "source-over"})
+  @ViewAnimator({type: String, state: "source-over"})
   compositeOperation: ViewAnimator<this, CanvasCompositeOperation>;
 
   get pixelRatio(): number {
@@ -104,7 +123,7 @@ export class MapRasterView extends MapGraphicsNodeView {
     }
   }
 
-  protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
+  protected modifyUpdate(targetView: View, updateFlags: ViewFlags): ViewFlags {
     let additionalFlags = 0;
     if ((updateFlags & View.UpdateMask) !== 0) {
       if ((updateFlags & View.ProcessMask) !== 0) {
@@ -118,36 +137,27 @@ export class MapRasterView extends MapGraphicsNodeView {
     return additionalFlags;
   }
 
-  cascadeProcess(processFlags: ViewFlags, viewContext: MapGraphicsViewContext): void {
-    viewContext = this.rasterViewContext(viewContext);
-    super.cascadeProcess(processFlags, viewContext);
-  }
-
-  cascadeDisplay(displayFlags: ViewFlags, viewContext: MapGraphicsViewContext): void {
-    viewContext = this.rasterViewContext(viewContext);
-    super.cascadeDisplay(displayFlags, viewContext);
-  }
-
   /** @hidden */
-  protected doDisplay(displayFlags: ViewFlags, viewContext: MapRasterViewContext): void {
+  protected doDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     let cascadeFlags = displayFlags;
-    this.willDisplay(viewContext);
-    this._viewFlags |= View.DisplayingFlag;
+    this._viewFlags |= View.TraversingFlag | View.DisplayingFlag;
+    this._viewFlags &= ~View.NeedsDisplay;
     try {
+      this.willDisplay(viewContext);
       if (((this._viewFlags | displayFlags) & View.NeedsLayout) !== 0) {
+        this.willLayout(viewContext);
         cascadeFlags |= View.NeedsLayout;
         this._viewFlags &= ~View.NeedsLayout;
-        this.willLayout(viewContext);
       }
       if (((this._viewFlags | displayFlags) & View.NeedsRender) !== 0) {
+        this.willRender(viewContext);
         cascadeFlags |= View.NeedsRender;
         this._viewFlags &= ~View.NeedsRender;
-        this.willRender(viewContext);
       }
       if (((this._viewFlags | displayFlags) & View.NeedsComposite) !== 0) {
+        this.willComposite(viewContext);
         cascadeFlags |= View.NeedsComposite;
         this._viewFlags &= ~View.NeedsComposite;
-        this.willComposite(viewContext);
       }
 
       this.onDisplay(viewContext);
@@ -172,24 +182,24 @@ export class MapRasterView extends MapGraphicsNodeView {
       if ((cascadeFlags & View.NeedsLayout) !== 0) {
         this.didLayout(viewContext);
       }
-    } finally {
-      this._viewFlags &= ~View.DisplayingFlag;
       this.didDisplay(viewContext);
+    } finally {
+      this._viewFlags &= ~(View.TraversingFlag | View.DisplayingFlag);
     }
   }
 
-  protected onLayout(viewContext: MapRasterViewContext): void {
+  protected onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.resizeCanvas(this._canvas);
     this.resetRenderer();
   }
 
-  protected onRender(viewContext: MapRasterViewContext): void {
+  protected onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     this.clearCanvas();
   }
 
-  protected willComposite(viewContext: MapRasterViewContext): void {
+  protected willComposite(viewContext: ViewContextType<this>): void {
     this.willObserve(function (viewObserver: MapRasterViewObserver): void {
       if (viewObserver.viewWillRender !== void 0) {
         viewObserver.viewWillRender(viewContext, this);
@@ -197,11 +207,11 @@ export class MapRasterView extends MapGraphicsNodeView {
     });
   }
 
-  protected onComposite(viewContext: MapRasterViewContext): void {
+  protected onComposite(viewContext: ViewContextType<this>): void {
     this.compositeImage(viewContext);
   }
 
-  protected didComposite(viewContext: MapRasterViewContext): void {
+  protected didComposite(viewContext: ViewContextType<this>): void {
     this.didObserve(function (viewObserver: MapRasterViewObserver): void {
       if (viewObserver.viewDidRender !== void 0) {
         viewObserver.viewDidRender(viewContext, this);
@@ -209,16 +219,15 @@ export class MapRasterView extends MapGraphicsNodeView {
     });
   }
 
-  childViewContext(childView: View, viewContext: MapRasterViewContext): MapRasterViewContext {
-    return viewContext;
-  }
-
-  rasterViewContext(viewContext: MapGraphicsViewContext): MapRasterViewContext {
+  extendViewContext(viewContext: MapGraphicsViewContext): ViewContextType<this> {
     const rasterViewContext = Object.create(viewContext);
     rasterViewContext.compositor = viewContext.renderer;
     rasterViewContext.renderer = this.renderer;
     return rasterViewContext;
   }
+
+  // @ts-ignore
+  declare readonly viewContext: MapRasterViewContext;
 
   /** @hidden */
   get compositeFrame(): BoxR2 {
@@ -242,8 +251,7 @@ export class MapRasterView extends MapGraphicsNodeView {
     }
   }
 
-  hitTest(x: number, y: number, viewContext: MapRasterViewContext): GraphicsView | null {
-    const rasterViewContext = this.rasterViewContext(viewContext);
+  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const compositeFrame = this.compositeFrame;
     x -= Math.floor(compositeFrame.xMin);
     y -= Math.floor(compositeFrame.yMin);
@@ -255,7 +263,7 @@ export class MapRasterView extends MapGraphicsNodeView {
       if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isCulled()) {
         const hitBounds = childView.hitBounds;
         if (hitBounds.contains(x, y)) {
-          hit = childView.hitTest(x, y, rasterViewContext);
+          hit = childView.hitTest(x, y, viewContext);
           if (hit !== null) {
             break;
           }
@@ -318,7 +326,7 @@ export class MapRasterView extends MapGraphicsNodeView {
     }
   }
 
-  protected compositeImage(viewContext: MapRasterViewContext): void {
+  protected compositeImage(viewContext: ViewContextType<this>): void {
     const compositor = viewContext.compositor;
     const renderer = viewContext.renderer;
     if (compositor instanceof CanvasRenderer && renderer instanceof CanvasRenderer) {
@@ -327,8 +335,8 @@ export class MapRasterView extends MapGraphicsNodeView {
       const pixelRatio = compositor.pixelRatio;
       const context = compositor.context;
       context.save();
-      context.globalAlpha = this.opacity.value!;
-      context.globalCompositeOperation = this.compositeOperation.value!;
+      context.globalAlpha = this.opacity.getValue();
+      context.globalCompositeOperation = this.compositeOperation.getValue();
       const x = Math.floor(compositeFrame.xMin) * pixelRatio;
       const y = Math.floor(compositeFrame.yMin) * pixelRatio;
       context.putImageData(imageData, x, y);

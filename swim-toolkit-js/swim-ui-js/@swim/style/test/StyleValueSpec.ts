@@ -18,6 +18,7 @@ import {Angle} from "@swim/angle";
 import {Length} from "@swim/length";
 import {Color} from "@swim/color";
 import {Font} from "@swim/font";
+import {LinearGradient} from "@swim/gradient";
 import {Transform} from "@swim/transform";
 import {StyleValue} from "@swim/style";
 
@@ -96,6 +97,16 @@ export class StyleValueSpec extends Spec {
     exam.equal(StyleValue.parse("italic small-caps bold expanded 12px/16px \"Open Sans\", sans-serif"),
                Font.family(["Open Sans", "sans-serif"]).style("italic").variant("small-caps")
                    .weight("bold").stretch("expanded").size(Length.px(12)).height(Length.px(16)));
+  }
+
+  @Test
+  parseLinearGradients(exam: Exam): void {
+    exam.equal(StyleValue.parse("linear-gradient(0, #000000, #ffffff)"),
+               LinearGradient.create(0, "#000000", "#ffffff"));
+    exam.equal(StyleValue.parse("linear-gradient(to right, #000000 33%, #ffffff 67%)"),
+               LinearGradient.create("right", "#000000 33%", "#ffffff 67%"));
+    exam.equal(StyleValue.parse("linear-gradient(to bottom left, #000000 33%, 50%, #ffffff 67%)"),
+               LinearGradient.create(["bottom", "left"], "#000000 33%", "50%, #ffffff 67%"));
   }
 
   @Test

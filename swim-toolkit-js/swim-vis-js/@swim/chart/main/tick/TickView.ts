@@ -16,17 +16,16 @@ import {AnyPointR2, PointR2, BoxR2} from "@swim/math";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Transition} from "@swim/transition";
-import {TweenState} from "@swim/animate";
+import {TweenAnimator} from "@swim/animate";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
+  ViewContextType,
   ViewFlags,
   View,
   ViewAnimator,
-  GraphicsViewContext,
   GraphicsViewInit,
   GraphicsView,
-  GraphicsViewController,
-  GraphicsNodeView,
+  LayerView,
 } from "@swim/view";
 import {AnyTextRunView, TextRunView} from "@swim/typeset";
 import {TopTickView} from "./TopTickView";
@@ -64,7 +63,7 @@ export interface TickViewInit<D> extends GraphicsViewInit {
   tickLabel?: GraphicsView | string | null;
 }
 
-export abstract class TickView<D> extends GraphicsNodeView {
+export abstract class TickView<D> extends LayerView {
   /** @hidden */
   readonly _value: D;
   /** @hidden */
@@ -86,8 +85,38 @@ export abstract class TickView<D> extends GraphicsNodeView {
     this.opacity.interpolate = TickView.interpolateOpacity;
   }
 
-  get viewController(): GraphicsViewController<TickView<D>> | null {
-    return this._viewController;
+  initView(init: TickViewInit<D>): void {
+    super.initView(init);
+    if (init.tickMarkColor !== void 0) {
+      this.tickMarkColor(init.tickMarkColor);
+    }
+    if (init.tickMarkWidth !== void 0) {
+      this.tickMarkWidth(init.tickMarkWidth);
+    }
+    if (init.tickMarkLength !== void 0) {
+      this.tickMarkLength(init.tickMarkLength);
+    }
+    if (init.tickLabelPadding !== void 0) {
+      this.tickLabelPadding(init.tickLabelPadding);
+    }
+
+    if (init.gridLineColor !== void 0) {
+      this.gridLineColor(init.gridLineColor);
+    }
+    if (init.gridLineWidth !== void 0) {
+      this.gridLineWidth(init.gridLineWidth);
+    }
+
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
+
+    if (init.tickLabel !== void 0) {
+      this.tickLabel(init.tickLabel);
+    }
   }
 
   abstract get orientation(): TickOrientation;
@@ -96,38 +125,38 @@ export abstract class TickView<D> extends GraphicsNodeView {
     return this._value;
   }
 
-  @ViewAnimator(PointR2, {value: PointR2.origin()})
+  @ViewAnimator({type: PointR2, state: PointR2.origin()})
   anchor: ViewAnimator<this, PointR2, AnyPointR2>;
 
-  @ViewAnimator(Number, {value: 1})
+  @ViewAnimator({type: Number, state: 1})
   opacity: ViewAnimator<this, number>;
 
-  @ViewAnimator(Number, {inherit: true})
-  tickMarkSpacing: ViewAnimator<this, number>;
+  @ViewAnimator({type: Number, inherit: true})
+  tickMarkSpacing: ViewAnimator<this, number | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  tickMarkColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  tickMarkColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Number, {inherit: true})
-  tickMarkWidth: ViewAnimator<this, number>;
+  @ViewAnimator({type: Number, inherit: true})
+  tickMarkWidth: ViewAnimator<this, number | undefined>;
 
-  @ViewAnimator(Number, {inherit: true})
-  tickMarkLength: ViewAnimator<this, number>;
+  @ViewAnimator({type: Number, inherit: true})
+  tickMarkLength: ViewAnimator<this, number | undefined>;
 
-  @ViewAnimator(Number, {inherit: true})
-  tickLabelPadding: ViewAnimator<this, number>;
+  @ViewAnimator({type: Number, inherit: true})
+  tickLabelPadding: ViewAnimator<this, number | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  gridLineColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  gridLineColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Number, {inherit: true})
-  gridLineWidth: ViewAnimator<this, number>;
+  @ViewAnimator({type: Number, inherit: true})
+  gridLineWidth: ViewAnimator<this, number | undefined>;
 
-  @ViewAnimator(Font, {inherit: true})
-  font: ViewAnimator<this, Font, AnyFont>;
+  @ViewAnimator({type: Font, inherit: true})
+  font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  textColor: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
   tickLabel(): GraphicsView | null;
   tickLabel(tickLabel: GraphicsView | AnyTextRunView | null): this;
@@ -169,35 +198,31 @@ export abstract class TickView<D> extends GraphicsNodeView {
     }
   }
 
-  protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
+  protected modifyUpdate(targetView: View, updateFlags: ViewFlags): ViewFlags {
     let additionalFlags = 0;
     if ((updateFlags & View.NeedsAnimate) !== 0) {
       additionalFlags |= View.NeedsAnimate;
     }
-    additionalFlags |= super.modifyUpdate(updateFlags | additionalFlags);
+    additionalFlags |= super.modifyUpdate(targetView, updateFlags | additionalFlags);
     return additionalFlags;
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: GraphicsViewContext): ViewFlags {
+  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsLayout) !== 0) {
       processFlags |= View.NeedsAnimate;
     }
     return processFlags;
   }
 
-  protected onAnimate(viewContext: GraphicsViewContext): void {
+  protected onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
     const tickLabel = this.tickLabel();
     if (tickLabel !== null) {
       this.layoutTickLabel(tickLabel);
     }
-
-    // We don't need to run the layout phase unless the view frame changes
-    // between now and the display pass.
-    this._viewFlags &= ~View.NeedsLayout;
   }
 
-  protected onLayout(viewContext: GraphicsViewContext): void {
+  protected onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     const tickLabel = this.tickLabel();
     if (tickLabel !== null) {
@@ -205,7 +230,7 @@ export abstract class TickView<D> extends GraphicsNodeView {
     }
   }
 
-  protected willRender(viewContext: GraphicsViewContext): void {
+  protected willRender(viewContext: ViewContextType<this>): void {
     super.willRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
@@ -214,16 +239,16 @@ export abstract class TickView<D> extends GraphicsNodeView {
     }
   }
 
-  protected onRender(viewContext: GraphicsViewContext): void {
+  protected onRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
       const context = renderer.context;
-      context.globalAlpha = this.opacity.value!;
+      context.globalAlpha = this.opacity.getValue();
       this.renderTick(context, this.viewFrame);
     }
   }
 
-  protected didRender(viewContext: GraphicsViewContext): void {
+  protected didRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
@@ -243,11 +268,11 @@ export abstract class TickView<D> extends GraphicsNodeView {
     if (isNaN(view._offset0)) {
       view._offset0 = offset;
     }
-    const tickSpacing = view.tickMarkSpacing.value! / 2;
+    const tickSpacing = view.tickMarkSpacing.getValue() / 2;
     const v = Math.min(Math.abs(offset - view._offset0) / tickSpacing, 1);
     const opacity = this._interpolator!.interpolate(Math.max(u, v));
     if (u === 1 || v === 1) {
-      this._tweenState = TweenState.Converged;
+      this._animatorFlags &= ~TweenAnimator.TweeningFlag;
     }
     if (opacity === 0 && view._state === TickState.Leaving) {
       view._state = TickState.Excluded;
@@ -307,45 +332,7 @@ export abstract class TickView<D> extends GraphicsNodeView {
       throw new TypeError();
     }
     const view = TickView.from(init.value, orientation);
-
-    if (init.tickMarkColor !== void 0) {
-      view.tickMarkColor(init.tickMarkColor);
-    }
-    if (init.tickMarkWidth !== void 0) {
-      view.tickMarkWidth(init.tickMarkWidth);
-    }
-    if (init.tickMarkLength !== void 0) {
-      view.tickMarkLength(init.tickMarkLength);
-    }
-    if (init.tickLabelPadding !== void 0) {
-      view.tickLabelPadding(init.tickLabelPadding);
-    }
-
-    if (init.gridLineColor !== void 0) {
-      view.gridLineColor(init.gridLineColor);
-    }
-    if (init.gridLineWidth !== void 0) {
-      view.gridLineWidth(init.gridLineWidth);
-    }
-
-    if (init.font !== void 0) {
-      view.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      view.textColor(init.textColor);
-    }
-
-    if (init.tickLabel !== void 0) {
-      view.tickLabel(init.tickLabel);
-    }
-
-    if (init.hidden !== void 0) {
-      view.setHidden(init.hidden);
-    }
-    if (init.culled !== void 0) {
-      view.setCulled(init.culled);
-    }
-
+    view.initView(init);
     return view;
   }
 

@@ -105,4 +105,9 @@ export class PxLength extends Length {
     }
   }
 }
+if (typeof CSSUnitValue !== "undefined") { // CSS Typed OM support
+  PxLength.prototype.toCssValue = function (this: PxLength): CSSUnitValue | undefined {
+    return new CSSUnitValue(this._value, "px");
+  };
+}
 Length.Px = PxLength;

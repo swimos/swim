@@ -17,6 +17,7 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {Ease, AnyTransition, Transition} from "@swim/transition";
 import {View, ViewScope, ViewAnimator} from "@swim/view";
+import {ChartViewObserver} from "./ChartViewObserver";
 import {ChartViewController} from "./ChartViewController";
 import {ScaleViewInit, ScaleView} from "./scale/ScaleView";
 import {AnyGraphView, GraphView} from "./graph/GraphView";
@@ -25,6 +26,7 @@ import {AnyAxisView, AxisView} from "./axis/AxisView";
 export type AnyChartView<X = unknown, Y = unknown> = ChartView<X, Y> | ChartViewInit<X, Y>;
 
 export interface ChartViewInit<X = unknown, Y = unknown> extends ScaleViewInit<X, Y> {
+  viewController?: ChartViewController<X, Y>;
   graph?: AnyGraphView<X, Y>;
 
   topAxis?: AnyAxisView<X> | true;
@@ -57,8 +59,70 @@ export class ChartView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
     this.initChart();
   }
 
-  get viewController(): ChartViewController<X, Y> | null {
-    return this._viewController;
+  initView(init: ChartViewInit<X, Y>): void {
+    super.initView(init);
+     if (init.graph !== void 0) {
+      this.setGraph(init.graph);
+    }
+
+    if (init.topAxis !== void 0) {
+      this.topAxis(init.topAxis);
+    }
+    if (init.rightAxis !== void 0) {
+      this.rightAxis(init.rightAxis);
+    }
+    if (init.bottomAxis !== void 0) {
+      this.bottomAxis(init.bottomAxis);
+    }
+    if (init.leftAxis !== void 0) {
+      this.leftAxis(init.leftAxis);
+    }
+
+    if (init.gutterTop !== void 0) {
+      this.gutterTop(init.gutterTop);
+    }
+    if (init.gutterRight !== void 0) {
+      this.gutterRight(init.gutterRight);
+    }
+    if (init.gutterBottom !== void 0) {
+      this.gutterBottom(init.gutterBottom);
+    }
+    if (init.gutterLeft !== void 0) {
+      this.gutterLeft(init.gutterLeft);
+    }
+
+    if (init.borderColor !== void 0) {
+      this.borderColor(init.borderColor);
+    }
+    if (init.borderWidth !== void 0) {
+      this.borderWidth(init.borderWidth);
+    }
+    if (init.borderSerif !== void 0) {
+      this.borderSerif(init.borderSerif);
+    }
+
+    if (init.tickMarkColor !== void 0) {
+      this.tickMarkColor(init.tickMarkColor);
+    }
+    if (init.tickMarkWidth !== void 0) {
+      this.tickMarkWidth(init.tickMarkWidth);
+    }
+    if (init.tickMarkLength !== void 0) {
+      this.tickMarkLength(init.tickMarkLength);
+    }
+    if (init.tickLabelPadding !== void 0) {
+      this.tickLabelPadding(init.tickLabelPadding);
+    }
+    if (init.tickTransition !== void 0) {
+      this.tickTransition(init.tickTransition);
+    }
+
+    if (init.gridLineColor !== void 0) {
+      this.gridLineColor(init.gridLineColor);
+    }
+    if (init.gridLineWidth !== void 0) {
+      this.gridLineWidth(init.gridLineWidth);
+    }
   }
 
   protected initChart(): void {
@@ -69,19 +133,22 @@ export class ChartView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
     return new GraphView();
   }
 
-  graph(): GraphView<X, Y> | null;
-  graph(graph: AnyGraphView<X, Y> | null): this;
-  graph(graph?: AnyGraphView<X, Y> | null): GraphView<X, Y> | null | this {
-    if (graph === void 0) {
-      const childView = this.getChildView("graph");
-      return childView instanceof GraphView ? childView : null;
-    } else {
-      if (graph !== null) {
-        graph = GraphView.fromAny(graph);
-      }
-      this.setChildView("graph", graph);
-      return this;
+  // @ts-ignore
+  declare readonly viewController: ChartViewController<X, Y> | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<ChartViewObserver<X, Y>>;
+
+  get graph(): GraphView<X, Y> | null {
+    const childView = this.getChildView("graph");
+    return childView instanceof GraphView ? childView : null;
+  }
+
+  setGraph(graph: AnyGraphView<X, Y> | null): void {
+    if (graph !== null) {
+      graph = GraphView.fromAny(graph);
     }
+    this.setChildView("graph", graph);
   }
 
   topAxis(): AxisView<X> | null;
@@ -160,57 +227,58 @@ export class ChartView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
     }
   }
 
-  @ViewAnimator(Length, {value: Length.px(20)})
+  @ViewAnimator({type: Length, state: Length.px(20)})
   gutterTop: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Length, {value: Length.px(40)})
+  @ViewAnimator({type: Length, state: Length.px(40)})
   gutterRight: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Length, {value: Length.px(20)})
+  @ViewAnimator({type: Length, state: Length.px(20)})
   gutterBottom: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Length, {value: Length.px(40)})
+  @ViewAnimator({type: Length, state: Length.px(40)})
   gutterLeft: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Color, {value: Color.black()})
+  @ViewAnimator({type: Color, state: Color.black()})
   borderColor: ViewAnimator<this, Color, AnyColor>;
 
-  @ViewAnimator(Number, {value: 1})
+  @ViewAnimator({type: Number, state: 1})
   borderWidth: ViewAnimator<this, number>;
 
-  @ViewAnimator(Number, {value: 6})
+  @ViewAnimator({type: Number, state: 6})
   borderSerif: ViewAnimator<this, number>;
 
-  @ViewAnimator(Color, {value: Color.black()})
+  @ViewAnimator({type: Color, state: Color.black()})
   tickMarkColor: ViewAnimator<this, Color, AnyColor>;
 
-  @ViewAnimator(Number, {value: 1})
+  @ViewAnimator({type: Number, state: 1})
   tickMarkWidth: ViewAnimator<this, number>;
 
-  @ViewAnimator(Number, {value: 6})
+  @ViewAnimator({type: Number, state: 6})
   tickMarkLength: ViewAnimator<this, number>;
 
-  @ViewAnimator(Number, {value: 2})
+  @ViewAnimator({type: Number, state: 2})
   tickLabelPadding: ViewAnimator<this, number>;
 
-  @ViewScope(Object, {
+  @ViewScope({
+    type: Transition,
     inherit: true,
-    init(): Transition<any> {
+    initState(): Transition<any> {
       return Transition.duration(250, Ease.cubicOut);
     },
   })
-  tickTransition: ViewScope<this, Transition<any>>;
+  tickTransition: ViewScope<this, Transition<any>, AnyTransition<any>>;
 
-  @ViewAnimator(Color, {value: Color.transparent()})
+  @ViewAnimator({type: Color, state: Color.transparent()})
   gridLineColor: ViewAnimator<this, Color, AnyColor>;
 
-  @ViewAnimator(Number, {value: 0})
+  @ViewAnimator({type: Number, state: 0})
   gridLineWidth: ViewAnimator<this, number>;
 
   xRange(): readonly [number, number] | undefined {
     const frame = this.viewFrame;
-    const gutterLeft = this.gutterLeft.value!.pxValue(frame.width);
-    const gutterRight = this.gutterRight.value!.pxValue(frame.width);
+    const gutterLeft = this.gutterLeft.getValue().pxValue(frame.width);
+    const gutterRight = this.gutterRight.getValue().pxValue(frame.width);
     const xRangeMin = this._xRangePadding[0];
     const xRangeMax = this.viewFrame.width - gutterRight - gutterLeft - this._xRangePadding[1];
     return [xRangeMin, xRangeMax];
@@ -218,8 +286,8 @@ export class ChartView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
 
   yRange(): readonly [number, number] | undefined {
     const frame = this.viewFrame;
-    const gutterTop = this.gutterTop.value!.pxValue(frame.height);
-    const gutterBottom = this.gutterBottom.value!.pxValue(frame.height);
+    const gutterTop = this.gutterTop.getValue().pxValue(frame.height);
+    const gutterBottom = this.gutterBottom.getValue().pxValue(frame.height);
     const yRangeMin = this._yRangePadding[0];
     const yRangeMax = this.viewFrame.height - gutterBottom - gutterTop - this._yRangePadding[1];
     return [yRangeMin, yRangeMax];
@@ -265,10 +333,10 @@ export class ChartView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
   }
 
   protected layoutChart(frame: BoxR2): void {
-    const gutterTop = this.gutterTop.value!.pxValue(frame.height);
-    const gutterRight = this.gutterRight.value!.pxValue(frame.width);
-    const gutterBottom = this.gutterBottom.value!.pxValue(frame.height);
-    const gutterLeft = this.gutterLeft.value!.pxValue(frame.width);
+    const gutterTop = this.gutterTop.getValue().pxValue(frame.height);
+    const gutterRight = this.gutterRight.getValue().pxValue(frame.width);
+    const gutterBottom = this.gutterBottom.getValue().pxValue(frame.height);
+    const gutterLeft = this.gutterLeft.getValue().pxValue(frame.width);
 
     const graphTop = frame.yMin + gutterTop;
     const graphRight = frame.xMax - gutterRight;
@@ -316,7 +384,7 @@ export class ChartView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
       }
     }
 
-    const graph = this.graph();
+    const graph = this.graph;
     if (graph !== null) {
       const graphFrame = graph.viewFrame;
       if (graphFrame.xMin !== graphLeft || graphFrame.yMin !== graphTop ||
@@ -338,71 +406,7 @@ export class ChartView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
 
   static fromInit<X, Y>(init: ChartViewInit<X, Y>): ChartView<X, Y> {
     const view = new ChartView<X, Y>();
-    ScaleView.init(view, init);
-
-    if (init.graph !== void 0) {
-      view.graph(init.graph);
-    }
-
-    if (init.topAxis !== void 0) {
-      view.topAxis(init.topAxis);
-    }
-    if (init.rightAxis !== void 0) {
-      view.rightAxis(init.rightAxis);
-    }
-    if (init.bottomAxis !== void 0) {
-      view.bottomAxis(init.bottomAxis);
-    }
-    if (init.leftAxis !== void 0) {
-      view.leftAxis(init.leftAxis);
-    }
-
-    if (init.gutterTop !== void 0) {
-      view.gutterTop(init.gutterTop);
-    }
-    if (init.gutterRight !== void 0) {
-      view.gutterRight(init.gutterRight);
-    }
-    if (init.gutterBottom !== void 0) {
-      view.gutterBottom(init.gutterBottom);
-    }
-    if (init.gutterLeft !== void 0) {
-      view.gutterLeft(init.gutterLeft);
-    }
-
-    if (init.borderColor !== void 0) {
-      view.borderColor(init.borderColor);
-    }
-    if (init.borderWidth !== void 0) {
-      view.borderWidth(init.borderWidth);
-    }
-    if (init.borderSerif !== void 0) {
-      view.borderSerif(init.borderSerif);
-    }
-
-    if (init.tickMarkColor !== void 0) {
-      view.tickMarkColor(init.tickMarkColor);
-    }
-    if (init.tickMarkWidth !== void 0) {
-      view.tickMarkWidth(init.tickMarkWidth);
-    }
-    if (init.tickMarkLength !== void 0) {
-      view.tickMarkLength(init.tickMarkLength);
-    }
-    if (init.tickLabelPadding !== void 0) {
-      view.tickLabelPadding(init.tickLabelPadding);
-    }
-    if (init.tickTransition !== void 0) {
-      view.tickTransition(Transition.fromAny(init.tickTransition));
-    }
-
-    if (init.gridLineColor !== void 0) {
-      view.gridLineColor(init.gridLineColor);
-    }
-    if (init.gridLineWidth !== void 0) {
-      view.gridLineWidth(init.gridLineWidth);
-    }
-
+    view.initView(init);
     return view;
   }
 }

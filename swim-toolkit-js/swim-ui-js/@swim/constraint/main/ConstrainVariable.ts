@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Output, Debug, Format} from "@swim/codec";
 import {ConstraintMap} from "./ConstraintMap";
 import {ConstraintSymbol} from "./ConstraintSymbol";
 import {Constrain} from "./Constrain";
 import {ConstrainTerm} from "./ConstrainTerm";
 import {AnyConstraintStrength, ConstraintStrength} from "./ConstraintStrength";
-import {ConstraintScope} from "./ConstraintScope";
 
-export abstract class ConstrainVariable extends ConstrainTerm implements ConstraintSymbol, Debug {
+export abstract class ConstrainVariable extends ConstrainTerm implements ConstraintSymbol {
   /** @hidden */
   isExternal(): boolean {
     return true;
@@ -39,8 +37,6 @@ export abstract class ConstrainVariable extends ConstrainTerm implements Constra
   isConstant(): boolean {
     return false;
   }
-
-  abstract get scope(): ConstraintScope;
 
   abstract get name(): string;
 
@@ -106,15 +102,6 @@ export abstract class ConstrainVariable extends ConstrainTerm implements Constra
 
   divide(scalar: number): Constrain {
     return Constrain.product(1 / scalar, this);
-  }
-
-  debug(output: Output): void {
-    output = output.debug(this.scope).write(46/*'.'*/).write("variable").write(40/*'('*/)
-        .debug(this.name).write(", ").debug(this.value).write(41/*')'*/);
-  }
-
-  toString(): string {
-    return Format.debug(this);
   }
 }
 Constrain.Variable = ConstrainVariable;

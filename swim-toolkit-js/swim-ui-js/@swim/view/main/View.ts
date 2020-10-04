@@ -23,20 +23,24 @@ import {
   AnyConstraintStrength,
   ConstraintStrength,
   Constraint,
+  ConstraintScope,
 } from "@swim/constraint";
-import {Viewport} from "./viewport/Viewport";
+import {ViewContextType, ViewContext} from "./ViewContext";
+import {ViewObserverType, ViewObserver} from "./ViewObserver";
+import {ViewControllerType, ViewController} from "./ViewController";
+import {SubviewConstructor, Subview} from "./Subview";
+import {ViewManager} from "./manager/ViewManager";
+import {LayoutAnchorConstructor, LayoutAnchor} from "./layout/LayoutAnchor";
 import {ViewIdiom} from "./viewport/ViewIdiom";
-import {ViewContext} from "./ViewContext";
-import {ViewObserver} from "./ViewObserver";
-import {ViewController} from "./ViewController";
-import {RootView} from "./root/RootView";
-import {ViewScopeDescriptor, ViewScopeConstructor, ViewScope} from "./scope/ViewScope";
-import {ViewAnimatorDescriptor, ViewAnimatorConstructor, ViewAnimator} from "./animator/ViewAnimator";
-import {LayoutContext} from "./layout/LayoutContext";
-import {LayoutAnchor} from "./layout/LayoutAnchor";
+import {Viewport} from "./viewport/Viewport";
+import {ViewServiceConstructor, ViewService} from "./service/ViewService";
+import {DisplayService} from "./service/DisplayService";
+import {LayoutService} from "./service/LayoutService";
+import {ViewportService} from "./service/ViewportService";
+import {ViewScopeConstructor, ViewScope} from "./scope/ViewScope";
+import {ViewAnimatorConstructor, ViewAnimator} from "./animator/ViewAnimator";
 import {GraphicsView} from "./graphics/GraphicsView";
-import {GraphicsNodeView} from "./graphics/GraphicsNodeView";
-import {GraphicsLeafView} from "./graphics/GraphicsLeafView";
+import {LayerView} from "./graphics/LayerView";
 import {RasterView} from "./raster/RasterView";
 import {ViewNode, NodeView} from "./node/NodeView";
 import {TextView} from "./text/TextView";
@@ -44,13 +48,13 @@ import {ElementViewTagMap, ElementViewConstructor, ElementView} from "./element/
 import {SvgView} from "./svg/SvgView";
 import {HtmlView} from "./html/HtmlView";
 import {CanvasView} from "./canvas/CanvasView";
-import {UiView} from "./ui/UiView";
-
-export type ViewControllerType<V extends View> = V extends {readonly viewController: infer VC} ? VC : unknown;
+import {StyleView} from "./style/StyleView";
 
 export type ViewFlags = number;
 
 export interface ViewInit {
+  key?: string;
+  viewController?: ViewController;
 }
 
 export interface ViewConstructor<V extends View = View> {
@@ -58,14 +62,30 @@ export interface ViewConstructor<V extends View = View> {
 }
 
 export interface ViewClass {
-  /** @hidden */
-  _viewScopeDescriptors?: {[scopeName: string]: ViewScopeDescriptor<View, unknown> | undefined};
+  readonly mountFlags: ViewFlags;
+
+  readonly powerFlags: ViewFlags;
+
+  readonly uncullFlags: ViewFlags;
+
+  readonly insertChildFlags: ViewFlags;
+
+  readonly removeChildFlags: ViewFlags;
 
   /** @hidden */
-  _viewAnimatorDescriptors?: {[animatorName: string]: ViewAnimatorDescriptor<View, unknown> | undefined};
+  _subviewConstructors?: {[subviewName: string]: SubviewConstructor<any, any> | undefined};
+
+  /** @hidden */
+  _viewServiceConstructors?: {[serviceName: string]: ViewServiceConstructor<any, unknown> | undefined};
+
+  /** @hidden */
+  _viewScopeConstructors?: {[scopeName: string]: ViewScopeConstructor<any, unknown> | undefined};
+
+  /** @hidden */
+  _viewAnimatorConstructors?: {[animatorName: string]: ViewAnimatorConstructor<any, unknown> | undefined};
 }
 
-export abstract class View implements AnimatorContext, LayoutContext {
+export abstract class View implements AnimatorContext, ConstraintScope {
   abstract get viewController(): ViewController | null;
 
   abstract setViewController(viewController: ViewControllerType<this> | null): void;
@@ -84,60 +104,92 @@ export abstract class View implements AnimatorContext, LayoutContext {
 
   abstract get viewObservers(): ReadonlyArray<ViewObserver>;
 
-  abstract addViewObserver(viewObserver: ViewObserver): void;
+  abstract addViewObserver(viewObserver: ViewObserverType<this>): void;
 
-  protected willAddViewObserver(viewObserver: ViewObserver): void {
+  protected willAddViewObserver(viewObserver: ViewObserverType<this>): void {
     // hook
   }
 
-  protected onAddViewObserver(viewObserver: ViewObserver): void {
+  protected onAddViewObserver(viewObserver: ViewObserverType<this>): void {
     // hook
   }
 
-  protected didAddViewObserver(viewObserver: ViewObserver): void {
+  protected didAddViewObserver(viewObserver: ViewObserverType<this>): void {
     // hook
   }
 
-  abstract removeViewObserver(viewObserver: ViewObserver): void;
+  abstract removeViewObserver(viewObserver: ViewObserverType<this>): void;
 
-  protected willRemoveViewObserver(viewObserver: ViewObserver): void {
+  protected willRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
     // hook
   }
 
-  protected onRemoveViewObserver(viewObserver: ViewObserver): void {
+  protected onRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
     // hook
   }
 
-  protected didRemoveViewObserver(viewObserver: ViewObserver): void {
+  protected didRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
     // hook
   }
 
-  protected willObserve(callback: (this: this, viewObserver: ViewObserver) => void): void {
+  protected willObserve<T>(callback: (this: this, viewObserver: ViewObserverType<this>) => T | void): T | undefined {
+    let result: T | undefined;
     const viewController = this.viewController;
     if (viewController !== null) {
-      callback.call(this, viewController);
+      result = callback.call(this, viewController);
+      if (result !== void 0) {
+        return result;
+      }
     }
     const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      callback.call(this, viewObservers[i]);
+    let i = 0;
+    while (i < viewObservers.length) {
+      const viewObserver = viewObservers[i];
+      result = callback.call(this, viewObserver);
+      if (result !== void 0) {
+        return result;
+      }
+      if (viewObserver === viewObservers[i]) {
+        i += 1;
+      }
     }
+    return result;
   }
 
-  protected didObserve(callback: (this: this, viewObserver: ViewObserver) => void): void {
+  protected didObserve<T>(callback: (this: this, viewObserver: ViewObserverType<this>) => T | void): T | undefined {
+    let result: T | undefined;
     const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      callback.call(this, viewObservers[i]);
+    let i = 0;
+    while (i < viewObservers.length) {
+      const viewObserver = viewObservers[i];
+      result = callback.call(this, viewObserver);
+      if (result !== void 0) {
+        return result;
+      }
+      if (viewObserver === viewObservers[i]) {
+        i += 1;
+      }
     }
     const viewController = this.viewController;
     if (viewController !== null) {
-      callback.call(this, viewController);
+      result = callback.call(this, viewController);
+      if (result !== void 0) {
+        return result;
+      }
+    }
+    return result;
+  }
+
+  initView(init: ViewInit): void {
+    if (init.viewController !== void 0) {
+      this.setViewController(init.viewController as ViewControllerType<this>);
     }
   }
 
-  abstract get key(): string | null;
+  abstract get key(): string | undefined;
 
   /** @hidden */
-  abstract setKey(key: string | null): void;
+  abstract setKey(key: string | undefined): void;
 
   abstract get parentView(): View | null;
 
@@ -158,6 +210,9 @@ export abstract class View implements AnimatorContext, LayoutContext {
         this.cascadeMount();
         if (newParentView.isPowered()) {
           this.cascadePower();
+        }
+        if (newParentView.isCulled()) {
+          this.cascadeCull();
         }
       }
     } else if (this.isMounted()) {
@@ -183,6 +238,14 @@ export abstract class View implements AnimatorContext, LayoutContext {
 
   abstract get childViews(): ReadonlyArray<View>;
 
+  abstract firstChildView(): View | null;
+
+  abstract lastChildView(): View | null;
+
+  abstract nextChildView(targetView: View): View | null;
+
+  abstract previousChildView(targetView: View): View | null;
+
   abstract forEachChildView<T, S = unknown>(callback: (this: S, childView: View) => T | void,
                                             thisArg?: S): T | undefined;
 
@@ -196,6 +259,10 @@ export abstract class View implements AnimatorContext, LayoutContext {
 
   abstract insertChildView(childView: View, targetView: View | null, key?: string): void;
 
+  get insertChildFlags(): ViewFlags {
+    return this.viewClass.insertChildFlags;
+  }
+
   protected willInsertChildView(childView: View, targetView: View | null | undefined): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillInsertChildView !== void 0) {
@@ -205,7 +272,7 @@ export abstract class View implements AnimatorContext, LayoutContext {
   }
 
   protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
-    // hook
+    this.requireUpdate(this.insertChildFlags);
   }
 
   protected didInsertChildView(childView: View, targetView: View | null | undefined): void {
@@ -216,12 +283,18 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
+  abstract cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void;
+
   abstract removeChildView(key: string): View | null;
   abstract removeChildView(childView: View): void;
 
   abstract removeAll(): void;
 
   abstract remove(): void;
+
+  get removeChildFlags(): ViewFlags {
+    return this.viewClass.removeChildFlags;
+  }
 
   protected willRemoveChildView(childView: View): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
@@ -232,7 +305,7 @@ export abstract class View implements AnimatorContext, LayoutContext {
   }
 
   protected onRemoveChildView(childView: View): void {
-    // hook
+    this.requireUpdate(this.removeChildFlags);
   }
 
   protected didRemoveChildView(childView: View): void {
@@ -241,6 +314,39 @@ export abstract class View implements AnimatorContext, LayoutContext {
         viewObserver.viewDidRemoveChildView(childView, this);
       }
     });
+  }
+
+  getSuperView<V extends View>(viewClass: {new(...args: any[]): V}): V | null {
+    const parentView = this.parentView;
+    if (parentView === null) {
+      return null;
+    } else if (parentView instanceof viewClass) {
+      return parentView;
+    } else {
+      return parentView.getSuperView(viewClass);
+    }
+  }
+
+  getBaseView<V extends View>(viewClass: {new(...args: any[]): V}): V | null {
+    const parentView = this.parentView;
+    if (parentView === null) {
+      return null;
+    } else if (parentView instanceof viewClass) {
+      const baseView = parentView.getBaseView(viewClass);
+      return baseView !== null ? baseView : parentView;
+    } else {
+      return parentView.getBaseView(viewClass);
+    }
+  }
+
+  readonly displayService: DisplayService<this>; // defined by DisplayService
+
+  readonly layoutService: LayoutService<this>; // defined by LayoutService
+
+  readonly viewportService: ViewportService<this>; // defined by ViewportService
+
+  get viewClass(): ViewClass {
+    return this.constructor as unknown as ViewClass;
   }
 
   /** @hidden */
@@ -255,6 +361,10 @@ export abstract class View implements AnimatorContext, LayoutContext {
 
   abstract cascadeMount(): void;
 
+  get mountFlags(): ViewFlags {
+    return this.viewClass.mountFlags;
+  }
+
   protected willMount(): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillMount !== void 0) {
@@ -264,7 +374,8 @@ export abstract class View implements AnimatorContext, LayoutContext {
   }
 
   protected onMount(): void {
-    // hook
+    this.requestUpdate(this, this.viewFlags & ~View.StatusMask, false);
+    this.requireUpdate(this.mountFlags);
   }
 
   protected didMount(): void {
@@ -303,6 +414,10 @@ export abstract class View implements AnimatorContext, LayoutContext {
 
   abstract cascadePower(): void;
 
+  get powerFlags(): ViewFlags {
+    return this.viewClass.powerFlags;
+  }
+
   protected willPower(): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillPower !== void 0) {
@@ -312,7 +427,7 @@ export abstract class View implements AnimatorContext, LayoutContext {
   }
 
   protected onPower(): void {
-    // hook
+    this.requireUpdate(this.powerFlags);
   }
 
   protected didPower(): void {
@@ -345,22 +460,74 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  get updateTime(): number {
-    const parentView = this.parentView;
-    return parentView !== null ? parentView.updateTime : performance.now();
+  isCulled(): boolean {
+    return (this.viewFlags & View.CulledMask) !== 0;
+  }
+
+  abstract setCulled(culled: boolean): void;
+
+  abstract cascadeCull(): void;
+
+  protected willCull(): void {
+    this.willObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewWillCull !== void 0) {
+        viewObserver.viewWillCull(this);
+      }
+    });
+  }
+
+  protected onCull(): void {
+    // hook
+  }
+
+  protected didCull(): void {
+    this.didObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewDidCull !== void 0) {
+        viewObserver.viewDidCull(this);
+      }
+    });
+  }
+
+  abstract cascadeUncull(): void;
+
+  get uncullFlags(): ViewFlags {
+    return this.viewClass.uncullFlags;
+  }
+
+  protected willUncull(): void {
+    this.willObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewWillUncull !== void 0) {
+        viewObserver.viewWillUncull(this);
+      }
+    });
+  }
+
+  protected onUncull(): void {
+    this.requestUpdate(this, this.viewFlags & ~View.StatusMask, false);
+    this.requireUpdate(this.uncullFlags);
+  }
+
+  protected didUncull(): void {
+    this.didObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewDidUncull !== void 0) {
+        viewObserver.viewDidUncull(this);
+      }
+    });
   }
 
   requireUpdate(updateFlags: ViewFlags, immediate: boolean = false): void {
     updateFlags &= ~View.StatusMask;
-    this.willRequireUpdate(updateFlags, immediate);
-    const oldUpdateFlags = this.viewFlags;
-    const newUpdateFlags = oldUpdateFlags | updateFlags;
-    const deltaUpdateFlags = newUpdateFlags & ~oldUpdateFlags;
-    if (deltaUpdateFlags !== 0) {
-      this.setViewFlags(newUpdateFlags);
-      this.requestUpdate(deltaUpdateFlags, immediate);
+    if (updateFlags !== 0) {
+      this.willRequireUpdate(updateFlags, immediate);
+      const oldUpdateFlags = this.viewFlags;
+      const newUpdateFlags = oldUpdateFlags | updateFlags;
+      const deltaUpdateFlags = newUpdateFlags & ~oldUpdateFlags;
+      if (deltaUpdateFlags !== 0) {
+        this.setViewFlags(newUpdateFlags);
+        this.requestUpdate(this, deltaUpdateFlags, immediate);
+      }
+      this.didRequireUpdate(updateFlags, immediate);
     }
-    this.didRequireUpdate(updateFlags, immediate);
   }
 
   protected willRequireUpdate(updateFlags: ViewFlags, immediate: boolean): void {
@@ -371,17 +538,24 @@ export abstract class View implements AnimatorContext, LayoutContext {
     // hook
   }
 
-  requestUpdate(updateFlags: ViewFlags, immediate: boolean): void {
-    updateFlags = this.willRequestUpdate(updateFlags, immediate);
-    const parentView = this.parentView;
-    if (parentView !== null) {
-      parentView.requestUpdate(updateFlags, immediate);
+  requestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
+    if ((this.viewFlags & View.CulledMask) !== View.CulledFlag) { // if not culled root
+      updateFlags = this.willRequestUpdate(targetView, updateFlags, immediate);
+      const parentView = this.parentView;
+      if (parentView !== null) {
+        parentView.requestUpdate(targetView, updateFlags, immediate);
+      } else if (this.isMounted()) {
+        const displayManager = this.displayService.manager;
+        if (displayManager !== void 0) {
+          displayManager.requestUpdate(targetView, updateFlags, immediate);
+        }
+      }
+      this.didRequestUpdate(targetView, updateFlags, immediate);
     }
-    this.didRequestUpdate(updateFlags, immediate);
   }
 
-  protected willRequestUpdate(updateFlags: ViewFlags, immediate: boolean): ViewFlags {
-    let additionalFlags = this.modifyUpdate(updateFlags);
+  protected willRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): ViewFlags {
+    let additionalFlags = this.modifyUpdate(targetView, updateFlags);
     additionalFlags &= ~View.StatusMask;
     if (additionalFlags !== 0) {
       updateFlags |= additionalFlags;
@@ -390,11 +564,11 @@ export abstract class View implements AnimatorContext, LayoutContext {
     return updateFlags;
   }
 
-  protected didRequestUpdate(updateFlags: ViewFlags, immediate: boolean): void {
+  protected didRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
     // hook
   }
 
-  protected modifyUpdate(updateFlags: ViewFlags): ViewFlags {
+  protected modifyUpdate(targetView: View, updateFlags: ViewFlags): ViewFlags {
     let additionalFlags = 0;
     if ((updateFlags & View.ProcessMask) !== 0) {
       additionalFlags |= View.NeedsProcess;
@@ -405,6 +579,10 @@ export abstract class View implements AnimatorContext, LayoutContext {
     return additionalFlags;
   }
 
+  isTraversing(): boolean {
+    return (this.viewFlags & View.TraversingFlag) !== 0;
+  }
+
   isUpdating(): boolean {
     return (this.viewFlags & View.UpdatingMask) !== 0;
   }
@@ -413,16 +591,13 @@ export abstract class View implements AnimatorContext, LayoutContext {
     return (this.viewFlags & View.ProcessingFlag) !== 0;
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: ViewContext): ViewFlags {
+  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     return processFlags;
   }
 
   abstract cascadeProcess(processFlags: ViewFlags, viewContext: ViewContext): void;
 
-  /** @hidden */
-  protected abstract doProcess(processFlags: ViewFlags, viewContext: ViewContext): void;
-
-  protected willProcess(viewContext: ViewContext): void {
+  protected willProcess(viewContext: ViewContextType<this>): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillProcess !== void 0) {
         viewObserver.viewWillProcess(viewContext, this);
@@ -430,11 +605,11 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  protected onProcess(viewContext: ViewContext): void {
+  protected onProcess(viewContext: ViewContextType<this>): void {
     // hook
   }
 
-  protected didProcess(viewContext: ViewContext): void {
+  protected didProcess(viewContext: ViewContextType<this>): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewDidProcess !== void 0) {
         viewObserver.viewDidProcess(viewContext, this);
@@ -442,7 +617,7 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  protected willResize(viewContext: ViewContext): void {
+  protected willResize(viewContext: ViewContextType<this>): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillResize !== void 0) {
         viewObserver.viewWillResize(viewContext, this);
@@ -450,11 +625,11 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  protected onResize(viewContext: ViewContext): void {
+  protected onResize(viewContext: ViewContextType<this>): void {
     // hook
   }
 
-  protected didResize(viewContext: ViewContext): void {
+  protected didResize(viewContext: ViewContextType<this>): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewDidResize !== void 0) {
         viewObserver.viewDidResize(viewContext, this);
@@ -462,7 +637,7 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  protected willScroll(viewContext: ViewContext): void {
+  protected willScroll(viewContext: ViewContextType<this>): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillScroll !== void 0) {
         viewObserver.viewWillScroll(viewContext, this);
@@ -470,11 +645,11 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  protected onScroll(viewContext: ViewContext): void {
+  protected onScroll(viewContext: ViewContextType<this>): void {
     // hook
   }
 
-  protected didScroll(viewContext: ViewContext): void {
+  protected didScroll(viewContext: ViewContextType<this>): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewDidScroll !== void 0) {
         viewObserver.viewDidScroll(viewContext, this);
@@ -482,27 +657,27 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  protected willCompute(viewContext: ViewContext): void {
+  protected willChange(viewContext: ViewContextType<this>): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewWillCompute !== void 0) {
-        viewObserver.viewWillCompute(viewContext, this);
+      if (viewObserver.viewWillChange !== void 0) {
+        viewObserver.viewWillChange(viewContext, this);
       }
     });
   }
 
-  protected onCompute(viewContext: ViewContext): void {
+  protected onChange(viewContext: ViewContextType<this>): void {
     // hook
   }
 
-  protected didCompute(viewContext: ViewContext): void {
+  protected didChange(viewContext: ViewContextType<this>): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewDidCompute !== void 0) {
-        viewObserver.viewDidCompute(viewContext, this);
+      if (viewObserver.viewDidChange !== void 0) {
+        viewObserver.viewDidChange(viewContext, this);
       }
     });
   }
 
-  protected willAnimate(viewContext: ViewContext): void {
+  protected willAnimate(viewContext: ViewContextType<this>): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillAnimate !== void 0) {
         viewObserver.viewWillAnimate(viewContext, this);
@@ -510,11 +685,11 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  protected onAnimate(viewContext: ViewContext): void {
+  protected onAnimate(viewContext: ViewContextType<this>): void {
     // hook
   }
 
-  protected didAnimate(viewContext: ViewContext): void {
+  protected didAnimate(viewContext: ViewContextType<this>): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewDidAnimate !== void 0) {
         viewObserver.viewDidAnimate(viewContext, this);
@@ -522,7 +697,7 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  protected willLayout(viewContext: ViewContext): void {
+  protected willLayout(viewContext: ViewContextType<this>): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillLayout !== void 0) {
         viewObserver.viewWillLayout(viewContext, this);
@@ -530,11 +705,11 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  protected onLayout(viewContext: ViewContext): void {
+  protected onLayout(viewContext: ViewContextType<this>): void {
     // hook
   }
 
-  protected didLayout(viewContext: ViewContext): void {
+  protected didLayout(viewContext: ViewContextType<this>): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewDidLayout !== void 0) {
         viewObserver.viewDidLayout(viewContext, this);
@@ -542,57 +717,70 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  /** @hidden */
-  protected doProcessChildViews(processFlags: ViewFlags, viewContext: ViewContext): void {
-    const childViews = this.childViews;
-    if ((processFlags & View.ProcessMask) !== 0 && childViews.length !== 0) {
-      this.willProcessChildViews(viewContext);
-      for (let i = 0; i < childViews.length; i += 1) {
-        const childView = childViews[i];
-        const childViewContext = this.childViewContext(childView, viewContext);
-        this.doProcessChildView(childView, processFlags, childViewContext);
+  protected willProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    this.willObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewWillProcessChildViews !== void 0) {
+        viewObserver.viewWillProcessChildViews(processFlags, viewContext, this);
       }
-      this.didProcessChildViews(viewContext);
-    }
+    });
+  }
+
+  protected onProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    this.processChildViews(processFlags, viewContext);
+  }
+
+  protected didProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    this.didObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewDidProcessChildViews !== void 0) {
+        viewObserver.viewDidProcessChildViews(processFlags, viewContext, this);
+      }
+    });
+  }
+
+  protected processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
+                              callback?: (this: this, childView: View) => void): void {
+    this.forEachChildView(function (childView: View): void {
+      this.processChildView(childView, processFlags, viewContext);
+      if (callback !== void 0) {
+        callback.call(this, childView);
+      }
+      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
+        this.removeChildView(childView);
+      }
+    }, this);
   }
 
   /** @hidden */
-  protected doProcessChildView(childView: View, processFlags: ViewFlags, viewContext: ViewContext): void {
+  protected processChildView(childView: View, processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    this.willProcessChildView(childView, processFlags, viewContext);
+    this.onProcessChildView(childView, processFlags, viewContext);
+    this.didProcessChildView(childView, processFlags, viewContext);
+  }
+
+  protected willProcessChildView(childView: View, processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    // hook
+  }
+
+  protected onProcessChildView(childView: View, processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     childView.cascadeProcess(processFlags, viewContext);
   }
 
-  /** @hidden */
-  protected willProcessChildViews(viewContext: ViewContext): void {
-    this.willObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewWillProcessChildViews !== void 0) {
-        viewObserver.viewWillProcessChildViews(viewContext, this);
-      }
-    });
-  }
-
-  /** @hidden */
-  protected didProcessChildViews(viewContext: ViewContext): void {
-    this.didObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewDidProcessChildViews !== void 0) {
-        viewObserver.viewDidProcessChildViews(viewContext, this);
-      }
-    });
+  protected didProcessChildView(childView: View, processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    // hook
   }
 
   isDisplaying(): boolean {
     return (this.viewFlags & View.DisplayingFlag) !== 0;
   }
 
-  needsDisplay(displayFlags: ViewFlags, viewContext: ViewContext): ViewFlags {
+  needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     return displayFlags;
   }
 
   abstract cascadeDisplay(displayFlags: ViewFlags, viewContext: ViewContext): void;
 
-  /** @hidden */
-  protected abstract doDisplay(displayFlags: ViewFlags, viewContext: ViewContext): void;
-
-  protected willDisplay(viewContext: ViewContext): void {
+  protected willDisplay(viewContext: ViewContextType<this>): void {
     this.willObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewWillDisplay !== void 0) {
         viewObserver.viewWillDisplay(viewContext, this);
@@ -600,11 +788,11 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  protected onDisplay(viewContext: ViewContext): void {
+  protected onDisplay(viewContext: ViewContextType<this>): void {
     // hook
   }
 
-  protected didDisplay(viewContext: ViewContext): void {
+  protected didDisplay(viewContext: ViewContextType<this>): void {
     this.didObserve(function (viewObserver: ViewObserver): void {
       if (viewObserver.viewDidDisplay !== void 0) {
         viewObserver.viewDidDisplay(viewContext, this);
@@ -612,45 +800,97 @@ export abstract class View implements AnimatorContext, LayoutContext {
     });
   }
 
-  /** @hidden */
-  protected doDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContext): void {
-    const childViews = this.childViews;
-    if ((displayFlags & View.DisplayMask) !== 0 && childViews.length !== 0) {
-      this.willDisplayChildViews(viewContext);
-      for (let i = 0; i < childViews.length; i += 1) {
-        const childView = childViews[i];
-        const childViewContext = this.childViewContext(childView, viewContext);
-        this.doDisplayChildView(childView, displayFlags, childViewContext);
+  protected willDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    this.willObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewWillDisplayChildViews !== void 0) {
+        viewObserver.viewWillDisplayChildViews(displayFlags, viewContext, this);
       }
-      this.didDisplayChildViews(viewContext);
-    }
+    });
+  }
+
+  protected onDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    this.displayChildViews(displayFlags, viewContext);
+  }
+
+  protected didDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    this.didObserve(function (viewObserver: ViewObserver): void {
+      if (viewObserver.viewDidDisplayChildViews !== void 0) {
+        viewObserver.viewDidDisplayChildViews(displayFlags, viewContext, this);
+      }
+    });
+  }
+
+  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                              callback?: (this: this, childView: View) => void): void {
+    this.forEachChildView(function (childView: View): void {
+      this.displayChildView(childView, displayFlags, viewContext);
+      if (callback !== void 0) {
+        callback.call(this, childView);
+      }
+      if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+        childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
+        this.removeChildView(childView);
+      }
+    }, this);
   }
 
   /** @hidden */
-  protected doDisplayChildView(childView: View, displayFlags: ViewFlags, viewContext: ViewContext): void {
+  protected displayChildView(childView: View, displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    this.willDisplayChildView(childView, displayFlags, viewContext);
+    this.onDisplayChildView(childView, displayFlags, viewContext);
+    this.didDisplayChildView(childView, displayFlags, viewContext);
+  }
+
+  protected willDisplayChildView(childView: View, displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    // hook
+  }
+
+  protected onDisplayChildView(childView: View, displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     childView.cascadeDisplay(displayFlags, viewContext);
   }
 
-  /** @hidden */
-  protected willDisplayChildViews(viewContext: ViewContext): void {
-    this.willObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewWillDisplayChildViews !== void 0) {
-        viewObserver.viewWillDisplayChildViews(viewContext, this);
-      }
-    });
+  protected didDisplayChildView(childView: View, displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+    // hook
   }
 
+  abstract hasSubview(subviewName: string): boolean;
+
+  abstract getSubview(subviewName: string): Subview<this, View> | null;
+
+  abstract setSubview(subviewName: string, subview: Subview<this, View, unknown> | null): void;
+
   /** @hidden */
-  protected didDisplayChildViews(viewContext: ViewContext): void {
-    this.didObserve(function (viewObserver: ViewObserver): void {
-      if (viewObserver.viewDidDisplayChildViews !== void 0) {
-        viewObserver.viewDidDisplayChildViews(viewContext, this);
+  getLazySubview(subviewName: string): Subview<this, View> | null {
+    let subview = this.getSubview(subviewName);
+    if (subview === null) {
+      const viewClass = (this as any).__proto__ as ViewClass;
+      const constructor = View.getSubviewConstructor(subviewName, viewClass);
+      if (constructor !== null) {
+        subview = new constructor(this, subviewName);
+        this.setSubview(subviewName, subview);
       }
-    });
+    }
+    return subview;
   }
 
-  childViewContext(childView: View, viewContext: ViewContext): ViewContext {
-    return viewContext;
+  abstract hasViewService(serviceName: string): boolean;
+
+  abstract getViewService(serviceName: string): ViewService<this, unknown> | null;
+
+  abstract setViewService(serviceName: string, viewService: ViewService<this, unknown> | null): void;
+
+  /** @hidden */
+  getLazyViewService(serviceName: string): ViewService<this, unknown> | null {
+    let viewService = this.getViewService(serviceName);
+    if (viewService === null) {
+      const viewClass = (this as any).__proto__ as ViewClass;
+      const constructor = View.getViewServiceConstructor(serviceName, viewClass);
+      if (constructor !== null) {
+        viewService = new constructor(this, serviceName);
+        this.setViewService(serviceName, viewService);
+      }
+    }
+    return viewService;
   }
 
   abstract hasViewScope(scopeName: string): boolean;
@@ -664,54 +904,33 @@ export abstract class View implements AnimatorContext, LayoutContext {
     let viewScope = this.getViewScope(scopeName);
     if (viewScope === null) {
       const viewClass = (this as any).__proto__ as ViewClass;
-      const descriptor = View.getViewScopeDescriptor(scopeName, viewClass);
-      if (descriptor !== null && descriptor.scopeType !== void 0) {
-        const ViewScope = descriptor.scopeType;
-        viewScope = new ViewScope<this>(this, scopeName, descriptor);
+      const constructor = View.getViewScopeConstructor(scopeName, viewClass);
+      if (constructor !== null) {
+        viewScope = new constructor(this, scopeName);
         this.setViewScope(scopeName, viewScope);
       }
     }
-    return viewScope
-  }
-
-  /** @hidden */
-  viewScopeDidSetAuto<T, U>(viewScope: ViewScope<View, T, U>, auto: boolean): void {
-    if (auto) {
-      this.requireUpdate(View.NeedsCompute);
-    }
-  }
-
-  /** @hidden */
-  viewScopeDidSetState<T, U>(viewScope: ViewScope<View, T, U>, newState: T | undefined, oldState: T | undefined): void {
-    this.requireUpdate(View.NeedsCompute);
+    return viewScope;
   }
 
   abstract hasViewAnimator(animatorName: string): boolean;
 
   abstract getViewAnimator(animatorName: string): ViewAnimator<this, unknown> | null;
 
-  abstract setViewAnimator(animatorName: string, animator: ViewAnimator<this, unknown> | null): void;
+  abstract setViewAnimator(animatorName: string, viewAnimator: ViewAnimator<this, unknown> | null): void;
 
   /** @hidden */
   getLazyViewAnimator(animatorName: string): ViewAnimator<this, unknown> | null {
     let viewAnimator = this.getViewAnimator(animatorName);
     if (viewAnimator === null) {
       const viewClass = (this as any).__proto__ as ViewClass;
-      const descriptor = View.getViewAnimatorDescriptor(animatorName, viewClass);
-      if (descriptor !== null && descriptor.animatorType !== void 0) {
-        const ViewAnimator = descriptor.animatorType;
-        viewAnimator = new ViewAnimator<this>(this, animatorName, descriptor);
+      const constructor = View.getViewAnimatorConstructor(animatorName, viewClass);
+      if (constructor !== null) {
+        viewAnimator = new constructor(this, animatorName);
         this.setViewAnimator(animatorName, viewAnimator);
       }
     }
     return viewAnimator;
-  }
-
-  /** @hidden */
-  animatorDidSetAuto(animator: Animator, auto: boolean): void {
-    if (auto && animator instanceof View.Animator) {
-      this.requireUpdate(View.NeedsCompute);
-    }
   }
 
   /** @hidden */
@@ -752,18 +971,18 @@ export abstract class View implements AnimatorContext, LayoutContext {
 
   /** @hidden */
   activateConstraint(constraint: Constraint): void {
-    const rootView = this.rootView;
-    if (rootView !== null) {
-      rootView.activateConstraint(constraint);
+    const layoutManager = this.layoutService.manager;
+    if (layoutManager !== void 0) {
+      layoutManager.activateConstraint(constraint);
       this.requireUpdate(View.NeedsLayout);
     }
   }
 
   /** @hidden */
   deactivateConstraint(constraint: Constraint): void {
-    const rootView = this.rootView;
-    if (rootView !== null) {
-      rootView.deactivateConstraint(constraint);
+    const layoutManager = this.layoutService.manager;
+    if (layoutManager !== void 0) {
+      layoutManager.deactivateConstraint(constraint);
       this.requireUpdate(View.NeedsLayout);
     }
   }
@@ -790,43 +1009,70 @@ export abstract class View implements AnimatorContext, LayoutContext {
 
   /** @hidden */
   activateConstraintVariable(constraintVariable: ConstrainVariable): void {
-    const rootView = this.rootView;
-    if (rootView !== null) {
-      rootView.activateConstraintVariable(constraintVariable);
+    const layoutManager = this.layoutService.manager;
+    if (layoutManager !== void 0) {
+      layoutManager.activateConstraintVariable(constraintVariable);
       this.requireUpdate(View.NeedsLayout);
     }
   }
 
   /** @hidden */
   deactivateConstraintVariable(constraintVariable: ConstrainVariable): void {
-    const rootView = this.rootView;
-    if (rootView !== null) {
-      rootView.deactivateConstraintVariable(constraintVariable);
+    const layoutManager = this.layoutService.manager;
+    if (layoutManager !== void 0) {
+      layoutManager.deactivateConstraintVariable(constraintVariable);
       this.requireUpdate(View.NeedsLayout);
     }
   }
 
   /** @hidden */
   setConstraintVariable(constraintVariable: ConstrainVariable, state: number): void {
-    const rootView = this.rootView;
-    if (rootView !== null) {
-      rootView.setConstraintVariable(constraintVariable, state);
+    const layoutManager = this.layoutService.manager;
+    if (layoutManager !== void 0) {
+      layoutManager.setConstraintVariable(constraintVariable, state);
     }
   }
 
-  get viewport(): Viewport | null {
+  /** @hidden */
+  updateConstraintVariables(): void {
+    const layoutManager = this.layoutService.manager;
+    if (layoutManager !== void 0) {
+      layoutManager.updateConstraintVariables();
+    }
+  }
+
+  extendViewContext(viewContext: ViewContext): ViewContextType<this> {
+    return viewContext as ViewContextType<this>;
+  }
+
+  get superViewContext(): ViewContext {
+    let superViewContext: ViewContext;
     const parentView = this.parentView;
-    return parentView !== null ? parentView.viewport : null;
+    if (parentView !== null) {
+      superViewContext = parentView.viewContext;
+    } else if (this.isMounted()) {
+      const viewportManager = this.viewportService.manager;
+      if (viewportManager !== void 0) {
+        superViewContext = viewportManager.viewContext;
+      } else {
+        superViewContext = ViewContext.default();
+      }
+    } else {
+      superViewContext = ViewContext.default();
+    }
+    return superViewContext;
+  }
+
+  get viewContext(): ViewContext {
+    return this.extendViewContext(this.superViewContext);
   }
 
   get viewIdiom(): ViewIdiom {
-    const parentView = this.parentView;
-    return parentView !== null ? parentView.viewIdiom : "unspecified";
+    return this.viewContext.viewIdiom;
   }
 
-  get rootView(): RootView | null {
-    const parentView = this.parentView;
-    return parentView !== null ? parentView.rootView : null;
+  get viewport(): Viewport {
+    return this.viewContext.viewport;
   }
 
   /**
@@ -896,15 +1142,15 @@ export abstract class View implements AnimatorContext, LayoutContext {
                options?: EventListenerOptions | boolean): this;
 
   /** @hidden */
-  static getViewScopeDescriptor<V extends View>(scopeName: string, viewClass: ViewClass | null = null): ViewScopeDescriptor<V, unknown> | null {
+  static getSubviewConstructor(subviewName: string, viewClass: ViewClass | null = null): SubviewConstructor<any, any> | null {
     if (viewClass === null) {
       viewClass = this.prototype as unknown as ViewClass;
     }
     do {
-      if (viewClass.hasOwnProperty("_viewScopeDescriptors")) {
-        const descriptor = viewClass._viewScopeDescriptors![scopeName];
-        if (descriptor !== void 0) {
-          return descriptor;
+      if (viewClass.hasOwnProperty("_subviewConstructors")) {
+        const constructor = viewClass._subviewConstructors![subviewName];
+        if (constructor !== void 0) {
+          return constructor;
         }
       }
       viewClass = (viewClass as any).__proto__ as ViewClass | null;
@@ -913,18 +1159,93 @@ export abstract class View implements AnimatorContext, LayoutContext {
   }
 
   /** @hidden */
-  static decorateViewScope<V extends View, T, U>(ViewScope: ViewScopeConstructor<T, U>,
-                                                 descriptor: ViewScopeDescriptor<V, T, U> | undefined,
-                                                 viewClass: ViewClass, scopeName: string): void {
-    if (!viewClass.hasOwnProperty("_viewScopeDescriptors")) {
-      viewClass._viewScopeDescriptors = {};
+  static decorateSubview<V extends View, S extends View, U>(constructor: SubviewConstructor<V, S, U>,
+                                                            viewClass: ViewClass, subviewName: string): void {
+    if (!viewClass.hasOwnProperty("_subviewConstructors")) {
+      viewClass._subviewConstructors = {};
     }
-    viewClass._viewScopeDescriptors![scopeName] = descriptor;
+    viewClass._subviewConstructors![subviewName] = constructor;
+    Object.defineProperty(viewClass, subviewName, {
+      get: function (this: V): Subview<V, S, U> {
+        let subview = this.getSubview(subviewName) as Subview<V, S, U> | null;
+        if (subview === null) {
+          subview = new constructor(this, subviewName);
+          this.setSubview(subviewName, subview);
+        }
+        return subview;
+      },
+      configurable: true,
+      enumerable: true,
+    });
+  }
+
+  /** @hidden */
+  static getViewServiceConstructor(serviceName: string, viewClass: ViewClass | null = null): ViewServiceConstructor<any, unknown> | null {
+    if (viewClass === null) {
+      viewClass = this.prototype as unknown as ViewClass;
+    }
+    do {
+      if (viewClass.hasOwnProperty("_viewServiceConstructors")) {
+        const constructor = viewClass._viewServiceConstructors![serviceName];
+        if (constructor !== void 0) {
+          return constructor;
+        }
+      }
+      viewClass = (viewClass as any).__proto__ as ViewClass | null;
+    } while (viewClass !== null);
+    return null;
+  }
+
+  /** @hidden */
+  static decorateViewService<V extends View, T>(constructor: ViewServiceConstructor<V, T>,
+                                                viewClass: ViewClass, serviceName: string): void {
+    if (!viewClass.hasOwnProperty("_viewServiceConstructors")) {
+      viewClass._viewServiceConstructors = {};
+    }
+    viewClass._viewServiceConstructors![serviceName] = constructor;
+    Object.defineProperty(viewClass, serviceName, {
+      get: function (this: V): ViewService<V, T> {
+        let viewService = this.getViewService(serviceName) as ViewService<V, T> | null;
+        if (viewService === null) {
+          viewService = new constructor(this, serviceName);
+          this.setViewService(serviceName, viewService);
+        }
+        return viewService;
+      },
+      configurable: true,
+      enumerable: true,
+    });
+  }
+
+  /** @hidden */
+  static getViewScopeConstructor(scopeName: string, viewClass: ViewClass | null = null): ViewScopeConstructor<any, unknown> | null {
+    if (viewClass === null) {
+      viewClass = this.prototype as unknown as ViewClass;
+    }
+    do {
+      if (viewClass.hasOwnProperty("_viewScopeConstructors")) {
+        const constructor = viewClass._viewScopeConstructors![scopeName];
+        if (constructor !== void 0) {
+          return constructor;
+        }
+      }
+      viewClass = (viewClass as any).__proto__ as ViewClass | null;
+    } while (viewClass !== null);
+    return null;
+  }
+
+  /** @hidden */
+  static decorateViewScope<V extends View, T, U>(constructor: ViewScopeConstructor<V, T, U>,
+                                                 viewClass: ViewClass, scopeName: string): void {
+    if (!viewClass.hasOwnProperty("_viewScopeConstructors")) {
+      viewClass._viewScopeConstructors = {};
+    }
+    viewClass._viewScopeConstructors![scopeName] = constructor;
     Object.defineProperty(viewClass, scopeName, {
       get: function (this: V): ViewScope<V, T, U> {
         let viewScope = this.getViewScope(scopeName) as ViewScope<V, T, U> | null;
         if (viewScope === null) {
-          viewScope = new ViewScope<V>(this, scopeName, descriptor);
+          viewScope = new constructor(this, scopeName);
           this.setViewScope(scopeName, viewScope);
         }
         return viewScope;
@@ -935,12 +1256,15 @@ export abstract class View implements AnimatorContext, LayoutContext {
   }
 
   /** @hidden */
-  static getViewAnimatorDescriptor<V extends View>(animatorName: string, viewClass: ViewClass | null): ViewAnimatorDescriptor<V, unknown> | null {
+  static getViewAnimatorConstructor(animatorName: string, viewClass: ViewClass | null): ViewAnimatorConstructor<any, unknown> | null {
+    if (viewClass === null) {
+      viewClass = this.prototype as unknown as ViewClass;
+    }
     while (viewClass !== null) {
-      if (viewClass.hasOwnProperty("_viewAnimatorDescriptors")) {
-        const descriptor = viewClass._viewAnimatorDescriptors![animatorName];
-        if (descriptor !== void 0) {
-          return descriptor;
+      if (viewClass.hasOwnProperty("_viewAnimatorConstructors")) {
+        const constructor = viewClass._viewAnimatorConstructors![animatorName];
+        if (constructor !== void 0) {
+          return constructor;
         }
       }
       viewClass = (viewClass as any).__proto__ as ViewClass | null;
@@ -949,21 +1273,37 @@ export abstract class View implements AnimatorContext, LayoutContext {
   }
 
   /** @hidden */
-  static decorateViewAnimator<V extends View, T, U>(ViewAnimator: ViewAnimatorConstructor<T, U>,
-                                                    descriptor: ViewAnimatorDescriptor<V, T, U> | undefined,
+  static decorateViewAnimator<V extends View, T, U>(constructor: ViewAnimatorConstructor<V, T, U>,
                                                     viewClass: ViewClass, animatorName: string): void {
-    if (!viewClass.hasOwnProperty("_viewAnimatorDescriptors")) {
-      viewClass._viewAnimatorDescriptors = {};
+    if (!viewClass.hasOwnProperty("_viewAnimatorConstructors")) {
+      viewClass._viewAnimatorConstructors = {};
     }
-    viewClass._viewAnimatorDescriptors![animatorName] = descriptor;
+    viewClass._viewAnimatorConstructors![animatorName] = constructor;
     Object.defineProperty(viewClass, animatorName, {
       get: function (this: V): ViewAnimator<V, T, U> {
-        let animator = this.getViewAnimator(animatorName) as ViewAnimator<V, T, U> | null;
-        if (animator === null) {
-          animator = new ViewAnimator<V>(this, animatorName, descriptor);
-          this.setViewAnimator(animatorName, animator);
+        let viewAnimator = this.getViewAnimator(animatorName) as ViewAnimator<V, T, U> | null;
+        if (viewAnimator === null) {
+          viewAnimator = new constructor(this, animatorName);
+          this.setViewAnimator(animatorName, viewAnimator);
         }
-        return animator;
+        return viewAnimator;
+      },
+      configurable: true,
+      enumerable: true,
+    });
+  }
+
+  /** @hidden */
+  static decorateLayoutAnchor<V extends View>(constructor: LayoutAnchorConstructor<V>,
+                                              viewClass: unknown, anchorName: string): void {
+    Object.defineProperty(viewClass, anchorName, {
+      get: function (this: V): LayoutAnchor<V> {
+        let layoutAnchor = this.getLayoutAnchor(anchorName) as LayoutAnchor<V> | null;
+        if (layoutAnchor === null) {
+          layoutAnchor = new constructor(this, anchorName);
+          this.setLayoutAnchor(anchorName, layoutAnchor);
+        }
+        return layoutAnchor;
       },
       configurable: true,
       enumerable: true,
@@ -973,12 +1313,24 @@ export abstract class View implements AnimatorContext, LayoutContext {
   static fromTag<T extends keyof ElementViewTagMap>(tag: T): ElementViewTagMap[T];
   static fromTag(tag: string): ElementView;
   static fromTag(tag: string): ElementView {
-    if (tag === "svg") {
-      return new View.Svg(document.createElementNS(View.Svg.namespace, tag) as SVGElement);
+    if (this.prototype instanceof View.Svg) {
+      const node = document.createElementNS(View.Svg.namespace, tag) as SVGElement;
+      return new (this as unknown as {new(node: Element): ElementView})(node);
+    } else if (this.prototype instanceof View.Element) {
+      const node = document.createElement(tag);
+      return new (this as unknown as {new(node: Element): ElementView})(node);
+    } else if (tag === "svg") {
+      const node = document.createElementNS(View.Svg.namespace, tag) as SVGElement;
+      return new View.Svg(node);
     } else if (tag === "canvas") {
-      return new View.Canvas(document.createElement(tag) as HTMLCanvasElement);
+      const node = document.createElement(tag) as HTMLCanvasElement;
+      return new View.Canvas(node);
+    } else if (tag === "style") {
+      const node = document.createElement(tag) as HTMLStyleElement;
+      return new View.Style(node);
     } else {
-      return new View.Html(document.createElement(tag));
+      const node = document.createElement(tag);
+      return new View.Html(node);
     }
   }
 
@@ -993,7 +1345,9 @@ export abstract class View implements AnimatorContext, LayoutContext {
       return node.view;
     } else {
       let view: NodeView;
-      if (node instanceof Element) {
+      if (this.prototype instanceof View.Element) {
+        view = new (this as unknown as {new(node: Node): NodeView})(node);
+      } else if (node instanceof Element) {
         if (node instanceof HTMLElement) {
           if (node instanceof HTMLCanvasElement) {
             view = new View.Canvas(node);
@@ -1013,12 +1367,15 @@ export abstract class View implements AnimatorContext, LayoutContext {
       const parentView = view.parentView;
       if (parentView !== null) {
         view.setParentView(parentView, null);
+        view.cascadeInsert();
+      } else {
+        view.mount();
       }
       return view;
     }
   }
 
-  static fromConstructor<C extends ElementViewConstructor | ViewConstructor>(viewConstructor: C): InstanceType<C>;
+  static fromConstructor<VC extends ElementViewConstructor | ViewConstructor>(viewConstructor: VC): InstanceType<VC>;
   static fromConstructor(viewConstructor: ElementViewConstructor | ViewConstructor): View {
     if (View.Element.isConstructor(viewConstructor)) {
       if (viewConstructor.namespace === void 0) {
@@ -1039,15 +1396,15 @@ export abstract class View implements AnimatorContext, LayoutContext {
   static create(node: Element): ElementView;
   static create(node: Text): TextView;
   static create(node: Node): NodeView;
-  static create<C extends ElementViewConstructor>(viewConstructor: C): InstanceType<C>;
-  static create<C extends ViewConstructor>(viewConstructor: C): InstanceType<C>;
+  static create<VC extends ElementViewConstructor>(viewConstructor: VC): InstanceType<VC>;
+  static create<VC extends ViewConstructor>(viewConstructor: VC): InstanceType<VC>;
   static create(source: string | Node | ElementViewConstructor | ViewConstructor): View {
     if (typeof source === "string") {
-      return View.fromTag(source);
+      return this.fromTag(source);
     } else if (source instanceof Node) {
-      return View.fromNode(source);
+      return this.fromNode(source);
     } else if (typeof source === "function") {
-      return View.fromConstructor(source);
+      return this.fromConstructor(source);
     }
     throw new TypeError("" + source);
   }
@@ -1057,47 +1414,60 @@ export abstract class View implements AnimatorContext, LayoutContext {
   /** @hidden */
   static readonly PoweredFlag: ViewFlags = 1 << 1;
   /** @hidden */
-  static readonly HiddenFlag: ViewFlags = 1 << 2;
+  static readonly CullFlag: ViewFlags = 1 << 2;
   /** @hidden */
   static readonly CulledFlag: ViewFlags = 1 << 3;
   /** @hidden */
-  static readonly ProcessingFlag: ViewFlags = 1 << 4;
+  static readonly HiddenFlag: ViewFlags = 1 << 4;
   /** @hidden */
-  static readonly DisplayingFlag: ViewFlags = 1 << 5;
+  static readonly AnimatingFlag: ViewFlags = 1 << 5;
   /** @hidden */
-  static readonly ImmediateFlag: ViewFlags = 1 << 6;
+  static readonly TraversingFlag: ViewFlags = 1 << 6;
   /** @hidden */
-  static readonly RemovingFlag: ViewFlags = 1 << 7;
+  static readonly ProcessingFlag: ViewFlags = 1 << 7;
+  /** @hidden */
+  static readonly DisplayingFlag: ViewFlags = 1 << 8;
+  /** @hidden */
+  static readonly RemovingFlag: ViewFlags = 1 << 9;
+  /** @hidden */
+  static readonly ImmediateFlag: ViewFlags = 1 << 10;
+  /** @hidden */
+  static readonly CulledMask: ViewFlags = View.CullFlag
+                                        | View.CulledFlag;
   /** @hidden */
   static readonly UpdatingMask: ViewFlags = View.ProcessingFlag
                                           | View.DisplayingFlag;
   /** @hidden */
   static readonly StatusMask: ViewFlags = View.MountedFlag
                                         | View.PoweredFlag
-                                        | View.HiddenFlag
+                                        | View.CullFlag
                                         | View.CulledFlag
+                                        | View.HiddenFlag
+                                        | View.AnimatingFlag
+                                        | View.TraversingFlag
                                         | View.ProcessingFlag
                                         | View.DisplayingFlag
-                                        | View.RemovingFlag;
+                                        | View.RemovingFlag
+                                        | View.ImmediateFlag;
 
-  static readonly NeedsProcess: ViewFlags = 1 << 8;
-  static readonly NeedsResize: ViewFlags = 1 << 9;
-  static readonly NeedsScroll: ViewFlags = 1 << 10;
-  static readonly NeedsCompute: ViewFlags = 1 << 11;
-  static readonly NeedsAnimate: ViewFlags = 1 << 12;
-  static readonly NeedsProject: ViewFlags = 1 << 13;
+  static readonly NeedsProcess: ViewFlags = 1 << 11;
+  static readonly NeedsResize: ViewFlags = 1 << 12;
+  static readonly NeedsScroll: ViewFlags = 1 << 13;
+  static readonly NeedsChange: ViewFlags = 1 << 14;
+  static readonly NeedsAnimate: ViewFlags = 1 << 15;
+  static readonly NeedsProject: ViewFlags = 1 << 16;
   /** @hidden */
   static readonly ProcessMask: ViewFlags = View.NeedsProcess
                                          | View.NeedsResize
                                          | View.NeedsScroll
-                                         | View.NeedsCompute
+                                         | View.NeedsChange
                                          | View.NeedsAnimate
                                          | View.NeedsProject;
 
-  static readonly NeedsDisplay: ViewFlags = 1 << 14;
-  static readonly NeedsLayout: ViewFlags = 1 << 15;
-  static readonly NeedsRender: ViewFlags = 1 << 16;
-  static readonly NeedsComposite: ViewFlags = 1 << 17;
+  static readonly NeedsDisplay: ViewFlags = 1 << 17;
+  static readonly NeedsLayout: ViewFlags = 1 << 18;
+  static readonly NeedsRender: ViewFlags = 1 << 19;
+  static readonly NeedsComposite: ViewFlags = 1 << 20;
   /** @hidden */
   static readonly DisplayMask: ViewFlags = View.NeedsDisplay
                                          | View.NeedsLayout
@@ -1113,17 +1483,27 @@ export abstract class View implements AnimatorContext, LayoutContext {
   /** @hidden */
   static readonly ViewFlagMask: ViewFlags = (1 << View.ViewFlagShift) - 1;
 
+  static readonly mountFlags: ViewFlags = View.NeedsResize | View.NeedsLayout;
+  static readonly powerFlags: ViewFlags = 0;
+  static readonly uncullFlags: ViewFlags = 0;
+  static readonly insertChildFlags: ViewFlags = 0;
+  static readonly removeChildFlags: ViewFlags = 0;
+
   // Forward type declarations
+  /** @hidden */
+  static Subview: typeof Subview; // defined by Subview
+  /** @hidden */
+  static Manager: typeof ViewManager; // defined by ViewManager
+  /** @hidden */
+  static Service: typeof ViewService; // defined by ViewService
+  /** @hidden */
+  static Scope: typeof ViewScope; // defined by ViewScope
   /** @hidden */
   static Animator: typeof ViewAnimator; // defined by ViewAnimator
   /** @hidden */
-  static Root: typeof RootView; // defined by RootView
-  /** @hidden */
   static Graphics: typeof GraphicsView; // defined by GraphicsView
   /** @hidden */
-  static GraphicsNode: typeof GraphicsNodeView; // defined by GraphicsNodeView
-  /** @hidden */
-  static GraphicsLeaf: typeof GraphicsLeafView; // defined by GraphicsLeafView
+  static Layer: typeof LayerView; // defined by LayerView
   /** @hidden */
   static Raster: typeof RasterView; // defined by RasterView
   /** @hidden */
@@ -1139,5 +1519,5 @@ export abstract class View implements AnimatorContext, LayoutContext {
   /** @hidden */
   static Canvas: typeof CanvasView; // defined by CanvasView
   /** @hidden */
-  static Ui: typeof UiView; // defined by UiView
+  static Style: typeof StyleView; // defined by StyleView
 }

@@ -15,9 +15,11 @@
       "@swim/color": ["@swim/color/main"],
       "@swim/font": ["@swim/font/main"],
       "@swim/shadow": ["@swim/shadow/main"],
+      "@swim/gradient": ["@swim/gradient/main"],
       "@swim/transform": ["@swim/transform/main"],
       "@swim/scale": ["@swim/scale/main"],
       "@swim/transition": ["@swim/transition/main"],
+      "@swim/animate": ["@swim/animate/main"],
       "@swim/style": ["@swim/style/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
@@ -34,9 +36,11 @@
     {"path": "../../color/main"},
     {"path": "../../font/main"},
     {"path": "../../shadow/main"},
+    {"path": "../../gradient/main"},
     {"path": "../../transform/main"},
     {"path": "../../scale/main"},
     {"path": "../../transition/main"},
+    {"path": "../../animate/main"},
     {"path": "../../style/main"}
   ]
 }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View, HtmlView, HtmlViewController} from "@swim/view";
+import {View, HtmlView} from "@swim/view";
 
 export class NavbarView extends HtmlView {
   /** @hidden */
@@ -22,10 +22,6 @@ export class NavbarView extends HtmlView {
     super(node);
     this.onToggleClick = this.onToggleClick.bind(this);
     this._visibleClass = "navbar-visible";
-  }
-
-  get viewController(): HtmlViewController<NavbarView> | null {
-    return this._viewController;
   }
 
   get toggleView(): HtmlView | null {

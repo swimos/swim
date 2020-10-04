@@ -21,13 +21,13 @@ import {StyleValue} from "@swim/style";
 export class StyleTransitionFormSpec extends Spec {
   @Test
   moldTransitions(exam: Exam): void {
-    exam.equal(StyleValue.transitionForm().mold(Transition.from(250, Ease.quadOut, Interpolator.between(1, 2))),
-               Record.of(Attr.of("transition", Record.of(Slot.of("duration", 250), Slot.of("ease", "quad-out"))), Attr.of("interpolate", Record.of(1, 2))));
+    exam.equal(StyleValue.transitionForm().mold(Transition.from(250, Ease.cubicOut, Interpolator.between(1, 2))),
+               Record.of(Attr.of("transition", Record.of(Slot.of("duration", 250), Slot.of("ease", "cubic-out"))), Attr.of("interpolate", Record.of(1, 2))));
   }
 
   @Test
   castTransitions(exam: Exam): void {
-    exam.equal(StyleValue.transitionForm().cast(Record.of(Attr.of("transition", Record.of(Slot.of("duration", 250), Slot.of("ease", "quad-out"))), Attr.of("interpolate", Record.of(1, 2)))),
-               Transition.from(250, Ease.quadOut, Interpolator.between(1, 2)));
+    exam.equal(StyleValue.transitionForm().cast(Record.of(Attr.of("transition", Record.of(Slot.of("duration", 250), Slot.of("ease", "cubic-out"))), Attr.of("interpolate", Record.of(1, 2)))),
+               Transition.from(250, Ease.cubicOut, Interpolator.between(1, 2)));
   }
 }

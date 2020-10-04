@@ -28,48 +28,62 @@ import {FontForm} from "./FontForm";
 export type AnyFont = Font | FontInit | string;
 
 export interface FontInit {
-  style?: FontStyle | null;
-  variant?: FontVariant | null;
-  weight?: FontWeight | null;
-  stretch?: FontStretch | null;
-  size?: AnyFontSize | null;
-  height?: AnyLineHeight | null;
+  style?: FontStyle;
+  variant?: FontVariant;
+  weight?: FontWeight;
+  stretch?: FontStretch;
+  size?: AnyFontSize;
+  height?: AnyLineHeight;
   family: FontFamily | FontFamily[];
 }
 
 export class Font implements Equals, Debug {
   /** @hidden */
-  readonly _style: FontStyle | null;
+  readonly _style?: FontStyle;
   /** @hidden */
-  readonly _variant: FontVariant | null;
+  readonly _variant?: FontVariant;
   /** @hidden */
-  readonly _weight: FontWeight | null;
+  readonly _weight?: FontWeight;
   /** @hidden */
-  readonly _stretch: FontStretch | null;
+  readonly _stretch?: FontStretch;
   /** @hidden */
-  readonly _size: FontSize | null;
+  readonly _size?: FontSize;
   /** @hidden */
-  readonly _height: LineHeight | null;
+  readonly _height?: LineHeight;
   /** @hidden */
   readonly _family: FontFamily | ReadonlyArray<FontFamily>;
+  /** @hidden */
+  _string?: string;
 
-  constructor(style: FontStyle | null, variant: FontVariant | null,
-              weight: FontWeight | null, stretch: FontStretch | null,
-              size: FontSize | null, height: LineHeight | null,
+  constructor(style: FontStyle | undefined, variant: FontVariant | undefined,
+              weight: FontWeight | undefined, stretch: FontStretch | undefined,
+              size: FontSize | undefined, height: LineHeight | undefined,
               family: FontFamily | ReadonlyArray<FontFamily>) {
-    this._style = style;
-    this._variant = variant;
-    this._weight = weight;
-    this._stretch = stretch;
-    this._size = size;
-    this._height = height;
+    if (style !== void 0) {
+      this._style = style;
+    }
+    if (variant !== void 0) {
+      this._variant = variant;
+    }
+    if (weight !== void 0) {
+      this._weight = weight;
+    }
+    if (stretch !== void 0) {
+      this._stretch = stretch;
+    }
+    if (size !== void 0) {
+      this._size = size;
+    }
+    if (height !== void 0) {
+      this._height = height;
+    }
     this._family = family;
   }
 
-  style(): FontStyle | null;
-  style(style: FontStyle | null): Font;
-  style(style?: FontStyle | null): FontStyle | null | Font {
-    if (style === void 0) {
+  style(): FontStyle | undefined;
+  style(style: FontStyle | undefined): Font;
+  style(style?: FontStyle): FontStyle | undefined | Font {
+    if (arguments.length === 0) {
       return this._style;
     } else {
       if (this._style === style) {
@@ -81,10 +95,10 @@ export class Font implements Equals, Debug {
     }
   }
 
-  variant(): FontVariant | null;
-  variant(variant: FontVariant | null): Font;
-  variant(variant?: FontVariant | null): FontVariant | null | Font {
-    if (variant === void 0) {
+  variant(): FontVariant | undefined;
+  variant(variant: FontVariant | undefined): Font;
+  variant(variant?: FontVariant): FontVariant | undefined | Font {
+    if (arguments.length === 0) {
       return this._variant;
     } else {
       if (this._variant === variant) {
@@ -96,10 +110,10 @@ export class Font implements Equals, Debug {
     }
   }
 
-  weight(): FontWeight | null;
-  weight(weight: FontWeight | null): Font;
-  weight(weight?: FontWeight | null): FontWeight | null | Font {
-    if (weight === void 0) {
+  weight(): FontWeight | undefined;
+  weight(weight: FontWeight | undefined): Font;
+  weight(weight?: FontWeight): FontWeight | undefined | Font {
+    if (arguments.length === 0) {
       return this._weight;
     } else {
       if (this._weight === weight) {
@@ -111,10 +125,10 @@ export class Font implements Equals, Debug {
     }
   }
 
-  stretch(): FontStretch | null;
-  stretch(stretch: FontStretch | null): Font;
-  stretch(stretch?: FontStretch | null): FontStretch | null | Font {
-    if (stretch === void 0) {
+  stretch(): FontStretch | undefined;
+  stretch(stretch: FontStretch | undefined): Font;
+  stretch(stretch?: FontStretch): FontStretch | undefined | Font {
+    if (arguments.length === 0) {
       return this._stretch;
     } else {
       if (this._stretch === stretch) {
@@ -126,34 +140,34 @@ export class Font implements Equals, Debug {
     }
   }
 
-  size(): FontSize | null;
-  size(size: AnyFontSize | null): Font;
-  size(size?: AnyFontSize | null): FontSize | null | Font {
-    if (size === void 0) {
+  size(): FontSize | undefined;
+  size(size: AnyFontSize | undefined): Font;
+  size(size?: AnyFontSize): FontSize | undefined | Font {
+    if (arguments.length === 0) {
       return this._size;
     } else {
-      size = size !== null ? FontSize.fromAny(size) : null;
+      size = size !== void 0 ? FontSize.fromAny(size) : void 0;
       if (Objects.equal(this._size, size)) {
         return this;
       } else {
         return new Font(this._style, this._variant, this._weight, this._stretch,
-                        size as FontSize | null, this._height, this._family);
+                        size as FontSize | undefined, this._height, this._family);
       }
     }
   }
 
-  height(): LineHeight | null;
-  height(height: AnyLineHeight | null): Font;
-  height(height?: AnyLineHeight | null): LineHeight | null | Font {
-    if (height === void 0) {
+  height(): LineHeight | undefined;
+  height(height: AnyLineHeight | undefined): Font;
+  height(height?: AnyLineHeight): LineHeight | undefined | Font {
+    if (arguments.length === 0) {
       return this._height;
     } else {
-      height = height !== null ? LineHeight.fromAny(height) : null;
+      height = height !== void 0 ? LineHeight.fromAny(height) : void 0;
       if (Objects.equal(this._height, height)) {
         return this;
       } else {
         return new Font(this._style, this._variant, this._weight, this._stretch,
-                        this._size, height as LineHeight | null, this._family);
+                        this._size, height as LineHeight | undefined, this._family);
       }
     }
   }
@@ -202,7 +216,7 @@ export class Font implements Equals, Debug {
   }
 
   debug(output: Output): void {
-    output = output.write("Font").write(46/*'.'*/).write("family").write(40/*'('*/).write(41/*')'*/);
+    output = output.write("Font").write(46/*'.'*/).write("family").write(40/*'('*/);
     if (typeof this._family === "string") {
       output = output.debug(this._family);
     } else if (Array.isArray(this._family) && this._family.length !== 0) {
@@ -212,152 +226,149 @@ export class Font implements Equals, Debug {
       }
     }
     output = output.write(41/*')'*/);
-    if (this._style !== null) {
+    if (this._style !== void 0) {
       output = output.write(46/*'.'*/).write("style").write(40/*'('*/).debug(this._style).write(41/*')'*/);
     }
-    if (this._variant !== null) {
+    if (this._variant !== void 0) {
       output = output.write(46/*'.'*/).write("variant").write(40/*'('*/).debug(this._variant).write(41/*')'*/);
     }
-    if (this._weight !== null) {
+    if (this._weight !== void 0) {
       output = output.write(46/*'.'*/).write("weight").write(40/*'('*/).debug(this._weight).write(41/*')'*/);
     }
-    if (this._stretch !== null) {
+    if (this._stretch !== void 0) {
       output = output.write(46/*'.'*/).write("stretch").write(40/*'('*/).debug(this._stretch).write(41/*')'*/);
     }
-    if (this._size !== null) {
+    if (this._size !== void 0) {
       output = output.write(46/*'.'*/).write("size").write(40/*'('*/).debug(this._size).write(41/*')'*/);
     }
-    if (this._height !== null) {
+    if (this._height !== void 0) {
       output = output.write(46/*'.'*/).write("height").write(40/*'('*/).debug(this._height).write(41/*')'*/);
     }
   }
 
   toString(): string {
-    let s = "";
-    if (this._style !== null || this._variant === "normal" || this._weight === "normal" || this._stretch === "normal") {
-      s += this._style || "normal";
-    }
-    if (this._variant !== null || this._weight === "normal" || this._stretch === "normal") {
-      if (s.length !== 0) {
-        s += " ";
+    let s = this._string;
+    if (s === void 0) {
+      s = "";
+      if (this._style !== void 0 || this._variant === "normal" || this._weight === "normal" || this._stretch === "normal") {
+        s += this._style || "normal";
       }
-      s += this._variant || "normal";
-    }
-    if (this._weight !== null || this._stretch === "normal") {
-      if (s.length !== 0) {
-        s += " ";
+      if (this._variant !== void 0 || this._weight === "normal" || this._stretch === "normal") {
+        if (s.length !== 0) {
+          s += " ";
+        }
+        s += this._variant || "normal";
       }
-      s += this._weight || "normal";
-    }
-    if (this._stretch !== null) {
-      if (s.length !== 0) {
-        s += " ";
+      if (this._weight !== void 0 || this._stretch === "normal") {
+        if (s.length !== 0) {
+          s += " ";
+        }
+        s += this._weight || "normal";
       }
-      s += this._stretch;
-    }
-    if (this._size !== null) {
-      if (s.length !== 0) {
-        s += " ";
+      if (this._stretch !== void 0) {
+        if (s.length !== 0) {
+          s += " ";
+        }
+        s += this._stretch;
       }
-      s += this._size.toString();
-      if (this._height !== null) {
-        s += "/";
-        s += this._height.toString();
+      if (this._size !== void 0) {
+        if (s.length !== 0) {
+          s += " ";
+        }
+        s += this._size.toString();
+        if (this._height !== void 0) {
+          s += "/";
+          s += this._height.toString();
+        }
       }
-    }
-    if (typeof this._family === "string") {
-      if (s.length !== 0) {
-        s += " ";
+      if (typeof this._family === "string") {
+        if (s.length !== 0) {
+          s += " ";
+        }
+        s += FontFamily.format(this._family);
+      } else if (Array.isArray(this._family) && this._family.length !== 0) {
+        if (s.length !== 0) {
+          s += " ";
+        }
+        s += FontFamily.format(this._family[0]);
+        for (let i = 1; i < this._family.length; i += 1) {
+          s += ", ";
+          s += FontFamily.format(this._family[i]);
+        }
       }
-      s += FontFamily.format(this._family);
-    } else if (Array.isArray(this._family) && this._family.length !== 0) {
-      if (s.length !== 0) {
-        s += " ";
-      }
-      s += FontFamily.format(this._family[0]);
-      for (let i = 1; i < this._family.length; i += 1) {
-        s += ", ";
-        s += FontFamily.format(this._family[i]);
-      }
+      this._string = s;
     }
     return s;
   }
 
-  static style(style: FontStyle | null, family: FontFamily | ReadonlyArray<FontFamily>): Font {
+  static style(style: FontStyle | undefined, family: FontFamily | ReadonlyArray<FontFamily>): Font {
     if (Array.isArray(family) && family.length === 1) {
       family = family[0];
     }
-    return new Font(style, null, null, null, null, null, family);
+    return new Font(style, void 0, void 0, void 0, void 0, void 0, family);
   }
 
-  static variant(variant: FontVariant | null, family: FontFamily | ReadonlyArray<FontFamily>): Font {
+  static variant(variant: FontVariant | undefined, family: FontFamily | ReadonlyArray<FontFamily>): Font {
     if (Array.isArray(family) && family.length === 1) {
       family = family[0];
     }
-    return new Font(null, variant, null, null, null, null, family);
+    return new Font(void 0, variant, void 0, void 0, void 0, void 0, family);
   }
 
-  static weight(weight: FontWeight | null, family: FontFamily | ReadonlyArray<FontFamily>): Font {
+  static weight(weight: FontWeight | undefined, family: FontFamily | ReadonlyArray<FontFamily>): Font {
     if (Array.isArray(family) && family.length === 1) {
       family = family[0];
     }
-    return new Font(null, null, weight, null, null, null, family);
+    return new Font(void 0, void 0, weight, void 0, void 0, void 0, family);
   }
 
-  static stretch(stretch: FontStretch | null, family: FontFamily | ReadonlyArray<FontFamily>): Font {
+  static stretch(stretch: FontStretch | undefined, family: FontFamily | ReadonlyArray<FontFamily>): Font {
     if (Array.isArray(family) && family.length === 1) {
       family = family[0];
     }
-    return new Font(null, null, null, stretch, null, null, family);
+    return new Font(void 0, void 0, void 0, stretch, void 0, void 0, family);
   }
 
-  static size(size: AnyFontSize | null, family: FontFamily | ReadonlyArray<FontFamily>): Font {
-    size = size !== null ? FontSize.fromAny(size) : null;
+  static size(size: AnyFontSize | undefined, family: FontFamily | ReadonlyArray<FontFamily>): Font {
+    size = size !== void 0 ? FontSize.fromAny(size) : void 0;
     if (Array.isArray(family) && family.length === 1) {
       family = family[0];
     }
-    return new Font(null, null, null, null, size as FontSize | null, null, family);
+    return new Font(void 0, void 0, void 0, void 0, size as FontSize | undefined, void 0, family);
   }
 
   static family(family: FontFamily | ReadonlyArray<FontFamily>): Font {
     if (Array.isArray(family) && family.length === 1) {
       family = family[0];
     }
-    return new Font(null, null, null, null, null, null, family);
+    return new Font(void 0, void 0, void 0, void 0, void 0, void 0, family);
   }
 
-  static from(style: FontStyle | null = null, variant: FontVariant | null = null,
-              weight: FontWeight | null = null, stretch: FontStretch | null = null,
-              size: AnyFontSize | null = null, height: AnyLineHeight | null = null,
+  static from(style: FontStyle | undefined, variant: FontVariant | undefined,
+              weight: FontWeight | undefined, stretch: FontStretch | undefined,
+              size: AnyFontSize | undefined, height: AnyLineHeight | undefined,
               family: FontFamily | ReadonlyArray<FontFamily>): Font {
-    size = size !== null ? FontSize.fromAny(size) : null;
-    height = height !== null ? LineHeight.fromAny(height) : null;
+    size = size !== void 0 ? FontSize.fromAny(size) : void 0;
+    height = height !== void 0 ? LineHeight.fromAny(height) : void 0;
     if (Array.isArray(family) && family.length === 1) {
       family = family[0];
     }
-    return new Font(style, variant, weight, stretch, size as FontSize | null,
-                    height as LineHeight | null, family);
+    return new Font(style, variant, weight, stretch, size as FontSize | undefined,
+                    height as LineHeight | undefined, family);
   }
 
-  static fromAny(value: AnyFont): Font {
-    if (value instanceof Font) {
-      return value;
-    } else if (typeof value === "object" && value !== null) {
-      return Font.from(value.style, value.variant, value.weight, value.stretch,
-                       value.size, value.height, value.family);
-    } else if (typeof value === "string") {
-      return Font.parse(value);
-    }
-    throw new TypeError("" + value);
+  static fromInit(init: FontInit): Font {
+    return Font.from(init.style, init.variant, init.weight, init.stretch,
+                     init.size, init.height, init.family);
   }
 
   static fromValue(value: Value): Font | undefined {
     const header = value.header("font");
     if (header.isDefined()) {
-      const style = header.get("style").stringValue(null) as FontStyle | null;
-      const variant = header.get("variant").stringValue(null) as FontVariant | null;
-      const weight = header.get("weight").stringValue(null) as FontWeight | null;
-      const stretch = header.get("stretch").stringValue(null) as FontStretch | null;
+      const style = header.get("style").stringValue(void 0) as FontStyle | undefined;
+      const variant = header.get("variant").stringValue(void 0) as FontVariant | undefined;
+      const weight = header.get("weight").stringValue(void 0) as FontWeight | undefined;
+      const stretch = header.get("stretch").stringValue(void 0) as FontStretch | undefined;
       const size = FontSize.fromValue(header.get("size"));
       const height = LineHeight.fromValue(header.get("height"));
       const family = FontFamily.fromValue(header.get("family"));
@@ -366,6 +377,17 @@ export class Font implements Equals, Debug {
       }
     }
     return void 0;
+  }
+
+  static fromAny(value: AnyFont): Font {
+    if (value instanceof Font) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return Font.fromInit(value);
+    } else if (typeof value === "string") {
+      return Font.parse(value);
+    }
+    throw new TypeError("" + value);
   }
 
   static parse(string: string): Font {
@@ -392,6 +414,11 @@ export class Font implements Equals, Debug {
       return init.family !== void 0;
     }
     return false;
+  }
+
+  /** @hidden */
+  static isAny(value: unknown): value is AnyFont {
+    return value instanceof Font || Font.isInit(value);
   }
 
   private static _form?: Form<Font, AnyFont>;

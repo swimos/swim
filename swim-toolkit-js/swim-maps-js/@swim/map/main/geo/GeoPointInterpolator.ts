@@ -53,13 +53,13 @@ export class GeoPointInterpolator extends Interpolator<GeoPoint> {
   range(p0: AnyGeoPoint, p1: AnyGeoPoint): GeoPointInterpolator;
   range(p0?: readonly [AnyGeoPoint, AnyGeoPoint] | AnyGeoPoint,
         p1?: AnyGeoPoint): readonly [GeoPoint, GeoPoint] | GeoPointInterpolator {
-    if (p0 === void 0) {
+    if (arguments.length === 0) {
       return [this.interpolate(0), this.interpolate(1)];
-    } else if (p1 === void 0) {
+    } else if (arguments.length === 1) {
       p0 = p0 as readonly [AnyGeoPoint, AnyGeoPoint];
       return GeoPointInterpolator.between(p0[0], p0[1]);
     } else {
-      return GeoPointInterpolator.between(p0 as AnyGeoPoint, p1);
+      return GeoPointInterpolator.between(p0 as AnyGeoPoint, p1 as AnyGeoPoint);
     }
   }
 

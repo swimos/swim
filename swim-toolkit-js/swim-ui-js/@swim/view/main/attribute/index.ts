@@ -13,8 +13,15 @@
 // limitations under the License.
 
 export {
-  AttributeAnimatorType,
-  AttributeAnimatorClass,
+  AttributeAnimatorMemberType,
+  AttributeAnimatorMemberInit,
+  AttributeAnimatorInit,
+  AttributeAnimatorDescriptorInit,
+  AttributeAnimatorDescriptorExtends,
+  AttributeAnimatorDescriptorFromAny,
+  AttributeAnimatorDescriptor,
+  AttributeAnimatorPrototype,
+  AttributeAnimatorConstructor,
   AttributeAnimator,
 } from "./AttributeAnimator";
 

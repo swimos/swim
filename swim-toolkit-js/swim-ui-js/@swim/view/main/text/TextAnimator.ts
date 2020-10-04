@@ -19,7 +19,7 @@ export class TextAnimator<T = unknown> extends TweenFrameAnimator<T> {
   readonly target: Node;
   formatter: ((value: T) => string) | {format(value: T): string} | null;
 
-  constructor(target: Node, value?: T, transition: Transition<T> | null = null,
+  constructor(target: Node, value: T, transition: Transition<T> | null = null,
               formatter: ((value: T) => string) | {format(value: T): string} | null = null) {
     super(value, transition);
     this.target = target;
@@ -58,17 +58,6 @@ export class TextAnimator<T = unknown> extends TweenFrameAnimator<T> {
       target.innerText = text;
     } else {
       target.textContent = text;
-    }
-  }
-
-  delete(): void {
-    const target = this.target;
-    if (target instanceof Text) {
-      target.nodeValue = null;
-    } else if (target instanceof HTMLElement) {
-      target.innerText = "";
-    } else {
-      target.textContent = null;
     }
   }
 }

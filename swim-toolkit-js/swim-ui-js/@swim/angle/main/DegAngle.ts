@@ -86,4 +86,9 @@ export class DegAngle extends Angle {
     return DegAngle._zero;
   }
 }
+if (typeof CSSUnitValue !== "undefined") { // CSS Typed OM support
+  DegAngle.prototype.toCssValue = function (this: DegAngle): CSSUnitValue | undefined {
+    return new CSSUnitValue(this._value, "deg");
+  };
+}
 Angle.Deg = DegAngle;

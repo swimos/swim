@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContext} from "./ViewContext";
-import {View} from "./View";
+import {ViewContextType} from "./ViewContext";
+import {ViewFlags, View} from "./View";
+
+export type ViewObserverType<V extends View> =
+  V extends {readonly viewObservers: ReadonlyArray<infer VO>} ? VO : unknown;
 
 export interface ViewObserver<V extends View = View> {
   viewWillSetParentView?(newParentView: View | null, oldParentView: View | null, view: V): void;
@@ -44,39 +47,47 @@ export interface ViewObserver<V extends View = View> {
 
   viewDidUnpower?(view: V): void;
 
-  viewWillProcess?(viewContext: ViewContext, view: V): void;
+  viewWillCull?(view: V): void;
 
-  viewDidProcess?(viewContext: ViewContext, view: V): void;
+  viewDidCull?(view: V): void;
 
-  viewWillResize?(viewContext: ViewContext, view: V): void;
+  viewWillUncull?(view: V): void;
 
-  viewDidResize?(viewContext: ViewContext, view: V): void;
+  viewDidUncull?(view: V): void;
 
-  viewWillScroll?(viewContext: ViewContext, view: V): void;
+  viewWillProcess?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidScroll?(viewContext: ViewContext, view: V): void;
+  viewDidProcess?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewWillCompute?(viewContext: ViewContext, view: V): void;
+  viewWillResize?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidCompute?(viewContext: ViewContext, view: V): void;
+  viewDidResize?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewWillAnimate?(viewContext: ViewContext, view: V): void;
+  viewWillScroll?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidAnimate?(viewContext: ViewContext, view: V): void;
+  viewDidScroll?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewWillLayout?(viewContext: ViewContext, view: V): void;
+  viewWillChange?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidLayout?(viewContext: ViewContext, view: V): void;
+  viewDidChange?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewWillProcessChildViews?(viewContext: ViewContext, view: V): void;
+  viewWillAnimate?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidProcessChildViews?(viewContext: ViewContext, view: V): void;
+  viewDidAnimate?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewWillDisplay?(viewContext: ViewContext, view: V): void;
+  viewWillLayout?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidDisplay?(viewContext: ViewContext, view: V): void;
+  viewDidLayout?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewWillDisplayChildViews?(viewContext: ViewContext, view: V): void;
+  viewWillProcessChildViews?(processFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidDisplayChildViews?(viewContext: ViewContext, view: V): void;
+  viewDidProcessChildViews?(processFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void;
+
+  viewWillDisplay?(viewContext: ViewContextType<V>, view: V): void;
+
+  viewDidDisplay?(viewContext: ViewContextType<V>, view: V): void;
+
+  viewWillDisplayChildViews?(displayFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void;
+
+  viewDidDisplayChildViews?(displayFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void;
 }

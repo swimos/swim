@@ -15,28 +15,18 @@
 import {BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
-import {AnyFont} from "@swim/font";
-import {ContinuousScale} from "@swim/scale";
 import {CanvasRenderer, CanvasContext} from "@swim/render";
-import {ViewAnimator, GraphicsViewInit, GraphicsView, StrokeViewInit, StrokeView} from "@swim/view";
-import {AnyDataPointView, DataPointView} from "../data/DataPointView";
+import {ViewAnimator, GraphicsView, StrokeViewInit, StrokeView} from "@swim/view";
+import {DataPointView} from "../data/DataPointView";
 import {PlotView} from "./PlotView";
 import {PlotViewController} from "./PlotViewController";
-import {SeriesPlotHitMode, SeriesPlotType, AnySeriesPlotView, SeriesPlotView} from "./SeriesPlotView";
+import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
 
 export type AnyLinePlotView<X, Y> = LinePlotView<X, Y> | LinePlotViewInit<X, Y>;
 
-export interface LinePlotViewInit<X, Y> extends GraphicsViewInit, StrokeViewInit {
-  xScale?: ContinuousScale<X, number>;
-  yScale?: ContinuousScale<Y, number>;
-
-  data?: AnyDataPointView<X, Y>[];
-
-  hitMode?: SeriesPlotHitMode;
+export interface LinePlotViewInit<X, Y> extends SeriesPlotViewInit<X, Y>, StrokeViewInit {
+  viewController?: PlotViewController<X, Y>;
   hitWidth?: number;
-
-  font?: AnyFont;
-  textColor?: AnyColor;
 }
 
 export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeView {
@@ -48,18 +38,28 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     this._hitWidth = 5;
   }
 
-  get viewController(): PlotViewController<X, Y, LinePlotView<X, Y>> | null {
-    return this._viewController;
+  initView(init: LinePlotViewInit<X, Y>): void {
+    super.initView(init);
+     if (init.hitWidth !== void 0) {
+      this.hitWidth(init.hitWidth);
+    }
+
+    if (init.stroke !== void 0) {
+      this.stroke(init.stroke);
+    }
+    if (init.strokeWidth !== void 0) {
+      this.strokeWidth(init.strokeWidth);
+    }
   }
 
   get plotType(): SeriesPlotType {
     return "line";
   }
 
-  @ViewAnimator(Color, {value: Color.black()})
+  @ViewAnimator({type: Color, state: Color.black()})
   stroke: ViewAnimator<this, Color, AnyColor>;
 
-  @ViewAnimator(Length, {value: Length.px(1)})
+  @ViewAnimator({type: Length, state: Length.px(1)})
   strokeWidth: ViewAnimator<this, Length, AnyLength>;
 
   hitWidth(): number;
@@ -77,8 +77,8 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     const data = this._data;
     const n = data.size;
 
-    const stroke = this.stroke.value!;
-    const strokeWidth = this.strokeWidth.value!.pxValue(Math.min(frame.width, frame.height));
+    const stroke = this.stroke.getValue();
+    const strokeWidth = this.strokeWidth.getValue().pxValue(Math.min(frame.width, frame.height));
     const gradientStops = this._gradientStops;
     let gradient: CanvasGradient | undefined;
 
@@ -161,7 +161,7 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     return null;
   }
 
-  static fromAny<X, Y>(plot: AnySeriesPlotView<X, Y>): LinePlotView<X, Y> {
+  static fromAny<X, Y>(plot: AnyLinePlotView<X, Y>): LinePlotView<X, Y> {
     if (plot instanceof LinePlotView) {
       return plot;
     } else if (typeof plot === "object" && plot !== null) {
@@ -172,49 +172,7 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
 
   static fromInit<X, Y>(init: LinePlotViewInit<X, Y>): LinePlotView<X, Y> {
     const view = new LinePlotView<X, Y>();
-
-    if (init.xScale !== void 0) {
-      view.xScale(init.xScale);
-    }
-    if (init.yScale !== void 0) {
-      view.yScale(init.yScale);
-    }
-
-    const data = init.data;
-    if (data !== void 0) {
-      for (let i = 0, n = data.length; i < n; i += 1) {
-        view.insertDataPoint(data[i]);
-      }
-    }
-
-    if (init.hitMode !== void 0) {
-      view.hitMode(init.hitMode);
-    }
-    if (init.hitWidth !== void 0) {
-      view.hitWidth(init.hitWidth);
-    }
-
-    if (init.stroke !== void 0) {
-      view.stroke(init.stroke);
-    }
-    if (init.strokeWidth !== void 0) {
-      view.strokeWidth(init.strokeWidth);
-    }
-
-    if (init.font !== void 0) {
-      view.font(init.font);
-    }
-    if (init.textColor !== void 0) {
-      view.textColor(init.textColor);
-    }
-
-    if (init.hidden !== void 0) {
-      view.setHidden(init.hidden);
-    }
-    if (init.culled !== void 0) {
-      view.setCulled(init.culled);
-    }
-
+    view.initView(init);
     return view;
   }
 }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
   </head>
   <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
-    <div id="app" style="display: flex; position: relative; width: 100%; height: 100%;">
+    <div id="ui" style="display: flex; position: relative; width: 100%; height: 100%;">
     </div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBI-Gz_lh3-rKXFwlpElD7pInA60U-iK0c"></script>
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
@@ -21,9 +21,9 @@ const GREEN = swim.Color.parse("#54e218");
 const INTERSECTION_COLOR = swim.Color.parse("#00a6ed");
 const RIPPLE_COLOR = swim.Color.parse("#efefef").alpha(0.25);
 
-const appView = new swim.AppView(document.getElementById("app"));
+const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
 
-const map = new google.maps.Map(appView.node, {
+const map = new google.maps.Map(uiView.node, {
   center: {lng: -122.162, lat: 37.445},
   zoom: 17,
   heading: -160,
@@ -33,10 +33,10 @@ const mapView = new swim.GoogleMapView(map);
 mapView.overlayCanvas()
     .pointerEventsEnabled(true);
 
-const mapLayer = mapView.append(new swim.MapLayerView(undefined, 0, 15));
-//mapLayer.tileOutlineColor("#cc0000");
+const mapGrid = mapView.append(swim.MapGridView);
+//mapGrid.tileOutlineColor("#008f11");
 
-const host = swim.hostRef("warps://traffic.swim.services")
+const host = swim.hostRef("warps://traffic.swim.services");
 
 const intersectionsLink = host.downlinkMap()
     .nodeUri("/city/PaloAlto_CA_US")
@@ -46,14 +46,14 @@ const intersectionsLink = host.downlinkMap()
       const lng = value.get("lng").numberValue();
       const lat = value.get("lat").numberValue();
 
-      let intersectionView = mapLayer.getChildView(key);
+      let intersectionView = mapGrid.getChildView(key);
       if (intersectionView === null) {
         const intersectionId = value.get("id").stringValue();
         intersectionView = new swim.MapCircleView()
             .geoCenter([lng, lat])
             .radius(5)
             .fill(INTERSECTION_COLOR);
-        mapLayer.setChildView(key, intersectionView);
+        mapGrid.setChildView(key, intersectionView);
         linkIntersection(intersectionId, host.nodeRef(key), intersectionView);
       }
     })
@@ -67,7 +67,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
   intersectionView.on("click", function (event) {
     event.stopPropagation();
     if (!intersectionPopover) {
-      intersectionPopover = new swim.PopoverView()
+      intersectionPopover = swim.View.create(swim.PopoverView)
           .width(240)
           .height(360)
           .borderRadius(5)
@@ -76,7 +76,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
       intersectionPopover.setSource(intersectionView);
       intersectionPopover.hideModal();
     }
-    appView.toggleModal(intersectionPopover, {multi: event.shiftKey});
+    uiView.modalService.toggleModal(intersectionPopover, {multi: event.shiftKey});
   });
 
   const schematicLink = node.downlinkValue()
@@ -114,7 +114,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
                 detectorApproaches.push(approachView);
                 detectors[detectorId] = detectorApproaches;
               }
-              mapLayer.setChildView(approachKey, approachView);
+              mapGrid.setChildView(approachKey, approachView);
             }
           }
         })

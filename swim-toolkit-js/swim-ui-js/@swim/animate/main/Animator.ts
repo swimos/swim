@@ -15,9 +15,9 @@
 import {AnimatorContext} from "./AnimatorContext";
 
 export abstract class Animator implements AnimatorContext {
-  abstract animate(animator?: Animator): void;
+  abstract onAnimate(t: number): void;
 
-  abstract onFrame(t: number): void;
+  abstract animate(animator?: Animator): void;
 
   abstract cancel(): void;
 }

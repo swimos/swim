@@ -86,4 +86,9 @@ export class TurnAngle extends Angle {
     return TurnAngle._zero;
   }
 }
+if (typeof CSSUnitValue !== "undefined") { // CSS Typed OM support
+  TurnAngle.prototype.toCssValue = function (this: TurnAngle): CSSUnitValue | undefined {
+    return new CSSUnitValue(this._value, "turn");
+  };
+}
 Angle.Turn = TurnAngle;

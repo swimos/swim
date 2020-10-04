@@ -66,6 +66,6 @@ export abstract class FrameAnimator extends Animator {
 
   protected onAnimationFrame(timestamp: number): void {
     this._animationFrame = 0;
-    this.onFrame(timestamp);
+    this.onAnimate(timestamp);
   }
 }

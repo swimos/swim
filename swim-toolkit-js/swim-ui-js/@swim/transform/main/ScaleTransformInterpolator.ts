@@ -60,13 +60,13 @@ export class ScaleTransformInterpolator extends TransformInterpolator<ScaleTrans
   range(f0: AnyTransform, f1: AnyTransform): TransformInterpolator;
   range(f0?: readonly [AnyTransform, AnyTransform] | AnyTransform,
         f1?: AnyTransform): readonly [ScaleTransform, ScaleTransform] | TransformInterpolator {
-    if (f0 === void 0) {
+    if (arguments.length === 0) {
       return [this.interpolate(0), this.interpolate(1)];
-    } else if (f1 === void 0) {
+    } else if (arguments.length === 1) {
       f0 = f0 as readonly [AnyTransform, AnyTransform];
       return ScaleTransformInterpolator.between(f0[0], f0[1]);
     } else {
-      return ScaleTransformInterpolator.between(f0 as AnyTransform, f1);
+      return ScaleTransformInterpolator.between(f0 as AnyTransform, f1 as AnyTransform);
     }
   }
 

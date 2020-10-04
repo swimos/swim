@@ -17,7 +17,7 @@
 const VEHICLE_COLOR = swim.Color.parse("#00a6ed");
 const RIPPLE_COLOR = swim.Color.parse("#efefef").alpha(0.25);
 
-const uiView = new swim.UiView(document.getElementById("ui"));
+const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
 
 const map = new google.maps.Map(uiView.node, {
   center: {lng: -118, lat: 33.95},
@@ -27,8 +27,8 @@ const map = new google.maps.Map(uiView.node, {
 const mapView = new swim.GoogleMapView(map);
 mapView.overlayCanvas();
 
-const mapLayer = mapView.append(new swim.MapLayerView(undefined, 0, 12));
-//mapLayer.tileOutlineColor("#cc0000");
+const mapGrid = mapView.append(swim.MapGridView);
+//mapGrid.tileOutlineColor("#008f11");
 
 const vehiclesLink = swim.downlinkMap()
     .hostUri("warp://transit.swim.services")
@@ -40,7 +40,7 @@ const vehiclesLink = swim.downlinkMap()
       const lat = value.get("latitude").numberValue(0);
       const tween = swim.Transition.duration(10000);
 
-      let vehicleView = mapLayer.getChildView(key);
+      let vehicleView = mapGrid.getChildView(key);
       if (vehicleView !== null) {
         vehicleView.geoCenter([lng, lat], tween);
         if (!document.hidden && mapView.geoBounds.contains(lng, lat)) {
@@ -48,7 +48,7 @@ const vehiclesLink = swim.downlinkMap()
         }
       } else {
         vehicleView = new swim.MapCircleView().geoCenter([lng, lat]).radius(5).fill(VEHICLE_COLOR);
-        mapLayer.setChildView(key, vehicleView);
+        mapGrid.setChildView(key, vehicleView);
       }
     })
     .open();

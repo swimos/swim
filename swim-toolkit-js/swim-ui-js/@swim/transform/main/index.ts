@@ -42,3 +42,91 @@ export {AffineTransformInterpolator} from "./AffineTransformInterpolator";
 export {TransformListInterpolator} from "./TransformListInterpolator";
 
 export {TransformForm} from "./TransformForm";
+
+declare global { // CSS Typed OM shim
+  interface CSSStyleValue {
+  }
+
+  interface CSSKeywordValue extends CSSStyleValue {
+    value: string;
+  }
+  var CSSKeywordValue: {
+    new(value: string): CSSKeywordValue;
+  };
+
+  interface CSSNumericValue extends CSSStyleValue {
+    to(unit: string): CSSUnitValue;
+  }
+  type CSSNumberish = number | CSSNumericValue;
+
+  interface CSSTransformValue extends CSSStyleValue {
+    readonly length: number;
+    [index: number]: CSSTransformComponent | undefined;
+    readonly is2D: boolean;
+    toMatrix(): DOMMatrix;
+  }
+  var CSSTransformValue: {
+    new(transform: CSSTransformComponent[]): CSSTransformValue;
+  };
+
+  interface CSSTransformComponent {
+    readonly is2D: boolean;
+    toMatrix(): DOMMatrix;
+  }
+
+  interface CSSTranslate extends CSSTransformComponent {
+    x: CSSNumberish;
+    y: CSSNumberish;
+  }
+  var CSSTranslate: {
+    new(x: CSSNumberish, y: CSSNumberish): CSSTranslate;
+  };
+
+  interface CSSRotate extends CSSTransformComponent {
+    angle: CSSNumericValue;
+  }
+  var CSSRotate: {
+    new(angle: CSSNumericValue): CSSRotate;
+  };
+
+  interface CSSScale extends CSSTransformComponent {
+    x: CSSNumberish;
+    y: CSSNumberish;
+  }
+  var CSSScale: {
+    new(x: CSSNumberish, y: CSSNumberish): CSSScale;
+  };
+
+  interface CSSSkew extends CSSTransformComponent {
+    ax: CSSNumberish;
+    ay: CSSNumberish;
+  }
+  var CSSSkew: {
+    new(ax: CSSNumberish, ay: CSSNumberish): CSSSkew;
+  };
+
+  interface CSSSkewX extends CSSTransformComponent {
+    ax: CSSNumberish;
+  }
+  var CSSSkewX: {
+    new(ax: CSSNumberish): CSSSkewX;
+  };
+
+  interface CSSSkewY extends CSSTransformComponent {
+    ay: CSSNumberish;
+  }
+  var CSSSkewY: {
+    new(ay: CSSNumberish): CSSSkewY;
+  };
+
+  interface CSSMatrixComponent extends CSSTransformComponent {
+    matrix: DOMMatrix;
+  }
+  var CSSMatrixComponent: {
+    new(matrix: DOMMatrixReadOnly, options?: CSSMatrixComponentOptions): CSSMatrixComponent;
+  };
+
+  interface CSSMatrixComponentOptions {
+    is2D?: boolean;
+  }
+}

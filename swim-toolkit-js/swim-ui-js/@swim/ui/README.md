@@ -40,6 +40,10 @@ component libraries:
   ([npm](https://www.npmjs.com/package/@swim/shadow),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_shadow.html)) –
   CSS box shadow types and parsers.
+- [**@swim/gradient**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/gradient)
+  ([npm](https://www.npmjs.com/package/@swim/gradient),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_gradient.html)) –
+  CSS gradient types and parsers.
 - [**@swim/transform**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/transform)
   ([npm](https://www.npmjs.com/package/@swim/transform),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_transform.html)) –
@@ -56,15 +60,15 @@ component libraries:
   [doc](https://docs.swimos.org/js/latest/modules/_swim_transition.html)) –
   transition types that specify duration, ease, interpolator, and lifecycle
   callback parameters for tween animations.
+- [**@swim/style**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/style)
+  ([npm](https://www.npmjs.com/package/@swim/style),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_style.html)) –
+  CSS style types and universal style value parser.
 - [**@swim/animate**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/animate)
   ([npm](https://www.npmjs.com/package/@swim/animate),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_animate.html)) –
   property-managing animator types that efficiently tween values between
   discrete state changes.
-- [**@swim/style**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/style)
-  ([npm](https://www.npmjs.com/package/@swim/style),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_style.html)) –
-  CSS style types and universal style value parser.
 - [**@swim/render**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/render)
   ([npm](https://www.npmjs.com/package/@swim/render),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_render.html)) –

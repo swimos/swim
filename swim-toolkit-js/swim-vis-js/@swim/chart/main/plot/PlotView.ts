@@ -19,19 +19,21 @@ import {Tween} from "@swim/transition";
 import {GraphicsViewInit, GraphicsView} from "@swim/view";
 import {AnyDataPointView} from "../data/DataPointView";
 import {ScaleXYView} from "../scale/ScaleXYView";
+import {PlotViewObserver} from "./PlotViewObserver";
 import {PlotViewController} from "./PlotViewController";
 import {ScatterPlotView} from "./ScatterPlotView";
 import {SeriesPlotView} from "./SeriesPlotView";
-import {BubblePlotView} from "./BubblePlotView";
-import {LinePlotView} from "./LinePlotView";
-import {AreaPlotView} from "./AreaPlotView";
+import {BubblePlotViewInit, BubblePlotView} from "./BubblePlotView";
+import {LinePlotViewInit, LinePlotView} from "./LinePlotView";
+import {AreaPlotViewInit, AreaPlotView} from "./AreaPlotView";
 
 export type PlotType = "bubble" | "line" | "area";
 
 export type AnyPlotView<X, Y> = PlotView<X, Y> | PlotViewInit<X, Y> | PlotType;
 
 export interface PlotViewInit<X, Y> extends GraphicsViewInit {
-  plotType: PlotType;
+  viewController?: PlotViewController<X, Y>;
+  plotType?: PlotType;
 
   xScale?: ContinuousScale<X, number>;
   yScale?: ContinuousScale<Y, number>;
@@ -43,7 +45,11 @@ export interface PlotViewInit<X, Y> extends GraphicsViewInit {
 }
 
 export interface PlotView<X, Y> extends GraphicsView, ScaleXYView<X, Y> {
-  viewController: PlotViewController<X, Y> | null;
+  // @ts-ignore
+  declare readonly viewController: PlotViewController<X, Y> | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<PlotViewObserver<X, Y>>;
 
   plotType: PlotType;
 
@@ -113,11 +119,11 @@ export const PlotView = {
   fromInit<X, Y>(init: PlotViewInit<X, Y>): PlotView<X, Y> {
     const type = init.plotType;
     if (type === "bubble") {
-      return PlotView.Bubble.fromInit(init);
+      return PlotView.Bubble.fromInit(init as BubblePlotViewInit<X, Y>);
     } else if (type === "line") {
-      return PlotView.Line.fromInit(init);
+      return PlotView.Line.fromInit(init as LinePlotViewInit<X, Y>);
     } else if (type === "area") {
-      return PlotView.Area.fromInit(init);
+      return PlotView.Area.fromInit(init as AreaPlotViewInit<X, Y>);
     }
     throw new TypeError("" + init);
   },

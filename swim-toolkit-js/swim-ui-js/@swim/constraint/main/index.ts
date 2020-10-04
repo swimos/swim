@@ -41,6 +41,8 @@ export {
 } from "./ConstraintStrength";
 export {Constraint} from "./Constraint";
 
+export {ConstraintGroup} from "./ConstraintGroup";
+
 export {ConstraintScope} from "./ConstraintScope";
 
 export {ConstraintSolver} from "./ConstraintSolver";

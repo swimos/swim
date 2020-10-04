@@ -44,13 +44,13 @@ export class AngleInterpolator extends Interpolator<Angle, AnyAngle> {
   range(t0: AnyAngle, t1: AnyAngle): AngleInterpolator;
   range(a0?: readonly [AnyAngle, AnyAngle] | AnyAngle,
         a1?: AnyAngle): readonly [Angle, Angle] | AngleInterpolator {
-    if (a0 === void 0) {
+    if (arguments.length === 0) {
       return [Angle.from(this.v0, this.units), Angle.from(this.v0 + this.dv, this.units)];
-    } else if (a1 === void 0) {
+    } else if (arguments.length === 1) {
       a0 = a0 as readonly [AnyAngle, AnyAngle];
       return AngleInterpolator.between(a0[0], a0[1]);
     } else {
-      return AngleInterpolator.between(a0 as AnyAngle, a1);
+      return AngleInterpolator.between(a0 as AnyAngle, a1 as AnyAngle);
     }
   }
 

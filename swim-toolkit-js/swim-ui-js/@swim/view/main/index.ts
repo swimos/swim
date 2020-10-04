@@ -12,30 +12,56 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {ViewContext} from "./ViewContext";
 export {
-  ViewControllerType,
+  ViewContextType,
+  ViewContext,
+} from "./ViewContext";
+export {
   ViewFlags,
   ViewInit,
+  ViewConstructor,
   ViewClass,
   View,
 } from "./View";
-export {ViewObserver} from "./ViewObserver";
-export {ViewController} from "./ViewController";
+export {
+  ViewObserverType,
+  ViewObserver,
+} from "./ViewObserver";
+export {
+  ViewControllerType,
+  ViewController,
+} from "./ViewController";
+
+export {
+  SubviewMemberType,
+  SubviewMemberInit,
+  SubviewInit,
+  SubviewDescriptorInit,
+  SubviewDescriptorExtends,
+  SubviewDescriptorFromAny,
+  SubviewDescriptor,
+  SubviewPrototype,
+  SubviewConstructor,
+  Subview,
+} from "./Subview";
+
+export {SubviewObserver} from "./SubviewObserver";
+
+export * from "./manager";
+
+export * from "./display";
+
+export * from "./layout";
 
 export * from "./viewport";
 
 export * from "./event";
 
-export * from "./modal";
-
-export * from "./root";
+export * from "./service";
 
 export * from "./scope";
 
 export * from "./animator";
-
-export * from "./layout";
 
 export * from "./graphics";
 
@@ -47,8 +73,6 @@ export * from "./text";
 
 export * from "./attribute";
 
-export * from "./style";
-
 export * from "./element";
 
 export * from "./svg";
@@ -57,4 +81,4 @@ export * from "./html";
 
 export * from "./canvas";
 
-export * from "./ui";
+export * from "./style";

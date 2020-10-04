@@ -18,11 +18,10 @@ import {AnyColor, Color} from "@swim/color";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
 import {
+  ViewContextType,
   ViewAnimator,
-  GraphicsViewContext,
   GraphicsView,
-  GraphicsViewController,
-  GraphicsLeafView,
+  LayerView,
   FillViewInit,
   FillView,
   StrokeViewInit,
@@ -39,38 +38,39 @@ export interface RectViewInit extends FillViewInit, StrokeViewInit {
   height?: AnyLength;
 }
 
-export class RectView extends GraphicsLeafView implements FillView, StrokeView {
-  get viewController(): GraphicsViewController<RectView> | null {
-    return this._viewController;
+export class RectView extends LayerView implements FillView, StrokeView {
+  initView(init: RectViewInit): void {
+    super.initView(init);
+    this.setState(init);
   }
 
-  @ViewAnimator(Length, {value: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero()})
   x: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Length, {value: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero()})
   y: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Length, {value: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero()})
   width: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Length, {value: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero()})
   height: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator(Color, {inherit: true})
-  fill: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  fill: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Color, {inherit: true})
-  stroke: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, inherit: true})
+  stroke: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  @ViewAnimator(Length, {inherit: true})
-  strokeWidth: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: Length, inherit: true})
+  strokeWidth: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
 
   get value(): Rect {
-    return new Rect(this.x.value!, this.y.value!, this.width.value!, this.height.value!);
+    return new Rect(this.x.getValue(), this.y.getValue(), this.width.getValue(), this.height.getValue());
   }
 
   get state(): Rect {
-    return new Rect(this.x.state!, this.y.state!, this.width.state!, this.height.state!);
+    return new Rect(this.x.getState(), this.y.getState(), this.width.getState(), this.height.getState());
   }
 
   setState(rect: Rect | RectViewInit, tween?: Tween<any>): void {
@@ -98,15 +98,9 @@ export class RectView extends GraphicsLeafView implements FillView, StrokeView {
     if (rect.strokeWidth !== void 0) {
       this.strokeWidth(rect.strokeWidth, tween);
     }
-    if (rect.hidden !== void 0) {
-      this.setHidden(rect.hidden);
-    }
-    if (rect.culled !== void 0) {
-      this.setCulled(rect.culled);
-    }
   }
 
-  protected onRender(viewContext: GraphicsViewContext): void {
+  protected onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -118,10 +112,10 @@ export class RectView extends GraphicsLeafView implements FillView, StrokeView {
   }
 
   protected renderRect(context: CanvasContext, frame: BoxR2): void {
-    const x = this.x.value!.pxValue(frame.width);
-    const y = this.y.value!.pxValue(frame.height);
-    const width = this.width.value!.pxValue(frame.width);
-    const height = this.height.value!.pxValue(frame.height);
+    const x = this.x.getValue().pxValue(frame.width);
+    const y = this.y.getValue().pxValue(frame.height);
+    const width = this.width.getValue().pxValue(frame.width);
+    const height = this.height.getValue().pxValue(frame.height);
     context.beginPath();
     context.rect(x, y, width, height);
     const fill = this.fill.value;
@@ -143,15 +137,15 @@ export class RectView extends GraphicsLeafView implements FillView, StrokeView {
 
   get viewBounds(): BoxR2 {
     const frame = this.viewFrame;
-    const x = this.x.value!.pxValue(frame.width);
-    const y = this.y.value!.pxValue(frame.height);
-    const width = this.width.value!.pxValue(frame.width);
-    const height = this.height.value!.pxValue(frame.height);
+    const x = this.x.getValue().pxValue(frame.width);
+    const y = this.y.getValue().pxValue(frame.height);
+    const width = this.width.getValue().pxValue(frame.width);
+    const height = this.height.getValue().pxValue(frame.height);
     return new BoxR2(x, y, x + width, y + height);
   }
 
-  hitTest(x: number, y: number, viewContext: GraphicsViewContext): GraphicsView | null {
-    let hit = super.hitTest(x, y, viewContext);
+  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
       if (renderer instanceof CanvasRenderer) {
@@ -167,10 +161,10 @@ export class RectView extends GraphicsLeafView implements FillView, StrokeView {
   }
 
   protected hitTestRect(hx: number, hy: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
-    const x = this.x.value!.pxValue(frame.width);
-    const y = this.y.value!.pxValue(frame.height);
-    const width = this.width.value!.pxValue(frame.width);
-    const height = this.height.value!.pxValue(frame.height);
+    const x = this.x.getValue().pxValue(frame.width);
+    const y = this.y.getValue().pxValue(frame.height);
+    const width = this.width.getValue().pxValue(frame.width);
+    const height = this.height.getValue().pxValue(frame.height);
     context.beginPath();
     context.rect(x, y, width, height);
     if (this.fill.value !== void 0 && context.isPointInPath(hx, hy)) {
@@ -191,11 +185,23 @@ export class RectView extends GraphicsLeafView implements FillView, StrokeView {
   static fromAny(rect: AnyRectView): RectView {
     if (rect instanceof RectView) {
       return rect;
-    } else if (rect instanceof Rect || typeof rect === "object" && rect !== null) {
-      const view = new RectView();
-      view.setState(rect);
-      return view;
+    } else if (rect instanceof Rect) {
+      return RectView.fromRect(rect);
+    } else if (typeof rect === "object" && rect !== null) {
+      return RectView.fromInit(rect);
     }
     throw new TypeError("" + rect);
+  }
+
+  static fromRect(arc: Rect): RectView {
+    const view = new RectView();
+    view.setState(arc);
+    return view;
+  }
+
+  static fromInit(init: RectViewInit): RectView {
+    const view = new RectView();
+    view.initView(init);
+    return view;
   }
 }

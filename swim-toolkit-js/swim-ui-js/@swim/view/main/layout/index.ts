@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {LayoutContext} from "./LayoutContext";
-
 export {
-  LayoutAnchorGetState,
-  LayoutAnchorSetValue,
+  LayoutAnchorInit,
+  LayoutAnchorDescriptorInit,
+  LayoutAnchorDescriptorExtends,
   LayoutAnchorDescriptor,
+  LayoutAnchorPrototype,
   LayoutAnchorConstructor,
-  LayoutAnchorClass,
   LayoutAnchor,
 } from "./LayoutAnchor";
 
-export {LayoutManager} from "./LayoutManager";
-
 export {LayoutSolver} from "./LayoutSolver";
+
+export {LayoutManager} from "./LayoutManager";
+export {LayoutManagerObserver} from "./LayoutManagerObserver";

@@ -22,6 +22,8 @@ import {AffineTransform} from "./AffineTransform";
 export class TransformList extends Transform {
   /** @hidden */
   readonly _transforms: ReadonlyArray<Transform>;
+  /** @hidden */
+  _string?: string;
 
   constructor(transforms: ReadonlyArray<Transform>) {
     super();
@@ -169,17 +171,22 @@ export class TransformList extends Transform {
   }
 
   toString(): string {
-    const transforms = this._transforms;
-    const n = transforms.length;
-    if (n > 0) {
-      let s = transforms[0].toString();
-      for (let i = 1; i < n; i += 1) {
-        s = s + " " + transforms[i].toString();
+    let string = this._string;
+    if (string === void 0) {
+      const transforms = this._transforms;
+      const n = transforms.length;
+      if (n > 0) {
+        string = transforms[0].toString();
+        for (let i = 1; i < n; i += 1) {
+          string += " ";
+          string += transforms[i].toString();
+        }
+      } else {
+        string = "none";
       }
-      return s;
-    } else {
-      return "";
+      this._string = string;
     }
+    return string;
   }
 
   toAttributeString(): string {
@@ -188,7 +195,8 @@ export class TransformList extends Transform {
     if (n > 0) {
       let s = transforms[0].toAttributeString();
       for (let i = 1; i < n; i += 1) {
-        s = s + " " + transforms[i].toAttributeString();
+        s += " ";
+        s += transforms[i].toAttributeString();
       }
       return s;
     } else {
@@ -242,5 +250,26 @@ export class TransformList extends Transform {
       return new TransformList([transform]);
     }
   }
+}
+if (typeof CSSMatrixComponent !== "undefined") { // CSS Typed OM support
+  TransformList.prototype.toCssTransformComponent = function (this: TransformList): CSSTransformComponent | undefined {
+    return new CSSMatrixComponent(this.toMatrix());
+  };
+}
+if (typeof CSSTransformValue !== "undefined") { // CSS Typed OM support
+  TransformList.prototype.toCssValue = function (this: TransformList): CSSTransformValue | undefined {
+    const transforms = this._transforms;
+    const n = transforms.length;
+    const components = new Array<CSSTransformComponent>(n);
+    for (let i = 0, n = transforms.length; i < n; i += 1) {
+      const transform = transforms[i];
+      const component = transform.toCssTransformComponent();
+      if (component === void 0) {
+        return void 0;
+      }
+      components[i] = component;
+    }
+    return new CSSTransformValue(components);
+  };
 }
 Transform.List = TransformList;

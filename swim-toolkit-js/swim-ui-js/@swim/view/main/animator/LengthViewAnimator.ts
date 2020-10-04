@@ -12,39 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
 import {AnyLength, Length} from "@swim/length";
-import {Tween} from "@swim/transition";
 import {View} from "../View";
-import {ViewAnimatorDescriptor, ViewAnimatorConstructor, ViewAnimator} from "./ViewAnimator";
+import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
-export interface LengthViewAnimator<V extends View> extends ViewAnimator<V, Length, AnyLength> {
+export abstract class LengthViewAnimator<V extends View> extends ViewAnimator<V, Length | null | undefined, AnyLength | null | undefined> {
+  fromAny(value: AnyLength | null | undefined): Length | null | undefined {
+    return value !== void 0 && value !== null ? Length.fromAny(value) : null;
+  }
 }
-
-/** @hidden */
-export const LengthViewAnimator: ViewAnimatorConstructor<Length, AnyLength> = (function (_super: typeof ViewAnimator): ViewAnimatorConstructor<Length, AnyLength> {
-  const LengthViewAnimator: ViewAnimatorConstructor<Length, AnyLength> = function <V extends View>(
-      this: LengthViewAnimator<V>, view: V, animatorName: string | undefined,
-      descriptor?: ViewAnimatorDescriptor<V, Length, AnyLength>): LengthViewAnimator<V> {
-    let _this: LengthViewAnimator<V> = function accessor(value?: AnyLength, tween?: Tween<Length>): Length | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as LengthViewAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, descriptor) || _this;
-    return _this;
-  } as unknown as ViewAnimatorConstructor<Length, AnyLength>;
-  __extends(LengthViewAnimator, _super);
-
-  LengthViewAnimator.prototype.fromAny = function (this: LengthViewAnimator<View>, value: AnyLength | null): Length | null {
-    return value !== null ? Length.fromAny(value) : null;
-  };
-
-  return LengthViewAnimator;
-}(ViewAnimator));
 ViewAnimator.Length = LengthViewAnimator;

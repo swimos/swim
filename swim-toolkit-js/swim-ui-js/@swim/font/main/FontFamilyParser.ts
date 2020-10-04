@@ -42,7 +42,7 @@ export class FontFamilyParser extends Parser<FontFamily> {
         input = input.step();
       }
       if (input.isCont()) {
-        if (Unicode.isAlpha(c)) {
+        if (Unicode.isAlpha(c) || c === 45/*'-'*/) {
           output = output || Unicode.stringOutput();
           step = 2;
         } else if (c === 34/*'"'*/ || c === 39/*'\''*/ && (quote === c || quote === 0)) {

@@ -1,0 +1,24 @@
+{
+  "extends": "../../../tsconfig-main",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/main",
+    "paths": {
+      "@swim/util": ["../../swim-system-js/swim-core-js/@swim/util/main"],
+      "@swim/codec": ["../../swim-system-js/swim-core-js/@swim/codec/main"],
+      "@swim/interpolate": ["../../swim-system-js/swim-core-js/@swim/interpolate/main"],
+      "@swim/structure": ["../../swim-system-js/swim-core-js/@swim/structure/main"],
+      "@swim/length": ["@swim/length/main"],
+      "@swim/color": ["@swim/color/main"],
+    },
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
+  },
+  "references": [
+    {"path": "../../../../../swim-system-js/swim-core-js/@swim/util/main"},
+    {"path": "../../../../../swim-system-js/swim-core-js/@swim/codec/main"},
+    {"path": "../../../../../swim-system-js/swim-core-js/@swim/interpolate/main"},
+    {"path": "../../../../../swim-system-js/swim-core-js/@swim/structure/main"},
+    {"path": "../../length/main"},
+    {"path": "../../color/main"},
+  ]
+}

@@ -27,3 +27,17 @@ export {AngleParser} from "./AngleParser";
 export {AngleInterpolator} from "./AngleInterpolator";
 
 export {AngleForm} from "./AngleForm";
+
+declare global { // CSS Typed OM shim
+  interface CSSStyleValue {
+  }
+  interface CSSNumericValue extends CSSStyleValue {
+  }
+  interface CSSUnitValue extends CSSNumericValue {
+    value: number;
+    readonly unit: string;
+  }
+  var CSSUnitValue: {
+    new(value: number, unit: string): CSSUnitValue;
+  };
+}

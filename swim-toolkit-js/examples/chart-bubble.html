@@ -12,7 +12,7 @@
     <script src="../swim-vis-js/@swim/vis/dist/main/swim-vis.js"></script>
     <script>
 
-const uiView = new swim.UiView(document.getElementById("ui"));
+const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
 
 const canvas = uiView.append("canvas")
     .wheelEventsEnabled(true)
@@ -28,6 +28,8 @@ const chart = canvas.append(swim.ChartView)
     .yGestures(true)
     .xRangePadding(20, 20)
     .yRangePadding(20, 20)
+    .xFitAlign(0.5)
+    .yFitAlign(0.5)
     .fitAspectRatio(-1)
     .preserveAspectRatio(true)
     .domainTracking(true)
@@ -36,7 +38,7 @@ const chart = canvas.append(swim.ChartView)
     .font("12px sans-serif")
     .textColor("#4a4a4a")
     .rescaleTransition(undefined);
-const graph = chart.graph();
+const graph = chart.graph;
 
 chart.leftAxis().createTickLabel = function (tickValue) {
   return tickValue + "%";

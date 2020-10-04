@@ -13,11 +13,16 @@
 // limitations under the License.
 
 import {View} from "../View";
-import {NodeView} from "../node/NodeView";
+import {NodeViewInit, NodeView} from "../node/NodeView";
+import {TextViewObserver} from "./TextViewObserver";
 import {TextViewController} from "./TextViewController";
 
 export interface ViewText extends Text {
   view?: TextView;
+}
+
+export interface TextViewInit extends NodeViewInit {
+  viewController?: TextViewController;
 }
 
 export class TextView extends NodeView {
@@ -25,12 +30,17 @@ export class TextView extends NodeView {
     super(node);
   }
 
-  get node(): ViewText {
-    return this._node;
-  }
+  // @ts-ignore
+  declare readonly node: ViewText;
 
-  get viewController(): TextViewController | null {
-    return this._viewController;
+  // @ts-ignore
+  declare readonly viewController: TextViewController | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<TextViewObserver>;
+
+  initView(init: TextViewInit): void {
+    super.initView(init);
   }
 }
 View.Text = TextView;

@@ -25,6 +25,7 @@
     "@swim/color": "3.11.0-dev.20200619",
     "@swim/font": "3.11.0-dev.20200619",
     "@swim/shadow": "3.11.0-dev.20200619",
+    "@swim/gradient": "3.11.0-dev.20200619",
     "@swim/transform": "3.11.0-dev.20200619",
     "@swim/scale": "3.11.0-dev.20200619",
     "@swim/transition": "3.11.0-dev.20200619",

@@ -3,9 +3,12 @@
   "include": [],
   "references": [
     {"path": "./@swim/theme"},
-    {"path": "./@swim/app"},
-    {"path": "./@swim/controls"},
-    {"path": "./@swim/navigation"},
+    {"path": "./@swim/modal"},
+    {"path": "./@swim/button"},
+    {"path": "./@swim/token"},
+    {"path": "./@swim/drawer"},
+    {"path": "./@swim/menu"},
+    {"path": "./@swim/tree"},
     {"path": "./@swim/ux"}
   ]
 }

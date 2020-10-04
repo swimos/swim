@@ -27,11 +27,11 @@ export class TopTickView<X> extends TickView<X> {
   }
 
   protected layoutTickLabel(tickLabel: GraphicsView): void {
-    const anchor = this.anchor.value!;
+    const anchor = this.anchor.getValue();
     const x = Math.round(anchor.x);
     const y0 = Math.round(anchor.y);
-    const y1 = y0 - this.tickMarkLength.value!;
-    const y2 = y1 - this.tickLabelPadding.value!;
+    const y1 = y0 - this.tickMarkLength.getValue();
+    const y2 = y1 - this.tickLabelPadding.getValue();
 
     if (TypesetView.is(tickLabel)) {
       tickLabel.textAlign.setAutoState("center");
@@ -41,16 +41,16 @@ export class TopTickView<X> extends TickView<X> {
   }
 
   protected renderTick(context: CanvasContext, frame: BoxR2): void {
-    const anchor = this.anchor.value!;
+    const anchor = this.anchor.getValue();
     const x = Math.round(anchor.x);
     const y0 = Math.round(anchor.y);
-    const tickMarkLength = this.tickMarkLength.value!;
+    const tickMarkLength = this.tickMarkLength.getValue();
     const y1 = y0 - tickMarkLength;
 
     const tickMarkWidth = this.tickMarkWidth.value;
     if (tickMarkWidth !== void 0 && tickMarkWidth !== 0 && tickMarkLength !== 0) {
       context.beginPath();
-      context.strokeStyle = this.tickMarkColor.value!.toString();
+      context.strokeStyle = this.tickMarkColor.getValue().toString();
       context.lineWidth = tickMarkWidth;
       context.moveTo(x, y0);
       context.lineTo(x, y1);
@@ -60,7 +60,7 @@ export class TopTickView<X> extends TickView<X> {
     const gridLineWidth = this.gridLineWidth.value;
     if (gridLineWidth !== void 0 && gridLineWidth !== 0 && frame.xMin < x && x < frame.xMax) {
       context.beginPath();
-      context.strokeStyle = this.gridLineColor.value!.toString();
+      context.strokeStyle = this.gridLineColor.getValue().toString();
       context.lineWidth = gridLineWidth;
       context.moveTo(x, y0);
       context.lineTo(x, frame.yMax);

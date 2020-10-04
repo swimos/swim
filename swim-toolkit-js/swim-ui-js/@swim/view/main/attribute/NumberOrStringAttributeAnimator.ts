@@ -12,47 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {__extends} from "tslib";
-import {Tween} from "@swim/transition";
-import {AttributeAnimatorConstructor, AttributeAnimator} from "./AttributeAnimator";
+import {AttributeAnimator} from "./AttributeAnimator";
 import {ElementView} from "../element/ElementView";
 
 /** @hidden */
-export interface NumberOrStringAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, number | string, number | string> {
-}
-
-/** @hidden */
-export const NumberOrStringAttributeAnimator: AttributeAnimatorConstructor<number | string, number | string> = (function (_super: typeof AttributeAnimator): AttributeAnimatorConstructor<number | string, number | string> {
-  const NumberOrStringAttributeAnimator: AttributeAnimatorConstructor<number | string, number | string> = function <V extends ElementView>(
-      this: NumberOrStringAttributeAnimator<V>, view: V, animatorName: string, attributeName: string): NumberOrStringAttributeAnimator<V> {
-    let _this: NumberOrStringAttributeAnimator<V> = function accessor(value?: number | string, tween?: Tween<number | string>): number | string | undefined | V {
-      if (arguments.length === 0) {
-        return _this.value;
-      } else {
-        _this.setState(value, tween);
-        return _this._view;
-      }
-    } as NumberOrStringAttributeAnimator<V>;
-    (_this as any).__proto__ = this;
-    _this = _super.call(_this, view, animatorName, attributeName) || _this;
-    return _this;
-  } as unknown as AttributeAnimatorConstructor<number | string, number | string>;
-  __extends(NumberOrStringAttributeAnimator, _super);
-
-  NumberOrStringAttributeAnimator.prototype.parse = function (this: NumberOrStringAttributeAnimator<ElementView>, value: string): number | string {
+export abstract class NumberOrStringAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, number | string, number | string> {
+  parse(value: string): number | string {
     const number = +value;
     return isFinite(number) ? number : value;
-  };
+  }
 
-  NumberOrStringAttributeAnimator.prototype.fromAny = function (this: NumberOrStringAttributeAnimator<ElementView>, value: number | string): number | string {
-    if (typeof value === "string") {
+  fromAny(value: number | string): number | string {
+    if (typeof value === "number") {
+      return value;
+    } else {
       const number = +value;
       return isFinite(number) ? number : value;
-    } else {
-      return value;
     }
-  };
-
-  return NumberOrStringAttributeAnimator;
-}(AttributeAnimator));
+  }
+}
 AttributeAnimator.NumberOrString = NumberOrStringAttributeAnimator;

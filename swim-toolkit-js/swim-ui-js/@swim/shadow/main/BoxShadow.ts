@@ -22,41 +22,121 @@ import {BoxShadowForm} from "./BoxShadowForm";
 
 export type AnyBoxShadow = BoxShadow | BoxShadowInit | string | BoxShadowArray;
 
-export type BoxShadowArray = {[index: number]: BoxShadow | BoxShadowInit | string, length: number};
-
 export interface BoxShadowInit {
+  inset?: boolean;
   offsetX?: AnyLength;
   offsetY?: AnyLength;
   blurRadius?: AnyLength;
   spreadRadius?: AnyLength;
   color?: AnyColor;
-  inset?: boolean;
 }
 
+export type BoxShadowArray = {[index: number]: BoxShadow | BoxShadowInit | string, length: number};
+
 export class BoxShadow implements Equals {
-  readonly inset: boolean;
-  readonly offsetX: Length;
-  readonly offsetY: Length;
-  readonly blurRadius: Length;
-  readonly spreadRadius: Length;
-  readonly color: Color;
-  readonly next: BoxShadow | null;
+  /** @hidden */
+  readonly _inset: boolean;
+  /** @hidden */
+  readonly _offsetX: Length;
+  /** @hidden */
+  readonly _offsetY: Length;
+  /** @hidden */
+  readonly _blurRadius: Length;
+  /** @hidden */
+  readonly _spreadRadius: Length;
+  /** @hidden */
+  readonly _color: Color;
+  /** @hidden */
+  readonly _next: BoxShadow | null;
+  /** @hidden */
+  _string?: string;
 
   constructor(inset: boolean, offsetX: Length, offsetY: Length, blurRadius: Length,
               spreadRadius: Length, color: Color, next: BoxShadow | null) {
-    this.inset = inset;
-    this.offsetX = offsetX;
-    this.offsetY = offsetY;
-    this.blurRadius = blurRadius;
-    this.spreadRadius = spreadRadius;
-    this.color = color;
-    this.next = next;
+    this._inset = inset;
+    this._offsetX = offsetX;
+    this._offsetY = offsetY;
+    this._blurRadius = blurRadius;
+    this._spreadRadius = spreadRadius;
+    this._color = color;
+    this._next = next;
   }
 
   isDefined(): boolean {
-    return this.inset || this.offsetX.isDefined() || this.offsetY.isDefined()
-        || this.blurRadius.isDefined() || this.spreadRadius.isDefined()
-        || this.color.isDefined() || (this.next !== null ? this.next.isDefined() : false);
+    return this._inset || this._offsetX.isDefined() || this._offsetY.isDefined()
+        || this._blurRadius.isDefined() || this._spreadRadius.isDefined()
+        || this._color.isDefined() || (this._next !== null ? this._next.isDefined() : false);
+  }
+
+  inset(): boolean;
+  inset(inset: boolean): BoxShadow;
+  inset(inset?: boolean): boolean | BoxShadow {
+    if (inset === void 0) {
+      return this._inset;
+    } else {
+      return new BoxShadow(inset, this._offsetX, this._offsetY, this._blurRadius,
+                           this._spreadRadius, this._color, this._next);
+    }
+  }
+
+  offsetX(): Length;
+  offsetX(offsetX: AnyLength): BoxShadow;
+  offsetX(offsetX?: AnyLength): Length | BoxShadow {
+    if (offsetX === void 0) {
+      return this._offsetX;
+    } else {
+      offsetX = Length.fromAny(offsetX);
+      return new BoxShadow(this._inset, offsetX, this._offsetY, this._blurRadius,
+                           this._spreadRadius, this._color, this._next);
+    }
+  }
+
+  offsetY(): Length;
+  offsetY(offsetY: AnyLength): BoxShadow;
+  offsetY(offsetY?: AnyLength): Length | BoxShadow {
+    if (offsetY === void 0) {
+      return this._offsetY;
+    } else {
+      offsetY = Length.fromAny(offsetY);
+      return new BoxShadow(this._inset, this._offsetX, offsetY, this._blurRadius,
+                           this._spreadRadius, this._color, this._next);
+    }
+  }
+
+  blurRadius(): Length;
+  blurRadius(blurRadius: AnyLength): BoxShadow;
+  blurRadius(blurRadius?: AnyLength): Length | BoxShadow {
+    if (blurRadius === void 0) {
+      return this._blurRadius;
+    } else {
+      blurRadius = Length.fromAny(blurRadius);
+      return new BoxShadow(this._inset, this._offsetX, this._offsetY, blurRadius,
+                           this._spreadRadius, this._color, this._next);
+    }
+  }
+
+  spreadRadius(): Length;
+  spreadRadius(spreadRadius: AnyLength): BoxShadow;
+  spreadRadius(spreadRadius?: AnyLength): Length | BoxShadow {
+    if (spreadRadius === void 0) {
+      return this._spreadRadius;
+    } else {
+      spreadRadius = Length.fromAny(spreadRadius);
+      return new BoxShadow(this._inset, this._offsetX, this._offsetY, this._blurRadius,
+                           spreadRadius, this._color, this._next);
+    }
+  }
+
+  color(): Color;
+  color(color: AnyColor): BoxShadow;
+  color(color?: AnyColor): Color | BoxShadow {
+    if (color === void 0) {
+      return this._color;
+    } else {
+      color = Color.fromAny(color);
+      return new BoxShadow(this._inset, this._offsetX, this._offsetY, this._blurRadius,
+                           this._spreadRadius, color, this._next);
+    }
   }
 
   and(value: AnyBoxShadow): BoxShadow;
@@ -67,52 +147,51 @@ export class BoxShadow implements Equals {
   and(inset: boolean, offsetX: AnyLength, offsetY: AnyLength, blurRadius: AnyLength, color: AnyColor): BoxShadow;
   and(inset: boolean, offsetX: AnyLength, offsetY: AnyLength, blurRadius: AnyLength, spreadRadius: AnyLength, color: AnyColor): BoxShadow;
   and(inset: AnyBoxShadow | AnyLength | boolean, offsetX?: AnyLength, offsetY?: AnyColor | AnyLength, blurRadius?: AnyColor | AnyLength, spreadRadius?: AnyColor | AnyLength, color?: AnyColor): BoxShadow {
-    const next = this.next !== null ? this.next.and.apply(this.next, arguments) : BoxShadow.of.apply(null, arguments);
-    return new BoxShadow(this.inset, this.offsetX, this.offsetY, this.blurRadius,
-                         this.spreadRadius, this.color, next);
+    const next = this._next !== null ? this._next.and.apply(this._next, arguments) : BoxShadow.of.apply(null, arguments);
+    return new BoxShadow(this._inset, this._offsetX, this._offsetY, this._blurRadius,
+                         this._spreadRadius, this._color, next);
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof BoxShadow) {
-      return this.inset === that.inset && this.offsetX.equals(that.offsetX)
-          && this.offsetY.equals(that.offsetY) && this.blurRadius.equals(that.blurRadius)
-          && this.spreadRadius.equals(that.spreadRadius) && this.color.equals(that.color)
-          && Objects.equal(this.next, that.next);
+      return this._inset === that._inset && this._offsetX.equals(that._offsetX)
+          && this._offsetY.equals(that._offsetY) && this._blurRadius.equals(that._blurRadius)
+          && this._spreadRadius.equals(that._spreadRadius) && this._color.equals(that._color)
+          && Objects.equal(this._next, that._next);
     }
     return false;
   }
 
   toString(): string {
-    if (this.isDefined()) {
-      let s = "";
-      let boxShadow = this as BoxShadow;
-      do {
-        if (boxShadow.inset) {
+    let s = this._string;
+    if (s === void 0) {
+      if (this.isDefined()) {
+        s = "";
+        if (this._inset) {
           s += "inset";
           s += " ";
         }
-        s += boxShadow.offsetX.toString();
+        s += this._offsetX.toString();
         s += " ";
-        s += boxShadow.offsetY.toString();
+        s += this._offsetY.toString();
         s += " ";
-        s += boxShadow.blurRadius.toString();
+        s += this._blurRadius.toString();
         s += " ";
-        s += boxShadow.spreadRadius.toString();
+        s += this._spreadRadius.toString();
         s += " ";
-        s += boxShadow.color.toString();
-        if (boxShadow.next !== null) {
+        s += this._color.toString();
+        if (this._next !== null) {
           s += ", ";
-          boxShadow = boxShadow.next;
-          continue;
+          s += this._next.toString();
         }
-        break;
-      } while (true);
-      return s;
-    } else {
-      return "none";
+      } else {
+        s = "none";
+      }
+      this._string = s;
     }
+    return s;
   }
 
   private static _none?: BoxShadow;
@@ -182,6 +261,24 @@ export class BoxShadow implements Equals {
     return new BoxShadow(inset, offsetX, offsetY, blurRadius, spreadRadius, color, null);
   }
 
+  static fromInit(init: BoxShadowInit): BoxShadow {
+    const inset = init.inset || false;
+    const offsetX = init.offsetX !== void 0 ? Length.fromAny(init.offsetX) : Length.zero();
+    const offsetY = init.offsetY !== void 0 ? Length.fromAny(init.offsetY) : Length.zero();
+    const blurRadius = init.blurRadius !== void 0 ? Length.fromAny(init.blurRadius) : Length.zero();
+    const spreadRadius = init.spreadRadius !== void 0 ? Length.fromAny(init.spreadRadius) : Length.zero();
+    const color = init.color !== void 0 ? Color.fromAny(init.color) : Color.black();
+    return new BoxShadow(inset, offsetX, offsetY, blurRadius, spreadRadius, color, null);
+  }
+
+  static fromArray(array: BoxShadowArray): BoxShadow {
+    let boxShadow = BoxShadow.fromAny(array[0]);
+    for (let i = 1; i < array.length; i += 1) {
+      boxShadow = boxShadow.and(array[i]);
+    }
+    return boxShadow;
+  }
+
   static fromAny(...values: AnyBoxShadow[]): BoxShadow {
     let value: AnyBoxShadow;
     if (arguments.length === 0) {
@@ -196,21 +293,9 @@ export class BoxShadow implements Equals {
     } else if (typeof value === "string") {
       return BoxShadow.parse(value);
     } else if (typeof value === "object" && value !== null && (value as any).length === void 0) {
-      value = value as BoxShadowInit;
-      const inset = value.inset || false;
-      const offsetX = value.offsetX !== void 0 ? Length.fromAny(value.offsetX) : Length.zero();
-      const offsetY = value.offsetY !== void 0 ? Length.fromAny(value.offsetY) : Length.zero();
-      const blurRadius = value.blurRadius !== void 0 ? Length.fromAny(value.blurRadius) : Length.zero();
-      const spreadRadius = value.spreadRadius !== void 0 ? Length.fromAny(value.spreadRadius) : Length.zero();
-      const color = value.color !== void 0 ? Color.fromAny(value.color) : Color.black();
-      return new BoxShadow(inset, offsetX, offsetY, blurRadius, spreadRadius, color, null);
+      return BoxShadow.fromInit(value as BoxShadowInit);
     } else if (typeof value === "object" && value !== null && (value as any).length > 0) {
-      value = value as BoxShadowArray;
-      let boxShadow = BoxShadow.fromAny(value[0]);
-      for (let i = 1; i < value.length; i += 1) {
-        boxShadow = boxShadow.and(value[i]);
-      }
-      return boxShadow;
+      return BoxShadow.fromArray(value as BoxShadowArray);
     }
     throw new TypeError("" + value);
   }
@@ -305,6 +390,30 @@ export class BoxShadow implements Equals {
       return init.offsetX !== void 0 && init.offsetY !== void 0 && init.color !== void 0;
     }
     return false;
+  }
+
+  /** @hidden */
+  static isArray(value: unknown): value is BoxShadowArray {
+    if (Array.isArray(value)) {
+      const n = value.length;
+      if (n !== 0) {
+        for (let i = 0; i < n; i += 1) {
+          if (!BoxShadow.isAny(value)) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** @hidden */
+  static isAny(value: unknown): value is AnyBoxShadow {
+    return value instanceof BoxShadow
+        || BoxShadow.isArray(value)
+        || BoxShadow.isInit(value)
+        || typeof value === "string";
   }
 
   private static _form?: Form<BoxShadow, AnyBoxShadow>;

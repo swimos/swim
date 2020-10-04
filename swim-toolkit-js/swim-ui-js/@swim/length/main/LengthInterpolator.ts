@@ -44,13 +44,13 @@ export class LengthInterpolator extends Interpolator<Length, AnyLength> {
   range(t0: AnyLength, t1: AnyLength): LengthInterpolator;
   range(l0?: readonly [AnyLength, AnyLength] | AnyLength,
         l1?: AnyLength): readonly [Length, Length] | LengthInterpolator {
-    if (l0 === void 0) {
+    if (arguments.length === 0) {
       return [Length.from(this.v0, this.units), Length.from(this.v0 + this.dv, this.units)];
-    } else if (l1 === void 0) {
+    } else if (arguments.length === 1) {
       l0 = l0 as readonly [AnyLength, AnyLength];
       return LengthInterpolator.between(l0[0], l0[1]);
     } else {
-      return LengthInterpolator.between(l0 as AnyLength, l1);
+      return LengthInterpolator.between(l0 as AnyLength, l1 as AnyLength);
     }
   }
 

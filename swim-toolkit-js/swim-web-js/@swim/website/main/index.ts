@@ -14,4 +14,4 @@
 
 export {NavbarView} from "./NavbarView";
 
-export {DropdownView} from "./DropdownView";
+export {ToggleView} from "./ToggleView";

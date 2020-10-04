@@ -18,6 +18,7 @@ import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/map";
 import {EsriProjection} from "./EsriProjection";
 import {EsriView} from "./EsriView";
 import {EsriMapViewProjection} from "./EsriMapViewProjection";
+import {EsriMapViewObserver} from "./EsriMapViewObserver";
 import {EsriMapViewController} from "./EsriMapViewController";
 
 export class EsriMapView extends EsriView {
@@ -48,9 +49,11 @@ export class EsriMapView extends EsriView {
     map.watch("extent", this.onMapRender);
   }
 
-  get viewController(): EsriMapViewController | null {
-    return this._viewController;
-  }
+  // @ts-ignore
+  declare readonly viewController: EsriMapViewController | null;
+
+  // @ts-ignore
+  declare readonly viewObservers: ReadonlyArray<EsriMapViewObserver>;
 
   project(lnglat: AnyGeoPoint): PointR2;
   project(lng: number, lat: number): PointR2;
@@ -116,8 +119,8 @@ export class EsriMapView extends EsriView {
   }
 
   overlayCanvas(): CanvasView | null {
-    if (this._parentView !== null) {
-      return this.canvasView;
+    if (this.isMounted()) {
+      return this.getSuperView(CanvasView);
     } else {
       const map = this._map;
       const container = View.fromNode(map.container);

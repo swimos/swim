@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {UiViewController} from "@swim/view";
+import {HtmlViewController} from "@swim/view";
 import {WebAppView} from "./WebAppView";
 import {WebAppViewObserver} from "./WebAppViewObserver";
 
-export class WebAppViewController<V extends WebAppView = WebAppView> extends UiViewController<V> implements WebAppViewObserver<V> {
+export class WebAppViewController<V extends WebAppView = WebAppView> extends HtmlViewController<V> implements WebAppViewObserver<V> {
 }

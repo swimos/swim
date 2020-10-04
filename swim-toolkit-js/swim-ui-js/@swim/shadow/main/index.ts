@@ -14,9 +14,10 @@
 
 export {
   AnyBoxShadow,
-  BoxShadowArray,
   BoxShadowInit,
+  BoxShadowArray,
   BoxShadow,
 } from "./BoxShadow";
+export {BoxShadowInterpolator} from "./BoxShadowInterpolator";
 export {BoxShadowParser} from "./BoxShadowParser";
 export {BoxShadowForm} from "./BoxShadowForm";
