@@ -36,7 +36,7 @@ export class DisclosureButton extends ThemedHtmlView {
     icon.viewBox.setAutoState("0 0 24 24");
     const arrow = icon.append("polygon", "arrow");
     arrow.points.setAutoState("0 4 -6 -2 -4.59 -3.41 0 1.17 4.59 -3.41 6 -2");
-    arrow.transform.setAutoState(Transform.translate(12, 12).rotate(Angle.deg(-180)));
+    arrow.transform.setAutoState(Transform.translate(12, 12).rotate(Angle.deg(0)));
   }
 
   get icon(): SvgView {
@@ -74,7 +74,7 @@ export class DisclosureButton extends ThemedHtmlView {
         const colorInterpolator = ColorInterpolator.between(collapsedColor, expandedColor);
         this.arrow.fill.setAutoState(colorInterpolator.interpolate(disclosurePhase));
       }
-      const transform = Transform.translate(12, 12).rotate(Angle.deg(-180 * (1 - disclosurePhase)));
+      const transform = Transform.translate(12, 12).rotate(Angle.deg(-180 * disclosurePhase));
       this.arrow.transform.setAutoState(transform);
     }
   }

@@ -31,7 +31,7 @@ const LightMutedColor = Color.parse("#989898");
 const LightNeutralColor = Color.parse("#808080");
 const LightHighlightColor = Color.black(0.05);
 
-const LightBackgroundColor = Color.white();
+const LightBackgroundColor = Color.parse("#fcfcfc");
 const LightBorderColor = LightBackgroundColor.darker(1 / 2);
 
 const LightPrimaryColor = Color.parse("#49cbad");
@@ -143,8 +143,9 @@ const LightEmbossed = FeelVector.of(
 );
 
 const LightNested = FeelVector.of(
-  [Look.backgroundColor, Color.black(1 / 16)],
-  [Look.borderColor, Color.black(1 / 16)],
+  [Look.backgroundColor, Color.black(1 / 24)],
+  [Look.accentColor, Color.black(-1 / 8)],
+  [Look.borderColor, Color.black(1 / 24)],
 );
 
 const LightHovering = FeelVector.of(

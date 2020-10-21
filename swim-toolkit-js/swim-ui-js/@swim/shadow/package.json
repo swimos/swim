@@ -1,6 +1,6 @@
 {
   "name": "@swim/shadow",
-  "version": "3.11.0-dev.20200619",
+  "version": "3.11.0-dev.20201021",
   "description": "CSS box shadow types and parsers",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/shadow",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,11 +11,11 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20200619",
-    "@swim/codec": "3.11.0-dev.20200619",
-    "@swim/interpolate": "3.11.0-dev.20200619",
-    "@swim/structure": "3.11.0-dev.20200619",
-    "@swim/length": "3.11.0-dev.20200619",
-    "@swim/color": "3.11.0-dev.20200619"
+    "@swim/util": "3.11.0-dev.20201021",
+    "@swim/codec": "3.11.0-dev.20201021",
+    "@swim/interpolate": "3.11.0-dev.20201021",
+    "@swim/structure": "3.11.0-dev.20201021",
+    "@swim/length": "3.11.0-dev.20201021",
+    "@swim/color": "3.11.0-dev.20201021"
   }
 }
