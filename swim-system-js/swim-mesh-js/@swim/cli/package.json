@@ -1,6 +1,6 @@
 {
   "name": "@swim/cli",
-  "version": "3.11.0-dev.20200619",
+  "version": "3.11.0-dev.20201021",
   "description": "Command line client for linking to Web Agent lanes over the WARP protocol",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/cli",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -21,18 +21,18 @@
     "websocket"
   ],
   "devDependencies": {
-    "@swim/util": "3.11.0-dev.20200619",
-    "@swim/codec": "3.11.0-dev.20200619",
-    "@swim/args": "3.11.0-dev.20200619",
-    "@swim/collections": "3.11.0-dev.20200619",
-    "@swim/interpolate": "3.11.0-dev.20200619",
-    "@swim/structure": "3.11.0-dev.20200619",
-    "@swim/streamlet": "3.11.0-dev.20200619",
-    "@swim/dataflow": "3.11.0-dev.20200619",
-    "@swim/recon": "3.11.0-dev.20200619",
-    "@swim/uri": "3.11.0-dev.20200619",
-    "@swim/warp": "3.11.0-dev.20200619",
-    "@swim/client": "3.11.0-dev.20200619"
+    "@swim/util": "3.11.0-dev.20201021",
+    "@swim/codec": "3.11.0-dev.20201021",
+    "@swim/args": "3.11.0-dev.20201021",
+    "@swim/collections": "3.11.0-dev.20201021",
+    "@swim/interpolate": "3.11.0-dev.20201021",
+    "@swim/structure": "3.11.0-dev.20201021",
+    "@swim/streamlet": "3.11.0-dev.20201021",
+    "@swim/dataflow": "3.11.0-dev.20201021",
+    "@swim/recon": "3.11.0-dev.20201021",
+    "@swim/uri": "3.11.0-dev.20201021",
+    "@swim/warp": "3.11.0-dev.20201021",
+    "@swim/client": "3.11.0-dev.20201021"
   },
   "dependencies": {
     "ws": "7"

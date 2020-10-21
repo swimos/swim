@@ -1,6 +1,6 @@
 {
   "name": "@swim/core",
-  "version": "3.11.0-dev.20200619",
+  "version": "3.11.0-dev.20201021",
   "description": "Lightweight, portable, dependency-free, and strongly typed foundation framework",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,16 +11,16 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20200619",
-    "@swim/codec": "3.11.0-dev.20200619",
-    "@swim/collections": "3.11.0-dev.20200619",
-    "@swim/interpolate": "3.11.0-dev.20200619",
-    "@swim/structure": "3.11.0-dev.20200619",
-    "@swim/streamlet": "3.11.0-dev.20200619",
-    "@swim/dataflow": "3.11.0-dev.20200619",
-    "@swim/recon": "3.11.0-dev.20200619",
-    "@swim/math": "3.11.0-dev.20200619",
-    "@swim/time": "3.11.0-dev.20200619",
-    "@swim/uri": "3.11.0-dev.20200619"
+    "@swim/util": "3.11.0-dev.20201021",
+    "@swim/codec": "3.11.0-dev.20201021",
+    "@swim/collections": "3.11.0-dev.20201021",
+    "@swim/interpolate": "3.11.0-dev.20201021",
+    "@swim/structure": "3.11.0-dev.20201021",
+    "@swim/streamlet": "3.11.0-dev.20201021",
+    "@swim/dataflow": "3.11.0-dev.20201021",
+    "@swim/recon": "3.11.0-dev.20201021",
+    "@swim/math": "3.11.0-dev.20201021",
+    "@swim/time": "3.11.0-dev.20201021",
+    "@swim/uri": "3.11.0-dev.20201021"
   }
 }

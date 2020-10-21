@@ -1,6 +1,6 @@
 {
   "name": "@swim/core",
-  "version": "3.11.0-dev.20200619",
+  "version": "3.11.0-dev.20201021",
   "description": "Swim Core TypeScript Framework",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,7 +11,7 @@
   "devDependencies": {
     "@rollup/plugin-node-resolve": "9",
     "@types/node": "14",
-    "rollup": "2.26",
+    "rollup": "2.32",
     "rollup-plugin-sourcemaps": "0.6",
     "terser": "5",
     "tslib": "2",

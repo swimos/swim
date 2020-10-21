@@ -1,6 +1,6 @@
 {
   "name": "@swim/system",
-  "version": "3.11.0-dev.20200619",
+  "version": "3.11.0-dev.20201021",
   "description": "Swim System TypeScript Implementation",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,7 +11,7 @@
     "@rollup/plugin-node-resolve": "9",
     "@types/node": "14",
     "@types/ws": "7",
-    "rollup": "2.26",
+    "rollup": "2.32",
     "rollup-plugin-sourcemaps": "0.6",
     "terser": "5",
     "tslib": "2",
