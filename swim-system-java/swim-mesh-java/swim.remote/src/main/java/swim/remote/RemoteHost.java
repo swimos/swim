@@ -668,33 +668,33 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   protected void onCommandMessage(CommandMessage message) {
     final Policy policy = policy();
+    final PolicyDirective<CommandMessage> directive;
     if (policy != null) {
-      final PolicyDirective<CommandMessage> directive = policy.canDownlink(message, this.remoteIdentity);
-      if (directive.isAllowed()) {
-        final CommandMessage newMessage = directive.get();
-        if (newMessage != null) {
-          message = newMessage;
-        }
+      directive = policy.canDownlink(message, this.remoteIdentity);
+    } else {
+      directive = PolicyDirective.allow();
+    }
 
-        final Uri nodeUri = resolve(message.nodeUri());
-        final Uri laneUri = message.laneUri();
-        final CommandMessage resolvedMessage = message.nodeUri(nodeUri);
+    if (directive.isAllowed()) {
+      final CommandMessage newMessage = directive.get();
+      if (newMessage != null) {
+        message = newMessage;
+      }
 
-        final HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = this.downlinks.get(nodeUri);
-        if (nodeDownlinks != null) {
-          final RemoteWarpDownlink laneDownlink = nodeDownlinks.get(laneUri);
-          if (laneDownlink != null) {
-            laneDownlink.queueUp(resolvedMessage);
-            return;
-          }
-        }
-
+      final Uri nodeUri = resolve(message.nodeUri());
+      final Uri laneUri = message.laneUri();
+      final CommandMessage resolvedMessage = message.nodeUri(nodeUri);
+      final HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = this.downlinks.get(nodeUri);
+      final RemoteWarpDownlink laneDownlink = nodeDownlinks != null ? nodeDownlinks.get(laneUri) : null;
+      if (laneDownlink != null) {
+        laneDownlink.queueUp(resolvedMessage);
+      } else {
         willPushMessage(resolvedMessage);
         this.hostContext.pushDown(new Push<Envelope>(Uri.empty(), Uri.empty(), nodeUri, laneUri,
-                                                     0.0f, null, resolvedMessage, this.messageCont));
-      } else if (directive.isForbidden()) {
-        forbid();
+                0.0f, null, resolvedMessage, this.messageCont));
       }
+    } else if (directive.isForbidden()) {
+      forbid();
     }
 
     DOWNLINK_COMMAND_DELTA.incrementAndGet(this);
