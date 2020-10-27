@@ -17,16 +17,8 @@ import {AnyAngle, Angle} from "@swim/angle";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
-import {
-  ViewContextType,
-  ViewFlags,
-  View,
-  ViewAnimator,
-  GraphicsViewInit,
-  LayerView,
-  TypesetView,
-} from "@swim/view";
-import {AnyTextRunView, TextRunView} from "@swim/typeset";
+import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {GraphicsViewInit, LayerView, TypesetView, AnyTextRunView, TextRunView} from "@swim/graphics";
 import {AnySliceView, SliceView} from "./SliceView";
 
 export type AnyPieView = PieView | PieViewInit;
@@ -273,18 +265,18 @@ export class PieView extends LayerView {
     this._viewFlags &= ~View.NeedsLayout;
   }
 
-  static fromAny(pie: AnyPieView): PieView {
-    if (pie instanceof PieView) {
-      return pie;
-    } else if (typeof pie === "object" && pie !== null) {
-      return PieView.fromInit(pie);
-    }
-    throw new TypeError("" + pie);
-  }
-
   static fromInit(init: PieViewInit): PieView {
     const view = new PieView();
     view.initView(init);
     return view;
+  }
+
+  static fromAny(value: AnyPieView): PieView {
+    if (value instanceof PieView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

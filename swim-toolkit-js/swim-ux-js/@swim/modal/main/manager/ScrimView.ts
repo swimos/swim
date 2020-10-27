@@ -14,7 +14,7 @@
 
 import {Color} from "@swim/color";
 import {Tween, Transition} from "@swim/transition";
-import {ViewNodeType} from "@swim/view";
+import {ViewNodeType} from "@swim/dom";
 import {Look, ThemedHtmlView} from "@swim/theme";
 import {ModalState} from "../Modal";
 import {ModalManager} from "./ModalManager";

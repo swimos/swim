@@ -26,8 +26,8 @@ import {
   View,
   ViewAnimator,
   ContinuousScaleViewAnimator,
-  GraphicsView,
 } from "@swim/view";
+import {GraphicsView} from "@swim/graphics";
 import {DataPointCategory} from "../data/DataPoint";
 import {AnyDataPointView, DataPointView} from "../data/DataPointView";
 import {PlotViewInit, PlotView} from "./PlotView";
@@ -716,17 +716,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
 
   protected abstract hitTestPlot(x: number, y: number, renderer: CanvasRenderer): GraphicsView | null;
 
-  static fromAny<X, Y>(plot: AnySeriesPlotView<X, Y>): SeriesPlotView<X, Y> {
-    if (plot instanceof SeriesPlotView) {
-      return plot;
-    } else if (typeof plot === "string") {
-      return SeriesPlotView.fromType(plot);
-    } else if (typeof plot === "object" && plot !== null) {
-      return SeriesPlotView.fromInit(plot);
-    }
-    throw new TypeError("" + plot);
-  }
-
   static fromType<X, Y>(type: SeriesPlotType): SeriesPlotView<X, Y> {
     if (type === "line") {
       return new PlotView.Line();
@@ -744,6 +733,17 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       return PlotView.Area.fromInit(init);
     }
     throw new TypeError("" + init);
+  }
+
+  static fromAny<X, Y>(value: AnySeriesPlotView<X, Y>): SeriesPlotView<X, Y> {
+    if (value instanceof SeriesPlotView) {
+      return value;
+    } else if (typeof value === "string") {
+      return this.fromType(value);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }
 PlotView.Series = SeriesPlotView;

@@ -57,10 +57,11 @@ The **Swim UI** framework consists of the following component libraries:
 - [**@swim/view**](@swim/view) –
   unified HTML, SVG, and Canvas view hierarchy, with integrated controller
   architecture, animated procedural styling, and constraint-based layouts.
-- [**@swim/shape**](@swim/shape) –
-  canvas shape views, with animated geometry and style properties.
-- [**@swim/typeset**](@swim/typeset) –
-  canvas typesetting views, with animated text, layout, font, and style properties.
+- [**@swim/dom**](@swim/dom) –
+  HTML and SVG views, with procedural attribute and style animators.
+- [**@swim/graphics**](@swim/graphics) –
+  canvas graphics views, with procedurally animated shapes, and procedurally
+  styled typesetters.
 - [**@swim/gesture**](@swim/gesture) –
   multitouch gesture recognizers, with kinematic surface modeling.
 

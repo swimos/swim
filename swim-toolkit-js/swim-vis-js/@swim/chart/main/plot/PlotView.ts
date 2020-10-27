@@ -16,7 +16,7 @@ import {AnyColor} from "@swim/color";
 import {AnyFont} from "@swim/font";
 import {ContinuousScale} from "@swim/scale";
 import {Tween} from "@swim/transition";
-import {GraphicsViewInit, GraphicsView} from "@swim/view";
+import {GraphicsViewInit, GraphicsView} from "@swim/graphics";
 import {AnyDataPointView} from "../data/DataPointView";
 import {ScaleXYView} from "../scale/ScaleXYView";
 import {PlotViewObserver} from "./PlotViewObserver";
@@ -94,17 +94,6 @@ export const PlotView = {
     return false;
   },
 
-  fromAny<X, Y>(plot: AnyPlotView<X, Y>): PlotView<X, Y> {
-    if (PlotView.is(plot)) {
-      return plot;
-    } else if (typeof plot === "string") {
-      return PlotView.fromType(plot);
-    } else if (typeof plot === "object" && plot !== null) {
-      return PlotView.fromInit(plot);
-    }
-    throw new TypeError("" + plot);
-  },
-
   fromType<X, Y>(type: PlotType): PlotView<X, Y> {
     if (type === "bubble") {
       return new PlotView.Bubble();
@@ -126,6 +115,17 @@ export const PlotView = {
       return PlotView.Area.fromInit(init as AreaPlotViewInit<X, Y>);
     }
     throw new TypeError("" + init);
+  },
+
+  fromAny<X, Y>(value: AnyPlotView<X, Y>): PlotView<X, Y> {
+    if (this.is(value)) {
+      return value;
+    } else if (typeof value === "string") {
+      return this.fromType(value);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   },
 
   Scatter: void 0 as unknown as typeof ScatterPlotView,

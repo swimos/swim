@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Transition} from "@swim/transition";
-import {ViewNodeType} from "@swim/view";
+import {ViewNodeType} from "@swim/dom";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
 import {TreeCell} from "./TreeCell";
 

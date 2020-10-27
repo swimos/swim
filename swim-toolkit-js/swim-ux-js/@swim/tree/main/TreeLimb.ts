@@ -15,16 +15,8 @@
 import {BoxR2} from "@swim/math";
 import {Length} from "@swim/length";
 import {Tween, Transition} from "@swim/transition";
-import {
-  ViewContextType,
-  ViewContext,
-  ViewFlags,
-  View,
-  ViewScope,
-  ViewAnimator,
-  ViewNodeType,
-  HtmlView,
-} from "@swim/view";
+import {ViewContextType, ViewContext, ViewFlags, View, ViewScope, ViewAnimator} from "@swim/view";
+import {ViewNodeType, HtmlViewConstructor} from "@swim/dom";
 import {Look, ThemedHtmlViewInit, ThemedHtmlView} from "@swim/theme";
 import {AnyTreeSeed, TreeSeed} from "./TreeSeed";
 import {TreeViewContext} from "./TreeViewContext";
@@ -33,7 +25,7 @@ import {TreeLimbObserver} from "./TreeLimbObserver";
 import {TreeLimbController} from "./TreeLimbController";
 import {AnyTreeView, TreeView} from "./TreeView";
 
-export type AnyTreeLimb = TreeLimb | TreeLimbInit;
+export type AnyTreeLimb = TreeLimb | TreeLimbInit | HTMLElement;
 
 export interface TreeLimbInit extends ThemedHtmlViewInit {
   viewController?: TreeLimbController;
@@ -400,19 +392,23 @@ export class TreeLimb extends ThemedHtmlView {
     this.height.setAutoState(y);
   }
 
-  static fromAny(limb: AnyTreeLimb): TreeLimb {
-    if (limb instanceof TreeLimb) {
-      return limb;
-    } else if (typeof limb === "object" && limb !== null) {
-      return TreeLimb.fromInit(limb);
-    }
-    throw new TypeError("" + limb);
-  }
-
   static fromInit(init: TreeLimbInit): TreeLimb {
-    const view = HtmlView.create(TreeLimb);
+    const view = TreeLimb.create();
     view.initView(init);
     return view;
+  }
+
+  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static fromAny(value: AnyTreeLimb): TreeLimb;
+  static fromAny(value: AnyTreeLimb): TreeLimb {
+    if (value instanceof this) {
+      return value;
+    } else if (value instanceof HTMLElement) {
+      return this.fromNode(value);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 
   static readonly uncullFlags: ViewFlags = ThemedHtmlView.uncullFlags | View.NeedsLayout;

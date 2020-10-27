@@ -14,7 +14,8 @@
 
 import {BoxR2} from "@swim/math";
 import {CanvasRenderer, CanvasContext} from "@swim/render";
-import {ViewContextType, View, GraphicsView} from "@swim/view";
+import {ViewContextType, View} from "@swim/view";
+import {GraphicsView} from "@swim/graphics";
 import {ScaleViewInit, ScaleView} from "../scale/ScaleView";
 import {AnyPlotView, PlotView} from "../plot/PlotView";
 import {GraphViewObserver} from "./GraphViewObserver";
@@ -107,18 +108,18 @@ export class GraphView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
     return hit;
   }
 
-  static fromAny<X, Y>(graph: AnyGraphView<X, Y>): GraphView<X, Y> {
-    if (graph instanceof GraphView) {
-      return graph;
-    } else if (typeof graph === "object" && graph !== null) {
-      return GraphView.fromInit(graph);
-    }
-    throw new TypeError("" + graph);
-  }
-
   static fromInit<X, Y>(init: GraphViewInit<X, Y>): GraphView<X, Y> {
     const view = new GraphView<X, Y>();
     view.initView(init);
     return view;
+  }
+
+  static fromAny<X, Y>(value: AnyGraphView<X, Y>): GraphView<X, Y> {
+    if (value instanceof GraphView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

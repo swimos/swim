@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewNodeType, SvgView} from "@swim/view";
+import {ViewNodeType, SvgView} from "@swim/dom";
 import {IconButton} from "@swim/button";
 import {DrawerView} from "./DrawerView";
 
@@ -36,7 +36,7 @@ export class DrawerButton extends IconButton {
   }
 
   protected createIcon(): SvgView {
-    const icon = SvgView.create("svg").width(24).height(24).viewBox("0 0 24 24");
+    const icon = SvgView.create().width(24).height(24).viewBox("0 0 24 24");
     icon.append("path").d("M21,17 L21,19 L3,19 L3,17 L21,17 Z M21,11 L21,13 L3,13 L3,11 L21,11 Z M3,5 L3,7 L21,7 L21,5 L3,5 Z");
     return icon;
   }

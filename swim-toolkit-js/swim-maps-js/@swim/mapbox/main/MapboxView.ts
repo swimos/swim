@@ -14,7 +14,9 @@
 
 import * as mapboxgl from "mapbox-gl";
 import {AnyPointR2, PointR2} from "@swim/math";
-import {ViewContextType, ViewFlags, View, GraphicsViewContext, CanvasView} from "@swim/view";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {HtmlView} from "@swim/dom";
+import {GraphicsViewContext, CanvasView} from "@swim/graphics";
 import {AnyGeoPoint, GeoPoint, GeoBox, MapLayerView} from "@swim/map";
 import {MapboxProjection} from "./MapboxProjection";
 import {MapboxViewObserver} from "./MapboxViewObserver";
@@ -172,9 +174,9 @@ export class MapboxView extends MapLayerView {
       return this.getSuperView(CanvasView);
     } else {
       const map = this._map;
-      View.fromNode(map.getContainer());
-      const canvasContainer = View.fromNode(map.getCanvasContainer());
-      const canvas = canvasContainer.append("canvas");
+      HtmlView.fromNode(map.getContainer());
+      const canvasContainer = HtmlView.fromNode(map.getCanvasContainer());
+      const canvas = canvasContainer.append(CanvasView);
       canvas.setEventNode(canvasContainer.node);
       canvas.append(this);
       return canvas;

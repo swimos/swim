@@ -22,7 +22,8 @@ import {
   CanvasRenderer,
   WebGLRenderer,
 } from "@swim/render";
-import {ViewContextType, ViewFlags, View, ViewAnimator, GraphicsView} from "@swim/view";
+import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {GraphicsView} from "@swim/graphics";
 import {MapGraphicsViewContext} from "../graphics/MapGraphicsViewContext";
 import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
 import {MapLayerView} from "../graphics/MapLayerView";

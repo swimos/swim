@@ -24,8 +24,8 @@
       "@swim/render": ["@swim/render/main"],
       "@swim/constraint": ["@swim/constraint/main"],
       "@swim/view": ["@swim/view/main"],
-      "@swim/shape": ["@swim/shape/main"],
-      "@swim/typeset": ["@swim/typeset/main"],
+      "@swim/dom": ["@swim/dom/main"],
+      "@swim/graphics": ["@swim/graphics/main"],
       "@swim/gesture": ["@swim/gesture/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
@@ -45,8 +45,8 @@
     {"path": "../../render/main"},
     {"path": "../../constraint/main"},
     {"path": "../../view/main"},
-    {"path": "../../shape/main"},
-    {"path": "../../typeset/main"},
+    {"path": "../../dom/main"},
+    {"path": "../../graphics/main"},
     {"path": "../../gesture/main"}
   ]
 }

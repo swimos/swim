@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HtmlViewObserver} from "@swim/view";
+import {HtmlViewObserver} from "@swim/dom";
 import {ThemedViewObserver} from "./ThemedViewObserver";
 import {ThemedHtmlView} from "./ThemedHtmlView";
 

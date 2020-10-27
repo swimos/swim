@@ -114,14 +114,15 @@ style, animate, and render mixed HTML, SVG, Canvas, and WebGL components.
   [doc](https://docs.swimos.org/js/latest/modules/_swim_view.html)) –
   unified HTML, SVG, and Canvas view hierarchy, with integrated controller
   architecture, animated procedural styling, and constraint-based layouts.
-- [**@swim/shape**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/shape)
-  ([npm](https://www.npmjs.com/package/@swim/shape),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_shape.html)) –
-  canvas shape views, with animated geometry and style properties.
-- [**@swim/typeset**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/typeset)
-  ([npm](https://www.npmjs.com/package/@swim/typeset),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_typeset.html)) –
-  canvas typesetting views, with animated text, layout, font, and style properties.
+- [**@swim/dom**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/dom)
+  ([npm](https://www.npmjs.com/package/@swim/dom),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_dom.html)) –
+  HTML and SVG views, with procedural attribute and style animators.
+- [**@swim/graphics**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/graphics)
+  ([npm](https://www.npmjs.com/package/@swim/graphics),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_graphics.html)) –
+  canvas graphics views, with procedurally animated shapes, and procedurally
+  styled typesetters.
 - [**@swim/gesture**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/gesture)
   ([npm](https://www.npmjs.com/package/@swim/gesture),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_gesture.html)) –

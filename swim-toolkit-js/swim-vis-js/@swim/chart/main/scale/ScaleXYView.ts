@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicsView} from "@swim/view";
+import {GraphicsView} from "@swim/graphics";
 import {ScaleXView} from "./ScaleXView";
 import {ScaleYView} from "./ScaleYView";
 import {ScaleView} from "./ScaleView";

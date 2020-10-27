@@ -14,7 +14,7 @@
 
 import {ContinuousScale} from "@swim/scale";
 import {Tween} from "@swim/transition";
-import {GraphicsView} from "@swim/view";
+import {GraphicsView} from "@swim/graphics";
 import {ScaleView} from "./ScaleView";
 
 export interface ScaleXView<X = unknown> extends GraphicsView {

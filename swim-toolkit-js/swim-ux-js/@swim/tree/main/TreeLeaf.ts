@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {Tween, Transition} from "@swim/transition";
-import {ViewContextType, ViewFlags, View, ViewScope, ViewNode, ViewNodeType, HtmlView} from "@swim/view";
+import {ViewContextType, ViewFlags, View, ViewScope} from "@swim/view";
+import {ViewNode, ViewNodeType, HtmlViewConstructor, HtmlView} from "@swim/dom";
 import {PositionGestureInput, PositionGestureDelegate} from "@swim/gesture";
 import {Look, Feel, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ButtonMembraneInit, ButtonMembrane} from "@swim/button";
@@ -22,7 +23,7 @@ import {AnyTreeCell, TreeCell} from "./TreeCell";
 import {TreeLeafObserver} from "./TreeLeafObserver";
 import {TreeLeafController} from "./TreeLeafController";
 
-export type AnyTreeLeaf = TreeLeaf | TreeLeafInit;
+export type AnyTreeLeaf = TreeLeaf | TreeLeafInit | HTMLElement;
 
 export interface TreeLeafInit extends ButtonMembraneInit {
   viewController?: TreeLeafController;
@@ -61,7 +62,7 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
   }
 
   addCell(cell: AnyTreeCell, key?: string): TreeCell {
-    if (key === void 0) {
+    if (key === void 0 && "key" in cell) {
       key = cell.key;
     }
     cell = TreeCell.fromAny(cell);
@@ -298,18 +299,22 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
     }
   }
 
-  static fromAny(leaf: AnyTreeLeaf): TreeLeaf {
-    if (leaf instanceof TreeLeaf) {
-      return leaf;
-    } else if (typeof leaf === "object" && leaf !== null) {
-      return TreeLeaf.fromInit(leaf);
-    }
-    throw new TypeError("" + leaf);
-  }
-
   static fromInit(init: TreeLeafInit): TreeLeaf {
-    const view = HtmlView.create(TreeLeaf);
+    const view = TreeLeaf.create();
     view.initView(init);
     return view;
+  }
+
+  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static fromAny(value: AnyTreeLeaf): TreeLeaf;
+  static fromAny(value: AnyTreeLeaf): TreeLeaf {
+    if (value instanceof this) {
+      return value;
+    } else if (value instanceof HTMLElement) {
+      return this.fromNode(value);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

@@ -25,8 +25,8 @@ import {
   View,
   ViewAnimator,
   ContinuousScaleViewAnimator,
-  LayerView,
 } from "@swim/view";
+import {LayerView} from "@swim/graphics";
 import {AnyDataPointView, DataPointView} from "../data/DataPointView";
 import {PlotViewInit, PlotView} from "./PlotView";
 import {PlotViewObserver} from "./PlotViewObserver";
@@ -484,17 +484,6 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
 
   protected abstract renderPlot(context: CanvasContext, frame: BoxR2): void;
 
-  static fromAny<X, Y>(plot: AnyScatterPlotView<X, Y>): ScatterPlotView<X, Y> {
-    if (plot instanceof ScatterPlotView) {
-      return plot;
-    } else if (typeof plot === "string") {
-      return ScatterPlotView.fromType(plot);
-    } else if (typeof plot === "object" && plot !== null) {
-      return ScatterPlotView.fromInit(plot);
-    }
-    throw new TypeError("" + plot);
-  }
-
   static fromType<X, Y>(type: ScatterPlotType): ScatterPlotView<X, Y> {
     if (type === "bubble") {
       return new PlotView.Bubble();
@@ -508,6 +497,17 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
       return PlotView.Bubble.fromInit(init);
     }
     throw new TypeError("" + init);
+  }
+
+  static fromAny<X, Y>(value: AnyScatterPlotView<X, Y>): ScatterPlotView<X, Y> {
+    if (value instanceof ScatterPlotView) {
+      return value;
+    } else if (typeof value === "string") {
+      return this.fromType(value);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }
 PlotView.Scatter = ScatterPlotView;

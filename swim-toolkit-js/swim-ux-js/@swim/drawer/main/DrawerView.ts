@@ -15,14 +15,8 @@
 import {AnyLength, Length} from "@swim/length";
 import {Color} from "@swim/color";
 import {Tween, Transition} from "@swim/transition";
-import {
-  ViewContextType,
-  View,
-  ViewEdgeInsets,
-  ViewScope,
-  ViewAnimator,
-  ViewNodeType,
-} from "@swim/view";
+import {ViewContextType, View, ViewEdgeInsets, ViewScope, ViewAnimator} from "@swim/view";
+import {ViewNodeType} from "@swim/dom";
 import {
   Look,
   Feel,

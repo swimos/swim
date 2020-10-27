@@ -12,14 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContextType, ViewFlags, View, ViewScope, ViewNodeType, HtmlView} from "@swim/view";
+import {ViewContextType, ViewFlags, View, ViewScope} from "@swim/view";
+import {ViewNodeType, HtmlViewConstructor} from "@swim/dom";
 import {ThemedHtmlViewInit, ThemedHtmlView} from "@swim/theme";
 import {AnyTreeSeed, TreeSeed} from "./TreeSeed";
 import {AnyTreeVein, TreeVein} from "./TreeVein";
 import {TreeStemObserver} from "./TreeStemObserver";
 import {TreeStemController} from "./TreeStemController";
 
-export type AnyTreeStem = TreeStem | TreeStemInit;
+export type AnyTreeStem = TreeStem | TreeStemInit | HTMLElement;
 
 export interface TreeStemInit extends ThemedHtmlViewInit {
   viewController?: TreeStemController;
@@ -51,7 +52,7 @@ export class TreeStem extends ThemedHtmlView {
   }
 
   addVein(vein: AnyTreeVein, key?: string): TreeVein {
-    if (key === void 0) {
+    if (key === void 0 && "key" in vein) {
       key = vein.key;
     }
     vein = TreeVein.fromAny(vein);
@@ -122,18 +123,22 @@ export class TreeStem extends ThemedHtmlView {
     super.displayChildViews(displayFlags, viewContext, needsLayout ? layoutChildView : callback);
   }
 
-  static fromAny(stem: AnyTreeStem): TreeStem {
-    if (stem instanceof TreeStem) {
-      return stem;
-    } else if (typeof stem === "object" && stem !== null) {
-      return TreeStem.fromInit(stem);
-    }
-    throw new TypeError("" + stem);
-  }
-
   static fromInit(init: TreeStemInit): TreeStem {
-    const view = HtmlView.create(TreeStem);
+    const view = TreeStem.create();
     view.initView(init);
     return view;
+  }
+
+  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static fromAny(value: AnyTreeStem): TreeStem;
+  static fromAny(value: AnyTreeStem): TreeStem {
+    if (value instanceof this) {
+      return value;
+    } else if (value instanceof HTMLElement) {
+      return this.fromNode(value);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

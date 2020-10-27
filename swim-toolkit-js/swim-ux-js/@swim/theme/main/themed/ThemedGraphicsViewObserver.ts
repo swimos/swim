@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewFlags, GraphicsViewContext, GraphicsViewObserver} from "@swim/view";
+import {ViewFlags} from "@swim/view";
+import {GraphicsViewContext, GraphicsViewObserver} from "@swim/graphics";
 import {ThemedViewObserver} from "./ThemedViewObserver";
 import {ThemedGraphicsView} from "./ThemedGraphicsView";
 

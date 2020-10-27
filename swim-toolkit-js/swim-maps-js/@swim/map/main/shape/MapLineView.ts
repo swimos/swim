@@ -16,14 +16,8 @@ import {AnyPointR2, PointR2, BoxR2, SegmentR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {
-  ViewContextType,
-  View,
-  ViewAnimator,
-  GraphicsView,
-  StrokeViewInit,
-  StrokeView,
-} from "@swim/view";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {GraphicsView, StrokeViewInit, StrokeView} from "@swim/graphics";
 import {AnyGeoPoint, GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
 import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
@@ -253,18 +247,18 @@ export class MapLineView extends MapLayerView implements StrokeView {
     return null;
   }
 
-  static fromAny(line: AnyMapLineView): MapLineView {
-    if (line instanceof MapLineView) {
-      return line;
-    } else if (typeof line === "object" && line !== null) {
-      return MapLineView.fromInit(line);
-    }
-    throw new TypeError("" + line);
-  }
-
   static fromInit(init: MapLineViewInit): MapLineView {
     const view = new MapLineView();
     view.initView(init);
     return view;
+  }
+
+  static fromAny(value: AnyMapLineView): MapLineView {
+    if (value instanceof MapLineView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

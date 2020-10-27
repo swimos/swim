@@ -18,16 +18,8 @@ import {AnyFont, Font} from "@swim/font";
 import {Transition} from "@swim/transition";
 import {TweenAnimator} from "@swim/animate";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {
-  ViewContextType,
-  ViewFlags,
-  View,
-  ViewAnimator,
-  GraphicsViewInit,
-  GraphicsView,
-  LayerView,
-} from "@swim/view";
-import {AnyTextRunView, TextRunView} from "@swim/typeset";
+import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {GraphicsViewInit, GraphicsView, LayerView, AnyTextRunView, TextRunView} from "@swim/graphics";
 import {TopTickView} from "./TopTickView";
 import {RightTickView} from "./RightTickView";
 import {BottomTickView} from "./BottomTickView";
@@ -303,25 +295,16 @@ export abstract class TickView<D> extends LayerView {
 
   static from<D>(value: D, orientation: TickOrientation): TickView<D> {
     if (orientation === "top") {
-      return TickView.top(value);
+      return this.top(value);
     } else if (orientation === "right") {
-      return TickView.right(value);
+      return this.right(value);
     } else if (orientation === "bottom") {
-      return TickView.bottom(value);
+      return this.bottom(value);
     } else if (orientation === "left") {
-      return TickView.left(value);
+      return this.left(value);
     } else {
       throw new TypeError(orientation);
     }
-  }
-
-  static fromAny<D>(tick: AnyTickView<D>, orientation?: TickOrientation): TickView<D> {
-    if (tick instanceof TickView) {
-      return tick;
-    } else if (typeof tick === "object" && tick !== null) {
-      return TickView.fromInit(tick, orientation);
-    }
-    throw new TypeError("" + tick);
   }
 
   static fromInit<D>(init: TickViewInit<D>, orientation?: TickOrientation): TickView<D> {
@@ -331,9 +314,18 @@ export abstract class TickView<D> extends LayerView {
     if (orientation === void 0) {
       throw new TypeError();
     }
-    const view = TickView.from(init.value, orientation);
+    const view = this.from(init.value, orientation);
     view.initView(init);
     return view;
+  }
+
+  static fromAny<D>(value: AnyTickView<D>, orientation?: TickOrientation): TickView<D> {
+    if (value instanceof TickView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value, orientation);
+    }
+    throw new TypeError("" + value);
   }
 
   // Forward type declarations

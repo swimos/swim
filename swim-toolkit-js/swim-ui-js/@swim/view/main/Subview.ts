@@ -24,10 +24,9 @@ import {
   Constraint,
   ConstraintScope,
 } from "@swim/constraint";
-import {ViewConstructor, View} from "./View";
+import {ViewFactory, View} from "./View";
 import {ViewObserverType} from "./ViewObserver";
 import {SubviewObserver} from "./SubviewObserver";
-import {NodeView} from "./node/NodeView";
 
 export type SubviewMemberType<V, K extends keyof V> =
   V extends {[P in K]: Subview<any, infer S, any>} ? S : unknown;
@@ -39,8 +38,7 @@ export interface SubviewInit<S extends View, U = S> {
   extends?: SubviewPrototype;
   observe?: boolean;
   child?: boolean;
-  type?: unknown;
-  tag?: string;
+  type?: ViewFactory<S, U>;
 
   willSetSubview?(newSubview: S | null, oldSubview: S | null): void;
   onSetSubview?(newSubview: S | null, oldSubview: S | null): void;
@@ -82,10 +80,7 @@ export declare abstract class Subview<V extends View, S extends View, U = S> {
   child: boolean;
 
   /** @hidden */
-  readonly type?: unknown;
-
-  /** @hidden */
-  readonly tag?: unknown;
+  readonly type?: ViewFactory<S>;
 
   get name(): string;
 
@@ -533,26 +528,20 @@ Subview.prototype.remove = function <S extends View>(this: Subview<View, S>): S 
 
 Subview.prototype.createSubview = function <S extends View, U>(this: Subview<View, S, U>): S | U | null {
   const type = this.type;
-  if (typeof type === "function" && type.prototype instanceof View) {
-    if (this.tag !== void 0) {
-      return (type as typeof NodeView).fromTag(this.tag as string) as unknown as S;
-    } else {
-      return View.create(type as ViewConstructor) as S;
-    }
+  if (type !== void 0) {
+    return type.create();
   }
   return null;
 };
 
 Subview.prototype.fromAny = function <S extends View, U>(this: Subview<View, S, U>, value: S | U): S | null {
-  if (value instanceof Node) {
-    const type = this.type;
-    if (typeof type === "function" && type.prototype instanceof NodeView) {
-      return (type as typeof NodeView).fromNode(value) as unknown as S;
-    } else {
-      return View.fromNode(value) as unknown as S;
-    }
+  const type = this.type;
+  if (FromAny.is<S, U>(type)) {
+    return type.fromAny(value);
+  } else if (value instanceof View) {
+    return value;
   }
-  return value as S | null;
+  return null;
 };
 
 Subview.define = function <V extends View, S extends View, U, I>(descriptor: SubviewDescriptor<V, S, U, I>): SubviewConstructor<V, S, U, I> {

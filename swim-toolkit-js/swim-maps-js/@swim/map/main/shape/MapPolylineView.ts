@@ -18,14 +18,8 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {
-  ViewContextType,
-  View,
-  ViewAnimator,
-  GraphicsView,
-  StrokeViewInit,
-  StrokeView,
-} from "@swim/view";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {GraphicsView, StrokeViewInit, StrokeView} from "@swim/graphics";
 import {GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
 import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
@@ -455,18 +449,18 @@ export class MapPolylineView extends MapLayerView implements StrokeView {
     return null;
   }
 
-  static fromAny(polyline: AnyMapPolylineView): MapPolylineView {
-    if (polyline instanceof MapPolylineView) {
-      return polyline;
-    } else if (typeof polyline === "object" && polyline !== null) {
-      return MapPolylineView.fromInit(polyline);
-    }
-    throw new TypeError("" + polyline);
-  }
-
   static fromInit(init: MapPolylineViewInit): MapPolylineView {
     const view = new MapPolylineView();
     view.initView(init);
     return view;
+  }
+
+  static value(value: AnyMapPolylineView): MapPolylineView {
+    if (value instanceof MapPolylineView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

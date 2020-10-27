@@ -13,7 +13,9 @@
 // limitations under the License.
 
 import {AnyPointR2, PointR2} from "@swim/math";
-import {ViewContextType, ViewFlags, View, GraphicsViewContext, ViewHtml, HtmlView, CanvasView} from "@swim/view";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {ViewHtml, HtmlView} from "@swim/dom";
+import {GraphicsViewContext, CanvasView} from "@swim/graphics";
 import {AnyGeoPoint, GeoPoint, GeoBox, MapLayerView} from "@swim/map";
 import {GoogleMapProjection} from "./GoogleMapProjection";
 import {GoogleMapViewObserver} from "./GoogleMapViewObserver";
@@ -184,7 +186,7 @@ export class GoogleMapView extends MapLayerView {
         constructor(mapView: GoogleMapView) {
           super();
           this._mapView = mapView;
-          this._canvasView = HtmlView.create("canvas");
+          this._canvasView = CanvasView.create();
           this._canvasView.append(this._mapView);
         }
         onAdd(): void {
@@ -213,7 +215,7 @@ export class GoogleMapView extends MapLayerView {
     if (parentNode instanceof HTMLElement && !(parentNode as ViewHtml).view) {
       GoogleMapView.materializeAncestors(parentNode);
     }
-    return View.fromNode(node);
+    return HtmlView.fromNode(node);
   }
 
   static readonly powerFlags: ViewFlags = MapLayerView.powerFlags | View.NeedsProject;

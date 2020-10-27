@@ -38,6 +38,7 @@
     "@swim/render": "3.11.0-dev.20201021",
     "@swim/constraint": "3.11.0-dev.20201021",
     "@swim/view": "3.11.0-dev.20201021",
+    "@swim/dom": "3.11.0-dev.20201021",
     "@swim/model": "3.11.0-dev.20201021"
   }
 }

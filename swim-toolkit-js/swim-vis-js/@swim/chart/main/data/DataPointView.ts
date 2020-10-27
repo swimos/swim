@@ -18,17 +18,15 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
+import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
 import {
-  ViewContextType,
-  ViewFlags,
-  View,
-  ViewAnimator,
   GraphicsViewInit,
   GraphicsView,
   LayerView,
   TypesetView,
-} from "@swim/view";
-import {AnyTextRunView, TextRunView} from "@swim/typeset";
+  AnyTextRunView,
+  TextRunView,
+} from "@swim/graphics";
 import {DataPointCategory, DataPointLabelPlacement} from "./DataPoint";
 
 export type AnyDataPointView<X, Y> = DataPointView<X, Y> | DataPointViewInit<X, Y>;
@@ -335,18 +333,18 @@ export class DataPointView<X, Y> extends LayerView {
     return null;
   }
 
-  static fromAny<X, Y>(point: AnyDataPointView<X, Y>): DataPointView<X, Y> {
-    if (point instanceof DataPointView) {
-      return point;
-    } else if (typeof point === "object" && point !== null) {
-      return DataPointView.fromInit(point);
-    }
-    throw new TypeError("" + point);
-  }
-
   static fromInit<X, Y>(init: DataPointViewInit<X, Y>): DataPointView<X, Y> {
     const view = new DataPointView(init.x, init.y);
     view.initView(init);
     return view;
+  }
+
+  static fromAny<X, Y>(value: AnyDataPointView<X, Y>): DataPointView<X, Y> {
+    if (value instanceof DataPointView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

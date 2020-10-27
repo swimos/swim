@@ -39,16 +39,6 @@ import {LayoutService} from "./service/LayoutService";
 import {ViewportService} from "./service/ViewportService";
 import {ViewScopeConstructor, ViewScope} from "./scope/ViewScope";
 import {ViewAnimatorConstructor, ViewAnimator} from "./animator/ViewAnimator";
-import {GraphicsView} from "./graphics/GraphicsView";
-import {LayerView} from "./graphics/LayerView";
-import {RasterView} from "./raster/RasterView";
-import {ViewNode, NodeView} from "./node/NodeView";
-import {TextView} from "./text/TextView";
-import {ElementViewTagMap, ElementViewConstructor, ElementView} from "./element/ElementView";
-import {SvgView} from "./svg/SvgView";
-import {HtmlView} from "./html/HtmlView";
-import {CanvasView} from "./canvas/CanvasView";
-import {StyleView} from "./style/StyleView";
 
 export type ViewFlags = number;
 
@@ -57,8 +47,14 @@ export interface ViewInit {
   viewController?: ViewController;
 }
 
+export interface ViewFactory<V extends View = View, U = V> {
+  create(): V;
+  fromAny?(value: V | U): V;
+}
+
 export interface ViewConstructor<V extends View = View> {
   new(): V;
+  prototype: V;
 }
 
 export interface ViewClass {
@@ -1310,105 +1306,6 @@ export abstract class View implements AnimatorContext, ConstraintScope {
     });
   }
 
-  static fromTag<T extends keyof ElementViewTagMap>(tag: T): ElementViewTagMap[T];
-  static fromTag(tag: string): ElementView;
-  static fromTag(tag: string): ElementView {
-    if (this.prototype instanceof View.Svg) {
-      const node = document.createElementNS(View.Svg.namespace, tag) as SVGElement;
-      return new (this as unknown as {new(node: Element): ElementView})(node);
-    } else if (this.prototype instanceof View.Element) {
-      const node = document.createElement(tag);
-      return new (this as unknown as {new(node: Element): ElementView})(node);
-    } else if (tag === "svg") {
-      const node = document.createElementNS(View.Svg.namespace, tag) as SVGElement;
-      return new View.Svg(node);
-    } else if (tag === "canvas") {
-      const node = document.createElement(tag) as HTMLCanvasElement;
-      return new View.Canvas(node);
-    } else if (tag === "style") {
-      const node = document.createElement(tag) as HTMLStyleElement;
-      return new View.Style(node);
-    } else {
-      const node = document.createElement(tag);
-      return new View.Html(node);
-    }
-  }
-
-  static fromNode(node: HTMLCanvasElement): CanvasView;
-  static fromNode(node: HTMLElement): HtmlView;
-  static fromNode(node: SVGElement): SvgView;
-  static fromNode(node: Element): ElementView;
-  static fromNode(node: Text): TextView;
-  static fromNode(node: Node): NodeView;
-  static fromNode(node: ViewNode): NodeView {
-    if (node.view instanceof View) {
-      return node.view;
-    } else {
-      let view: NodeView;
-      if (this.prototype instanceof View.Element) {
-        view = new (this as unknown as {new(node: Node): NodeView})(node);
-      } else if (node instanceof Element) {
-        if (node instanceof HTMLElement) {
-          if (node instanceof HTMLCanvasElement) {
-            view = new View.Canvas(node);
-          } else {
-            view = new View.Html(node);
-          }
-        } else if (node instanceof SVGElement) {
-          view = new View.Svg(node);
-        } else {
-          view = new View.Element(node);
-        }
-      } else if (node instanceof Text) {
-        view = new View.Text(node);
-      } else {
-        view = new View.Node(node);
-      }
-      const parentView = view.parentView;
-      if (parentView !== null) {
-        view.setParentView(parentView, null);
-        view.cascadeInsert();
-      } else {
-        view.mount();
-      }
-      return view;
-    }
-  }
-
-  static fromConstructor<VC extends ElementViewConstructor | ViewConstructor>(viewConstructor: VC): InstanceType<VC>;
-  static fromConstructor(viewConstructor: ElementViewConstructor | ViewConstructor): View {
-    if (View.Element.isConstructor(viewConstructor)) {
-      if (viewConstructor.namespace === void 0) {
-        return new viewConstructor(document.createElement(viewConstructor.tag));
-      } else {
-        return new viewConstructor(document.createElementNS(viewConstructor.namespace, viewConstructor.tag));
-      }
-    } else if (typeof viewConstructor === "function") {
-      return new viewConstructor();
-    }
-    throw new TypeError("" + viewConstructor);
-  }
-
-  static create<T extends keyof ElementViewTagMap>(tag: T): ElementViewTagMap[T];
-  static create(tag: string): ElementView;
-  static create(node: HTMLElement): HtmlView;
-  static create(node: SVGElement): SvgView;
-  static create(node: Element): ElementView;
-  static create(node: Text): TextView;
-  static create(node: Node): NodeView;
-  static create<VC extends ElementViewConstructor>(viewConstructor: VC): InstanceType<VC>;
-  static create<VC extends ViewConstructor>(viewConstructor: VC): InstanceType<VC>;
-  static create(source: string | Node | ElementViewConstructor | ViewConstructor): View {
-    if (typeof source === "string") {
-      return this.fromTag(source);
-    } else if (source instanceof Node) {
-      return this.fromNode(source);
-    } else if (typeof source === "function") {
-      return this.fromConstructor(source);
-    }
-    throw new TypeError("" + source);
-  }
-
   /** @hidden */
   static readonly MountedFlag: ViewFlags = 1 << 0;
   /** @hidden */
@@ -1486,8 +1383,8 @@ export abstract class View implements AnimatorContext, ConstraintScope {
   static readonly mountFlags: ViewFlags = View.NeedsResize | View.NeedsLayout;
   static readonly powerFlags: ViewFlags = 0;
   static readonly uncullFlags: ViewFlags = 0;
-  static readonly insertChildFlags: ViewFlags = 0;
-  static readonly removeChildFlags: ViewFlags = 0;
+  static readonly insertChildFlags: ViewFlags = View.NeedsLayout;
+  static readonly removeChildFlags: ViewFlags = View.NeedsLayout;
 
   // Forward type declarations
   /** @hidden */
@@ -1500,24 +1397,4 @@ export abstract class View implements AnimatorContext, ConstraintScope {
   static Scope: typeof ViewScope; // defined by ViewScope
   /** @hidden */
   static Animator: typeof ViewAnimator; // defined by ViewAnimator
-  /** @hidden */
-  static Graphics: typeof GraphicsView; // defined by GraphicsView
-  /** @hidden */
-  static Layer: typeof LayerView; // defined by LayerView
-  /** @hidden */
-  static Raster: typeof RasterView; // defined by RasterView
-  /** @hidden */
-  static Node: typeof NodeView; // defined by NodeView
-  /** @hidden */
-  static Text: typeof TextView; // defined by TextView
-  /** @hidden */
-  static Element: typeof ElementView; // defined by ElementView
-  /** @hidden */
-  static Svg: typeof SvgView; // defined by SvgView
-  /** @hidden */
-  static Html: typeof HtmlView; // defined by HtmlView
-  /** @hidden */
-  static Canvas: typeof CanvasView; // defined by CanvasView
-  /** @hidden */
-  static Style: typeof StyleView; // defined by StyleView
 }

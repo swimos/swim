@@ -16,16 +16,8 @@ import {AnyPointR2, PointR2, BoxR2, CircleR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {
-  ViewContextType,
-  View,
-  ViewAnimator,
-  GraphicsView,
-  FillViewInit,
-  FillView,
-  StrokeViewInit,
-  StrokeView,
-} from "@swim/view";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {GraphicsView, FillViewInit, FillView, StrokeViewInit, StrokeView} from "@swim/graphics";
 import {AnyGeoPoint, GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
 import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
@@ -253,18 +245,18 @@ export class MapCircleView extends MapLayerView implements FillView, StrokeView 
     return null;
   }
 
-  static fromAny(circle: AnyMapCircleView): MapCircleView {
-    if (circle instanceof MapCircleView) {
-      return circle;
-    } else if (typeof circle === "object" && circle !== null) {
-      return MapCircleView.fromInit(circle);
-    }
-    throw new TypeError("" + circle);
-  }
-
   static fromInit(init: MapCircleViewInit): MapCircleView {
     const view = new MapCircleView();
     view.initView(init);
     return view;
+  }
+
+  static fromAny(value: AnyMapCircleView): MapCircleView {
+    if (value instanceof MapCircleView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

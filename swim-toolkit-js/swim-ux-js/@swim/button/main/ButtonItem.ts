@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {Transition} from "@swim/transition";
-import {ViewContextType, View, ViewAnimator, ViewNodeType, SvgView, HtmlView} from "@swim/view";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {ViewNodeType, HtmlView, SvgView} from "@swim/dom";
 import {Look, MoodVector, ThemeMatrix, ThemedHtmlView} from "@swim/theme";
 import {FloatingButton} from "./FloatingButton";
 
@@ -29,7 +30,7 @@ export class ButtonItem extends ThemedHtmlView {
   }
 
   protected createButton(): FloatingButton | null {
-    const button = HtmlView.create(FloatingButton);
+    const button = FloatingButton.create();
     button.setButtonType("mini");
     return button;
   }
@@ -39,7 +40,7 @@ export class ButtonItem extends ThemedHtmlView {
     return childView instanceof FloatingButton ? childView : null;
   }
 
-  get icon(): SvgView | HtmlView | null {
+  get icon(): HtmlView | SvgView | null {
     const button = this.button;
     return button !== null ? button.icon : null;
   }

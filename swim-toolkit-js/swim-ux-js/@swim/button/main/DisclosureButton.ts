@@ -16,7 +16,8 @@ import {Angle} from "@swim/angle";
 import {AnyColor, Color, ColorInterpolator} from "@swim/color";
 import {Transform} from "@swim/transform";
 import {Transition} from "@swim/transition";
-import {ViewContextType, ViewAnimator, ViewNodeType, SvgView} from "@swim/view";
+import {ViewContextType, ViewAnimator} from "@swim/view";
+import {ViewNodeType, SvgView} from "@swim/dom";
 import {Look, MoodVector, ThemeMatrix, ThemedHtmlView} from "@swim/theme";
 
 export class DisclosureButton extends ThemedHtmlView {
@@ -30,7 +31,7 @@ export class DisclosureButton extends ThemedHtmlView {
     this.flexShrink.setAutoState(0);
     this.cursor.setAutoState("pointer");
 
-    const icon = this.append("svg", "icon");
+    const icon = this.append(SvgView, "icon");
     icon.width.setAutoState(24);
     icon.height.setAutoState(24);
     icon.viewBox.setAutoState("0 0 24 24");

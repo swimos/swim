@@ -16,13 +16,8 @@ import {BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {CanvasContext} from "@swim/render";
-import {
-  ViewAnimator,
-  FillViewInit,
-  FillView,
-  StrokeViewInit,
-  StrokeView,
-} from "@swim/view";
+import {ViewAnimator} from "@swim/view";
+import {FillViewInit, FillView, StrokeViewInit, StrokeView} from "@swim/graphics";
 import {DataPointView} from "../data/DataPointView";
 import {PlotView} from "./PlotView";
 import {PlotViewController} from "./PlotViewController";
@@ -102,19 +97,19 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
     }
   }
 
-  static fromAny<X, Y>(plot: AnyBubblePlotView<X, Y>): BubblePlotView<X, Y> {
-    if (plot instanceof BubblePlotView) {
-      return plot;
-    } else if (typeof plot === "object" && plot !== null) {
-      return BubblePlotView.fromInit(plot);
-    }
-    throw new TypeError("" + plot);
-  }
-
   static fromInit<X, Y>(init: BubblePlotViewInit<X, Y>): BubblePlotView<X, Y> {
     const view = new BubblePlotView<X, Y>();
     view.initView(init);
     return view;
+  }
+
+  static fromAny<X, Y>(value: AnyBubblePlotView<X, Y>): BubblePlotView<X, Y> {
+    if (value instanceof BubblePlotView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }
 PlotView.Bubble = BubblePlotView;

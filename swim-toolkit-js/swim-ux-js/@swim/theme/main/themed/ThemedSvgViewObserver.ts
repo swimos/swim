@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {SvgViewObserver} from "@swim/view";
+import {SvgViewObserver} from "@swim/dom";
 import {ThemedViewObserver} from "./ThemedViewObserver";
 import {ThemedSvgView} from "./ThemedSvgView";
 

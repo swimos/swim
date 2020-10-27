@@ -24,7 +24,7 @@ const source = bodyView.append("div")
     bodyView.modalService.toggleModal(popover);
   });
 
-const popover = swim.View.create(swim.PopoverView)
+const popover = swim.PopoverView.create()
   .placement(["top", "bottom", "right", "left", "below"])
   .minWidth(240)
   .minHeight(360)

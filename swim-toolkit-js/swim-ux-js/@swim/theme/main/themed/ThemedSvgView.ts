@@ -13,15 +13,8 @@
 // limitations under the License.
 
 import {Tween, Transition} from "@swim/transition";
-import {
-  ViewContextType,
-  ViewFlags,
-  View,
-  ViewScope,
-  NodeView,
-  SvgViewInit,
-  SvgView,
-} from "@swim/view";
+import {ViewContextType, ViewFlags, View, ViewScope} from "@swim/view";
+import {NodeView, SvgViewInit, SvgViewFactory, SvgViewConstructor, SvgView} from "@swim/dom";
 import {Look} from "../look/Look";
 import {Feel} from "../feel/Feel";
 import {Mood} from "../mood/Mood";
@@ -34,6 +27,12 @@ import {ThemedSvgViewController} from "./ThemedSvgViewController";
 
 export interface ThemedSvgViewInit extends SvgViewInit, ThemedViewInit {
   viewController?: ThemedSvgViewController;
+}
+
+export interface ThemedSvgViewFactory<V extends ThemedSvgView = ThemedSvgView> extends SvgViewFactory<V> {
+}
+
+export interface ThemedSvgViewConstructor<V extends ThemedSvgView = ThemedSvgView> extends SvgViewConstructor<V> {
 }
 
 export class ThemedSvgView extends SvgView implements ThemedView {
@@ -251,4 +250,227 @@ export class ThemedSvgView extends SvgView implements ThemedView {
   }
 
   static readonly mountFlags: ViewFlags = SvgView.mountFlags | View.NeedsChange;
+
+  /** @hidden */
+  static readonly tags: {[tag: string]: typeof ThemedSvgView | undefined} = {};
+
+  /** @hidden */
+  static decorateTag(tag: string, constructor: typeof ThemedSvgView, name: string): void {
+    const tagConstructor = constructor.forTag(tag);
+    Object.defineProperty(ThemedSvgView, name, {
+      value: tagConstructor,
+      configurable: true,
+      enumerable: true,
+    });
+    if (!(tag in ThemedSvgView.tags)) {
+      ThemedSvgView.tags[tag] = tagConstructor;
+    }
+  }
+
+  @ThemedSvgView.Tag("a")
+  static a: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("animate")
+  static animate: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("animateMotion")
+  static animateMotion: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("animateTransform")
+  static animateTransform: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("audio")
+  static audio: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("canvas")
+  static canvas: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("circle")
+  static circle: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("clipPath")
+  static clipPath: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("defs")
+  static defs: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("desc")
+  static desc: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("discard")
+  static discard: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("ellipse")
+  static ellipse: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feBlend")
+  static feBlend: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feColorMatrix")
+  static feColorMatrix: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feComponentTransfer")
+  static feComponentTransfer: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feComposite")
+  static feComposite: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feConvolveMatrix")
+  static feConvolveMatrix: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feDiffuseLighting")
+  static feDiffuseLighting: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feDisplacementMap")
+  static feDisplacementMap: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feDistantLight")
+  static feDistantLight: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feDropShadow")
+  static feDropShadow: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feFlood")
+  static feFlood: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feFuncA")
+  static feFuncA: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feFuncB")
+  static feFuncB: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feFuncG")
+  static feFuncG: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feFuncR")
+  static feFuncR: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feGaussianBlur")
+  static feGaussianBlur: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feImage")
+  static feImage: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feMerge")
+  static feMerge: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feMergeNode")
+  static feMergeNode: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feMorphology")
+  static feMorphology: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feOffset")
+  static feOffset: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("fePointLight")
+  static fePointLight: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feSpecularLighting")
+  static feSpecularLighting: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feSpotLight")
+  static feSpotLight: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feTile")
+  static feTile: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("feTurbulence")
+  static feTurbulence: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("filter")
+  static filter: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("foreignObject")
+  static foreignObject: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("g")
+  static g: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("iframe")
+  static iframe: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("image")
+  static image: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("line")
+  static line: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("linearGradient")
+  static linearGradient: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("marker")
+  static marker: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("mask")
+  static mask: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("metadata")
+  static metadata: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("mpath")
+  static mpath: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("path")
+  static path: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("pattern")
+  static pattern: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("polygon")
+  static polygon: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("polyline")
+  static polyline: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("radialGradient")
+  static radialGradient: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("rect")
+  static rect: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("script")
+  static script: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("set")
+  static set: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("stop")
+  static stop: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("style")
+  static style: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("svg")
+  static svg: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("switch")
+  static switch: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("symbol")
+  static symbol: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("text")
+  static text: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("textPath")
+  static textPath: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("title")
+  static title: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("tspan")
+  static tspan: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("unknown")
+  static unknown: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("use")
+  static use: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("video")
+  static video: ThemedSvgViewFactory;
+
+  @ThemedSvgView.Tag("view")
+  static view: ThemedSvgViewFactory;
 }

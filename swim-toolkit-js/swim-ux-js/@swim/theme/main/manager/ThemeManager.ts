@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {Tween, Transition} from "@swim/transition";
-import {View, ViewManager, Viewport, HtmlView} from "@swim/view";
+import {View, ViewManager, Viewport} from "@swim/view";
+import {HtmlView} from "@swim/dom";
 import {Look} from "../look/Look";
 import {Mood} from "../mood/Mood";
 import {MoodVector} from "../mood/MoodVector";

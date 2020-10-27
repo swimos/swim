@@ -14,7 +14,7 @@
 
 import {PointR2, BoxR2} from "@swim/math";
 import {CanvasContext} from "@swim/render";
-import {GraphicsView, TypesetView} from "@swim/view";
+import {GraphicsView, TypesetView} from "@swim/graphics";
 import {TickOrientation, TickView} from "./TickView";
 
 export class TopTickView<X> extends TickView<X> {

@@ -15,7 +15,8 @@
 import {BoxR2} from "@swim/math";
 import {AnyColor, Color} from "@swim/color";
 import {CanvasRenderer, CanvasContext} from "@swim/render";
-import {ViewAnimator, GraphicsView, FillViewInit, FillView} from "@swim/view";
+import {ViewAnimator} from "@swim/view";
+import {GraphicsView, FillViewInit, FillView} from "@swim/graphics";
 import {PlotView} from "./PlotView";
 import {PlotViewController} from "./PlotViewController";
 import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
@@ -138,19 +139,19 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
     return null;
   }
 
-  static fromAny<X, Y>(plot: AnyAreaPlotView<X, Y>): AreaPlotView<X, Y> {
-    if (plot instanceof AreaPlotView) {
-      return plot;
-    } else if (typeof plot === "object" && plot !== null) {
-      return AreaPlotView.fromInit(plot as AreaPlotViewInit<X, Y>);
-    }
-    throw new TypeError("" + plot);
-  }
-
   static fromInit<X, Y>(init: AreaPlotViewInit<X, Y>): AreaPlotView<X, Y> {
     const view = new AreaPlotView<X, Y>();
     view.initView(init);
     return view;
+  }
+
+  static fromAny<X, Y>(value: AnyAreaPlotView<X, Y>): AreaPlotView<X, Y> {
+    if (value instanceof AreaPlotView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }
 PlotView.Area = AreaPlotView;

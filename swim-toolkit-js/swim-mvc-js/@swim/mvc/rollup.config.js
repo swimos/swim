@@ -38,6 +38,7 @@ const main = {
       "@swim/render": "swim",
       "@swim/constraint": "swim",
       "@swim/view": "swim",
+      "@swim/dom": "swim",
     },
     sourcemap: true,
     interop: false,
@@ -71,6 +72,7 @@ const main = {
     "@swim/render",
     "@swim/constraint",
     "@swim/view",
+    "@swim/dom",
   ],
   plugins: [
     nodeResolve({customResolveOptions: {paths: "../.."}}),

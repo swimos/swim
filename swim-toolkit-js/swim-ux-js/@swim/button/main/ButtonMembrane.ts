@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewNodeType} from "@swim/view";
+import {ViewNodeType} from "@swim/dom";
 import {PositionGestureInput, PositionGesture, PositionGestureDelegate} from "@swim/gesture";
 import {ThemedHtmlViewInit, ThemedHtmlView} from "@swim/theme";
 import {ButtonGlow} from "./ButtonGlow";

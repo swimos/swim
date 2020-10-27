@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {AnyPointR2, PointR2} from "@swim/math";
-import {View, CanvasView} from "@swim/view";
+import {HtmlView} from "@swim/dom";
+import {CanvasView} from "@swim/graphics";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/map";
 import {EsriProjection} from "./EsriProjection";
 import {EsriView} from "./EsriView";
@@ -123,10 +124,10 @@ export class EsriMapView extends EsriView {
       return this.getSuperView(CanvasView);
     } else {
       const map = this._map;
-      const container = View.fromNode(map.container);
-      const esriViewRoot = View.fromNode(container.node.querySelector(".esri-view-root") as HTMLDivElement);
-      const esriOverlaySurface = View.fromNode(esriViewRoot.node.querySelector(".esri-overlay-surface") as HTMLDivElement);
-      const canvas = esriOverlaySurface.append("canvas");
+      const container = HtmlView.fromNode(map.container);
+      const esriViewRoot = HtmlView.fromNode(container.node.querySelector(".esri-view-root") as HTMLDivElement);
+      const esriOverlaySurface = HtmlView.fromNode(esriViewRoot.node.querySelector(".esri-overlay-surface") as HTMLDivElement);
+      const canvas = esriOverlaySurface.append(CanvasView);
       canvas.setEventNode(esriViewRoot.node);
       canvas.append(this);
       return canvas;

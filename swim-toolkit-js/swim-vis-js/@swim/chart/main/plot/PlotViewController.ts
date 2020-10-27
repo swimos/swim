@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {ContinuousScale} from "@swim/scale";
-import {GraphicsViewController} from "@swim/view";
+import {GraphicsViewController} from "@swim/graphics";
 import {PlotType, PlotView} from "./PlotView";
 import {PlotViewObserver} from "./PlotViewObserver";
 

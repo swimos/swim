@@ -18,18 +18,17 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
 import {
-  ViewContextType,
-  View,
-  ViewAnimator,
   GraphicsViewInit,
   GraphicsView,
   LayerView,
   FillView,
+  Arc,
   TypesetView,
-} from "@swim/view";
-import {Arc} from "@swim/shape";
-import {AnyTextRunView, TextRunView} from "@swim/typeset";
+  AnyTextRunView,
+  TextRunView,
+} from "@swim/graphics";
 
 export type AnySliceView = SliceView | SliceViewInit;
 
@@ -374,18 +373,18 @@ export class SliceView extends LayerView {
     return null;
   }
 
-  static fromAny(slice: AnySliceView): SliceView {
-    if (slice instanceof SliceView) {
-      return slice;
-    } else if (typeof slice === "object" && slice !== null) {
-      return SliceView.fromInit(slice);
-    }
-    throw new TypeError("" + slice);
-  }
-
   static fromInit(init: SliceViewInit): SliceView {
     const view = new SliceView();
     view.initView(init);
     return view;
+  }
+
+  static fromAny(value: AnySliceView): SliceView {
+    if (value instanceof SliceView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

@@ -14,7 +14,7 @@
 
 import {Length} from "@swim/length";
 import {Tween, Transition} from "@swim/transition";
-import {ViewNodeType} from "@swim/view";
+import {ViewNodeType} from "@swim/dom";
 import {Look, MoodVector, ThemeMatrix, ThemedHtmlView} from "@swim/theme";
 
 export type ButtonGlowState = "ready" | "glowing" | "pulsing" | "fading";

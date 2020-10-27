@@ -15,8 +15,10 @@
 import {AnyAngle, Angle} from "@swim/angle";
 import {AnyLength, Length} from "@swim/length";
 import {Transition} from "@swim/transition";
+import {Height, Width, StyleAnimator} from "@swim/style";
 import {PathContext} from "@swim/render";
-import {ViewContextType, View, ViewAnimator, ViewNodeType, SvgView} from "@swim/view";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {ViewNodeType, SvgView} from "@swim/dom";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
 import {TreeCellInit, TreeCell} from "./TreeCell";
 
@@ -40,7 +42,7 @@ export class PolygonTreeCell extends TreeCell {
     this.addClass("polygon-tree-cell")
     this.justifyContent.setAutoState("center");
 
-    const icon = this.append("svg", "icon");
+    const icon = this.append(SvgView, "icon");
     icon.append("path", "shape");
   }
 
@@ -77,6 +79,12 @@ export class PolygonTreeCell extends TreeCell {
       this.requireUpdate(View.NeedsLayout);
     }
   }
+
+  @StyleAnimator({propertyNames: "height", type: [Length, String], updateFlags: View.NeedsLayout})
+  height: StyleAnimator<this, Height>;
+
+  @StyleAnimator({propertyNames: "width", type: [Length, String], updateFlags: View.NeedsLayout})
+  width: StyleAnimator<this, Width>;
 
   @ViewAnimator({type: Length, state: Length.pct(50), updateFlags: View.NeedsLayout})
   radius: ViewAnimator<this, Length, AnyLength>;

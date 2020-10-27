@@ -73,10 +73,11 @@ style, animate, and render mixed HTML, SVG, Canvas, and WebGL components.
 - [**@swim/view**](swim-ui-js/@swim/view) –
   unified HTML, SVG, and Canvas view hierarchy, with integrated controller
   architecture, animated procedural styling, and constraint-based layouts.
-- [**@swim/shape**](swim-ui-js/@swim/shape) –
-  canvas shape views, with animated geometry and style properties.
-- [**@swim/typeset**](swim-ui-js/@swim/typeset) –
-  canvas typesetting views, with animated text, layout, font, and style properties.
+- [**@swim/dom**](swim-ui-js/@swim/dom) –
+  HTML and SVG views, with procedural attribute and style animators.
+- [**@swim/graphics**](swim-ui-js/@swim/graphics) –
+  canvas graphics views, with procedurally animated shapes, and procedurally
+  styled typesetters.
 - [**@swim/gesture**](swim-ui-js/@swim/gesture) –
   multitouch gesture recognizers, with kinematic surface modeling.
 

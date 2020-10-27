@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Transition} from "@swim/transition";
-import {HtmlViewController} from "@swim/view";
+import {HtmlViewController} from "@swim/dom";
 import {MoodVector} from "../mood/MoodVector";
 import {ThemeMatrix} from "../theme/ThemeMatrix";
 import {ThemedViewController} from "./ThemedViewController";

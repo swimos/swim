@@ -15,16 +15,8 @@
 import {AnyLength, Length} from "@swim/length";
 import {Tween, Transition} from "@swim/transition";
 import {Height} from "@swim/style";
-import {
-  ViewContextType,
-  View,
-  ViewEdgeInsets,
-  ViewScope,
-  ViewAnimator,
-  ViewNodeType,
-  SvgView,
-  HtmlView,
-} from "@swim/view";
+import {ViewContextType, View, ViewEdgeInsets, ViewScope, ViewAnimator} from "@swim/view";
+import {ViewNodeType, HtmlView, SvgView} from "@swim/dom";
 import {PositionGestureInput, PositionGestureDelegate} from "@swim/gesture";
 import {Look, Feel, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ButtonMembrane} from "@swim/button";

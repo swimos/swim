@@ -31,6 +31,8 @@
     "@swim/render": "3.11.0-dev.20201021",
     "@swim/constraint": "3.11.0-dev.20201021",
     "@swim/view": "3.11.0-dev.20201021",
+    "@swim/dom": "3.11.0-dev.20201021",
+    "@swim/graphics": "3.11.0-dev.20201021",
     "@swim/theme": "3.11.0-dev.20201021",
     "@swim/modal": "3.11.0-dev.20201021",
     "@swim/website": "3.11.0-dev.20201021",

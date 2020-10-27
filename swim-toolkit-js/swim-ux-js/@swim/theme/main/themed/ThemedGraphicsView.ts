@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicsViewInit, GraphicsView} from "@swim/view";
+import {GraphicsViewInit, GraphicsView} from "@swim/graphics";
 import {ThemedViewInit, ThemedView} from "./ThemedView";
 import {ThemedGraphicsViewController} from "./ThemedGraphicsViewController";
 

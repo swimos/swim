@@ -14,7 +14,8 @@
 
 import {__extends} from "tslib";
 import {FromAny} from "@swim/util";
-import {ViewConstructor, View, ViewObserverType, NodeView} from "@swim/view";
+import {ViewFactory, View, ViewObserverType} from "@swim/view";
+import {NodeView} from "@swim/dom";
 import {Component} from "../Component";
 import {ComponentViewObserver} from "./ComponentViewObserver";
 
@@ -27,8 +28,7 @@ export type ComponentViewMemberInit<V, K extends keyof V> =
 export interface ComponentViewInit<V extends View, U = V> {
   extends?: ComponentViewPrototype;
   observe?: boolean;
-  type?: unknown;
-  tag?: string;
+  type?: ViewFactory<V, U>;
 
   willSetView?(newView: V | null, oldView: V | null): void;
   onSetView?(newView: V | null, oldView: V | null): void;
@@ -65,7 +65,7 @@ export declare abstract class ComponentView<C extends Component, V extends View,
   constructor(component: C, viewName: string | undefined);
 
   /** @hidden */
-  readonly type?: unknown;
+  readonly type?: ViewFactory<V>;
 
   readonly tag?: string;
 
@@ -310,27 +310,21 @@ ComponentView.prototype.remove = function <V extends View>(this: ComponentView<C
 
 ComponentView.prototype.createView = function <V extends View, U>(this: ComponentView<Component, V, U>): V | U | null {
   const type = this.type;
-  if (typeof type === "function" && type.prototype instanceof View) {
-    if (this.tag !== void 0) {
-      return (type as typeof NodeView).fromTag(this.tag as string) as unknown as V;
-    } else {
-      return View.create(type as ViewConstructor) as V;
-    }
+  if (type !== void 0) {
+    return type.create();
   }
   return null;
 };
 
 ComponentView.prototype.fromAny = function <V extends View, U>(this: ComponentView<Component, V, U>,
                                                                value: V | U): V | null {
-  if (value instanceof Node) {
-    const type = this.type;
-    if (typeof type === "function" && type.prototype instanceof NodeView) {
-      return (type as typeof NodeView).fromNode(value) as unknown as V;
-    } else {
-      return View.fromNode(value) as unknown as V;
-    }
+  const type = this.type;
+  if (FromAny.is<V, U>(type)) {
+    return type.fromAny(value);
+  } else if (value instanceof View) {
+    return value;
   }
-  return value as V | null;
+  return null;
 };
 
 ComponentView.define = function <C extends Component, V extends View, U, I>(descriptor: ComponentViewDescriptor<C, V, U, I>): ComponentViewConstructor<C, V, U, I> {

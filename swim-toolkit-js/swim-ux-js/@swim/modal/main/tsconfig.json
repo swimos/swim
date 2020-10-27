@@ -24,6 +24,8 @@
       "@swim/render": ["../swim-ui-js/@swim/render/main"],
       "@swim/constraint": ["../swim-ui-js/@swim/constraint/main"],
       "@swim/view": ["../swim-ui-js/@swim/view/main"],
+      "@swim/dom": ["../swim-ui-js/@swim/dom/main"],
+      "@swim/graphics": ["../swim-ui-js/@swim/graphics/main"],
       "@swim/theme": ["@swim/theme/main"]
     },
     "tsBuildInfoFile": ".tsbuildinfo"
@@ -49,6 +51,8 @@
     {"path": "../../../../swim-ui-js/@swim/render/main"},
     {"path": "../../../../swim-ui-js/@swim/constraint/main"},
     {"path": "../../../../swim-ui-js/@swim/view/main"},
+    {"path": "../../../../swim-ui-js/@swim/dom/main"},
+    {"path": "../../../../swim-ui-js/@swim/graphics/main"},
     {"path": "../../theme/main"}
   ]
 }

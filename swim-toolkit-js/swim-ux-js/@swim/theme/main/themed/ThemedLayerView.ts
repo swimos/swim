@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {Tween, Transition} from "@swim/transition";
-import {ViewContextType, ViewFlags, View, ViewScope, LayerView} from "@swim/view";
+import {ViewContextType, ViewFlags, View, ViewScope} from "@swim/view";
+import {LayerView} from "@swim/graphics";
 import {Look} from "../look/Look";
 import {Feel} from "../feel/Feel";
 import {Mood} from "../mood/Mood";

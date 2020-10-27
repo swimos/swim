@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicsView, GraphicsViewController} from "@swim/view";
+import {GraphicsView, GraphicsViewController} from "@swim/graphics";
 import {TickView} from "../tick/TickView";
 import {AxisOrientation, AxisView} from "./AxisView";
 import {AxisViewObserver} from "./AxisViewObserver";

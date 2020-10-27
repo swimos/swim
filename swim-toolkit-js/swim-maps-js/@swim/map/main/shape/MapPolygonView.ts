@@ -18,16 +18,8 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {
-  ViewContextType,
-  View,
-  ViewAnimator,
-  GraphicsView,
-  FillViewInit,
-  FillView,
-  StrokeViewInit,
-  StrokeView,
-} from "@swim/view";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {GraphicsView, FillViewInit, FillView, StrokeViewInit, StrokeView} from "@swim/graphics";
 import {GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
 import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
@@ -422,18 +414,18 @@ export class MapPolygonView extends MapLayerView implements FillView, StrokeView
     return null;
   }
 
-  static fromAny(polygon: AnyMapPolygonView): MapPolygonView {
-    if (polygon instanceof MapPolygonView) {
-      return polygon;
-    } else if (typeof polygon === "object" && polygon !== null) {
-      return MapPolygonView.fromInit(polygon);
-    }
-    throw new TypeError("" + polygon);
-  }
-
   static fromInit(init: MapPolygonViewInit): MapPolygonView {
     const view = new MapPolygonView();
     view.initView(init);
     return view;
+  }
+
+  static fromAny(value: AnyMapPolygonView): MapPolygonView {
+    if (value instanceof MapPolygonView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

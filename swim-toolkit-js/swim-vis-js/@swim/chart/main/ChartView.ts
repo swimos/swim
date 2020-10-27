@@ -395,18 +395,18 @@ export class ChartView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
     }
   }
 
-  static fromAny<X, Y>(chart: AnyChartView<X, Y>): ChartView<X, Y> {
-    if (chart instanceof ChartView) {
-      return chart;
-    } else if (typeof chart === "object" && chart !== null) {
-      return ChartView.fromInit(chart);
-    }
-    throw new TypeError("" + chart);
-  }
-
   static fromInit<X, Y>(init: ChartViewInit<X, Y>): ChartView<X, Y> {
     const view = new ChartView<X, Y>();
     view.initView(init);
     return view;
+  }
+
+  static fromAny<X, Y>(value: AnyChartView<X, Y>): ChartView<X, Y> {
+    if (value instanceof ChartView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

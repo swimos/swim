@@ -15,7 +15,8 @@
 import {Color} from "@swim/color";
 import {Transition} from "@swim/transition";
 import {StyleRule, StyleSheet} from "@swim/style";
-import {Subview, ViewNodeType, HtmlView, StyleView} from "@swim/view";
+import {Subview} from "@swim/view";
+import {ViewNodeType, HtmlView, StyleView} from "@swim/dom";
 import {PositionGesture} from "@swim/gesture";
 import {Look, MoodVector, ThemeMatrix, ThemedSvgView} from "@swim/theme";
 import {TokenViewInit, TokenView} from "./TokenView";
@@ -91,7 +92,7 @@ export class InputTokenView extends TokenView {
 
   @Subview<InputTokenView, StyleView>({
     child: true,
-    type: StyleView,
+    type: HtmlView.style,
     viewDidMount(styleView: StyleView): void {
       this.view.initStylesheet(styleView);
     },
@@ -100,8 +101,7 @@ export class InputTokenView extends TokenView {
 
   @Subview<InputTokenView, HtmlView>({
     child: false,
-    type: HtmlView,
-    tag: "input",
+    type: HtmlView.input,
     onSetSubview(labelView: HtmlView | null): void {
       if (labelView !== null) {
         if (labelView.parentView === null) {

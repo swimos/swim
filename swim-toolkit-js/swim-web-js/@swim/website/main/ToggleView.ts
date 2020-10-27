@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {Tween} from "@swim/transition";
-import {View, HtmlView} from "@swim/view";
+import {View} from "@swim/view";
+import {HtmlView} from "@swim/dom";
 import {ModalOptions, ModalState, Modal} from "@swim/modal";
 
 export class ToggleView extends HtmlView implements Modal {

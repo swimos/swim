@@ -18,18 +18,17 @@ import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
 import {
-  ViewContextType,
-  View,
-  ViewAnimator,
   GraphicsViewInit,
   GraphicsView,
   LayerView,
   FillView,
+  Arc,
   TypesetView,
-} from "@swim/view";
-import {Arc} from "@swim/shape";
-import {AnyTextRunView, TextRunView} from "@swim/typeset";
+  AnyTextRunView,
+  TextRunView,
+} from "@swim/graphics";
 
 export type DialViewArrangement = "auto" | "manual";
 
@@ -419,18 +418,18 @@ export class DialView extends LayerView {
     return null;
   }
 
-  static fromAny(dial: AnyDialView): DialView {
-    if (dial instanceof DialView) {
-      return dial;
-    } else if (typeof dial === "object" && dial !== null) {
-      return DialView.fromInit(dial);
-    }
-    throw new TypeError("" + dial);
-  }
-
   static fromInit(init: DialViewInit): DialView {
     const view = new DialView();
     view.initView(init);
     return view;
+  }
+
+  static fromAny(value: AnyDialView): DialView {
+    if (value instanceof DialView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return DialView.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

@@ -181,8 +181,8 @@ const ui = [
     ],
   },
   {
-    id: "shape",
-    name: "@swim/shape",
+    id: "dom",
+    name: "@swim/dom",
     targets: [
       {
         id: "main",
@@ -191,12 +191,12 @@ const ui = [
     ],
   },
   {
-    id: "typeset",
-    name: "@swim/typeset",
+    id: "graphics",
+    name: "@swim/graphics",
     targets: [
       {
         id: "main",
-        deps: ["angle", "length", "color", "font", "shadow", "gradient", "transform", "scale", "transition", "animate", "style", "render", "constraint", "view"],
+        deps: ["angle", "length", "color", "font", "shadow", "gradient", "transform", "scale", "transition", "animate", "style", "render", "constraint", "view", "dom"],
       },
     ],
   },
@@ -218,7 +218,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["angle", "length", "color", "font", "shadow", "gradient", "transform", "scale", "transition", "animate", "style", "render", "constraint", "view", "shape", "typeset", "gesture"],
+        deps: ["angle", "length", "color", "font", "shadow", "gradient", "transform", "scale", "transition", "animate", "style", "render", "constraint", "view", "dom", "graphics", "gesture"],
       },
     ],
   },

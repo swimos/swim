@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {AnyPointR2, PointR2} from "@swim/math";
-import {ViewContextType, ViewFlags, View, GraphicsViewContext, CanvasView} from "@swim/view";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {GraphicsViewContext, CanvasView} from "@swim/graphics";
 import {AnyGeoPoint, GeoPoint, MapLayerView} from "@swim/map";
 import {EsriProjection} from "./EsriProjection";
 import {EsriViewObserver} from "./EsriViewObserver";

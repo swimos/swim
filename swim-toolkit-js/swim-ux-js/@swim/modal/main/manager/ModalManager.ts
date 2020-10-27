@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View, ViewManager, ViewNode, NodeView} from "@swim/view";
+import {View, ViewManager} from "@swim/view";
+import {ViewNode, NodeView} from "@swim/dom";
 import {ModalOptions, Modal} from "../Modal";
 import {ModalManagerObserver} from "./ModalManagerObserver";
 
@@ -49,7 +50,7 @@ export class ModalManager<V extends View = View> extends ViewManager<V> {
   }
 
   setContainer(container: ViewNode | NodeView): void {
-    if (container instanceof View.Node) {
+    if (container instanceof NodeView) {
       container = container._node;
     }
     this._containerNode = container;
@@ -60,7 +61,7 @@ export class ModalManager<V extends View = View> extends ViewManager<V> {
     const containerView = containerNode.view;
     if (containerView !== void 0) {
       containerView.appendChildView(modalView);
-    } else if (modalView instanceof View.Node) {
+    } else if (modalView instanceof NodeView) {
       containerNode.appendChild(modalView._node);
       modalView.mount();
     } else {

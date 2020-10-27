@@ -26,9 +26,8 @@ import {
   ViewScope,
   ViewAnimator,
   ContinuousScaleViewAnimator,
-  GraphicsViewInit,
-  GraphicsView,
 } from "@swim/view";
+import {GraphicsViewInit, GraphicsView} from "@swim/graphics";
 import {AnyTickView, TickView} from "../tick/TickView";
 import {TickGenerator} from "../tick/TickGenerator";
 import {AxisViewObserver} from "./AxisViewObserver";
@@ -586,30 +585,16 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
 
   static fromOrientation<D>(orientation: AxisOrientation): AxisView<D> {
     if (orientation === "top") {
-      return AxisView.top();
+      return this.top();
     } else if (orientation === "right") {
-      return AxisView.right();
+      return this.right();
     } else if (orientation === "bottom") {
-      return AxisView.bottom();
+      return this.bottom();
     } else if (orientation === "left") {
-      return AxisView.left();
+      return this.left();
     } else {
       throw new TypeError(orientation);
     }
-  }
-
-  static fromAny<D>(axis: AnyAxisView<D> | true, orientation?: AxisOrientation): AxisView<D> {
-    if (axis instanceof AxisView) {
-      return axis;
-    } else if (axis === true) {
-      if (orientation === void 0) {
-        throw new Error("undefined axis orientation");
-      }
-      return AxisView.fromOrientation(orientation);
-    } else if (typeof axis === "object" && axis !== null) {
-      return AxisView.fromInit(axis, orientation);
-    }
-    throw new TypeError("" + axis);
   }
 
   static fromInit<D>(init: AxisViewInit<D>, orientation?: AxisOrientation): AxisView<D> {
@@ -619,9 +604,23 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
         throw new Error("undefined axis orientation");
       }
     }
-    const view = AxisView.fromOrientation<D>(orientation);
+    const view = this.fromOrientation<D>(orientation);
     view.initView(init)
     return view;
+  }
+
+  static fromAny<D>(value: AnyAxisView<D> | true, orientation?: AxisOrientation): AxisView<D> {
+    if (value instanceof AxisView) {
+      return value;
+    } else if (value === true) {
+      if (orientation === void 0) {
+        throw new Error("undefined axis orientation");
+      }
+      return this.fromOrientation(orientation);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value, orientation);
+    }
+    throw new TypeError("" + value);
   }
 
   // Forward type declarations

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewNodeType, HtmlView} from "@swim/view";
+import {ViewNodeType, HtmlViewConstructor} from "@swim/dom";
 import {PositionGestureInput} from "@swim/gesture";
 import {ThemedHtmlViewInit, ThemedHtmlView} from "@swim/theme";
 import {TreeCellObserver} from "./TreeCellObserver";
@@ -21,7 +21,7 @@ import {TitleTreeCell} from "./TitleTreeCell";
 import {DisclosureTreeCell} from "./DisclosureTreeCell";
 import {PolygonTreeCell} from "./PolygonTreeCell";
 
-export type AnyTreeCell = TreeCell | TreeCellInit;
+export type AnyTreeCell = TreeCell | TreeCellInit | HTMLElement;
 
 export interface TreeCellInit extends ThemedHtmlViewInit {
   viewController?: TreeCellController;
@@ -64,28 +64,32 @@ export class TreeCell extends ThemedHtmlView {
     }
   }
 
-  static fromAny(stem: AnyTreeCell): TreeCell {
-    if (stem instanceof TreeCell) {
-      return stem;
-    } else if (typeof stem === "object" && stem !== null) {
-      return TreeCell.fromInit(stem);
-    }
-    throw new TypeError("" + stem);
-  }
-
   static fromInit(init: TreeCellInit): TreeCell {
     let view: TreeCell;
     if (init.cellType === "title") {
-      view = HtmlView.create(TreeCell.Title);
+      view = TreeCell.Title.create();
     } else if (init.cellType === "disclosure") {
-      view = HtmlView.create(TreeCell.Disclosure);
+      view = TreeCell.Disclosure.create();
     } else if (init.cellType === "polygon") {
-      view = HtmlView.create(TreeCell.Polygon);
+      view = TreeCell.Polygon.create();
     } else {
-      view = HtmlView.create(TreeCell);
+      view = TreeCell.create();
     }
     view.initView(init);
     return view;
+  }
+
+  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static fromAny(value: AnyTreeCell): TreeCell;
+  static fromAny(value: AnyTreeCell): TreeCell {
+    if (value instanceof this) {
+      return value;
+    } else if (value instanceof HTMLElement) {
+      return this.fromNode(value);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 
   // Forward type declarations

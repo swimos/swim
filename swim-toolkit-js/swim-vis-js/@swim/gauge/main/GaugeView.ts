@@ -17,16 +17,8 @@ import {AnyAngle, Angle} from "@swim/angle";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
-import {
-  ViewContextType,
-  ViewFlags,
-  View,
-  ViewAnimator,
-  GraphicsViewInit,
-  LayerView,
-  TypesetView,
-} from "@swim/view";
-import {AnyTextRunView, TextRunView} from "@swim/typeset";
+import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {GraphicsViewInit, LayerView, TypesetView, AnyTextRunView, TextRunView} from "@swim/graphics";
 import {AnyDialView, DialView} from "./DialView";
 
 export type AnyGaugeView = GaugeView | GaugeViewInit;
@@ -315,18 +307,18 @@ export class GaugeView extends LayerView {
     this._viewFlags &= ~View.NeedsLayout;
   }
 
-  static fromAny(gauge: AnyGaugeView): GaugeView {
-    if (gauge instanceof GaugeView) {
-      return gauge;
-    } else if (typeof gauge === "object" && gauge !== null) {
-      return GaugeView.fromInit(gauge);
-    }
-    throw new TypeError("" + gauge);
-  }
-
   static fromInit(init: GaugeViewInit): GaugeView {
     const view = new GaugeView();
     view.initView(init);
     return view;
+  }
+
+  static fromAny(value: AnyGaugeView): GaugeView {
+    if (value instanceof GaugeView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

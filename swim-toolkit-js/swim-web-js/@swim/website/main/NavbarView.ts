@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View, HtmlView} from "@swim/view";
+import {View} from "@swim/view";
+import {HtmlView} from "@swim/dom";
 
 export class NavbarView extends HtmlView {
   /** @hidden */

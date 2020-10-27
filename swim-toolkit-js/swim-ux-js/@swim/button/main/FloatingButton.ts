@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {Tween, Transition} from "@swim/transition";
-import {ViewContextType, View, ViewAnimator, ViewNodeType, SvgView, HtmlView} from "@swim/view";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {ViewNodeType, HtmlView, SvgView} from "@swim/dom";
 import {PositionGestureInput, PositionGestureDelegate} from "@swim/gesture";
 import {Look, Feel, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ButtonMorph} from "./ButtonMorph";
@@ -63,12 +64,12 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
     return childView instanceof ButtonMorph ? childView : null;
   }
 
-  get icon(): SvgView | HtmlView | null {
+  get icon(): HtmlView | SvgView | null {
     const morph = this.morph;
     return morph !== null ? morph.icon : null;
   }
 
-  setIcon(icon: SvgView | HtmlView | null, tween?: Tween<any>, ccw: boolean = false): void {
+  setIcon(icon: HtmlView | SvgView | null, tween?: Tween<any>, ccw: boolean = false): void {
     let morph = this.morph;
     if (morph === null) {
       morph = this.append(ButtonMorph, "morph");

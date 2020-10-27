@@ -26,9 +26,8 @@ import {
   ViewScope,
   ViewAnimator,
   ContinuousScaleViewAnimator,
-  GraphicsViewInit,
-  LayerView,
 } from "@swim/view";
+import {GraphicsViewInit, LayerView} from "@swim/graphics";
 import {ScaleGestureInput, ScaleGestureDelegate, ScaleGesture} from "@swim/gesture";
 import {ScaleXView} from "./ScaleXView";
 import {ScaleYView} from "./ScaleYView";

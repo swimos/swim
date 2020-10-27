@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HtmlViewController} from "@swim/view";
+import {HtmlViewController} from "@swim/dom";
 import {WebAppView} from "./WebAppView";
 import {WebAppViewObserver} from "./WebAppViewObserver";
 

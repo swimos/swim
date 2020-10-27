@@ -67,7 +67,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
   intersectionView.on("click", function (event) {
     event.stopPropagation();
     if (!intersectionPopover) {
-      intersectionPopover = swim.View.create(swim.PopoverView)
+      intersectionPopover = swim.PopoverView.create()
           .width(240)
           .height(360)
           .borderRadius(5)

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HtmlView} from "@swim/view";
+import {HtmlView} from "@swim/dom";
 import {ThemedHtmlViewController} from "@swim/theme";
 import {ButtonItem} from "./ButtonItem";
 import {ButtonStackState, ButtonStack} from "./ButtonStack";

@@ -15,21 +15,9 @@
 import {Length} from "@swim/length";
 import {Tween, Transition} from "@swim/transition";
 import {PathContext} from "@swim/render";
-import {
-  ViewContextType,
-  ViewFlags,
-  View,
-  Subview,
-  ViewAnimator,
-  ViewNodeType,
-  SvgView,
-  HtmlView,
-} from "@swim/view";
-import {
-  PositionGestureInput,
-  PositionGesture,
-  PositionGestureDelegate,
-} from "@swim/gesture";
+import {ViewContextType, ViewFlags, View, Subview, ViewAnimator} from "@swim/view";
+import {ViewNodeType, ElementView, HtmlView, SvgView} from "@swim/dom";
+import {PositionGestureInput, PositionGesture, PositionGestureDelegate} from "@swim/gesture";
 import {
   Look,
   Feel,
@@ -144,14 +132,15 @@ export class TokenView extends ThemedHtmlView {
     return new PositionGesture(footView, this.foot);
   }
 
-  protected initIcon(iconView: SvgView | HtmlView): void {
+  protected initIcon(iconView: ElementView): void {
     iconView.addClass("icon");
     if (iconView instanceof HtmlView) {
       iconView.position.setAutoState("absolute");
-    } else {
+      iconView.pointerEvents.setAutoState("none");
+    } else if (iconView instanceof SvgView) {
       iconView.setStyle("position", "absolute");
+      iconView.pointerEvents.setAutoState("none");
     }
-    iconView.pointerEvents.setAutoState("none");
   }
 
   protected initLabelContainer(labelContainer: HtmlView): void {
@@ -183,13 +172,13 @@ export class TokenView extends ThemedHtmlView {
     actionContainer.pointerEvents.setAutoState("none");
   }
 
-  protected initAction(actionView: SvgView | HtmlView): void {
+  protected initAction(actionView: ElementView): void {
     if (actionView instanceof HtmlView) {
       actionView.position.setAutoState("absolute");
       actionView.top.setAutoState(0);
       actionView.bottom.setAutoState(0);
       actionView.left.setAutoState(0);
-    } else if (actionView !== null) {
+    } else if (actionView instanceof SvgView) {
       actionView.setStyle("position", "absolute");
       actionView.setStyle("top", "0");
       actionView.setStyle("bottom", "0");
@@ -214,7 +203,6 @@ export class TokenView extends ThemedHtmlView {
 
   @Subview<TokenView, ThemedSvgView>({
     type: ThemedSvgView,
-    tag: "svg",
     onSetSubview(shapeView: ThemedSvgView | null): void {
       if (shapeView !== null) {
         this.view.initShape(shapeView);
@@ -226,8 +214,7 @@ export class TokenView extends ThemedHtmlView {
   @Subview<TokenView, ThemedSvgView, ThemedSvgView, ThemedViewObserver & PositionGestureDelegate>({
     extends: void 0,
     child: false,
-    type: ThemedSvgView,
-    tag: "path",
+    type: ThemedSvgView.path,
     onSetSubview(headView: ThemedSvgView | null): void {
       if (headView !== null) {
         this.view.initHead(headView);
@@ -298,8 +285,7 @@ export class TokenView extends ThemedHtmlView {
   @Subview<TokenView, ThemedSvgView, ThemedSvgView, ThemedViewObserver & PositionGestureDelegate>({
     extends: void 0,
     child: false,
-    type: ThemedSvgView,
-    tag: "path",
+    type: ThemedSvgView.path,
     onSetSubview(bodyView: ThemedSvgView | null): void {
       if (bodyView !== null) {
         this.view.initBody(bodyView);
@@ -364,8 +350,7 @@ export class TokenView extends ThemedHtmlView {
   @Subview<TokenView, ThemedSvgView, ThemedSvgView, ThemedViewObserver & PositionGestureDelegate>({
     extends: void 0,
     child: false,
-    type: ThemedSvgView,
-    tag: "path",
+    type: ThemedSvgView.path,
     onSetSubview(footView: ThemedSvgView | null): void {
       if (footView !== null) {
         this.view.initFoot(footView);
@@ -433,18 +418,20 @@ export class TokenView extends ThemedHtmlView {
   })
   readonly foot: Subview<this, ThemedSvgView> & PositionGestureDelegate;
 
-  @Subview<TokenView, SvgView | HtmlView, SvgView | HtmlView, {embossed: boolean}>({
+  @Subview<TokenView, ElementView, Element, {embossed: boolean}>({
     extends: void 0,
-    type: SvgView,
-    tag: "path",
+    type: SvgView.path,
     embossed: true,
-    onSetSubview(iconView: SvgView | HtmlView | null): void {
+    onSetSubview(iconView: ElementView | null): void {
       if (iconView !== null) {
         this.view.initIcon(iconView);
       }
     },
+    fromAny(value: ElementView | Element): ElementView {
+      return ElementView.fromAny(value);
+    },
   })
-  readonly icon: Subview<this, SvgView | HtmlView> & {embossed: boolean};
+  readonly icon: Subview<this, ElementView> & {embossed: boolean};
 
   @Subview<TokenView, HtmlView>({
     type: HtmlView,
@@ -484,12 +471,12 @@ export class TokenView extends ThemedHtmlView {
   })
   readonly actionContainer: Subview<this, HtmlView>;
 
-  @Subview<TokenView, SvgView | HtmlView, SvgView | HtmlView, {embossed: boolean}>({
+  @Subview<TokenView, ElementView, Element, {embossed: boolean}>({
     extends: void 0,
     child: false,
     type: HtmlView,
     embossed: true,
-    onSetSubview(actionView: SvgView | HtmlView | null): void {
+    onSetSubview(actionView: ElementView | null): void {
       if (actionView !== null) {
         if (actionView.parentView === null) {
           this.view.actionContainer.insert();
@@ -501,8 +488,11 @@ export class TokenView extends ThemedHtmlView {
         this.view.initAction(actionView);
       }
     },
+    fromAny(value: ElementView | Element): ElementView {
+      return ElementView.fromAny(value);
+    },
   })
-  readonly action: Subview<this, SvgView | HtmlView> & {embossed: boolean};
+  readonly action: Subview<this, ElementView> & {embossed: boolean};
 
   needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsLayout) !== 0) {
@@ -629,7 +619,7 @@ export class TokenView extends ThemedHtmlView {
       iconView.top.setAutoState(paddingTop);
       iconView.width.setAutoState(tokenHeight);
       iconView.height.setAutoState(tokenHeight);
-    } else if (iconView !== null) {
+    } else if (iconView instanceof SvgView) {
       iconView.setStyle("left", paddingLeft + "px");
       iconView.setStyle("top", paddingTop + "px");
       iconView.setStyle("width", tokenHeight + "px");
@@ -639,7 +629,7 @@ export class TokenView extends ThemedHtmlView {
     if (actionView instanceof HtmlView) {
       actionView.top.setAutoState(0);
       actionView.bottom.setAutoState(0);
-    } else if (actionView !== null) {
+    } else if (actionView instanceof SvgView) {
       const actionHeight = actionView.height.getStateOr(Length.zero()).pxValue();
       const actionPadding = (height - actionHeight) / 2;
       actionView.setStyle("top", actionPadding + "px");

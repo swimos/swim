@@ -17,15 +17,8 @@ import {BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {Color} from "@swim/color";
 import {Tween, Transition} from "@swim/transition";
-import {
-  ViewContextType,
-  ViewContext,
-  ViewFlags,
-  View,
-  ViewAnimator,
-  HtmlView,
-  HtmlViewObserver,
-} from "@swim/view";
+import {ViewContextType, ViewContext, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {HtmlView, HtmlViewObserver} from "@swim/dom";
 import {Look, ThemedHtmlViewInit, ThemedHtmlView} from "@swim/theme";
 import {ModalOptions, ModalState, Modal} from "../Modal";
 import {PopoverViewObserver} from "./PopoverViewObserver";

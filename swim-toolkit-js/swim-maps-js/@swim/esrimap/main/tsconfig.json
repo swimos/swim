@@ -24,8 +24,8 @@
       "@swim/render": ["../swim-ui-js/@swim/render/main"],
       "@swim/constraint": ["../swim-ui-js/@swim/constraint/main"],
       "@swim/view": ["../swim-ui-js/@swim/view/main"],
-      "@swim/shape": ["../swim-ui-js/@swim/shape/main"],
-      "@swim/typeset": ["../swim-ui-js/@swim/typeset/main"],
+      "@swim/dom": ["../swim-ui-js/@swim/dom/main"],
+      "@swim/graphics": ["../swim-ui-js/@swim/graphics/main"],
       "@swim/map": ["@swim/map/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
@@ -51,8 +51,8 @@
     {"path": "../../../../swim-ui-js/@swim/render/main"},
     {"path": "../../../../swim-ui-js/@swim/constraint/main"},
     {"path": "../../../../swim-ui-js/@swim/view/main"},
-    {"path": "../../../../swim-ui-js/@swim/shape/main"},
-    {"path": "../../../../swim-ui-js/@swim/typeset/main"},
+    {"path": "../../../../swim-ui-js/@swim/dom/main"},
+    {"path": "../../../../swim-ui-js/@swim/graphics/main"},
     {"path": "../../map/main"}
   ]
 }

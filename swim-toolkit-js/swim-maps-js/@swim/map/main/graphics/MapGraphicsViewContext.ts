@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicsViewContext} from "@swim/view";
+import {GraphicsViewContext} from "@swim/graphics";
 import {GeoBox} from "../geo/GeoBox";
 import {GeoProjection} from "../geo/GeoProjection";
 

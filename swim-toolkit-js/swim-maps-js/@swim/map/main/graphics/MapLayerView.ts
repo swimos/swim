@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {BoxR2} from "@swim/math";
-import {ViewContextType, ViewFlags, View, GraphicsView} from "@swim/view";
+import {ViewContextType, ViewFlags, View} from "@swim/view";
+import {GraphicsView} from "@swim/graphics";
 import {GeoBox} from "../geo/GeoBox";
 import {MapGraphicsView} from "./MapGraphicsView";
 

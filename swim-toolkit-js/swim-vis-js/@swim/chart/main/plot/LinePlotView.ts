@@ -16,7 +16,8 @@ import {BoxR2} from "@swim/math";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {CanvasRenderer, CanvasContext} from "@swim/render";
-import {ViewAnimator, GraphicsView, StrokeViewInit, StrokeView} from "@swim/view";
+import {ViewAnimator} from "@swim/view";
+import {GraphicsView, StrokeViewInit, StrokeView} from "@swim/graphics";
 import {DataPointView} from "../data/DataPointView";
 import {PlotView} from "./PlotView";
 import {PlotViewController} from "./PlotViewController";
@@ -161,19 +162,19 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     return null;
   }
 
-  static fromAny<X, Y>(plot: AnyLinePlotView<X, Y>): LinePlotView<X, Y> {
-    if (plot instanceof LinePlotView) {
-      return plot;
-    } else if (typeof plot === "object" && plot !== null) {
-      return LinePlotView.fromInit(plot as LinePlotViewInit<X, Y>);
-    }
-    throw new TypeError("" + plot);
-  }
-
   static fromInit<X, Y>(init: LinePlotViewInit<X, Y>): LinePlotView<X, Y> {
     const view = new LinePlotView<X, Y>();
     view.initView(init);
     return view;
+  }
+
+  static fromAny<X, Y>(value: AnyLinePlotView<X, Y>): LinePlotView<X, Y> {
+    if (value instanceof LinePlotView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }
 PlotView.Line = LinePlotView;

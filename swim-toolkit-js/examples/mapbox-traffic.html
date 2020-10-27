@@ -72,7 +72,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
   let intersectionPopover = null;
   intersectionView.on("pointerup", function (event) {
     if (!intersectionPopover) {
-      intersectionPopover = swim.View.create(swim.PopoverView)
+      intersectionPopover = swim.PopoverView.create()
           .width(240)
           .height(360)
           .borderRadius(5)

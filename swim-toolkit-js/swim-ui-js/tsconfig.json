@@ -16,8 +16,8 @@
     {"path": "./@swim/render"},
     {"path": "./@swim/constraint"},
     {"path": "./@swim/view"},
-    {"path": "./@swim/shape"},
-    {"path": "./@swim/typeset"},
+    {"path": "./@swim/dom"},
+    {"path": "./@swim/graphics"},
     {"path": "./@swim/gesture"},
     {"path": "./@swim/ui"}
   ]

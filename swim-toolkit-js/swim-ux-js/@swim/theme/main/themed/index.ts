@@ -29,15 +29,19 @@ export {ThemedGraphicsViewController} from "./ThemedGraphicsViewController";
 export {ThemedLayerView} from "./ThemedLayerView";
 
 export {
-  ThemedSvgViewInit,
-  ThemedSvgView,
-} from "./ThemedSvgView";
-export {ThemedSvgViewObserver} from "./ThemedSvgViewObserver";
-export {ThemedSvgViewController} from "./ThemedSvgViewController";
-
-export {
   ThemedHtmlViewInit,
+  ThemedHtmlViewFactory,
+  ThemedHtmlViewConstructor,
   ThemedHtmlView,
 } from "./ThemedHtmlView";
 export {ThemedHtmlViewObserver} from "./ThemedHtmlViewObserver";
 export {ThemedHtmlViewController} from "./ThemedHtmlViewController";
+
+export {
+  ThemedSvgViewInit,
+  ThemedSvgViewFactory,
+  ThemedSvgViewConstructor,
+  ThemedSvgView,
+} from "./ThemedSvgView";
+export {ThemedSvgViewObserver} from "./ThemedSvgViewObserver";
+export {ThemedSvgViewController} from "./ThemedSvgViewController";

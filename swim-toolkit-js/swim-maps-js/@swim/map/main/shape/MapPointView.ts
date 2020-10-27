@@ -18,15 +18,8 @@ import {AnyColor, Color} from "@swim/color";
 import {AnyFont, Font} from "@swim/font";
 import {Tween} from "@swim/transition";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {
-  ViewContextType,
-  ViewFlags,
-  View,
-  ViewAnimator,
-  GraphicsView,
-  TypesetView,
-} from "@swim/view";
-import {AnyTextRunView, TextRunView} from "@swim/typeset";
+import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {GraphicsView, TypesetView, AnyTextRunView, TextRunView} from "@swim/graphics";
 import {AnyGeoPoint, GeoPointInit, GeoPointTuple, GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
 import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
@@ -331,17 +324,6 @@ export class MapPointView extends MapLayerView {
     return init;
   }
 
-  static fromAny(point: AnyMapPointView): MapPointView {
-    if (point instanceof MapPointView) {
-      return point;
-    } else if (point instanceof GeoPoint || GeoPoint.isTuple(point)) {
-      return MapPointView.fromGeoPoint(point);
-    } else if (typeof point === "object" && point !== null) {
-      return MapPointView.fromInit(point);
-    }
-    throw new TypeError("" + point);
-  }
-
   static fromGeoPoint<X, Y>(point: AnyGeoPoint): MapPointView {
     const view = new MapPointView();
     view.setState(point);
@@ -352,5 +334,16 @@ export class MapPointView extends MapLayerView {
     const view = new MapPointView();
     view.initView(init);
     return view;
+  }
+
+  static fromAny(value: AnyMapPointView): MapPointView {
+    if (value instanceof MapPointView) {
+      return value;
+    } else if (value instanceof GeoPoint || GeoPoint.isTuple(value)) {
+      return this.fromGeoPoint(value);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

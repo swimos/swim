@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContextType, GraphicsViewController} from "@swim/view";
+import {ViewContextType} from "@swim/view";
+import {GraphicsViewController} from "@swim/graphics";
 import {GeoBox} from "../geo/GeoBox";
 import {GeoProjection} from "../geo/GeoProjection";
 import {MapGraphicsView} from "./MapGraphicsView";

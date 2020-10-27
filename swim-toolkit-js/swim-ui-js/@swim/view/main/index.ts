@@ -19,6 +19,7 @@ export {
 export {
   ViewFlags,
   ViewInit,
+  ViewFactory,
   ViewConstructor,
   ViewClass,
   View,
@@ -62,23 +63,3 @@ export * from "./service";
 export * from "./scope";
 
 export * from "./animator";
-
-export * from "./graphics";
-
-export * from "./raster";
-
-export * from "./node";
-
-export * from "./text";
-
-export * from "./attribute";
-
-export * from "./element";
-
-export * from "./svg";
-
-export * from "./html";
-
-export * from "./canvas";
-
-export * from "./style";

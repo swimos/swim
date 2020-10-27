@@ -23,9 +23,8 @@ import {
   ViewEdgeInsets,
   ViewScope,
   ViewAnimator,
-  ViewNodeType,
-  HtmlView,
 } from "@swim/view";
+import {ViewNodeType, HtmlViewConstructor, HtmlView} from "@swim/dom";
 import {
   Look,
   Feel,
@@ -41,7 +40,7 @@ import {AnyTreeStem, TreeStem} from "./TreeStem";
 import {TreeViewObserver} from "./TreeViewObserver";
 import {TreeViewController} from "./TreeViewController";
 
-export type AnyTreeView = TreeView | TreeViewInit;
+export type AnyTreeView = TreeView | TreeViewInit | HTMLElement;
 
 export interface TreeViewInit extends ThemedHtmlViewInit {
   viewController?: TreeViewController;
@@ -115,7 +114,7 @@ export class TreeView extends ThemedHtmlView {
   }
 
   addLimb(limb: AnyTreeLimb, key?: string): TreeLimb {
-    if (key === void 0) {
+    if (key === void 0 && "key" in limb) {
       key = limb.key;
     }
     limb = TreeLimb.fromAny(limb);
@@ -519,18 +518,22 @@ export class TreeView extends ThemedHtmlView {
     }
   }
 
-  static fromAny(tree: AnyTreeView): TreeView {
-    if (tree instanceof TreeView) {
-      return tree;
-    } else if (typeof tree === "object" && tree !== null) {
-      return TreeView.fromInit(tree);
-    }
-    throw new TypeError("" + tree);
-  }
-
   static fromInit(init: TreeViewInit): TreeView {
-    const view = HtmlView.create(TreeView);
+    const view = TreeView.create();
     view.initView(init);
     return view;
+  }
+
+  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static fromAny(value: AnyTreeView): TreeView;
+  static fromAny(value: AnyTreeView): TreeView {
+    if (value instanceof this) {
+      return value;
+    } else if (value instanceof HTMLElement) {
+      return this.fromNode(value);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

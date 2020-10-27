@@ -23,7 +23,10 @@
       "@swim/style": ["../swim-ui-js/@swim/style/main"],
       "@swim/render": ["../swim-ui-js/@swim/render/main"],
       "@swim/constraint": ["../swim-ui-js/@swim/constraint/main"],
-      "@swim/view": ["../swim-ui-js/@swim/view/main"]
+      "@swim/view": ["../swim-ui-js/@swim/view/main"],
+      "@swim/dom": ["../swim-ui-js/@swim/dom/main"],
+      "@swim/theme": ["../swim-ux-js/@swim/theme/main"],
+      "@swim/modal": ["../swim-ux-js/@swim/modal/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
@@ -48,6 +51,9 @@
     {"path": "../../../../swim-ui-js/@swim/style/main"},
     {"path": "../../../../swim-ui-js/@swim/render/main"},
     {"path": "../../../../swim-ui-js/@swim/constraint/main"},
-    {"path": "../../../../swim-ui-js/@swim/view/main"}
+    {"path": "../../../../swim-ui-js/@swim/view/main"},
+    {"path": "../../../../swim-ui-js/@swim/dom/main"},
+    {"path": "../../../../swim-ux-js/@swim/theme/main"},
+    {"path": "../../../../swim-ux-js/@swim/modal/main"}
   ]
 }

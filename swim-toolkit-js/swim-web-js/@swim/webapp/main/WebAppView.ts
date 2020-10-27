@@ -18,9 +18,9 @@ import {
   TextView,
   ElementView,
   ElementViewController,
-  SvgView,
   HtmlView,
-} from "@swim/view";
+  SvgView,
+} from "@swim/dom";
 import {WebAppViewObserver} from "./WebAppViewObserver";
 import {WebAppViewController} from "./WebAppViewController";
 

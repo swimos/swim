@@ -33,8 +33,8 @@
     "@swim/render": "3.11.0-dev.20201021",
     "@swim/constraint": "3.11.0-dev.20201021",
     "@swim/view": "3.11.0-dev.20201021",
-    "@swim/shape": "3.11.0-dev.20201021",
-    "@swim/typeset": "3.11.0-dev.20201021",
+    "@swim/dom": "3.11.0-dev.20201021",
+    "@swim/graphics": "3.11.0-dev.20201021",
     "@swim/gesture": "3.11.0-dev.20201021",
 
     "@rollup/plugin-node-resolve": "9",

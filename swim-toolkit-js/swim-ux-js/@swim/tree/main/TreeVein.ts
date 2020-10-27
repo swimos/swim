@@ -13,12 +13,12 @@
 // limitations under the License.
 
 import {Transition} from "@swim/transition";
-import {ViewNodeType, HtmlView} from "@swim/view";
+import {ViewNodeType, HtmlViewConstructor} from "@swim/dom";
 import {Look, MoodVector, ThemeMatrix, ThemedHtmlViewInit, ThemedHtmlView} from "@swim/theme";
 import {TreeVeinObserver} from "./TreeVeinObserver";
 import {TreeVeinController} from "./TreeVeinController";
 
-export type AnyTreeVein = TreeVein | TreeVeinInit;
+export type AnyTreeVein = TreeVein | TreeVeinInit | HTMLElement;
 
 export interface TreeVeinInit extends ThemedHtmlViewInit {
   viewController?: TreeVeinController;
@@ -50,18 +50,22 @@ export class TreeVein extends ThemedHtmlView {
     this.color.setAutoState(theme.inner(mood, Look.neutralColor), transition);
   }
 
-  static fromAny(stem: AnyTreeVein): TreeVein {
-    if (stem instanceof TreeVein) {
-      return stem;
-    } else if (typeof stem === "object" && stem !== null) {
-      return TreeVein.fromInit(stem);
-    }
-    throw new TypeError("" + stem);
-  }
-
   static fromInit(init: TreeVeinInit): TreeVein {
-    const view = HtmlView.create(TreeVein);
+    const view = TreeVein.create();
     view.initView(init);
     return view;
+  }
+
+  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static fromAny(value: AnyTreeVein): TreeVein;
+  static fromAny(value: AnyTreeVein): TreeVein {
+    if (value instanceof this) {
+      return value;
+    } else if (value instanceof HTMLElement) {
+      return this.fromNode(value);
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

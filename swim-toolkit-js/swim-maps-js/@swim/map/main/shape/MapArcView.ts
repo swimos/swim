@@ -17,17 +17,9 @@ import {AnyAngle, Angle} from "@swim/angle";
 import {AnyLength, Length} from "@swim/length";
 import {AnyColor, Color} from "@swim/color";
 import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {
-  ViewContextType,
-  View,
-  ViewAnimator,
-  GraphicsView,
-  FillViewInit,
-  FillView,
-  StrokeViewInit,
-  StrokeView,
-} from "@swim/view";
-import {Arc} from "@swim/shape";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {GraphicsView, FillViewInit, FillView, StrokeViewInit, StrokeView} from "@swim/graphics";
+import {Arc} from "@swim/graphics";
 import {AnyGeoPoint, GeoPoint} from "../geo/GeoPoint";
 import {GeoBox} from "../geo/GeoBox";
 import {MapGraphicsViewInit} from "../graphics/MapGraphicsView";
@@ -269,18 +261,18 @@ export class MapArcView extends MapLayerView implements FillView, StrokeView {
     return null;
   }
 
-  static fromAny(arc: AnyMapArcView): MapArcView {
-    if (arc instanceof MapArcView) {
-      return arc;
-    } else if (typeof arc === "object" && arc !== null) {
-      return MapArcView.fromInit(arc);
-    }
-    throw new TypeError("" + arc);
-  }
-
   static fromInit(init: MapArcViewInit): MapArcView {
     const view = new MapArcView();
     view.initView(init);
     return view;
+  }
+
+  static fromAny(value: AnyMapArcView): MapArcView {
+    if (value instanceof MapArcView) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
   }
 }

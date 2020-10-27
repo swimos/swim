@@ -15,7 +15,7 @@
 import {Angle} from "@swim/angle";
 import {Transform} from "@swim/transform";
 import {Tween, Transition} from "@swim/transition";
-import {ViewNodeType, SvgView, HtmlView} from "@swim/view";
+import {ViewNodeType, HtmlView, SvgView} from "@swim/dom";
 import {Look, ThemedHtmlView} from "@swim/theme";
 
 export class ButtonMorph extends ThemedHtmlView {
@@ -34,13 +34,13 @@ export class ButtonMorph extends ThemedHtmlView {
     return childView instanceof HtmlView ? childView : null;
   }
 
-  get icon(): SvgView | HtmlView | null {
+  get icon(): HtmlView | SvgView | null {
     const form = this.form;
     const childView = form !== null ? form.getChildView("icon") : null;
     return childView instanceof SvgView || childView instanceof HtmlView ? childView : null;
   }
 
-  setIcon(icon: SvgView | HtmlView | null, tween?: Tween<any>, ccw: boolean = false): void {
+  setIcon(icon: HtmlView | SvgView | null, tween?: Tween<any>, ccw: boolean = false): void {
     if (tween === void 0 || tween === true) {
       tween = this.getLookOr(Look.transition, null);
     } else {
@@ -65,7 +65,7 @@ export class ButtonMorph extends ThemedHtmlView {
     this.appendChildView(newForm, "form");
   }
 
-  protected createForm(icon: SvgView | HtmlView | null): HtmlView {
+  protected createForm(icon: HtmlView | SvgView | null): HtmlView {
     const form = HtmlView.create("div");
     form.addClass("morph-form");
     form.position.setAutoState("absolute");
