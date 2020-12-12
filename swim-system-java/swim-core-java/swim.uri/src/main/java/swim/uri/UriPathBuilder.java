@@ -91,11 +91,18 @@ public final class UriPathBuilder implements Builder<String, UriPath> {
   public boolean addSegment(String segment) {
     segment = UriPath.cacheSegment(segment);
     final UriPath tail = UriPath.segment(segment, UriPath.empty());
-    final int size = this.size;
+    int size = this.size;
     if (size == 0) {
       this.first = tail;
     } else {
-      dealias(size - 1).setTail(tail);
+      final UriPath last = dealias(size - 1);
+      if (last.isAbsolute()) {
+        last.setTail(tail);
+      } else {
+        last.setTail(UriPath.slash(tail));
+        size += 1;
+        this.aliased += 1;
+      }
     }
     this.last = tail;
     this.size = size + 1;
@@ -109,7 +116,14 @@ public final class UriPathBuilder implements Builder<String, UriPath> {
       if (size == 0) {
         this.first = path;
       } else {
-        dealias(size - 1).setTail(path);
+        final UriPath last = dealias(size - 1);
+        if (last.isAbsolute() || path.isAbsolute()) {
+          last.setTail(path);
+        } else {
+          last.setTail(UriPath.slash(path));
+          size += 1;
+          this.aliased += 1;
+        }
       }
       size += 1;
       do {
