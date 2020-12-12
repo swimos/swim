@@ -63,10 +63,10 @@ final class UriPathSegment extends UriPath {
 
   @Override
   void setTail(UriPath tail) {
-    if (tail.isAbsolute()) {
-      this.tail = tail;
+    if (tail instanceof UriPathSegment) {
+      throw new UnsupportedOperationException();
     } else {
-      this.tail = UriPath.slash(tail);
+      this.tail = tail;
     }
   }
 
