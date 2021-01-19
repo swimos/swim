@@ -14,59 +14,32 @@
 
 package swim.client;
 
-import swim.api.Downlink;
-import swim.api.agent.Agent;
-import swim.api.agent.AgentDef;
-import swim.api.agent.AgentFactory;
-import swim.api.auth.Credentials;
-import swim.api.auth.Identity;
 import swim.api.client.Client;
-import swim.api.policy.Policy;
-import swim.api.policy.PolicyDirective;
-import swim.concurrent.MainStage;
-import swim.concurrent.Schedule;
+import swim.api.downlink.EventDownlink;
+import swim.api.downlink.ListDownlink;
+import swim.api.downlink.MapDownlink;
+import swim.api.downlink.ValueDownlink;
+import swim.api.http.HttpDownlink;
+import swim.api.ref.HostRef;
+import swim.api.ref.LaneRef;
+import swim.api.ref.NodeRef;
+import swim.api.ws.WsDownlink;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 import swim.concurrent.Theater;
 import swim.io.TlsSettings;
 import swim.io.http.HttpEndpoint;
 import swim.io.http.HttpSettings;
-import swim.remote.RemoteHostClient;
-import swim.runtime.AbstractSwimRef;
-import swim.runtime.EdgeAddress;
-import swim.runtime.EdgeBinding;
-import swim.runtime.EdgeContext;
-import swim.runtime.HostAddress;
-import swim.runtime.HostBinding;
-import swim.runtime.LaneAddress;
-import swim.runtime.LaneBinding;
-import swim.runtime.LaneDef;
-import swim.runtime.LinkBinding;
-import swim.runtime.MeshAddress;
-import swim.runtime.MeshBinding;
-import swim.runtime.Metric;
-import swim.runtime.NodeAddress;
-import swim.runtime.NodeBinding;
-import swim.runtime.PartAddress;
-import swim.runtime.PartBinding;
-import swim.runtime.Push;
-import swim.runtime.router.EdgeTable;
-import swim.runtime.router.MeshTable;
-import swim.runtime.router.PartTable;
-import swim.store.StoreBinding;
+import swim.structure.Value;
 import swim.uri.Uri;
+import swim.warp.CommandMessage;
 
-public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContext {
+public class ClientRuntime implements Client {
 
-  final Stage stage;
-  final HttpEndpoint endpoint;
-  final EdgeBinding edge;
-  StoreBinding store;
+  private final SwimClientRef clientRef;
 
   public ClientRuntime(Stage stage, HttpSettings settings) {
-    this.stage = stage;
-    this.endpoint = new HttpEndpoint(stage, settings);
-    this.edge = new EdgeTable();
-    this.edge.setEdgeContext(this);
+    this.clientRef = new SwimClientRef(stage, new HttpEndpoint(stage, settings));
   }
 
   public ClientRuntime(Stage stage) {
@@ -79,318 +52,177 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
 
   @Override
   public void start() {
-    if (this.stage instanceof MainStage) {
-      ((MainStage) this.stage).start();
-    }
-    this.endpoint.start();
-    this.edge.start();
+    this.clientRef.start();
   }
 
   @Override
   public void stop() {
-    this.endpoint.stop();
-    if (this.stage instanceof MainStage) {
-      ((MainStage) this.stage).stop();
-    }
+    this.clientRef.stop();
   }
 
   @Override
-  public final EdgeBinding edgeWrapper() {
-    return this.edge.edgeWrapper();
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> T unwrapEdge(Class<T> edgeClass) {
-    if (edgeClass.isAssignableFrom(getClass())) {
-      return (T) this;
-    } else {
-      return null;
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T> T bottomEdge(Class<T> edgeClass) {
-    if (edgeClass.isAssignableFrom(getClass())) {
-      return (T) this;
-    } else {
-      return null;
-    }
+  public HostRef hostRef(Uri hostUri) {
+    return this.clientRef.hostRef(hostUri);
   }
 
   @Override
-  public EdgeAddress cellAddress() {
-    return new EdgeAddress(edgeName());
+  public HostRef hostRef(String hostUri) {
+    return this.clientRef.hostRef(hostUri);
   }
 
   @Override
-  public String edgeName() {
-    return "";
+  public NodeRef nodeRef(Uri hostUri, Uri nodeUri) {
+    return this.clientRef.nodeRef(hostUri, nodeUri);
   }
 
   @Override
-  public Uri meshUri() {
-    return Uri.empty();
+  public NodeRef nodeRef(String hostUri, String nodeUri) {
+    return this.clientRef.nodeRef(hostUri, nodeUri);
   }
 
   @Override
-  public Policy policy() {
-    return null; // TODO
+  public NodeRef nodeRef(Uri nodeUri) {
+    return this.clientRef.nodeRef(nodeUri);
   }
 
   @Override
-  public Schedule schedule() {
-    return this.stage;
+  public NodeRef nodeRef(String nodeUri) {
+    return this.clientRef.nodeRef(nodeUri);
   }
 
   @Override
-  public final Stage stage() {
-    return this.stage;
+  public LaneRef laneRef(Uri hostUri, Uri nodeUri, Uri laneUri) {
+    return this.clientRef.laneRef(hostUri, nodeUri, laneUri);
   }
 
   @Override
-  public final StoreBinding store() {
-    return this.store;
-  }
-
-  public final HttpEndpoint endpoint() {
-    return this.endpoint;
+  public LaneRef laneRef(String hostUri, String nodeUri, String laneUri) {
+    return this.clientRef.laneRef(hostUri, nodeUri, laneUri);
   }
 
   @Override
-  public void openMetaEdge(EdgeBinding edge, NodeBinding metaEdge) {
-    // nop
+  public LaneRef laneRef(Uri nodeUri, Uri laneUri) {
+    return this.clientRef.laneRef(nodeUri, laneUri);
   }
 
   @Override
-  public MeshBinding createMesh(MeshAddress meshAddress) {
-    return new MeshTable();
+  public LaneRef laneRef(String nodeUri, String laneUri) {
+    return this.clientRef.laneRef(nodeUri, laneUri);
   }
 
   @Override
-  public MeshBinding injectMesh(MeshAddress meshAddress, MeshBinding mesh) {
-    return mesh;
+  public void command(Uri hostUri, Uri nodeUri, Uri laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    this.clientRef.command(hostUri, nodeUri, laneUri, prio, body, cont);
   }
 
   @Override
-  public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
-    // nop
+  public void command(String hostUri, String nodeUri, String laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    this.clientRef.command(hostUri, nodeUri, laneUri, prio, body, cont);
   }
 
   @Override
-  public PartBinding createPart(PartAddress partAddress) {
-    return new PartTable();
+  public void command(Uri hostUri, Uri nodeUri, Uri laneUri, Value body, Cont<CommandMessage> cont) {
+    this.clientRef.command(hostUri, nodeUri, laneUri, body, cont);
   }
 
   @Override
-  public PartBinding injectPart(PartAddress partAddress, PartBinding part) {
-    return part;
+  public void command(String hostUri, String nodeUri, String laneUri, Value body, Cont<CommandMessage> cont) {
+    this.clientRef.command(hostUri, nodeUri, laneUri, body, cont);
   }
 
   @Override
-  public void openMetaPart(PartBinding part, NodeBinding metaPart) {
-    // nop
+  public void command(Uri nodeUri, Uri laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    this.clientRef.command(nodeUri, laneUri, prio, body, cont);
   }
 
   @Override
-  public HostBinding createHost(HostAddress hostAddress) {
-    return new RemoteHostClient(hostAddress.hostUri(), this.endpoint);
+  public void command(String nodeUri, String laneUri, float prio, Value body, Cont<CommandMessage> cont) {
+    this.clientRef.command(nodeUri, laneUri, prio, body, cont);
   }
 
   @Override
-  public HostBinding injectHost(HostAddress hostAddress, HostBinding host) {
-    return host;
+  public void command(Uri nodeUri, Uri laneUri, Value body, Cont<CommandMessage> cont) {
+    this.clientRef.command(nodeUri, laneUri, body, cont);
   }
 
   @Override
-  public void openMetaHost(HostBinding host, NodeBinding metaHost) {
-    // nop
+  public void command(String nodeUri, String laneUri, Value body, Cont<CommandMessage> cont) {
+    this.clientRef.command(nodeUri, laneUri, body, cont);
   }
 
   @Override
-  public NodeBinding createNode(NodeAddress nodeAddress) {
-    return null;
+  public void command(Uri hostUri, Uri nodeUri, Uri laneUri, float prio, Value body) {
+    this.clientRef.command(hostUri, nodeUri, laneUri, prio, body);
   }
 
   @Override
-  public NodeBinding injectNode(NodeAddress nodeAddress, NodeBinding node) {
-    return node;
+  public void command(String hostUri, String nodeUri, String laneUri, float prio, Value body) {
+    this.clientRef.command(hostUri, nodeUri, laneUri, prio, body);
   }
 
   @Override
-  public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
-    // nop
+  public void command(Uri hostUri, Uri nodeUri, Uri laneUri, Value body) {
+    this.clientRef.command(hostUri, nodeUri, laneUri, body);
   }
 
   @Override
-  public LaneBinding createLane(LaneAddress lane) {
-    return null;
+  public void command(String hostUri, String nodeUri, String laneUri, Value body) {
+    this.clientRef.command(hostUri, nodeUri, laneUri, body);
   }
 
   @Override
-  public LaneBinding injectLane(LaneAddress laneAddress, LaneBinding lane) {
-    return lane;
+  public void command(Uri nodeUri, Uri laneUri, float prio, Value body) {
+    this.clientRef.command(nodeUri, laneUri, prio, body);
   }
 
   @Override
-  public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
-    // nop
+  public void command(String nodeUri, String laneUri, float prio, Value body) {
+    this.clientRef.command(nodeUri, laneUri, prio, body);
   }
 
   @Override
-  public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
-    // nop
+  public void command(Uri nodeUri, Uri laneUri, Value body) {
+    this.clientRef.command(nodeUri, laneUri, body);
   }
 
   @Override
-  public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
-    // nop
-  }
-
-  @Override
-  public LaneBinding createLane(NodeBinding node, LaneDef laneDef) {
-    return null;
-  }
-
-  @Override
-  public void openLanes(NodeBinding node) {
-    // nop
-  }
-
-  @Override
-  public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
-    return null;
-  }
-
-  @Override
-  public <A extends Agent> AgentFactory<A> createAgentFactory(NodeBinding node, Class<? extends A> agentClass) {
-    return null;
-  }
-
-  @Override
-  public void openAgents(NodeBinding node) {
-    // nop
-  }
-
-  @Override
-  public PolicyDirective<Identity> authenticate(Credentials credentials) {
-    return null; // TODO
-  }
-
-  @Override
-  public LinkBinding bindDownlink(Downlink downlink) {
-    return this.edge.bindDownlink(downlink);
-  }
-
-  @Override
-  public void openDownlink(LinkBinding link) {
-    this.edge.openDownlink(link);
-  }
-
-  @Override
-  public void closeDownlink(LinkBinding link) {
-    // nop
-  }
-
-  @Override
-  public void pushDown(Push<?> push) {
-    this.edge.pushDown(push);
-  }
-
-  @Override
-  public void reportDown(Metric metric) {
-    this.edge.reportDown(metric);
-  }
-
-  @Override
-  public void trace(Object message) {
-    // TODO
-  }
-
-  @Override
-  public void debug(Object message) {
-    // TODO
-  }
-
-  @Override
-  public void info(Object message) {
-    // TODO
-  }
-
-  @Override
-  public void warn(Object message) {
-    // TODO
-  }
-
-  @Override
-  public void error(Object message) {
-    // TODO
-  }
-
-  @Override
-  public void fail(Object message) {
-    // TODO
+  public void command(String nodeUri, String laneUri, Value body) {
+    this.clientRef.command(nodeUri, laneUri, body);
   }
 
   @Override
   public void close() {
-    // TODO
+    this.clientRef.close();
   }
 
   @Override
-  public void willOpen() {
-    // nop
+  public EventDownlink<Value> downlink() {
+    return this.clientRef.downlink();
   }
 
   @Override
-  public void didOpen() {
-    // nop
+  public ListDownlink<Value> downlinkList() {
+    return this.clientRef.downlinkList();
   }
 
   @Override
-  public void willLoad() {
-    // nop
+  public MapDownlink<Value, Value> downlinkMap() {
+    return this.clientRef.downlinkMap();
   }
 
   @Override
-  public void didLoad() {
-    // nop
+  public ValueDownlink<Value> downlinkValue() {
+    return this.clientRef.downlinkValue();
   }
 
   @Override
-  public void willStart() {
-    // nop
+  public <V> HttpDownlink<V> downlinkHttp() {
+    return this.clientRef.downlinkHttp();
   }
 
   @Override
-  public void didStart() {
-    // nop
-  }
-
-  @Override
-  public void willStop() {
-    // nop
-  }
-
-  @Override
-  public void didStop() {
-    // nop
-  }
-
-  @Override
-  public void willUnload() {
-    // nop
-  }
-
-  @Override
-  public void didUnload() {
-    // nop
-  }
-
-  @Override
-  public void willClose() {
-    // nop
+  public <I, O> WsDownlink<I, O> downlinkWs() {
+    return this.clientRef.downlinkWs();
   }
 
 }
