@@ -383,6 +383,7 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
         throw new WarpException("overdemand");
       }
     } while (true);
+    generateDemand();
   }
 
   protected void generateDemand() {

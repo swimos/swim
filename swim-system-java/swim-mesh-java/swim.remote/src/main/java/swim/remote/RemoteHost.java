@@ -552,13 +552,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void didConnect() {
-    this.messageCont = new RemoteHostMessageCont(this);
-    final InetSocketAddress remoteAddress = this.warpSocketContext.remoteAddress();
-    final UriAuthority remoteAuthority = UriAuthority.from(UriHost.inetAddress(remoteAddress.getAddress()),
-        UriPort.from(remoteAddress.getPort()));
-    this.remoteUri = Uri.from(UriScheme.from("warp"), remoteAuthority, UriPath.slash());
-    REMOTE_IDENTITY.set(this, new Unauthenticated(this.requestUri, this.remoteUri, Value.absent()));
-    connectUplinks();
+    start();
     this.hostContext.didConnect();
   }
 
@@ -584,7 +578,13 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void didUpgrade(HttpRequest<?> request, HttpResponse<?> response) {
-    start();
+    this.messageCont = new RemoteHostMessageCont(this);
+    final InetSocketAddress remoteAddress = this.warpSocketContext.remoteAddress();
+    final UriAuthority remoteAuthority = UriAuthority.from(UriHost.inetAddress(remoteAddress.getAddress()),
+            UriPort.from(remoteAddress.getPort()));
+    this.remoteUri = Uri.from(UriScheme.from("warp"), remoteAuthority, UriPath.slash());
+    REMOTE_IDENTITY.set(this, new Unauthenticated(this.requestUri, this.remoteUri, Value.absent()));
+    connectUplinks();
   }
 
   @Override
@@ -625,22 +625,22 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void didRead(WsControl<?, ?> frame) {
+    if (frame instanceof WsPing<?, ?>) {
+      didReadPing((WsPing<?, ?>) frame);
+    } else if (frame instanceof WsClose<?, ?>) {
+      didReadClose((WsClose<?, ?>) frame);
+    }
+  }
+
+  protected void didReadPing(WsPing<?, ?> frame) {
     final WarpSocketContext warpSocketContext = this.warpSocketContext;
-    if (frame instanceof WsClose<?, ?>) {
-      if (warpSocketContext != null) {
-        warpSocketContext.write(WsClose.from(1000));
-      } else {
-        didReadClose((WsClose<?, ?>) frame);
-      }
-    } else if (frame instanceof WsPing<?, ?>) {
-      if (warpSocketContext != null) {
-        warpSocketContext.write(WsPong.from(frame.payload()));
-      }
+    if (warpSocketContext != null) {
+      warpSocketContext.write(WsPong.from(frame.payload()));
     }
   }
 
   protected void didReadClose(WsClose<?, ?> frame) {
-    close();
+    writeClose(WsClose.from(1000));
   }
 
   protected void onEventMessage(EventMessage message) {
@@ -971,12 +971,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       this.warpSocketContext.feed(response, 1.0f);
     }
     if (directive != null && directive.isForbidden()) {
-      final WarpSocketContext warpSocketContext = this.warpSocketContext;
-      if (warpSocketContext != null) {
-        warpSocketContext.write(WsClose.from(1008, "Unauthorized"));
-      } else {
-        close();
-      }
+      writeClose(WsClose.from(1008, "Unauthorized"));
     }
   }
 
@@ -999,9 +994,13 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void forbid() {
+    writeClose(WsClose.from(1008, "Forbidden"));
+  }
+
+  protected void writeClose(WsClose<?, ? extends Envelope> frame) {
     final WarpSocketContext warpSocketContext = this.warpSocketContext;
     if (warpSocketContext != null) {
-      warpSocketContext.write(WsClose.from(1008, "Forbidden"));
+      warpSocketContext.write(frame);
     } else {
       close();
     }
@@ -1019,7 +1018,13 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void didWrite(WsControl<?, ?> frame) {
-    // nop
+    if (frame instanceof WsClose<?, ?>) {
+      didWriteClose((WsClose<?, ?>) frame);
+    }
+  }
+
+  protected void didWriteClose(WsClose<?, ?> frame) {
+    close();
   }
 
   @Override
@@ -1047,6 +1052,18 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     }
     try {
       this.hostContext.didDisconnect();
+    } catch (Throwable cause) {
+      if (!Conts.isNonFatal(cause)) {
+        throw cause;
+      }
+      failure = cause;
+    }
+    try {
+      final WarpSocketContext warpSocketContext = this.warpSocketContext;
+      if (warpSocketContext != null) {
+        this.warpSocketContext = null;
+        warpSocketContext.close();
+      }
     } catch (Throwable cause) {
       if (!Conts.isNonFatal(cause)) {
         throw cause;

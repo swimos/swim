@@ -37,6 +37,7 @@ import swim.uri.Uri;
 import swim.uri.UriAuthority;
 import swim.uri.UriPath;
 import swim.uri.UriScheme;
+import swim.warp.Envelope;
 import swim.ws.WsClose;
 import swim.ws.WsRequest;
 
@@ -143,8 +144,17 @@ public class RemoteHostClient extends RemoteHost {
     super.willOpen();
   }
 
+  protected void writeClose(WsClose<?, ? extends Envelope> frame) {
+    final WarpSocketContext warpSocketContext = this.warpSocketContext;
+    if (warpSocketContext != null) {
+      warpSocketContext.write(frame);
+    } else {
+      close();
+    }
+  }
+
   @Override
-  protected void didReadClose(WsClose<?, ?> frame) {
+  protected void didWriteClose(WsClose<?, ?> frame) {
     Throwable failure = null;
     try {
       final WarpSocketContext warpSocketContext = this.warpSocketContext;
@@ -249,21 +259,7 @@ final class RemoteHostClientReconnectTimer implements TimerFunction {
 
   @Override
   public void runTimer() {
-    Throwable failure = null;
-    try {
-      this.client.connect();
-    } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
-        throw cause;
-      }
-      failure = cause;
-    }
-    this.client.reconnect(); // schedule reconnect
-    if (failure instanceof RuntimeException) {
-      throw (RuntimeException) failure;
-    } else if (failure instanceof Error) {
-      throw (Error) failure;
-    }
+    this.client.connect();
   }
 
 }
