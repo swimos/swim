@@ -42,6 +42,10 @@ public class ClientRuntime implements Client {
     this.clientRef = new SwimClientRef(stage, new HttpEndpoint(stage, settings));
   }
 
+  public ClientRuntime(SwimClientRef clientRef) {
+    this.clientRef = clientRef;
+  }
+
   public ClientRuntime(Stage stage) {
     this(stage, HttpSettings.standard().tlsSettings(TlsSettings.standard()));
   }

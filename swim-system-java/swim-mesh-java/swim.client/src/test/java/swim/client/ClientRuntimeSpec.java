@@ -26,14 +26,33 @@ import swim.api.warp.function.OnEvent;
 import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
+import swim.concurrent.Stage;
+import swim.concurrent.Theater;
+import swim.io.TlsSettings;
+import swim.io.http.HttpEndpoint;
+import swim.io.http.HttpSettings;
 import swim.structure.Value;
+import static org.testng.Assert.fail;
 
 public class ClientRuntimeSpec {
 
   @Test
   public void testLink() throws InterruptedException {
-    final ClientRuntime client = new ClientRuntime();
+    final Object[] failure = {null};
+
+    final HttpSettings httpSettings = HttpSettings.standard().tlsSettings(TlsSettings.standard());
+    final Stage stage = new Theater();
+    final SwimClientRef swimClientRef = new SwimClientRef(stage, new HttpEndpoint(stage, httpSettings)) {
+      @Override
+      public void fail(Object cause) {
+        super.fail(cause);
+        failure[0] = cause;
+      }
+    };
+
+    final ClientRuntime client = new ClientRuntime(swimClientRef);
     final CountDownLatch didSync = new CountDownLatch(1);
+
     class IntersectionsController implements OnEvent<Value>, WillLink, DidLink,
         WillSync, DidSync, WillUnlink, DidUnlink, DidConnect, DidDisconnect, DidClose {
 
@@ -87,7 +106,6 @@ public class ClientRuntimeSpec {
       public void didClose() {
         System.out.println("didClose");
       }
-
     }
 
     try {
@@ -102,6 +120,16 @@ public class ClientRuntimeSpec {
       didSync.await();
     } finally {
       client.stop();
+
+      if (failure[0] != null) {
+        final Object cause = failure[0];
+        if (cause instanceof Throwable) {
+          final Throwable throwable = (Throwable) cause;
+          fail("Unexpected exception thrown", throwable);
+        } else {
+          fail();
+        }
+      }
     }
   }
 

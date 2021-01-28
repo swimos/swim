@@ -148,6 +148,7 @@ public class SwimClientRef extends AbstractSwimRef implements EdgeContext {
   @Override
   public void fail(Object message) {
     // TODO
+
   }
 
   @Override
