@@ -125,7 +125,7 @@ public class ClientRuntimeSpec {
         final Object cause = failure[0];
         if (cause instanceof Throwable) {
           final Throwable throwable = (Throwable) cause;
-          fail("Unexpected exception thrown", throwable);
+          fail("Unexpected exception", throwable);
         } else {
           fail();
         }
