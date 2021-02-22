@@ -533,15 +533,19 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   @SuppressWarnings("unchecked")
   @Override
   public void pushUp(Push<?> push) {
-    final Object message = push.message();
-    if (message instanceof Envelope) {
-      final Envelope envelope = (Envelope) message;
-      final Uri remoteNodeUri = resolve(envelope.nodeUri());
-      final Envelope remoteEnvelope = envelope.nodeUri(remoteNodeUri);
-      final PullRequest<Envelope> pull = createPull(push.prio(), remoteEnvelope, (Cont<Envelope>) push.cont());
-      this.warpSocketContext.feed(pull);
+    if (this.warpSocketContext == null) {
+      push.trap(new HostException("Disconnected from: " + remoteUri.authority().hostAddress()));
     } else {
-      push.trap(new HostException("unsupported message: " + message));
+      final Object message = push.message();
+      if (message instanceof Envelope) {
+        final Envelope envelope = (Envelope) message;
+        final Uri remoteNodeUri = resolve(envelope.nodeUri());
+        final Envelope remoteEnvelope = envelope.nodeUri(remoteNodeUri);
+        final PullRequest<Envelope> pull = createPull(push.prio(), remoteEnvelope, (Cont<Envelope>) push.cont());
+        this.warpSocketContext.feed(pull);
+      } else {
+        push.trap(new HostException("unsupported message: " + message));
+      }
     }
   }
 
