@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Inlet} from "./Inlet";
-import {Outlet} from "./Outlet";
-import {StreamletContext} from "./StreamletContext";
-import {StreamletScope} from "./StreamletScope";
+import type {Inlet} from "./Inlet";
+import type {Outlet} from "./Outlet";
+import type {StreamletContext} from "./StreamletContext";
+import type {StreamletScope} from "./StreamletScope";
 
 /**
  * Stateful node in a dataflow graph that uses the state of its [[Inlet
@@ -23,10 +23,10 @@ import {StreamletScope} from "./StreamletScope";
  */
 export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
   /**
-   * Returns the lexically scoped parent of this `Streamlet`.  Returns `null`
-   * if this `Streamlet` has no lexical parent.
+   * The lexically scoped parent of this `Streamlet`, or `null` if this
+   * `Streamlet` has no lexical parent.
    */
-  streamletScope(): StreamletScope<O> | null;
+  readonly streamletScope: StreamletScope<O> | null;
 
   /**
    * Sets the lexically scoped parent of this `Streamlet`.
@@ -34,9 +34,9 @@ export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
   setStreamletScope(scope: StreamletScope<O> | null): void;
 
   /**
-   * Returns the environment in which this `Streamlet` operates.
+   * The environment in which this `Streamlet` operates.
    */
-  streamletContext(): StreamletContext | null;
+  readonly streamletContext: StreamletContext | null;
 
   /**
    * Sets the environment in which this `Streamlet` operates.
@@ -110,16 +110,17 @@ export interface Streamlet<I = unknown, O = I> extends StreamletScope<O> {
   recohere(version: number): void;
 }
 
-/** @hidden */
-export const Streamlet = {
-  is<I, O>(object: unknown): object is Streamlet<I, O> {
-    if (typeof object === "object" && object !== null) {
-      const streamlet = object as Streamlet<I, O>;
-      return typeof streamlet.streamletScope === "function"
-          && typeof streamlet.setStreamletScope === "function"
-          && typeof streamlet.streamletContext === "function"
-          && typeof streamlet.setStreamletContext === "function";
-    }
-    return false;
-  },
+export const Streamlet = {} as {
+  is<I, O>(object: unknown): object is Streamlet<I, O>;
+};
+
+Streamlet.is = function <I, O>(object: unknown): object is Streamlet<I, O> {
+  if (typeof object === "object" && object !== null) {
+    const streamlet = object as Streamlet<I, O>;
+    return "streamletScope" in streamlet
+        && typeof streamlet.setStreamletScope === "function"
+        && "streamletContext" in streamlet
+        && typeof streamlet.setStreamletContext === "function";
+  }
+  return false;
 };

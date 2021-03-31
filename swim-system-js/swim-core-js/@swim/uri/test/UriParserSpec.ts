@@ -56,104 +56,104 @@ export class UriParserSpec extends Spec {
 
   @Test
   parseURIsWithHostNamesAndPorts(exam: Exam): void {
-    exam.equal(Uri.parse("//domain:80"), Uri.hostName("domain").portNumber(80));
+    exam.equal(Uri.parse("//domain:80"), Uri.hostName("domain").withPortNumber(80));
   }
 
   @Test
   parseURIsWithIPv4AddressesAndPorts(exam: Exam): void {
-    exam.equal(Uri.parse("//127.0.0.1:80"), Uri.hostIPv4("127.0.0.1").portNumber(80));
+    exam.equal(Uri.parse("//127.0.0.1:80"), Uri.hostIPv4("127.0.0.1").withPortNumber(80));
   }
 
   @Test
   parseURIsWithIPv6AddressesAndPorts(exam: Exam): void {
-    exam.equal(Uri.parse("//[::1]:80"), Uri.hostIPv6("::1").portNumber(80));
+    exam.equal(Uri.parse("//[::1]:80"), Uri.hostIPv6("::1").withPortNumber(80));
   }
 
   @Test
   parseURIsWithPortsButNotHost(exam: Exam): void {
-    exam.equal(Uri.parse("//:80"), Uri.hostName("").portNumber(80));
+    exam.equal(Uri.parse("//:80"), Uri.hostName("").withPortNumber(80));
   }
 
   @Test
   parseURIsWithEmptyPorts(exam: Exam): void {
-    exam.equal(Uri.parse("//:"), Uri.hostName("").portNumber(0));
+    exam.equal(Uri.parse("//:"), Uri.hostName("").withPortNumber(0));
   }
 
   @Test
   parseURIsWithEmptyUsers(exam: Exam): void {
-    exam.equal(Uri.parse("//@"), Uri.username("").hostName(""));
+    exam.equal(Uri.parse("//@"), Uri.username("").withHostName(""));
   }
 
   @Test
   parseURIsWithEmptyUsersAndPorts(exam: Exam): void {
-    exam.equal(Uri.parse("//@:"), Uri.username("").hostName("").portNumber(0));
+    exam.equal(Uri.parse("//@:"), Uri.username("").withHostName("").withPortNumber(0));
   }
 
   @Test
   parseURIsWithUsersButNotHosts(exam: Exam): void {
-    exam.equal(Uri.parse("//user@"), Uri.username("user").hostName(""));
+    exam.equal(Uri.parse("//user@"), Uri.username("user").withHostName(""));
   }
 
   @Test
   parseURIsWithUsernamesAndPasswordsButNotHosts(exam: Exam): void {
-    exam.equal(Uri.parse("//user:pass@"), Uri.username("user", "pass").hostName(""));
+    exam.equal(Uri.parse("//user:pass@"), Uri.username("user", "pass").withHostName(""));
   }
 
   @Test
   parseURIsWithUsersContainingPercentEscapes(exam: Exam): void {
-    exam.equal(Uri.parse("//%2f%3a@"), Uri.username("/:").hostName(""));
-    exam.equal(Uri.parse("//a%2fb%3ac@"), Uri.username("a/b:c").hostName(""));
+    exam.equal(Uri.parse("//%2f%3a@"), Uri.username("/:").withHostName(""));
+    exam.equal(Uri.parse("//a%2fb%3ac@"), Uri.username("a/b:c").withHostName(""));
   }
 
   @Test
   parseURIsWithUsernamesAndPasswordsContainingPercentEscapes(exam: Exam): void {
-    exam.equal(Uri.parse("//%2f%3a:%3a%2f@"), Uri.username("/:", ":/").hostName(""));
-    exam.equal(Uri.parse("//a%2fb%3ac:d%3ae%2ff@"), Uri.username("a/b:c", "d:e/f").hostName(""));
+    exam.equal(Uri.parse("//%2f%3a:%3a%2f@"), Uri.username("/:", ":/").withHostName(""));
+    exam.equal(Uri.parse("//a%2fb%3ac:d%3ae%2ff@"), Uri.username("a/b:c", "d:e/f").withHostName(""));
   }
 
   @Test
   parseURIsWithUsersAndHostNames(exam: Exam): void {
-    exam.equal(Uri.parse("//user@domain"), Uri.username("user").hostName("domain"));
+    exam.equal(Uri.parse("//user@domain"), Uri.username("user").withHostName("domain"));
   }
 
   @Test
   parseURIsWithUsernamesAndPasswordsAndHostNames(exam: Exam): void {
-    exam.equal(Uri.parse("//user:pass@domain"), Uri.username("user", "pass").hostName("domain"));
+    exam.equal(Uri.parse("//user:pass@domain"), Uri.username("user", "pass").withHostName("domain"));
   }
 
   @Test
   parseURIsWithUsesAndIPv4Addresses(exam: Exam): void {
-    exam.equal(Uri.parse("//user@127.0.0.1"), Uri.username("user").hostIPv4("127.0.0.1"));
+    exam.equal(Uri.parse("//user@127.0.0.1"), Uri.username("user").withHostIPv4("127.0.0.1"));
   }
 
   @Test
   parseURIsWithUsernamesAndPasswordsndIPv4Addresses(exam: Exam): void {
-    exam.equal(Uri.parse("//user:pass@127.0.0.1"), Uri.username("user", "pass").hostIPv4("127.0.0.1"));
+    exam.equal(Uri.parse("//user:pass@127.0.0.1"), Uri.username("user", "pass").withHostIPv4("127.0.0.1"));
   }
 
   @Test
   parseURIsWithUsersAndIPv6Addresses(exam: Exam): void {
-    exam.equal(Uri.parse("//user@[::1]"), Uri.username("user").hostIPv6("::1"));
+    exam.equal(Uri.parse("//user@[::1]"), Uri.username("user").withHostIPv6("::1"));
   }
 
   @Test
   parseURIsWithUsernamesAndPasswordsAndIPv6Addresses(exam: Exam): void {
-    exam.equal(Uri.parse("//user:pass@[::1]"), Uri.username("user", "pass").hostIPv6("::1"));
+    exam.equal(Uri.parse("//user:pass@[::1]"), Uri.username("user", "pass").withHostIPv6("::1"));
   }
 
   @Test
   parseURIsWithUsersAndHostNamesAndPorts(exam: Exam): void {
-    exam.equal(Uri.parse("//user@domain:80"), Uri.username("user").hostName("domain").portNumber(80));
+    exam.equal(Uri.parse("//user@domain:80"), Uri.username("user").withHostName("domain").withPortNumber(80));
   }
 
   @Test
   parseURIsWithUsesAndIPv4AddressesAndPorts(exam: Exam): void {
-    exam.equal(Uri.parse("//user@127.0.0.1:80"), Uri.username("user").hostIPv4("127.0.0.1").portNumber(80));
+    exam.equal(Uri.parse("//user@127.0.0.1:80"), Uri.username("user").withHostIPv4("127.0.0.1").withPortNumber(80));
   }
 
   @Test
   parseURIsWithUsersAndIPv6AddressesAndPorts(exam: Exam): void {
-    exam.equal(Uri.parse("//user@[::1]:80"), Uri.username("user").hostIPv6("::1").portNumber(80));
+    exam.equal(Uri.parse("//user@[::1]:80"), Uri.username("user").withHostIPv6("::1").withPortNumber(80));
   }
 
   @Test
@@ -175,7 +175,7 @@ export class UriParserSpec extends Spec {
 
   @Test
   parseURIsWithPathsContainingPermittedDelimeters(exam: Exam): void {
-    exam.equal(Uri.parse("/one/!$&()*+,;='/three"), Uri.path("/", "one", "/", "!$&()*+,;=\'", "/", "three"));
+    exam.equal(Uri.parse("/one/!$&()*+,;='/three"), Uri.path("/", "one", "/", "!$&()*+,;='", "/", "three"));
   }
 
   @Test
@@ -242,73 +242,73 @@ export class UriParserSpec extends Spec {
 
   @Test
   parseURIsWithSchemesAndAuthorities(exam: Exam): void {
-    exam.equal(Uri.parse("scheme://domain"), Uri.schemeName("scheme").hostName("domain"));
-    exam.equal(Uri.parse("scheme://domain:80"), Uri.schemeName("scheme").hostName("domain").portNumber(80));
-    exam.equal(Uri.parse("scheme://user@domain"), Uri.schemeName("scheme").username("user").hostName("domain"));
-    exam.equal(Uri.parse("scheme://user@domain:80"), Uri.schemeName("scheme").username("user").hostName("domain").portNumber(80));
+    exam.equal(Uri.parse("scheme://domain"), Uri.schemeName("scheme").withHostName("domain"));
+    exam.equal(Uri.parse("scheme://domain:80"), Uri.schemeName("scheme").withHostName("domain").withPortNumber(80));
+    exam.equal(Uri.parse("scheme://user@domain"), Uri.schemeName("scheme").withUsername("user").withHostName("domain"));
+    exam.equal(Uri.parse("scheme://user@domain:80"), Uri.schemeName("scheme").withUsername("user").withHostName("domain").withPortNumber(80));
   }
 
   @Test
   parseURIsWithSchemesAndAbsolutePaths(exam: Exam): void {
-    exam.equal(Uri.parse("scheme:/"), Uri.schemeName("scheme").path("/"));
-    exam.equal(Uri.parse("scheme:/one"), Uri.schemeName("scheme").path("/", "one"));
-    exam.equal(Uri.parse("scheme:/one/"), Uri.schemeName("scheme").path("/", "one", "/"));
-    exam.equal(Uri.parse("scheme:/one/two"), Uri.schemeName("scheme").path("/", "one", "/", "two"));
-    exam.equal(Uri.parse("scheme:/one/two/"), Uri.schemeName("scheme").path("/", "one", "/", "two", "/"));
+    exam.equal(Uri.parse("scheme:/"), Uri.schemeName("scheme").withPath("/"));
+    exam.equal(Uri.parse("scheme:/one"), Uri.schemeName("scheme").withPath("/", "one"));
+    exam.equal(Uri.parse("scheme:/one/"), Uri.schemeName("scheme").withPath("/", "one", "/"));
+    exam.equal(Uri.parse("scheme:/one/two"), Uri.schemeName("scheme").withPath("/", "one", "/", "two"));
+    exam.equal(Uri.parse("scheme:/one/two/"), Uri.schemeName("scheme").withPath("/", "one", "/", "two", "/"));
   }
 
   @Test
   parseURIsWithSchemesAndRelativePaths(exam: Exam): void {
-    exam.equal(Uri.parse("scheme:one"), Uri.schemeName("scheme").path("one"));
-    exam.equal(Uri.parse("scheme:one/"), Uri.schemeName("scheme").path("one", "/"));
-    exam.equal(Uri.parse("scheme:one/two"), Uri.schemeName("scheme").path("one", "/", "two"));
-    exam.equal(Uri.parse("scheme:one/two/"), Uri.schemeName("scheme").path("one", "/", "two", "/"));
+    exam.equal(Uri.parse("scheme:one"), Uri.schemeName("scheme").withPath("one"));
+    exam.equal(Uri.parse("scheme:one/"), Uri.schemeName("scheme").withPath("one", "/"));
+    exam.equal(Uri.parse("scheme:one/two"), Uri.schemeName("scheme").withPath("one", "/", "two"));
+    exam.equal(Uri.parse("scheme:one/two/"), Uri.schemeName("scheme").withPath("one", "/", "two", "/"));
   }
 
   @Test
   parseURIsWithSchemesAndQueries(exam: Exam): void {
-    exam.equal(Uri.parse("scheme:?query"), Uri.schemeName("scheme").query({$0: "query"}));
-    exam.equal(Uri.parse("scheme:?key=value"), Uri.schemeName("scheme").query({key: "value"}));
+    exam.equal(Uri.parse("scheme:?query"), Uri.schemeName("scheme").withQuery({$0: "query"}));
+    exam.equal(Uri.parse("scheme:?key=value"), Uri.schemeName("scheme").withQuery({key: "value"}));
   }
 
   @Test
   parseURIsWithSchemesAndFragments(exam: Exam): void {
-    exam.equal(Uri.parse("scheme:#fragment"), Uri.schemeName("scheme").fragmentIdentifier("fragment"));
+    exam.equal(Uri.parse("scheme:#fragment"), Uri.schemeName("scheme").withFragmentIdentifier("fragment"));
   }
 
   @Test
   parseURIsWithSchemesAuthoritiesAndPaths(exam: Exam): void {
-    exam.equal(Uri.parse("scheme://domain/path"), Uri.schemeName("scheme").hostName("domain").path("/", "path"));
-    exam.equal(Uri.parse("scheme://domain:80/path"), Uri.schemeName("scheme").hostName("domain").portNumber(80).path("/", "path"));
+    exam.equal(Uri.parse("scheme://domain/path"), Uri.schemeName("scheme").withHostName("domain").withPath("/", "path"));
+    exam.equal(Uri.parse("scheme://domain:80/path"), Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withPath("/", "path"));
   }
 
   @Test
   parseURIsWithSchemesAuthoritiesAndQueries(exam: Exam): void {
-    exam.equal(Uri.parse("scheme://domain?query"), Uri.schemeName("scheme").hostName("domain").query({$0: "query"}));
-    exam.equal(Uri.parse("scheme://domain:80?query"), Uri.schemeName("scheme").hostName("domain").portNumber(80).query({$0: "query"}));
+    exam.equal(Uri.parse("scheme://domain?query"), Uri.schemeName("scheme").withHostName("domain").withQuery({$0: "query"}));
+    exam.equal(Uri.parse("scheme://domain:80?query"), Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withQuery({$0: "query"}));
   }
 
   @Test
   parseURIsWithSchemesAuthoritiesAndFragments(exam: Exam): void {
-    exam.equal(Uri.parse("scheme://domain#fragment"), Uri.schemeName("scheme").hostName("domain").fragmentIdentifier("fragment"));
-    exam.equal(Uri.parse("scheme://domain:80#fragment"), Uri.schemeName("scheme").hostName("domain").portNumber(80).fragmentIdentifier("fragment"));
+    exam.equal(Uri.parse("scheme://domain#fragment"), Uri.schemeName("scheme").withHostName("domain").withFragmentIdentifier("fragment"));
+    exam.equal(Uri.parse("scheme://domain:80#fragment"), Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withFragmentIdentifier("fragment"));
   }
 
   @Test
   parseURIsWithSchemesAuthoritiesPathsAndQueries(exam: Exam): void {
-    exam.equal(Uri.parse("scheme://domain/path?query"), Uri.schemeName("scheme").hostName("domain").path("/", "path").query({$0: "query"}));
-    exam.equal(Uri.parse("scheme://domain:80/path?query"), Uri.schemeName("scheme").hostName("domain").portNumber(80).path("/", "path").query({$0: "query"}));
+    exam.equal(Uri.parse("scheme://domain/path?query"), Uri.schemeName("scheme").withHostName("domain").withPath("/", "path").withQuery({$0: "query"}));
+    exam.equal(Uri.parse("scheme://domain:80/path?query"), Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withPath("/", "path").withQuery({$0: "query"}));
   }
 
   @Test
   parseURIsWithSchemesAuthoritiesPathsAndFragments(exam: Exam): void {
-    exam.equal(Uri.parse("scheme://domain/path#fragment"), Uri.schemeName("scheme").hostName("domain").path("/", "path").fragmentIdentifier("fragment"));
-    exam.equal(Uri.parse("scheme://domain:80/path#fragment"), Uri.schemeName("scheme").hostName("domain").portNumber(80).path("/", "path").fragmentIdentifier("fragment"));
+    exam.equal(Uri.parse("scheme://domain/path#fragment"), Uri.schemeName("scheme").withHostName("domain").withPath("/", "path").withFragmentIdentifier("fragment"));
+    exam.equal(Uri.parse("scheme://domain:80/path#fragment"), Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withPath("/", "path").withFragmentIdentifier("fragment"));
   }
 
   @Test
   parseURIsWithSchemesAuthoritiesPathsQueriesAndFragments(exam: Exam): void {
-    exam.equal(Uri.parse("scheme://domain/path?query#fragment"), Uri.schemeName("scheme").hostName("domain").path("/", "path").query({$0: "query"}).fragmentIdentifier("fragment"));
-    exam.equal(Uri.parse("scheme://domain:80/path?query#fragment"), Uri.schemeName("scheme").hostName("domain").portNumber(80).path("/", "path").query({$0: "query"}).fragmentIdentifier("fragment"));
+    exam.equal(Uri.parse("scheme://domain/path?query#fragment"), Uri.schemeName("scheme").withHostName("domain").withPath("/", "path").withQuery({$0: "query"}).withFragmentIdentifier("fragment"));
+    exam.equal(Uri.parse("scheme://domain:80/path?query#fragment"), Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withPath("/", "path").withQuery({$0: "query"}).withFragmentIdentifier("fragment"));
   }
 }

@@ -12,122 +12,133 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Lazy, Numbers, Strings} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {AnyItem, Item} from "./Item";
 import {AnyValue, Value} from "./Value";
 
 export type AnyBool = Bool | boolean;
 
 export class Bool extends Value {
-  /** @hidden */
-  readonly _value: boolean;
-  /** @hidden */
-  _hashCode?: number;
-
   private constructor(value: boolean) {
     super();
-    this._value = value;
+    Object.defineProperty(this, "value", {
+      value: value,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "hashValue", {
+      value: Strings.hash(value ? "true" : "false"),
+    });
   }
 
   isConstant(): boolean {
     return true;
   }
 
-  get value(): boolean {
-    return this._value;
-  }
+  declare readonly value: boolean;
 
   stringValue(): string;
   stringValue<T>(orElse: T): string;
   stringValue<T>(orElse?: T): string {
-    return this._value ? "true" : "false";
+    return this.value ? "true" : "false";
   }
 
   booleanValue(): boolean;
   booleanValue<T>(orElse: T): boolean;
   booleanValue<T>(orElse?: T): boolean {
-    return this._value;
+    return this.value;
   }
 
   toAny(): AnyBool {
-    return this._value;
+    return this.value;
   }
 
   valueOf(): boolean {
-    return this._value;
+    return this.value;
   }
 
   conditional(thenTerm: AnyValue, elseTerm: AnyValue): Value;
   conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item;
   conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item {
-    return this._value ? Item.fromAny(thenTerm) : Item.fromAny(elseTerm);
+    return this.value ? Item.fromAny(thenTerm) : Item.fromAny(elseTerm);
   }
 
   or(that: AnyValue): Value;
   or(that: AnyItem): Item;
   or(that: AnyItem): Item {
-    return this._value ? this : Item.fromAny(that);
+    return this.value ? this : Item.fromAny(that);
   }
 
   and(that: AnyValue): Value;
   and(that: AnyItem): Item;
   and(that: AnyItem): Item {
-    return this._value ? Item.fromAny(that) : this;
+    return this.value ? Item.fromAny(that) : this;
   }
 
   not(): Value {
-    return Bool.from(!this._value);
+    return Bool.from(!this.value);
   }
 
-  typeOrder(): number {
+  get typeOrder(): number {
     return 7;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof Bool) {
-      if (this._value && !that._value) {
+      if (this.value && !that.value) {
         return -1;
-      } else if (!this._value && that._value) {
+      } else if (!this.value && that.value) {
         return 1;
       } else {
         return 0;
       }
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown): boolean {
+    return this.equals(that);
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Bool) {
-      return this._value === that._value;
+      return this.value === that.value;
     }
     return false;
   }
 
+  /** @hidden */
+  declare readonly hashValue: number;
+
   hashCode(): number {
-    if (this._hashCode === void 0) {
-      this._hashCode = Murmur3.hash(this._value ? "true" : "false");
-    }
-    return this._hashCode;
+    return this.hashValue;
   }
 
   debug(output: Output): void {
     output = output.write("Bool").write(46/*'.'*/).write("from")
-        .write(40/*'('*/).write(this._value ? "true" : "false").write(41/*')'*/);
+        .write(40/*'('*/).write(this.value ? "true" : "false").write(41/*')'*/);
   }
 
   display(output: Output): void {
-    output = output.write(this._value ? "true" : "false");
+    output = output.write(this.value ? "true" : "false");
   }
 
-  private static readonly True: Bool = new Bool(true);
+  @Lazy
+  static get true(): Bool {
+    return new Bool(true);
+  }
 
-  private static readonly False: Bool = new Bool(false);
+  @Lazy
+  static get false(): Bool {
+    return new Bool(false);
+  }
 
   static from(value: boolean): Bool {
-    return value ? Bool.True : Bool.False;
+    return value ? Bool.true : Bool.false;
   }
 
   static fromAny(value: AnyBool): Bool {
@@ -140,4 +151,3 @@ export class Bool extends Value {
     }
   }
 }
-Item.Bool = Bool;

@@ -12,114 +12,79 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Objects, Assert} from "@swim/util";
-import {Spec} from "./Spec";
-import {TestOptions} from "./Test";
+import {Values, Assert} from "@swim/util";
 import {TestException} from "./TestException";
+import type {TestOptions} from "./Test";
+import type {Spec} from "./Spec";
 import {Proof} from "./Proof";
-import {Report} from "./Report";
+import type {Report} from "./Report";
 
 /**
  * The `Passing`/`Failing`/`Pending` status of an `Exam`.
+ * - "passing": the `Exam` has only valid proof points.
+ * - "failing": the `Exam` has invalid proof points.
+ * - "pending": the `Exam` has tentative proof points.
  */
-export const enum ExamStatus {
-  /**
-   * The `Exam` has only valid proof points.
-   */
-  Passing,
-  /**
-   * The `Exam` has invalid proof points.
-   */
-  Failing,
-  /**
-   * The `Exam` has tentative proof points.
-   */
-  Pending,
-}
+export type ExamStatus = "passing" | "failing" | "pending";
 
 export class Exam implements Assert {
+  constructor(report: Report, spec: Spec, name: string, options: TestOptions) {
+    Object.defineProperty(this, "report", {
+      value: report,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "spec", {
+      value: spec,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "name", {
+      value: name,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "options", {
+      value: options,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "status", {
+      value: "passing",
+      enumerable: true,
+      configurable: true,
+    });
+  }
+
   /**
    * The unit test `Report` to which this `Exam` sends results.
-   * @hidden
    */
-  readonly _report: Report;
+  declare readonly report: Report;
 
   /**
    * The `Spec` that created this `Exam`.
-   * @hidden
    */
-  readonly _spec: Spec;
+  declare readonly spec: Spec;
 
   /**
    * The name of the test that this `Exam` is evaluating.
-   * @hidden
    */
-  readonly _name: string;
-
-  /**
-   * The options that govern the behavior of this `Exam`.
-   * @hidden
-   */
-  readonly _options: TestOptions;
-
-  /**
-   * The current `Passing`/`Failing`/`Pending` status of this `Exam`.
-   * @hidden
-   */
-  _status: ExamStatus;
-
-  constructor(report: Report, spec: Spec, name: string,
-              options: TestOptions, status: ExamStatus = ExamStatus.Passing) {
-    this._report = report;
-    this._spec = spec;
-    this._name = name;
-    this._options = options;
-    this._status = status;
-  }
-
-  /**
-   * Returns the unit test `Report` to which this `Exam` sends results.
-   */
-  report(): Report {
-    return this._report;
-  }
-
-  /**
-   * Returns the `Spec` that created this `Exam`.
-   */
-  spec(): Spec {
-    return this._spec;
-  }
-
-  /**
-   * Returns the name of the test that this `Exam` is evaluating.
-   */
-  name(): string {
-    return this._name;
-  }
+  declare readonly name: string;
 
   /**
    * Returns the options that govern the behavior of this `Exam`.
    */
-  options(): TestOptions {
-    return this._options;
-  }
+  declare readonly options: TestOptions;
 
   /**
    * Returns the current `Passing`/`Failing`/`Pending` status of this `Exam`.
    */
-  status(): ExamStatus {
-    return this._status;
-  }
+  declare readonly status: ExamStatus;
 
   /**
    * Makes a comment about the circumstances of the test case.
    */
   comment(message: string): void {
-    if (typeof this._spec.onComment === "function") {
-      this._spec.onComment(this._report, this, message);
+    if (typeof this.spec.onComment === "function") {
+      this.spec.onComment(this.report, this, message);
     }
-    this._report.onComment(this._spec, this, message);
+    this.report.onComment(this.spec, this, message);
   }
 
   /**
@@ -127,14 +92,22 @@ export class Exam implements Assert {
    */
   proove(proof: Proof): void {
     if (!proof.isValid()) {
-      this._status = ExamStatus.Failing;
+      Object.defineProperty(this, "status", {
+        value: "failing",
+        enumerable: true,
+        configurable: true,
+      });
     } else if (proof.isPending()) {
-      this._status = ExamStatus.Pending;
+      Object.defineProperty(this, "status", {
+        value: "pending",
+        enumerable: true,
+        configurable: true,
+      });
     }
-    if (typeof this._spec.onProof === "function") {
-      this._spec.onProof(this._report, this, proof);
+    if (typeof this.spec.onProof === "function") {
+      this.spec.onProof(this.report, this, proof);
     }
-    this._report.onProof(this._spec, this, proof);
+    this.report.onProof(this.spec, this, proof);
   }
 
   /**
@@ -219,8 +192,44 @@ export class Exam implements Assert {
     }
   }
 
+  identical(lhs: unknown, rhs: unknown, message?: string): void {
+    if (lhs === rhs) {
+      this.proove(Proof.valid("identical", message));
+    } else {
+      this.proove(Proof.refuted(lhs, "===", rhs, message));
+      throw new TestException(message);
+    }
+  }
+
+  notIdentical(lhs: unknown, rhs: unknown, message?: string): void {
+    if (lhs !== rhs) {
+      this.proove(Proof.valid("not identical", message));
+    } else {
+      this.proove(Proof.refuted(lhs, "!==", rhs, message));
+      throw new TestException(message);
+    }
+  }
+
+  instanceOf(object: unknown, constructor: Function, message?: string): void {
+    if (object instanceof constructor) {
+      this.proove(Proof.valid("instanceof", message));
+    } else {
+      this.proove(Proof.refuted(object, "instanceof", constructor, message));
+      throw new TestException(message);
+    }
+  }
+
+  notInstanceOf(object: unknown, constructor: Function, message?: string): void {
+    if (!(object instanceof constructor)) {
+      this.proove(Proof.valid("not instanceof", message));
+    } else {
+      this.proove(Proof.refuted(object, "!instanceof", constructor, message));
+      throw new TestException(message);
+    }
+  }
+
   equal(lhs: unknown, rhs: unknown, message?: string): void {
-    if (Objects.equal(lhs, rhs)) {
+    if (Values.equal(lhs, rhs)) {
       this.proove(Proof.valid("equal", message));
     } else {
       this.proove(Proof.refuted(lhs, "equal", rhs, message));
@@ -229,7 +238,7 @@ export class Exam implements Assert {
   }
 
   notEqual(lhs: unknown, rhs: unknown, message?: string): void {
-    if (!Objects.equal(lhs, rhs)) {
+    if (!Values.equal(lhs, rhs)) {
       this.proove(Proof.valid("not equal"));
     } else {
       this.proove(Proof.refuted(lhs, "not equal", rhs, message));
@@ -237,26 +246,26 @@ export class Exam implements Assert {
     }
   }
 
-  identity(lhs: unknown, rhs: unknown, message?: string): void {
-    if (lhs === rhs) {
-      this.proove(Proof.valid("identity", message));
+  equivalent(lhs: unknown, rhs: unknown, message?: string): void {
+    if (Values.equivalent(lhs, rhs)) {
+      this.proove(Proof.valid("equivalent", message));
     } else {
-      this.proove(Proof.refuted(lhs, "===", rhs, message));
+      this.proove(Proof.refuted(lhs, "equivalent", rhs, message));
       throw new TestException(message);
     }
   }
 
-  notIdentity(lhs: unknown, rhs: unknown, message?: string): void {
-    if (lhs !== rhs) {
-      this.proove(Proof.valid("not identity", message));
+  notEquivalent(lhs: unknown, rhs: unknown, message?: string): void {
+    if (!Values.equivalent(lhs, rhs)) {
+      this.proove(Proof.valid("not equivalent"));
     } else {
-      this.proove(Proof.refuted(lhs, "!==", rhs, message));
+      this.proove(Proof.refuted(lhs, "not equivalent", rhs, message));
       throw new TestException(message);
     }
   }
 
   compareLessThan(lhs: unknown, rhs: unknown, message?: string): void {
-    if (Objects.compare(lhs, rhs) < 0) {
+    if (Values.compare(lhs, rhs) < 0) {
       this.proove(Proof.valid("compare less than", message));
     } else {
       this.proove(Proof.refuted(lhs, "<", rhs, message));
@@ -265,7 +274,7 @@ export class Exam implements Assert {
   }
 
   compareNotLessThan(lhs: unknown, rhs: unknown, message?: string): void {
-    if (!(Objects.compare(lhs, rhs) < 0)) {
+    if (!(Values.compare(lhs, rhs) < 0)) {
       this.proove(Proof.valid("compare not less than", message));
     } else {
       this.proove(Proof.refuted(lhs, "!<", rhs, message));
@@ -274,7 +283,7 @@ export class Exam implements Assert {
   }
 
   compareLessThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
-    if (Objects.compare(lhs, rhs) <= 0) {
+    if (Values.compare(lhs, rhs) <= 0) {
       this.proove(Proof.valid("compare less than or equal", message));
     } else {
       this.proove(Proof.refuted(lhs, "<=", rhs, message));
@@ -283,7 +292,7 @@ export class Exam implements Assert {
   }
 
   compareNotLessThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
-    if (!(Objects.compare(lhs, rhs) <= 0)) {
+    if (!(Values.compare(lhs, rhs) <= 0)) {
       this.proove(Proof.valid("compare not less than or equal", message));
     } else {
       this.proove(Proof.refuted(lhs, "!<=", rhs, message));
@@ -292,7 +301,7 @@ export class Exam implements Assert {
   }
 
   compareEqual(lhs: unknown, rhs: unknown, message?: string): void {
-    if (Objects.compare(lhs, rhs) === 0) {
+    if (Values.compare(lhs, rhs) === 0) {
       this.proove(Proof.valid("compare equal", message));
     } else {
       this.proove(Proof.refuted(lhs, "==", rhs, message));
@@ -301,7 +310,7 @@ export class Exam implements Assert {
   }
 
   compareNotEqual(lhs: unknown, rhs: unknown, message?: string): void {
-    if (!(Objects.compare(lhs, rhs) === 0)) {
+    if (!(Values.compare(lhs, rhs) === 0)) {
       this.proove(Proof.valid("compare not equal", message));
     } else {
       this.proove(Proof.refuted(lhs, "!=", rhs, message));
@@ -310,7 +319,7 @@ export class Exam implements Assert {
   }
 
   compareGreaterThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
-    if (Objects.compare(lhs, rhs) >= 0) {
+    if (Values.compare(lhs, rhs) >= 0) {
       this.proove(Proof.valid("compare greater than or equal", message));
     } else {
       this.proove(Proof.refuted(lhs, ">=", rhs, message));
@@ -319,7 +328,7 @@ export class Exam implements Assert {
   }
 
   compareNotGreaterThanOrEqual(lhs: unknown, rhs: unknown, message?: string): void {
-    if (!(Objects.compare(lhs, rhs) >= 0)) {
+    if (!(Values.compare(lhs, rhs) >= 0)) {
       this.proove(Proof.valid("compare not greater than or equal", message));
     } else {
       this.proove(Proof.refuted(lhs, "!>=", rhs, message));
@@ -328,7 +337,7 @@ export class Exam implements Assert {
   }
 
   compareGreaterThan(lhs: unknown, rhs: unknown, message?: string): void {
-    if (Objects.compare(lhs, rhs) > 0) {
+    if (Values.compare(lhs, rhs) > 0) {
       this.proove(Proof.valid("compare greater than", message));
     } else {
       this.proove(Proof.refuted(lhs, ">", rhs, message));
@@ -337,7 +346,7 @@ export class Exam implements Assert {
   }
 
   compareNotGreaterThan(lhs: unknown, rhs: unknown, message?: string): void {
-    if (!(Objects.compare(lhs, rhs) > 0)) {
+    if (!(Values.compare(lhs, rhs) > 0)) {
       this.proove(Proof.valid("compare not greater than", message));
     } else {
       this.proove(Proof.refuted(lhs, "!>", rhs, message));

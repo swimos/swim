@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {Item} from "../Item";
 import {BinaryOperator} from "./BinaryOperator";
-import {AnyInterpreter, Interpreter} from "../Interpreter";
+import {AnyInterpreter, Interpreter} from "../interpreter/Interpreter";
 
 export class OrOperator extends BinaryOperator {
   constructor(operand1: Item, operand2: Item) {
     super(operand1, operand2);
   }
 
-  operator(): string {
+  get operator(): string {
     return "||";
   }
 
-  precedence(): number {
+  get precedence(): number {
     return 3;
   }
 
@@ -35,11 +35,11 @@ export class OrOperator extends BinaryOperator {
     interpreter = Interpreter.fromAny(interpreter);
     interpreter.willOperate(this);
     let result: Item;
-    const argument1 = this._operand1.evaluate(interpreter);
+    const argument1 = this.operand1.evaluate(interpreter);
     if (argument1.booleanValue(false)) {
       result = argument1;
     } else {
-      const argument2 = this._operand2.evaluate(interpreter);
+      const argument2 = this.operand2.evaluate(interpreter);
       result = argument2;
     }
     interpreter.didOperate(this, result);
@@ -48,52 +48,58 @@ export class OrOperator extends BinaryOperator {
 
   substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const argument1 = this._operand1.substitute(interpreter);
-    const argument2 = this._operand2.substitute(interpreter);
+    const argument1 = this.operand1.substitute(interpreter);
+    const argument2 = this.operand2.substitute(interpreter);
     return argument1.or(argument2);
   }
 
-  typeOrder(): number {
+  get typeOrder(): number {
     return 21;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof OrOperator) {
-      let order = this._operand1.compareTo(that._operand1);
+      let order = this.operand1.compareTo(that.operand1);
       if (order === 0) {
-        order = this._operand2.compareTo(that._operand2);
+        order = this.operand2.compareTo(that.operand2);
       }
       return order;
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof OrOperator) {
+      return this.operand1.equivalentTo(that.operand1, epsilon)
+          && this.operand2.equivalentTo(that.operand2, epsilon);
+    }
+    return false;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof OrOperator) {
-      return this._operand1.equals(that._operand1) && this._operand2.equals(that._operand2);
+      return this.operand1.equals(that.operand1) && this.operand2.equals(that.operand2);
     }
     return false;
   }
 
   hashCode(): number {
-    if (OrOperator._hashSeed === void 0) {
-      OrOperator._hashSeed = Murmur3.seed(OrOperator);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(OrOperator._hashSeed,
-        this._operand1.hashCode()), this._operand2.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(OrOperator),
+        this.operand1.hashCode()), this.operand2.hashCode()));
   }
 
   debug(output: Output): void {
-    output.debug(this._operand1).write(46/*'.'*/).write("or").write(40/*'('*/)
-        .debug(this._operand2).write(41/*')'*/);
+    output.debug(this.operand1).write(46/*'.'*/).write("or").write(40/*'('*/)
+        .debug(this.operand2).write(41/*')'*/);
   }
 
   clone(): OrOperator {
-    return new OrOperator(this._operand1.clone(), this._operand2.clone());
+    return new OrOperator(this.operand1.clone(), this.operand2.clone());
   }
-
-  private static _hashSeed?: number;
 }
-Item.OrOperator = OrOperator;

@@ -13,64 +13,80 @@
 // limitations under the License.
 
 import {Cursor} from "@swim/util";
-import {Value} from "../Value";
-import {Form} from "../Form";
+import type {Value} from "../Value";
+import type {Form} from "../form/Form";
 
 /** @hidden */
 export class ValueCursor<V> extends Cursor<V> {
-  private readonly _cursor: Cursor<Value>;
-  private readonly _form: Form<V, unknown>;
+  /** @hidden */
+  declare readonly cursor: Cursor<Value>;
+  /** @hidden */
+  declare readonly form: Form<V, unknown>;
 
   constructor(cursor: Cursor<Value>, form: Form<V, unknown>) {
     super();
-    this._cursor = cursor;
-    this._form = form;
+    Object.defineProperty(this, "cursor", {
+      value: cursor,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "form", {
+      value: form,
+      enumerable: true,
+    });
   }
 
   isEmpty(): boolean {
-    return this._cursor.isEmpty();
+    return this.cursor.isEmpty();
   }
 
   head(): V {
-    const value = this._cursor.head();
-    return value.coerce(this._form);
+    const value = this.cursor.head();
+    return value.coerce(this.form);
   }
 
   step(): void {
-    this._cursor.step();
+    this.cursor.step();
   }
 
   skip(count: number): void {
-    this._cursor.skip(count);
+    this.cursor.skip(count);
   }
 
   hasNext(): boolean {
-    return this._cursor.hasNext();
+    return this.cursor.hasNext();
   }
 
   nextIndex(): number {
-    return this._cursor.nextIndex();
+    return this.cursor.nextIndex();
   }
 
   next(): {value?: V, done: boolean} {
-    const {value, done} = this._cursor.next();
-    return {value: value && value.coerce(this._form), done};
+    const {value, done} = this.cursor.next();
+    if (value !== void 0) {
+      return {value: value.coerce(this.form), done};
+    } else {
+      return {done};
+    }
   }
 
   hasPrevious(): boolean {
-    return this._cursor.hasPrevious();
+    return this.cursor.hasPrevious();
   }
 
   previousIndex(): number {
-    return this._cursor.previousIndex();
+    return this.cursor.previousIndex();
   }
 
   previous(): {value?: V, done: boolean} {
-    const {value, done} = this._cursor.next();
-    return {value: value && value.coerce(this._form), done};
+    const {value, done} = this.cursor.previous();
+    if (value !== void 0) {
+      return {value: value.coerce(this.form), done};
+    } else {
+      return {done};
+    }
   }
 
   delete(): void {
-    this._cursor.delete();
+    this.cursor.delete();
   }
 }

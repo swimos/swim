@@ -17,36 +17,38 @@ import {AnyTimeZone, TimeZone} from "./TimeZone";
 
 /** @hidden */
 export class TimeZoneForm extends Form<TimeZone, AnyTimeZone> {
-  private readonly _unit: TimeZone | undefined;
-
-  constructor(unit?: TimeZone) {
+  constructor(unit: TimeZone | undefined) {
     super();
-    this._unit = unit;
+    Object.defineProperty(this, "unit", {
+      value: unit,
+      enumerable: true,
+    });
   }
 
-  unit(): TimeZone | undefined;
-  unit(unit: TimeZone | undefined): Form<TimeZone, AnyTimeZone>;
-  unit(unit?: TimeZone | undefined): TimeZone | undefined | Form<TimeZone, AnyTimeZone> {
-    if (arguments.length === 0) {
-      return this._unit;
-    } else {
+  // @ts-ignore
+  declare readonly unit: TimeZone | undefined;
+
+  withUnit(unit: TimeZone | undefined): Form<TimeZone, AnyTimeZone> {
+    if (unit !== this.unit) {
       return new TimeZoneForm(unit);
+    } else {
+      return this;
     }
   }
 
   mold(zone: AnyTimeZone): Item {
     zone = TimeZone.fromAny(zone);
-    const name = zone.name();
+    const name = zone.name;
     if (name !== void 0) {
       return Text.from(name);
     } else {
-      return Num.from(zone._offset);
+      return Num.from(zone.offset);
     }
   }
 
   cast(item: Item): TimeZone | undefined {
     const value = item.toValue();
-    return TimeZone.fromValue(value);
+    const zone = TimeZone.fromValue(value);
+    return zone !== null ? zone : void 0;
   }
 }
-TimeZone.Form = TimeZoneForm;

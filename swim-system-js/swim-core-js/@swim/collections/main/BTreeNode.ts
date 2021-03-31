@@ -12,48 +12,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor} from "@swim/util";
-import {BTreeContext} from "./BTreeContext";
-import {BTree} from "./BTree";
+import type {Cursor} from "@swim/util";
+import type {BTreeContext} from "./BTreeContext";
 import {BTreePage} from "./BTreePage";
+import {BTreeNodeCursor} from "./"; // forward import
 
 /** @hidden */
 export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
-  readonly _pages: BTreePage<K, V, U>[];
-  readonly _knots: K[];
-  readonly _fold: U | undefined;
-  readonly _size: number;
+  /** @hidden */
+  declare readonly pages: ReadonlyArray<BTreePage<K, V, U>>;
+  /** @hidden */
+  declare readonly knots: ReadonlyArray<K>;
 
-  constructor(pages: BTreePage<K, V, U>[], knots: K[], fold: U | undefined, size: number) {
+  constructor(pages: ReadonlyArray<BTreePage<K, V, U>>, knots: ReadonlyArray<K>,
+              fold: U | undefined, size: number) {
     super();
-    this._pages = pages;
-    this._knots = knots;
-    this._fold = fold;
-    this._size = size;
+    Object.defineProperty(this, "pages", {
+      value: pages,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "knots", {
+      value: knots,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "fold", {
+      value: fold,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "size", {
+      value: size,
+      enumerable: true,
+    });
   }
 
   get arity(): number {
-    return this._pages.length;
+    return this.pages.length;
   }
 
-  get size(): number {
-    return this._size;
-  }
+  declare readonly size: number;
 
   isEmpty(): boolean {
-    return this._size === 0;
+    return this.size === 0;
   }
 
-  fold(): U | undefined {
-    return this._fold;
-  }
+  declare readonly fold: U | undefined;
 
   minKey(): K {
-    return this._pages[0].minKey();
+    return this.pages[0]!.minKey();
   }
 
   maxKey(): K {
-    return this._pages[this._pages.length - 1].maxKey();
+    return this.pages[this.pages.length - 1]!.maxKey();
   }
 
   has(key: K, tree: BTreeContext<K, V>): boolean {
@@ -65,7 +74,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     } else {
       return true;
     }
-    return this._pages[xx].has(key, tree);
+    return this.pages[xx]!.has(key, tree);
   }
 
   get(key: K, tree: BTreeContext<K, V>): V | undefined {
@@ -75,13 +84,13 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     } else {
       x = -(x + 1);
     }
-    return this._pages[x].get(key, tree);
+    return this.pages[x]!.get(key, tree);
   }
 
   getEntry(x: number): [K, V] | undefined {
-    const pages = this._pages;
+    const pages = this.pages;
     for (let i = 0, n = pages.length; i < n; i += 1) {
-      const page = pages[i];
+      const page = pages[i]!;
       if (x < page.size) {
         return page.getEntry(x);
       } else {
@@ -92,18 +101,18 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   firstEntry(): [K, V] | undefined {
-    const pages = this._pages;
+    const pages = this.pages;
     if (pages.length !== 0) {
-      return pages[0].firstEntry();
+      return pages[0]!.firstEntry();
     } else {
       return void 0;
     }
   }
 
   lastEntry(): [K, V] | undefined {
-    const pages = this._pages;
+    const pages = this.pages;
     if (pages.length !== 0) {
-      return pages[pages.length - 1].lastEntry();
+      return pages[pages.length - 1]!.lastEntry();
     } else {
       return void 0;
     }
@@ -116,10 +125,10 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     } else {
       x = -(x + 1);
     }
-    const pages = this._pages;
-    let entry = pages[x].nextEntry(key, tree);
+    const pages = this.pages;
+    let entry = pages[x]!.nextEntry(key, tree);
     if (entry === void 0 && x + 1 < pages.length) {
-      entry = pages[x + 1].nextEntry(key, tree);
+      entry = pages[x + 1]!.nextEntry(key, tree);
     }
     return entry;
   }
@@ -131,10 +140,10 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     } else {
       x = -(x + 1);
     }
-    const pages = this._pages;
-    let entry = pages[x].previousEntry(key, tree);
+    const pages = this.pages;
+    let entry = pages[x]!.previousEntry(key, tree);
     if (entry === void 0 && x > 0) {
-      entry = pages[x - 1].previousEntry(key, tree);
+      entry = pages[x - 1]!.previousEntry(key, tree);
     }
     return entry;
   }
@@ -146,7 +155,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     } else {
       x = -(x + 1);
     }
-    const oldPage = this._pages[x];
+    const oldPage = this.pages[x]!;
     const newPage = oldPage.updated(key, newValue, tree);
     if (oldPage !== newPage) {
       if (oldPage.size !== newPage.size && tree.pageShouldSplit(newPage)) {
@@ -160,11 +169,11 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   private updatedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
-    const oldPages = this._pages;
+    const oldPages = this.pages;
     const newPages = oldPages.slice(0);
     newPages[x] = newPage;
 
-    const oldKnots = this._knots;
+    const oldKnots = this.knots;
     let newKnots: K[];
     if (oldKnots.length > 0) {
       newKnots = oldKnots.slice(0);
@@ -175,15 +184,15 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
       newKnots = [];
     }
 
-    const newSize = this._size - oldPage.size + newPage.size;
-    return this.newNode(newPages, newKnots, void 0, newSize);
+    const newSize = this.size - oldPage.size + newPage.size;
+    return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
   private updatedPageSplit(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
-    const oldPages = this._pages;
+    const oldPages = this.pages;
     const newPages = new Array<BTreePage<K, V, U>>(oldPages.length + 1);
     for (let i = 0; i < x; i += 1) {
-      newPages[i] = oldPages[i];
+      newPages[i] = oldPages[i]!;
     }
 
     const newLeftPage = newPage.splitLeft(newPage.arity >>> 1);
@@ -191,71 +200,71 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     newPages[x] = newLeftPage;
     newPages[x + 1] = newRightPage;
     for (let i = x + 1; i < oldPages.length; i += 1) {
-      newPages[i + 1] = oldPages[i];
+      newPages[i + 1] = oldPages[i]!;
     }
 
-    const oldKnots = this._knots;
+    const oldKnots = this.knots;
     const newKnots = new Array<K>(oldPages.length);
     if (x > 0) {
       for (let i = 0; i < x - 1; i += 1) {
-        newKnots[i] = oldKnots[i];
+        newKnots[i] = oldKnots[i]!;
       }
       newKnots[x - 1] = newLeftPage.minKey();
       newKnots[x] = newRightPage.minKey();
       for (let i = x; i < oldKnots.length; i += 1) {
-        newKnots[i + 1] = oldKnots[i];
+        newKnots[i + 1] = oldKnots[i]!;
       }
     } else {
       newKnots[0] = newRightPage.minKey();
       for (let i = 0; i < oldKnots.length; i += 1) {
-        newKnots[i + 1] = oldKnots[i];
+        newKnots[i + 1] = oldKnots[i]!;
       }
     }
 
-    const newSize = this._size - oldPage.size + newPage.size;
-    return this.newNode(newPages, newKnots, void 0, newSize);
+    const newSize = this.size - oldPage.size + newPage.size;
+    return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
   private updatedPageMerge(x: number, newPage: BTreeNode<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
-    const oldPages = this._pages;
-    const midPages = newPage._pages;
+    const oldPages = this.pages;
+    const midPages = newPage.pages;
     const newPages = new Array<BTreePage<K, V, U>>(oldPages.length + midPages.length - 1);
     for (let i = 0; i < x; i += 1) {
-      newPages[i] = oldPages[i];
+      newPages[i] = oldPages[i]!;
     }
     for (let i = 0; i < midPages.length; i += 1) {
-      newPages[i + x] = midPages[i];
+      newPages[i + x] = midPages[i]!;
     }
     for (let i = x + 1; i < oldPages.length; i += 1) {
-      newPages[i + midPages.length - 1] = oldPages[i];
+      newPages[i + midPages.length - 1] = oldPages[i]!;
     }
 
-    const oldKnots = this._knots;
-    const midKnots = newPage._knots;
+    const oldKnots = this.knots;
+    const midKnots = newPage.knots;
     const newKnots = new Array<K>(newPages.length - 1);
     if (x > 0) {
       for (let i = 0; i < x - 1; i += 1) {
-        newKnots[i] = oldKnots[i];
+        newKnots[i] = oldKnots[i]!;
       }
-      newKnots[x - 1] = midPages[0].minKey();
+      newKnots[x - 1] = midPages[0]!.minKey();
       for (let i = 0; i < midKnots.length; i += 1) {
-        newKnots[i + x] = midKnots[i];
+        newKnots[i + x] = midKnots[i]!;
       }
       for (let i = x; i < oldKnots.length; i += 1) {
-        newKnots[i + midKnots.length] = oldKnots[i];
+        newKnots[i + midKnots.length] = oldKnots[i]!;
       }
     } else {
       for (let i = 0; i < midKnots.length; i += 1) {
-        newKnots[i] = midKnots[i];
+        newKnots[i] = midKnots[i]!;
       }
-      newKnots[midKnots.length] = oldPages[1].minKey();
+      newKnots[midKnots.length] = oldPages[1]!.minKey();
       for (let i = 1; i < oldKnots.length; i += 1) {
-        newKnots[i + midKnots.length] = oldKnots[i];
+        newKnots[i + midKnots.length] = oldKnots[i]!;
       }
     }
 
-    const newSize = this._size - oldPage.size + newPage.size;
-    return this.newNode(newPages, newKnots, void 0, newSize);
+    const newSize = this.size - oldPage.size + newPage.size;
+    return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
   removed(key: K, tree: BTreeContext<K, V>): BTreePage<K, V, U> {
@@ -265,7 +274,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     } else {
       x = -(x + 1);
     }
-    const oldPage = this._pages[x];
+    const oldPage = this.pages[x]!;
     const newPage = oldPage.removed(key, tree);
     if (oldPage !== newPage) {
       return this.replacedPage(x, newPage, oldPage, tree);
@@ -282,13 +291,13 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
       } else {
         return this.updatedPage(x, newPage, oldPage);
       }
-    } else if (this._pages.length > 2) {
+    } else if (this.pages.length > 2) {
       return this.removedPage(x, newPage, oldPage);
-    } else if (this._pages.length > 1) {
+    } else if (this.pages.length > 1) {
       if (x === 0) {
-        return this._pages[1];
+        return this.pages[1]!;
       } else {
-        return this._pages[0];
+        return this.pages[0]!;
       }
     } else {
       return BTreePage.empty();
@@ -296,42 +305,42 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   private removedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
-    const oldPages = this._pages;
+    const oldPages = this.pages;
     const newPages = new Array<BTreePage<K, V, U>>(oldPages.length - 1);
     for (let i = 0; i < x; i += 1) {
-      newPages[i] = oldPages[i];
+      newPages[i] = oldPages[i]!;
     }
     for (let i = x + 1; i < oldPages.length; i += 1) {
-      newPages[i - 1] = oldPages[i];
+      newPages[i - 1] = oldPages[i]!;
     }
 
-    const oldKnots = this._knots;
+    const oldKnots = this.knots;
     const newKnots = new Array<K>(oldKnots.length - 1);
     if (x > 0) {
       for (let i = 0; i < x - 1; i += 1) {
-        newKnots[i] = oldKnots[i];
+        newKnots[i] = oldKnots[i]!;
       }
       for (let i = x; i < oldKnots.length; i += 1) {
-        newKnots[i - 1] = oldKnots[i];
+        newKnots[i - 1] = oldKnots[i]!;
       }
     } else {
       for (let i = 1; i < oldKnots.length; i += 1) {
-        newKnots[i - 1] = oldKnots[i];
+        newKnots[i - 1] = oldKnots[i]!;
       }
     }
 
-    const newSize = this._size - oldPage.size;
-    return this.newNode(newPages, newKnots, void 0, newSize);
+    const newSize = this.size - oldPage.size;
+    return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
   drop(lower: number, tree: BTreeContext<K, V>): BTreePage<K, V, U> {
     if (lower > 0) {
-      let newSize = this._size;
+      let newSize = this.size;
       if (lower < newSize) {
-        const oldPages = this._pages;
+        const oldPages = this.pages;
         let x = 0;
         while (x < oldPages.length) {
-          const size = oldPages[x].size;
+          const size = oldPages[x]!.size;
           if (size <= lower) {
             newSize -= size;
             lower -= size;
@@ -346,25 +355,25 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
           if (x > 0) {
             const newPages = new Array<BTreePage<K, V, U>>(newArity);
             for (let i = 0; i < newArity; i += 1) {
-              newPages[i] = oldPages[i + x];
+              newPages[i] = oldPages[i + x]!;
             }
             const newKnots = new Array<K>(newArity - 1);
             for (let i = 0; i < newKnots.length; i += 1) {
-              newKnots[i] = this._knots[i + x];
+              newKnots[i] = this.knots[i + x]!;
             }
-            newNode = this.newNode(newPages, newKnots, void 0, newSize);
+            newNode = new BTreeNode(newPages, newKnots, void 0, newSize);
           } else {
             newNode = this;
           }
           if (lower > 0) {
-            const oldPage = oldPages[x];
+            const oldPage = oldPages[x]!;
             const newPage = oldPage.drop(lower, tree);
             return newNode.replacedPage(0, newPage, oldPage, tree);
           } else {
             return newNode;
           }
         } else {
-          return oldPages[x].drop(lower, tree);
+          return oldPages[x]!.drop(lower, tree);
         }
       } else {
         return BTreePage.empty();
@@ -375,13 +384,13 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   take(upper: number, tree: BTreeContext<K, V>): BTreePage<K, V, U> {
-    if (upper < this._size) {
+    if (upper < this.size) {
       if (upper > 0) {
-        const oldPages = this._pages;
+        const oldPages = this.pages;
         let x = 0;
         let newSize = 0;
         while (x < oldPages.length && upper > 0) {
-          const size = oldPages[x].size;
+          const size = oldPages[x]!.size;
           newSize += size;
           x += 1;
           if (size <= upper) {
@@ -396,27 +405,27 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
           if (x < oldPages.length) {
             const newPages = new Array<BTreePage<K, V, U>>(newArity);
             for (let i = 0; i < newArity; i += 1) {
-              newPages[i] = oldPages[i];
+              newPages[i] = oldPages[i]!;
             }
             const newKnots = new Array<K>(newArity - 1);
             for (let i = 0; i < newKnots.length; i += 1) {
-              newKnots[i] = this._knots[i];
+              newKnots[i] = this.knots[i]!;
             }
-            newNode = this.newNode(newPages, newKnots, void 0, newSize);
+            newNode = new BTreeNode(newPages, newKnots, void 0, newSize);
           } else {
             newNode = this;
           }
           if (upper > 0) {
-            const oldPage = oldPages[x - 1];
+            const oldPage = oldPages[x - 1]!;
             const newPage = oldPage.take(upper, tree);
             return newNode.replacedPage(x - 1, newPage, oldPage, tree);
           } else {
             return newNode;
           }
         } else if (upper > 0) {
-          return oldPages[0].take(upper, tree);
+          return oldPages[0]!.take(upper, tree);
         } else {
-          return oldPages[0];
+          return oldPages[0]!;
         }
       } else {
         return BTreePage.empty();
@@ -427,8 +436,8 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   balanced(tree: BTreeContext<K, V>): BTreeNode<K, V, U> {
-    if (this._pages.length > 1 && tree.pageShouldSplit(this)) {
-      const x = this._knots.length >>> 1;
+    if (this.pages.length > 1 && tree.pageShouldSplit(this)) {
+      const x = this.knots.length >>> 1;
       return this.split(x);
     } else {
       return this;
@@ -445,67 +454,67 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     const newKnots = new Array<K>(1);
     newKnots[0] = newRightPage.minKey();
 
-    return this.newNode(newPages, newKnots, void 0, this._size);
+    return new BTreeNode(newPages, newKnots, void 0, this.size);
   }
 
   splitLeft(x: number): BTreeNode<K, V, U> {
-    const oldPages = this._pages;
+    const oldPages = this.pages;
     const newPages = new Array<BTreePage<K, V, U>>(x + 1);
     for (let i = 0; i < x + 1; i += 1) {
-      newPages[i] = oldPages[i];
+      newPages[i] = oldPages[i]!;
     }
 
-    const oldKnots = this._knots;
+    const oldKnots = this.knots;
     const newKnots = new Array<K>(x);
     for (let i = 0; i < x; i += 1) {
-      newKnots[i] = oldKnots[i];
+      newKnots[i] = oldKnots[i]!;
     }
 
     let newSize = 0;
     for (let i = 0; i <= x; i += 1) {
-      newSize += newPages[i].size;
+      newSize += newPages[i]!.size;
     }
 
-    return this.newNode(newPages, newKnots, void 0, newSize);
+    return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
   splitRight(x: number): BTreeNode<K, V, U> {
-    const oldPages = this._pages;
+    const oldPages = this.pages;
     const newArity = oldPages.length - (x + 1);
     const newPages = new Array<BTreePage<K, V, U>>(newArity);
     for (let i = 0; i < newArity; i += 1) {
-      newPages[i] = oldPages[i + (x + 1)];
+      newPages[i] = oldPages[i + (x + 1)]!;
     }
 
-    const oldKnots = this._knots;
+    const oldKnots = this.knots;
     const newKnots = new Array<K>(newArity - 1);
     for (let i = 0; i < newKnots.length; i += 1) {
-      newKnots[i] = oldKnots[i + (x + 1)];
+      newKnots[i] = oldKnots[i + (x + 1)]!;
     }
 
     let newSize = 0;
     for (let i = 0; i < newArity; i += 1) {
-      newSize += newPages[i].size;
+      newSize += newPages[i]!.size;
     }
 
-    return this.newNode(newPages, newKnots, void 0, newSize);
+    return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
   reduced(identity: U, accumulator: (result: U, element: V) => U,
           combiner: (result: U, result2: U) => U): BTreeNode<K, V, U> {
-    if (this._fold === void 0) {
-      const oldPages = this._pages;
+    if (this.fold === void 0) {
+      const oldPages = this.pages;
       const n = oldPages.length;
       const newPages = new Array<BTreePage<K, V, U>>(n);
       for (let i = 0; i < n; i += 1) {
-        newPages[i] = oldPages[i].reduced(identity, accumulator, combiner);
+        newPages[i] = oldPages[i]!.reduced(identity, accumulator, combiner);
       }
       // assert n > 0;
-      let fold: U = newPages[0].fold()!;
+      let fold: U = newPages[0]!.fold!;
       for (let i = 1; i < n; i += 1) {
-        fold = combiner(fold, newPages[i].fold()!);
+        fold = combiner(fold, newPages[i]!.fold!);
       }
-      return this.newNode(newPages, this._knots, fold, this._size);
+      return new BTreeNode(newPages, this.knots, fold, this.size);
     } else {
       return this;
     }
@@ -513,9 +522,9 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
 
   forEach<T, S>(callback: (this: S, key: K, value: V) => T | void,
                 thisArg: S): T | undefined {
-    const pages = this._pages;
+    const pages = this.pages;
     for (let i = 0, n = pages.length; i < n; i += 1) {
-      const result = pages[i].forEach(callback, thisArg);
+      const result = pages[i]!.forEach(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
@@ -525,9 +534,9 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
 
   forEachKey<T, S>(callback: (this: S, key: K) => T | void,
                    thisArg: S): T | undefined {
-    const pages = this._pages;
+    const pages = this.pages;
     for (let i = 0, n = pages.length; i < n; i += 1) {
-      const result = pages[i].forEachKey(callback, thisArg);
+      const result = pages[i]!.forEachKey(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
@@ -537,9 +546,9 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
 
   forEachValue<T, S>(callback: (this: S, value: V) => T | void,
                      thisArg: S): T | undefined {
-    const pages = this._pages;
+    const pages = this.pages;
     for (let i = 0, n = pages.length; i < n; i += 1) {
-      const result = pages[i].forEachValue(callback, thisArg);
+      const result = pages[i]!.forEachValue(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
@@ -548,19 +557,19 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   entries(): Cursor<[K, V]> {
-    return new BTree.NodeCursor(this._pages);
+    return new BTreeNodeCursor(this.pages);
   }
 
   reverseEntries(): Cursor<[K, V]> {
-    return new BTree.NodeCursor(this._pages, this._size, this._pages.length);
+    return new BTreeNodeCursor(this.pages, this.size, this.pages.length);
   }
 
   private lookup(key: K, tree: BTreeContext<K, V>): number {
     let lo = 0;
-    let hi = this._knots.length - 1;
+    let hi = this.knots.length - 1;
     while (lo <= hi) {
       const mid = (lo + hi) >>> 1;
-      const order = tree.compare(key, this._knots[mid]);
+      const order = tree.compare(key, this.knots[mid]!);
       if (order > 0) {
         lo = mid + 1;
       } else if (order < 0) {
@@ -571,9 +580,4 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
     return -(lo + 1);
   }
-
-  protected newNode(pages: BTreePage<K, V, U>[], knots: K[], fold: U | undefined, size: number): BTreeNode<K, V, U> {
-    return new BTreeNode(pages, knots, fold, size);
-  }
 }
-BTree.Node = BTreeNode;

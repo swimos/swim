@@ -19,8 +19,9 @@ import {AbstractMapInletMapOutlet} from "../AbstractMapInletMapOutlet";
 
 export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapOutlet<K, K, V, V, I, Map<K, V>> {
   has(key: K): boolean {
-    if (this._input !== null) {
-      const value = this._input.get(key);
+    const input = this.input;
+    if (input !== null) {
+      const value = input.get(key);
       return value !== void 0 && this.evaluate(key, value);
     }
     return false;
@@ -36,7 +37,7 @@ export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
         const next = keys.next();
         if (!next.done) {
           const key = next.value!;
-          const value = this._input!.get(key);
+          const value = this.input!.get(key);
           if (value !== void 0 && this.evaluate(key, value)) {
             output.set(key, value);
           }
@@ -46,8 +47,9 @@ export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
       } while (true);
       return output;
     } else {
-      if (this._input !== null) {
-        const value = this._input.get(key);
+      const input = this.input;
+      if (input !== null) {
+        const value = input.get(key);
         if (value !== void 0 && this.evaluate(key, value)) {
           return value;
         }
@@ -57,8 +59,9 @@ export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
   }
 
   keyIterator(): Iterator<K> {
-    if (this._input !== null) {
-      return this._input.keyIterator(); // TODO: filter keys
+    const input = this.input;
+    if (input !== null) {
+      return input.keyIterator(); // TODO: filter keys
     } else {
       return Cursor.empty();
     }
@@ -74,8 +77,9 @@ export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
 
   protected willRecohereInputKey(key: K, effect: KeyEffect, version: number): KeyEffect {
     if (effect === KeyEffect.Update) {
-      if (this._input !== null) {
-        const value = this._input.get(key);
+      const input = this.input;
+      if (input !== null) {
+        const value = input.get(key);
         if (value === void 0 || !this.evaluate(key, value)) {
           return KeyEffect.Remove;
         }

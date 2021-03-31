@@ -12,114 +12,136 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
+import type {Interpolator} from "@swim/mapping";
 import {Item} from "../Item";
-import {Value} from "../Value";
-import {Operator} from "../Operator";
-import {AnyInterpreter, Interpreter} from "../Interpreter";
+import type {Value} from "../Value";
+import {Operator} from "./Operator";
+import {InvokeOperatorInterpolator} from "../"; // forward import
+import {Func} from "../"; // forward import
+import {AnyInterpreter, Interpreter} from "../"; // forward import
 
 export class InvokeOperator extends Operator {
-  /** @hidden */
-  readonly _func: Value;
-  /** @hidden */
-  readonly _args: Value;
-  /** @hidden */
-  _state?: unknown;
-
   constructor(func: Value, args: Value) {
     super();
-    this._func = func;
-    this._args = args.commit();
+    Object.defineProperty(this, "func", {
+      value: func,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "args", {
+      value: args.commit(),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "state", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  func(): Value {
-    return this._func;
-  }
+  declare readonly func: Value;
 
-  args(): Value {
-    return this._args;
-  }
+  declare readonly args: Value;
 
-  state(): unknown {
-    return this._state;
-  }
+  declare readonly state: unknown;
 
-  setState(state: unknown) {
-    this._state = state;
+  setState(state: unknown): void {
+    Object.defineProperty(this, "state", {
+      value: state,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   isConstant(): boolean {
-    return this._func.isConstant() && this._args.isConstant();
+    return this.func.isConstant() && this.args.isConstant();
   }
 
-  precedence(): number {
+  get precedence(): number {
     return 11;
   }
 
   evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const func = this._func.evaluate(interpreter);
-    if (func instanceof Item.Func) {
-      return func.invoke(this._args, interpreter, this);
+    const func = this.func.evaluate(interpreter);
+    if (func instanceof Func) {
+      return func.invoke(this.args, interpreter, this);
     }
     return Item.absent();
   }
 
   substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const func = this._func.evaluate(interpreter);
-    if (func instanceof Item.Func) {
-      const result = func.expand(this._args, interpreter, this);
+    const func = this.func.evaluate(interpreter);
+    if (func instanceof Func) {
+      const result = func.expand(this.args, interpreter, this);
       if (result !== void 0) {
         return result;
       }
     }
-    const args = this._args.substitute(interpreter).toValue();
-    return new InvokeOperator(this._func, args);
+    const args = this.args.substitute(interpreter).toValue();
+    return new InvokeOperator(this.func, args);
   }
 
-  typeOrder(): number {
+  interpolateTo(that: InvokeOperator): Interpolator<InvokeOperator>;
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    if (that instanceof InvokeOperator) {
+      return InvokeOperatorInterpolator(this, that);
+    } else {
+      return super.interpolateTo(that);
+    }
+  }
+
+  get typeOrder(): number {
     return 41;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof InvokeOperator) {
-      let order = this._func.compareTo(that._func);
+      let order = this.func.compareTo(that.func);
       if (order === 0) {
-        order = this._args.compareTo(that._args);
+        order = this.args.compareTo(that.args);
       }
       return order;
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof InvokeOperator) {
+      return this.func.equals(that.func)
+          && this.args.equivalentTo(that.args, epsilon);
+    }
+    return false;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof InvokeOperator) {
-      return this._func.equals(that._func) && this._args.equals(that._args);
+      return this.func.equals(that.func) && this.args.equals(that.args);
     }
     return false;
   }
 
   hashCode(): number {
-    if (InvokeOperator._hashSeed === void 0) {
-      InvokeOperator._hashSeed = Murmur3.seed(InvokeOperator);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(InvokeOperator._hashSeed,
-        this._func.hashCode()), this._args.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(InvokeOperator),
+        this.func.hashCode()), this.args.hashCode()));
   }
 
   debug(output: Output): void {
-    output.debug(this._func).write(46/*'.'*/).write("invoke").write(40/*'('*/)
-        .debug(this._args).write(41/*')'*/);
+    output.debug(this.func).write(46/*'.'*/).write("invoke").write(40/*'('*/)
+        .debug(this.args).write(41/*')'*/);
   }
 
   clone(): InvokeOperator {
-    return new InvokeOperator(this._func.clone(), this._args.clone());
+    return new InvokeOperator(this.func.clone(), this.args.clone());
   }
-
-  private static _hashSeed?: number;
 }
-Item.InvokeOperator = InvokeOperator;

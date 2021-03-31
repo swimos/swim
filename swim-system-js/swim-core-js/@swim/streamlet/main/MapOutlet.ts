@@ -12,22 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Iterator, Map} from "@swim/util";
+import type {Iterator, Map} from "@swim/util";
 import {Outlet} from "./Outlet";
-import {KeyEffect} from "./KeyEffect";
-import {FilterFieldsFunction} from "./function";
-import {MapValueFunction, MapFieldValuesFunction} from "./function";
-import {WatchValueFunction, WatchFieldsFunction} from "./function";
-import {MemoizeMapCombinator} from "./combinator/MemoizeMapCombinator";
-import {FilterFieldsCombinator} from "./combinator/FilterFieldsCombinator";
-import {MapFieldValuesCombinator} from "./combinator/MapFieldValuesCombinator";
-import {ReduceFieldsCombinator} from "./combinator/ReduceFieldsCombinator";
-import {WatchFieldsCombinator} from "./combinator/WatchFieldsCombinator";
+import type {KeyEffect} from "./KeyEffect";
+import type {MapOutletCombinators} from "./MapOutletCombinators";
+import type {FilterFieldsFunction} from "./function";
+import type {MapValueFunction, MapFieldValuesFunction} from "./function";
+import type {WatchValueFunction, WatchFieldsFunction} from "./function";
 
 /**
  * Output connector from a [[Streamlet]] for a key-value map state.
  */
-export interface MapOutlet<K, V, O> extends Outlet<O> {
+export interface MapOutlet<K, V, O> extends Outlet<O>, MapOutletCombinators<K, V, O> {
   /**
    * Returns `true` if the current state of this `MapOutlet` contains the given
    * `key`; otherwise returns `false`.
@@ -88,27 +84,16 @@ export interface MapOutlet<K, V, O> extends Outlet<O> {
   watch(func: WatchFieldsFunction<K, V>): this;
 }
 
-/** @hidden */
-export const MapOutlet = {
-  is<K, V, I>(object: unknown): object is MapOutlet<K, V, I> {
-    if (typeof object === "object" && object !== null) {
-      const outlet = object as MapOutlet<K, V, I>;
-      return Outlet.is(outlet)
-          && typeof outlet.keyIterator === "function"
-          && typeof outlet.outlet === "function";
-    }
-    return false;
-  },
+export const MapOutlet = {} as {
+  is<K, V, I>(object: unknown): object is MapOutlet<K, V, I>;
+};
 
-  // Forward type declarations
-  /** @hidden */
-  MemoizeMapCombinator: void 0 as unknown as typeof MemoizeMapCombinator, // defined by MemoizeMapCombinator
-  /** @hidden */
-  FilterFieldsCombinator: void 0 as unknown as typeof FilterFieldsCombinator, // defined by FilterFieldsCombinator
-  /** @hidden */
-  MapFieldValuesCombinator: void 0 as unknown as typeof MapFieldValuesCombinator, // defined by MapFieldValuesCombinator
-  /** @hidden */
-  ReduceFieldsCombinator: void 0 as unknown as typeof ReduceFieldsCombinator, // defined by ReduceFieldsCombinator
-  /** @hidden */
-  WatchFieldsCombinator: void 0 as unknown as typeof WatchFieldsCombinator, // defined by WatchFieldsCombinator
+MapOutlet.is = function <K, V, I>(object: unknown): object is MapOutlet<K, V, I> {
+  if (typeof object === "object" && object !== null) {
+    const outlet = object as MapOutlet<K, V, I>;
+    return Outlet.is(outlet)
+        && typeof outlet.keyIterator === "function"
+        && typeof outlet.outlet === "function";
+  }
+  return false;
 };

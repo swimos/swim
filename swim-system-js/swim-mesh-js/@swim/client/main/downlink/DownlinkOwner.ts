@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Downlink} from "./Downlink";
+import type {Downlink} from "./Downlink";
 
 /** @hidden */
 export interface DownlinkOwner {

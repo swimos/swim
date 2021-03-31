@@ -25,30 +25,30 @@ export class UnlinkedResponseSpec extends Spec {
   @Test
   parseUnlinkedWithNamedHeaders(exam: WarpExam): void {
     exam.parses("@unlinked(node: node_uri, lane: lane_uri)",
-                UnlinkedResponse.of("node_uri", "lane_uri"));
+                UnlinkedResponse.create("node_uri", "lane_uri"));
   }
 
   @Test
   parseUnlinkedWithPositionalHeaders(exam: WarpExam): void {
     exam.parses("@unlinked(node_uri, lane_uri)",
-                UnlinkedResponse.of("node_uri", "lane_uri"));
+                UnlinkedResponse.create("node_uri", "lane_uri"));
   }
 
   @Test
   parseUnlinkedWithBody(exam: WarpExam): void {
     exam.parses("@unlinked(node_uri, lane_uri)@test",
-                UnlinkedResponse.of("node_uri", "lane_uri", Record.of(Attr.of("test"))));
+                UnlinkedResponse.create("node_uri", "lane_uri", Record.of(Attr.of("test"))));
   }
 
   @Test
   writeUnlinked(exam: WarpExam): void {
-    exam.writes(UnlinkedResponse.of("node_uri", "lane_uri"),
+    exam.writes(UnlinkedResponse.create("node_uri", "lane_uri"),
                 "@unlinked(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   writeUnlinkedWithBody(exam: WarpExam): void {
-    exam.writes(UnlinkedResponse.of("node_uri", "lane_uri", Record.of(Attr.of("test"))),
+    exam.writes(UnlinkedResponse.create("node_uri", "lane_uri", Record.of(Attr.of("test"))),
                 "@unlinked(node:node_uri,lane:lane_uri)@test");
   }
 }

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyValue} from "@swim/structure";
-import {AnyUri} from "@swim/uri";
-import {DownlinkContext} from "../downlink/DownlinkContext";
-import {BaseRef} from "./BaseRef";
+import type {AnyValue} from "@swim/structure";
+import type {AnyUri} from "@swim/uri";
+import type {DownlinkContext} from "../downlink/DownlinkContext";
+import type {BaseRef} from "./BaseRef";
 
 /** @hidden */
 export interface RefContext extends DownlinkContext {

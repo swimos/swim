@@ -12,71 +12,84 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor} from "@swim/util";
+import type {Cursor} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {AnyItem, Item, Field, Slot, AnyValue, Value, Record, AnyText, Text, AnyNum, MathModule} from "@swim/structure";
 import {KeyEffect, MapOutlet} from "@swim/streamlet";
-import {RecordOutlet} from "./RecordOutlet";
 import {RecordStreamlet} from "./RecordStreamlet";
 import {AbstractRecordOutlet} from "./AbstractRecordOutlet";
 import {RecordFieldUpdater} from "./RecordFieldUpdater";
-import {Reifier} from "./Reifier";
+import {RecordScope} from "./"; // forward import
+import {Reifier} from "./"; // forward import
+import {Dataflow} from "./"; // forward import
 
 export class RecordModel extends AbstractRecordOutlet {
-  /** @hidden */
-  protected _state: Record;
-  /** @hidden */
-  protected _fieldUpdaters: BTree<Value, RecordFieldUpdater>;
-
-  constructor(state: Record = Record.create()) {
+  constructor(state?: Record) {
     super();
-    this._state = state;
-    this._fieldUpdaters = new BTree();
+    if (state === void 0) {
+      state = Record.create();
+    }
+    Object.defineProperty(this, "state", {
+      value: state,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "fieldUpdaters", {
+      value: new BTree(),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
+  /** @hidden */
+  declare readonly state: Record;
+
+  /** @hidden */
+  declare readonly fieldUpdaters: BTree<Value, RecordFieldUpdater>;
+
   isEmpty(): boolean {
-    return this._state.isEmpty();
+    return this.state.isEmpty();
   }
 
   isArray(): boolean {
-    return this._state.isArray();
+    return this.state.isArray();
   }
 
   isObject(): boolean {
-    return this._state.isObject();
+    return this.state.isObject();
   }
 
   get length(): number {
-    return this._state.length;
+    return this.state.length;
   }
 
-  fieldCount(): number {
-    return this._state.fieldCount();
+  get fieldCount(): number {
+    return this.state.fieldCount;
   }
 
-  valueCount(): number {
-    return this._state.valueCount();
+  get valueCount(): number {
+    return this.state.valueCount;
   }
 
   has(key: AnyValue): boolean {
-    if (this._state.has(key)) {
+    if (this.state.has(key)) {
       return true;
     } else {
-      const scope = this.streamletScope();
+      const scope = this.streamletScope;
       return scope instanceof Record ? scope.has(key) : false;
     }
   }
 
   hasOwn(key: AnyValue): boolean {
-    return this._state.has(key);
+    return this.state.has(key);
   }
 
   indexOf(item: AnyItem, index?: number): number {
-    return this._state.indexOf(item, index);
+    return this.state.indexOf(item, index);
   }
 
   lastIndexOf(item: AnyItem, index: number = 0): number {
-    return this._state.lastIndexOf(item, index);
+    return this.state.lastIndexOf(item, index);
   }
 
   get(): Record;
@@ -86,9 +99,9 @@ export class RecordModel extends AbstractRecordOutlet {
       return this;
     } else {
       key = Value.fromAny(key);
-      let value = this._state.get(key);
+      let value = this.state.get(key);
       if (!value.isDefined()) {
-        const scope = this.streamletScope();
+        const scope = this.streamletScope;
         if (scope instanceof Record) {
           value = scope.get(key);
         }
@@ -99,9 +112,9 @@ export class RecordModel extends AbstractRecordOutlet {
 
   getAttr(key: AnyText): Value {
     key = Text.fromAny(key);
-    let value = this._state.getAttr(key);
+    let value = this.state.getAttr(key);
     if (!value.isDefined()) {
-      const scope = this.streamletScope();
+      const scope = this.streamletScope;
       if (scope instanceof Record) {
         value = scope.getAttr(key);
       }
@@ -111,9 +124,9 @@ export class RecordModel extends AbstractRecordOutlet {
 
   getSlot(key: AnyValue): Value {
     key = Value.fromAny(key);
-    let value = this._state.getSlot(key);
+    let value = this.state.getSlot(key);
     if (!value.isDefined()) {
-      const scope = this.streamletScope();
+      const scope = this.streamletScope;
       if (scope instanceof Record) {
         value = scope.getSlot(key);
       }
@@ -123,9 +136,9 @@ export class RecordModel extends AbstractRecordOutlet {
 
   getField(key: AnyValue): Field | undefined {
     key = Value.fromAny(key);
-    let field = this._state.getField(key);
+    let field = this.state.getField(key);
     if (field === void 0) {
-      const scope = this.streamletScope();
+      const scope = this.streamletScope;
       if (scope instanceof Record) {
         field = scope.getField(key);
       }
@@ -134,28 +147,32 @@ export class RecordModel extends AbstractRecordOutlet {
   }
 
   getItem(index: AnyNum): Item {
-    return this._state.getItem(index);
+    return this.state.getItem(index);
   }
 
   bindValue(key: Value, expr: Value): void {
     const fieldUpdater = new RecordFieldUpdater(this, key);
-    const valueInput = RecordOutlet.Dataflow.compile(expr, this);
+    const valueInput = Dataflow.compile(expr, this);
     fieldUpdater.bindInput(valueInput);
     // TODO: clean up existing field updater
-    this._fieldUpdaters = this._fieldUpdaters.updated(key, fieldUpdater);
+    Object.defineProperty(this, "fieldUpdaters", {
+      value: this.fieldUpdaters.updated(key, fieldUpdater),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   set(key: AnyValue, newValue: AnyValue): this {
     key = Value.fromAny(key);
-    if (!this._state.has(key)) {
-      const scope = this.streamletScope();
+    if (!this.state.has(key)) {
+      const scope = this.streamletScope;
       if (scope instanceof Record && scope.has(key)) {
         scope.set(key, newValue);
       } else {
-        this._state.set(key, newValue);
+        this.state.set(key, newValue);
       }
     } else {
-      this._state.set(key, newValue);
+      this.state.set(key, newValue);
     }
     this.decohereInputKey(key, KeyEffect.Update);
     return this;
@@ -163,15 +180,15 @@ export class RecordModel extends AbstractRecordOutlet {
 
   setAttr(key: AnyText, newValue: AnyValue): this {
     key = Text.fromAny(key);
-    if (!this._state.has(key)) {
-      const scope = this.streamletScope();
+    if (!this.state.has(key)) {
+      const scope = this.streamletScope;
       if (scope instanceof Record && scope.has(key)) {
         scope.setAttr(key, newValue);
       } else {
-        this._state.setAttr(key, newValue);
+        this.state.setAttr(key, newValue);
       }
     } else {
-      this._state.setAttr(key, newValue);
+      this.state.setAttr(key, newValue);
     }
     this.decohereInputKey(key, KeyEffect.Update);
     return this;
@@ -179,24 +196,24 @@ export class RecordModel extends AbstractRecordOutlet {
 
   setSlot(key: AnyValue, newValue: AnyValue): this {
     key = Value.fromAny(key);
-    if (!this._state.has(key)) {
-      const scope = this.streamletScope();
+    if (!this.state.has(key)) {
+      const scope = this.streamletScope;
       if (scope instanceof Record && scope.has(key)) {
         scope.setSlot(key, newValue);
       } else {
-        this._state.setSlot(key, newValue);
+        this.state.setSlot(key, newValue);
       }
     } else {
-      this._state.setSlot(key, newValue);
+      this.state.setSlot(key, newValue);
     }
     this.decohereInputKey(key, KeyEffect.Update);
     return this;
   }
 
   setItem(index: number, newItem: AnyItem): this {
-    const oldItem = this._state.getItem(index);
+    const oldItem = this.state.getItem(index);
     newItem = Item.fromAny(newItem);
-    this._state.setItem(index, newItem);
+    this.state.setItem(index, newItem);
     if (oldItem instanceof Field && newItem instanceof Field) {
       if (oldItem.key.equals(newItem.key)) {
         this.decohereInputKey(oldItem.key, KeyEffect.Update);
@@ -215,10 +232,10 @@ export class RecordModel extends AbstractRecordOutlet {
   }
 
   push(...newItems: AnyItem[]): number {
-    let i = this._state.length;
-    const n = this._state.push.apply(this._state, arguments);
+    let i = this.state.length;
+    const n = this.state.push(...newItems);
     while (i < n) {
-      const newItem = this._state.get(i);
+      const newItem = this.state.get(i);
       if (newItem instanceof Field) {
         this.decohereInputKey(newItem.key, KeyEffect.Update);
       }
@@ -228,13 +245,13 @@ export class RecordModel extends AbstractRecordOutlet {
   }
 
   splice(start: number, deleteCount: number = 0, ...newItems: AnyItem[]): Item[] {
-    const n = this._state.length;
+    const n = this.state.length;
     if (start < 0) {
       start = n + start;
     }
     start = Math.max(0, start);
     deleteCount = Math.max(0, deleteCount);
-    const deleted = this._state.splice.apply(this._state, arguments);
+    const deleted = this.state.splice(start, deleteCount, ...newItems);
     for (let i = 0; i < deleted.length; i += 1) {
       const oldItem = deleted[i];
       if (oldItem instanceof Field) {
@@ -242,7 +259,7 @@ export class RecordModel extends AbstractRecordOutlet {
       }
     }
     for (let i = start; i < start + newItems.length; i += 1) {
-      const newItem = this._state.get(i);
+      const newItem = this.state.get(i);
       if (newItem instanceof Field) {
         this.decohereInputKey(newItem.key, KeyEffect.Update);
       }
@@ -251,7 +268,7 @@ export class RecordModel extends AbstractRecordOutlet {
   }
 
   delete(key: AnyValue): Item {
-    const oldItem = this._state.delete(key);
+    const oldItem = this.state.delete(key);
     if (oldItem instanceof Field) {
       this.decohereInputKey(oldItem.key, KeyEffect.Remove);
     }
@@ -259,8 +276,8 @@ export class RecordModel extends AbstractRecordOutlet {
   }
 
   clear(): void {
-    const oldState = this._state.branch();
-    this._state.clear();
+    const oldState = this.state.branch();
+    this.state.clear();
     oldState.forEach(function (oldItem: Item): void {
       if (oldItem instanceof Field) {
         this.decohereInputKey(oldItem.key, KeyEffect.Remove);
@@ -268,9 +285,12 @@ export class RecordModel extends AbstractRecordOutlet {
     }, this);
   }
 
-  forEach<T, S = unknown>(callback: (this: S, item: Item, index: number) => T | void,
-                          thisArg?: S): T | undefined {
-    return this._state.forEach(callback, thisArg);
+  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                thisArg: S): T | undefined;
+  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
+                thisArg?: S): T | undefined {
+    return this.state.forEach(callback, thisArg);
   }
 
   keyIterator(): Cursor<Value> {
@@ -278,10 +298,14 @@ export class RecordModel extends AbstractRecordOutlet {
   }
 
   disconnectInputs(): void {
-    const fieldUpdaters = this._fieldUpdaters;
-    if (!fieldUpdaters.isEmpty()) {
-      this._fieldUpdaters = new BTree();
-      fieldUpdaters.forEach(function (key: Value, inlet: RecordFieldUpdater): void {
+    const oldFieldUpdaters = this.fieldUpdaters;
+    if (!oldFieldUpdaters.isEmpty()) {
+      Object.defineProperty(this, "fieldUpdaters", {
+        value: new BTree(),
+        enumerable: true,
+        configurable: true,
+      });
+      oldFieldUpdaters.forEach(function (key: Value, inlet: RecordFieldUpdater): void {
         inlet.disconnectInputs();
       }, this);
     }
@@ -309,28 +333,28 @@ export class RecordModel extends AbstractRecordOutlet {
     const value = field.value;
     if (value instanceof RecordStreamlet) {
       value.setStreamletScope(this);
-      this._state.push(field);
+      this.state.push(field);
     } else if (value instanceof Record) {
       // Add recursively materialized nested scope.
-      const child = new RecordOutlet.Scope(this);
+      const child = new RecordScope(this);
       child.materialize(value);
-      this._state.push(field.updatedValue(child));
+      this.state.push(field.updatedValue(child));
     } else {
-      this._state.push(field);
+      this.state.push(field);
     }
   }
 
   materializeValue(value: Value): void {
     if (value instanceof RecordStreamlet) {
       value.setStreamletScope(this);
-      this._state.push(value);
+      this.state.push(value);
     } else if (value instanceof Record) {
       // Add recursively materialized nested scope.
-      const child = new RecordOutlet.Scope(this);
+      const child = new RecordScope(this);
       child.materialize(value);
-      this._state.push(child);
+      this.state.push(child);
     } else {
-      this._state.push(value);
+      this.state.push(value);
     }
   }
 
@@ -361,7 +385,7 @@ export class RecordModel extends AbstractRecordOutlet {
         this.decohereInputKey(key, KeyEffect.Update);
       } else if (value instanceof Record) {
         // Recursively compile nested scope.
-        (this._state.getItem(index).toValue() as RecordModel).compile(value);
+        (this.state.getItem(index).toValue() as RecordModel).compile(value);
         // Decohere nested scope key.
         this.decohereInputKey(key, KeyEffect.Update);
       } else {
@@ -381,7 +405,7 @@ export class RecordModel extends AbstractRecordOutlet {
       value.compile();
     } else if (value instanceof Record) {
       // Recursively compile nested scope.
-      (this._state.getItem(index) as RecordModel).compile(value);
+      (this.state.getItem(index) as RecordModel).compile(value);
     } else if (!value.isConstant()) {
       // TODO: Bind dynamic item updater.
     } else {
@@ -399,7 +423,10 @@ export class RecordModel extends AbstractRecordOutlet {
   }
 
   reifyItem(item: Item, reifier: Reifier | null): Item {
-    const scope = this.streamletScope();
+    if (reifier !== null) {
+      item = reifier.reify(item);
+    }
+    const scope = this.streamletScope;
     if (scope instanceof RecordModel) {
       return scope.reifyItem(item, reifier);
     } else {
@@ -415,13 +442,12 @@ export class RecordModel extends AbstractRecordOutlet {
   }
 
   static of(...items: AnyItem[]): RecordModel {
-    return RecordModel.from(Record.of.apply(void 0, arguments));
+    return RecordModel.from(Record.of(...items));
   }
 
   static globalScope(): RecordModel {
     const model = new RecordModel();
-    model.materializeField(Slot.of("math", MathModule.scope().branch()));
+    model.materializeField(Slot.of("math", MathModule.scope.branch()));
     return model;
   }
 }
-RecordOutlet.Model = RecordModel;

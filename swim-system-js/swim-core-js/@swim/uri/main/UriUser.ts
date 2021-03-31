@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HashCode, Murmur3} from "@swim/util";
+import {HashCode, Lazy, Strings} from "@swim/util";
 import {Output, Format, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
 
@@ -20,63 +20,58 @@ export type AnyUriUser = UriUser | UriUserInit | string;
 
 export interface UriUserInit {
   username?: string;
-  password?: string | null;
+  password?: string;
 }
 
 export class UriUser implements HashCode, Debug, Display {
   /** @hidden */
-  readonly _username: string | null;
-  /** @hidden */
-  readonly _password: string | null;
-
-  /** @hidden */
-  constructor(username: string | null, password: string | null) {
-    this._username = username;
-    this._password = password;
+  constructor(username: string | undefined, password: string | undefined) {
+    Object.defineProperty(this, "username", {
+      value: username,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "password", {
+      value: password,
+      enumerable: true,
+    });
   }
 
   isDefined(): boolean {
-    return this._username !== null;
+    return this.username !== void 0;
   }
 
-  username(): string;
-  username(username: string): UriUser;
-  username(username?: string): string | UriUser {
-    if (username === void 0) {
-      return this._username || "";
+  declare readonly username: string | undefined;
+
+  withUsername(username: string | undefined): UriUser {
+    if (username !== this.username) {
+      return this.copy(username, this.password);
     } else {
-      if (username !== this._username) {
-        return this.copy(username, this._password);
-      } else {
-        return this;
-      }
+      return this;
     }
   }
 
-  password(): string | null;
-  password(password: string | null): UriUser;
-  password(password?: string | null): string | null | UriUser {
-    if (password === void 0) {
-      return this._password;
+  declare readonly password: string | undefined;
+
+  withPassword(password: string | undefined): UriUser {
+    if (password !== this.password) {
+      return this.copy(this.username, password);
     } else {
-      if (password !== this._password) {
-        return this.copy(this._username, password);
-      } else {
-        return this;
-      }
+      return this;
     }
   }
 
-  protected copy(username: string | null, password: string | null): UriUser {
-    return UriUser.from(username, password);
+  protected copy(username: string | undefined, password: string | undefined): UriUser {
+    return UriUser.create(username, password);
   }
 
   toAny(user?: {username?: string, password?: string}): {username?: string, password?: string} | undefined {
-    if (this._username !== null) {
-      user = user || {};
-      user.username = this._username;
-      if (this._password !== null) {
-        user.password = this._password;
+    if (this.username !== void 0) {
+      if (user === void 0) {
+        user = {};
+      }
+      user.username = this.username;
+      if (this.password !== void 0) {
+        user.password = this.password;
       }
     }
     return user;
@@ -86,34 +81,31 @@ export class UriUser implements HashCode, Debug, Display {
     if (this === that) {
       return true;
     } else if (that instanceof UriUser) {
-      return this._username === that._username && this._password === that._password;
+      return this.username === that.username && this.password === that.password;
     }
     return false;
   }
 
   hashCode(): number {
-    if (UriUser._hashSeed === void 0) {
-      UriUser._hashSeed = Murmur3.seed(UriUser);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(UriUser._hashSeed,
-        Murmur3.hash(this._username)), Murmur3.hash(this._password)));
+    return Strings.hash(this.toString());
   }
 
   debug(output: Output): void {
     output = output.write("UriUser").write(46/*'.'*/);
     if (this.isDefined()) {
-      output = output.write("parse").write(40/*'('*/).write(34/*'"'*/).display(this).write(34/*'"'*/).write(41/*')'*/);
+      output = output.write("parse").write(40/*'('*/).write(34/*'"'*/)
+          .display(this).write(34/*'"'*/).write(41/*')'*/);
     } else {
       output = output.write("undefined").write(40/*'('*/).write(41/*')'*/);
     }
   }
 
   display(output: Output): void {
-    if (this._username !== null) {
-      Uri.writeUser(this._username, output);
-      if (this._password !== null) {
+    if (this.username !== void 0) {
+      Uri.writeUser(this.username, output);
+      if (this.password !== void 0) {
         output = output.write(58/*':'*/);
-        Uri.writeUser(this._password, output);
+        Uri.writeUser(this.password, output);
       }
     }
   }
@@ -122,43 +114,38 @@ export class UriUser implements HashCode, Debug, Display {
     return Format.display(this);
   }
 
-  private static _hashSeed?: number;
-
-  private static _undefined?: UriUser;
-
+  @Lazy
   static undefined(): UriUser {
-    if (UriUser._undefined === void 0) {
-      UriUser._undefined = new UriUser(null, null);
-    }
-    return UriUser._undefined;
+    return new UriUser(void 0, void 0);
   }
 
-  static from(username: string | null, password: string | null = null): UriUser {
-    if (username !== null || password !== null) {
-      return new UriUser(username || "", password);
+  static create(username: string | undefined, password?: string | undefined): UriUser {
+    if (username !== void 0 || password !== void 0) {
+      return new UriUser(username, password);
     } else {
       return UriUser.undefined();
     }
   }
 
-  static fromAny(user: AnyUriUser | null | undefined): UriUser {
-    if (user === null || user === void 0) {
+  static fromInit(init: UriUserInit): UriUser {
+    return UriUser.create(init.username, init.password);
+  }
+
+  static fromAny(value: AnyUriUser | null | undefined): UriUser {
+    if (value === void 0 || value === null) {
       return UriUser.undefined();
-    } else if (user instanceof UriUser) {
-      return user;
-    } else if (typeof user === "object") {
-      const username = typeof user.username === "string" ? user.username : null;
-      const password = typeof user.password === "string" ? user.password : null;
-      return UriUser.from(username, password);
-    } else if (typeof user === "string") {
-      return UriUser.parse(user);
+    } else if (value instanceof UriUser) {
+      return value;
+    } else if (typeof value === "object") {
+      return UriUser.fromInit(value);
+    } else if (typeof value === "string") {
+      return UriUser.parse(value);
     } else {
-      throw new TypeError("" + user);
+      throw new TypeError("" + value);
     }
   }
 
-  static parse(string: string): UriUser {
-    return Uri.standardParser().parseUserString(string);
+  static parse(userPart: string): UriUser {
+    return Uri.standardParser.parseUserString(userPart);
   }
 }
-Uri.User = UriUser;

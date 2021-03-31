@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Outlet} from "./Outlet";
+import type {Outlet} from "./Outlet";
 import {AbstractInlet} from "./AbstractInlet";
 
 /**
@@ -21,23 +21,21 @@ import {AbstractInlet} from "./AbstractInlet";
  * `Inlet` recoheres.
  */
 export class OutletInlet<I> extends AbstractInlet<I> {
-  /** @hidden */
-  protected readonly _outlet: Outlet<unknown>;
-
   constructor(outlet: Outlet<unknown>) {
     super();
-    this._outlet = outlet;
+    Object.defineProperty(this, "outlet", {
+      value: outlet,
+      enumerable: true,
+    });
   }
 
-  outlet(): Outlet<unknown> {
-    return this._outlet;
-  }
+  declare readonly outlet: Outlet<unknown>;
 
   protected onDecohereOutput(): void {
-    this._outlet.decohereInput();
+    this.outlet.decohereInput();
   }
 
   protected onRecohereOutput(version: number): void {
-    this._outlet.recohereInput(version);
+    this.outlet.recohereInput(version);
   }
 }

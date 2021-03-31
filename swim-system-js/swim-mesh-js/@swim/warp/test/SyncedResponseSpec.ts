@@ -25,30 +25,30 @@ export class SyncedResponseSpec extends Spec {
   @Test
   parseSyncedWithNamedHeaders(exam: WarpExam): void {
     exam.parses("@synced(node: node_uri, lane: lane_uri)",
-                SyncedResponse.of("node_uri", "lane_uri"));
+                SyncedResponse.create("node_uri", "lane_uri"));
   }
 
   @Test
   parseSyncedWithPositionalHeaders(exam: WarpExam): void {
     exam.parses("@synced(node_uri, lane_uri)",
-                SyncedResponse.of("node_uri", "lane_uri"));
+                SyncedResponse.create("node_uri", "lane_uri"));
   }
 
   @Test
   parseSyncedWithBody(exam: WarpExam): void {
     exam.parses("@synced(node_uri, lane_uri)@test",
-                SyncedResponse.of("node_uri", "lane_uri", Record.of(Attr.of("test"))));
+                SyncedResponse.create("node_uri", "lane_uri", Record.of(Attr.of("test"))));
   }
 
   @Test
   writeSynced(exam: WarpExam): void {
-    exam.writes(SyncedResponse.of("node_uri", "lane_uri"),
+    exam.writes(SyncedResponse.create("node_uri", "lane_uri"),
                 "@synced(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   writeSyncedWithBody(exam: WarpExam): void {
-    exam.writes(SyncedResponse.of("node_uri", "lane_uri", Record.of(Attr.of("test"))),
+    exam.writes(SyncedResponse.create("node_uri", "lane_uri", Record.of(Attr.of("test"))),
                 "@synced(node:node_uri,lane:lane_uri)@test");
   }
 }

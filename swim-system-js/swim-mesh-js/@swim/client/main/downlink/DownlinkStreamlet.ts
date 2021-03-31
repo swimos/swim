@@ -12,23 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Map} from "@swim/util";
+import type {Map} from "@swim/util";
 import {Value, Form} from "@swim/structure";
 import {Outlet, Inoutlet, StreamletScope, Out, Inout} from "@swim/streamlet";
 import {AbstractRecordStreamlet, Reifier} from "@swim/dataflow";
-import {DownlinkType, Downlink} from "./Downlink";
+import type {DownlinkType, Downlink} from "./Downlink";
 import {ValueDownlink} from "./ValueDownlink";
-import {DownlinkRecord} from "./DownlinkRecord";
+import type {DownlinkRecord} from "./DownlinkRecord";
 import {MapDownlinkRecord} from "./MapDownlinkRecord";
 import {DownlinkReifier} from "./DownlinkReifier";
-import {WarpRef} from "../WarpRef";
+import type {WarpRef} from "../WarpRef";
 import {client} from "..";
 
 export class DownlinkStreamlet extends AbstractRecordStreamlet {
-  warp: WarpRef | undefined;
-  downlink: Downlink | undefined;
+  constructor(warp: WarpRef | null = null, scope?: StreamletScope<Value> | null) {
+    super(scope);
+    this.warp = warp;
+    this.downlink = null;
+    this.downlinkRecord = null;
+
+    this.inputHostUri = void 0;
+    this.inputNodeUri = void 0;
+    this.inputLaneUri = void 0;
+    this.inputPrio = void 0;
+    this.inputRate = void 0;
+    this.inputBody = void 0;
+    this.inputType = void 0;
+  }
+
+  warp: WarpRef | null;
+
+  downlink: Downlink | null;
+
   /** @hidden */
-  downlinkRecord: DownlinkRecord | undefined;
+  downlinkRecord: DownlinkRecord | null;
+
   /** @hidden */
   inputHostUri: string | undefined;
   /** @hidden */
@@ -43,11 +61,6 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
   inputBody: Value | undefined;
   /** @hidden */
   inputType: DownlinkType | undefined;
-
-  constructor(warp?: WarpRef, scope?: StreamletScope<Value> | null) {
-    super(scope);
-    this.warp = warp;
-  }
 
   @Inout
   hostUri: Inoutlet<Value> = this.inoutlet();
@@ -71,14 +84,14 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
   type: Inoutlet<Value> = this.inoutlet();
 
   @Out
-  state: Outlet<Value | Map<Value, Value>>;
+  state: Outlet<Value | Map<Value, Value>> = this.outlet();
 
   getOutput(outlet: Outlet<Value> | string): Value | undefined {
     outlet = this.outlet(outlet)!;
     if (outlet === this.state) {
       if (this.downlink instanceof ValueDownlink) {
         return this.downlink.get();
-      } else if (this.downlinkRecord !== void 0) {
+      } else if (this.downlinkRecord !== null) {
         return this.downlinkRecord;
       }
     }
@@ -97,10 +110,10 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
         || prio !== this.inputPrio || rate !== this.inputRate
         || (body === void 0 ? this.inputBody !== void 0 : !body.equals(this.inputBody))
         || type !== this.inputType) {
-      if (this.downlink !== void 0) {
+      if (this.downlink !== null) {
         this.downlink.close();
-        this.downlink = void 0;
-        this.downlinkRecord = void 0;
+        this.downlink = null;
+        this.downlinkRecord = null;
       }
       this.inputHostUri = hostUri;
       this.inputNodeUri = nodeUri;
@@ -109,7 +122,7 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
       this.inputRate = rate;
       this.inputBody = body;
       this.inputType = type;
-      const warp = this.warp || client;
+      const warp = this.warp ?? client;
       if (type === "map") {
         let downlink = warp.downlinkMap();
         if (hostUri !== void 0) {
@@ -162,7 +175,6 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
   }
 
   private static _reifier?: DownlinkReifier;
-
   static reifier(warp?: WarpRef): Reifier {
     if (warp === void 0) {
       if (DownlinkStreamlet._reifier === void 0) {

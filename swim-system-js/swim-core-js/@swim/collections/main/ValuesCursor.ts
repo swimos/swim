@@ -16,56 +16,60 @@ import {Cursor} from "@swim/util";
 
 /** @hidden */
 export class ValuesCursor<K, V> extends Cursor<V> {
-  private readonly _cursor: Cursor<[K, V]>;
+  /** @hidden */
+  declare readonly cursor: Cursor<[K, V]>;
 
   constructor(cursor: Cursor<[K, V]>) {
     super();
-    this._cursor = cursor;
+    Object.defineProperty(this, "cursor", {
+      value: cursor,
+      enumerable: true,
+    });
   }
 
   isEmpty(): boolean {
-    return this._cursor.isEmpty();
+    return this.cursor.isEmpty();
   }
 
   head(): V {
-    return this._cursor.head()[1];
+    return this.cursor.head()[1];
   }
 
   step(): void {
-    this._cursor.step();
+    this.cursor.step();
   }
 
   skip(count: number): void {
-    this._cursor.skip(count);
+    this.cursor.skip(count);
   }
 
   hasNext(): boolean {
-    return this._cursor.hasNext();
+    return this.cursor.hasNext();
   }
 
   nextIndex(): number {
-    return this._cursor.nextIndex();
+    return this.cursor.nextIndex();
   }
 
   next(): {value?: V, done: boolean} {
-    const {value, done} = this._cursor.next();
+    const {value, done} = this.cursor.next();
     return {value: value && value[1], done};
   }
 
   hasPrevious(): boolean {
-    return this._cursor.hasPrevious();
+    return this.cursor.hasPrevious();
   }
 
   previousIndex(): number {
-    return this._cursor.previousIndex();
+    return this.cursor.previousIndex();
   }
 
   previous(): {value?: V, done: boolean} {
-    const {value, done} = this._cursor.previous();
+    const {value, done} = this.cursor.previous();
     return {value: value && value[1], done};
   }
 
   delete(): void {
-    this._cursor.delete();
+    this.cursor.delete();
   }
 }

@@ -12,65 +12,98 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Iterator} from "@swim/util";
+import type {Iterator} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {KeyEffect} from "../KeyEffect";
-import {MapOutlet} from "../MapOutlet";
+import type {MapOutlet} from "../MapOutlet";
 import {AbstractMapInoutlet} from "../AbstractMapInoutlet";
 
 export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V, IO, IO> {
-  /** @hidden */
-  protected _state: IO | undefined;
-  /** @hidden */
-  protected _cache: BTree<K, V>;
-
   constructor() {
     super();
-    this._cache = new BTree();
+    Object.defineProperty(this, "state", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "cache", {
+      value: new BTree(),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
+  /** @hidden */
+  declare readonly state: IO | undefined;
+
+  /** @hidden */
+  declare readonly cache: BTree<K, V>;
+
   has(key: K): boolean {
-    return this._cache.has(key);
+    return this.cache.has(key);
   }
 
   get(): IO | undefined;
   get(key: K): V | undefined;
   get(key?: K): IO | V | undefined {
     if (key === void 0) {
-      if (this._state === void 0 && this._input !== null) {
-        this._state = this._input.get();
+      let state = this.state;
+      const input = this.input;
+      if (state === void 0 && input !== null) {
+        state = input.get();
+        Object.defineProperty(this, "state", {
+          value: state,
+          enumerable: true,
+          configurable: true,
+        });
       }
-      return this._state;
+      return state;
     } else {
-      return this._cache.get(key);
+      return this.cache.get(key);
     }
   }
 
   keyIterator(): Iterator<K> {
-    return this._cache.keys();
+    return this.cache.keys();
   }
 
   protected onRecohereKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
-      if (this._input !== null) {
-        const value = this._input.get(key);
+      const input = this.input;
+      if (input !== null) {
+        const value = input.get(key);
         if (value !== void 0) {
-          this._cache = this._cache.updated(key, value);
+          Object.defineProperty(this, "cache", {
+            value: this.cache.updated(key, value),
+            enumerable: true,
+            configurable: true,
+          });
         } else {
-          this._cache = this._cache.removed(key);
+          Object.defineProperty(this, "cache", {
+            value: this.cache.removed(key),
+            enumerable: true,
+            configurable: true,
+          });
         }
       }
     } else if (effect === KeyEffect.Remove) {
-      this._cache = this._cache.removed(key);
+      Object.defineProperty(this, "cache", {
+        value: this.cache.removed(key),
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 
   protected onRecohere(version: number): void {
-    this._state = void 0;
+    Object.defineProperty(this, "state", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   memoize(): MapOutlet<K, V, IO> {
     return this;
   }
 }
-MapOutlet.MemoizeMapCombinator = MemoizeMapCombinator;

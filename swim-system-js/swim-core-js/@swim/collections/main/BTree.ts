@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor, ReducedMap} from "@swim/util";
+import type {Cursor, ReducedMap} from "@swim/util";
 import {BTreeContext} from "./BTreeContext";
-import {BTreePage} from "./BTreePage";
-import {BTreeLeaf} from "./BTreeLeaf";
-import {BTreeNode} from "./BTreeNode";
-import {BTreeNodeCursor} from "./BTreeNodeCursor";
+import {BTreePage} from "./"; // forward import
 
-export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K, V> implements ReducedMap<K, V, U> {
+export class BTree<K = unknown, V = unknown, U = never> extends BTreeContext<K, V> implements ReducedMap<K, V, U> {
   root: BTreePage<K, V, U>;
 
-  constructor(root: BTreePage<K, V, U> = BTree.Page.empty()) {
+  constructor(root?: BTreePage<K, V, U>) {
     super();
+    if (root === void 0) {
+      root = BTreePage.empty();
+    }
     this.root = root;
   }
 
@@ -163,7 +163,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
       if (lower < this.root.size) {
         this.root = this.root.drop(lower, this);
       } else {
-        this.root = BTree.Page.empty();
+        this.root = BTreePage.empty();
       }
     }
     return this;
@@ -174,17 +174,17 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
       if (upper > 0) {
         this.root = this.root.take(upper, this);
       } else {
-        this.root = BTree.Page.empty();
+        this.root = BTreePage.empty();
       }
     }
     return this;
   }
 
   clear(): void {
-    this.root = BTree.Page.empty();
+    this.root = BTreePage.empty();
   }
 
-  updated(key: K, newValue: V): BTree<K, V> {
+  updated(key: K, newValue: V): BTree<K, V, U> {
     const oldRoot = this.root;
     let newRoot = oldRoot.updated(key, newValue, this);
     if (oldRoot !== newRoot) {
@@ -197,7 +197,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
     }
   }
 
-  removed(key: K): BTree<K, V> {
+  removed(key: K): BTree<K, V, U> {
     const oldRoot = this.root;
     const newRoot = oldRoot.removed(key, this);
     if (oldRoot !== newRoot) {
@@ -207,9 +207,9 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
     }
   }
 
-  cleared(): BTree<K, V> {
+  cleared(): BTree<K, V, U> {
     if (!this.root.isEmpty()) {
-      return this.copy(BTree.Page.empty());
+      return this.copy(BTreePage.empty());
     } else {
       return this;
     }
@@ -221,21 +221,30 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
     if (oldRoot !== newRoot) {
       this.root = newRoot;
     }
-    return newRoot.fold()!;
+    return newRoot.fold!;
   }
 
-  forEach<T, S = unknown>(callback: (this: S, key: K, value: V) => T | void,
-                          thisArg?: S): T | undefined {
+  forEach<T>(callback: (key: K, value: V) => T | void): T | undefined;
+  forEach<T, S>(callback: (this: S, key: K, value: V) => T | void,
+                thisArg: S): T | undefined;
+  forEach<T, S>(callback: (this: S | undefined, key: K, value: V) => T | void,
+                thisArg?: S): T | undefined {
     return this.root.forEach(callback, thisArg);
   }
 
-  forEachKey<T, S = unknown>(callback: (this: S, key: K) => T | void,
-                             thisArg?: S): T | undefined {
+  forEachKey<T>(callback: (key: K) => T | void): T | undefined;
+  forEachKey<T, S>(callback: (this: S, key: K) => T | void,
+                   thisArg: S): T | undefined;
+  forEachKey<T, S>(callback: (this: S | undefined, key: K) => T | void,
+                   thisArg?: S): T | undefined {
     return this.root.forEachKey(callback, thisArg);
   }
 
-  forEachValue<T, S = unknown>(callback: (this: S, value: V) => T | void,
-                               thisArg?: S): T | undefined {
+  forEachValue<T>(callback: (value: V) => T | void): T | undefined;
+  forEachValue<T, S>(callback: (this: S, value: V) => T | void,
+                     thisArg: S): T | undefined;
+  forEachValue<T, S>(callback: (this: S | undefined, value: V) => T | void,
+                     thisArg?: S): T | undefined {
     return this.root.forEachValue(callback, thisArg);
   }
 
@@ -263,7 +272,7 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
     return this.root.reverseEntries();
   }
 
-  clone(): BTree<K, V> {
+  clone(): BTree<K, V, U> {
     return this.copy(this.root);
   }
 
@@ -277,14 +286,4 @@ export class BTree<K = unknown, V = unknown, U = unknown> extends BTreeContext<K
     }
     return tree;
   }
-
-  // Forward type declarations
-  /** @hidden */
-  static Page: typeof BTreePage; // defined by BTreePage
-  /** @hidden */
-  static Leaf: typeof BTreeLeaf; // defined by BTreeLeaf
-  /** @hidden */
-  static Node: typeof BTreeNode; // defined by BTreeNode
-  /** @hidden */
-  static NodeCursor: typeof BTreeNodeCursor; // defined by BTreeNodeCursor
 }

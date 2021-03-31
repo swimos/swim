@@ -12,72 +12,72 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
-import {Item} from "../Item";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
+import type {Item} from "../Item";
 import {UnaryOperator} from "./UnaryOperator";
-import {AnyInterpreter, Interpreter} from "../Interpreter";
+import {AnyInterpreter, Interpreter} from "../interpreter/Interpreter";
 
 export class NotOperator extends UnaryOperator {
   constructor(operand: Item) {
     super(operand);
   }
 
-  operator(): string {
+  get operator(): string {
     return "!";
   }
 
-  precedence(): number {
+  get precedence(): number {
     return 10;
   }
 
   evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const argument = this._operand.evaluate(interpreter);
+    const argument = this.operand.evaluate(interpreter);
     return argument.not();
   }
 
   substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const argument = this._operand.substitute(interpreter);
+    const argument = this.operand.substitute(interpreter);
     return argument.not();
   }
 
-  typeOrder(): number {
+  get typeOrder(): number {
     return 37;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
-    if (that instanceof NotOperator) {
-      return this._operand.compareTo(that._operand);
+  compareTo(that: Item): number {
+    return Numbers.compare(this.typeOrder, that.typeOrder);
+  }
+
+  equivalentTo(that: Item, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof NotOperator) {
+      return this.operand.equivalentTo(that.operand, epsilon);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return false;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof NotOperator) {
-      return this._operand.equals(that._operand);
+      return this.operand.equals(that.operand);
     }
     return false;
   }
 
   hashCode(): number {
-    if (NotOperator._hashSeed === void 0) {
-      NotOperator._hashSeed = Murmur3.seed(NotOperator);
-    }
-    return Murmur3.mash(Murmur3.mix(NotOperator._hashSeed, this._operand.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Constructors.hash(NotOperator), this.operand.hashCode()));
   }
 
   debug(output: Output): void {
-    output.debug(this._operand).write(46/*'.'*/).write("not").write(40/*'('*/).write(41/*')'*/);
+    output.debug(this.operand).write(46/*'.'*/).write("not").write(40/*'('*/).write(41/*')'*/);
   }
 
   clone(): NotOperator {
-    return new NotOperator(this._operand.clone());
+    return new NotOperator(this.operand.clone());
   }
-
-  private static _hashSeed?: number;
 }
-Item.NotOperator = NotOperator;

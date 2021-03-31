@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapOutlet} from "../MapOutlet";
-import {WatchFieldsFunction} from "../function";
+import type {WatchFieldsFunction} from "../function";
 import {WatchFieldsOperator} from "./WatchFieldsOperator";
 
 export class WatchFieldsCombinator<K, V, O> extends WatchFieldsOperator<K, V, O> {
-  /** @hidden */
-  protected readonly _func: WatchFieldsFunction<K, V>;
-
   constructor(func: WatchFieldsFunction<K, V>) {
     super();
-    this._func = func;
+    Object.defineProperty(this, "func", {
+      value: func,
+      enumerable: true,
+    });
   }
+
+  /** @hidden */
+  declare readonly func: WatchFieldsFunction<K, V>;
 
   evaluate(key: K, value: V | undefined): void {
     if (value !== void 0) {
-      return this._func(key, value);
+      const func = this.func;
+      return func(key, value);
     }
   }
 }
-MapOutlet.WatchFieldsCombinator = WatchFieldsCombinator;

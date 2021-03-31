@@ -38,4 +38,3 @@ export class DateTimeParser extends Parser<DateTime> {
     return new DateTimeParser(dateParser);
   }
 }
-DateTime.Parser = DateTimeParser;

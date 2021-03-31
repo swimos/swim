@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {AbstractRecordOutlet} from "@swim/dataflow";
-import {Downlink} from "./Downlink";
+import type {Downlink} from "./Downlink";
 
 export abstract class DownlinkRecord extends AbstractRecordOutlet {
-  abstract get downlink(): Downlink;
+  abstract readonly downlink: Downlink;
 }

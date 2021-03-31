@@ -12,26 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {AnyItem, Item} from "../Item";
 import {AnyValue, Value} from "../Value";
-import {AnyText} from "../Text";
-import {AnyNum} from "../Num";
-import {Selector} from "../Selector";
-import {AnyInterpreter, Interpreter} from "../Interpreter";
+import {AnyText, Text} from "../Text";
+import {AnyNum, Num} from "../Num";
+import {Selector} from "./Selector";
+import {GetSelector} from "../"; // forward import
+import {GetAttrSelector} from "../"; // forward import
+import {GetItemSelector} from "../"; // forward import
+import {FilterSelector} from "../"; // forward import
+import {AnyInterpreter, Interpreter} from "../"; // forward import
 
 export class IdentitySelector extends Selector {
-  then(): Selector {
+  get then(): Selector {
     return this;
   }
 
-  forSelected<T, S = unknown>(interpreter: Interpreter,
-                              callback: (this: S, interpreter: Interpreter) => T | undefined,
-                              thisArg?: S): T | undefined {
+  forSelected<T>(interpreter: Interpreter,
+                 callback: (interpreter: Interpreter) => T | undefined): T | undefined;
+  forSelected<T, S>(interpreter: Interpreter,
+                    callback: (this: S, interpreter: Interpreter) => T | undefined,
+                    thisArg: S): T | undefined;
+  forSelected<T, S>(interpreter: Interpreter,
+                    callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
+                    thisArg?: S): T | undefined {
     let selected: T | undefined;
     interpreter.willSelect(this);
-    if (interpreter.scopeDepth() !== 0) {
+    if (interpreter.scopeDepth !== 0) {
       // Pop the current selection off of the stack to take it out of scope.
       const oldScope = interpreter.popScope();
       // Evaluate the current selection.
@@ -47,9 +56,14 @@ export class IdentitySelector extends Selector {
     return selected;
   }
 
-  mapSelected<S = unknown>(interpreter: Interpreter,
-                           transform: (this: S, interpreter: Interpreter) => Item,
-                           thisArg?: S): Item {
+  mapSelected(interpreter: Interpreter,
+              transform: (interpreter: Interpreter) => Item): Item;
+  mapSelected<S>(interpreter: Interpreter,
+                 transform: (this: S, interpreter: Interpreter) => Item,
+                 thisArg: S): Item;
+  mapSelected<S>(interpreter: Interpreter,
+                 transform: (this: S | undefined, interpreter: Interpreter) => Item,
+                 thisArg?: S): Item {
     return transform.call(thisArg, interpreter);
   }
 
@@ -60,17 +74,17 @@ export class IdentitySelector extends Selector {
 
   get(key: AnyValue): Selector {
     key = Value.fromAny(key);
-    return new Item.GetSelector(key, this);
+    return new GetSelector(key, this);
   }
 
   getAttr(key: AnyText): Selector {
-    key = Item.Text.fromAny(key);
-    return new Item.GetAttrSelector(key, this);
+    key = Text.fromAny(key);
+    return new GetAttrSelector(key, this);
   }
 
   getItem(index: AnyNum): Selector {
-    index = Item.Num.fromAny(index);
-    return new Item.GetItemSelector(index, this);
+    index = Num.fromAny(index);
+    return new GetItemSelector(index, this);
   }
 
   andThen(then: Selector): Selector {
@@ -95,19 +109,26 @@ export class IdentitySelector extends Selector {
 
   filter(predicate?: AnyItem): Selector {
     if (arguments.length === 0) {
-      return new Item.FilterSelector(this, this);
+      return new FilterSelector(this, this);
     } else {
       predicate = Item.fromAny(predicate);
       return predicate.filter();
     }
   }
 
-  typeOrder(): number {
+  get typeOrder(): number {
     return 10;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+  compareTo(that: unknown): number {
+    if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
+    }
+    return NaN;
+  }
+
+  equivalentTo(that: unknown): boolean {
+    return this === that;
   }
 
   equals(that: unknown): boolean {
@@ -115,10 +136,7 @@ export class IdentitySelector extends Selector {
   }
 
   hashCode(): number {
-    if (IdentitySelector._hashSeed === void 0) {
-      IdentitySelector._hashSeed = Murmur3.seed(IdentitySelector);
-    }
-    return IdentitySelector._hashSeed;
+    return Constructors.hash(IdentitySelector);
   }
 
   debugThen(output: Output): void {
@@ -128,8 +146,4 @@ export class IdentitySelector extends Selector {
   clone(): Selector {
     return this;
   }
-
-  private static _hashSeed?: number;
 }
-Item.IdentitySelector = IdentitySelector;
-Selector._identity = new IdentitySelector();

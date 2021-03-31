@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Outlet} from "./Outlet";
-
-import {StreamletContext} from "./StreamletContext";
+import type {Outlet} from "./Outlet";
+import type {StreamletContext} from "./StreamletContext";
 
 export interface StreamletScope<O> {
   /**
-   * Returns the lexically scoped parent of this `StreamletScope`.
-   * Returns `null` if this `StreamletScope` has no lexical parent.
+   * The lexically scoped parent of this `StreamletScope`, or `null` if this
+   * `StreamletScope` has no lexical parent.
    */
-  streamletScope(): StreamletScope<O> | null;
+  readonly streamletScope: StreamletScope<O> | null;
 
   /**
-   * Returns the environment in which this `StreamletScope` operates.
+   * The environment in which this `StreamletScope` operates.
    */
-  streamletContext(): StreamletContext | null;
+  readonly streamletContext: StreamletContext | null;
 
   /**
    * Returns an `Outlet` that updates when the specified `key` updates.
@@ -34,15 +33,16 @@ export interface StreamletScope<O> {
   outlet(key: string): Outlet<O> | null;
 }
 
-/** @hidden */
-export const StreamletScope = {
-  is<O>(object: unknown): object is StreamletScope<O> {
-    if (typeof object === "object" && object !== null) {
-      const scope = object as StreamletScope<O>;
-      return typeof scope.streamletScope === "function"
-          && typeof scope.streamletContext === "function"
-          && typeof scope.outlet === "function";
-    }
-    return false;
-  },
+export const StreamletScope = {} as {
+  is<O>(object: unknown): object is StreamletScope<O>;
+};
+
+StreamletScope.is = function <O>(object: unknown): object is StreamletScope<O> {
+  if (typeof object === "object" && object !== null) {
+    const scope = object as StreamletScope<O>;
+    return "streamletScope" in scope
+        && "streamletContext" in scope
+        && typeof scope.outlet === "function";
+  }
+  return false;
 };

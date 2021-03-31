@@ -12,40 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
-
-import {FilterFieldsOperatorSpec} from "./FilterFieldsOperatorSpec";
-import {MapValueOperatorSpec} from "./MapValueOperatorSpec";
-import {MapFieldValuesOperatorSpec} from "./MapFieldValuesOperatorSpec";
-import {ReduceFieldsOperatorSpec} from "./ReduceFieldsOperatorSpec";
-
-@Unit
-class CombinatorSpec extends Spec {
-  @Unit
-  filterFieldsCombinatorSpec(): Spec {
-    return new FilterFieldsOperatorSpec();
-  }
-
-  @Unit
-  mapValueOperatorSpec(): Spec {
-    return new MapValueOperatorSpec();
-  }
-
-  @Unit
-  mapFieldValuesOperatorSpec(): Spec {
-    return new MapFieldValuesOperatorSpec();
-  }
-
-  @Unit
-  reduceFieldsOperatorSpec(): Spec {
-    return new ReduceFieldsOperatorSpec();
-  }
-}
-
-export {
-  FilterFieldsOperatorSpec,
-  MapValueOperatorSpec,
-  MapFieldValuesOperatorSpec,
-  ReduceFieldsOperatorSpec,
-  CombinatorSpec,
-};
+export {FilterFieldsOperatorSpec} from "./FilterFieldsOperatorSpec";
+export {MapValueOperatorSpec} from "./MapValueOperatorSpec";
+export {MapFieldValuesOperatorSpec} from "./MapFieldValuesOperatorSpec";
+export {ReduceFieldsOperatorSpec} from "./ReduceFieldsOperatorSpec";
+export {CombinatorSuite} from "./CombinatorSuite";

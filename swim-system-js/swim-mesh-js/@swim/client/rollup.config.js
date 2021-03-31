@@ -13,8 +13,8 @@ const main = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
+      "@swim/mapping": "swim",
       "@swim/collections": "swim",
-      "@swim/interpolate": "swim",
       "@swim/structure": "swim",
       "@swim/streamlet": "swim",
       "@swim/dataflow": "swim",
@@ -30,8 +30,8 @@ const main = {
   external: [
     "@swim/util",
     "@swim/codec",
+    "@swim/mapping",
     "@swim/collections",
-    "@swim/interpolate",
     "@swim/structure",
     "@swim/streamlet",
     "@swim/dataflow",
@@ -41,7 +41,7 @@ const main = {
     "ws",
   ],
   plugins: [
-    nodeResolve({customResolveOptions: {paths: "../.."}}),
+    nodeResolve({moduleDirectories: ["../..", "../../../swim-core-js", "node_modules"]}),
     sourcemaps(),
   ],
   onwarn(warning, warn) {
@@ -69,7 +69,7 @@ const test = {
     "ws",
   ],
   plugins: [
-    nodeResolve({customResolveOptions: {paths: ["../..", "../../../swim-core-js"]}}),
+    nodeResolve({moduleDirectories: ["../..", "../../../swim-core-js", "node_modules"]}),
     sourcemaps(),
   ],
   onwarn(warning, warn) {

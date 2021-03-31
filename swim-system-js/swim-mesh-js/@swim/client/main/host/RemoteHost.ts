@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {BTree} from "@swim/collections";
-import {AnyUri, Uri, UriCache} from "@swim/uri";
 import {AnyValue, Value} from "@swim/structure";
+import {AnyUri, Uri, UriCache} from "@swim/uri";
 import {
   Envelope,
   EventMessage,
@@ -30,111 +30,130 @@ import {
   DeauthRequest,
   DeauthedResponse,
 } from "@swim/warp";
-import {HostDownlink} from "./HostDownlink";
-import {HostContext} from "./HostContext";
+import type {HostDownlink} from "./HostDownlink";
+import type {HostContext} from "./HostContext";
 import {HostOptions, Host} from "./Host";
-
-const UNLINK_DELAY = 0;
-const MAX_RECONNECT_TIMEOUT = 30000;
-const IDLE_TIMEOUT = 1000;
-const SEND_BUFFER_SIZE = 1024;
 
 /** @hidden */
 export abstract class RemoteHost extends Host {
-  /** @hidden */
-  readonly _context: HostContext;
-  /** @hidden */
-  readonly _hostUri: Uri;
-  /** @hidden */
-  readonly _options: HostOptions;
-  /** @hidden */
-  _downlinks: BTree<Uri, BTree<Uri, HostDownlink>>;
-  /** @hidden */
-  _downlinkCount: number;
-  /** @hidden */
-  _authenticated: boolean;
-  /** @hidden */
-  _session: Value;
-  /** @hidden */
-  _uriCache: UriCache;
-  /** @hidden */
-  _sendBuffer: Envelope[];
-  /** @hidden */
-  _reconnectTimer: number;
-  /** @hidden */
-  _reconnectTimeout: number;
-  /** @hidden */
-  _idleTimer: number;
-
   constructor(context: HostContext, hostUri: Uri, options: HostOptions = {}) {
     super();
-    this._context = context;
-    this._hostUri = hostUri;
-    this._options = options;
-    this._downlinks = new BTree();
-    this._downlinkCount = 0;
-    this._authenticated = false;
-    this._session = Value.absent();
-    this._uriCache = new UriCache(hostUri);
-    this._sendBuffer = [];
-    this._reconnectTimer = 0;
-    this._reconnectTimeout = 0;
-    this._idleTimer = 0;
+    Object.defineProperty(this, "context", {
+      value: context,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "hostUri", {
+      value: hostUri,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "options", {
+      value: options,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "authenticated", {
+      value: false,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "session", {
+      value: Value.absent(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "sendBuffer", {
+      value: [],
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "downlinks", {
+      value: new BTree(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "downlinkCount", {
+      value: 0,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "uriCache", {
+      value: new UriCache(hostUri),
+      enumerable: true,
+      configurable: true,
+    });
+    this.reconnectTimer = 0;
+    this.reconnectTimeout = 0;
+    this.idleTimer = 0;
   }
 
-  hostUri(): Uri {
-    return this._hostUri;
+  /** @hidden */
+  declare readonly context: HostContext;
+
+  declare readonly hostUri: Uri;
+
+  declare readonly options: HostOptions;
+
+  get credentials(): Value {
+    return this.options.credentials ?? Value.absent();
   }
 
-  credentials(): Value {
-    return this._options.credentials || Value.absent();
+  get unlinkDelay(): number {
+    return this.options.unlinkDelay ?? RemoteHost.UnlinkDelay;
   }
 
-  unlinkDelay(): number {
-    const unlinkDelay = this._options.unlinkDelay;
-    return typeof unlinkDelay === "number" ? unlinkDelay : UNLINK_DELAY;
+  get maxReconnectTimeout(): number {
+    return this.options.maxReconnectTimeout ?? RemoteHost.MaxReconnectTimeout;
   }
 
-  maxReconnectTimeout(): number {
-    return this._options.maxReconnectTimeout || MAX_RECONNECT_TIMEOUT;
+  get idleTimeout(): number {
+    return this.options.idleTimeout ?? RemoteHost.IdleTimeout;
   }
 
-  idleTimeout(): number {
-    return this._options.idleTimeout || IDLE_TIMEOUT;
-  }
-
-  sendBufferSize(): number {
-    return this._options.sendBufferSize || SEND_BUFFER_SIZE;
+  get sendBufferSize(): number {
+    return this.options.sendBufferSize ?? RemoteHost.SendBufferSize;
   }
 
   abstract isConnected(): boolean;
 
+  /** @hidden */
+  declare readonly authenticated: boolean;
+
   isAuthenticated(): boolean {
-    return this._authenticated;
+    return this.authenticated;
   }
 
-  session(): Value {
-    return this._session;
-  }
+  declare readonly session: Value;
+
+  /** @hidden */
+  declare readonly sendBuffer: Envelope[];
+
+  /** @hidden */
+  declare readonly downlinks: BTree<Uri, BTree<Uri, HostDownlink>>;
+
+  /** @hidden */
+  declare readonly downlinkCount: number;
 
   isIdle(): boolean {
-    return !this._sendBuffer.length && !this._downlinkCount;
+    return this.sendBuffer.length === 0 && this.downlinkCount === 0;
   }
 
+  /** @hidden */
+  declare readonly uriCache: UriCache;
+
   resolve(relative: AnyUri): Uri {
-    return this._uriCache.resolve(relative);
+    return this.uriCache.resolve(relative);
   }
 
   unresolve(absolute: AnyUri): Uri {
-    return this._uriCache.unresolve(absolute);
+    return this.uriCache.unresolve(absolute);
   }
 
   authenticate(credentials: AnyValue): void {
     credentials = Value.fromAny(credentials);
-    if (!credentials.equals(this._options.credentials)) {
-      this._options.credentials = credentials;
+    if (!credentials.equals(this.options.credentials)) {
+      this.options.credentials = credentials;
       if (this.isConnected()) {
-        const request = AuthRequest.of(credentials);
+        const request = new AuthRequest(credentials);
         this.push(request);
       } else {
         this.open();
@@ -144,21 +163,25 @@ export abstract class RemoteHost extends Host {
 
   openDownlink(downlink: HostDownlink): void {
     this.clearIdle();
-    const nodeUri = this.resolve(downlink.nodeUri());
-    const laneUri = downlink.laneUri();
-    if (this._downlinkCount === 0) {
+    const nodeUri = this.resolve(downlink.nodeUri);
+    const laneUri = downlink.laneUri;
+    if (this.downlinkCount === 0) {
       this.open();
     }
-    let nodeDownlinks = this._downlinks.get(nodeUri);
+    let nodeDownlinks = this.downlinks.get(nodeUri);
     if (nodeDownlinks === void 0) {
       nodeDownlinks = new BTree();
-      this._downlinks.set(nodeUri, nodeDownlinks);
+      this.downlinks.set(nodeUri, nodeDownlinks);
     }
     if (nodeDownlinks.get(laneUri) !== void 0) {
       throw new Error("duplicate downlink");
     }
     nodeDownlinks.set(laneUri, downlink);
-    this._downlinkCount += 1;
+    Object.defineProperty(this, "downlinkCount", {
+      value: this.downlinkCount + 1,
+      enumerable: true,
+      configurable: true,
+    });
     downlink.openUp(this);
     if (this.isConnected()) {
       downlink.hostDidConnect(this);
@@ -166,28 +189,32 @@ export abstract class RemoteHost extends Host {
   }
 
   unlinkDownlink(downlink: HostDownlink): void {
-    const nodeUri = this.resolve(downlink.nodeUri());
-    const laneUri = downlink.laneUri();
-    const nodeDownlinks = this._downlinks.get(nodeUri);
+    const nodeUri = this.resolve(downlink.nodeUri);
+    const laneUri = downlink.laneUri;
+    const nodeDownlinks = this.downlinks.get(nodeUri);
     if (nodeDownlinks !== void 0 && nodeDownlinks.get(laneUri) && this.isConnected()) {
-      const request = UnlinkRequest.of(this.unresolve(nodeUri), laneUri);
+      const request = new UnlinkRequest(this.unresolve(nodeUri), laneUri, Value.absent());
       downlink.onUnlinkRequest(request, this);
       this.push(request);
     }
   }
 
   closeDownlink(downlink: HostDownlink): void {
-    const nodeUri = this.resolve(downlink.nodeUri());
-    const laneUri = downlink.laneUri();
-    const nodeDownlinks = this._downlinks.get(nodeUri);
+    const nodeUri = this.resolve(downlink.nodeUri);
+    const laneUri = downlink.laneUri;
+    const nodeDownlinks = this.downlinks.get(nodeUri);
     if (nodeDownlinks !== void 0) {
       if (nodeDownlinks.get(laneUri)) {
-        this._downlinkCount -= 1;
+        Object.defineProperty(this, "downlinkCount", {
+          value: this.downlinkCount - 1,
+          enumerable: true,
+          configurable: true,
+        });
         nodeDownlinks.delete(laneUri);
         if (nodeDownlinks.isEmpty()) {
-          this._downlinks.delete(nodeUri);
+          this.downlinks.delete(nodeUri);
         }
-        if (this._downlinkCount === 0) {
+        if (this.downlinkCount === 0) {
           this.watchIdle();
         }
         downlink.closeUp(this);
@@ -200,7 +227,7 @@ export abstract class RemoteHost extends Host {
     nodeUri = this.resolve(nodeUri);
     laneUri = Uri.fromAny(laneUri);
     body = Value.fromAny(body);
-    const message = CommandMessage.of(this.unresolve(nodeUri), laneUri, body);
+    const message = new CommandMessage(this.unresolve(nodeUri), laneUri as Uri, body);
     this.push(message);
   }
 
@@ -235,13 +262,13 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onEventMessage(message: EventMessage): void {
-    const nodeUri = this.resolve(message.node());
-    const laneUri = message.lane();
-    const nodeDownlinks = this._downlinks.get(nodeUri);
+    const nodeUri = this.resolve(message.node);
+    const laneUri = message.lane;
+    const nodeDownlinks = this.downlinks.get(nodeUri);
     if (nodeDownlinks !== void 0) {
       const downlink = nodeDownlinks.get(laneUri);
       if (downlink !== void 0) {
-        const resolvedMessage = message.node(nodeUri);
+        const resolvedMessage = message.withNode(nodeUri);
         downlink.onEventMessage(resolvedMessage, this);
       }
     }
@@ -256,13 +283,13 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onLinkedResponse(response: LinkedResponse): void {
-    const nodeUri = this.resolve(response.node());
-    const laneUri = response.lane();
-    const nodeDownlinks = this._downlinks.get(nodeUri);
+    const nodeUri = this.resolve(response.node);
+    const laneUri = response.lane;
+    const nodeDownlinks = this.downlinks.get(nodeUri);
     if (nodeDownlinks !== void 0) {
       const downlink = nodeDownlinks.get(laneUri);
       if (downlink !== void 0) {
-        const resolvedResponse = response.node(nodeUri);
+        const resolvedResponse = response.withNode(nodeUri);
         downlink.onLinkedResponse(resolvedResponse, this);
       }
     }
@@ -273,13 +300,13 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onSyncedResponse(response: SyncedResponse): void {
-    const nodeUri = this.resolve(response.node());
-    const laneUri = response.lane();
-    const nodeDownlinks = this._downlinks.get(nodeUri);
+    const nodeUri = this.resolve(response.node);
+    const laneUri = response.lane;
+    const nodeDownlinks = this.downlinks.get(nodeUri);
     if (nodeDownlinks !== void 0) {
       const downlink = nodeDownlinks.get(laneUri);
       if (downlink !== void 0) {
-        const resolvedResponse = response.node(nodeUri);
+        const resolvedResponse = response.withNode(nodeUri);
         downlink.onSyncedResponse(resolvedResponse, this);
       }
     }
@@ -290,13 +317,13 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onUnlinkedResponse(response: UnlinkedResponse): void {
-    const nodeUri = this.resolve(response.node());
-    const laneUri = response.lane();
-    const nodeDownlinks = this._downlinks.get(nodeUri);
+    const nodeUri = this.resolve(response.node);
+    const laneUri = response.lane;
+    const nodeDownlinks = this.downlinks.get(nodeUri);
     if (nodeDownlinks !== void 0) {
       const downlink = nodeDownlinks.get(laneUri);
       if (downlink !== void 0) {
-        const resolvedResponse = response.node(nodeUri);
+        const resolvedResponse = response.withNode(nodeUri);
         downlink.onUnlinkedResponse(resolvedResponse, this);
       }
     }
@@ -307,9 +334,17 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onAuthedResponse(response: AuthedResponse): void {
-    this._authenticated = true;
-    this._session = response.body();
-    this._context.hostDidAuthenticate(response.body(), this);
+    Object.defineProperty(this, "authenticated", {
+      value: true,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "session", {
+      value: response.body,
+      enumerable: true,
+      configurable: true,
+    });
+    this.context.hostDidAuthenticate(response.body, this);
   }
 
   protected onDeauthRequest(request: DeauthRequest): void {
@@ -317,19 +352,36 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onDeauthedResponse(response: DeauthedResponse): void {
-    this._authenticated = false;
-    this._session = Value.absent();
-    this._context.hostDidDeauthenticate(response.body(), this);
+    Object.defineProperty(this, "authenticated", {
+      value: false,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "session", {
+      value: Value.absent(),
+      enumerable: true,
+      configurable: true,
+    });
+    this.context.hostDidDeauthenticate(response.body, this);
   }
 
   protected onUnknownEnvelope(envelope: Envelope | string): void {
     // nop
   }
 
+  /** @hidden */
+  reconnectTimer: number;
+
+  /** @hidden */
+  reconnectTimeout: number;
+
+  /** @hidden */
+  idleTimer: number;
+
   protected onConnect(): void {
-    this._reconnectTimeout = 0;
-    this._context.hostDidConnect(this);
-    this._downlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, HostDownlink>): void {
+    this.reconnectTimeout = 0;
+    this.context.hostDidConnect(this);
+    this.downlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, HostDownlink>): void {
       nodeDownlinks.forEach(function (laneUri: Uri, downlink: HostDownlink): void {
         downlink.hostDidConnect(this);
       }, this);
@@ -337,10 +389,18 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onDisconnect(): void {
-    this._authenticated = false;
-    this._session = Value.absent();
-    this._context.hostDidDisconnect(this);
-    this._downlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, HostDownlink>): void {
+    Object.defineProperty(this, "authenticated", {
+      value: false,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "session", {
+      value: Value.absent(),
+      enumerable: true,
+      configurable: true,
+    });
+    this.context.hostDidDisconnect(this);
+    this.downlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, HostDownlink>): void {
       nodeDownlinks.forEach(function (laneUri: Uri, downlink: HostDownlink): void {
         downlink.hostDidDisconnect(this);
       }, this);
@@ -348,8 +408,8 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onError(error?: unknown): void {
-    this._context.hostDidFail(error, this);
-    this._downlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, HostDownlink>): void {
+    this.context.hostDidFail(error, this);
+    this.downlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, HostDownlink>): void {
       nodeDownlinks.forEach(function (laneUri: Uri, downlink: HostDownlink): void {
         downlink.hostDidFail(error, this);
       }, this);
@@ -357,33 +417,33 @@ export abstract class RemoteHost extends Host {
   }
 
   protected reconnect(): void {
-    if (this._reconnectTimer === 0) {
-      if (this._reconnectTimeout === 0) {
-        this._reconnectTimeout = Math.floor(500 + 1000 * Math.random());
+    if (this.reconnectTimer === 0) {
+      if (this.reconnectTimeout === 0) {
+        this.reconnectTimeout = Math.floor(500 + 1000 * Math.random());
       } else {
-        this._reconnectTimeout = Math.min(Math.floor(1.8 * this._reconnectTimeout), this.maxReconnectTimeout());
+        this.reconnectTimeout = Math.min(Math.floor(1.8 * this.reconnectTimeout), this.maxReconnectTimeout);
       }
-      this._reconnectTimer = setTimeout(this.open.bind(this), this._reconnectTimeout) as any;
+      this.reconnectTimer = setTimeout(this.open.bind(this), this.reconnectTimeout) as any;
     }
   }
 
   protected clearReconnect(): void {
-    if (this._reconnectTimer !== 0) {
-      clearTimeout(this._reconnectTimer);
-      this._reconnectTimer = 0;
+    if (this.reconnectTimer !== 0) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = 0;
     }
   }
 
   protected watchIdle(): void {
-    if (this._idleTimer === 0 && this.isConnected() && this.isIdle()) {
-      this._idleTimer = setTimeout(this.checkIdle.bind(this), this.idleTimeout()) as any;
+    if (this.idleTimer === 0 && this.isConnected() && this.isIdle()) {
+      this.idleTimer = setTimeout(this.checkIdle.bind(this), this.idleTimeout) as any;
     }
   }
 
   protected clearIdle(): void {
-    if (this._idleTimer !== 0) {
-      clearTimeout(this._idleTimer);
-      this._idleTimer = 0;
+    if (this.idleTimer !== 0) {
+      clearTimeout(this.idleTimer);
+      this.idleTimer = 0;
     }
   }
 
@@ -396,11 +456,11 @@ export abstract class RemoteHost extends Host {
   abstract open(): void;
 
   close(): void {
-    this._context.closeHost(this);
+    this.context.closeHost(this);
   }
 
   closeUp(): void {
-    this._downlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, HostDownlink>): void {
+    this.downlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, HostDownlink>): void {
       nodeDownlinks.forEach(function (laneUri: Uri, downlink: HostDownlink): void {
         downlink.closeUp(this);
       }, this);
@@ -408,4 +468,9 @@ export abstract class RemoteHost extends Host {
   }
 
   abstract push(envelope: Envelope): void;
+
+  static readonly UnlinkDelay: number = 0;
+  static readonly MaxReconnectTimeout: number = 30000;
+  static readonly IdleTimeout: number = 1000;
+  static readonly SendBufferSize: number = 1024;
 }

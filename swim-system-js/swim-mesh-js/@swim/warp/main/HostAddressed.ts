@@ -12,91 +12,87 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3} from "@swim/util";
-import {Output} from "@swim/codec";
-import {AnyUri, Uri} from "@swim/uri";
+import {Murmur3, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {AnyValue, Value, Attr} from "@swim/structure";
+import {AnyUri, Uri} from "@swim/uri";
 import {Envelope} from "./Envelope";
 
-export abstract class HostAddressed extends Envelope {
-  /** @hidden */
-  readonly _body: Value;
+export interface HostAddressedConstructor<E extends HostAddressed<E>> {
+  new(body: Value): E;
 
+  readonly tag: string;
+}
+
+export abstract class HostAddressed<E extends HostAddressed<E>> extends Envelope {
   constructor(body: Value) {
     super();
-    this._body = body;
+    Object.defineProperty(this, "body", {
+      value: body,
+      enumerable: true,
+    });
   }
 
-  node(): Uri;
-  node(node: AnyUri): this;
-  node(node?: AnyUri): Uri | this {
-    if (node === void 0) {
-      return Uri.empty();
-    } else {
-      return this;
-    }
+  get node(): Uri {
+    return Uri.empty();
   }
 
-  lane(): Uri;
-  lane(lane: AnyUri): this;
-  lane(lane?: AnyUri): Uri | this {
-    if (lane === void 0) {
-      return Uri.empty();
-    } else {
-      return this;
-    }
+  withNode(node: AnyUri): E {
+    return this as unknown as E;
   }
 
-  body(): Value;
-  body(body: AnyValue): this;
-  body(body?: AnyValue): Value | this {
-    if (body === void 0) {
-      return this._body;
-    } else {
-      body = Value.fromAny(body);
-      return this.copy(body);
-    }
+  get lane(): Uri {
+    return Uri.empty();
   }
+
+  withLane(lane: AnyUri): E {
+    return this as unknown as E;
+  }
+
+  declare readonly body: Value;
+
+  withBody(body: AnyValue): E {
+    body = Value.fromAny(body);
+    return this.copy(body);
+  }
+
+  protected abstract copy(body: Value): E;
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
-    } else if (that instanceof HostAddressed
-        && (this as any).__proto__.constructor === (that as any).__proto__.constructor) {
-      return this._body.equals(that._body);
+    } else if (that instanceof HostAddressed) {
+      return this.constructor === that.constructor
+          && this.body.equals(that.body);
     }
     return false;
   }
 
-  hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.seed((this as any).__proto__), this._body.hashCode()));
+  hashCode(): number {
+    return Murmur3.mash(Murmur3.mix(Constructors.hash(this.constructor),
+          this.body.hashCode()));
   }
 
   debug(output: Output): void {
-    output = output.write((this as any).__proto__.constructor.name).write(46/*'.'*/).write("of").write(40/*'('*/);
-    if (this._body.isDefined()) {
-      output = output.debug(this._body);
+    output = output.write(this.constructor.name).write(46/*'.'*/)
+        .write("create").write(40/*'('*/);
+    if (this.body.isDefined()) {
+      output = output.debug(this.body);
     }
     output = output.write(41/*')'*/);
   }
 
-  protected abstract copy(body: Value): this;
-
   toValue(): Value {
-    return Attr.of(this.tag()).concat(this._body);
+    return Attr.of(this.tag).concat(this.body);
   }
 
-  static fromValue(value: Value,
-                   E?: {
-                     new(body: Value): HostAddressed;
-                     tag(): string;
-                   })
-                   : HostAddressed | undefined {
-    const header = value.header(E!.tag());
+  static fromValue<E extends HostAddressed<E>>(this: HostAddressedConstructor<E>,
+                                               value: Value): E | null {
+    const header = value.header(this.tag);
     if (header.isDefined()) {
       const body = value.body();
-      return new E!(body);
+      return new this(body);
     }
-    return void 0;
+    return null;
   }
 }

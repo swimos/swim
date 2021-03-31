@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Input, Output, Parser} from "@swim/codec";
-import {DateTimeInit, DateTime} from "../DateTime";
-import {DateTimeFormat} from "../DateTimeFormat";
+import type {Input, Output, Parser} from "@swim/codec";
+import type {DateTimeInit, DateTime} from "../DateTime";
+import {DateTimeFormat} from "./DateTimeFormat";
+import {MonthOfYearParser} from "../"; // forward import
 
 /** @hidden */
 export class MonthOfYearFormat extends DateTimeFormat {
   writeDate(date: DateTime, output: Output): void {
-    DateTimeFormat.writeDateNumber2(date.month() + 1, output);
+    DateTimeFormat.writeDateNumber2(date.month + 1, output);
   }
 
   parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {
-    return DateTimeFormat.MonthOfYearParser.parse(input, date);
+    return MonthOfYearParser.parse(input, date);
   }
 }
-DateTimeFormat.MonthOfYear = MonthOfYearFormat;

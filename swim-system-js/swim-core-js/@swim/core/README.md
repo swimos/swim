@@ -30,15 +30,19 @@ component libraries:
   [doc](https://docs.swimos.org/js/latest/modules/_swim_codec.html)) –
   incremental I/O; functional parsers and writers; display, debug, and
   diagnostic formatters; and Unicode and binary codecs.
+- [**@swim/mapping**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/mapping)
+  ([npm](https://www.npmjs.com/package/@swim/mapping),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_mapping.html)) –
+  functional maps, interpolators, and scales.
 - [**@swim/collections**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/collections)
   ([npm](https://www.npmjs.com/package/@swim/collections),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_collections.html)) –
   immutable, structure sharing collections, including B-trees and S-trees
   (sequence trees).
-- [**@swim/interpolate**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/interpolate)
-  ([npm](https://www.npmjs.com/package/@swim/interpolate),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_interpolate.html)) –
-  extensible interpolators for smoothly blending between values.
+- [**@swim/constraint**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/constraint)
+  ([npm](https://www.npmjs.com/package/@swim/constraint),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_constraint.html)) –
+  incremental solver for systems of linear constraint equations.
 - [**@swim/structure**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/structure)
   ([npm](https://www.npmjs.com/package/@swim/structure),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_structure.html)) –
@@ -59,21 +63,25 @@ component libraries:
   ([npm](https://www.npmjs.com/package/@swim/recon),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_recon.html)) –
   object notation with attributes, like if JSON and XML had a baby.
-- [**@swim/math**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/math)
-  ([npm](https://www.npmjs.com/package/@swim/math),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_math.html)) –
-  mathematical and geometric structures and operators.
-- [**@swim/time**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/time)
-  ([npm](https://www.npmjs.com/package/@swim/time),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_time.html)) –
-  date-time, time zone, and time interval data types,
-  with `strptime`/`strftime`-style parsers and formatters.
 - [**@swim/uri**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/uri)
   ([npm](https://www.npmjs.com/package/@swim/uri),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_uri.html)) –
   rich object model for working with Uniform Resource Identifiers and URI
   subcomponents, including an efficient and safe codec for parsing and
   writing compliant URI strings.
+- [**@swim/math**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/math)
+  ([npm](https://www.npmjs.com/package/@swim/math),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_math.html)) –
+  mathematical and geometric structures and operators.
+- [**@swim/geo**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/geo)
+  ([npm](https://www.npmjs.com/package/@swim/geo),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_geo.html)) –
+  geospatial coordinate, projection, and geometry types.
+- [**@swim/time**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/time)
+  ([npm](https://www.npmjs.com/package/@swim/time),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_time.html)) –
+  date-time, time zone, and time interval data types,
+  with `strptime`/`strftime`-style parsers and formatters.
 
 **@swim/core** has no external dependencies.
 

@@ -14,6 +14,7 @@
 
 import {TestOptions, Test, Spec, Report} from "@swim/unit";
 import {AnyValue, Value, Text} from "@swim/structure";
+import {Uri} from "@swim/uri";
 import {
   Envelope,
   EventMessage,
@@ -22,9 +23,8 @@ import {
   SyncRequest,
   SyncedResponse,
 } from "@swim/warp";
-import {Uri} from "@swim/uri";
-import {ValueDownlink, WarpClient} from "@swim/client";
-import {MockServer} from "../MockServer";
+import type {ValueDownlink, WarpClient} from "@swim/client";
+import type {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
 export class ValueDownlinkSpec extends Spec {
@@ -37,14 +37,14 @@ export class ValueDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
-          exam.equal(envelope.node(), Uri.parse("house/kitchen"));
-          exam.equal(envelope.lane(), Uri.parse("light"));
-          exam.equal(envelope.body(), Text.from("on"));
+          exam.equal(envelope.node, Uri.parse("house/kitchen"));
+          exam.equal(envelope.lane, Uri.parse("light"));
+          exam.equal(envelope.body, Text.from("on"));
           resolve();
         }
       };
       const downlink = client.downlinkValue()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("house/kitchen")
         .laneUri("light")
         .keepLinked(false)
@@ -60,13 +60,13 @@ export class ValueDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
-          server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
-          server.send(EventMessage.of(envelope.node(), envelope.lane(), Text.from('on')));
-          server.send(SyncedResponse.of(envelope.node(), envelope.lane()));
+          server.send(LinkedResponse.create(envelope.node, envelope.lane));
+          server.send(EventMessage.create(envelope.node, envelope.lane, Text.from('on')));
+          server.send(SyncedResponse.create(envelope.node, envelope.lane));
         }
       };
       client.downlinkValue()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("house/kitchen")
         .laneUri("light")
         .keepLinked(false)

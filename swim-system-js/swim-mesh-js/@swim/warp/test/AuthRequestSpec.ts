@@ -24,21 +24,21 @@ export class AuthRequestSpec extends Spec {
 
   @Test
   parseAuth(exam: WarpExam): void {
-    exam.parses("@auth", AuthRequest.of());
+    exam.parses("@auth", AuthRequest.create());
   }
 
   @Test
   parseAuthWithBody(exam: WarpExam): void {
-    exam.parses("@auth@test", AuthRequest.of(Record.of(Attr.of("test"))));
+    exam.parses("@auth@test", AuthRequest.create(Record.of(Attr.of("test"))));
   }
 
   @Test
   writeAuth(exam: WarpExam): void {
-    exam.writes(AuthRequest.of(), "@auth");
+    exam.writes(AuthRequest.create(), "@auth");
   }
 
   @Test
   writeAuthWithBody(exam: WarpExam): void {
-    exam.writes(AuthRequest.of(Record.of(Attr.of("test"))), "@auth@test");
+    exam.writes(AuthRequest.create(Record.of(Attr.of("test"))), "@auth@test");
   }
 }

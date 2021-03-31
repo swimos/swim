@@ -15,22 +15,32 @@
 import {AbstractOutlet} from "./AbstractOutlet";
 
 export class ValueInput<O> extends AbstractOutlet<O> {
-  /** @hidden */
-  protected _state: O | undefined;
-
   constructor(state?: O) {
     super();
-    this._state = state;
+    Object.defineProperty(this, "state", {
+      value: state,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
+  /** @hidden */
+  declare readonly state: O | undefined;
+
   get(): O | undefined {
-    return this._state;
+    return this.state;
   }
 
   set(newState: O | undefined): O | undefined {
-    const oldState = this._state;
-    this._state = newState;
-    this.decohereInput();
+    const oldState = this.state;
+    if (oldState !== newState) {
+      Object.defineProperty(this, "state", {
+        value: newState,
+        enumerable: true,
+        configurable: true,
+      });
+      this.decohereInput();
+    }
     return oldState;
   }
 }

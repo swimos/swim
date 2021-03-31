@@ -12,35 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
+export {DiagnosticSpec} from "./DiagnosticSpec";
+export {CodecSuite} from "./CodecSuite";
 
-import {InputsSpec} from "./InputsSpec";
-import {OutputsSpec} from "./OutputsSpec";
-import {DiagnosticSpec} from "./DiagnosticSpec";
-
-@Unit
-class CodecSpec extends Spec {
-  @Unit
-  inputsSpec(): Spec {
-    return new InputsSpec();
-  }
-
-  @Unit
-  outputsSpec(): Spec {
-    return new OutputsSpec();
-  }
-
-  @Unit
-  diagnosticSpec(): Spec {
-    return new DiagnosticSpec();
-  }
-}
-
-export {
-  InputsSpec,
-  OutputsSpec,
-  DiagnosticSpec,
-  CodecSpec,
-};
-
-CodecSpec.run();
+import {CodecSuite} from "./CodecSuite";
+CodecSuite.run();

@@ -12,45 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
+import type {Interpolator} from "@swim/mapping";
 import {Item} from "../Item";
-import {Operator} from "../Operator";
-import {AnyInterpreter, Interpreter} from "../Interpreter";
+import {Operator} from "./Operator";
+import {ConditionalOperatorInterpolator} from "../"; // forward import
+import {AnyInterpreter, Interpreter} from "../"; // forward import
 
 export class ConditionalOperator extends Operator {
-  /** @hidden */
-  readonly _ifTerm: Item;
-  /** @hidden */
-  readonly _thenTerm: Item;
-  /** @hidden */
-  readonly _elseTerm: Item;
-
   constructor(ifTerm: Item, thenTerm: Item, elseTerm: Item) {
     super();
-    this._ifTerm = ifTerm.commit();
-    this._thenTerm = thenTerm.commit();
-    this._elseTerm = elseTerm.commit();
+    Object.defineProperty(this, "ifTerm", {
+      value: ifTerm.commit(),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "thenTerm", {
+      value: thenTerm.commit(),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "elseTerm", {
+      value: elseTerm.commit(),
+      enumerable: true,
+    });
   }
 
-  ifTerm(): Item {
-    return this._ifTerm;
-  }
+  declare readonly ifTerm: Item;
 
-  thenTerm(): Item {
-    return this._thenTerm;
-  }
+  declare readonly thenTerm: Item;
 
-  elseTerm(): Item {
-    return this._elseTerm;
-  }
+  declare readonly elseTerm: Item;
 
   isConstant(): boolean {
-    return this._ifTerm.isConstant() && this._thenTerm.isConstant()
-        && this._elseTerm.isConstant();
+    return this.ifTerm.isConstant() && this.thenTerm.isConstant()
+        && this.elseTerm.isConstant();
   }
 
-  precedence(): number {
+  get precedence(): number {
     return 2;
   }
 
@@ -58,12 +56,12 @@ export class ConditionalOperator extends Operator {
     interpreter = Interpreter.fromAny(interpreter);
     interpreter.willOperate(this);
     let result;
-    const ifTerm = this._ifTerm.evaluate(interpreter);
+    const ifTerm = this.ifTerm.evaluate(interpreter);
     if (ifTerm.booleanValue(false)) {
-      const theTerm = this._thenTerm.evaluate(interpreter);
+      const theTerm = this.thenTerm.evaluate(interpreter);
       result = theTerm;
     } else {
-      const elseTerm = this._elseTerm.evaluate(interpreter);
+      const elseTerm = this.elseTerm.evaluate(interpreter);
       result = elseTerm;
     }
     interpreter.didOperate(this, result);
@@ -72,58 +70,76 @@ export class ConditionalOperator extends Operator {
 
   substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const ifTerm = this._ifTerm.substitute(interpreter);
-    const thenTerm = this._thenTerm.substitute(interpreter);
-    const elseTerm = this._elseTerm.substitute(interpreter);
+    const ifTerm = this.ifTerm.substitute(interpreter);
+    const thenTerm = this.thenTerm.substitute(interpreter);
+    const elseTerm = this.elseTerm.substitute(interpreter);
     return new ConditionalOperator(ifTerm, thenTerm, elseTerm);
   }
 
-  typeOrder() {
+  interpolateTo(that: ConditionalOperator): Interpolator<ConditionalOperator>;
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    if (that instanceof ConditionalOperator) {
+      return ConditionalOperatorInterpolator(this, that);
+    } else {
+      return super.interpolateTo(that);
+    }
+  }
+
+  get typeOrder(): number {
     return 20;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof ConditionalOperator) {
-      let order = this._ifTerm.compareTo(that._ifTerm);
+      let order = this.ifTerm.compareTo(that.ifTerm);
       if (order === 0) {
-        order = this._thenTerm.compareTo(that._thenTerm);
+        order = this.thenTerm.compareTo(that.thenTerm);
         if (order === 0) {
-          order = this._elseTerm.compareTo(that._elseTerm);
+          order = this.elseTerm.compareTo(that.elseTerm);
         }
       }
       return order;
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof ConditionalOperator) {
+      return this.ifTerm.equivalentTo(that.ifTerm, epsilon)
+          && this.thenTerm.equivalentTo(that.thenTerm, epsilon)
+          && this.elseTerm.equivalentTo(that.elseTerm, epsilon);
+    }
+    return false;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof ConditionalOperator) {
-      return this._ifTerm.equals(that._ifTerm) && this._thenTerm.equals(that._thenTerm)
-          && this._elseTerm.equals(that._elseTerm);
+      return this.ifTerm.equals(that.ifTerm) && this.thenTerm.equals(that.thenTerm)
+          && this.elseTerm.equals(that.elseTerm);
     }
     return false;
   }
 
   hashCode(): number {
-    if (ConditionalOperator._hashSeed === void 0) {
-      ConditionalOperator._hashSeed = Murmur3.seed(ConditionalOperator);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(ConditionalOperator._hashSeed,
-        this._ifTerm.hashCode()), this._thenTerm.hashCode()), this._elseTerm.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Constructors.hash(ConditionalOperator),
+        this.ifTerm.hashCode()), this.thenTerm.hashCode()), this.elseTerm.hashCode()));
   }
 
   debug(output: Output): void {
-    output.debug(this._ifTerm).write(46/*'.'*/).write("conditional").write(40/*'('*/)
-        .debug(this._thenTerm).write(44/*','*/).write(32/*' '*/)
-        .debug(this._elseTerm).write(41/*')'*/);
+    output.debug(this.ifTerm).write(46/*'.'*/).write("conditional").write(40/*'('*/)
+        .debug(this.thenTerm).write(44/*','*/).write(32/*' '*/)
+        .debug(this.elseTerm).write(41/*')'*/);
   }
 
   clone(): ConditionalOperator {
-    return new ConditionalOperator(this._ifTerm.clone(), this._thenTerm.clone(), this._elseTerm.clone());
+    return new ConditionalOperator(this.ifTerm.clone(), this.thenTerm.clone(), this.elseTerm.clone());
   }
-
-  private static _hashSeed?: number;
 }
-Item.ConditionalOperator = ConditionalOperator;

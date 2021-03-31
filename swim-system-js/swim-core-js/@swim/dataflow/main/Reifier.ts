@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Item} from "@swim/structure";
+import type {Item} from "@swim/structure";
 
 export abstract class Reifier {
   abstract reify(item: Item): Item;
 
   static system(): Reifier {
-    return null as unknown as Reifier;
+    return null as unknown as Reifier; // TODO
   }
 }

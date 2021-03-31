@@ -13,9 +13,8 @@
 // limitations under the License.
 
 import {Input, Parser, Diagnostic} from "@swim/codec";
-import {DateTimeInit} from "../DateTime";
-import {DateTimeFormat} from "../DateTimeFormat";
-import {DateTimeSpecifiers} from "../DateTimeSpecifiers";
+import type {DateTimeInit} from "../DateTime";
+import type {DateTimeSpecifiers} from "./DateTimeSpecifiers";
 
 /** @hidden */
 export class PatternParser extends Parser<DateTimeInit> {
@@ -87,4 +86,3 @@ export class PatternParser extends Parser<DateTimeInit> {
     return new PatternParser(pattern, specifiers, date, dateParser, step);
   }
 }
-DateTimeFormat.PatternParser = PatternParser;

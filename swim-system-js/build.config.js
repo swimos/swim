@@ -66,6 +66,21 @@ const core = [
     ],
   },
   {
+    id: "mapping",
+    name: "@swim/mapping",
+    path: "swim-core-js/@swim/mapping",
+    targets: [
+      {
+        id: "main",
+        deps: ["util"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "mapping"],
+      },
+    ],
+  },
+  {
     id: "collections",
     name: "@swim/collections",
     path: "swim-core-js/@swim/collections",
@@ -81,17 +96,17 @@ const core = [
     ],
   },
   {
-    id: "interpolate",
-    name: "@swim/interpolate",
-    path: "swim-core-js/@swim/interpolate",
+    id: "constraint",
+    name: "@swim/constraint",
+    path: "swim-core-js/@swim/constraint",
     targets: [
       {
         id: "main",
-        deps: ["util"],
+        deps: ["util", "codec"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "interpolate"],
+        deps: ["util", "codec", "unit", "constraint"],
       },
     ],
   },
@@ -102,11 +117,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "interpolate"],
+        deps: ["util", "codec", "mapping"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure"],
+        deps: ["util", "codec", "unit", "mapping", "structure"],
       },
     ],
   },
@@ -132,11 +147,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "interpolate", "structure", "streamlet"],
+        deps: ["util", "codec", "mapping", "collections", "structure", "streamlet"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "collections", "interpolate", "structure", "streamlet", "dataflow"],
+        deps: ["util", "codec", "unit", "mapping", "collections", "structure", "streamlet", "dataflow"],
       },
     ],
   },
@@ -147,41 +162,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "interpolate", "structure"],
+        deps: ["util", "codec", "mapping", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure", "recon"],
-      },
-    ],
-  },
-  {
-    id: "math",
-    name: "@swim/math",
-    path: "swim-core-js/@swim/math",
-    targets: [
-      {
-        id: "main",
-        deps: ["util", "codec", "interpolate", "structure"],
-      },
-      {
-        id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure", "math"],
-      },
-    ],
-  },
-  {
-    id: "time",
-    name: "@swim/time",
-    path: "swim-core-js/@swim/time",
-    targets: [
-      {
-        id: "main",
-        deps: ["util", "codec", "interpolate", "structure"],
-      },
-      {
-        id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure", "time"],
+        deps: ["util", "codec", "unit", "mapping", "structure", "recon"],
       },
     ],
   },
@@ -192,11 +177,56 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "interpolate", "structure"],
+        deps: ["util", "codec", "mapping", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure", "uri"],
+        deps: ["util", "codec", "unit", "mapping", "structure", "uri"],
+      },
+    ],
+  },
+  {
+    id: "math",
+    name: "@swim/math",
+    path: "swim-core-js/@swim/math",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "mapping", "structure"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "mapping", "structure", "math"],
+      },
+    ],
+  },
+  {
+    id: "geo",
+    name: "@swim/geo",
+    path: "swim-core-js/@swim/geo",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "mapping", "structure", "math"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "mapping", "structure", "math", "geo"],
+      },
+    ],
+  },
+  {
+    id: "time",
+    name: "@swim/time",
+    path: "swim-core-js/@swim/time",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "mapping", "structure"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "mapping", "structure", "time"],
       },
     ],
   },
@@ -204,12 +234,12 @@ const core = [
     id: "core",
     name: "@swim/core",
     path: "swim-core-js/@swim/core",
-    title: "Swim Core Framework",
-    umbrella: true,
+    title: "Swim Core",
+    framework: true,
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "interpolate", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time"],
       },
     ],
   },
@@ -223,11 +253,11 @@ const mesh = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "interpolate", "structure", "recon", "uri"],
+        deps: ["util", "codec", "mapping", "structure", "recon", "uri"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure", "recon", "uri", "warp"],
+        deps: ["util", "codec", "unit", "mapping", "structure", "recon", "uri", "warp"],
       },
     ],
   },
@@ -238,11 +268,11 @@ const mesh = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "interpolate", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
+        deps: ["util", "codec", "mapping", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "collections", "unit", "interpolate", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "collections", "unit", "mapping", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },
@@ -253,7 +283,7 @@ const mesh = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "args", "collections", "interpolate", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "args", "mapping", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },
@@ -261,8 +291,8 @@ const mesh = [
     id: "mesh",
     name: "@swim/mesh",
     path: "swim-mesh-js/@swim/mesh",
-    title: "Swim Mesh Framework",
-    umbrella: true,
+    title: "Swim Mesh",
+    framework: true,
     targets: [
       {
         id: "main",
@@ -276,8 +306,8 @@ const system = [
   {
     id: "system",
     name: "@swim/system",
-    title: "SwimOS",
-    umbrella: true,
+    title: "Swim System",
+    framework: true,
     targets: [
       {
         id: "main",

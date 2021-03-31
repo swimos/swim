@@ -25,48 +25,48 @@ export class SyncRequestSpec extends Spec {
   @Test
   parseSyncWithNamedHeaders(exam: WarpExam): void {
     exam.parses("@sync(node: node_uri, lane: lane_uri, prio: 0.5, rate: 1.0)",
-                SyncRequest.of("node_uri", "lane_uri", 0.5, 1.0));
+                SyncRequest.create("node_uri", "lane_uri", 0.5, 1.0));
   }
 
   @Test
   parseSyncWithPositionalHeaders(exam: WarpExam): void {
     exam.parses("@sync(node_uri, lane_uri, prio: 0.5)",
-                SyncRequest.of("node_uri", "lane_uri", 0.5, 0.0));
+                SyncRequest.create("node_uri", "lane_uri", 0.5, 0.0));
   }
 
   @Test
   parseSyncWithBody(exam: WarpExam): void {
     exam.parses("@sync(node_uri, lane_uri)@test",
-                SyncRequest.of("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))));
+                SyncRequest.create("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))));
   }
 
   @Test
   writeSync(exam: WarpExam): void {
-    exam.writes(SyncRequest.of("node_uri", "lane_uri", 0.0, 0.0),
+    exam.writes(SyncRequest.create("node_uri", "lane_uri", 0.0, 0.0),
                 "@sync(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   writeSyncWithPrio(exam: WarpExam): void {
-    exam.writes(SyncRequest.of("node_uri", "lane_uri", 0.5, 0.0),
+    exam.writes(SyncRequest.create("node_uri", "lane_uri", 0.5, 0.0),
                 "@sync(node:node_uri,lane:lane_uri,prio:0.5)");
   }
 
   @Test
   writeSyncWithRate(exam: WarpExam): void {
-    exam.writes(SyncRequest.of("node_uri", "lane_uri", 0.0, 1.0),
+    exam.writes(SyncRequest.create("node_uri", "lane_uri", 0.0, 1.0),
                 "@sync(node:node_uri,lane:lane_uri,rate:1)");
   }
 
   @Test
   writeSyncWithPrioAndRate(exam: WarpExam): void {
-    exam.writes(SyncRequest.of("node_uri", "lane_uri", 0.5, 1.0),
+    exam.writes(SyncRequest.create("node_uri", "lane_uri", 0.5, 1.0),
                 "@sync(node:node_uri,lane:lane_uri,prio:0.5,rate:1)");
   }
 
   @Test
   writeSyncWithBody(exam: WarpExam): void {
-    exam.writes(SyncRequest.of("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))),
+    exam.writes(SyncRequest.create("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))),
                 "@sync(node:node_uri,lane:lane_uri)@test");
   }
 }

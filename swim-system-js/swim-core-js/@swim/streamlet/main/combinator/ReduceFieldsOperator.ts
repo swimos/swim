@@ -17,34 +17,39 @@ import {KeyEffect} from "../KeyEffect";
 import {AbstractMapInletOutlet} from "../AbstractMapInletOutlet";
 
 export abstract class ReduceFieldsOperator<K, V, I, O> extends AbstractMapInletOutlet<K, V, I, O> {
-  /** @hidden */
-  protected _state: BTree<K, V, O>;
-
   constructor() {
     super();
-    this._state = new BTree();
+    Object.defineProperty(this, "state", {
+      value: new BTree(),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
+  /** @hidden */
+  declare readonly state: BTree<K, V, O>;
+
   get(): O | undefined {
-    return this._state.reduced(this.identity(), this.accumulate.bind(this), this.combine.bind(this));
+    return this.state.reduced(this.identity, this.accumulate.bind(this), this.combine.bind(this));
   }
 
   protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
-      if (this._input !== null) {
-        const value = this._input.get(key);
+      const input = this.input;
+      if (input !== null) {
+        const value = input.get(key);
         if (value !== void 0) {
-          this._state.set(key, value);
+          this.state.set(key, value);
         } else {
-          this._state.delete(key);
+          this.state.delete(key);
         }
       }
     } else if (effect === KeyEffect.Remove) {
-      this._state.delete(key);
+      this.state.delete(key);
     }
   }
 
-  abstract identity(): O;
+  abstract readonly identity: O;
 
   abstract accumulate(result: O, value: V): O;
 

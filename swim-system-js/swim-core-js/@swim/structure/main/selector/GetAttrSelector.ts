@@ -12,55 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {Item} from "../Item";
 import {Field} from "../Field";
 import {Attr} from "../Attr";
-import {Text} from "../Text";
-import {Selector} from "../Selector";
-import {AnyInterpreter, Interpreter} from "../Interpreter";
+import {Record} from "../Record";
+import type {Text} from "../Text";
+import {Selector} from "./Selector";
+import {AnyInterpreter, Interpreter} from "../"; // forward import
 
 export class GetAttrSelector extends Selector {
-  /** @hidden */
-  readonly _key: Text;
-  /** @hidden */
-  readonly _then: Selector;
-
   constructor(key: Text, then: Selector) {
     super();
-    this._key = key;
-    this._then = then;
+    Object.defineProperty(this, "item", {
+      value: key,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "then", {
+      value: then,
+      enumerable: true,
+    });
   }
 
-  accessor(): Text {
-    return this._key;
-  }
+  declare readonly item: Text;
 
-  then(): Selector {
-    return this._then;
-  }
+  declare readonly then: Selector;
 
-  forSelected<T, S = unknown>(interpreter: Interpreter,
-                              callback: (this: S, interpreter: Interpreter) => T | undefined,
-                              thisArg?: S): T | undefined {
+  forSelected<T>(interpreter: Interpreter,
+                 callback: (interpreter: Interpreter) => T | undefined): T | undefined;
+  forSelected<T, S>(interpreter: Interpreter,
+                    callback: (this: S, interpreter: Interpreter) => T | undefined,
+                    thisArg: S): T | undefined;
+  forSelected<T, S>(interpreter: Interpreter,
+                    callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
+                    thisArg?: S): T | undefined {
     interpreter.willSelect(this);
-    const key = this._key;
-    const selected = GetAttrSelector.forSelected(key, this._then, interpreter, callback);
+    const key = this.item;
+    const selected = GetAttrSelector.forSelected(key, this.then, interpreter, callback);
     interpreter.didSelect(this, selected);
     return selected;
   }
 
   private static forSelected<T, S>(key: Text, then: Selector, interpreter: Interpreter,
-                                   callback: (this: S, interpreter: Interpreter) => T | undefined,
+                                   callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
                                    thisArg?: S): T | undefined {
     let selected: T | undefined;
-    if (interpreter.scopeDepth() !== 0) {
+    if (interpreter.scopeDepth !== 0) {
       // Pop the next selection off of the stack to take it out of scope.
       const scope = interpreter.popScope().toValue();
       let field: Field | undefined;
       // Only records can have members.
-      if (scope instanceof Item.Record) {
+      if (scope instanceof Record) {
         field = scope.getField(key);
         if (field instanceof Attr) {
           // Push the field value onto the scope stack.
@@ -80,26 +83,31 @@ export class GetAttrSelector extends Selector {
     return selected;
   }
 
-  mapSelected<S = unknown>(interpreter: Interpreter,
-                           transform: (this: S, interpreter: Interpreter) => Item,
-                           thisArg?: S): Item {
+  mapSelected(interpreter: Interpreter,
+              transform: (interpreter: Interpreter) => Item): Item;
+  mapSelected<S>(interpreter: Interpreter,
+                 transform: (this: S, interpreter: Interpreter) => Item,
+                 thisArg: S): Item;
+  mapSelected<S>(interpreter: Interpreter,
+                 transform: (this: S | undefined, interpreter: Interpreter) => Item,
+                 thisArg?: S): Item {
     let result: Item;
     interpreter.willTransform(this);
-    const key = this._key;
-    if (interpreter.scopeDepth() !== 0) {
+    const key = this.item;
+    if (interpreter.scopeDepth !== 0) {
       // Pop the current selection off of the stack to take it out of scope.
       const scope = interpreter.popScope().toValue();
       // Only records can have members.
-      if (scope instanceof Item.Record) {
+      if (scope instanceof Record) {
         const oldField = scope.getField(key);
-        if (oldField instanceof Item.Attr) {
+        if (oldField instanceof Attr) {
           // Push the field value onto the scope stack.
           interpreter.pushScope(oldField.toValue());
           // Transform the field value.
-          const newItem = this._then.mapSelected(interpreter, transform, thisArg);
+          const newItem = this.then.mapSelected(interpreter, transform, thisArg);
           // Pop the field value off the scope stack.
           interpreter.popScope();
-          if (newItem instanceof Item.Field) {
+          if (newItem instanceof Field) {
             // Replace the original field with the transformed field.
             if (key.equals(newItem.key)) {
               scope.setAttr(key, newItem.toValue());
@@ -128,28 +136,28 @@ export class GetAttrSelector extends Selector {
 
   substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const key = this._key;
-    const value = GetAttrSelector.substitute(key, this._then, interpreter);
+    const key = this.item;
+    const value = GetAttrSelector.substitute(key, this.then, interpreter);
     if (value !== void 0) {
       return value;
     }
-    let then = this._then.substitute(interpreter);
+    let then = this.then.substitute(interpreter);
     if (!(then instanceof Selector)) {
-      then = this._then;
+      then = this.then;
     }
-    return new GetAttrSelector(this._key, then as Selector);
+    return new GetAttrSelector(this.item, then as Selector);
   }
 
   private static substitute(key: Text, then: Selector, interpreter: Interpreter): Item | undefined {
     let selected: Item | undefined;
-    if (interpreter.scopeDepth() !== 0) {
+    if (interpreter.scopeDepth !== 0) {
       // Pop the next selection off of the stack to take it out of scope.
       const scope = interpreter.popScope().toValue();
       let field: Field | undefined;
       // Only records can have members.
-      if (scope instanceof Item.Record) {
+      if (scope instanceof Record) {
         field = scope.getField(key);
-        if (field instanceof Item.Attr) {
+        if (field instanceof Attr) {
           // Substitute the field value.
           selected = field.toValue().substitute(interpreter);
         }
@@ -164,50 +172,56 @@ export class GetAttrSelector extends Selector {
   }
 
   andThen(then: Selector): Selector {
-    return new GetAttrSelector(this._key, this._then.andThen(then));
+    return new GetAttrSelector(this.item, this.then.andThen(then));
   }
 
-  typeOrder(): number {
+  get typeOrder(): number {
     return 13;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof GetAttrSelector) {
-      let order = this._key.compareTo(that._key);
+      let order = this.item.compareTo(that.item);
       if (order === 0) {
-        order = this._then.compareTo(that._then);
+        order = this.then.compareTo(that.then);
       }
       return order;
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof GetAttrSelector) {
+      return this.item.equals(that.item) && this.then.equivalentTo(that.then, epsilon);
+    }
+    return false;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof GetAttrSelector) {
-      return this._key.equals(that._key) && this._then.equals(that._then);
+      return this.item.equals(that.item) && this.then.equals(that.then);
     }
     return false;
   }
 
   hashCode(): number {
-    if (GetAttrSelector._hashSeed === void 0) {
-      GetAttrSelector._hashSeed = Murmur3.seed(GetAttrSelector);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(GetAttrSelector._hashSeed,
-        this._key.hashCode()), this._then.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(GetAttrSelector),
+        this.item.hashCode()), this.then.hashCode()));
   }
 
   debugThen(output: Output): void {
-    output = output.write(46/*'.'*/).write("getAttr").write(40/*'('*/).debug(this._key).write(41/*')'*/);
-    this._then.debugThen(output);
+    output = output.write(46/*'.'*/).write("getAttr").write(40/*'('*/)
+        .debug(this.item).write(41/*')'*/);
+    this.then.debugThen(output);
   }
 
   clone(): Selector {
-    return new GetAttrSelector(this._key.clone(), this._then.clone());
+    return new GetAttrSelector(this.item.clone(), this.then.clone());
   }
-
-  private static _hashSeed?: number;
 }
-Item.GetAttrSelector = GetAttrSelector;

@@ -12,27 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Item} from "../Item";
+import type {Item} from "../Item";
 import {Bool} from "../Bool";
-import {Form} from "../Form";
+import {Form} from "./Form";
 
 /** @hidden */
 export class BooleanForm extends Form<boolean> {
-  /** @hidden */
-  readonly _unit: boolean | undefined;
-
   constructor(unit?: boolean) {
     super();
-    this._unit = unit;
+    Object.defineProperty(this, "unit", {
+      value: unit,
+      enumerable: true,
+    });
   }
 
-  unit(): boolean | undefined;
-  unit(unit: boolean | undefined): Form<boolean>;
-  unit(unit?: boolean | undefined): boolean | undefined | Form<boolean> {
-    if (arguments.length === 0) {
-      return this._unit;
-    } else {
+  // @ts-ignore
+  declare readonly unit: boolean | undefined;
+
+  withUnit(unit: boolean | undefined): Form<boolean> {
+    if (unit !== this.unit) {
       return new BooleanForm(unit);
+    } else {
+      return this;
     }
   }
 
@@ -45,7 +46,7 @@ export class BooleanForm extends Form<boolean> {
   }
 
   cast(item: Item, object?: boolean): boolean | undefined {
-    const value = item.target();
+    const value = item.target;
     try {
       return value.booleanValue();
     } catch (error) {
@@ -53,4 +54,3 @@ export class BooleanForm extends Form<boolean> {
     }
   }
 }
-Form.BooleanForm = BooleanForm;

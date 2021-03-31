@@ -57,7 +57,7 @@ export class RecordMapSpec extends Spec {
     const xs = Record.of().attr("k", "v").attr("a", 3);
     exam.false(xs.isEmpty());
     exam.equal(xs.length, 2);
-    exam.equal(xs.fieldCount(), 2);
+    exam.equal(xs.fieldCount, 2);
     exam.equal(xs.getItem(0), Attr.of("k", "v"));
     exam.equal(xs.getItem(1), Attr.of("a", 3));
   }
@@ -67,7 +67,7 @@ export class RecordMapSpec extends Spec {
     const xs = Record.of().slot("k", "v").slot("a", 3).slot(4, 5);
     exam.false(xs.isEmpty());
     exam.equal(xs.length, 3);
-    exam.equal(xs.fieldCount(), 3);
+    exam.equal(xs.fieldCount, 3);
     exam.equal(xs.getItem(0), Slot.of("k", "v"));
     exam.equal(xs.getItem(1), Slot.of("a", 3));
     exam.equal(xs.getItem(2), Slot.of(4, 5));
@@ -289,7 +289,7 @@ export class RecordMapSpec extends Spec {
     }
     exam.false(xs.isEmpty());
     exam.equal(xs.length, n);
-    exam.equal(xs.fieldCount(), n);
+    exam.equal(xs.fieldCount, n);
 
     for (let i = 1; i <= n; i += 1) {
       const key = ((i & 0x1) === 0 ? +1 : -1) * (i >> 1);

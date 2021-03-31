@@ -13,13 +13,12 @@
 // limitations under the License.
 
 import {Unicode} from "@swim/codec";
-import {TestException, TestOptions, Spec, Proof, Report, ExamStatus, Exam} from "@swim/unit";
+import {TestException, TestOptions, Spec, Proof, Report, Exam} from "@swim/unit";
 import {Envelope} from "@swim/warp";
 
 export class WarpExam extends Exam {
-  constructor(report: Report, spec: Spec, name: string,
-              options: TestOptions, status?: ExamStatus) {
-    super(report, spec, name, options, status);
+  constructor(report: Report, spec: Spec, name: string, options: TestOptions) {
+    super(report, spec, name, options);
   }
 
   parses(recon: string, envelope: Envelope): void {

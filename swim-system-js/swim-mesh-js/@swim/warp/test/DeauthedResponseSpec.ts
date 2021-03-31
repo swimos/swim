@@ -24,21 +24,21 @@ export class DeauthedResponseSpec extends Spec {
 
   @Test
   parseDeauthed(exam: WarpExam): void {
-    exam.parses("@deauthed", DeauthedResponse.of());
+    exam.parses("@deauthed", DeauthedResponse.create());
   }
 
   @Test
   parseDeauthedWithBody(exam: WarpExam): void {
-    exam.parses("@deauthed@test", DeauthedResponse.of(Record.of(Attr.of("test"))));
+    exam.parses("@deauthed@test", DeauthedResponse.create(Record.of(Attr.of("test"))));
   }
 
   @Test
   writeDeauthed(exam: WarpExam): void {
-    exam.writes(DeauthedResponse.of(), "@deauthed");
+    exam.writes(DeauthedResponse.create(), "@deauthed");
   }
 
   @Test
   writeDeauthedWithBody(exam: WarpExam): void {
-    exam.writes(DeauthedResponse.of(Record.of(Attr.of("test"))), "@deauthed@test");
+    exam.writes(DeauthedResponse.create(Record.of(Attr.of("test"))), "@deauthed@test");
   }
 }

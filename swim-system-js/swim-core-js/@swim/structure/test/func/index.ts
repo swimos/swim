@@ -12,19 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
-
-import {LambdaFuncSpec} from "./LambdaFuncSpec";
-
-@Unit
-class FuncSpec extends Spec {
-  @Unit
-  lambdaFuncSpec(): Spec {
-    return new LambdaFuncSpec();
-  }
-}
-
-export {
-  FuncSpec,
-  LambdaFuncSpec,
-};
+export {LambdaFuncSpec} from "./LambdaFuncSpec";
+export {FuncSuite} from "./FuncSuite";

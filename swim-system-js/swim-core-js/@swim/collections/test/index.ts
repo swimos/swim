@@ -12,28 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
+export {BTreeSpec} from "./BTreeSpec";
+export {STreeSpec} from "./STreeSpec";
+export {CollectionsSuite} from "./CollectionsSuite";
 
-import {BTreeSpec} from "./BTreeSpec";
-import {STreeSpec} from "./STreeSpec";
-
-@Unit
-class CollectionsSpec extends Spec {
-  @Unit
-  btreeSpec(): Spec {
-    return new BTreeSpec();
-  }
-
-  @Unit
-  streeSpec(): Spec {
-    return new STreeSpec();
-  }
-}
-
-export {
-  BTreeSpec,
-  STreeSpec,
-  CollectionsSpec,
-};
-
-CollectionsSpec.run();
+import {CollectionsSuite} from "./CollectionsSuite";
+CollectionsSuite.run();

@@ -24,7 +24,7 @@ export class RecordMapViewMutableSpec extends Spec {
     xss.set("a", "B");
     exam.equal(xs.length, 3);
     exam.equal(xss.length, 1);
-    exam.equal(xs.fieldCount(), 3);
+    exam.equal(xs.fieldCount, 3);
     exam.equal(xs.get("a"), Text.from("B"));
     exam.equal(xss.get("a"), Text.from("B"));
     exam.equal(xs, Record.of().attr("k", "v").slot("a", "B").slot("c", "d"));
@@ -33,7 +33,7 @@ export class RecordMapViewMutableSpec extends Spec {
     xss.set("k", "V");
     exam.equal(xs.length, 4);
     exam.equal(xss.length, 2);
-    exam.equal(xs.fieldCount(), 4);
+    exam.equal(xs.fieldCount, 4);
     exam.equal(xs.get("k"), Text.from("V"));
     exam.equal(xss.get("k"), Text.from("V"));
     exam.equal(xs, Record.of().attr("k", "v").slot("a", "B").slot("k", "V").slot("c", "d"));
@@ -59,7 +59,7 @@ export class RecordMapViewMutableSpec extends Spec {
     xss = xss.updatedAttr("a", "B");
     exam.equal(xs.length, 3);
     exam.equal(xss.length, 1);
-    exam.equal(xs.fieldCount(), 3);
+    exam.equal(xs.fieldCount, 3);
     exam.equal(xs.get("a"), Text.from("B"));
     exam.equal(xss.get("a"), Text.from("B"));
     exam.equal(xs, Record.of().attr("k", "v").attr("a", "B").slot("e", "f"));
@@ -68,7 +68,7 @@ export class RecordMapViewMutableSpec extends Spec {
     xss = xss.updatedAttr("c", "D");
     exam.equal(xs.length, 4);
     exam.equal(xss.length, 2);
-    exam.equal(xs.fieldCount(), 4);
+    exam.equal(xs.fieldCount, 4);
     exam.equal(xs.get("c"), Text.from("D"));
     exam.equal(xss.get("c"), Text.from("D"));
     exam.equal(xs, Record.of().attr("k", "v").attr("a", "B").attr("c", "D").slot("e", "f"));
@@ -83,7 +83,7 @@ export class RecordMapViewMutableSpec extends Spec {
     xss = xss.updatedSlot("a", "B");
     exam.equal(xs.length, 3);
     exam.equal(xss.length, 1);
-    exam.equal(xs.fieldCount(), 3);
+    exam.equal(xs.fieldCount, 3);
     exam.equal(xs.get("a"), Text.from("B"));
     exam.equal(xss.get("a"), Text.from("B"));
     exam.equal(xs, Record.of().attr("k", "v").slot("a", "B").slot("e", "f"));
@@ -92,7 +92,7 @@ export class RecordMapViewMutableSpec extends Spec {
     xss = xss.updatedSlot("c", "D");
     exam.equal(xs.length, 4);
     exam.equal(xss.length, 2);
-    exam.equal(xs.fieldCount(), 4);
+    exam.equal(xs.fieldCount, 4);
     exam.equal(xs.get("c"), Text.from("D"));
     exam.equal(xss.get("c"), Text.from("D"));
     exam.equal(xs, Record.of().attr("k", "v").slot("a", "B").slot("c", "D").slot("e", "f"));
@@ -189,28 +189,28 @@ export class RecordMapViewMutableSpec extends Spec {
     xss.delete("c");
     exam.equal(xs.length, 3);
     exam.equal(xss.length, 1);
-    exam.equal(xs.fieldCount(), 3);
+    exam.equal(xs.fieldCount, 3);
     exam.equal(xs, Record.of().attr("k", "v").slot("a", "b").slot("e", "f"));
     exam.equal(xss, Record.of().slot("a", "b"));
 
     xss.delete("k");
     exam.equal(xs.length, 3);
     exam.equal(xss.length, 1);
-    exam.equal(xs.fieldCount(), 3);
+    exam.equal(xs.fieldCount, 3);
     exam.equal(xs, Record.of().attr("k", "v").slot("a", "b").slot("e", "f"));
     exam.equal(xss, Record.of().slot("a", "b"));
 
     xss.delete("a");
     exam.equal(xs.length, 2);
     exam.equal(xss.length, 0);
-    exam.equal(xs.fieldCount(), 2);
+    exam.equal(xs.fieldCount, 2);
     exam.equal(xs, Record.of().attr("k", "v").slot("e", "f"));
     exam.equal(xss, Record.empty());
 
     xss.delete("z");
     exam.equal(xs.length, 2);
     exam.equal(xss.length, 0);
-    exam.equal(xs.fieldCount(), 2);
+    exam.equal(xs.fieldCount, 2);
     exam.equal(xs, Record.of().attr("k", "v").slot("e", "f"));
     exam.equal(xss, Record.empty());
   }

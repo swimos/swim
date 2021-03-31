@@ -12,141 +12,131 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3} from "@swim/util";
-import {Output} from "@swim/codec";
-import {AnyUri, Uri} from "@swim/uri";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {Item, Attr, AnyValue, Value, Record} from "@swim/structure";
+import {AnyUri, Uri} from "@swim/uri";
 import {Envelope} from "./Envelope";
 
-export abstract class LinkAddressed extends Envelope {
-  /** @hidden */
-  readonly _node: Uri;
-  /** @hidden */
-  readonly _lane: Uri;
-  /** @hidden */
-  readonly _prio: number;
-  /** @hidden */
-  readonly _rate: number;
-  /** @hidden */
-  readonly _body: Value;
+export interface LinkAddressedConstructor<E extends LinkAddressed<E>> {
+  new(node: Uri, lane: Uri, prio: number, rate: number, body: Value): E;
 
+  readonly tag: string;
+}
+
+export abstract class LinkAddressed<E extends LinkAddressed<E>> extends Envelope {
   constructor(node: Uri, lane: Uri, prio: number, rate: number, body: Value) {
     super();
-    this._node = node;
-    this._lane = lane;
-    this._prio = prio;
-    this._rate = rate;
-    this._body = body;
+    Object.defineProperty(this, "node", {
+      value: node,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "lane", {
+      value: lane,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "prio", {
+      value: prio,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "rate", {
+      value: rate,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "body", {
+      value: body,
+      enumerable: true,
+    });
   }
 
-  node(): Uri;
-  node(node: AnyUri): this;
-  node(node?: AnyUri): Uri | this {
-    if (node === undefined) {
-      return this._node;
-    } else {
-      node = Uri.fromAny(node);
-      return this.copy(node, this._lane, this._prio, this._rate, this._body);
-    }
+  declare readonly node: Uri;
+
+  withNode(node: AnyUri): E {
+    node = Uri.fromAny(node);
+    return this.copy(node as Uri, this.lane, this.prio, this.rate, this.body);
   }
 
-  lane(): Uri;
-  lane(lane: AnyUri): this;
-  lane(lane?: AnyUri): Uri | this {
-    if (lane === undefined) {
-      return this._lane;
-    } else {
-      lane = Uri.fromAny(lane);
-      return this.copy(this._node, lane, this._prio, this._rate, this._body);
-    }
+  declare readonly lane: Uri;
+
+  withLane(lane: AnyUri): E {
+    lane = Uri.fromAny(lane);
+    return this.copy(this.node, lane as Uri, this.prio, this.rate, this.body);
   }
 
-  prio(): number;
-  prio(prio: number): this;
-  prio(prio?: number): number | this {
-    if (prio === undefined) {
-      return this._prio;
-    } else {
-      return this.copy(this._node, this._lane, prio, this._rate, this._body);
-    }
+  // @ts-ignore
+  declare readonly prio: number;
+
+  withPrio(prio: number): E {
+    return this.copy(this.node, this.lane, prio, this.rate, this.body);
   }
 
-  rate(): number;
-  rate(rate: number): this;
-  rate(rate?: number): number | this {
-    if (rate === undefined) {
-      return this._rate;
-    } else {
-      return this.copy(this._node, this._lane, this._prio, rate, this._body);
-    }
+  // @ts-ignore
+  declare readonly rate: number;
+
+  withRate(rate: number): E {
+    return this.copy(this.node, this.lane, this.prio, rate, this.body);
   }
 
-  body(): Value;
-  body(body: AnyValue): this;
-  body(body?: AnyValue): Value | this {
-    if (body === undefined) {
-      return this._body;
-    } else {
-      body = Value.fromAny(body);
-      return this.copy(this._node, this._lane, this._prio, this._rate, body);
-    }
+  declare readonly body: Value;
+
+  withBody(body: AnyValue): E {
+    body = Value.fromAny(body);
+    return this.copy(this.node, this.lane, this.prio, this.rate, body);
   }
 
-  protected abstract copy(node: Uri, lane: Uri, prio: number, rate: number, body: Value): this;
+  protected abstract copy(node: Uri, lane: Uri, prio: number, rate: number, body: Value): E;
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
-    } else if (that instanceof LinkAddressed
-        && (this as any).__proto__.constructor === (that as any).__proto__.constructor) {
-      return this._node.equals(that._node) && this._lane.equals(that._lane)
-          && this._prio === that._prio && this._rate === that._rate
-          && this._body.equals(that._body);
+    } else if (that instanceof LinkAddressed) {
+      return this.constructor === that.constructor
+          && this.node.equals(that.node) && this.lane.equals(that.lane)
+          && this.prio === that.prio && this.rate === that.rate
+          && this.body.equals(that.body);
     }
     return false;
   }
 
   hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.seed((this as any).__proto__), this._node.hashCode()), this._lane.hashCode()),
-        Murmur3.hash(this._prio)), Murmur3.hash(this._rate)), this._body.hashCode()));
+        Constructors.hash(this.constructor), this.node.hashCode()), this.lane.hashCode()),
+        Numbers.hash(this.prio)), Numbers.hash(this.rate)), this.body.hashCode()));
   }
 
   debug(output: Output): void {
-    output = output.write((this as any).__proto__.constructor.name).write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this._node.toString()).write(", ").debug(this._lane.toString());
-    if (this._prio !== 0 || this._rate !== 0) {
-      output = output.write(", ").debug(this._prio).write(", ").debug(this._rate);
+    output = output.write(this.constructor.name).write(46/*'.'*/)
+        .write("create").write(40/*'('*/)
+        .debug(this.node.toString()).write(", ").debug(this.lane.toString());
+    if (this.prio !== 0 || this.rate !== 0) {
+      output = output.write(", ").debug(this.prio).write(", ").debug(this.rate);
     }
-    if (this._body.isDefined()) {
-      output = output.write(", ").debug(this._body);
+    if (this.body.isDefined()) {
+      output = output.write(", ").debug(this.body);
     }
     output = output.write(41/*')'*/);
   }
 
   toValue(): Value {
     const header = Record.create(4)
-        .slot("node", this._node.toString())
-        .slot("lane", this._lane.toString());
-    if (this._prio !== 0) {
-      header.slot("prio", this._prio);
+        .slot("node", this.node.toString())
+        .slot("lane", this.lane.toString());
+    if (this.prio !== 0) {
+      header.slot("prio", this.prio);
     }
-    if (this._rate !== 0) {
-      header.slot("rate", this._rate);
+    if (this.rate !== 0) {
+      header.slot("rate", this.rate);
     }
-    return Attr.of(this.tag(), header).concat(this._body);
+    return Attr.of(this.tag, header).concat(this.body);
   }
 
-  static fromValue(value: Value,
-                   E?: {
-                     new(node: Uri, lane: Uri, prio: number, rate: number, body: Value): LinkAddressed;
-                     tag(): string;
-                   }): LinkAddressed | undefined {
+  static fromValue<E extends LinkAddressed<E>>(this: LinkAddressedConstructor<E>,
+                                               value: Value): E | null {
     let node: Uri | undefined;
     let lane: Uri | undefined;
     let prio = 0;
     let rate = 0;
-    const header = value.header(E!.tag());
+    const header = value.header(this.tag);
     header.forEach(function (header: Item, index: number) {
       const key = header.key.stringValue(void 0);
       if (key !== void 0) {
@@ -169,8 +159,8 @@ export abstract class LinkAddressed extends Envelope {
     });
     if (node !== void 0 && lane !== void 0) {
       const body = value.body();
-      return new E!(node, lane, prio, rate, body);
+      return new this(node, lane, prio, rate, body);
     }
-    return void 0;
+    return null;
   }
 }

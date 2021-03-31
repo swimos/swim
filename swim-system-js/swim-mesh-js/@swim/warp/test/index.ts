@@ -12,98 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
+export {WarpExam} from "./WarpExam";
+export {EventMessageSpec} from "./EventMessageSpec";
+export {CommandMessageSpec} from "./CommandMessageSpec";
+export {LinkRequestSpec} from "./LinkRequestSpec";
+export {LinkedResponseSpec} from "./LinkedResponseSpec";
+export {SyncRequestSpec} from "./SyncRequestSpec";
+export {SyncedResponseSpec} from "./SyncedResponseSpec";
+export {UnlinkRequestSpec} from "./UnlinkRequestSpec";
+export {UnlinkedResponseSpec} from "./UnlinkedResponseSpec";
+export {AuthRequestSpec} from "./AuthRequestSpec";
+export {AuthedResponseSpec} from "./AuthedResponseSpec";
+export {DeauthRequestSpec} from "./DeauthRequestSpec";
+export {DeauthedResponseSpec} from "./DeauthedResponseSpec";
+export {WarpSuite} from "./WarpSuite";
 
-import {EventMessageSpec} from "./EventMessageSpec";
-import {CommandMessageSpec} from "./CommandMessageSpec";
-import {LinkRequestSpec} from "./LinkRequestSpec";
-import {LinkedResponseSpec} from "./LinkedResponseSpec";
-import {SyncRequestSpec} from "./SyncRequestSpec";
-import {SyncedResponseSpec} from "./SyncedResponseSpec";
-import {UnlinkRequestSpec} from "./UnlinkRequestSpec";
-import {UnlinkedResponseSpec} from "./UnlinkedResponseSpec";
-import {AuthRequestSpec} from "./AuthRequestSpec";
-import {AuthedResponseSpec} from "./AuthedResponseSpec";
-import {DeauthRequestSpec} from "./DeauthRequestSpec";
-import {DeauthedResponseSpec} from "./DeauthedResponseSpec";
-
-@Unit
-class WarpSpec extends Spec {
-  @Unit
-  eventMessageSpec(): Spec {
-    return new EventMessageSpec();
-  }
-
-  @Unit
-  commandMessageSpec(): Spec {
-    return new CommandMessageSpec();
-  }
-
-  @Unit
-  linkRequestSpec(): Spec {
-    return new LinkRequestSpec();
-  }
-
-  @Unit
-  linkedResponseSpec(): Spec {
-    return new LinkedResponseSpec();
-  }
-
-  @Unit
-  syncRequestSpec(): Spec {
-    return new SyncRequestSpec();
-  }
-
-  @Unit
-  syncedResponseSpec(): Spec {
-    return new SyncedResponseSpec();
-  }
-
-  @Unit
-  unlinkRequestSpec(): Spec {
-    return new UnlinkRequestSpec();
-  }
-
-  @Unit
-  unlinkedResponseSpec(): Spec {
-    return new UnlinkedResponseSpec();
-  }
-
-  @Unit
-  authRequestSpec(): Spec {
-    return new AuthRequestSpec();
-  }
-
-  @Unit
-  authedResponseSpec(): Spec {
-    return new AuthedResponseSpec();
-  }
-
-  @Unit
-  deauthRequestSpec(): Spec {
-    return new DeauthRequestSpec();
-  }
-
-  @Unit
-  deauthedResponseSpec(): Spec {
-    return new DeauthedResponseSpec();
-  }
-}
-
-export {
-  EventMessageSpec,
-  CommandMessageSpec,
-  LinkRequestSpec,
-  LinkedResponseSpec,
-  SyncRequestSpec,
-  SyncedResponseSpec,
-  UnlinkRequestSpec,
-  UnlinkedResponseSpec,
-  AuthRequestSpec,
-  AuthedResponseSpec,
-  DeauthRequestSpec,
-  DeauthedResponseSpec,
-  WarpSpec,
-};
-
-WarpSpec.run();
+import {WarpSuite} from "./WarpSuite";
+WarpSuite.run();

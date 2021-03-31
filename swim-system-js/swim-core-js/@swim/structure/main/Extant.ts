@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Lazy, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
+import type {Interpolator} from "@swim/mapping";
 import {Item} from "./Item";
 import {Value} from "./Value";
 import {Record} from "./Record";
@@ -49,7 +50,7 @@ export class Extant extends Value {
    * Always returns an empty `Record` because `Extant` is not a distinct value.
    */
   unflattened(): Record {
-    return Value.Record.empty();
+    return Record.empty();
   }
 
   not(): Value {
@@ -88,12 +89,26 @@ export class Extant extends Value {
     return null;
   }
 
-  typeOrder(): number {
+  interpolateTo(that: Extant): Interpolator<Extant>;
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    return super.interpolateTo(that);
+  }
+
+  get typeOrder(): number {
     return 98;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+  compareTo(that: unknown): number {
+    if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
+    }
+    return NaN;
+  }
+
+  equivalentTo(that: unknown): boolean {
+    return this === that;
   }
 
   equals(that: unknown): boolean {
@@ -101,10 +116,7 @@ export class Extant extends Value {
   }
 
   hashCode(): number {
-    if (Extant._hashSeed === void 0) {
-      Extant._hashSeed = Murmur3.seed(Extant);
-    }
-    return Extant._hashSeed;
+    return Constructors.hash(Extant);
   }
 
   debug(output: Output): void {
@@ -115,12 +127,9 @@ export class Extant extends Value {
     output = output.write("null");
   }
 
-  private static readonly _extant: Extant = new Extant();
-
-  private static _hashSeed?: number;
-
+  @Lazy
   static extant(): Extant {
-    return Extant._extant;
+    return new Extant();
   }
 
   static fromAny(value: AnyExtant): Extant {
@@ -133,4 +142,3 @@ export class Extant extends Value {
     }
   }
 }
-Item.Extant = Extant;

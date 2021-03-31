@@ -13,7 +13,7 @@ const main = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
-      "@swim/interpolate": "swim",
+      "@swim/mapping": "swim",
       "@swim/structure": "swim",
     },
     sourcemap: true,
@@ -23,11 +23,11 @@ const main = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/interpolate",
+    "@swim/mapping",
     "@swim/structure",
   ],
   plugins: [
-    nodeResolve({customResolveOptions: {paths: "../.."}}),
+    nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
     sourcemaps(),
   ],
   onwarn(warning, warn) {
@@ -47,7 +47,7 @@ const test = {
     extend: true,
   },
   plugins: [
-    nodeResolve({customResolveOptions: {paths: "../.."}}),
+    nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
     sourcemaps(),
   ],
   onwarn(warning, warn) {

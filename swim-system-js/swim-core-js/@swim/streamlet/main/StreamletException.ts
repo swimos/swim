@@ -15,6 +15,6 @@
 export class StreamletException extends Error {
   constructor(message?: string) {
     super(message);
-    (this as any).__proto__ = StreamletException.prototype;
+    Object.setPrototypeOf(this, StreamletException.prototype);
   }
 }

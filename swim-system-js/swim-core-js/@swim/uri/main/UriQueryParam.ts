@@ -13,26 +13,38 @@
 // limitations under the License.
 
 import {Output, Format} from "@swim/codec";
-import {Uri} from "./Uri";
 import {UriQuery} from "./UriQuery";
 
 /** @hidden */
 export class UriQueryParam extends UriQuery {
-  /** @hidden */
-  readonly _key: string | null;
-  /** @hidden */
-  _value: string;
-  /** @hidden */
-  _tail: UriQuery;
-  /** @hidden */
-  _string?: string;
-
-  constructor(key: string | null, value: string, tail: UriQuery) {
+  constructor(key: string | undefined, value: string, tail: UriQuery) {
     super();
-    this._key = key;
-    this._value = value;
-    this._tail = tail;
+    Object.defineProperty(this, "key", {
+      value: key,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "value", {
+      value: value,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "rest", {
+      value: tail,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "stringValue", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
+
+  declare readonly key: string | undefined;
+
+  declare readonly value: string;
+
+  /** @hidden */
+  declare readonly rest: UriQuery;
 
   isDefined(): boolean {
     return true;
@@ -42,50 +54,55 @@ export class UriQueryParam extends UriQuery {
     return false;
   }
 
-  head(): [string | null, string] {
-    return [this._key, this._value];
-  }
-
-  key(): string | null {
-    return this._key;
-  }
-
-  value(): string {
-    return this._value;
+  head(): [string | undefined, string] {
+    return [this.key, this.value];
   }
 
   tail(): UriQuery {
-    return this._tail;
+    return this.rest;
   }
 
   /** @hidden */
   setTail(tail: UriQuery): void {
-    this._tail = tail;
+    Object.defineProperty(this, "rest", {
+      value: tail,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   /** @hidden */
   dealias(): UriQuery {
-    return new UriQueryParam(this._key, this._value, this._tail);
+    return new UriQueryParam(this.key, this.value, this.rest);
   }
 
   debug(output: Output): void {
     output = output.write("UriQuery").write(46/*'.'*/).write("parse")
-        .write(40/*'('*/).write(34/*'"'*/) .display(this).write(34/*'"'*/).write(41/*')'*/);
+        .write(40/*'('*/).write(34/*'"'*/).display(this).write(34/*'"'*/).write(41/*')'*/);
   }
 
   display(output: Output): void {
-    if (this._string !== void 0) {
-      output = output.write(this._string);
+    const stringValue = this.stringValue;
+    if (stringValue !== void 0) {
+      output = output.write(stringValue);
     } else {
       super.display(output);
     }
   }
 
+  /** @hidden */
+  declare readonly stringValue: string | undefined;
+
   toString(): string {
-    if (this._string === void 0) {
-      this._string = Format.display(this);
+    let stringValue = this.stringValue;
+    if (stringValue === void 0) {
+      stringValue = Format.display(this);
+      Object.defineProperty(this, "stringValue", {
+        value: stringValue,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    return this._string;
+    return stringValue;
   }
 }
-Uri.QueryParam = UriQueryParam;

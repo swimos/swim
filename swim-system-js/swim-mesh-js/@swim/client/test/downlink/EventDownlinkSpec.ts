@@ -14,15 +14,15 @@
 
 import {TestOptions, Test, Spec, Report} from "@swim/unit";
 import {Text} from "@swim/structure";
+import {Uri} from "@swim/uri";
 import {
   Envelope,
   CommandMessage,
   LinkRequest,
   LinkedResponse,
 } from "@swim/warp";
-import {Uri} from "@swim/uri";
 import {Downlink, WarpClient} from "@swim/client";
-import {MockServer} from "../MockServer";
+import type {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
 export class EventDownlinkSpec extends Spec {
@@ -35,12 +35,12 @@ export class EventDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof LinkRequest) {
-          server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
+          server.send(LinkedResponse.create(envelope.node, envelope.lane));
         }
       };
       let linkCount = 0;
       client.downlink()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("house/kitchen")
         .laneUri("light")
         .didLink(function (downlink: Downlink): void {
@@ -63,12 +63,12 @@ export class EventDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof LinkRequest) {
-          server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
+          server.send(LinkedResponse.create(envelope.node, envelope.lane));
         }
       };
       let linkCount = 0;
       client.downlink()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("house/kitchen")
         .laneUri("light")
         .didLink(function (downlink: Downlink): void {
@@ -97,14 +97,14 @@ export class EventDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
-          exam.equal(envelope.node(), Uri.parse("house/kitchen"));
-          exam.equal(envelope.lane(), Uri.parse("light"));
-          exam.equal(envelope.body(), Text.from("on"));
+          exam.equal(envelope.node, Uri.parse("house/kitchen"));
+          exam.equal(envelope.lane, Uri.parse("light"));
+          exam.equal(envelope.body, Text.from("on"));
           resolve();
         }
       };
       const downlink = client.downlink()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("house/kitchen")
         .laneUri("light")
         .keepLinked(false)

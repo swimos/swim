@@ -12,106 +12,120 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor} from "@swim/util";
-import {Value, Form} from "@swim/structure";
-import {Inlet, Outlet} from "@swim/streamlet";
-import {MapValueFunction, MapValueCombinator} from "@swim/streamlet";
-import {WatchValueFunction, WatchValueCombinator} from "@swim/streamlet";
-import {Uri} from "@swim/uri";
-import {DownlinkContext} from "./DownlinkContext";
-import {DownlinkOwner} from "./DownlinkOwner";
+import {Arrays, Cursor} from "@swim/util";
+import {AnyValue, Value, Form} from "@swim/structure";
+import {Inlet, Outlet, OutletCombinators} from "@swim/streamlet";
+import type {AnyUri, Uri} from "@swim/uri";
+import type {DownlinkContext} from "./DownlinkContext";
+import type {DownlinkOwner} from "./DownlinkOwner";
 import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
 import {ValueDownlinkModel} from "./ValueDownlinkModel";
 
-export type ValueDownlinkWillSet<V, VU = V> = (newValue: V, downlink: ValueDownlink<V, VU>) => V | void;
-export type VaueDownlinkDidSet<V, VU = V> = (newValue: V, oldValue: V, downlink: ValueDownlink<V, VU>) => void;
+export type ValueDownlinkWillSet<V, VU = never> = (newValue: V, downlink: ValueDownlink<V, VU>) => V | void;
+export type VaueDownlinkDidSet<V, VU = never> = (newValue: V, oldValue: V, downlink: ValueDownlink<V, VU>) => void;
 
-export interface ValueDownlinkObserver<V, VU = V> extends DownlinkObserver {
+export interface ValueDownlinkObserver<V, VU = never> extends DownlinkObserver {
   willSet?: ValueDownlinkWillSet<V, VU>;
   didSet?: VaueDownlinkDidSet<V, VU>;
 }
 
-export interface ValueDownlinkInit<V, VU = V> extends ValueDownlinkObserver<V, VU>, DownlinkInit {
+export interface ValueDownlinkInit<V, VU = never> extends ValueDownlinkObserver<V, VU>, DownlinkInit {
   valueForm?: Form<V, VU>;
 }
 
-export class ValueDownlink<V, VU = V> extends Downlink implements Inlet<V>, Outlet<V> {
+export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, Outlet<V> {
   /** @hidden */
-  _observers: ReadonlyArray<ValueDownlinkObserver<V, VU>> | null;
-  /** @hidden */
-  _model: ValueDownlinkModel | null;
-  /** @hidden */
-  _valueForm: Form<V, VU>;
-  /** @hidden */
-  _state0: Value;
-  /** @hidden */
-  _input: Outlet<V> | null;
-  /** @hidden */
-  _outputs: ReadonlyArray<Inlet<V>> | null; // TODO: unify with observers
-  /** @hidden */
-  _version: number;
-
-  /** @hidden */
-  constructor(context: DownlinkContext, owner?: DownlinkOwner, init?: ValueDownlinkInit<V, VU>,
+  constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: ValueDownlinkInit<V, VU>,
               hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number, rate?: number,
               body?: Value, flags: number = DownlinkFlags.KeepLinkedSynced,
-              observers?: ReadonlyArray<ValueDownlinkObserver<V, VU>> | ValueDownlinkObserver<V, VU> | null,
+              observers?: ReadonlyArray<ValueDownlinkObserver<V, VU>> | ValueDownlinkObserver<V, VU>,
               valueForm?: Form<V, VU>, state0: Value = Value.absent()) {
     super(context, owner, init, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
     if (init !== void 0) {
-      const observer = this._observers![this._observers!.length - 1];
-      observer.willSet = init.willSet || observer.willSet;
-      observer.didSet = init.didSet || observer.didSet;
+      const observer = this.observers[this.observers.length - 1]!;
+      observer.willSet = init.willSet ?? observer.willSet;
+      observer.didSet = init.didSet ?? observer.didSet;
       valueForm = init.valueForm !== void 0 ? init.valueForm : valueForm;
     }
-    this._valueForm = valueForm !== void 0 ? valueForm : Form.forValue() as any;
-    this._state0 = state0;
-    this._input = null;
-    this._outputs = null;
-    this._version = -1;
+    Object.defineProperty(this, "ownValueForm", {
+      value: valueForm !== void 0 ? valueForm : Form.forValue() as unknown as Form<V, VU>,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "state0", {
+      value: state0,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "input", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "version", {
+      value: -1,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  protected copy(context: DownlinkContext, owner: DownlinkOwner | undefined,
-                 hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
-                 body: Value, flags: number, observers: ReadonlyArray<ValueDownlinkObserver<V, VU>> | null,
-                 valueForm?: Form<V, VU>, state0?: Value): this {
-    if (arguments.length === 10) {
-      state0 = this._state0;
-      valueForm = this._valueForm;
-    }
-    return new ValueDownlink(context, owner, void 0, hostUri, nodeUri, laneUri,
-                             prio, rate, body, flags, observers, valueForm, state0) as this;
-  }
+  /** @hidden */
+  declare readonly model: ValueDownlinkModel | null;
 
-  type(): DownlinkType {
+  /** @hidden */
+  declare observers: ReadonlyArray<ValueDownlinkObserver<V, VU>>;
+
+  /** @hidden */
+  declare readonly ownValueForm: Form<V, VU>;
+
+  /** @hidden */
+  declare readonly state0: Value;
+
+  get type(): DownlinkType {
     return "value";
   }
 
+  protected copy<V, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
+                        hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
+                        body: Value, flags: number, observers: ReadonlyArray<ValueDownlinkObserver<V, VU>>,
+                        valueForm?: Form<V, VU>, state0?: Value): ValueDownlink<V, VU> {
+    if (arguments.length === 10) {
+      state0 = this.state0;
+      valueForm = this.ownValueForm as unknown as Form<V, VU>;
+    }
+    return new ValueDownlink(context, owner, void 0, hostUri, nodeUri, laneUri,
+                             prio, rate, body, flags, observers, valueForm, state0);
+  }
+
   valueForm(): Form<V, VU>;
-  valueForm<V2, V2U = V2>(valueForm: Form<V2, V2U>): ValueDownlink<V2, V2U>;
-  valueForm<V2, V2U = V2>(valueForm?: Form<V2, V2U>): Form<V, VU> | ValueDownlink<V2, V2U> {
+  valueForm<V2, V2U = never>(valueForm: Form<V2, V2U>): ValueDownlink<V2, V2U>;
+  valueForm<V2, V2U = never>(valueForm?: Form<V2, V2U>): Form<V, VU> | ValueDownlink<V2, V2U> {
     if (valueForm === void 0) {
-      return this._valueForm;
+      return this.ownValueForm;
     } else {
-      return this.copy(this._context, this._owner, this._hostUri, this._nodeUri, this._laneUri,
-                       this._prio, this._rate, this._body, this._flags, this._observers,
-                       valueForm as any, this._state0) as any;
+      return this.copy(this.context, this.owner, this.ownHostUri, this.ownNodeUri, this.ownLaneUri,
+                       this.ownPrio, this.ownRate, this.ownBody, this.flags, this.observers as any,
+                       valueForm, this.state0);
     }
   }
 
   get(): V {
-    const value = this._model!.get();
-    const object = value.coerce(this._valueForm);
+    const value = this.model!.get();
+    const object = value.coerce(this.ownValueForm);
     return object;
   }
 
   set(newObject: V | VU): void {
-    const newValue = this._valueForm.mold(newObject);
-    this._model!.set(newValue);
+    const newValue = this.ownValueForm.mold(newObject);
+    this.model!.set(newValue);
   }
 
   setState(state: Value): void {
-    this._model!.setState(state);
+    this.model!.setState(state);
   }
 
   observe(observer: ValueDownlinkObserver<V, VU>): this {
@@ -128,19 +142,18 @@ export class ValueDownlink<V, VU = V> extends Downlink implements Inlet<V>, Outl
 
   /** @hidden */
   valueWillSet(newValue: Value): Value {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
     let newObject: V | undefined;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.willSet !== void 0) {
         if (newObject === void 0) {
-          newObject = newValue.coerce(this._valueForm);
+          newObject = newValue.coerce(this.ownValueForm);
         }
         const newResult = observer.willSet(newObject, this);
         if (newResult !== void 0) {
           newObject = newResult;
-          newValue = this._valueForm.mold(newObject);
+          newValue = this.ownValueForm.mold(newObject);
         }
       }
     }
@@ -148,19 +161,18 @@ export class ValueDownlink<V, VU = V> extends Downlink implements Inlet<V>, Outl
   }
 
   /** @hidden */
-  valueDidSet(newValue: Value, oldValue: Value) {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
+  valueDidSet(newValue: Value, oldValue: Value): void {
     let newObject: V | undefined;
     let oldObject: V | undefined;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.didSet !== void 0) {
         if (newObject === void 0) {
-          newObject = newValue.coerce(this._valueForm);
+          newObject = newValue.coerce(this.ownValueForm);
         }
         if (oldObject === void 0) {
-          oldObject = oldValue.coerce(this._valueForm);
+          oldObject = oldValue.coerce(this.ownValueForm);
         }
         observer.didSet(newObject, oldObject, this);
       }
@@ -170,145 +182,161 @@ export class ValueDownlink<V, VU = V> extends Downlink implements Inlet<V>, Outl
   }
 
   initialState(): Value;
-  initialState(state0: Value): this;
-  initialState(state0?: Value): Value | this {
+  initialState(state0: Value): ValueDownlink<V, VU>;
+  initialState(state0?: Value): Value | ValueDownlink<V, VU> {
     if (state0 === void 0) {
-      return this._state0;
+      return this.state0;
     } else {
-      return this.copy(this._context, this._owner, this._hostUri, this._nodeUri, this._laneUri,
-                       this._prio, this._rate, this._body, this._flags, this._observers,
-                       this._valueForm, state0);
+      return this.copy(this.context, this.owner, this.ownHostUri, this.ownNodeUri, this.ownLaneUri,
+                       this.ownPrio, this.ownRate, this.ownBody, this.flags, this.observers,
+                       this.ownValueForm, state0);
     }
   }
 
   /** @hidden */
   protected didAliasModel(): void {
     this.onLinkedResponse();
-    this.valueDidSet(this._model!.get(), Value.absent());
+    this.valueDidSet(this.model!.get(), Value.absent());
     this.onSyncedResponse();
   }
 
   open(): this {
-    const laneUri = this._laneUri;
+    const laneUri = this.ownLaneUri;
     if (laneUri.isEmpty()) {
       throw new Error("no lane");
     }
-    let nodeUri = this._nodeUri;
+    let nodeUri = this.ownNodeUri;
     if (nodeUri.isEmpty()) {
       throw new Error("no node");
     }
-    let hostUri = this._hostUri;
+    let hostUri = this.ownHostUri;
     if (hostUri.isEmpty()) {
       hostUri = nodeUri.endpoint();
       nodeUri = hostUri.unresolve(nodeUri);
     }
-    let model = this._context.getDownlink(hostUri, nodeUri, laneUri);
+    let model = this.context.getDownlink(hostUri, nodeUri, laneUri);
     if (model !== void 0) {
       if (!(model instanceof ValueDownlinkModel)) {
         throw new Error("downlink type mismatch");
       }
       model.addDownlink(this);
-      this._model = model as ValueDownlinkModel;
+      Object.defineProperty(this, "model", {
+        value: model as ValueDownlinkModel,
+        enumerable: true,
+        configurable: true,
+      });
       setTimeout(this.didAliasModel.bind(this));
     } else {
-      model = new ValueDownlinkModel(this._context, hostUri, nodeUri, laneUri, this._prio,
-                                     this._rate, this._body, this._state0);
+      model = new ValueDownlinkModel(this.context, hostUri, nodeUri, laneUri, this.ownPrio,
+                                     this.ownRate, this.ownBody, this.state0);
       model.addDownlink(this);
-      this._context.openDownlink(model);
-      this._model = model as ValueDownlinkModel;
+      this.context.openDownlink(model);
+      Object.defineProperty(this, "model", {
+        value: model as ValueDownlinkModel,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    if (this._owner !== void 0) {
-      this._owner.addDownlink(this);
+    if (this.owner !== null) {
+      this.owner.addDownlink(this);
     }
     return this;
   }
 
-  input(): Outlet<V> | null {
-    return this._input;
-  }
+  declare readonly input: Outlet<V> | null;
 
-  bindInput(input: Outlet<V> | null): void {
-    if (this._input !== null) {
-      this._input.unbindOutput(this);
-    }
-    this._input = input;
-    if (this._input !== null) {
-      this._input.bindOutput(this);
+  /** @hidden */
+  declare readonly outputs: ReadonlyArray<Inlet<V>>;
+
+  /** @hidden */
+  declare readonly version: number;
+
+  bindInput(newInput: Outlet<V> | null): void {
+    const oldInput = this.input;
+    if (oldInput !== newInput) {
+      if (oldInput !== null) {
+        oldInput.unbindOutput(this);
+      }
+      Object.defineProperty(this, "input", {
+        value: newInput,
+        enumerable: true,
+        configurable: true,
+      });
+      if (newInput !== null) {
+        newInput.bindOutput(this);
+      }
     }
   }
 
   unbindInput(): void {
-    if (this._input !== null) {
-      this._input.unbindOutput(this);
+    const oldInput = this.input;
+    if (oldInput !== null) {
+      oldInput.unbindOutput(this);
+      Object.defineProperty(this, "input", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    this._input = null;
   }
 
   disconnectInputs(): void {
-    const input = this._input;
-    if (input !== null) {
-      input.unbindOutput(this);
-      this._input = null;
-      input.disconnectInputs();
+    const oldInput = this.input;
+    if (oldInput !== null) {
+      oldInput.unbindOutput(this);
+      Object.defineProperty(this, "input", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
+      oldInput.disconnectInputs();
     }
   }
 
   outputIterator(): Cursor<Inlet<V>> {
-    return this._outputs !== null ? Cursor.array(this._outputs) : Cursor.empty();
+    return Cursor.array(this.outputs);
   }
 
   bindOutput(output: Inlet<V>): void {
-    const oldOutputs = this._outputs;
-    const n = oldOutputs !== null ? oldOutputs.length : 0;
-    const newOutputs = new Array<Inlet<V>>(n + 1);
-    for (let i = 0; i < n; i += 1) {
-      newOutputs[i] = oldOutputs![i];
-    }
-    newOutputs[n] = output;
-    this._outputs = newOutputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.inserted(output, this.outputs),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   unbindOutput(output: Inlet<V>): void {
-    const oldOutputs = this._outputs;
-    const n = oldOutputs !== null ? oldOutputs.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      if (oldOutputs![i] === output) {
-        if (n > 1) {
-          const newOutputs = new Array<Inlet<V>>(n - 1);
-          for (let j = 0; j < i; j += 1) {
-            newOutputs[j] = oldOutputs![j];
-          }
-          for (let j = i; j < n - 1; j += 1) {
-            newOutputs[j] = oldOutputs![j + 1];
-          }
-          this._outputs = newOutputs;
-        } else {
-          this._outputs = null;
-        }
-        break;
-      }
-    }
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.removed(output, this.outputs),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   unbindOutputs(): void {
-    const oldOutputs = this._outputs;
-    if (oldOutputs !== null) {
-      this._outputs = null;
-      for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
-        oldOutputs[i].unbindInput();
-      }
+    const oldOutputs = this.outputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
+      const output = oldOutputs[i]!;
+      output.unbindInput();
     }
   }
 
   disconnectOutputs(): void {
-    const outputs = this._outputs;
-    if (outputs !== null) {
-      this._outputs = null;
-      for (let i = 0, n = outputs.length; i < n; i += 1) {
-        const output = outputs[i];
-        output.unbindInput();
-        output.disconnectOutputs();
-      }
+    const oldOutputs = this.outputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
+      const output = oldOutputs[i]!;
+      output.unbindInput();
+      output.disconnectOutputs();
     }
   }
 
@@ -321,13 +349,17 @@ export class ValueDownlink<V, VU = V> extends Downlink implements Inlet<V>, Outl
   }
 
   decohere(): void {
-    if (this._version >= 0) {
+    if (this.version >= 0) {
       this.willDecohere();
-      this._version = -1;
+      Object.defineProperty(this, "version", {
+        value: -1,
+        enumerable: true,
+        configurable: true,
+      });
       this.onDecohere();
-      const n = this._outputs !== null ? this._outputs.length : 0;
-      for (let i = 0; i < n; i += 1) {
-        this._outputs![i].decohereOutput();
+      const outputs = this.outputs;
+      for (let i = 0, n = outputs.length; i < n; i += 1) {
+        outputs[i]!.decohereOutput();
       }
       this.didDecohere();
     }
@@ -342,16 +374,20 @@ export class ValueDownlink<V, VU = V> extends Downlink implements Inlet<V>, Outl
   }
 
   recohere(version: number): void {
-    if (this._version < 0) {
+    if (this.version < 0) {
       this.willRecohere(version);
-      this._version = version;
-      if (this._input !== null) {
-        this._input.recohereInput(version);
+      Object.defineProperty(this, "version", {
+        value: version,
+        enumerable: true,
+        configurable: true,
+      });
+      if (this.input !== null) {
+        this.input.recohereInput(version);
       }
       this.onRecohere(version);
-      const n = this._outputs !== null ? this._outputs.length : 0;
-      for (let i = 0; i < n; i += 1) {
-        this._outputs![i].recohereOutput(version);
+      const outputs = this.outputs;
+      for (let i = 0, n = outputs.length; i < n; i += 1) {
+        outputs[i]!.recohereOutput(version);
       }
       this.didRecohere(version);
     }
@@ -374,8 +410,9 @@ export class ValueDownlink<V, VU = V> extends Downlink implements Inlet<V>, Outl
   }
 
   protected onRecohere(version: number): void {
-    if (this._input !== null) {
-      const value = this._input.get();
+    const input = this.input;
+    if (input !== null) {
+      const value = input.get();
       if (value !== void 0) {
         this.set(value);
       }
@@ -385,20 +422,32 @@ export class ValueDownlink<V, VU = V> extends Downlink implements Inlet<V>, Outl
   protected didRecohere(version: number): void {
     // hook
   }
-
-  memoize(): Outlet<V> {
-    return this;
-  }
-
-  map<V2>(func: MapValueFunction<V, V2>): Outlet<V2> {
-    const combinator = new MapValueCombinator<V, V2>(func);
-    combinator.bindInput(this);
-    return combinator;
-  }
-
-  watch(func: WatchValueFunction<V>): this {
-    const combinator = new WatchValueCombinator<V>(func);
-    combinator.bindInput(this);
-    return this;
-  }
 }
+export interface ValueDownlink<V, VU> {
+  hostUri(): Uri;
+  hostUri(hostUri: AnyUri): ValueDownlink<V, VU>;
+
+  nodeUri(): Uri;
+  nodeUri(nodeUri: AnyUri): ValueDownlink<V, VU>;
+
+  laneUri(): Uri;
+  laneUri(laneUri: AnyUri): ValueDownlink<V, VU>;
+
+  prio(): number;
+  prio(prio: number): ValueDownlink<V, VU>;
+
+  rate(): number;
+  rate(rate: number): ValueDownlink<V, VU>;
+
+  body(): Value;
+  body(body: AnyValue): ValueDownlink<V, VU>;
+
+  keepLinked(): boolean;
+  keepLinked(keepLinked: boolean): ValueDownlink<V, VU>;
+
+  keepSynced(): boolean;
+  keepSynced(keepSynced: boolean): ValueDownlink<V, VU>;
+}
+export interface ValueDownlink<V, VU> extends OutletCombinators<V> {
+}
+OutletCombinators.define(ValueDownlink.prototype);

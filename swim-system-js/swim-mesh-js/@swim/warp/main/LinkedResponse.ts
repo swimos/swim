@@ -12,34 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyUri, Uri} from "@swim/uri";
 import {AnyValue, Value} from "@swim/structure";
-import {Envelope} from "./Envelope";
+import {AnyUri, Uri} from "@swim/uri";
 import {LinkAddressed} from "./LinkAddressed";
 
-export class LinkedResponse extends LinkAddressed {
+export class LinkedResponse extends LinkAddressed<LinkedResponse> {
   constructor(node: Uri, lane: Uri, prio: number, rate: number, body: Value) {
     super(node, lane, prio, rate, body);
   }
 
-  protected copy(node: Uri, lane: Uri, prio: number, rate: number, body: Value): this {
-    return new LinkedResponse(node, lane, prio, rate, body) as this;
+  protected copy(node: Uri, lane: Uri, prio: number, rate: number, body: Value): LinkedResponse {
+    return new LinkedResponse(node, lane, prio, rate, body);
   }
 
-  static tag(): string {
+  static get tag(): string {
     return "linked";
   }
 
-  static fromValue(value: Value): LinkedResponse | undefined {
-    return LinkAddressed.fromValue(value, LinkedResponse) as LinkedResponse | undefined;
-  }
-
-  static of(node: AnyUri, lane: AnyUri, prio: number = 0, rate: number = 0,
-            body: AnyValue = Value.absent()): LinkedResponse {
+  static create(node: AnyUri, lane: AnyUri, prio: number = 0, rate: number = 0,
+                body: AnyValue = Value.absent()): LinkedResponse {
     node = Uri.fromAny(node);
     lane = Uri.fromAny(lane);
     body = Value.fromAny(body);
-    return new LinkedResponse(node, lane, prio, rate, body);
+    return new LinkedResponse(node as Uri, lane as Uri, prio, rate, body);
   }
 }
-Envelope.LinkedResponse = LinkedResponse;

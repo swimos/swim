@@ -31,9 +31,9 @@ export abstract class Proof implements Display {
   }
 
   /**
-   * Returns an optional message detailing the circumstances of the assertion.
+   * An optional message detailing the circumstances of the assertion.
    */
-  abstract message(): string | null;
+  abstract readonly message: string | undefined;
 
   abstract display(output: Output): void;
 
@@ -45,7 +45,7 @@ export abstract class Proof implements Display {
    * Returns generic `Proof` for the validity of an `operator`, with an
    * optional `message` detailing the circumstances of the assertion.
    */
-  static valid(operator: string, message: string | null = null): ValidProof {
+  static valid(operator: string, message?: string): ValidProof {
     return new ValidProof(operator, message);
   }
 
@@ -53,7 +53,7 @@ export abstract class Proof implements Display {
    * Returns generic `Proof` against the validity of an `operator`, with an
    * optional `message` detailing the circumstances of the assertion.
    */
-  static invalid(operator: string, message: string | null = null): InvalidProof {
+  static invalid(operator: string, message?: string): InvalidProof {
     return new InvalidProof(operator, message);
   }
 
@@ -62,7 +62,7 @@ export abstract class Proof implements Display {
    * assertion, citing contradictory left- and right-hand side operands, along
    * with an optional `message` detailing the circumstances of the assertion.
    */
-  static refuted(lhs: unknown, operator: string, rhs: unknown, message: string | null = null): RefutedProof {
+  static refuted(lhs: unknown, operator: string, rhs: unknown, message?: string): RefutedProof {
     return new RefutedProof(lhs, operator, rhs, message);
   }
 
@@ -71,7 +71,7 @@ export abstract class Proof implements Display {
    * that was thrown while evaluating the assertion, along with an optional
    * `message` detailing the circumstances of the assertion.
    */
-  static error(error: unknown, message: string | null = null): ErrorProof {
+  static error(error: unknown, message?: string): ErrorProof {
     return new ErrorProof(error, message);
   }
 
@@ -80,7 +80,7 @@ export abstract class Proof implements Display {
    * yet been implemented, along with an optional `message` detailing the
    * circumstances of the assertion.
    */
-  static pending(message: string | null = null): PendingProof {
+  static pending(message?: string): PendingProof {
     return new PendingProof(message);
   }
 }
@@ -89,15 +89,16 @@ export abstract class Proof implements Display {
  * Generic `Proof` for the validity of an assertion.
  */
 export class ValidProof extends Proof {
-  /** @hidden */
-  readonly _operator: string;
-  /** @hidden */
-  readonly _message: string | null;
-
-  constructor(operator: string, message: string | null) {
+  constructor(operator: string, message: string | undefined) {
     super();
-    this._operator = operator;
-    this._message = message;
+    Object.defineProperty(this, "operator", {
+      value: operator,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "message", {
+      value: message,
+      enumerable: true,
+    });
   }
 
   isValid(): boolean {
@@ -105,25 +106,21 @@ export class ValidProof extends Proof {
   }
 
   /**
-   * Returns the name of the asserted operator.
+   * The name of the asserted operator.
    */
-  operator(): string {
-    return this._operator;
-  }
+  declare readonly operator: string;
 
-  message(): string | null {
-    return this._message;
-  }
+  declare readonly message: string | undefined;
 
   display(output: Output): void {
-    if (this._message !== null) {
+    if (this.message !== void 0) {
       OutputStyle.gray(output);
-      output.display(this._message).write(58/*':'*/).write(32/*' '*/);
+      output.display(this.message).write(58/*':'*/).write(32/*' '*/);
       OutputStyle.reset(output);
     }
 
     OutputStyle.green(output);
-    output = output.write(this._operator);
+    output = output.write(this.operator);
     OutputStyle.reset(output);
   }
 }
@@ -132,15 +129,16 @@ export class ValidProof extends Proof {
  * Generic `Proof` against the validity of an assertion.
  */
 export class InvalidProof extends Proof {
-  /** @hidden */
-  readonly _operator: string;
-  /** @hidden */
-  readonly _message: string | null;
-
-  constructor(operator: string, message: string | null) {
+  constructor(operator: string, message: string | undefined) {
     super();
-    this._operator = operator;
-    this._message = message;
+    Object.defineProperty(this, "operator", {
+      value: operator,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "message", {
+      value: message,
+      enumerable: true,
+    });
   }
 
   isValid(): boolean {
@@ -148,25 +146,21 @@ export class InvalidProof extends Proof {
   }
 
   /**
-   * Returns the name of the asserted operator.
+   * The name of the asserted operator.
    */
-  operator(): string {
-    return this._operator;
-  }
+  declare readonly operator: string;
 
-  message(): string | null {
-    return this._message;
-  }
+  declare readonly message: string | undefined;
 
   display(output: Output): void {
-    if (this._message !== null) {
+    if (this.message !== void 0) {
       OutputStyle.gray(output);
-      output.display(this._message).write(58/*':'*/).write(32/*' '*/);
+      output.display(this.message).write(58/*':'*/).write(32/*' '*/);
       OutputStyle.reset(output);
     }
 
     OutputStyle.red(output);
-    output = output.write(this._operator);
+    output = output.write(this.operator);
     OutputStyle.reset(output);
   }
 }
@@ -175,21 +169,24 @@ export class InvalidProof extends Proof {
  * Specific `Proof` against the validity of a binary operator assertion.
  */
 export class RefutedProof extends Proof {
-  /** @hidden */
-  readonly _lhs: unknown;
-  /** @hidden */
-  readonly _operator: string;
-  /** @hidden */
-  readonly _rhs: unknown;
-  /** @hidden */
-  readonly _message: string | null;
-
-  constructor(lhs: unknown, operator: string, rhs: unknown, message: string | null) {
+  constructor(lhs: unknown, operator: string, rhs: unknown, message: string | undefined) {
     super();
-    this._lhs = lhs;
-    this._operator = operator;
-    this._rhs = rhs;
-    this._message = message;
+    Object.defineProperty(this, "lhs", {
+      value: lhs,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "operator", {
+      value: operator,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "rhs", {
+      value: rhs,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "message", {
+      value: message,
+      enumerable: true,
+    });
   }
 
   isValid(): boolean {
@@ -199,44 +196,36 @@ export class RefutedProof extends Proof {
   /**
    * Returns the left-hand side of the contradictory expression.
    */
-  lhs(): unknown {
-    return this._lhs;
-  }
+  declare readonly lhs: unknown;
 
   /**
-   * Returns the name of the asserted binary operator.
+   * The name of the asserted binary operator.
    */
-  operator(): string {
-    return this._operator;
-  }
+  declare readonly operator: string;
 
   /**
    * Returns the right-hand side of the contradictory expression.
    */
-  rhs(): unknown {
-    return this._rhs;
-  }
+  declare readonly rhs: unknown;
 
-  message(): string | null {
-    return this._message;
-  }
+  declare readonly message: string | undefined;
 
   display(output: Output): void {
-    if (this._message !== null) {
+    if (this.message !== void 0) {
       OutputStyle.gray(output);
-      output.display(this._message).write(58/*':'*/).write(32/*' '*/);
+      output.display(this.message).write(58/*':'*/).write(32/*' '*/);
       OutputStyle.reset(output);
     }
 
-    output.display(this._lhs);
+    output.display(this.lhs);
 
     output = output.write(32/*' '*/);
     OutputStyle.red(output);
-    output = output.write(this._operator);
+    output = output.write(this.operator);
     OutputStyle.reset(output);
     output = output.write(32/*' '*/);
 
-    output.display(this._rhs);
+    output.display(this.rhs);
   }
 }
 
@@ -244,15 +233,16 @@ export class RefutedProof extends Proof {
  * `Proof` against the validity of an assertion due to an exception.
  */
 export class ErrorProof extends Proof {
-  /** @hidden */
-  readonly _error: unknown;
-  /** @hidden */
-  readonly _message: string | null;
-
-  constructor(error: unknown, message: string | null) {
+  constructor(error: unknown, message: string | undefined) {
     super();
-    this._error = error;
-    this._message = message;
+    Object.defineProperty(this, "error", {
+      value: error,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "message", {
+      value: message,
+      enumerable: true,
+    });
   }
 
   isValid(): boolean {
@@ -260,28 +250,24 @@ export class ErrorProof extends Proof {
   }
 
   /**
-   * Returns the exception that was thrown while evaluating the assertion.
+   * The exception that was thrown while evaluating the assertion.
    */
-  error(): unknown {
-    return this._error;
-  }
+  declare readonly error: unknown;
 
-  message(): string | null {
-    return this._message;
-  }
+  declare readonly message: string | undefined;
 
   display(output: Output): void {
-    if (this._message !== null) {
+    if (this.message !== void 0) {
       OutputStyle.gray(output);
-      output.display(this._message).write(58/*':'*/).write(32/*' '*/);
+      output.display(this.message).write(58/*':'*/).write(32/*' '*/);
       OutputStyle.reset(output);
     }
 
     OutputStyle.red(output);
-    output = output.write("" + this._error);
+    output = output.write("" + this.error);
     OutputStyle.reset(output);
 
-    const stack = (this._error as any).stack;
+    const stack = (this.error as Error).stack;
     if (typeof stack === "string") {
       output = output.writeln().write(stack);
     }
@@ -293,12 +279,12 @@ export class ErrorProof extends Proof {
  * implemented.
  */
 export class PendingProof extends Proof {
-  /** @hidden */
-  readonly _message: string | null;
-
-  constructor(message: string | null) {
+  constructor(message: string | undefined) {
     super();
-    this._message = message;
+    Object.defineProperty(this, "message", {
+      value: message,
+      enumerable: true,
+    });
   }
 
   isValid(): boolean {
@@ -309,14 +295,12 @@ export class PendingProof extends Proof {
     return true;
   }
 
-  message(): string | null {
-    return this._message;
-  }
+  declare readonly message: string | undefined;
 
   display(output: Output): void {
-    if (this._message !== null) {
+    if (this.message !== void 0) {
       OutputStyle.gray(output);
-      output.display(this._message).write(58/*':'*/).write(32/*' '*/);
+      output.display(this.message).write(58/*':'*/).write(32/*' '*/);
       OutputStyle.reset(output);
     }
 

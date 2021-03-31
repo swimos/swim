@@ -16,38 +16,39 @@ import {Value, Record, Func, Interpreter} from "@swim/structure";
 import {Inlet, AbstractOutlet, OutletInlet} from "@swim/streamlet";
 
 export class InvokeOutlet extends AbstractOutlet<Value> {
-  /** @hidden */
-  readonly _scope: Record;
-  /** @hidden */
-  readonly _funcInlet: Inlet<Value>;
-  /** @hidden */
-  readonly _argsInlet: Inlet<Value>;
-
   constructor(scope: Record) {
     super();
-    this._scope = scope;
-    this._funcInlet = new OutletInlet<Value>(this);
-    this._argsInlet = new OutletInlet<Value>(this);
+    Object.defineProperty(this, "scope", {
+      value: scope,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "funcInlet", {
+      value: new OutletInlet<Value>(this),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "argsInlet", {
+      value: new OutletInlet<Value>(this),
+      enumerable: true,
+    });
   }
 
-  funcInlet(): Inlet<Value> {
-    return this._funcInlet;
-  }
+  /** @hidden */
+  declare readonly scope: Record;
 
-  argsInlet(): Inlet<Value> {
-    return this._argsInlet;
-  }
+  declare readonly funcInlet: Inlet<Value>;
+
+  declare readonly argsInlet: Inlet<Value>;
 
   get(): Value {
-    const funcInput = this._funcInlet.input();
-    const argsInput = this._argsInlet.input();
+    const funcInput = this.funcInlet.input;
+    const argsInput = this.argsInlet.input;
     if (funcInput !== null && argsInput !== null) {
       const func = funcInput.get();
       if (func instanceof Func) {
         const args = argsInput.get();
         if (args !== void 0) {
           const interpreter = new Interpreter();
-          interpreter.pushScope(this._scope);
+          interpreter.pushScope(this.scope);
           const result = func.invoke(args, interpreter, void 0 /* TODO: generalize InvokeOperator to InvokeContext */);
           return result.toValue();
         }

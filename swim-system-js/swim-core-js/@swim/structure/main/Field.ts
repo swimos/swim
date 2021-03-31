@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Interpolator} from "@swim/mapping";
 import {AnyItem, Item} from "./Item";
-import {AnyValue, Value} from "./Value";
-import {Record} from "./Record";
-import {AnyText} from "./Text";
-import {AnyNum} from "./Num";
+import {FieldInterpolator} from "./"; // forward import
+import {Attr} from "./"; // forward import
+import {Slot} from "./" // forward import
+import {AnyValue, Value} from "./"; // forward import
+import {Record} from "./"; // forward import
+import {AnyText, Text} from "./"; // forward import
+import type {AnyNum} from "./Num";
 
 export type AnyField = Field
                      | {readonly $key: AnyValue, readonly $value: AnyValue}
@@ -76,14 +80,14 @@ export abstract class Field extends Item {
    * Always returns `undefined` because a `Field` can't be a `Record`, so it
    * can't have a first member `Attr` whose key string could be returned.
    */
-  tag(): string | undefined {
+  get tag(): string | undefined {
     return void 0;
   }
 
   /**
    * Always returns the value component of this `Field`.
    */
-  target(): Value {
+  get target(): Value {
     return this.value;
   }
 
@@ -92,14 +96,14 @@ export abstract class Field extends Item {
    * `Value`.
    */
   flattened(): Value {
-    return Item.Value.absent();
+    return Value.absent();
   }
 
   /**
    * Returns a `Record` containing just this `Field`.
    */
   unflattened(): Record {
-    return Item.Record.of(this);
+    return Record.of(this);
   }
 
   /**
@@ -108,7 +112,7 @@ export abstract class Field extends Item {
    * equal to the `tag`.
    */
   header(tag: string): Value {
-    return Item.Value.absent();
+    return Value.absent();
   }
 
   /**
@@ -133,7 +137,7 @@ export abstract class Field extends Item {
    * `Record`, so it can't have any non-first members.
    */
   tail(): Record {
-    return Item.Record.empty();
+    return Record.empty();
   }
 
   /**
@@ -142,7 +146,7 @@ export abstract class Field extends Item {
    * a distinct `Value`, so it can't return `Extant`.
    */
   body(): Value {
-    return Item.Value.absent();
+    return Value.absent();
   }
 
   /**
@@ -166,7 +170,7 @@ export abstract class Field extends Item {
    * can't have a `Field` member whose key is equal to the given `key`.
    */
   get(key: AnyValue): Value {
-    return Item.Value.absent();
+    return Value.absent();
   }
 
   /**
@@ -174,7 +178,7 @@ export abstract class Field extends Item {
    * can't have an `Attr` member whose key is equal to the given `key`.
    */
   getAttr(key: AnyText): Value {
-    return Item.Value.absent();
+    return Value.absent();
   }
 
   /**
@@ -182,7 +186,7 @@ export abstract class Field extends Item {
    * can't have a `Slot` member whose key is equal to the given `key`.
    */
   getSlot(key: AnyValue): Value {
-    return Item.Value.absent();
+    return Value.absent();
   }
 
   /**
@@ -226,7 +230,7 @@ export abstract class Field extends Item {
   }
 
   lambda(template: Value): Value {
-    return Item.Value.absent();
+    return Value.absent();
   }
 
   /**
@@ -288,21 +292,40 @@ export abstract class Field extends Item {
 
   abstract commit(): this;
 
+  interpolateTo(that: Field): Interpolator<Field>;
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    if (that instanceof Field) {
+      return FieldInterpolator(this, that);
+    } else {
+      return super.interpolateTo(that);
+    }
+  }
+
   /** @hidden */
-  static readonly IMMUTABLE: number = 1 << 0;
+  static readonly ImmutableFlag: number = 1 << 0;
 
   static of(key: AnyValue, value?: AnyValue): Field {
-    let name;
+    let name: string | undefined;
     if (typeof key === "string") {
       name = key;
-    } else if (key instanceof Item.Text) {
+    } else if (key instanceof Text) {
       name = key.value;
     }
     if (name !== void 0 && name.charCodeAt(0) === 64/*'@'*/) {
-      arguments[0] = name.slice(1);
-      return Item.Attr.of.apply(undefined, arguments);
+      name = name.slice(1);
+      if (arguments.length === 1) {
+        return Attr.of(name);
+      } else {
+        return Attr.of(name, value);
+      }
     } else {
-      return Item.Slot.of.apply(undefined, arguments);
+      if (arguments.length === 1) {
+        return Slot.of(key);
+      } else {
+        return Slot.of(key, value);
+      }
     }
   }
 
@@ -321,4 +344,3 @@ export abstract class Field extends Item {
     throw new TypeError("" + field);
   }
 }
-Item.Field = Field;

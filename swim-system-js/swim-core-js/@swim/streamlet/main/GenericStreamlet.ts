@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Inlet} from "./Inlet";
-import {Outlet} from "./Outlet";
-import {Streamlet} from "./Streamlet";
+import type {Inlet} from "./Inlet";
+import type {Outlet} from "./Outlet";
+import type {Streamlet} from "./Streamlet";
 
 export interface GenericStreamlet<I = unknown, O = I> extends Streamlet<I, O> {
   getOutput(outlet: Outlet<O>): O | undefined;

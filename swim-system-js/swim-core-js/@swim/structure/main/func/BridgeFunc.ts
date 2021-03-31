@@ -12,22 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {Item} from "../Item";
-import {Func} from "../Func";
+import {Func} from "./Func";
 
 export abstract class BridgeFunc extends Func {
-  typeOrder(): number {
+  get typeOrder(): number {
     return 51;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof BridgeFunc) {
-      return Objects.compare((this as any).__proto__.constructor.name,
-                             (that as any).__proto__.constructor.name);
+      return Constructors.compare(this.constructor, that.constructor);
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown): boolean {
+    return this === that;
   }
 
   equals(that: unknown): boolean {
@@ -35,11 +40,10 @@ export abstract class BridgeFunc extends Func {
   }
 
   hashCode(): number {
-    return Murmur3.seed((this as any).__proto__.constructor);
+    return Constructors.hash(this.constructor);
   }
 
-  debug(output: Output) {
-    output = output.write((this as any).__proto__.constructor.name);
+  debug(output: Output): void {
+    output = output.write(this.constructor.name);
   }
 }
-Item.BridgeFunc = BridgeFunc;

@@ -12,75 +12,72 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Value, AnyValue} from "@swim/structure";
+import type {Value, AnyValue} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
 import {EventDownlinkInit, EventDownlink} from "../downlink/EventDownlink";
 import {ListDownlinkInit, ListDownlink} from "../downlink/ListDownlink";
 import {MapDownlinkInit, MapDownlink} from "../downlink/MapDownlink";
 import {ValueDownlinkInit, ValueDownlink} from "../downlink/ValueDownlink";
-import {RefContext} from "./RefContext";
+import type {RefContext} from "./RefContext";
 import {BaseRef} from "./BaseRef";
 import {HostRef} from "./HostRef";
 import {LaneRef} from "./LaneRef";
 
 export class NodeRef extends BaseRef {
-  /** @hidden */
-  readonly _hostUri: Uri;
-  /** @hidden */
-  readonly _nodeUri: Uri;
-
   constructor(context: RefContext, hostUri: Uri, nodeUri: Uri) {
     super(context);
-    this._hostUri = hostUri;
-    this._nodeUri = nodeUri;
+    Object.defineProperty(this, "hostUri", {
+      value: hostUri,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "nodeUri", {
+      value: nodeUri,
+      enumerable: true,
+    });
   }
 
-  hostUri(): Uri {
-    return this._hostUri;
-  }
+  declare readonly hostUri: Uri;
 
-  nodeUri(): Uri {
-    return this._nodeUri;
-  }
+  declare readonly nodeUri: Uri;
 
   hostRef(hostUri: AnyUri): HostRef {
     hostUri = Uri.fromAny(hostUri);
-    return new HostRef(this._context, hostUri);
+    return new HostRef(this.context, hostUri as Uri);
   }
 
   nodeRef(nodeUri: AnyUri): NodeRef {
     nodeUri = Uri.fromAny(nodeUri);
-    return new NodeRef(this._context, this._hostUri, nodeUri);
+    return new NodeRef(this.context, this.hostUri, nodeUri as Uri);
   }
 
   laneRef(laneUri: AnyUri): LaneRef {
     laneUri = Uri.fromAny(laneUri);
-    return new LaneRef(this._context, this._hostUri, this._nodeUri, laneUri);
+    return new LaneRef(this.context, this.hostUri, this.nodeUri, laneUri as Uri);
   }
 
   downlink(init?: EventDownlinkInit): EventDownlink {
-    return new EventDownlink(this._context, this, init, this._hostUri, this._nodeUri);
+    return new EventDownlink(this.context, this, init, this.hostUri, this.nodeUri);
   }
 
   downlinkList(init?: ListDownlinkInit<Value, AnyValue>): ListDownlink<Value, AnyValue>;
-  downlinkList<V extends VU, VU = V>(init?: ListDownlinkInit<V, VU>): ListDownlink<V, VU>;
-  downlinkList<V extends VU, VU = V>(init?: ListDownlinkInit<V, VU>): ListDownlink<V, VU> {
-    return new ListDownlink(this._context, this, init, this._hostUri, this._nodeUri);
+  downlinkList<V extends VU, VU = never>(init?: ListDownlinkInit<V, VU>): ListDownlink<V, VU>;
+  downlinkList<V extends VU, VU = never>(init?: ListDownlinkInit<V, VU>): ListDownlink<V, VU> {
+    return new ListDownlink(this.context, this, init, this.hostUri, this.nodeUri);
   }
 
   downlinkMap(init?: MapDownlinkInit<Value, Value, AnyValue, AnyValue>): MapDownlink<Value, Value, AnyValue, AnyValue>;
-  downlinkMap<K extends KU, V extends VU, KU = K, VU = V>(init?: MapDownlinkInit<K, V, KU, VU>): MapDownlink<K, V, KU, VU>;
-  downlinkMap<K extends KU, V extends VU, KU = K, VU = V>(init?: MapDownlinkInit<K, V, KU, VU>): MapDownlink<K, V, KU, VU> {
-    return new MapDownlink(this._context, this, init, this._hostUri, this._nodeUri);
+  downlinkMap<K extends KU, V extends VU, KU = never, VU = never>(init?: MapDownlinkInit<K, V, KU, VU>): MapDownlink<K, V, KU, VU>;
+  downlinkMap<K extends KU, V extends VU, KU = never, VU = never>(init?: MapDownlinkInit<K, V, KU, VU>): MapDownlink<K, V, KU, VU> {
+    return new MapDownlink(this.context, this, init, this.hostUri, this.nodeUri);
   }
 
   downlinkValue(init?: ValueDownlinkInit<Value, AnyValue>): ValueDownlink<Value, AnyValue>;
-  downlinkValue<V extends VU, VU = V>(init?: ValueDownlinkInit<V, VU>): ValueDownlink<V, VU>;
-  downlinkValue<V extends VU, VU = V>(init?: ValueDownlinkInit<V, VU>): ValueDownlink<V, VU> {
-    return new ValueDownlink(this._context, this, init, this._hostUri, this._nodeUri);
+  downlinkValue<V extends VU, VU = never>(init?: ValueDownlinkInit<V, VU>): ValueDownlink<V, VU>;
+  downlinkValue<V extends VU, VU = never>(init?: ValueDownlinkInit<V, VU>): ValueDownlink<V, VU> {
+    return new ValueDownlink(this.context, this, init, this.hostUri, this.nodeUri);
   }
 
   command(laneUri: AnyUri, body: AnyValue): void {
-    this._context.command(this._hostUri, this._nodeUri, laneUri, body);
+    this.context.command(this.hostUri, this.nodeUri, laneUri, body);
   }
 }

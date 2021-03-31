@@ -15,18 +15,20 @@
 import {Diagnostic} from "@swim/codec";
 
 export class UriException extends Error {
-  readonly diagnostic?: Diagnostic;
+  declare readonly diagnostic: Diagnostic | null;
 
   constructor(message?: Diagnostic | string) {
-    super(message instanceof Diagnostic ? message.message() || void 0 : message);
-    if (message instanceof Diagnostic) {
-      this.diagnostic = message;
-    }
-    (this as any).__proto__ = UriException.prototype;
+    super(message instanceof Diagnostic ? message.message : message);
+    Object.setPrototypeOf(this, UriException.prototype);
+    Object.defineProperty(this, "diagnostic", {
+      value: message instanceof Diagnostic ? message : null,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   toString(): string {
-    if (this.diagnostic !== void 0) {
+    if (this.diagnostic !== null) {
       return this.diagnostic.toString();
     } else {
       return super.toString();

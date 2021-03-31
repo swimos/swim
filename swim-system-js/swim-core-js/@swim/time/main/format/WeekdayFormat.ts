@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Input, Output, Parser} from "@swim/codec";
-import {DateTimeLocale} from "../DateTimeLocale";
-import {DateTimeInit, DateTime} from "../DateTime";
-import {DateTimeFormat} from "../DateTimeFormat";
+import type {Input, Output, Parser} from "@swim/codec";
+import type {DateTimeInit, DateTime} from "../DateTime";
+import type {DateTimeLocale} from "./DateTimeLocale";
+import {DateTimeFormat} from "./DateTimeFormat";
+import {WeekdayParser} from "../"; // forward import
 
 /** @hidden */
 export class WeekdayFormat extends DateTimeFormat {
@@ -26,12 +27,19 @@ export class WeekdayFormat extends DateTimeFormat {
     this.locale = locale;
   }
 
+  withLocale(locale: DateTimeLocale): DateTimeFormat {
+    if (locale !== this.locale) {
+      return new WeekdayFormat(locale);
+    } else {
+      return this;
+    }
+  }
+
   writeDate(date: DateTime, output: Output): void {
-    output.write(this.locale.weekdays[date.weekday()]);
+    output.write(this.locale.weekdays[date.weekday]!);
   }
 
   parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {
-    return DateTimeFormat.WeekdayParser.parse(input, this.locale, date);
+    return WeekdayParser.parse(input, this.locale, date);
   }
 }
-DateTimeFormat.Weekday = WeekdayFormat;

@@ -59,6 +59,7 @@ export {UriPathSegment} from "./UriPathSegment";
 export {UriPathSlash} from "./UriPathSlash";
 export {UriPathEmpty} from "./UriPathEmpty";
 export {UriPathBuilder} from "./UriPathBuilder";
+export {UriPathForm} from "./UriPathForm";
 
 export {
   AnyUriQuery,
@@ -73,19 +74,8 @@ export {
   UriFragment,
 } from "./UriFragment";
 
-export {UriParser} from "./UriParser";
-export {UriAbsoluteParser} from "./UriAbsoluteParser";
-export {UriSchemeParser} from "./UriSchemeParser";
-export {UriAuthorityParser} from "./UriAuthorityParser";
-export {UriUserParser} from "./UriUserParser";
-export {UriHostParser} from "./UriHostParser";
-export {UriHostAddressParser} from "./UriHostAddressParser";
-export {UriHostLiteralParser} from "./UriHostLiteralParser";
-export {UriPortParser} from "./UriPortParser";
-export {UriPathParser} from "./UriPathParser";
-export {UriQueryParser} from "./UriQueryParser";
-export {UriFragmentParser} from "./UriFragmentParser";
-
 export {UriForm} from "./UriForm";
 
 export {UriCache} from "./UriCache";
+
+export * from "./parser";

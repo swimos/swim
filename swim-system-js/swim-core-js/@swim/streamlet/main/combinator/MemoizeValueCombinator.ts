@@ -12,20 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Outlet} from "../Outlet";
+import type {Outlet} from "../Outlet";
 import {AbstractInoutlet} from "../AbstractInoutlet";
 
 export class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
+  constructor() {
+    super();
+    Object.defineProperty(this, "state", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
+  }
+
   /** @hidden */
-  protected _state: IO | undefined;
+  declare readonly state: IO | undefined;
 
   get(): IO | undefined {
-    return this._state;
+    return this.state;
   }
 
   protected onRecohere(version: number): void {
-    if (this._input !== null) {
-      this._state = this._input.get();
+    const input = this.input;
+    if (input !== null) {
+      Object.defineProperty(this, "state", {
+        value: input.get(),
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 
@@ -33,4 +47,3 @@ export class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
     return this;
   }
 }
-Outlet.MemoizeValueCombinator = MemoizeValueCombinator;

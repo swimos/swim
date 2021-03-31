@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Value} from "@swim/structure";
-import {Host} from "./host/Host";
-import {WarpRef} from "./WarpRef";
+import type {Value} from "@swim/structure";
+import type {Host} from "./host/Host";
+import type {WarpRef} from "./WarpRef";
 
 export type WarpDidConnect = (host: Host, warp: WarpRef) => void;
 export type WarpDidAuthenticate = (body: Value, host: Host, warp: WarpRef) => void;
@@ -29,8 +29,3 @@ export interface WarpObserver {
   didDisconnect?: WarpDidDisconnect;
   didFail?: WarpDidFail;
 }
-
-/**
- * @deprecated
- */
-export type SwimObserver = WarpObserver;

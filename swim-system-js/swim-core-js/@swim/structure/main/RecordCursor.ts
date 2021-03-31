@@ -13,110 +13,184 @@
 // limitations under the License.
 
 import {Cursor} from "@swim/util";
-import {Item} from "./Item";
-import {Record} from "./Record";
+import type {Item} from "./Item";
+import type {Record} from "./Record";
 
 /** @hidden */
 export class RecordCursor extends Cursor<Item> {
   /** @hidden */
-  readonly _record: Record;
+  declare readonly record: Record;
   /** @hidden */
-  readonly _lower: number;
+  declare readonly lower: number;
   /** @hidden */
-  readonly _upper: number;
+  declare readonly upper: number;
   /** @hidden */
-  _index: number;
+  declare readonly index: number;
   /** @hidden */
-  _direction: number;
+  declare readonly direction: number;
 
-  constructor(record: Record, lower: number = 0, upper: number = record.length, index: number = lower) {
+  constructor(record: Record, lower?: number, upper?: number, index?: number) {
     super();
-    this._record = record;
-    this._lower = lower;
-    this._upper = upper;
-    this._index = index;
-    this._direction = 0;
+    if (lower === void 0) {
+      lower = 0;
+    }
+    if (upper === void 0) {
+      upper = record.length;
+    }
+    if (index === void 0) {
+      index = lower;
+    }
+    Object.defineProperty(this, "record", {
+      value: record,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "lower", {
+      value: lower,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "upper", {
+      value: upper,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "index", {
+      value: index,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "direction", {
+      value: 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   isEmpty(): boolean {
-    return this._index >= this._upper;
+    return this.index >= this.upper;
   }
 
   head(): Item {
-    this._direction = 0;
-    if (this._index < this._upper) {
-      return this._record.getItem(this._index);
+    Object.defineProperty(this, "direction", {
+      value: 0,
+      enumerable: true,
+      configurable: true,
+    });
+    if (this.index < this.upper) {
+      return this.record.getItem(this.index);
     } else {
       throw new Error("empty");
     }
   }
 
   step(): void {
-    this._direction = 0;
-    if (this._index < this._upper) {
-      this._index += 1;
+    Object.defineProperty(this, "direction", {
+      value: 0,
+      enumerable: true,
+      configurable: true,
+    });
+    if (this.index < this.upper) {
+      Object.defineProperty(this, "index", {
+        value: this.index + 1,
+        enumerable: true,
+        configurable: true,
+      });
     } else {
       throw new Error("empty");
     }
   }
 
   skip(count: number): void {
-    this._index = Math.min(Math.max(this._lower, this._index + count, this._upper));
+    Object.defineProperty(this, "index", {
+      value: Math.min(Math.max(this.lower, this.index + count, this.upper)),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   hasNext(): boolean {
-    return this._index < this._upper;
+    return this.index < this.upper;
   }
 
   nextIndex(): number {
-    return this._index - this._lower;
+    return this.index - this.lower;
   }
 
   next(): {value?: Item, done: boolean} {
-    this._direction = 1;
-    const index = this._index;
-    if (index < this._upper) {
-      this._index = index + 1;
-      return {value: this._record.getItem(index), done: this._index === this._upper};
+    Object.defineProperty(this, "direction", {
+      value: 1,
+      enumerable: true,
+      configurable: true,
+    });
+    const index = this.index;
+    if (index < this.upper) {
+      Object.defineProperty(this, "index", {
+        value: index + 1,
+        enumerable: true,
+        configurable: true,
+      });
+      return {value: this.record.getItem(index), done: this.index === this.upper};
     } else {
-      this._index = this._upper;
+      Object.defineProperty(this, "index", {
+        value: this.upper,
+        enumerable: true,
+        configurable: true,
+      });
       return {done: true};
     }
   }
 
   hasPrevious(): boolean {
-    return this._index > this._lower;
+    return this.index > this.lower;
   }
 
   previousIndex(): number {
-    return this._index - this._lower - 1;
+    return this.index - this.lower - 1;
   }
 
   previous(): {value?: Item, done: boolean} {
-    this._direction = -1;
-    const index = this._index - 1;
-    if (index >= this._lower) {
-      this._index = index;
-      return {value: this._record.getItem(index), done: index === this._lower};
+    Object.defineProperty(this, "direction", {
+      value: -1,
+      enumerable: true,
+      configurable: true,
+    });
+    const index = this.index - 1;
+    if (index >= this.lower) {
+      Object.defineProperty(this, "index", {
+        value: index,
+        enumerable: true,
+        configurable: true,
+      });
+      return {value: this.record.getItem(index), done: index === this.lower};
     } else {
-      this._index = 0;
+      Object.defineProperty(this, "index", {
+        value: 0,
+        enumerable: true,
+        configurable: true,
+      });
       return {done: true};
     }
   }
 
   set(newItem: Item): void {
-    if (this._direction > 0) {
-      this._record.setItem(this._index - 1, newItem);
+    if (this.direction > 0) {
+      this.record.setItem(this.index - 1, newItem);
     } else {
-      this._record.setItem(this._index, newItem);
+      this.record.setItem(this.index, newItem);
     }
   }
 
   delete(): void {
-    if (this._direction > 0) {
-      this._index -= 1;
+    if (this.direction > 0) {
+      Object.defineProperty(this, "index", {
+        value: this.index - 1,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    this._record.splice(this._index, 1);
-    this._direction = 0;
+    this.record.splice(this.index, 1);
+    Object.defineProperty(this, "direction", {
+      value: 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
 }

@@ -14,6 +14,7 @@
 
 import {TestOptions, Test, Spec, Report} from "@swim/unit";
 import {Attr, Slot, Value, Record, Text} from "@swim/structure";
+import {Uri} from "@swim/uri";
 import {
   Envelope,
   EventMessage,
@@ -26,9 +27,8 @@ import {
   AuthedResponse,
   DeauthedResponse,
 } from "@swim/warp";
-import {Uri} from "@swim/uri";
 import {Host, Downlink, WarpClient} from "@swim/client";
-import {MockServer} from "./MockServer";
+import type {MockServer} from "./MockServer";
 import {ClientExam} from "./ClientExam";
 
 export class WarpClientSpec extends Spec {
@@ -41,10 +41,10 @@ export class WarpClientSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       client.didConnect(function (host: Host): void {
         exam.comment("didConnect");
-        exam.equal(host.hostUri(), server.hostUri());
+        exam.equal(host.hostUri, server.hostUri);
         resolve();
       });
-      client.command(server.hostUri(), "/", "connect");
+      client.command(server.hostUri, "/", "connect");
     });
   }
 
@@ -57,10 +57,10 @@ export class WarpClientSpec extends Spec {
       });
       client.didDisconnect(function (host: Host): void {
         exam.comment("didDisconnect");
-        exam.equal(host.hostUri(), server.hostUri());
+        exam.equal(host.hostUri, server.hostUri);
         resolve();
       });
-      client.command(server.hostUri(), "/", "connect");
+      client.command(server.hostUri, "/", "connect");
     });
   }
 
@@ -68,17 +68,17 @@ export class WarpClientSpec extends Spec {
   clientDidAuthenticate(exam: ClientExam): Promise<void> {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
-        exam.true(envelope instanceof AuthRequest);
-        exam.equal(envelope.body(), Record.of(Slot.of("key", 1234)));
-        server.send(AuthedResponse.of(Record.of(Slot.of("id", 5678))));
+        exam.instanceOf(envelope, AuthRequest);
+        exam.equal(envelope.body, Record.of(Slot.of("key", 1234)));
+        server.send(AuthedResponse.create(Record.of(Slot.of("id", 5678))));
       };
       client.didAuthenticate(function (body: Value, host: Host): void {
         exam.comment("didAuthenticate");
-        exam.equal(host.hostUri(), server.hostUri());
+        exam.equal(host.hostUri, server.hostUri);
         exam.equal(body, Record.of(Slot.of("id", 5678)));
         resolve();
       });
-      client.authenticate(server.hostUri(), Record.of(Slot.of("key", 1234)));
+      client.authenticate(server.hostUri, Record.of(Slot.of("key", 1234)));
     });
   }
 
@@ -86,20 +86,20 @@ export class WarpClientSpec extends Spec {
   clientDidDeauthenticate(exam: ClientExam): Promise<void> {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
-        exam.true(envelope instanceof AuthRequest);
-        exam.equal(envelope.body(), Record.of(Slot.of("key", 1234)));
-        server.send(DeauthedResponse.of(Record.of(Attr.of("denied"))));
+        exam.instanceOf(envelope, AuthRequest);
+        exam.equal(envelope.body, Record.of(Slot.of("key", 1234)));
+        server.send(DeauthedResponse.create(Record.of(Attr.of("denied"))));
       };
       client.didAuthenticate(function (body: Value, host: Host): void {
         exam.fail("didAuthenticate");
       });
       client.didDeauthenticate(function (body: Value, host: Host): void {
         exam.comment("didDeauthenticate");
-        exam.equal(host.hostUri(), server.hostUri());
+        exam.equal(host.hostUri, server.hostUri);
         exam.equal(body, Record.of(Attr.of("denied")));
         resolve();
       });
-      client.authenticate(server.hostUri(), Record.of(Slot.of("key", 1234)));
+      client.authenticate(server.hostUri, Record.of(Slot.of("key", 1234)));
     });
   }
 
@@ -107,14 +107,14 @@ export class WarpClientSpec extends Spec {
   clientDownlink(exam: ClientExam): Promise<void> {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
-        exam.true(envelope instanceof LinkRequest);
-        exam.equal(envelope.node(), Uri.parse("house/kitchen"));
-        exam.equal(envelope.lane(), Uri.parse("light"));
-        server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
-        server.send(EventMessage.of(envelope.node(), envelope.lane(), "on"));
+        exam.instanceOf(envelope, LinkRequest);
+        exam.equal(envelope.node, Uri.parse("house/kitchen"));
+        exam.equal(envelope.lane, Uri.parse("light"));
+        server.send(LinkedResponse.create(envelope.node, envelope.lane));
+        server.send(EventMessage.create(envelope.node, envelope.lane, "on"));
       };
       client.downlink()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("house/kitchen")
         .laneUri("light")
         .keepLinked(false)
@@ -138,18 +138,18 @@ export class WarpClientSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof LinkRequest) {
-          exam.equal(envelope.node(), Uri.parse("house/kitchen"));
-          exam.equal(envelope.lane(), Uri.parse("light"));
-          server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
-          server.send(EventMessage.of(envelope.node(), envelope.lane(), "on"));
+          exam.equal(envelope.node, Uri.parse("house/kitchen"));
+          exam.equal(envelope.lane, Uri.parse("light"));
+          server.send(LinkedResponse.create(envelope.node, envelope.lane));
+          server.send(EventMessage.create(envelope.node, envelope.lane, "on"));
         } else if (envelope instanceof UnlinkRequest) {
-          exam.equal(envelope.node(), Uri.parse("house/kitchen"));
-          exam.equal(envelope.lane(), Uri.parse("light"));
-          server.send(UnlinkedResponse.of(envelope.node(), envelope.lane()));
+          exam.equal(envelope.node, Uri.parse("house/kitchen"));
+          exam.equal(envelope.lane, Uri.parse("light"));
+          server.send(UnlinkedResponse.create(envelope.node, envelope.lane));
         }
       };
       client.downlink()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("house/kitchen")
         .laneUri("light")
         .willLink(function (): void {
@@ -163,7 +163,7 @@ export class WarpClientSpec extends Spec {
           exam.equal(body, Text.from("on"));
           downlink.close();
           client.downlink()
-            .hostUri(server.hostUri())
+            .hostUri(server.hostUri)
             .nodeUri("house/kitchen")
             .laneUri("light")
             .keepLinked(false)
@@ -188,13 +188,13 @@ export class WarpClientSpec extends Spec {
   clientCommand(exam: ClientExam): Promise<void> {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
-        exam.true(envelope instanceof CommandMessage);
-        exam.equal(envelope.node(), Uri.parse("house/kitchen"));
-        exam.equal(envelope.lane(), Uri.parse("light"));
-        exam.equal(envelope.body(), Text.from("on"));
+        exam.instanceOf(envelope, CommandMessage);
+        exam.equal(envelope.node, Uri.parse("house/kitchen"));
+        exam.equal(envelope.lane, Uri.parse("light"));
+        exam.equal(envelope.body, Text.from("on"));
         resolve();
       };
-      client.command(server.hostUri(), "house/kitchen", "light", "on");
+      client.command(server.hostUri, "house/kitchen", "light", "on");
     });
   }
 }

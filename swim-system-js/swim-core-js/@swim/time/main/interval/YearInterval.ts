@@ -13,44 +13,44 @@
 // limitations under the License.
 
 import {AnyDateTime, DateTime} from "../DateTime";
-import {UnitTimeInterval, TimeInterval} from "../TimeInterval";
+import {UnitTimeInterval, TimeInterval} from "./TimeInterval";
+import {YearsInterval} from "../"; // forward import
 
 /** @hidden */
 export class YearInterval extends UnitTimeInterval {
-  offset(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  offset(t: AnyDateTime, k?: number): DateTime {
+    let d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    d = d.year(d.year() + k);
+    d = d.withYear(d.year + k);
     return d;
   }
 
-  next(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  next(t: AnyDateTime, k?: number): DateTime {
+    const d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.year(d.year() + k).month(0, 1).hour(0, 0, 0, 0);
+    return d.withYear(d.year + k).withMonth(0, 1).withHour(0, 0, 0, 0);
   }
 
-  floor(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    return d.month(0, 1).hour(0, 0, 0, 0);
+  floor(t: AnyDateTime): DateTime {
+    const d = DateTime.fromAny(t);
+    return d.withMonth(0, 1).withHour(0, 0, 0, 0);
   }
 
-  ceil(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    d = d.time(d.time() - 1);
-    d = d.month(0, 1).hour(0, 0, 0, 0);
-    d = d.year(d.year() + 1);
-    return d.month(0, 1).hour(0, 0, 0, 0);
+  ceil(t: AnyDateTime): DateTime {
+    let d = DateTime.fromAny(t);
+    d = new DateTime(d.time - 1, d.zone);
+    d = d.withMonth(0, 1).withHour(0, 0, 0, 0);
+    d = d.withYear(d.year + 1);
+    return d.withMonth(0, 1).withHour(0, 0, 0, 0);
   }
 
   every(k: number): TimeInterval {
     if (k === 1) {
       return this;
     } else if (isFinite(k) && k >= 1) {
-      return new TimeInterval.Years(k);
+      return new YearsInterval(k);
     } else {
       throw new Error("" + k);
     }
   }
 }
-TimeInterval.Year = YearInterval;

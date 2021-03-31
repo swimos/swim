@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Input, Output, Parser} from "@swim/codec";
-import {DateTimeInit, DateTime} from "../DateTime";
-import {DateTimeFormat} from "../DateTimeFormat";
+import type {Input, Output, Parser} from "@swim/codec";
+import type {DateTimeInit, DateTime} from "../DateTime";
+import {DateTimeFormat} from "./DateTimeFormat";
+import {SecondParser} from "../"; // forward import
 
 /** @hidden */
 export class SecondFormat extends DateTimeFormat {
   writeDate(date: DateTime, output: Output): void {
-    DateTimeFormat.writeDateNumber2(date.second(), output);
+    DateTimeFormat.writeDateNumber2(date.second, output);
   }
 
   parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {
-    return DateTimeFormat. SecondParser.parse(input, date);
+    return SecondParser.parse(input, date);
   }
 }
-DateTimeFormat.Second = SecondFormat;

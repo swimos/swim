@@ -15,16 +15,16 @@
 import {Item, Field, Value, Record} from "@swim/structure";
 import {RecordModel, Reifier} from "@swim/dataflow";
 import {DownlinkStreamlet} from "./DownlinkStreamlet";
-import {WarpRef} from "../WarpRef";
+import type {WarpRef} from "../WarpRef";
 
 /** @hidden */
 export class DownlinkReifier extends Reifier {
-  warp: WarpRef | undefined;
-
-  constructor(warp?: WarpRef) {
+  constructor(warp: WarpRef | null = null) {
     super();
     this.warp = warp;
   }
+
+  warp: WarpRef | null;
 
   reify(item: Item): Item {
     if (item instanceof Field) {
@@ -56,7 +56,7 @@ export class DownlinkReifier extends Reifier {
 
   /** @hidden */
   reifyModel(model: RecordModel): Record {
-    if (model.tag() === "link") {
+    if (model.tag === "link") {
       const streamlet = new DownlinkStreamlet(this.warp, model);
       streamlet.compile();
       return streamlet;

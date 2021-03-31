@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects, Cursor} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Lazy, Numbers, Constructors, Cursor} from "@swim/util";
+import type {Output} from "@swim/codec";
+import type {Interpolator} from "@swim/mapping";
 import {AnyItem, Item} from "./Item";
+import {Attr} from "./Attr";
+import {Slot} from "./Slot";
 import {AnyValue, Value} from "./Value";
 import {Record} from "./Record";
-import {AnyText} from "./Text";
+import type {AnyText} from "./Text";
 
 export type AnyAbsent = Absent | undefined;
 
@@ -49,33 +52,33 @@ export class Absent extends Value {
    * Always returns an empty `Record` because `Absent` is not a distinct value.
    */
   unflattened(): Record {
-    return Value.Record.empty();
+    return Record.empty();
   }
 
   updated(key: AnyValue, value: AnyValue): Record {
-    return Value.Record.of(Item.Slot.of(key, value));
+    return Record.of(Slot.of(key, value));
   }
 
   updatedAttr(key: AnyText, value: AnyValue): Record {
-    return Value.Record.of(Item.Attr.of(key, value));
+    return Record.of(Attr.of(key, value));
   }
 
   updatedSlot(key: AnyValue, value: AnyValue): Record {
-    return Value.Record.of(Item.Slot.of(key, value));
+    return Record.of(Slot.of(key, value));
   }
 
   appended(...items: AnyItem[]): Record {
-    return Value.Record.of(items);
+    return Record.of(items);
   }
 
   prepended(...items: AnyItem[]): Record {
-    return Value.Record.of(items);
+    return Record.of(items);
   }
 
   concat(...items: AnyItem[]): Record {
-    const record = Value.Record.create();
-    for (let i = 0, n = arguments.length; i < n; i += 1) {
-      Item.fromAny(arguments[i]).forEach(function (item: Item): void {
+    const record = Record.create();
+    for (let i = 0, n = items.length; i < n; i += 1) {
+      Item.fromAny(items[i]).forEach(function (item: Item): void {
         record.push(item);
       });
     }
@@ -120,8 +123,11 @@ export class Absent extends Value {
     return void 0;
   }
 
-  forEach<T, S = unknown>(callback: (this: S, item: Item, index: number) => T | void,
-                          thisArg?: S): T | undefined {
+  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                thisArg: S): T | undefined;
+  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
+                thisArg?: S): T | undefined {
     return void 0;
   }
 
@@ -129,12 +135,26 @@ export class Absent extends Value {
     return Cursor.empty();
   }
 
-  typeOrder(): number {
+  interpolateTo(that: Absent): Interpolator<Absent>;
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    return super.interpolateTo(that);
+  }
+
+  get typeOrder(): number {
     return 99;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+  compareTo(that: unknown): number {
+    if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
+    }
+    return NaN;
+  }
+
+  equivalentTo(that: unknown): boolean {
+    return this === that;
   }
 
   equals(that: unknown): boolean {
@@ -142,10 +162,7 @@ export class Absent extends Value {
   }
 
   hashCode(): number {
-    if (Absent._hashSeed === void 0) {
-      Absent._hashSeed = Murmur3.seed(Absent);
-    }
-    return Absent._hashSeed;
+    return Constructors.hash(Absent);
   }
 
   debug(output: Output): void {
@@ -156,12 +173,9 @@ export class Absent extends Value {
     output = output.write("undefined");
   }
 
-  private static readonly _absent: Absent = new Absent();
-
-  private static _hashSeed?: number;
-
+  @Lazy
   static absent(): Absent {
-    return Absent._absent;
+    return new Absent();
   }
 
   static fromAny(value: AnyAbsent): Absent {
@@ -174,4 +188,3 @@ export class Absent extends Value {
     }
   }
 }
-Item.Absent = Absent;

@@ -18,8 +18,9 @@ import {AbstractMapInoutlet} from "../AbstractMapInoutlet";
 
 export abstract class MapFieldValuesOperator<K, VI, VO, I> extends AbstractMapInoutlet<K, VI, VO, I, Map<K, VO>> {
   has(key: K): boolean {
-    if (this._input !== null) {
-      return this._input.has(key);
+    const input = this.input;
+    if (input !== null) {
+      return input.has(key);
     } else {
       return false;
     }
@@ -35,7 +36,7 @@ export abstract class MapFieldValuesOperator<K, VI, VO, I> extends AbstractMapIn
         const next = keys.next();
         if (!next.done) {
           const key = next.value!;
-          const value = this.evaluate(key, this._input!.get(key));
+          const value = this.evaluate(key, this.input!.get(key));
           if (value !== void 0) {
             output.set(key, value);
           }
@@ -45,8 +46,9 @@ export abstract class MapFieldValuesOperator<K, VI, VO, I> extends AbstractMapIn
       } while (true);
       return output;
     } else {
-      if (this._input !== null) {
-        return this.evaluate(key, this._input.get(key));
+      const input = this.input;
+      if (input !== null) {
+        return this.evaluate(key, input.get(key));
       } else {
         return void 0;
       }
@@ -54,8 +56,9 @@ export abstract class MapFieldValuesOperator<K, VI, VO, I> extends AbstractMapIn
   }
 
   keyIterator(): Iterator<K> {
-    if (this._input !== null) {
-      return this._input.keyIterator(); // TODO: filter keys
+    const input = this.input;
+    if (input !== null) {
+      return input.keyIterator(); // TODO: filter keys
     } else {
       return Cursor.empty();
     }

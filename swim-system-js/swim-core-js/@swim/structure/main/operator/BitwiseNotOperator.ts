@@ -12,72 +12,77 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {Item} from "../Item";
 import {UnaryOperator} from "./UnaryOperator";
-import {AnyInterpreter, Interpreter} from "../Interpreter";
+import {AnyInterpreter, Interpreter} from "../interpreter/Interpreter";
 
 export class BitwiseNotOperator extends UnaryOperator {
   constructor(operand: Item) {
     super(operand);
   }
 
-  operator(): string {
+  get operator(): string {
     return "~";
   }
 
-  precedence(): number {
+  get precedence(): number {
     return 10;
   }
 
   evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const argument = this._operand.evaluate(interpreter);
+    const argument = this.operand.evaluate(interpreter);
     return argument.bitwiseNot();
   }
 
   substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const argument = this._operand.substitute(interpreter);
+    const argument = this.operand.substitute(interpreter);
     return argument.bitwiseNot();
   }
 
-  typeOrder(): number {
+  get typeOrder(): number {
     return 38;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof BitwiseNotOperator) {
-      return this._operand.compareTo(that._operand);
+      return this.operand.compareTo(that.operand);
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof BitwiseNotOperator) {
+      return this.operand.equivalentTo(that.operand, epsilon);
+    }
+    return false;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof BitwiseNotOperator) {
-      return this._operand.equals(that._operand);
+      return this.operand.equals(that.operand);
     }
     return false;
   }
 
   hashCode(): number {
-    if (BitwiseNotOperator._hashSeed === void 0) {
-      BitwiseNotOperator._hashSeed = Murmur3.seed(BitwiseNotOperator);
-    }
-    return Murmur3.mash(Murmur3.mix(BitwiseNotOperator._hashSeed, this._operand.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Constructors.hash(BitwiseNotOperator), this.operand.hashCode()));
   }
 
   debug(output: Output): void {
-    output.debug(this._operand).write(46/*'.'*/).write("bitwiseNot").write(40/*'('*/).write(41/*')'*/);
+    output.debug(this.operand).write(46/*'.'*/).write("bitwiseNot").write(40/*'('*/).write(41/*')'*/);
   }
 
   clone(): BitwiseNotOperator {
-    return new BitwiseNotOperator(this._operand.clone());
+    return new BitwiseNotOperator(this.operand.clone());
   }
-
-  private static _hashSeed?: number;
 }
-Item.BitwiseNotOperator = BitwiseNotOperator;

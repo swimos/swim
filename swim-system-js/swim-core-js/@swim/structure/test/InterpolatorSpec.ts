@@ -14,16 +14,15 @@
 
 import {Attr, Record} from "@swim/structure";
 import {Spec, Test, Exam} from "@swim/unit";
-import {Interpolator} from "@swim/interpolate";
 
 export class InterpolatorSpec extends Spec {
   @Test
   interpolateRecords(exam: Exam): void {
     const v0 = Record.of(Attr.of("test", -1), 0, "%");
     const v1 = Record.of(Attr.of("test", 1), 1, "%");
-    const interpolator = Interpolator.between(v0, v1);
-    exam.equal(interpolator.interpolate(0), v0);
-    exam.equal(interpolator.interpolate(0.5), Record.of(Attr.of("test", 0), 0.5, "%"));
-    exam.equal(interpolator.interpolate(1), v1);
+    const interpolator = v0.interpolateTo(v1);
+    exam.equal(interpolator(0), v0);
+    exam.equal(interpolator(0.5), Record.of(Attr.of("test", 0), 0.5, "%"));
+    exam.equal(interpolator(1), v1);
   }
 }

@@ -12,45 +12,70 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor, Map} from "@swim/util";
+import {Arrays, Cursor, Map} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {AnyItem, Item, Field, AnyValue, Value, Record, Text, Selector} from "@swim/structure";
-import {Inlet, Outlet, KeyEffect, MapInlet, MapOutlet, KeyOutlet, StreamletContext, StreamletScope} from "@swim/streamlet";
-import {MemoizeMapCombinator} from "@swim/streamlet";
-import {FilterFieldsFunction, FilterFieldsCombinator} from "@swim/streamlet";
-import {MapValueFunction, MapValueCombinator} from "@swim/streamlet";
-import {MapFieldValuesFunction, MapFieldValuesCombinator} from "@swim/streamlet";
-import {ReduceFieldsCombinator} from "@swim/streamlet";
-import {WatchValueFunction, WatchValueCombinator} from "@swim/streamlet";
-import {WatchFieldsFunction, WatchFieldsCombinator} from "@swim/streamlet";
+import {
+  Inlet,
+  Outlet,
+  KeyEffect,
+  MapInlet,
+  MapOutlet,
+  MapOutletCombinators,
+  KeyOutlet,
+  StreamletContext,
+  StreamletScope,
+  FilterFieldsFunction,
+  FilterFieldsCombinator,
+} from "@swim/streamlet";
 import {RecordOutlet} from "./RecordOutlet";
+import {RecordStreamlet} from "./"; // forward import
 
 export abstract class AbstractRecordOutlet extends Record implements RecordOutlet {
-  /** @hidden */
-  protected _effects: BTree<Value, KeyEffect>;
-  /** @hidden */
-  protected _outlets: BTree<Value, KeyOutlet<Value, Value>>;
-  /** @hidden */
-  protected _outputs: ReadonlyArray<Inlet<Record>> | null;
-  /** @hidden */
-  protected _version: number;
-
   constructor() {
     super();
-    this._effects = new BTree();
-    this._outlets = new BTree();
-    this._outputs = null;
-    this._version = -1;
+    Object.defineProperty(this, "effects", {
+      value: new BTree(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "outlets", {
+      value: new BTree(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "version", {
+      value: -1,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  streamletScope(): StreamletScope<Value> | null {
+  /** @hidden */
+  declare readonly effects: BTree<Value, KeyEffect>;
+
+  /** @hidden */
+  declare readonly outlets: BTree<Value, KeyOutlet<Value, Value>>;
+
+  /** @hidden */
+  declare readonly outputs: ReadonlyArray<Inlet<Record>>;
+
+  /** @hidden */
+  declare readonly version: number;
+
+  get streamletScope(): StreamletScope<Value> | null {
     return null;
   }
 
-  streamletContext(): StreamletContext | null {
-    const scope = this.streamletScope();
+  get streamletContext(): StreamletContext | null {
+    const scope = this.streamletScope;
     if (scope !== null) {
-      return scope.streamletContext();
+      return scope.streamletContext;
     }
     return null;
   }
@@ -76,91 +101,92 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
       key = Text.from(key);
     }
     if (!this.hasOwn(key)) {
-      const scope = this.streamletScope();
+      const scope = this.streamletScope;
       if (RecordOutlet.is(scope) && scope.has(key)) {
         // TODO: Support dynamic shadowing?
         return scope.outlet(key);
       }
     }
-    let outlet = this._outlets.get(key);
+    const oldOutlets = this.outlets;
+    let outlet = oldOutlets.get(key);
     if (outlet === void 0) {
       outlet = new KeyOutlet<Value, Value>(this, key);
-      this._outlets = this._outlets.updated(key, outlet);
+      Object.defineProperty(this, "outlets", {
+        value: oldOutlets.updated(key, outlet),
+        enumerable: true,
+        configurable: true,
+      });
       this.decohereInputKey(key, KeyEffect.Update);
     }
     return outlet;
   }
 
   outputIterator(): Cursor<Inlet<Record>> {
-    return this._outputs !== null ? Cursor.array(this._outputs) : Cursor.empty();
+    return Cursor.array(this.outputs);
   }
 
   bindOutput(output: Inlet<Record>): void {
-    const oldOutputs = this._outputs;
-    const n = oldOutputs !== null ? oldOutputs.length : 0;
-    const newOutputs = new Array<Inlet<Record>>(n + 1);
-    for (let i = 0; i < n; i += 1) {
-      newOutputs[i] = oldOutputs![i];
-    }
-    newOutputs[n] = output;
-    this._outputs = newOutputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.inserted(output, this.outputs),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   unbindOutput(output: Inlet<Record>): void {
-    const oldOutputs = this._outputs;
-    const n = oldOutputs !== null ? oldOutputs.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      if (oldOutputs![i] === output) {
-        if (n > 1) {
-          const newOutputs = new Array<Inlet<Record>>(n - 1);
-          for (let j = 0; j < i; j += 1) {
-            newOutputs[j] = oldOutputs![j];
-          }
-          for (let j = i; j < n - 1; j += 1) {
-            newOutputs[j] = oldOutputs![j + 1];
-          }
-          this._outputs = newOutputs;
-        } else {
-          this._outputs = null;
-        }
-        break;
-      }
-    }
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.removed(output, this.outputs),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   unbindOutputs(): void {
-    const outlets = this._outlets;
-    if (outlets.isEmpty()) {
-      this._outlets = new BTree();
-      outlets.forEach(function (key: Value, keyOutlet: KeyOutlet<Value, Value>) {
+    const oldOutlets = this.outlets;
+    if (oldOutlets.isEmpty()) {
+      Object.defineProperty(this, "outlets", {
+        value: new BTree(),
+        enumerable: true,
+        configurable: true,
+      });
+      oldOutlets.forEach(function (key: Value, keyOutlet: KeyOutlet<Value, Value>) {
         keyOutlet.unbindOutputs();
       }, this);
     }
-    const oldOutputs = this._outputs;
-    if (oldOutputs !== null) {
-      this._outputs = null;
-      for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
-        oldOutputs[i].unbindInput();
-      }
+    const oldOutputs = this.outputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
+      const output = oldOutputs[i]!;
+      output.unbindInput();
     }
   }
 
   disconnectOutputs(): void {
-    const outlets = this._outlets;
-    if (outlets.isEmpty()) {
-      this._outlets = new BTree();
-      outlets.forEach(function (key: Value, keyOutlet: KeyOutlet<Value, Value>) {
+    const oldOutlets = this.outlets;
+    if (oldOutlets.isEmpty()) {
+      Object.defineProperty(this, "outlets", {
+        value: new BTree(),
+        enumerable: true,
+        configurable: true,
+      });
+      oldOutlets.forEach(function (key: Value, keyOutlet: KeyOutlet<Value, Value>) {
         keyOutlet.disconnectOutputs();
       }, this);
     }
-    const outputs = this._outputs;
-    if (outputs !== null) {
-      this._outputs = null;
-      for (let i = 0, n = outputs.length; i < n; i += 1) {
-        const output = outputs[i];
-        output.unbindInput();
-        output.disconnectOutputs();
-      }
+    const oldOutputs = this.outputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
+      const output = oldOutputs[i]!;
+      output.unbindInput();
+      output.disconnectOutputs();
     }
     this.forEach(function (member: Item): void {
       if (member instanceof Field) {
@@ -168,7 +194,7 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
       }
       if (member instanceof AbstractRecordOutlet) {
         member.disconnectOutputs();
-      } else if (member instanceof RecordOutlet.Streamlet) {
+      } else if (member instanceof RecordStreamlet) {
         member.disconnectOutputs();
       } else if (RecordOutlet.is(member)) {
         member.disconnectOutputs();
@@ -181,22 +207,30 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
   }
 
   decohereInputKey(key: Value, effect: KeyEffect): void {
-    const oldEffects = this._effects;
+    const oldEffects = this.effects;
     if (oldEffects.get(key) !== effect) {
       this.willDecohereInputKey(key, effect);
-      this._effects = oldEffects.updated(key, effect);
-      this._version = -1;
+      Object.defineProperty(this, "effects", {
+        value: oldEffects.updated(key, effect),
+        enumerable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, "version", {
+        value: -1,
+        enumerable: true,
+        configurable: true,
+      });
       this.onDecohereInputKey(key, effect);
-      const n = this._outputs !== null ? this._outputs.length : 0;
-      for (let i = 0; i < n; i += 1) {
-        const output = this._outputs![i];
+      const outputs = this.outputs;
+      for (let i = 0, n = outputs.length; i < n; i += 1) {
+        const output = outputs[i]!;
         if (MapInlet.is(output)) {
           output.decohereOutputKey(key, effect);
         } else {
           output.decohereOutput();
         }
       }
-      const outlet = this._outlets.get(key);
+      const outlet = this.outlets.get(key);
       if (outlet !== void 0) {
         outlet.decohereInput();
       }
@@ -205,15 +239,20 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
   }
 
   decohereInput(): void {
-    if (this._version >= 0) {
+    if (this.version >= 0) {
       this.willDecohereInput();
-      this._version = -1;
+      Object.defineProperty(this, "version", {
+        value: -1,
+        enumerable: true,
+        configurable: true,
+      });
       this.onDecohereInput();
-      const n = this._outputs !== null ? this._outputs.length : 0;
-      for (let i = 0; i < n; i += 1) {
-        this._outputs![i].decohereOutput();
+      const outputs = this.outputs;
+      for (let i = 0, n = outputs.length; i < n; i += 1) {
+        const output = outputs[i]!;
+        output.decohereOutput();
       }
-      this._outlets.forEach(function (key: Value, outlet: KeyOutlet<Value, Value>): void {
+      this.outlets.forEach(function (key: Value, outlet: KeyOutlet<Value, Value>): void {
         outlet.decohereInput();
       }, this);
       this.didDecohereInput();
@@ -221,20 +260,25 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
   }
 
   recohereInputKey(key: Value, version: number): void {
-    if (this._version < 0) {
-      const oldEffects = this._effects;
+    if (this.version < 0) {
+      const oldEffects = this.effects;
       const effect = oldEffects.get(key);
       if (effect !== void 0) {
         this.willRecohereInputKey(key, effect, version);
-        this._effects = oldEffects.removed(key);
+        Object.defineProperty(this, "effects", {
+          value: oldEffects.removed(key),
+          enumerable: true,
+          configurable: true,
+        });
         this.onRecohereInputKey(key, effect, version);
-        for (let i = 0, n = this._outputs !== null ? this._outputs.length : 0; i < n; i += 1) {
-          const output = this._outputs![i];
+        const outputs = this.outputs;
+        for (let i = 0, n = outputs.length; i < n; i += 1) {
+          const output = outputs[i];
           if (MapInlet.is(output)) {
             output.recohereOutputKey(key, version);
           }
         }
-        const outlet = this._outlets.get(key);
+        const outlet = this.outlets.get(key);
         if (outlet !== void 0) {
           outlet.recohereInput(version);
         }
@@ -244,15 +288,21 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
   }
 
   recohereInput(version: number): void {
-    if (this._version < 0) {
+    if (this.version < 0) {
       this.willRecohereInput(version);
-      this._effects.forEach(function (key: Value): void {
+      this.effects.forEach(function (key: Value): void {
         this.recohereInputKey(key, version);
       }, this);
-      this._version = version;
+      Object.defineProperty(this, "version", {
+        value: version,
+        enumerable: true,
+        configurable: true,
+      });
       this.onRecohereInput(version);
-      for (let i = 0, n = this._outputs !== null ? this._outputs.length : 0; i < n; i += 1) {
-        this._outputs![i].recohereOutput(version);
+      const outputs = this.outputs;
+      for (let i = 0, n = outputs.length; i < n; i += 1) {
+        const output = outputs[i]!;
+        output.recohereOutput(version);
       }
       this.forEach(function (member: Item): void {
         if (member instanceof Field) {
@@ -260,7 +310,7 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
         }
         if (member instanceof AbstractRecordOutlet) {
           member.recohereInput(version);
-        } else if (member instanceof RecordOutlet.Streamlet) {
+        } else if (member instanceof RecordStreamlet) {
           member.recohere(version);
         } else if (RecordOutlet.is(member)) {
           member.recohereInput(version);
@@ -318,12 +368,6 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
     // hook
   }
 
-  memoize(): MapOutlet<Value, Value, Record> {
-    const combinator = new MemoizeMapCombinator<Value, Value, Record>();
-    combinator.bindInput(this);
-    return combinator;
-  }
-
   filter(predicate?: AnyItem): Selector;
   filter(func: FilterFieldsFunction<Value, Value>): MapOutlet<Value, Value, Map<Value, Value>>;
   filter(func: AnyItem | FilterFieldsFunction<Value, Value>): Selector | MapOutlet<Value, Value, Map<Value, Value>> {
@@ -335,38 +379,7 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
       return combinator;
     }
   }
-
-  map<O2>(func: MapValueFunction<Record, O2>): Outlet<O2>;
-  map<V2>(func: MapFieldValuesFunction<Value, Value, V2>): MapOutlet<Value, V2, Map<Value, V2>>;
-  map<V2>(func: MapValueFunction<Record, V2> | MapFieldValuesFunction<Value, Value, V2>): Outlet<V2> | MapOutlet<Value, V2, Map<Value, V2>> {
-    if (func.length === 1) {
-      const combinator = new MapValueCombinator<Record, V2>(func as MapValueFunction<Record, V2>);
-      combinator.bindInput(this);
-      return combinator;
-    } else {
-      const combinator = new MapFieldValuesCombinator<Value, Value, V2, Record>(func as MapFieldValuesFunction<Value, Value, V2>);
-      combinator.bindInput(this);
-      return combinator;
-    }
-  }
-
-  reduce<U>(identity: U, accumulator: (result: U, element: Value) => U, combiner: (result: U, result2: U) => U): Outlet<U> {
-    const combinator = new ReduceFieldsCombinator<Value, Value, Record, U>(identity, accumulator, combiner);
-    combinator.bindInput(this);
-    return combinator;
-  }
-
-  watch(func: WatchValueFunction<Record>): this;
-  watch(func: WatchFieldsFunction<Value, Value>): this;
-  watch(func: WatchValueFunction<Record> | WatchFieldsFunction<Value, Value>): this {
-    if (func.length === 1) {
-      const combinator = new WatchValueCombinator<Record>(func as WatchValueFunction<Record>);
-      combinator.bindInput(this);
-      return this;
-    } else {
-      const combinator = new WatchFieldsCombinator<Value, Value, Record>(func as WatchFieldsFunction<Value, Value>);
-      combinator.bindInput(this);
-      return this;
-    }
-  }
 }
+export interface AbstractRecordOutlet extends MapOutletCombinators<Value, Value, Record> {
+}
+MapOutletCombinators.define(AbstractRecordOutlet.prototype);

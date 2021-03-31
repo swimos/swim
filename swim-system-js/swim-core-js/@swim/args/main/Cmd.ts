@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Objects} from "@swim/util";
+import {Equals, Arrays} from "@swim/util";
 import {Output, Debug, Format, Unicode} from "@swim/codec";
 import {AnyOpt, Opt} from "./Opt";
 import {AnyArg, Arg} from "./Arg";
 
-export type ExecCmd = (this: Cmd, opts: {[name: string]: string | null | undefined}, args: string[]) => void;
+export type ExecCmd = (this: Cmd, opts: {[name: string]: string | undefined}, args: string[]) => void;
 
 export type AnyCmd = Cmd | CmdInit | string;
 
 export interface CmdInit {
   id?: string;
   name: string;
-  desc?: string | null;
+  desc?: string;
   opts?: AnyOpt[];
   args?: AnyArg[];
   cmds?: AnyCmd[];
@@ -32,114 +32,114 @@ export interface CmdInit {
 }
 
 export class Cmd implements Equals, Debug {
-  /** @hidden */
-  readonly _id: string;
-  /** @hidden */
-  readonly _name: string;
-  /** @hidden */
-  _desc: string | null;
-  /** @hidden */
-  _opts: Opt[];
-  /** @hidden */
-  _args: Arg[];
-  /** @hidden */
-  _cmds: Cmd[];
-  /** @hidden */
-  _exec: ExecCmd | null;
-  /** @hidden */
-  _base: Cmd | undefined;
-
-  constructor(id: string, name: string, desc: string | null, opts: Opt[],
-              args: Arg[], cmds: Cmd[], exec: ExecCmd | null, base: Cmd | undefined) {
-    this._id = id;
-    this._name = name;
-    this._desc = desc;
-    this._opts = opts;
-    this._args = args;
-    this._cmds = cmds;
-    this._exec = exec;
-    this._base = base;
+  constructor(id: string, name: string, desc: string | undefined, opts: Opt[],
+              args: Arg[], cmds: Cmd[], exec: ExecCmd | null, base: Cmd | null) {
+    Object.defineProperty(this, "id", {
+      value: id,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "name", {
+      value: name,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "desc", {
+      value: desc,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "opts", {
+      value: opts,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "args", {
+      value: args,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "cmds", {
+      value: cmds,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "exec", {
+      value: exec,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "base", {
+      value: base,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  base(): Cmd | undefined {
-    return this._base;
+  declare readonly id: string;
+
+  declare readonly name: string;
+
+  declare readonly desc: string | undefined;
+
+  withDesc(desc: string | undefined): this {
+    Object.defineProperty(this, "desc", {
+      value: desc,
+      enumerable: true,
+      configurable: true,
+    });
+    return this;
   }
 
-  id(): string {
-    return this._id;
-  }
+  declare readonly opts: ReadonlyArray<Opt>;
 
-  name(): string {
-    return this._name;
-  }
-
-  desc(): string | null;
-  desc(desc: string | null): this;
-  desc(desc?: string | null): string | null | this {
-    if (desc === void 0) {
-      return this._desc;
-    } else {
-      this._desc = desc;
-      return this;
-    }
-  }
-
-  opts(): Opt[] {
-    return this._opts;
-  }
-
-  opt(opt: AnyOpt): this {
+  withOpt(opt: AnyOpt): this {
     opt = Opt.fromAny(opt);
-    this._opts.push(opt);
+    (this.opts as Opt[]).push(opt);
     return this;
   }
 
-  args(): Arg[] {
-    return this._args;
-  }
+  declare readonly args: ReadonlyArray<Arg>;
 
-  /** @hidden */
-  arg(arg: AnyArg): this {
+  withArg(arg: AnyArg): this {
     arg = Arg.fromAny(arg);
-    this._args.push(arg);
+    (this.args as Arg[]).push(arg as Arg);
     return this;
   }
 
-  cmds(): Cmd[] {
-    return this._cmds;
-  }
+  declare readonly cmds: ReadonlyArray<Cmd>;
 
-  cmd(cmd: AnyCmd): this {
+  withCmd(cmd: AnyCmd): this {
     cmd = Cmd.fromAny(cmd);
-    this._cmds.push(cmd);
+    (this.cmds as Cmd[]).push(cmd);
     return this;
   }
 
-  helpCmd(): this {
-    const cmd = this.cmd(Cmd.help());
-    if (cmd._exec === null) {
-      cmd._exec = execDefaultHelpCmd;
+  withHelpCmd(): this {
+    this.withCmd(Cmd.help());
+    if (this.exec === null) {
+      this.onExec(execDefaultHelpCmd);
     }
-    return cmd;
+    return this;
   }
 
   getOpt(name: string): Opt {
-    for (let i = 0, n = this._opts.length; i < n; i += 1) {
-      const opt = this._opts[i];
-      if (name === opt._name) {
+    const opts = this.opts;
+    for (let i = 0, n = opts.length; i < n; i += 1) {
+      const opt = opts[i]!;
+      if (name === opt.name) {
         return opt;
       }
     }
     throw new Error("undefined opt: " + name);
   }
 
-  getArg(index: number = 0): Arg {
-    return this._args[index];
+  getArg(index: number = 0): Arg | null {
+    const arg = this.args[index];
+    return arg !== void 0 ? arg : null;
   }
 
   getValue(index: number = 0): string | undefined {
-    const arg = this._args[index];
-    return arg !== void 0 ? arg.value() : void 0;
+    const arg = this.args[index];
+    return arg !== void 0 ? arg.value : void 0;
   }
 
   parse(params?: string[], paramIndex?: number): Cmd {
@@ -152,15 +152,18 @@ export class Cmd implements Equals, Debug {
       paramIndex = 1;
     }
     const paramCount = params.length;
-    const optCount = this._opts.length;
-    const argCount = this._args.length;
+    const opts = this.opts;
+    const optCount = opts.length;
+    const args = this.args;
+    const argCount = args.length;
 
     if (paramIndex < paramCount) {
-      const cmdCount = this._cmds.length;
+      const cmds = this.cmds;
+      const cmdCount = cmds.length;
       for (let cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
-        const cmd = this._cmds[cmdIndex];
-        if (params[paramIndex] === cmd._name) {
-          cmd._base = this;
+        const cmd = cmds[cmdIndex]!;
+        if (params[paramIndex] === cmd.name) {
+          cmd.withBase(this);
           return cmd.parse(params, paramIndex + 1);
         }
       }
@@ -168,15 +171,15 @@ export class Cmd implements Equals, Debug {
 
     let argIndex = 0;
     while (paramIndex < paramCount) {
-      const param = params[paramIndex];
+      const param = params[paramIndex]!;
       paramIndex += 1;
       const argLength = param.length;
       if (argLength > 2 && param.charCodeAt(0) === 45/*'-'*/ && param.charCodeAt(1) === 45/*'-'*/) {
         const name = param.substring(2);
         for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
-          const opt = this._opts[optIndex];
-          if (name === opt._name) {
-            opt._defs += 1;
+          const opt = opts[optIndex]!;
+          if (name === opt.name) {
+            opt.def();
             paramIndex = opt.parse(params, paramIndex);
           }
         }
@@ -184,9 +187,9 @@ export class Cmd implements Equals, Debug {
         for (let flagIndex = 1; flagIndex < argLength; flagIndex += 1) {
           const flag = param.charAt(flagIndex);
           for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
-            const opt = this._opts[optIndex];
-            if (flag === opt._flag) {
-              opt._defs += 1;
+            const opt = opts[optIndex]!;
+            if (flag === opt.flag) {
+              opt.def();
               if (argLength === 2) {
                 paramIndex = opt.parse(params, paramIndex);
               }
@@ -194,79 +197,90 @@ export class Cmd implements Equals, Debug {
           }
         }
       } else if (argIndex < argCount) {
-        const arg = this._args[argIndex];
-        arg.value(param);
+        const arg = args[argIndex]!;
+        arg.withValue(param);
         argIndex += 1;
       }
     }
     return this;
   }
 
-  exec(): ExecCmd | null;
-  exec(exec: ExecCmd | null): this;
-  exec(exec?: ExecCmd | null): ExecCmd | null | this {
-    if (exec === void 0) {
-      return this._exec;
-    } else {
-      this._exec = exec;
-      return this;
-    }
+  declare readonly exec: ExecCmd | null;
+
+  onExec(exec: ExecCmd | null): this {
+    Object.defineProperty(this, "exec", {
+      value: exec,
+      enumerable: true,
+      configurable: true,
+    });
+    return this;
+  }
+
+  declare readonly base: Cmd | null;
+
+  withBase(base: Cmd | null): this {
+    Object.defineProperty(this, "base", {
+      value: base,
+      enumerable: true,
+      configurable: true,
+    });
+    return this;
   }
 
   run(): void {
-    if (this._exec !== null) {
-      const opts = {} as {[name: string]: string | null | undefined};
-      const args = [] as string[];
-      let cmd: Cmd | undefined = this;
+    if (this.exec !== null) {
+      const opts: {[name: string]: string | undefined} = {};
+      const args: string[] = [];
+      let cmd: Cmd | null = this;
       do {
-        const optCount = cmd._opts.length;
+        const optCount = cmd.opts.length;
         for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
-          const opt = cmd._opts[optIndex];
+          const opt = cmd.opts[optIndex]!;
           const value = opt.getValue();
           if (value !== void 0) {
-            opts[opt._name] = value;
-          } else if (opt.defs()) {
-            opts[opt._name] = null;
+            opts[opt.name] = value;
+          } else if (opt.defs) {
+            opts[opt.name] = void 0;
           }
         }
-        const argCount = cmd._args.length;
+        const argCount = cmd.args.length;
         for (let argIndex = argCount - 1; argIndex >= 0; argIndex -= 1) {
-          const arg = cmd._args[argIndex];
-          const argValue = arg.value();
+          const arg = cmd.args[argIndex]!;
+          const argValue = arg.value;
           if (argValue !== void 0) {
             args.unshift(argValue);
           }
         }
-        cmd = cmd._base;
-      } while (cmd !== void 0);
-      this._exec.call(this, opts, args);
+        cmd = cmd.base;
+      } while (cmd !== null);
+      this.exec.call(this, opts, args);
     }
   }
 
   /** @hidden */
   writeFullName(output: Output): void {
-    if (this._base !== void 0) {
-      this._base.writeFullName(output);
+    if (this.base !== null) {
+      this.base.writeFullName(output);
       output.write(32/*' '*/);
     }
-    output.write(this._name);
+    output.write(this.name);
   }
 
   /** @hidden */
   writeHelp(output: Output): void {
     output.write("Usage: ");
     this.writeFullName(output);
-    const optCount = this._opts.length;
-    const argCount = this._args.length;
-    const cmdCount = this._cmds.length;
+    const optCount = this.opts.length;
+    const argCount = this.args.length;
+    const cmdCount = this.cmds.length;
     if (optCount !== 0) {
       output.write(32/*' '*/).write("[options]");
     }
     if (argCount !== 0) {
       for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
-        const arg = this._args[argIndex];
-        output.write(32/*' '*/).write(91/*'['*/).write(arg._name).write(93/*']'*/);
-        if (arg._optional) {
+        const arg = this.args[argIndex]!;
+        output.write(32/*' '*/).write(91/*'['*/).write(arg.name).write(93/*']'*/);
+        if (arg.optional) {
           output.write(63/*'?'*/);
         }
       }
@@ -278,19 +292,19 @@ export class Cmd implements Equals, Debug {
       output.writeln();
       output.writeln("Options:");
       for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
-        const opt = this._opts[optIndex];
-        if (opt._flag !== null) {
-          output.write("  -").write(opt._flag).write(", --").write(opt._name);
+        const opt = this.opts[optIndex]!;
+        if (opt.flag !== void 0) {
+          output.write("  -").write(opt.flag).write(", --").write(opt.name);
         } else {
-          output.write("      --").write(opt._name);
+          output.write("      --").write(opt.name);
         }
-        let optLength = opt._name.length;
-        const optArgCount = opt._args.length;
+        let optLength = opt.name.length;
+        const optArgCount = opt.args.length;
         for (let optArgIndex = 0; optArgIndex < optArgCount; optArgIndex += 1) {
-          const optArg = opt._args[optArgIndex];
-          output.write(32/*' '*/).write(60/*'<'*/).write(optArg._name).write(62/*'>'*/);
-          optLength += 2 + optArg._name.length + 1;
-          if (optArg._optional) {
+          const optArg = opt.args[optArgIndex]!;
+          output.write(32/*' '*/).write(60/*'<'*/).write(optArg.name).write(62/*'>'*/);
+          optLength += 2 + optArg.name.length + 1;
+          if (optArg.optional) {
             output.write(63/*'?'*/);
             optLength += 1;
           }
@@ -298,8 +312,8 @@ export class Cmd implements Equals, Debug {
         for (let i = optLength; i < 15; i += 1) {
           output.write(32/*' '*/);
         }
-        if (opt._desc !== null) {
-          output.write(32/*' '*/).write(opt._desc);
+        if (opt.desc !== void 0) {
+          output.write(32/*' '*/).write(opt.desc);
         }
         output.writeln();
       }
@@ -308,13 +322,13 @@ export class Cmd implements Equals, Debug {
       output.writeln();
       output.writeln("Commands:");
       for (let cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
-        const cmd = this._cmds[cmdIndex];
-        output.write("  ").write(cmd._name);
-        for (let i = cmd._name.length; i < 20; i += 1) {
+        const cmd = this.cmds[cmdIndex]!;
+        output.write("  ").write(cmd.name);
+        for (let i = cmd.name.length; i < 20; i += 1) {
           output.write(32/*' '*/);
         }
-        if (cmd._desc !== null) {
-          output.write("  ").write(cmd._desc);
+        if (cmd.desc !== void 0) {
+          output.write("  ").write(cmd.desc);
         }
         output.writeln();
       }
@@ -331,39 +345,39 @@ export class Cmd implements Equals, Debug {
     if (this === that) {
       return true;
     } else if (that instanceof Cmd) {
-      return this._id === that._id && this._name === that._name && this._desc === that._desc
-          && Objects.equal(this._opts, that._opts) && Objects.equal(this._args, that._args)
-          && Objects.equal(this._cmds, that._cmds) && Objects.equal(this._exec, that._exec)
-          && Objects.equal(this._base, that._base);
+      return this.id === that.id && this.name === that.name && this.desc === that.desc
+          && Arrays.equal(this.opts, that.opts) && Arrays.equal(this.args, that.args)
+          && Arrays.equal(this.cmds, that.cmds) && Equals(this.exec, that.exec)
+          && Equals(this.base, that.base);
     }
     return false;
   }
 
   debug(output: Output): void {
-    output = output.write("Cmd").write(46/*'.'*/).write("of").write(40/*'('*/).debug(this._name).write(41/*')'*/);
-    if (this._desc !== null) {
-      output = output.write(46/*'.'*/).write("desc").write(40/*'('*/).debug(this._desc).write(41/*')'*/);
+    output = output.write("Cmd").write(46/*'.'*/).write("of").write(40/*'('*/).debug(this.name).write(41/*')'*/);
+    if (this.desc !== void 0) {
+      output = output.write(46/*'.'*/).write("desc").write(40/*'('*/).debug(this.desc).write(41/*')'*/);
     }
-    const optCount = this._opts.length;
-    for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
-      const opt = this._opts[optIndex];
+    const opts = this.opts;
+    for (let optIndex = 0, optCount = opts.length; optIndex < optCount; optIndex += 1) {
+      const opt = opts[optIndex]!;
       output = output.write(46/*'.'*/).write("opt").write(40/*'('*/).debug(opt).write(41/*')'*/);
     }
-    const argCount = this._args.length;
-    for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
-      const arg = this._args[argIndex];
+    const args = this.args;
+    for (let argIndex = 0, argCount = args.length; argIndex < argCount; argIndex += 1) {
+      const arg = args[argIndex]!;
       output = output.write(46/*'.'*/).write("arg").write(40/*'('*/).debug(arg).write(41/*')'*/);
     }
-    const cmdCount = this._cmds.length;
-    for (let cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
-      const cmd = this._cmds[cmdIndex];
+    const cmds = this.cmds;
+    for (let cmdIndex = 0, cmdCount = cmds.length; cmdIndex < cmdCount; cmdIndex += 1) {
+      const cmd = cmds[cmdIndex];
       output = output.write(46/*'.'*/).write("cmd").write(40/*'('*/).debug(cmd).write(41/*')'*/);
     }
-    if (this._exec !== null) {
-      output = output.write(46/*'.'*/).write("exec").write(40/*'('*/).debug(this._exec).write(41/*')'*/);
+    if (this.exec !== null) {
+      output = output.write(46/*'.'*/).write("exec").write(40/*'('*/).debug(this.exec).write(41/*')'*/);
     }
-    if (this._base !== null) {
-      output = output.write(46/*'.'*/).write("base").write(40/*'('*/).debug(this._base).write(41/*')'*/);
+    if (this.base !== null) {
+      output = output.write(46/*'.'*/).write("base").write(40/*'('*/).debug(this.base).write(41/*')'*/);
     }
   }
 
@@ -372,84 +386,91 @@ export class Cmd implements Equals, Debug {
   }
 
   clone(): Cmd {
-    const optCount = this._opts.length;
+    const optCount = this.opts.length;
     const opts = new Array<Opt>(optCount);
     for (let i = 0; i < optCount; i += 1) {
-      opts[i] = this._opts[i].clone();
+      opts[i] = this.opts[i]!.clone();
     }
-    const argCount = this._args.length;
+    const argCount = this.args.length;
     const args = new Array<Arg>(argCount);
     for (let i = 0; i < argCount; i += 1) {
-      args[i] = this._args[i].clone();
+      args[i] = this.args[i]!.clone();
     }
-    const cmdCount = this._cmds.length;
+    const cmdCount = this.cmds.length;
     const cmds = new Array<Cmd>(cmdCount);
     for (let i = 0; i < cmdCount; i += 1) {
-      cmds[i] = this._cmds[i].clone();
+      cmds[i] = this.cmds[i]!.clone();
     }
-    return new Cmd(this._id, this._name, this._desc, opts, args, cmds, this._exec, this._base);
+    return new Cmd(this.id, this.name, this.desc, opts, args, cmds, this.exec, this.base);
   }
 
-  static of(id: string, name: string = id, desc: string | null = null,
-            anyOpts?: AnyOpt[], anyArgs?: AnyArg[], anyCmds?: AnyCmd[],
-            exec: ExecCmd | null = null): Cmd {
+  static create(id: string, name?: string, desc?: string, anyOpts?: AnyOpt[],
+                anyArgs?: AnyArg[], anyCmds?: AnyCmd[], exec: ExecCmd | null = null): Cmd {
+    if (name === void 0) {
+      name = id;
+    }
     const optCount = anyOpts !== void 0 ? anyOpts.length : 0;
     const opts = new Array<Opt>(optCount);
     for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
-      opts[optIndex] = Opt.fromAny(anyOpts![optIndex]);
+      opts[optIndex] = Opt.fromAny(anyOpts![optIndex]!);
     }
     const argCount = anyArgs !== void 0 ? anyArgs.length : 0;
     const args = new Array<Arg>(argCount);
     for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
-      args[argIndex] = Arg.fromAny(anyArgs![argIndex]);
+      args[argIndex] = Arg.fromAny(anyArgs![argIndex]!);
     }
     const cmdCount = anyCmds !== void 0 ? anyCmds.length : 0;
     const cmds = new Array<Cmd>(cmdCount);
     for (let cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
-      cmds[cmdIndex] = Cmd.fromAny(anyCmds![cmdIndex]);
+      cmds[cmdIndex] = Cmd.fromAny(anyCmds![cmdIndex]!);
     }
-    return new Cmd(id, name, desc, opts, args, cmds, exec, void 0);
+    return new Cmd(id, name, desc, opts, args, cmds, exec, null);
   }
 
-  static fromAny(cmd: AnyCmd): Cmd {
-    if (cmd instanceof Cmd) {
-      return cmd;
-    } else if (typeof cmd === "string") {
-      return new Cmd(cmd, cmd, null, [], [], [], null, void 0);
+  static fromInit(init: CmdInit): Cmd {
+    const id = init.id !== void 0 ? init.id : init.name;
+    const optCount = init.opts !== void 0 ? init.opts.length : 0;
+    const opts = new Array<Opt>(optCount);
+    for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
+      opts[optIndex] = Opt.fromAny(init.opts![optIndex]!);
+    }
+    const argCount = init.args !== void 0 ? init.args.length : 0;
+    const args = new Array<Arg>(argCount);
+    for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
+      args[argIndex] = Arg.fromAny(init.args![argIndex]!);
+    }
+    const cmdCount = init.cmds !== void 0 ? init.cmds.length : 0;
+    const cmds = new Array<Cmd>(cmdCount);
+    for (let initIndex = 0; initIndex < cmdCount; initIndex += 1) {
+      cmds[initIndex] = Cmd.fromAny(init.cmds![initIndex]!);
+    }
+    const exec = init.exec !== void 0 ? init.exec : null;
+    return new Cmd(id, init.name, init.desc, opts, args, cmds, exec, null);
+  }
+
+  static fromAny(value: AnyCmd): Cmd {
+    if (value instanceof Cmd) {
+      return value;
+    } else if (typeof value === "string") {
+      return new Cmd(value, value, void 0, [], [], [], null, null);
+    } else if (typeof value === "object" && value !== null) {
+      return Cmd.fromInit(value);
     } else {
-      const id = cmd.id !== void 0 ? cmd.id : cmd.name;
-      const desc = cmd.desc !== void 0 ? cmd.desc : null;
-      const optCount = cmd.opts !== void 0 ? cmd.opts.length : 0;
-      const opts = new Array<Opt>(optCount);
-      for (let optIndex = 0; optIndex < optCount; optIndex += 1) {
-        opts[optIndex] = Opt.fromAny(cmd.opts![optIndex]);
-      }
-      const argCount = cmd.args !== void 0 ? cmd.args.length : 0;
-      const args = new Array<Arg>(argCount);
-      for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
-        args[argIndex] = Arg.fromAny(cmd.args![argIndex]);
-      }
-      const cmdCount = cmd.cmds !== void 0 ? cmd.cmds.length : 0;
-      const cmds = new Array<Cmd>(cmdCount);
-      for (let cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
-        cmds[cmdIndex] = Cmd.fromAny(cmd.cmds![cmdIndex]);
-      }
-      const exec = cmd.exec !== void 0 ? cmd.exec : null;
-      return new Cmd(id, cmd.name, desc, opts, args, cmds, exec, void 0);
+      throw new TypeError("" + value);
     }
   }
 
   static help(): Cmd {
-    return Cmd.of("help").exec(execHelpCmd);
+    return Cmd.create("help").onExec(execHelpCmd);
   }
 }
 
-function execHelpCmd(this: Cmd, args: {[name: string]: string}) {
-  if (this._base !== void 0) {
-    console.log(this._base.toHelp());
+function execHelpCmd(this: Cmd, args: {[name: string]: string | undefined}) {
+  if (this.base !== null) {
+    console.log(this.base.toHelp());
   }
 }
 
-function execDefaultHelpCmd(this: Cmd, args: {[name: string]: string}) {
+function execDefaultHelpCmd(this: Cmd, args: {[name: string]: string | undefined}) {
   console.log(this.toHelp());
 }

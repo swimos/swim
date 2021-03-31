@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Outlet} from "./Outlet";
-import {KeyEffect} from "./KeyEffect";
+import type {Outlet} from "./Outlet";
+import type {KeyEffect} from "./KeyEffect";
 import {AbstractMapInlet} from "./AbstractMapInlet";
 
 /**
@@ -22,31 +22,29 @@ import {AbstractMapInlet} from "./AbstractMapInlet";
  * whenever the `MapInlet` recoheres.
  */
 export class OutletMapInlet<K, V, O> extends AbstractMapInlet<K, V, O> {
-  /** @hidden */
-  protected readonly _outlet: Outlet<unknown>;
-
   constructor(outlet: Outlet<unknown>) {
     super();
-    this._outlet = outlet;
+    Object.defineProperty(this, "outlet", {
+      value: outlet,
+      enumerable: true,
+    });
   }
 
-  outlet(): Outlet<unknown> {
-    return this._outlet;
-  }
+  declare readonly outlet: Outlet<unknown>;
 
   protected onDecohereOutputKey(key: K, effect: KeyEffect): void {
-    this._outlet.decohereInput();
+    this.outlet.decohereInput();
   }
 
   protected onDecohereOutput(): void {
-    this._outlet.decohereInput();
+    this.outlet.decohereInput();
   }
 
   protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
-    this._outlet.recohereInput(version);
+    this.outlet.recohereInput(version);
   }
 
   protected onRecohereOutput(version: number): void {
-    this._outlet.recohereInput(version);
+    this.outlet.recohereInput(version);
   }
 }

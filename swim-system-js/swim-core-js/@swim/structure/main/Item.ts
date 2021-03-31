@@ -12,69 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Comparable, HashCode, Cursor} from "@swim/util";
+import {Lazy, HashCode, Equivalent, Compare, Cursor} from "@swim/util";
 import {Debug, Display, Format, Output} from "@swim/codec";
-import {Field} from "./Field";
-import {Attr} from "./Attr";
-import {Slot} from "./Slot";
-import {AnyValue, Value} from "./Value";
-import {Record} from "./Record";
-import {RecordMap} from "./RecordMap";
-import {RecordMapView} from "./RecordMapView";
-import {Data} from "./Data";
-import {AnyText, Text} from "./Text";
-import {AnyNum, Num} from "./Num";
-import {Bool} from "./Bool";
-import {Expression} from "./Expression";
-import {Selector} from "./Selector";
-import {Operator} from "./Operator";
-import {Func} from "./Func";
-import {Extant} from "./Extant";
-import {Absent} from "./Absent";
-import {Form} from "./Form";
-import {AnyInterpreter} from "./Interpreter";
-import {BinaryOperator} from "./operator/BinaryOperator";
-import {UnaryOperator} from "./operator/UnaryOperator";
-import {ConditionalOperator} from "./operator/ConditionalOperator";
-import {OrOperator} from "./operator/OrOperator";
-import {AndOperator} from "./operator/AndOperator";
-import {BitwiseOrOperator} from "./operator/BitwiseOrOperator";
-import {BitwiseXorOperator} from "./operator/BitwiseXorOperator";
-import {BitwiseAndOperator} from "./operator/BitwiseAndOperator";
-import {LtOperator} from "./operator/LtOperator";
-import {LeOperator} from "./operator/LeOperator";
-import {EqOperator} from "./operator/EqOperator";
-import {NeOperator} from "./operator/NeOperator";
-import {GeOperator} from "./operator/GeOperator";
-import {GtOperator} from "./operator/GtOperator";
-import {PlusOperator} from "./operator/PlusOperator";
-import {MinusOperator} from "./operator/MinusOperator";
-import {TimesOperator} from "./operator/TimesOperator";
-import {DivideOperator} from "./operator/DivideOperator";
-import {ModuloOperator} from "./operator/ModuloOperator";
-import {NotOperator} from "./operator/NotOperator";
-import {BitwiseNotOperator} from "./operator/BitwiseNotOperator";
-import {NegativeOperator} from "./operator/NegativeOperator";
-import {PositiveOperator} from "./operator/PositiveOperator";
-import {InvokeOperator} from "./operator/InvokeOperator";
-import {IdentitySelector} from "./selector/IdentitySelector";
-import {GetSelector} from "./selector/GetSelector";
-import {GetAttrSelector} from "./selector/GetAttrSelector";
-import {GetItemSelector} from "./selector/GetItemSelector";
-import {KeysSelector} from "./selector/KeysSelector";
-import {ValuesSelector} from "./selector/ValuesSelector";
-import {ChildrenSelector} from "./selector/ChildrenSelector";
-import {DescendantsSelector} from "./selector/DescendantsSelector";
-import {FilterSelector} from "./selector/FilterSelector";
-import {LiteralSelector} from "./selector/LiteralSelector";
-import {LambdaFunc} from "./func/LambdaFunc";
-import {BridgeFunc} from "./func/BridgeFunc";
-import {MathModule} from "./func/MathModule";
+import type {Interpolate, Interpolator} from "@swim/mapping";
+import {ItemInterpolator} from "./"; // forward import
+import type {Field} from "./Field";
+import {AnyValue, Value} from "./"; // forward import
+import {Record} from "./"; // forward import
+import type {AnyText} from "./Text";
+import type {AnyNum} from "./Num";
+import {Bool} from "./"; // forward import
+import {Extant} from "./"; // forward import
+import {Absent} from "./"; // forward import
+import {Selector} from "./"; // forward import
+import {MathModule} from "./"; // forward import
+import type {AnyInterpreter} from "./interpreter/Interpreter";
+import type {Form} from "./form/Form";
 
 export type AnyItem = Item
                     | {readonly $key: AnyValue, readonly $value: AnyValue}
                     | {readonly [key: string]: AnyValue}
-                    | ReadonlyArray<unknown> // ReadonlyArray<AnyItem>
+                    | ReadonlyArray<AnyItem>
                     | Uint8Array
                     | string
                     | number
@@ -82,7 +40,7 @@ export type AnyItem = Item
                     | null
                     | undefined;
 
-export abstract class Item implements Comparable<Item>, HashCode, Debug, Display {
+export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, Compare, Debug, Display {
   /** @hidden */
   constructor() {
     // stub
@@ -108,7 +66,7 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
    * Returns the key component of this `Item`, if this `Item is a [[Field]];
    * otherwise returns [[Absent]] if this `Item` is a `Value`.
    */
-  abstract get key(): Value;
+  abstract readonly key: Value;
 
   /**
    * Returns the value component of this `Item`, if this `Item` is a [[Field]];
@@ -126,7 +84,7 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
    * structure.  The `tag` can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
-  abstract tag(): string | undefined;
+  abstract readonly tag: string | undefined;
 
   /**
    * Returns the [[Item.flattened flattened]] members of this `Item` after all
@@ -138,7 +96,7 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
    * attributed structure is a `Record` with one or more attributes that modify
    * one or more other members.
    */
-  abstract target(): Value;
+  abstract readonly target: Value;
 
   /**
    * Returns the sole member of this `Item`, if this `Item` is a [[Record]]
@@ -213,7 +171,7 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
    * Returns the number of members contained in this `Item`, if this `Item` is
    * a [[Record]]; otherwise returns `0` if this `Item` is not a `Record`.
    */
-  abstract get length(): number;
+  abstract readonly length: number;
 
   /**
    * Returns `true` if this `Item` is a [[Record]] that has a [[Field]] member
@@ -265,36 +223,36 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
   abstract getItem(index: AnyNum): Item;
 
   updated(key: AnyValue, value: AnyValue): Record {
-    const record = Item.Record.create(2);
+    const record = Record.create(2);
     record.push(this);
     record.set(key, value);
     return record;
   }
 
   updatedAttr(key: AnyText, value: AnyValue): Record {
-    const record = Item.Record.create(2);
+    const record = Record.create(2);
     record.push(this);
     record.setAttr(key, value);
     return record;
   }
 
   updatedSlot(key: AnyValue, value: AnyValue): Record {
-    const record = Item.Record.create(2);
+    const record = Record.create(2);
     record.push(this);
     record.setSlot(key, value);
     return record;
   }
 
   appended(...items: AnyItem[]): Record {
-    const record = Item.Record.create(1 + arguments.length);
+    const record = Record.create(1 + arguments.length);
     record.push(this);
-    record.push.apply(record, arguments);
+    record.push(...items);
     return record;
   }
 
   prepended(...items: AnyItem[]): Record {
-    const record = Item.Record.create(arguments.length + 1);
-    record.push.apply(record, arguments);
+    const record = Record.create(arguments.length + 1);
+    record.push(...items);
     record.push(this);
     return record;
   }
@@ -302,10 +260,10 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
   abstract deleted(key: AnyValue): Item;
 
   concat(...items: AnyItem[]): Record {
-    const record = Item.Record.create();
+    const record = Record.create();
     record.push(this);
-    for (let i = 0, n = arguments.length; i < n; i += 1) {
-      Item.fromAny(arguments[i]).forEach(function (item: Item): void {
+    for (let i = 0, n = items.length; i < n; i += 1) {
+      Item.fromAny(items[i]).forEach(function (item: Item): void {
         record.push(item);
       });
     }
@@ -326,32 +284,32 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
 
   lt(that: AnyItem): Item {
     that = Item.fromAny(that);
-    return this.compareTo(that) < 0 ? Item.Bool.from(true) : Item.absent();
+    return this.compareTo(that) < 0 ? Bool.from(true) : Item.absent();
   }
 
   le(that: AnyItem): Item {
     that = Item.fromAny(that);
-    return this.compareTo(that) <= 0 ? Item.Bool.from(true) : Item.absent();
+    return this.compareTo(that) <= 0 ? Bool.from(true) : Item.absent();
   }
 
   eq(that: AnyItem): Item {
     that = Item.fromAny(that);
-    return this.equals(that) ? Item.Bool.from(true) : Item.absent();
+    return this.equals(that) ? Bool.from(true) : Item.absent();
   }
 
   ne(that: AnyItem): Item {
     that = Item.fromAny(that);
-    return !this.equals(that) ? Item.Bool.from(true) : Item.absent();
+    return !this.equals(that) ? Bool.from(true) : Item.absent();
   }
 
   ge(that: AnyItem): Item {
     that = Item.fromAny(that);
-    return this.compareTo(that) >= 0 ? Item.Bool.from(true) : Item.absent();
+    return this.compareTo(that) >= 0 ? Bool.from(true) : Item.absent();
   }
 
   gt(that: AnyItem): Item {
     that = Item.fromAny(that);
-    return this.compareTo(that) > 0 ? Item.Bool.from(true) : Item.absent();
+    return this.compareTo(that) > 0 ? Bool.from(true) : Item.absent();
   }
 
   abstract plus(that: AnyItem): Item;
@@ -381,8 +339,12 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
   abstract lambda(template: Value): Value;
 
   filter(predicate?: AnyItem): Selector {
-    const selector = Item.Selector.literal(this);
-    return selector.filter.apply(selector, arguments);
+    const selector = Selector.literal(this);
+    if (arguments.length === 0) {
+      return selector.filter();
+    } else {
+      return selector.filter(predicate);
+    }
   }
 
   max(that: Item): Item {
@@ -456,7 +418,7 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
   coerce<T, E = T>(form: Form<T, unknown>, orElse?: E): T | E {
     let object: T | E | undefined = form.cast(this);
     if (object === void 0) {
-      object = form.unit();
+      object = form.unit;
     }
     if (object === void 0) {
       object = orElse;
@@ -479,12 +441,15 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
   abstract commit(): this;
 
   /** @hidden */
-  precedence(): number {
+  get precedence(): number {
     return 11;
   }
 
-  forEach<T, S = unknown>(callback: (this: S, item: Item, index: number) => T | void,
-                          thisArg?: S): T | undefined {
+  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                thisArg: S): T | undefined;
+  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | undefined,
+                thisArg?: S): T | undefined {
     return callback.call(thisArg, this, 0);
   }
 
@@ -492,14 +457,26 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
     return Cursor.unary(this);
   }
 
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    if (that instanceof Item) {
+      return ItemInterpolator(this, that);
+    } else {
+      return null;
+    }
+  }
+
   /**
    * Returns the heterogeneous sort order of this `Item`.  Used to impose a
    * total order on the set of all items.  When comparing two items of
-   * different types, the items order according to their `typeOrder}`.
+   * different types, the items order according to their `typeOrder`.
    */
-  abstract typeOrder(): number;
+  abstract readonly typeOrder: number;
 
-  abstract compareTo(that: Item): 0 | 1 | -1;
+  abstract compareTo(that: unknown): number;
+
+  abstract equivalentTo(that: unknown, epsilon?: number): boolean;
 
   abstract keyEquals(key: unknown): boolean;
 
@@ -518,143 +495,29 @@ export abstract class Item implements Comparable<Item>, HashCode, Debug, Display
   }
 
   static empty(): Item {
-    return Item.Record.empty();
+    return Record.empty();
   }
 
   static extant(): Item {
-    return Item.Extant.extant();
+    return Extant.extant();
   }
 
   static absent(): Item {
-    return Item.Absent.absent();
+    return Absent.absent();
   }
 
   static fromAny(item: AnyItem): Item {
     if (item instanceof Item) {
       return item;
     } else {
-      return Item.Value.fromAny(item);
+      return Value.fromAny(item);
     }
   }
 
-  private static _globalScope?: Item;
-
+  @Lazy
   static globalScope(): Item {
-    if (Item._globalScope === void 0) {
-      Item._globalScope = Item.Record.create(1)
-          .slot("math", Item.MathModule.scope())
-          .commit();
-    }
-    return Item._globalScope;
+    return Record.create(1)
+        .slot("math", MathModule.scope)
+        .commit();
   }
-
-  // Forward type declarations
-  /** @hidden */
-  static Field: typeof Field; // defined by Field
-  /** @hidden */
-  static Attr: typeof Attr; // defined by Attr
-  /** @hidden */
-  static Slot: typeof Slot; // defined by Slot
-  /** @hidden */
-  static Value: typeof Value; // defined by Value
-  /** @hidden */
-  static Record: typeof Record; // defined by Record
-  /** @hidden */
-  static RecordMap: typeof RecordMap; // defined by RecordMap
-  /** @hidden */
-  static RecordMapView: typeof RecordMapView; // defined by RecordMapView
-  /** @hidden */
-  static Data: typeof Data; // defined by Data
-  /** @hidden */
-  static Text: typeof Text; // defined by Text
-  /** @hidden */
-  static Num: typeof Num; // defined by Num
-  /** @hidden */
-  static Bool: typeof Bool; // defined by Bool
-  /** @hidden */
-  static Expression: typeof Expression; // defined by Expression
-  /** @hidden */
-  static Selector: typeof Selector; // defined by Selector
-  /** @hidden */
-  static Operator: typeof Operator; // defined by Operator
-  /** @hidden */
-  static Func: typeof Func; // defined by Func
-  /** @hidden */
-  static Extant: typeof Extant; // defined by Extant
-  /** @hidden */
-  static Absent: typeof Absent; // defined by Absent
-  /** @hidden */
-  static BinaryOperator: typeof BinaryOperator; // defined by BinaryOperator
-  /** @hidden */
-  static UnaryOperator: typeof UnaryOperator; // defined by UnaryOperator
-  /** @hidden */
-  static ConditionalOperator: typeof ConditionalOperator; // defined by ConditionalOperator
-  /** @hidden */
-  static OrOperator: typeof OrOperator; // defined by OrOperator
-  /** @hidden */
-  static AndOperator: typeof AndOperator; // defined by AndOperator
-  /** @hidden */
-  static BitwiseOrOperator: typeof BitwiseOrOperator; // defined by BitwiseOrOperator
-  /** @hidden */
-  static BitwiseXorOperator: typeof BitwiseXorOperator; // defined by BitwiseXorOperator
-  /** @hidden */
-  static BitwiseAndOperator: typeof BitwiseAndOperator; // defined by BitwiseAndOperator
-  /** @hidden */
-  static LtOperator: typeof LtOperator; // defined by LtOperator
-  /** @hidden */
-  static LeOperator: typeof LeOperator; // defined by LeOperator
-  /** @hidden */
-  static EqOperator: typeof EqOperator; // defined by EqOperator
-  /** @hidden */
-  static NeOperator: typeof NeOperator; // defined by NeOperator
-  /** @hidden */
-  static GeOperator: typeof GeOperator; // defined by GeOperator
-  /** @hidden */
-  static GtOperator: typeof GtOperator; // defined by GtOperator
-  /** @hidden */
-  static PlusOperator: typeof PlusOperator; // defined by PlusOperator
-  /** @hidden */
-  static MinusOperator: typeof MinusOperator; // defined by MinusOperator
-  /** @hidden */
-  static TimesOperator: typeof TimesOperator; // defined by TimesOperator
-  /** @hidden */
-  static DivideOperator: typeof DivideOperator; // defined by DivideOperator
-  /** @hidden */
-  static ModuloOperator: typeof ModuloOperator; // defined by ModuloOperator
-  /** @hidden */
-  static NotOperator: typeof NotOperator; // defined by NotOperator
-  /** @hidden */
-  static BitwiseNotOperator: typeof BitwiseNotOperator; // defined by BitwiseNotOperator
-  /** @hidden */
-  static NegativeOperator: typeof NegativeOperator; // defined by NegativeOperator
-  /** @hidden */
-  static PositiveOperator: typeof PositiveOperator; // defined by PositiveOperator
-  /** @hidden */
-  static InvokeOperator: typeof InvokeOperator; // defined by InvokeOperator
-  /** @hidden */
-  static IdentitySelector: typeof IdentitySelector; // defined by IdentitySelector
-  /** @hidden */
-  static GetSelector: typeof GetSelector; // defined by GetSelector
-  /** @hidden */
-  static GetAttrSelector: typeof GetAttrSelector; // defined by GetAttrSelector
-  /** @hidden */
-  static GetItemSelector: typeof GetItemSelector; // defined by GetItemSelector
-  /** @hidden */
-  static KeysSelector: typeof KeysSelector; // defined by KeysSelector
-  /** @hidden */
-  static ValuesSelector: typeof ValuesSelector; // defined by ValuesSelector
-  /** @hidden */
-  static ChildrenSelector: typeof ChildrenSelector; // defined by ChildrenSelector
-  /** @hidden */
-  static DescendantsSelector: typeof DescendantsSelector; // defined by DescendantsSelector
-  /** @hidden */
-  static FilterSelector: typeof FilterSelector; // defined by FilterSelector
-  /** @hidden */
-  static LiteralSelector: typeof LiteralSelector; // defined by LiteralSelector
-  /** @hidden */
-  static LambdaFunc: typeof LambdaFunc; // defined by LambdaFunc
-  /** @hidden */
-  static BridgeFunc: typeof BridgeFunc; // defined by BridgeFunc
-  /** @hidden */
-  static MathModule: typeof MathModule; // defined by MathModule
 }

@@ -1,0 +1,20 @@
+{
+  "name": "@swim/geo",
+  "version": "3.11.0-dev.20210331",
+  "description": "Geospatial coordinate, projection, and geometry types",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/geo",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2020 Swim inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "dist/main/swim-geo.js",
+  "module": "lib/main/index.js",
+  "types": "lib/main/index.d.ts",
+  "dependencies": {
+    "@swim/util": "3.11.0-dev.20210331",
+    "@swim/codec": "3.11.0-dev.20210331",
+    "@swim/mapping": "3.11.0-dev.20210331",
+    "@swim/structure": "3.11.0-dev.20210331",
+    "@swim/math": "3.11.0-dev.20210331"
+  }
+}

@@ -33,8 +33,8 @@ export class RecordMapImmutableSpec extends Spec {
     const xs = Record.of().attr("k", "v").slot("a", "b").commit();
     exam.true(xs.has("k")); // force hashTable
     const ys = xs.updatedAttr("a", "B");
-    exam.equal(xs.fieldCount(), 2);
-    exam.equal(ys.fieldCount(), 2);
+    exam.equal(xs.fieldCount, 2);
+    exam.equal(ys.fieldCount, 2);
     exam.equal(xs, Record.of().attr("k", "v").slot("a", "b"));
     exam.equal(ys, Record.of().attr("k", "v").attr("a", "B"));
   }
@@ -44,8 +44,8 @@ export class RecordMapImmutableSpec extends Spec {
     const xs = Record.of().attr("k", "v").slot("a", "b").commit();
     exam.true(xs.has("k")); // force hashTable
     const ys = xs.updatedSlot("k", "V");
-    exam.equal(xs.fieldCount(), 2);
-    exam.equal(ys.fieldCount(), 2);
+    exam.equal(xs.fieldCount, 2);
+    exam.equal(ys.fieldCount, 2);
     exam.equal(xs, Record.of().attr("k", "v").slot("a", "b"));
     exam.equal(ys, Record.of().slot("k", "V").slot("a", "b"));
   }
@@ -109,8 +109,8 @@ export class RecordMapImmutableSpec extends Spec {
     exam.true(xs.has("k")); // force hashTable
     const ys = xs.branch();
     ys.set("k", "V");
-    exam.equal(xs.fieldCount(), 2);
-    exam.equal(ys.fieldCount(), 2);
+    exam.equal(xs.fieldCount, 2);
+    exam.equal(ys.fieldCount, 2);
     exam.equal(xs.get("k"), Text.from("v"));
     exam.equal(xs.get("a"), Text.from("b"));
     exam.equal(ys.get("k"), Text.from("V"));
@@ -181,8 +181,8 @@ export class RecordMapImmutableSpec extends Spec {
     ys.delete("a");
     exam.equal(xs.length, 2);
     exam.equal(ys.length, 1);
-    exam.equal(xs.fieldCount(), 2);
-    exam.equal(ys.fieldCount(), 1);
+    exam.equal(xs.fieldCount, 2);
+    exam.equal(ys.fieldCount, 1);
     exam.equal(xs, Record.of().attr("k", "v").slot("a", "b"));
     exam.equal(ys, Record.of().attr("k", "v"));
   }

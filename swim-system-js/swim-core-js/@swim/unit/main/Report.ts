@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec} from "./Spec";
-import {Proof} from "./Proof";
-import {Exam} from "./Exam";
+import type {Spec} from "./Spec";
+import type {Proof} from "./Proof";
+import type {Exam} from "./Exam";
 
 /**
  * Unit test result aggregator.

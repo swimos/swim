@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {Input, Parser} from "@swim/codec";
-import {DateTimeInit} from "../DateTime";
-import {DateTimeFormat} from "../DateTimeFormat";
+import type {DateTimeInit} from "../DateTime";
+import {DateTimeFormat} from "./DateTimeFormat";
 
 /** @hidden */
 export class Hour12Parser extends Parser<DateTimeInit> {
@@ -38,7 +38,7 @@ export class Hour12Parser extends Parser<DateTimeInit> {
   }
 
   static bind(hour: number, date: DateTimeInit): Parser<DateTimeInit> {
-    date.hour = (date.hour || 0) + hour;
+    date.hour = (date.hour !== void 0 ? date.hour : 0) + hour;
     return Parser.done(date);
   }
 
@@ -46,4 +46,3 @@ export class Hour12Parser extends Parser<DateTimeInit> {
     return new Hour12Parser(date, hour, step);
   }
 }
-DateTimeFormat.Hour12Parser = Hour12Parser;

@@ -12,25 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Builder} from "@swim/util";
-import {Item} from "./Item";
+import type {Builder} from "@swim/util";
+import type {Item} from "./Item";
 import {Field} from "./Field";
 import {Value} from "./Value";
 import {Record} from "./Record";
 
 /** @hidden */
 export class ValueBuilder implements Builder<Item, Value> {
-  _record: Record | null;
-  _value: Value | null;
+  /** @hidden */
+  record: Record | null;
+  /** @hidden */
+  value: Value | null;
 
   constructor() {
-    this._record = null;
-    this._value = null;
+    this.record = null;
+    this.value = null;
   }
 
   push(...items: Item[]): void {
-    for (let i = 0, n = arguments.length; i < n; i += 1) {
-      const item = arguments[i] as Item;
+    for (let i = 0, n = items.length; i < n; i += 1) {
+      const item = items[i]!;
       if (item instanceof Field) {
         return this.pushField(item);
       } else if (item instanceof Value) {
@@ -43,35 +45,35 @@ export class ValueBuilder implements Builder<Item, Value> {
 
   /** @hidden */
   pushField(item: Field): void {
-    if (this._record === null) {
-      this._record = Item.Record.create();
-      if (this._value !== null) {
-        this._record.push(this._value);
-        this._value = null;
+    if (this.record === null) {
+      this.record = Record.create();
+      if (this.value !== null) {
+        this.record.push(this.value);
+        this.value = null;
       }
     }
-    this._record.push(item);
+    this.record.push(item);
   }
 
   /** @hidden */
   pushValue(item: Value): void {
-    if (this._record !== null) {
-      this._record.push(item);
-    } else if (this._value === null) {
-      this._value = item;
+    if (this.record !== null) {
+      this.record.push(item);
+    } else if (this.value === null) {
+      this.value = item;
     } else {
-      this._record = Item.Record.create();
-      this._record.push(this._value);
-      this._value = null;
-      this._record.push(item);
+      this.record = Record.create();
+      this.record.push(this.value);
+      this.value = null;
+      this.record.push(item);
     }
   }
 
   bind(): Value {
-    if (this._record !== null) {
-      return this._record;
-    } else if (this._value !== null) {
-      return this._value;
+    if (this.record !== null) {
+      return this.record;
+    } else if (this.value !== null) {
+      return this.value;
     } else {
       return Value.absent();
     }

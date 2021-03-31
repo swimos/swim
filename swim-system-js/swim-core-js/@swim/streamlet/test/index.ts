@@ -12,29 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
-
-import {CombinatorSpec} from "./combinator";
-import {AbstractStreamletSpec} from "./AbstractStreamletSpec";
-
-@Unit
-class StreamletSpec extends Spec {
-  @Unit
-  combinatorSpec(): Spec {
-    return new CombinatorSpec();
-  }
-
-  @Unit
-  abstractStreamletSpec(): Spec {
-    return new AbstractStreamletSpec();
-  }
-}
-
 export * from "./combinator";
+export {AbstractStreamletSpec} from "./AbstractStreamletSpec";
+export {StreamletSuite} from "./StreamletSuite";
 
-export {
-  AbstractStreamletSpec,
-  StreamletSpec,
-};
-
-StreamletSpec.run();
+import {StreamletSuite} from "./StreamletSuite";
+StreamletSuite.run();

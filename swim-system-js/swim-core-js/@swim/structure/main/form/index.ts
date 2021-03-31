@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export {FormException} from "./FormException";
+
+export {Form} from "./Form";
+
 export {TagForm} from "./TagForm";
 
 export {UnitForm} from "./UnitForm";

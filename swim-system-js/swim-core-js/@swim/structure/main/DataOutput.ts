@@ -13,19 +13,25 @@
 // limitations under the License.
 
 import {AnyOutputSettings, OutputSettings, Output} from "@swim/codec";
-import {Data} from "./Data";
+import type {Data} from "./Data";
 
 /** @hidden */
 export class DataOutput extends Output<Data> {
   /** @hidden */
-  readonly _data: Data;
-  /** @hidden */
-  _settings: OutputSettings;
+  declare readonly data: Data;
 
   constructor(data: Data, settings: OutputSettings) {
     super();
-    this._data = data;
-    this._settings = settings;
+    Object.defineProperty(this, "data", {
+      value: data,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "settings", {
+      value: settings,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   isCont(): boolean {
@@ -44,19 +50,17 @@ export class DataOutput extends Output<Data> {
     return false;
   }
 
-  isPart(): boolean;
-  isPart(isPart: boolean): Output<Data>;
-  isPart(isPart?: boolean): boolean | Output<Data> {
-    if (isPart === void 0) {
-      return false;
-    } else {
-      return this;
-    }
+  isPart(): boolean {
+    return false;
+  }
+
+  asPart(part: boolean): Output<Data> {
+    return this;
   }
 
   write(b: number | string): Output<Data> {
     if (typeof b === "number") {
-      this._data.addByte(b);
+      this.data.addByte(b);
       return this;
     } else {
       throw new TypeError("" + b);
@@ -67,22 +71,23 @@ export class DataOutput extends Output<Data> {
     throw new TypeError("" + string);
   }
 
-  settings(): OutputSettings;
-  settings(settings: AnyOutputSettings): Output<Data>;
-  settings(settings?: AnyOutputSettings): OutputSettings | Output<Data> {
-    if (settings === void 0) {
-      return this._settings;
-    } else {
-      this._settings = OutputSettings.fromAny(settings);
-      return this;
-    }
+  declare readonly settings: OutputSettings;
+
+  withSettings(settings: AnyOutputSettings): Output<Data> {
+    settings = OutputSettings.fromAny(settings);
+    Object.defineProperty(this, "settings", {
+      value: settings,
+      enumerable: true,
+      configurable: true,
+    });
+    return this;
   }
 
   bind(): Data {
-    return this._data;
+    return this.data;
   }
 
   clone(): Output<Data> {
-    return new DataOutput(this._data.branch(), this._settings);
+    return new DataOutput(this.data.branch(), this.settings);
   }
 }

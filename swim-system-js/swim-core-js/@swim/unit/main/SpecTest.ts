@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import {TestException} from "./TestException";
-import {TestFunc, TestOptions} from "./Test";
+import type {TestFunc, TestOptions} from "./Test";
 import {SpecClass, Spec} from "./Spec";
 import {Proof} from "./Proof";
-import {Report} from "./Report";
+import type {Report} from "./Report";
 import {Exam} from "./Exam";
 
 /**
@@ -26,51 +26,35 @@ import {Exam} from "./Exam";
  * context of a particular `Spec` instance.
  */
 export class SpecTest {
+  constructor(name: string, func: TestFunc, options: TestOptions) {
+    Object.defineProperty(this, "name", {
+      value: name,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "func", {
+      value: func,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "options", {
+      value: options,
+      enumerable: true,
+    });
+  }
+
   /**
-   * The name of this test.
-   * @hidden
+   * The name of this test–typically the name of the underlying test function.
    */
-  readonly _name: string;
+  declare readonly name: string;
 
   /**
    * The function used to evaluate this test.
-   * @hidden
    */
-  readonly _func: TestFunc;
+  declare readonly func: TestFunc;
 
   /**
-   * Options that govern the execution of this test unit.
-   * @hidden
+   * The options that govern the evaluation of this test.
    */
-  readonly _options: TestOptions;
-
-  constructor(name: string, func: TestFunc, options: TestOptions) {
-    this._name = name;
-    this._func = func;
-    this._options = options;
-  }
-
-  /**
-   * Returns the name of this test–typically the name of the underlying test
-   * function.
-   */
-  get name(): string {
-    return this._name;
-  }
-
-  /**
-   * Returns the function used to evaluate this test.
-   */
-  get func(): TestFunc {
-    return this._func;
-  }
-
-  /**
-   * Returns the options that govern the evaluation of this test.
-   */
-  get options(): TestOptions {
-    return this._options;
-  }
+  declare readonly options: TestOptions;
 
   /**
    * Lifecycle callback invoked before each evaluation of the test function.
@@ -106,17 +90,17 @@ export class SpecTest {
   run(report: Report, spec: Spec): Promise<Exam> {
     let exam;
     if (typeof spec.createExam === "function") {
-      exam = spec.createExam(report, this._name, this._options);
+      exam = spec.createExam(report, this.name, this.options);
     } else {
-      exam = new Exam(report, spec, this._name, this._options);
+      exam = new Exam(report, spec, this.name, this.options);
     }
     try {
       this.willRunTest(report, spec, exam);
       let result;
-      if (this._options.pending) {
+      if (this.options.pending) {
         exam.pending();
       } else {
-        result = this._func.call(spec, exam);
+        result = this.func.call(spec, exam);
       }
       if (result instanceof Promise) {
         return result.then(this.runTestSuccess.bind(this, report, spec, exam),
@@ -159,11 +143,10 @@ export class SpecTest {
    * Curried [[Test]] method decorator, with captured `options`.
    * @hidden
    */
-  static decorate(options: TestOptions, target: SpecClass, name: string,
+  static decorate(options: TestOptions, target: SpecClass, propertyKey: string | symbol,
                   descriptor: PropertyDescriptor): void {
     Spec.init(target);
-
-    const test = new SpecTest(name, descriptor.value, options);
-    target._tests!.push(test);
+    const test = new SpecTest(propertyKey.toString(), descriptor.value, options);
+    target.tests!.push(test);
   }
 }

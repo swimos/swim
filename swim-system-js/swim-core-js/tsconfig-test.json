@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
+    "allowUmdGlobalAccess": true,
     "alwaysStrict": true,
     "composite": true,
     "declaration": true,
     "declarationMap": true,
     "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
+    "importsNotUsedAsValues": "error",
     "incremental": true,
     "module": "es6",
     "moduleResolution": "node",
@@ -14,13 +17,17 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
+    "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "preserveConstEnums": true,
     "pretty": true,
     "removeComments": true,
     "skipLibCheck": true,
     "sourceMap": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
     "strictNullChecks": true,
+    "strictPropertyInitialization": true,
     "target": "ES5",
     "types": ["node"]
   }

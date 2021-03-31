@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Lazy, Arrays} from "@swim/util";
 import {AnyUri, Uri} from "@swim/uri";
 import {Item, Attr, AnyValue, Value, Record, Form} from "@swim/structure";
-import {
+import type {
   EventMessage,
   LinkRequest,
   LinkedResponse,
@@ -23,10 +24,10 @@ import {
   UnlinkRequest,
   UnlinkedResponse,
 } from "@swim/warp";
-import {Host} from "../host/Host";
-import {DownlinkOwner} from "./DownlinkOwner";
-import {DownlinkContext} from "./DownlinkContext";
-import {DownlinkModel} from "./DownlinkModel";
+import type {Host} from "../host/Host";
+import type {DownlinkOwner} from "./DownlinkOwner";
+import type {DownlinkContext} from "./DownlinkContext";
+import type {DownlinkModel} from "./DownlinkModel";
 
 export type DownlinkType = "event" | "list" | "map" | "value";
 
@@ -76,192 +77,235 @@ export const enum DownlinkFlags {
 }
 
 export abstract class Downlink {
-  /** @hidden */
-  readonly _context: DownlinkContext;
-  /** @hidden */
-  readonly _owner: DownlinkOwner | undefined;
-  /** @hidden */
-  readonly _hostUri: Uri;
-  /** @hidden */
-  readonly _nodeUri: Uri;
-  /** @hidden */
-  readonly _laneUri: Uri;
-  /** @hidden */
-  readonly _prio: number;
-  /** @hidden */
-  readonly _rate: number;
-  /** @hidden */
-  readonly _body: Value;
-  /** @hidden */
-  readonly _flags: number;
-  /** @hidden */
-  _model: DownlinkModel | null;
-  /** @hidden */
-  _observers: ReadonlyArray<DownlinkObserver> | null;
-
-  constructor(context: DownlinkContext, owner?: DownlinkOwner, init?: DownlinkInit,
+  constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: DownlinkInit,
               hostUri: Uri = Uri.empty(), nodeUri: Uri = Uri.empty(), laneUri: Uri = Uri.empty(),
               prio: number = 0, rate: number = 0, body: Value = Value.absent(),
-              flags: number = 0, observers: ReadonlyArray<DownlinkObserver> | DownlinkObserver | null = null) {
+              flags: number = 0, observers?: ReadonlyArray<DownlinkObserver> | DownlinkObserver) {
     let observer: DownlinkObserver | undefined;
-    if (observers === null) {
-      observers = [];
+    if (observers === void 0) {
+      observers = Arrays.empty
     } else if (!Array.isArray(observers)) {
       observer = observers as DownlinkObserver;
-      observers = [observer];
+      observers = [observer] as ReadonlyArray<DownlinkObserver>;
     }
     if (init !== void 0) {
-      observer = observer || {};
-      observers = observers !== null ? observers.concat(observer) : [observer];
       hostUri = init.hostUri !== void 0 ? Uri.fromAny(init.hostUri) : hostUri;
       nodeUri = init.nodeUri !== void 0 ? Uri.fromAny(init.nodeUri) : nodeUri;
       laneUri = init.laneUri !== void 0 ? Uri.fromAny(init.laneUri) : laneUri;
       prio = init.prio !== void 0 ? init.prio : prio;
       rate = init.rate !== void 0 ? init.rate : rate;
       body = init.body !== void 0 ? Value.fromAny(init.body) : body;
-      observer.onEvent = init.onEvent || observer.onEvent;
-      observer.onCommand = init.onCommand || observer.onCommand;
-      observer.willLink = init.willLink || observer.willLink;
-      observer.didLink = init.didLink || observer.didLink;
-      observer.willSync = init.willSync || observer.willSync;
-      observer.didSync = init.didSync || observer.didSync;
-      observer.willUnlink = init.willUnlink || observer.willUnlink;
-      observer.didUnlink = init.didUnlink || observer.didUnlink;
-      observer.didConnect = init.didConnect || observer.didConnect;
-      observer.didDisconnect = init.didDisconnect || observer.didDisconnect;
-      observer.didClose = init.didClose || observer.didClose;
-      observer.didFail = init.didFail || observer.didFail;
+      observer = observer ?? {};
+      observers = Arrays.inserted(observer, observers);
+      observer.onEvent = init.onEvent ?? observer.onEvent;
+      observer.onCommand = init.onCommand ?? observer.onCommand;
+      observer.willLink = init.willLink ?? observer.willLink;
+      observer.didLink = init.didLink ?? observer.didLink;
+      observer.willSync = init.willSync ?? observer.willSync;
+      observer.didSync = init.didSync ?? observer.didSync;
+      observer.willUnlink = init.willUnlink ?? observer.willUnlink;
+      observer.didUnlink = init.didUnlink ?? observer.didUnlink;
+      observer.didConnect = init.didConnect ?? observer.didConnect;
+      observer.didDisconnect = init.didDisconnect ?? observer.didDisconnect;
+      observer.didClose = init.didClose ?? observer.didClose;
+      observer.didFail = init.didFail ?? observer.didFail;
     }
-    this._context = context;
-    this._owner = owner;
-    this._hostUri = hostUri;
-    this._nodeUri = nodeUri;
-    this._laneUri = laneUri;
-    this._prio = prio;
-    this._rate = rate;
-    this._body = body;
-    this._flags = flags;
-    this._model = null;
-    this._observers = observers;
+    Object.defineProperty(this, "context", {
+      value: context,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "owner", {
+      value: owner,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "ownHostUri", {
+      value: hostUri,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "ownNodeUri", {
+      value: nodeUri,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "ownLaneUri", {
+      value: laneUri,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "ownPrio", {
+      value: prio,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "ownRate", {
+      value: rate,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "ownBody", {
+      value: body,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "flags", {
+      value: flags,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "model", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "observers", {
+      value: observers,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  protected abstract copy(context: DownlinkContext, owner: DownlinkOwner | undefined,
+  /** @hidden */
+  declare readonly context: DownlinkContext;
+
+  /** @hidden */
+  declare readonly owner: DownlinkOwner | null;
+  
+  /** @hidden */
+  declare readonly ownHostUri: Uri;
+  
+  /** @hidden */
+  declare readonly ownNodeUri: Uri;
+  
+  /** @hidden */
+  declare readonly ownLaneUri: Uri;
+  
+  /** @hidden */
+  declare readonly ownPrio: number;
+  
+  /** @hidden */
+  declare readonly ownRate: number;
+  
+  /** @hidden */
+  declare readonly ownBody: Value;
+
+  /** @hidden */
+  declare readonly flags: number;
+
+  /** @hidden */
+  declare readonly model: DownlinkModel | null;
+
+  /** @hidden */
+  declare readonly observers: ReadonlyArray<DownlinkObserver>;
+
+  abstract readonly type: DownlinkType;
+
+  protected abstract copy(context: DownlinkContext, owner: DownlinkOwner | null,
                           hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
-                          body: Value, flags: number, observers: ReadonlyArray<DownlinkObserver> | null): this;
+                          body: Value, flags: number, observers: ReadonlyArray<DownlinkObserver>): Downlink;
 
   hostUri(): Uri;
-  hostUri(hostUri: AnyUri): this;
-  hostUri(hostUri?: AnyUri): Uri | this {
+  hostUri(hostUri: AnyUri): Downlink;
+  hostUri(hostUri?: AnyUri): Uri | Downlink {
     if (hostUri === void 0) {
-      return this._hostUri;
+      return this.ownHostUri;
     } else {
       hostUri = Uri.fromAny(hostUri);
-      return this.copy(this._context, this._owner, hostUri, this._nodeUri, this._laneUri,
-                       this._prio, this._rate, this._body, this._flags, this._observers);
+      return this.copy(this.context, this.owner, hostUri as Uri, this.ownNodeUri, this.ownLaneUri,
+                       this.ownPrio, this.ownRate, this.ownBody, this.flags, this.observers);
     }
   }
 
   nodeUri(): Uri;
-  nodeUri(nodeUri: AnyUri): this;
-  nodeUri(nodeUri?: AnyUri): Uri | this {
+  nodeUri(nodeUri: AnyUri): Downlink;
+  nodeUri(nodeUri?: AnyUri): Uri | Downlink {
     if (nodeUri === void 0) {
-      return this._nodeUri;
+      return this.ownNodeUri;
     } else {
       nodeUri = Uri.fromAny(nodeUri);
-      return this.copy(this._context, this._owner, this._hostUri, nodeUri, this._laneUri,
-                       this._prio, this._rate, this._body, this._flags, this._observers);
+      return this.copy(this.context, this.owner, this.ownHostUri, nodeUri as Uri, this.ownLaneUri,
+                       this.ownPrio, this.ownRate, this.ownBody, this.flags, this.observers);
     }
   }
 
   laneUri(): Uri;
-  laneUri(laneUri: AnyUri): this;
-  laneUri(laneUri?: AnyUri): Uri | this {
+  laneUri(laneUri: AnyUri): Downlink;
+  laneUri(laneUri?: AnyUri): Uri | Downlink {
     if (laneUri === void 0) {
-      return this._laneUri;
+      return this.ownLaneUri;
     } else {
       laneUri = Uri.fromAny(laneUri);
-      return this.copy(this._context, this._owner, this._hostUri, this._nodeUri, laneUri,
-                       this._prio, this._rate, this._body, this._flags, this._observers);
+      return this.copy(this.context, this.owner, this.ownHostUri, this.ownNodeUri, laneUri as Uri,
+                       this.ownPrio, this.ownRate, this.ownBody, this.flags, this.observers);
     }
   }
 
   prio(): number;
-  prio(prio: number ): this;
-  prio(prio?: number): number | this {
+  prio(prio: number): Downlink;
+  prio(prio?: number): number | Downlink {
     if (prio === void 0) {
-      return this._prio;
+      return this.ownPrio;
     } else {
-      return this.copy(this._context, this._owner, this._hostUri, this._nodeUri, this._laneUri,
-                       prio, this._rate, this._body, this._flags, this._observers);
+      return this.copy(this.context, this.owner, this.ownHostUri, this.ownNodeUri, this.ownLaneUri,
+                       prio, this.ownRate, this.ownBody, this.flags, this.observers);
     }
   }
 
   rate(): number;
-  rate(rate: number): this;
-  rate(rate?: number): number | this {
+  rate(rate: number): Downlink;
+  rate(rate?: number): number | Downlink {
     if (rate === void 0) {
-      return this._rate;
+      return this.ownRate;
     } else {
-      return this.copy(this._context, this._owner, this._hostUri, this._nodeUri, this._laneUri,
-                       this._prio, rate, this._body, this._flags, this._observers);
+      return this.copy(this.context, this.owner, this.ownHostUri, this.ownNodeUri, this.ownLaneUri,
+                       this.ownPrio, rate, this.ownBody, this.flags, this.observers);
     }
   }
 
   body(): Value;
-  body(body: AnyValue): this;
-  body(body?: AnyValue): Value | this {
+  body(body: AnyValue): Downlink;
+  body(body?: AnyValue): Value | Downlink {
     if (body === void 0) {
-      return this._body;
+      return this.ownBody;
     } else {
       body = Value.fromAny(body);
-      return this.copy(this._context, this._owner, this._hostUri, this._nodeUri, this._laneUri,
-                       this._prio, this._rate, body, this._flags, this._observers);
+      return this.copy(this.context, this.owner, this.ownHostUri, this.ownNodeUri, this.ownLaneUri,
+                       this.ownPrio, this.ownRate, body, this.flags, this.observers);
     }
   }
 
-  abstract type(): DownlinkType;
-
   keepLinked(): boolean;
-  keepLinked(keepLinked: boolean): this;
-  keepLinked(keepLinked?: boolean): boolean | this {
+  keepLinked(keepLinked: boolean): Downlink;
+  keepLinked(keepLinked?: boolean): boolean | Downlink {
     if (keepLinked === void 0) {
-      return (this._flags & DownlinkFlags.KeepLinked) !== 0;
+      return (this.flags & DownlinkFlags.KeepLinked) !== 0;
     } else {
-      const flags = keepLinked ? this._flags | DownlinkFlags.KeepLinked : this._flags & ~DownlinkFlags.KeepLinked;
-      return this.copy(this._context, this._owner, this._hostUri, this._nodeUri, this._laneUri,
-                       this._prio, this._rate, this._body, flags, this._observers);
+      const flags = keepLinked ? this.flags | DownlinkFlags.KeepLinked : this.flags & ~DownlinkFlags.KeepLinked;
+      return this.copy(this.context, this.owner, this.ownHostUri, this.ownNodeUri, this.ownLaneUri,
+                       this.ownPrio, this.ownRate, this.ownBody, flags, this.observers);
     }
   }
 
   keepSynced(): boolean;
-  keepSynced(keepSynced: boolean): this;
-  keepSynced(keepSynced?: boolean): boolean | this {
+  keepSynced(keepSynced: boolean): Downlink;
+  keepSynced(keepSynced?: boolean): boolean | Downlink {
     if (keepSynced === void 0) {
-      return (this._flags & DownlinkFlags.KeepSynced) !== 0;
+      return (this.flags & DownlinkFlags.KeepSynced) !== 0;
     } else {
-      const flags = keepSynced ? this._flags | DownlinkFlags.KeepSynced : this._flags & ~DownlinkFlags.KeepSynced;
-      return this.copy(this._context, this._owner, this._hostUri, this._nodeUri, this._laneUri,
-                       this._prio, this._rate, this._body, flags, this._observers);
+      const flags = keepSynced ? this.flags | DownlinkFlags.KeepSynced : this.flags & ~DownlinkFlags.KeepSynced;
+      return this.copy(this.context, this.owner, this.ownHostUri, this.ownNodeUri, this.ownLaneUri,
+                       this.ownPrio, this.ownRate, this.ownBody, flags, this.observers);
     }
   }
 
   observe(observer: DownlinkObserver): this {
-    const oldObservers = this._observers;
-    const n = oldObservers !== null ? oldObservers.length : 0;
-    const newObservers = new Array<DownlinkObserver>(n + 1);
-    for (let i = 0; i < n; i += 1) {
-      newObservers[i] = oldObservers![i];
-    }
-    newObservers[n] = observer;
-    this._observers = newObservers;
+    Object.defineProperty(this, "observers", {
+      value: Arrays.inserted(observer, this.observers),
+      enumerable: true,
+      configurable: true,
+    });
     return this;
   }
 
   unobserve(observer: unknown): this {
-    const oldObservers = this._observers;
-    const n = oldObservers !== null ? oldObservers.length : 0;
+    const oldObservers = this.observers;
+    const n = oldObservers.length;
     for (let i = 0; i < n; i += 1) {
-      const oldObserver = oldObservers![i] as {[key: string]: unknown};
+      const oldObserver = oldObservers[i]! as {[key: string]: unknown};
       let found = oldObserver === observer; // check object identity
       if (!found) {
         for (const key in oldObserver) { // check property identity
@@ -275,14 +319,22 @@ export abstract class Downlink {
         if (n > 1) {
           const newObservers = new Array<DownlinkObserver>(n - 1);
           for (let j = 0; j < i; j += 1) {
-            newObservers[j] = oldObservers![j];
+            newObservers[j] = oldObservers[j]!;
           }
           for (let j = i + 1; j < n; j += 1) {
-            newObservers[j - 1] = oldObservers![j];
+            newObservers[j - 1] = oldObservers[j]!;
           }
-          this._observers = newObservers;
+          Object.defineProperty(this, "observers", {
+            value: newObservers,
+            enumerable: true,
+            configurable: true,
+          });
         } else {
-          this._observers = null;
+          Object.defineProperty(this, "observers", {
+            value: Arrays.empty,
+            enumerable: true,
+            configurable: true,
+          });
         }
         break;
       }
@@ -339,43 +391,46 @@ export abstract class Downlink {
   }
 
   isConnected(): boolean {
-    return this._model !== null ? this._model.isConnected() : false;
+    const model = this.model;
+    return model !== null && model.isConnected();
   }
 
   isAuthenticated(): boolean {
-    return this._model !== null ? this._model.isAuthenticated() : false;
+    const model = this.model;
+    return model !== null && model.isAuthenticated();
   }
 
   isLinked(): boolean {
-    return this._model !== null ? this._model.isLinked() : false;
+    const model = this.model;
+    return model !== null && model.isLinked();
   }
 
   isSynced(): boolean {
-    return this._model !== null ? this._model.isSynced() : false;
+    const model = this.model;
+    return model !== null && model.isSynced();
   }
 
-  session(): Value {
-    return this._model !== null ? this._model.session() : Value.absent();
+  get session(): Value {
+    const model = this.model;
+    return model !== null ? model.session : Value.absent();
   }
 
   /** @hidden */
   onEventMessage(message: EventMessage): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.onEvent !== void 0) {
-        observer.onEvent(message.body(), this);
+        observer.onEvent(message.body, this);
       }
     }
   }
 
   /** @hidden */
   onCommandMessage(body: Value): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.onCommand !== void 0) {
         observer.onCommand(body, this);
       }
@@ -384,10 +439,9 @@ export abstract class Downlink {
 
   /** @hidden */
   onLinkRequest(request?: LinkRequest): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.willLink !== void 0) {
         observer.willLink(this);
       }
@@ -396,10 +450,9 @@ export abstract class Downlink {
 
   /** @hidden */
   onLinkedResponse(response?: LinkedResponse): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.didLink !== void 0) {
         observer.didLink(this);
       }
@@ -408,10 +461,9 @@ export abstract class Downlink {
 
   /** @hidden */
   onSyncRequest(request?: SyncRequest): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.willSync !== void 0) {
         observer.willSync(this);
       }
@@ -420,10 +472,9 @@ export abstract class Downlink {
 
   /** @hidden */
   onSyncedResponse(response?: SyncedResponse): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.didSync !== void 0) {
         observer.didSync(this);
       }
@@ -432,10 +483,9 @@ export abstract class Downlink {
 
   /** @hidden */
   onUnlinkRequest(request?: UnlinkRequest): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.willUnlink !== void 0) {
         observer.willUnlink(this);
       }
@@ -444,10 +494,9 @@ export abstract class Downlink {
 
   /** @hidden */
   onUnlinkedResponse(response?: UnlinkedResponse): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.didUnlink !== void 0) {
         observer.didUnlink(this);
       }
@@ -456,10 +505,9 @@ export abstract class Downlink {
 
   /** @hidden */
   hostDidConnect(): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.didConnect !== void 0) {
         observer.didConnect(this);
       }
@@ -468,10 +516,9 @@ export abstract class Downlink {
 
   /** @hidden */
   hostDidDisconnect(): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.didDisconnect !== void 0) {
         observer.didDisconnect(this);
       }
@@ -480,10 +527,9 @@ export abstract class Downlink {
 
   /** @hidden */
   hostDidFail(error: unknown): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.didFail !== void 0) {
         observer.didFail(error, this);
       }
@@ -491,17 +537,19 @@ export abstract class Downlink {
   }
 
   command(body: AnyValue): void {
-    this._model!.command(body);
+    this.model!.command(body);
   }
 
   abstract open(): this;
 
   close(): void {
-    if (this._owner !== void 0) {
-      this._owner.removeDownlink(this);
+    const owner = this.owner;
+    if (owner !== null) {
+      owner.removeDownlink(this);
     }
-    if (this._model !== null) {
-      this._model.removeDownlink(this);
+    const model = this.model;
+    if (model !== null) {
+      model.removeDownlink(this);
     }
   }
 
@@ -512,38 +560,25 @@ export abstract class Downlink {
 
   /** @hidden */
   closeUp(): void {
-    const observers = this._observers;
-    const n = observers !== null ? observers.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      const observer = observers![i];
+    const observers = this.observers;
+    for (let i = 0, n = observers.length; i < n; i += 1) {
+      const observer = observers[i]!;
       if (observer.didClose !== void 0) {
         observer.didClose(this);
       }
     }
   }
 
-  private static _initForm?: Form<DownlinkInit | undefined>;
-
+  @Lazy
   static initForm(): Form<DownlinkInit | undefined> {
-    if (Downlink._initForm === void 0) {
-      Downlink._initForm = new DownlinkInitForm();
-    }
-    return Downlink._initForm;
+    return new DownlinkInitForm();
   }
 }
 
 /** @hidden */
 class DownlinkInitForm extends Form<DownlinkInit | undefined> {
-  tag(): string;
-  tag(tag: string | undefined): Form<DownlinkInit | undefined>;
-  tag(tag?: string | undefined): string | Form<DownlinkInit | undefined> {
-    if (arguments.length === 0) {
-      return "link";
-    } else if (tag !== void 0) {
-      return super.tag(tag);
-    } else {
-      return this;
-    }
+  get tag(): string | undefined {
+    return "link";
   }
 
   mold(init: DownlinkInit | undefined): Item {

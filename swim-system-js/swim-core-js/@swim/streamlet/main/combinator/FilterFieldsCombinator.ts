@@ -12,21 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapOutlet} from "../MapOutlet";
-import {FilterFieldsFunction} from "../function";
+import type {FilterFieldsFunction} from "../function";
 import {FilterFieldsOperator} from "./FilterFieldsOperator";
 
 export class FilterFieldsCombinator<K, V, I> extends FilterFieldsOperator<K, V, I> {
-  /** @hidden */
-  protected readonly _func: FilterFieldsFunction<K, V>;
-
   constructor(func: FilterFieldsFunction<K, V>) {
     super();
-    this._func = func;
+    Object.defineProperty(this, "func", {
+      value: func,
+      enumerable: true,
+    });
   }
 
+  /** @hidden */
+  declare readonly func: FilterFieldsFunction<K, V>;
+
   evaluate(key: K, value: V): boolean {
-    return this._func(key, value);
+    const func = this.func;
+    return func(key, value);
   }
 }
-MapOutlet.FilterFieldsCombinator = FilterFieldsCombinator;

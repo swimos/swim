@@ -12,40 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Output} from "@swim/codec";
+import type {Output} from "@swim/codec";
 import {Uri} from "./Uri";
 import {UriHost} from "./UriHost";
 
 /** @hidden */
 export class UriHostName extends UriHost {
   /** @hidden */
-  readonly _address: string;
-
-  /** @hidden */
   constructor(address: string) {
     super();
-    this._address = address;
+    Object.defineProperty(this, "address", {
+      value: address,
+      enumerable: true,
+    });
   }
 
-  address(): string {
-    return this._address;
-  }
+  declare readonly address: string;
 
-  name(): string {
-    return this._address;
+  get name(): string {
+    return this.address;
   }
 
   debug(output: Output): void {
-    output = output.write("UriHost").write(46/*'.'*/).write("from")
-        .write(40/*'('*/).debug(this._address).write(41/*')'*/);
+    output = output.write("UriHost").write(46/*'.'*/).write("hostname")
+        .write(40/*'('*/).debug(this.address).write(41/*')'*/);
   }
 
   display(output: Output): void {
-    Uri.writeHost(this._address, output);
+    Uri.writeHost(this.address, output);
   }
 
   toString(): string {
-    return this._address;
+    return this.address;
   }
 }
-Uri.HostName = UriHostName;

@@ -12,32 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor} from "@swim/util";
+import type {Cursor} from "@swim/util";
 import {AnyItem, Item, Slot, AnyValue, Value, Record, AnyText, AnyNum, Num} from "@swim/structure";
 import {KeyEffect} from "@swim/streamlet";
 import {DownlinkRecord} from "./DownlinkRecord";
-import {MapDownlink} from "./MapDownlink";
+import type {MapDownlink} from "./MapDownlink";
 
 export class MapDownlinkRecord extends DownlinkRecord {
-  /** @hidden */
-  readonly _downlink: MapDownlink<Value, Value, AnyValue, AnyValue>;
-
   constructor(downlink: MapDownlink<Value, Value, AnyValue, AnyValue>) {
     super();
-    this._downlink = downlink;
-    this._downlink.observe(this);
+    Object.defineProperty(this, "downlink", {
+      value: downlink,
+      enumerable: true,
+    });
+    downlink.observe(this);
   }
 
-  get downlink(): MapDownlink<Value, Value, AnyValue, AnyValue> {
-    return this._downlink;
-  }
+  declare readonly downlink: MapDownlink<Value, Value, AnyValue, AnyValue>;
 
   isEmpty(): boolean {
-    return this._downlink.isEmpty();
+    return this.downlink.isEmpty();
   }
 
   isArray(): boolean {
-    return this._downlink.isEmpty();
+    return this.downlink.isEmpty();
   }
 
   isObject(): boolean {
@@ -45,11 +43,11 @@ export class MapDownlinkRecord extends DownlinkRecord {
   }
 
   get length(): number {
-    return this._downlink.size;
+    return this.downlink.size;
   }
 
   has(key: AnyValue): boolean {
-    return this._downlink.has(key);
+    return this.downlink.has(key);
   }
 
   get(): Record;
@@ -58,7 +56,7 @@ export class MapDownlinkRecord extends DownlinkRecord {
     if (key === void 0) {
       return this;
     } else {
-      return this._downlink.get(key);
+      return this.downlink.get(key);
     }
   }
 
@@ -74,20 +72,20 @@ export class MapDownlinkRecord extends DownlinkRecord {
     if (index instanceof Num) {
       index = index.value;
     }
-    const n = this._downlink.size;
+    const n = this.downlink.size;
     if (index < 0) {
       index = n + index;
     }
     index = Math.min(Math.max(0, index), n - 1);
     if (index >= 0) {
-      const entry = this._downlink.getEntry(index)!;
+      const entry = this.downlink.getEntry(index)!;
       return Slot.of(entry[0], entry[1]);
     }
     return Item.absent();
   }
 
   set(key: AnyValue, newValue: AnyValue): this {
-    this._downlink.set(key, newValue);
+    this.downlink.set(key, newValue);
     return this;
   }
 
@@ -113,21 +111,24 @@ export class MapDownlinkRecord extends DownlinkRecord {
 
   delete(key: AnyValue): Item {
     key = Value.fromAny(key);
-    const oldValue = this._downlink.get(key);
-    if (this._downlink.delete(key)) {
+    const oldValue = this.downlink.get(key);
+    if (this.downlink.delete(key)) {
       return Slot.of(key, oldValue);
     }
     return Item.absent();
   }
 
   clear(): void {
-    this._downlink.clear();
+    this.downlink.clear();
   }
 
-  forEach<T, S = unknown>(callback: (this: S, item: Item, index: number) => T | void,
-                          thisArg?: S): T | undefined {
+  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                thisArg: S): T | undefined;
+  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
+                thisArg?: S): T | undefined {
     let index = 0;
-    return this._downlink.forEach(function (key: Value, value: Value): T | void {
+    return this.downlink.forEach(function (key: Value, value: Value): T | void {
       const result = callback.call(thisArg, Slot.of(key, value), index);
       index += 1;
       return result;
@@ -135,7 +136,7 @@ export class MapDownlinkRecord extends DownlinkRecord {
   }
 
   keyIterator(): Cursor<Value> {
-    return this._downlink.keys();
+    return this.downlink.keys();
   }
 
   didUpdate(key: Value, newValue: Value, oldValue: Value): void {

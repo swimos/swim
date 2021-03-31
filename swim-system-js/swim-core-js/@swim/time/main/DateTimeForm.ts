@@ -17,20 +17,22 @@ import {Item, Value, Text, Form} from "@swim/structure";
 
 /** @hidden */
 export class DateTimeForm extends Form<DateTime, AnyDateTime> {
-  private readonly _unit: DateTime | undefined;
-
-  constructor(unit?: DateTime) {
+  constructor(unit: DateTime | undefined) {
     super();
-    this._unit = unit;
+    Object.defineProperty(this, "unit", {
+      value: unit,
+      enumerable: true,
+    });
   }
 
-  unit(): DateTime | undefined;
-  unit(unit: DateTime | undefined): Form<DateTime, AnyDateTime>;
-  unit(unit?: DateTime | undefined): DateTime | undefined | Form<DateTime, AnyDateTime> {
-    if (arguments.length === 0) {
-      return this._unit !== void 0 ? this._unit : new DateTime(0);
-    } else {
+  // @ts-ignore
+  declare readonly unit: DateTime | undefined;
+
+  withUnit(unit: DateTime | undefined): Form<DateTime, AnyDateTime> {
+    if (unit !== this.unit) {
       return new DateTimeForm(unit);
+    } else {
+      return this;
     }
   }
 
@@ -40,7 +42,7 @@ export class DateTimeForm extends Form<DateTime, AnyDateTime> {
   }
 
   cast(value: Value): DateTime | undefined {
-    let date: DateTime | undefined;
+    let date: DateTime | null = null;
     try {
       date = DateTime.fromValue(value);
       if (date === void 0) {
@@ -57,7 +59,6 @@ export class DateTimeForm extends Form<DateTime, AnyDateTime> {
     } catch (e) {
       // swallow
     }
-    return date;
+    return date !== null ? date : void 0;
   }
 }
-DateTime.Form = DateTimeForm;

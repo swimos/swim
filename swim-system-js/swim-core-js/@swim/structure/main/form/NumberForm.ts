@@ -12,27 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Item} from "../Item";
+import type {Item} from "../Item";
 import {Num} from "../Num";
-import {Form} from "../Form";
+import {Form} from "./Form";
 
 /** @hidden */
 export class NumberForm extends Form<number> {
-  /** @hidden */
-  readonly _unit: number | undefined;
-
   constructor(unit?: number) {
     super();
-    this._unit = unit;
+    Object.defineProperty(this, "unit", {
+      value: unit,
+      enumerable: true,
+    });
   }
 
-  unit(): number | undefined;
-  unit(unit: number | undefined): Form<number>;
-  unit(unit?: number | undefined): number | undefined | Form<number> {
-    if (arguments.length === 0) {
-      return this._unit;
-    } else {
+  // @ts-ignore
+  declare readonly unit: number | undefined;
+
+  withUnit(unit: number | undefined): Form<number> {
+    if (unit !== this.unit) {
       return new NumberForm(unit);
+    } else {
+      return this;
     }
   }
 
@@ -45,7 +46,7 @@ export class NumberForm extends Form<number> {
   }
 
   cast(item: Item, object?: number): number | undefined {
-    const value = item.target();
+    const value = item.target;
     try {
       return value.numberValue();
     } catch (error) {
@@ -53,4 +54,3 @@ export class NumberForm extends Form<number> {
     }
   }
 }
-Form.NumberForm = NumberForm;

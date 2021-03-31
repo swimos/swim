@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as child_process from "child_process";
-import * as fs from "fs";
-import * as path from "path";
-import * as ts from "typescript";
-
+import * as ChildProcess from "child_process";
+import * as FS from "fs";
+import * as Path from "path";
+import type * as ts from "typescript";
 import {OutputSettings, OutputStyle, Unicode} from "@swim/codec";
 import {Build} from "./Build";
 import {TargetConfig, Target} from "./Target";
@@ -27,12 +26,12 @@ export interface ProjectConfig {
   path?: string;
   title?: string;
   readme?: string;
+  framework?: boolean;
   targets: TargetConfig[];
   devel?: boolean;
   tests?: string;
   cleanDirs?: string[];
   compilerOptions?: ts.CompilerOptions;
-  umbrella?: boolean;
 }
 
 export class Project {
@@ -44,6 +43,7 @@ export class Project {
   readonly baseDir: string;
   readonly title: string | undefined;
   readonly readme: string | undefined;
+  readonly framework: boolean;
 
   readonly packagePath: string;
   readonly package: any;
@@ -58,21 +58,20 @@ export class Project {
   readonly compilerOptions: ts.CompilerOptions;
   bundleConfig: any;
 
-  readonly umbrella: boolean;
-
   constructor(build: Build, config: ProjectConfig) {
     this.build = build;
 
     this.id = config.id;
     this.name = config.name;
     this.path = config.path !== void 0 ? config.path : this.name;
-    this.baseDir = path.resolve(this.build.baseDir, this.path);
+    this.baseDir = Path.resolve(this.build.baseDir, this.path);
     this.title = config.title;
     this.readme = config.readme;
+    this.framework = config.framework || false;
 
-    this.packagePath = path.join(this.baseDir, "package.json");
+    this.packagePath = Path.join(this.baseDir, "package.json");
     try {
-      this.package = JSON.parse(fs.readFileSync(this.packagePath, "utf8"));
+      this.package = JSON.parse(FS.readFileSync(this.packagePath, "utf8"));
     } catch (error) {
       console.log(this.packagePath);
       throw error;
@@ -87,13 +86,11 @@ export class Project {
 
     this.compilerOptions = config.compilerOptions || this.build.compilerOptions;
     this.bundleConfig = {};
-
-    this.umbrella = config.umbrella || false;
   }
 
   initTargets(config: ProjectConfig): void {
     for (let i = 0; i < config.targets.length; i += 1) {
-      const targetConfig = config.targets[i];
+      const targetConfig = config.targets[i]!;
       const target = new Target(this, targetConfig);
       this.targets[target.id] = target;
       this.targetList.push(target);
@@ -102,19 +99,27 @@ export class Project {
 
   initDeps(config: ProjectConfig): void {
     for (let i = 0; i < config.targets.length; i += 1) {
-      const targetConfig = config.targets[i];
+      const targetConfig = config.targets[i]!;
       const target = this.targets[targetConfig.id]!;
       target.initDeps(targetConfig);
     }
   }
 
+  initPeerDeps(config: ProjectConfig): void {
+    for (let i = 0; i < config.targets.length; i += 1) {
+      const targetConfig = config.targets[i]!;
+      const target = this.targets[targetConfig.id]!;
+      target.initPeerDeps(targetConfig);
+    }
+  }
+
   initBundle(): Promise<unknown> {
-    const bundleConfigPath = path.join(this.baseDir, "rollup.config.js");
-    if (fs.existsSync(bundleConfigPath)) {
+    const bundleConfigPath = Path.join(this.baseDir, "rollup.config.js");
+    if (FS.existsSync(bundleConfigPath)) {
       return Build.importScript(bundleConfigPath)
         .then((bundleConfig: any): void => {
           for (let i = 0; i < this.targetList.length; i += 1) {
-            const target = this.targetList[i];
+            const target = this.targetList[i]!;
             const targetBundleConfig = bundleConfig[target.id];
             if (targetBundleConfig !== void 0) {
               target.initBundle(targetBundleConfig);
@@ -126,6 +131,11 @@ export class Project {
     } else {
       return Promise.resolve(void 0);
     }
+  }
+
+  getTarget(targetId: string): Target | null {
+    const target = this.targets[targetId];
+    return target !== void 0 ? target : null;
   }
 
   updatePackage(): void {
@@ -141,7 +151,7 @@ export class Project {
       const deps = pkg.dependencies;
       for (const dep in deps) {
         for (let i = 0; i < this.build.projectList.length; i += 1) {
-          const project = this.build.projectList[i];
+          const project = this.build.projectList[i]!;
           if (project.name === dep && deps[dep] !== build.version) {
             deps[dep] = build.version;
             modified = true;
@@ -151,7 +161,7 @@ export class Project {
     }
 
     if (modified) {
-      fs.writeFileSync(this.packagePath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
+      FS.writeFileSync(this.packagePath, JSON.stringify(pkg, null, 2) + "\n", "utf8");
     }
   }
 
@@ -166,7 +176,7 @@ export class Project {
     OutputStyle.reset(output);
     console.log(output.bind());
 
-    return new Promise((resolve, reject): void => {
+    return new Promise<void>((resolve, reject): void => {
       const command = "npm";
       const args = ["publish"];
       if (options !== void 0) {
@@ -184,13 +194,13 @@ export class Project {
       for (let i = 0; i < args.length; i += 1) {
         output.write(" ");
         OutputStyle.gray(output);
-        output.write(args[i]);
+        output.write(args[i]!);
         OutputStyle.reset(output);
       }
       console.log(output.bind());
 
       const t0 = Date.now();
-      const proc = child_process.spawn(command, args, {cwd: this.baseDir, stdio: "inherit"});
+      const proc = ChildProcess.spawn(command, args, {cwd: this.baseDir, stdio: "inherit"});
       proc.on("exit", (code: number): void => {
         const dt = Date.now() - t0;
         if (code === 0) {
@@ -228,7 +238,7 @@ export class Project {
   clean(): void {
     this.cleanTargets();
     for (let i = 0; i < this.cleanDirs.length; i += 1) {
-      const cleanDir = path.resolve(this.baseDir, this.cleanDirs[i]);
+      const cleanDir = Path.resolve(this.baseDir, this.cleanDirs[i]!);
       const output = Unicode.stringOutput(OutputSettings.styled());
       OutputStyle.greenBold(output);
       output.write("deleting");
@@ -242,22 +252,22 @@ export class Project {
 
   cleanTargets(): void {
     for (let i = 0; i < this.targetList.length; i += 1) {
-      const target = this.targetList[i];
+      const target = this.targetList[i]!;
       target.clean();
     }
   }
 
   private static rmdir(dir: string): void {
-    if (fs.existsSync(dir)) {
-      fs.readdirSync(dir).forEach((fileName) => {
-        const file = path.join(dir, fileName);
-        if (fs.lstatSync(file).isDirectory()) {
+    if (FS.existsSync(dir)) {
+      FS.readdirSync(dir).forEach((fileName) => {
+        const file = Path.join(dir, fileName);
+        if (FS.lstatSync(file).isDirectory()) {
           Project.rmdir(file);
         } else {
-          fs.unlinkSync(file);
+          FS.unlinkSync(file);
         }
       });
-      fs.rmdirSync(dir);
+      FS.rmdirSync(dir);
     }
   }
 }

@@ -12,34 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyUri, Uri} from "@swim/uri";
 import {AnyValue, Value} from "@swim/structure";
-import {Envelope} from "./Envelope";
+import {AnyUri, Uri} from "@swim/uri";
 import {LinkAddressed} from "./LinkAddressed";
 
-export class SyncRequest extends LinkAddressed {
+export class SyncRequest extends LinkAddressed<SyncRequest> {
   constructor(node: Uri, lane: Uri, prio: number, rate: number, body: Value) {
     super(node, lane, prio, rate, body);
   }
 
-  protected copy(node: Uri, lane: Uri, prio: number, rate: number, body: Value): this {
-    return new SyncRequest(node, lane, prio, rate, body) as this;
+  protected copy(node: Uri, lane: Uri, prio: number, rate: number, body: Value): SyncRequest {
+    return new SyncRequest(node, lane, prio, rate, body);
   }
 
-  static tag(): string {
+  static get tag(): string {
     return "sync";
   }
 
-  static fromValue(value: Value): SyncRequest | undefined {
-    return LinkAddressed.fromValue(value, SyncRequest) as SyncRequest | undefined;
-  }
-
-  static of(node: AnyUri, lane: AnyUri, prio: number = 0, rate: number = 0,
-            body: AnyValue = Value.absent()): SyncRequest {
+  static create(node: AnyUri, lane: AnyUri, prio: number = 0, rate: number = 0,
+                body: AnyValue = Value.absent()): SyncRequest {
     node = Uri.fromAny(node);
     lane = Uri.fromAny(lane);
     body = Value.fromAny(body);
-    return new SyncRequest(node, lane, prio, rate, body);
+    return new SyncRequest(node as Uri, lane as Uri, prio, rate, body);
   }
 }
-Envelope.SyncRequest = SyncRequest;

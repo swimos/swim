@@ -18,14 +18,20 @@ import {Text} from "./Text";
 /** @hidden */
 export class TextOutput extends Output<Text> {
   /** @hidden */
-  _string: string;
-  /** @hidden */
-  _settings: OutputSettings;
+  declare readonly string: string;
 
   constructor(string: string, settings: OutputSettings) {
     super();
-    this._string = string;
-    this._settings = settings;
+    Object.defineProperty(this, "string", {
+      value: string,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "settings", {
+      value: settings,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   isCont(): boolean {
@@ -44,14 +50,12 @@ export class TextOutput extends Output<Text> {
     return false;
   }
 
-  isPart(): boolean;
-  isPart(isPart: boolean): Output<Text>;
-  isPart(isPart?: boolean): boolean | Output<Text> {
-    if (isPart === void 0) {
-      return false;
-    } else {
-      return this;
-    }
+  isPart(): boolean {
+    return false;
+  }
+
+  asPart(part: boolean): Output<Text> {
+    return this;
   }
 
   write(token: number | string): Output<Text> {
@@ -66,30 +70,35 @@ export class TextOutput extends Output<Text> {
         token = "\ufffd";
       }
     }
-    this._string += token;
+    Object.defineProperty(this, "string", {
+      value: this.string + token,
+      enumerable: true,
+      configurable: true,
+    });
     return this;
   }
 
-  settings(): OutputSettings;
-  settings(settings: AnyOutputSettings): Output<Text>;
-  settings(settings?: AnyOutputSettings): OutputSettings | Output<Text> {
-    if (settings === void 0) {
-      return this._settings;
-    } else {
-      this._settings = OutputSettings.fromAny(settings);
-      return this;
-    }
+  declare readonly settings: OutputSettings;
+
+  withSettings(settings: AnyOutputSettings): Output<Text> {
+    settings = OutputSettings.fromAny(settings);
+    Object.defineProperty(this, "settings", {
+      value: settings,
+      enumerable: true,
+      configurable: true,
+    });
+    return this;
   }
 
   bind(): Text {
-    return Text.from(this._string);
+    return Text.from(this.string);
   }
 
   clone(): Output<Text> {
-    return new TextOutput(this._string, this._settings);
+    return new TextOutput(this.string, this.settings);
   }
 
   toString(): string {
-    return this._string;
+    return this.string;
   }
 }

@@ -12,60 +12,66 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Item} from "../Item";
+import type {Item} from "../Item";
 import {Attr} from "../Attr";
-import {Form} from "../Form";
+import {Form} from "./Form";
 
 /** @hidden */
-export class TagForm<T, U = T> extends Form<T, U> {
-  /** @hidden */
-  readonly _tag: string;
-  /** @hidden */
-  readonly _form: Form<T, U>;
-
-  constructor(tag: string, form: Form<T, U>) {
+export class TagForm<T, U = never> extends Form<T, U> {
+  constructor(form: Form<T, U>, tag: string) {
     super();
-    this._tag = tag;
-    this._form = form;
+    Object.defineProperty(this, "form", {
+      value: form,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "tag", {
+      value: tag,
+      enumerable: true,
+    });
   }
 
-  tag(): string | undefined;
-  tag(tag: string | undefined): Form<T, U>;
-  tag(tag?: string | undefined): string | undefined | Form<T, U> {
-    if (arguments.length === 0) {
-      return this._tag;
-    } else if (tag !== void 0) {
-      return new TagForm<T, U>(tag, this._form);
+  /** @hidden */
+  declare readonly form: Form<T, U>;
+
+  // @ts-ignore
+  declare readonly tag: string;
+
+  withTag(tag: string | undefined): Form<T, U> {
+     if (tag !== void 0 && tag !== this.tag) {
+      return new TagForm(this.form, tag);
+    } else if (tag === void 0) {
+      return this.form;
     } else {
-      return this._form;
+      return this;
     }
   }
 
-  unit(): T | undefined;
-  unit(unit: T | undefined): Form<T, U>;
-  unit(unit?: T | undefined): T | undefined | Form<T, U> {
-    if (arguments.length === 0) {
-      return this._form.unit();
+  get unit(): T | undefined {
+    return this.form.unit;
+  }
+
+  withUnit(unit: T | undefined): Form<T, U> {
+    if (unit !== this.unit) {
+      return new TagForm(this.form.withUnit(unit), this.tag);
     } else {
-      return new TagForm<T, U>(this._tag, this._form.unit(unit));
+      return this;
     }
   }
 
   mold(object: T | U, item?: Item): Item {
-    item = this._form.mold(object, item);
-    if (!item.header(this._tag).isDefined()) {
-      item = item.prepended(Attr.of(this._tag));
+    item = this.form.mold(object, item);
+    if (!item.header(this.tag).isDefined()) {
+      item = item.prepended(Attr.of(this.tag));
     }
     return item;
   }
 
   cast(item: Item, object?: T): T | undefined {
-    if (item.header(this._tag).isDefined()) {
-      return this._form.cast(item, object);
-    } else if (item.keyEquals(this._tag)) {
-      return this._form.cast(item.toValue(), object);
+    if (item.header(this.tag).isDefined()) {
+      return this.form.cast(item, object);
+    } else if (item.keyEquals(this.tag)) {
+      return this.form.cast(item.toValue(), object);
     }
     return void 0;
   }
 }
-Form.TagForm = TagForm;

@@ -13,54 +13,79 @@
 // limitations under the License.
 
 import {BTree} from "@swim/collections";
-import {KeyEffect} from "./KeyEffect";
-import {MapInlet} from "./MapInlet";
+import type {KeyEffect} from "./KeyEffect";
+import type {MapInlet} from "./MapInlet";
 import {MapOutlet} from "./MapOutlet";
 
 export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
-  /** @hidden */
-  protected _input: MapOutlet<K, V, O> | null;
-  /** @hidden */
-  protected _effects: BTree<K, KeyEffect>;
-  /** @hidden */
-  protected _version: number;
-
   constructor() {
-    this._input = null;
-    this._effects = new BTree();
-    this._version = -1;
+    Object.defineProperty(this, "input", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "effects", {
+      value: new BTree(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "version", {
+      value: -1,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  input(): MapOutlet<K, V, O> | null {
-    return this._input;
-  }
+  declare readonly input: MapOutlet<K, V, O> | null;
 
-  bindInput(input: MapOutlet<K, V, O> | null): void {
-    if (!MapOutlet.is(input)) {
-      throw new TypeError("" + input);
+  /** @hidden */
+  declare readonly effects: BTree<K, KeyEffect>;
+
+  /** @hidden */
+  declare readonly version: number;
+
+  bindInput(newInput: MapOutlet<K, V, O> | null): void {
+    if (!MapOutlet.is(newInput)) {
+      throw new TypeError("" + newInput);
     }
-    if (this._input !== null) {
-      this._input.unbindOutput(this);
-    }
-    this._input = input;
-    if (this._input !== null) {
-      this._input.bindOutput(this);
+    const oldInput = this.input;
+    if (oldInput !== newInput) {
+      if (oldInput !== null) {
+        oldInput.unbindOutput(this);
+      }
+      Object.defineProperty(this, "input", {
+        value: newInput,
+        enumerable: true,
+        configurable: true,
+      });
+      if (newInput !== null) {
+        newInput.bindOutput(this);
+      }
     }
   }
 
   unbindInput(): void {
-    if (this._input !== null) {
-      this._input.unbindOutput(this);
+    const oldInput = this.input;
+    if (oldInput !== null) {
+      oldInput.unbindOutput(this);
+      Object.defineProperty(this, "input", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    this._input = null;
   }
 
   disconnectInputs(): void {
-    const input = this._input;
-    if (input !== null) {
-      input.unbindOutput(this);
-      this._input = null;
-      input.disconnectInputs();
+    const oldInput = this.input;
+    if (oldInput !== null) {
+      oldInput.unbindOutput(this);
+      Object.defineProperty(this, "input", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
+      oldInput.disconnectInputs();
     }
   }
 
@@ -69,34 +94,50 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
   }
 
   decohereOutputKey(key: K, effect: KeyEffect): void {
-    const oldEffects = this._effects;
+    const oldEffects = this.effects;
     if (oldEffects.get(key) !== effect) {
       this.willDecohereOutputKey(key, effect);
-      this._effects = oldEffects.updated(key, effect);
-      this._version = -1;
+      Object.defineProperty(this, "effects", {
+        value: oldEffects.updated(key, effect),
+        enumerable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, "version", {
+        value: -1,
+        enumerable: true,
+        configurable: true,
+      });
       this.onDecohereOutputKey(key, effect);
       this.didDecohereOutputKey(key, effect);
     }
   }
 
   decohereOutput(): void {
-    if (this._version >= 0) {
+    if (this.version >= 0) {
       this.willDecohereOutput();
-      this._version = -1;
+      Object.defineProperty(this, "version", {
+        value: -1,
+        enumerable: true,
+        configurable: true,
+      });
       this.onDecohereOutput();
       this.didDecohereOutput();
     }
   }
 
   recohereOutputKey(key: K, version: number): void {
-    if (this._version < 0) {
-      const oldEffects = this._effects;
+    if (this.version < 0) {
+      const oldEffects = this.effects;
       const effect = oldEffects.get(key);
       if (effect !== void 0) {
         this.willRecohereOutputKey(key, effect, version);
-        this._effects = oldEffects.removed(key);
-        if (this._input !== null) {
-          this._input.recohereInputKey(key, version);
+        Object.defineProperty(this, "effects", {
+          value: oldEffects.removed(key),
+          enumerable: true,
+          configurable: true,
+        });
+        if (this.input !== null) {
+          this.input.recohereInputKey(key, version);
         }
         this.onRecohereOutputKey(key, effect, version);
         this.didRecohereOutputKey(key, effect, version);
@@ -105,12 +146,16 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
   }
 
   recohereOutput(version: number): void {
-    if (this._version < 0) {
+    if (this.version < 0) {
       this.willRecohereOutput(version);
-      this._effects.forEach(function (key: K): void {
+      this.effects.forEach(function (key: K): void {
         this.recohereOutputKey(key, version);
       }, this);
-      this._version = version;
+      Object.defineProperty(this, "version", {
+        value: version,
+        enumerable: true,
+        configurable: true,
+      });
       this.onRecohereOutput(version);
       this.didRecohereOutput(version);
     }

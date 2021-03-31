@@ -21,6 +21,6 @@ import {AssertException} from "@swim/util";
 export class TestException extends AssertException {
   constructor(message?: string) {
     super(message);
-    (this as any).__proto__ = TestException.prototype;
+    Object.setPrototypeOf(this, TestException.prototype);
   }
 }

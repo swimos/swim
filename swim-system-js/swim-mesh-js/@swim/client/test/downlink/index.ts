@@ -12,63 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
-
-import {EventDownlinkSpec} from "./EventDownlinkSpec";
-import {ListDownlinkSpec} from "./ListDownlinkSpec";
-import {MapDownlinkSpec} from "./MapDownlinkSpec";
-import {ValueDownlinkSpec} from "./ValueDownlinkSpec";
-
-import {MapDownlinkRecordSpec} from "./MapDownlinkRecordSpec";
-import {ValueDownlinkRecordSpec} from "./ValueDownlinkRecordSpec";
-
-import {DownlinkStreamletSpec} from "./DownlinkStreamletSpec";
-
-@Unit
-class DownlinkSpec extends Spec {
-  @Unit
-  eventDownlinkSpec(): Spec {
-    return new EventDownlinkSpec();
-  }
-
-  @Unit
-  listDownlinkSpec(): Spec {
-    return new ListDownlinkSpec();
-  }
-
-  @Unit
-  mapDownlinkSpec(): Spec {
-    return new MapDownlinkSpec();
-  }
-
-  @Unit
-  valueDownlinkSpec(): Spec {
-    return new ValueDownlinkSpec();
-  }
-
-  @Unit
-  mapDownlinkRecordSpec(): Spec {
-    return new MapDownlinkRecordSpec();
-  }
-
-  @Unit
-  valueDownlinkRecordSpec(): Spec {
-    return new ValueDownlinkRecordSpec();
-  }
-
-  @Unit
-  downlinkStreamletSpec(): Spec {
-    return new DownlinkStreamletSpec();
-  }
-}
-
-export {
-  DownlinkSpec,
-  EventDownlinkSpec,
-  ListDownlinkSpec,
-  MapDownlinkSpec,
-  ValueDownlinkSpec,
-  MapDownlinkRecordSpec,
-  ValueDownlinkRecordSpec,
-  DownlinkStreamletSpec,
-};
+export {EventDownlinkSpec} from "./EventDownlinkSpec";
+export {ListDownlinkSpec} from "./ListDownlinkSpec";
+export {MapDownlinkSpec} from "./MapDownlinkSpec";
+export {ValueDownlinkSpec} from "./ValueDownlinkSpec";
+export {MapDownlinkRecordSpec} from "./MapDownlinkRecordSpec";
+export {ValueDownlinkRecordSpec} from "./ValueDownlinkRecordSpec";
+export {DownlinkStreamletSpec} from "./DownlinkStreamletSpec";
+export {DownlinkSuite} from "./DownlinkSuite";

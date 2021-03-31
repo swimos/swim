@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Map} from "@swim/util";
-import {Outlet} from "./Outlet";
-import {Inoutlet} from "./Inoutlet";
-import {MapInlet} from "./MapInlet";
-import {MapOutlet} from "./MapOutlet";
-import {MapValueFunction, MapFieldValuesFunction} from "./function";
-import {WatchValueFunction, WatchFieldsFunction} from "./function";
+import type {Map} from "@swim/util";
+import type {Outlet} from "./Outlet";
+import type {Inoutlet} from "./Inoutlet";
+import type {MapInlet} from "./MapInlet";
+import type {MapOutlet} from "./MapOutlet";
+import type {MapValueFunction, MapFieldValuesFunction} from "./function";
+import type {WatchValueFunction, WatchFieldsFunction} from "./function";
 
 export interface MapInoutlet<K, VI, VO, I, O> extends Inoutlet<I, O>, MapInlet<K, VI, I>, MapOutlet<K, VO, O> {
   /**

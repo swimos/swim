@@ -12,22 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor} from "@swim/util";
+import {Lazy, Cursor} from "@swim/util";
 import {KeysCursor} from "./KeysCursor";
 import {ValuesCursor} from "./ValuesCursor";
-import {BTreeContext} from "./BTreeContext";
-import {BTree} from "./BTree";
-import {BTreeLeaf} from "./BTreeLeaf";
+import type {BTreeContext} from "./BTreeContext";
+import {BTreeLeaf} from "./"; // forward import
 
 /** @hidden */
 export abstract class BTreePage<K, V, U> {
-  abstract get arity(): number;
+  abstract readonly arity: number;
 
-  abstract get size(): number;
+  abstract readonly size: number;
 
   abstract isEmpty(): boolean;
 
-  abstract fold(): U | undefined;
+  abstract readonly fold: U | undefined;
 
   abstract minKey(): K;
 
@@ -95,13 +94,8 @@ export abstract class BTreePage<K, V, U> {
 
   abstract reverseEntries(): Cursor<[K, V]>;
 
-  private static _empty?: BTreeLeaf<unknown, unknown, unknown>;
-
+  @Lazy
   static empty<K, V, U>(): BTreeLeaf<K, V, U> {
-    if (BTreePage._empty === void 0) {
-      BTreePage._empty = new BTree.Leaf([], void 0);
-    }
-    return BTreePage._empty as BTreeLeaf<K, V, U>;
+    return new BTreeLeaf([], void 0 as U | undefined);
   }
 }
-BTree.Page = BTreePage;

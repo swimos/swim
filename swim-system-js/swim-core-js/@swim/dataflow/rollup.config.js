@@ -12,8 +12,8 @@ const main = {
     format: "umd",
     globals: {
       "@swim/util": "swim",
+      "@swim/mapping": "swim",
       "@swim/collections": "swim",
-      "@swim/interpolate": "swim",
       "@swim/structure": "swim",
       "@swim/streamlet": "swim",
     },
@@ -23,13 +23,13 @@ const main = {
   },
   external: [
     "@swim/util",
+    "@swim/mapping",
     "@swim/collections",
-    "@swim/interpolate",
     "@swim/structure",
     "@swim/streamlet",
   ],
   plugins: [
-    nodeResolve({customResolveOptions: {paths: "../.."}}),
+    nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
     sourcemaps(),
   ],
   onwarn(warning, warn) {
@@ -49,7 +49,7 @@ const test = {
     extend: true,
   },
   plugins: [
-    nodeResolve({customResolveOptions: {paths: "../.."}}),
+    nodeResolve({moduleDirectories: ["../..", "node_modules"]}),
     sourcemaps(),
   ],
   onwarn(warning, warn) {

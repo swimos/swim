@@ -13,39 +13,45 @@
 // limitations under the License.
 
 import {Arg, Opt, Cmd} from "@swim/args";
-import {Value} from "@swim/structure";
+import type {Value} from "@swim/structure";
 import {Recon} from "@swim/recon";
 import {AnyUri, Uri} from "@swim/uri";
 import * as client from "@swim/client";
 
-function link(hostUri: AnyUri | null | undefined, nodeUri: AnyUri | null | undefined,
-              laneUri: AnyUri | null | undefined, format?: string | null): client.Downlink {
-  return client.downlink()
-      .hostUri(hostUri)
-      .nodeUri(nodeUri)
-      .laneUri(laneUri)
-      .keepSynced(true)
-      .onEvent((body: Value) => {
+function link(hostUri: AnyUri | undefined, nodeUri: AnyUri | undefined,
+              laneUri: AnyUri | undefined, format?: string): client.Downlink {
+  let downlink = client.downlink();
+  if (hostUri !== void 0) {
+    downlink = downlink.hostUri(hostUri);
+  }
+  if (nodeUri !== void 0) {
+    downlink = downlink.nodeUri(nodeUri);
+  }
+  if (laneUri !== void 0) {
+    downlink = downlink.laneUri(laneUri);
+  }
+  return downlink.keepSynced(true)
+      .onEvent(function (body: Value): void {
         if (format === "json") {
           console.log(JSON.stringify(body.toAny()));
         } else {
           console.log(Recon.toString(body));
         }
       })
-      .didUnlink((downlink: client.Downlink) => {
+      .didUnlink(function (downlink: client.Downlink): void {
         downlink.close();
       });
 }
 
-function runLink(this: Cmd, args: {[name: string]: string | null | undefined}): void {
+function runLink(this: Cmd, args: {[name: string]: string | undefined}): void {
   link(args.host, args.node, args.lane, args.format).keepSynced(false).open();
 }
 
-function runSync(this: Cmd, args: {[name: string]: string | null | undefined}): void {
+function runSync(this: Cmd, args: {[name: string]: string | undefined}): void {
   link(args.host, args.node, args.lane, args.format).open();
 }
 
-function runGet(this: Cmd, args: {[name: string]: string | null | undefined}): void {
+function runGet(this: Cmd, args: {[name: string]: string | undefined}): void {
   link(args.host, args.node, args.lane, args.format)
       .didSync((downlink: client.Downlink) => {
         downlink.close();
@@ -53,7 +59,7 @@ function runGet(this: Cmd, args: {[name: string]: string | null | undefined}): v
       .open();
 }
 
-function runReflect(this: Cmd, args: {[name: string]: string | null | undefined}): void {
+function runReflect(this: Cmd, args: {[name: string]: string | undefined}): void {
   const edgeUri = args.edge;
   if (edgeUri) {
     const meshUri = args.mesh;
@@ -73,7 +79,7 @@ function runReflect(this: Cmd, args: {[name: string]: string | null | undefined}
         metaNodeUri = metaNodeUri.appendedPath("lane", laneUri);
         link(edgeUri, metaNodeUri, "linkStats", args.format).open();
       } else {
-        if (args.link !== void 0) {
+        if ("link" in args) {
           link(edgeUri, metaNodeUri, "linkStats", args.format).open();
         } else {
           link(edgeUri, metaNodeUri, "routerStats", args.format).open();
@@ -92,15 +98,15 @@ function runReflect(this: Cmd, args: {[name: string]: string | null | undefined}
           metaNodeUri = metaNodeUri.appendedPath(hostUri);
         }
       }
-      if (args.process !== void 0) {
+      if ("process" in args) {
         link(edgeUri, metaNodeUri, "processStats", args.format).open();
-      } else if (args.system !== void 0) {
+      } else if ("system" in args) {
         link(edgeUri, metaNodeUri, "systemStats", args.format).open();
-      } else if (args.data !== void 0) {
+      } else if ("data" in args) {
         link(edgeUri, metaNodeUri, "dataStats", args.format).open();
-      } else if (args.router !== void 0) {
+      } else if ("router" in args) {
         link(edgeUri, metaNodeUri, "routerStats", args.format).open();
-      } else if (args.link !== void 0) {
+      } else if ("link" in args) {
         link(edgeUri, metaNodeUri, "linkStats", args.format).open();
       } else {
         link(edgeUri, metaNodeUri, "hostStats", args.format).open();
@@ -110,27 +116,27 @@ function runReflect(this: Cmd, args: {[name: string]: string | null | undefined}
       if (meshUri) {
         metaNodeUri = metaNodeUri.appendedPath(meshUri);
       }
-      if (args.process !== void 0) {
+      if ("process" in args) {
         link(edgeUri, metaNodeUri, "processStats", args.format).open();
-      } else if (args.system !== void 0) {
+      } else if ("system" in args) {
         link(edgeUri, metaNodeUri, "systemStats", args.format).open();
-      } else if (args.data !== void 0) {
+      } else if ("data" in args) {
         link(edgeUri, metaNodeUri, "dataStats", args.format).open();
-      } else if (args.router !== void 0) {
+      } else if ("router" in args) {
         link(edgeUri, metaNodeUri, "routerStats", args.format).open();
-      } else if (args.link !== void 0) {
+      } else if ("link" in args) {
         link(edgeUri, metaNodeUri, "linkStats", args.format).open();
       } else {
         link(edgeUri, metaNodeUri, "meshStats", args.format).open();
       }
     } else {
-      if (args.process !== void 0) {
+      if ("process" in args) {
         link(edgeUri, "swim:meta:edge", "processStats", args.format).open();
-      } else if (args.system !== void 0) {
+      } else if ("system" in args) {
         link(edgeUri, "swim:meta:edge", "systemStats", args.format).open();
-      } else if (args.data !== void 0) {
+      } else if ("data" in args) {
         link(edgeUri, "swim:meta:edge", "dataStats", args.format).open();
-      } else if (args.link !== void 0) {
+      } else if ("link" in args) {
         link(edgeUri, "swim:meta:edge", "linkStats", args.format).open();
       } else {
         link(edgeUri, "swim:meta:edge", "routerStats", args.format).open();
@@ -139,71 +145,71 @@ function runReflect(this: Cmd, args: {[name: string]: string | null | undefined}
   }
 }
 
-function runReflectLog(this: Cmd, args: {[name: string]: string | null | undefined}): void {
+function runReflectLog(this: Cmd, args: {[name: string]: string | undefined}): void {
   // TODO
 }
 
-const linkCmd = Cmd.of("link")
-    .desc("stream changes to a lane of a remote node")
-    .opt(Opt.of("host").flag("h").arg("hostUri").desc("remote host to link"))
-    .opt(Opt.of("node").flag("n").arg("nodeUri").desc("remote node to link"))
-    .opt(Opt.of("lane").flag("l").arg("laneUri").desc("lane to link"))
-    .opt(Opt.of("format").flag("f").arg("json|recon").desc("event output format"))
-    .helpCmd()
-    .exec(runLink);
+const linkCmd = Cmd.create("link")
+    .withDesc("stream changes to a lane of a remote node")
+    .withOpt(Opt.create("host").withFlag("h").withArg("hostUri").withDesc("remote host to link"))
+    .withOpt(Opt.create("node").withFlag("n").withArg("nodeUri").withDesc("remote node to link"))
+    .withOpt(Opt.create("lane").withFlag("l").withArg("laneUri").withDesc("lane to link"))
+    .withOpt(Opt.create("format").withFlag("f").withArg("json|recon").withDesc("event output format"))
+    .withHelpCmd()
+    .onExec(runLink);
 
-const syncCmd = Cmd.of("sync")
-    .desc("stream the current state and changes to a lane of a remote node")
-    .opt(Opt.of("host").flag("h").arg("hostUri").desc("remote host to link"))
-    .opt(Opt.of("node").flag("n").arg("nodeUri").desc("remote node to link"))
-    .opt(Opt.of("lane").flag("l").arg("laneUri").desc("lane to link"))
-    .opt(Opt.of("format").flag("f").arg("json|recon").desc("event output format"))
-    .helpCmd()
-    .exec(runSync);
+const syncCmd = Cmd.create("sync")
+    .withDesc("stream the current state and changes to a lane of a remote node")
+    .withOpt(Opt.create("host").withFlag("h").withArg("hostUri").withDesc("remote host to link"))
+    .withOpt(Opt.create("node").withFlag("n").withArg("nodeUri").withDesc("remote node to link"))
+    .withOpt(Opt.create("lane").withFlag("l").withArg("laneUri").withDesc("lane to link"))
+    .withOpt(Opt.create("format").withFlag("f").withArg("json|recon").withDesc("event output format"))
+    .withHelpCmd()
+    .onExec(runSync);
 
-const getCmd = Cmd.of("get")
-    .desc("fetch the current state of a lane of a remote node")
-    .opt(Opt.of("host").flag("h").arg("hostUri").desc("remote host to link"))
-    .opt(Opt.of("node").flag("n").arg("nodeUri").desc("remote node to link"))
-    .opt(Opt.of("lane").flag("l").arg("laneUri").desc("lane to link"))
-    .opt(Opt.of("format").flag("f").arg("json|recon").desc("event output format"))
-    .helpCmd()
-    .exec(runGet);
+const getCmd = Cmd.create("get")
+    .withDesc("fetch the current state of a lane of a remote node")
+    .withOpt(Opt.create("host").withFlag("h").withArg("hostUri").withDesc("remote host to link"))
+    .withOpt(Opt.create("node").withFlag("n").withArg("nodeUri").withDesc("remote node to link"))
+    .withOpt(Opt.create("lane").withFlag("l").withArg("laneUri").withDesc("lane to link"))
+    .withOpt(Opt.create("format").withFlag("f").withArg("json|recon").withDesc("event output format"))
+    .withHelpCmd()
+    .onExec(runGet);
 
-const reflectLogCmd = Cmd.of("log")
-    .desc("stream log events")
-    .opt(Opt.of("trace").flag("t").desc("stream trace log messages"))
-    .opt(Opt.of("debug").flag("d").desc("stream debug log messages"))
-    .opt(Opt.of("info").flag("i").desc("stream info log messages"))
-    .opt(Opt.of("warn").flag("w").desc("stream warning log messages"))
-    .opt(Opt.of("error").flag("e").desc("stream error log messages"))
-    .helpCmd()
-    .exec(runReflectLog);
+const reflectLogCmd = Cmd.create("log")
+    .withDesc("stream log events")
+    .withOpt(Opt.create("trace").withFlag("t").withDesc("stream trace log messages"))
+    .withOpt(Opt.create("debug").withFlag("d").withDesc("stream debug log messages"))
+    .withOpt(Opt.create("info").withFlag("i").withDesc("stream info log messages"))
+    .withOpt(Opt.create("warn").withFlag("w").withDesc("stream warning log messages"))
+    .withOpt(Opt.create("error").withFlag("e").withDesc("stream error log messages"))
+    .withHelpCmd()
+    .onExec(runReflectLog);
 
-const reflectCmd = Cmd.of("reflect")
-    .desc("stream introspection metadata")
-    .opt(Opt.of("edge").flag("e").arg("edgeUri").desc("endpoint to introspect"))
-    .opt(Opt.of("mesh").flag("m").arg(Arg.of("meshUri").optional(true)).desc("introspect default or specified mesh"))
-    .opt(Opt.of("part").flag("p").arg(Arg.of("partKey").optional(true)).desc("introspect default or specified partition"))
-    .opt(Opt.of("host").flag("h").arg(Arg.of("hostUri").optional(true)).desc("introspect default or specified host"))
-    .opt(Opt.of("node").flag("n").arg("nodeUri").desc("introspect specified node"))
-    .opt(Opt.of("lane").flag("l").arg("laneUri").desc("introspect specified lane"))
-    .opt(Opt.of("link").flag("k").desc("introspect link behavior"))
-    .opt(Opt.of("router").flag("r").desc("introspect router behavior"))
-    .opt(Opt.of("data").desc("introspect data behavior"))
-    .opt(Opt.of("system").desc("introspect system behavior"))
-    .opt(Opt.of("process").desc("introspect process behavior"))
-    .opt(Opt.of("stats").flag("s").desc("stream introspection statistics"))
-    .opt(Opt.of("format").flag("f").arg("json|recon").desc("event output format"))
-    .cmd(reflectLogCmd)
-    .helpCmd()
-    .exec(runReflect);
+const reflectCmd = Cmd.create("reflect")
+    .withDesc("stream introspection metadata")
+    .withOpt(Opt.create("edge").withFlag("e").withArg("edgeUri").withDesc("endpoint to introspect"))
+    .withOpt(Opt.create("mesh").withFlag("m").withArg(Arg.create("meshUri").asOptional(true)).withDesc("introspect default or specified mesh"))
+    .withOpt(Opt.create("part").withFlag("p").withArg(Arg.create("partKey").asOptional(true)).withDesc("introspect default or specified partition"))
+    .withOpt(Opt.create("host").withFlag("h").withArg(Arg.create("hostUri").asOptional(true)).withDesc("introspect default or specified host"))
+    .withOpt(Opt.create("node").withFlag("n").withArg("nodeUri").withDesc("introspect specified node"))
+    .withOpt(Opt.create("lane").withFlag("l").withArg("laneUri").withDesc("introspect specified lane"))
+    .withOpt(Opt.create("link").withFlag("k").withDesc("introspect link behavior"))
+    .withOpt(Opt.create("router").withFlag("r").withDesc("introspect router behavior"))
+    .withOpt(Opt.create("data").withDesc("introspect data behavior"))
+    .withOpt(Opt.create("system").withDesc("introspect system behavior"))
+    .withOpt(Opt.create("process").withDesc("introspect process behavior"))
+    .withOpt(Opt.create("stats").withFlag("s").withDesc("stream introspection statistics"))
+    .withOpt(Opt.create("format").withFlag("f").withArg("json|recon").withDesc("event output format"))
+    .withCmd(reflectLogCmd)
+    .withHelpCmd()
+    .onExec(runReflect);
 
-const cmd = Cmd.of("swim-cli")
-    .cmd(linkCmd)
-    .cmd(syncCmd)
-    .cmd(getCmd)
-    .cmd(reflectCmd)
-    .helpCmd();
+const cmd = Cmd.create("swim-cli")
+    .withCmd(linkCmd)
+    .withCmd(syncCmd)
+    .withCmd(getCmd)
+    .withCmd(reflectCmd)
+    .withHelpCmd();
 
 cmd.parse().run();

@@ -25,48 +25,48 @@ export class LinkRequestSpec extends Spec {
   @Test
   parseLinkWithNamedHeaders(exam: WarpExam): void {
     exam.parses("@link(node: node_uri, lane: lane_uri, prio: 0.5, rate: 1.0)",
-                LinkRequest.of("node_uri", "lane_uri", 0.5, 1.0));
+                LinkRequest.create("node_uri", "lane_uri", 0.5, 1.0));
   }
 
   @Test
   parseLinkWithPositionalHeaders(exam: WarpExam): void {
     exam.parses("@link(node_uri, lane_uri)",
-                LinkRequest.of("node_uri", "lane_uri", 0.0, 0.0));
+                LinkRequest.create("node_uri", "lane_uri", 0.0, 0.0));
   }
 
   @Test
   parseLinkWithBody(exam: WarpExam): void {
     exam.parses("@link(node_uri, lane_uri)@test",
-                LinkRequest.of("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))));
+                LinkRequest.create("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))));
   }
 
   @Test
   writeLink(exam: WarpExam): void {
-    exam.writes(LinkRequest.of("node_uri", "lane_uri", 0.0, 0.0),
+    exam.writes(LinkRequest.create("node_uri", "lane_uri", 0.0, 0.0),
                 "@link(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   writeLinkWithPrio(exam: WarpExam): void {
-    exam.writes(LinkRequest.of("node_uri", "lane_uri", 0.5, 0.0),
+    exam.writes(LinkRequest.create("node_uri", "lane_uri", 0.5, 0.0),
                 "@link(node:node_uri,lane:lane_uri,prio:0.5)");
   }
 
   @Test
   writeLinkWithRate(exam: WarpExam): void {
-    exam.writes(LinkRequest.of("node_uri", "lane_uri", 0.0, 1.0),
+    exam.writes(LinkRequest.create("node_uri", "lane_uri", 0.0, 1.0),
                 "@link(node:node_uri,lane:lane_uri,rate:1)");
   }
 
   @Test
   writeLinkWithPrioAndRate(exam: WarpExam): void {
-    exam.writes(LinkRequest.of("node_uri", "lane_uri", 0.5, 1.0),
+    exam.writes(LinkRequest.create("node_uri", "lane_uri", 0.5, 1.0),
                 "@link(node:node_uri,lane:lane_uri,prio:0.5,rate:1)");
   }
 
   @Test
   writeLinkWithBody(exam: WarpExam): void {
-    exam.writes(LinkRequest.of("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))),
+    exam.writes(LinkRequest.create("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))),
                 "@link(node:node_uri,lane:lane_uri)@test");
   }
 }

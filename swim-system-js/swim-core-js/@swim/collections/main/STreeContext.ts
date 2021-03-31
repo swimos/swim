@@ -12,13 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Random, Objects} from "@swim/util";
-import {STreePage} from "./STreePage";
+import {Random, Values} from "@swim/util";
+import type {STreePage} from "./STreePage";
 
 /** @hidden */
 export abstract class STreeContext<V, I> {
-  pageSplitSize: number;
- 
+  get pageSplitSize(): number {
+    return 32;
+  }
+
+  set pageSplitSize(pageSplitSize: number) {
+    Object.defineProperty(this, "pageSplitSize", {
+      value: pageSplitSize,
+      configurable: true,
+      enumerable: true,
+      writable: true,
+    });
+  }
+
   identify(value: V): I {
     const id = new Uint8Array(6);
     Random.fillBytes(id);
@@ -26,7 +37,7 @@ export abstract class STreeContext<V, I> {
   }
 
   compare(x: I, y: I): number {
-    return Objects.compare(x, y);
+    return Values.compare(x, y);
   }
 
   pageShouldSplit(page: STreePage<V, I>): boolean {
@@ -37,4 +48,3 @@ export abstract class STreeContext<V, I> {
     return page.arity < this.pageSplitSize >>> 1;
   }
 }
-STreeContext.prototype.pageSplitSize = 32;

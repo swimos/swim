@@ -12,30 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapOutlet} from "./MapOutlet";
+import type {MapOutlet} from "./MapOutlet";
 import {AbstractOutlet} from "./AbstractOutlet";
 
 export class KeyOutlet<K, V> extends AbstractOutlet<V> {
-  /** @hidden */
-  protected readonly _input: MapOutlet<K, V, unknown>;
-  /** @hidden */
-  protected readonly _key: K;
-
   constructor(input: MapOutlet<K, V, unknown>, key: K) {
     super();
-    this._input = input;
-    this._key = key;
+    Object.defineProperty(this, "input", {
+      value: input,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "key", {
+      value: key,
+      enumerable: true,
+    });
   }
 
-  input(): MapOutlet<K, V, unknown> {
-    return this._input;
-  }
+  declare readonly input: MapOutlet<K, V, unknown>;
 
-  key(): K {
-    return this._key;
-  }
+  declare readonly key: K;
 
   get(): V | undefined {
-    return this._input.get(this._key);
+    return this.input.get(this.key);
   }
 }

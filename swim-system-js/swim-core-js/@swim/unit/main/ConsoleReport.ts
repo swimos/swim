@@ -13,74 +13,74 @@
 // limitations under the License.
 
 import {OutputSettings, OutputStyle, Unicode} from "@swim/codec";
-import {Spec} from "./Spec";
-import {Proof} from "./Proof";
-import {Exam} from "./Exam";
+import type {Spec} from "./Spec";
+import type {Proof} from "./Proof";
 import {Report} from "./Report";
+import type {Exam} from "./Exam";
 
 /**
  * Unit test `Report` that prints its results to the console.
  */
 export class ConsoleReport extends Report {
   /** @hidden */
-  _outputSettings: OutputSettings;
+  outputSettings: OutputSettings;
   /** @hidden */
-  _testDepth: number;
+  testDepth: number;
   /** @hidden */
-  _passCount: number;
+  passCount: number;
   /** @hidden */
-  _failCount: number;
+  failCount: number;
 
   constructor(outputSettings?: OutputSettings) {
     super();
     if (outputSettings === void 0) {
       outputSettings = OutputSettings.styled();
     }
-    this._outputSettings = outputSettings;
-    this._testDepth = 0;
-    this._passCount = 0;
-    this._failCount = 0;
+    this.outputSettings = outputSettings;
+    this.testDepth = 0;
+    this.passCount = 0;
+    this.failCount = 0;
   }
 
   willRunSpec(spec: Spec): void {
-    let output = Unicode.stringOutput(this._outputSettings);
-    if (this._testDepth > 0) {
+    let output = Unicode.stringOutput(this.outputSettings);
+    if (this.testDepth > 0) {
       OutputStyle.cyanBold(output);
-      for (let i = 0; i < this._testDepth - 1; i += 1) {
+      for (let i = 0; i < this.testDepth - 1; i += 1) {
         output = output.write(124/*'|'*/).write(32/*' '*/).write(32/*' '*/);
       }
       output = output.write(124/*'|'*/).write(45/*'-'*/).write(32/*' '*/);
       OutputStyle.reset(output);
     }
     OutputStyle.bold(output);
-    output = output.write(spec.name());
+    output = output.write(spec.name);
     OutputStyle.reset(output);
     console.log(output.toString());
 
-    this._testDepth += 1;
+    this.testDepth += 1;
   }
 
   willRunTest(spec: Spec, exam: Exam): void {
-    let output = Unicode.stringOutput(this._outputSettings);
+    let output = Unicode.stringOutput(this.outputSettings);
     OutputStyle.cyanBold(output);
-    for (let i = 0; i < this._testDepth - 1; i += 1) {
+    for (let i = 0; i < this.testDepth - 1; i += 1) {
       output = output.write(124/*'|'*/).write(32/*' '*/).write(32/*' '*/);
     }
     output = output.write(124/*'|'*/).write(45/*'-'*/).write(32/*' '*/);
     OutputStyle.reset(output);
-    output = output.write(exam.name());
+    output = output.write(exam.name);
     console.log(output.toString());
   }
 
   onProof(spec: Spec, exam: Exam, proof: Proof): void {
     if (proof.isValid()) {
-      this._passCount += 1;
+      this.passCount += 1;
     } else {
-      this._failCount += 1;
+      this.failCount += 1;
     }
-    let output = Unicode.stringOutput(this._outputSettings);
+    let output = Unicode.stringOutput(this.outputSettings);
     OutputStyle.cyanBold(output);
-    for (let i = 0; i < this._testDepth; i += 1) {
+    for (let i = 0; i < this.testDepth; i += 1) {
       output = output.write(124/*'|'*/).write(32/*' '*/).write(32/*' '*/);
     }
     OutputStyle.reset(output);
@@ -89,9 +89,9 @@ export class ConsoleReport extends Report {
   }
 
   onComment(spec: Spec, exam: Exam, message: string): void {
-    let output = Unicode.stringOutput(this._outputSettings);
+    let output = Unicode.stringOutput(this.outputSettings);
     OutputStyle.cyanBold(output);
-    for (let i = 0; i < this._testDepth; i += 1) {
+    for (let i = 0; i < this.testDepth; i += 1) {
       output = output.write(124/*'|'*/).write(32/*' '*/).write(32/*' '*/);
     }
     OutputStyle.reset(output);
@@ -102,10 +102,10 @@ export class ConsoleReport extends Report {
   }
 
   didRunSpec(spec: Spec): void {
-    this._testDepth -= 1;
-    if (this._testDepth === 0) {
-      let output = Unicode.stringOutput(this._outputSettings);
-      if (this._failCount === 0) {
+    this.testDepth -= 1;
+    if (this.testDepth === 0) {
+      let output = Unicode.stringOutput(this.outputSettings);
+      if (this.failCount === 0) {
         OutputStyle.greenBold(output);
         output = output.write("success");
         OutputStyle.reset(output);
@@ -115,28 +115,28 @@ export class ConsoleReport extends Report {
         OutputStyle.reset(output);
       }
       output = output.write(58/*':'*/);
-      if (this._passCount !== 0) {
+      if (this.passCount !== 0) {
         output = output.write(32/*' '*/);
-        output = output.display(this._passCount);
+        output = output.display(this.passCount);
         output = output.write(32/*' '*/);
-        output = output.write(this._passCount !== 1 ? "exams" : "exam");
+        output = output.write(this.passCount !== 1 ? "exams" : "exam");
         output = output.write(32/*' '*/);
-        if (this._failCount === 0) {
+        if (this.failCount === 0) {
           OutputStyle.green(output);
         }
         output = output.write("passed");
-        if (this._failCount === 0) {
+        if (this.failCount === 0) {
           OutputStyle.reset(output);
         }
       }
-      if (this._failCount !== 0) {
-        if (this._passCount !== 0) {
+      if (this.failCount !== 0) {
+        if (this.passCount !== 0) {
           output = output.write(59/*';'*/);
         }
         output = output.write(32/*' '*/);
-        output = output.display(this._failCount);
+        output = output.display(this.failCount);
         output = output.write(32/*' '*/);
-        output = output.write(this._failCount !== 1 ? "exams" : "exam");
+        output = output.write(this.failCount !== 1 ? "exams" : "exam");
         output = output.write(32/*' '*/);
         OutputStyle.red(output);
         output = output.write("failed");

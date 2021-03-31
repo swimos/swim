@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Iterator} from "@swim/util";
-import {Inlet} from "./Inlet";
-import {MapValueFunction, WatchValueFunction} from "./function";
-import {MemoizeValueCombinator} from "./combinator/MemoizeValueCombinator";
-import {MapValueCombinator} from "./combinator/MapValueCombinator";
-import {WatchValueCombinator} from "./combinator/WatchValueCombinator";
+import type {Iterator} from "@swim/util";
+import type {Inlet} from "./Inlet";
+import type {OutletCombinators} from "./OutletCombinators";
+import type {MapValueFunction, WatchValueFunction} from "./function";
 
 export type OutletType = "value" | "map";
 
@@ -35,7 +33,7 @@ export interface OutletOptions {
  * The [[bindOutput]] method "plugs" an `Inlet` into the `Outlet`.
  * The [[unbindOutput]] method "unplugs" an `Inlet` from the `Outlet`.
  */
-export interface Outlet<O = unknown> {
+export interface Outlet<O = unknown> extends OutletCombinators<O> {
   /**
    * Returns the current state of this `Outlet`.
    */
@@ -104,23 +102,16 @@ export interface Outlet<O = unknown> {
   watch(func: WatchValueFunction<O>): this;
 }
 
-/** @hidden */
-export const Outlet = {
-  is<O>(object: unknown): object is Outlet<O> {
-    if (typeof object === "object" && object !== null) {
-      const outlet = object as Outlet<O>;
-      return typeof outlet.outputIterator === "function"
-          && typeof outlet.bindOutput === "function"
-          && typeof outlet.unbindOutput === "function";
-    }
-    return false;
-  },
+export const Outlet = {} as {
+  is<O>(object: unknown): object is Outlet<O>;
+};
 
-  // Forward type declarations
-  /** @hidden */
-  MemoizeValueCombinator: void 0 as unknown as typeof MemoizeValueCombinator, // defined by MemoizeValueCombinator
-  /** @hidden */
-  MapValueCombinator: void 0 as unknown as typeof MapValueCombinator, // defined by MapValueCombinator
-  /** @hidden */
-  WatchValueCombinator: void 0 as unknown as typeof WatchValueCombinator, // defined by WatchValueCombinator
+Outlet.is = function <O>(object: unknown): object is Outlet<O> {
+  if (typeof object === "object" && object !== null) {
+    const outlet = object as Outlet<O>;
+    return typeof outlet.outputIterator === "function"
+        && typeof outlet.bindOutput === "function"
+        && typeof outlet.unbindOutput === "function";
+  }
+  return false;
 };

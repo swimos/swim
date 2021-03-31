@@ -14,9 +14,20 @@
 
 export {Envelope} from "./Envelope";
 
-export {HostAddressed} from "./HostAddressed";
-export {LaneAddressed} from "./LaneAddressed";
-export {LinkAddressed} from "./LinkAddressed";
+export {
+  HostAddressedConstructor,
+  HostAddressed,
+} from "./HostAddressed";
+
+export {
+  LaneAddressedConstructor,
+  LaneAddressed,
+} from "./LaneAddressed";
+
+export {
+  LinkAddressedConstructor,
+  LinkAddressed,
+} from "./LinkAddressed";
 
 export {EventMessage} from "./EventMessage";
 export {CommandMessage} from "./CommandMessage";

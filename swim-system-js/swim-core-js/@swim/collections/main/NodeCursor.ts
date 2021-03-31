@@ -17,20 +17,24 @@ import {Cursor} from "@swim/util";
 /** @hidden */
 export abstract class NodeCursor<T, P> extends Cursor<T> {
   /** @hidden */
-  readonly _pages: P[];
+  declare readonly pages: ReadonlyArray<P>;
   /** @hidden */
-  _index: number;
+  index: number;
   /** @hidden */
-  _pageIndex: number;
+  childIndex: number;
   /** @hidden */
-  _pageCursor: Cursor<T> | undefined;
+  childCursor: Cursor<T> | null;
 
-  constructor(pages: P[], index: number = 0, pageIndex: number = 0, pageCursor?: Cursor<T>) {
+  constructor(pages: ReadonlyArray<P>, index: number,
+              childIndex: number, childCursor: Cursor<T> | null) {
     super();
-    this._pages = pages;
-    this._index = index;
-    this._pageIndex = pageIndex;
-    this._pageCursor = pageCursor;
+    Object.defineProperty(this, "pages", {
+      value: pages,
+      enumerable: true,
+    });
+    this.index = index;
+    this.childIndex = childIndex;
+    this.childCursor = childCursor;
   }
 
   protected abstract pageSize(page: P): number;
@@ -41,17 +45,17 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   isEmpty(): boolean {
     do {
-      if (this._pageCursor !== void 0) {
-        if (!this._pageCursor.isEmpty()) {
+      if (this.childCursor !== null) {
+        if (!this.childCursor.isEmpty()) {
           return false;
         } else {
-          this._pageCursor = void 0;
+          this.childCursor = null;
         }
-      } else if (this._pageIndex < this._pages.length) {
-        this._pageCursor = this.pageCursor(this._pages[this._pageIndex]);
-        this._pageIndex += 1;
+      } else if (this.childIndex < this.pages.length) {
+        this.childCursor = this.pageCursor(this.pages[this.childIndex]!);
+        this.childIndex += 1;
       } else {
-        this._pageIndex = this._pages.length;
+        this.childIndex = this.pages.length;
         return true;
       }
     } while (true);
@@ -59,18 +63,18 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   head(): T {
     do {
-      if (this._pageCursor !== void 0) {
-        if (!this._pageCursor.isEmpty()) {
-          return this._pageCursor.head();
+      if (this.childCursor !== null) {
+        if (!this.childCursor.isEmpty()) {
+          return this.childCursor.head();
         } else {
-          this._pageCursor = void 0;
+          this.childCursor = null;
         }
       } else {
-        if (this._pageIndex < this._pages.length) {
-          this._pageCursor = this.pageCursor(this._pages[this._pageIndex]);
-          this._pageIndex += 1;
+        if (this.childIndex < this.pages.length) {
+          this.childCursor = this.pageCursor(this.pages[this.childIndex]!);
+          this.childIndex += 1;
         } else {
-          this._pageIndex = this._pages.length;
+          this.childIndex = this.pages.length;
           throw new Error("empty");
         }
       }
@@ -79,19 +83,19 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   step(): void {
     do {
-      if (this._pageCursor !== void 0) {
-        if (!this._pageCursor.isEmpty()) {
-          this._index += 1;
+      if (this.childCursor !== null) {
+        if (!this.childCursor.isEmpty()) {
+          this.index += 1;
           return;
         } else {
-          this._pageCursor = void 0;
+          this.childCursor = null;
         }
       } else {
-        if (this._pageIndex < this._pages.length) {
-          this._pageCursor = this.pageCursor(this._pages[this._pageIndex]);
-          this._pageIndex += 1;
+        if (this.childIndex < this.pages.length) {
+          this.childCursor = this.pageCursor(this.pages[this.childIndex]!);
+          this.childIndex += 1;
         } else {
-          this._pageIndex = this._pages.length;
+          this.childIndex = this.pages.length;
           throw new Error("empty");
         }
       }
@@ -100,28 +104,28 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   skip(count: number): void {
     while (count > 0) {
-      if (this._pageCursor !== void 0) {
-        if (this._pageCursor.hasNext()) {
-          this._index += 1;
+      if (this.childCursor !== null) {
+        if (this.childCursor.hasNext()) {
+          this.index += 1;
           count -= 1;
-          this._pageCursor.next();
+          this.childCursor.next();
         } else {
-          this._pageCursor = void 0;
+          this.childCursor = null;
         }
-      } else if (this._pageIndex < this._pages.length) {
-        const page = this._pages[this._pageIndex];
+      } else if (this.childIndex < this.pages.length) {
+        const page = this.pages[this.childIndex]!;
         const pageSize = this.pageSize(page);
-        this._pageIndex += 1;
+        this.childIndex += 1;
         if (pageSize < count) {
-          this._pageCursor = this.pageCursor(page);
+          this.childCursor = this.pageCursor(page);
           if (count > 0) {
-            this._index += count;
-            this._pageCursor!.skip(count);
+            this.index += count;
+            this.childCursor!.skip(count);
             count = 0;
           }
           break;
         } else {
-          this._index += pageSize;
+          this.index += pageSize;
           count -= pageSize;
         }
       } else {
@@ -132,41 +136,41 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   hasNext(): boolean {
     do {
-      if (this._pageCursor !== void 0) {
-        if (this._pageCursor.hasNext()) {
+      if (this.childCursor !== null) {
+        if (this.childCursor.hasNext()) {
           return true;
         } else {
-          this._pageCursor = void 0;
+          this.childCursor = null;
         }
-      } else if (this._pageIndex < this._pages.length) {
-        this._pageCursor = this.pageCursor(this._pages[this._pageIndex]);
-        this._pageIndex += 1;
+      } else if (this.childIndex < this.pages.length) {
+        this.childCursor = this.pageCursor(this.pages[this.childIndex]!);
+        this.childIndex += 1;
       } else {
-        this._pageIndex = this._pages.length;
+        this.childIndex = this.pages.length;
         return false;
       }
     } while (true);
   }
 
   nextIndex(): number {
-    return this._index;
+    return this.index;
   }
 
   next(): {value?: T, done: boolean} {
     do {
-      if (this._pageCursor !== void 0) {
-        if (this._pageCursor.hasNext()) {
-          this._index += 1;
-          return this._pageCursor.next();
+      if (this.childCursor !== null) {
+        if (this.childCursor.hasNext()) {
+          this.index += 1;
+          return this.childCursor.next();
         } else {
-          this._pageCursor = void 0;
+          this.childCursor = null;
         }
       } else {
-        if (this._pageIndex < this._pages.length) {
-          this._pageCursor = this.pageCursor(this._pages[this._pageIndex]);
-          this._pageIndex += 1;
+        if (this.childIndex < this.pages.length) {
+          this.childCursor = this.pageCursor(this.pages[this.childIndex]!);
+          this.childIndex += 1;
         } else {
-          this._pageIndex = this._pages.length;
+          this.childIndex = this.pages.length;
           return {done: true};
         }
       }
@@ -175,50 +179,50 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   hasPrevious(): boolean {
     do {
-      if (this._pageCursor !== void 0) {
-        if (this._pageCursor.hasPrevious()) {
+      if (this.childCursor !== null) {
+        if (this.childCursor.hasPrevious()) {
           return true;
         } else {
-          this._pageCursor = void 0;
+          this.childCursor = null;
         }
-      } else if (this._pageIndex > 0) {
-        this._pageCursor = this.reversePageCursor(this._pages[this._pageIndex - 1]);
-        this._pageIndex -= 1;
+      } else if (this.childIndex > 0) {
+        this.childCursor = this.reversePageCursor(this.pages[this.childIndex - 1]!);
+        this.childIndex -= 1;
       } else {
-        this._pageIndex = 0;
+        this.childIndex = 0;
         return false;
       }
     } while (true);
   }
 
   previousIndex(): number {
-    return this._index - 1;
+    return this.index - 1;
   }
 
   previous(): {value?: T, done: boolean} {
     do {
-      if (this._pageCursor !== void 0) {
-        if (this._pageCursor.hasPrevious()) {
-          this._index -= 1;
-          return this._pageCursor.previous();
+      if (this.childCursor !== null) {
+        if (this.childCursor.hasPrevious()) {
+          this.index -= 1;
+          return this.childCursor.previous();
         } else {
-          this._pageCursor = void 0;
+          this.childCursor = null;
         }
-      } else if (this._pageIndex > 0) {
-        this._pageCursor = this.reversePageCursor(this._pages[this._pageIndex - 1]);
-        this._pageIndex -= 1;
+      } else if (this.childIndex > 0) {
+        this.childCursor = this.reversePageCursor(this.pages[this.childIndex - 1]!);
+        this.childIndex -= 1;
       } else {
-        this._pageIndex = 0;
+        this.childIndex = 0;
         return {done: true};
       }
     } while (true);
   }
 
   set(newValue: T): void {
-    this._pageCursor!.set(newValue);
+    this.childCursor!.set(newValue);
   }
 
   delete(): void {
-    this._pageCursor!.delete();
+    this.childCursor!.delete();
   }
 }

@@ -25,30 +25,30 @@ export class CommandMessageSpec extends Spec {
   @Test
   parseCommandWithNamedHeaders(exam: WarpExam): void {
     exam.parses("@command(node: node_uri, lane: lane_uri)",
-                CommandMessage.of("node_uri", "lane_uri"));
+                CommandMessage.create("node_uri", "lane_uri"));
   }
 
   @Test
   parseCommandWithPositionalHeaders(exam: WarpExam): void {
     exam.parses("@command(node_uri, lane_uri)",
-                CommandMessage.of("node_uri", "lane_uri"));
+                CommandMessage.create("node_uri", "lane_uri"));
   }
 
   @Test
   parseCommandWithBody(exam: WarpExam): void {
     exam.parses("@command(node_uri, lane_uri)@test",
-                CommandMessage.of("node_uri", "lane_uri", Record.of(Attr.of("test"))));
+                CommandMessage.create("node_uri", "lane_uri", Record.of(Attr.of("test"))));
   }
 
   @Test
   writeCommand(exam: WarpExam): void {
-    exam.writes(CommandMessage.of("node_uri", "lane_uri"),
+    exam.writes(CommandMessage.create("node_uri", "lane_uri"),
                 "@command(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   writeCommandWithBody(exam: WarpExam): void {
-    exam.writes(CommandMessage.of("node_uri", "lane_uri", Record.of(Attr.of("test"))),
+    exam.writes(CommandMessage.create("node_uri", "lane_uri", Record.of(Attr.of("test"))),
                 "@command(node:node_uri,lane:lane_uri)@test");
   }
 }

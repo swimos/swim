@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Input, Output, Parser} from "@swim/codec";
-import {DateTimeInit, DateTime} from "../DateTime";
-import {DateTimeFormat} from "../DateTimeFormat";
-import {DateTimeSpecifiers} from "../DateTimeSpecifiers";
+import type {Input, Output, Parser} from "@swim/codec";
+import type {DateTimeInit, DateTime} from "../DateTime";
+import type {DateTimeSpecifiers} from "./DateTimeSpecifiers";
+import {DateTimeFormat} from "./DateTimeFormat";
+import {PatternParser} from "../"; // forward import
 
 /** @hidden */
 export class PatternFormat extends DateTimeFormat {
@@ -56,7 +57,6 @@ export class PatternFormat extends DateTimeFormat {
   }
 
   parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {
-    return DateTimeFormat.PatternParser.parse(input, this.pattern, this.specifiers, date);
+    return PatternParser.parse(input, this.pattern, this.specifiers, date);
   }
 }
-DateTimeFormat.Pattern = PatternFormat;

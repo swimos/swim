@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {AnyDateTime, DateTime} from "../DateTime";
-import {TimeInterval} from "../TimeInterval";
+import {TimeInterval} from "./TimeInterval";
 
 /** @hidden */
 export class FilterTimeInterval extends TimeInterval {
@@ -26,8 +26,8 @@ export class FilterTimeInterval extends TimeInterval {
     this.predicate = predicate;
   }
 
-  offset(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  offset(t: AnyDateTime, k?: number): DateTime {
+    let d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
     while (k < 0) {
       do {
@@ -44,12 +44,11 @@ export class FilterTimeInterval extends TimeInterval {
     return d;
   }
 
-  floor(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
+  floor(t: AnyDateTime): DateTime {
+    let d = DateTime.fromAny(t);
     while (d = this.unit.floor(d), d.isDefined() && !this.predicate(d)) {
-      d = d.time(d.time() - 1);
+      d = new DateTime(d.time - 1, d.zone);
     }
     return d;
   }
 }
-TimeInterval.Filter = FilterTimeInterval;

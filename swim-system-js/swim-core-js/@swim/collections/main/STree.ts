@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor} from "@swim/util";
+import type {Cursor} from "@swim/util";
 import {STreeContext} from "./STreeContext";
-import {STreePage} from "./STreePage";
-import {STreeLeaf} from "./STreeLeaf";
-import {STreeNode} from "./STreeNode";
-import {STreeNodeCursor} from "./STreeNodeCursor";
+import {STreePage} from "./"; // forward import
 
 export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
   root: STreePage<V, I>;
 
-  constructor(root: STreePage<V, I> = STree.Page.empty()) {
+  constructor(root?: STreePage<V, I>) {
     super();
+    if (root === void 0) {
+      root = STreePage.empty();
+    }
     this.root = root;
   }
 
@@ -97,7 +97,7 @@ export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
   push(...newValues: V[]): number {
     let newRoot = this.root;
     for (let i = 0; i < newValues.length; i += 1) {
-      newRoot = newRoot.inserted(newRoot.size, newValues[i], void 0, this).balanced(this);
+      newRoot = newRoot.inserted(newRoot.size, newValues[i]!, void 0, this).balanced(this);
     }
     this.root = newRoot;
     return newRoot.size;
@@ -118,7 +118,7 @@ export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
   unshift(...newValues: V[]): number {
     let newRoot = this.root;
     for (let i = newValues.length - 1; i >= 0; i -= 1) {
-      newRoot = newRoot.inserted(0, newValues[i], void 0, this).balanced(this);
+      newRoot = newRoot.inserted(0, newValues[i]!, void 0, this).balanced(this);
     }
     this.root = newRoot;
     return newRoot.size;
@@ -173,7 +173,7 @@ export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
       newRoot = newRoot.removed(start, this);
     }
     for (let i = 0; i < newValues.length; i += 1) {
-      newRoot = newRoot.inserted(start + i, newValues[i], void 0, this).balanced(this);
+      newRoot = newRoot.inserted(start + i, newValues[i]!, void 0, this).balanced(this);
     }
     this.root = newRoot;
     return deleted;
@@ -185,7 +185,7 @@ export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
       if (lower < oldRoot.size) {
         this.root = oldRoot.drop(lower, this);
       } else {
-        this.root = STree.Page.empty();
+        this.root = STreePage.empty();
       }
     }
     return this;
@@ -197,18 +197,21 @@ export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
       if (upper > 0) {
         this.root = oldRoot.take(upper, this);
       } else {
-        this.root = STree.Page.empty();
+        this.root = STreePage.empty();
       }
     }
     return this;
   }
 
   clear(): void {
-    this.root = STree.Page.empty();
+    this.root = STreePage.empty();
   }
 
-  forEach<T, S = unknown>(callback: (this: S, value: V, index: number, id: I) => T | void,
-                          thisArg?: S): T | undefined {
+  forEach<T>(callback: (value: V, index: number, id: I) => T | void): T | undefined;
+  forEach<T, S>(callback: (this: S, value: V, index: number, id: I) => T | void,
+                thisArg: S): T | undefined;
+  forEach<T, S>(callback: (this: S | undefined, value: V, index: number, id: I) => T | void,
+                thisArg?: S): T | undefined {
     return this.root.forEach(callback, thisArg, 0);
   }
 
@@ -267,15 +270,4 @@ export class STree<V = unknown, I = unknown> extends STreeContext<V, I> {
     } while (isFinite(index) && index !== start);
     return -1;
   }
-
-  // Forward type declarations
-  /** @hidden */
-  static Page: typeof STreePage; // defined by STreePage
-  /** @hidden */
-  static Leaf: typeof STreeLeaf; // defined by STreeLeaf
-  /** @hidden */
-  static Node: typeof STreeNode; // defined by STreeNode
-  /** @hidden */
-  static NodeCursor: typeof STreeNodeCursor; // defined by STreeNodeCursor
 }
-STree.prototype.pageSplitSize = 32;

@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Input, Output, Parser} from "@swim/codec";
-import {DateTimeInit, DateTime} from "../DateTime";
-import {DateTimeFormat} from "../DateTimeFormat";
+import type {Input, Output, Parser} from "@swim/codec";
+import type {DateTimeInit, DateTime} from "../DateTime";
+import {DateTimeFormat} from "./DateTimeFormat";
+import {Hour24Parser} from "../"; // forward import
 
 /** @hidden */
 export class Hour24Format extends DateTimeFormat {
   writeDate(date: DateTime, output: Output): void {
-    DateTimeFormat.writeDateNumber2(date.hour(), output);
+    DateTimeFormat.writeDateNumber2(date.hour, output);
   }
 
   parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {
-    return DateTimeFormat.Hour24Parser.parse(input, date);
+    return Hour24Parser.parse(input, date);
   }
 }
-DateTimeFormat.Hour24 = Hour24Format;

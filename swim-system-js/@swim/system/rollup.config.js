@@ -21,8 +21,9 @@ const main = {
     "ws",
   ],
   plugins: [
-    nodeResolve({customResolveOptions: {paths: ["../../swim-core-js",
-                                                "../../swim-mesh-js"]}}),
+    nodeResolve({moduleDirectories: ["../../swim-mesh-js",
+                                     "../../swim-core-js",
+                                     "node_modules"]}),
     sourcemaps(),
   ],
   onwarn(warning, warn) {

@@ -12,11 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export {Operator} from "./Operator";
+
 export {BinaryOperator} from "./BinaryOperator";
+export {BinaryOperatorInterpolator} from "./BinaryOperatorInterpolator";
 
 export {UnaryOperator} from "./UnaryOperator";
+export {UnaryOperatorInterpolator} from "./UnaryOperatorInterpolator";
 
 export {ConditionalOperator} from "./ConditionalOperator";
+export {ConditionalOperatorInterpolator} from "./ConditionalOperatorInterpolator";
 
 export {OrOperator} from "./OrOperator";
 
@@ -59,3 +64,4 @@ export {NegativeOperator} from "./NegativeOperator";
 export {PositiveOperator} from "./PositiveOperator";
 
 export {InvokeOperator} from "./InvokeOperator";
+export {InvokeOperatorInterpolator} from "./InvokeOperatorInterpolator";

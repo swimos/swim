@@ -12,55 +12,79 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor, Map} from "@swim/util";
+import type {Cursor, Map} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {KeyEffect} from "./KeyEffect";
 import {AbstractMapOutlet} from "./AbstractMapOutlet";
 
 export class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
-  /** @hidden */
-  protected _state: BTree<K, V>;
-
-  constructor(state: BTree<K, V> = new BTree()) {
+  constructor(state?: BTree<K, V>) {
     super();
-    this._state = state;
+    if (state === void 0) {
+      state = new BTree();
+    }
+    Object.defineProperty(this, "state", {
+      value: state,
+      enumerable: true,
+      configurable: true,
+    });
+    let effects = this.effects;
     state.forEach(function (key: K): void {
-      this._effects = this._effects.updated(key, KeyEffect.Update);
+      effects = effects.updated(key, KeyEffect.Update);
     }, this);
+    Object.defineProperty(this, "effects", {
+      value: effects,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
+  /** @hidden */
+  declare readonly state: BTree<K, V>;
+
   has(key: K): boolean {
-    return this._state.has(key);
+    return this.state.has(key);
   }
 
   get(): Map<K, V> | undefined;
   get(key: K): V | undefined;
   get(key?: K): Map<K, V> | V | undefined {
     if (key === void 0) {
-      return this._state;
+      return this.state;
     } else {
-      return this._state.get(key);
+      return this.state.get(key);
     }
   }
 
   set(key: K, newValue: V): V | undefined {
-    const oldValue = this._state.get(key);
-    this._state = this._state.updated(key, newValue);
-    this.decohereInputKey(key, KeyEffect.Update);
+    const oldState = this.state;
+    const oldValue = oldState.get(key);
+    if (oldValue !== newValue) {
+      Object.defineProperty(this, "state", {
+        value: oldState.updated(key, newValue),
+        enumerable: true,
+        configurable: true,
+      });
+      this.decohereInputKey(key, KeyEffect.Update);
+    }
     return oldValue;
   }
 
   delete(key: K): this {
-    const oldState = this._state;
+    const oldState = this.state;
     const newState = oldState.removed(key);
     if (oldState !== newState) {
-      this._state = newState;
+      Object.defineProperty(this, "state", {
+        value: newState,
+        enumerable: true,
+        configurable: true,
+      });
       this.decohereInputKey(key, KeyEffect.Remove);
     }
     return this;
   }
 
   keyIterator(): Cursor<K> {
-    return this._state.keys();
+    return this.state.keys();
   }
 }

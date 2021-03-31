@@ -13,120 +13,202 @@
 // limitations under the License.
 
 import {Item} from "../Item";
-import {Value} from "../Value";
+import type {Value} from "../Value";
 import {Record} from "../Record";
-import {Func} from "../Func";
-import {Interpreter} from "../Interpreter";
-import {InvokeOperator} from "../operator/InvokeOperator";
+import {Num} from "../Num";
+import type {InvokeOperator} from "../operator/InvokeOperator";
+import type {Func} from "./Func";
 import {BridgeFunc} from "./BridgeFunc";
+import {Interpreter} from "../"; // forward import
 
-export class MathModule {
-  private constructor() {
-    // stub
-  }
+export const MathModule = {} as {
+  readonly max: Func;
 
-  private static _max?: Func;
-  private static _min?: Func;
-  private static _abs?: Func;
-  private static _ceil?: Func;
-  private static _floor?: Func;
-  private static _round?: Func;
-  private static _sqrt?: Func;
-  private static _pow?: Func;
-  private static _rate?: Func;
-  private static _random?: Func;
+  readonly min: Func;
 
-  private static _scope?: Record;
+  readonly abs: Func;
 
-  static max(): Func {
-    if (MathModule._max === void 0) {
-      MathModule._max = new MaxFunc();
-    }
-    return MathModule._max;
-  }
+  readonly ceil: Func;
 
-  static min(): Func {
-    if (MathModule._min === void 0) {
-      MathModule._min = new MinFunc();
-    }
-    return MathModule._min;
-  }
+  readonly floor: Func;
 
-  static abs(): Func {
-    if (MathModule._abs === void 0) {
-      MathModule._abs = new AbsFunc();
-    }
-    return MathModule._abs;
-  }
+  readonly round: Func;
 
-  static ceil(): Func {
-    if (MathModule._ceil === void 0) {
-      MathModule._ceil = new CeilFunc();
-    }
-    return MathModule._ceil;
-  }
+  readonly sqrt: Func;
 
-  static floor(): Func {
-    if (MathModule._floor === void 0) {
-      MathModule._floor = new FloorFunc();
-    }
-    return MathModule._floor;
-  }
+  readonly pow: Func;
 
-  static round(): Func {
-    if (MathModule._round === void 0) {
-      MathModule._round = new RoundFunc();
-    }
-    return MathModule._round;
-  }
+  readonly rate: Func;
 
-  static sqrt(): Func {
-    if (MathModule._sqrt === void 0) {
-      MathModule._sqrt = new SqrtFunc();
-    }
-    return MathModule._sqrt;
-  }
+  readonly random: Func;
 
-  static pow(): Func {
-    if (MathModule._pow === void 0) {
-      MathModule._pow = new PowFunc();
-    }
-    return MathModule._pow;
-  }
+  readonly scope: Record;
+};
 
-  static rate(): Func {
-    if (MathModule._rate === void 0) {
-      MathModule._rate = new RateFunc();
-    }
-    return MathModule._rate;
-  }
+Object.defineProperty(MathModule, "max", {
+  get(): Func {
+    const func = new MaxFunc();
+    Object.defineProperty(MathModule, "max", {
+      value: func,
+      configurable: true,
+      enumerable: true,
+    });
+    return func;
+  },
+  configurable: true,
+  enumerable: true,
+});
 
-  static random(): Func {
-    if (MathModule._random === void 0) {
-      MathModule._random = new RandomFunc();
-    }
-    return MathModule._random;
-  }
+Object.defineProperty(MathModule, "min", {
+  get(): Func {
+    const func = new MinFunc();
+    Object.defineProperty(MathModule, "min", {
+      value: func,
+      configurable: true,
+      enumerable: true,
+    });
+    return func;
+  },
+  configurable: true,
+  enumerable: true,
+});
 
-  static scope(): Record {
-    if (MathModule._scope === void 0) {
-      MathModule._scope = Item.Record.create(10)
-          .slot("max", MathModule.max())
-          .slot("min", MathModule.min())
-          .slot("abs", MathModule.abs())
-          .slot("ceil", MathModule.ceil())
-          .slot("floor", MathModule.floor())
-          .slot("round", MathModule.round())
-          .slot("pow", MathModule.pow())
-          .slot("sqrt", MathModule.sqrt())
-          .slot("rate", MathModule.rate())
-          .slot("random", MathModule.random())
-          .commit();
-    }
-    return MathModule._scope;
-  }
-}
-Item.MathModule = MathModule;
+Object.defineProperty(MathModule, "abs", {
+  get(): Func {
+    const func = new AbsFunc();
+    Object.defineProperty(MathModule, "abs", {
+      value: func,
+      configurable: true,
+      enumerable: true,
+    });
+    return func;
+  },
+  configurable: true,
+  enumerable: true,
+});
+
+Object.defineProperty(MathModule, "ceil", {
+  get(): Func {
+    const func = new CeilFunc();
+    Object.defineProperty(MathModule, "ceil", {
+      value: func,
+      configurable: true,
+      enumerable: true,
+    });
+    return func;
+  },
+  configurable: true,
+  enumerable: true,
+});
+
+Object.defineProperty(MathModule, "floor", {
+  get(): Func {
+    const func = new FloorFunc();
+    Object.defineProperty(MathModule, "floor", {
+      value: func,
+      configurable: true,
+      enumerable: true,
+    });
+    return func;
+  },
+  configurable: true,
+  enumerable: true,
+});
+
+Object.defineProperty(MathModule, "round", {
+  get(): Func {
+    const func = new RoundFunc();
+    Object.defineProperty(MathModule, "round", {
+      value: func,
+      configurable: true,
+      enumerable: true,
+    });
+    return func;
+  },
+  configurable: true,
+  enumerable: true,
+});
+
+Object.defineProperty(MathModule, "sqrt", {
+  get(): Func {
+    const func = new SqrtFunc();
+    Object.defineProperty(MathModule, "sqrt", {
+      value: func,
+      configurable: true,
+      enumerable: true,
+    });
+    return func;
+  },
+  configurable: true,
+  enumerable: true,
+});
+
+Object.defineProperty(MathModule, "pow", {
+  get(): Func {
+    const func = new PowFunc();
+    Object.defineProperty(MathModule, "pow", {
+      value: func,
+      configurable: true,
+      enumerable: true,
+    });
+    return func;
+  },
+  configurable: true,
+  enumerable: true,
+});
+
+Object.defineProperty(MathModule, "rate", {
+  get(): Func {
+    const func = new RateFunc();
+    Object.defineProperty(MathModule, "rate", {
+      value: func,
+      configurable: true,
+      enumerable: true,
+    });
+    return func;
+  },
+  configurable: true,
+  enumerable: true,
+});
+
+Object.defineProperty(MathModule, "random", {
+  get(): Func {
+    const func = new RandomFunc();
+    Object.defineProperty(MathModule, "random", {
+      value: func,
+      configurable: true,
+      enumerable: true,
+    });
+    return func;
+  },
+  configurable: true,
+  enumerable: true,
+});
+
+Object.defineProperty(MathModule, "scope", {
+  get(): Record {
+    const scope = Record.create(10)
+        .slot("max", MathModule.max)
+        .slot("min", MathModule.min)
+        .slot("abs", MathModule.abs)
+        .slot("ceil", MathModule.ceil)
+        .slot("floor", MathModule.floor)
+        .slot("round", MathModule.round)
+        .slot("pow", MathModule.pow)
+        .slot("sqrt", MathModule.sqrt)
+        .slot("rate", MathModule.rate)
+        .slot("random", MathModule.random)
+        .commit();
+    Object.defineProperty(MathModule, "scope", {
+      value: scope,
+      configurable: true,
+      enumerable: true,
+    });
+    return scope;
+  },
+  configurable: true,
+  enumerable: true,
+});
 
 /** @hidden */
 class MaxFunc extends BridgeFunc {
@@ -143,7 +225,7 @@ class MaxFunc extends BridgeFunc {
     if (y !== void 0) {
       return x.max(y);
     } else if (operator !== void 0) {
-      y = operator.state() as Item;
+      y = operator.state as Item;
       const max = y !== void 0 ? x.max(y) : x;
       operator.setState(max);
       return max;
@@ -175,7 +257,7 @@ class MinFunc extends BridgeFunc {
     if (y !== void 0) {
       return x.min(y);
     } else if (operator !== void 0) {
-      y = operator.state() as Item;
+      y = operator.state as Item;
       const min = y !== void 0 ? x.min(y) : x;
       operator.setState(min);
       return min;
@@ -196,7 +278,7 @@ class MinFunc extends BridgeFunc {
 class AbsFunc extends BridgeFunc {
   invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
-    if (args instanceof Item.Num) {
+    if (args instanceof Num) {
       return args.abs();
     }
     return Item.absent();
@@ -207,7 +289,7 @@ class AbsFunc extends BridgeFunc {
 class CeilFunc extends BridgeFunc {
   invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
-    if (args instanceof Item.Num) {
+    if (args instanceof Num) {
       return args.ceil();
     }
     return Item.absent();
@@ -218,7 +300,7 @@ class CeilFunc extends BridgeFunc {
 class FloorFunc extends BridgeFunc {
   invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
-    if (args instanceof Item.Num) {
+    if (args instanceof Num) {
       return args.floor();
     }
     return Item.absent();
@@ -229,7 +311,7 @@ class FloorFunc extends BridgeFunc {
 class RoundFunc extends BridgeFunc {
   invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
-    if (args instanceof Item.Num) {
+    if (args instanceof Num) {
       return args.round();
     }
     return Item.absent();
@@ -240,7 +322,7 @@ class RoundFunc extends BridgeFunc {
 class SqrtFunc extends BridgeFunc {
   invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
-    if (args instanceof Item.Num) {
+    if (args instanceof Num) {
       return args.sqrt();
     }
     return Item.absent();
@@ -253,7 +335,7 @@ class PowFunc extends BridgeFunc {
     interpreter = Interpreter.fromAny(interpreter);
     const x = args.getItem(0).evaluate(interpreter);
     const y = args.getItem(1).evaluate(interpreter);
-    if (x instanceof Item.Num && y instanceof Item.Num) {
+    if (x instanceof Num && y instanceof Num) {
       return x.pow(y);
     }
     return Item.absent();
@@ -274,7 +356,7 @@ class RateFunc extends BridgeFunc {
       period = 1000;
     }
     if (isFinite(value) && operator !== void 0) {
-      let state = operator.state() as {v0: number, t0: number, dv: number, dt: number} | undefined;
+      let state = operator.state as {v0: number, t0: number, dv: number, dt: number} | undefined;
       if (state === void 0) {
         state = {v0: value, t0: Date.now(), dv: 0, dt: 0};
         operator.setState(state);
@@ -291,7 +373,7 @@ class RateFunc extends BridgeFunc {
         operator.setState(state);
         if (state.dt !== 0) {
           const rate = period * state.dv / state.dt;
-          return Item.Num.from(rate);
+          return Num.from(rate);
         }
       }
     }
@@ -311,6 +393,6 @@ class RandomFunc extends BridgeFunc {
     const lower = args.length >= 1 ? args.getItem(0).numberValue(0.0) : 0.0;
     const upper = args.length >= 2 ? args.getItem(1).numberValue(lower + 1.0) : lower + 1.0;
     const value = lower + Math.random() * (upper - lower);
-    return Item.Num.from(value);
+    return Num.from(value);
   }
 }

@@ -25,30 +25,30 @@ export class UnlinkRequestSpec extends Spec {
   @Test
   parseUnlinkWithNamedHeaders(exam: WarpExam): void {
     exam.parses("@unlink(node: node_uri, lane: lane_uri)",
-                UnlinkRequest.of("node_uri", "lane_uri"));
+                UnlinkRequest.create("node_uri", "lane_uri"));
   }
 
   @Test
   parseUnlinkWithPositionalHeaders(exam: WarpExam): void {
     exam.parses("@unlink(node_uri, lane_uri)",
-                UnlinkRequest.of("node_uri", "lane_uri"));
+                UnlinkRequest.create("node_uri", "lane_uri"));
   }
 
   @Test
   parseUnlinkWithBody(exam: WarpExam): void {
     exam.parses("@unlink(node_uri, lane_uri)@test",
-                UnlinkRequest.of("node_uri", "lane_uri", Record.of(Attr.of("test"))));
+                UnlinkRequest.create("node_uri", "lane_uri", Record.of(Attr.of("test"))));
   }
 
   @Test
   writeUnlink(exam: WarpExam): void {
-    exam.writes(UnlinkRequest.of("node_uri", "lane_uri"),
+    exam.writes(UnlinkRequest.create("node_uri", "lane_uri"),
                 "@unlink(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   writeUnlinkWithBody(exam: WarpExam): void {
-    exam.writes(UnlinkRequest.of("node_uri", "lane_uri", Record.of(Attr.of("test"))),
+    exam.writes(UnlinkRequest.create("node_uri", "lane_uri", Record.of(Attr.of("test"))),
                 "@unlink(node:node_uri,lane:lane_uri)@test");
   }
 }

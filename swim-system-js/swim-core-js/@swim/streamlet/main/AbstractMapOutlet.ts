@@ -12,34 +12,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Iterator, Cursor, Map} from "@swim/util";
+import {Arrays, Iterator, Cursor} from "@swim/util";
 import {BTree} from "@swim/collections";
-import {Inlet} from "./Inlet";
-import {Outlet} from "./Outlet";
-import {KeyEffect} from "./KeyEffect";
+import type {Inlet} from "./Inlet";
+import type {Outlet} from "./Outlet";
+import type {KeyEffect} from "./KeyEffect";
 import {MapInlet} from "./MapInlet";
-import {MapOutlet} from "./MapOutlet";
+import type {MapOutlet} from "./MapOutlet";
+import {MapOutletCombinators} from "./MapOutletCombinators";
 import {KeyOutlet} from "./KeyOutlet";
-import {FilterFieldsFunction} from "./function";
-import {MapValueFunction, MapFieldValuesFunction} from "./function";
-import {WatchValueFunction, WatchFieldsFunction} from "./function";
 
 export abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
-  /** @hidden */
-  protected _effects: BTree<K, KeyEffect>;
-  /** @hidden */
-  protected _outlets: BTree<K, KeyOutlet<K, V>>;
-  /** @hidden */
-  protected _outputs: ReadonlyArray<Inlet<O>> | null;
-  /** @hidden */
-  protected _version: number;
-
   constructor() {
-    this._effects = new BTree();
-    this._outlets = new BTree();
-    this._outputs = null;
-    this._version = -1;
+    Object.defineProperty(this, "effects", {
+      value: new BTree(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "outlets", {
+      value: new BTree(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "version", {
+      value: -1,
+      enumerable: true,
+      configurable: true,
+    });
   }
+
+  /** @hidden */
+  declare readonly effects: BTree<K, KeyEffect>;
+
+  /** @hidden */
+  declare readonly outlets: BTree<K, KeyOutlet<K, V>>;
+
+  /** @hidden */
+  declare readonly outputs: ReadonlyArray<Inlet<O>>;
+
+  /** @hidden */
+  declare readonly version: number;
 
   abstract has(key: K): boolean;
 
@@ -50,85 +67,85 @@ export abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
   abstract keyIterator(): Iterator<K>;
 
   outlet(key: K): Outlet<V> {
-    let outlet = this._outlets.get(key);
+    const oldOutlets = this.outlets;
+    let outlet = oldOutlets.get(key);
     if (outlet === void 0) {
-      outlet = new KeyOutlet<K, V>(this, key);
-      this._outlets = this._outlets.updated(key, outlet);
+      outlet = new KeyOutlet(this, key);
+      Object.defineProperty(this, "outlets", {
+        value: oldOutlets.updated(key, outlet),
+        enumerable: true,
+        configurable: true,
+      });
     }
     return outlet;
   }
 
   outputIterator(): Iterator<Inlet<O>> {
-    return this._outputs !== null ? Cursor.array(this._outputs) : Cursor.empty();
+    return Cursor.array(this.outputs);
   }
 
   bindOutput(output: Inlet<O>): void {
-    const oldOutputs = this._outputs;
-    const n = oldOutputs !== null ? oldOutputs.length : 0;
-    const newOutputs = new Array<Inlet<O>>(n + 1);
-    for (let i = 0; i < n; i += 1) {
-      newOutputs[i] = oldOutputs![i];
-    }
-    newOutputs[n] = output;
-    this._outputs = newOutputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.inserted(output, this.outputs),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   unbindOutput(output: Inlet<O>): void {
-    const oldOutputs = this._outputs;
-    const n = oldOutputs !== null ? oldOutputs.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      if (oldOutputs![i] === output) {
-        if (n > 1) {
-          const newOutputs = new Array<Inlet<O>>(n - 1);
-          for (let j = 0; j < i; j += 1) {
-            newOutputs[j] = oldOutputs![j];
-          }
-          for (let j = i; j < n - 1; j += 1) {
-            newOutputs[j] = oldOutputs![j + 1];
-          }
-          this._outputs = newOutputs;
-        } else {
-          this._outputs = null;
-        }
-        break;
-      }
-    }
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.removed(output, this.outputs),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   unbindOutputs(): void {
-    const outlets = this._outlets;
-    if (outlets.isEmpty()) {
-      this._outlets = new BTree();
-      outlets.forEach(function (key: K, keyOutlet: KeyOutlet<K, V>) {
+    const oldOutlets = this.outlets;
+    if (oldOutlets.isEmpty()) {
+      Object.defineProperty(this, "outlets", {
+        value: new BTree(),
+        enumerable: true,
+        configurable: true,
+      });
+      oldOutlets.forEach(function (key: K, keyOutlet: KeyOutlet<K, V>) {
         keyOutlet.unbindOutputs();
       }, this);
     }
-    const outputs = this._outputs;
-    if (outputs !== null) {
-      this._outputs = null;
-      for (let i = 0, n = outputs.length; i < n; i += 1) {
-        const output = outputs[i];
-        output.unbindInput();
-      }
+    const oldOutputs = this.outputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
+      const output = oldOutputs[i]!;
+      output.unbindInput();
     }
   }
 
   disconnectOutputs(): void {
-    const outlets = this._outlets;
-    if (outlets.isEmpty()) {
-      this._outlets = new BTree();
-      outlets.forEach(function (key: K, keyOutlet: KeyOutlet<K, V>) {
+    const oldOutlets = this.outlets;
+    if (oldOutlets.isEmpty()) {
+      Object.defineProperty(this, "outlets", {
+        value: new BTree(),
+        enumerable: true,
+        configurable: true,
+      });
+      oldOutlets.forEach(function (key: K, keyOutlet: KeyOutlet<K, V>) {
         keyOutlet.disconnectOutputs();
       }, this);
     }
-    const outputs = this._outputs;
-    if (outputs !== null) {
-      this._outputs = null;
-      for (let i = 0, n = outputs.length; i < n; i += 1) {
-        const output = outputs[i];
-        output.unbindInput();
-        output.disconnectOutputs();
-      }
+    const oldOutputs = this.outputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
+      const output = oldOutputs[i]!;
+      output.unbindInput();
+      output.disconnectOutputs();
     }
   }
 
@@ -137,22 +154,30 @@ export abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
   }
 
   decohereInputKey(key: K, effect: KeyEffect): void {
-    const oldEffects = this._effects;
+    const oldEffects = this.effects;
     if (oldEffects.get(key) !== effect) {
       this.willDecohereInputKey(key, effect);
-      this._effects = oldEffects.updated(key, effect);
-      this._version = -1;
+      Object.defineProperty(this, "effects", {
+        value: oldEffects.updated(key, effect),
+        enumerable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, "version", {
+        value: -1,
+        enumerable: true,
+        configurable: true,
+      });
       this.onDecohereInputKey(key, effect);
-      const n = this._outputs !== null ? this._outputs.length : 0;
-      for (let i = 0; i < n; i += 1) {
-        const output = this._outputs![i];
+      const outputs = this.outputs;
+      for (let i = 0, n = outputs.length; i < n; i += 1) {
+        const output = outputs[i]!;
         if (MapInlet.is(output)) {
           output.decohereOutputKey(key, effect);
         } else {
           output.decohereOutput();
         }
       }
-      const outlet = this._outlets.get(key);
+      const outlet = this.outlets.get(key);
       if (outlet !== void 0) {
         outlet.decohereInput();
       }
@@ -161,15 +186,20 @@ export abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
   }
 
   decohereInput(): void {
-    if (this._version >= 0) {
+    if (this.version >= 0) {
       this.willDecohereInput();
-      this._version = -1;
+      Object.defineProperty(this, "version", {
+        value: -1,
+        enumerable: true,
+        configurable: true,
+      });
       this.onDecohereInput();
-      const n = this._outputs !== null ? this._outputs.length : 0;
-      for (let i = 0; i < n; i += 1) {
-        this._outputs![i].decohereOutput();
+      const outputs = this.outputs;
+      for (let i = 0, n = outputs.length; i < n; i += 1) {
+        const output = outputs[i]!;
+        output.decohereOutput();
       }
-      this._outlets.forEach(function (key: K, outlet: KeyOutlet<K, V>): void {
+      this.outlets.forEach(function (key: K, outlet: KeyOutlet<K, V>): void {
         outlet.decohereInput();
       }, this);
       this.didDecohereInput();
@@ -177,20 +207,25 @@ export abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
   }
 
   recohereInputKey(key: K, version: number): void {
-    if (this._version < 0) {
-      const oldEffects = this._effects;
+    if (this.version < 0) {
+      const oldEffects = this.effects;
       const effect = oldEffects.get(key);
       if (effect !== void 0) {
         this.willRecohereInputKey(key, effect, version);
-        this._effects = oldEffects.removed(key);
+        Object.defineProperty(this, "effects", {
+          value: oldEffects.removed(key),
+          enumerable: true,
+          configurable: true,
+        });
         this.onRecohereInputKey(key, effect, version);
-        for (let i = 0, n = this._outputs !== null ? this._outputs.length : 0; i < n; i += 1) {
-          const output = this._outputs![i];
+        const outputs = this.outputs;
+        for (let i = 0, n = outputs.length; i < n; i += 1) {
+          const output = outputs[i];
           if (MapInlet.is(output)) {
             output.recohereOutputKey(key, version);
           }
         }
-        const outlet = this._outlets.get(key);
+        const outlet = this.outlets.get(key);
         if (outlet !== void 0) {
           outlet.recohereInput(version);
         }
@@ -200,15 +235,21 @@ export abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
   }
 
   recohereInput(version: number): void {
-    if (this._version < 0) {
+    if (this.version < 0) {
       this.willRecohereInput(version);
-      this._effects.forEach(function (key: K): void {
+      this.effects.forEach(function (key: K): void {
         this.recohereInputKey(key, version);
       }, this);
-      this._version = version;
+      Object.defineProperty(this, "version", {
+        value: version,
+        enumerable: true,
+        configurable: true,
+      });
       this.onRecohereInput(version);
-      for (let i = 0, n = this._outputs !== null ? this._outputs.length : 0; i < n; i += 1) {
-        this._outputs![i].recohereOutput(version);
+      const outputs = this.outputs;
+      for (let i = 0, n = outputs.length; i < n; i += 1) {
+        const output = outputs[i]!;
+        output.recohereOutput(version);
       }
       this.didRecohereInput(version);
     }
@@ -261,50 +302,7 @@ export abstract class AbstractMapOutlet<K, V, O> implements MapOutlet<K, V, O> {
   protected didRecohereInput(version: number): void {
     // hook
   }
-
-  memoize(): MapOutlet<K, V, O> {
-    const combinator = new MapOutlet.MemoizeMapCombinator<K, V, O>();
-    combinator.bindInput(this);
-    return combinator;
-  }
-
-  filter(func: FilterFieldsFunction<K, V>): MapOutlet<K, V, Map<K, V>> {
-    const combinator = new MapOutlet.FilterFieldsCombinator<K, V, O>(func);
-    combinator.bindInput(this);
-    return combinator;
-  }
-
-  map<O2>(func: MapValueFunction<O, O2>): Outlet<O2>;
-  map<V2>(func: MapFieldValuesFunction<K, V, V2>): MapOutlet<K, V2, Map<K, V2>>;
-  map<V2>(func: MapValueFunction<O, V2> | MapFieldValuesFunction<K, V, V2>): Outlet<V2> | MapOutlet<K, V2, Map<K, V2>> {
-    if (func.length === 1) {
-      const combinator = new Outlet.MapValueCombinator<O, V2>(func as MapValueFunction<O, V2>);
-      combinator.bindInput(this);
-      return combinator;
-    } else {
-      const combinator = new MapOutlet.MapFieldValuesCombinator<K, V, V2, O>(func as MapFieldValuesFunction<K, V, V2>);
-      combinator.bindInput(this);
-      return combinator;
-    }
-  }
-
-  reduce<U>(identity: U, accumulator: (result: U, element: V) => U, combiner: (result: U, result2: U) => U): Outlet<U> {
-    const combinator = new MapOutlet.ReduceFieldsCombinator<K, V, O, U>(identity, accumulator, combiner);
-    combinator.bindInput(this);
-    return combinator;
-  }
-
-  watch(func: WatchValueFunction<O>): this;
-  watch(func: WatchFieldsFunction<K, V>): this;
-  watch(func: WatchValueFunction<O> | WatchFieldsFunction<K, V>): this {
-    if (func.length === 1) {
-      const combinator = new Outlet.WatchValueCombinator<O>(func as WatchValueFunction<O>);
-      combinator.bindInput(this);
-      return this;
-    } else {
-      const combinator = new MapOutlet.WatchFieldsCombinator<K, V, O>(func as WatchFieldsFunction<K, V>);
-      combinator.bindInput(this);
-      return this;
-    }
-  }
 }
+export interface AbstractMapOutlet<K, V, O> extends MapOutletCombinators<K, V, O> {
+}
+MapOutletCombinators.define(AbstractMapOutlet.prototype);

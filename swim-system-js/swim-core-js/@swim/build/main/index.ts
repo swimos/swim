@@ -28,6 +28,7 @@ export {
 } from "./Target";
 
 export {DocTarget} from "./DocTarget";
+export {DocTheme} from "./DocTheme";
 
 export {cli} from "./cli";
 

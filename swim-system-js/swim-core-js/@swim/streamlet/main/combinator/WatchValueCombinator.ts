@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Outlet} from "../Outlet";
-import {WatchValueFunction} from "../function";
+import type {WatchValueFunction} from "../function";
 import {WatchValueOperator} from "./WatchValueOperator";
 
 export class WatchValueCombinator<I> extends WatchValueOperator<I> {
-  /** @hidden */
-  protected readonly _func: WatchValueFunction<I>;
-
   constructor(func: WatchValueFunction<I>) {
     super();
-    this._func = func;
+    Object.defineProperty(this, "func", {
+      value: func,
+      enumerable: true,
+    });
   }
+
+  /** @hidden */
+  declare readonly func: WatchValueFunction<I>;
 
   evaluate(value: I | undefined): void {
     if (value !== void 0) {
-      return this._func(value);
+      const func = this.func;
+      return func(value);
     }
   }
 }
-Outlet.WatchValueCombinator = WatchValueCombinator;

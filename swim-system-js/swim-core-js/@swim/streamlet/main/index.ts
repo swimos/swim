@@ -22,6 +22,7 @@ export {
   OutletOptions,
   Outlet,
 } from "./Outlet";
+export {OutletCombinators} from "./OutletCombinators";
 export {
   InoutletType,
   InoutletOptions,
@@ -31,6 +32,7 @@ export {
 export {KeyEffect} from "./KeyEffect";
 export {MapInlet} from "./MapInlet";
 export {MapOutlet} from "./MapOutlet";
+export {MapOutletCombinators} from "./MapOutletCombinators";
 export {MapInoutlet} from "./MapInoutlet";
 export {MapInletOutlet} from "./MapInletOutlet";
 export {MapInletMapOutlet} from "./MapInletMapOutlet";
@@ -68,7 +70,7 @@ export * from "./combinator";
 export {
   InletDescriptor,
   OutletDescriptor,
-  StreamletClass,
+  StreamletPrototype,
   AbstractStreamlet,
 } from "./AbstractStreamlet";
 export {StreamletInlet} from "./StreamletInlet";

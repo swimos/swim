@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {AnyDateTime, DateTime} from "../DateTime";
-import {TimeInterval} from "../TimeInterval";
+import {TimeInterval} from "./TimeInterval";
 
 /** @hidden */
 export class YearsInterval extends TimeInterval {
@@ -21,35 +21,34 @@ export class YearsInterval extends TimeInterval {
 
   constructor(stride: number) {
     super();
-    this.stride = stride || 1;
+    this.stride = stride;
   }
 
-  offset(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  offset(t: AnyDateTime, k?: number): DateTime {
+    const d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.year(d.year() + k * this.stride);
+    return d.withYear(d.year + k * this.stride);
   }
 
-  next(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  next(t: AnyDateTime, k?: number): DateTime {
+    let d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    d = d.year(Math.floor((d.year() + k * this.stride) / this.stride) * this.stride);
-    return d.month(0, 1).hour(0, 0, 0, 0);
+    d = d.withYear(Math.floor((d.year + k * this.stride) / this.stride) * this.stride);
+    return d.withMonth(0, 1).withHour(0, 0, 0, 0);
   }
 
-  floor(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    d = d.year(Math.floor(d.year() / this.stride) * this.stride);
-    return d.month(0, 1).hour(0, 0, 0, 0);
+  floor(t: AnyDateTime): DateTime {
+    let d = DateTime.fromAny(t);
+    d = d.withYear(Math.floor(d.year / this.stride) * this.stride);
+    return d.withMonth(0, 1).withHour(0, 0, 0, 0);
   }
 
-  ceil(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    d = d.time(d.time() - 1);
-    d = d.year(Math.floor(d.year() / this.stride) * this.stride);
-    d = d.month(0, 1).hour(0, 0, 0, 0);
-    d = d.year(Math.floor((d.year() + this.stride) / this.stride) * this.stride);
-    return d.month(0, 1).hour(0, 0, 0, 0);
+  ceil(t: AnyDateTime): DateTime {
+    let d = DateTime.fromAny(t);
+    d = new DateTime(d.time - 1, d.zone);
+    d = d.withYear(Math.floor(d.year / this.stride) * this.stride);
+    d = d.withMonth(0, 1).withHour(0, 0, 0, 0);
+    d = d.withYear(Math.floor((d.year + this.stride) / this.stride) * this.stride);
+    return d.withMonth(0, 1).withHour(0, 0, 0, 0);
   }
 }
-TimeInterval.Years = YearsInterval;

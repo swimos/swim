@@ -15,21 +15,30 @@
 import {AbstractInlet} from "./AbstractInlet";
 
 export class ValueOutput<I> extends AbstractInlet<I> {
-  /** @hidden */
-  protected _state: I | undefined;
-
   constructor(state?: I) {
     super();
-    this._state = state;
+    Object.defineProperty(this, "state", {
+      value: state,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
+  /** @hidden */
+  declare readonly state: I | undefined;
+
   get(): I | undefined {
-    return this._state;
+    return this.state;
   }
 
   protected onRecohereOutput(version: number): void {
-    if (this._input !== null) {
-      this._state = this._input.get();
+    const input = this.input;
+    if (input !== null) {
+      Object.defineProperty(this, "state", {
+        value: input.get(),
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 }

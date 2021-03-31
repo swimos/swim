@@ -16,35 +16,47 @@ import {HashGenCacheMap} from "@swim/util";
 import {AnyUri, Uri} from "./Uri";
 
 export class UriCache {
-  /** @hidden */
-  _base: Uri;
-  /** @hidden */
-  _resolveCache: HashGenCacheMap<Uri, Uri>;
-  /** @hidden */
-  _unresolveCache: HashGenCacheMap<Uri, Uri>;
-
   constructor(base: Uri, size: number = 32) {
-    this._base = base;
-    this._resolveCache = new HashGenCacheMap(size);
-    this._unresolveCache = new HashGenCacheMap(size);
+    Object.defineProperty(this, "base", {
+      value: base,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "resolveCache", {
+      value: new HashGenCacheMap(size),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "unresolveCache", {
+      value: new HashGenCacheMap(size),
+      enumerable: true,
+      configurable: true,
+    });
   }
+
+  declare readonly base: Uri;
+
+  /** @hidden */
+  declare readonly resolveCache: HashGenCacheMap<Uri, Uri>;
+
+  /** @hidden */
+  declare readonly unresolveCache: HashGenCacheMap<Uri, Uri>;
 
   resolve(relative: AnyUri): Uri {
     relative = Uri.fromAny(relative);
-    let absolute = this._resolveCache.get(relative);
-    if (absolute === undefined) {
-      absolute = this._base.resolve(relative);
-      this._resolveCache.put(relative, absolute);
+    let absolute = this.resolveCache.get(relative as Uri);
+    if (absolute === void 0) {
+      absolute = this.base.resolve(relative);
+      this.resolveCache.put(relative as Uri, absolute);
     }
     return absolute;
   }
 
   unresolve(absolute: AnyUri): Uri {
     absolute = Uri.fromAny(absolute);
-    let relative = this._unresolveCache.get(absolute);
-    if (relative === undefined) {
-      relative = this._base.unresolve(absolute);
-      this._unresolveCache.put(absolute, relative);
+    let relative = this.unresolveCache.get(absolute as Uri);
+    if (relative === void 0) {
+      relative = this.base.unresolve(absolute);
+      this.unresolveCache.put(absolute as Uri, relative);
     }
     return relative;
   }

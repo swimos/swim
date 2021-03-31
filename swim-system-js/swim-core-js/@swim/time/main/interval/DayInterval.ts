@@ -13,49 +13,49 @@
 // limitations under the License.
 
 import {AnyDateTime, DateTime} from "../DateTime";
-import {UnitTimeInterval, TimeInterval} from "../TimeInterval";
+import {UnitTimeInterval, TimeInterval} from "./TimeInterval";
+import {FilterTimeInterval} from "./FilterTimeInterval";
 
 /** @hidden */
 export class DayInterval extends UnitTimeInterval {
-  offset(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  offset(t: AnyDateTime, k?: number): DateTime {
+    const d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.day(d.day() + k);
+    return d.withDay(d.day + k);
   }
 
-  next(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  next(t: AnyDateTime, k?: number): DateTime {
+    let d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    d = d.day(d.day() + k);
-    return d.hour(0, 0, 0, 0);
+    d = d.withDay(d.day + k);
+    return d.withHour(0, 0, 0, 0);
   }
 
-  floor(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    return d.hour(0, 0, 0, 0);
+  floor(t: AnyDateTime): DateTime {
+    const d = DateTime.fromAny(t);
+    return d.withHour(0, 0, 0, 0);
   }
 
-  ceil(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    d = d.time(d.time() - 1);
-    d = d.hour(0, 0, 0, 0);
-    d = d.day(d.day() + 1);
-    return d.hour(0, 0, 0, 0);
+  ceil(t: AnyDateTime): DateTime {
+    let d = DateTime.fromAny(t);
+    d = new DateTime(d.time - 1, d.zone);
+    d = d.withHour(0, 0, 0, 0);
+    d = d.withDay(d.day + 1);
+    return d.withHour(0, 0, 0, 0);
   }
 
   every(k: number): TimeInterval {
     if (k === 1) {
       return this;
     } else if (isFinite(k) && k >= 1) {
-      return new TimeInterval.Filter(this, DayInterval.modulo.bind(void 0, k));
+      return new FilterTimeInterval(this, DayInterval.modulo.bind(void 0, k));
     } else {
       throw new Error("" + k);
     }
   }
 
   private static modulo(k: number, d: DateTime): boolean {
-    const day = d.day();
+    const day = d.day;
     return isFinite(day) && day % k === 0;
   }
 }
-TimeInterval.Day = DayInterval;

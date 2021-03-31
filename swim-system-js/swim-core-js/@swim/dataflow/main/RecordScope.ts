@@ -13,22 +13,21 @@
 // limitations under the License.
 
 import {AnyItem, Value, Record} from "@swim/structure";
-import {StreamletScope} from "@swim/streamlet";
-import {RecordOutlet} from "./RecordOutlet";
+import type {StreamletScope} from "@swim/streamlet";
 import {RecordModel} from "./RecordModel";
 
 export class RecordScope extends RecordModel {
-  /** @hidden */
-  protected scope: StreamletScope<Value> | null;
-
   constructor(scope: StreamletScope<Value> | null, state?: Record) {
     super(state);
-    this.scope = scope;
+    Object.defineProperty(this, "streamletScope", {
+      value: scope,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  streamletScope(): StreamletScope<Value> | null {
-    return this.scope;
-  }
+  // @ts-ignore
+  declare readonly streamletScope: StreamletScope<Value> | null;
 
   static from(record: Record): RecordScope {
     const scope = new RecordScope(RecordScope.globalScope());
@@ -38,7 +37,6 @@ export class RecordScope extends RecordModel {
   }
 
   static of(...items: AnyItem[]): RecordScope {
-    return RecordScope.from(Record.of.apply(void 0, arguments));
+    return RecordScope.from(Record.of(...items));
   }
 }
-RecordOutlet.Scope = RecordScope;

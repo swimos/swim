@@ -15,6 +15,7 @@
 import {TestOptions, Test, Spec, Report} from "@swim/unit";
 import {BTree} from "@swim/collections";
 import {Attr, Slot, AnyValue, Value, Record, Text} from "@swim/structure";
+import {Uri} from "@swim/uri";
 import {
   Envelope,
   EventMessage,
@@ -23,9 +24,8 @@ import {
   SyncRequest,
   SyncedResponse,
 } from "@swim/warp";
-import {Uri} from "@swim/uri";
-import {MapDownlink, WarpClient} from "@swim/client";
-import {MockServer} from "../MockServer";
+import type {MapDownlink, WarpClient} from "@swim/client";
+import type {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
 export class MapDownlinkSpec extends Spec {
@@ -38,15 +38,15 @@ export class MapDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
-          exam.equal(envelope.node(), Uri.parse("dictionary/english"));
-          exam.equal(envelope.lane(), Uri.parse("definitions"));
+          exam.equal(envelope.node, Uri.parse("dictionary/english"));
+          exam.equal(envelope.lane, Uri.parse("definitions"));
           const header = Record.of(Slot.of("key", "the"));
-          exam.equal(envelope.body(), Attr.of("update", header).concat("definite article"));
+          exam.equal(envelope.body, Attr.of("update", header).concat("definite article"));
           resolve();
         }
       };
       const downlink = client.downlinkMap()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("dictionary/english")
         .laneUri("definitions")
         .keepLinked(false)
@@ -64,15 +64,15 @@ export class MapDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
-          server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
+          server.send(LinkedResponse.create(envelope.node, envelope.lane));
           const header = Record.of(Slot.of("key", "the"));
-          server.send(EventMessage.of(envelope.node(), envelope.lane(),
+          server.send(EventMessage.create(envelope.node, envelope.lane,
                       Attr.of("update", header).concat("definite article")));
-          server.send(SyncedResponse.of(envelope.node(), envelope.lane()));
+          server.send(SyncedResponse.create(envelope.node, envelope.lane));
         }
       };
       client.downlinkMap()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("dictionary/english")
         .laneUri("definitions")
         .keepLinked(false)
@@ -101,15 +101,15 @@ export class MapDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
-          exam.equal(envelope.node(), Uri.parse("dictionary/english"));
-          exam.equal(envelope.lane(), Uri.parse("definitions"));
+          exam.equal(envelope.node, Uri.parse("dictionary/english"));
+          exam.equal(envelope.lane, Uri.parse("definitions"));
           const header = Record.of(Slot.of("key", "the"));
-          exam.equal(envelope.body(), Record.of(Attr.of("remove", header)));
+          exam.equal(envelope.body, Record.of(Attr.of("remove", header)));
           resolve();
         }
       };
       const downlink = client.downlinkMap()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("dictionary/english")
         .laneUri("definitions")
         .keepLinked(false)
@@ -128,14 +128,14 @@ export class MapDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
-          server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
+          server.send(LinkedResponse.create(envelope.node, envelope.lane));
           const header = Record.of(Slot.of("key", "the"));
-          server.send(EventMessage.of(envelope.node(), envelope.lane(), Record.of(Attr.of("remove", header))));
-          server.send(SyncedResponse.of(envelope.node(), envelope.lane()));
+          server.send(EventMessage.create(envelope.node, envelope.lane, Record.of(Attr.of("remove", header))));
+          server.send(SyncedResponse.create(envelope.node, envelope.lane));
         }
       };
       client.downlinkMap()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("dictionary/english")
         .laneUri("definitions")
         .keepLinked(false)
@@ -163,14 +163,14 @@ export class MapDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof CommandMessage) {
-          exam.equal(envelope.node(), Uri.parse("dictionary/english"));
-          exam.equal(envelope.lane(), Uri.parse("definitions"));
-          exam.equal(envelope.body(), Record.of(Attr.of("clear")));
+          exam.equal(envelope.node, Uri.parse("dictionary/english"));
+          exam.equal(envelope.lane, Uri.parse("definitions"));
+          exam.equal(envelope.body, Record.of(Attr.of("clear")));
           resolve();
         }
       };
       const downlink = client.downlinkMap()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("dictionary/english")
         .laneUri("definitions")
         .keepLinked(false)
@@ -192,13 +192,13 @@ export class MapDownlinkSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
-          server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
-          server.send(EventMessage.of(envelope.node(), envelope.lane(), Record.of(Attr.of("clear"))));
-          server.send(SyncedResponse.of(envelope.node(), envelope.lane()));
+          server.send(LinkedResponse.create(envelope.node, envelope.lane));
+          server.send(EventMessage.create(envelope.node, envelope.lane, Record.of(Attr.of("clear"))));
+          server.send(SyncedResponse.create(envelope.node, envelope.lane));
         }
       };
       client.downlinkMap()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("dictionary/english")
         .laneUri("definitions")
         .keepLinked(false)

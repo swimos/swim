@@ -12,39 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapOutlet} from "../MapOutlet";
 import {ReduceFieldsOperator} from "./ReduceFieldsOperator";
 
 export class ReduceFieldsCombinator<K, V, I, O> extends ReduceFieldsOperator<K, V, I, O> {
-  /** @hidden */
-  protected readonly _identity: O;
-  /** @hidden */
-  protected readonly _accumulator: (result: O, element: V) => O;
-  /** @hidden */
-  protected readonly _combiner: (result: O, result2: O) => O;
-
   constructor(identity: O, accumulator: (result: O, element: V) => O,
               combiner: (result: O, result2: O) => O) {
     super();
-    this._identity = identity;
-    this._accumulator = accumulator;
-    this._combiner = combiner;
+    Object.defineProperty(this, "identity", {
+      value: identity,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "accumulator", {
+      value: accumulator,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "combiner", {
+      value: combiner,
+      enumerable: true,
+    });
   }
 
   get(): O {
-    return this._state.reduced(this._identity, this._accumulator, this._combiner);
+    return this.state.reduced(this.identity, this.accumulator, this.combiner);
   }
 
-  identity(): O {
-    return this._identity;
-  }
+  declare readonly identity: O;
+
+  /** @hidden */
+  declare readonly accumulator: (result: O, element: V) => O;
 
   accumulate(result: O, value: V): O {
-    return this._accumulator(result, value);
+    const accumulator = this.accumulator;
+    return accumulator(result, value);
   }
 
+  /** @hidden */
+  declare readonly combiner: (result: O, result2: O) => O;
+
   combine(result: O, value: O): O {
-    return this._combiner(result, value);
+    const combiner = this.combiner;
+    return combiner(result, value);
   }
 }
-MapOutlet.ReduceFieldsCombinator = ReduceFieldsCombinator;

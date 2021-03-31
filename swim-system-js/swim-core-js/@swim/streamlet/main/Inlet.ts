@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Outlet} from "./Outlet";
+import type {Outlet} from "./Outlet";
 
 export type InletType = "value" | "map";
 
@@ -41,10 +41,10 @@ export interface InletOptions {
  */
 export interface Inlet<I = unknown> {
   /**
-   * Returns the `Outlet` from which this `Inlet` acquires its state; returns
-   * `null` if this `Inlet` is disconnected.
+   * The `Outlet` from which this `Inlet` acquires its state, or `null` if
+   * this `Inlet` is disconnected.
    */
-  input(): Outlet<I> | null;
+  readonly input: Outlet<I> | null;
 
   /**
    * Connects this `Inlet` to an `Outlet` from which it will  acquire its
@@ -97,15 +97,16 @@ export interface Inlet<I = unknown> {
   recohereOutput(version: number): void;
 }
 
-/** @hidden */
-export const Inlet = {
-  is<I>(object: unknown): object is Inlet<I> {
-    if (typeof object === "object" && object !== null) {
-      const inlet = object as Inlet<I>;
-      return typeof inlet.input === "function"
-          && typeof inlet.bindInput === "function"
-          && typeof inlet.unbindInput === "function";
-    }
-    return false;
-  },
+export const Inlet = {} as {
+   is<I>(object: unknown): object is Inlet<I>;
+};
+
+Inlet.is = function <I>(object: unknown): object is Inlet<I> {
+  if (typeof object === "object" && object !== null) {
+    const inlet = object as Inlet<I>;
+    return "input" in inlet
+        && typeof inlet.bindInput === "function"
+        && typeof inlet.unbindInput === "function";
+  }
+  return false;
 };

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Value} from "@swim/structure";
-import {Host} from "./Host";
+import type {Value} from "@swim/structure";
+import type {Host} from "./Host";
 
 /** @hidden */
 export interface HostContext {

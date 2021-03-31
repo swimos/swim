@@ -16,28 +16,25 @@ import {Item, Value} from "@swim/structure";
 import {Inlet, AbstractOutlet, OutletInlet} from "@swim/streamlet";
 
 export abstract class BinaryOutlet extends AbstractOutlet<Value> {
-  /** @hidden */
-  readonly _operand1Inlet: Inlet<Value>;
-  /** @hidden */
-  readonly _operand2Inlet: Inlet<Value>;
-
   constructor() {
     super();
-    this._operand1Inlet = new OutletInlet<Value>(this);
-    this._operand2Inlet = new OutletInlet<Value>(this);
+    Object.defineProperty(this, "operand1Inlet", {
+      value: new OutletInlet<Value>(this),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "operand2Inlet", {
+      value: new OutletInlet<Value>(this),
+      enumerable: true,
+    });
   }
 
-  operand1Inlet(): Inlet<Value> {
-    return this._operand1Inlet;
-  }
+  declare readonly operand1Inlet: Inlet<Value>;
 
-  operand2Inlet(): Inlet<Value> {
-    return this._operand2Inlet;
-  }
+  declare readonly operand2Inlet: Inlet<Value>;
 
   get(): Value {
-    const operand1Input = this._operand1Inlet.input();
-    const operand2Input = this._operand2Inlet.input();
+    const operand1Input = this.operand1Inlet.input;
+    const operand2Input = this.operand2Inlet.input;
     if (operand1Input !== null && operand2Input !== null) {
       const argument1 = operand1Input.get();
       const argument2 = operand2Input.get();

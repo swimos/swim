@@ -6,13 +6,13 @@
     "paths": {
       "@swim/util": ["@swim/util/main"],
       "@swim/codec": ["@swim/codec/main"],
-      "@swim/interpolate": ["@swim/interpolate/main"]
+      "@swim/mapping": ["@swim/mapping/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../util/main"},
     {"path": "../../codec/main"},
-    {"path": "../../interpolate/main"}
+    {"path": "../../mapping/main"}
   ]
 }

@@ -25,30 +25,30 @@ export class EventMessageSpec extends Spec {
   @Test
   parseEventWithNamedHeaders(exam: WarpExam): void {
     exam.parses("@event(node: node_uri, lane: lane_uri)",
-                EventMessage.of("node_uri", "lane_uri"));
+                EventMessage.create("node_uri", "lane_uri"));
   }
 
   @Test
   parseEventWithPositionalHeaders(exam: WarpExam): void {
     exam.parses("@event(node_uri, lane_uri)",
-                EventMessage.of("node_uri", "lane_uri"));
+                EventMessage.create("node_uri", "lane_uri"));
   }
 
   @Test
   parseEventWithBody(exam: WarpExam): void {
     exam.parses("@event(node_uri, lane_uri)@test",
-                EventMessage.of("node_uri", "lane_uri", Record.of(Attr.of("test"))));
+                EventMessage.create("node_uri", "lane_uri", Record.of(Attr.of("test"))));
   }
 
   @Test
   writeEvent(exam: WarpExam): void {
-    exam.writes(EventMessage.of("node/uri", "lane_uri"),
+    exam.writes(EventMessage.create("node/uri", "lane_uri"),
                 "@event(node:\"node/uri\",lane:lane_uri)");
   }
 
   @Test
   writeEventWithBody(exam: WarpExam): void {
-    exam.writes(EventMessage.of("node/uri", "lane_uri", Record.of(Attr.of("test"))),
+    exam.writes(EventMessage.create("node/uri", "lane_uri", Record.of(Attr.of("test"))),
                 "@event(node:\"node/uri\",lane:lane_uri)@test");
   }
 }

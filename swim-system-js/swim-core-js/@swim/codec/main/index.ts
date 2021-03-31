@@ -12,56 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {Tag} from "./Tag";
-export {Mark} from "./Mark";
-export {Span} from "./Span";
+export * from "./source";
 
-export {InputException} from "./InputException";
-export {
-  AnyInputSettings,
-  InputSettingsInit,
-  InputSettings,
-} from "./InputSettings";
-export {Input} from "./Input";
-export {InputBuffer} from "./InputBuffer";
+export * from "./input";
 
-export {OutputException} from "./OutputException";
-export {
-  AnyOutputSettings,
-  OutputSettingsInit,
-  OutputSettings,
-} from "./OutputSettings";
-export {Output} from "./Output";
-export {OutputBuffer} from "./OutputBuffer";
+export * from "./output";
 
-export {ParserException} from "./ParserException";
-export {Parser} from "./Parser";
+export * from "./parser";
 
-export {WriterException} from "./WriterException";
-export {Writer} from "./Writer";
+export * from "./writer";
 
-export {OutputStyle} from "./OutputStyle";
-export {Display} from "./Display";
-export {Debug} from "./Debug";
-export {Format} from "./Format";
+export * from "./format";
 
-export {Diagnostic} from "./Diagnostic";
+export * from "./binary";
 
-export {UtfErrorMode} from "./UtfErrorMode";
-export {Unicode} from "./Unicode";
-export {Utf8} from "./Utf8";
+export * from "./unicode";
 
-export {Binary} from "./Binary";
-
-export {Base10} from "./Base10";
-export {Base10NumberParser} from "./Base10NumberParser";
-export {Base10IntegerWriter} from "./Base10IntegerWriter";
-
-export {Base16} from "./Base16";
-export {Base16Parser} from "./Base16Parser";
-export {Base16Writer} from "./Base16Writer";
-export {Base16IntegerWriter} from "./Base16IntegerWriter";
-
-export {Base64} from "./Base64";
-export {Base64Parser} from "./Base64Parser";
-export {Base64Writer} from "./Base64Writer";
+export * from "./number";

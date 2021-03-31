@@ -12,32 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Comparable, HashCode, Murmur3} from "@swim/util";
+import {HashCode, Compare, Lazy, Strings} from "@swim/util";
 import {Output, Format, Debug, Display, Base16} from "@swim/codec";
-import {Form} from "@swim/structure";
+import type {Form} from "@swim/structure";
 import {UriException} from "./UriException";
-import {AnyUriScheme, UriScheme} from "./UriScheme";
-import {AnyUriAuthority, UriAuthorityInit, UriAuthority} from "./UriAuthority";
-import {AnyUriUser, UriUser} from "./UriUser";
-import {AnyUriHost, UriHost} from "./UriHost";
-import {UriHostName} from "./UriHostName";
-import {UriHostIPv4} from "./UriHostIPv4";
-import {UriHostIPv6} from "./UriHostIPv6";
-import {UriHostUndefined} from "./UriHostUndefined";
-import {AnyUriPort, UriPort} from "./UriPort";
-import {AnyUriPath, UriPath} from "./UriPath";
-import {UriPathSegment} from "./UriPathSegment";
-import {UriPathSlash} from "./UriPathSlash";
-import {UriPathEmpty} from "./UriPathEmpty";
-import {UriPathBuilder} from "./UriPathBuilder";
-import {AnyUriQuery, UriQuery} from "./UriQuery";
-import {UriQueryParam} from "./UriQueryParam";
-import {UriQueryUndefined} from "./UriQueryUndefined";
-import {UriQueryBuilder} from "./UriQueryBuilder";
-import {AnyUriFragment, UriFragment} from "./UriFragment";
-import {UriParser} from "./UriParser";
-import {UriForm} from "./UriForm";
-import {UriPathForm} from "./UriPathForm";
+import {AnyUriScheme, UriScheme} from "./"; // forward import
+import {AnyUriAuthority, UriAuthorityInit, UriAuthority} from "./"; // forward import
+import type {AnyUriUser, UriUser} from "./UriUser";
+import type {AnyUriHost, UriHost} from "./UriHost";
+import type {AnyUriPort, UriPort} from "./UriPort";
+import {AnyUriPath, UriPath} from "./"; // forward import
+import {UriPathBuilder} from "./"; // forward import
+import {AnyUriQuery, UriQuery} from "./"; // forward import
+import {UriQueryBuilder} from "./"; // forward import
+import {AnyUriFragment, UriFragment} from "./"; // forward import
+import {UriForm} from "./"; // forward import
+import {UriParser} from "./"; // forward import
 
 export type AnyUri = Uri | UriInit | string;
 
@@ -49,451 +39,405 @@ export interface UriInit extends UriAuthorityInit {
   fragment?: AnyUriFragment;
 }
 
-export class Uri implements Comparable<Uri>, HashCode, Debug, Display {
-  /** @hidden */
-  readonly _scheme: UriScheme;
-  /** @hidden */
-  readonly _authority: UriAuthority;
-  /** @hidden */
-  readonly _path: UriPath;
-  /** @hidden */
-  readonly _query: UriQuery;
-  /** @hidden */
-  readonly _fragment: UriFragment;
-  /** @hidden */
-  _string?: string;
-  /** @hidden */
-  _hashCode?: number;
-
+export class Uri implements HashCode, Compare, Debug, Display {
   /** @hidden */
   constructor(scheme: UriScheme, authority: UriAuthority, path: UriPath,
               query: UriQuery, fragment: UriFragment) {
-    this._scheme = scheme;
-    this._authority = authority;
-    this._path = path;
-    this._query = query;
-    this._fragment = fragment;
+    Object.defineProperty(this, "scheme", {
+      value: scheme,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "authority", {
+      value: authority,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "path", {
+      value: path,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "query", {
+      value: query,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "fragment", {
+      value: fragment,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "hashValue", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "stringValue", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   isDefined(): boolean {
-    return this._scheme.isDefined() || this._authority.isDefined() || this._path.isDefined()
-        || this._query.isDefined() || this._fragment.isDefined();
+    return this.scheme.isDefined() || this.authority.isDefined() || this.path.isDefined()
+        || this.query.isDefined() || this.fragment.isDefined();
   }
 
   isEmpty(): boolean {
-    return !this._scheme.isDefined() && !this._authority.isDefined() && this._path.isEmpty()
-        && !this._query.isDefined() && !this._fragment.isDefined();
+    return !this.scheme.isDefined() && !this.authority.isDefined() && this.path.isEmpty()
+        && !this.query.isDefined() && !this.fragment.isDefined();
   }
 
-  scheme(): UriScheme;
-  scheme(scheme: AnyUriScheme): Uri;
-  scheme(scheme?: AnyUriScheme): UriScheme | Uri {
-    if (scheme === void 0) {
-      return this._scheme;
+  declare readonly scheme: UriScheme;
+
+  withScheme(scheme: AnyUriScheme): Uri {
+    scheme = UriScheme.fromAny(scheme);
+    if (scheme !== this.scheme) {
+      return this.copy(scheme, this.authority, this.path, this.query, this.fragment);
     } else {
-      scheme = Uri.Scheme.fromAny(scheme);
-      if (scheme !== this._scheme) {
-        return this.copy(scheme, this._authority, this._path, this._query, this._fragment);
-      } else {
-        return this;
-      }
+      return this;
     }
   }
 
-  schemePart(): string;
-  schemePart(scheme: string): Uri;
-  schemePart(scheme?: string): string | Uri {
-    if (scheme === void 0) {
-      return this._scheme.toString();
+  get schemePart(): string {
+    return this.scheme.toString();
+  }
+
+  withSchemePart(schemePart: string): Uri {
+    return this.withScheme(UriScheme.parse(schemePart));
+  }
+
+  get schemeName(): string {
+    return this.scheme.name;
+  }
+
+  withSchemeName(schemeName: string): Uri {
+    return this.withScheme(UriScheme.create(schemeName));
+  }
+
+  declare readonly authority: UriAuthority;
+
+  withAuthority(authority: AnyUriAuthority): Uri {
+    authority = UriAuthority.fromAny(authority);
+    if (authority !== this.authority) {
+      return this.copy(this.scheme, authority as UriAuthority, this.path, this.query, this.fragment);
     } else {
-      return this.scheme(Uri.Scheme.parse(scheme));
+      return this;
     }
   }
 
-  schemeName(): string;
-  schemeName(scheme: string): Uri;
-  schemeName(scheme?: string): string | Uri {
-    if (scheme === void 0) {
-      return this._scheme.name();
+  get authorityPart(): string {
+    return this.authority.toString();
+  }
+
+  withAuthorityPart(authorityPart: string): Uri {
+    return this.withAuthority(UriAuthority.parse(authorityPart));
+  }
+
+  get user(): UriUser {
+    return this.authority.user;
+  }
+
+  withUser(user: AnyUriUser): Uri {
+    return this.withAuthority(this.authority.withUser(user));
+  }
+
+  get userPart(): string {
+    return this.authority.userPart;
+  }
+
+  withUserPart(userPart: string): Uri {
+    return this.withAuthority(this.authority.withUserPart(userPart));
+  }
+
+  get username(): string | undefined {
+    return this.authority.username;
+  }
+
+  withUsername(username: string | undefined, password?: string): Uri {
+    if (arguments.length === 1) {
+      return this.withAuthority(this.authority.withUsername(username));
     } else {
-      return this.scheme(Uri.Scheme.from(scheme));
+      return this.withAuthority(this.authority.withUsername(username, password));
     }
   }
 
-  authority(): UriAuthority;
-  authority(authority: AnyUriAuthority): Uri;
-  authority(authority?: AnyUriAuthority): UriAuthority | Uri {
-    if (authority === void 0) {
-      return this._authority;
+  get password(): string | undefined {
+    return this.authority.password;
+  }
+
+  withPassword(password: string | undefined): Uri {
+    return this.withAuthority(this.authority.withPassword(password));
+  }
+
+  get host(): UriHost {
+    return this.authority.host;
+  }
+
+  withHost(host: AnyUriHost): Uri {
+    return this.withAuthority(this.authority.withHost(host));
+  }
+
+  get hostPart(): string {
+    return this.authority.hostPart;
+  }
+
+  withHostPart(hostPart: string): Uri {
+    return this.withAuthority(this.authority.withHostPart(hostPart));
+  }
+
+  get hostAddress(): string {
+    return this.authority.hostAddress;
+  }
+
+  get hostName(): string | undefined {
+    return this.authority.hostName;
+  }
+
+  withHostName(hostName: string): Uri {
+    return this.withAuthority(this.authority.withHostName(hostName));
+  }
+
+  get hostIPv4(): string | undefined {
+    return this.authority.hostIPv4;
+  }
+
+  withHostIPv4(hostIPv4: string): Uri {
+    return this.withAuthority(this.authority.withHostIPv4(hostIPv4));
+  }
+
+  get hostIPv6(): string | undefined {
+    return this.authority.hostIPv6;
+  }
+
+  withHostIPv6(hostIPv6: string): Uri {
+    return this.withAuthority(this.authority.withHostIPv6(hostIPv6));
+  }
+
+  get port(): UriPort {
+    return this.authority.port;
+  }
+
+  withPort(port: AnyUriPort): Uri {
+    return this.withAuthority(this.authority.withPort(port));
+  }
+
+  get portPart(): string {
+    return this.authority.portPart;
+  }
+
+  withPortPart(portPart: string): Uri {
+    return this.withAuthority(this.authority.withPortPart(portPart));
+  }
+
+  get portNumber(): number {
+    return this.authority.portNumber;
+  }
+
+  withPortNumber(portNumber: number): Uri {
+    return this.withAuthority(this.authority.withPortNumber(portNumber));
+  }
+
+  declare readonly path: UriPath;
+
+  withPath(...components: AnyUriPath[]): Uri {
+    const path = UriPath.of(...components);
+    if (path !== this.path) {
+      return this.copy(this.scheme, this.authority, path, this.query, this.fragment);
     } else {
-      authority = Uri.Authority.fromAny(authority);
-      if (authority !== this._authority) {
-        return this.copy(this._scheme, authority, this._path, this._query, this._fragment);
-      } else {
-        return this;
-      }
+      return this;
     }
   }
 
-  authorityPart(): string;
-  authorityPart(authority: string): Uri;
-  authorityPart(authority?: string): string | Uri {
-    if (authority === void 0) {
-      return this._authority.toString();
-    } else {
-      return this.authority(Uri.Authority.parse(authority));
-    }
+  get pathPart(): string {
+    return this.path.toString();
   }
 
-  user(): UriUser;
-  user(user: AnyUriUser): Uri;
-  user(user?: AnyUriUser): UriUser | Uri {
-    if (user === void 0) {
-      return this._authority.user();
-    } else {
-      return this.authority(this._authority.user(user));
-    }
+  withPathPart(pathPart: string): Uri {
+    return this.withPath(UriPath.parse(pathPart));
   }
 
-  userPart(): string;
-  userPart(user: string): Uri;
-  userPart(user?: string): string | Uri {
-    if (user === void 0) {
-      return this._authority.userPart();
-    } else {
-      return this.authority(this._authority.userPart(user));
-    }
+  get pathName(): string {
+    return this.path.name;
   }
 
-  username(): string;
-  username(username: string, password?: string | null): Uri;
-  username(username?: string, password?: string | null): string | Uri {
-    if (username === void 0) {
-      return this._authority.username();
-    } else {
-      return this.authority(this._authority.username(username, password));
-    }
-  }
-
-  password(): string | null;
-  password(password: string | null): Uri;
-  password(password?: string | null): string | null | Uri {
-    if (password === void 0) {
-      return this._authority.password();
-    } else {
-      return this.authority(this._authority.password(password));
-    }
-  }
-
-  host(): UriHost;
-  host(host: AnyUriHost): Uri;
-  host(host?: AnyUriHost): UriHost | Uri {
-    if (host === void 0) {
-      return this._authority.host();
-    } else {
-      return this.authority(this._authority.host(host));
-    }
-  }
-
-  hostPart(): string;
-  hostPart(host: string): Uri;
-  hostPart(host?: string): string | Uri {
-    if (host === void 0) {
-      return this._authority.hostPart();
-    } else {
-      return this.authority(this._authority.hostPart(host));
-    }
-  }
-
-  hostAddress(): string {
-    return this._authority.hostAddress();
-  }
-
-  hostName(): string | null;
-  hostName(address: string): Uri;
-  hostName(address?: string): string | null | Uri {
-    if (address === void 0) {
-      return this._authority.hostName();
-    } else {
-      return this.authority(this._authority.hostName(address));
-    }
-  }
-
-  hostIPv4(): string | null;
-  hostIPv4(address: string): Uri;
-  hostIPv4(address?: string): string | null | Uri {
-    if (address === void 0) {
-      return this._authority.hostIPv4();
-    } else {
-      return this.authority(this._authority.hostIPv4(address));
-    }
-  }
-
-  hostIPv6(): string | null;
-  hostIPv6(address: string): Uri;
-  hostIPv6(address?: string): string | null | Uri {
-    if (address === void 0) {
-      return this._authority.hostIPv6();
-    } else {
-      return this.authority(this._authority.hostIPv6(address));
-    }
-  }
-
-  port(): UriPort;
-  port(port: AnyUriPort): Uri;
-  port(port?: AnyUriPort): UriPort | Uri {
-    if (port === void 0) {
-      return this._authority.port();
-    } else {
-      return this.authority(this._authority.port(port));
-    }
-  }
-
-  portPart(): string;
-  portPart(port: string): Uri;
-  portPart(port?: string): string | Uri {
-    if (port === void 0) {
-      return this._authority.portPart();
-    } else {
-      return this.authority(this._authority.portPart(port));
-    }
-  }
-
-  portNumber(): number;
-  portNumber(port: number): Uri;
-  portNumber(port?: number): number | Uri {
-    if (port === void 0) {
-      return this._authority.portNumber();
-    } else {
-      return this.authority(this._authority.portNumber(port));
-    }
-  }
-
-  path(): UriPath;
-  path(...components: AnyUriPath[]): Uri;
-  path(...components: AnyUriPath[]): UriPath | Uri {
-    if (arguments.length === 0) {
-      return this._path;
-    } else {
-      const path = Uri.Path.from.apply(void 0, components);
-      if (path !== this._path) {
-        return this.copy(this._scheme, this._authority, path, this._query, this._fragment);
-      } else {
-        return this;
-      }
-    }
-  }
-
-  pathPart(): string;
-  pathPart(path: string): Uri;
-  pathPart(path?: string): string | Uri {
-    if (path === void 0) {
-      return this._path.toString();
-    } else {
-      return this.path(Uri.Path.parse(path));
-    }
-  }
-
-  pathName(): string;
-  pathName(name: string): Uri;
-  pathName(name?: string): string | Uri {
-    if (name === void 0) {
-      return this._path.name();
-    } else {
-      return this.path(this._path.name(name));
-    }
+  withPathName(pathName: string): Uri {
+    return this.withPath(this.path.withName(pathName));
   }
 
   parentPath(): UriPath {
-    return this._path.parent();
+    return this.path.parent();
   }
 
   basePath(): UriPath {
-    return this._path.base();
+    return this.path.base();
   }
 
   parent(): Uri {
-    return Uri.from(this._scheme, this._authority, this._path.parent());
+    return Uri.create(this.scheme, this.authority, this.path.parent());
   }
 
   base(): Uri {
-    return Uri.from(this._scheme, this._authority, this._path.base());
+    return Uri.create(this.scheme, this.authority, this.path.base());
   }
 
   appendedPath(...components: AnyUriPath[]): Uri {
-    return this.path(this._path.appended.apply(this._path, arguments));
+    return this.withPath(this.path.appended(...components));
   }
 
   appendedSlash(): Uri {
-    return this.path(this._path.appendedSlash());
+    return this.withPath(this.path.appendedSlash());
   }
 
   appendedSegment(segment: string): Uri {
-    return this.path(this._path.appendedSegment(segment));
+    return this.withPath(this.path.appendedSegment(segment));
   }
 
   prependedPath(...components: AnyUriPath[]): Uri {
-    return this.path(this._path.prepended.apply(this._path, arguments));
+    return this.withPath(this.path.prepended(...components));
   }
 
   prependedSlash(): Uri {
-    return this.path(this._path.prependedSlash());
+    return this.withPath(this.path.prependedSlash());
   }
 
   prependedSegment(segment: string): Uri {
-    return this.path(this._path.prependedSegment(segment));
+    return this.withPath(this.path.prependedSegment(segment));
   }
 
-  query(): UriQuery;
-  query(query: AnyUriQuery): Uri;
-  query(query?: AnyUriQuery): UriQuery | Uri {
-    if (query === void 0) {
-      return this._query;
+  declare readonly query: UriQuery;
+
+  withQuery(query: AnyUriQuery): Uri {
+    query = UriQuery.fromAny(query);
+    if (query !== this.query) {
+      return this.copy(this.scheme, this.authority, this.path, query, this.fragment);
     } else {
-      query = Uri.Query.fromAny(query);
-      if (query !== this._query) {
-        return this.copy(this._scheme, this._authority, this._path, query, this._fragment);
-      } else {
-        return this;
-      }
+      return this;
     }
   }
 
-  queryPart(): string;
-  queryPart(query: string): Uri;
-  queryPart(query?: string): string | Uri {
-    if (query === void 0) {
-      return this._query.toString();
-    } else {
-      return this.query(Uri.Query.parse(query));
-    }
+  get queryPart(): string {
+    return this.query.toString();
+  }
+
+  withQueryPart(query: string): Uri {
+    return this.withQuery(UriQuery.parse(query));
   }
 
   updatedQuery(key: string, value: string): Uri {
-    return this.query(this._query.updated(key, value));
+    return this.withQuery(this.query.updated(key, value));
   }
 
   removedQuery(key: string): Uri {
-    return this.query(this._query.removed(key));
+    return this.withQuery(this.query.removed(key));
   }
 
-  appendedQuery(key: string | null, value: string): Uri;
+  appendedQuery(key: string | undefined, value: string): Uri;
   appendedQuery(params: AnyUriQuery): Uri;
-  appendedQuery(key: AnyUriQuery | null, value?: string): Uri {
-    return this.query(this._query.appended(key as any, value as any));
+  appendedQuery(key: AnyUriQuery | undefined, value?: string): Uri {
+    return this.withQuery(this.query.appended(key as any, value as any));
   }
 
-  prependedQuery(key: string | null, value: string): Uri;
+  prependedQuery(key: string | undefined, value: string): Uri;
   prependedQuery(params: AnyUriQuery): Uri;
-  prependedQuery(key: AnyUriQuery | null, value?: string): Uri {
-    return this.query(this._query.prepended(key as any, value as any));
+  prependedQuery(key: AnyUriQuery | undefined, value?: string): Uri {
+    return this.withQuery(this.query.prepended(key as any, value as any));
   }
 
-  fragment(): UriFragment;
-  fragment(fragment: AnyUriFragment): Uri;
-  fragment(fragment?: AnyUriFragment): UriFragment | Uri {
-    if (fragment === void 0) {
-      return this._fragment;
+  declare readonly fragment: UriFragment;
+
+  withFragment(fragment: AnyUriFragment): Uri {
+    fragment = UriFragment.fromAny(fragment);
+    if (fragment !== this.fragment) {
+      return Uri.create(this.scheme, this.authority, this.path, this.query, fragment);
     } else {
-      fragment = Uri.Fragment.fromAny(fragment);
-      if (fragment !== this._fragment) {
-        return Uri.from(this._scheme, this._authority, this._path, this._query, fragment);
-      } else {
-        return this;
-      }
+      return this;
     }
   }
 
-  fragmentPart(): string | null;
-  fragmentPart(fragment: string): Uri;
-  fragmentPart(fragment?: string): string  | null| Uri {
-    if (fragment === void 0) {
-      return this._fragment.toString();
-    } else {
-      return this.fragment(Uri.Fragment.parse(fragment));
-    }
+  get fragmentPart(): string {
+    return this.fragment.toString();
   }
 
-  fragmentIdentifier(): string | null;
-  fragmentIdentifier(identifier: string | null): Uri;
-  fragmentIdentifier(identifier?: string | null): string | null | Uri {
-    if (identifier === void 0) {
-      return this._fragment.identifier();
-    } else {
-      return this.fragment(Uri.Fragment.from(identifier));
-    }
+  withFragmentPart(fragmentPart: string): Uri {
+    return this.withFragment(UriFragment.parse(fragmentPart));
+  }
+
+  get fragmentIdentifier(): string | undefined {
+    return this.fragment.identifier;
+  }
+
+  withFragmentIdentifier(fragmentIdentifier: string | undefined): Uri {
+    return this.withFragment(UriFragment.create(fragmentIdentifier));
   }
 
   endpoint(): Uri {
-    if (this._path.isDefined() || this._query.isDefined() || this._fragment.isDefined()) {
-      return Uri.from(this._scheme, this._authority);
+    if (this.path.isDefined() || this.query.isDefined() || this.fragment.isDefined()) {
+      return Uri.create(this.scheme, this.authority);
     } else {
       return this;
     }
   }
 
   resolve(relative: AnyUri): Uri {
-    relative = Uri.fromAny(relative);
-    if (relative._scheme.isDefined()) {
-      return this.copy(relative._scheme,
-                       relative._authority,
-                       relative._path.removeDotSegments(),
-                       relative._query,
-                       relative._fragment);
-    } else if (relative._authority.isDefined()) {
-      return this.copy(this._scheme,
-                       relative._authority,
-                       relative._path.removeDotSegments(),
-                       relative._query,
-                       relative._fragment);
-    } else if (relative._path.isEmpty()) {
-      return this.copy(this._scheme,
-                       this._authority,
-                       this._path,
-                       relative._query.isDefined() ? relative._query : this._query,
-                       relative._fragment);
-    } else if (relative._path.isAbsolute()) {
-      return this.copy(this._scheme,
-                       this._authority,
-                       relative._path.removeDotSegments(),
-                       relative._query,
-                       relative._fragment);
+    const that = Uri.fromAny(relative);
+    if (that.scheme.isDefined()) {
+      return this.copy(that.scheme,
+                       that.authority,
+                       that.path.removeDotSegments(),
+                       that.query,
+                       that.fragment);
+    } else if (that.authority.isDefined()) {
+      return this.copy(this.scheme,
+                       that.authority,
+                       that.path.removeDotSegments(),
+                       that.query,
+                       that.fragment);
+    } else if (that.path.isEmpty()) {
+      return this.copy(this.scheme,
+                       this.authority,
+                       this.path,
+                       that.query.isDefined() ? that.query : this.query,
+                       that.fragment);
+    } else if (that.path.isAbsolute()) {
+      return this.copy(this.scheme,
+                       this.authority,
+                       that.path.removeDotSegments(),
+                       that.query,
+                       that.fragment);
     } else {
-      return this.copy(this._scheme,
-                       this._authority,
-                       this.merge(relative._path).removeDotSegments(),
-                       relative._query,
-                       relative._fragment);
+      return this.copy(this.scheme,
+                       this.authority,
+                       this.merge(that.path).removeDotSegments(),
+                       that.query,
+                       that.fragment);
     }
   }
 
   /** @hidden */
   merge(relative: UriPath): UriPath {
-    if (this._authority.isDefined() && this._path.isEmpty()) {
+    if (this.authority.isDefined() && this.path.isEmpty()) {
       return relative.prependedSlash();
-    } else if (this._path.isEmpty()) {
+    } else if (this.path.isEmpty()) {
       return relative;
     } else {
-      return this._path.merge(relative);
+      return this.path.merge(relative);
     }
   }
 
   unresolve(absolute: AnyUri): Uri {
-    absolute = Uri.fromAny(absolute);
-    if (!this._scheme.equals(absolute._scheme) || !this._authority.equals(absolute._authority)) {
-      return absolute;
+    const that = Uri.fromAny(absolute);
+    if (!this.scheme.equals(that.scheme) || !this.authority.equals(that.authority)) {
+      return that;
     } else {
-      return Uri.from(Uri.Scheme.undefined(),
-                      Uri.Authority.undefined(),
-                      this._path.unmerge(absolute._path),
-                      absolute._query,
-                      absolute._fragment);
+      return Uri.create(UriScheme.undefined(),
+                        UriAuthority.undefined(),
+                        this.path.unmerge(that.path),
+                        that.query,
+                        that.fragment);
     }
   }
 
   protected copy(scheme: UriScheme, authority: UriAuthority, path: UriPath,
                  query: UriQuery, fragment: UriFragment): Uri {
-    return Uri.from(scheme, authority, path, query, fragment);
+    return Uri.create(scheme, authority, path, query, fragment);
   }
 
   toAny(): {scheme?: string, username?: string, password?: string, host?: string,
@@ -502,17 +446,19 @@ export class Uri implements Comparable<Uri>, HashCode, Debug, Display {
     const uri = {} as {scheme?: string, username?: string, password?: string, host?: string,
                        port?: number, path: string[], query?: {[key: string]: string},
                        fragment?: string};
-    uri.scheme = this._scheme.toAny();
-    this._authority.toAny(uri);
-    uri.path = this._path.toAny();
-    uri.query = this._query.toAny();
-    uri.fragment = this._fragment.toAny();
+    uri.scheme = this.scheme.toAny();
+    this.authority.toAny(uri);
+    uri.path = this.path.toAny();
+    uri.query = this.query.toAny();
+    uri.fragment = this.fragment.toAny();
     return uri;
   }
 
-  compareTo(that: Uri): 0 | 1 | -1 {
-    const order = this.toString().localeCompare(that.toString());
-    return order < 0 ? -1 : order > 0 ? 1 : 0;
+  compareTo(that: Uri): number {
+    if (that instanceof Uri) {
+      return this.toString().localeCompare(that.toString());
+    }
+    return NaN;
   }
 
   equals(that: unknown): boolean {
@@ -524,11 +470,20 @@ export class Uri implements Comparable<Uri>, HashCode, Debug, Display {
     return false;
   }
 
+  /** @hidden */
+  declare readonly hashValue: number | undefined;
+
   hashCode(): number {
-    if (this._hashCode === void 0) {
-      this._hashCode = Murmur3.hash(this.toString());
+    let hashValue = this.hashValue;
+    if (hashValue === void 0) {
+      hashValue = Strings.hash(this.toString());
+      Object.defineProperty(this, "hashValue", {
+        value: hashValue,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    return this._hashCode;
+    return hashValue;
   }
 
   debug(output: Output): void {
@@ -540,213 +495,230 @@ export class Uri implements Comparable<Uri>, HashCode, Debug, Display {
     }
   }
 
+  /** @hidden */
+  declare readonly stringValue: string | undefined;
+
   display(output: Output): void {
-    if (this._string !== void 0) {
-      output = output.write(this._string);
+    const stringValue = this.stringValue;
+    if (stringValue !== void 0) {
+      output = output.write(stringValue);
     } else {
-      if (this._scheme.isDefined()) {
-        output.display(this._scheme).write(58/*':'*/);
+      if (this.scheme.isDefined()) {
+        output.display(this.scheme).write(58/*':'*/);
       }
-      if (this._authority.isDefined()) {
-        output = output.write(47/*'/'*/).write(47/*'/'*/).display(this._authority);
+      if (this.authority.isDefined()) {
+        output = output.write(47/*'/'*/).write(47/*'/'*/).display(this.authority);
       }
-      output.display(this._path);
-      if (this._query.isDefined()) {
-        output = output.write(63/*'?'*/).display(this._query);
+      output.display(this.path);
+      if (this.query.isDefined()) {
+        output = output.write(63/*'?'*/).display(this.query);
       }
-      if (this._fragment.isDefined()) {
-        output = output.write(35/*'#'*/).display(this._fragment);
+      if (this.fragment.isDefined()) {
+        output = output.write(35/*'#'*/).display(this.fragment);
       }
     }
   }
 
   toString(): string {
-    let string = this._string;
-    if (string === void 0) {
-      string = Format.display(this);
-      this._string = string;
+    let stringValue = this.stringValue;
+    if (stringValue === void 0) {
+      stringValue = Format.display(this);
+      Object.defineProperty(this, "stringValue", {
+        value: stringValue,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    return string;
+    return stringValue;
   }
 
-  private static _empty?: Uri;
-
-  private static _standardParser?: UriParser;
-
+  @Lazy
   static empty(): Uri {
-    if (Uri._empty === void 0) {
-      Uri._empty = new Uri(Uri.Scheme.undefined(), Uri.Authority.undefined(), Uri.Path.empty(),
-                           Uri.Query.undefined(), Uri.Fragment.undefined());
-    }
-    return Uri._empty;
+    return new Uri(UriScheme.undefined(), UriAuthority.undefined(), UriPath.empty(),
+                   UriQuery.undefined(), UriFragment.undefined());
   }
 
-  static from(scheme: UriScheme = Uri.Scheme.undefined(),
-              authority: UriAuthority = Uri.Authority.undefined(),
-              path: UriPath = Uri.Path.empty(),
-              query: UriQuery = Uri.Query.undefined(),
-              fragment: UriFragment = Uri.Fragment.undefined()): Uri {
-    if (scheme.isDefined() || authority.isDefined() || path.isDefined()
-        || query.isDefined() || fragment.isDefined()) {
+  static create(scheme: UriScheme = UriScheme.undefined(),
+                authority: UriAuthority = UriAuthority.undefined(),
+                path: UriPath = UriPath.empty(),
+                query: UriQuery = UriQuery.undefined(),
+                fragment: UriFragment = UriFragment.undefined()): Uri {
+    if (scheme.isDefined() || authority.isDefined() || path.isDefined() ||
+        query.isDefined() || fragment.isDefined()) {
       return new Uri(scheme, authority, path, query, fragment);
     } else {
       return Uri.empty();
     }
   }
 
-  static fromAny(uri: AnyUri | null | undefined): Uri {
-    if (uri === null || uri === void 0) {
-      return Uri.empty();
-    } else if (uri instanceof Uri) {
-      return uri;
-    } else if (typeof uri === "object") {
-      const scheme = Uri.Scheme.fromAny(uri.scheme);
-      const authority = Uri.Authority.fromAny(uri.authority || uri);
-      const path = Uri.Path.fromAny(uri.path);
-      const query = Uri.Query.fromAny(uri.query);
-      const fragment = Uri.Fragment.fromAny(uri.fragment);
-      if (scheme.isDefined() || authority.isDefined() || path.isDefined()
-          || query.isDefined() || fragment.isDefined()) {
-        return new Uri(scheme, authority, path, query, fragment);
-      } else {
-        return Uri.empty();
-      }
-    } else if (typeof uri === "string") {
-      return Uri.parse(uri);
+  static fromInit(init: UriInit): Uri {
+    const scheme = UriScheme.fromAny(init.scheme);
+    const authority = UriAuthority.fromAny(init.authority !== void 0 ? init.authority : init);
+    const path = UriPath.fromAny(init.path);
+    const query = UriQuery.fromAny(init.query);
+    const fragment = UriFragment.fromAny(init.fragment);
+    if (scheme.isDefined() || authority.isDefined() || path.isDefined() ||
+        query.isDefined() || fragment.isDefined()) {
+      return new Uri(scheme, authority, path, query, fragment);
     } else {
-      throw new TypeError("" + uri);
+      return Uri.empty();
+    }
+  }
+
+  static fromAny(value: AnyUri | null | undefined): Uri {
+    if (value === void 0 || value === null) {
+      return Uri.empty();
+    } else if (value instanceof Uri) {
+      return value;
+    } else if (typeof value === "object") {
+      return Uri.fromInit(value);
+    } else if (typeof value === "string") {
+      return Uri.parse(value);
+    } else {
+      throw new TypeError("" + value);
     }
   }
 
   static scheme(scheme: AnyUriScheme): Uri {
-    scheme = Uri.Scheme.fromAny(scheme);
-    return Uri.from(scheme, void 0, void 0, void 0, void 0);
+    scheme = UriScheme.fromAny(scheme);
+    return Uri.create(scheme, void 0, void 0, void 0, void 0);
   }
 
-  static schemePart(part: string): Uri {
-    const scheme = Uri.Scheme.parse(part);
-    return Uri.from(scheme, void 0, void 0, void 0, void 0);
+  static schemePart(schemePart: string): Uri {
+    const scheme = UriScheme.parse(schemePart);
+    return Uri.create(scheme, void 0, void 0, void 0, void 0);
   }
 
   static schemeName(name: string): Uri {
-    const scheme = Uri.Scheme.from(name);
-    return Uri.from(scheme, void 0, void 0, void 0, void 0);
+    const scheme = UriScheme.create(name);
+    return Uri.create(scheme, void 0, void 0, void 0, void 0);
   }
 
   static authority(authority: AnyUriAuthority): Uri {
-    authority = Uri.Authority.fromAny(authority);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+    authority = UriAuthority.fromAny(authority);
+    return Uri.create(void 0, authority as UriAuthority, void 0, void 0, void 0);
   }
 
-  static authorityPart(part: string): Uri {
-    const authority = Uri.Authority.parse(part);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+  static authorityPart(authorityPart: string): Uri {
+    const authority = UriAuthority.parse(authorityPart);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
   static user(user: AnyUriUser): Uri {
-    const authority = Uri.Authority.user(user);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+    const authority = UriAuthority.user(user);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
-  static userPart(part: string): Uri {
-    const authority = Uri.Authority.userPart(part);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+  static userPart(userPart: string): Uri {
+    const authority = UriAuthority.userPart(userPart);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
-  static username(username: string, password?: string | null): Uri {
-    const authority = Uri.Authority.username(username, password);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+  static username(username: string, password?: string): Uri {
+    const authority = UriAuthority.username(username, password);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
   static password(password: string): Uri {
-    const authority = Uri.Authority.password(password);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+    const authority = UriAuthority.password(password);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
   static host(host: AnyUriHost): Uri {
-    const authority = Uri.Authority.host(host);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+    const authority = UriAuthority.host(host);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
-  static hostPart(part: string): Uri {
-    const authority = Uri.Authority.hostPart(part);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+  static hostPart(hostPart: string): Uri {
+    const authority = UriAuthority.hostPart(hostPart);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
-  static hostName(address: string): Uri {
-    const authority = Uri.Authority.hostName(address);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+  static hostName(hostName: string): Uri {
+    const authority = UriAuthority.hostName(hostName);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
-  static hostIPv4(address: string): Uri {
-    const authority = Uri.Authority.hostIPv4(address);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+  static hostIPv4(hostIPv4: string): Uri {
+    const authority = UriAuthority.hostIPv4(hostIPv4);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
-  static hostIPv6(address: string): Uri {
-    const authority = Uri.Authority.hostIPv6(address);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+  static hostIPv6(hostIPv6: string): Uri {
+    const authority = UriAuthority.hostIPv6(hostIPv6);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
   static port(port: AnyUriPort): Uri {
-    const authority = Uri.Authority.port(port);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+    const authority = UriAuthority.port(port);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
-  static portPart(part: string): Uri {
-    const authority = Uri.Authority.portPart(part);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+  static portPart(portPart: string): Uri {
+    const authority = UriAuthority.portPart(portPart);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
-  static portNumber(number: number): Uri {
-    const authority = Uri.Authority.portNumber(number);
-    return Uri.from(void 0, authority, void 0, void 0, void 0);
+  static portNumber(portNumber: number): Uri {
+    const authority = UriAuthority.portNumber(portNumber);
+    return Uri.create(void 0, authority, void 0, void 0, void 0);
   }
 
   static path(...components: AnyUriPath[]): Uri {
-    const path = Uri.Path.from.apply(void 0, components);
-    return Uri.from(void 0, void 0, path, void 0, void 0);
+    const path = UriPath.of(...components);
+    return Uri.create(void 0, void 0, path, void 0, void 0);
   }
 
-  static pathPart(part: string): Uri {
-    const path = Uri.Path.parse(part);
-    return Uri.from(void 0, void 0, path, void 0, void 0);
+  static pathPart(pathPart: string): Uri {
+    const path = UriPath.parse(pathPart);
+    return Uri.create(void 0, void 0, path, void 0, void 0);
   }
 
   static query(query: AnyUriQuery): Uri {
-    query = Uri.Query.fromAny(query);
-    return Uri.from(void 0, void 0, void 0, query, void 0);
+    query = UriQuery.fromAny(query);
+    return Uri.create(void 0, void 0, void 0, query, void 0);
   }
 
-  static queryPart(part: string): Uri {
-    const query = Uri.Query.parse(part);
-    return Uri.from(void 0, void 0, void 0, query, void 0);
+  static queryPart(queryPart: string): Uri {
+    const query = UriQuery.parse(queryPart);
+    return Uri.create(void 0, void 0, void 0, query, void 0);
   }
 
   static fragment(fragment: AnyUriFragment): Uri {
-    fragment = Uri.Fragment.fromAny(fragment);
-    return Uri.from(void 0, void 0, void 0, void 0, fragment);
+    fragment = UriFragment.fromAny(fragment);
+    return Uri.create(void 0, void 0, void 0, void 0, fragment);
   }
 
-  static fragmentPart(part: string): Uri {
-    const fragment = Uri.Fragment.parse(part);
-    return Uri.from(void 0, void 0, void 0, void 0, fragment);
+  static fragmentPart(fragmentPart: string): Uri {
+    const fragment = UriFragment.parse(fragmentPart);
+    return Uri.create(void 0, void 0, void 0, void 0, fragment);
   }
 
-  static fragmentIdentifier(identifier: string): Uri {
-    const fragment = Uri.Fragment.from(identifier);
-    return Uri.from(void 0, void 0, void 0, void 0, fragment);
+  static fragmentIdentifier(fragmentIdentifier: string | undefined): Uri {
+    const fragment = UriFragment.create(fragmentIdentifier);
+    return Uri.create(void 0, void 0, void 0, void 0, fragment);
   }
 
-  static standardParser(): UriParser {
-    if (this._standardParser === void 0) {
-      this._standardParser = new Uri.Parser();
-    }
-    return this._standardParser;
+  @Lazy
+  static get standardParser(): UriParser {
+    return new UriParser();
   }
 
   static parse(string: string): Uri {
-    return Uri.standardParser().parseAbsoluteString(string);
+    return Uri.standardParser.parseAbsoluteString(string);
+  }
+
+  static pathBuilder(): UriPathBuilder {
+    return new UriPathBuilder();
+  }
+
+  static queryBuilder(): UriQueryBuilder {
+    return new UriQueryBuilder();
+  }
+
+  @Lazy
+  static form(): Form<Uri, AnyUri> {
+    return new UriForm(Uri.empty());
   }
 
   /** @hidden */
@@ -982,64 +954,10 @@ export class Uri implements Comparable<Uri>, HashCode, Debug, Display {
   }
 
   /** @hidden */
-  static writePctEncoded(c: number, output: Output) {
+  static writePctEncoded(c: number, output: Output): void {
+    const base16 = Base16.lowercase;
     output = output.write(37/*'%'*/)
-          .write(Base16.lowercase().encodeDigit(c >>> 4 & 0xF))
-          .write(Base16.lowercase().encodeDigit(c       & 0xF));
-  }
-
-  // Forward type declarations
-  /** @hidden */
-  static Scheme: typeof UriScheme; // defined by UriScheme
-  /** @hidden */
-  static Authority: typeof UriAuthority; // defined by UriAuthority
-  /** @hidden */
-  static User: typeof UriUser; // defined by UriUser
-  /** @hidden */
-  static Host: typeof UriHost; // defined by UriHost
-  /** @hidden */
-  static HostName: typeof UriHostName; // defined by UriHostName
-  /** @hidden */
-  static HostIPv4: typeof UriHostIPv4; // defined by UriHostIPv4
-  /** @hidden */
-  static HostIPv6: typeof UriHostIPv6; // defined by UriHostIPv6
-  /** @hidden */
-  static HostUndefined: typeof UriHostUndefined; // defined by UriHostUndefined
-  /** @hidden */
-  static Port: typeof UriPort; // defined by UriPort
-  /** @hidden */
-  static Path: typeof UriPath; // defined by UriPath
-  /** @hidden */
-  static PathSegment: typeof UriPathSegment; // defined by UriPathSegment
-  /** @hidden */
-  static PathSlash: typeof UriPathSlash; // defined by UriPathSlash
-  /** @hidden */
-  static PathEmpty: typeof UriPathEmpty; // defined by UriPathEmpty
-  /** @hidden */
-  static PathBuilder: typeof UriPathBuilder; // defined by UriPathBuilder
-  /** @hidden */
-  static Query: typeof UriQuery; // defined by UriQuery
-  /** @hidden */
-  static QueryParam: typeof UriQueryParam; // defined by UriQueryParam
-  /** @hidden */
-  static QueryUndefined: typeof UriQueryUndefined; // defined by UriQueryUndefined
-  /** @hidden */
-  static QueryBuilder: typeof UriQueryBuilder; // defined by UriQueryBuilder
-  /** @hidden */
-  static Fragment: typeof UriFragment; // defined by UriFragment
-  /** @hidden */
-  static Parser: typeof UriParser; // defined by UriParser
-  /** @hidden */
-  static Form: typeof UriForm; // defined by UriForm
-  /** @hidden */
-  static PathForm: typeof UriPathForm; // defined by UriPathForm
-
-  private static _form?: Form<Uri>;
-
-  static form(): Form<Uri> {
-    if (Uri._form === void 0) {
-      Uri._form = new Uri.Form(Uri.empty());
-    }
-    return Uri._form;
+          .write(base16.encodeDigit(c >>> 4 & 0xF))
+          .write(base16.encodeDigit(c       & 0xF));
   }
 }

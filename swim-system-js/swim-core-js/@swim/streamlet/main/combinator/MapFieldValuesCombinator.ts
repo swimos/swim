@@ -12,25 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapOutlet} from "../MapOutlet";
-import {MapFieldValuesFunction} from "../function";
+import type {MapFieldValuesFunction} from "../function";
 import {MapFieldValuesOperator} from "./MapFieldValuesOperator";
 
 export class MapFieldValuesCombinator<K, VI, VO, I> extends MapFieldValuesOperator<K, VI, VO, I> {
-  /** @hidden */
-  protected readonly _func: MapFieldValuesFunction<K, VI, VO>;
-
   constructor(func: MapFieldValuesFunction<K, VI, VO> ) {
     super();
-    this._func = func;
+    Object.defineProperty(this, "func", {
+      value: func,
+      enumerable: true,
+    });
   }
+
+  /** @hidden */
+  declare readonly func: MapFieldValuesFunction<K, VI, VO>;
 
   evaluate(key: K, value: VI | undefined): VO | undefined {
     if (value !== void 0) {
-      return this._func(key, value);
+      const func = this.func;
+      return func(key, value);
     } else {
       return void 0;
     }
   }
 }
-MapOutlet.MapFieldValuesCombinator = MapFieldValuesCombinator;

@@ -12,6 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export {DateTimeLocale} from "./DateTimeLocale";
+export {DateTimeSpecifiers} from "./DateTimeSpecifiers";
+export {
+  DateNumberFactory,
+  DateStringFactory,
+  DateTimeFormat,
+} from "./DateTimeFormat";
+
 export {YearFormat} from "./YearFormat";
 export {MonthOfYearFormat} from "./MonthOfYearFormat";
 export {MonthFormat} from "./MonthFormat";

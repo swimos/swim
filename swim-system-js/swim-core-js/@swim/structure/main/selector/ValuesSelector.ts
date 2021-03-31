@@ -12,34 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {Item} from "../Item";
-import {Selector} from "../Selector";
-import {AnyInterpreter, Interpreter} from "../Interpreter";
+import {Field} from "../Field";
+import {Record} from "../Record";
+import {Selector} from "./Selector";
+import {AnyInterpreter, Interpreter} from "../"; // forward import
 
 export class ValuesSelector extends Selector {
-  /** @hidden */
-  readonly _then: Selector;
-
   constructor(then: Selector) {
     super();
-    this._then = then;
+    Object.defineProperty(this, "then", {
+      value: then,
+      enumerable: true,
+    });
   }
 
-  then(): Selector {
-    return this._then;
-  }
+  declare readonly then: Selector;
 
-  forSelected<T, S = unknown>(interpreter: Interpreter,
-                              callback: (this: S, interpreter: Interpreter) => T | undefined,
-                              thisArg?: S): T | undefined {
+  forSelected<T>(interpreter: Interpreter,
+                 callback: (interpreter: Interpreter) => T | undefined): T | undefined;
+  forSelected<T, S>(interpreter: Interpreter,
+                    callback: (this: S, interpreter: Interpreter) => T | undefined,
+                    thisArg: S): T | undefined;
+  forSelected<T, S>(interpreter: Interpreter,
+                    callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
+                    thisArg?: S): T | undefined {
     let selected: T | undefined;
     interpreter.willSelect(this);
-    if (interpreter.scopeDepth() !== 0) {
+    if (interpreter.scopeDepth !== 0) {
       // Pop the current selection off of the stack to take it out of scope.
       const scope = interpreter.popScope();
-      if (scope instanceof Item.Record) {
+      if (scope instanceof Record) {
         const children = scope.iterator();
         // For each child, while none have been selected:
         while (selected === void 0 && children.hasNext()) {
@@ -47,7 +52,7 @@ export class ValuesSelector extends Selector {
           // Push the child value onto the scope stack.
           interpreter.pushScope(child.toValue());
           // Subselect the child value.
-          selected = this._then.forSelected(interpreter, callback, thisArg);
+          selected = this.then.forSelected(interpreter, callback, thisArg);
           // Pop the child value off of the scope stack.
           interpreter.popScope();
         }
@@ -55,7 +60,7 @@ export class ValuesSelector extends Selector {
         // Push the value onto the scope stack.
         interpreter.pushScope(scope.toValue());
         // Subselect the value.
-        selected = this._then.forSelected(interpreter, callback, thisArg);
+        selected = this.then.forSelected(interpreter, callback, thisArg);
         // Pop the value off of the scope stack.
         interpreter.popScope();
       }
@@ -66,28 +71,33 @@ export class ValuesSelector extends Selector {
     return selected;
   }
 
-  mapSelected<S = unknown>(interpreter: Interpreter,
-                           transform: (this: S, interpreter: Interpreter) => Item,
-                           thisArg?: S): Item {
+  mapSelected(interpreter: Interpreter,
+              transform: (interpreter: Interpreter) => Item): Item;
+  mapSelected<S>(interpreter: Interpreter,
+                 transform: (this: S, interpreter: Interpreter) => Item,
+                 thisArg: S): Item;
+  mapSelected<S>(interpreter: Interpreter,
+                 transform: (this: S | undefined, interpreter: Interpreter) => Item,
+                 thisArg?: S): Item {
     let result: Item;
     interpreter.willTransform(this);
-    if (interpreter.scopeDepth() !== 0) {
+    if (interpreter.scopeDepth !== 0) {
       // Pop the current selection off of the stack to take it out of scope.
       let scope = interpreter.popScope();
-      if (scope instanceof Item.Record) {
+      if (scope instanceof Record) {
         const children = scope.iterator();
         while (children.hasNext()) {
           const child = children.next().value!;
-          if (child instanceof Item.Field) {
+          if (child instanceof Field) {
             const oldValue = child.toValue();
             // Push the child value onto the scope stack.
             interpreter.pushScope(oldValue);
             // Transform the child value.
-            const newItem = this._then.mapSelected(interpreter, transform, thisArg);
+            const newItem = this.then.mapSelected(interpreter, transform, thisArg);
             // Pop the child value off of the scope stack.
             interpreter.popScope();
             if (newItem.isDefined()) {
-              if (newItem instanceof Item.Field) {
+              if (newItem instanceof Field) {
                 children.set(newItem);
               } else if (newItem !== oldValue) {
                 children.set(child.updatedValue(newItem.toValue()));
@@ -99,7 +109,7 @@ export class ValuesSelector extends Selector {
             // Push the child onto the scope stack.
             interpreter.pushScope(child.toValue());
             // Transform the child.
-            const newItem = this._then.mapSelected(interpreter, transform, thisArg);
+            const newItem = this.then.mapSelected(interpreter, transform, thisArg);
             // Pop the child off of the scope stack.
             interpreter.popScope();
             if (newItem.isDefined()) {
@@ -111,16 +121,16 @@ export class ValuesSelector extends Selector {
             }
           }
         }
-      } else if (scope instanceof Item.Field) {
+      } else if (scope instanceof Field) {
         const oldValue = scope.toValue();
         // Push the field value onto the scope stack.
         interpreter.pushScope(oldValue);
         // Transform the field value.
-        const newItem = this._then.mapSelected(interpreter, transform, thisArg);
+        const newItem = this.then.mapSelected(interpreter, transform, thisArg);
         // Pop the field value off of the scope stack.
         interpreter.popScope();
         if (newItem.isDefined()) {
-          if (newItem instanceof Item.Field) {
+          if (newItem instanceof Field) {
             scope = newItem;
           } else if (newItem !== oldValue) {
             scope = scope.updatedValue(newItem.toValue());
@@ -132,7 +142,7 @@ export class ValuesSelector extends Selector {
         // Push the value onto the scope stack.
         interpreter.pushScope(scope);
         // Transform the value.
-        scope = this._then.mapSelected(interpreter, transform, thisArg);
+        scope = this.then.mapSelected(interpreter, transform, thisArg);
         // Pop the value off of the scope stack.
         interpreter.popScope();
       }
@@ -148,53 +158,58 @@ export class ValuesSelector extends Selector {
 
   substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    let then = this._then.substitute(interpreter);
+    let then = this.then.substitute(interpreter);
     if (!(then instanceof Selector)) {
-      then = this._then;
+      then = this.then;
     }
     return new ValuesSelector(then as Selector);
   }
 
   andThen(then: Selector): Selector {
-    return new ValuesSelector(this._then.andThen(then));
+    return new ValuesSelector(this.then.andThen(then));
   }
 
-  typeOrder(): number {
+  get typeOrder(): number {
     return 16;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof ValuesSelector) {
-      return this._then.compareTo(that._then);
+      return this.then.compareTo(that.then);
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof ValuesSelector) {
+      return this.then.equivalentTo(that.then, epsilon);
+    }
+    return false;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof ValuesSelector) {
-      return this._then.equals(that._then);
+      return this.then.equals(that.then);
     }
     return false;
   }
 
   hashCode(): number {
-    if (ValuesSelector._hashSeed === void 0) {
-      ValuesSelector._hashSeed = Murmur3.seed(ValuesSelector);
-    }
-    return Murmur3.mash(Murmur3.mix(ValuesSelector._hashSeed, this._then.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Constructors.hash(ValuesSelector), this.then.hashCode()));
   }
 
   debugThen(output: Output): void {
     output = output.write(46/*'.'*/).write("values").write(40/*'('*/).write(41/*')'*/);
-    this._then.debugThen(output);
+    this.then.debugThen(output);
   }
 
   clone(): Selector {
-    return new ValuesSelector(this._then.clone());
+    return new ValuesSelector(this.then.clone());
   }
-
-  private static _hashSeed?: number;
 }
-Item.ValuesSelector = ValuesSelector;

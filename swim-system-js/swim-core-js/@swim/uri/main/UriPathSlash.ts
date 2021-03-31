@@ -13,21 +13,27 @@
 // limitations under the License.
 
 import {Output, Format} from "@swim/codec";
-import {Uri} from "./Uri";
 import {UriPath} from "./UriPath";
 
 /** @hidden */
 export class UriPathSlash extends UriPath {
   /** @hidden */
-  _tail: UriPath;
-  /** @hidden */
-  _string?: string;
-
-  /** @hidden */
   constructor(tail: UriPath) {
     super();
-    this._tail = tail;
+    Object.defineProperty(this, "rest", {
+      value: tail,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "stringValue", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
+
+  /** @hidden */
+  declare readonly rest: UriPath;
 
   isDefined(): boolean {
     return true;
@@ -50,26 +56,30 @@ export class UriPathSlash extends UriPath {
   }
 
   tail(): UriPath {
-    return this._tail;
+    return this.rest;
   }
 
   /** @hidden */
   setTail(tail: UriPath): void {
-    this._tail = tail;
+    Object.defineProperty(this, "rest", {
+      value: tail,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   /** @hidden */
   dealias(): UriPath {
-    return new UriPathSlash(this._tail);
+    return new UriPathSlash(this.rest);
   }
 
   parent(): UriPath {
-    const tail = this._tail;
+    const tail = this.rest;
     if (tail.isEmpty()) {
       return UriPath.empty();
     } else {
-      const next = tail.tail();
-      if (next.isEmpty()) {
+      const rest = tail.tail();
+      if (rest.isEmpty()) {
         return UriPath.slash();
       } else {
         return new UriPathSlash(tail.parent());
@@ -78,7 +88,7 @@ export class UriPathSlash extends UriPath {
   }
 
   base(): UriPath {
-    const tail = this._tail;
+    const tail = this.rest;
     if (tail.isEmpty()) {
       return this;
     } else {
@@ -96,18 +106,27 @@ export class UriPathSlash extends UriPath {
   }
 
   display(output: Output): void {
-    if (this._string !== void 0) {
-      output = output.write(this._string);
+    const stringValue = this.stringValue;
+    if (stringValue !== void 0) {
+      output = output.write(stringValue);
     } else {
       super.display(output);
     }
   }
 
+  /** @hidden */
+  declare readonly stringValue: string | undefined;
+
   toString(): string {
-    if (this._string === void 0) {
-      this._string = Format.display(this);
+    let stringValue = this.stringValue;
+    if (stringValue === void 0) {
+      stringValue = Format.display(this);
+      Object.defineProperty(this, "stringValue", {
+        value: stringValue,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    return this._string;
+    return stringValue;
   }
 }
-Uri.PathSlash = UriPathSlash;

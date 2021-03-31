@@ -12,49 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Comparable, HashCode, Murmur3, HashGenCacheMap} from "@swim/util";
-import {Output, Debug, Display} from "@swim/codec";
+import {HashCode, Compare, Lazy, Strings, HashGenCacheMap} from "@swim/util";
+import type {Output, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
 
 export type AnyUriScheme = UriScheme | string;
 
-export class UriScheme implements Comparable<UriScheme>, HashCode, Debug, Display {
-  /** @hidden */
-  readonly _name: string;
-
+export class UriScheme implements HashCode, Compare, Debug, Display {
   /** @hidden */
   constructor(name: string) {
-    this._name = name;
+    Object.defineProperty(this, "name", {
+      value: name,
+      enumerable: true,
+    });
   }
 
   isDefined(): boolean {
-    return this._name.length !== 0;
+    return this.name.length !== 0;
   }
 
-  name(): string {
-    return this._name;
-  }
+  declare readonly name: string;
 
   toAny(): string | undefined {
-    return this._name.length !== 0 ? this._name : void 0;
+    return this.name.length !== 0 ? this.name : void 0;
   }
 
-  compareTo(that: UriScheme): 0 | 1 | -1 {
-    const order = this._name.localeCompare(that._name);
-    return order < 0 ? -1 : order > 0 ? 1 : 0;
+  compareTo(that: unknown): number {
+    if (that instanceof UriScheme) {
+      return this.name.localeCompare(that.name);
+    }
+    return NaN;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof UriScheme) {
-      return this._name === that._name;
+      return this.name === that.name;
     }
     return false;
   }
 
   hashCode(): number {
-    return Murmur3.hash(this._name);
+    return Strings.hash(this.name);
   }
 
   debug(output: Output): void {
@@ -67,57 +67,48 @@ export class UriScheme implements Comparable<UriScheme>, HashCode, Debug, Displa
   }
 
   display(output: Output): void {
-    Uri.writeScheme(this._name, output);
+    Uri.writeScheme(this.name, output);
   }
 
   toString(): string {
-    return this._name;
+    return this.name;
   }
 
-  private static _undefined?: UriScheme;
-
-  private static _cache?: HashGenCacheMap<string, UriScheme>;
-
+  @Lazy
   static undefined(): UriScheme {
-    if (UriScheme._undefined === void 0) {
-      UriScheme._undefined = new UriScheme("");
-    }
-    return UriScheme._undefined;
+    return new UriScheme("");
   }
 
-  static from(name: string): UriScheme {
-    const cache = UriScheme.cache();
-    const scheme = cache.get(name);
+  static create(schemeName: string): UriScheme {
+    const cache = UriScheme.cache;
+    const scheme = cache.get(schemeName);
     if (scheme !== void 0) {
       return scheme;
     } else {
-      return cache.put(name, new UriScheme(name));
+      return cache.put(schemeName, new UriScheme(schemeName));
     }
   }
 
-  static fromAny(scheme: AnyUriScheme | null | undefined): UriScheme {
-    if (scheme === null || scheme === void 0) {
+  static fromAny(value: AnyUriScheme | null | undefined): UriScheme {
+    if (value === void 0 || value === null) {
       return UriScheme.undefined();
-    } else if (scheme instanceof UriScheme) {
-      return scheme;
-    } else if (typeof scheme === "string") {
-      return UriScheme.parse(scheme);
+    } else if (value instanceof UriScheme) {
+      return value;
+    } else if (typeof value === "string") {
+      return UriScheme.parse(value);
     } else {
-      throw new TypeError("" + scheme);
+      throw new TypeError("" + value);
     }
   }
 
-  static parse(string: string): UriScheme {
-    return Uri.standardParser().parseSchemeString(string);
+  static parse(schemePart: string): UriScheme {
+    return Uri.standardParser.parseSchemeString(schemePart);
   }
 
   /** @hidden */
-  static cache(): HashGenCacheMap<string, UriScheme> {
-    if (UriScheme._cache === void 0) {
-      const cacheSize = 4;
-      UriScheme._cache = new HashGenCacheMap<string, UriScheme>(cacheSize);
-    }
-    return UriScheme._cache;
+  @Lazy
+  static get cache(): HashGenCacheMap<string, UriScheme> {
+    const cacheSize = 4;
+    return new HashGenCacheMap<string, UriScheme>(cacheSize);
   }
 }
-Uri.Scheme = UriScheme;

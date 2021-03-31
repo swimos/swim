@@ -12,48 +12,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {Item} from "../Item";
-import {Num} from "../Num";
-import {Selector} from "../Selector";
-import {AnyInterpreter, Interpreter} from "../Interpreter";
+import {Record} from "../Record";
+import type {Num} from "../Num";
+import {Selector} from "./Selector";
+import {AnyInterpreter, Interpreter} from "../"; // forward import
 
 export class GetItemSelector extends Selector {
-  /** @hidden */
-  readonly _index: Num;
-  /** @hidden */
-  readonly _then: Selector;
-
   constructor(index: Num, then: Selector) {
     super();
-    this._index = index;
-    this._then = then;
+    Object.defineProperty(this, "item", {
+      value: index,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "then", {
+      value: then,
+      enumerable: true,
+    });
   }
 
-  accessor(): Num {
-    return this._index;
-  }
+  declare readonly item: Num;
 
-  then(): Selector {
-    return this._then;
-  }
+  declare readonly then: Selector;
 
-  forSelected<T, S = unknown>(interpreter: Interpreter,
-                              callback: (this: S, interpreter: Interpreter) => T | undefined,
-                              thisArg?: S): T | undefined {
+  forSelected<T>(interpreter: Interpreter,
+                 callback: (interpreter: Interpreter) => T | undefined): T | undefined;
+  forSelected<T, S>(interpreter: Interpreter,
+                    callback: (this: S, interpreter: Interpreter) => T | undefined,
+                    thisArg: S): T | undefined;
+  forSelected<T, S>(interpreter: Interpreter,
+                    callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
+                    thisArg?: S): T | undefined {
     let selected: T | undefined;
     interpreter.willSelect(this);
-    const index = this._index.numberValue();
-    if (interpreter.scopeDepth() !== 0) {
+    const index = this.item.numberValue();
+    if (interpreter.scopeDepth !== 0) {
       // Pop the current selection off of the stack to take it out of scope.
       const scope = interpreter.popScope().toValue();
-      if (scope instanceof Item.Record && index < scope.length) {
+      if (scope instanceof Record && index < scope.length) {
         const item = scope.getItem(index);
         // Push the item onto the scope stack.
         interpreter.pushScope(item);
         // Subselect the item.
-        selected = this._then.forSelected(interpreter, callback, thisArg);
+        selected = this.then.forSelected(interpreter, callback, thisArg);
         // Pop the item off of the scope stack.
         interpreter.popScope();
       }
@@ -64,21 +67,26 @@ export class GetItemSelector extends Selector {
     return selected;
   }
 
-  mapSelected<S = unknown>(interpreter: Interpreter,
-                           transform: (this: S, interpreter: Interpreter) => Item,
-                           thisArg?: S): Item {
+  mapSelected(interpreter: Interpreter,
+              transform: (interpreter: Interpreter) => Item): Item;
+  mapSelected<S>(interpreter: Interpreter,
+                 transform: (this: S, interpreter: Interpreter) => Item,
+                 thisArg: S): Item;
+  mapSelected<S>(interpreter: Interpreter,
+                 transform: (this: S | undefined, interpreter: Interpreter) => Item,
+                 thisArg?: S): Item {
     let result: Item;
     interpreter.willTransform(this);
-    if (interpreter.scopeDepth() !== 0) {
+    if (interpreter.scopeDepth !== 0) {
       // Pop the current selection off of the stack to take it out of scope.
       const scope = interpreter.popScope().toValue();
-      const index = this._index.numberValue();
-      if (scope instanceof Item.Record && index < scope.length) {
+      const index = this.item.numberValue();
+      if (scope instanceof Record && index < scope.length) {
         const oldItem = scope.getItem(index);
         // Push the item onto the scope stack.
         interpreter.pushScope(oldItem);
         // Transform the item.
-        const newItem = this._then.mapSelected(interpreter, transform, thisArg);
+        const newItem = this.then.mapSelected(interpreter, transform, thisArg);
         // Pop the item off the scope stack.
         interpreter.popScope();
         if (newItem.isDefined()) {
@@ -99,12 +107,12 @@ export class GetItemSelector extends Selector {
 
   substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const index = this._index.numberValue();
-    if (interpreter.scopeDepth() !== 0) {
+    const index = this.item.numberValue();
+    if (interpreter.scopeDepth !== 0) {
       // Pop the current selection off of the stack to take it out of scope.
       const scope = interpreter.popScope().toValue();
       let selected: Item | undefined;
-      if (scope instanceof Item.Record && index < scope.length) {
+      if (scope instanceof Record && index < scope.length) {
         const item = scope.getItem(index);
         // Substitute the item.
         selected = item.substitute(interpreter);
@@ -115,58 +123,64 @@ export class GetItemSelector extends Selector {
         return selected;
       }
     }
-    let then = this._then.substitute(interpreter);
+    let then = this.then.substitute(interpreter);
     if (!(then instanceof Selector)) {
-      then = this._then;
+      then = this.then;
     }
-    return new GetItemSelector(this._index, then as Selector);
+    return new GetItemSelector(this.item, then as Selector);
   }
 
   andThen(then: Selector): Selector {
-    return new GetItemSelector(this._index, this._then.andThen(then));
+    return new GetItemSelector(this.item, this.then.andThen(then));
   }
 
-  typeOrder(): number {
+  get typeOrder(): number {
     return 14;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof GetItemSelector) {
-      let order = this._index.compareTo(that._index);
+      let order = this.item.compareTo(that.item);
       if (order === 0) {
-        order = this._then.compareTo(that._then);
+        order = this.then.compareTo(that.then);
       }
       return order;
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof GetItemSelector) {
+      return this.item.equals(that.item) && this.then.equivalentTo(that.then, epsilon);
+    }
+    return false;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof GetItemSelector) {
-      return this._index.equals(that._index) && this._then.equals(that._then);
+      return this.item.equals(that.item) && this.then.equals(that.then);
     }
     return false;
   }
 
   hashCode(): number {
-    if (GetItemSelector._hashSeed === void 0) {
-      GetItemSelector._hashSeed = Murmur3.seed(GetItemSelector);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(GetItemSelector._hashSeed,
-        this._index.hashCode()), this._then.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(GetItemSelector),
+        this.item.hashCode()), this.then.hashCode()));
   }
 
   debugThen(output: Output): void {
-    output = output.write(46/*'.'*/).write("getItem").write(40/*'('*/).debug(this._index).write(41/*')'*/);
-    this._then.debugThen(output);
+    output = output.write(46/*'.'*/).write("getItem").write(40/*'('*/)
+      .debug(this.item).write(41/*')'*/);
+    this.then.debugThen(output);
   }
 
   clone(): Selector {
-    return new GetItemSelector(this._index, this._then.clone());
+    return new GetItemSelector(this.item, this.then.clone());
   }
-
-  private static _hashSeed?: number;
 }
-Item.GetItemSelector = GetItemSelector;

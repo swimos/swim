@@ -12,55 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
 import {Item} from "../Item";
 import {Field} from "../Field";
-import {Value} from "../Value";
-import {Selector} from "../Selector";
-import {AnyInterpreter, Interpreter} from "../Interpreter";
+import type {Value} from "../Value";
+import {Record} from "../Record";
+import {Selector} from "./Selector";
+import {AnyInterpreter, Interpreter} from "../"; // forward import
 
 export class GetSelector extends Selector {
-  /** @hidden */
-  readonly _key: Value;
-  /** @hidden */
-  readonly _then: Selector;
-
   constructor(key: Value, then: Selector) {
     super();
-    this._key = key.commit();
-    this._then = then;
+    Object.defineProperty(this, "item", {
+      value: key.commit(),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "then", {
+      value: then,
+      enumerable: true,
+    });
   }
 
-  accessor(): Value {
-    return this._key;
-  }
+  declare readonly item: Value;
 
-  then(): Selector {
-    return this._then;
-  }
+  declare readonly then: Selector;
 
-  forSelected<T, S = unknown>(interpreter: Interpreter,
-                              callback: (this: S, interpreter: Interpreter) => T | undefined,
-                              thisArg?: S): T | undefined {
+  forSelected<T>(interpreter: Interpreter,
+                 callback: (interpreter: Interpreter) => T | undefined): T | undefined;
+  forSelected<T, S>(interpreter: Interpreter,
+                    callback: (this: S, interpreter: Interpreter) => T | undefined,
+                    thisArg: S): T | undefined;
+  forSelected<T, S>(interpreter: Interpreter,
+                    callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
+                    thisArg?: S): T | undefined {
     interpreter.willSelect(this);
     // Evaluate the key, in case it's dynamic.
-    const key = this._key.evaluate(interpreter).toValue();
-    const selected = GetSelector.forSelected(key, this._then, interpreter, callback, thisArg);
+    const key = this.item.evaluate(interpreter).toValue();
+    const selected = GetSelector.forSelected(key, this.then, interpreter, callback, thisArg);
     interpreter.didSelect(this, selected);
     return selected;
   }
 
   private static forSelected<T, S>(key: Value, then: Selector, interpreter: Interpreter,
-                                   callback: (this: S, interpreter: Interpreter) => T,
+                                   callback: (this: S | undefined, interpreter: Interpreter) => T,
                                    thisArg?: S): T | undefined {
     let selected: T | undefined;
-    if (interpreter.scopeDepth() !== 0) {
+    if (interpreter.scopeDepth !== 0) {
       // Pop the next selection off of the stack to take it out of scope.
       const scope = interpreter.popScope().toValue();
       let field: Field | undefined;
       // Only records can have members.
-      if (scope instanceof Item.Record) {
+      if (scope instanceof Record) {
         field = scope.getField(key);
         if (field !== void 0) {
           // Push the field value onto the scope stack.
@@ -80,27 +83,32 @@ export class GetSelector extends Selector {
     return selected;
   }
 
-  mapSelected<S = unknown>(interpreter: Interpreter,
-                           transform: (this: S, interpreter: Interpreter) => Item,
-                           thisArg?: S): Item {
+  mapSelected(interpreter: Interpreter,
+              transform: (interpreter: Interpreter) => Item): Item;
+  mapSelected<S>(interpreter: Interpreter,
+                 transform: (this: S, interpreter: Interpreter) => Item,
+                 thisArg: S): Item;
+  mapSelected<S>(interpreter: Interpreter,
+                 transform: (this: S | undefined, interpreter: Interpreter) => Item,
+                 thisArg?: S): Item {
     let result: Item;
     interpreter.willTransform(this);
     // Evaluate the key, if it's dynamic.
-    const key = this._key.evaluate(interpreter).toValue();
-    if (interpreter.scopeDepth() !== 0) {
+    const key = this.item.evaluate(interpreter).toValue();
+    if (interpreter.scopeDepth !== 0) {
       // Pop the current selection off of the stack to take it out of scope.
       const scope = interpreter.popScope().toValue();
       // Only records can have members.
-      if (scope instanceof Item.Record) {
+      if (scope instanceof Record) {
         const oldField = scope.getField(key);
         if (oldField !== void 0) {
           // Push the field value onto the scope stack.
           interpreter.pushScope(oldField.toValue());
           // Transform the field value.
-          const newItem = this._then.mapSelected(interpreter, transform, thisArg);
+          const newItem = this.then.mapSelected(interpreter, transform, thisArg);
           // Pop the field value off the scope stack.
           interpreter.popScope();
-          if (newItem instanceof Item.Field) {
+          if (newItem instanceof Field) {
             // Replace the original field with the transformed field.
             if (key.equals(newItem.key)) {
               scope.set(key, newItem.toValue());
@@ -130,26 +138,26 @@ export class GetSelector extends Selector {
   substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     // Evaluate the key, in case it's dynamic.
-    const key = this._key.evaluate(interpreter).toValue();
-    const value = GetSelector.substitute(key, this._then, interpreter);
+    const key = this.item.evaluate(interpreter).toValue();
+    const value = GetSelector.substitute(key, this.then, interpreter);
     if (value !== void 0) {
       return value;
     }
-    let then = this._then.substitute(interpreter);
+    let then = this.then.substitute(interpreter);
     if (!(then instanceof Selector)) {
-      then = this._then;
+      then = this.then;
     }
-    return new GetSelector(this._key, then as Selector);
+    return new GetSelector(this.item, then as Selector);
   }
 
   private static substitute(key: Value, then: Selector, interpreter: Interpreter): Item | undefined {
     let selected: Item | undefined;
-    if (interpreter.scopeDepth() !== 0) {
+    if (interpreter.scopeDepth !== 0) {
       // Pop the next selection off of the stack to take it out of scope.
       const scope = interpreter.popScope().toValue();
       let field: Field | undefined;
       // Only records can have members.
-      if (scope instanceof Item.Record) {
+      if (scope instanceof Record) {
         field = scope.getField(key);
         if (field !== void 0) {
           // Substitute the field value.
@@ -166,50 +174,55 @@ export class GetSelector extends Selector {
   }
 
   andThen(then: Selector): Selector {
-    return new GetSelector(this._key, this._then.andThen(then));
+    return new GetSelector(this.item, this.then.andThen(then));
   }
 
-  typeOrder(): number {
+  get typeOrder(): number {
     return 12;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof GetSelector) {
-      let order = this._key.compareTo(that._key);
+      let order = this.item.compareTo(that.item);
       if (order === 0) {
-        order = this._then.compareTo(that._then);
+        order = this.then.compareTo(that.then);
       }
       return order;
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof GetSelector) {
+      return this.item.equals(that.item) && this.then.equivalentTo(that.then, epsilon);
+    }
+    return false;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof GetSelector) {
-      return this._key.equals(that._key) && this._then.equals(that._then);
+      return this.item.equals(that.item) && this.then.equals(that.then);
     }
     return false;
   }
 
   hashCode(): number {
-    if (GetSelector._hashSeed === void 0) {
-      GetSelector._hashSeed = Murmur3.seed(GetSelector);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(GetSelector._hashSeed,
-        this._key.hashCode()), this._then.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(GetSelector),
+        this.item.hashCode()), this.then.hashCode()));
   }
 
   debugThen(output: Output): void {
-    output = output.write(46/*'.'*/).write("get").write(40/*'('*/).debug(this._key).write(41/*')'*/);
-    this._then.debugThen(output);
+    output = output.write(46/*'.'*/).write("get").write(40/*'('*/).debug(this.item).write(41/*')'*/);
+    this.then.debugThen(output);
   }
 
   clone(): Selector {
-    return new GetSelector(this._key.clone(), this._then.clone());
+    return new GetSelector(this.item.clone(), this.then.clone());
   }
-
-  private static _hashSeed?: number;
 }
-Item.GetSelector = GetSelector;

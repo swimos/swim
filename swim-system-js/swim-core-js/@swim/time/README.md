@@ -23,21 +23,21 @@ current time in the local time zone, or in an optionally specified time zone.
 
 ```typescript
 DateTime.current();
-DateTime.current(TimeZone.utc());
+DateTime.current(TimeZone.utc);
 ```
 
-The `DateTime.from` static method coerces plain JavaScript objects, of type
-`DateTimeInit`, to instances of `DateTime`.  `DateTime.from` defaults to UTC,
+The `DateTime.fromInit` static method coerces plain JavaScript objects, of type
+`DateTimeInit`, to instances of `DateTime`.  `DateTime.fromInit` defaults to UTC,
 but can optionally be passed a specific time zone.
 
 ```typescript
-DateTime.from({year: 2019});
+DateTime.fromInit({year: 2019});
 // "2019-01-01T00:00:00.000Z"
 
-DateTime.from({year: 2019, month: 8, day: 12, hour: 5, minute: 16, second: 10});
+DateTime.fromInit({year: 2019, month: 8, day: 12, hour: 5, minute: 16, second: 10});
 // "2019-09-12T05:16:10.000Z"
 
-DateTime.from({year: 2019, month: 8, day: 12, hour: 5, minute: 16, second: 10}, TimeZone.local());
+DateTime.fromInit({year: 2019, month: 8, day: 12, hour: 5, minute: 16, second: 10}, TimeZone.local);
 // "2019-09-11T15:16:10.000Z"
 ```
 
@@ -64,10 +64,10 @@ Coordinated Time (UTC).  The `TimeZone.local` and `TimeZone.utc` static methods
 return the current local time zone, and the UTC time zone, respectively.
 
 ```typescript
-TimeZone.local();
+TimeZone.local;
 // TimeZone.forOffset(-420)
 
-TimeZone.utc();
+TimeZone.utc;
 // TimeZone.forOffset(0)
 ```
 
@@ -75,7 +75,7 @@ TimeZone.utc();
 
 A `DateTimeFormat` represents a string encoding that parse date-time strings
 as `DateTime` objects, and format `DateTime` objects as date-time strings.
-The `DateTimeFormat.iso8601()` static method returns the standard ISO 8601
+The `DateTimeFormat.iso8601` static method returns the standard ISO 8601
 date-time format.  The `DateTimeFormat.pattern` method returns a
 `DateTimeFormat` that parses and formats date-times according to a
 `strptime`/`strftime`-style format string.
@@ -84,7 +84,7 @@ Use the `parse` method of a `DateTimeFormat` to parse a `DateTime` object from
 a compatible date-time string:
 
 ```typeScript
-DateTimeFormat.iso8601().parse("2019-08-12T16:11:59.586Z");
+DateTimeFormat.iso8601.parse("2019-08-12T16:11:59.586Z");
 // "2019-08-12T16:11:59.586Z
 
 DateTimeFormat.pattern("%Y-%m-%d").parse("2019-08-12");
@@ -99,7 +99,7 @@ to a compatible date-time string.  You can also optionally pass a
 `DateTimeFormat` to a `DateTime`'s `toString` method.
 
 ```typescript
-DateTimeFormat.iso8601().format(DateTime.current());
+DateTimeFormat.iso8601.format(DateTime.current());
 // "2019-08-12T16:15:27.045Z"
 
 DateTime.current().toString(DateTimeFormat.pattern("%Y-%m-%d"));
@@ -138,36 +138,30 @@ to the `ceil` of the interval, or to `round` a `DateTime` to the nearest
 whole interval.
 
 ```typescript
-TimeInterval.second().offset("2019-08-12T16:35:10.838Z", 5);
+TimeInterval.second.offset("2019-08-12T16:35:10.838Z", 5);
 // "2019-08-12T16:35:15.838Z"
 
-TimeInterval.minute().next("2019-08-12T16:35:10.838Z");
+TimeInterval.minute.next("2019-08-12T16:35:10.838Z");
 // "2019-08-12T16:36:00.000Z"
 
-TimeInterval.minute().next("2019-08-12T16:35:10.838Z", 30);
+TimeInterval.minute.next("2019-08-12T16:35:10.838Z", 30);
 // "2019-08-12T17:05:00.000Z"
 
-TimeInterval.hour().floor("2019-08-12T16:35:10.838Z");
+TimeInterval.hour.floor("2019-08-12T16:35:10.838Z");
 // "2019-08-12T16:00:00.000Z"
 
-TimeInterval.day().ceil("2019-08-12T16:35:10.838Z");
+TimeInterval.day.ceil("2019-08-12T16:35:10.838Z");
 // "2019-08-13T00:00:00.000Z"
 
-TimeInterval.week().round("2019-08-12T16:35:10.838Z");
+TimeInterval.week.round("2019-08-12T16:35:10.838Z");
 // "2019-08-11T00:00:00.000Z"
 ```
 
 The `every` method of a `UnitTimeInterval` returns a new `TimeInterval` equal
-to a multiple of the base time interval.  The `TimeInterval.millisecond`,
-`TimeInterval.second`, `TimeInterval.minute`, `TimeInterval.hour`,
-`TimeInterval.day` factory methods also take an integer multiple as an optional
-argument, returning the equivalent of calling `every` on the base interval.
+to a multiple of the base time interval.
 
 ```typescript
-TimeInterval.minute().every(15).next("2019-08-12T16:35:10.838Z");
-// "2019-08-12T16:45:00.000Z"
-
-TimeInterval.minute(15).next("2019-08-12T16:35:10.838Z");
+TimeInterval.minute.every(15).next("2019-08-12T16:35:10.838Z");
 // "2019-08-12T16:45:00.000Z"
 ```
 
@@ -184,7 +178,7 @@ a shorthand for computing a range of `DateTime`s between two times, and
 return the equivalent of calling `range` on the underlying time interval.
 
 ```typescript
-TimeInterval.year().range({year: 2017}, {year: 2020});
+TimeInterval.year.range({year: 2017}, {year: 2020});
 // ["2017-01-01T00:00:00.000Z", "2018-01-01T00:00:00.000Z", "2019-01-01T00:00:00.000Z"]
 
 TimeInterval.months({year: 2019, month: 3}, {year: 2019, month: 6});

@@ -12,250 +12,270 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Murmur3, Numbers, Constructors} from "@swim/util";
+import type {Output} from "@swim/codec";
+import type {Interpolator} from "@swim/mapping";
 import {AnyItem, Item} from "./Item";
 import {AnyField, Field} from "./Field";
-import {AnyValue, Value} from "./Value";
-import {AnyInterpreter, Interpreter} from "./Interpreter";
+import {SlotInterpolator} from "./"; // forward import
+import {AnyValue, Value} from "./"; // forward import
+import {Text} from "./"; // forward import
+import {Extant} from "./" // forward import
+import {Expression} from "./"; // forward import
+import {BitwiseOrOperator} from "./"; // forward import
+import {BitwiseXorOperator} from "./"; // forward import
+import {BitwiseAndOperator} from "./"; // forward import
+import {PlusOperator} from "./"; // forward import
+import {MinusOperator} from "./"; // forward import
+import {TimesOperator} from "./"; // forward import
+import {DivideOperator} from "./"; // forward import
+import {ModuloOperator} from "./"; // forward import
+import {AnyInterpreter, Interpreter} from "./"; // forward import
 
 export class Slot extends Field {
-  /** @hidden */
-  readonly _key: Value;
-  /** @hidden */
-  _value: Value;
-  /** @hidden */
-  _flags: number;
-
-  constructor(key: Value, value: Value = Item.Value.extant(), flags: number = 0) {
+  constructor(key: Value, value: Value, flags?: number) {
     super();
-    this._key = key.commit();
-    this._value = value;
-    this._flags = flags;
+    Object.defineProperty(this, "key", {
+      value: key.commit(),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "value", {
+      value: value,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "flags", {
+      value: flags !== void 0 ? flags : 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  get key(): Value {
-    return this._key;
-  }
+  declare readonly key: Value;
 
-  get value(): Value {
-    return this._value;
-  }
+  declare readonly value: Value;
+
+  /** @hidden */
+  declare readonly flags: number;
 
   isConstant(): boolean {
-    return this._key.isConstant() && this._value.isConstant();
+    return this.key.isConstant() && this.value.isConstant();
   }
 
   setValue(newValue: Value): Value {
-    if ((this._flags & Field.IMMUTABLE) !== 0) {
+    if ((this.flags & Field.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
-    const oldValue = this._value;
-    this._value = newValue;
+    const oldValue = this.value;
+    Object.defineProperty(this, "value", {
+      value: newValue,
+      enumerable: true,
+      configurable: true,
+    });
     return oldValue;
   }
 
   updatedValue(value: Value): Slot {
-    return new Slot(this._key, value);
+    return new Slot(this.key, value);
   }
 
   bitwiseOr(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.BitwiseOrOperator(this, that);
+    if (that instanceof Expression) {
+      return new BitwiseOrOperator(this, that);
     }
     let newValue;
-    if (that instanceof Slot && this._key.equals(that._key)) {
-      newValue = this._value.bitwiseOr(that._value);
-    } else if (that instanceof Item.Value) {
-      newValue = this._value.bitwiseOr(that);
+    if (that instanceof Slot && this.key.equals(that.key)) {
+      newValue = this.value.bitwiseOr(that.value);
+    } else if (that instanceof Value) {
+      newValue = this.value.bitwiseOr(that);
     } else {
-      newValue = Item.Value.absent();
+      newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   bitwiseXor(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.BitwiseXorOperator(this, that);
+    if (that instanceof Expression) {
+      return new BitwiseXorOperator(this, that);
     }
     let newValue;
-    if (that instanceof Slot && this._key.equals(that._key)) {
-      newValue = this._value.bitwiseXor(that._value);
-    } else if (that instanceof Item.Value) {
-      newValue = this._value.bitwiseXor(that);
+    if (that instanceof Slot && this.key.equals(that.key)) {
+      newValue = this.value.bitwiseXor(that.value);
+    } else if (that instanceof Value) {
+      newValue = this.value.bitwiseXor(that);
     } else {
-      newValue = Item.Value.absent();
+      newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   bitwiseAnd(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.BitwiseAndOperator(this, that);
+    if (that instanceof Expression) {
+      return new BitwiseAndOperator(this, that);
     }
     let newValue;
-    if (that instanceof Slot && this._key.equals(that._key)) {
-      newValue = this._value.bitwiseAnd(that._value);
-    } else if (that instanceof Item.Value) {
-      newValue = this._value.bitwiseAnd(that);
+    if (that instanceof Slot && this.key.equals(that.key)) {
+      newValue = this.value.bitwiseAnd(that.value);
+    } else if (that instanceof Value) {
+      newValue = this.value.bitwiseAnd(that);
     } else {
-      newValue = Item.Value.absent();
+      newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   plus(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.PlusOperator(this, that);
+    if (that instanceof Expression) {
+      return new PlusOperator(this, that);
     }
     let newValue;
-    if (that instanceof Slot && this._key.equals(that._key)) {
-      newValue = this._value.plus(that._value);
-    } else if (that instanceof Item.Value) {
-      newValue = this._value.plus(that);
+    if (that instanceof Slot && this.key.equals(that.key)) {
+      newValue = this.value.plus(that.value);
+    } else if (that instanceof Value) {
+      newValue = this.value.plus(that);
     } else {
-      newValue = Item.Value.absent();
+      newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   minus(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.MinusOperator(this, that);
+    if (that instanceof Expression) {
+      return new MinusOperator(this, that);
     }
     let newValue;
-    if (that instanceof Slot && this._key.equals(that._key)) {
-      newValue = this._value.minus(that._value);
-    } else if (that instanceof Item.Value) {
-      newValue = this._value.minus(that);
+    if (that instanceof Slot && this.key.equals(that.key)) {
+      newValue = this.value.minus(that.value);
+    } else if (that instanceof Value) {
+      newValue = this.value.minus(that);
     } else {
-      newValue = Item.Value.absent();
+      newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   times(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.TimesOperator(this, that);
+    if (that instanceof Expression) {
+      return new TimesOperator(this, that);
     }
     let newValue;
-    if (that instanceof Slot && this._key.equals(that._key)) {
-      newValue = this._value.times(that._value);
-    } else if (that instanceof Item.Value) {
-      newValue = this._value.times(that);
+    if (that instanceof Slot && this.key.equals(that.key)) {
+      newValue = this.value.times(that.value);
+    } else if (that instanceof Value) {
+      newValue = this.value.times(that);
     } else {
-      newValue = Item.Value.absent();
+      newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   divide(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.DivideOperator(this, that);
+    if (that instanceof Expression) {
+      return new DivideOperator(this, that);
     }
     let newValue;
-    if (that instanceof Slot && this._key.equals(that._key)) {
-      newValue = this._value.divide(that._value);
-    } else if (that instanceof Item.Value) {
-      newValue = this._value.divide(that);
+    if (that instanceof Slot && this.key.equals(that.key)) {
+      newValue = this.value.divide(that.value);
+    } else if (that instanceof Value) {
+      newValue = this.value.divide(that);
     } else {
-      newValue = Item.Value.absent();
+      newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   modulo(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.ModuloOperator(this, that);
+    if (that instanceof Expression) {
+      return new ModuloOperator(this, that);
     }
     let newValue;
-    if (that instanceof Slot && this._key.equals(that._key)) {
-      newValue = this._value.modulo(that._value);
-    } else if (that instanceof Item.Value) {
-      newValue = this._value.modulo(that);
+    if (that instanceof Slot && this.key.equals(that.key)) {
+      newValue = this.value.modulo(that.value);
+    } else if (that instanceof Value) {
+      newValue = this.value.modulo(that);
     } else {
-      newValue = Item.Value.absent();
+      newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   not(): Item {
-    const newValue = this._value.not();
+    const newValue = this.value.not();
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   bitwiseNot(): Item {
-    const newValue = this._value.bitwiseNot();
+    const newValue = this.value.bitwiseNot();
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   negative(): Item {
-    const newValue = this._value.negative();
+    const newValue = this.value.negative();
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   positive(): Item {
-    const newValue = this._value.positive();
+    const newValue = this.value.positive();
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   inverse(): Item {
-    const newValue = this._value.inverse();
+    const newValue = this.value.inverse();
     if (newValue.isDefined()) {
-      return new Slot(this._key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const key = this._key.evaluate(interpreter).toValue();
-    const value = this._value.evaluate(interpreter).toValue();
-    if (key === this._key && value === this._value) {
+    const key = this.key.evaluate(interpreter).toValue();
+    const value = this.value.evaluate(interpreter).toValue();
+    if (key === this.key && value === this.value) {
       return this;
     } else if (key.isDefined() && value.isDefined()) {
       return new Slot(key, value);
@@ -265,9 +285,9 @@ export class Slot extends Field {
 
   substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
-    const key = this._key.substitute(interpreter).toValue();
-    const value = this._value.substitute(interpreter).toValue();
-    if (key === this._key && value === this._value) {
+    const key = this.key.substitute(interpreter).toValue();
+    const value = this.value.substitute(interpreter).toValue();
+    if (key === this.key && value === this.value) {
       return this;
     } else if (key.isDefined() && value.isDefined()) {
       return new Slot(key, value);
@@ -277,11 +297,11 @@ export class Slot extends Field {
 
   toAny(): AnyField {
     const field = {} as {[key: string]: AnyValue};
-    if (this._key instanceof Item.Text) {
-      field[this._key.value] = this._value.toAny();
+    if (this.key instanceof Text) {
+      field[this.key.value] = this.value.toAny();
     } else {
-      field.$key = this._key.toAny();
-      field.$value = this._value.toAny();
+      field.$key = this.key.toAny();
+      field.$value = this.value.toAny();
     }
     return field;
   }
@@ -291,55 +311,95 @@ export class Slot extends Field {
   }
 
   isMutable(): boolean {
-    return (this._flags & Field.IMMUTABLE) === 0;
+    return (this.flags & Field.ImmutableFlag) === 0;
   }
 
   alias(): void {
-    this._flags |= Field.IMMUTABLE;
+    if ((this.flags & Field.ImmutableFlag) === 0) {
+      Object.defineProperty(this, "flags", {
+        value: this.flags | Field.ImmutableFlag,
+        enumerable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, "value", {
+        value: this.value,
+        enumerable: true,
+      });
+    }
   }
 
   branch(): Slot {
-    if ((this._flags & Field.IMMUTABLE) !== 0) {
-      return new Slot(this._key, this._value, this._flags & ~Field.IMMUTABLE);
+    if ((this.flags & Field.ImmutableFlag) !== 0) {
+      return new Slot(this.key, this.value, this.flags & ~Field.ImmutableFlag);
     } else {
       return this;
     }
   }
 
   clone(): Slot {
-    return new Slot(this._key.clone(), this._value.clone());
+    return new Slot(this.key.clone(), this.value.clone());
   }
 
   commit(): this {
-    if ((this._flags & Field.IMMUTABLE) === 0) {
-      this._flags |= Field.IMMUTABLE;
-      this._value.commit();
+    if ((this.flags & Field.ImmutableFlag) === 0) {
+      Object.defineProperty(this, "flags", {
+        value: this.flags | Field.ImmutableFlag,
+        enumerable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, "value", {
+        value: this.value,
+        enumerable: true,
+      });
     }
+    this.value.commit();
     return this;
   }
 
-  typeOrder(): number {
+  interpolateTo(that: Slot): Interpolator<Slot>;
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    if (that instanceof Slot) {
+      return SlotInterpolator(this, that);
+    } else {
+      return super.interpolateTo(that);
+    }
+  }
+
+  get typeOrder(): number {
     return 2;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof Slot) {
-      let order = this._key.compareTo(that._key);
+      let order = this.key.compareTo(that.key);
       if (order === 0) {
-        order = this._value.compareTo(that._value);
+        order = this.value.compareTo(that.value);
       }
       return order;
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof Slot) {
+      return this.key.equals(that.key) && this.value.equivalentTo(that.value, epsilon);
+    }
+    return false;
   }
 
   keyEquals(key: unknown): boolean {
-    if (typeof key === "string" && this._key instanceof Item.Text) {
-      return this._key.value === key;
+    if (typeof key === "string" && this.key instanceof Text) {
+      return this.key.value === key;
     } else if (key instanceof Field) {
-      return this._key.equals(key.key);
+      return this.key.equals(key.key);
     } else {
-      return this._key.equals(key);
+      return this.key.equals(key);
     }
   }
 
@@ -347,22 +407,19 @@ export class Slot extends Field {
     if (this === that) {
       return true;
     } else if (that instanceof Slot) {
-      return this._key.equals(that._key) && this._value.equals(that._value);
+      return this.key.equals(that.key) && this.value.equals(that.value);
     }
     return false;
   }
 
   hashCode(): number {
-    if (Slot._hashSeed === void 0) {
-      Slot._hashSeed = Murmur3.seed(Slot);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Slot._hashSeed,
-        this._key.hashCode()), this._value.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(Slot),
+        this.key.hashCode()), this.value.hashCode()));
   }
 
   debug(output: Output): void {
     output = output.write("Slot").write(46/*'.'*/).write("of").write(40/*'('*/).display(this.key);
-    if (!(this.value instanceof Item.Extant)) {
+    if (!(this.value instanceof Extant)) {
       output = output.write(44/*','*/).write(32/*' '*/).display(this.value);
     }
     output = output.write(41/*')'*/);
@@ -372,12 +429,13 @@ export class Slot extends Field {
     this.debug(output);
   }
 
-  private static _hashSeed?: number;
-
   static of(key: AnyValue, value?: AnyValue): Slot {
-    key = Item.Value.fromAny(key);
-    value = arguments.length >= 2 ? Item.Value.fromAny(value) : Item.Value.extant();
+    key = Value.fromAny(key);
+    if (arguments.length === 1) {
+      value = Value.extant();
+    } else {
+      value = Value.fromAny(value);
+    }
     return new Slot(key, value);
   }
 }
-Item.Slot = Slot;

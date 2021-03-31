@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Inlet} from "./Inlet";
-import {Outlet} from "./Outlet";
+import type {Inlet} from "./Inlet";
+import type {Outlet} from "./Outlet";
 
 export type InoutletType = "value" | "map";
 

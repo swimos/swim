@@ -20,11 +20,11 @@ export class AbstractStreamletSpec extends Spec {
   inspectGenericStreamlets(exam: Exam): void {
     class TestStreamlet extends AbstractStreamlet {
       @In
-      foo: Inlet;
+      foo: Inlet = this.inlet();
       @Inout
-      bar: Inoutlet;
+      bar: Inoutlet = this.inoutlet();
       @Out
-      baz: Outlet;
+      baz: Outlet = this.outlet();
     }
     const streamlet = new TestStreamlet();
     exam.equal(streamlet.inlet("foo"), streamlet.foo);
@@ -39,13 +39,13 @@ export class AbstractStreamletSpec extends Spec {
   inspectInheritedStreamlets(exam: Exam): void {
     class ParentStreamlet extends AbstractStreamlet {
       @In
-      foo: Inlet;
+      foo: Inlet = this.inlet();
       @Out
-      baz: Outlet;
+      baz: Outlet = this.outlet();
     }
     class ChildStreamlet extends ParentStreamlet {
       @Inout
-      bar: Inlet;
+      bar: Inlet = this.inlet();
     }
     const streamlet = new ChildStreamlet();
     exam.equal(streamlet.inlet("foo"), streamlet.foo);

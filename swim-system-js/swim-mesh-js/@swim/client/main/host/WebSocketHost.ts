@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Uri} from "@swim/uri";
+import type {Uri} from "@swim/uri";
 import {Envelope, CommandMessage, AuthRequest} from "@swim/warp";
-import {HostContext} from "./HostContext";
-import {HostOptions} from "./Host";
+import type {HostContext} from "./HostContext";
+import type {HostOptions} from "./Host";
 import {RemoteHost} from "./RemoteHost";
 
 /** @hidden */
@@ -28,58 +28,74 @@ export interface WebSocketHostOptions extends HostOptions {
 
 /** @hidden */
 export class WebSocketHost extends RemoteHost {
-  /** @hidden */
-  readonly _options: WebSocketHostOptions;
-  /** @hidden */
-  _socket: WebSocket | undefined;
-
   constructor(context: HostContext, hostUri: Uri, options: WebSocketHostOptions = {}) {
     super(context, hostUri, options);
+    Object.defineProperty(this, "socket", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  get WebSocket(): WebSocketConstructor | undefined {
-    return this._options.WebSocket
-        || typeof WebSocket !== "undefined" && WebSocket
-        || typeof require === "function" && require("ws") as WebSocketConstructor
-        || void 0;
+  declare readonly options: WebSocketHostOptions;
+
+  /** @hidden */
+  declare readonly socket: WebSocket | null;
+
+  get WebSocket(): WebSocketConstructor | null {
+    if (this.options.WebSocket !== void 0) {
+      return this.options.WebSocket;
+    } else if (typeof WebSocket !== "undefined") {
+      return WebSocket;
+    } else if (typeof require === "function") {
+      return require("ws") as WebSocketConstructor;
+    } else {
+      return null;
+    }
   }
 
   isConnected(): boolean {
-    return this._socket !== void 0 ? this._socket.readyState === this._socket.OPEN : false;
+    return this.socket !== null && this.socket.readyState === this.socket.OPEN;
   }
 
   open(): void {
     this.clearReconnect();
-    if (this._socket === void 0) {
+    let socket = this.socket;
+    if (socket === null) {
       const WebSocket = this.WebSocket;
-      if (WebSocket === void 0) {
+      if (WebSocket === null) {
         throw new Error("WebSocket undefined");
       }
-      let hostUri = this._hostUri;
-      const schemeName = hostUri.schemeName();
+      let hostUri = this.hostUri;
+      const schemeName = hostUri.schemeName;
       if (schemeName === "warp" || schemeName === "swim") {
-        hostUri = hostUri.scheme("ws");
+        hostUri = hostUri.withSchemeName("ws");
       } else if (schemeName === "warps" || schemeName === "swims") {
-        hostUri = hostUri.scheme("wss");
+        hostUri = hostUri.withSchemeName("wss");
       }
-      if (this._options.protocols !== void 0) {
-        this._socket = new WebSocket(hostUri.toString(), this._options.protocols);
+      if (this.options.protocols !== void 0) {
+        socket = new WebSocket(hostUri.toString(), this.options.protocols);
       } else {
-        this._socket = new WebSocket(hostUri.toString());
+        socket = new WebSocket(hostUri.toString());
       }
-      this._socket.onopen = this.onWebSocketOpen.bind(this);
-      this._socket.onmessage = this.onWebSocketMessage.bind(this);
-      this._socket.onclose = this.onWebSocketClose.bind(this);
-      this._socket.onerror = this.onWebSocketError.bind(this);
+      Object.defineProperty(this, "socket", {
+        value: socket,
+        enumerable: true,
+        configurable: true,
+      });
+      socket.onopen = this.onWebSocketOpen.bind(this);
+      socket.onmessage = this.onWebSocketMessage.bind(this);
+      socket.onclose = this.onWebSocketClose.bind(this);
+      socket.onerror = this.onWebSocketError.bind(this);
     }
   }
 
   close(): void {
     this.clearReconnect();
     this.clearIdle();
-    if (this._socket !== void 0) {
-      this._socket.close();
-      if (!this._context.isOnline()) {
+    if (this.socket !== null) {
+      this.socket.close();
+      if (!this.context.isOnline()) {
         this.onWebSocketClose(); // force close event
       }
     } else {
@@ -91,11 +107,11 @@ export class WebSocketHost extends RemoteHost {
     if (this.isConnected()) {
       this.clearIdle();
       const text = envelope.toRecon();
-      this._socket!.send(text);
+      this.socket!.send(text);
       this.watchIdle();
     } else if (envelope instanceof CommandMessage) {
-      if (this._sendBuffer.length < this.sendBufferSize()) {
-        this._sendBuffer.push(envelope);
+      if (this.sendBuffer.length < this.sendBufferSize) {
+        this.sendBuffer.push(envelope);
       } else {
         throw new Error("send buffer overflow");
       }
@@ -105,14 +121,14 @@ export class WebSocketHost extends RemoteHost {
 
   protected onWebSocketOpen(): void {
     if (this.isConnected()) {
-      const credentials = this.credentials();
+      const credentials = this.credentials;
       if (credentials.isDefined()) {
         const request = new AuthRequest(credentials);
         this.push(request);
       }
       this.onConnect();
       let envelope;
-      while ((envelope = this._sendBuffer.shift()) && this.isConnected()) {
+      while ((envelope = this.sendBuffer.shift()) && this.isConnected()) {
         this.push(envelope);
       }
       this.watchIdle();
@@ -125,7 +141,7 @@ export class WebSocketHost extends RemoteHost {
     const data = message.data;
     if (typeof data === "string") {
       const envelope = Envelope.parseRecon(data);
-      if (envelope !== void 0) {
+      if (envelope !== null) {
         this.onEnvelope(envelope);
       } else {
         this.onUnknownEnvelope(data);
@@ -134,17 +150,22 @@ export class WebSocketHost extends RemoteHost {
   }
 
   protected onWebSocketClose(): void {
-    if (this._socket !== void 0) {
-      this._socket.onopen = null;
-      this._socket.onmessage = null;
-      this._socket.onclose = null;
-      this._socket.onerror = null;
-      this._socket = void 0;
+    const socket = this.socket;
+    if (socket !== null) {
+      socket.onopen = null;
+      socket.onmessage = null;
+      socket.onclose = null;
+      socket.onerror = null;
+      Object.defineProperty(this, "socket", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
     }
     this.onDisconnect();
     this.clearIdle();
     if (!this.isIdle()) {
-      if (this._context.isOnline()) {
+      if (this.context.isOnline()) {
         this.reconnect();
       }
     } else {
@@ -153,9 +174,9 @@ export class WebSocketHost extends RemoteHost {
   }
 
   protected onWebSocketError(): void {
-    if (this._socket !== void 0) {
-      this._socket.close();
-      if (!this._context.isOnline()) {
+    if (this.socket !== null) {
+      this.socket.close();
+      if (!this.context.isOnline()) {
         this.onWebSocketClose(); // force close event
       } else {
         this.onError();

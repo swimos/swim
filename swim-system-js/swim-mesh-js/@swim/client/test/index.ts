@@ -12,37 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
-
-import {WarpClientSpec} from "./WarpClientSpec";
-
-import {DownlinkSpec} from "./downlink";
-import {RefSpec} from "./ref";
-
-@Unit
-class ClientSpec extends Spec {
-  @Unit
-  downlinkSpec(): Spec {
-    return new DownlinkSpec();
-  }
-
-  @Unit
-  refSpec(): Spec {
-    return new RefSpec();
-  }
-
-  @Unit
-  warpClientSpec(): Spec {
-    return new WarpClientSpec();
-  }
-}
+export {MockServer} from "./MockServer";
+export {ClientExam} from "./ClientExam";
 
 export * from "./downlink";
 export * from "./ref";
+export {ClientSuite} from "./ClientSuite";
 
-export {
-  WarpClientSpec,
-  ClientSpec,
-};
-
-ClientSpec.run();
+import {ClientSuite} from "./ClientSuite";
+ClientSuite.run();

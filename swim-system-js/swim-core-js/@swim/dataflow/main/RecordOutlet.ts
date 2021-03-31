@@ -12,15 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Map} from "@swim/util";
-import {Value, Record} from "@swim/structure";
+import type {Map} from "@swim/util";
+import type {Value, Record} from "@swim/structure";
 import {Outlet, MapOutlet, StreamletScope} from "@swim/streamlet";
-import {MapValueFunction, MapFieldValuesFunction} from "@swim/streamlet";
-import {WatchValueFunction, WatchFieldsFunction} from "@swim/streamlet";
-import {RecordStreamlet} from "./RecordStreamlet";
-import {RecordModel} from "./RecordModel";
-import {RecordScope} from "./RecordScope";
-import {Dataflow} from "./Dataflow";
+import type {MapValueFunction, MapFieldValuesFunction} from "@swim/streamlet";
+import type {WatchValueFunction, WatchFieldsFunction} from "@swim/streamlet";
 
 export interface RecordOutlet extends Outlet<Record>, MapOutlet<Value, Value, Record>, StreamletScope<Value> {
   outlet(key: Value | string): Outlet<Value>;
@@ -37,23 +33,14 @@ export interface RecordOutlet extends Outlet<Record>, MapOutlet<Value, Value, Re
   watch(func: WatchFieldsFunction<Value, Value>): this;
 }
 
-/** @hidden */
-export const RecordOutlet = {
-  is(object: unknown): object is RecordOutlet {
-    if (typeof object === "object" && object !== null) {
-      const outlet = object as RecordOutlet;
-      return MapOutlet.is(outlet) && StreamletScope.is(outlet);
-    }
-    return false;
-  },
+export const RecordOutlet = {} as {
+  is(object: unknown): object is RecordOutlet;
+};
 
-  // Forward type declarations
-  /** @hidden */
-  Streamlet: void 0 as unknown as typeof RecordStreamlet, // defined by RecordStreamlet
-  /** @hidden */
-  Model: void 0 as unknown as typeof RecordModel, // defined by RecordModel
-  /** @hidden */
-  Scope: void 0 as unknown as typeof RecordScope, // defined by RecordScope
-  /** @hidden */
-  Dataflow: void 0 as unknown as typeof Dataflow, // defined by Dataflow
+RecordOutlet.is = function (object: unknown): object is RecordOutlet {
+  if (typeof object === "object" && object !== null) {
+    const outlet = object as RecordOutlet;
+    return MapOutlet.is(outlet) && StreamletScope.is(outlet);
+  }
+  return false;
 };

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HashCode, Murmur3, Objects} from "@swim/util";
+import {Murmur3, HashCode, Booleans, Strings, Constructors} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 
 export type AnyArg = Arg | ArgInit | string;
@@ -20,71 +20,73 @@ export type AnyArg = Arg | ArgInit | string;
 export interface ArgInit {
   readonly name: string;
   readonly value?: string;
-  readonly optional: boolean;
+  readonly optional?: boolean;
 }
 
 export class Arg implements HashCode, Debug {
-  /** @hidden */
-  readonly _name: string;
-  /** @hidden */
-  _value: string | undefined;
-  /** @hidden */
-  _optional: boolean;
-
   constructor(name: string, value: string | undefined, optional: boolean) {
-    this._name = name;
-    this._value = value;
-    this._optional = optional;
+    Object.defineProperty(this, "name", {
+      value: name,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "value", {
+      value: value,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "optional", {
+      value: optional,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  name(): string {
-    return this._name;
+  declare readonly name: string;
+
+  declare readonly value: string | undefined;
+
+  withValue(value: string | undefined): this {
+    Object.defineProperty(this, "value", {
+      value: value,
+      enumerable: true,
+      configurable: true,
+    });
+    return this;
   }
 
-  value(): string | undefined;
-  value(value: string | undefined): this;
-  value(value?: string | undefined): string | undefined | this {
-    if (arguments.length === 0) {
-      return this._value;
-    } else {
-      this._value = value;
-      return this;
-    }
-  }
+  declare readonly optional: boolean;
 
-  optional(): boolean;
-  optional(optional: boolean): this;
-  optional(optional?: boolean): boolean | this {
-    if (optional === void 0) {
-      return this._optional;
-    } else {
-      this._optional = optional;
-      return this;
-    }
+  asOptional(optional: boolean): this {
+    Object.defineProperty(this, "optional", {
+      value: optional,
+      enumerable: true,
+      configurable: true,
+    });
+    return this;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Arg) {
-      return this._name === that._name && Objects.equal(this._value, that._value)
-          && this._optional === that._optional;
+      return this.name === that.name && this.value === that.value
+          && this.optional === that.optional;
     }
     return false;
   }
 
   hashCode(): number {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.seed(Arg),
-        Murmur3.hash(this._name)), Murmur3.hash(this._value as any)), Murmur3.hash(this._optional)));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Constructors.hash(Arg),
+        Strings.hash(this.name)), Strings.hash(this.value)), Booleans.hash(this.optional)));
   }
 
   debug(output: Output): void {
-    output = output.write("Arg").write(46/*'.'*/).write("of").write(40/*'('*/).debug(this._name);
-    if (this._value !== void 0) {
-      output = output.write(", ").debug(this._value);
+    output = output.write("Arg").write(46/*'.'*/).write("of").write(40/*'('*/).debug(this.name);
+    if (this.value !== void 0) {
+      output = output.write(", ").debug(this.value);
     }
     output = output.write(41/*')'*/);
-    if (this._optional) {
+    if (this.optional) {
       output = output.write(46/*'.'*/).write("optional").write(40/*'('*/).write("true").write(41/*')'*/);
     }
   }
@@ -94,20 +96,26 @@ export class Arg implements HashCode, Debug {
   }
 
   clone(): Arg {
-    return new Arg(this._name, this._value, this._optional);
+    return new Arg(this.name, this.value, this.optional);
   }
 
-  static of(name: string, value?: string, optional: boolean = false): Arg {
+  static create(name: string, value?: string, optional: boolean = false): Arg {
     return new Arg(name, value, optional);
   }
 
-  static fromAny(arg: AnyArg): Arg {
-    if (arg instanceof Arg) {
-      return arg;
-    } else if (typeof arg === "string") {
-      return new Arg(arg, void 0, false);
+  static fromInit(init: ArgInit): Arg {
+    return new Arg(init.name, init.value, init.optional !== void 0 ? init.optional : false);
+  }
+
+  static fromAny(value: AnyArg): Arg {
+    if (value instanceof Arg) {
+      return value;
+    } else if (typeof value === "string") {
+      return new Arg(value, void 0, false);
+    } else if (typeof value === "object" && value !== null) {
+      return Arg.fromInit(value);
     } else {
-      return new Arg(arg.name, arg.value, arg.optional || false);
+      throw new TypeError("" + value);
     }
   }
 }

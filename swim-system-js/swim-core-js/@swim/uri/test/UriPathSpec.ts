@@ -18,12 +18,12 @@ import {UriPath} from "@swim/uri";
 export class UriPathSpec extends Spec {
   @Test
   testPathName(exam: Exam): void {
-    exam.equal(UriPath.parse("").name(), "");
-    exam.equal(UriPath.parse("foo").name(), "foo");
-    exam.equal(UriPath.parse("/foo").name(), "foo");
-    exam.equal(UriPath.parse("/foo/").name(), "");
-    exam.equal(UriPath.parse("/foo/bar").name(), "bar");
-    exam.equal(UriPath.parse("/foo/bar/").name(), "");
+    exam.equal(UriPath.parse("").name, "");
+    exam.equal(UriPath.parse("foo").name, "foo");
+    exam.equal(UriPath.parse("/foo").name, "foo");
+    exam.equal(UriPath.parse("/foo/").name, "");
+    exam.equal(UriPath.parse("/foo/bar").name, "bar");
+    exam.equal(UriPath.parse("/foo/bar/").name, "");
   }
 
   @Test

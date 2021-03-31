@@ -13,30 +13,31 @@
 // limitations under the License.
 
 import {Item, Text, Form} from "@swim/structure";
-import {Uri} from "./Uri";
-import {UriPath} from "./UriPath";
+import {AnyUriPath, UriPath} from "./UriPath";
 
 /** @hidden */
-export class UriPathForm extends Form<UriPath> {
-  /** @hidden */
-  readonly _unit: UriPath | undefined;
-
-  constructor(unit?: UriPath ) {
+export class UriPathForm extends Form<UriPath, AnyUriPath> {
+  constructor(unit: UriPath | undefined) {
     super();
-    this._unit = unit;
+    Object.defineProperty(this, "unit", {
+      value: unit,
+      enumerable: true,
+    });
   }
 
-  unit(): UriPath | undefined;
-  unit(unit: UriPath | undefined): Form<UriPath>;
-  unit(unit?: UriPath | undefined): UriPath | undefined | Form<UriPath> {
-    if (arguments.length === 0) {
-      return this._unit;
-    } else {
+  // @ts-ignore
+  declare readonly unit: UriPath | undefined;
+
+  withUnit(unit: UriPath | undefined): Form<UriPath, AnyUriPath> {
+    if (unit !== this.unit) {
       return new UriPathForm(unit);
+    } else {
+      return this;
     }
   }
 
-  mold(object: UriPath, item?: Item): Item {
+  mold(object: AnyUriPath, item?: Item): Item {
+    object = UriPath.fromAny(object);
     if (item === void 0) {
       return Text.from(object.toString());
     } else {
@@ -45,11 +46,11 @@ export class UriPathForm extends Form<UriPath> {
   }
 
   cast(item: Item, object?: UriPath): UriPath | undefined {
-    const value = item.target();
+    const value = item.target;
     try {
       const string = value.stringValue();
       if (typeof string === "string") {
-        return Uri.Path.parse(string);
+        return UriPath.parse(string);
       }
     } catch (error) {
       // swallow
@@ -57,4 +58,3 @@ export class UriPathForm extends Form<UriPath> {
     return void 0;
   }
 }
-Uri.PathForm = UriPathForm;

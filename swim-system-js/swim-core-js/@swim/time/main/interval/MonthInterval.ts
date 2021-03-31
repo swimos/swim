@@ -13,49 +13,49 @@
 // limitations under the License.
 
 import {AnyDateTime, DateTime} from "../DateTime";
-import {UnitTimeInterval, TimeInterval} from "../TimeInterval";
+import {UnitTimeInterval, TimeInterval} from "./TimeInterval";
+import {FilterTimeInterval} from "./FilterTimeInterval";
 
 /** @hidden */
 export class MonthInterval extends UnitTimeInterval {
-  offset(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  offset(t: AnyDateTime, k?: number): DateTime {
+    const d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.month(d.month() + k);
+    return d.withMonth(d.month + k);
   }
 
-  next(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  next(t: AnyDateTime, k?: number): DateTime {
+    let d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    d = d.month(d.month() + k);
-    return d.day(1).hour(0, 0, 0, 0);
+    d = d.withMonth(d.month + k);
+    return d.withDay(1).withHour(0, 0, 0, 0);
   }
 
-  floor(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    return d.day(1).hour(0, 0, 0, 0);
+  floor(t: AnyDateTime): DateTime {
+    const d = DateTime.fromAny(t);
+    return d.withDay(1).withHour(0, 0, 0, 0);
   }
 
-  ceil(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    d = d.time(d.time() - 1);
-    d = d.day(1).hour(0, 0, 0, 0);
-    d = d.month(d.month() + 1);
-    return d.day(1).hour(0, 0, 0, 0);
+  ceil(t: AnyDateTime): DateTime {
+    let d = DateTime.fromAny(t);
+    d = new DateTime(d.time - 1, d.zone);
+    d = d.withDay(1).withHour(0, 0, 0, 0);
+    d = d.withMonth(d.month + 1);
+    return d.withDay(1).withHour(0, 0, 0, 0);
   }
 
   every(k: number): TimeInterval {
     if (k === 1) {
       return this;
     } else if (isFinite(k) && k >= 1) {
-      return new TimeInterval.Filter(this, MonthInterval.modulo.bind(void 0, k));
+      return new FilterTimeInterval(this, MonthInterval.modulo.bind(void 0, k));
     } else {
       throw new Error("" + k);
     }
   }
 
   private static modulo(k: number, d: DateTime): boolean {
-    const month = d.month();
+    const month = d.month;
     return isFinite(month) && month % k === 0;
   }
 }
-TimeInterval.Month = MonthInterval;

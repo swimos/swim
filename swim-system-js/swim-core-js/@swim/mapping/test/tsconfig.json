@@ -1,0 +1,19 @@
+{
+  "extends": "../../../tsconfig-test",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/test",
+    "paths": {
+      "@swim/util": ["@swim/util/main"],
+      "@swim/codec": ["@swim/codec/main"],
+      "@swim/unit": ["@swim/unit/main"],
+      "@swim/mapping": ["@swim/mapping/main"]
+    }
+  },
+  "references": [
+    {"path": "../../util/main"},
+    {"path": "../../codec/main"},
+    {"path": "../../unit/main"},
+    {"path": "../../mapping/main"}
+  ]
+}

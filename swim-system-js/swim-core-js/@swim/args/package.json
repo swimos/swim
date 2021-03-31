@@ -1,6 +1,6 @@
 {
   "name": "@swim/args",
-  "version": "3.11.0-dev.20201021",
+  "version": "3.11.0-dev.20210331",
   "description": "Composable command line argument parser",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/args",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,7 +11,7 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20201021",
-    "@swim/codec": "3.11.0-dev.20201021"
+    "@swim/util": "3.11.0-dev.20210331",
+    "@swim/codec": "3.11.0-dev.20210331"
   }
 }

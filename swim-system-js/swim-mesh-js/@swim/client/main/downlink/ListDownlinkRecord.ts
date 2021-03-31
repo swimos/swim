@@ -15,23 +15,21 @@
 import {Cursor} from "@swim/util";
 import {AnyItem, Item, AnyValue, Value, Record, AnyText, AnyNum, Num} from "@swim/structure";
 import {DownlinkRecord} from "./DownlinkRecord";
-import {ListDownlink} from "./ListDownlink";
+import type {ListDownlink} from "./ListDownlink";
 
 export class ListDownlinkRecord extends DownlinkRecord {
-  /** @hidden */
-  readonly _downlink: ListDownlink<Value, AnyValue>;
-
   constructor(downlink: ListDownlink<Value, AnyValue>) {
     super();
-    this._downlink = downlink;
+    Object.defineProperty(this, "downlink", {
+      value: downlink,
+      enumerable: true,
+    });
   }
 
-  get downlink(): ListDownlink<Value, AnyValue> {
-    return this._downlink;
-  }
+  declare readonly downlink: ListDownlink<Value, AnyValue>;
 
   isEmpty(): boolean {
-    return this._downlink.isEmpty();
+    return this.downlink.isEmpty();
   }
 
   isArray(): boolean {
@@ -39,15 +37,15 @@ export class ListDownlinkRecord extends DownlinkRecord {
   }
 
   isObject(): boolean {
-    return this._downlink.isEmpty();
+    return this.downlink.isEmpty();
   }
 
   get length(): number {
-    return this._downlink.length;
+    return this.downlink.length;
   }
 
   get size(): number {
-    return this._downlink.length;
+    return this.downlink.length;
   }
 
   has(key: AnyValue): boolean {
@@ -76,13 +74,13 @@ export class ListDownlinkRecord extends DownlinkRecord {
     if (index instanceof Num) {
       index = index.value;
     }
-    const n = this._downlink.length;
+    const n = this.downlink.length;
     if (index < 0) {
       index = n + index;
     }
     index = Math.min(Math.max(0, index), n - 1);
     if (index >= 0) {
-      return this._downlink.get(index);
+      return this.downlink.get(index);
     }
     return Item.absent();
   }
@@ -103,23 +101,23 @@ export class ListDownlinkRecord extends DownlinkRecord {
     if (index instanceof Num) {
       index = index.value;
     }
-    const n = this._downlink.length;
+    const n = this.downlink.length;
     if (index < 0) {
       index = n + index;
     }
     index = Math.min(Math.max(0, index), n - 1);
     if (index >= 0) {
-      this._downlink.set(index, Value.fromAny(newItem));
+      this.downlink.set(index, Value.fromAny(newItem));
     }
     return this;
   }
 
   push(...newItems: AnyItem[]): number {
-    return this._downlink.push.apply(this._downlink, arguments);
+    return this.downlink.push(...newItems);
   }
 
   splice(start: number, deleteCount?: number, ...newItems: AnyItem[]): Item[] {
-    return this._downlink.splice.apply(this._downlink, arguments);
+    return this.downlink.splice(start, deleteCount, ...newItems);
   }
 
   delete(key: AnyValue): Item {
@@ -127,12 +125,15 @@ export class ListDownlinkRecord extends DownlinkRecord {
   }
 
   clear(): void {
-    this._downlink.clear();
+    this.downlink.clear();
   }
 
-  forEach<T, S = unknown>(callback: (this: S, item: Item, index: number) => T | void,
-                          thisArg?: S): T | undefined {
-    return this._downlink.forEach(callback, thisArg);
+  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                thisArg: S): T | undefined;
+  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
+                thisArg?: S): T | undefined {
+    return this.downlink.forEach(callback, thisArg);
   }
 
   keyIterator(): Cursor<Value> {

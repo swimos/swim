@@ -13,24 +13,34 @@
 // limitations under the License.
 
 import {Output, Format} from "@swim/codec";
-import {Uri} from "./Uri";
 import {UriPath} from "./UriPath";
 
 /** @hidden */
 export class UriPathSegment extends UriPath {
   /** @hidden */
-  readonly _head: string;
-  /** @hidden */
-  _tail: UriPath;
-  /** @hidden */
-  _string?: string;
-
-  /** @hidden */
   constructor(head: string, tail: UriPath) {
     super();
-    this._head = head;
-    this._tail = tail;
+    Object.defineProperty(this, "segment", {
+      value: head,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "rest", {
+      value: tail,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "stringValue", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
+
+  /** @hidden */
+  declare readonly segment: string;
+
+  /** @hidden */
+  declare readonly rest: UriPath;
 
   isDefined(): boolean {
     return true;
@@ -49,52 +59,55 @@ export class UriPathSegment extends UriPath {
   }
 
   head(): string {
-    return this._head;
+    return this.segment;
   }
 
   tail(): UriPath {
-    return this._tail;
+    return this.rest;
   }
 
   /** @hidden */
   setTail(tail: UriPath): void {
-    if (tail.isAbsolute()) {
-      this._tail = tail;
-    } else {
-      this._tail = UriPath.slash(tail);
+    if (tail instanceof UriPathSegment) {
+      throw new Error("adjacent path segments");
     }
+    Object.defineProperty(this, "rest", {
+      value: tail,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   /** @hidden */
   dealias(): UriPath {
-    return new UriPathSegment(this._head, this._tail);
+    return new UriPathSegment(this.segment, this.rest);
   }
 
   parent(): UriPath {
-    const tail = this._tail;
+    const tail = this.rest;
     if (tail.isEmpty()) {
       return UriPath.empty();
     } else {
-      const next = tail.tail();
-      if (next.isEmpty()) {
+      const rest = tail.tail();
+      if (rest.isEmpty()) {
         return UriPath.empty();
       } else {
-        return new UriPathSegment(this._head, tail.parent());
+        return new UriPathSegment(this.segment, tail.parent());
       }
     }
   }
 
   base(): UriPath {
-    const tail = this._tail;
+    const tail = this.rest;
     if (tail.isEmpty()) {
       return UriPath.empty();
     } else {
-      return new UriPathSegment(this._head, tail.base());
+      return new UriPathSegment(this.segment, tail.base());
     }
   }
 
   prependedSegment(segment: string): UriPath {
-    return UriPath.segment(segment, UriPath.slash(this));
+    return UriPath.segment(segment, this.prependedSlash());
   }
 
   debug(output: Output): void {
@@ -103,18 +116,27 @@ export class UriPathSegment extends UriPath {
   }
 
   display(output: Output): void {
-    if (this._string !== void 0) {
-      output = output.write(this._string);
+    const stringValue = this.stringValue;
+    if (stringValue !== void 0) {
+      output = output.write(stringValue);
     } else {
       super.display(output);
     }
   }
 
+  /** @hidden */
+  declare readonly stringValue: string | undefined;
+
   toString(): string {
-    if (this._string === void 0) {
-      this._string = Format.display(this);
+    let stringValue = this.stringValue;
+    if (stringValue === void 0) {
+      stringValue = Format.display(this);
+      Object.defineProperty(this, "stringValue", {
+        value: stringValue,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    return this._string;
+    return stringValue;
   }
 }
-Uri.PathSegment = UriPathSegment;

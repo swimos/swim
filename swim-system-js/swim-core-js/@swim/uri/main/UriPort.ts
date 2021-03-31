@@ -12,62 +12,60 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Comparable, HashCode, Murmur3, HashGenCacheMap} from "@swim/util";
+import {HashCode, Lazy, Compare, Strings, HashGenCacheMap} from "@swim/util";
 import {Output, Format, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
 
 export type AnyUriPort = UriPort | number | string;
 
-export class UriPort implements Comparable<UriPort>, HashCode, Debug, Display {
+export class UriPort implements HashCode, Compare, Debug, Display {
   /** @hidden */
-  readonly _number: number;
-
-  /** @hidden */
-  constructor(num: number) {
-    this._number = num;
+  constructor(portNumber: number) {
+    Object.defineProperty(this, "number", {
+      value: portNumber,
+      enumerable: true,
+    });
   }
 
   isDefined(): boolean {
-    return this._number !== 0;
+    return this.number !== 0;
   }
 
-  number(): number {
-    return this._number;
-  }
+  declare readonly number: number;
 
   valueOf(): number {
-    return this._number;
+    return this.number;
   }
 
   toAny(): number {
-    return this._number;
+    return this.number;
   }
 
-  compareTo(that: UriPort): 0 | 1 | -1 {
-    return this._number < that._number ? -1 : this._number > that._number ? 1 : 0;
+  compareTo(that: unknown): number {
+    if (that instanceof UriPort) {
+      return this.number < that.number ? -1 : this.number > that.number ? 1 : 0;
+    }
+    return NaN;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof UriPort) {
-      return this._number === that._number;
+      return this.number === that.number;
     }
     return false;
   }
 
   hashCode(): number {
-    if (UriPort._hashSeed === void 0) {
-      UriPort._hashSeed = Murmur3.seed(UriPort);
-    }
-    return Murmur3.mash(Murmur3.mix(UriPort._hashSeed, this._number));
+    return Strings.hash(this.toString());
   }
 
   debug(output: Output): void {
     output = output.write("UriPort").write(46/*'.'*/);
     if (this.isDefined()) {
-      output = output.write("from").write(40/*'('*/);
-      Format.displayNumber(this._number, output);
+      output = output.write("create").write(40/*'('*/);
+      Format.displayNumber(this.number, output);
       output = output.write(41/*')'*/);
     } else {
       output = output.write("undefined").write(40/*'('*/).write(41/*')'*/);
@@ -75,67 +73,56 @@ export class UriPort implements Comparable<UriPort>, HashCode, Debug, Display {
   }
 
   display(output: Output): void {
-    Format.displayNumber(this._number, output);
+    Format.displayNumber(this.number, output);
   }
 
   toString(): string {
-    return "" + this._number;
+    return "" + this.number;
   }
 
-  private static _hashSeed?: number;
-
-  private static _undefined?: UriPort;
-
-  private static _cache?: HashGenCacheMap<number, UriPort>;
-
+  @Lazy
   static undefined(): UriPort {
-    if (UriPort._undefined === void 0) {
-      UriPort._undefined = new UriPort(0);
-    }
-    return UriPort._undefined;
+    return new UriPort(0);
   }
 
-  static from(number: number) {
-    if (number > 0) {
-      const cache = UriPort.cache();
+  static create(number: number): UriPort {
+    if (number === 0) {
+      return UriPort.undefined();
+    } else if (number > 0) {
+      const cache = UriPort.cache;
       const port = cache.get(number);
       if (port !== void 0) {
         return port;
       } else {
         return cache.put(number, new UriPort(number));
       }
-    } else if (number === 0) {
-      return UriPort.undefined();
     } else {
       throw new TypeError("" + number);
     }
   }
 
-  static fromAny(port: AnyUriPort | null | undefined): UriPort {
-    if (port === null || port === void 0) {
+  static fromAny(value: AnyUriPort | null | undefined): UriPort {
+    if (value === void 0 || value === null) {
       return UriPort.undefined();
-    } else if (port instanceof UriPort) {
-      return port;
-    } else if (typeof port === "number") {
-      return UriPort.from(port);
-    } else if (typeof port === "string") {
-      return UriPort.parse(port);
+    } else if (value instanceof UriPort) {
+      return value;
+    } else if (typeof value === "number") {
+      return UriPort.create(value);
+    } else if (typeof value === "string") {
+      return UriPort.parse(value);
     } else {
-      throw new TypeError("" + port);
+      throw new TypeError("" + value);
     }
   }
 
-  static parse(string: string): UriPort {
-    return Uri.standardParser().parsePortString(string);
+  static parse(portPart: string): UriPort {
+    return Uri.standardParser.parsePortString(portPart);
   }
 
   /** @hidden */
-  static cache(): HashGenCacheMap<number, UriPort> {
-    if (UriPort._cache === void 0) {
-      const cacheSize = 4;
-      UriPort._cache = new HashGenCacheMap<number, UriPort>(cacheSize);
-    }
-    return UriPort._cache;
+  @Lazy
+  static get cache(): HashGenCacheMap<number, UriPort> {
+    const cacheSize = 16;
+    return new HashGenCacheMap<number, UriPort>(cacheSize);
   }
 }
-Uri.Port = UriPort;

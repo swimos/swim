@@ -23,7 +23,7 @@ import {
   SyncedResponse,
 } from "@swim/warp";
 import {MapDownlinkRecord, WarpClient} from "@swim/client";
-import {MockServer} from "../MockServer";
+import type {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
 export class MapDownlinkRecordSpec extends Spec {
@@ -36,15 +36,15 @@ export class MapDownlinkRecordSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
-          server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
+          server.send(LinkedResponse.create(envelope.node, envelope.lane));
           const header = Record.of(Slot.of("key", "the"));
-          server.send(EventMessage.of(envelope.node(), envelope.lane(),
+          server.send(EventMessage.create(envelope.node, envelope.lane,
                       Attr.of("update", header).concat("definite article")));
-          server.send(SyncedResponse.of(envelope.node(), envelope.lane()));
+          server.send(SyncedResponse.create(envelope.node, envelope.lane));
         }
       };
       const downlink = client.downlinkMap()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("dictionary/english")
         .laneUri("definitions")
         .keepLinked(false)
@@ -53,12 +53,12 @@ export class MapDownlinkRecordSpec extends Spec {
 
       class StateOutput extends AbstractMapInlet<Value, Value, Record> {
         didRecohereOutputKey(key: Value, version: number): void {
-          const state = this._input!.get()!;
+          const state = this.input!.get()!;
           exam.equal(key, Text.from("the"));
           exam.equal(state.get(Text.from("the")), Text.from("definite article"));
         }
         didRecohereOutput(version: number): void {
-          const state = this._input!.get()!;
+          const state = this.input!.get()!;
           exam.equal(state, Record.of(Slot.of("the", "definite article")));
           resolve();
         }

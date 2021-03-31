@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapInlet} from "./MapInlet";
-import {MapOutlet} from "./MapOutlet";
+import type {MapInlet} from "./MapInlet";
+import type {MapOutlet} from "./MapOutlet";
 
 export interface MapInletMapOutlet<KI, KO, VI, VO, I, O> extends MapInlet<KI, VI, I>, MapOutlet<KO, VO, O> {
 }

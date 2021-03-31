@@ -12,36 +12,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Map} from "@swim/util";
+import type {Map} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {KeyEffect} from "./KeyEffect";
 import {AbstractMapInlet} from "./AbstractMapInlet";
 
 export class MapOutput<K, V> extends AbstractMapInlet<K, V, Map<K, V>> {
-  /** @hidden */
-  protected _state: BTree<K, V>;
-
   constructor() {
     super();
-    this._state = new BTree();
+    Object.defineProperty(this, "state", {
+      value: new BTree(),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
+  /** @hidden */
+  declare readonly state: BTree<K, V>;
+
   get(): Map<K, V> {
-    return this._state;
+    return this.state;
   }
 
   protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
-      if (this._input !== null) {
-        const value = this._input.get(key);
+      const input = this.input;
+      if (input !== null) {
+        const value = input.get(key);
         if (value !== void 0) {
-          this._state = this._state.updated(key, value);
+          Object.defineProperty(this, "state", {
+            value: this.state.updated(key, value),
+            enumerable: true,
+            configurable: true,
+          });
         } else {
-          this._state = this._state.removed(key);
+          Object.defineProperty(this, "state", {
+            value: this.state.removed(key),
+            enumerable: true,
+            configurable: true,
+          });
         }
       }
     } else if (effect === KeyEffect.Remove) {
-      this._state = this._state.removed(key);
+      Object.defineProperty(this, "state", {
+        value: this.state.removed(key),
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 }

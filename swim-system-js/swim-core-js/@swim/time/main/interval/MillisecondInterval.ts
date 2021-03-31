@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {AnyDateTime, DateTime} from "../DateTime";
-import {UnitTimeInterval, TimeInterval} from "../TimeInterval";
+import {UnitTimeInterval, TimeInterval} from "./TimeInterval";
+import {MillisecondsInterval} from "../"; // forward import
 
 /** @hidden */
 export class MillisecondInterval extends UnitTimeInterval {
@@ -45,10 +46,9 @@ export class MillisecondInterval extends UnitTimeInterval {
     if (k === 1) {
       return this;
     } else if (isFinite(k) && k >= 1) {
-      return new TimeInterval.Milliseconds(k);
+      return new MillisecondsInterval(k);
     } else {
       throw new Error("" + k);
     }
   }
 }
-TimeInterval.Millisecond = MillisecondInterval;

@@ -40,11 +40,13 @@ and strongly typed baseline on which to build higher level libraries.
   composable command line argument parser.
 - [**@swim/unit**](swim-core-js/@swim/unit) –
   specializable unit testing framework.
+- [**@swim/mapping**](swim-core-js/@swim/mapping) –
+  functional maps, interpolators, and scales.
 - [**@swim/collections**](swim-core-js/@swim/collections) –
   immutable, structure sharing collections, including B-trees and S-trees
   (sequence trees).
-- [**@swim/interpolate**](swim-core-js/@swim/interpolate) –
-  extensible interpolators for smoothly blending between values.
+- [**@swim/constraint**](swim-core-js/@swim/constraint) –
+  incremental solver for systems of linear constraint equations.
 - [**@swim/structure**](swim-core-js/@swim/structure) –
   generic structured data model, with support for selectors, expressions,
   and lambda functions.  Used as a common abstract syntax tree for Recon,
@@ -57,15 +59,17 @@ and strongly typed baseline on which to build higher level libraries.
   compiler from **@swim/structure** expressions to live-updated data models.
 - [**@swim/recon**](swim-core-js/@swim/recon) –
   object notation with attributes, like if JSON and XML had a baby.
-- [**@swim/math**](swim-core-js/@swim/math) –
-  mathematical and geometric structures and operators.
-- [**@swim/time**](swim-core-js/@swim/time) –
-  date-time, time zone, and time interval data types,
-  with `strptime`/`strftime`-style parsers and formatters.
 - [**@swim/uri**](swim-core-js/@swim/uri) –
   rich object model for working with Uniform Resource Identifiers and URI
   subcomponents, including an efficient and safe codec for parsing and
   writing compliant URI strings.
+- [**@swim/math**](swim-core-js/@swim/math) –
+  mathematical and geometric structures and operators.
+- [**@swim/geo**](swim-core-js/@swim/geo) –
+  geospatial coordinate, projection, and geometry types.
+- [**@swim/time**](swim-core-js/@swim/time) –
+  date-time, time zone, and time interval data types,
+  with `strptime`/`strftime`-style parsers and formatters.
 
 ### [**Swim Mesh** Framework](swim-mesh-js)
 

@@ -13,29 +13,31 @@
 // limitations under the License.
 
 import {Item, Text, Form} from "@swim/structure";
-import {Uri} from "./Uri";
+import {AnyUri, Uri} from "./Uri";
 
 /** @hidden */
-export class UriForm extends Form<Uri> {
-  /** @hidden */
-  readonly _unit: Uri | undefined;
-
-  constructor(unit?: Uri ) {
+export class UriForm extends Form<Uri, AnyUri> {
+  constructor(unit: Uri | undefined) {
     super();
-    this._unit = unit;
+    Object.defineProperty(this, "unit", {
+      value: unit,
+      enumerable: true,
+    });
   }
 
-  unit(): Uri | undefined;
-  unit(unit: Uri | undefined): Form<Uri>;
-  unit(unit?: Uri | undefined): Uri | undefined | Form<Uri> {
-    if (arguments.length === 0) {
-      return this._unit;
-    } else {
+  // @ts-ignore
+  declare readonly unit: Uri | undefined;
+
+  withUnit(unit: Uri | undefined): Form<Uri, AnyUri> {
+    if (unit !== this.unit) {
       return new UriForm(unit);
+    } else {
+      return this;
     }
   }
 
-  mold(object: Uri, item?: Item): Item {
+  mold(object: AnyUri, item?: Item): Item {
+    object = Uri.fromAny(object);
     if (item === void 0) {
       return Text.from(object.toString());
     } else {
@@ -44,7 +46,7 @@ export class UriForm extends Form<Uri> {
   }
 
   cast(item: Item, object?: Uri): Uri | undefined {
-    const value = item.target();
+    const value = item.target;
     try {
       const string = value.stringValue();
       if (typeof string === "string") {
@@ -56,4 +58,3 @@ export class UriForm extends Form<Uri> {
     return void 0;
   }
 }
-Uri.Form = UriForm;

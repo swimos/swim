@@ -124,11 +124,11 @@ export class BTreeSpec extends Spec {
       return x[0] === y[0] && x[1] === y[1];
     }
     for (let i = 0; i < n; i += 1) {
-      if (tree.nextEntry(2 * i - 2) !== undefined) {
-        exam.equal(tree.nextEntry(i - 2), undefined);
+      if (tree.nextEntry(2 * i - 2) !== void 0) {
+        exam.equal(tree.nextEntry(i - 2), void 0);
       }
-      if (tree.nextEntry(2 * i - 1) !== undefined) {
-        exam.equal(tree.nextEntry(i - 1), undefined);
+      if (tree.nextEntry(2 * i - 1) !== void 0) {
+        exam.equal(tree.nextEntry(i - 1), void 0);
       }
       tree.set(2 * i, i);
       if (!equal(tree.nextEntry(2 * i - 2)!, [2 * i, i])) {

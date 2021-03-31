@@ -12,119 +12,127 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Iterator, Cursor} from "@swim/util";
-import {Inlet} from "./Inlet";
-import {Outlet} from "./Outlet";
-import {Inoutlet} from "./Inoutlet";
-import {MapValueFunction, WatchValueFunction} from "./function";
+import {Arrays, Iterator, Cursor} from "@swim/util";
+import type {Inlet} from "./Inlet";
+import type {Outlet} from "./Outlet";
+import {OutletCombinators} from "./OutletCombinators";
+import type {Inoutlet} from "./Inoutlet";
 
 export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
-  /** @hidden */
-  protected _input: Outlet<I> | null;
-  /** @hidden */
-  protected _outputs: ReadonlyArray<Inlet<O>> | null;
-  /** @hidden */
-  protected _version: number;
-
   constructor() {
-    this._input = null;
-    this._outputs = null;
-    this._version = -1;
+    Object.defineProperty(this, "input", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "version", {
+      value: -1,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  abstract get(): O | undefined;
+  declare readonly input: Outlet<I> | null;
 
-  input(): Outlet<I> | null {
-    return this._input;
-  }
+  /** @hidden */
+  declare readonly outputs: ReadonlyArray<Inlet<O>>;
 
-  bindInput(input: Outlet<I> | null): void {
-    if (this._input !== null) {
-      this._input.unbindOutput(this);
-    }
-    this._input = input;
-    if (this._input !== null) {
-      this._input.bindOutput(this);
+  /** @hidden */
+  declare readonly version: number;
+
+  bindInput(newInput: Outlet<I> | null): void {
+    const oldInput = this.input;
+    if (oldInput !== newInput) {
+      if (oldInput !== null) {
+        oldInput.unbindOutput(this);
+      }
+      Object.defineProperty(this, "input", {
+        value: newInput,
+        enumerable: true,
+        configurable: true,
+      });
+      if (newInput !== null) {
+        newInput.bindOutput(this);
+      }
     }
   }
 
   unbindInput(): void {
-    if (this._input !== null) {
-      this._input.unbindOutput(this);
+    const oldInput = this.input;
+    if (oldInput !== null) {
+      oldInput.unbindOutput(this);
+      Object.defineProperty(this, "input", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    this._input = null;
   }
 
   disconnectInputs(): void {
-    if (this._outputs === null) {
-      const input = this._input;
-      if (input !== null) {
-        input.unbindOutput(this);
-        this._input = null;
-        input.disconnectInputs();
-      }
+    const oldInput = this.input;
+    if (oldInput !== null) {
+      oldInput.unbindOutput(this);
+      Object.defineProperty(this, "input", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
+      oldInput.disconnectInputs();
     }
   }
 
+  abstract get(): O | undefined;
+
   outputIterator(): Iterator<Inlet<O>> {
-    return this._outputs !== null ? Cursor.array(this._outputs) : Cursor.empty();
+    return Cursor.array(this.outputs);
   }
 
   bindOutput(output: Inlet<O>): void {
-    const oldOutputs = this._outputs;
-    const n = oldOutputs !== null ? oldOutputs.length : 0;
-    const newOutputs = new Array<Inlet<O>>(n + 1);
-    for (let i = 0; i < n; i += 1) {
-      newOutputs[i] = oldOutputs![i];
-    }
-    newOutputs[n] = output;
-    this._outputs = newOutputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.inserted(output, this.outputs),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   unbindOutput(output: Inlet<O>): void {
-    const oldOutputs = this._outputs;
-    const n = oldOutputs !== null ? oldOutputs.length : 0;
-    for (let i = 0; i < n; i += 1) {
-      if (oldOutputs![i] === output) {
-        if (n > 1) {
-          const newOutputs = new Array<Inlet<O>>(n - 1);
-          for (let j = 0; j < i; j += 1) {
-            newOutputs[j] = oldOutputs![j];
-          }
-          for (let j = i; j < n - 1; j += 1) {
-            newOutputs[j] = oldOutputs![j + 1];
-          }
-          this._outputs = newOutputs;
-        } else {
-          this._outputs = null;
-        }
-        break;
-      }
-    }
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.removed(output, this.outputs),
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   unbindOutputs(): void {
-    const outputs = this._outputs;
-    if (outputs !== null) {
-      this._outputs = null;
-      for (let i = 0, n = outputs.length; i < n; i += 1) {
-        const output = outputs[i];
-        output.unbindInput();
-      }
+    const oldOutputs = this.outputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
+      const output = oldOutputs[i]!;
+      output.unbindInput();
     }
   }
 
   disconnectOutputs(): void {
-    if (this._input === null) {
-      const outputs = this._outputs;
-      if (outputs !== null) {
-        this._outputs = null;
-        for (let i = 0, n = outputs.length; i < n; i += 1) {
-          const output = outputs[i];
-          output.unbindInput();
-          output.disconnectOutputs();
-        }
-      }
+    const oldOutputs = this.outputs;
+    Object.defineProperty(this, "outputs", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
+      const output = oldOutputs[i]!;
+      output.unbindInput();
+      output.disconnectOutputs();
     }
   }
 
@@ -137,13 +145,17 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
   }
 
   decohere(): void {
-    if (this._version >= 0) {
+    if (this.version >= 0) {
       this.willDecohere();
-      this._version = -1;
+      Object.defineProperty(this, "version", {
+        value: -1,
+        enumerable: true,
+        configurable: true,
+      });
       this.onDecohere();
-      const n = this._outputs !== null ? this._outputs.length : 0;
-      for (let i = 0; i < n; i += 1) {
-        this._outputs![i].decohereOutput();
+      const outputs = this.outputs;
+      for (let i = 0, n = outputs.length; i < n; i += 1) {
+        outputs[i]!.decohereOutput();
       }
       this.didDecohere();
     }
@@ -158,16 +170,20 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
   }
 
   recohere(version: number): void {
-    if (this._version < 0) {
+    if (this.version < 0) {
       this.willRecohere(version);
-      this._version = version;
-      if (this._input !== null) {
-        this._input.recohereInput(version);
+      Object.defineProperty(this, "version", {
+        value: version,
+        enumerable: true,
+        configurable: true,
+      });
+      if (this.input !== null) {
+        this.input.recohereInput(version);
       }
       this.onRecohere(version);
-      const n = this._outputs !== null ? this._outputs.length : 0;
-      for (let i = 0; i < n; i += 1) {
-        this._outputs![i].recohereOutput(version);
+      const outputs = this.outputs;
+      for (let i = 0, n = outputs.length; i < n; i += 1) {
+        outputs[i]!.recohereOutput(version);
       }
       this.didRecohere(version);
     }
@@ -196,22 +212,7 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
   protected didRecohere(version: number): void {
     // stub
   }
-
-  memoize(): Outlet<O> {
-    const combinator = new Outlet.MemoizeValueCombinator<O>();
-    combinator.bindInput(this);
-    return combinator;
-  }
-
-  map<O2>(func: MapValueFunction<O, O2>): Outlet<O2> {
-    const combinator = new Outlet.MapValueCombinator<O, O2>(func);
-    combinator.bindInput(this);
-    return combinator;
-  }
-
-  watch(func: WatchValueFunction<O>): this {
-    const combinator = new Outlet.WatchValueCombinator<O>(func);
-    combinator.bindInput(this);
-    return this;
-  }
 }
+export interface AbstractInoutlet<I, O> extends OutletCombinators<O> {
+}
+OutletCombinators.define(AbstractInoutlet.prototype);

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {AnyDateTime, DateTime} from "../DateTime";
-import {TimeInterval} from "../TimeInterval";
+import {TimeInterval} from "./TimeInterval";
 
 /** @hidden */
 export class WeekInterval extends TimeInterval {
@@ -24,33 +24,32 @@ export class WeekInterval extends TimeInterval {
     this.day = day;
   }
 
-  offset(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  offset(t: AnyDateTime, k?: number): DateTime {
+    const d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    return d.day(d.day() + 7 * k);
+    return d.withDay(d.day + 7 * k);
   }
 
-  next(d: AnyDateTime, k?: number): DateTime {
-    d = DateTime.fromAny(d);
+  next(t: AnyDateTime, k?: number): DateTime {
+    let d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    d = d.day(d.day() + 7 * k);
-    d = d.day(d.day() - (d.weekday() + 7 - this.day) % 7);
-    return d.hour(0, 0, 0, 0);
+    d = d.withDay(d.day + 7 * k);
+    d = d.withDay(d.day - (d.weekday + 7 - this.day) % 7);
+    return d.withHour(0, 0, 0, 0);
   }
 
-  floor(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    d = d.day(d.day() - (d.weekday() + 7 - this.day) % 7);
-    return d.hour(0, 0, 0, 0);
+  floor(t: AnyDateTime): DateTime {
+    let d = DateTime.fromAny(t);
+    d = d.withDay(d.day - (d.weekday + 7 - this.day) % 7);
+    return d.withHour(0, 0, 0, 0);
   }
 
-  ceil(d: AnyDateTime): DateTime {
-    d = DateTime.fromAny(d);
-    d = d.time(d.time() - 1);
-    d = d.day(d.day() - (d.weekday() + 7 - this.day) % 7);
-    d = d.hour(0, 0, 0, 0);
-    d = d.day(d.day() + 7);
-    return d.hour(0, 0, 0, 0);
+  ceil(t: AnyDateTime): DateTime {
+    let d = DateTime.fromAny(t);
+    d = new DateTime(d.time - 1, d.zone);
+    d = d.withDay(d.day - (d.weekday + 7 - this.day) % 7);
+    d = d.withHour(0, 0, 0, 0);
+    d = d.withDay(d.day + 7);
+    return d.withHour(0, 0, 0, 0);
   }
 }
-TimeInterval.Week = WeekInterval;

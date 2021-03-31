@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Uri} from "@swim/uri";
-import {DownlinkModel} from "./DownlinkModel";
+import type {Uri} from "@swim/uri";
+import type {DownlinkModel} from "./DownlinkModel";
 
 /** @hidden */
 export interface DownlinkContext {

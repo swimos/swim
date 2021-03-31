@@ -24,21 +24,21 @@ export class DeauthRequestSpec extends Spec {
 
   @Test
   parseDeauth(exam: WarpExam): void {
-    exam.parses("@deauth", DeauthRequest.of());
+    exam.parses("@deauth", DeauthRequest.create());
   }
 
   @Test
   parseDeauthWithBody(exam: WarpExam): void {
-    exam.parses("@deauth@test", DeauthRequest.of(Record.of(Attr.of("test"))));
+    exam.parses("@deauth@test", DeauthRequest.create(Record.of(Attr.of("test"))));
   }
 
   @Test
   writeDeauth(exam: WarpExam): void {
-    exam.writes(DeauthRequest.of(), "@deauth");
+    exam.writes(DeauthRequest.create(), "@deauth");
   }
 
   @Test
   writeDeauthWithBody(exam: WarpExam): void {
-    exam.writes(DeauthRequest.of(Record.of(Attr.of("test"))), "@deauth@test");
+    exam.writes(DeauthRequest.create(Record.of(Attr.of("test"))), "@deauth@test");
   }
 }

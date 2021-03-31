@@ -12,48 +12,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects, HashGenCacheSet} from "@swim/util";
+import {Lazy, Numbers, Strings, HashGenCacheSet} from "@swim/util";
 import {OutputSettings, Output, Format} from "@swim/codec";
+import type {Interpolator} from "@swim/mapping";
 import {AnyItem, Item} from "./Item";
 import {AnyValue, Value} from "./Value";
-import {TextOutput} from "./TextOutput";
+import {Num} from "./"; // forward import
+import {TextOutput} from "./"; // forward import
 
 export type AnyText = Text | string;
 
 export class Text extends Value {
-  /** @hidden */
-  readonly _value: string;
-  /** @hidden */
-  _hashCode?: number;
-
   private constructor(value: string) {
     super();
-    this._value = value;
+    Object.defineProperty(this, "value", {
+      value: value,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "hashValue", {
+      value: void 0,
+      configurable: true,
+    });
   }
 
   isConstant(): boolean {
     return true;
   }
 
-  get value(): string {
-    return this._value;
-  }
+  declare readonly value: string;
 
   get size(): number {
-    return this._value.length;
+    return this.value.length;
   }
 
   stringValue(): string;
   stringValue<T>(orElse: T): string;
   stringValue<T>(orElse?: T): string {
-    return this._value;
+    return this.value;
   }
 
   numberValue(): number | undefined;
   numberValue<T>(orElse: T): number | T;
   numberValue<T>(orElse?: T): number | T | undefined {
     try {
-      return Item.Num.from(this._value).numberValue();
+      return Num.parse(this.value).numberValue();
     } catch (error) {
       return orElse;
     }
@@ -62,9 +64,9 @@ export class Text extends Value {
   booleanValue(): boolean | undefined;
   booleanValue<T>(orElse: T): boolean | T;
   booleanValue<T>(orElse?: T): boolean | T | undefined {
-    if (this._value === "true") {
+    if (this.value === "true") {
       return true;
-    } else if (this._value === "false") {
+    } else if (this.value === "false") {
       return false;
     } else {
       return orElse;
@@ -72,11 +74,11 @@ export class Text extends Value {
   }
 
   toAny(): AnyText {
-    return this._value;
+    return this.value;
   }
 
   valueOf(): string {
-    return this._value;
+    return this.value;
   }
 
   plus(that: AnyValue): Value;
@@ -84,7 +86,7 @@ export class Text extends Value {
   plus(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Text) {
-      return Text.from(this._value + that._value);
+      return Text.from(this.value + that.value);
     }
     return super.plus(that);
   }
@@ -101,64 +103,73 @@ export class Text extends Value {
     return this;
   }
 
-  typeOrder(): number {
+  interpolateTo(that: Text): Interpolator<Text>;
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    return super.interpolateTo(that);
+  }
+
+  get typeOrder(): number {
     return 5;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof Text) {
-      const order = this._value.localeCompare(that._value);
-      return order < 0 ? -1 : order > 0 ? 1 : 0;
+      return this.value.localeCompare(that.value);
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown): boolean {
+    return this.equals(that);
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Text) {
-      return this._value === that._value;
+      return this.value === that.value;
     }
     return false;
   }
 
+  /** @hidden */
+  declare readonly hashValue: number | undefined;
+
   hashCode(): number {
-    if (this._hashCode === void 0) {
-      this._hashCode = Murmur3.hash(this._value);
+    let hashValue = this.hashValue;
+    if (hashValue === void 0) {
+      hashValue = Strings.hash(this.value);
+      Object.defineProperty(this, "hashValue", {
+        value: hashValue,
+      });
     }
-    return this._hashCode;
+    return hashValue;
   }
 
   debug(output: Output): void {
     output = output.write("Text").write(46/*'.'*/);
-    if (this._value.length === 0) {
+    if (this.value.length === 0) {
       output = output.write("empty").write(40/*'('*/).write(41/*')'*/);
     } else {
-      output = output.write("from").write(40/*'('*/).debug(this._value).write(41/*')'*/);
+      output = output.write("from").write(40/*'('*/).debug(this.value).write(41/*')'*/);
     }
   }
 
   display(output: Output): void {
-    Format.debug(this._value, output);
+    Format.debug(this.value, output);
   }
 
   toString(): string {
-    return this._value;
+    return this.value;
   }
 
-  private static _empty?: Text;
-
-  private static _cache?: HashGenCacheSet<Text>;
-
-  static output(settings: OutputSettings = OutputSettings.standard()): Output<Text> {
-    return new TextOutput("", settings);
-  }
-
+  @Lazy
   static empty(): Text {
-    if (Text._empty === void 0) {
-      Text._empty = new Text("");
-    }
-    return Text._empty;
+    return new Text("");
   }
 
   static from(value: string): Text {
@@ -168,7 +179,7 @@ export class Text extends Value {
     } else {
       let text = new Text(value);
       if (n <= 64) {
-        text = Text.cache().put(text);
+        text = Text.cache.put(text);
       }
       return text;
     }
@@ -184,13 +195,17 @@ export class Text extends Value {
     }
   }
 
-  /** @hidden */
-  static cache(): HashGenCacheSet<Text> {
-    if (Text._cache === void 0) {
-      const cacheSize = 128;
-      Text._cache = new HashGenCacheSet<Text>(cacheSize);
+  static output(settings?: OutputSettings): Output<Text> {
+    if (settings === void 0) {
+      settings = OutputSettings.standard();
     }
-    return Text._cache;
+    return new TextOutput("", settings);
+  }
+
+  /** @hidden */
+  @Lazy
+  static get cache(): HashGenCacheSet<Text> {
+    const cacheSize = 128;
+    return new HashGenCacheSet<Text>(cacheSize);
   }
 }
-Item.Text = Text;

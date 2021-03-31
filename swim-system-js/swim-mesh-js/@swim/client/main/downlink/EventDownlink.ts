@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Value} from "@swim/structure";
-import {Uri} from "@swim/uri";
-import {DownlinkContext} from "./DownlinkContext";
-import {DownlinkOwner} from "./DownlinkOwner";
+import type {AnyValue, Value} from "@swim/structure";
+import type {AnyUri, Uri} from "@swim/uri";
+import type {DownlinkContext} from "./DownlinkContext";
+import type {DownlinkOwner} from "./DownlinkOwner";
 import {DownlinkType, DownlinkObserver, DownlinkInit, DownlinkFlags, Downlink} from "./Downlink";
 import {EventDownlinkModel} from "./EventDownlinkModel";
 
@@ -27,27 +27,28 @@ export interface EventDownlinkInit extends EventDownlinkObserver, DownlinkInit {
 
 export class EventDownlink extends Downlink {
   /** @hidden */
-  _observers: ReadonlyArray<EventDownlinkObserver> | null;
-  /** @hidden */
-  _model: EventDownlinkModel | null;
-
-  /** @hidden */
-  constructor(context: DownlinkContext, owner?: DownlinkOwner, init?: EventDownlinkInit,
+  constructor(context: DownlinkContext, owner: DownlinkOwner | null, init?: EventDownlinkInit,
               hostUri?: Uri, nodeUri?: Uri, laneUri?: Uri, prio?: number,
               rate?: number, body?: Value, flags: number = DownlinkFlags.KeepLinked,
-              observers?: ReadonlyArray<EventDownlinkObserver> | EventDownlinkObserver | null) {
+              observers?: ReadonlyArray<EventDownlinkObserver> | EventDownlinkObserver) {
     super(context, owner, init, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
   }
 
-  protected copy(context: DownlinkContext, owner: DownlinkOwner | undefined,
-                 hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
-                 body: Value, flags: number, observers: ReadonlyArray<EventDownlinkObserver> | null): this {
-    return new EventDownlink(context, owner, void 0, hostUri, nodeUri, laneUri,
-                             prio, rate, body, flags, observers) as this;
+  /** @hidden */
+  declare readonly model: EventDownlinkModel | null;
+
+  /** @hidden */
+  declare readonly observers: ReadonlyArray<EventDownlinkObserver>;
+
+  get type(): DownlinkType {
+    return "event";
   }
 
-  type(): DownlinkType {
-    return "event";
+  protected copy(context: DownlinkContext, owner: DownlinkOwner | null,
+                 hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
+                 body: Value, flags: number, observers: ReadonlyArray<EventDownlinkObserver>): EventDownlink {
+    return new EventDownlink(context, owner, void 0, hostUri, nodeUri, laneUri,
+                             prio, rate, body, flags, observers);
   }
 
   observe(observer: EventDownlinkObserver): this {
@@ -55,35 +56,64 @@ export class EventDownlink extends Downlink {
   }
 
   open(): this {
-    const laneUri = this._laneUri;
+    const laneUri = this.ownLaneUri;
     if (laneUri.isEmpty()) {
       throw new Error("no lane");
     }
-    let nodeUri = this._nodeUri;
+    let nodeUri = this.ownNodeUri;
     if (nodeUri.isEmpty()) {
       throw new Error("no node");
     }
-    let hostUri = this._hostUri;
+    let hostUri = this.ownHostUri;
     if (hostUri.isEmpty()) {
       hostUri = nodeUri.endpoint();
       nodeUri = hostUri.unresolve(nodeUri);
     }
-    let model = this._context.getDownlink(hostUri, nodeUri, laneUri);
+    let model = this.context.getDownlink(hostUri, nodeUri, laneUri);
     if (model !== void 0) {
       if (!(model instanceof EventDownlinkModel)) {
         throw new Error("downlink type mismatch");
       }
       model.addDownlink(this);
     } else {
-      model = new EventDownlinkModel(this._context, hostUri, nodeUri, laneUri,
-                                     this._prio, this._rate, this._body);
+      model = new EventDownlinkModel(this.context, hostUri, nodeUri, laneUri,
+                                     this.ownPrio, this.ownRate, this.ownBody);
       model.addDownlink(this);
-      this._context.openDownlink(model);
+      this.context.openDownlink(model);
     }
-    this._model = model as EventDownlinkModel;
-    if (this._owner !== void 0) {
-      this._owner.addDownlink(this);
+    Object.defineProperty(this, "model", {
+      value: model as EventDownlinkModel,
+      enumerable: true,
+      configurable: true,
+    });
+    if (this.owner !== null) {
+      this.owner.addDownlink(this);
     }
     return this;
   }
+}
+export interface EventDownlink {
+  hostUri(): Uri;
+  hostUri(hostUri: AnyUri): EventDownlink;
+
+  nodeUri(): Uri;
+  nodeUri(nodeUri: AnyUri): EventDownlink;
+
+  laneUri(): Uri;
+  laneUri(laneUri: AnyUri): EventDownlink;
+
+  prio(): number;
+  prio(prio: number): EventDownlink;
+
+  rate(): number;
+  rate(rate: number): EventDownlink;
+
+  body(): Value;
+  body(body: AnyValue): EventDownlink;
+
+  keepLinked(): boolean;
+  keepLinked(keepLinked: boolean): EventDownlink;
+
+  keepSynced(): boolean;
+  keepSynced(keepSynced: boolean): EventDownlink;
 }

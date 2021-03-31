@@ -1,6 +1,6 @@
 {
   "name": "@swim/core",
-  "version": "3.11.0-dev.20201021",
+  "version": "3.11.0-dev.20210331",
   "description": "Swim Core TypeScript Framework",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -9,15 +9,18 @@
   "repository": "https://github.com/swimos/swim.git",
   "private": true,
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "9",
+    "@rollup/plugin-node-resolve": "11",
+    "@types/eslint": "7",
     "@types/node": "14",
-    "rollup": "2.32",
+    "@typescript-eslint/eslint-plugin": "4",
+    "@typescript-eslint/parser": "4",
+    "eslint": "7",
+    "rollup": "2.42",
     "rollup-plugin-sourcemaps": "0.6",
     "terser": "5",
     "tslib": "2",
-    "tslint": "6",
-    "typedoc": "0.19",
-    "typescript": "4.0"
+    "typedoc": "0.20",
+    "typescript": "4.2"
   },
   "scripts": {
     "postinstall": "cd ./@swim/build && npm run compile && npm run bundle",

@@ -12,24 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Comparable, HashCode, Murmur3, HashGenCacheSet} from "@swim/util";
-import {Output, Debug, Display} from "@swim/codec";
+import {HashCode, Compare, Lazy, Strings, HashGenCacheSet} from "@swim/util";
+import type {Output, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
-import {UriQueryBuilder} from "./UriQueryBuilder";
+import {UriQueryParam} from "./"; // forward import
+import {UriQueryUndefined} from "./"; // forward import
+import {UriQueryBuilder} from "./"; // forward import
 
 export type AnyUriQuery = UriQuery | {[key: string]: string} | string;
 
-export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug, Display {
-  /** @hidden */
-  _hashCode?: number;
-
+export abstract class UriQuery implements HashCode, Compare, Debug, Display {
   abstract isDefined(): boolean;
 
   abstract isEmpty(): boolean;
 
   get length(): number {
     let n = 0;
-    let query = this as UriQuery;
+    let query: UriQuery = this;
     while (!query.isEmpty()) {
       n += 1;
       query = query.tail();
@@ -37,11 +36,11 @@ export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug,
     return n;
   }
 
-  abstract head(): [string | null, string];
+  abstract head(): [string | undefined, string];
 
-  abstract key(): string | null;
+  abstract readonly key: string | undefined;
 
-  abstract value(): string;
+  abstract readonly value: string;
 
   abstract tail(): UriQuery;
 
@@ -52,9 +51,9 @@ export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug,
   abstract dealias(): UriQuery;
 
   has(key: string): boolean {
-    let query = this as UriQuery;
+    let query: UriQuery = this;
     while (!query.isEmpty()) {
-      if (key === query.key()) {
+      if (key === query.key) {
         return true;
       }
       query = query.tail();
@@ -63,10 +62,10 @@ export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug,
   }
 
   get(key: string): string | undefined {
-    let query = this as UriQuery;
+    let query: UriQuery = this;
     while (!query.isEmpty()) {
-      if (key === query.key()) {
-        return query.value();
+      if (key === query.key) {
+        return query.value;
       }
       query = query.tail();
     }
@@ -74,15 +73,15 @@ export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug,
   }
 
   updated(key: string, value: string): UriQuery {
-    let query = this as UriQuery;
-    const builder = new Uri.QueryBuilder();
+    let query: UriQuery = this;
+    const builder = new UriQueryBuilder();
     let updated = false;
     while (!query.isEmpty()) {
-      if (key === query.key()) {
+      if (key === query.key) {
         builder.addParam(key, value);
         updated = true;
       } else {
-        builder.addParam(query.key(), query.value());
+        builder.addParam(query.key, query.value);
       }
       query = query.tail();
     }
@@ -93,14 +92,14 @@ export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug,
   }
 
   removed(key: string): UriQuery {
-    let query = this as UriQuery;
-    const builder = new Uri.QueryBuilder();
+    let query: UriQuery = this;
+    const builder = new UriQueryBuilder();
     let updated = false;
     while (!query.isEmpty()) {
-      if (key === query.key()) {
+      if (key === query.key) {
         updated = true;
       } else {
-        builder.addParam(query.key(), query.value());
+        builder.addParam(query.key, query.value);
       }
       query = query.tail();
     }
@@ -111,19 +110,19 @@ export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug,
     }
   }
 
-  appended(key: string | null, value: string): UriQuery;
+  appended(key: string | undefined, value: string): UriQuery;
   appended(params: AnyUriQuery): UriQuery;
-  appended(key: AnyUriQuery | null, value?: string): UriQuery {
-    const builder = new Uri.QueryBuilder();
+  appended(key: AnyUriQuery | undefined, value?: string): UriQuery {
+    const builder = new UriQueryBuilder();
     builder.addQuery(this);
     builder.add(key as any, value as any);
     return builder.bind();
   }
 
-  prepended(key: string | null, value: string): UriQuery;
+  prepended(key: string | undefined, value: string): UriQuery;
   prepended(params: AnyUriQuery): UriQuery;
-  prepended(key: AnyUriQuery | null, value?: string): UriQuery {
-    const builder = new Uri.QueryBuilder();
+  prepended(key: AnyUriQuery | undefined, value?: string): UriQuery {
+    const builder = new UriQueryBuilder();
     builder.add(key as any, value as any);
     builder.addQuery(this);
     return builder.bind();
@@ -132,14 +131,14 @@ export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug,
   toAny(params?: {[key: string]: string}): {[key: string]: string} | undefined {
     if (this.isDefined()) {
       params = params || {};
-      let query = this as UriQuery;
+      let query: UriQuery = this;
       let i = 0;
       while (!query.isEmpty()) {
-        const key = query.key();
-        if (key !== null) {
-          params[key] = query.value();
+        const key = query.key;
+        if (key !== void 0) {
+          params[key] = query.value;
         } else {
-          params["$" + i] = query.value();
+          params["$" + i] = query.value;
         }
         query = query.tail();
         i += 1;
@@ -148,9 +147,11 @@ export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug,
     return params;
   }
 
-  compareTo(that: UriQuery): 0 | 1 | -1 {
-    const order = this.toString().localeCompare(that.toString());
-    return order < 0 ? -1 : order > 0 ? 1 : 0;
+  compareTo(that: UriQuery): number {
+    if (that instanceof UriQuery) {
+      return this.toString().localeCompare(that.toString());
+    }
+    return NaN;
   }
 
   equals(that: unknown): boolean {
@@ -163,16 +164,13 @@ export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug,
   }
 
   hashCode(): number {
-    if (this._hashCode === void 0) {
-      this._hashCode = Murmur3.hash(this.toString());
-    }
-    return this._hashCode;
+    return Strings.hash(this.toString());
   }
 
   abstract debug(output: Output): void;
 
   display(output: Output): void {
-    let query = this as UriQuery;
+    let query: UriQuery = this;
     let first = true;
     while (!query.isEmpty()) {
       if (!first) {
@@ -180,93 +178,76 @@ export abstract class UriQuery implements Comparable<UriQuery>, HashCode, Debug,
       } else {
         first = false;
       }
-      const key = query.key();
-      if (key !== null) {
+      const key = query.key;
+      if (key !== void 0) {
         Uri.writeParam(key, output);
         output = output.write(61/*'='*/);
       }
-      Uri.writeQuery(query.value(), output);
+      Uri.writeQuery(query.value, output);
       query = query.tail();
     }
   }
 
   abstract toString(): string;
 
-  private static _undefined: UriQuery;
-
-  private static _keyCache: HashGenCacheSet<string>;
-
-  static builder(): UriQueryBuilder {
-    return new Uri.QueryBuilder();
-  }
-
+  @Lazy
   static undefined(): UriQuery {
-    if (UriQuery._undefined === void 0) {
-      UriQuery._undefined = new Uri.QueryUndefined();
-    }
-    return UriQuery._undefined;
+    return new UriQueryUndefined();
   }
 
   static param(value: string, tail?: UriQuery): UriQuery;
-  static param(key: string | null, value: string, tail?: UriQuery): UriQuery;
-  static param(key: string | null, value?: UriQuery | string, tail?: UriQuery): UriQuery {
+  static param(key: string | undefined, value: string, tail?: UriQuery): UriQuery;
+  static param(key: string | undefined, value?: UriQuery | string, tail?: UriQuery): UriQuery {
     if (tail === void 0) {
       tail = value as UriQuery | undefined;
       value = key!;
-      key = null;
-    } else if (key !== null) {
+      key = void 0;
+    } else if (key !== void 0) {
       key = this.cacheKey(key);
     }
     if (tail === void 0) {
       tail = UriQuery.undefined();
     }
-    return new Uri.QueryParam(key, value as string, tail);
+    return new UriQueryParam(key, value as string, tail);
   }
 
-  static from(key: string | null, value: string): UriQuery;
-  static from(params: AnyUriQuery): UriQuery;
-  static from(key: AnyUriQuery | null, value?: string): UriQuery {
-    const builder = new Uri.QueryBuilder();
-    builder.add(key as any, value as any);
-    return builder.bind();
-  }
-
-  static fromAny(query: AnyUriQuery | null | undefined): UriQuery {
-    if (query === null || query === void 0) {
+  static fromAny(value: AnyUriQuery | null | undefined): UriQuery {
+    if (value === void 0 || value === null) {
       return UriQuery.undefined();
-    } else if (query instanceof UriQuery) {
-      return query;
-    } else if (typeof query === "object") {
-      const builder = new Uri.QueryBuilder();
-      builder.add(query);
+    } else if (value instanceof UriQuery) {
+      return value;
+    } else if (typeof value === "object") {
+      const builder = new UriQueryBuilder();
+      builder.add(value);
       return builder.bind();
-    } else if (typeof query === "string") {
-      return UriQuery.parse(query);
+    } else if (typeof value === "string") {
+      return UriQuery.parse(value);
     } else {
-      throw new TypeError("" + query);
+      throw new TypeError("" + value);
     }
   }
 
-  static parse(string: string): UriQuery {
-    return Uri.standardParser().parseQueryString(string);
+  static parse(queryPart: string): UriQuery {
+    return Uri.standardParser.parseQueryString(queryPart);
+  }
+
+  static builder(): UriQueryBuilder {
+    return new UriQueryBuilder();
   }
 
   /** @hidden */
-  static keyCache(): HashGenCacheSet<string> {
-    if (UriQuery._keyCache === void 0) {
-      const keyCacheSize = 64;
-      UriQuery._keyCache = new HashGenCacheSet<string>(keyCacheSize);
-    }
-    return UriQuery._keyCache;
+  @Lazy
+  static get keyCache(): HashGenCacheSet<string> {
+    const keyCacheSize = 64;
+    return new HashGenCacheSet<string>(keyCacheSize);
   }
 
   /** @hidden */
   static cacheKey(key: string): string {
     if (key.length <= 32) {
-      return UriQuery.keyCache().put(key);
+      return UriQuery.keyCache.put(key);
     } else {
       return key;
     }
   }
 }
-Uri.Query = UriQuery;

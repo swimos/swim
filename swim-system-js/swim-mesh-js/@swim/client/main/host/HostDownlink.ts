@@ -12,15 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Uri} from "@swim/uri";
-import {EventMessage, LinkedResponse, SyncedResponse, UnlinkRequest, UnlinkedResponse} from "@swim/warp";
-import {Host} from "./Host";
+import type {Uri} from "@swim/uri";
+import type {
+  EventMessage,
+  LinkedResponse,
+  SyncedResponse,
+  UnlinkRequest,
+  UnlinkedResponse,
+} from "@swim/warp";
+import type {Host} from "./Host";
 
 /** @hidden */
 export interface HostDownlink {
-  nodeUri(): Uri;
+  readonly nodeUri: Uri;
  
-  laneUri(): Uri;
+  readonly laneUri: Uri;
  
   onEventMessage(message: EventMessage, hsot: Host): void;
  

@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {AnyDateTime, DateTime} from "../DateTime";
-import {MILLIS_PER_MINUTE, UnitTimeInterval, TimeInterval} from "../TimeInterval";
+import {UnitTimeInterval, TimeInterval} from "./TimeInterval";
+import {FilterTimeInterval} from "./FilterTimeInterval";
 
 /** @hidden */
 export class MinuteInterval extends UnitTimeInterval {
@@ -21,7 +22,7 @@ export class MinuteInterval extends UnitTimeInterval {
     const z = DateTime.zone(d);
     d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    d += k * MILLIS_PER_MINUTE;
+    d += k * TimeInterval.MillisPerMinute;
     return new DateTime(d, z);
   }
 
@@ -29,21 +30,21 @@ export class MinuteInterval extends UnitTimeInterval {
     const z = DateTime.zone(d);
     d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
-    d = Math.floor((d + k * MILLIS_PER_MINUTE) / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE;
+    d = Math.floor((d + k * TimeInterval.MillisPerMinute) / TimeInterval.MillisPerMinute) * TimeInterval.MillisPerMinute;
     return new DateTime(d, z);
   }
 
   floor(d: AnyDateTime): DateTime {
     const z = DateTime.zone(d);
     d = DateTime.time(d);
-    d = Math.floor(d / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE;
+    d = Math.floor(d / TimeInterval.MillisPerMinute) * TimeInterval.MillisPerMinute;
     return new DateTime(d, z);
   }
 
   ceil(d: AnyDateTime): DateTime {
     const z = DateTime.zone(d);
     d = DateTime.time(d);
-    d = Math.floor(((Math.floor((d - 1) / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE) + MILLIS_PER_MINUTE) / MILLIS_PER_MINUTE) * MILLIS_PER_MINUTE;
+    d = Math.floor(((Math.floor((d - 1) / TimeInterval.MillisPerMinute) * TimeInterval.MillisPerMinute) + TimeInterval.MillisPerMinute) / TimeInterval.MillisPerMinute) * TimeInterval.MillisPerMinute;
     return new DateTime(d, z);
   }
 
@@ -51,15 +52,14 @@ export class MinuteInterval extends UnitTimeInterval {
     if (k === 1) {
       return this;
     } else if (isFinite(k) && k >= 1) {
-      return new TimeInterval.Filter(this, MinuteInterval.modulo.bind(void 0, k));
+      return new FilterTimeInterval(this, MinuteInterval.modulo.bind(void 0, k));
     } else {
       throw new Error("" + k);
     }
   }
 
   private static modulo(k: number, d: DateTime): boolean {
-    const minute = d.minute();
+    const minute = d.minute;
     return isFinite(minute) && minute % k === 0;
   }
 }
-TimeInterval.Minute = MinuteInterval;

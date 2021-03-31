@@ -12,51 +12,54 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Comparable, HashCode, Murmur3, HashGenCacheMap} from "@swim/util";
+import {HashCode, Compare, Lazy, Strings, HashGenCacheMap} from "@swim/util";
 import {Output, Format, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
 
 export type AnyUriFragment = UriFragment | string;
 
-export class UriFragment implements Comparable<UriFragment>, HashCode, Debug, Display {
+export class UriFragment implements HashCode, Compare, Debug, Display {
   /** @hidden */
-  readonly _identifier: string | null;
-  /** @hidden */
-  _string?: string;
-
-  /** @hidden */
-  constructor(identifier: string | null) {
-    this._identifier = identifier;
+  constructor(identifier: string | undefined) {
+    Object.defineProperty(this, "identifier", {
+      value: identifier,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "stringValue", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   isDefined(): boolean {
-    return this._identifier !== null;
+    return this.identifier !== void 0;
   }
 
-  identifier(): string | null {
-    return this._identifier;
-  }
+  declare readonly identifier: string | undefined;
 
   toAny(): string | undefined {
-    return this._identifier !== null ? this._identifier : void 0;
+    return this.identifier;
   }
 
-  compareTo(that: UriFragment): 0 | 1 | -1 {
-    const order = this.toString().localeCompare(that.toString());
-    return order < 0 ? -1 : order > 0 ? 1 : 0;
+  compareTo(that: UriFragment): number {
+    if (that instanceof UriFragment) {
+      return this.toString().localeCompare(that.toString());
+    }
+    return NaN;
   }
 
   equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof UriFragment) {
-      return this._identifier === that._identifier;
+      return this.identifier === that.identifier;
     }
     return false;
   }
 
   hashCode(): number {
-    return Murmur3.hash(this._identifier);
+    return Strings.hash(this.identifier);
   }
 
   debug(output: Output): void {
@@ -69,34 +72,38 @@ export class UriFragment implements Comparable<UriFragment>, HashCode, Debug, Di
   }
 
   display(output: Output): void {
-    if (this._string !== void 0) {
-      output = output.write(this._string);
-    } else if (this._identifier !== null) {
-      Uri.writeFragment(this._identifier, output);
+    const stringValue = this.stringValue
+    if (stringValue !== void 0) {
+      output = output.write(stringValue);
+    } else if (this.identifier !== void 0) {
+      Uri.writeFragment(this.identifier, output);
     }
   }
+
+  /** @hidden */
+  declare readonly stringValue: string | undefined;
 
   toString(): string {
-    if (this._string === void 0) {
-      this._string = Format.display(this);
+    let stringValue = this.stringValue;
+    if (stringValue === void 0) {
+      stringValue = Format.display(this);
+      Object.defineProperty(this, "stringValue", {
+        value: stringValue,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    return this._string;
+    return stringValue;
   }
 
-  private static _undefined?: UriFragment;
-
-  private static _cache?: HashGenCacheMap<string, UriFragment>;
-
+  @Lazy
   static undefined(): UriFragment {
-    if (UriFragment._undefined === void 0) {
-      UriFragment._undefined = new UriFragment(null);
-    }
-    return UriFragment._undefined;
+    return new UriFragment(void 0);
   }
 
-  static from(identifier: string | null): UriFragment {
-    if (identifier !== null) {
-      const cache = UriFragment.cache();
+  static create(identifier: string | undefined): UriFragment {
+    if (identifier !== void 0) {
+      const cache = UriFragment.cache;
       const fragment = cache.get(identifier);
       if (fragment !== void 0) {
         return fragment;
@@ -108,29 +115,26 @@ export class UriFragment implements Comparable<UriFragment>, HashCode, Debug, Di
     }
   }
 
-  static fromAny(fragment: AnyUriFragment | null | undefined): UriFragment {
-    if (fragment === null || fragment === void 0) {
+  static fromAny(value: AnyUriFragment | null | undefined): UriFragment {
+    if (value === void 0 || value === null) {
       return UriFragment.undefined();
-    } else if (fragment instanceof UriFragment) {
-      return fragment;
-    } else if (typeof fragment === "string") {
-      return UriFragment.parse(fragment);
+    } else if (value instanceof UriFragment) {
+      return value;
+    } else if (typeof value === "string") {
+      return UriFragment.parse(value);
     } else {
-      throw new TypeError("" + fragment);
+      throw new TypeError("" + value);
     }
   }
 
-  static parse(string: string): UriFragment {
-    return Uri.standardParser().parseFragmentString(string);
+  static parse(fragmentPart: string): UriFragment {
+    return Uri.standardParser.parseFragmentString(fragmentPart);
   }
 
   /** @hidden */
-  static cache(): HashGenCacheMap<string, UriFragment> {
-    if (UriFragment._cache === void 0) {
-      const cacheSize = 32;
-      UriFragment._cache = new HashGenCacheMap<string, UriFragment>(cacheSize);
-    }
-    return UriFragment._cache;
+  @Lazy
+  static get cache(): HashGenCacheMap<string, UriFragment> {
+    const cacheSize = 32;
+    return new HashGenCacheMap<string, UriFragment>(cacheSize);
   }
 }
-Uri.Fragment = UriFragment;

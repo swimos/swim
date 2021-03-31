@@ -13,66 +13,86 @@
 // limitations under the License.
 
 import {Cursor} from "@swim/util";
-import {Value} from "../Value";
-import {Form} from "../Form";
+import type {Value} from "../Value";
+import type {Form} from "../form/Form";
 
 /** @hidden */
 export class ValueEntryCursor<K, V> extends Cursor<[K, V]> {
-  private readonly _cursor: Cursor<[Value, Value]>;
-  private readonly _keyForm: Form<K, unknown>;
-  private readonly _valueForm: Form<V, unknown>;
+  /** @hidden */
+  declare readonly cursor: Cursor<[Value, Value]>;
+  /** @hidden */
+  declare readonly keyForm: Form<K, unknown>;
+  /** @hidden */
+  declare readonly valueForm: Form<V, unknown>;
 
   constructor(cursor: Cursor<[Value, Value]>, keyForm: Form<K, unknown>, valueForm: Form<V, unknown>) {
     super();
-    this._cursor = cursor;
-    this._keyForm = keyForm;
-    this._valueForm = valueForm;
+    Object.defineProperty(this, "cursor", {
+      value: cursor,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "keyForm", {
+      value: keyForm,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "valueForm", {
+      value: valueForm,
+      enumerable: true,
+    });
   }
 
   isEmpty(): boolean {
-    return this._cursor.isEmpty();
+    return this.cursor.isEmpty();
   }
 
   head(): [K, V] {
-    const pair = this._cursor.head();
-    return [pair[0].coerce(this._keyForm), pair[1].coerce(this._valueForm)];
+    const pair = this.cursor.head();
+    return [pair[0].coerce(this.keyForm), pair[1].coerce(this.valueForm)];
   }
 
   step(): void {
-    this._cursor.step();
+    this.cursor.step();
   }
 
   skip(count: number): void {
-    this._cursor.skip(count);
+    this.cursor.skip(count);
   }
 
   hasNext(): boolean {
-    return this._cursor.hasNext();
+    return this.cursor.hasNext();
   }
 
   nextIndex(): number {
-    return this._cursor.nextIndex();
+    return this.cursor.nextIndex();
   }
 
   next(): {value?: [K, V], done: boolean} {
-    const {value, done} = this._cursor.next();
-    return {value: value && [value[0].coerce(this._keyForm), value[1].coerce(this._valueForm)], done};
+    const {value, done} = this.cursor.next();
+    if (value !== void 0) {
+      return {value: [value[0].coerce(this.keyForm), value[1].coerce(this.valueForm)], done};
+    } else {
+      return {done};
+    }
   }
 
   hasPrevious(): boolean {
-    return this._cursor.hasPrevious();
+    return this.cursor.hasPrevious();
   }
 
   previousIndex(): number {
-    return this._cursor.previousIndex();
+    return this.cursor.previousIndex();
   }
 
   previous(): {value?: [K, V], done: boolean} {
-    const {value, done} = this._cursor.next();
-    return {value: value && [value[0].coerce(this._keyForm), value[1].coerce(this._valueForm)], done};
+    const {value, done} = this.cursor.previous();
+    if (value !== void 0) {
+      return {value: [value[0].coerce(this.keyForm), value[1].coerce(this.valueForm)], done};
+    } else {
+      return {done};
+    }
   }
 
   delete(): void {
-    this._cursor.delete();
+    this.cursor.delete();
   }
 }

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Spec, Test, Exam} from "@swim/unit";
 import {Severity} from "@swim/util";
 import {Mark, Span, OutputSettings, Diagnostic, Unicode} from "@swim/codec";
-import {Spec, Test, Exam} from "@swim/unit";
 
 export class DiagnosticSpec extends Spec {
   printDiagnostic(diagnostic: Diagnostic): void {
@@ -23,9 +23,9 @@ export class DiagnosticSpec extends Spec {
 
   @Test
   testOneLineMarkAtStart(exam: Exam): void {
-    const input = Unicode.stringInput("Hello, world!\n").id("input");
+    const input = Unicode.stringInput("Hello, world!\n").withId("input");
     const mark = Mark.at(0, 1, 1);
-    const diagnostic = Diagnostic.from(input, mark, Severity.debug());
+    const diagnostic = Diagnostic.create(input, mark, Severity.debug());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), " --> input:1:1\n"
                                     + "  |\n"
@@ -35,9 +35,9 @@ export class DiagnosticSpec extends Spec {
 
   @Test
   testOneLineMarkAtNewline(exam: Exam): void {
-    const input = Unicode.stringInput("Hello, world!\n").id("input");
+    const input = Unicode.stringInput("Hello, world!\n").withId("input");
     const mark = Mark.at(13, 1, 14);
-    const diagnostic = Diagnostic.from(input, mark, Severity.debug());
+    const diagnostic = Diagnostic.create(input, mark, Severity.debug());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), " --> input:1:14\n"
                                     + "  |\n"
@@ -47,9 +47,9 @@ export class DiagnosticSpec extends Spec {
 
   @Test
   testOneLineMark(exam: Exam): void {
-    const input = Unicode.stringInput("Hello, world!\n").id("input");
+    const input = Unicode.stringInput("Hello, world!\n").withId("input");
     const mark = Mark.at(5, 1, 6);
-    const diagnostic = Diagnostic.from(input, mark, Severity.info());
+    const diagnostic = Diagnostic.create(input, mark, Severity.info());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), " --> input:1:6\n"
                                     + "  |\n"
@@ -59,9 +59,9 @@ export class DiagnosticSpec extends Spec {
 
   @Test
   testOneLineMarkWithNote(exam: Exam): void {
-    const input = Unicode.stringInput("Hello, world!\n").id("input");
+    const input = Unicode.stringInput("Hello, world!\n").withId("input");
     const mark = Mark.at(5, 1, 6, "comma");
-    const diagnostic = Diagnostic.from(input, mark, Severity.note(), null, "optional punctuation");
+    const diagnostic = Diagnostic.create(input, mark, Severity.note(), void 0, "optional punctuation");
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), " --> input:1:6\n"
                                     + "  |\n"
@@ -73,9 +73,9 @@ export class DiagnosticSpec extends Spec {
 
   @Test
   testOneLineMarkNoNewline(exam: Exam): void {
-    const input = Unicode.stringInput("Hello, world!").id("input");
+    const input = Unicode.stringInput("Hello, world!").withId("input");
     const mark = Mark.at(5, 1, 6);
-    const diagnostic = Diagnostic.from(input, mark, Severity.warning());
+    const diagnostic = Diagnostic.create(input, mark, Severity.warning());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), " --> input:1:6\n"
                                     + "  |\n"
@@ -85,9 +85,9 @@ export class DiagnosticSpec extends Spec {
 
   @Test
   testOneLineSpan(exam: Exam): void {
-    const input = Unicode.stringInput("Hello, wordl!\n").id("input");
+    const input = Unicode.stringInput("Hello, wordl!\n").withId("input");
     const span = Span.from(Mark.at(7, 1, 8), Mark.at(11, 1, 12));
-    const diagnostic = Diagnostic.from(input, span, Severity.warning());
+    const diagnostic = Diagnostic.create(input, span, Severity.warning());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), " --> input:1:8\n"
                                     + "  |\n"
@@ -97,9 +97,9 @@ export class DiagnosticSpec extends Spec {
 
   @Test
   testOneLineSpanWithMessageAndNotes(exam: Exam): void {
-    const input = Unicode.stringInput("Hello, wordl!\n").id("input");
+    const input = Unicode.stringInput("Hello, wordl!\n").withId("input");
     const span = Span.from(Mark.at(7, 1, 8), Mark.at(11, 1, 12, "did you mean 'world'?"));
-    const diagnostic = Diagnostic.from(input, span, Severity.warning(), "check your spelling");
+    const diagnostic = Diagnostic.create(input, span, Severity.warning(), "check your spelling");
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), "warning: check your spelling\n"
                                     + " --> input:1:8\n"
@@ -110,9 +110,9 @@ export class DiagnosticSpec extends Spec {
 
   @Test
   testOneLineNumberPadding(exam: Exam): void {
-    const input = Unicode.stringInput("\n\n\n\n\n\n\n\n\nHello, world!\n").id("input");
+    const input = Unicode.stringInput("\n\n\n\n\n\n\n\n\nHello, world!\n").withId("input");
     const mark = Mark.at(14, 10, 6);
-    const diagnostic = Diagnostic.from(input, mark, Severity.warning());
+    const diagnostic = Diagnostic.create(input, mark, Severity.warning());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), "  --> input:10:6\n"
                                     + "   |\n"
@@ -123,9 +123,9 @@ export class DiagnosticSpec extends Spec {
   @Test
   testTwoLineSpan(exam: Exam): void {
     const input = Unicode.stringInput("@test {\"\n"
-                                    + "}\"\n").id("input");
+                                    + "}\"\n").withId("input");
     const span = Span.from(Mark.at(6, 1, 7), Mark.at(10, 2, 2));
-    const diagnostic = Diagnostic.from(input, span, Severity.error());
+    const diagnostic = Diagnostic.create(input, span, Severity.error());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), " --> input:1:7\n"
                                     + "  |\n"
@@ -138,9 +138,9 @@ export class DiagnosticSpec extends Spec {
   @Test
   testTwoLineSpanWithMessageAndNotes(exam: Exam): void {
     const input = Unicode.stringInput("@test {\"\n"
-                                    + "}\"\n").id("input");
+                                    + "}\"\n").withId("input");
     const span = Span.from(Mark.at(6, 1, 7, "opened here"), Mark.at(10, 2, 2, "implicitly closed"));
-    const diagnostic = Diagnostic.from(input, span, Severity.error(), "unclosed block", "check delimiter ordering");
+    const diagnostic = Diagnostic.create(input, span, Severity.error(), "unclosed block", "check delimiter ordering");
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), "error: unclosed block\n"
                                     + " --> input:1:7\n"
@@ -161,9 +161,9 @@ export class DiagnosticSpec extends Spec {
                                     + "  c: 3\n"
                                     + "  d: 4\n"
                                     + "  e: 5\n"
-                                    + "]\n").id("input");
+                                    + "]\n").withId("input");
     const span = Span.from(Mark.at(6, 1, 7), Mark.at(43, 7, 1));
-    const diagnostic = Diagnostic.from(input, span, Severity.error());
+    const diagnostic = Diagnostic.create(input, span, Severity.error());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), " --> input:1:7\n"
                                     + "  |\n"
@@ -186,9 +186,9 @@ export class DiagnosticSpec extends Spec {
                                     + "  c: 3\n"
                                     + "  d: 4\n"
                                     + "  e: 5\n"
-                                    + "]\n").id("input");
+                                    + "]\n").withId("input");
     const span = Span.from(Mark.at(6, 1, 7, "opened here"), Mark.at(43, 7, 1, "implicitly closed"));
-    const diagnostic = Diagnostic.from(input, span, Severity.error());
+    const diagnostic = Diagnostic.create(input, span, Severity.error());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), " --> input:1:7\n"
                                     + "  |\n"
@@ -214,9 +214,9 @@ export class DiagnosticSpec extends Spec {
                                     + "  f: 6\n"
                                     + "  g: 7\n"
                                     + "  h: 8\n"
-                                    + "]\n").id("input");
+                                    + "]\n").withId("input");
     const span = Span.from(Mark.at(6, 1, 7), Mark.at(64, 10, 1));
-    const diagnostic = Diagnostic.from(input, span, Severity.error());
+    const diagnostic = Diagnostic.create(input, span, Severity.error());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), "  --> input:1:7\n"
                                     + "   |\n"
@@ -242,9 +242,9 @@ export class DiagnosticSpec extends Spec {
                                     + "  f: 6\n"
                                     + "  g: 7\n"
                                     + "  h: 8\n"
-                                    + "]\n").id("input");
+                                    + "]\n").withId("input");
     const span = Span.from(Mark.at(6, 1, 7, "opened here"), Mark.at(64, 10, 1, "implicitly closed"));
-    const diagnostic = Diagnostic.from(input, span, Severity.error());
+    const diagnostic = Diagnostic.create(input, span, Severity.error());
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), "  --> input:1:7\n"
                                     + "   |\n"
@@ -265,11 +265,11 @@ export class DiagnosticSpec extends Spec {
                                     + "  foo: 1\n"
                                     + "  bar: 2\n"
                                     + "  foo: 3\n"
-                                    + "]\n").id("input");
+                                    + "]\n").withId("input");
     const span0 = Span.from(Mark.at(10, 2, 3), Mark.at(12, 2, 5, "first use"));
-    const cause = Diagnostic.from(input, span0, Severity.note());
+    const cause = Diagnostic.create(input, span0, Severity.note());
     const span1 = Span.from(Mark.at(28, 4, 3), Mark.at(30, 4, 5, "second use"));
-    const diagnostic = Diagnostic.from(input, span1, Severity.error(), "duplicate field", cause);
+    const diagnostic = Diagnostic.create(input, span1, Severity.error(), "duplicate field", cause);
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), "error: duplicate field\n"
                                     + " --> input:4:3\n"
@@ -287,11 +287,11 @@ export class DiagnosticSpec extends Spec {
                                     + "  foo: 1\n"
                                     + "  bar: 2\n"
                                     + "  foo: 3\n"
-                                    + "]\n").id("input");
+                                    + "]\n").withId("input");
     const span0 = Span.from(Mark.at(28, 4, 3), Mark.at(30, 4, 5, "clobbered here"));
-    const cause = Diagnostic.from(input, span0, Severity.note());
+    const cause = Diagnostic.create(input, span0, Severity.note());
     const span1 = Span.from(Mark.at(10, 2, 3), Mark.at(12, 2, 5, "defined here"));
-    const diagnostic = Diagnostic.from(input, span1, Severity.error(), "clobbered field", cause);
+    const diagnostic = Diagnostic.create(input, span1, Severity.error(), "clobbered field", cause);
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), "error: clobbered field\n"
                                     + " --> input:2:3\n"
@@ -309,11 +309,11 @@ export class DiagnosticSpec extends Spec {
                                     + "  foo: 1\n"
                                     + "  bar: 2\n"
                                     + "  foo: 3\n"
-                                    + "]\n").id("input");
+                                    + "]\n").withId("input");
     const span0 = Span.from(Mark.at(10, 2, 3), Mark.at(12, 2, 5, "first use"));
-    const cause = Diagnostic.from(input, span0, Severity.note(), "clobbered field");
+    const cause = Diagnostic.create(input, span0, Severity.note(), "clobbered field");
     const span1 = Span.from(Mark.at(28, 4, 3), Mark.at(30, 4, 5, "second use"));
-    const diagnostic = Diagnostic.from(input, span1, Severity.error(), "duplicate field", cause);
+    const diagnostic = Diagnostic.create(input, span1, Severity.error(), "duplicate field", cause);
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), "error: duplicate field\n"
                                     + " --> input:4:3\n"
@@ -329,12 +329,12 @@ export class DiagnosticSpec extends Spec {
 
   @Test
   testMultiInputCause(exam: Exam): void {
-    const input0 = Unicode.stringInput("test: true\n").id("input0");
+    const input0 = Unicode.stringInput("test: true\n").withId("input0");
     const span0 = Span.from(Mark.at(0, 1, 1), Mark.at(3, 1, 4, "original definition"));
-    const cause = Diagnostic.from(input0, span0, Severity.note());
-    const input1 = Unicode.stringInput("test: false\n").id("input1");
+    const cause = Diagnostic.create(input0, span0, Severity.note());
+    const input1 = Unicode.stringInput("test: false\n").withId("input1");
     const span1 = Span.from(Mark.at(0, 1, 1), Mark.at(3, 1, 4, "duplicate definition"));
-    const diagnostic = Diagnostic.from(input1, span1, Severity.error(), "ambiguous definition", cause);
+    const diagnostic = Diagnostic.create(input1, span1, Severity.error(), "ambiguous definition", cause);
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), "error: ambiguous definition\n"
                                     + " --> input1:1:1\n"
@@ -349,12 +349,12 @@ export class DiagnosticSpec extends Spec {
 
   @Test
   testMultiInputMultiMessageCause(exam: Exam): void {
-    const input0 = Unicode.stringInput("test: true\n").id("input0");
+    const input0 = Unicode.stringInput("test: true\n").withId("input0");
     const span0 = Span.from(Mark.at(0, 1, 1), Mark.at(3, 1, 4, "original definition"));
-    const cause = Diagnostic.from(input0, span0, Severity.note(), "clobbered declaration");
-    const input1 = Unicode.stringInput("test: false\n").id("input1");
+    const cause = Diagnostic.create(input0, span0, Severity.note(), "clobbered declaration");
+    const input1 = Unicode.stringInput("test: false\n").withId("input1");
     const span1 = Span.from(Mark.at(0, 1, 1), Mark.at(3, 1, 4, "duplicate definition"));
-    const diagnostic = Diagnostic.from(input1, span1, Severity.error(), "ambiguous definition", cause);
+    const diagnostic = Diagnostic.create(input1, span1, Severity.error(), "ambiguous definition", cause);
     this.printDiagnostic(diagnostic);
     exam.equal(diagnostic.toString(), "error: ambiguous definition\n"
                                     + " --> input1:1:1\n"

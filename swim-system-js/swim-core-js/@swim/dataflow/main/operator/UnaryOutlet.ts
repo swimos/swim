@@ -16,20 +16,18 @@ import {Item, Value} from "@swim/structure";
 import {Inlet, AbstractOutlet, OutletInlet} from "@swim/streamlet";
 
 export abstract class UnaryOutlet extends AbstractOutlet<Value> {
-  /** @hidden */
-  readonly _operandInlet: Inlet<Value>;
-
   constructor() {
     super();
-    this._operandInlet = new OutletInlet<Value>(this);
+    Object.defineProperty(this, "operandInlet", {
+      value: new OutletInlet<Value>(this),
+      enumerable: true,
+    });
   }
 
-  operandInlet(): Inlet<Value> {
-    return this._operandInlet;
-  }
+  declare readonly operandInlet: Inlet<Value>;
 
   get(): Value {
-    const operandInput = this._operandInlet.input();
+    const operandInput = this.operandInlet.input;
     if (operandInput !== null) {
       const argument = operandInput.get();
       if (argument !== void 0) {

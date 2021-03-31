@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Comparable, HashCode, Murmur3, HashGenCacheMap} from "@swim/util";
-import {Output, Debug, Display} from "@swim/codec";
+import {HashCode, Compare, Lazy, Strings, HashGenCacheMap} from "@swim/util";
+import type {Output, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
+import {UriHostName} from "./" // forward import
+import {UriHostIPv4} from "./" // forward import
+import {UriHostIPv6} from "./" // forward import
+import {UriHostUndefined} from "./" // forward import
 
 export type AnyUriHost = UriHost | string;
 
-export abstract class UriHost implements Comparable<UriHost>, HashCode, Debug, Display {
-  /** @hidden */
-  _hashCode?: number;
-
+export abstract class UriHost implements HashCode, Compare, Debug, Display {
   protected constructor() {
     // stub
   }
@@ -30,27 +31,29 @@ export abstract class UriHost implements Comparable<UriHost>, HashCode, Debug, D
     return true;
   }
 
-  abstract address(): string;
+  abstract readonly address: string;
 
-  name(): string | null {
-    return null;
+  get name(): string | undefined {
+    return void 0;
   }
 
-  ipv4(): string | null {
-    return null;
+  get ipv4(): string | undefined {
+    return void 0;
   }
 
-  ipv6(): string | null {
-    return null;
+  get ipv6(): string | undefined {
+    return void 0;
   }
 
   toAny(): string {
     return this.toString();
   }
 
-  compareTo(that: UriHost): 0 | 1 | -1 {
-    const order = this.toString().localeCompare(that.toString());
-    return order < 0 ? -1 : order > 0 ? 1 : 0;
+  compareTo(that: unknown): number {
+    if (that instanceof UriHost) {
+      return this.toString().localeCompare(that.toString());
+    }
+    return NaN;
   }
 
   equals(that: unknown): boolean {
@@ -63,10 +66,7 @@ export abstract class UriHost implements Comparable<UriHost>, HashCode, Debug, D
   }
 
   hashCode(): number {
-    if (this._hashCode === void 0) {
-      this._hashCode = Murmur3.hash(this.toString());
-    }
-    return this._hashCode;
+    return Strings.hash(this.toString());
   }
 
   abstract debug(output: Output): void;
@@ -75,70 +75,61 @@ export abstract class UriHost implements Comparable<UriHost>, HashCode, Debug, D
 
   abstract toString(): string;
 
-  private static _undefined?: UriHost;
-
-  private static _cache?: HashGenCacheMap<string, UriHost>;
-
+  @Lazy
   static undefined(): UriHost {
-    if (UriHost._undefined === void 0) {
-      UriHost._undefined = new Uri.HostUndefined();
-    }
-    return UriHost._undefined;
+    return new UriHostUndefined();
   }
 
-  static from(address: string): UriHost {
-    const cache = UriHost.cache();
-    const host = cache.get(address);
-    if (host instanceof Uri.HostName) {
+  static hostname(name: string): UriHost {
+    const cache = UriHost.cache;
+    const host = cache.get(name);
+    if (host instanceof UriHostName) {
       return host;
     } else {
-      return cache.put(address, new Uri.HostName(address));
+      return cache.put(name, new UriHostName(name));
     }
   }
 
-  static ipv4(address: string): UriHost {
-    const cache = UriHost.cache();
-    const host = cache.get(address);
-    if (host instanceof Uri.HostIPv4) {
+  static ipv4(ipv4: string): UriHost {
+    const cache = UriHost.cache;
+    const host = cache.get(ipv4);
+    if (host instanceof UriHostIPv4) {
       return host;
     } else {
-      return cache.put(address, new Uri.HostIPv4(address));
+      return cache.put(ipv4, new UriHostIPv4(ipv4));
     }
   }
 
-  static ipv6(address: string): UriHost {
-    const cache = UriHost.cache();
-    const host = cache.get(address);
-    if (host instanceof Uri.HostIPv6) {
+  static ipv6(ipv6: string): UriHost {
+    const cache = UriHost.cache;
+    const host = cache.get(ipv6);
+    if (host instanceof UriHostIPv6) {
       return host;
     } else {
-      return cache.put(address, new Uri.HostIPv6(address));
+      return cache.put(ipv6, new UriHostIPv6(ipv6));
     }
   }
 
-  static fromAny(host: AnyUriHost | null | undefined): UriHost {
-    if (host === null || host === void 0) {
+  static fromAny(value: AnyUriHost | null | undefined): UriHost {
+    if (value === void 0 || value === null) {
       return UriHost.undefined();
-    } else if (host instanceof UriHost) {
-      return host;
-    } else if (typeof host === "string") {
-      return UriHost.parse(host);
+    } else if (value instanceof UriHost) {
+      return value;
+    } else if (typeof value === "string") {
+      return UriHost.parse(value);
     } else {
-      throw new TypeError("" + host);
+      throw new TypeError("" + value);
     }
   }
 
-  static parse(string: string): UriHost {
-    return Uri.standardParser().parseHostString(string);
+  static parse(hostPart: string): UriHost {
+    return Uri.standardParser.parseHostString(hostPart);
   }
 
   /** @hidden */
-  static cache(): HashGenCacheMap<string, UriHost> {
-    if (UriHost._cache === void 0) {
-      const cacheSize = 16;
-      UriHost._cache = new HashGenCacheMap<string, UriHost>(cacheSize);
-    }
-    return UriHost._cache;
+  @Lazy
+  static get cache(): HashGenCacheMap<string, UriHost> {
+    const cacheSize = 16;
+    return new HashGenCacheMap<string, UriHost>(cacheSize);
   }
 }
-Uri.Host = UriHost;

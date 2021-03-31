@@ -94,23 +94,23 @@ undefined URI components are valid instances of their respective component
 classes.
 
 ```typescript
-Uri.empty().scheme();
+Uri.empty().scheme;
 // UriScheme.undefined()
 
-Uri.empty().authority();
+Uri.empty().authority;
 // UriAuthority.undefined()
 
-Uri.empty().path();
+Uri.empty().path;
 // UriPath.empty()
 
-Uri.empty().query();
+Uri.empty().query;
 // UriQuery.undefined()
 
-Uri.empty().fragment();
+Uri.empty().fragment;
 // UriFragment.undefined()
 ```
 
-Use the `Uri.from` static method to construct a new `Uri` from a `UriScheme`,
+Use the `Uri.create` static method to construct a new `Uri` from a `UriScheme`,
 `UriAuthority`, `UriPath`, `UriQuery`, and `UriFragment`, with `undefined` and
 ommitted arguments replaced by their respective undefined component instances.
 
@@ -177,10 +177,10 @@ Uri.parse("http://user:pass@example.com:80").user();
 // UriUser.parse("user:pass")
 
 Uri.parse("http://user:pass@example.com:80").host();
-// UriHost.from("example.com")
+// UriHost.create("example.com")
 
 Uri.parse("http://user:pass@example.com:80").port();
-// UriPort.from(80)
+// UriPort.create(80)
 
 Uri.parse("http://example.com/test?foo&bar=baz#qux").path();
 // UriPath.parse("/test")
@@ -313,7 +313,7 @@ Uri.parse("http://example.com/foo/").unresolve("http://example.com/foo/bar/baz")
 
 The `UriScheme` class wraps a valid URI scheme name, giving it a meaningful
 type, and a consistent set of methods.  The `UriScheme.undefined` static method
-returns the singleton undefined `UriScheme` instance.  The `UriScheme.from`
+returns the singleton undefined `UriScheme` instance.  The `UriScheme.create`
 static method returns a cached `UriScheme` instance with the given scheme name.
 The `UriScheme.parse` static method parses a URI scheme component to ensure it
 is valid.
@@ -328,16 +328,16 @@ scheme name, or `undefined` if the scheme is not defined.
 UriScheme.undefined().isDefined();
 // false
 
-UriScheme.from("http").isDefined();
+UriScheme.create("http").isDefined();
 // true
 
 UriScheme.parse("my_scheme");
 // throws exception
 
-UriScheme.from("https").name();
+UriScheme.create("https").name;
 // "name"
 
-UriScheme.undefined().name();
+UriScheme.undefined().name;
 // ""
 
 UriScheme.undefined().toAny()
@@ -387,17 +387,17 @@ The `UriAuthority.undefined` static method returns a singleton `UriAuthority`
 instance with undefined user, host, and port components.
 
 ```typescript
-UriAuthority.undefined().user();
+UriAuthority.undefined().user;
 // UriUser.undefined()
 
-UriAuthority.undefined().host();
+UriAuthority.undefined().host;
 // UriHost.undefined()
 
-UriAuthority.undefined().port();
+UriAuthority.undefined().port;
 // UriPort.undefined()
 ```
 
-Use the `UriAuthority.from` static method to construct a new `UriAuthority`
+Use the `UriAuthority.create` static method to construct a new `UriAuthority`
 from a `UriUser`, `UriHost`, and `UriPort`, with `undefined` and ommitted
 arguments replaced by their respective undefined component instances.
 
@@ -436,26 +436,26 @@ instance methods access and update authority subcomponents.  Because
 Here are some examples showing how to access `UriAuthority` subcomponents:
 
 ```typescript
-UriAuthority.parse("user:pass@example.com:80").user();
+UriAuthority.parse("user:pass@example.com:80").user;
 // UriUser.parse("user:pass")
 
-UriAuthority.parse("user:pass@example.com:80").host();
-// UriHost.from("example.com")
+UriAuthority.parse("user:pass@example.com:80").host;
+// UriHost.create("example.com")
 
-UriAuthority.parse("user:pass@example.com:80").port();
-// UriPort.from(80)
+UriAuthority.parse("user:pass@example.com:80").port;
+// UriPort.create(80)
 ```
 
 Here are some examples showing how to update `UriAuthority` subcomponents.
 
 ```typescript
-UriAuthority.parse("user:pass@example.com:80").user(null);
+UriAuthority.parse("user:pass@example.com:80").withUser(null);
 // UriAuthority.parse("example.com:80")
 
-UriAuthority.parse("user:pass@example.com:80").host("www.example.com");
+UriAuthority.parse("user:pass@example.com:80").withHost("www.example.com");
 // UriAuthority.parse("user:pass@www.example.com:80")
 
-UriAuthority.parse("user:pass@example.com:80").port(8080);
+UriAuthority.parse("user:pass@example.com:80").withPort(8080);
 // UriAuthority.parse("user:pass@example.com:8080")
 ```
 
@@ -463,7 +463,7 @@ UriAuthority.parse("user:pass@example.com:80").port(8080);
 
 The `UriUser` class wraps a username and optional password string.  The
 `UriUser.undefined` static method returns a singleton `UriUser` with an
-undefined username and password.  The `UriUser.from` static method constructs
+undefined username and password.  The `UriUser.create` static method constructs
 a new `UriUser` from a username and optional password string.  The
 `UriUser.fromAny` static method coerces a plain old JavaScript object, of type
 `UriUserInit`, or a URI-encoded user string, to a structured `UriUser` instance.
@@ -491,16 +491,16 @@ Use the `UriUser.username` and `UriUser.password` methods to access and update
 user subcomponents.
 
 ```typescript
-UriUser.parse("user:pass").username();
+UriUser.parse("user:pass").username;
 // "user"
 
-UriUser.parse("user:pass").password();
+UriUser.parse("user:pass").password;
 // "pass"
 
-UriUser.parse("user:pass").username("multi");
+UriUser.parse("user:pass").withUsername("multi");
 // UriUser.parse("multi:pass")
 
-UriUser.parse("user:pass").password("secret");
+UriUser.parse("user:pass").withPassword("secret");
 // UriUser.parse("user:secret")
 ```
 
@@ -509,14 +509,14 @@ UriUser.parse("user:pass").password("secret");
 The `UriHost` class models a URI host component, which is either a DNS name,
 an IPv4 address, an IPv6 address, or an undefined host component.  The
 `UriHost.parse` static method parses a URI-encoded host component to a strongly
-typed UriHost instance.  The `UriHost.from` static method constructs a new
+typed UriHost instance.  The `UriHost.hostname` static method constructs a new
 `UriHost` from a host name string.  The `UriHost.ipv4` static method constructs
 a new `UriHost` from an IPv4 address.  And the `UriHost.ipv6` static method
 constructs a new `UriHost` from an IPv6 address.
 
 ```typescript
 UriHost.parse("example.com");
-// UriHost.from("example.com")
+// UriHost.hostname("example.com")
 
 UriHost.parse("127.0.0.1");
 // UriHost.ipv4("127.0.0.1")
@@ -541,7 +541,7 @@ UriHost.parse("example.com").isDefined();
 
 The `UriPort` class wraps a network port number, giving it a meaningful type,
 and a consistent set of methods.  The `UriPort.undefined` static method returns
-the singleton undefined `UriPort` instance.  The `UriPort.from` static method
+the singleton undefined `UriPort` instance.  The `UriPort.create` static method
 returns a cached `UriPort` instance with the given port number.  And the
 `UriPort.parse` static method parses a URI port number.
 
@@ -554,13 +554,13 @@ is not defined.
 UriPort.undefined().isDefined();
 // false
 
-UriPort.from(80).isDefined();
+UriPort.create(80).isDefined();
 // true
 
-UriPort.parse("80").number();
+UriPort.parse("80").number;
 // 80
 
-UriPort.undefined().number();
+UriPort.undefined().number;
 // 0
 ```
 
@@ -572,7 +572,7 @@ incrementally deconstruct URI paths by prefix.  Despite being implemented as a
 linked list, `UriPath` provides a familiar array-like interface.
 
 The `UriPath.parse` static method parses a URI-encoded path string to a
-structured `UriPath` list.  The `UriPath.from` static method constructs a
+structured `UriPath` list.  The `UriPath.of` static method constructs a
 `UriPath` instance from a sequence of unencoded URI path components.  The
 `UriPath.toString` instance method returns a memoized URI-encoded path string.
 
@@ -583,7 +583,7 @@ const path = UriPath.parse("/foo/bar");
 path.toString();
 // "/foo/bar"
 
-UriPath.from("/", "foo/bar");
+UriPath.of("/", "foo/bar");
 // UriPath.parse("/foo%2fbar")
 ```
 
@@ -684,16 +684,16 @@ UriPath.empty().isRelative();
 The `UriPath.name` method gets or updates the last segment of a path.
 
 ```typescript
-UriPath.parse("/foo/index.html").name();
+UriPath.parse("/foo/index.html").name;
 // "index.html"
 
-UriPath.parse("/foo/").name();
+UriPath.parse("/foo/").name;
 // ""
 
-UriPath.parse("/foo/index.html").name("script.js");
+UriPath.parse("/foo/index.html").withName("script.js");
 // UriPath.parse("/foo/script.js")
 
-UriPath.parse("/foo/").name("script.js");
+UriPath.parse("/foo/").withName("script.js");
 // UriPath.parse("/foo/script.js")
 ```
 
@@ -866,7 +866,7 @@ The `UriQuery.builder` method returns a new `UriQueryBuilder` instance.
 The `UriFragment` class wraps a URI fragment identifier, giving it a meaningful
 type, and a consistent set of methods.  The `UriFragment.undefined` static
 method returns the singleton undefined `UriFragment` instance.  The
-`UriFragment.from` static method returns a cached `UriFragment` instance with
+`UriFragment.create` static method returns a cached `UriFragment` instance with
 the given fragment identifier.  The `UriFragment.parse` static method decodes
 an encoded URI fragment component.
 
@@ -879,19 +879,19 @@ identifier, or the `null` if the fragment is not defined.
 UriFragment.undefined().isDefined();
 // false
 
-UriFragment.from("toc").isDefined();
+UriFragment.create("toc").isDefined();
 // true
 
-UriFragment.from("2%");
+UriFragment.create("2%");
 // UriFragment.parse("2%25")
 
-UriFragment.parse("https").name();
+UriFragment.parse("https").identifier;
 // "name"
 
-UriFragment.parse("the%20end").identifier();
+UriFragment.parse("the%20end").identifier;
 // "the end"
 
-UriFragment.undefined().identifier()
+UriFragment.undefined().identifier;
 // null
 ```
 

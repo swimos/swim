@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export {Func} from "./Func";
+
 export {LambdaFunc} from "./LambdaFunc";
 
 export {BridgeFunc} from "./BridgeFunc";

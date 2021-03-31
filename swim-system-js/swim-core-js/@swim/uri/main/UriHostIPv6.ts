@@ -12,51 +12,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Output} from "@swim/codec";
+import type {Output} from "@swim/codec";
 import {Uri} from "./Uri";
 import {UriHost} from "./UriHost";
 
 /** @hidden */
 export class UriHostIPv6 extends UriHost {
   /** @hidden */
-  readonly _address: string;
-  /** @hidden */
-  _string?: string;
-
-  /** @hidden */
   constructor(address: string) {
     super();
-    this._address = address;
+    Object.defineProperty(this, "address", {
+      value: address,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "stringValue", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  address(): string {
-    return this._address;
-  }
+  declare readonly address: string;
 
-  ipv6(): string {
-    return this._address;
+  get ipv6(): string {
+    return this.address;
   }
 
   debug(output: Output): void {
     output = output.write("UriHost").write(46/*'.'*/).write("ipv6")
-        .write(40/*'('*/).debug(this._address).write(41/*')'*/);
+        .write(40/*'('*/).debug(this.address).write(41/*')'*/);
   }
 
   display(output: Output): void {
-    if (this._string !== void 0) {
-      output = output.write(this._string);
+    const stringValue = this.stringValue;
+    if (stringValue !== void 0) {
+      output = output.write(stringValue);
     } else {
       output = output.write(91/*'['*/);
-      Uri.writeHostLiteral(this._address, output);
+      Uri.writeHostLiteral(this.address, output);
       output = output.write(93/*']'*/);
     }
   }
 
+  /** @hidden */
+  declare readonly stringValue: string | undefined;
+
   toString(): string {
-    if (this._string === void 0) {
-      this._string = "[" + this.address + "]";
+    let stringValue = this.stringValue;
+    if (stringValue === void 0) {
+      stringValue = "[" + this.address + "]";
+      Object.defineProperty(this, "stringValue", {
+        value: stringValue,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    return this._string;
+    return stringValue;
   }
 }
-Uri.HostIPv6 = UriHostIPv6;

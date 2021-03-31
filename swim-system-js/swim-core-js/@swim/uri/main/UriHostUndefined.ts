@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Output} from "@swim/codec";
-import {Uri} from "./Uri";
+import type {Output} from "@swim/codec";
 import {UriHost} from "./UriHost";
 
 /** @hidden */
@@ -27,7 +26,7 @@ export class UriHostUndefined extends UriHost {
     return false;
   }
 
-  address(): string {
+  get address(): string {
     return "";
   }
 
@@ -44,4 +43,3 @@ export class UriHostUndefined extends UriHost {
     return "";
   }
 }
-Uri.HostUndefined = UriHostUndefined;

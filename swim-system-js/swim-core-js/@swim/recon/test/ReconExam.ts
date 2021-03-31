@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Objects} from "@swim/util";
+import {Arrays, Values} from "@swim/util";
 import {Input, ParserException, Parser, Unicode, Utf8, Binary} from "@swim/codec";
-import {TestException, TestOptions, Spec, Proof, Report, ExamStatus, Exam} from "@swim/unit";
+import {TestException, TestOptions, Spec, Proof, Report, Exam} from "@swim/unit";
 import {Item, Value} from "@swim/structure";
 import {Recon} from "@swim/recon";
 
 export class ReconExam extends Exam {
-  constructor(report: Report, spec: Spec, name: string,
-              options: TestOptions, status?: ExamStatus) {
-    super(report, spec, name, options, status);
+  constructor(report: Report, spec: Spec, name: string, options: TestOptions) {
+    super(report, spec, name, options);
   }
 
   parsed<O>(actual: O, expected: O, a: string, b: string, part: number): void {
-    if (!Objects.equal(actual, expected)) {
+    if (!Values.equal(actual, expected)) {
       const message = Unicode.stringOutput();
       message.write("when parsing part ").debug(part)
           .write(" of ").debug(a).write(", ").debug(b);
@@ -55,14 +54,14 @@ export class ReconExam extends Exam {
         const a = (input as string).substring(0, i);
         const b = (input as string).substring(i, n);
 
-        let parser = (iteratee as Parser<O>).feed(Unicode.stringInput(a).isPart(true));
+        let parser = (iteratee as Parser<O>).feed(Unicode.stringInput(a).asPart(true));
         if (parser.isDone()) {
           this.parsed(parser.bind(), expected, a, b, 0);
         } else if (parser.isError()) {
           this.parseFailed(parser.trap(), a, b, 0);
         }
 
-        parser = parser.feed(Unicode.stringInput(b).isPart(true));
+        parser = parser.feed(Unicode.stringInput(b).asPart(true));
         if (parser.isDone()) {
           this.parsed(parser.bind(), expected, a, b, 1);
         } else if (parser.isError()) {
@@ -93,7 +92,7 @@ export class ReconExam extends Exam {
 
   writes(item: Item, expected: Uint8Array | string): void {
     if (typeof expected === "string") {
-      const output = Utf8.encodedOutput(Binary.uint8ArrayOutput());
+      const output = Utf8.encodedOutput(Binary.output());
       Unicode.writeString(expected, output);
       expected = output.bind();
     }
@@ -105,12 +104,12 @@ export class ReconExam extends Exam {
     for (let i = 0; i <= n; i += 1) {
       const actual = new Uint8Array(n);
       let buffer = Binary.outputBuffer(actual);
-      buffer = buffer.limit(i);
-      let writer = Recon.write(item, Utf8.decodedOutput(buffer).isPart(true));
-      buffer = buffer.limit(buffer.capacity());
-      writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
+      buffer = buffer.withLimit(i);
+      let writer = Recon.write(item, Utf8.decodedOutput(buffer).asPart(true));
+      buffer = buffer.withLimit(buffer.capacity);
+      writer = writer.pull(Utf8.decodedOutput(buffer).asPart(false));
       if (writer.isDone()) {
-        if (!Objects.equal(actual, expected)) {
+        if (!Arrays.equal(actual, expected)) {
           this.proove(Proof.refuted(actual, "writes", expected));
           throw new TestException();
         }
@@ -127,7 +126,7 @@ export class ReconExam extends Exam {
 
   writesBlock(item: Item, expected: Uint8Array | string): void {
     if (typeof expected === "string") {
-      const output = Utf8.encodedOutput(Binary.uint8ArrayOutput());
+      const output = Utf8.encodedOutput(Binary.output());
       Unicode.writeString(expected, output);
       expected = output.bind();
     }
@@ -139,12 +138,12 @@ export class ReconExam extends Exam {
     for (let i = 0; i <= n; i += 1) {
       const actual = new Uint8Array(n);
       let buffer = Binary.outputBuffer(actual);
-      buffer = buffer.limit(i);
-      let writer = Recon.writeBlock(item, Utf8.decodedOutput(buffer).isPart(true));
-      buffer = buffer.limit(buffer.capacity());
-      writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
+      buffer = buffer.withLimit(i);
+      let writer = Recon.writeBlock(item, Utf8.decodedOutput(buffer).asPart(true));
+      buffer = buffer.withLimit(buffer.capacity);
+      writer = writer.pull(Utf8.decodedOutput(buffer).asPart(false));
       if (writer.isDone()) {
-        if (!Objects.equal(actual, expected)) {
+        if (!Arrays.equal(actual, expected)) {
           this.proove(Proof.refuted(actual, "writes", expected));
           throw new TestException();
         }

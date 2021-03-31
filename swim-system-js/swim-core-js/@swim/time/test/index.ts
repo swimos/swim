@@ -12,28 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
+export {DateTimeParserSpec} from "./DateTimeParserSpec";
+export {TimeIntervalSpec} from "./TimeIntervalSpec";
+export {TimeSuite} from "./TimeSuite";
 
-import {DateTimeParserSpec} from "./DateTimeParserSpec";
-import {TimeIntervalSpec} from "./TimeIntervalSpec";
-
-@Unit
-class TimeSpec extends Spec {
-  @Unit
-  dateTimeParserSpec(): Spec {
-    return new DateTimeParserSpec();
-  }
-
-  @Unit
-  timeIntervalSpec(): Spec {
-    return new TimeIntervalSpec();
-  }
-}
-
-export {
-  DateTimeParserSpec,
-  TimeIntervalSpec,
-  TimeSpec,
-};
-
-TimeSpec.run();
+import {TimeSuite} from "./TimeSuite";
+TimeSuite.run();

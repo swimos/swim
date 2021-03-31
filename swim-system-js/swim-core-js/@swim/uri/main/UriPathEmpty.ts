@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Output} from "@swim/codec";
-import {Uri} from "./Uri";
+import type {Output} from "@swim/codec";
 import {AnyUriPath, UriPath} from "./UriPath";
 
 /** @hidden */
@@ -40,16 +39,16 @@ export class UriPathEmpty extends UriPath {
   }
 
   head(): string {
-    throw new Error("Empty UriPath");
+    throw new Error("empty path");
   }
 
   tail(): UriPath {
-    throw new Error("Empty UriPath");
+    throw new Error("empty path");
   }
 
   /** @hidden */
   setTail(tail: UriPath): void {
-    throw new Error("Empty UriPath");
+    throw new Error("empty path");
   }
 
   /** @hidden */
@@ -66,7 +65,7 @@ export class UriPathEmpty extends UriPath {
   }
 
   appended(...components: AnyUriPath[]): UriPath {
-    return UriPath.from.apply(void 0, arguments);
+    return UriPath.of(...components);
   }
 
   appendedSlash(): UriPath {
@@ -78,7 +77,7 @@ export class UriPathEmpty extends UriPath {
   }
 
   prepended(...components: AnyUriPath[]): UriPath {
-    return UriPath.from.apply(void 0, arguments);
+    return UriPath.of(...components);
   }
 
   prependedSlash(): UriPath {
@@ -106,4 +105,3 @@ export class UriPathEmpty extends UriPath {
     return "";
   }
 }
-Uri.PathEmpty = UriPathEmpty;

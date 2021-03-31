@@ -12,21 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
+export {RecordScopeSpec} from "./RecordScopeSpec";
+export {DataflowSuite} from "./DataflowSuite";
 
-import {RecordScopeSpec} from "./RecordScopeSpec";
-
-@Unit
-class DynamicSpec extends Spec {
-  @Unit
-  recordScopeSpec(): Spec {
-    return new RecordScopeSpec();
-  }
-}
-
-export {
-  RecordScopeSpec,
-  DynamicSpec,
-};
-
-DynamicSpec.run();
+import {DataflowSuite} from "./DataflowSuite";
+DataflowSuite.run();

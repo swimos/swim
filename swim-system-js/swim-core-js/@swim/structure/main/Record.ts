@@ -12,24 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Objects, Cursor, Builder} from "@swim/util";
-import {Output} from "@swim/codec";
+import {Murmur3, Numbers, Constructors, Cursor, Builder} from "@swim/util";
+import type {Output} from "@swim/codec";
+import type {Interpolator} from "@swim/mapping";
 import {AnyItem, Item} from "./Item";
 import {Field} from "./Field";
+import {Attr} from "./Attr";
+import {Slot} from "./Slot";
 import {AnyValue, Value} from "./Value";
-import {RecordCursor} from "./RecordCursor";
-import {AnyText} from "./Text";
-import {AnyNum} from "./Num";
-import {AnyInterpreter, Interpreter} from "./Interpreter";
+import {RecordInterpolator} from "./"; // forward import
+import {RecordCursor} from "./"; // forward import
+import {RecordMap} from "./"; // forward import
+import {AnyText, Text} from "./"; // forward import
+import type {AnyNum} from "./Num";
+import {AnyInterpreter, Interpreter} from "./"; // forward import
 
 export type AnyRecord = Record
                       | {readonly [key: string]: AnyValue}
-                      | ReadonlyArray<unknown>; // ReadonlyArray<AnyItem>
+                      | ReadonlyArray<AnyItem>;
 
 export abstract class Record extends Value implements Builder<Item, Record> {
-  /** @hidden */
-  _hashCode?: number;
-
   /** @hidden */
   constructor() {
     super();
@@ -45,7 +47,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * members.
    */
   isArray(): boolean {
-    return this.fieldCount() === 0;
+    return this.fieldCount === 0;
   }
 
   /**
@@ -53,7 +55,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * members.
    */
   isObject(): boolean {
-    return this.valueCount() === 0;
+    return this.valueCount === 0;
   }
 
   /**
@@ -64,10 +66,10 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   /**
    * Returns the number of [[Field]] members contained in this `Record`.
    */
-  fieldCount(): number {
+  get fieldCount(): number {
     let count = 0;
     this.forEach(function (member: Item): void {
-      if (member instanceof Item.Field) {
+      if (member instanceof Field) {
         count += 1;
       }
     }, this);
@@ -77,7 +79,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   /**
    * Returns the number of [[Value]] members contained in this `Record`.
    */
-  valueCount(): number {
+  get valueCount(): number {
     let count = 0;
     this.forEach(function (member: Item): void {
       if (member instanceof Value) {
@@ -102,9 +104,9 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * structure.  The `tag` can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
-  tag(): string | undefined {
+  get tag(): string | undefined {
     const item = this.head();
-    if (item instanceof Item.Attr) {
+    if (item instanceof Attr) {
       return item.key.value;
     }
     return void 0;
@@ -118,12 +120,12 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * attributed structure is a `Record` with one or more attributes that modify
    * one or more other members.
    */
-  target(): Value {
+  get target(): Value {
     let value: Value | undefined;
     let record: Record | undefined;
     let modified = false;
     this.forEach(function (item: Item): void {
-      if (item instanceof Item.Attr) {
+      if (item instanceof Attr) {
         modified = true;
       } else if (value === void 0 && item instanceof Value) {
         value = item;
@@ -173,7 +175,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   }
 
   /**
-   * Returns `this` `Record.
+   * Returns this `Record`.
    */
   unflattened(): Record {
     return this;
@@ -193,7 +195,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    */
   header(tag: string): Value {
     const head = this.head();
-    if (head instanceof Item.Attr && head.key.value === tag) {
+    if (head instanceof Attr && head.key.value === tag) {
       return head.value;
     } else {
       return Value.absent();
@@ -208,7 +210,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    */
   headers(tag: string): Record | undefined {
     const head = this.head();
-    if (head instanceof Item.Attr && head.key.value === tag) {
+    if (head instanceof Attr && head.key.value === tag) {
       const header = head.value;
       if (header instanceof Record) {
         return header;
@@ -267,7 +269,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   has(key: AnyValue): boolean {
     key = Value.fromAny(key);
     return this.forEach(function (item: Item): boolean | undefined {
-      return item instanceof Item.Field && item.key.equals(key) ? true : void 0;
+      return item instanceof Field && item.key.equals(key) ? true : void 0;
     }, this) || false;
   }
 
@@ -308,7 +310,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   get(key: AnyValue): Value {
     key = Value.fromAny(key);
     return this.forEach(function (item: Item): Value | undefined {
-      return item instanceof Item.Field && item.key.equals(key) ? item.value : void 0;
+      return item instanceof Field && item.key.equals(key) ? item.value : void 0;
     }, this) || Value.absent();
   }
 
@@ -318,9 +320,9 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * `Attr` member with a key equal to the given `key`.
    */
   getAttr(key: AnyText): Value {
-    key = Value.Text.fromAny(key);
+    key = Text.fromAny(key);
     return this.forEach(function (item: Item): Value | undefined {
-      return item instanceof Item.Attr && item.key.equals(key) ? item.value : void 0;
+      return item instanceof Attr && item.key.equals(key) ? item.value : void 0;
     }, this) || Value.absent();
   }
 
@@ -332,7 +334,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   getSlot(key: AnyValue): Value {
     key = Value.fromAny(key);
     return this.forEach(function (item: Item): Value | undefined {
-      return item instanceof Item.Slot && item.key.equals(key) ? item.value : void 0;
+      return item instanceof Slot && item.key.equals(key) ? item.value : void 0;
     }, this) || Value.absent();
   }
 
@@ -344,7 +346,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   getField(key: AnyValue): Field | undefined {
     key = Value.fromAny(key);
     return this.forEach(function (item: Item): Field | undefined {
-      return item instanceof Item.Field && item.key.equals(key) ? item : void 0;
+      return item instanceof Field && item.key.equals(key) ? item : void 0;
     }, this);
   }
 
@@ -362,7 +364,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     const items = this.iterator();
     while (!items.isEmpty()) {
       const item = items.head();
-      if (item instanceof Item.Field && item.key.equals(key)) {
+      if (item instanceof Field && item.key.equals(key)) {
         if (item.isMutable()) {
           item.setValue(newValue);
         } else {
@@ -372,27 +374,27 @@ export abstract class Record extends Value implements Builder<Item, Record> {
       }
       items.step();
     }
-    this.push(new Item.Slot(key, newValue));
+    this.push(new Slot(key, newValue));
     return this;
   }
 
   setAttr(key: AnyText, newValue: AnyValue): this {
-    key = Value.Text.fromAny(key);
+    key = Text.fromAny(key);
     newValue = Value.fromAny(newValue);
     const items = this.iterator();
     while (!items.isEmpty()) {
       const item = items.head();
-      if (item instanceof Item.Field && item.key.equals(key)) {
-        if (item instanceof Item.Attr && item.isMutable()) {
+      if (item instanceof Field && item.key.equals(key)) {
+        if (item instanceof Attr && item.isMutable()) {
           item.setValue(newValue);
         } else {
-          items.set(new Item.Attr(key, newValue));
+          items.set(new Attr(key, newValue));
         }
         return this;
       }
       items.step();
     }
-    this.push(new Item.Attr(key, newValue));
+    this.push(new Attr(key, newValue));
     return this;
   }
 
@@ -402,17 +404,17 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     const items = this.iterator();
     while (!items.isEmpty()) {
       const item = items.head();
-      if (item instanceof Item.Field && item.key.equals(key)) {
-        if (item instanceof Item.Slot && item.isMutable()) {
+      if (item instanceof Field && item.key.equals(key)) {
+        if (item instanceof Slot && item.isMutable()) {
           item.setValue(newValue);
         } else {
-          items.set(new Item.Slot(key, newValue));
+          items.set(new Slot(key, newValue));
         }
         return this;
       }
       items.step();
     }
-    this.push(new Item.Slot(key, newValue));
+    this.push(new Slot(key, newValue));
     return this;
   }
 
@@ -435,37 +437,37 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     while (!items.isEmpty()) {
       const item = items.head();
       if (item.key.equals(key)) {
-        if (item instanceof Item.Field && item.isMutable()) {
+        if (item instanceof Field && item.isMutable()) {
           item.setValue(value);
         } else {
-          items.set(new Item.Slot(key, value));
+          items.set(new Slot(key, value));
         }
         return record;
       }
       items.step();
     }
-    record.push(new Item.Slot(key, value));
+    record.push(new Slot(key, value));
     return record;
   }
 
   updatedAttr(key: AnyText, value: AnyValue): Record {
-    key = Value.Text.fromAny(key);
+    key = Text.fromAny(key);
     value = Value.fromAny(value);
     const record = this.isMutable() ? this : this.branch();
     const items = record.iterator();
     while (!items.isEmpty()) {
       const item = items.head();
       if (item.key.equals(key)) {
-        if (item instanceof Item.Attr && item.isMutable()) {
+        if (item instanceof Attr && item.isMutable()) {
           item.setValue(value);
         } else {
-          items.set(new Item.Attr(key, value));
+          items.set(new Attr(key, value));
         }
         return record;
       }
       items.step();
     }
-    record.push(new Item.Attr(key, value));
+    record.push(new Attr(key, value));
     return record;
   }
 
@@ -477,16 +479,16 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     while (!items.isEmpty()) {
       const item = items.head();
       if (item.key.equals(key)) {
-        if (item instanceof Item.Slot && item.isMutable()) {
+        if (item instanceof Slot && item.isMutable()) {
           item.setValue(value);
         } else {
-          items.set(new Item.Slot(key, value));
+          items.set(new Slot(key, value));
         }
         return record;
       }
       items.step();
     }
-    record.push(new Item.Slot(key, value));
+    record.push(new Slot(key, value));
     return record;
   }
 
@@ -500,13 +502,13 @@ export abstract class Record extends Value implements Builder<Item, Record> {
 
   appended(...items: AnyItem[]): Record {
     const record = this.isMutable() ? this : this.branch();
-    record.push.apply(record, arguments);
+    record.push(...items);
     return record;
   }
 
   prepended(...items: AnyItem[]): Record {
     const record = this.isMutable() ? this : this.branch();
-    record.splice.apply(record, Array.prototype.concat.apply([0, 0], arguments));
+    record.splice(0, 0, ...items);
     return record;
   }
 
@@ -518,8 +520,8 @@ export abstract class Record extends Value implements Builder<Item, Record> {
 
   concat(...items: AnyItem[]): Record {
     const record = this.isMutable() ? this : this.branch();
-    for (let i = 0, n = arguments.length; i < n; i += 1) {
-      Item.fromAny(arguments[i]).forEach(function (item: Item): void {
+    for (let i = 0, n = items.length; i < n; i += 1) {
+      Item.fromAny(items[i]).forEach(function (item: Item): void {
         record.push(item);
       });
     }
@@ -527,16 +529,28 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   }
 
   slice(lower?: number, upper?: number): Record {
-    return this.subRecord.apply(this, arguments).branch();
+    return this.subRecord(lower, upper).branch();
   }
 
   attr(key: AnyText, value?: AnyValue): this {
-    this.push(Item.Attr.of.apply(void 0, arguments));
+    let field: Field;
+    if (arguments.length === 1) {
+      field = Attr.of(key);
+    } else {
+      field = Attr.of(key, value);
+    }
+    this.push(field);
     return this;
   }
 
   slot(key: AnyValue, value?: AnyValue): this {
-    this.push(Item.Slot.of.apply(void 0, arguments));
+    let field: Field;
+    if (arguments.length === 1) {
+      field = Slot.of(key);
+    } else {
+      field = Slot.of(key, value);
+    }
+    this.push(field);
     return this;
   }
 
@@ -546,7 +560,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   }
 
   items(...items: AnyItem[]): this {
-    this.push.apply(this, arguments);
+    this.push(this, ...items);
     return this;
   }
 
@@ -616,7 +630,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     this.forEach(function (item: Item, index: number): void {
       if (item instanceof Value) {
         array[index] = item.toAny();
-      } else if (item instanceof Item.Field) {
+      } else if (item instanceof Field) {
         array[index] = {
           $key: item.key.toAny(),
           $value: item.value.toAny(),
@@ -629,10 +643,10 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   toObject(): {[key: string]: AnyValue} {
     const object = {} as {[key: string]: AnyValue};
     this.forEach(function (item: Item, index: number): void {
-      if (item instanceof Item.Attr) {
+      if (item instanceof Attr) {
         object["@" + item.key.value] = item.value.toAny();
-      } else if (item instanceof Item.Slot) {
-        if (item.key instanceof Value.Text) {
+      } else if (item instanceof Slot) {
+        if (item.key instanceof Text) {
           object[item.key.value] = item.value.toAny();
         } else {
           object["$" + index] = {
@@ -696,7 +710,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     } else if (upper < 0) {
       upper = n + upper;
     }
-    const record = Value.Record.create();
+    const record = Record.create();
     this.forEach(function (item: Item, index: number): null | void {
       if (index < lower!) {
         return;
@@ -710,22 +724,34 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return record;
   }
 
-  abstract forEach<T, S = unknown>(callback: (this: S, item: Item, index: number) => T | void,
-                                   thisArg?: S): T | undefined;
+  abstract forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  abstract forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                         thisArg: S): T | undefined;
 
   iterator(): Cursor<Item> {
     return new RecordCursor(this);
   }
 
-  typeOrder(): number {
+  interpolateTo(that: Record): Interpolator<Record>;
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    if (that instanceof Record) {
+      return RecordInterpolator(this, that);
+    } else {
+      return super.interpolateTo(that);
+    }
+  }
+
+  get typeOrder(): number {
     return 3;
   }
 
-  compareTo(that: Item): 0 | 1 | -1 {
+  compareTo(that: unknown): number {
     if (that instanceof Record) {
       const xs = this.iterator();
       const ys = that.iterator();
-      let order = 0 as 0 | 1 | -1;
+      let order = 0;
       do {
         if (!xs.isEmpty() && !ys.isEmpty()) {
           order = xs.head().compareTo(ys.head());
@@ -744,8 +770,28 @@ export abstract class Record extends Value implements Builder<Item, Record> {
       } else {
         return 0;
       }
+    } else if (that instanceof Item) {
+      return Numbers.compare(this.typeOrder, that.typeOrder);
     }
-    return Objects.compare(this.typeOrder(), that.typeOrder());
+    return NaN;
+  }
+
+  equivalentTo(that: unknown, epsilon?: number): boolean {
+    if (this === that) {
+      return true;
+    } else if (that instanceof Record) {
+      const xs = this.iterator();
+      const ys = that.iterator();
+      while (!xs.isEmpty() && !ys.isEmpty()) {
+        if (!xs.head().equivalentTo(ys.head(), epsilon)) {
+          return false;
+        }
+        xs.step();
+        ys.step();
+      }
+      return xs.isEmpty() && ys.isEmpty();
+    }
+    return false;
   }
 
   equals(that: unknown): boolean {
@@ -767,17 +813,11 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   }
 
   hashCode(): number {
-    if (this._hashCode === void 0) {
-      if (Record._hashSeed === void 0) {
-        Record._hashSeed = Murmur3.seed(Record);
-      }
-      let code = Record._hashSeed;
-      this.forEach(function (item: Item): void {
-        code = Murmur3.mix(code, item.hashCode());
-      }, this);
-      this._hashCode = Murmur3.mash(code);
-    }
-    return this._hashCode;
+    let hashValue = Constructors.hash(Record);
+    this.forEach(function (item: Item): void {
+      hashValue = Murmur3.mix(hashValue, item.hashCode());
+    }, this);
+    return hashValue;
   }
 
   debug(output: Output): void {
@@ -801,22 +841,20 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   }
 
   /** @hidden */
-  static readonly ALIASED: number = 1;
+  static readonly AliasedFlag: number = 1;
   /** @hidden */
-  static readonly IMMUTABLE: number = 2;
-
-  private static _hashSeed?: number;
+  static readonly ImmutableFlag: number = 2;
 
   static empty(): Record {
-    return Record.RecordMap.empty();
+    return RecordMap.empty();
   }
 
   static create(initialCapacity?: number): Record {
-    return Record.RecordMap.create(initialCapacity);
+    return RecordMap.create(initialCapacity);
   }
 
   static of(...items: AnyItem[]): Record {
-    return Record.RecordMap.of.apply(void 0, arguments);
+    return RecordMap.of(...items);
   }
 
   static fromAny(value: AnyRecord): Record {
@@ -845,13 +883,13 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     for (const key in object) {
       const value = object[key];
       if (key.charCodeAt(0) === 36/*'$'*/) {
-        if (!value || typeof value !== "object" || !value.hasOwnProperty("$key")) {
+        if (!value || typeof value !== "object" || !Object.prototype.hasOwnProperty.call(value, "$key")) {
           record.push(Value.fromAny(value));
         } else {
-          record.push(Item.Field.of((value as any).$key, (value as any).$value));
+          record.push(Field.of((value as any).$key, (value as any).$value));
         }
       } else {
-        record.push(Item.Field.of(key, value));
+        record.push(Field.of(key, value));
       }
     }
     return record;
@@ -864,4 +902,3 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return n + 1;
   }
 }
-Item.Record = Record;

@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor} from "@swim/util";
+import {Lazy, Cursor} from "@swim/util";
 import {KeysCursor} from "./KeysCursor";
 import {ValuesCursor} from "./ValuesCursor";
-import {STreeContext} from "./STreeContext";
-import {STree} from "./STree";
-import {STreeLeaf} from "./STreeLeaf";
+import type {STreeContext} from "./STreeContext";
+import {STreeLeaf} from "./"; // forward import
 
 /** @hidden */
 export abstract class STreePage<V = unknown, I = unknown> {
-  abstract get arity(): number;
+  abstract readonly arity: number;
 
-  abstract get size(): number;
+  abstract readonly size: number;
 
   abstract isEmpty(): boolean;
 
@@ -72,13 +71,8 @@ export abstract class STreePage<V = unknown, I = unknown> {
 
   abstract reverseEntries(): Cursor<[I, V]>;
 
-  private static _empty?: STreeLeaf<unknown, unknown>;
-
+  @Lazy
   static empty<V, I>(): STreeLeaf<V, I> {
-    if (STreePage._empty === void 0) {
-      STreePage._empty = new STree.Leaf([]);
-    }
-    return STreePage._empty as STreeLeaf<V, I>;
+    return new STreeLeaf([]);
   }
 }
-STree.Page = STreePage;

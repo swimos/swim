@@ -14,7 +14,29 @@
 
 import {AnyItem, Item} from "./Item";
 import {AnyValue, Value} from "./Value";
-import {Operator} from "./Operator";
+import {Num} from "./Num";
+import type {Operator} from "./operator/Operator";
+import {ConditionalOperator} from "./"; // forward import
+import {OrOperator} from "./"; // forward import
+import {AndOperator} from "./"; // forward import
+import {BitwiseOrOperator} from "./"; // forward import
+import {BitwiseXorOperator} from "./"; // forward import
+import {BitwiseAndOperator} from "./"; // forward import
+import {LtOperator} from "./"; // forward import
+import {LeOperator} from "./"; // forward import
+import {EqOperator} from "./"; // forward import
+import {NeOperator} from "./"; // forward import
+import {GeOperator} from "./"; // forward import
+import {GtOperator} from "./"; // forward import
+import {PlusOperator} from "./"; // forward import
+import {MinusOperator} from "./"; // forward import
+import {TimesOperator} from "./"; // forward import
+import {DivideOperator} from "./"; // forward import
+import {ModuloOperator} from "./"; // forward import
+import {NotOperator} from "./"; // forward import
+import {BitwiseNotOperator} from "./"; // forward import
+import {NegativeOperator} from "./"; // forward import
+import {PositiveOperator} from "./"; // forward import
 
 export abstract class Expression extends Value {
   /** @hidden */
@@ -27,111 +49,110 @@ export abstract class Expression extends Value {
   conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item {
     thenTerm = Item.fromAny(thenTerm);
     elseTerm = Item.fromAny(elseTerm);
-    return new Item.ConditionalOperator(this, thenTerm, elseTerm);
+    return new ConditionalOperator(this, thenTerm, elseTerm);
   }
 
   or(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.OrOperator(this, that);
+    return new OrOperator(this, that);
   }
 
   and(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.AndOperator(this, that);
+    return new AndOperator(this, that);
   }
 
   bitwiseOr(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.BitwiseOrOperator(this, that);
+    return new BitwiseOrOperator(this, that);
   }
 
   bitwiseXor(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.BitwiseXorOperator(this, that);
+    return new BitwiseXorOperator(this, that);
   }
 
   bitwiseAnd(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.BitwiseAndOperator(this, that);
+    return new BitwiseAndOperator(this, that);
   }
 
   lt(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.LtOperator(this, that);
+    return new LtOperator(this, that);
   }
 
   le(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.LeOperator(this, that);
+    return new LeOperator(this, that);
   }
 
   eq(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.EqOperator(this, that);
+    return new EqOperator(this, that);
   }
 
   ne(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.NeOperator(this, that);
+    return new NeOperator(this, that);
   }
 
   ge(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.GeOperator(this, that);
+    return new GeOperator(this, that);
   }
 
   gt(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.GtOperator(this, that);
+    return new GtOperator(this, that);
   }
 
   plus(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.PlusOperator(this, that);
+    return new PlusOperator(this, that);
   }
 
   minus(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.MinusOperator(this, that);
+    return new MinusOperator(this, that);
   }
 
   times(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.TimesOperator(this, that);
+    return new TimesOperator(this, that);
   }
 
   divide(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.DivideOperator(this, that);
+    return new DivideOperator(this, that);
   }
 
   modulo(that: AnyItem): Operator {
     that = Item.fromAny(that);
-    return new Item.ModuloOperator(this, that);
+    return new ModuloOperator(this, that);
   }
 
   not(): Operator {
-    return new Item.NotOperator(this);
+    return new NotOperator(this);
   }
 
   bitwiseNot(): Operator {
-    return new Item.BitwiseNotOperator(this);
+    return new BitwiseNotOperator(this);
   }
 
   negative(): Operator {
-    return new Item.NegativeOperator(this);
+    return new NegativeOperator(this);
   }
 
   positive(): Operator {
-    return new Item.PositiveOperator(this);
+    return new PositiveOperator(this);
   }
 
   inverse(): Operator {
-    return new Item.DivideOperator(Item.Num.positiveOne(), this);
+    return new DivideOperator(Num.one, this);
   }
 
   toAny(): AnyValue {
     return this;
   }
 }
-Item.Expression = Expression;

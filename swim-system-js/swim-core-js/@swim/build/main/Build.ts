@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as path from "path";
-import * as ts from "typescript";
+import * as Path from "path";
 import * as rollup from "rollup";
-
+import type * as ts from "typescript";
 import {OutputSettings, OutputStyle, Unicode} from "@swim/codec";
 import {ProjectConfig, Project} from "./Project";
-import {Target} from "./Target";
+import type {Target} from "./Target";
 
 export interface BuildConfig {
   version?: string;
@@ -46,7 +45,7 @@ export class Build {
     this.gaID = config.gaID;
 
     for (let i = 0; i < config.projects.length; i += 1) {
-      const projectConfig = config.projects[i];
+      const projectConfig = config.projects[i]!;
       if (config.devel !== void 0) {
         projectConfig.devel = config.devel;
       }
@@ -59,21 +58,27 @@ export class Build {
     }
 
     for (let i = 0; i < config.projects.length; i += 1) {
-      const projectConfig = config.projects[i];
+      const projectConfig = config.projects[i]!;
       const project = this.projects[projectConfig.id]!;
       project.initTargets(projectConfig);
     }
 
     for (let i = 0; i < config.projects.length; i += 1) {
-      const projectConfig = config.projects[i];
+      const projectConfig = config.projects[i]!;
       const project = this.projects[projectConfig.id]!;
       project.initDeps(projectConfig);
+    }
+
+    for (let i = 0; i < config.projects.length; i += 1) {
+      const projectConfig = config.projects[i]!;
+      const project = this.projects[projectConfig.id]!;
+      project.initPeerDeps(projectConfig);
     }
   }
 
   initBundle(i: number = 0): Promise<unknown> {
     if (i < this.projectList.length) {
-      const project = this.projectList[i];
+      const project = this.projectList[i]!;
       return project.initBundle().then(this.initBundle.bind(this, i + 1));
     } else {
       return Promise.resolve(void 0);
@@ -86,6 +91,23 @@ export class Build {
     });
   }
 
+  getProject(projectId: string): Project | null {
+    const project = this.projects[projectId];
+    return project !== void 0 ? project : null;
+  }
+
+  getTarget(specifier: string): Target | null {
+    const [projectId, targetId] = specifier.split(":");
+    const project = this.projects[projectId!];
+    if (project !== void 0) {
+      const target = project.targets[targetId || "main"];
+      if (target !== void 0) {
+        return target;
+      }
+    }
+    return null;
+  }
+
   transitiveProjects(specifiers: string[] | string | undefined, targetId: string | undefined): Project[] {
     if (specifiers === void 0) {
       specifiers = Object.keys(this.projects);
@@ -94,7 +116,7 @@ export class Build {
     }
     let projects: Project[] = [];
     for (let i = 0; i < specifiers.length; i += 1) {
-      const projectId = specifiers[i];
+      const projectId = specifiers[i]!;
       const project = this.projects[projectId];
       if (project !== void 0) {
         if (targetId !== void 0) {
@@ -104,7 +126,7 @@ export class Build {
           }
         } else {
           for (let j = 0; j < project.targetList.length; j += 1) {
-            const target = project.targetList[j];
+            const target = project.targetList[j]!;
             projects = target.transitiveProjects(projects);
           }
         }
@@ -131,7 +153,7 @@ export class Build {
     }
     const targets: Target[] = [];
     for (let i = 0; i < specifiers.length; i += 1) {
-      const specifier = specifiers[i];
+      const specifier = specifiers[i]!;
       const [projectId, targetId] = specifier.split(":");
       if (projectId !== void 0) { // <project>(:<target>)?
         const project = this.projects[projectId];
@@ -146,7 +168,7 @@ export class Build {
             }
           } else { // <project>(:?)
             for (let j = 0; j < project.targetList.length; j += 1) {
-              const target = project.targetList[j];
+              const target = project.targetList[j]!;
               target.selected = true;
               if (targets.indexOf(target) < 0) {
                 targets.push(target);
@@ -166,7 +188,7 @@ export class Build {
         }
       } else if (targetId !== void 0) { // :<target>
         for (let j = 0; j < this.projectList.length; j += 1) {
-          const target = this.projectList[j].targets[targetId];
+          const target = this.projectList[j]!.targets[targetId];
           if (target !== void 0) {
             target.selected = true;
             if (targets.indexOf(target) < 0) {
@@ -187,7 +209,7 @@ export class Build {
     }
     let targets: Target[] = [];
     for (let i = 0; i < specifiers.length; i += 1) {
-      const specifier = specifiers[i];
+      const specifier = specifiers[i]!;
       const [projectId, targetId] = specifier.split(":");
       if (projectId !== void 0) { // <project>(:<target>)?
         const project = this.projects[projectId];
@@ -200,7 +222,7 @@ export class Build {
             }
           } else { // <project>(:?)
             for (let j = 0; j < project.targetList.length; j += 1) {
-              const target = project.targetList[j];
+              const target = project.targetList[j]!;
               target.selected = true;
               targets = target.transitiveTargets(targets);
             }
@@ -218,7 +240,7 @@ export class Build {
         }
       } else if (targetId !== void 0) { // :<target>
         for (let j = 0; j < this.projectList.length; j += 1) {
-          const target = this.projectList[j].targets[targetId];
+          const target = this.projectList[j]!.targets[targetId];
           if (target !== void 0) {
             target.selected = true;
             targets = target.transitiveTargets(targets);
@@ -238,9 +260,9 @@ export class Build {
       specifiers = specifiers.split(",");
     }
     if (i < specifiers.length) {
-      const specifier = specifiers[i];
+      const specifier = specifiers[i]!;
       const [projectId] = specifier.split(":");
-      const project = this.projects[projectId];
+      const project = this.projects[projectId!];
       if (project !== void 0) {
         const result = callback(project);
         if (result !== void 0) {
@@ -253,7 +275,7 @@ export class Build {
         OutputStyle.reset(output);
         output.write(" ");
         OutputStyle.yellow(output);
-        output.write(projectId);
+        output.write(projectId!);
         OutputStyle.reset(output);
         console.log(output.bind());
       }
@@ -271,7 +293,7 @@ export class Build {
       projects = this.transitiveProjects(projects, targetId);
     }
     if (i < projects.length) {
-      const project = projects[i];
+      const project = projects[i]!;
       const result = callback(project);
       if (result !== void 0) {
         return result.then(this.forEachTransitiveProject.bind(this, projects, callback, targetId, i + 1));
@@ -290,7 +312,7 @@ export class Build {
       targets = this.targets(targets);
     }
     if (i < targets.length) {
-      const target = targets[i];
+      const target = targets[i]!;
       const result = callback(target);
       if (result !== void 0) {
         return result.then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
@@ -309,7 +331,7 @@ export class Build {
       targets = this.transitiveTargets(targets);
     }
     if (i < targets.length) {
-      const target = targets[i];
+      const target = targets[i]!;
       const result = callback(target);
       if (result !== void 0) {
         return result.then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
@@ -328,7 +350,7 @@ export class Build {
     OutputStyle.reset(output);
     console.log(output.bind());
     for (let i = 0; i < this.projectList.length; i += 1) {
-      const project = this.projectList[i];
+      const project = this.projectList[i]!;
       const output = Unicode.stringOutput(OutputSettings.styled());
       output.write(" - ");
       OutputStyle.yellow(output);
@@ -348,7 +370,7 @@ export class Build {
     OutputStyle.reset(output);
     console.log(output.bind());
     for (let i = 0; i < targets.length; i += 1) {
-      const target = targets[i];
+      const target = targets[i]!;
       const output = Unicode.stringOutput(OutputSettings.styled());
       output.write(" - ");
       if (target.selected) {
@@ -367,7 +389,7 @@ export class Build {
       .rollup({
         input: scriptFile,
         external: function (id: string): boolean {
-          return id[0] !== "." && !path.isAbsolute(id) || id.slice(-5, id.length) === ".json";
+          return id[0] !== "." && !Path.isAbsolute(id) || id.slice(-5, id.length) === ".json";
         },
         onwarn(warning: rollup.RollupWarning, warn?: any): void {
           if (warning.code === "MIXED_EXPORTS") {
@@ -401,7 +423,7 @@ export class Build {
   }
 
   static load(configFile: string, devel?: boolean, tests?: string): Promise<Build> {
-    configFile = path.resolve(process.cwd(), configFile);
+    configFile = Path.resolve(process.cwd(), configFile);
     return Build.importScript(configFile)
       .then((config: any): Promise<Build> => {
         if (devel !== void 0) {

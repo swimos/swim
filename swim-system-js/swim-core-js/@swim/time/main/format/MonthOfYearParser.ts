@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {Input, Parser} from "@swim/codec";
-import {DateTimeInit} from "../DateTime";
-import {DateTimeFormat} from "../DateTimeFormat";
+import type {DateTimeInit} from "../DateTime";
+import {DateTimeFormat} from "./DateTimeFormat";
 
 /** @hidden */
 export class MonthOfYearParser extends Parser<DateTimeInit> {
@@ -46,4 +46,3 @@ export class MonthOfYearParser extends Parser<DateTimeInit> {
     return new MonthOfYearParser(date, month, step);
   }
 }
-DateTimeFormat.MonthOfYearParser = MonthOfYearParser;

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Streamlet} from "./Streamlet";
-import {GenericStreamlet} from "./GenericStreamlet";
+import type {Streamlet} from "./Streamlet";
+import type {GenericStreamlet} from "./GenericStreamlet";
 import {AbstractOutlet} from "./AbstractOutlet";
 
 /**
@@ -22,35 +22,34 @@ import {AbstractOutlet} from "./AbstractOutlet";
  * `Streamlet`.
  */
 export class StreamletOutlet<O> extends AbstractOutlet<O> {
-  /** @hidden */
-  protected readonly _streamlet: Streamlet<unknown, O>;
-
   constructor(streamlet: Streamlet<unknown, O>) {
     super();
-    this._streamlet = streamlet;
+    Object.defineProperty(this, "streamlet", {
+      value: streamlet,
+      enumerable: true,
+    });
   }
 
-  streamlet(): Streamlet<unknown, O> {
-    return this._streamlet;
-  }
+  declare readonly streamlet: Streamlet<unknown, O>;
 
   get(): O | undefined {
-    const streamlet = this._streamlet as GenericStreamlet<unknown, O>;
+    const streamlet = this.streamlet as GenericStreamlet<unknown, O>;
     if (streamlet.getOutput !== void 0) {
       return streamlet.getOutput(this);
+    } else {
+      return void 0;
     }
-    return void 0;
   }
 
   protected willDecohereInput(): void {
-    const streamlet = this._streamlet as GenericStreamlet<unknown, O>;
+    const streamlet = this.streamlet as GenericStreamlet<unknown, O>;
     if (streamlet.willDecohereOutlet !== void 0) {
       streamlet.willDecohereOutlet(this);
     }
   }
 
   protected didDecohereInput(): void {
-    const streamlet = this._streamlet as GenericStreamlet<unknown, O>;
+    const streamlet = this.streamlet as GenericStreamlet<unknown, O>;
     if (streamlet.didDecohereOutlet !== void 0) {
       streamlet.didDecohereOutlet(this);
     } else {
@@ -59,14 +58,14 @@ export class StreamletOutlet<O> extends AbstractOutlet<O> {
   }
 
   protected willRecohereInput(version: number): void {
-    const streamlet = this._streamlet as GenericStreamlet<unknown, O>;
+    const streamlet = this.streamlet as GenericStreamlet<unknown, O>;
     if (streamlet.willRecohereOutlet !== void 0) {
       streamlet.willRecohereOutlet(this, version);
     }
   }
 
   protected didRecohereInput(version: number): void {
-    const streamlet = this._streamlet as GenericStreamlet<unknown, O>;
+    const streamlet = this.streamlet as GenericStreamlet<unknown, O>;
     if (streamlet.didRecohereOutlet !== void 0) {
       streamlet.didRecohereOutlet(this, version);
     }

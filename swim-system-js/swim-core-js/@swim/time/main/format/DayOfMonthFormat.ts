@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Input, Output, Parser} from "@swim/codec";
-import {DateTimeInit, DateTime} from "../DateTime";
-import {DateTimeFormat} from "../DateTimeFormat";
+import type {Input, Output, Parser} from "@swim/codec";
+import type {DateTimeInit, DateTime} from "../DateTime";
+import {DateTimeFormat} from "./DateTimeFormat";
+import {DayOfMonthParser} from "../"; // forward import
 
 /** @hidden */
 export class DayOfMonthFormat extends DateTimeFormat {
   writeDate(date: DateTime, output: Output): void {
-    DateTimeFormat.writeDateNumber2(date.day(), output);
+    DateTimeFormat.writeDateNumber2(date.day, output);
   }
 
   parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {
-    return DateTimeFormat.DayOfMonthParser.parse(input, date);
+    return DayOfMonthParser.parse(input, date);
   }
 }
-DateTimeFormat.DayOfMonth = DayOfMonthFormat;

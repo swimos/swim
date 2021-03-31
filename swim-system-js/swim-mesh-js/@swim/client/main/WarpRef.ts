@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyValue, Value} from "@swim/structure";
-import {AnyUri} from "@swim/uri";
-import {EventDownlinkInit, EventDownlink} from "./downlink/EventDownlink";
-import {ListDownlinkInit, ListDownlink} from "./downlink/ListDownlink";
-import {MapDownlinkInit, MapDownlink} from "./downlink/MapDownlink";
-import {ValueDownlinkInit, ValueDownlink} from "./downlink/ValueDownlink";
-import {HostRef} from "./ref/HostRef";
-import {NodeRef} from "./ref/NodeRef";
-import {LaneRef} from "./ref/LaneRef";
-import {
+import type {AnyValue, Value} from "@swim/structure";
+import type {AnyUri} from "@swim/uri";
+import type {EventDownlinkInit, EventDownlink} from "./downlink/EventDownlink";
+import type {ListDownlinkInit, ListDownlink} from "./downlink/ListDownlink";
+import type {MapDownlinkInit, MapDownlink} from "./downlink/MapDownlink";
+import type {ValueDownlinkInit, ValueDownlink} from "./downlink/ValueDownlink";
+import type {HostRef} from "./ref/HostRef";
+import type {NodeRef} from "./ref/NodeRef";
+import type {LaneRef} from "./ref/LaneRef";
+import type {
   WarpDidConnect,
   WarpDidAuthenticate,
   WarpDidDeauthenticate,
@@ -34,13 +34,13 @@ export interface WarpRef {
   downlink(init?: EventDownlinkInit): EventDownlink;
 
   downlinkList(init?: ListDownlinkInit<Value, AnyValue>): ListDownlink<Value, AnyValue>;
-  downlinkList<V extends VU, VU = V>(init?: ListDownlinkInit<V, VU>): ListDownlink<V, VU>;
+  downlinkList<V extends VU, VU = never>(init?: ListDownlinkInit<V, VU>): ListDownlink<V, VU>;
 
   downlinkMap(init?: MapDownlinkInit<Value, Value, AnyValue, AnyValue>): MapDownlink<Value, Value, AnyValue, AnyValue>;
-  downlinkMap<K extends KU, V extends VU, KU = K, VU = V>(init?: MapDownlinkInit<K, V, KU, VU>): MapDownlink<K, V, KU, VU>;
+  downlinkMap<K extends KU, V extends VU, KU = never, VU = never>(init?: MapDownlinkInit<K, V, KU, VU>): MapDownlink<K, V, KU, VU>;
 
   downlinkValue(init?: ValueDownlinkInit<Value, AnyValue>): ValueDownlink<Value, AnyValue>;
-  downlinkValue<V extends VU, VU = V>(init?: ValueDownlinkInit<V, VU>): ValueDownlink<V, VU>;
+  downlinkValue<V extends VU, VU = never>(init?: ValueDownlinkInit<V, VU>): ValueDownlink<V, VU>;
 
   hostRef(hostUri: AnyUri): HostRef;
 
@@ -59,8 +59,3 @@ export interface WarpRef {
   didDisconnect(didDisconnect: WarpDidDisconnect): this;
   didFail(didFail: WarpDidFail): this;
 }
-
-/**
- * @deprecated
- */
-export type SwimRef = WarpRef;

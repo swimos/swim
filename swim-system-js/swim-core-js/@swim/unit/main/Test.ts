@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {SpecClass} from "./Spec";
 import {SpecTest} from "./SpecTest";
-import {Exam} from "./Exam";
+import type {SpecClass} from "./Spec";
+import type {Exam} from "./Exam";
 
 /**
  * Test evaluation function, invoked with an [[Exam]] instance to proove a unit
@@ -90,13 +90,13 @@ export function Test(options: TestOptions): MethodDecorator;
  * }
  * ```
  */
-export function Test(target: unknown, name: string, descriptor: PropertyDescriptor): void;
+export function Test(target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor): void;
 
-export function Test(target: unknown, name?: string,
+export function Test(target: TestOptions | Object, propertyKey?: string | symbol,
                      descriptor?: PropertyDescriptor): MethodDecorator | void {
   if (arguments.length === 1) {
-    return SpecTest.decorate.bind(void 0, target as TestOptions);
+    return SpecTest.decorate.bind(SpecTest, target as TestOptions);
   } else {
-    SpecTest.decorate({}, target as SpecClass, name!, descriptor!);
+    SpecTest.decorate({}, target as SpecClass, propertyKey!, descriptor!);
   }
 }

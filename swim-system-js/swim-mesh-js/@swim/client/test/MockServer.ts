@@ -12,23 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as http from "http";
+import * as ws from "ws";
 import {AnyUri, Uri} from "@swim/uri";
 import {Envelope} from "@swim/warp";
 import {WarpClient} from "@swim/client";
-import * as http from "http";
-import * as ws from "ws";
 
 export class MockServer {
-  readonly _hostUri: Uri;
-  client: WarpClient;
-  httpServer: http.Server | undefined;
-  wsServer: ws.Server | undefined;
-  socket: ws | undefined;
-
   constructor(hostUri: AnyUri = "ws://localhost:5619", client: WarpClient = new WarpClient()) {
-    hostUri = Uri.fromAny(hostUri);
-    this._hostUri = hostUri;
-    this.client = client;
+    Object.defineProperty(this, "hostUri", {
+      value: Uri.fromAny(hostUri),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "client", {
+      value: client,
+      enumerable: true,
+    });
+
+    Object.defineProperty(this, "httpServer", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "wsServer", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "socket", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
 
     this.onOpen = this.onOpen.bind(this);
     this.onMessage = this.onMessage.bind(this);
@@ -36,13 +51,22 @@ export class MockServer {
     this.onError = this.onError.bind(this);
   }
 
-  hostUri(): Uri {
-    return this._hostUri;
-  }
+  declare readonly hostUri: Uri;
+
+  declare readonly client: WarpClient;
+
+  /** @hidden */
+  declare readonly httpServer: http.Server | null;
+
+  /** @hidden */
+  declare readonly wsServer: ws.Server | null;
+
+  /** @hidden */
+  declare readonly socket: ws | null;
 
   resolve(relative: AnyUri): Uri {
     relative = Uri.fromAny(relative);
-    return this._hostUri.resolve(relative);
+    return this.hostUri.resolve(relative);
   }
 
   send(data: unknown): void {
@@ -53,53 +77,86 @@ export class MockServer {
   }
 
   close(): void {
-    if (this.socket !== void 0) {
-      this.socket.close();
-      this.socket = void 0;
+    const socket = this.socket;
+    if (socket !== null) {
+      socket.close();
+      Object.defineProperty(this, "socket", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 
   run<T>(callback: (server: MockServer, client: WarpClient,
                     resolve: (result?: T) => void,
-                    reject: (reason?: unknown) => void) => void): Promise<T> {
+                    reject: (reason?: unknown) => void) => void): Promise<T | void> {
     return new Promise((resolve: (result?: T) => void, reject: (reason?: unknown) => void): void => {
-      this.httpServer = http.createServer();
-      this.httpServer.listen(this._hostUri.portNumber(), () => {
-        try {
-          this.wsServer = new ws.Server({port: void 0, server: this.httpServer});
-          this.wsServer.on("connection", this.onOpen);
-          callback(this, this.client, resolve, reject);
-        } catch (error) {
-          reject(error);
-        }
-      });
-    }).then(this.runSuccess.bind(this), this.runFailure.bind(this));
+        const httpServer = http.createServer();
+        Object.defineProperty(this, "httpServer", {
+          value: httpServer,
+          enumerable: true,
+          configurable: true,
+        });
+        httpServer.listen(this.hostUri.portNumber, (): void => {
+          try {
+            const wsServer = new ws.Server({port: void 0, server: httpServer});
+            Object.defineProperty(this, "wsServer", {
+              value: wsServer,
+              enumerable: true,
+              configurable: true,
+            });
+            wsServer.on("connection", this.onOpen);
+            callback(this, this.client, resolve, reject);
+          } catch (error) {
+            reject(error);
+          }
+        });
+      })
+      .then(this.runSuccess.bind(this), this.runFailure.bind(this));
   }
 
   protected runSuccess<T>(result: T): Promise<T> {
-    return this.stop().then(() => result);
+    return this.stop().then(function (): T {
+      return result;
+    });
   }
 
-  protected runFailure(): Promise<void> {
-    return this.stop();
+  protected runFailure(reason: unknown): Promise<void> {
+    return this.stop().then(function (): never {
+      throw reason;
+    });
   }
 
   stop(): Promise<void> {
-    if (this.client !== void 0) {
-      this.client.close();
+    this.client.close();
+    const socket = this.socket;
+    if (socket !== null) {
+      socket.terminate();
+      Object.defineProperty(this, "socket", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    if (this.socket !== void 0) {
-      this.socket.terminate();
-      this.socket = void 0;
+    const wsServer = this.wsServer;
+    if (wsServer !== null) {
+      wsServer.close();
+      Object.defineProperty(this, "wsServer", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    if (this.wsServer !== void 0) {
-      this.wsServer.close();
-      this.wsServer = void 0;
-    }
-    if (this.httpServer !== void 0) {
+    const httpServer = this.httpServer;
+    if (httpServer !== null) {
       return new Promise((resolve: () => void, reject: (reason: unknown) => void): void => {
-        this.httpServer!.close(() => {
-          this.httpServer = void 0;
+        httpServer.close((): void => {
+          Object.defineProperty(this, "httpServer", {
+            value: null,
+            enumerable: true,
+            configurable: true,
+          });
           resolve();
         });
       });
@@ -109,10 +166,14 @@ export class MockServer {
   }
 
   onOpen(socket: ws): void {
-    this.socket = socket;
-    this.socket.onmessage = this.onMessage;
-    this.socket.onclose = this.onClose;
-    this.socket.onerror = this.onError;
+    socket.onmessage = this.onMessage;
+    socket.onclose = this.onClose;
+    socket.onerror = this.onError;
+    Object.defineProperty(this, "socket", {
+      value: socket,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   onMessage(message: { data: ws.Data; type: string; target: ws }): void {
@@ -124,12 +185,17 @@ export class MockServer {
   }
 
   onClose(): void {
-    if (this.socket !== void 0) {
-      this.socket.onopen = void 0 as any;
-      this.socket.onmessage = void 0 as any;
-      this.socket.onclose = void 0 as any;
-      this.socket.onerror = void 0 as any;
-      this.socket = void 0;
+    const socket = this.socket;
+    if (socket !== null) {
+      socket.onopen = void 0 as any;
+      socket.onmessage = void 0 as any;
+      socket.onclose = void 0 as any;
+      socket.onerror = void 0 as any;
+      Object.defineProperty(this, "socket", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 

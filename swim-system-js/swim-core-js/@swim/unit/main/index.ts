@@ -14,10 +14,20 @@
 
 export {TestException} from "./TestException";
 
-export {TestFunc, TestOptions, Test} from "./Test";
+export {
+  TestFunc,
+  TestOptions,
+  Test,
+} from "./Test";
 
-export {UnitFunc, UnitOptions, Unit} from "./Unit";
+export {SpecUnit} from "./SpecUnit";
+export {
+  UnitFunc,
+  UnitOptions,
+  Unit,
+} from "./Unit";
 
+export {SpecTest} from "./SpecTest";
 export {
   SpecClass,
   Spec,
@@ -35,4 +45,7 @@ export {
 export {Report} from "./Report";
 export {ConsoleReport} from "./ConsoleReport";
 
-export {ExamStatus, Exam} from "./Exam";
+export {
+  ExamStatus,
+  Exam,
+} from "./Exam";

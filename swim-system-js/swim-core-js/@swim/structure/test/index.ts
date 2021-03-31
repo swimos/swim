@@ -12,73 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
-
-import {ItemOrderSpec} from "./ItemOrderSpec";
-import {RecordMapSpec} from "./RecordMapSpec";
-import {RecordMapViewSpec} from "./RecordMapViewSpec";
-import {SelectorSpec} from "./SelectorSpec";
-import {OperatorSpec} from "./OperatorSpec";
-import {InterpolatorSpec} from "./InterpolatorSpec";
-
-import {FuncSpec} from "./func";
-import {FormSpec} from "./form";
-
-@Unit
-class StructureSpec extends Spec {
-  @Unit
-  itemOrderSpec(): Spec {
-    return new ItemOrderSpec();
-  }
-
-  @Unit
-  recordMapSpec(): Spec {
-    return new RecordMapSpec();
-  }
-
-  @Unit
-  recordMapViewSpec(): Spec {
-    return new RecordMapViewSpec();
-  }
-
-  @Unit
-  selectorSpec(): Spec {
-    return new SelectorSpec();
-  }
-
-  @Unit
-  operatorSpec(): Spec {
-    return new OperatorSpec();
-  }
-
-  @Unit
-  funcSpec(): Spec {
-    return new FuncSpec();
-  }
-
-  @Unit
-  formSpec(): Spec {
-    return new FormSpec();
-  }
-
-  @Unit
-  interpolatorSpec(): Spec {
-    return new InterpolatorSpec();
-  }
-}
-
-export {
-  ItemOrderSpec,
-  RecordMapSpec,
-  RecordMapViewSpec,
-  SelectorSpec,
-  OperatorSpec,
-  InterpolatorSpec,
-};
-
+export {ItemOrderSpec} from "./ItemOrderSpec";
+export {RecordMapSpec} from "./RecordMapSpec";
+export {RecordMapViewSpec} from "./RecordMapViewSpec";
+export {SelectorSpec} from "./SelectorSpec";
+export {OperatorSpec} from "./OperatorSpec";
 export * from "./func";
 export * from "./form";
+export {InterpolatorSpec} from "./InterpolatorSpec";
+export {StructureSuite} from "./StructureSuite";
 
-export {StructureSpec};
-
-StructureSpec.run();
+import {StructureSuite} from "./StructureSuite";
+StructureSuite.run();

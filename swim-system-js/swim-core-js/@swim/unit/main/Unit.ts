@@ -104,23 +104,22 @@ export function Unit(options: UnitOptions): MethodDecorator;
  * }
  * ```
  */
-export function Unit(target: unknown, name: string, descriptor: PropertyDescriptor): void;
+export function Unit(target: Object, propertyKey: string, descriptor: PropertyDescriptor): void;
 
 /**
  * Class decorator that initializes a `Spec` subclass.
  */
 export function Unit(constructor: Function): void;
 
-export function Unit(target: unknown, name?: string,
+export function Unit(target: UnitOptions | Object | Function, propertyKey?: string,
                      descriptor?: PropertyDescriptor): MethodDecorator | void {
   if (arguments.length === 1) {
     if (typeof target === "function") {
-      const specClass = target.prototype as SpecClass;
-      Spec.init(specClass);
+      Spec.init(target.prototype as SpecClass);
     } else {
-      return SpecUnit.decorate.bind(void 0, target as UnitOptions);
+      return SpecUnit.decorate.bind(SpecUnit, target as UnitOptions);
     }
   } else {
-    SpecUnit.decorate({}, target as SpecClass, name!, descriptor!);
+    SpecUnit.decorate({}, target as SpecClass, propertyKey!, descriptor!);
   }
 }

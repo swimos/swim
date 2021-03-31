@@ -24,21 +24,21 @@ export class AuthedResponseSpec extends Spec {
 
   @Test
   parseAuthed(exam: WarpExam): void {
-    exam.parses("@authed", AuthedResponse.of());
+    exam.parses("@authed", AuthedResponse.create());
   }
 
   @Test
   parseAuthedWithBody(exam: WarpExam): void {
-    exam.parses("@authed@test", AuthedResponse.of(Record.of(Attr.of("test"))));
+    exam.parses("@authed@test", AuthedResponse.create(Record.of(Attr.of("test"))));
   }
 
   @Test
   writeAuthed(exam: WarpExam): void {
-    exam.writes(AuthedResponse.of(), "@authed");
+    exam.writes(AuthedResponse.create(), "@authed");
   }
 
   @Test
   writeAuthedWithBody(exam: WarpExam): void {
-    exam.writes(AuthedResponse.of(Record.of(Attr.of("test"))), "@authed@test");
+    exam.writes(AuthedResponse.create(Record.of(Attr.of("test"))), "@authed@test");
   }
 }

@@ -56,94 +56,94 @@ export class UriWriterSpec extends Spec {
 
   @Test
   writeURIsWithHostNamesAndPorts(exam: Exam): void {
-    exam.equal(Uri.hostName("domain").portNumber(80).toString(), "//domain:80");
+    exam.equal(Uri.hostName("domain").withPortNumber(80).toString(), "//domain:80");
   }
 
   @Test
   writeURIsWithIPv4AddressesAndPorts(exam: Exam): void {
-    exam.equal(Uri.hostIPv4("127.0.0.1").portNumber(80).toString(), "//127.0.0.1:80");
+    exam.equal(Uri.hostIPv4("127.0.0.1").withPortNumber(80).toString(), "//127.0.0.1:80");
   }
 
   @Test
   writeURIsWithIPv6AddressesAndPorts(exam: Exam): void {
-    exam.equal(Uri.hostIPv6("::1").portNumber(80).toString(), "//[::1]:80");
+    exam.equal(Uri.hostIPv6("::1").withPortNumber(80).toString(), "//[::1]:80");
   }
 
   @Test
   writeURIsWithPortsButNotHost(exam: Exam): void {
-    exam.equal(Uri.hostName("").portNumber(80).toString(), "//:80");
+    exam.equal(Uri.hostName("").withPortNumber(80).toString(), "//:80");
   }
 
   @Test
   writeURIsWithEmptyUsers(exam: Exam): void {
-    exam.equal(Uri.username("").hostName("").toString(), "//@");
+    exam.equal(Uri.username("").withHostName("").toString(), "//@");
   }
 
   @Test
   writeURIsWithUsersButNotHosts(exam: Exam): void {
-    exam.equal(Uri.username("user").hostName("").toString(), "//user@");
+    exam.equal(Uri.username("user").withHostName("").toString(), "//user@");
   }
 
   @Test
   writeURIsWithUsernamesAndPasswordsButNotHosts(exam: Exam): void {
-    exam.equal(Uri.username("user", "pass").hostName("").toString(), "//user:pass@");
+    exam.equal(Uri.username("user", "pass").withHostName("").toString(), "//user:pass@");
   }
 
   @Test
   writeURIsWithUsersContainingPercentEscapes(exam: Exam): void {
-    exam.equal(Uri.username("/:").hostName("").toString(), "//%2f%3a@");
-    exam.equal(Uri.username("a/b:c").hostName("").toString(), "//a%2fb%3ac@");
+    exam.equal(Uri.username("/:").withHostName("").toString(), "//%2f%3a@");
+    exam.equal(Uri.username("a/b:c").withHostName("").toString(), "//a%2fb%3ac@");
   }
 
   @Test
   writeURIsWithUsernamesAndPasswordsContainingPercentEscapes(exam: Exam): void {
-    exam.equal(Uri.username("/:", ":/").hostName("").toString(), "//%2f%3a:%3a%2f@");
-    exam.equal(Uri.username("a/b:c", "d:e/f").hostName("").toString(), "//a%2fb%3ac:d%3ae%2ff@");
+    exam.equal(Uri.username("/:", ":/").withHostName("").toString(), "//%2f%3a:%3a%2f@");
+    exam.equal(Uri.username("a/b:c", "d:e/f").withHostName("").toString(), "//a%2fb%3ac:d%3ae%2ff@");
   }
 
   @Test
   writeURIsWithUsersAndHostNames(exam: Exam): void {
-    exam.equal(Uri.username("user").hostName("domain").toString(), "//user@domain");
+    exam.equal(Uri.username("user").withHostName("domain").toString(), "//user@domain");
   }
 
   @Test
   writeURIsWithUsernamesAndPasswordsAndHostNames(exam: Exam): void {
-    exam.equal(Uri.username("user", "pass").hostName("domain").toString(), "//user:pass@domain");
+    exam.equal(Uri.username("user", "pass").withHostName("domain").toString(), "//user:pass@domain");
   }
 
   @Test
   writeURIsWithUsesAndIPv4Addresses(exam: Exam): void {
-    exam.equal(Uri.username("user").hostIPv4("127.0.0.1").toString(), "//user@127.0.0.1");
+    exam.equal(Uri.username("user").withHostIPv4("127.0.0.1").toString(), "//user@127.0.0.1");
   }
 
   @Test
   writeURIsWithUsernamesAndPasswordsndIPv4Addresses(exam: Exam): void {
-    exam.equal(Uri.username("user", "pass").hostIPv4("127.0.0.1").toString(), "//user:pass@127.0.0.1");
+    exam.equal(Uri.username("user", "pass").withHostIPv4("127.0.0.1").toString(), "//user:pass@127.0.0.1");
   }
 
   @Test
   writeURIsWithUsersAndIPv6Addresses(exam: Exam): void {
-    exam.equal(Uri.username("user").hostIPv6("::1").toString(), "//user@[::1]");
+    exam.equal(Uri.username("user").withHostIPv6("::1").toString(), "//user@[::1]");
   }
 
   @Test
   writeURIsWithUsernamesAndPasswordsAndIPv6Addresses(exam: Exam): void {
-    exam.equal(Uri.username("user", "pass").hostIPv6("::1").toString(), "//user:pass@[::1]");
+    exam.equal(Uri.username("user", "pass").withHostIPv6("::1").toString(), "//user:pass@[::1]");
   }
 
   @Test
   writeURIsWithUsersAndHostNamesAndPorts(exam: Exam): void {
-    exam.equal(Uri.username("user").hostName("domain").portNumber(80).toString(), "//user@domain:80");
+    exam.equal(Uri.username("user").withHostName("domain").withPortNumber(80).toString(), "//user@domain:80");
   }
 
   @Test
   writeURIsWithUsesAndIPv4AddressesAndPorts(exam: Exam): void {
-    exam.equal(Uri.username("user").hostIPv4("127.0.0.1").portNumber(80).toString(), "//user@127.0.0.1:80");
+    exam.equal(Uri.username("user").withHostIPv4("127.0.0.1").withPortNumber(80).toString(), "//user@127.0.0.1:80");
   }
 
   @Test
   writeURIsWithUsersAndIPv6AddressesAndPorts(exam: Exam): void {
-    exam.equal(Uri.username("user").hostIPv6("::1").portNumber(80).toString(), "//user@[::1]:80");
+    exam.equal(Uri.username("user").withHostIPv6("::1").withPortNumber(80).toString(), "//user@[::1]:80");
   }
 
   @Test
@@ -165,7 +165,7 @@ export class UriWriterSpec extends Spec {
 
   @Test
   writeURIsWithPathsContainingPermittedDelimeters(exam: Exam): void {
-    exam.equal(Uri.path("/", "one", "/", "!$&()*+,;=\'", "/", "three").toString(), "/one/!$&()*+,;='/three");
+    exam.equal(Uri.path("/", "one", "/", "!$&()*+,;='", "/", "three").toString(), "/one/!$&()*+,;='/three");
   }
 
   @Test
@@ -231,73 +231,73 @@ export class UriWriterSpec extends Spec {
 
   @Test
   writeURIsWithSchemesAndAuthorities(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").hostName("domain").toString(), "scheme://domain");
-    exam.equal(Uri.schemeName("scheme").hostName("domain").portNumber(80).toString(), "scheme://domain:80");
-    exam.equal(Uri.schemeName("scheme").username("user").hostName("domain").toString(), "scheme://user@domain");
-    exam.equal(Uri.schemeName("scheme").username("user").hostName("domain").portNumber(80).toString(), "scheme://user@domain:80");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").toString(), "scheme://domain");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).toString(), "scheme://domain:80");
+    exam.equal(Uri.schemeName("scheme").withUsername("user").withHostName("domain").toString(), "scheme://user@domain");
+    exam.equal(Uri.schemeName("scheme").withUsername("user").withHostName("domain").withPortNumber(80).toString(), "scheme://user@domain:80");
   }
 
   @Test
   writeURIsWithSchemesAndAbsolutePaths(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").path("/").toString(), "scheme:/");
-    exam.equal(Uri.schemeName("scheme").path("/", "one").toString(), "scheme:/one");
-    exam.equal(Uri.schemeName("scheme").path("/", "one", "/").toString(), "scheme:/one/");
-    exam.equal(Uri.schemeName("scheme").path("/", "one", "/", "two").toString(), "scheme:/one/two");
-    exam.equal(Uri.schemeName("scheme").path("/", "one", "/", "two", "/").toString(), "scheme:/one/two/");
+    exam.equal(Uri.schemeName("scheme").withPath("/").toString(), "scheme:/");
+    exam.equal(Uri.schemeName("scheme").withPath("/", "one").toString(), "scheme:/one");
+    exam.equal(Uri.schemeName("scheme").withPath("/", "one", "/").toString(), "scheme:/one/");
+    exam.equal(Uri.schemeName("scheme").withPath("/", "one", "/", "two").toString(), "scheme:/one/two");
+    exam.equal(Uri.schemeName("scheme").withPath("/", "one", "/", "two", "/").toString(), "scheme:/one/two/");
   }
 
   @Test
   writeURIsWithSchemesAndRelativePaths(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").path("one").toString(), "scheme:one");
-    exam.equal(Uri.schemeName("scheme").path("one", "/").toString(), "scheme:one/");
-    exam.equal(Uri.schemeName("scheme").path("one", "/", "two").toString(), "scheme:one/two");
-    exam.equal(Uri.schemeName("scheme").path("one", "/", "two", "/").toString(), "scheme:one/two/");
+    exam.equal(Uri.schemeName("scheme").withPath("one").toString(), "scheme:one");
+    exam.equal(Uri.schemeName("scheme").withPath("one", "/").toString(), "scheme:one/");
+    exam.equal(Uri.schemeName("scheme").withPath("one", "/", "two").toString(), "scheme:one/two");
+    exam.equal(Uri.schemeName("scheme").withPath("one", "/", "two", "/").toString(), "scheme:one/two/");
   }
 
   @Test
   writeURIsWithSchemesAndQueries(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").query({$0: "query"}).toString(), "scheme:?query");
-    exam.equal(Uri.schemeName("scheme").query({key: "value"}).toString(), "scheme:?key=value");
+    exam.equal(Uri.schemeName("scheme").withQuery({$0: "query"}).toString(), "scheme:?query");
+    exam.equal(Uri.schemeName("scheme").withQuery({key: "value"}).toString(), "scheme:?key=value");
   }
 
   @Test
   writeURIsWithSchemesAndFragments(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").fragmentIdentifier("fragment").toString(), "scheme:#fragment");
+    exam.equal(Uri.schemeName("scheme").withFragmentIdentifier("fragment").toString(), "scheme:#fragment");
   }
 
   @Test
   writeURIsWithSchemesAuthoritiesAndPaths(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").hostName("domain").path("/", "path").toString(), "scheme://domain/path");
-    exam.equal(Uri.schemeName("scheme").hostName("domain").portNumber(80).path("/", "path").toString(), "scheme://domain:80/path");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPath("/", "path").toString(), "scheme://domain/path");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withPath("/", "path").toString(), "scheme://domain:80/path");
   }
 
   @Test
   writeURIsWithSchemesAuthoritiesAndQueries(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").hostName("domain").query({$0: "query"}).toString(), "scheme://domain?query");
-    exam.equal(Uri.schemeName("scheme").hostName("domain").portNumber(80).query({$0: "query"}).toString(), "scheme://domain:80?query");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withQuery({$0: "query"}).toString(), "scheme://domain?query");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withQuery({$0: "query"}).toString(), "scheme://domain:80?query");
   }
 
   @Test
   writeURIsWithSchemesAuthoritiesAndFragments(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").hostName("domain").fragmentIdentifier("fragment").toString(), "scheme://domain#fragment");
-    exam.equal(Uri.schemeName("scheme").hostName("domain").portNumber(80).fragmentIdentifier("fragment").toString(), "scheme://domain:80#fragment");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withFragmentIdentifier("fragment").toString(), "scheme://domain#fragment");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withFragmentIdentifier("fragment").toString(), "scheme://domain:80#fragment");
   }
 
   @Test
   writeURIsWithSchemesAuthoritiesPathsAndQueries(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").hostName("domain").path("/", "path").query({$0: "query"}).toString(), "scheme://domain/path?query");
-    exam.equal(Uri.schemeName("scheme").hostName("domain").portNumber(80).path("/", "path").query({$0: "query"}).toString(), "scheme://domain:80/path?query");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPath("/", "path").withQuery({$0: "query"}).toString(), "scheme://domain/path?query");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withPath("/", "path").withQuery({$0: "query"}).toString(), "scheme://domain:80/path?query");
   }
 
   @Test
   writeURIsWithSchemesAuthoritiesPathsAndFragments(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").hostName("domain").path("/", "path").fragmentIdentifier("fragment").toString(), "scheme://domain/path#fragment");
-    exam.equal(Uri.schemeName("scheme").hostName("domain").portNumber(80).path("/", "path").fragmentIdentifier("fragment").toString(), "scheme://domain:80/path#fragment");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPath("/", "path").withFragmentIdentifier("fragment").toString(), "scheme://domain/path#fragment");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withPath("/", "path").withFragmentIdentifier("fragment").toString(), "scheme://domain:80/path#fragment");
   }
 
   @Test
   writeURIsWithSchemesAuthoritiesPathsQueriesAndFragments(exam: Exam): void {
-    exam.equal(Uri.schemeName("scheme").hostName("domain").path("/", "path").query({$0: "query"}).fragmentIdentifier("fragment").toString(), "scheme://domain/path?query#fragment");
-    exam.equal(Uri.schemeName("scheme").hostName("domain").portNumber(80).path("/", "path").query({$0: "query"}).fragmentIdentifier("fragment").toString(), "scheme://domain:80/path?query#fragment");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPath("/", "path").withQuery({$0: "query"}).withFragmentIdentifier("fragment").toString(), "scheme://domain/path?query#fragment");
+    exam.equal(Uri.schemeName("scheme").withHostName("domain").withPortNumber(80).withPath("/", "path").withQuery({$0: "query"}).withFragmentIdentifier("fragment").toString(), "scheme://domain:80/path?query#fragment");
   }
 }

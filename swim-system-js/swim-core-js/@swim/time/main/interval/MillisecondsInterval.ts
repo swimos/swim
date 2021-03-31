@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {AnyDateTime, DateTime} from "../DateTime";
-import {TimeInterval} from "../TimeInterval";
+import {TimeInterval} from "./TimeInterval";
 
 /** @hidden */
 export class MillisecondsInterval extends TimeInterval {
@@ -21,7 +21,7 @@ export class MillisecondsInterval extends TimeInterval {
 
   constructor(stride: number) {
     super();
-    if (typeof stride !== "number" || !isFinite(stride) || isNaN(stride)) {
+    if (!isFinite(stride)) {
       stride = 1;
     }
     this.stride = stride;
@@ -60,4 +60,3 @@ export class MillisecondsInterval extends TimeInterval {
     return new DateTime(d, z);
   }
 }
-TimeInterval.Milliseconds = MillisecondsInterval;

@@ -14,22 +14,16 @@
 
 export {Recon} from "./Recon";
 
-export {ReconParser} from "./ReconParser";
+export * from "./parser";
 
-export {ReconStructureParser} from "./ReconStructureParser";
-
-export {ReconWriter} from "./ReconWriter";
-
-export {ReconStructureWriter} from "./ReconStructureWriter";
+export * from "./writer";
 
 declare module "@swim/structure" {
   interface Item {
     toRecon(): string;
     toReconBlock(): string;
   }
-}
 
-declare module "@swim/structure" {
   namespace Value {
     function parseRecon(recon: string): Value;
   }

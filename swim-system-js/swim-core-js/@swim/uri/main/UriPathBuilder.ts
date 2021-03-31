@@ -12,38 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Builder} from "@swim/util";
-import {Uri} from "./Uri";
+import type {Builder} from "@swim/util";
 import {AnyUriPath, UriPath} from "./UriPath";
 
 export class UriPathBuilder implements Builder<string, UriPath> {
   /** @hidden */
-  _first: UriPath;
+  first: UriPath;
   /** @hidden */
-  _last: UriPath | null;
+  last: UriPath | null;
   /** @hidden */
-  _size: number;
+  size: number;
   /** @hidden */
-  _aliased: number;
+  aliased: number;
 
   constructor() {
-    this._first = Uri.Path.empty();
-    this._last = null;
-    this._size = 0;
-    this._aliased = 0;
+    this.first = UriPath.empty();
+    this.last = null;
+    this.size = 0;
+    this.aliased = 0;
   }
 
   isEmpty(): boolean {
-    return this._size === 0;
+    return this.size === 0;
   }
 
   push(...components: AnyUriPath[]): void {
     for (let i = 0; i < components.length; i += 1) {
-      const component = components[i];
-      if (component instanceof Uri.Path) {
+      const component = components[i]!;
+      if (component instanceof UriPath) {
         this.addPath(component);
       } else if (Array.isArray(component)) {
-        this.push.apply(this, component);
+        this.push(...component);
       } else if (component === "/") {
         this.addSlash();
       } else {
@@ -53,43 +52,57 @@ export class UriPathBuilder implements Builder<string, UriPath> {
   }
 
   bind(): UriPath {
-    this._aliased = 0;
-    return this._first;
+    this.aliased = 0;
+    return this.first;
   }
 
   addSlash(): void {
-    const tail = Uri.Path.slash().dealias();
-    const size = this._size;
+    const tail = UriPath.slash().dealias();
+    const size = this.size;
     if (size === 0) {
-      this._first = tail;
+      this.first = tail;
     } else {
       this.dealias(size - 1).setTail(tail);
     }
-    this._last = tail;
-    this._size = size + 1;
-    this._aliased += 1;
+    this.last = tail;
+    this.size = size + 1;
+    this.aliased += 1;
   }
 
   addSegment(segment: string): void {
-    const tail = Uri.Path.segment(segment, Uri.Path.empty());
-    const size = this._size;
+    const tail = UriPath.segment(segment, UriPath.empty());
+    let size = this.size;
     if (size === 0) {
-      this._first = tail;
+      this.first = tail;
     } else {
-      this.dealias(size - 1).setTail(tail);
+      const last = this.dealias(size - 1);
+      if (last.isAbsolute()) {
+        last.setTail(tail);
+      } else {
+        last.setTail(tail.prependedSlash());
+        size += 1;
+        this.aliased += 1;
+      }
     }
-    this._last = tail;
-    this._size = size + 1;
-    this._aliased += 1;
+    this.last = tail;
+    this.size = size + 1;
+    this.aliased += 1;
   }
 
   addPath(path: UriPath): void {
     if (!path.isEmpty()) {
-      let size = this._size;
+      let size = this.size;
       if (size === 0) {
-        this._first = path;
+        this.first = path;
       } else {
-        this.dealias(size - 1).setTail(path);
+        const last = this.dealias(size - 1);
+        if (last.isAbsolute() || path.isAbsolute()) {
+          last.setTail(path);
+        } else {
+          last.setTail(path.prependedSlash());
+          size += 1;
+          this.aliased += 1;
+        }
       }
       size += 1;
       do {
@@ -101,33 +114,33 @@ export class UriPathBuilder implements Builder<string, UriPath> {
           break;
         }
       } while (true);
-      this._last = path;
-      this._size = size;
+      this.last = path;
+      this.size = size;
     }
   }
 
   pop(): UriPath {
-    const size = this._size;
-    const aliased = this._aliased;
+    const size = this.size;
+    const aliased = this.aliased;
     if (size === 0) {
       throw new Error("Empty UriPath");
     } else if (size === 1) {
-      const first = this._first;
-      this._first = first.tail();
+      const first = this.first;
+      this.first = first.tail();
       if (first.tail().isEmpty()) {
-        this._last = null;
+        this.last = null;
       }
-      this._size = size - 1;
+      this.size = size - 1;
       if (aliased > 0) {
-        this._aliased = aliased - 1;
+        this.aliased = aliased - 1;
       }
       return first;
     } else {
       const last = this.dealias(size - 2);
-      last.setTail(Uri.Path.empty());
-      this._last = last;
-      this._size = size - 1;
-      this._aliased = aliased - 1;
+      last.setTail(UriPath.empty());
+      this.last = last;
+      this.size = size - 1;
+      this.aliased = aliased - 1;
       return last.tail();
     }
   }
@@ -135,10 +148,10 @@ export class UriPathBuilder implements Builder<string, UriPath> {
   /** @hidden */
   dealias(n: number): UriPath {
     let i = 0;
-    let xi = null as UriPath | null;
-    let xs = this._first;
-    if (this._aliased <= n) {
-      while (i < this._aliased) {
+    let xi: UriPath | null = null;
+    let xs = this.first;
+    if (this.aliased <= n) {
+      while (i < this.aliased) {
         xi = xs;
         xs = xs.tail();
         i += 1;
@@ -146,7 +159,7 @@ export class UriPathBuilder implements Builder<string, UriPath> {
       while (i <= n) {
         const xn = xs.dealias();
         if (i === 0) {
-          this._first = xn;
+          this.first = xn;
         } else {
           xi!.setTail(xn);
         }
@@ -154,14 +167,14 @@ export class UriPathBuilder implements Builder<string, UriPath> {
         xs = xs.tail();
         i += 1;
       }
-      if (i === this._size) {
-        this._last = xi;
+      if (i === this.size) {
+        this.last = xi;
       }
-      this._aliased = i;
+      this.aliased = i;
     } else if (n === 0) {
-      xi = this._first;
-    } else if (n === this._size - 1) {
-      xi = this._last;
+      xi = this.first;
+    } else if (n === this.size - 1) {
+      xi = this.last;
     } else {
       while (i <= n) {
         xi = xs;
@@ -172,4 +185,3 @@ export class UriPathBuilder implements Builder<string, UriPath> {
     return xi!;
   }
 }
-Uri.PathBuilder = UriPathBuilder;

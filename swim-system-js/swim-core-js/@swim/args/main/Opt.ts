@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Objects} from "@swim/util";
+import {Equals, Arrays} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 import {AnyArg, Arg} from "./Arg";
 
@@ -20,93 +20,107 @@ export type AnyOpt = Opt | OptInit | string;
 
 export interface OptInit {
   name: string;
-  flag?: string | null;
-  desc?: string | null;
+  flag?: string;
+  desc?: string;
   args?: AnyArg[];
 }
 
 export class Opt implements Equals, Debug {
-  /** @hidden */
-  readonly _name: string;
-  /** @hidden */
-  _flag: string | null;
-  /** @hidden */
-  _desc: string | null;
-  /** @hidden */
-  _args: Arg[];
-  /** @hidden */
-  _defs: number;
-
-  constructor(name: string, flag: string | null, desc: string | null, args: Arg[], defs: number) {
-    this._name = name;
-    this._flag = flag;
-    this._desc = desc;
-    this._args = args;
-    this._defs = defs;
+  constructor(name: string, flag: string | undefined, desc: string | undefined,
+              args: ReadonlyArray<Arg>, defs: number) {
+    Object.defineProperty(this, "name", {
+      value: name,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "flag", {
+      value: flag,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "desc", {
+      value: desc,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "args", {
+      value: args,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "defs", {
+      value: defs,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  name(): string {
-    return this._name;
-  }
+  declare readonly name: string;
 
-  flag(): string | null;
-  flag(flag: string | null): this;
-  flag(flag?: string | null): string | null | this {
-    if (flag === void 0) {
-      return this._flag;
-    } else {
-      this._flag = flag;
-      return this;
-    }
-  }
+  declare readonly flag: string | undefined;
 
-  desc(): string | null;
-  desc(desc: string | null): this;
-  desc(desc?: string | null): string | null | this {
-    if (desc === void 0) {
-      return this._desc;
-    } else {
-      this._desc = desc;
-      return this;
-    }
-  }
-
-  args(): Arg[] {
-    return this._args;
-  }
-
-  /** @hidden */
-  arg(arg: AnyArg): this {
-    arg = Arg.fromAny(arg);
-    this._args.push(arg);
+  withFlag(flag: string | undefined): this {
+    Object.defineProperty(this, "flag", {
+      value: flag,
+      enumerable: true,
+      configurable: true,
+    });
     return this;
   }
 
-  defs(): number {
-    return this._defs;
+  declare readonly desc: string | undefined;
+
+  withDesc(desc: string | undefined): this {
+    Object.defineProperty(this, "desc", {
+      value: desc,
+      enumerable: true,
+      configurable: true,
+    });
+    return this;
+  }
+
+  declare readonly args: ReadonlyArray<Arg>;
+
+  /** @hidden */
+  withArg(arg: AnyArg): this {
+    arg = Arg.fromAny(arg);
+    (this.args as Arg[]).push(arg as Arg);
+    return this;
+  }
+
+  declare readonly defs: number;
+
+  def(): this {
+    Object.defineProperty(this, "defs", {
+      value: this.defs + 1,
+      enumerable: true,
+      configurable: true,
+    });
+    return this;
   }
 
   isDefined(): boolean {
-    return this._defs !== 0;
+    return this.defs !== 0;
   }
 
-  getArg(index: number = 0): Arg {
-    return this._args[index];
+  getArg(index: number = 0): Arg | null {
+    const arg = this.args[index];
+    return arg !== void 0 ? arg : null;
   }
 
   getValue(index: number = 0): string | undefined {
-    const arg = this._args[index];
-    return arg !== void 0 ? arg.value() : void 0;
+    const arg = this.args[index];
+    return arg !== void 0 ? arg.value : void 0;
   }
 
   parse(params: string[], paramIndex: number): number {
-    const argCount = this._args.length;
+    const args = this.args;
+    const argCount = args.length;
     const paramCount = params.length;
     for (let argIndex = 0; argIndex < argCount && paramIndex < paramCount; argIndex += 1) {
-      const arg = this._args[argIndex];
-      const param = params[paramIndex];
-      if (!arg._optional || param.charCodeAt(0) !== 45/*'-'*/) {
-        arg.value(param);
+      const arg = args[argIndex]!;
+      const param = params[paramIndex]!;
+      if (!arg.optional || param.charCodeAt(0) !== 45/*'-'*/) {
+        arg.withValue(param);
         paramIndex += 1;
       } else {
         break;
@@ -119,24 +133,24 @@ export class Opt implements Equals, Debug {
     if (this === that) {
       return true;
     } else if (that instanceof Opt) {
-      return this._name === that._name && this._flag === that._flag
-          && this._desc === that._desc && Objects.equal(this._args, that._args)
-          && this._defs === that._defs;
+      return this.name === that.name && this.flag === that.flag
+          && this.desc === that.desc && Arrays.equal(this.args, that.args)
+          && this.defs === that.defs;
     }
     return false;
   }
 
   debug(output: Output): void {
-    output = output.write("Opt").write(46/*'.'*/).write("of").write(40/*'('*/).debug(this._name).write(41/*')'*/);
-    if (this._flag !== null) {
-      output = output.write(46/*'.'*/).write("flag").write(40/*'('*/).debug(this._flag).write(41/*')'*/);
+    output = output.write("Opt").write(46/*'.'*/).write("of").write(40/*'('*/).debug(this.name).write(41/*')'*/);
+    if (this.flag !== void 0) {
+      output = output.write(46/*'.'*/).write("flag").write(40/*'('*/).debug(this.flag).write(41/*')'*/);
     }
-    if (this._desc !== null) {
-      output = output.write(46/*'.'*/).write("desc").write(40/*'('*/).debug(this._desc).write(41/*')'*/);
+    if (this.desc !== void 0) {
+      output = output.write(46/*'.'*/).write("desc").write(40/*'('*/).debug(this.desc).write(41/*')'*/);
     }
-    const argCount = this._args.length;
-    for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
-      const arg = this._args[argIndex];
+    const args = this.args;
+    for (let argIndex = 0, argCount = args.length; argIndex < argCount; argIndex += 1) {
+      const arg = args[argIndex]!;
       output = output.write(46/*'.'*/).write("arg").write(40/*'('*/).debug(arg).write(41/*')'*/);
     }
   }
@@ -146,37 +160,42 @@ export class Opt implements Equals, Debug {
   }
 
   clone(): Opt {
-    const argCount = this._args.length;
-    const args = new Array<Arg>(argCount);
+    const oldArgs = this.args;
+    const argCount = oldArgs.length;
+    const newArgs = new Array<Arg>(argCount);
     for (let i = 0; i < argCount; i += 1) {
-      args[i] = this._args[i].clone();
+      newArgs[i] = oldArgs[i]!.clone();
     }
-    return new Opt(this._name, this._flag, this._desc, args, this._defs);
+    return new Opt(this.name, this.flag, this.desc, newArgs, this.defs);
   }
 
-  static of(name: string, flag: string | null = null, desc: string | null = null, anyArgs?: AnyArg[]): Opt {
+  static create(name: string, flag?: string, desc?: string, anyArgs?: AnyArg[]): Opt {
     const argCount = anyArgs !== void 0 ? anyArgs.length : 0;
     const args = new Array<Arg>(argCount);
     for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
-      args[argIndex] = Arg.fromAny(anyArgs![argIndex]);
+      args[argIndex] = Arg.fromAny(anyArgs![argIndex]!);
     }
     return new Opt(name, flag, desc, args, 0);
   }
 
-  static fromAny(opt: AnyOpt): Opt {
-    if (opt instanceof Opt) {
-      return opt;
-    } else if (typeof opt === "string") {
-      return new Opt(opt, null, null, [], 0);
+  static fromInit(init: OptInit): Opt {
+    const argCount = init.args !== void 0 ? init.args.length : 0;
+    const args = new Array<Arg>(argCount);
+    for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
+      args[argIndex] = Arg.fromAny(init.args![argIndex]!);
+    }
+    return new Opt(init.name, init.flag, init.desc, args, 0);
+  }
+
+  static fromAny(value: AnyOpt): Opt {
+    if (value instanceof Opt) {
+      return value;
+    } else if (typeof value === "string") {
+      return new Opt(value, void 0, void 0, [], 0);
+    } else if (typeof value === "object" && value !== null) {
+      return Opt.fromInit(value);
     } else {
-      const flag = opt.flag !== void 0 ? opt.flag : null;
-      const desc = opt.desc !== void 0 ? opt.desc : null;
-      const argCount = opt.args !== void 0 ? opt.args.length : 0;
-      const args = new Array<Arg>(argCount);
-      for (let argIndex = 0; argIndex < argCount; argIndex += 1) {
-        args[argIndex] = Arg.fromAny(opt.args![argIndex]);
-      }
-      return new Opt(opt.name, flag, desc, args, 0);
+      throw new TypeError("" + value);
     }
   }
 }

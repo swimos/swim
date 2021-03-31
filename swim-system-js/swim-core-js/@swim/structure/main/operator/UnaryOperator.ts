@@ -12,26 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Item} from "../Item";
-import {Operator} from "../Operator";
+import type {Interpolator} from "@swim/mapping";
+import type {Item} from "../Item";
+import {Operator} from "./Operator";
+import {UnaryOperatorInterpolator} from "../"; // forward import
 
 export abstract class UnaryOperator extends Operator {
-  /** @hidden */
-  readonly _operand: Item;
-
   constructor(operand: Item) {
     super();
-    this._operand = operand;
+    Object.defineProperty(this, "operand", {
+      value: operand,
+      enumerable: true,
+    });
   }
 
-  operand(): Item {
-    return this._operand;
-  }
+  declare readonly operand: Item;
 
-  abstract operator(): string;
+  abstract readonly operator: string;
 
   isConstant(): boolean {
-    return this._operand.isConstant();
+    return this.operand.isConstant();
+  }
+
+  interpolateTo(that: UnaryOperator): Interpolator<UnaryOperator>;
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    if (that instanceof UnaryOperator && this.operator === that.operator) {
+      return UnaryOperatorInterpolator(this, that);
+    } else {
+      return super.interpolateTo(that);
+    }
   }
 }
-Item.UnaryOperator = UnaryOperator;

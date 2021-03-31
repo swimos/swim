@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Comparable, HashCode, Murmur3} from "@swim/util";
+import {HashCode, Compare, Lazy, Strings} from "@swim/util";
 import {Output, Format, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
-import {AnyUriUser, UriUserInit, UriUser} from "./UriUser";
-import {AnyUriHost, UriHost} from "./UriHost";
-import {AnyUriPort, UriPort} from "./UriPort";
+import {AnyUriUser, UriUserInit, UriUser} from "./"; // forward import
+import {AnyUriHost, UriHost} from "./"; // forward import
+import {AnyUriPort, UriPort} from "./"; // forward import
 
 export type AnyUriAuthority = UriAuthority | UriAuthorityInit | string;
 
@@ -27,192 +27,176 @@ export interface UriAuthorityInit extends UriUserInit {
   port?: AnyUriPort;
 }
 
-export class UriAuthority implements Comparable<UriAuthority>, HashCode, Debug, Display {
-  /** @hidden */
-  readonly _user: UriUser;
-  /** @hidden */
-  readonly _host: UriHost;
-  /** @hidden */
-  readonly _port: UriPort;
-  /** @hidden */
-  _string?: string;
-  /** @hidden */
-  _hashCode?: number;
-
+export class UriAuthority implements HashCode, Compare, Debug, Display {
   /** @hidden */
   constructor(user: UriUser, host: UriHost, port: UriPort) {
-    this._user = user;
-    this._host = host;
-    this._port = port;
+    Object.defineProperty(this, "user", {
+      value: user,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "host", {
+      value: host,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "port", {
+      value: port,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "hashValue", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "stringValue", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   isDefined(): boolean {
-    return this._user.isDefined() || this._host.isDefined() || this._port.isDefined();
+    return this.user.isDefined() || this.host.isDefined() || this.port.isDefined();
   }
 
-  user(): UriUser;
-  user(user: AnyUriUser): UriAuthority;
-  user(user?: AnyUriUser): UriUser | UriAuthority {
-    if (user === void 0) {
-      return this._user;
+  declare readonly user: UriUser;
+
+  withUser(user: AnyUriUser): UriAuthority {
+    user = UriUser.fromAny(user);
+    if (user !== this.user) {
+      return this.copy(user as UriUser, this.host, this.port);
     } else {
-      user = Uri.User.fromAny(user);
-      if (user !== this._user) {
-        return this.copy(user, this._host, this._port);
-      } else {
-        return this;
-      }
+      return this;
     }
   }
 
-  userPart(): string;
-  userPart(user: string): UriAuthority;
-  userPart(user?: string): string | UriAuthority {
-    if (user === void 0) {
-      return this._user.toString();
+  get userPart(): string {
+    return this.user.toString();
+  }
+
+  withUserPart(userPart: string): UriAuthority {
+    return this.withUser(UriUser.parse(userPart));
+  }
+
+  get username(): string | undefined {
+    return this.user.username;
+  }
+
+  withUsername(username: string | undefined, password?: string): UriAuthority {
+    if (arguments.length === 1) {
+      return this.withUser(this.user.withUsername(username));
     } else {
-      return this.user(Uri.User.parse(user));
+      return this.withUser(UriUser.create(username, password));
     }
   }
 
-  username(): string;
-  username(username: string, password?: string | null): UriAuthority;
-  username(username?: string, password?: string | null): string | UriAuthority {
-    if (username === void 0) {
-      return this._user._username || "";
-    } else if (password === void 0) {
-      return this.user(this._user.username(username));
+  get password(): string | undefined {
+    return this.user.password;
+  }
+
+  withPassword(password: string | undefined): UriAuthority {
+    return this.withUser(this.user.withPassword(password));
+  }
+
+  declare readonly host: UriHost;
+
+  withHost(host: AnyUriHost): UriAuthority {
+    host = UriHost.fromAny(host);
+    if (host !== this.host) {
+      return this.copy(this.user, host, this.port);
     } else {
-      return this.user(Uri.User.from(username, password));
+      return this;
     }
   }
 
-  password(): string | null;
-  password(password: string | null): UriAuthority;
-  password(password?: string | null): string | null | UriAuthority {
-    if (password === void 0) {
-      return this._user.password();
+  get hostPart(): string {
+    return this.host.toString();
+  }
+
+  withHostPart(hostPart: string): UriAuthority {
+    return this.withHost(UriHost.parse(hostPart));
+  }
+
+  get hostAddress(): string {
+    return this.host.address;
+  }
+
+  get hostName(): string | undefined {
+    return this.host.name;
+  }
+
+  withHostName(hostName: string): UriAuthority {
+    return this.withHost(UriHost.hostname(hostName));
+  }
+
+  get hostIPv4(): string | undefined {
+    return this.host.ipv4;
+  }
+
+  withHostIPv4(hostIPv4: string): UriAuthority {
+    return this.withHost(UriHost.ipv4(hostIPv4));
+  }
+
+  get hostIPv6(): string | undefined {
+    return this.host.ipv6;
+  }
+
+  withHostIPv6(hostIPv5: string): UriAuthority {
+    return this.withHost(UriHost.ipv6(hostIPv5));
+  }
+
+  declare readonly port: UriPort;
+
+  withPort(port: AnyUriPort): UriAuthority {
+    port = UriPort.fromAny(port);
+    if (port !== this.port) {
+      return this.copy(this.user, this.host, port);
     } else {
-      return this.user(this._user.password(password));
+      return this;
     }
   }
 
-  host(): UriHost;
-  host(host: AnyUriHost): UriAuthority;
-  host(host?: AnyUriHost): UriHost | UriAuthority {
-    if (host === void 0) {
-      return this._host;
-    } else {
-      host = Uri.Host.fromAny(host);
-      if (host !== this._host) {
-        return this.copy(this._user, host, this._port);
-      } else {
-        return this;
-      }
-    }
+  get portPart(): string {
+    return this.port.toString();
   }
 
-  hostPart(): string;
-  hostPart(host: string): UriAuthority;
-  hostPart(host?: string): string | UriAuthority {
-    if (host === void 0) {
-      return this._host.toString();
-    } else {
-      return this.host(Uri.Host.parse(host));
-    }
+  withPortPart(portPart: string): UriAuthority {
+    return this.withPort(UriPort.parse(portPart));
   }
 
-  hostAddress(): string {
-    return this._host.address();
+  get portNumber(): number {
+    return this.port.number;
   }
 
-  hostName(): string | null;
-  hostName(address: string): UriAuthority;
-  hostName(address?: string): string | null | UriAuthority {
-    if (address === void 0) {
-      return this._host.name();
-    } else {
-      return this.host(Uri.Host.from(address));
-    }
-  }
-
-  hostIPv4(): string | null;
-  hostIPv4(address: string): UriAuthority;
-  hostIPv4(address?: string): string | null | UriAuthority {
-    if (address === void 0) {
-      return this._host.ipv4();
-    } else {
-      return this.host(Uri.Host.ipv4(address));
-    }
-  }
-
-  hostIPv6(): string | null;
-  hostIPv6(address: string): UriAuthority;
-  hostIPv6(address?: string): string | null | UriAuthority {
-    if (address === void 0) {
-      return this._host.ipv6();
-    } else {
-      return this.host(Uri.Host.ipv6(address));
-    }
-  }
-
-  port(): UriPort;
-  port(port: AnyUriPort): UriAuthority;
-  port(port?: AnyUriPort): UriPort | UriAuthority {
-    if (port === void 0) {
-      return this._port;
-    } else {
-      port = Uri.Port.fromAny(port);
-      if (port !== this._port) {
-        return this.copy(this._user, this._host, port);
-      } else {
-        return this;
-      }
-    }
-  }
-
-  portPart(): string;
-  portPart(port: string): UriAuthority;
-  portPart(port?: string): string | UriAuthority {
-    if (port === void 0) {
-      return this._port.toString();
-    } else {
-      return this.port(Uri.Port.parse(port));
-    }
-  }
-
-  portNumber(): number;
-  portNumber(port: number): UriAuthority;
-  portNumber(port?: number): number | UriAuthority {
-    if (port === void 0) {
-      return this._port.number();
-    } else {
-      return this.port(Uri.Port.from(port));
-    }
+  withPortNumber(portNumber: number): UriAuthority {
+    return this.withPort(UriPort.create(portNumber));
   }
 
   protected copy(user: UriUser, host: UriHost, port: UriPort): UriAuthority {
-    return UriAuthority.from(user, host, port);
+    return UriAuthority.create(user, host, port);
   }
 
   toAny(authority?: {username?: string, password?: string, host?: string, port?: number}):
       {username?: string, password?: string, host?: string, port?: number} | undefined {
     if (this.isDefined()) {
-      authority = authority || {};
-      this._user.toAny(authority);
-      if (this._host.isDefined()) {
-        authority.host = this._host.toAny();
+      if (authority === void 0) {
+        authority = {};
       }
-      if (this._port.isDefined()) {
-        authority.port = this._port.toAny();
+      this.user.toAny(authority);
+      if (this.host.isDefined()) {
+        authority.host = this.host.toAny();
+      }
+      if (this.port.isDefined()) {
+        authority.port = this.port.toAny();
       }
     }
     return authority;
   }
 
-  compareTo(that: UriAuthority): 0 | 1 | -1 {
-    const order = this.toString().localeCompare(that.toString());
-    return order < 0 ? -1 : order > 0 ? 1 : 0;
+  compareTo(that: unknown): number {
+    if (that instanceof UriAuthority) {
+      return this.toString().localeCompare(that.toString());
+    }
+    return NaN;
   }
 
   equals(that: unknown): boolean {
@@ -224,55 +208,73 @@ export class UriAuthority implements Comparable<UriAuthority>, HashCode, Debug, 
     return false;
   }
 
+  /** @hidden */
+  declare readonly hashValue: number | undefined;
+
   hashCode(): number {
-    if (this._hashCode === void 0) {
-      this._hashCode = Murmur3.hash(this.toString());
+    let hashValue = this.hashValue;
+    if (hashValue === void 0) {
+      hashValue = Strings.hash(this.toString());
+      Object.defineProperty(this, "hashValue", {
+        value: hashValue,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    return this._hashCode;
+    return hashValue;
   }
 
   debug(output: Output): void {
     output = output.write("UriAuthority").write(46/*'.'*/);
     if (this.isDefined()) {
-      output = output.write("parse").write(40/*'('*/).write(34/*'"'*/).display(this).write(34/*'"'*/).write(41/*')'*/);
+      output = output.write("parse").write(40/*'('*/).write(34/*'"'*/)
+        .display(this).write(34/*'"'*/).write(41/*')'*/);
     } else {
       output = output.write("undefined").write(40/*'('*/).write(41/*')'*/);
     }
   }
 
   display(output: Output): void {
-    if (this._string !== void 0) {
-      output = output.write(this._string);
+    const stringValue = this.stringValue;
+    if (stringValue !== void 0) {
+      output = output.write(stringValue);
     } else {
-      if (this._user.isDefined()) {
-        output.display(this._user).write(64/*'@'*/);
+      const user = this.user;
+      if (user.isDefined()) {
+        output.display(user).write(64/*'@'*/);
       }
-      output.display(this._host);
-      if (this._port.isDefined()) {
-        output = output.write(58/*':'*/).display(this._port);
+      output.display(this.host);
+      const port = this.port;
+      if (port.isDefined()) {
+        output = output.write(58/*':'*/).display(port);
       }
     }
   }
+
+  /** @hidden */
+  declare readonly stringValue: string | undefined;
 
   toString(): string {
-    if (this._string === void 0) {
-      this._string = Format.display(this);
+    let stringValue = this.stringValue;
+    if (stringValue === void 0) {
+      stringValue = Format.display(this);
+      Object.defineProperty(this, "stringValue", {
+        value: stringValue,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    return this._string;
+    return stringValue;
   }
 
-  private static _undefined?: UriAuthority;
-
+  @Lazy
   static undefined(): UriAuthority {
-    if (UriAuthority._undefined === void 0) {
-      UriAuthority._undefined = new UriAuthority(Uri.User.undefined(), Uri.Host.undefined(), Uri.Port.undefined());
-    }
-    return UriAuthority._undefined;
+    return new UriAuthority(UriUser.undefined(), UriHost.undefined(), UriPort.undefined());
   }
 
-  static from(user: UriUser = Uri.User.undefined(),
-              host: UriHost = Uri.Host.undefined(),
-              port: UriPort = Uri.Port.undefined()): UriAuthority {
+  static create(user: UriUser = UriUser.undefined(),
+                host: UriHost = UriHost.undefined(),
+                port: UriPort = UriPort.undefined()): UriAuthority {
     if (user.isDefined() || host.isDefined() || port.isDefined()) {
       return new UriAuthority(user, host, port);
     } else {
@@ -280,85 +282,88 @@ export class UriAuthority implements Comparable<UriAuthority>, HashCode, Debug, 
     }
   }
 
-  static fromAny(authority: AnyUriAuthority | null | undefined): UriAuthority {
-    if (authority === null || authority === void 0) {
+  static fromInit(init: UriAuthorityInit): UriAuthority {
+    const user = UriUser.fromAny(init.user !== void 0 ? init.user : init);
+    const host = UriHost.fromAny(init.host);
+    const port = UriPort.fromAny(init.port);
+    return UriAuthority.create(user, host, port);
+  }
+
+  static fromAny(value: AnyUriAuthority | null | undefined): UriAuthority {
+    if (value === void 0 || value === null) {
       return UriAuthority.undefined();
-    } else if (authority instanceof UriAuthority) {
-      return authority;
-    } else if (typeof authority === "object") {
-      const user = Uri.User.fromAny(authority.user || authority);
-      const host = Uri.Host.fromAny(authority.host);
-      const port = Uri.Port.fromAny(authority.port);
-      return UriAuthority.from(user, host, port);
-    } else if (typeof authority === "string") {
-      return UriAuthority.parse(authority);
+    } else if (value instanceof UriAuthority) {
+      return value;
+    } else if (typeof value === "object") {
+      return UriAuthority.fromInit(value);
+    } else if (typeof value === "string") {
+      return UriAuthority.parse(value);
     } else {
-      throw new TypeError("" + authority);
+      throw new TypeError("" + value);
     }
   }
 
   static user(user: AnyUriUser): UriAuthority {
-    user = Uri.User.fromAny(user);
-    return UriAuthority.from(user, void 0, void 0);
+    user = UriUser.fromAny(user);
+    return UriAuthority.create(user as UriUser, void 0, void 0);
   }
 
-  static userPart(part: string): UriAuthority {
-    const user = Uri.User.parse(part);
-    return UriAuthority.from(user, void 0, void 0);
+  static userPart(userPart: string): UriAuthority {
+    const user = UriUser.parse(userPart);
+    return UriAuthority.create(user, void 0, void 0);
   }
 
-  static username(username: string, password?: string | null): UriAuthority {
-    const user = Uri.User.from(username, password);
-    return UriAuthority.from(user, void 0, void 0);
+  static username(username: string, password?: string | undefined): UriAuthority {
+    const user = UriUser.create(username, password);
+    return UriAuthority.create(user, void 0, void 0);
   }
 
   static password(password: string): UriAuthority {
-    const user = Uri.User.from("", password);
-    return UriAuthority.from(user, void 0, void 0);
+    const user = UriUser.create("", password);
+    return UriAuthority.create(user, void 0, void 0);
   }
 
   static host(host: AnyUriHost): UriAuthority {
-    host = Uri.Host.fromAny(host);
-    return UriAuthority.from(void 0, host, void 0);
+    host = UriHost.fromAny(host);
+    return UriAuthority.create(void 0, host, void 0);
   }
 
-  static hostPart(part: string): UriAuthority {
-    const host = Uri.Host.parse(part);
-    return UriAuthority.from(void 0, host, void 0);
+  static hostPart(hostPart: string): UriAuthority {
+    const host = UriHost.parse(hostPart);
+    return UriAuthority.create(void 0, host, void 0);
   }
 
-  static hostName(address: string): UriAuthority {
-    const host = Uri.Host.from(address);
-    return UriAuthority.from(void 0, host, void 0);
+  static hostName(hostName: string): UriAuthority {
+    const host = UriHost.hostname(hostName);
+    return UriAuthority.create(void 0, host, void 0);
   }
 
-  static hostIPv4(address: string): UriAuthority {
-    const host = Uri.Host.ipv4(address);
-    return UriAuthority.from(void 0, host, void 0);
+  static hostIPv4(hostIPv4: string): UriAuthority {
+    const host = UriHost.ipv4(hostIPv4);
+    return UriAuthority.create(void 0, host, void 0);
   }
 
-  static hostIPv6(address: string): UriAuthority {
-    const host = Uri.Host.ipv6(address);
-    return UriAuthority.from(void 0, host, void 0);
+  static hostIPv6(hostIPv6: string): UriAuthority {
+    const host = UriHost.ipv6(hostIPv6);
+    return UriAuthority.create(void 0, host, void 0);
   }
 
   static port(port: AnyUriPort): UriAuthority {
-    port = Uri.Port.fromAny(port);
-    return UriAuthority.from(void 0, void 0, port);
+    port = UriPort.fromAny(port);
+    return UriAuthority.create(void 0, void 0, port);
   }
 
-  static portPart(part: string): UriAuthority {
-    const port = Uri.Port.parse(part);
-    return UriAuthority.from(void 0, void 0, port);
+  static portPart(portPart: string): UriAuthority {
+    const port = UriPort.parse(portPart);
+    return UriAuthority.create(void 0, void 0, port);
   }
 
-  static portNumber(number: number): UriAuthority {
-    const port = Uri.Port.from(number);
-    return UriAuthority.from(void 0, void 0, port);
+  static portNumber(portNumber: number): UriAuthority {
+    const port = UriPort.create(portNumber);
+    return UriAuthority.create(void 0, void 0, port);
   }
 
-  static parse(string: string): UriAuthority {
-    return Uri.standardParser().parseAuthorityString(string);
+  static parse(authorityPart: string): UriAuthority {
+    return Uri.standardParser.parseAuthorityString(authorityPart);
   }
 }
-Uri.Authority = UriAuthority;

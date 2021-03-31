@@ -13,35 +13,32 @@
 // limitations under the License.
 
 import {Value} from "@swim/structure";
-import {Inlet, MapInlet, AbstractOutlet, OutletInlet, OutletMapInlet} from "@swim/streamlet";
+import {AbstractOutlet, OutletInlet, OutletMapInlet} from "@swim/streamlet";
 
 /** @hidden */
 export class GetOutlet extends AbstractOutlet<Value> {
-  /** @hidden */
-  readonly _keyInlet: OutletInlet<Value>;
-  /** @hidden */
-  readonly _mapInlet: OutletMapInlet<Value, Value, unknown>;
-
   constructor() {
     super();
-    this._keyInlet = new OutletInlet<Value>(this);
-    this._mapInlet = new OutletMapInlet<Value, Value, unknown>(this);
+    Object.defineProperty(this, "keyInlet", {
+      value: new OutletInlet<Value>(this),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "mapInlet", {
+      value: new OutletMapInlet<Value, Value, unknown>(this),
+      enumerable: true,
+    });
   }
 
-  keyInlet(): Inlet<Value> {
-    return this._keyInlet;
-  }
+  declare readonly keyInlet: OutletInlet<Value>;
 
-  mapInlet(): MapInlet<Value, Value, unknown> {
-    return this._mapInlet;
-  }
+  declare readonly mapInlet: OutletMapInlet<Value, Value, unknown>;
 
   get(): Value {
-    const keyInput = this._keyInlet.input();
+    const keyInput = this.keyInlet.input;
     if (keyInput !== null) {
       const key = keyInput.get();
       if (key !== void 0) {
-        const mapInput = this._mapInlet.input();
+        const mapInput = this.mapInlet.input;
         if (mapInput !== null) {
           const value = mapInput.get(key);
           if (value !== void 0) {

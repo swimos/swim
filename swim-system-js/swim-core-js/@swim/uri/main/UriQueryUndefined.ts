@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Output} from "@swim/codec";
-import {Uri} from "./Uri";
+import type {Output} from "@swim/codec";
 import {AnyUriQuery, UriQuery} from "./UriQuery";
+import {UriQueryBuilder} from "./"; // forward import
 
 /** @hidden */
 export class UriQueryUndefined extends UriQuery {
@@ -26,25 +26,25 @@ export class UriQueryUndefined extends UriQuery {
     return true;
   }
 
-  head(): [string | null, string] {
-    throw new Error("Undefined Query");
+  head(): [string | undefined, string] {
+    throw new Error("undefined query");
   }
 
-  key(): string | null {
-    throw new Error("Undefined Query");
+  get key(): string | undefined {
+    throw new Error("undefined query");
   }
 
-  value(): string {
-    throw new Error("Undefined Query");
+  get value(): string {
+    throw new Error("undefined query");
   }
 
   tail(): UriQuery {
-    throw new Error("Undefined Query");
+    throw new Error("undefined query");
   }
 
   /** @hidden */
   setTail(tail: UriQuery): void {
-    throw new Error("Undefined Query");
+    throw new Error("undefined query");
   }
 
   /** @hidden */
@@ -60,16 +60,20 @@ export class UriQueryUndefined extends UriQuery {
     return this;
   }
 
-  appended(key: string | null, value: string): UriQuery;
+  appended(key: string | undefined, value: string): UriQuery;
   appended(params: AnyUriQuery): UriQuery;
-  appended(key: AnyUriQuery | null, value?: string): UriQuery {
-    return UriQuery.from(key as any, value as any);
+  appended(key: AnyUriQuery | undefined, value?: string): UriQuery {
+    const builder = new UriQueryBuilder();
+    builder.add(key as any, value as any);
+    return builder.bind();
   }
 
-  prepended(key: string | null, value: string): UriQuery;
+  prepended(key: string | undefined, value: string): UriQuery;
   prepended(params: AnyUriQuery): UriQuery;
-  prepended(key: AnyUriQuery | null, value?: string): UriQuery {
-    return UriQuery.from(key as any, value as any);
+  prepended(key: AnyUriQuery | undefined, value?: string): UriQuery {
+    const builder = new UriQueryBuilder();
+    builder.add(key as any, value as any);
+    return builder.bind();
   }
 
   debug(output: Output): void {
@@ -85,4 +89,3 @@ export class UriQueryUndefined extends UriQuery {
     return "";
   }
 }
-Uri.QueryUndefined = UriQueryUndefined;

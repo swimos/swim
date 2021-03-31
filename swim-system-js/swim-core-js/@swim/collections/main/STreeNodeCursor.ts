@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor} from "@swim/util";
+import type {Cursor} from "@swim/util";
 import {NodeCursor} from "./NodeCursor";
-import {STree} from "./STree";
-import {STreePage} from "./STreePage";
+import type {STreePage} from "./STreePage";
 
 /** @hidden */
 export class STreeNodeCursor<V, I> extends NodeCursor<[I, V], STreePage<V, I>> {
-  constructor(pages: STreePage<V, I>[], index?: number, pageIndex?: number,
-              subCursor?: Cursor<[I, V]>) {
-    super(pages, index, pageIndex, subCursor);
+  constructor(pages: ReadonlyArray<STreePage<V, I>>, index: number = 0,
+              childIndex: number = 0, childCursor: Cursor<[I, V]> | null = null) {
+    super(pages, index, childIndex, childCursor);
   }
 
   protected pageSize(page: STreePage<V, I>): number {
@@ -36,4 +35,3 @@ export class STreeNodeCursor<V, I> extends NodeCursor<[I, V], STreePage<V, I>> {
     return page.reverseEntries();
   }
 }
-STree.NodeCursor = STreeNodeCursor;

@@ -75,8 +75,22 @@ const core = [
     ],
   },
   {
-    id: "interpolate",
-    name: "@swim/interpolate",
+    id: "constraint",
+    name: "@swim/constraint",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "constraint"],
+      },
+    ],
+  },
+  {
+    id: "mapping",
+    name: "@swim/mapping",
     targets: [
       {
         id: "main",
@@ -84,7 +98,7 @@ const core = [
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "interpolate"],
+        deps: ["util", "codec", "unit", "mapping"],
       },
     ],
   },
@@ -94,11 +108,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "interpolate"],
+        deps: ["util", "codec", "mapping"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure"],
+        deps: ["util", "codec", "unit", "mapping", "structure"],
       },
     ],
   },
@@ -122,11 +136,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "interpolate", "structure", "streamlet"],
+        deps: ["util", "codec", "mapping", "collections", "structure", "streamlet"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "collections", "interpolate", "structure", "streamlet", "dataflow"],
+        deps: ["util", "codec", "unit", "mapping", "collections", "structure", "streamlet", "dataflow"],
       },
     ],
   },
@@ -136,39 +150,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "interpolate", "structure"],
+        deps: ["util", "codec", "mapping", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure", "recon"],
-      },
-    ],
-  },
-  {
-    id: "math",
-    name: "@swim/math",
-    targets: [
-      {
-        id: "main",
-        deps: ["util", "codec", "interpolate", "structure"],
-      },
-      {
-        id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure", "math"],
-      },
-    ],
-  },
-  {
-    id: "time",
-    name: "@swim/time",
-    targets: [
-      {
-        id: "main",
-        deps: ["util", "codec", "interpolate", "structure"],
-      },
-      {
-        id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure", "time"],
+        deps: ["util", "codec", "unit", "mapping", "structure", "recon"],
       },
     ],
   },
@@ -178,23 +164,65 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "interpolate", "structure"],
+        deps: ["util", "codec", "mapping", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "interpolate", "structure", "uri"],
+        deps: ["util", "codec", "unit", "mapping", "structure", "uri"],
+      },
+    ],
+  },
+  {
+    id: "math",
+    name: "@swim/math",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "mapping", "structure"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "mapping", "structure", "math"],
+      },
+    ],
+  },
+  {
+    id: "geo",
+    name: "@swim/geo",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "mapping", "structure", "math"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "mapping", "structure", "math", "geo"],
+      },
+    ],
+  },
+  {
+    id: "time",
+    name: "@swim/time",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "mapping", "structure"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "mapping", "structure", "time"],
       },
     ],
   },
   {
     id: "core",
     name: "@swim/core",
-    title: "Swim Core Framework",
-    umbrella: true,
+    title: "Swim Core",
+    framework: true,
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "collections", "interpolate", "structure", "streamlet", "dataflow", "recon", "math", "time", "uri"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time"],
       },
     ],
   },

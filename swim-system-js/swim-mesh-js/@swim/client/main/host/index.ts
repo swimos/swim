@@ -24,6 +24,7 @@ export {
 export {RemoteHost} from "./RemoteHost";
 
 export {
+  WebSocketConstructor,
   WebSocketHostOptions,
   WebSocketHost,
 } from "./WebSocketHost";

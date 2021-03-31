@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export {Selector} from "./Selector";
+
 export {IdentitySelector} from "./IdentitySelector";
 
 export {GetSelector} from "./GetSelector";

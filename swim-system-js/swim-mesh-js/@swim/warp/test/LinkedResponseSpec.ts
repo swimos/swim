@@ -25,48 +25,48 @@ export class LinkedResponseSpec extends Spec {
   @Test
   parseLinkedWithNamedHeaders(exam: WarpExam): void {
     exam.parses("@linked(node: node_uri, lane: lane_uri, prio: 0.5, rate: 1.0)",
-                LinkedResponse.of("node_uri", "lane_uri", 0.5, 1.0));
+                LinkedResponse.create("node_uri", "lane_uri", 0.5, 1.0));
   }
 
   @Test
   parseLinkedWithPositionalHeaders(exam: WarpExam): void {
     exam.parses("@linked(node_uri, lane_uri)",
-                LinkedResponse.of("node_uri", "lane_uri", 0.0, 0.0));
+                LinkedResponse.create("node_uri", "lane_uri", 0.0, 0.0));
   }
 
   @Test
   parseLinkedWithBody(exam: WarpExam): void {
     exam.parses("@linked(node_uri, lane_uri)@test",
-                LinkedResponse.of("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))));
+                LinkedResponse.create("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))));
   }
 
   @Test
   writeLinked(exam: WarpExam): void {
-    exam.writes(LinkedResponse.of("node_uri", "lane_uri", 0.0, 0.0),
+    exam.writes(LinkedResponse.create("node_uri", "lane_uri", 0.0, 0.0),
                 "@linked(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   writeLinkedWithPrio(exam: WarpExam): void {
-    exam.writes(LinkedResponse.of("node_uri", "lane_uri", 0.5, 0.0),
+    exam.writes(LinkedResponse.create("node_uri", "lane_uri", 0.5, 0.0),
                 "@linked(node:node_uri,lane:lane_uri,prio:0.5)");
   }
 
   @Test
   writeLinkedWithRate(exam: WarpExam): void {
-    exam.writes(LinkedResponse.of("node_uri", "lane_uri", 0.0, 1.0),
+    exam.writes(LinkedResponse.create("node_uri", "lane_uri", 0.0, 1.0),
                 "@linked(node:node_uri,lane:lane_uri,rate:1)");
   }
 
   @Test
   writeLinkedWithPrioAndRate(exam: WarpExam): void {
-    exam.writes(LinkedResponse.of("node_uri", "lane_uri", 0.5, 1.0),
+    exam.writes(LinkedResponse.create("node_uri", "lane_uri", 0.5, 1.0),
                 "@linked(node:node_uri,lane:lane_uri,prio:0.5,rate:1)");
   }
 
   @Test
   writeLinkedWithBody(exam: WarpExam): void {
-    exam.writes(LinkedResponse.of("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))),
+    exam.writes(LinkedResponse.create("node_uri", "lane_uri", 0.0, 0.0, Record.of(Attr.of("test"))),
                 "@linked(node:node_uri,lane:lane_uri)@test");
   }
 }

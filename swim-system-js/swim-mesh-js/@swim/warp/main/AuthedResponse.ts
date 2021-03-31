@@ -13,29 +13,23 @@
 // limitations under the License.
 
 import {AnyValue, Value} from "@swim/structure";
-import {Envelope} from "./Envelope";
 import {HostAddressed} from "./HostAddressed";
 
-export class AuthedResponse extends HostAddressed {
+export class AuthedResponse extends HostAddressed<AuthedResponse> {
   constructor(body: Value) {
     super(body);
   }
 
-  protected copy(body: Value): this {
-    return new AuthedResponse(body) as this;
+  protected copy(body: Value): AuthedResponse {
+    return new AuthedResponse(body);
   }
 
-  static tag(): string {
+  static get tag(): string {
     return "authed";
   }
 
-  static fromValue(value: Value): AuthedResponse | undefined {
-    return HostAddressed.fromValue(value, AuthedResponse) as AuthedResponse | undefined;
-  }
-
-  static of(body: AnyValue = Value.absent()): AuthedResponse {
+  static create(body: AnyValue = Value.absent()): AuthedResponse {
     body = Value.fromAny(body);
     return new AuthedResponse(body);
   }
 }
-Envelope.AuthedResponse = AuthedResponse;

@@ -12,17 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Builder} from "@swim/util";
 import {AnyItem, Item} from "./Item";
-import {Field} from "./Field";
-import {ValueBuilder} from "./ValueBuilder";
-import {Record} from "./Record";
-import {AnyText} from "./Text";
-import {AnyNum} from "./Num";
+import type {Builder} from "@swim/util";
+import type {Interpolator} from "@swim/mapping";
+import type {Field} from "./Field";
+import {Attr} from "./Attr";
+import {Slot} from "./Slot";
+import {ValueBuilder} from "./"; // forward import
+import {Record} from "./"; // forward import
+import {Data} from "./"; // forward import
+import {AnyText, Text} from "./"; // forward import
+import {AnyNum, Num} from "./"; // forward import
+import {Bool} from "./"; // forward import
+import {Extant} from "./"; // forward import
+import {Absent} from "./"; // forward import
+import {Expression} from "./"; // forward import
+import {BitwiseOrOperator} from "./"; // forward import
+import {BitwiseXorOperator} from "./"; // forward import
+import {BitwiseAndOperator} from "./"; // forward import
+import {LtOperator} from "./"; // forward import
+import {LeOperator} from "./"; // forward import
+import {EqOperator} from "./"; // forward import
+import {NeOperator} from "./"; // forward import
+import {GeOperator} from "./"; // forward import
+import {GtOperator} from "./"; // forward import
+import {PlusOperator} from "./"; // forward import
+import {MinusOperator} from "./"; // forward import
+import {TimesOperator} from "./"; // forward import
+import {DivideOperator} from "./"; // forward import
+import {ModuloOperator} from "./"; // forward import
+import {LambdaFunc} from "./"; // forward import
 
 export type AnyValue = Value
                      | {readonly [key: string]: AnyValue}
-                     | ReadonlyArray<unknown> // ReadonlyArray<AnyItem>
+                     | ReadonlyArray<AnyItem>
                      | Uint8Array
                      | string
                      | number
@@ -75,7 +98,7 @@ export abstract class Value extends Item {
    * structure.  The `tag` can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
-  tag(): string | undefined {
+  get tag(): string | undefined {
     return void 0;
   }
 
@@ -88,7 +111,7 @@ export abstract class Value extends Item {
    * attributed structure is a `Record` with one or more attributes that modify
    * one or more other members.
    */
-  target(): Value {
+  get target(): Value {
     return this;
   }
 
@@ -114,7 +137,7 @@ export abstract class Value extends Item {
    * `Value` equivalently to a unary `Record`.
    */
   unflattened(): Record {
-    return Value.Record.of(this);
+    return Record.of(this);
   }
 
   /**
@@ -163,7 +186,7 @@ export abstract class Value extends Item {
    * empty `Record`.
    */
   tail(): Record {
-    return Value.Record.empty();
+    return Record.empty();
   }
 
   /**
@@ -273,17 +296,17 @@ export abstract class Value extends Item {
   bitwiseOr(that: AnyItem): Item;
   bitwiseOr(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.BitwiseOrOperator(this, that);
-    } else if (that instanceof Item.Attr) {
+    if (that instanceof Expression) {
+      return new BitwiseOrOperator(this, that);
+    } else if (that instanceof Attr) {
       const newValue = this.bitwiseOr(that.value);
       if (newValue.isDefined()) {
-        return new Item.Attr(that.key, newValue);
+        return new Attr(that.key, newValue);
       }
-    } else if (that instanceof Item.Slot) {
+    } else if (that instanceof Slot) {
       const newValue = this.bitwiseOr(that.value);
       if (newValue.isDefined()) {
-        return new Item.Slot(that.key, newValue);
+        return new Slot(that.key, newValue);
       }
     }
     return Item.absent();
@@ -293,17 +316,17 @@ export abstract class Value extends Item {
   bitwiseXor(that: AnyItem): Item;
   bitwiseXor(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.BitwiseXorOperator(this, that);
-    } else if (that instanceof Item.Attr) {
+    if (that instanceof Expression) {
+      return new BitwiseXorOperator(this, that);
+    } else if (that instanceof Attr) {
       const newValue = this.bitwiseXor(that.value);
       if (newValue.isDefined()) {
-        return new Item.Attr(that.key, newValue);
+        return new Attr(that.key, newValue);
       }
-    } else if (that instanceof Item.Slot) {
+    } else if (that instanceof Slot) {
       const newValue = this.bitwiseXor(that.value);
       if (newValue.isDefined()) {
-        return new Item.Slot(that.key, newValue);
+        return new Slot(that.key, newValue);
       }
     }
     return Item.absent();
@@ -313,17 +336,17 @@ export abstract class Value extends Item {
   bitwiseAnd(that: AnyItem): Item;
   bitwiseAnd(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.BitwiseAndOperator(this, that);
-    } else if (that instanceof Item.Attr) {
+    if (that instanceof Expression) {
+      return new BitwiseAndOperator(this, that);
+    } else if (that instanceof Attr) {
       const newValue = this.bitwiseAnd(that.value);
       if (newValue.isDefined()) {
-        return new Item.Attr(that.key, newValue);
+        return new Attr(that.key, newValue);
       }
-    } else if (that instanceof Item.Slot) {
+    } else if (that instanceof Slot) {
       const newValue = this.bitwiseAnd(that.value);
       if (newValue.isDefined()) {
-        return new Item.Slot(that.key, newValue);
+        return new Slot(that.key, newValue);
       }
     }
     return Item.absent();
@@ -333,8 +356,8 @@ export abstract class Value extends Item {
   lt(that: AnyItem): Item;
   lt(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.LtOperator(this, that);
+    if (that instanceof Expression) {
+      return new LtOperator(this, that);
     }
     return super.lt(that);
   }
@@ -343,8 +366,8 @@ export abstract class Value extends Item {
   le(that: AnyItem): Item;
   le(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.LeOperator(this, that);
+    if (that instanceof Expression) {
+      return new LeOperator(this, that);
     }
     return super.le(that);
   }
@@ -353,8 +376,8 @@ export abstract class Value extends Item {
   eq(that: AnyItem): Item;
   eq(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.EqOperator(this, that);
+    if (that instanceof Expression) {
+      return new EqOperator(this, that);
     }
     return super.eq(that);
   }
@@ -363,8 +386,8 @@ export abstract class Value extends Item {
   ne(that: AnyItem): Item;
   ne(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.NeOperator(this, that);
+    if (that instanceof Expression) {
+      return new NeOperator(this, that);
     }
     return super.ne(that);
   }
@@ -373,8 +396,8 @@ export abstract class Value extends Item {
   ge(that: AnyItem): Item;
   ge(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.GeOperator(this, that);
+    if (that instanceof Expression) {
+      return new GeOperator(this, that);
     }
     return super.ge(that);
   }
@@ -383,8 +406,8 @@ export abstract class Value extends Item {
   gt(that: AnyItem): Item;
   gt(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.GtOperator(this, that);
+    if (that instanceof Expression) {
+      return new GtOperator(this, that);
     }
     return super.gt(that);
   }
@@ -393,17 +416,17 @@ export abstract class Value extends Item {
   plus(that: AnyItem): Item;
   plus(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.PlusOperator(this, that);
-    } else if (that instanceof Item.Attr) {
+    if (that instanceof Expression) {
+      return new PlusOperator(this, that);
+    } else if (that instanceof Attr) {
       const newValue = this.plus(that.value);
       if (newValue.isDefined()) {
-        return new Item.Attr(that.key, newValue);
+        return new Attr(that.key, newValue);
       }
-    } else if (that instanceof Item.Slot) {
+    } else if (that instanceof Slot) {
       const newValue = this.plus(that.value);
       if (newValue.isDefined()) {
-        return new Item.Slot(that.key, newValue);
+        return new Slot(that.key, newValue);
       }
     }
     return Item.absent();
@@ -413,17 +436,17 @@ export abstract class Value extends Item {
   minus(that: AnyItem): Item;
   minus(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.MinusOperator(this, that);
-    } else if (that instanceof Item.Attr) {
+    if (that instanceof Expression) {
+      return new MinusOperator(this, that);
+    } else if (that instanceof Attr) {
       const newValue = this.minus(that.value);
       if (newValue.isDefined()) {
-        return new Item.Attr(that.key, newValue);
+        return new Attr(that.key, newValue);
       }
-    } else if (that instanceof Item.Slot) {
+    } else if (that instanceof Slot) {
       const newValue = this.minus(that.value);
       if (newValue.isDefined()) {
-        return new Item.Slot(that.key, newValue);
+        return new Slot(that.key, newValue);
       }
     }
     return Item.absent();
@@ -433,17 +456,17 @@ export abstract class Value extends Item {
   times(that: AnyItem): Item;
   times(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.TimesOperator(this, that);
-    } else if (that instanceof Item.Attr) {
+    if (that instanceof Expression) {
+      return new TimesOperator(this, that);
+    } else if (that instanceof Attr) {
       const newValue = this.times(that.value);
       if (newValue.isDefined()) {
-        return new Item.Attr(that.key, newValue);
+        return new Attr(that.key, newValue);
       }
-    } else if (that instanceof Item.Slot) {
+    } else if (that instanceof Slot) {
       const newValue = this.times(that.value);
       if (newValue.isDefined()) {
-        return new Item.Slot(that.key, newValue);
+        return new Slot(that.key, newValue);
       }
     }
     return Item.absent();
@@ -453,17 +476,17 @@ export abstract class Value extends Item {
   divide(that: AnyItem): Item;
   divide(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.DivideOperator(this, that);
-    } else if (that instanceof Item.Attr) {
+    if (that instanceof Expression) {
+      return new DivideOperator(this, that);
+    } else if (that instanceof Attr) {
       const newValue = this.divide(that.value);
       if (newValue.isDefined()) {
-        return new Item.Attr(that.key, newValue);
+        return new Attr(that.key, newValue);
       }
-    } else if (that instanceof Item.Slot) {
+    } else if (that instanceof Slot) {
       const newValue = this.divide(that.value);
       if (newValue.isDefined()) {
-        return new Item.Slot(that.key, newValue);
+        return new Slot(that.key, newValue);
       }
     }
     return Item.absent();
@@ -473,17 +496,17 @@ export abstract class Value extends Item {
   modulo(that: AnyItem): Item;
   modulo(that: AnyItem): Item {
     that = Item.fromAny(that);
-    if (that instanceof Item.Expression) {
-      return new Item.ModuloOperator(this, that);
-    } else if (that instanceof Item.Attr) {
+    if (that instanceof Expression) {
+      return new ModuloOperator(this, that);
+    } else if (that instanceof Attr) {
       const newValue = this.modulo(that.value);
       if (newValue.isDefined()) {
-        return new Item.Attr(that.key, newValue);
+        return new Attr(that.key, newValue);
       }
-    } else if (that instanceof Item.Slot) {
+    } else if (that instanceof Slot) {
       const newValue = this.modulo(that.value);
       if (newValue.isDefined()) {
-        return new Item.Slot(that.key, newValue);
+        return new Slot(that.key, newValue);
       }
     }
     return Item.absent();
@@ -510,7 +533,7 @@ export abstract class Value extends Item {
   }
 
   lambda(template: Value): Value {
-    return new Item.LambdaFunc(this, template);
+    return new LambdaFunc(this, template);
   }
 
   /**
@@ -582,6 +605,13 @@ export abstract class Value extends Item {
     return this;
   }
 
+  interpolateTo(that: Value): Interpolator<Value>;
+  interpolateTo(that: Item): Interpolator<Item>;
+  interpolateTo(that: unknown): Interpolator<Item> | null;
+  interpolateTo(that: unknown): Interpolator<Item> | null {
+    return super.interpolateTo(that);
+  }
+
   keyEquals(key: unknown): boolean {
     return false;
   }
@@ -591,39 +621,38 @@ export abstract class Value extends Item {
   }
 
   static empty(): Value {
-    return Value.Record.empty();
+    return Record.empty();
   }
 
   static extant(): Value {
-    return Value.Extant.extant();
+    return Extant.extant();
   }
 
   static absent(): Value {
-    return Value.Absent.absent();
+    return Absent.absent();
   }
 
   static fromAny(value: AnyValue): Value {
     if (value instanceof Value) {
       return value;
     } else if (value === void 0) {
-      return Value.Absent.absent();
+      return Absent.absent();
     } else if (value === null) {
-      return Value.Extant.extant();
+      return Extant.extant();
     } else if (typeof value === "boolean") {
-      return Value.Bool.from(value);
+      return Bool.from(value);
     } else if (typeof value === "number") {
-      return Value.Num.from(value);
+      return Num.from(value);
     } else if (typeof value === "string") {
-      return Value.Text.from(value);
+      return Text.from(value);
     } else if (value instanceof Uint8Array) {
-      return Value.Data.wrap(value);
+      return Data.wrap(value);
     } else if (Array.isArray(value)) {
-      return Value.Record.fromArray(value);
+      return Record.fromArray(value);
     } else if (typeof value === "object") {
-      return Value.Record.fromObject(value as {[key: string]: AnyValue});
+      return Record.fromObject(value as {[key: string]: AnyValue});
     } else {
       throw new TypeError("" + value);
     }
   }
 }
-Item.Value = Value;

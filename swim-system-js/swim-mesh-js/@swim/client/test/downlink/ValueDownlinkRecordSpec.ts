@@ -23,7 +23,7 @@ import {
   SyncedResponse,
 } from "@swim/warp";
 import {ValueDownlinkRecord, WarpClient} from "@swim/client";
-import {MockServer} from "../MockServer";
+import type {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
 export class ValueDownlinkRecordSpec extends Spec {
@@ -36,13 +36,13 @@ export class ValueDownlinkRecordSpec extends Spec {
     return exam.mockServer((server: MockServer, client: WarpClient, resolve: () => void): void => {
       server.onEnvelope = function (envelope: Envelope): void {
         if (envelope instanceof SyncRequest) {
-          server.send(LinkedResponse.of(envelope.node(), envelope.lane()));
-          server.send(EventMessage.of(envelope.node(), envelope.lane(), Text.from('on')));
-          server.send(SyncedResponse.of(envelope.node(), envelope.lane()));
+          server.send(LinkedResponse.create(envelope.node, envelope.lane));
+          server.send(EventMessage.create(envelope.node, envelope.lane, Text.from('on')));
+          server.send(SyncedResponse.create(envelope.node, envelope.lane));
         }
       };
       const downlink = client.downlinkValue()
-        .hostUri(server.hostUri())
+        .hostUri(server.hostUri)
         .nodeUri("house/kitchen")
         .laneUri("light")
         .keepLinked(false)
@@ -51,7 +51,7 @@ export class ValueDownlinkRecordSpec extends Spec {
 
       class StateOutput extends AbstractInlet<Value> {
         didRecohereOutput(version: number): void {
-          const state = this._input!.get()!;
+          const state = this.input!.get()!;
           exam.equal(state, Record.of("on"));
           resolve();
         }

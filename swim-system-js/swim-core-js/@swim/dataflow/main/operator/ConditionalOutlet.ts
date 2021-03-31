@@ -16,39 +16,35 @@ import {Value} from "@swim/structure";
 import {Inlet, AbstractOutlet, OutletInlet} from "@swim/streamlet";
 
 export class ConditionalOutlet extends AbstractOutlet<Value> {
-  /** @hidden */
-  readonly _ifInlet: Inlet<Value>;
-  /** @hidden */
-  readonly _thenInlet: Inlet<Value>;
-  /** @hidden */
-  readonly _elseInlet: Inlet<Value>;
-
   constructor() {
     super();
-    this._ifInlet = new OutletInlet<Value>(this);
-    this._thenInlet = new OutletInlet<Value>(this);
-    this._elseInlet = new OutletInlet<Value>(this);
+    Object.defineProperty(this, "ifInlet", {
+      value: new OutletInlet<Value>(this),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "thenInlet", {
+      value: new OutletInlet<Value>(this),
+      enumerable: true,
+    });
+    Object.defineProperty(this, "elseInlet", {
+      value: new OutletInlet<Value>(this),
+      enumerable: true,
+    });
   }
 
-  ifInlet(): Inlet<Value> {
-    return this._ifInlet;
-  }
+  declare readonly ifInlet: Inlet<Value>;
 
-  thenInlet(): Inlet<Value> {
-    return this._thenInlet;
-  }
+  declare readonly thenInlet: Inlet<Value>;
 
-  elseInlet(): Inlet<Value> {
-    return this._elseInlet;
-  }
+  declare readonly elseInlet: Inlet<Value>;
 
   get(): Value {
-    const ifInput = this._ifInlet.input();
+    const ifInput = this.ifInlet.input;
     if (ifInput !== null) {
       const ifTerm = ifInput.get();
       if (ifTerm !== void 0) {
         if (ifTerm.booleanValue(false)) {
-          const thenInput = this._thenInlet.input();
+          const thenInput = this.thenInlet.input;
           if (thenInput !== null) {
             const thenTerm = thenInput.get();
             if (thenTerm !== void 0) {
@@ -56,7 +52,7 @@ export class ConditionalOutlet extends AbstractOutlet<Value> {
             }
           }
         } else {
-          const elseInput = this._elseInlet.input();
+          const elseInput = this.elseInlet.input;
           if (elseInput !== null) {
             const elseTerm = elseInput.get();
             if (elseTerm !== void 0) {

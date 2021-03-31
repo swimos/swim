@@ -6,7 +6,7 @@
     "paths": {
       "@swim/util": ["../swim-core-js/@swim/util/main"],
       "@swim/codec": ["../swim-core-js/@swim/codec/main"],
-      "@swim/interpolate": ["../swim-core-js/@swim/interpolate/main"],
+      "@swim/mapping": ["../swim-core-js/@swim/mapping/main"],
       "@swim/structure": ["../swim-core-js/@swim/structure/main"],
       "@swim/recon": ["../swim-core-js/@swim/recon/main"],
       "@swim/uri": ["../swim-core-js/@swim/uri/main"]
@@ -16,7 +16,7 @@
   "references": [
     {"path": "../../../../swim-core-js/@swim/util/main"},
     {"path": "../../../../swim-core-js/@swim/codec/main"},
-    {"path": "../../../../swim-core-js/@swim/interpolate/main"},
+    {"path": "../../../../swim-core-js/@swim/mapping/main"},
     {"path": "../../../../swim-core-js/@swim/structure/main"},
     {"path": "../../../../swim-core-js/@swim/recon/main"},
     {"path": "../../../../swim-core-js/@swim/uri/main"}

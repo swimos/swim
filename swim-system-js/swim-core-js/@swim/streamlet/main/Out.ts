@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {OutletOptions} from "./Outlet";
-import {StreamletClass, AbstractStreamlet} from "./AbstractStreamlet";
+import type {OutletOptions} from "./Outlet";
+import {StreamletPrototype, AbstractStreamlet} from "./AbstractStreamlet";
 
 export function Out(name: string): PropertyDecorator;
 export function Out(options: OutletOptions): PropertyDecorator;
@@ -25,6 +25,6 @@ export function Out(target: unknown, key?: string): PropertyDecorator | void {
     }
     return AbstractStreamlet.decorateOutlet.bind(void 0, target as OutletOptions);
   } else {
-    AbstractStreamlet.decorateOutlet({}, target as StreamletClass, key!);
+    AbstractStreamlet.decorateOutlet({}, target as StreamletPrototype, key!);
   }
 }

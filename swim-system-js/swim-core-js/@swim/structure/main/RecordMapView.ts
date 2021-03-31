@@ -13,35 +13,50 @@
 // limitations under the License.
 
 import {AnyItem, Item} from "./Item";
+import {Field} from "./Field";
+import {Attr} from "./Attr";
 import {AnyValue, Value} from "./Value";
 import {Record} from "./Record";
 import {RecordMap} from "./RecordMap";
-import {AnyNum} from "./Num";
+import {AnyNum, Num} from "./"; // forward import
 
 /** @hidden */
 export class RecordMapView extends Record {
-  /** @hidden */
-  readonly _record: RecordMap;
-  /** @hidden */
-  _lower: number;
-  /** @hidden */
-  _upper: number;
-
   constructor(record: RecordMap, lower: number, upper: number) {
     super();
-    this._record = record;
-    this._lower = lower;
-    this._upper = upper;
+    Object.defineProperty(this, "record", {
+      value: record,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "lower", {
+      value: lower,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "upper", {
+      value: upper,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
+  /** @hidden */
+  declare readonly record: RecordMap;
+
+  /** @hidden */
+  declare readonly lower: number;
+
+  /** @hidden */
+  declare readonly upper: number;
+
   isEmpty(): boolean {
-    return this._lower === this._upper;
+    return this.lower === this.upper;
   }
 
   isArray(): boolean {
-    const array = this._record._array!;
-    for (let i = this._lower, n = this._upper; i < n; i += 1) {
-      if (array[i] instanceof Item.Field) {
+    const array = this.record.array;
+    for (let i = this.lower, n = this.upper; i < n; i += 1) {
+      if (array![i] instanceof Field) {
         return false;
       }
     }
@@ -49,9 +64,9 @@ export class RecordMapView extends Record {
   }
 
   isObject(): boolean {
-    const array = this._record._array!;
-    for (let i = this._lower, n = this._upper; i < n; i += 1) {
-      if (array[i] instanceof Value) {
+    const array = this.record.array;
+    for (let i = this.lower, n = this.upper; i < n; i += 1) {
+      if (array![i] instanceof Value) {
         return false;
       }
     }
@@ -59,25 +74,25 @@ export class RecordMapView extends Record {
   }
 
   get length(): number {
-    return this._upper - this._lower;
+    return this.upper - this.lower;
   }
 
-  fieldCount(): number {
-    const array = this._record._array!;
+  get fieldCount(): number {
+    const array = this.record.array;
     let k = 0;
-    for (let i = this._lower, n = this._upper; i < n; i += 1) {
-      if (array[i] instanceof Item.Field) {
+    for (let i = this.lower, n = this.upper; i < n; i += 1) {
+      if (array![i] instanceof Field) {
         k += 1;
       }
     }
     return k;
   }
 
-  valueCount(): number {
+  get valueCount(): number {
     let k = 0;
-    const array = this._record._array!;
-    for (let i = this._lower, n = this._upper; i < n; i += 1) {
-      if (array[i] instanceof Value) {
+    const array = this.record.array;
+    for (let i = this.lower, n = this.upper; i < n; i += 1) {
+      if (array![i] instanceof Value) {
         k += 1;
       }
     }
@@ -85,33 +100,33 @@ export class RecordMapView extends Record {
   }
 
   isConstant(): boolean {
-    const array = this._record._array;
-    for (let i = this._lower, n = this._upper; i < n; i += 1) {
-      if (!array![i].isConstant()) {
+    const array = this.record.array;
+    for (let i = this.lower, n = this.upper; i < n; i += 1) {
+      if (!array![i]!.isConstant()) {
         return false;
       }
     }
     return true;
   }
 
-  tag(): string | undefined {
+  get tag(): string | undefined {
     if (this.length > 0) {
-      const item = this._record._array![this._lower];
-      if (item instanceof Item.Attr) {
+      const item = this.record.array![this.lower];
+      if (item instanceof Attr) {
         return item.key.value;
       }
     }
     return void 0;
   }
 
-  target(): Value {
+  get target(): Value {
     let value: Value | undefined;
     let record: Record | undefined;
     let modified = false;
-    const array = this._record._array!;
-    for (let i = this._lower, n = this._upper; i < n; i += 1) {
-      const item = array[i];
-      if (item instanceof Item.Attr) {
+    const array = this.record.array;
+    for (let i = this.lower, n = this.upper; i < n; i += 1) {
+      const item = array![i];
+      if (item instanceof Attr) {
         modified = true;
       } else if (value === void 0 && item instanceof Value) {
         value = item;
@@ -138,7 +153,7 @@ export class RecordMapView extends Record {
 
   head(): Item {
     if (this.length > 0) {
-      return this._record._array![this._lower];
+      return this.record.array![this.lower]!;
     } else {
       return Item.absent();
     }
@@ -146,7 +161,7 @@ export class RecordMapView extends Record {
 
   tail(): Record {
     if (this.length > 0) {
-      return new RecordMapView(this._record, this._lower + 1, this._upper);
+      return new RecordMapView(this.record, this.lower + 1, this.upper);
     } else {
       return Record.empty();
     }
@@ -155,9 +170,9 @@ export class RecordMapView extends Record {
   body(): Value {
     const n = this.length;
     if (n > 2) {
-      return new RecordMapView(this._record, this._lower + 1, this._upper).branch();
+      return new RecordMapView(this.record, this.lower + 1, this.upper).branch();
     } else if (n === 2) {
-      const item = this._record._array![this._lower + 1];
+      const item = this.record.array![this.lower + 1];
       if (item instanceof Value) {
         return item;
       } else {
@@ -170,15 +185,15 @@ export class RecordMapView extends Record {
 
   indexOf(item: AnyItem, index: number = 0): number {
     item = Item.fromAny(item);
-    const array = this._record._array!;
+    const array = this.record.array;
     const n = this.length;
     if (index < 0) {
       index = Math.max(0, n + index);
     }
-    index = this._lower + index;
-    while (index < this._upper) {
-      if (item.equals(array[index])) {
-        return index - this._lower;
+    index = this.lower + index;
+    while (index < this.upper) {
+      if (item.equals(array![index])) {
+        return index - this.lower;
       }
       index += 1;
     }
@@ -187,17 +202,17 @@ export class RecordMapView extends Record {
 
   lastIndexOf(item: AnyItem, index?: number): number {
     item = Item.fromAny(item);
-    const array = this._record._array!;
+    const array = this.record.array;
     const n = this.length;
     if (index === void 0) {
       index = n - 1;
     } else if (index < 0) {
       index = n + index;
     }
-    index = this._lower + Math.min(index, n - 1);
-    while (index >= this._lower) {
-      if (item.equals(array[index])) {
-        return index - this._lower;
+    index = this.lower + Math.min(index, n - 1);
+    while (index >= this.lower) {
+      if (item.equals(array![index])) {
+        return index - this.lower;
       }
       index -= 1;
     }
@@ -205,7 +220,7 @@ export class RecordMapView extends Record {
   }
 
   getItem(index: AnyNum): Item {
-    if (index instanceof Item.Num) {
+    if (index instanceof Num) {
       index = index.value;
     }
     const n = this.length;
@@ -213,14 +228,14 @@ export class RecordMapView extends Record {
       index = n + index;
     }
     if (index >= 0 && index < n) {
-      return this._record._array![this._lower + index];
+      return this.record.array![this.lower + index]!;
     } else {
       return Item.absent();
     }
   }
 
   setItem(index: number, newItem: AnyItem): this {
-    if ((this._record._flags & Record.IMMUTABLE) !== 0) {
+    if ((this.record.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
     newItem = Item.fromAny(newItem);
@@ -231,7 +246,7 @@ export class RecordMapView extends Record {
     if (index < 0 || index > n) {
       throw new RangeError("" + index);
     }
-    if ((this._record._flags & Record.ALIASED) !== 0) {
+    if ((this.record.flags & Record.AliasedFlag) !== 0) {
       this.setItemAliased(index, newItem);
     } else {
       this.setItemMutable(index, newItem);
@@ -240,119 +255,203 @@ export class RecordMapView extends Record {
   }
 
   private setItemAliased(index: number, newItem: Item): void {
-    const n = this._record._itemCount;
-    const oldArray = this._record._array!;
+    const record = this.record;
+    const n = record.length;
+    const oldArray = record.array;
     const newArray = new Array(Record.expand(n));
     for (let i = 0; i < n; i += 1) {
-      newArray[i] = oldArray[i];
+      newArray[i] = oldArray![i];
     }
-    const oldItem = oldArray[this._lower + index];
-    newArray[this._lower + index] = newItem;
-    this._record._array = newArray;
-    this._record._table = null;
-    if (newItem instanceof Item.Field) {
-      if (!(oldItem instanceof Item.Field)) {
-        this._record._fieldCount += 1;
+    const oldItem = oldArray !== null ? oldArray[this.lower + index] : null;
+    newArray[this.lower + index] = newItem;
+    Object.defineProperty(record, "array", {
+      value: newArray,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "table", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    if (newItem instanceof Field) {
+      if (!(oldItem instanceof Field)) {
+        Object.defineProperty(record, "fieldCount", {
+          value: record.fieldCount + 1,
+          enumerable: true,
+          configurable: true,
+        });
       }
-    } else if (oldItem instanceof Item.Field) {
-      this._record._fieldCount -= 1;
+    } else if (oldItem instanceof Field) {
+      Object.defineProperty(record, "fieldCount", {
+        value: record.fieldCount - 1,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    this._record._flags &= ~Record.ALIASED;
+    Object.defineProperty(record, "flags", {
+      value: record.flags & ~Record.AliasedFlag,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   private setItemMutable(index: number, newItem: Item): void {
-    const array = this._record._array!;
-    const oldItem = array[this._lower + index];
-    array[this._lower + index] = newItem;
-    if (newItem instanceof Item.Field) {
-      this._record._table = null;
-      if (!(oldItem instanceof Item.Field)) {
-        this._record._fieldCount += 1;
+    const record = this.record;
+    const array = record.array!;
+    const oldItem = array[this.lower + index];
+    array[this.lower + index] = newItem;
+    if (newItem instanceof Field) {
+      Object.defineProperty(record, "table", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
+      if (!(oldItem instanceof Field)) {
+        Object.defineProperty(record, "fieldCount", {
+          value: record.fieldCount + 1,
+          enumerable: true,
+          configurable: true,
+        });
       }
-    } else if (oldItem instanceof Item.Field) {
-      this._record._table = null;
-      this._record._fieldCount -= 1;
+    } else if (oldItem instanceof Field) {
+      Object.defineProperty(record, "table", {
+        value: null,
+        enumerable: true,
+        configurable: true,
+      });
+      Object.defineProperty(record, "fieldCount", {
+        value: record.fieldCount - 1,
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 
   push(...newItems: AnyItem[]): number {
-    if ((this._record._flags & Record.IMMUTABLE) !== 0) {
+    if ((this.record.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
-    if ((this._record._flags & Record.ALIASED) !== 0) {
-      this.pushAliased.apply(this, arguments);
+    if ((this.record.flags & Record.AliasedFlag) !== 0) {
+      this.pushAliased(...newItems);
     } else {
-      this.pushMutable.apply(this, arguments);
+      this.pushMutable(...newItems);
     }
     return this.length;
   }
 
   private pushAliased(...newItems: AnyItem[]): void {
+    const record = this.record;
     const k = newItems.length;
-    let m = this._record._itemCount;
-    let n = this._record._fieldCount;
-    const oldArray = this._record._array;
+    let m = record.length;
+    let n = record.fieldCount;
+    const oldArray = record.array;
     const newArray = new Array(Record.expand(m + k));
     if (oldArray !== null) {
-      for (let i = 0; i < this._upper; i += 1) {
+      for (let i = 0; i < this.upper; i += 1) {
         newArray[i] = oldArray[i];
       }
-      for (let i = this._upper; i < m; i += 1) {
+      for (let i = this.upper; i < m; i += 1) {
         newArray[i + k] = oldArray[i];
       }
     }
     for (let i = 0; i < k; i += 1) {
       const newItem = Item.fromAny(newItems[i]);
-      newArray[i + this._upper] = newItem;
+      newArray[i + this.upper] = newItem;
       m += 1;
-      if (newItem instanceof Item.Field) {
+      if (newItem instanceof Field) {
         n += 1;
       }
     }
-    this._record._array = newArray;
-    this._record._table = null;
-    this._record._itemCount = m;
-    this._record._fieldCount = n;
-    this._record._flags &= ~Record.ALIASED;
-    this._upper += k;
+    Object.defineProperty(record, "array", {
+      value: newArray,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "table", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "length", {
+      value: m,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "fieldCount", {
+      value: n,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "flags", {
+      value: record.flags & ~Record.AliasedFlag,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "upper", {
+      value: this.upper + k,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   private pushMutable(...newItems: AnyItem[]): void {
+    const record = this.record;
     const k = newItems.length;
-    let m = this._record._itemCount;
-    let n = this._record._fieldCount;
-    const oldArray = this._record._array!;
+    let m = record.length;
+    let n = record.fieldCount;
+    const oldArray = record.array!;
     let newArray;
     if (oldArray === null || m + k > oldArray.length) {
       newArray = new Array(Record.expand(m + k));
       if (oldArray !== null) {
-        for (let i = 0; i < this._upper; i += 1) {
+        for (let i = 0; i < this.upper; i += 1) {
           newArray[i] = oldArray[i];
         }
       }
     } else {
       newArray = oldArray;
     }
-    for (let i = m - 1; i >= this._upper; i -= 1) {
+    for (let i = m - 1; i >= this.upper; i -= 1) {
       newArray[i + k] = oldArray[i];
     }
     for (let i = 0; i < k; i += 1) {
       const newItem = Item.fromAny(newItems[i]);
-      newArray[i + this._upper] = newItem;
+      newArray[i + this.upper] = newItem;
       m += 1;
-      if (newItem instanceof Item.Field) {
+      if (newItem instanceof Field) {
         n += 1;
-        this._record._table = null;
+        Object.defineProperty(record, "table", {
+          value: null,
+          enumerable: true,
+          configurable: true,
+        });
       }
     }
-    this._record._array = newArray;
-    this._record._itemCount = m;
-    this._record._fieldCount = n;
-    this._upper += k;
+    Object.defineProperty(record, "array", {
+      value: newArray,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "length", {
+      value: m,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "fieldCount", {
+      value: n,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "upper", {
+      value: this.upper + k,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   splice(start: number, deleteCount: number = 0, ...newItems: AnyItem[]): Item[] {
-    if ((this._record._flags & Record.IMMUTABLE) !== 0) {
+    if ((this.record.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
     const n = this.length;
@@ -362,21 +461,25 @@ export class RecordMapView extends Record {
     start = Math.min(Math.max(0, start), n);
     deleteCount = Math.min(Math.max(0, deleteCount), n - start);
     let deleted;
-    if ((this._record._flags & Record.ALIASED) !== 0) {
-      deleted = this._record.spliceAliased(this._lower + start, deleteCount, ...newItems);
+    if ((this.record.flags & Record.AliasedFlag) !== 0) {
+      deleted = this.record.spliceAliased(this.lower + start, deleteCount, ...newItems);
     } else {
-      deleted = this._record.spliceMutable(this._lower + start, deleteCount, ...newItems);
+      deleted = this.record.spliceMutable(this.lower + start, deleteCount, ...newItems);
     }
-    this._upper += newItems.length - deleted.length;
+    Object.defineProperty(this, "upper", {
+      value: this.upper + newItems.length - deleted.length,
+      enumerable: true,
+      configurable: true,
+    });
     return deleted;
   }
 
   delete(key: AnyValue): Item {
-    if ((this._record._flags & Record.IMMUTABLE) !== 0) {
+    if ((this.record.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
     key = Value.fromAny(key);
-    if ((this._record._flags & Record.ALIASED) !== 0) {
+    if ((this.record.flags & Record.AliasedFlag) !== 0) {
       return this.deleteAliased(key);
     } else {
       return this.deleteMutable(key);
@@ -385,21 +488,46 @@ export class RecordMapView extends Record {
 
   /** @hidden */
   deleteAliased(key: Value): Item {
-    const n = this._record._itemCount;
-    const oldArray = this._record._array!;
+    const record = this.record;
+    const n = record.length;
+    const oldArray = record.array;
     const newArray = new Array(Record.expand(n));
-    for (let i = this._lower; i < this._upper; i += 1) {
-      const item = oldArray[i];
-      if (item instanceof Item.Field && item.key.equals(key)) {
+    for (let i = this.lower; i < this.upper; i += 1) {
+      const item = oldArray![i];
+      if (item instanceof Field && item.key.equals(key)) {
         for (let j = i + 1; j < n; j += 1, i += 1) {
-          newArray[i] = oldArray[j];
+          newArray[i] = oldArray![j];
         }
-        this._record._array = newArray;
-        this._record._table = null;
-        this._record._itemCount = n - 1;
-        this._record._fieldCount -= 1;
-        this._record._flags &= ~Record.ALIASED;
-        this._upper -= 1;
+        Object.defineProperty(record, "array", {
+          value: newArray,
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(record, "table", {
+          value: null,
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(record, "length", {
+          value: n - 1,
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(record, "fieldCount", {
+          value: record.fieldCount - 1,
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(record, "flags", {
+          value: record.flags & ~Record.AliasedFlag,
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(this, "upper", {
+          value: this.upper - 1,
+          enumerable: true,
+          configurable: true,
+        });
         return item;
       }
       newArray[i] = item;
@@ -409,19 +537,36 @@ export class RecordMapView extends Record {
 
   /** @hidden */
   deleteMutable(key: Value): Item {
-    const n = this._record._itemCount;
-    const array = this._record._array!;
-    for (let i = this._lower; i < this._upper; i += 1) {
-      const item = array[i];
-      if (item instanceof Item.Field && item.key.equals(key)) {
+    const record = this.record;
+    const n = record.length;
+    const array = record.array;
+    for (let i = this.lower; i < this.upper; i += 1) {
+      const item = array![i]!;
+      if (item instanceof Field && item.key.equals(key)) {
         for (let j = i + 1; j < n; j += 1, i += 1) {
-          array[i] = array[j];
+          array![i] = array![j]!;
         }
-        array[n - 1] = void 0 as any;
-        this._record._table = null;
-        this._record._itemCount -= 1;
-        this._record._fieldCount -= 1;
-        this._upper -= 1;
+        array![n - 1] = void 0 as any;
+        Object.defineProperty(record, "table", {
+          value: null,
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(record, "length", {
+          value: n - 1,
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(record, "fieldCount", {
+          value: record.fieldCount - 1,
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(this, "upper", {
+          value: this.upper - 1,
+          enumerable: true,
+          configurable: true,
+        });
         return item;
       }
     }
@@ -429,10 +574,10 @@ export class RecordMapView extends Record {
   }
 
   clear(): void {
-    if ((this._record._flags & Record.IMMUTABLE) !== 0) {
+    if ((this.record.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
-    if ((this._record._flags & Record.ALIASED) !== 0) {
+    if ((this.record.flags & Record.AliasedFlag) !== 0) {
       this.clearAliased();
     } else {
       this.clearMutable();
@@ -440,91 +585,137 @@ export class RecordMapView extends Record {
   }
 
   private clearAliased(): void {
-    const m = this._record._itemCount;
-    let n = this._record._fieldCount;
+    const record = this.record;
+    const m = record.length;
+    let n = record.fieldCount;
     const l = m - this.length;
-    const oldArray = this._record._array!;
+    const oldArray = record.array;
     const newArray = new Array(Record.expand(l));
     let i = 0;
-    while (i < this._lower) {
-      newArray[i] = oldArray[i];
+    while (i < this.lower) {
+      newArray[i] = oldArray![i];
       i += 1;
     }
-    while (i < this._upper) {
-      if (oldArray[i] instanceof Item.Field) {
+    while (i < this.upper) {
+      if (oldArray![i] instanceof Field) {
         n -= 1;
       }
       i += 1;
     }
-    i = this._lower;
-    let j = this._upper;
+    i = this.lower;
+    let j = this.upper;
     while (j < m) {
-      newArray[i] = oldArray[j];
+      newArray[i] = oldArray![j];
       i += 1;
       j += 1;
     }
-    this._record._array = newArray;
-    this._record._table = null;
-    this._record._itemCount = l;
-    this._record._fieldCount = n;
-    this._record._flags &= ~Record.ALIASED;
-    this._upper = this._lower;
+    Object.defineProperty(record, "array", {
+      value: newArray,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "table", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "length", {
+      value: l,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "fieldCount", {
+      value: n,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "flags", {
+      value: record.flags & ~Record.AliasedFlag,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "upper", {
+      value: this.lower,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   private clearMutable(): void {
-    const m = this._record._itemCount;
-    let n = this._record._fieldCount;
-    const array = this._record._array!;
-    let i = this._lower;
-    while (i < this._upper) {
-      if (array[i] instanceof Item.Field) {
+    const record = this.record;
+    const m = record.length;
+    let n = record.fieldCount;
+    const array = record.array;
+    let i = this.lower;
+    while (i < this.upper) {
+      if (array![i] instanceof Field) {
         n -= 1;
       }
       i += 1;
     }
-    i = this._lower;
-    let j = this._upper;
+    i = this.lower;
+    let j = this.upper;
     while (j < m) {
-      const item = array[j];
-      if (item instanceof Item.Field) {
-        this._record._table = null;
+      const item = array![j]!;
+      if (item instanceof Field) {
+        Object.defineProperty(record, "table", {
+          value: null,
+          enumerable: true,
+          configurable: true,
+        });
       }
-      array[i] = item;
+      array![i] = item;
       i += 1;
       j += 1;
     }
-    this._record._itemCount = i;
-    this._record._fieldCount = n;
+    Object.defineProperty(record, "length", {
+      value: i,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(record, "fieldCount", {
+      value: n,
+      enumerable: true,
+      configurable: true,
+    });
     while (i < m) {
-      array[i] = void 0 as any;
+      array![i] = void 0 as any;
       i += 1;
     }
-    this._upper = this._lower;
+    Object.defineProperty(this, "upper", {
+      value: this.lower,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   isAliased(): boolean {
-    return (this._record._flags & Record.ALIASED) !== 0;
+    return (this.record.flags & Record.AliasedFlag) !== 0;
   }
 
   isMutable(): boolean {
-    return (this._record._flags & Record.IMMUTABLE) === 0;
+    return (this.record.flags & Record.ImmutableFlag) === 0;
   }
 
   alias(): void {
-    this._record._flags |= Record.ALIASED;
+    Object.defineProperty(this.record, "flags", {
+      value: this.record.flags | Record.AliasedFlag,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   branch(): RecordMap {
     const m = this.length;
     let n = 0;
-    const oldArray = this._record._array!;
+    const oldArray = this.record.array;
     const newArray = new Array(Record.expand(m));
-    let i = this._lower;
+    let i = this.lower;
     let j = 0;
     while (j < m) {
-      const item = oldArray[i];
+      const item = oldArray![i];
       newArray[j] = item;
-      if (item instanceof Item.Field) {
+      if (item instanceof Field) {
         n += 1;
       }
       i += 1;
@@ -536,14 +727,14 @@ export class RecordMapView extends Record {
   clone(): RecordMap {
     const m = this.length;
     let n = 0;
-    const oldArray = this._record._array!;
+    const oldArray = this.record.array;
     const newArray = new Array(Record.expand(m));
-    let i = this._lower;
+    let i = this.lower;
     let j = 0;
     while (j < m) {
-      const item = oldArray[i];
+      const item = oldArray![i]!;
       newArray[j] = item.clone();
-      if (item instanceof Item.Field) {
+      if (item instanceof Field) {
         n += 1;
       }
       i += 1;
@@ -553,7 +744,7 @@ export class RecordMapView extends Record {
   }
 
   commit(): this {
-    this._record.commit();
+    this.record.commit();
     return this;
   }
 
@@ -572,19 +763,21 @@ export class RecordMapView extends Record {
     if (lower < 0 || upper > n || lower > upper) {
       throw new RangeError(lower + ", " + upper);
     }
-    return new RecordMapView(this._record, this._lower + lower, this._upper + upper);
+    return new RecordMapView(this.record, this.lower + lower, this.upper + upper);
   }
 
-  forEach<T, S = unknown>(callback: (this: S, item: Item, index: number) => T | void,
-                          thisArg?: S): T | undefined {
-    const array = this._record._array!;
-    for (let i = this._lower, n = this._upper; i < n; i += 1) {
-      const result = callback.call(thisArg, array[i], i);
+  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                thisArg?: S): T | undefined;
+  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
+                thisArg?: S): T | undefined {
+    const array = this.record.array;
+    for (let i = this.lower, n = this.upper; i < n; i += 1) {
+      const result = callback.call(thisArg, array![i]!, i);
       if (result !== void 0) {
         return result;
       }
     }
-    return;
+    return void 0;
   }
 }
-Item.RecordMapView = RecordMapView;

@@ -18,12 +18,12 @@ export * from "./downlink";
 
 export * from "./ref";
 
-export {WarpRef, SwimRef} from "./WarpRef";
-export {WarpObserver, SwimObserver} from "./WarpObserver";
+export {WarpRef} from "./WarpRef";
+export {WarpObserver} from "./WarpObserver";
 
 export {
-  WarpClientOptions, SwimClientOptions,
-  WarpClient, SwimClient,
+  WarpClientOptions,
+  WarpClient,
 } from "./WarpClient";
 
 import {WarpClient} from "./WarpClient";

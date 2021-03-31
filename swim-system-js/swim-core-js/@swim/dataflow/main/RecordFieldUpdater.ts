@@ -12,35 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Value, Record} from "@swim/structure";
+import type {Value, Record} from "@swim/structure";
 import {KeyEffect, AbstractInlet} from "@swim/streamlet";
 import {RecordOutlet} from "./RecordOutlet";
 
 export class RecordFieldUpdater extends AbstractInlet<Value> {
-  /** @hidden */
-  protected readonly _record: Record;
-  /** @hidden */
-  protected readonly _key: Value;
-
   constructor(record: Record, key: Value) {
     super();
-    this._record = record;
-    this._key = key;
+    Object.defineProperty(this, "record", {
+      value: record,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "key", {
+      value: key,
+      enumerable: true,
+    });
   }
 
+  declare readonly record: Record;
+
+  declare readonly key: Value;
+
   protected onDecohereOutput(): void {
-    if (RecordOutlet.is(this._record)) {
-      this._record.decohereInputKey(this._key, KeyEffect.Update);
+    const record = this.record;
+    if (RecordOutlet.is(record)) {
+      record.decohereInputKey(this.key, KeyEffect.Update);
     }
   }
 
   protected onRecohereOutput(version: number): void {
-    if (this._input !== null) {
-      const value = this._input.get();
+    const input = this.input;
+    if (input !== null) {
+      const value = input.get();
       if (value !== void 0) {
-        this._record.set(this._key, value);
+        this.record.set(this.key, value);
       } else {
-        this._record.delete(this._key);
+        this.record.delete(this.key);
       }
     }
   }

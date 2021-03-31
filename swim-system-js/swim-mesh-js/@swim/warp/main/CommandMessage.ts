@@ -12,33 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyUri, Uri} from "@swim/uri";
 import {AnyValue, Value} from "@swim/structure";
-import {Envelope} from "./Envelope";
+import {AnyUri, Uri} from "@swim/uri";
 import {LaneAddressed} from "./LaneAddressed";
 
-export class CommandMessage extends LaneAddressed {
+export class CommandMessage extends LaneAddressed<CommandMessage> {
   constructor(node: Uri, lane: Uri, body: Value) {
     super(node, lane, body);
   }
 
-  protected copy(node: Uri, lane: Uri, body: Value): this {
-    return new CommandMessage(node, lane, body) as this;
+  protected copy(node: Uri, lane: Uri, body: Value): CommandMessage {
+    return new CommandMessage(node, lane, body);
   }
 
-  static tag(): string {
+  static get tag(): string {
     return "command";
   }
 
-  static fromValue(value: Value): CommandMessage | undefined {
-    return LaneAddressed.fromValue(value, CommandMessage) as CommandMessage | undefined;
-  }
-
-  static of(node: AnyUri, lane: AnyUri, body: AnyValue = Value.absent()): CommandMessage {
+  static create(node: AnyUri, lane: AnyUri, body: AnyValue = Value.absent()): CommandMessage {
     node = Uri.fromAny(node);
     lane = Uri.fromAny(lane);
     body = Value.fromAny(body);
-    return new CommandMessage(node, lane, body);
+    return new CommandMessage(node as Uri, lane as Uri, body);
   }
 }
-Envelope.CommandMessage = CommandMessage;

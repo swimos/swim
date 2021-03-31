@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Item, Value} from "@swim/structure";
+import type {Item, Value} from "@swim/structure";
 import {UnaryOutlet} from "./UnaryOutlet";
 
 export class PositiveOutlet extends UnaryOutlet {
