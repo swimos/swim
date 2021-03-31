@@ -17,9 +17,15 @@ export {
   ViewContext,
 } from "./ViewContext";
 export {
+  ViewMemberType,
+  ViewMemberInit,
+  ViewMemberKey,
+  ViewMemberMap,
   ViewFlags,
+  ViewPrecedence,
   ViewInit,
   ViewFactory,
+  ViewPrototype,
   ViewConstructor,
   ViewClass,
   View,
@@ -27,39 +33,78 @@ export {
 export {
   ViewObserverType,
   ViewObserver,
+  ViewObserverCache,
+  ViewWillResize,
+  ViewDidResize,
+  ViewWillScroll,
+  ViewDidScroll,
+  ViewWillChange,
+  ViewDidChange,
+  ViewWillAnimate,
+  ViewDidAnimate,
+  ViewWillProject,
+  ViewDidProject,
+  ViewWillLayout,
+  ViewDidLayout,
+  ViewWillRender,
+  ViewDidRender,
+  ViewWillComposite,
+  ViewDidComposite,
 } from "./ViewObserver";
 export {
   ViewControllerType,
   ViewController,
 } from "./ViewController";
 
-export {
-  SubviewMemberType,
-  SubviewMemberInit,
-  SubviewInit,
-  SubviewDescriptorInit,
-  SubviewDescriptorExtends,
-  SubviewDescriptorFromAny,
-  SubviewDescriptor,
-  SubviewPrototype,
-  SubviewConstructor,
-  Subview,
-} from "./Subview";
-
-export {SubviewObserver} from "./SubviewObserver";
-
 export * from "./manager";
+
+export * from "./viewport";
 
 export * from "./display";
 
 export * from "./layout";
 
-export * from "./viewport";
+export * from "./theme";
 
-export * from "./event";
+export * from "./modal";
 
 export * from "./service";
 
-export * from "./scope";
+export * from "./property";
+
+export * from "./animation";
 
 export * from "./animator";
+
+export * from "./fastener";
+
+export * from "./event";
+
+export * from "./gesture";
+
+declare global {
+  interface VisualViewportEventMap {
+    "resize": UIEvent;
+    "scroll": Event;
+  }
+
+  interface VisualViewport extends EventTarget {
+    readonly width: number;
+    readonly height: number;
+    readonly offsetLeft: number;
+    readonly offsetTop: number;
+    readonly pageLeft: number;
+    readonly pageTop: number;
+    readonly scale: number;
+    onresize: ((this: VisualViewport, event: UIEvent) => any) | null;
+    onscroll: ((this: VisualViewport, event: Event) => any) | null;
+    addEventListener<K extends keyof VisualViewportEventMap>(type: K, listener: (this: VisualViewport, event: VisualViewportEventMap[K]) => unknown, options?: boolean | AddEventListenerOptions): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener<K extends keyof VisualViewportEventMap>(type: K, listener: (this: VisualViewport, event: VisualViewportEventMap[K]) => unknown, options?: boolean | EventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+  }
+
+  interface Window {
+    readonly visualViewport: VisualViewport;
+  }
+}

@@ -13,41 +13,35 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {AnyLength, Length} from "@swim/length";
-import {AnyColor, Color} from "@swim/color";
+import type {AnyTiming} from "@swim/mapping";
+import {AnyLength, Length, AnyTransform, Transform} from "@swim/math";
 import {
   FontStyle,
   FontVariant,
   FontWeight,
   FontStretch,
-  AnyFontSize,
-  FontSize,
-  AnyLineHeight,
-  LineHeight,
   FontFamily,
   AnyFont,
   Font,
-} from "@swim/font";
-import {AnyTransform, Transform} from "@swim/transform";
-import {Tween} from "@swim/transition";
-import {
+  AnyColor,
+  Color,
+} from "@swim/style";
+import type {ViewFactory, ViewConstructor, View} from "@swim/view";
+import type {
   AlignmentBaseline,
   CssCursor,
   FillRule,
-  Paint,
-  PointerEvents,
   StrokeLinecap,
+  SvgPointerEvents,
   TextAnchor,
   TouchAction,
-  StyleAnimatorMemberInit,
-  StyleAnimator,
-} from "@swim/style";
-import {ViewFactory, ViewConstructor, View} from "@swim/view";
-import {NodeViewConstructor, NodeView} from "../node/NodeView";
+} from "../style/types";
+import {StyleAnimatorMemberInit, StyleAnimator} from "../style/StyleAnimator";
+import {ViewNodeType, NodeViewConstructor, NodeView} from "../node/NodeView";
 import {AttributeAnimatorMemberInit, AttributeAnimator} from "../attribute/AttributeAnimator";
-import {ElementViewInit,  ElementViewConstructor, ElementViewClass, ElementView} from "../element/ElementView";
-import {SvgViewObserver} from "./SvgViewObserver";
-import {SvgViewController} from "./SvgViewController";
+import {ElementViewInit, ElementViewConstructor, ElementView} from "../element/ElementView";
+import type {SvgViewObserver} from "./SvgViewObserver";
+import type {SvgViewController} from "./SvgViewController";
 
 export interface ViewSvg extends SVGElement {
   view?: SvgView;
@@ -99,6 +93,7 @@ export interface SvgViewAttributesInit {
 }
 
 export interface SvgViewStyleInit {
+  cssTransform?: StyleAnimatorMemberInit<SvgView, "cssTransform">;
   filter?: StyleAnimatorMemberInit<SvgView, "filter">;
   fontFamily?: StyleAnimatorMemberInit<SvgView, "fontFamily">;
   fontSize?: StyleAnimatorMemberInit<SvgView, "fontSize">;
@@ -192,28 +187,15 @@ export interface SvgViewFactory<V extends SvgView = SvgView, U = SVGElement> ext
 }
 
 export interface SvgViewConstructor<V extends SvgView = SvgView> extends ElementViewConstructor<V> {
-  new(node: SVGElement): V;
   readonly namespace: string;
   fromTag(tag: string): V;
-  fromNode(node: SVGElement): V;
-}
-
-export interface SvgViewClass extends ElementViewClass {
+  fromNode(node: ViewNodeType<V>): V;
 }
 
 export class SvgView extends ElementView {
   constructor(node: SVGElement) {
     super(node);
   }
-
-  // @ts-ignore
-  declare readonly node: ViewSvg;
-
-  // @ts-ignore
-  declare readonly viewController: SvgViewController | null;
-
-  // @ts-ignore
-  declare readonly viewObservers: ReadonlyArray<SvgViewObserver>;
 
   initView(init: SvgViewInit): void {
     super.initView(init);
@@ -358,6 +340,9 @@ export class SvgView extends ElementView {
   }
 
   initStyle(init: SvgViewStyleInit): void {
+    if (init.cssTransform !== void 0) {
+      this.cssTransform(init.cssTransform);
+    }
     if (init.filter !== void 0) {
       this.filter(init.filter);
     }
@@ -387,9 +372,11 @@ export class SvgView extends ElementView {
     }
   }
 
-  get viewClass(): SvgViewClass {
-    return this.constructor as unknown as SvgViewClass;
-  }
+  declare readonly node: SVGElement;
+
+  declare readonly viewController: SvgViewController | null;
+
+  declare readonly viewObservers: ReadonlyArray<SvgViewObserver>;
 
   append<V extends View>(childView: V, key?: string): V;
   append<V extends NodeView>(viewConstructor: NodeViewConstructor<V>, key?: string): V;
@@ -456,14 +443,14 @@ export class SvgView extends ElementView {
 
   get parentTransform(): Transform {
     const transform = this.transform.value;
-    return transform !== void 0 ? transform : Transform.identity();
+    return transform !== null ? transform : Transform.identity();
   }
 
   on<T extends keyof SVGElementEventMap>(type: T, listener: (this: SVGElement, event: SVGElementEventMap[T]) => unknown,
                                          options?: AddEventListenerOptions | boolean): this;
   on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
   on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
-    this._node.addEventListener(type, listener, options);
+    this.node.addEventListener(type, listener, options);
     return this;
   }
 
@@ -471,221 +458,232 @@ export class SvgView extends ElementView {
                                           options?: EventListenerOptions | boolean): this;
   off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
   off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
-    this._node.removeEventListener(type, listener, options);
+    this.node.removeEventListener(type, listener, options);
     return this;
   }
 
   @AttributeAnimator({attributeName: "alignment-baseline", type: String})
-  alignmentBaseline: AttributeAnimator<this, AlignmentBaseline>;
+  declare alignmentBaseline: AttributeAnimator<this, AlignmentBaseline>;
 
   @AttributeAnimator({attributeName: "clip-path", type: String})
-  clipPath: AttributeAnimator<this, string>;
+  declare clipPath: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "cursor", type: String})
-  cursor: AttributeAnimator<this, CssCursor>;
+  declare cursor: AttributeAnimator<this, CssCursor | undefined>;
 
   @AttributeAnimator({attributeName: "cx", type: Number})
-  cx: AttributeAnimator<this, number, number | string>;
+  declare cx: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "cy", type: Number})
-  cy: AttributeAnimator<this, number, number | string>;
+  declare cy: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "d", type: String})
-  d: AttributeAnimator<this, string>;
+  declare d: AttributeAnimator<this, string | undefined>;
 
-  @AttributeAnimator({attributeName: "dx", type: [Number, String]}) // list-of-lengths
-  dx: AttributeAnimator<this, number, number | string>;
+  @AttributeAnimator({attributeName: "dx", type: Length, state: null})
+  declare dx: AttributeAnimator<this, Length | null, AnyLength | null>;
 
-  @AttributeAnimator({attributeName: "dy", type: [Number, String]}) // list-of-lengths
-  dy: AttributeAnimator<this, number, number | string>;
+  @AttributeAnimator({attributeName: "dy", type: Length, state: null})
+  declare dy: AttributeAnimator<this, Length | null, AnyLength | null>;
 
   @AttributeAnimator({attributeName: "edgeMode", type: String})
-  edgeMode: AttributeAnimator<this, string>;
+  declare edgeMode: AttributeAnimator<this, string | undefined>;
 
-  @AttributeAnimator({attributeName: "fill", type: [Color, String]})
-  fill: AttributeAnimator<this, Paint, AnyColor | Paint>;
+  @AttributeAnimator({attributeName: "fill", type: Color, state: null})
+  declare fill: AttributeAnimator<this, Color | null, AnyColor | null>;
 
   @AttributeAnimator({attributeName: "fill-rule", type: String})
-  fillRule: AttributeAnimator<this, FillRule>;
+  declare fillRule: AttributeAnimator<this, FillRule | undefined>;
 
-  @AttributeAnimator({attributeName: "flood-color", type: [Color, String]})
-  floodColor: AttributeAnimator<this, Color | "currentColor", AnyColor | "currentColor">;
+  @AttributeAnimator({attributeName: "flood-color", type: Color, state: null})
+  declare floodColor: AttributeAnimator<this, Color | null, AnyColor | null>;
 
   @AttributeAnimator({attributeName: "flood-opacity", type: Number})
-  floodOpacity: AttributeAnimator<this, number, number | string>;
+  declare floodOpacity: AttributeAnimator<this, number | undefined>;
 
-  @AttributeAnimator({attributeName: "height", type: Length})
-  height: AttributeAnimator<this, Length, AnyLength>;
+  @AttributeAnimator({attributeName: "height", type: Length, state: null})
+  declare height: AttributeAnimator<this, Length | null, AnyLength | null>;
 
   @AttributeAnimator({attributeName: "in", type: String})
-  in: AttributeAnimator<this, string>;
+  declare in: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "in2", type: String})
-  in2: AttributeAnimator<this, string>;
+  declare in2: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "lengthAdjust", type: String})
-  lengthAdjust: AttributeAnimator<this, "spacing" | "spacingAndGlyphs">;
+  declare lengthAdjust: AttributeAnimator<this, "spacing" | "spacingAndGlyphs" | undefined>;
 
   @AttributeAnimator({attributeName: "mode", type: String})
-  mode: AttributeAnimator<this, string>;
+  declare mode: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "opacity", type: Number})
-  opacity: AttributeAnimator<this, number>;
+  declare opacity: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "pointer-events", type: String})
-  pointerEvents: AttributeAnimator<this, PointerEvents>;
+  declare pointerEvents: AttributeAnimator<this, SvgPointerEvents | undefined>;
 
   @AttributeAnimator({attributeName: "points", type: String})
-  points: AttributeAnimator<this, string>;
+  declare points: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "preserveAspectRatio", type: Boolean})
-  preserveAspectRatio: AttributeAnimator<this, boolean, boolean | string>;
+  declare preserveAspectRatio: AttributeAnimator<this, boolean | undefined>;
 
   @AttributeAnimator({attributeName: "r", type: Number})
-  r: AttributeAnimator<this, number, number | string>;
+  declare r: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "result", type: String})
-  result: AttributeAnimator<this, string>;
+  declare result: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "stdDeviation", type: Number})
-  stdDeviation: AttributeAnimator<this, number, number | string>;
+  declare stdDeviation: AttributeAnimator<this, number | undefined>;
 
-  @AttributeAnimator({attributeName: "stroke", type: [Color, String]})
-  stroke: AttributeAnimator<this, Paint, AnyColor | Paint>;
+  @AttributeAnimator({attributeName: "stroke", type: Color, state: null})
+  declare stroke: AttributeAnimator<this, Color | null, AnyColor | null>;
 
   @AttributeAnimator({attributeName: "stroke-dasharray", type: String})
-  strokeDasharray: AttributeAnimator<this, string>;
+  declare strokeDasharray: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "stroke-linecap", type: String})
-  strokeLinecap: AttributeAnimator<this, StrokeLinecap>;
+  declare strokeLinecap: AttributeAnimator<this, StrokeLinecap | undefined>;
 
   @AttributeAnimator({attributeName: "stroke-width", type: Number})
-  strokeWidth: AttributeAnimator<this, number, number | string>;
+  declare strokeWidth: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "text-anchor", type: String})
-  textAnchor: AttributeAnimator<this, TextAnchor>;
+  declare textAnchor: AttributeAnimator<this, TextAnchor | undefined>;
 
-  @AttributeAnimator({attributeName: "textLength", type: Length})
-  textLength: AttributeAnimator<this, Length, AnyLength>;
+  @AttributeAnimator({attributeName: "textLength", type: Length, state: null})
+  declare textLength: AttributeAnimator<this, Length | null, AnyLength | null>;
 
-  @AttributeAnimator({attributeName: "transform", type: Transform})
-  transform: AttributeAnimator<this, Transform, AnyTransform>;
+  @AttributeAnimator({attributeName: "transform", type: Transform, state: null})
+  declare transform: AttributeAnimator<this, Transform | null, AnyTransform | null>;
 
   @AttributeAnimator({attributeName: "type", type: String})
-  type: AttributeAnimator<this, string>;
+  declare type: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "values", type: String})
-  values: AttributeAnimator<this, string>;
+  declare values: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "viewBox", type: String})
-  viewBox: AttributeAnimator<this, string>;
+  declare viewBox: AttributeAnimator<this, string | undefined>;
 
-  @AttributeAnimator({attributeName: "width", type: Length})
-  width: AttributeAnimator<this, Length, AnyLength>;
+  @AttributeAnimator({attributeName: "width", type: Length, state: null})
+  declare width: AttributeAnimator<this, Length | null, AnyLength | null>;
 
   @AttributeAnimator({attributeName: "x", type: Number})
-  x: AttributeAnimator<this, number, number | string>;
+  declare x: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "x1", type: Number})
-  x1: AttributeAnimator<this, number, number | string>;
+  declare x1: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "x2", type: Number})
-  x2: AttributeAnimator<this, number, number | string>;
+  declare x2: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "y", type: Number})
-  y: AttributeAnimator<this, number, number | string>;
+  declare y: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "y1", type: Number})
-  y1: AttributeAnimator<this, number, number | string>;
+  declare y1: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "y2", type: Number})
-  y2: AttributeAnimator<this, number, number | string>;
+  declare y2: AttributeAnimator<this, number | undefined>;
+
+  @StyleAnimator({propertyNames: "transform", type: Transform, state: null})
+  declare cssTransform: StyleAnimator<this, Transform | null, AnyTransform | null>;
 
   @StyleAnimator({propertyNames: "filter", type: String})
-  filter: StyleAnimator<this, string>;
+  declare filter: StyleAnimator<this, string | undefined>;
 
-  font(): Font | undefined;
-  font(value: AnyFont | undefined, tween?: Tween<any>, priority?: string): this;
-  font(value?: AnyFont | undefined, tween?: Tween<any>, priority?: string): Font | undefined | this {
+  font(): Font | null;
+  font(value: AnyFont | null, timing?: AnyTiming | boolean): this;
+  font(value?: AnyFont | null, timing?: AnyTiming | boolean): Font | null | this {
     if (value === void 0) {
-      const style = this.fontStyle();
-      const variant = this.fontVariant();
-      const weight = this.fontWeight();
-      const stretch = this.fontStretch();
-      const size = this.fontSize();
-      const height = this.lineHeight();
-      const family = this.fontFamily();
+      const style = this.fontStyle.value;
+      const variant = this.fontVariant.value;
+      const weight = this.fontWeight.value;
+      const stretch = this.fontStretch.value;
+      const size = this.fontSize.value;
+      const height = this.lineHeight.value;
+      const family = this.fontFamily.value;
       if (family !== void 0) {
-        return Font.from(style, variant, weight, stretch, size, height, family);
+        return Font.create(style, variant, weight, stretch, size, height, family);
       } else {
-        return void 0;
+        return null;
       }
     } else {
-      if (value !== void 0) {
+      if (value !== null) {
         value = Font.fromAny(value);
+        if (value.style !== void 0) {
+          this.fontStyle.setState(value.style, timing);
+        }
+        if (value.variant !== void 0) {
+          this.fontVariant.setState(value.variant, timing);
+        }
+        if (value.weight !== void 0) {
+          this.fontWeight.setState(value.weight, timing);
+        }
+        if (value.stretch !== void 0) {
+          this.fontStretch.setState(value.stretch, timing);
+        }
+        if (value.size !== void 0) {
+          this.fontSize.setState(value.size, timing);
+        }
+        if (value.height !== void 0) {
+          this.lineHeight.setState(value.height, timing);
+        }
+        this.fontFamily.setState(value.family, timing);
+      } else {
+        this.fontStyle.setState(void 0, timing);
+        this.fontVariant.setState(void 0, timing);
+        this.fontWeight.setState(void 0, timing);
+        this.fontStretch.setState(void 0, timing);
+        this.fontSize.setState(null, timing);
+        this.lineHeight.setState(null, timing);
+        this.fontFamily.setState(void 0, timing);
       }
-      if (value === void 0 || value.style() !== null) {
-        this.fontStyle(value !== void 0 ? value.style() || void 0 : void 0, tween, priority);
-      }
-      if (value === void 0 || value.variant() !== null) {
-        this.fontVariant(value !== void 0 ? value.variant() || void 0 : void 0, tween, priority);
-      }
-      if (value === void 0 || value.weight() !== null) {
-        this.fontWeight(value !== void 0 ? value.weight() || void 0 : void 0, tween, priority);
-      }
-      if (value === void 0 || value.stretch() !== null) {
-        this.fontStretch(value !== void 0 ? value.stretch() || void 0 : void 0, tween, priority);
-      }
-      if (value === void 0 || value.size() !== null) {
-        this.fontSize(value !== void 0 ? value.size() || void 0 : void 0, tween, priority);
-      }
-      if (value === void 0 || value.height() !== null) {
-        this.lineHeight(value !== void 0 ? value.height() || void 0 : void 0, tween, priority);
-      }
-      this.fontFamily(value !== void 0 ? value.family() : void 0, tween, priority);
       return this;
     }
   }
 
   @StyleAnimator({propertyNames: "font-family", type: FontFamily})
-  fontFamily: StyleAnimator<this, FontFamily | FontFamily[], FontFamily | ReadonlyArray<FontFamily>>;
+  declare fontFamily: StyleAnimator<this, FontFamily | FontFamily[] | undefined, FontFamily | ReadonlyArray<FontFamily> | undefined>;
 
-  @StyleAnimator({propertyNames: "font-size", type: [Length, String]})
-  fontSize: StyleAnimator<this, FontSize, AnyFontSize>;
+  @StyleAnimator({propertyNames: "font-size", type: Length, state: null})
+  declare fontSize: StyleAnimator<this, Length | null, AnyLength | null>;
 
   @StyleAnimator({propertyNames: "font-stretch", type: String})
-  fontStretch: StyleAnimator<this, FontStretch>;
+  declare fontStretch: StyleAnimator<this, FontStretch | undefined>;
 
   @StyleAnimator({propertyNames: "font-style", type: String})
-  fontStyle: StyleAnimator<this, FontStyle>;
+  declare fontStyle: StyleAnimator<this, FontStyle | undefined>;
 
   @StyleAnimator({propertyNames: "font-variant", type: String})
-  fontVariant: StyleAnimator<this, FontVariant>;
+  declare fontVariant: StyleAnimator<this, FontVariant | undefined>;
 
   @StyleAnimator({propertyNames: "font-weight", type: String})
-  fontWeight: StyleAnimator<this, FontWeight>;
+  declare fontWeight: StyleAnimator<this, FontWeight | undefined>;
 
-  @StyleAnimator({propertyNames: "line-height", type: LineHeight})
-  lineHeight: StyleAnimator<this, LineHeight, AnyLineHeight>;
+  @StyleAnimator({propertyNames: "line-height", type: Length, state: null})
+  declare lineHeight: StyleAnimator<this, Length | null, AnyLength | null>;
 
   @StyleAnimator({propertyNames: "touch-action", type: String})
-  touchAction: StyleAnimator<this, TouchAction>;
+  declare touchAction: StyleAnimator<this, TouchAction | undefined>;
 
   /** @hidden */
-  static readonly tags: {[tag: string]: SvgViewConstructor | undefined} = {};
+  static readonly tags: {[tag: string]: SvgViewConstructor<any> | undefined} = {};
 
   static readonly tag: string = "svg";
 
   static readonly namespace: string = "http://www.w3.org/2000/svg";
 
-  static forTag<S extends typeof SvgView>(this: S, tag: string): S {
+  static forTag(tag: string): SvgViewConstructor<SvgView> {
     if (tag === this.tag) {
-      return this;
+      return this as unknown as SvgViewConstructor<SvgView>;
     } else {
       const _super = this;
       const _constructor = function HtmlTagView(this: SvgView, node: SVGElement): SvgView {
-        return _super!.call(this, node) || this;
-      } as unknown as S;
+        return (_super as Function).call(this, node) || this;
+      } as unknown as SvgViewConstructor<SvgView>;
       __extends(_constructor, _super);
       (_constructor as any).tag = tag;
       return _constructor;
@@ -696,25 +694,29 @@ export class SvgView extends ElementView {
     return this.fromTag(tag);
   }
 
-  static fromTag<S extends SvgViewConstructor<InstanceType<S>>>(this: S, tag: string): InstanceType<S> {
-    let viewConstructor: SvgViewConstructor<InstanceType<S>> | undefined;
-    if (this.hasOwnProperty("tags")) {
-      viewConstructor = (this as any).tags[tag];
+  static fromTag<S extends SvgViewConstructor<InstanceType<S>>>(this: S, tag: string): InstanceType<S>;
+  static fromTag(tag: string): ElementView;
+  static fromTag(tag: string): ElementView {
+    let viewConstructor: SvgViewConstructor | undefined;
+    if (Object.prototype.hasOwnProperty.call(this, "tags")) {
+      viewConstructor = this.tags[tag];
     }
     if (viewConstructor === void 0) {
       viewConstructor = this;
     }
-    const node = document.createElementNS(viewConstructor.namespace, tag) as SVGElement;
+    const node = document.createElementNS(viewConstructor.namespace!, tag) as SVGElement;
     return new viewConstructor(node);
   }
 
-  static fromNode<S extends SvgViewConstructor<InstanceType<S>>>(this: S, node: ViewSvg): InstanceType<S> {
+  static fromNode<S extends SvgViewConstructor<InstanceType<S>>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
+  static fromNode(node: ViewSvg): SvgView;
+  static fromNode(node: ViewSvg): SvgView {
     if (node.view instanceof this) {
       return node.view;
     } else {
-      let viewConstructor: S | undefined;
-      if (this.hasOwnProperty("tags")) {
-        viewConstructor = (this as any).tags[node.tagName];
+      let viewConstructor: SvgViewConstructor | undefined;
+      if (Object.prototype.hasOwnProperty.call(this, "tags")) {
+        viewConstructor = this.tags[node.tagName];
       }
       if (viewConstructor === void 0) {
         viewConstructor = this;
@@ -729,15 +731,15 @@ export class SvgView extends ElementView {
     if (value instanceof this) {
       return value;
     } else if (value instanceof SVGElement) {
-      return this.fromNode(value);
+      return this.fromNode(value as ViewNodeType<InstanceType<S>>);
     }
     throw new TypeError("" + value);
   }
 
   /** @hidden */
-  static decorateTag(tag: string, constructor: typeof SvgView, name: string): void {
-    const tagConstructor = constructor.forTag(tag);
-    Object.defineProperty(SvgView, name, {
+  static decorateTag(tag: string, target: Object, propertyKey: string | symbol): void {
+    const tagConstructor = (target as typeof SvgView).forTag(tag);
+    Object.defineProperty(SvgView, propertyKey, {
       value: tagConstructor,
       configurable: true,
       enumerable: true,
@@ -746,7 +748,7 @@ export class SvgView extends ElementView {
       SvgView.tags[tag] = tagConstructor;
     }
     if (!(tag in ElementView.tags)) {
-      ElementView.tags[tag] = tagConstructor;
+      ElementView.tags[tag] = tagConstructor as ElementViewConstructor<any>;
     }
   }
 
@@ -962,4 +964,3 @@ export class SvgView extends ElementView {
   @SvgView.Tag("view")
   static view: SvgViewFactory;
 }
-NodeView.Svg = SvgView;

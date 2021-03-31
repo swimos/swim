@@ -12,27 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyPointR2, PointR2} from "@swim/math";
+import type {AnyTiming} from "@swim/mapping";
+import type {AnyPointR2, PointR2} from "@swim/math";
+import type {AnyGeoPoint, GeoPoint} from "@swim/geo";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
-import {GraphicsViewContext, CanvasView} from "@swim/graphics";
-import {AnyGeoPoint, GeoPoint, MapLayerView} from "@swim/map";
+import type {GraphicsViewContext, CanvasView} from "@swim/graphics";
+import {MapView, MapLayerView} from "@swim/map";
 import {EsriProjection} from "./EsriProjection";
-import {EsriViewObserver} from "./EsriViewObserver";
-import {EsriViewController} from "./EsriViewController";
+import type {EsriViewObserver} from "./EsriViewObserver";
+import type {EsriViewController} from "./EsriViewController";
 
-export abstract class EsriView extends MapLayerView {
+export abstract class EsriView extends MapLayerView implements MapView {
   constructor() {
     super();
     EsriProjection.init();
   }
 
-  abstract get map(): __esri.View;
-
-  // @ts-ignore
   declare readonly viewController: EsriViewController | null;
 
-  // @ts-ignore
   declare readonly viewObservers: ReadonlyArray<EsriViewObserver>;
+
+  abstract readonly map: __esri.View;
 
   abstract project(lnglat: AnyGeoPoint): PointR2;
   abstract project(lng: number, lat: number): PointR2;
@@ -40,55 +40,50 @@ export abstract class EsriView extends MapLayerView {
   abstract unproject(point: AnyPointR2): GeoPoint;
   abstract unproject(x: number, y: number): GeoPoint;
 
-  abstract get geoProjection(): EsriProjection;
+  // @ts-ignore
+  abstract readonly geoProjection: EsriProjection;
 
-  protected willSetGeoProjection(geoProjection: EsriProjection): void {
-    this.willObserve(function (viewObserver: EsriViewObserver): void {
-      if (viewObserver.viewWillSetGeoProjection !== void 0) {
-        viewObserver.viewWillSetGeoProjection(geoProjection, this);
+  declare readonly mapCenter: GeoPoint;
+
+  // @ts-ignore
+  abstract readonly mapZoom: number;
+
+  // @ts-ignore
+  abstract readonly mapHeading: number;
+
+  // @ts-ignore
+  abstract readonly mapTilt: number;
+
+  abstract moveTo(mapCenter: AnyGeoPoint | undefined, mapZoom: number | undefined,
+                  timing?: AnyTiming | boolean): void;
+
+  protected mapWillMove(mapCenter: GeoPoint, mapZoom: number): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.mapViewWillMove !== void 0) {
+      viewController.mapViewWillMove(mapCenter, mapZoom, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.mapViewWillMove !== void 0) {
+        viewObserver.mapViewWillMove(mapCenter, mapZoom, this);
       }
-    });
-  }
-
-  protected onSetGeoProjection(geoProjection: EsriProjection): void {
-    if (!this.isHidden() && !this.isCulled()) {
-      this.requireUpdate(View.NeedsProject, false);
     }
   }
 
-  protected didSetGeoProjection(geoProjection: EsriProjection): void {
-    this.didObserve(function (viewObserver: EsriViewObserver): void {
-      if (viewObserver.viewDidSetGeoProjection !== void 0) {
-        viewObserver.viewDidSetGeoProjection(geoProjection, this);
+  protected mapDidMove(mapCenter: GeoPoint, mapZoom: number): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!
+      if (viewObserver.mapViewDidMove !== void 0) {
+        viewObserver.mapViewDidMove(mapCenter, mapZoom, this);
       }
-    });
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.mapViewDidMove !== void 0) {
+      viewController.mapViewDidMove(mapCenter, mapZoom, this);
+    }
   }
-
-  abstract get mapZoom(): number;
-
-  protected willSetMapZoom(newMapZoom: number, oldMapZoom: number): void {
-    this.didObserve(function (viewObserver: EsriViewObserver): void {
-      if (viewObserver.viewWillSetMapZoom !== void 0) {
-        viewObserver.viewWillSetMapZoom(newMapZoom, oldMapZoom, this);
-      }
-    });
-  }
-
-  protected onSetMapZoom(newMapZoom: number, oldMapZoom: number): void {
-    // hook
-  }
-
-  protected didSetMapZoom(newMapZoom: number, oldMapZoom: number): void {
-    this.didObserve(function (viewObserver: EsriViewObserver): void {
-      if (viewObserver.viewDidSetMapZoom !== void 0) {
-        viewObserver.viewDidSetMapZoom(newMapZoom, oldMapZoom, this);
-      }
-    });
-  }
-
-  abstract get mapHeading(): number;
-
-  abstract get mapTilt(): number;
 
   extendViewContext(viewContext: GraphicsViewContext): ViewContextType<this> {
     const mapViewContext = Object.create(viewContext);

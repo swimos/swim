@@ -19,7 +19,6 @@ export {
   PlotView,
 } from "./PlotView";
 export {PlotViewObserver} from "./PlotViewObserver";
-export {PlotViewController} from "./PlotViewController";
 
 export {
   ScatterPlotType,
@@ -27,6 +26,7 @@ export {
   ScatterPlotViewInit,
   ScatterPlotView,
 } from "./ScatterPlotView";
+export {ScatterPlotViewObserver} from "./ScatterPlotViewObserver";
 
 export {
   SeriesPlotHitMode,
@@ -35,21 +35,61 @@ export {
   SeriesPlotViewInit,
   SeriesPlotView,
 } from "./SeriesPlotView";
+export {SeriesPlotViewObserver} from "./SeriesPlotViewObserver";
 
 export {
   AnyBubblePlotView,
   BubblePlotViewInit,
   BubblePlotView,
 } from "./BubblePlotView";
+export {BubblePlotViewObserver} from "./BubblePlotViewObserver";
 
 export {
   AnyLinePlotView,
   LinePlotViewInit,
   LinePlotView,
 } from "./LinePlotView";
+export {LinePlotViewObserver} from "./LinePlotViewObserver";
 
 export {
   AnyAreaPlotView,
   AreaPlotViewInit,
   AreaPlotView,
 } from "./AreaPlotView";
+export {AreaPlotViewObserver} from "./AreaPlotViewObserver";
+
+export {PlotTrait} from "./PlotTrait";
+export {PlotTraitObserver} from "./PlotTraitObserver";
+
+export {ScatterPlotTrait} from "./ScatterPlotTrait";
+export {ScatterPlotTraitObserver} from "./ScatterPlotTraitObserver";
+
+export {SeriesPlotTrait} from "./SeriesPlotTrait";
+export {SeriesPlotTraitObserver} from "./SeriesPlotTraitObserver";
+
+export {BubblePlotTrait} from "./BubblePlotTrait";
+export {BubblePlotTraitObserver} from "./BubblePlotTraitObserver";
+
+export {LinePlotTrait} from "./LinePlotTrait";
+export {LinePlotTraitObserver} from "./LinePlotTraitObserver";
+
+export {AreaPlotTrait} from "./AreaPlotTrait";
+export {AreaPlotTraitObserver} from "./AreaPlotTraitObserver";
+
+export {PlotComponent} from "./PlotComponent";
+export {PlotComponentObserver} from "./PlotComponentObserver";
+
+export {ScatterPlotComponent} from "./ScatterPlotComponent";
+export {ScatterPlotComponentObserver} from "./ScatterPlotComponentObserver";
+
+export {SeriesPlotComponent} from "./SeriesPlotComponent";
+export {SeriesPlotComponentObserver} from "./SeriesPlotComponentObserver";
+
+export {BubblePlotComponent} from "./BubblePlotComponent";
+export {BubblePlotComponentObserver} from "./BubblePlotComponentObserver";
+
+export {LinePlotComponent} from "./LinePlotComponent";
+export {LinePlotComponentObserver} from "./LinePlotComponentObserver";
+
+export {AreaPlotComponent} from "./AreaPlotComponent";
+export {AreaPlotComponentObserver} from "./AreaPlotComponentObserver";

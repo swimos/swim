@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
+import type {Equals} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
-import {BoxR2} from "@swim/math";
-import {AnyLength, Length} from "@swim/length";
-import {DrawingContext, Renderer, PathContext, PathRenderer, Graphics} from "@swim/render";
+import {AnyLength, Length, BoxR2} from "@swim/math";
+import type {Graphics} from "../graphics/Graphics";
+import type {GraphicsRenderer} from "../graphics/GraphicsRenderer";
+import type {DrawingContext} from "../drawing/DrawingContext";
+import {PathContext} from "../path/PathContext";
+import {PathRenderer} from "../path/PathRenderer";
 
 export type AnyRect = Rect | RectInit;
 
@@ -28,87 +31,75 @@ export interface RectInit {
 }
 
 export class Rect implements Graphics, Equals, Debug {
-  /** @hidden */
-  readonly _x: Length;
-  /** @hidden */
-  readonly _y: Length;
-  /** @hidden */
-  readonly _width: Length;
-  /** @hidden */
-  readonly _height: Length;
-
   constructor(x: Length, y: Length, width: Length, height: Length) {
-    this._x = x;
-    this._y = y;
-    this._width = width;
-    this._height = height;
+    Object.defineProperty(this, "x", {
+      value: x,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "y", {
+      value: y,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "width", {
+      value: width,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "height", {
+      value: height,
+      enumerable: true,
+    });
   }
 
-  x(): Length;
-  x(x: AnyLength): Rect;
-  x(x?: AnyLength): Length | Rect {
-    if (x === void 0) {
-      return this._x;
+  declare readonly x: Length;
+
+  withX(x: AnyLength): Rect {
+    x = Length.fromAny(x);
+    if (this.x.equals(x)) {
+      return this;
     } else {
-      x = Length.fromAny(x);
-      if (this._x.equals(x)) {
-        return this;
-      } else {
-        return this.copy(x, this._y, this._width, this._height);
-      }
+      return this.copy(x, this.y, this.width, this.height);
     }
   }
 
-  y(): Length;
-  y(y: AnyLength): Rect;
-  y(y?: AnyLength): Length | Rect {
-    if (y === void 0) {
-      return this._y;
+  declare readonly y: Length;
+
+  withY(y: AnyLength): Rect {
+    y = Length.fromAny(y);
+    if (this.y.equals(y)) {
+      return this;
     } else {
-      y = Length.fromAny(y);
-      if (this._y.equals(y)) {
-        return this;
-      } else {
-        return this.copy(this._x, y, this._width, this._height);
-      }
+      return this.copy(this.x, y, this.width, this.height);
     }
   }
 
-  width(): Length;
-  width(width: AnyLength): Rect;
-  width(width?: AnyLength): Length | Rect {
-    if (width === void 0) {
-      return this._width;
+  declare readonly width: Length;
+
+  withWidth(width: AnyLength): Rect {
+    width = Length.fromAny(width);
+    if (this.width.equals(width)) {
+      return this;
     } else {
-      width = Length.fromAny(width);
-      if (this._width.equals(width)) {
-        return this;
-      } else {
-        return this.copy(this._x, this._y, width, this._height);
-      }
+      return this.copy(this.x, this.y, width, this.height);
     }
   }
 
-  height(): Length;
-  height(height: AnyLength): Rect;
-  height(height?: AnyLength): Length | Rect {
-    if (height === void 0) {
-      return this._height;
+  declare readonly height: Length;
+
+  withHeight(height: AnyLength): Rect {
+    height = Length.fromAny(height);
+    if (this.height.equals(height)) {
+      return this;
     } else {
-      height = Length.fromAny(height);
-      if (this._height.equals(height)) {
-        return this;
-      } else {
-        return this.copy(this._x, this._y, this._width, height);
-      }
+      return this.copy(this.x, this.y, this.width, height);
     }
   }
 
   render(): string;
-  render(renderer: Renderer, frame?: BoxR2): void;
-  render(renderer?: Renderer, frame?: BoxR2): string | void {
+  render(renderer: GraphicsRenderer, frame?: BoxR2): void;
+  render(renderer?: GraphicsRenderer, frame?: BoxR2): string | void {
     if (renderer === void 0) {
       const context = new PathContext();
+      context.setPrecision(3);
       this.draw(context, frame);
       return context.toString();
     } else if (renderer instanceof PathRenderer) {
@@ -116,13 +107,13 @@ export class Rect implements Graphics, Equals, Debug {
     }
   }
 
-  draw(context: DrawingContext, frame?: BoxR2): void {
+  draw(context: DrawingContext, frame: BoxR2 | null = null): void {
     this.renderRect(context, frame);
   }
 
-  protected renderRect(context: DrawingContext, frame: BoxR2 | undefined): void {
-    context.rect(this._x.pxValue(), this._y.pxValue(),
-                 this._width.pxValue(), this._height.pxValue());
+  protected renderRect(context: DrawingContext, frame: BoxR2 | null): void {
+    context.rect(this.x.pxValue(), this.y.pxValue(),
+                 this.width.pxValue(), this.height.pxValue());
   }
 
   protected copy(x: Length, y: Length, width: Length, height: Length): Rect {
@@ -131,10 +122,10 @@ export class Rect implements Graphics, Equals, Debug {
 
   toAny(): RectInit {
     return {
-      x: this._x,
-      y: this._y,
-      width: this._width,
-      height: this._height,
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height,
     };
   }
 
@@ -142,23 +133,23 @@ export class Rect implements Graphics, Equals, Debug {
     if (this === that) {
       return true;
     } else if (that instanceof Rect) {
-      return this._x.equals(that._x) && this._y.equals(that._y)
-          && this._width.equals(that._width) && this._height.equals(that._height);
+      return this.x.equals(that.x) && this.y.equals(that.y)
+          && this.width.equals(that.width) && this.height.equals(that.height);
     }
     return false;
   }
 
   debug(output: Output): void {
-    output = output.write("Rect").write(46/*'.'*/).write("from").write(40/*'('*/)
-        .debug(this._x).write(", ").debug(this._y).write(", ")
-        .debug(this._width).write(", ").debug(this._height).write(41/*')'*/);
+    output = output.write("Rect").write(46/*'.'*/).write("create").write(40/*'('*/)
+        .debug(this.x).write(", ").debug(this.y).write(", ")
+        .debug(this.width).write(", ").debug(this.height).write(41/*')'*/);
   }
 
   toString(): string {
     return Format.debug(this);
   }
 
-  static from(x: AnyLength, y: AnyLength, width: AnyLength, height: AnyLength): Rect {
+  static create(x: AnyLength, y: AnyLength, width: AnyLength, height: AnyLength): Rect {
     x = Length.fromAny(x);
     y = Length.fromAny(y);
     width = Length.fromAny(width);
@@ -166,12 +157,12 @@ export class Rect implements Graphics, Equals, Debug {
     return new Rect(x, y, width, height);
   }
 
-  static fromAny(rect: AnyRect): Rect {
-    if (rect instanceof Rect) {
-      return rect;
-    } else if (typeof rect === "object" && rect !== null) {
-      return Rect.from(rect.x, rect.y, rect.width, rect.height);
+  static fromAny(value: AnyRect): Rect {
+    if (value instanceof Rect) {
+      return value;
+    } else if (typeof value === "object" && value !== null) {
+      return Rect.create(value.x, value.y, value.width, value.height);
     }
-    throw new TypeError("" + rect);
+    throw new TypeError("" + value);
   }
 }

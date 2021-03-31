@@ -12,20 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContextType} from "./ViewContext";
-import {ViewFlags, View} from "./View";
+import type {Timing} from "@swim/mapping";
+import type {MoodVector, ThemeMatrix} from "@swim/theme";
+import type {ViewContextType} from "./ViewContext";
+import type {View} from "./View";
 
 export type ViewObserverType<V extends View> =
-  V extends {readonly viewObservers: ReadonlyArray<infer VO>} ? VO : unknown;
+  V extends {readonly viewObservers: ReadonlyArray<infer VO>} ? VO : never;
 
 export interface ViewObserver<V extends View = View> {
   viewWillSetParentView?(newParentView: View | null, oldParentView: View | null, view: V): void;
 
   viewDidSetParentView?(newParentView: View | null, oldParentView: View | null, view: V): void;
 
-  viewWillInsertChildView?(childView: View, targetView: View | null | undefined, view: V): void;
+  viewWillInsertChildView?(childView: View, targetView: View | null, view: V): void;
 
-  viewDidInsertChildView?(childView: View, targetView: View | null | undefined, view: V): void;
+  viewDidInsertChildView?(childView: View, targetView: View | null, view: V): void;
 
   viewWillRemoveChildView?(childView: View, view: V): void;
 
@@ -55,10 +57,6 @@ export interface ViewObserver<V extends View = View> {
 
   viewDidUncull?(view: V): void;
 
-  viewWillProcess?(viewContext: ViewContextType<V>, view: V): void;
-
-  viewDidProcess?(viewContext: ViewContextType<V>, view: V): void;
-
   viewWillResize?(viewContext: ViewContextType<V>, view: V): void;
 
   viewDidResize?(viewContext: ViewContextType<V>, view: V): void;
@@ -75,19 +73,123 @@ export interface ViewObserver<V extends View = View> {
 
   viewDidAnimate?(viewContext: ViewContextType<V>, view: V): void;
 
+  viewWillProject?(viewContext: ViewContextType<V>, view: V): void;
+
+  viewDidProject?(viewContext: ViewContextType<V>, view: V): void;
+
   viewWillLayout?(viewContext: ViewContextType<V>, view: V): void;
 
   viewDidLayout?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewWillProcessChildViews?(processFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void;
+  viewWillRender?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidProcessChildViews?(processFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void;
+  viewDidRender?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewWillDisplay?(viewContext: ViewContextType<V>, view: V): void;
+  viewWillComposite?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewDidDisplay?(viewContext: ViewContextType<V>, view: V): void;
+  viewDidComposite?(viewContext: ViewContextType<V>, view: V): void;
 
-  viewWillDisplayChildViews?(displayFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void;
+  viewWillApplyTheme?(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, view: V): void;
 
-  viewDidDisplayChildViews?(displayFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void;
+  viewDidApplyTheme?(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, view: V): void;
+}
+
+/** @hidden */
+export interface ViewObserverCache<V extends View> {
+  viewWillResizeObservers?: ReadonlyArray<ViewWillResize<V>>;
+  viewDidResizeObservers?: ReadonlyArray<ViewDidResize<V>>;
+  viewWillScrollObservers?: ReadonlyArray<ViewWillScroll<V>>;
+  viewDidScrollObservers?: ReadonlyArray<ViewDidScroll<V>>;
+  viewWillChangeObservers?: ReadonlyArray<ViewWillChange<V>>;
+  viewDidChangeObservers?: ReadonlyArray<ViewDidChange<V>>;
+  viewWillAnimateObservers?: ReadonlyArray<ViewWillAnimate<V>>;
+  viewDidAnimateObservers?: ReadonlyArray<ViewDidAnimate<V>>;
+  viewWillProjectObservers?: ReadonlyArray<ViewWillProject<V>>;
+  viewDidProjectObservers?: ReadonlyArray<ViewDidProject<V>>;
+  viewWillLayoutObservers?: ReadonlyArray<ViewWillLayout<V>>;
+  viewDidLayoutObservers?: ReadonlyArray<ViewDidLayout<V>>;
+  viewWillRenderObservers?: ReadonlyArray<ViewWillRender<V>>;
+  viewDidRenderObservers?: ReadonlyArray<ViewDidRender<V>>;
+  viewWillCompositeObservers?: ReadonlyArray<ViewWillComposite<V>>;
+  viewDidCompositeObservers?: ReadonlyArray<ViewDidComposite<V>>;
+}
+
+/** @hidden */
+export interface ViewWillResize<V extends View = View> {
+  viewWillResize(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewDidResize<V extends View = View> {
+  viewDidResize(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewWillScroll<V extends View = View> {
+  viewWillScroll(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewDidScroll<V extends View = View> {
+  viewDidScroll(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewWillChange<V extends View = View> {
+  viewWillChange(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewDidChange<V extends View = View> {
+  viewDidChange(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewWillAnimate<V extends View = View> {
+  viewWillAnimate(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewDidAnimate<V extends View = View> {
+  viewDidAnimate(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewWillProject<V extends View = View> {
+  viewWillProject(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewDidProject<V extends View = View> {
+  viewDidProject(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewWillLayout<V extends View = View> {
+  viewWillLayout(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewDidLayout<V extends View = View> {
+  viewDidLayout(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewWillRender<V extends View = View> {
+  viewWillRender(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewDidRender<V extends View = View> {
+  viewDidRender(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewWillComposite<V extends View = View> {
+  viewWillComposite(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewDidComposite<V extends View = View> {
+  viewDidComposite(viewContext: ViewContextType<V>, view: V): void;
 }

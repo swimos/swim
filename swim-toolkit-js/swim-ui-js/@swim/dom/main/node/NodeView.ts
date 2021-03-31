@@ -12,38 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {BoxR2} from "@swim/math";
-import {Transform} from "@swim/transform";
-import {ConstrainVariable, Constraint} from "@swim/constraint";
+import {Arrays} from "@swim/util";
+import type {AnyTiming} from "@swim/mapping";
+import type {ConstraintVariable, Constraint} from "@swim/constraint";
+import {BoxR2, Transform} from "@swim/math";
+import type {Look, Feel, MoodVector} from "@swim/theme";
 import {
   ViewContextType,
   ViewContext,
   ViewFlags,
   ViewInit,
   ViewConstructor,
-  ViewClass,
   View,
   ViewObserverType,
-  ViewControllerType,
-  Subview,
   ViewService,
-  ViewScope,
+  ModalManager,
+  ViewProperty,
   ViewAnimator,
-  LayoutAnchor,
+  ViewFastener,
 } from "@swim/view";
-import {NodeViewObserver} from "./NodeViewObserver";
-import {NodeViewController} from "./NodeViewController";
-import {TextViewConstructor, TextView} from "../text/TextView";
-import {ViewElement, ElementViewConstructor, ElementView} from "../element/ElementView";
-import {HtmlView} from "../html/HtmlView";
-import {StyleView} from "../style/StyleView";
-import {SvgView} from "../svg/SvgView";
+import type {NodeViewObserver} from "./NodeViewObserver";
+import type {NodeViewController} from "./NodeViewController";
+import {TextViewConstructor, TextView} from "../"; // forward import
+import {ViewElement, ElementView} from "../"; // forward import
+
+export type ViewNodeType<V extends NodeView> = V extends {readonly node: infer N} ? N : never;
 
 export interface ViewNode extends Node {
   view?: NodeView;
 }
-
-export type ViewNodeType<V extends NodeView> = V extends {readonly node: infer N} ? N : Node;
 
 export interface NodeViewInit extends ViewInit {
   viewController?: NodeViewController;
@@ -51,56 +48,58 @@ export interface NodeViewInit extends ViewInit {
 }
 
 export interface NodeViewConstructor<V extends NodeView = NodeView> {
-  new(node: Node): V;
-  prototype: V;
-}
-
-export interface NodeViewClass extends ViewClass {
+  new(node: ViewNodeType<V>): V;
+  readonly prototype: V;
 }
 
 export class NodeView extends View {
-  /** @hidden */
-  readonly _node: ViewNodeType<this>;
-  /** @hidden */
-  _key?: string;
-  /** @hidden */
-  _childViewMap?: {[key: string]: View | undefined};
-  /** @hidden */
-  _viewController: ViewControllerType<this> | null;
-  /** @hidden */
-  _viewObservers?: ViewObserverType<this>[];
-  /** @hidden */
-  _viewFlags: ViewFlags;
-  /** @hidden */
-  _subviews?: {[subviewName: string]: Subview<View, View> | undefined};
-  /** @hidden */
-  _viewServices?: {[serviceName: string]: ViewService<View, unknown> | undefined};
-  /** @hidden */
-  _viewScopes?: {[scopeName: string]: ViewScope<View, unknown> | undefined};
-  /** @hidden */
-  _viewAnimators?: {[animatorName: string]: ViewAnimator<View, unknown> | undefined};
-  /** @hidden */
-  _layoutAnchors?: {[anchorName: string]: LayoutAnchor<View> | undefined};
-  /** @hidden */
-  _constraints?: Constraint[];
-  /** @hidden */
-  _constraintVariables?: ConstrainVariable[];
-
   constructor(node: Node) {
     super();
-    this._node = node as ViewNodeType<this>;
-    this._node.view = this;
-    this._viewController = null;
-    this._viewFlags = 0;
-    this.initNode(this._node);
-  }
-
-  get node(): ViewNode {
-    return this._node;
-  }
-
-  protected initNode(node: ViewNodeType<this>): void {
-    // hook
+    Object.defineProperty(this, "key", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "node", {
+      value: node,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "childViewMap", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "viewServices", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "viewProperties", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "viewAnimators", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "viewFasteners", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "constraints", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "constraintVariables", {
+      value: Arrays.empty,
+      enumerable: true,
+      configurable: true,
+    });
+    (node as ViewNode).view = this;
   }
 
   initView(init: NodeViewInit): void {
@@ -110,87 +109,27 @@ export class NodeView extends View {
     }
   }
 
-  get viewController(): NodeViewController | null {
-    return this._viewController;
-  }
+  declare readonly node: Node;
 
-  setViewController(newViewController: ViewControllerType<this> | null): void {
-    const oldViewController = this._viewController;
-    if (oldViewController !== newViewController) {
-      this.willSetViewController(newViewController);
-      if (oldViewController !== null) {
-        oldViewController.setView(null);
-      }
-      this._viewController = newViewController;
-      if (newViewController !== null) {
-        newViewController.setView(this);
-      }
-      this.onSetViewController(newViewController);
-      this.didSetViewController(newViewController);
-    }
-  }
+  declare readonly viewController: NodeViewController | null;
 
-  get viewObservers(): ReadonlyArray<NodeViewObserver> {
-    let viewObservers = this._viewObservers;
-    if (viewObservers === void 0) {
-      viewObservers = [];
-      this._viewObservers = viewObservers;
-    }
-    return viewObservers;
-  }
-
-  addViewObserver(viewObserver: ViewObserverType<this>): void {
-    let viewObservers = this._viewObservers;
-    let index: number;
-    if (viewObservers === void 0) {
-      viewObservers = [];
-      this._viewObservers = viewObservers;
-      index = -1;
-    } else {
-      index = viewObservers.indexOf(viewObserver);
-    }
-    if (index < 0) {
-      this.willAddViewObserver(viewObserver);
-      viewObservers.push(viewObserver);
-      this.onAddViewObserver(viewObserver);
-      this.didAddViewObserver(viewObserver);
-    }
-  }
-
-  removeViewObserver(viewObserver: ViewObserverType<this>): void {
-    const viewObservers = this._viewObservers;
-    if (viewObservers !== void 0) {
-      const index = viewObservers.indexOf(viewObserver);
-      if (index >= 0) {
-        this.willRemoveViewObserver(viewObserver);
-        viewObservers.splice(index, 1);
-        this.onRemoveViewObserver(viewObserver);
-        this.didRemoveViewObserver(viewObserver);
-      }
-    }
-  }
+  declare readonly viewObservers: ReadonlyArray<NodeViewObserver>;
 
   protected willObserve<T>(callback: (this: this, viewObserver: ViewObserverType<this>) => T | void): T | undefined {
     let result: T | undefined;
-    const viewController = this._viewController;
+    const viewController = this.viewController;
     if (viewController !== null) {
-      result = callback.call(this, viewController);
+      result = callback.call(this, viewController as ViewObserverType<this>) as T | undefined;
       if (result !== void 0) {
         return result;
       }
     }
-    const viewObservers = this._viewObservers;
-    if (viewObservers !== void 0) {
-      let i = 0;
-      while (i < viewObservers.length) {
-        const viewObserver = viewObservers[i];
-        result = callback.call(this, viewObserver);
-        if (result !== void 0) {
-          return result;
-        }
-        if (viewObserver === viewObservers[i]) {
-          i += 1;
-        }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      result = callback.call(this, viewObserver as ViewObserverType<this>) as T | undefined;
+      if (result !== void 0) {
+        return result;
       }
     }
     return result;
@@ -198,23 +137,17 @@ export class NodeView extends View {
 
   protected didObserve<T>(callback: (this: this, viewObserver: ViewObserverType<this>) => T | void): T | undefined {
     let result: T | undefined;
-    const viewObservers = this._viewObservers;
-    if (viewObservers !== void 0) {
-      let i = 0;
-      while (i < viewObservers.length) {
-        const viewObserver = viewObservers[i];
-        result = callback.call(this, viewObserver);
-        if (result !== void 0) {
-          return result;
-        }
-        if (viewObserver === viewObservers[i]) {
-          i += 1;
-        }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      result = callback.call(this, viewObserver as ViewObserverType<this>) as T | undefined;
+      if (result !== void 0) {
+        return result;
       }
     }
-    const viewController = this._viewController;
+    const viewController = this.viewController;
     if (viewController !== null) {
-      result = callback.call(this, viewController);
+      result = callback.call(this, viewController as ViewObserverType<this>) as T | undefined;
       if (result !== void 0) {
         return result;
       }
@@ -222,21 +155,19 @@ export class NodeView extends View {
     return result;
   }
 
-  get key(): string | undefined {
-    return this._key;
-  }
+  declare readonly key: string | undefined;
 
   /** @hidden */
   setKey(key: string | undefined): void {
-    if (key !== void 0) {
-      this._key = key;
-    } else if (this._key !== void 0) {
-      this._key = void 0;
-    }
+    Object.defineProperty(this, "key", {
+      value: key,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   get parentView(): View | null {
-    const parentNode: ViewNode | null = this._node.parentNode;
+    const parentNode: ViewNode | null = this.node.parentNode;
     if (parentNode !== null) {
       const parentView = parentNode.view;
       if (parentView instanceof View) {
@@ -249,15 +180,40 @@ export class NodeView extends View {
   /** @hidden */
   setParentView(newParentView: View | null, oldParentView: View | null): void {
     this.willSetParentView(newParentView, oldParentView);
+    if (oldParentView !== null) {
+      this.detachParentView(oldParentView);
+    }
+    if (newParentView !== null) {
+      this.attachParentView(newParentView);
+    }
     this.onSetParentView(newParentView, oldParentView);
     this.didSetParentView(newParentView, oldParentView);
   }
 
+  remove(): void {
+    const node = this.node;
+    const parentNode: ViewNode | null = node.parentNode;
+    if (parentNode !== null) {
+      const parentView = parentNode.view;
+      if (parentView !== void 0) {
+        if ((this.viewFlags & View.TraversingFlag) === 0) {
+          parentView.removeChildView(this);
+        } else {
+          this.setViewFlags(this.viewFlags | View.RemovingFlag);
+        }
+      } else {
+        parentNode.removeChild(node);
+        this.setParentView(null, this);
+        this.setKey(void 0);
+      }
+    }
+  }
+
   get childViewCount(): number {
     let childViewCount = 0;
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
         childViewCount += 1;
       }
@@ -266,10 +222,10 @@ export class NodeView extends View {
   }
 
   get childViews(): ReadonlyArray<View> {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     const childViews = [];
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
         childViews.push(childView);
       }
@@ -278,9 +234,9 @@ export class NodeView extends View {
   }
 
   firstChildView(): View | null {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
         return childView;
       }
@@ -289,9 +245,9 @@ export class NodeView extends View {
   }
 
   lastChildView(): View | null {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     for (let i = childNodes.length - 1; i >= 0; i -= 1) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
         return childView;
       }
@@ -301,7 +257,7 @@ export class NodeView extends View {
 
   nextChildView(targetView: View): View | null {
     if (targetView instanceof NodeView && targetView.parentView === this) {
-      let targetNode: ViewNode | null = targetView._node;
+      let targetNode: ViewNode | null = targetView.node;
       do {
         targetNode = targetNode!.nextSibling;
         if (targetNode !== null) {
@@ -318,7 +274,7 @@ export class NodeView extends View {
 
   previousChildView(targetView: View): View | null {
     if (targetView instanceof NodeView && targetView.parentView === this) {
-      let targetNode: ViewNode | null = targetView._node;
+      let targetNode: ViewNode | null = targetView.node;
       do {
         targetNode = targetNode!.previousSibling;
         if (targetNode !== null) {
@@ -333,16 +289,19 @@ export class NodeView extends View {
     return null;
   }
 
-  forEachChildView<T, S = unknown>(callback: (this: S, childView: View) => T | void,
-                                   thisArg?: S): T | undefined {
+  forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
+  forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
+                         thisArg: S): T | undefined;
+  forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
+                         thisArg?: S): T | undefined {
     let result: T | undefined;
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
-      const childNode = childNodes[i] as ViewNode;
+      const childNode = childNodes[i]! as ViewNode;
       const childView = childNode.view;
       if (childView !== void 0) {
-        result = callback.call(thisArg, childView);
+        result = callback.call(thisArg, childView) as T | undefined;
         if (result !== void 0) {
           break;
         }
@@ -354,9 +313,12 @@ export class NodeView extends View {
     return result;
   }
 
+  /** @hidden */
+  declare readonly childViewMap: {[key: string]: View | undefined} | null;
+
   getChildView(key: string): View | null {
-    const childViewMap = this._childViewMap;
-    if (childViewMap !== void 0) {
+    const childViewMap = this.childViewMap;
+    if (childViewMap !== null) {
       const childView = childViewMap[key];
       if (childView !== void 0) {
         return childView;
@@ -366,43 +328,47 @@ export class NodeView extends View {
   }
 
   setChildView(key: string, newChildView: View | null): View | null {
+    let targetNode: ViewNode | null = null;
     if (newChildView !== null) {
       if (!(newChildView instanceof NodeView)) {
         throw new TypeError("" + newChildView);
       }
+      if (newChildView.parentView === this) {
+        targetNode = newChildView.node.nextSibling;
+      }
       newChildView.remove();
     }
-    let oldChildView: View | null = null;
-    let targetNode: Node | null = null;
-    const childViewMap = this._childViewMap;
-    if (childViewMap !== void 0) {
-      const childView = childViewMap[key];
-      if (childView !== void 0) {
-        oldChildView = childView;
-        if (!(childView instanceof NodeView)) {
-          throw new TypeError("" + childView);
-        }
-        const childNode = childView._node;
-        targetNode = childNode.nextSibling;
-        this.willRemoveChildView(childView);
-        this.willRemoveChildNode(childNode);
-        childView.setParentView(null, this);
-        this.removeChildViewMap(childView);
-        this._node.removeChild(childNode);
-        this.onRemoveChildNode(childNode);
-        this.onRemoveChildView(childView);
-        this.didRemoveChildNode(childNode);
-        this.didRemoveChildView(childView);
-        childView.setKey(void 0);
+    const oldChildView = this.getChildView(key);
+    if (oldChildView !== null) {
+      if (!(oldChildView instanceof NodeView)) {
+        throw new TypeError("" + oldChildView);
       }
+      const oldChildNode = oldChildView.node;
+      targetNode = oldChildNode.nextSibling;
+      this.willRemoveChildView(oldChildView);
+      this.willRemoveChildNode(oldChildNode);
+      oldChildView.setParentView(null, this);
+      this.removeChildViewMap(oldChildView);
+      this.node.removeChild(oldChildNode);
+      this.onRemoveChildNode(oldChildNode);
+      this.onRemoveChildView(oldChildView);
+      this.didRemoveChildNode(oldChildNode);
+      this.didRemoveChildView(oldChildView);
+      oldChildView.setKey(void 0);
     }
     if (newChildView !== null) {
-      const newChildNode = newChildView._node;
-      const targetView = targetNode !== null ? (targetNode as ViewNode).view : null;
+      const newChildNode = newChildView.node;
+      let targetView: View | null | undefined = null;
+      if (targetNode !== null) {
+        targetView = targetNode.view;
+        if (targetView === void 0) {
+          targetView = null;
+        }
+      }
       newChildView.setKey(key);
       this.willInsertChildView(newChildView, targetView);
       this.willInsertChildNode(newChildNode, targetNode);
-      this._node.insertBefore(newChildNode, targetNode);
+      this.node.insertBefore(newChildNode, targetNode);
       this.insertChildViewMap(newChildView);
       newChildView.setParentView(this, null);
       this.onInsertChildNode(newChildNode, targetNode);
@@ -418,10 +384,14 @@ export class NodeView extends View {
   protected insertChildViewMap(childView: View): void {
     const key = childView.key;
     if (key !== void 0) {
-      let childViewMap = this._childViewMap;
-      if (childViewMap === void 0) {
+      let childViewMap = this.childViewMap;
+      if (childViewMap === null) {
         childViewMap = {};
-        this._childViewMap = childViewMap;
+        Object.defineProperty(this, "childViewMap", {
+          value: childViewMap,
+          enumerable: true,
+          configurable: true,
+        });
       }
       childViewMap[key] = childView;
     }
@@ -429,10 +399,10 @@ export class NodeView extends View {
 
   /** @hidden */
   protected removeChildViewMap(childView: View): void {
-    const childViewMap = this._childViewMap;
-    if (childViewMap !== void 0) {
-      const key = childView.key;
-      if (key !== void 0) {
+    const key = childView.key;
+    if (key !== void 0) {
+      const childViewMap = this.childViewMap;
+      if (childViewMap !== null) {
         delete childViewMap[key];
       }
     }
@@ -457,10 +427,10 @@ export class NodeView extends View {
       this.removeChildView(key);
       childView.setKey(key);
     }
-    const childNode = childView._node;
+    const childNode = childView.node;
     this.willInsertChildView(childView, null);
     this.willInsertChildNode(childNode, null);
-    this._node.appendChild(childNode);
+    this.node.appendChild(childNode);
     this.insertChildViewMap(childView);
     childView.setParentView(this, null);
     this.onInsertChildNode(childNode, null);
@@ -481,7 +451,7 @@ export class NodeView extends View {
       this.willInsertChildView(childView, null);
     }
     this.willInsertChildNode(childNode, null);
-    this._node.appendChild(childNode);
+    this.node.appendChild(childNode);
     if (childView !== void 0) {
       this.insertChildViewMap(childView);
       childView.setParentView(this, null);
@@ -516,12 +486,18 @@ export class NodeView extends View {
       this.removeChildView(key);
       childView.setKey(key);
     }
-    const childNode = childView._node;
-    const targetNode = this._node.firstChild as ViewNode | null;
-    const targetView = targetNode !== null ? targetNode.view : null;
+    const childNode = childView.node;
+    const targetNode = this.node.firstChild as ViewNode | null;
+    let targetView: View | null | undefined = null;
+    if (targetNode !== null) {
+      targetView = targetNode.view;
+      if (targetView === void 0) {
+        targetView = null;
+      }
+    }
     this.willInsertChildView(childView, targetView);
     this.willInsertChildNode(childNode, targetNode);
-    this._node.insertBefore(childNode, targetNode);
+    this.node.insertBefore(childNode, targetNode);
     this.insertChildViewMap(childView);
     childView.setParentView(this, null);
     this.onInsertChildNode(childNode, targetNode);
@@ -533,8 +509,14 @@ export class NodeView extends View {
 
   prependChildNode(childNode: Node, key?: string): void {
     const childView = (childNode as ViewNode).view;
-    const targetNode = this._node.firstChild as ViewNode | null;
-    const targetView = targetNode !== null ? targetNode.view : null;
+    const targetNode = this.node.firstChild as ViewNode | null;
+    let targetView: View | null | undefined = null;
+    if (targetNode !== null) {
+      targetView = targetNode.view;
+      if (targetView === void 0) {
+        targetView = null;
+      }
+    }
     if (childView !== void 0) {
       childView.remove();
       if (key !== void 0) {
@@ -544,7 +526,7 @@ export class NodeView extends View {
       this.willInsertChildView(childView, targetView);
     }
     this.willInsertChildNode(childNode, targetNode);
-    this._node.insertBefore(childNode, targetNode);
+    this.node.insertBefore(childNode, targetNode);
     if (childView !== void 0) {
       this.insertChildViewMap(childView);
       childView.setParentView(this, null);
@@ -565,13 +547,13 @@ export class NodeView extends View {
       if (target instanceof View) {
         this.insertChildView(child, target, key);
       } else if (target instanceof Node || target === null) {
-        this.insertChildNode(child._node, target, key);
+        this.insertChildNode(child.node, target, key);
       } else {
         throw new TypeError("" + target);
       }
     } else if (child instanceof Node) {
       if (target instanceof NodeView) {
-        this.insertChildNode(child, target._node, key);
+        this.insertChildNode(child, target.node, key);
       } else if (target instanceof Node || target === null) {
         this.insertChildNode(child, target, key);
       } else {
@@ -594,11 +576,11 @@ export class NodeView extends View {
       this.removeChildView(key);
       childView.setKey(key);
     }
-    const childNode = childView._node;
-    const targetNode = targetView !== null ? targetView._node : null;
+    const childNode = childView.node;
+    const targetNode = targetView !== null ? targetView.node : null;
     this.willInsertChildView(childView, targetView);
     this.willInsertChildNode(childNode, targetNode);
-    this._node.insertBefore(childNode, targetNode);
+    this.node.insertBefore(childNode, targetNode);
     this.insertChildViewMap(childView);
     childView.setParentView(this, null);
     this.onInsertChildNode(childNode, targetNode);
@@ -608,14 +590,20 @@ export class NodeView extends View {
     childView.cascadeInsert();
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
+  protected onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
-    this.insertSubview(childView);
+    this.insertViewFastener(childView, targetView);
   }
 
   insertChildNode(childNode: Node, targetNode: Node | null, key?: string): void {
     const childView = (childNode as ViewNode).view;
-    const targetView = targetNode !== null ? (targetNode as ViewNode).view : null;
+    let targetView: View | null | undefined = null;
+    if (targetNode !== null) {
+      targetView = (targetNode as ViewNode).view;
+      if (targetView === void 0) {
+        targetView = null;
+      }
+    }
     if (childView !== void 0) {
       childView.remove();
       if (key !== void 0) {
@@ -625,7 +613,7 @@ export class NodeView extends View {
       this.willInsertChildView(childView, targetView);
     }
     this.willInsertChildNode(childNode, targetNode);
-    this._node.insertBefore(childNode, targetNode);
+    this.node.insertBefore(childNode, targetNode);
     if (childView !== void 0) {
       this.insertChildViewMap(childView);
       childView.setParentView(this, null);
@@ -647,8 +635,8 @@ export class NodeView extends View {
       this.removeChildView(key);
       childView.setKey(key);
     }
-    const childNode = childView._node;
-    const targetNode = targetView !== null ? targetView._node : null;
+    const childNode = childView.node;
+    const targetNode = targetView !== null ? targetView.node : null;
     this.willInsertChildView(childView, targetView);
     this.willInsertChildNode(childNode, targetNode);
     this.insertChildViewMap(childView);
@@ -661,43 +649,48 @@ export class NodeView extends View {
   }
 
   protected willInsertChildNode(childNode: Node, targetNode: Node | null): void {
-    this.willObserve(function (viewObserver: NodeViewObserver): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillInsertChildNode !== void 0) {
+      viewController.viewWillInsertChildNode(childNode, targetNode, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.viewWillInsertChildNode !== void 0) {
         viewObserver.viewWillInsertChildNode(childNode, targetNode, this);
       }
-    });
+    }
   }
 
   protected onInsertChildNode(childNode: Node, targetNode: Node | null): void {
-    this.requireUpdate(View.NeedsLayout);
+    this.requireUpdate(this.insertChildFlags);
   }
 
   protected didInsertChildNode(childNode: Node, targetNode: Node | null): void {
-    this.didObserve(function (viewObserver: NodeViewObserver): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.viewDidInsertChildNode !== void 0) {
         viewObserver.viewDidInsertChildNode(childNode, targetNode, this);
       }
-    });
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidInsertChildNode !== void 0) {
+      viewController.viewDidInsertChildNode(childNode, targetNode, this);
+    }
   }
 
   cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void {
-    const viewFlags = this._viewFlags;
-    if ((viewFlags & (View.MountedFlag | View.PoweredFlag)) === (View.MountedFlag | View.PoweredFlag)) {
+    if ((this.viewFlags & (View.MountedFlag | View.PoweredFlag)) === (View.MountedFlag | View.PoweredFlag)) {
       if (updateFlags === void 0) {
         updateFlags = 0;
       }
-      updateFlags |= viewFlags & View.UpdateMask;
+      updateFlags |= this.viewFlags & View.UpdateMask;
       if ((updateFlags & View.ProcessMask) !== 0) {
         if (viewContext === void 0) {
           viewContext = this.superViewContext;
         }
         this.cascadeProcess(updateFlags, viewContext);
-      }
-      if ((updateFlags & View.DisplayMask) !== 0) {
-        if (viewContext === void 0) {
-          viewContext = this.superViewContext;
-        }
-        this.cascadeDisplay(updateFlags, viewContext);
       }
     }
   }
@@ -727,15 +720,15 @@ export class NodeView extends View {
     if (!(childView instanceof NodeView)) {
       throw new TypeError("" + childView);
     }
-    const childNode = childView._node;
-    if (childNode.parentNode !== this._node) {
+    const childNode = childView.node;
+    if (childNode.parentNode !== this.node) {
       throw new Error("not a child view");
     }
     this.willRemoveChildView(childView);
     this.willRemoveChildNode(childNode);
     childView.setParentView(null, this);
     this.removeChildViewMap(childView);
-    this._node.removeChild(childNode);
+    this.node.removeChild(childNode);
     this.onRemoveChildNode(childNode);
     this.onRemoveChildView(childView);
     this.didRemoveChildNode(childNode);
@@ -748,11 +741,11 @@ export class NodeView extends View {
 
   protected onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
-    this.removeSubview(childView);
+    this.removeViewFastener(childView);
   }
 
   removeChildNode(childNode: Node): void {
-    if (childNode.parentNode !== this._node) {
+    if (childNode.parentNode !== this.node) {
       throw new Error("not a child node")
     }
     const childView = (childNode as ViewNode).view;
@@ -760,7 +753,7 @@ export class NodeView extends View {
       this.willRemoveChildView(childView);
     }
     this.willRemoveChildNode(childNode);
-    this._node.removeChild(childNode);
+    this.node.removeChild(childNode);
     if (childView !== void 0) {
       childView.setParentView(null, this);
       this.removeChildViewMap(childView);
@@ -778,14 +771,14 @@ export class NodeView extends View {
 
   removeAll(): void {
     do {
-      const childNode = this._node.lastChild as ViewNode | null;
+      const childNode = this.node.lastChild as ViewNode | null;
       if (childNode !== null) {
         const childView = childNode.view;
         if (childView !== void 0) {
           this.willRemoveChildView(childView);
         }
         this.willRemoveChildNode(childNode);
-        this._node.removeChild(childNode);
+        this.node.removeChild(childNode);
         if (childView !== void 0) {
           childView.setParentView(null, this);
           this.removeChildViewMap(childView);
@@ -805,68 +798,54 @@ export class NodeView extends View {
     } while (true);
   }
 
-  remove(): void {
-    const node = this._node;
-    const parentNode: ViewNode | null = node.parentNode;
-    if (parentNode !== null) {
-      const parentView = parentNode.view;
-      if (parentView !== void 0) {
-        if ((this._viewFlags & View.TraversingFlag) === 0) {
-          parentView.removeChildView(this);
-        } else {
-          this._viewFlags |= View.RemovingFlag;
-        }
-      } else {
-        parentNode.removeChild(node);
-        this.setParentView(null, this);
-        this.setKey(void 0);
-      }
-    }
-  }
-
   protected willRemoveChildNode(childNode: Node): void {
-    this.willObserve(function (viewObserver: NodeViewObserver): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillRemoveChildNode !== void 0) {
+      viewController.viewWillRemoveChildNode(childNode, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.viewWillRemoveChildNode !== void 0) {
         viewObserver.viewWillRemoveChildNode(childNode, this);
       }
-    });
-  }
-
-  protected onRemoveChildNode(childNode: Node): void {
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected didRemoveChildNode(childNode: Node): void {
-    this.didObserve(function (viewObserver: NodeViewObserver): void {
-      if (viewObserver.viewDidRemoveChildNode !== void 0) {
-        viewObserver.viewDidRemoveChildNode(childNode, this);
-      }
-    });
-  }
-
-  text(): string | null;
-  text(value: string | null): this;
-  text(value?: string | null): string | null | this {
-    if (value === void 0) {
-      return this._node.textContent;
-    } else {
-      this._node.textContent = value;
-      return this;
     }
   }
 
-  get viewClass(): NodeViewClass {
-    return this.constructor as unknown as NodeViewClass;
+  protected onRemoveChildNode(childNode: Node): void {
+    this.requireUpdate(this.removeChildFlags);
   }
 
-  /** @hidden */
-  get viewFlags(): ViewFlags {
-    return this._viewFlags;
+  protected didRemoveChildNode(childNode: Node): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidRemoveChildNode !== void 0) {
+        viewObserver.viewDidRemoveChildNode(childNode, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidRemoveChildNode !== void 0) {
+      viewController.viewDidRemoveChildNode(childNode, this);
+    }
   }
 
-  /** @hidden */
-  setViewFlags(viewFlags: ViewFlags): void {
-    this._viewFlags = viewFlags;
+  text(): string | undefined;
+  text(value: string | null | undefined): this;
+  text(value?: string | null | undefined): string | undefined | this {
+    if (arguments.length === 0) {
+      value = this.node.textContent;
+      if (value === null) {
+        value = void 0;
+      }
+      return value;
+    } else {
+      if (value === void 0) {
+        value = null;
+      }
+      this.node.textContent = value;
+      return this;
+    }
   }
 
   /** @hidden */
@@ -902,7 +881,7 @@ export class NodeView extends View {
   }
 
   mount(): void {
-    if (!this.isMounted() && NodeView.isNodeMounted(this._node) && NodeView.isRootView(this._node)) {
+    if (!this.isMounted() && NodeView.isNodeMounted(this.node) && NodeView.isRootView(this.node)) {
       this.cascadeMount();
       if (!this.isPowered() && document.visibilityState === "visible") {
         this.cascadePower();
@@ -912,16 +891,15 @@ export class NodeView extends View {
   }
 
   cascadeMount(): void {
-    if ((this._viewFlags & View.MountedFlag) === 0) {
-      this._viewFlags |= View.MountedFlag;
-      this._viewFlags |= View.TraversingFlag;
+    if ((this.viewFlags & View.MountedFlag) === 0) {
+      this.setViewFlags(this.viewFlags | (View.MountedFlag | View.TraversingFlag));
       try {
         this.willMount();
         this.onMount();
         this.doMountChildViews();
         this.didMount();
       } finally {
-        this._viewFlags &= ~View.TraversingFlag;
+        this.setViewFlags(this.viewFlags & ~View.TraversingFlag);
       }
     } else {
       throw new Error("already mounted");
@@ -930,10 +908,10 @@ export class NodeView extends View {
 
   protected onMount(): void {
     super.onMount();
-    this.mountServices();
-    this.mountScopes();
-    this.mountAnimators();
-    this.mountSubviews();
+    this.mountViewServices();
+    this.mountViewProperties();
+    this.mountViewAnimators();
+    this.mountViewFasteners();
   }
 
   protected didMount(): void {
@@ -943,14 +921,14 @@ export class NodeView extends View {
 
   /** @hidden */
   protected doMountChildViews(): void {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
         childView.cascadeMount();
-        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
-          childView._viewFlags &= ~View.RemovingFlag;
+        if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+          childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
           this.removeChildView(childView);
           continue;
         }
@@ -960,16 +938,15 @@ export class NodeView extends View {
   }
 
   cascadeUnmount(): void {
-    if ((this._viewFlags & View.MountedFlag) !== 0) {
-      this._viewFlags &= ~View.MountedFlag
-      this._viewFlags |= View.TraversingFlag;
+    if ((this.viewFlags & View.MountedFlag) !== 0) {
+      this.setViewFlags(this.viewFlags & ~View.MountedFlag | View.TraversingFlag);
       try {
         this.willUnmount();
         this.doUnmountChildViews();
         this.onUnmount();
         this.didUnmount();
       } finally {
-        this._viewFlags &= ~View.TraversingFlag;
+        this.setViewFlags(this.viewFlags & ~View.TraversingFlag);
       }
     } else {
       throw new Error("already unmounted");
@@ -982,23 +959,23 @@ export class NodeView extends View {
   }
 
   protected onUnmount(): void {
-    this.unmountSubviews();
-    this.unmountAnimators();
-    this.unmountScopes();
-    this.unmountServices();
-    this._viewFlags &= ~View.ViewFlagMask | View.RemovingFlag;
+    this.unmountViewFasteners();
+    this.unmountViewAnimators();
+    this.unmountViewProperties();
+    this.unmountViewServices();
+    this.setViewFlags(this.viewFlags & (~View.ViewFlagMask | View.RemovingFlag));
   }
 
   /** @hidden */
   protected doUnmountChildViews(): void {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
         childView.cascadeUnmount();
-        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
-          childView._viewFlags &= ~View.RemovingFlag;
+        if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+          childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
           this.removeChildView(childView);
           continue;
         }
@@ -1008,16 +985,15 @@ export class NodeView extends View {
   }
 
   cascadePower(): void {
-    if ((this._viewFlags & View.PoweredFlag) === 0) {
-      this._viewFlags |= View.PoweredFlag;
-      this._viewFlags |= View.TraversingFlag;
+    if ((this.viewFlags & View.PoweredFlag) === 0) {
+      this.setViewFlags(this.viewFlags | (View.PoweredFlag | View.TraversingFlag));
       try {
         this.willPower();
         this.onPower();
         this.doPowerChildViews();
         this.didPower();
       } finally {
-        this._viewFlags &= ~View.TraversingFlag;
+        this.setViewFlags(this.viewFlags & ~View.TraversingFlag);
       }
     } else {
       throw new Error("already powered");
@@ -1026,14 +1002,14 @@ export class NodeView extends View {
 
   /** @hidden */
   protected doPowerChildViews(): void {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
         childView.cascadePower();
-        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
-          childView._viewFlags &= ~View.RemovingFlag;
+        if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+          childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
           this.removeChildView(childView);
           continue;
         }
@@ -1043,16 +1019,15 @@ export class NodeView extends View {
   }
 
   cascadeUnpower(): void {
-    if ((this._viewFlags & View.PoweredFlag) !== 0) {
-      this._viewFlags &= ~View.PoweredFlag
-      this._viewFlags |= View.TraversingFlag;
+    if ((this.viewFlags & View.PoweredFlag) !== 0) {
+      this.setViewFlags(this.viewFlags & ~View.PoweredFlag | View.TraversingFlag);
       try {
         this.willUnpower();
         this.doUnpowerChildViews();
         this.onUnpower();
         this.didUnpower();
       } finally {
-        this._viewFlags &= ~View.TraversingFlag;
+        this.setViewFlags(this.viewFlags & ~View.TraversingFlag);
       }
     } else {
       throw new Error("already unpowered");
@@ -1061,14 +1036,14 @@ export class NodeView extends View {
 
   /** @hidden */
   protected doUnpowerChildViews(): void {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
         childView.cascadeUnpower();
-        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
-          childView._viewFlags &= ~View.RemovingFlag;
+        if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+          childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
           this.removeChildView(childView);
           continue;
         }
@@ -1078,14 +1053,14 @@ export class NodeView extends View {
   }
 
   setCulled(culled: boolean): void {
-    const viewFlags = this._viewFlags;
+    const viewFlags = this.viewFlags;
     if (culled && (viewFlags & View.CulledFlag) === 0) {
-      this._viewFlags = viewFlags | View.CulledFlag;
+      this.setViewFlags(viewFlags | View.CulledFlag);
       if ((viewFlags & View.CullFlag) === 0) {
         this.doCull();
       }
     } else if (!culled && (viewFlags & View.CulledFlag) !== 0) {
-      this._viewFlags = viewFlags & ~View.CulledFlag;
+      this.setViewFlags(viewFlags & ~View.CulledFlag);
       if ((viewFlags & View.CullFlag) === 0) {
         this.doUncull();
       }
@@ -1093,39 +1068,37 @@ export class NodeView extends View {
   }
 
   cascadeCull(): void {
-    if ((this._viewFlags & View.CullFlag) === 0) {
-      this._viewFlags |= View.CullFlag;
-      if ((this._viewFlags & View.CulledFlag) === 0) {
+    if ((this.viewFlags & View.CullFlag) === 0) {
+      this.setViewFlags(this.viewFlags | View.CullFlag);
+      if ((this.viewFlags & View.CulledFlag) === 0) {
         this.doCull();
       }
-    } else {
-      throw new Error("already culled");
     }
   }
 
   /** @hidden */
   protected doCull(): void {
-    this._viewFlags |= View.TraversingFlag;
+    this.setViewFlags(this.viewFlags | View.TraversingFlag);
     try {
       this.willCull();
       this.onCull();
       this.doCullChildViews();
       this.didCull();
     } finally {
-      this._viewFlags &= ~View.TraversingFlag;
+      this.setViewFlags(this.viewFlags & ~View.TraversingFlag);
     }
   }
 
   /** @hidden */
   protected doCullChildViews(): void {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
         childView.cascadeCull();
-        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
-          childView._viewFlags &= ~View.RemovingFlag;
+        if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+          childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
           this.removeChildView(childView);
           continue;
         }
@@ -1135,39 +1108,37 @@ export class NodeView extends View {
   }
 
   cascadeUncull(): void {
-    if ((this._viewFlags & View.CullFlag) !== 0) {
-      this._viewFlags &= ~View.CullFlag
-      if ((this._viewFlags & View.CulledFlag) === 0) {
+    if ((this.viewFlags & View.CullFlag) !== 0) {
+      this.setViewFlags(this.viewFlags & ~View.CullFlag);
+      if ((this.viewFlags & View.CulledFlag) === 0) {
         this.doUncull();
       }
-    } else {
-      throw new Error("already unculled");
     }
   }
 
   /** @hidden */
   protected doUncull(): void {
-    this._viewFlags |= View.TraversingFlag;
+    this.setViewFlags(this.viewFlags | View.TraversingFlag);
     try {
       this.willUncull();
       this.doUncullChildViews();
       this.onUncull();
       this.didUncull();
     } finally {
-      this._viewFlags &= ~View.TraversingFlag;
+      this.setViewFlags(this.viewFlags & ~View.TraversingFlag);
     }
   }
 
   /** @hidden */
   protected doUncullChildViews(): void {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
         childView.cascadeUncull();
-        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
-          childView._viewFlags &= ~View.RemovingFlag;
+        if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+          childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
           this.removeChildView(childView);
           continue;
         }
@@ -1178,40 +1149,43 @@ export class NodeView extends View {
 
   cascadeProcess(processFlags: ViewFlags, viewContext: ViewContext): void {
     const extendedViewContext = this.extendViewContext(viewContext);
-    processFlags |= this._viewFlags & View.UpdateMask;
+    processFlags &= ~View.NeedsProcess;
+    processFlags |= this.viewFlags & View.UpdateMask;
     processFlags = this.needsProcess(processFlags, extendedViewContext);
-    this.doProcess(processFlags, extendedViewContext);
+    if ((processFlags & View.ProcessMask) !== 0) {
+      this.doProcess(processFlags, extendedViewContext);
+    }
   }
 
   /** @hidden */
   protected doProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     let cascadeFlags = processFlags;
-    this._viewFlags |= View.TraversingFlag | View.ProcessingFlag;
-    this._viewFlags &= ~(View.NeedsProcess | View.NeedsProject);
+    this.setViewFlags(this.viewFlags & ~(View.NeedsProcess | View.NeedsProject)
+                                     |  (View.TraversingFlag | View.ProcessingFlag));
     try {
-      this.willProcess(viewContext);
-      if (((this._viewFlags | processFlags) & View.NeedsResize) !== 0) {
-        this.willResize(viewContext);
+      this.willProcess(cascadeFlags, viewContext);
+      if (((this.viewFlags | processFlags) & View.NeedsResize) !== 0) {
         cascadeFlags |= View.NeedsResize;
-        this._viewFlags &= ~View.NeedsResize;
+        this.setViewFlags(this.viewFlags & ~View.NeedsResize);
+        this.willResize(viewContext);
       }
-      if (((this._viewFlags | processFlags) & View.NeedsScroll) !== 0) {
-        this.willScroll(viewContext);
+      if (((this.viewFlags | processFlags) & View.NeedsScroll) !== 0) {
         cascadeFlags |= View.NeedsScroll;
-        this._viewFlags &= ~View.NeedsScroll;
+        this.setViewFlags(this.viewFlags & ~View.NeedsScroll);
+        this.willScroll(viewContext);
       }
-      if (((this._viewFlags | processFlags) & View.NeedsChange) !== 0) {
-        this.willChange(viewContext);
+      if (((this.viewFlags | processFlags) & View.NeedsChange) !== 0) {
         cascadeFlags |= View.NeedsChange;
-        this._viewFlags &= ~View.NeedsChange;
+        this.setViewFlags(this.viewFlags & ~View.NeedsChange);
+        this.willChange(viewContext);
       }
-      if (((this._viewFlags | processFlags) & View.NeedsAnimate) !== 0) {
-        this.willAnimate(viewContext);
+      if (((this.viewFlags | processFlags) & View.NeedsAnimate) !== 0) {
         cascadeFlags |= View.NeedsAnimate;
-        this._viewFlags &= ~View.NeedsAnimate;
+        this.setViewFlags(this.viewFlags & ~View.NeedsAnimate);
+        this.willAnimate(viewContext);
       }
 
-      this.onProcess(viewContext);
+      this.onProcess(cascadeFlags, viewContext);
       if ((cascadeFlags & View.NeedsResize) !== 0) {
         this.onResize(viewContext);
       }
@@ -1239,35 +1213,25 @@ export class NodeView extends View {
       if ((cascadeFlags & View.NeedsResize) !== 0) {
         this.didResize(viewContext);
       }
-      this.didProcess(viewContext);
+      this.didProcess(cascadeFlags, viewContext);
     } finally {
-      this._viewFlags &= ~(View.TraversingFlag | View.ProcessingFlag);
+      this.setViewFlags(this.viewFlags & ~(View.TraversingFlag | View.ProcessingFlag));
     }
+  }
+
+  protected willResize(viewContext: ViewContextType<this>): void {
+    super.willResize(viewContext);
+    this.evaluateConstraintVariables();
   }
 
   protected onChange(viewContext: ViewContextType<this>): void {
     super.onChange(viewContext);
-    this.updateScopes();
-  }
-
-  protected onAnimate(viewContext: ViewContextType<this>): void {
-    super.onAnimate(viewContext);
-    this.updateAnimators(viewContext.updateTime);
-  }
-
-  protected willLayout(viewContext: ViewContextType<this>): void {
-    super.willLayout(viewContext);
-    this.updateConstraints();
-  }
-
-  protected didLayout(viewContext: ViewContextType<this>): void {
-    this.updateConstraintVariables();
-    super.didLayout(viewContext);
+    this.changeViewProperties();
   }
 
   /** @hidden */
   protected doProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    if ((processFlags & View.ProcessMask) !== 0 && this._node.childNodes.length !== 0) {
+    if ((processFlags & View.ProcessMask) !== 0) {
       this.willProcessChildViews(processFlags, viewContext);
       this.onProcessChildViews(processFlags, viewContext);
       this.didProcessChildViews(processFlags, viewContext);
@@ -1275,18 +1239,16 @@ export class NodeView extends View {
   }
 
   protected processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              callback?: (this: this, childView: View) => void): void {
-    const childNodes = this._node.childNodes;
+                              processChildView: (this: this, childView: View, processFlags: ViewFlags,
+                                                 viewContext: ViewContextType<this>) => void): void {
+    const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
-        this.processChildView(childView, processFlags, viewContext);
-        if (callback !== void 0) {
-          callback.call(this, childView);
-        }
-        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
-          childView._viewFlags &= ~View.RemovingFlag;
+        processChildView.call(this, childView, processFlags, viewContext);
+        if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+          childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
           this.removeChildView(childView);
           continue;
         }
@@ -1297,25 +1259,28 @@ export class NodeView extends View {
 
   cascadeDisplay(displayFlags: ViewFlags, viewContext: ViewContext): void {
     const extendedViewContext = this.extendViewContext(viewContext);
-    displayFlags |= this._viewFlags & View.UpdateMask;
+    displayFlags &= ~View.NeedsDisplay;
+    displayFlags |= this.viewFlags & View.UpdateMask;
     displayFlags = this.needsDisplay(displayFlags, extendedViewContext);
-    this.doDisplay(displayFlags, extendedViewContext);
+    if ((displayFlags & View.DisplayMask) !== 0) {
+      this.doDisplay(displayFlags, extendedViewContext);
+    }
   }
 
   /** @hidden */
   protected doDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     let cascadeFlags = displayFlags;
-    this._viewFlags |= View.TraversingFlag | View.DisplayingFlag;
-    this._viewFlags &= ~(View.NeedsDisplay | View.NeedsRender | View.NeedsComposite);
+    this.setViewFlags(this.viewFlags & ~(View.NeedsDisplay | View.NeedsRender | View.NeedsComposite)
+                                     |  (View.TraversingFlag | View.DisplayingFlag));
     try {
-      this.willDisplay(viewContext);
-      if (((this._viewFlags | displayFlags) & View.NeedsLayout) !== 0) {
-        this.willLayout(viewContext);
+      this.willDisplay(cascadeFlags, viewContext);
+      if (((this.viewFlags | displayFlags) & View.NeedsLayout) !== 0) {
         cascadeFlags |= View.NeedsLayout;
-        this._viewFlags &= ~View.NeedsLayout;
+        this.setViewFlags(this.viewFlags & ~View.NeedsLayout);
+        this.willLayout(viewContext);
       }
 
-      this.onDisplay(viewContext);
+      this.onDisplay(cascadeFlags, viewContext);
       if ((cascadeFlags & View.NeedsLayout) !== 0) {
         this.onLayout(viewContext);
       }
@@ -1325,16 +1290,15 @@ export class NodeView extends View {
       if ((cascadeFlags & View.NeedsLayout) !== 0) {
         this.didLayout(viewContext);
       }
-      this.didDisplay(viewContext);
+      this.didDisplay(cascadeFlags, viewContext);
     } finally {
-      this._viewFlags &= ~(View.TraversingFlag | View.DisplayingFlag);
+      this.setViewFlags(this.viewFlags & ~(View.TraversingFlag | View.DisplayingFlag));
     }
   }
 
   /** @hidden */
   protected doDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    if ((displayFlags & View.DisplayMask) !== 0 && this._node.childNodes.length !== 0
-        && !this.isCulled()) {
+    if ((displayFlags & View.DisplayMask) !== 0 && !this.isCulled()) {
       this.willDisplayChildViews(displayFlags, viewContext);
       this.onDisplayChildViews(displayFlags, viewContext);
       this.didDisplayChildViews(displayFlags, viewContext);
@@ -1342,18 +1306,16 @@ export class NodeView extends View {
   }
 
   protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              callback?: (this: this, childView: View) => void): void {
-    const childNodes = this._node.childNodes;
+                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                 viewContext: ViewContextType<this>) => void): void {
+    const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
-      const childView = (childNodes[i] as ViewNode).view;
+      const childView = (childNodes[i]! as ViewNode).view;
       if (childView !== void 0) {
-        this.displayChildView(childView, displayFlags, viewContext);
-        if (callback !== void 0) {
-          callback.call(this, childView);
-        }
-        if ((childView._viewFlags & View.RemovingFlag) !== 0) {
-          childView._viewFlags &= ~View.RemovingFlag;
+        displayChildView.call(this, childView, displayFlags, viewContext);
+        if ((childView.viewFlags & View.RemovingFlag) !== 0) {
+          childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
           this.removeChildView(childView);
           continue;
         }
@@ -1362,94 +1324,43 @@ export class NodeView extends View {
     }
   }
 
-  hasSubview(subviewName: string): boolean {
-    const subviews = this._subviews;
-    return subviews !== void 0 && subviews[subviewName] !== void 0;
+  getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
+    return void 0;
   }
 
-  getSubview(subviewName: string): Subview<this, View> | null {
-    const subviews = this._subviews;
-    if (subviews !== void 0) {
-      const subview = subviews[subviewName];
-      if (subview !== void 0) {
-        return subview as Subview<this, View>;
-      }
+  getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
+  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
+  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
+    if (arguments.length === 2) {
+      elseValue = mood as E;
+      mood = null;
     }
-    return null;
+    return elseValue as E;
   }
 
-  setSubview(subviewName: string, newSubview: Subview<this, View> | null): void {
-    let subviews = this._subviews;
-    if (subviews === void 0) {
-      subviews = {};
-      this._subviews = subviews;
-    }
-    const oldSubview = subviews[subviewName];
-    if (oldSubview !== void 0 && this.isMounted()) {
-      oldSubview.unmount();
-    }
-    if (newSubview !== null) {
-      subviews[subviewName] = newSubview;
-      if (this.isMounted()) {
-        newSubview.mount();
-      }
-    } else {
-      delete subviews[subviewName];
-    }
+  modifyMood(feel: Feel, ...entires: [Feel, number | undefined][]): void;
+  modifyMood(feel: Feel, ...args: [...entires: [Feel, number | undefined][], timing: AnyTiming | boolean]): void;
+  modifyMood(feel: Feel, ...args: [Feel, number | undefined][] | [...entires: [Feel, number | undefined][], timing: AnyTiming | boolean]): void {
+    // nop
+  }
+
+  modifyTheme(feel: Feel, ...enties: [Feel, number | undefined][]): void;
+  modifyTheme(feel: Feel, ...args: [...enties: [Feel, number | undefined][], timing: AnyTiming | boolean]): void;
+  modifyTheme(feel: Feel, ...args: [Feel, number | undefined][] | [...enties: [Feel, number | undefined][], timing: AnyTiming | boolean]): void {
+    // nop
   }
 
   /** @hidden */
-  protected mountSubviews(): void {
-    const subviews = this._subviews;
-    if (subviews !== void 0) {
-      for (const subviewName in subviews) {
-        const subview = subviews[subviewName]!;
-        subview.mount();
-      }
-    }
-  }
-
-  /** @hidden */
-  protected unmountSubviews(): void {
-    const subviews = this._subviews;
-    if (subviews !== void 0) {
-      for (const subviewName in subviews) {
-        const subview = subviews[subviewName]!;
-        subview.unmount();
-      }
-    }
-  }
-
-  /** @hidden */
-  protected insertSubview(childView: View): void {
-    const subviewName = childView.key;
-    if (subviewName !== void 0) {
-      const subview = this.getLazySubview(subviewName);
-      if (subview !== null && subview.child) {
-        subview.doSetSubview(childView);
-      }
-    }
-  }
-
-  /** @hidden */
-  protected removeSubview(childView: View): void {
-    const subviewName = childView.key;
-    if (subviewName !== void 0) {
-      const subview = this.getSubview(subviewName);
-      if (subview !== null && subview.child) {
-        subview.doSetSubview(null);
-      }
-    }
-  }
+  declare readonly viewServices: {[serviceName: string]: ViewService<View, unknown> | undefined} | null;
 
   hasViewService(serviceName: string): boolean {
-    const viewServices = this._viewServices;
-    return viewServices !== void 0 && viewServices[serviceName] !== void 0;
+    const viewServices = this.viewServices;
+    return viewServices !== null && viewServices[serviceName] !== void 0;
   }
 
   getViewService(serviceName: string): ViewService<this, unknown> | null {
-    const viewServices = this._viewServices;
-    if (viewServices !== void 0) {
+    const viewServices = this.viewServices;
+    if (viewServices !== null) {
       const viewService = viewServices[serviceName];
       if (viewService !== void 0) {
         return viewService as ViewService<this, unknown>;
@@ -1459,10 +1370,14 @@ export class NodeView extends View {
   }
 
   setViewService(serviceName: string, newViewService: ViewService<this, unknown> | null): void {
-    let viewServices = this._viewServices;
-    if (viewServices === void 0) {
+    let viewServices = this.viewServices;
+    if (viewServices === null) {
       viewServices = {};
-      this._viewServices = viewServices;
+      Object.defineProperty(this, "viewServices", {
+        value: viewServices,
+        enumerable: true,
+        configurable: true,
+      });
     }
     const oldViewService = viewServices[serviceName];
     if (oldViewService !== void 0 && this.isMounted()) {
@@ -1479,104 +1394,104 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  protected mountServices(): void {
-    const viewServices = this._viewServices;
-    if (viewServices !== void 0) {
-      for (const serviceName in viewServices) {
-        const viewService = viewServices[serviceName]!;
-        viewService.mount();
-      }
+  protected mountViewServices(): void {
+    const viewServices = this.viewServices;
+    for (const serviceName in viewServices) {
+      const viewService = viewServices[serviceName]!;
+      viewService.mount();
     }
   }
 
   /** @hidden */
-  protected unmountServices(): void {
-    const viewServices = this._viewServices;
-    if (viewServices !== void 0) {
-      for (const serviceName in viewServices) {
-        const viewService = viewServices[serviceName]!;
-        viewService.unmount();
-      }
+  protected unmountViewServices(): void {
+    const viewServices = this.viewServices;
+    for (const serviceName in viewServices) {
+      const viewService = viewServices[serviceName]!;
+      viewService.unmount();
     }
   }
 
-  hasViewScope(scopeName: string): boolean {
-    const viewScopes = this._viewScopes;
-    return viewScopes !== void 0 && viewScopes[scopeName] !== void 0;
+  /** @hidden */
+  declare readonly viewProperties: {[propertyName: string]: ViewProperty<View, unknown> | undefined} | null;
+
+  hasViewProperty(propertyName: string): boolean {
+    const viewProperties = this.viewProperties;
+    return viewProperties !== null && viewProperties[propertyName] !== void 0;
   }
 
-  getViewScope(scopeName: string): ViewScope<this, unknown> | null {
-    const viewScopes = this._viewScopes;
-    if (viewScopes !== void 0) {
-      const viewScope = viewScopes[scopeName];
-      if (viewScope !== void 0) {
-        return viewScope as ViewScope<this, unknown>;
+  getViewProperty(propertyName: string): ViewProperty<this, unknown> | null {
+    const viewProperties = this.viewProperties;
+    if (viewProperties !== null) {
+      const viewProperty = viewProperties[propertyName];
+      if (viewProperty !== void 0) {
+        return viewProperty as ViewProperty<this, unknown>;
       }
     }
     return null;
   }
 
-  setViewScope(scopeName: string, newViewScope: ViewScope<this, unknown> | null): void {
-    let viewScopes = this._viewScopes;
-    if (viewScopes === void 0) {
-      viewScopes = {};
-      this._viewScopes = viewScopes;
+  setViewProperty(propertyName: string, newViewProperty: ViewProperty<this, unknown> | null): void {
+    let viewProperties = this.viewProperties;
+    if (viewProperties === null) {
+      viewProperties = {};
+      Object.defineProperty(this, "viewProperties", {
+        value: viewProperties,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    const oldViewScope = viewScopes[scopeName];
-    if (oldViewScope !== void 0 && this.isMounted()) {
-      oldViewScope.unmount();
+    const oldViewProperty = viewProperties[propertyName];
+    if (oldViewProperty !== void 0 && this.isMounted()) {
+      oldViewProperty.unmount();
     }
-    if (newViewScope !== null) {
-      viewScopes[scopeName] = newViewScope;
+    if (newViewProperty !== null) {
+      viewProperties[propertyName] = newViewProperty;
       if (this.isMounted()) {
-        newViewScope.mount();
+        newViewProperty.mount();
       }
     } else {
-      delete viewScopes[scopeName];
+      delete viewProperties[propertyName];
     }
   }
 
   /** @hidden */
-  updateScopes(): void {
-    const viewScopes = this._viewScopes;
-    if (viewScopes !== void 0) {
-      for (const scopeName in viewScopes) {
-        const viewScope = viewScopes[scopeName]!;
-        viewScope.onChange();
-      }
+  changeViewProperties(): void {
+    const viewProperties = this.viewProperties;
+    for (const propertyName in viewProperties) {
+      const viewProperty = viewProperties[propertyName]!;
+      viewProperty.onChange();
     }
   }
 
   /** @hidden */
-  protected mountScopes(): void {
-    const viewScopes = this._viewScopes;
-    if (viewScopes !== void 0) {
-      for (const scopeName in viewScopes) {
-        const viewScope = viewScopes[scopeName]!;
-        viewScope.mount();
-      }
+  protected mountViewProperties(): void {
+    const viewProperties = this.viewProperties;
+    for (const propertyName in viewProperties) {
+      const viewProperty = viewProperties[propertyName]!;
+      viewProperty.mount();
     }
   }
 
   /** @hidden */
-  protected unmountScopes(): void {
-    const viewScopes = this._viewScopes;
-    if (viewScopes !== void 0) {
-      for (const scopeName in viewScopes) {
-        const viewScope = viewScopes[scopeName]!;
-        viewScope.unmount();
-      }
+  protected unmountViewProperties(): void {
+    const viewProperties = this.viewProperties;
+    for (const propertyName in viewProperties) {
+      const viewProperty = viewProperties[propertyName]!;
+      viewProperty.unmount();
     }
   }
+
+  /** @hidden */
+  declare readonly viewAnimators: {[animatorName: string]: ViewAnimator<View, unknown> | undefined} | null;
 
   hasViewAnimator(animatorName: string): boolean {
-    const viewAnimators = this._viewAnimators;
-    return viewAnimators !== void 0 && viewAnimators[animatorName] !== void 0;
+    const viewAnimators = this.viewAnimators;
+    return viewAnimators !== null && viewAnimators[animatorName] !== void 0;
   }
 
   getViewAnimator(animatorName: string): ViewAnimator<this, unknown> | null {
-    const viewAnimators = this._viewAnimators;
-    if (viewAnimators !== void 0) {
+    const viewAnimators = this.viewAnimators;
+    if (viewAnimators !== null) {
       const viewAnimator = viewAnimators[animatorName];
       if (viewAnimator !== void 0) {
         return viewAnimator as ViewAnimator<this, unknown>;
@@ -1586,10 +1501,14 @@ export class NodeView extends View {
   }
 
   setViewAnimator(animatorName: string, newViewAnimator: ViewAnimator<this, unknown> | null): void {
-    let viewAnimators = this._viewAnimators;
-    if (viewAnimators === void 0) {
+    let viewAnimators = this.viewAnimators;
+    if (viewAnimators === null) {
       viewAnimators = {};
-      this._viewAnimators = viewAnimators;
+      Object.defineProperty(this, "viewAnimators", {
+        value: viewAnimators,
+        enumerable: true,
+        configurable: true,
+      });
     }
     const oldViewAnimator = viewAnimators[animatorName];
     if (oldViewAnimator !== void 0 && this.isMounted()) {
@@ -1606,216 +1525,197 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  updateAnimators(t: number): void {
-    this.updateViewAnimators(t);
-  }
-
-  /** @hidden */
-  updateViewAnimators(t: number): void {
-    const viewAnimators = this._viewAnimators;
-    if (viewAnimators !== void 0) {
-      for (const animatorName in viewAnimators) {
-        const viewAnimator = viewAnimators[animatorName]!;
-        viewAnimator.onAnimate(t);
-      }
-    }
-  }
-
-  /** @hidden */
-  protected mountAnimators(): void {
-    this.mountViewAnimators();
-  }
-
-  /** @hidden */
   protected mountViewAnimators(): void {
-    const viewAnimators = this._viewAnimators;
-    if (viewAnimators !== void 0) {
-      for (const animatorName in viewAnimators) {
-        const viewAnimator = viewAnimators[animatorName]!;
-        viewAnimator.mount();
-      }
+    const viewAnimators = this.viewAnimators;
+    for (const animatorName in viewAnimators) {
+      const viewAnimator = viewAnimators[animatorName]!;
+      viewAnimator.mount();
     }
-  }
-
-  /** @hidden */
-  protected unmountAnimators(): void {
-    this.unmountViewAnimators();
   }
 
   /** @hidden */
   protected unmountViewAnimators(): void {
-    const viewAnimators = this._viewAnimators;
-    if (viewAnimators !== void 0) {
-      for (const animatorName in viewAnimators) {
-        const viewAnimator = viewAnimators[animatorName]!;
-        viewAnimator.unmount();
-      }
+    const viewAnimators = this.viewAnimators;
+    for (const animatorName in viewAnimators) {
+      const viewAnimator = viewAnimators[animatorName]!;
+      viewAnimator.unmount();
     }
   }
 
-  hasLayoutAnchor(anchorName: string): boolean {
-    const layoutAnchors = this._layoutAnchors;
-    return layoutAnchors !== void 0 && layoutAnchors[anchorName] !== void 0;
+  /** @hidden */
+  declare readonly viewFasteners: {[fastenerName: string]: ViewFastener<View, View> | undefined} | null;
+
+  hasViewFastener(fastenerName: string): boolean {
+    const viewFasteners = this.viewFasteners;
+    return viewFasteners !== null && viewFasteners[fastenerName] !== void 0;
   }
 
-  getLayoutAnchor(anchorName: string): LayoutAnchor<this> | null {
-    const layoutAnchors = this._layoutAnchors;
-    if (layoutAnchors !== void 0) {
-      const layoutAnchor = layoutAnchors[anchorName];
-      if (layoutAnchor !== void 0) {
-        return layoutAnchor as LayoutAnchor<this>;
+  getViewFastener(fastenerName: string): ViewFastener<this, View> | null {
+    const viewFasteners = this.viewFasteners;
+    if (viewFasteners !== null) {
+      const viewFastener = viewFasteners[fastenerName];
+      if (viewFastener !== void 0) {
+        return viewFastener as ViewFastener<this, View>;
       }
     }
     return null;
   }
 
-  setLayoutAnchor(anchorName: string, layoutAnchor: LayoutAnchor<this> | null): void {
-    let layoutAnchors = this._layoutAnchors;
-    if (layoutAnchors === void 0) {
-      layoutAnchors = {};
-      this._layoutAnchors = layoutAnchors;
+  setViewFastener(fastenerName: string, newViewFastener: ViewFastener<this, any> | null): void {
+    let viewFasteners = this.viewFasteners;
+    if (viewFasteners === null) {
+      viewFasteners = {};
+      Object.defineProperty(this, "viewFasteners", {
+        value: viewFasteners,
+        enumerable: true,
+        configurable: true,
+      });
     }
-    if (layoutAnchor !== null) {
-      layoutAnchors[anchorName] = layoutAnchor;
+    const oldViewFastener = viewFasteners[fastenerName];
+    if (oldViewFastener !== void 0 && this.isMounted()) {
+      oldViewFastener.unmount();
+    }
+    if (newViewFastener !== null) {
+      viewFasteners[fastenerName] = newViewFastener;
+      if (this.isMounted()) {
+        newViewFastener.mount();
+      }
     } else {
-      delete layoutAnchors[anchorName];
+      delete viewFasteners[fastenerName];
     }
   }
 
-  get constraints(): ReadonlyArray<Constraint> {
-    let constraints = this._constraints;
-    if (constraints === void 0) {
-      constraints = [];
-      this._constraints = constraints;
+  /** @hidden */
+  protected mountViewFasteners(): void {
+    const viewFasteners = this.viewFasteners;
+    for (const fastenerName in viewFasteners) {
+      const viewFastener = viewFasteners[fastenerName]!;
+      viewFastener.mount();
     }
-    return constraints;
   }
+
+  /** @hidden */
+  protected unmountViewFasteners(): void {
+    const viewFasteners = this.viewFasteners;
+    for (const fastenerName in viewFasteners) {
+      const viewFastener = viewFasteners[fastenerName]!;
+      viewFastener.unmount();
+    }
+  }
+
+  /** @hidden */
+  protected insertViewFastener(childView: View, targetView: View | null): void {
+    const fastenerName = childView.key;
+    if (fastenerName !== void 0) {
+      const viewFastener = this.getLazyViewFastener(fastenerName);
+      if (viewFastener !== null && viewFastener.child === true) {
+        viewFastener.doSetView(childView, targetView);
+      }
+    }
+  }
+
+  /** @hidden */
+  protected removeViewFastener(childView: View): void {
+    const fastenerName = childView.key;
+    if (fastenerName !== void 0) {
+      const viewFastener = this.getViewFastener(fastenerName);
+      if (viewFastener !== null && viewFastener.child === true) {
+        viewFastener.doSetView(null, null);
+      }
+    }
+  }
+
+  declare readonly constraints: ReadonlyArray<Constraint>;
 
   hasConstraint(constraint: Constraint): boolean {
-    const constraints = this._constraints;
-    return constraints !== void 0 && constraints.indexOf(constraint) >= 0;
+    return this.constraints.indexOf(constraint) >= 0;
   }
 
   addConstraint(constraint: Constraint): void {
-    let constraints = this._constraints;
-    if (constraints === void 0) {
-      constraints = [];
-      this._constraints = constraints;
-    }
-    if (constraints.indexOf(constraint) < 0) {
-      constraints.push(constraint);
+    const oldConstraints = this.constraints;
+    const newConstraints = Arrays.inserted(constraint, oldConstraints);
+    if (oldConstraints !== newConstraints) {
+      Object.defineProperty(this, "constraints", {
+        value: newConstraints,
+        enumerable: true,
+        configurable: true,
+      });
       this.activateConstraint(constraint);
     }
   }
 
   removeConstraint(constraint: Constraint): void {
-    const constraints = this._constraints;
-    if (constraints !== void 0) {
-      const index = constraints.indexOf(constraint);
-      if (index >= 0) {
-        constraints.splice(index, 1);
-        this.deactivateConstraint(constraint);
-      }
+    const oldConstraints = this.constraints;
+    const newConstraints = Arrays.removed(constraint, oldConstraints);
+    if (oldConstraints !== newConstraints) {
+      this.deactivateConstraint(constraint);
+      Object.defineProperty(this, "constraints", {
+        value: newConstraints,
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 
-  get constraintVariables(): ReadonlyArray<ConstrainVariable> {
-    let constraintVariables = this._constraintVariables;
-    if (constraintVariables === void 0) {
-      constraintVariables = [];
-      this._constraintVariables = constraintVariables;
-    }
-    return constraintVariables;
+  declare readonly constraintVariables: ReadonlyArray<ConstraintVariable>;
+
+  hasConstraintVariable(constraintVariable: ConstraintVariable): boolean {
+    return this.constraintVariables.indexOf(constraintVariable) >= 0;
   }
 
-  hasConstraintVariable(constraintVariable: ConstrainVariable): boolean {
-    const constraintVariables = this._constraintVariables;
-    return constraintVariables !== void 0 && constraintVariables.indexOf(constraintVariable) >= 0;
-  }
-
-  addConstraintVariable(constraintVariable: ConstrainVariable): void {
-    let constraintVariables = this._constraintVariables;
-    if (constraintVariables === void 0) {
-      constraintVariables = [];
-      this._constraintVariables = constraintVariables;
-    }
-    if (constraintVariables.indexOf(constraintVariable) < 0) {
-      constraintVariables.push(constraintVariable);
+  addConstraintVariable(constraintVariable: ConstraintVariable): void {
+    const oldConstraintVariables = this.constraintVariables;
+    const newConstraintVariables = Arrays.inserted(constraintVariable, oldConstraintVariables);
+    if (oldConstraintVariables !== newConstraintVariables) {
+      Object.defineProperty(this, "constraintVariables", {
+        value: newConstraintVariables,
+        enumerable: true,
+        configurable: true,
+      });
       this.activateConstraintVariable(constraintVariable);
     }
   }
 
-  removeConstraintVariable(constraintVariable: ConstrainVariable): void {
-    const constraintVariables = this._constraintVariables;
-    if (constraintVariables !== void 0) {
-      const index = constraintVariables.indexOf(constraintVariable);
-      if (index >= 0) {
-        this.deactivateConstraintVariable(constraintVariable);
-        constraintVariables.splice(index, 1);
-      }
+  removeConstraintVariable(constraintVariable: ConstraintVariable): void {
+    const oldConstraintVariables = this.constraintVariables;
+    const newConstraintVariables = Arrays.removed(constraintVariable, oldConstraintVariables);
+    if (oldConstraintVariables !== newConstraintVariables) {
+      this.deactivateConstraintVariable(constraintVariable);
+      Object.defineProperty(this, "constraintVariables", {
+        value: newConstraintVariables,
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 
-  protected updateConstraints(): void {
-    this.updateLayoutAnchors();
-  }
-
   /** @hidden */
-  updateLayoutAnchors(): void {
-    const layoutAnchors = this._layoutAnchors;
-    if (layoutAnchors !== void 0) {
-      for (const anchorName in layoutAnchors) {
-        const layoutAnchor = layoutAnchors[anchorName]!;
-        layoutAnchor.updateState();
-      }
+  evaluateConstraintVariables(): void {
+    const constraintVariables = this.constraintVariables;
+    for (let i = 0, n = constraintVariables.length; i < n; i += 1) {
+      const constraintVariable = constraintVariables[i]!;
+      constraintVariable.evaluateConstraintVariable();
     }
   }
 
   /** @hidden */
   activateLayout(): void {
-    const constraints = this._constraints;
-    const constraintVariables = this._constraintVariables;
-    if (constraints !== void 0 || constraintVariables !== void 0) {
-      const layoutManager = this.layoutService.manager;
-      if (layoutManager !== void 0) {
-        if (constraintVariables !== void 0) {
-          for (let i = 0, n = constraintVariables.length; i < n; i += 1) {
-            const constraintVariable = constraintVariables[i];
-            if (constraintVariable instanceof LayoutAnchor) {
-              layoutManager.activateConstraintVariable(constraintVariable);
-              this.requireUpdate(View.NeedsLayout);
-            }
-          }
-        }
-        if (constraints !== void 0) {
-          for (let i = 0, n = constraints.length; i < n; i += 1) {
-            layoutManager.activateConstraint(constraints[i]);
-            this.requireUpdate(View.NeedsLayout);
-          }
-        }
+    const layoutManager = this.layoutService.manager;
+    if (layoutManager !== void 0) {
+      const constraints = this.constraints;
+      for (let i = 0, n = constraints.length; i < n; i += 1) {
+        layoutManager.activateConstraint(constraints[i]!);
       }
     }
   }
 
   /** @hidden */
   deactivateLayout(): void {
-    const constraints = this._constraints;
-    const constraintVariables = this._constraintVariables;
-    if (constraints !== void 0 || constraintVariables !== void 0) {
-      const layoutManager = this.layoutService.manager;
-      if (layoutManager !== void 0) {
-        if (constraints !== void 0) {
-          for (let i = 0, n = constraints.length; i < n; i += 1) {
-            layoutManager.deactivateConstraint(constraints[i]);
-            this.requireUpdate(View.NeedsLayout);
-          }
-        }
-        if (constraintVariables !== void 0) {
-          for (let i = 0, n = constraintVariables.length; i < n; i += 1) {
-            layoutManager.deactivateConstraintVariable(constraintVariables[i]);
-            this.requireUpdate(View.NeedsLayout);
-          }
-        }
+    const layoutManager = this.layoutService.manager;
+    if (layoutManager !== void 0) {
+      const constraints = this.constraints;
+      for (let i = 0, n = constraints.length; i < n; i += 1) {
+        layoutManager.deactivateConstraint(constraints[i]!);
       }
     }
   }
@@ -1826,7 +1726,7 @@ export class NodeView extends View {
 
   get clientBounds(): BoxR2 {
     const range = document.createRange();
-    range.selectNode(this._node);
+    range.selectNode(this.node);
     const bounds = range.getBoundingClientRect();
     range.detach();
     return new BoxR2(bounds.left, bounds.top, bounds.right, bounds.bottom);
@@ -1834,7 +1734,7 @@ export class NodeView extends View {
 
   get pageBounds(): BoxR2 {
     const range = document.createRange();
-    range.selectNode(this._node);
+    range.selectNode(this.node);
     const bounds = range.getBoundingClientRect();
     range.detach();
     const scrollX = window.pageXOffset;
@@ -1844,16 +1744,16 @@ export class NodeView extends View {
   }
 
   dispatchEvent(event: Event): boolean {
-    return this._node.dispatchEvent(event);
+    return this.node.dispatchEvent(event);
   }
 
   on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
-    this._node.addEventListener(type, listener, options);
+    this.node.addEventListener(type, listener, options);
     return this;
   }
 
   off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
-    this._node.removeEventListener(type, listener, options);
+    this.node.removeEventListener(type, listener, options);
     return this;
   }
 
@@ -1872,9 +1772,9 @@ export class NodeView extends View {
     if (node.view instanceof this) {
       return node.view;
     } else if (node instanceof Element) {
-      return NodeView.Element.fromNode(node as ViewElement);
+      return ElementView.fromNode(node as ViewElement);
     } else if (node instanceof Text) {
-      return NodeView.Text.fromNode(node);
+      return TextView.fromNode(node);
     } else {
       const view = new NodeView(node);
       this.mount(view);
@@ -1886,10 +1786,10 @@ export class NodeView extends View {
   static fromConstructor<V extends View>(viewConstructor: ViewConstructor): V;
   static fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View;
   static fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View {
-    if (viewConstructor.prototype instanceof NodeView.Element) {
-      return NodeView.Element.fromConstructor(viewConstructor as ElementViewConstructor);
-    } else if (viewConstructor.prototype instanceof NodeView.Text) {
-      return NodeView.Text.fromConstructor(viewConstructor as TextViewConstructor);
+    if (viewConstructor.prototype instanceof ElementView) {
+      return ElementView.fromConstructor(viewConstructor as NodeViewConstructor);
+    } else if (viewConstructor.prototype instanceof TextView) {
+      return TextView.fromConstructor(viewConstructor as unknown as TextViewConstructor);
     } else if (viewConstructor.prototype instanceof View) {
       return new (viewConstructor as ViewConstructor)();
     } else {
@@ -1905,18 +1805,17 @@ export class NodeView extends View {
     }
     throw new TypeError("" + value);
   }
-
-  // Forward type declarations
-  /** @hidden */
-  static Node: typeof NodeView; // defined by NodeView
-  /** @hidden */
-  static Text: typeof TextView; // defined by TextView
-  /** @hidden */
-  static Element: typeof ElementView; // defined by ElementView
-  /** @hidden */
-  static Html: typeof HtmlView; // defined by HtmlView
-  /** @hidden */
-  static Style: typeof StyleView; // defined by StyleView
-  /** @hidden */
-  static Svg: typeof SvgView; // defined by SvgView
 }
+
+ModalManager.insertModalView = function (modalView: View): void {
+  const matteNode = document.body as ViewNode;
+  const matteView = matteNode.view;
+  if (matteView !== void 0) {
+    matteView.appendChildView(modalView);
+  } else if (modalView instanceof NodeView) {
+    matteNode.appendChild(modalView.node);
+    modalView.mount();
+  } else {
+    throw new TypeError("" + modalView);
+  }
+};

@@ -1,0 +1,22 @@
+{
+  "name": "@swim/theme",
+  "version": "3.11.0-dev.20210331",
+  "description": "Semantic looks and feels for mood-aware UX components",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/style",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2020 Swim inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "dist/main/swim-theme.js",
+  "module": "lib/main/index.js",
+  "types": "lib/main/index.d.ts",
+  "dependencies": {
+    "@swim/util": "3.11.0-dev.20210331",
+    "@swim/codec": "3.11.0-dev.20210331",
+    "@swim/mapping": "3.11.0-dev.20210331",
+    "@swim/structure": "3.11.0-dev.20210331",
+    "@swim/math": "3.11.0-dev.20210331",
+    "@swim/time": "3.11.0-dev.20210331",
+    "@swim/style": "3.11.0-dev.20210331"
+  }
+}

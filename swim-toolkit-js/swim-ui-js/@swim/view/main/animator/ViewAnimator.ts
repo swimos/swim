@@ -13,89 +13,81 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Objects, FromAny} from "@swim/util";
-import {AnyAngle, Angle} from "@swim/angle";
-import {AnyLength, Length} from "@swim/length";
-import {AnyColor, Color} from "@swim/color";
-import {AnyFont, Font} from "@swim/font";
-import {AnyTransform, Transform} from "@swim/transform";
-import {ContinuousScale} from "@swim/scale";
-import {Tween} from "@swim/transition";
-import {Animator, TweenAnimator} from "@swim/animate";
-import {ViewFlags, View} from "../View";
-import {StringViewAnimator} from "./StringViewAnimator";
-import {BooleanViewAnimator} from "./BooleanViewAnimator";
-import {NumberViewAnimator} from "./NumberViewAnimator";
-import {AngleViewAnimator} from "./AngleViewAnimator";
-import {LengthViewAnimator} from "./LengthViewAnimator";
-import {ColorViewAnimator} from "./ColorViewAnimator";
-import {FontViewAnimator} from "./FontViewAnimator";
-import {TransformViewAnimator} from "./TransformViewAnimator";
-import {ContinuousScaleViewAnimator} from "./ContinuousScaleViewAnimator";
+import {FromAny} from "@swim/util";
+import type {AnyTiming, Timing} from "@swim/mapping";
+import {AnyLength, Length, AnyAngle, Angle, AnyTransform, Transform} from "@swim/math";
+import {AnyFont, Font, AnyColor, Color} from "@swim/style";
+import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
+import {ViewFlags, ViewPrecedence, View} from "../View";
+import {Animator} from "./Animator";
+import {StringViewAnimator} from "../"; // forward import
+import {BooleanViewAnimator} from "../"; // forward import
+import {NumberViewAnimator} from "../"; // forward import
+import {AngleViewAnimator} from "../"; // forward import
+import {LengthViewAnimator} from "../"; // forward import
+import {ColorViewAnimator} from "../"; // forward import
+import {FontViewAnimator} from "../"; // forward import
+import {TransformViewAnimator} from "../"; // forward import
 
 export type ViewAnimatorMemberType<V, K extends keyof V> =
-  V extends {[P in K]: ViewAnimator<any, infer T, any>} ? T : unknown;
+  V[K] extends ViewAnimator<any, infer T, any> ? T : never;
 
 export type ViewAnimatorMemberInit<V, K extends keyof V> =
-  V extends {[P in K]: ViewAnimator<any, infer T, infer U>} ? T | U : unknown;
+  V[K] extends ViewAnimator<any, infer T, infer U> ? T | U : never;
 
-export interface ViewAnimatorInit<T, U = T> {
-  extends?: ViewAnimatorPrototype;
+export type ViewAnimatorMemberKey<V, K extends keyof V> =
+  V[K] extends ViewAnimator<any, any> ? K : never;
+
+export type ViewAnimatorMemberMap<V> = {
+  -readonly [K in keyof V as ViewAnimatorMemberKey<V, K>]?: ViewAnimatorMemberInit<V, K>;
+};
+
+export interface ViewAnimatorInit<T, U = never> {
+  extends?: ViewAnimatorClass;
   type?: unknown;
-  state?: T | U;
   inherit?: string | boolean;
 
+  state?: T | U;
+  look?: Look<T>;
+  precedence?: ViewPrecedence;
   updateFlags?: ViewFlags;
-  willUpdate?(newValue: T, oldValue: T): void;
-  onUpdate?(newValue: T, oldValue: T): void;
-  didUpdate?(newValue: T, oldValue: T): void;
+  isDefined?(value: T): boolean;
+  willSetValue?(newValue: T, oldValue: T): void;
+  didSetValue?(newValue: T, oldValue: T): void;
+  willSetState?(newValue: T, oldValue: T): void;
+  didSetState?(newValue: T, oldValue: T): void;
+  onBegin?(value: T): void;
+  onEnd?(value: T): void;
+  onInterrupt?(value: T): void;
   fromAny?(value: T | U): T;
   initState?(): T | U;
 }
 
-export type ViewAnimatorDescriptorInit<V extends View, T, U = T, I = {}> = ViewAnimatorInit<T, U> & ThisType<ViewAnimator<V, T, U> & I> & I;
+export type ViewAnimatorDescriptor<V extends View, T, U = never, I = {}> = ViewAnimatorInit<T, U> & ThisType<ViewAnimator<V, T, U> & I> & Partial<I>;
 
-export type ViewAnimatorDescriptorExtends<V extends View, T, U = T, I = {}> = {extends: ViewAnimatorPrototype | undefined} & ViewAnimatorDescriptorInit<V, T, U, I>;
+export type ViewAnimatorDescriptorExtends<V extends View, T, U = never, I = {}> = {extends: ViewAnimatorClass | undefined} & ViewAnimatorDescriptor<V, T, U, I>;
 
-export type ViewAnimatorDescriptorFromAny<V extends View, T, U = T, I = {}> = ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & ViewAnimatorDescriptorInit<V, T, U, I>;
+export type ViewAnimatorDescriptorFromAny<V extends View, T, U = never, I = {}> = ({type: FromAny<T, U>} | {fromAny(value: T | U): T}) & ViewAnimatorDescriptor<V, T, U, I>;
 
-export type ViewAnimatorDescriptor<V extends View, T, U = T, I = {}> =
-  U extends T ? ViewAnimatorDescriptorInit<V, T, U, I> :
-  T extends Angle | null | undefined ? U extends AnyAngle | null | undefined ? {type: typeof Angle} & ViewAnimatorDescriptorInit<V, T, U, I> : ViewAnimatorDescriptorExtends<V, T, U, I> :
-  T extends Length | null | undefined ? U extends AnyLength | null | undefined ? {type: typeof Length} & ViewAnimatorDescriptorInit<V, T, U, I> : ViewAnimatorDescriptorExtends<V, T, U, I> :
-  T extends Color | null | undefined ? U extends AnyColor | null | undefined ? {type: typeof Color} & ViewAnimatorDescriptorInit<V, T, U, I> : ViewAnimatorDescriptorExtends<V, T, U, I> :
-  T extends Font | null | undefined ? U extends AnyFont | null | undefined ? {type: typeof Font} & ViewAnimatorDescriptorInit<V, T, U, I> : ViewAnimatorDescriptorExtends<V, T, U, I> :
-  T extends Transform | null | undefined ? U extends AnyTransform | null | undefined ? {type: typeof Transform} & ViewAnimatorDescriptorInit<V, T, U, I> : ViewAnimatorDescriptorExtends<V, T, U, I> :
-  T extends ContinuousScale<infer X, infer Y> | undefined ? U extends ContinuousScale<X, Y> | string | undefined ? {type: typeof ContinuousScale} & ViewAnimatorDescriptorInit<V, T, U, I> : ViewAnimatorDescriptorExtends<V, T, U, I> :
-  T extends string | null | undefined ? U extends string | null | undefined ? {type: typeof String} & ViewAnimatorDescriptorInit<V, T, U, I> : ViewAnimatorDescriptorExtends<V, T, U, I> :
-  T extends boolean | null | undefined ? U extends boolean | string | null | undefined ? {type: typeof Boolean} & ViewAnimatorDescriptorInit<V, T, U, I> : ViewAnimatorDescriptorExtends<V, T, U, I> :
-  T extends number | null | undefined ? U extends number | string | null | undefined ? {type: typeof Number} & ViewAnimatorDescriptorInit<V, T, U, I> : ViewAnimatorDescriptorExtends<V, T, U, I> :
-  ViewAnimatorDescriptorFromAny<V, T, U, I>;
+export interface ViewAnimatorConstructor<V extends View, T, U = never, I = {}> {
+  new(owner: V, animatorName: string | undefined): ViewAnimator<V, T, U> & I;
+  prototype: ViewAnimator<any, any> & I;
+}
 
-export type ViewAnimatorPrototype = Function & {prototype: ViewAnimator<any, any, any>};
+export interface ViewAnimatorClass extends Function {
+  readonly prototype: ViewAnimator<any, any>;
+}
 
-export type ViewAnimatorConstructor<V extends View, T, U = T, I = {}> = {
-  new(view: V, animatorName: string | undefined): ViewAnimator<V, T, U> & I;
-  prototype: ViewAnimator<any, any, any> & I;
-};
+export interface ViewAnimator<V extends View, T, U = never> extends Animator<T> {
+  (): T;
+  (newState: T | U, precedenceOrTiming: ViewPrecedence | AnyTiming | boolean | undefined): V;
+  (newState: T | U, timing?: AnyTiming | boolean, precedence?: ViewPrecedence): V;
 
-export declare abstract class ViewAnimator<V extends View, T, U = T> {
-  /** @hidden */
-  _view: V;
-  /** @hidden */
-  _inherit: string | boolean;
-  /** @hidden */
-  _superAnimator?: ViewAnimator<View, T, U>;
-  /** @hidden */
-  _subAnimators?: ViewAnimator<View, T, U>[];
+  readonly name: string;
 
-  constructor(view: V, animatorName: string | undefined);
+  readonly owner: V;
 
-  get name(): string;
-
-  get view(): V;
-
-  get inherit(): string | boolean;
+  readonly inherit: string | boolean;
 
   setInherit(inherit: string | boolean): void;
 
@@ -103,12 +95,10 @@ export declare abstract class ViewAnimator<V extends View, T, U = T> {
 
   setInherited(inherited: boolean): void;
 
-  updateFlags?: ViewFlags;
-
   /** @hidden */
-  get superName(): string | undefined;
+  readonly superName: string | undefined;
 
-  get superAnimator(): ViewAnimator<View, T, U> | null;
+  readonly superAnimator: ViewAnimator<View, T> | null;
 
   /** @hidden */
   bindSuperAnimator(): void;
@@ -117,116 +107,128 @@ export declare abstract class ViewAnimator<V extends View, T, U = T> {
   unbindSuperAnimator(): void;
 
   /** @hidden */
-  addSubAnimator(subAnimator: ViewAnimator<View, T, U>): void;
+  subAnimators: ViewAnimator<View, T>[] | null;
 
   /** @hidden */
-  removeSubAnimator(subAnimator: ViewAnimator<View, T, U>): void;
+  addSubAnimator(subAnimator: ViewAnimator<View, T>): void;
 
-  isAuto(): boolean;
+  /** @hidden */
+  removeSubAnimator(subAnimator: ViewAnimator<View, T>): void;
 
-  setAuto(auto: boolean): void;
+  readonly superValue: T | undefined;
 
-  isTweening(): boolean;
+  getValue(): NonNullable<T>;
 
-  get ownValue(): T | undefined;
+  onSetValue(newValue: T, oldValue: T): void;
 
-  get ownState(): T | undefined;
+  readonly superState: T | undefined;
 
-  get superValue(): T | undefined;
+  getState(): NonNullable<T>;
 
-  get superState(): T | undefined;
+  setState(newState: T | U, precedenceOrTiming: ViewPrecedence | AnyTiming | boolean | undefined): void;
+  setState(newState: T | U, timing?: AnyTiming | boolean, precedence?: ViewPrecedence): void;
 
-  getValue(): T extends undefined ? never : T;
+  /** @hidden */
+  setOwnState(newState: T | U, timing?: AnyTiming | boolean): void;
 
-  getState(): T extends undefined ? never : T;
+  /** @hidden */
+  setImmediateState(newState: T, oldState: T): void;
 
-  getValueOr<E>(elseValue: E): (T extends undefined ? never : T) | E;
+  /** @hidden */
+  onSetPrecedence(newPrecedence: ViewPrecedence, oldPrecedence: ViewPrecedence): void;
 
-  getStateOr<E>(elseState: E): (T extends undefined ? never : T) | E;
+  readonly superLook: Look<T> | null;
 
-  setState(state: T | U, tween?: Tween<T>): void;
+  onSetLook(newLook: Look<T> | null, oldLook: Look<T> | null, timing: Timing | boolean): void;
 
-  setAutoState(state: T | U, tween?: Tween<T>): void;
+  applyLook(look: Look<T>, timing: Timing | boolean): void;
 
-  setOwnState(state: T | U, tween?: Tween<T>): void;
-
-  setBaseState(state: T | U, tween?: Tween<T>): void;
+  applyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void;
 
   onAnimate(t: number): void;
 
-  onAnimateInherited(): void;
+  onAnimateInherited(t: number): void;
 
-  update(newValue: T, oldValue: T): void;
+  willStartAnimating(): void;
 
-  onUpdate(newValue: T, oldValue: T): void;
+  didStartAnimating(): void;
 
-  /** @hidden */
-  updateSubAnimators(newValue: T, oldValue: T): void;
+  willStopAnimating(): void;
 
-  animate(animator?: Animator): void;
+  didStopAnimating(): void;
+
+  updateFlags?: ViewFlags;
+
+  fromAny(value: T | U): T;
+
+  isMounted(): boolean;
 
   /** @hidden */
   mount(): void;
 
   /** @hidden */
+  willMount(): void;
+
+  /** @hidden */
+  onMount(): void;
+
+  /** @hidden */
+  didMount(): void;
+
+  /** @hidden */
   unmount(): void;
 
-  fromAny(value: T | U): T;
+  /** @hidden */
+  willUnmount(): void;
 
   /** @hidden */
-  initState?(): T | U;
+  onUnmount(): void;
 
   /** @hidden */
-  static getConstructor(type: unknown): ViewAnimatorPrototype | null;
+  didUnmount(): void;
 
-  static define<V extends View, T, U = T, I = {}>(descriptor: ViewAnimatorDescriptorExtends<V, T, U, I>): ViewAnimatorConstructor<V, T, U, I>;
-  static define<V extends View, T, U = T>(descriptor: ViewAnimatorDescriptor<V, T, U>): ViewAnimatorConstructor<V, T, U>;
-
-  // Forward type declarations
-  /** @hidden */
-  static String: typeof StringViewAnimator; // defined by StringViewAnimator
-  /** @hidden */
-  static Boolean: typeof BooleanViewAnimator; // defined by BooleanViewAnimator
-  /** @hidden */
-  static Number: typeof NumberViewAnimator; // defined by NumberViewAnimator
-  /** @hidden */
-  static Angle: typeof AngleViewAnimator; // defined by AngleViewAnimator
-  /** @hidden */
-  static Length: typeof LengthViewAnimator; // defined by LengthViewAnimator
-  /** @hidden */
-  static Color: typeof ColorViewAnimator; // defined by ColorViewAnimator
-  /** @hidden */
-  static Font: typeof FontViewAnimator; // defined by FontViewAnimator
-  /** @hidden */
-  static Transform: typeof TransformViewAnimator; // defined by TransformViewAnimator
-  /** @hidden */
-  static ContinuousScale: typeof ContinuousScaleViewAnimator; // defined by ContinuousScaleViewAnimator
+  toString(): string;
 }
 
-export interface ViewAnimator<V extends View, T, U = T> extends TweenAnimator<T> {
-  (): T;
-  (state: T | U, tween?: Tween<T>): V;
-}
-
-export function ViewAnimator<V extends View, T, U = T, I = {}>(descriptor: ViewAnimatorDescriptorExtends<V, T, U, I>): PropertyDecorator;
-export function ViewAnimator<V extends View, T, U = T>(descriptor: ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
-
-export function ViewAnimator<V extends View, T, U>(
+export const ViewAnimator = function <V extends View, T, U>(
     this: ViewAnimator<V, T, U> | typeof ViewAnimator,
-    view: V | ViewAnimatorDescriptor<V, T, U>,
+    owner: V | ViewAnimatorDescriptor<V, T, U>,
     animatorName?: string,
   ): ViewAnimator<V, T, U> | PropertyDecorator {
   if (this instanceof ViewAnimator) { // constructor
-    return ViewAnimatorConstructor.call(this, view as V, animatorName);
+    return ViewAnimatorConstructor.call(this as ViewAnimator<V, unknown, unknown>, owner as V, animatorName);
   } else { // decorator factory
-    return ViewAnimatorDecoratorFactory(view as ViewAnimatorDescriptor<V, T, U>);
+    return ViewAnimatorDecoratorFactory(owner as ViewAnimatorDescriptor<V, T, U>);
   }
-}
-__extends(ViewAnimator, TweenAnimator);
-View.Animator = ViewAnimator;
+} as {
+  /** @hidden */
+  new<V extends View, T, U = never>(owner: V, animatorName: string | undefined): ViewAnimator<V, T, U>;
 
-function ViewAnimatorConstructor<V extends View, T, U>(this: ViewAnimator<V, T, U>, view: V, animatorName: string | undefined): ViewAnimator<V, T, U> {
-  const _this: ViewAnimator<V, T, U> = TweenAnimator.call(this, void 0, null) || this;
+  <V extends View, T extends Angle | null | undefined = Angle | null | undefined, U extends AnyAngle | null | undefined = AnyAngle | null | undefined>(descriptor: {type: typeof Angle} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
+  <V extends View, T extends Length | null | undefined = Length | null | undefined, U extends AnyLength | null | undefined = AnyLength | null | undefined>(descriptor: {type: typeof Length} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
+  <V extends View, T extends Color | null | undefined = Color | null | undefined, U extends AnyColor | null | undefined = AnyColor | null | undefined>(descriptor: {type: typeof Color} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
+  <V extends View, T extends Font | null | undefined = Font | null | undefined, U extends AnyFont | null | undefined = AnyFont | null | undefined>(descriptor: {type: typeof Font} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
+  <V extends View, T extends Transform | null | undefined = Transform | null | undefined, U extends AnyTransform | null | undefined = AnyTransform | null | undefined>(descriptor: {type: typeof Transform} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
+  <V extends View, T extends string | null | undefined = string | null | undefined, U extends string | null | undefined = string | null | undefined>(descriptor: {type: typeof String} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
+  <V extends View, T extends boolean | null | undefined = boolean | null | undefined, U extends boolean | string | null | undefined = boolean | string | null | undefined>(descriptor: {type: typeof Boolean} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
+  <V extends View, T extends number | null | undefined = number | null | undefined, U extends number | string | null | undefined = number | string | null | undefined>(descriptor: {type: typeof Number} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
+  <V extends View, T, U = never>(descriptor: ViewAnimatorDescriptorFromAny<V, T, U>): PropertyDecorator;
+  <V extends View, T, U = never, I = {}>(descriptor: ViewAnimatorDescriptorExtends<V, T, U, I>): PropertyDecorator;
+  <V extends View, T, U = never>(descriptor: ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
+
+  /** @hiddem */
+  prototype: ViewAnimator<any, any>;
+
+  /** @hidden */
+  getClass(type: unknown): ViewAnimatorClass | null;
+
+  define<V extends View, T, U = never, I = {}>(descriptor: ViewAnimatorDescriptorExtends<V, T, U, I>): ViewAnimatorConstructor<V, T, U, I>;
+  define<V extends View, T, U = never>(descriptor: ViewAnimatorDescriptor<V, T, U>): ViewAnimatorConstructor<V, T, U>;
+};
+__extends(ViewAnimator, Animator);
+
+function ViewAnimatorConstructor<V extends View, T, U>(this: ViewAnimator<V, T, U>, owner: V, animatorName: string | undefined): ViewAnimator<V, T, U> {
+  const _this: ViewAnimator<V, T, U> = (Animator as Function).call(this) || this;
   if (animatorName !== void 0) {
     Object.defineProperty(_this, "name", {
       value: animatorName,
@@ -234,158 +236,156 @@ function ViewAnimatorConstructor<V extends View, T, U>(this: ViewAnimator<V, T, 
       configurable: true,
     });
   }
-  _this._view = view;
-  if (_this.initState !== void 0) {
-    const initState = _this.initState();
-    if (initState !== void 0) {
-      _this._state = _this.fromAny(initState);
-      _this._value = _this._state;
-    }
-  } else if (this._inherit !== false) {
-    this._animatorFlags |= TweenAnimator.InheritedFlag;
-  }
+  Object.defineProperty(_this, "owner", {
+    value: owner,
+    enumerable: true,
+  });
+  Object.defineProperty(_this, "inherit", {
+    value: false,
+    enumerable: true,
+    configurable: true,
+  });
+  Object.defineProperty(_this, "superAnimator", {
+    value: null,
+    enumerable: true,
+    configurable: true,
+  });
+  Object.defineProperty(_this, "subAnimators", {
+    value: null,
+    enumerable: true,
+    configurable: true,
+  });
   return _this;
 }
 
 function ViewAnimatorDecoratorFactory<V extends View, T, U>(descriptor: ViewAnimatorDescriptor<V, T, U>): PropertyDecorator {
-  return View.decorateViewAnimator.bind(ViewAnimator, ViewAnimator.define(descriptor));
+  return View.decorateViewAnimator.bind(ViewAnimator, ViewAnimator.define(descriptor as ViewAnimatorDescriptor<View, unknown>));
 }
 
-Object.defineProperty(ViewAnimator.prototype, "view", {
-  get: function <V extends View>(this: ViewAnimator<V, unknown>): V {
-    return this._view;
-  },
-  enumerable: true,
-  configurable: true,
-});
-
-Object.defineProperty(ViewAnimator.prototype, "inherit", {
-  get: function (this: ViewAnimator<View, unknown>): string | boolean {
-    return this._inherit;
-  },
-  enumerable: true,
-  configurable: true,
-});
-
-ViewAnimator.prototype.setInherit = function (this: ViewAnimator<View, unknown>,
-                                              inherit: string | boolean): void {
-  if (this._inherit !== inherit) {
+ViewAnimator.prototype.setInherit = function (this: ViewAnimator<View, unknown>, inherit: string | boolean): void {
+  if (this.inherit !== inherit) {
     this.unbindSuperAnimator();
-    if (inherit !== false) {
-      this._inherit = inherit;
-      this.bindSuperAnimator();
-    } else if (this._inherit !== false) {
-      this._inherit = false;
-    }
+    Object.defineProperty(this, "inherit", {
+      value: inherit,
+      enumerable: true,
+      configurable: true,
+    });
+    this.bindSuperAnimator();
   }
 };
 
 ViewAnimator.prototype.isInherited = function (this: ViewAnimator<View, unknown>): boolean {
-  return (this._animatorFlags & TweenAnimator.InheritedFlag) !== 0;
+  return (this.animatorFlags & Animator.InheritedFlag) !== 0;
 };
 
-ViewAnimator.prototype.setInherited = function (this: ViewAnimator<View, unknown>,
-                                             inherited: boolean): void {
-  if (inherited && (this._animatorFlags & TweenAnimator.InheritedFlag) === 0) {
-    this._animatorFlags |= TweenAnimator.InheritedFlag;
-    this.animate();
-  } else if (!inherited && (this._animatorFlags & TweenAnimator.InheritedFlag) !== 0) {
-    this._animatorFlags &= ~TweenAnimator.InheritedFlag;
-    this.animate();
+ViewAnimator.prototype.setInherited = function (this: ViewAnimator<View, unknown>, inherited: boolean): void {
+  if (inherited && (this.animatorFlags & Animator.InheritedFlag) === 0) {
+    const superAnimator = this.superAnimator;
+    if (superAnimator !== null && superAnimator.precedence >= this.precedence) {
+      this.setAnimatorFlags(this.animatorFlags & ~Animator.OverrideFlag | Animator.InheritedFlag);
+      this.setOwnLook(superAnimator.look);
+      if (this.look === null) {
+        Object.defineProperty(this, "ownState", {
+          value: superAnimator.state,
+          enumerable: true,
+          configurable: true,
+        });
+        this.setValue(superAnimator.value, this.value);
+        if (superAnimator.isAnimating()) {
+          this.startAnimating();
+        } else {
+          this.stopAnimating();
+        }
+      }
+    }
+  } else if (!inherited && (this.animatorFlags & Animator.InheritedFlag) !== 0) {
+    const superAnimator = this.superAnimator;
+    if (superAnimator !== null && superAnimator.precedence < this.precedence) {
+      this.setAnimatorFlags(this.animatorFlags & ~Animator.InheritedFlag);
+    }
   }
 };
 
 Object.defineProperty(ViewAnimator.prototype, "superName", {
   get: function (this: ViewAnimator<View, unknown>): string | undefined {
-    const inherit = this._inherit;
+    const inherit = this.inherit;
     return typeof inherit === "string" ? inherit : inherit === true ? this.name : void 0;
   },
   enumerable: true,
   configurable: true,
 });
 
-Object.defineProperty(ViewAnimator.prototype, "superAnimator", {
-  get: function (this: ViewAnimator<View, unknown>): ViewAnimator<View, unknown> | null {
-    let superAnimator: ViewAnimator<View, unknown> | null | undefined = this._superAnimator;
-    if (superAnimator === void 0) {
-      superAnimator = null;
-      let view = this._view;
-      if (!view.isMounted()) {
-        const superName = this.superName;
-        if (superName !== void 0) {
-          do {
-            const parentView = view.parentView;
-            if (parentView !== null) {
-              view = parentView;
-              const animator = view.getLazyViewAnimator(superName);
-              if (animator !== null) {
-                superAnimator = animator;
+ViewAnimator.prototype.bindSuperAnimator = function (this: ViewAnimator<View, unknown>): void {
+  const superName = this.superName;
+  if (superName !== void 0 && this.isMounted()) {
+    let view = this.owner;
+    do {
+      const parentView = view.parentView;
+      if (parentView !== null) {
+        view = parentView;
+        const superAnimator = view.getLazyViewAnimator(superName);
+        if (superAnimator !== null) {
+          Object.defineProperty(this, "superAnimator", {
+            value: superAnimator,
+            enumerable: true,
+            configurable: true,
+          });
+          superAnimator.addSubAnimator(this);
+          if ((this.animatorFlags & Animator.OverrideFlag) === 0 && superAnimator.precedence >= this.precedence) {
+            this.setAnimatorFlags(this.animatorFlags | Animator.InheritedFlag);
+            this.setOwnLook(superAnimator.look);
+            if (this.look === null) {
+              Object.defineProperty(this, "ownState", {
+                value: superAnimator.state,
+                enumerable: true,
+                configurable: true,
+              });
+              this.setValue(superAnimator.value, this.value);
+              if (superAnimator.isAnimating()) {
+                this.startAnimating();
               } else {
-                continue;
+                this.stopAnimating();
               }
             }
-            break;
-          } while (true);
+          }
+        } else {
+          continue;
         }
       }
-    }
-    return superAnimator;
-  },
-  enumerable: true,
-  configurable: true,
-});
-
-ViewAnimator.prototype.bindSuperAnimator = function (this: ViewAnimator<View, unknown>): void {
-  let view = this._view;
-  if (view.isMounted()) {
-    const superName = this.superName;
-    if (superName !== void 0) {
-      do {
-        const parentView = view.parentView;
-        if (parentView !== null) {
-          view = parentView;
-          const animator = view.getLazyViewAnimator(superName);
-          if (animator !== null) {
-            this._superAnimator = animator;
-            animator.addSubAnimator(this);
-            if (this.isInherited()) {
-              this._state = animator._state;
-              this._value = animator._value;
-              this._animatorFlags |= TweenAnimator.UpdatedFlag;
-              this.animate();
-            }
-          } else {
-            continue;
-          }
-        }
-        break;
-      } while (true);
-    }
+      break;
+    } while (true);
   }
 };
 
 ViewAnimator.prototype.unbindSuperAnimator = function (this: ViewAnimator<View, unknown>): void {
-  const superAnimator = this._superAnimator;
-  if (superAnimator !== void 0) {
+  const superAnimator = this.superAnimator;
+  if (superAnimator !== null) {
     superAnimator.removeSubAnimator(this);
-    this._superAnimator = void 0;
+    Object.defineProperty(this, "superAnimator", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    this.setAnimatorFlags(this.animatorFlags & ~Animator.InheritedFlag);
   }
 };
 
-ViewAnimator.prototype.addSubAnimator = function <T, U>(this: ViewAnimator<View, T, U>,
-                                                        subAnimator: ViewAnimator<View, T, U>): void {
-  let subAnimators = this._subAnimators;
-  if (subAnimators === void 0) {
+ViewAnimator.prototype.addSubAnimator = function <T>(this: ViewAnimator<View, T>, subAnimator: ViewAnimator<View, T>): void {
+  let subAnimators = this.subAnimators;
+  if (subAnimators === null) {
     subAnimators = [];
-    this._subAnimators = subAnimators;
+    Object.defineProperty(this, "subAnimators", {
+      value: subAnimators,
+      enumerable: true,
+      configurable: true,
+    });
   }
   subAnimators.push(subAnimator);
 };
 
-ViewAnimator.prototype.removeSubAnimator = function <T, U>(this: ViewAnimator<View, T, U>,
-                                                           subAnimator: ViewAnimator<View, T, U>): void {
-  const subAnimators = this._subAnimators;
-  if (subAnimators !== void 0) {
+ViewAnimator.prototype.removeSubAnimator = function <T>(this: ViewAnimator<View, T>,  subAnimator: ViewAnimator<View, T>): void {
+  const subAnimators = this.subAnimators;
+  if (subAnimators !== null) {
     const index = subAnimators.indexOf(subAnimator);
     if (index >= 0) {
       subAnimators.splice(index, 1);
@@ -393,46 +393,8 @@ ViewAnimator.prototype.removeSubAnimator = function <T, U>(this: ViewAnimator<Vi
   }
 };
 
-ViewAnimator.prototype.isAuto = function (this: ViewAnimator<View, unknown>): boolean {
-  return (this._animatorFlags & TweenAnimator.OverrideFlag) === 0;
-};
-
-ViewAnimator.prototype.setAuto = function (this: ViewAnimator<View, unknown>,
-                                           auto: boolean): void {
-  if (auto && (this._animatorFlags & TweenAnimator.OverrideFlag) !== 0) {
-    this._animatorFlags &= ~TweenAnimator.OverrideFlag;
-  } else if (!auto && (this._animatorFlags & TweenAnimator.OverrideFlag) === 0) {
-    this._animatorFlags |= TweenAnimator.OverrideFlag;
-  }
-};
-
-ViewAnimator.prototype.isTweening = function (this: ViewAnimator<View, unknown>): boolean {
-  if (!this.isInherited()) {
-    return (this._animatorFlags & TweenAnimator.TweeningFlag) !== 0;
-  } else {
-    const superAnimator = this.superAnimator;
-    return superAnimator !== null && superAnimator.isTweening();
-  }
-};
-
-Object.defineProperty(ViewAnimator.prototype, "ownValue", {
-  get: function <T, U>(this: ViewAnimator<View, T, U>): T | undefined {
-    return !this.isInherited() ? this.value : void 0;
-  },
-  enumerable: true,
-  configurable: true,
-});
-
-Object.defineProperty(ViewAnimator.prototype, "ownState", {
-  get: function <T, U>(this: ViewAnimator<View, T, U>): T | undefined {
-    return !this.isInherited() ? this.state : void 0;
-  },
-  enumerable: true,
-  configurable: true,
-});
-
 Object.defineProperty(ViewAnimator.prototype, "superValue", {
-  get: function <T, U>(this: ViewAnimator<View, T, U>): T | undefined {
+  get: function <T>(this: ViewAnimator<View, T>): T | undefined {
     const superAnimator = this.superAnimator;
     return superAnimator !== null ? superAnimator.value : void 0;
   },
@@ -440,8 +402,23 @@ Object.defineProperty(ViewAnimator.prototype, "superValue", {
   configurable: true,
 });
 
+ViewAnimator.prototype.getValue = function <T, U>(this: ViewAnimator<View, T, U>): NonNullable<T> {
+  const value = this.value;
+  if (value === void 0 || value === null) {
+    throw new TypeError(value + " " + this.name + " value");
+  }
+  return value as NonNullable<T>;
+};
+
+ViewAnimator.prototype.onSetValue = function <T>(this: ViewAnimator<View, T>, newValue: T, oldValue: T): void {
+  const updateFlags = this.updateFlags;
+  if (updateFlags !== void 0) {
+    this.owner.requireUpdate(updateFlags);
+  }
+};
+
 Object.defineProperty(ViewAnimator.prototype, "superState", {
-  get: function <T, U>(this: ViewAnimator<View, T, U>): T | undefined {
+  get: function <T>(this: ViewAnimator<View, T>): T | undefined {
     const superAnimator = this.superAnimator;
     return superAnimator !== null ? superAnimator.state : void 0;
   },
@@ -449,212 +426,304 @@ Object.defineProperty(ViewAnimator.prototype, "superState", {
   configurable: true,
 });
 
-ViewAnimator.prototype.getValue = function <T, U>(this: ViewAnimator<View, T, U>): T extends undefined ? never : T {
-  const value = this.value;
-  if (value === void 0) {
-    throw new TypeError("undefined " + this.name + " value");
-  }
-  return value as T extends undefined ? never : T;
-};
-
-ViewAnimator.prototype.getState = function <T, U>(this: ViewAnimator<View, T, U>): T extends undefined ? never : T {
+ViewAnimator.prototype.getState = function <T, U>(this: ViewAnimator<View, T, U>): NonNullable<T> {
   const state = this.state;
-  if (state === void 0) {
-    throw new TypeError("undefined " + this.name + " state");
+  if (state === void 0 || state === null) {
+    throw new TypeError(state + " " + this.name + " state");
   }
-  return state as T extends undefined ? never : T;
+  return state as NonNullable<T>;
 };
 
-ViewAnimator.prototype.getValueOr = function <T, U, E>(this: ViewAnimator<View, T, U>,
-                                                       elseValue: E): (T extends undefined ? never : T) | E {
-  let value: T | E | undefined = this.value;
-  if (value === void 0) {
-    value = elseValue;
-  }
-  return value as (T extends undefined ? never : T) | E;
+ViewAnimator.prototype.setOwnState = function <T, U>(this: ViewAnimator<View, T, U>, state: T | U, timing?: AnyTiming | boolean): void {
+  state = this.fromAny(state);
+  Animator.prototype.setOwnState.call(this, state, timing);
 };
 
-ViewAnimator.prototype.getStateOr = function <T, U, E>(this: ViewAnimator<View, T, U>,
-                                                       elseState: E): (T extends undefined ? never : T) | E {
-  let state: T | E | undefined = this.state;
-  if (state === void 0) {
-    state = elseState
-  }
-  return state as (T extends undefined ? never : T) | E;
-};
-
-ViewAnimator.prototype.setState = function <T, U>(this: ViewAnimator<View, T, U>,
-                                                  state: T | U, tween?: Tween<T>): void {
-  this._animatorFlags |= TweenAnimator.OverrideFlag;
-  this.setOwnState(state, tween);
-};
-
-ViewAnimator.prototype.setAutoState = function <T, U>(this: ViewAnimator<View, T, U>,
-                                                      state: T | U, tween?: Tween<T>): void {
-  if ((this._animatorFlags & TweenAnimator.OverrideFlag) === 0) {
-    this.setOwnState(state, tween);
-  }
-};
-
-ViewAnimator.prototype.setOwnState = function <T, U>(this: ViewAnimator<View, T, U>,
-                                                     state: T | U, tween?: Tween<T>): void {
-  if (state !== void 0) {
-    state = this.fromAny(state);
-  }
-  this._animatorFlags &= ~TweenAnimator.InheritedFlag;
-  TweenAnimator.prototype.setState.call(this, state, tween);
-};
-
-ViewAnimator.prototype.setBaseState = function <T, U>(this: ViewAnimator<View, T, U>,
-                                                      state: T | U, tween?: Tween<T>): void {
-  let superAnimator: ViewAnimator<View, T, U> | null | undefined;
-  if (this.isInherited() && (superAnimator = this.superAnimator, superAnimator !== null)) {
-    superAnimator.setBaseState(state, tween);
-  } else {
-    this.setState(state, tween);
-  }
-};
-
-ViewAnimator.prototype.onAnimate = function <T, U>(this: ViewAnimator<View, T, U>, t: number): void {
-  if (!this.isInherited()) {
-    TweenAnimator.prototype.onAnimate.call(this, t);
-  } else if (this.isUpdated()) {
-    this.onAnimateInherited();
-  } else {
-    this.onIdle();
-  }
-};
-
-ViewAnimator.prototype.onAnimateInherited = function <T, U>(this: ViewAnimator<View, T, U>): void {
-  const superAnimator = this._superAnimator;
-  if (superAnimator !== void 0) {
-    this._animatorFlags &= ~TweenAnimator.UpdatedFlag;
-    this.update(superAnimator.value, this.value);
-  } else {
-    this.onIdle();
-  }
-};
-
-ViewAnimator.prototype.update = function <T, U>(this: ViewAnimator<View, T, U>,
-                                                newValue: T, oldValue: T): void {
-  if (!Objects.equal(oldValue, newValue)) {
-    this.willUpdate(newValue, oldValue);
-    this._value = newValue;
-    this._animatorFlags |= TweenAnimator.UpdatedFlag;
-    this.onUpdate(newValue, oldValue);
-    this.updateSubAnimators(newValue, oldValue);
-    this.didUpdate(newValue, oldValue);
-  }
-};
-
-ViewAnimator.prototype.onUpdate = function <T, U>(this: ViewAnimator<View, T, U>,
-                                                  newValue: T, oldValue: T): void {
-  const updateFlags = this.updateFlags;
-  if (updateFlags !== void 0) {
-    this._view.requireUpdate(updateFlags);
-  }
-};
-
-ViewAnimator.prototype.updateSubAnimators = function <T, U>(this: ViewAnimator<View, T, U>,
-                                                            newValue: T, oldValue: T): void {
-  const subAnimators = this._subAnimators;
-  if (subAnimators !== void 0) {
+ViewAnimator.prototype.setImmediateState = function <T>(this: ViewAnimator<View, T>, newState: T, oldState: T): void {
+  Animator.prototype.setImmediateState.call(this, newState, oldState);
+  const subAnimators = this.subAnimators;
+  if (subAnimators !== null) {
     for (let i = 0, n = subAnimators.length; i < n; i += 1) {
-      const subAnimator = subAnimators[i];
+      const subAnimator = subAnimators[i]!;
       if (subAnimator.isInherited()) {
-        subAnimator._animatorFlags |= TweenAnimator.UpdatedFlag;
-        subAnimator.animate();
+        subAnimator.startAnimating();
       }
     }
   }
 };
 
-ViewAnimator.prototype.animate = function <T, U>(this: ViewAnimator<View, T, U>,
-                                                 animator: Animator = this): void {
-  if (animator !== this || (this._animatorFlags & TweenAnimator.DisabledFlag) === 0) {
-    this._view.animate(animator);
+ViewAnimator.prototype.onSetPrecedence = function (this: ViewAnimator<View, unknown>, newPrecedence: ViewPrecedence, oldPrecedence: ViewPrecedence): void {
+  if (newPrecedence > oldPrecedence && (this.animatorFlags & Animator.InheritedFlag) !== 0) {
+    const superAnimator = this.superAnimator;
+    if (superAnimator !== null && superAnimator.precedence < this.precedence) {
+      this.setAnimatorFlags(this.animatorFlags & ~Animator.InheritedFlag);
+    }
   }
 };
 
-ViewAnimator.prototype.mount = function (this: ViewAnimator<View, unknown>): void {
-  this.bindSuperAnimator();
+Object.defineProperty(ViewAnimator.prototype, "superLook", {
+  get: function <T>(this: ViewAnimator<View, T>): Look<T> | null {
+    const superAnimator = this.superAnimator;
+    return superAnimator !== null ? superAnimator.look : null;
+  },
+  enumerable: true,
+  configurable: true,
+});
+
+ViewAnimator.prototype.onSetLook = function <T>(this: ViewAnimator<View, T>, newLook: Look<T> | null, oldLook: Look<T> | null, timing: Timing | boolean): void {
+  if (newLook !== null) {
+    this.applyLook(newLook, timing);
+  }
 };
 
-ViewAnimator.prototype.unmount = function (this: ViewAnimator<View, unknown>): void {
-  this.unbindSuperAnimator();
+ViewAnimator.prototype.applyLook = function <T>(this: ViewAnimator<View, T>, look: Look<T>, timing: Timing | boolean): void {
+  if (this.owner.isMounted()) {
+    const state = this.owner.getLook(look);
+    if (state !== void 0) {
+      if (timing === true) {
+        timing = this.owner.getLookOr(Look.timing, true);
+      }
+      this.setOwnState(state, timing);
+    }
+  } else {
+    this.owner.requireUpdate(View.NeedsChange);
+  }
+};
+
+ViewAnimator.prototype.applyTheme = function <T>(this: ViewAnimator<View, T>, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  const look = this.look;
+  if (look !== null) {
+    const state = theme.get(look, mood);
+    if (state !== void 0) {
+      if (timing === true) {
+        timing = this.owner.getLookOr(Look.timing, true);
+      }
+      this.setOwnState(state, timing);
+    }
+  }
+};
+
+ViewAnimator.prototype.onAnimate = function (this: ViewAnimator<View, unknown>, t: number): void {
+  if (!this.isInherited()) {
+    Animator.prototype.onAnimate.call(this, t);
+  } else {
+    this.onAnimateInherited(t);
+  }
+};
+
+ViewAnimator.prototype.onAnimateInherited = function (this: ViewAnimator<View, unknown>, t: number): void {
+  const superAnimator = this.superAnimator;
+  if (superAnimator !== null && superAnimator.precedence >= this.precedence) {
+    this.setOwnLook(superAnimator.look);
+    if (this.look !== null) {
+      Animator.prototype.onAnimate.call(this, t);
+    } else {
+      Object.defineProperty(this, "ownState", {
+        value: superAnimator.state,
+        enumerable: true,
+        configurable: true,
+      });
+      this.setValue(superAnimator.value, this.value);
+      if (!superAnimator.isAnimating()) {
+        this.stopAnimating();
+      }
+    }
+  } else {
+    this.stopAnimating();
+  }
+};
+
+ViewAnimator.prototype.willStartAnimating = function (this: ViewAnimator<View, unknown>): void {
+  this.owner.trackWillStartAnimating(this);
+  const subAnimators = this.subAnimators;
+  if (subAnimators !== null) {
+    for (let i = 0, n = subAnimators.length; i < n; i += 1) {
+      const subAnimator = subAnimators[i]!;
+      if (subAnimator.isInherited()) {
+        subAnimator.startAnimating();
+      }
+    }
+  }
+};
+
+ViewAnimator.prototype.didStartAnimating = function (this: ViewAnimator<View, unknown>): void {
+  this.owner.trackDidStartAnimating(this);
+};
+
+ViewAnimator.prototype.willStopAnimating = function (this: ViewAnimator<View, unknown>): void {
+  this.owner.trackWillStopAnimating(this);
+};
+
+ViewAnimator.prototype.didStopAnimating = function (this: ViewAnimator<View, unknown>): void {
+  this.owner.trackDidStopAnimating(this);
 };
 
 ViewAnimator.prototype.fromAny = function <T, U>(this: ViewAnimator<View, T, U>, value: T | U): T {
   return value as T;
 };
 
-ViewAnimator.getConstructor = function (type: unknown): ViewAnimatorPrototype | null {
+ViewAnimator.prototype.isMounted = function (this: ViewAnimator<View, unknown>): boolean {
+  return (this.animatorFlags & Animator.MountedFlag) !== 0;
+};
+
+ViewAnimator.prototype.mount = function (this: ViewAnimator<View, unknown>): void {
+  if ((this.animatorFlags & Animator.MountedFlag) === 0) {
+    this.willMount();
+    this.setAnimatorFlags(this.animatorFlags | Animator.MountedFlag);
+    this.onMount();
+    this.didMount();
+  }
+};
+
+ViewAnimator.prototype.willMount = function (this: ViewAnimator<View, unknown>): void {
+  // hook
+};
+
+ViewAnimator.prototype.onMount = function (this: ViewAnimator<View, unknown>): void {
+  this.bindSuperAnimator();
+  const look = this.look;
+  if (look !== null) {
+    this.applyLook(look, false);
+  }
+};
+
+ViewAnimator.prototype.didMount = function (this: ViewAnimator<View, unknown>): void {
+  // hook
+};
+
+ViewAnimator.prototype.unmount = function (this: ViewAnimator<View, unknown>): void {
+  if ((this.animatorFlags & Animator.MountedFlag) !== 0) {
+    this.willUnmount();
+    this.setAnimatorFlags(this.animatorFlags & ~Animator.MountedFlag);
+    this.onUnmount();
+    this.didUnmount();
+  }
+};
+
+ViewAnimator.prototype.willUnmount = function (this: ViewAnimator<View, unknown>): void {
+  // hook
+};
+
+ViewAnimator.prototype.onUnmount = function (this: ViewAnimator<View, unknown>): void {
+  this.stopAnimating();
+  this.unbindSuperAnimator();
+};
+
+ViewAnimator.prototype.didUnmount = function (this: ViewAnimator<View, unknown>): void {
+  // hook
+};
+
+ViewAnimator.prototype.toString = function (this: ViewAnimator<View, unknown>): string {
+  return this.name;
+};
+
+ViewAnimator.getClass = function (type: unknown): ViewAnimatorClass | null {
   if (type === String) {
-    return ViewAnimator.String;
+    return StringViewAnimator;
   } else if (type === Boolean) {
-    return ViewAnimator.Boolean;
+    return BooleanViewAnimator;
   } else if (type === Number) {
-    return ViewAnimator.Number;
+    return NumberViewAnimator;
   } else if (type === Angle) {
-    return ViewAnimator.Angle;
+    return AngleViewAnimator;
   } else if (type === Length) {
-    return ViewAnimator.Length;
+    return LengthViewAnimator;
   } else if (type === Color) {
-    return ViewAnimator.Color;
+    return ColorViewAnimator;
   } else if (type === Font) {
-    return ViewAnimator.Font;
+    return FontViewAnimator;
   } else if (type === Transform) {
-    return ViewAnimator.Transform;
-  } else if (type === ContinuousScale) {
-    return ViewAnimator.ContinuousScale;
+    return TransformViewAnimator;
   }
   return null;
 };
 
 ViewAnimator.define = function <V extends View, T, U, I>(descriptor: ViewAnimatorDescriptor<V, T, U, I>): ViewAnimatorConstructor<V, T, U, I> {
-  let _super: ViewAnimatorPrototype | null | undefined = descriptor.extends;
-  const state = descriptor.state;
+  let _super: ViewAnimatorClass | null | undefined = descriptor.extends;
   const inherit = descriptor.inherit;
+  const state = descriptor.state;
+  const look = descriptor.look;
+  const precedence = descriptor.precedence;
+  const initState = descriptor.initState;
   delete descriptor.extends;
-  delete descriptor.state;
   delete descriptor.inherit;
+  delete descriptor.state;
+  delete descriptor.look;
+  delete descriptor.precedence;
+  delete descriptor.initState;
 
   if (_super === void 0) {
-    _super = ViewAnimator.getConstructor(descriptor.type);
+    _super = ViewAnimator.getClass(descriptor.type);
   }
   if (_super === null) {
     _super = ViewAnimator;
-    if (!descriptor.hasOwnProperty("fromAny") && FromAny.is<T, U>(descriptor.type)) {
+    if (descriptor.fromAny === void 0 && FromAny.is<T, U>(descriptor.type)) {
       descriptor.fromAny = descriptor.type.fromAny;
     }
   }
 
-  const _constructor = function ViewAnimatorAccessor(this: ViewAnimator<V, T, U>, view: V, animatorName: string | undefined): ViewAnimator<V, T, U> {
-    let _this: ViewAnimator<V, T, U> = function accessor(state?: T | U, tween?: Tween<T>): T | V {
+  const _constructor = function DecoratedViewAnimator(this: ViewAnimator<V, T, U>, owner: V, animatorName: string | undefined): ViewAnimator<V, T, U> {
+    let _this: ViewAnimator<V, T, U> = function ViewAnimatorAccessor(state?: T | U, timing?: ViewPrecedence | AnyTiming | boolean, precedence?: ViewPrecedence): T | V {
       if (arguments.length === 0) {
         return _this.value;
       } else {
-        _this.setState(state!, tween);
-        return _this._view;
+        if (arguments.length === 2) {
+          _this.setState(state!, timing);
+        } else {
+          _this.setState(state!, timing as AnyTiming | boolean | undefined, precedence);
+        }
+        return _this.owner;
       }
     } as ViewAnimator<V, T, U>;
     Object.setPrototypeOf(_this, this);
-    _this = _super!.call(_this, view, animatorName) || _this;
+    _this = _super!.call(_this, owner, animatorName) || _this;
+    let ownState: T | undefined;
+    if (initState !== void 0) {
+      ownState = _this.fromAny(initState());
+    } else if (state !== void 0) {
+      ownState = _this.fromAny(state);
+    }
+    if (ownState !== void 0) {
+      Object.defineProperty(_this, "ownValue", {
+        value: ownState,
+        enumerable: true,
+        configurable: true,
+      });
+      Object.defineProperty(_this, "ownState", {
+        value: ownState,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    if (look !== void 0) {
+      Object.defineProperty(_this, "ownLook", {
+        value: look,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    if (precedence !== void 0) {
+      Object.defineProperty(_this, "precedence", {
+        value: precedence,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    if (inherit !== void 0) {
+      Object.defineProperty(_this, "inherit", {
+        value: inherit,
+        enumerable: true,
+        configurable: true,
+      });
+    }
     return _this;
   } as unknown as ViewAnimatorConstructor<V, T, U, I>
 
-  const _prototype = descriptor as unknown as ViewAnimator<V, T, U> & I;
+  const _prototype = descriptor as unknown as ViewAnimator<any, any> & I;
   Object.setPrototypeOf(_constructor, _super);
   _constructor.prototype = _prototype;
   _constructor.prototype.constructor = _constructor;
   Object.setPrototypeOf(_constructor.prototype, _super.prototype);
-
-  if (state !== void 0 && !_prototype.hasOwnProperty("initState")) {
-    _prototype.initState = function (): T | U {
-      return state;
-    };
-  }
-  _prototype._inherit = inherit !== void 0 ? inherit : false;
 
   return _constructor;
 };

@@ -12,22 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {PointR2, BoxR2} from "@swim/math";
-import {AnyLength, Length} from "@swim/length";
-import {AnyColor, Color} from "@swim/color";
-import {AnyFont, Font} from "@swim/font";
-import {Tween} from "@swim/transition";
-import {CanvasContext, CanvasRenderer} from "@swim/render";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import type {AnyTiming} from "@swim/mapping";
+import {AnyLength, Length, PointR2, BoxR2} from "@swim/math";
+import {AnyFont, Font, AnyColor, Color} from "@swim/style";
+import {ViewContextType, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
+  GraphicsViewController,
   LayerView,
+  CanvasContext,
+  CanvasRenderer,
   TypesetView,
   AnyTextRunView,
   TextRunView,
 } from "@swim/graphics";
-import {DataPointCategory, DataPointLabelPlacement} from "./DataPoint";
+import type {DataPointCategory, DataPointLabelPlacement} from "./DataPoint";
+import type {DataPointViewObserver} from "./DataPointViewObserver";
 
 export type AnyDataPointView<X, Y> = DataPointView<X, Y> | DataPointViewInit<X, Y>;
 
@@ -35,46 +36,45 @@ export interface DataPointViewInit<X, Y> extends GraphicsViewInit {
   x: X;
   y: Y;
   y2?: Y;
-  r?: AnyLength;
-
+  radius?: AnyLength;
   hitRadius?: number;
-
-  category?: DataPointCategory | null;
 
   color?: AnyColor;
   opacity?: number;
 
-  labelPadding?: AnyLength;
-  labelPlacement?: DataPointLabelPlacement;
-
   font?: AnyFont;
   textColor?: AnyColor;
 
-  label?: GraphicsView | string | null;
+  category?: DataPointCategory;
+
+  labelPadding?: AnyLength;
+  labelPlacement?: DataPointLabelPlacement;
+  label?: GraphicsView | string;
 }
 
 export class DataPointView<X, Y> extends LayerView {
-  /** @hidden */
-  _xCoord: number;
-  /** @hidden */
-  _yCoord: number;
-  /** @hidden */
-  _y2Coord?: number;
-  /** @hidden */
-  _hitRadius?: number;
-  /** @hidden */
-  _gradientStop?: boolean;
-  /** @hidden */
-  _category?: DataPointCategory;
-  /** @hidden */
-  _labelPlacement?: DataPointLabelPlacement;
-
-  constructor(x: X, y: Y) {
+  constructor() {
     super();
-    this._xCoord = NaN;
-    this._yCoord = NaN;
-    this.x.setAutoState(x);
-    this.y.setAutoState(y);
+    Object.defineProperty(this, "xCoord", {
+      value: NaN,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "yCoord", {
+      value: NaN,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "y2Coord", {
+      value: void 0,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "gradientStop", {
+      value: false,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   initView(init: DataPointViewInit<X, Y>): void {
@@ -82,196 +82,405 @@ export class DataPointView<X, Y> extends LayerView {
     this.setState(init);
   }
 
-  get xCoord(): number {
-    return this._xCoord;
+  declare readonly viewController: GraphicsViewController & DataPointViewObserver<X, Y> | null;
+
+  declare readonly viewObservers: ReadonlyArray<DataPointViewObserver<X, Y>>;
+
+  declare readonly xCoord: number
+
+  /** @hidden */
+  setXCoord(xCoord: number): void {
+    Object.defineProperty(this, "xCoord", {
+      value: xCoord,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  get yCoord(): number {
-    return this._yCoord;
+  declare readonly yCoord: number
+
+  /** @hidden */
+  setYCoord(yCoord: number): void {
+    Object.defineProperty(this, "yCoord", {
+      value: yCoord,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  get y2Coord(): number | undefined {
-    return this._y2Coord;
+  declare readonly y2Coord: number | undefined;
+
+  /** @hidden */
+  setY2Coord(y2Coord: number | undefined): void {
+    Object.defineProperty(this, "y2Coord", {
+      value: y2Coord,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  @ViewAnimator({type: Object})
-  x: ViewAnimator<this, X | undefined>;
+  protected willSetX(newX: X | undefined, oldX: X | undefined): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.dataPointViewWillSetX !== void 0) {
+      viewController.dataPointViewWillSetX(newX, oldX, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.dataPointViewWillSetX !== void 0) {
+        viewObserver.dataPointViewWillSetX(newX, oldX, this);
+      }
+    }
+  }
 
-  @ViewAnimator({type: Object})
-  y: ViewAnimator<this, Y | undefined>;
+  protected onSetX(newX: X | undefined, oldX: X | undefined): void {
+    // hook
+  }
 
-  @ViewAnimator({type: Object})
-  y2: ViewAnimator<this, Y | undefined>;
+  protected didSetX(newX: X | undefined, oldX: X | undefined): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.dataPointViewDidSetX !== void 0) {
+        viewObserver.dataPointViewDidSetX(newX, oldX, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.dataPointViewDidSetX !== void 0) {
+      viewController.dataPointViewDidSetX(newX, oldX, this);
+    }
+  }
 
-  @ViewAnimator({type: Length})
-  r: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
+  @ViewAnimator<DataPointView<X, Y>, X | undefined>({
+    extends: void 0,
+    willSetValue(newX: X | undefined, oldX: X | undefined): void {
+      this.owner.willSetX(newX, oldX);
+    },
+    didSetValue(newX: X | undefined, oldX: X | undefined): void {
+      this.owner.onSetX(newX, oldX);
+      this.owner.didSetX(newX, oldX);
+    },
+  })
+  declare x: ViewAnimator<this, X | undefined>;
 
-  @ViewAnimator({type: Color})
-  color: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  protected willSetY(newY: Y | undefined, oldY: Y | undefined): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.dataPointViewWillSetY !== void 0) {
+      viewController.dataPointViewWillSetY(newY, oldY, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.dataPointViewWillSetY !== void 0) {
+        viewObserver.dataPointViewWillSetY(newY, oldY, this);
+      }
+    }
+  }
 
-  @ViewAnimator({type: Number})
-  opacity: ViewAnimator<this, number | undefined>;
+  protected onSetY(newY: Y | undefined, oldY: Y | undefined): void {
+    // hook
+  }
 
-  @ViewAnimator({type: Length})
-  labelPadding: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
+  protected didSetY(newY: Y | undefined, oldY: Y | undefined): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.dataPointViewDidSetY !== void 0) {
+        viewObserver.dataPointViewDidSetY(newY, oldY, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.dataPointViewDidSetY !== void 0) {
+      viewController.dataPointViewDidSetY(newY, oldY, this);
+    }
+  }
+
+  @ViewAnimator<DataPointView<X, Y>, Y>({
+    willSetValue(newY: Y | undefined, oldY: Y | undefined): void {
+      this.owner.willSetY(newY, oldY);
+    },
+    didSetValue(newY: Y | undefined, oldY: Y | undefined): void {
+      this.owner.onSetY(newY, oldY);
+      this.owner.didSetY(newY, oldY);
+    },
+  })
+  declare y: ViewAnimator<this, Y>;
+
+  protected willSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.dataPointViewWillSetY2 !== void 0) {
+      viewController.dataPointViewWillSetY2(newY2, oldY2, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.dataPointViewWillSetY2 !== void 0) {
+        viewObserver.dataPointViewWillSetY2(newY2, oldY2, this);
+      }
+    }
+  }
+
+  protected onSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
+    // hook
+  }
+
+  protected didSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.dataPointViewDidSetY2 !== void 0) {
+        viewObserver.dataPointViewDidSetY2(newY2, oldY2, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.dataPointViewDidSetY2 !== void 0) {
+      viewController.dataPointViewDidSetY2(newY2, oldY2, this);
+    }
+  }
+
+  @ViewAnimator<DataPointView<X, Y>, Y | undefined>({
+    willSetValue(newY2: Y | undefined, oldY2: Y | undefined): void {
+      this.owner.willSetY2(newY2, oldY2);
+    },
+    didSetValue(newY2: Y | undefined, oldY2: Y | undefined): void {
+      this.owner.onSetY2(newY2, oldY2);
+      this.owner.didSetY2(newY2, oldY2);
+    },
+  })
+  declare y2: ViewAnimator<this, Y | undefined>;
+
+  protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.dataPointViewWillSetRadius !== void 0) {
+      viewController.dataPointViewWillSetRadius(newRadius, oldRadius, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.dataPointViewWillSetRadius !== void 0) {
+        viewObserver.dataPointViewWillSetRadius(newRadius, oldRadius, this);
+      }
+    }
+  }
+
+  protected onSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
+    // hook
+  }
+
+  protected didSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.dataPointViewDidSetRadius !== void 0) {
+        viewObserver.dataPointViewDidSetRadius(newRadius, oldRadius, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.dataPointViewDidSetRadius !== void 0) {
+      viewController.dataPointViewDidSetRadius(newRadius, oldRadius, this);
+    }
+  }
+
+  @ViewAnimator<DataPointView<X, Y>, Length | null, AnyLength | null>({
+    type: Length,
+    state: null,
+    willSetValue(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.willSetRadius(newRadius, oldRadius);
+    },
+    didSetValue(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.onSetRadius(newRadius, oldRadius);
+      this.owner.didSetRadius(newRadius, oldRadius);
+    },
+  })
+  declare radius: ViewAnimator<this, Length | null, AnyLength | null>;
+
+  @ViewProperty({type: Number, state: 5})
+  declare hitRadius: ViewProperty<this, number>;
+
+  @ViewAnimator<DataPointView<X, Y>, Color | null>({
+    type: Color,
+    state: null,
+    didSetValue(newColor: Color | null, oldColor: Color | null): void {
+      this.owner.updateGradientStop();
+    },
+  })
+  declare color: ViewAnimator<this, Color | null, AnyColor | null>;
+
+  @ViewAnimator<DataPointView<X, Y>, number | undefined>({
+    type: Number,
+    didSetValue(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+      this.owner.updateGradientStop();
+    },
+  })
+  declare opacity: ViewAnimator<this, number | undefined>;
 
   @ViewAnimator({type: Font, inherit: true})
-  font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
+  declare font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
 
   @ViewAnimator({type: Color, inherit: true})
-  textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  declare textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
-  hitRadius(): number;
-  hitRadius(hitRadius: number): this;
-  hitRadius(hitRadius?: number): number | this {
-    if (hitRadius === void 0) {
-      return this._hitRadius !== void 0 ? this._hitRadius : 5;
-    } else {
-      this._hitRadius = hitRadius;
-      return this;
-    }
+  @ViewProperty({type: String})
+  declare category: ViewProperty<this, DataPointCategory | undefined>;
+
+  @ViewAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsLayout})
+  declare labelPadding: ViewAnimator<this, Length, AnyLength>;
+
+  protected initLabel(labelView: GraphicsView): void {
+    // hook
   }
 
-  category(): DataPointCategory | null;
-  category(category: DataPointCategory | null): this;
-  category(category?: DataPointCategory | null): DataPointCategory | null | this {
-    if (category === void 0) {
-      return this._category !== void 0 ? this._category : null;
-    } else {
-      if (category !== null) {
-        this._category = category;
-      } else if (this._category !== void 0) {
-        this._category = void 0;
+  protected attachLabel(labelView: GraphicsView): void {
+    // hook
+  }
+
+  protected detachLabel(labelView: GraphicsView): void {
+    // hook
+  }
+
+  protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.dataPointViewWillSetLabel !== void 0) {
+      viewController.dataPointViewWillSetLabel(newLabelView, oldLabelView, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.dataPointViewWillSetLabel !== void 0) {
+        viewObserver.dataPointViewWillSetLabel(newLabelView, oldLabelView, this);
       }
-      return this;
     }
   }
 
-  label(): GraphicsView | null;
-  label(label: GraphicsView | AnyTextRunView | null): this;
-  label(label?: GraphicsView | AnyTextRunView | null): GraphicsView | null | this {
-    if (label === void 0) {
-      const childView = this.getChildView("label");
-      return childView instanceof GraphicsView ? childView : null;
-    } else {
-      if (label !== null && !(label instanceof GraphicsView)) {
-        label = TextRunView.fromAny(label);
+  protected onSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    if (oldLabelView !== null) {
+      this.detachLabel(oldLabelView);
+    }
+    if (newLabelView !== null) {
+      this.attachLabel(newLabelView);
+      this.initLabel(newLabelView);
+    }
+  }
+
+  protected didSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.dataPointViewDidSetLabel !== void 0) {
+        viewObserver.dataPointViewDidSetLabel(newLabelView, oldLabelView, this);
       }
-      this.setChildView("label", label);
-      return this;
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.dataPointViewDidSetLabel !== void 0) {
+      viewController.dataPointViewDidSetLabel(newLabelView, oldLabelView, this);
     }
   }
 
-  labelPlacement(): DataPointLabelPlacement;
-  labelPlacement(labelPlacement: DataPointLabelPlacement): this;
-  labelPlacement(labelPlacement?: DataPointLabelPlacement): DataPointLabelPlacement | this {
-    if (labelPlacement === void 0) {
-      return this._labelPlacement !== void 0 ? this._labelPlacement : "auto";
-    } else {
-      this._labelPlacement = labelPlacement;
-      return this;
-    }
-  }
+  @ViewFastener<DataPointView<X, Y>, GraphicsView, AnyTextRunView>({
+    key: true,
+    type: TextRunView,
+    fromAny(value: GraphicsView | AnyTextRunView): GraphicsView {
+      if (value instanceof GraphicsView) {
+        return value;
+      } else if (typeof value === "string" && this.view instanceof TextRunView) {
+        this.view.text(value);
+        return this.view;
+      } else {
+        return TextRunView.fromAny(value);
+      }
+    },
+    willSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+      this.owner.willSetLabel(newLabelView, oldLabelView);
+    },
+    onSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+      this.owner.onSetLabel(newLabelView, oldLabelView);
+    },
+    didSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+      this.owner.didSetLabel(newLabelView, oldLabelView);
+    },
+  })
+  declare label: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
-  setState(point: DataPointViewInit<X, Y>, tween?: Tween<any>): void {
+  @ViewProperty({type: String, state: "auto"})
+  declare labelPlacement: ViewProperty<this, DataPointLabelPlacement>;
+
+  setState(point: DataPointViewInit<X, Y>, timing?: AnyTiming | boolean): void {
+    if (point.x !== void 0) {
+      this.x(point.x, timing);
+    }
+    if (point.y !== void 0) {
+      this.y(point.y, timing);
+    }
     if (point.y2 !== void 0) {
-      this.y2(point.y2, tween);
+      this.y2(point.y2, timing);
     }
-    if (point.r !== void 0) {
-      this.r(point.r, tween);
+    if (point.radius !== void 0) {
+      this.radius(point.radius, timing);
     }
-
     if (point.hitRadius !== void 0) {
       this.hitRadius(point.hitRadius);
+    }
+
+    if (point.color !== void 0) {
+      this.color(point.color, timing);
+    }
+    if (point.opacity !== void 0) {
+      this.opacity(point.opacity, timing);
+    }
+
+    if (point.font !== void 0) {
+      this.font(point.font, timing);
+    }
+    if (point.textColor !== void 0) {
+      this.textColor(point.textColor, timing);
     }
 
     if (point.category !== void 0) {
       this.category(point.category);
     }
 
-    if (point.color !== void 0) {
-      this.color(point.color, tween);
-    }
-    if (point.opacity !== void 0) {
-      this.opacity(point.opacity, tween);
-    }
-
     if (point.labelPadding !== void 0) {
-      this.labelPadding(point.labelPadding, tween);
+      this.labelPadding(point.labelPadding, timing);
     }
     if (point.labelPlacement !== void 0) {
       this.labelPlacement(point.labelPlacement);
     }
-
-    if (point.font !== void 0) {
-      this.font(point.font, tween);
-    }
-    if (point.textColor !== void 0) {
-      this.textColor(point.textColor, tween);
-    }
-
     if (point.label !== void 0) {
       this.label(point.label);
     }
   }
 
+  /** @hidden */
+  declare readonly gradientStop: boolean;
+
   isGradientStop(): boolean {
-    let gradientStop = this._gradientStop;
-    if (gradientStop === void 0) {
-      gradientStop = this.color.value !== void 0 || this.opacity.value !== void 0;
-      this._gradientStop = gradientStop;
-    }
-    return gradientStop;
+    return this.gradientStop;
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
-    this.requireUpdate(View.NeedsAnimate);
-    if (childView.key === "label" && childView instanceof GraphicsView) {
-      this.onInsertLabel(childView);
-    }
-  }
-
-  protected onRemoveChildView(childView: View): void {
-    this.requireUpdate(View.NeedsAnimate);
-    if (childView.key === "label" && childView instanceof GraphicsView) {
-      this.onRemoveLabel(childView);
-    }
-  }
-
-  protected onInsertLabel(label: GraphicsView): void {
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected onRemoveLabel(label: GraphicsView): void {
-    // hook
-  }
-
-  protected modifyUpdate(targetView: View, updateFlags: ViewFlags): ViewFlags {
-    let additionalFlags = 0;
-    if ((updateFlags & View.NeedsAnimate) !== 0) {
-      additionalFlags |= View.NeedsLayout;
-    }
-    additionalFlags |= super.modifyUpdate(targetView, updateFlags | additionalFlags);
-    return additionalFlags;
-  }
-
-  protected onAnimate(viewContext: ViewContextType<this>): void {
-    super.onAnimate(viewContext);
-    this._gradientStop = this.color.value !== void 0 || this.opacity.value !== void 0;
+  protected updateGradientStop(): void {
+    Object.defineProperty(this, "gradientStop", {
+      value: this.color.value !== null || this.opacity.value !== void 0,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   protected onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
-    const label = this.label();
-    if (label !== null) {
-      this.layoutLabel(label, this.viewFrame);
+    this.layoutDataPoint(this.viewFrame);
+  }
+
+  protected layoutDataPoint(frame: BoxR2): void {
+    const labelView = this.label.view;
+    if (labelView !== null) {
+      this.layoutLabel(labelView, frame);
     }
   }
 
-  protected layoutLabel(label: GraphicsView, frame: BoxR2): void {
-    let placement = this._labelPlacement;
+  protected layoutLabel(labelView: GraphicsView, frame: BoxR2): void {
+    let placement = this.labelPlacement.state;
     if (placement !== "above" && placement !== "below" && placement !== "middle") {
-      const category = this._category;
+      const category = this.category.state;
       if (category === "increasing" || category === "maxima") {
         placement = "above";
       } else if (category === "decreasing" || category === "minima") {
@@ -281,27 +490,25 @@ export class DataPointView<X, Y> extends LayerView {
       }
     }
 
-    const labelPadding = this.labelPadding.value;
-    const padding = labelPadding !== void 0 ? labelPadding.pxValue(Math.min(frame.width, frame.height)) : 0;
-    const x = this._xCoord;
-    const y0 = this._yCoord;
+    const x = this.xCoord;
+    const y0 = this.yCoord;
     let y1 = y0;
     if (placement === "above") {
-      y1 -= padding;
+      y1 -= this.labelPadding.getValue().pxValue(Math.min(frame.width, frame.height));
     } else if (placement === "below") {
-      y1 += padding;
+      y1 += this.labelPadding.getValue().pxValue(Math.min(frame.width, frame.height));
     }
 
-    if (TypesetView.is(label)) {
-      label.textAlign.setAutoState("center");
+    if (TypesetView.is(labelView)) {
+      labelView.textAlign.setState("center", View.Intrinsic);
       if (placement === "above") {
-        label.textBaseline.setAutoState("bottom");
+        labelView.textBaseline.setState("bottom", View.Intrinsic);
       } else if (placement === "below") {
-        label.textBaseline.setAutoState("top");
+        labelView.textBaseline.setState("top", View.Intrinsic);
       } else if (placement === "middle") {
-        label.textBaseline.setAutoState("middle");
+        labelView.textBaseline.setState("middle", View.Intrinsic);
       }
-      label.textOrigin.setAutoState(new PointR2(x, y1));
+      labelView.textOrigin.setState(new PointR2(x, y1), View.Intrinsic);
     }
   }
 
@@ -318,23 +525,27 @@ export class DataPointView<X, Y> extends LayerView {
   }
 
   protected hitTestPoint(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
-    let hitRadius = this.hitRadius();
-    const radius = this.r.value;
-    if (radius !== void 0) {
+    let hitRadius = this.hitRadius.state;
+    const radius = this.radius.value;
+    if (radius !== null) {
       const size = Math.min(frame.width, frame.height);
       hitRadius = Math.max(hitRadius, radius.pxValue(size));
     }
 
-    const dx = this._xCoord - x;
-    const dy = this._yCoord - y;
+    const dx = this.xCoord - x;
+    const dy = this.yCoord - y;
     if (dx * dx + dy * dy < hitRadius * hitRadius) {
       return this;
     }
     return null;
   }
 
+  static create<X, Y>(): DataPointView<X, Y> {
+    return new DataPointView<X, Y>();
+  }
+
   static fromInit<X, Y>(init: DataPointViewInit<X, Y>): DataPointView<X, Y> {
-    const view = new DataPointView(init.x, init.y);
+    const view = new DataPointView<X, Y>();
     view.initView(init);
     return view;
   }

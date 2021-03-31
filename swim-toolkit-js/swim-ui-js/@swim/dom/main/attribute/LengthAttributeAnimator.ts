@@ -12,18 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength, Length} from "@swim/length";
+import {AnyLength, Length} from "@swim/math";
 import {AttributeAnimator} from "./AttributeAnimator";
-import {ElementView} from "../element/ElementView";
+import type {ElementView} from "../element/ElementView";
 
 /** @hidden */
-export abstract class LengthAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Length, AnyLength> {
-  parse(value: string): Length {
-    return Length.parse(value, this.node);
+export abstract class LengthAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Length | null, AnyLength | null> {
+  parse(value: string): Length | null {
+    return Length.parse(value);
   }
 
-  fromAny(value: AnyLength): Length {
-    return Length.fromAny(value, this.node);
+  fromAny(value: AnyLength): Length | null {
+    try {
+      return Length.fromAny(value);
+    } catch (swallow) {
+      return null;
+    }
   }
 }
-AttributeAnimator.Length = LengthAttributeAnimator;

@@ -4,65 +4,63 @@
     <title>Swim Pie</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
   </head>
-  <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
-    <div id="ui" style="display: flex; width: 67%; height: 67%;">
-    </div>
+  <body style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-vis-js/@swim/vis/dist/main/swim-vis.js"></script>
     <script>
 
-const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
+//setTimeout(function () {
+//  swim.ThemeManager.global().setTheme(swim.Theme.light);
+//}, 1000);
 
-const canvas = uiView.append("canvas")
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.append("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+
+const canvasView = swim.CanvasView.create()
+    .mouseEventsEnabled(true)
     .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const pie = new swim.PieView()
-    .tickColor("#4a4a4a")
-    .font("14px sans-serif")
-    .textColor("#4a4a4a");
-canvas.append(pie);
+const pieView = canvasView.append(swim.PieView)
+    .font("14px sans-serif");
 
-const slice0 = new swim.SliceView()
+const slice0View = pieView.append(swim.SliceView, "slice0")
     .value(1)
-    .sliceColor("#4a4a4a")
-    .label(new swim.TextRunView().text("Label 0").textColor("#ffffff"))
+    .label("Label 0")
     .legend("Legend 0")
     .on("pointerenter", function (event) {
-      slice0.sliceColor("#1db0ef", {duration: 200});
+      slice0View.modifyMood(swim.Feel.default, [swim.Feel.primary, 1], true);
     })
     .on("pointerleave", function (event) {
-      slice0.sliceColor("#4a4a4a", {duration: 200});
+      slice0View.modifyMood(swim.Feel.default, [swim.Feel.primary, void 0], true);
     });
-pie.append(slice0, "slice0");
+slice0View.label.view.textColor.setLook(swim.Look.backgroundColor);
 
-const slice1 = new swim.SliceView()
+const slice1View = pieView.append(swim.SliceView, "slice1")
     .value(2)
-    .sliceColor("#989898")
-    .label(new swim.TextRunView().text("Label 1").textColor("#ffffff"))
+    .label("Label 1")
     .legend("Legend 1")
     .on("pointerenter", function (event) {
-      slice1.sliceColor("#71d600", {duration: 200});
+      slice1View.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
     })
     .on("pointerleave", function (event) {
-      slice1.sliceColor("#989898", {duration: 200});
+      slice1View.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
     });
-pie.append(slice1, "slice1");
+slice1View.label.view.textColor.setLook(swim.Look.backgroundColor);
 
 setInterval(function () {
-  const tween = swim.Transition.duration(1000);
-  slice0.value(Math.random(), tween)
-        .outerRadius(swim.Length.pct(20 + 10 * Math.random()), tween);
-  if (!slice0.isHovering()) {
-    slice0.sliceColor(Math.random() < 0.5 ? "#4a4a4a" : "#989898", tween);
-  }
-  slice1.value(Math.random(), tween)
-        .outerRadius(swim.Length.pct(20 + 10 * Math.random()), tween);
-   if (!slice1.isHovering()) {
-    slice1.sliceColor(Math.random() < 0.5 ? "#4a4a4a" : "#989898", tween);
-  }
+  const timing = swim.Easing.linear.withDuration(1000);
+  slice0View.value(Math.random(), timing)
+            .outerRadius(swim.Length.pct(20 + 10 * Math.random()), timing);
+  slice1View.value(Math.random(), timing)
+            .outerRadius(swim.Length.pct(20 + 10 * Math.random()), timing);
 }, 1000);
+
+containerView.append(canvasView);
 
     </script>
   </body>

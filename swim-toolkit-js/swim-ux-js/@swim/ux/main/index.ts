@@ -12,16 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "@swim/theme";
-
-export * from "@swim/modal";
-
 export * from "@swim/button";
 
 export * from "@swim/token";
 
-export * from "@swim/drawer";
+export * from "@swim/grid";
 
-export * from "@swim/menu";
+export * from "@swim/window";
 
-export * from "@swim/tree";
+export * from "@swim/deck";

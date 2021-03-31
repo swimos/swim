@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {NodeViewController} from "../node/NodeViewController";
-import {TextView} from "./TextView";
-import {TextViewObserver} from "./TextViewObserver";
+import type {TextView} from "./TextView";
+import type {TextViewObserver} from "./TextViewObserver";
 
 export class TextViewController<V extends TextView = TextView> extends NodeViewController<V> implements TextViewObserver<V> {
 }

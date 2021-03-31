@@ -12,15 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContextType} from "@swim/view";
-import {HtmlViewObserver} from "@swim/dom";
-import {CanvasView} from "./CanvasView";
+import type {HtmlViewObserver} from "@swim/dom";
+import type {CanvasView} from "./CanvasView";
 
 export interface CanvasViewObserver<V extends CanvasView = CanvasView> extends HtmlViewObserver<V> {
-  viewWillRender?(viewContext: ViewContextType<V>, view: V): void;
-
-  viewDidRender?(viewContext: ViewContextType<V>, view: V): void;
-
   viewWillSetHidden?(hidden: boolean, view: V): void;
 
   viewDidSetHidden?(hidden: boolean, view: V): void;

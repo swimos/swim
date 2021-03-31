@@ -19,5 +19,3 @@ export {
 } from "./MapGraphicsView";
 export {MapGraphicsViewObserver} from "./MapGraphicsViewObserver";
 export {MapGraphicsViewController} from "./MapGraphicsViewController";
-
-export {MapLayerView} from "./MapLayerView";

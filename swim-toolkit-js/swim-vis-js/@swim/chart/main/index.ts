@@ -14,7 +14,7 @@
 
 export * from "./data";
 
-export * from "./scale";
+export * from "./scaled";
 
 export * from "./plot";
 
@@ -24,10 +24,4 @@ export * from "./tick";
 
 export * from "./axis";
 
-export {
-  AnyChartView,
-  ChartViewInit,
-  ChartView,
-} from "./ChartView";
-export {ChartViewObserver} from "./ChartViewObserver";
-export {ChartViewController} from "./ChartViewController";
+export * from "./chart";

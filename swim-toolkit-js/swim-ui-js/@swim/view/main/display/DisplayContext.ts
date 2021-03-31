@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContext} from "../ViewContext";
+import type {ViewContext} from "../ViewContext";
 
 /** @hidden */
 export interface DisplayContext extends ViewContext {

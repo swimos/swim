@@ -13,9 +13,14 @@
 // limitations under the License.
 
 export {
+  CanvasCompositeOperation,
+  CanvasContext,
+} from "./CanvasContext";
+export {CanvasRenderer} from "./CanvasRenderer";
+
+export {
   CanvasViewMouse,
   CanvasViewPointer,
-  ViewCanvas,
   CanvasViewInit,
   CanvasFlags,
   CanvasView,

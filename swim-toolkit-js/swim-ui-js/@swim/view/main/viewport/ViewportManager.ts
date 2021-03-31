@@ -12,30 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContext} from "../ViewContext";
+import {Lazy} from "@swim/util";
 import {View} from "../View";
-import {ViewManagerObserverType, ViewManager} from "../manager/ViewManager";
-import {ViewIdiom} from "./ViewIdiom";
+import {ViewManager} from "../manager/ViewManager";
+import type {ViewManagerObserverType} from "../manager/ViewManagerObserver";
+import type {ViewIdiom} from "./ViewIdiom";
 import {Viewport} from "./Viewport";
-import {ViewportContext} from "./ViewportContext";
-import {ViewportManagerObserver} from "./ViewportManagerObserver";
+import type {ViewportContext} from "./ViewportContext";
+import type {ViewportManagerObserver} from "./ViewportManagerObserver";
 
 export class ViewportManager<V extends View = View> extends ViewManager<V> {
-  /** @hidden */
-  readonly _viewContext: ViewportContext;
-  /** @hidden */
-  _reorientationTimer: number;
-
   constructor() {
     super();
+    Object.defineProperty(this, "viewContext", {
+      value: this.initViewContext(),
+      enumerable: true,
+      configurable: true,
+    });
+    this.viewportResizeTimer = 0;
+    this.reorientationTimer = 0;
+
     this.throttleScroll = this.throttleScroll.bind(this);
     this.throttleResize = this.throttleResize.bind(this);
+    this.debounceViewportResize = this.debounceViewportResize.bind(this);
+    this.throttleViewportResize = this.throttleViewportResize.bind(this);
     this.debounceReorientation = this.debounceReorientation.bind(this);
     this.throttleReorientation = this.throttleReorientation.bind(this);
-
-    this._reorientationTimer = 0;
-    this._viewContext = this.initViewContext();
   }
+
+  declare readonly viewContext: ViewportContext;
 
   protected initViewContext(): ViewportContext {
     return {
@@ -45,16 +50,12 @@ export class ViewportManager<V extends View = View> extends ViewManager<V> {
     };
   }
 
-  get viewContext(): ViewContext {
-    return this._viewContext;
-  }
-
   get viewport(): Viewport {
-    return this._viewContext.viewport;
+    return this.viewContext.viewport;
   }
 
   get viewIdiom(): ViewIdiom {
-    return this._viewContext.viewIdiom;
+    return this.viewContext.viewIdiom;
   }
 
   /** @hidden */
@@ -73,14 +74,17 @@ export class ViewportManager<V extends View = View> extends ViewManager<V> {
 
   /** @hidden */
   updateViewIdiom(viewport: Viewport): void {
-    let viewIdiom = this.willObserve(function (viewManagerObserver: ViewportManagerObserver): void | ViewIdiom {
+    let viewIdiom: ViewIdiom | undefined;
+    const viewManagerObservers = this.viewManagerObservers;
+    for (let i = 0, n = viewManagerObservers.length; i < n; i += 1) {
+      const viewManagerObserver = viewManagerObservers[i]!;
       if (viewManagerObserver.detectViewIdiom !== void 0) {
-        const viewIdiom = viewManagerObserver.detectViewIdiom(viewport!, this);
+        viewIdiom = viewManagerObserver.detectViewIdiom(viewport, this) as ViewIdiom | undefined;
         if (viewIdiom !== void 0) {
-          return viewIdiom;
+          break;
         }
       }
-    });
+    }
     if (viewIdiom === void 0) {
       viewIdiom = this.detectViewIdiom(viewport);
     }
@@ -90,7 +94,7 @@ export class ViewportManager<V extends View = View> extends ViewManager<V> {
   }
 
   setViewIdiom(newViewIdiom: ViewIdiom): void {
-    const viewContext = this._viewContext;
+    const viewContext = this.viewContext;
     const oldViewIdiom = viewContext.viewIdiom;
     if (oldViewIdiom !== newViewIdiom) {
       this.willSetViewIdiom(newViewIdiom, oldViewIdiom);
@@ -101,34 +105,40 @@ export class ViewportManager<V extends View = View> extends ViewManager<V> {
   }
 
   protected willSetViewIdiom(newViewIdiom: ViewIdiom, oldViewIdiom: ViewIdiom): void {
-    this.willObserve(function (viewManagerObserver: ViewportManagerObserver): void {
+    const viewManagerObservers = this.viewManagerObservers;
+    for (let i = 0, n = viewManagerObservers.length; i < n; i += 1) {
+      const viewManagerObserver = viewManagerObservers[i]!;
       if (viewManagerObserver.viewportManagerWillSetViewIdiom !== void 0) {
         viewManagerObserver.viewportManagerWillSetViewIdiom(newViewIdiom, oldViewIdiom, this);
       }
-    });
+    }
   }
 
   protected onSetViewIdiom(newViewIdiom: ViewIdiom, oldViewIdiom: ViewIdiom): void {
-    const rootViews = this._rootViews;
+    const rootViews = this.rootViews;
     for (let i = 0, n = rootViews.length; i < n; i += 1) {
-      rootViews[i].requireUpdate(View.NeedsLayout);
+      rootViews[i]!.requireUpdate(View.NeedsLayout);
     }
   }
 
   protected didSetViewIdiom(newViewIdiom: ViewIdiom, oldViewIdiom: ViewIdiom): void {
-    this.didObserve(function (viewManagerObserver: ViewportManagerObserver): void {
+    const viewManagerObservers = this.viewManagerObservers;
+    for (let i = 0, n = viewManagerObservers.length; i < n; i += 1) {
+      const viewManagerObserver = viewManagerObservers[i]!;
       if (viewManagerObserver.viewportManagerDidSetViewIdiom !== void 0) {
         viewManagerObserver.viewportManagerDidSetViewIdiom(newViewIdiom, oldViewIdiom, this);
       }
-    });
+    }
   }
 
   protected willReorient(orientation: OrientationType): void {
-    this.willObserve(function (viewManagerObserver: ViewportManagerObserver): void {
+    const viewManagerObservers = this.viewManagerObservers;
+    for (let i = 0, n = viewManagerObservers.length; i < n; i += 1) {
+      const viewManagerObserver = viewManagerObservers[i]!;
       if (viewManagerObserver.viewportManagerWillReorient !== void 0) {
         viewManagerObserver.viewportManagerWillReorient(orientation, this);
       }
-    });
+    }
   }
 
   protected onReorient(orientation: OrientationType): void {
@@ -136,14 +146,15 @@ export class ViewportManager<V extends View = View> extends ViewManager<V> {
   }
 
   protected didReorient(orientation: OrientationType): void {
-    this.didObserve(function (viewManagerObserver: ViewportManagerObserver): void {
+    const viewManagerObservers = this.viewManagerObservers;
+    for (let i = 0, n = viewManagerObservers.length; i < n; i += 1) {
+      const viewManagerObserver = viewManagerObservers[i]!;
       if (viewManagerObserver.viewportManagerDidReorient !== void 0) {
         viewManagerObserver.viewportManagerDidReorient(orientation, this);
       }
-    });
+    }
   }
 
-  // @ts-ignore
   declare readonly viewManagerObservers: ReadonlyArray<ViewportManagerObserver>;
 
   protected onAddViewManagerObserver(viewManagerObserver: ViewManagerObserverType<this>): void {
@@ -169,6 +180,9 @@ export class ViewportManager<V extends View = View> extends ViewManager<V> {
       window.addEventListener("scroll", this.throttleScroll, {passive: true});
       window.addEventListener("resize", this.throttleResize);
       window.addEventListener("orientationchange", this.debounceReorientation);
+      if (window.visualViewport !== void 0) {
+        window.visualViewport.addEventListener('resize', this.debounceViewportResize);
+      }
     }
   }
 
@@ -177,67 +191,100 @@ export class ViewportManager<V extends View = View> extends ViewManager<V> {
       window.removeEventListener("scroll", this.throttleScroll);
       window.removeEventListener("resize", this.throttleResize);
       window.removeEventListener("orientationchange", this.debounceReorientation);
+      if (window.visualViewport !== void 0) {
+        window.visualViewport.removeEventListener('resize', this.debounceViewportResize);
+      }
     }
   }
 
   /** @hidden */
   throttleScroll(): void {
-    const rootViews = this._rootViews;
+    const rootViews = this.rootViews;
     for (let i = 0, n = rootViews.length; i < n; i += 1) {
-      rootViews[i].requireUpdate(View.NeedsScroll);
+      rootViews[i]!.requireUpdate(View.NeedsScroll);
     }
   }
 
   /** @hidden */
   throttleResize(): void {
     const viewport = this.detectViewport();
-    this._viewContext.viewport = viewport;
+    this.viewContext.viewport = viewport;
     this.updateViewIdiom(viewport);
 
-    const rootViews = this._rootViews;
+    const rootViews = this.rootViews;
     for (let i = 0, n = rootViews.length; i < n; i += 1) {
-      rootViews[i].requireUpdate(View.NeedsResize | View.NeedsLayout);
+      rootViews[i]!.requireUpdate(View.NeedsResize | View.NeedsLayout);
     }
   }
 
   /** @hidden */
-  protected debounceReorientation(): void {
-    if (this._reorientationTimer !== 0) {
-      clearTimeout(this._reorientationTimer);
-      this._reorientationTimer = 0;
+  viewportResizeTimer: number;
+
+  /** @hidden */
+  protected debounceViewportResize(): void {
+    if (this.viewportResizeTimer !== 0) {
+      clearTimeout(this.viewportResizeTimer);
+      this.viewportResizeTimer = 0;
     }
-    this._reorientationTimer = setTimeout(this.throttleReorientation, ViewportManager.ReorientationDelay) as any;
+    this.viewportResizeTimer = setTimeout(this.throttleViewportResize, ViewportManager.ViewportResizeDelay) as any;
+  }
+
+  /** @hidden */
+  protected throttleViewportResize(): void {
+    if (this.viewportResizeTimer !== 0) {
+      clearTimeout(this.viewportResizeTimer);
+      this.viewportResizeTimer = 0;
+    }
+
+    const viewport = this.detectViewport();
+    this.viewContext.viewport = viewport;
+    this.updateViewIdiom(viewport);
+
+    const rootViews = this.rootViews;
+    for (let i = 0, n = rootViews.length; i < n; i += 1) {
+      rootViews[i]!.requireUpdate(View.NeedsResize | View.NeedsScroll | View.NeedsLayout);
+    }
+  }
+
+  /** @hidden */
+  reorientationTimer: number;
+
+  /** @hidden */
+  protected debounceReorientation(): void {
+    if (this.reorientationTimer !== 0) {
+      clearTimeout(this.reorientationTimer);
+      this.reorientationTimer = 0;
+    }
+    this.reorientationTimer = setTimeout(this.throttleReorientation, ViewportManager.ReorientationDelay) as any;
   }
 
   /** @hidden */
   protected throttleReorientation(): void {
-    if (this._reorientationTimer !== 0) {
-      clearTimeout(this._reorientationTimer);
-      this._reorientationTimer = 0;
+    if (this.reorientationTimer !== 0) {
+      clearTimeout(this.reorientationTimer);
+      this.reorientationTimer = 0;
     }
 
     const viewport = this.detectViewport();
-    this._viewContext.viewport = viewport;
+    this.viewContext.viewport = viewport;
     this.willReorient(viewport.orientation);
     this.updateViewIdiom(viewport);
     this.onReorient(viewport.orientation);
     this.didReorient(viewport.orientation);
 
-    const rootViews = this._rootViews;
+    const rootViews = this.rootViews;
     for (let i = 0, n = rootViews.length; i < n; i += 1) {
-      rootViews[i].requireUpdate(View.NeedsResize | View.NeedsScroll | View.NeedsLayout);
+      rootViews[i]!.requireUpdate(View.NeedsResize | View.NeedsScroll | View.NeedsLayout);
     }
   }
 
   /** @hidden */
+  static ViewportResizeDelay: number = 200;
+  /** @hidden */
   static ReorientationDelay: number = 100;
 
-  private static _global?: ViewportManager<any>;
+  @Lazy
   static global<V extends View>(): ViewportManager<V> {
-    if (ViewportManager._global === void 0) {
-      ViewportManager._global = new ViewportManager();
-    }
-    return ViewportManager._global;
+    return new ViewportManager();
   }
 }
-ViewManager.Viewport = ViewportManager;

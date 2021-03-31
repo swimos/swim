@@ -125,14 +125,14 @@ body {
             <option value="500">500 ms</option>
             <option value="1000" selected>1 s</option>
             <option value="2000">2 s</option>
+            <option value="5000">5 s</option>
           </select>
           <label for="updateRate">Rate</label>
         </div>
       </div>
     </div>
-    <div id="ui">
-    </div>
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-vis-js/@swim/vis/dist/main/swim-vis.js"></script>
     <script>
@@ -155,48 +155,58 @@ const tickWidth = document.getElementById("tickWidth");
 const tickPadding = document.getElementById("tickPadding");
 const updateRate = document.getElementById("updateRate");
 
-// Create a new ui view
-const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
-// and append a canvas.
-const canvas = uiView.append("canvas")
-    .pointerEventsEnabled(true)
-    .touchAction("manipulation")
-    .userSelect("none");
+//setTimeout(function () {
+//  swim.ThemeManager.global().setTheme(swim.Theme.light);
+//}, 1000);
 
-// Create a new pie view
-const pie = new swim.PieView()
-    .tickColor("#4a4a4a")
-    .title(new swim.TextRunView().text("Pie").font("16px sans-serif"))
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.append("div").id("ui").touchAction("none").userSelect("none");
+
+const canvasView = containerView.append(swim.CanvasView)
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
+
+// Append a new pie view to the canvas.
+const pieView = canvasView.append(swim.PieView)
     .font("14px sans-serif")
-    .textColor("#4a4a4a");
-// and append it to the canvas.
-canvas.append(pie);
+    .title(swim.TextRunView.fromAny("Pie").font("16px sans-serif"));
 
 // Create an array to hold our active slice views.
-const slices = [];
-
-// Define some slice colors.
-const sliceColors = ["#4a4a4a", "#989898"];
-const hoverColors = ["#00a6ed", "#ff5a6e", "#7AE7D2", "#ff8c00"];
+const sliceViews = [];
 
 function createSlice() {
-  // Pick a random slice color.
-  const sliceColor = sliceColors[Math.floor(Math.random() * sliceColors.length)];
   // Create a new slice.
-  const slice = new swim.SliceView()
+  const sliceView = new swim.SliceView()
       .value(0) // initialize to zero so the slice will tween in
-      .sliceColor(sliceColor)
-      .label(new swim.TextRunView().textColor("#ffffff"))
+      .label("")
       .legend("");
+  sliceView.label.view.textColor.setLook(swim.Look.backgroundColor);
+  sliceView.label.view.setHidden(true);
+  sliceView.legend.view.setHidden(true);
+  sliceView.modifyMood(swim.Feel.default, [swim.Feel.primary, 1]);
+  sliceView.addViewObserver({
+    sliceViewDidSetValue(newValue) {
+      // Update the slice label.
+      sliceView.label.view.text(Math.round(100 * newValue / sliceView.total()) + "%")
+                          .setHidden(!showLabels.checked);
+
+      // Update the slice legend.
+      sliceView.legend.view.text(sliceView.key + " (" + Math.round(100 * newValue) + ")")
+                           .setHidden(!showLegend.checked);
+    },
+  });
   // Add mouse event handlers.
-  slice.on("pointerenter", function (event) {
-        slice.sliceColor(hoverColors[Math.floor(Math.random() * hoverColors.length)], {duration: 200});
-      })
-      .on("pointerleave", function (event) {
-        slice.sliceColor(sliceColor, {duration: 200});
-      });
+  sliceView.on("pointerenter", function (event) {
+             sliceView.modifyMood(swim.Feel.default, [swim.Feel.hovering, 1], true);
+           })
+           .on("pointerleave", function (event) {
+             sliceView.modifyMood(swim.Feel.default, [swim.Feel.hovering, void 0], true);
+           });
   // Return the initialized slice.
-  return slice;
+  return sliceView;
 }
 
 // Define a global to hold the update timer.
@@ -208,63 +218,58 @@ function updatePie() {
   // and animation duration.
   const duration = +updateRate.value;
 
-  // Configure animation transition.
-  const tween = swim.Transition.duration(duration);
+  // Configure animation timing.
+  const timing = swim.Easing.linear.withDuration(duration);
 
   // Insert any missing slices.
-  for (let i = slices.length; i < count; i += 1) {
-    const slice = createSlice()
-        .value(Math.random(), tween);
-    slices[i] = slice;
-    pie.append(slice, "Slice " + String.fromCharCode(65/*'A'*/ + (i % 26)) + (Math.floor(i / 26) + 1));
+  for (let i = sliceViews.length; i < count; i += 1) {
+    const sliceView = createSlice()
+        .value(Math.random(), timing);
+    sliceViews[i] = sliceView;
+    pieView.append(sliceView, "Slice " + String.fromCharCode(65/*'A'*/ + (i % 26)) + (Math.floor(i / 26) + 1));
   }
 
   // Remove any excess slices.
-  for (let i = slices.length - 1; i >= count; i -= 1) {
-    const slice = slices[i];
-    slices.splice(i, 1);
-    slice.value(0, tween.onEnd(() => slice.remove()));
+  for (let i = sliceViews.length - 1; i >= count; i -= 1) {
+    const sliceView = sliceViews[i];
+    sliceViews.splice(i, 1);
+    sliceView.value(0, timing);
+    sliceView.value.onEnd = function () {
+      sliceView.remove();
+    };
   }
 
   // Update pie chart properties.
-  pie.baseAngle(swim.Angle.rad(-0.5 * Math.PI + (baseAngle.checked ? Math.PI * Math.random() : 0)), tween)
-     .padAngle(swim.Angle.deg(padAngle.checked ? 5 * Math.random() : count >= 26 ? 0.5 : 2), tween)
-     .cornerRadius(swim.Length.pct(cornerRadius.checked ? 10 * Math.random() : 0), tween)
-     .tickRadius(swim.Length.pct(tickRadius.checked ? 25 + 20 * Math.random() : 30), tween)
-     .tickLength(swim.Length.pct(tickLength.checked ? 40 + 10 * Math.random() : 50), tween)
-     .tickWidth(swim.Length.px(tickWidth.checked ? 0.5 + Math.random() : 1), tween)
-     .tickPadding(swim.Length.px(pie.tickWidth.state.pxValue() + 1 + (tickPadding.checked ? 4 * Math.random() : 0)), tween);
+  pieView.baseAngle(swim.Angle.rad(-0.5 * Math.PI + (baseAngle.checked ? Math.PI * Math.random() : 0)), timing)
+         .padAngle(swim.Angle.deg(padAngle.checked ? 5 * Math.random() : count >= 26 ? 0.5 : 2), timing)
+         .cornerRadius(swim.Length.pct(cornerRadius.checked ? 10 * Math.random() : 0), timing)
+         .tickRadius(swim.Length.pct(tickRadius.checked ? 25 + 20 * Math.random() : 30), timing)
+         .tickLength(swim.Length.pct(tickLength.checked ? 40 + 10 * Math.random() : 50), timing)
+         .tickWidth(swim.Length.px(tickWidth.checked ? 0.5 + Math.random() : 1), timing)
+         .tickPadding(swim.Length.px(pieView.tickWidth.state.pxValue() + 1 + (tickPadding.checked ? 4 * Math.random() : 0)), timing);
 
   // Update the pie chart title.
-  pie.title().setHidden(!showTitle.checked);
+  pieView.title.view.setHidden(!showTitle.checked);
 
   // Update all slices.
   for (let i = 0; i < count; i += 1) {
-    const slice = slices[i];
-    const oldValue = slice.value();
-    const newValue = Math.random();
+    const sliceView = sliceViews[i];
+    const oldValue = sliceView.value();
+    const newValue = 0.1 + 0.8 * Math.random();
 
     // Update slice properties.
-    slice.value(newValue, tween)
-         .innerRadius(swim.Length.pct((showTitle.checked ? 5 : 3) + (innerRadius.checked ? 7 * Math.random() : 0)), tween)
-         .outerRadius(swim.Length.pct(outerRadius.checked ? 20 + 10 * Math.random() : 25), tween)
-         .labelRadius(swim.Length.pct(labelRadius.checked ? 33 + 34 * Math.random() : 50), tween)
-         .tickAlign(tickAlign.checked ? Math.random() : 0.5, tween);
-    if (!slice.isHovering()) {
-      slice.sliceColor(Math.random() < 0.5 ? "#4a4a4a" : "#989898", tween);
+    sliceView.value(newValue, timing)
+             .innerRadius(swim.Length.pct((showTitle.checked ? 5 : 3) + (innerRadius.checked ? 7 * Math.random() : 0)), timing)
+             .outerRadius(swim.Length.pct(outerRadius.checked ? 20 + 10 * Math.random() : 25), timing)
+             .labelRadius(swim.Length.pct(labelRadius.checked ? 33 + 34 * Math.random() : 50), timing)
+             .tickAlign(tickAlign.checked ? Math.random() : 0.5, timing);
+    if (newValue < 0.5) {
+      sliceView.modifyMood(swim.Feel.default, [swim.Feel.warning, void 0], [swim.Feel.alert, void 0], timing);
+    } else if (newValue < 0.75) {
+      sliceView.modifyMood(swim.Feel.default, [swim.Feel.warning, 0.5 + 0.5 * (newValue - 0.5) / 0.25], [swim.Feel.alert, void 0], timing);
+    } else {
+      sliceView.modifyMood(swim.Feel.default, [swim.Feel.warning, void 0], [swim.Feel.alert, 0.5 + 0.5 * (newValue - 0.75) / 0.25], timing);
     }
-
-    // Update the slice label.
-    const labelInterpolator = swim.Interpolator.between(oldValue, newValue)
-                                               .map((value) => Math.round(100 * value / slice.total()) + "%");
-    slice.label().text(newValue, tween.interpolator(labelInterpolator))
-                 .setHidden(!showLabels.checked);
-
-    // Update the slice legend.
-    const legendInterpolator = swim.Interpolator.between(oldValue, newValue)
-                                                 .map((value) => slice.key + " (" + Math.round(100 * value) + ")");
-    slice.legend().text(newValue, tween.interpolator(legendInterpolator))
-                  .setHidden(!showLegend.checked);
   }
 
   // Make sure we never schedule multiple timers.

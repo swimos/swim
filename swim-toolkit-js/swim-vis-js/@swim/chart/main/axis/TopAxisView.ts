@@ -12,39 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {ContinuousScale} from "@swim/mapping";
 import {PointR2, BoxR2} from "@swim/math";
-import {ContinuousScale} from "@swim/scale";
-import {CanvasContext} from "@swim/render";
-import {ViewAnimator, ContinuousScaleViewAnimator} from "@swim/view";
-import {TickView} from "../tick/TickView";
-import {AxisOrientation, AxisView} from "./AxisView";
+import {View, ViewAnimator} from "@swim/view";
+import type {CanvasContext} from "@swim/graphics";
+import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
+import type {TickView} from "../tick/TickView";
+import {AxisOrientation, AnyAxisView, AxisViewInit, AxisView} from "./AxisView";
 
-export class TopAxisView<X = unknown> extends AxisView<X> {
+export class TopAxisView<X> extends AxisView<X> {
   get orientation(): AxisOrientation {
     return "top";
   }
 
-  @ViewAnimator({type: ContinuousScale, inherit: "xScale"})
-  scale: ContinuousScaleViewAnimator<this, X, number>;
+  @ViewAnimator({
+    extends: ContinuousScaleAnimator,
+    type: ContinuousScale,
+    inherit: "xScale",
+    state: null,
+    updateFlags: View.NeedsLayout,
+  })
+  declare scale: ContinuousScaleAnimator<this, X, number>;
 
   protected layoutTick(tick: TickView<X>, origin: PointR2, frame: BoxR2,
                        scale: ContinuousScale<X, number>): void {
-    if (tick.anchor.isAuto()) {
-      tick._offset = scale.scale(tick._value);
-      tick.anchor.setAutoState(new PointR2(frame.xMin + tick._offset, origin.y));
+    if (tick.anchor.isPrecedent(View.Intrinsic)) {
+      const offset = scale(tick.value);
+      tick.setOffset(offset);
+      tick.anchor.setState(new PointR2(frame.xMin + offset, origin.y), View.Intrinsic);
     }
   }
 
   protected renderDomain(context: CanvasContext, origin: PointR2, frame: BoxR2): void {
-    const borderWidth = this.borderWidth.value;
-    if (borderWidth !== void 0 && borderWidth !== 0) {
+    const borderColor = this.borderColor.value;
+    const borderWidth = this.borderWidth.getValue();
+    if (borderColor !== null && borderWidth !== 0) {
       const x0 = frame.xMin;
       const x1 = frame.xMax;
       const y = origin.y;
       const dy = this.borderSerif.getValue();
 
       context.beginPath();
-      context.strokeStyle = this.borderColor.getValue().toString();
+      context.strokeStyle = borderColor.toString();
       context.lineWidth = borderWidth;
       if (dy !== 0) {
         context.moveTo(x0, y - dy);
@@ -58,5 +67,25 @@ export class TopAxisView<X = unknown> extends AxisView<X> {
       context.stroke();
     }
   }
+
+  static create<X>(): TopAxisView<X> {
+    return new TopAxisView<X>();
+  }
+
+  static fromInit<X>(init: AxisViewInit<X>): TopAxisView<X> {
+    const view = new TopAxisView<X>();
+    view.initView(init)
+    return view;
+  }
+
+  static fromAny<X>(value: AnyAxisView<X> | true): TopAxisView<X> {
+    if (value instanceof TopAxisView) {
+      return value;
+    } else if (value === true) {
+      return new TopAxisView<X>();
+    } else if (typeof value === "object" && value !== null && !(value instanceof AxisView)) {
+      return this.fromInit(value);
+    }
+    throw new TypeError("" + value);
+  }
 }
-AxisView.Top = TopAxisView;

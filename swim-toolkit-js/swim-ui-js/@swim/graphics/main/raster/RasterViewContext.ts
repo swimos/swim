@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Renderer} from "@swim/render";
-import {GraphicsViewContext} from "../GraphicsViewContext";
+import type {GraphicsRenderer} from "../graphics/GraphicsRenderer";
+import type {GraphicsViewContext} from "../graphics/GraphicsViewContext";
 
 export interface RasterViewContext extends GraphicsViewContext {
-  readonly compositor: Renderer | null;
+  readonly compositor: GraphicsRenderer | null;
 }

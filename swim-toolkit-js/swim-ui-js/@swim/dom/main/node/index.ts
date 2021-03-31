@@ -13,11 +13,10 @@
 // limitations under the License.
 
 export {
-  ViewNode,
   ViewNodeType,
+  ViewNode,
   NodeViewInit,
   NodeViewConstructor,
-  NodeViewClass,
   NodeView,
 } from "./NodeView";
 export {NodeViewObserver} from "./NodeViewObserver";

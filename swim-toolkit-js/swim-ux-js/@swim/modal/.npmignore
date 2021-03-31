@@ -1,8 +1,0 @@
-.gitignore
-.npmignore
-dist/test
-doc/
-lib/test
-rollup.config.js
-test/
-tsconfig.json

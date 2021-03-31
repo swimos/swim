@@ -12,12 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContextType} from "@swim/view";
-import {GraphicsViewObserver} from "@swim/graphics";
-import {MapGraphicsView} from "./MapGraphicsView";
+import type {GraphicsViewObserver} from "@swim/graphics";
+import type {MapGraphicsView} from "./MapGraphicsView";
 
 export interface MapGraphicsViewObserver<V extends MapGraphicsView = MapGraphicsView> extends GraphicsViewObserver<V> {
-  viewWillProject?(viewContext: ViewContextType<V>, view: V): void;
-
-  viewDidProject?(viewContext: ViewContextType<V>, view: V): void;
 }

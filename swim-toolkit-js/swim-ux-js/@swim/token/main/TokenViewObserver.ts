@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ThemedHtmlViewObserver} from "@swim/theme";
-import {TokenView} from "./TokenView";
+import type {HtmlViewObserver} from "@swim/dom";
+import type {TokenView} from "./TokenView";
 
-export interface TokenViewObserver<V extends TokenView = TokenView> extends ThemedHtmlViewObserver<V> {
+export interface TokenViewObserver<V extends TokenView = TokenView> extends HtmlViewObserver<V> {
   tokenWillExpand?(view: V): void;
 
   tokenDidExpand?(view: V): void;

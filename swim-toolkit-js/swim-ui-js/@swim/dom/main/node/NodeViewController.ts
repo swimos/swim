@@ -13,17 +13,17 @@
 // limitations under the License.
 
 import {ViewController} from "@swim/view";
-import {ViewNodeType, NodeView} from "./NodeView";
-import {NodeViewObserver} from "./NodeViewObserver";
+import type {ViewNodeType, NodeView} from "./NodeView";
+import type {NodeViewObserver} from "./NodeViewObserver";
 
 export class NodeViewController<V extends NodeView = NodeView> extends ViewController<V> implements NodeViewObserver<V> {
   get node(): ViewNodeType<V> | null {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.node as ViewNodeType<V> : null;
   }
 
   appendChildNode(childNode: Node, key?: string): void {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       view.appendChildNode(childNode, key);
     } else {
@@ -32,7 +32,7 @@ export class NodeViewController<V extends NodeView = NodeView> extends ViewContr
   }
 
   prependChildNode(childNode: Node, key?: string): void {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       view.prependChildNode(childNode, key);
     } else {
@@ -41,7 +41,7 @@ export class NodeViewController<V extends NodeView = NodeView> extends ViewContr
   }
 
   insertChildNode(childNode: Node, targetNode: Node | null, key?: string): void {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       view.insertChildNode(childNode, targetNode, key);
     } else {
@@ -58,7 +58,7 @@ export class NodeViewController<V extends NodeView = NodeView> extends ViewContr
   }
 
   removeChildNode(childNode: Node): void {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       view.removeChildNode(childNode);
     } else {

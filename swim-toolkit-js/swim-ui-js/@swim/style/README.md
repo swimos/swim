@@ -6,10 +6,9 @@
 
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
-**@swim/style** provides CSS style types, and implements a universal style
-value parser.  **@swim/style** is part of the
-[**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/ui)
-framework.
+**@swim/style** implements font, color, gradient, shadow and related types and parsers.
+**@swim/style** is part of the
+[**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/ui) framework.
 
 ## Installation
 

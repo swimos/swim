@@ -12,28 +12,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HtmlView} from "@swim/dom";
-import {ThemedHtmlViewController} from "@swim/theme";
-import {ButtonItem} from "./ButtonItem";
-import {ButtonStackState, ButtonStack} from "./ButtonStack";
-import {ButtonStackObserver} from "./ButtonStackObserver";
+import {HtmlView, HtmlViewController} from "@swim/dom";
+import type {ButtonItem} from "./ButtonItem";
+import type {ButtonStackState, ButtonStack} from "./ButtonStack";
+import type {ButtonStackObserver} from "./ButtonStackObserver";
 
-export class ButtonStackController<V extends ButtonStack = ButtonStack> extends ThemedHtmlViewController<V> implements ButtonStackObserver<V> {
+export class ButtonStackController<V extends ButtonStack = ButtonStack> extends HtmlViewController<V> implements ButtonStackObserver<V> {
   get stackState(): ButtonStackState | null {
-    return this._view !== null ? this._view.stackState : null;
+    const view = this.view;
+    return view !== null ? view.stackState : null;
   }
 
   get button(): HtmlView | null {
-    return this._view !== null ? this._view.button : null;
+    const view = this.view;
+    return view !== null ? view.button : null;
   }
 
   get items(): ReadonlyArray<ButtonItem> {
-    return this._view !== null ? this._view.items : [];
+    const view = this.view;
+    return view !== null ? view.items : [];
   }
 
   removeItems(): void {
-    if (this._view !== null) {
-      this._view.removeItems();
+    const view = this.view;
+    if (view !== null) {
+      view.removeItems();
     }
   }
 

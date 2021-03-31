@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HtmlView} from "@swim/dom";
-import {TokenViewObserver} from "./TokenViewObserver";
-import {InputTokenView} from "./InputTokenView";
+import type {HtmlView} from "@swim/dom";
+import type {TokenViewObserver} from "./TokenViewObserver";
+import type {InputTokenView} from "./InputTokenView";
 
 export interface InputTokenViewObserver<V extends InputTokenView = InputTokenView> extends TokenViewObserver<V> {
   tokenDidUpdateInput?(inputView: HtmlView, view: V): void;

@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View} from "../View";
-import {ViewManagerObserver} from "../manager/ViewManagerObserver";
-import {ViewIdiom} from "./ViewIdiom";
-import {Viewport} from "./Viewport";
-import {ViewportManager} from "./ViewportManager";
+import type {View} from "../View";
+import type {ViewManagerObserver} from "../manager/ViewManagerObserver";
+import type {ViewIdiom} from "./ViewIdiom";
+import type {Viewport} from "./Viewport";
+import type {ViewportManager} from "./ViewportManager";
 
 export interface ViewportManagerObserver<V extends View = View, VM extends ViewportManager<V> = ViewportManager<V>> extends ViewManagerObserver<V, VM> {
   detectViewIdiom?(viewport: Viewport, viewportManager: VM): void | ViewIdiom;

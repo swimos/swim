@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyPointR2, PointR2, BoxR2} from "@swim/math";
-import {AnyAngle, Angle} from "@swim/angle";
-import {AnyLength, Length} from "@swim/length";
-import {AnyColor, Color} from "@swim/color";
-import {Tween} from "@swim/transition";
-import {CanvasContext, CanvasRenderer} from "@swim/render";
+import type {AnyTiming} from "@swim/mapping";
+import {AnyLength, Length, AnyAngle, Angle, AnyPointR2, PointR2, BoxR2} from "@swim/math";
+import {AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewAnimator} from "@swim/view";
-import {GraphicsView} from "../GraphicsView";
-import {LayerView} from "../LayerView";
-import {FillViewInit, FillView} from "./FillView";
-import {StrokeViewInit, StrokeView} from "./StrokeView";
+import type {GraphicsView} from "../graphics/GraphicsView";
+import {LayerView} from "../layer/LayerView";
+import type {CanvasContext} from "../canvas/CanvasContext";
+import {CanvasRenderer} from "../canvas/CanvasRenderer";
+import type {FillViewInit, FillView} from "./FillView";
+import type {StrokeViewInit, StrokeView} from "./StrokeView";
 import {ArcInit, Arc} from "./Arc";
 
 export type AnyArcView = ArcView | Arc | ArcViewInit;
@@ -37,86 +36,86 @@ export class ArcView extends LayerView implements FillView, StrokeView {
   }
 
   @ViewAnimator({type: PointR2, state: PointR2.origin()})
-  center: ViewAnimator<this, PointR2, AnyPointR2>;
+  declare center: ViewAnimator<this, PointR2, AnyPointR2>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  innerRadius: ViewAnimator<this, Length, AnyLength>;
+  declare innerRadius: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  outerRadius: ViewAnimator<this, Length, AnyLength>;
+  declare outerRadius: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Angle, state: Angle.zero()})
-  startAngle: ViewAnimator<this, Angle, AnyAngle>;
+  declare startAngle: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Angle, state: Angle.zero()})
-  sweepAngle: ViewAnimator<this, Angle, AnyAngle>;
+  declare sweepAngle: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Angle, state: Angle.zero()})
-  padAngle: ViewAnimator<this, Angle, AnyAngle>;
+  declare padAngle: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Length, state: null})
-  padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
+  declare padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  cornerRadius: ViewAnimator<this, Length, AnyLength>;
+  declare cornerRadius: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Color, inherit: true})
-  fill: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  @ViewAnimator({type: Color, state: null, inherit: true})
+  declare fill: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, inherit: true})
-  stroke: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  @ViewAnimator({type: Color, state: null, inherit: true})
+  declare stroke: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, inherit: true})
-  strokeWidth: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
+  @ViewAnimator({type: Length, state: null, inherit: true})
+  declare strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;
 
   get value(): Arc {
-    return new Arc(this.center.getValue(), this.innerRadius.getValue(), this.outerRadius.getValue(),
-                   this.startAngle.getValue(), this.sweepAngle.getValue(), this.padAngle.getValue(),
-                   this.padRadius.getValue(), this.cornerRadius.getValue());
+    return new Arc(this.center.value, this.innerRadius.value, this.outerRadius.value,
+                   this.startAngle.value, this.sweepAngle.value, this.padAngle.value,
+                   this.padRadius.value, this.cornerRadius.value);
   }
 
   get state(): Arc {
-    return new Arc(this.center.getState(), this.innerRadius.getState(), this.outerRadius.getState(),
-                   this.startAngle.getState(), this.sweepAngle.getState(), this.padAngle.getState(),
-                   this.padRadius.getState(), this.cornerRadius.getState());
+    return new Arc(this.center.state, this.innerRadius.state, this.outerRadius.state,
+                   this.startAngle.state, this.sweepAngle.state, this.padAngle.state,
+                   this.padRadius.state, this.cornerRadius.state);
   }
 
-  setState(arc: Arc | ArcViewInit, tween?: Tween<any>): void {
+  setState(arc: Arc | ArcViewInit, timing?: AnyTiming | boolean): void {
     if (arc instanceof Arc) {
       arc = arc.toAny();
     }
     if (arc.center !== void 0) {
-      this.center(arc.center, tween);
+      this.center(arc.center, timing);
     }
     if (arc.innerRadius !== void 0) {
-      this.innerRadius(arc.innerRadius, tween);
+      this.innerRadius(arc.innerRadius, timing);
     }
     if (arc.outerRadius !== void 0) {
-      this.outerRadius(arc.outerRadius, tween);
+      this.outerRadius(arc.outerRadius, timing);
     }
     if (arc.startAngle !== void 0) {
-      this.startAngle(arc.startAngle, tween);
+      this.startAngle(arc.startAngle, timing);
     }
     if (arc.sweepAngle !== void 0) {
-      this.sweepAngle(arc.sweepAngle, tween);
+      this.sweepAngle(arc.sweepAngle, timing);
     }
     if (arc.padAngle !== void 0) {
-      this.padAngle(arc.padAngle, tween);
+      this.padAngle(arc.padAngle, timing);
     }
     if (arc.padRadius !== void 0) {
-      this.padRadius(arc.padRadius, tween);
+      this.padRadius(arc.padRadius, timing);
     }
     if (arc.cornerRadius !== void 0) {
-      this.cornerRadius(arc.cornerRadius, tween);
+      this.cornerRadius(arc.cornerRadius, timing);
     }
     if (arc.fill !== void 0) {
-      this.fill(arc.fill, tween);
+      this.fill(arc.fill, timing);
     }
     if (arc.stroke !== void 0) {
-      this.stroke(arc.stroke, tween);
+      this.stroke(arc.stroke, timing);
     }
     if (arc.strokeWidth !== void 0) {
-      this.strokeWidth(arc.strokeWidth, tween);
+      this.strokeWidth(arc.strokeWidth, timing);
     }
   }
 
@@ -135,14 +134,14 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     const arc = this.value;
     arc.draw(context, frame);
     const fill = this.fill.value;
-    if (fill !== void 0) {
+    if (fill !== null) {
       context.fillStyle = fill.toString();
       context.fill();
     }
     const stroke = this.stroke.value;
-    if (stroke !== void 0) {
+    if (stroke !== null) {
       const strokeWidth = this.strokeWidth.value;
-      if (strokeWidth !== void 0) {
+      if (strokeWidth !== null) {
         const size = Math.min(frame.width, frame.height);
         context.lineWidth = strokeWidth.pxValue(size);
       }
@@ -156,7 +155,8 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     const size = Math.min(frame.width, frame.height);
     const inversePageTransform = this.pageTransform.inverse();
     const center = this.center.getValue();
-    const [px, py] = inversePageTransform.transform(center.x, center.y);
+    const px = inversePageTransform.transformX(center.x, center.y);
+    const py = inversePageTransform.transformY(center.x, center.y);
     const r = (this.innerRadius.getValue().pxValue(size) + this.outerRadius.getValue().pxValue(size)) / 2;
     const a = this.startAngle.getValue().radValue() + this.sweepAngle.getValue().radValue() / 2;
     const x = px + r * Math.cos(a);
@@ -193,11 +193,11 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     context.beginPath();
     const arc = this.value;
     arc.draw(context, frame);
-    if (this.fill.value !== void 0 && context.isPointInPath(x, y)) {
+    if (this.fill.value !== null && context.isPointInPath(x, y)) {
       return this;
-    } else if (this.stroke.value !== void 0) {
+    } else if (this.stroke.value !== null) {
       const strokeWidth = this.strokeWidth.value;
-      if (strokeWidth !== void 0) {
+      if (strokeWidth !== null) {
         const size = Math.min(frame.width, frame.height);
         context.lineWidth = strokeWidth.pxValue(size);
         if (context.isPointInStroke(x, y)) {

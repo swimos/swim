@@ -12,19 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {BoxR2} from "@swim/math";
-import {AnyColor, Color} from "@swim/color";
-import {CanvasRenderer, CanvasContext} from "@swim/render";
+import type {BoxR2} from "@swim/math";
+import {AnyColor, Color} from "@swim/style";
+import {Look} from "@swim/theme";
 import {ViewAnimator} from "@swim/view";
-import {GraphicsView, FillViewInit, FillView} from "@swim/graphics";
-import {PlotView} from "./PlotView";
-import {PlotViewController} from "./PlotViewController";
+import type {GraphicsView, GraphicsViewController, CanvasContext, CanvasRenderer, FillViewInit, FillView} from "@swim/graphics";
 import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
+import type {AreaPlotViewObserver} from "./AreaPlotViewObserver";
 
 export type AnyAreaPlotView<X, Y> = AreaPlotView<X, Y> | AreaPlotViewInit<X, Y>;
 
 export interface AreaPlotViewInit<X, Y> extends SeriesPlotViewInit<X, Y>, FillViewInit {
-  viewController?: PlotViewController<X, Y>;
 }
 
 export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView {
@@ -35,39 +33,41 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
     }
   }
 
+  declare readonly viewController: GraphicsViewController<AreaPlotView<X, Y>> & AreaPlotViewObserver<X, Y> | null;
+
+  declare readonly viewObservers: ReadonlyArray<AreaPlotViewObserver<X, Y>>;
+
   get plotType(): SeriesPlotType {
     return "area";
   }
 
-  @ViewAnimator({type: Color, state: Color.black()})
-  fill: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, state: null, look: Look.accentColor})
+  declare fill: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected renderPlot(context: CanvasContext, frame: BoxR2): void {
-    const data = this._data;
-    const n = data.size;
-
-    const fill = this.fill.getValue();
-    const gradientStops = this._gradientStops;
-    let gradient: CanvasGradient | undefined;
+    const fill = this.fill.getValueOr(Color.transparent());
+    const gradientStops = this.gradientStops;
+    let gradient: CanvasGradient | null = null;
 
     context.beginPath();
 
     let x0: number;
     let x1: number;
     let dx: number;
-    if (n > 0) {
-      const p0 = data.firstValue()!;
-      const p1 = data.lastValue()!;
-      x0 = p0._xCoord;
-      x1 = p1._xCoord;
+    const dataPointFasteners = this.dataPointFasteners;
+    if (!dataPointFasteners.isEmpty()) {
+      const p0 = dataPointFasteners.firstValue()!.view!;
+      const p1 = dataPointFasteners.lastValue()!.view!;
+      x0 = p0.xCoord;
+      x1 = p1.xCoord;
       dx = x1 - x0;
-      context.moveTo(p0._xCoord, p0._yCoord);
+      context.moveTo(p0.xCoord, p0.yCoord);
       if (gradientStops !== 0) {
         gradient = context.createLinearGradient(x0, 0, x1, 0);
         if (p0.isGradientStop()) {
-          let color = p0.color.value || fill;
+          let color = p0.color.getValueOr(fill);
           const opacity = p0.opacity.value;
-          if (typeof opacity === "number") {
+          if (opacity !== void 0) {
             color = color.alpha(opacity);
           }
           gradient.addColorStop(0, color.toString());
@@ -79,64 +79,68 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
       dx = NaN;
     }
 
-    const cursor = data.values();
+    const cursor = dataPointFasteners.values();
     cursor.next();
     while (cursor.hasNext()) {
-      const p = cursor.next().value!;
-      context.lineTo(p._xCoord, p._yCoord);
-      if (gradient !== void 0 && p.isGradientStop()) {
+      const p = cursor.next().value!.view!;
+      context.lineTo(p.xCoord, p.yCoord);
+      if (gradient !== null && p.isGradientStop()) {
         let color = p.color.value || fill;
         const opacity = p.opacity.value;
-        if (typeof opacity === "number") {
+        if (opacity !== void 0) {
           color = color.alpha(opacity);
         }
-        const offset = (p._xCoord - x0) / (dx || 1);
+        const offset = (p.xCoord - x0) / (dx || 1);
         gradient.addColorStop(offset, color.toString());
       }
     }
     while (cursor.hasPrevious()) {
-      const p = cursor.previous().value!;
-      context.lineTo(p._xCoord, p._y2Coord!);
+      const p = cursor.previous().value!.view!;
+      context.lineTo(p.xCoord, p.y2Coord!);
     }
-    if (n > 0) {
+    if (!dataPointFasteners.isEmpty()) {
       context.closePath();
     }
 
-    context.fillStyle = gradient !== void 0 ? gradient : fill.toString();
+    context.fillStyle = gradient !== null ? gradient : fill.toString();
     context.fill();
   }
 
   protected hitTestPlot(x: number, y: number, renderer: CanvasRenderer): GraphicsView | null {
     const context = renderer.context;
-    const data = this._data;
-    const n = data.size;
+    const dataPointFasteners = this.dataPointFasteners;
 
     context.beginPath();
-    const cursor = data.values();
+    const cursor = dataPointFasteners.values();
     if (cursor.hasNext()) {
-      const p = cursor.next().value!;
-      context.moveTo(p._xCoord, p._yCoord);
+      const p = cursor.next().value!.view!;
+      context.moveTo(p.xCoord, p.yCoord);
     }
     while (cursor.hasNext()) {
-      const p = cursor.next().value!;
-      context.lineTo(p._xCoord, p._yCoord);
+      const p = cursor.next().value!.view!;
+      context.lineTo(p.xCoord, p.yCoord);
     }
     while (cursor.hasPrevious()) {
-      const p = cursor.previous().value!;
-      context.lineTo(p._xCoord, p._y2Coord!);
+      const p = cursor.previous().value!.view!;
+      context.lineTo(p.xCoord, p.y2Coord!);
     }
-    if (n > 0) {
+    if (!dataPointFasteners.isEmpty()) {
       context.closePath();
     }
 
     if (context.isPointInPath(x, y)) {
-      if (this._hitMode === "plot") {
+      const hitMode = this.hitMode.state;
+      if (hitMode === "plot") {
         return this;
-      } else if (this._hitMode === "data") {
+      } else if (hitMode === "data") {
         return this.hitTestDomain(x, y, renderer);
       }
     }
     return null;
+  }
+
+  static create<X, Y>(): AreaPlotView<X, Y> {
+    return new AreaPlotView<X, Y>();
   }
 
   static fromInit<X, Y>(init: AreaPlotViewInit<X, Y>): AreaPlotView<X, Y> {
@@ -154,4 +158,3 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
     throw new TypeError("" + value);
   }
 }
-PlotView.Area = AreaPlotView;

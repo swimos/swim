@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View} from "../View";
-import {ViewManager} from "./ViewManager";
+import type {View} from "../View";
+import type {ViewManager} from "./ViewManager";
+
+export type ViewManagerObserverType<VM extends ViewManager> =
+  VM extends {readonly viewManagerObservers: ReadonlyArray<infer VMO>} ? VMO : never;
 
 export interface ViewManagerObserver<V extends View = View, VM extends ViewManager<V> = ViewManager<V>> {
   viewManagerWillAttach?(viewManager: VM): void;
 
-  viewanagerDidAttach?(viewManager: VM): void;
+  viewManagerDidAttach?(viewManager: VM): void;
 
   viewManagerWillDetach?(viewManager: VM): void;
 

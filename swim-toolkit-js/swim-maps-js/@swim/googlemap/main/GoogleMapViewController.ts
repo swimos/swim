@@ -12,25 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapGraphicsViewController} from "@swim/map";
-import {GoogleMapProjection} from "./GoogleMapProjection";
-import {GoogleMapView} from "./GoogleMapView";
-import {GoogleMapViewObserver} from "./GoogleMapViewObserver";
+import type {GeoPoint} from "@swim/geo";
+import {MapGraphicsViewController, MapViewController} from "@swim/map";
+import type {GoogleMapView} from "./GoogleMapView";
+import type {GoogleMapViewObserver} from "./GoogleMapViewObserver";
 
-export class GoogleMapViewController<V extends GoogleMapView = GoogleMapView> extends MapGraphicsViewController<V> implements GoogleMapViewObserver<V> {
-  viewWillSetGeoProjection(geoProjection: GoogleMapProjection, view: V): void {
+export class GoogleMapViewController<V extends GoogleMapView = GoogleMapView> extends MapGraphicsViewController<V> implements MapViewController<V>, GoogleMapViewObserver<V> {
+  mapViewWillMove(mapCenter: GeoPoint, mapZoom: number, view: V): void {
     // hook
   }
 
-  viewDidSetGeoProjection(geoProjection: GoogleMapProjection, view: V): void {
-    // hook
-  }
-
-  viewWillSetMapZoom(newMapZoom: number, oldMapZoom: number, view: V): void {
-    // hook
-  }
-
-  viewDidSetMapZoom(newMapZoom: number, oldMapZoom: number, view: V): void {
+  mapViewDidMove(mapCenter: GeoPoint, mapZoom: number, view: V): void {
     // hook
   }
 }

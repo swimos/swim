@@ -15,14 +15,9 @@
 export {
   AnyStyleValue,
   StyleValue,
-  StyleValueClass,
 } from "./StyleValue";
-export {StyleValueParser} from "./StyleValueParser";
 export {StyleValueForm} from "./StyleValueForm";
-
-export {StyleInterpolatorForm} from "./StyleInterpolatorForm";
-export {StyleScaleForm} from "./StyleScaleForm";
-export {StyleTransitionForm} from "./StyleTransitionForm";
+export {StyleValueParser} from "./StyleValueParser";
 
 export {ToAttributeString} from "./ToAttributeString";
 export {ToStyleString} from "./ToStyleString";

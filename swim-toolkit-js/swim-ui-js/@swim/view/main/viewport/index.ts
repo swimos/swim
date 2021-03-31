@@ -15,6 +15,7 @@
 export {ViewIdiom} from "./ViewIdiom";
 export {ViewEdgeInsets} from "./ViewEdgeInsets";
 export {ViewColorScheme} from "./ViewColorScheme";
+export {VisualViewport} from "./VisualViewport";
 export {Viewport} from "./Viewport";
 
 export {ViewportContext} from "./ViewportContext";

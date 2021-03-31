@@ -1,36 +1,41 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Swim Pie</title>
+    <title>Swim Pie Transit</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
   </head>
-  <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
-    <div id="ui" style="display: flex; width: 67%; height: 67%;">
-    </div>
+  <body style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
     <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-vis-js/@swim/vis/dist/main/swim-vis.js"></script>
     <script>
 
-const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
+//setTimeout(function () {
+//  swim.ThemeManager.global().setTheme(swim.Theme.light);
+//}, 1000);
 
-const canvas = uiView.append("canvas");
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.append("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+
+const canvasView = swim.CanvasView.create()
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
 
 const sliceColors = [swim.Color.parse("#00a6ed"), swim.Color.parse("#7ed321"),
                      swim.Color.parse("#c200fb"), swim.Color.parse("#50e3c2"),
                      swim.Color.parse("#57b8ff"), swim.Color.parse("#5aff15"),
                      swim.Color.parse("#55dde0"), swim.Color.parse("#f7aef8")];
 
-const pie = new swim.PieView()
+const pieView = canvasView.append(swim.PieView)
     .innerRadius("15%")
     .outerRadius("25%")
-    .tickColor("#b7b7b7")
-    .font("14px sans-serif")
-    .textColor("#4a4a4a");
-canvas.append(pie);
+    .font("14px sans-serif");
 
-const tween = swim.Transition.duration(1000);
+const timing = swim.Easing.linear.withDuration(1000);
 
 const vehiclesLink = swim.downlinkMap()
     .hostUri("warp://transit.swim.services")
@@ -42,21 +47,21 @@ const vehiclesLink = swim.downlinkMap()
       const sliceColor = sliceColors[index % 8];
       const sliceValue = value.numberValue();
       if (sliceValue > 0) {
-        let slice = pie.getChildView(id);
-        if (slice) {
-          slice.value(sliceValue, tween);
-          slice.label().text(sliceValue.toFixed());
-        } else {
-          slice = new swim.SliceView()
-              .value(sliceValue)
+        let sliceView = pieView.getChildView(id);
+        if (sliceView === null) {
+          sliceView = pieView.append(swim.SliceView, id)
               .sliceColor(sliceColor)
               .label(sliceValue.toFixed())
               .legend(id);
-          pie.setChildView(id, slice);
+          sliceView.label.view.textColor.setLook(swim.Look.backgroundColor);
         }
+        sliceView.value(sliceValue, timing);
+        sliceView.label(sliceValue.toFixed());
       }
     })
     .open();
+
+containerView.append(canvasView);
 
     </script>
   </body>

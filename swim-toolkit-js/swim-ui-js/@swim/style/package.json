@@ -1,7 +1,7 @@
 {
   "name": "@swim/style",
-  "version": "3.11.0-dev.20201021",
-  "description": "CSS style types and universal style value parser",
+  "version": "3.11.0-dev.20210331",
+  "description": "Font, color, gradient, shadow and related types and parsers",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/style",
   "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2020 Swim inc.",
@@ -11,21 +11,11 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20201021",
-    "@swim/codec": "3.11.0-dev.20201021",
-    "@swim/interpolate": "3.11.0-dev.20201021",
-    "@swim/structure": "3.11.0-dev.20201021",
-    "@swim/math": "3.11.0-dev.20201021",
-    "@swim/time": "3.11.0-dev.20201021",
-    "@swim/angle": "3.11.0-dev.20201021",
-    "@swim/length": "3.11.0-dev.20201021",
-    "@swim/color": "3.11.0-dev.20201021",
-    "@swim/font": "3.11.0-dev.20201021",
-    "@swim/shadow": "3.11.0-dev.20201021",
-    "@swim/gradient": "3.11.0-dev.20201021",
-    "@swim/transform": "3.11.0-dev.20201021",
-    "@swim/scale": "3.11.0-dev.20201021",
-    "@swim/transition": "3.11.0-dev.20201021",
-    "@swim/animate": "3.11.0-dev.20201021"
+    "@swim/util": "3.11.0-dev.20210331",
+    "@swim/codec": "3.11.0-dev.20210331",
+    "@swim/mapping": "3.11.0-dev.20210331",
+    "@swim/structure": "3.11.0-dev.20210331",
+    "@swim/math": "3.11.0-dev.20210331",
+    "@swim/time": "3.11.0-dev.20210331"
   }
 }

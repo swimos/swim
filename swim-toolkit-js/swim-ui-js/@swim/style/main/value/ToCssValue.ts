@@ -15,20 +15,20 @@
 import {ToStyleString} from "./ToStyleString";
 
 export interface ToCssValue {
-  toCssValue(): CSSStyleValue | undefined;
+  toCssValue(): CSSStyleValue | null;
 }
 
-export let ToCssValue: (value: unknown) => CSSStyleValue | undefined;
+export let ToCssValue: (value: unknown) => CSSStyleValue | null;
 
 if (typeof CSSStyleValue !== "undefined") { // CSS Typed OM support
-  ToCssValue = function (value: unknown): CSSStyleValue | undefined {
+  ToCssValue = function (value: unknown): CSSStyleValue | null {
     if (typeof value === "object" && value !== null &&
         typeof (value as ToCssValue).toCssValue === "function") {
       return (value as ToCssValue).toCssValue();
     } else if (typeof value === "number") {
       return new CSSUnitValue(value, "number");
     } else {
-      return void 0;
+      return null;
     }
   };
 } else {

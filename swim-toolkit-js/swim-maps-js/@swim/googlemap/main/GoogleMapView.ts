@@ -12,168 +12,200 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyPointR2, PointR2} from "@swim/math";
+import {Equivalent} from "@swim/util";
+import {AnyTiming, Timing} from "@swim/mapping";
+import type {AnyPointR2, PointR2} from "@swim/math";
+import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
+import {Look, Mood} from "@swim/theme";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {ViewHtml, HtmlView} from "@swim/dom";
 import {GraphicsViewContext, CanvasView} from "@swim/graphics";
-import {AnyGeoPoint, GeoPoint, GeoBox, MapLayerView} from "@swim/map";
+import {MapView, MapLayerView} from "@swim/map";
 import {GoogleMapProjection} from "./GoogleMapProjection";
-import {GoogleMapViewObserver} from "./GoogleMapViewObserver";
-import {GoogleMapViewController} from "./GoogleMapViewController";
+import type {GoogleMapViewObserver} from "./GoogleMapViewObserver";
+import type {GoogleMapViewController} from "./GoogleMapViewController";
 
-export class GoogleMapView extends MapLayerView {
-  /** @hidden */
-  readonly _map: google.maps.Map;
-  /** @hidden */
-  _geoProjection: GoogleMapProjection;
-  /** @hidden */
-  _mapOverlay: google.maps.OverlayView | null;
-  /** @hidden */
-  _mapZoom: number;
-  /** @hidden */
-  _mapHeading: number;
-  /** @hidden */
-  _mapTilt: number;
-
+export class GoogleMapView extends MapLayerView implements MapView {
   constructor(map: google.maps.Map) {
     super();
+    Object.defineProperty(this, "map", {
+      value: map,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "geoProjection", {
+      value: new GoogleMapProjection(this),
+      enumerable: true,
+      configurable: true,
+    });
+    const center = map.getCenter();
+    Object.defineProperty(this, "mapCenter", {
+      value: new GeoPoint(center.lng(), center.lat()),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "mapZoom", {
+      value: map.getZoom(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "mapHeading", {
+      value: map.getHeading(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "mapTilt", {
+      value: map.getTilt(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "mapOverlay", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
     this.onMapRender = this.onMapRender.bind(this);
-    this._map = map;
-    this._geoProjection = new GoogleMapProjection(this);
-    this._mapOverlay = null;
-    this._mapZoom = map.getZoom();
-    this._mapHeading = map.getHeading();
-    this._mapTilt = map.getTilt();
     this.initMap(map);
   }
 
-  get map(): google.maps.Map {
-    return this._map;
-  }
+  declare readonly viewController: GoogleMapViewController | null;
+
+  declare readonly viewObservers: ReadonlyArray<GoogleMapViewObserver>;
+
+  declare readonly map: google.maps.Map;
 
   protected initMap(map: google.maps.Map): void {
     // hook
   }
 
-  // @ts-ignore
-  declare readonly viewController: GoogleMapViewController | null;
-
-  // @ts-ignore
-  declare readonly viewObservers: ReadonlyArray<GoogleMapViewObserver>;
-
   project(lnglat: AnyGeoPoint): PointR2;
   project(lng: number, lat: number): PointR2;
   project(lng: AnyGeoPoint | number, lat?: number): PointR2 {
-    return this._geoProjection.project.apply(this._geoProjection, arguments);
+    if (arguments.length === 1) {
+      return this.geoProjection.project(lng as AnyGeoPoint);
+    } else {
+      return this.geoProjection.project(lng as number, lat!);
+    }
   }
 
   unproject(point: AnyPointR2): GeoPoint;
   unproject(x: number, y: number): GeoPoint;
   unproject(x: AnyPointR2 | number, y?: number): GeoPoint {
-    return this._geoProjection.unproject.apply(this._geoProjection, arguments);
-  }
-
-  get geoProjection(): GoogleMapProjection {
-    return this._geoProjection;
-  }
-
-  setGeoProjection(geoProjection: GoogleMapProjection): void {
-    this.willSetGeoProjection(geoProjection);
-    this._geoProjection = geoProjection;
-    this.onSetGeoProjection(geoProjection);
-    this.didSetGeoProjection(geoProjection);
-  }
-
-  protected willSetGeoProjection(geoProjection: GoogleMapProjection): void {
-    this.willObserve(function (viewObserver: GoogleMapViewObserver): void {
-      if (viewObserver.viewWillSetGeoProjection !== void 0) {
-        viewObserver.viewWillSetGeoProjection(geoProjection, this);
-      }
-    });
-  }
-
-  protected onSetGeoProjection(geoProjection: GoogleMapProjection): void {
-    if (!this.isHidden() && !this.isCulled()) {
-      this.requireUpdate(View.NeedsProject, true);
+    if (arguments.length === 1) {
+      return this.geoProjection.unproject(x as AnyPointR2);
+    } else {
+      return this.geoProjection.unproject(x as number, y!);
     }
   }
 
-  protected didSetGeoProjection(geoProjection: GoogleMapProjection): void {
-    this.didObserve(function (viewObserver: GoogleMapViewObserver): void {
-      if (viewObserver.viewDidSetGeoProjection !== void 0) {
-        viewObserver.viewDidSetGeoProjection(geoProjection, this);
+  // @ts-ignore
+  declare readonly geoProjection: GoogleMapProjection;
+
+  declare readonly mapCenter: GeoPoint;
+
+  // @ts-ignore
+  declare readonly mapZoom: number;
+
+  // @ts-ignore
+  declare readonly mapHeading: number;
+
+  // @ts-ignore
+  declare readonly mapTilt: number;
+
+  moveTo(mapCenter: AnyGeoPoint | undefined, mapZoom: number | undefined,
+         timing?: AnyTiming | boolean): void {
+    if (timing === void 0 || timing === true) {
+      timing = this.getLookOr(Look.timing, Mood.ambient, false);
+    } else {
+      timing = Timing.fromAny(timing);
+    }
+    if (mapCenter !== void 0) {
+      mapCenter = GeoPoint.fromAny(mapCenter);
+      if (!this.mapCenter.equivalentTo(mapCenter, 1e-5)) {
+        this.map.panTo(mapCenter);
       }
-    });
-  }
-
-  get mapOverlay(): google.maps.OverlayView | null {
-    return this._mapOverlay;
-  }
-
-  get mapZoom(): number {
-    return this._mapZoom;
-  }
-
-  setMapZoom(newMapZoom: number): void {
-    const oldMapZoom = this._mapZoom;
-    if (oldMapZoom !== newMapZoom) {
-      this.willSetMapZoom(newMapZoom, oldMapZoom);
-      this._mapZoom = newMapZoom;
-      this.onSetMapZoom(newMapZoom, oldMapZoom);
-      this.didSetMapZoom(newMapZoom, oldMapZoom);
+    }
+    if (mapZoom !== void 0 && !Equivalent(this.mapZoom, mapZoom, 1e-5)) {
+      this.map.setZoom(mapZoom);
     }
   }
 
-  protected willSetMapZoom(newMapZoom: number, oldMapZoom: number): void {
-    this.didObserve(function (viewObserver: GoogleMapViewObserver): void {
-      if (viewObserver.viewWillSetMapZoom !== void 0) {
-        viewObserver.viewWillSetMapZoom(newMapZoom, oldMapZoom, this);
+  protected mapWillMove(mapCenter: GeoPoint, mapZoom: number): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.mapViewWillMove !== void 0) {
+      viewController.mapViewWillMove(mapCenter, mapZoom, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.mapViewWillMove !== void 0) {
+        viewObserver.mapViewWillMove(mapCenter, mapZoom, this);
       }
-    });
+    }
   }
 
-  protected onSetMapZoom(newMapZoom: number, oldMapZoom: number): void {
-    // hook
-  }
-
-  protected didSetMapZoom(newMapZoom: number, oldMapZoom: number): void {
-    this.didObserve(function (viewObserver: GoogleMapViewObserver): void {
-      if (viewObserver.viewDidSetMapZoom !== void 0) {
-        viewObserver.viewDidSetMapZoom(newMapZoom, oldMapZoom, this);
+  protected mapDidMove(mapCenter: GeoPoint, mapZoom: number): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!
+      if (viewObserver.mapViewDidMove !== void 0) {
+        viewObserver.mapViewDidMove(mapCenter, mapZoom, this);
       }
-    });
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.mapViewDidMove !== void 0) {
+      viewController.mapViewDidMove(mapCenter, mapZoom, this);
+    }
   }
 
-  get mapHeading(): number {
-    return this._mapHeading;
-  }
-
-  get mapTilt(): number {
-    return this._mapTilt;
-  }
+  declare readonly mapOverlay: google.maps.OverlayView | null;
 
   extendViewContext(viewContext: GraphicsViewContext): ViewContextType<this> {
     const mapViewContext = Object.create(viewContext);
-    mapViewContext.geoProjection = this._geoProjection;
+    mapViewContext.geoProjection = this.geoProjection;
     mapViewContext.geoFrame = this.geoFrame;
-    mapViewContext.mapZoom = this._mapZoom;
-    mapViewContext.mapHeading = this._mapHeading;
-    mapViewContext.mapTilt = this._mapTilt;
+    mapViewContext.mapZoom = this.mapZoom;
+    mapViewContext.mapHeading = this.mapHeading;
+    mapViewContext.mapTilt = this.mapTilt;
     return mapViewContext;
   }
 
   get geoFrame(): GeoBox {
-    const bounds = this._map.getBounds()!;
+    const bounds = this.map.getBounds()!;
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
     return new GeoBox(sw.lng(), sw.lat(), ne.lng(), ne.lat());
   }
 
-  protected onMapRender(): void {
-    this._mapHeading = this._map.getHeading();
-    this._mapTilt = this._map.getTilt();
-    this.setMapZoom(this._map.getZoom());
-    this.setGeoProjection(this._geoProjection);
+  /** @hidden */
+  onMapRender(): void {
+    this.mapWillMove(this.mapCenter, this.mapZoom);
+    const map = this.map;
+    const center = map.getCenter();
+    Object.defineProperty(this, "mapCenter", {
+      value: new GeoPoint(center.lng(), center.lat()),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "mapZoom", {
+      value: map.getZoom(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "mapHeading", {
+      value: map.getHeading(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "mapTilt", {
+      value: map.getTilt(),
+      enumerable: true,
+      configurable: true,
+    });
+    if (!this.isHidden() && !this.isCulled()) {
+      this.requireUpdate(View.NeedsProject, true);
+    }
+    this.mapDidMove(this.mapCenter, this.mapZoom);
   }
 
   overlayCanvas(): CanvasView | null {
@@ -181,36 +213,49 @@ export class GoogleMapView extends MapLayerView {
       return this.getSuperView(CanvasView);
     } else {
       class GoogleMapOverlayView extends google.maps.OverlayView {
-        readonly _mapView: GoogleMapView;
-        readonly _canvasView: CanvasView;
         constructor(mapView: GoogleMapView) {
           super();
-          this._mapView = mapView;
-          this._canvasView = CanvasView.create();
-          this._canvasView.append(this._mapView);
+          Object.defineProperty(this, "mapView", {
+            value: mapView,
+            enumerable: true,
+            configurable: true,
+          });
+          Object.defineProperty(this, "canvasView", {
+            value: CanvasView.create(),
+            enumerable: true,
+            configurable: true,
+          });
+          this.canvasView.appendChildView(mapView);
         }
+        declare readonly mapView: GoogleMapView;
+        declare readonly canvasView: CanvasView;
         onAdd(): void {
           const panes = this.getPanes();
           const overlayMouseTarget = GoogleMapView.materializeAncestors(panes.overlayMouseTarget as HTMLElement);
           const overlayContainer = overlayMouseTarget.parentView as HtmlView;
           const container = overlayContainer.parentView as HtmlView;
-          container.append(this._canvasView!);
+          container.appendChildView(this.canvasView!);
         }
         onRemove(): void {
-          this._canvasView.remove();
+          this.canvasView.remove();
         }
         draw(): void {
-          this._mapView.onMapRender();
+          this.mapView.onMapRender();
         }
       }
       const mapOverlay = new GoogleMapOverlayView(this);
-      mapOverlay.setMap(this._map);
-      this._mapOverlay = mapOverlay;
-      return mapOverlay._canvasView;
+      mapOverlay.setMap(this.map);
+      Object.defineProperty(this, "mapOverlay", {
+        value: mapOverlay,
+        enumerable: true,
+        configurable: true,
+      });
+      return mapOverlay.canvasView;
     }
   }
 
-  private static materializeAncestors(node: HTMLElement): HtmlView {
+  /** @hidden */
+  static materializeAncestors(node: HTMLElement): HtmlView {
     const parentNode = node.parentNode;
     if (parentNode instanceof HTMLElement && !(parentNode as ViewHtml).view) {
       GoogleMapView.materializeAncestors(parentNode);

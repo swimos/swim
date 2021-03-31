@@ -6,6 +6,7 @@
   </head>
   <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
     <script>
@@ -35,9 +36,9 @@ popover.hideModal(false);
 bodyView.modalService.presentModal(popover);
 
 //setInterval(function () {
-//  const tween = swim.Transition.duration(1000);
-//  source.left(Math.random() * window.innerWidth, tween)
-//        .top(Math.random() * window.innerHeight, tween);
+//  const timing = swim.Easing.linear.withDuration(1000);
+//  source.left(Math.random() * window.innerWidth, timing)
+//        .top(Math.random() * window.innerHeight, timing);
 //}, 1000);
 
 window.addEventListener("mousemove", function (event) {

@@ -12,10 +12,56 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from "./types";
+
 export {
-  ViewStyle,
-  StyleViewInit,
-  StyleView,
-} from "./StyleView";
-export {StyleViewObserver} from "./StyleViewObserver";
-export {StyleViewController} from "./StyleViewController";
+  StyleContextPrototype,
+  StyleContext,
+} from "./StyleContext";
+
+export {
+  StyleAnimatorMemberType,
+  StyleAnimatorMemberInit,
+  StyleAnimatorMemberKey,
+  StyleAnimatorMemberMap,
+  StyleAnimatorInit,
+  StyleAnimatorDescriptor,
+  StyleAnimatorDescriptorExtends,
+  StyleAnimatorDescriptorFromAny,
+  StyleAnimatorConstructor,
+  StyleAnimatorClass,
+  StyleAnimator,
+} from "./StyleAnimator";
+
+export {
+  StyleAnimatorConstraintInit,
+  StyleAnimatorConstraintDescriptor,
+  StyleAnimatorConstraintDescriptorExtends,
+  StyleAnimatorConstraintDescriptorFromAny,
+  StyleAnimatorConstraintConstructor,
+  StyleAnimatorConstraintClass,
+  StyleAnimatorConstraint,
+} from "./StyleAnimatorConstraint";
+
+export {StringStyleAnimator} from "./StringStyleAnimator";
+
+export {NumberStyleAnimator} from "./NumberStyleAnimator";
+
+export {NumberStyleAnimatorConstraint} from "./NumberStyleAnimatorConstraint";
+
+export {LengthStyleAnimator} from "./LengthStyleAnimator";
+
+export {LengthStyleAnimatorConstraint} from "./LengthStyleAnimatorConstraint";
+
+export {ColorStyleAnimator} from "./ColorStyleAnimator";
+
+export {FontFamilyStyleAnimator} from "./FontFamilyStyleAnimator";
+
+export {BoxShadowStyleAnimator} from "./BoxShadowStyleAnimator";
+
+export {TransformStyleAnimator} from "./TransformStyleAnimator";
+
+export {
+  StyleMapInit,
+  StyleMap,
+} from "./StyleMap";

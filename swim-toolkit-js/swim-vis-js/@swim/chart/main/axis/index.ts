@@ -19,12 +19,24 @@ export {
   AxisView,
 } from "./AxisView";
 export {AxisViewObserver} from "./AxisViewObserver";
-export {AxisViewController} from "./AxisViewController";
 
 export {TopAxisView} from "./TopAxisView";
-
 export {RightAxisView} from "./RightAxisView";
-
 export {BottomAxisView} from "./BottomAxisView";
-
 export {LeftAxisView} from "./LeftAxisView";
+
+export {AxisTrait} from "./AxisTrait";
+export {AxisTraitObserver} from "./AxisTraitObserver";
+
+export {TopAxisTrait} from "./TopAxisTrait";
+export {RightAxisTrait} from "./RightAxisTrait";
+export {BottomAxisTrait} from "./BottomAxisTrait";
+export {LeftAxisTrait} from "./LeftAxisTrait";
+
+export {AxisComponent} from "./AxisComponent";
+export {AxisComponentObserver} from "./AxisComponentObserver";
+
+export {TopAxisComponent} from "./TopAxisComponent";
+export {RightAxisComponent} from "./RightAxisComponent";
+export {BottomAxisComponent} from "./BottomAxisComponent";
+export {LeftAxisComponent} from "./LeftAxisComponent";

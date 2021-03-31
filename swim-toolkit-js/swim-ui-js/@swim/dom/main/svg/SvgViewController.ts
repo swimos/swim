@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {ElementViewController} from "../element/ElementViewController";
-import {SvgView} from "./SvgView";
-import {SvgViewObserver} from "./SvgViewObserver";
+import type {SvgView} from "./SvgView";
+import type {SvgViewObserver} from "./SvgViewObserver";
 
 export class SvgViewController<V extends SvgView = SvgView> extends ElementViewController<V> implements SvgViewObserver<V> {
 }

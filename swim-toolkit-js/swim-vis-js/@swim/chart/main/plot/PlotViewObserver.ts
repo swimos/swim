@@ -12,8 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicsViewObserver} from "@swim/graphics";
-import {PlotView} from "./PlotView";
+import type {View} from "@swim/view";
+import type {DataPointView} from "../data/DataPointView";
+import type {ScaledXYViewObserver} from "../scaled/ScaledXYViewObserver";
+import type {PlotView} from "./PlotView";
 
-export interface PlotViewObserver<X = unknown, Y = unknown, V extends PlotView<X, Y> = PlotView<X, Y>> extends GraphicsViewObserver<V> {
+export interface PlotViewObserver<X, Y, V extends PlotView<X, Y> = PlotView<X, Y>> extends ScaledXYViewObserver<X, Y, V> {
+  plotViewWillSetDataPoint?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, targetView: View | null, view: V): void;
+
+  plotViewDidSetDataPoint?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, targetView: View | null, view: V): void;
 }

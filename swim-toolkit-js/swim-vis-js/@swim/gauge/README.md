@@ -24,18 +24,20 @@ be found in `node_modules/@swim/gauge/dist/main/swim-gauge.js`.
 
 ### Browser
 
-Browser applications can load `swim-vis.js`—which bundles the
-**@swim/gauge** library—along with its `swim-core.js` and `swim-ui.js`
+Browser applications can load `swim-vis.js`—which bundles the **@swim/gauge**
+library—along with its `swim-core.js`, `swim-mesh.js`, and `swim-ui.js`
 dependencies, directly from the SwimOS CDN.
 
 ```html
 <!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-mesh.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-vis.js"></script>
 
 <!-- Production -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-mesh.min.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.min.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-vis.min.js"></script>
 ```
@@ -79,10 +81,9 @@ var gauge = require("@swim/gauge");
 
 When loaded by a web browser, the `swim-gauge.js` script adds all
 **@swim/gauge** library exports to the global `swim` namespace.
-The `swim-gauge.js` script requires that `swim-core.js` and `swim-ui.js`
-have already been loaded.
+The `swim-gauge.js` script requires that `swim-core.js`, and `swim-mesh.js`,
+and `swim-ui.js` have already been loaded.
 
-The `swim-toolkit.js` script also adds all **@swim/gauge** library
-exports to the global `swim` namespace, making it a drop-in replacement for
-`swim-ui.js` and `swim-gauge.js` when additional **@swim/toolkit** frameworks
-are needed.
+The `swim-toolkit.js` script also adds all **@swim/gauge** library exports to
+the global `swim` namespace, making it a drop-in replacement for `swim-ui.js`
+and `swim-gauge.js` when additional **@swim/toolkit** frameworks are needed.

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View, ViewObserver} from "@swim/view";
+import type {View, ViewObserver} from "@swim/view";
 
 export interface ButtonObserver<V extends View = View> extends ViewObserver<V> {
   buttonDidPress?(view: V): void;

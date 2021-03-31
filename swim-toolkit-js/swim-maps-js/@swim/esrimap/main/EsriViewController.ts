@@ -12,25 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {MapGraphicsViewController} from "@swim/map";
-import {EsriProjection} from "./EsriProjection";
-import {EsriView} from "./EsriView";
-import {EsriViewObserver} from "./EsriViewObserver";
+import type {GeoPoint} from "@swim/geo";
+import {MapGraphicsViewController, MapViewController} from "@swim/map";
+import type {EsriView} from "./EsriView";
+import type {EsriViewObserver} from "./EsriViewObserver";
 
-export class EsriViewController<V extends EsriView = EsriView> extends MapGraphicsViewController<V> implements EsriViewObserver<V> {
-  viewWillSetGeoProjection(geoProjection: EsriProjection, view: V): void {
+export class EsriViewController<V extends EsriView = EsriView> extends MapGraphicsViewController<V> implements MapViewController<V>, EsriViewObserver<V> {
+  mapViewWillMove(mapCenter: GeoPoint, mapZoom: number, view: V): void {
     // hook
   }
 
-  viewDidSetGeoProjection(geoProjection: EsriProjection, view: V): void {
-    // hook
-  }
-
-  viewWillSetMapZoom(newMapZoom: number, oldMapZoom: number, view: V): void {
-    // hook
-  }
-
-  viewDidSetMapZoom(newMapZoom: number, oldMapZoom: number, view: V): void {
+  mapViewDidMove(mapCenter: GeoPoint, mapZoom: number, view: V): void {
     // hook
   }
 }

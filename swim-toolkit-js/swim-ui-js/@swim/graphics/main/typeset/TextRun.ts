@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Objects} from "@swim/util";
+import {Equals} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 import {AnyPointR2, PointR2, BoxR2} from "@swim/math";
-import {AnyColor, Color} from "@swim/color";
-import {AnyFont, Font} from "@swim/font";
-import {Renderer, CanvasContext, CanvasRenderer, Graphics} from "@swim/render";
+import {AnyFont, Font, AnyColor, Color} from "@swim/style";
+import type {GraphicsRenderer} from "../graphics/GraphicsRenderer";
+import type {Graphics} from "../graphics/Graphics";
+import type {CanvasContext} from "../canvas/CanvasContext";
+import {CanvasRenderer} from "../canvas/CanvasRenderer";
 
 export type AnyTextRun = TextRun | TextRunInit | string;
 
@@ -31,158 +33,139 @@ export interface TextRunInit {
 }
 
 export class TextRun implements Graphics, Equals, Debug {
-  /** @hidden */
-  readonly _text: string;
-  /** @hidden */
-  readonly _font: Font | null;
-  /** @hidden */
-  readonly _textAlign: CanvasTextAlign | null;
-  /** @hidden */
-  readonly _textBaseline: CanvasTextBaseline | null;
-  /** @hidden */
-  readonly _textOrigin: PointR2 | null;
-  /** @hidden */
-  readonly _textColor: Color | null;
-
   constructor(text: string, font: Font | null, textAlign: CanvasTextAlign | null,
               textBaseline: CanvasTextBaseline | null, textOrigin: PointR2 | null,
               textColor: Color | null) {
-    this._text = text;
-    this._font = font;
-    this._textAlign = textAlign;
-    this._textBaseline = textBaseline;
-    this._textOrigin = textOrigin;
-    this._textColor = textColor;
+    Object.defineProperty(this, "text", {
+      value: text,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "font", {
+      value: font,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "textAlign", {
+      value: textAlign,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "textBaseline", {
+      value: textBaseline,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "textOrigin", {
+      value: textOrigin,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "textColor", {
+      value: textColor,
+      enumerable: true,
+    });
   }
 
-  text(): string;
-  text(text: string): TextRun;
-  text(text?: string): string | TextRun {
-    if (text === void 0) {
-      return this._text;
+  declare readonly text: string;
+
+  withText(text: string): TextRun {
+    if (this.text === text) {
+      return this;
     } else {
-      if (this._text === text) {
-        return this;
-      } else {
-        return this.copy(text, this._font, this._textAlign,
-                         this._textBaseline, this._textOrigin, this._textColor);
-      }
+      return this.copy(text, this.font, this.textAlign,
+                       this.textBaseline, this.textOrigin, this.textColor);
     }
   }
 
-  font(): Font | null;
-  font(font: AnyFont | null): TextRun;
-  font(font?: AnyFont | null): Font | null | TextRun {
-    if (font === void 0) {
-      return this._font;
+  declare readonly font: Font | null;
+
+  withFont(font: AnyFont | null): TextRun {
+    if (font !== null) {
+      font = Font.fromAny(font);
+    }
+    if (this.font === font) {
+      return this;
     } else {
-      if (font !== null) {
-        font = Font.fromAny(font);
-      }
-      if (this._font === font) {
-        return this;
-      } else {
-        return this.copy(this._text, font, this._textAlign,
-                         this._textBaseline, this._textOrigin, this._textColor);
-      }
+      return this.copy(this.text, font, this.textAlign,
+                       this.textBaseline, this.textOrigin, this.textColor);
     }
   }
 
-  textAlign(): CanvasTextAlign | null;
-  textAlign(textAlign: CanvasTextAlign | null): TextRun;
-  textAlign(textAlign?: CanvasTextAlign | null): CanvasTextAlign | null | TextRun {
-    if (textAlign === void 0) {
-      return this._textAlign;
+  declare readonly textAlign: CanvasTextAlign | null;
+
+  withTextAlign(textAlign: CanvasTextAlign | null): TextRun {
+    if (this.textAlign === textAlign) {
+      return this;
     } else {
-      if (this._textAlign === textAlign) {
-        return this;
-      } else {
-        return this.copy(this._text, this._font, textAlign,
-                         this._textBaseline, this._textOrigin, this._textColor);
-      }
+      return this.copy(this.text, this.font, textAlign,
+                       this.textBaseline, this.textOrigin, this.textColor);
     }
   }
 
-  textBaseline(): CanvasTextBaseline | null;
-  textBaseline(textBaseline: CanvasTextBaseline | null): TextRun;
-  textBaseline(textBaseline?: CanvasTextBaseline | null): CanvasTextBaseline | null | TextRun {
-    if (textBaseline === void 0) {
-      return this._textBaseline;
+  declare readonly textBaseline: CanvasTextBaseline | null;
+
+  withTextBaseline(textBaseline: CanvasTextBaseline | null): TextRun {
+    if (this.textBaseline === textBaseline) {
+      return this;
     } else {
-      if (this._textBaseline === textBaseline) {
-        return this;
-      } else {
-        return this.copy(this._text, this._font, this._textAlign,
-                         textBaseline, this._textOrigin, this._textColor);
-      }
+      return this.copy(this.text, this.font, this.textAlign,
+                       textBaseline, this.textOrigin, this.textColor);
     }
   }
 
-  textOrigin(): PointR2 | null;
-  textOrigin(textOrigin: AnyPointR2 | null): TextRun | null;
-  textOrigin(textOrigin?: AnyPointR2 | null): PointR2 | null | TextRun {
-    if (textOrigin === void 0) {
-      return this._textOrigin;
+  declare readonly textOrigin: PointR2 | null;
+
+  withTextOrigin(textOrigin: AnyPointR2 | null): TextRun | null {
+    if (textOrigin !== null) {
+      textOrigin = PointR2.fromAny(textOrigin);
+    }
+    if (Equals(this.textOrigin, textOrigin)) {
+      return this;
     } else {
-      if (textOrigin !== null) {
-        textOrigin = PointR2.fromAny(textOrigin);
-      }
-      if (Objects.equal(this._textOrigin, textOrigin)) {
-        return this;
-      } else {
-        return this.copy(this._text, this._font, this._textAlign,
-                         this._textBaseline, textOrigin as PointR2, this._textColor);
-      }
+      return this.copy(this.text, this.font, this.textAlign,
+                       this.textBaseline, textOrigin as PointR2, this.textColor);
     }
   }
 
-  textColor(): Color | null;
-  textColor(textColor: AnyColor | null): TextRun;
-  textColor(textColor?: AnyColor | null): Color | null | TextRun {
-    if (textColor === void 0) {
-      return this._textColor;
+  declare readonly textColor: Color | null;
+
+  withTextColor(textColor: AnyColor | null): TextRun {
+    if (textColor !== null) {
+      textColor = Color.fromAny(textColor);
+    }
+    if (Equals(this.textColor, textColor)) {
+      return this;
     } else {
-      if (textColor !== null) {
-        textColor = Color.fromAny(textColor);
-      }
-      if (Objects.equal(this._textColor, textColor)) {
-        return this;
-      } else {
-        return this.copy(this._text, this._font, this._textAlign,
-                         this._textBaseline, this._textOrigin, textColor);
-      }
+      return this.copy(this.text, this.font, this.textAlign,
+                       this.textBaseline, this.textOrigin, textColor);
     }
   }
 
-  render(renderer: Renderer, frame: BoxR2): void {
+  render(renderer: GraphicsRenderer, frame: BoxR2): void {
     if (renderer instanceof CanvasRenderer) {
       this.draw(renderer.context, frame);
     }
   }
 
-  draw(context: CanvasContext, frame: BoxR2) {
+  draw(context: CanvasContext, frame: BoxR2): void {
     this.renderText(context, frame);
   }
 
   protected renderText(context: CanvasContext, frame: BoxR2): void {
     context.save();
-    if (this._font !== null) {
-      context.font = this._font.toString();
+    if (this.font !== null) {
+      context.font = this.font.toString();
     }
-    if (this._textAlign !== null) {
-      context.textAlign = this._textAlign;
+    if (this.textAlign !== null) {
+      context.textAlign = this.textAlign;
     }
-    if (this._textBaseline !== null) {
-      context.textBaseline = this._textBaseline;
+    if (this.textBaseline !== null) {
+      context.textBaseline = this.textBaseline;
     }
-    let textOrigin = this._textOrigin;
+    let textOrigin = this.textOrigin;
     if (textOrigin === null) {
       textOrigin = PointR2.origin();
     }
-    if (this._textColor !== null) {
-      context.fillStyle = this._textColor.toString();
+    if (this.textColor !== null) {
+      context.fillStyle = this.textColor.toString();
     }
-    context.fillText(this._text, textOrigin.x, textOrigin.y);
+    context.fillText(this.text, textOrigin.x, textOrigin.y);
     context.restore();
   }
 
@@ -193,25 +176,25 @@ export class TextRun implements Graphics, Equals, Debug {
   }
 
   toAny(): TextRunInit {
-    const init: TextRunInit = {text: this._text};
-    init.text = this._text;
-    if (this._font !== null) {
-      init.font = this._font;
+    const init: TextRunInit = {text: this.text};
+    init.text = this.text;
+    if (this.font !== null) {
+      init.font = this.font;
     }
-    if (this._font !== null) {
-      init.font = this._font;
+    if (this.font !== null) {
+      init.font = this.font;
     }
-    if (this._textAlign !== null) {
-      init.textAlign = this._textAlign;
+    if (this.textAlign !== null) {
+      init.textAlign = this.textAlign;
     }
-    if (this._textBaseline !== null) {
-      init.textBaseline = this._textBaseline;
+    if (this.textBaseline !== null) {
+      init.textBaseline = this.textBaseline;
     }
-    if (this._textOrigin !== null) {
-      init.textOrigin = this._textOrigin;
+    if (this.textOrigin !== null) {
+      init.textOrigin = this.textOrigin;
     }
-    if (this._textColor !== null) {
-      init.textColor = this._textColor;
+    if (this.textColor !== null) {
+      init.textColor = this.textColor;
     }
     return init;
   }
@@ -220,33 +203,33 @@ export class TextRun implements Graphics, Equals, Debug {
     if (this === that) {
       return true;
     } else if (that instanceof TextRun) {
-      return this._text === that._text
-          && Objects.equal(this._font, that._font)
-          && this._textAlign === that._textAlign
-          && this._textBaseline === that._textBaseline
-          && Objects.equal(this._textOrigin, that._textOrigin)
-          && Objects.equal(this._textColor, that._textColor);
+      return this.text === that.text
+          && Equals(this.font, that.font)
+          && this.textAlign === that.textAlign
+          && this.textBaseline === that.textBaseline
+          && Equals(this.textOrigin, that.textOrigin)
+          && Equals(this.textColor, that.textColor);
     }
     return false;
   }
 
   debug(output: Output): void {
-    output = output.write("TextRun").write(46/*'.'*/).write("from").write(40/*'('*/)
-        .debug(this._text).write(41/*')'*/);
-    if (this._font !== null) {
-      output = output.write(46/*'.'*/).write("font").write(40/*'('*/).debug(this._font).write(41/*')'*/);
+    output = output.write("TextRun").write(46/*'.'*/).write("create").write(40/*'('*/)
+        .debug(this.text).write(41/*')'*/);
+    if (this.font !== null) {
+      output = output.write(46/*'.'*/).write("font").write(40/*'('*/).debug(this.font).write(41/*')'*/);
     }
-    if (this._textAlign !== null) {
-      output = output.write(46/*'.'*/).write("textAlign").write(40/*'('*/).debug(this._textAlign).write(41/*')'*/);
+    if (this.textAlign !== null) {
+      output = output.write(46/*'.'*/).write("textAlign").write(40/*'('*/).debug(this.textAlign).write(41/*')'*/);
     }
-    if (this._textBaseline !== null) {
-      output = output.write(46/*'.'*/).write("textBaseline").write(40/*'('*/).debug(this._textBaseline).write(41/*')'*/);
+    if (this.textBaseline !== null) {
+      output = output.write(46/*'.'*/).write("textBaseline").write(40/*'('*/).debug(this.textBaseline).write(41/*')'*/);
     }
-    if (this._textOrigin !== null) {
-      output = output.write(46/*'.'*/).write("textOrigin").write(40/*'('*/).debug(this._textOrigin).write(41/*')'*/);
+    if (this.textOrigin !== null) {
+      output = output.write(46/*'.'*/).write("textOrigin").write(40/*'('*/).debug(this.textOrigin).write(41/*')'*/);
     }
-    if (this._textColor !== null) {
-      output = output.write(46/*'.'*/).write("textColor").write(40/*'('*/).debug(this._textColor).write(41/*')'*/);
+    if (this.textColor !== null) {
+      output = output.write(46/*'.'*/).write("textColor").write(40/*'('*/).debug(this.textColor).write(41/*')'*/);
     }
   }
 
@@ -254,12 +237,12 @@ export class TextRun implements Graphics, Equals, Debug {
     return Format.debug(this);
   }
 
-  static from(text: string,
-              font: AnyFont | null = null,
-              textAlign: CanvasTextAlign | null = null,
-              textBaseline: CanvasTextBaseline | null = null,
-              textOrigin: AnyPointR2 | null = null,
-              textColor: AnyColor | null = null): TextRun {
+  static create(text: string,
+                font: AnyFont | null = null,
+                textAlign: CanvasTextAlign | null = null,
+                textBaseline: CanvasTextBaseline | null = null,
+                textOrigin: AnyPointR2 | null = null,
+                textColor: AnyColor | null = null): TextRun {
     if (font !== null) {
       font = Font.fromAny(font);
     }
@@ -272,15 +255,15 @@ export class TextRun implements Graphics, Equals, Debug {
     return new TextRun(text, font, textAlign, textBaseline, textOrigin as PointR2, textColor);
   }
 
-  static fromAny(run: AnyTextRun): TextRun {
-    if (run instanceof TextRun) {
-      return run;
-    } else if (typeof run === "string") {
-      return TextRun.from(run);
-    } else if (typeof run === "object" && run !== null) {
-      return TextRun.from(run.text, run.font, run.textAlign, run.textBaseline,
-                          run.textOrigin, run.textColor);
+  static fromAny(value: AnyTextRun): TextRun {
+    if (value instanceof TextRun) {
+      return value;
+    } else if (typeof value === "string") {
+      return TextRun.create(value);
+    } else if (typeof value === "object" && value !== null) {
+      return TextRun.create(value.text, value.font, value.textAlign, value.textBaseline,
+                            value.textOrigin, value.textColor);
     }
-    throw new TypeError("" + run);
+    throw new TypeError("" + value);
   }
 }

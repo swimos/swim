@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {NodeViewController} from "../node/NodeViewController";
-import {ElementView} from "./ElementView";
-import {ElementViewObserver} from "./ElementViewObserver";
+import type {ElementView} from "./ElementView";
+import type {ElementViewObserver} from "./ElementViewObserver";
 
 export class ElementViewController<V extends ElementView = ElementView> extends NodeViewController<V> implements ElementViewObserver<V> {
   viewWillSetAttribute(name: string, value: unknown, view: V): void {

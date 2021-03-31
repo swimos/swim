@@ -12,50 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {BoxR2} from "@swim/math";
-import {Transform} from "@swim/transform";
-import {
-  AnyRenderer,
-  RendererType,
-  Renderer,
-  CanvasCompositeOperation,
-  CanvasRenderer,
-  WebGLRenderer,
-} from "@swim/render";
+import {BoxR2, Transform} from "@swim/math";
 import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
-import {GraphicsViewContext} from "../GraphicsViewContext";
-import {GraphicsViewInit, GraphicsView} from "../GraphicsView";
-import {LayerView} from "../LayerView";
-import {RasterViewContext} from "./RasterViewContext";
-import {RasterViewObserver} from "./RasterViewObserver";
-import {RasterViewController} from "./RasterViewController";
+import type {AnyGraphicsRenderer, GraphicsRendererType, GraphicsRenderer} from "../graphics/GraphicsRenderer";
+import type {GraphicsViewContext} from "../graphics/GraphicsViewContext";
+import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
+import {LayerView} from "../layer/LayerView";
+import {WebGLRenderer} from "../webgl/WebGLRenderer";
+import type {CanvasCompositeOperation} from "../canvas/CanvasContext";
+import {CanvasRenderer} from "../canvas/CanvasRenderer";
+import {CanvasView} from "../canvas/CanvasView";
+import type {RasterViewContext} from "./RasterViewContext";
 
 export interface RasterViewInit extends GraphicsViewInit {
-  viewController?: RasterViewController;
   opacity?: number;
   compositeOperation?: CanvasCompositeOperation;
 }
 
 export class RasterView extends LayerView {
-  /** @hidden */
-  _canvas: HTMLCanvasElement;
-  /** @hidden */
-  _renderer: Renderer | null | undefined;
-  /** @hidden */
-  _rasterFrame: BoxR2;
-
   constructor() {
     super();
-    this._canvas = this.createCanvas();
-    this._renderer = void 0;
-    this._rasterFrame = BoxR2.undefined();
+    Object.defineProperty(this, "canvas", {
+      value: this.createCanvas(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "renderer", {
+      value: this.createRenderer(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "rasterFrame", {
+      value: BoxR2.undefined(),
+      enumerable: true,
+      configurable: true,
+    });
   }
-
-  // @ts-ignore
-  declare readonly viewController: RasterViewController | null;
-
-  // @ts-ignore
-  declare readonly viewObservers: ReadonlyArray<RasterViewObserver>;
 
   initView(init: RasterViewInit): void {
     super.initView(init);
@@ -68,55 +60,52 @@ export class RasterView extends LayerView {
   }
 
   @ViewAnimator({type: Number, state: 1})
-  opacity: ViewAnimator<this, number>;
+  declare opacity: ViewAnimator<this, number>;
 
   @ViewAnimator({type: String, state: "source-over"})
-  compositeOperation: ViewAnimator<this, CanvasCompositeOperation>;
+  declare compositeOperation: ViewAnimator<this, CanvasCompositeOperation>;
 
   get pixelRatio(): number {
     return window.devicePixelRatio || 1;
   }
 
-  get canvas(): HTMLCanvasElement {
-    return this._canvas;
-  }
+  /** @hidden */
+  declare readonly canvas: HTMLCanvasElement;
 
-  get compositor(): Renderer | null {
+  get compositor(): GraphicsRenderer | null {
     const parentView = this.parentView;
-    if (parentView instanceof GraphicsView || parentView instanceof GraphicsView.Canvas) {
+    if (parentView instanceof GraphicsView || parentView instanceof CanvasView) {
       return parentView.renderer;
     } else {
       return null;
     }
   }
 
-  get renderer(): Renderer | null {
-    let renderer = this._renderer;
-    if (renderer === void 0) {
-      renderer = this.createRenderer();
-      this._renderer = renderer;
-    }
-    return renderer;
-  }
+  // @ts-ignore
+  declare readonly renderer: GraphicsRenderer | null;
 
-  setRenderer(renderer: AnyRenderer | null): void {
+  setRenderer(renderer: AnyGraphicsRenderer | null): void {
     if (typeof renderer === "string") {
-      renderer = this.createRenderer(renderer as RendererType);
+      renderer = this.createRenderer(renderer as GraphicsRendererType);
     }
-    this._renderer = renderer;
+    Object.defineProperty(this, "renderer", {
+      value: renderer,
+      enumerable: true,
+      configurable: true,
+    });
     this.resetRenderer();
   }
 
-  protected createRenderer(rendererType: RendererType = "canvas"): Renderer | null {
+  protected createRenderer(rendererType: GraphicsRendererType = "canvas"): GraphicsRenderer | null {
     if (rendererType === "canvas") {
-      const context = this._canvas.getContext("2d");
+      const context = this.canvas.getContext("2d");
       if (context !== null) {
-        return new CanvasRenderer(context, this.pixelRatio);
+        return new CanvasRenderer(context, this.pixelRatio, this.theme.state, this.mood.state);
       } else {
         throw new Error("Failed to create canvas rendering context");
       }
     } else if (rendererType === "webgl") {
-      const context = this._canvas.getContext("webgl");
+      const context = this.canvas.getContext("webgl");
       if (context !== null) {
         return new WebGLRenderer(context, this.pixelRatio);
       } else {
@@ -127,74 +116,39 @@ export class RasterView extends LayerView {
     }
   }
 
-  protected modifyUpdate(targetView: View, updateFlags: ViewFlags): ViewFlags {
-    let additionalFlags = 0;
-    if ((updateFlags & View.UpdateMask) !== 0) {
-      if ((updateFlags & View.ProcessMask) !== 0) {
-        additionalFlags |= View.NeedsProcess;
-      }
-      if ((updateFlags & View.DisplayMask) !== 0) {
-        additionalFlags |= View.NeedsDisplay;
-      }
-      additionalFlags |= View.NeedsRender | View.NeedsComposite;
-    }
-    return additionalFlags;
+  protected didRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
+    super.didRequestUpdate(targetView, updateFlags, immediate);
+    this.requireUpdate(View.NeedsRender | View.NeedsComposite);
   }
 
-  /** @hidden */
-  protected doDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    let cascadeFlags = displayFlags;
-    this._viewFlags |= View.TraversingFlag | View.DisplayingFlag;
-    this._viewFlags &= ~View.NeedsDisplay;
-    try {
-      this.willDisplay(viewContext);
-      if (((this._viewFlags | displayFlags) & View.NeedsLayout) !== 0) {
-        this.willLayout(viewContext);
-        cascadeFlags |= View.NeedsLayout;
-        this._viewFlags &= ~View.NeedsLayout;
-      }
-      if (((this._viewFlags | displayFlags) & View.NeedsRender) !== 0) {
-        this.willRender(viewContext);
-        cascadeFlags |= View.NeedsRender;
-        this._viewFlags &= ~View.NeedsRender;
-      }
-      if (((this._viewFlags | displayFlags) & View.NeedsComposite) !== 0) {
-        this.willComposite(viewContext);
-        cascadeFlags |= View.NeedsComposite;
-        this._viewFlags &= ~View.NeedsComposite;
-      }
-
-      this.onDisplay(viewContext);
-      if ((cascadeFlags & View.NeedsLayout) !== 0) {
-        this.onLayout(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsRender) !== 0) {
-        this.onRender(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsComposite) !== 0) {
-        this.onComposite(viewContext);
-      }
-
-      this.doDisplayChildViews(cascadeFlags, viewContext);
-
-      if ((cascadeFlags & View.NeedsComposite) !== 0) {
-        this.didComposite(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsRender) !== 0) {
-        this.didRender(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsLayout) !== 0) {
-        this.didLayout(viewContext);
-      }
-      this.didDisplay(viewContext);
-    } finally {
-      this._viewFlags &= ~(View.TraversingFlag | View.DisplayingFlag);
+  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+    if ((this.viewFlags & View.ProcessMask) !== 0 || (processFlags & View.NeedsResize) !== 0) {
+      this.requireUpdate(View.NeedsRender | View.NeedsComposite);
+    } else {
+      processFlags = 0;
     }
+    return processFlags;
   }
 
   protected onResize(viewContext: ViewContextType<this>): void {
     super.onResize(viewContext);
-    this.resizeCanvas(this._canvas);
+    this.requireUpdate(View.NeedsLayout | View.NeedsRender | View.NeedsComposite);
+  }
+
+  needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+    if ((this.viewFlags & View.DisplayMask) !== 0) {
+      displayFlags |= View.NeedsRender | View.NeedsComposite;
+    } else if ((displayFlags & View.NeedsComposite) !== 0) {
+      displayFlags = View.NeedsDisplay | View.NeedsComposite;
+    } else {
+      displayFlags = 0;
+    }
+    return displayFlags;
+  }
+
+  protected onLayout(viewContext: ViewContextType<this>): void {
+    super.onLayout(viewContext);
+    this.resizeCanvas(this.canvas);
     this.resetRenderer();
   }
 
@@ -203,24 +157,15 @@ export class RasterView extends LayerView {
     this.clearCanvas();
   }
 
-  protected willComposite(viewContext: ViewContextType<this>): void {
-    this.willObserve(function (viewObserver: RasterViewObserver): void {
-      if (viewObserver.viewWillRender !== void 0) {
-        viewObserver.viewWillRender(viewContext, this);
-      }
-    });
-  }
-
-  protected onComposite(viewContext: ViewContextType<this>): void {
-    this.compositeImage(viewContext);
-  }
-
   protected didComposite(viewContext: ViewContextType<this>): void {
-    this.didObserve(function (viewObserver: RasterViewObserver): void {
-      if (viewObserver.viewDidRender !== void 0) {
-        viewObserver.viewDidRender(viewContext, this);
-      }
-    });
+    this.compositeImage(viewContext);
+    super.didComposite(viewContext);
+  }
+
+  protected onSetHidden(hidden: boolean): void {
+    if (!hidden) {
+      this.requireUpdate(View.NeedsRender | View.NeedsComposite);
+    }
   }
 
   extendViewContext(viewContext: GraphicsViewContext): ViewContextType<this> {
@@ -235,10 +180,10 @@ export class RasterView extends LayerView {
 
   /** @hidden */
   get compositeFrame(): BoxR2 {
-    let viewFrame = this._viewFrame;
-    if (viewFrame === void 0) {
-      const parentView = this._parentView;
-      if (parentView instanceof GraphicsView || parentView instanceof GraphicsView.Canvas) {
+    let viewFrame = this.ownViewFrame;
+    if (viewFrame === null) {
+      const parentView = this.parentView;
+      if (parentView instanceof GraphicsView || parentView instanceof CanvasView) {
         viewFrame = parentView.viewFrame;
       } else {
         viewFrame = BoxR2.undefined();
@@ -247,16 +192,19 @@ export class RasterView extends LayerView {
     return viewFrame;
   }
 
+  /** @hidden */
+  declare readonly rasterFrame: BoxR2;
+
   get viewFrame(): BoxR2 {
-    return this._rasterFrame;
+    return this.rasterFrame;
   }
 
   setViewFrame(viewFrame: BoxR2 | null): void {
-    if (viewFrame !== null) {
-      this._viewFrame = viewFrame;
-    } else if (this._viewFrame !== void 0) {
-      this._viewFrame = void 0;
-    }
+    Object.defineProperty(this, "ownViewFrame", {
+      value: viewFrame,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
@@ -265,7 +213,7 @@ export class RasterView extends LayerView {
     y -= Math.floor(compositeFrame.yMin);
 
     let hit: GraphicsView | null = null;
-    const childViews = this._childViews;
+    const childViews = this.childViews;
     for (let i = childViews.length - 1; i >= 0; i -= 1) {
       const childView = childViews[i];
       if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isCulled()) {
@@ -295,27 +243,31 @@ export class RasterView extends LayerView {
     return document.createElement("canvas");
   }
 
-  protected resizeCanvas(node: HTMLCanvasElement): void {
+  protected resizeCanvas(canvas: HTMLCanvasElement): void {
     const compositeFrame = this.compositeFrame;
     const xMin = compositeFrame.xMin - Math.floor(compositeFrame.xMin);
     const yMin = compositeFrame.yMin - Math.floor(compositeFrame.yMin);
     const xMax = Math.ceil(xMin + compositeFrame.width);
     const yMax = Math.ceil(yMin + compositeFrame.height);
     const rasterFrame = new BoxR2(xMin, yMin, xMax, yMax);
-    if (!this._rasterFrame.equals(rasterFrame)) {
+    if (!this.rasterFrame.equals(rasterFrame)) {
       const pixelRatio = this.pixelRatio;
-      node.width = xMax * pixelRatio;
-      node.height = yMax * pixelRatio;
-      node.style.width = xMax + "px";
-      node.style.height = yMax + "px";
-      this._rasterFrame = rasterFrame;
+      canvas.width = xMax * pixelRatio;
+      canvas.height = yMax * pixelRatio;
+      canvas.style.width = xMax + "px";
+      canvas.style.height = yMax + "px";
+      Object.defineProperty(this, "rasterFrame", {
+        value: rasterFrame,
+        enumerable: true,
+        configurable: true,
+      });
     }
   }
 
   clearCanvas(): void {
     const renderer = this.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const rasterFrame = this._rasterFrame;
+      const rasterFrame = this.rasterFrame;
       renderer.context.clearRect(0, 0, rasterFrame.xMax, rasterFrame.yMax);
     } else if (renderer instanceof WebGLRenderer) {
       const context = renderer.context;
@@ -329,7 +281,7 @@ export class RasterView extends LayerView {
       const pixelRatio = this.pixelRatio;
       renderer.context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     } else if (renderer instanceof WebGLRenderer) {
-      const rasterFrame = this._rasterFrame;
+      const rasterFrame = this.rasterFrame;
       renderer.context.viewport(0, 0, rasterFrame.xMax, rasterFrame.yMax);
     }
   }
@@ -338,16 +290,14 @@ export class RasterView extends LayerView {
     const compositor = viewContext.compositor;
     const renderer = viewContext.renderer;
     if (compositor instanceof CanvasRenderer && renderer instanceof CanvasRenderer) {
-      const imageData = renderer.context.getImageData(0, 0, this._canvas.width, this._canvas.height);
       const compositeFrame = this.compositeFrame;
-      const pixelRatio = compositor.pixelRatio;
       const context = compositor.context;
       context.save();
       context.globalAlpha = this.opacity.getValue();
       context.globalCompositeOperation = this.compositeOperation.getValue();
-      const x = Math.floor(compositeFrame.xMin) * pixelRatio;
-      const y = Math.floor(compositeFrame.yMin) * pixelRatio;
-      context.putImageData(imageData, x, y);
+      const x = Math.floor(compositeFrame.x);
+      const y = Math.floor(compositeFrame.y);
+      context.drawImage(this.canvas, x, y, compositeFrame.width, compositeFrame.height);
       context.restore();
     }
   }
@@ -355,5 +305,8 @@ export class RasterView extends LayerView {
   static create(): RasterView {
     return new RasterView();
   }
+
+  static readonly mountFlags: ViewFlags = LayerView.mountFlags | View.NeedsRender | View.NeedsComposite;
+  static readonly powerFlags: ViewFlags = LayerView.powerFlags | View.NeedsRender | View.NeedsComposite;
+  static readonly uncullFlags: ViewFlags = LayerView.uncullFlags | View.NeedsRender | View.NeedsComposite;
 }
-GraphicsView.Raster = RasterView;

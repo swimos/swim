@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {AnyDomain, Domain, LinearDomain, ContinuousScale, LinearScale} from "@swim/mapping";
 import {BTree} from "@swim/collections";
-import {TimeZone, AnyDateTime, DateTime, DateTimeFormat, TimeInterval} from "@swim/time";
-import {ContinuousScale, TimeScale} from "@swim/scale";
+import {TimeZone, AnyDateTime, DateTime, TimeDomain, DateTimeFormat, TimeInterval, TimeScale} from "@swim/time";
 
 const ERROR_10 = Math.sqrt(50);
 const ERROR_5 = Math.sqrt(10);
@@ -29,24 +29,24 @@ const MONTH = 30 * DAY;
 const YEAR = 365 * DAY;
 
 const TIME_TICK_INTERVALS = new BTree<number, TimeInterval>()
-  .set(SECOND, TimeInterval.second())
-  .set(5 * SECOND, TimeInterval.second(5))
-  .set(15 * SECOND, TimeInterval.second(15))
-  .set(30 * SECOND, TimeInterval.second(30))
-  .set(MINUTE, TimeInterval.minute(1))
-  .set(5 * MINUTE, TimeInterval.minute(5))
-  .set(15 * MINUTE, TimeInterval.minute(15))
-  .set(30 * MINUTE, TimeInterval.minute(30))
-  .set(HOUR, TimeInterval.hour())
-  .set(3 * HOUR, TimeInterval.hour(3))
-  .set(6 * HOUR, TimeInterval.hour(6))
-  .set(12 * HOUR, TimeInterval.hour(12))
-  .set(DAY, TimeInterval.day())
-  .set(2 * DAY, TimeInterval.day(2))
-  .set(WEEK, TimeInterval.week())
-  .set(MONTH, TimeInterval.month())
-  .set(3 * MONTH, TimeInterval.month(3))
-  .set(YEAR, TimeInterval.year());
+  .set(SECOND, TimeInterval.second)
+  .set(5 * SECOND, TimeInterval.second.every(5))
+  .set(15 * SECOND, TimeInterval.second.every(15))
+  .set(30 * SECOND, TimeInterval.second.every(30))
+  .set(MINUTE, TimeInterval.minute)
+  .set(5 * MINUTE, TimeInterval.minute.every(5))
+  .set(15 * MINUTE, TimeInterval.minute.every(15))
+  .set(30 * MINUTE, TimeInterval.minute.every(30))
+  .set(HOUR, TimeInterval.hour)
+  .set(3 * HOUR, TimeInterval.hour.every(3))
+  .set(6 * HOUR, TimeInterval.hour.every(6))
+  .set(12 * HOUR, TimeInterval.hour.every(12))
+  .set(DAY, TimeInterval.day)
+  .set(2 * DAY, TimeInterval.day.every(2))
+  .set(WEEK, TimeInterval.week)
+  .set(MONTH, TimeInterval.month)
+  .set(3 * MONTH, TimeInterval.month.every(3))
+  .set(YEAR, TimeInterval.year);
 
 const MILLISECOND_FORMAT = DateTimeFormat.pattern(".%L");
 const SECOND_FORMAT = DateTimeFormat.pattern(":%S");
@@ -61,8 +61,8 @@ export abstract class TickGenerator<D> {
   abstract count(): number;
   abstract count(n: number): this;
 
-  abstract domain(): readonly [D, D];
-  abstract domain(xs: readonly [D, D]): this;
+  abstract domain(): Domain<D>;
+  abstract domain(xs: AnyDomain<D>): this;
   abstract domain(x0: D, x1: D): this;
 
   abstract generate(): D[];
@@ -76,11 +76,13 @@ export abstract class TickGenerator<D> {
       n = 10;
     }
     if (scale instanceof TimeScale) {
-      const domain = scale.domain() as unknown as DateTime[];
+      const domain = scale.domain;
       return new TimeTickGenerator(domain[0], domain[1], n) as unknown as TickGenerator<D>;
-    } else {
-      const domain = scale.domain() as unknown as number[];
+    } else if (scale instanceof LinearScale) {
+      const domain = scale.domain;
       return new NumberTickGenerator(domain[0], domain[1], n) as unknown as TickGenerator<D>;
+    } else {
+      throw new TypeError("" + scale);
     }
   }
 
@@ -126,15 +128,15 @@ export class NumberTickGenerator extends TickGenerator<number> {
     }
   }
 
-  domain(): readonly [number, number];
-  domain(xs: readonly [number, number]): this;
+  domain(): Domain<number>;
+  domain(xs: AnyDomain<number>): this;
   domain(x0: number, x1: number): this;
-  domain(x0?: readonly [number, number] | number, x1?: number): readonly [number, number] | this {
+  domain(x0?: AnyDomain<number> | number, x1?: number): Domain<number> | this {
     if (x0 === void 0) {
-      return [this.x0, this.x0 + this.dx];
+      return LinearDomain(this.x0, this.x0 + this.dx);
     } else if (x1 === void 0) {
-      this.x0 = (x0 as readonly [number, number])[0];
-      this.dx = (x0 as readonly [number, number])[1] - this.x0;
+      this.x0 = (x0 as AnyDomain<number>)[0];
+      this.dx = (x0 as AnyDomain<number>)[1] - this.x0;
       return this;
     } else {
       this.x0 = x0 as number;
@@ -164,7 +166,7 @@ export class NumberTickGenerator extends TickGenerator<number> {
       x0 = Math.ceil(x0 / step);
       x1 = Math.floor(x1 / step);
       const n = Math.ceil(x1 - x0 + 1);
-      ticks = new Array(n);
+      ticks = new Array<number>(n);
       for (let i = 0; i < n; i += 1) {
         ticks[i] = (x0 + i) * step;
       }
@@ -172,7 +174,7 @@ export class NumberTickGenerator extends TickGenerator<number> {
       x0 = Math.floor(x0 * step);
       x1 = Math.ceil(x1 * step);
       const n = Math.ceil(x0 - x1 + 1);
-      ticks = new Array(n);
+      ticks = new Array<number>(n);
       for (let i = 0; i < n; i += 1) {
         ticks[i] = (x0 - i) / step;
       }
@@ -206,13 +208,13 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
   /** @hidden */
   protected n: number;
 
-  constructor(d0: AnyDateTime, d1: AnyDateTime, n: number, zone?: TimeZone) {
+  constructor(t0: AnyDateTime, t1: AnyDateTime, n: number, zone?: TimeZone) {
     super();
-    d0 = DateTime.fromAny(d0);
-    d1 = DateTime.fromAny(d1);
-    this.t0 = d0.time();
-    this.dt = d1.time() - this.t0;
-    this.zone = zone || d0.zone();
+    const d0 = DateTime.fromAny(t0);
+    const d1 = DateTime.fromAny(t1);
+    this.t0 = d0.time;
+    this.dt = d1.time - this.t0;
+    this.zone = zone !== void 0 ? zone : d0.zone;
     this.n = Math.max(0, n);
   }
 
@@ -227,24 +229,24 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
     }
   }
 
-  domain(): readonly [DateTime, DateTime];
-  domain(ts: readonly [AnyDateTime, AnyDateTime]): this;
+  domain(): Domain<DateTime>;
+  domain(ts: AnyDomain<DateTime>): this;
   domain(d0: AnyDateTime, d1: AnyDateTime): this;
-  domain(d0?: readonly [AnyDateTime, AnyDateTime] | AnyDateTime,
-         d1?: AnyDateTime): readonly [DateTime, DateTime] | this {
+  domain(d0?: AnyDomain<DateTime> | AnyDateTime,
+         d1?: AnyDateTime): Domain<DateTime> | this {
     if (d0 === void 0) {
-      return [new DateTime(this.t0, this.zone), new DateTime(this.t0 + this.dt, this.zone)];
+      return TimeDomain(new DateTime(this.t0, this.zone), new DateTime(this.t0 + this.dt, this.zone));
     } else {
       if (d1 === void 0) {
-        d1 = (d0 as readonly [AnyDateTime, AnyDateTime])[1];
-        d0 = (d0 as readonly [AnyDateTime, AnyDateTime])[0];
+        d1 = (d0 as AnyDomain<DateTime>)[1];
+        d0 = (d0 as AnyDomain<DateTime>)[0];
       } else {
         d0 = d0 as AnyDateTime;
       }
       d0 = DateTime.fromAny(d0);
       d1 = DateTime.fromAny(d1);
-      this.t0 = d0.time();
-      this.dt = d1.time() - this.t0;
+      this.t0 = (d0 as DateTime).time;
+      this.dt = (d1 as DateTime).time - this.t0;
       return this;
     }
   }
@@ -274,21 +276,21 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
   }
 
   format(tickValue: DateTime): string {
-    if (TimeInterval.second().floor(tickValue) < tickValue) {
+    if (TimeInterval.second.floor(tickValue) < tickValue) {
       return MILLISECOND_FORMAT.format(tickValue);
-    } else if (TimeInterval.minute().floor(tickValue) < tickValue) {
+    } else if (TimeInterval.minute.floor(tickValue) < tickValue) {
       return SECOND_FORMAT.format(tickValue);
-    } else if (TimeInterval.hour().floor(tickValue) < tickValue) {
+    } else if (TimeInterval.hour.floor(tickValue) < tickValue) {
       return MINUTE_FORMAT.format(tickValue);
-    } else if (TimeInterval.day().floor(tickValue) < tickValue) {
+    } else if (TimeInterval.day.floor(tickValue) < tickValue) {
       return HOUR_FORMAT.format(tickValue);
-    } else if (TimeInterval.month().floor(tickValue) < tickValue) {
-      if (TimeInterval.week().floor(tickValue) < tickValue) {
+    } else if (TimeInterval.month.floor(tickValue) < tickValue) {
+      if (TimeInterval.week.floor(tickValue) < tickValue) {
         return WEEKDAY_FORMAT.format(tickValue);
       } else {
         return MONTHDAY_FORMAT.format(tickValue);
       }
-    } else if (TimeInterval.year().floor(tickValue) < tickValue) {
+    } else if (TimeInterval.year.floor(tickValue) < tickValue) {
       return MONTH_FORMAT.format(tickValue);
     } else {
       return YEAR_FORMAT.format(tickValue);
@@ -302,7 +304,7 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
       const duration = TIME_TICK_INTERVALS.nextKey(t);
       if (duration === void 0) {
         const k = TickGenerator.step(dt / YEAR, interval);
-        interval = TimeInterval.year(k);
+        interval = TimeInterval.year.every(k);
       } else if (duration > SECOND) {
         if (t / TIME_TICK_INTERVALS.previousKey(t)! < duration / t) {
           interval = TIME_TICK_INTERVALS.previousValue(t)!;
@@ -311,7 +313,7 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
         }
       } else {
         const k = Math.max(1, TickGenerator.step(dt, interval));
-        interval = TimeInterval.millisecond(k);
+        interval = TimeInterval.millisecond.every(k);
       }
     }
     return interval;

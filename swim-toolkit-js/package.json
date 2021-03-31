@@ -1,6 +1,6 @@
 {
   "name": "@swim/toolkit",
-  "version": "3.11.0-dev.20201021",
+  "version": "3.11.0-dev.20210331",
   "description": "Swim Toolkit TypeScript Implementation",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
@@ -8,18 +8,21 @@
   "repository": "https://github.com/swimos/swim.git",
   "private": true,
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "9",
-    "@types/arcgis-js-api": "4.17",
-    "@types/googlemaps": "3.40",
-    "@types/mapbox-gl": "1.12",
+    "@rollup/plugin-node-resolve": "11",
+    "@types/arcgis-js-api": "4.18",
+    "@types/eslint": "7",
+    "@types/googlemaps": "3.43",
+    "@types/mapbox-gl": "2.1",
     "@types/node": "14",
-    "rollup": "2.32",
+    "@typescript-eslint/eslint-plugin": "4",
+    "@typescript-eslint/parser": "4",
+    "eslint": "7",
+    "rollup": "2.42",
     "rollup-plugin-sourcemaps": "0.6",
     "terser": "5",
     "tslib": "2",
-    "tslint": "6",
-    "typedoc": "0.19",
-    "typescript": "4.0"
+    "typedoc": "0.20",
+    "typescript": "4.2"
   },
   "scripts": {
     "postinstall": "cd ../swim-system-js/swim-core-js/@swim/build && npm run compile && npm run bundle",

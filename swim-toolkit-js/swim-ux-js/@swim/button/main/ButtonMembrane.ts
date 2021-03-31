@@ -12,31 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewNodeType} from "@swim/dom";
-import {PositionGestureInput, PositionGesture, PositionGestureDelegate} from "@swim/gesture";
-import {ThemedHtmlViewInit, ThemedHtmlView} from "@swim/theme";
+import {HtmlViewInit, HtmlView} from "@swim/dom";
+import {PositionGestureInput, PositionGesture, PositionGestureDelegate} from "@swim/view";
 import {ButtonGlow} from "./ButtonGlow";
 
-export interface ButtonMembraneInit extends ThemedHtmlViewInit {
+export interface ButtonMembraneInit extends HtmlViewInit {
 }
 
-export class ButtonMembrane extends ThemedHtmlView implements PositionGestureDelegate {
-  /** @hidden */
-  _gesture: PositionGesture<ButtonMembrane>;
-
+export class ButtonMembrane extends HtmlView implements PositionGestureDelegate {
   constructor(node: HTMLElement) {
     super(node);
-    this._gesture = this.createGesture();
+    Object.defineProperty(this, "gesture", {
+      value: this.createGesture(),
+      enumerable: true,
+      configurable: true,
+    });
+    this.initMembrane(node);
   }
 
-  protected initNode(node: ViewNodeType<this>): void {
-    super.initNode(node);
+  protected initMembrane(node: HTMLElement): void {
     this.addClass("membrane");
   }
 
   initView(init: ButtonMembraneInit): void {
     super.initView(init);
   }
+
+  /** @hidden */
+  declare readonly gesture: PositionGesture<ButtonMembrane>;
 
   protected createGesture(): PositionGesture<ButtonMembrane> {
     return new PositionGesture(this, this);
@@ -76,9 +79,9 @@ export class ButtonMembrane extends ThemedHtmlView implements PositionGestureDel
 
   didMovePress(input: PositionGestureInput, event: Event | null): void {
     if (input.isRunaway()) {
-      this._gesture.cancelPress(input, event);
+      this.gesture.cancelPress(input, event);
     } else if (!this.clientBounds.contains(input.x, input.y)) {
-      this._gesture.beginHover(input, event);
+      this.gesture.beginHover(input, event);
       if (input.detail instanceof ButtonGlow) {
         input.detail.fade(input.x, input.y);
         input.detail = void 0;
@@ -88,7 +91,7 @@ export class ButtonMembrane extends ThemedHtmlView implements PositionGestureDel
 
   didEndPress(input: PositionGestureInput, event: Event | null): void {
     if (!this.clientBounds.contains(input.x, input.y)) {
-      this._gesture.endHover(input, event);
+      this.gesture.endHover(input, event);
       if (input.detail instanceof ButtonGlow) {
         input.detail.fade(input.x, input.y);
         input.detail = void 0;
@@ -100,7 +103,7 @@ export class ButtonMembrane extends ThemedHtmlView implements PositionGestureDel
 
   didCancelPress(input: PositionGestureInput, event: Event | null): void {
     if (!this.clientBounds.contains(input.x, input.y)) {
-      this._gesture.endHover(input, event);
+      this.gesture.endHover(input, event);
     }
     if (input.detail instanceof ButtonGlow) {
       input.detail.fade(input.x, input.y);

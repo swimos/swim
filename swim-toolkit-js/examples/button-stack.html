@@ -13,6 +13,7 @@
   </head>
   <body style="display: flex; width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
     <script>
@@ -35,11 +36,11 @@ if (navigator.standalone) {
   document.body.style.height = "100%";
 }
 
-const bodyView = swim.ThemedHtmlView.fromNode(document.body);
+const bodyView = swim.HtmlView.fromNode(document.body);
 
 bodyView.append(swim.ScrimView);
 
-const buttonStack = bodyView.append(swim.ButtonStack)
+const buttonStack = swim.ButtonStack.create()
   .position("absolute")
   .top("60%")
   .right("50%")
@@ -47,34 +48,28 @@ const buttonStack = bodyView.append(swim.ButtonStack)
   .left("50%");
 buttonStack.setViewController(new swim.ButtonStackController());
 
-const buttonIcon = swim.SvgView.create().width(24).height(24).viewBox("0 0 24 24");
-buttonIcon.append("path").d("M18,1.61 L24,12 L18,22.39 L6,22.39 L0,12 L6,1.61 L18,1.61 Z M16.85,3.61 L7.15,3.61 L2.31,12 L7.15,20.39 L16.85,20.39 L21.69,12 L16.85,3.61 Z M18,13 L13,13 L13,18 L11,18 L11,13 L6,13 L6,11 L11,11 L11,6 L13,6 L13,11 L18,11 L18,13 Z");
 buttonStack.button.modifyMood(swim.Feel.default, [swim.Feel.primary, 1]);
-buttonStack.setButtonIcon(buttonIcon, false);
+buttonStack.button.pushIcon(swim.VectorIcon.create(24, 24, "M18,1.6L24,12L18,22.4L6,22.4L0,12L6,1.6L18,1.6ZM16.9,3.6L7.2,3.6L2.3,12L7.2,20.4L16.9,20.4L21.7,12L16.9,3.6ZM18,13L13,13L13,18L11,18L11,13L6,13L6,11L11,11L11,6L13,6L13,11L18,11L18,13Z"));
 
-const buttonIcon1 = swim.SvgView.create().width(24).height(24).viewBox("0 0 24 24");
-buttonIcon1.append("path").d("M18,13 L13,13 L13,18 L11,18 L11,13 L6,13 L6,11 L11,11 L11,6 L13,6 L13,11 L18,11 L18,13 Z");
 const buttonItem1 = swim.ButtonItem.create();
 buttonItem1.button.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1]);
-buttonItem1.button.setIcon(buttonIcon1);
+buttonItem1.button.pushIcon(swim.VectorIcon.create(24, 24, "M18,13L13,13L13,18L11,18L11,13L6,13L6,11L11,11L11,6L13,6L13,11L18,11L18,13Z"));
 buttonItem1.append("span", "label").text("Action 1");
 buttonStack.append(buttonItem1);
 
-const buttonIcon2 = swim.SvgView.create().width(24).height(24).viewBox("0 0 24 24");
-buttonIcon2.append("path").d("M18,13 L13,13 L13,18 L11,18 L11,13 L6,13 L6,11 L11,11 L11,6 L13,6 L13,11 L18,11 L18,13 Z");
 const buttonItem2 = swim.ButtonItem.create();
 buttonItem2.button.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1]);
-buttonItem2.button.setIcon(buttonIcon2);
+buttonItem2.button.pushIcon(swim.VectorIcon.create(24, 24, "M18,13L13,13L13,18L11,18L11,13L6,13L6,11L11,11L11,6L13,6L13,11L18,11L18,13Z"));
 buttonItem2.append("span", "label").text("Action 2");
 buttonStack.append(buttonItem2);
 
-const buttonIcon3 = swim.SvgView.create().width(24).height(24).viewBox("0 0 24 24");
-buttonIcon3.append("path").d("M18,13 L13,13 L13,18 L11,18 L11,13 L6,13 L6,11 L11,11 L11,6 L13,6 L13,11 L18,11 L18,13 Z");
 const buttonItem3 = swim.ButtonItem.create();
 buttonItem3.button.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1]);
-buttonItem3.button.setIcon(buttonIcon3);
+buttonItem3.button.pushIcon(swim.VectorIcon.create(24, 24, "M18,13L13,13L13,18L11,18L11,13L6,13L6,11L11,11L11,6L13,6L13,11L18,11L18,13Z"));
 buttonItem3.append("span", "label").text("Action 3");
 buttonStack.append(buttonItem3);
+
+bodyView.append(buttonStack);
 
     </script>
   </body>

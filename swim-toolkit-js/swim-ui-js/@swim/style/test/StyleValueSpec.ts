@@ -13,14 +13,9 @@
 // limitations under the License.
 
 import {Spec, Test, Exam} from "@swim/unit";
+import {Length, Angle, Transform, AffineTransform} from "@swim/math";
 import {DateTime} from "@swim/time";
-import {Angle} from "@swim/angle";
-import {Length} from "@swim/length";
-import {Color} from "@swim/color";
-import {Font} from "@swim/font";
-import {LinearGradient} from "@swim/gradient";
-import {Transform} from "@swim/transform";
-import {StyleValue} from "@swim/style";
+import {Font, Color, LinearGradient, StyleValue} from "@swim/style";
 
 export class StyleValueSpec extends Spec {
   @Test
@@ -58,45 +53,45 @@ export class StyleValueSpec extends Spec {
 
   @Test
   parseFonts(exam: Exam): void {
-    exam.equal(StyleValue.parse("normal sans-serif"), Font.family("sans-serif").style("normal"));
-    exam.equal(StyleValue.parse("italic sans-serif"), Font.family("sans-serif").style("italic"));
-    exam.equal(StyleValue.parse("oblique sans-serif"), Font.family("sans-serif").style("oblique"));
+    exam.equal(StyleValue.parse("normal sans-serif"), Font.family("sans-serif").withStyle("normal"));
+    exam.equal(StyleValue.parse("italic sans-serif"), Font.family("sans-serif").withStyle("italic"));
+    exam.equal(StyleValue.parse("oblique sans-serif"), Font.family("sans-serif").withStyle("oblique"));
 
-    exam.equal(StyleValue.parse("small-caps sans-serif"), Font.family("sans-serif").variant("small-caps"));
+    exam.equal(StyleValue.parse("small-caps sans-serif"), Font.family("sans-serif").withVariant("small-caps"));
 
-    exam.equal(StyleValue.parse("bold sans-serif"), Font.family("sans-serif").weight("bold"));
-    exam.equal(StyleValue.parse("bolder sans-serif"), Font.family("sans-serif").weight("bolder"));
-    exam.equal(StyleValue.parse("lighter sans-serif"), Font.family("sans-serif").weight("lighter"));
-    exam.equal(StyleValue.parse("100 sans-serif"), Font.family("sans-serif").weight("100"));
-    exam.equal(StyleValue.parse("200 sans-serif"), Font.family("sans-serif").weight("200"));
-    exam.equal(StyleValue.parse("300 sans-serif"), Font.family("sans-serif").weight("300"));
-    exam.equal(StyleValue.parse("400 sans-serif"), Font.family("sans-serif").weight("400"));
-    exam.equal(StyleValue.parse("500 sans-serif"), Font.family("sans-serif").weight("500"));
-    exam.equal(StyleValue.parse("600 sans-serif"), Font.family("sans-serif").weight("600"));
-    exam.equal(StyleValue.parse("700 sans-serif"), Font.family("sans-serif").weight("700"));
-    exam.equal(StyleValue.parse("800 sans-serif"), Font.family("sans-serif").weight("800"));
-    exam.equal(StyleValue.parse("900 sans-serif"), Font.family("sans-serif").weight("900"));
+    exam.equal(StyleValue.parse("bold sans-serif"), Font.family("sans-serif").withWeight("bold"));
+    exam.equal(StyleValue.parse("bolder sans-serif"), Font.family("sans-serif").withWeight("bolder"));
+    exam.equal(StyleValue.parse("lighter sans-serif"), Font.family("sans-serif").withWeight("lighter"));
+    exam.equal(StyleValue.parse("100 sans-serif"), Font.family("sans-serif").withWeight("100"));
+    exam.equal(StyleValue.parse("200 sans-serif"), Font.family("sans-serif").withWeight("200"));
+    exam.equal(StyleValue.parse("300 sans-serif"), Font.family("sans-serif").withWeight("300"));
+    exam.equal(StyleValue.parse("400 sans-serif"), Font.family("sans-serif").withWeight("400"));
+    exam.equal(StyleValue.parse("500 sans-serif"), Font.family("sans-serif").withWeight("500"));
+    exam.equal(StyleValue.parse("600 sans-serif"), Font.family("sans-serif").withWeight("600"));
+    exam.equal(StyleValue.parse("700 sans-serif"), Font.family("sans-serif").withWeight("700"));
+    exam.equal(StyleValue.parse("800 sans-serif"), Font.family("sans-serif").withWeight("800"));
+    exam.equal(StyleValue.parse("900 sans-serif"), Font.family("sans-serif").withWeight("900"));
 
-    exam.equal(StyleValue.parse("ultra-condensed sans-serif"), Font.family("sans-serif").stretch("ultra-condensed"));
-    exam.equal(StyleValue.parse("extra-condensed sans-serif"), Font.family("sans-serif").stretch("extra-condensed"));
-    exam.equal(StyleValue.parse("semi-condensed sans-serif"), Font.family("sans-serif").stretch("semi-condensed"));
-    exam.equal(StyleValue.parse("condensed sans-serif"), Font.family("sans-serif").stretch("condensed"));
-    exam.equal(StyleValue.parse("expanded sans-serif"), Font.family("sans-serif").stretch("expanded"));
-    exam.equal(StyleValue.parse("semi-expanded sans-serif"), Font.family("sans-serif").stretch("semi-expanded"));
-    exam.equal(StyleValue.parse("extra-expanded sans-serif"), Font.family("sans-serif").stretch("extra-expanded"));
-    exam.equal(StyleValue.parse("ultra-expanded sans-serif"), Font.family("sans-serif").stretch("ultra-expanded"));
+    exam.equal(StyleValue.parse("ultra-condensed sans-serif"), Font.family("sans-serif").withStretch("ultra-condensed"));
+    exam.equal(StyleValue.parse("extra-condensed sans-serif"), Font.family("sans-serif").withStretch("extra-condensed"));
+    exam.equal(StyleValue.parse("semi-condensed sans-serif"), Font.family("sans-serif").withStretch("semi-condensed"));
+    exam.equal(StyleValue.parse("condensed sans-serif"), Font.family("sans-serif").withStretch("condensed"));
+    exam.equal(StyleValue.parse("expanded sans-serif"), Font.family("sans-serif").withStretch("expanded"));
+    exam.equal(StyleValue.parse("semi-expanded sans-serif"), Font.family("sans-serif").withStretch("semi-expanded"));
+    exam.equal(StyleValue.parse("extra-expanded sans-serif"), Font.family("sans-serif").withStretch("extra-expanded"));
+    exam.equal(StyleValue.parse("ultra-expanded sans-serif"), Font.family("sans-serif").withStretch("ultra-expanded"));
 
-    exam.equal(StyleValue.parse("12px sans-serif"), Font.family("sans-serif").size(Length.px(12)));
+    exam.equal(StyleValue.parse("12px sans-serif"), Font.family("sans-serif").withSize(Length.px(12)));
 
-    exam.equal(StyleValue.parse("12px/16px sans-serif"), Font.family("sans-serif").size(Length.px(12)).height(Length.px(16)));
-    exam.equal(StyleValue.parse("12px/normal sans-serif"), Font.family("sans-serif").size(Length.px(12)).height("normal"));
+    exam.equal(StyleValue.parse("12px/16px sans-serif"), Font.family("sans-serif").withSize(Length.px(12)).withHeight(Length.px(16)));
+    exam.equal(StyleValue.parse("12px/normal sans-serif"), Font.family("sans-serif").withSize(Length.px(12)).withHeight("normal"));
 
     exam.equal(StyleValue.parse("normal normal normal normal 12px/normal \"Open Sans\", sans-serif"),
-               Font.family(["Open Sans", "sans-serif"]).style("normal").variant("normal")
-                   .weight("normal").stretch("normal").size(Length.px(12)).height("normal"));
+               Font.family(["Open Sans", "sans-serif"]).withStyle("normal").withVariant("normal")
+                   .withWeight("normal").withStretch("normal").withSize(Length.px(12)).withHeight("normal"));
     exam.equal(StyleValue.parse("italic small-caps bold expanded 12px/16px \"Open Sans\", sans-serif"),
-               Font.family(["Open Sans", "sans-serif"]).style("italic").variant("small-caps")
-                   .weight("bold").stretch("expanded").size(Length.px(12)).height(Length.px(16)));
+               Font.family(["Open Sans", "sans-serif"]).withStyle("italic").withVariant("small-caps")
+                   .withWeight("bold").withStretch("expanded").withSize(Length.px(12)).withHeight(Length.px(16)));
   }
 
   @Test
@@ -122,6 +117,6 @@ export class StyleValueSpec extends Spec {
     exam.equal(StyleValue.parse("skewX(30)"), Transform.skewX(30));
     exam.equal(StyleValue.parse("skewY(60)"), Transform.skewY(60));
     exam.equal(StyleValue.parse("skew(30,60)"), Transform.skew(30, 60));
-    exam.equal(StyleValue.parse("matrix(1,0,0,1,0,0)"), Transform.Affine.identity());
+    exam.equal(StyleValue.parse("matrix(1,0,0,1,0,0)"), AffineTransform.identity());
   }
 }

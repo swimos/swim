@@ -12,21 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GeoProjection} from "@swim/map";
+import type {GeoProjection} from "@swim/geo";
 
 export interface EsriProjection extends GeoProjection {
   readonly map: __esri.View;
 }
 
 /** @hidden */
-export const EsriProjection = {
-  webMercatorUtils: void 0 as __esri.webMercatorUtils | undefined,
+export const EsriProjection = {} as {
+  webMercatorUtils: __esri.webMercatorUtils | undefined;
 
-  init(): void {
-    if (EsriProjection.webMercatorUtils === void 0) {
-      (window.require as any)(["esri/geometry/support/webMercatorUtils"], function (webMercatorUtils: __esri.webMercatorUtils): void {
-        EsriProjection.webMercatorUtils = webMercatorUtils;
-      });
-    }
-  },
-}
+  init(): void;
+};
+
+EsriProjection.init = function (): void {
+  if (EsriProjection.webMercatorUtils === void 0) {
+    (window.require as any)(["esri/geometry/support/webMercatorUtils"], function (webMercatorUtils: __esri.webMercatorUtils): void {
+      EsriProjection.webMercatorUtils = webMercatorUtils;
+    });
+  }
+};

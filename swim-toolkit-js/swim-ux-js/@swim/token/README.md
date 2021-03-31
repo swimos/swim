@@ -6,8 +6,7 @@
 
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
-**@swim/token** implements compact, editable pin and chip token views.
-**@swim/token** is part of the
+**@swim/token** implements attribute, action, and user input token views.  **@swim/token** is part of the
 [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/ux) framework.
 
 ## Installation

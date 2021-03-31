@@ -13,16 +13,15 @@
 // limitations under the License.
 
 import {AttributeAnimator} from "./AttributeAnimator";
-import {ElementView} from "../element/ElementView";
+import type {ElementView} from "../element/ElementView";
 
 /** @hidden */
-export abstract class BooleanAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, boolean, boolean | string> {
-  parse(value: string): boolean {
+export abstract class BooleanAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, boolean | undefined, string> {
+  parse(value: string): boolean | undefined {
     return !!value;
   }
 
-  fromAny(value: boolean | string): boolean {
+  fromAny(value: boolean | string): boolean | undefined {
     return !!value;
   }
 }
-AttributeAnimator.Boolean = BooleanAttributeAnimator;

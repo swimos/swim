@@ -12,49 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContextType} from "@swim/view";
+import {GeoBox, GeoProjection} from "@swim/geo";
 import {GraphicsViewController} from "@swim/graphics";
-import {GeoBox} from "../geo/GeoBox";
-import {GeoProjection} from "../geo/GeoProjection";
-import {MapGraphicsView} from "./MapGraphicsView";
-import {MapGraphicsViewObserver} from "./MapGraphicsViewObserver";
+import type {MapGraphicsView} from "./MapGraphicsView";
+import type {MapGraphicsViewObserver} from "./MapGraphicsViewObserver";
 
 export class MapGraphicsViewController<V extends MapGraphicsView = MapGraphicsView> extends GraphicsViewController<V> implements MapGraphicsViewObserver<V> {
   get geoProjection(): GeoProjection | null {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.geoProjection : null;
   }
 
   get mapZoom(): number {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.mapZoom : 0;
   }
 
   get mapHeading(): number {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.mapHeading : 0;
   }
 
   get mapTilt(): number {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.mapTilt : 0;
   }
 
   get geoFrame(): GeoBox {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.geoFrame : GeoBox.globe();
   }
 
   get geoBounds(): GeoBox {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.geoBounds : GeoBox.undefined();
-  }
-
-  viewWillProject(viewContext: ViewContextType<V>, view: V): void {
-    // hook
-  }
-
-  viewDidProject(viewContext: ViewContextType<V>, view: V): void {
-    // hook
   }
 }

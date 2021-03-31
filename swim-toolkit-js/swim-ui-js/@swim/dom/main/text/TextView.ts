@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewConstructor, View} from "@swim/view";
+import type {ViewConstructor, View} from "@swim/view";
 import {NodeViewInit, NodeViewConstructor, NodeView} from "../node/NodeView";
-import {TextViewObserver} from "./TextViewObserver";
-import {TextViewController} from "./TextViewController";
+import type {TextViewObserver} from "./TextViewObserver";
+import type {TextViewController} from "./TextViewController";
 
 export interface ViewText extends Text {
   view?: TextView;
@@ -26,7 +26,6 @@ export interface TextViewInit extends NodeViewInit {
 }
 
 export interface TextViewConstructor<V extends TextView = TextView> extends NodeViewConstructor<V> {
-  new(node: Text): V;
 }
 
 export class TextView extends NodeView {
@@ -34,13 +33,10 @@ export class TextView extends NodeView {
     super(node);
   }
 
-  // @ts-ignore
-  declare readonly node: ViewText;
+  declare readonly node: Text;
 
-  // @ts-ignore
   declare readonly viewController: TextViewController | null;
 
-  // @ts-ignore
   declare readonly viewObservers: ReadonlyArray<TextViewObserver>;
 
   initView(init: TextViewInit): void {
@@ -64,4 +60,3 @@ export class TextView extends NodeView {
     }
   }
 }
-NodeView.Text = TextView;

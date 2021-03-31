@@ -1,0 +1,26 @@
+{
+  "extends": "../../../tsconfig-main",
+  "compilerOptions": {
+    "baseUrl": "../../..",
+    "outDir": "../lib/main",
+    "paths": {
+      "@swim/util": ["../../swim-system-js/swim-core-js/@swim/util/main"],
+      "@swim/codec": ["../../swim-system-js/swim-core-js/@swim/codec/main"],
+      "@swim/mapping": ["../../swim-system-js/swim-core-js/@swim/mapping/main"],
+      "@swim/structure": ["../../swim-system-js/swim-core-js/@swim/structure/main"],
+      "@swim/math": ["../../swim-system-js/swim-core-js/@swim/math/main"],
+      "@swim/time": ["../../swim-system-js/swim-core-js/@swim/time/main"],
+      "@swim/style": ["@swim/style/main"]
+    },
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
+  },
+  "references": [
+    {"path": "../../../../../swim-system-js/swim-core-js/@swim/util/main"},
+    {"path": "../../../../../swim-system-js/swim-core-js/@swim/codec/main"},
+    {"path": "../../../../../swim-system-js/swim-core-js/@swim/mapping/main"},
+    {"path": "../../../../../swim-system-js/swim-core-js/@swim/structure/main"},
+    {"path": "../../../../../swim-system-js/swim-core-js/@swim/math/main"},
+    {"path": "../../../../../swim-system-js/swim-core-js/@swim/time/main"},
+    {"path": "../../style/main"}
+  ]
+}

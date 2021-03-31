@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Gauge Component</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+  </head>
+  <body style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script src="../swim-vis-js/@swim/vis/dist/main/swim-vis.js"></script>
+    <script>
+
+//setTimeout(function () {
+//  swim.ThemeManager.global().setTheme(swim.Theme.light);
+//}, 1000);
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.append("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+
+const canvasView = containerView.append(swim.CanvasView)
+    .mouseEventsEnabled(true)
+    .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
+    .touchAction("manipulation");
+
+class ExampleGaugeComponent extends swim.GaugeComponent {
+  initGaugeView(gaugeView) {
+    super.initGaugeView(gaugeView);
+    gaugeView.innerRadius(swim.Length.pct(25))
+             .startAngle(swim.Angle.rad(3 * Math.PI / 4))
+             .sweepAngle(swim.Angle.rad(3 * Math.PI / 2))
+             .cornerRadius(0)
+             .tickAlign(1)
+             .font("14px sans-serif");
+  }
+  initDialView(dialView) {
+    super.initDialView(dialView);
+    dialView.on("pointerenter", function (event) {
+              dialView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+            })
+            .on("pointerleave", function (event) {
+              dialView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+            });
+  }
+  onSetDialViewValue(newValue, oldValue, dialFastener) {
+    super.onSetDialViewValue(newValue, oldValue, dialFastener);
+    const label = Math.round(100 * newValue).toString();
+    dialFastener.component.setLabel(label);
+  }
+}
+
+const dial1Model = new swim.CompoundModel();
+const dial1Trait = new swim.DialTrait();
+dial1Trait.setValue(Math.random());
+dial1Trait.setLegend("Dial 1");
+dial1Model.setTrait("dial", dial1Trait);
+
+const dial2Model = new swim.CompoundModel();
+const dial2Trait = new swim.DialTrait();
+dial2Trait.setValue(Math.random());
+dial2Trait.setLegend("Dial 2");
+dial2Model.setTrait("dial", dial2Trait);
+
+const dial3Model = new swim.CompoundModel();
+const dial3Trait = new swim.DialTrait();
+dial3Trait.setValue(Math.random());
+dial3Trait.setLegend("Dial 3");
+dial3Model.setTrait("dial", dial3Trait);
+
+const gaugeModel = new swim.CompoundModel();
+gaugeModel.mount();
+const gaugeTrait = new swim.GaugeTrait();
+gaugeModel.setTrait("gauge", gaugeTrait);
+gaugeModel.appendChildModel(dial1Model, "dial1");
+gaugeModel.appendChildModel(dial2Model, "dial2");
+gaugeModel.appendChildModel(dial3Model, "dial3");
+
+const gaugeComponent = new ExampleGaugeComponent();
+gaugeComponent.mount();
+gaugeComponent.gauge.injectView(canvasView);
+gaugeComponent.gauge.setTrait(gaugeTrait);
+
+setInterval(function () {
+  dial1Trait.setValue(0.1 + 0.9 * Math.random());
+  dial2Trait.setValue(0.1 + 0.9 * Math.random());
+  dial3Trait.setValue(0.1 + 0.9 * Math.random());
+}, 1000);
+
+setInterval(function () {
+  if (dial3Model.isMounted()) {
+    dial3Model.remove();
+  } else {
+    gaugeModel.appendChildModel(dial3Model, "dial3");
+  }
+}, 2500);
+
+    </script>
+  </body>
+</html>

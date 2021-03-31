@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ThemedHtmlViewController} from "@swim/theme";
-import {TokenViewState, TokenView} from "./TokenView";
-import {TokenViewObserver} from "./TokenViewObserver";
+import {HtmlViewController} from "@swim/dom";
+import type {TokenViewState, TokenView} from "./TokenView";
+import type {TokenViewObserver} from "./TokenViewObserver";
 
-export class TokenViewController<V extends TokenView = TokenView> extends ThemedHtmlViewController<V> implements TokenViewObserver<V> {
+export class TokenViewController<V extends TokenView = TokenView> extends HtmlViewController<V> implements TokenViewObserver<V> {
   get tokenState(): TokenViewState | null {
-    return this._view !== null ? this._view.tokenState : null;
+    const view = this.view;
+    return view !== null ? view.tokenState : null;
   }
 
   tokenWillExpand(view: V): void {
@@ -30,7 +31,7 @@ export class TokenViewController<V extends TokenView = TokenView> extends Themed
   }
 
   tokenWillCollapse(view: V): void {
-    const labelView = view.label.subview;
+    const labelView = view.label.view;
     if (labelView !== null) {
       labelView.node.blur();
     }
@@ -42,7 +43,7 @@ export class TokenViewController<V extends TokenView = TokenView> extends Themed
 
   tokenDidPressHead(view: V): void {
     view.toggle();
-    const labelView = view.label.subview;
+    const labelView = view.label.view;
     if (labelView !== null && view.isExpanded()) {
       labelView.node.focus();
     }

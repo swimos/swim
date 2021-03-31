@@ -12,30 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContextType, ViewContext} from "./ViewContext";
-import {ViewFlags, View} from "./View";
-import {ViewObserver} from "./ViewObserver";
-import {ViewIdiom} from "./viewport/ViewIdiom";
-import {Viewport} from "./viewport/Viewport";
+import type {Timing} from "@swim/mapping";
+import type {MoodVector, ThemeMatrix} from "@swim/theme";
+import type {ViewContextType, ViewContext} from "./ViewContext";
+import {ViewClass, View} from "./View";
+import type {ViewObserver} from "./ViewObserver";
+import type {ViewIdiom} from "./viewport/ViewIdiom";
+import type {Viewport} from "./viewport/Viewport";
+import {ViewportManager} from "./"; // forward import
 
 export type ViewControllerType<V extends View> =
-  V extends {readonly viewController: infer VC} ? VC : unknown;
+  V extends {readonly viewController: infer VC | null} ? VC : never;
 
 export class ViewController<V extends View = View> implements ViewObserver<V> {
-  /** @hidden */
-  protected _view: V | null;
-
   constructor() {
-    this._view = null;
+    Object.defineProperty(this, "view", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  get view(): V | null {
-    return this._view;
-  }
+  declare readonly view: V | null;
 
   setView(view: V | null): void {
     this.willSetView(view);
-    this._view = view;
+    Object.defineProperty(this, "view", {
+      value: view,
+      enumerable: true,
+      configurable: true,
+    });
     this.onSetView(view);
     this.didSetView(view);
   }
@@ -53,12 +59,12 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   get key(): string | undefined {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.key : void 0;
   }
 
   get parentView(): View | null {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.parentView : null;
   }
 
@@ -75,8 +81,13 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
+  get childViewCount(): number {
+    const view = this.view;
+    return view !== null ? view.childViewCount : 0;
+  }
+
   get childViews(): ReadonlyArray<View> {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.childViews : [];
   }
 
@@ -87,7 +98,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   getChildView(key: string): View | null {
-    const view = this._view;
+    const view = this.view;
     return view !== null ? view.getChildView(key) : null;
   }
 
@@ -97,7 +108,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   setChildView(key: string, newChildView: View | null): View | null {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       return view.setChildView(key, newChildView);
     } else {
@@ -116,7 +127,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   appendChildView(childView: View, key?: string): void {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       view.appendChildView(childView, key);
     } else {
@@ -125,7 +136,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   appendChildViewController(childViewController: ViewController, key?: string): void {
-    const view = this._view;
+    const view = this.view;
     const childView = childViewController.view;
     if (view !== null && childView !== null) {
       view.appendChildView(childView, key);
@@ -135,7 +146,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   prependChildView(childView: View, key?: string): void {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       view.prependChildView(childView, key);
     } else {
@@ -144,7 +155,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   prependChildViewController(childViewController: ViewController, key?: string): void {
-    const view = this._view;
+    const view = this.view;
     const childView = childViewController.view;
     if (view !== null && childView !== null) {
       view.prependChildView(childView, key);
@@ -154,7 +165,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   insertChildView(childView: View, targetView: View | null, key?: string): void {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       view.insertChildView(childView, targetView, key);
     } else {
@@ -165,7 +176,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   insertChildViewController(childViewController: ViewController,
                             targetViewController: ViewController | View | null,
                             key?: string): void {
-    const view = this._view;
+    const view = this.view;
     const childView = childViewController.view;
     if (view !== null && childView !== null) {
       let targetView: View | null;
@@ -180,33 +191,29 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     }
   }
 
-  viewWillInsertChildView(childView: View, targetView: View | null | undefined, view: V): void {
+  viewWillInsertChildView(childView: View, targetView: View | null, view: V): void {
     // hook
   }
 
-  viewDidInsertChildView(childView: View, targetView: View | null | undefined, view: V): void {
+  viewDidInsertChildView(childView: View, targetView: View | null, view: V): void {
     // hook
   }
 
   removeChildView(key: string): View | null;
   removeChildView(childView: View): void;
   removeChildView(key: string | View): View | null | void {
-    const view = this._view;
-    if (view !== null) {
-      if (typeof key === "string") {
-        return view.removeChildView(key);
-      } else {
-        view.removeChildView(key);
-      }
-    } else {
-      throw new Error("no view");
+    const view = this.view;
+    if (typeof key === "string") {
+      return view !== null ? view.removeChildView(key) : null;
+    } else if (view !== null) {
+      view.removeChildView(key);
     }
   }
 
   removeChildViewController(key: string): ViewController | null;
   removeChildViewController(childViewController: ViewController): void;
   removeChildViewController(childViewController: string | ViewController): ViewController | null | void {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       if (typeof childViewController === "string") {
         const childView = view.removeChildView(childViewController);
@@ -225,7 +232,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   removeAll(): void {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       view.removeAll();
     } else {
@@ -234,7 +241,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   remove(): void {
-    const view = this._view;
+    const view = this.view;
     if (view !== null) {
       view.remove();
     } else {
@@ -250,18 +257,18 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
-  getSuperView<V extends View>(viewClass: {new(...args: any[]): V}): V | null {
-    const view = this._view;
+  getSuperView<V extends View>(viewClass: ViewClass<V>): V | null {
+    const view = this.view;
     return view !== null ? view.getSuperView(viewClass) : null;
   }
 
-  getBaseView<V extends View>(viewClass: {new(...args: any[]): V}): V | null {
-    const view = this._view;
+  getBaseView<V extends View>(viewClass: ViewClass<V>): V | null {
+    const view = this.view;
     return view !== null ? view.getBaseView(viewClass) : null;
   }
 
   isMounted(): boolean {
-    const view = this._view;
+    const view = this.view;
     return view !== null && view.isMounted();
   }
 
@@ -282,7 +289,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   isPowered(): boolean {
-    const view = this._view;
+    const view = this.view;
     return view !== null && view.isPowered();
   }
 
@@ -303,7 +310,7 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   isCulled(): boolean {
-    const view = this._view;
+    const view = this.view;
     return view !== null && view.isCulled();
   }
 
@@ -324,26 +331,18 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
   }
 
   isTraversing(): boolean {
-    const view = this._view;
+    const view = this.view;
     return view !== null && view.isTraversing();
   }
 
   isUpdating(): boolean {
-    const view = this._view;
+    const view = this.view;
     return view !== null && view.isUpdating();
   }
 
   isProcessing(): boolean {
-    const view = this._view;
+    const view = this.view;
     return view !== null && view.isProcessing();
-  }
-
-  viewWillProcess(viewContext: ViewContextType<V>, view: V): void {
-    // hook
-  }
-
-  viewDidProcess(viewContext: ViewContextType<V>, view: V): void {
-    // hook
   }
 
   viewWillResize(viewContext: ViewContextType<V>, view: V): void {
@@ -378,6 +377,19 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
+  viewWillProject(viewContext: ViewContextType<V>, view: V): void {
+    // hook
+  }
+
+  viewDidProject(viewContext: ViewContextType<V>, view: V): void {
+    // hook
+  }
+
+  isDisplaying(): boolean {
+    const view = this.view;
+    return view !== null && view.isDisplaying();
+  }
+
   viewWillLayout(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
@@ -386,38 +398,33 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
-  viewWillProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void {
+  viewWillRender(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void {
+  viewDidRender(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  isDisplaying(): boolean {
-    const view = this._view;
-    return view !== null && view.isDisplaying();
-  }
-
-  viewWillDisplay(viewContext: ViewContextType<V>, view: V): void {
+  viewWillComposite(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewDidDisplay(viewContext: ViewContextType<V>, view: V): void {
+  viewDidComposite(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }
 
-  viewWillDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void {
+  viewWillApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, view: V): void {
     // hook
   }
 
-  viewDidDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<V>, view: V): void {
+  viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, view: V): void {
     // hook
   }
 
   get viewContext(): ViewContext {
-    const view = this._view;
-    return view !== null ? view.viewContext : ViewContext.default();
+    const view = this.view;
+    return view !== null ? view.viewContext : ViewportManager.global().viewContext;
   }
 
   get viewIdiom(): ViewIdiom {

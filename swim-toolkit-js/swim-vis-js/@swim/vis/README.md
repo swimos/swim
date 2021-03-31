@@ -49,17 +49,19 @@ bundles all **@swim/vis** component libraries, can be found in
 
 ### Browser
 
-Browser applications can load `swim-vis.js`, along with its `swim-core.js`
-and `swim-ui.js` dependencies, from the SwimOS CDN.
+Browser applications can load `swim-vis.js`, along with its `swim-core.js`,
+`swim-mesh.js`, and `swim-ui.js` dependencies, from the SwimOS CDN.
 
 ```html
 <!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-mesh.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-vis.js"></script>
 
 <!-- Production -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-mesh.min.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.min.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-vis.min.js"></script>
 ```
@@ -105,9 +107,10 @@ var swim = require("@swim/vis");
 
 When loaded by a web browser, the `swim-vis.js` script adds all component
 library exports to the global `swim` namespace.  The `swim-vis.js` script
-requires that `swim-core.js` and `swim-ui.js` have already been loaded.
+requires that `swim-core.js`, `swim-mesh.js`, and `swim-ui.js` have already
+been loaded.
 
 The `swim-toolkit.js` script also adds all **@swim/vis** component library
-exports to the global `swim` namespace, making it a drop-in replacement
-for `swim-ui.js` and `swim-vis.js` when additional **@swim/toolkit**
-frameworks are needed.
+exports to the global `swim` namespace, making it a drop-in replacement for
+`swim-ui.js` and `swim-vis.js` when additional **@swim/toolkit** frameworks
+are needed.

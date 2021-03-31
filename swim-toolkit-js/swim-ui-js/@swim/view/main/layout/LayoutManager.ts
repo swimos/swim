@@ -12,100 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ConstrainVariable, Constraint, ConstraintSolver} from "@swim/constraint";
-import {View} from "../View";
+import {Lazy} from "@swim/util";
+import {ConstraintVariable, Constraint, ConstraintSolver} from "@swim/constraint";
+import type {View} from "../View";
 import {ViewManager} from "../manager/ViewManager";
-import {LayoutSolver} from "./LayoutSolver";
-import {LayoutManagerObserver} from "./LayoutManagerObserver";
+import type {LayoutManagerObserver} from "./LayoutManagerObserver";
 
 export class LayoutManager<V extends View = View> extends ViewManager<V> {
-  /** @hidden */
-  readonly _solver: LayoutSolver;
-
   constructor() {
     super();
-    this._solver = this.createSolver();
+    Object.defineProperty(this, "solver", {
+      value: this.createSolver(),
+      enumerable: true,
+    });
   }
+
+  declare readonly solver: ConstraintSolver;
 
   /** @hidden */
-  protected createSolver(): LayoutSolver {
-    return new LayoutSolver(this);
-  }
-
-  get solver(): ConstraintSolver {
-    return this._solver;
+  protected createSolver(): ConstraintSolver {
+    return new ConstraintSolver();
   }
 
   activateConstraint(constraint: Constraint): void {
-    this._solver.addConstraint(constraint);
+    this.solver.addConstraint(constraint);
   }
 
   deactivateConstraint(constraint: Constraint): void {
-    this._solver.removeConstraint(constraint);
+    this.solver.removeConstraint(constraint);
   }
 
-  activateConstraintVariable(constraintVariable: ConstrainVariable): void {
-    this._solver.addConstraintVariable(constraintVariable);
+  activateConstraintVariable(constraintVariable: ConstraintVariable): void {
+    this.solver.addConstraintVariable(constraintVariable);
   }
 
-  deactivateConstraintVariable(constraintVariable: ConstrainVariable): void {
-    this._solver.removeConstraintVariable(constraintVariable);
+  deactivateConstraintVariable(constraintVariable: ConstraintVariable): void {
+    this.solver.removeConstraintVariable(constraintVariable);
   }
 
-  setConstraintVariable(constraintVariable: ConstrainVariable, state: number): void {
-    this._solver.setConstraintVariable(constraintVariable, state);
+  setConstraintVariable(constraintVariable: ConstraintVariable, state: number): void {
+    this.solver.setConstraintVariable(constraintVariable, state);
   }
 
-  updateConstraintVariables(): void {
-    this._solver.updateConstraintVariables();
-  }
-
-  didAddConstraint(constraint: Constraint): void {
-    const rootViews = this._rootViews;
-    for (let i = 0, n = rootViews.length; i < n; i += 1) {
-      rootViews[i].requireUpdate(View.NeedsLayout);
-    }
-  }
-
-  didRemoveConstraint(constraint: Constraint): void {
-    const rootViews = this._rootViews;
-    for (let i = 0, n = rootViews.length; i < n; i += 1) {
-      rootViews[i].requireUpdate(View.NeedsLayout);
-    }
-  }
-
-  didAddConstraintVariable(constraintVariable: ConstrainVariable): void {
-    const rootViews = this._rootViews;
-    for (let i = 0, n = rootViews.length; i < n; i += 1) {
-      rootViews[i].requireUpdate(View.NeedsLayout);
-    }
-  }
-
-  didRemoveConstraintVariable(constraintVariable: ConstrainVariable): void {
-    const rootViews = this._rootViews;
-    for (let i = 0, n = rootViews.length; i < n; i += 1) {
-      rootViews[i].requireUpdate(View.NeedsLayout);
-    }
-  }
-
-  didUpdateConstraintVariable(constraintVariable: ConstrainVariable, newValue: number, oldValue: number): void {
-    if (oldValue !== newValue) {
-      const rootViews = this._rootViews;
-      for (let i = 0, n = rootViews.length; i < n; i += 1) {
-        rootViews[i].requireUpdate(View.NeedsLayout);
-      }
-    }
-  }
-
-  // @ts-ignore
   declare readonly viewManagerObservers: ReadonlyArray<LayoutManagerObserver>;
 
-  private static _global?: LayoutManager<any>;
+  @Lazy
   static global<V extends View>(): LayoutManager<V> {
-    if (LayoutManager._global === void 0) {
-      LayoutManager._global = new LayoutManager();
-    }
-    return LayoutManager._global;
+    return new LayoutManager();
   }
 }
-ViewManager.Layout = LayoutManager;

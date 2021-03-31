@@ -22,3 +22,20 @@ export {
   DataPointViewInit,
   DataPointView,
 } from "./DataPointView";
+export {DataPointViewObserver} from "./DataPointViewObserver";
+
+export {
+  DataPointLabel,
+  DataPointLabelFunction,
+  DataPointTrait,
+} from "./DataPointTrait";
+export {DataPointTraitObserver} from "./DataPointTraitObserver";
+
+export {DataSetTrait} from "./DataSetTrait";
+export {DataSetTraitObserver} from "./DataSetTraitObserver";
+
+export {DataPointComponent} from "./DataPointComponent";
+export {DataPointComponentObserver} from "./DataPointComponentObserver";
+
+export {DataSetComponent} from "./DataSetComponent";
+export {DataSetComponentObserver} from "./DataSetComponentObserver";

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {PointR2, BoxR2} from "@swim/math";
-import {CanvasContext} from "@swim/render";
-import {GraphicsView, TypesetView} from "@swim/graphics";
+import {View} from "@swim/view";
+import {GraphicsView, CanvasContext, TypesetView} from "@swim/graphics";
 import {TickOrientation, TickView} from "./TickView";
 
 export class LeftTickView<Y> extends TickView<Y> {
@@ -26,17 +26,17 @@ export class LeftTickView<Y> extends TickView<Y> {
     return "left";
   }
 
-  protected layoutTickLabel(tickLabel: GraphicsView): void {
+  protected layoutLabel(labelView: GraphicsView): void {
     const anchor = this.anchor.getValue();
     const x0 = Math.round(anchor.x);
     const y = Math.round(anchor.y);
     const x1 = x0 - this.tickMarkLength.getValue();
     const x2 = x1 - this.tickLabelPadding.getValue();
 
-    if (TypesetView.is(tickLabel)) {
-      tickLabel.textAlign.setAutoState("right");
-      tickLabel.textBaseline.setAutoState("middle");
-      tickLabel.textOrigin.setAutoState(new PointR2(x2, y));
+    if (TypesetView.is(labelView)) {
+      labelView.textAlign.setState("right", View.Intrinsic);
+      labelView.textBaseline.setState("middle", View.Intrinsic);
+      labelView.textOrigin.setState(new PointR2(x2, y), View.Intrinsic);
     }
   }
 
@@ -47,20 +47,22 @@ export class LeftTickView<Y> extends TickView<Y> {
     const tickMarkLength = this.tickMarkLength.getValue();
     const x1 = x0 - tickMarkLength;
 
-    const tickMarkWidth = this.tickMarkWidth.value;
-    if (tickMarkWidth !== void 0 && tickMarkWidth !== 0 && tickMarkLength !== 0) {
+    const tickMarkColor = this.tickMarkColor.value;
+    const tickMarkWidth = this.tickMarkWidth.getValue();
+    if (tickMarkColor !== null && tickMarkWidth !== 0 && tickMarkLength !== 0) {
       context.beginPath();
-      context.strokeStyle = this.tickMarkColor.getValue().toString();
+      context.strokeStyle = tickMarkColor.toString();
       context.lineWidth = tickMarkWidth;
       context.moveTo(x0, y);
       context.lineTo(x1, y);
       context.stroke();
     }
 
+    const gridLineColor = this.gridLineColor.value;
     const gridLineWidth = this.gridLineWidth.getValue();
-    if (gridLineWidth !== 0 && frame.yMin < y && y < frame.yMax) {
+    if (gridLineColor !== null && gridLineWidth !== 0 && frame.yMin < y && y < frame.yMax) {
       context.beginPath();
-      context.strokeStyle = this.gridLineColor.getValue().toString();
+      context.strokeStyle = gridLineColor.toString();
       context.lineWidth = gridLineWidth;
       context.moveTo(x0, y);
       context.lineTo(frame.xMax, y);
@@ -68,4 +70,3 @@ export class LeftTickView<Y> extends TickView<Y> {
     }
   }
 }
-TickView.Left = LeftTickView;

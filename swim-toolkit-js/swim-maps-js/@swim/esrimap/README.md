@@ -6,7 +6,7 @@
 
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
-**@swim/esrimap** adds support for overlaying **@swim/map** views on ArcGIS maps.
+**@swim/esrimap** provides **@swim/map** overlays for ArcGIS maps.
 Check out the [traffic map](https://www.swimos.org/demo/map/traffic.html) and
 [transit map](https://www.swimos.org/demo/map/transit.html) demos to see
 massively real-time maps in action.  **@swim/esrimap** is part of the

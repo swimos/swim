@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View} from "../View";
+import type {View} from "../View";
 import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
@@ -21,4 +21,3 @@ export abstract class BooleanViewAnimator<V extends View> extends ViewAnimator<V
     return !!value;
   }
 }
-ViewAnimator.Boolean = BooleanViewAnimator;

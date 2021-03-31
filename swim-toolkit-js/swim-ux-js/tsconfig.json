@@ -2,13 +2,11 @@
   "files": [],
   "include": [],
   "references": [
-    {"path": "./@swim/theme"},
-    {"path": "./@swim/modal"},
     {"path": "./@swim/button"},
     {"path": "./@swim/token"},
-    {"path": "./@swim/drawer"},
-    {"path": "./@swim/menu"},
-    {"path": "./@swim/tree"},
+    {"path": "./@swim/grid"},
+    {"path": "./@swim/window"},
+    {"path": "./@swim/deck"},
     {"path": "./@swim/ux"}
   ]
 }

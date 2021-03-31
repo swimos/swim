@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {NodeViewObserver} from "../node/NodeViewObserver";
-import {TextView} from "./TextView";
+import type {NodeViewObserver} from "../node/NodeViewObserver";
+import type {TextView} from "./TextView";
 
 export interface TextViewObserver<V extends TextView = TextView> extends NodeViewObserver<V> {
 }

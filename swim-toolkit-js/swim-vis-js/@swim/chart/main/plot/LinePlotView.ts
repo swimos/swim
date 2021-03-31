@@ -12,33 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {BoxR2} from "@swim/math";
-import {AnyLength, Length} from "@swim/length";
-import {AnyColor, Color} from "@swim/color";
-import {CanvasRenderer, CanvasContext} from "@swim/render";
-import {ViewAnimator} from "@swim/view";
-import {GraphicsView, StrokeViewInit, StrokeView} from "@swim/graphics";
-import {DataPointView} from "../data/DataPointView";
-import {PlotView} from "./PlotView";
-import {PlotViewController} from "./PlotViewController";
+import {AnyLength, Length, BoxR2} from "@swim/math";
+import {AnyColor, Color} from "@swim/style";
+import {Look} from "@swim/theme";
+import {View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
+import type {GraphicsView, GraphicsViewController, CanvasContext, CanvasRenderer, StrokeViewInit, StrokeView} from "@swim/graphics";
+import type {DataPointView} from "../data/DataPointView";
 import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
+import type {LinePlotViewObserver} from "./LinePlotViewObserver";
 
 export type AnyLinePlotView<X, Y> = LinePlotView<X, Y> | LinePlotViewInit<X, Y>;
 
 export interface LinePlotViewInit<X, Y> extends SeriesPlotViewInit<X, Y>, StrokeViewInit {
-  viewController?: PlotViewController<X, Y>;
   hitWidth?: number;
 }
 
 export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeView {
-  /** @hidden */
-  _hitWidth: number;
-
-  constructor() {
-    super();
-    this._hitWidth = 5;
-  }
-
   initView(init: LinePlotViewInit<X, Y>): void {
     super.initView(init);
      if (init.hitWidth !== void 0) {
@@ -53,44 +42,56 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     }
   }
 
+  declare readonly viewController: GraphicsViewController<LinePlotView<X, Y>> & LinePlotViewObserver<X, Y> | null;
+
+  declare readonly viewObservers: ReadonlyArray<LinePlotViewObserver<X, Y>>;
+
   get plotType(): SeriesPlotType {
     return "line";
   }
 
-  @ViewAnimator({type: Color, state: Color.black()})
-  stroke: ViewAnimator<this, Color, AnyColor>;
+  @ViewAnimator({type: Color, state: null, look: Look.accentColor})
+  declare stroke: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, state: Length.px(1)})
-  strokeWidth: ViewAnimator<this, Length, AnyLength>;
-
-  hitWidth(): number;
-  hitWidth(hitWidth: number): this;
-  hitWidth(hitWidth?: number): number | this {
-    if (hitWidth === void 0) {
-      return this._hitWidth;
-    } else {
-      this._hitWidth = hitWidth;
-      return this;
+  protected onSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+    if (this.xRangePadding.isPrecedent(View.Intrinsic) || this.yRangePadding.isPrecedent(View.Intrinsic)) {
+      const frame = this.viewFrame;
+      const size = Math.min(frame.width, frame.height);
+      const strokeWidth = this.strokeWidth.getValueOr(Length.zero()).pxValue(size);
+      const strokeRadius = strokeWidth / 2;
+      this.xRangePadding.setState([strokeRadius, strokeRadius], View.Intrinsic);
+      this.yRangePadding.setState([strokeRadius, strokeRadius], View.Intrinsic);
     }
   }
 
-  protected renderPlot(context: CanvasContext, frame: BoxR2): void {
-    const data = this._data;
-    const n = data.size;
+  @ViewAnimator<LinePlotView<X, Y>, Length | null, AnyLength | null>({
+    type: Length,
+    state: Length.px(1),
+    didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+      this.owner.onSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+    },
+  })
+  declare strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;
 
-    const stroke = this.stroke.getValue();
-    const strokeWidth = this.strokeWidth.getValue().pxValue(Math.min(frame.width, frame.height));
-    const gradientStops = this._gradientStops;
-    let gradient: CanvasGradient | undefined;
+  @ViewProperty({type: Number, state: 5})
+  declare hitWidth: ViewProperty<this, number>;
+
+  protected renderPlot(context: CanvasContext, frame: BoxR2): void {
+    const size = Math.min(frame.width, frame.height);
+    const stroke = this.stroke.getValueOr(Color.transparent());
+    const strokeWidth = this.strokeWidth.getValueOr(Length.zero()).pxValue(size);
+    const gradientStops = this.gradientStops;
+    let gradient: CanvasGradient | null = null;
 
     let x0: number;
     let x1: number;
     let dx: number;
-    if (n > 0) {
-      const p0 = data.firstValue()!;
-      const p1 = data.lastValue()!;
-      x0 = p0._xCoord;
-      x1 = p1._xCoord;
+    const dataPointFasteners = this.dataPointFasteners;
+    if (!dataPointFasteners.isEmpty()) {
+      const p0 = dataPointFasteners.firstValue()!.view!;
+      const p1 = dataPointFasteners.lastValue()!.view!;
+      x0 = p0.xCoord;
+      x1 = p1.xCoord;
       dx = x1 - x0;
       if (gradientStops !== 0) {
         gradient = context.createLinearGradient(x0, 0, x1, 0);
@@ -103,18 +104,20 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
 
     context.beginPath();
     let i = 0;
-    data.forEach(function (x: X, p: DataPointView<X, Y>): void {
-      const xCoord = p._xCoord;
-      const yCoord = p._yCoord;
+    type self = this;
+    dataPointFasteners.forEach(function (x: X, dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): void {
+      const p = dataPointFastener.view!;
+      const xCoord = p.xCoord;
+      const yCoord = p.yCoord;
       if (i === 0) {
         context.moveTo(xCoord, yCoord);
       } else {
         context.lineTo(xCoord, yCoord);
       }
-      if (gradient !== void 0 && p.isGradientStop()) {
-        let color = p.color.value || stroke;
+      if (gradient !== null && p.isGradientStop()) {
+        let color = p.color.getValueOr(stroke);
         const opacity = p.opacity.value;
-        if (typeof opacity === "number") {
+        if (opacity !== void 0) {
           color = color.alpha(opacity);
         }
         const offset = (xCoord - x0) / (dx || 1);
@@ -123,16 +126,16 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
       i += 1;
     }, this);
 
-    context.strokeStyle = gradient !== void 0 ? gradient : stroke.toString();
+    context.strokeStyle = gradient !== null ? gradient : stroke.toString();
     context.lineWidth = strokeWidth;
     context.stroke();
   }
 
   protected hitTestPlot(x: number, y: number, renderer: CanvasRenderer): GraphicsView | null {
     const context = renderer.context;
-    let hitWidth = this._hitWidth;
+    let hitWidth = this.hitWidth.state;
     const strokeWidth = this.strokeWidth.value;
-    if (strokeWidth !== void 0) {
+    if (strokeWidth !== null) {
       const frame = this.viewFrame;
       const size = Math.min(frame.width, frame.height);
       hitWidth = Math.max(hitWidth, strokeWidth.pxValue(size));
@@ -140,9 +143,11 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
 
     context.beginPath();
     let i = 0;
-    this._data.forEach(function (x: X, p: DataPointView<X, Y>): void {
-      const xCoord = p._xCoord;
-      const yCoord = p._yCoord;
+    type self = this;
+    this.dataPointFasteners.forEach(function (x: X, dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): void {
+      const p = dataPointFastener.view!;
+      const xCoord = p.xCoord;
+      const yCoord = p.yCoord;
       if (i === 0) {
         context.moveTo(xCoord, yCoord);
       } else {
@@ -153,13 +158,18 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
 
     context.lineWidth = hitWidth;
     if (context.isPointInStroke(x, y)) {
-      if (this._hitMode === "plot") {
+      const hitMode = this.hitMode.state;
+      if (hitMode === "plot") {
         return this;
-      } else if (this._hitMode === "data") {
+      } else if (hitMode === "data") {
         return this.hitTestDomain(x, y, renderer);
       }
     }
     return null;
+  }
+
+  static create<X, Y>(): LinePlotView<X, Y> {
+    return new LinePlotView<X, Y>();
   }
 
   static fromInit<X, Y>(init: LinePlotViewInit<X, Y>): LinePlotView<X, Y> {
@@ -177,4 +187,3 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     throw new TypeError("" + value);
   }
 }
-PlotView.Line = LinePlotView;

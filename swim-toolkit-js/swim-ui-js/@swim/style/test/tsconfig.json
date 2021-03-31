@@ -7,31 +7,14 @@
       "@swim/util": ["../../swim-system-js/swim-core-js/@swim/util/main"],
       "@swim/codec": ["../../swim-system-js/swim-core-js/@swim/codec/main"],
       "@swim/unit": ["../../swim-system-js/swim-core-js/@swim/unit/main"],
-      "@swim/interpolate": ["../../swim-system-js/swim-core-js/@swim/interpolate/main"],
+      "@swim/mapping": ["../../swim-system-js/swim-core-js/@swim/mapping/main"],
       "@swim/structure": ["../../swim-system-js/swim-core-js/@swim/structure/main"],
+      "@swim/math": ["../../swim-system-js/swim-core-js/@swim/math/main"],
       "@swim/time": ["../../swim-system-js/swim-core-js/@swim/time/main"],
-      "@swim/angle": ["@swim/angle/main"],
-      "@swim/length": ["@swim/length/main"],
-      "@swim/color": ["@swim/color/main"],
-      "@swim/font": ["@swim/font/main"],
-      "@swim/shadow": ["@swim/shadow/main"],
-      "@swim/gradient": ["@swim/gradient/main"],
-      "@swim/transform": ["@swim/transform/main"],
-      "@swim/scale": ["@swim/scale/main"],
-      "@swim/transition": ["@swim/transition/main"],
       "@swim/style": ["@swim/style/main"]
     }
   },
   "references": [
-    {"path": "../../angle/main"},
-    {"path": "../../length/main"},
-    {"path": "../../color/main"},
-    {"path": "../../font/main"},
-    {"path": "../../shadow/main"},
-    {"path": "../../gradient/main"},
-    {"path": "../../transform/main"},
-    {"path": "../../scale/main"},
-    {"path": "../../transition/main"},
     {"path": "../../style/main"}
   ]
 }

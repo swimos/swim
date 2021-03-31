@@ -12,18 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyColor, Color} from "@swim/color";
+import {AnyColor, Color} from "@swim/style";
 import {AttributeAnimator} from "./AttributeAnimator";
-import {ElementView} from "../element/ElementView";
+import type {ElementView} from "../element/ElementView";
 
 /** @hidden */
-export abstract class ColorAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Color, AnyColor> {
-  parse(value: string): Color {
+export abstract class ColorAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Color | null, AnyColor | null> {
+  parse(value: string): Color | null {
     return Color.parse(value);
   }
 
-  fromAny(value: AnyColor): Color {
-    return Color.fromAny(value);
+  fromAny(value: AnyColor): Color | null {
+    try {
+      return Color.fromAny(value);
+    } catch (swallow) {
+      return null;
+    }
   }
 }
-AttributeAnimator.Color = ColorAttributeAnimator;

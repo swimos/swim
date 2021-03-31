@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTransform, Transform} from "@swim/transform";
-import {View} from "../View";
+import {AnyTransform, Transform} from "@swim/math";
+import type {View} from "../View";
 import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
@@ -22,4 +22,3 @@ export abstract class TransformViewAnimator<V extends View> extends ViewAnimator
     return value !== void 0 && value !== null ? Transform.fromAny(value) : null;
   }
 }
-ViewAnimator.Transform = TransformViewAnimator;

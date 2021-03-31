@@ -12,16 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {ViewContext} from "../ViewContext";
 import {View} from "../View";
 import {DisplayManager} from "../display/DisplayManager";
 import {ViewService} from "./ViewService";
 import {ViewManagerService} from "./ViewManagerService";
 
 export abstract class DisplayService<V extends View> extends ViewManagerService<V, DisplayManager<V>> {
+  updatedViewContext(viewContext: ViewContext): ViewContext {
+    let manager = this.manager;
+    if (manager === void 0) {
+      manager = DisplayManager.global();
+    }
+    return manager.updatedViewContext(viewContext);
+  }
+
   initManager(): DisplayManager<V> {
     return DisplayManager.global();
   }
 }
-ViewService.Display = DisplayService;
 
 ViewService({type: DisplayManager, observe: false})(View.prototype, "displayService");

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 import {ElementViewController} from "../element/ElementViewController";
-import {HtmlView} from "./HtmlView";
-import {HtmlViewObserver} from "./HtmlViewObserver";
+import type {HtmlView} from "./HtmlView";
+import type {HtmlViewObserver} from "./HtmlViewObserver";
 
 export class HtmlViewController<V extends HtmlView = HtmlView> extends ElementViewController<V> implements HtmlViewObserver<V> {
 }

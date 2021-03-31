@@ -12,173 +12,246 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as mapboxgl from "mapbox-gl";
-import {AnyPointR2, PointR2} from "@swim/math";
+import {Equivalent} from "@swim/util";
+import {AnyTiming, Timing} from "@swim/mapping";
+import type {AnyPointR2, PointR2} from "@swim/math";
+import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
+import {Look, Mood} from "@swim/theme";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {GraphicsViewContext, CanvasView} from "@swim/graphics";
-import {AnyGeoPoint, GeoPoint, GeoBox, MapLayerView} from "@swim/map";
+import {MapView, MapLayerView} from "@swim/map";
 import {MapboxProjection} from "./MapboxProjection";
-import {MapboxViewObserver} from "./MapboxViewObserver";
-import {MapboxViewController} from "./MapboxViewController";
+import type {MapboxViewObserver} from "./MapboxViewObserver";
+import type {MapboxViewController} from "./MapboxViewController";
 
-export class MapboxView extends MapLayerView {
-  /** @hidden */
-  readonly _map: mapboxgl.Map;
-  /** @hidden */
-  _geoProjection: MapboxProjection;
-  /** @hidden */
-  _mapZoom: number;
-  /** @hidden */
-  _mapHeading: number;
-  /** @hidden */
-  _mapTilt: number;
-
+export class MapboxView extends MapLayerView implements MapView {
   constructor(map: mapboxgl.Map) {
     super();
+    Object.defineProperty(this, "map", {
+      value: map,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "geoProjection", {
+      value: new MapboxProjection(map),
+      enumerable: true,
+      configurable: true,
+    });
+    const center = map.getCenter();
+    Object.defineProperty(this, "mapCenter", {
+      value: new GeoPoint(center.lng, center.lat),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "mapZoom", {
+      value: map.getZoom(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "mapHeading", {
+      value: map.getBearing(),
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "mapTilt", {
+      value: map.getPitch(),
+      enumerable: true,
+      configurable: true,
+    });
     this.onMapRender = this.onMapRender.bind(this);
-    this._map = map;
-    this._geoProjection = new MapboxProjection(this._map);
-    this._mapZoom = map.getZoom();
-    this._mapHeading = map.getBearing();
-    this._mapTilt = map.getPitch();
-    this.initMap(this._map);
+    this.startRepositioning = this.startRepositioning.bind(this);
+    this.stopRepositioning = this.stopRepositioning.bind(this);
+    this.initMap(map);
   }
 
-  get map(): mapboxgl.Map {
-    return this._map;
-  }
+  declare readonly viewController: MapboxViewController | null;
+
+  declare readonly viewObservers: ReadonlyArray<MapboxViewObserver>;
+
+  declare readonly map: mapboxgl.Map;
 
   protected initMap(map: mapboxgl.Map): void {
     map.on("render", this.onMapRender);
+    map.on("movestart", this.startRepositioning);
+    map.on("moveend", this.stopRepositioning);
   }
-
-  // @ts-ignore
-  declare readonly viewController: MapboxViewController | null;
-
-  // @ts-ignore
-  declare readonly viewObservers: ReadonlyArray<MapboxViewObserver>;
 
   project(lnglat: AnyGeoPoint): PointR2;
   project(lng: number, lat: number): PointR2;
   project(lng: AnyGeoPoint | number, lat?: number): PointR2 {
-    return this._geoProjection.project.apply(this._geoProjection, arguments);
+    if (arguments.length === 1) {
+      return this.geoProjection.project(lng as AnyGeoPoint);
+    } else {
+      return this.geoProjection.project(lng as number, lat!);
+    }
   }
 
   unproject(point: AnyPointR2): GeoPoint;
   unproject(x: number, y: number): GeoPoint;
   unproject(x: AnyPointR2 | number, y?: number): GeoPoint {
-    return this._geoProjection.unproject.apply(this._geoProjection, arguments);
-  }
-
-  get geoProjection(): MapboxProjection {
-    return this._geoProjection;
-  }
-
-  setGeoProjection(geoProjection: MapboxProjection): void {
-    this.willSetGeoProjection(geoProjection);
-    this._geoProjection = geoProjection;
-    this.onSetGeoProjection(geoProjection);
-    this.didSetGeoProjection(geoProjection);
-  }
-
-  protected willSetGeoProjection(geoProjection: MapboxProjection): void {
-    this.willObserve(function (viewObserver: MapboxViewObserver): void {
-      if (viewObserver.viewWillSetGeoProjection !== void 0) {
-        viewObserver.viewWillSetGeoProjection(geoProjection, this);
-      }
-    });
-  }
-
-  protected onSetGeoProjection(geoProjection: MapboxProjection): void {
-    if (!this.isHidden() && !this.isCulled()) {
-      this.requireUpdate(View.NeedsProject, true);
+    if (arguments.length === 1) {
+      return this.geoProjection.unproject(x as AnyPointR2);
+    } else {
+      return this.geoProjection.unproject(x as number, y!);
     }
   }
 
-  protected didSetGeoProjection(geoProjection: MapboxProjection): void {
-    this.didObserve(function (viewObserver: MapboxViewObserver): void {
-      if (viewObserver.viewDidSetGeoProjection !== void 0) {
-        viewObserver.viewDidSetGeoProjection(geoProjection, this);
+  // @ts-ignore
+  declare readonly geoProjection: MapboxProjection;
+
+  declare readonly mapCenter: GeoPoint;
+
+  // @ts-ignore
+  declare readonly mapZoom: number;
+
+  // @ts-ignore
+  declare readonly mapHeading: number;
+
+  // @ts-ignore
+  declare readonly mapTilt: number;
+
+  moveTo(mapCenter: AnyGeoPoint | undefined, mapZoom: number | undefined,
+         timing?: AnyTiming | boolean): void {
+    if (timing === void 0 || timing === true) {
+      timing = this.getLookOr(Look.timing, Mood.ambient, false);
+    } else {
+      timing = Timing.fromAny(timing);
+    }
+    const options: mapboxgl.FlyToOptions = {};
+    if (mapCenter !== void 0) {
+      mapCenter = GeoPoint.fromAny(mapCenter);
+      if (!this.mapCenter.equivalentTo(mapCenter, 1e-5)) {
+        options.center = mapCenter;
       }
-    });
+    }
+    if (mapZoom !== void 0 && !Equivalent(this.mapZoom, mapZoom, 1e-5)) {
+      options.zoom = mapZoom;
+    }
+    if (timing instanceof Timing) {
+      options.duration = timing.duration;
+    }
+    this.map.flyTo(options);
   }
 
-  get mapZoom(): number {
-    return this._mapZoom;
-  }
-
-  setMapZoom(newMapZoom: number): void {
-    const oldMapZoom = this._mapZoom;
-    if (oldMapZoom !== newMapZoom) {
-      this.willSetMapZoom(newMapZoom, oldMapZoom);
-      this._mapZoom = newMapZoom;
-      this.onSetMapZoom(newMapZoom, oldMapZoom);
-      this.didSetMapZoom(newMapZoom, oldMapZoom);
+  protected mapWillMove(mapCenter: GeoPoint, mapZoom: number): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.mapViewWillMove !== void 0) {
+      viewController.mapViewWillMove(mapCenter, mapZoom, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.mapViewWillMove !== void 0) {
+        viewObserver.mapViewWillMove(mapCenter, mapZoom, this);
+      }
     }
   }
 
-  protected willSetMapZoom(newMapZoom: number, oldMapZoom: number): void {
-    this.didObserve(function (viewObserver: MapboxViewObserver): void {
-      if (viewObserver.viewWillSetMapZoom !== void 0) {
-        viewObserver.viewWillSetMapZoom(newMapZoom, oldMapZoom, this);
+  protected mapDidMove(mapCenter: GeoPoint, mapZoom: number): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!
+      if (viewObserver.mapViewDidMove !== void 0) {
+        viewObserver.mapViewDidMove(mapCenter, mapZoom, this);
       }
-    });
-  }
-
-  protected onSetMapZoom(newZoom: number, oldZoom: number): void {
-    // hook
-  }
-
-  protected didSetMapZoom(newZoom: number, oldZoom: number): void {
-    this.didObserve(function (viewObserver: MapboxViewObserver): void {
-      if (viewObserver.viewDidSetMapZoom !== void 0) {
-        viewObserver.viewDidSetMapZoom(newZoom, oldZoom, this);
-      }
-    });
-  }
-
-  get mapHeading(): number {
-    return this._mapHeading;
-  }
-
-  get mapTilt(): number {
-    return this._mapTilt;
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.mapViewDidMove !== void 0) {
+      viewController.mapViewDidMove(mapCenter, mapZoom, this);
+    }
   }
 
   extendViewContext(viewContext: GraphicsViewContext): ViewContextType<this> {
     const mapViewContext = Object.create(viewContext);
-    mapViewContext.geoProjection = this._geoProjection;
+    mapViewContext.geoProjection = this.geoProjection;
     mapViewContext.geoFrame = this.geoFrame;
-    mapViewContext.mapZoom = this._mapZoom;
-    mapViewContext.mapHeading = this._mapHeading;
-    mapViewContext.mapTilt = this._mapTilt;
+    mapViewContext.mapZoom = this.mapZoom;
+    mapViewContext.mapHeading = this.mapHeading;
+    mapViewContext.mapTilt = this.mapTilt;
     return mapViewContext;
   }
 
   get geoFrame(): GeoBox {
-    const bounds = this._map.getBounds();
+    const bounds = this.map.getBounds();
     return new GeoBox(bounds.getWest(), bounds.getSouth(),
                       bounds.getEast(), bounds.getNorth());
   }
 
+  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+    if ((processFlags & View.NeedsResize) !== 0) {
+      processFlags |= View.NeedsProject;
+    }
+    return processFlags;
+  }
+
   protected onMapRender(): void {
-    this._mapHeading = this._map.getBearing();
-    this._mapTilt = this._map.getPitch();
-    this.setMapZoom(this._map.getZoom());
-    this.setGeoProjection(this._geoProjection);
+    const map = this.map;
+    let needsProject = false;
+    const oldMapCenter = this.mapCenter;
+    const center = map.getCenter();
+    const newMapCenter = new GeoPoint(center.lng, center.lat);
+    if (!oldMapCenter.equals(newMapCenter)) {
+      Object.defineProperty(this, "mapCenter", {
+        value: newMapCenter,
+        enumerable: true,
+        configurable: true,
+      });
+      needsProject = true;
+    }
+    const oldMapZoom = this.mapZoom;
+    const newMapZoom = map.getZoom();
+    if (oldMapZoom !== newMapZoom) {
+      Object.defineProperty(this, "mapZoom", {
+        value: newMapZoom,
+        enumerable: true,
+        configurable: true,
+      });
+      needsProject = true;
+    }
+    const oldMapHeading = this.mapHeading;
+    const newMapHeading = map.getBearing();
+    if (oldMapHeading !== newMapHeading) {
+      Object.defineProperty(this, "mapHeading", {
+        value: newMapHeading,
+        enumerable: true,
+        configurable: true,
+      });
+      needsProject = true;
+    }
+    const oldMapTilt = this.mapTilt;
+    const newMapTilt = map.getPitch();
+    if (oldMapTilt !== newMapTilt) {
+      Object.defineProperty(this, "mapTilt", {
+        value: newMapTilt,
+        enumerable: true,
+        configurable: true,
+      });
+      needsProject = true;
+    }
+    if (needsProject && !this.isHidden() && !this.isCulled()) {
+      this.requireUpdate(View.NeedsProject, true);
+    }
+  }
+
+  protected startRepositioning(): void {
+    this.mapWillMove(this.mapCenter, this.mapZoom);
+  }
+
+  protected stopRepositioning(): void {
+    this.mapDidMove(this.mapCenter, this.mapZoom);
   }
 
   overlayCanvas(): CanvasView | null {
     if (this.isMounted()) {
       return this.getSuperView(CanvasView);
     } else {
-      const map = this._map;
+      const map = this.map;
       HtmlView.fromNode(map.getContainer());
       const canvasContainer = HtmlView.fromNode(map.getCanvasContainer());
       const canvas = canvasContainer.append(CanvasView);
       canvas.setEventNode(canvasContainer.node);
-      canvas.append(this);
+      canvas.appendChildView(this);
       return canvas;
     }
   }

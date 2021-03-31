@@ -15,6 +15,7 @@
 /// <reference types="googlemaps"/>
 
 export {GoogleMapProjection} from "./GoogleMapProjection";
+
 export {GoogleMapView} from "./GoogleMapView";
 export {GoogleMapViewObserver} from "./GoogleMapViewObserver";
 export {GoogleMapViewController} from "./GoogleMapViewController";

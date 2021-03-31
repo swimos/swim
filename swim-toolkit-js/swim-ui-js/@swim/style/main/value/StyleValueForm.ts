@@ -13,35 +13,31 @@
 // limitations under the License.
 
 import {Item, Record, Num, Bool, Form} from "@swim/structure";
+import {Length, Angle, Transform} from "@swim/math";
 import {DateTime} from "@swim/time";
-import {Angle} from "@swim/angle";
-import {Length} from "@swim/length";
-import {Color} from "@swim/color";
-import {Font} from "@swim/font";
-import {BoxShadow} from "@swim/shadow";
-import {Transform} from "@swim/transform";
-import {Interpolator} from "@swim/interpolate";
-import {Scale} from "@swim/scale";
-import {Transition} from "@swim/transition";
+import {Font} from "../font/Font";
+import {Color} from "../color/Color";
+import {BoxShadow} from "../shadow/BoxShadow";
 import {AnyStyleValue, StyleValue} from "./StyleValue";
 
 /** @hidden */
 export class StyleValueForm extends Form<StyleValue, AnyStyleValue> {
-  readonly _unit: StyleValue | undefined;
-
-  constructor(unit?: StyleValue) {
+  constructor(unit: StyleValue | undefined) {
     super();
-    this._unit = unit;
+    Object.defineProperty(this, "unit", {
+      value: unit,
+      enumerable: true,
+    });
   }
 
-  unit(): StyleValue | undefined;
-  unit(unit: AnyStyleValue | undefined): Form<StyleValue, AnyStyleValue>;
-  unit(unit?: AnyStyleValue | undefined): StyleValue | undefined | Form<StyleValue, AnyStyleValue> {
-    if (arguments.length === 0) {
-      return this._unit as StyleValue;
+  // @ts-ignore
+  declare readonly unit: StyleValue | undefined;
+
+  withUnit(unit: StyleValue | undefined): Form<StyleValue, AnyStyleValue> {
+    if (unit !== this.unit) {
+      return new StyleValueForm(unit);
     } else {
-      unit = unit !== void 0 ? StyleValue.fromAny(unit) : void 0;
-      return new StyleValueForm(unit as StyleValue | undefined);
+      return this;
     }
   }
 
@@ -54,20 +50,14 @@ export class StyleValueForm extends Form<StyleValue, AnyStyleValue> {
         return Angle.form().mold(value);
       } else if (value instanceof Length) {
         return Length.form().mold(value);
-      } else if (value instanceof Color) {
-        return Color.form().mold(value);
       } else if (value instanceof Font) {
         return Font.form().mold(value);
+      } else if (value instanceof Color) {
+        return Color.form().mold(value);
       } else if (value instanceof BoxShadow) {
         return BoxShadow.form().mold(value);
       } else if (value instanceof Transform) {
         return Transform.form().mold(value);
-      } else if (value instanceof Interpolator) {
-        return StyleValue.interpolatorForm().mold(value);
-      } else if (value instanceof Scale) {
-        return StyleValue.scaleForm().mold(value);
-      } else if (value instanceof Transition) {
-        return StyleValue.transitionForm().mold(value);
       } else if (typeof value === "number") {
         return Num.from(value);
       }
@@ -95,47 +85,34 @@ export class StyleValueForm extends Form<StyleValue, AnyStyleValue> {
     }
     if (value instanceof Record) {
       const date = DateTime.fromValue(value);
-      if (date !== void 0) {
+      if (date !== null) {
         return date;
       }
       const angle = Angle.fromValue(value);
-      if (angle !== void 0) {
+      if (angle !== null) {
         return angle;
       }
       const length = Length.fromValue(value);
-      if (length !== void 0) {
+      if (length !== null) {
         return length;
       }
-      const color = Color.fromValue(value);
-      if (color !== void 0) {
-        return color;
-      }
       const font = Font.fromValue(value);
-      if (font !== void 0) {
+      if (font !== null) {
         return font;
       }
+      const color = Color.fromValue(value);
+      if (color !== null) {
+        return color;
+      }
       const boxShadow = BoxShadow.fromValue(value);
-      if (boxShadow !== void 0) {
+      if (boxShadow !== null) {
         return boxShadow;
       }
       const transform = Transform.fromValue(value);
-      if (transform !== void 0) {
+      if (transform !== null) {
         return transform;
-      }
-      const interpolator = StyleValue.interpolatorForm().cast(value);
-      if (interpolator !== void 0) {
-        return interpolator;
-      }
-      const scale = StyleValue.scaleForm().cast(value);
-      if (scale !== void 0) {
-        return scale;
-      }
-      const transition = StyleValue.transitionForm().cast(value);
-      if (transition !== void 0) {
-        return transition;
       }
     }
     return void 0;
   }
 }
-StyleValue.Form = StyleValueForm;

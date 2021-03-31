@@ -14,10 +14,21 @@
 
 export {
   ViewElement,
+  ElementViewMemberType,
+  ElementViewMemberInit,
+  ElementViewMemberKey,
+  ElementViewMemberMap,
   ElementViewInit,
+  ElementViewPrototype,
   ElementViewConstructor,
-  ElementViewClass,
   ElementView,
 } from "./ElementView";
-export {ElementViewObserver} from "./ElementViewObserver";
+export {
+  ElementViewObserver,
+  ElementViewObserverCache,
+  ViewWillSetAttribute,
+  ViewDidSetAttribute,
+  ViewWillSetStyle,
+  ViewDidSetStyle,
+} from "./ElementViewObserver";
 export {ElementViewController} from "./ElementViewController";

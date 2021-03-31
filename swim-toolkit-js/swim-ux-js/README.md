@@ -18,20 +18,16 @@ The **Swim UX** framework consists of the following component libraries:
 
 - [**@swim/ux**](@swim/ux) –
   umbrella package that depends on, and re-exports, all **Swim UX** libraries.
-- [**@swim/theme**](@swim/theme) –
-  semantic looks and feels for mood-aware UX components.
 - [**@swim/button**](@swim/button) –
-  procedurally styled multitouch buttons.
-- [**@swim/modal**](@swim/modal) –
-  auto-placed, source-tracking popover views.
-- [**@swim/drawer**](@swim/drawer) –
-  responsive, minifiable drawer views.
+  button-like user interface controls.
 - [**@swim/token**](@swim/token) –
-  compact, editable pin and chip token views.
-- [**@swim/menu**](@swim/menu) –
-  context-sensitive menu lists and menu items.
-- [**@swim/tree**](@swim/tree) –
-  disclosable tree views with tabular columns.
+  attribute, action, and user input token views.
+- [**@swim/grid**](@swim/grid) –
+  tables, trees, lists, and other tabular views.
+- [**@swim/window**](@swim/window) –
+  popovers, drawers, and other view surfaces.
+- [**@swim/deck**](@swim/deck) –
+  card stack navigation views.
 
 **Swim UX** builds on the [**Swim Core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js)
 and [**Swim UI**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js)
@@ -160,39 +156,39 @@ swim-ux-js $ bin/build.js compile
 
 To compile a subset of projects and targets, include a `--projects` (`-p`)
 option, with a comma-separated list of `$project:($target)?` specifiers.
-For example, to build the `main` target of the `modal` project, and all
+For example, to build the `main` target of the `tree` project, and all
 targets of the `ux` project, run:
 
 ```sh
-swim-ux-js $ bin/build.js compile -p modal:main,ux
+swim-ux-js $ bin/build.js compile -p tree:main,ux
 ```
 
 ### Running tests
 
 Use the `test` build script command to compile and run unit tests.
-For example, to compile and test the `theme` project, run:
+For example, to compile and test the `button` project, run:
 
 ```sh
-swim-ux-js $ bin/build.js test -p theme
+swim-ux-js $ bin/build.js test -p button
 ```
 
 ### Continuous development builds
 
 Use the `watch` build script command to automatically rebuild projects when
 dependent source files change.  For example, to continuously recompile the
-`main` target of the `button` project when any source file in the project–or
+`main` target of the `tree` project when any source file in the project–or
 in one of the project's transitive local dependencies–changes, run:
 
 ```sh
-swim-ux-js $ bin/build.js watch -p button:main
+swim-ux-js $ bin/build.js watch -p tree:main
 ```
 
 Pass the `--devel` (`-d`) option to expedite recompilation by skipping the
 minification step.  Add the `--test` (`-t`) option to automatically run unit
 tests after each successful compilation.  For example, to continuosly compile
-and test the `theme` project, bypassing minification, and skipping generation
+and test the `button` project, bypassing minification, and skipping generation
 of the main script, run:
 
 ```sh
-swim-ux-js $ bin/build.js watch -p theme:test -d -t
+swim-ux-js $ bin/build.js watch -p button:test -d -t
 ```

@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {BoxR2} from "@swim/math";
-import {AnyLength, Length} from "@swim/length";
-import {AnyColor, Color} from "@swim/color";
-import {Tween} from "@swim/transition";
-import {CanvasContext, CanvasRenderer} from "@swim/render";
+import type {AnyTiming} from "@swim/mapping";
+import {AnyLength, Length, BoxR2} from "@swim/math";
+import {AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewAnimator} from "@swim/view";
-import {GraphicsView} from "../GraphicsView";
-import {LayerView} from "../LayerView";
-import {FillViewInit, FillView} from "./FillView";
-import {StrokeViewInit, StrokeView} from "./StrokeView";
+import type {GraphicsView} from "../graphics/GraphicsView";
+import {LayerView} from "../layer/LayerView";
+import type {CanvasContext} from "../canvas/CanvasContext";
+import {CanvasRenderer} from "../canvas/CanvasRenderer";
+import type {FillViewInit, FillView} from "./FillView";
+import type {StrokeViewInit, StrokeView} from "./StrokeView";
 import {Rect} from "./Rect";
 
 export type AnyRectView = RectView | Rect | RectViewInit;
@@ -40,25 +40,25 @@ export class RectView extends LayerView implements FillView, StrokeView {
   }
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  x: ViewAnimator<this, Length, AnyLength>;
+  declare x: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  y: ViewAnimator<this, Length, AnyLength>;
+  declare y: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  width: ViewAnimator<this, Length, AnyLength>;
+  declare width: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  height: ViewAnimator<this, Length, AnyLength>;
+  declare height: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Color, inherit: true})
-  fill: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  @ViewAnimator({type: Color, state: null, inherit: true})
+  declare fill: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, inherit: true})
-  stroke: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  @ViewAnimator({type: Color, state: null, inherit: true})
+  declare stroke: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, inherit: true})
-  strokeWidth: ViewAnimator<this, Length | undefined, AnyLength | undefined>;
+  @ViewAnimator({type: Length, state: null, inherit: true})
+  declare strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;
 
   get value(): Rect {
     return new Rect(this.x.getValue(), this.y.getValue(), this.width.getValue(), this.height.getValue());
@@ -68,30 +68,30 @@ export class RectView extends LayerView implements FillView, StrokeView {
     return new Rect(this.x.getState(), this.y.getState(), this.width.getState(), this.height.getState());
   }
 
-  setState(rect: Rect | RectViewInit, tween?: Tween<any>): void {
+  setState(rect: Rect | RectViewInit, timing?: AnyTiming | boolean): void {
     if (rect instanceof Rect) {
       rect = rect.toAny();
     }
     if (rect.x !== void 0) {
-      this.x(rect.x, tween);
+      this.x(rect.x, timing);
     }
     if (rect.y !== void 0) {
-      this.y(rect.y, tween);
+      this.y(rect.y, timing);
     }
     if (rect.width !== void 0) {
-      this.width(rect.width, tween);
+      this.width(rect.width, timing);
     }
     if (rect.height !== void 0) {
-      this.height(rect.height, tween);
+      this.height(rect.height, timing);
     }
     if (rect.fill !== void 0) {
-      this.fill(rect.fill, tween);
+      this.fill(rect.fill, timing);
     }
     if (rect.stroke !== void 0) {
-      this.stroke(rect.stroke, tween);
+      this.stroke(rect.stroke, timing);
     }
     if (rect.strokeWidth !== void 0) {
-      this.strokeWidth(rect.strokeWidth, tween);
+      this.strokeWidth(rect.strokeWidth, timing);
     }
   }
 
@@ -114,14 +114,14 @@ export class RectView extends LayerView implements FillView, StrokeView {
     context.beginPath();
     context.rect(x, y, width, height);
     const fill = this.fill.value;
-    if (fill !== void 0) {
+    if (fill !== null) {
       context.fillStyle = fill.toString();
       context.fill();
     }
     const stroke = this.stroke.value;
-    if (stroke !== void 0) {
+    if (stroke !== null) {
       const strokeWidth = this.strokeWidth.value;
-      if (strokeWidth !== void 0) {
+      if (strokeWidth !== null) {
         const size = Math.min(frame.width, frame.height);
         context.lineWidth = strokeWidth.pxValue(size);
       }
@@ -162,11 +162,11 @@ export class RectView extends LayerView implements FillView, StrokeView {
     const height = this.height.getValue().pxValue(frame.height);
     context.beginPath();
     context.rect(x, y, width, height);
-    if (this.fill.value !== void 0 && context.isPointInPath(hx, hy)) {
+    if (this.fill.value !== null && context.isPointInPath(hx, hy)) {
       return this;
-    } else if (this.stroke.value !== void 0) {
+    } else if (this.stroke.value !== null) {
       const strokeWidth = this.strokeWidth.value;
-      if (strokeWidth !== void 0) {
+      if (strokeWidth !== null) {
         const size = Math.min(frame.width, frame.height);
         context.lineWidth = strokeWidth.pxValue(size);
         if (context.isPointInStroke(hx, hy)) {

@@ -1,0 +1,26 @@
+{
+  "name": "@swim/model",
+  "version": "3.11.0-dev.20210331",
+  "description": "Lifecycle-managed model hierarchy supporting dynamic scoping and service injection",
+  "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/model",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2020 Swim inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "dist/main/swim-model.js",
+  "module": "lib/main/index.js",
+  "types": "lib/main/index.d.ts",
+  "dependencies": {
+    "@swim/util": "3.11.0-dev.20210331",
+    "@swim/codec": "3.11.0-dev.20210331",
+    "@swim/mapping": "3.11.0-dev.20210331",
+    "@swim/collections": "3.11.0-dev.20210331",
+    "@swim/structure": "3.11.0-dev.20210331",
+    "@swim/streamlet": "3.11.0-dev.20210331",
+    "@swim/dataflow": "3.11.0-dev.20210331",
+    "@swim/recon": "3.11.0-dev.20210331",
+    "@swim/uri": "3.11.0-dev.20210331",
+    "@swim/warp": "3.11.0-dev.20210331",
+    "@swim/client": "3.11.0-dev.20210331"
+  }
+}

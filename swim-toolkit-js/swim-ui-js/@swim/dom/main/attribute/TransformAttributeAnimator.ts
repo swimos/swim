@@ -12,18 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTransform, Transform} from "@swim/transform";
+import {AnyTransform, Transform} from "@swim/math";
 import {AttributeAnimator} from "./AttributeAnimator";
-import {ElementView} from "../element/ElementView";
+import type {ElementView} from "../element/ElementView";
 
 /** @hidden */
-export abstract class TransformAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Transform, AnyTransform> {
-  parse(value: string): Transform {
+export abstract class TransformAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Transform | null, AnyTransform | null> {
+  parse(value: string): Transform | null {
     return Transform.parse(value);
   }
 
-  fromAny(value: AnyTransform): Transform {
-    return Transform.fromAny(value);
+  fromAny(value: AnyTransform): Transform | null {
+    try {
+      return Transform.fromAny(value);
+    } catch (swallow) {
+      return null;
+    }
   }
 }
-AttributeAnimator.Transform = TransformAttributeAnimator;

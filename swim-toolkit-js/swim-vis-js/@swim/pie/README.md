@@ -25,17 +25,19 @@ be found in `node_modules/@swim/pie/dist/main/swim-pie.js`.
 ### Browser
 
 Browser applications can load `swim-vis.js`—which bundles the **@swim/pie**
-library—along with its `swim-core.js` and `swim-ui.js` dependencies, directly
-from the SwimOS CDN.
+library—along with its `swim-core.js`, `swim-mesh.js`, and `swim-ui.js`
+dependencies, directly from the SwimOS CDN.
 
 ```html
 <!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-mesh.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-vis.js"></script>
 
 <!-- Production -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-mesh.min.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.min.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-vis.min.js"></script>
 ```
@@ -79,10 +81,9 @@ var pie = require("@swim/pie");
 
 When loaded by a web browser, the `swim-pie.js` script adds all
 **@swim/pie** library exports to the global `swim` namespace.
-The `swim-pie.js` script requires that `swim-core.js` and `swim-ui.js`
-have already been loaded.
+The `swim-pie.js` script requires that `swim-core.js`, `swim-mesh.js`,
+and `swim-ui.js` have already been loaded.
 
-The `swim-toolkit.js` script also adds all **@swim/pie** library
-exports to the global `swim` namespace, making it a drop-in replacement for
-`swim-ui.js` and `swim-pie.js` when additional **@swim/toolkit** frameworks
-are needed.
+The `swim-toolkit.js` script also adds all **@swim/pie** library exports to the
+global `swim` namespace, making it a drop-in replacement for `swim-ui.js` and
+`swim-pie.js` when additional **@swim/toolkit** frameworks are needed.

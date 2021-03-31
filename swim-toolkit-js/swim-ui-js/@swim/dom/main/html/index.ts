@@ -20,8 +20,14 @@ export {
   HtmlViewTagMap,
   HtmlViewFactory,
   HtmlViewConstructor,
-  HtmlViewClass,
   HtmlView,
 } from "./HtmlView";
 export {HtmlViewObserver} from "./HtmlViewObserver";
 export {HtmlViewController} from "./HtmlViewController";
+
+export {
+  StyleViewInit,
+  StyleView,
+} from "./StyleView";
+export {StyleViewObserver} from "./StyleViewObserver";
+export {StyleViewController} from "./StyleViewController";

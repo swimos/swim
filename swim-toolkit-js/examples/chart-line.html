@@ -5,51 +5,57 @@
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
   </head>
   <body style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; margin: 0; overflow: hidden;">
-    <div id="ui" style="display: flex; width: 90%; height: 90%; touch-action: none;">
-    </div>
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-vis-js/@swim/vis/dist/main/swim-vis.js"></script>
     <script>
 
-const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
+//setTimeout(function () {
+//  swim.ThemeManager.global().setTheme(swim.Theme.light);
+//}, 1000);
 
-const canvas = uiView.append("canvas")
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.append("div").display("flex").width("90%").height("90%").touchAction("none").userSelect("none");
+
+const canvasView = swim.CanvasView.create()
     .wheelEventsEnabled(true)
     .mouseEventsEnabled(true)
     .pointerEventsEnabled(true)
     .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const chart = canvas.append(swim.ChartView)
+const chartView = canvasView.append(swim.ChartView)
     .bottomAxis(true)
     .leftAxis(true)
-    //.xDomainBounds(false, false)
-    //.yDomainBounds(false, false)
-    .xDomainPadding(Math.PI, Math.PI)
-    .yDomainPadding(1, 1)
-    .xRangePadding(2)
-    .yRangePadding(2)
+    //.xDomainBounds([false, false])
+    //.yDomainBounds([false, false])
+    .xDomainPadding([Math.PI, Math.PI])
+    .yDomainPadding([1, 1])
+    //.xRangePadding([2, 2])
+    //.yRangePadding([2, 2])
     .fitAspectRatio(-1 / 4)
     .preserveAspectRatio(true)
     .domainTracking(true)
     .xGestures(true)
-    .yGestures(true);
-const graph = chart.graph;
+    .yGestures(true)
+    .font("12px sans-serif");
 
-chart.leftAxis().gridLineColor("#d8d8d8")
-                .gridLineWidth(1);
+const graphView = chartView.graph.injectView();
 
-const plot = graph.append(swim.LinePlotView)
+chartView.leftAxis.view.gridLineWidth(1);
+
+const plotView = graphView.append(swim.LinePlotView)
     .hitMode("plot")
-    .stroke("#4a4a4a")
     .strokeWidth(4)
     .on("pointerenter", function (event) {
-      plot.stroke("#1db0ef", {duration: 250});
+      plotView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
     })
     .on("pointerleave", function (event) {
-      plot.stroke("#4a4a4a", {duration: 250});
+      plotView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
     });
+plotView.modifyMood(swim.Feel.default, [swim.Feel.primary, 1]);
 
 const cycles = 4;
 const samplesPerCycle = 100;
@@ -58,14 +64,11 @@ let n = cycles * samplesPerCycle
 while (i <= n) {
   const x = i * 2 * Math.PI / samplesPerCycle;
   const y = Math.sin(x) * x;
-  plot.insertDataPoint({x: x, y: y});
+  plotView.insertDataPoint({x: x, y: y});
   i += 1;
 }
 
-//setTimeout(function () {
-//  chart.xDomain(0, Math.PI, {duration: 10000, ease: "cubic-in-out"});
-//  chart.yDomain(-1, 1, {duration: 10000, ease: "cubic-in-out"});
-//}, 1000);
+containerView.append(canvasView);
 
     </script>
   </body>

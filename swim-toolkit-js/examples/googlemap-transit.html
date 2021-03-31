@@ -30,6 +30,8 @@ mapView.overlayCanvas();
 const mapGrid = mapView.append(swim.MapGridView);
 //mapGrid.tileOutlineColor("#008f11");
 
+const vehicleIcon = swim.VectorIcon.create(24, 24, "M12.289,0.001C17.561,0.021,21.845,0.641,21.996,4.771L22,5L22,17.655C22,18.697,21.542,19.629,20.862,20.312L20.713,20.455L20.713,22.7C20.713,23.35,20.22,23.924,19.593,23.993L19.466,24L18.218,24C17.569,24,17.066,23.467,17.006,22.828L17,22.7L17,21.438L7,21.438L7,22.7C7,23.35,6.503,23.924,5.871,23.993L5.743,24L4.495,24C3.852,24,3.318,23.467,3.254,22.828L3.248,22.7L3.248,20.455C2.537,19.807,2.066,18.902,2.006,17.877L2,17.655L2,5C2,0.664,6.343,0.022,11.711,0.001L12.289,0.001ZM6.5,15C5.395,15,4.5,15.895,4.5,17C4.5,18.105,5.395,19,6.5,19C7.605,19,8.5,18.105,8.5,17C8.5,15.895,7.605,15,6.5,15ZM17.5,15C16.395,15,15.5,15.895,15.5,17C15.5,18.105,16.395,19,17.5,19C18.605,19,19.5,18.105,19.5,17C19.5,15.895,18.605,15,17.5,15ZM19.5,5L4.5,5L4.5,11L19.5,11L19.5,5Z");
+
 const vehiclesLink = swim.downlinkMap()
     .hostUri("warp://transit.swim.services")
     .nodeUri("/state/US/S-CA")
@@ -38,23 +40,29 @@ const vehiclesLink = swim.downlinkMap()
       key = key.stringValue();
       const lng = value.get("longitude").numberValue(0);
       const lat = value.get("latitude").numberValue(0);
-      const tween = swim.Transition.duration(10000);
+      const timing = swim.Easing.linear.withDuration(10000);
 
       let vehicleView = mapGrid.getChildView(key);
       if (vehicleView !== null) {
-        vehicleView.geoCenter([lng, lat], tween);
+        vehicleView.geoCenter([lng, lat], timing);
         if (!document.hidden && mapView.geoBounds.contains(lng, lat)) {
           ripple(lng, lat);
         }
       } else {
-        vehicleView = new swim.MapCircleView().geoCenter([lng, lat]).radius(5).fill(VEHICLE_COLOR);
+        //vehicleView = new swim.GeoCircleView().geoCenter([lng, lat]).radius(5).fill(VEHICLE_COLOR);
+        vehicleView = new swim.GeoIconView()
+            .geoCenter([lng, lat])
+            .iconWidth(10)
+            .iconHeight(10)
+            .iconColor(VEHICLE_COLOR)
+            .graphics(vehicleIcon);
         mapGrid.setChildView(key, vehicleView);
       }
     })
     .open();
 
 function ripple(lng, lat) {
-  const ripple = new swim.MapCircleView()
+  const ripple = new swim.GeoCircleView()
       .geoCenter([lng, lat])
       .radius(0)
       .stroke(RIPPLE_COLOR)
@@ -62,9 +70,12 @@ function ripple(lng, lat) {
   mapView.append(ripple);
   const frame = mapView.viewFrame;
   const radius = Math.min(frame.width, frame.height) / 8;
-  const tween = swim.Transition.duration(2000);
-  ripple.stroke(RIPPLE_COLOR.alpha(0), tween)
-        .radius(radius, tween.onEnd(function () { ripple.remove(); }));
+  const timing = swim.Easing.linear.withDuration(2000);
+  ripple.stroke(RIPPLE_COLOR.alpha(0), timing)
+        .radius(radius, timing);
+  ripple.radius.onEnd = function () {
+    ripple.remove();
+  };
 }
 
     </script>

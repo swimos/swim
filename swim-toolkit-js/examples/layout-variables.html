@@ -4,15 +4,18 @@
     <title>Layout Variables</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
   </head>
-  <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
+  <body style="width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script>
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const divider = bodyView.constraintVariable("divider");
-bodyView.constraint(divider, "eq", bodyView.widthAnchor.divide(4)).enabled(true);
+const leftPaneWidth = bodyView.constraintVariable("leftPaneWidth");
+bodyView.constraint(leftPaneWidth.constrain(), "eq", bodyView.width.divide(4));
+
+const rightPaneWidth = bodyView.constraintVariable("rightPaneWidth");
+bodyView.constraint(rightPaneWidth.constrain(), "eq", bodyView.width.minus(leftPaneWidth));
 
 const sidebar = bodyView.append("div")
     .position("absolute")
@@ -22,23 +25,17 @@ const sidebar = bodyView.append("div")
     .borderRightWidth(1)
     .borderRightStyle("solid")
     .borderRightColor("#0000cc");
-sidebar.widthAnchor.constrained(true);
-sidebar.constraint(sidebar.widthAnchor, "eq", divider).enabled(true);
+sidebar.constraint(sidebar.width.constrain(), "eq", leftPaneWidth);
 
 const circle = bodyView.append("div")
     .position("absolute")
     .borderRadius("50%")
     .backgroundColor("#989898");
-circle.leftAnchor.constrained(true);
-circle.topAnchor.constrained(true);
-circle.widthAnchor.constrained(true);
-circle.heightAnchor.constrained(true);
-circle.centerXAnchor.constrained(true);
-circle.centerYAnchor.constrained(true);
-circle.constraint(circle.widthAnchor, "eq", circle.heightAnchor).enabled(true);
-circle.constraint(circle.heightAnchor, "eq", bodyView.heightAnchor.divide(3)).enabled(true);
-circle.constraint(circle.centerXAnchor, "eq", bodyView.widthAnchor.plus(divider).divide(2)).enabled(true);
-circle.constraint(circle.centerYAnchor, "eq", bodyView.heightAnchor.divide(2).minus(10)).enabled(true);
+circle.addClass("circle");
+circle.constraint(circle.width.constrain(), "eq", circle.height);
+circle.constraint(circle.height.constrain(), "eq", bodyView.height.divide(3));
+circle.constraint(circle.left.constrain(), "eq", leftPaneWidth.plus(rightPaneWidth.times(0.5)).minus(circle.width.times(0.5)));
+circle.constraint(circle.top.constrain(), "eq", bodyView.height.times(0.5).minus(circle.height.times(0.5)).plus(10));
 
     </script>
   </body>

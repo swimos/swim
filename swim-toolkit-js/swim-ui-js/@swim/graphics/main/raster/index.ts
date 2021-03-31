@@ -17,5 +17,3 @@ export {
   RasterViewInit,
   RasterView,
 } from "./RasterView";
-export {RasterViewObserver} from "./RasterViewObserver";
-export {RasterViewController} from "./RasterViewController";

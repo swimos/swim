@@ -29,8 +29,8 @@ const vis = [
   {
     id: "vis",
     name: "@swim/vis",
-    title: "Swim Visualizations Framework",
-    umbrella: true,
+    title: "Swim Vis",
+    framework: true,
     targets: [
       {
         id: "main",

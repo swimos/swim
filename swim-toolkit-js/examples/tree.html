@@ -13,6 +13,7 @@
   </head>
   <body style="display: flex; width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
     <script>
@@ -32,7 +33,7 @@ if (navigator.standalone) {
   document.body.style.height = "100%";
 }
 
-const bodyView = swim.ThemedHtmlView.fromNode(document.body);
+const bodyView = swim.HtmlView.fromNode(document.body);
 
 const container = swim.HtmlView.create("div")
   .position("relative")
@@ -53,9 +54,9 @@ bodyView.append(container);
 
 const iconCell = {
   key: "icon",
-  cellType: "polygon",
-  sides: 6,
-  radius: 20,
+  cellType: "icon",
+  iconWidth: 40,
+  graphics: swim.PolygonIcon.create(6),
 };
 const disclosureCell = {
   key: "disclose",

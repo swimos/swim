@@ -12,32 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Angle} from "@swim/angle";
-import {AnyColor, Color, ColorInterpolator} from "@swim/color";
-import {Transform} from "@swim/transform";
-import {Transition} from "@swim/transition";
-import {ViewContextType, ViewAnimator} from "@swim/view";
-import {ViewNodeType, SvgView} from "@swim/dom";
-import {Look, MoodVector, ThemeMatrix, ThemedHtmlView} from "@swim/theme";
+import type {Timing} from "@swim/mapping";
+import {Angle, Transform} from "@swim/math";
+import {AnyColor, Color} from "@swim/style";
+import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
+import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {HtmlView, SvgView} from "@swim/dom";
 
-export class DisclosureButton extends ThemedHtmlView {
-  protected initNode(node: ViewNodeType<this>): void {
-    super.initNode(node);
+export class DisclosureButton extends HtmlView {
+  constructor(node: HTMLElement) {
+    super(node);
+    this.initDisclosureButton();
+  }
+
+  protected initDisclosureButton(): void {
     this.addClass("disclosure-button");
-    this.display.setAutoState("flex");
-    this.justifyContent.setAutoState("center");
-    this.alignItems.setAutoState("center");
-    this.flexGrow.setAutoState(1);
-    this.flexShrink.setAutoState(0);
-    this.cursor.setAutoState("pointer");
+    this.display.setState("flex", View.Intrinsic);
+    this.justifyContent.setState("center", View.Intrinsic);
+    this.alignItems.setState("center", View.Intrinsic);
+    this.flexGrow.setState(1, View.Intrinsic);
+    this.flexShrink.setState(0, View.Intrinsic);
+    this.cursor.setState("pointer", View.Intrinsic);
 
     const icon = this.append(SvgView, "icon");
-    icon.width.setAutoState(24);
-    icon.height.setAutoState(24);
-    icon.viewBox.setAutoState("0 0 24 24");
+    icon.width.setState(24, View.Intrinsic);
+    icon.height.setState(24, View.Intrinsic);
+    icon.viewBox.setState("0 0 24 24", View.Intrinsic);
     const arrow = icon.append("polygon", "arrow");
-    arrow.points.setAutoState("0 4 -6 -2 -4.59 -3.41 0 1.17 4.59 -3.41 6 -2");
-    arrow.transform.setAutoState(Transform.translate(12, 12).rotate(Angle.deg(0)));
+    arrow.points.setState("0 4 -6 -2 -4.59 -3.41 0 1.17 4.59 -3.41 6 -2", View.Intrinsic);
+    arrow.transform.setState(Transform.translate(12, 12).rotate(Angle.deg(0)), View.Intrinsic);
   }
 
   get icon(): SvgView {
@@ -49,34 +52,35 @@ export class DisclosureButton extends ThemedHtmlView {
     return icon.getChildView("arrow") as SvgView;
   }
 
-  @ViewAnimator({type: Number, inherit: true})
-  disclosurePhase: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
+  @ViewAnimator({type: Number, inherit: true, updateFlags: View.NeedsAnimate})
+  declare disclosurePhase: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
 
-  @ViewAnimator({type: Color, inherit: true})
-  collapsedColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  @ViewAnimator({type: Color, inherit: true, state: null, updateFlags: View.NeedsAnimate})
+  declare collapsedColor: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, inherit: true})
-  expandedColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  @ViewAnimator({type: Color, inherit: true, state: null, updateFlags: View.NeedsAnimate})
+  declare expandedColor: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector,
-                         transition: Transition<any> | null): void {
-    super.onApplyTheme(theme, mood, transition);
-    this.collapsedColor.setAutoState(theme.inner(mood, Look.color), transition);
-    this.expandedColor.setAutoState(theme.inner(mood, Look.accentColor), transition);
+  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+    super.onApplyTheme(theme, mood, timing);
+    this.collapsedColor.setState(theme.getOr(Look.color, mood, null), timing, View.Intrinsic);
+    this.expandedColor.setState(theme.getOr(Look.accentColor, mood, null), timing, View.Intrinsic);
   }
 
   protected onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
-    if (this.disclosurePhase.isUpdated()) {
-      const disclosurePhase = this.disclosurePhase.getValueOr(0);
-      const collapsedColor = this.collapsedColor.value;
-      const expandedColor = this.expandedColor.value;
-      if (collapsedColor !== void 0 && expandedColor !== void 0 && this.arrow.fill.isAuto()) {
-        const colorInterpolator = ColorInterpolator.between(collapsedColor, expandedColor);
-        this.arrow.fill.setAutoState(colorInterpolator.interpolate(disclosurePhase));
+    if (this.disclosurePhase.isUpdated() || this.collapsedColor.isUpdated() || this.expandedColor.isUpdated()) {
+      const disclosurePhase = this.disclosurePhase.takeValue()!;
+      const collapsedColor = this.collapsedColor.takeValue();
+      const expandedColor = this.expandedColor.takeValue();
+      if (collapsedColor !== null && expandedColor !== null && this.arrow.fill.isPrecedent(View.Intrinsic)) {
+        const colorInterpolator = collapsedColor.interpolateTo(expandedColor);
+        this.arrow.fill.setState(colorInterpolator(disclosurePhase), View.Intrinsic);
       }
       const transform = Transform.translate(12, 12).rotate(Angle.deg(-180 * disclosurePhase));
-      this.arrow.transform.setAutoState(transform);
+      this.arrow.transform.setState(transform, View.Intrinsic);
     }
   }
+
+  static readonly uncullFlags: ViewFlags = HtmlView.uncullFlags | View.NeedsAnimate;
 }

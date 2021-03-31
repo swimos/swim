@@ -1,34 +1,10 @@
 const ux = [
   {
-    id: "theme",
-    name: "@swim/theme",
-    targets: [
-      {
-        id: "main",
-      },
-      {
-        id: "test",
-        deps: ["theme"],
-      },
-    ],
-  },
-  {
-    id: "modal",
-    name: "@swim/modal",
-    targets: [
-      {
-        id: "main",
-        deps: ["theme"],
-      },
-    ],
-  },
-  {
     id: "button",
     name: "@swim/button",
     targets: [
       {
         id: "main",
-        deps: ["theme", "modal"],
       },
     ],
   },
@@ -38,49 +14,48 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["theme", "modal", "button"],
       },
     ],
   },
   {
-    id: "drawer",
-    name: "@swim/drawer",
+    id: "grid",
+    name: "@swim/grid",
     targets: [
       {
         id: "main",
-        deps: ["theme", "modal", "button"],
+        deps: ["button"],
       },
     ],
   },
   {
-    id: "menu",
-    name: "@swim/menu",
+    id: "window",
+    name: "@swim/window",
     targets: [
       {
         id: "main",
-        deps: ["theme", "modal", "button"],
+        deps: ["button"],
       },
     ],
   },
   {
-    id: "tree",
-    name: "@swim/tree",
+    id: "deck",
+    name: "@swim/deck",
     targets: [
       {
         id: "main",
-        deps: ["theme", "modal", "button"],
+        deps: ["button"],
       },
     ],
   },
   {
     id: "ux",
     name: "@swim/ux",
-    title: "Swim User Experience Framework",
-    umbrella: true,
+    title: "Swim UX",
+    framework: true,
     targets: [
       {
         id: "main",
-        deps: ["theme", "modal", "button", "token", "drawer", "menu", "tree"],
+        deps: ["button", "token", "grid", "window", "deck"],
       },
     ],
   },

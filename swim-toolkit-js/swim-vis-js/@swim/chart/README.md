@@ -28,18 +28,20 @@ be found in `node_modules/@swim/chart/dist/main/swim-chart.js`.
 
 ### Browser
 
-Browser applications can load `swim-vis.js`—which bundles the
-**@swim/chart** library—along with its `swim-core.js` and `swim-ui.js`
+Browser applications can load `swim-vis.js`—which bundles the **@swim/chart**
+library—along with its `swim-core.js`, `swim-mesh.js`, and `swim-ui.js`
 dependencies, directly from the SwimOS CDN.
 
 ```html
 <!-- Development -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-mesh.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-vis.js"></script>
 
 <!-- Production -->
 <script src="https://cdn.swimos.org/js/latest/swim-core.min.js"></script>
+<script src="https://cdn.swimos.org/js/latest/swim-mesh.min.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-ui.min.js"></script>
 <script src="https://cdn.swimos.org/js/latest/swim-vis.min.js"></script>
 ```
@@ -83,10 +85,9 @@ var chart = require("@swim/chart");
 
 When loaded by a web browser, the `swim-chart.js` script adds all
 **@swim/chart** library exports to the global `swim` namespace.
-The `swim-chart.js` script requires that `swim-core.js` and `swim-ui.js`
-have already been loaded.
+The `swim-chart.js` script requires that `swim-core.js`, `swim-mesh.js`,
+and `swim-ui.js` have already been loaded.
 
-The `swim-toolkit.js` script also adds all **@swim/chart** library
-exports to the global `swim` namespace, making it a drop-in replacement for
-`swim-ui.js` and `swim-chart.js` when additional **@swim/toolkit** frameworks
-are needed.
+The `swim-toolkit.js` script also adds all **@swim/chart** library exports to
+the global `swim` namespace, making it a drop-in replacement for `swim-ui.js`
+and `swim-chart.js` when additional **@swim/toolkit** frameworks are needed.

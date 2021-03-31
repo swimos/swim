@@ -15,13 +15,14 @@
 export {
   AttributeAnimatorMemberType,
   AttributeAnimatorMemberInit,
+  AttributeAnimatorMemberKey,
+  AttributeAnimatorMemberMap,
   AttributeAnimatorInit,
-  AttributeAnimatorDescriptorInit,
+  AttributeAnimatorDescriptor,
   AttributeAnimatorDescriptorExtends,
   AttributeAnimatorDescriptorFromAny,
-  AttributeAnimatorDescriptor,
-  AttributeAnimatorPrototype,
   AttributeAnimatorConstructor,
+  AttributeAnimatorClass,
   AttributeAnimator,
 } from "./AttributeAnimator";
 
@@ -36,9 +37,3 @@ export {LengthAttributeAnimator} from "./LengthAttributeAnimator";
 export {ColorAttributeAnimator} from "./ColorAttributeAnimator";
 
 export {TransformAttributeAnimator} from "./TransformAttributeAnimator";
-
-export {NumberOrStringAttributeAnimator} from "./NumberOrStringAttributeAnimator";
-
-export {LengthOrStringAttributeAnimator} from "./LengthOrStringAttributeAnimator";
-
-export {ColorOrStringAttributeAnimator} from "./ColorOrStringAttributeAnimator";

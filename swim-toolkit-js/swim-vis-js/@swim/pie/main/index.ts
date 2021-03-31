@@ -12,14 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {
-  AnySliceView,
-  SliceViewInit,
-  SliceView,
-} from "./SliceView";
+export * from "./pie";
 
-export {
-  AnyPieView,
-  PieViewInit,
-  PieView,
-} from "./PieView";
+export * from "./slice";

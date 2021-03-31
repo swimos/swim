@@ -13,17 +13,61 @@
 // limitations under the License.
 
 export {
-  AnyGeoPoint,
-  GeoPointInit,
-  GeoPointTuple,
-  GeoPoint,
-} from "./GeoPoint";
-export {GeoPointInterpolator} from "./GeoPointInterpolator";
+  GeoViewInit,
+  GeoView,
+} from "./GeoView";
+export {GeoViewObserver} from "./GeoViewObserver";
 
 export {
-  AnyGeoBox,
-  GeoBoxInit,
-  GeoBox,
-} from "./GeoBox";
+  AnyGeoIconView,
+  GeoIconViewInit,
+  GeoIconView,
+} from "./GeoIconView";
+export {GeoIconViewObserver} from "./GeoIconViewObserver";
 
-export {GeoProjection} from "./GeoProjection";
+export {
+  AnyGeoCircleView,
+  GeoCircleViewInit,
+  GeoCircleView,
+} from "./GeoCircleView";
+export {GeoCircleViewObserver} from "./GeoCircleViewObserver";
+
+export {
+  AnyGeoArcView,
+  GeoArcViewInit,
+  GeoArcView,
+} from "./GeoArcView";
+export {GeoArcViewObserver} from "./GeoArcViewObserver";
+
+export {
+  GeoPathViewInit,
+  GeoPathView,
+} from "./GeoPathView";
+export {GeoPathViewObserver} from "./GeoPathViewObserver";
+
+export {
+  GeoLineViewInit,
+  GeoLineView,
+} from "./GeoLineView";
+export {GeoLineViewObserver} from "./GeoLineViewObserver";
+
+export {
+  GeoAreaViewInit,
+  GeoAreaView,
+} from "./GeoAreaView";
+export {GeoAreaViewObserver} from "./GeoAreaViewObserver";
+
+export {
+  GeoPointLabelPlacement,
+  AnyGeoPointView,
+  GeoPointViewInit,
+  GeoPointView,
+} from "./GeoPointView";
+export {GeoPointViewObserver} from "./GeoPointViewObserver";
+
+export {
+  AnyGeoPlotView,
+  GeoPlotViewInit,
+  GeoPlotView,
+} from "./GeoPlotView";
+export {GeoPlotViewObserver} from "./GeoPlotViewObserver";

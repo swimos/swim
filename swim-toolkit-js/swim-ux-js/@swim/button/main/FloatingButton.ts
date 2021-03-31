@@ -12,154 +12,225 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Tween, Transition} from "@swim/transition";
-import {ViewContextType, View, ViewAnimator} from "@swim/view";
-import {ViewNodeType, HtmlView, SvgView} from "@swim/dom";
-import {PositionGestureInput, PositionGestureDelegate} from "@swim/gesture";
+import {AnyTiming, Timing} from "@swim/mapping";
+import {Length, Angle, Transform} from "@swim/math";
 import {Look, Feel, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ButtonMorph} from "./ButtonMorph";
+import {
+  ViewContextType,
+  ViewContext,
+  View,
+  ViewObserverType,
+  ViewAnimator,
+  ViewFastener,
+  PositionGestureInput,
+  PositionGestureDelegate,
+} from "@swim/view";
+import {Graphics, HtmlIconView} from "@swim/graphics";
 import {ButtonMembrane} from "./ButtonMembrane";
 
 export type FloatingButtonType = "regular" | "mini";
 
 export class FloatingButton extends ButtonMembrane implements PositionGestureDelegate {
-  /** @hidden */
-  _buttonType: FloatingButtonType;
-
   constructor(node: HTMLElement) {
     super(node);
-    this._buttonType = "regular";
+    Object.defineProperty(this, "buttonType", {
+      value: "regular",
+      enumerable: true,
+      configurable: true,
+    });
+    this.iconCount = 0;
+    this.icon = null;
+    this.initButton();
   }
 
-  protected initNode(node: ViewNodeType<this>): void {
-    super.initNode(node);
+  protected initButton(): void {
     this.addClass("floating-button");
-    this.position.setAutoState("relative");
-    this.display.setAutoState("flex");
-    this.justifyContent.setAutoState("center");
-    this.alignItems.setAutoState("center");
-    this.borderTopLeftRadius.setAutoState("50%");
-    this.borderTopRightRadius.setAutoState("50%");
-    this.borderBottomLeftRadius.setAutoState("50%");
-    this.borderBottomRightRadius.setAutoState("50%");
-    this.overflowX.setAutoState("hidden");
-    this.overflowY.setAutoState("hidden");
-    this.userSelect.setAutoState("none");
-    this.cursor.setAutoState("pointer");
+    this.position.setState("relative", View.Intrinsic);
+    if (this.buttonType === "regular") {
+      this.width.setState(56, View.Intrinsic);
+      this.height.setState(56, View.Intrinsic);
+    } else if (this.buttonType === "mini") {
+      this.width.setState(40, View.Intrinsic);
+      this.height.setState(40, View.Intrinsic);
+    }
+    this.borderTopLeftRadius.setState(Length.pct(50), View.Intrinsic);
+    this.borderTopRightRadius.setState(Length.pct(50), View.Intrinsic);
+    this.borderBottomLeftRadius.setState(Length.pct(50), View.Intrinsic);
+    this.borderBottomRightRadius.setState(Length.pct(50), View.Intrinsic);
+    this.overflowX.setState("hidden", View.Intrinsic);
+    this.overflowY.setState("hidden", View.Intrinsic);
+    this.userSelect.setState("none", View.Intrinsic);
+    this.cursor.setState("pointer", View.Intrinsic);
   }
 
-  get buttonType(): FloatingButtonType {
-    return this._buttonType;
-  }
+  declare readonly buttonType: FloatingButtonType;
 
   setButtonType(buttonType: FloatingButtonType): void {
-    if (this._buttonType !== buttonType) {
-      this._buttonType = buttonType;
-      this.requireUpdate(View.NeedsChange);
+    if (this.buttonType !== buttonType) {
+      Object.defineProperty(this, "buttonType", {
+        value: buttonType,
+        enumerable: true,
+        configurable: true,
+      });
+      if (buttonType === "regular") {
+        this.width.setState(56, View.Intrinsic);
+        this.height.setState(56, View.Intrinsic);
+      } else if (buttonType === "mini") {
+        this.width.setState(40, View.Intrinsic);
+        this.height.setState(40, View.Intrinsic);
+      }
     }
   }
 
-  get morph(): ButtonMorph | null {
-    const childView = this.getChildView("morph");
-    return childView instanceof ButtonMorph ? childView : null;
+  /** @hidden */
+  static IconFastener = ViewFastener.define<FloatingButton, HtmlIconView, never, ViewObserverType<HtmlIconView> & {iconIndex: number}>({
+    extends: void 0,
+    type: HtmlIconView,
+    child: false,
+    observe: true,
+    iconIndex: 0,
+    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, iconView: HtmlIconView): void {
+      const iconColor = theme.getOr(Look.backgroundColor, mood, null);
+      iconView.iconColor.setState(iconColor, timing);
+    },
+    viewDidAnimate(viewContext: ViewContext, iconView: HtmlIconView): void {
+      if (!iconView.opacity.isAnimating() && this.iconIndex !== this.owner.iconCount) {
+        iconView.remove();
+        if (this.iconIndex > this.owner.iconCount) {
+          this.owner.setViewFastener(this.key!, null);
+        }
+      }
+    },
+  });
+
+  /** @hidden */
+  iconCount: number;
+
+  icon: ViewFastener<this, HtmlIconView> | null;
+
+  pushIcon(icon: Graphics, timing?: AnyTiming | boolean): void {
+    if (timing === void 0 || timing === true) {
+      timing = this.getLookOr(Look.timing, false);
+    } else {
+      timing = Timing.fromAny(timing);
+    }
+
+    const oldIconCount = this.iconCount;
+    const oldIconKey = "icon" + oldIconCount;
+    const oldIconFastener = this.getViewFastener(oldIconKey) as ViewFastener<this, HtmlIconView> | null;
+    const oldIconView = oldIconFastener !== null ? oldIconFastener.view : null;
+    if (oldIconView !== null) {
+      if (timing !== false) {
+        oldIconView.opacity.setState(0, timing, View.Intrinsic);
+        oldIconView.transform.setState(Transform.rotate(Angle.deg(90)), timing, View.Intrinsic);
+      } else {
+        oldIconView.remove();
+      }
+    }
+
+    const newIconCount = oldIconCount + 1;
+    const newIconKey = "icon" + newIconCount;
+    const newIconFastener = new FloatingButton.IconFastener(this, newIconKey, newIconKey);
+    newIconFastener.iconIndex = newIconCount;
+    const newIconView = HtmlIconView.create();
+    newIconView.position.setState("absolute", View.Intrinsic);
+    newIconView.left.setState(0, View.Intrinsic);
+    newIconView.top.setState(0, View.Intrinsic);
+    newIconView.width.setState(this.width.state, View.Intrinsic);
+    newIconView.height.setState(this.height.state, View.Intrinsic);
+    newIconView.opacity.setState(0, View.Intrinsic);
+    newIconView.opacity.setState(1, timing, View.Intrinsic);
+    newIconView.transform.setState(Transform.rotate(Angle.deg(-90)), View.Intrinsic);
+    newIconView.transform.setState(Transform.rotate(Angle.deg(0)), timing, View.Intrinsic);
+    newIconView.pointerEvents.setState("none", View.Intrinsic);
+    newIconView.iconWidth.setState(24, View.Intrinsic);
+    newIconView.iconHeight.setState(24, View.Intrinsic);
+    newIconView.iconColor.setPrecedence(View.Extrinsic);
+    newIconView.graphics.setState(icon, View.Intrinsic);
+    newIconFastener.setView(newIconView);
+    this.setViewFastener(newIconKey, newIconFastener);
+    this.appendChildView(newIconView, newIconKey);
+
+    this.iconCount = newIconCount;
+    this.icon = newIconFastener;
   }
 
-  get icon(): HtmlView | SvgView | null {
-    const morph = this.morph;
-    return morph !== null ? morph.icon : null;
-  }
+  popIcon(timing?: AnyTiming | boolean): void {
+    if (timing === void 0 || timing === true) {
+      timing = this.getLookOr(Look.timing, false);
+    } else {
+      timing = Timing.fromAny(timing);
+    }
 
-  setIcon(icon: HtmlView | SvgView | null, tween?: Tween<any>, ccw: boolean = false): void {
-    let morph = this.morph;
-    if (morph === null) {
-      morph = this.append(ButtonMorph, "morph");
+    const oldIconCount = this.iconCount;
+    const oldIconKey = "icon" + oldIconCount;
+    const oldIconFastener = this.getViewFastener(oldIconKey) as ViewFastener<this, HtmlIconView> | null;
+    const oldIconView = oldIconFastener !== null ? oldIconFastener.view : null;
+    if (oldIconView !== null) {
+      if (timing !== false) {
+        oldIconView.opacity.setState(0, timing, View.Intrinsic);
+        oldIconView.transform.setState(Transform.rotate(Angle.deg(-90)), timing, View.Intrinsic);
+      } else {
+        oldIconView.remove();
+      }
     }
-    if (icon instanceof SvgView) {
-      icon.fill.setAutoState(this.getLook(Look.backgroundColor), tween);
+
+    const newIconCount = oldIconCount - 1;
+    const newIconKey = "icon" + newIconCount;
+    const newIconFastener = this.getViewFastener(newIconKey) as ViewFastener<this, HtmlIconView> | null;
+    const newIconView = newIconFastener !== null ? newIconFastener.view : null;
+    if (newIconView !== null) {
+      newIconView.opacity.setState(1, timing, View.Intrinsic);
+      newIconView.transform.setState(Transform.rotate(Angle.deg(0)), timing, View.Intrinsic);
+      this.appendChildView(newIconView, newIconKey);
     }
-    morph.setIcon(icon, tween, ccw);
+
+    this.iconCount = newIconCount;
+    this.icon = newIconFastener;
   }
 
   @ViewAnimator({type: Number, inherit: true})
-  stackPhase: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
+  declare stackPhase: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector,
-                         transition: Transition<any> | null): void {
-    super.onApplyTheme(theme, mood, transition);
+  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+    super.onApplyTheme(theme, mood, timing);
 
-    if (this._buttonType === "regular") {
-      this.width.setAutoState(56, transition);
-      this.height.setAutoState(56, transition);
-    } else if (this._buttonType === "mini") {
-      this.width.setAutoState(40, transition);
-      this.height.setAutoState(40, transition);
+    this.backgroundColor.setState(theme.getOr(Look.accentColor, mood, null), timing, View.Intrinsic);
+
+    let shadow = theme.getOr(Look.shadow, Mood.floating, null);
+    if (shadow !== null) {
+      const shadowColor = shadow.color;
+      const stackPhase = this.stackPhase.getValueOr(1);
+      shadow = shadow.withColor(shadowColor.alpha(shadowColor.alpha() * stackPhase));
     }
-
-    this.backgroundColor.setAutoState(theme.inner(mood, Look.accentColor), transition);
-
-    let shadow = theme.inner(Mood.floating, Look.shadow);
-    if (shadow !== void 0) {
-      const shadowColor = shadow.color();
-      const phase = this.stackPhase.getValueOr(1);
-      shadow = shadow.color(shadowColor.alpha(shadowColor.alpha() * phase));
-    }
-    this.boxShadow.setAutoState(shadow, transition);
-
-    const icon = this.icon;
-    if (icon instanceof SvgView) {
-      icon.fill.setAutoState(theme.inner(mood, Look.backgroundColor), transition);
-    }
+    this.boxShadow.setState(shadow, timing, View.Intrinsic);
   }
 
   protected onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
 
-    let shadow = this.getLook(Look.shadow, Mood.floating);
-    if (shadow !== void 0) {
-      const shadowColor = shadow.color();
-      const phase = this.stackPhase.getValueOr(1);
-      shadow = shadow.color(shadowColor.alpha(shadowColor.alpha() * phase));
+    let shadow = this.getLookOr(Look.shadow, Mood.floating, null);
+    if (shadow !== null) {
+      const shadowColor = shadow.color;
+      const stackPhase = this.stackPhase.getValueOr(1);
+      shadow = shadow.withColor(shadowColor.alpha(shadowColor.alpha() * stackPhase));
     }
-    this.boxShadow.setAutoState(shadow);
-  }
-
-  protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
-    super.onInsertChildView(childView, targetView);
-    const childKey = childView.key;
-    if (childKey === "morph" && childView instanceof ButtonMorph) {
-      this.onInsertMorph(childView);
-    }
-  }
-
-  protected onRemoveChildView(childView: View): void {
-    const childKey = childView.key;
-    if (childKey === "morph" && childView instanceof ButtonMorph) {
-      this.onRemoveMorph(childView);
-    }
-    super.onRemoveChildView(childView);
-  }
-
-  protected onInsertMorph(morph: ButtonMorph): void {
-    // hook
-  }
-
-  protected onRemoveMorph(morph: ButtonMorph): void {
-    // hook
+    this.boxShadow.setState(shadow, View.Intrinsic);
   }
 
   didStartHovering(): void {
     this.modifyMood(Feel.default, [Feel.hovering, 1]);
-    if (this.backgroundColor.isAuto()) {
-      const transition = this.getLook(Look.transition);
-      this.backgroundColor.setAutoState(this.getLook(Look.accentColor), transition);
+    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+      const timing = this.getLook(Look.timing);
+      this.backgroundColor.setState(this.getLookOr(Look.accentColor, null), timing, View.Intrinsic);
     }
   }
 
   didStopHovering(): void {
     this.modifyMood(Feel.default, [Feel.hovering, void 0]);
-    if (this.backgroundColor.isAuto()) {
-      const transition = this.getLook(Look.transition);
-      this.backgroundColor.setAutoState(this.getLook(Look.accentColor), transition);
+    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+      const timing = this.getLook(Look.timing);
+      this.backgroundColor.setState(this.getLookOr(Look.accentColor, null), timing, View.Intrinsic);
     }
   }
 

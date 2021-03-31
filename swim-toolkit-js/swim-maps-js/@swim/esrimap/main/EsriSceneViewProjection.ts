@@ -13,24 +13,23 @@
 // limitations under the License.
 
 import {AnyPointR2, PointR2} from "@swim/math";
-import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/map";
+import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {EsriProjection} from "./EsriProjection";
 
 export class EsriSceneViewProjection implements EsriProjection {
-  /** @hidden */
-  readonly _map: __esri.SceneView;
-
   constructor(map: __esri.SceneView) {
     EsriProjection.init();
-    this._map = map;
+    Object.defineProperty(this, "map", {
+      value: map,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  get map(): __esri.SceneView {
-    return this._map;
-  }
+  declare readonly map: __esri.SceneView;
 
   get bounds(): GeoBox {
-    let extent = this._map.extent;
+    let extent = this.map.extent;
     if (extent !== null) {
       extent = EsriProjection.webMercatorUtils!.webMercatorToGeographic(extent) as __esri.Extent;
     }
@@ -52,7 +51,7 @@ export class EsriSceneViewProjection implements EsriProjection {
     } else {
       geoPoint = {x: lng.lng, y: lng.lat, spatialReference: {wkid: 4326}} as __esri.Point;
     }
-    const point = this._map.toScreen(geoPoint);
+    const point = this.map.toScreen(geoPoint);
     return point !== null ? new PointR2(point.x, point.y) : PointR2.origin();
   }
 
@@ -67,7 +66,7 @@ export class EsriSceneViewProjection implements EsriProjection {
     } else {
       viewPoint = x;
     }
-    const point = this._map.toMap(viewPoint);
+    const point = this.map.toMap(viewPoint);
     return point !== null ? new GeoPoint(point.longitude, point.latitude) : GeoPoint.origin();
   }
 }

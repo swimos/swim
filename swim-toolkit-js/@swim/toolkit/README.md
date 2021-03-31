@@ -14,13 +14,9 @@ real-time user interface toolkit, the
 [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js)
 real-time application framework, the
 [**@swim/vis**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-vis-js)
-real-time visualizations framework, the
+real-time visualizations framework, and the
 [**@swim/maps**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js)
-real-time maps framework, the
-[**@swim/mvc**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-mvc-js)
-real-time component framework, and the
-[**@swim/web**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-web-js)
-real-time web application framework.
+real-time maps framework.
 
 ## Umbrella Framework
 
@@ -36,7 +32,7 @@ framework, and provides the following top-level libraries:
 
 ### [**Swim UI** Framework](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js)
 
-The **Swim UI** framework implements a user interface toolkit for pervasively
+The **Swim UI** framework implements a user interface framework for pervasively
 real-time applications.  A unified view hierarchy, with builtin procedural
 styling and animation, makes it easy for **Swim UI** components to uniformly
 style, animate, and render mixed HTML, SVG, Canvas, and WebGL components.
@@ -48,67 +44,18 @@ style, animate, and render mixed HTML, SVG, Canvas, and WebGL components.
   pervasively real-time user interface toolkit, with a unified view hierarchy
   for HTML, SVG, and Canvas components, animated procedural styling, and
   constraint-based layouts.
-- [**@swim/angle**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/angle)
-  ([npm](https://www.npmjs.com/package/@swim/angle),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_angle.html)) –
-  dimensional angle types with unit-aware algebraic operators, conversions,
-  and parsers.
-- [**@swim/length**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/length)
-  ([npm](https://www.npmjs.com/package/@swim/length),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_length.html)) –
-  DOM-relative length types with unit-aware algebraic operators, conversions,
-  and parsers.
-- [**@swim/color**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/color)
-  ([npm](https://www.npmjs.com/package/@swim/color),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_color.html)) –
-  RGB and HSL color types with color-space-aware operators, conversions,
-  and parsers.
-- [**@swim/font**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/font)
-  ([npm](https://www.npmjs.com/package/@swim/font),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_font.html)) –
-  CSS font property types and parsers.
-- [**@swim/shadow**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/shadow)
-  ([npm](https://www.npmjs.com/package/@swim/shadow),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_shadow.html)) –
-  CSS box shadow types and parsers.
-- [**@swim/gradient**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/gradient)
-  ([npm](https://www.npmjs.com/package/@swim/gradient),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_gradient.html)) –
-  CSS gradient types and parsers.
-- [**@swim/transform**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/transform)
-  ([npm](https://www.npmjs.com/package/@swim/transform),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_transform.html)) –
-  CSS and SVG compatible transform types with unit-aware algebraic operators
-  and parsers.
-- [**@swim/scale**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/scale)
-  ([npm](https://www.npmjs.com/package/@swim/scale),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_scale.html)) –
-  scale types that map numeric and temporal input domains to interpolated
-  output ranges, with support for continuous domain clamping, domain solving,
-  range unscaling, and interpolation between scales.
-- [**@swim/transition**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/transition)
-  ([npm](https://www.npmjs.com/package/@swim/transition),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_transition.html)) –
-  transition types that specify duration, ease, interpolator, and lifecycle
-  callback parameters for tween animations.
+- [**@swim/model**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/model)
+  ([npm](https://www.npmjs.com/package/@swim/model),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_model.html)) –
+  lifecycle-managed model hierarchy supporting dynamic scoping and service injection.
 - [**@swim/style**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/style)
   ([npm](https://www.npmjs.com/package/@swim/style),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_style.html)) –
-  CSS style types and universal style value parser.
-- [**@swim/animate**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/animate)
-  ([npm](https://www.npmjs.com/package/@swim/animate),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_animate.html)) –
-  property-managing animator types that efficiently tween values between
-  discrete state changes.
-- [**@swim/render**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/render)
-  ([npm](https://www.npmjs.com/package/@swim/render),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_render.html)) –
-  renderable graphic types for SVG and Canvas compatible path drawing contexts,
-  and Canvas compatible rendering contexts.
-- [**@swim/constraint**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/constraint)
-  ([npm](https://www.npmjs.com/package/@swim/constraint),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_constraint.html)) –
-  incremental solver for systems of linear layout constraints.
+  Font, color, gradient, shadow and related types and parsers.
+- [**@swim/theme**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/theme)
+  ([npm](https://www.npmjs.com/package/@swim/theme),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_theme.html)) –
+  semantic looks and feels for mood-aware UX components.
 - [**@swim/view**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/view)
   ([npm](https://www.npmjs.com/package/@swim/view),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_view.html)) –
@@ -123,14 +70,14 @@ style, animate, and render mixed HTML, SVG, Canvas, and WebGL components.
   [doc](https://docs.swimos.org/js/latest/modules/_swim_graphics.html)) –
   canvas graphics views, with procedurally animated shapes, and procedurally
   styled typesetters.
-- [**@swim/gesture**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/gesture)
-  ([npm](https://www.npmjs.com/package/@swim/gesture),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_gesture.html)) –
-  multitouch gesture recognizers, with kinematic surface modeling.
+- [**@swim/component**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/component)
+  ([npm](https://www.npmjs.com/package/@swim/component),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_component.html)) –
+  componentized controller layer with application lifecycle and service management.
 
 ### [**Swim UX Framework**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js)
 
-The **Swim UX** framework implements a user interface framework for advanced
+The **Swim UX** framework implements a user interface toolkit for advanced
 real-time applications.  **Swim UX** provides popovers, drawers, menus,
 toolbars, controls, and other interactive application views and controllers.
 **Swim UX** consists of the following component libraries:
@@ -138,35 +85,27 @@ toolbars, controls, and other interactive application views and controllers.
 - [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/ux)
   ([npm](https://www.npmjs.com/package/@swim/ux),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_ux.html)) –
-  thin web application framework built on the **@swim/ui** toolkit.
-- [**@swim/theme**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/theme)
-  ([npm](https://www.npmjs.com/package/@swim/theme),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_theme.html)) –
-  semantic looks and feels for mood-aware UX components.
+  user interface toolkit for advanced real-time applications.
 - [**@swim/button**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/button)
   ([npm](https://www.npmjs.com/package/@swim/button),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_button.html)) –
-  procedurally styled multitouch buttons.
-- [**@swim/modal**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/modal)
-  ([npm](https://www.npmjs.com/package/@swim/modal),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_modal.html)) –
-  auto-placed, source-tracking popover views.
-- [**@swim/drawer**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/drawer)
-  ([npm](https://www.npmjs.com/package/@swim/drawer),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_drawer.html)) –
-  responsive, minifiable drawer views.
+  button-like user interface controls.
 - [**@swim/token**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/token)
   ([npm](https://www.npmjs.com/package/@swim/token),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_token.html)) –
-  compact, editable pin and chip token views.
-- [**@swim/menu**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/menu)
-  ([npm](https://www.npmjs.com/package/@swim/menu),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_menu.html)) –
-  context-sensitive menu lists and menu items.
-- [**@swim/tree**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/tree)
-  ([npm](https://www.npmjs.com/package/@swim/tree),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_tree.html)) –
-  disclosable tree views with tabular columns.
+  attribute, action, and user input token views.
+- [**@swim/grid**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/grid)
+  ([npm](https://www.npmjs.com/package/@swim/grid),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_grid.html)) –
+  tables, trees, lists, and other tabular views.
+- [**@swim/window**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/window)
+  ([npm](https://www.npmjs.com/package/@swim/window),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_window.html)) –
+  popovers, drawers, and other view surfaces.
+- [**@swim/deck**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/deck)
+  ([npm](https://www.npmjs.com/package/@swim/deck),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_deck.html)) –
+  card stack navigation views.
 
 ### [**Swim Visualizations** Framework](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-vis-js)
 
@@ -207,59 +146,19 @@ the following component libraries:
 - [**@swim/map**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/map)
   ([npm](https://www.npmjs.com/package/@swim/map),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_map.html)) –
-  canvas views for efficiently rendering geospatially located map overlays,
-  including fully animatable views for lines, circles, and polygons.
+  graphics views for efficiently rendering animated geospatial map overlays.
 - [**@swim/mapbox**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/mapbox)
   ([npm](https://www.npmjs.com/package/@swim/mapbox),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_mapbox.html)) –
-  support for overlaying **@swim/map** views on Mapbox maps.
+  **@swim/map** overlays for Mapbox maps.
 - [**@swim/googlemap**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/googlemap)
   ([npm](https://www.npmjs.com/package/@swim/googlemap),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_googlemap.html)) –
-  support for overlaying **@swim/map** views on Google maps.
+  **@swim/map** overlays for Google maps.
 - [**@swim/esrimap**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/esrimap)
   ([npm](https://www.npmjs.com/package/@swim/esrimap),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_esrimap.html)) –
-  support for overlaying **@swim/map** views on ArcGIS maps.
-
-### [**Swim MVC** Framework](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-mvc-js)
-
-The **Swim MVC** framework implements a model-view-controller framework built
-on the **Swim UI** toolkit.  **Swim MVC** consists of the following component
-libraries:
-
-- [**@swim/mvc**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-mvc-js/@swim/mvc)
-  ([npm](https://www.npmjs.com/package/@swim/mvc),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_mvc.html)) –
-  model-view-controller framework built on the **@swim/ui** toolkit.
-- [**@swim/model**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-mvc-js/@swim/model)
-  ([npm](https://www.npmjs.com/package/@swim/model),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_model.html)) –
-  lifecycle-managed model hierarchy supporting dynamic scoping and service injection.
-- [**@swim/component**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-mvc-js/@swim/component)
-  ([npm](https://www.npmjs.com/package/@swim/component),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_component.html)) –
-  componentized controller layer with application lifecycle and service management.
-
-### [**Swim Web** Framework](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-web-js)
-
-The **Swim Web** framework implements a thin web application framework built
-on the **Swim UI** toolkit.  **Swim Web** consists of the following component
-libraries:
-
-- [**@swim/web**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-web-js/@swim/web)
-  ([npm](https://www.npmjs.com/package/@swim/web),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_web.html)) –
-  thin web application framework built on the **@swim/ui** toolkit.
-- [**@swim/website**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-web-js/@swim/website)
-  ([npm](https://www.npmjs.com/package/@swim/website),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_website.html)) –
-  minimalist components that implement common dynamic website behaviors.
-- [**@swim/webapp**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-web-js/@swim/webapp)
-  ([npm](https://www.npmjs.com/package/@swim/webapp),
-  [doc](https://docs.swimos.org/js/latest/modules/_swim_webapp.html)) –
-  lightweight web application loader that dynamically instantiates views and
-  controllers declared by `swim-` HTML attributes.
+  **@swim/map** overlays for ArcGIS maps.
 
 ## Installation
 
@@ -278,8 +177,8 @@ bundles all **@swim/toolkit** child frameworks, can be found in
 
 Browser applications can load `swim-toolkit.js`, along with its `swim-system.js`
 dependency, from the SwimOS CDN.  The `swim-toolkit.js` bundle supersedes
-`swim-ui.js`, `swim-ux.js`, `swim-vis.js`, `swim-maps.js`, and
-`swim-web.js`—those scripts need not be loaded when using `swim-toolkit.js`.
+`swim-ui.js`, `swim-ux.js`, `swim-vis.js`, and `swim-maps.js`—those scripts
+need not be loaded when using `swim-toolkit.js`.
 
 ```html
 <!-- Development -->

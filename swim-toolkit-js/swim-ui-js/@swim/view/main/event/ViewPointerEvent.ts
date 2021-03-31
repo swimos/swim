@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewEventInit, ViewEvent} from "./ViewEvent";
+import type {ViewEventInit, ViewEvent} from "./ViewEvent";
 
 export interface ViewPointerEventInit extends PointerEventInit, ViewEventInit {
 }

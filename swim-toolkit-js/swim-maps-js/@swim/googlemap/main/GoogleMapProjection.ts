@@ -13,23 +13,27 @@
 // limitations under the License.
 
 import {AnyPointR2, PointR2} from "@swim/math";
-import {AnyGeoPoint, GeoPoint, GeoBox, GeoProjection} from "@swim/map";
-import {GoogleMapView} from "./GoogleMapView";
+import {AnyGeoPoint, GeoPoint, GeoBox, GeoProjection} from "@swim/geo";
+import type {GoogleMapView} from "./GoogleMapView";
 
 export class GoogleMapProjection implements GeoProjection {
-  /** @hidden */
-  readonly _mapView: GoogleMapView;
-
   constructor(mapView: GoogleMapView) {
-    this._mapView = mapView;
+    Object.defineProperty(this, "mapView", {
+      value: mapView,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
+  /** @hidden */
+  declare readonly mapView: GoogleMapView;
+
   get map(): google.maps.Map {
-    return this._mapView._map;
+    return this.mapView.map;
   }
 
   get bounds(): GeoBox {
-    const bounds = this._mapView._map.getBounds()!;
+    const bounds = this.mapView.map.getBounds()!;
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
     return new GeoBox(sw.lng(), sw.lat(), ne.lng(), ne.lat());
@@ -46,7 +50,7 @@ export class GoogleMapProjection implements GeoProjection {
     } else {
       geoPoint = new google.maps.LatLng(lng.lat, lng.lng);
     }
-    const projection = this._mapView._mapOverlay!.getProjection()!;
+    const projection = this.mapView.mapOverlay!.getProjection()!;
     const point = projection.fromLatLngToContainerPixel(geoPoint);
     return new PointR2(point.x, point.y);
   }
@@ -62,7 +66,7 @@ export class GoogleMapProjection implements GeoProjection {
     } else {
       viewPoint = new google.maps.Point(x.x, x.y);
     }
-    const projection = this._mapView._mapOverlay!.getProjection()!;
+    const projection = this.mapView.mapOverlay!.getProjection()!;
     const point = projection.fromContainerPixelToLatLng(viewPoint);
     return new GeoPoint(point.lng(), point.lat());
   }

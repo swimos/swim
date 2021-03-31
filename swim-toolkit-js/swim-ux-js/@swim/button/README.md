@@ -6,8 +6,7 @@
 
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
-**@swim/button** implements procedurally styled multitouch buttons, including
-flingable floating action buttons. **@swim/button** is part of the
+**@swim/button** implements button-like user interface controls.  **@swim/button** is part of the
 [**@swim/ux**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ux-js/@swim/ux) framework.
 
 ## Installation

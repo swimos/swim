@@ -20,7 +20,6 @@ export {
   SvgViewTagMap,
   SvgViewFactory,
   SvgViewConstructor,
-  SvgViewClass,
   SvgView,
 } from "./SvgView";
 export {SvgViewObserver} from "./SvgViewObserver";

@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {BoxR2} from "@swim/math";
-import {CanvasRenderer, CanvasContext} from "@swim/render";
-import {ViewContextType, View} from "@swim/view";
-import {GraphicsView} from "@swim/graphics";
-import {ScaleViewInit, ScaleView} from "../scale/ScaleView";
+import type {BoxR2} from "@swim/math";
+import {AnyFont, Font, AnyColor, Color} from "@swim/style";
+import {ViewContextType, ViewAnimator} from "@swim/view";
+import {GraphicsView, GraphicsViewController, CanvasContext, CanvasRenderer} from "@swim/graphics";
+import {ScaledViewInit, ScaledView} from "../scaled/ScaledView";
 import {AnyPlotView, PlotView} from "../plot/PlotView";
-import {GraphViewObserver} from "./GraphViewObserver";
-import {GraphViewController} from "./GraphViewController";
+import type {GraphViewObserver} from "./GraphViewObserver";
 
-export type AnyGraphView<X = unknown, Y = unknown> = GraphView<X, Y> | GraphViewInit<X, Y>;
+export type AnyGraphView<X, Y> = GraphView<X, Y> | GraphViewInit<X, Y>;
 
-export interface GraphViewInit<X = unknown, Y = unknown> extends ScaleViewInit<X, Y> {
-  viewController?: GraphViewController<X, Y>;
+export interface GraphViewInit<X, Y> extends ScaledViewInit<X, Y> {
   plots?: AnyPlotView<X, Y>[];
+
+  font?: AnyFont;
+  textColor?: AnyColor;
 }
 
-export class GraphView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
-  // @ts-ignore
-  declare readonly viewController: GraphViewController<X, Y> | null;
+export class GraphView<X, Y> extends ScaledView<X, Y> {
+  declare readonly viewController: GraphicsViewController<GraphView<X, Y>> & GraphViewObserver<X, Y> | null;
 
-  // @ts-ignore
   declare readonly viewObservers: ReadonlyArray<GraphViewObserver<X, Y>>;
 
   initView(init: GraphViewInit<X, Y>): void {
@@ -40,10 +39,23 @@ export class GraphView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
     const plots = init.plots;
     if (plots !== void 0) {
       for (let i = 0, n = plots.length; i < n; i += 1) {
-        this.addPlot(plots[i]);
+        this.addPlot(plots[i]!);
       }
     }
+
+    if (init.font !== void 0) {
+      this.font(init.font);
+    }
+    if (init.textColor !== void 0) {
+      this.textColor(init.textColor);
+    }
   }
+
+  @ViewAnimator({type: Font, inherit: true, state: null})
+  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
+
+  @ViewAnimator({type: Color, inherit: true, state: null})
+  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
 
   addPlot(plot: AnyPlotView<X, Y>, key?: string): void {
     if (key === void 0 && typeof plot === "object" && plot !== null) {
@@ -51,28 +63,6 @@ export class GraphView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
     }
     plot = PlotView.fromAny(plot);
     this.appendChildView(plot);
-  }
-
-  protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
-    super.onInsertChildView(childView, targetView);
-    if (PlotView.is<X, Y>(childView)) {
-      this.onInsertPlot(childView);
-    }
-  }
-
-  protected onRemoveChildView(childView: View): void {
-    if (PlotView.is<X, Y>(childView)) {
-      this.onRemovePlot(childView);
-    }
-    super.onRemoveChildView(childView);
-  }
-
-  protected onInsertPlot(plot: PlotView<X, Y>): void {
-    // hook
-  }
-
-  protected onRemovePlot(plot: PlotView<X, Y>): void {
-    // hook
   }
 
   protected willRender(viewContext: ViewContextType<this>): void {
@@ -106,6 +96,10 @@ export class GraphView<X = unknown, Y = unknown> extends ScaleView<X, Y> {
       hit = this;
     }
     return hit;
+  }
+
+  static create<X, Y>(): GraphView<X, Y> {
+    return new GraphView<X, Y>();
   }
 
   static fromInit<X, Y>(init: GraphViewInit<X, Y>): GraphView<X, Y> {

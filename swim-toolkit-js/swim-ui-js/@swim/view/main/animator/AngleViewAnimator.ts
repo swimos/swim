@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyAngle, Angle} from "@swim/angle";
-import {View} from "../View";
+import {AnyAngle, Angle} from "@swim/math";
+import type {View} from "../View";
 import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
@@ -22,4 +22,3 @@ export abstract class AngleViewAnimator<V extends View> extends ViewAnimator<V, 
     return value !== void 0 && value !== null ? Angle.fromAny(value) : value;
   }
 }
-ViewAnimator.Angle = AngleViewAnimator;

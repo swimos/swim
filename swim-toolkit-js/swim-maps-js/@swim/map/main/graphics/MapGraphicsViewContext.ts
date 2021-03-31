@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicsViewContext} from "@swim/graphics";
-import {GeoBox} from "../geo/GeoBox";
-import {GeoProjection} from "../geo/GeoProjection";
+import type {GeoBox, GeoProjection} from "@swim/geo";
+import type {GraphicsViewContext} from "@swim/graphics";
 
 export interface MapGraphicsViewContext extends GraphicsViewContext {
   readonly geoProjection: GeoProjection;

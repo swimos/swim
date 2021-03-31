@@ -19,41 +19,12 @@ The **Swim UI** framework consists of the following component libraries:
 
 - [**@swim/ui**](@swim/ui) –
   umbrella package that depends on, and re-exports, all Swim UI libraries.
-- [**@swim/angle**](@swim/angle) –
-  dimensional angle types with unit-aware algebraic operators, conversions,
-  and parsers.
-- [**@swim/length**](@swim/length) –
-  DOM-relative length types with unit-aware algebraic operators, conversions,
-  and parsers.
-- [**@swim/color**](@swim/color) –
-  RGB and HSL color types with color-space-aware operators, conversions,
-  and parsers.
-- [**@swim/font**](@swim/font) –
-  CSS font property types and parsers.
-- [**@swim/shadow**](@swim/shadow) –
-  CSS box shadow types and parsers.
-- [**@swim/gradient**](@swim/gradient) –
-  CSS gradient types and parsers.
-- [**@swim/transform**](@swim/transform) –
-  CSS and SVG compatible transform types with unit-aware algebraic operators
-  and parsers.
-- [**@swim/scale**](@swim/scale) –
-  scale types that map numeric and temporal input domains to interpolated
-  output ranges, with support for continuous domain clamping, domain solving,
-  range unscaling, and interpolation between scales.
-- [**@swim/transition**](@swim/transition) –
-  transition types that specify duration, ease, interpolator, and lifecycle
-  callback parameters for tween animations.
+- [**@swim/model**](@swim/model) –
+  lifecycle-managed model hierarchy supporting dynamic scoping and service injection.
 - [**@swim/style**](@swim/style) –
-  CSS style types and universal style value parser.
-- [**@swim/animate**](@swim/animate) –
-  property-managing animator types that efficiently tween values between
-  discrete state changes.
-- [**@swim/render**](@swim/render) –
-  renderable graphic types for SVG/Canvas-compatible path drawing contexts,
-  and Canvas-compatible rendering contexts.
-- [**@swim/constraint**](@swim/constraint) –
-  incremental solver for systems of linear layout constraints.
+  Font, color, gradient, shadow and related types and parsers.
+- [**@swim/theme**](@swim/theme) –
+  semantic looks and feels for mood-aware UX components.
 - [**@swim/view**](@swim/view) –
   unified HTML, SVG, and Canvas view hierarchy, with integrated controller
   architecture, animated procedural styling, and constraint-based layouts.
@@ -62,8 +33,8 @@ The **Swim UI** framework consists of the following component libraries:
 - [**@swim/graphics**](@swim/graphics) –
   canvas graphics views, with procedurally animated shapes, and procedurally
   styled typesetters.
-- [**@swim/gesture**](@swim/gesture) –
-  multitouch gesture recognizers, with kinematic surface modeling.
+- [**@swim/component**](@swim/component) –
+  componentized controller layer with application lifecycle and service management.
 
 **Swim UI** builds on the [**Swim Core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js)
 framework; it has no additional dependencies.
@@ -188,39 +159,39 @@ swim-ui-js $ bin/build.js compile
 
 To compile a subset of projects and targets, include a `--projects` (`-p`)
 option, with a comma-separated list of `$project:($target)?` specifiers.
-For example, to build the `main` target of the `color` project, and all
-targets of the `transition` project, run:
+For example, to build the `main` target of the `style` project, and all
+targets of the `theme` project, run:
 
 ```sh
-swim-ui-js $ bin/build.js compile -p color:main,transition
+swim-ui-js $ bin/build.js compile -p style:main,theme
 ```
 
 ### Running tests
 
 Use the `test` build script command to compile and run unit tests.
-For example, to compile and test the `style` project, run:
+For example, to compile and test the `theme` project, run:
 
 ```sh
-swim-ui-js $ bin/build.js test -p style
+swim-ui-js $ bin/build.js test -p theme
 ```
 
 ### Continuous development builds
 
 Use the `watch` build script command to automatically rebuild projects when
 dependent source files change.  For example, to continuously recompile the
-`main` target of the `render` project when any source file in the project–or
+`main` target of the `view` project when any source file in the project–or
 in one of the project's transitive local dependencies–changes, run:
 
 ```sh
-swim-ui-js $ bin/build.js watch -p render:main
+swim-ui-js $ bin/build.js watch -p view:main
 ```
 
 Pass the `--devel` (`-d`) option to expedite recompilation by skipping the
 minification step.  Add the `--test` (`-t`) option to automatically run unit
 tests after each successful compilation.  For example, to continuosly compile
-and test the `font` project, bypassing minification, and skipping generation
+and test the `theme` project, bypassing minification, and skipping generation
 of the main script, run:
 
 ```sh
-swim-ui-js $ bin/build.js watch -p font:test -d -t
+swim-ui-js $ bin/build.js watch -p theme:test -d -t
 ```

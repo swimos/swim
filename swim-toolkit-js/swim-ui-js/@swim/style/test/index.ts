@@ -12,42 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Spec, Unit} from "@swim/unit";
+export {FontParserSpec} from "./FontParserSpec";
+export {FontWriterSpec} from "./FontWriterSpec";
+export {ColorParserSpec} from "./ColorParserSpec";
+export {ColorStopSpec} from "./ColorStopSpec";
+export {LinearGradientSpec} from "./LinearGradientSpec";
+export {BoxShadowSpec} from "./BoxShadowSpec";
+export {StyleValueSpec} from "./StyleValueSpec";
+export {StyleSuite} from "./StyleSuite";
 
-import {StyleValueSpec} from "./StyleValueSpec";
-import {StyleInterpolatorFormSpec} from "./StyleInterpolatorFormSpec";
-import {StyleScaleFormSpec} from "./StyleScaleFormSpec";
-import {StyleTransitionFormSpec} from "./StyleTransitionFormSpec";
-
-@Unit
-class StyleSpec extends Spec {
-  @Unit
-  styleValueSpec(): Spec {
-    return new StyleValueSpec();
-  }
-
-  @Unit
-  styleInterpolatorFormSpec(): Spec {
-    return new StyleInterpolatorFormSpec();
-  }
-
-  @Unit
-  styleScaleFormSpec(): Spec {
-    return new StyleScaleFormSpec();
-  }
-
-  @Unit
-  styleTransitionFormSpec(): Spec {
-    return new StyleTransitionFormSpec();
-  }
-}
-
-export {
-  StyleValueSpec,
-  StyleInterpolatorFormSpec,
-  StyleScaleFormSpec,
-  StyleTransitionFormSpec,
-  StyleSpec,
-};
-
-StyleSpec.run();
+import {StyleSuite} from "./StyleSuite";
+StyleSuite.run();

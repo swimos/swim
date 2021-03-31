@@ -13,33 +13,35 @@
 // limitations under the License.
 
 import {Input, Output, Parser, Diagnostic, Unicode, Base10} from "@swim/codec";
-import {DateTimeInit, DateTimeFormat} from "@swim/time";
-import {Angle} from "@swim/angle";
-import {Length} from "@swim/length";
-import {Color, HexColorParser, RgbColorParser, HslColorParser} from "@swim/color";
-import {FontWeight, FontParser} from "@swim/font";
-import {LinearGradientParser} from "@swim/gradient";
 import {
+  Length,
+  Angle,
   Transform,
   TranslateTransformParser,
   ScaleTransformParser,
   RotateTransformParser,
   SkewTransformParser,
   AffineTransformParser,
-} from "@swim/transform";
-import {StyleValue} from "./StyleValue";
-
-const ISO_8601_REST = DateTimeFormat.pattern('%m-%dT%H:%M:%S.%LZ');
+} from "@swim/math";
+import {DateTimeInit, DateTimeFormat} from "@swim/time";
+import type {FontWeight} from "../font/FontWeight";
+import {FontParser} from "../font/FontParser";
+import {Color} from "../color/Color";
+import {HexColorParser} from "../rgb/HexColorParser";
+import {RgbColorParser} from "../rgb/RgbColorParser";
+import {HslColorParser} from "../hsl/HslColorParser";
+import {LinearGradientParser} from "../gradient/LinearGradientParser";
+import type {StyleValue} from "./StyleValue";
 
 /** @hidden */
 export class StyleValueParser extends Parser<StyleValue> {
   private readonly identOutput: Output<string> | undefined;
   private readonly valueParser: Parser<number> | undefined;
-  private readonly unitsOutput: Output<String> | undefined;
+  private readonly unitsOutput: Output<string> | undefined;
   private readonly step: number | undefined;
 
   constructor(identOutput?: Output<string>, valueParser?: Parser<number>,
-              unitsOutput?: Output<String>, step?: number) {
+              unitsOutput?: Output<string>, step?: number) {
     super();
     this.identOutput = identOutput;
     this.valueParser = valueParser;
@@ -53,7 +55,7 @@ export class StyleValueParser extends Parser<StyleValue> {
   }
 
   static parse(input: Input, identOutput?: Output<string>, valueParser?: Parser<number>,
-               unitsOutput?: Output<String>, step: number = 1): Parser<StyleValue> {
+               unitsOutput?: Output<string>, step: number = 1): Parser<StyleValue> {
     let c = 0;
     if (step === 1) {
       while (input.isCont() && (c = input.head(), Unicode.isSpace(c))) {
@@ -86,6 +88,8 @@ export class StyleValueParser extends Parser<StyleValue> {
           case "hsl":
           case "hsla": return HslColorParser.parseRest(input);
 
+          case "linear-gradient": return LinearGradientParser.parseRest(input, identOutput);
+
           case "normal":
           case "italic":
           case "oblique": return FontParser.parseRest(input, ident);
@@ -111,8 +115,6 @@ export class StyleValueParser extends Parser<StyleValue> {
           case "xx-large":
           case "xx-small": return FontParser.parseRest(input, void 0, void 0, void 0, void 0, ident);
 
-          case "linear-gradient": return LinearGradientParser.parseRest(input, identOutput);
-
           case "translateX":
           case "translateY":
           case "translate": return TranslateTransformParser.parseRest(input, identOutput);
@@ -128,12 +130,13 @@ export class StyleValueParser extends Parser<StyleValue> {
 
           case "true": return Parser.done(true);
           case "false": return Parser.done(false);
-          default:
-            const color = Color.fromName(ident);
-            if (color !== void 0) {
+          default: {
+            const color = Color.forName(ident);
+            if (color !== null) {
               return Parser.done(color);
             }
             return Parser.error(Diagnostic.message("unknown style value: " + ident, input));
+          }
         }
       }
     }
@@ -154,7 +157,7 @@ export class StyleValueParser extends Parser<StyleValue> {
         input.step();
         const date = {} as DateTimeInit;
         date.year = valueParser!.bind();
-        return ISO_8601_REST.parseDate(input, date);
+        return DateTimeFormat.pattern('%m-%dT%H:%M:%S.%LZ').parseDate(input, date);
       } else if (!input.isEmpty()) {
         step = 5;
       }
@@ -211,4 +214,3 @@ export class StyleValueParser extends Parser<StyleValue> {
     return new StyleValueParser(identOutput, valueParser, unitsOutput, step);
   }
 }
-StyleValue.Parser = StyleValueParser;

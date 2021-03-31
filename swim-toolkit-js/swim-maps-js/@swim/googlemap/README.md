@@ -6,7 +6,7 @@
 
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
-**@swim/googlemap** adds support for overlaying **@swim/map** views on Google maps.
+**@swim/googlemap** provides **@swim/map** overlays for Google maps.
 Check out the [traffic map](https://www.swimos.org/demo/map/traffic.html) and
 [transit map](https://www.swimos.org/demo/map/transit.html) demos to see
 massively real-time maps in action.  **@swim/googlemap** is part of the

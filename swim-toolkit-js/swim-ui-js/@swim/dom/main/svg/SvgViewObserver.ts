@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ElementViewObserver} from "../element/ElementViewObserver";
-import {SvgView} from "./SvgView";
+import type {ElementViewObserver} from "../element/ElementViewObserver";
+import type {SvgView} from "./SvgView";
 
 export interface SvgViewObserver<V extends SvgView = SvgView> extends ElementViewObserver<V> {
 }

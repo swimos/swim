@@ -12,95 +12,136 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Length} from "@swim/length";
-import {Tween, Transition} from "@swim/transition";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
-import {ViewNodeType, ViewNode, HtmlView, SvgView} from "@swim/dom";
-import {PositionGestureInput, PositionGesture, PositionGestureDelegate} from "@swim/gesture";
-import {Look, ThemedHtmlView} from "@swim/theme";
-import {ModalOptions, ModalState, Modal} from "@swim/modal";
+import {Lazy} from "@swim/util";
+import {AnyTiming, Timing} from "@swim/mapping";
+import {Length} from "@swim/math";
+import {Look} from "@swim/theme";
+import {
+  ViewContextType,
+  View,
+  ModalOptions,
+  ModalState,
+  Modal,
+  ViewAnimator,
+  PositionGestureInput,
+  PositionGesture,
+  PositionGestureDelegate,
+} from "@swim/view";
+import {StyleAnimator, ViewNode, HtmlView} from "@swim/dom";
+import {Graphics, VectorIcon} from "@swim/graphics";
 import {FloatingButton} from "./FloatingButton";
 import {ButtonItem} from "./ButtonItem";
-import {ButtonStackObserver} from "./ButtonStackObserver";
-import {ButtonStackController} from "./ButtonStackController";
+import type {ButtonStackObserver} from "./ButtonStackObserver";
+import type {ButtonStackController} from "./ButtonStackController";
 
 export type ButtonStackState = "collapsed" | "expanding" | "expanded" | "collapsing";
 
-export class ButtonStack extends ThemedHtmlView implements Modal, PositionGestureDelegate {
-  /** @hidden */
-  _stackState: ButtonStackState;
-  /** @hidden */
-  _buttonIcon: HtmlView | SvgView | null;
-  /** @hidden */
-  _buttonSpacing: number;
-  /** @hidden */
-  _itemSpacing: number;
-  /** @hidden */
-  _stackHeight: number;
-  /** @hidden */
-  _gesture: PositionGesture<HtmlView> | null;
-
+export class ButtonStack extends HtmlView implements Modal, PositionGestureDelegate {
   constructor(node: HTMLElement) {
     super(node);
+    Object.defineProperty(this, "stackState", {
+      value: "collapsed",
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "stackHeight", {
+      value: 0,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "gesture", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    this.onClick = this.onClick.bind(this);
     this.onContextMenu = this.onContextMenu.bind(this);
-    this._stackState = "collapsed";
-    this._buttonIcon = null;
-    this._buttonSpacing = 28;
-    this._itemSpacing = 20;
-    this._stackHeight = 0;
-    this._gesture = null;
-    this.initChildren();
+    this.initButtonStack();
+    this.initButton();
   }
 
-  protected initNode(node: ViewNodeType<this>): void {
+  protected initButtonStack(): void {
     this.addClass("button-stack");
-    this.display.setAutoState("block");
-    this.position.setAutoState("relative");
-    this.width.setAutoState(56);
-    this.height.setAutoState(56);
-    this.opacity.setAutoState(1);
-    this.userSelect.setAutoState("none");
-    this.cursor.setAutoState("pointer");
+    this.display.setState("block", View.Intrinsic);
+    this.position.setState("relative", View.Intrinsic);
+    this.width.setState(56, View.Intrinsic);
+    this.height.setState(56, View.Intrinsic);
+    this.opacity.setState(1, View.Intrinsic);
+    this.userSelect.setState("none", View.Intrinsic);
+    this.cursor.setState("pointer", View.Intrinsic);
   }
 
-  protected initChildren(): void {
+  protected initButton(): void {
     const button = this.createButton();
     if (button !== null) {
       this.append(button, "button");
     }
   }
 
+  declare readonly viewController: ButtonStackController | null;
+
+  declare readonly viewObservers: ReadonlyArray<ButtonStackObserver>;
+
+  declare readonly stackState: ButtonStackState
+
+  /** @hidden */
+  declare readonly stackHeight: number;
+
   protected createButton(): HtmlView | null {
     return FloatingButton.create();
   }
 
-  // @ts-ignore
-  declare readonly viewController: ButtonStackController | null;
-
-  // @ts-ignore
-  declare readonly viewObservers: ReadonlyArray<ButtonStackObserver>;
-
-  get stackState(): ButtonStackState {
-    return this._stackState;
-  }
+  /** @hidden */
+  declare readonly gesture: PositionGesture<HtmlView> | null;
 
   isExpanded(): boolean {
-    return this._stackState === "expanded" || this._stackState === "expanding";
+    return this.stackState === "expanded" || this.stackState === "expanding";
   }
 
   isCollapsed(): boolean {
-    return this._stackState === "collapsed" || this._stackState === "collapsing";
+    return this.stackState === "collapsed" || this.stackState === "collapsing";
   }
 
-  @ViewAnimator({type: Number, state: 0})
-  stackPhase: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
+  @ViewAnimator<ButtonStack, number>({
+    type: Number,
+    state: 0,
+    updateFlags: View.NeedsLayout,
+    onEnd(stackPhase: number): void {
+      const stackState = this.owner.stackState;
+      if (stackState === "expanding" && stackPhase === 1) {
+        this.owner.didExpand();
+      } else if (stackState === "collapsing" && stackPhase === 0) {
+        this.owner.didCollapse();
+      }
+    },
+  })
+  declare stackPhase: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
+
+  @ViewAnimator({type: Number, state: 28, updateFlags: View.NeedsLayout})
+  declare buttonSpacing: ViewAnimator<this, number>;
+
+  @ViewAnimator({type: Number, state: 20, updateFlags: View.NeedsLayout})
+  declare itemSpacing: ViewAnimator<this, number>;
+
+  @StyleAnimator<ButtonStack, number | undefined>({
+    propertyNames: "opacity",
+    type: Number,
+    onEnd(opacity: number | undefined): void {
+      if (opacity === 1) {
+        this.owner.didShow();
+      } else if (opacity === 0) {
+        this.owner.didHide();
+      }
+    },
+  })
+  declare opacity: StyleAnimator<this, number | undefined>;
 
   get modalView(): View | null {
     return null;
   }
 
   get modalState(): ModalState {
-    const stackState = this._stackState;
+    const stackState = this.stackState;
     if (stackState === "collapsed") {
       return "hidden";
     } else if (stackState === "expanding") {
@@ -118,12 +159,12 @@ export class ButtonStack extends ThemedHtmlView implements Modal, PositionGestur
     return this.stackPhase.getValue();
   }
 
-  showModal(options: ModalOptions, tween?: Tween<any>): void {
-    this.expand(tween);
+  showModal(options: ModalOptions, timing?: AnyTiming | boolean): void {
+    this.expand(timing);
   }
 
-  hideModal(tween?: Tween<any>): void {
-    this.collapse(tween);
+  hideModal(timing?: AnyTiming | boolean): void {
+    this.collapse(timing);
   }
 
   get button(): HtmlView | null {
@@ -131,33 +172,12 @@ export class ButtonStack extends ThemedHtmlView implements Modal, PositionGestur
     return childView instanceof HtmlView ? childView : null;
   }
 
-  get buttonIcon(): HtmlView | SvgView | null {
-    return this._buttonIcon;
-  }
-
-  setButtonIcon(buttonIcon: HtmlView | SvgView | null, tween?: Tween<any>, ccw?: boolean): void {
-    this._buttonIcon = buttonIcon;
-    const button = this.button;
-    if (button instanceof FloatingButton) {
-      if (tween === void 0 || tween === true) {
-        tween = this.getLookOr(Look.transition, null);
-      } else {
-        tween = Transition.forTween(tween);
-      }
-      button.setIcon(buttonIcon, tween, ccw);
-    }
-  }
-
-  protected createCloseIcon(): SvgView {
-    const icon = SvgView.create().width(24).height(24).viewBox("0 0 24 24");
-    icon.append("path")
-        .fill(this.getLook(Look.backgroundColor))
-        .d("M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z");
-    return icon;
+  get closeIcon(): Graphics {
+    return ButtonStack.closeIcon;
   }
 
   get items(): ReadonlyArray<ButtonItem> {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     const childViews = [];
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
       const childView = (childNodes[i] as ViewNode).view;
@@ -176,7 +196,7 @@ export class ButtonStack extends ThemedHtmlView implements Modal, PositionGestur
   }
 
   removeItems(): void {
-    const childNodes = this._node.childNodes;
+    const childNodes = this.node.childNodes;
     for (let i = childNodes.length - 1; i >= 0; i -= 1) {
       const childView = (childNodes[i] as ViewNode).view;
       if (childView instanceof ButtonItem) {
@@ -187,21 +207,14 @@ export class ButtonStack extends ThemedHtmlView implements Modal, PositionGestur
 
   protected onMount(): void {
     super.onMount();
+    this.on("click", this.onClick);
     this.on("contextmenu", this.onContextMenu);
   }
 
   protected onUnmount(): void {
+    this.off("click", this.onClick);
     this.off("contextmenu", this.onContextMenu);
     super.onUnmount();
-  }
-
-  protected modifyUpdate(targetView: View, updateFlags: ViewFlags): ViewFlags {
-    let additionalFlags = 0;
-    if ((updateFlags & View.NeedsAnimate) !== 0) {
-      additionalFlags |= View.NeedsLayout;
-    }
-    additionalFlags |= super.modifyUpdate(targetView, updateFlags | additionalFlags);
-    return additionalFlags;
   }
 
   protected onLayout(viewContext: ViewContextType<this>): void {
@@ -214,8 +227,8 @@ export class ButtonStack extends ThemedHtmlView implements Modal, PositionGestur
   }
 
   protected layoutStack(): void {
-    const phase = this.stackPhase.getValue();
-    const childNodes = this._node.childNodes;
+    const stackPhase = this.stackPhase.getValue();
+    const childNodes = this.node.childNodes;
     const childCount = childNodes.length;
     const button = this.button;
     let zIndex = childCount - 1;
@@ -223,41 +236,47 @@ export class ButtonStack extends ThemedHtmlView implements Modal, PositionGestur
     let stackHeight = 0;
     let y: number;
     if (button !== null) {
-      button.zIndex.setAutoState(childCount);
+      button.zIndex.setState(childCount, View.Intrinsic);
       const buttonHeight = button !== null ? button.height.value : void 0;
       y = buttonHeight instanceof Length
         ? buttonHeight.pxValue()
-        : button._node.offsetHeight;
+        : button.node.offsetHeight;
     } else {
       y = 0;
     }
+    const buttonSpacing = this.buttonSpacing.value;
+    const itemSpacing = this.itemSpacing.value;
     for (let i = 0; i < childCount; i += 1) {
       const childView = (childNodes[i] as ViewNode).view;
       if (childView instanceof ButtonItem) {
         if (itemIndex === 0) {
-          stackHeight += this._buttonSpacing;
-          y += this._buttonSpacing;
+          stackHeight += buttonSpacing;
+          y += buttonSpacing;
         } else {
-          stackHeight += this._itemSpacing;
-          y += this._itemSpacing;
+          stackHeight += itemSpacing;
+          y += itemSpacing;
         }
         const itemHeight = childView.height.value;
         const dy = itemHeight instanceof Length
                  ? itemHeight.pxValue()
-                 : childView._node.offsetHeight;
-        childView.display.setAutoState(phase === 0 ? "none" : "flex");
-        childView.bottom.setAutoState(phase * y);
-        childView.zIndex.setAutoState(zIndex);
+                 : childView.node.offsetHeight;
+        childView.display.setState(stackPhase === 0 ? "none" : "flex", View.Intrinsic);
+        childView.bottom.setState(stackPhase * y, View.Intrinsic);
+        childView.zIndex.setState(zIndex, View.Intrinsic);
         y += dy;
         stackHeight += dy;
         itemIndex += 1;
         zIndex -= 1;
       }
     }
-    this._stackHeight = stackHeight;
+    Object.defineProperty(this, "stackHeight", {
+      value: stackHeight,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null | undefined): void {
+  protected onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     const childKey = childView.key;
     if (childKey === "button" && childView instanceof HtmlView) {
@@ -278,229 +297,302 @@ export class ButtonStack extends ThemedHtmlView implements Modal, PositionGestur
   }
 
   protected onInsertButton(button: HtmlView): void {
-    this._gesture = new PositionGesture(button, this);
-    button.addViewObserver(this._gesture);
+    const gesture = new PositionGesture(button, this);
+    Object.defineProperty(this, "gesture", {
+      value: gesture,
+      enumerable: true,
+      configurable: true,
+    });
+    button.addViewObserver(gesture);
     if (button instanceof FloatingButton) {
-      button.stackPhase.setAutoState(1);
-      if (this.isCollapsed && this._buttonIcon !== null) {
-        button.setIcon(this._buttonIcon);
-      } else if (this.isExpanded()) {
-        button.setIcon(this.createCloseIcon());
+      button.stackPhase.setState(1, View.Intrinsic);
+      if (this.isExpanded()) {
+        button.pushIcon(this.closeIcon);
       }
     }
-    button.zIndex.setAutoState(0);
+    button.zIndex.setState(0, View.Intrinsic);
   }
 
   protected onRemoveButton(button: HtmlView): void {
-    button.removeViewObserver(this._gesture!);
-    this._gesture = null;
+    button.removeViewObserver(this.gesture!);
+    Object.defineProperty(this, "gesture", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   protected onInsertItem(item: ButtonItem): void {
-    item.position.setAutoState("absolute");
-    item.right.setAutoState(8);
-    item.bottom.setAutoState(8);
-    item.left.setAutoState(8);
-    item.zIndex.setAutoState(0);
+    item.position.setState("absolute", View.Intrinsic);
+    item.right.setState(8, View.Intrinsic);
+    item.bottom.setState(8, View.Intrinsic);
+    item.left.setState(8, View.Intrinsic);
+    item.zIndex.setState(0, View.Intrinsic);
   }
 
   protected onRemoveItem(item: ButtonItem): void {
     // hook
   }
 
-  expand(tween?: Tween<any>): void {
-    if (this._stackState !== "expanded" || this.stackPhase.value !== 1) {
-      if (tween === void 0 || tween === true) {
-        tween = this.getLookOr(Look.transition, null);
+  expand(timing?: AnyTiming | boolean): void {
+    if (this.stackState !== "expanded" || this.stackPhase.value !== 1) {
+      if (timing === void 0 || timing === true) {
+        timing = this.getLookOr(Look.timing, false);
       } else {
-        tween = Transition.forTween(tween);
+        timing = Timing.fromAny(timing);
       }
-      if (this._stackState !== "expanding") {
+      if (this.stackState !== "expanding") {
         this.willExpand();
         const button = this.button;
         if (button instanceof FloatingButton) {
-          button.setIcon(this.createCloseIcon(), tween);
+          button.pushIcon(this.closeIcon, timing);
         }
       }
-      if (tween !== null) {
+      if (timing !== false) {
         if (this.stackPhase.value !== 1) {
-          this.stackPhase.setAutoState(1, tween.onEnd(this.didExpand.bind(this)));
+          this.stackPhase.setState(1, timing, View.Intrinsic);
         } else {
           setTimeout(this.didExpand.bind(this));
         }
       } else {
-        this.stackPhase.setAutoState(1);
+        this.stackPhase.setState(1, View.Intrinsic);
         this.didExpand();
       }
     }
   }
 
   protected willExpand(): void {
-    this._stackState = "expanding";
-    this.willObserve(function (viewObserver: ButtonStackObserver): void {
+    Object.defineProperty(this, "stackState", {
+      value: "expanding",
+      enumerable: true,
+      configurable: true,
+    });
+
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.buttonStackWillExpand !== void 0) {
+      viewController.buttonStackWillExpand(this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.buttonStackWillExpand !== void 0) {
         viewObserver.buttonStackWillExpand(this);
       }
-    });
+    }
   }
 
   protected didExpand(): void {
-    this._stackState = "expanded";
+    Object.defineProperty(this, "stackState", {
+      value: "expanded",
+      enumerable: true,
+      configurable: true,
+    });
     this.requireUpdate(View.NeedsLayout);
-    this.didObserve(function (viewObserver: ButtonStackObserver): void {
+
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.buttonStackDidExpand !== void 0) {
         viewObserver.buttonStackDidExpand(this);
       }
-    });
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.buttonStackDidExpand !== void 0) {
+      viewController.buttonStackDidExpand(this);
+    }
   }
 
-  collapse(tween?: Tween<any>): void {
-    if (this._stackState !== "collapsed" || this.stackPhase.value !== 0) {
-      if (tween === void 0 || tween === true) {
-        tween = this.getLookOr(Look.transition, null);
+  collapse(timing?: AnyTiming | boolean): void {
+    if (this.stackState !== "collapsed" || this.stackPhase.value !== 0) {
+      if (timing === void 0 || timing === true) {
+        timing = this.getLookOr(Look.timing, false);
       } else {
-        tween = Transition.forTween(tween);
+        timing = Timing.fromAny(timing);
       }
-      if (this._stackState !== "collapsing") {
+      if (this.stackState !== "collapsing") {
         this.willCollapse();
         const button = this.button;
-        if (button instanceof FloatingButton) {
-          button.setIcon(this._buttonIcon, tween, true);
+        if (button instanceof FloatingButton && button.iconCount > 1) {
+          button.popIcon(timing);
         }
       }
-      if (tween !== null) {
+      if (timing !== false) {
         if (this.stackPhase.value !== 0) {
-          this.stackPhase.setAutoState(0, tween.onEnd(this.didCollapse.bind(this)));
+          this.stackPhase.setState(0, timing, View.Intrinsic);
         } else {
           setTimeout(this.didCollapse.bind(this));
         }
       } else {
-        this.stackPhase.setAutoState(0);
+        this.stackPhase.setState(0, View.Intrinsic);
         this.didCollapse();
       }
     }
   }
 
   protected willCollapse(): void {
-    this._stackState = "collapsing";
-    this.willObserve(function (viewObserver: ButtonStackObserver): void {
+    Object.defineProperty(this, "stackState", {
+      value: "collapsing",
+      enumerable: true,
+      configurable: true,
+    });
+
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.buttonStackWillCollapse !== void 0) {
+      viewController.buttonStackWillCollapse(this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.buttonStackWillCollapse !== void 0) {
         viewObserver.buttonStackWillCollapse(this);
       }
-    });
-  }
-
-  protected didCollapse(): void {
-    this._stackState = "collapsed";
-    this.requireUpdate(View.NeedsLayout);
-    this.didObserve(function (viewObserver: ButtonStackObserver): void {
-      if (viewObserver.buttonStackDidCollapse !== void 0) {
-        viewObserver.buttonStackDidCollapse(this);
-      }
-    });
-  }
-
-  toggle(tween?: Tween<any>): void {
-    const stackState = this._stackState;
-    if (stackState === "collapsed" || stackState === "collapsing") {
-      this.expand(tween);
-    } else if (stackState === "expanded" || stackState === "expanding") {
-      this.collapse(tween);
     }
   }
 
-  show(tween?: Tween<any>): void {
+  protected didCollapse(): void {
+    Object.defineProperty(this, "stackState", {
+      value: "collapsed",
+      enumerable: true,
+      configurable: true,
+    });
+    this.requireUpdate(View.NeedsLayout);
+
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.buttonStackDidCollapse !== void 0) {
+        viewObserver.buttonStackDidCollapse(this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.buttonStackDidCollapse !== void 0) {
+      viewController.buttonStackDidCollapse(this);
+    }
+  }
+
+  toggle(timing?: AnyTiming | boolean): void {
+    const stackState = this.stackState;
+    if (stackState === "collapsed" || stackState === "collapsing") {
+      this.expand(timing);
+    } else if (stackState === "expanded" || stackState === "expanding") {
+      this.collapse(timing);
+    }
+  }
+
+  show(timing?: AnyTiming | boolean): void {
     if (this.opacity.state !== 1) {
-      if (tween === void 0 || tween === true) {
-        tween = this.getLookOr(Look.transition, null);
+      if (timing === void 0 || timing === true) {
+        timing = this.getLookOr(Look.timing, false);
       } else {
-        tween = Transition.forTween(tween);
+        timing = Timing.fromAny(timing);
       }
       this.willShow();
-      if (tween !== null) {
-        this.opacity.setAutoState(1, tween.onEnd(this.didShow.bind(this)));
+      if (timing !== false) {
+        this.opacity.setState(1, timing, View.Intrinsic);
       } else {
-        this.opacity.setAutoState(1);
+        this.opacity.setState(1, View.Intrinsic);
         this.didShow();
       }
     }
   }
 
   protected willShow(): void {
-    this.willObserve(function (viewObserver: ButtonStackObserver): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.buttonStackWillShow !== void 0) {
+      viewController.buttonStackWillShow(this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.buttonStackWillShow !== void 0) {
         viewObserver.buttonStackWillShow(this);
       }
-    });
+    }
+
     this.display("block");
   }
 
   protected didShow(): void {
     this.requireUpdate(View.NeedsLayout);
-    this.didObserve(function (viewObserver: ButtonStackObserver): void {
+
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.buttonStackDidShow !== void 0) {
         viewObserver.buttonStackDidShow(this);
       }
-    });
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.buttonStackDidShow !== void 0) {
+      viewController.buttonStackDidShow(this);
+    }
   }
 
-  hide(tween?: Tween<any>): void {
+  hide(timing?: AnyTiming | boolean): void {
     if (this.opacity.state !== 0) {
-      if (tween === void 0 || tween === true) {
-        tween = this.getLookOr(Look.transition, null);
+      if (timing === void 0 || timing === true) {
+        timing = this.getLookOr(Look.timing, false);
       } else {
-        tween = Transition.forTween(tween);
+        timing = Timing.fromAny(timing);
       }
       this.willHide();
-      if (tween !== null) {
-        this.opacity.setAutoState(0, tween.onEnd(this.didHide.bind(this)));
+      if (timing !== false) {
+        this.opacity.setState(0, timing, View.Intrinsic);
       } else {
-        this.opacity.setAutoState(0);
+        this.opacity.setState(0, View.Intrinsic);
         this.didHide();
       }
     }
   }
 
   protected willHide(): void {
-    this.willObserve(function (viewObserver: ButtonStackObserver): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.buttonStackWillHide !== void 0) {
+      viewController.buttonStackWillHide(this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.buttonStackWillHide !== void 0) {
         viewObserver.buttonStackWillHide(this);
       }
-    });
+    }
   }
 
   protected didHide(): void {
     this.display("none");
     this.requireUpdate(View.NeedsLayout);
-    this.didObserve(function (viewObserver: ButtonStackObserver): void {
+
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.buttonStackDidHide !== void 0) {
         viewObserver.buttonStackDidHide(this);
       }
-    });
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.buttonStackDidHide !== void 0) {
+      viewController.buttonStackDidHide(this);
+    }
   }
 
   didBeginPress(input: PositionGestureInput, event: Event | null): void {
     // hook
   }
 
-  didHoldPress(input: PositionGestureInput): void {
-    input.preventDefault();
-    this.toggle();
-  }
-
   didMovePress(input: PositionGestureInput, event: Event | null): void {
-    if (!input.defaultPrevented && this._stackState !== "expanded") {
-      const stackHeight = this._stackHeight;
+    if (!input.defaultPrevented && this.stackState !== "expanded") {
+      const stackHeight = this.stackHeight;
       const stackPhase = Math.min(Math.max(0, -(input.y - input.y0) / (0.5 * stackHeight)), 1);
-      this.stackPhase.setAutoState(stackPhase);
+      this.stackPhase.setState(stackPhase, View.Intrinsic);
       this.requireUpdate(View.NeedsLayout);
       if (stackPhase > 0.1) {
         input.clearHoldTimer();
-        if (this._stackState === "collapsed") {
+        if (this.stackState === "collapsed") {
           this.willExpand();
           const button = this.button;
           if (button instanceof FloatingButton) {
-            button.setIcon(this.createCloseIcon(), true);
+            button.pushIcon(this.closeIcon);
           }
         }
       }
@@ -509,9 +601,6 @@ export class ButtonStack extends ThemedHtmlView implements Modal, PositionGestur
 
   didEndPress(input: PositionGestureInput, event: Event | null): void {
     if (!input.defaultPrevented) {
-      if (event !== null) {
-        event.stopPropagation();
-      }
       const stackPhase = this.stackPhase.getValue();
       if (input.t - input.t0 < input.holdDelay) {
         if (stackPhase < 0.1 || this.stackState === "expanded") {
@@ -542,7 +631,23 @@ export class ButtonStack extends ThemedHtmlView implements Modal, PositionGestur
     }
   }
 
+  didLongPress(input: PositionGestureInput): void {
+    input.preventDefault();
+    this.toggle();
+  }
+
+  protected onClick(event: MouseEvent): void {
+    if (event.target === this.button?.node) {
+      event.stopPropagation();
+    }
+  }
+
   protected onContextMenu(event: MouseEvent): void {
     event.preventDefault();
+  }
+
+  @Lazy
+  static get closeIcon(): Graphics {
+    return VectorIcon.create(24, 24, "M19,6.4L17.6,5L12,10.6L6.4,5L5,6.4L10.6,12L5,17.6L6.4,19L12,13.4L17.6,19L19,17.6L13.4,12Z");
   }
 }

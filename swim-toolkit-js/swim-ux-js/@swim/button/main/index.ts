@@ -14,8 +14,6 @@
 
 export {ButtonObserver} from "./ButtonObserver";
 
-export {ButtonMorph} from "./ButtonMorph";
-
 export {
   ButtonGlowState,
   ButtonGlow,

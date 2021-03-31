@@ -12,132 +12,127 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GeoPoint} from "../geo/GeoPoint";
-import {GeoBox} from "../geo/GeoBox";
-import {MapGraphicsView} from "../graphics/MapGraphicsView";
+import {Arrays} from "@swim/util";
+import {GeoPoint, GeoBox} from "@swim/geo";
+import type {MapGraphicsView} from "../graphics/MapGraphicsView";
 
 export class MapGridTile {
-  /** @hidden */
-  readonly _depth: number;
-  /** @hidden */
-  readonly _maxDepth: number;
-  /** @hidden */
-  readonly _density: number
-  /** @hidden */
-  readonly _geoFrame: GeoBox;
-  /** @hidden */
-  readonly _geoBounds: GeoBox;
-  /** @hidden */
-  readonly _geoCenter: GeoPoint;
-  /** @hidden */
-  readonly _southWest: MapGridTile | null;
-  /** @hidden */
-  readonly _northWest: MapGridTile | null;
-  /** @hidden */
-  readonly _southEast: MapGridTile | null;
-  /** @hidden */
-  readonly _northEast: MapGridTile | null;
-  /** @hidden */
-  readonly _views: ReadonlyArray<MapGraphicsView>;
-  /** @hidden */
-  readonly _size: number;
-
   constructor(depth: number, maxDepth: number, density: number,
               geoFrame: GeoBox, geoBounds: GeoBox, geoCenter: GeoPoint,
               southWest: MapGridTile | null, northWest: MapGridTile | null,
               southEast: MapGridTile | null, northEast: MapGridTile | null,
               views: ReadonlyArray<MapGraphicsView>, size: number) {
-    this._depth = depth;
-    this._maxDepth = maxDepth;
-    this._density = density;
-    this._geoFrame = geoFrame;
-    this._geoBounds = geoBounds;
-    this._geoCenter = geoCenter;
-    this._southWest = southWest;
-    this._northWest = northWest;
-    this._southEast = southEast;
-    this._northEast = northEast;
-    this._views = views;
-    this._size = size;
+    Object.defineProperty(this, "depth", {
+      value: depth,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "maxDepth", {
+      value: maxDepth,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "density", {
+      value: density,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "geoFrame", {
+      value: geoFrame,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "geoBounds", {
+      value: geoBounds,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "geoCenter", {
+      value: geoCenter,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "southWest", {
+      value: southWest,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "northWest", {
+      value: northWest,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "southEast", {
+      value: southEast,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "northEast", {
+      value: northEast,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "views", {
+      value: views,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "size", {
+      value: size,
+      enumerable: true,
+    });
   }
 
-  get depth(): number {
-    return this._depth;
-  }
+  declare readonly depth: number;
 
-  get maxDepth(): number {
-    return this._maxDepth;
-  }
+  declare readonly maxDepth: number;
 
-  get geoFrame(): GeoBox {
-    return this._geoFrame;
-  }
+  declare readonly density: number
 
-  get geoBounds(): GeoBox {
-    return this._geoBounds;
-  }
+  declare readonly geoFrame: GeoBox;
 
-  get geoCenter(): GeoPoint {
-    return this._geoCenter;
-  }
+  declare readonly geoBounds: GeoBox;
 
-  get southWest(): MapGridTile | null {
-    return this._southWest;
-  }
+  declare readonly geoCenter: GeoPoint;
 
-  get northWest(): MapGridTile | null {
-    return this._northWest;
-  }
+  declare readonly southWest: MapGridTile | null;
 
-  get southEast(): MapGridTile | null {
-    return this._southEast;
-  }
+  declare readonly northWest: MapGridTile | null;
 
-  get northEast(): MapGridTile | null {
-    return this._northEast;
-  }
+  declare readonly southEast: MapGridTile | null;
 
-  get size(): number {
-    return this._size;
-  }
+  declare readonly northEast: MapGridTile | null;
+
+  declare readonly views: ReadonlyArray<MapGraphicsView>;
+
+  declare readonly size: number;
 
   isEmpty(): boolean {
-    return this._size === 0;
+    return this.size === 0;
   }
 
   contains(bounds: GeoBox): boolean {
-    return this._geoFrame.contains(bounds);
+    return this.geoFrame.contains(bounds);
   }
 
   intersects(bounds: GeoBox): boolean {
-    return this._geoFrame.intersects(bounds);
+    return this.geoFrame.intersects(bounds);
   }
 
   getTile(bounds: GeoBox): MapGridTile {
-    if (this._depth < this._maxDepth && this._size > this._density) {
-      const geoCenter = this._geoCenter;
+    if (this.depth < this.maxDepth && this.size > this.density) {
+      const geoCenter = this.geoCenter;
       const inWest = bounds.lngMin <= geoCenter.lng;
       const inSouth = bounds.latMin <= geoCenter.lat;
       const inEast = bounds.lngMax > geoCenter.lng;
       const inNorth = bounds.latMax > geoCenter.lat;
       if (inWest !== inEast && inSouth !== inNorth) {
         if (inSouth && inWest) {
-          const southWest = this._southWest;
+          const southWest = this.southWest;
           if (southWest !== null) {
             return southWest.getTile(bounds);
           }
         } else if (inNorth && inWest) {
-          const northWest = this._northWest;
+          const northWest = this.northWest;
           if (northWest !== null) {
             return northWest.getTile(bounds);
           }
         } else if (inSouth && inEast) {
-          const southEast = this._southEast;
+          const southEast = this.southEast;
           if (southEast !== null) {
             return southEast.getTile(bounds);
           }
         } else if (inNorth && inEast) {
-          const northEast = this._northEast;
+          const northEast = this.northEast;
           if (northEast !== null) {
             return northEast.getTile(bounds);
           }
@@ -148,7 +143,7 @@ export class MapGridTile {
   }
 
   has(view: MapGraphicsView, bounds: GeoBox): boolean {
-    if (this._depth < this._maxDepth && this._size > this._density) {
+    if (this.depth < this.maxDepth && this.size > this.density) {
       const contained = this.hasNode(view, bounds);
       if (contained !== void 0) {
         return contained;
@@ -158,29 +153,29 @@ export class MapGridTile {
   }
 
   private hasNode(view: MapGraphicsView, bounds: GeoBox): boolean | undefined {
-    const geoCenter = this._geoCenter;
+    const geoCenter = this.geoCenter;
     const inWest = bounds.lngMin <= geoCenter.lng;
     const inSouth = bounds.latMin <= geoCenter.lat;
     const inEast = bounds.lngMax > geoCenter.lng;
     const inNorth = bounds.latMax > geoCenter.lat;
     if (inWest !== inEast && inSouth !== inNorth) {
       if (inSouth && inWest) {
-        const southWest = this._southWest;
+        const southWest = this.southWest;
         if (southWest !== null) {
           return southWest.has(view, bounds);
         }
       } else if (inNorth && inWest) {
-        const northWest = this._northWest;
+        const northWest = this.northWest;
         if (northWest !== null) {
           return northWest.has(view, bounds);
         }
       } else if (inSouth && inEast) {
-        const southEast = this._southEast;
+        const southEast = this.southEast;
         if (southEast !== null) {
           return southEast.has(view, bounds);
         }
       } else if (inNorth && inEast) {
-        const northEast = this._northEast;
+        const northEast = this.northEast;
         if (northEast !== null) {
           return northEast.has(view, bounds);
         }
@@ -190,96 +185,96 @@ export class MapGridTile {
   }
 
   private hasLeaf(view: MapGraphicsView, bounds: GeoBox): boolean {
-    return this._views.indexOf(view) >= 0;
+    return this.views.indexOf(view) >= 0;
   }
 
   inserted(view: MapGraphicsView, bounds: GeoBox): MapGridTile {
     let tile: MapGridTile = this;
-    if (tile._depth < tile._maxDepth && tile._size > tile._density) {
+    if (tile.depth < tile.maxDepth && tile.size > tile.density) {
       const newTile = tile.insertedNode(view, bounds);
       if (newTile !== null) {
         tile = newTile;
-        if (this !== tile && tile._size === tile._density + 1) {
+        if (this !== tile && tile.size === tile.density + 1) {
           tile = tile.reinsertedNode();
         }
         return tile;
       }
     }
     tile = tile.insertedLeaf(view, bounds);
-    if (this !== tile && tile._size === tile._density + 1) {
+    if (this !== tile && tile.depth < tile.maxDepth && tile.size === tile.density + 1) {
       tile = tile.reinsertedNode();
     }
     return tile;
   }
 
   private insertedNode(view: MapGraphicsView, bounds: GeoBox): MapGridTile | null {
-    const geoCenter = this._geoCenter;
+    const geoCenter = this.geoCenter;
     const inWest = bounds.lngMin <= geoCenter.lng;
     const inSouth = bounds.latMin <= geoCenter.lat;
     const inEast = bounds.lngMax > geoCenter.lng;
     const inNorth = bounds.latMax > geoCenter.lat;
     if (inWest !== inEast && inSouth !== inNorth) {
       if (inSouth && inWest) {
-        const oldSouthWest = this._southWest;
+        const oldSouthWest = this.southWest;
         let newSouthWest = oldSouthWest;
         if (newSouthWest === null) {
-          newSouthWest = this.createTile(this._depth + 1, this._maxDepth, this._density,
-                                         new GeoBox(this._geoFrame._lngMin, this._geoFrame._latMin,
-                                                    this._geoCenter._lng, this._geoCenter._lat));
+          newSouthWest = this.createTile(this.depth + 1, this.maxDepth, this.density,
+                                         new GeoBox(this.geoFrame.lngMin, this.geoFrame.latMin,
+                                                    this.geoCenter.lng, this.geoCenter.lat));
         }
         newSouthWest = newSouthWest.inserted(view, bounds);
         if (oldSouthWest !== newSouthWest) {
-          return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                 void 0, this._geoCenter, newSouthWest, this._northWest,
-                                 this._southEast, this._northEast, this._views, this._size + 1);
+          return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                 void 0, this.geoCenter, newSouthWest, this.northWest,
+                                 this.southEast, this.northEast, this.views, this.size + 1);
         } else {
           return this;
         }
       } else if (inNorth && inWest) {
-        const oldNorthWest = this._northWest;
+        const oldNorthWest = this.northWest;
         let newNorthWest = oldNorthWest;
         if (newNorthWest === null) {
-          newNorthWest = this.createTile(this._depth + 1, this._maxDepth, this._density,
-                                         new GeoBox(this._geoFrame._lngMin, this._geoCenter._lat,
-                                                    this._geoCenter._lng, this._geoFrame._latMax));
+          newNorthWest = this.createTile(this.depth + 1, this.maxDepth, this.density,
+                                         new GeoBox(this.geoFrame.lngMin, this.geoCenter.lat,
+                                                    this.geoCenter.lng, this.geoFrame.latMax));
         }
         newNorthWest = newNorthWest.inserted(view, bounds);
         if (oldNorthWest !== newNorthWest) {
-          return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                 void 0, this._geoCenter, this._southWest, newNorthWest,
-                                 this._southEast, this._northEast, this._views, this._size + 1);
+          return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                 void 0, this.geoCenter, this.southWest, newNorthWest,
+                                 this.southEast, this.northEast, this.views, this.size + 1);
         } else {
           return this;
         }
       } else if (inSouth && inEast) {
-        const oldSouthEast = this._southEast;
+        const oldSouthEast = this.southEast;
         let newSouthEast = oldSouthEast;
         if (newSouthEast === null) {
-          newSouthEast = this.createTile(this._depth + 1, this._maxDepth, this._density,
-                                         new GeoBox(this._geoCenter._lng, this._geoFrame._latMin,
-                                                    this._geoFrame._lngMax, this._geoCenter._lat));
+          newSouthEast = this.createTile(this.depth + 1, this.maxDepth, this.density,
+                                         new GeoBox(this.geoCenter.lng, this.geoFrame.latMin,
+                                                    this.geoFrame.lngMax, this.geoCenter.lat));
         }
         newSouthEast = newSouthEast.inserted(view, bounds);
         if (oldSouthEast !== newSouthEast) {
-          return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                 void 0, this._geoCenter, this._southWest, this._northWest,
-                                 newSouthEast, this._northEast, this._views, this._size + 1);
+          return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                 void 0, this.geoCenter, this.southWest, this.northWest,
+                                 newSouthEast, this.northEast, this.views, this.size + 1);
         } else {
           return this;
         }
       } else if (inNorth && inEast) {
-        const oldNorthEast = this._northEast;
+        const oldNorthEast = this.northEast;
         let newNorthEast = oldNorthEast;
         if (newNorthEast === null) {
-          newNorthEast = this.createTile(this._depth + 1, this._maxDepth, this._density,
-                                         new GeoBox(this._geoCenter._lng, this._geoCenter._lat,
-                                                    this._geoFrame._lngMax, this._geoFrame._latMax));
+          newNorthEast = this.createTile(this.depth + 1, this.maxDepth, this.density,
+                                         new GeoBox(this.geoCenter.lng, this.geoCenter.lat,
+                                                    this.geoFrame.lngMax, this.geoFrame.latMax));
         }
         newNorthEast = newNorthEast.inserted(view, bounds);
         if (oldNorthEast !== newNorthEast) {
-          return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                 void 0, this._geoCenter, this._southWest, this._northWest,
-                                 this._southEast, newNorthEast, this._views, this._size + 1);
+          return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                 void 0, this.geoCenter, this.southWest, this.northWest,
+                                 this.southEast, newNorthEast, this.views, this.size + 1);
         } else {
           return this;
         }
@@ -289,13 +284,13 @@ export class MapGridTile {
   }
 
   private insertedLeaf(view: MapGraphicsView, bounds: GeoBox): MapGridTile {
-    const oldViews = this._views;
+    const oldViews = this.views;
     if (oldViews.indexOf(view) < 0) {
       const newViews = oldViews.slice(0);
       newViews.push(view);
-      return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                             void 0, this._geoCenter, this._southWest, this._northWest,
-                             this._southEast, this._northEast, newViews, this._size + 1);
+      return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                             void 0, this.geoCenter, this.southWest, this.northWest,
+                             this.southEast, this.northEast, newViews, this.size + 1);
     } else {
       return this;
     }
@@ -303,79 +298,79 @@ export class MapGridTile {
 
   removed(view: MapGraphicsView, bounds: GeoBox): MapGridTile {
     let tile: MapGridTile = this;
-    if (tile._depth < tile._maxDepth && tile._size > tile._density) {
+    if (tile.depth < tile.maxDepth && tile.size > tile.density) {
       const newTile = tile.removedNode(view, bounds);
       if (newTile !== null) {
         tile = newTile;
-        if (this !== tile && tile._size === tile._density) {
+        if (this !== tile && tile.size === tile.density) {
           tile = tile.reinsertedLeaf();
         }
         return tile;
       }
     }
     tile = tile.removedLeaf(view, bounds);
-    if (this !== tile && tile._size === tile._density) {
+    if (this !== tile && tile.size === tile.density) {
       tile = tile.reinsertedLeaf();
     }
     return tile;
   }
 
   private removedNode(view: MapGraphicsView, bounds: GeoBox): MapGridTile | null {
-    const geoCenter = this._geoCenter;
+    const geoCenter = this.geoCenter;
     const inWest = bounds.lngMin <= geoCenter.lng;
     const inSouth = bounds.latMin <= geoCenter.lat;
     const inEast = bounds.lngMax > geoCenter.lng;
     const inNorth = bounds.latMax > geoCenter.lat;
     if (inWest !== inEast && inSouth !== inNorth) {
       if (inSouth && inWest) {
-        const oldSouthWest = this._southWest;
+        const oldSouthWest = this.southWest;
         if (oldSouthWest !== null) {
           let newSouthWest: MapGridTile | null = oldSouthWest.removed(view, bounds);
           if (newSouthWest.isEmpty()) {
             newSouthWest = null;
           }
-          return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                 void 0, this._geoCenter, newSouthWest, this._northWest,
-                                 this._southEast, this._northEast, this._views, this._size - 1);
+          return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                 void 0, this.geoCenter, newSouthWest, this.northWest,
+                                 this.southEast, this.northEast, this.views, this.size - 1);
         } else {
           return this;
         }
       } else if (inNorth && inWest) {
-        const oldNorthWest = this._northWest;
+        const oldNorthWest = this.northWest;
         if (oldNorthWest !== null) {
           let newNorthWest: MapGridTile | null = oldNorthWest.removed(view, bounds);
           if (newNorthWest.isEmpty()) {
             newNorthWest = null;
           }
-          return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                 void 0, this._geoCenter, this._southWest, newNorthWest,
-                                 this._southEast, this._northEast, this._views, this._size - 1);
+          return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                 void 0, this.geoCenter, this.southWest, newNorthWest,
+                                 this.southEast, this.northEast, this.views, this.size - 1);
         } else {
           return this;
         }
       } else if (inSouth && inEast) {
-        const oldSouthEast = this._southEast;
+        const oldSouthEast = this.southEast;
         if (oldSouthEast !== null) {
           let newSouthEast: MapGridTile | null = oldSouthEast.removed(view, bounds);
           if (newSouthEast.isEmpty()) {
             newSouthEast = null;
           }
-          return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                 void 0, this._geoCenter, this._southWest, this._northWest,
-                                 newSouthEast, this._northEast, this._views, this._size - 1);
+          return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                 void 0, this.geoCenter, this.southWest, this.northWest,
+                                 newSouthEast, this.northEast, this.views, this.size - 1);
         } else {
           return this;
         }
       } else if (inNorth && inEast) {
-        const oldNorthEast = this._northEast;
+        const oldNorthEast = this.northEast;
         if (oldNorthEast !== null) {
           let newNorthEast: MapGridTile | null = oldNorthEast.removed(view, bounds);
           if (newNorthEast.isEmpty()) {
             newNorthEast = null;
           }
-          return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                 void 0, this._geoCenter, this._southWest, this._northWest,
-                                 this._southEast, newNorthEast, this._views, this._size - 1);
+          return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                 void 0, this.geoCenter, this.southWest, this.northWest,
+                                 this.southEast, newNorthEast, this.views, this.size - 1);
         } else {
           return this;
         }
@@ -385,22 +380,22 @@ export class MapGridTile {
   }
 
   private removedLeaf(view: MapGraphicsView, bounds: GeoBox): MapGridTile {
-    const oldViews = this._views;
+    const oldViews = this.views;
     const index = oldViews.indexOf(view);
     if (index >= 0) {
       const newViews = oldViews.slice(0);
       newViews.splice(index, 1);
-      return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                             void 0, this._geoCenter, this._southWest, this._northWest,
-                             this._southEast, this._northEast, newViews, this._size - 1);
+      return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                             void 0, this.geoCenter, this.southWest, this.northWest,
+                             this.southEast, this.northEast, newViews, this.size - 1);
     } else {
       return this;
     }
   }
 
   private reinsertedNode(): MapGridTile {
-    let tile = this.createTile(this._depth, this._maxDepth, this._density,
-                               this._geoFrame, void 0, this._geoCenter);
+    let tile = this.createTile(this.depth, this.maxDepth, this.density,
+                               this.geoFrame, void 0, this.geoCenter);
     this.forEach(function (view: MapGraphicsView): void {
       const bounds = view.geoBounds;
       const newTile = tile.insertedNode(view, bounds);
@@ -414,8 +409,8 @@ export class MapGridTile {
   }
 
   private reinsertedLeaf(): MapGridTile {
-    let tile = this.createTile(this._depth, this._maxDepth, this._density,
-                               this._geoFrame, void 0, this._geoCenter);
+    let tile = this.createTile(this.depth, this.maxDepth, this.density,
+                               this.geoFrame, void 0, this.geoCenter);
     this.forEach(function (view: MapGraphicsView): void {
       tile = tile.insertedLeaf(view, view.geoBounds);
     }, this);
@@ -423,8 +418,8 @@ export class MapGridTile {
   }
 
   moved(view: MapGraphicsView, newBounds: GeoBox, oldBounds: GeoBox): MapGridTile {
-    if (this._depth < this._maxDepth && this._size > this._density) {
-      const geoCenter = this._geoCenter;
+    if (this.depth < this.maxDepth && this.size > this.density) {
+      const geoCenter = this.geoCenter;
       const newInWest = newBounds.lngMin <= geoCenter.lng;
       const newInSouth = newBounds.latMin <= geoCenter.lat;
       const newInEast = newBounds.lngMax > geoCenter.lng;
@@ -437,36 +432,36 @@ export class MapGridTile {
         // in same tile
         if (newInWest !== newInEast && newInSouth !== newInNorth) {
           if (newInSouth && newInWest) {
-            const oldSouthWest = this._southWest!;
+            const oldSouthWest = this.southWest!;
             const newSouthWest = oldSouthWest.moved(view, newBounds, oldBounds);
             if (oldSouthWest !== newSouthWest) {
-              return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                     void 0, this._geoCenter, newSouthWest, this._northWest,
-                                     this._southEast, this._northEast, this._views, this._size);
+              return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                     void 0, this.geoCenter, newSouthWest, this.northWest,
+                                     this.southEast, this.northEast, this.views, this.size);
             }
           } else if (newInNorth && newInWest) {
-            const oldNorthWest = this._northWest!;
+            const oldNorthWest = this.northWest!;
             const newNorthWest = oldNorthWest.moved(view, newBounds, oldBounds);
             if (oldNorthWest !== newNorthWest) {
-              return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                     void 0, this._geoCenter, this._southWest, newNorthWest,
-                                     this._southEast, this._northEast, this._views, this._size);
+              return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                     void 0, this.geoCenter, this.southWest, newNorthWest,
+                                     this.southEast, this.northEast, this.views, this.size);
             }
           } else if (newInSouth && newInEast) {
-            const oldSouthEast = this._southEast!;
+            const oldSouthEast = this.southEast!;
             const newSouthEast = oldSouthEast.moved(view, newBounds, oldBounds);
             if (oldSouthEast !== newSouthEast) {
-              return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                     void 0, this._geoCenter, this._southWest, this._northWest,
-                                     newSouthEast, this._northEast, this._views, this._size);
+              return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                     void 0, this.geoCenter, this.southWest, this.northWest,
+                                     newSouthEast, this.northEast, this.views, this.size);
             }
           } else if (newInNorth && newInEast) {
-            const oldNorthEast = this._northEast!;
+            const oldNorthEast = this.northEast!;
             const newNorthEast = oldNorthEast.moved(view, newBounds, oldBounds);
             if (oldNorthEast !== newNorthEast) {
-              return this.createTile(this._depth, this._maxDepth, this._density, this._geoFrame,
-                                     void 0, this._geoCenter, this._southWest, this._northWest,
-                                     this._southEast, newNorthEast, this._views, this._size);
+              return this.createTile(this.depth, this.maxDepth, this.density, this.geoFrame,
+                                     void 0, this.geoCenter, this.southWest, this.northWest,
+                                     this.southEast, newNorthEast, this.views, this.size);
             }
           }
         }
@@ -477,34 +472,36 @@ export class MapGridTile {
     return this;
   }
 
-  forEach<T, S>(callback: (this: S, view: MapGraphicsView) => T | void, thisArg?: S): T | undefined {
-    if (this._southWest !== null) {
-      const result = this._southWest.forEach(callback, thisArg);
+  forEach<T>(callback: (view: MapGraphicsView) => T | void): T | undefined;
+  forEach<T, S>(callback: (this: S, view: MapGraphicsView) => T | void, thisArg: S): T | undefined;
+  forEach<T, S>(callback: (this: S | undefined, view: MapGraphicsView) => T | void, thisArg?: S): T | undefined {
+    if (this.southWest !== null) {
+      const result = this.southWest.forEach(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
     }
-    if (this._northWest !== null) {
-      const result = this._northWest.forEach(callback, thisArg);
+    if (this.northWest !== null) {
+      const result = this.northWest.forEach(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
     }
-    if (this._southEast !== null) {
-      const result = this._southEast.forEach(callback, thisArg);
+    if (this.southEast !== null) {
+      const result = this.southEast.forEach(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
     }
-    if (this._northEast !== null) {
-      const result = this._northEast.forEach(callback, thisArg);
+    if (this.northEast !== null) {
+      const result = this.northEast.forEach(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
     }
-    const views = this._views;
+    const views = this.views;
     for (let i = 0; i < views.length; i += 1) {
-      const result = callback.call(thisArg, views[i]);
+      const result = callback.call(thisArg, views[i]!);
       if (result !== void 0) {
         return result;
       }
@@ -512,34 +509,36 @@ export class MapGridTile {
     return void 0;
   }
 
-  forEachReverse<T, S>(callback: (this: S, view: MapGraphicsView) => T | void, thisArg?: S): T | undefined {
-    const views = this._views;
+  forEachReverse<T>(callback: (view: MapGraphicsView) => T | void): T | undefined;
+  forEachReverse<T, S>(callback: (this: S, view: MapGraphicsView) => T | void, thisArg: S): T | undefined;
+  forEachReverse<T, S>(callback: (this: S | undefined, view: MapGraphicsView) => T | void, thisArg?: S): T | undefined {
+    const views = this.views;
     for (let i = views.length - 1; i >= 0; i -= 1) {
-      const result = callback.call(thisArg, views[i]);
+      const result = callback.call(thisArg, views[i]!);
       if (result !== void 0) {
         return result;
       }
     }
-    if (this._northEast !== null) {
-      const result = this._northEast.forEachReverse(callback, thisArg);
+    if (this.northEast !== null) {
+      const result = this.northEast.forEachReverse(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
     }
-    if (this._southEast !== null) {
-      const result = this._southEast.forEachReverse(callback, thisArg);
+    if (this.southEast !== null) {
+      const result = this.southEast.forEachReverse(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
     }
-    if (this._northWest !== null) {
-      const result = this._northWest.forEachReverse(callback, thisArg);
+    if (this.northWest !== null) {
+      const result = this.northWest.forEachReverse(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
     }
-    if (this._southWest !== null) {
-      const result = this._southWest.forEachReverse(callback, thisArg);
+    if (this.southWest !== null) {
+      const result = this.southWest.forEachReverse(callback, thisArg);
       if (result !== void 0) {
         return result;
       }
@@ -547,35 +546,37 @@ export class MapGridTile {
     return void 0;
   }
 
-  forEachIntersecting<T, S>(bounds: GeoBox, callback: (this: S, view: MapGraphicsView) => T | void, thisArg?: S): T | undefined {
-    if (this._geoFrame.intersects(bounds)) {
-      if (this._southWest !== null) {
-        const result = this._southWest.forEachIntersecting(bounds, callback, thisArg);
+  forEachIntersecting<T>(bounds: GeoBox, callback: (view: MapGraphicsView) => T | void): T | undefined;
+  forEachIntersecting<T, S>(bounds: GeoBox, callback: (this: S, view: MapGraphicsView) => T | void, thisArg: S): T | undefined;
+  forEachIntersecting<T, S>(bounds: GeoBox, callback: (this: S | undefined, view: MapGraphicsView) => T | void, thisArg?: S): T | undefined {
+    if (this.geoFrame.intersects(bounds)) {
+      if (this.southWest !== null) {
+        const result = this.southWest.forEachIntersecting(bounds, callback, thisArg);
         if (result !== void 0) {
           return result;
         }
       }
-      if (this._northWest !== null) {
-        const result = this._northWest.forEachIntersecting(bounds, callback, thisArg);
+      if (this.northWest !== null) {
+        const result = this.northWest.forEachIntersecting(bounds, callback, thisArg);
         if (result !== void 0) {
           return result;
         }
       }
-      if (this._southEast !== null) {
-        const result = this._southEast.forEachIntersecting(bounds, callback, thisArg);
+      if (this.southEast !== null) {
+        const result = this.southEast.forEachIntersecting(bounds, callback, thisArg);
         if (result !== void 0) {
           return result;
         }
       }
-      if (this._northEast !== null) {
-        const result = this._northEast.forEachIntersecting(bounds, callback, thisArg);
+      if (this.northEast !== null) {
+        const result = this.northEast.forEachIntersecting(bounds, callback, thisArg);
         if (result !== void 0) {
           return result;
         }
       }
-      const views = this._views;
+      const views = this.views;
       for (let i = 0; i < views.length; i += 1) {
-        const result = callback.call(thisArg, views[i]);
+        const result = callback.call(thisArg, views[i]!);
         if (result !== void 0) {
           return result;
         }
@@ -584,35 +585,37 @@ export class MapGridTile {
     return void 0;
   }
 
-  forEachNonIntersecting<T, S>(bounds: GeoBox, callback: (this: S, view: MapGraphicsView) => T | void, thisArg?: S): T | undefined {
-    if (!this._geoFrame.intersects(bounds)) {
-      if (this._southWest !== null) {
-        const result = this._southWest.forEachNonIntersecting(bounds, callback, thisArg);
+  forEachNonIntersecting<T>(bounds: GeoBox, callback: (view: MapGraphicsView) => T | void): T | undefined;
+  forEachNonIntersecting<T, S>(bounds: GeoBox, callback: (this: S, view: MapGraphicsView) => T | void, thisArg: S): T | undefined;
+  forEachNonIntersecting<T, S>(bounds: GeoBox, callback: (this: S | undefined, view: MapGraphicsView) => T | void, thisArg?: S): T | undefined {
+    if (!this.geoFrame.intersects(bounds)) {
+      if (this.southWest !== null) {
+        const result = this.southWest.forEachNonIntersecting(bounds, callback, thisArg);
         if (result !== void 0) {
           return result;
         }
       }
-      if (this._northWest !== null) {
-        const result = this._northWest.forEachNonIntersecting(bounds, callback, thisArg);
+      if (this.northWest !== null) {
+        const result = this.northWest.forEachNonIntersecting(bounds, callback, thisArg);
         if (result !== void 0) {
           return result;
         }
       }
-      if (this._southEast !== null) {
-        const result = this._southEast.forEachNonIntersecting(bounds, callback, thisArg);
+      if (this.southEast !== null) {
+        const result = this.southEast.forEachNonIntersecting(bounds, callback, thisArg);
         if (result !== void 0) {
           return result;
         }
       }
-      if (this._northEast !== null) {
-        const result = this._northEast.forEachNonIntersecting(bounds, callback, thisArg);
+      if (this.northEast !== null) {
+        const result = this.northEast.forEachNonIntersecting(bounds, callback, thisArg);
         if (result !== void 0) {
           return result;
         }
       }
-      const views = this._views;
+      const views = this.views;
       for (let i = 0; i < views.length; i += 1) {
-        const result = callback.call(thisArg, views[i]);
+        const result = callback.call(thisArg, views[i]!);
         if (result !== void 0) {
           return result;
         }
@@ -625,25 +628,25 @@ export class MapGridTile {
                        geoFrame: GeoBox, geoBounds?: GeoBox, geoCenter?: GeoPoint,
                        southWest: MapGridTile | null = null, northWest: MapGridTile | null = null,
                        southEast: MapGridTile | null = null, northEast: MapGridTile | null = null,
-                       views: ReadonlyArray<MapGraphicsView> = [], size: number = 0): MapGridTile {
+                       views: ReadonlyArray<MapGraphicsView> = Arrays.empty, size: number = 0): MapGridTile {
     if (geoCenter === void 0) {
       geoCenter = geoFrame.center;
     }
     if (geoBounds === void 0) {
       if (southWest !== null) {
-        geoBounds = southWest._geoBounds;
+        geoBounds = southWest.geoBounds;
       }
       if (northWest !== null) {
-        geoBounds = geoBounds !== void 0 ? geoBounds.union(northWest._geoBounds) : northWest._geoBounds;
+        geoBounds = geoBounds !== void 0 ? geoBounds.union(northWest.geoBounds) : northWest.geoBounds;
       }
       if (southEast !== null) {
-        geoBounds = geoBounds !== void 0 ? geoBounds.union(southEast._geoBounds) : southEast._geoBounds;
+        geoBounds = geoBounds !== void 0 ? geoBounds.union(southEast.geoBounds) : southEast.geoBounds;
       }
       if (northEast !== null) {
-        geoBounds = geoBounds !== void 0 ? geoBounds.union(northEast._geoBounds) : northEast._geoBounds;
+        geoBounds = geoBounds !== void 0 ? geoBounds.union(northEast.geoBounds) : northEast.geoBounds;
       }
       for (let i = 0; i < views.length; i += 1) {
-        const view = views[i];
+        const view = views[i]!;
         geoBounds = geoBounds !== void 0 ? geoBounds.union(view.geoBounds) : view.geoBounds;
       }
       if (geoBounds === void 0) {
@@ -669,6 +672,6 @@ export class MapGridTile {
       density = 8;
     }
     return new MapGridTile(depth, maxDepth, density, geoFrame, geoFrame,
-                           geoFrame.center, null, null, null, null, [], 0);
+                           geoFrame.center, null, null, null, null, Arrays.empty, 0);
   }
 }

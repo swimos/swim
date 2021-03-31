@@ -13,30 +13,21 @@
 // limitations under the License.
 
 import {AttributeAnimator} from "./AttributeAnimator";
-import {ElementView} from "../element/ElementView";
+import type {ElementView} from "../element/ElementView";
 
 /** @hidden */
-export abstract class NumberAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, number, number | string> {
-  parse(value: string): number {
+export abstract class NumberAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, number | undefined, string> {
+  parse(value: string): number | undefined {
     const number = +value;
-    if (isFinite(number)) {
-      return number;
-    } else {
-      throw new Error(value);
-    }
+    return isFinite(number) ? number : void 0;
   }
 
-  fromAny(value: number | string): number {
+  fromAny(value: number | string): number | undefined {
     if (typeof value === "number") {
       return value;
     } else {
       const number = +value;
-      if (isFinite(number)) {
-        return number;
-      } else {
-        throw new Error(value);
-      }
+      return isFinite(number) ? number : void 0;
     }
   }
 }
-AttributeAnimator.Number = NumberAttributeAnimator;

@@ -49,7 +49,7 @@ const intersectionsLink = host.downlinkMap()
       let intersectionView = mapGrid.getChildView(key);
       if (intersectionView === null) {
         const intersectionId = value.get("id").stringValue();
-        intersectionView = new swim.MapCircleView()
+        intersectionView = new swim.GeoCircleView()
             .geoCenter([lng, lat])
             .radius(5)
             .fill(INTERSECTION_COLOR);
@@ -83,18 +83,18 @@ function linkIntersection(intersectionId, node, intersectionView) {
       .laneUri("intersection/schematic")
       .didSet(function (value) {
         value.forEach(function (item) {
-          if (item.tag() === "approach") {
+          if (item.tag === "approach") {
             const approachId = item.get("id").stringValue();
             const approachKey = intersectionId + "-" + approachId;
             let approachView = approaches[approachId];
             if (approachView === undefined) {
               const points = item.get("coords").toAny();
-              approachView = swim.MapPolygonView.fromAny({
-                  points: points,
-                  fill: swim.Color.transparent(),
-                  stroke: swim.Color.transparent(),
-                  strokeWidth: 3,
-                })
+              points.push(points[0]); // close path
+              const approachView = new swim.GeoAreaView()
+                .geoPath(points)
+                .fill(swim.Color.transparent())
+                .stroke(swim.Color.transparent())
+                .strokeWidth(3)
                 .on("pointerenter", function (event) {
                   updateApproach(approachView);
                 })
@@ -166,12 +166,12 @@ function linkIntersection(intersectionId, node, intersectionView) {
     if (approachView.occupied === false) {
       phaseColor = phaseColor.alpha(0.25);
     }
-    const tween = swim.Transition.duration(250, "cubic-out");
-    approachView.fill(phaseColor, tween);
+    const timing = swim.Easing.cubicOut.withDuration(250);
+    approachView.fill(phaseColor, timing);
     if (approachView.isHovering()) {
-      approachView.stroke("#ffffff", tween);
+      approachView.stroke("#ffffff", timing);
     } else {
-      approachView.stroke(swim.Color.transparent(), tween);
+      approachView.stroke(swim.Color.transparent(), timing);
     }
   }
 
@@ -179,7 +179,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
     if (document.hidden || !mapView.geoBounds.contains(intersectionView.geoCenter.value)) {
       return;
     }
-    const ripple = new swim.MapCircleView()
+    const ripple = new swim.GeoCircleView()
         .geoCenter(intersectionView.geoCenter.value)
         .radius(0)
         .stroke(RIPPLE_COLOR)
@@ -187,9 +187,12 @@ function linkIntersection(intersectionId, node, intersectionView) {
     mapView.append(ripple);
     const frame = mapView.viewFrame;
     const radius = Math.min(frame.width, frame.height) / 8;
-    const tween = swim.Transition.duration(2000);
-    ripple.stroke(RIPPLE_COLOR.alpha(0), tween)
-          .radius(radius, tween.onEnd(function () { ripple.remove(); }));
+    const timing = swim.Easing.linear.withDuration(2000);
+    ripple.stroke(RIPPLE_COLOR.alpha(0), timing)
+          .radius(radius, timing);
+    ripple.radius.onEnd = function () {
+      ripple.remove();
+    };
   }
 }
 

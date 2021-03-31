@@ -12,16 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Color} from "@swim/color";
-import {Transition} from "@swim/transition";
-import {StyleRule, StyleSheet} from "@swim/style";
-import {Subview} from "@swim/view";
-import {ViewNodeType, HtmlView, StyleView} from "@swim/dom";
-import {PositionGesture} from "@swim/gesture";
-import {Look, MoodVector, ThemeMatrix, ThemedSvgView} from "@swim/theme";
+import type {Timing} from "@swim/mapping";
+import {Color} from "@swim/style";
+import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
+import {View, ViewFastener, PositionGesture} from "@swim/view";
+import {StyleRule, StyleSheet, HtmlView, StyleView, SvgView} from "@swim/dom";
 import {TokenViewInit, TokenView} from "./TokenView";
-import {InputTokenViewObserver} from "./InputTokenViewObserver";
-import {InputTokenViewController} from "./InputTokenViewController";
+import type {InputTokenViewObserver} from "./InputTokenViewObserver";
+import type {InputTokenViewController} from "./InputTokenViewController";
 
 export interface InputTokenViewInit extends TokenViewInit {
   controller?: InputTokenViewController;
@@ -35,25 +33,19 @@ export class InputTokenView extends TokenView {
     this.onInputKey = this.onInputKey.bind(this);
   }
 
-  protected initNode(node: ViewNodeType<this>): void {
-    super.initNode(node);
+  protected initToken(): void {
+    this.stylesheet.injectView();
+    super.initToken();
     this.addClass("input-token");
+    this.label.setView(this.label.createView());
   }
 
-  // @ts-ignore
   declare readonly viewController: InputTokenViewController | null;
 
-  // @ts-ignore
   declare readonly viewObservers: ReadonlyArray<InputTokenViewObserver>;
 
   initView(init: InputTokenViewInit): void {
     super.initView(init);
-  }
-
-  protected initSubviews(): void {
-    this.stylesheet.insert();
-    super.initSubviews();
-    this.label.setSubview(this.label.createSubview());
   }
 
   protected initStylesheet(styleView: StyleView): void {
@@ -71,142 +63,146 @@ export class InputTokenView extends TokenView {
 
   protected initLabel(labelView: HtmlView): void {
     super.initLabel(labelView);
-    labelView.paddingTop.setAutoState(0);
-    labelView.paddingRight.setAutoState(0);
-    labelView.paddingBottom.setAutoState(0);
-    labelView.paddingLeft.setAutoState(0);
-    labelView.borderTopStyle.setAutoState("none");
-    labelView.borderRightStyle.setAutoState("none");
-    labelView.borderBottomStyle.setAutoState("none");
-    labelView.borderLeftStyle.setAutoState("none");
-    labelView.boxSizing.setAutoState("border-box");
-    labelView.backgroundColor.setAutoState(Color.transparent());
-    labelView.appearance.setAutoState("none");
-    labelView.outlineStyle.setAutoState("none");
-    labelView.pointerEvents.setAutoState("auto");
+    labelView.paddingTop.setState(0, View.Intrinsic);
+    labelView.paddingRight.setState(0, View.Intrinsic);
+    labelView.paddingBottom.setState(0, View.Intrinsic);
+    labelView.paddingLeft.setState(0, View.Intrinsic);
+    labelView.borderTopStyle.setState("none", View.Intrinsic);
+    labelView.borderRightStyle.setState("none", View.Intrinsic);
+    labelView.borderBottomStyle.setState("none", View.Intrinsic);
+    labelView.borderLeftStyle.setState("none", View.Intrinsic);
+    labelView.boxSizing.setState("border-box", View.Intrinsic);
+    labelView.backgroundColor.setState(Color.transparent(), View.Intrinsic);
+    labelView.appearance.setState("none", View.Intrinsic);
+    labelView.outlineStyle.setState("none", View.Intrinsic);
+    labelView.pointerEvents.setState("auto", View.Intrinsic);
   }
 
-  protected createBodyGesture(bodyView: ThemedSvgView): PositionGesture<ThemedSvgView> | null {
+  protected createBodyGesture(bodyView: SvgView): PositionGesture<SvgView> | null {
     return null;
   }
 
-  @Subview<InputTokenView, StyleView>({
-    child: true,
+  @ViewFastener<InputTokenView, StyleView>({
+    key: true,
     type: HtmlView.style,
+    child: true,
+    observe: true,
     viewDidMount(styleView: StyleView): void {
-      this.view.initStylesheet(styleView);
+      this.owner.initStylesheet(styleView);
     },
   })
-  readonly stylesheet: Subview<this, StyleView>;
+  declare stylesheet: ViewFastener<this, StyleView>;
 
-  @Subview<InputTokenView, HtmlView>({
+  @ViewFastener<InputTokenView, HtmlView>({
     child: false,
     type: HtmlView.input,
-    onSetSubview(labelView: HtmlView | null): void {
+    observe: true,
+    onSetView(labelView: HtmlView | null): void {
       if (labelView !== null) {
         if (labelView.parentView === null) {
-          this.view.labelContainer.insert();
-          const labelContainer = this.view.labelContainer.subview;
+          this.owner.labelContainer.injectView();
+          const labelContainer = this.owner.labelContainer.view;
           if (labelContainer !== null) {
             labelContainer.appendChildView(labelView);
           }
         }
-        this.view.initLabel(labelView);
+        this.owner.initLabel(labelView);
       }
     },
     viewDidMount(labelView: HtmlView): void {
-      labelView.on("input", this.view.onInputUpdate);
-      labelView.on("change", this.view.onInputChange);
-      labelView.on("keydown", this.view.onInputKey);
+      labelView.on("input", this.owner.onInputUpdate as EventListener);
+      labelView.on("change", this.owner.onInputChange);
+      labelView.on("keydown", this.owner.onInputKey);
     },
     viewWillUnmount(labelView: HtmlView): void {
-      labelView.off("input", this.view.onInputUpdate);
-      labelView.off("change", this.view.onInputChange);
-      labelView.off("keydown", this.view.onInputKey);
+      labelView.off("input", this.owner.onInputUpdate as EventListener);
+      labelView.off("change", this.owner.onInputChange);
+      labelView.off("keydown", this.owner.onInputKey);
     },
   })
-  readonly label: Subview<this, HtmlView>;
+  declare label: ViewFastener<this, HtmlView>;
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector,
-                         transition: Transition<any> | null): void {
-    super.onApplyTheme(theme, mood, transition);
-    const styleView = this.stylesheet.subview;
+  /** @hidden */
+  get placeholderLook(): Look<Color> {
+    return Look.neutralColor;
+  }
+
+  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+    super.onApplyTheme(theme, mood, timing);
+    const styleView = this.stylesheet.view;
     if (styleView !== null) {
       const placeholder = styleView.getCssRule("placeholder") as StyleRule<StyleSheet> | null;
       if (placeholder !== null) {
-        placeholder.color.setAutoState(theme.inner(mood, Look.mutedColor), transition);
+        placeholder.color.setState(theme.getOr(this.placeholderLook, mood, null), timing, View.Intrinsic);
       }
     }
 
-    const labelView = this.label.subview;
+    const labelView = this.label.view;
     if (labelView !== null) {
-      const font = theme.inner(mood, Look.font);
-      if (font !== void 0) {
-        if (font._style !== void 0) {
-          labelView.fontStyle.setAutoState(font._style);
-        }
-        if (font._variant !== void 0) {
-          labelView.fontVariant.setAutoState(font._variant);
-        }
-        if (font._weight !== void 0) {
-          labelView.fontWeight.setAutoState(font._weight);
-        }
-        if (font._stretch !== void 0) {
-          labelView.fontStretch.setAutoState(font._stretch);
-        }
-        if (font._size !== void 0) {
-          labelView.fontSize.setAutoState(font._size);
-        }
-        if (font._height !== void 0) {
-          labelView.lineHeight.setAutoState(font._height);
-        }
-        labelView.fontFamily.setAutoState(font._family);
-      }
+      labelView.font(theme.getOr(Look.font, mood, null), false, View.Intrinsic);
     }
   }
 
   protected onInputUpdate(event: InputEvent): void {
-    const inputView = this.label.subview;
+    const inputView = this.label.view;
     if (inputView !== null) {
       this.didUpdateInput(inputView);
     }
   }
 
   protected didUpdateInput(inputView: HtmlView): void {
-    this.didObserve(function (viewObserver: InputTokenViewObserver): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.tokenDidUpdateInput !== void 0) {
         viewObserver.tokenDidUpdateInput(inputView, this);
       }
-    });
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.tokenDidUpdateInput !== void 0) {
+      viewController.tokenDidUpdateInput(inputView, this);
+    }
   }
 
   protected onInputChange(event: Event): void {
-    const inputView = this.label.subview;
+    const inputView = this.label.view;
     if (inputView !== null) {
       this.didChangeInput(inputView);
     }
   }
 
   protected didChangeInput(inputView: HtmlView): void {
-    this.didObserve(function (viewObserver: InputTokenViewObserver): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.tokenDidChangeInput !== void 0) {
         viewObserver.tokenDidChangeInput(inputView, this);
       }
-    });
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.tokenDidChangeInput !== void 0) {
+      viewController.tokenDidChangeInput(inputView, this);
+    }
   }
 
   protected onInputKey(event: KeyboardEvent): void {
-    const inputView = this.label.subview;
+    const inputView = this.label.view;
     if (inputView !== null && event.key === "Enter") {
       this.didAcceptInput(inputView);
     }
   }
 
   protected didAcceptInput(inputView: HtmlView): void {
-    this.didObserve(function (viewObserver: InputTokenViewObserver): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
       if (viewObserver.tokenDidAcceptInput !== void 0) {
         viewObserver.tokenDidAcceptInput(inputView, this);
       }
-    });
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.tokenDidAcceptInput !== void 0) {
+      viewController.tokenDidAcceptInput(inputView, this);
+    }
   }
 }

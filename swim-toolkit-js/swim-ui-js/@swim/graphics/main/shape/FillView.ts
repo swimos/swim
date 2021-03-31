@@ -12,33 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyColor, Color} from "@swim/color";
-import {ViewAnimator} from "@swim/view";
-import {GraphicsViewInit, GraphicsView} from "../GraphicsView";
+import type {AnyColor, Color} from "@swim/style";
+import type {ViewAnimator} from "@swim/view";
+import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 
 export interface FillViewInit extends GraphicsViewInit {
   fill?: AnyColor;
 }
 
 export interface FillView extends GraphicsView {
-  readonly fill: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  readonly fill: ViewAnimator<this, Color | null, AnyColor | null>;
 }
 
-/** @hidden */
-export const FillView = {
-  /** @hidden */
-  is(object: unknown): object is FillView {
-    if (typeof object === "object" && object !== null) {
-      const view = object as FillView;
-      return view instanceof GraphicsView
-          && "fill" in view;
-    }
-    return false;
-  },
+export const FillView = {} as {
+  is(object: unknown): object is FillView;
 
-  initView(view: FillView, init: FillViewInit): void {
-    if (init.fill !== void 0) {
-      view.fill(init.fill);
-    }
-  },
+  initView(view: FillView, init: FillViewInit): void;
+};
+
+FillView.is = function (object: unknown): object is FillView {
+  if (typeof object === "object" && object !== null) {
+    const view = object as FillView;
+    return view instanceof GraphicsView
+        && "fill" in view;
+  }
+  return false;
+};
+
+FillView.initView = function (view: FillView, init: FillViewInit): void {
+  if (init.fill !== void 0) {
+    view.fill(init.fill);
+  }
 };

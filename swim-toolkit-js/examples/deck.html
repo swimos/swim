@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Deck</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body style="display: flex;">
+    <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
+    <script>
+
+if (navigator.standalone) {
+  document.documentElement.style.width = "100vw";
+  document.documentElement.style.height = "100vh";
+} else {
+  document.documentElement.style.width = "100%";
+  document.documentElement.style.height = "100%";
+}
+document.body.style.position = "fixed";
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
+if (navigator.standalone) {
+  document.body.style.width = "100vw";
+  document.body.style.height = "100vh";
+} else {
+  document.body.style.width = "100%";
+  document.body.style.height = "100%";
+}
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const deckView = swim.DeckView.create().flexGrow(1);
+
+deckView.setViewController(new swim.TitleDeckViewController());
+
+const deckBar = deckView.bar.view;
+
+const backButton = deckBar.backButton.view;
+backButton.closeIcon.setView(deckBar.createCloseIcon());
+backButton.closeIcon.injectView();
+
+const card1 = swim.DeckCard.create();
+card1.cardTitle.setState("Card 1");
+const header1 = card1.append(swim.HtmlView.h2.create().margin(12).text("Card 1")).cursor("pointer");
+header1.on("click", () => {
+  deckView.pushCard(card2);
+});
+
+const card2 = swim.DeckCard.create();
+card2.cardTitle.setState("Card 2");
+const header2 = card2.append(swim.HtmlView.h2.create().margin(12).text("Card 2")).cursor("pointer");
+header2.on("click", () => {
+  deckView.pushCard(card3);
+});
+
+const card3 = swim.DeckCard.create();
+card3.cardTitle.setState("Card 3");
+card3.append(swim.HtmlView.h2.create().margin(12).text("Card 3"));
+
+deckView.pushCard(card1);
+
+bodyView.append(deckView);
+
+    </script>
+  </body>
+</html>

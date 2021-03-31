@@ -12,35 +12,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContext} from "../ViewContext";
+import type {ViewContext} from "../ViewContext";
 import {View} from "../View";
-import {ViewIdiom} from "../viewport/ViewIdiom";
-import {Viewport} from "../viewport/Viewport";
+import type {ViewIdiom} from "../viewport/ViewIdiom";
+import type {Viewport} from "../viewport/Viewport";
 import {ViewportManager} from "../viewport/ViewportManager";
 import {ViewService} from "./ViewService";
 import {ViewManagerService} from "./ViewManagerService";
 
 export abstract class ViewportService<V extends View> extends ViewManagerService<V, ViewportManager<V>> {
-  initManager(): ViewportManager<V> {
-    return ViewportManager.global();
-  }
-
   get viewContext(): ViewContext {
-    return this.manager.viewContext;
+    let manager = this.manager;
+    if (manager === void 0) {
+      manager = ViewportManager.global();
+    }
+    return manager.viewContext;
   }
 
   get viewport(): Viewport {
-    return this.manager.viewport;
+    let manager = this.manager;
+    if (manager === void 0) {
+      manager = ViewportManager.global();
+    }
+    return manager.viewport;
   }
 
   get viewIdiom(): ViewIdiom {
-    return this.manager.viewIdiom;
+    let manager = this.manager;
+    if (manager === void 0) {
+      manager = ViewportManager.global();
+    }
+    return manager.viewIdiom;
   }
 
   setViewIdiom(viewIdiom: ViewIdiom): void {
-    this.manager.setViewIdiom(viewIdiom);
+    let manager = this.manager;
+    if (manager === void 0) {
+      manager = ViewportManager.global();
+    }
+    manager.setViewIdiom(viewIdiom);
+  }
+
+  initManager(): ViewportManager<V> {
+    return ViewportManager.global();
   }
 }
-ViewService.Viewport = ViewportService;
 
 ViewService({type: ViewportManager, observe: false})(View.prototype, "viewportService");

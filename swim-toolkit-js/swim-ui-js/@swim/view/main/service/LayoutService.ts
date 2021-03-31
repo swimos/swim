@@ -22,6 +22,5 @@ export abstract class LayoutService<V extends View> extends ViewManagerService<V
     return LayoutManager.global();
   }
 }
-ViewService.Layout = LayoutService;
 
 ViewService({type: LayoutManager, observe: false})(View.prototype, "layoutService");

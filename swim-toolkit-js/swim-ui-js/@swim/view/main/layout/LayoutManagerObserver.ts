@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View} from "../View";
-import {ViewManagerObserver} from "../manager/ViewManagerObserver";
-import {LayoutManager} from "./LayoutManager";
+import type {View} from "../View";
+import type {ViewManagerObserver} from "../manager/ViewManagerObserver";
+import type {LayoutManager} from "./LayoutManager";
 
 export interface LayoutManagerObserver<V extends View = View, VM extends LayoutManager<V> = LayoutManager<V>> extends ViewManagerObserver<V, VM> {
 }

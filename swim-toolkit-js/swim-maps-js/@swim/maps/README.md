@@ -20,20 +20,19 @@ component libraries:
 - [**@swim/map**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/map)
   ([npm](https://www.npmjs.com/package/@swim/map),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_map.html)) –
-  canvas views for efficiently rendering geospatially located map overlays,
-  including fully animatable views for lines, circles, and polygons.
+  graphics views for efficiently rendering animated geospatial map overlays.
 - [**@swim/mapbox**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/mapbox)
   ([npm](https://www.npmjs.com/package/@swim/mapbox),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_mapbox.html)) –
-  support for overlaying **@swim/map** views on Mapbox maps.
+  **@swim/map** overlays for Mapbox maps.
 - [**@swim/googlemap**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/googlemap)
   ([npm](https://www.npmjs.com/package/@swim/googlemap),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_googlemap.html)) –
-  support for overlaying **@swim/map** views on Google maps.
+  **@swim/map** overlays for Google maps.
 - [**@swim/esrimap**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/esrimap)
   ([npm](https://www.npmjs.com/package/@swim/esrimap),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_esrimap.html)) –
-  support for overlaying **@swim/map** views on ArcGIS maps.
+  **@swim/map** overlays for ArcGIS maps.
 
 **@swim/maps** builds on the [**@swim/core**](https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core)
 and [**@swim/ui**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/ui)

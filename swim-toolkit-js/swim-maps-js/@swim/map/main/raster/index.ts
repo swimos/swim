@@ -17,5 +17,3 @@ export {
   MapRasterViewInit,
   MapRasterView,
 } from "./MapRasterView";
-export {MapRasterViewObserver} from "./MapRasterViewObserver";
-export {MapRasterViewController} from "./MapRasterViewController";

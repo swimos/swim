@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyPointR2, PointR2} from "@swim/math";
-import {AnyColor, Color} from "@swim/color";
-import {AnyFont, Font} from "@swim/font";
-import {ViewAnimator} from "@swim/view";
-import {GraphicsViewInit, GraphicsView} from "../GraphicsView";
+import type {AnyPointR2, PointR2} from "@swim/math";
+import type {AnyFont, Font, AnyColor, Color} from "@swim/style";
+import type {ViewAnimator} from "@swim/view";
+import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
 
 export interface TypesetViewInit extends GraphicsViewInit {
   font?: AnyFont;
@@ -27,48 +26,50 @@ export interface TypesetViewInit extends GraphicsViewInit {
 }
 
 export interface TypesetView extends GraphicsView {
-  readonly font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
+  readonly font: ViewAnimator<this, Font | null, AnyFont | null>;
 
   readonly textAlign: ViewAnimator<this, CanvasTextAlign | undefined>;
 
   readonly textBaseline: ViewAnimator<this, CanvasTextBaseline | undefined>;
 
-  readonly textOrigin: ViewAnimator<this, PointR2 | undefined, AnyPointR2 | undefined>;
+  readonly textOrigin: ViewAnimator<this, PointR2 | null, AnyPointR2 | null>;
 
-  readonly textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  readonly textColor: ViewAnimator<this, Color | null, AnyColor | null>;
 }
 
-/** @hidden */
-export const TypesetView = {
-  /** @hidden */
-  is(object: unknown): object is TypesetView {
-    if (typeof object === "object" && object !== null) {
-      const view = object as TypesetView;
-      return view instanceof GraphicsView
-          && "font" in view
-          && "textAlign" in view
-          && "textBaseline" in view
-          && "textOrigin" in view
-          && "textColor" in view;
-    }
-    return false;
-  },
+export const TypesetView = {} as {
+  is(object: unknown): object is TypesetView;
 
-  initView(view: TypesetView, init: TypesetViewInit): void {
-    if (init.font !== void 0) {
-      view.font(init.font);
-    }
-    if (init.textAlign !== void 0) {
-      view.textAlign(init.textAlign);
-    }
-    if (init.textBaseline !== void 0) {
-      view.textBaseline(init.textBaseline);
-    }
-    if (init.textOrigin !== void 0) {
-      view.textOrigin(init.textOrigin);
-    }
-    if (init.textColor !== void 0) {
-      view.textColor(init.textColor);
-    }
-  },
+  initView(view: TypesetView, init: TypesetViewInit): void;
+};
+
+TypesetView.is = function (object: unknown): object is TypesetView {
+  if (typeof object === "object" && object !== null) {
+    const view = object as TypesetView;
+    return view instanceof GraphicsView
+        && "font" in view
+        && "textAlign" in view
+        && "textBaseline" in view
+        && "textOrigin" in view
+        && "textColor" in view;
+  }
+  return false;
+};
+
+TypesetView.initView = function (view: TypesetView, init: TypesetViewInit): void {
+  if (init.font !== void 0) {
+    view.font(init.font);
+  }
+  if (init.textAlign !== void 0) {
+    view.textAlign(init.textAlign);
+  }
+  if (init.textBaseline !== void 0) {
+    view.textBaseline(init.textBaseline);
+  }
+  if (init.textOrigin !== void 0) {
+    view.textOrigin(init.textOrigin);
+  }
+  if (init.textColor !== void 0) {
+    view.textColor(init.textColor);
+  }
 };

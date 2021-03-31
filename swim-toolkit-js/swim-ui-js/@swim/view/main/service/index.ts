@@ -16,18 +16,21 @@ export {
   ViewServiceMemberType,
   ViewServiceFlags,
   ViewServiceInit,
-  ViewServiceDescriptorInit,
-  ViewServiceDescriptorExtends,
   ViewServiceDescriptor,
-  ViewServicePrototype,
+  ViewServiceDescriptorExtends,
   ViewServiceConstructor,
+  ViewServiceClass,
   ViewService,
 } from "./ViewService";
 
 export {ViewManagerService} from "./ViewManagerService";
 
+export {ViewportService} from "./ViewportService";
+
 export {DisplayService} from "./DisplayService";
 
 export {LayoutService} from "./LayoutService";
 
-export {ViewportService} from "./ViewportService";
+export {ThemeService} from "./ThemeService";
+
+export {ModalService} from "./ModalService";

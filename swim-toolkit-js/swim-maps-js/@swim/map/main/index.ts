@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./geo";
-
 export * from "./graphics";
 
-export * from "./raster";
+export * from "./layer";
 
 export * from "./grid";
 
-export * from "./shape";
+export * from "./raster";
+
+export * from "./map";
+
+export * from "./geo";

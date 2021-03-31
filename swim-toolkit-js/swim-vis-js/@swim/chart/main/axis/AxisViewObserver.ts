@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicsViewObserver} from "@swim/graphics";
-import {AxisView} from "./AxisView";
+import type {GraphicsView, GraphicsViewObserver} from "@swim/graphics";
+import type {TickView} from "../tick/TickView";
+import type {AxisView} from "./AxisView";
 
 export interface AxisViewObserver<D = unknown, V extends AxisView<D> = AxisView<D>> extends GraphicsViewObserver<V> {
+  createTickLabel?(tickValue: D, tickView: TickView<D>, view: V): GraphicsView | string | null;
+
+  formatTickLabel?(tickLabel: string, tickView: TickView<D>, view: V): string | null;
 }

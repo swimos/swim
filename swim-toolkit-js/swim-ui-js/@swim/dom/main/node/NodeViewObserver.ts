@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewObserver} from "@swim/view";
-import {NodeView} from "./NodeView";
+import type {ViewObserver} from "@swim/view";
+import type {NodeView} from "./NodeView";
 
 export interface NodeViewObserver<V extends NodeView = NodeView> extends ViewObserver<V> {
   viewWillInsertChildNode?(childNode: Node, targetNode: Node | null, view: V): void;

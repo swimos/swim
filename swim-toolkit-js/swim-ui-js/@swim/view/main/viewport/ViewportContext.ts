@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ViewContext} from "../ViewContext";
-import {ViewIdiom} from "./ViewIdiom";
-import {Viewport} from "./Viewport";
+import type {ViewContext} from "../ViewContext";
+import type {ViewIdiom} from "./ViewIdiom";
+import type {Viewport} from "./Viewport";
 
 /** @hidden */
 export interface ViewportContext extends ViewContext {

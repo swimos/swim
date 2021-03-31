@@ -12,24 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as mapboxgl from "mapbox-gl";
 import {AnyPointR2, PointR2} from "@swim/math";
-import {AnyGeoPoint, GeoPoint, GeoBox, GeoProjection} from "@swim/map";
+import {AnyGeoPoint, GeoPoint, GeoBox, GeoProjection} from "@swim/geo";
 
 export class MapboxProjection implements GeoProjection {
-  /** @hidden */
-  readonly _map: mapboxgl.Map;
-
   constructor(map: mapboxgl.Map) {
-    this._map = map;
+    Object.defineProperty(this, "map", {
+      value: map,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
-  get map(): mapboxgl.Map {
-    return this._map;
-  }
+  declare readonly map: mapboxgl.Map;
 
   get bounds(): GeoBox {
-    const bounds = this._map.getBounds();
+    const bounds = this.map.getBounds();
     return new GeoBox(bounds.getWest(), bounds.getSouth(),
                       bounds.getEast(), bounds.getNorth());
   }
@@ -43,7 +41,7 @@ export class MapboxProjection implements GeoProjection {
     } else {
       geoPoint = lng;
     }
-    const point = this._map.project(geoPoint);
+    const point = this.map.project(geoPoint);
     return new PointR2(point.x, point.y);
   }
 
@@ -58,7 +56,7 @@ export class MapboxProjection implements GeoProjection {
     } else {
       viewPoint = new mapboxgl.Point(x.x, x.y);
     }
-    const point = this._map.unproject(viewPoint);
+    const point = this.map.unproject(viewPoint);
     return new GeoPoint(point.lng, point.lat);
   }
 }

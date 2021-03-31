@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyFont, Font} from "@swim/font";
-import {View} from "../View";
+import {AnyFont, Font} from "@swim/style";
+import type {View} from "../View";
 import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
@@ -22,4 +22,3 @@ export abstract class FontViewAnimator<V extends View> extends ViewAnimator<V, F
     return value !== void 0 && value !== null ? Font.fromAny(value) : value;
   }
 }
-ViewAnimator.Font = FontViewAnimator;

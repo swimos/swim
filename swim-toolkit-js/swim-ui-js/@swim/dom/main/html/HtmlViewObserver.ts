@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {ElementViewObserver} from "../element/ElementViewObserver";
-import {HtmlView} from "./HtmlView";
+import type {ElementViewObserver} from "../element/ElementViewObserver";
+import type {HtmlView} from "./HtmlView";
 
 export interface HtmlViewObserver<V extends HtmlView = HtmlView> extends ElementViewObserver<V> {
 }

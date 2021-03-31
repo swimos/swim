@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {AnyTiming} from "@swim/mapping";
 import {AnyPointR2, PointR2} from "@swim/math";
-import {AnyColor, Color} from "@swim/color";
-import {AnyFont, Font} from "@swim/font";
-import {Tween} from "@swim/transition";
-import {CanvasContext, CanvasRenderer} from "@swim/render";
+import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewAnimator} from "@swim/view";
-import {LayerView} from "../LayerView";
-import {TypesetViewInit, TypesetView} from "./TypesetView";
+import {LayerView} from "../layer/LayerView";
+import type {CanvasContext} from "../canvas/CanvasContext";
+import {CanvasRenderer} from "../canvas/CanvasRenderer";
+import type {TypesetViewInit, TypesetView} from "./TypesetView";
 import {TextRun} from "./TextRun";
 
 export type AnyTextRunView = TextRunView | TextRun | TextRunViewInit | string;
@@ -35,22 +35,22 @@ export class TextRunView extends LayerView implements TypesetView {
   }
 
   @ViewAnimator({type: String, state: ""})
-  text: ViewAnimator<this, string>;
+  declare text: ViewAnimator<this, string>;
 
-  @ViewAnimator({type: Font, inherit: true})
-  font: ViewAnimator<this, Font | undefined, AnyFont | undefined>;
-
-  @ViewAnimator({type: String, inherit: true})
-  textAlign: ViewAnimator<this, CanvasTextAlign | undefined>;
+  @ViewAnimator({type: Font, state: null, inherit: true})
+  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
 
   @ViewAnimator({type: String, inherit: true})
-  textBaseline: ViewAnimator<this, CanvasTextBaseline | undefined>;
+  declare textAlign: ViewAnimator<this, CanvasTextAlign | undefined>;
 
-  @ViewAnimator({type: PointR2, inherit: true})
-  textOrigin: ViewAnimator<this, PointR2 | undefined, AnyPointR2 | undefined>;
+  @ViewAnimator({type: String, inherit: true})
+  declare textBaseline: ViewAnimator<this, CanvasTextBaseline | undefined>;
 
-  @ViewAnimator({type: Color, inherit: true})
-  textColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  @ViewAnimator({type: PointR2, state: null, inherit: true})
+  declare textOrigin: ViewAnimator<this, PointR2 | null, AnyPointR2 | null>;
+
+  @ViewAnimator({type: Color, state: null, inherit: true})
+  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
 
   get value(): TextRun {
     return new TextRun(this.text.getValue(), this.font.getValue(), this.textAlign.getValue(),
@@ -62,30 +62,30 @@ export class TextRunView extends LayerView implements TypesetView {
                        this.textBaseline.getState(), this.textOrigin.getState(), this.textColor.getState());
   }
 
-  setState(run: TextRun | TextRunViewInit | string, tween?: Tween<any>): void {
+  setState(run: TextRun | TextRunViewInit | string, timing?: AnyTiming | boolean): void {
     if (typeof run === "string") {
-      this.text(run, tween);
+      this.text(run, timing);
     } else {
       if (run instanceof TextRun) {
         run = run.toAny();
       }
       if (run.text !== void 0) {
-        this.text(run.text, tween);
+        this.text(run.text, timing);
       }
       if (run.font !== void 0) {
-        this.font(run.font, tween);
+        this.font(run.font, timing);
       }
       if (run.textAlign !== void 0) {
-        this.textAlign(run.textAlign, tween);
+        this.textAlign(run.textAlign, timing);
       }
       if (run.textBaseline !== void 0) {
-        this.textBaseline(run.textBaseline, tween);
+        this.textBaseline(run.textBaseline, timing);
       }
       if (run.textOrigin !== void 0) {
-        this.textOrigin(run.textOrigin, tween);
+        this.textOrigin(run.textOrigin, timing);
       }
       if (run.textColor !== void 0) {
-        this.textColor(run.textColor, tween);
+        this.textColor(run.textColor, timing);
       }
     }
   }
@@ -103,7 +103,7 @@ export class TextRunView extends LayerView implements TypesetView {
 
   protected renderText(context: CanvasContext): void {
     const font = this.font.value;
-    if (font !== void 0) {
+    if (font !== null) {
       context.font = font.toString();
     }
     const textAlign = this.textAlign.value;
@@ -115,11 +115,11 @@ export class TextRunView extends LayerView implements TypesetView {
       context.textBaseline = textBaseline;
     }
     let textOrigin = this.textOrigin.value;
-    if (textOrigin === void 0) {
+    if (textOrigin === null) {
       textOrigin = PointR2.origin();
     }
     const textColor = this.textColor.value;
-    if (textColor !== void 0) {
+    if (textColor !== null) {
       context.fillStyle = textColor.toString();
     }
     context.fillText(this.text.getValue(), textOrigin.x, textOrigin.y);

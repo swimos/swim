@@ -4,67 +4,64 @@
     <title>Swim Gauge Cluster</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
   </head>
-  <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
-    <div id="ui" style="display: flex; width: 67%; height: 67%;">
-    </div>
+  <body style="position: fixed; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
     <script src="../swim-vis-js/@swim/vis/dist/main/swim-vis.js"></script>
     <script>
 
-const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
+//setTimeout(function () {
+//  swim.ThemeManager.global().setTheme(swim.Theme.light);
+//}, 1000);
 
-const canvas = uiView.append("canvas")
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = bodyView.append("div").display("flex").width("67%").height("67%").touchAction("none").userSelect("none");
+
+const canvasView = swim.CanvasView.create()
+    .mouseEventsEnabled(true)
     .pointerEventsEnabled(true)
+    .touchEventsEnabled(true)
     .touchAction("manipulation");
 
-const gauge = new swim.GaugeView()
+const gaugeView = canvasView.append(swim.GaugeView)
     .innerRadius(swim.Length.pct(25))
     .startAngle(swim.Angle.rad(3 * Math.PI / 4))
     .sweepAngle(swim.Angle.rad(3 * Math.PI / 2))
-    .dialColor("#cccccc")
-    .title(new swim.TextRunView().text("Gauge").font("20px sans-serif"))
     .font("14px sans-serif")
-    .textColor("#4a4a4a")
+    .title(swim.TextRunView.fromAny("Gauge").font("20px sans-serif"))
     .on("pointerover", function (event) {
       if (event.targetView instanceof swim.DialView) {
-        event.targetView.dialColor("#dddddd", {duration: 200});
+        event.targetView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
       }
     })
     .on("pointerout", function (event) {
       if (event.targetView instanceof swim.DialView) {
-        event.targetView.dialColor("#cccccc", {duration: 200});
+        event.targetView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
       }
     });
-canvas.append(gauge);
 
-const dial0 = new swim.DialView()
+const dial0View = gaugeView.append(swim.DialView, "dial0")
     .value(0.33)
-    .meterColor("#989898")
     .label("label 0");
-gauge.append(dial0);
 
-const dial1 = new swim.DialView()
+const dial1View = gaugeView.append(swim.DialView, "dial1")
     .value(0.5)
-    .meterColor("#4a4a4a")
     .label("label 1");
-gauge.append(dial1);
 
-const dial2 = new swim.DialView()
+const dial2View = gaugeView.append(swim.DialView, "dial2")
     .value(0.67)
-    .meterColor("#989898")
     .label("label 2");
-gauge.append(dial2);
 
 setInterval(function () {
-  const tween = swim.Transition.duration(1000);
-  dial0.value(Math.random(), tween)
-        .meterColor(Math.random() < 0.5 ? "#4a4a4a" : "#989898", tween);
-  dial1.value(Math.random(), tween)
-        .meterColor(Math.random() < 0.5 ? "#4a4a4a" : "#989898", tween);
-  dial2.value(Math.random(), tween)
-        .meterColor(Math.random() < 0.5 ? "#4a4a4a" : "#989898", tween);
+  const timing = swim.Easing.linear.withDuration(1000);
+  dial0View.value(Math.random(), timing);
+  dial1View.value(Math.random(), timing);
+  dial2View.value(Math.random(), timing);
 }, 1000);
+
+containerView.append(canvasView);
 
     </script>
   </body>

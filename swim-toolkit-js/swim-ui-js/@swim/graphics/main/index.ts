@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {GraphicsViewContext} from "./GraphicsViewContext";
-export {
-  GraphicsViewInit,
-  GraphicsViewConstructor,
-  GraphicsViewClass,
-  GraphicsView,
-} from "./GraphicsView";
-export {GraphicsViewObserver} from "./GraphicsViewObserver";
-export {GraphicsViewController} from "./GraphicsViewController";
+export * from "./graphics";
 
-export {LayerView} from "./LayerView";
+export * from "./layer";
+
+export * from "./drawing";
+
+export * from "./path";
+
+export * from "./painting";
+
+export * from "./canvas";
 
 export * from "./raster";
 
@@ -30,4 +30,12 @@ export * from "./shape";
 
 export * from "./typeset";
 
-export * from "./canvas";
+export * from "./icon";
+
+export * from "./webgl";
+
+declare global {
+  interface Document {
+    createTouchList?(...touches: Touch[]): TouchList;
+  }
+}

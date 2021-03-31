@@ -6,9 +6,8 @@
 
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
-**@swim/map** provides canvas views for efficiently rendering geospatially
-located map overlays, including fully animatable views for lines, circles,
-and polygons.  Check out the [traffic map](https://www.swimos.org/demo/map/traffic.html)
+**@swim/map** provides graphics views for efficiently rendering animated
+geospatial map overlays.  Check out the [traffic map](https://www.swimos.org/demo/map/traffic.html)
 and [transit map](https://www.swimos.org/demo/map/transit.html) demos to see
 massively real-time maps in action.  **@swim/map** is part of the
 [**@swim/maps**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/maps) framework.
