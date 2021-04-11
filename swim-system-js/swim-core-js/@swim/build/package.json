@@ -1,6 +1,6 @@
 {
   "name": "@swim/build",
-  "version": "3.11.0-dev.20210331",
+  "version": "3.11.0-dev.20210411",
   "description": "Swim build tool",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/build",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -17,7 +17,7 @@
     "@typescript-eslint/eslint-plugin": "4",
     "@typescript-eslint/parser": "4",
     "eslint": "7",
-    "rollup": "2.42",
+    "rollup": "2.45",
     "rollup-plugin-sourcemaps": "0.6",
     "terser": "5",
     "tslib": "2",
@@ -25,9 +25,9 @@
     "typescript": "4.2"
   },
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210331",
-    "@swim/codec": "3.11.0-dev.20210331",
-    "@swim/args": "3.11.0-dev.20210331"
+    "@swim/util": "3.11.0-dev.20210411",
+    "@swim/codec": "3.11.0-dev.20210411",
+    "@swim/args": "3.11.0-dev.20210411"
   },
   "scripts": {
     "compile": "tsc -b",

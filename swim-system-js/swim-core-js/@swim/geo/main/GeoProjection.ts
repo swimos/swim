@@ -13,12 +13,9 @@
 // limitations under the License.
 
 import type {AnyPointR2, PointR2} from "@swim/math";
-import type {GeoBox} from "./GeoBox";
 import type {AnyGeoPoint, GeoPoint} from "./GeoPoint";
 
 export interface GeoProjection {
-  readonly bounds: GeoBox;
-
   project(lnglat: AnyGeoPoint): PointR2;
   project(lng: number, lat: number): PointR2;
 
@@ -31,7 +28,7 @@ export const GeoProjection = {} as {
 };
 
 GeoProjection.is = function (object: unknown): object is GeoProjection {
-  if (typeof object === "object" && object !== null) {
+  if (object !== void 0 && object !== null) {
     const projection = object as GeoProjection;
     return typeof projection.project === "function"
         && typeof projection.unproject === "function";

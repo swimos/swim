@@ -1,6 +1,6 @@
 {
   "name": "@swim/time",
-  "version": "3.11.0-dev.20210331",
+  "version": "3.11.0-dev.20210411",
   "description": "Date-time, time zone, and time interval data types, with strptime/strftime-style parsers and formatters",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/time",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,9 +11,9 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210331",
-    "@swim/codec": "3.11.0-dev.20210331",
-    "@swim/mapping": "3.11.0-dev.20210331",
-    "@swim/structure": "3.11.0-dev.20210331"
+    "@swim/util": "3.11.0-dev.20210411",
+    "@swim/codec": "3.11.0-dev.20210411",
+    "@swim/mapping": "3.11.0-dev.20210411",
+    "@swim/structure": "3.11.0-dev.20210411"
   }
 }

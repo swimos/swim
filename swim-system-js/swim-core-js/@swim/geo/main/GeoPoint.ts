@@ -208,7 +208,7 @@ export class GeoPoint extends GeoShape implements Interpolate<GeoPoint>, HashCod
 
   /** @hidden */
   static normalizeLat(lat: number): number {
-    lat = Math.min(Math.max(-90, lat), 90);
+    lat = Math.min(Math.max(-90 + Equivalent.Epsilon, lat), 90 - Equivalent.Epsilon);
     return lat;
   }
 

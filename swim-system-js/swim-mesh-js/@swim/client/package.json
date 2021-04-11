@@ -1,6 +1,6 @@
 {
   "name": "@swim/client",
-  "version": "3.11.0-dev.20210331",
+  "version": "3.11.0-dev.20210411",
   "description": "Streaming API client for linking to lanes of stateful Web Agents using the WARP protocol, enabling massively real-time applications that continuously synchronize all shared states with ping latency",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/client",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -23,16 +23,16 @@
     "@types/ws": "7"
   },
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210331",
-    "@swim/codec": "3.11.0-dev.20210331",
-    "@swim/mapping": "3.11.0-dev.20210331",
-    "@swim/collections": "3.11.0-dev.20210331",
-    "@swim/structure": "3.11.0-dev.20210331",
-    "@swim/streamlet": "3.11.0-dev.20210331",
-    "@swim/dataflow": "3.11.0-dev.20210331",
-    "@swim/recon": "3.11.0-dev.20210331",
-    "@swim/uri": "3.11.0-dev.20210331",
-    "@swim/warp": "3.11.0-dev.20210331",
+    "@swim/util": "3.11.0-dev.20210411",
+    "@swim/codec": "3.11.0-dev.20210411",
+    "@swim/mapping": "3.11.0-dev.20210411",
+    "@swim/collections": "3.11.0-dev.20210411",
+    "@swim/structure": "3.11.0-dev.20210411",
+    "@swim/streamlet": "3.11.0-dev.20210411",
+    "@swim/dataflow": "3.11.0-dev.20210411",
+    "@swim/recon": "3.11.0-dev.20210411",
+    "@swim/uri": "3.11.0-dev.20210411",
+    "@swim/warp": "3.11.0-dev.20210411",
     "ws": "7"
   }
 }
