@@ -212,12 +212,12 @@ component libraries:
 
 ## [**Swim System** TypeScript Implementation](swim-system-js)
 
-The **Swim System** Typescript implementation provides a standalone set of
-frameworks for building massively real-time streaming WARP client applications.
-**Swim System** encompasses the [**Swim Core**](swim-system-js/swim-core-js)
+The **Swim System** TypeScript implementation provides a standalone set of
+frameworks for building massively real-time streaming client applications.
+**Swim System** incorporates the [**Swim Core**](swim-system-js/swim-core-js)
 foundation framework, and the [**Swim Mesh**](swim-system-js/swim-mesh-js)
-multiplexed streaming WARP framework.  **Swim System** provides the following
-top-level libraries:
+multiplexed streaming WARP client framework.  **Swim System** provides the
+following top-level libraries:
 
 - [**@swim/system**](swim-system-js/@swim/system) –
   umbrella package that depends on, and re-exports, all **Swim System** child
@@ -241,11 +241,13 @@ libraries.  **Swim Core** consists of the following component libraries:
   composable command line argument parser.
 - [**@swim/unit**](swim-system-js/swim-core-js/@swim/unit) –
   specializable unit testing framework.
+- [**@swim/mapping**](swim-system-js/swim-core-js/@swim/mapping) –
+  functional maps, interpolators, and scales.
 - [**@swim/collections**](swim-system-js/swim-core-js/@swim/collections) –
   immutable, structure sharing collections, including B-trees and S-trees
   (sequence trees).
-- [**@swim/interpolate**](swim-system-js/swim-core-js/@swim/interpolate) –
-  extensible interpolators for smoothly blending between values.
+- [**@swim/constraint**](swim-system-js/swim-core-js/@swim/constraint) –
+  incremental solver for systems of linear constraint equations.
 - [**@swim/structure**](swim-system-js/swim-core-js/@swim/structure) –
   generic structured data model, with support for selectors, expressions,
   and lambda functions.  Used as a common abstract syntax tree for Recon,
@@ -258,15 +260,17 @@ libraries.  **Swim Core** consists of the following component libraries:
   compiler from **@swim/structure** expressions to live-updated data models.
 - [**@swim/recon**](swim-system-js/swim-core-js/@swim/recon) –
   object notation with attributes, like if JSON and XML had a baby.
-- [**@swim/math**](swim-system-js/swim-core-js/@swim/math) –
-  mathematical and geometric structures and operators.
-- [**@swim/time**](swim-system-js/swim-core-js/@swim/time) –
-  date-time, time zone, and time interval data types,
-  with `strptime`/`strftime`-style parsers and formatters.
 - [**@swim/uri**](swim-system-js/swim-core-js/@swim/uri) –
   rich object model for working with Uniform Resource Identifiers and URI
   subcomponents, including an efficient and safe codec for parsing and
   writing compliant URI strings.
+- [**@swim/math**](swim-system-js/swim-core-js/@swim/math) –
+  mathematical and geometric structures and operators.
+- [**@swim/geo**](swim-system-js/swim-core-js/@swim/geo) –
+  geospatial coordinate, projection, and geometry types.
+- [**@swim/time**](swim-system-js/swim-core-js/@swim/time) –
+  date-time, time zone, and time interval data types,
+  with `strptime`/`strftime`-style parsers and formatters.
 
 ### [**Swim Mesh** TypeScript Framework](swim-system-js/swim-mesh-js)
 
@@ -290,14 +294,13 @@ the following component libraries:
 
 ## [**Swim Toolkit** TypeScript Implementation](swim-toolkit-js)
 
-The **Swim Toolkit** TypeScript implementation provides user interface
-frameworks for building advanced real-time applications.  **Swim Toolkit**
+The **Swim Toolkit** TypeScript implementation provides a set of frameworks for
+building pervasively real-time user interface applications.  **Swim Toolkit**
 incorporates the [**Swim UI**](swim-toolkit-js/swim-ui-js) real-time user
 interface toolkit, the [**Swim UX**](swim-toolkit-js/swim-ux-js) real-time
 application framework, the [**Swim Visualizations**](swim-toolkit-js/swim-vis-js)
-framework, the [**Swim Maps**](swim-toolkit-js/swim-maps-js) framework, and the
-[**Swim Web**](swim-toolkit-js/swim-web-js) real-time web application framework.
-**Swim Toolkit** provides the following top-level libraries:
+real-time visualizations framework, and the [**Swim Maps**](swim-toolkit-js/swim-maps-js)
+real-time maps framework. **Swim Toolkit** provides the following top-level libraries:
 
 - [**@swim/toolkit**](swim-toolkit-js/@swim/toolkit) –
   umbrella package that depends on, and re-exports, all **Swim Toolkit**
@@ -305,7 +308,7 @@ framework, the [**Swim Maps**](swim-toolkit-js/swim-maps-js) framework, and the
 
 ### [**Swim UI** TypeScript Framework](swim-toolkit-js/swim-ui-js)
 
-The **Swim UI** TypeScript framework implements a user interface toolkit for
+The **Swim UI** TypeScript framework implements a user interface framework for
 pervasively real-time applications.  A unified view hierarchy, with builtin
 procedural styling and animation, makes it easy for **Swim UI** components to
 uniformly style, animate, and render mixed HTML, SVG, Canvas, and WebGL
@@ -313,68 +316,42 @@ components.  **Swim UI** consists of the following component libraries:
 
 - [**@swim/ui**](swim-toolkit-js/swim-ui-js/@swim/ui) –
   umbrella package that depends on, and re-exports, all **Swim UI** libraries.
-- [**@swim/angle**](swim-toolkit-js/swim-ui-js/@swim/angle) –
-  dimensional angle types with unit-aware algebraic operators, conversions,
-  and parsers.
-- [**@swim/length**](swim-toolkit-js/swim-ui-js/@swim/length) –
-  DOM-relative length types with unit-aware algebraic operators, conversions,
-  and parsers.
-- [**@swim/color**](swim-toolkit-js/swim-ui-js/@swim/color) –
-  RGB and HSL color types with color-space-aware operators, conversions,
-  and parsers.
-- [**@swim/font**](swim-toolkit-js/swim-ui-js/@swim/font) –
-  CSS font property types and parsers.
-- [**@swim/shadow**](swim-toolkit-js/swim-ui-js/@swim/shadow) –
-  CSS box shadow types and parsers.
-- [**@swim/transform**](swim-toolkit-js/swim-ui-js/@swim/transform) –
-  CSS and SVG compatible transform types with unit-aware algebraic operators
-  and parsers.
-- [**@swim/scale**](swim-toolkit-js/swim-ui-js/@swim/scale) –
-  scale types that map numeric and temporal input domains to interpolated
-  output ranges, with support for continuous domain clamping, domain solving,
-  range unscaling, and interpolation between scales.
-- [**@swim/transition**](swim-toolkit-js/swim-ui-js/@swim/transition) –
-  transition types that specify duration, ease, interpolator, and lifecycle
-  callback parameters for tween animations.
-- [**@swim/animate**](swim-toolkit-js/swim-ui-js/@swim/animate) –
-  property-managing animator types that efficiently tween values between
-  discrete state changes.
+- [**@swim/model**](swim-toolkit-js/swim-ui-js/@swim/model) –
+  lifecycle-managed model hierarchy supporting dynamic scoping and service injection.
 - [**@swim/style**](swim-toolkit-js/swim-ui-js/@swim/style) –
-  CSS style types and universal style value parser.
-- [**@swim/render**](swim-toolkit-js/swim-ui-js/@swim/render) –
-  renderable graphic types for SVG/Canvas-compatible path drawing contexts,
-  and Canvas-compatible rendering contexts.
-- [**@swim/constraint**](swim-toolkit-js/swim-ui-js/@swim/constraint) –
-  incremental solver for systems of linear layout constraints.
+  Font, color, gradient, shadow and related types and parsers.
+- [**@swim/theme**](swim-toolkit-js/swim-ui-js/@swim/theme) –
+  semantic looks and feels for mood-aware UX components.
 - [**@swim/view**](swim-toolkit-js/swim-ui-js/@swim/view) –
   unified HTML, SVG, and Canvas view hierarchy, with integrated controller
   architecture, animated procedural styling, and constraint-based layouts.
-- [**@swim/shape**](swim-toolkit-js/swim-ui-js/@swim/shape) –
-  canvas shape views, with animated geometry and style properties.
-- [**@swim/typeset**](swim-toolkit-js/swim-ui-js/@swim/typeset) –
-  canvas typesetting views, with animated text, layout, font, and style properties.
-- [**@swim/gesture**](swim-toolkit-js/swim-ui-js/@swim/gesture) –
-  multitouch gesture recognizers, with kinematic surface modeling.
+- [**@swim/dom**](swim-toolkit-js/swim-ui-js/@swim/dom) –
+  HTML and SVG views, with procedural attribute and style animators.
+- [**@swim/graphics**](swim-toolkit-js/swim-ui-js/@swim/graphics) –
+  canvas graphics views, with procedurally animated shapes, and procedurally
+  styled typesetters.
+- [**@swim/component**](swim-toolkit-js/swim-ui-js/@swim/component) –
+  componentized controller layer with application lifecycle and service management.
 
 ### [**Swim UX** TypeScript Framework](swim-toolkit-js/swim-ux-js)
 
-The **Swim UX** TypeScript framework implements a user interface framework for
+The **Swim UX** TypeScript framework implements a user interface toolkit for
 advanced real-time applications.  **Swim UX** provides popovers, drawers, menus,
 toolbars, controls, and other interactive application views and controllers.
 **Swim UX** consists of the following component libraries:
 
 - [**@swim/ux**](swim-toolkit-js/swim-ux-js/@swim/ux) –
   umbrella package that depends on, and re-exports, all **Swim UX** libraries.
-- [**@swim/theme**](swim-toolkit-js/swim-ux-js/@swim/theme) –
-  semantic looks and feels for mood-aware UX components.
-- [**@swim/app**](swim-toolkit-js/swim-ux-js/@swim/app) –
-  application model for coordinating window-level components, such as popovers
-  and drawers.
-- [**@swim/controls**](swim-toolkit-js/swim-ux-js/@swim/controls) –
-  buttons, switches, sliders, and other user interface controls.
-- [**@swim/navigation**](swim-toolkit-js/swim-ux-js/@swim/navigation) –
-  menus, tree views, nav bars, tab bars, and other user interface navigation
-  components.
+- [**@swim/button**](swim-toolkit-js/swim-ux-js/@swim/button) –
+  button-like user interface controls.
+- [**@swim/token**](swim-toolkit-js/swim-ux-js/@swim/token) –
+  attribute, action, and user input token views.
+- [**@swim/grid**](swim-toolkit-js/swim-ux-js/@swim/grid) –
+  tables, trees, lists, and other tabular views.
+- [**@swim/window**](swim-toolkit-js/swim-ux-js/@swim/window) –
+  popovers, drawers, and other view surfaces.
+- [**@swim/deck**](swim-toolkit-js/swim-ux-js/@swim/deck) –
+  card stack navigation views.
 
 ### [**Swim Visualizations** TypeScript Framework](swim-toolkit-js/swim-vis-js)
 
@@ -402,28 +379,13 @@ consists of the following component libraries:
 - [**@swim/maps**](swim-toolkit-js/swim-maps-js/@swim/maps) –
   umbrella package that depends on, and re-exports, all **Swim Maps** libraries.
 - [**@swim/map**](swim-toolkit-js/swim-maps-js/@swim/map) –
-  canvas views for efficiently rendering geospatially located map overlays,
-  including fully animatable views for lines, circles, and polygons.
+  graphics views for efficiently rendering animated geospatial map overlays.
 - [**@swim/mapbox**](swim-toolkit-js/swim-maps-js/@swim/mapbox) –
-  support for overlaying **@swim/map** views on Mapbox maps.
+  **@swim/map** overlays for Mapbox maps.
 - [**@swim/googlemap**](swim-toolkit-js/swim-maps-js/@swim/googlemap) –
-  support for overlaying **@swim/map** views on Google maps.
+  **@swim/map** overlays for Google maps.
 - [**@swim/esrimap**](swim-toolkit-js/swim-maps-js/@swim/esrimap) –
-  support for overlaying **@swim/map** views on ArcGIS maps.
-
-### [**Swim Web** TypeScript Framework](swim-toolkit-js/swim-web-js)
-
-The **Swim Web** TypeScript framework implements a thin web application
-framework built on the **Swim UI** toolkit.  **Swim Web** consists of the
-following component libraries:
-
-- [**@swim/web**](swim-toolkit-js/swim-web-js/@swim/web) –
-  umbrella package that depends on, and re-exports, all **Swim Web** libraries.
-- [**@swim/website**](swim-toolkit-js/swim-web-js/@swim/website) –
-  minimalist components that implement common dynamic website behaviors.
-- [**@swim/webapp**](swim-toolkit-js/swim-web-js/@swim/webapp) –
-  lightweight web application loader that dynamically instantiates views and
-  controllers declared by `swim-` HTML attributes.
+  **@swim/map** overlays for ArcGIS maps.
 
 ## Concepts
 
