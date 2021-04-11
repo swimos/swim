@@ -13,26 +13,171 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/mapping";
-import type {GeoProjection, AnyGeoPoint, GeoPoint} from "@swim/geo";
-import type {MapGraphicsView} from "../graphics/MapGraphicsView";
+import type {GeoBox} from "@swim/geo";
+import {ViewContextType, ViewFlags, View, ViewFastener} from "@swim/view";
+import {HtmlView} from "@swim/dom";
+import {GraphicsViewContext, CanvasView} from "@swim/graphics";
+import type {AnyGeoPerspective} from "../geo/GeoPerspective";
+import type {GeoViewport} from "../geo/GeoViewport";
+import {GeoLayerView} from "../layer/GeoLayerView";
 import type {MapViewObserver} from "./MapViewObserver";
 import type {MapViewController} from "./MapViewController";
 
-export interface MapView extends MapGraphicsView {
-  readonly viewController: MapViewController | null;
+export abstract class MapView extends GeoLayerView {
+  declare readonly viewController: MapViewController | null;
 
-  readonly viewObservers: ReadonlyArray<MapViewObserver>;
+  declare readonly viewObservers: ReadonlyArray<MapViewObserver>;
 
-  readonly geoProjection: GeoProjection | null
+  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+    if ((processFlags & View.NeedsResize) !== 0) {
+      processFlags |= View.NeedsProject;
+    }
+    return processFlags;
+  }
 
-  readonly mapCenter: GeoPoint;
+  extendViewContext(viewContext: GraphicsViewContext): ViewContextType<this> {
+    const mapViewContext = Object.create(viewContext);
+    mapViewContext.geoViewport = this.geoViewport;
+    return mapViewContext;
+  }
 
-  readonly mapZoom: number;
+  get geoFrame(): GeoBox {
+    return this.geoViewport.geoFrame;
+  }
 
-  readonly mapHeading: number;
+  abstract get geoViewport(): GeoViewport;
 
-  readonly mapTilt: number;
+  abstract moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void;
 
-  moveTo(mapCenter: AnyGeoPoint | undefined, mapZoom: number | undefined,
-         timing?: AnyTiming | boolean): void;
+  protected initCanvas(canvasView: CanvasView): void {
+    // hook
+  }
+
+  protected attachCanvas(canvasView: CanvasView): void {
+    // hook
+  }
+
+  protected detachCanvas(canvasView: CanvasView): void {
+    // hook
+  }
+
+  protected willSetCanvas(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillSetMapCanvas !== void 0) {
+      viewController.viewWillSetMapCanvas(newCanvasView, oldCanvasView, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetMapCanvas !== void 0) {
+        viewObserver.viewWillSetMapCanvas(newCanvasView, oldCanvasView, this);
+      }
+    }
+  }
+
+  protected onSetCanvas(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
+    if (oldCanvasView !== null) {
+      this.detachCanvas(oldCanvasView);
+    }
+    if (newCanvasView !== null) {
+      this.attachCanvas(newCanvasView);
+      this.initCanvas(newCanvasView);
+    }
+  }
+
+  protected didSetCanvas(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetMapCanvas !== void 0) {
+        viewObserver.viewDidSetMapCanvas(newCanvasView, oldCanvasView, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidSetMapCanvas !== void 0) {
+      viewController.viewDidSetMapCanvas(newCanvasView, oldCanvasView, this);
+    }
+  }
+
+  @ViewFastener<MapView, CanvasView>({
+    type: CanvasView,
+    child: false,
+    willSetView(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
+      this.owner.willSetCanvas(newCanvasView, oldCanvasView);
+    },
+    onSetView(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
+      this.owner.onSetCanvas(newCanvasView, oldCanvasView);
+    },
+    didSetView(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
+      this.owner.didSetCanvas(newCanvasView, oldCanvasView);
+    },
+  })
+  declare canvas: ViewFastener<this, CanvasView>;
+
+  protected initContainer(containerView: HtmlView): void {
+    // hook
+  }
+
+  protected attachContainer(containerView: HtmlView): void {
+    // hook
+  }
+
+  protected detachContainer(containerView: HtmlView): void {
+    // hook
+  }
+
+  protected willSetContainer(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillSetMapContainer !== void 0) {
+      viewController.viewWillSetMapContainer(newContainerView, oldContainerView, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetMapContainer !== void 0) {
+        viewObserver.viewWillSetMapContainer(newContainerView, oldContainerView, this);
+      }
+    }
+  }
+
+  protected onSetContainer(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
+    if (oldContainerView !== null) {
+      this.detachContainer(oldContainerView);
+    }
+    if (newContainerView !== null) {
+      this.attachContainer(newContainerView);
+      this.initContainer(newContainerView);
+    }
+  }
+
+  protected didSetContainer(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetMapContainer !== void 0) {
+        viewObserver.viewDidSetMapContainer(newContainerView, oldContainerView, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidSetMapContainer !== void 0) {
+      viewController.viewDidSetMapContainer(newContainerView, oldContainerView, this);
+    }
+  }
+
+  @ViewFastener<MapView, HtmlView>({
+    type: HtmlView,
+    child: false,
+    willSetView(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
+      this.owner.willSetContainer(newContainerView, oldContainerView);
+    },
+    onSetView(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
+      this.owner.onSetContainer(newContainerView, oldContainerView);
+    },
+    didSetView(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
+      this.owner.didSetContainer(newContainerView, oldContainerView);
+    },
+  })
+  declare container: ViewFastener<this, HtmlView>;
+
+  static readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsProject;
 }

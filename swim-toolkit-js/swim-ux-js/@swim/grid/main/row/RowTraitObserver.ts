@@ -17,7 +17,7 @@ import type {CellTrait} from "../cell/CellTrait";
 import type {RowTrait} from "./RowTrait";
 
 export interface RowTraitObserver<R extends RowTrait = RowTrait> extends TraitObserver<R> {
-  rowTraitWillSetCell?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillSetCell?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait | null, trait: R): void;
 
-  rowTraitDidSetCell?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidSetCell?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait | null, trait: R): void;
 }

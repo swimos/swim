@@ -21,6 +21,8 @@ export type AnyMoodVector<M extends Mood = Feel> = MoodVector<M> | MoodVectorArr
 
 export type MoodVectorArray<M extends Mood = Feel> = ReadonlyArray<[M, number]>;
 
+export type MoodVectorUpdates<M extends Mood = Feel> = ReadonlyArray<[M, number | undefined]>;
+
 export class MoodVector<M extends Mood = Feel> implements Equals, Debug {
   constructor(array: ReadonlyArray<[M, number]>,
               index: {readonly [name: string]: number | undefined}) {
@@ -85,37 +87,56 @@ export class MoodVector<M extends Mood = Feel> implements Equals, Debug {
     return entry !== void 0 ? entry[1] : elseValue;
   }
 
-  updated(key: M, value: number | undefined): MoodVector<M> {
-    const oldArray = this.array;
-    const oldIndex = this.index;
-    const i = oldIndex[key.name];
-    if (value !== void 0 && i !== void 0) { // update
-      const newArray = oldArray.slice(0);
-      newArray[i] = [key, value];
-      return this.copy(newArray, oldIndex);
-    } else if (value !== void 0) { // insert
-      const newArray = oldArray.slice(0);
-      const newIndex: {[name: string]: number | undefined} = {};
-      for (const name in oldIndex) {
-        newIndex[name] = oldIndex[name];
+  updated(key: M, value: number | undefined): MoodVector<M>;
+  updated(updates: MoodVectorUpdates<M>): MoodVector<M>;
+  updated(updates: MoodVectorUpdates<M> | M, value?: number | undefined): MoodVector<M> {
+    let key: M;
+    let oldArray = this.array;
+    let oldIndex = this.index;
+    let newArray: [M, number][] | undefined;
+    let newIndex: {[name: string]: number | undefined} | undefined;
+    const updateCount = Array.isArray(updates) ? updates.length : 1;
+    for (let updateIndex = 0; updateIndex < updateCount; updateIndex += 1) {
+      if (updateIndex === 0 && !Array.isArray(updates)) {
+        key = updates as M;
+      } else {
+        [key, value] = (updates as MoodVectorUpdates<M>)[updateIndex]!;
       }
-      newIndex[key.name] = newArray.length;
-      newArray.push([key, value]);
-      return this.copy(newArray, newIndex);
-    } else if (i !== void 0) { // remove
-      const newArray = new Array<[M, number]>();
-      const newIndex: {[name: string]: number | undefined} = {};
-      let k = 0;
-      for (let j = 0, n = oldArray.length; j < n; j += 1) {
-        const entry = oldArray[j]!;
-        if (entry[0] !== key) {
-          newArray[k] = entry;
-          newIndex[entry[0].name] = k;
-          k += 1;
+      const i = oldIndex[key.name];
+      if (value !== void 0 && i !== void 0) { // update
+        newArray = oldArray.slice(0);
+        newIndex = oldIndex;
+        newArray[i] = [key, value];
+        oldArray = newArray;
+      } else if (value !== void 0) { // insert
+        newArray = oldArray.slice(0);
+        newIndex = {};
+        for (const name in oldIndex) {
+          newIndex[name] = oldIndex[name];
         }
+        newIndex[key.name] = newArray.length;
+        newArray.push([key, value]);
+        oldArray = newArray;
+        oldIndex = newIndex;
+      } else if (i !== void 0) { // remove
+        newArray = new Array<[M, number]>();
+        newIndex = {};
+        let k = 0;
+        for (let j = 0, n = oldArray.length; j < n; j += 1) {
+          const entry = oldArray[j]!;
+          if (entry[0] !== key) {
+            newArray[k] = entry;
+            newIndex[entry[0].name] = k;
+            k += 1;
+          }
+        }
+        oldArray = newArray;
+        oldIndex = newIndex;
       }
+    }
+    if (newArray !== void 0 && newIndex !== void 0) {
       return this.copy(newArray, newIndex);
-    } else { // nop
+    } else {
       return this;
     }
   }

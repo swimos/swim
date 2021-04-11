@@ -33,12 +33,12 @@ const gaugeView = canvasView.append(swim.GaugeView)
     .title(swim.TextRunView.fromAny("Gauge").font("20px sans-serif"))
     .on("pointerover", function (event) {
       if (event.targetView instanceof swim.DialView) {
-        event.targetView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+        event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
       }
     })
     .on("pointerout", function (event) {
       if (event.targetView instanceof swim.DialView) {
-        event.targetView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+        event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
       }
     });
 

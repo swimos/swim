@@ -185,22 +185,21 @@ function createDial() {
       .legend("");
   dialView.label.view.setHidden(true);
   dialView.legend.view.setHidden(true);
-  //dialView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1]);
+  //dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]]);
   dialView.value.didSetValue = function (newValue) {
     // Update the dial label.
     dialView.label.view.text(Math.round(100 * newValue / dialView.limit()) + "%")
                        .setHidden(!showLabels.checked);
-
     // Update the dial legend.
     dialView.legend.view.text(dialView.key + " (" + Math.round(100 * newValue) + ")")
                         .setHidden(!showLegend.checked);
   };
   // Add mouse event handlers.
   dialView.on("pointerenter", function (event) {
-            dialView.modifyMood(swim.Feel.default, [swim.Feel.hovering, 1], true);
+            dialView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, 1]], true);
           })
           .on("pointerleave", function (event) {
-            dialView.modifyMood(swim.Feel.default, [swim.Feel.hovering, void 0], true);
+            dialView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, void 0]], true);
           });
   // Return the initialized dial.
   return dialView;
@@ -262,11 +261,11 @@ function updateGauge() {
             .labelPadding(swim.Length.pct(labelPadding.checked ? 10 + 40 * Math.random() : 25), timing)
             .tickAlign(tickAlign.checked ? Math.random() : 0.5, timing);
     if (newValue < 0.5) {
-      dialView.modifyMood(swim.Feel.default, [swim.Feel.warning, void 0], [swim.Feel.alert, void 0], timing);
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, void 0]], timing);
     } else if (newValue < 0.75) {
-      dialView.modifyMood(swim.Feel.default, [swim.Feel.warning, 0.5 + 0.5 * (newValue - 0.5) / 0.25], [swim.Feel.alert, void 0], timing);
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.warning, 0.5 + 0.5 * (newValue - 0.5) / 0.25], [swim.Feel.alert, void 0]], timing);
     } else {
-      dialView.modifyMood(swim.Feel.default, [swim.Feel.warning, void 0], [swim.Feel.alert, 0.5 + 0.5 * (newValue - 0.75) / 0.25], timing);
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, 0.5 + 0.5 * (newValue - 0.75) / 0.25]], timing);
     }
   }
 

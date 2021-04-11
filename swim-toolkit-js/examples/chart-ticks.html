@@ -78,7 +78,7 @@ const plotView = graphView.append(swim.LinePlotView)
       chartView.topAxis.view.removeTick(dataPoint.x.value);
       chartView.rightAxis.view.removeTick(dataPoint.y.value);
     });
-plotView.modifyMood(swim.Feel.default, [swim.Feel.primary, 1]);
+plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
 
 const cycles = 2;
 const samples = 100;

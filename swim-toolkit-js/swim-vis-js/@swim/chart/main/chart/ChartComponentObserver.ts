@@ -21,59 +21,59 @@ import type {ChartTrait} from "./ChartTrait";
 import type {ChartComponent} from "./ChartComponent";
 
 export interface ChartComponentObserver<X, Y, C extends ChartComponent<X, Y> = ChartComponent<X, Y>> extends GraphComponentObserver<X, Y, C> {
-  chartWillSetTrait?(newChartTraitt: ChartTrait<X, Y> | null, oldChartTrait: ChartTrait<X, Y> | null, component: C): void;
+  componentWillSetChartTrait?(newChartTraitt: ChartTrait<X, Y> | null, oldChartTrait: ChartTrait<X, Y> | null, component: C): void;
 
-  chartDidSetTrait?(newChartTraitt: ChartTrait<X, Y> | null, oldChartTrait: ChartTrait<X, Y> | null, component: C): void;
+  componentDidSetChartTrait?(newChartTraitt: ChartTrait<X, Y> | null, oldChartTrait: ChartTrait<X, Y> | null, component: C): void;
 
-  chartWillSetView?(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null, component: C): void;
+  componentWillSetChartView?(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null, component: C): void;
 
-  chartDidSetView?(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null, component: C): void;
+  componentDidSetChartView?(newChartView: ChartView<X, Y> | null, oldChartView: ChartView<X, Y> | null, component: C): void;
 
-  chartWillSetTopAxis?(newTopAxisComponent: AxisComponent<X> | null, oldTopAxisComponent: AxisComponent<X> | null, component: C): void;
+  componentWillSetTopAxis?(newTopAxisComponent: AxisComponent<X> | null, oldTopAxisComponent: AxisComponent<X> | null, component: C): void;
 
-  chartDidSetTopAxis?(newTopAxisComponent: AxisComponent<X> | null, oldTopAxisComponent: AxisComponent<X> | null, component: C): void;
+  componentDidSetTopAxis?(newTopAxisComponent: AxisComponent<X> | null, oldTopAxisComponent: AxisComponent<X> | null, component: C): void;
 
-  chartWillSetTopAxisTrait?(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, component: C): void;
+  componentWillSetTopAxisTrait?(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, component: C): void;
 
-  chartDidSetTopAxisTrait?(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, component: C): void;
+  componentDidSetTopAxisTrait?(newTopAxisTrait: AxisTrait<X> | null, oldTopAxisTrait: AxisTrait<X> | null, component: C): void;
 
-  chartWillSetTopAxisView?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, component: C): void;
+  componentWillSetTopAxisView?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, component: C): void;
 
-  chartDidSetTopAxisView?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, component: C): void;
+  componentDidSetTopAxisView?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, component: C): void;
 
-  chartWillSetRightAxis?(newRightAxisComponent: AxisComponent<Y> | null, oldRightAxisComponent: AxisComponent<Y> | null, component: C): void;
+  componentWillSetRightAxis?(newRightAxisComponent: AxisComponent<Y> | null, oldRightAxisComponent: AxisComponent<Y> | null, component: C): void;
 
-  chartDidSetRightAxis?(newRightAxisComponent: AxisComponent<Y> | null, oldRightAxisComponent: AxisComponent<Y> | null, component: C): void;
+  componentDidSetRightAxis?(newRightAxisComponent: AxisComponent<Y> | null, oldRightAxisComponent: AxisComponent<Y> | null, component: C): void;
 
-  chartWillSetRightAxisTrait?(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, component: C): void;
+  componentWillSetRightAxisTrait?(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, component: C): void;
 
-  chartDidSetRightAxisTrait?(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, component: C): void;
+  componentDidSetRightAxisTrait?(newRightAxisTrait: AxisTrait<Y> | null, oldRightAxisTrait: AxisTrait<Y> | null, component: C): void;
 
-  chartWillSetRightAxisView?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, component: C): void;
+  componentWillSetRightAxisView?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, component: C): void;
 
-  chartDidSetRightAxisView?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, component: C): void;
+  componentDidSetRightAxisView?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, component: C): void;
 
-  chartWillSetBottomAxis?(newBottomAxisComponent: AxisComponent<X> | null, oldBottomAxisComponent: AxisComponent<X> | null, component: C): void;
+  componentWillSetBottomAxis?(newBottomAxisComponent: AxisComponent<X> | null, oldBottomAxisComponent: AxisComponent<X> | null, component: C): void;
 
-  chartDidSetBottomAxis?(newBottomAxisComponent: AxisComponent<X> | null, oldBottomAxisComponent: AxisComponent<X> | null, component: C): void;
+  componentDidSetBottomAxis?(newBottomAxisComponent: AxisComponent<X> | null, oldBottomAxisComponent: AxisComponent<X> | null, component: C): void;
 
-  chartWillSetBottomAxisTrait?(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, component: C): void;
+  componentWillSetBottomAxisTrait?(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, component: C): void;
 
-  chartDidSetBottomAxisTrait?(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, component: C): void;
+  componentDidSetBottomAxisTrait?(newBottomAxisTrait: AxisTrait<X> | null, oldBottomAxisTrait: AxisTrait<X> | null, component: C): void;
 
-  chartWillSetBottomAxisView?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, component: C): void;
+  componentWillSetBottomAxisView?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, component: C): void;
 
-  chartDidSetBottomAxisView?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, component: C): void;
+  componentDidSetBottomAxisView?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, component: C): void;
 
-  chartWillSetLeftAxis?(newLeftAxisComponent: AxisComponent<Y> | null, oldLeftAxisComponent: AxisComponent<Y> | null, component: C): void;
+  componentWillSetLeftAxis?(newLeftAxisComponent: AxisComponent<Y> | null, oldLeftAxisComponent: AxisComponent<Y> | null, component: C): void;
 
-  chartDidSetLeftAxis?(newLeftAxisComponent: AxisComponent<Y> | null, oldLeftAxisComponent: AxisComponent<Y> | null, component: C): void;
+  componentDidSetLeftAxis?(newLeftAxisComponent: AxisComponent<Y> | null, oldLeftAxisComponent: AxisComponent<Y> | null, component: C): void;
 
-  chartWillSetLeftAxisTrait?(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, component: C): void;
+  componentWillSetLeftAxisTrait?(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, component: C): void;
 
-  chartDidSetLeftAxisTrait?(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, component: C): void;
+  componentDidSetLeftAxisTrait?(newLeftAxisTrait: AxisTrait<Y> | null, oldLeftAxisTrait: AxisTrait<Y> | null, component: C): void;
 
-  chartWillSetLeftAxisView?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, component: C): void;
+  componentWillSetLeftAxisView?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, component: C): void;
 
-  chartDidSetLeftAxisView?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, component: C): void;
+  componentDidSetLeftAxisView?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, component: C): void;
 }

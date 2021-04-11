@@ -14,6 +14,7 @@
 
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {AnyLength, Length} from "@swim/math";
+import {Model} from "@swim/model";
 import type {AnyColor, Color} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {View} from "@swim/view";
@@ -26,73 +27,6 @@ import type {DataPointComponentObserver} from "./DataPointComponentObserver";
 export class DataPointComponent<X, Y> extends CompositeComponent {
   declare readonly componentObservers: ReadonlyArray<DataPointComponentObserver<X, Y>>;
 
-  get x(): X | undefined {
-    const dataPointTrait = this.dataPoint.trait;
-    return dataPointTrait !== null ? dataPointTrait.x : void 0;
-  }
-
-  get y(): Y | undefined {
-    const dataPointTrait = this.dataPoint.trait;
-    return dataPointTrait !== null ? dataPointTrait.y : void 0;
-  }
-
-  get y2(): Y | undefined {
-    const dataPointTrait = this.dataPoint.trait;
-    return dataPointTrait !== null ? dataPointTrait.y2 : void 0;
-  }
-
-  get radius(): Length | null {
-    const dataPointTrait = this.dataPoint.trait;
-    return dataPointTrait !== null ? dataPointTrait.radius : null;
-  }
-
-  get color(): Look<Color> | AnyColor | null {
-    const dataPointTrait = this.dataPoint.trait;
-    return dataPointTrait !== null ? dataPointTrait.color : null;
-  }
-
-  setX(x: X): void {
-    const dataPointTrait = this.dataPoint.trait;
-    if (dataPointTrait !== null) {
-      dataPointTrait.setX(x);
-    }
-  }
-
-  setY(y: Y): void {
-    const dataPointTrait = this.dataPoint.trait;
-    if (dataPointTrait !== null) {
-      dataPointTrait.setY(y);
-    }
-  }
-
-  setY2(y: Y): void {
-    const dataPointTrait = this.dataPoint.trait;
-    if (dataPointTrait !== null) {
-      dataPointTrait.setY2(y);
-    }
-  }
-
-  setRadius(radius: AnyLength | null): void {
-    const dataPointTrait = this.dataPoint.trait;
-    if (dataPointTrait !== null) {
-      dataPointTrait.setRadius(radius);
-    }
-  }
-
-  setColor(color: Look<Color> | AnyColor | null): void {
-    const dataPointTrait = this.dataPoint.trait;
-    if (dataPointTrait !== null) {
-      dataPointTrait.setColor(color);
-    }
-  }
-
-  setLabel(label: DataPointLabel<X, Y> | null): void {
-    const dataPointTrait = this.dataPoint.trait;
-    if (dataPointTrait !== null) {
-      dataPointTrait.setLabel(label);
-    }
-  }
-
   protected initDataPointTrait(dataPointTrait: DataPointTrait<X, Y>): void {
     // hook
   }
@@ -100,19 +34,20 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
   protected attachDataPointTrait(dataPointTrait: DataPointTrait<X, Y>): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
-      this.setDataPointViewX(dataPointTrait.x, dataPointTrait);
-      this.setDataPointViewY(dataPointTrait.y, dataPointTrait);
-      this.setDataPointViewY2(dataPointTrait.y2, dataPointTrait);
-      this.setDataPointViewRadius(dataPointTrait.radius, dataPointTrait);
-      this.setDataPointViewColor(dataPointTrait.color, dataPointTrait);
-      this.setDataPointLabelView(dataPointTrait.label, dataPointTrait);
+      this.setX(dataPointTrait.x.state, dataPointTrait);
+      this.setY(dataPointTrait.y.state, dataPointTrait);
+      this.setY2(dataPointTrait.y2.state, dataPointTrait);
+      this.setRadius(dataPointTrait.radius.state, dataPointTrait);
+      this.setColor(dataPointTrait.color.state, dataPointTrait);
+      this.setOpacity(dataPointTrait.opacity.state, dataPointTrait);
+      this.setLabelView(dataPointTrait.label.state, dataPointTrait);
     }
   }
 
   protected detachDataPointTrait(dataPointTrait: DataPointTrait<X, Y>): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
-      this.setDataPointLabelView(null, dataPointTrait);
+      this.setLabelView(null, dataPointTrait);
     }
   }
 
@@ -120,8 +55,8 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointWillSetTrait !== void 0) {
-        componentObserver.dataPointWillSetTrait(newDataPointTrait, oldDataPointTrait, this);
+      if (componentObserver.componentWillSetDataPointTrait !== void 0) {
+        componentObserver.componentWillSetDataPointTrait(newDataPointTrait, oldDataPointTrait, this);
       }
     }
   }
@@ -140,50 +75,26 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointDidSetTrait !== void 0) {
-        componentObserver.dataPointDidSetTrait(newDataPointTrait, oldDataPointTrait, this);
+      if (componentObserver.componentDidSetDataPointTrait !== void 0) {
+        componentObserver.componentDidSetDataPointTrait(newDataPointTrait, oldDataPointTrait, this);
       }
     }
   }
 
-  protected onSetDataPointTraitX(newX: X, oldX: X, dataPointTrait: DataPointTrait<X, Y>): void {
-    this.setDataPointViewX(newX, dataPointTrait);
-  }
-
-  protected onSetDataPointTraitY(newY: Y, oldY: Y, dataPointTrait: DataPointTrait<X, Y>): void {
-    this.setDataPointViewY(newY, dataPointTrait);
-  }
-
-  protected updateDataPointTraitLabel(x: X | undefined, y: Y | undefined, dataPointTrait: DataPointTrait<X, Y>): void {
+  protected updateLabel(x: X | undefined, y: Y | undefined, dataPointTrait: DataPointTrait<X, Y>): void {
     const label = dataPointTrait.formatLabel(x, y);
     if (label !== void 0) {
-      dataPointTrait.setLabel(label);
+      dataPointTrait.label.setState(label, Model.Intrinsic);
     }
-  }
-
-  protected onSetDataPointTraitY2(newY2: Y | undefined, oldY: Y | undefined, dataPointTrait: DataPointTrait<X, Y>): void {
-    this.setDataPointViewY2(newY2, dataPointTrait);
-  }
-
-  protected onSetDataPointTraitRadius(newRadius: Length | null, oldRadius: Length | null, dataPointTrait: DataPointTrait<X, Y>): void {
-    this.setDataPointViewRadius(newRadius, dataPointTrait);
-  }
-
-  protected onSetDataPointTraitColor(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null, dataPointTrait: DataPointTrait<X, Y>): void {
-    this.setDataPointViewColor(newColor, dataPointTrait);
-  }
-
-  protected onSetDataPointTraitLabel(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null, dataPointTrait: DataPointTrait<X, Y>): void {
-    this.setDataPointLabelView(newLabel, dataPointTrait);
   }
 
   protected createDataPointView(dataPointTrait: DataPointTrait<X, Y> | null): DataPointView<X, Y> {
     const dataPointView = DataPointView.create<X, Y>();
     if (dataPointTrait !== null) {
-      dataPointView.x.setState(dataPointTrait.x, View.Intrinsic);
-      dataPointView.y.setState(dataPointTrait.y, View.Intrinsic);
-      dataPointView.y2.setState(dataPointTrait.y2, View.Intrinsic);
-      dataPointView.radius.setState(dataPointTrait.radius, View.Intrinsic);
+      dataPointView.x.setState(dataPointTrait.x.state, View.Intrinsic);
+      dataPointView.y.setState(dataPointTrait.y.state, View.Intrinsic);
+      dataPointView.y2.setState(dataPointTrait.y2.state, View.Intrinsic);
+      dataPointView.radius.setState(dataPointTrait.radius.state, View.Intrinsic);
     }
     return dataPointView;
   }
@@ -193,12 +104,8 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     if (dataPointTrait !== null) {
       const x = dataPointView.x.value;
       const y = dataPointView.y.value;
-      this.updateDataPointTraitLabel(x, y, dataPointTrait);
+      this.updateLabel(x, y, dataPointTrait);
     }
-  }
-
-  protected themeDataPointView(dataPointView: DataPointView<X, Y>, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
-    // hook
   }
 
   protected attachDataPointView(dataPointView: DataPointView<X, Y>): void {
@@ -206,12 +113,13 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
 
     const dataPointTrait = this.dataPoint.trait;
     if (dataPointTrait !== null) {
-      this.setDataPointViewX(dataPointTrait.x, dataPointTrait);
-      this.setDataPointViewY(dataPointTrait.y, dataPointTrait);
-      this.setDataPointViewY2(dataPointTrait.y2, dataPointTrait);
-      this.setDataPointViewRadius(dataPointTrait.radius, dataPointTrait);
-      this.setDataPointViewColor(dataPointTrait.color, dataPointTrait);
-      this.setDataPointLabelView(dataPointTrait.label, dataPointTrait);
+      this.setX(dataPointTrait.x.state, dataPointTrait);
+      this.setY(dataPointTrait.y.state, dataPointTrait);
+      this.setY2(dataPointTrait.y2.state, dataPointTrait);
+      this.setRadius(dataPointTrait.radius.state, dataPointTrait);
+      this.setColor(dataPointTrait.color.state, dataPointTrait);
+      this.setOpacity(dataPointTrait.opacity.state, dataPointTrait);
+      this.setLabelView(dataPointTrait.label.state, dataPointTrait);
     }
   }
 
@@ -223,8 +131,8 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointWillSetView !== void 0) {
-        componentObserver.dataPointWillSetView(newDataPointView, oldDataPointView, this);
+      if (componentObserver.componentWillSetDataPointView !== void 0) {
+        componentObserver.componentWillSetDataPointView(newDataPointView, oldDataPointView, this);
       }
     }
   }
@@ -243,13 +151,17 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointDidSetView !== void 0) {
-        componentObserver.dataPointDidSetView(newDataPointView, oldDataPointView, this);
+      if (componentObserver.componentDidSetDataPointView !== void 0) {
+        componentObserver.componentDidSetDataPointView(newDataPointView, oldDataPointView, this);
       }
     }
   }
 
-  protected setDataPointViewX(x: X, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected themeDataPointView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, dataPointView: DataPointView<X, Y>): void {
+    // hook
+  }
+
+  protected setX(x: X, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -264,35 +176,35 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     }
   }
 
-  protected willSetDataPointViewX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>): void {
+  protected willSetX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointWillSetViewX !== void 0) {
-        componentObserver.dataPointWillSetViewX(newX, oldX, this);
+      if (componentObserver.componentWillSetDataPointX !== void 0) {
+        componentObserver.componentWillSetDataPointX(newX, oldX, this);
       }
     }
   }
 
-  protected onSetDataPointViewX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>): void {
+  protected onSetX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>): void {
     const dataPointTrait = this.dataPoint.trait;
     if (dataPointTrait !== null) {
       const y = dataPointView.y.value;
-      this.updateDataPointTraitLabel(newX, y, dataPointTrait);
+      this.updateLabel(newX, y, dataPointTrait);
     }
   }
 
-  protected didSetDataPointViewX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>): void {
+  protected didSetX(newX: X | undefined, oldX: X | undefined, dataPointView: DataPointView<X, Y>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointDidSetViewX !== void 0) {
-        componentObserver.dataPointDidSetViewX(newX, oldX, this);
+      if (componentObserver.componentDidSetDataPointX !== void 0) {
+        componentObserver.componentDidSetDataPointX(newX, oldX, this);
       }
     }
   }
 
-  protected setDataPointViewY(y: Y, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setY(y: Y, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -307,35 +219,35 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     }
   }
 
-  protected willSetDataPointViewY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>): void {
+  protected willSetY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointWillSetViewY !== void 0) {
-        componentObserver.dataPointWillSetViewY(newY, oldY, this);
+      if (componentObserver.componentWillSetDataPointY !== void 0) {
+        componentObserver.componentWillSetDataPointY(newY, oldY, this);
       }
     }
   }
 
-  protected onSetDataPointViewY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>): void {
+  protected onSetY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>): void {
     const dataPointTrait = this.dataPoint.trait;
     if (dataPointTrait !== null) {
       const x = dataPointView.x.value;
-      this.updateDataPointTraitLabel(x, newY, dataPointTrait);
+      this.updateLabel(x, newY, dataPointTrait);
     }
   }
 
-  protected didSetDataPointViewY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>): void {
+  protected didSetY(newY: Y | undefined, oldY: Y | undefined, dataPointView: DataPointView<X, Y>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointDidSetViewY !== void 0) {
-        componentObserver.dataPointDidSetViewY(newY, oldY, this);
+      if (componentObserver.componentDidSetDataPointY !== void 0) {
+        componentObserver.componentDidSetDataPointY(newY, oldY, this);
       }
     }
   }
 
-  protected setDataPointViewY2(y2: Y | undefined, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setY2(y2: Y | undefined, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -350,31 +262,31 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     }
   }
 
-  protected willSetDataPointViewY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
+  protected willSetY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointWillSetViewY2 !== void 0) {
-        componentObserver.dataPointWillSetViewY2(newY2, oldY2, this);
+      if (componentObserver.componentWillSetDataPointY2 !== void 0) {
+        componentObserver.componentWillSetDataPointY2(newY2, oldY2, this);
       }
     }
   }
 
-  protected onSetDataPointViewY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
+  protected onSetY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
     // hook
   }
 
-  protected didSetDataPointViewY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
+  protected didSetY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointView: DataPointView<X, Y>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointDidSetViewY2 !== void 0) {
-        componentObserver.dataPointDidSetViewY2(newY2, oldY2, this);
+      if (componentObserver.componentDidSetDataPointY2 !== void 0) {
+        componentObserver.componentDidSetDataPointY2(newY2, oldY2, this);
       }
     }
   }
 
-  protected setDataPointViewRadius(radius: AnyLength | null, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setRadius(radius: AnyLength | null, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -389,31 +301,31 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     }
   }
 
-  protected willSetDataPointViewRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<X, Y>): void {
+  protected willSetRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<X, Y>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointWillSetViewRadius !== void 0) {
-        componentObserver.dataPointWillSetViewRadius(newRadius, oldRadius, this);
+      if (componentObserver.componentWillSetDataPointRadius !== void 0) {
+        componentObserver.componentWillSetDataPointRadius(newRadius, oldRadius, this);
       }
     }
   }
 
-  protected onSetDataPointViewRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<X, Y>): void {
+  protected onSetRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<X, Y>): void {
     // hook
   }
 
-  protected didSetDataPointViewRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<X, Y>): void {
+  protected didSetRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<X, Y>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointDidSetViewRadius !== void 0) {
-        componentObserver.dataPointDidSetViewRadius(newRadius, oldRadius, this);
+      if (componentObserver.componentDidSetDataPointRadius !== void 0) {
+        componentObserver.componentDidSetDataPointRadius(newRadius, oldRadius, this);
       }
     }
   }
 
-  protected setDataPointViewColor(color: Look<Color> | AnyColor | null, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setColor(color: Look<Color> | AnyColor | null, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
       if (timing === void 0 || timing === true) {
@@ -432,7 +344,70 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     }
   }
 
-  protected createDataPointLabelView(label: DataPointLabel<X, Y>, dataPointTrait: DataPointTrait<X, Y>): GraphicsView | string | null {
+  protected willSetColor(newColor: Color | null, oldColor: Color | null, dataPointView: DataPointView<X, Y>): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentWillSetDataPointColor !== void 0) {
+        componentObserver.componentWillSetDataPointColor(newColor, oldColor, this);
+      }
+    }
+  }
+
+  protected onSetColor(newColor: Color | null, oldColor: Color | null, dataPointView: DataPointView<X, Y>): void {
+    // hook
+  }
+
+  protected didSetColor(newColor: Color | null, oldColor: Color | null, dataPointView: DataPointView<X, Y>): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentDidSetDataPointColor !== void 0) {
+        componentObserver.componentDidSetDataPointColor(newColor, oldColor, this);
+      }
+    }
+  }
+
+  protected setOpacity(opacity: number | undefined, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
+    const dataPointView = this.dataPoint.view;
+    if (dataPointView !== null) {
+      if (timing === void 0 || timing === true) {
+        timing = this.dataPointTiming.state;
+        if (timing === true) {
+          timing = dataPointView.getLook(Look.timing, Mood.ambient);
+        }
+      } else {
+        timing = Timing.fromAny(timing);
+      }
+      dataPointView.opacity.setState(opacity, timing, View.Intrinsic);
+    }
+  }
+
+  protected willSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointView: DataPointView<X, Y>): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentWillSetDataPointOpacity !== void 0) {
+        componentObserver.componentWillSetDataPointOpacity(newOpacity, oldOpacity, this);
+      }
+    }
+  }
+
+  protected onSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointView: DataPointView<X, Y>): void {
+    // hook
+  }
+
+  protected didSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointView: DataPointView<X, Y>): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentDidSetDataPointOpacity !== void 0) {
+        componentObserver.componentDidSetDataPointOpacity(newOpacity, oldOpacity, this);
+      }
+    }
+  }
+
+  protected createLabelView(label: DataPointLabel<X, Y>, dataPointTrait: DataPointTrait<X, Y>): GraphicsView | string | null {
     if (typeof label === "function") {
       return label(dataPointTrait);
     } else {
@@ -440,52 +415,52 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     }
   }
 
-  protected setDataPointLabelView(label: DataPointLabel<X, Y> | null, dataPointTrait: DataPointTrait<X, Y>): void {
+  protected setLabelView(label: DataPointLabel<X, Y> | null, dataPointTrait: DataPointTrait<X, Y>): void {
     const dataPointView = this.dataPoint.view;
     if (dataPointView !== null) {
-      const labelView = label !== null ? this.createDataPointLabelView(label, dataPointTrait) : null;
+      const labelView = label !== null ? this.createLabelView(label, dataPointTrait) : null;
       dataPointView.label.setView(labelView);
     }
   }
 
-  protected initDataPointLabelView(labelView: GraphicsView): void {
+  protected initLabelView(labelView: GraphicsView): void {
     // hook
   }
 
-  protected attachDataPointLabelView(labelView: GraphicsView): void {
+  protected attachLabelView(labelView: GraphicsView): void {
     // hook
   }
 
-  protected detachDataPointLabelView(labelView: GraphicsView): void {
+  protected detachLabelView(labelView: GraphicsView): void {
     // hook
   }
 
-  protected willSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+  protected willSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointWillSetLabelView !== void 0) {
-        componentObserver.dataPointWillSetLabelView(newLabelView, oldLabelView, this);
+      if (componentObserver.componentWillSetDataPointLabelView !== void 0) {
+        componentObserver.componentWillSetDataPointLabelView(newLabelView, oldLabelView, this);
       }
     }
   }
 
-  protected onSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+  protected onSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     if (oldLabelView !== null) {
-      this.detachDataPointLabelView(oldLabelView);
+      this.detachLabelView(oldLabelView);
     }
     if (newLabelView !== null) {
-      this.attachDataPointLabelView(newLabelView);
-      this.initDataPointLabelView(newLabelView);
+      this.attachLabelView(newLabelView);
+      this.initLabelView(newLabelView);
     }
   }
 
-  protected didSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+  protected didSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataPointDidSetLabelView !== void 0) {
-        componentObserver.dataPointDidSetLabelView(newLabelView, oldLabelView, this);
+      if (componentObserver.componentDidSetDataPointLabelView !== void 0) {
+        componentObserver.componentDidSetDataPointLabelView(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -507,37 +482,51 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
       this.owner.didSetDataPointView(newDataPointView, oldDataPointView);
     },
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.themeDataPointView(dataPointView, theme, mood, timing);
+      this.owner.themeDataPointView(theme, mood, timing, dataPointView);
     },
-    dataPointViewWillSetX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.willSetDataPointViewX(newX, oldX, dataPointView);
+    viewWillSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.willSetX(newX, oldX, dataPointView);
     },
-    dataPointViewDidSetX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointViewX(newX, oldX, dataPointView);
-      this.owner.didSetDataPointViewX(newX, oldX, dataPointView);
+    viewDidSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.onSetX(newX, oldX, dataPointView);
+      this.owner.didSetX(newX, oldX, dataPointView);
     },
-    dataPointViewWillSetY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.willSetDataPointViewY(newY, oldY, dataPointView);
+    viewWillSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.willSetY(newY, oldY, dataPointView);
     },
-    dataPointViewDidSetY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointViewY(newY, oldY, dataPointView);
-      this.owner.didSetDataPointViewY(newY, oldY, dataPointView);
+    viewDidSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.onSetY(newY, oldY, dataPointView);
+      this.owner.didSetY(newY, oldY, dataPointView);
     },
-    dataPointViewWillSetY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.willSetDataPointViewY2(newY2, oldY2, dataPointView);
+    viewWillSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.willSetY2(newY2, oldY2, dataPointView);
     },
-    dataPointViewDidSetY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointViewY2(newY2, oldY2, dataPointView);
-      this.owner.didSetDataPointViewY2(newY2, oldY2, dataPointView);
+    viewDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.onSetY2(newY2, oldY2, dataPointView);
+      this.owner.didSetY2(newY2, oldY2, dataPointView);
     },
-    dataPointViewWillSetRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.willSetDataPointViewRadius(newRadius, oldRadius, dataPointView);
+    viewWillSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.willSetRadius(newRadius, oldRadius, dataPointView);
     },
-    dataPointViewDidSetRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.onSetDataPointViewRadius(newRadius, oldRadius, dataPointView);
-      this.owner.didSetDataPointViewRadius(newRadius, oldRadius, dataPointView);
+    viewDidSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.onSetRadius(newRadius, oldRadius, dataPointView);
+      this.owner.didSetRadius(newRadius, oldRadius, dataPointView);
     },
-    dataPointViewDidSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    viewWillSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.willSetColor(newColor, oldColor, dataPointView);
+    },
+    viewDidSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.onSetColor(newColor, oldColor, dataPointView);
+      this.owner.didSetColor(newColor, oldColor, dataPointView);
+    },
+    viewWillSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.willSetOpacity(newOpacity, oldOpacity, dataPointView);
+    },
+    viewDidSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+      this.owner.onSetOpacity(newOpacity, oldOpacity, dataPointView);
+      this.owner.didSetOpacity(newOpacity, oldOpacity, dataPointView);
+    },
+    viewDidSetDataPointLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
       this.owner.label.setView(newLabelView);
     },
     createView(): DataPointView<unknown, unknown> | null {
@@ -554,23 +543,26 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
     didSetTrait(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null): void {
       this.owner.didSetDataPointTrait(newDataPointTrait, oldDataPointTrait);
     },
-    dataPointTraitDidSetX(newX: unknown , oldX: unknown, dataPointTrait: DataPointTrait<unknown, unknown>): void {
-      this.owner.onSetDataPointTraitX(newX, oldX, dataPointTrait);
+    traitDidSetDataPointX(newX: unknown , oldX: unknown, dataPointTrait: DataPointTrait<unknown, unknown>): void {
+      this.owner.setX(newX, dataPointTrait);
     },
-    dataPointTraitDidSetY(newY: unknown, oldY: unknown, dataPointTrait: DataPointTrait<unknown, unknown>): void {
-      this.owner.onSetDataPointTraitY(newY, oldY, dataPointTrait);
+    traitDidSetDataPointY(newY: unknown, oldY: unknown, dataPointTrait: DataPointTrait<unknown, unknown>): void {
+      this.owner.setY(newY, dataPointTrait);
     },
-    dataPointTraitDidSetY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointTrait: DataPointTrait<unknown, unknown>): void {
-      this.owner.onSetDataPointTraitY2(newY2, oldY2, dataPointTrait);
+    traitDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointTrait: DataPointTrait<unknown, unknown>): void {
+      this.owner.setY2(newY2, dataPointTrait);
     },
-    dataPointTraitDidSetRadius(newRadius: Length | null, oldRadius: Length | null, dataPointTrait: DataPointTrait<unknown, unknown>): void {
-      this.owner.onSetDataPointTraitRadius(newRadius, oldRadius, dataPointTrait);
+    traitDidSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointTrait: DataPointTrait<unknown, unknown>): void {
+      this.owner.setRadius(newRadius, dataPointTrait);
     },
-    dataPointTraitDidSetColor(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null, dataPointTrait: DataPointTrait<unknown, unknown>): void {
-      this.owner.onSetDataPointTraitColor(newColor, oldColor, dataPointTrait);
+    traitDidSetDataPointColor(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null, dataPointTrait: DataPointTrait<unknown, unknown>): void {
+      this.owner.setColor(newColor, dataPointTrait);
     },
-    dataPointTraitDidSetLabel(newLabel: DataPointLabel<unknown, unknown> | null, oldLabel: DataPointLabel<unknown, unknown> | null, dataPointTrait: DataPointTrait<unknown, unknown>): void {
-      this.owner.onSetDataPointTraitLabel(newLabel, oldLabel, dataPointTrait);
+    traitDidSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointTrait: DataPointTrait<unknown, unknown>): void {
+      this.owner.setOpacity(newOpacity, dataPointTrait);
+    },
+    traitDidSetDataPointLabel(newLabel: DataPointLabel<unknown, unknown> | null, oldLabel: DataPointLabel<unknown, unknown> | null, dataPointTrait: DataPointTrait<unknown, unknown>): void {
+      this.owner.setLabelView(newLabel, dataPointTrait);
     },
   });
 
@@ -582,13 +574,13 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
   @ComponentView<DataPointComponent<X, Y>, GraphicsView>({
     key: true,
     willSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.willSetDataPointLabelView(newLabelView, oldLabelView);
+      this.owner.willSetLabelView(newLabelView, oldLabelView);
     },
     onSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.onSetDataPointLabelView(newLabelView, oldLabelView);
+      this.owner.onSetLabelView(newLabelView, oldLabelView);
     },
     didSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.didSetDataPointLabelView(newLabelView, oldLabelView);
+      this.owner.didSetLabelView(newLabelView, oldLabelView);
     },
   })
   declare label: ComponentView<this, GraphicsView>;

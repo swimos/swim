@@ -335,7 +335,7 @@ export abstract class Animator<T> implements AnimationTrack {
 
   declare readonly interpolator: Interpolator<T> | null;
 
-  isPrecedent(precedence: ViewPrecedence): boolean {
+  takesPrecedence(precedence: ViewPrecedence): boolean {
     return precedence >= this.precedence;
   }
 

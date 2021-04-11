@@ -18,7 +18,8 @@ import {TraitModelType, TraitContextType, Trait} from "../Trait";
 import type {TraitObserverType} from "../TraitObserver";
 import type {TraitConsumerType, TraitConsumer} from "../TraitConsumer";
 import type {TraitService} from "../service/TraitService";
-import {TraitProperty} from "../property/TraitProperty";
+import {ModelProperty} from "../property/ModelProperty";
+import type {TraitProperty} from "../property/TraitProperty";
 import type {TraitModel} from "../fastener/TraitModel";
 import type {TraitFastener} from "../fastener/TraitFastener";
 import type {ModelDownlink} from "../downlink/ModelDownlink";
@@ -127,8 +128,8 @@ export class GenericTrait extends Trait {
 
   protected attachModel(newModel: TraitModelType<this>): void {
     this.attachTraitServices();
-    this.attachTraitProperties();
     if (this.isMounted()) {
+      this.mountTraitProperties();
       this.mountTraitModels();
       this.mountTraitFasteners();
       this.mountTraitDownlinks();
@@ -140,8 +141,8 @@ export class GenericTrait extends Trait {
       this.unmountTraitDownlinks();
       this.unmountTraitFasteners();
       this.unmountTraitModels();
+      this.unmountTraitProperties();
     }
-    this.detachTraitProperties();
     this.detachTraitServices();
   }
 
@@ -231,6 +232,11 @@ export class GenericTrait extends Trait {
     } else {
       throw new Error("already unpowered");
     }
+  }
+
+  protected onMutate(modelContext: TraitContextType<this>): void {
+    super.onMutate(modelContext);
+    this.mutateTraitProperties();
   }
 
   protected onReconcile(modelContext: TraitContextType<this>): void {
@@ -355,6 +361,28 @@ export class GenericTrait extends Trait {
     }
   }
 
+
+
+
+  hasModelProperty(propertyName: string): boolean {
+    const model = this.model;
+    return model !== null && model.hasModelProperty(propertyName);
+  }
+
+  getModelProperty(propertyName: string): ModelProperty<TraitModelType<this>, unknown> | null {
+    const model = this.model as TraitModelType<this>;
+    return model !== null ? model.getModelProperty(propertyName) : null;
+  }
+
+  setModelProperty(propertyName: string, newModelProperty: ModelProperty<TraitModelType<this>, unknown> | null): void {
+    const model = this.model;
+    if (model !== null) {
+      model.setModelProperty(propertyName, newModelProperty);
+    } else {
+      throw new Error("no model");
+    }
+  }
+
   /** @hidden */
   declare readonly traitProperties: {[propertyName: string]: TraitProperty<Trait, unknown> | undefined} | null;
 
@@ -386,12 +414,12 @@ export class GenericTrait extends Trait {
     }
     const oldTraitProperty = traitProperties[propertyName];
     if (oldTraitProperty !== void 0 && this.isMounted()) {
-      oldTraitProperty.detach();
+      oldTraitProperty.unmount();
     }
     if (newTraitProperty !== null) {
       traitProperties[propertyName] = newTraitProperty;
       if (this.isMounted()) {
-        newTraitProperty.attach();
+        newTraitProperty.mount();
       }
     } else {
       delete traitProperties[propertyName];
@@ -399,20 +427,29 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  protected attachTraitProperties(): void {
+  mutateTraitProperties(): void {
     const traitProperties = this.traitProperties;
     for (const propertyName in traitProperties) {
       const traitProperty = traitProperties[propertyName]!;
-      traitProperty.attach();
+      traitProperty.onMutate();
     }
   }
 
   /** @hidden */
-  protected detachTraitProperties(): void {
+  protected mountTraitProperties(): void {
     const traitProperties = this.traitProperties;
     for (const propertyName in traitProperties) {
       const traitProperty = traitProperties[propertyName]!;
-      traitProperty.detach();
+      traitProperty.mount();
+    }
+  }
+
+  /** @hidden */
+  protected unmountTraitProperties(): void {
+    const traitProperties = this.traitProperties;
+    for (const propertyName in traitProperties) {
+      const traitProperty = traitProperties[propertyName]!;
+      traitProperty.unmount();
     }
   }
 
@@ -677,12 +714,9 @@ export class GenericTrait extends Trait {
   }
 }
 
-TraitProperty({
+ModelProperty({
   type: Object,
   inherit: true,
-  modelProperty: {
-    type: Object,
-    inherit: true,
-    updateFlags: Model.NeedsReconcile,
-  },
+  state: null,
+  updateFlags: Model.NeedsReconcile,
 })(Trait.prototype, "warpRef");

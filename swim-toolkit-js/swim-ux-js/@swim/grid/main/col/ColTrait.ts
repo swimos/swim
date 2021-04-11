@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
-import {GenericTrait} from "@swim/model";
+import {TraitProperty, GenericTrait} from "@swim/model";
 import type {HtmlView} from "@swim/dom";
 import {AnyColLayout, ColLayout} from "../layout/ColLayout";
 import type {ColTraitObserver} from "./ColTraitObserver";
@@ -22,47 +21,14 @@ export type ColHeader = ColHeaderFunction | string;
 export type ColHeaderFunction = (colTrait: ColTrait) => HtmlView | string | null;
 
 export class ColTrait extends GenericTrait {
-  constructor() {
-    super();
-    Object.defineProperty(this, "layout", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "header", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-
   declare readonly traitObservers: ReadonlyArray<ColTraitObserver>;
-
-  declare readonly layout: ColLayout | null;
-
-  setLayout(newLayout: AnyColLayout | null): void {
-    if (newLayout !== null) {
-      newLayout = ColLayout.fromAny(newLayout);
-    }
-    const oldLayout = this.layout;
-    if (!Equals(newLayout, oldLayout)) {
-      this.willSetLayout(newLayout as ColLayout, oldLayout);
-      Object.defineProperty(this, "layout", {
-        value: newLayout,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetLayout(newLayout as ColLayout, oldLayout);
-      this.didSetLayout(newLayout as ColLayout, oldLayout);
-    }
-  }
 
   protected willSetLayout(newLayout: ColLayout | null, oldHeader: ColLayout | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.colTraitWillSetLayout !== void 0) {
-        traitObserver.colTraitWillSetLayout(newLayout, oldHeader, this);
+      if (traitObserver.traitWillSetColLayout !== void 0) {
+        traitObserver.traitWillSetColLayout(newLayout, oldHeader, this);
       }
     }
   }
@@ -75,34 +41,31 @@ export class ColTrait extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.colTraitDidSetLayout !== void 0) {
-        traitObserver.colTraitDidSetLayout(newLayout, oldHeader, this);
+      if (traitObserver.traitDidSetColLayout !== void 0) {
+        traitObserver.traitDidSetColLayout(newLayout, oldHeader, this);
       }
     }
   }
 
-  declare readonly header: ColHeader | null;
-
-  setHeader(newHeader: ColHeader | null): void {
-    const oldHeader = this.header;
-    if (!Equals(newHeader, oldHeader)) {
-      this.willSetHeader(newHeader, oldHeader);
-      Object.defineProperty(this, "header", {
-        value: newHeader,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetHeader(newHeader, oldHeader);
-      this.didSetHeader(newHeader, oldHeader);
-    }
-  }
+  @TraitProperty<ColTrait, ColLayout | null, AnyColLayout | null>({
+    type: ColLayout,
+    state: null,
+    willSetState(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
+      this.owner.willSetLayout(newLayout, oldLayout);
+    },
+    didSetState(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
+      this.owner.onSetLayout(newLayout, oldLayout);
+      this.owner.didSetLayout(newLayout, oldLayout);
+    },
+  })
+  declare layout: TraitProperty<this, ColLayout | null, AnyColLayout | null>;
 
   protected willSetHeader(newHeader: ColHeader | null, oldHeader: ColHeader | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.colTraitWillSetHeader !== void 0) {
-        traitObserver.colTraitWillSetHeader(newHeader, oldHeader, this);
+      if (traitObserver.traitWillSetColHeader !== void 0) {
+        traitObserver.traitWillSetColHeader(newHeader, oldHeader, this);
       }
     }
   }
@@ -115,9 +78,21 @@ export class ColTrait extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.colTraitDidSetHeader !== void 0) {
-        traitObserver.colTraitDidSetHeader(newHeader, oldHeader, this);
+      if (traitObserver.traitDidSetColHeader !== void 0) {
+        traitObserver.traitDidSetColHeader(newHeader, oldHeader, this);
       }
     }
   }
+
+  @TraitProperty<ColTrait, ColHeader | null>({
+    state: null,
+    willSetState(newHeader: ColHeader | null, oldHeader: ColHeader | null): void {
+      this.owner.willSetHeader(newHeader, oldHeader);
+    },
+    didSetState(newHeader: ColHeader | null, oldHeader: ColHeader | null): void {
+      this.owner.onSetHeader(newHeader, oldHeader);
+      this.owner.didSetHeader(newHeader, oldHeader);
+    },
+  })
+  declare header: TraitProperty<this, ColHeader | null>;
 }

@@ -14,19 +14,19 @@
 
 /// <reference types="arcgis-js-api"/>
 
-export {EsriProjection} from "./EsriProjection";
+export {EsriViewport} from "./EsriViewport";
 
 export {EsriView} from "./EsriView";
 export {EsriViewObserver} from "./EsriViewObserver";
 export {EsriViewController} from "./EsriViewController";
 
-export {EsriMapViewProjection} from "./EsriMapViewProjection";
+export {EsriMapViewport} from "./EsriMapViewport";
 
 export {EsriMapView} from "./EsriMapView";
 export {EsriMapViewObserver} from "./EsriMapViewObserver";
 export {EsriMapViewController} from "./EsriMapViewController";
 
-export {EsriSceneViewProjection} from "./EsriSceneViewProjection";
+export {EsriSceneViewport} from "./EsriSceneViewport";
 
 export {EsriSceneView} from "./EsriSceneView";
 export {EsriSceneViewObserver} from "./EsriSceneViewObserver";

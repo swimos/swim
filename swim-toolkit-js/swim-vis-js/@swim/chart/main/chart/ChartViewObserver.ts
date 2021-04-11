@@ -18,23 +18,23 @@ import type {AxisView} from "../axis/AxisView";
 import type {ChartView} from "./ChartView";
 
 export interface ChartViewObserver<X, Y, V extends ChartView<X, Y> = ChartView<X, Y>> extends ScaledViewObserver<X, Y, V> {
-  chartViewWillSetGraph?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, view: V): void;
+  viewWillSetGraph?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, view: V): void;
 
-  chartViewDidSetGraph?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, view: V): void;
+  viewDidSetGraph?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, view: V): void;
 
-  chartViewWillSetTopAxis?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, view: V): void;
+  viewWillSetTopAxis?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, view: V): void;
 
-  chartViewDidSetTopAxis?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, view: V): void;
+  viewDidSetTopAxis?(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null, view: V): void;
 
-  chartViewWillSetRightAxis?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, view: V): void;
+  viewWillSetRightAxis?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, view: V): void;
 
-  chartViewDidSetRightAxis?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, view: V): void;
+  viewDidSetRightAxis?(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null, view: V): void;
 
-  chartViewWillSetBottomAxis?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, view: V): void;
+  viewWillSetBottomAxis?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, view: V): void;
 
-  chartViewDidSetBottomAxis?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, view: V): void;
+  viewDidSetBottomAxis?(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null, view: V): void;
 
-  chartViewWillSetLeftAxis?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, view: V): void;
+  viewWillSetLeftAxis?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, view: V): void;
 
-  chartViewDidSetLeftAxis?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, view: V): void;
+  viewDidSetLeftAxis?(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null, view: V): void;
 }

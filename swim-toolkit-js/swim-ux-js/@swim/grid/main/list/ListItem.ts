@@ -154,7 +154,7 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
   protected initLabelView(labelView: HtmlView): void {
     labelView.flexGrow.setState(1, View.Intrinsic);
     labelView.flexShrink.setState(0, View.Intrinsic);
-    if (labelView.color.isPrecedent(View.Intrinsic)) {
+    if (labelView.color.takesPrecedence(View.Intrinsic)) {
       const itemColor = this.getLookOr(this.highlighted.state ? Look.color : Look.mutedColor, null);
       labelView.color.setState(itemColor, View.Intrinsic);
     }
@@ -213,7 +213,7 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
       accessoryView.iconWidth.setState(24, View.Intrinsic);
       accessoryView.iconHeight.setState(24, View.Intrinsic);
       accessoryView.iconColor.setState(this.getLookOr(Look.mutedColor, null));
-    } else if (accessoryView.color.isPrecedent(View.Intrinsic)) {
+    } else if (accessoryView.color.takesPrecedence(View.Intrinsic)) {
       const itemColor = this.getLookOr(this.highlighted.state ? Look.color : Look.mutedColor, null);
       accessoryView.color.setState(itemColor, View.Intrinsic);
     }
@@ -223,7 +223,7 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
     super.onApplyTheme(theme, mood, timing);
     const itemColor = theme.getOr(this.highlighted.state ? Look.color : Look.mutedColor, mood, null);
 
-    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       let backgroundColor = theme.getOr(Look.backgroundColor, mood, null);
       if (backgroundColor !== null && !this.highlighted.state && !this.gesture.isHovering()) {
         backgroundColor = backgroundColor.alpha(0);
@@ -309,13 +309,13 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
   highlight(timing?: AnyTiming | boolean): this {
     if (!this.highlighted.state) {
       this.highlighted.setState(true);
-      this.modifyMood(Feel.default, [Feel.selected, 1], [Feel.hovering, void 0]);
+      this.modifyMood(Feel.default, [[Feel.selected, 1], [Feel.hovering, void 0]]);
       if (timing === true) {
         timing = this.getLook(Look.timing);
       } else {
         timing = Timing.fromAny(timing);
       }
-      if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+      if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
         this.backgroundColor.setState(this.getLookOr(Look.backgroundColor, null), View.Intrinsic);
       }
       const iconColor = this.getLookOr(Look.color, null);
@@ -324,13 +324,13 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
         iconView.iconColor.setState(iconColor, timing);
       }
       const labelView = this.label.view;
-      if (labelView !== null && labelView.color.isPrecedent(View.Intrinsic)) {
+      if (labelView !== null && labelView.color.takesPrecedence(View.Intrinsic)) {
         labelView.color.setState(iconColor, timing, View.Intrinsic);
       }
       const accessoryView = this.accessory.view;
       if (accessoryView instanceof HtmlIconView) {
         accessoryView.iconColor.setState(iconColor, timing);
-      } else if (accessoryView !== null && accessoryView.color.isPrecedent(View.Intrinsic)) {
+      } else if (accessoryView !== null && accessoryView.color.takesPrecedence(View.Intrinsic)) {
         accessoryView.color.setState(iconColor, timing, View.Intrinsic);
       }
     }
@@ -340,13 +340,13 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
   unhighlight(timing?: AnyTiming | boolean): this {
     if (this.highlighted.state) {
       this.highlighted.setState(false);
-      this.modifyMood(Feel.default, [Feel.selected, void 0]);
+      this.modifyMood(Feel.default, [[Feel.selected, void 0]]);
       if (timing === true) {
         timing = this.getLookOr(Look.timing, false);
       } else {
         timing = Timing.fromAny(timing);
       }
-      if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+      if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
         let backgroundColor = this.getLookOr(Look.backgroundColor, null);
         if (backgroundColor !== null && !this.gesture.isHovering()) {
           backgroundColor = backgroundColor.alpha(0);
@@ -359,13 +359,13 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
         iconView.iconColor.setState(iconColor, timing, 1);
       }
       const labelView = this.label.view;
-      if (labelView !== null && labelView.color.isPrecedent(View.Intrinsic)) {
+      if (labelView !== null && labelView.color.takesPrecedence(View.Intrinsic)) {
         labelView.color.setState(iconColor, timing, View.Intrinsic);
       }
       const accessoryView = this.accessory.view;
       if (accessoryView instanceof HtmlIconView) {
         accessoryView.iconColor.setState(iconColor, timing);
-      } else if (accessoryView !== null && accessoryView.color.isPrecedent(View.Intrinsic)) {
+      } else if (accessoryView !== null && accessoryView.color.takesPrecedence(View.Intrinsic)) {
         accessoryView.color.setState(iconColor, timing, View.Intrinsic);
       }
     }
@@ -394,8 +394,8 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
 
   didStartHovering(): void {
     if (!this.highlighted.state && this.hovers) {
-      this.modifyMood(Feel.default, [Feel.hovering, 1]);
-      if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+      this.modifyMood(Feel.default, [[Feel.hovering, 1]]);
+      if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
         const timing = this.gesture.isPressing() ? this.getLook(Look.timing) : false;
         this.backgroundColor.setState(this.getLookOr(Look.backgroundColor, null), timing, View.Intrinsic);
       }
@@ -403,8 +403,8 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
   }
 
   didStopHovering(): void {
-    this.modifyMood(Feel.default, [Feel.hovering, void 0]);
-    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+    this.modifyMood(Feel.default, [[Feel.hovering, void 0]]);
+    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       let backgroundColor = this.getLookOr(Look.backgroundColor, null);
       if (backgroundColor !== null && !this.highlighted.state) {
         backgroundColor = backgroundColor.alpha(0);

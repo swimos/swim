@@ -50,15 +50,15 @@ chartView.leftAxis.view.createTickLabel = function (tickValue) {
 const plotView = graphView.append(swim.BubblePlotView)
     .on("pointerover", function (event) {
       if (event.targetView instanceof swim.DataPointView) {
-        event.targetView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+        event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
       }
     })
     .on("pointerout", function (event) {
       if (event.targetView instanceof swim.DataPointView) {
-        event.targetView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+        event.targetView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
       }
     });
-plotView.modifyMood(swim.Feel.default, [swim.Feel.primary, 1]);
+plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
 
 const n = 10;
 for (let i = 0; i < n; i += 1) {

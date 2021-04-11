@@ -17,6 +17,7 @@ export {Look} from "./Look";
 export {
   AnyLookVector,
   LookVectorArray,
+  LookVectorUpdates,
   LookVector,
 } from "./LookVector";
 

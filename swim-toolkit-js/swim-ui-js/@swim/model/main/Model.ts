@@ -786,7 +786,7 @@ export abstract class Model implements ModelDownlinkContext {
 
   declare readonly warpService: WarpService<this>; // defined by WarpService
 
-  declare readonly warpRef: ModelProperty<this, WarpRef | undefined>; // defined by GenericModel
+  declare readonly warpRef: ModelProperty<this, WarpRef | null>; // defined by GenericModel
 
   isMounted(): boolean {
     return (this.modelFlags & Model.MountedFlag) !== 0;

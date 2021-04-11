@@ -16,7 +16,7 @@ import type {Timing} from "@swim/mapping";
 import {Angle, Transform} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
 import {HtmlView, SvgView} from "@swim/dom";
 
 export class DisclosureButton extends HtmlView {
@@ -73,7 +73,7 @@ export class DisclosureButton extends HtmlView {
       const disclosurePhase = this.disclosurePhase.takeValue()!;
       const collapsedColor = this.collapsedColor.takeValue();
       const expandedColor = this.expandedColor.takeValue();
-      if (collapsedColor !== null && expandedColor !== null && this.arrow.fill.isPrecedent(View.Intrinsic)) {
+      if (collapsedColor !== null && expandedColor !== null && this.arrow.fill.takesPrecedence(View.Intrinsic)) {
         const colorInterpolator = collapsedColor.interpolateTo(expandedColor);
         this.arrow.fill.setState(colorInterpolator(disclosurePhase), View.Intrinsic);
       }
@@ -81,6 +81,4 @@ export class DisclosureButton extends HtmlView {
       this.arrow.transform.setState(transform, View.Intrinsic);
     }
   }
-
-  static readonly uncullFlags: ViewFlags = HtmlView.uncullFlags | View.NeedsAnimate;
 }

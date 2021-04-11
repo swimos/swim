@@ -16,7 +16,7 @@ import type {TraitObserver} from "@swim/model";
 import type {CellContent, CellTrait} from "./CellTrait";
 
 export interface CellTraitObserver<R extends CellTrait = CellTrait> extends TraitObserver<R> {
-  cellTraitWillSetContent?(newContent: CellContent | null, oldContent: CellContent | null, trait: R): void;
+  traitWillSetCellContent?(newCellContent: CellContent | null, oldCellContent: CellContent | null, trait: R): void;
 
-  cellTraitDidSetContent?(newContent: CellContent | null, oldContent: CellContent | null, trait: R): void;
+  traitDidSetCellContent?(newCellContent: CellContent | null, oldCellContent: CellContent | null, trait: R): void;
 }

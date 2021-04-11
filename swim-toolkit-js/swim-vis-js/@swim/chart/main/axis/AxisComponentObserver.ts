@@ -18,11 +18,11 @@ import type {AxisTrait} from "./AxisTrait";
 import type {AxisComponent} from "./AxisComponent";
 
 export interface AxisComponentObserver<D, C extends AxisComponent<D> = AxisComponent<D>> extends ComponentObserver<C> {
-  axisWillSetTrait?(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null, component: C): void;
+  componentWillSetAxisTrait?(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null, component: C): void;
 
-  axisDidSetTrait?(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null, component: C): void;
+  componentDidSetAxisTrait?(newAxisTrait: AxisTrait<D> | null, oldAxisTrait: AxisTrait<D> | null, component: C): void;
 
-  axisWillSetView?(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null, component: C): void;
+  componentWillSetAxisView?(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null, component: C): void;
 
-  axisDidSetView?(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null, component: C): void;
+  componentDidSetAxisView?(newAxisView: AxisView<D> | null, oldAxisView: AxisView<D> | null, component: C): void;
 }

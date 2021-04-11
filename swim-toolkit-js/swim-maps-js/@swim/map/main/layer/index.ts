@@ -12,4 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {MapLayerView} from "./MapLayerView";
+export {GeoLayerView} from "./GeoLayerView";
+
+export {GeoLayerTrait} from "./GeoLayerTrait";
+export {GeoLayerTraitObserver} from "./GeoLayerTraitObserver";
+
+export {GeoLayerComponent} from "./GeoLayerComponent";
+export {GeoLayerComponentObserver} from "./GeoLayerComponentObserver";

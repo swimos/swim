@@ -394,7 +394,7 @@ export abstract class DeckButtonLabel<V extends DeckButton, S extends HtmlView> 
   }
 
   protected viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, labelView: S): void {
-    if (labelView.color.isPrecedent(View.Intrinsic)) {
+    if (labelView.color.takesPrecedence(View.Intrinsic)) {
       labelView.color.setState(theme.getOr(this.owner.colorLook, mood, null), timing, View.Intrinsic);
     }
   }

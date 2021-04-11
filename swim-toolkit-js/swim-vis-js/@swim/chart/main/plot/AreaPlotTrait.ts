@@ -12,49 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
+import {TraitProperty} from "@swim/model";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {AreaPlotTraitObserver} from "./AreaPlotTraitObserver";
 
 export class AreaPlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
-  constructor() {
-    super();
-    Object.defineProperty(this, "fill", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-
   declare readonly traitObservers: ReadonlyArray<AreaPlotTraitObserver<X, Y>>;
-
-  declare readonly fill: Look<Color> | Color | null;
-
-  setFill(newFill: Look<Color> | AnyColor | null): void {
-    if (newFill !== null && !(newFill instanceof Look)) {
-      newFill = Color.fromAny(newFill);
-    }
-    const oldFill = this.fill;
-    if (!Equals(newFill, oldFill)) {
-      this.willSetFill(newFill, oldFill);
-      Object.defineProperty(this, "fill", {
-        value: newFill,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetFill(newFill, oldFill);
-      this.didSetFill(newFill, oldFill);
-    }
-  }
 
   protected willSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.areaPlotTraitWillSetFill !== void 0) {
-        traitObserver.areaPlotTraitWillSetFill(newFill, oldFill, this);
+      if (traitObserver.traitWillSetPlotFill !== void 0) {
+        traitObserver.traitWillSetPlotFill(newFill, oldFill, this);
       }
     }
   }
@@ -67,9 +39,27 @@ export class AreaPlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.areaPlotTraitDidSetFill !== void 0) {
-        traitObserver.areaPlotTraitDidSetFill(newFill, oldFill, this);
+      if (traitObserver.traitDidSetPlotFill !== void 0) {
+        traitObserver.traitDidSetPlotFill(newFill, oldFill, this);
       }
     }
   }
+
+  @TraitProperty<AreaPlotTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+    state: null,
+    willSetState(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
+      this.owner.willSetFill(newFill, oldFill);
+    },
+    didSetState(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
+      this.owner.onSetFill(newFill, oldFill);
+      this.owner.didSetFill(newFill, oldFill);
+    },
+    fromAny(fill: Look<Color> | AnyColor | null): Look<Color> | Color | null {
+      if (fill !== null && !(fill instanceof Look)) {
+        fill = Color.fromAny(fill);
+      }
+      return fill;
+    },
+  })
+  declare fill: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 }

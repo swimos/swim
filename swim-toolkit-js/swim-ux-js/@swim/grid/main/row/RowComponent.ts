@@ -63,8 +63,8 @@ export class RowComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowWillSetTrait !== void 0) {
-        componentObserver.rowWillSetTrait(newRowTrait, oldRowTrait, this);
+      if (componentObserver.componentWillSetRowTrait !== void 0) {
+        componentObserver.componentWillSetRowTrait(newRowTrait, oldRowTrait, this);
       }
     }
   }
@@ -83,8 +83,8 @@ export class RowComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowDidSetTrait !== void 0) {
-        componentObserver.rowDidSetTrait(newRowTrait, oldRowTrait, this);
+      if (componentObserver.componentDidSetRowTrait !== void 0) {
+        componentObserver.componentDidSetRowTrait(newRowTrait, oldRowTrait, this);
       }
     }
   }
@@ -94,10 +94,6 @@ export class RowComponent extends CompositeComponent {
   }
 
   protected initRowView(rowView: RowView): void {
-    // hook
-  }
-
-  protected themeRowView(rowView: RowView, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     // hook
   }
 
@@ -125,8 +121,8 @@ export class RowComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowWillSetView !== void 0) {
-        componentObserver.rowWillSetView(newRowView, oldRowView, this);
+      if (componentObserver.componentWillSetRowView !== void 0) {
+        componentObserver.componentWillSetRowView(newRowView, oldRowView, this);
       }
     }
   }
@@ -145,10 +141,14 @@ export class RowComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowDidSetView !== void 0) {
-        componentObserver.rowDidSetView(newRowView, oldRowView, this);
+      if (componentObserver.componentDidSetRowView !== void 0) {
+        componentObserver.componentDidSetRowView(newRowView, oldRowView, this);
       }
     }
+  }
+
+  protected themeRowView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, rowView: RowView): void {
+    // hook
   }
 
   /** @hidden */
@@ -165,7 +165,7 @@ export class RowComponent extends CompositeComponent {
       this.owner.didSetRowView(newRowView, oldRowView);
     },
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, rowView: RowView): void {
-      this.owner.themeRowView(rowView, theme, mood, timing);
+      this.owner.themeRowView(theme, mood, timing, rowView);
     },
     createView(): RowView | null {
       return this.owner.createRowView();
@@ -181,12 +181,12 @@ export class RowComponent extends CompositeComponent {
     didSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null): void {
       this.owner.didSetRowTrait(newRowTrait, oldRowTrait);
     },
-    rowTraitWillSetCell(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait): void {
+    traitWillSetCell(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait): void {
       if (oldCellTrait !== null) {
         this.owner.removeCellTrait(oldCellTrait);
       }
     },
-    rowTraitDidSetCell(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait): void {
+    traitDidSetCell(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, targetTrait: Trait): void {
       if (newCellTrait !== null) {
         this.owner.insertCellTrait(newCellTrait, targetTrait);
       }
@@ -274,8 +274,8 @@ export class RowComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowWillSetCell !== void 0) {
-        componentObserver.rowWillSetCell(newCellComponent, oldCellComponent, cellFastener);
+      if (componentObserver.componentWillSetCell !== void 0) {
+        componentObserver.componentWillSetCell(newCellComponent, oldCellComponent, cellFastener);
       }
     }
   }
@@ -296,8 +296,8 @@ export class RowComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowDidSetCell !== void 0) {
-        componentObserver.rowDidSetCell(newCellComponent, oldCellComponent, cellFastener);
+      if (componentObserver.componentDidSetCell !== void 0) {
+        componentObserver.componentDidSetCell(newCellComponent, oldCellComponent, cellFastener);
       }
     }
   }
@@ -369,8 +369,8 @@ export class RowComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowWillSetCellTrait !== void 0) {
-        componentObserver.rowWillSetCellTrait(newCellTrait, oldCellTrait, cellFastener);
+      if (componentObserver.componentWillSetCellTrait !== void 0) {
+        componentObserver.componentWillSetCellTrait(newCellTrait, oldCellTrait, cellFastener);
       }
     }
   }
@@ -391,8 +391,8 @@ export class RowComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowDidSetCellTrait !== void 0) {
-        componentObserver.rowDidSetCellTrait(newCellTrait, oldCellTrait, cellFastener);
+      if (componentObserver.componentDidSetCellTrait !== void 0) {
+        componentObserver.componentDidSetCellTrait(newCellTrait, oldCellTrait, cellFastener);
       }
     }
   }
@@ -402,23 +402,23 @@ export class RowComponent extends CompositeComponent {
   }
 
   protected initCellView(cellView: CellView, cellFastener: ComponentFastener<this, CellComponent>): void {
-    const contentView = cellView.content.view;
-    if (contentView !== null) {
-      this.initCellContentView(contentView, cellFastener);
+    const cellContentView = cellView.content.view;
+    if (cellContentView !== null) {
+      this.initCellContentView(cellContentView, cellFastener);
     }
   }
 
   protected attachCellView(cellView: CellView, cellFastener: ComponentFastener<this, CellComponent>): void {
-    const contentView = cellView.content.view;
-    if (contentView !== null) {
-      this.attachCellContentView(contentView, cellFastener);
+    const cellContentView = cellView.content.view;
+    if (cellContentView !== null) {
+      this.attachCellContentView(cellContentView, cellFastener);
     }
   }
 
   protected detachCellView(cellView: CellView, cellFastener: ComponentFastener<this, CellComponent>): void {
-    const contentView = cellView.content.view;
-    if (contentView !== null) {
-      this.detachCellContentView(contentView, cellFastener);
+    const cellContentView = cellView.content.view;
+    if (cellContentView !== null) {
+      this.detachCellContentView(cellContentView, cellFastener);
     }
     cellView.remove();
   }
@@ -428,8 +428,8 @@ export class RowComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowWillSetCellView !== void 0) {
-        componentObserver.rowWillSetCellView(newCellView, oldCellView, cellFastener);
+      if (componentObserver.componentWillSetCellView !== void 0) {
+        componentObserver.componentWillSetCellView(newCellView, oldCellView, cellFastener);
       }
     }
   }
@@ -450,53 +450,53 @@ export class RowComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowDidSetCellView !== void 0) {
-        componentObserver.rowDidSetCellView(newCellView, oldCellView, cellFastener);
+      if (componentObserver.componentDidSetCellView !== void 0) {
+        componentObserver.componentDidSetCellView(newCellView, oldCellView, cellFastener);
       }
     }
   }
 
-  protected initCellContentView(contentView: HtmlView, cellFastener: ComponentFastener<this, CellComponent>): void {
+  protected initCellContentView(cellContentView: HtmlView, cellFastener: ComponentFastener<this, CellComponent>): void {
     // hook
   }
 
-  protected attachCellContentView(contentView: HtmlView, cellFastener: ComponentFastener<this, CellComponent>): void {
+  protected attachCellContentView(cellContentView: HtmlView, cellFastener: ComponentFastener<this, CellComponent>): void {
     // hook
   }
 
-  protected detachCellContentView(contentView: HtmlView, cellFastener: ComponentFastener<this, CellComponent>): void {
+  protected detachCellContentView(cellContentView: HtmlView, cellFastener: ComponentFastener<this, CellComponent>): void {
     // hook
   }
 
-  protected willSetCellContentView(newContentView: HtmlView | null, oldContentView: HtmlView | null,
+  protected willSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null,
                                    cellFastener: ComponentFastener<this, CellComponent>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowWillSetCellContentView !== void 0) {
-        componentObserver.rowWillSetCellContentView(newContentView, oldContentView, cellFastener);
+      if (componentObserver.componentWillSetCellContentView !== void 0) {
+        componentObserver.componentWillSetCellContentView(newCellContentView, oldCellContentView, cellFastener);
       }
     }
   }
 
-  protected onSetCellContentView(newContentView: HtmlView | null, oldContentView: HtmlView | null,
+  protected onSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null,
                                  cellFastener: ComponentFastener<this, CellComponent>): void {
-    if (oldContentView !== null) {
-      this.detachCellContentView(oldContentView, cellFastener);
+    if (oldCellContentView !== null) {
+      this.detachCellContentView(oldCellContentView, cellFastener);
     }
-    if (newContentView !== null) {
-      this.attachCellContentView(newContentView, cellFastener);
-      this.initCellContentView(newContentView, cellFastener);
+    if (newCellContentView !== null) {
+      this.attachCellContentView(newCellContentView, cellFastener);
+      this.initCellContentView(newCellContentView, cellFastener);
     }
   }
 
-  protected didSetCellContentView(newContentView: HtmlView | null, oldContentView: HtmlView | null,
+  protected didSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null,
                                   cellFastener: ComponentFastener<this, CellComponent>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.rowDidSetCellContentView !== void 0) {
-        componentObserver.rowDidSetCellContentView(newContentView, oldContentView, cellFastener);
+      if (componentObserver.componentDidSetCellContentView !== void 0) {
+        componentObserver.componentDidSetCellContentView(newCellContentView, oldCellContentView, cellFastener);
       }
     }
   }
@@ -515,26 +515,26 @@ export class RowComponent extends CompositeComponent {
     didSetComponent(newCellComponent: CellComponent | null, oldCellComponent: CellComponent | null): void {
       this.owner.didSetCell(newCellComponent, oldCellComponent, this);
     },
-    cellWillSetTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
+    componentWillSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
       this.owner.willSetCellTrait(newCellTrait, oldCellTrait, this);
     },
-    cellDidSetTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
+    componentDidSetCellTrait(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null): void {
       this.owner.onSetCellTrait(newCellTrait, oldCellTrait, this);
       this.owner.didSetCellTrait(newCellTrait, oldCellTrait, this);
     },
-    cellWillSetView(newCellView: CellView | null, oldCellView: CellView | null): void {
+    componentWillSetCellView(newCellView: CellView | null, oldCellView: CellView | null): void {
       this.owner.willSetCellView(newCellView, oldCellView, this);
     },
-    cellDidSetView(newCellView: CellView | null, oldCellView: CellView | null): void {
+    componentDidSetCellView(newCellView: CellView | null, oldCellView: CellView | null): void {
       this.owner.onSetCellView(newCellView, oldCellView, this);
       this.owner.didSetCellView(newCellView, oldCellView, this);
     },
-    cellWillSetContentView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-      this.owner.willSetCellContentView(newContentView, oldContentView, this);
+    componentWillSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null): void {
+      this.owner.willSetCellContentView(newCellContentView, oldCellContentView, this);
     },
-    cellDidSetContentView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-      this.owner.onSetCellContentView(newContentView, oldContentView, this);
-      this.owner.didSetCellContentView(newContentView, oldContentView, this);
+    componentDidSetCellContentView(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null): void {
+      this.owner.onSetCellContentView(newCellContentView, oldCellContentView, this);
+      this.owner.didSetCellContentView(newCellContentView, oldCellContentView, this);
     },
   });
 

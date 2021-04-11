@@ -16,13 +16,6 @@ import {__extends} from "tslib";
 import {Equals, FromAny} from "@swim/util";
 import {ModelFlags, ModelPrecedence, Model} from "../Model";
 import {Trait} from "../Trait";
-import {
-  ModelPropertyFlags,
-  ModelPropertyDescriptorExtends,
-  ModelPropertyDescriptor,
-  ModelPropertyConstructor,
-  ModelProperty,
-} from "./ModelProperty";
 import {StringTraitProperty} from "../"; // forward import
 import {BooleanTraitProperty} from "../"; // forward import
 import {NumberTraitProperty} from "../"; // forward import
@@ -40,6 +33,8 @@ export type TraitPropertyMemberMap<R> = {
   -readonly [K in keyof R as TraitPropertyMemberKey<R, K>]?: TraitPropertyMemberInit<R, K>;
 };
 
+export type TraitPropertyFlags = number;
+
 export interface TraitPropertyInit<T, U = never> {
   extends?: TraitPropertyClass;
   type?: unknown;
@@ -50,15 +45,9 @@ export interface TraitPropertyInit<T, U = never> {
   updateFlags?: ModelFlags;
   willSetState?(newState: T, oldState: T): void;
   didSetState?(newState: T, oldState: T): void;
+  getSuperTrait?(superModel: Model): Trait | null;
   fromAny?(value: T | U): T;
   initState?(): T | U;
-
-  /** @hidden */
-  modelProperty?: ModelPropertyDescriptorExtends<Model, T> | ModelPropertyDescriptor<Model, T>;
-  /** @hidden */
-  modelPropertyConstructor?: ModelPropertyConstructor<Model, T>;
-  /** @hidden */
-  createModelProperty?(): ModelProperty<Model, T>;
 }
 
 export type TraitPropertyDescriptor<R extends Trait, T, U = never, I = {}> = TraitPropertyInit<T, U> & ThisType<TraitProperty<R, T, U> & I> & Partial<I>;
@@ -84,20 +73,6 @@ export interface TraitProperty<R extends Trait, T, U = never> {
 
   readonly owner: R;
 
-  readonly modelProperty: ModelProperty<Model, T> | null;
-
-  /** @hidden */
-  modelPropertyConstructor?: ModelPropertyConstructor<Model, T>;
-
-  /** @hidden */
-  createModelProperty(): ModelProperty<Model, T>;
-
-  /** @hidden */
-  bindModelProperty(): void;
-
-  /** @hidden */
-  unbindModelProperty(): void;
-
   readonly inherit: string | boolean;
 
   setInherit(inherit: string | boolean): void;
@@ -109,7 +84,25 @@ export interface TraitProperty<R extends Trait, T, U = never> {
   /** @hidden */
   readonly superName: string | undefined;
 
-  readonly superProperty: ModelProperty<Model, T> | null;
+  readonly superProperty: TraitProperty<Trait, T> | null;
+
+  /** @hidden */
+  getSuperTrait(superModel: Model): Trait | null;
+
+  /** @hidden */
+  bindSuperProperty(): void;
+
+  /** @hidden */
+  unbindSuperProperty(): void;
+
+  /** @hidden */
+  readonly subProperties: TraitProperty<Trait, T>[] | null;
+
+  /** @hidden */
+  addSubProperty(subProperty: TraitProperty<Trait, T>): void;
+
+  /** @hidden */
+  removeSubProperty(subProperty: TraitProperty<Trait, T>): void;
 
   readonly superState: T | undefined;
 
@@ -132,7 +125,7 @@ export interface TraitProperty<R extends Trait, T, U = never> {
 
   didSetState(newState: T, oldState: T): void;
 
-  isPrecedent(precedence: ModelPrecedence): boolean;
+  takesPrecedence(precedence: ModelPrecedence): boolean;
 
   readonly precedence: ModelPrecedence;
 
@@ -148,10 +141,10 @@ export interface TraitProperty<R extends Trait, T, U = never> {
   didSetPrecedence(newPrecedence: ModelPrecedence, oldPrecedence: ModelPrecedence): void;
 
   /** @hidden */
-  propertyFlags: ModelPropertyFlags;
+  propertyFlags: TraitPropertyFlags;
 
   /** @hidden */
-  setPropertyFlags(propertyFlags: ModelPropertyFlags): void;
+  setPropertyFlags(propertyFlags: TraitPropertyFlags): void;
 
   isUpdated(): boolean;
 
@@ -165,14 +158,43 @@ export interface TraitProperty<R extends Trait, T, U = never> {
   mutate(): void;
 
   /** @hidden */
-  attach(): void;
+  onMutate(): void;
 
   /** @hidden */
-  detach(): void;
+  onMutateInherited(): void;
+
+  /** @hidden */
+  updateSubProperties(newState: T, oldState: T): void;
 
   updateFlags?: ModelFlags;
 
   fromAny(value: T | U): T;
+
+  isMounted(): boolean;
+
+  /** @hidden */
+  mount(): void;
+
+  /** @hidden */
+  willMount(): void;
+
+  /** @hidden */
+  onMount(): void;
+
+  /** @hidden */
+  didMount(): void;
+
+  /** @hidden */
+  unmount(): void;
+
+  /** @hidden */
+  willUnmount(): void;
+
+  /** @hidden */
+  onUnmount(): void;
+
+  /** @hidden */
+  didUnmount(): void;
 
   toString(): string;
 }
@@ -206,6 +228,15 @@ export const TraitProperty = function <R extends Trait, T, U>(
 
   define<R extends Trait, T, U = never, I = {}>(descriptor: TraitPropertyDescriptorExtends<R, T, U, I>): TraitPropertyConstructor<R, T, U, I>;
   define<R extends Trait, T, U = never>(descriptor: TraitPropertyDescriptor<R, T, U>): TraitPropertyConstructor<R, T, U>;
+
+  /** @hidden */
+  MountedFlag: TraitPropertyFlags;
+  /** @hidden */
+  UpdatedFlag: TraitPropertyFlags;
+  /** @hidden */
+  OverrideFlag: TraitPropertyFlags;
+  /** @hidden */
+  InheritedFlag: TraitPropertyFlags;
 }
 __extends(TraitProperty, Object);
 
@@ -221,13 +252,18 @@ function TraitPropertyConstructor<R extends Trait, T, U>(this: TraitProperty<R, 
     value: owner,
     enumerable: true,
   });
-  Object.defineProperty(this, "modelProperty", {
+  Object.defineProperty(this, "inherit", {
+    value: false,
+    enumerable: true,
+    configurable: true,
+  });
+  Object.defineProperty(this, "superProperty", {
     value: null,
     enumerable: true,
     configurable: true,
   });
-  Object.defineProperty(this, "inherit", {
-    value: false,
+  Object.defineProperty(this, "subProperties", {
+    value: null,
     enumerable: true,
     configurable: true,
   });
@@ -237,7 +273,7 @@ function TraitPropertyConstructor<R extends Trait, T, U>(this: TraitProperty<R, 
     configurable: true,
   });
   Object.defineProperty(this, "propertyFlags", {
-    value: ModelProperty.UpdatedFlag,
+    value: TraitProperty.UpdatedFlag,
     enumerable: true,
     configurable: true,
   });
@@ -253,130 +289,117 @@ function TraitPropertyDecoratorFactory<R extends Trait, T, U>(descriptor: TraitP
   return Trait.decorateTraitProperty.bind(Trait, TraitProperty.define(descriptor as TraitPropertyDescriptor<Trait, unknown>));
 }
 
-TraitProperty.prototype.createModelProperty = function <T, U>(this: TraitProperty<Trait, T, U>): ModelProperty<Model, T> {
-  const modelPropertyConstructor = this.modelPropertyConstructor;
-  if (modelPropertyConstructor !== void 0) {
-    const model = this.owner.model;
-    if (model !== null) {
-      const modelProperty = new modelPropertyConstructor(model, this.name);
-      Object.defineProperty(modelProperty, "inherit", {
-        value: this.inherit,
-        enumerable: true,
-        configurable: true,
-      });
-      modelProperty.setPropertyFlags(this.propertyFlags);
-      Object.defineProperty(modelProperty, "ownState", {
-        value: this.state,
-        enumerable: true,
-        configurable: true,
-      });
-      return modelProperty;
-    } else {
-      throw new Error("no model");
-    }
-  } else {
-    throw new Error("no model property constructor");
-  }
-};
-
-TraitProperty.prototype.bindModelProperty = function (this: TraitProperty<Trait, unknown>): void {
-  const model = this.owner.model;
-  if (model !== null) {
-    let modelProperty = model.getLazyModelProperty(this.name);
-    if (modelProperty === null) {
-      modelProperty = this.createModelProperty();
-      model.setModelProperty(this.name, modelProperty);
-    }
-    Object.defineProperty(this, "modelProperty", {
-      value: modelProperty,
-      enumerable: true,
-      configurable: true,
-    });
-    modelProperty.addTraitProperty(this);
-    Object.defineProperty(this, "inherit", {
-      value: modelProperty.inherit,
-      enumerable: true,
-      configurable: true,
-    });
-    this.setPropertyFlags(modelProperty.propertyFlags);
-    Object.defineProperty(this, "ownState", {
-      value: modelProperty.state,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-};
-
-TraitProperty.prototype.unbindModelProperty = function (this: TraitProperty<Trait, unknown>): void {
-  const modelProperty = this.modelProperty;
-  if (modelProperty !== null) {
-    modelProperty.removeTraitProperty(this);
-    Object.defineProperty(this, "modelProperty", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-};
-
 TraitProperty.prototype.setInherit = function (this: TraitProperty<Trait, unknown>, inherit: string | boolean): void {
-  const modelProperty = this.modelProperty;
-  if (modelProperty !== null) {
-    modelProperty.setInherit(inherit);
-  } else if (this.inherit !== inherit) {
+  if (this.inherit !== inherit) {
+    this.unbindSuperProperty();
     Object.defineProperty(this, "inherit", {
       value: inherit,
       enumerable: true,
       configurable: true,
     });
+    this.bindSuperProperty();
   }
 };
 
 TraitProperty.prototype.isInherited = function (this: TraitProperty<Trait, unknown>): boolean {
-  return (this.propertyFlags & ModelProperty.InheritedFlag) !== 0;
+  return (this.propertyFlags & TraitProperty.InheritedFlag) !== 0;
 };
 
 TraitProperty.prototype.setInherited = function (this: TraitProperty<Trait, unknown>, inherited: boolean): void {
-  const modelProperty = this.modelProperty;
-  if (modelProperty !== null) {
-    modelProperty.setInherited(inherited);
-  } else if (inherited && (this.propertyFlags & ModelProperty.InheritedFlag) === 0) {
+  if (inherited && (this.propertyFlags & TraitProperty.InheritedFlag) === 0) {
     const superProperty = this.superProperty;
     if (superProperty !== null && superProperty.precedence >= this.precedence) {
-      this.setPropertyFlags(this.propertyFlags & ~ModelProperty.OverrideFlag | ModelProperty.InheritedFlag);
+      this.setPropertyFlags(this.propertyFlags & ~TraitProperty.OverrideFlag | TraitProperty.InheritedFlag);
       this.setOwnState(superProperty.state);
       this.mutate();
     }
-  } else if (!inherited && (this.propertyFlags & ModelProperty.InheritedFlag) !== 0) {
+  } else if (!inherited && (this.propertyFlags & TraitProperty.InheritedFlag) !== 0) {
     const superProperty = this.superProperty;
     if (superProperty !== null && superProperty.precedence < this.precedence) {
-      this.setPropertyFlags(this.propertyFlags & ~ModelProperty.InheritedFlag);
+      this.setPropertyFlags(this.propertyFlags & ~TraitProperty.InheritedFlag);
     }
   }
 };
 
 Object.defineProperty(TraitProperty.prototype, "superName", {
   get: function (this: TraitProperty<Trait, unknown>): string | undefined {
-    const modelProperty = this.modelProperty;
-    return modelProperty !== null ? modelProperty.superName : void 0;
+    const inherit = this.inherit;
+    return typeof inherit === "string" ? inherit : inherit === true ? this.name : void 0;
   },
   enumerable: true,
   configurable: true,
 });
 
-Object.defineProperty(TraitProperty.prototype, "superProperty", {
-  get: function (this: TraitProperty<Trait, unknown>): ModelProperty<Model, unknown> | null {
-    const modelProperty = this.modelProperty;
-    return modelProperty !== null ? modelProperty.superProperty : null;
-  },
-  enumerable: true,
-  configurable: true,
-});
+TraitProperty.prototype.getSuperTrait = function (this: TraitProperty<Trait, unknown>, superModel: Model): Trait | null {
+  return superModel.getTrait(this.name);
+};
+
+TraitProperty.prototype.bindSuperProperty = function (this: TraitProperty<Trait, unknown>): void {
+  const superName = this.superName;
+  if (superName !== void 0 && this.isMounted()) {
+    let superModel = this.owner.parentModel;
+    while (superModel !== null) {
+      const superTrait = this.getSuperTrait(superModel);
+      const superProperty = superTrait !== null ? superTrait.getLazyTraitProperty(superName) : null;
+      if (superProperty !== null) {
+        Object.defineProperty(this, "superProperty", {
+          value: superProperty,
+          enumerable: true,
+          configurable: true,
+        });
+        superProperty.addSubProperty(this);
+        if ((this.propertyFlags & TraitProperty.OverrideFlag) === 0 && superProperty.precedence >= this.precedence) {
+          this.setPropertyFlags(this.propertyFlags | TraitProperty.InheritedFlag);
+          this.setOwnState(superProperty.state);
+          this.mutate();
+        }
+        break;
+      }
+      superModel = superModel.parentModel;
+    }
+  }
+};
+
+TraitProperty.prototype.unbindSuperProperty = function (this: TraitProperty<Trait, unknown>): void {
+  const superProperty = this.superProperty;
+  if (superProperty !== null) {
+    superProperty.removeSubProperty(this);
+    Object.defineProperty(this, "superProperty", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    this.setPropertyFlags(this.propertyFlags & ~TraitProperty.InheritedFlag);
+  }
+};
+
+TraitProperty.prototype.addSubProperty = function <T>(this: TraitProperty<Trait, T>, subProperty: TraitProperty<Trait, T>): void {
+  let subProperties = this.subProperties;
+  if (subProperties === null) {
+    subProperties = [];
+    Object.defineProperty(this, "subProperties", {
+      value: subProperties,
+      enumerable: true,
+      configurable: true,
+    });
+  }
+  subProperties.push(subProperty);
+};
+
+TraitProperty.prototype.removeSubProperty = function <T>(this: TraitProperty<Trait, T>, subProperty: TraitProperty<Trait, T>): void {
+  const subProperties = this.subProperties;
+  if (subProperties !== null) {
+    const index = subProperties.indexOf(subProperty);
+    if (index >= 0) {
+      subProperties.splice(index, 1);
+    }
+  }
+};
 
 Object.defineProperty(TraitProperty.prototype, "superState", {
   get: function <T>(this: TraitProperty<Trait, T>): T | undefined {
-    const modelProperty = this.modelProperty;
-    return modelProperty !== null ? modelProperty.superState : void 0;
+    const superProperty = this.superProperty;
+    return superProperty !== null ? superProperty.state : void 0;
   },
   enumerable: true,
   configurable: true,
@@ -410,12 +433,8 @@ TraitProperty.prototype.setState = function <T, U>(this: TraitProperty<Trait, T,
   if (precedence === void 0) {
     precedence = Model.Extrinsic;
   }
-  const modelProperty = this.modelProperty;
-  if (modelProperty !== null) {
-    newState = this.fromAny(newState);
-    modelProperty.setState(newState, precedence);
-  } else if (precedence >= this.precedence) {
-    this.setPropertyFlags(this.propertyFlags & ~ModelProperty.InheritedFlag | ModelProperty.OverrideFlag);
+  if (precedence >= this.precedence) {
+    this.setPropertyFlags(this.propertyFlags & ~TraitProperty.InheritedFlag | TraitProperty.OverrideFlag);
     this.setPrecedence(precedence);
     this.setOwnState(newState);
   }
@@ -423,22 +442,18 @@ TraitProperty.prototype.setState = function <T, U>(this: TraitProperty<Trait, T,
 
 TraitProperty.prototype.setOwnState = function <T, U>(this: TraitProperty<Trait, T, U>, newState: T | U): void {
   newState = this.fromAny(newState);
-  const modelProperty = this.modelProperty;
-  if (modelProperty !== null) {
-    modelProperty.setOwnState(newState);
-  } else {
-    const oldState = this.state;
-    if (!Equals(newState, oldState)) {
-      this.willSetState(newState, oldState);
-      Object.defineProperty(this, "ownState", {
-        value: newState,
-        enumerable: true,
-        configurable: true,
-      });
-      this.setPropertyFlags(this.propertyFlags | ModelProperty.UpdatedFlag);
-      this.onSetState(newState, oldState);
-      this.didSetState(newState, oldState);
-    }
+  const oldState = this.state;
+  if (!Equals(newState, oldState)) {
+    this.willSetState(newState, oldState);
+    Object.defineProperty(this, "ownState", {
+      value: newState,
+      enumerable: true,
+      configurable: true,
+    });
+    this.setPropertyFlags(this.propertyFlags | TraitProperty.UpdatedFlag);
+    this.onSetState(newState, oldState);
+    this.updateSubProperties(newState, oldState);
+    this.didSetState(newState, oldState);
   }
 };
 
@@ -457,7 +472,7 @@ TraitProperty.prototype.didSetState = function <T>(this: TraitProperty<Trait, T>
   // hook
 };
 
-TraitProperty.prototype.isPrecedent = function (this: TraitProperty<Trait, unknown>, precedence: ModelPrecedence): boolean {
+TraitProperty.prototype.takesPrecedence = function (this: TraitProperty<Trait, unknown>, precedence: ModelPrecedence): boolean {
   return precedence >= this.precedence;
 };
 
@@ -480,10 +495,10 @@ TraitProperty.prototype.willSetPrecedence = function (this: TraitProperty<Trait,
 };
 
 TraitProperty.prototype.onSetPrecedence = function (this: TraitProperty<Trait, unknown>, newPrecedence: ModelPrecedence, oldPrecedence: ModelPrecedence): void {
-  if (newPrecedence > oldPrecedence && (this.propertyFlags & ModelProperty.InheritedFlag) !== 0) {
+  if (newPrecedence > oldPrecedence && (this.propertyFlags & TraitProperty.InheritedFlag) !== 0) {
     const superProperty = this.superProperty;
     if (superProperty !== null && superProperty.precedence < this.precedence) {
-      this.setPropertyFlags(this.propertyFlags & ~ModelProperty.InheritedFlag);
+      this.setPropertyFlags(this.propertyFlags & ~TraitProperty.InheritedFlag);
     }
   }
 };
@@ -492,7 +507,7 @@ TraitProperty.prototype.didSetPrecedence = function (this: TraitProperty<Trait, 
   // hook
 };
 
-TraitProperty.prototype.setPropertyFlags = function (this: TraitProperty<Trait, unknown>, propertyFlags: ModelPropertyFlags): void {
+TraitProperty.prototype.setPropertyFlags = function (this: TraitProperty<Trait, unknown>, propertyFlags: TraitPropertyFlags): void {
   Object.defineProperty(this, "propertyFlags", {
     value: propertyFlags,
     enumerable: true,
@@ -501,12 +516,12 @@ TraitProperty.prototype.setPropertyFlags = function (this: TraitProperty<Trait, 
 };
 
 TraitProperty.prototype.isUpdated = function (this: TraitProperty<Trait, unknown>): boolean {
-  return (this.propertyFlags & ModelProperty.UpdatedFlag) !== 0;
+  return (this.propertyFlags & TraitProperty.UpdatedFlag) !== 0;
 };
 
 Object.defineProperty(TraitProperty.prototype, "updatedState", {
   get: function <T>(this: TraitProperty<Trait, T>): T | undefined {
-    if ((this.propertyFlags & ModelProperty.UpdatedFlag) !== 0) {
+    if ((this.propertyFlags & TraitProperty.UpdatedFlag) !== 0) {
       return this.state;
     } else {
       return void 0;
@@ -518,8 +533,8 @@ Object.defineProperty(TraitProperty.prototype, "updatedState", {
 
 TraitProperty.prototype.takeUpdatedState = function <T>(this: TraitProperty<Trait, T>): T | undefined {
   const propertyFlags = this.propertyFlags;
-  if ((propertyFlags & ModelProperty.UpdatedFlag) !== 0) {
-    this.setPropertyFlags(propertyFlags & ~ModelProperty.UpdatedFlag);
+  if ((propertyFlags & TraitProperty.UpdatedFlag) !== 0) {
+    this.setPropertyFlags(propertyFlags & ~TraitProperty.UpdatedFlag);
     return this.state;
   } else {
     return void 0;
@@ -527,7 +542,7 @@ TraitProperty.prototype.takeUpdatedState = function <T>(this: TraitProperty<Trai
 }
 
 TraitProperty.prototype.takeState = function <T>(this: TraitProperty<Trait, T>): T {
-  this.setPropertyFlags(this.propertyFlags & ~ModelProperty.UpdatedFlag);
+  this.setPropertyFlags(this.propertyFlags & ~TraitProperty.UpdatedFlag);
   return this.state;
 }
 
@@ -535,16 +550,77 @@ TraitProperty.prototype.mutate = function (this: TraitProperty<Trait, unknown>):
   this.owner.requireUpdate(Model.NeedsMutate);
 };
 
-TraitProperty.prototype.attach = function (this: TraitProperty<Trait, unknown>): void {
-  this.bindModelProperty();
+TraitProperty.prototype.onMutate = function (this: TraitProperty<Trait, unknown>): void {
+  if (this.isInherited()) {
+    this.onMutateInherited();
+  }
 };
 
-TraitProperty.prototype.detach = function (this: TraitProperty<Trait, unknown>): void {
-  this.unbindModelProperty();
+TraitProperty.prototype.onMutateInherited = function <T>(this: TraitProperty<Trait, T>): void {
+  const superProperty = this.superProperty;
+  if (superProperty !== null && superProperty.precedence >= this.precedence) {
+    this.setOwnState(superProperty.state);
+  }
+};
+
+TraitProperty.prototype.updateSubProperties = function <T>(this: TraitProperty<Trait, T>, newState: T, oldState: T): void {
+  const subProperties = this.subProperties;
+  for (let i = 0, n = subProperties !== null ? subProperties.length : 0; i < n; i += 1) {
+    const subProperty = subProperties![i]!;
+    if (subProperty.isInherited()) {
+      subProperty.mutate();
+    }
+  }
 };
 
 TraitProperty.prototype.fromAny = function <T, U>(this: TraitProperty<Trait, T, U>, value: T | U): T {
   return value as T;
+};
+
+TraitProperty.prototype.isMounted = function (this: TraitProperty<Trait, unknown>): boolean {
+  return (this.propertyFlags & TraitProperty.MountedFlag) !== 0;
+};
+
+TraitProperty.prototype.mount = function (this: TraitProperty<Trait, unknown>): void {
+  if ((this.propertyFlags & TraitProperty.MountedFlag) === 0) {
+    this.willMount();
+    this.setPropertyFlags(this.propertyFlags | TraitProperty.MountedFlag);
+    this.onMount();
+    this.didMount();
+  }
+};
+
+TraitProperty.prototype.willMount = function (this: TraitProperty<Trait, unknown>): void {
+  // hook
+};
+
+TraitProperty.prototype.onMount = function (this: TraitProperty<Trait, unknown>): void {
+  this.bindSuperProperty();
+};
+
+TraitProperty.prototype.didMount = function (this: TraitProperty<Trait, unknown>): void {
+  // hook
+};
+
+TraitProperty.prototype.unmount = function (this: TraitProperty<Trait, unknown>): void {
+  if ((this.propertyFlags & TraitProperty.MountedFlag) !== 0) {
+    this.willUnmount();
+    this.setPropertyFlags(this.propertyFlags & ~TraitProperty.MountedFlag);
+    this.onUnmount();
+    this.didUnmount();
+  }
+};
+
+TraitProperty.prototype.willUnmount = function (this: TraitProperty<Trait, unknown>): void {
+  // hook
+};
+
+TraitProperty.prototype.onUnmount = function (this: TraitProperty<Trait, unknown>): void {
+  this.unbindSuperProperty();
+};
+
+TraitProperty.prototype.didUnmount = function (this: TraitProperty<Trait, unknown>): void {
+  // hook
 };
 
 TraitProperty.prototype.toString = function (this: TraitProperty<Trait, unknown>): string {
@@ -564,26 +640,23 @@ TraitProperty.getClass = function (type: unknown): TraitPropertyClass | null {
 
 TraitProperty.define = function <R extends Trait, T, U, I>(descriptor: TraitPropertyDescriptor<R, T, U, I>): TraitPropertyConstructor<R, T, U, I> {
   let _super: TraitPropertyClass | null | undefined = descriptor.extends;
-  const type = descriptor.type;
   const inherit = descriptor.inherit;
   const state = descriptor.state;
   const precedence = descriptor.precedence;
   const initState = descriptor.initState;
-  let modelProperty = descriptor.modelProperty;
   delete descriptor.extends;
   delete descriptor.inherit;
   delete descriptor.state;
   delete descriptor.precedence;
   delete descriptor.initState;
-  delete descriptor.modelProperty;
 
   if (_super === void 0) {
-    _super = TraitProperty.getClass(type);
+    _super = TraitProperty.getClass(descriptor.type);
   }
   if (_super === null) {
     _super = TraitProperty;
-    if (descriptor.fromAny === void 0 && FromAny.is<T, U>(type)) {
-      descriptor.fromAny = type.fromAny;
+    if (descriptor.fromAny === void 0 && FromAny.is<T, U>(descriptor.type)) {
+      descriptor.fromAny = descriptor.type.fromAny;
     }
   }
 
@@ -634,17 +707,10 @@ TraitProperty.define = function <R extends Trait, T, U, I>(descriptor: TraitProp
   _constructor.prototype.constructor = _constructor;
   Object.setPrototypeOf(_constructor.prototype, _super.prototype);
 
-  if (_prototype.modelPropertyConstructor === void 0) {
-    if (modelProperty === void 0) {
-      modelProperty = {
-        extends: void 0,
-        type,
-        inherit,
-        state: state as T,
-      };
-    }
-    _prototype.modelPropertyConstructor = ModelProperty.define(modelProperty as ModelPropertyDescriptor<Model, T>);
-  }
-
   return _constructor;
 };
+
+TraitProperty.MountedFlag = 1 << 0;
+TraitProperty.UpdatedFlag = 1 << 1;
+TraitProperty.OverrideFlag = 1 << 2;
+TraitProperty.InheritedFlag = 1 << 3;

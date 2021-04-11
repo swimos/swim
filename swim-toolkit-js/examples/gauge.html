@@ -33,10 +33,10 @@ const dialView = gaugeView.append(swim.DialView)
     .value(0.33)
     .legend("Legend")
     .on("pointerenter", function (event) {
-      dialView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
     })
     .on("pointerleave", function (event) {
-      dialView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+      dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
     });
 
 setInterval(function () {

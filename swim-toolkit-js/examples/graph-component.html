@@ -43,10 +43,10 @@ class ExampleGraphComponent extends swim.GraphComponent {
     super.initPlotView(plotView, plotFastener);
     plotView.hitMode("plot")
             .on("pointerenter", function (event) {
-              plotView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+              plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
             })
             .on("pointerleave", function (event) {
-              plotView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+              plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
             });
   }
   initDataPointView(dataPointView, dataPointFastener, plotFastener) {
@@ -55,9 +55,9 @@ class ExampleGraphComponent extends swim.GraphComponent {
 }
 
 const plot1Model = new swim.CompoundModel();
-const plot1Trait = new swim.LinePlotTrait();
-plot1Trait.setStroke(swim.Look.accentColor);
-plot1Trait.setStrokeWidth(4);
+const plot1Trait = new swim.LinePlotTrait()
+  .stroke(swim.Look.accentColor)
+  .strokeWidth(4);
 plot1Model.setTrait("plot", plot1Trait);
 
 const dataSet1Trait = new swim.DataSetTrait();
@@ -69,9 +69,7 @@ while (i <= n) {
   const x = i * 2 * Math.PI / samplesPerCycle;
   const y = Math.sin(x) * x;
   const dataPointModel = new swim.CompoundModel();
-  const dataPointTrait = new swim.DataPointTrait();
-  dataPointTrait.setX(x);
-  dataPointTrait.setY(y);
+  const dataPointTrait = new swim.DataPointTrait(x, y);
   dataPointModel.setTrait("dataPoint", dataPointTrait);
   plot1Model.appendChildModel(dataPointModel);
   i += 1;

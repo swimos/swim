@@ -421,7 +421,7 @@ export class TreeLimb extends HtmlView {
     let yState = yValue
     const leaf = this.leaf;
     if (leaf !== null) {
-      if (leaf.top.isPrecedent(View.Intrinsic)) {
+      if (leaf.top.takesPrecedence(View.Intrinsic)) {
         leaf.top.setIntermediateValue(Length.px(yValue * disclosingPhase), Length.px(yState));
       }
       leaf.width.setState(width, View.Intrinsic);
@@ -434,7 +434,7 @@ export class TreeLimb extends HtmlView {
     }
     const subtree = this.subtree;
     if (subtree !== null && disclosureState !== "collapsed") {
-      if (subtree.top.isPrecedent(View.Intrinsic)) {
+      if (subtree.top.takesPrecedence(View.Intrinsic)) {
         subtree.top.setIntermediateValue(Length.px(yValue * disclosingPhase), Length.px(yState));
       }
       subtree.width.setState(width, View.Intrinsic);
@@ -452,7 +452,7 @@ export class TreeLimb extends HtmlView {
       yValue += limbSpacing * disclosingPhase;
       yState += limbSpacing;
     }
-    if (this.height.isPrecedent(View.Intrinsic)) {
+    if (this.height.takesPrecedence(View.Intrinsic)) {
       this.height.setIntermediateValue(Length.px(yValue), Length.px(yState));
     }
   }

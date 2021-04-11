@@ -13,61 +13,23 @@
 // limitations under the License.
 
 export {
+  AnyGeoPerspective,
+  GeoPerspectiveInit,
+  GeoPerspective,
+} from "./GeoPerspective";
+
+export {GeoViewport} from "./GeoViewport";
+
+export {GeoViewContext} from "./GeoViewContext";
+export {
   GeoViewInit,
   GeoView,
 } from "./GeoView";
 export {GeoViewObserver} from "./GeoViewObserver";
+export {GeoViewController} from "./GeoViewController";
 
-export {
-  AnyGeoIconView,
-  GeoIconViewInit,
-  GeoIconView,
-} from "./GeoIconView";
-export {GeoIconViewObserver} from "./GeoIconViewObserver";
+export {GeoTrait} from "./GeoTrait";
+export {GeoTraitObserver} from "./GeoTraitObserver";
 
-export {
-  AnyGeoCircleView,
-  GeoCircleViewInit,
-  GeoCircleView,
-} from "./GeoCircleView";
-export {GeoCircleViewObserver} from "./GeoCircleViewObserver";
-
-export {
-  AnyGeoArcView,
-  GeoArcViewInit,
-  GeoArcView,
-} from "./GeoArcView";
-export {GeoArcViewObserver} from "./GeoArcViewObserver";
-
-export {
-  GeoPathViewInit,
-  GeoPathView,
-} from "./GeoPathView";
-export {GeoPathViewObserver} from "./GeoPathViewObserver";
-
-export {
-  GeoLineViewInit,
-  GeoLineView,
-} from "./GeoLineView";
-export {GeoLineViewObserver} from "./GeoLineViewObserver";
-
-export {
-  GeoAreaViewInit,
-  GeoAreaView,
-} from "./GeoAreaView";
-export {GeoAreaViewObserver} from "./GeoAreaViewObserver";
-
-export {
-  GeoPointLabelPlacement,
-  AnyGeoPointView,
-  GeoPointViewInit,
-  GeoPointView,
-} from "./GeoPointView";
-export {GeoPointViewObserver} from "./GeoPointViewObserver";
-
-export {
-  AnyGeoPlotView,
-  GeoPlotViewInit,
-  GeoPlotView,
-} from "./GeoPlotView";
-export {GeoPlotViewObserver} from "./GeoPlotViewObserver";
+export {GeoComponent} from "./GeoComponent";
+export {GeoComponentObserver} from "./GeoComponentObserver";

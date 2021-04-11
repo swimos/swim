@@ -51,10 +51,95 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
     return "bubble";
   }
 
-  @ViewAnimator({type: Length, state: Length.px(5)})
+  protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillSetPlotRadius !== void 0) {
+      viewController.viewWillSetPlotRadius(newRadius, oldRadius, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetPlotRadius !== void 0) {
+        viewObserver.viewWillSetPlotRadius(newRadius, oldRadius, this);
+      }
+    }
+  }
+
+  protected onSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
+    // hook
+  }
+
+  protected didSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetPlotRadius !== void 0) {
+        viewObserver.viewDidSetPlotRadius(newRadius, oldRadius, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidSetPlotRadius !== void 0) {
+      viewController.viewDidSetPlotRadius(newRadius, oldRadius, this);
+    }
+  }
+
+  @ViewAnimator<BubblePlotView<X, Y>, Length | null, AnyLength | null>({
+    type: Length,
+    state: Length.px(5),
+    willSetValue(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.willSetRadius(newRadius, oldRadius);
+    },
+    didSetValue(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.onSetRadius(newRadius, oldRadius);
+      this.owner.didSetRadius(newRadius, oldRadius);
+    },
+  })
   declare radius: ViewAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Color, state: null, look: Look.accentColor})
+  protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillSetPlotFill !== void 0) {
+      viewController.viewWillSetPlotFill(newFill, oldFill, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetPlotFill !== void 0) {
+        viewObserver.viewWillSetPlotFill(newFill, oldFill, this);
+      }
+    }
+  }
+
+  protected onSetFill(newFill: Color | null, oldFill: Color | null): void {
+    // hook
+  }
+
+  protected didSetFill(newFill: Color | null, oldFill: Color | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetPlotFill !== void 0) {
+        viewObserver.viewDidSetPlotFill(newFill, oldFill, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidSetPlotFill !== void 0) {
+      viewController.viewDidSetPlotFill(newFill, oldFill, this);
+    }
+  }
+
+  @ViewAnimator<BubblePlotView<X, Y>, Color | null, AnyColor | null>({
+    type: Color,
+    state: null,
+    look: Look.accentColor,
+    willSetValue(newFill: Color | null, oldFill: Color | null): void {
+      this.owner.willSetFill(newFill, oldFill);
+    },
+    didSetValue(newFill: Color | null, oldFill: Color | null): void {
+      this.owner.onSetFill(newFill, oldFill);
+      this.owner.didSetFill(newFill, oldFill);
+    },
+  })
   declare fill: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Color, state: null})

@@ -837,6 +837,8 @@ export class CanvasView extends HtmlView {
 
   protected onResize(viewContext: ViewContextType<this>): void {
     super.onResize(viewContext);
+    this.resizeCanvas(this.node);
+    this.resetRenderer();
     this.requireUpdate(View.NeedsLayout | View.NeedsRender | View.NeedsComposite);
   }
 
@@ -943,12 +945,6 @@ export class CanvasView extends HtmlView {
   protected didDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     this.detectHitTargets();
     super.didDisplay(displayFlags, viewContext);
-  }
-
-  protected onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
-    this.resizeCanvas(this.node);
-    this.resetRenderer();
   }
 
   protected willRender(viewContext: ViewContextType<this>): void {

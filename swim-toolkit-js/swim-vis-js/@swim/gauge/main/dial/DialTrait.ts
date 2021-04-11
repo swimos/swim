@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
-import {GenericTrait} from "@swim/model";
+import {TraitProperty, GenericTrait} from "@swim/model";
 import type {GraphicsView} from "@swim/graphics";
 import type {DialTraitObserver} from "./DialTraitObserver";
 
@@ -24,54 +23,14 @@ export type DialLegend = DialLegendFunction | string;
 export type DialLegendFunction = (dialTrait: DialTrait) => GraphicsView | string | null;
 
 export class DialTrait extends GenericTrait {
-  constructor() {
-    super();
-    Object.defineProperty(this, "value", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "limit", {
-      value: 1,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "label", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "legend", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-
   declare readonly traitObservers: ReadonlyArray<DialTraitObserver>;
-
-  declare readonly value: number;
-
-  setValue(newValue: number): void {
-    const oldValue = this.value;
-    if (newValue !== oldValue) {
-      this.willSetValue(newValue, oldValue);
-      Object.defineProperty(this, "value", {
-        value: newValue,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetValue(newValue, oldValue);
-      this.didSetValue(newValue, oldValue);
-    }
-  }
 
   protected willSetValue(newValue: number, oldValue: number): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dialTraitWillSetValue !== void 0) {
-        traitObserver.dialTraitWillSetValue(newValue, oldValue, this);
+      if (traitObserver.traitWillSetDialValue !== void 0) {
+        traitObserver.traitWillSetDialValue(newValue, oldValue, this);
       }
     }
   }
@@ -84,34 +43,31 @@ export class DialTrait extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dialTraitDidSetValue !== void 0) {
-        traitObserver.dialTraitDidSetValue(newValue, oldValue, this);
+      if (traitObserver.traitDidSetDialValue !== void 0) {
+        traitObserver.traitDidSetDialValue(newValue, oldValue, this);
       }
     }
   }
 
-  declare readonly limit: number;
-
-  setLimit(newLimit: number): void {
-    const oldLimit = this.limit;
-    if (newLimit !== oldLimit) {
-      this.willSetLimit(newLimit, oldLimit);
-      Object.defineProperty(this, "limit", {
-        value: newLimit,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetLimit(newLimit, oldLimit);
-      this.didSetLimit(newLimit, oldLimit);
-    }
-  }
+  @TraitProperty<DialTrait, number>({
+    type: Number,
+    state: 0,
+    willSetState(newValue: number, oldValue: number): void {
+      this.owner.willSetValue(newValue, oldValue);
+    },
+    didSetState(newValue: number, oldValue: number): void {
+      this.owner.onSetValue(newValue, oldValue);
+      this.owner.didSetValue(newValue, oldValue);
+    },
+  })
+  declare value: TraitProperty<this, number>;
 
   protected willSetLimit(newLimit: number, oldLimit: number): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dialTraitWillSetLimit !== void 0) {
-        traitObserver.dialTraitWillSetLimit(newLimit, oldLimit, this);
+      if (traitObserver.traitWillSetDialLimit !== void 0) {
+        traitObserver.traitWillSetDialLimit(newLimit, oldLimit, this);
       }
     }
   }
@@ -124,34 +80,31 @@ export class DialTrait extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dialTraitDidSetLimit !== void 0) {
-        traitObserver.dialTraitDidSetLimit(newLimit, oldLimit, this);
+      if (traitObserver.traitDidSetDialLimit !== void 0) {
+        traitObserver.traitDidSetDialLimit(newLimit, oldLimit, this);
       }
     }
   }
 
-  declare readonly label: DialLabel | null;
-
-  setLabel(newLabel: DialLabel | null): void {
-    const oldLabel = this.label;
-    if (!Equals(newLabel, oldLabel)) {
-      this.willSetLabel(newLabel, oldLabel);
-      Object.defineProperty(this, "label", {
-        value: newLabel,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetLabel(newLabel, oldLabel);
-      this.didSetLabel(newLabel, oldLabel);
-    }
-  }
+  @TraitProperty<DialTrait, number>({
+    type: Number,
+    state: 1,
+    willSetState(newLimit: number, oldLimit: number): void {
+      this.owner.willSetLimit(newLimit, oldLimit);
+    },
+    didSetState(newLimit: number, oldLimit: number): void {
+      this.owner.onSetLimit(newLimit, oldLimit);
+      this.owner.didSetLimit(newLimit, oldLimit);
+    },
+  })
+  declare limit: TraitProperty<this, number>;
 
   protected willSetLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dialTraitWillSetLabel !== void 0) {
-        traitObserver.dialTraitWillSetLabel(newLabel, oldLabel, this);
+      if (traitObserver.traitWillSetDialLabel !== void 0) {
+        traitObserver.traitWillSetDialLabel(newLabel, oldLabel, this);
       }
     }
   }
@@ -164,8 +117,8 @@ export class DialTrait extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dialTraitDidSetLabel !== void 0) {
-        traitObserver.dialTraitDidSetLabel(newLabel, oldLabel, this);
+      if (traitObserver.traitDidSetDialLabel !== void 0) {
+        traitObserver.traitDidSetDialLabel(newLabel, oldLabel, this);
       }
     }
   }
@@ -174,28 +127,24 @@ export class DialTrait extends GenericTrait {
     return void 0;
   }
 
-  declare readonly legend: DialLegend | null;
-
-  setLegend(newLegend: DialLegend | null): void {
-    const oldLegend = this.legend;
-    if (!Equals(newLegend, oldLegend)) {
-      this.willSetLegend(newLegend, oldLegend);
-      Object.defineProperty(this, "legend", {
-        value: newLegend,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetLegend(newLegend, oldLegend);
-      this.didSetLegend(newLegend, oldLegend);
-    }
-  }
+  @TraitProperty<DialTrait, DialLabel | null>({
+    state: null,
+    willSetState(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
+      this.owner.willSetLabel(newLabel, oldLabel);
+    },
+    didSetState(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
+      this.owner.onSetLabel(newLabel, oldLabel);
+      this.owner.didSetLabel(newLabel, oldLabel);
+    },
+  })
+  declare label: TraitProperty<this, DialLabel | null>;
 
   protected willSetLegend(newLegend: DialLegend | null, oldLegend: DialLegend | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dialTraitWillSetLegend !== void 0) {
-        traitObserver.dialTraitWillSetLegend(newLegend, oldLegend, this);
+      if (traitObserver.traitWillSetDialLegend !== void 0) {
+        traitObserver.traitWillSetDialLegend(newLegend, oldLegend, this);
       }
     }
   }
@@ -208,8 +157,8 @@ export class DialTrait extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dialTraitDidSetLegend !== void 0) {
-        traitObserver.dialTraitDidSetLegend(newLegend, oldLegend, this);
+      if (traitObserver.traitDidSetDialLegend !== void 0) {
+        traitObserver.traitDidSetDialLegend(newLegend, oldLegend, this);
       }
     }
   }
@@ -217,4 +166,16 @@ export class DialTrait extends GenericTrait {
   formatLegend(value: number, limit: number): string | undefined {
     return void 0;
   }
+
+  @TraitProperty<DialTrait, DialLegend | null>({
+    state: null,
+    willSetState(newLegend: DialLegend | null, oldLegend: DialLegend | null): void {
+      this.owner.willSetLegend(newLegend, oldLegend);
+    },
+    didSetState(newLegend: DialLegend | null, oldLegend: DialLegend | null): void {
+      this.owner.onSetLegend(newLegend, oldLegend);
+      this.owner.didSetLegend(newLegend, oldLegend);
+    },
+  })
+  declare legend: TraitProperty<this, DialLegend | null>;
 }

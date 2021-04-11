@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Color} from "@swim/style";
 import type {SeriesPlotViewObserver} from "./SeriesPlotViewObserver";
 import type {AreaPlotView} from "./AreaPlotView";
 
 export interface AreaPlotViewObserver<X, Y, V extends AreaPlotView<X, Y> = AreaPlotView<X, Y>> extends SeriesPlotViewObserver<X, Y, V> {
+  viewWillSetPlotFill?(newFill: Color | null, oldFill: Color | null, view: V): void;
+
+  viewDidSetPlotFill?(newFill: Color | null, oldFill: Color | null, view: V): void;
 }

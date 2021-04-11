@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {MapRasterViewContext} from "./MapRasterViewContext";
+export {GeoRasterViewContext} from "./GeoRasterViewContext";
 export {
-  MapRasterViewInit,
-  MapRasterView,
-} from "./MapRasterView";
+  GeoRasterViewInit,
+  GeoRasterView,
+} from "./GeoRasterView";

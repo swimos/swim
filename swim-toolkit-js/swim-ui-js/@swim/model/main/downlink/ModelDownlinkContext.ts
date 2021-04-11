@@ -27,7 +27,7 @@ export interface ModelDownlinkContext {
   requireUpdate(updateFlags: ModelFlags): void;
 
   readonly warpRef: {
-    readonly state: WarpRef | undefined;
+    readonly state: WarpRef | null;
   };
 
   readonly warpService: {

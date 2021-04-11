@@ -44,8 +44,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.chartTraitWillSetGraph !== void 0) {
-        traitObserver.chartTraitWillSetGraph(newGraphTrait, oldGraphTrait, targetTrait, this);
+      if (traitObserver.traitWillSetGraph !== void 0) {
+        traitObserver.traitWillSetGraph(newGraphTrait, oldGraphTrait, targetTrait, this);
       }
     }
   }
@@ -64,8 +64,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.chartTraitDidSetGraph !== void 0) {
-        traitObserver.chartTraitDidSetGraph(newGraphTrait, oldGraphTrait, targetTrait, this);
+      if (traitObserver.traitDidSetGraph !== void 0) {
+        traitObserver.traitDidSetGraph(newGraphTrait, oldGraphTrait, targetTrait, this);
       }
     }
   }
@@ -105,8 +105,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.chartTraitWillSetTopAxis !== void 0) {
-        traitObserver.chartTraitWillSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait, this);
+      if (traitObserver.traitWillSetTopAxis !== void 0) {
+        traitObserver.traitWillSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait, this);
       }
     }
   }
@@ -125,8 +125,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.chartTraitDidSetTopAxis !== void 0) {
-        traitObserver.chartTraitDidSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait, this);
+      if (traitObserver.traitDidSetTopAxis !== void 0) {
+        traitObserver.traitDidSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait, this);
       }
     }
   }
@@ -165,8 +165,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.chartTraitWillSetRightAxis !== void 0) {
-        traitObserver.chartTraitWillSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait, this);
+      if (traitObserver.traitWillSetRightAxis !== void 0) {
+        traitObserver.traitWillSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait, this);
       }
     }
   }
@@ -185,8 +185,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.chartTraitDidSetRightAxis !== void 0) {
-        traitObserver.chartTraitDidSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait, this);
+      if (traitObserver.traitDidSetRightAxis !== void 0) {
+        traitObserver.traitDidSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait, this);
       }
     }
   }
@@ -225,8 +225,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.chartTraitWillSetBottomAxis !== void 0) {
-        traitObserver.chartTraitWillSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait, this);
+      if (traitObserver.traitWillSetBottomAxis !== void 0) {
+        traitObserver.traitWillSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait, this);
       }
     }
   }
@@ -245,8 +245,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.chartTraitDidSetBottomAxis !== void 0) {
-        traitObserver.chartTraitDidSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait, this);
+      if (traitObserver.traitDidSetBottomAxis !== void 0) {
+        traitObserver.traitDidSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait, this);
       }
     }
   }
@@ -285,8 +285,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.chartTraitWillSetLeftAxis !== void 0) {
-        traitObserver.chartTraitWillSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait, this);
+      if (traitObserver.traitWillSetLeftAxis !== void 0) {
+        traitObserver.traitWillSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait, this);
       }
     }
   }
@@ -305,8 +305,8 @@ export class ChartTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.chartTraitDidSetLeftAxis !== void 0) {
-        traitObserver.chartTraitDidSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait, this);
+      if (traitObserver.traitDidSetLeftAxis !== void 0) {
+        traitObserver.traitDidSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait, this);
       }
     }
   }

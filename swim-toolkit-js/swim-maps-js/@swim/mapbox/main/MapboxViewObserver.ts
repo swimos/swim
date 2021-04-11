@@ -13,7 +13,15 @@
 // limitations under the License.
 
 import type {MapViewObserver} from "@swim/map";
+import type {MapboxViewport} from "./MapboxViewport";
 import type {MapboxView} from "./MapboxView";
 
 export interface MapboxViewObserver<V extends MapboxView = MapboxView> extends MapViewObserver<V> {
+  viewWillSetGeoViewport?(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport, view: V): void;
+
+  viewDidSetGeoViewport?(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport, view: V): void;
+
+  viewWillMoveMap?(view: V): void;
+
+  viewDidMoveMap?(view: V): void;
 }

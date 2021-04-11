@@ -16,7 +16,7 @@ import type {HtmlView, HtmlViewObserver} from "@swim/dom";
 import type {CellView} from "./CellView";
 
 export interface CellViewObserver<V extends CellView = CellView> extends HtmlViewObserver<V> {
-  cellViewWillSetContent?(newContentView: HtmlView | null, oldContentView: HtmlView | null, view: V): void;
+  viewWillSetCellContent?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, view: V): void;
 
-  cellViewDidSetContent?(newContentView: HtmlView | null, oldContentView: HtmlView | null, view: V): void;
+  viewDidSetCellContent?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, view: V): void;
 }

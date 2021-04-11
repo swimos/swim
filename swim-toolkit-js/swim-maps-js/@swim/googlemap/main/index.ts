@@ -14,7 +14,7 @@
 
 /// <reference types="googlemaps"/>
 
-export {GoogleMapProjection} from "./GoogleMapProjection";
+export {GoogleMapViewport} from "./GoogleMapViewport";
 
 export {GoogleMapView} from "./GoogleMapView";
 export {GoogleMapViewObserver} from "./GoogleMapViewObserver";

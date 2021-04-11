@@ -15,7 +15,7 @@
 import type {Timing} from "@swim/mapping";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {CssRule} from "../css/CssRule";
-import {StyleSheet} from "../css/StyleSheet";
+import {StyleSheetContext, StyleSheet} from "../css/StyleSheet";
 import {HtmlViewInit, HtmlView} from "../html/HtmlView";
 import type {StyleViewObserver} from "./StyleViewObserver";
 import type {StyleViewController} from "./StyleViewController";
@@ -24,7 +24,7 @@ export interface StyleViewInit extends HtmlViewInit {
   viewController?: StyleViewController;
 }
 
-export class StyleView extends HtmlView {
+export class StyleView extends HtmlView implements StyleSheetContext {
   constructor(node: HTMLStyleElement) {
     super(node);
     Object.defineProperty(this, "sheet", {

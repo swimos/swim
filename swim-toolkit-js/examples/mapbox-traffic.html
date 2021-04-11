@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
     <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.1.1/mapbox-gl.css">
   </head>
-  <body style="display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; margin: 0;">
-    <div id="ui" style="display: flex; position: relative; width: 100%; height: 100%;">
-    </div>
+  <body style="width: 100vw; height: 100vh; margin: 0;">
     <script src="../../swim-system-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
     <script src="../../swim-system-js/swim-mesh-js/@swim/mesh/dist/main/swim-mesh.js"></script>
     <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
@@ -22,25 +20,25 @@ const GREEN = swim.Color.parse("#54e218");
 const INTERSECTION_COLOR = swim.Color.parse("#00a6ed");
 const RIPPLE_COLOR = swim.Color.parse("#efefef").alpha(0.25);
 
-const uiView = swim.HtmlView.fromNode(document.getElementById("ui"));
+const bodyView = swim.HtmlView.fromNode(document.body);
 
 mapboxgl.accessToken = "pk.eyJ1Ijoic3dpbWl0IiwiYSI6ImNqY2c3NXZkYzFoa2QycXQ1eXl1Mnd6M3EifQ.qpRE7xC08AyZfxJ56LoN7w";
 const map = new mapboxgl.Map({
-  container: uiView.node,
+  container: bodyView.node,
   style: "mapbox://styles/mapbox/dark-v10",
   center: {lng: -122.157139, lat: 37.450809},
-  pitch: 70,
+  pitch: 60,
   zoom: 18,
   bearing: -160,
   boxZoom: false,
 });
 
 const mapView = new swim.MapboxView(map);
-mapView.overlayCanvas()
-    .pointerEventsEnabled(true);
+mapView.container.setView(bodyView);
+mapView.canvas.view.pointerEventsEnabled(true);
 
-const mapGrid = mapView.append(swim.MapGridView);
-//mapGrid.tileOutlineColor("#008f11");
+const layerView = mapView.append(swim.GeoTreeView);
+//layerView.treeOutlineColor("#008f11");
 
 const host = swim.hostRef("warps://traffic.swim.services");
 
@@ -52,14 +50,14 @@ const intersectionsLink = host.downlinkMap()
       const lng = value.get("lng").numberValue();
       const lat = value.get("lat").numberValue();
 
-      let intersectionView = mapGrid.getChildView(key);
+      let intersectionView = layerView.getChildView(key);
       if (intersectionView === null) {
         const intersectionId = value.get("id").stringValue();
         intersectionView = new swim.GeoCircleView()
             .geoCenter([lng, lat])
             .radius(5)
             .fill(INTERSECTION_COLOR);
-        mapGrid.setChildView(key, intersectionView);
+        layerView.setChildView(key, intersectionView);
         linkIntersection(intersectionId, host.nodeRef(key), intersectionView);
       }
     })
@@ -81,7 +79,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
       intersectionPopover.setSource(intersectionView);
       intersectionPopover.hideModal();
     }
-    uiView.modalService.toggleModal(intersectionPopover, {multi: event.shiftKey});
+    bodyView.modalService.toggleModal(intersectionPopover, {multi: event.shiftKey});
   });
   intersectionView.on("click", function (event) {
     event.stopPropagation();
@@ -122,7 +120,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
                 detectorApproaches.push(approachView);
                 detectors[detectorId] = detectorApproaches;
               }
-              mapGrid.setChildView(approachKey, approachView);
+              layerView.setChildView(approachKey, approachView);
             }
           }
         })
@@ -184,7 +182,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
   }
 
   function rippleIntersection() {
-    if (document.hidden || !mapView.geoBounds.contains(intersectionView.geoCenter.value)) {
+    if (document.hidden || !mapView.geoFrame.contains(intersectionView.geoCenter.value)) {
       return;
     }
     const ripple = new swim.GeoCircleView()
@@ -192,7 +190,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
         .radius(0)
         .stroke(RIPPLE_COLOR)
         .strokeWidth(1);
-    mapView.append(ripple);
+    layerView.append(ripple);
     const frame = mapView.viewFrame;
     const radius = Math.min(frame.width, frame.height) / 8;
     const timing = swim.Easing.linear.withDuration(2000);

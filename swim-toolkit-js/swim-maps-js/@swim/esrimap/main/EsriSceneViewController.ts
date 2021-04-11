@@ -13,8 +13,16 @@
 // limitations under the License.
 
 import {EsriViewController} from "./EsriViewController";
+import type {EsriSceneViewport} from "./EsriSceneViewport";
 import type {EsriSceneView} from "./EsriSceneView";
 import type {EsriSceneViewObserver} from "./EsriSceneViewObserver";
 
 export class EsriSceneViewController<V extends EsriSceneView = EsriSceneView> extends EsriViewController<V> implements EsriSceneViewObserver<V> {
+  viewWillSetGeoViewport(newGeoViewport: EsriSceneViewport, oldGeoViewport: EsriSceneViewport, view: V): void {
+    // hook
+  }
+
+  viewDidSetGeoViewport(newGeoViewport: EsriSceneViewport, oldGeoViewport: EsriSceneViewport, view: V): void {
+    // hook
+  }
 }

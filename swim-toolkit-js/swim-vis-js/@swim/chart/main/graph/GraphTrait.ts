@@ -82,8 +82,8 @@ export class GraphTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.graphTraitWillSetPlot !== void 0) {
-        traitObserver.graphTraitWillSetPlot(newPlotTrait, oldPlotTrait, targetTrait, this);
+      if (traitObserver.traitWillSetPlot !== void 0) {
+        traitObserver.traitWillSetPlot(newPlotTrait, oldPlotTrait, targetTrait, this);
       }
     }
   }
@@ -104,8 +104,8 @@ export class GraphTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.graphTraitDidSetPlot !== void 0) {
-        traitObserver.graphTraitDidSetPlot(newPlotTrait, oldPlotTrait, targetTrait, this);
+      if (traitObserver.traitDidSetPlot !== void 0) {
+        traitObserver.traitDidSetPlot(newPlotTrait, oldPlotTrait, targetTrait, this);
       }
     }
   }

@@ -13,8 +13,16 @@
 // limitations under the License.
 
 import {EsriViewController} from "./EsriViewController";
+import type {EsriMapViewport} from "./EsriMapViewport";
 import type {EsriMapView} from "./EsriMapView";
 import type {EsriMapViewObserver} from "./EsriMapViewObserver";
 
 export class EsriMapViewController<V extends EsriMapView = EsriMapView> extends EsriViewController<V> implements EsriMapViewObserver<V> {
+  viewWillSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport, view: V): void {
+    // hook
+  }
+
+  viewDidSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport, view: V): void {
+    // hook
+  }
 }

@@ -49,10 +49,10 @@ const ringView = gaugeView.append(swim.DialView, "ring")
     .dialColor(swim.Color.transparent())
     .legend("Legend")
     .on("pointerenter", function (event) {
-      ringView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+      ringView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
     })
     .on("pointerleave", function (event) {
-      ringView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+      ringView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
     });
 
 setInterval(function () {

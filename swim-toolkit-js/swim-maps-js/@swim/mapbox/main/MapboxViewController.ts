@@ -12,17 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {GeoPoint} from "@swim/geo";
-import {MapGraphicsViewController, MapViewController} from "@swim/map";
+import {MapViewController} from "@swim/map";
+import type {MapboxViewport} from "./MapboxViewport";
 import type {MapboxView} from "./MapboxView";
 import type {MapboxViewObserver} from "./MapboxViewObserver";
 
-export class MapboxViewController<V extends MapboxView = MapboxView> extends MapGraphicsViewController<V> implements MapViewController<V>, MapboxViewObserver<V> {
-  mapViewWillMove(mapCenter: GeoPoint, mapZoom: number, view: V): void {
+export class MapboxViewController<V extends MapboxView = MapboxView> extends MapViewController<V> implements MapboxViewObserver<V> {
+  viewWillSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport, view: V): void {
     // hook
   }
 
-  mapViewDidMove(mapCenter: GeoPoint, mapZoom: number, view: V): void {
+  viewDidSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport, view: V): void {
+    // hook
+  }
+
+  viewWillMoveMap(view: V): void {
+    // hook
+  }
+
+  viewDidMoveMap(view: V): void {
     // hook
   }
 }

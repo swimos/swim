@@ -132,14 +132,14 @@ export class SliceView extends LayerView {
 
   protected willSetValue(newValue: number, oldValue: number): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.sliceViewWillSetValue !== void 0) {
-      viewController.sliceViewWillSetValue(newValue, oldValue, this);
+    if (viewController !== null && viewController.viewWillSetSliceValue !== void 0) {
+      viewController.viewWillSetSliceValue(newValue, oldValue, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.sliceViewWillSetValue !== void 0) {
-        viewObserver.sliceViewWillSetValue(newValue, oldValue, this);
+      if (viewObserver.viewWillSetSliceValue !== void 0) {
+        viewObserver.viewWillSetSliceValue(newValue, oldValue, this);
       }
     }
   }
@@ -152,13 +152,13 @@ export class SliceView extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.sliceViewDidSetValue !== void 0) {
-        viewObserver.sliceViewDidSetValue(newValue, oldValue, this);
+      if (viewObserver.viewDidSetSliceValue !== void 0) {
+        viewObserver.viewDidSetSliceValue(newValue, oldValue, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.sliceViewDidSetValue !== void 0) {
-      viewController.sliceViewDidSetValue(newValue, oldValue, this);
+    if (viewController !== null && viewController.viewDidSetSliceValue !== void 0) {
+      viewController.viewDidSetSliceValue(newValue, oldValue, this);
     }
   }
 
@@ -243,14 +243,14 @@ export class SliceView extends LayerView {
 
   protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.sliceViewWillSetLabel !== void 0) {
-      viewController.sliceViewWillSetLabel(newLabelView, oldLabelView, this);
+    if (viewController !== null && viewController.viewWillSetSliceLabel !== void 0) {
+      viewController.viewWillSetSliceLabel(newLabelView, oldLabelView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.sliceViewWillSetLabel !== void 0) {
-        viewObserver.sliceViewWillSetLabel(newLabelView, oldLabelView, this);
+      if (viewObserver.viewWillSetSliceLabel !== void 0) {
+        viewObserver.viewWillSetSliceLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -269,13 +269,13 @@ export class SliceView extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.sliceViewDidSetLabel !== void 0) {
-        viewObserver.sliceViewDidSetLabel(newLabelView, oldLabelView, this);
+      if (viewObserver.viewDidSetSliceLabel !== void 0) {
+        viewObserver.viewDidSetSliceLabel(newLabelView, oldLabelView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.sliceViewDidSetLabel !== void 0) {
-      viewController.sliceViewDidSetLabel(newLabelView, oldLabelView, this);
+    if (viewController !== null && viewController.viewDidSetSliceLabel !== void 0) {
+      viewController.viewDidSetSliceLabel(newLabelView, oldLabelView, this);
     }
   }
 
@@ -318,14 +318,14 @@ export class SliceView extends LayerView {
 
   protected willSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.sliceViewWillSetLegend !== void 0) {
-      viewController.sliceViewWillSetLegend(newLegendView, oldLegendView, this);
+    if (viewController !== null && viewController.viewWillSetSliceLegend !== void 0) {
+      viewController.viewWillSetSliceLegend(newLegendView, oldLegendView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.sliceViewWillSetLegend !== void 0) {
-        viewObserver.sliceViewWillSetLegend(newLegendView, oldLegendView, this);
+      if (viewObserver.viewWillSetSliceLegend !== void 0) {
+        viewObserver.viewWillSetSliceLegend(newLegendView, oldLegendView, this);
       }
     }
   }
@@ -344,13 +344,13 @@ export class SliceView extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.sliceViewDidSetLegend !== void 0) {
-        viewObserver.sliceViewDidSetLegend(newLegendView, oldLegendView, this);
+      if (viewObserver.viewDidSetSliceLegend !== void 0) {
+        viewObserver.viewDidSetSliceLegend(newLegendView, oldLegendView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.sliceViewDidSetLegend !== void 0) {
-      viewController.sliceViewDidSetLegend(newLegendView, oldLegendView, this);
+    if (viewController !== null && viewController.viewDidSetSliceLegend !== void 0) {
+      viewController.viewDidSetSliceLegend(newLegendView, oldLegendView, this);
     }
   }
 

@@ -57,8 +57,8 @@ export class BubblePlotTrait<X, Y> extends ScatterPlotTrait<X, Y> {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.bubblePlotTraitWillSetRadius !== void 0) {
-        traitObserver.bubblePlotTraitWillSetRadius(newRadius, oldRadius, this);
+      if (traitObserver.traitWillSetPlotRadius !== void 0) {
+        traitObserver.traitWillSetPlotRadius(newRadius, oldRadius, this);
       }
     }
   }
@@ -71,8 +71,8 @@ export class BubblePlotTrait<X, Y> extends ScatterPlotTrait<X, Y> {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.bubblePlotTraitDidSetRadius !== void 0) {
-        traitObserver.bubblePlotTraitDidSetRadius(newRadius, oldRadius, this);
+      if (traitObserver.traitDidSetPlotRadius !== void 0) {
+        traitObserver.traitDidSetPlotRadius(newRadius, oldRadius, this);
       }
     }
   }
@@ -100,8 +100,8 @@ export class BubblePlotTrait<X, Y> extends ScatterPlotTrait<X, Y> {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.bubblePlotTraitWillSetFill !== void 0) {
-        traitObserver.bubblePlotTraitWillSetFill(newFill, oldFill, this);
+      if (traitObserver.traitWillSetPlotFill !== void 0) {
+        traitObserver.traitWillSetPlotFill(newFill, oldFill, this);
       }
     }
   }
@@ -114,8 +114,8 @@ export class BubblePlotTrait<X, Y> extends ScatterPlotTrait<X, Y> {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.bubblePlotTraitDidSetFill !== void 0) {
-        traitObserver.bubblePlotTraitDidSetFill(newFill, oldFill, this);
+      if (traitObserver.traitDidSetPlotFill !== void 0) {
+        traitObserver.traitDidSetPlotFill(newFill, oldFill, this);
       }
     }
   }

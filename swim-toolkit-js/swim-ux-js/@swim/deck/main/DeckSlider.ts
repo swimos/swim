@@ -229,7 +229,7 @@ export abstract class DeckSliderItem<V extends DeckSlider, S extends HtmlView> e
   }
 
   protected viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, itemView: S): void {
-    if (itemView.color.isPrecedent(View.Intrinsic)) {
+    if (itemView.color.takesPrecedence(View.Intrinsic)) {
       itemView.color.setState(theme.getOr(this.owner.colorLook, mood, null), timing, View.Intrinsic);
     }
   }

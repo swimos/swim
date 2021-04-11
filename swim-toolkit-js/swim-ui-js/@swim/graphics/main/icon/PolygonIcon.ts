@@ -17,7 +17,7 @@ import {Output, Debug, Format} from "@swim/codec";
 import type {Interpolate, Interpolator} from "@swim/mapping";
 import {AnyAngle, Angle, BoxR2} from "@swim/math";
 import type {Color} from "@swim/style";
-import {Look, Feel, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
+import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import type {GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {DrawingContext} from "../drawing/DrawingContext";
 import {DrawingRenderer} from "../drawing/DrawingRenderer";
@@ -89,12 +89,12 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     }
   }
 
-  modifyMood(feel: Feel, ...entries: [Feel, number | undefined][]): PolygonIcon {
+  modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>): PolygonIcon {
     let oldMoodModifier = this.moodModifier;
     if (oldMoodModifier === null) {
       oldMoodModifier = MoodMatrix.empty();
     }
-    const newMoodModifier = oldMoodModifier.updatedCol(feel, true, ...entries);
+    const newMoodModifier = oldMoodModifier.updatedCol(feel, updates, true);
     if (!newMoodModifier.equals(oldMoodModifier)) {
       return this.withMoodModifier(newMoodModifier);
     } else {

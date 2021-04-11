@@ -38,35 +38,35 @@ class ExampleGaugeComponent extends swim.GaugeComponent {
   initDialView(dialView) {
     super.initDialView(dialView);
     dialView.on("pointerenter", function (event) {
-              dialView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+              dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
             })
             .on("pointerleave", function (event) {
-              dialView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+              dialView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
             });
   }
-  onSetDialViewValue(newValue, oldValue, dialFastener) {
-    super.onSetDialViewValue(newValue, oldValue, dialFastener);
+  onSetDialValue(newValue, oldValue, dialFastener) {
+    super.onSetDialValue(newValue, oldValue, dialFastener);
     const label = Math.round(100 * newValue).toString();
-    dialFastener.component.setLabel(label);
+    dialFastener.component.dial.trait.label.setState(label);
   }
 }
 
 const dial1Model = new swim.CompoundModel();
-const dial1Trait = new swim.DialTrait();
-dial1Trait.setValue(Math.random());
-dial1Trait.setLegend("Dial 1");
+const dial1Trait = new swim.DialTrait()
+  .value(Math.random())
+  .legend("Dial 1");
 dial1Model.setTrait("dial", dial1Trait);
 
 const dial2Model = new swim.CompoundModel();
-const dial2Trait = new swim.DialTrait();
-dial2Trait.setValue(Math.random());
-dial2Trait.setLegend("Dial 2");
+const dial2Trait = new swim.DialTrait()
+  .value(Math.random())
+  .legend("Dial 2");
 dial2Model.setTrait("dial", dial2Trait);
 
 const dial3Model = new swim.CompoundModel();
-const dial3Trait = new swim.DialTrait();
-dial3Trait.setValue(Math.random());
-dial3Trait.setLegend("Dial 3");
+const dial3Trait = new swim.DialTrait()
+  .value(Math.random())
+  .legend("Dial 3");
 dial3Model.setTrait("dial", dial3Trait);
 
 const gaugeModel = new swim.CompoundModel();
@@ -83,9 +83,9 @@ gaugeComponent.gauge.injectView(canvasView);
 gaugeComponent.gauge.setTrait(gaugeTrait);
 
 setInterval(function () {
-  dial1Trait.setValue(0.1 + 0.9 * Math.random());
-  dial2Trait.setValue(0.1 + 0.9 * Math.random());
-  dial3Trait.setValue(0.1 + 0.9 * Math.random());
+  dial1Trait.value.setState(0.1 + 0.9 * Math.random());
+  dial2Trait.value.setState(0.1 + 0.9 * Math.random());
+  dial3Trait.value.setState(0.1 + 0.9 * Math.random());
 }, 1000);
 
 setInterval(function () {

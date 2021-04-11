@@ -13,22 +13,21 @@
 // limitations under the License.
 
 import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
 import type {AreaPlotView} from "./AreaPlotView";
 import type {AreaPlotTrait} from "./AreaPlotTrait";
 import type {SeriesPlotComponentObserver} from "./SeriesPlotComponentObserver";
 import type {AreaPlotComponent} from "./AreaPlotComponent";
 
 export interface AreaPlotComponentObserver<X, Y, C extends AreaPlotComponent<X, Y> = AreaPlotComponent<X, Y>> extends SeriesPlotComponentObserver<X, Y, C> {
-  plotWillSetTrait?(newPlotTrait: AreaPlotTrait<X, Y> | null, oldPlotTrait: AreaPlotTrait<X, Y> | null, component: C): void;
+  componentWillSetPlotTrait?(newPlotTrait: AreaPlotTrait<X, Y> | null, oldPlotTrait: AreaPlotTrait<X, Y> | null, component: C): void;
 
-  plotDidSetTrait?(newPlotTrait: AreaPlotTrait<X, Y> | null, oldPlotTrait: AreaPlotTrait<X, Y> | null, component: C): void;
+  componentDidSetPlotTrait?(newPlotTrait: AreaPlotTrait<X, Y> | null, oldPlotTrait: AreaPlotTrait<X, Y> | null, component: C): void;
 
-  plotWillSetView?(newPlotView: AreaPlotView<X, Y> | null, oldPlotView: AreaPlotView<X, Y> | null, component: C): void;
+  componentWillSetPlotView?(newPlotView: AreaPlotView<X, Y> | null, oldPlotView: AreaPlotView<X, Y> | null, component: C): void;
 
-  plotDidSetView?(newPlotView: AreaPlotView<X, Y> | null, oldPlotView: AreaPlotView<X, Y> | null, component: C): void;
+  componentDidSetPlotView?(newPlotView: AreaPlotView<X, Y> | null, oldPlotView: AreaPlotView<X, Y> | null, component: C): void;
 
-  areaPlotWillSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, component: C): void;
+  componentWillSetPlotFill?(newFill: Color | null, oldFill: Color | null, component: C): void;
 
-  areaPlotDidSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, component: C): void;
+  componentDidSetPlotFill?(newFill: Color | null, oldFill: Color | null, component: C): void;
 }

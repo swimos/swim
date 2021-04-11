@@ -39,15 +39,15 @@ class ExampleTableComponent extends swim.TableComponent {
 }
 
 const colAModel = new swim.CompoundModel();
-const colATrait = new swim.ColTrait();
-colATrait.setLayout({key: "a", grow: 2, textColor: swim.Look.mutedColor});
-colATrait.setHeader("A");
+const colATrait = new swim.ColTrait()
+  .layout({key: "a", grow: 2, textColor: swim.Look.mutedColor})
+  .header("A");
 colAModel.setTrait("colA", colATrait);
 
 const colBModel = new swim.CompoundModel();
-const colBTrait = new swim.ColTrait();
-colBTrait.setLayout({key: "b", grow: 1});
-colBTrait.setHeader("B");
+const colBTrait = new swim.ColTrait()
+  .layout({key: "b", grow: 1})
+  .header("B");
 colBModel.setTrait("colB", colBTrait);
 
 const tableModel = new swim.CompoundModel();
@@ -60,10 +60,10 @@ tableModel.appendChildModel(colBModel);
 function createRowModel(i) {
   const rowModel = new swim.CompoundModel();
   const rowTrait = new swim.RowTrait();
-  const cellATrait = new swim.CellTrait();
-  cellATrait.setContent(i + "A");
-  const cellBTrait = new swim.CellTrait();
-  cellBTrait.setContent(i + "B");
+  const cellATrait = new swim.CellTrait()
+    .content(i + "A");
+  const cellBTrait = new swim.CellTrait()
+    .content(i + "B");
   rowModel.setTrait("col", rowTrait);
   rowModel.setTrait("a", cellATrait);
   rowModel.setTrait("b", cellBTrait);

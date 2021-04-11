@@ -16,7 +16,7 @@ import {Equals, Equivalent, Lazy} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 import type {Interpolate, Interpolator} from "@swim/mapping";
 import {BoxR2} from "@swim/math";
-import {Feel, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
+import {Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import type {GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {DrawingContext} from "../drawing/DrawingContext";
 import {DrawingRenderer} from "../drawing/DrawingRenderer";
@@ -99,12 +99,12 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
     }
   }
 
-  modifyMood(feel: Feel, ...entries: [Feel, number | undefined][]): EnclosedIcon {
+  modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>): EnclosedIcon {
     let oldMoodModifier = this.moodModifier;
     if (oldMoodModifier === null) {
       oldMoodModifier = MoodMatrix.empty();
     }
-    const newMoodModifier = oldMoodModifier.updatedCol(feel, true, ...entries);
+    const newMoodModifier = oldMoodModifier.updatedCol(feel, updates, true);
     if (!newMoodModifier.equals(oldMoodModifier)) {
       return this.withMoodModifier(newMoodModifier);
     } else {
@@ -124,12 +124,12 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
     }
   }
 
-  modifyOuterMood(feel: Feel, ...entries: [Feel, number | undefined][]): EnclosedIcon {
+  modifyOuterMood(feel: Feel, updates: MoodVectorUpdates<Feel>): EnclosedIcon {
     let oldOuterMoodModifier = this.outerMoodModifier;
     if (oldOuterMoodModifier === null) {
       oldOuterMoodModifier = MoodMatrix.empty();
     }
-    const newOuterMoodModifier = oldOuterMoodModifier.updatedCol(feel, true, ...entries);
+    const newOuterMoodModifier = oldOuterMoodModifier.updatedCol(feel, updates, true);
     if (!newOuterMoodModifier.equals(oldOuterMoodModifier)) {
       return this.withOuterMoodModifier(newOuterMoodModifier);
     } else {
@@ -149,12 +149,12 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
     }
   }
 
-  modifyInnerMood(feel: Feel, ...entries: [Feel, number | undefined][]): EnclosedIcon {
+  modifyInnerMood(feel: Feel, updates: MoodVectorUpdates<Feel>): EnclosedIcon {
     let oldInnerMoodModifier = this.innerMoodModifier;
     if (oldInnerMoodModifier === null) {
       oldInnerMoodModifier = MoodMatrix.empty();
     }
-    const newInnerMoodModifier = oldInnerMoodModifier.updatedCol(feel, true, ...entries);
+    const newInnerMoodModifier = oldInnerMoodModifier.updatedCol(feel, updates, true);
     if (!newInnerMoodModifier.equals(oldInnerMoodModifier)) {
       return this.withInnerMoodModifier(newInnerMoodModifier);
     } else {
@@ -343,6 +343,6 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
 
   @Lazy
   static get embossedMoodModifier(): MoodMatrix {
-    return MoodMatrix.empty().updatedCol(Feel.default, true, [Feel.embossed, 1]);
+    return MoodMatrix.empty().updatedCol(Feel.default, [[Feel.embossed, 1]], true);
   }
 }

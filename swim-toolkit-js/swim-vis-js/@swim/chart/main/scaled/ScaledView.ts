@@ -224,14 +224,14 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
   protected willSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetXScale !== void 0) {
-      viewController.scaledViewWillSetXScale(newXScale, oldXScale, this);
+    if (viewController !== null && viewController.viewWillSetXScale !== void 0) {
+      viewController.viewWillSetXScale(newXScale, oldXScale, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetXScale !== void 0) {
-        viewObserver.scaledViewWillSetXScale(newXScale, oldXScale, this);
+      if (viewObserver.viewWillSetXScale !== void 0) {
+        viewObserver.viewWillSetXScale(newXScale, oldXScale, this);
       }
     }
   }
@@ -245,13 +245,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetXScale !== void 0) {
-        viewObserver.scaledViewDidSetXScale(newXScale, oldXScale, this);
+      if (viewObserver.viewDidSetXScale !== void 0) {
+        viewObserver.viewDidSetXScale(newXScale, oldXScale, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetXScale !== void 0) {
-      viewController.scaledViewDidSetXScale(newXScale, oldXScale, this);
+    if (viewController !== null && viewController.viewDidSetXScale !== void 0) {
+      viewController.viewDidSetXScale(newXScale, oldXScale, this);
     }
   }
 
@@ -287,14 +287,14 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
   protected willSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetYScale !== void 0) {
-      viewController.scaledViewWillSetYScale(newYScale, oldYScale, this);
+    if (viewController !== null && viewController.viewWillSetYScale !== void 0) {
+      viewController.viewWillSetYScale(newYScale, oldYScale, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetYScale !== void 0) {
-        viewObserver.scaledViewWillSetYScale(newYScale, oldYScale, this);
+      if (viewObserver.viewWillSetYScale !== void 0) {
+        viewObserver.viewWillSetYScale(newYScale, oldYScale, this);
       }
     }
   }
@@ -308,13 +308,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetYScale !== void 0) {
-        viewObserver.scaledViewDidSetYScale(newYScale, oldYScale, this);
+      if (viewObserver.viewDidSetYScale !== void 0) {
+        viewObserver.viewDidSetYScale(newYScale, oldYScale, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetYScale !== void 0) {
-      viewController.scaledViewDidSetYScale(newYScale, oldYScale, this);
+    if (viewController !== null && viewController.viewDidSetYScale !== void 0) {
+      viewController.viewDidSetYScale(newYScale, oldYScale, this);
     }
   }
 
@@ -456,14 +456,14 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
   protected willSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetXDataDomain !== void 0) {
-      viewController.scaledViewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+    if (viewController !== null && viewController.viewWillSetXDataDomain !== void 0) {
+      viewController.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetXDataDomain !== void 0) {
-        viewObserver.scaledViewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+      if (viewObserver.viewWillSetXDataDomain !== void 0) {
+        viewObserver.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
       }
     }
   }
@@ -478,13 +478,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetXDataDomain !== void 0) {
-        viewObserver.scaledViewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+      if (viewObserver.viewDidSetXDataDomain !== void 0) {
+        viewObserver.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetXDataDomain !== void 0) {
-      viewController.scaledViewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+    if (viewController !== null && viewController.viewDidSetXDataDomain !== void 0) {
+      viewController.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
     }
   }
 
@@ -521,14 +521,14 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
   protected willSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetYDataDomain !== void 0) {
-      viewController.scaledViewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+    if (viewController !== null && viewController.viewWillSetYDataDomain !== void 0) {
+      viewController.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetYDataDomain !== void 0) {
-        viewObserver.scaledViewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+      if (viewObserver.viewWillSetYDataDomain !== void 0) {
+        viewObserver.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
       }
     }
   }
@@ -543,13 +543,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetYDataDomain !== void 0) {
-        viewObserver.scaledViewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+      if (viewObserver.viewDidSetYDataDomain !== void 0) {
+        viewObserver.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetYDataDomain !== void 0) {
-      viewController.scaledViewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+    if (viewController !== null && viewController.viewDidSetYDataDomain !== void 0) {
+      viewController.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
     }
   }
 
@@ -722,14 +722,14 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
   protected willSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetXRangePadding !== void 0) {
-      viewController.scaledViewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+    if (viewController !== null && viewController.viewWillSetXRangePadding !== void 0) {
+      viewController.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetXRangePadding !== void 0) {
-        viewObserver.scaledViewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+      if (viewObserver.viewWillSetXRangePadding !== void 0) {
+        viewObserver.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
       }
     }
   }
@@ -742,18 +742,18 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetXRangePadding !== void 0) {
-        viewObserver.scaledViewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+      if (viewObserver.viewDidSetXRangePadding !== void 0) {
+        viewObserver.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetXRangePadding !== void 0) {
-      viewController.scaledViewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+    if (viewController !== null && viewController.viewDidSetXRangePadding !== void 0) {
+      viewController.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
     }
   }
 
   protected updateXRangePadding(xScaledRangePadding: readonly [number, number], scaledFastener: ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>): void {
-    if (this.xRangePadding.isPrecedent(View.Intrinsic)) {
+    if (this.xRangePadding.takesPrecedence(View.Intrinsic)) {
       let xRangePadding = this.xRangePadding.state;
       if (xRangePadding === null || this.scaledFasteners.length === 1) {
         xRangePadding = xScaledRangePadding;
@@ -780,14 +780,14 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
   protected willSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetYRangePadding !== void 0) {
-      viewController.scaledViewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+    if (viewController !== null && viewController.viewWillSetYRangePadding !== void 0) {
+      viewController.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetYRangePadding !== void 0) {
-        viewObserver.scaledViewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+      if (viewObserver.viewWillSetYRangePadding !== void 0) {
+        viewObserver.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
       }
     }
   }
@@ -800,18 +800,18 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetYRangePadding !== void 0) {
-        viewObserver.scaledViewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+      if (viewObserver.viewDidSetYRangePadding !== void 0) {
+        viewObserver.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetYRangePadding !== void 0) {
-      viewController.scaledViewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+    if (viewController !== null && viewController.viewDidSetYRangePadding !== void 0) {
+      viewController.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
     }
   }
 
   protected updateYRangePadding(yScaledRangePadding: readonly [number, number], scaledFastener: ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>): void {
-    if (this.yRangePadding.isPrecedent(View.Intrinsic)) {
+    if (this.yRangePadding.takesPrecedence(View.Intrinsic)) {
       let yRangePadding = this.yRangePadding.state;
       if (yRangePadding === null || this.scaledFasteners.length === 1) {
         yRangePadding = yScaledRangePadding;
@@ -1142,14 +1142,14 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   protected willSetScaled(newScaledView: ScaledXView<X> | ScaledYView<Y> | null, oldScaledView: ScaledXView<X> | ScaledYView<Y> | null,
                           targetView: View | null, scaledFastener: ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetScaled !== void 0) {
-      viewController.scaledViewWillSetScaled(newScaledView, oldScaledView, targetView, this);
+    if (viewController !== null && viewController.viewWillSetScaled !== void 0) {
+      viewController.viewWillSetScaled(newScaledView, oldScaledView, targetView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetScaled !== void 0) {
-        viewObserver.scaledViewWillSetScaled(newScaledView, oldScaledView, targetView, this);
+      if (viewObserver.viewWillSetScaled !== void 0) {
+        viewObserver.viewWillSetScaled(newScaledView, oldScaledView, targetView, this);
       }
     }
   }
@@ -1172,13 +1172,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetScaled !== void 0) {
-        viewObserver.scaledViewDidSetScaled(newScaledView, oldScaledView, targetView, this);
+      if (viewObserver.viewDidSetScaled !== void 0) {
+        viewObserver.viewDidSetScaled(newScaledView, oldScaledView, targetView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetScaled !== void 0) {
-      viewController.scaledViewDidSetScaled(newScaledView, oldScaledView, targetView, this);
+    if (viewController !== null && viewController.viewDidSetScaled !== void 0) {
+      viewController.viewDidSetScaled(newScaledView, oldScaledView, targetView, this);
     }
   }
 
@@ -1227,22 +1227,22 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     didSetView(newScaledView: ScaledView<unknown, unknown> | null, oldScaledView: ScaledXView<unknown> | ScaledYView<unknown> | null, targetView: View | null): void {
       this.owner.didSetScaled(newScaledView, oldScaledView, targetView, this);
     },
-    scaledViewDidSetXScale(newXScale: ContinuousScale<unknown, number> | null, oldXScale: ContinuousScale<unknown, number> | null): void {
+    viewDidSetXScale(newXScale: ContinuousScale<unknown, number> | null, oldXScale: ContinuousScale<unknown, number> | null): void {
       this.owner.onSetScaledXScale(newXScale, oldXScale, this);
     },
-    scaledViewDidSetYScale(newYScale: ContinuousScale<unknown, number> | null, oldYScale: ContinuousScale<unknown, number> | null): void {
+    viewDidSetYScale(newYScale: ContinuousScale<unknown, number> | null, oldYScale: ContinuousScale<unknown, number> | null): void {
       this.owner.onSetScaledYScale(newYScale, oldYScale, this);
     },
-    scaledViewDidSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
+    viewDidSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
       this.owner.onSetScaledXRangePadding(newXRangePadding, oldXRangePadding, this);
     },
-    scaledViewDidSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
+    viewDidSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
       this.owner.onSetScaledYRangePadding(newYRangePadding, oldYRangePadding, this);
     },
-    scaledViewDidSetXDataDomain(newXDomain: Domain<unknown> | null, oldXDomain: Domain<unknown> | null): void {
+    viewDidSetXDataDomain(newXDomain: Domain<unknown> | null, oldXDomain: Domain<unknown> | null): void {
       this.owner.onSetScaledXDataDomain(newXDomain, oldXDomain, this);
     },
-    scaledViewDidSetYDataDomain(newYDomain: Domain<unknown> | null, oldYDomain: Domain<unknown> | null): void {
+    viewDidSetYDataDomain(newYDomain: Domain<unknown> | null, oldYDomain: Domain<unknown> | null): void {
       this.owner.onSetScaledYDataDomain(newYDomain, oldYDomain, this);
     },
   });

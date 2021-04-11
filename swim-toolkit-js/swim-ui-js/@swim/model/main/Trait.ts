@@ -20,6 +20,7 @@ import type {TraitObserverType, TraitObserver} from "./TraitObserver";
 import type {TraitConsumerType, TraitConsumer} from "./TraitConsumer";
 import type {WarpManager} from "./warp/WarpManager";
 import type {TraitServiceConstructor, TraitService} from "./service/TraitService";
+import type {ModelPropertyConstructor, ModelProperty} from "./property/ModelProperty";
 import type {TraitPropertyConstructor, TraitProperty} from "./property/TraitProperty";
 import type {TraitModelConstructor, TraitModel} from "./fastener/TraitModel";
 import type {TraitFastenerConstructor, TraitFastener} from "./fastener/TraitFastener";
@@ -35,6 +36,9 @@ export type TraitFlags = number;
 export interface TraitPrototype {
   /** @hidden */
   traitServiceConstructors?: {[serviceName: string]: TraitServiceConstructor<Trait, unknown> | undefined};
+
+  /** @hidden */
+  modelPropertyConstructors?: {[propertyName: string]: ModelPropertyConstructor<Model, unknown> | undefined};
 
   /** @hidden */
   traitPropertyConstructors?: {[propertyName: string]: TraitPropertyConstructor<Trait, unknown> | undefined};
@@ -573,7 +577,7 @@ export abstract class Trait implements ModelDownlinkContext {
 
   declare readonly warpService: TraitService<this, WarpManager>; // defined by WarpService
 
-  declare readonly warpRef: TraitProperty<this, WarpRef | undefined>; // defined by GenericTrait
+  declare readonly warpRef: ModelProperty<TraitModelType<this>, WarpRef | null>; // defined by GenericTrait
 
   isMounted(): boolean {
     return (this.traitFlags & Trait.MountedFlag) !== 0;
@@ -1088,6 +1092,12 @@ export abstract class Trait implements ModelDownlinkContext {
     return traitService;
   }
 
+  abstract hasModelProperty(propertyName: string): boolean;
+
+  abstract getModelProperty(propertyName: string): ModelProperty<TraitModelType<this>, unknown> | null;
+
+  abstract setModelProperty(propertyName: string, modelProperty: ModelProperty<TraitModelType<this>, unknown> | null): void;
+
   abstract hasTraitProperty(propertyName: string): boolean;
 
   abstract getTraitProperty(propertyName: string): TraitProperty<this, unknown> | null;
@@ -1199,6 +1209,23 @@ export abstract class Trait implements ModelDownlinkContext {
       configurable: true,
       enumerable: true,
     });
+  }
+
+  /** @hidden */
+  static getModelPropertyConstructor(propertyName: string, traitPrototype: TraitPrototype | null = null): ModelPropertyConstructor<Model, unknown> | null {
+    if (traitPrototype === null) {
+      traitPrototype = this.prototype as TraitPrototype;
+    }
+    do {
+      if (Object.prototype.hasOwnProperty.call(traitPrototype, "modelPropertyConstructors")) {
+        const constructor = traitPrototype.modelPropertyConstructors![propertyName];
+        if (constructor !== void 0) {
+          return constructor;
+        }
+      }
+      traitPrototype = Object.getPrototypeOf(traitPrototype);
+    } while (traitPrototype !== null);
+    return null;
   }
 
   /** @hidden */

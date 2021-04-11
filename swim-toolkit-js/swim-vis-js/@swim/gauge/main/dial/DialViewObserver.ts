@@ -17,19 +17,19 @@ import type {GraphicsView} from "@swim/graphics";
 import type {DialView} from "./DialView";
 
 export interface DialViewObserver<V extends DialView = DialView> extends ViewObserver<V> {
-  dialViewWillSetValue?(newValue: number, oldValue: number, view: V): void;
+  viewWillSetDialValue?(newValue: number, oldValue: number, view: V): void;
 
-  dialViewDidSetValue?(newValue: number, oldValue: number, view: V): void;
+  viewDidSetDialValue?(newValue: number, oldValue: number, view: V): void;
 
-  dialViewWillSetLimit?(newLimit: number, oldLimit: number, view: V): void;
+  viewWillSetDialLimit?(newLimit: number, oldLimit: number, view: V): void;
 
-  dialViewDidSetLimit?(newLimit: number, oldLimit: number, view: V): void;
+  viewDidSetDialLimit?(newLimit: number, oldLimit: number, view: V): void;
 
-  dialViewWillSetLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewWillSetDialLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
 
-  dialViewDidSetLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewDidSetDialLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
 
-  dialViewWillSetLegend?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, view: V): void;
+  viewWillSetDialLegend?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, view: V): void;
 
-  dialViewDidSetLegend?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, view: V): void;
+  viewDidSetDialLegend?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, view: V): void;
 }

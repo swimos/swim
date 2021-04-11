@@ -54,7 +54,10 @@ export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
   protected attachPlotTrait(plotTrait: AreaPlotTrait<X, Y>): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
-      this.setPlotViewFill(plotTrait.fill, plotTrait);
+      const fill = plotTrait.fill.state;
+      if (fill !== null) {
+        this.setPlotFill(fill, plotTrait);
+      }
     }
   }
 
@@ -66,8 +69,8 @@ export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.plotWillSetTrait !== void 0) {
-        componentObserver.plotWillSetTrait(newPlotTrait, oldPlotTrait, this);
+      if (componentObserver.componentWillSetPlotTrait !== void 0) {
+        componentObserver.componentWillSetPlotTrait(newPlotTrait, oldPlotTrait, this);
       }
     }
   }
@@ -86,32 +89,8 @@ export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.plotDidSetTrait !== void 0) {
-        componentObserver.plotDidSetTrait(newPlotTrait, oldPlotTrait, this);
-      }
-    }
-  }
-
-  protected willSetPlotTraitFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<X, Y>): void {
-    const componentObservers = this.componentObservers;
-    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
-      const componentObserver = componentObservers[i]!;
-      if (componentObserver.areaPlotWillSetFill !== void 0) {
-        componentObserver.areaPlotWillSetFill(newFill, oldFill, this);
-      }
-    }
-  }
-
-  protected onSetPlotTraitFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<X, Y>): void {
-    this.setPlotViewFill(newFill, plotTrait);
-  }
-
-  protected didSetPlotTraitFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<X, Y>): void {
-    const componentObservers = this.componentObservers;
-    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
-      const componentObserver = componentObservers[i]!;
-      if (componentObserver.areaPlotDidSetFill !== void 0) {
-        componentObserver.areaPlotDidSetFill(newFill, oldFill, this);
+      if (componentObserver.componentDidSetPlotTrait !== void 0) {
+        componentObserver.componentDidSetPlotTrait(newPlotTrait, oldPlotTrait, this);
       }
     }
   }
@@ -124,14 +103,13 @@ export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
     // hook
   }
 
-  protected themePlotView(plotView: AreaPlotView<X, Y>, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
-    // hook
-  }
-
   protected attachPlotView(plotView: AreaPlotView<X, Y>): void {
     const plotTrait = this.plot.trait;
     if (plotTrait !== null) {
-      this.setPlotViewFill(plotTrait.fill, plotTrait);
+      const fill = plotTrait.fill.state;
+      if (fill !== null) {
+        this.setPlotFill(fill, plotTrait);
+      }
     }
 
     const dataPointFasteners = this.dataPointFasteners;
@@ -151,8 +129,8 @@ export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.plotWillSetView !== void 0) {
-        componentObserver.plotWillSetView(newPlotView, oldPlotView, this);
+      if (componentObserver.componentWillSetPlotView !== void 0) {
+        componentObserver.componentWillSetPlotView(newPlotView, oldPlotView, this);
       }
     }
   }
@@ -171,13 +149,17 @@ export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.plotDidSetView !== void 0) {
-        componentObserver.plotDidSetView(newPlotView, oldPlotView, this);
+      if (componentObserver.componentDidSetPlotView !== void 0) {
+        componentObserver.componentDidSetPlotView(newPlotView, oldPlotView, this);
       }
     }
   }
 
-  protected setPlotViewFill(fill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected themePlotView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, plotView: AreaPlotView<X, Y>): void {
+    // hook
+  }
+
+  protected setPlotFill(fill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<X, Y>, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -196,6 +178,30 @@ export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
     }
   }
 
+  protected willSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentWillSetPlotFill !== void 0) {
+        componentObserver.componentWillSetPlotFill(newFill, oldFill, this);
+      }
+    }
+  }
+
+  protected onSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
+    // hook
+  }
+
+  protected didSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<X, Y>): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentDidSetPlotFill !== void 0) {
+        componentObserver.componentDidSetPlotFill(newFill, oldFill, this);
+      }
+    }
+  }
+
   /** @hidden */
   static PlotFastener = ComponentViewTrait.define<AreaPlotComponent<unknown, unknown>, AreaPlotView<unknown, unknown>, AreaPlotTrait<unknown, unknown>>({
     viewType: AreaPlotView,
@@ -210,7 +216,14 @@ export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
       this.owner.didSetPlotView(newPlotView, oldPlotView);
     },
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, plotView: AreaPlotView<unknown, unknown>): void {
-      this.owner.themePlotView(plotView, theme, mood, timing);
+      this.owner.themePlotView(theme, mood, timing, plotView);
+    },
+    viewWillSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<unknown, unknown>): void {
+      this.owner.willSetPlotFill(newFill, oldFill, plotView);
+    },
+    viewDidSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<unknown, unknown>): void {
+      this.owner.onSetPlotFill(newFill, oldFill, plotView);
+      this.owner.didSetPlotFill(newFill, oldFill, plotView);
     },
     createView(): AreaPlotView<unknown, unknown> | null {
       return this.owner.createPlotView();
@@ -226,12 +239,8 @@ export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
     didSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
       this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
     },
-    areaPlotTraitWillSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<unknown, unknown>): void {
-      this.owner.willSetPlotTraitFill(newFill, oldFill, plotTrait);
-    },
-    areaPlotTraitDidSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<unknown, unknown>): void {
-      this.owner.onSetPlotTraitFill(newFill, oldFill, plotTrait);
-      this.owner.didSetPlotTraitFill(newFill, oldFill, plotTrait);
+    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<unknown, unknown>): void {
+      this.owner.setPlotFill(newFill, plotTrait);
     },
   });
 

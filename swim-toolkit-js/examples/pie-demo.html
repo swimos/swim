@@ -186,24 +186,23 @@ function createSlice() {
   sliceView.label.view.textColor.setLook(swim.Look.backgroundColor);
   sliceView.label.view.setHidden(true);
   sliceView.legend.view.setHidden(true);
-  sliceView.modifyMood(swim.Feel.default, [swim.Feel.primary, 1]);
+  sliceView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
   sliceView.addViewObserver({
-    sliceViewDidSetValue(newValue) {
+    viewWillLayout() {
       // Update the slice label.
-      sliceView.label.view.text(Math.round(100 * newValue / sliceView.total()) + "%")
+      sliceView.label.view.text(Math.round(100 * sliceView.value.value / sliceView.total.value) + "%")
                           .setHidden(!showLabels.checked);
-
       // Update the slice legend.
-      sliceView.legend.view.text(sliceView.key + " (" + Math.round(100 * newValue) + ")")
+      sliceView.legend.view.text(sliceView.key + " (" + Math.round(100 * sliceView.value.value) + ")")
                            .setHidden(!showLegend.checked);
     },
   });
   // Add mouse event handlers.
   sliceView.on("pointerenter", function (event) {
-             sliceView.modifyMood(swim.Feel.default, [swim.Feel.hovering, 1], true);
+             sliceView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, 1]], true);
            })
            .on("pointerleave", function (event) {
-             sliceView.modifyMood(swim.Feel.default, [swim.Feel.hovering, void 0], true);
+             sliceView.modifyMood(swim.Feel.default, [[swim.Feel.hovering, void 0]], true);
            });
   // Return the initialized slice.
   return sliceView;
@@ -264,11 +263,11 @@ function updatePie() {
              .labelRadius(swim.Length.pct(labelRadius.checked ? 33 + 34 * Math.random() : 50), timing)
              .tickAlign(tickAlign.checked ? Math.random() : 0.5, timing);
     if (newValue < 0.5) {
-      sliceView.modifyMood(swim.Feel.default, [swim.Feel.warning, void 0], [swim.Feel.alert, void 0], timing);
+      sliceView.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, void 0]], timing);
     } else if (newValue < 0.75) {
-      sliceView.modifyMood(swim.Feel.default, [swim.Feel.warning, 0.5 + 0.5 * (newValue - 0.5) / 0.25], [swim.Feel.alert, void 0], timing);
+      sliceView.modifyMood(swim.Feel.default, [[swim.Feel.warning, 0.5 + 0.5 * (newValue - 0.5) / 0.25], [swim.Feel.alert, void 0]], timing);
     } else {
-      sliceView.modifyMood(swim.Feel.default, [swim.Feel.warning, void 0], [swim.Feel.alert, 0.5 + 0.5 * (newValue - 0.75) / 0.25], timing);
+      sliceView.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, 0.5 + 0.5 * (newValue - 0.75) / 0.25]], timing);
     }
   }
 

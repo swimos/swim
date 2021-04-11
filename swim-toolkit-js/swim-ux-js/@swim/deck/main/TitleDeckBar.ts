@@ -219,7 +219,7 @@ export class TitleDeckBar extends DeckBar {
     const backMembrane = this.backMembrane.view;
     const backButton = this.backButton.view;
     if (backMembrane !== null && backButton !== null) {
-      if (backMembrane.width.isPrecedent(View.Intrinsic)) {
+      if (backMembrane.width.takesPrecedence(View.Intrinsic)) {
         let backButtonLeft: Length | number | null = backButton.left.state;
         backButtonLeft = backButtonLeft instanceof Length ? backButtonLeft.pxValue() : backButton.node.offsetLeft;
         if (backButton.label !== null) {
@@ -230,7 +230,7 @@ export class TitleDeckBar extends DeckBar {
           backMembrane.width.setState(backButtonLeft + backButtonWidth, View.Intrinsic);
         }
       }
-      if (backMembrane.height.isPrecedent(View.Intrinsic)) {
+      if (backMembrane.height.takesPrecedence(View.Intrinsic)) {
         let backButtonTop: Length | number | null = backButton.top.state;
         backButtonTop = backButtonTop instanceof Length ? backButtonTop.pxValue() : backButton.node.offsetTop;
         let backButtonHeight: Length | number | null = backButton.height.state;

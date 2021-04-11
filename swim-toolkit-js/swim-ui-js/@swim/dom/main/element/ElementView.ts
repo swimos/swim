@@ -15,7 +15,7 @@
 import {Arrays} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {BoxR2} from "@swim/math";
-import {Look, Feel, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
+import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import {ToAttributeString, ToStyleString, ToCssValue} from "@swim/style";
 import {
   ViewContextType,
@@ -232,14 +232,10 @@ export class ElementView extends NodeView implements StyleContext {
     return value;
   }
 
-  modifyMood(feel: Feel, ...entires: [Feel, number | undefined][]): void;
-  modifyMood(feel: Feel, ...args: [...entires: [Feel, number | undefined][], timing: AnyTiming | boolean]): void;
-  modifyMood(feel: Feel, ...args: [Feel, number | undefined][] | [...entires: [Feel, number | undefined][], timing: AnyTiming | boolean]): void {
-    if (this.moodModifier.isPrecedent(View.Intrinsic)) {
-      let timing = args.length !== 0 && !Array.isArray(args[args.length - 1]) ? args.pop() as AnyTiming | boolean : void 0;
-      const entries = args as [Feel, number | undefined][];
+  modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
+    if (this.moodModifier.takesPrecedence(View.Intrinsic)) {
       const oldMoodModifier = this.moodModifier.getStateOr(MoodMatrix.empty());
-      const newMoodModifier = oldMoodModifier.updatedCol(feel, true, ...entries);
+      const newMoodModifier = oldMoodModifier.updatedCol(feel, updates, true);
       if (!newMoodModifier.equals(oldMoodModifier)) {
         this.moodModifier.setState(newMoodModifier, View.Intrinsic);
         this.changeMood();
@@ -261,14 +257,10 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  modifyTheme(feel: Feel, ...enties: [Feel, number | undefined][]): void;
-  modifyTheme(feel: Feel, ...args: [...enties: [Feel, number | undefined][], timing: AnyTiming | boolean]): void;
-  modifyTheme(feel: Feel, ...args: [Feel, number | undefined][] | [...enties: [Feel, number | undefined][], timing: AnyTiming | boolean]): void {
-    if (this.themeModifier.isPrecedent(View.Intrinsic)) {
-      let timing = args.length !== 0 && !Array.isArray(args[args.length - 1]) ? args.pop() as AnyTiming | boolean : void 0;
-      const entries = args as [Feel, number | undefined][];
+  modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
+    if (this.themeModifier.takesPrecedence(View.Intrinsic)) {
       const oldThemeModifier = this.themeModifier.getStateOr(MoodMatrix.empty());
-      const newThemeModifier = oldThemeModifier.updatedCol(feel, true, ...entries);
+      const newThemeModifier = oldThemeModifier.updatedCol(feel, updates, true);
       if (!newThemeModifier.equals(oldThemeModifier)) {
         this.themeModifier.setState(newThemeModifier, View.Intrinsic);
         this.changeTheme();
@@ -292,7 +284,7 @@ export class ElementView extends NodeView implements StyleContext {
 
   protected changeMood(): void {
     const moodModifierProperty = this.getViewProperty("moodModifier") as ViewProperty<this, MoodMatrix | null> | null;
-    if (moodModifierProperty !== null && this.mood.isPrecedent(View.Intrinsic)) {
+    if (moodModifierProperty !== null && this.mood.takesPrecedence(View.Intrinsic)) {
       const moodModifier = moodModifierProperty.state;
       if (moodModifier !== null) {
         let superMood = this.mood.superState;
@@ -314,7 +306,7 @@ export class ElementView extends NodeView implements StyleContext {
 
   protected changeTheme(): void {
     const themeModifierProperty = this.getViewProperty("themeModifier") as ViewProperty<this, MoodMatrix | null> | null;
-    if (themeModifierProperty !== null && this.theme.isPrecedent(View.Intrinsic)) {
+    if (themeModifierProperty !== null && this.theme.takesPrecedence(View.Intrinsic)) {
       const themeModifier = themeModifierProperty.state;
       if (themeModifier !== null) {
         let superTheme = this.theme.superState;
@@ -354,10 +346,10 @@ export class ElementView extends NodeView implements StyleContext {
     if (NodeView.isRootView(this.node)) {
       const themeManager = this.themeService.manager;
       if (themeManager !== void 0) {
-        if (this.mood.isPrecedent(View.Intrinsic) && this.mood.state === null) {
+        if (this.mood.takesPrecedence(View.Intrinsic) && this.mood.state === null) {
           this.mood.setState(themeManager.mood, View.Intrinsic);
         }
-        if (this.theme.isPrecedent(View.Intrinsic) && this.theme.state === null) {
+        if (this.theme.takesPrecedence(View.Intrinsic) && this.theme.state === null) {
           this.theme.setState(themeManager.theme, View.Intrinsic);
         }
       }

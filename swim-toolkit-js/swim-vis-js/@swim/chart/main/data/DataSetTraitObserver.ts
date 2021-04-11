@@ -17,7 +17,7 @@ import type {DataPointTrait} from "./DataPointTrait";
 import type {DataSetTrait} from "./DataSetTrait";
 
 export interface DataSetTraitObserver<X, Y, R extends DataSetTrait<X, Y> = DataSetTrait<X, Y>> extends TraitObserver<R> {
-  dataSetTraitWillSetDataPoint?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
+  traitWillSetDataPoint?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
 
-  dataSetTraitDidSetDataPoint?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
+  traitDidSetDataPoint?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
 }

@@ -18,11 +18,11 @@ import type {ScatterPlotTrait} from "./ScatterPlotTrait";
 import type {ScatterPlotComponent} from "./ScatterPlotComponent";
 
 export interface ScatterPlotComponentObserver<X, Y, C extends ScatterPlotComponent<X, Y> = ScatterPlotComponent<X, Y>> extends PlotComponentObserver<X, Y, C> {
-  plotWillSetTrait?(newPlotTrait: ScatterPlotTrait<X, Y> | null, oldPlotTrait: ScatterPlotTrait<X, Y> | null, component: C): void;
+  componentWillSetPlotTrait?(newPlotTrait: ScatterPlotTrait<X, Y> | null, oldPlotTrait: ScatterPlotTrait<X, Y> | null, component: C): void;
 
-  plotDidSetTrait?(newPlotTrait: ScatterPlotTrait<X, Y> | null, oldPlotTrait: ScatterPlotTrait<X, Y> | null, component: C): void;
+  componentDidSetPlotTrait?(newPlotTrait: ScatterPlotTrait<X, Y> | null, oldPlotTrait: ScatterPlotTrait<X, Y> | null, component: C): void;
 
-  plotWillSetView?(newPlotView: ScatterPlotView<X, Y> | null, oldPlotView: ScatterPlotView<X, Y> | null, component: C): void;
+  componentWillSetPlotView?(newPlotView: ScatterPlotView<X, Y> | null, oldPlotView: ScatterPlotView<X, Y> | null, component: C): void;
 
-  plotDidSetView?(newPlotView: ScatterPlotView<X, Y> | null, oldPlotView: ScatterPlotView<X, Y> | null, component: C): void;
+  componentDidSetPlotView?(newPlotView: ScatterPlotView<X, Y> | null, oldPlotView: ScatterPlotView<X, Y> | null, component: C): void;
 }

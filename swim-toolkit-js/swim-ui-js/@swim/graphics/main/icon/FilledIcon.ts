@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Color} from "@swim/style";
-import type {Look, Feel, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
+import type {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import {Icon} from "./Icon";
 
 export abstract class FilledIcon extends Icon {
@@ -27,7 +27,7 @@ export abstract class FilledIcon extends Icon {
 
   abstract withMoodModifier(moodModifier: MoodMatrix | null): FilledIcon;
 
-  abstract modifyMood(feel: Feel, ...entries: [Feel, number | undefined][]): FilledIcon;
+  abstract modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>): FilledIcon;
 
   abstract withTheme(theme: ThemeMatrix, mood: MoodVector): FilledIcon;
 }

@@ -23,7 +23,7 @@ export class CellView extends HtmlView {
   }
 
   protected initCell(): void {
-    this.addClass("table-cell");
+    this.addClass("cell");
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
   }
@@ -59,14 +59,14 @@ export class CellView extends HtmlView {
 
   protected willSetContent(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.cellViewWillSetContent !== void 0) {
-      viewController.cellViewWillSetContent(newContentView, oldContentView, this);
+    if (viewController !== null && viewController.viewWillSetCellContent !== void 0) {
+      viewController.viewWillSetCellContent(newContentView, oldContentView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.cellViewWillSetContent !== void 0) {
-        viewObserver.cellViewWillSetContent(newContentView, oldContentView, this);
+      if (viewObserver.viewWillSetCellContent !== void 0) {
+        viewObserver.viewWillSetCellContent(newContentView, oldContentView, this);
       }
     }
   }
@@ -85,13 +85,13 @@ export class CellView extends HtmlView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.cellViewDidSetContent !== void 0) {
-        viewObserver.cellViewDidSetContent(newContentView, oldContentView, this);
+      if (viewObserver.viewDidSetCellContent !== void 0) {
+        viewObserver.viewDidSetCellContent(newContentView, oldContentView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.cellViewDidSetContent !== void 0) {
-      viewController.cellViewDidSetContent(newContentView, oldContentView, this);
+    if (viewController !== null && viewController.viewDidSetCellContent !== void 0) {
+      viewController.viewDidSetCellContent(newContentView, oldContentView, this);
     }
   }
 

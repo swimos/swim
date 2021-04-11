@@ -228,14 +228,14 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
 
   protected willSetGraph(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.chartViewWillSetGraph !== void 0) {
-      viewController.chartViewWillSetGraph(newGraphView, oldGraphView, this);
+    if (viewController !== null && viewController.viewWillSetGraph !== void 0) {
+      viewController.viewWillSetGraph(newGraphView, oldGraphView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.chartViewWillSetGraph !== void 0) {
-        viewObserver.chartViewWillSetGraph(newGraphView, oldGraphView, this);
+      if (viewObserver.viewWillSetGraph !== void 0) {
+        viewObserver.viewWillSetGraph(newGraphView, oldGraphView, this);
       }
     }
   }
@@ -254,13 +254,13 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.chartViewDidSetGraph !== void 0) {
-        viewObserver.chartViewDidSetGraph(newGraphView, oldGraphView, this);
+      if (viewObserver.viewDidSetGraph !== void 0) {
+        viewObserver.viewDidSetGraph(newGraphView, oldGraphView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.chartViewDidSetGraph !== void 0) {
-      viewController.chartViewDidSetGraph(newGraphView, oldGraphView, this);
+    if (viewController !== null && viewController.viewDidSetGraph !== void 0) {
+      viewController.viewDidSetGraph(newGraphView, oldGraphView, this);
     }
   }
 
@@ -300,14 +300,14 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
 
   protected willSetTopAxis(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.chartViewWillSetTopAxis !== void 0) {
-      viewController.chartViewWillSetTopAxis(newTopAxisView, oldTopAxisView, this);
+    if (viewController !== null && viewController.viewWillSetTopAxis !== void 0) {
+      viewController.viewWillSetTopAxis(newTopAxisView, oldTopAxisView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.chartViewWillSetTopAxis !== void 0) {
-        viewObserver.chartViewWillSetTopAxis(newTopAxisView, oldTopAxisView, this);
+      if (viewObserver.viewWillSetTopAxis !== void 0) {
+        viewObserver.viewWillSetTopAxis(newTopAxisView, oldTopAxisView, this);
       }
     }
   }
@@ -326,13 +326,13 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.chartViewDidSetTopAxis !== void 0) {
-        viewObserver.chartViewDidSetTopAxis(newTopAxisView, oldTopAxisView, this);
+      if (viewObserver.viewDidSetTopAxis !== void 0) {
+        viewObserver.viewDidSetTopAxis(newTopAxisView, oldTopAxisView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.chartViewDidSetTopAxis !== void 0) {
-      viewController.chartViewDidSetTopAxis(newTopAxisView, oldTopAxisView, this);
+    if (viewController !== null && viewController.viewDidSetTopAxis !== void 0) {
+      viewController.viewDidSetTopAxis(newTopAxisView, oldTopAxisView, this);
     }
   }
 
@@ -372,14 +372,14 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
 
   protected willSetRightAxis(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.chartViewWillSetRightAxis !== void 0) {
-      viewController.chartViewWillSetRightAxis(newRightAxisView, oldRightAxisView, this);
+    if (viewController !== null && viewController.viewWillSetRightAxis !== void 0) {
+      viewController.viewWillSetRightAxis(newRightAxisView, oldRightAxisView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.chartViewWillSetRightAxis !== void 0) {
-        viewObserver.chartViewWillSetRightAxis(newRightAxisView, oldRightAxisView, this);
+      if (viewObserver.viewWillSetRightAxis !== void 0) {
+        viewObserver.viewWillSetRightAxis(newRightAxisView, oldRightAxisView, this);
       }
     }
   }
@@ -398,13 +398,13 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.chartViewDidSetRightAxis !== void 0) {
-        viewObserver.chartViewDidSetRightAxis(newRightAxisView, oldRightAxisView, this);
+      if (viewObserver.viewDidSetRightAxis !== void 0) {
+        viewObserver.viewDidSetRightAxis(newRightAxisView, oldRightAxisView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.chartViewDidSetRightAxis !== void 0) {
-      viewController.chartViewDidSetRightAxis(newRightAxisView, oldRightAxisView, this);
+    if (viewController !== null && viewController.viewDidSetRightAxis !== void 0) {
+      viewController.viewDidSetRightAxis(newRightAxisView, oldRightAxisView, this);
     }
   }
 
@@ -444,14 +444,14 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
 
   protected willSetBottomAxis(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.chartViewWillSetBottomAxis !== void 0) {
-      viewController.chartViewWillSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
+    if (viewController !== null && viewController.viewWillSetBottomAxis !== void 0) {
+      viewController.viewWillSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.chartViewWillSetBottomAxis !== void 0) {
-        viewObserver.chartViewWillSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
+      if (viewObserver.viewWillSetBottomAxis !== void 0) {
+        viewObserver.viewWillSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
       }
     }
   }
@@ -470,13 +470,13 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.chartViewDidSetBottomAxis !== void 0) {
-        viewObserver.chartViewDidSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
+      if (viewObserver.viewDidSetBottomAxis !== void 0) {
+        viewObserver.viewDidSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.chartViewDidSetBottomAxis !== void 0) {
-      viewController.chartViewDidSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
+    if (viewController !== null && viewController.viewDidSetBottomAxis !== void 0) {
+      viewController.viewDidSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
     }
   }
 
@@ -516,14 +516,14 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
 
   protected willSetLeftAxis(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.chartViewWillSetLeftAxis !== void 0) {
-      viewController.chartViewWillSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
+    if (viewController !== null && viewController.viewWillSetLeftAxis !== void 0) {
+      viewController.viewWillSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.chartViewWillSetLeftAxis !== void 0) {
-        viewObserver.chartViewWillSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
+      if (viewObserver.viewWillSetLeftAxis !== void 0) {
+        viewObserver.viewWillSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
       }
     }
   }
@@ -542,13 +542,13 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.chartViewDidSetLeftAxis !== void 0) {
-        viewObserver.chartViewDidSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
+      if (viewObserver.viewDidSetLeftAxis !== void 0) {
+        viewObserver.viewDidSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.chartViewDidSetLeftAxis !== void 0) {
-      viewController.chartViewDidSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
+    if (viewController !== null && viewController.viewDidSetLeftAxis !== void 0) {
+      viewController.viewDidSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
     }
   }
 

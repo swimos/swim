@@ -17,11 +17,11 @@ import type {DialTrait} from "../dial/DialTrait";
 import type {GaugeTitle, GaugeTrait} from "./GaugeTrait";
 
 export interface GaugeTraitObserver<R extends GaugeTrait = GaugeTrait> extends TraitObserver<R> {
-  gaugeTraitWillSetTitle?(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, trait: R): void;
+  traitWillSetGaugeTitle?(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, trait: R): void;
 
-  gaugeTraitDidSetTitle?(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, trait: R): void;
+  traitDidSetGaugeTitle?(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, trait: R): void;
 
-  gaugeTraitWillSetDial?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillSetDial?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, targetTrait: Trait | null, trait: R): void;
 
-  gaugeTraitDidSetDial?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidSetDial?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, targetTrait: Trait | null, trait: R): void;
 }

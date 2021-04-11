@@ -15,6 +15,7 @@
 import type {Timing} from "@swim/mapping";
 import type {Length} from "@swim/math";
 import type {Trait} from "@swim/model";
+import type {Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {GraphicsView} from "@swim/graphics";
 import {Component, ComponentViewTrait, ComponentFastener, CompositeComponent} from "@swim/component";
@@ -68,8 +69,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphWillSetTrait !== void 0) {
-        componentObserver.graphWillSetTrait(newGraphTrait, oldGraphTrait, this);
+      if (componentObserver.componentWillSetGraphTrait !== void 0) {
+        componentObserver.componentWillSetGraphTrait(newGraphTrait, oldGraphTrait, this);
       }
     }
   }
@@ -88,8 +89,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphDidSetTrait !== void 0) {
-        componentObserver.graphDidSetTrait(newGraphTrait, oldGraphTrait, this);
+      if (componentObserver.componentDidSetGraphTrait !== void 0) {
+        componentObserver.componentDidSetGraphTrait(newGraphTrait, oldGraphTrait, this);
       }
     }
   }
@@ -99,10 +100,6 @@ export class GraphComponent<X, Y> extends CompositeComponent {
   }
 
   protected initGraphView(graphView: GraphView<X, Y>): void {
-    // hook
-  }
-
-  protected themeGraphView(graphView: GraphView<X, Y>, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     // hook
   }
 
@@ -127,8 +124,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphWillSetView !== void 0) {
-        componentObserver.graphWillSetView(newGraphView, oldGraphView, this);
+      if (componentObserver.componentWillSetGraphView !== void 0) {
+        componentObserver.componentWillSetGraphView(newGraphView, oldGraphView, this);
       }
     }
   }
@@ -147,10 +144,14 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphDidSetView !== void 0) {
-        componentObserver.graphDidSetView(newGraphView, oldGraphView, this);
+      if (componentObserver.componentDidSetGraphView !== void 0) {
+        componentObserver.componentDidSetGraphView(newGraphView, oldGraphView, this);
       }
     }
+  }
+
+  protected themeGraphView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, graphView: GraphView<X, Y>): void {
+    // hook
   }
 
   /** @hidden */
@@ -167,7 +168,7 @@ export class GraphComponent<X, Y> extends CompositeComponent {
       this.owner.didSetGraphView(newGraphView, oldGraphView);
     },
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, graphView: GraphView<unknown, unknown>): void {
-      this.owner.themeGraphView(graphView, theme, mood, timing);
+      this.owner.themeGraphView(theme, mood, timing, graphView);
     },
     createView(): GraphView<unknown, unknown> | null {
       return this.owner.createGraphView();
@@ -183,12 +184,12 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     didSetTrait(newGraphTrait: GraphTrait<unknown, unknown> | null, oldGraphTrait: GraphTrait<unknown, unknown> | null): void {
       this.owner.didSetGraphTrait(newGraphTrait, oldGraphTrait);
     },
-    graphTraitWillSetPlot(newPlotTrait: PlotTrait<unknown, unknown> | null, oldPlotTrait: PlotTrait<unknown, unknown> | null, targetTrait: Trait): void {
+    traitWillSetPlot(newPlotTrait: PlotTrait<unknown, unknown> | null, oldPlotTrait: PlotTrait<unknown, unknown> | null, targetTrait: Trait): void {
       if (oldPlotTrait !== null) {
         this.owner.removePlotTrait(oldPlotTrait);
       }
     },
-    graphTraitDidSetPlot(newPlotTrait: PlotTrait<unknown, unknown> | null, oldPlotTrait: PlotTrait<unknown, unknown> | null, targetTrait: Trait): void {
+    traitDidSetPlot(newPlotTrait: PlotTrait<unknown, unknown> | null, oldPlotTrait: PlotTrait<unknown, unknown> | null, targetTrait: Trait): void {
       if (newPlotTrait !== null) {
         this.owner.insertPlotTrait(newPlotTrait, targetTrait);
       }
@@ -291,8 +292,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphWillSetPlot !== void 0) {
-        componentObserver.graphWillSetPlot(newPlotComponent, oldPlotComponent, plotFastener);
+      if (componentObserver.componentWillSetPlot !== void 0) {
+        componentObserver.componentWillSetPlot(newPlotComponent, oldPlotComponent, plotFastener);
       }
     }
   }
@@ -313,8 +314,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphDidSetPlot !== void 0) {
-        componentObserver.graphDidSetPlot(newPlotComponent, oldPlotComponent, plotFastener);
+      if (componentObserver.componentDidSetPlot !== void 0) {
+        componentObserver.componentDidSetPlot(newPlotComponent, oldPlotComponent, plotFastener);
       }
     }
   }
@@ -386,8 +387,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphWillSetPlotTrait !== void 0) {
-        componentObserver.graphWillSetPlotTrait(newPlotTrait, oldPlotTrait, plotFastener);
+      if (componentObserver.componentWillSetPlotTrait !== void 0) {
+        componentObserver.componentWillSetPlotTrait(newPlotTrait, oldPlotTrait, plotFastener);
       }
     }
   }
@@ -408,8 +409,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphDidSetPlotTrait !== void 0) {
-        componentObserver.graphDidSetPlotTrait(newPlotTrait, oldPlotTrait, plotFastener);
+      if (componentObserver.componentDidSetPlotTrait !== void 0) {
+        componentObserver.componentDidSetPlotTrait(newPlotTrait, oldPlotTrait, plotFastener);
       }
     }
   }
@@ -435,8 +436,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphWillSetPlotView !== void 0) {
-        componentObserver.graphWillSetPlotView(newPlotView, oldPlotView, plotFastener);
+      if (componentObserver.componentWillSetPlotView !== void 0) {
+        componentObserver.componentWillSetPlotView(newPlotView, oldPlotView, plotFastener);
       }
     }
   }
@@ -457,8 +458,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphDidSetPlotView !== void 0) {
-        componentObserver.graphDidSetPlotView(newPlotView, oldPlotView, plotFastener);
+      if (componentObserver.componentDidSetPlotView !== void 0) {
+        componentObserver.componentDidSetPlotView(newPlotView, oldPlotView, plotFastener);
       }
     }
   }
@@ -480,8 +481,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphWillSetDataSetTrait !== void 0) {
-        componentObserver.graphWillSetDataSetTrait(newDataSetTrait, oldDataSetTrait, plotFastener);
+      if (componentObserver.componentWillSetDataSetTrait !== void 0) {
+        componentObserver.componentWillSetDataSetTrait(newDataSetTrait, oldDataSetTrait, plotFastener);
       }
     }
   }
@@ -502,8 +503,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphDidSetDataSetTrait !== void 0) {
-        componentObserver.graphDidSetDataSetTrait(newDataSetTrait, oldDataSetTrait, plotFastener);
+      if (componentObserver.componentDidSetDataSetTrait !== void 0) {
+        componentObserver.componentDidSetDataSetTrait(newDataSetTrait, oldDataSetTrait, plotFastener);
       }
     }
   }
@@ -553,8 +554,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphWillSetDataPoint !== void 0) {
-        componentObserver.graphWillSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener, plotFastener);
+      if (componentObserver.componentWillSetDataPoint !== void 0) {
+        componentObserver.componentWillSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener, plotFastener);
       }
     }
   }
@@ -577,8 +578,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphDidSetDataPoint !== void 0) {
-        componentObserver.graphDidSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener, plotFastener);
+      if (componentObserver.componentDidSetDataPoint !== void 0) {
+        componentObserver.componentDidSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener, plotFastener);
       }
     }
   }
@@ -607,8 +608,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphWillSetDataPointTrait !== void 0) {
-        componentObserver.graphWillSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, plotFastener);
+      if (componentObserver.componentWillSetDataPointTrait !== void 0) {
+        componentObserver.componentWillSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, plotFastener);
       }
     }
   }
@@ -631,8 +632,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphDidSetDataPointTrait !== void 0) {
-        componentObserver.graphDidSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, plotFastener);
+      if (componentObserver.componentDidSetDataPointTrait !== void 0) {
+        componentObserver.componentDidSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, plotFastener);
       }
     }
   }
@@ -670,8 +671,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphWillSetDataPointView !== void 0) {
-        componentObserver.graphWillSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, plotFastener);
+      if (componentObserver.componentWillSetDataPointView !== void 0) {
+        componentObserver.componentWillSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, plotFastener);
       }
     }
   }
@@ -694,33 +695,45 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphDidSetDataPointView !== void 0) {
-        componentObserver.graphDidSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, plotFastener);
+      if (componentObserver.componentDidSetDataPointView !== void 0) {
+        componentObserver.componentDidSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, plotFastener);
       }
     }
   }
 
-  protected onSetDataPointViewX(newX: X | undefined, oldX: X | undefined,
-                                dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>,
-                                plotFastener: ComponentFastener<this, PlotComponent<X, Y>>): void {
+  protected onSetDataPointX(newX: X | undefined, oldX: X | undefined,
+                            dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>,
+                            plotFastener: ComponentFastener<this, PlotComponent<X, Y>>): void {
     // hook
   }
 
-  protected onSetDataPointViewY(newY: Y | undefined, oldY: Y | undefined,
-                                dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>,
-                                plotFastener: ComponentFastener<this, PlotComponent<X, Y>>): void {
+  protected onSetDataPointY(newY: Y | undefined, oldY: Y | undefined,
+                            dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>,
+                            plotFastener: ComponentFastener<this, PlotComponent<X, Y>>): void {
     // hook
   }
 
-  protected onSetDataPointViewY2(newY2: Y | undefined, oldY2: Y | undefined,
+  protected onSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined,
+                             dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>,
+                             plotFastener: ComponentFastener<this, PlotComponent<X, Y>>): void {
+    // hook
+  }
+
+  protected onSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null,
                                  dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>,
                                  plotFastener: ComponentFastener<this, PlotComponent<X, Y>>): void {
     // hook
   }
 
-  protected onSetDataPointViewRadius(newRadius: Length | null, oldRadius: Length | null,
-                                     dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>,
-                                     plotFastener: ComponentFastener<this, PlotComponent<X, Y>>): void {
+  protected onSetDataPointColor(newColor: Color | null, oldColor: Color | null,
+                                dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>,
+                                plotFastener: ComponentFastener<this, PlotComponent<X, Y>>): void {
+    // hook
+  }
+
+  protected onSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined,
+                                  dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>,
+                                  plotFastener: ComponentFastener<this, PlotComponent<X, Y>>): void {
     // hook
   }
 
@@ -748,8 +761,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphWillSetDataPointLabelView !== void 0) {
-        componentObserver.graphWillSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, plotFastener);
+      if (componentObserver.componentWillSetDataPointLabelView !== void 0) {
+        componentObserver.componentWillSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, plotFastener);
       }
     }
   }
@@ -772,8 +785,8 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.graphDidSetDataPointLabelView !== void 0) {
-        componentObserver.graphDidSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, plotFastener);
+      if (componentObserver.componentDidSetDataPointLabelView !== void 0) {
+        componentObserver.componentDidSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, plotFastener);
       }
     }
   }
@@ -792,76 +805,80 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     didSetComponent(newPlotComponent: PlotComponent<unknown, unknown> | null, oldPlotComponent: PlotComponent<unknown, unknown> | null): void {
       this.owner.didSetPlot(newPlotComponent, oldPlotComponent, this);
     },
-    plotWillSetTrait(newPlotTrait: PlotTrait<unknown, unknown> | null, oldPlotTrait: PlotTrait<unknown, unknown> | null): void {
+    componentWillSetPlotTrait(newPlotTrait: PlotTrait<unknown, unknown> | null, oldPlotTrait: PlotTrait<unknown, unknown> | null): void {
       this.owner.willSetPlotTrait(newPlotTrait, oldPlotTrait, this);
     },
-    plotDidSetTrait(newPlotTrait: PlotTrait<unknown, unknown> | null, oldPlotTrait: PlotTrait<unknown, unknown> | null): void {
+    componentDidSetPlotTrait(newPlotTrait: PlotTrait<unknown, unknown> | null, oldPlotTrait: PlotTrait<unknown, unknown> | null): void {
       this.owner.onSetPlotTrait(newPlotTrait, oldPlotTrait, this);
       this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait, this);
     },
-    plotWillSetView(newPlotView: PlotView<unknown, unknown> | null, oldPlotView: PlotView<unknown, unknown> | null): void {
+    componentWillSetPlotView(newPlotView: PlotView<unknown, unknown> | null, oldPlotView: PlotView<unknown, unknown> | null): void {
       this.owner.willSetPlotView(newPlotView, oldPlotView, this);
     },
-    plotDidSetView(newPlotView: PlotView<unknown, unknown> | null, oldPlotView: PlotView<unknown, unknown> | null): void {
+    componentDidSetPlotView(newPlotView: PlotView<unknown, unknown> | null, oldPlotView: PlotView<unknown, unknown> | null): void {
       this.owner.onSetPlotView(newPlotView, oldPlotView, this);
       this.owner.didSetPlotView(newPlotView, oldPlotView, this);
     },
-    dataSetWillSetTrait(newDataSetTrait: DataSetTrait<unknown, unknown> | null, oldDataSetTrait: DataSetTrait<unknown, unknown> | null): void {
+    componentWillSetDataSetTrait(newDataSetTrait: DataSetTrait<unknown, unknown> | null, oldDataSetTrait: DataSetTrait<unknown, unknown> | null): void {
       this.owner.willSetDataSetTrait(newDataSetTrait, oldDataSetTrait, this);
     },
-    dataSetDidSetTrait(newDataSetTrait: DataSetTrait<unknown, unknown> | null, oldDataSetTrait: DataSetTrait<unknown, unknown> | null): void {
+    componentDidSetDataSetTrait(newDataSetTrait: DataSetTrait<unknown, unknown> | null, oldDataSetTrait: DataSetTrait<unknown, unknown> | null): void {
       this.owner.onSetDataSetTrait(newDataSetTrait, oldDataSetTrait, this);
       this.owner.didSetDataSetTrait(newDataSetTrait, oldDataSetTrait, this);
     },
-    dataSetWillSetDataPoint(newDataPointComponent: DataPointComponent<unknown, unknown> | null, oldDataPointComponent: DataPointComponent<unknown, unknown> | null,
-                            dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+    componentWillSetDataPoint(newDataPointComponent: DataPointComponent<unknown, unknown> | null, oldDataPointComponent: DataPointComponent<unknown, unknown> | null,
+                              dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
       this.owner.willSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener, this);
     },
-    dataSetDidSetDataPoint(newDataPointComponent: DataPointComponent<unknown, unknown> | null, oldDataPointComponent: DataPointComponent<unknown, unknown> | null,
-                           dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+    componentDidSetDataPoint(newDataPointComponent: DataPointComponent<unknown, unknown> | null, oldDataPointComponent: DataPointComponent<unknown, unknown> | null,
+                             dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
       this.owner.onSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener, this);
       this.owner.didSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener, this);
     },
-    dataSetWillSetDataPointTrait(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null,
-                                 dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+    componentWillSetDataPointTrait(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null,
+                                   dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
       this.owner.willSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, this);
     },
-    dataSetDidSetDataPointTrait(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null,
-                                dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+    componentDidSetDataPointTrait(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null,
+                                  dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
       this.owner.onSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, this);
       this.owner.didSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener, this);
     },
-    dataSetWillSetDataPointView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null,
-                                dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+    componentWillSetDataPointView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null,
+                                  dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
       this.owner.willSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, this);
     },
-    dataSetDidSetDataPointView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null,
-                               dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+    componentDidSetDataPointView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null,
+                                 dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
       this.owner.onSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, this);
       this.owner.didSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener, this);
     },
-    dataSetDidSetDataPointViewX(newX: unknown | undefined, oldX: unknown | undefined,
-                                dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
-      this.owner.onSetDataPointViewX(newX, oldX, dataPointFastener, this);
+    componentDidSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined,
+                              dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+      this.owner.onSetDataPointX(newX, oldX, dataPointFastener, this);
     },
-    dataSetDidSetDataPointViewY(newY: unknown | undefined, oldY: unknown | undefined,
-                                dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
-      this.owner.onSetDataPointViewY(newY, oldY, dataPointFastener, this);
+    componentDidSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined,
+                              dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+      this.owner.onSetDataPointY(newY, oldY, dataPointFastener, this);
     },
-    dataSetDidSetDataPointViewY2(newY2: unknown | undefined, oldY2: unknown | undefined,
-                                 dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
-      this.owner.onSetDataPointViewY2(newY2, oldY2, dataPointFastener, this);
+    componentDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined,
+                               dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+      this.owner.onSetDataPointY2(newY2, oldY2, dataPointFastener, this);
     },
-    dataSetDidSetDataPointViewRadius(newRadius: Length | null, oldRadius: Length | null,
-                                     dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
-      this.owner.onSetDataPointViewRadius(newRadius, oldRadius, dataPointFastener, this);
+    componentDidSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null,
+                                   dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+      this.owner.onSetDataPointRadius(newRadius, oldRadius, dataPointFastener, this);
     },
-    dataSetWillSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
-                                     dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+    componentDidSetDataPointColor(newColor: Color | null, oldColor: Color | null,
+                                  dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+      this.owner.onSetDataPointColor(newColor, oldColor, dataPointFastener, this);
+    },
+    componentWillSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
+                                       dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
       this.owner.willSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, this);
     },
-    dataSetDidSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
-                                    dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
+    componentDidSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null,
+                                      dataPointFastener: ComponentFastener<PlotComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>): void {
       this.owner.onSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, this);
       this.owner.didSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener, this);
     },

@@ -51,12 +51,12 @@ const plotView = graphView.append(swim.LinePlotView)
     .hitMode("plot")
     .strokeWidth(4)
     .on("pointerenter", function (event) {
-      plotView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
     })
     .on("pointerleave", function (event) {
-      plotView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
     });
-plotView.modifyMood(swim.Feel.default, [swim.Feel.primary, 1]);
+plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
 
 const cycles = 4;
 const samplesPerCycle = 100;

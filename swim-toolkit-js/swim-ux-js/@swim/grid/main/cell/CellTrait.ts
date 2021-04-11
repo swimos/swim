@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
-import {GenericTrait} from "@swim/model";
+import {TraitProperty, GenericTrait} from "@swim/model";
 import type {HtmlView} from "@swim/dom";
 import type {CellTraitObserver} from "./CellTraitObserver";
 
@@ -21,39 +20,14 @@ export type CellContent = CellContentFunction | string;
 export type CellContentFunction = (cellTrait: CellTrait) => HtmlView | string | null;
 
 export class CellTrait extends GenericTrait {
-  constructor() {
-    super();
-    Object.defineProperty(this, "content", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-
   declare readonly traitObservers: ReadonlyArray<CellTraitObserver>;
-
-  declare readonly content: CellContent | null;
-
-  setContent(newContent: CellContent | null): void {
-    const oldContent = this.content;
-    if (!Equals(newContent, oldContent)) {
-      this.willSetContent(newContent, oldContent);
-      Object.defineProperty(this, "content", {
-        value: newContent,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetContent(newContent, oldContent);
-      this.didSetContent(newContent, oldContent);
-    }
-  }
 
   protected willSetContent(newContent: CellContent | null, oldContent: CellContent | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.cellTraitWillSetContent !== void 0) {
-        traitObserver.cellTraitWillSetContent(newContent, oldContent, this);
+      if (traitObserver.traitWillSetCellContent !== void 0) {
+        traitObserver.traitWillSetCellContent(newContent, oldContent, this);
       }
     }
   }
@@ -66,9 +40,21 @@ export class CellTrait extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.cellTraitDidSetContent !== void 0) {
-        traitObserver.cellTraitDidSetContent(newContent, oldContent, this);
+      if (traitObserver.traitDidSetCellContent !== void 0) {
+        traitObserver.traitDidSetCellContent(newContent, oldContent, this);
       }
     }
   }
+
+  @TraitProperty<CellTrait, CellContent | null>({
+    state: null,
+    willSetState(newContent: CellContent | null, oldContent: CellContent | null): void {
+      this.owner.willSetContent(newContent, oldContent);
+    },
+    didSetState(newContent: CellContent | null, oldContent: CellContent | null): void {
+      this.owner.onSetContent(newContent, oldContent);
+      this.owner.didSetContent(newContent, oldContent);
+    },
+  })
+  declare content: TraitProperty<this, CellContent | null>;
 }

@@ -17,7 +17,7 @@ import type {PlotTrait} from "../plot/PlotTrait";
 import type {GraphTrait} from "./GraphTrait";
 
 export interface GraphTraitObserver<X, Y, R extends GraphTrait<X, Y> = GraphTrait<X, Y>> extends TraitObserver<R> {
-  graphTraitWillSetPlot?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
+  traitWillSetPlot?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
 
-  graphTraitDidSetPlot?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
+  traitDidSetPlot?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
 }

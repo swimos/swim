@@ -121,14 +121,14 @@ export class DataPointView<X, Y> extends LayerView {
 
   protected willSetX(newX: X | undefined, oldX: X | undefined): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dataPointViewWillSetX !== void 0) {
-      viewController.dataPointViewWillSetX(newX, oldX, this);
+    if (viewController !== null && viewController.viewWillSetDataPointX !== void 0) {
+      viewController.viewWillSetDataPointX(newX, oldX, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dataPointViewWillSetX !== void 0) {
-        viewObserver.dataPointViewWillSetX(newX, oldX, this);
+      if (viewObserver.viewWillSetDataPointX !== void 0) {
+        viewObserver.viewWillSetDataPointX(newX, oldX, this);
       }
     }
   }
@@ -141,13 +141,13 @@ export class DataPointView<X, Y> extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dataPointViewDidSetX !== void 0) {
-        viewObserver.dataPointViewDidSetX(newX, oldX, this);
+      if (viewObserver.viewDidSetDataPointX !== void 0) {
+        viewObserver.viewDidSetDataPointX(newX, oldX, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dataPointViewDidSetX !== void 0) {
-      viewController.dataPointViewDidSetX(newX, oldX, this);
+    if (viewController !== null && viewController.viewDidSetDataPointX !== void 0) {
+      viewController.viewDidSetDataPointX(newX, oldX, this);
     }
   }
 
@@ -165,14 +165,14 @@ export class DataPointView<X, Y> extends LayerView {
 
   protected willSetY(newY: Y | undefined, oldY: Y | undefined): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dataPointViewWillSetY !== void 0) {
-      viewController.dataPointViewWillSetY(newY, oldY, this);
+    if (viewController !== null && viewController.viewWillSetDataPointY !== void 0) {
+      viewController.viewWillSetDataPointY(newY, oldY, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dataPointViewWillSetY !== void 0) {
-        viewObserver.dataPointViewWillSetY(newY, oldY, this);
+      if (viewObserver.viewWillSetDataPointY !== void 0) {
+        viewObserver.viewWillSetDataPointY(newY, oldY, this);
       }
     }
   }
@@ -185,13 +185,13 @@ export class DataPointView<X, Y> extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dataPointViewDidSetY !== void 0) {
-        viewObserver.dataPointViewDidSetY(newY, oldY, this);
+      if (viewObserver.viewDidSetDataPointY !== void 0) {
+        viewObserver.viewDidSetDataPointY(newY, oldY, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dataPointViewDidSetY !== void 0) {
-      viewController.dataPointViewDidSetY(newY, oldY, this);
+    if (viewController !== null && viewController.viewDidSetDataPointY !== void 0) {
+      viewController.viewDidSetDataPointY(newY, oldY, this);
     }
   }
 
@@ -208,14 +208,14 @@ export class DataPointView<X, Y> extends LayerView {
 
   protected willSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dataPointViewWillSetY2 !== void 0) {
-      viewController.dataPointViewWillSetY2(newY2, oldY2, this);
+    if (viewController !== null && viewController.viewWillSetDataPointY2 !== void 0) {
+      viewController.viewWillSetDataPointY2(newY2, oldY2, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dataPointViewWillSetY2 !== void 0) {
-        viewObserver.dataPointViewWillSetY2(newY2, oldY2, this);
+      if (viewObserver.viewWillSetDataPointY2 !== void 0) {
+        viewObserver.viewWillSetDataPointY2(newY2, oldY2, this);
       }
     }
   }
@@ -228,13 +228,13 @@ export class DataPointView<X, Y> extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dataPointViewDidSetY2 !== void 0) {
-        viewObserver.dataPointViewDidSetY2(newY2, oldY2, this);
+      if (viewObserver.viewDidSetDataPointY2 !== void 0) {
+        viewObserver.viewDidSetDataPointY2(newY2, oldY2, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dataPointViewDidSetY2 !== void 0) {
-      viewController.dataPointViewDidSetY2(newY2, oldY2, this);
+    if (viewController !== null && viewController.viewDidSetDataPointY2 !== void 0) {
+      viewController.viewDidSetDataPointY2(newY2, oldY2, this);
     }
   }
 
@@ -251,14 +251,14 @@ export class DataPointView<X, Y> extends LayerView {
 
   protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dataPointViewWillSetRadius !== void 0) {
-      viewController.dataPointViewWillSetRadius(newRadius, oldRadius, this);
+    if (viewController !== null && viewController.viewWillSetDataPointRadius !== void 0) {
+      viewController.viewWillSetDataPointRadius(newRadius, oldRadius, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dataPointViewWillSetRadius !== void 0) {
-        viewObserver.dataPointViewWillSetRadius(newRadius, oldRadius, this);
+      if (viewObserver.viewWillSetDataPointRadius !== void 0) {
+        viewObserver.viewWillSetDataPointRadius(newRadius, oldRadius, this);
       }
     }
   }
@@ -271,13 +271,13 @@ export class DataPointView<X, Y> extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dataPointViewDidSetRadius !== void 0) {
-        viewObserver.dataPointViewDidSetRadius(newRadius, oldRadius, this);
+      if (viewObserver.viewDidSetDataPointRadius !== void 0) {
+        viewObserver.viewDidSetDataPointRadius(newRadius, oldRadius, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dataPointViewDidSetRadius !== void 0) {
-      viewController.dataPointViewDidSetRadius(newRadius, oldRadius, this);
+    if (viewController !== null && viewController.viewDidSetDataPointRadius !== void 0) {
+      viewController.viewDidSetDataPointRadius(newRadius, oldRadius, this);
     }
   }
 
@@ -297,19 +297,91 @@ export class DataPointView<X, Y> extends LayerView {
   @ViewProperty({type: Number, state: 5})
   declare hitRadius: ViewProperty<this, number>;
 
-  @ViewAnimator<DataPointView<X, Y>, Color | null>({
+  protected willSetColor(newColor: Color | null, oldColor: Color | null): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillSetDataPointColor !== void 0) {
+      viewController.viewWillSetDataPointColor(newColor, oldColor, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetDataPointColor !== void 0) {
+        viewObserver.viewWillSetDataPointColor(newColor, oldColor, this);
+      }
+    }
+  }
+
+  protected onSetColor(newColor: Color | null, oldColor: Color | null): void {
+    this.updateGradientStop();
+  }
+
+  protected didSetColor(newColor: Color | null, oldColor: Color | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetDataPointColor !== void 0) {
+        viewObserver.viewDidSetDataPointColor(newColor, oldColor, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidSetDataPointColor !== void 0) {
+      viewController.viewDidSetDataPointColor(newColor, oldColor, this);
+    }
+  }
+
+  @ViewAnimator<DataPointView<X, Y>, Color | null, AnyColor | null>({
     type: Color,
     state: null,
+    willSetValue(newColor: Color | null, oldColor: Color | null): void {
+      this.owner.willSetColor(newColor, oldColor);
+    },
     didSetValue(newColor: Color | null, oldColor: Color | null): void {
-      this.owner.updateGradientStop();
+      this.owner.onSetColor(newColor, oldColor);
+      this.owner.didSetColor(newColor, oldColor);
     },
   })
   declare color: ViewAnimator<this, Color | null, AnyColor | null>;
 
+  protected willSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillSetDataPointOpacity !== void 0) {
+      viewController.viewWillSetDataPointOpacity(newOpacity, oldOpacity, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetDataPointOpacity !== void 0) {
+        viewObserver.viewWillSetDataPointOpacity(newOpacity, oldOpacity, this);
+      }
+    }
+  }
+
+  protected onSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+    this.updateGradientStop();
+  }
+
+  protected didSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetDataPointOpacity !== void 0) {
+        viewObserver.viewDidSetDataPointOpacity(newOpacity, oldOpacity, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidSetDataPointOpacity !== void 0) {
+      viewController.viewDidSetDataPointOpacity(newOpacity, oldOpacity, this);
+    }
+  }
+
   @ViewAnimator<DataPointView<X, Y>, number | undefined>({
     type: Number,
+    willSetValue(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+      this.owner.willSetOpacity(newOpacity, oldOpacity);
+    },
     didSetValue(newOpacity: number | undefined, oldOpacity: number | undefined): void {
-      this.owner.updateGradientStop();
+      this.owner.onSetOpacity(newOpacity, oldOpacity);
+      this.owner.didSetOpacity(newOpacity, oldOpacity);
     },
   })
   declare opacity: ViewAnimator<this, number | undefined>;
@@ -340,14 +412,14 @@ export class DataPointView<X, Y> extends LayerView {
 
   protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dataPointViewWillSetLabel !== void 0) {
-      viewController.dataPointViewWillSetLabel(newLabelView, oldLabelView, this);
+    if (viewController !== null && viewController.viewWillSetDataPointLabel !== void 0) {
+      viewController.viewWillSetDataPointLabel(newLabelView, oldLabelView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dataPointViewWillSetLabel !== void 0) {
-        viewObserver.dataPointViewWillSetLabel(newLabelView, oldLabelView, this);
+      if (viewObserver.viewWillSetDataPointLabel !== void 0) {
+        viewObserver.viewWillSetDataPointLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -366,13 +438,13 @@ export class DataPointView<X, Y> extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dataPointViewDidSetLabel !== void 0) {
-        viewObserver.dataPointViewDidSetLabel(newLabelView, oldLabelView, this);
+      if (viewObserver.viewDidSetDataPointLabel !== void 0) {
+        viewObserver.viewDidSetDataPointLabel(newLabelView, oldLabelView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dataPointViewDidSetLabel !== void 0) {
-      viewController.dataPointViewDidSetLabel(newLabelView, oldLabelView, this);
+    if (viewController !== null && viewController.viewDidSetDataPointLabel !== void 0) {
+      viewController.viewDidSetDataPointLabel(newLabelView, oldLabelView, this);
     }
   }
 

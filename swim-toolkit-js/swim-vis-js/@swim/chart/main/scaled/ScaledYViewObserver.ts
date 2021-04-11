@@ -17,15 +17,15 @@ import type {GraphicsViewObserver} from "@swim/graphics";
 import type {ScaledYView} from "./ScaledYView";
 
 export interface ScaledYViewObserver<Y, V extends ScaledYView<Y> = ScaledYView<Y>> extends GraphicsViewObserver<V> {
-  scaledViewWillSetYScale?(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null, view: V): void;
+  viewWillSetYScale?(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null, view: V): void;
 
-  scaledViewDidSetYScale?(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null, view: V): void;
+  viewDidSetYScale?(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null, view: V): void;
 
-  scaledViewWillSetYRangePadding?(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number], view: V): void;
+  viewWillSetYRangePadding?(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number], view: V): void;
 
-  scaledViewDidSetYRangePadding?(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number], view: V): void;
+  viewDidSetYRangePadding?(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number], view: V): void;
 
-  scaledViewWillSetYDataDomain?(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null, view: V): void;
+  viewWillSetYDataDomain?(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null, view: V): void;
 
-  scaledViewDidSetYDataDomain?(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null, view: V): void;
+  viewDidSetYDataDomain?(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null, view: V): void;
 }

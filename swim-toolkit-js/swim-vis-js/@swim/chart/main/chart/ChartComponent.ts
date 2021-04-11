@@ -81,8 +81,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetTrait !== void 0) {
-        componentObserver.chartWillSetTrait(newGraphTrait, oldGraphTrait, this);
+      if (componentObserver.componentWillSetChartTrait !== void 0) {
+        componentObserver.componentWillSetChartTrait(newGraphTrait, oldGraphTrait, this);
       }
     }
   }
@@ -101,8 +101,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetTrait !== void 0) {
-        componentObserver.chartDidSetTrait(newGraphTrait, oldGraphTrait, this);
+      if (componentObserver.componentDidSetChartTrait !== void 0) {
+        componentObserver.componentDidSetChartTrait(newGraphTrait, oldGraphTrait, this);
       }
     }
   }
@@ -112,10 +112,6 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
   }
 
   protected initChartView(chartView: ChartView<X, Y>): void {
-    // hook
-  }
-
-  protected themeChartView(chartView: ChartView<X, Y>, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     // hook
   }
 
@@ -133,8 +129,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetView !== void 0) {
-        componentObserver.chartWillSetView(newChartView, oldChartView, this);
+      if (componentObserver.componentWillSetChartView !== void 0) {
+        componentObserver.componentWillSetChartView(newChartView, oldChartView, this);
       }
     }
   }
@@ -153,10 +149,14 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetView !== void 0) {
-        componentObserver.chartDidSetView(newChartView, oldChartView, this);
+      if (componentObserver.componentDidSetChartView !== void 0) {
+        componentObserver.componentDidSetChartView(newChartView, oldChartView, this);
       }
     }
+  }
+
+  protected themeChartView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, chartView: ChartView<X, Y>): void {
+    // hook
   }
 
   /** @hidden */
@@ -173,7 +173,7 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
       this.owner.didSetChartView(newChartView, oldChartView);
     },
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, chartView: ChartView<unknown, unknown>): void {
-      this.owner.themeChartView(chartView, theme, mood, timing);
+      this.owner.themeChartView(theme, mood, timing, chartView);
     },
     createView(): ChartView<unknown, unknown> | null {
       return this.owner.createChartView();
@@ -189,42 +189,42 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     didSetTrait(newChartTrait: ChartTrait<unknown, unknown> | null, oldChartTrait: ChartTrait<unknown, unknown> | null): void {
       this.owner.didSetChartTrait(newChartTrait, oldChartTrait);
     },
-    chartTraitWillSetTopAxis(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
+    traitWillSetTopAxis(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
       if (oldTopAxisTrait !== null) {
         this.owner.removeTopAxisTrait(oldTopAxisTrait);
       }
     },
-    chartTraitDidSetTopAxis(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
+    traitDidSetTopAxis(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
       if (newTopAxisTrait !== null) {
         this.owner.insertTopAxisTrait(newTopAxisTrait);
       }
     },
-    chartTraitWillSetRightAxis(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
+    traitWillSetRightAxis(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
       if (oldRightAxisTrait !== null) {
         this.owner.removeRightAxisTrait(oldRightAxisTrait);
       }
     },
-    chartTraitDidSetRightAxis(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
+    traitDidSetRightAxis(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
       if (newRightAxisTrait !== null) {
         this.owner.insertRightAxisTrait(newRightAxisTrait);
       }
     },
-    chartTraitWillSetBottomAxis(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
+    traitWillSetBottomAxis(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
       if (oldBottomAxisTrait !== null) {
         this.owner.removeBottomAxisTrait(oldBottomAxisTrait);
       }
     },
-    chartTraitDidSetBottomAxis(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
+    traitDidSetBottomAxis(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
       if (newBottomAxisTrait !== null) {
         this.owner.insertBottomAxisTrait(newBottomAxisTrait);
       }
     },
-    chartTraitWillSetLeftAxis(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
+    traitWillSetLeftAxis(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
       if (oldLeftAxisTrait !== null) {
         this.owner.removeLeftAxisTrait(oldLeftAxisTrait);
       }
     },
-    chartTraitDidSetLeftAxis(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
+    traitDidSetLeftAxis(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null, targetTrait: Trait | null): void {
       if (newLeftAxisTrait !== null) {
         this.owner.insertLeftAxisTrait(newLeftAxisTrait);
       }
@@ -297,8 +297,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetTopAxis !== void 0) {
-        componentObserver.chartWillSetTopAxis(newTopAxisComponent, oldTopAxisComponent, this);
+      if (componentObserver.componentWillSetTopAxis !== void 0) {
+        componentObserver.componentWillSetTopAxis(newTopAxisComponent, oldTopAxisComponent, this);
       }
     }
   }
@@ -317,8 +317,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetTopAxis !== void 0) {
-        componentObserver.chartDidSetTopAxis(newTopAxisComponent, oldTopAxisComponent, this);
+      if (componentObserver.componentDidSetTopAxis !== void 0) {
+        componentObserver.componentDidSetTopAxis(newTopAxisComponent, oldTopAxisComponent, this);
       }
     }
   }
@@ -385,8 +385,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetTopAxisTrait !== void 0) {
-        componentObserver.chartWillSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait, this);
+      if (componentObserver.componentWillSetTopAxisTrait !== void 0) {
+        componentObserver.componentWillSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait, this);
       }
     }
   }
@@ -405,8 +405,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetTopAxisTrait !== void 0) {
-        componentObserver.chartDidSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait, this);
+      if (componentObserver.componentDidSetTopAxisTrait !== void 0) {
+        componentObserver.componentDidSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait, this);
       }
     }
   }
@@ -431,8 +431,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetTopAxisView !== void 0) {
-        componentObserver.chartWillSetTopAxisView(newTopAxisView, oldTopAxisView, this);
+      if (componentObserver.componentWillSetTopAxisView !== void 0) {
+        componentObserver.componentWillSetTopAxisView(newTopAxisView, oldTopAxisView, this);
       }
     }
   }
@@ -451,8 +451,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetTopAxisView !== void 0) {
-        componentObserver.chartDidSetTopAxisView(newTopAxisView, oldTopAxisView, this);
+      if (componentObserver.componentDidSetTopAxisView !== void 0) {
+        componentObserver.componentDidSetTopAxisView(newTopAxisView, oldTopAxisView, this);
       }
     }
   }
@@ -470,17 +470,17 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     didSetComponent(newTopAxisComponent: AxisComponent<unknown> | null, oldTopAxisComponent: AxisComponent<unknown> | null): void {
       this.owner.didSetTopAxis(newTopAxisComponent, oldTopAxisComponent);
     },
-    axisWillSetTrait(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null): void {
+    componentWillSetAxisTrait(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null): void {
       this.owner.willSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait);
     },
-    axisDidSetTrait(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null): void {
+    componentDidSetAxisTrait(newTopAxisTrait: AxisTrait<unknown> | null, oldTopAxisTrait: AxisTrait<unknown> | null): void {
       this.owner.onSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait);
       this.owner.didSetTopAxisTrait(newTopAxisTrait, oldTopAxisTrait);
     },
-    axisWillSetView(newTopAxisView: AxisView<unknown> | null, oldTopAxisView: AxisView<unknown> | null): void {
+    componentWillSetAxisView(newTopAxisView: AxisView<unknown> | null, oldTopAxisView: AxisView<unknown> | null): void {
       this.owner.willSetTopAxisView(newTopAxisView, oldTopAxisView);
     },
-    axisDidSetView(newTopAxisView: AxisView<unknown> | null, oldTopAxisView: AxisView<unknown> | null): void {
+    componentDidSetAxisView(newTopAxisView: AxisView<unknown> | null, oldTopAxisView: AxisView<unknown> | null): void {
       this.owner.onSetTopAxisView(newTopAxisView, oldTopAxisView);
       this.owner.didSetTopAxisView(newTopAxisView, oldTopAxisView);
     },
@@ -532,8 +532,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetRightAxis !== void 0) {
-        componentObserver.chartWillSetRightAxis(newRightAxisComponent, oldRightAxisComponent, this);
+      if (componentObserver.componentWillSetRightAxis !== void 0) {
+        componentObserver.componentWillSetRightAxis(newRightAxisComponent, oldRightAxisComponent, this);
       }
     }
   }
@@ -552,8 +552,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetRightAxis !== void 0) {
-        componentObserver.chartDidSetRightAxis(newRightAxisComponent, oldRightAxisComponent, this);
+      if (componentObserver.componentDidSetRightAxis !== void 0) {
+        componentObserver.componentDidSetRightAxis(newRightAxisComponent, oldRightAxisComponent, this);
       }
     }
   }
@@ -620,8 +620,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetRightAxisTrait !== void 0) {
-        componentObserver.chartWillSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait, this);
+      if (componentObserver.componentWillSetRightAxisTrait !== void 0) {
+        componentObserver.componentWillSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait, this);
       }
     }
   }
@@ -640,8 +640,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetRightAxisTrait !== void 0) {
-        componentObserver.chartDidSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait, this);
+      if (componentObserver.componentDidSetRightAxisTrait !== void 0) {
+        componentObserver.componentDidSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait, this);
       }
     }
   }
@@ -666,8 +666,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetRightAxisView !== void 0) {
-        componentObserver.chartWillSetRightAxisView(newRightAxisView, oldRightAxisView, this);
+      if (componentObserver.componentWillSetRightAxisView !== void 0) {
+        componentObserver.componentWillSetRightAxisView(newRightAxisView, oldRightAxisView, this);
       }
     }
   }
@@ -686,8 +686,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetRightAxisView !== void 0) {
-        componentObserver.chartDidSetRightAxisView(newRightAxisView, oldRightAxisView, this);
+      if (componentObserver.componentDidSetRightAxisView !== void 0) {
+        componentObserver.componentDidSetRightAxisView(newRightAxisView, oldRightAxisView, this);
       }
     }
   }
@@ -705,17 +705,17 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     didSetComponent(newRightAxisComponent: AxisComponent<unknown> | null, oldRightAxisComponent: AxisComponent<unknown> | null): void {
       this.owner.didSetRightAxis(newRightAxisComponent, oldRightAxisComponent);
     },
-    axisWillSetTrait(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null): void {
+    componentWillSetAxisTrait(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null): void {
       this.owner.willSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait);
     },
-    axisDidSetTrait(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null): void {
+    componentDidSetAxisTrait(newRightAxisTrait: AxisTrait<unknown> | null, oldRightAxisTrait: AxisTrait<unknown> | null): void {
       this.owner.onSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait);
       this.owner.didSetRightAxisTrait(newRightAxisTrait, oldRightAxisTrait);
     },
-    axisWillSetView(newRightAxisView: AxisView<unknown> | null, oldRightAxisView: AxisView<unknown> | null): void {
+    componentWillSetAxisView(newRightAxisView: AxisView<unknown> | null, oldRightAxisView: AxisView<unknown> | null): void {
       this.owner.willSetRightAxisView(newRightAxisView, oldRightAxisView);
     },
-    axisDidSetView(newRightAxisView: AxisView<unknown> | null, oldRightAxisView: AxisView<unknown> | null): void {
+    componentDidSetAxisView(newRightAxisView: AxisView<unknown> | null, oldRightAxisView: AxisView<unknown> | null): void {
       this.owner.onSetRightAxisView(newRightAxisView, oldRightAxisView);
       this.owner.didSetRightAxisView(newRightAxisView, oldRightAxisView);
     },
@@ -767,8 +767,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetBottomAxis !== void 0) {
-        componentObserver.chartWillSetBottomAxis(newBottomAxisComponent, oldBottomAxisComponent, this);
+      if (componentObserver.componentWillSetBottomAxis !== void 0) {
+        componentObserver.componentWillSetBottomAxis(newBottomAxisComponent, oldBottomAxisComponent, this);
       }
     }
   }
@@ -787,8 +787,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetBottomAxis !== void 0) {
-        componentObserver.chartDidSetBottomAxis(newBottomAxisComponent, oldBottomAxisComponent, this);
+      if (componentObserver.componentDidSetBottomAxis !== void 0) {
+        componentObserver.componentDidSetBottomAxis(newBottomAxisComponent, oldBottomAxisComponent, this);
       }
     }
   }
@@ -855,8 +855,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetBottomAxisTrait !== void 0) {
-        componentObserver.chartWillSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait, this);
+      if (componentObserver.componentWillSetBottomAxisTrait !== void 0) {
+        componentObserver.componentWillSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait, this);
       }
     }
   }
@@ -875,8 +875,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetBottomAxisTrait !== void 0) {
-        componentObserver.chartDidSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait, this);
+      if (componentObserver.componentDidSetBottomAxisTrait !== void 0) {
+        componentObserver.componentDidSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait, this);
       }
     }
   }
@@ -901,8 +901,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetBottomAxisView !== void 0) {
-        componentObserver.chartWillSetBottomAxisView(newBottomAxisView, oldBottomAxisView, this);
+      if (componentObserver.componentWillSetBottomAxisView !== void 0) {
+        componentObserver.componentWillSetBottomAxisView(newBottomAxisView, oldBottomAxisView, this);
       }
     }
   }
@@ -921,8 +921,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetBottomAxisView !== void 0) {
-        componentObserver.chartDidSetBottomAxisView(newBottomAxisView, oldBottomAxisView, this);
+      if (componentObserver.componentDidSetBottomAxisView !== void 0) {
+        componentObserver.componentDidSetBottomAxisView(newBottomAxisView, oldBottomAxisView, this);
       }
     }
   }
@@ -940,17 +940,17 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     didSetComponent(newBottomAxisComponent: AxisComponent<unknown> | null, oldBottomAxisComponent: AxisComponent<unknown> | null): void {
       this.owner.didSetBottomAxis(newBottomAxisComponent, oldBottomAxisComponent);
     },
-    axisWillSetTrait(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null): void {
+    componentWillSetAxisTrait(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null): void {
       this.owner.willSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait);
     },
-    axisDidSetTrait(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null): void {
+    componentDidSetAxisTrait(newBottomAxisTrait: AxisTrait<unknown> | null, oldBottomAxisTrait: AxisTrait<unknown> | null): void {
       this.owner.onSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait);
       this.owner.didSetBottomAxisTrait(newBottomAxisTrait, oldBottomAxisTrait);
     },
-    axisWillSetView(newBottomAxisView: AxisView<unknown> | null, oldBottomAxisView: AxisView<unknown> | null): void {
+    componentWillSetAxisView(newBottomAxisView: AxisView<unknown> | null, oldBottomAxisView: AxisView<unknown> | null): void {
       this.owner.willSetBottomAxisView(newBottomAxisView, oldBottomAxisView);
     },
-    axisDidSetView(newBottomAxisView: AxisView<unknown> | null, oldBottomAxisView: AxisView<unknown> | null): void {
+    componentDidSetAxisView(newBottomAxisView: AxisView<unknown> | null, oldBottomAxisView: AxisView<unknown> | null): void {
       this.owner.onSetBottomAxisView(newBottomAxisView, oldBottomAxisView);
       this.owner.didSetBottomAxisView(newBottomAxisView, oldBottomAxisView);
     },
@@ -1002,8 +1002,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetLeftAxis !== void 0) {
-        componentObserver.chartWillSetLeftAxis(newLeftAxisComponent, oldLeftAxisComponent, this);
+      if (componentObserver.componentWillSetLeftAxis !== void 0) {
+        componentObserver.componentWillSetLeftAxis(newLeftAxisComponent, oldLeftAxisComponent, this);
       }
     }
   }
@@ -1022,8 +1022,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetLeftAxis !== void 0) {
-        componentObserver.chartDidSetLeftAxis(newLeftAxisComponent, oldLeftAxisComponent, this);
+      if (componentObserver.componentDidSetLeftAxis !== void 0) {
+        componentObserver.componentDidSetLeftAxis(newLeftAxisComponent, oldLeftAxisComponent, this);
       }
     }
   }
@@ -1090,8 +1090,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetLeftAxisTrait !== void 0) {
-        componentObserver.chartWillSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait, this);
+      if (componentObserver.componentWillSetLeftAxisTrait !== void 0) {
+        componentObserver.componentWillSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait, this);
       }
     }
   }
@@ -1110,8 +1110,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetLeftAxisTrait !== void 0) {
-        componentObserver.chartDidSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait, this);
+      if (componentObserver.componentDidSetLeftAxisTrait !== void 0) {
+        componentObserver.componentDidSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait, this);
       }
     }
   }
@@ -1136,8 +1136,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartWillSetLeftAxisView !== void 0) {
-        componentObserver.chartWillSetLeftAxisView(newLeftAxisView, oldLeftAxisView, this);
+      if (componentObserver.componentWillSetLeftAxisView !== void 0) {
+        componentObserver.componentWillSetLeftAxisView(newLeftAxisView, oldLeftAxisView, this);
       }
     }
   }
@@ -1156,8 +1156,8 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.chartDidSetLeftAxisView !== void 0) {
-        componentObserver.chartDidSetLeftAxisView(newLeftAxisView, oldLeftAxisView, this);
+      if (componentObserver.componentDidSetLeftAxisView !== void 0) {
+        componentObserver.componentDidSetLeftAxisView(newLeftAxisView, oldLeftAxisView, this);
       }
     }
   }
@@ -1175,17 +1175,17 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     didSetComponent(newLeftAxisComponent: AxisComponent<unknown> | null, oldLeftAxisComponent: AxisComponent<unknown> | null): void {
       this.owner.didSetLeftAxis(newLeftAxisComponent, oldLeftAxisComponent);
     },
-    axisWillSetTrait(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null): void {
+    componentWillSetAxisTrait(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null): void {
       this.owner.willSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait);
     },
-    axisDidSetTrait(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null): void {
+    componentDidSetAxisTrait(newLeftAxisTrait: AxisTrait<unknown> | null, oldLeftAxisTrait: AxisTrait<unknown> | null): void {
       this.owner.onSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait);
       this.owner.didSetLeftAxisTrait(newLeftAxisTrait, oldLeftAxisTrait);
     },
-    axisWillSetView(newLeftAxisView: AxisView<unknown> | null, oldLeftAxisView: AxisView<unknown> | null): void {
+    componentWillSetAxisView(newLeftAxisView: AxisView<unknown> | null, oldLeftAxisView: AxisView<unknown> | null): void {
       this.owner.willSetLeftAxisView(newLeftAxisView, oldLeftAxisView);
     },
-    axisDidSetView(newLeftAxisView: AxisView<unknown> | null, oldLeftAxisView: AxisView<unknown> | null): void {
+    componentDidSetAxisView(newLeftAxisView: AxisView<unknown> | null, oldLeftAxisView: AxisView<unknown> | null): void {
       this.owner.onSetLeftAxisView(newLeftAxisView, oldLeftAxisView);
       this.owner.didSetLeftAxisView(newLeftAxisView, oldLeftAxisView);
     },

@@ -15,6 +15,7 @@
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {Length} from "@swim/math";
 import type {Trait} from "@swim/model";
+import type {Color} from "@swim/style";
 import type {GraphicsView} from "@swim/graphics";
 import {
   Component,
@@ -68,8 +69,8 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetTrait !== void 0) {
-        componentObserver.dataSetWillSetTrait(newDataSetTrait, oldDataSetTrait, this);
+      if (componentObserver.componentWillSetDataSetTrait !== void 0) {
+        componentObserver.componentWillSetDataSetTrait(newDataSetTrait, oldDataSetTrait, this);
       }
     }
   }
@@ -88,8 +89,8 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetDidSetTrait !== void 0) {
-        componentObserver.dataSetDidSetTrait(newDataSetTrait, oldDataSetTrait, this);
+      if (componentObserver.componentDidSetDataSetTrait !== void 0) {
+        componentObserver.componentDidSetDataSetTrait(newDataSetTrait, oldDataSetTrait, this);
       }
     }
   }
@@ -107,12 +108,12 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     didSetTrait(newDataSetTrait: DataSetTrait<unknown, unknown> | null, oldDataSetTrait: DataSetTrait<unknown, unknown> | null): void {
       this.owner.didSetDataSetTrait(newDataSetTrait, oldDataSetTrait);
     },
-    dataSetTraitWillSetDataPoint(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null, targetTrait: Trait): void {
+    traitWillSetDataPoint(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null, targetTrait: Trait): void {
       if (oldDataPointTrait !== null) {
         this.owner.removeDataPointTrait(oldDataPointTrait);
       }
     },
-    dataSetTraitDidSetDataPoint(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null, targetTrait: Trait): void {
+    traitDidSetDataPoint(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null, targetTrait: Trait): void {
       if (newDataPointTrait !== null) {
         this.owner.insertDataPointTrait(newDataPointTrait, targetTrait);
       }
@@ -200,8 +201,8 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPoint !== void 0) {
-        componentObserver.dataSetWillSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener);
+      if (componentObserver.componentWillSetDataPoint !== void 0) {
+        componentObserver.componentWillSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener);
       }
     }
   }
@@ -222,8 +223,8 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetDidSetDataPoint !== void 0) {
-        componentObserver.dataSetDidSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener);
+      if (componentObserver.componentDidSetDataPoint !== void 0) {
+        componentObserver.componentDidSetDataPoint(newDataPointComponent, oldDataPointComponent, dataPointFastener);
       }
     }
   }
@@ -290,8 +291,8 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointTrait !== void 0) {
-        componentObserver.dataSetWillSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener);
+      if (componentObserver.componentWillSetDataPointTrait !== void 0) {
+        componentObserver.componentWillSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener);
       }
     }
   }
@@ -312,8 +313,8 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetDidSetDataPointTrait !== void 0) {
-        componentObserver.dataSetDidSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener);
+      if (componentObserver.componentDidSetDataPointTrait !== void 0) {
+        componentObserver.componentDidSetDataPointTrait(newDataPointTrait, oldDataPointTrait, dataPointFastener);
       }
     }
   }
@@ -349,8 +350,8 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointView !== void 0) {
-        componentObserver.dataSetWillSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener);
+      if (componentObserver.componentWillSetDataPointView !== void 0) {
+        componentObserver.componentWillSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener);
       }
     }
   }
@@ -371,104 +372,152 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetDidSetDataPointView !== void 0) {
-        componentObserver.dataSetDidSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener);
+      if (componentObserver.componentDidSetDataPointView !== void 0) {
+        componentObserver.componentDidSetDataPointView(newDataPointView, oldDataPointView, dataPointFastener);
       }
     }
   }
 
-  protected willSetDataPointViewX(newX: X | undefined, oldX: X | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected willSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointViewX !== void 0) {
-        componentObserver.dataSetWillSetDataPointViewX(newX, oldX, dataPointFastener);
+      if (componentObserver.componentWillSetDataPointX !== void 0) {
+        componentObserver.componentWillSetDataPointX(newX, oldX, dataPointFastener);
       }
     }
   }
 
-  protected onSetDataPointViewX(newX: X | undefined, oldX: X | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected onSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     // hook
   }
 
-  protected didSetDataPointViewX(newX: X | undefined, oldX: X | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected didSetDataPointX(newX: X | undefined, oldX: X | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointViewX !== void 0) {
-        componentObserver.dataSetWillSetDataPointViewX(newX, oldX, dataPointFastener);
+      if (componentObserver.componentDidSetDataPointX !== void 0) {
+        componentObserver.componentDidSetDataPointX(newX, oldX, dataPointFastener);
       }
     }
   }
 
-  protected willSetDataPointViewY(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected willSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointViewY !== void 0) {
-        componentObserver.dataSetWillSetDataPointViewY(newY, oldY, dataPointFastener);
+      if (componentObserver.componentWillSetDataPointY !== void 0) {
+        componentObserver.componentWillSetDataPointY(newY, oldY, dataPointFastener);
       }
     }
   }
 
-  protected onSetDataPointViewY(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected onSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     // hook
   }
 
-  protected didSetDataPointViewY(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected didSetDataPointY(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointViewY !== void 0) {
-        componentObserver.dataSetWillSetDataPointViewY(newY, oldY, dataPointFastener);
+      if (componentObserver.componentDidSetDataPointY !== void 0) {
+        componentObserver.componentDidSetDataPointY(newY, oldY, dataPointFastener);
       }
     }
   }
 
-  protected willSetDataPointViewY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected willSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointViewY2 !== void 0) {
-        componentObserver.dataSetWillSetDataPointViewY2(newY2, oldY2, dataPointFastener);
+      if (componentObserver.componentWillSetDataPointY2 !== void 0) {
+        componentObserver.componentWillSetDataPointY2(newY2, oldY2, dataPointFastener);
       }
     }
   }
 
-  protected onSetDataPointViewY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected onSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     // hook
   }
 
-  protected didSetDataPointViewY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected didSetDataPointY2(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointViewY2 !== void 0) {
-        componentObserver.dataSetWillSetDataPointViewY2(newY2, oldY2, dataPointFastener);
+      if (componentObserver.componentDidSetDataPointY2 !== void 0) {
+        componentObserver.componentDidSetDataPointY2(newY2, oldY2, dataPointFastener);
       }
     }
   }
 
-  protected willSetDataPointViewRadius(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected willSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointViewRadius !== void 0) {
-        componentObserver.dataSetWillSetDataPointViewRadius(newRadius, oldRadius, dataPointFastener);
+      if (componentObserver.componentWillSetDataPointRadius !== void 0) {
+        componentObserver.componentWillSetDataPointRadius(newRadius, oldRadius, dataPointFastener);
       }
     }
   }
 
-  protected onSetDataPointViewRadius(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected onSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     // hook
   }
 
-  protected didSetDataPointViewRadius(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected didSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointViewRadius !== void 0) {
-        componentObserver.dataSetWillSetDataPointViewRadius(newRadius, oldRadius, dataPointFastener);
+      if (componentObserver.componentDidSetDataPointRadius !== void 0) {
+        componentObserver.componentDidSetDataPointRadius(newRadius, oldRadius, dataPointFastener);
+      }
+    }
+  }
+
+  protected willSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentWillSetDataPointColor !== void 0) {
+        componentObserver.componentWillSetDataPointColor(newColor, oldColor, dataPointFastener);
+      }
+    }
+  }
+
+  protected onSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+    // hook
+  }
+
+  protected didSetDataPointColor(newColor: Color | null, oldColor: Color | null, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentDidSetDataPointColor !== void 0) {
+        componentObserver.componentDidSetDataPointColor(newColor, oldColor, dataPointFastener);
+      }
+    }
+  }
+
+  protected willSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentWillSetDataPointOpacity !== void 0) {
+        componentObserver.componentWillSetDataPointOpacity(newOpacity, oldOpacity, dataPointFastener);
+      }
+    }
+  }
+
+  protected onSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+    // hook
+  }
+
+  protected didSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentDidSetDataPointOpacity !== void 0) {
+        componentObserver.componentDidSetDataPointOpacity(newOpacity, oldOpacity, dataPointFastener);
       }
     }
   }
@@ -490,8 +539,8 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetWillSetDataPointLabelView !== void 0) {
-        componentObserver.dataSetWillSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener);
+      if (componentObserver.componentWillSetDataPointLabelView !== void 0) {
+        componentObserver.componentWillSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener);
       }
     }
   }
@@ -512,8 +561,8 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dataSetDidSetDataPointLabelView !== void 0) {
-        componentObserver.dataSetDidSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener);
+      if (componentObserver.componentDidSetDataPointLabelView !== void 0) {
+        componentObserver.componentDidSetDataPointLabelView(newLabelView, oldLabelView, dataPointFastener);
       }
     }
   }
@@ -535,52 +584,66 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     didSetComponent(newDataPointComponent: DataPointComponent<unknown, unknown> | null, oldDataPointComponent: DataPointComponent<unknown, unknown> | null): void {
       this.owner.didSetDataPoint(newDataPointComponent, oldDataPointComponent, this);
     },
-    dataPointWillSetTrait(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null): void {
+    componentWillSetDataPointTrait(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null): void {
       this.owner.willSetDataPointTrait(newDataPointTrait, oldDataPointTrait, this);
     },
-    dataPointDidSetTrait(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null): void {
+    componentDidSetDataPointTrait(newDataPointTrait: DataPointTrait<unknown, unknown> | null, oldDataPointTrait: DataPointTrait<unknown, unknown> | null): void {
       this.owner.onSetDataPointTrait(newDataPointTrait, oldDataPointTrait, this);
       this.owner.didSetDataPointTrait(newDataPointTrait, oldDataPointTrait, this);
     },
-    dataPointWillSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null): void {
+    componentWillSetDataPointView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null): void {
       this.owner.willSetDataPointView(newDataPointView, oldDataPointView, this);
     },
-    dataPointDidSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null): void {
+    componentDidSetDataPointView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null): void {
       this.owner.onSetDataPointView(newDataPointView, oldDataPointView, this);
       this.owner.didSetDataPointView(newDataPointView, oldDataPointView, this);
     },
-    dataPointWillSetViewX(newX: unknown | undefined, oldX: unknown | undefined): void {
-      this.owner.willSetDataPointViewX(newX, oldX, this);
+    componentWillSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined): void {
+      this.owner.willSetDataPointX(newX, oldX, this);
     },
-    dataPointDidSetViewX(newX: unknown | undefined, oldX: unknown | undefined): void {
-      this.owner.onSetDataPointViewX(newX, oldX, this);
-      this.owner.didSetDataPointViewX(newX, oldX, this);
+    componentDidSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined): void {
+      this.owner.onSetDataPointX(newX, oldX, this);
+      this.owner.didSetDataPointX(newX, oldX, this);
     },
-    dataPointWillSetViewY(newY: unknown | undefined, oldY: unknown | undefined): void {
-      this.owner.willSetDataPointViewY(newY, oldY, this);
+    componentWillSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined): void {
+      this.owner.willSetDataPointY(newY, oldY, this);
     },
-    dataPointDidSetViewY(newY: unknown | undefined, oldY: unknown | undefined): void {
-      this.owner.onSetDataPointViewY(newY, oldY, this);
-      this.owner.didSetDataPointViewY(newY, oldY, this);
+    componentDidSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined): void {
+      this.owner.onSetDataPointY(newY, oldY, this);
+      this.owner.didSetDataPointY(newY, oldY, this);
     },
-    dataPointWillSetViewY2(newY2: unknown | undefined, oldY2: unknown | undefined): void {
-      this.owner.willSetDataPointViewY2(newY2, oldY2, this);
+    componentWillSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined): void {
+      this.owner.willSetDataPointY2(newY2, oldY2, this);
     },
-    dataPointDidSetViewY2(newY2: unknown | undefined, oldY2: unknown | undefined): void {
-      this.owner.onSetDataPointViewY2(newY2, oldY2, this);
-      this.owner.didSetDataPointViewY2(newY2, oldY2, this);
+    componentDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined): void {
+      this.owner.onSetDataPointY2(newY2, oldY2, this);
+      this.owner.didSetDataPointY2(newY2, oldY2, this);
     },
-    dataPointWillSetViewRadius(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.willSetDataPointViewRadius(newRadius, oldRadius, this);
+    componentWillSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.willSetDataPointRadius(newRadius, oldRadius, this);
     },
-    dataPointDidSetViewRadius(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.onSetDataPointViewRadius(newRadius, oldRadius, this);
-      this.owner.didSetDataPointViewRadius(newRadius, oldRadius, this);
+    componentDidSetDataPointRadius(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.onSetDataPointRadius(newRadius, oldRadius, this);
+      this.owner.didSetDataPointRadius(newRadius, oldRadius, this);
     },
-    dataPointWillSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    componentWillSetDataPointColor(newColor: Color | null, oldColor: Color | null): void {
+      this.owner.willSetDataPointColor(newColor, oldColor, this);
+    },
+    componentDidSetDataPointColor(newColor: Color | null, oldColor: Color | null): void {
+      this.owner.onSetDataPointColor(newColor, oldColor, this);
+      this.owner.didSetDataPointColor(newColor, oldColor, this);
+    },
+    componentWillSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+      this.owner.willSetDataPointOpacity(newOpacity, oldOpacity, this);
+    },
+    componentDidSetDataPointOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+      this.owner.onSetDataPointOpacity(newOpacity, oldOpacity, this);
+      this.owner.didSetDataPointOpacity(newOpacity, oldOpacity, this);
+    },
+    componentWillSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
       this.owner.willSetDataPointLabelView(newLabelView, oldLabelView, this);
     },
-    dataPointDidSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    componentDidSetDataPointLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
       this.owner.onSetDataPointLabelView(newLabelView, oldLabelView, this);
       this.owner.didSetDataPointLabelView(newLabelView, oldLabelView, this);
     },

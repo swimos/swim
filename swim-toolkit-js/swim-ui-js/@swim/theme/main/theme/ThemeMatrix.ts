@@ -15,9 +15,9 @@
 import {Equals, Lazy, Arrays} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
 import type {Look} from "../look/Look";
-import {AnyLookVector, LookVector} from "../look/LookVector";
+import {AnyLookVector, LookVectorUpdates, LookVector} from "../look/LookVector";
 import type {Feel} from "../feel/Feel";
-import {AnyFeelVector, FeelVector} from "../feel/FeelVector";
+import {AnyFeelVector, FeelVectorUpdates, FeelVector} from "../feel/FeelVector";
 import {MoodVector} from "../mood/MoodVector";
 import type {MoodMatrix} from "../mood/MoodMatrix";
 
@@ -355,8 +355,8 @@ export class ThemeMatrix implements Equals, Debug {
     }
   }
 
-  updatedRow<T, U = never>(look: Look<T, U>, defaultRow: AnyLookVector<T> | undefined,
-                           ...entries: [Feel, T | U | undefined][]): ThemeMatrix {
+  updatedRow<T, U = never>(look: Look<T, U>, updates: LookVectorUpdates<T>,
+                           defaultRow?: AnyLookVector<T>): ThemeMatrix {
     const oldRow = this.getRow(look);
     let newRow = oldRow;
     if (newRow === void 0) {
@@ -367,10 +367,7 @@ export class ThemeMatrix implements Equals, Debug {
       }
       newRow = defaultRow;
     }
-    for (let j = 0, n = entries.length; j < n; j += 1) {
-      const [feel, value] = entries[j]!;
-      newRow = newRow.updated(feel, value !== void 0 ? look.coerce(value) : void 0);
-    }
+    newRow = newRow.updated(updates);
     if (!newRow.equals(oldRow)) {
       return this.row(look, newRow);
     } else {
@@ -378,8 +375,8 @@ export class ThemeMatrix implements Equals, Debug {
     }
   }
 
-  updatedCol(feel: Feel, defaultCol: AnyFeelVector | undefined,
-             ...entries: [Look<unknown>, unknown | undefined][]): ThemeMatrix {
+  updatedCol(feel: Feel, updates: FeelVectorUpdates,
+             defaultCol?: AnyFeelVector): ThemeMatrix {
     const oldCol = this.getCol(feel);
     let newCol = oldCol;
     if (newCol === void 0) {
@@ -390,10 +387,7 @@ export class ThemeMatrix implements Equals, Debug {
       }
       newCol = defaultCol;
     }
-    for (let i = 0, m = entries.length; i < m; i += 1) {
-      const [look, value] = entries[i]!;
-      newCol = newCol.updated(look, value);
-    }
+    newCol = newCol.updated(updates);
     if (!newCol.equals(oldCol)) {
       return this.col(feel, newCol);
     } else {

@@ -39,8 +39,8 @@ export class PlotTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.plotTraitWillSetDataSet !== void 0) {
-        traitObserver.plotTraitWillSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait, this);
+      if (traitObserver.traitWillSetDataSet !== void 0) {
+        traitObserver.traitWillSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait, this);
       }
     }
   }
@@ -59,8 +59,8 @@ export class PlotTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.plotTraitDidSetDataSet !== void 0) {
-        traitObserver.plotTraitDidSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait, this);
+      if (traitObserver.traitDidSetDataSet !== void 0) {
+        traitObserver.traitDidSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait, this);
       }
     }
   }

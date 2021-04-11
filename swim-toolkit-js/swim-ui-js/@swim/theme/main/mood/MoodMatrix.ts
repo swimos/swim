@@ -16,7 +16,7 @@ import {Equals, Lazy, Arrays} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
 import type {Feel} from "../feel/Feel";
 import type {Mood} from "./Mood";
-import {AnyMoodVector, MoodVector} from "./MoodVector";
+import {AnyMoodVector, MoodVectorUpdates, MoodVector} from "./MoodVector";
 
 export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements Equals, Debug {
   constructor(rowArray: ReadonlyArray<[M, MoodVector<N>]>,
@@ -393,12 +393,12 @@ export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements
     }
   }
 
-  updatedRow(rowKey: M, defaultRow: AnyMoodVector<N> | undefined,
-             ...entries: [N, number | undefined][]): MoodMatrix<M, N>;
-  updatedRow(rowKey: M & N, defaultRow: AnyMoodVector<N> | boolean | undefined,
-             ...entries: [M & N, number | undefined][]): MoodMatrix<M | N, N>
-  updatedRow(rowKey: M & N, defaultRow: AnyMoodVector<N> | boolean | undefined,
-             ...entries: [M & N, number | undefined][]): MoodMatrix<M | N, N> {
+  updatedRow(rowKey: M, updates: MoodVectorUpdates<N>,
+             defaultRow?: AnyMoodVector<N>): MoodMatrix<M, N>;
+  updatedRow(rowKey: M & N, updates: MoodVectorUpdates<M & N>,
+             defaultRow?: AnyMoodVector<N> | boolean): MoodMatrix<M | N, N>
+  updatedRow(rowKey: M & N, updates: MoodVectorUpdates<M & N>,
+             defaultRow?: AnyMoodVector<N> | boolean): MoodMatrix<M | N, N> {
     const oldRow = this.getRow(rowKey);
     let newRow = oldRow;
     if (newRow === void 0) {
@@ -414,10 +414,7 @@ export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements
       }
       newRow = defaultRow;
     }
-    for (let j = 0, n = entries.length; j < n; j += 1) {
-      const [colKey, value] = entries[j]!;
-      newRow = newRow.updated(colKey, value);
-    }
+    newRow = newRow.updated(updates);
     if (!newRow.equals(oldRow)) {
       return this.row(rowKey, newRow);
     } else {
@@ -425,12 +422,12 @@ export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements
     }
   }
 
-  updatedCol(colKey: N, defaultCol: AnyMoodVector<M> | undefined,
-             ...entries: [M, number | undefined][]): MoodMatrix<M, N>;
-  updatedCol(colKey: M & N, defaultCol: AnyMoodVector<M> | boolean | undefined,
-             ...entries: [M & N, number | undefined][]): MoodMatrix<M | N, N>;
-  updatedCol(colKey: M & N, defaultCol: AnyMoodVector<M> | boolean | undefined,
-             ...entries: [M & N, number | undefined][]): MoodMatrix<M | N, N> {
+  updatedCol(colKey: N, updates: MoodVectorUpdates<M>,
+             defaultCol?: AnyMoodVector<M>): MoodMatrix<M, N>;
+  updatedCol(colKey: M & N, updates: MoodVectorUpdates<M & N>,
+             defaultCol?: AnyMoodVector<M> | boolean): MoodMatrix<M | N, N>;
+  updatedCol(colKey: M & N, updates: MoodVectorUpdates<M & N>,
+             defaultCol?: AnyMoodVector<M> | boolean): MoodMatrix<M | N, N> {
     const oldCol = this.getCol(colKey);
     let newCol = oldCol;
     if (newCol === void 0) {
@@ -446,10 +443,7 @@ export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements
       }
       newCol = defaultCol;
     }
-    for (let i = 0, m = entries.length; i < m; i += 1) {
-      const [rowKey, value] = entries[i]!;
-      newCol = newCol.updated(rowKey, value);
-    }
+    newCol = newCol.updated(updates);
     if (!newCol.equals(oldCol)) {
       return this.col(colKey, newCol);
     } else {

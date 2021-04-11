@@ -17,7 +17,7 @@ import type {DataSetTrait} from "../data/DataSetTrait";
 import type {PlotTrait} from "./PlotTrait";
 
 export interface PlotTraitObserver<X, Y, R extends PlotTrait<X, Y> = PlotTrait<X, Y>> extends TraitObserver<R> {
-  plotTraitWillSetDataSet?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
+  traitWillSetDataSet?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
 
-  plotTraitDidSetDataSet?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
+  traitDidSetDataSet?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, targetTrait: Trait | null, trait: R): void;
 }

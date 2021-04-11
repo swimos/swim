@@ -62,7 +62,7 @@ export class ButtonItem extends HtmlView {
   protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     const label = this.label;
-    if (label !== null && label.color.isPrecedent(View.Intrinsic)) {
+    if (label !== null && label.color.takesPrecedence(View.Intrinsic)) {
       label.color.setState(theme.getOr(Look.mutedColor, mood, null), timing, View.Intrinsic);
     }
   }

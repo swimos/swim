@@ -19,23 +19,23 @@ import type {SliceTrait} from "./SliceTrait";
 import type {SliceComponent} from "./SliceComponent";
 
 export interface SliceComponentObserver<C extends SliceComponent = SliceComponent> extends ComponentObserver<C> {
-  sliceWillSetTrait?(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null, component: C): void;
+  componentWillSetSliceTrait?(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null, component: C): void;
 
-  sliceDidSetTrait?(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null, component: C): void;
+  componentDidSetSliceTrait?(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null, component: C): void;
 
-  sliceWillSetView?(newSliceView: SliceView | null, oldSliceView: SliceView | null, component: C): void;
+  componentWillSetSliceView?(newSliceView: SliceView | null, oldSliceView: SliceView | null, component: C): void;
 
-  sliceDidSetView?(newSliceView: SliceView | null, oldSliceView: SliceView | null, component: C): void;
+  componentDidSetSliceView?(newSliceView: SliceView | null, oldSliceView: SliceView | null, component: C): void;
 
-  sliceWillSetViewValue?(newValue: number, oldValue: number, component: C): void;
+  componentWillSetSliceValue?(newValue: number, oldValue: number, component: C): void;
 
-  sliceDidSetViewValue?(newValue: number, oldValue: number, component: C): void;
+  componentDidSetSliceValue?(newValue: number, oldValue: number, component: C): void;
 
-  sliceWillSetLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, component: C): void;
+  componentWillSetSliceLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, component: C): void;
 
-  sliceDidSetLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, component: C): void;
+  componentDidSetSliceLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, component: C): void;
 
-  sliceWillSetLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, component: C): void;
+  componentWillSetSliceLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, component: C): void;
 
-  sliceDidSetLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, component: C): void;
+  componentDidSetSliceLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, component: C): void;
 }

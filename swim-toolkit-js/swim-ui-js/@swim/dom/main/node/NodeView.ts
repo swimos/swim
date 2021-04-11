@@ -16,7 +16,7 @@ import {Arrays} from "@swim/util";
 import type {AnyTiming} from "@swim/mapping";
 import type {ConstraintVariable, Constraint} from "@swim/constraint";
 import {BoxR2, Transform} from "@swim/math";
-import type {Look, Feel, MoodVector} from "@swim/theme";
+import type {Look, Feel, MoodVectorUpdates, MoodVector} from "@swim/theme";
 import {
   ViewContextType,
   ViewContext,
@@ -1338,15 +1338,11 @@ export class NodeView extends View {
     return elseValue as E;
   }
 
-  modifyMood(feel: Feel, ...entires: [Feel, number | undefined][]): void;
-  modifyMood(feel: Feel, ...args: [...entires: [Feel, number | undefined][], timing: AnyTiming | boolean]): void;
-  modifyMood(feel: Feel, ...args: [Feel, number | undefined][] | [...entires: [Feel, number | undefined][], timing: AnyTiming | boolean]): void {
+  modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
     // nop
   }
 
-  modifyTheme(feel: Feel, ...enties: [Feel, number | undefined][]): void;
-  modifyTheme(feel: Feel, ...args: [...enties: [Feel, number | undefined][], timing: AnyTiming | boolean]): void;
-  modifyTheme(feel: Feel, ...args: [Feel, number | undefined][] | [...enties: [Feel, number | undefined][], timing: AnyTiming | boolean]): void {
+  modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
     // nop
   }
 

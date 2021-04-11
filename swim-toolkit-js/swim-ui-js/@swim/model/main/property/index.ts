@@ -38,6 +38,7 @@ export {
   TraitPropertyMemberInit,
   TraitPropertyMemberKey,
   TraitPropertyMemberMap,
+  TraitPropertyFlags,
   TraitPropertyInit,
   TraitPropertyDescriptor,
   TraitPropertyDescriptorExtends,

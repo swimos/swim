@@ -23,7 +23,7 @@ export class ColView extends HtmlView {
   }
 
   protected initCol(): void {
-    this.addClass("table-col");
+    this.addClass("col");
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
   }
@@ -55,14 +55,14 @@ export class ColView extends HtmlView {
 
   protected willSetHeader(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.colViewWillSetHeader !== void 0) {
-      viewController.colViewWillSetHeader(newHeaderView, oldHeaderView, this);
+    if (viewController !== null && viewController.viewWillSetColHeader !== void 0) {
+      viewController.viewWillSetColHeader(newHeaderView, oldHeaderView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.colViewWillSetHeader !== void 0) {
-        viewObserver.colViewWillSetHeader(newHeaderView, oldHeaderView, this);
+      if (viewObserver.viewWillSetColHeader !== void 0) {
+        viewObserver.viewWillSetColHeader(newHeaderView, oldHeaderView, this);
       }
     }
   }
@@ -81,13 +81,13 @@ export class ColView extends HtmlView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.colViewDidSetHeader !== void 0) {
-        viewObserver.colViewDidSetHeader(newHeaderView, oldHeaderView, this);
+      if (viewObserver.viewDidSetColHeader !== void 0) {
+        viewObserver.viewDidSetColHeader(newHeaderView, oldHeaderView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.colViewDidSetHeader !== void 0) {
-      viewController.colViewDidSetHeader(newHeaderView, oldHeaderView, this);
+    if (viewController !== null && viewController.viewDidSetColHeader !== void 0) {
+      viewController.viewDidSetColHeader(newHeaderView, oldHeaderView, this);
     }
   }
 

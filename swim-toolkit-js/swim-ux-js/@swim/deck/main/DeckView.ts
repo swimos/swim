@@ -305,7 +305,7 @@ export abstract class DeckViewCard<V extends DeckView, S extends DeckCard> exten
 
   protected initCard(cardView: S): void {
     let edgeInsets = this.owner.edgeInsets.state;
-    if (edgeInsets === void 0 && this.owner.edgeInsets.isPrecedent(View.Intrinsic)) {
+    if (edgeInsets === void 0 && this.owner.edgeInsets.takesPrecedence(View.Intrinsic)) {
       edgeInsets = this.owner.viewport.safeArea;
     }
 
@@ -343,7 +343,7 @@ export abstract class DeckViewCard<V extends DeckView, S extends DeckCard> exten
 
   protected resizeCard(cardView: S, viewContext: ViewContext): void {
     let edgeInsets = this.owner.edgeInsets.state;
-    if (edgeInsets === void 0 && this.owner.edgeInsets.isPrecedent(View.Intrinsic)) {
+    if (edgeInsets === void 0 && this.owner.edgeInsets.takesPrecedence(View.Intrinsic)) {
       edgeInsets = viewContext.viewport.safeArea;
     }
 

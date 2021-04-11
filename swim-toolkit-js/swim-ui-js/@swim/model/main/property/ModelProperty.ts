@@ -13,13 +13,11 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Equals, FromAny, Arrays} from "@swim/util";
+import {Equals, FromAny} from "@swim/util";
 import {ModelFlags, ModelPrecedence, Model} from "../Model";
-import type {Trait} from "../Trait";
 import {StringModelProperty} from "../"; // forward import
 import {BooleanModelProperty} from "../"; // forward import
 import {NumberModelProperty} from "../"; // forward import
-import type {TraitProperty} from "./TraitProperty";
 
 export type ModelPropertyMemberType<M, K extends keyof M> =
   M[K] extends ModelProperty<any, infer T, any> ? T : never;
@@ -101,15 +99,6 @@ export interface ModelProperty<M extends Model, T, U = never> {
   /** @hidden */
   removeSubProperty(subProperty: ModelProperty<Model, T>): void;
 
-  /** @hidden */
-  readonly traitProperties: ReadonlyArray<TraitProperty<Trait, T>>;
-
-  /** @hidden */
-  addTraitProperty(traitProperty: TraitProperty<Trait, T>): void;
-
-  /** @hidden */
-  removeTraitProperty(traitProperty: TraitProperty<Trait, T>): void;
-
   readonly superState: T | undefined;
 
   readonly ownState: T;
@@ -131,7 +120,7 @@ export interface ModelProperty<M extends Model, T, U = never> {
 
   didSetState(newState: T, oldState: T): void;
 
-  isPrecedent(precedence: ModelPrecedence): boolean;
+  takesPrecedence(precedence: ModelPrecedence): boolean;
 
   readonly precedence: ModelPrecedence;
 
@@ -273,11 +262,6 @@ function ModelPropertyConstructor<M extends Model, T, U>(this: ModelProperty<M, 
     enumerable: true,
     configurable: true,
   });
-  Object.defineProperty(this, "traitProperties", {
-    value: Arrays.empty,
-    enumerable: true,
-    configurable: true,
-  });
   Object.defineProperty(this, "precedence", {
     value: Model.Intrinsic,
     enumerable: true,
@@ -321,11 +305,6 @@ ModelProperty.prototype.setInherited = function (this: ModelProperty<Model, unkn
     const superProperty = this.superProperty;
     if (superProperty !== null && superProperty.precedence >= this.precedence) {
       this.setPropertyFlags(this.propertyFlags & ~ModelProperty.OverrideFlag | ModelProperty.InheritedFlag);
-      const traitProperties = this.traitProperties;
-      for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-        const traitProperty = traitProperties[i]!;
-        traitProperty.setPropertyFlags(traitProperty.propertyFlags & ~ModelProperty.OverrideFlag | ModelProperty.InheritedFlag);
-      }
       this.setOwnState(superProperty.state);
       this.mutate();
     }
@@ -333,11 +312,6 @@ ModelProperty.prototype.setInherited = function (this: ModelProperty<Model, unkn
     const superProperty = this.superProperty;
     if (superProperty !== null && superProperty.precedence < this.precedence) {
       this.setPropertyFlags(this.propertyFlags & ~ModelProperty.InheritedFlag);
-      const traitProperties = this.traitProperties;
-      for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-        const traitProperty = traitProperties[i]!;
-        traitProperty.setPropertyFlags(traitProperty.propertyFlags & ~ModelProperty.InheritedFlag);
-      }
     }
   }
 };
@@ -354,34 +328,25 @@ Object.defineProperty(ModelProperty.prototype, "superName", {
 ModelProperty.prototype.bindSuperProperty = function (this: ModelProperty<Model, unknown>): void {
   const superName = this.superName;
   if (superName !== void 0 && this.isMounted()) {
-    let model = this.owner;
-    do {
-      const parentModel = model.parentModel;
-      if (parentModel !== null) {
-        model = parentModel;
-        const superProperty = model.getLazyModelProperty(superName);
-        if (superProperty !== null) {
-          Object.defineProperty(this, "superProperty", {
-            value: superProperty,
-            enumerable: true,
-            configurable: true,
-          });
-          superProperty.addSubProperty(this);
-          if ((this.propertyFlags & ModelProperty.OverrideFlag) === 0 && superProperty.precedence >= this.precedence) {
-            this.setPropertyFlags(this.propertyFlags | ModelProperty.InheritedFlag);
-            const traitProperties = this.traitProperties;
-            for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-              const traitProperty = traitProperties[i]!;
-              traitProperty.setPropertyFlags(traitProperty.propertyFlags | ModelProperty.InheritedFlag);
-            }
-            this.setOwnState(superProperty.state);
-          }
-        } else {
-          continue;
+    let superModel = this.owner.parentModel;
+    while (superModel !== null) {
+      const superProperty = superModel.getLazyModelProperty(superName);
+      if (superProperty !== null) {
+        Object.defineProperty(this, "superProperty", {
+          value: superProperty,
+          enumerable: true,
+          configurable: true,
+        });
+        superProperty.addSubProperty(this);
+        if ((this.propertyFlags & ModelProperty.OverrideFlag) === 0 && superProperty.precedence >= this.precedence) {
+          this.setPropertyFlags(this.propertyFlags | ModelProperty.InheritedFlag);
+          this.setOwnState(superProperty.state);
+          this.mutate();
         }
+        break;
       }
-      break;
-    } while (true);
+      superModel = superModel.parentModel;
+    }
   }
 };
 
@@ -395,11 +360,6 @@ ModelProperty.prototype.unbindSuperProperty = function (this: ModelProperty<Mode
       configurable: true,
     });
     this.setPropertyFlags(this.propertyFlags & ~ModelProperty.InheritedFlag);
-    const traitProperties = this.traitProperties;
-    for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-      const traitProperty = traitProperties[i]!;
-      traitProperty.setPropertyFlags(traitProperty.propertyFlags & ~ModelProperty.InheritedFlag);
-    }
   }
 };
 
@@ -424,22 +384,6 @@ ModelProperty.prototype.removeSubProperty = function <T>(this: ModelProperty<Mod
       subProperties.splice(index, 1);
     }
   }
-};
-
-ModelProperty.prototype.addTraitProperty = function <T>(this: ModelProperty<Model, T>, traitProperty: TraitProperty<Trait, T>): void {
-  Object.defineProperty(this, "traitProperties", {
-    value: Arrays.inserted(traitProperty, this.traitProperties),
-    enumerable: true,
-    configurable: true,
-  });
-};
-
-ModelProperty.prototype.removeTraitProperty = function <T>(this: ModelProperty<Model, T>, traitProperty: TraitProperty<Trait, T>): void {
-  Object.defineProperty(this, "traitProperties", {
-    value: Arrays.removed(traitProperty, this.traitProperties),
-    enumerable: true,
-    configurable: true,
-  });
 };
 
 Object.defineProperty(ModelProperty.prototype, "superState", {
@@ -482,12 +426,6 @@ ModelProperty.prototype.setState = function <T, U>(this: ModelProperty<Model, T,
   if (precedence >= this.precedence) {
     this.setPropertyFlags(this.propertyFlags & ~ModelProperty.InheritedFlag | ModelProperty.OverrideFlag);
     this.setPrecedence(precedence);
-    const traitProperties = this.traitProperties;
-    for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-      const traitProperty = traitProperties[i]!;
-      traitProperty.setPropertyFlags(traitProperty.propertyFlags & ~ModelProperty.InheritedFlag | ModelProperty.OverrideFlag);
-      traitProperty.setPrecedence(precedence);
-    }
     this.setOwnState(newState);
   }
 };
@@ -496,37 +434,15 @@ ModelProperty.prototype.setOwnState = function <T, U>(this: ModelProperty<Model,
   newState = this.fromAny(newState);
   const oldState = this.state;
   if (!Equals(newState, oldState)) {
-    const traitProperties = this.traitProperties;
     this.willSetState(newState, oldState);
-    for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-      const traitProperty = traitProperties[i]!;
-      traitProperty.willSetState(newState, oldState);
-    }
     Object.defineProperty(this, "ownState", {
       value: newState,
       enumerable: true,
       configurable: true,
     });
     this.setPropertyFlags(this.propertyFlags | ModelProperty.UpdatedFlag);
-    for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-      const traitProperty = traitProperties[i]!;
-      Object.defineProperty(traitProperty, "ownState", {
-        value: newState,
-        enumerable: true,
-        configurable: true,
-      });
-      traitProperty.setPropertyFlags(traitProperty.propertyFlags | ModelProperty.UpdatedFlag);
-    }
     this.onSetState(newState, oldState);
-    for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-      const traitProperty = traitProperties[i]!;
-      traitProperty.onSetState(newState, oldState);
-    }
     this.updateSubProperties(newState, oldState);
-    for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-      const traitProperty = traitProperties[i]!;
-      traitProperty.didSetState(newState, oldState);
-    }
     this.didSetState(newState, oldState);
   }
 };
@@ -546,33 +462,20 @@ ModelProperty.prototype.didSetState = function <T>(this: ModelProperty<Model, T>
   // hook
 };
 
-ModelProperty.prototype.isPrecedent = function (this: ModelProperty<Model, unknown>, precedence: ModelPrecedence): boolean {
+ModelProperty.prototype.takesPrecedence = function (this: ModelProperty<Model, unknown>, precedence: ModelPrecedence): boolean {
   return precedence >= this.precedence;
 };
 
 ModelProperty.prototype.setPrecedence = function (this: ModelProperty<Model, unknown>, newPrecedence: ModelPrecedence): void {
   const oldPrecedence = this.precedence;
   if (newPrecedence !== oldPrecedence) {
-    const traitProperties = this.traitProperties;
     this.willSetPrecedence(newPrecedence, oldPrecedence);
-    for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-      const traitProperty = traitProperties[i]!;
-      traitProperty.willSetPrecedence(newPrecedence, oldPrecedence);
-    }
     Object.defineProperty(this, "precedence", {
       value: newPrecedence,
       enumerable: true,
       configurable: true,
     });
     this.onSetPrecedence(newPrecedence, oldPrecedence);
-    for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-      const traitProperty = traitProperties[i]!;
-      traitProperty.onSetPrecedence(newPrecedence, oldPrecedence);
-    }
-    for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-      const traitProperty = traitProperties[i]!;
-      traitProperty.didSetPrecedence(newPrecedence, oldPrecedence);
-    }
     this.didSetPrecedence(newPrecedence, oldPrecedence);
   }
 };
@@ -586,11 +489,6 @@ ModelProperty.prototype.onSetPrecedence = function (this: ModelProperty<Model, u
     const superProperty = this.superProperty;
     if (superProperty !== null && superProperty.precedence < this.precedence) {
       this.setPropertyFlags(this.propertyFlags & ~ModelProperty.InheritedFlag);
-      const traitProperties = this.traitProperties;
-      for (let i = 0, n = traitProperties.length; i < n; i += 1) {
-        const traitProperty = traitProperties[i]!;
-        traitProperty.setPropertyFlags(traitProperty.propertyFlags & ~ModelProperty.InheritedFlag);
-      }
     }
   }
 };

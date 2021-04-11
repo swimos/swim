@@ -36,7 +36,7 @@ export class TopAxisView<X> extends AxisView<X> {
 
   protected layoutTick(tick: TickView<X>, origin: PointR2, frame: BoxR2,
                        scale: ContinuousScale<X, number>): void {
-    if (tick.anchor.isPrecedent(View.Intrinsic)) {
+    if (tick.anchor.takesPrecedence(View.Intrinsic)) {
       const offset = scale(tick.value);
       tick.setOffset(offset);
       tick.anchor.setState(new PointR2(frame.xMin + offset, origin.y), View.Intrinsic);

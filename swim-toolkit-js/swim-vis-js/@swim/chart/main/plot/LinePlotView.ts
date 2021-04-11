@@ -50,11 +50,68 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     return "line";
   }
 
-  @ViewAnimator({type: Color, state: null, look: Look.accentColor})
+  protected willSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillSetPlotStroke !== void 0) {
+      viewController.viewWillSetPlotStroke(newStroke, oldStroke, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetPlotStroke !== void 0) {
+        viewObserver.viewWillSetPlotStroke(newStroke, oldStroke, this);
+      }
+    }
+  }
+
+  protected onSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
+    // hook
+  }
+
+  protected didSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetPlotStroke !== void 0) {
+        viewObserver.viewDidSetPlotStroke(newStroke, oldStroke, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidSetPlotStroke !== void 0) {
+      viewController.viewDidSetPlotStroke(newStroke, oldStroke, this);
+    }
+  }
+
+  @ViewAnimator<LinePlotView<X, Y>, Color | null, AnyColor | null>({
+    type: Color,
+    state: null,
+    look: Look.accentColor,
+    willSetValue(newStroke: Color | null, oldStroke: Color | null): void {
+      this.owner.willSetStroke(newStroke, oldStroke);
+    },
+    didSetValue(newStroke: Color | null, oldStroke: Color | null): void {
+      this.owner.onSetStroke(newStroke, oldStroke);
+      this.owner.didSetStroke(newStroke, oldStroke);
+    },
+  })
   declare stroke: ViewAnimator<this, Color | null, AnyColor | null>;
 
+  protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillSetPlotStrokeWidth !== void 0) {
+      viewController.viewWillSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetPlotStrokeWidth !== void 0) {
+        viewObserver.viewWillSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
+      }
+    }
+  }
+
   protected onSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    if (this.xRangePadding.isPrecedent(View.Intrinsic) || this.yRangePadding.isPrecedent(View.Intrinsic)) {
+    if (this.xRangePadding.takesPrecedence(View.Intrinsic) || this.yRangePadding.takesPrecedence(View.Intrinsic)) {
       const frame = this.viewFrame;
       const size = Math.min(frame.width, frame.height);
       const strokeWidth = this.strokeWidth.getValueOr(Length.zero()).pxValue(size);
@@ -64,11 +121,29 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     }
   }
 
+  protected didSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetPlotStrokeWidth !== void 0) {
+        viewObserver.viewDidSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidSetPlotStrokeWidth !== void 0) {
+      viewController.viewDidSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
+    }
+  }
+
   @ViewAnimator<LinePlotView<X, Y>, Length | null, AnyLength | null>({
     type: Length,
     state: Length.px(1),
+    willSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+      this.owner.willSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+    },
     didSetValue(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
       this.owner.onSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
+      this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
     },
   })
   declare strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;

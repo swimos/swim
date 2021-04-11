@@ -691,12 +691,12 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
       maxHeight = Math.round(Math.max(0, placementBottom - placementTop));
     }
 
-    if (placement !== "none" && (left !== node.offsetLeft && this.left.isPrecedent(View.Intrinsic)
-                              || top !== node.offsetTop && this.top.isPrecedent(View.Intrinsic)
-                              || width !== oldWidth && this.width.isPrecedent(View.Intrinsic)
-                              || height !== oldHeight && this.height.isPrecedent(View.Intrinsic)
-                              || maxWidth !== oldMaxWidth && this.maxWidth.isPrecedent(View.Intrinsic)
-                              || maxHeight !== oldMaxHeight && this.maxHeight.isPrecedent(View.Intrinsic))) {
+    if (placement !== "none" && (left !== node.offsetLeft && this.left.takesPrecedence(View.Intrinsic)
+                              || top !== node.offsetTop && this.top.takesPrecedence(View.Intrinsic)
+                              || width !== oldWidth && this.width.takesPrecedence(View.Intrinsic)
+                              || height !== oldHeight && this.height.takesPrecedence(View.Intrinsic)
+                              || maxWidth !== oldMaxWidth && this.maxWidth.takesPrecedence(View.Intrinsic)
+                              || maxHeight !== oldMaxHeight && this.maxHeight.takesPrecedence(View.Intrinsic))) {
       this.willPlacePopover(placement!);
       this.position.setState("absolute", View.Intrinsic);
       this.left.setState(left, View.Intrinsic);

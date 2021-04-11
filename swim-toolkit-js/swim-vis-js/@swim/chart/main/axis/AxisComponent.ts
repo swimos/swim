@@ -46,8 +46,8 @@ export abstract class AxisComponent<D> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.axisWillSetTrait !== void 0) {
-        componentObserver.axisWillSetTrait(newAxisTrait, oldAxisTrait, this);
+      if (componentObserver.componentWillSetAxisTrait !== void 0) {
+        componentObserver.componentWillSetAxisTrait(newAxisTrait, oldAxisTrait, this);
       }
     }
   }
@@ -66,8 +66,8 @@ export abstract class AxisComponent<D> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.axisDidSetTrait !== void 0) {
-        componentObserver.axisDidSetTrait(newAxisTrait, oldAxisTrait, this);
+      if (componentObserver.componentDidSetAxisTrait !== void 0) {
+        componentObserver.componentDidSetAxisTrait(newAxisTrait, oldAxisTrait, this);
       }
     }
   }
@@ -75,10 +75,6 @@ export abstract class AxisComponent<D> extends CompositeComponent {
   protected abstract createAxisView(): AxisView<D> | null;
 
   protected initAxisView(axisView: AxisView<D>): void {
-    // hook
-  }
-
-  protected themeAxisView(axisView: AxisView<D>, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     // hook
   }
 
@@ -94,8 +90,8 @@ export abstract class AxisComponent<D> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.axisWillSetView !== void 0) {
-        componentObserver.axisWillSetView(newAxisView, oldAxisView, this);
+      if (componentObserver.componentWillSetAxisView !== void 0) {
+        componentObserver.componentWillSetAxisView(newAxisView, oldAxisView, this);
       }
     }
   }
@@ -114,10 +110,14 @@ export abstract class AxisComponent<D> extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.axisDidSetView !== void 0) {
-        componentObserver.axisDidSetView(newAxisView, oldAxisView, this);
+      if (componentObserver.componentDidSetAxisView !== void 0) {
+        componentObserver.componentDidSetAxisView(newAxisView, oldAxisView, this);
       }
     }
+  }
+
+  protected themeAxisView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, axisView: AxisView<D>): void {
+    // hook
   }
 
   /** @hidden */
@@ -133,7 +133,7 @@ export abstract class AxisComponent<D> extends CompositeComponent {
       this.owner.didSetAxisView(newAxisView, oldAxisView);
     },
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, axisView: AxisView<unknown>): void {
-      this.owner.themeAxisView(axisView, theme, mood, timing);
+      this.owner.themeAxisView(theme, mood, timing, axisView);
     },
     createView(): AxisView<unknown> | null {
       return this.owner.createAxisView();

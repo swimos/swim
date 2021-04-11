@@ -243,7 +243,7 @@ export class TreeView extends HtmlView {
   }
 
   protected onUpdateDepth(depth: number): void {
-    this.modifyTheme(Feel.default, [Feel.nested, depth !== 0 ? 1 : void 0]);
+    this.modifyTheme(Feel.default, [[Feel.nested, depth !== 0 ? 1 : void 0]]);
   }
 
   /** @hidden */
@@ -494,7 +494,7 @@ export class TreeView extends HtmlView {
       if (childView instanceof HtmlView) {
         childView.width.setState(width, View.Intrinsic);
         if (childView instanceof TreeLimb || childView instanceof TreeStem) {
-          if (childView.top.isPrecedent(View.Intrinsic)) {
+          if (childView.top.takesPrecedence(View.Intrinsic)) {
             childView.top.setIntermediateValue(Length.px(yValue * disclosingPhase), Length.px(yState));
           }
         }
@@ -529,7 +529,7 @@ export class TreeView extends HtmlView {
     }
     super.displayChildViews(displayFlags, viewContext, layoutChildView);
 
-    if (this.height.isPrecedent(View.Intrinsic)) {
+    if (this.height.takesPrecedence(View.Intrinsic)) {
       this.height.setIntermediateValue(Length.px(yValue), Length.px(yState));
     }
 

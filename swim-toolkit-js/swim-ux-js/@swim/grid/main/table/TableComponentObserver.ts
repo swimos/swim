@@ -30,63 +30,63 @@ import type {TableTrait} from "./TableTrait";
 import type {TableComponent} from "./TableComponent";
 
 export interface TableComponentObserver<C extends TableComponent = TableComponent> extends ComponentObserver<C> {
-  tableWillSetTrait?(newTableTrait: TableTrait | null, oldTableTrait: TableTrait | null, component: C): void;
+  componentWillSetTableTrait?(newTableTrait: TableTrait | null, oldTableTrait: TableTrait | null, component: C): void;
 
-  tableDidSetTrait?(newTableTrait: TableTrait | null, oldTableTrait: TableTrait | null, component: C): void;
+  componentDidSetTableTrait?(newTableTrait: TableTrait | null, oldTableTrait: TableTrait | null, component: C): void;
 
-  tableWillSetLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, component: C): void;
+  componentWillSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, component: C): void;
 
-  tableDidSetLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, component: C): void;
+  componentDidSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, component: C): void;
 
-  tableWillSetView?(newTableView: TableView | null, oldTableView: TableView | null, component: C): void;
+  componentWillSetTableView?(newTableView: TableView | null, oldTableView: TableView | null, component: C): void;
 
-  tableDidSetView?(newTableView: TableView | null, oldTableView: TableView | null, component: C): void;
+  componentDidSetTableView?(newTableView: TableView | null, oldTableView: TableView | null, component: C): void;
 
-  tableWillSetCol?(newColComponent: ColComponent | null, oldColComponent: ColComponent | null, colFastener: ComponentFastener<C, ColComponent>): void;
+  componentWillSetCol?(newColComponent: ColComponent | null, oldColComponent: ColComponent | null, colFastener: ComponentFastener<C, ColComponent>): void;
 
-  tableDidSetCol?(newColComponent: ColComponent | null, oldColComponent: ColComponent | null, colFastener: ComponentFastener<C, ColComponent>): void;
+  componentDidSetCol?(newColComponent: ColComponent | null, oldColComponent: ColComponent | null, colFastener: ComponentFastener<C, ColComponent>): void;
 
-  tableWillSetColTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, colFastener: ComponentFastener<C, ColComponent>): void;
+  componentWillSetColTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, colFastener: ComponentFastener<C, ColComponent>): void;
 
-  tableDidSetColTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, colFastener: ComponentFastener<C, ColComponent>): void;
+  componentDidSetColTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, colFastener: ComponentFastener<C, ColComponent>): void;
 
-  tableWillSetColView?(newColView: ColView | null, oldColView: ColView | null, colFastener: ComponentFastener<C, ColComponent>): void;
+  componentWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colFastener: ComponentFastener<C, ColComponent>): void;
 
-  tableDidSetColView?(newColView: ColView | null, oldColView: ColView | null, colFastener: ComponentFastener<C, ColComponent>): void;
+  componentDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colFastener: ComponentFastener<C, ColComponent>): void;
 
-  tableWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colFastener: ComponentFastener<C, ColComponent>): void;
+  componentWillSetColView?(newColView: ColView | null, oldColView: ColView | null, colFastener: ComponentFastener<C, ColComponent>): void;
 
-  tableDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, colFastener: ComponentFastener<C, ColComponent>): void;
+  componentDidSetColView?(newColView: ColView | null, oldColView: ColView | null, colFastener: ComponentFastener<C, ColComponent>): void;
 
-  tableWillSetColHeaderView?(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null, colFastener: ComponentFastener<C, ColComponent>): void;
+  componentWillSetColHeaderView?(newColHeaderView: HtmlView | null, oldColHeaderView: HtmlView | null, colFastener: ComponentFastener<C, ColComponent>): void;
 
-  tableDidSetColHeaderView?(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null, colFastener: ComponentFastener<C, ColComponent>): void;
+  componentDidSetColHeaderView?(newColHeaderView: HtmlView | null, oldColHeaderView: HtmlView | null, colFastener: ComponentFastener<C, ColComponent>): void;
 
-  tableWillSetRow?(newRowComponent: RowComponent | null, oldRowComponent: RowComponent | null, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentWillSetRow?(newRowComponent: RowComponent | null, oldRowComponent: RowComponent | null, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableDidSetRow?(newRowComponent: RowComponent | null, oldRowComponent: RowComponent | null, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentDidSetRow?(newRowComponent: RowComponent | null, oldRowComponent: RowComponent | null, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableWillSetRowTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentWillSetRowTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableDidSetRowTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentDidSetRowTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableWillSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentWillSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableDidSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentDidSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableWillSetCell?(newCellComponent: CellComponent | null, oldCellComponent: CellComponent | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentWillSetCell?(newCellComponent: CellComponent | null, oldCellComponent: CellComponent | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableDidSetCell?(newCellComponent: CellComponent | null, oldCellComponent: CellComponent | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentDidSetCell?(newCellComponent: CellComponent | null, oldCellComponent: CellComponent | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableWillSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentWillSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableDidSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentDidSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableWillSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentWillSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableDidSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentDidSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableWillSetCellContentView?(newContentView: HtmlView | null, oldContentView: HtmlView | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentWillSetCellContentView?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
 
-  tableDidSetCellContentView?(newContentView: HtmlView | null, oldContentView: HtmlView | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
+  componentDidSetCellContentView?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, cellFastener: ComponentFastener<RowComponent, CellComponent>, rowFastener: ComponentFastener<C, RowComponent>): void;
 }

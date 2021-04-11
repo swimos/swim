@@ -16,19 +16,19 @@ import type {TraitObserver} from "@swim/model";
 import type {DialLabel, DialLegend, DialTrait} from "./DialTrait";
 
 export interface DialTraitObserver<R extends DialTrait = DialTrait> extends TraitObserver<R> {
-  dialTraitWillSetValue?(newValue: number, oldValue: number, trait: R): void;
+  traitWillSetDialValue?(newValue: number, oldValue: number, trait: R): void;
 
-  dialTraitDidSetValue?(newValue: number, oldValue: number, trait: R): void;
+  traitDidSetDialValue?(newValue: number, oldValue: number, trait: R): void;
 
-  dialTraitWillSetLimit?(newLimit: number, oldLimit: number, trait: R): void;
+  traitWillSetDialLimit?(newLimit: number, oldLimit: number, trait: R): void;
 
-  dialTraitDidSetLimit?(newLimit: number, oldLimit: number, trait: R): void;
+  traitDidSetDialLimit?(newLimit: number, oldLimit: number, trait: R): void;
 
-  dialTraitWillSetLabel?(newLabel: DialLabel | null, oldLabel: DialLabel | null, trait: R): void;
+  traitWillSetDialLabel?(newLabel: DialLabel | null, oldLabel: DialLabel | null, trait: R): void;
 
-  dialTraitDidSetLabel?(newLabel: DialLabel | null, oldLabel: DialLabel | null, trait: R): void;
+  traitDidSetDialLabel?(newLabel: DialLabel | null, oldLabel: DialLabel | null, trait: R): void;
 
-  dialTraitWillSetLegend?(newLegend: DialLegend | null, oldLegend: DialLegend | null, trait: R): void;
+  traitWillSetDialLegend?(newLegend: DialLegend | null, oldLegend: DialLegend | null, trait: R): void;
 
-  dialTraitDidSetLegend?(newLegend: DialLegend | null, oldLegend: DialLegend | null, trait: R): void;
+  traitDidSetDialLegend?(newLegend: DialLegend | null, oldLegend: DialLegend | null, trait: R): void;
 }

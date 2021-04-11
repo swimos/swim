@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {GeoShape} from "@swim/geo";
-import type {MapGraphicsViewObserver} from "../graphics/MapGraphicsViewObserver";
+import type {GeoBox} from "@swim/geo";
+import type {GraphicsViewObserver} from "@swim/graphics";
 import type {GeoView} from "./GeoView";
 
-export interface GeoViewObserver<V extends GeoView = GeoView> extends MapGraphicsViewObserver<V> {
-  geoViewWillSetGeometry?(newGeoShape: GeoShape | null, oldGeoShape: GeoShape | null, view: V): void;
+export interface GeoViewObserver<V extends GeoView = GeoView> extends GraphicsViewObserver<V> {
+  viewWillSetGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, view: V): void;
 
-  geoViewDidSetGeometry?(newGeoShape: GeoShape | null, oldGeoShape: GeoShape | null, view: V): void;
+  viewDidSetGeoBounds?(newGeoBounds: GeoBox, oldGeoBounds: GeoBox, view: V): void;
 }

@@ -19,11 +19,11 @@ import type {SeriesPlotTraitObserver} from "./SeriesPlotTraitObserver";
 import type {LinePlotTrait} from "./LinePlotTrait";
 
 export interface LinePlotTraitObserver<X, Y, R extends LinePlotTrait<X, Y> = LinePlotTrait<X, Y>> extends SeriesPlotTraitObserver<X, Y, R> {
-  linePlotTraitWillSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;
+  traitWillSetPlotStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;
 
-  linePlotTraitDidSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;
+  traitDidSetPlotStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, trait: R): void;
 
-  linePlotTraitWillSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, trait: R): void;
+  traitWillSetPlotStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, trait: R): void;
 
-  linePlotTraitDidSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, trait: R): void;
+  traitDidSetPlotStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, trait: R): void;
 }

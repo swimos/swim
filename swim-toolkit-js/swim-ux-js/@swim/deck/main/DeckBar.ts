@@ -46,7 +46,7 @@ export class DeckBar extends HtmlView {
   declare readonly viewObservers: ReadonlyArray<DeckBarObserver>;
 
   protected initTheme(): void {
-    this.modifyTheme(Feel.default, [Feel.translucent, 1], [Feel.primary, 1]);
+    this.modifyTheme(Feel.default, [[Feel.translucent, 1], [Feel.primary, 1]]);
   }
 
   @ViewProperty({type: DeckRail, state: null})
@@ -66,7 +66,7 @@ export class DeckBar extends HtmlView {
 
   protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       this.backgroundColor.setState(theme.getOr(Look.backgroundColor, mood, null), timing, View.Intrinsic);
     }
   }
@@ -107,7 +107,7 @@ export class DeckBar extends HtmlView {
         width = width instanceof Length ? width.pxValue() : this.node.offsetWidth;
       }
       let edgeInsets = this.edgeInsets.superState;
-      if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.isPrecedent(View.Intrinsic)) {
+      if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.takesPrecedence(View.Intrinsic)) {
         edgeInsets = viewContext.viewport.safeArea;
       }
       const insetTop = edgeInsets !== void 0 && edgeInsets !== null ? edgeInsets.insetTop : 0;
@@ -127,7 +127,7 @@ export class DeckBar extends HtmlView {
 
   protected layoutBar(viewContext: ViewContextType<this>): void {
     let edgeInsets = this.edgeInsets.superState;
-    if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.isPrecedent(View.Intrinsic)) {
+    if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.takesPrecedence(View.Intrinsic)) {
       edgeInsets = viewContext.viewport.safeArea;
     }
     const insetTop = edgeInsets !== void 0 && edgeInsets !== null ? edgeInsets.insetTop : 0;
@@ -150,7 +150,7 @@ export class DeckBar extends HtmlView {
                                                 viewContext: ViewContextType<this>) => void): void {
     const rail = this.rail.state;
     let edgeInsets = this.edgeInsets.superState;
-    if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.isPrecedent(View.Intrinsic)) {
+    if ((edgeInsets === void 0 || edgeInsets === null) && this.edgeInsets.takesPrecedence(View.Intrinsic)) {
       edgeInsets = viewContext.viewport.safeArea;
     }
     let height: Length | number | null = this.height.state;

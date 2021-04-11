@@ -117,14 +117,14 @@ export class TableView extends HtmlView {
   protected willSetRow(newRowView: RowView | null, oldRowView: RowView | null,
                        targetView: View | null, rowFastener: ViewFastener<this, RowView>): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.tableViewWillSetRow !== void 0) {
-      viewController.tableViewWillSetRow(newRowView, oldRowView, targetView, this);
+    if (viewController !== null && viewController.viewWillSetRow !== void 0) {
+      viewController.viewWillSetRow(newRowView, oldRowView, targetView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.tableViewWillSetRow !== void 0) {
-        viewObserver.tableViewWillSetRow(newRowView, oldRowView, targetView, this);
+      if (viewObserver.viewWillSetRow !== void 0) {
+        viewObserver.viewWillSetRow(newRowView, oldRowView, targetView, this);
       }
     }
   }
@@ -145,13 +145,13 @@ export class TableView extends HtmlView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.tableViewDidSetRow !== void 0) {
-        viewObserver.tableViewDidSetRow(newRowView, oldRowView, targetView, this);
+      if (viewObserver.viewDidSetRow !== void 0) {
+        viewObserver.viewDidSetRow(newRowView, oldRowView, targetView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.tableViewDidSetRow !== void 0) {
-      viewController.tableViewDidSetRow(newRowView, oldRowView, targetView, this);
+    if (viewController !== null && viewController.viewDidSetRow !== void 0) {
+      viewController.viewDidSetRow(newRowView, oldRowView, targetView, this);
     }
   }
 

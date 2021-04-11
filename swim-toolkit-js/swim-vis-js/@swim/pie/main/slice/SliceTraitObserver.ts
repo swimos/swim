@@ -16,15 +16,15 @@ import type {TraitObserver} from "@swim/model";
 import type {SliceLabel, SliceLegend, SliceTrait} from "./SliceTrait";
 
 export interface SliceTraitObserver<R extends SliceTrait = SliceTrait> extends TraitObserver<R> {
-  sliceTraitWillSetValue?(newValue: number, oldValue: number, trait: R): void;
+  traitWillSetSliceValue?(newValue: number, oldValue: number, trait: R): void;
 
-  sliceTraitDidSetValue?(newValue: number, oldValue: number, trait: R): void;
+  traitDidSetSliceValue?(newValue: number, oldValue: number, trait: R): void;
 
-  sliceTraitWillSetLabel?(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, trait: R): void;
+  traitWillSetSliceLabel?(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, trait: R): void;
 
-  sliceTraitDidSetLabel?(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, trait: R): void;
+  traitDidSetSliceLabel?(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, trait: R): void;
 
-  sliceTraitWillSetLegend?(newLegend: SliceLegend | null, oldLegend: SliceLegend | null, trait: R): void;
+  traitWillSetSliceLegend?(newLegend: SliceLegend | null, oldLegend: SliceLegend | null, trait: R): void;
 
-  sliceTraitDidSetLegend?(newLegend: SliceLegend | null, oldLegend: SliceLegend | null, trait: R): void;
+  traitDidSetSliceLegend?(newLegend: SliceLegend | null, oldLegend: SliceLegend | null, trait: R): void;
 }

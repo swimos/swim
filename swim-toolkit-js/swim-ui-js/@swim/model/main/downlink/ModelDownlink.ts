@@ -537,7 +537,7 @@ ModelDownlink.prototype.link = function (this: ModelDownlink<ModelDownlinkContex
   if (this.downlink === null) {
     let warp = this.ownWarp;
     if (warp === null) {
-      warp = this.owner.warpRef.state || null;
+      warp = this.owner.warpRef.state;
     }
     if (warp === null) {
       warp = this.owner.warpService.manager.client;

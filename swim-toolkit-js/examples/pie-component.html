@@ -33,39 +33,39 @@ class ExamplePieComponent extends swim.PieComponent {
   initSliceView(sliceView) {
     super.initSliceView(sliceView);
     sliceView.on("pointerenter", function (event) {
-               sliceView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+               sliceView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
              })
              .on("pointerleave", function (event) {
-               sliceView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+               sliceView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
              });
   }
   initSliceLabelView(labelView) {
     super.initSliceLabelView(labelView);
     labelView.textColor.setLook(swim.Look.backgroundColor);
   }
-  onSetSliceViewValue(newValue, oldValue, sliceFastener) {
-    super.onSetSliceViewValue(newValue, oldValue, sliceFastener);
+  onSetSliceValue(newValue, oldValue, sliceFastener) {
+    super.onSetSliceValue(newValue, oldValue, sliceFastener);
     const label = Math.round(100 * newValue).toString();
-    sliceFastener.component.setLabel(label);
+    sliceFastener.component.slice.trait.label.setState(label);
   }
 }
 
 const slice1Model = new swim.CompoundModel();
-const slice1Trait = new swim.SliceTrait();
-slice1Trait.setValue(1);
-slice1Trait.setLegend("Slice 1");
+const slice1Trait = new swim.SliceTrait()
+  .value(1)
+  .legend("Slice 1");
 slice1Model.setTrait("slice", slice1Trait);
 
 const slice2Model = new swim.CompoundModel();
-const slice2Trait = new swim.SliceTrait();
-slice2Trait.setValue(1);
-slice2Trait.setLegend("Slice 2");
+const slice2Trait = new swim.SliceTrait()
+  .value(1)
+  .legend("Slice 2");
 slice2Model.setTrait("slice", slice2Trait);
 
 const slice3Model = new swim.CompoundModel();
-const slice3Trait = new swim.SliceTrait();
-slice3Trait.setValue(1);
-slice3Trait.setLegend("Slice 3");
+const slice3Trait = new swim.SliceTrait()
+  .value(1)
+  .legend("Slice 3");
 slice3Model.setTrait("slice", slice3Trait);
 
 const pieModel = new swim.CompoundModel();
@@ -82,9 +82,9 @@ pieComponent.pie.injectView(canvasView);
 pieComponent.pie.setTrait(pieTrait);
 
 setInterval(function () {
-  slice1Trait.setValue(0.1 + 0.9 * Math.random());
-  slice2Trait.setValue(0.1 + 0.9 * Math.random());
-  slice3Trait.setValue(0.1 + 0.9 * Math.random());
+  slice1Trait.value.setState(0.1 + 0.9 * Math.random());
+  slice2Trait.value.setState(0.1 + 0.9 * Math.random());
+  slice3Trait.value.setState(0.1 + 0.9 * Math.random());
 }, 1000);
 
 setInterval(function () {

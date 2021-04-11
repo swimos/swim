@@ -20,7 +20,7 @@ import type {ScaledYView} from "./ScaledYView";
 import type {ScaledView} from "./ScaledView";
 
 export interface ScaledViewObserver<X, Y, V extends ScaledView<X, Y> = ScaledView<X, Y>> extends GraphicsViewObserver<V>, ScaledXYViewObserver<X, Y, V> {
-  scaledViewWillSetScaled?(newScaledView: ScaledXView<X> | ScaledYView<Y> | null, oldScaledView: ScaledXView<X> | ScaledYView<Y> | null, targetView: View | null, view: V): void;
+  viewWillSetScaled?(newScaledView: ScaledXView<X> | ScaledYView<Y> | null, oldScaledView: ScaledXView<X> | ScaledYView<Y> | null, targetView: View | null, view: V): void;
 
-  scaledViewDidSetScaled?(newScaledView: ScaledXView<X> | ScaledYView<Y> | null, oldScaledView: ScaledXView<X> | ScaledYView<Y> | null, targetView: View | null, view: V): void;
+  viewDidSetScaled?(newScaledView: ScaledXView<X> | ScaledYView<Y> | null, oldScaledView: ScaledXView<X> | ScaledYView<Y> | null, targetView: View | null, view: V): void;
 }

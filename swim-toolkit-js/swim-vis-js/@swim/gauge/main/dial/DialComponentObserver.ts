@@ -19,27 +19,27 @@ import type {DialTrait} from "./DialTrait";
 import type {DialComponent} from "./DialComponent";
 
 export interface DialComponentObserver<C extends DialComponent = DialComponent> extends ComponentObserver<C> {
-  dialWillSetTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, component: C): void;
+  componentWillSetDialTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, component: C): void;
 
-  dialDidSetTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, component: C): void;
+  componentDidSetDialTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, component: C): void;
 
-  dialWillSetView?(newDialView: DialView | null, oldDialView: DialView | null, component: C): void;
+  componentWillSetDialView?(newDialView: DialView | null, oldDialView: DialView | null, component: C): void;
 
-  dialDidSetView?(newDialView: DialView | null, oldDialView: DialView | null, component: C): void;
+  componentDidSetDialView?(newDialView: DialView | null, oldDialView: DialView | null, component: C): void;
 
-  dialWillSetViewValue?(newValue: number, oldValue: number, component: C): void;
+  componentWillSetDialValue?(newValue: number, oldValue: number, component: C): void;
 
-  dialDidSetViewValue?(newValue: number, oldValue: number, component: C): void;
+  componentDidSetDialValue?(newValue: number, oldValue: number, component: C): void;
 
-  dialWillSetViewLimit?(newLimit: number, oldLimit: number, component: C): void;
+  componentWillSetDialLimit?(newLimit: number, oldLimit: number, component: C): void;
 
-  dialDidSetViewLimit?(newLimit: number, oldLimit: number, component: C): void;
+  componentDidSetDialLimit?(newLimit: number, oldLimit: number, component: C): void;
 
-  dialWillSetLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, component: C): void;
+  componentWillSetDialLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, component: C): void;
 
-  dialDidSetLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, component: C): void;
+  componentDidSetDialLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, component: C): void;
 
-  dialWillSetLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, component: C): void;
+  componentWillSetDialLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, component: C): void;
 
-  dialDidSetLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, component: C): void;
+  componentDidSetDialLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, component: C): void;
 }

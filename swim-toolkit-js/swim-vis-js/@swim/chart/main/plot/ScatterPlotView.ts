@@ -99,14 +99,14 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
 
   protected willSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetXScale !== void 0) {
-      viewController.scaledViewWillSetXScale(newXScale, oldXScale, this);
+    if (viewController !== null && viewController.viewWillSetXScale !== void 0) {
+      viewController.viewWillSetXScale(newXScale, oldXScale, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetXScale !== void 0) {
-        viewObserver.scaledViewWillSetXScale(newXScale, oldXScale, this);
+      if (viewObserver.viewWillSetXScale !== void 0) {
+        viewObserver.viewWillSetXScale(newXScale, oldXScale, this);
       }
     }
   }
@@ -120,13 +120,13 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetXScale !== void 0) {
-        viewObserver.scaledViewDidSetXScale(newXScale, oldXScale, this);
+      if (viewObserver.viewDidSetXScale !== void 0) {
+        viewObserver.viewDidSetXScale(newXScale, oldXScale, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetXScale !== void 0) {
-      viewController.scaledViewDidSetXScale(newXScale, oldXScale, this);
+    if (viewController !== null && viewController.viewDidSetXScale !== void 0) {
+      viewController.viewDidSetXScale(newXScale, oldXScale, this);
     }
   }
 
@@ -147,14 +147,14 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
 
   protected willSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetYScale !== void 0) {
-      viewController.scaledViewWillSetYScale(newYScale, oldYScale, this);
+    if (viewController !== null && viewController.viewWillSetYScale !== void 0) {
+      viewController.viewWillSetYScale(newYScale, oldYScale, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetYScale !== void 0) {
-        viewObserver.scaledViewWillSetYScale(newYScale, oldYScale, this);
+      if (viewObserver.viewWillSetYScale !== void 0) {
+        viewObserver.viewWillSetYScale(newYScale, oldYScale, this);
       }
     }
   }
@@ -168,13 +168,13 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetYScale !== void 0) {
-        viewObserver.scaledViewDidSetYScale(newYScale, oldYScale, this);
+      if (viewObserver.viewDidSetYScale !== void 0) {
+        viewObserver.viewDidSetYScale(newYScale, oldYScale, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetYScale !== void 0) {
-      viewController.scaledViewDidSetYScale(newYScale, oldYScale, this);
+    if (viewController !== null && viewController.viewDidSetYScale !== void 0) {
+      viewController.viewDidSetYScale(newYScale, oldYScale, this);
     }
   }
 
@@ -233,14 +233,14 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
 
   protected willSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetXRangePadding !== void 0) {
-      viewController.scaledViewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+    if (viewController !== null && viewController.viewWillSetXRangePadding !== void 0) {
+      viewController.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetXRangePadding !== void 0) {
-        viewObserver.scaledViewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+      if (viewObserver.viewWillSetXRangePadding !== void 0) {
+        viewObserver.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
       }
     }
   }
@@ -253,13 +253,13 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetXRangePadding !== void 0) {
-        viewObserver.scaledViewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+      if (viewObserver.viewDidSetXRangePadding !== void 0) {
+        viewObserver.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetXRangePadding !== void 0) {
-      viewController.scaledViewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
+    if (viewController !== null && viewController.viewDidSetXRangePadding !== void 0) {
+      viewController.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
     }
   }
 
@@ -279,14 +279,14 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
 
   protected willSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetYRangePadding !== void 0) {
-      viewController.scaledViewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+    if (viewController !== null && viewController.viewWillSetYRangePadding !== void 0) {
+      viewController.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetYRangePadding !== void 0) {
-        viewObserver.scaledViewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+      if (viewObserver.viewWillSetYRangePadding !== void 0) {
+        viewObserver.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
       }
     }
   }
@@ -299,13 +299,13 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetYRangePadding !== void 0) {
-        viewObserver.scaledViewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+      if (viewObserver.viewDidSetYRangePadding !== void 0) {
+        viewObserver.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetYRangePadding !== void 0) {
-      viewController.scaledViewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
+    if (viewController !== null && viewController.viewDidSetYRangePadding !== void 0) {
+      viewController.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
     }
   }
 
@@ -341,14 +341,14 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
 
   protected willSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetXDataDomain !== void 0) {
-      viewController.scaledViewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+    if (viewController !== null && viewController.viewWillSetXDataDomain !== void 0) {
+      viewController.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetXDataDomain !== void 0) {
-        viewObserver.scaledViewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+      if (viewObserver.viewWillSetXDataDomain !== void 0) {
+        viewObserver.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
       }
     }
   }
@@ -362,13 +362,13 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetXDataDomain !== void 0) {
-        viewObserver.scaledViewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+      if (viewObserver.viewDidSetXDataDomain !== void 0) {
+        viewObserver.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetXDataDomain !== void 0) {
-      viewController.scaledViewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
+    if (viewController !== null && viewController.viewDidSetXDataDomain !== void 0) {
+      viewController.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
     }
   }
 
@@ -405,14 +405,14 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
 
   protected willSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewWillSetYDataDomain !== void 0) {
-      viewController.scaledViewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+    if (viewController !== null && viewController.viewWillSetYDataDomain !== void 0) {
+      viewController.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewWillSetYDataDomain !== void 0) {
-        viewObserver.scaledViewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+      if (viewObserver.viewWillSetYDataDomain !== void 0) {
+        viewObserver.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
       }
     }
   }
@@ -426,13 +426,13 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.scaledViewDidSetYDataDomain !== void 0) {
-        viewObserver.scaledViewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+      if (viewObserver.viewDidSetYDataDomain !== void 0) {
+        viewObserver.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.scaledViewDidSetYDataDomain !== void 0) {
-      viewController.scaledViewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
+    if (viewController !== null && viewController.viewDidSetYDataDomain !== void 0) {
+      viewController.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
     }
   }
 
@@ -563,14 +563,14 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   protected willSetDataPoint(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
                              targetView: View | null, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.plotViewWillSetDataPoint !== void 0) {
-      viewController.plotViewWillSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+    if (viewController !== null && viewController.viewWillSetDataPoint !== void 0) {
+      viewController.viewWillSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.plotViewWillSetDataPoint !== void 0) {
-        viewObserver.plotViewWillSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+      if (viewObserver.viewWillSetDataPoint !== void 0) {
+        viewObserver.viewWillSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
       }
     }
   }
@@ -591,13 +591,13 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.plotViewDidSetDataPoint !== void 0) {
-        viewObserver.plotViewDidSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+      if (viewObserver.viewDidSetDataPoint !== void 0) {
+        viewObserver.viewDidSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.plotViewDidSetDataPoint !== void 0) {
-      viewController.plotViewDidSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
+    if (viewController !== null && viewController.viewDidSetDataPoint !== void 0) {
+      viewController.viewDidSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
     }
   }
 
@@ -644,16 +644,16 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     didSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null, targetView: View | null): void {
       this.owner.didSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
     },
-    dataPointViewDidSetX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+    viewDidSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
       this.owner.onSetDataPointX(newX, oldX, dataPointView, this);
     },
-    dataPointViewDidSetY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+    viewDidSetDataPointY(newY: unknown | undefined, oldY: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
       this.owner.onSetDataPointY(newY, oldY, dataPointView, this);
     },
-    dataPointViewDidSetY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
+    viewDidSetDataPointY2(newY2: unknown | undefined, oldY2: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
       this.owner.onSetDataPointY2(newY2, oldY2, dataPointView, this);
     },
-    dataPointViewDidSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointView: DataPointView<unknown, unknown>): void {
+    viewDidSetDataPointLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointView: DataPointView<unknown, unknown>): void {
       this.owner.onSetDataPointLabel(newLabelView, oldLabelView, dataPointView, this);
     },
   });

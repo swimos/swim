@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
 import {AnyLength, Length} from "@swim/math";
+import {TraitProperty, GenericTrait} from "@swim/model";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
-import {GenericTrait} from "@swim/model";
 import type {GraphicsView} from "@swim/graphics";
 import type {DataPointTraitObserver} from "./DataPointTraitObserver";
 
@@ -26,33 +25,13 @@ export type DataPointLabelFunction<X, Y> = (dataPointTrait: DataPointTrait<X, Y>
 export class DataPointTrait<X, Y> extends GenericTrait {
   constructor(x: X, y: Y) {
     super();
-    Object.defineProperty(this, "x", {
+    Object.defineProperty(this.x, "ownState", {
       value: x,
       enumerable: true,
       configurable: true,
     });
-    Object.defineProperty(this, "y", {
+    Object.defineProperty(this.y, "ownState", {
       value: y,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "y2", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "radius", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "color", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "label", {
-      value: null,
       enumerable: true,
       configurable: true,
     });
@@ -60,28 +39,12 @@ export class DataPointTrait<X, Y> extends GenericTrait {
 
   declare readonly traitObservers: ReadonlyArray<DataPointTraitObserver<X, Y>>;
 
-  declare readonly x: X;
-
-  setX(newX: X): void {
-    const oldX = this.x;
-    if (!Equals(newX, oldX)) {
-      this.willSetX(newX, oldX);
-      Object.defineProperty(this, "x", {
-        value: newX,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetX(newX, oldX);
-      this.didSetX(newX, oldX);
-    }
-  }
-
   protected willSetX(newX: X, oldX: X): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitWillSetX !== void 0) {
-        traitObserver.dataPointTraitWillSetX(newX, oldX, this);
+      if (traitObserver.traitWillSetDataPointX !== void 0) {
+        traitObserver.traitWillSetDataPointX(newX, oldX, this);
       }
     }
   }
@@ -94,34 +57,29 @@ export class DataPointTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitDidSetX !== void 0) {
-        traitObserver.dataPointTraitDidSetX(newX, oldX, this);
+      if (traitObserver.traitDidSetDataPointX !== void 0) {
+        traitObserver.traitDidSetDataPointX(newX, oldX, this);
       }
     }
   }
 
-  declare readonly y: Y;
-
-  setY(newY: Y): void {
-    const oldY = this.y;
-    if (!Equals(newY, oldY)) {
-      this.willSetY(newY, oldY);
-      Object.defineProperty(this, "y", {
-        value: newY,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetY(newY, oldY);
-      this.didSetY(newY, oldY);
-    }
-  }
+  @TraitProperty<DataPointTrait<X, Y>, X>({
+    willSetState(newX: X, oldX: X): void {
+      this.owner.willSetX(newX, oldX);
+    },
+    didSetState(newX: X, oldX: X): void {
+      this.owner.onSetX(newX, oldX);
+      this.owner.didSetX(newX, oldX);
+    },
+  })
+  declare x: TraitProperty<this, X>;
 
   protected willSetY(newY: Y, oldY: Y): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitWillSetY !== void 0) {
-        traitObserver.dataPointTraitWillSetY(newY, oldY, this);
+      if (traitObserver.traitWillSetDataPointY !== void 0) {
+        traitObserver.traitWillSetDataPointY(newY, oldY, this);
       }
     }
   }
@@ -134,77 +92,64 @@ export class DataPointTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitDidSetY !== void 0) {
-        traitObserver.dataPointTraitDidSetY(newY, oldY, this);
+      if (traitObserver.traitDidSetDataPointY !== void 0) {
+        traitObserver.traitDidSetDataPointY(newY, oldY, this);
       }
     }
   }
 
-  declare readonly y2: Y;
+  @TraitProperty<DataPointTrait<X, Y>, Y>({
+    willSetState(newY: Y, oldY: Y): void {
+      this.owner.willSetY(newY, oldY);
+    },
+    didSetState(newY: Y, oldY: Y): void {
+      this.owner.onSetY(newY, oldY);
+      this.owner.didSetY(newY, oldY);
+    },
+  })
+  declare y: TraitProperty<this, Y>;
 
-  setY2(newY2: Y): void {
-    const oldY2 = this.y2;
-    if (!Equals(newY2, oldY2)) {
-      this.willSetY2(newY2, oldY2);
-      Object.defineProperty(this, "y2", {
-        value: newY2,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetY2(newY2, oldY2);
-      this.didSetY2(newY2, oldY2);
-    }
-  }
-
-  protected willSetY2(newY2: Y, oldY2: Y): void {
+  protected willSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitWillSetY2 !== void 0) {
-        traitObserver.dataPointTraitWillSetY2(newY2, oldY2, this);
+      if (traitObserver.traitWillSetDataPointY2 !== void 0) {
+        traitObserver.traitWillSetDataPointY2(newY2, oldY2, this);
       }
     }
   }
 
-  protected onSetY2(newY2: Y, oldY2: Y): void {
+  protected onSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
     // hook
   }
 
-  protected didSetY2(newY2: Y, oldY2: Y): void {
+  protected didSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitDidSetY2 !== void 0) {
-        traitObserver.dataPointTraitDidSetY2(newY2, oldY2, this);
+      if (traitObserver.traitDidSetDataPointY2 !== void 0) {
+        traitObserver.traitDidSetDataPointY2(newY2, oldY2, this);
       }
     }
   }
 
-  declare readonly radius: Length | null;
-
-  setRadius(newRadius: AnyLength | null): void {
-    if (newRadius !== null) {
-      newRadius = Length.fromAny(newRadius);
-    }
-    const oldRadius = this.radius;
-    if (!Equals(newRadius, oldRadius)) {
-      this.willSetRadius(newRadius, oldRadius);
-      Object.defineProperty(this, "radius", {
-        value: newRadius,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetRadius(newRadius, oldRadius);
-      this.didSetRadius(newRadius, oldRadius);
-    }
-  }
+  @TraitProperty<DataPointTrait<X, Y>, Y | undefined>({
+    willSetState(newY2: Y | undefined, oldY2: Y | undefined): void {
+      this.owner.willSetY2(newY2, oldY2);
+    },
+    didSetState(newY2: Y | undefined, oldY2: Y | undefined): void {
+      this.owner.onSetY2(newY2, oldY2);
+      this.owner.didSetY2(newY2, oldY2);
+    },
+  })
+  declare y2: TraitProperty<this, Y | undefined>;
 
   protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitWillSetRadius !== void 0) {
-        traitObserver.dataPointTraitWillSetRadius(newRadius, oldRadius, this);
+      if (traitObserver.traitWillSetDataPointRadius !== void 0) {
+        traitObserver.traitWillSetDataPointRadius(newRadius, oldRadius, this);
       }
     }
   }
@@ -217,37 +162,31 @@ export class DataPointTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitDidSetRadius !== void 0) {
-        traitObserver.dataPointTraitDidSetRadius(newRadius, oldRadius, this);
+      if (traitObserver.traitDidSetDataPointRadius !== void 0) {
+        traitObserver.traitDidSetDataPointRadius(newRadius, oldRadius, this);
       }
     }
   }
 
-  declare readonly color: Look<Color> | Color | null;
-
-  setColor(newColor: Look<Color> | AnyColor | null): void {
-    if (newColor !== null && !(newColor instanceof Look)) {
-      newColor = Color.fromAny(newColor);
-    }
-    const oldColor = this.color;
-    if (!Equals(newColor, oldColor)) {
-      this.willSetColor(newColor, oldColor);
-      Object.defineProperty(this, "color", {
-        value: newColor,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetColor(newColor, oldColor);
-      this.didSetColor(newColor, oldColor);
-    }
-  }
+  @TraitProperty<DataPointTrait<X, Y>, Length | null, AnyLength | null>({
+    type: Length,
+    state: null,
+    willSetState(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.willSetRadius(newRadius, oldRadius);
+    },
+    didSetState(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.onSetRadius(newRadius, oldRadius);
+      this.owner.didSetRadius(newRadius, oldRadius);
+    },
+  })
+  declare radius: TraitProperty<this, Length | null, AnyLength | null>;
 
   protected willSetColor(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitWillSetColor !== void 0) {
-        traitObserver.dataPointTraitWillSetColor(newColor, oldColor, this);
+      if (traitObserver.traitWillSetDataPointColor !== void 0) {
+        traitObserver.traitWillSetDataPointColor(newColor, oldColor, this);
       }
     }
   }
@@ -260,34 +199,72 @@ export class DataPointTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitDidSetColor !== void 0) {
-        traitObserver.dataPointTraitDidSetColor(newColor, oldColor, this);
+      if (traitObserver.traitDidSetDataPointColor !== void 0) {
+        traitObserver.traitDidSetDataPointColor(newColor, oldColor, this);
       }
     }
   }
 
-  declare readonly label: DataPointLabel<X, Y> | null;
+  @TraitProperty<DataPointTrait<X, Y>, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+    state: null,
+    willSetState(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null): void {
+      this.owner.willSetColor(newColor, oldColor);
+    },
+    didSetState(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null): void {
+      this.owner.onSetColor(newColor, oldColor);
+      this.owner.didSetColor(newColor, oldColor);
+    },
+    fromAny(color: Look<Color> | AnyColor | null): Look<Color> | Color | null {
+      if (color !== null && !(color instanceof Look)) {
+        color = Color.fromAny(color);
+      }
+      return color;
+    },
+  })
+  declare color: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
-  setLabel(newLabel: DataPointLabel<X, Y> | null): void {
-    const oldLabel = this.label;
-    if (!Equals(newLabel, oldLabel)) {
-      this.willSetLabel(newLabel, oldLabel);
-      Object.defineProperty(this, "label", {
-        value: newLabel,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetLabel(newLabel, oldLabel);
-      this.didSetLabel(newLabel, oldLabel);
+  protected willSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+    const traitObservers = this.traitObservers;
+    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
+      const traitObserver = traitObservers[i]!;
+      if (traitObserver.traitWillSetDataPointOpacity !== void 0) {
+        traitObserver.traitWillSetDataPointOpacity(newOpacity, oldOpacity, this);
+      }
     }
   }
+
+  protected onSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+    // hook
+  }
+
+  protected didSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+    const traitObservers = this.traitObservers;
+    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
+      const traitObserver = traitObservers[i]!;
+      if (traitObserver.traitDidSetDataPointOpacity !== void 0) {
+        traitObserver.traitDidSetDataPointOpacity(newOpacity, oldOpacity, this);
+      }
+    }
+  }
+
+  @TraitProperty<DataPointTrait<X, Y>, number | undefined>({
+    type: Number,
+    willSetState(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+      this.owner.willSetOpacity(newOpacity, oldOpacity);
+    },
+    didSetState(newOpacity: number | undefined, oldOpacity: number | undefined): void {
+      this.owner.onSetOpacity(newOpacity, oldOpacity);
+      this.owner.didSetOpacity(newOpacity, oldOpacity);
+    },
+  })
+  declare opacity: TraitProperty<this, number | undefined>;
 
   protected willSetLabel(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitWillSetLabel !== void 0) {
-        traitObserver.dataPointTraitWillSetLabel(newLabel, oldLabel, this);
+      if (traitObserver.traitWillSetDataPointLabel !== void 0) {
+        traitObserver.traitWillSetDataPointLabel(newLabel, oldLabel, this);
       }
     }
   }
@@ -300,8 +277,8 @@ export class DataPointTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataPointTraitDidSetLabel !== void 0) {
-        traitObserver.dataPointTraitDidSetLabel(newLabel, oldLabel, this);
+      if (traitObserver.traitDidSetDataPointLabel !== void 0) {
+        traitObserver.traitDidSetDataPointLabel(newLabel, oldLabel, this);
       }
     }
   }
@@ -309,4 +286,16 @@ export class DataPointTrait<X, Y> extends GenericTrait {
   formatLabel(x: X | undefined, y: Y | undefined): string | undefined {
     return void 0;
   }
+
+  @TraitProperty<DataPointTrait<X, Y>, DataPointLabel<X, Y> | null>({
+    state: null,
+    willSetState(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null): void {
+      this.owner.willSetLabel(newLabel, oldLabel);
+    },
+    didSetState(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null): void {
+      this.owner.onSetLabel(newLabel, oldLabel);
+      this.owner.didSetLabel(newLabel, oldLabel);
+    },
+  })
+  declare label: TraitProperty<this, DataPointLabel<X, Y> | null>;
 }

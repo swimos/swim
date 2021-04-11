@@ -22,43 +22,43 @@ import type {GaugeTrait} from "./GaugeTrait";
 import type {GaugeComponent} from "./GaugeComponent";
 
 export interface GaugeComponentObserver<C extends GaugeComponent = GaugeComponent> extends ComponentObserver<C> {
-  gaugeWillSetTrait?(newGaugeTrait: GaugeTrait | null, oldGaugeTrait: GaugeTrait | null, component: C): void;
+  componentWillSetGaugeTrait?(newGaugeTrait: GaugeTrait | null, oldGaugeTrait: GaugeTrait | null, component: C): void;
 
-  gaugeDidSetTrait?(newGaugeTrait: GaugeTrait | null, oldGaugeTrait: GaugeTrait | null, component: C): void;
+  componentDidSetGaugeTrait?(newGaugeTrait: GaugeTrait | null, oldGaugeTrait: GaugeTrait | null, component: C): void;
 
-  gaugeWillSetView?(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null, component: C): void;
+  componentWillSetGaugeView?(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null, component: C): void;
 
-  gaugeDidSetView?(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null, component: C): void;
+  componentDidSetGaugeView?(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null, component: C): void;
 
-  gaugeWillSetTitleView?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, component: C): void;
+  componentWillSetGaugeTitleView?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, component: C): void;
 
-  gaugeDidSetTitleView?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, component: C): void;
+  componentWillSetGaugeTitleView?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, component: C): void;
 
-  gaugeWillSetDial?(newDialComponent: DialComponent | null, oldDialComponent: DialComponent | null, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentWillSetDial?(newDialComponent: DialComponent | null, oldDialComponent: DialComponent | null, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeDidSetDial?(newDialComponent: DialComponent | null, oldDialComponent: DialComponent | null, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentDidSetDial?(newDialComponent: DialComponent | null, oldDialComponent: DialComponent | null, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeWillSetDialTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentWillSetDialTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeDidSetDialTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentDidSetDialTrait?(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeWillSetDialView?(newDialView: DialView | null, oldDialView: DialView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentWillSetDialView?(newDialView: DialView | null, oldDialView: DialView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeDidSetDialView?(newDialView: DialView | null, oldDialView: DialView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentDidSetDialView?(newDialView: DialView | null, oldDialView: DialView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeWillSetDialViewValue?(newValue: number, oldValue: number, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentWillSetDialValue?(newValue: number, oldValue: number, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeDidSetDialViewValue?(newValue: number, oldValue: number, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentDidSetDialValue?(newValue: number, oldValue: number, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeWillSetDialViewLimit?(newLimit: number, oldLimit: number, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentWillSetDialLimit?(newLimit: number, oldLimit: number, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeDidSetDialViewLimit?(newLimit: number, oldLimit: number, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentDidSetDialLimit?(newLimit: number, oldLimit: number, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeWillSetDialLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentWillSetDialLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeDidSetDialLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentDidSetDialLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeWillSetDialLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentWillSetDialLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
 
-  gaugeDidSetDialLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
+  componentDidSetDialLegendView?(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null, dialFastener: ComponentFastener<C, DialComponent>): void;
 }

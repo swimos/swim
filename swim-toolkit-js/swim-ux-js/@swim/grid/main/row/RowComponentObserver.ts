@@ -22,27 +22,27 @@ import type {RowTrait} from "./RowTrait";
 import type {RowComponent} from "./RowComponent";
 
 export interface RowComponentObserver<C extends RowComponent = RowComponent> extends ComponentObserver<C> {
-  rowWillSetTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, component: C): void;
+  componentWillSetRowTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, component: C): void;
 
-  rowDidSetTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, component: C): void;
+  componentDidSetRowTrait?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, component: C): void;
 
-  rowWillSetView?(newRowView: RowView | null, oldRowView: RowView | null, component: C): void;
+  componentWillSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, component: C): void;
 
-  rowDidSetView?(newRowView: RowView | null, oldRowView: RowView | null, component: C): void;
+  componentDidSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, component: C): void;
 
-  rowWillSetCell?(newCellComponent: CellComponent | null, oldCellComponent: CellComponent | null, cellFastener: ComponentFastener<C, CellComponent>): void;
+  componentWillSetCell?(newCellComponent: CellComponent | null, oldCellComponent: CellComponent | null, cellFastener: ComponentFastener<C, CellComponent>): void;
 
-  rowDidSetCell?(newCellComponent: CellComponent | null, oldCellComponent: CellComponent | null, cellFastener: ComponentFastener<C, CellComponent>): void;
+  componentDidSetCell?(newCellComponent: CellComponent | null, oldCellComponent: CellComponent | null, cellFastener: ComponentFastener<C, CellComponent>): void;
 
-  rowWillSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ComponentFastener<C, CellComponent>): void;
+  componentWillSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ComponentFastener<C, CellComponent>): void;
 
-  rowDidSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ComponentFastener<C, CellComponent>): void;
+  componentDidSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, cellFastener: ComponentFastener<C, CellComponent>): void;
 
-  rowWillSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ComponentFastener<C, CellComponent>): void;
+  componentWillSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ComponentFastener<C, CellComponent>): void;
 
-  rowDidSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ComponentFastener<C, CellComponent>): void;
+  componentDidSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, cellFastener: ComponentFastener<C, CellComponent>): void;
 
-  rowWillSetCellContentView?(newContentView: HtmlView | null, oldContentView: HtmlView | null, cellFastener: ComponentFastener<C, CellComponent>): void;
+  componentWillSetCellContentView?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, cellFastener: ComponentFastener<C, CellComponent>): void;
 
-  rowDidSetCellContentView?(newContentView: HtmlView | null, oldContentView: HtmlView | null, cellFastener: ComponentFastener<C, CellComponent>): void;
+  componentDidSetCellContentView?(newCellContentView: HtmlView | null, oldCellContentView: HtmlView | null, cellFastener: ComponentFastener<C, CellComponent>): void;
 }

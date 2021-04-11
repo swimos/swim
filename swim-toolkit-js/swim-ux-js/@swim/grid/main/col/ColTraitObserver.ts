@@ -17,11 +17,11 @@ import type {ColLayout} from "../layout/ColLayout";
 import type {ColHeader, ColTrait} from "./ColTrait";
 
 export interface ColTraitObserver<R extends ColTrait = ColTrait> extends TraitObserver<R> {
-  colTraitWillSetLayout?(newLayout: ColLayout | null, oldLayout: ColLayout | null, trait: R): void;
+  traitWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, trait: R): void;
 
-  colTraitDidSetLayout?(newLayout: ColLayout | null, oldLayout: ColLayout | null, trait: R): void;
+  traitDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, trait: R): void;
 
-  colTraitWillSetHeader?(newHeader: ColHeader | null, oldHeader: ColHeader | null, trait: R): void;
+  traitWillSetColHeader?(newColHeader: ColHeader | null, oldColHeader: ColHeader | null, trait: R): void;
 
-  colTraitDidSetHeader?(newHeader: ColHeader | null, oldHeader: ColHeader | null, trait: R): void;
+  traitDidSetColHeader?(newColHeader: ColHeader | null, oldColHeader: ColHeader | null, trait: R): void;
 }

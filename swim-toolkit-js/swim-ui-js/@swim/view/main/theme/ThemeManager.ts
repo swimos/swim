@@ -51,7 +51,7 @@ export class ThemeManager<V extends View = View> extends ViewManager<V> {
     const rootViews = this.rootViews;
     for (let i = 0, n = rootViews.length; i < n; i += 1) {
       const rootView = rootViews[i]!;
-      if (rootView.mood.isPrecedent(View.Intrinsic)) {
+      if (rootView.mood.takesPrecedence(View.Intrinsic)) {
         rootView.mood.setState(mood, View.Intrinsic);
         rootView.requireUpdate(View.NeedsChange);
       }
@@ -80,7 +80,7 @@ export class ThemeManager<V extends View = View> extends ViewManager<V> {
     const rootViews = this.rootViews;
     for (let i = 0, n = rootViews.length; i < n; i += 1) {
       const rootView = rootViews[i]!;
-      if (rootView.theme.isPrecedent(View.Intrinsic)) {
+      if (rootView.theme.takesPrecedence(View.Intrinsic)) {
         rootView.theme.setState(theme, View.Intrinsic);
         rootView.requireUpdate(View.NeedsChange);
       }

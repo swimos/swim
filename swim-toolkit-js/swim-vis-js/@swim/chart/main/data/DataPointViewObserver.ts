@@ -13,27 +13,36 @@
 // limitations under the License.
 
 import type {Length} from "@swim/math";
+import type {Color} from "@swim/style";
 import type {GraphicsView, GraphicsViewObserver} from "@swim/graphics";
 import type {DataPointView} from "./DataPointView";
 
 export interface DataPointViewObserver<X, Y, V extends DataPointView<X, Y> = DataPointView<X, Y>> extends GraphicsViewObserver<V> {
-  dataPointViewWillSetX?(newX: X | undefined, oldX: X | undefined, view: V): void;
+  viewWillSetDataPointX?(newX: X | undefined, oldX: X | undefined, view: V): void;
 
-  dataPointViewDidSetX?(newX: X | undefined, oldX: X | undefined, view: V): void;
+  viewDidSetDataPointX?(newX: X | undefined, oldX: X | undefined, view: V): void;
 
-  dataPointViewWillSetY?(newY: Y | undefined, oldY: Y | undefined, view: V): void;
+  viewWillSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, view: V): void;
 
-  dataPointViewDidSetY?(newY: Y | undefined, oldY: Y | undefined, view: V): void;
+  viewDidSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, view: V): void;
 
-  dataPointViewWillSetY2?(newY2: Y | undefined, oldY2: Y | undefined, view: V): void;
+  viewWillSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, view: V): void;
 
-  dataPointViewDidSetY2?(newY2: Y | undefined, oldY2: Y | undefined, view: V): void;
+  viewDidSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, view: V): void;
 
-  dataPointViewWillSetRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
+  viewWillSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
 
-  dataPointViewDidSetRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
+  viewDidSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
 
-  dataPointViewWillSetLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewWillSetDataPointColor?(newColor: Color | null, oldColor: Color | null, view: V): void;
 
-  dataPointViewDidSetLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+  viewDidSetDataPointColor?(newColor: Color | null, oldColor: Color | null, view: V): void;
+
+  viewWillSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, view: V): void;
+
+  viewDidSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, view: V): void;
+
+  viewWillSetDataPointLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
+
+  viewDidSetDataPointLabel?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, view: V): void;
 }

@@ -40,12 +40,12 @@ const graphView = chartView.graph.injectView();
 const plotView = graphView.append(swim.AreaPlotView)
     .hitMode("plot")
     .on("pointerenter", function (event) {
-      plotView.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
     })
     .on("pointerleave", function (event) {
-      plotView.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+      plotView.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
     });
-plotView.modifyMood(swim.Feel.default, [swim.Feel.primary, 1]);
+plotView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
 
 const cycles = 2;
 const samples = 100;

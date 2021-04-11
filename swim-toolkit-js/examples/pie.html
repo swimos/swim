@@ -33,10 +33,10 @@ const slice0View = pieView.append(swim.SliceView, "slice0")
     .label("Label 0")
     .legend("Legend 0")
     .on("pointerenter", function (event) {
-      slice0View.modifyMood(swim.Feel.default, [swim.Feel.primary, 1], true);
+      slice0View.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]], true);
     })
     .on("pointerleave", function (event) {
-      slice0View.modifyMood(swim.Feel.default, [swim.Feel.primary, void 0], true);
+      slice0View.modifyMood(swim.Feel.default, [[swim.Feel.primary, void 0]], true);
     });
 slice0View.label.view.textColor.setLook(swim.Look.backgroundColor);
 
@@ -45,10 +45,10 @@ const slice1View = pieView.append(swim.SliceView, "slice1")
     .label("Label 1")
     .legend("Legend 1")
     .on("pointerenter", function (event) {
-      slice1View.modifyMood(swim.Feel.default, [swim.Feel.secondary, 1], true);
+      slice1View.modifyMood(swim.Feel.default, [[swim.Feel.secondary, 1]], true);
     })
     .on("pointerleave", function (event) {
-      slice1View.modifyMood(swim.Feel.default, [swim.Feel.secondary, void 0], true);
+      slice1View.modifyMood(swim.Feel.default, [[swim.Feel.secondary, void 0]], true);
     });
 slice1View.label.view.textColor.setLook(swim.Look.backgroundColor);
 

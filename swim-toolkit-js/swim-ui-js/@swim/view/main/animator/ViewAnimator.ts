@@ -318,42 +318,37 @@ Object.defineProperty(ViewAnimator.prototype, "superName", {
 ViewAnimator.prototype.bindSuperAnimator = function (this: ViewAnimator<View, unknown>): void {
   const superName = this.superName;
   if (superName !== void 0 && this.isMounted()) {
-    let view = this.owner;
-    do {
-      const parentView = view.parentView;
-      if (parentView !== null) {
-        view = parentView;
-        const superAnimator = view.getLazyViewAnimator(superName);
-        if (superAnimator !== null) {
-          Object.defineProperty(this, "superAnimator", {
-            value: superAnimator,
-            enumerable: true,
-            configurable: true,
-          });
-          superAnimator.addSubAnimator(this);
-          if ((this.animatorFlags & Animator.OverrideFlag) === 0 && superAnimator.precedence >= this.precedence) {
-            this.setAnimatorFlags(this.animatorFlags | Animator.InheritedFlag);
-            this.setOwnLook(superAnimator.look);
-            if (this.look === null) {
-              Object.defineProperty(this, "ownState", {
-                value: superAnimator.state,
-                enumerable: true,
-                configurable: true,
-              });
-              this.setValue(superAnimator.value, this.value);
-              if (superAnimator.isAnimating()) {
-                this.startAnimating();
-              } else {
-                this.stopAnimating();
-              }
+    let superView = this.owner.parentView;
+    while (superView !== null) {
+      const superAnimator = superView.getLazyViewAnimator(superName);
+      if (superAnimator !== null) {
+        Object.defineProperty(this, "superAnimator", {
+          value: superAnimator,
+          enumerable: true,
+          configurable: true,
+        });
+        superAnimator.addSubAnimator(this);
+        if ((this.animatorFlags & Animator.OverrideFlag) === 0 && superAnimator.precedence >= this.precedence) {
+          this.setAnimatorFlags(this.animatorFlags | Animator.InheritedFlag);
+          this.setOwnLook(superAnimator.look);
+          if (this.look === null) {
+            Object.defineProperty(this, "ownState", {
+              value: superAnimator.state,
+              enumerable: true,
+              configurable: true,
+            });
+            this.setValue(superAnimator.value, this.value);
+            if (superAnimator.isAnimating()) {
+              this.startAnimating();
+            } else {
+              this.stopAnimating();
             }
           }
-        } else {
-          continue;
         }
+        break;
       }
-      break;
-    } while (true);
+      superView = superView.parentView;
+    }
   }
 };
 

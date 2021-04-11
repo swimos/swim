@@ -18,7 +18,7 @@ import type {SeriesPlotTraitObserver} from "./SeriesPlotTraitObserver";
 import type {AreaPlotTrait} from "./AreaPlotTrait";
 
 export interface AreaPlotTraitObserver<X, Y, R extends AreaPlotTrait<X, Y> = AreaPlotTrait<X, Y>> extends SeriesPlotTraitObserver<X, Y, R> {
-  areaPlotTraitWillSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, trait: R): void;
+  traitWillSetPlotFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, trait: R): void;
 
-  areaPlotTraitDidSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, trait: R): void;
+  traitDidSetPlotFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, trait: R): void;
 }

@@ -16,9 +16,8 @@ export {MapView} from "./MapView";
 export {MapViewObserver} from "./MapViewObserver";
 export {MapViewController} from "./MapViewController";
 
-export {GeoMapProjection} from "./GeoMapProjection";
-export {EquirectangularGeoMapProjection} from "./EquirectangularGeoMapProjection";
+export {MapTrait} from "./MapTrait";
+export {MapTraitObserver} from "./MapTraitObserver";
 
-export {GeoMapView} from "./GeoMapView";
-export {GeoMapViewObserver} from "./GeoMapViewObserver";
-export {GeoMapViewController} from "./GeoMapViewController";
+export {MapComponent} from "./MapComponent";
+export {MapComponentObserver} from "./MapComponentObserver";

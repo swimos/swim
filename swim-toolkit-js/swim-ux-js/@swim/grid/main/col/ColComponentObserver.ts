@@ -20,19 +20,19 @@ import type {ColTrait} from "./ColTrait";
 import type {ColComponent} from "./ColComponent";
 
 export interface ColComponentObserver<C extends ColComponent = ColComponent> extends ComponentObserver<C> {
-  colWillSetView?(newColView: ColView | null, oldColView: ColView | null, component: C): void;
+  componentWillSetColView?(newColView: ColView | null, oldColView: ColView | null, component: C): void;
 
-  colDidSetView?(newColView: ColView | null, oldColView: ColView | null, component: C): void;
+  componentDidSetColView?(newColView: ColView | null, oldColView: ColView | null, component: C): void;
 
-  colWillSetTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, component: C): void;
+  componentWillSetColTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, component: C): void;
 
-  colDidSetTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, component: C): void;
+  componentDidSetColTrait?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, component: C): void;
 
-  colWillSetLayout?(newLayout: ColLayout | null, oldLayout: ColLayout | null, component: C): void;
+  componentWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, component: C): void;
 
-  colDidSetLayout?(newLayout: ColLayout | null, oldLayout: ColLayout | null, component: C): void;
+  componentDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, component: C): void;
 
-  colWillSetHeaderView?(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null, component: C): void;
+  componentWillSetColHeaderView?(newColHeaderView: HtmlView | null, oldColHeaderView: HtmlView | null, component: C): void;
 
-  colDidSetHeaderView?(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null, component: C): void;
+  componentDidSetColHeaderView?(newColHeaderView: HtmlView | null, oldColHeaderView: HtmlView | null, component: C): void;
 }

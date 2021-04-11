@@ -18,7 +18,7 @@ import type {CellView} from "../cell/CellView";
 import type {RowView} from "./RowView";
 
 export interface RowViewObserver<V extends RowView = RowView> extends HtmlViewObserver<V> {
-  rowViewWillSetCell?(newCellView: CellView | null, oldCellView: CellView | null, targetView: View | null, view: V): void;
+  viewWillSetCell?(newCellView: CellView | null, oldCellView: CellView | null, targetView: View | null, view: V): void;
 
-  rowViewDidSetCell?(newCellView: CellView | null, oldCellView: CellView | null, targetView: View | null, view: V): void;
+  viewDidSetCell?(newCellView: CellView | null, oldCellView: CellView | null, targetView: View | null, view: V): void;
 }

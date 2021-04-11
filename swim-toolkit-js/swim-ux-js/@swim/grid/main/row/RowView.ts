@@ -30,7 +30,7 @@ export class RowView extends HtmlView {
   }
 
   protected initRow(): void {
-    this.addClass("table-row");
+    this.addClass("row");
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
   }
@@ -41,9 +41,6 @@ export class RowView extends HtmlView {
 
   @ViewProperty({type: TableLayout, state: null, inherit: true})
   declare layout: ViewProperty<this, TableLayout | null, AnyTableLayout | null>;
-
-  @ViewProperty({type: Number, inherit: true})
-  declare colSpacing: ViewProperty<this, number | undefined>;
 
   insertCell(cellView: CellView, targetView: View | null = null): void {
     const cellFasteners = this.cellFasteners as ViewFastener<this, CellView>[];
@@ -99,14 +96,14 @@ export class RowView extends HtmlView {
   protected willSetCell(newCellView: CellView | null, oldCellView: CellView | null,
                         targetView: View | null, cellFastener: ViewFastener<this, CellView>): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.rowViewWillSetCell !== void 0) {
-      viewController.rowViewWillSetCell(newCellView, oldCellView, targetView, this);
+    if (viewController !== null && viewController.viewWillSetCell !== void 0) {
+      viewController.viewWillSetCell(newCellView, oldCellView, targetView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.rowViewWillSetCell !== void 0) {
-        viewObserver.rowViewWillSetCell(newCellView, oldCellView, targetView, this);
+      if (viewObserver.viewWillSetCell !== void 0) {
+        viewObserver.viewWillSetCell(newCellView, oldCellView, targetView, this);
       }
     }
   }
@@ -127,13 +124,13 @@ export class RowView extends HtmlView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.rowViewDidSetCell !== void 0) {
-        viewObserver.rowViewDidSetCell(newCellView, oldCellView, targetView, this);
+      if (viewObserver.viewDidSetCell !== void 0) {
+        viewObserver.viewDidSetCell(newCellView, oldCellView, targetView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.rowViewDidSetCell !== void 0) {
-      viewController.rowViewDidSetCell(newCellView, oldCellView, targetView, this);
+    if (viewController !== null && viewController.viewDidSetCell !== void 0) {
+      viewController.viewDidSetCell(newCellView, oldCellView, targetView, this);
     }
   }
 

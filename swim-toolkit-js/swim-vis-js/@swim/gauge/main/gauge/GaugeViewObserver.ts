@@ -18,11 +18,11 @@ import type {DialView} from "../dial/DialView";
 import type {GaugeView} from "./GaugeView";
 
 export interface GaugeViewObserver<V extends GaugeView = GaugeView> extends ViewObserver<V> {
-  gaugeViewWillSetTitle?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, view: V): void;
+  viewWillSetGaugeTitle?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, view: V): void;
 
-  gaugeViewDidSetTitle?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, view: V): void;
+  viewDidSetGaugeTitle?(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null, view: V): void;
 
-  gaugeViewWillSetDial?(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null, view: V): void;
+  viewWillSetDial?(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null, view: V): void;
 
-  gaugeViewDidSetDial?(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null, view: V): void;
+  viewDidSetDial?(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null, view: V): void;
 }

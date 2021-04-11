@@ -22,6 +22,8 @@ export type AnyFeelVector = FeelVector | FeelVectorArray;
 
 export type FeelVectorArray = ReadonlyArray<[Look<unknown>, unknown]>;
 
+export type FeelVectorUpdates = ReadonlyArray<[Look<unknown>, unknown | undefined]>;
+
 export class FeelVector implements Interpolate<FeelVector>, Equals, Debug {
   constructor(array: ReadonlyArray<[Look<unknown>, unknown]>,
               index: {readonly [name: string]: number | undefined}) {
@@ -86,37 +88,56 @@ export class FeelVector implements Interpolate<FeelVector>, Equals, Debug {
     return entry !== void 0 ? entry[1] : elseValue;
   }
 
-  updated<T, U = never>(look: Look<T, U>, value: T | U | undefined): FeelVector {
-    const oldArray = this.array;
-    const oldIndex = this.index;
-    const i = oldIndex[look.name];
-    if (value !== void 0 && i !== void 0) { // update
-      const newArray = oldArray.slice(0);
-      newArray[i] = [look, value];
-      return this.copy(newArray, oldIndex);
-    } else if (value !== void 0) { // insert
-      const newArray = oldArray.slice(0);
-      const newIndex: {[name: string]: number | undefined} = {};
-      for (const name in oldIndex) {
-        newIndex[name] = oldIndex[name];
+  updated<T, U = never>(look: Look<T, U>, value: T | U | undefined): FeelVector;
+  updated(updates: FeelVectorUpdates): FeelVector;
+  updated(updates: FeelVectorUpdates | Look<unknown>, value?: unknown | undefined): FeelVector {
+    let look: Look<unknown>;
+    let oldArray = this.array;
+    let oldIndex = this.index;
+    let newArray: [Look<unknown>, unknown][] | undefined;
+    let newIndex: {[name: string]: number | undefined} | undefined;
+    const updateCount = Array.isArray(updates) ? updates.length : 1;
+    for (let updateIndex = 0; updateIndex < updateCount; updateIndex += 1) {
+      if (updateIndex === 0 && !Array.isArray(updates)) {
+        look = updates as Look<unknown>;
+      } else {
+        [look, value] = (updates as FeelVectorUpdates)[updateIndex]!;
       }
-      newIndex[look.name] = newArray.length;
-      newArray.push([look, value]);
-      return this.copy(newArray, newIndex);
-    } else if (i !== void 0) { // remove
-      const newArray = new Array<[Look<unknown>, unknown]>();
-      const newIndex: {[name: string]: number | undefined} = {};
-      let k = 0;
-      for (let j = 0, n = oldArray.length; j < n; j += 1) {
-        const entry = oldArray[j]!;
-        if (entry[0] !== look) {
-          newArray[k] = entry;
-          newIndex[entry[0].name] = k;
-          k += 1;
+      const i = oldIndex[look.name];
+      if (value !== void 0 && i !== void 0) { // update
+        const newArray = oldArray.slice(0);
+        newIndex = oldIndex;
+        newArray[i] = [look, value];
+        oldArray = newArray;
+      } else if (value !== void 0) { // insert
+        const newArray = oldArray.slice(0);
+        const newIndex: {[name: string]: number | undefined} = {};
+        for (const name in oldIndex) {
+          newIndex[name] = oldIndex[name];
         }
+        newIndex[look.name] = newArray.length;
+        newArray.push([look, value]);
+        oldArray = newArray;
+        oldIndex = newIndex;
+      } else if (i !== void 0) { // remove
+        const newArray = new Array<[Look<unknown>, unknown]>();
+        const newIndex: {[name: string]: number | undefined} = {};
+        let k = 0;
+        for (let j = 0, n = oldArray.length; j < n; j += 1) {
+          const entry = oldArray[j]!;
+          if (entry[0] !== look) {
+            newArray[k] = entry;
+            newIndex[entry[0].name] = k;
+            k += 1;
+          }
+        }
+        oldArray = newArray;
+        oldIndex = newIndex;
       }
+    }
+    if (newArray !== void 0 && newIndex !== void 0) {
       return this.copy(newArray, newIndex);
-    } else { // nop
+    } else {
       return this;
     }
   }

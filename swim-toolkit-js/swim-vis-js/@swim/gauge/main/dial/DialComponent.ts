@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {AnyTiming, Timing} from "@swim/mapping";
+import {Model} from "@swim/model";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {View} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
@@ -24,39 +25,6 @@ import type {DialComponentObserver} from "./DialComponentObserver";
 export class DialComponent extends CompositeComponent {
   declare readonly componentObservers: ReadonlyArray<DialComponentObserver>;
 
-  get value(): number | undefined {
-    const dialTrait = this.dial.trait;
-    return dialTrait !== null ? dialTrait.value : void 0;
-  }
-
-  setValue(value: number): void {
-    const dialTrait = this.dial.trait;
-    if (dialTrait !== null) {
-      dialTrait.setValue(value);
-    }
-  }
-
-  setLimit(limit: number): void {
-    const dialTrait = this.dial.trait;
-    if (dialTrait !== null) {
-      dialTrait.setLimit(limit);
-    }
-  }
-
-  setLabel(label: DialLabel | null): void {
-    const dialTrait = this.dial.trait;
-    if (dialTrait !== null) {
-      dialTrait.setLabel(label);
-    }
-  }
-
-  setLegend(label: DialLegend | null): void {
-    const dialTrait = this.dial.trait;
-    if (dialTrait !== null) {
-      dialTrait.setLegend(label);
-    }
-  }
-
   protected initDialTrait(dialTrait: DialTrait): void {
     // hook
   }
@@ -64,10 +32,10 @@ export class DialComponent extends CompositeComponent {
   protected attachDialTrait(dialTrait: DialTrait): void {
     const dialView = this.dial.view;
     if (dialView !== null) {
-      this.setDialViewValue(dialTrait.value, dialTrait);
-      this.setDialViewLimit(dialTrait.limit, dialTrait);
-      this.setDialLabelView(dialTrait.label, dialTrait);
-      this.setDialLegendView(dialTrait.legend, dialTrait);
+      this.setValue(dialTrait.value.state, dialTrait);
+      this.setLimit(dialTrait.limit.state, dialTrait);
+      this.setLabelView(dialTrait.label.state, dialTrait);
+      this.setLegendView(dialTrait.legend.state, dialTrait);
     }
   }
 
@@ -79,8 +47,8 @@ export class DialComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialWillSetTrait !== void 0) {
-        componentObserver.dialWillSetTrait(newDialTrait, oldDialTrait, this);
+      if (componentObserver.componentWillSetDialTrait !== void 0) {
+        componentObserver.componentWillSetDialTrait(newDialTrait, oldDialTrait, this);
       }
     }
   }
@@ -99,40 +67,28 @@ export class DialComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialDidSetTrait !== void 0) {
-        componentObserver.dialDidSetTrait(newDialTrait, oldDialTrait, this);
+      if (componentObserver.componentDidSetDialTrait !== void 0) {
+        componentObserver.componentDidSetDialTrait(newDialTrait, oldDialTrait, this);
       }
     }
   }
 
-  protected onSetDialTraitValue(newValue: number, oldValue: number, dialTrait: DialTrait): void {
-    this.setDialViewValue(newValue, dialTrait);
-  }
-
-  protected onSetDialTraitLimit(newLimit: number, oldLimit: number, dialTrait: DialTrait): void {
-    this.setDialViewLimit(newLimit, dialTrait);
-  }
-
-  protected updateDialTraitLabel(value: number, limit: number, dialTrait: DialTrait): void {
-    const label = dialTrait.formatLabel(value, limit);
-    if (label !== void 0) {
-      dialTrait.setLabel(label);
+  protected updateLabel(value: number, limit: number, dialTrait: DialTrait): void {
+    if (dialTrait.label.takesPrecedence(Model.Intrinsic)) {
+      const label = dialTrait.formatLabel(value, limit);
+      if (label !== void 0) {
+        dialTrait.label.setState(label, Model.Intrinsic);
+      }
     }
   }
 
-  protected onSetDialTraitLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null, dialTrait: DialTrait): void {
-    this.setDialLabelView(newLabel, dialTrait);
-  }
-
-  protected updateDialTraitLegend(value: number, limit: number, dialTrait: DialTrait): void {
-    const legend = dialTrait.formatLegend(value, limit);
-    if (legend !== void 0) {
-      dialTrait.setLegend(legend);
+  protected updateLegend(value: number, limit: number, dialTrait: DialTrait): void {
+    if (dialTrait.legend.takesPrecedence(Model.Intrinsic)) {
+      const legend = dialTrait.formatLegend(value, limit);
+      if (legend !== void 0) {
+        dialTrait.legend.setState(legend, Model.Intrinsic);
+      }
     }
-  }
-
-  protected onSetDialTraitLegend(newLegend: DialLegend | null, oldLegend: DialLegend | null, dialTrait: DialTrait): void {
-    this.setDialLegendView(newLegend, dialTrait);
   }
 
   protected createDialView(): DialView {
@@ -144,17 +100,13 @@ export class DialComponent extends CompositeComponent {
     if (dialTrait !== null) {
       const value = dialView.value.value;
       const limit = dialView.limit.value;
-      this.updateDialTraitLabel(value, limit, dialTrait);
-      this.updateDialTraitLegend(value, limit, dialTrait);
-      this.setDialViewValue(dialTrait.value, dialTrait);
-      this.setDialViewLimit(dialTrait.limit, dialTrait);
-      this.setDialLabelView(dialTrait.label, dialTrait);
-      this.setDialLegendView(dialTrait.legend, dialTrait);
+      this.updateLabel(value, limit, dialTrait);
+      this.updateLegend(value, limit, dialTrait);
+      this.setValue(dialTrait.value.state, dialTrait);
+      this.setLimit(dialTrait.limit.state, dialTrait);
+      this.setLabelView(dialTrait.label.state, dialTrait);
+      this.setLegendView(dialTrait.legend.state, dialTrait);
     }
-  }
-
-  protected themeDialView(dialView: DialView, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
-    // hook
   }
 
   protected attachDialView(dialView: DialView): void {
@@ -171,8 +123,8 @@ export class DialComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialWillSetView !== void 0) {
-        componentObserver.dialWillSetView(newDialView, oldDialView, this);
+      if (componentObserver.componentWillSetDialView !== void 0) {
+        componentObserver.componentWillSetDialView(newDialView, oldDialView, this);
       }
     }
   }
@@ -191,15 +143,19 @@ export class DialComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialDidSetView !== void 0) {
-        componentObserver.dialDidSetView(newDialView, oldDialView, this);
+      if (componentObserver.componentDidSetDialView !== void 0) {
+        componentObserver.componentDidSetDialView(newDialView, oldDialView, this);
       }
     }
   }
 
-  protected setDialViewValue(value: number, dialTrait: DialTrait, timing?: AnyTiming | boolean): void {
+  protected themeDialView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, dialView: DialView): void {
+    // hook
+  }
+
+  protected setValue(value: number, dialTrait: DialTrait, timing?: AnyTiming | boolean): void {
     const dialView = this.dial.view;
-    if (dialView !== null && dialView.value.isPrecedent(View.Intrinsic)) {
+    if (dialView !== null && dialView.value.takesPrecedence(View.Intrinsic)) {
       if (timing === void 0 || timing === true) {
         timing = this.dialTiming.state;
         if (timing === true) {
@@ -212,38 +168,38 @@ export class DialComponent extends CompositeComponent {
     }
   }
 
-  protected willSetDialViewValue(newValue: number, oldValue: number, dialView: DialView): void {
+  protected willSetValue(newValue: number, oldValue: number, dialView: DialView): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialWillSetViewValue !== void 0) {
-        componentObserver.dialWillSetViewValue(newValue, oldValue, this);
+      if (componentObserver.componentWillSetDialValue !== void 0) {
+        componentObserver.componentWillSetDialValue(newValue, oldValue, this);
       }
     }
   }
 
-  protected onSetDialViewValue(newValue: number, oldValue: number, dialView: DialView): void {
+  protected onSetValue(newValue: number, oldValue: number, dialView: DialView): void {
     const dialTrait = this.dial.trait;
     if (dialTrait !== null) {
       const limit = dialView.limit.value;
-      this.updateDialTraitLabel(newValue, limit, dialTrait);
-      this.updateDialTraitLegend(newValue, limit, dialTrait);
+      this.updateLabel(newValue, limit, dialTrait);
+      this.updateLegend(newValue, limit, dialTrait);
     }
   }
 
-  protected didSetDialViewValue(newValue: number, oldValue: number, dialView: DialView): void {
+  protected didSetValue(newValue: number, oldValue: number, dialView: DialView): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialDidSetViewValue !== void 0) {
-        componentObserver.dialDidSetViewValue(newValue, oldValue, this);
+      if (componentObserver.componentDidSetDialValue !== void 0) {
+        componentObserver.componentDidSetDialValue(newValue, oldValue, this);
       }
     }
   }
 
-  protected setDialViewLimit(limit: number, dialTrait: DialTrait, timing?: AnyTiming | boolean): void {
+  protected setLimit(limit: number, dialTrait: DialTrait, timing?: AnyTiming | boolean): void {
     const dialView = this.dial.view;
-    if (dialView !== null && dialView.limit.isPrecedent(View.Intrinsic)) {
+    if (dialView !== null && dialView.limit.takesPrecedence(View.Intrinsic)) {
       if (timing === void 0 || timing === true) {
         timing = this.dialTiming.state;
         if (timing === true) {
@@ -256,36 +212,36 @@ export class DialComponent extends CompositeComponent {
     }
   }
 
-  protected willSetDialViewLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
+  protected willSetLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialWillSetViewLimit !== void 0) {
-        componentObserver.dialWillSetViewLimit(newLimit, oldLimit, this);
+      if (componentObserver.componentWillSetDialLimit !== void 0) {
+        componentObserver.componentWillSetDialLimit(newLimit, oldLimit, this);
       }
     }
   }
 
-  protected onSetDialViewLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
+  protected onSetLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
     const dialTrait = this.dial.trait;
     if (dialTrait !== null) {
       const value = dialView.value.value;
-      this.updateDialTraitLabel(value, newLimit, dialTrait);
-      this.updateDialTraitLegend(value, newLimit, dialTrait);
+      this.updateLabel(value, newLimit, dialTrait);
+      this.updateLegend(value, newLimit, dialTrait);
     }
   }
 
-  protected didSetDialViewLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
+  protected didSetLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialDidSetViewLimit !== void 0) {
-        componentObserver.dialDidSetViewLimit(newLimit, oldLimit, this);
+      if (componentObserver.componentDidSetDialLimit !== void 0) {
+        componentObserver.componentDidSetDialLimit(newLimit, oldLimit, this);
       }
     }
   }
 
-  protected createDialLabelView(label: DialLabel, dialTrait: DialTrait): GraphicsView | string | null {
+  protected createLabelView(label: DialLabel, dialTrait: DialTrait): GraphicsView | string | null {
     if (typeof label === "function") {
       return label(dialTrait);
     } else {
@@ -293,57 +249,57 @@ export class DialComponent extends CompositeComponent {
     }
   }
 
-  protected setDialLabelView(label: DialLabel | null, dialTrait: DialTrait): void {
+  protected setLabelView(label: DialLabel | null, dialTrait: DialTrait): void {
     const dialView = this.dial.view;
     if (dialView !== null) {
-      const labelView = label !== null ? this.createDialLabelView(label, dialTrait) : null;
+      const labelView = label !== null ? this.createLabelView(label, dialTrait) : null;
       dialView.label.setView(labelView);
     }
   }
 
-  protected initDialLabelView(labelView: GraphicsView): void {
+  protected initLabelView(labelView: GraphicsView): void {
     // hook
   }
 
-  protected attachDialLabelView(labelView: GraphicsView): void {
+  protected attachLabelView(labelView: GraphicsView): void {
     // hook
   }
 
-  protected detachDialLabelView(labelView: GraphicsView): void {
+  protected detachLabelView(labelView: GraphicsView): void {
     // hook
   }
 
-  protected willSetDialLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+  protected willSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialWillSetLabelView !== void 0) {
-        componentObserver.dialWillSetLabelView(newLabelView, oldLabelView, this);
+      if (componentObserver.componentWillSetDialLabelView !== void 0) {
+        componentObserver.componentWillSetDialLabelView(newLabelView, oldLabelView, this);
       }
     }
   }
 
-  protected onSetDialLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+  protected onSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     if (oldLabelView !== null) {
-      this.detachDialLabelView(oldLabelView);
+      this.detachLabelView(oldLabelView);
     }
     if (newLabelView !== null) {
-      this.attachDialLabelView(newLabelView);
-      this.initDialLabelView(newLabelView);
+      this.attachLabelView(newLabelView);
+      this.initLabelView(newLabelView);
     }
   }
 
-  protected didSetDialLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+  protected didSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialDidSetLabelView !== void 0) {
-        componentObserver.dialDidSetLabelView(newLabelView, oldLabelView, this);
+      if (componentObserver.componentDidSetDialLabelView !== void 0) {
+        componentObserver.componentDidSetDialLabelView(newLabelView, oldLabelView, this);
       }
     }
   }
 
-  protected createDialLegendView(legend: DialLegend, dialTrait: DialTrait): GraphicsView | string | null {
+  protected createLegendView(legend: DialLegend, dialTrait: DialTrait): GraphicsView | string | null {
     if (typeof legend === "function") {
       return legend(dialTrait);
     } else {
@@ -351,52 +307,52 @@ export class DialComponent extends CompositeComponent {
     }
   }
 
-  protected setDialLegendView(legend: DialLegend | null, dialTrait: DialTrait): void {
+  protected setLegendView(legend: DialLegend | null, dialTrait: DialTrait): void {
     const dialView = this.dial.view;
     if (dialView !== null) {
-      const legendView = legend !== null ? this.createDialLegendView(legend, dialTrait) : null;
+      const legendView = legend !== null ? this.createLegendView(legend, dialTrait) : null;
       dialView.legend.setView(legendView);
     }
   }
 
-  protected initDialLegendView(legendView: GraphicsView): void {
+  protected initLegendView(legendView: GraphicsView): void {
     // hook
   }
 
-  protected attachDialLegendView(legendView: GraphicsView): void {
+  protected attachLegendView(legendView: GraphicsView): void {
     // hook
   }
 
-  protected detachDialLegendView(legendView: GraphicsView): void {
+  protected detachLegendView(legendView: GraphicsView): void {
     // hook
   }
 
-  protected willSetDialLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+  protected willSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialWillSetLegendView !== void 0) {
-        componentObserver.dialWillSetLegendView(newLegendView, oldLegendView, this);
+      if (componentObserver.componentWillSetDialLegendView !== void 0) {
+        componentObserver.componentWillSetDialLegendView(newLegendView, oldLegendView, this);
       }
     }
   }
 
-  protected onSetDialLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+  protected onSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
     if (oldLegendView !== null) {
-      this.detachDialLegendView(oldLegendView);
+      this.detachLegendView(oldLegendView);
     }
     if (newLegendView !== null) {
-      this.attachDialLegendView(newLegendView);
-      this.initDialLegendView(newLegendView);
+      this.attachLegendView(newLegendView);
+      this.initLegendView(newLegendView);
     }
   }
 
-  protected didSetDialLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+  protected didSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.dialDidSetLegendView !== void 0) {
-        componentObserver.dialDidSetLegendView(newLegendView, oldLegendView, this);
+      if (componentObserver.componentDidSetDialLegendView !== void 0) {
+        componentObserver.componentDidSetDialLegendView(newLegendView, oldLegendView, this);
       }
     }
   }
@@ -418,26 +374,26 @@ export class DialComponent extends CompositeComponent {
       this.owner.didSetDialView(newDialView, oldDialView);
     },
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, dialView: DialView): void {
-      this.owner.themeDialView(dialView, theme, mood, timing);
+      this.owner.themeDialView(theme, mood, timing, dialView);
     },
-    dialViewWillSetValue(newValue: number, oldValue: number, dialView: DialView): void {
-      this.owner.willSetDialViewValue(newValue, oldValue, dialView);
+    viewWillSetDialValue(newValue: number, oldValue: number, dialView: DialView): void {
+      this.owner.willSetValue(newValue, oldValue, dialView);
     },
-    dialViewDidSetValue(newValue: number, oldValue: number, dialView: DialView): void {
-      this.owner.onSetDialViewValue(newValue, oldValue, dialView);
-      this.owner.didSetDialViewValue(newValue, oldValue, dialView);
+    viewDidSetDialValue(newValue: number, oldValue: number, dialView: DialView): void {
+      this.owner.onSetValue(newValue, oldValue, dialView);
+      this.owner.didSetValue(newValue, oldValue, dialView);
     },
-    dialViewWillSetLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
-      this.owner.willSetDialViewLimit(newLimit, oldLimit, dialView);
+    viewWillSetDialLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
+      this.owner.willSetLimit(newLimit, oldLimit, dialView);
     },
-    dialViewDidSetLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
-      this.owner.onSetDialViewLimit(newLimit, oldLimit, dialView);
-      this.owner.didSetDialViewLimit(newLimit, oldLimit, dialView);
+    viewDidSetDialLimit(newLimit: number, oldLimit: number, dialView: DialView): void {
+      this.owner.onSetLimit(newLimit, oldLimit, dialView);
+      this.owner.didSetLimit(newLimit, oldLimit, dialView);
     },
-    dialViewDidSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    viewDidSetDialLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
       this.owner.label.setView(newLabelView);
     },
-    dialViewDidSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+    viewDidSetDialLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
       this.owner.legend.setView(newLegendView);
     },
     createView(): DialView | null {
@@ -454,17 +410,17 @@ export class DialComponent extends CompositeComponent {
     didSetTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
       this.owner.didSetDialTrait(newDialTrait, oldDialTrait);
     },
-    dialTraitDidSetValue(newValue: number, oldValue: number, dialTrait: DialTrait): void {
-      this.owner.onSetDialTraitValue(newValue, oldValue, dialTrait);
+    traitDidSetDialValue(newValue: number, oldValue: number, dialTrait: DialTrait): void {
+      this.owner.setValue(newValue, dialTrait);
     },
-    dialTraitDidSetLimit(newLimit: number, oldLimit: number, dialTrait: DialTrait): void {
-      this.owner.onSetDialTraitLimit(newLimit, oldLimit, dialTrait);
+    traitDidSetDialLimit(newLimit: number, oldLimit: number, dialTrait: DialTrait): void {
+      this.owner.setLimit(newLimit, dialTrait);
     },
-    dialTraitDidSetLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null, dialTrait: DialTrait): void {
-      this.owner.onSetDialTraitLabel(newLabel, oldLabel, dialTrait);
+    traitDidSetDialLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null, dialTrait: DialTrait): void {
+      this.owner.setLabelView(newLabel, dialTrait);
     },
-    dialTraitDidSetLegend(newLegend: DialLegend | null, oldLegend: DialLegend | null, dialTrait: DialTrait): void {
-      this.owner.onSetDialTraitLegend(newLegend, oldLegend, dialTrait);
+    traitDidSetDialLegend(newLegend: DialLegend | null, oldLegend: DialLegend | null, dialTrait: DialTrait): void {
+      this.owner.setLegendView(newLegend, dialTrait);
     },
   });
 
@@ -476,13 +432,13 @@ export class DialComponent extends CompositeComponent {
   @ComponentView<DialComponent, GraphicsView>({
     key: true,
     willSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.willSetDialLabelView(newLabelView, oldLabelView);
+      this.owner.willSetLabelView(newLabelView, oldLabelView);
     },
     onSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.onSetDialLabelView(newLabelView, oldLabelView);
+      this.owner.onSetLabelView(newLabelView, oldLabelView);
     },
     didSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.didSetDialLabelView(newLabelView, oldLabelView);
+      this.owner.didSetLabelView(newLabelView, oldLabelView);
     },
   })
   declare label: ComponentView<this, GraphicsView>;
@@ -490,13 +446,13 @@ export class DialComponent extends CompositeComponent {
   @ComponentView<DialComponent, GraphicsView>({
     key: true,
     willSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.willSetDialLegendView(newLegendView, oldLegendView);
+      this.owner.willSetLegendView(newLegendView, oldLegendView);
     },
     onSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.onSetDialLegendView(newLegendView, oldLegendView);
+      this.owner.onSetLegendView(newLegendView, oldLegendView);
     },
     didSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.didSetDialLegendView(newLegendView, oldLegendView);
+      this.owner.didSetLegendView(newLegendView, oldLegendView);
     },
   })
   declare legend: ComponentView<this, GraphicsView>;

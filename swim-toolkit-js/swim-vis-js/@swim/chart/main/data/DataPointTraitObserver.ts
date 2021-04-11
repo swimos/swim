@@ -19,27 +19,31 @@ import type {TraitObserver} from "@swim/model";
 import type {DataPointLabel, DataPointTrait} from "./DataPointTrait";
 
 export interface DataPointTraitObserver<X, Y, R extends DataPointTrait<X, Y> = DataPointTrait<X, Y>> extends TraitObserver<R> {
-  dataPointTraitWillSetX?(newX: X, oldX: X, trait: R): void;
+  traitWillSetDataPointX?(newX: X, oldX: X, trait: R): void;
 
-  dataPointTraitDidSetX?(newX: X, oldX: X, trait: R): void;
+  traitDidSetDataPointX?(newX: X, oldX: X, trait: R): void;
 
-  dataPointTraitWillSetY?(newY: Y, oldY: Y, trait: R): void;
+  traitWillSetDataPointY?(newY: Y, oldY: Y, trait: R): void;
 
-  dataPointTraitDidSetY?(newY: Y, oldY: Y, trait: R): void;
+  traitDidSetDataPointY?(newY: Y, oldY: Y, trait: R): void;
 
-  dataPointTraitWillSetY2?(newY2: Y | undefined, oldY2: Y | undefined, trait: R): void;
+  traitWillSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, trait: R): void;
 
-  dataPointTraitDidSetY2?(newY2: Y | undefined, oldY2: Y | undefined, trait: R): void;
+  traitDidSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, trait: R): void;
 
-  dataPointTraitWillSetRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
+  traitWillSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
 
-  dataPointTraitDidSetRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
+  traitDidSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
 
-  dataPointTraitWillSetColor?(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null, trait: R): void;
+  traitWillSetDataPointColor?(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null, trait: R): void;
 
-  dataPointTraitDidSetColor?(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null, trait: R): void;
+  traitDidSetDataPointColor?(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null, trait: R): void;
 
-  dataPointTraitWillSetLabel?(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null, trait: R): void;
+  traitWillSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, trait: R): void;
 
-  dataPointTraitDidSetLabel?(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null, trait: R): void;
+  traitDidSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, trait: R): void;
+
+  traitWillSetDataPointLabel?(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null, trait: R): void;
+
+  traitDidSetDataPointLabel?(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null, trait: R): void;
 }

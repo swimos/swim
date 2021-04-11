@@ -17,15 +17,15 @@ import type {GraphicsViewObserver} from "@swim/graphics";
 import type {ScaledXView} from "./ScaledXView";
 
 export interface ScaledXViewObserver<X, V extends ScaledXView<X> = ScaledXView<X>> extends GraphicsViewObserver<V> {
-  scaledViewWillSetXScale?(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null, view: V): void;
+  viewWillSetXScale?(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null, view: V): void;
 
-  scaledViewDidSetXScale?(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null, view: V): void;
+  viewDidSetXScale?(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null, view: V): void;
 
-  scaledViewWillSetXRangePadding?(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number], view: V): void;
+  viewWillSetXRangePadding?(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number], view: V): void;
 
-  scaledViewDidSetXRangePadding?(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number], view: V): void;
+  viewDidSetXRangePadding?(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number], view: V): void;
 
-  scaledViewWillSetXDataDomain?(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null, view: V): void;
+  viewWillSetXDataDomain?(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null, view: V): void;
 
-  scaledViewDidSetXDataDomain?(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null, view: V): void;
+  viewDidSetXDataDomain?(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null, view: V): void;
 }

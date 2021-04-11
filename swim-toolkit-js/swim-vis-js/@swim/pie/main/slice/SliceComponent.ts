@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {AnyTiming, Timing} from "@swim/mapping";
+import {Model} from "@swim/model";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {View} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
@@ -24,32 +25,6 @@ import type {SliceComponentObserver} from "./SliceComponentObserver";
 export class SliceComponent extends CompositeComponent {
   declare readonly componentObservers: ReadonlyArray<SliceComponentObserver>;
 
-  get value(): number | undefined {
-    const sliceTrait = this.slice.trait;
-    return sliceTrait !== null ? sliceTrait.value : void 0;
-  }
-
-  setValue(value: number): void {
-    const sliceTrait = this.slice.trait;
-    if (sliceTrait !== null) {
-      sliceTrait.setValue(value);
-    }
-  }
-
-  setLabel(label: SliceLabel | null): void {
-    const sliceTrait = this.slice.trait;
-    if (sliceTrait !== null) {
-      sliceTrait.setLabel(label);
-    }
-  }
-
-  setLegend(label: SliceLegend | null): void {
-    const sliceTrait = this.slice.trait;
-    if (sliceTrait !== null) {
-      sliceTrait.setLegend(label);
-    }
-  }
-
   protected initSliceTrait(sliceTrait: SliceTrait): void {
     // hook
   }
@@ -57,9 +32,9 @@ export class SliceComponent extends CompositeComponent {
   protected attachSliceTrait(sliceTrait: SliceTrait): void {
     const sliceView = this.slice.view;
     if (sliceView !== null) {
-      this.setSliceViewValue(sliceTrait.value, sliceTrait);
-      this.setSliceLabelView(sliceTrait.label, sliceTrait);
-      this.setSliceLegendView(sliceTrait.legend, sliceTrait);
+      this.setValue(sliceTrait.value.state, sliceTrait);
+      this.setLabelView(sliceTrait.label.state, sliceTrait);
+      this.setLegendView(sliceTrait.legend.state, sliceTrait);
     }
   }
 
@@ -71,8 +46,8 @@ export class SliceComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.sliceWillSetTrait !== void 0) {
-        componentObserver.sliceWillSetTrait(newSliceTrait, oldSliceTrait, this);
+      if (componentObserver.componentWillSetSliceTrait !== void 0) {
+        componentObserver.componentWillSetSliceTrait(newSliceTrait, oldSliceTrait, this);
       }
     }
   }
@@ -91,36 +66,28 @@ export class SliceComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.sliceDidSetTrait !== void 0) {
-        componentObserver.sliceDidSetTrait(newSliceTrait, oldSliceTrait, this);
+      if (componentObserver.componentDidSetSliceTrait !== void 0) {
+        componentObserver.componentDidSetSliceTrait(newSliceTrait, oldSliceTrait, this);
       }
     }
   }
 
-  protected onSetSliceTraitValue(newValue: number, oldValue: number, sliceTrait: SliceTrait): void {
-    this.setSliceViewValue(newValue, sliceTrait);
-  }
-
-  protected updateSliceTraitLabel(value: number, sliceTrait: SliceTrait): void {
-    const label = sliceTrait.formatLabel(value);
-    if (label !== void 0) {
-      sliceTrait.setLabel(label);
+  protected updateLabel(value: number, sliceTrait: SliceTrait): void {
+    if (sliceTrait.label.takesPrecedence(Model.Intrinsic)) {
+      const label = sliceTrait.formatLabel(value);
+      if (label !== void 0) {
+        sliceTrait.label.setState(label, Model.Intrinsic);
+      }
     }
   }
 
-  protected onSetSliceTraitLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, sliceTrait: SliceTrait): void {
-    this.setSliceLabelView(newLabel, sliceTrait);
-  }
-
-  protected updateSliceTraitLegend(value: number, sliceTrait: SliceTrait): void {
-    const legend = sliceTrait.formatLegend(value);
-    if (legend !== void 0) {
-      sliceTrait.setLegend(legend);
+  protected updateLegend(value: number, sliceTrait: SliceTrait): void {
+    if (sliceTrait.legend.takesPrecedence(Model.Intrinsic)) {
+      const legend = sliceTrait.formatLegend(value);
+      if (legend !== void 0) {
+        sliceTrait.legend.setState(legend, Model.Intrinsic);
+      }
     }
-  }
-
-  protected onSetSliceTraitLegend(newLegend: SliceLabel | null, oldLegend: SliceLabel | null, sliceTrait: SliceTrait): void {
-    this.setSliceLegendView(newLegend, sliceTrait);
   }
 
   protected createSliceView(): SliceView {
@@ -132,16 +99,12 @@ export class SliceComponent extends CompositeComponent {
     sliceView.setHidden(value === 0);
     const sliceTrait = this.slice.trait;
     if (sliceTrait !== null) {
-      this.updateSliceTraitLabel(value, sliceTrait);
-      this.updateSliceTraitLegend(value, sliceTrait);
-      this.setSliceViewValue(sliceTrait.value, sliceTrait);
-      this.setSliceLabelView(sliceTrait.label, sliceTrait);
-      this.setSliceLegendView(sliceTrait.legend, sliceTrait);
+      this.updateLabel(value, sliceTrait);
+      this.updateLegend(value, sliceTrait);
+      this.setValue(sliceTrait.value.state, sliceTrait);
+      this.setLabelView(sliceTrait.label.state, sliceTrait);
+      this.setLegendView(sliceTrait.legend.state, sliceTrait);
     }
-  }
-
-  protected themeSliceView(sliceView: SliceView, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
-    // hook
   }
 
   protected attachSliceView(sliceView: SliceView): void {
@@ -158,8 +121,8 @@ export class SliceComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.sliceWillSetView !== void 0) {
-        componentObserver.sliceWillSetView(newSliceView, oldSliceView, this);
+      if (componentObserver.componentWillSetSliceView !== void 0) {
+        componentObserver.componentWillSetSliceView(newSliceView, oldSliceView, this);
       }
     }
   }
@@ -178,15 +141,19 @@ export class SliceComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.sliceDidSetView !== void 0) {
-        componentObserver.sliceDidSetView(newSliceView, oldSliceView, this);
+      if (componentObserver.componentDidSetSliceView !== void 0) {
+        componentObserver.componentDidSetSliceView(newSliceView, oldSliceView, this);
       }
     }
   }
 
-  protected setSliceViewValue(value: number, sliceTrait: SliceTrait, timing?: AnyTiming | boolean): void {
+  protected themeSliceView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, sliceView: SliceView): void {
+    // hook
+  }
+
+  protected setValue(value: number, sliceTrait: SliceTrait, timing?: AnyTiming | boolean): void {
     const sliceView = this.slice.view;
-    if (sliceView !== null && sliceView.value.isPrecedent(View.Intrinsic)) {
+    if (sliceView !== null && sliceView.value.takesPrecedence(View.Intrinsic)) {
       if (timing === void 0 || timing === true) {
         timing = this.sliceTiming.state;
         if (timing === true) {
@@ -199,36 +166,36 @@ export class SliceComponent extends CompositeComponent {
     }
   }
 
-  protected willSetSliceViewValue(newValue: number, oldValue: number, sliceView: SliceView): void {
+  protected willSetValue(newValue: number, oldValue: number, sliceView: SliceView): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.sliceWillSetViewValue !== void 0) {
-        componentObserver.sliceWillSetViewValue(newValue, oldValue, this);
+      if (componentObserver.componentWillSetSliceValue !== void 0) {
+        componentObserver.componentWillSetSliceValue(newValue, oldValue, this);
       }
     }
   }
 
-  protected onSetSliceViewValue(newValue: number, oldValue: number, sliceView: SliceView): void {
+  protected onSetValue(newValue: number, oldValue: number, sliceView: SliceView): void {
     sliceView.setHidden(newValue === 0);
     const sliceTrait = this.slice.trait;
     if (sliceTrait !== null) {
-      this.updateSliceTraitLabel(newValue, sliceTrait);
-      this.updateSliceTraitLegend(newValue, sliceTrait);
+      this.updateLabel(newValue, sliceTrait);
+      this.updateLegend(newValue, sliceTrait);
     }
   }
 
-  protected didSetSliceViewValue(newValue: number, oldValue: number, sliceView: SliceView): void {
+  protected didSetValue(newValue: number, oldValue: number, sliceView: SliceView): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.sliceDidSetViewValue !== void 0) {
-        componentObserver.sliceDidSetViewValue(newValue, oldValue, this);
+      if (componentObserver.componentDidSetSliceValue !== void 0) {
+        componentObserver.componentDidSetSliceValue(newValue, oldValue, this);
       }
     }
   }
 
-  protected createSliceLabelView(label: SliceLabel, sliceTrait: SliceTrait): GraphicsView | string | null {
+  protected createLabelView(label: SliceLabel, sliceTrait: SliceTrait): GraphicsView | string | null {
     if (typeof label === "function") {
       return label(sliceTrait);
     } else {
@@ -236,57 +203,57 @@ export class SliceComponent extends CompositeComponent {
     }
   }
 
-  protected setSliceLabelView(label: SliceLabel | null, sliceTrait: SliceTrait): void {
+  protected setLabelView(label: SliceLabel | null, sliceTrait: SliceTrait): void {
     const sliceView = this.slice.view;
     if (sliceView !== null) {
-      const labelView = label !== null ? this.createSliceLabelView(label, sliceTrait) : null;
+      const labelView = label !== null ? this.createLabelView(label, sliceTrait) : null;
       sliceView.label.setView(labelView);
     }
   }
 
-  protected initSliceLabelView(labelView: GraphicsView): void {
+  protected initLabelView(labelView: GraphicsView): void {
     // hook
   }
 
-  protected attachSliceLabelView(labelView: GraphicsView): void {
+  protected attachLabelView(labelView: GraphicsView): void {
     // hook
   }
 
-  protected detachSliceLabelView(labelView: GraphicsView): void {
+  protected detachLabelView(labelView: GraphicsView): void {
     // hook
   }
 
-  protected willSetSliceLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+  protected willSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.sliceWillSetLabelView !== void 0) {
-        componentObserver.sliceWillSetLabelView(newLabelView, oldLabelView, this);
+      if (componentObserver.componentWillSetSliceLabelView !== void 0) {
+        componentObserver.componentWillSetSliceLabelView(newLabelView, oldLabelView, this);
       }
     }
   }
 
-  protected onSetSliceLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+  protected onSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     if (oldLabelView !== null) {
-      this.detachSliceLabelView(oldLabelView);
+      this.detachLabelView(oldLabelView);
     }
     if (newLabelView !== null) {
-      this.attachSliceLabelView(newLabelView);
-      this.initSliceLabelView(newLabelView);
+      this.attachLabelView(newLabelView);
+      this.initLabelView(newLabelView);
     }
   }
 
-  protected didSetSliceLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+  protected didSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.sliceDidSetLabelView !== void 0) {
-        componentObserver.sliceDidSetLabelView(newLabelView, oldLabelView, this);
+      if (componentObserver.componentDidSetSliceLabelView !== void 0) {
+        componentObserver.componentDidSetSliceLabelView(newLabelView, oldLabelView, this);
       }
     }
   }
 
-  protected createSliceLegendView(legend: SliceLegend, sliceTrait: SliceTrait): GraphicsView | string | null {
+  protected createLegendView(legend: SliceLegend, sliceTrait: SliceTrait): GraphicsView | string | null {
     if (typeof legend === "function") {
       return legend(sliceTrait);
     } else {
@@ -294,52 +261,52 @@ export class SliceComponent extends CompositeComponent {
     }
   }
 
-  protected setSliceLegendView(legend: SliceLegend | null, sliceTrait: SliceTrait): void {
+  protected setLegendView(legend: SliceLegend | null, sliceTrait: SliceTrait): void {
     const sliceView = this.slice.view;
     if (sliceView !== null) {
-      const legendView = legend !== null ? this.createSliceLegendView(legend, sliceTrait) : null;
+      const legendView = legend !== null ? this.createLegendView(legend, sliceTrait) : null;
       sliceView.legend.setView(legendView);
     }
   }
 
-  protected initSliceLegendView(legendView: GraphicsView): void {
+  protected initLegendView(legendView: GraphicsView): void {
     // hook
   }
 
-  protected attachSliceLegendView(legendView: GraphicsView): void {
+  protected attachLegendView(legendView: GraphicsView): void {
     // hook
   }
 
-  protected detachSliceLegendView(legendView: GraphicsView): void {
+  protected detachLegendView(legendView: GraphicsView): void {
     // hook
   }
 
-  protected willSetSliceLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+  protected willSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.sliceWillSetLegendView !== void 0) {
-        componentObserver.sliceWillSetLegendView(newLegendView, oldLegendView, this);
+      if (componentObserver.componentWillSetSliceLegendView !== void 0) {
+        componentObserver.componentWillSetSliceLegendView(newLegendView, oldLegendView, this);
       }
     }
   }
 
-  protected onSetSliceLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+  protected onSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
     if (oldLegendView !== null) {
-      this.detachSliceLegendView(oldLegendView);
+      this.detachLegendView(oldLegendView);
     }
     if (newLegendView !== null) {
-      this.attachSliceLegendView(newLegendView);
-      this.initSliceLegendView(newLegendView);
+      this.attachLegendView(newLegendView);
+      this.initLegendView(newLegendView);
     }
   }
 
-  protected didSetSliceLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+  protected didSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.sliceDidSetLegendView !== void 0) {
-        componentObserver.sliceDidSetLegendView(newLegendView, oldLegendView, this);
+      if (componentObserver.componentDidSetSliceLegendView !== void 0) {
+        componentObserver.componentDidSetSliceLegendView(newLegendView, oldLegendView, this);
       }
     }
   }
@@ -361,19 +328,19 @@ export class SliceComponent extends CompositeComponent {
       this.owner.didSetSliceView(newSliceView, oldSliceView);
     },
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, sliceView: SliceView): void {
-      this.owner.themeSliceView(sliceView, theme, mood, timing);
+      this.owner.themeSliceView(theme, mood, timing, sliceView);
     },
-    sliceViewWillSetValue(newValue: number, oldValue: number, sliceView: SliceView): void {
-      this.owner.willSetSliceViewValue(newValue, oldValue, sliceView);
+    viewWillSetSliceValue(newValue: number, oldValue: number, sliceView: SliceView): void {
+      this.owner.willSetValue(newValue, oldValue, sliceView);
     },
-    sliceViewDidSetValue(newValue: number, oldValue: number, sliceView: SliceView): void {
-      this.owner.onSetSliceViewValue(newValue, oldValue, sliceView);
-      this.owner.didSetSliceViewValue(newValue, oldValue, sliceView);
+    viewDidSetSliceValue(newValue: number, oldValue: number, sliceView: SliceView): void {
+      this.owner.onSetValue(newValue, oldValue, sliceView);
+      this.owner.didSetValue(newValue, oldValue, sliceView);
     },
-    sliceViewDidSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    viewDidSetSliceLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
       this.owner.label.setView(newLabelView);
     },
-    sliceViewDidSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+    viewDidSetSliceLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
       this.owner.legend.setView(newLegendView);
     },
     createView(): SliceView | null {
@@ -390,14 +357,14 @@ export class SliceComponent extends CompositeComponent {
     didSetTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null): void {
       this.owner.didSetSliceTrait(newSliceTrait, oldSliceTrait);
     },
-    sliceTraitDidSetValue(newValue: number, oldValue: number, sliceTrait: SliceTrait): void {
-      this.owner.onSetSliceTraitValue(newValue, oldValue, sliceTrait);
+    traitDidSetSliceValue(newValue: number, oldValue: number, sliceTrait: SliceTrait): void {
+      this.owner.setValue(newValue, sliceTrait);
     },
-    sliceTraitDidSetLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, sliceTrait: SliceTrait): void {
-      this.owner.onSetSliceTraitLabel(newLabel, oldLabel, sliceTrait);
+    traitDidSetSliceLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, sliceTrait: SliceTrait): void {
+      this.owner.setLabelView(newLabel, sliceTrait);
     },
-    sliceTraitDidSetLegend(newLegend: SliceLegend | null, oldLegend: SliceLegend | null, sliceTrait: SliceTrait): void {
-      this.owner.onSetSliceTraitLegend(newLegend, oldLegend, sliceTrait);
+    traitDidSetSliceLegend(newLegend: SliceLegend | null, oldLegend: SliceLegend | null, sliceTrait: SliceTrait): void {
+      this.owner.setLegendView(newLegend, sliceTrait);
     },
   });
 
@@ -409,13 +376,13 @@ export class SliceComponent extends CompositeComponent {
   @ComponentView<SliceComponent, GraphicsView>({
     key: true,
     willSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.willSetSliceLabelView(newLabelView, oldLabelView);
+      this.owner.willSetLabelView(newLabelView, oldLabelView);
     },
     onSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.onSetSliceLabelView(newLabelView, oldLabelView);
+      this.owner.onSetLabelView(newLabelView, oldLabelView);
     },
     didSetView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-      this.owner.didSetSliceLabelView(newLabelView, oldLabelView);
+      this.owner.didSetLabelView(newLabelView, oldLabelView);
     },
   })
   declare label: ComponentView<this, GraphicsView>;
@@ -423,13 +390,13 @@ export class SliceComponent extends CompositeComponent {
   @ComponentView<SliceComponent, GraphicsView>({
     key: true,
     willSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.willSetSliceLegendView(newLegendView, oldLegendView);
+      this.owner.willSetLegendView(newLegendView, oldLegendView);
     },
     onSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.onSetSliceLegendView(newLegendView, oldLegendView);
+      this.owner.onSetLegendView(newLegendView, oldLegendView);
     },
     didSetView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-      this.owner.didSetSliceLegendView(newLegendView, oldLegendView);
+      this.owner.didSetLegendView(newLegendView, oldLegendView);
     },
   })
   declare legend: ComponentView<this, GraphicsView>;

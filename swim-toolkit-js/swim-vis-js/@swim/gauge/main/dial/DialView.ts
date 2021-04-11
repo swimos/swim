@@ -138,14 +138,14 @@ export class DialView extends LayerView {
 
   protected willSetValue(newValue: number, oldValue: number): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dialViewWillSetValue !== void 0) {
-      viewController.dialViewWillSetValue(newValue, oldValue, this);
+    if (viewController !== null && viewController.viewWillSetDialValue !== void 0) {
+      viewController.viewWillSetDialValue(newValue, oldValue, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dialViewWillSetValue !== void 0) {
-        viewObserver.dialViewWillSetValue(newValue, oldValue, this);
+      if (viewObserver.viewWillSetDialValue !== void 0) {
+        viewObserver.viewWillSetDialValue(newValue, oldValue, this);
       }
     }
   }
@@ -158,13 +158,13 @@ export class DialView extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dialViewDidSetValue !== void 0) {
-        viewObserver.dialViewDidSetValue(newValue, oldValue, this);
+      if (viewObserver.viewDidSetDialValue !== void 0) {
+        viewObserver.viewDidSetDialValue(newValue, oldValue, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dialViewDidSetValue !== void 0) {
-      viewController.dialViewDidSetValue(newValue, oldValue, this);
+    if (viewController !== null && viewController.viewDidSetDialValue !== void 0) {
+      viewController.viewDidSetDialValue(newValue, oldValue, this);
     }
   }
 
@@ -183,14 +183,14 @@ export class DialView extends LayerView {
 
   protected willSetLimit(newLimit: number, oldLimit: number): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dialViewWillSetLimit !== void 0) {
-      viewController.dialViewWillSetLimit(newLimit, oldLimit, this);
+    if (viewController !== null && viewController.viewWillSetDialLimit !== void 0) {
+      viewController.viewWillSetDialLimit(newLimit, oldLimit, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dialViewWillSetLimit !== void 0) {
-        viewObserver.dialViewWillSetLimit(newLimit, oldLimit, this);
+      if (viewObserver.viewWillSetDialLimit !== void 0) {
+        viewObserver.viewWillSetDialLimit(newLimit, oldLimit, this);
       }
     }
   }
@@ -203,13 +203,13 @@ export class DialView extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dialViewDidSetLimit !== void 0) {
-        viewObserver.dialViewDidSetLimit(newLimit, oldLimit, this);
+      if (viewObserver.viewDidSetDialLimit !== void 0) {
+        viewObserver.viewDidSetDialLimit(newLimit, oldLimit, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dialViewDidSetLimit !== void 0) {
-      viewController.dialViewDidSetLimit(newLimit, oldLimit, this);
+    if (viewController !== null && viewController.viewDidSetDialLimit !== void 0) {
+      viewController.viewDidSetDialLimit(newLimit, oldLimit, this);
     }
   }
 
@@ -291,14 +291,14 @@ export class DialView extends LayerView {
 
   protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dialViewWillSetLabel !== void 0) {
-      viewController.dialViewWillSetLabel(newLabelView, oldLabelView, this);
+    if (viewController !== null && viewController.viewWillSetDialLabel !== void 0) {
+      viewController.viewWillSetDialLabel(newLabelView, oldLabelView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dialViewWillSetLabel !== void 0) {
-        viewObserver.dialViewWillSetLabel(newLabelView, oldLabelView, this);
+      if (viewObserver.viewWillSetDialLabel !== void 0) {
+        viewObserver.viewWillSetDialLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -317,13 +317,13 @@ export class DialView extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dialViewDidSetLabel !== void 0) {
-        viewObserver.dialViewDidSetLabel(newLabelView, oldLabelView, this);
+      if (viewObserver.viewDidSetDialLabel !== void 0) {
+        viewObserver.viewDidSetDialLabel(newLabelView, oldLabelView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dialViewDidSetLabel !== void 0) {
-      viewController.dialViewDidSetLabel(newLabelView, oldLabelView, this);
+    if (viewController !== null && viewController.viewDidSetDialLabel !== void 0) {
+      viewController.viewDidSetDialLabel(newLabelView, oldLabelView, this);
     }
   }
 
@@ -366,14 +366,14 @@ export class DialView extends LayerView {
 
   protected willSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dialViewWillSetLegend !== void 0) {
-      viewController.dialViewWillSetLegend(newLegendView, oldLegendView, this);
+    if (viewController !== null && viewController.viewWillSetDialLegend !== void 0) {
+      viewController.viewWillSetDialLegend(newLegendView, oldLegendView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dialViewWillSetLegend !== void 0) {
-        viewObserver.dialViewWillSetLegend(newLegendView, oldLegendView, this);
+      if (viewObserver.viewWillSetDialLegend !== void 0) {
+        viewObserver.viewWillSetDialLegend(newLegendView, oldLegendView, this);
       }
     }
   }
@@ -392,13 +392,13 @@ export class DialView extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.dialViewDidSetLegend !== void 0) {
-        viewObserver.dialViewDidSetLegend(newLegendView, oldLegendView, this);
+      if (viewObserver.viewDidSetDialLegend !== void 0) {
+        viewObserver.viewDidSetDialLegend(newLegendView, oldLegendView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.dialViewDidSetLegend !== void 0) {
-      viewController.dialViewDidSetLegend(newLegendView, oldLegendView, this);
+    if (viewController !== null && viewController.viewDidSetDialLegend !== void 0) {
+      viewController.viewDidSetDialLegend(newLegendView, oldLegendView, this);
     }
   }
 

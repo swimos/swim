@@ -18,11 +18,11 @@ import type {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {SeriesPlotComponent} from "./SeriesPlotComponent";
 
 export interface SeriesPlotComponentObserver<X, Y, C extends SeriesPlotComponent<X, Y> = SeriesPlotComponent<X, Y>> extends PlotComponentObserver<X, Y, C> {
-  plotWillSetTrait?(newPlotTrait: SeriesPlotTrait<X, Y> | null, oldPlotTrait: SeriesPlotTrait<X, Y> | null, component: C): void;
+  componentWillSetPlotTrait?(newPlotTrait: SeriesPlotTrait<X, Y> | null, oldPlotTrait: SeriesPlotTrait<X, Y> | null, component: C): void;
 
-  plotDidSetTrait?(newPlotTrait: SeriesPlotTrait<X, Y> | null, oldPlotTrait: SeriesPlotTrait<X, Y> | null, component: C): void;
+  componentDidSetPlotTrait?(newPlotTrait: SeriesPlotTrait<X, Y> | null, oldPlotTrait: SeriesPlotTrait<X, Y> | null, component: C): void;
 
-  plotWillSetView?(newPlotView: SeriesPlotView<X, Y> | null, oldPlotView: SeriesPlotView<X, Y> | null, component: C): void;
+  componentWillSetPlotView?(newPlotView: SeriesPlotView<X, Y> | null, oldPlotView: SeriesPlotView<X, Y> | null, component: C): void;
 
-  plotDidSetView?(newPlotView: SeriesPlotView<X, Y> | null, oldPlotView: SeriesPlotView<X, Y> | null, component: C): void;
+  componentDidSetPlotView?(newPlotView: SeriesPlotView<X, Y> | null, oldPlotView: SeriesPlotView<X, Y> | null, component: C): void;
 }

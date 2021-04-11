@@ -19,15 +19,15 @@ import type {RowTrait} from "../row/RowTrait";
 import type {TableTrait} from "./TableTrait";
 
 export interface TableTraitObserver<R extends TableTrait = TableTrait> extends TraitObserver<R> {
-  tableTraitWillSetLayout?(newLayout: TableLayout | null, oldLayout: TableLayout | null, trait: R): void;
+  traitWillSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, trait: R): void;
 
-  tableTraitDidSetLayout?(newLayout: TableLayout | null, oldLayout: TableLayout | null, trait: R): void;
+  traitDidSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, trait: R): void;
 
-  tableTraitWillSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
 
-  tableTraitDidSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
 
-  tableTraitWillSetRow?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitWillSetRow?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, targetTrait: Trait | null, trait: R): void;
 
-  tableTraitDidSetRow?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, targetTrait: Trait | null, trait: R): void;
+  traitDidSetRow?(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null, targetTrait: Trait | null, trait: R): void;
 }

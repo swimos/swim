@@ -17,6 +17,7 @@ export {Mood} from "./Mood";
 export {
   AnyMoodVector,
   MoodVectorArray,
+  MoodVectorUpdates,
   MoodVector,
 } from "./MoodVector";
 

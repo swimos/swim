@@ -17,6 +17,7 @@ export {Feel} from "./Feel";
 export {
   AnyFeelVector,
   FeelVectorArray,
+  FeelVectorUpdates,
   FeelVector,
 } from "./FeelVector";
 export {FeelVectorInterpolator} from "./FeelVectorInterpolator";

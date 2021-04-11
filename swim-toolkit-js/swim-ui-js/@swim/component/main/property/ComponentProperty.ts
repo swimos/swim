@@ -120,7 +120,7 @@ export interface ComponentProperty<C extends Component, T, U = never> {
 
   didSetState(newState: T, oldState: T): void;
 
-  isPrecedent(precedence: ComponentPrecedence): boolean;
+  takesPrecedence(precedence: ComponentPrecedence): boolean;
 
   readonly precedence: ComponentPrecedence;
 
@@ -328,30 +328,25 @@ Object.defineProperty(ComponentProperty.prototype, "superName", {
 ComponentProperty.prototype.bindSuperProperty = function (this: ComponentProperty<Component, unknown>): void {
   const superName = this.superName;
   if (superName !== void 0 && this.isMounted()) {
-    let component = this.owner;
-    do {
-      const parentComponent = component.parentComponent;
-      if (parentComponent !== null) {
-        component = parentComponent;
-        const superProperty = component.getLazyComponentProperty(superName);
-        if (superProperty !== null) {
-          Object.defineProperty(this, "superProperty", {
-            value: superProperty,
-            enumerable: true,
-            configurable: true,
-          });
-          superProperty.addSubProperty(this);
-          if ((this.propertyFlags & ComponentProperty.OverrideFlag) === 0 && superProperty.precedence >= this.precedence) {
-            this.setPropertyFlags(this.propertyFlags | ComponentProperty.InheritedFlag);
-            this.setOwnState(superProperty.state);
-            this.revise();
-          }
-        } else {
-          continue;
+    let superComponent = this.owner.parentComponent;
+    while (superComponent !== null) {
+      const superProperty = superComponent.getLazyComponentProperty(superName);
+      if (superProperty !== null) {
+        Object.defineProperty(this, "superProperty", {
+          value: superProperty,
+          enumerable: true,
+          configurable: true,
+        });
+        superProperty.addSubProperty(this);
+        if ((this.propertyFlags & ComponentProperty.OverrideFlag) === 0 && superProperty.precedence >= this.precedence) {
+          this.setPropertyFlags(this.propertyFlags | ComponentProperty.InheritedFlag);
+          this.setOwnState(superProperty.state);
+          this.revise();
         }
+        break;
       }
-      break;
-    } while (true);
+      superComponent = superComponent.parentComponent;
+    }
   }
 };
 
@@ -467,7 +462,7 @@ ComponentProperty.prototype.didSetState = function <T>(this: ComponentProperty<C
   // hook
 };
 
-ComponentProperty.prototype.isPrecedent = function (this: ComponentProperty<Component, unknown>, precedence: ComponentPrecedence): boolean {
+ComponentProperty.prototype.takesPrecedence = function (this: ComponentProperty<Component, unknown>, precedence: ComponentPrecedence): boolean {
   return precedence >= this.precedence;
 };
 

@@ -978,5 +978,6 @@ export abstract class GenericModel extends Model {
 ModelProperty({
   type: Object,
   inherit: true,
+  state: null,
   updateFlags: Model.NeedsReconcile,
 })(Model.prototype, "warpRef");

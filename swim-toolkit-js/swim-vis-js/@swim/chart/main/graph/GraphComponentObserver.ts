@@ -26,43 +26,43 @@ import type {GraphTrait} from "./GraphTrait";
 import type {GraphComponent} from "./GraphComponent";
 
 export interface GraphComponentObserver<X, Y, C extends GraphComponent<X, Y> = GraphComponent<X, Y>> extends ComponentObserver<C> {
-  graphWillSetTrait?(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, component: C): void;
+  componentWillSetGraphTrait?(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, component: C): void;
 
-  graphDidSetTrait?(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, component: C): void;
+  componentDidSetGraphTrait?(newGraphTrait: GraphTrait<X, Y> | null, oldGraphTrait: GraphTrait<X, Y> | null, component: C): void;
 
-  graphWillSetView?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, component: C): void;
+  componentWillSetGraphView?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, component: C): void;
 
-  graphDidSetView?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, component: C): void;
+  componentDidSetGraphView?(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null, component: C): void;
 
-  graphWillSetPlot?(newPlotComponent: PlotComponent<X, Y> | null, oldPlotComponent: PlotComponent<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentWillSetPlot?(newPlotComponent: PlotComponent<X, Y> | null, oldPlotComponent: PlotComponent<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphDidSetPlot?(newPlotComponent: PlotComponent<X, Y> | null, oldPlotComponent: PlotComponent<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentDidSetPlot?(newPlotComponent: PlotComponent<X, Y> | null, oldPlotComponent: PlotComponent<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphWillSetPlotTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentWillSetPlotTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphDidSetPlotTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentDidSetPlotTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphWillSetPlotView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentWillSetPlotView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphDidSetPlotView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentDidSetPlotView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphWillSetDataSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentWillSetDataSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphDidSetDataSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentDidSetDataSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphWillSetDataPoint?(newDataPointComponent: DataPointComponent<X, Y> | null, oldDataPointComponent: DataPointComponent<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentWillSetDataPoint?(newDataPointComponent: DataPointComponent<X, Y> | null, oldDataPointComponent: DataPointComponent<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphDidSetDataPoint?(newDataPointComponent: DataPointComponent<X, Y> | null, oldDataPointComponent: DataPointComponent<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentDidSetDataPoint?(newDataPointComponent: DataPointComponent<X, Y> | null, oldDataPointComponent: DataPointComponent<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphWillSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentWillSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphDidSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentDidSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphWillSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentWillSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphDidSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentDidSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphWillSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentWillSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 
-  graphDidSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
+  componentDidSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ComponentFastener<PlotComponent<X, Y>, DataPointComponent<X, Y>>, plotFastener: ComponentFastener<C, PlotComponent<X, Y>>): void;
 }

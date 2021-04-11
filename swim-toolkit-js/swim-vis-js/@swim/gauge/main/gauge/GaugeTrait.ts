@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
-import {Model, TraitModelType, Trait, TraitFastener, GenericTrait} from "@swim/model";
+import {Model, TraitModelType, Trait, TraitProperty, TraitFastener, GenericTrait} from "@swim/model";
 import type {GraphicsView} from "@swim/graphics";
 import {DialTrait} from "../dial/DialTrait";
 import type {GaugeTraitObserver} from "./GaugeTraitObserver";
@@ -24,11 +23,6 @@ export type GaugeTitleFunction = (gaugeTrait: GaugeTrait) => GraphicsView | stri
 export class GaugeTrait extends GenericTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "title", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
     Object.defineProperty(this, "dialFasteners", {
       value: [],
       enumerable: true,
@@ -37,28 +31,12 @@ export class GaugeTrait extends GenericTrait {
 
   declare readonly traitObservers: ReadonlyArray<GaugeTraitObserver>;
 
-  declare readonly title: GaugeTitle | null;
-
-  setTitle(newTitle: GaugeTitle | null): void {
-    const oldTitle = this.title;
-    if (!Equals(newTitle, oldTitle)) {
-      this.willSetTitle(newTitle, oldTitle);
-      Object.defineProperty(this, "title", {
-        value: newTitle,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetTitle(newTitle, oldTitle);
-      this.didSetTitle(newTitle, oldTitle);
-    }
-  }
-
   protected willSetTitle(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.gaugeTraitWillSetTitle !== void 0) {
-        traitObserver.gaugeTraitWillSetTitle(newTitle, oldTitle, this);
+      if (traitObserver.traitWillSetGaugeTitle !== void 0) {
+        traitObserver.traitWillSetGaugeTitle(newTitle, oldTitle, this);
       }
     }
   }
@@ -71,11 +49,23 @@ export class GaugeTrait extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.gaugeTraitDidSetTitle !== void 0) {
-        traitObserver.gaugeTraitDidSetTitle(newTitle, oldTitle, this);
+      if (traitObserver.traitDidSetGaugeTitle !== void 0) {
+        traitObserver.traitDidSetGaugeTitle(newTitle, oldTitle, this);
       }
     }
   }
+
+  @TraitProperty<GaugeTrait, GaugeTitle | null>({
+    state: null,
+    willSetState(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null): void {
+      this.owner.willSetTitle(newTitle, oldTitle);
+    },
+    didSetState(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null): void {
+      this.owner.onSetTitle(newTitle, oldTitle);
+      this.owner.didSetTitle(newTitle, oldTitle);
+    },
+  })
+  declare title: TraitProperty<this, GaugeTitle | null>;
 
   insertDial(dialTrait: DialTrait, targetTrait: Trait | null = null): void {
     const dialFasteners = this.dialFasteners as TraitFastener<this, DialTrait>[];
@@ -132,8 +122,8 @@ export class GaugeTrait extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.gaugeTraitWillSetDial !== void 0) {
-        traitObserver.gaugeTraitWillSetDial(newDialTrait, oldDialTrait, targetTrait, this);
+      if (traitObserver.traitWillSetDial !== void 0) {
+        traitObserver.traitWillSetDial(newDialTrait, oldDialTrait, targetTrait, this);
       }
     }
   }
@@ -154,8 +144,8 @@ export class GaugeTrait extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.gaugeTraitDidSetDial !== void 0) {
-        traitObserver.gaugeTraitDidSetDial(newDialTrait, oldDialTrait, targetTrait, this);
+      if (traitObserver.traitDidSetDial !== void 0) {
+        traitObserver.traitDidSetDial(newDialTrait, oldDialTrait, targetTrait, this);
       }
     }
   }

@@ -14,26 +14,25 @@
 
 import type {Length} from "@swim/math";
 import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
 import type {BubblePlotView} from "./BubblePlotView";
 import type {BubblePlotTrait} from "./BubblePlotTrait";
 import type {ScatterPlotComponentObserver} from "./ScatterPlotComponentObserver";
 import type {BubblePlotComponent} from "./BubblePlotComponent";
 
 export interface BubblePlotComponentObserver<X, Y, C extends BubblePlotComponent<X, Y> = BubblePlotComponent<X, Y>> extends ScatterPlotComponentObserver<X, Y, C> {
-  plotWillSetTrait?(newPlotTrait: BubblePlotTrait<X, Y> | null, oldPlotTrait: BubblePlotTrait<X, Y> | null, component: C): void;
+  componentWillSetPlotTrait?(newPlotTrait: BubblePlotTrait<X, Y> | null, oldPlotTrait: BubblePlotTrait<X, Y> | null, component: C): void;
 
-  plotDidSetTrait?(newPlotTrait: BubblePlotTrait<X, Y> | null, oldPlotTrait: BubblePlotTrait<X, Y> | null, component: C): void;
+  componentDidSetPlotTrait?(newPlotTrait: BubblePlotTrait<X, Y> | null, oldPlotTrait: BubblePlotTrait<X, Y> | null, component: C): void;
 
-  plotWillSetView?(newPlotView: BubblePlotView<X, Y> | null, oldPlotView: BubblePlotView<X, Y> | null, component: C): void;
+  componentWillSetPlotView?(newPlotView: BubblePlotView<X, Y> | null, oldPlotView: BubblePlotView<X, Y> | null, component: C): void;
 
-  plotDidSetView?(newPlotView: BubblePlotView<X, Y> | null, oldPlotView: BubblePlotView<X, Y> | null, component: C): void;
+  componentDidSetPlotView?(newPlotView: BubblePlotView<X, Y> | null, oldPlotView: BubblePlotView<X, Y> | null, component: C): void;
 
-  bubblePlotWillSetRadius?(newRadius: Length | null, oldRadius: Length | null, component: C): void;
+  componentWillSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, component: C): void;
 
-  bubblePlotDidSetRadius?(newRadius: Length | null, oldRadius: Length | null, component: C): void;
+  componentDidSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, component: C): void;
 
-  bubblePlotWillSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, component: C): void;
+  componentWillSetPlotFill?(newFill: Color | null, oldFill: Color | null, component: C): void;
 
-  bubblePlotDidSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, component: C): void;
+  componentDidSetPlotFill?(newFill: Color | null, oldFill: Color | null, component: C): void;
 }

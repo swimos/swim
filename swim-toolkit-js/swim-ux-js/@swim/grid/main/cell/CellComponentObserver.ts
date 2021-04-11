@@ -19,15 +19,15 @@ import type {CellTrait} from "./CellTrait";
 import type {CellComponent} from "./CellComponent";
 
 export interface CellComponentObserver<C extends CellComponent = CellComponent> extends ComponentObserver<C> {
-  cellWillSetView?(newCellView: CellView | null, oldCellView: CellView | null, component: C): void;
+  componentWillSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, component: C): void;
 
-  cellDidSetView?(newCellView: CellView | null, oldCellView: CellView | null, component: C): void;
+  componentDidSetCellView?(newCellView: CellView | null, oldCellView: CellView | null, component: C): void;
 
-  cellWillSetTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, component: C): void;
+  componentWillSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, component: C): void;
 
-  cellDidSetTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, component: C): void;
+  componentDidSetCellTrait?(newCellTrait: CellTrait | null, oldCellTrait: CellTrait | null, component: C): void;
 
-  cellWillSetContentView?(newContentView: HtmlView | null, oldContentView: HtmlView | null, component: C): void;
+  componentWillSetCellContentView?(cellContentView: HtmlView | null, oldCellContentView: HtmlView | null, component: C): void;
 
-  cellDidSetContentView?(newContentView: HtmlView | null, oldContentView: HtmlView | null, component: C): void;
+  componentDidSetCellContentView?(cellContentView: HtmlView | null, oldCellContentView: HtmlView | null, component: C): void;
 }

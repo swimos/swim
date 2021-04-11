@@ -77,7 +77,7 @@ export class DrawerView extends HtmlView implements Modal {
   }
 
   protected initTheme(): void {
-    this.modifyTheme(Feel.default, [Feel.raised, 1]);
+    this.modifyTheme(Feel.default, [[Feel.raised, 1]]);
   }
 
   declare readonly viewController: DrawerViewController | null;
@@ -303,7 +303,7 @@ export class DrawerView extends HtmlView implements Modal {
 
   protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       this.backgroundColor.setState(theme.getOr(Look.backgroundColor, mood, null), timing, View.Intrinsic);
     }
   }

@@ -210,14 +210,14 @@ export class GaugeView extends LayerView {
 
   protected willSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.gaugeViewWillSetTitle !== void 0) {
-      viewController.gaugeViewWillSetTitle(newTitleView, oldTitleView, this);
+    if (viewController !== null && viewController.viewWillSetGaugeTitle !== void 0) {
+      viewController.viewWillSetGaugeTitle(newTitleView, oldTitleView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.gaugeViewWillSetTitle !== void 0) {
-        viewObserver.gaugeViewWillSetTitle(newTitleView, oldTitleView, this);
+      if (viewObserver.viewWillSetGaugeTitle !== void 0) {
+        viewObserver.viewWillSetGaugeTitle(newTitleView, oldTitleView, this);
       }
     }
   }
@@ -236,13 +236,13 @@ export class GaugeView extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.gaugeViewDidSetTitle !== void 0) {
-        viewObserver.gaugeViewDidSetTitle(newTitleView, oldTitleView, this);
+      if (viewObserver.viewDidSetGaugeTitle !== void 0) {
+        viewObserver.viewDidSetGaugeTitle(newTitleView, oldTitleView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.gaugeViewDidSetTitle !== void 0) {
-      viewController.gaugeViewDidSetTitle(newTitleView, oldTitleView, this);
+    if (viewController !== null && viewController.viewDidSetGaugeTitle !== void 0) {
+      viewController.viewDidSetGaugeTitle(newTitleView, oldTitleView, this);
     }
   }
 
@@ -328,14 +328,14 @@ export class GaugeView extends LayerView {
   protected willSetDial(newDialView: DialView | null, oldDialView: DialView | null,
                         targetView: View | null, dialFastener: ViewFastener<this, DialView>): void {
     const viewController = this.viewController;
-    if (viewController !== null && viewController.gaugeViewWillSetDial !== void 0) {
-      viewController.gaugeViewWillSetDial(newDialView, oldDialView, targetView, this);
+    if (viewController !== null && viewController.viewWillSetDial !== void 0) {
+      viewController.viewWillSetDial(newDialView, oldDialView, targetView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.gaugeViewWillSetDial !== void 0) {
-        viewObserver.gaugeViewWillSetDial(newDialView, oldDialView, targetView, this);
+      if (viewObserver.viewWillSetDial !== void 0) {
+        viewObserver.viewWillSetDial(newDialView, oldDialView, targetView, this);
       }
     }
   }
@@ -356,13 +356,13 @@ export class GaugeView extends LayerView {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.gaugeViewDidSetDial !== void 0) {
-        viewObserver.gaugeViewDidSetDial(newDialView, oldDialView, targetView, this);
+      if (viewObserver.viewDidSetDial !== void 0) {
+        viewObserver.viewDidSetDial(newDialView, oldDialView, targetView, this);
       }
     }
     const viewController = this.viewController;
-    if (viewController !== null && viewController.gaugeViewDidSetDial !== void 0) {
-      viewController.gaugeViewDidSetDial(newDialView, oldDialView, targetView, this);
+    if (viewController !== null && viewController.viewDidSetDial !== void 0) {
+      viewController.viewDidSetDial(newDialView, oldDialView, targetView, this);
     }
   }
 
@@ -406,13 +406,13 @@ export class GaugeView extends LayerView {
     didSetView(newDialView: DialView | null, oldDialView: DialView | null, targetView: View | null): void {
       this.owner.didSetDial(newDialView, oldDialView, targetView, this);
     },
-    dialViewDidSetValue(newValue: number, oldValue: number): void {
+    viewDidSetDialValue(newValue: number, oldValue: number): void {
       this.owner.onSetDialValue(newValue, oldValue, this);
     },
-    dialViewDidSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    viewDidSetDialLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
       this.owner.onSetDialLabel(newLabelView, oldLabelView, this);
     },
-    dialViewDidSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+    viewDidSetDialLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
       this.owner.onSetDialLegend(newLegendView, oldLegendView, this);
     },
   });
@@ -476,7 +476,7 @@ export class GaugeView extends LayerView {
   }
 
   protected layoutGauge(frame: BoxR2): void {
-    if (this.center.isPrecedent(View.Intrinsic)) {
+    if (this.center.takesPrecedence(View.Intrinsic)) {
       const cx = (frame.xMin + frame.xMax) / 2;
       const cy = (frame.yMin + frame.yMax) / 2;
       this.center.setState(new PointR2(cx, cy), View.Intrinsic);

@@ -12,14 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./graphics";
+export * from "./geo";
+
+export * from "./tree";
 
 export * from "./layer";
 
-export * from "./grid";
-
 export * from "./raster";
+
+export * from "./shape";
+
+export * from "./path";
+
+export * from "./plot";
+
+export * from "./icon";
 
 export * from "./map";
 
-export * from "./geo";
+export * from "./world";

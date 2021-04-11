@@ -1,6 +1,6 @@
 {
   "name": "@swim/graphics",
-  "version": "3.11.0-dev.20210331",
+  "version": "3.11.0-dev.20210411",
   "description": "Canvas graphics views, with procedurally animated shapes, and procedurally styled typesetters",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/graphics",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,16 +11,16 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210331",
-    "@swim/codec": "3.11.0-dev.20210331",
-    "@swim/mapping": "3.11.0-dev.20210331",
-    "@swim/constraint": "3.11.0-dev.20210331",
-    "@swim/structure": "3.11.0-dev.20210331",
-    "@swim/math": "3.11.0-dev.20210331",
-    "@swim/time": "3.11.0-dev.20210331",
-    "@swim/style": "3.11.0-dev.20210331",
-    "@swim/theme": "3.11.0-dev.20210331",
-    "@swim/view": "3.11.0-dev.20210331",
-    "@swim/dom": "3.11.0-dev.20210331"
+    "@swim/util": "3.11.0-dev.20210411",
+    "@swim/codec": "3.11.0-dev.20210411",
+    "@swim/mapping": "3.11.0-dev.20210411",
+    "@swim/constraint": "3.11.0-dev.20210411",
+    "@swim/structure": "3.11.0-dev.20210411",
+    "@swim/math": "3.11.0-dev.20210411",
+    "@swim/time": "3.11.0-dev.20210411",
+    "@swim/style": "3.11.0-dev.20210411",
+    "@swim/theme": "3.11.0-dev.20210411",
+    "@swim/view": "3.11.0-dev.20210411",
+    "@swim/dom": "3.11.0-dev.20210411"
   }
 }

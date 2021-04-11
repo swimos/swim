@@ -19,11 +19,11 @@ import type {ScatterPlotTraitObserver} from "./ScatterPlotTraitObserver";
 import type {BubblePlotTrait} from "./BubblePlotTrait";
 
 export interface BubblePlotTraitObserver<X, Y, R extends BubblePlotTrait<X, Y> = BubblePlotTrait<X, Y>> extends ScatterPlotTraitObserver<X, Y, R> {
-  bubblePlotTraitWillSetRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
+  traitWillSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
 
-  bubblePlotTraitDidSetRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
+  traitDidSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, trait: R): void;
 
-  bubblePlotTraitWillSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, trait: R): void;
+  traitWillSetPlotFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, trait: R): void;
 
-  bubblePlotTraitDidSetFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, trait: R): void;
+  traitDidSetPlotFill?(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, trait: R): void;
 }

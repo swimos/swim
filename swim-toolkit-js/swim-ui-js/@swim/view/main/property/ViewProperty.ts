@@ -121,7 +121,7 @@ export interface ViewProperty<V extends View, T, U = never> {
 
   didSetState(newState: T, oldState: T): void;
 
-  isPrecedent(precedence: ViewPrecedence): boolean;
+  takesPrecedence(precedence: ViewPrecedence): boolean;
 
   readonly precedence: ViewPrecedence;
 
@@ -333,30 +333,25 @@ Object.defineProperty(ViewProperty.prototype, "superName", {
 ViewProperty.prototype.bindSuperProperty = function (this: ViewProperty<View, unknown>): void {
   const superName = this.superName;
   if (superName !== void 0 && this.isMounted()) {
-    let view = this.owner;
-    do {
-      const parentView = view.parentView;
-      if (parentView !== null) {
-        view = parentView;
-        const superProperty = view.getLazyViewProperty(superName);
-        if (superProperty !== null) {
-          Object.defineProperty(this, "superProperty", {
-            value: superProperty,
-            enumerable: true,
-            configurable: true,
-          });
-          superProperty.addSubProperty(this);
-          if ((this.propertyFlags & ViewProperty.OverrideFlag) === 0 && superProperty.precedence >= this.precedence) {
-            this.setPropertyFlags(this.propertyFlags | ViewProperty.InheritedFlag);
-            this.setOwnState(superProperty.state);
-            this.change();
-          }
-        } else {
-          continue;
+    let superView = this.owner.parentView;
+    while (superView !== null) {
+      const superProperty = superView.getLazyViewProperty(superName);
+      if (superProperty !== null) {
+        Object.defineProperty(this, "superProperty", {
+          value: superProperty,
+          enumerable: true,
+          configurable: true,
+        });
+        superProperty.addSubProperty(this);
+        if ((this.propertyFlags & ViewProperty.OverrideFlag) === 0 && superProperty.precedence >= this.precedence) {
+          this.setPropertyFlags(this.propertyFlags | ViewProperty.InheritedFlag);
+          this.setOwnState(superProperty.state);
+          this.change();
         }
+        break;
       }
-      break;
-    } while (true);
+      superView = superView.parentView;
+    }
   }
 };
 
@@ -472,7 +467,7 @@ ViewProperty.prototype.didSetState = function <T>(this: ViewProperty<View, T>, n
   // hook
 };
 
-ViewProperty.prototype.isPrecedent = function (this: ViewProperty<View, unknown>, precedence: ViewPrecedence): boolean {
+ViewProperty.prototype.takesPrecedence = function (this: ViewProperty<View, unknown>, precedence: ViewPrecedence): boolean {
   return precedence >= this.precedence;
 };
 

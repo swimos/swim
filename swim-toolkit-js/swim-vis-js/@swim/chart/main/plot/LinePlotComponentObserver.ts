@@ -14,26 +14,25 @@
 
 import type {Length} from "@swim/math";
 import type {Color} from "@swim/style";
-import type {Look} from "@swim/theme";
 import type {LinePlotView} from "./LinePlotView";
 import type {LinePlotTrait} from "./LinePlotTrait";
 import type {SeriesPlotComponentObserver} from "./SeriesPlotComponentObserver";
 import type {LinePlotComponent} from "./LinePlotComponent";
 
 export interface LinePlotComponentObserver<X, Y, C extends LinePlotComponent<X, Y> = LinePlotComponent<X, Y>> extends SeriesPlotComponentObserver<X, Y, C> {
-  plotWillSetTrait?(newPlotTrait: LinePlotTrait<X, Y> | null, oldPlotTrait: LinePlotTrait<X, Y> | null, component: C): void;
+  componentWillSetPlotTrait?(newPlotTrait: LinePlotTrait<X, Y> | null, oldPlotTrait: LinePlotTrait<X, Y> | null, component: C): void;
 
-  plotDidSetTrait?(newPlotTrait: LinePlotTrait<X, Y> | null, oldPlotTrait: LinePlotTrait<X, Y> | null, component: C): void;
+  componentDidSetPlotTrait?(newPlotTrait: LinePlotTrait<X, Y> | null, oldPlotTrait: LinePlotTrait<X, Y> | null, component: C): void;
 
-  plotWillSetView?(newPlotView: LinePlotView<X, Y> | null, oldPlotView: LinePlotView<X, Y> | null, component: C): void;
+  componentWillSetPlotView?(newPlotView: LinePlotView<X, Y> | null, oldPlotView: LinePlotView<X, Y> | null, component: C): void;
 
-  plotDidSetView?(newPlotView: LinePlotView<X, Y> | null, oldPlotView: LinePlotView<X, Y> | null, component: C): void;
+  componentDidSetPlotView?(newPlotView: LinePlotView<X, Y> | null, oldPlotView: LinePlotView<X, Y> | null, component: C): void;
 
-  linePlotWillSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, component: C): void;
+  componentWillSetPlotStroke?(newStroke: Color | null, oldStroke: Color | null, component: C): void;
 
-  linePlotDidSetStroke?(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, component: C): void;
+  componentDidSetPlotStroke?(newStroke: Color | null, oldStroke: Color | null, component: C): void;
 
-  linePlotWillSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, component: C): void;
+  componentWillSetPlotStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, component: C): void;
 
-  linePlotDidSetStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, component: C): void;
+  componentDidSetPlotStrokeWidth?(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, component: C): void;
 }

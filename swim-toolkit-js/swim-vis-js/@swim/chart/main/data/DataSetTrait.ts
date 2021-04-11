@@ -82,8 +82,8 @@ export class DataSetTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataSetTraitWillSetDataPoint !== void 0) {
-        traitObserver.dataSetTraitWillSetDataPoint(newDataPointTrait, oldDataPointTrait, targetTrait, this);
+      if (traitObserver.traitWillSetDataPoint !== void 0) {
+        traitObserver.traitWillSetDataPoint(newDataPointTrait, oldDataPointTrait, targetTrait, this);
       }
     }
   }
@@ -104,8 +104,8 @@ export class DataSetTrait<X, Y> extends GenericTrait {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.dataSetTraitDidSetDataPoint !== void 0) {
-        traitObserver.dataSetTraitDidSetDataPoint(newDataPointTrait, oldDataPointTrait, targetTrait, this);
+      if (traitObserver.traitDidSetDataPoint !== void 0) {
+        traitObserver.traitDidSetDataPoint(newDataPointTrait, oldDataPointTrait, targetTrait, this);
       }
     }
   }

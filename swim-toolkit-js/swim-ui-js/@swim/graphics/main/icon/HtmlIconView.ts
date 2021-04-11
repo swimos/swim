@@ -134,9 +134,9 @@ export class HtmlIconView extends HtmlView implements IconView {
 
   protected layoutIcon(): void {
     const svgView = this.svgView;
-    if (svgView !== null && (svgView.width.isPrecedent(View.Intrinsic)
-                          || svgView.height.isPrecedent(View.Intrinsic)
-                          || svgView.viewBox.isPrecedent(View.Intrinsic))) {
+    if (svgView !== null && (svgView.width.takesPrecedence(View.Intrinsic)
+                          || svgView.height.takesPrecedence(View.Intrinsic)
+                          || svgView.viewBox.takesPrecedence(View.Intrinsic))) {
       let viewWidth: Length | number | null = this.width.value;
       viewWidth = viewWidth instanceof Length ? viewWidth.pxValue() : this.node.offsetWidth;
       let viewHeight: Length | number | null = this.height.value;

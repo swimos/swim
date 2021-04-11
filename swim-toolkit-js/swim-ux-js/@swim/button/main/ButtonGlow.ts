@@ -77,7 +77,7 @@ export class ButtonGlow extends HtmlView {
   declare opacity: StyleAnimator<this, number | undefined>;
 
   protected didMount(): void {
-    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       let highlightColor = this.getLookOr(Look.highlightColor, null);
       if (highlightColor !== null) {
         highlightColor = highlightColor.alpha(1);
@@ -100,7 +100,7 @@ export class ButtonGlow extends HtmlView {
 
   protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       let highlightColor = theme.getOr(Look.highlightColor, mood, null);
       if (highlightColor !== null) {
         highlightColor = highlightColor.alpha(1);

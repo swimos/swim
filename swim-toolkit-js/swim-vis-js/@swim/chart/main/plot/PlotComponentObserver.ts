@@ -18,11 +18,11 @@ import type {PlotTrait} from "./PlotTrait";
 import type {PlotComponent} from "./PlotComponent";
 
 export interface PlotComponentObserver<X, Y, C extends PlotComponent<X, Y> = PlotComponent<X, Y>> extends DataSetComponentObserver<X, Y, C> {
-  plotWillSetTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, component: C): void;
+  componentWillSetPlotTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, component: C): void;
 
-  plotDidSetTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, component: C): void;
+  componentDidSetPlotTrait?(newPlotTrait: PlotTrait<X, Y> | null, oldPlotTrait: PlotTrait<X, Y> | null, component: C): void;
 
-  plotWillSetView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, component: C): void;
+  componentWillSetPlotView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, component: C): void;
 
-  plotDidSetView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, component: C): void;
+  componentDidSetPlotView?(newPlotView: PlotView<X, Y> | null, oldPlotView: PlotView<X, Y> | null, component: C): void;
 }

@@ -122,8 +122,8 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
   }
 
   protected onHighlight(timing: Timing | boolean): void {
-    this.modifyMood(Feel.default, [Feel.selected, 1]);
-    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+    this.modifyMood(Feel.default, [[Feel.selected, 1]]);
+    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       this.backgroundColor.setState(this.getLookOr(Look.backgroundColor, null), timing, View.Intrinsic);
     }
     const selectedColor = this.getLookOr(Look.accentColor, null);
@@ -188,8 +188,8 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
   }
 
   protected onUnhighlight(timing: Timing | boolean): void {
-    this.modifyMood(Feel.default, [Feel.selected, void 0]);
-    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+    this.modifyMood(Feel.default, [[Feel.selected, void 0]]);
+    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       let backgroundColor = this.getLookOr(Look.backgroundColor, null);
       if (backgroundColor !== null) {
         backgroundColor = backgroundColor.alpha(0);
@@ -222,7 +222,7 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
 
   protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (this.backgroundColor.isPrecedent(View.Intrinsic)) {
+    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       let backgroundColor = this.getLookOr(Look.backgroundColor, null);
       if (backgroundColor !== null && !this.highlighted.state) {
         backgroundColor = backgroundColor.alpha(0);

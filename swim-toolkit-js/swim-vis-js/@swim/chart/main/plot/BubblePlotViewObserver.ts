@@ -12,8 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Length} from "@swim/math";
+import type {Color} from "@swim/style";
 import type {ScatterPlotViewObserver} from "./ScatterPlotViewObserver";
 import type {BubblePlotView} from "./BubblePlotView";
 
 export interface BubblePlotViewObserver<X, Y, V extends BubblePlotView<X, Y> = BubblePlotView<X, Y>> extends ScatterPlotViewObserver<X, Y, V> {
+  viewWillSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
+
+  viewDidSetPlotRadius?(newRadius: Length | null, oldRadius: Length | null, view: V): void;
+
+  viewWillSetPlotFill?(newFill: Color | null, oldFill: Color | null, view: V): void;
+
+  viewDidSetPlotFill?(newFill: Color | null, oldFill: Color | null, view: V): void;
 }

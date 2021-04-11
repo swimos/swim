@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import type {Length} from "@swim/math";
+import type {Color} from "@swim/style";
 import type {GraphicsView} from "@swim/graphics";
 import type {ComponentObserver, ComponentFastener} from "@swim/component";
 import type {DataPointView} from "./DataPointView";
@@ -22,39 +23,47 @@ import type {DataSetTrait} from "./DataSetTrait";
 import type {DataSetComponent} from "./DataSetComponent";
 
 export interface DataSetComponentObserver<X, Y, C extends DataSetComponent<X, Y> = DataSetComponent<X, Y>> extends ComponentObserver<C> {
-  dataSetWillSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, component: C): void;
+  componentWillSetDataSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, component: C): void;
 
-  dataSetDidSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, component: C): void;
+  componentDidSetDataSetTrait?(newDataSetTrait: DataSetTrait<X, Y> | null, oldDataSetTrait: DataSetTrait<X, Y> | null, component: C): void;
 
-  dataSetWillSetDataPoint?(newDataPointComponent: DataPointComponent<X, Y> | null, oldDataPointComponent: DataPointComponent<X, Y> | null, dataPointDastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentWillSetDataPoint?(newDataPointComponent: DataPointComponent<X, Y> | null, oldDataPointComponent: DataPointComponent<X, Y> | null, dataPointDastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetDidSetDataPoint?(newDataPointComponent: DataPointComponent<X, Y> | null, oldDataPointComponent: DataPointComponent<X, Y> | null, dataPointDastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentDidSetDataPoint?(newDataPointComponent: DataPointComponent<X, Y> | null, oldDataPointComponent: DataPointComponent<X, Y> | null, dataPointDastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetWillSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentWillSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetDidSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentDidSetDataPointTrait?(newDataPointTrait: DataPointTrait<X, Y> | null, oldDataPointTrait: DataPointTrait<X, Y> | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetWillSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentWillSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetDidSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentDidSetDataPointView?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetWillSetDataPointViewX?(newX: X | undefined, oldX: X | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentWillSetDataPointX?(newX: X | undefined, oldX: X | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetDidSetDataPointViewX?(newX: X | undefined, oldX: X | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentDidSetDataPointX?(newX: X | undefined, oldX: X | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetWillSetDataPointViewY?(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentWillSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetDidSetDataPointViewY?(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentDidSetDataPointY?(newY: Y | undefined, oldY: Y | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetWillSetDataPointViewY2?(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentWillSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetDidSetDataPointViewY2?(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentDidSetDataPointY2?(newY2: Y | undefined, oldY2: Y | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetWillSetDataPointViewRadius?(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentWillSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetDidSetDataPointViewRadius?(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentDidSetDataPointRadius?(newRadius: Length | null, oldRadius: Length | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetWillSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentWillSetDataPointColor?(newColor: Color | null, oldColor: Color | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 
-  dataSetDidSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+  componentDidSetDataPointColor?(newColor: Color | null, oldColor: Color | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+
+  componentWillSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+
+  componentDidSetDataPointOpacity?(newOpacity: number | undefined, oldOpacity: number | undefined, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+
+  componentWillSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
+
+  componentDidSetDataPointLabelView?(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null, dataPointFastener: ComponentFastener<C, DataPointComponent<X, Y>>): void;
 }

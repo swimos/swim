@@ -42,13 +42,6 @@ export class GaugeComponent extends CompositeComponent {
 
   declare readonly componentObservers: ReadonlyArray<GaugeComponentObserver>;
 
-  setTitle(title: GaugeTitle | null): void {
-    const gaugeTrait = this.gauge.trait;
-    if (gaugeTrait !== null) {
-      gaugeTrait.setTitle(title);
-    }
-  }
-
   protected initGaugeTrait(gaugeTrait: GaugeTrait): void {
     // hook
   }
@@ -56,7 +49,7 @@ export class GaugeComponent extends CompositeComponent {
   protected attachGaugeTrait(gaugeTrait: GaugeTrait): void {
     const gaugeView = this.gauge.view;
     if (gaugeView !== null) {
-      this.setGaugeTitleView(gaugeTrait.title, gaugeTrait);
+      this.setTitleView(gaugeTrait.title.state, gaugeTrait);
     }
 
     const dialFasteners = gaugeTrait.dialFasteners;
@@ -79,7 +72,7 @@ export class GaugeComponent extends CompositeComponent {
  
     const gaugeView = this.gauge.view;
     if (gaugeView !== null) {
-      this.setGaugeTitleView(null, gaugeTrait);
+      this.setTitleView(null, gaugeTrait);
     }
  }
 
@@ -87,8 +80,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeWillSetTrait !== void 0) {
-        componentObserver.gaugeWillSetTrait(newGaugeTrait, oldGaugeTrait, this);
+      if (componentObserver.componentWillSetGaugeTrait !== void 0) {
+        componentObserver.componentWillSetGaugeTrait(newGaugeTrait, oldGaugeTrait, this);
       }
     }
   }
@@ -107,14 +100,10 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeDidSetTrait !== void 0) {
-        componentObserver.gaugeDidSetTrait(newGaugeTrait, oldGaugeTrait, this);
+      if (componentObserver.componentDidSetGaugeTrait !== void 0) {
+        componentObserver.componentDidSetGaugeTrait(newGaugeTrait, oldGaugeTrait, this);
       }
     }
-  }
-
-  protected onSetGaugeTraitTitle(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, gaugeTrait: GaugeTrait): void {
-    this.setGaugeTitleView(newTitle, gaugeTrait);
   }
 
   protected createGaugeView(): GaugeView | null {
@@ -125,16 +114,12 @@ export class GaugeComponent extends CompositeComponent {
     // hook
   }
 
-  protected themeGaugeView(gaugeView: GaugeView, theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
-    // hook
-  }
-
   protected attachGaugeView(gaugeView: GaugeView): void {
     this.title.setView(gaugeView.title.view);
 
     const gaugeTrait = this.gauge.trait;
     if (gaugeTrait !== null) {
-      this.setGaugeTitleView(gaugeTrait.title, gaugeTrait);
+      this.setTitleView(gaugeTrait.title.state, gaugeTrait);
     }
 
     const dialFasteners = this.dialFasteners;
@@ -157,8 +142,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeWillSetView !== void 0) {
-        componentObserver.gaugeWillSetView(newGaugeView, oldGaugeView, this);
+      if (componentObserver.componentWillSetGaugeView !== void 0) {
+        componentObserver.componentWillSetGaugeView(newGaugeView, oldGaugeView, this);
       }
     }
   }
@@ -177,13 +162,17 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeDidSetView !== void 0) {
-        componentObserver.gaugeDidSetView(newGaugeView, oldGaugeView, this);
+      if (componentObserver.componentDidSetGaugeView !== void 0) {
+        componentObserver.componentDidSetGaugeView(newGaugeView, oldGaugeView, this);
       }
     }
   }
 
-  protected createGaugeTitleView(title: GaugeTitle, gaugeTrait: GaugeTrait): GraphicsView | string | null {
+  protected themeGaugeView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, gaugeView: GaugeView): void {
+    // hook
+  }
+
+  protected createTitleView(title: GaugeTitle, gaugeTrait: GaugeTrait): GraphicsView | string | null {
     if (typeof title === "function") {
       return title(gaugeTrait);
     } else {
@@ -191,52 +180,52 @@ export class GaugeComponent extends CompositeComponent {
     }
   }
 
-  protected setGaugeTitleView(title: GaugeTitle | null, gaugeTrait: GaugeTrait): void {
+  protected setTitleView(title: GaugeTitle | null, gaugeTrait: GaugeTrait): void {
     const gaugeView = this.gauge.view;
     if (gaugeView !== null) {
-      const titleView = title !== null ? this.createGaugeTitleView(title, gaugeTrait) : null;
+      const titleView = title !== null ? this.createTitleView(title, gaugeTrait) : null;
       gaugeView.title.setView(titleView);
     }
   }
 
-  protected initGaugeTitleView(titleView: GraphicsView): void {
+  protected initTitleView(titleView: GraphicsView): void {
     // hook
   }
 
-  protected attachGaugeTitleView(titleView: GraphicsView): void {
+  protected attachTitleView(titleView: GraphicsView): void {
     // hook
   }
 
-  protected detachGaugeTitleView(titleView: GraphicsView): void {
+  protected detachTitleView(titleView: GraphicsView): void {
     // hook
   }
 
-  protected willSetGaugeTitleView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+  protected willSetTitleView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeWillSetTitleView !== void 0) {
-        componentObserver.gaugeWillSetTitleView(newTitleView, oldTitleView, this);
+      if (componentObserver.componentWillSetGaugeTitleView !== void 0) {
+        componentObserver.componentWillSetGaugeTitleView(newTitleView, oldTitleView, this);
       }
     }
   }
 
-  protected onSetGaugeTitleView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+  protected onSetTitleView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
     if (oldTitleView !== null) {
-      this.detachGaugeTitleView(oldTitleView);
+      this.detachTitleView(oldTitleView);
     }
     if (newTitleView !== null) {
-      this.attachGaugeTitleView(newTitleView);
-      this.initGaugeTitleView(newTitleView);
+      this.attachTitleView(newTitleView);
+      this.initTitleView(newTitleView);
     }
   }
 
-  protected didSetGaugeTitleView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+  protected didSetTitleView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeDidSetTitleView !== void 0) {
-        componentObserver.gaugeDidSetTitleView(newTitleView, oldTitleView, this);
+      if (componentObserver.componentWillSetGaugeTitleView !== void 0) {
+        componentObserver.componentWillSetGaugeTitleView(newTitleView, oldTitleView, this);
       }
     }
   }
@@ -255,9 +244,9 @@ export class GaugeComponent extends CompositeComponent {
       this.owner.didSetGaugeView(newGaugeView, oldGaugeView);
     },
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, gaugeView: GaugeView): void {
-      this.owner.themeGaugeView(gaugeView, theme, mood, timing);
+      this.owner.themeGaugeView(theme, mood, timing, gaugeView);
     },
-    gaugeViewDidSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
+    viewDidSetGaugeTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
       this.owner.title.setView(newTitleView);
     },
     createView(): GaugeView | null {
@@ -274,15 +263,15 @@ export class GaugeComponent extends CompositeComponent {
     didSetTrait(newGaugeTrait: GaugeTrait | null, oldGaugeTrait: GaugeTrait | null): void {
       this.owner.didSetGaugeTrait(newGaugeTrait, oldGaugeTrait);
     },
-    gaugeTraitDidSetTitle(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, gaugeTrait: GaugeTrait): void {
-      this.owner.onSetGaugeTraitTitle(newTitle, oldTitle, gaugeTrait);
+    traitDidSetGaugeTitle(newTitle: GaugeTitle | null, oldTitle: GaugeTitle | null, gaugeTrait: GaugeTrait): void {
+      this.owner.setTitleView(newTitle, gaugeTrait);
     },
-    gaugeTraitWillSetDial(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, targetTrait: Trait): void {
+    traitWillSetDial(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, targetTrait: Trait): void {
       if (oldDialTrait !== null) {
         this.owner.removeDialTrait(oldDialTrait);
       }
     },
-    gaugeTraitDidSetDial(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, targetTrait: Trait): void {
+    traitDidSetDial(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null, targetTrait: Trait): void {
       if (newDialTrait !== null) {
         this.owner.insertDialTrait(newDialTrait, targetTrait);
       }
@@ -297,13 +286,13 @@ export class GaugeComponent extends CompositeComponent {
   @ComponentView<GaugeComponent, GraphicsView>({
     key: true,
     willSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.willSetGaugeTitleView(newTitleView, oldTitleView);
+      this.owner.willSetTitleView(newTitleView, oldTitleView);
     },
     onSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.onSetGaugeTitleView(newTitleView, oldTitleView);
+      this.owner.onSetTitleView(newTitleView, oldTitleView);
     },
     didSetView(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-      this.owner.didSetGaugeTitleView(newTitleView, oldTitleView);
+      this.owner.didSetTitleView(newTitleView, oldTitleView);
     },
   })
   declare title: ComponentView<this, GraphicsView>;
@@ -384,8 +373,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeWillSetDial !== void 0) {
-        componentObserver.gaugeWillSetDial(newDialComponent, oldDialComponent, dialFastener);
+      if (componentObserver.componentWillSetDial !== void 0) {
+        componentObserver.componentWillSetDial(newDialComponent, oldDialComponent, dialFastener);
       }
     }
   }
@@ -406,8 +395,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeDidSetDial !== void 0) {
-        componentObserver.gaugeDidSetDial(newDialComponent, oldDialComponent, dialFastener);
+      if (componentObserver.componentDidSetDial !== void 0) {
+        componentObserver.componentDidSetDial(newDialComponent, oldDialComponent, dialFastener);
       }
     }
   }
@@ -479,8 +468,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeWillSetDialTrait !== void 0) {
-        componentObserver.gaugeWillSetDialTrait(newDialTrait, oldDialTrait, dialFastener);
+      if (componentObserver.componentWillSetDialTrait !== void 0) {
+        componentObserver.componentWillSetDialTrait(newDialTrait, oldDialTrait, dialFastener);
       }
     }
   }
@@ -501,8 +490,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeDidSetDialTrait !== void 0) {
-        componentObserver.gaugeDidSetDialTrait(newDialTrait, oldDialTrait, dialFastener);
+      if (componentObserver.componentDidSetDialTrait !== void 0) {
+        componentObserver.componentDidSetDialTrait(newDialTrait, oldDialTrait, dialFastener);
       }
     }
   }
@@ -550,8 +539,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeWillSetDialView !== void 0) {
-        componentObserver.gaugeWillSetDialView(newDialView, oldDialView, dialFastener);
+      if (componentObserver.componentWillSetDialView !== void 0) {
+        componentObserver.componentWillSetDialView(newDialView, oldDialView, dialFastener);
       }
     }
   }
@@ -572,62 +561,62 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeDidSetDialView !== void 0) {
-        componentObserver.gaugeDidSetDialView(newDialView, oldDialView, dialFastener);
+      if (componentObserver.componentDidSetDialView !== void 0) {
+        componentObserver.componentDidSetDialView(newDialView, oldDialView, dialFastener);
       }
     }
   }
 
-  protected willSetDialViewValue(newValue: number, oldValue: number,
-                                 dialFastener: ComponentFastener<this, DialComponent>): void {
+  protected willSetDialValue(newValue: number, oldValue: number,
+                             dialFastener: ComponentFastener<this, DialComponent>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeWillSetDialViewValue !== void 0) {
-        componentObserver.gaugeWillSetDialViewValue(newValue, oldValue, dialFastener);
+      if (componentObserver.componentWillSetDialValue !== void 0) {
+        componentObserver.componentWillSetDialValue(newValue, oldValue, dialFastener);
       }
     }
   }
 
-  protected onSetDialViewValue(newValue: number, oldValue: number,
-                               dialFastener: ComponentFastener<this, DialComponent>): void {
+  protected onSetDialValue(newValue: number, oldValue: number,
+                           dialFastener: ComponentFastener<this, DialComponent>): void {
     // hook
   }
 
-  protected didSetDialViewValue(newValue: number, oldValue: number,
-                                dialFastener: ComponentFastener<this, DialComponent>): void {
+  protected didSetDialValue(newValue: number, oldValue: number,
+                            dialFastener: ComponentFastener<this, DialComponent>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeDidSetDialViewValue !== void 0) {
-        componentObserver.gaugeDidSetDialViewValue(newValue, oldValue, dialFastener);
+      if (componentObserver.componentDidSetDialValue !== void 0) {
+        componentObserver.componentDidSetDialValue(newValue, oldValue, dialFastener);
       }
     }
   }
 
-  protected willSetDialViewLimit(newLimit: number, oldLimit: number,
-                                 dialFastener: ComponentFastener<this, DialComponent>): void {
+  protected willSetDialLimit(newLimit: number, oldLimit: number,
+                             dialFastener: ComponentFastener<this, DialComponent>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeWillSetDialViewLimit !== void 0) {
-        componentObserver.gaugeWillSetDialViewLimit(newLimit, oldLimit, dialFastener);
+      if (componentObserver.componentWillSetDialLimit !== void 0) {
+        componentObserver.componentWillSetDialLimit(newLimit, oldLimit, dialFastener);
       }
     }
   }
 
-  protected onSetDialViewLimit(newLimit: number, oldLimit: number,
-                               dialFastener: ComponentFastener<this, DialComponent>): void {
+  protected onSetDialLimit(newLimit: number, oldLimit: number,
+                           dialFastener: ComponentFastener<this, DialComponent>): void {
     // hook
   }
 
-  protected didSetDialViewLimit(newLimit: number, oldLimit: number,
-                                dialFastener: ComponentFastener<this, DialComponent>): void {
+  protected didSetDialLimit(newLimit: number, oldLimit: number,
+                            dialFastener: ComponentFastener<this, DialComponent>): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeDidSetDialViewLimit !== void 0) {
-        componentObserver.gaugeDidSetDialViewLimit(newLimit, oldLimit, dialFastener);
+      if (componentObserver.componentDidSetDialLimit !== void 0) {
+        componentObserver.componentDidSetDialLimit(newLimit, oldLimit, dialFastener);
       }
     }
   }
@@ -649,8 +638,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeWillSetDialLabelView !== void 0) {
-        componentObserver.gaugeWillSetDialLabelView(newLabelView, oldLabelView, dialFastener);
+      if (componentObserver.componentWillSetDialLabelView !== void 0) {
+        componentObserver.componentWillSetDialLabelView(newLabelView, oldLabelView, dialFastener);
       }
     }
   }
@@ -671,8 +660,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeDidSetDialLabelView !== void 0) {
-        componentObserver.gaugeDidSetDialLabelView(newLabelView, oldLabelView, dialFastener);
+      if (componentObserver.componentDidSetDialLabelView !== void 0) {
+        componentObserver.componentDidSetDialLabelView(newLabelView, oldLabelView, dialFastener);
       }
     }
   }
@@ -694,8 +683,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeWillSetDialLegendView !== void 0) {
-        componentObserver.gaugeWillSetDialLegendView(newLegendView, oldLegendView, dialFastener);
+      if (componentObserver.componentWillSetDialLegendView !== void 0) {
+        componentObserver.componentWillSetDialLegendView(newLegendView, oldLegendView, dialFastener);
       }
     }
   }
@@ -716,8 +705,8 @@ export class GaugeComponent extends CompositeComponent {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
-      if (componentObserver.gaugeDidSetDialLegendView !== void 0) {
-        componentObserver.gaugeDidSetDialLegendView(newLegendView, oldLegendView, dialFastener);
+      if (componentObserver.componentDidSetDialLegendView !== void 0) {
+        componentObserver.componentDidSetDialLegendView(newLegendView, oldLegendView, dialFastener);
       }
     }
   }
@@ -739,45 +728,45 @@ export class GaugeComponent extends CompositeComponent {
     didSetComponent(newDialComponent: DialComponent | null, oldDialComponent: DialComponent | null): void {
       this.owner.didSetDial(newDialComponent, oldDialComponent, this);
     },
-    dialWillSetTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
+    componentWillSetDialTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
       this.owner.willSetDialTrait(newDialTrait, oldDialTrait, this);
     },
-    dialDidSetTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
+    componentDidSetDialTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
       this.owner.onSetDialTrait(newDialTrait, oldDialTrait, this);
       this.owner.didSetDialTrait(newDialTrait, oldDialTrait, this);
     },
-    dialWillSetView(newDialView: DialView | null, oldDialView: DialView | null): void {
+    componentWillSetDialView(newDialView: DialView | null, oldDialView: DialView | null): void {
       this.owner.willSetDialView(newDialView, oldDialView, this);
     },
-    dialDidSetView(newDialView: DialView | null, oldDialView: DialView | null): void {
+    componentDidSetDialView(newDialView: DialView | null, oldDialView: DialView | null): void {
       this.owner.onSetDialView(newDialView, oldDialView, this);
       this.owner.didSetDialView(newDialView, oldDialView, this);
     },
-    dialWillSetViewValue(newValue: number, oldValue: number): void {
-      this.owner.willSetDialViewValue(newValue, oldValue, this);
+    componentWillSetDialValue(newValue: number, oldValue: number): void {
+      this.owner.willSetDialValue(newValue, oldValue, this);
     },
-    dialDidSetViewValue(newValue: number, oldValue: number): void {
-      this.owner.onSetDialViewValue(newValue, oldValue, this);
-      this.owner.didSetDialViewValue(newValue, oldValue, this);
+    componentDidSetDialValue(newValue: number, oldValue: number): void {
+      this.owner.onSetDialValue(newValue, oldValue, this);
+      this.owner.didSetDialValue(newValue, oldValue, this);
     },
-    dialWillSetViewLimit(newLimit: number, oldLimit: number): void {
-      this.owner.willSetDialViewLimit(newLimit, oldLimit, this);
+    componentWillSetDialLimit(newLimit: number, oldLimit: number): void {
+      this.owner.willSetDialLimit(newLimit, oldLimit, this);
     },
-    dialDidSetViewLimit(newLimit: number, oldLimit: number): void {
-      this.owner.onSetDialViewLimit(newLimit, oldLimit, this);
-      this.owner.didSetDialViewLimit(newLimit, oldLimit, this);
+    componentDidSetDialLimit(newLimit: number, oldLimit: number): void {
+      this.owner.onSetDialLimit(newLimit, oldLimit, this);
+      this.owner.didSetDialLimit(newLimit, oldLimit, this);
     },
-    dialWillSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    componentWillSetDialLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
       this.owner.willSetDialLabelView(newLabelView, oldLabelView, this);
     },
-    dialDidSetLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
+    componentDidSetDialLabelView(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
       this.owner.onSetDialLabelView(newLabelView, oldLabelView, this);
       this.owner.didSetDialLabelView(newLabelView, oldLabelView, this);
     },
-    dialWillSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+    componentWillSetDialLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
       this.owner.willSetDialLegendView(newLegendView, oldLegendView, this);
     },
-    dialDidSetLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
+    componentDidSetDialLegendView(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
       this.owner.onSetDialLegendView(newLegendView, oldLegendView, this);
       this.owner.didSetDialLegendView(newLegendView, oldLegendView, this);
     },

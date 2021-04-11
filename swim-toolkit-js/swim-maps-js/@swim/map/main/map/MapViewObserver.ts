@@ -12,12 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {GeoPoint} from "@swim/geo";
-import type {MapGraphicsViewObserver} from "../graphics/MapGraphicsViewObserver";
+import type {HtmlView} from "@swim/dom";
+import type {CanvasView} from "@swim/graphics";
+import type {GeoViewport} from "../geo/GeoViewport";
+import type {GeoViewObserver} from "../geo/GeoViewObserver";
 import type {MapView} from "./MapView";
 
-export interface MapViewObserver<V extends MapView = MapView> extends MapGraphicsViewObserver<V> {
-  mapViewWillMove?(mapCenter: GeoPoint, mapZoom: number, view: V): void;
+export interface MapViewObserver<V extends MapView = MapView> extends GeoViewObserver<V> {
+  viewWillSetGeoViewport?(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, view: V): void;
 
-  mapViewDidMove?(mapCenter: GeoPoint, mapZoom: number, view: V): void;
+  viewDidSetGeoViewport?(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, view: V): void;
+
+  viewWillSetMapCanvas?(newMapCanvasView: CanvasView | null, oldMapCanvasView: CanvasView | null, view: V): void;
+
+  viewDidSetMapCanvas?(newMapCanvasView: CanvasView | null, oldMapCanvasView: CanvasView | null, view: V): void;
+
+  viewWillSetMapContainer?(newMapContainerView: HtmlView | null, oldMapContainerView: HtmlView | null, view: V): void;
+
+  viewDidSetMapContainer?(newMapContainerView: HtmlView | null, oldMapContainerView: HtmlView | null, view: V): void;
 }

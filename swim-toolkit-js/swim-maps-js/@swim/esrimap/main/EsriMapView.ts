@@ -14,15 +14,14 @@
 
 import {Equivalent} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
-import type {AnyPointR2, PointR2} from "@swim/math";
-import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
+import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
 import {HtmlView} from "@swim/dom";
-import {CanvasView} from "@swim/graphics";
-import {EsriProjection} from "./EsriProjection";
+import type {CanvasView} from "@swim/graphics";
+import type {AnyGeoPerspective} from "@swim/map";
 import {EsriView} from "./EsriView";
-import {EsriMapViewProjection} from "./EsriMapViewProjection";
+import {EsriMapViewport} from "./EsriMapViewport";
 import type {EsriMapViewObserver} from "./EsriMapViewObserver";
 import type {EsriMapViewController} from "./EsriMapViewController";
 
@@ -32,26 +31,9 @@ export class EsriMapView extends EsriView {
     Object.defineProperty(this, "map", {
       value: map,
       enumerable: true,
-      configurable: true,
     });
-    Object.defineProperty(this, "geoProjection", {
-      value: new EsriMapViewProjection(map),
-      enumerable: true,
-      configurable: true,
-    });
-    const center = map.center;
-    Object.defineProperty(this, "mapCenter", {
-      value: new GeoPoint(center.longitude, center.latitude),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "mapZoom", {
-      value: map.zoom,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "mapHeading", {
-      value: map.rotation,
+    Object.defineProperty(this, "geoViewport", {
+      value: EsriMapViewport.create(map),
       enumerable: true,
       configurable: true,
     });
@@ -69,111 +51,136 @@ export class EsriMapView extends EsriView {
     map.watch("extent", this.onMapRender);
   }
 
-  project(lnglat: AnyGeoPoint): PointR2;
-  project(lng: number, lat: number): PointR2;
-  project(lng: AnyGeoPoint | number, lat?: number): PointR2 {
-    if (arguments.length === 1) {
-      return this.geoProjection.project(lng as AnyGeoPoint);
-    } else {
-      return this.geoProjection.project(lng as number, lat!);
+  declare readonly geoViewport: EsriMapViewport;
+
+  protected willSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillSetGeoViewport !== void 0) {
+      viewController.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetGeoViewport !== void 0) {
+        viewObserver.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+      }
     }
   }
 
-  unproject(point: AnyPointR2): GeoPoint;
-  unproject(x: number, y: number): GeoPoint;
-  unproject(x: AnyPointR2 | number, y?: number): GeoPoint {
-    if (arguments.length === 1) {
-      return this.geoProjection.unproject(x as AnyPointR2);
-    } else {
-      return this.geoProjection.unproject(x as number, y!);
+  protected onSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport): void {
+    // hook
+  }
+
+  protected didSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!
+      if (viewObserver.viewDidSetGeoViewport !== void 0) {
+        viewObserver.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidSetGeoViewport !== void 0) {
+      viewController.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
     }
   }
 
-  declare readonly geoProjection: EsriMapViewProjection;
-
-  declare readonly mapCenter: GeoPoint;
-
-  declare readonly mapZoom: number;
-
-  declare readonly mapHeading: number;
-
-  get mapTilt(): number {
-    return 0;
+  protected updateGeoViewport(): boolean {
+    const oldGeoViewport = this.geoViewport;
+    const newGeoViewport = EsriMapViewport.create(this.map);
+    if (!newGeoViewport.equals(oldGeoViewport)) {
+      this.willSetGeoViewport(newGeoViewport, oldGeoViewport);
+      Object.defineProperty(this, "geoViewport", {
+        value: newGeoViewport,
+        enumerable: true,
+        configurable: true,
+      });
+      this.onSetGeoViewport(newGeoViewport, oldGeoViewport);
+      this.didSetGeoViewport(newGeoViewport, oldGeoViewport);
+      return true;
+    }
+    return false;
   }
 
-  moveTo(mapCenter: AnyGeoPoint | undefined, mapZoom: number | undefined,
-         timing?: AnyTiming | boolean): void {
+  protected onMapRender(): void {
+    if (this.updateGeoViewport()) {
+      const immediate = !this.isHidden() && !this.isCulled();
+      this.requireUpdate(View.NeedsProject, immediate);
+    }
+  }
+
+  moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
+    const target: __esri.GoToTarget2D = {};
+    const options: __esri.GoToOptions2D = {};
+    const geoViewport = this.geoViewport;
+    let geoCenter = geoPerspective.geoCenter;
+    if (geoCenter !== void 0 && geoCenter !== null) {
+      geoCenter = GeoPoint.fromAny(geoCenter);
+      if (!geoViewport.geoCenter.equivalentTo(geoCenter, 1e-5)) {
+        target.center = [geoCenter.lng, geoCenter.lat];
+      }
+    }
+    const zoom = geoPerspective.zoom;
+    if (zoom !== void 0 && !Equivalent(geoViewport.zoom, zoom, 1e-5)) {
+      target.zoom = zoom;
+    }
+    const heading = geoPerspective.heading;
+    if (heading !== void 0 && !Equivalent(geoViewport.heading, heading, 1e-5)) {
+      target.heading = heading;
+    }
+    const tilt = geoPerspective.tilt;
+    if (tilt !== void 0 && !Equivalent(geoViewport.tilt, tilt, 1e-5)) {
+      target.tilt = tilt;
+    }
     if (timing === void 0 || timing === true) {
       timing = this.getLookOr(Look.timing, Mood.ambient, false);
     } else {
       timing = Timing.fromAny(timing);
     }
-    const target: __esri.GoToTarget2D = {};
-    if (mapCenter !== void 0) {
-      mapCenter = GeoPoint.fromAny(mapCenter);
-      if (!this.mapCenter.equivalentTo(mapCenter, 1e-5)) {
-        target.center = [mapCenter.lng, mapCenter.lat];
-      }
-    }
-    if (mapZoom !== void 0 && !Equivalent(this.mapZoom, mapZoom, 1e-5)) {
-      target.zoom = mapZoom;
-    }
-    const options: __esri.GoToOptions2D = {};
     if (timing instanceof Timing) {
       options.duration = timing.duration;
     }
     this.map.goTo(target, options);
   }
 
-  get geoFrame(): GeoBox {
-    let extent = this.map.extent;
-    if (extent !== null) {
-      extent = EsriProjection.webMercatorUtils!.webMercatorToGeographic(extent) as __esri.Extent;
-    }
-    if (extent !== null) {
-      return new GeoBox(extent.xmin, extent.ymin, extent.xmax, extent.ymax);
-    } else {
-      return GeoBox.globe();
+  protected attachCanvas(canvasView: CanvasView): void {
+    super.attachCanvas(canvasView);
+    if (this.parentView === null) {
+      canvasView.appendChildView(this);
+      canvasView.setEventNode(this.map.container.querySelector(".esri-view-root") as HTMLElement);
     }
   }
 
-  protected onMapRender(): void {
-    this.mapWillMove(this.mapCenter, this.mapZoom);
-    const map = this.map;
-    const center = map.center;
-    Object.defineProperty(this, "mapCenter", {
-      value: new GeoPoint(center.longitude, center.latitude),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "mapZoom", {
-      value: map.zoom,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "mapHeading", {
-      value: map.rotation,
-      enumerable: true,
-      configurable: true,
-    });
-    if (!this.isHidden() && !this.isCulled()) {
-      this.requireUpdate(View.NeedsProject, false);
+  protected detachCanvas(canvasView: CanvasView): void {
+    if (this.parentView === canvasView) {
+      canvasView.removeChildView(this);
     }
-    this.mapDidMove(this.mapCenter, this.mapZoom);
+    super.detachCanvas(canvasView);
   }
 
-  overlayCanvas(): CanvasView | null {
-    if (this.isMounted()) {
-      return this.getSuperView(CanvasView);
-    } else {
-      const map = this.map;
-      const container = HtmlView.fromNode(map.container);
-      const esriViewRoot = HtmlView.fromNode(container.node.querySelector(".esri-view-root") as HTMLDivElement);
-      const esriOverlaySurface = HtmlView.fromNode(esriViewRoot.node.querySelector(".esri-overlay-surface") as HTMLDivElement);
-      const canvas = esriOverlaySurface.append(CanvasView);
-      canvas.setEventNode(esriViewRoot.node);
-      canvas.appendChildView(this);
-      return canvas;
+  protected initContainer(containerView: HtmlView): void {
+    super.initContainer(containerView);
+    const esriContainerView = HtmlView.fromNode(this.map.container);
+    const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
+    HtmlView.fromNode(esriRootView.node.querySelector(".esri-overlay-surface") as HTMLDivElement);
+  }
+
+  protected attachContainer(containerView: HtmlView): void {
+    super.attachContainer(containerView);
+    const esriContainerView = HtmlView.fromNode(this.map.container);
+    const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
+    const esriSurfaceView = HtmlView.fromNode(esriRootView.node.querySelector(".esri-overlay-surface") as HTMLDivElement);
+    this.canvas.injectView(esriSurfaceView);
+  }
+
+  protected detachContainer(containerView: HtmlView): void {
+    const canvasView = this.canvas.view;
+    const esriContainerView = HtmlView.fromNode(this.map.container);
+    const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
+    const esriSurfaceView = HtmlView.fromNode(esriRootView.node.querySelector(".esri-overlay-surface") as HTMLDivElement);
+    if (canvasView !== null && canvasView.parentView === esriSurfaceView) {
+      esriSurfaceView.removeChildView(containerView);
     }
+    super.detachContainer(containerView);
   }
 }

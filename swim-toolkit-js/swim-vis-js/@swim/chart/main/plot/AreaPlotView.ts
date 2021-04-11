@@ -41,7 +41,50 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
     return "area";
   }
 
-  @ViewAnimator({type: Color, state: null, look: Look.accentColor})
+  protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillSetPlotFill !== void 0) {
+      viewController.viewWillSetPlotFill(newFill, oldFill, this);
+    }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetPlotFill !== void 0) {
+        viewObserver.viewWillSetPlotFill(newFill, oldFill, this);
+      }
+    }
+  }
+
+  protected onSetFill(newFill: Color | null, oldFill: Color | null): void {
+    // hook
+  }
+
+  protected didSetFill(newFill: Color | null, oldFill: Color | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetPlotFill !== void 0) {
+        viewObserver.viewDidSetPlotFill(newFill, oldFill, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidSetPlotFill !== void 0) {
+      viewController.viewDidSetPlotFill(newFill, oldFill, this);
+    }
+  }
+
+  @ViewAnimator<AreaPlotView<X, Y>, Color | null, AnyColor | null>({
+    type: Color,
+    state: null,
+    look: Look.accentColor,
+    willSetValue(newFill: Color | null, oldFill: Color | null): void {
+      this.owner.willSetFill(newFill, oldFill);
+    },
+    didSetValue(newFill: Color | null, oldFill: Color | null): void {
+      this.owner.onSetFill(newFill, oldFill);
+      this.owner.didSetFill(newFill, oldFill);
+    },
+  })
   declare fill: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected renderPlot(context: CanvasContext, frame: BoxR2): void {

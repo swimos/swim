@@ -1015,7 +1015,7 @@ const tree0 = swim.TreeView.fromAny({
     },
   ],
 });
-tree0.modifyTheme(swim.Feel.default, [swim.Feel.primary, 1]);
+tree0.modifyTheme(swim.Feel.default, [[swim.Feel.primary, 1]]);
 container.append(tree0, "tree0");
 
 const limb01 = tree0.getChildView("limb01");
@@ -1038,15 +1038,15 @@ function updateMood(view) {
   const alertThreshold = 0.95;
   let u = Math.random();
   if (u < warnThreshold) {
-    view.modifyMood(swim.Feel.default, [swim.Feel.warning, undefined], [swim.Feel.alert, undefined]);
+    view.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, void 0]]);
   } else if (u < alertThreshold) {
     u = (u - warnThreshold) / (alertThreshold - warnThreshold);
     u = 0.6 + 0.4 * u;
-    view.modifyMood(swim.Feel.default, [swim.Feel.warning, 1], [swim.Feel.alert, undefined]);
+    view.modifyMood(swim.Feel.default, [[swim.Feel.warning, 1], [swim.Feel.alert, void 0]]);
   } else {
     u = (u - alertThreshold) / (1 - alertThreshold);
     u = 0.6 + 0.4 * u;
-    view.modifyMood(swim.Feel.default, [swim.Feel.warning, undefined], [swim.Feel.alert, u]);
+    view.modifyMood(swim.Feel.default, [[swim.Feel.warning, void 0], [swim.Feel.alert, u]]);
   }
 }
 function updateMoods() {

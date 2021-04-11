@@ -18,7 +18,7 @@ import type {ScaledXYViewObserver} from "../scaled/ScaledXYViewObserver";
 import type {PlotView} from "./PlotView";
 
 export interface PlotViewObserver<X, Y, V extends PlotView<X, Y> = PlotView<X, Y>> extends ScaledXYViewObserver<X, Y, V> {
-  plotViewWillSetDataPoint?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, targetView: View | null, view: V): void;
+  viewWillSetDataPoint?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, targetView: View | null, view: V): void;
 
-  plotViewDidSetDataPoint?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, targetView: View | null, view: V): void;
+  viewDidSetDataPoint?(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null, targetView: View | null, view: V): void;
 }
