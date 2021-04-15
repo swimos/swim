@@ -25,7 +25,6 @@ export class TransformForm extends Form<Transform, AnyTransform> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: Transform | undefined;
 
   withUnit(unit: Transform | undefined): Form<Transform, AnyTransform> {

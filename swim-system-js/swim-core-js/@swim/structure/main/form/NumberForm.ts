@@ -26,7 +26,6 @@ export class NumberForm extends Form<number> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: number | undefined;
 
   withUnit(unit: number | undefined): Form<number> {

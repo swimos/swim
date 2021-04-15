@@ -43,17 +43,13 @@ export abstract class Envelope implements HashCode, Debug {
 
   abstract withLane(lane: AnyUri): Envelope;
 
-  get prio(): number {
-    return 0;
-  }
+  declare readonly prio: number; // getter defined below to work around useDefineForClassFields lunacy
 
   withPrio(prio: number): Envelope {
     return this;
   }
 
-  get rate(): number {
-    return 0;
-  }
+  declare readonly rate: number; // getter defined below to work around useDefineForClassFields lunacy
 
   withRate(rate: number): Envelope {
     return this;
@@ -101,3 +97,17 @@ export abstract class Envelope implements HashCode, Debug {
     return Envelope.fromValue(Recon.parse(input));
   }
 }
+Object.defineProperty(Envelope.prototype, "prio", {
+  get(this: Envelope): number {
+    return 0;
+  },
+  enumerable: true,
+  configurable: true,
+});
+Object.defineProperty(Envelope.prototype, "rate", {
+  get(this: Envelope): number {
+    return 0;
+  },
+  enumerable: true,
+  configurable: true,
+});

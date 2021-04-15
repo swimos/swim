@@ -26,7 +26,6 @@ export class RecordScope extends RecordModel {
     });
   }
 
-  // @ts-ignore
   declare readonly streamletScope: StreamletScope<Value> | null;
 
   static from(record: Record): RecordScope {

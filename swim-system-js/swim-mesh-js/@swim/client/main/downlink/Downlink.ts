@@ -577,9 +577,7 @@ export abstract class Downlink {
 
 /** @hidden */
 class DownlinkInitForm extends Form<DownlinkInit | undefined> {
-  get tag(): string | undefined {
-    return "link";
-  }
+  declare readonly tag: string | undefined; // getter defined below to work around useDefineForClassFields lunacy
 
   mold(init: DownlinkInit | undefined): Item {
     if (init !== void 0) {
@@ -649,3 +647,10 @@ class DownlinkInitForm extends Form<DownlinkInit | undefined> {
     return void 0;
   }
 }
+Object.defineProperty(DownlinkInitForm.prototype, "tag", {
+  get(this: DownlinkInitForm): string | undefined {
+    return "link";
+  },
+  enumerable: true,
+  configurable: true,
+});

@@ -1,13 +1,12 @@
 {
   "extends": "../../../tsconfig-main",
   "compilerOptions": {
-    "baseUrl": "../../..",
     "outDir": "../lib/main",
     "paths": {
-      "@swim/util": ["@swim/util/main"],
-      "@swim/codec": ["@swim/codec/main"],
-      "@swim/mapping": ["@swim/mapping/main"],
-      "@swim/structure": ["@swim/structure/main"]
+      "@swim/util": ["../../util/main"],
+      "@swim/codec": ["../../codec/main"],
+      "@swim/mapping": ["../../mapping/main"],
+      "@swim/structure": ["../../structure/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },

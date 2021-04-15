@@ -77,16 +77,7 @@ export class RecordMapView extends Record {
     return this.upper - this.lower;
   }
 
-  get fieldCount(): number {
-    const array = this.record.array;
-    let k = 0;
-    for (let i = this.lower, n = this.upper; i < n; i += 1) {
-      if (array![i] instanceof Field) {
-        k += 1;
-      }
-    }
-    return k;
-  }
+  declare readonly fieldCount: number; // getter defined below to work around useDefineForClassFields lunacy
 
   get valueCount(): number {
     let k = 0;
@@ -781,3 +772,17 @@ export class RecordMapView extends Record {
     return void 0;
   }
 }
+Object.defineProperty(RecordMapView.prototype, "fieldCount", {
+  get(this: RecordMapView): number {
+    const array = this.record.array;
+    let k = 0;
+    for (let i = this.lower, n = this.upper; i < n; i += 1) {
+      if (array![i] instanceof Field) {
+        k += 1;
+      }
+    }
+    return k;
+  },
+  enumerable: true,
+  configurable: true,
+});

@@ -25,7 +25,6 @@ export class AnyForm extends Form<AnyItem> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: AnyItem | undefined;
 
   withUnit(unit: AnyItem | undefined): Form<AnyItem> {

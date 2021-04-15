@@ -25,7 +25,6 @@ export class TimeZoneForm extends Form<TimeZone, AnyTimeZone> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: TimeZone | undefined;
 
   withUnit(unit: TimeZone | undefined): Form<TimeZone, AnyTimeZone> {

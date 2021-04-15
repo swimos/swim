@@ -50,12 +50,12 @@ export abstract class Field extends Item {
   /**
    * Returns the key component of this `Field`.
    */
-  abstract get key(): Value;
+  abstract readonly key: Value;
 
   /**
    * Returns the value component of this `Field`.
    */
-  abstract get value(): Value;
+  abstract readonly value: Value;
 
   /**
    * Sets the value of this `Field` to the new `value`, returning the old value.

@@ -35,9 +35,7 @@ export abstract class Form<T, U = never> {
    * attribute.  Used to accelerate distrcrimination of polymorphic structural
    * types with nominal type hints.
    */
-  get tag(): string | undefined {
-    return void 0;
-  }
+  declare readonly tag: string | undefined; // getter defined below to work around useDefineForClassFields lunacy
 
   /**
    * Returns a version of this `Form` that requires a head [Attr] with the
@@ -56,9 +54,7 @@ export abstract class Form<T, U = never> {
    * fallback return value when [Item.coerce coercing] an invalid structural
    * value.
    */
-  get unit(): T | undefined {
-    return void 0;
-  }
+  declare readonly unit: T | undefined; // getter defined below to work around useDefineForClassFields lunacy
 
   /**
    * Returns a version of this `Form` with the given `unit` value.
@@ -113,3 +109,17 @@ export abstract class Form<T, U = never> {
     return new ValueForm(Value.absent());
   }
 }
+Object.defineProperty(Form.prototype, "tag", {
+  get<T, U>(this: Form<T, U>): string | undefined {
+    return void 0;
+  },
+  enumerable: true,
+  configurable: true,
+});
+Object.defineProperty(Form.prototype, "unit", {
+  get<T, U>(this: Form<T, U>): T | undefined {
+    return void 0;
+  },
+  enumerable: true,
+  configurable: true,
+});

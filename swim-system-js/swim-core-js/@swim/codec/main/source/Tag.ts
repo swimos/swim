@@ -29,12 +29,12 @@ export abstract class Tag implements HashCode, Display, Debug {
   /**
    * The first source position covered by this `Tag`.
    */
-  abstract get start(): Mark;
+  abstract readonly start: Mark;
 
   /**
    * The last source position covered by this `Tag`.
    */
-  abstract get end(): Mark;
+  abstract readonly end: Mark;
 
   /**
    * Returns a `Tag` that includes all source locations covered by

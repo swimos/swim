@@ -1,13 +1,12 @@
 {
   "extends": "../../../tsconfig-main",
   "compilerOptions": {
-    "baseUrl": "../../..",
     "lib": ["ES6", "ES2015.Promise", "ScriptHost"],
     "outDir": "../lib/main",
     "paths": {
-      "@swim/util": ["@swim/util/main"],
-      "@swim/codec": ["@swim/codec/main"],
-      "@swim/args": ["@swim/args/main"]
+      "@swim/util": ["../../util/main"],
+      "@swim/codec": ["../../codec/main"],
+      "@swim/args": ["../../args/main"]
     },
     "target": "ES6",
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"

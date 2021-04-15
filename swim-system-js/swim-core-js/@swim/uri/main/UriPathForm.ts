@@ -25,7 +25,6 @@ export class UriPathForm extends Form<UriPath, AnyUriPath> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: UriPath | undefined;
 
   withUnit(unit: UriPath | undefined): Form<UriPath, AnyUriPath> {

@@ -25,7 +25,6 @@ export class DateTimeForm extends Form<DateTime, AnyDateTime> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: DateTime | undefined;
 
   withUnit(unit: DateTime | undefined): Form<DateTime, AnyDateTime> {

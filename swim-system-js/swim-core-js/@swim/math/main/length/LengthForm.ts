@@ -31,7 +31,6 @@ export class LengthForm extends Form<Length, AnyLength> {
 
   declare readonly defaultUnits: LengthUnits | undefined;
 
-  // @ts-ignore
   declare readonly unit: Length | undefined;
 
   withUnit(unit: Length | undefined): Form<Length, AnyLength> {

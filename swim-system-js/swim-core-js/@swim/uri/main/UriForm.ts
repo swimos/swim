@@ -25,7 +25,6 @@ export class UriForm extends Form<Uri, AnyUri> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: Uri | undefined;
 
   withUnit(unit: Uri | undefined): Form<Uri, AnyUri> {

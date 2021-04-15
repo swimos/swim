@@ -31,7 +31,6 @@ export class AngleForm extends Form<Angle, AnyAngle> {
 
   declare readonly defaultUnits: AngleUnits | undefined;
 
-  // @ts-ignore
   declare readonly unit: Angle | undefined;
 
   withUnit(unit: Angle | undefined): Form<Angle, AnyAngle> {

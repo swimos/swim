@@ -26,7 +26,6 @@ export class ValueForm extends Form<Value, AnyValue> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: Value | undefined;
 
   withUnit(unit: Value | undefined): Form<Value> {

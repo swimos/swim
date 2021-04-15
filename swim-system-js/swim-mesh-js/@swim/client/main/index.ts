@@ -26,16 +26,4 @@ export {
   WarpClient,
 } from "./WarpClient";
 
-import {WarpClient} from "./WarpClient";
-export const client = new WarpClient();
-export const isOnline = client.isOnline.bind(client);
-export const keepOnline = client.keepOnline.bind(client);
-export const downlink = client.downlink.bind(client);
-export const downlinkList = client.downlinkList.bind(client);
-export const downlinkMap = client.downlinkMap.bind(client);
-export const downlinkValue = client.downlinkValue.bind(client);
-export const hostRef = client.hostRef.bind(client);
-export const nodeRef = client.nodeRef.bind(client);
-export const laneRef = client.laneRef.bind(client);
-export const authenticate = client.authenticate.bind(client);
-export const command = client.command.bind(client);
+export * from "./client";

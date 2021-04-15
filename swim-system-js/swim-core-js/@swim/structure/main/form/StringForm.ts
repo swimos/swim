@@ -26,7 +26,6 @@ export class StringForm extends Form<string> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: string | undefined;
 
   withUnit(unit: string | undefined): Form<string> {

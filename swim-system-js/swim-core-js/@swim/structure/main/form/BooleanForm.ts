@@ -26,7 +26,6 @@ export class BooleanForm extends Form<boolean> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: boolean | undefined;
 
   withUnit(unit: boolean | undefined): Form<boolean> {

@@ -1,22 +1,21 @@
 {
   "extends": "../../../tsconfig-main",
   "compilerOptions": {
-    "baseUrl": "../../..",
     "outDir": "../lib/main",
     "paths": {
-      "@swim/util": ["@swim/util/main"],
-      "@swim/codec": ["@swim/codec/main"],
-      "@swim/mapping": ["@swim/mapping/main"],
-      "@swim/collections": ["@swim/collections/main"],
-      "@swim/constraint": ["@swim/constraint/main"],
-      "@swim/structure": ["@swim/structure/main"],
-      "@swim/streamlet": ["@swim/streamlet/main"],
-      "@swim/dataflow": ["@swim/dataflow/main"],
-      "@swim/recon": ["@swim/recon/main"],
-      "@swim/uri": ["@swim/uri/main"],
-      "@swim/math": ["@swim/math/main"],
-      "@swim/geo": ["@swim/geo/main"],
-      "@swim/time": ["@swim/time/main"]
+      "@swim/util": ["../../util/main"],
+      "@swim/codec": ["../../codec/main"],
+      "@swim/mapping": ["../../mapping/main"],
+      "@swim/collections": ["../../collections/main"],
+      "@swim/constraint": ["../../constraint/main"],
+      "@swim/structure": ["../../structure/main"],
+      "@swim/streamlet": ["../../streamlet/main"],
+      "@swim/dataflow": ["../../dataflow/main"],
+      "@swim/recon": ["../../recon/main"],
+      "@swim/uri": ["../../uri/main"],
+      "@swim/math": ["../../math/main"],
+      "@swim/geo": ["../../geo/main"],
+      "@swim/time": ["../../time/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },

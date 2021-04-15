@@ -68,7 +68,6 @@ export class RecordMap extends Record {
 
   declare readonly length: number;
 
-  // @ts-ignore
   declare readonly fieldCount: number;
 
   get valueCount(): number {

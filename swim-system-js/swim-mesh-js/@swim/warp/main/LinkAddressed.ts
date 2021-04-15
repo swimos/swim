@@ -63,14 +63,12 @@ export abstract class LinkAddressed<E extends LinkAddressed<E>> extends Envelope
     return this.copy(this.node, lane as Uri, this.prio, this.rate, this.body);
   }
 
-  // @ts-ignore
   declare readonly prio: number;
 
   withPrio(prio: number): E {
     return this.copy(this.node, this.lane, prio, this.rate, this.body);
   }
 
-  // @ts-ignore
   declare readonly rate: number;
 
   withRate(rate: number): E {

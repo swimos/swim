@@ -66,15 +66,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   /**
    * Returns the number of [[Field]] members contained in this `Record`.
    */
-  get fieldCount(): number {
-    let count = 0;
-    this.forEach(function (member: Item): void {
-      if (member instanceof Field) {
-        count += 1;
-      }
-    }, this);
-    return count;
-  }
+  declare readonly fieldCount: number; // getter defined below to work around useDefineForClassFields lunacy
 
   /**
    * Returns the number of [[Value]] members contained in this `Record`.
@@ -902,3 +894,16 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return n + 1;
   }
 }
+Object.defineProperty(Record.prototype, "fieldCount", {
+  get(this: Record): number {
+    let count = 0;
+    this.forEach(function (member: Item): void {
+      if (member instanceof Field) {
+        count += 1;
+      }
+    }, this);
+    return count;
+  },
+  enumerable: true,
+  configurable: true,
+});

@@ -32,9 +32,7 @@ export class UnitForm<T, U = never> extends Form<T, U> {
   /** @hidden */
   declare readonly form: Form<T, U>;
 
-  get tag(): string | undefined {
-    return this.form.tag;
-  }
+  declare readonly tag: string | undefined; // // getter defined below to work around useDefineForClassFields lunacy
 
   withTag(tag: string | undefined): Form<T, U> {
     if (tag !== this.tag) {
@@ -44,7 +42,6 @@ export class UnitForm<T, U = never> extends Form<T, U> {
     }
   }
 
-  // @ts-ignore
   declare readonly unit: T | undefined;
 
   withUnit(unit: T | undefined): Form<T, U> {
@@ -73,3 +70,10 @@ export class UnitForm<T, U = never> extends Form<T, U> {
     }
   }
 }
+Object.defineProperty(UnitForm.prototype, "tag", {
+  get<T, U>(this: UnitForm<T, U>): string | undefined {
+    return this.form.tag;
+  },
+  enumerable: true,
+  configurable: true,
+});

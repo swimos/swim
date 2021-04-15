@@ -68,9 +68,7 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
   /** @hidden */
   declare readonly version: number;
 
-  get streamletScope(): StreamletScope<Value> | null {
-    return null;
-  }
+  declare readonly streamletScope: StreamletScope<Value> | null; // getter defined below to work around useDefineForClassFields lunacy
 
   get streamletContext(): StreamletContext | null {
     const scope = this.streamletScope;
@@ -380,6 +378,13 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
     }
   }
 }
+Object.defineProperty(AbstractRecordOutlet.prototype, "streamletScope", {
+  get(this: AbstractRecordOutlet): StreamletScope<Value> | null {
+    return null;
+  },
+  enumerable: true,
+  configurable: true,
+});
 export interface AbstractRecordOutlet extends MapOutletCombinators<Value, Value, Record> {
 }
 MapOutletCombinators.define(AbstractRecordOutlet.prototype);

@@ -63,9 +63,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return this.state.length;
   }
 
-  get fieldCount(): number {
-    return this.state.fieldCount;
-  }
+  declare readonly fieldCount: number; // getter defined below to work around useDefineForClassFields lunacy
 
   get valueCount(): number {
     return this.state.valueCount;
@@ -451,3 +449,10 @@ export class RecordModel extends AbstractRecordOutlet {
     return model;
   }
 }
+Object.defineProperty(RecordModel.prototype, "fieldCount", {
+  get(this: RecordModel): number {
+    return this.state.fieldCount;
+  },
+  enumerable: true,
+  configurable: true,
+});
