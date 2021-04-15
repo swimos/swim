@@ -25,7 +25,6 @@ export class ColorForm extends Form<Color, AnyColor> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: Color | undefined;
 
   withUnit(unit: Color | undefined): Form<Color, AnyColor> {

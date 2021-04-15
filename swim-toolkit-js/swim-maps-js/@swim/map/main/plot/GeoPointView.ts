@@ -28,6 +28,7 @@ import {
 import type {GeoViewInit} from "../geo/GeoView";
 import type {GeoViewController} from "../geo/GeoViewController";
 import {GeoLayerView} from "../layer/GeoLayerView";
+import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoPointViewObserver} from "./GeoPointViewObserver";
 
 export type GeoPointLabelPlacement = "auto" | "top" | "right" | "bottom" | "left";
@@ -327,10 +328,7 @@ export class GeoPointView extends GeoLayerView {
     // nop
   }
 
-  get viewBounds(): BoxR2 {
-    const {x, y} = this.viewPoint.getValue();
-    return new BoxR2(x, y, x, y);
-  }
+  declare readonly viewBounds: BoxR2; // getter defined below to work around useDefineForClassFields lunacy
 
   get hitBounds(): BoxR2 {
     const {x, y} = this.viewPoint.getValue();
@@ -366,6 +364,10 @@ export class GeoPointView extends GeoLayerView {
       return this;
     }
     return null;
+  }
+
+  ripple(options?: GeoRippleOptions): GeoRippleView | null {
+    return GeoRippleView.ripple(this, options);
   }
 
   toAny(): GeoPointViewInit {
@@ -424,3 +426,11 @@ export class GeoPointView extends GeoLayerView {
     throw new TypeError("" + value);
   }
 }
+Object.defineProperty(GeoPointView.prototype, "viewBounds", {
+  get(this: GeoPointView): BoxR2 {
+    const {x, y} = this.viewPoint.getValue();
+    return new BoxR2(x, y, x, y);
+  },
+  enumerable: true,
+  configurable: true,
+});

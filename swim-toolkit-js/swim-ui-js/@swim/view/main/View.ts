@@ -1449,9 +1449,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
     }
   }
 
-  get viewContext(): ViewContext {
-    return this.extendViewContext(this.superViewContext);
-  }
+  declare readonly viewContext: ViewContext; // getter defined below to work around useDefineForClassFields lunacy
 
   get viewIdiom(): ViewIdiom {
     return this.viewContext.viewIdiom;
@@ -1747,11 +1745,13 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   static readonly NeedsDisplay: ViewFlags = 1 << 17;
   static readonly NeedsLayout: ViewFlags = 1 << 18;
   static readonly NeedsRender: ViewFlags = 1 << 19;
-  static readonly NeedsComposite: ViewFlags = 1 << 20;
+  static readonly NeedsRasterize: ViewFlags = 1 << 20;
+  static readonly NeedsComposite: ViewFlags = 1 << 21;
   /** @hidden */
   static readonly DisplayMask: ViewFlags = View.NeedsDisplay
                                          | View.NeedsLayout
                                          | View.NeedsRender
+                                         | View.NeedsRasterize
                                          | View.NeedsComposite;
 
   /** @hidden */
@@ -1772,3 +1772,10 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   static readonly Intrinsic: ViewPrecedence = 0;
   static readonly Extrinsic: ViewPrecedence = 1;
 }
+Object.defineProperty(View.prototype, "viewContext", {
+  get(this: View): ViewContext {
+    return this.extendViewContext(this.superViewContext);
+  },
+  enumerable: true,
+  configurable: true,
+});

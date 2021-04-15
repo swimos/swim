@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="arcgis-js-api"/>
-
 export {EsriViewport} from "./EsriViewport";
 
 export {EsriView} from "./EsriView";

@@ -22,6 +22,7 @@ import type {ModelService} from "../service/ModelService";
 import {ModelProperty} from "../property/ModelProperty";
 import type {ModelFastener} from "../fastener/ModelFastener";
 import type {ModelTrait} from "../fastener/ModelTrait";
+import {ModelDownlinkContext} from "../downlink/ModelDownlinkContext";
 import type {ModelDownlink} from "../downlink/ModelDownlink";
 
 export abstract class GenericModel extends Model {
@@ -151,7 +152,7 @@ export abstract class GenericModel extends Model {
     }
   }
 
-  abstract get childModelCount(): number;
+  abstract readonly childModelCount: number;
 
   abstract readonly childModels: ReadonlyArray<Model>;
 
@@ -230,6 +231,9 @@ export abstract class GenericModel extends Model {
     this.mountModelFasteners();
     this.mountModelTraits();
     this.mountModelDownlinks();
+    if (this.modelConsumers.length !== 0) {
+      this.startConsuming();
+    }
   }
 
   /** @hidden */
@@ -271,6 +275,7 @@ export abstract class GenericModel extends Model {
   }
 
   protected onUnmount(): void {
+    this.stopConsuming();
     this.unmountModelDownlinks();
     this.unmountModelTraits();
     this.unmountModelFasteners();
@@ -551,24 +556,6 @@ export abstract class GenericModel extends Model {
     this.reconcileModelDownlinks();
   }
 
-  protected startConsuming(): void {
-    if ((this.modelFlags & Model.ConsumingFlag) === 0) {
-      this.willStartConsuming();
-      this.setModelFlags(this.modelFlags | Model.ConsumingFlag);
-      this.onStartConsuming();
-      this.didStartConsuming();
-    }
-  }
-
-  protected stopConsuming(): void {
-    if ((this.modelFlags & Model.ConsumingFlag) !== 0) {
-      this.willStopConsuming();
-      this.setModelFlags(this.modelFlags & ~Model.ConsumingFlag);
-      this.onStopConsuming();
-      this.didStopConsuming();
-    }
-  }
-
   declare readonly modelConsumers: ReadonlyArray<ModelConsumer>;
 
   addModelConsumer(modelConsumer: ModelConsumerType<this>): void {
@@ -583,10 +570,15 @@ export abstract class GenericModel extends Model {
       });
       this.onAddModelConsumer(modelConsumer);
       this.didAddModelConsumer(modelConsumer);
-      if (oldModelConsumers.length === 0) {
+      if (oldModelConsumers.length === 0 && this.isMounted()) {
         this.startConsuming();
       }
     }
+  }
+
+  protected onStartConsuming(): void {
+    super.onStartConsuming();
+    this.startConsumingModelDownlinks();
   }
 
   removeModelConsumer(modelConsumer: ModelConsumerType<this>): void {
@@ -605,6 +597,11 @@ export abstract class GenericModel extends Model {
         this.stopConsuming();
       }
     }
+  }
+
+  protected onStopConsuming(): void {
+    this.stopConsumingModelDownlinks();
+    super.onStopConsuming();
   }
 
   /** @hidden */
@@ -935,12 +932,18 @@ export abstract class GenericModel extends Model {
     }
     const oldModelDownlink = modelDownlinks[downlinkName];
     if (oldModelDownlink !== void 0 && this.isMounted()) {
+      if (this.isConsuming() && oldModelDownlink.consume === true) {
+        oldModelDownlink.removeDownlinkConsumer(this);
+      }
       oldModelDownlink.unmount();
     }
     if (newModelDownlink !== null) {
       modelDownlinks[downlinkName] = newModelDownlink;
       if (this.isMounted()) {
         newModelDownlink.mount();
+        if (this.isConsuming() && newModelDownlink.consume === true) {
+          newModelDownlink.addDownlinkConsumer(this);
+        }
       }
     } else {
       delete modelDownlinks[downlinkName];
@@ -954,6 +957,7 @@ export abstract class GenericModel extends Model {
       const modelDownlink = modelDownlinks[downlinkName]!;
       modelDownlink.mount();
     }
+    ModelDownlinkContext.initModelDownlinks(this);
   }
 
   /** @hidden */
@@ -971,6 +975,28 @@ export abstract class GenericModel extends Model {
     for (const downlinkName in modelDownlinks) {
       const modelDownlink = modelDownlinks[downlinkName]!;
       modelDownlink.reconcile();
+    }
+  }
+
+  /** @hidden */
+  protected startConsumingModelDownlinks(): void {
+    const modelDownlinks = this.modelDownlinks;
+    for (const downlinkName in modelDownlinks) {
+      const modelDownlink = modelDownlinks[downlinkName]!;
+      if (modelDownlink.consume === true) {
+        modelDownlink.addDownlinkConsumer(this);
+      }
+    }
+  }
+
+  /** @hidden */
+  protected stopConsumingModelDownlinks(): void {
+    const modelDownlinks = this.modelDownlinks;
+    for (const downlinkName in modelDownlinks) {
+      const modelDownlink = modelDownlinks[downlinkName]!;
+      if (modelDownlink.consume === true) {
+        modelDownlink.removeDownlinkConsumer(this);
+      }
     }
   }
 }

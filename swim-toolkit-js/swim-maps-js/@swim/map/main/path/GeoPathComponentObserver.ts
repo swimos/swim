@@ -27,7 +27,7 @@ export interface GeoPathComponentObserver<C extends GeoPathComponent = GeoPathCo
 
   componentDidSetGeoView?(newGeoView: GeoPathView | null, oldGeoView: GeoPathView | null, component: C): void;
 
-  componentWillSetGeoPath?(newGeoPath: GeoPath, oldGeoPath: GeoPath, component: C): void;
+  componentWillSetGeoPath?(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, component: C): void;
 
-  componentDidSetGeoPath?(newGeoPath: GeoPath, oldGeoPath: GeoPath, component: C): void;
+  componentDidSetGeoPath?(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, component: C): void;
 }

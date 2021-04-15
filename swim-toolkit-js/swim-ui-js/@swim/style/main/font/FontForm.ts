@@ -26,7 +26,6 @@ export class FontForm extends Form<Font, AnyFont> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: Font | undefined;
 
   withUnit(unit: Font | undefined): Form<Font, AnyFont> {

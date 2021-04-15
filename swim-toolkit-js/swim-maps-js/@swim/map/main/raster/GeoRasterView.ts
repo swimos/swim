@@ -81,7 +81,6 @@ export class GeoRasterView extends GeoLayerView {
     return parentView instanceof GraphicsView ? parentView.renderer : null;
   }
 
-  // @ts-ignore
   declare readonly renderer: GraphicsRenderer | null;
 
   setRenderer(renderer: AnyGraphicsRenderer | null): void {
@@ -175,7 +174,6 @@ export class GeoRasterView extends GeoLayerView {
     return rasterViewContext;
   }
 
-  // @ts-ignore
   declare readonly viewContext: GeoRasterViewContext;
 
   /** @hidden */

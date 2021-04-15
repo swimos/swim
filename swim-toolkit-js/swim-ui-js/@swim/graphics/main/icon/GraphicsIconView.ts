@@ -98,19 +98,7 @@ export class GraphicsIconView extends LayerView implements IconView {
     }
   }
 
-  get viewBounds(): BoxR2 {
-    const viewFrame = this.viewFrame;
-    const viewWidth = viewFrame.width;
-    const viewHeight = viewFrame.height;
-    const viewSize = Math.min(viewWidth, viewHeight);
-    let iconWidth: Length | number | null = this.iconWidth.value;
-    iconWidth = iconWidth instanceof Length ? iconWidth.pxValue(viewSize) : viewSize;
-    let iconHeight: Length | number | null = this.iconHeight.value;
-    iconHeight = iconHeight instanceof Length ? iconHeight.pxValue(viewSize) : viewSize;
-    const x = viewFrame.x + (viewWidth - iconWidth) * this.xAlign.getValue();
-    const y = viewFrame.y + (viewHeight - iconHeight) * this.yAlign.getValue();
-    return new BoxR2(x, y, x + iconWidth, y + iconHeight);
-  }
+  declare readonly viewBounds: BoxR2; // getter defined below to work around useDefineForClassFields lunacy
 
   protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit = super.doHitTest(x, y, viewContext);
@@ -146,3 +134,20 @@ export class GraphicsIconView extends LayerView implements IconView {
     return new GraphicsIconView();
   }
 }
+Object.defineProperty(GraphicsIconView.prototype, "viewBounds", {
+  get(this: GraphicsIconView): BoxR2 {
+    const viewFrame = this.viewFrame;
+    const viewWidth = viewFrame.width;
+    const viewHeight = viewFrame.height;
+    const viewSize = Math.min(viewWidth, viewHeight);
+    let iconWidth: Length | number | null = this.iconWidth.value;
+    iconWidth = iconWidth instanceof Length ? iconWidth.pxValue(viewSize) : viewSize;
+    let iconHeight: Length | number | null = this.iconHeight.value;
+    iconHeight = iconHeight instanceof Length ? iconHeight.pxValue(viewSize) : viewSize;
+    const x = viewFrame.x + (viewWidth - iconWidth) * this.xAlign.getValue();
+    const y = viewFrame.y + (viewHeight - iconHeight) * this.yAlign.getValue();
+    return new BoxR2(x, y, x + iconWidth, y + iconHeight);
+  },
+  enumerable: true,
+  configurable: true,
+});

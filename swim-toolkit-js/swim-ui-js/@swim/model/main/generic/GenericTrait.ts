@@ -22,6 +22,7 @@ import {ModelProperty} from "../property/ModelProperty";
 import type {TraitProperty} from "../property/TraitProperty";
 import type {TraitModel} from "../fastener/TraitModel";
 import type {TraitFastener} from "../fastener/TraitFastener";
+import {ModelDownlinkContext} from "../downlink/ModelDownlinkContext";
 import type {ModelDownlink} from "../downlink/ModelDownlink";
 
 export class GenericTrait extends Trait {
@@ -190,6 +191,9 @@ export class GenericTrait extends Trait {
     this.mountTraitModels();
     this.mountTraitFasteners();
     this.mountTraitDownlinks();
+    if (this.traitConsumers.length !== 0) {
+      this.startConsuming();
+    }
   }
 
   /** @hidden */
@@ -205,6 +209,7 @@ export class GenericTrait extends Trait {
   }
 
   protected onUnmount(): void {
+    this.stopConsuming();
     this.unmountTraitDownlinks();
     this.unmountTraitFasteners();
     this.unmountTraitModels();
@@ -244,24 +249,6 @@ export class GenericTrait extends Trait {
     this.reconcileTraitDownlinks();
   }
 
-  protected startConsuming(): void {
-    if ((this.traitFlags & Trait.ConsumingFlag) === 0) {
-      this.willStartConsuming();
-      this.setTraitFlags(this.traitFlags | Trait.ConsumingFlag);
-      this.onStartConsuming();
-      this.didStartConsuming();
-    }
-  }
-
-  protected stopConsuming(): void {
-    if ((this.traitFlags & Trait.ConsumingFlag) !== 0) {
-      this.willStopConsuming();
-      this.setTraitFlags(this.traitFlags & ~Trait.ConsumingFlag);
-      this.onStopConsuming();
-      this.didStopConsuming();
-    }
-  }
-
   declare readonly traitConsumers: ReadonlyArray<TraitConsumer>;
 
   addTraitConsumer(traitConsumer: TraitConsumerType<this>): void {
@@ -276,10 +263,15 @@ export class GenericTrait extends Trait {
       });
       this.onAddTraitConsumer(traitConsumer);
       this.didAddTraitConsumer(traitConsumer);
-      if (oldTraitConsumers.length === 0) {
+      if (oldTraitConsumers.length === 0 && this.isMounted()) {
         this.startConsuming();
       }
     }
+  }
+
+  protected onStartConsuming(): void {
+    super.onStartConsuming();
+    this.startConsumingTraitDownlinks();
   }
 
   removeTraitConsumer(traitConsumer: TraitConsumerType<this>): void {
@@ -298,6 +290,11 @@ export class GenericTrait extends Trait {
         this.stopConsuming();
       }
     }
+  }
+
+  protected onStopConsuming(): void {
+    this.stopConsumingTraitDownlinks();
+    super.onStopConsuming();
   }
 
   /** @hidden */
@@ -674,12 +671,18 @@ export class GenericTrait extends Trait {
     }
     const oldTraitDownlink = traitDownlinks[downlinkName];
     if (oldTraitDownlink !== void 0 && this.isMounted()) {
+      if (this.isConsuming() && oldTraitDownlink.consume === true) {
+        oldTraitDownlink.removeDownlinkConsumer(this);
+      }
       oldTraitDownlink.unmount();
     }
     if (newTraitDownlink !== null) {
       traitDownlinks[downlinkName] = newTraitDownlink;
       if (this.isMounted()) {
         newTraitDownlink.mount();
+        if (this.isConsuming() && newTraitDownlink.consume === true) {
+          newTraitDownlink.addDownlinkConsumer(this);
+        }
       }
     } else {
       delete traitDownlinks[downlinkName];
@@ -693,6 +696,7 @@ export class GenericTrait extends Trait {
       const traitDownlink = traitDownlinks[downlinkName]!;
       traitDownlink.mount();
     }
+    ModelDownlinkContext.initModelDownlinks(this);
   }
 
   /** @hidden */
@@ -710,6 +714,28 @@ export class GenericTrait extends Trait {
     for (const downlinkName in traitDownlinks) {
       const traitDownlink = traitDownlinks[downlinkName]!;
       traitDownlink.reconcile();
+    }
+  }
+
+  /** @hidden */
+  protected startConsumingTraitDownlinks(): void {
+    const traitDownlinks = this.traitDownlinks;
+    for (const downlinkName in traitDownlinks) {
+      const traitDownlink = traitDownlinks[downlinkName]!;
+      if (traitDownlink.consume === true) {
+        traitDownlink.addDownlinkConsumer(this);
+      }
+    }
+  }
+
+  /** @hidden */
+  protected stopConsumingTraitDownlinks(): void {
+    const traitDownlinks = this.traitDownlinks;
+    for (const downlinkName in traitDownlinks) {
+      const traitDownlink = traitDownlinks[downlinkName]!;
+      if (traitDownlink.consume === true) {
+        traitDownlink.removeDownlinkConsumer(this);
+      }
     }
   }
 }

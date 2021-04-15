@@ -14,7 +14,7 @@
     <script>
 
 const VEHICLE_COLOR = swim.Color.parse("#00a6ed");
-const RIPPLE_COLOR = swim.Color.parse("#efefef").alpha(0.25);
+const RIPPLE_COLOR = swim.Color.parse("#efefef");
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
@@ -73,9 +73,11 @@ require([
         let vehicleView = layerView.getChildView(key);
         if (vehicleView !== null) {
           vehicleView.geoCenter([lng, lat], timing);
-          if (!document.hidden && mapView.geoFrame.contains(lng, lat)) {
-            ripple(lng, lat);
-          }
+          vehicleView.ripple({
+            color: RIPPLE_COLOR,
+            opacity: 0.25,
+            timing: 2000,
+          });
         } else {
           //vehicleView = new swim.GeoCircleView().geoCenter([lng, lat]).radius(5).fill(VEHICLE_COLOR);
           vehicleView = new swim.GeoIconView()
@@ -88,23 +90,6 @@ require([
         }
       })
       .open();
-
-  function ripple(lng, lat) {
-    const ripple = new swim.GeoCircleView()
-        .geoCenter([lng, lat])
-        .radius(0)
-        .stroke(RIPPLE_COLOR)
-        .strokeWidth(1);
-    layerView.append(ripple);
-    const frame = mapView.viewFrame;
-    const radius = Math.min(frame.width, frame.height) / 8;
-    const timing = swim.Easing.linear.withDuration(2000);
-    ripple.stroke(RIPPLE_COLOR.alpha(0), timing)
-          .radius(radius, timing);
-    ripple.radius.onEnd = function () {
-      ripple.remove();
-    };
-  }
 
 });
 

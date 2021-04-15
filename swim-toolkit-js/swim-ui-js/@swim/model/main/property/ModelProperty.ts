@@ -567,14 +567,6 @@ ModelProperty.prototype.fromAny = function <T, U>(this: ModelProperty<Model, T, 
   return value as T;
 };
 
-ModelProperty.prototype.mount = function (this: ModelProperty<Model, unknown>): void {
-  this.bindSuperProperty();
-};
-
-ModelProperty.prototype.unmount = function (this: ModelProperty<Model, unknown>): void {
-  this.unbindSuperProperty();
-};
-
 ModelProperty.prototype.isMounted = function (this: ModelProperty<Model, unknown>): boolean {
   return (this.propertyFlags & ModelProperty.MountedFlag) !== 0;
 };

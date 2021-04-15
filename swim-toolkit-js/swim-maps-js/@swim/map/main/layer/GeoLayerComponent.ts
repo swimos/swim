@@ -90,6 +90,30 @@ export class GeoLayerComponent extends GeoComponent {
     }
   }
 
+  protected willSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentWillSetGeoBounds !== void 0) {
+        componentObserver.componentWillSetGeoBounds(newGeoBounds, oldGeoBounds, this);
+      }
+    }
+  }
+
+  protected onSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
+    // hook
+  }
+
+  protected didSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
+    const componentObservers = this.componentObservers;
+    for (let i = 0, n = componentObservers.length; i < n; i += 1) {
+      const componentObserver = componentObservers[i]!;
+      if (componentObserver.componentDidSetGeoBounds !== void 0) {
+        componentObserver.componentDidSetGeoBounds(newGeoBounds, oldGeoBounds, this);
+      }
+    }
+  }
+
   protected createGeoView(): GeoView | null {
     return GeoTreeView.create();
   }
@@ -145,11 +169,19 @@ export class GeoLayerComponent extends GeoComponent {
     }
   }
 
+  protected themeGeoView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoView): void {
+    // hook
+  }
+
   protected projectGeoView(viewContext: GeoViewContext, geoView: GeoView): void {
     // hook
   }
 
-  protected themeGeoView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoView): void {
+  protected cullGeoView(geoView: GeoView): void {
+    // hook
+  }
+
+  protected uncullGeoView(geoView: GeoView): void {
     // hook
   }
 
@@ -165,11 +197,17 @@ export class GeoLayerComponent extends GeoComponent {
     didSetView(newGeoView: GeoView | null, oldGeoView: GeoView | null): void {
       this.owner.didSetGeoView(newGeoView, oldGeoView);
     },
+    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoView): void {
+      this.owner.themeGeoView(theme, mood, timing, geoView);
+    },
     viewWillProject(viewContext: GeoViewContext, geoView: GeoView): void {
       this.owner.projectGeoView(viewContext, geoView);
     },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoView): void {
-      this.owner.themeGeoView(theme, mood, timing, geoView);
+    viewDidCull(geoView: GeoView): void {
+      this.owner.cullGeoView(geoView);
+    },
+    viewWillUncull(geoView: GeoView): void {
+      this.owner.uncullGeoView(geoView);
     },
     createView(): GeoView | null {
       return this.owner.createGeoView();
@@ -184,6 +222,13 @@ export class GeoLayerComponent extends GeoComponent {
     },
     didSetTrait(newGeoTrait: GeoLayerTrait | null, oldGeoTrait: GeoLayerTrait | null): void {
       this.owner.didSetGeoTrait(newGeoTrait, oldGeoTrait);
+    },
+    traitWillSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
+      this.owner.willSetGeoBounds(newGeoBounds, oldGeoBounds);
+    },
+    traitDidSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
+      this.owner.onSetGeoBounds(newGeoBounds, oldGeoBounds);
+      this.owner.didSetGeoBounds(newGeoBounds, oldGeoBounds);
     },
     traitWillSetFeature(newFeatureTrait: GeoTrait | null, oldFeatureTrait: GeoTrait | null, targetTrait: Trait): void {
       if (oldFeatureTrait !== null) {

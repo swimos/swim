@@ -13,12 +13,13 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Equals} from "@swim/util";
+import {Equals, Arrays} from "@swim/util";
 import {AnyValue, Value, Form} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
 import type {DownlinkType, DownlinkObserver, Downlink, WarpRef} from "@swim/client";
 import {Model} from "../Model";
 import {ModelDownlinkContext} from "./ModelDownlinkContext";
+import type {ModelDownlinkConsumerType, ModelDownlinkConsumer} from "./ModelDownlinkConsumer";
 import {
   ModelEventDownlinkDescriptorExtends,
   ModelEventDownlinkDescriptor,
@@ -48,7 +49,7 @@ export interface ModelDownlinkInit extends DownlinkObserver {
   extends?: ModelDownlinkClass;
   type?: DownlinkType;
 
-  enabled?: boolean;
+  consume?: boolean;
   hostUri?: AnyUri | (() => AnyUri | null);
   nodeUri?: AnyUri | (() => AnyUri | null);
   laneUri?: AnyUri | (() => AnyUri | null);
@@ -56,6 +57,14 @@ export interface ModelDownlinkInit extends DownlinkObserver {
   rate?: number | (() => number | undefined);
   body?: AnyValue | (() => AnyValue | null);
 
+  willStartConsuming?(): void;
+  didStartConsuming?(): void;
+  willStopConsuming?(): void;
+  didStopConsuming?(): void;
+  willAddDownlinkConsumer?(downlinkConsumer: ModelDownlinkConsumer): void;
+  didAddDownlinkConsumer?(downlinkConsumer: ModelDownlinkConsumer): void;
+  willRemoveDownlinkConsumer?(downlinkConsumer: ModelDownlinkConsumer): void;
+  didRemoveDownlinkConsumer?(downlinkConsumer: ModelDownlinkConsumer): void;
   initDownlink?(downlink: Downlink): Downlink;
 }
 
@@ -87,8 +96,58 @@ export interface ModelDownlink<M extends ModelDownlinkContext> {
   /** @hidden */
   setDownlinkFlags(downlinkFlags: ModelDownlinkFlags): void;
 
-  enabled(): boolean;
-  enabled(enabled: boolean): this;
+  /** @hidden */
+  consume?: boolean;
+
+  isConsuming(): boolean;
+
+  /** @hidden */
+  startConsuming(): void;
+
+  /** @hidden */
+  willStartConsuming(): void;
+
+  /** @hidden */
+  onStartConsuming(): void;
+
+  /** @hidden */
+  didStartConsuming(): void;
+
+  /** @hidden */
+  stopConsuming(): void;
+
+  /** @hidden */
+  willStopConsuming(): void;
+
+  /** @hidden */
+  onStopConsuming(): void;
+
+  /** @hidden */
+  didStopConsuming(): void;
+
+  readonly downlinkConsumers: ReadonlyArray<ModelDownlinkConsumer>;
+
+  addDownlinkConsumer(downlinkConsumer: ModelDownlinkConsumerType<this>): void
+
+  /** @hidden */
+  willAddDownlinkConsumer(downlinkConsumer: ModelDownlinkConsumerType<this>): void;
+
+  /** @hidden */
+  onAddDownlinkConsumer(downlinkConsumer: ModelDownlinkConsumerType<this>): void;
+
+  /** @hidden */
+  didAddDownlinkConsumer(downlinkConsumer: ModelDownlinkConsumerType<this>): void;
+
+  removeDownlinkConsumer(downlinkConsumer: ModelDownlinkConsumerType<this>): void
+
+  /** @hidden */
+  willRemoveDownlinkConsumer(downlinkConsumer: ModelDownlinkConsumerType<this>): void;
+
+  /** @hidden */
+  onRemoveDownlinkConsumer(downlinkConsumer: ModelDownlinkConsumerType<this>): void;
+
+  /** @hidden */
+  didRemoveDownlinkConsumer(downlinkConsumer: ModelDownlinkConsumerType<this>): void;
 
   /** @hidden */
   readonly ownWarp: WarpRef | null;
@@ -174,11 +233,31 @@ export interface ModelDownlink<M extends ModelDownlinkContext> {
   /** @hidden */
   initBody?(): AnyValue | null;
 
+  isMounted(): boolean;
+
   /** @hidden */
   mount(): void;
 
   /** @hidden */
+  willMount(): void;
+
+  /** @hidden */
+  onMount(): void;
+
+  /** @hidden */
+  didMount(): void;
+
+  /** @hidden */
   unmount(): void;
+
+  /** @hidden */
+  willUnmount(): void;
+
+  /** @hidden */
+  onUnmount(): void;
+
+  /** @hidden */
+  didUnmount(): void;
 }
 
 export const ModelDownlink = function <M extends ModelDownlinkContext>(
@@ -235,9 +314,11 @@ export const ModelDownlink = function <M extends ModelDownlinkContext>(
   define<M extends ModelDownlinkContext>(descriptor: ModelDownlinkDescriptor<M>): ModelDownlinkConstructor<M>;
 
   /** @hidden */
-  PendingFlag: ModelDownlinkFlags;
+  MountedFlag: ModelDownlinkFlags;
   /** @hidden */
-  EnabledFlag: ModelDownlinkFlags;
+  ConsumingFlag: ModelDownlinkFlags;
+  /** @hidden */
+  PendingFlag: ModelDownlinkFlags;
   /** @hidden */
   RelinkMask: ModelDownlinkFlags;
 };
@@ -262,6 +343,11 @@ function ModelDownlinkConstructor<M extends ModelDownlinkContext>(this: ModelDow
   });
   Object.defineProperty(this, "downlinkFlags", {
     value: ModelDownlink.PendingFlag,
+    enumerable: true,
+    configurable: true,
+  });
+  Object.defineProperty(this, "downlinkConsumers", {
+    value: Arrays.empty,
     enumerable: true,
     configurable: true,
   });
@@ -315,20 +401,111 @@ ModelDownlink.prototype.setDownlinkFlags = function (this: ModelDownlink<ModelDo
   });
 };
 
-ModelDownlink.prototype.enabled = function (this: ModelDownlink<ModelDownlinkContext>, enabled?: boolean): boolean | ModelDownlink<ModelDownlinkContext> {
-  if (enabled === void 0) {
-    return (this.downlinkFlags & ModelDownlink.EnabledFlag) !== 0;
-  } else {
-    if (enabled && (this.downlinkFlags & ModelDownlink.EnabledFlag) === 0) {
-      this.setDownlinkFlags(this.downlinkFlags | ModelDownlink.EnabledFlag);
-      this.owner.requireUpdate(Model.NeedsReconcile);
-    } else if (!enabled && (this.downlinkFlags & ModelDownlink.EnabledFlag) !== 0) {
-      this.setDownlinkFlags(this.downlinkFlags & ~ModelDownlink.EnabledFlag);
-      this.owner.requireUpdate(Model.NeedsReconcile);
-    }
-    return this;
+ModelDownlink.prototype.isConsuming = function (this: ModelDownlink<ModelDownlinkContext>): boolean {
+  return (this.downlinkFlags & ModelDownlink.ConsumingFlag) !== 0;
+};
+
+ModelDownlink.prototype.startConsuming = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  if ((this.downlinkFlags & ModelDownlink.ConsumingFlag) === 0) {
+    this.willStartConsuming();
+    this.setDownlinkFlags(this.downlinkFlags | ModelDownlink.ConsumingFlag);
+    this.onStartConsuming();
+    this.didStartConsuming();
   }
-} as typeof ModelDownlink.prototype.enabled;
+};
+
+ModelDownlink.prototype.willStartConsuming = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  // hook
+};
+
+ModelDownlink.prototype.onStartConsuming = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  this.owner.requireUpdate(Model.NeedsReconcile);
+};
+
+ModelDownlink.prototype.didStartConsuming = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  // hook
+};
+
+ModelDownlink.prototype.stopConsuming = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  if ((this.downlinkFlags & ModelDownlink.ConsumingFlag) !== 0) {
+    this.willStopConsuming();
+    this.setDownlinkFlags(this.downlinkFlags & ~ModelDownlink.ConsumingFlag);
+    this.onStopConsuming();
+    this.didStopConsuming();
+  }
+};
+
+ModelDownlink.prototype.willStopConsuming = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  // hook
+};
+
+ModelDownlink.prototype.onStopConsuming = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  this.owner.requireUpdate(Model.NeedsReconcile);
+};
+
+ModelDownlink.prototype.didStopConsuming = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  // hook
+};
+
+ModelDownlink.prototype.addDownlinkConsumer = function (this: ModelDownlink<ModelDownlinkContext>, downlinkConsumer: ModelDownlinkConsumerType<ModelDownlink<any>>): void {
+  const oldDownlinkConsumers = this.downlinkConsumers;
+  const newDownlinkConsumers = Arrays.inserted(downlinkConsumer, oldDownlinkConsumers);
+  if (oldDownlinkConsumers !== newDownlinkConsumers) {
+    this.willAddDownlinkConsumer(downlinkConsumer);
+    Object.defineProperty(this, "downlinkConsumers", {
+      value: newDownlinkConsumers,
+      enumerable: true,
+      configurable: true,
+    });
+    this.onAddDownlinkConsumer(downlinkConsumer);
+    this.didAddDownlinkConsumer(downlinkConsumer);
+    if (oldDownlinkConsumers.length === 0) {
+      this.startConsuming();
+    }
+  }
+};
+
+ModelDownlink.prototype.willAddDownlinkConsumer = function (this: ModelDownlink<ModelDownlinkContext>, downlinkConsumer: ModelDownlinkConsumerType<ModelDownlink<any>>): void {
+  // hook
+}
+
+ModelDownlink.prototype.onAddDownlinkConsumer = function (this: ModelDownlink<ModelDownlinkContext>, downlinkConsumer: ModelDownlinkConsumerType<ModelDownlink<any>>): void {
+  // hook
+};
+
+ModelDownlink.prototype.didAddDownlinkConsumer = function (this: ModelDownlink<ModelDownlinkContext>, downlinkConsumer: ModelDownlinkConsumerType<ModelDownlink<any>>): void {
+  // hook
+};
+
+ModelDownlink.prototype.removeDownlinkConsumer = function (this: ModelDownlink<ModelDownlinkContext>, downlinkConsumer: ModelDownlinkConsumerType<ModelDownlink<any>>): void {
+  const oldDownlinkConsumers = this.downlinkConsumers;
+  const newDownlinkConsumers = Arrays.removed(downlinkConsumer, oldDownlinkConsumers);
+  if (oldDownlinkConsumers !== newDownlinkConsumers) {
+    this.willRemoveDownlinkConsumer(downlinkConsumer);
+    Object.defineProperty(this, "downlinkConsumers", {
+      value: newDownlinkConsumers,
+      enumerable: true,
+      configurable: true,
+    });
+    this.onRemoveDownlinkConsumer(downlinkConsumer);
+    this.didRemoveDownlinkConsumer(downlinkConsumer);
+    if (newDownlinkConsumers.length === 0) {
+      this.stopConsuming();
+    }
+  }
+};
+
+ModelDownlink.prototype.willRemoveDownlinkConsumer = function (this: ModelDownlink<ModelDownlinkContext>, downlinkConsumer: ModelDownlinkConsumerType<ModelDownlink<any>>): void {
+  // hook
+};
+
+ModelDownlink.prototype.onRemoveDownlinkConsumer = function (this: ModelDownlink<ModelDownlinkContext>, downlinkConsumer: ModelDownlinkConsumerType<ModelDownlink<any>>): void {
+  // hook
+};
+
+ModelDownlink.prototype.didRemoveDownlinkConsumer = function (this: ModelDownlink<ModelDownlinkContext>, downlinkConsumer: ModelDownlinkConsumerType<ModelDownlink<any>>): void {
+  // hook
+};
 
 ModelDownlink.prototype.warp = function (this: ModelDownlink<ModelDownlinkContext>, warp?: WarpRef | null): WarpRef | null | ModelDownlink<ModelDownlinkContext> {
   if (warp === void 0) {
@@ -572,16 +749,18 @@ ModelDownlink.prototype.unlink = function (this: ModelDownlink<ModelDownlinkCont
 
 ModelDownlink.prototype.relink = function (this: ModelDownlink<ModelDownlinkContext>): void {
   this.setDownlinkFlags(this.downlinkFlags | ModelDownlink.PendingFlag);
-  this.owner.requireUpdate(Model.NeedsReconcile);
+  if ((this.downlinkFlags & ModelDownlink.ConsumingFlag) !== 0) {
+    this.owner.requireUpdate(Model.NeedsReconcile);
+  }
 };
 
 ModelDownlink.prototype.reconcile = function (this: ModelDownlink<ModelDownlinkContext>): void {
   if (this.downlink !== null && (this.downlinkFlags & ModelDownlink.RelinkMask) === ModelDownlink.RelinkMask) {
     this.unlink();
     this.link();
-  } else if (this.downlink === null && (this.downlinkFlags & ModelDownlink.EnabledFlag) !== 0) {
+  } else if (this.downlink === null && (this.downlinkFlags & ModelDownlink.ConsumingFlag) !== 0) {
     this.link();
-  } else if (this.downlink !== null && (this.downlinkFlags & ModelDownlink.EnabledFlag) === 0) {
+  } else if (this.downlink !== null && (this.downlinkFlags & ModelDownlink.ConsumingFlag) === 0) {
     this.unlink();
   }
 };
@@ -614,14 +793,52 @@ ModelDownlink.prototype.bindDownlink = function (this: ModelDownlink<ModelDownli
   return downlink;
 };
 
+ModelDownlink.prototype.isMounted = function (this: ModelDownlink<ModelDownlinkContext>): boolean {
+  return (this.downlinkFlags & ModelDownlink.MountedFlag) !== 0;
+};
+
 ModelDownlink.prototype.mount = function (this: ModelDownlink<ModelDownlinkContext>): void {
-  if ((this.downlinkFlags & ModelDownlink.EnabledFlag) !== 0) {
+  if ((this.downlinkFlags & ModelDownlink.MountedFlag) === 0) {
+    this.willMount();
+    this.setDownlinkFlags(this.downlinkFlags | ModelDownlink.MountedFlag);
+    this.onMount();
+    this.didMount();
+  }
+};
+
+ModelDownlink.prototype.willMount = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  // hook
+};
+
+ModelDownlink.prototype.onMount = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  if ((this.downlinkFlags & ModelDownlink.ConsumingFlag) !== 0) {
     this.owner.requireUpdate(Model.NeedsReconcile);
   }
 };
 
+ModelDownlink.prototype.didMount = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  // hook
+};
+
 ModelDownlink.prototype.unmount = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  if ((this.downlinkFlags & ModelDownlink.MountedFlag) !== 0) {
+    this.willUnmount();
+    this.setDownlinkFlags(this.downlinkFlags & ~ModelDownlink.MountedFlag);
+    this.onUnmount();
+    this.didUnmount();
+  }
+};
+
+ModelDownlink.prototype.willUnmount = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  // hook
+};
+
+ModelDownlink.prototype.onUnmount = function (this: ModelDownlink<ModelDownlinkContext>): void {
   this.unlink();
+};
+
+ModelDownlink.prototype.didUnmount = function (this: ModelDownlink<ModelDownlinkContext>): void {
+  // hook
 };
 
 ModelDownlink.define = function <M extends ModelDownlinkContext, I>(descriptor: ModelDownlinkDescriptor<M, I>): ModelDownlinkConstructor<M, I> {
@@ -637,7 +854,6 @@ ModelDownlink.define = function <M extends ModelDownlinkContext, I>(descriptor: 
     return ModelValueDownlink.define(descriptor as unknown as ModelValueDownlinkDescriptor<M, any, any>) as unknown as ModelDownlinkConstructor<M, I>;
   } else {
     let _super: ModelDownlinkClass | null | undefined = descriptor.extends;
-    const enabled = descriptor.enabled;
     let hostUri = descriptor.hostUri;
     let nodeUri = descriptor.nodeUri;
     let laneUri = descriptor.laneUri;
@@ -645,7 +861,6 @@ ModelDownlink.define = function <M extends ModelDownlinkContext, I>(descriptor: 
     let rate = descriptor.rate;
     let body = descriptor.body;
     delete descriptor.extends;
-    delete descriptor.enabled;
     delete descriptor.hostUri;
     delete descriptor.nodeUri;
     delete descriptor.laneUri;
@@ -659,13 +874,6 @@ ModelDownlink.define = function <M extends ModelDownlinkContext, I>(descriptor: 
 
     const _constructor = function DecoratedModelDownlink(this: ModelDownlink<M>, owner: M, downlinkName: string | undefined): ModelDownlink<M> {
       const _this: ModelDownlink<M> = _super!.call(this, owner, downlinkName) || this;
-      if (enabled === true) {
-        Object.defineProperty(_this, "downlinkFlags", {
-          value: _this.downlinkFlags | ModelDownlink.EnabledFlag,
-          enumerable: true,
-          configurable: true,
-        });
-      }
       if (hostUri !== void 0) {
         Object.defineProperty(_this, "ownHostUri", {
           value: hostUri as Uri,
@@ -754,6 +962,7 @@ ModelDownlink.define = function <M extends ModelDownlinkContext, I>(descriptor: 
   }
 };
 
-ModelDownlink.PendingFlag = 1 << 0;
-ModelDownlink.EnabledFlag = 1 << 1;
-ModelDownlink.RelinkMask = ModelDownlink.PendingFlag | ModelDownlink.EnabledFlag;
+ModelDownlink.MountedFlag = 1 << 0;
+ModelDownlink.ConsumingFlag = 1 << 1;
+ModelDownlink.PendingFlag = 1 << 2;
+ModelDownlink.RelinkMask = ModelDownlink.ConsumingFlag | ModelDownlink.PendingFlag;

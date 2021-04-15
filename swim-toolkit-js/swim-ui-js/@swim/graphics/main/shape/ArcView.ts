@@ -164,14 +164,7 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     return new BoxR2(x, y, x, y);
   }
 
-  get viewBounds(): BoxR2 {
-    const frame = this.viewFrame;
-    const size = Math.min(frame.width, frame.height);
-    const center = this.center.getValue();
-    const radius = this.outerRadius.getValue().pxValue(size);
-    return new BoxR2(center.x - radius, center.y - radius,
-                     center.x + radius, center.y + radius);
-  }
+  declare readonly viewBounds: BoxR2; // getter defined below to work around useDefineForClassFields lunacy
 
   protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit = super.doHitTest(x, y, viewContext);
@@ -236,3 +229,15 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     }
   }
 }
+Object.defineProperty(ArcView.prototype, "viewBounds", {
+  get(this: ArcView): BoxR2 {
+    const frame = this.viewFrame;
+    const size = Math.min(frame.width, frame.height);
+    const center = this.center.getValue();
+    const radius = this.outerRadius.getValue().pxValue(size);
+    return new BoxR2(center.x - radius, center.y - radius,
+                     center.x + radius, center.y + radius);
+  },
+  enumerable: true,
+  configurable: true,
+});

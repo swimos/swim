@@ -21,10 +21,11 @@ export abstract class GeoPathTrait extends GeoTrait {
   declare readonly traitObservers: ReadonlyArray<GeoPathTraitObserver>;
 
   get geoBounds(): GeoBox {
-    return this.geoPath.state.bounds;
+    const geoPath = this.geoPath.state;
+    return geoPath !== null ? geoPath.bounds : GeoBox.undefined();
   }
 
-  protected willSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
+  protected willSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
@@ -34,11 +35,11 @@ export abstract class GeoPathTrait extends GeoTrait {
     }
   }
 
-  protected onSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
+  protected onSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
     // hook
   }
 
-  protected didSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
+  protected didSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
@@ -48,16 +49,16 @@ export abstract class GeoPathTrait extends GeoTrait {
     }
   }
 
-  @TraitProperty<GeoPathTrait, GeoPath, AnyGeoPath>({
+  @TraitProperty<GeoPathTrait, GeoPath | null, AnyGeoPath | null>({
     type: GeoPath,
-    state: GeoPath.empty(),
-    willSetState(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
+    state: null,
+    willSetState(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
       this.owner.willSetGeoPath(newGeoPath, oldGeoPath);
     },
-    didSetState(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
+    didSetState(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
       this.owner.onSetGeoPath(newGeoPath, oldGeoPath);
       this.owner.didSetGeoPath(newGeoPath, oldGeoPath);
     },
   })
-  declare geoPath: TraitProperty<this, GeoPath, AnyGeoPath>;
+  declare geoPath: TraitProperty<this, GeoPath | null, AnyGeoPath | null>;
 }

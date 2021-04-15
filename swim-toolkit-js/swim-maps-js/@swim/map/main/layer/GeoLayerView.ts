@@ -404,7 +404,6 @@ export class GeoLayerView extends GeoView {
     }
   }
 
-  // @ts-ignore
   declare readonly geoBounds: GeoBox;
 
   protected setGeoBounds(newGeoBounds: GeoBox): void {

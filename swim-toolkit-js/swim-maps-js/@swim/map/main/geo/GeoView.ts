@@ -200,7 +200,6 @@ export abstract class GeoView extends GraphicsView {
     this.setCulled(!geoFrame.intersects(this.geoBounds));
   }
 
-  // @ts-ignore
   declare readonly viewContext: GeoViewContext;
 
   get geoViewport(): GeoViewport {
@@ -221,9 +220,7 @@ export abstract class GeoView extends GraphicsView {
    * view could possibly render.  Views with geo bounds that don't overlap
    * their map frames may be culled from rendering and hit testing.
    */
-  get geoBounds(): GeoBox {
-    return this.geoFrame;
-  }
+  declare readonly geoBounds: GeoBox; // getter defined below to work around useDefineForClassFields lunacy
 
   get ownGeoBounds(): GeoBox | null {
     return null;
@@ -293,3 +290,10 @@ export abstract class GeoView extends GraphicsView {
   static readonly mountFlags: ViewFlags = GraphicsView.mountFlags | View.NeedsProject;
   static readonly uncullFlags: ViewFlags = GraphicsView.uncullFlags | View.NeedsProject;
 }
+Object.defineProperty(GeoView.prototype, "geoBounds", {
+  get(this: GeoView): GeoBox {
+    return this.geoFrame;
+  },
+  enumerable: true,
+  configurable: true,
+});

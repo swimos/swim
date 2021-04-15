@@ -24,7 +24,7 @@ import type {ModelPropertyConstructor, ModelProperty} from "./property/ModelProp
 import type {TraitPropertyConstructor, TraitProperty} from "./property/TraitProperty";
 import type {TraitModelConstructor, TraitModel} from "./fastener/TraitModel";
 import type {TraitFastenerConstructor, TraitFastener} from "./fastener/TraitFastener";
-import type {ModelDownlinkContext} from "./downlink/ModelDownlinkContext";
+import {ModelDownlinkContextPrototype, ModelDownlinkContext} from "./downlink/ModelDownlinkContext";
 import type {ModelDownlink} from "./downlink/ModelDownlink";
 
 export type TraitModelType<R extends Trait> = R extends {readonly model: infer M} ? M extends null ? never : M : Model;
@@ -33,7 +33,7 @@ export type TraitContextType<R extends Trait> = ModelContextType<TraitModelType<
 
 export type TraitFlags = number;
 
-export interface TraitPrototype {
+export interface TraitPrototype extends ModelDownlinkContextPrototype {
   /** @hidden */
   traitServiceConstructors?: {[serviceName: string]: TraitServiceConstructor<Trait, unknown> | undefined};
 
@@ -155,7 +155,7 @@ export abstract class Trait implements ModelDownlinkContext {
     // hook
   }
 
-  abstract get key(): string | undefined;
+  abstract readonly key: string | undefined;
 
   /** @hidden */
   abstract setKey(key: string | undefined): void;
@@ -174,7 +174,7 @@ export abstract class Trait implements ModelDownlinkContext {
     }
   }
 
-  abstract get model(): Model | null;
+  abstract readonly model: Model | null;
 
   /** @hidden */
   abstract setModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void;
@@ -991,6 +991,15 @@ export abstract class Trait implements ModelDownlinkContext {
     return (this.constructor as TraitClass).startConsumingFlags;
   }
 
+  protected startConsuming(): void {
+    if ((this.traitFlags & Trait.ConsumingFlag) === 0) {
+      this.willStartConsuming();
+      this.setTraitFlags(this.traitFlags | Trait.ConsumingFlag);
+      this.onStartConsuming();
+      this.didStartConsuming();
+    }
+  }
+
   protected willStartConsuming(): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
@@ -1019,6 +1028,15 @@ export abstract class Trait implements ModelDownlinkContext {
     return (this.constructor as TraitClass).stopConsumingFlags;
   }
 
+  protected stopConsuming(): void {
+    if ((this.traitFlags & Trait.ConsumingFlag) !== 0) {
+      this.willStopConsuming();
+      this.setTraitFlags(this.traitFlags & ~Trait.ConsumingFlag);
+      this.onStopConsuming();
+      this.didStopConsuming();
+    }
+  }
+
   protected willStopConsuming(): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
@@ -1043,7 +1061,7 @@ export abstract class Trait implements ModelDownlinkContext {
     }
   }
 
-  abstract get traitConsumers(): ReadonlyArray<TraitConsumer>;
+  abstract readonly traitConsumers: ReadonlyArray<TraitConsumer>;
 
   abstract addTraitConsumer(traitConsumer: TraitConsumerType<this>): void;
 
@@ -1166,6 +1184,19 @@ export abstract class Trait implements ModelDownlinkContext {
   abstract getModelDownlink(downlinkName: string): ModelDownlink<this> | null;
 
   abstract setModelDownlink(downlinkName: string, traitDownlink: ModelDownlink<this> | null): void;
+
+  /** @hidden */
+  getLazyModelDownlink(downlinkName: string): ModelDownlink<this> | null {
+    let modelDownlink = this.getModelDownlink(downlinkName) as ModelDownlink<this> | null;
+    if (modelDownlink === null) {
+      const constructor = ModelDownlinkContext.getModelDownlinkConstructor(downlinkName, Object.getPrototypeOf(this));
+      if (constructor !== null) {
+        modelDownlink = new constructor(this, downlinkName) as ModelDownlink<this>;
+        this.setModelDownlink(downlinkName, modelDownlink);
+      }
+    }
+    return modelDownlink;
+  }
 
   get modelContext(): TraitContextType<this> | null {
     const model = this.model;

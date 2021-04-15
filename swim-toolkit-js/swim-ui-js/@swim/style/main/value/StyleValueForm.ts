@@ -30,7 +30,6 @@ export class StyleValueForm extends Form<StyleValue, AnyStyleValue> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: StyleValue | undefined;
 
   withUnit(unit: StyleValue | undefined): Form<StyleValue, AnyStyleValue> {

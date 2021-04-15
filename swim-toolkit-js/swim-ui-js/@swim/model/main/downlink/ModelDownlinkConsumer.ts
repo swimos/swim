@@ -12,24 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./geo";
+import type {ModelDownlink} from "./ModelDownlink";
 
-export * from "./tree";
+export type ModelDownlinkConsumerType<M extends ModelDownlink<any>> =
+  M extends {readonly downlinkConsumers: ReadonlyArray<infer MC>} ? MC : never;
 
-export * from "./layer";
-
-export * from "./raster";
-
-export * from "./effect";
-
-export * from "./shape";
-
-export * from "./path";
-
-export * from "./plot";
-
-export * from "./icon";
-
-export * from "./map";
-
-export * from "./world";
+export type ModelDownlinkConsumer<M extends ModelDownlink<any> = ModelDownlink<any>> = unknown

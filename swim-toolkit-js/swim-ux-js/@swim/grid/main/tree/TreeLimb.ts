@@ -56,7 +56,6 @@ export class TreeLimb extends HtmlView {
 
   declare readonly viewObservers: ReadonlyArray<TreeLimbObserver>;
 
-  // @ts-ignore
   declare readonly viewContext: TreeViewContext;
 
   initView(init: TreeLimbInit): void {

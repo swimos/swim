@@ -22,6 +22,7 @@ export abstract class ValueDownlinkTrait extends DownlinkTrait {
   }
 
   @ModelValueDownlink<ValueDownlinkTrait, Value, AnyValue>({
+    consume: true,
     didSet(newValue: Value, oldValue: Value): void {
       if (this.owner.isConsuming()) {
         this.owner.downlinkDidSet(newValue, oldValue);
@@ -29,14 +30,4 @@ export abstract class ValueDownlinkTrait extends DownlinkTrait {
     },
   })
   declare downlink: ModelValueDownlink<this, Value, AnyValue>;
-
-  protected onStartConsuming(): void {
-    super.onStartConsuming();
-    this.downlink.enabled(true);
-  }
-
-  protected onStopConsuming(): void {
-    super.onStopConsuming();
-    this.downlink.enabled(false);
-  }
 }

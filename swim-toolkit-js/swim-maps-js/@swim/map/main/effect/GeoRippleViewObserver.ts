@@ -12,24 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./geo";
+import type {GeoPoint} from "@swim/geo";
+import type {GeoViewObserver} from "../geo/GeoViewObserver";
+import type {GeoRippleView} from "./GeoRippleView";
 
-export * from "./tree";
+export interface GeoRippleViewObserver<V extends GeoRippleView = GeoRippleView> extends GeoViewObserver<V> {
+  viewWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, view: V): void;
 
-export * from "./layer";
-
-export * from "./raster";
-
-export * from "./effect";
-
-export * from "./shape";
-
-export * from "./path";
-
-export * from "./plot";
-
-export * from "./icon";
-
-export * from "./map";
-
-export * from "./world";
+  viewDidSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, view: V): void;
+}

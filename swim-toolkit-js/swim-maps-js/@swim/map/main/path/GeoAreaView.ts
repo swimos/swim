@@ -232,8 +232,8 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   }
 
   protected renderArea(context: CanvasContext, frame: BoxR2): void {
-    const viewPath = this.viewPath.getValue();
-    if (viewPath.isDefined()) {
+    const viewPath = this.viewPath.value;
+    if (viewPath !== null && viewPath.isDefined()) {
       context.beginPath();
       viewPath.draw(context);
       const fill = this.fill.value;
@@ -269,8 +269,8 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   }
 
   protected hitTestArea(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
-    const viewPath = this.viewPath.getValue();
-    if (viewPath.isDefined()) {
+    const viewPath = this.viewPath.value;
+    if (viewPath !== null && viewPath.isDefined()) {
       context.beginPath();
       viewPath.draw(context);
       if (this.fill.value !== null && context.isPointInPath(x, y)) {

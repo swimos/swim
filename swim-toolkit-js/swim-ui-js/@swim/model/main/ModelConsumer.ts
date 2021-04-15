@@ -15,6 +15,6 @@
 import type {Model} from "./Model";
 
 export type ModelConsumerType<M extends Model> =
-  M extends {readonly modelConsumers: ReadonlyArray<infer MC>} ? MC : unknown;
+  M extends {readonly modelConsumers: ReadonlyArray<infer MC>} ? MC : never;
 
 export type ModelConsumer<M extends Model = Model> = unknown

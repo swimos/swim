@@ -28,9 +28,9 @@ export interface GeoIconComponentObserver<C extends GeoIconComponent = GeoIconCo
 
   componentDidSetGeoView?(newGeoView: GeoIconView | null, oldGeoView: GeoIconView | null, component: C): void;
 
-  componentWillSetGeoCenter?(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint, component: C): void;
+  componentWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, component: C): void;
 
-  componentDidSetGeoCenter?(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint, component: C): void;
+  componentDidSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, component: C): void;
 
   componentWillSetIconLayout?(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null, component: C): void;
 

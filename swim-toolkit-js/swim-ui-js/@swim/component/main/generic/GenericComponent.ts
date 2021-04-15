@@ -143,7 +143,7 @@ export abstract class GenericComponent extends Component {
     }
   }
 
-  abstract get childComponentCount(): number;
+  abstract readonly childComponentCount: number;
 
   abstract readonly childComponents: ReadonlyArray<Component>;
 

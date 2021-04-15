@@ -27,7 +27,6 @@ export class BoxShadowForm extends Form<BoxShadow | null, AnyBoxShadow> {
     });
   }
 
-  // @ts-ignore
   declare readonly unit: BoxShadow | null | undefined;
 
   withUnit(unit: BoxShadow | null | undefined): Form<BoxShadow | null, AnyBoxShadow> {

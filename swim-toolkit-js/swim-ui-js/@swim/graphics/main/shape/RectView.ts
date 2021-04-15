@@ -130,14 +130,7 @@ export class RectView extends LayerView implements FillView, StrokeView {
     }
   }
 
-  get viewBounds(): BoxR2 {
-    const frame = this.viewFrame;
-    const x = this.x.getValue().pxValue(frame.width);
-    const y = this.y.getValue().pxValue(frame.height);
-    const width = this.width.getValue().pxValue(frame.width);
-    const height = this.height.getValue().pxValue(frame.height);
-    return new BoxR2(x, y, x + width, y + height);
-  }
+  declare readonly viewBounds: BoxR2; // getter defined below to work around useDefineForClassFields lunacy
 
   protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit = super.doHitTest(x, y, viewContext);
@@ -205,3 +198,15 @@ export class RectView extends LayerView implements FillView, StrokeView {
     }
   }
 }
+Object.defineProperty(RectView.prototype, "viewBounds", {
+  get(this: RectView): BoxR2 {
+    const frame = this.viewFrame;
+    const x = this.x.getValue().pxValue(frame.width);
+    const y = this.y.getValue().pxValue(frame.height);
+    const width = this.width.getValue().pxValue(frame.width);
+    const height = this.height.getValue().pxValue(frame.height);
+    return new BoxR2(x, y, x + width, y + height);
+  },
+  enumerable: true,
+  configurable: true,
+});

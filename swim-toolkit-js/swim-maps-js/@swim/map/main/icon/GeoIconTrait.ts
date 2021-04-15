@@ -22,10 +22,11 @@ export class GeoIconTrait extends GeoTrait {
   declare readonly traitObservers: ReadonlyArray<GeoIconTraitObserver>;
 
   get geoBounds(): GeoBox {
-    return this.geoCenter.state.bounds;
+    const geoCenter = this.geoCenter.state;
+    return geoCenter !== null ? geoCenter.bounds : GeoBox.undefined();
   }
 
-  protected willSetGeoCenter(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint): void {
+  protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
@@ -35,11 +36,11 @@ export class GeoIconTrait extends GeoTrait {
     }
   }
 
-  protected onSetGeoCenter(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint): void {
+  protected onSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
     // hook
   }
 
-  protected didSetGeoCenter(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint): void {
+  protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
@@ -49,18 +50,18 @@ export class GeoIconTrait extends GeoTrait {
     }
   }
 
-  @TraitProperty<GeoIconTrait, GeoPoint, AnyGeoPoint>({
+  @TraitProperty<GeoIconTrait, GeoPoint | null, AnyGeoPoint | null>({
     type: GeoPoint,
-    state: GeoPoint.origin(),
-    willSetState(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint): void {
+    state: null,
+    willSetState(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
       this.owner.willSetGeoCenter(newGeoCenter, oldGeoCenter);
     },
-    didSetState(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint): void {
+    didSetState(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
       this.owner.onSetGeoCenter(newGeoCenter, oldGeoCenter);
       this.owner.didSetGeoCenter(newGeoCenter, oldGeoCenter);
     },
   })
-  declare geoCenter: TraitProperty<this, GeoPoint, AnyGeoPoint>;
+  declare geoCenter: TraitProperty<this, GeoPoint | null, AnyGeoPoint | null>;
 
   protected willSetIconLayout(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
     const traitObservers = this.traitObservers;

@@ -18,7 +18,7 @@ const RED = swim.Color.parse("#a50f21");
 const YELLOW = swim.Color.parse("#fccf20");
 const GREEN = swim.Color.parse("#54e218");
 const INTERSECTION_COLOR = swim.Color.parse("#00a6ed");
-const RIPPLE_COLOR = swim.Color.parse("#efefef").alpha(0.25);
+const RIPPLE_COLOR = swim.Color.parse("#efefef");
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
@@ -153,7 +153,11 @@ function linkIntersection(intersectionId, node, intersectionView) {
           updateApproach(approachView);
         }
         if (occupied) {
-          rippleIntersection();
+          intersectionView.ripple({
+            color: RIPPLE_COLOR,
+            opacity: 0.25,
+            timing: 2000,
+          });
         }
       })
       .open();
@@ -179,26 +183,6 @@ function linkIntersection(intersectionId, node, intersectionView) {
     } else {
       approachView.stroke(swim.Color.transparent(), timing);
     }
-  }
-
-  function rippleIntersection() {
-    if (document.hidden || !mapView.geoFrame.contains(intersectionView.geoCenter.value)) {
-      return;
-    }
-    const ripple = new swim.GeoCircleView()
-        .geoCenter(intersectionView.geoCenter.value)
-        .radius(0)
-        .stroke(RIPPLE_COLOR)
-        .strokeWidth(1);
-    layerView.append(ripple);
-    const frame = mapView.viewFrame;
-    const radius = Math.min(frame.width, frame.height) / 8;
-    const timing = swim.Easing.linear.withDuration(2000);
-    ripple.stroke(RIPPLE_COLOR.alpha(0), timing)
-          .radius(radius, timing);
-    ripple.radius.onEnd = function () {
-      ripple.remove();
-    };
   }
 }
 

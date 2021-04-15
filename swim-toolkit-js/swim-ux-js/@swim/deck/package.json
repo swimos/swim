@@ -1,6 +1,6 @@
 {
   "name": "@swim/deck",
-  "version": "3.11.0-dev.20210411",
+  "version": "3.11.0-dev.20210415",
   "description": "Card stack navigation views",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
@@ -11,18 +11,18 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210411",
-    "@swim/codec": "3.11.0-dev.20210411",
-    "@swim/mapping": "3.11.0-dev.20210411",
-    "@swim/constraint": "3.11.0-dev.20210411",
-    "@swim/structure": "3.11.0-dev.20210411",
-    "@swim/math": "3.11.0-dev.20210411",
-    "@swim/time": "3.11.0-dev.20210411",
-    "@swim/style": "3.11.0-dev.20210411",
-    "@swim/theme": "3.11.0-dev.20210411",
-    "@swim/view": "3.11.0-dev.20210411",
-    "@swim/dom": "3.11.0-dev.20210411",
-    "@swim/graphics": "3.11.0-dev.20210411",
-    "@swim/button": "3.11.0-dev.20210411"
+    "@swim/util": "3.11.0-dev.20210415",
+    "@swim/codec": "3.11.0-dev.20210415",
+    "@swim/mapping": "3.11.0-dev.20210415",
+    "@swim/constraint": "3.11.0-dev.20210415",
+    "@swim/structure": "3.11.0-dev.20210415",
+    "@swim/math": "3.11.0-dev.20210415",
+    "@swim/time": "3.11.0-dev.20210415",
+    "@swim/style": "3.11.0-dev.20210415",
+    "@swim/theme": "3.11.0-dev.20210415",
+    "@swim/view": "3.11.0-dev.20210415",
+    "@swim/dom": "3.11.0-dev.20210415",
+    "@swim/graphics": "3.11.0-dev.20210415",
+    "@swim/button": "3.11.0-dev.20210415"
   }
 }

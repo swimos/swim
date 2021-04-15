@@ -368,7 +368,6 @@ ModelMapDownlink.prototype.createDownlink = function <K, V, KU, VU>(this: ModelM
 
 ModelMapDownlink.define = function <M extends ModelDownlinkContext, K, V, KU, VU, I>(descriptor: ModelMapDownlinkDescriptor<M, K, V, KU, VU, I>): ModelMapDownlinkConstructor<M, K, V, KU, VU, I> {
   let _super: ModelMapDownlinkClass | null | undefined = descriptor.extends;
-  const enabled = descriptor.enabled;
   const keyForm = descriptor.keyForm;
   const valueForm = descriptor.valueForm;
   let hostUri = descriptor.hostUri;
@@ -378,7 +377,6 @@ ModelMapDownlink.define = function <M extends ModelDownlinkContext, K, V, KU, VU
   let rate = descriptor.rate;
   let body = descriptor.body;
   delete descriptor.extends;
-  delete descriptor.enabled;
   delete descriptor.keyForm;
   delete descriptor.valueForm;
   delete descriptor.hostUri;
@@ -403,13 +401,6 @@ ModelMapDownlink.define = function <M extends ModelDownlinkContext, K, V, KU, VU
     } as ModelMapDownlink<M, K, V, KU, VU>;
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, downlinkName) || _this;
-    if (enabled === true) {
-      Object.defineProperty(_this, "downlinkFlags", {
-        value: _this.downlinkFlags | ModelDownlink.EnabledFlag,
-        enumerable: true,
-        configurable: true,
-      });
-    }
     if (keyForm !== void 0) {
       Object.defineProperty(_this, "ownKeyForm", {
         value: keyForm,

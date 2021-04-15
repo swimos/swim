@@ -15,6 +15,6 @@
 import type {Trait} from "./Trait";
 
 export type TraitConsumerType<R extends Trait> =
-  R extends {readonly traitConsumers: ReadonlyArray<infer RC>} ? RC : unknown;
+  R extends {readonly traitConsumers: ReadonlyArray<infer RC>} ? RC : never;
 
 export type TraitConsumer<R extends Trait = Trait> = unknown

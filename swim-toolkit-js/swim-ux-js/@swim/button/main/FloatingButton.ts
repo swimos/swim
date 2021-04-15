@@ -19,12 +19,12 @@ import {
   ViewContextType,
   ViewContext,
   View,
-  ViewObserverType,
   ViewAnimator,
   ViewFastener,
   PositionGestureInput,
   PositionGestureDelegate,
 } from "@swim/view";
+import type {HtmlViewObserver} from "@swim/dom";
 import {Graphics, HtmlIconView} from "@swim/graphics";
 import {ButtonMembrane} from "./ButtonMembrane";
 
@@ -83,7 +83,7 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
   }
 
   /** @hidden */
-  static IconFastener = ViewFastener.define<FloatingButton, HtmlIconView, never, ViewObserverType<HtmlIconView> & {iconIndex: number}>({
+  static IconFastener = ViewFastener.define<FloatingButton, HtmlIconView, never, HtmlViewObserver & {iconIndex: number}>({
     extends: void 0,
     type: HtmlIconView,
     child: false,

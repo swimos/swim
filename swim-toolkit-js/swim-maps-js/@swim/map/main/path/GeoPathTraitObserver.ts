@@ -17,7 +17,7 @@ import type {GeoTraitObserver} from "../geo/GeoTraitObserver";
 import type {GeoPathTrait} from "./GeoPathTrait";
 
 export interface GeoPathTraitObserver<R extends GeoPathTrait = GeoPathTrait> extends GeoTraitObserver<R> {
-  traitWillSetGeoPath?(newGeoPath: GeoPath, oldGeoPath: GeoPath, trait: R): void;
+  traitWillSetGeoPath?(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, trait: R): void;
 
-  traitDidSetGeoPath?(newGeoPath: GeoPath, oldGeoPath: GeoPath, trait: R): void;
+  traitDidSetGeoPath?(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, trait: R): void;
 }

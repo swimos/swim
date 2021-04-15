@@ -144,7 +144,6 @@ ModelValueDownlink.prototype.createDownlink = function <V, VU>(this: ModelValueD
 
 ModelValueDownlink.define = function <M extends ModelDownlinkContext, V, VU, I>(descriptor: ModelValueDownlinkDescriptor<M, V, VU, I>): ModelValueDownlinkConstructor<M, V, VU, I> {
   let _super: ModelValueDownlinkClass | null | undefined = descriptor.extends;
-  const enabled = descriptor.enabled;
   const valueForm = descriptor.valueForm;
   let hostUri = descriptor.hostUri;
   let nodeUri = descriptor.nodeUri;
@@ -153,7 +152,6 @@ ModelValueDownlink.define = function <M extends ModelDownlinkContext, V, VU, I>(
   let rate = descriptor.rate;
   let body = descriptor.body;
   delete descriptor.extends;
-  delete descriptor.enabled;
   delete descriptor.valueForm;
   delete descriptor.hostUri;
   delete descriptor.nodeUri;
@@ -177,13 +175,6 @@ ModelValueDownlink.define = function <M extends ModelDownlinkContext, V, VU, I>(
     } as ModelValueDownlink<M, V, VU>;
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, downlinkName) || _this;
-    if (enabled === true) {
-      Object.defineProperty(_this, "downlinkFlags", {
-        value: _this.downlinkFlags | ModelDownlink.EnabledFlag,
-        enumerable: true,
-        configurable: true,
-      });
-    }
     if (valueForm !== void 0) {
       Object.defineProperty(_this, "ownValueForm", {
         value: valueForm,

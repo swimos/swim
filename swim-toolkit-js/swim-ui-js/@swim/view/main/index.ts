@@ -48,6 +48,8 @@ export {
   ViewDidLayout,
   ViewWillRender,
   ViewDidRender,
+  ViewWillRasterize,
+  ViewDidRasterize,
   ViewWillComposite,
   ViewDidComposite,
 } from "./ViewObserver";

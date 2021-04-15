@@ -17,6 +17,12 @@ import type {ModelFlags} from "../Model";
 import type {WarpManager} from "../warp/WarpManager";
 import type {ModelDownlinkConstructor, ModelDownlink} from "./ModelDownlink";
 
+/** @hidden */
+export interface ModelDownlinkContextPrototype {
+  /** @hidden */
+  modelDownlinkConstructors?: {[downlinkName: string]: ModelDownlinkConstructor<ModelDownlinkContext> | undefined};
+}
+
 export interface ModelDownlinkContext {
   hasModelDownlink(downlinkName: string): boolean;
 
@@ -24,31 +30,75 @@ export interface ModelDownlinkContext {
 
   setModelDownlink(downlinkName: string, modelDownlink: ModelDownlink<this> | null): void;
 
-  requireUpdate(updateFlags: ModelFlags): void;
+  /** @hidden */
+  getLazyModelDownlink(downlinkName: string): ModelDownlink<this> | null;
 
-  readonly warpRef: {
-    readonly state: WarpRef | null;
-  };
+  requireUpdate(updateFlags: ModelFlags): void;
 
   readonly warpService: {
     readonly manager: WarpManager;
+  };
+
+  readonly warpRef: {
+    readonly state: WarpRef | null;
   };
 }
 
 /** @hidden */
 export const ModelDownlinkContext = {} as {
   /** @hidden */
-  decorateModelDownlink(constructor: ModelDownlinkConstructor<ModelDownlinkContext>,
+  initModelDownlinks(modelDownlinkContext: ModelDownlinkContext): void;
+
+  /** @hidden */
+  getModelDownlinkConstructor(downlinkName: string, modelDownlinkContextPrototype: ModelDownlinkContextPrototype | null): ModelDownlinkConstructor<ModelDownlinkContext> | null;
+
+  /** @hidden */
+  decorateModelDownlink(modelDownlinkConstructor: ModelDownlinkConstructor<ModelDownlinkContext>,
                         target: Object, propertyKey: string | symbol): void;
 };
 
-ModelDownlinkContext.decorateModelDownlink = function (constructor: ModelDownlinkConstructor<ModelDownlinkContext>,
+ModelDownlinkContext.initModelDownlinks = function (modelDownlinkContext: ModelDownlinkContext): void {
+  let modelDownlinkContextPrototype: ModelDownlinkContextPrototype | null = Object.getPrototypeOf(modelDownlinkContext) as ModelDownlinkContextPrototype;
+  do {
+    if (Object.prototype.hasOwnProperty.call(modelDownlinkContextPrototype, "modelDownlinkConstructors")) {
+      const modelDownlinkConstructors = modelDownlinkContextPrototype.modelDownlinkConstructors!;
+      for (const downlinkName in modelDownlinkConstructors) {
+        const modelDownlinkConstructor = modelDownlinkConstructors[downlinkName]!;
+        if (modelDownlinkConstructor.prototype.consume !== void 0 && !modelDownlinkContext.hasModelDownlink(downlinkName)) {
+          const modelDownlink = new modelDownlinkConstructor(modelDownlinkContext, downlinkName);
+          modelDownlinkContext.setModelDownlink(downlinkName, modelDownlink);
+        }
+      }
+    }
+    modelDownlinkContextPrototype = Object.getPrototypeOf(modelDownlinkContextPrototype);
+  } while (modelDownlinkContextPrototype !== null);
+};
+
+ModelDownlinkContext.getModelDownlinkConstructor = function (downlinkName: string, modelDownlinkContextPrototype: ModelDownlinkContextPrototype | null): ModelDownlinkConstructor<ModelDownlinkContext> | null {
+  while (modelDownlinkContextPrototype !== null) {
+    if (Object.prototype.hasOwnProperty.call(modelDownlinkContextPrototype, "modelDownlinkConstructors")) {
+      const modelDownlinkConstructor = modelDownlinkContextPrototype.modelDownlinkConstructors![downlinkName];
+      if (modelDownlinkConstructor !== void 0) {
+        return modelDownlinkConstructor;
+      }
+    }
+    modelDownlinkContextPrototype = Object.getPrototypeOf(modelDownlinkContextPrototype);
+  }
+  return null;
+};
+
+ModelDownlinkContext.decorateModelDownlink = function (modelDownlinkConstructor: ModelDownlinkConstructor<ModelDownlinkContext>,
                                                        target: Object, propertyKey: string | symbol): void {
+  const modelDownlinkContextPrototype = target as ModelDownlinkContextPrototype;
+  if (!Object.prototype.hasOwnProperty.call(modelDownlinkContextPrototype, "modelDownlinkConstructors")) {
+    modelDownlinkContextPrototype.modelDownlinkConstructors = {};
+  }
+  modelDownlinkContextPrototype.modelDownlinkConstructors![propertyKey.toString()] = modelDownlinkConstructor;
   Object.defineProperty(target, propertyKey, {
     get: function (this: ModelDownlinkContext): ModelDownlink<ModelDownlinkContext> {
       let modelDownlink = this.getModelDownlink(propertyKey.toString());
       if (modelDownlink === null) {
-        modelDownlink = new constructor(this, propertyKey.toString());
+        modelDownlink = new modelDownlinkConstructor(this, propertyKey.toString());
         this.setModelDownlink(propertyKey.toString(), modelDownlink);
       }
       return modelDownlink;

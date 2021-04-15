@@ -27,6 +27,8 @@ import {
   ViewObserverType,
   ViewWillRender,
   ViewDidRender,
+  ViewWillRasterize,
+  ViewDidRasterize,
   ViewWillComposite,
   ViewDidComposite,
   ViewService,
@@ -43,6 +45,33 @@ import type {GraphicsViewContext} from "./GraphicsViewContext";
 import type {GraphicsViewObserver} from "./GraphicsViewObserver";
 import type {GraphicsViewController} from "./GraphicsViewController";
 import {CanvasView} from "../"; // forward import
+
+export interface GraphicsViewEventMap {
+  "auxclick": MouseEvent;
+  "click": MouseEvent;
+  "contextmenu": MouseEvent;
+  "dblclick": MouseEvent;
+  "mousedown": MouseEvent;
+  "mouseenter": MouseEvent;
+  "mouseleave": MouseEvent;
+  "mousemove": MouseEvent;
+  "mouseout": MouseEvent;
+  "mouseover": MouseEvent;
+  "mouseup": MouseEvent;
+  "pointercancel": PointerEvent;
+  "pointerdown": PointerEvent;
+  "pointerenter": PointerEvent;
+  "pointerleave": PointerEvent;
+  "pointermove": PointerEvent;
+  "pointerout": PointerEvent;
+  "pointerover": PointerEvent;
+  "pointerup": PointerEvent;
+  "touchcancel": TouchEvent;
+  "touchend": TouchEvent;
+  "touchmove": TouchEvent;
+  "touchstart": TouchEvent;
+  "wheel": WheelEvent;
+}
 
 export interface GraphicsViewInit extends ViewInit {
   viewController?: GraphicsViewController;
@@ -149,6 +178,12 @@ export abstract class GraphicsView extends View {
     if (viewObserver.viewDidRender !== void 0) {
       this.viewObserverCache.viewDidRenderObservers = Arrays.inserted(viewObserver as ViewDidRender, this.viewObserverCache.viewDidRenderObservers);
     }
+    if (viewObserver.viewWillRasterize !== void 0) {
+      this.viewObserverCache.viewWillRasterizeObservers = Arrays.inserted(viewObserver as ViewWillRasterize, this.viewObserverCache.viewWillRasterizeObservers);
+    }
+    if (viewObserver.viewDidRasterize !== void 0) {
+      this.viewObserverCache.viewDidRasterizeObservers = Arrays.inserted(viewObserver as ViewDidRasterize, this.viewObserverCache.viewDidRasterizeObservers);
+    }
     if (viewObserver.viewWillComposite !== void 0) {
       this.viewObserverCache.viewWillCompositeObservers = Arrays.inserted(viewObserver as ViewWillComposite, this.viewObserverCache.viewWillCompositeObservers);
     }
@@ -164,6 +199,12 @@ export abstract class GraphicsView extends View {
     }
     if (viewObserver.viewDidRender !== void 0) {
       this.viewObserverCache.viewDidRenderObservers = Arrays.removed(viewObserver as ViewDidRender, this.viewObserverCache.viewDidRenderObservers);
+    }
+    if (viewObserver.viewWillRasterize !== void 0) {
+      this.viewObserverCache.viewWillRasterizeObservers = Arrays.removed(viewObserver as ViewWillRasterize, this.viewObserverCache.viewWillRasterizeObservers);
+    }
+    if (viewObserver.viewDidRasterize !== void 0) {
+      this.viewObserverCache.viewDidRasterizeObservers = Arrays.removed(viewObserver as ViewDidRasterize, this.viewObserverCache.viewDidRasterizeObservers);
     }
     if (viewObserver.viewWillComposite !== void 0) {
       this.viewObserverCache.viewWillCompositeObservers = Arrays.removed(viewObserver as ViewWillComposite, this.viewObserverCache.viewWillCompositeObservers);
@@ -585,14 +626,7 @@ export abstract class GraphicsView extends View {
     this.setCulled(!viewFrame.intersects(this.viewBounds));
   }
 
-  get renderer(): GraphicsRenderer | null {
-    const parentView = this.parentView;
-    if (parentView instanceof GraphicsView || parentView instanceof CanvasView) {
-      return parentView.renderer;
-    } else {
-      return null;
-    }
-  }
+  declare readonly renderer: GraphicsRenderer | null; // getter defined below to work around useDefineForClassFields lunacy
 
   needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((this.viewFlags & View.NeedsAnimate) === 0) {
@@ -719,6 +753,11 @@ export abstract class GraphicsView extends View {
         this.setViewFlags(this.viewFlags & ~View.NeedsRender);
         this.willRender(viewContext);
       }
+      if (((this.viewFlags | displayFlags) & View.NeedsRasterize) !== 0) {
+        cascadeFlags |= View.NeedsRasterize;
+        this.setViewFlags(this.viewFlags & ~View.NeedsRasterize);
+        this.willRasterize(viewContext);
+      }
       if (((this.viewFlags | displayFlags) & View.NeedsComposite) !== 0) {
         cascadeFlags |= View.NeedsComposite;
         this.setViewFlags(this.viewFlags & ~View.NeedsComposite);
@@ -732,6 +771,9 @@ export abstract class GraphicsView extends View {
       if ((cascadeFlags & View.NeedsRender) !== 0) {
         this.onRender(viewContext);
       }
+      if ((cascadeFlags & View.NeedsRasterize) !== 0) {
+        this.onRasterize(viewContext);
+      }
       if ((cascadeFlags & View.NeedsComposite) !== 0) {
         this.onComposite(viewContext);
       }
@@ -740,6 +782,9 @@ export abstract class GraphicsView extends View {
 
       if ((cascadeFlags & View.NeedsComposite) !== 0) {
         this.didComposite(viewContext);
+      }
+      if ((cascadeFlags & View.NeedsRasterize) !== 0) {
+        this.didRasterize(viewContext);
       }
       if ((cascadeFlags & View.NeedsRender) !== 0) {
         this.didRender(viewContext);
@@ -782,6 +827,38 @@ export abstract class GraphicsView extends View {
     const viewController = this.viewController;
     if (viewController !== null && viewController.viewDidRender !== void 0) {
       viewController.viewDidRender(viewContext, this);
+    }
+  }
+
+  protected willRasterize(viewContext: ViewContextType<this>): void {
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewWillRasterize !== void 0) {
+      viewController.viewWillRasterize(viewContext, this);
+    }
+    const viewObservers = this.viewObserverCache.viewWillRasterizeObservers;
+    if (viewObservers !== void 0) {
+      for (let i = 0; i < viewObservers.length; i += 1) {
+        const viewObserver = viewObservers[i]!;
+        viewObserver.viewWillRasterize(viewContext, this);
+      }
+    }
+  }
+
+  protected onRasterize(viewContext: ViewContextType<this>): void {
+    // hook
+  }
+
+  protected didRasterize(viewContext: ViewContextType<this>): void {
+    const viewObservers = this.viewObserverCache.viewDidRasterizeObservers;
+    if (viewObservers !== void 0) {
+      for (let i = 0; i < viewObservers.length; i += 1) {
+        const viewObserver = viewObservers[i]!;
+        viewObserver.viewDidRasterize(viewContext, this);
+      }
+    }
+    const viewController = this.viewController;
+    if (viewController !== null && viewController.viewDidRasterize !== void 0) {
+      viewController.viewDidRasterize(viewContext, this);
     }
   }
 
@@ -1500,7 +1577,6 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  // @ts-ignore
   declare readonly viewContext: GraphicsViewContext;
 
   /** @hidden */
@@ -1540,9 +1616,7 @@ export abstract class GraphicsView extends View {
    * this view could possibly render.  Views with view bounds that don't
    * overlap their view frames may be culled from rendering and hit testing.
    */
-  get viewBounds(): BoxR2 {
-    return this.viewFrame;
-  }
+  declare readonly viewBounds: BoxR2; // getter defined below to work around useDefineForClassFields lunacy
 
   get ownViewBounds(): BoxR2 | null {
     return null;
@@ -1640,8 +1714,10 @@ export abstract class GraphicsView extends View {
   /** @hidden */
   declare readonly eventHandlers: {[type: string]: ViewEventHandler[] | undefined} | null;
 
-  on(type: string, listener: EventListenerOrEventListenerObject,
-     options?: AddEventListenerOptions | boolean): this {
+  on<T extends keyof GraphicsViewEventMap>(type: T, listener: (this: this, event: GraphicsViewEventMap[T]) => unknown,
+                                           options?: AddEventListenerOptions | boolean): this;
+  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
+  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
     let eventHandlers = this.eventHandlers;
     if (eventHandlers === null) {
       eventHandlers = {};
@@ -1682,8 +1758,10 @@ export abstract class GraphicsView extends View {
     return this;
   }
 
-  off(type: string, listener: EventListenerOrEventListenerObject,
-      options?: EventListenerOptions | boolean): this {
+  off<T extends keyof GraphicsViewEventMap>(type: T, listener: (this: View, event: GraphicsViewEventMap[T]) => unknown,
+                                            options?: EventListenerOptions | boolean): this;
+  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
+  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
     const eventHandlers = this.eventHandlers;
     if (eventHandlers !== null) {
       const handlers = eventHandlers[type];
@@ -1721,7 +1799,7 @@ export abstract class GraphicsView extends View {
           if (!handler.capture) {
             const listener = handler.listener;
             if (typeof listener === "function") {
-              listener(event);
+              listener.call(this, event);
             } else if (typeof listener === "object" && listener !== null) {
               listener.handleEvent(event);
             }
@@ -1969,3 +2047,22 @@ export abstract class GraphicsView extends View {
   static readonly insertChildFlags: ViewFlags = View.insertChildFlags | View.NeedsRender;
   static readonly removeChildFlags: ViewFlags = View.removeChildFlags | View.NeedsRender;
 }
+Object.defineProperty(GraphicsView.prototype, "renderer", {
+  get(this: GraphicsView): GraphicsRenderer | null {
+    const parentView = this.parentView;
+    if (parentView instanceof GraphicsView || parentView instanceof CanvasView) {
+      return parentView.renderer;
+    } else {
+      return null;
+    }
+  },
+  enumerable: true,
+  configurable: true,
+});
+Object.defineProperty(GraphicsView.prototype, "viewBounds", {
+  get(this: GraphicsView): BoxR2 {
+    return this.viewFrame;
+  },
+  enumerable: true,
+  configurable: true,
+});

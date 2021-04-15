@@ -17,7 +17,7 @@ import type {GeoViewObserver} from "../geo/GeoViewObserver";
 import type {GeoArcView} from "./GeoArcView";
 
 export interface GeoArcViewObserver<V extends GeoArcView = GeoArcView> extends GeoViewObserver<V> {
-  viewWillSetGeoCenter?(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint, view: V): void;
+  viewWillSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, view: V): void;
 
-  viewDidSetGeoCenter?(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint, view: V): void;
+  viewDidSetGeoCenter?(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, view: V): void;
 }

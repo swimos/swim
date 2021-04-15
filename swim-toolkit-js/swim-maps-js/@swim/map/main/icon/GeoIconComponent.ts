@@ -128,7 +128,7 @@ export class GeoIconComponent extends GeoComponent {
     // hook
   }
 
-  protected setGeoCenter(geoCenter: GeoPoint, geoTrait: GeoIconTrait, timing?: AnyTiming | boolean): void {
+  protected setGeoCenter(geoCenter: GeoPoint | null, geoTrait: GeoIconTrait, timing?: AnyTiming | boolean): void {
     const geoView = this.geo.view;
     if (geoView !== null) {
       if (timing === void 0 || timing === true) {
@@ -143,7 +143,7 @@ export class GeoIconComponent extends GeoComponent {
     }
   }
 
-  protected willSetGeoCenter(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint, geoView: GeoIconView): void {
+  protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoView: GeoIconView): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
@@ -153,11 +153,11 @@ export class GeoIconComponent extends GeoComponent {
     }
   }
 
-  protected onSetGeoCenter(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint, geoView: GeoIconView): void {
+  protected onSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoView: GeoIconView): void {
     // hook
   }
 
-  protected didSetGeoCenter(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint, geoView: GeoIconView): void {
+  protected didSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoView: GeoIconView): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
@@ -268,10 +268,10 @@ export class GeoIconComponent extends GeoComponent {
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoIconView): void {
       this.owner.themeGeoView(theme, mood, timing, geoView);
     },
-    viewWillSetGeoCenter(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint, geoView: GeoIconView): void {
+    viewWillSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoView: GeoIconView): void {
       this.owner.willSetGeoCenter(newGeoCenter, oldGeoCenter, geoView);
     },
-    viewDidSetGeoCenter(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint, geoView: GeoIconView): void {
+    viewDidSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoView: GeoIconView): void {
       this.owner.onSetGeoCenter(newGeoCenter, oldGeoCenter, geoView);
       this.owner.didSetGeoCenter(newGeoCenter, oldGeoCenter, geoView);
     },
@@ -296,7 +296,7 @@ export class GeoIconComponent extends GeoComponent {
     didSetTrait(newGeoTrait: GeoIconTrait | null, oldGeoTrait: GeoIconTrait | null): void {
       this.owner.didSetGeoTrait(newGeoTrait, oldGeoTrait);
     },
-    traitDidSetGeoCenter(newGeoCenter: GeoPoint, oldGeoCenter: GeoPoint, geoTrait: GeoIconTrait): void {
+    traitDidSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoTrait: GeoIconTrait): void {
       this.owner.setGeoCenter(newGeoCenter, geoTrait);
     },
     traitDidSetIconLayout(newIconLayout: IconLayout, oldIconLayout: IconLayout, geoTrait: GeoIconTrait): void {

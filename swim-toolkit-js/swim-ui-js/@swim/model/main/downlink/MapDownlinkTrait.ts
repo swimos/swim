@@ -26,6 +26,7 @@ export abstract class MapDownlinkTrait extends DownlinkTrait {
   }
 
   @ModelMapDownlink<MapDownlinkTrait, Value, Value, AnyValue, AnyValue>({
+    consume: true,
     didUpdate(key: Value, newValue: Value, oldValue: Value): void {
       if (this.owner.isConsuming()) {
         this.owner.downlinkDidUpdate(key, newValue, oldValue);
@@ -38,14 +39,4 @@ export abstract class MapDownlinkTrait extends DownlinkTrait {
     },
   })
   declare downlink: ModelMapDownlink<this, Value, Value, AnyValue, AnyValue>;
-
-  protected onStartConsuming(): void {
-    super.onStartConsuming();
-    this.downlink.enabled(true);
-  }
-
-  protected onStopConsuming(): void {
-    super.onStopConsuming();
-    this.downlink.enabled(false);
-  }
 }

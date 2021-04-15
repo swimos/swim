@@ -406,6 +406,14 @@ export class ViewController<V extends View = View> implements ViewObserver<V> {
     // hook
   }
 
+  viewWillRasterize(viewContext: ViewContextType<V>, view: V): void {
+    // hook
+  }
+
+  viewDidRasterize(viewContext: ViewContextType<V>, view: V): void {
+    // hook
+  }
+
   viewWillComposite(viewContext: ViewContextType<V>, view: V): void {
     // hook
   }

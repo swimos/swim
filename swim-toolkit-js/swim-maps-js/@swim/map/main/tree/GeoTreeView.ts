@@ -482,9 +482,7 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  get geoBounds(): GeoBox {
-    return this.root.geoBounds;
-  }
+  declare readonly geoBounds: GeoBox; // getter defined below to work around useDefineForClassFields lunacy
 
   protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const geoPoint = viewContext.geoViewport.unproject(x, y);
@@ -525,3 +523,10 @@ export class GeoTreeView extends GeoView {
     return new GeoTreeView();
   }
 }
+Object.defineProperty(GeoTreeView.prototype, "geoBounds", {
+  get(this: GeoTreeView): GeoBox {
+    return this.root.geoBounds;
+  },
+  enumerable: true,
+  configurable: true,
+});

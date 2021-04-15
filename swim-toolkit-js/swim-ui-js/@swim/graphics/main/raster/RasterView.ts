@@ -81,7 +81,6 @@ export class RasterView extends LayerView {
     }
   }
 
-  // @ts-ignore
   declare readonly renderer: GraphicsRenderer | null;
 
   setRenderer(renderer: AnyGraphicsRenderer | null): void {
@@ -175,7 +174,6 @@ export class RasterView extends LayerView {
     return rasterViewContext;
   }
 
-  // @ts-ignore
   declare readonly viewContext: RasterViewContext;
 
   /** @hidden */

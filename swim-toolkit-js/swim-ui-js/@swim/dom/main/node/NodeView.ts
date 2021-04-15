@@ -1270,7 +1270,7 @@ export class NodeView extends View {
   /** @hidden */
   protected doDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     let cascadeFlags = displayFlags;
-    this.setViewFlags(this.viewFlags & ~(View.NeedsDisplay | View.NeedsRender | View.NeedsComposite)
+    this.setViewFlags(this.viewFlags & ~(View.NeedsDisplay | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite)
                                      |  (View.TraversingFlag | View.DisplayingFlag));
     try {
       this.willDisplay(cascadeFlags, viewContext);

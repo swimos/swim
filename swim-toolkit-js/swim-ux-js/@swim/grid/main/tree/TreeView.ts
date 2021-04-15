@@ -71,7 +71,6 @@ export class TreeView extends HtmlView {
 
   declare readonly viewObservers: ReadonlyArray<TreeViewObserver>;
 
-  // @ts-ignore
   declare readonly viewContext: TreeViewContext;
 
   initView(init: TreeViewInit): void {

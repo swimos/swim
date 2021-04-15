@@ -149,7 +149,7 @@ export class GeoAreaComponent extends GeoPathComponent {
     // hook
   }
 
-  protected setGeoPath(geoPath: GeoPath, geoTrait: GeoAreaTrait, timing?: AnyTiming | boolean): void {
+  protected setGeoPath(geoPath: GeoPath | null, geoTrait: GeoAreaTrait, timing?: AnyTiming | boolean): void {
     const geoView = this.geo.view;
     if (geoView !== null) {
       if (timing === void 0 || timing === true) {
@@ -164,7 +164,7 @@ export class GeoAreaComponent extends GeoPathComponent {
     }
   }
 
-  protected willSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath, geoView: GeoAreaView): void {
+  protected willSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
@@ -174,11 +174,11 @@ export class GeoAreaComponent extends GeoPathComponent {
     }
   }
 
-  protected onSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath, geoView: GeoAreaView): void {
+  protected onSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
     // hook
   }
 
-  protected didSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath, geoView: GeoAreaView): void {
+  protected didSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
     const componentObservers = this.componentObservers;
     for (let i = 0, n = componentObservers.length; i < n; i += 1) {
       const componentObserver = componentObservers[i]!;
@@ -329,10 +329,10 @@ export class GeoAreaComponent extends GeoPathComponent {
     viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoAreaView): void {
       this.owner.themeGeoView(theme, mood, timing, geoView);
     },
-    viewWillSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath, geoView: GeoAreaView): void {
+    viewWillSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
       this.owner.willSetGeoPath(newGeoPath, oldGeoPath, geoView);
     },
-    viewDidSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath, geoView: GeoAreaView): void {
+    viewDidSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
       this.owner.onSetGeoPath(newGeoPath, oldGeoPath, geoView);
       this.owner.didSetGeoPath(newGeoPath, oldGeoPath, geoView);
     },
@@ -371,7 +371,7 @@ export class GeoAreaComponent extends GeoPathComponent {
     didSetTrait(newGeoTrait: GeoAreaTrait | null, oldGeoTrait: GeoAreaTrait | null): void {
       this.owner.didSetGeoTrait(newGeoTrait, oldGeoTrait);
     },
-    traitDidSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath, geoTrait: GeoAreaTrait): void {
+    traitDidSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoTrait: GeoAreaTrait): void {
       this.owner.setGeoPath(newGeoPath, geoTrait);
     },
     traitDidSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, geoTrait: GeoAreaTrait): void {

@@ -17,7 +17,7 @@ import type {GeoViewObserver} from "../geo/GeoViewObserver";
 import type {GeoPathView} from "./GeoPathView";
 
 export interface GeoPathViewObserver<V extends GeoPathView = GeoPathView> extends GeoViewObserver<V> {
-  viewWillSetGeoPath?(newGeoPath: GeoPath, oldGeoPath: GeoPath, view: V): void;
+  viewWillSetGeoPath?(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, view: V): void;
 
-  viewDidSetGeoPath?(newGeoPath: GeoPath, oldGeoPath: GeoPath, view: V): void;
+  viewDidSetGeoPath?(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, view: V): void;
 }

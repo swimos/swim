@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// <reference types="arcgis-js-api"/>
+
 import {MapView} from "@swim/map";
 import {EsriViewport} from "./EsriViewport";
 import type {EsriViewObserver} from "./EsriViewObserver";

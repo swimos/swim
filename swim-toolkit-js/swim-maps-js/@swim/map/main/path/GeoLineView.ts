@@ -163,8 +163,8 @@ export class GeoLineView extends GeoPathView implements StrokeView {
   }
 
   protected renderLine(context: CanvasContext, frame: BoxR2): void {
-    const viewPath = this.viewPath.getValue();
-    if (viewPath.isDefined()) {
+    const viewPath = this.viewPath.value;
+    if (viewPath !== null && viewPath.isDefined()) {
       context.beginPath();
       viewPath.draw(context);
       const stroke = this.stroke.value;
@@ -195,8 +195,8 @@ export class GeoLineView extends GeoPathView implements StrokeView {
   }
 
   protected hitTestLine(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
-    const viewPath = this.viewPath.getValue();
-    if (viewPath.isDefined()) {
+    const viewPath = this.viewPath.value;
+    if (viewPath !== null && viewPath.isDefined()) {
       context.beginPath();
       viewPath.draw(context);
       if (this.stroke.value !== null) {

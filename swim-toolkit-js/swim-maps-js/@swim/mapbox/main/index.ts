@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="mapbox-gl"/>
-
 export {MapboxViewport} from "./MapboxViewport";
 
 export {MapboxView} from "./MapboxView";

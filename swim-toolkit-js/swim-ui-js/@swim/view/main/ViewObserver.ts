@@ -85,6 +85,10 @@ export interface ViewObserver<V extends View = View> {
 
   viewDidRender?(viewContext: ViewContextType<V>, view: V): void;
 
+  viewWillRasterize?(viewContext: ViewContextType<V>, view: V): void;
+
+  viewDidRasterize?(viewContext: ViewContextType<V>, view: V): void;
+
   viewWillComposite?(viewContext: ViewContextType<V>, view: V): void;
 
   viewDidComposite?(viewContext: ViewContextType<V>, view: V): void;
@@ -110,6 +114,8 @@ export interface ViewObserverCache<V extends View> {
   viewDidLayoutObservers?: ReadonlyArray<ViewDidLayout<V>>;
   viewWillRenderObservers?: ReadonlyArray<ViewWillRender<V>>;
   viewDidRenderObservers?: ReadonlyArray<ViewDidRender<V>>;
+  viewWillRasterizeObservers?: ReadonlyArray<ViewWillRasterize<V>>;
+  viewDidRasterizeObservers?: ReadonlyArray<ViewDidRasterize<V>>;
   viewWillCompositeObservers?: ReadonlyArray<ViewWillComposite<V>>;
   viewDidCompositeObservers?: ReadonlyArray<ViewDidComposite<V>>;
 }
@@ -182,6 +188,16 @@ export interface ViewWillRender<V extends View = View> {
 /** @hidden */
 export interface ViewDidRender<V extends View = View> {
   viewDidRender(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewWillRasterize<V extends View = View> {
+  viewWillRasterize(viewContext: ViewContextType<V>, view: V): void;
+}
+
+/** @hidden */
+export interface ViewDidRasterize<V extends View = View> {
+  viewDidRasterize(viewContext: ViewContextType<V>, view: V): void;
 }
 
 /** @hidden */

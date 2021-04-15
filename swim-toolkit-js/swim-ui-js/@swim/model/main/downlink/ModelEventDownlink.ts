@@ -91,7 +91,6 @@ ModelEventDownlink.prototype.createDownlink = function <V, VU>(this: ModelEventD
 
 ModelEventDownlink.define = function <M extends ModelDownlinkContext, V, VU, I>(descriptor: ModelEventDownlinkDescriptor<M, I>): ModelEventDownlinkConstructor<M, I> {
   let _super: ModelEventDownlinkClass | null | undefined = descriptor.extends;
-  const enabled = descriptor.enabled;
   let hostUri = descriptor.hostUri;
   let nodeUri = descriptor.nodeUri;
   let laneUri = descriptor.laneUri;
@@ -99,7 +98,6 @@ ModelEventDownlink.define = function <M extends ModelDownlinkContext, V, VU, I>(
   let rate = descriptor.rate;
   let body = descriptor.body;
   delete descriptor.extends;
-  delete descriptor.enabled;
   delete descriptor.hostUri;
   delete descriptor.nodeUri;
   delete descriptor.laneUri;
@@ -113,13 +111,6 @@ ModelEventDownlink.define = function <M extends ModelDownlinkContext, V, VU, I>(
 
   const _constructor = function DecoratedModelEventDownlink(this: ModelDownlink<M>, owner: M, downlinkName: string | undefined): ModelEventDownlink<M> {
     const _this: ModelEventDownlink<M> = _super!.call(this, owner, downlinkName) || this;
-    if (enabled === true) {
-      Object.defineProperty(_this, "downlinkFlags", {
-        value: _this.downlinkFlags | ModelDownlink.EnabledFlag,
-        enumerable: true,
-        configurable: true,
-      });
-    }
     if (hostUri !== void 0) {
       Object.defineProperty(_this, "ownHostUri", {
         value: hostUri as Uri,
