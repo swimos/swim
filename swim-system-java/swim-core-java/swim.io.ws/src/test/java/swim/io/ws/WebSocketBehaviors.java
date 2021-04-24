@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.testng.TestException;
 import org.testng.annotations.Test;
+import swim.codec.Parser;
 import swim.codec.Utf8;
 import swim.concurrent.Theater;
 import swim.deflate.Deflate;
@@ -37,6 +38,7 @@ import swim.ws.WsClose;
 import swim.ws.WsData;
 import swim.ws.WsDeflateEncoder;
 import swim.ws.WsEncoder;
+import swim.ws.WsFragment;
 import swim.ws.WsFrame;
 import swim.ws.WsPing;
 import swim.ws.WsPong;
@@ -47,6 +49,12 @@ import swim.ws.WsValue;
 import static org.testng.Assert.assertEquals;
 
 public abstract class WebSocketBehaviors {
+
+  protected final WsSettings wsSettings;
+
+  public WebSocketBehaviors(WsSettings wsSettings) {
+    this.wsSettings = wsSettings;
+  }
 
   protected abstract IpServiceRef bind(HttpEndpoint endpoint, HttpService service);
 
@@ -83,11 +91,11 @@ public abstract class WebSocketBehaviors {
         serverUpgrade.countDown();
       }
     };
-    final AbstractWsServer server = new AbstractWsServer() {
+    final AbstractWsServer server = new AbstractWsServer(WebSocketBehaviors.this.wsSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
         final WsRequest wsRequest = WsRequest.from(httpRequest);
-        final WsResponse wsResponse = wsRequest.accept(wsSettings);
+        final WsResponse wsResponse = wsRequest.accept(WebSocketBehaviors.this.wsSettings);
         return upgrade(serverSocket, wsResponse);
       }
     };
@@ -170,11 +178,11 @@ public abstract class WebSocketBehaviors {
         serverWrite.countDown();
       }
     };
-    final AbstractWsServer server = new AbstractWsServer() {
+    final AbstractWsServer server = new AbstractWsServer(WebSocketBehaviors.this.wsSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
         final WsRequest wsRequest = WsRequest.from(httpRequest);
-        final WsResponse wsResponse = wsRequest.accept(wsSettings);
+        final WsResponse wsResponse = wsRequest.accept(WebSocketBehaviors.this.wsSettings);
         return upgrade(serverSocket, wsResponse);
       }
     };
@@ -253,11 +261,11 @@ public abstract class WebSocketBehaviors {
         serverWritePong.countDown();
       }
     };
-    final AbstractWsServer server = new AbstractWsServer() {
+    final AbstractWsServer server = new AbstractWsServer(WebSocketBehaviors.this.wsSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
         final WsRequest wsRequest = WsRequest.from(httpRequest);
-        final WsResponse wsResponse = wsRequest.accept(wsSettings);
+        final WsResponse wsResponse = wsRequest.accept(WebSocketBehaviors.this.wsSettings);
         return upgrade(serverSocket, wsResponse);
       }
     };
@@ -334,11 +342,11 @@ public abstract class WebSocketBehaviors {
         serverWriteClose.countDown();
       }
     };
-    final AbstractWsServer server = new AbstractWsServer() {
+    final AbstractWsServer server = new AbstractWsServer(WebSocketBehaviors.this.wsSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
         final WsRequest wsRequest = WsRequest.from(httpRequest);
-        final WsResponse wsResponse = wsRequest.accept(wsSettings);
+        final WsResponse wsResponse = wsRequest.accept(WebSocketBehaviors.this.wsSettings);
         return upgrade(serverSocket, wsResponse);
       }
     };
@@ -387,11 +395,11 @@ public abstract class WebSocketBehaviors {
       bind(endpoint, new AbstractHttpService() {
         @Override
         public HttpServer createServer() {
-          return new AbstractWsServer() {
+          return new AbstractWsServer(WebSocketBehaviors.this.wsSettings) {
             @Override
             public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
               final WsRequest wsRequest = WsRequest.from(httpRequest);
-              final WsResponse wsResponse = wsRequest.accept(wsSettings);
+              final WsResponse wsResponse = wsRequest.accept(WebSocketBehaviors.this.wsSettings);
               return upgrade(new AbstractWebSocket<String, String>() {
                 boolean closed;
 
@@ -445,15 +453,20 @@ public abstract class WebSocketBehaviors {
       final IpSocketRef[] clients = new IpSocketRef[connections];
       for (int connection = 0; connection < connections; connection += 1) {
         clients[connection] = connect(endpoint, new AbstractWebSocket<String, String>() {
+          Parser<String> payloadParser;
           @Override
           public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-            read(Utf8.stringParser());
+            this.payloadParser = Utf8.stringParser();
+            read(this.payloadParser);
           }
 
           @Override
           public void didRead(WsFrame<? extends String> frame) {
             if (frame instanceof WsData<?>) {
-              read(Utf8.stringParser());
+              this.payloadParser = Utf8.stringParser();
+              read(this.payloadParser);
+            } else if (frame instanceof WsFragment<?>) {
+              read(this.payloadParser);
             } else if (frame instanceof WsClose<?, ?>) {
               clientDone.countDown();
             }

@@ -24,8 +24,11 @@ import swim.ws.WsRequest;
 
 public class WebSocketDeflateSpec extends WebSocketBehaviors {
 
-  final WsSettings wsSettings = WsSettings.defaultCompression();
   final Uri wsUri = Uri.parse("ws://127.0.0.1:33556/");
+
+  public WebSocketDeflateSpec() {
+    super(WsSettings.defaultCompression());
+  }
 
   @Override
   protected IpServiceRef bind(HttpEndpoint endpoint, HttpService service) {

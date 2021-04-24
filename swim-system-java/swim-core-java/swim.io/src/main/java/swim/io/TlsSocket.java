@@ -479,7 +479,9 @@ class TlsSocket implements Transport, IpSocketContext {
         this.context.close();
         break;
       case BUFFER_OVERFLOW:
-        this.context.close();
+        if (this.writeBuffer.position() == 0) {
+          this.context.close();
+        }
         break;
       default:
         throw new AssertionError(sslStatus); // unreachable

@@ -24,8 +24,11 @@ import swim.ws.WsRequest;
 
 public class SecureWebSocketSpec extends WebSocketBehaviors {
 
-  final WsSettings wsSettings = WsSettings.noCompression().tlsSettings(TestTlsSettings.tlsSettings());
   final Uri wsUri = Uri.parse("ws://127.0.0.1:33555/");
+
+  public SecureWebSocketSpec() {
+    super(WsSettings.noCompression().tlsSettings(TestTlsSettings.tlsSettings()));
+  }
 
   @Override
   protected IpServiceRef bind(HttpEndpoint endpoint, HttpService service) {

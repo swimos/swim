@@ -690,18 +690,6 @@ final class StationTransport implements TransportContext, TransportRef {
           // Output bytes were successfully written to the transport channel.
           if (!writeBuffer.hasRemaining()) {
             // The output buffer has no more bytes to be written.
-            try {
-              // Inform the transport binding that the write completed.
-              this.transport.didWrite();
-            } catch (Throwable cause) {
-              if (!Conts.isNonFatal(cause)) {
-                // Rethrow the fatal exception.
-                throw cause;
-              }
-              // Report the non-fatal transport exception.
-              didFail(cause);
-              break;
-            }
             continue;
           } else {
             // The output buffer still has bytes remaining to be written;
@@ -723,9 +711,19 @@ final class StationTransport implements TransportContext, TransportRef {
         // Clear the output buffer to prepare it for new output data.
         ((Buffer) writeBuffer).clear();
         try {
-          // Tell the transport binding to write more output bytes to the
-          // output buffer.
-          this.transport.doWrite();
+          while (writeBuffer.hasRemaining() && FLOW_CONTROL.get(this).isWriteEnabled()) {
+            final int oldPosition = writeBuffer.position();
+            // Tell the transport binding to write more output bytes to the
+            // output buffer.
+            this.transport.doWrite();
+            final int newPosition = writeBuffer.position();
+            if (oldPosition != newPosition) {
+              // Inform the transport binding that the write completed.
+              this.transport.didWrite();
+            } else {
+              break;
+            }
+          }
         } catch (Throwable cause) {
           if (!Conts.isNonFatal(cause)) {
             // Rethrow the fatal exception.

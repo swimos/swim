@@ -118,7 +118,7 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
           }
         } else if (headerSize < maxHeaderSize) {
           // shift payload if header smaller than anticipated
-          output = output.move(maxHeaderSize, headerSize, payloadSize);
+          output = output.move(outputBase + maxHeaderSize, outputBase + headerSize, payloadSize);
         }
         position += payloadSize;
         offset += payloadSize;

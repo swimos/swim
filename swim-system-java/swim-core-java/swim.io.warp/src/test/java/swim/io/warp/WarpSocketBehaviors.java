@@ -43,6 +43,12 @@ import static org.testng.Assert.assertEquals;
 
 public abstract class WarpSocketBehaviors {
 
+  protected final WarpSettings warpSettings;
+
+  public WarpSocketBehaviors(WarpSettings warpSettings) {
+    this.warpSettings = warpSettings;
+  }
+
   protected abstract IpServiceRef bind(HttpEndpoint endpoint, HttpService service);
 
   protected abstract IpSocketRef connect(HttpEndpoint endpoint, WarpSocket socket);
@@ -78,11 +84,11 @@ public abstract class WarpSocketBehaviors {
         serverUpgrade.countDown();
       }
     };
-    final AbstractWarpServer server = new AbstractWarpServer() {
+    final AbstractWarpServer server = new AbstractWarpServer(WarpSocketBehaviors.this.warpSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
         final WsRequest wsRequest = WsRequest.from(httpRequest);
-        final WsResponse wsResponse = wsRequest.accept(wsSettings);
+        final WsResponse wsResponse = wsRequest.accept(WarpSocketBehaviors.this.warpSettings.wsSettings());
         return upgrade(serverSocket, wsResponse);
       }
     };
@@ -165,11 +171,11 @@ public abstract class WarpSocketBehaviors {
         serverWrite.countDown();
       }
     };
-    final AbstractWarpServer server = new AbstractWarpServer() {
+    final AbstractWarpServer server = new AbstractWarpServer(WarpSocketBehaviors.this.warpSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
         final WsRequest wsRequest = WsRequest.from(httpRequest);
-        final WsResponse wsResponse = wsRequest.accept(wsSettings);
+        final WsResponse wsResponse = wsRequest.accept(WarpSocketBehaviors.this.warpSettings.wsSettings());
         return upgrade(serverSocket, wsResponse);
       }
     };
@@ -242,11 +248,11 @@ public abstract class WarpSocketBehaviors {
         serverWrite.countDown();
       }
     };
-    final AbstractWarpServer server = new AbstractWarpServer() {
+    final AbstractWarpServer server = new AbstractWarpServer(WarpSocketBehaviors.this.warpSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
         final WsRequest wsRequest = WsRequest.from(httpRequest);
-        final WsResponse wsResponse = wsRequest.accept(wsSettings);
+        final WsResponse wsResponse = wsRequest.accept(WarpSocketBehaviors.this.warpSettings.wsSettings());
         return upgrade(serverSocket, wsResponse);
       }
     };
@@ -296,11 +302,11 @@ public abstract class WarpSocketBehaviors {
       bind(endpoint, new AbstractHttpService() {
         @Override
         public HttpServer createServer() {
-          return new AbstractWarpServer() {
+          return new AbstractWarpServer(WarpSocketBehaviors.this.warpSettings) {
             @Override
             public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
               final WsRequest wsRequest = WsRequest.from(httpRequest);
-              final WsResponse wsResponse = wsRequest.accept(wsSettings);
+              final WsResponse wsResponse = wsRequest.accept(WarpSocketBehaviors.this.warpSettings.wsSettings());
               return upgrade(new AbstractWarpSocket() {
                 boolean closed;
 

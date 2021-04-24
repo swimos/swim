@@ -12,40 +12,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package swim.io.ws;
+package swim.io.warp;
 
 import swim.io.IpServiceRef;
 import swim.io.IpSocketRef;
 import swim.io.http.HttpClient;
 import swim.io.http.HttpEndpoint;
 import swim.io.http.HttpService;
+import swim.io.ws.WsSettings;
 import swim.uri.Uri;
 import swim.ws.WsRequest;
 
-public class WebSocketSpec extends WebSocketBehaviors {
+public class SecureWarpSocketDeflateSpec extends WarpSocketBehaviors {
 
-  final Uri wsUri = Uri.parse("ws://127.0.0.1:33556/");
+  final Uri wsUri = Uri.parse("ws://127.0.0.1:23555/");
 
-  public WebSocketSpec() {
-    super(WsSettings.noCompression());
+  public SecureWarpSocketDeflateSpec() {
+    super(WarpSettings.standard().wsSettings(WsSettings.defaultCompression()).tlsSettings(TestTlsSettings.tlsSettings()));
   }
 
   @Override
   protected IpServiceRef bind(HttpEndpoint endpoint, HttpService service) {
-    return endpoint.bindHttp("127.0.0.1", 33556, service, this.wsSettings.httpSettings());
+    return endpoint.bindHttps("127.0.0.1", 23555, service, this.warpSettings.httpSettings());
   }
 
   @Override
-  protected IpSocketRef connect(HttpEndpoint endpoint, final WebSocket<?, ?> socket) {
-    final WsRequest wsRequest = this.wsSettings.handshakeRequest(this.wsUri);
-    final HttpClient client = new AbstractWsClient(this.wsSettings) {
+  protected IpSocketRef connect(HttpEndpoint endpoint, final WarpSocket socket) {
+    final WsRequest wsRequest = this.warpSettings.wsSettings().handshakeRequest(this.wsUri);
+    final HttpClient client = new AbstractWarpClient(this.warpSettings) {
       @Override
       public void didConnect() {
         super.didConnect();
         doRequest(upgrade(socket, wsRequest));
       }
     };
-    return endpoint.connectHttp("127.0.0.1", 33556, client, this.wsSettings.httpSettings());
+    return endpoint.connectHttps("127.0.0.1", 23555, client, this.warpSettings.httpSettings());
   }
 
 }

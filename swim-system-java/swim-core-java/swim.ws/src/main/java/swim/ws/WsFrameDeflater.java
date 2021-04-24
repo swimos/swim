@@ -50,7 +50,7 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
     final int maskSize = isMasked ? 4 : 0;
     final int maxHeaderSize = (outputSize <= 127 ? 2 : outputSize <= 65539 ? 4 : 10) + maskSize;
 
-    if (outputSize >= maxHeaderSize) {
+    if (outputSize >= maxHeaderSize + 16) {
       // prepare output buffer for payload
       final int outputBase = output.index();
       final int maxPayloadBase = outputBase + maxHeaderSize;
@@ -123,7 +123,7 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
           }
         } else if (headerSize < maxHeaderSize) {
           // shift payload if header smaller than anticipated
-          output = output.move(maxHeaderSize, headerSize, payloadSize);
+          output = output.move(outputBase + maxHeaderSize, outputBase + headerSize, payloadSize);
         }
         position += payloadSize;
         offset += payloadSize;

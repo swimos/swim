@@ -24,8 +24,11 @@ import swim.ws.WsRequest;
 
 public class SecureWarpSocketSpec extends WarpSocketBehaviors {
 
-  final WarpSettings warpSettings = WarpSettings.standard().tlsSettings(TestTlsSettings.tlsSettings());
   final Uri wsUri = Uri.parse("ws://127.0.0.1:23555/");
+
+  public SecureWarpSocketSpec() {
+    super(WarpSettings.standard().tlsSettings(TestTlsSettings.tlsSettings()));
+  }
 
   @Override
   protected IpServiceRef bind(HttpEndpoint endpoint, HttpService service) {
