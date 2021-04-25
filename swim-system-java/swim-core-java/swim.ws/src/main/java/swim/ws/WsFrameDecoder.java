@@ -16,6 +16,7 @@ package swim.ws;
 
 import swim.codec.Decoder;
 import swim.codec.DecoderException;
+import swim.codec.Format;
 import swim.codec.InputBuffer;
 
 final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
@@ -23,31 +24,37 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
   final WsDecoder ws;
   final Decoder<O> content;
   final int finRsvOp;
-  final long position;
   final long offset;
   final long length;
   final byte[] maskingKey;
+  final int position;
   final int step;
 
-  WsFrameDecoder(WsDecoder ws, Decoder<O> content, int finRsvOp, long position,
-                 long offset, long length, byte[] maskingKey, int step) {
+  WsFrameDecoder(WsDecoder ws, Decoder<O> content, int finRsvOp, long offset,
+                 long length, byte[] maskingKey, int position, int step) {
     this.ws = ws;
-    this.position = position;
     this.content = content;
     this.finRsvOp = finRsvOp;
     this.offset = offset;
     this.length = length;
     this.maskingKey = maskingKey;
+    this.position = position;
     this.step = step;
   }
 
   WsFrameDecoder(WsDecoder ws, Decoder<O> content) {
-    this(ws, content, 0, 0L, 0L, 0L, null, 1);
+    this(ws, content, 0, 0L, 0L, null, 0, 1);
+  }
+
+  @Override
+  public Decoder<WsFrame<O>> feed(InputBuffer input) {
+    return decode(input, this.ws, this.content, this.finRsvOp, this.offset,
+                  this.length, this.maskingKey, this.position, this.step);
   }
 
   static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDecoder ws, Decoder<O> content,
-                                        int finRsvOp, long position, long offset, long length,
-                                        byte[] maskingKey, int step) {
+                                        int finRsvOp, long offset, long length,
+                                        byte[] maskingKey, int position, int step) {
     if (step == 1 && input.isCont()) { // decode finRsvOp
       finRsvOp = input.head();
       input = input.step();
@@ -110,11 +117,11 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
       final int size = (int) Math.min(length - offset, input.remaining());
       if (maskingKey != null) {
         for (int i = 0; i < size; i += 1) {
-          input.set(base + i, (input.get(base + i) ^ maskingKey[(int) (position + i) & 0x3]) & 0xff);
+          input.set(base + i, (input.get(base + i) ^ maskingKey[position + i & 0x3]) & 0xff);
         }
       }
-      position += size;
       offset += size;
+      position += size;
 
       final boolean eof = offset == length && (finRsvOp & 0x80) != 0;
       final boolean inputPart = input.isPart();
@@ -129,10 +136,10 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
       }
       input = input.isPart(inputPart);
 
-      if (input.index() != base + size) {
-        return error(new DecoderException("undecoded websocket data"));
-      } else if (content.isError()) {
+      if (content.isError()) {
         return content.asError();
+      } else if (input.index() != base + size) {
+        return error(new DecoderException("WsFrameDecoder undecoded websocket data"));
       } else if (content.isDone()) {
         if (offset == length) {
           if ((finRsvOp & 0x80) != 0) {
@@ -166,18 +173,12 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
     } else if (input.isError()) {
       return error(input.trap());
     }
-    return new WsFrameDecoder<O>(ws, content, finRsvOp, position, offset,
-        length, maskingKey, step);
+    return new WsFrameDecoder<O>(ws, content, finRsvOp, offset, length,
+                                 maskingKey, position, step);
   }
 
   static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDecoder ws, Decoder<O> content) {
-    return decode(input, ws, content, 0, 0L, 0L, 0L, null, 1);
-  }
-
-  @Override
-  public Decoder<WsFrame<O>> feed(InputBuffer input) {
-    return decode(input, this.ws, this.content, this.finRsvOp, this.position,
-        this.offset, this.length, this.maskingKey, this.step);
+    return decode(input, ws, content, 0, 0L, 0L, null, 0, 1);
   }
 
 }

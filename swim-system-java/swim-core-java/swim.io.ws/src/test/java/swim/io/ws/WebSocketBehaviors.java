@@ -453,20 +453,17 @@ public abstract class WebSocketBehaviors {
       final IpSocketRef[] clients = new IpSocketRef[connections];
       for (int connection = 0; connection < connections; connection += 1) {
         clients[connection] = connect(endpoint, new AbstractWebSocket<String, String>() {
-          Parser<String> payloadParser;
           @Override
           public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-            this.payloadParser = Utf8.stringParser();
-            read(this.payloadParser);
+            read(Utf8.stringParser());
           }
 
           @Override
           public void didRead(WsFrame<? extends String> frame) {
             if (frame instanceof WsData<?>) {
-              this.payloadParser = Utf8.stringParser();
-              read(this.payloadParser);
+              read(Utf8.stringParser());
             } else if (frame instanceof WsFragment<?>) {
-              read(this.payloadParser);
+              read(((WsFragment<? extends String>) frame).contentDecoder());
             } else if (frame instanceof WsClose<?, ?>) {
               clientDone.countDown();
             }

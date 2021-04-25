@@ -25,26 +25,27 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
   final WsDeflateEncoder ws;
   final WsFrame<O> frame;
   final Encoder<?, ?> content;
-  final long position;
   final long offset;
 
-  WsFrameDeflater(WsDeflateEncoder ws, WsFrame<O> frame, Encoder<?, ?> content,
-                  long position, long offset) {
+  WsFrameDeflater(WsDeflateEncoder ws, WsFrame<O> frame, Encoder<?, ?> content, long offset) {
     this.ws = ws;
     this.frame = frame;
     this.content = content;
-    this.position = position;
     this.offset = offset;
   }
 
   WsFrameDeflater(WsDeflateEncoder ws, WsFrame<O> frame) {
-    this(ws, frame, null, 0L, 0L);
+    this(ws, frame, null, 0L);
+  }
+
+  @Override
+  public Encoder<Object, WsFrame<O>> pull(OutputBuffer<?> output) {
+    return encode(output, this.ws, this.frame, this.content, this.offset);
   }
 
   @SuppressWarnings("unchecked")
   static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsDeflateEncoder ws,
-                                                WsFrame<O> frame, Encoder<?, ?> content,
-                                                long position, long offset) {
+                                                WsFrame<O> frame, Encoder<?, ?> content, long offset) {
     final boolean isMasked = ws.isMasked();
     final int outputSize = output.remaining();
     final int maskSize = isMasked ? 4 : 0;
@@ -118,14 +119,12 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
 
           // mask payload, shifting if header smaller than anticipated
           for (int i = 0; i < payloadSize; i += 1) {
-            output.set(outputBase + headerSize + i, (output.get(outputBase + maxHeaderSize + i)
-                ^ maskingKey[(int) (position + i) & 0x3]) & 0xff);
+            output.set(outputBase + headerSize + i, (output.get(outputBase + maxHeaderSize + i) ^ maskingKey[i & 0x3]) & 0xff);
           }
         } else if (headerSize < maxHeaderSize) {
           // shift payload if header smaller than anticipated
           output = output.move(outputBase + maxHeaderSize, outputBase + headerSize, payloadSize);
         }
-        position += payloadSize;
         offset += payloadSize;
         output = output.index(outputBase + headerSize + payloadSize);
 
@@ -146,16 +145,11 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
     } else if (output.isError()) {
       return error(output.trap());
     }
-    return new WsFrameDeflater<O>(ws, frame, content, position, offset);
+    return new WsFrameDeflater<O>(ws, frame, content, offset);
   }
 
   static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsDeflateEncoder ws, WsFrame<O> frame) {
-    return encode(output, ws, frame, null, 0L, 0L);
-  }
-
-  @Override
-  public Encoder<Object, WsFrame<O>> pull(OutputBuffer<?> output) {
-    return encode(output, this.ws, this.frame, this.content, this.position, this.offset);
+    return encode(output, ws, frame, null, 0L);
   }
 
 }

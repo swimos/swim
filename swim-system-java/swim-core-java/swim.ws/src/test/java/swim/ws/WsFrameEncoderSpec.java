@@ -36,7 +36,7 @@ public class WsFrameEncoderSpec {
         k += 1;
       }
       frameEncoder = frameEncoder.pull(Binary.outputBuffer(actual, i, Math.min(bufferSize, actual.length - i))
-          .isPart(actual.length - i > bufferSize));
+                                             .isPart(actual.length - i > bufferSize));
       if (frameEncoder.isError()) {
         throw new TestException(frameEncoder.trap());
       }

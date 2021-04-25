@@ -25,8 +25,8 @@ import static org.testng.Assert.assertTrue;
 public class WsFrameDeflaterSpec {
 
   static void assertEncodes(WsEncoder ws, WsFrame<?> frame, Data encoded, int... bufferSizes) {
-    final byte[] actual = new byte[encoded.size() + 4];
-    int bufferSize = encoded.size() + 4;
+    final byte[] actual = new byte[encoded.size() + 16];
+    int bufferSize = encoded.size() + 16;
     Encoder<?, ?> frameEncoder = ws.frameEncoder(frame);
     for (int k = 0, i = 0, n = actual.length; i < n; i += bufferSize) {
       if (k < bufferSizes.length) {
@@ -34,7 +34,7 @@ public class WsFrameDeflaterSpec {
         k += 1;
       }
       frameEncoder = frameEncoder.pull(Binary.outputBuffer(actual, i, Math.min(bufferSize, actual.length - i))
-          .isPart(actual.length - i > bufferSize));
+                                             .isPart(actual.length - i > bufferSize));
       if (frameEncoder.isError()) {
         throw new TestException(frameEncoder.trap());
       }
@@ -58,7 +58,7 @@ public class WsFrameDeflaterSpec {
 
   @Test
   public void deflateUnmaskedTextFragments() {
-    assertEncodes(WsText.from("Hello"), Data.fromBase16("4103f248cd8004c9c90700"), 5, 10);
+    assertEncodes(WsText.from("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"), Data.fromBase16("411E72747276717573F7F0F4F2F6F1F5F30F080C0A0E090D0B8F888C4A4C4A4E8018494D4BCFC8CCCACEC9CDCB2F282C2A2E292D2BAFA8AC02000000"), 32, 32);
   }
 
   @Test
