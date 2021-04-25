@@ -44,11 +44,11 @@ public class WsFrameDeflaterSpec {
   }
 
   static void assertEncodes(WsFrame<?> frame, Data encoded, int... bufferSizes) {
-    assertEncodes(Ws.deflateEncoderUnmasked(), frame, encoded, bufferSizes);
+    assertEncodes(new WsDeflateEncoderTest(null), frame, encoded, bufferSizes);
   }
 
   static void assertEncodes(byte[] maskingKey, WsFrame<?> frame, Data encoded, int... bufferSizes) {
-    assertEncodes(new WsDeflateEncoderMaskedTest(maskingKey), frame, encoded, bufferSizes);
+    assertEncodes(new WsDeflateEncoderTest(maskingKey), frame, encoded, bufferSizes);
   }
 
   @Test
@@ -69,7 +69,7 @@ public class WsFrameDeflaterSpec {
 
   @Test
   public void deflateUnmaskedSharedWindow() {
-    final WsDeflateEncoder ws = Ws.deflateEncoderUnmasked();
+    final WsDeflateEncoder ws = new WsDeflateEncoderTest(null);
     assertEncodes(ws, WsText.from("Hello"), Data.fromBase16("c107f248cdc9c90700"));
     assertEncodes(ws, WsText.from("Hello"), Data.fromBase16("c105f200110000"));
     assertEncodes(ws, WsText.from("Hello"), Data.fromBase16("c10402130000"));
@@ -79,7 +79,7 @@ public class WsFrameDeflaterSpec {
   @Test
   public void deflateMaskedSharedWindow() {
     final byte[] maskingKey = {(byte) 0x37, (byte) 0xfa, (byte) 0x21, (byte) 0x3d};
-    final WsDeflateEncoder ws = new WsDeflateEncoderMaskedTest(maskingKey);
+    final WsDeflateEncoder ws = new WsDeflateEncoderTest(maskingKey);
     assertEncodes(ws, WsText.from("Hello"), Data.fromBase16("c18737fa213dc5b2ecf4fefd21"));
     assertEncodes(ws, WsText.from("Hello"), Data.fromBase16("c18537fa213dc5fa303d37"));
     assertEncodes(ws, WsText.from("Hello"), Data.fromBase16("c18437fa213d35e9213d"));

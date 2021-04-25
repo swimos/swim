@@ -30,32 +30,10 @@ import swim.util.Murmur3;
 
 public class WarpSettings implements Debug {
 
-  private static int hashSeed;
-  private static WarpSettings standard;
-  private static Form<WarpSettings> form;
   protected final WsSettings wsSettings;
 
   public WarpSettings(WsSettings wsSettings) {
     this.wsSettings = wsSettings;
-  }
-
-  public static WarpSettings standard() {
-    if (standard == null) {
-      standard = new WarpSettings(WsSettings.standard());
-    }
-    return standard;
-  }
-
-  public static WarpSettings from(WsSettings wsSettings) {
-    return new WarpSettings(wsSettings);
-  }
-
-  @Kind
-  public static Form<WarpSettings> form() {
-    if (form == null) {
-      form = new WarpSettingsForm();
-    }
-    return form;
   }
 
   public final WsSettings wsSettings() {
@@ -130,6 +108,29 @@ public class WarpSettings implements Debug {
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static int hashSeed;
+  private static WarpSettings standard;
+  private static Form<WarpSettings> form;
+
+  public static WarpSettings standard() {
+    if (standard == null) {
+      standard = new WarpSettings(WsSettings.standard());
+    }
+    return standard;
+  }
+
+  public static WarpSettings from(WsSettings wsSettings) {
+    return new WarpSettings(wsSettings);
+  }
+
+  @Kind
+  public static Form<WarpSettings> form() {
+    if (form == null) {
+      form = new WarpSettingsForm();
+    }
+    return form;
   }
 
 }

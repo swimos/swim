@@ -49,7 +49,7 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
     final int maxHeaderSize = (outputSize <= 127 ? 2 : outputSize <= 65539 ? 4 : 10) + maskSize;
     final WsOpcode opcode = frame.opcode();
 
-    if (outputSize >= maxHeaderSize + (opcode.isControl() ? 0 : 16)) {
+    if (outputSize >= maxHeaderSize + (opcode.isControl() ? 0 : ws.minDataFrameBufferSize())) {
       // prepare output buffer for payload
       final int outputBase = output.index();
       final int maxPayloadBase = outputBase + maxHeaderSize;

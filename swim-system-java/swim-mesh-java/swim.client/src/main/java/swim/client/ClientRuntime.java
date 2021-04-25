@@ -29,7 +29,7 @@ import swim.concurrent.Stage;
 import swim.concurrent.Theater;
 import swim.io.TlsSettings;
 import swim.io.http.HttpEndpoint;
-import swim.io.http.HttpSettings;
+import swim.io.warp.WarpSettings;
 import swim.remote.RemoteHostClient;
 import swim.runtime.AbstractSwimRef;
 import swim.runtime.EdgeAddress;
@@ -58,19 +58,21 @@ import swim.uri.Uri;
 public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContext {
 
   final Stage stage;
+  final WarpSettings warpSettings;
   final HttpEndpoint endpoint;
   final EdgeBinding edge;
   StoreBinding store;
 
-  public ClientRuntime(Stage stage, HttpSettings settings) {
+  public ClientRuntime(Stage stage, WarpSettings warpSettings) {
     this.stage = stage;
-    this.endpoint = new HttpEndpoint(stage, settings);
+    this.warpSettings = warpSettings;
+    this.endpoint = new HttpEndpoint(stage, warpSettings.httpSettings());
     this.edge = new EdgeTable();
     this.edge.setEdgeContext(this);
   }
 
   public ClientRuntime(Stage stage) {
-    this(stage, HttpSettings.standard().tlsSettings(TlsSettings.standard()));
+    this(stage, WarpSettings.standard().tlsSettings(TlsSettings.standard()));
   }
 
   public ClientRuntime() {
@@ -195,7 +197,7 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
 
   @Override
   public HostBinding createHost(HostAddress hostAddress) {
-    return new RemoteHostClient(hostAddress.hostUri(), this.endpoint);
+    return new RemoteHostClient(hostAddress.hostUri(), this.endpoint, this.warpSettings);
   }
 
   @Override

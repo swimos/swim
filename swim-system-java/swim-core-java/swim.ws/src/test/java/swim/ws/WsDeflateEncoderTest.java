@@ -14,22 +14,36 @@
 
 package swim.ws;
 
-final class WsStandardEncoderMaskedTest extends WsEncoder {
+import swim.deflate.Deflate;
+
+final class WsDeflateEncoderTest extends WsDeflateEncoder {
 
   final byte[] maskingKey;
 
-  WsStandardEncoderMaskedTest(byte[] maskingKey) {
+  WsDeflateEncoderTest(byte[] maskingKey, Deflate<?> deflate, int flush) {
+    super(deflate, flush);
     this.maskingKey = maskingKey;
+  }
+
+  WsDeflateEncoderTest(byte[] maskingKey) {
+    this(maskingKey, new Deflate<Object>(), Deflate.Z_SYNC_FLUSH);
   }
 
   @Override
   public boolean isMasked() {
-    return true;
+    return this.maskingKey != null;
   }
 
   @Override
   public void maskingKey(byte[] maskingKey) {
-    System.arraycopy(this.maskingKey, 0, maskingKey, 0, 4);
+    if (this.maskingKey != null) {
+      System.arraycopy(this.maskingKey, 0, maskingKey, 0, 4);
+    }
+  }
+
+  @Override
+  public int minDataFrameBufferSize() {
+    return 0;
   }
 
 }

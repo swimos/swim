@@ -32,9 +32,6 @@ import swim.ws.WsEngineSettings;
  */
 public class WsSettings extends WsEngineSettings {
 
-  private static int hashSeed;
-  private static WsSettings standard;
-  private static Form<WsSettings> form;
   protected final HttpSettings httpSettings;
 
   public WsSettings(HttpSettings httpSettings, int maxFrameSize, int maxMessageSize,
@@ -42,60 +39,8 @@ public class WsSettings extends WsEngineSettings {
                     boolean serverNoContextTakeover, boolean clientNoContextTakeover,
                     int serverMaxWindowBits, int clientMaxWindowBits) {
     super(maxFrameSize, maxMessageSize, serverCompressionLevel, clientCompressionLevel,
-        serverNoContextTakeover, clientNoContextTakeover, serverMaxWindowBits, clientMaxWindowBits);
+          serverNoContextTakeover, clientNoContextTakeover, serverMaxWindowBits, clientMaxWindowBits);
     this.httpSettings = httpSettings;
-  }
-
-  public static WsSettings standard() {
-    if (standard == null) {
-      final WsEngineSettings engineSettings = WsEngineSettings.standard();
-      standard = new WsSettings(HttpSettings.standard(),
-          engineSettings.maxFrameSize(), engineSettings.maxMessageSize(),
-          engineSettings.serverCompressionLevel(), engineSettings.clientCompressionLevel(),
-          engineSettings.serverNoContextTakeover(), engineSettings.clientNoContextTakeover(),
-          engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits());
-    }
-    return standard;
-  }
-
-  public static WsSettings noCompression() {
-    return standard().engineSettings(WsEngineSettings.noCompression());
-  }
-
-  public static WsSettings defaultCompression() {
-    return standard().engineSettings(WsEngineSettings.defaultCompression());
-  }
-
-  public static WsSettings fastestCompression() {
-    return standard().engineSettings(WsEngineSettings.fastestCompression());
-  }
-
-  public static WsSettings bestCompression() {
-    return standard().engineSettings(WsEngineSettings.bestCompression());
-  }
-
-  public static WsSettings from(HttpSettings httpSettings) {
-    return standard().httpSettings(httpSettings);
-  }
-
-  public static WsSettings from(IpSettings ipSettings) {
-    return standard().ipSettings(ipSettings);
-  }
-
-  public static WsSettings from(WsEngineSettings engineSettings) {
-    if (engineSettings instanceof WsSettings) {
-      return (WsSettings) engineSettings;
-    } else {
-      return standard().engineSettings(engineSettings);
-    }
-  }
-
-  @Kind
-  public static Form<WsSettings> form() {
-    if (form == null) {
-      form = new WsSettingsForm();
-    }
-    return form;
   }
 
   public final HttpSettings httpSettings() {
@@ -104,9 +49,9 @@ public class WsSettings extends WsEngineSettings {
 
   public WsSettings httpSettings(HttpSettings httpSettings) {
     return copy(httpSettings, this.maxFrameSize, this.maxMessageSize,
-        this.serverCompressionLevel, this.clientCompressionLevel,
-        this.serverNoContextTakeover, this.clientNoContextTakeover,
-        this.serverMaxWindowBits, this.clientMaxWindowBits);
+                this.serverCompressionLevel, this.clientCompressionLevel,
+                this.serverNoContextTakeover, this.clientNoContextTakeover,
+                this.serverMaxWindowBits, this.clientMaxWindowBits);
   }
 
   public final IpSettings ipSettings() {
@@ -135,9 +80,9 @@ public class WsSettings extends WsEngineSettings {
 
   public WsSettings engineSettings(WsEngineSettings engineSettings) {
     return copy(engineSettings.maxFrameSize(), engineSettings.maxMessageSize(),
-        engineSettings.serverCompressionLevel(), engineSettings.clientCompressionLevel(),
-        engineSettings.serverNoContextTakeover(), engineSettings.clientNoContextTakeover(),
-        engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits());
+                engineSettings.serverCompressionLevel(), engineSettings.clientCompressionLevel(),
+                engineSettings.serverNoContextTakeover(), engineSettings.clientNoContextTakeover(),
+                engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits());
   }
 
   @Override
@@ -195,9 +140,9 @@ public class WsSettings extends WsEngineSettings {
                             boolean serverNoContextTakeover, boolean clientNoContextTakeover,
                             int serverMaxWindowBits, int clientMaxWindowBits) {
     return new WsSettings(httpSettings, maxFrameSize, maxMessageSize,
-        serverCompressionLevel, clientCompressionLevel,
-        serverNoContextTakeover, clientNoContextTakeover,
-        serverMaxWindowBits, clientMaxWindowBits);
+                          serverCompressionLevel, clientCompressionLevel,
+                          serverNoContextTakeover, clientNoContextTakeover,
+                          serverMaxWindowBits, clientMaxWindowBits);
   }
 
   @Override
@@ -206,9 +151,9 @@ public class WsSettings extends WsEngineSettings {
                             boolean serverNoContextTakeover, boolean clientNoContextTakeover,
                             int serverMaxWindowBits, int clientMaxWindowBits) {
     return copy(this.httpSettings, maxFrameSize, maxMessageSize,
-        serverCompressionLevel, clientCompressionLevel,
-        serverNoContextTakeover, clientNoContextTakeover,
-        serverMaxWindowBits, clientMaxWindowBits);
+                serverCompressionLevel, clientCompressionLevel,
+                serverNoContextTakeover, clientNoContextTakeover,
+                serverMaxWindowBits, clientMaxWindowBits);
   }
 
   public boolean canEqual(Object other) {
@@ -242,7 +187,7 @@ public class WsSettings extends WsEngineSettings {
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, this.httpSettings.hashCode()),
-            this.maxFrameSize), this.maxMessageSize), this.serverCompressionLevel), this.clientCompressionLevel),
+        this.maxFrameSize), this.maxMessageSize), this.serverCompressionLevel), this.clientCompressionLevel),
         Murmur3.hash(this.serverNoContextTakeover)), Murmur3.hash(this.clientNoContextTakeover)),
         this.serverMaxWindowBits), this.clientMaxWindowBits));
   }
@@ -259,6 +204,62 @@ public class WsSettings extends WsEngineSettings {
         .write('.').write("clientNoContextTakeover").write('(').debug(this.clientNoContextTakeover).write(')')
         .write('.').write("serverMaxWindowBits").write('(').debug(this.serverMaxWindowBits).write(')')
         .write('.').write("clientMaxWindowBits").write('(').debug(this.clientMaxWindowBits).write(')');
+  }
+
+  private static int hashSeed;
+  private static WsSettings standard;
+  private static Form<WsSettings> form;
+
+  public static WsSettings standard() {
+    if (standard == null) {
+      final WsEngineSettings engineSettings = WsEngineSettings.standard();
+      standard = new WsSettings(HttpSettings.standard(),
+          engineSettings.maxFrameSize(), engineSettings.maxMessageSize(),
+          engineSettings.serverCompressionLevel(), engineSettings.clientCompressionLevel(),
+          engineSettings.serverNoContextTakeover(), engineSettings.clientNoContextTakeover(),
+          engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits());
+    }
+    return standard;
+  }
+
+  public static WsSettings noCompression() {
+    return standard().engineSettings(WsEngineSettings.noCompression());
+  }
+
+  public static WsSettings defaultCompression() {
+    return standard().engineSettings(WsEngineSettings.defaultCompression());
+  }
+
+  public static WsSettings fastestCompression() {
+    return standard().engineSettings(WsEngineSettings.fastestCompression());
+  }
+
+  public static WsSettings bestCompression() {
+    return standard().engineSettings(WsEngineSettings.bestCompression());
+  }
+
+  public static WsSettings from(HttpSettings httpSettings) {
+    return standard().httpSettings(httpSettings);
+  }
+
+  public static WsSettings from(IpSettings ipSettings) {
+    return standard().ipSettings(ipSettings);
+  }
+
+  public static WsSettings from(WsEngineSettings engineSettings) {
+    if (engineSettings instanceof WsSettings) {
+      return (WsSettings) engineSettings;
+    } else {
+      return standard().engineSettings(engineSettings);
+    }
+  }
+
+  @Kind
+  public static Form<WsSettings> form() {
+    if (form == null) {
+      form = new WsSettingsForm();
+    }
+    return form;
   }
 
 }
@@ -336,9 +337,9 @@ final class WsSettingsForm extends Form<WsSettings> {
       }
     }
     return new WsSettings(httpSettings, maxFrameSize, maxMessageSize,
-        serverCompressionLevel, clientCompressionLevel,
-        serverNoContextTakeover, clientNoContextTakeover,
-        serverMaxWindowBits, clientMaxWindowBits);
+                          serverCompressionLevel, clientCompressionLevel,
+                          serverNoContextTakeover, clientNoContextTakeover,
+                          serverMaxWindowBits, clientMaxWindowBits);
   }
 
 }

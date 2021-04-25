@@ -27,8 +27,8 @@ import static org.testng.Assert.assertTrue;
 public class WsFrameEncoderSpec {
 
   static void assertEncodes(WsEncoder ws, WsFrame<?> frame, Data encoded, int... bufferSizes) {
-    final byte[] actual = new byte[encoded.size() + 16];
-    int bufferSize = encoded.size() + 16;
+    final byte[] actual = new byte[encoded.size()];
+    int bufferSize = encoded.size();
     Encoder<?, ?> frameEncoder = ws.frameEncoder(frame);
     for (int k = 0, i = 0, n = encoded.size(); i < n; i += bufferSize) {
       if (k < bufferSizes.length) {
@@ -46,11 +46,11 @@ public class WsFrameEncoderSpec {
   }
 
   static void assertEncodes(WsFrame<?> frame, Data encoded, int... bufferSizes) {
-    assertEncodes(Ws.standardEncoderUnmasked(), frame, encoded, bufferSizes);
+    assertEncodes(new WsStandardEncoderTest(null), frame, encoded, bufferSizes);
   }
 
   static void assertEncodes(byte[] maskingKey, WsFrame<?> frame, Data encoded, int... bufferSizes) {
-    assertEncodes(new WsStandardEncoderMaskedTest(maskingKey), frame, encoded, bufferSizes);
+    assertEncodes(new WsStandardEncoderTest(maskingKey), frame, encoded, bufferSizes);
   }
 
   @Test
@@ -102,7 +102,7 @@ public class WsFrameEncoderSpec {
   @Test
   public void encodeTinyFrameToShortBuffer() {
     final OutputBuffer<ByteBuffer> output = Binary.outputBuffer(new byte[(1 << 16) - 1]);
-    Encoder<?, ?> frameEncoder = Ws.standardEncoderUnmasked().frameEncoder(WsText.from("Hello"));
+    Encoder<?, ?> frameEncoder = new WsStandardEncoderTest(null).frameEncoder(WsText.from("Hello"));
     frameEncoder = frameEncoder.pull(output);
     assertEquals(Data.wrap(output.bind()), Data.fromBase16("810548656c6c6f"));
   }
@@ -110,7 +110,7 @@ public class WsFrameEncoderSpec {
   @Test
   public void encodeTinyFrameToLongBuffer() {
     final OutputBuffer<ByteBuffer> output = Binary.outputBuffer(new byte[(1 << 20) - 1]);
-    Encoder<?, ?> frameEncoder = Ws.standardEncoderUnmasked().frameEncoder(WsText.from("Hello"));
+    Encoder<?, ?> frameEncoder = new WsStandardEncoderTest(null).frameEncoder(WsText.from("Hello"));
     frameEncoder = frameEncoder.pull(output);
     assertEquals(Data.wrap(output.bind()), Data.fromBase16("810548656c6c6f"));
   }
@@ -123,7 +123,7 @@ public class WsFrameEncoderSpec {
     frame.setByte(0, (byte) 0x82);
     frame.setByte(1, (byte) 125);
     final OutputBuffer<ByteBuffer> output = Binary.outputBuffer(new byte[payloadSize + 2]);
-    Encoder<?, ?> frameEncoder = Ws.standardEncoderUnmasked().frameEncoder(WsBinary.from(payload.writer()));
+    Encoder<?, ?> frameEncoder = new WsStandardEncoderTest(null).frameEncoder(WsBinary.from(payload.writer()));
     frameEncoder = frameEncoder.pull(output);
     assertEquals(Data.wrap(output.bind()), frame);
   }
@@ -138,7 +138,7 @@ public class WsFrameEncoderSpec {
     frame.setByte(2, (byte) (payloadSize >>> 8));
     frame.setByte(3, (byte) payloadSize);
     final OutputBuffer<ByteBuffer> output = Binary.outputBuffer(new byte[payloadSize + 4]);
-    Encoder<?, ?> frameEncoder = Ws.standardEncoderUnmasked().frameEncoder(WsBinary.from(payload.writer()));
+    Encoder<?, ?> frameEncoder = new WsStandardEncoderTest(null).frameEncoder(WsBinary.from(payload.writer()));
     frameEncoder = frameEncoder.pull(output);
     assertEquals(Data.wrap(output.bind()), frame);
   }
@@ -153,7 +153,7 @@ public class WsFrameEncoderSpec {
     frame.setByte(2, (byte) (payloadSize >>> 8));
     frame.setByte(3, (byte) payloadSize);
     final OutputBuffer<ByteBuffer> output = Binary.outputBuffer(new byte[payloadSize + 4]);
-    Encoder<?, ?> frameEncoder = Ws.standardEncoderUnmasked().frameEncoder(WsBinary.from(payload.writer()));
+    Encoder<?, ?> frameEncoder = new WsStandardEncoderTest(null).frameEncoder(WsBinary.from(payload.writer()));
     frameEncoder = frameEncoder.pull(output);
     assertEquals(Data.wrap(output.bind()), frame);
   }
@@ -174,7 +174,7 @@ public class WsFrameEncoderSpec {
     frame.setByte(8, (byte) (payloadSize >>> 8));
     frame.setByte(9, (byte) payloadSize);
     final OutputBuffer<ByteBuffer> output = Binary.outputBuffer(new byte[payloadSize + 10]);
-    Encoder<?, ?> frameEncoder = Ws.standardEncoderUnmasked().frameEncoder(WsBinary.from(payload.writer()));
+    Encoder<?, ?> frameEncoder = new WsStandardEncoderTest(null).frameEncoder(WsBinary.from(payload.writer()));
     frameEncoder = frameEncoder.pull(output);
     assertEquals(Data.wrap(output.bind()), frame);
   }

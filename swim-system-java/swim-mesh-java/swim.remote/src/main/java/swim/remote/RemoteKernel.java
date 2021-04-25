@@ -28,26 +28,20 @@ import swim.uri.Uri;
 
 public class RemoteKernel extends KernelProxy {
 
-  private static final double KERNEL_PRIORITY = 0.25;
   final double kernelPriority;
   WarpSettings warpSettings;
 
-  public RemoteKernel(double kernelPriority) {
+  public RemoteKernel(double kernelPriority, WarpSettings warpSettings) {
     this.kernelPriority = kernelPriority;
+    this.warpSettings = warpSettings;
+  }
+
+  public RemoteKernel(double kernelPriority) {
+    this(kernelPriority, null);
   }
 
   public RemoteKernel() {
     this(KERNEL_PRIORITY);
-  }
-
-  public static RemoteKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || RemoteKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new RemoteKernel(kernelPriority);
-    }
-    return null;
   }
 
   @Override
@@ -65,7 +59,7 @@ public class RemoteKernel extends KernelProxy {
 
   public final WarpSettings warpSettings() {
     if (this.warpSettings == null) {
-      this.warpSettings = WarpSettings.from(wsSettings()); // TODO: use moduleConfig
+      this.warpSettings = WarpSettings.from(wsSettings());
     }
     return this.warpSettings;
   }
@@ -87,6 +81,20 @@ public class RemoteKernel extends KernelProxy {
       return new RemoteHostClient(hostUri, endpoint, warpSettings());
     }
     return super.createHost(part, hostDef);
+  }
+
+  private static final double KERNEL_PRIORITY = 0.25;
+
+  public static RemoteKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || RemoteKernel.class.getName().equals(kernelClassName)) {
+      Thread.dumpStack();
+      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      final WarpSettings warpSettings = WarpSettings.form().cast(moduleConfig);
+      return new RemoteKernel(kernelPriority, warpSettings);
+    }
+    return null;
   }
 
 }

@@ -24,6 +24,10 @@ public abstract class WsEncoder {
 
   public abstract void maskingKey(byte[] maskingKey);
 
+  public int minDataFrameBufferSize() {
+    return 128;
+  }
+
   public <T> Encoder<?, WsFrame<T>> frameEncoder(WsFrame<T> frame) {
     final WsOpcode opcode = frame.opcode();
     switch (opcode) {

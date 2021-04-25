@@ -32,6 +32,7 @@ import swim.io.warp.AbstractWarpClient;
 import swim.io.warp.WarpSettings;
 import swim.io.warp.WarpSocketContext;
 import swim.io.warp.WarpWebSocket;
+import swim.io.ws.WsSettings;
 import swim.runtime.HostContext;
 import swim.uri.Uri;
 import swim.uri.UriAuthority;
@@ -76,9 +77,11 @@ public class RemoteHostClient extends RemoteHost {
 
     if (this.client == null) {
       final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, UriPath.slash(), this.baseUri.query());
-      final WsRequest wsRequest = WsRequest.from(requestUri, PROTOCOL_LIST);
-      final WarpWebSocket webSocket = new WarpWebSocket(this, this.warpSettings);
-      this.client = new RemoteHostClientBinding(this, webSocket, wsRequest, this.warpSettings);
+      final WarpSettings warpSettings = this.warpSettings;
+      final WsSettings wsSettings = warpSettings.wsSettings();
+      final WsRequest wsRequest = wsSettings.handshakeRequest(requestUri, PROTOCOL_LIST);
+      final WarpWebSocket webSocket = new WarpWebSocket(this, warpSettings);
+      this.client = new RemoteHostClientBinding(this, webSocket, wsRequest, warpSettings);
       setWarpSocketContext(webSocket); // eagerly set
     }
 
@@ -123,8 +126,8 @@ public class RemoteHostClient extends RemoteHost {
     } else {
       this.reconnectTimeout = Math.min(1.8 * this.reconnectTimeout, MAX_RECONNECT_TIMEOUT);
     }
-    this.reconnectTimer = this.hostContext.schedule().setTimer((long) this.reconnectTimeout,
-        new RemoteHostClientReconnectTimer(this));
+    this.reconnectTimer = this.hostContext.schedule().setTimer(
+        (long) this.reconnectTimeout, new RemoteHostClientReconnectTimer(this));
   }
 
   @Override

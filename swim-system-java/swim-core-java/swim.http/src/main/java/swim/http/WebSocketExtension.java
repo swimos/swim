@@ -54,6 +54,28 @@ public final class WebSocketExtension extends HttpPart implements Debug {
     return new WebSocketExtension("permessage-deflate", params);
   }
 
+  public static WebSocketExtension xWebkitDeflateFrame(boolean serverNoContextTakeover,
+                                                       boolean clientNoContextTakeover,
+                                                       int serverMaxWindowBits,
+                                                       int clientMaxWindowBits) {
+    FingerTrieSeq<WebSocketParam> params = FingerTrieSeq.empty();
+    if (serverNoContextTakeover) {
+      params = params.appended(WebSocketParam.serverNoContextTakeover());
+    }
+    if (clientNoContextTakeover) {
+      params = params.appended(WebSocketParam.clientNoContextTakeover());
+    }
+    if (serverMaxWindowBits != 15) {
+      params = params.appended(WebSocketParam.serverMaxWindowBits(serverMaxWindowBits));
+    }
+    if (clientMaxWindowBits == 0) {
+      params = params.appended(WebSocketParam.clientMaxWindowBits());
+    } else if (clientMaxWindowBits != 15) {
+      params = params.appended(WebSocketParam.clientMaxWindowBits(clientMaxWindowBits));
+    }
+    return new WebSocketExtension("x-webkit-deflate-frame", params);
+  }
+
   public static WebSocketExtension from(String name, FingerTrieSeq<WebSocketParam> params) {
     return new WebSocketExtension(name, params);
   }

@@ -34,6 +34,28 @@ final class WsDeflateServerEngine extends WsEngine {
     this.clientMaxWindowBits = clientMaxWindowBits;
   }
 
+  @Override
+  public WsDecoder decoder() {
+    return Ws.deflateDecoder(new Inflate<Object>(Inflate.Z_NO_WRAP, this.clientMaxWindowBits));
+  }
+
+  @Override
+  public WsEncoder encoder() {
+    final int flush;
+    if (serverNoContextTakeover) {
+      flush = Deflate.Z_FULL_FLUSH;
+    } else {
+      flush = Deflate.Z_SYNC_FLUSH;
+    }
+    return Ws.deflateEncoderUnmasked(new Deflate<Object>(Deflate.Z_NO_WRAP, this.serverCompressionLevel,
+                                     this.serverMaxWindowBits), flush);
+  }
+
+  @Override
+  public WsEngine extension(WebSocketExtension extension, WsEngineSettings settings) {
+    return this;
+  }
+
   static WsDeflateServerEngine from(WebSocketExtension extension, WsEngineSettings settings) {
     boolean serverNoContextTakeover = false;
     int serverMaxWindowBits = 15;
@@ -60,29 +82,7 @@ final class WsDeflateServerEngine extends WsEngine {
       }
     }
     return new WsDeflateServerEngine(settings.serverCompressionLevel, serverNoContextTakeover,
-        serverMaxWindowBits, clientMaxWindowBits);
-  }
-
-  @Override
-  public WsDecoder decoder() {
-    return Ws.deflateDecoder(new Inflate<Object>(Inflate.Z_NO_WRAP, this.clientMaxWindowBits));
-  }
-
-  @Override
-  public WsEncoder encoder() {
-    final int flush;
-    if (serverNoContextTakeover) {
-      flush = Deflate.Z_FULL_FLUSH;
-    } else {
-      flush = Deflate.Z_SYNC_FLUSH;
-    }
-    return Ws.deflateEncoderUnmasked(new Deflate<Object>(Deflate.Z_NO_WRAP, this.serverCompressionLevel,
-        this.serverMaxWindowBits), flush);
-  }
-
-  @Override
-  public WsEngine extension(WebSocketExtension extension, WsEngineSettings settings) {
-    return this;
+                                     serverMaxWindowBits, clientMaxWindowBits);
   }
 
 }
