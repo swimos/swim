@@ -16,7 +16,6 @@ package swim.ws;
 
 import swim.codec.Encoder;
 import swim.codec.EncoderException;
-import swim.codec.Format;
 import swim.codec.OutputBuffer;
 
 final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
@@ -48,8 +47,9 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
     final int outputSize = output.remaining();
     final int maskSize = isMasked ? 4 : 0;
     final int maxHeaderSize = (outputSize <= 127 ? 2 : outputSize <= 65539 ? 4 : 10) + maskSize;
+    final WsOpcode opcode = frame.opcode();
 
-    if (outputSize >= maxHeaderSize) {
+    if (outputSize >= maxHeaderSize + (opcode.isControl() ? 0 : 16)) {
       // prepare output buffer for payload
       final int outputBase = output.index();
       final int maxPayloadBase = outputBase + maxHeaderSize;
@@ -66,7 +66,6 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
       final int headerSize = (payloadSize <= 125 ? 2 : payloadSize <= 65535 ? 4 : 10) + maskSize;
 
       // encode header
-      final WsOpcode opcode = frame.opcode();
       final int finRsvOp;
       if (nextContent.isDone()) {
         if (offset == 0L) {

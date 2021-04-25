@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.testng.TestException;
 import org.testng.annotations.Test;
-import swim.codec.Parser;
 import swim.codec.Utf8;
 import swim.concurrent.Theater;
 import swim.deflate.Deflate;

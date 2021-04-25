@@ -28,7 +28,7 @@ public class WsFrameDeflaterSpec {
     final byte[] actual = new byte[encoded.size() + 16];
     int bufferSize = encoded.size() + 16;
     Encoder<?, ?> frameEncoder = ws.frameEncoder(frame);
-    for (int k = 0, i = 0, n = actual.length; i < n; i += bufferSize) {
+    for (int k = 0, i = 0, n = encoded.size(); i < n; i += bufferSize) {
       if (k < bufferSizes.length) {
         bufferSize = bufferSizes[k];
         k += 1;

@@ -16,7 +16,6 @@ package swim.ws;
 
 import swim.codec.Decoder;
 import swim.codec.DecoderException;
-import swim.codec.Format;
 import swim.codec.InputBuffer;
 
 final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {

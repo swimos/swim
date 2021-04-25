@@ -27,10 +27,10 @@ import static org.testng.Assert.assertTrue;
 public class WsFrameEncoderSpec {
 
   static void assertEncodes(WsEncoder ws, WsFrame<?> frame, Data encoded, int... bufferSizes) {
-    final byte[] actual = new byte[encoded.size()];
-    int bufferSize = encoded.size();
+    final byte[] actual = new byte[encoded.size() + 16];
+    int bufferSize = encoded.size() + 16;
     Encoder<?, ?> frameEncoder = ws.frameEncoder(frame);
-    for (int k = 0, i = 0, n = actual.length; i < n; i += bufferSize) {
+    for (int k = 0, i = 0, n = encoded.size(); i < n; i += bufferSize) {
       if (k < bufferSizes.length) {
         bufferSize = bufferSizes[k];
         k += 1;
@@ -42,7 +42,7 @@ public class WsFrameEncoderSpec {
       }
     }
     assertTrue(frameEncoder.isDone());
-    assertEquals(Data.wrap(actual), encoded);
+    assertEquals(Data.wrap(actual, 0, encoded.size()), encoded);
   }
 
   static void assertEncodes(WsFrame<?> frame, Data encoded, int... bufferSizes) {
@@ -70,7 +70,7 @@ public class WsFrameEncoderSpec {
 
   @Test
   public void encodeUnmaskedTextFragments() {
-    assertEncodes(WsText.from("Hello"), Data.fromBase16("010348656c80026c6f"), 5, 4);
+    assertEncodes(WsText.from("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"), Data.fromBase16("011a4142434445464748494a4b4c4d4e4f505152535455565758595a801a6162636465666768696a6b6c6d6e6f707172737475767778797a"), 28, 28);
   }
 
   @Test
