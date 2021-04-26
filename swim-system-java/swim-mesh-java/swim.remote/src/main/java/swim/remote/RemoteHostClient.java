@@ -36,7 +36,6 @@ import swim.io.ws.WsSettings;
 import swim.runtime.HostContext;
 import swim.uri.Uri;
 import swim.uri.UriAuthority;
-import swim.uri.UriPath;
 import swim.uri.UriScheme;
 import swim.ws.WsClose;
 import swim.ws.WsRequest;
@@ -76,7 +75,7 @@ public class RemoteHostClient extends RemoteHost {
     final int requestPort = remotePort > 0 ? remotePort : isSecure ? 443 : 80;
 
     if (this.client == null) {
-      final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, UriPath.slash(), this.baseUri.query());
+      final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, this.baseUri.path(), this.baseUri.query());
       final WarpSettings warpSettings = this.warpSettings;
       final WsSettings wsSettings = warpSettings.wsSettings();
       final WsRequest wsRequest = wsSettings.handshakeRequest(requestUri, PROTOCOL_LIST);
