@@ -49,21 +49,21 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
   @SuppressWarnings("unchecked")
   protected static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> EXEC_TIME =
       AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "execTime");
-  static final int OPENED = 1 << 0;
-  static final int LINKED = 1 << 1;
-  static final int LINK = 1 << 2;
-  static final int LINKING = 1 << 3;
-  static final int SYNC = 1 << 4;
-  static final int SYNCING = 1 << 5;
-  static final int UNLINK = 1 << 6;
-  static final int UNLINKING = 1 << 7;
-  static final int FEEDING_DOWN = 1 << 8;
-  static final int PULLING_DOWN = 1 << 9;
-  static final int CUED_UP = 1 << 10;
-  static final int FEEDING_UP = 1 << 11;
+  static final long OPENED = 1 << 0;
+  static final long LINKED = 1 << 1;
+  static final long LINK = 1 << 2;
+  static final long LINKING = 1 << 3;
+  static final long SYNC = 1 << 4;
+  static final long SYNCING = 1 << 5;
+  static final long UNLINK = 1 << 6;
+  static final long UNLINKING = 1 << 7;
+  static final long FEEDING_DOWN = 1 << 8;
+  static final long PULLING_DOWN = 1 << 9;
+  static final long CUED_UP = 1 << 10;
+  static final long FEEDING_UP = 1 << 11;
   @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "status");
+  static final AtomicLongFieldUpdater<WarpDownlinkModem<?>> STATUS =
+      AtomicLongFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "status");
   @SuppressWarnings("unchecked")
   static final AtomicIntegerFieldUpdater<WarpDownlinkModem<?>> OPEN_DELTA =
       AtomicIntegerFieldUpdater.newUpdater((Class<WarpDownlinkModem<?>>) (Class<?>) WarpDownlinkModem.class, "openDelta");
@@ -96,7 +96,7 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
   protected final Value body;
   protected WarpContext linkContext;
   protected CellContext cellContext;
-  protected volatile int status;
+  protected volatile long status;
   volatile long execDelta;
   volatile long execTime;
   volatile int openDelta;
@@ -165,8 +165,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   public void cueDown() {
     do {
-      final int oldStatus = this.status;
-      final int newStatus;
+      final long oldStatus = this.status;
+      final long newStatus;
       if ((oldStatus & FEEDING_DOWN) != 0) {
         newStatus = oldStatus & ~FEEDING_DOWN | PULLING_DOWN;
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
@@ -185,8 +185,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
   @Override
   public void feedDown() {
     do {
-      final int oldStatus = this.status;
-      final int newStatus;
+      final long oldStatus = this.status;
+      final long newStatus;
       if ((oldStatus & PULLING_DOWN) == 0) {
         newStatus = oldStatus & ~FEEDING_DOWN | PULLING_DOWN;
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
@@ -283,8 +283,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
   public void pushUp(Value body) {
     queueUp(body, null);
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus | FEEDING_UP;
+      final long oldStatus = this.status;
+      final long newStatus = oldStatus | FEEDING_UP;
       if (oldStatus != newStatus) {
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.linkContext.feedUp();
@@ -298,8 +298,12 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   public void cueUp() {
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus | (FEEDING_UP | CUED_UP);
+      final long oldStatus = this.status;
+      final long pullingUpCount = oldStatus >>> 32;
+      if (pullingUpCount > 0) {
+        continue;
+      }
+      final long newStatus = oldStatus | (FEEDING_UP | CUED_UP);
       if (oldStatus != newStatus) {
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
           if ((oldStatus & FEEDING_UP) == 0) {
@@ -315,9 +319,9 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   protected void feedUp() {
     do {
-      final int oldStatus = this.status;
+      final long oldStatus = this.status;
       if ((oldStatus & CUED_UP) != 0 || !upQueueIsEmpty()) {
-        final int newStatus = oldStatus | FEEDING_UP;
+        final long newStatus = oldStatus | FEEDING_UP;
         if (oldStatus != newStatus) {
           if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
             this.linkContext.feedUp();
@@ -334,53 +338,73 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   @Override
   public void pullUp() {
-    do {
-      final int oldStatus = this.status;
-      final int newStatus;
-      if ((oldStatus & UNLINK) != 0) {
-        newStatus = oldStatus & ~(UNLINK | FEEDING_UP);
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          final UnlinkRequest request = unlinkRequest();
-          pullUpUnlink(request);
-          pushUp(request);
-          break;
-        }
-      } else if ((oldStatus & SYNC) != 0) {
-        newStatus = oldStatus & ~(LINK | SYNC | FEEDING_UP);
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          final SyncRequest request = syncRequest();
-          pullUpSync(request);
-          pushUp(request);
-          feedUp();
-          break;
-        }
-      } else if ((oldStatus & LINK) != 0) {
-        newStatus = oldStatus & ~(LINK | FEEDING_UP);
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          final LinkRequest request = linkRequest();
-          pullUpLink(request);
-          pushUp(request);
-          feedUp();
-          break;
-        }
-      } else {
-        newStatus = oldStatus & ~(CUED_UP | FEEDING_UP);
-        if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          Push<CommandMessage> push = nextUpQueue();
-          if (push == null && (oldStatus & CUED_UP) != 0) {
-            push = nextUpCue();
+    boolean doFeedUp = false;
+    try {
+      do {
+        final long oldStatus = this.status;
+        final int oldCount = (int) (oldStatus >>> 32);
+        final long newCount = ((long) oldCount + 1) << 32;
+        final long oldFlags = oldStatus & 0xFFFFFFFFL;
+        final long newStatus;
+        if ((oldStatus & UNLINK) != 0) {
+          newStatus = oldFlags & ~(UNLINK | FEEDING_UP) | newCount;
+          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+            final UnlinkRequest request = unlinkRequest();
+            pullUpUnlink(request);
+            pushUp(request);
+            break;
           }
-          if (push != null) {
-            pullUpCommand(push.message());
-            this.linkContext.pushUp(push);
-            feedUp();
-          } else {
-            this.linkContext.skipUp();
+        } else if ((oldStatus & SYNC) != 0) {
+          newStatus = oldFlags & ~(LINK | SYNC | FEEDING_UP) | newCount;
+          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+            final SyncRequest request = syncRequest();
+            pullUpSync(request);
+            pushUp(request);
+            doFeedUp = true;
+            break;
           }
-          break;
+        } else if ((oldStatus & LINK) != 0) {
+          newStatus = oldFlags & ~(LINK | FEEDING_UP) | newCount;
+          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+            final LinkRequest request = linkRequest();
+            pullUpLink(request);
+            pushUp(request);
+            doFeedUp = true;
+            break;
+          }
+        } else {
+          final long newFlags = oldFlags & ~(CUED_UP | FEEDING_UP);
+          newStatus = newFlags | newCount;
+          if (oldFlags == newFlags || STATUS.compareAndSet(this, oldStatus, newStatus)) {
+            Push<CommandMessage> push = nextUpQueue();
+            if (push == null && (oldStatus & CUED_UP) != 0) {
+              push = nextUpCue();
+            }
+            if (push != null) {
+              pullUpCommand(push.message());
+              this.linkContext.pushUp(push);
+              doFeedUp = true;
+            } else {
+              this.linkContext.skipUp();
+            }
+            break;
+          }
         }
+      } while (true);
+    } finally {
+      STATUS.updateAndGet(this, s -> {
+        final long oldCount = s >>> 32;
+        if (oldCount == 0) {
+          return s;
+        } else {
+          final long newCount = (oldCount - 1) << 32;
+          return (s & 0xFFFFFFFFL) | newCount;
+        }
+      });
+      if (doFeedUp) {
+        feedUp();
       }
-    } while (true);
+    }
   }
 
   protected void pullUpCommand(CommandMessage message) {
@@ -406,8 +430,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   public void link() {
     do {
-      final int oldStatus = this.status;
-      final int newStatus;
+      final long oldStatus = this.status;
+      final long newStatus;
       if ((oldStatus & (LINKED | OPENED)) == OPENED) {
         newStatus = oldStatus | (FEEDING_UP | LINKING | LINK | LINKED);
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
@@ -424,8 +448,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   public void sync() {
     do {
-      final int oldStatus = this.status;
-      final int newStatus;
+      final long oldStatus = this.status;
+      final long newStatus;
       if ((oldStatus & (LINKED | OPENED)) == OPENED) {
         newStatus = oldStatus | (FEEDING_UP | SYNCING | SYNC | LINKING | LINK | LINKED);
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
@@ -442,8 +466,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   public void unlink() {
     do {
-      final int oldStatus = this.status;
-      final int newStatus;
+      final long oldStatus = this.status;
+      final long newStatus;
       if ((oldStatus & LINK) != 0) {
         newStatus = oldStatus & ~(FEEDING_UP | SYNCING | SYNC | LINKING | LINK | LINKED);
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
@@ -518,8 +542,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   protected void didOpen() {
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus | OPENED;
+      final long oldStatus = this.status;
+      final long newStatus = oldStatus | OPENED;
       if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
         break;
       }
@@ -565,8 +589,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   protected void didLink(LinkedResponse response) {
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus & ~LINKING;
+      final long oldStatus = this.status;
+      final long newStatus = oldStatus & ~LINKING;
       if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
         break;
       }
@@ -579,8 +603,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   protected void didSync(SyncedResponse response) {
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus & ~SYNCING;
+      final long oldStatus = this.status;
+      final long newStatus = oldStatus & ~SYNCING;
       if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
         break;
       }
@@ -593,8 +617,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
 
   protected void didUnlink(UnlinkedResponse response) {
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus & ~(PULLING_DOWN | UNLINKING | UNLINK | SYNCING | SYNC | LINKING | LINK | LINKED);
+      final long oldStatus = this.status;
+      final long newStatus = oldStatus & ~(PULLING_DOWN | UNLINKING | UNLINK | SYNCING | SYNC | LINKING | LINK | LINKED);
       if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
         break;
       }
@@ -616,8 +640,8 @@ public abstract class WarpDownlinkModem<View extends DownlinkView> extends Downl
   @Override
   public void didDisconnect() {
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus & ~(FEEDING_UP | UNLINKING | UNLINK | SYNCING | SYNC | LINKING | LINK | LINKED);
+      final long oldStatus = this.status;
+      final long newStatus = oldStatus & ~(FEEDING_UP | UNLINKING | UNLINK | SYNCING | SYNC | LINKING | LINK | LINKED);
       if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
         break;
       }

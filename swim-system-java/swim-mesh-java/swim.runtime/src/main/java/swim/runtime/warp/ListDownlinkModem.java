@@ -42,8 +42,8 @@ public abstract class ListDownlinkModem<View extends WarpDownlinkView> extends W
   public void pushUp(ListLinkDelta delta) {
     queueUp(delta);
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus | FEEDING_UP;
+      final long oldStatus = this.status;
+      final long newStatus = oldStatus | FEEDING_UP;
       if (oldStatus != newStatus) {
         if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.linkContext.feedUp();

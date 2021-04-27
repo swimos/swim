@@ -15,6 +15,7 @@
 package swim.runtime.lane;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import swim.api.Link;
 import swim.api.data.ValueData;
 import swim.concurrent.Cont;
@@ -31,11 +32,20 @@ import swim.warp.CommandMessage;
 
 public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUplink> {
 
+  static final AtomicLongFieldUpdater<ValueLaneModel> EPOCH =
+      AtomicLongFieldUpdater.newUpdater(ValueLaneModel.class, "epoch");
+  static final AtomicLongFieldUpdater<ValueLaneModel> SENT_EPOCH =
+      AtomicLongFieldUpdater.newUpdater(ValueLaneModel.class, "sentEpoch");
+
   static final int RESIDENT = 1 << 0;
   static final int TRANSIENT = 1 << 1;
   static final int SIGNED = 1 << 2;
   protected int flags;
   protected ValueData<Value> data;
+  @SuppressWarnings("FieldMayBeFinal")
+  private volatile long epoch = 0;
+  @SuppressWarnings("FieldMayBeFinal")
+  private volatile long sentEpoch = Long.MIN_VALUE;
 
   ValueLaneModel(int flags) {
     this.flags = flags;
@@ -169,6 +179,7 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
   Object oldObject;
   Value newValue;
   Object newObject;
+  private final long epoch;
 
   ValueLaneRelaySet(ValueLaneModel model, CommandMessage message, Cont<CommandMessage> cont, Value newValue) {
     super(model, 4);
@@ -176,6 +187,7 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
     this.message = message;
     this.cont = cont;
     this.newValue = newValue;
+    this.epoch = ValueLaneModel.EPOCH.getAndIncrement(model);
   }
 
   ValueLaneRelaySet(ValueLaneModel model, Link link, Value newValue) {
@@ -184,6 +196,7 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
     this.message = null;
     this.cont = null;
     this.newValue = newValue;
+    this.epoch = ValueLaneModel.EPOCH.getAndIncrement(model);
   }
 
   ValueLaneRelaySet(ValueLaneModel model, Stage stage, Value newValue) {
@@ -192,6 +205,7 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
     this.message = null;
     this.cont = null;
     this.newValue = newValue;
+    this.epoch = ValueLaneModel.EPOCH.getAndIncrement(model);
   }
 
   @Override
@@ -262,7 +276,12 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
 
   @Override
   protected void done() {
-    this.model.cueDown();
+    final long current = epoch;
+    final long newLastSent = ValueLaneModel.SENT_EPOCH.updateAndGet(
+        model, e -> Math.max(current, e));
+    if (current == newLastSent) {
+      this.model.cueDown();
+    }
     if (this.cont != null) {
       try {
         this.cont.bind(this.message);
