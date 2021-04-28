@@ -213,6 +213,11 @@ public class WarpErrorUplinkModem implements WarpContext {
     // nop
   }
 
+  @Override
+  public void didFailDown(Throwable error) {
+    error.printStackTrace();
+  }
+
   protected UnlinkedResponse getUnlinkedResponse() {
     return new UnlinkedResponse(this.linkBinding.nodeUri(), this.linkBinding.laneUri(), this.body);
   }

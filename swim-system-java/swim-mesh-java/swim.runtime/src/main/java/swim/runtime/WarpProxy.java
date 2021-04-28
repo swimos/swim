@@ -377,6 +377,16 @@ public abstract class WarpProxy implements WarpBinding, WarpContext {
   }
 
   @Override
+  public void didFailDown(Throwable error) {
+    this.linkContext.didFailDown(error);
+  }
+
+  @Override
+  public void didFailUp(Throwable error) {
+    this.linkBinding.didFailUp(error);
+  }
+
+  @Override
   public void didFail(Throwable error) {
     this.linkBinding.didFail(error);
   }

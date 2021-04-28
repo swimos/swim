@@ -324,4 +324,10 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
     return this;
   }
 
+  @Override
+  public void close() {
+    super.close();
+    this.model = null;
+  }
+
 }

@@ -15,13 +15,11 @@
 package swim.runtime;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import swim.concurrent.Conts;
 import swim.uri.Uri;
 
 public abstract class DownlinkModel<View extends DownlinkView> extends AbstractDownlinkBinding implements LinkBinding {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<DownlinkModel<?>, Object> VIEWS =
-      AtomicReferenceFieldUpdater.newUpdater((Class<DownlinkModel<?>>) (Class<?>) DownlinkModel.class, Object.class, "views");
   protected volatile Object views; // View | DownlinkView[]
 
   public DownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri) {
@@ -132,23 +130,19 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
   @SuppressWarnings("unchecked")
   @Override
   public void reopen() {
-    final Object views = VIEWS.getAndSet(this, null);
+    final Object views = this.views;
     View view;
     if (views instanceof DownlinkView) {
       view = (View) views;
       view.close();
-      didRemoveDownlink(view);
-      closeDown();
       view.open();
     } else if (views instanceof DownlinkView[]) {
       final DownlinkView[] viewArray = (DownlinkView[]) views;
-      final int n = viewArray.length;
+      final int n = ((DownlinkView[]) views).length;
       for (int i = 0; i < n; i += 1) {
         view = (View) viewArray[i];
         view.close();
-        didRemoveDownlink(view);
       }
-      closeDown();
       for (int i = 0; i < n; i += 1) {
         view = (View) viewArray[i];
         view.open();
@@ -173,12 +167,20 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
 
   @Override
   public void didFail(Throwable error) {
-    new DownlinkRelayDidFail<View>(this, error).run();
+    if (Conts.isNonFatal(error)) {
+      new DownlinkRelayDidFail<View>(this, error).run();
+    } else {
+      error.printStackTrace();
+    }
   }
 
   public void accumulateExecTime(long execDelta) {
     // hook
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<DownlinkModel<?>, Object> VIEWS =
+      AtomicReferenceFieldUpdater.newUpdater((Class<DownlinkModel<?>>) (Class<?>) DownlinkModel.class, Object.class, "views");
 
 }
 

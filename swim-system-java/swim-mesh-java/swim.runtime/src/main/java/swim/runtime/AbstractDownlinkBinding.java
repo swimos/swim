@@ -243,6 +243,9 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
   public abstract void didCloseUp();
 
   @Override
+  public abstract void didFailUp(Throwable error);
+
+  @Override
   public abstract void didFail(Throwable error);
 
   @Override

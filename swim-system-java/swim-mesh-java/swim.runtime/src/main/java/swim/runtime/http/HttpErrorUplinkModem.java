@@ -198,6 +198,11 @@ public class HttpErrorUplinkModem implements HttpContext {
   }
 
   @Override
+  public void didFailDown(Throwable error) {
+    error.printStackTrace();
+  }
+
+  @Override
   public void traceUp(Object message) {
     // nop
   }

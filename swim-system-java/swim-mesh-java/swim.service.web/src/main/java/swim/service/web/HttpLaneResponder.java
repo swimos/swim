@@ -320,6 +320,11 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
   }
 
   @Override
+  public void didFailUp(Throwable error) {
+    didFail(error);
+  }
+
+  @Override
   public void didFail(Throwable error) {
     this.linkContext.closeUp();
     closeDown();

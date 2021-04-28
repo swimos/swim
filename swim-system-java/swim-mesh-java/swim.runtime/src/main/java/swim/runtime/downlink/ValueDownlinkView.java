@@ -431,6 +431,12 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   }
 
   @Override
+  public void close() {
+    super.close();
+    this.model = null;
+  }
+
+  @Override
   public V get() {
     final V state = this.valueForm.cast(this.model.get());
     if (state == null) {

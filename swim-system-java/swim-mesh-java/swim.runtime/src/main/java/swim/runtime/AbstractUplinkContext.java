@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.Uplink;
 import swim.api.auth.Identity;
 import swim.collections.FingerTrieSeq;
+import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.structure.Value;
 import swim.uri.Uri;
@@ -306,6 +307,17 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
 
   protected void didClose() {
     laneBinding().closeUplink(linkKey());
+  }
+
+  @Override
+  public void didFailDown(Throwable error) {
+    try {
+      if (Conts.isNonFatal(error)) {
+        laneBinding().didFail(error);
+      }
+    } finally {
+      didClose();
+    }
   }
 
   protected void didFail(Throwable error) {

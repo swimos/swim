@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.api.LinkException;
 import swim.api.auth.Identity;
+import swim.concurrent.Conts;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.concurrent.StayContext;
@@ -43,12 +44,6 @@ import swim.warp.SyncRequest;
 
 class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
 
-  static final int FEEDING_DOWN = 1 << 0;
-  static final int PULLING_DOWN = 1 << 1;
-  static final int FEEDING_UP = 1 << 2;
-  static final int SYNC = 1 << 3;
-  static final AtomicIntegerFieldUpdater<RemoteWarpDownlink> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(RemoteWarpDownlink.class, "status");
   final RemoteHost host;
   Uri hostUri;
   final Uri remoteNodeUri;
@@ -360,11 +355,19 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
       oldStatus = this.status;
       newStatus = oldStatus & ~FEEDING_UP;
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if (envelope != null) {
-      this.linkContext.pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), this.nodeUri, this.laneUri,
-                                                 this.prio, this.host.remoteIdentity(), envelope, null));
+    try {
+      if (envelope != null) {
+        this.linkContext.pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), this.nodeUri, this.laneUri,
+                                                   this.prio, this.host.remoteIdentity(), envelope, null));
+      }
+      feedUpQueue();
+    } catch (Throwable error) {
+      if (Conts.isNonFatal(error)) {
+        this.linkContext.didFailDown(error);
+      } else {
+        throw error;
+      }
     }
-    feedUpQueue();
   }
 
   void feedUpQueue() {
@@ -379,7 +382,15 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
       }
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldStatus != newStatus) {
-      this.linkContext.feedUp();
+      try {
+        this.linkContext.feedUp();
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.linkContext.didFailDown(error);
+        } else {
+          throw error;
+        }
+      }
     }
   }
 
@@ -435,6 +446,15 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   }
 
   @Override
+  public void didFailUp(Throwable error) {
+    try {
+      didFail(error);
+    } finally {
+      closeDown();
+    }
+  }
+
+  @Override
   public void didFail(Throwable error) {
     error.printStackTrace();
   }
@@ -468,5 +488,13 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   public void failDown(Object message) {
     this.host.fail(message);
   }
+
+  static final int FEEDING_DOWN = 1 << 0;
+  static final int PULLING_DOWN = 1 << 1;
+  static final int FEEDING_UP = 1 << 2;
+  static final int SYNC = 1 << 3;
+
+  static final AtomicIntegerFieldUpdater<RemoteWarpDownlink> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(RemoteWarpDownlink.class, "status");
 
 }

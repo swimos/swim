@@ -20,11 +20,14 @@ import java.security.cert.Certificate;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import swim.api.LinkException;
 import swim.api.auth.Identity;
+import swim.concurrent.Conts;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.concurrent.StayContext;
+import swim.io.warp.WarpSocketContext;
 import swim.runtime.DownlinkAddress;
 import swim.runtime.LinkAddress;
 import swim.runtime.LinkBinding;
@@ -46,6 +49,7 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   final Value linkKey;
   final ConcurrentLinkedQueue<Push<Envelope>> downQueue;
   PullContext<? super Envelope> pullContext;
+  volatile long lastFeedDownTime;
   volatile int status;
 
   RemoteWarpUplink(RemoteHost host, WarpBinding link, Uri remoteNodeUri, Value linkKey) {
@@ -184,7 +188,16 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
       newStatus = oldStatus | FEEDING_DOWN;
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldStatus != newStatus) {
+      LAST_FEED_DOWN_TIME.set(this, System.currentTimeMillis());
       this.link.feedDown();
+    } else {
+      final long lastFeedDownTime = this.lastFeedDownTime;
+      if (lastFeedDownTime != 0L) {
+        final long pullDownDelay = System.currentTimeMillis() - lastFeedDownTime;
+        if (pullDownDelay >= MAX_PULL_DOWN_DELAY) {
+          this.link.didFailUp(new RemoteHostException("exceeded maximum pull down delay"));
+        }
+      }
     }
   }
 
@@ -197,10 +210,24 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
       oldStatus = this.status;
       newStatus = oldStatus & ~FEEDING_DOWN;
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if (push != null) {
-      this.link.pushDown(push);
+    try {
+      if (push != null) {
+        this.link.pushDown(push);
+        final long feedDownTime = LAST_FEED_DOWN_TIME.getAndSet(this, 0L);
+        didPullDown(System.currentTimeMillis() - feedDownTime);
+      }
+      feedDownQueue();
+    } catch (Throwable error) {
+      if (Conts.isNonFatal(error)) {
+        this.link.didFailUp(error);
+      } else {
+        throw error;
+      }
     }
-    feedDownQueue();
+  }
+
+  void didPullDown(long pullDownLatency) {
+    // TODO: report processing latency metric
   }
 
   void feedDownQueue() {
@@ -215,7 +242,16 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
       }
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldStatus != newStatus) {
-      this.link.feedDown();
+      LAST_FEED_DOWN_TIME.set(this, System.currentTimeMillis());
+      try {
+        this.link.feedDown();
+      } catch (Throwable error) {
+        if (Conts.isNonFatal(error)) {
+          this.link.didFailUp(error);
+        } else {
+          throw error;
+        }
+      }
     }
   }
 
@@ -232,7 +268,16 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
       }
     } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
     if ((oldStatus & PULLING_UP) == 0) {
-      this.host.warpSocketContext.feed(this);
+      final long t0 = System.currentTimeMillis();
+      do {
+        final WarpSocketContext warpSocketContext = this.host.warpSocketContext;
+        if (warpSocketContext != null) {
+          warpSocketContext.feed(this);
+          break;
+        } else if (System.currentTimeMillis() - t0 > MAX_FEED_UP_DELAY) {
+          throw new RemoteHostException("exceeded maximum feed up delay");
+        }
+      } while (true);
     }
   }
 
@@ -313,6 +358,7 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   public void didDisconnect() {
     this.link.didDisconnect();
     STATUS.set(this, 0);
+    LAST_FEED_DOWN_TIME.set(this, 0L);
   }
 
   @Override
@@ -321,7 +367,13 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   }
 
   public void didCloseUp() {
+    this.downQueue.clear();
     this.link.didCloseUp();
+  }
+
+  @Override
+  public void didFailDown(Throwable error) {
+    closeUp();
   }
 
   @Override
@@ -358,7 +410,30 @@ class RemoteWarpUplink implements WarpContext, PullRequest<Envelope> {
   static final int FEEDING_UP = 1 << 1;
   static final int PULLING_UP = 1 << 2;
 
+  static final long MAX_PULL_DOWN_DELAY;
+  static final long MAX_FEED_UP_DELAY;
+
+  static final AtomicLongFieldUpdater<RemoteWarpUplink> LAST_FEED_DOWN_TIME =
+      AtomicLongFieldUpdater.newUpdater(RemoteWarpUplink.class, "lastFeedDownTime");
   static final AtomicIntegerFieldUpdater<RemoteWarpUplink> STATUS =
       AtomicIntegerFieldUpdater.newUpdater(RemoteWarpUplink.class, "status");
+
+  static {
+    long maxPullDownDelay;
+    try {
+      maxPullDownDelay = Long.parseLong(System.getProperty("swim.remote.max.pull.down.delay"));
+    } catch (NumberFormatException e) {
+      maxPullDownDelay = 60L * 1000L;
+    }
+    MAX_PULL_DOWN_DELAY = maxPullDownDelay;
+
+    long maxFeedUpDelay;
+    try {
+      maxFeedUpDelay = Long.parseLong(System.getProperty("swim.remote.max.feed.up.delay"));
+    } catch (NumberFormatException e) {
+      maxFeedUpDelay = 1000L;
+    }
+    MAX_FEED_UP_DELAY = maxFeedUpDelay;
+  }
 
 }

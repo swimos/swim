@@ -915,6 +915,12 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   }
 
   @Override
+  public void close() {
+    super.close();
+    this.model = null;
+  }
+
+  @Override
   public boolean isEmpty() {
     return this.model.isEmpty();
   }

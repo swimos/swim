@@ -94,6 +94,8 @@ public interface LinkBinding {
 
   void didCloseUp();
 
+  void didFailUp(Throwable error);
+
   void didFail(Throwable error);
 
   void traceDown(Object message);

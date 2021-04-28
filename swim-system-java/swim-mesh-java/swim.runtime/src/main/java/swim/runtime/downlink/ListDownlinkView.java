@@ -995,6 +995,12 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   }
 
   @Override
+  public void close() {
+    super.close();
+    this.model = null;
+  }
+
+  @Override
   public boolean isEmpty() {
     return this.model.isEmpty();
   }

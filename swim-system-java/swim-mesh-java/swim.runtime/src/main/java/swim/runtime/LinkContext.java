@@ -67,6 +67,8 @@ public interface LinkContext {
 
   void didCloseDown();
 
+  void didFailDown(Throwable error);
+
   void traceUp(Object message);
 
   void debugUp(Object message);
