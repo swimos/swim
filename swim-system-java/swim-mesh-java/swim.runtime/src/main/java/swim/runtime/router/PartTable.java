@@ -66,91 +66,6 @@ import swim.uri.Uri;
 
 public class PartTable extends AbstractTierBinding implements PartBinding {
 
-  static final Uri HOSTS_URI = Uri.parse("hosts");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<PartTable, HashTrieMap<Uri, HostBinding>> HOSTS =
-      AtomicReferenceFieldUpdater.newUpdater(PartTable.class, (Class<HashTrieMap<Uri, HostBinding>>) (Class<?>) HashTrieMap.class, "hosts");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<PartTable, HashTrieMap<Value, LinkBinding>> UPLINKS =
-      AtomicReferenceFieldUpdater.newUpdater(PartTable.class, (Class<HashTrieMap<Value, LinkBinding>>) (Class<?>) HashTrieMap.class, "uplinks");
-  static final AtomicIntegerFieldUpdater<PartTable> HOST_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "hostOpenDelta");
-  static final AtomicLongFieldUpdater<PartTable> HOST_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "hostOpenCount");
-  static final AtomicIntegerFieldUpdater<PartTable> HOST_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "hostCloseDelta");
-  static final AtomicLongFieldUpdater<PartTable> HOST_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "hostCloseCount");
-  static final AtomicIntegerFieldUpdater<PartTable> NODE_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "nodeOpenDelta");
-  static final AtomicLongFieldUpdater<PartTable> NODE_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "nodeOpenCount");
-  static final AtomicIntegerFieldUpdater<PartTable> NODE_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "nodeCloseDelta");
-  static final AtomicLongFieldUpdater<PartTable> NODE_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "nodeCloseCount");
-  static final AtomicIntegerFieldUpdater<PartTable> AGENT_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "agentOpenDelta");
-  static final AtomicLongFieldUpdater<PartTable> AGENT_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "agentOpenCount");
-  static final AtomicIntegerFieldUpdater<PartTable> AGENT_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "agentCloseDelta");
-  static final AtomicLongFieldUpdater<PartTable> AGENT_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "agentCloseCount");
-  static final AtomicLongFieldUpdater<PartTable> AGENT_EXEC_DELTA =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "agentExecDelta");
-  static final AtomicLongFieldUpdater<PartTable> AGENT_EXEC_RATE =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "agentExecRate");
-  static final AtomicLongFieldUpdater<PartTable> AGENT_EXEC_TIME =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "agentExecTime");
-  static final AtomicIntegerFieldUpdater<PartTable> TIMER_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "timerEventDelta");
-  static final AtomicIntegerFieldUpdater<PartTable> TIMER_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "timerEventRate");
-  static final AtomicLongFieldUpdater<PartTable> TIMER_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "timerEventCount");
-  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkOpenDelta");
-  static final AtomicLongFieldUpdater<PartTable> DOWNLINK_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "downlinkOpenCount");
-  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkCloseDelta");
-  static final AtomicLongFieldUpdater<PartTable> DOWNLINK_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "downlinkCloseCount");
-  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkEventDelta");
-  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkEventRate");
-  static final AtomicLongFieldUpdater<PartTable> DOWNLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "downlinkEventCount");
-  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkCommandDelta");
-  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkCommandRate");
-  static final AtomicLongFieldUpdater<PartTable> DOWNLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "downlinkCommandCount");
-  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkOpenDelta");
-  static final AtomicLongFieldUpdater<PartTable> UPLINK_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "uplinkOpenCount");
-  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkCloseDelta");
-  static final AtomicLongFieldUpdater<PartTable> UPLINK_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "uplinkCloseCount");
-  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkEventDelta");
-  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkEventRate");
-  static final AtomicLongFieldUpdater<PartTable> UPLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "uplinkEventCount");
-  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkCommandDelta");
-  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkCommandRate");
-  static final AtomicLongFieldUpdater<PartTable> UPLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "uplinkCommandCount");
-  static final AtomicLongFieldUpdater<PartTable> LAST_REPORT_TIME =
-      AtomicLongFieldUpdater.newUpdater(PartTable.class, "lastReportTime");
   final PartPredicate predicate;
   protected PartContext partContext;
   volatile HashTrieMap<Uri, HostBinding> hosts;
@@ -923,6 +838,93 @@ public class PartTable extends AbstractTierBinding implements PartBinding {
         uplinkEventDelta, uplinkEventRate, uplinkEventCount,
         uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
+
+  static final Uri HOSTS_URI = Uri.parse("hosts");
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<PartTable, HashTrieMap<Uri, HostBinding>> HOSTS =
+      AtomicReferenceFieldUpdater.newUpdater(PartTable.class, (Class<HashTrieMap<Uri, HostBinding>>) (Class<?>) HashTrieMap.class, "hosts");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<PartTable, HashTrieMap<Value, LinkBinding>> UPLINKS =
+      AtomicReferenceFieldUpdater.newUpdater(PartTable.class, (Class<HashTrieMap<Value, LinkBinding>>) (Class<?>) HashTrieMap.class, "uplinks");
+  static final AtomicIntegerFieldUpdater<PartTable> HOST_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "hostOpenDelta");
+  static final AtomicLongFieldUpdater<PartTable> HOST_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "hostOpenCount");
+  static final AtomicIntegerFieldUpdater<PartTable> HOST_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "hostCloseDelta");
+  static final AtomicLongFieldUpdater<PartTable> HOST_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "hostCloseCount");
+  static final AtomicIntegerFieldUpdater<PartTable> NODE_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "nodeOpenDelta");
+  static final AtomicLongFieldUpdater<PartTable> NODE_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "nodeOpenCount");
+  static final AtomicIntegerFieldUpdater<PartTable> NODE_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "nodeCloseDelta");
+  static final AtomicLongFieldUpdater<PartTable> NODE_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "nodeCloseCount");
+  static final AtomicIntegerFieldUpdater<PartTable> AGENT_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "agentOpenDelta");
+  static final AtomicLongFieldUpdater<PartTable> AGENT_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "agentOpenCount");
+  static final AtomicIntegerFieldUpdater<PartTable> AGENT_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "agentCloseDelta");
+  static final AtomicLongFieldUpdater<PartTable> AGENT_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "agentCloseCount");
+  static final AtomicLongFieldUpdater<PartTable> AGENT_EXEC_DELTA =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "agentExecDelta");
+  static final AtomicLongFieldUpdater<PartTable> AGENT_EXEC_RATE =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "agentExecRate");
+  static final AtomicLongFieldUpdater<PartTable> AGENT_EXEC_TIME =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "agentExecTime");
+  static final AtomicIntegerFieldUpdater<PartTable> TIMER_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "timerEventDelta");
+  static final AtomicIntegerFieldUpdater<PartTable> TIMER_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "timerEventRate");
+  static final AtomicLongFieldUpdater<PartTable> TIMER_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "timerEventCount");
+  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkOpenDelta");
+  static final AtomicLongFieldUpdater<PartTable> DOWNLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "downlinkOpenCount");
+  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkCloseDelta");
+  static final AtomicLongFieldUpdater<PartTable> DOWNLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "downlinkCloseCount");
+  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkEventDelta");
+  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkEventRate");
+  static final AtomicLongFieldUpdater<PartTable> DOWNLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "downlinkEventCount");
+  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<PartTable> DOWNLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "downlinkCommandRate");
+  static final AtomicLongFieldUpdater<PartTable> DOWNLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "downlinkCommandCount");
+  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkOpenDelta");
+  static final AtomicLongFieldUpdater<PartTable> UPLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "uplinkOpenCount");
+  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkCloseDelta");
+  static final AtomicLongFieldUpdater<PartTable> UPLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "uplinkCloseCount");
+  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkEventDelta");
+  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkEventRate");
+  static final AtomicLongFieldUpdater<PartTable> UPLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "uplinkEventCount");
+  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<PartTable> UPLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(PartTable.class, "uplinkCommandRate");
+  static final AtomicLongFieldUpdater<PartTable> UPLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "uplinkCommandCount");
+  static final AtomicLongFieldUpdater<PartTable> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater(PartTable.class, "lastReportTime");
 
 }
 

@@ -87,10 +87,6 @@ import swim.uri.Uri;
 
 public class AgentNode extends AbstractTierBinding implements NodeBinding, CellContext, LaneFactory, Schedule, Stage, Task {
 
-  static final Uri LANES_URI = Uri.parse("lanes");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<AgentNode, HashTrieMap<Uri, LaneBinding>> LANES =
-      AtomicReferenceFieldUpdater.newUpdater(AgentNode.class, (Class<HashTrieMap<Uri, LaneBinding>>) (Class<?>) HashTrieMap.class, "lanes");
   final ConcurrentLinkedQueue<Runnable> mailbox;
   final long createdTime;
   protected NodeContext nodeContext;
@@ -719,5 +715,11 @@ public class AgentNode extends AbstractTierBinding implements NodeBinding, CellC
   public void taskDidCancel() {
     // nop
   }
+
+  static final Uri LANES_URI = Uri.parse("lanes");
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<AgentNode, HashTrieMap<Uri, LaneBinding>> LANES =
+      AtomicReferenceFieldUpdater.newUpdater(AgentNode.class, (Class<HashTrieMap<Uri, LaneBinding>>) (Class<?>) HashTrieMap.class, "lanes");
 
 }

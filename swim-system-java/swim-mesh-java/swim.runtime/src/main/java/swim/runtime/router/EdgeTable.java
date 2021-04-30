@@ -64,104 +64,6 @@ import swim.uri.Uri;
 
 public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
 
-  static final Uri MESHES_URI = Uri.parse("meshes");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<EdgeTable, HashTrieMap<Uri, MeshBinding>> MESHES =
-      AtomicReferenceFieldUpdater.newUpdater(EdgeTable.class, (Class<HashTrieMap<Uri, MeshBinding>>) (Class<?>) HashTrieMap.class, "meshes");
-  static final AtomicIntegerFieldUpdater<EdgeTable> MESH_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "meshOpenDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> MESH_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "meshOpenCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> MESH_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "meshCloseDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> MESH_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "meshCloseCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> PART_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "partOpenDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> PART_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "partOpenCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> PART_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "partCloseDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> PART_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "partCloseCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> HOST_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "hostOpenDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> HOST_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "hostOpenCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> HOST_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "hostCloseDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> HOST_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "hostCloseCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> NODE_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "nodeOpenDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> NODE_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "nodeOpenCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> NODE_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "nodeCloseDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> NODE_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "nodeCloseCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> AGENT_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "agentOpenDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> AGENT_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "agentOpenCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> AGENT_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "agentCloseDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> AGENT_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "agentCloseCount");
-  static final AtomicLongFieldUpdater<EdgeTable> AGENT_EXEC_DELTA =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "agentExecDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> AGENT_EXEC_RATE =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "agentExecRate");
-  static final AtomicLongFieldUpdater<EdgeTable> AGENT_EXEC_TIME =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "agentExecTime");
-  static final AtomicIntegerFieldUpdater<EdgeTable> TIMER_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "timerEventDelta");
-  static final AtomicIntegerFieldUpdater<EdgeTable> TIMER_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "timerEventRate");
-  static final AtomicLongFieldUpdater<EdgeTable> TIMER_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "timerEventCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkOpenDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> DOWNLINK_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "downlinkOpenCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkCloseDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> DOWNLINK_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "downlinkCloseCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkEventDelta");
-  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkEventRate");
-  static final AtomicLongFieldUpdater<EdgeTable> DOWNLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "downlinkEventCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkCommandDelta");
-  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkCommandRate");
-  static final AtomicLongFieldUpdater<EdgeTable> DOWNLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "downlinkCommandCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkOpenDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> UPLINK_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "uplinkOpenCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkCloseDelta");
-  static final AtomicLongFieldUpdater<EdgeTable> UPLINK_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "uplinkCloseCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkEventDelta");
-  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkEventRate");
-  static final AtomicLongFieldUpdater<EdgeTable> UPLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "uplinkEventCount");
-  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkCommandDelta");
-  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkCommandRate");
-  static final AtomicLongFieldUpdater<EdgeTable> UPLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "uplinkCommandCount");
-  static final AtomicLongFieldUpdater<EdgeTable> LAST_REPORT_TIME =
-      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "lastReportTime");
   protected EdgeContext edgeContext;
   volatile HashTrieMap<Uri, MeshBinding> meshes;
   volatile MeshBinding network;
@@ -898,6 +800,106 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
         uplinkEventDelta, uplinkEventRate, uplinkEventCount,
         uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
+
+  static final Uri MESHES_URI = Uri.parse("meshes");
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<EdgeTable, HashTrieMap<Uri, MeshBinding>> MESHES =
+      AtomicReferenceFieldUpdater.newUpdater(EdgeTable.class, (Class<HashTrieMap<Uri, MeshBinding>>) (Class<?>) HashTrieMap.class, "meshes");
+  static final AtomicIntegerFieldUpdater<EdgeTable> MESH_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "meshOpenDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> MESH_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "meshOpenCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> MESH_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "meshCloseDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> MESH_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "meshCloseCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> PART_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "partOpenDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> PART_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "partOpenCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> PART_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "partCloseDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> PART_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "partCloseCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> HOST_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "hostOpenDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> HOST_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "hostOpenCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> HOST_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "hostCloseDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> HOST_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "hostCloseCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> NODE_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "nodeOpenDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> NODE_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "nodeOpenCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> NODE_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "nodeCloseDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> NODE_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "nodeCloseCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> AGENT_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "agentOpenDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> AGENT_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "agentOpenCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> AGENT_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "agentCloseDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> AGENT_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "agentCloseCount");
+  static final AtomicLongFieldUpdater<EdgeTable> AGENT_EXEC_DELTA =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "agentExecDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> AGENT_EXEC_RATE =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "agentExecRate");
+  static final AtomicLongFieldUpdater<EdgeTable> AGENT_EXEC_TIME =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "agentExecTime");
+  static final AtomicIntegerFieldUpdater<EdgeTable> TIMER_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "timerEventDelta");
+  static final AtomicIntegerFieldUpdater<EdgeTable> TIMER_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "timerEventRate");
+  static final AtomicLongFieldUpdater<EdgeTable> TIMER_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "timerEventCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkOpenDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> DOWNLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "downlinkOpenCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkCloseDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> DOWNLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "downlinkCloseCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkEventDelta");
+  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkEventRate");
+  static final AtomicLongFieldUpdater<EdgeTable> DOWNLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "downlinkEventCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<EdgeTable> DOWNLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "downlinkCommandRate");
+  static final AtomicLongFieldUpdater<EdgeTable> DOWNLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "downlinkCommandCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkOpenDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> UPLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "uplinkOpenCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkCloseDelta");
+  static final AtomicLongFieldUpdater<EdgeTable> UPLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "uplinkCloseCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkEventDelta");
+  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkEventRate");
+  static final AtomicLongFieldUpdater<EdgeTable> UPLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "uplinkEventCount");
+  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<EdgeTable> UPLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "uplinkCommandRate");
+  static final AtomicLongFieldUpdater<EdgeTable> UPLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "uplinkCommandCount");
+  static final AtomicLongFieldUpdater<EdgeTable> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater(EdgeTable.class, "lastReportTime");
 
 }
 

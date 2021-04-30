@@ -67,96 +67,6 @@ import swim.uri.Uri;
 
 public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
-  static final Uri PARTS_URI = Uri.parse("parts");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<MeshTable, FingerTrieSeq<PartBinding>> PARTS =
-      AtomicReferenceFieldUpdater.newUpdater(MeshTable.class, (Class<FingerTrieSeq<PartBinding>>) (Class<?>) FingerTrieSeq.class, "parts");
-  static final AtomicIntegerFieldUpdater<MeshTable> PART_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "partOpenDelta");
-  static final AtomicLongFieldUpdater<MeshTable> PART_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "partOpenCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> PART_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "partCloseDelta");
-  static final AtomicLongFieldUpdater<MeshTable> PART_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "partCloseCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> HOST_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "hostOpenDelta");
-  static final AtomicLongFieldUpdater<MeshTable> HOST_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "hostOpenCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> HOST_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "hostCloseDelta");
-  static final AtomicLongFieldUpdater<MeshTable> HOST_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "hostCloseCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> NODE_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "nodeOpenDelta");
-  static final AtomicLongFieldUpdater<MeshTable> NODE_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "nodeOpenCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> NODE_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "nodeCloseDelta");
-  static final AtomicLongFieldUpdater<MeshTable> NODE_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "nodeCloseCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> AGENT_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "agentOpenDelta");
-  static final AtomicLongFieldUpdater<MeshTable> AGENT_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentOpenCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> AGENT_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "agentCloseDelta");
-  static final AtomicLongFieldUpdater<MeshTable> AGENT_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentCloseCount");
-  static final AtomicLongFieldUpdater<MeshTable> AGENT_EXEC_DELTA =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentExecDelta");
-  static final AtomicLongFieldUpdater<MeshTable> AGENT_EXEC_RATE =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentExecRate");
-  static final AtomicLongFieldUpdater<MeshTable> AGENT_EXEC_TIME =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentExecTime");
-  static final AtomicIntegerFieldUpdater<MeshTable> TIMER_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "timerEventDelta");
-  static final AtomicIntegerFieldUpdater<MeshTable> TIMER_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "timerEventRate");
-  static final AtomicLongFieldUpdater<MeshTable> TIMER_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "timerEventCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkOpenDelta");
-  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkOpenCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkCloseDelta");
-  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkCloseCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkEventDelta");
-  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkEventRate");
-  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkEventCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkCommandDelta");
-  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkCommandRate");
-  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkCommandCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_OPEN_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkOpenDelta");
-  static final AtomicLongFieldUpdater<MeshTable> UPLINK_OPEN_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkOpenCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_CLOSE_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkCloseDelta");
-  static final AtomicLongFieldUpdater<MeshTable> UPLINK_CLOSE_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkCloseCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkEventDelta");
-  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_EVENT_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkEventRate");
-  static final AtomicLongFieldUpdater<MeshTable> UPLINK_EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkEventCount");
-  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandDelta");
-  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_COMMAND_RATE =
-      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandRate");
-  static final AtomicLongFieldUpdater<MeshTable> UPLINK_COMMAND_COUNT =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandCount");
-  static final AtomicLongFieldUpdater<MeshTable> LAST_REPORT_TIME =
-      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "lastReportTime");
   protected MeshContext meshContext;
   volatile FingerTrieSeq<PartBinding> parts;
   volatile PartBinding gateway;
@@ -980,6 +890,98 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
         uplinkEventDelta, uplinkEventRate, uplinkEventCount,
         uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
+
+  static final Uri PARTS_URI = Uri.parse("parts");
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<MeshTable, FingerTrieSeq<PartBinding>> PARTS =
+      AtomicReferenceFieldUpdater.newUpdater(MeshTable.class, (Class<FingerTrieSeq<PartBinding>>) (Class<?>) FingerTrieSeq.class, "parts");
+  static final AtomicIntegerFieldUpdater<MeshTable> PART_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "partOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> PART_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "partOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> PART_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "partCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> PART_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "partCloseCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> HOST_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "hostOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> HOST_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "hostOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> HOST_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "hostCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> HOST_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "hostCloseCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> NODE_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "nodeOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> NODE_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "nodeOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> NODE_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "nodeCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> NODE_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "nodeCloseCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> AGENT_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "agentOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> AGENT_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> AGENT_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "agentCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> AGENT_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentCloseCount");
+  static final AtomicLongFieldUpdater<MeshTable> AGENT_EXEC_DELTA =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentExecDelta");
+  static final AtomicLongFieldUpdater<MeshTable> AGENT_EXEC_RATE =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentExecRate");
+  static final AtomicLongFieldUpdater<MeshTable> AGENT_EXEC_TIME =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "agentExecTime");
+  static final AtomicIntegerFieldUpdater<MeshTable> TIMER_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "timerEventDelta");
+  static final AtomicIntegerFieldUpdater<MeshTable> TIMER_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "timerEventRate");
+  static final AtomicLongFieldUpdater<MeshTable> TIMER_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "timerEventCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkCloseCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkEventDelta");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkEventRate");
+  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkEventCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<MeshTable> DOWNLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "downlinkCommandRate");
+  static final AtomicLongFieldUpdater<MeshTable> DOWNLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "downlinkCommandCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_OPEN_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkOpenDelta");
+  static final AtomicLongFieldUpdater<MeshTable> UPLINK_OPEN_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkOpenCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_CLOSE_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkCloseDelta");
+  static final AtomicLongFieldUpdater<MeshTable> UPLINK_CLOSE_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkCloseCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkEventDelta");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_EVENT_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkEventRate");
+  static final AtomicLongFieldUpdater<MeshTable> UPLINK_EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkEventCount");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandDelta");
+  static final AtomicIntegerFieldUpdater<MeshTable> UPLINK_COMMAND_RATE =
+      AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandRate");
+  static final AtomicLongFieldUpdater<MeshTable> UPLINK_COMMAND_COUNT =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "uplinkCommandCount");
+  static final AtomicLongFieldUpdater<MeshTable> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater(MeshTable.class, "lastReportTime");
 
 }
 
